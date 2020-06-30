@@ -210,6 +210,7 @@ namespace FudgeCore {
      * collects all lights and feeds all shaders used in the graph with these lights
      */
     public static setupTransformAndLights(_node: Node, _world: Matrix4x4 = Matrix4x4.IDENTITY(), _lights: MapLightTypeToLightList = new Map(), _shadersUsed: (typeof Shader)[] = null): void {
+      RenderManager.timestampUpdate = performance.now();
       let firstLevel: boolean = (_shadersUsed == null);
       if (firstLevel)
         _shadersUsed = [];
@@ -220,7 +221,7 @@ namespace FudgeCore {
       if (cmpTransform)
         world = Matrix4x4.MULTIPLICATION(_world, cmpTransform.local);
 
-      _node.mtxWorld = world;
+      _node.mtxWorld.set(world); // overwrite readonly mtxWorld of node
       _node.timestampUpdate = RenderManager.timestampUpdate;
 
       let cmpLights: ComponentLight[] = _node.getComponents(ComponentLight);

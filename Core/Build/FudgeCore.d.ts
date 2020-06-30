@@ -178,7 +178,7 @@ declare namespace FudgeCore {
      * Interface describing a mutator, which is an associative array with names of attributes and their corresponding values
      */
     interface Mutator {
-        [attribute: string]: Object;
+        [attribute: string]: General;
     }
     interface MutatorForAnimation extends Mutator {
         readonly forAnimation: null;
@@ -546,9 +546,9 @@ declare namespace FudgeCore {
         get copy(): Vector2;
         transform(_matrix: Matrix3x3, _includeTranslation?: boolean): void;
         /**
-         * Adds a z-component to the vector and returns a new Vector3
+         * Adds a z-component of the given magnitude (default=0) to the vector and returns a new Vector3
          */
-        toVector3(): Vector3;
+        toVector3(_z?: number): Vector3;
         toString(): string;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
@@ -1071,7 +1071,6 @@ declare namespace FudgeCore {
     class CoatTextured extends Coat {
         color: Color;
         texture: TextureImage;
-        pivot: Matrix3x3;
         tilingX: number;
         tilingY: number;
         repetition: boolean;
@@ -1414,6 +1413,7 @@ declare namespace FudgeCore {
         material: Material;
         clrPrimary: Color;
         clrSecondary: Color;
+        pivot: Matrix3x3;
         constructor(_material?: Material);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
@@ -1448,6 +1448,12 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    enum BASE {
+        SELF = 0,
+        PARENT = 1,
+        WORLD = 2,
+        NODE = 3
+    }
     /**
      * Attaches a transform-[[Matrix4x4]] to the node, moving, scaling and rotating it in space relative to its parent.
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -1456,6 +1462,25 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         local: Matrix4x4;
         constructor(_matrix?: Matrix4x4);
+        /**
+         * Adjusts the rotation to point the z-axis directly at the given target point in world space and tilts it to accord with the given up vector,
+         * respectively calculating yaw and pitch. If no up vector is given, the previous up-vector is used.
+         */
+        lookAt(_targetWorld: Vector3, _up?: Vector3): void;
+        /**
+         * Adjusts the rotation to match its y-axis with the given up-vector and facing its z-axis toward the given target at minimal angle,
+         * respectively calculating yaw only. If no up vector is given, the previous up-vector is used.
+         */
+        showTo(_targetWorld: Vector3, _up?: Vector3): void;
+        /**
+         * recalculates this local matrix to yield the identical world matrix based on the given node.
+         * Use rebase before appending the container of this component to another node while preserving its transformation in the world.
+         */
+        rebase(_node?: Node): void;
+        /**
+         * Applies the given transformation relative to the selected base (SELF, PARENT, WORLD) or a particular other node (NODE)
+         */
+        transform(_transform: Matrix4x4, _base?: BASE, _node?: Node): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
         protected reduceMutator(_mutator: Mutator): void;
@@ -1799,6 +1824,7 @@ declare namespace FudgeCore {
          * Set the graph to be drawn in the viewport.
          */
         setGraph(_graph: Node): void;
+        getGraph(): Node;
         /**
          * Logs this viewports scenegraph to the console.
          */
@@ -1820,6 +1846,11 @@ declare namespace FudgeCore {
          * Adjust the camera parameters to fit the rendering into the render vieport
          */
         adjustCamera(): void;
+        /**
+         * Returns a [[Ray]] in world coordinates from this camera through the point given in client space
+         */
+        getRayFromClient(_point: Vector2): Ray;
+        pointWorldToClient(_position: Vector3): Vector2;
         /**
          * Returns a point on the source-rectangle matching the given point on the client rectangle
          */
@@ -1856,7 +1887,7 @@ declare namespace FudgeCore {
         /**
          * Switch the viewports focus on or off. Only one viewport in one FUDGE instance can have the focus, thus receiving keyboard events.
          * So a viewport currently having the focus will lose it, when another one receives it. The viewports fire [[Event]]s accordingly.
-         *
+         * // TODO: examine, if this can be achieved by regular DOM-Focus and tabindex=0
          * @param _on
          */
         setFocus(_on: boolean): void;
@@ -2479,6 +2510,11 @@ declare namespace FudgeCore {
          */
         static SCALING(_scalar: Vector3): Matrix4x4;
         /**
+         * Returns a representation of the given matrix relative to the given base.
+         * If known, pass the inverse of the base to avoid unneccesary calculation
+         */
+        static RELATIVE(_matrix: Matrix4x4, _base: Matrix4x4, _inverse?: Matrix4x4): Matrix4x4;
+        /**
          * Computes and returns a matrix that applies perspective to an object, if its transform is multiplied by it.
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfViewInDegrees The field of view in Degrees. (Default = 45)
@@ -2515,11 +2551,12 @@ declare namespace FudgeCore {
          */
         rotateZ(_angleInDegrees: number, _fromLeft?: boolean): void;
         /**
-         * Adjusts the rotation of this matrix to point the y-axis directly at the given target and tilts it to accord with the given up vector,
+         * Adjusts the rotation of this matrix to point the z-axis directly at the given target and tilts it to accord with the given up vector,
          * respectively calculating yaw and pitch. If no up vector is given, the previous up-vector is used.
          * When _preserveScaling is false, a rotated identity matrix is the result.
          */
         lookAt(_target: Vector3, _up?: Vector3, _preserveScaling?: boolean): void;
+        lookAtRotate(_target: Vector3, _up?: Vector3, _preserveScaling?: boolean): void;
         /**
          * Adjusts the rotation of this matrix to match its y-axis with the given up-vector and facing its z-axis toward the given target at minimal angle,
          * respectively calculating yaw only. If no up vector is given, the previous up-vector is used.
@@ -2627,8 +2664,8 @@ declare namespace FudgeCore {
         private generate;
         /**
          * Create an instance of [[Random]]. If desired, creates a PRNG with it and feeds the given seed.
-         * @param _ownGenerator
-         * @param _seed
+         * @param _ownGenerator Default is false
+         * @param _seed Default is Math.random()
          */
         constructor(_ownGenerator?: boolean, _seed?: number);
         /**
@@ -3005,7 +3042,7 @@ declare namespace FudgeCore {
      */
     class Node extends EventTargetƒ implements Serializable {
         name: string;
-        mtxWorld: Matrix4x4;
+        readonly mtxWorld: Matrix4x4;
         timestampUpdate: number;
         private parent;
         private children;
@@ -3013,6 +3050,8 @@ declare namespace FudgeCore {
         private listeners;
         private captures;
         private active;
+        private worldInverseUpdated;
+        private worldInverse;
         /**
          * Creates a new node with a name and initializes all attributes
          * @param _name The name by which the node can be called.
@@ -3029,6 +3068,7 @@ declare namespace FudgeCore {
          * Fails if no [[ComponentTransform]] is attached
          */
         get mtxLocal(): Matrix4x4;
+        get mtxWorldInverse(): Matrix4x4;
         /**
          * Returns a reference to this nodes parent node
          */
@@ -4446,6 +4486,13 @@ declare namespace FudgeCore {
         direction: Vector3;
         length: number;
         constructor(_direction?: Vector3, _origin?: Vector3, _length?: number);
+        /**
+         * Returns the point of intersection of this ray with a plane defined by
+         * the given point of origin and the planes normal. All values and calculations
+         * must be relative to the same coordinate system, preferably the world
+         */
+        intersectPlane(_origin: Vector3, _normal: Vector3): Vector3;
+        getDistance(_target: Vector3): Vector3;
     }
 }
 declare namespace FudgeCore {
@@ -4736,7 +4783,7 @@ declare namespace FudgeCore {
         private offset;
         private lastCallToElapsed;
         private timers;
-        private idTimerNext;
+        private idTimerAddedLast;
         constructor();
         /**
          * Returns the game-time-object which starts automatically and serves as base for various internal operations.
@@ -4795,6 +4842,10 @@ declare namespace FudgeCore {
          */
         setTimer(_lapse: number, _count: number, _handler: TimerHandler, ..._arguments: Object[]): number;
         /**
+         * This method is called internally by [[Time]] and [[Timer]] and must not be called otherwise
+         */
+        addTimer(_timer: Timer): number;
+        /**
          * Deletes the timer with the id given by this time object
          */
         deleteTimer(_id: number): void;
@@ -4844,6 +4895,8 @@ declare namespace FudgeCore {
          * @param _count The desired number of calls to _handler, Timer deinstalls automatically after last call. Passing 0 invokes infinite calls
          * @param _handler The [[TimerHandler]] instance to call
          * @param _arguments Additional arguments to pass to _handler
+         *
+         * TODO: for proper handling and deletion, use Time.setTimer instead of instantiating timers yourself.
          */
         constructor(_time: Time, _elapse: number, _count: number, _handler: TimerHandler, ..._arguments: Object[]);
         /**

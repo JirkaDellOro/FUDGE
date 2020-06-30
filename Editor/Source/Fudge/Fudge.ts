@@ -52,7 +52,6 @@ namespace Fudge {
     // HACK!
     ipcRenderer.on("updateNode", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
       ƒ.Debug.log("UpdateViewNode");
-
     });
 
     //Physics Menu Items | Marko Fehrenbach, HFU 2020

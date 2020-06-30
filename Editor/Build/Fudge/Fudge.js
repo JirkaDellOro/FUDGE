@@ -483,12 +483,14 @@ var Fudge;
         setNode(_node) {
             this.node = _node;
             for (let view of this.views) {
-                if (view instanceof Fudge.ViewGraph) {
-                    view.setRoot(this.node);
-                }
-                else if (view instanceof Fudge.ViewRender) {
-                    view.setRoot(this.node);
-                }
+                // if (view instanceof ViewGraph) {
+                //   (<ViewGraph>view).setRoot(this.node);
+                // }
+                // else if (view instanceof ViewRender) {
+                //   (<ViewRender>view).setRoot(this.node);
+                // }
+                if (view["setRoot"])
+                    view["setRoot"](this.node);
             }
         }
         getNode() {
@@ -1451,24 +1453,17 @@ var Fudge;
                 }
             };
             if (_parent instanceof Fudge.PanelNode && _parent.getNode() != null)
-                this.graph = _parent.getNode();
+                this.setRoot(_parent.getNode());
             else
-                this.graph = new ƒ.Node("Node");
-            this.selectedNode = null;
+                this.setRoot(new ƒ.Node("Node"));
             this.parentPanel.addEventListener("select" /* SELECT */, this.setSelectedNode);
-            this.tree = new ƒui.Tree(new Fudge.ControllerTreeNode(), this.graph);
-            // this.listController.listRoot.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.passEventToPanel);
-            //TODO: examine if tree should fire common UI-EVENT for selection instead
-            this.tree.addEventListener(ƒui.EVENT_TREE.SELECT, this.passEventToPanel);
-            this.tree.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
-            this.fillContent();
             this.contextMenu = Fudge.ContextMenu.getMenu(ViewGraph, this.contextMenuCallback);
         }
         deconstruct() {
             //TODO: desconstruct
         }
         fillContent() {
-            this.content.append(this.tree);
+            // remove?
         }
         /**
          * Display structure of node
@@ -1477,7 +1472,16 @@ var Fudge;
         setRoot(_node) {
             if (!_node)
                 return;
+            if (this.tree)
+                this.content.removeChild(this.tree);
             this.graph = _node;
+            this.selectedNode = null;
+            this.tree = new ƒui.Tree(new Fudge.ControllerTreeNode(), this.graph);
+            // this.listController.listRoot.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.passEventToPanel);
+            //TODO: examine if tree should fire common UI-EVENT for selection instead
+            this.tree.addEventListener(ƒui.EVENT_TREE.SELECT, this.passEventToPanel);
+            this.tree.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
+            this.content.append(this.tree);
         }
     }
     Fudge.ViewGraph = ViewGraph;

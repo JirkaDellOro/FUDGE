@@ -31,7 +31,7 @@ namespace FudgeCore {
     private offset: number;
     private lastCallToElapsed: number;
     private timers: Timers = {};
-    private idTimerNext: number = 0;
+    private idTimerAddedLast: number = 0;
 
     constructor() {
       super();
@@ -173,9 +173,18 @@ namespace FudgeCore {
      * @param _arguments Additional parameters to pass to callback function
      */
     public setTimer(_lapse: number, _count: number, _handler: TimerHandler, ..._arguments: Object[]): number {
-      let timer: Timer = new Timer(this, _lapse, _count, _handler, _arguments);
-      this.timers[++this.idTimerNext] = timer;
-      return this.idTimerNext;
+      // tslint:disable-next-line: no-unused-expression
+      new Timer(this, _lapse, _count, _handler, _arguments);
+      //this.addTimer(timer);
+      return this.idTimerAddedLast;
+    }
+
+    /**
+     * This method is called internally by [[Time]] and [[Timer]] and must not be called otherwise
+     */
+    public addTimer(_timer: Timer): number {
+      this.timers[++this.idTimerAddedLast] = _timer;
+      return this.idTimerAddedLast;
     }
 
     /**

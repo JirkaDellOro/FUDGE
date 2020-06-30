@@ -10,7 +10,7 @@ namespace FudgeCore {
    * Interface describing a mutator, which is an associative array with names of attributes and their corresponding values
    */
   export interface Mutator {
-    [attribute: string]: Object;
+    [attribute: string]: General;
   }
 
   /*

@@ -661,7 +661,7 @@ var FudgeCore;
                 crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
                 crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.renderData["texture0"]);
                 crc3.uniform1i(_shader.uniforms["u_texture"], 0);
-                crc3.uniformMatrix3fv(_shader.uniforms["u_pivot"], false, this.pivot.get());
+                crc3.uniformMatrix3fv(_shader.uniforms["u_pivot"], false, _cmpMaterial.pivot.get());
             }
             else {
                 this.renderData = {};
@@ -1109,10 +1109,10 @@ var FudgeCore;
             this.data = Vector2.TRANSFORMATION(this, _matrix, _includeTranslation).data;
         }
         /**
-         * Adds a z-component to the vector and returns a new Vector3
+         * Adds a z-component of the given magnitude (default=0) to the vector and returns a new Vector3
          */
-        toVector3() {
-            return new FudgeCore.Vector3(this.x, this.y, 0);
+        toVector3(_z = 0) {
+            return new FudgeCore.Vector3(this.x, this.y, _z);
         }
         toString() {
             let result = `(${this.x.toPrecision(5)}, ${this.y.toPrecision(5)})`;
@@ -3307,6 +3307,13 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
+    let BASE;
+    (function (BASE) {
+        BASE[BASE["SELF"] = 0] = "SELF";
+        BASE[BASE["PARENT"] = 1] = "PARENT";
+        BASE[BASE["WORLD"] = 2] = "WORLD";
+        BASE[BASE["NODE"] = 3] = "NODE";
+    })(BASE = FudgeCore.BASE || (FudgeCore.BASE = {}));
     /**
      * Attaches a transform-[[Matrix4x4]] to the node, moving, scaling and rotating it in space relative to its parent.
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -3826,7 +3833,10 @@ var FudgeCore;
          */
         setCoat(_coat) {
             if (_coat.constructor != this.shaderType.getCoat())
-                throw (new Error("Shader and coat don't match"));
+                if (_coat instanceof this.shaderType.getCoat())
+                    FudgeCore.Debug.fudge("Coat is extension of Coat required by shader");
+                else
+                    throw (new Error("Shader and coat don't match"));
             this.coat = _coat;
         }
         /**
@@ -4103,6 +4113,9 @@ var FudgeCore;
                 this.graph.addEventListener("componentRemove" /* COMPONENT_REMOVE */, this.hndComponentEvent);
             }
         }
+        getGraph() {
+            return this.graph;
+        }
         /**
          * Logs this viewports scenegraph to the console.
          */
@@ -4177,6 +4190,27 @@ var FudgeCore;
         }
         // #endregion
         //#region Points
+        /**
+         * Returns a [[Ray]] in world coordinates from this camera through the point given in client space
+         */
+        getRayFromClient(_point) {
+            let posProjection = this.pointClientToProjection(_point);
+            let ray = new FudgeCore.Ray(new FudgeCore.Vector3(-posProjection.x, posProjection.y, 1));
+            // ray.direction.scale(camera.distance);
+            ray.origin.transform(this.camera.pivot);
+            ray.direction.transform(this.camera.pivot, false);
+            let cameraNode = this.camera.getContainer();
+            if (cameraNode) {
+                ray.origin.transform(cameraNode.mtxWorld);
+                ray.direction.transform(cameraNode.mtxWorld, false);
+            }
+            return ray;
+        }
+        pointWorldToClient(_position) {
+            let projection = this.camera.project(_position);
+            let posClient = this.pointClipToClient(projection.toVector2());
+            return posClient;
+        }
         /**
          * Returns a point on the source-rectangle matching the given point on the client rectangle
          */
@@ -4255,7 +4289,7 @@ var FudgeCore;
         /**
          * Switch the viewports focus on or off. Only one viewport in one FUDGE instance can have the focus, thus receiving keyboard events.
          * So a viewport currently having the focus will lose it, when another one receives it. The viewports fire [[Event]]s accordingly.
-         *
+         * // TODO: examine, if this can be achieved by regular DOM-Focus and tabindex=0
          * @param _on
          */
         setFocus(_on) {
@@ -4317,7 +4351,7 @@ var FudgeCore;
             event.canvasY = this.canvas.height * event.pointerY / event.clientRect.height;
         }
         activateEvent(_target, _type, _handler, _on) {
-            _type = _type.slice(1); // chip the ƒlorentin
+            _type = _type.slice(1); // chip the ƒlorin
             if (_on)
                 _target.addEventListener(_type, _handler);
             else
@@ -5462,6 +5496,15 @@ var FudgeCore;
             ]);
             return matrix;
         }
+        /**
+         * Returns a representation of the given matrix relative to the given base.
+         * If known, pass the inverse of the base to avoid unneccesary calculation
+         */
+        static RELATIVE(_matrix, _base, _inverse) {
+            let result = _inverse ? _inverse : Matrix4x4.INVERSION(_base);
+            result = Matrix4x4.MULTIPLICATION(result, _matrix);
+            return result;
+        }
         //#endregion
         //#region PROJECTIONS
         /**
@@ -5557,7 +5600,7 @@ var FudgeCore;
             FudgeCore.Recycler.store(rotation);
         }
         /**
-         * Adjusts the rotation of this matrix to point the y-axis directly at the given target and tilts it to accord with the given up vector,
+         * Adjusts the rotation of this matrix to point the z-axis directly at the given target and tilts it to accord with the given up vector,
          * respectively calculating yaw and pitch. If no up vector is given, the previous up-vector is used.
          * When _preserveScaling is false, a rotated identity matrix is the result.
          */
@@ -5569,6 +5612,36 @@ var FudgeCore;
                 matrix.scale(this.scaling);
             this.set(matrix);
             FudgeCore.Recycler.store(matrix);
+        }
+        // TODO: testing lookat that really just rotates the matrix rather than creating a new one
+        lookAtRotate(_target, _up, _preserveScaling = true) {
+            if (!_up)
+                _up = this.getY();
+            let scaling = this.scaling;
+            let difference = FudgeCore.Vector3.DIFFERENCE(_target, this.translation);
+            difference.normalize();
+            let cos = FudgeCore.Vector3.DOT(FudgeCore.Vector3.NORMALIZATION(this.getZ()), difference);
+            let sin = FudgeCore.Vector3.DOT(FudgeCore.Vector3.NORMALIZATION(this.getX()), difference);
+            console.log(sin, cos);
+            let mtxRotation = FudgeCore.Recycler.borrow(Matrix4x4);
+            mtxRotation.data.set([
+                cos, 0, -sin, 0,
+                0, 1, 0, 0,
+                sin, 0, cos, 0,
+                0, 0, 0, 1
+            ]);
+            this.multiply(mtxRotation, false);
+            cos = FudgeCore.Vector3.DOT(FudgeCore.Vector3.NORMALIZATION(this.getZ()), difference);
+            sin = -FudgeCore.Vector3.DOT(FudgeCore.Vector3.NORMALIZATION(this.getY()), difference);
+            console.log(sin, cos);
+            mtxRotation.data.set([
+                1, 0, 0, 0,
+                0, cos, sin, 0,
+                0, -sin, cos, 0,
+                0, 0, 0, 1
+            ]);
+            this.multiply(mtxRotation, false);
+            this.scaling = scaling;
         }
         /**
          * Adjusts the rotation of this matrix to match its y-axis with the given up-vector and facing its z-axis toward the given target at minimal angle,
@@ -6857,6 +6930,12 @@ var FudgeCore;
          */
         get mtxLocal() {
             return this.cmpTransform.local;
+        }
+        get mtxWorldInverse() {
+            if (this.worldInverseUpdated != this.timestampUpdate)
+                this.worldInverse = FudgeCore.Matrix4x4.INVERSION(this.mtxWorld);
+            this.worldInverseUpdated = this.timestampUpdate;
+            return this.worldInverse;
         }
         // #region Scenetree
         /**
@@ -10311,6 +10390,26 @@ var FudgeCore;
             this.direction = _direction;
             this.length = _length;
         }
+        /**
+         * Returns the point of intersection of this ray with a plane defined by
+         * the given point of origin and the planes normal. All values and calculations
+         * must be relative to the same coordinate system, preferably the world
+         */
+        intersectPlane(_origin, _normal) {
+            let difference = FudgeCore.Vector3.DIFFERENCE(_origin, this.origin);
+            let factor = FudgeCore.Vector3.DOT(difference, _normal) / FudgeCore.Vector3.DOT(this.direction, _normal);
+            let intersect = FudgeCore.Vector3.SUM(this.origin, FudgeCore.Vector3.SCALE(this.direction, factor));
+            return intersect;
+        }
+        getDistance(_target) {
+            let originToTarget = FudgeCore.Vector3.DIFFERENCE(_target, this.origin);
+            let raySection = FudgeCore.Vector3.NORMALIZATION(this.direction, 1);
+            let projectedLength = FudgeCore.Vector3.DOT(originToTarget, raySection);
+            raySection.scale(projectedLength);
+            raySection.add(this.origin);
+            let distance = FudgeCore.Vector3.DIFFERENCE(_target, raySection);
+            return distance;
+        }
     }
     FudgeCore.Ray = Ray;
 })(FudgeCore || (FudgeCore = {}));
@@ -11259,6 +11358,8 @@ var FudgeCore;
          * @param _count The desired number of calls to _handler, Timer deinstalls automatically after last call. Passing 0 invokes infinite calls
          * @param _handler The [[TimerHandler]] instance to call
          * @param _arguments Additional arguments to pass to _handler
+         *
+         * TODO: for proper handling and deletion, use Time.setTimer instead of instantiating timers yourself.
          */
         constructor(_time, _elapse, _count, _handler, ..._arguments) {
             this.time = _time;
@@ -11285,6 +11386,7 @@ var FudgeCore;
             };
             this.idWindow = window.setInterval(callback, this.timeoutReal, _arguments);
             this.active = true;
+            _time.addTimer(this);
         }
         /**
          * Returns the window-id of the timer, which was returned by setInterval

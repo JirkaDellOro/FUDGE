@@ -98,7 +98,6 @@ declare namespace FudgeAid {
         private static count;
         constructor(_name?: string, _transform?: ƒ.Matrix4x4, _material?: ƒ.Material, _mesh?: ƒ.Mesh);
         private static getNextName;
-        get local(): ƒ.Matrix4x4;
         get pivot(): ƒ.Matrix4x4;
         deserialize(_serialization: ƒ.Serialization): ƒ.Serializable;
     }
@@ -117,10 +116,85 @@ declare namespace FudgeAid {
 }
 declare namespace FudgeAid {
     import ƒ = FudgeCore;
+    /**
+     * Adds a light setup to the node given, consisting of an ambient light, a directional key light and a directional back light.
+     * Exept of the node to become the container, all parameters are optional and provided default values for general purpose.
+     */
     function addStandardLightComponents(_node: ƒ.Node, _clrAmbient?: ƒ.Color, _clrKey?: ƒ.Color, _clrBack?: ƒ.Color, _posKey?: ƒ.Vector3, _posBack?: ƒ.Vector3): void;
     /** Three Point Light setup that by default illuminates the Scene from +Z */
     class NodeThreePointLights extends Node {
         constructor(_name: string, _rotationY?: number);
+    }
+}
+declare namespace FudgeAid {
+    /**
+     * Handles the animation cycle of a sprite on a [[Node]]
+     */
+    class NodeSprite extends ƒ.Node {
+        private static mesh;
+        framerate: number;
+        private cmpMesh;
+        private cmpMaterial;
+        private animation;
+        private frameCurrent;
+        private direction;
+        private timer;
+        constructor(_name: string);
+        setAnimation(_animation: SpriteSheetAnimation): void;
+        /**
+         * Show a specific frame of the sequence
+         */
+        showFrame(_index: number): void;
+        /**
+         * Show the next frame of the sequence or start anew when the end or the start was reached, according to the direction of playing
+         */
+        showFrameNext: (_event: ƒ.EventTimer) => void;
+        /**
+         * Sets the direction for animation playback, negativ numbers make it play backwards.
+         */
+        setFrameDirection(_direction: number): void;
+    }
+}
+declare namespace FudgeAid {
+    import ƒ = FudgeCore;
+    /**
+     * Describes a single frame of a sprite animation
+     */
+    class SpriteFrame {
+        rectTexture: ƒ.Rectangle;
+        mtxPivot: ƒ.Matrix4x4;
+        mtxTexture: ƒ.Matrix3x3;
+        timeScale: number;
+    }
+    /**
+     * Convenience for creating a [[CoatTexture]] to use as spritesheet
+     */
+    function createSpriteSheet(_name: string, _image: HTMLImageElement): ƒ.CoatTextured;
+    /**
+     * Holds SpriteSheetAnimations in an associative hierarchical array
+     */
+    interface SpriteSheetAnimations {
+        [key: string]: SpriteSheetAnimation | SpriteSheetAnimations;
+    }
+    /**
+     * Handles a series of [[SpriteFrame]]s to be mapped onto a [[MeshSprite]]
+     * Contains the [[MeshSprite]], the [[Material]] and the spritesheet-texture
+     */
+    class SpriteSheetAnimation {
+        frames: SpriteFrame[];
+        name: string;
+        spritesheet: ƒ.CoatTextured;
+        constructor(_name: string, _spritesheet: ƒ.CoatTextured);
+        /**
+         * Stores a series of frames in this [[Sprite]], calculating the matrices to use in the components of a [[NodeSprite]]
+         */
+        generate(_rects: ƒ.Rectangle[], _resolutionQuad: number, _origin: ƒ.ORIGIN2D): void;
+        /**
+         * Add sprite frames using a grid on the spritesheet defined by a rectangle to start with, the number of frames,
+         * the size of the borders of the grid and more
+         */
+        generateByGrid(_startRect: ƒ.Rectangle, _frames: number, _borderSize: ƒ.Vector2, _resolutionQuad: number, _origin: ƒ.ORIGIN2D): void;
+        private createFrame;
     }
 }
 declare namespace FudgeAid {

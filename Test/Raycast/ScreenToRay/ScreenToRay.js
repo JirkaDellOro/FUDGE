@@ -114,6 +114,7 @@ var ScreenToRay;
         let rectProjection = cmpCamera.getProjectionRectangle();
         setUiPoint("Projection", posProjection);
         let ray = new ƒ.Ray(new ƒ.Vector3(-posProjection.x, posProjection.y, 1));
+        // ray = viewport.getRayFromScreenPoint(posMouse);
         return ray;
     }
     function setCursorPosition(_event) {

@@ -32,45 +32,45 @@ namespace MatrixTest {
       move(i);
     }
     viewport.draw();
-
-    // let relative: ƒ.Matrix4x4 = calculateRelativeMatrix(coSys[1].mtxWorld, coSys[0].mtxWorld);
-    // console.log("Relative", relative.toString());
-    // console.log("Local", coSys[1].mtxLocal.toString());
-    // coSys[1].cmpTransform.local = relative;
   }
 
 
   function move(_which: number): void {
     let fieldset: HTMLFieldSetElement = document.querySelector("fieldset#Interact" + _which);
     let formData: FormData = new FormData(fieldset.querySelector("form"));
-    // console.log(formData.get("t").valueOf(), formData.get("tValue"), formData.get("tDirection"));
-    // console.log(formData.get("r"), formData.get("rValue"), formData.get("rDirection"));
-    // console.log(formData.get("s"), formData.get("sValue"), formData.get("sDirection"));
 
+    let base: string = <string>formData.get("Base");
     let translate: ƒ.Vector3 = calcVector(String(formData.get("t")), Number(formData.get("tValue")), Number(formData.get("tDirection")));
     let rotate: ƒ.Vector3 = calcVector(String(formData.get("r")), Number(formData.get("rValue")), Number(formData.get("rDirection")));
     let scale: ƒ.Vector3 = calcVector(String(formData.get("s")), Number(formData.get("sValue")), Number(formData.get("sDirection")));
 
-    // let transform: ƒ.Matrix4x4 = ƒ.Matrix4x4.IDENTITY();
-    // coSys[_which].mtxLocal.translate(translate, false);
-    // coSys[_which].mtxLocal.rotate(rotate, false);
-    // scale.add(ƒ.Vector3.ONE());
-    // coSys[_which].mtxLocal.scale(scale);
-    let transform: ƒ.Matrix4x4 = coSys[_which].mtxLocal.copy;
-    if (_which == 1)
-      transform = calculateRelativeMatrix(transform, coSys[0].mtxWorld);
-
+    let transform: ƒ.Matrix4x4 = ƒ.Matrix4x4.IDENTITY();
     transform.translate(translate, false);
     transform.rotate(rotate, false);
     scale.add(ƒ.Vector3.ONE());
     transform.scale(scale);
 
-    if (_which == 1)
-      transform.multiply(coSys[0].mtxLocal, true);
-    transform = calculateRelativeMatrix(transform, root.mtxWorld);
-    coSys[_which].cmpTransform.local = transform;
-  }
+    let node: ƒ.Node = coSys[_which];
+    let other: ƒ.Node = coSys[_which ? 0 : 1];
+    let move: ƒ.Matrix4x4 = node.mtxLocal.copy;
 
+    switch (base) {
+      case "self":
+        node.cmpTransform.transform(transform, ƒ.BASE.SELF);
+        break;
+      case "parent":
+        node.cmpTransform.transform(transform, ƒ.BASE.PARENT);
+        break;
+      case "world":
+        node.cmpTransform.transform(transform, ƒ.BASE.WORLD);
+        break;
+      case "other":
+        node.cmpTransform.transform(transform, ƒ.BASE.NODE, other);
+        break;
+      default:
+        break;
+    }
+  }
 
   function createUI(_which: number): void {
     let fieldset: HTMLFieldSetElement;
@@ -84,13 +84,14 @@ namespace MatrixTest {
       }
 
     fieldset = document.querySelector("fieldset#Interact" + _which);
-    let table: string = "<form><table>";
+    let form: HTMLFormElement = fieldset.querySelector("form");
+    let table: string = "<table>";
     for (let transform of ["t", "r", "s"]) {
       let step: number = transform == "r" ? 1 : 0.1;
       let value: number = transform == "r" ? 5 : 0.1;
       table += `<tr><th>${transform}</th>`;
       for (let dimension of ["x", "y", "z"]) {
-        let id: string = transform + dimension;
+        let id: string = transform + dimension + _which;
         // fieldset.innerHTML += `<span>${id} <input id='${id}' type='number' step='0.1'/><button>+</button><button>-</button></span>`;
         table += `<td><input type="radio" name="${transform}" value="${dimension}" id="${id}" ${dimension == "x" ? "checked" : ""}></input>`;
         table += `<label for="${id}">${dimension}</label></td>`;
@@ -99,9 +100,9 @@ namespace MatrixTest {
       table += `<td><input type="range" name="${transform}Direction" step="1" value="0" min="-1" max="1"></input></td>`;
       table += "</tr>";
     }
-    table += "</table></form>";
+    table += "</table>";
     console.log(table);
-    fieldset.innerHTML += table;
+    form.innerHTML += table;
 
 
     fieldset.addEventListener("keyup", hndKey);
@@ -130,13 +131,24 @@ namespace MatrixTest {
   }
 
   function hndHierarchy(_event: Event): void {
-    let hierarchy: number = Number((<HTMLInputElement>_event.target).value);
+    let hierarchy: string = (<HTMLInputElement>_event.target).value;
+    let preserve: boolean = (<HTMLInputElement>document.querySelector("input#preserve")).checked;
+
+    if (preserve) {
+      coSys[0].cmpTransform.rebase(null);
+      coSys[1].cmpTransform.rebase(null);
+    }
+
     switch (hierarchy) {
-      case 0:
+      case "01":
+        if (preserve)
+          coSys[1].cmpTransform.rebase(coSys[0]);
         root.appendChild(coSys[0]);
         coSys[0].appendChild(coSys[1]);
         break;
-      case 1:
+      case "10":
+        if (preserve)
+          coSys[0].cmpTransform.rebase(coSys[1]);
         root.appendChild(coSys[1]);
         coSys[1].appendChild(coSys[0]);
         break;
@@ -160,12 +172,5 @@ namespace MatrixTest {
       let input: HTMLInputElement = fieldset.querySelector("#m" + index);
       input.value = data[index].toFixed(2);
     }
-  }
-
-  function calculateRelativeMatrix(_matrix: ƒ.Matrix4x4, _relativeTo: ƒ.Matrix4x4): ƒ.Matrix4x4 {
-    let result: ƒ.Matrix4x4;
-    result = ƒ.Matrix4x4.INVERSION(_relativeTo);
-    result = ƒ.Matrix4x4.MULTIPLICATION(result, _matrix);
-    return result;
   }
 }

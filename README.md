@@ -27,16 +27,15 @@ A collection of various other helpful documents and resources
 # Reference
 - [Wiki](https://github.com/JirkaDellOro/FUDGE/wiki)  
 - [Class-Diagramm Core](https://raw.githubusercontent.com/JirkaDellOro/FUDGE/development/Documentation/Design/Core.svg)  
-- [Core-API](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/Core)
-- [UserInterface-API](https:///JirkaDellOro.github.io/FUDGE/Documentation/Reference/UserInterface)
+- [APIs](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference)  
 
 # Call for papers
-- Modeller
-- Cameratransformation, Axonometry and VR
+- :pencil: Modeller
+- :pencil: Cameratransformation, Axonometry and VR
 - Shader
 - Primitve 3D-Models and 2D-Shapes 
 - Importer for standard file formats
-- Light and Shadpw
+- Light and Shadow
 - Diegetic User-Interface
 - Runtime-Recording for Replay
 - Grapheditor/Wiring for Shader and Animation

@@ -386,6 +386,16 @@ namespace FudgeCore {
       ]);
       return matrix;
     }
+
+    /**
+     * Returns a representation of the given matrix relative to the given base.
+     * If known, pass the inverse of the base to avoid unneccesary calculation 
+     */
+    public static RELATIVE(_matrix: Matrix4x4, _base: Matrix4x4, _inverse?: Matrix4x4): Matrix4x4 {
+      let result: Matrix4x4 = _inverse ? _inverse : Matrix4x4.INVERSION(_base);
+      result = Matrix4x4.MULTIPLICATION(result, _matrix);
+      return result;
+    }
     //#endregion
 
     //#region PROJECTIONS
@@ -491,7 +501,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Adjusts the rotation of this matrix to point the y-axis directly at the given target and tilts it to accord with the given up vector,
+     * Adjusts the rotation of this matrix to point the z-axis directly at the given target and tilts it to accord with the given up vector,
      * respectively calculating yaw and pitch. If no up vector is given, the previous up-vector is used. 
      * When _preserveScaling is false, a rotated identity matrix is the result. 
      */
@@ -505,6 +515,38 @@ namespace FudgeCore {
       this.set(matrix);
       Recycler.store(matrix);
     }
+    // TODO: testing lookat that really just rotates the matrix rather than creating a new one
+    public lookAtRotate(_target: Vector3, _up?: Vector3, _preserveScaling: boolean = true): void {
+      if (!_up)
+        _up = this.getY();
+
+      let scaling: Vector3 = this.scaling;
+      let difference: Vector3 = Vector3.DIFFERENCE(_target, this.translation);
+      difference.normalize();
+      let cos: number = Vector3.DOT(Vector3.NORMALIZATION(this.getZ()), difference);
+      let sin: number = Vector3.DOT(Vector3.NORMALIZATION(this.getX()), difference);
+      console.log(sin, cos);
+      let mtxRotation: Matrix4x4 = Recycler.borrow(Matrix4x4);
+      mtxRotation.data.set([
+        cos, 0, -sin, 0,
+        0, 1, 0, 0,
+        sin, 0, cos, 0,
+        0, 0, 0, 1
+      ]);
+      this.multiply(mtxRotation, false);
+
+      cos = Vector3.DOT(Vector3.NORMALIZATION(this.getZ()), difference);
+      sin = -Vector3.DOT(Vector3.NORMALIZATION(this.getY()), difference);
+      console.log(sin, cos);
+      mtxRotation.data.set([
+        1, 0, 0, 0,
+        0, cos, sin, 0,
+        0, -sin, cos, 0,
+        0, 0, 0, 1
+      ]);
+      this.multiply(mtxRotation, false);
+      this.scaling = scaling;
+    }
 
     /**
      * Adjusts the rotation of this matrix to match its y-axis with the given up-vector and facing its z-axis toward the given target at minimal angle,
@@ -515,7 +557,7 @@ namespace FudgeCore {
       if (!_up)
         _up = this.getY();
 
-      const matrix: Matrix4x4 = Matrix4x4.SHOW_TO(this.translation, _target, _up); 
+      const matrix: Matrix4x4 = Matrix4x4.SHOW_TO(this.translation, _target, _up);
       if (_preserveScaling)
         matrix.scale(this.scaling);
       this.set(matrix);

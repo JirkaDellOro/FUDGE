@@ -15,28 +15,22 @@ namespace Fudge {
     constructor(_parent: PanelNode) {
       super(_parent);
       if (_parent instanceof PanelNode && (<PanelNode>_parent).getNode() != null)
-        this.graph = (<PanelNode>_parent).getNode();
+        this.setRoot((<PanelNode>_parent).getNode());
       else
-        this.graph = new ƒ.Node("Node");
+        this.setRoot(new ƒ.Node("Node"));
 
-      this.selectedNode = null;
       this.parentPanel.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setSelectedNode);
-      this.tree = new ƒui.Tree<ƒ.Node>(new ControllerTreeNode(), this.graph);
-      // this.listController.listRoot.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.passEventToPanel);
-      //TODO: examine if tree should fire common UI-EVENT for selection instead
-      this.tree.addEventListener(ƒui.EVENT_TREE.SELECT, this.passEventToPanel);
-      this.tree.addEventListener(ƒui.EVENT_USERINTERFACE.CONTEXTMENU, this.openContextMenu);
-      this.fillContent();
-
       this.contextMenu = ContextMenu.getMenu(ViewGraph, this.contextMenuCallback);
     }
+
+
 
     deconstruct(): void {
       //TODO: desconstruct
     }
 
     fillContent(): void {
-      this.content.append(this.tree);
+      // remove?
     }
 
     /**
@@ -46,7 +40,18 @@ namespace Fudge {
     public setRoot(_node: ƒ.Node): void {
       if (!_node)
         return;
+      if (this.tree)
+        this.content.removeChild(this.tree);
+
       this.graph = _node;
+      this.selectedNode = null;
+
+      this.tree = new ƒui.Tree<ƒ.Node>(new ControllerTreeNode(), this.graph);
+      // this.listController.listRoot.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.passEventToPanel);
+      //TODO: examine if tree should fire common UI-EVENT for selection instead
+      this.tree.addEventListener(ƒui.EVENT_TREE.SELECT, this.passEventToPanel);
+      this.tree.addEventListener(ƒui.EVENT_USERINTERFACE.CONTEXTMENU, this.openContextMenu);
+      this.content.append(this.tree);
     }
 
     /**
@@ -56,7 +61,7 @@ namespace Fudge {
       // this.listController.setSelection(_event.detail);
       this.selectedNode = _event.detail;
     }
-    
+
     /**
      * Pass Event to Panel
      */
