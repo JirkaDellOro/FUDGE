@@ -1434,9 +1434,16 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Contains all the information which will be used to evaluate the closures of the particle effect. Current time and index, size and all the defined values of the storage partition of the effect will cached here while evaluating the effect.
+     */
     interface StoredValues {
         [key: string]: number;
     }
+    /**
+     * Attaches a [[PaticleEffect]] to the node.
+     * @author Jonas Plotzky, HFU, 2020
+     */
     class ComponentParticleSystem extends Component {
         static readonly iSubclass: number;
         readonly particleEffect: ParticleEffect;
@@ -3192,105 +3199,116 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * @class Factory class to create closures.
+     * Factory class to create closures.
+     * @author Jonas Plotzky, HFU, 2020
      */
     class ClosureFactory {
         private static closures;
         /**
-         * Creates a closure for the given function type and the parameters.
-         * @param _function the function type of the closure you want to create.
-         * @param _parameters the parameters, which should be functions themselves, given to the created closure.
-         * @returns
+         * Creates a closure of the given function type and passes the parameters to it.
+         * @param _function The function type of the closure you want to create.
+         * @param _parameters The parameters, which should be functions themselves, passed to the created closure.
          */
         static getClosure(_function: string, _parameters: Function[]): Function;
         /**
-         * Calculates the sum of the given parameters.
-         *  i.e. parameter[0] + ... + parameter[n]
+         * Creates a closure which will return the sum of the given parameters,
+         *  i.e. ```_parameters[0] + ... + _parameters[n]```.
          */
         private static createClosureAddition;
         /**
-     * Calculates the subtraction of the given parameters.
-     *  i.e. parameter[0] - parameter[n]
-     */
+         * Creates a closure which will return the subtraction of the given parameters,
+         *  i.e. ```_parameters[0] - _parameters[1]```.
+         */
         private static createClosureSubtraction;
         /**
-          * Calculates the product of the given parameters.
-          *   i.e. parameter[0] * ... * parameter[n]
+          * Creates a closure which will return the product of the given parameters,
+          *  i.e. ```_parameters[0] * ... * _parameters[n]```.
           */
         private static createClosureMultiplication;
         /**
-         * Calculates the division of the given parameters.
-         *  i.e. parameter[0] / parameter[1]
+         * Creates a closure which will return the division of the given parameters,
+         *  i.e. ```_parameters[0] / _parameters[1]```.
          */
         private static createClosureDivision;
         /**
-         * Calculates the modulo of the given parameters.
-         *  i.e. parameter[0] % parameter[1]
+         * Creates a closure which will return the modulo of the given parameters,
+         *  i.e. ```_parameters[0] % _parameters[1]```.
          */
         private static createClosureModulo;
         /**
          * Interpolates a linear function between two given points.
-         *  parameter[0] will be the input value for the function.
-         *  parameter[1] - parameter[4] describe the points between which will be interpoleted
+         * - ```_parameters[0]``` will be the input value for the function.
+         * - ```_parameters[1]``` x start value.
+         * - ```_parameters[2]``` y start value.
+         * - ```_parameters[3]``` x end value.
+         * - ```_parameters[4]``` y end value.
          */
         private static createClosureLinear;
         /**
-         * Creates a polynomial of third degree.
-         *  parameter[0] will be the input value for the function.
-         *  parameter[1] - parameter[4] representing a,b,c,d. These will be evaluated while parsing.
+         * Creates a polynomial function of third degree. A,b,c and d will be evaluated while parsing.
+         * - ```_parameters[0]``` will be the input value for the function.
+         * - ```_parameters[1]``` a value.
+         * - ```_parameters[2]``` b value.
+         * - ```_parameters[3]``` c value.
+         * - ```_parameters[4]``` d value.
          */
         private static createClosurePolynomial3;
         /**
-         * Creates a closure which will return the square root of the given parameter
-         *  parameter[0] will be the input value for the function.
+         * Creates a closure which will return the square root of the given parameter,
+         * ```parameters[0]``` will be the input value for the function.
          */
         private static createClosureSquareRoot;
         /**
          * Creates a closure which will return a number chosen from the given array of numbers.
-         *  parameter[0] representing the index of the number which will be chosen.
-         *  parameter[1] representing the array of random numbers to choose from.
+         * - ```_parameters[0]``` representing the index of the number which will be chosen.
+         * - ```_parameters[1]``` representing the array of random numbers to choose from.
          */
         private static createClosureRandom;
-        /**
-         * Creates a closure which will return the input value
-         */
-        private static createClosureIdentity;
     }
 }
 declare namespace FudgeCore {
+    /**
+     * The data format used to parse and store the paticle effect
+     */
     interface ParticleEffectData {
         [identifier: string]: General;
     }
+    /**
+     * Holds all the information which defines the particle effect. Can load the said information out of a json file.
+     * @authors Jonas Plotzky, HFU, 2020
+     */
     class ParticleEffect {
         storageSystem: ParticleEffectData;
         storageUpdate: ParticleEffectData;
         storageParticle: ParticleEffectData;
         transformLocal: ParticleEffectData;
         transformWorld: ParticleEffectData;
-        mutationComponents: ParticleEffectData;
+        componentMutations: ParticleEffectData;
         storedValues: StoredValues;
         private randomNumbers;
-        constructor(_filename: string, _numberOfParticles: number);
-        importFile(_filename: string): void;
+        constructor(_numberOfParticles: number);
         /**
-         * Parse the data from json file and return a particle effect definition
-         * @param _data the data to parse
-         * @returns a definition of the particle effect containing the closure for translation, rotation etc.
+         * Asynchronously loads the json from the given url and parses it initializing this particle effect.
          */
-        private parseFile;
+        load(_request: RequestInfo): Promise<void>;
         /**
-         * Create entries in stored values for each defined storage closure. Predefined values (time, index...) and previously defined ones (in json) can not be overwritten.
-         * @param _data The paticle data to parse
+         * Parses the data initializing this particle effect with the corresponding closures
+         * @param _data The paticle effect data to parse.
+         */
+        private parse;
+        /**
+         * Creates entries in [[storedValues]] for each defined closure in _data. Predefined values (time, index...) and previously defined ones (in json) can not be overwritten.
+         * @param _data The paticle effect data to parse.
          */
         private preParseStorage;
         /**
          * Parse the given effect data recursivley. The hierachy of the json file will be kept. Constants, variables("time") and functions definitions will be replaced with functions.
-         * @param _data The effect data to parse recursivley
+         * @param _data The particle effect data to parse recursivley.
          */
-        private parseDataRecursively;
+        private parseRecursively;
         /**
          * Parse the given closure data recursivley. Returns a function depending on the closure data.
-         * @param _data The closure data to parse recursively
+         * @param _data The closure data to parse recursively.
          */
         private parseClosure;
     }
@@ -3378,10 +3396,19 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Class that is used inside of [[RenderManager]] to draw the particle effects of nodes which have a [[ComponentParticleSystem]] attached.
+     * @author Jonas Plotzky, HFU, 2020
+     */
     abstract class RenderParticles extends RenderManager {
-        static drawParticles(_node: Node, _nodeTransform: Matrix4x4, _cmpCamera: ComponentCamera): void;
-        private static getMutatorFor;
-        private static evaluateMutator;
+        /**
+         * The render function for drawing a node which has a [[ComponentParticleSystem]] attached to it. The node represents a single particle of the particle system. Based on the attached [[ComponentParticleSystem]] the whole particle system will be drawn in its determined state.
+         */
+        static drawParticles(_node: Node, _nodeTransform: Matrix4x4, _cmpParticleSystem: ComponentParticleSystem, _cmpMesh: ComponentMesh, _cmpCamera: ComponentCamera): void;
+        private static applyTransform;
+        private static getMutatorFrom;
+        private static createMutatorFrom;
+        private static evaluateMutatorWith;
     }
 }
 declare namespace FudgeCore {

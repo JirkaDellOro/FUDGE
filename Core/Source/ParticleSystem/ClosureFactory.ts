@@ -1,53 +1,38 @@
 namespace FudgeCore {
 
   /**
-   * @class Factory class to create closures.
+   * Factory class to create closures.
+   * @author Jonas Plotzky, HFU, 2020
    */
   export class ClosureFactory {
     private static closures: { [key: string]: Function } = {
       "addition": ClosureFactory.createClosureAddition,
+      "subtraction": ClosureFactory.createClosureSubtraction,
       "multiplication": ClosureFactory.createClosureMultiplication,
       "division": ClosureFactory.createClosureDivision,
       "modulo": ClosureFactory.createClosureModulo,
       "linear": ClosureFactory.createClosureLinear,
       "polynomial": ClosureFactory.createClosurePolynomial3,
       "squareRoot": ClosureFactory.createClosureSquareRoot,
-      "random": ClosureFactory.createClosureRandom,
-      "identity": ClosureFactory.createClosureIdentity,
-      "subtraction": ClosureFactory.createClosureSubtraction
+      "random": ClosureFactory.createClosureRandom
     };
 
     /**
-     * Creates a closure for the given function type and the parameters.
-     * @param _function the function type of the closure you want to create.
-     * @param _parameters the parameters, which should be functions themselves, given to the created closure.
-     * @returns 
+     * Creates a closure of the given function type and passes the parameters to it.
+     * @param _function The function type of the closure you want to create.
+     * @param _parameters The parameters, which should be functions themselves, passed to the created closure.
      */
     public static getClosure(_function: string, _parameters: Function[]/*, _inputFactors?: { [key: string]: number }, _randomNumbers?: number[]*/): Function {
       let closure: Function = this.closures[_function];
       if (_function in this.closures)
         return closure(_parameters);
-      else {
-        Debug.error(`"${_function}" is not an operation`);
-        return null;
-      }
+      else 
+        throw `"${_function}" is not an operation`;
     }
 
-    // private static createClosures(): Map<CLOSURE_TYPE, Function> {
-    //   return new Map<CLOSURE_TYPE, Function>([
-    //     [CLOSURE_TYPE.ADDITION, this.createClosureAddition],
-    //     [CLOSURE_TYPE.MULTIPLICATION, this.createClosureMultiplication],
-    //     [CLOSURE_TYPE.DIVISION, this.createClosureDivision],
-    //     [CLOSURE_TYPE.MODULO, this.createClosureModulo],
-    //     [CLOSURE_TYPE.LINEAR, this.createClosureLinear],
-    //     [CLOSURE_TYPE.POLYNOMIAL3, this.createClosurePolynomial3],
-    //     [CLOSURE_TYPE.RANDOM, this.createClosureRandom],
-    //   ]);
-    // }
-
     /**
-     * Calculates the sum of the given parameters.
-     *  i.e. parameter[0] + ... + parameter[n]
+     * Creates a closure which will return the sum of the given parameters,  
+     *  i.e. ```_parameters[0] + ... + _parameters[n]```.
      */
     private static createClosureAddition(_parameters: Function[]): Function {
       return function (): number {
@@ -61,9 +46,9 @@ namespace FudgeCore {
       };
     }
 
-        /**
-     * Calculates the subtraction of the given parameters.
-     *  i.e. parameter[0] - parameter[n]
+    /**
+     * Creates a closure which will return the subtraction of the given parameters,  
+     *  i.e. ```_parameters[0] - _parameters[1]```.
      */
     private static createClosureSubtraction(_parameters: Function[]): Function {
       return function (): number {
@@ -75,8 +60,8 @@ namespace FudgeCore {
     }
 
     /**
-      * Calculates the product of the given parameters. 
-      *   i.e. parameter[0] * ... * parameter[n]
+      * Creates a closure which will return the product of the given parameters,  
+      *  i.e. ```_parameters[0] * ... * _parameters[n]```.
       */
     private static createClosureMultiplication(_parameters: Function[]): Function {
       return function (): number {
@@ -91,8 +76,8 @@ namespace FudgeCore {
     }
 
     /**
-     * Calculates the division of the given parameters. 
-     *  i.e. parameter[0] / parameter[1]
+     * Creates a closure which will return the division of the given parameters,  
+     *  i.e. ```_parameters[0] / _parameters[1]```.
      */
     private static createClosureDivision(_parameters: Function[]): Function {
       return function (): number {
@@ -104,8 +89,8 @@ namespace FudgeCore {
     }
 
     /**
-     * Calculates the modulo of the given parameters.
-     *  i.e. parameter[0] % parameter[1]
+     * Creates a closure which will return the modulo of the given parameters,  
+     *  i.e. ```_parameters[0] % _parameters[1]```.
      */
     private static createClosureModulo(_parameters: Function[]): Function {
       return function (): number {
@@ -118,13 +103,16 @@ namespace FudgeCore {
 
     /**
      * Interpolates a linear function between two given points.
-     *  parameter[0] will be the input value for the function.
-     *  parameter[1] - parameter[4] describe the points between which will be interpoleted
+     * - ```_parameters[0]``` will be the input value for the function.
+     * - ```_parameters[1]``` x start value.
+     * - ```_parameters[2]``` y start value.
+     * - ```_parameters[3]``` x end value.
+     * - ```_parameters[4]``` y end value.
      */
     private static createClosureLinear(_parameters: Function[]): Function {
       let xStart: number = _parameters[1]();
-      let xEnd: number = _parameters[2]();
-      let yStart: number = _parameters[3]();
+      let yStart: number = _parameters[2]();
+      let xEnd: number = _parameters[3]();
       let yEnd: number = _parameters[4]();
       return function (): number {
         Debug.group("ClosureLinear");
@@ -137,9 +125,12 @@ namespace FudgeCore {
     }
 
     /**
-     * Creates a polynomial of third degree.
-     *  parameter[0] will be the input value for the function.
-     *  parameter[1] - parameter[4] representing a,b,c,d. These will be evaluated while parsing.
+     * Creates a polynomial function of third degree. A,b,c and d will be evaluated while parsing.
+     * - ```_parameters[0]``` will be the input value for the function.  
+     * - ```_parameters[1]``` a value.
+     * - ```_parameters[2]``` b value.
+     * - ```_parameters[3]``` c value.
+     * - ```_parameters[4]``` d value.
      */
     private static createClosurePolynomial3(_parameters: Function[]): Function {
       let a: number = _parameters[1]();
@@ -156,8 +147,8 @@ namespace FudgeCore {
     }
 
     /**
-     * Creates a closure which will return the square root of the given parameter
-     *  parameter[0] will be the input value for the function.
+     * Creates a closure which will return the square root of the given parameter,  
+     * ```parameters[0]``` will be the input value for the function.
      */
     private static createClosureSquareRoot(_parameters: Function[]): Function {
       return function (): number {
@@ -171,25 +162,13 @@ namespace FudgeCore {
 
     /**
      * Creates a closure which will return a number chosen from the given array of numbers.
-     *  parameter[0] representing the index of the number which will be chosen.
-     *  parameter[1] representing the array of random numbers to choose from.
+     * - ```_parameters[0]``` representing the index of the number which will be chosen.  
+     * - ```_parameters[1]``` representing the array of random numbers to choose from.
      */
     private static createClosureRandom(_parameters: Function[]): Function {
       return function (): number {
         Debug.group("ClosureRandom");
         let result: number = _parameters[1]()[_parameters[0]()];
-        Debug.groupEnd();
-        return result;
-      };
-    }
-
-    /**
-     * Creates a closure which will return the input value
-     */
-    private static createClosureIdentity(_parameters: Function[]): Function {
-      return function (): number {
-        Debug.group("ClosureIdentity");
-        let result: number = _parameters[0]();
         Debug.groupEnd();
         return result;
       };

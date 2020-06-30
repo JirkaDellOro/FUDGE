@@ -68,7 +68,8 @@ namespace ParticleSystemTest {
     particles.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.1, 0.1, 0.1));
     particles.getComponent(f.ComponentMaterial).clrPrimary = new f.Color(1, 0.2, 0.2);
 
-    let particleEffect: f.ParticleEffect = new f.ParticleEffect("data.json", input.valueAsNumber);
+    let particleEffect: f.ParticleEffect = new f.ParticleEffect(input.valueAsNumber);
+    particleEffect.load("data.json");
 
     particleSystem = new f.ComponentParticleSystem(particleEffect);
     particles.addComponent(particleSystem);
@@ -76,7 +77,8 @@ namespace ParticleSystemTest {
 
     // setup input
     input.addEventListener("input", (_event: Event) => {
-      let newParticleEffect: f.ParticleEffect = new f.ParticleEffect("data.json", input.valueAsNumber);
+      let newParticleEffect: f.ParticleEffect = new f.ParticleEffect(input.valueAsNumber);
+      newParticleEffect.load("data.json");
       let newParticleSystem: f.ComponentParticleSystem = new f.ComponentParticleSystem(newParticleEffect);
       particles.removeComponent(particleSystem);
       particles.addComponent(newParticleSystem);

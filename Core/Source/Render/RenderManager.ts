@@ -96,35 +96,32 @@ namespace FudgeCore {
       if (!_node.isActive)
         return;
 
-      let finalTransform: Matrix4x4;
-
       let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
-      if (cmpMesh) // TODO: careful when using particlesystem, pivot must not change node position
-        finalTransform = Matrix4x4.MULTIPLICATION(_node.mtxWorld, cmpMesh.pivot);
-      else
-        finalTransform = _node.mtxWorld; // caution, RenderManager is a reference...
-
-      // multiply camera matrix
-      // TODO: this needs to be done extra for every single particle
-      let projection: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.ViewProjectionMatrix, finalTransform);
-
-      // TODO: create drawNode method for particle system using _node.mtxWorld instead of finalTransform
       let cmpParticleSystem: ComponentParticleSystem = _node.getComponent(ComponentParticleSystem);
       if (cmpParticleSystem)
-        RenderParticles.drawParticles(_node, _node.mtxWorld, _cmpCamera);
-      else
+        RenderParticles.drawParticles(_node, _node.mtxWorld, cmpParticleSystem, cmpMesh, _cmpCamera);
+      else {
+        let finalTransform: Matrix4x4;
+  
+        if (cmpMesh) // TODO: careful when using particlesystem, pivot must not change node position
+          finalTransform = Matrix4x4.MULTIPLICATION(_node.mtxWorld, cmpMesh.pivot);
+        else
+          finalTransform = _node.mtxWorld; // caution, RenderManager is a reference...
+  
+        // multiply camera matrix
+        let projection: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.ViewProjectionMatrix, finalTransform);
+    
         _drawNode(_node, finalTransform, projection);
 
-
+        Recycler.store(projection);
+        if (finalTransform != _node.mtxWorld)
+          Recycler.store(finalTransform);
+      }
+      
       for (let name in _node.getChildren()) {
         let childNode: Node = _node.getChildren()[name];
         RenderManager.drawGraphRecursive(childNode, _cmpCamera, _drawNode); //, world);
       }
-
-      // TODO: this should also be done per particle
-      Recycler.store(projection);
-      if (finalTransform != _node.mtxWorld)
-        Recycler.store(finalTransform);
     }
 
     /**

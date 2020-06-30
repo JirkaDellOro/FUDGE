@@ -1,30 +1,42 @@
 namespace FudgeCore {
+
+  /**
+   * The data format used to parse and store the paticle effect
+   */
   export interface ParticleEffectData {
     [identifier: string]: General;
   }
+
+  /**
+   * The parsing expression grammar.
+   */
+  type ClosureData = ClosureDataFunction | string | number;
 
   interface ClosureDataFunction {
     function: string;
     parameters: ClosureData[];
   }
-  type ClosureData = ClosureDataFunction | string | number;
-
-  // TODO: ParticleEffect should only be a resource, storedValues and randomNumbers should be part of ComponentParticleSystem
+  
+  /**
+   * Holds all the information which defines the particle effect. Can load the said information out of a json file.
+   * @authors Jonas Plotzky, HFU, 2020
+   */
   export class ParticleEffect {
     public storageSystem: ParticleEffectData;
     public storageUpdate: ParticleEffectData;
     public storageParticle: ParticleEffectData;
 
-    // TODO: Replace ParticleEffectData with Functions that take Mtx4/Components as arguments and know what to do with it.
+    // ParticleEffectData could be replaced with Functions that take Mtx4/Components as arguments and know what to do with it.
     public transformLocal: ParticleEffectData;
     public transformWorld: ParticleEffectData;
 
-    public mutationComponents: ParticleEffectData;
+    public componentMutations: ParticleEffectData;
 
+    // TODO: StoredValues and random number arrays should be stored inside each instance of ComponentParticleSystem and not per instance of ParticleEffect
     public storedValues: StoredValues = {};
     private randomNumbers: number[] = [];
 
-    constructor(_filename: string,  _numberOfParticles: number) {
+    constructor(_numberOfParticles: number) {
       this.storedValues = {
         "time": 0,
         "index": 0,
@@ -34,50 +46,46 @@ namespace FudgeCore {
       for (let i: number = 0; i < _numberOfParticles + 10 /* so that its possible to have 10 different random numbers per index i.e. randomNumber(index + x) */; i++) {
         this.randomNumbers.push(Math.random());
       }
-
-      this.importFile(_filename);
-    }
-
-    public importFile(_filename: string): void {
-      //TODO: import file use fetch
-      let file: XMLHttpRequest = new XMLHttpRequest();
-      file.open("GET", _filename, false);
-      file.send();
-      let data: ParticleEffectData = JSON.parse(file.responseText);
-      this.parseFile(data);
     }
 
     /**
-     * Parse the data from json file and return a particle effect definition
-     * @param _data the data to parse
-     * @returns a definition of the particle effect containing the closure for translation, rotation etc.
+     * Asynchronously loads the json from the given url and parses it initializing this particle effect.
      */
-    private parseFile(_data: ParticleEffectData): void {
-      // pre parse storage and initialize stored values
+    public async load(_request: RequestInfo): Promise<void> {
+      let data: ParticleEffectData = await window.fetch(_request)
+        .then(_response => _response.json());
+      this.parse(data);
+    }
+
+    /**
+     * Parses the data initializing this particle effect with the corresponding closures
+     * @param _data The paticle effect data to parse.
+     */
+    private parse(_data: ParticleEffectData): void {
       this.preParseStorage(_data["storage"]);
 
       let dataStorage: ParticleEffectData = _data["storage"];
 
-      this.storageSystem = this.parseDataRecursively(dataStorage["system"]);
-      this.storageUpdate = this.parseDataRecursively(dataStorage["update"]);
-      this.storageParticle = this.parseDataRecursively(dataStorage["particle"]);
+      this.storageSystem = this.parseRecursively(dataStorage["system"]);
+      this.storageUpdate = this.parseRecursively(dataStorage["update"]);
+      this.storageParticle = this.parseRecursively(dataStorage["particle"]);
 
       let dataTransform: ParticleEffectData = _data["transformations"];
 
-      this.transformLocal = this.parseDataRecursively(dataTransform["local"]);
-      this.transformWorld = this.parseDataRecursively(dataTransform["world"]);
+      this.transformLocal = this.parseRecursively(dataTransform["local"]);
+      this.transformWorld = this.parseRecursively(dataTransform["world"]);
 
-      this.mutationComponents = this.parseDataRecursively(_data["components"]);
+      this.componentMutations = this.parseRecursively(_data["components"]);
     }
 
     /**
-     * Create entries in stored values for each defined storage closure. Predefined values (time, index...) and previously defined ones (in json) can not be overwritten.
-     * @param _data The paticle data to parse
+     * Creates entries in [[storedValues]] for each defined closure in _data. Predefined values (time, index...) and previously defined ones (in json) can not be overwritten.
+     * @param _data The paticle effect data to parse.
      */
     private preParseStorage(_data: ParticleEffectData): void {
       for (const storagePartition in _data) {
-        let storage: ParticleEffectData = <ParticleEffectData>_data[storagePartition];
-        for (const storageValue in <ParticleEffectData>storage) {
+        let storage: ParticleEffectData = _data[storagePartition];
+        for (const storageValue in storage) {
           if (storageValue in this.storedValues) {
             throw `"${storageValue}" is already defined`;
           }
@@ -89,15 +97,15 @@ namespace FudgeCore {
 
     /**
      * Parse the given effect data recursivley. The hierachy of the json file will be kept. Constants, variables("time") and functions definitions will be replaced with functions.
-     * @param _data The effect data to parse recursivley
+     * @param _data The particle effect data to parse recursivley.
      */
-    private parseDataRecursively(_data: ParticleEffectData): ParticleEffectData {
+    private parseRecursively(_data: ParticleEffectData): ParticleEffectData {
       for (const key in _data) {
         let value: Object = _data[key];
         if (typeof value === "string" || typeof value === "number" || "function" in <ParticleEffectData>value)
           _data[key] = this.parseClosure(<ClosureData>value);
         else {
-          _data[key] = this.parseDataRecursively(<ParticleEffectData>value);
+          _data[key] = this.parseRecursively(<ParticleEffectData>value);
         }
       }
       return _data;
@@ -105,7 +113,7 @@ namespace FudgeCore {
 
     /**
      * Parse the given closure data recursivley. Returns a function depending on the closure data.
-     * @param _data The closure data to parse recursively
+     * @param _data The closure data to parse recursively.
      */
     private parseClosure(_data: ClosureData): Function {
       switch (typeof _data) {

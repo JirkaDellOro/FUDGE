@@ -1,29 +1,33 @@
 namespace FudgeCore {
+  /**
+   * Class that is used inside of [[RenderManager]] to draw the particle effects of nodes which have a [[ComponentParticleSystem]] attached.
+   * @author Jonas Plotzky, HFU, 2020
+   */
   export abstract class RenderParticles extends RenderManager {
-    public static drawParticles(_node: Node, _nodeTransform: Matrix4x4, _cmpCamera: ComponentCamera): void {
-      let cmpParticleSystem: ComponentParticleSystem = _node.getComponent(ComponentParticleSystem);
-      let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
-      let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
-      let mesh: Mesh = cmpMesh.mesh;
 
+    /**
+     * The render function for drawing a node which has a [[ComponentParticleSystem]] attached to it. The node represents a single particle of the particle system. Based on the attached [[ComponentParticleSystem]] the whole particle system will be drawn in its determined state.
+     */
+    public static drawParticles(_node: Node, _nodeTransform: Matrix4x4, _cmpParticleSystem: ComponentParticleSystem, _cmpMesh: ComponentMesh, _cmpCamera: ComponentCamera): void {
+      let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
+      let mesh: Mesh = _cmpMesh.mesh;
       let shader: typeof Shader = cmpMaterial.material.getShader();
       let coat: Coat = cmpMaterial.material.getCoat();
       shader.useProgram();
+      let cameraViewProjectionMatrix: Matrix4x4 = _cmpCamera.ViewProjectionMatrix;
 
-      let particleEffect: ParticleEffect = cmpParticleSystem.particleEffect;
+      let particleEffect: ParticleEffect = _cmpParticleSystem.particleEffect;
 
       let storedValues: StoredValues = particleEffect.storedValues;
-
       storedValues["time"] = Time.game.get() / 1000;
 
-      // TODO: names
-      let transformLocal: ParticleEffectData = particleEffect.transformLocal;
-      let transformWorld: ParticleEffectData = particleEffect.transformWorld;
-      let mutationComponents: ParticleEffectData = particleEffect.mutationComponents;
+      let dataTransformLocal: ParticleEffectData = particleEffect.transformLocal;
+      let dataTransformWorld: ParticleEffectData = particleEffect.transformWorld;
+      let dataComponentMutations: ParticleEffectData = particleEffect.componentMutations;
 
       // get relevant components
       let components: Component[] = [];
-      for (const componentClass in mutationComponents) {
+      for (const componentClass in dataComponentMutations) {
         components.push(_node.getComponent((<General>globalThis["FudgeCore"])[componentClass]));
       }
       let componentsLength: number = components.length;
@@ -33,92 +37,97 @@ namespace FudgeCore {
         componentMutators.push(components[i].getMutator());
       }
 
+      let cachedMutators: Map<ParticleEffectData, Mutator> = new Map<ParticleEffectData, Mutator>();
+
       // evaluate update storage
-      cmpParticleSystem.evaluateClosureStorage(particleEffect.storageUpdate);
+      _cmpParticleSystem.evaluateClosureStorage(particleEffect.storageUpdate);
 
       let storageParticle: ParticleEffectData;
       storageParticle = particleEffect.storageParticle;
-
-      let cameraViewProjectionMatrix: Matrix4x4 = _cmpCamera.ViewProjectionMatrix;
 
       for (let i: number = 0, length: number = storedValues["size"]; i < length; i++) {
         storedValues["index"] = i;
 
         // evaluate particle storage
-        cmpParticleSystem.evaluateClosureStorage(storageParticle);
+        _cmpParticleSystem.evaluateClosureStorage(storageParticle);
 
         // apply transformations
         let finalTransform: Matrix4x4 = Matrix4x4.IDENTITY();
-
-        finalTransform.mutate(this.getMutatorFor(transformLocal));
-        for (const key in transformLocal) {
-          // TODO: change this somehow... get mutators out of vectors and change them + get correct vector
-          let transformVector: Vector3 = key == "scale" ? Vector3.ONE() : Vector3.ZERO();
-          transformVector.mutate(this.getMutatorFor(transformLocal[key]));
-          (<General>finalTransform)[key](transformVector);
-          Recycler.store(transformVector);
-        }
-
-        let worldTransform: Matrix4x4 = Matrix4x4.IDENTITY(); // only if world is set in json
-        for (const key in transformWorld) {
-          let transformVector: Vector3 = Vector3.ZERO();
-          transformVector.mutate(this.getMutatorFor(transformWorld[key]));
-          (<General>worldTransform)[key](transformVector);
-          Recycler.store(transformVector);
-        }
-
-        // apply system transformation
-        finalTransform.multiply(cmpMesh.pivot);
+        this.applyTransform(finalTransform, dataTransformLocal, cachedMutators);
+        finalTransform.multiply(_cmpMesh.pivot);
         finalTransform.multiply(_nodeTransform, true);
-        finalTransform.multiply(worldTransform, true);
+        if (dataTransformWorld) {
+          let transformWorld: Matrix4x4 = Matrix4x4.IDENTITY();
+          this.applyTransform(transformWorld, dataTransformWorld, cachedMutators);
+          finalTransform.multiply(transformWorld, true);
+          Recycler.store(transformWorld);
+        }
 
-        // TODO: optimize check component mesh
+        // TODO: check component mesh
         // transformation.showTo(Matrix4x4.MULTIPLICATION(_cmpCamera.getContainer().mtxWorld, _cmpCamera.pivot).translation);
 
-        // evaluate component data
+        // mutate components
         for (let i: number = 0; i < componentsLength; i++) {
-          components[i].mutate(this.getMutatorFor(mutationComponents[components[i].type]));
+          components[i].mutate(this.getMutatorFrom(dataComponentMutations[components[i].type], cachedMutators));
         }
 
         // render
         let projection: Matrix4x4 = Matrix4x4.MULTIPLICATION(cameraViewProjectionMatrix, finalTransform);
-
         mesh.useRenderBuffers(shader, finalTransform, projection);
         coat.useRenderData(shader, cmpMaterial);
         RenderOperator.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, mesh.renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
 
         Recycler.store(projection);
-        Recycler.store(worldTransform);
         Recycler.store(finalTransform);
       }
 
-      // restore component state
+      // restore saved component state
       for (let i: number = 0; i < componentsLength; i++) {
         components[i].mutate(componentMutators[i]);
       }
     }
 
-    // TODO: don't create new Mutators all the time
-    private static getMutatorFor(_effectData: ParticleEffectData): Mutator {
+    private static applyTransform(_transform: Matrix4x4, _dataTransform: ParticleEffectData, _mutatorMap: Map<ParticleEffectData, Mutator>): void {
+      for (const key in _dataTransform) {
+        let transformVector: Vector3 = key == "scale" ? Vector3.ONE() : Vector3.ZERO();
+        transformVector.mutate(this.getMutatorFrom(_dataTransform[key], _mutatorMap));
+        (<General>_transform)[key](transformVector);
+        Recycler.store(transformVector);
+      }
+    }
+
+    private static getMutatorFrom(_effectData: ParticleEffectData, _mutatorMap: Map<ParticleEffectData, Mutator>): Mutator {
+      let mutator: Mutator = _mutatorMap.get(_effectData);
+      if (mutator) {
+        this.evaluateMutatorWith(mutator, _effectData);
+      } 
+      else {
+        mutator = this.createMutatorFrom(_effectData);
+        _mutatorMap.set(_effectData, mutator);
+      }
+      return mutator;
+    }
+
+    private static createMutatorFrom(_effectData: ParticleEffectData): Mutator {
       let mutator: Mutator = {};
       for (const attribute in _effectData) {
         let value: Object = _effectData[attribute];
         if (typeof value === "function") {
           mutator[attribute] = (<Function>value)();
         } else {
-          mutator[attribute] = this.getMutatorFor(value);
+          mutator[attribute] = this.createMutatorFrom(value);
         }
       }
       return mutator;
     }
 
-    private static evaluateMutator(_effectData: ParticleEffectData, _mutator: Mutator): void {
+    private static evaluateMutatorWith(_mutator: Mutator, _effectData: ParticleEffectData): void {
       for (const attribute in _effectData) {
         let value: Object = _effectData[attribute];
         if (typeof value === "function") {
           _mutator[attribute] = (<Function>value)();
         } else {
-          this.evaluateMutator(value, <Mutator>_mutator[attribute]);
+          this.evaluateMutatorWith(<Mutator>_mutator[attribute], value);
         }
       }
     }
