@@ -4149,7 +4149,7 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    /** Internal class for holding data about physics debug */
+    /** Internal class for holding data about physics debug vertices.*/
     class PhysicsDebugVertexBuffer {
         gl: WebGL2RenderingContext;
         numVertices: number;
@@ -4159,12 +4159,19 @@ declare namespace FudgeCore {
         stride: number;
         buffer: WebGLBuffer;
         dataLength: number;
+        /** Setup the rendering context for this buffer and create the actual buffer for this context. */
         constructor(_renderingContext: WebGL2RenderingContext);
+        /** Fill the bound buffer with data. Used at buffer initialization */
         setData(array: Array<number>): void;
+        /** Update the data in the buffer */
         updateData(array: Array<number>): void;
+        /** Update the buffer with the specific type of Float32Array */
         updateDataFloat32Array(array: Float32Array): void;
+        /** Set Shader Attributes informations by getting their position in the shader, setting the offset, stride and size. For later use in the binding process */
         setAttribs(attribs: Array<PhysicsDebugVertexAttribute>): void;
+        /** Get the position of the attribute in the shader */
         loadAttribIndices(_program: PhysicsDebugShader): void;
+        /** Enable a attribute in a shader for this context, */
         bindAttribs(): void;
     }
     /** Internal class for holding data about PhysicsDebugVertexBuffers */
@@ -4172,11 +4179,15 @@ declare namespace FudgeCore {
         gl: WebGL2RenderingContext;
         buffer: WebGLBuffer;
         count: number;
+        /** Setup the rendering context for this buffer and create the actual buffer for this context. */
         constructor(_renderingContext: WebGL2RenderingContext);
+        /** Fill the bound buffer with data amount. Used at buffer initialization */
         setData(array: Array<number>): void;
+        /** Update the actual data in the buffer */
         updateData(array: Array<number>): void;
+        /** Update the buffer with the specific type of Int16Array */
         updateDataInt16Array(array: Int16Array): void;
-        /** The actual DrawCall for physicsDebugDraw Buffers */
+        /** The actual DrawCall for physicsDebugDraw Buffers. This is where the information from the debug is actually drawn. */
         draw(_mode?: number, _count?: number): void;
     }
     /** Internal class for managing data about webGL Attributes */
@@ -4185,28 +4196,35 @@ declare namespace FudgeCore {
         name: string;
         constructor(_float32Count: number, _name: string);
     }
-    /** Internal class for Shaders only used by the physics debugDraw */
+    /** Internal class for Shaders used only by the physics debugDraw */
     class PhysicsDebugShader {
         gl: WebGL2RenderingContext;
         program: WebGLProgram;
         vertexShader: WebGLShader;
         fragmentShader: WebGLShader;
         uniformLocationMap: Map<string, WebGLUniformLocation>;
+        /** Introduce the Fudge Rendering Context to this class, creating a program and vertex/fragment shader in this context */
         constructor(_renderingContext: WebGL2RenderingContext);
+        /** Take glsl shaders as strings and compile them, attaching the compiled shaders to a program thats used by this rendering context. */
         compile(vertexSource: string, fragmentSource: string): void;
+        /** Get index of a attribute in a shader in this program */
         getAttribIndex(_name: string): number;
+        /** Get the location of a uniform in a shader in this program */
         getUniformLocation(_name: string): WebGLUniformLocation;
+        /** Get all indices for every attribute in the shaders of this program */
         getAttribIndices(_attribs: Array<PhysicsDebugVertexAttribute>): Array<number>;
+        /** Tell the Fudge Rendering Context to use this program to draw. */
         use(): void;
+        /** Compile a shader out of a string and validate it. */
         compileShader(shader: WebGLShader, source: string): void;
     }
-    /** Internal Class used to draw debugInformations about the physics simulation onto the renderContext. @author Marko Fehrenbach | HFU 2020 //Based on OimoPhysics Haxe DebugDrawDemo */
+    /** Internal Class used to draw debugInformations about the physics simulation onto the renderContext. No user interaction needed. @author Marko Fehrenbach | HFU 2020 //Based on OimoPhysics Haxe DebugDrawDemo */
     class PhysicsDebugDraw extends RenderOperator {
         oimoDebugDraw: OIMO.DebugDraw;
         style: OIMO.DebugDrawStyle;
         gl: WebGL2RenderingContext;
-        triangleBuffer: WebGLBuffer;
         program: WebGLProgram;
+        shader: PhysicsDebugShader;
         pointVBO: PhysicsDebugVertexBuffer;
         pointIBO: PhysicsDebugIndexBuffer;
         lineVBO: PhysicsDebugVertexBuffer;
@@ -4222,17 +4240,33 @@ declare namespace FudgeCore {
         triBufferSize: number;
         triData: Float32Array;
         numTriData: number;
-        shader: PhysicsDebugShader;
+        /** Creating the debug for physics in Fudge. Tell it to draw only wireframe objects, since Fudge is handling rendering of the objects besides physics.
+         * Override OimoPhysics Functions with own rendering. Initialize buffers and connect them with the context for later use. */
         constructor();
+        /** Receive the current DebugMode from the physics settings and set the OimoPhysics.DebugDraw booleans to show only certain informations.
+         * Needed since some debug informations exclude others, and can't be drawn at the same time, by OimoPhysics. And for users it provides more readability
+         * to debug only what they need and is commonly debugged.
+         */
         getDebugModeFromSettings(): void;
+        /** Creating the render buffers for later use. Defining the attributes used in shaders.
+         * Needs to create empty buffers to already have them ready to draw later on, linking is only possible with existing buffers. No performance loss because empty buffers are not drawn.*/
         initializeBuffers(): void;
+        /** Fill an array with empty values */
         private initFloatArray;
+        /** Overriding the existing functions from OimoPhysics.DebugDraw without actually inherit from the class, to avoid compiler problems.
+         * Overriding them to receive debugInformations in the format the physic engine provides them but handling the rendering in the fudge context. */
         private initializeOverride;
+        /** Before OimoPhysics.world is filling the debug. Make sure the buffers are reset. Also receiving the debugMode from settings and updating the current projection for the vertexShader. */
         begin(): void;
+        /** After OimoPhysics.world filled the debug. Rendering calls. Setting this program to be used by the Fudge rendering context. And draw each updated buffer and resetting them. */
         end(): void;
-        /** Draw the ray into the debugDraw Call */
+        /** Drawing the ray into the debugDraw Call. By using the overwritten line rendering functions and drawing a point (pointSize defined in the shader) at the end of the ray. */
         debugRay(_origin: Vector3, _end: Vector3, _color: Color): void;
+        /** The source code (string) of the in physicsDebug used very simple vertexShader.
+         *  Handling the projection (which includes, view/world[is always identity in this case]/projection in Fudge). Increasing the size of single points drawn.
+         *  And transfer position color to the fragmentShader. */
         private vertexShaderSource;
+        /** The source code (string) of the in physicsDebug used super simple fragmentShader. Unlit - only colorizing the drawn pixels, normals/position are given to make it expandable */
         private fragmentShaderSource;
     }
 }
