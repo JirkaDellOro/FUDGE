@@ -4,12 +4,14 @@ namespace FudgeCore {
      * The type of conncetion is defined by the subclasses like prismatic joint, cylinder joint etc.
      * A Rigidbody on the [[Node]] that this component is added to is needed. Setting the connectedRigidbody and
      * initializing the connection creates a physical connection between them. This differs from a connection through hierarchy
-     * in the node structure of fudge. Joints can have different DOF's (Degrees Of Freedom), 1 Axis = 1 Degree. 
-     * @authors Marko Fehrenbach, HFU, 2020
+     * in the node structure of fudge. Joints can have different DOF's (Degrees Of Freedom), 1 Axis that can either twist or swing is a degree of freedom.
+     * A joint typically consists of a motor that limits movement/rotation or is activly trying to move to a limit. And a spring which defines the rigidity.
+     * @author Marko Fehrenbach, HFU 2020
      */
   export abstract class ComponentJoint extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJoint);
 
+    /** Get/Set the first ComponentRigidbody of this connection. It should be the one that this component is attached too in the sceneTree. */
     get attachedRigidbody(): ComponentRigidbody {
       return this.attachedRB;
     }
@@ -17,6 +19,8 @@ namespace FudgeCore {
       this.connected = false;
       this.attachedRB = _cmpRB;
     }
+
+    /** Get/Set the second ComponentRigidbody of this connection. */
     get connectedRigidbody(): ComponentRigidbody {
       return this.connectedRB;
     }
@@ -25,6 +29,9 @@ namespace FudgeCore {
       this.connectedRB = _cmpRB;
     }
 
+    /** Get/Set if the two bodies collide with each other or only with the world but not with themselves. Default = no internal collision.
+     *  In most cases it's prefered to declare a minimum and maximum angle/length the bodies can move from one another instead of having them collide.
+     */
     get selfCollision(): boolean {
       return this.collisionBetweenConnectedBodies;
     }
@@ -36,29 +43,38 @@ namespace FudgeCore {
     protected connectedRB: ComponentRigidbody;
 
     protected connected: boolean = false;
-
     private collisionBetweenConnectedBodies: boolean;
 
+    /** Create a joint connection between the two given RigidbodyComponents. */
     constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null) {
       super();
       this.attachedRigidbody = _attachedRigidbody;
       this.connectedRigidbody = _connectedRigidbody;
     }
 
+    /** Check if connection is dirty, so when either rb is changed disconnect and reconnect. Internally used no user interaction needed. */
     public checkConnection(): boolean {
-      return this.connected; //check if connection is dirty, so when either rb is changed disconnect and reconnect
+      return this.connected;
     }
 
-    public abstract connect(): void; //Connect when both bodies are set, and it was not connected yet, or if any of the bodies is changed
+    /** Connect when both bodies are set, and it was not connected yet, or if any of the bodies has changed. This needs to be handled this way to ensure there are no errors
+     * in the simulation because a ComponentRigidbody was not yet fully created or any other piece like ComponentTransform is missing. But values are also remembered correctly.
+     */
+    public abstract connect(): void;
 
-    public abstract disconnect(): void; //When the ComponentJoint is removed, or before every connection, if connected
+    /** Disconnect on any changes to the two bodies, so they can potentially reconnect if the component is not removed.
+    */
+    public abstract disconnect(): void;
 
+    /** Get the actual joint in form of the physics engine OimoPhysics.joint. Used to expand functionality, normally no user interaction needed. */
     public abstract getOimoJoint(): OIMO.Joint;
 
+    /** Adding the given Fudge ComponentJoint to the oimoPhysics World */
     protected addConstraintToWorld(cmpJoint: ComponentJoint): void {
       Physics.world.addJoint(cmpJoint);
     }
 
+    /** Removing the given Fudge ComponentJoint to the oimoPhysics World */
     protected removeConstraintFromWorld(cmpJoint: ComponentJoint): void {
       Physics.world.removeJoint(cmpJoint);
     }

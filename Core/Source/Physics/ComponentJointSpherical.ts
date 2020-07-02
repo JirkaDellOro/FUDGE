@@ -3,6 +3,17 @@ namespace FudgeCore {
      * A physical connection between two bodies with three Degrees of Freedom, also known as ball and socket joint. Two bodies connected at their anchor but free to rotate.
      * Used for things like the connection of bones in the human shoulder (if simplified, else better use JointRagdoll). Two RigidBodies need to be defined to use it. Only spring settings can be defined.
      * 3 Degrees are swing horizontal, swing vertical and twist.
+     * 
+     * ```plaintext
+     *              JointHolder - attachedRigidbody (e.g. Human-Shoulder)
+     *         z                             -------
+     *      y  ↑                            |      |
+     *        \|            ----------------|      |
+     *  -x <---|---> x     |                |      |
+     *         |\           ----------------|      |
+     *         ↓ -y       conntectedRb      |      |
+     *        -z         (e.g. Upper-Arm)    -------
+     * ```
      * @authors Marko Fehrenbach, HFU, 2020
      */
   export class ComponentJointSpherical extends ComponentJoint {

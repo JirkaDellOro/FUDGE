@@ -1,9 +1,18 @@
 namespace FudgeCore {
   /**
      * A physical connection between two bodies with a defined axe of rotation and rotation. Two Degrees of Freedom in the defined axis.
-     * Two RigidBodies need to be defined to use it. For actual rotating a upper/lower limit need to be set otherwise it's just a holding connection.
-     * A motor can be defined for rotation and translation, along with spring settings.
-     * @authors Marko Fehrenbach, HFU, 2020
+     * Two RigidBodies need to be defined to use it. A motor can be defined for rotation and translation, along with spring settings.
+     * 
+     * ```plaintext
+     *          JointHolder - attachedRigidbody
+     *                    ----------  ↑
+     *                    |        |  |
+     *          <---------|        |--------------> connectedRigidbody, sliding on one Axis, 1st Degree of Freedom
+     *                    |        |  |   
+     *                    ----------  ↓ rotating on one Axis, 2nd Degree of Freedom   
+     * ```
+     * 
+     * @author Marko Fehrenbach, HFU 2020
      */
   export class ComponentJointCylindrical extends ComponentJoint {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointCylindrical);
@@ -194,6 +203,7 @@ namespace FudgeCore {
     }
     //#endregion
 
+    //Internal Variables
     private jointSpringDampingRatio: number = 0;
     private jointSpringFrequency: number = 0;
 
@@ -222,10 +232,9 @@ namespace FudgeCore {
     private jointAxis: OIMO.Vec3;
 
     private jointInternalCollision: boolean;
-
     private oimoJoint: OIMO.CylindricalJoint;
 
-
+    /** Creating a cylindrical joint between two ComponentRigidbodies moving on one axis and rotating around another bound on a local anchorpoint. */
     constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null, _axis: Vector3 = new Vector3(0, 1, 0), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
       super(_attachedRigidbody, _connectedRigidbody);
       this.jointAxis = new OIMO.Vec3(_axis.x, _axis.y, _axis.z);

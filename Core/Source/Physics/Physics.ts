@@ -4,7 +4,7 @@ namespace FudgeCore {
 
   /**
   * Main Physics Class to hold information about the physical representation of the scene
-  * @author Marko Fehrenbach, HFU, 2020
+  * @author Marko Fehrenbach, HFU 2020
   */
   export class Physics {
 

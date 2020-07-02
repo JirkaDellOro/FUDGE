@@ -4,7 +4,7 @@ namespace FudgeCore {
      * It's the connection between the Fudge Rendered world and the Physics world.
      * For the physics to correctly get the transformations rotations need to be applied with from left = true.
      * Or rotations need to happen before scaling.
-     * @authors Marko Fehrenbach, HFU, 2020
+     * @author Marko Fehrenbach, HFU 2020
      */
   export class ComponentRigidbody extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentRigidbody);
