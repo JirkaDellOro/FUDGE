@@ -1,10 +1,22 @@
 namespace FudgeCore {
   /**
      * A physical connection between two bodies with two defined axis (normally e.g. (0,0,1) and rotation(1,0,0)), they share the same anchor and have free rotation, but transfer the twist.
-     * In reality used in cars to transfer the more stable stationary force on the velocity axis to the bumping, damped moving wheel.
-     * Two RigidBodies need to be defined to use it. For actual rotating a upper/lower limit need to be set otherwise it's just a holding connection.
-     * The two motors can be defined for rotation and translation, along with spring settings for each axis.
-     * @authors Marko Fehrenbach, HFU, 2020
+     * In reality used in cars to transfer the more stable stationary force on the velocity axis to the bumping, damped moving wheel. Two RigidBodies need to be defined to use it.
+     * The two motors can be defined for the two rotation axis, along with springs.
+     * ```plaintext        
+     *                  
+     *                      anchor - twist is transfered between bodies
+     *         z                   |
+     *         ↑            -----  |  ------------
+     *         |           |     | ↓ |            | 
+     *  -x <---|---> x     |     | x |            |           e.g. wheel can still turn up/down, 
+     *         |           |     |   |            |           left right but transfering it's rotation on to the wheel-axis.
+     *         ↓            -----     ------------
+     *        -z    
+     *                 attachedRB          connectedRB
+     *                (e.g. wheel)       (e.g. wheel-axis)
+     * ```
+     * @author Marko Fehrenbach, HFU 2020
      */
   export class ComponentJointUniversal extends ComponentJoint {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointUniversal);
@@ -90,8 +102,6 @@ namespace FudgeCore {
       this.jointSecondSpringFrequency = _value;
       if (this.oimoJoint != null) this.oimoJoint.getSpringDamper2().frequency = this.jointSecondSpringFrequency;
     }
-
-
 
     /**
      * The amount of force needed to break the JOINT, in Newton. 0 equals unbreakable (default) 

@@ -1,8 +1,25 @@
 namespace FudgeCore {
   /**
-      * A physical connection between two bodies, designed to simulate behaviour within a real body. It has two axis, a swing and twist axis, similar to a Ragdoll joint,
-      * but more restrictive in it's angles. Two RigidBodies need to be defined to use it. For actual rotating a upper/lower limit need to be set otherwise it's just a holding connection.
-      * @authors Marko Fehrenbach, HFU, 2020
+      * A physical connection between two bodies, designed to simulate behaviour within a real body. It has two axis, a swing and twist axis, and also the perpendicular axis, 
+      * similar to a Spherical joint, but more restrictive in it's angles and only two degrees of freedom. Two RigidBodies need to be defined to use it. Mostly used to create humanlike joints that behave like a 
+      * lifeless body.
+      * ```plaintext        
+      *                  
+      *                      anchor - it can twist on one axis and swing on another
+      *         z                   |
+      *         ↑            -----  |  ------------
+      *         |           |     | ↓ |            |        e.g. z = TwistAxis, it can rotate in-itself around this axis 
+      *  -x <---|---> x     |     | x |            |        e.g. x = SwingAxis, it can rotate anchored around the base on this axis   
+      *         |           |     |   |            |           
+      *         ↓            -----     ------------         e.g. you can twist the leg in-itself to a certain degree,
+      *        -z                                           but also rotate it forward/backward/left/right to a certain degree
+      *                attachedRB          connectedRB
+      *              (e.g. upper-leg)         (e.g. pelvis)
+      * 
+      * ```
+      * Twist equals a rotation around a point without moving on an axis.
+      * Swing equals a rotation on a point with a moving local axis.
+      * @author Marko Fehrenbach, HFU, 2020
       */
   export class ComponentJointRagdoll extends ComponentJoint {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointRagdoll);
@@ -20,6 +37,7 @@ namespace FudgeCore {
       this.disconnect();
       this.dirtyStatus();
     }
+
     /**
     * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
     *  When changed after initialization the joint needs to be reconnected.
@@ -283,7 +301,6 @@ namespace FudgeCore {
       j.setBreakForce(this.breakForce);
       j.setBreakTorque(this.breakTorque);
       j.setAllowCollision(this.jointInternalCollision);
-
       this.oimoJoint = j;
     }
 

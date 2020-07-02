@@ -3229,36 +3229,61 @@ declare namespace FudgeCore {
        * The type of conncetion is defined by the subclasses like prismatic joint, cylinder joint etc.
        * A Rigidbody on the [[Node]] that this component is added to is needed. Setting the connectedRigidbody and
        * initializing the connection creates a physical connection between them. This differs from a connection through hierarchy
-       * in the node structure of fudge. Joints can have different DOF's (Degrees Of Freedom), 1 Axis = 1 Degree.
-       * @authors Marko Fehrenbach, HFU, 2020
+       * in the node structure of fudge. Joints can have different DOF's (Degrees Of Freedom), 1 Axis that can either twist or swing is a degree of freedom.
+       * A joint typically consists of a motor that limits movement/rotation or is activly trying to move to a limit. And a spring which defines the rigidity.
+       * @author Marko Fehrenbach, HFU 2020
        */
     abstract class ComponentJoint extends Component {
         static readonly iSubclass: number;
+        /** Get/Set the first ComponentRigidbody of this connection. It should be the one that this component is attached too in the sceneTree. */
         get attachedRigidbody(): ComponentRigidbody;
         set attachedRigidbody(_cmpRB: ComponentRigidbody);
+        /** Get/Set the second ComponentRigidbody of this connection. */
         get connectedRigidbody(): ComponentRigidbody;
         set connectedRigidbody(_cmpRB: ComponentRigidbody);
+        /** Get/Set if the two bodies collide with each other or only with the world but not with themselves. Default = no internal collision.
+         *  In most cases it's prefered to declare a minimum and maximum angle/length the bodies can move from one another instead of having them collide.
+         */
         get selfCollision(): boolean;
         set selfCollision(_value: boolean);
         protected attachedRB: ComponentRigidbody;
         protected connectedRB: ComponentRigidbody;
         protected connected: boolean;
         private collisionBetweenConnectedBodies;
+        /** Create a joint connection between the two given RigidbodyComponents. */
         constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody);
+        /** Check if connection is dirty, so when either rb is changed disconnect and reconnect. Internally used no user interaction needed. */
         checkConnection(): boolean;
+        /** Connect when both bodies are set, and it was not connected yet, or if any of the bodies has changed. This needs to be handled this way to ensure there are no errors
+         * in the simulation because a ComponentRigidbody was not yet fully created or any other piece like ComponentTransform is missing. But values are also remembered correctly.
+         */
         abstract connect(): void;
+        /** Disconnect on any changes to the two bodies, so they can potentially reconnect if the component is not removed.
+        */
         abstract disconnect(): void;
+        /** Get the actual joint in form of the physics engine OimoPhysics.joint. Used to expand functionality, normally no user interaction needed. */
         abstract getOimoJoint(): OIMO.Joint;
+        /** Adding the given Fudge ComponentJoint to the oimoPhysics World */
         protected addConstraintToWorld(cmpJoint: ComponentJoint): void;
+        /** Removing the given Fudge ComponentJoint to the oimoPhysics World */
         protected removeConstraintFromWorld(cmpJoint: ComponentJoint): void;
     }
 }
 declare namespace FudgeCore {
     /**
        * A physical connection between two bodies with a defined axe of rotation and rotation. Two Degrees of Freedom in the defined axis.
-       * Two RigidBodies need to be defined to use it. For actual rotating a upper/lower limit need to be set otherwise it's just a holding connection.
-       * A motor can be defined for rotation and translation, along with spring settings.
-       * @authors Marko Fehrenbach, HFU, 2020
+       * Two RigidBodies need to be defined to use it. A motor can be defined for rotation and translation, along with spring settings.
+       *
+       * ```plaintext
+       *          JointHolder - attachedRigidbody
+       *                    ----------  ↑
+       *                    |        |  |
+       *          <---------|        |--------------> connectedRigidbody, sliding on one Axis, 1st Degree of Freedom
+       *                    |        |  |
+       *                    ----------  ↓ rotating on one Axis, 2nd Degree of Freedom
+       * ```
+       *
+       * @author Marko Fehrenbach, HFU 2020
        */
     class ComponentJointCylindrical extends ComponentJoint {
         static readonly iSubclass: number;
@@ -3371,6 +3396,7 @@ declare namespace FudgeCore {
         private jointAxis;
         private jointInternalCollision;
         private oimoJoint;
+        /** Creating a cylindrical joint between two ComponentRigidbodies moving on one axis and rotating around another bound on a local anchorpoint. */
         constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
          * Initializing and connecting the two rigidbodies with the configured joint properties
@@ -3397,9 +3423,17 @@ declare namespace FudgeCore {
     /**
        * A physical connection between two bodies with a defined axe movement.
        * Used to create a sliding joint along one axis. Two RigidBodies need to be defined to use it.
-       * For actual sliding a upper/lower limit need to be set otherwise it's just a holding connection.
-       * A motor can be defined to move the connected along the defined axis.
-       * @authors Marko Fehrenbach, HFU, 2020
+       * A motor can be defined to move the connected along the defined axis. Great to construct standard springs or physical sliders.
+       *
+       * ```plaintext
+       *          JointHolder - attachedRigidbody
+       *                    --------
+       *                    |      |
+       *          <---------|      |--------------> connectedRigidbody, sliding on one Axis, 1 Degree of Freedom
+       *                    |      |
+       *                    --------
+       * ```
+       * @author Marko Fehrenbach, HFU 2020
        */
     class ComponentJointPrismatic extends ComponentJoint {
         static readonly iSubclass: number;
@@ -3450,7 +3484,7 @@ declare namespace FudgeCore {
         get motorSpeed(): number;
         set motorSpeed(_value: number);
         /**
-          * The maximum motor force in Newton. force <= 0 equals disabled.
+          * The maximum motor force in Newton. force <= 0 equals disabled. This is the force that the motor is using to hold the position, or reach it if a motorSpeed is defined.
          */
         get motorForce(): number;
         set motorForce(_value: number);
@@ -3474,6 +3508,7 @@ declare namespace FudgeCore {
         private jointAxis;
         private jointInternalCollision;
         private oimoJoint;
+        /** Creating a prismatic joint between two ComponentRigidbodies only moving on one axis bound on a local anchorpoint. */
         constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
          * Initializing and connecting the two rigidbodies with the configured joint properties
@@ -3490,17 +3525,38 @@ declare namespace FudgeCore {
          * Only to be used when functionality that is not added within Fudge is needed.
         */
         getOimoJoint(): OIMO.Joint;
+        /** Actual creation of a joint in the OimoPhysics system */
         private constructJoint;
+        /** Adding this joint to the world through the general function of the base class ComponentJoint. Happening when the joint is connecting.  */
         private superAdd;
+        /** Removing this joint to the world through the general function of the base class ComponentJoint. Happening when this component is removed from the Node. */
         private superRemove;
+        /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
         private dirtyStatus;
     }
 }
 declare namespace FudgeCore {
     /**
-        * A physical connection between two bodies, designed to simulate behaviour within a real body. It has two axis, a swing and twist axis, similar to a Ragdoll joint,
-        * but more restrictive in it's angles. Two RigidBodies need to be defined to use it. For actual rotating a upper/lower limit need to be set otherwise it's just a holding connection.
-        * @authors Marko Fehrenbach, HFU, 2020
+        * A physical connection between two bodies, designed to simulate behaviour within a real body. It has two axis, a swing and twist axis, and also the perpendicular axis,
+        * similar to a Spherical joint, but more restrictive in it's angles and only two degrees of freedom. Two RigidBodies need to be defined to use it. Mostly used to create humanlike joints that behave like a
+        * lifeless body.
+        * ```plaintext
+        *
+        *                      anchor - it can twist on one axis and swing on another
+        *         z                   |
+        *         ↑            -----  |  ------------
+        *         |           |     | ↓ |            |        e.g. z = TwistAxis, it can rotate in-itself around this axis
+        *  -x <---|---> x     |     | x |            |        e.g. x = SwingAxis, it can rotate anchored around the base on this axis
+        *         |           |     |   |            |
+        *         ↓            -----     ------------         e.g. you can twist the leg in-itself to a certain degree,
+        *        -z                                           but also rotate it forward/backward/left/right to a certain degree
+        *                attachedRB          connectedRB
+        *              (e.g. upper-leg)         (e.g. pelvis)
+        *
+        * ```
+        * Twist equals a rotation around a point without moving on an axis.
+        * Swing equals a rotation on a point with a moving local axis.
+        * @author Marko Fehrenbach, HFU, 2020
         */
     class ComponentJointRagdoll extends ComponentJoint {
         static readonly iSubclass: number;
@@ -3632,9 +3688,20 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
        * A physical connection between two bodies with a defined axe of rotation. Also known as HINGE joint.
-       * Two RigidBodies need to be defined to use it. For actual rotating a upper/lower limit need to be set otherwise it's just a holding connection.
-       * A motor can be defined to rotate the connected along the defined axis.
-       * @authors Marko Fehrenbach, HFU, 2020
+       * Two RigidBodies need to be defined to use it. A motor can be defined to rotate the connected along the defined axis.
+       *
+       * ```plaintext
+       *                  rotation axis, 1st Degree of freedom
+       *                    ↑
+       *              ---   |   ------------
+       *             |   |  |  |            |
+       *             |   |  |  |            |
+       *             |   |  |  |            |
+       *              ---   |   ------------
+       *      attachedRB    ↓    connectedRB
+       *   (e.g. Doorhinge)       (e.g. Door)
+       * ```
+       * @author Marko Fehrenbach, HFU, 2020
        */
     class ComponentJointRevolute extends ComponentJoint {
         static readonly iSubclass: number;
@@ -3736,6 +3803,17 @@ declare namespace FudgeCore {
        * A physical connection between two bodies with three Degrees of Freedom, also known as ball and socket joint. Two bodies connected at their anchor but free to rotate.
        * Used for things like the connection of bones in the human shoulder (if simplified, else better use JointRagdoll). Two RigidBodies need to be defined to use it. Only spring settings can be defined.
        * 3 Degrees are swing horizontal, swing vertical and twist.
+       *
+       * ```plaintext
+       *              JointHolder - attachedRigidbody (e.g. Human-Shoulder)
+       *         z                             -------
+       *      y  ↑                            |      |
+       *        \|            ----------------|      |
+       *  -x <---|---> x     |                |      |
+       *         |\           ----------------|      |
+       *         ↓ -y       conntectedRb      |      |
+       *        -z         (e.g. Upper-Arm)    -------
+       * ```
        * @authors Marko Fehrenbach, HFU, 2020
        */
     class ComponentJointSpherical extends ComponentJoint {
@@ -3806,10 +3884,22 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
        * A physical connection between two bodies with two defined axis (normally e.g. (0,0,1) and rotation(1,0,0)), they share the same anchor and have free rotation, but transfer the twist.
-       * In reality used in cars to transfer the more stable stationary force on the velocity axis to the bumping, damped moving wheel.
-       * Two RigidBodies need to be defined to use it. For actual rotating a upper/lower limit need to be set otherwise it's just a holding connection.
-       * The two motors can be defined for rotation and translation, along with spring settings for each axis.
-       * @authors Marko Fehrenbach, HFU, 2020
+       * In reality used in cars to transfer the more stable stationary force on the velocity axis to the bumping, damped moving wheel. Two RigidBodies need to be defined to use it.
+       * The two motors can be defined for the two rotation axis, along with springs.
+       * ```plaintext
+       *
+       *                      anchor - twist is transfered between bodies
+       *         z                   |
+       *         ↑            -----  |  ------------
+       *         |           |     | ↓ |            |
+       *  -x <---|---> x     |     | x |            |           e.g. wheel can still turn up/down,
+       *         |           |     |   |            |           left right but transfering it's rotation on to the wheel-axis.
+       *         ↓            -----     ------------
+       *        -z
+       *                 attachedRB          connectedRB
+       *                (e.g. wheel)       (e.g. wheel-axis)
+       * ```
+       * @author Marko Fehrenbach, HFU 2020
        */
     class ComponentJointUniversal extends ComponentJoint {
         static readonly iSubclass: number;
@@ -3957,7 +4047,7 @@ declare namespace FudgeCore {
        * It's the connection between the Fudge Rendered world and the Physics world.
        * For the physics to correctly get the transformations rotations need to be applied with from left = true.
        * Or rotations need to happen before scaling.
-       * @authors Marko Fehrenbach, HFU, 2020
+       * @author Marko Fehrenbach, HFU 2020
        */
     class ComponentRigidbody extends Component {
         static readonly iSubclass: number;
@@ -4218,7 +4308,7 @@ declare namespace FudgeCore {
         /** Compile a shader out of a string and validate it. */
         compileShader(shader: WebGLShader, source: string): void;
     }
-    /** Internal Class used to draw debugInformations about the physics simulation onto the renderContext. No user interaction needed. @author Marko Fehrenbach | HFU 2020 //Based on OimoPhysics Haxe DebugDrawDemo */
+    /** Internal Class used to draw debugInformations about the physics simulation onto the renderContext. No user interaction needed. @author Marko Fehrenbach, HFU 2020 //Based on OimoPhysics Haxe DebugDrawDemo */
     class PhysicsDebugDraw extends RenderOperator {
         oimoDebugDraw: OIMO.DebugDraw;
         style: OIMO.DebugDrawStyle;
@@ -4398,7 +4488,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
     * Main Physics Class to hold information about the physical representation of the scene
-    * @author Marko Fehrenbach, HFU, 2020
+    * @author Marko Fehrenbach, HFU 2020
     */
     class Physics {
         /** The PHYSICAL WORLD that gives every [[Node]] with a ComponentRigidbody a physical representation and moves them accordingly to the laws of the physical world. */

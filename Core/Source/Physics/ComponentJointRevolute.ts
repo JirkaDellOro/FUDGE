@@ -1,9 +1,20 @@
 namespace FudgeCore {
   /**
      * A physical connection between two bodies with a defined axe of rotation. Also known as HINGE joint.
-     * Two RigidBodies need to be defined to use it. For actual rotating a upper/lower limit need to be set otherwise it's just a holding connection.
-     * A motor can be defined to rotate the connected along the defined axis.
-     * @authors Marko Fehrenbach, HFU, 2020
+     * Two RigidBodies need to be defined to use it. A motor can be defined to rotate the connected along the defined axis.
+     * 
+     * ```plaintext        
+     *                  rotation axis, 1st Degree of freedom
+     *                    ↑
+     *              ---   |   ------------
+     *             |   |  |  |            | 
+     *             |   |  |  |            | 
+     *             |   |  |  |            | 
+     *              ---   |   ------------
+     *      attachedRB    ↓    connectedRB
+     *   (e.g. Doorhinge)       (e.g. Door)
+     * ```
+     * @author Marko Fehrenbach, HFU, 2020
      */
   export class ComponentJointRevolute extends ComponentJoint {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointRevolute);

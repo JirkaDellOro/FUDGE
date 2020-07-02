@@ -2,9 +2,17 @@ namespace FudgeCore {
   /**
      * A physical connection between two bodies with a defined axe movement.
      * Used to create a sliding joint along one axis. Two RigidBodies need to be defined to use it.
-     * For actual sliding a upper/lower limit need to be set otherwise it's just a holding connection.
-     * A motor can be defined to move the connected along the defined axis.
-     * @authors Marko Fehrenbach, HFU, 2020
+     * A motor can be defined to move the connected along the defined axis. Great to construct standard springs or physical sliders.
+     * 
+     * ```plaintext
+     *          JointHolder - attachedRigidbody
+     *                    --------
+     *                    |      |
+     *          <---------|      |--------------> connectedRigidbody, sliding on one Axis, 1 Degree of Freedom
+     *                    |      |
+     *                    --------
+     * ```
+     * @author Marko Fehrenbach, HFU 2020
      */
   export class ComponentJointPrismatic extends ComponentJoint {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointPrismatic);
@@ -110,7 +118,7 @@ namespace FudgeCore {
       if (this.oimoJoint != null) this.oimoJoint.getLimitMotor().motorSpeed = this.jointMotorSpeed;
     }
     /**
-      * The maximum motor force in Newton. force <= 0 equals disabled. 
+      * The maximum motor force in Newton. force <= 0 equals disabled. This is the force that the motor is using to hold the position, or reach it if a motorSpeed is defined.
      */
     get motorForce(): number {
       return this.jointMotorForce;
@@ -132,6 +140,7 @@ namespace FudgeCore {
     }
     //#endregion
 
+    //Internally used variables
     private jointSpringDampingRatio: number = 0;
     private jointSpringFrequency: number = 0;
 
@@ -150,10 +159,9 @@ namespace FudgeCore {
     private jointAxis: OIMO.Vec3;
 
     private jointInternalCollision: boolean;
-
     private oimoJoint: OIMO.PrismaticJoint;
 
-
+    /** Creating a prismatic joint between two ComponentRigidbodies only moving on one axis bound on a local anchorpoint. */
     constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null, _axis: Vector3 = new Vector3(0, 1, 0), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
       super(_attachedRigidbody, _connectedRigidbody);
       this.jointAxis = new OIMO.Vec3(_axis.x, _axis.y, _axis.z);
@@ -197,31 +205,35 @@ namespace FudgeCore {
       return this.oimoJoint;
     }
 
+    /** Actual creation of a joint in the OimoPhysics system */
     private constructJoint(): void {
-      this.springDamper = new OIMO.SpringDamper().setSpring(this.jointSpringFrequency, this.jointSpringDampingRatio);
-      this.translationalMotor = new OIMO.TranslationalLimitMotor().setLimits(this.jointMotorLimitLower, this.jointMotorLimitUpper);
+      this.springDamper = new OIMO.SpringDamper().setSpring(this.jointSpringFrequency, this.jointSpringDampingRatio); //Create spring settings, either as a spring or totally rigid
+      this.translationalMotor = new OIMO.TranslationalLimitMotor().setLimits(this.jointMotorLimitLower, this.jointMotorLimitUpper); //Create motor settings, to hold positions, set constraint min/max
       this.translationalMotor.setMotor(this.jointMotorSpeed, this.jointMotorForce);
-      this.config = new OIMO.PrismaticJointConfig();
-      let attachedRBPos: Vector3 = this.attachedRigidbody.getContainer().mtxWorld.translation;
+      this.config = new OIMO.PrismaticJointConfig(); //Create a specific config for this joint type that is calculating the local axis for both bodies
+      let attachedRBPos: Vector3 = this.attachedRigidbody.getContainer().mtxWorld.translation; //Setting the anchor position locally from the first rigidbody
       let worldAnchor: OIMO.Vec3 = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
-      this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, this.jointAxis);
-      this.config.springDamper = this.springDamper;
+      this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, this.jointAxis); //Initialize the config to calculate the local axis/anchors for the OimoPhysics Engine
+      this.config.springDamper = this.springDamper; //Telling the config to use the motor/spring of the Fudge Component
       this.config.limitMotor = this.translationalMotor;
-      var j: OIMO.PrismaticJoint = new OIMO.PrismaticJoint(this.config);
-      j.setBreakForce(this.breakForce);
+      var j: OIMO.PrismaticJoint = new OIMO.PrismaticJoint(this.config); //Creating the specific type of joint
+      j.setBreakForce(this.breakForce); //Set additional infos, if the joint is unbreakable and colliding internally
       j.setBreakTorque(this.breakTorque);
       j.setAllowCollision(this.jointInternalCollision);
-      this.oimoJoint = j;
+      this.oimoJoint = j; //Tell the Fudge Component which joint in the OimoPhysics system it represents
     }
 
+    /** Adding this joint to the world through the general function of the base class ComponentJoint. Happening when the joint is connecting.  */
     private superAdd(): void {
       this.addConstraintToWorld(this);
     }
 
+    /** Removing this joint to the world through the general function of the base class ComponentJoint. Happening when this component is removed from the Node. */
     private superRemove(): void {
       this.removeConstraintFromWorld(this);
     }
 
+    /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
     private dirtyStatus(): void {
       Physics.world.changeJointStatus(this);
     }
