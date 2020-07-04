@@ -36,6 +36,11 @@ namespace FudgeCore {
     }
     return mutator;
   }
+
+  export interface MutableForUserInterface {
+    getMutator(): Mutator;
+    updateMutator(_mutator: Mutator): void;
+  }
   /**
    * Base class for all types being mutable using [[Mutator]]-objects, thus providing and using interfaces created at runtime.  
    * Mutables provide a [[Mutator]] that is build by collecting all object-properties that are either of a primitive type or again Mutable.
@@ -44,6 +49,17 @@ namespace FudgeCore {
    * Otherwise, they will be ignored if not handled by an override of the mutate-method in the subclass and throw errors in an automatically generated user-interface for the object.
    */
   export abstract class Mutable extends EventTargetƒ {
+    /**
+     * Decorator allows to attach [[Mutable]] functionality to existing classes. 
+     */
+    // public static decorate(_constructor: Function): void {
+    //   Object.defineProperty(_constructor.prototype, "useRenderData", {
+    //     value: function getMutator(this: MutableForUserInterface): Mutator {
+    //       return getMutatorOfArbitrary(this);
+    //     }
+    //   });
+    // }
+
     /**
      * Retrieves the type of this mutable subclass as the name of the runtime class
      * @returns The type of the mutable

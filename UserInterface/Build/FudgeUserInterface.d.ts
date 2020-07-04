@@ -12,7 +12,9 @@ declare namespace FudgeUserInterface {
         protected mutable: ƒ.Mutable;
         /** [[FudgeCore.Mutator]] used to convey data to and from the mutable*/
         protected mutator: ƒ.Mutator;
-        constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
+        /** [[FudgeCore.Mutator]] used to store the data types of the mutator attributes*/
+        protected mutatorTypes: ƒ.Mutator;
+        constructor(_mutable: ƒ.Mutable | ƒ.MutableForUserInterface, _domElement: HTMLElement);
         /**
          * Recursive method taking the [[ƒ.Mutator]] of a [[ƒ.Mutable]] or another existing [[ƒ.Mutator]]
          * as a template and updating its values with those found in the given UI-domElement.
@@ -104,7 +106,7 @@ declare namespace FudgeUserInterface {
         /**
          * Set the value of this element using a format compatible with [[FudgeCore.Mutator]]
          */
-        abstract setMutatorValue(_value: Object): void;
+        setMutatorValue(_value: Object): void;
     }
 }
 declare namespace FudgeUserInterface {

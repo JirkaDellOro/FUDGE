@@ -189,6 +189,10 @@ declare namespace FudgeCore {
      * Collect applicable attributes of the instance and copies of their values in a Mutator-object
      */
     function getMutatorOfArbitrary(_object: Object): Mutator;
+    interface MutableForUserInterface {
+        getMutator(): Mutator;
+        updateMutator(_mutator: Mutator): void;
+    }
     /**
      * Base class for all types being mutable using [[Mutator]]-objects, thus providing and using interfaces created at runtime.
      * Mutables provide a [[Mutator]] that is build by collecting all object-properties that are either of a primitive type or again Mutable.
@@ -197,6 +201,9 @@ declare namespace FudgeCore {
      * Otherwise, they will be ignored if not handled by an override of the mutate-method in the subclass and throw errors in an automatically generated user-interface for the object.
      */
     abstract class Mutable extends EventTargetƒ {
+        /**
+         * Decorator allows to attach [[Mutable]] functionality to existing classes.
+         */
         /**
          * Retrieves the type of this mutable subclass as the name of the runtime class
          * @returns The type of the mutable
