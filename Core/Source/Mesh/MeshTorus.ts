@@ -4,7 +4,7 @@ namespace FudgeCore {
      * @authors Simon Storl-Schulke, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     export class MeshTorus extends Mesh {
-        public static readonly iSubclass: number = Mesh.registerSubclass(MeshSphere);
+        public static readonly iSubclass: number = Mesh.registerSubclass(MeshTorus);
 
         public normals: Float32Array;
         
@@ -50,6 +50,7 @@ namespace FudgeCore {
                     z = (1 + this._thickness * Math.cos(v)) * Math.cos(u);
 
                     vertices.push(x, y, z);
+                    
                     let normal: Vector3 = new Vector3(x - center[0], y - center[1], z);
                     normal.normalize();
                     normals.push(normal.x, normal.y, normal.z);
