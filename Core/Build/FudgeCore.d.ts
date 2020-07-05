@@ -3038,6 +3038,25 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Generate a Torus with a given thickness and the number of major- and minor segments
+     * @authors Simon Storl-Schulke, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class MeshTorus extends Mesh {
+        private _thickness;
+        private _majorSegments;
+        private _minorSegments;
+        static readonly iSubclass: number;
+        normals: Float32Array;
+        constructor(_thickness?: number, _majorSegments?: number, _minorSegments?: number);
+        create(): void;
+        protected createIndices(): Uint16Array;
+        protected createVertices(): Float32Array;
+        protected createTextureUVs(): Float32Array;
+        protected createFaceNormals(): Float32Array;
+    }
+}
+declare namespace FudgeCore {
     interface MapClassToComponents {
         [className: string]: Component[];
     }
