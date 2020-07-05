@@ -42,6 +42,7 @@
                   "material": {
                     "ƒ.Material": {
                       "name": "Magenta",
+                      "idResource": "dummyId0",
                       "shader": "ShaderUniColor",
                       "coat": {
                         "ƒ.CoatColored": {
@@ -131,6 +132,7 @@
                   "material": {
                     "ƒ.Material": {
                       "name": "Yellow",
+                      "idResource": "dummyId1",
                       "shader": "ShaderUniColor",
                       "coat": {
                         "ƒ.CoatColored": {
@@ -220,6 +222,7 @@
                   "material": {
                     "ƒ.Material": {
                       "name": "Cyan",
+                      "idResource": "dummyId2",
                       "shader": "ShaderUniColor",
                       "coat": {
                         "ƒ.CoatColored": {

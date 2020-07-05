@@ -269,6 +269,16 @@ var FudgeCore;
      */
     class Mutable extends FudgeCore.EventTargetƒ {
         /**
+         * Decorator allows to attach [[Mutable]] functionality to existing classes.
+         */
+        // public static decorate(_constructor: Function): void {
+        //   Object.defineProperty(_constructor.prototype, "useRenderData", {
+        //     value: function getMutator(this: MutableForUserInterface): Mutator {
+        //       return getMutatorOfArbitrary(this);
+        //     }
+        //   });
+        // }
+        /**
          * Retrieves the type of this mutable subclass as the name of the runtime class
          * @returns The type of the mutable
          */

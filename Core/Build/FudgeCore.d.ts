@@ -190,6 +190,10 @@ declare namespace FudgeCore {
      * Collect applicable attributes of the instance and copies of their values in a Mutator-object
      */
     function getMutatorOfArbitrary(_object: Object): Mutator;
+    interface MutableForUserInterface {
+        getMutator(): Mutator;
+        updateMutator(_mutator: Mutator): void;
+    }
     /**
      * Base class for all types being mutable using [[Mutator]]-objects, thus providing and using interfaces created at runtime.
      * Mutables provide a [[Mutator]] that is build by collecting all object-properties that are either of a primitive type or again Mutable.
@@ -198,6 +202,9 @@ declare namespace FudgeCore {
      * Otherwise, they will be ignored if not handled by an override of the mutate-method in the subclass and throw errors in an automatically generated user-interface for the object.
      */
     abstract class Mutable extends EventTargetƒ {
+        /**
+         * Decorator allows to attach [[Mutable]] functionality to existing classes.
+         */
         /**
          * Retrieves the type of this mutable subclass as the name of the runtime class
          * @returns The type of the mutable
@@ -3027,6 +3034,25 @@ declare namespace FudgeCore {
         constructor();
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
+        protected createTextureUVs(): Float32Array;
+        protected createFaceNormals(): Float32Array;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Generate a Torus with a given thickness and the number of major- and minor segments
+     * @authors Simon Storl-Schulke, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class MeshTorus extends Mesh {
+        private _thickness;
+        private _majorSegments;
+        private _minorSegments;
+        static readonly iSubclass: number;
+        normals: Float32Array;
+        constructor(_thickness?: number, _majorSegments?: number, _minorSegments?: number);
+        create(): void;
+        protected createIndices(): Uint16Array;
+        protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;
         protected createFaceNormals(): Float32Array;
     }

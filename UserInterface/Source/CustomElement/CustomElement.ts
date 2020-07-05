@@ -70,7 +70,7 @@ namespace FudgeUserInterface {
       ƒ.Debug.fudge("Map", _type.constructor.name, _typeCustomElement.constructor.name);
       CustomElement.mapObjectToCustomElement.set(_type, _typeCustomElement);
     }
-    
+
     /**
      * Add a label-element as child to this element
      */
@@ -89,6 +89,8 @@ namespace FudgeUserInterface {
     /**
      * Set the value of this element using a format compatible with [[FudgeCore.Mutator]]
      */
-    public abstract setMutatorValue(_value: Object): void;
+    public setMutatorValue(_value: Object): void {
+      Reflect.set(this, "value", _value);
+    }
   }
 }

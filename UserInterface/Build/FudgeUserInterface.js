@@ -11,19 +11,21 @@ var FudgeUserInterface;
     class Controller {
         constructor(_mutable, _domElement) {
             this.timeUpdate = 190;
+            /** [[FudgeCore.Mutator]] used to store the data types of the mutator attributes*/
+            this.mutatorTypes = null;
             this.mutateOnInput = (_event) => {
                 this.mutator = this.getMutator();
                 this.mutable.mutate(this.mutator);
                 _event.stopPropagation();
             };
             this.refresh = (_event) => {
-                //TODO: this.mutator is updated but then not used in updateUserInterface. Instead, the mutator is created again there...
-                this.mutable.updateMutator(this.mutator);
                 this.updateUserInterface();
             };
             this.domElement = _domElement;
             this.mutable = _mutable;
             this.mutator = _mutable.getMutator();
+            if (_mutable instanceof ƒ.Mutable)
+                this.mutatorTypes = _mutable.getMutatorAttributeTypes(this.mutator);
             // TODO: examine, if this should register to one common interval, instead of each installing its own.
             window.setInterval(this.refresh, this.timeUpdate);
             this.domElement.addEventListener("input", this.mutateOnInput);
@@ -49,9 +51,9 @@ var FudgeUserInterface;
                     let subMutator = Reflect.get(mutator, key);
                     let subMutable;
                     subMutable = Reflect.get(_mutable, key);
-                    let subTypes = subMutable.getMutatorAttributeTypes(subMutator);
+                    // let subTypes: ƒ.Mutator = subMutable.getMutatorAttributeTypes(subMutator);
                     if (subMutable instanceof ƒ.Mutable)
-                        mutator[key] = this.getMutator(subMutable, element, subMutator, subTypes);
+                        mutator[key] = this.getMutator(subMutable, element, subMutator); //, subTypes);
                 }
             }
             return mutator;
@@ -61,21 +63,28 @@ var FudgeUserInterface;
          */
         updateUserInterface(_mutable = this.mutable, _domElement = this.domElement) {
             // TODO: should get Mutator for UI or work with this.mutator (examine)
+            this.mutable.updateMutator(this.mutator);
             let mutator = _mutable.getMutator();
-            let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
+            let mutatorTypes = {};
+            if (_mutable instanceof ƒ.Mutable)
+                mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
                 let element = _domElement.querySelector(`[key=${key}]`);
                 if (!element)
                     continue;
+                let value = mutator[key];
                 if (element instanceof FudgeUserInterface.CustomElement && element != document.activeElement)
-                    element.setMutatorValue(mutator[key]);
+                    element.setMutatorValue(value);
                 else if (mutatorTypes[key] instanceof Object)
-                    element.setMutatorValue(mutator[key]);
+                    element.setMutatorValue(value);
                 else {
-                    let fieldset = element;
+                    // let fieldset: HTMLFieldSetElement = <HTMLFieldSetElement><HTMLElement>element;
                     let subMutable = Reflect.get(_mutable, key);
                     if (subMutable instanceof ƒ.Mutable)
-                        this.updateUserInterface(subMutable, fieldset);
+                        this.updateUserInterface(subMutable, element);
+                    else
+                        //element.setMutatorValue(value);
+                        Reflect.set(element, "value", value);
                 }
             }
         }
@@ -145,7 +154,7 @@ var FudgeUserInterface;
                     // TODO: remove switch and use registered custom elements instead
                     // let elementType: typeof CustomElement = CustomElement.get(<ObjectConstructor>_value.constructor);
                     let elementType = FudgeUserInterface.CustomElement.get(_type);
-                    console.log("CustomElement", _type, elementType);
+                    // console.log("CustomElement", _type, elementType);
                     if (!elementType)
                         return element;
                     // @ts-ignore: instantiate abstract class
@@ -202,7 +211,7 @@ var FudgeUserInterface;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
-    // import ƒ = FudgeCore;
+    var ƒ = FudgeCore;
     /**
      * Handles the mapping of CustomElements to their HTML-Tags via customElement.define
      * and to the data types and [[FudgeCore.Mutable]]s they render an interface for.
@@ -249,7 +258,7 @@ var FudgeUserInterface;
                 return element;
             }
             static map(_type, _typeCustomElement) {
-                console.log("Map", _type.constructor.name, _typeCustomElement.constructor.name);
+                ƒ.Debug.fudge("Map", _type.constructor.name, _typeCustomElement.constructor.name);
                 CustomElement.mapObjectToCustomElement.set(_type, _typeCustomElement);
             }
             /**
@@ -260,6 +269,12 @@ var FudgeUserInterface;
                 label.textContent = this.getAttribute("label");
                 this.appendChild(label);
                 return label;
+            }
+            /**
+             * Set the value of this element using a format compatible with [[FudgeCore.Mutator]]
+             */
+            setMutatorValue(_value) {
+                Reflect.set(this, "value", _value);
             }
         }
         CustomElement.mapObjectToCustomElement = new Map();
@@ -440,6 +455,7 @@ var FudgeUserInterface;
 var FudgeUserInterface;
 ///<reference path="CustomElement.ts"/>
 (function (FudgeUserInterface) {
+    var ƒ = FudgeCore;
     /**
      * Creates a CustomElement from an HTML-Template-Tag
      */
@@ -455,7 +471,7 @@ var FudgeUserInterface;
             static register(_tagName) {
                 for (let template of document.querySelectorAll("template")) {
                     if (template.content.firstElementChild.localName == _tagName) {
-                        console.log("Register", template);
+                        ƒ.Debug.fudge("Register", template);
                         CustomElementTemplate.fragment.set(_tagName, template.content);
                     }
                 }
@@ -506,7 +522,7 @@ var FudgeUserInterface;
         }
         connectedCallback() {
             super.connectedCallback();
-            console.log("Matrix Callback");
+            // console.log("Matrix Callback");
             let label = this.querySelector("label");
             label.textContent = this.getAttribute("label");
         }
@@ -1553,7 +1569,7 @@ var FudgeUserInterface;
                 this.clearSelection();
             };
             this.hndCopyPaste = (_event) => {
-                console.log(_event);
+                // console.log(_event);
                 _event.stopPropagation();
                 let target = _event.target;
                 switch (_event.type) {
@@ -1810,7 +1826,7 @@ var FudgeUserInterface;
                         target.dispatchEvent(new Event(FudgeUserInterface.EVENT_TREE.RENAME, { bubbles: true }));
                         break;
                     case "default":
-                        console.log(target);
+                        // console.log(target);
                         break;
                 }
             };
@@ -1971,4 +1987,3 @@ var FudgeUserInterface;
     FudgeUserInterface.TreeItem = TreeItem;
     customElements.define("li-tree-item", TreeItem, { extends: "li" });
 })(FudgeUserInterface || (FudgeUserInterface = {}));
-//# sourceMappingURL=FudgeUserInterface.js.map
