@@ -1537,7 +1537,7 @@ var Fudge;
             this.viewport.draw();
             this.content.append(this.canvas);
             ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
-            ƒ.Physics.start(this.graph); //recalculating physics depending on every transformation right before first draw @author Marko Fehrenbach | HFU 2020
+            ƒ.Physics.start(this.graph); //Starting for empty editor | recalculating physics depending on every transformation right before first draw @author Marko Fehrenbach | HFU 2020
             ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, this.animate);
             //Focus cameracontrols on new viewport
             let event = new CustomEvent(Fudge.EVENT_EDITOR.ACTIVEVIEWPORT, { detail: this.viewport.camera, bubbles: false });
@@ -1553,6 +1553,7 @@ var Fudge;
                 return;
             this.graph = _node;
             this.viewport.setGraph(this.graph);
+            ƒ.Physics.start(this.graph); //Starting after new load | recalculating physics depending on every transformation right before first draw @author Marko Fehrenbach | HFU 2020
         }
     }
     Fudge.ViewRender = ViewRender;

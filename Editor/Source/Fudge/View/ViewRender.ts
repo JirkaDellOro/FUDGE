@@ -41,7 +41,7 @@ namespace Fudge {
       this.content.append(this.canvas);
 
       ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
-      ƒ.Physics.start(this.graph); //recalculating physics depending on every transformation right before first draw @author Marko Fehrenbach | HFU 2020
+      ƒ.Physics.start(this.graph); //Starting for empty editor | recalculating physics depending on every transformation right before first draw @author Marko Fehrenbach | HFU 2020
 
       ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
 
@@ -61,7 +61,7 @@ namespace Fudge {
         return;
       this.graph = _node;
       this.viewport.setGraph(this.graph);
-
+      ƒ.Physics.start(this.graph); //Starting after new load | recalculating physics depending on every transformation right before first draw @author Marko Fehrenbach | HFU 2020
     }
     /** 
      * Update Viewport every frame

@@ -225,6 +225,24 @@ namespace FudgeCore {
       });
     }
 
+    /** Giving a ComponentRigidbody a specific identification number so it can be referenced in the loading process. And removed rb's can receive a new id. */
+    public distributeBodyID(): number {
+      let freeId: number = 0;
+      let free: boolean = false;
+      this.bodyList.forEach((_value: ComponentRigidbody): void => {
+        if (_value.id != freeId) {
+          free = true;
+        } else {
+          free = false;
+        }
+        if (!free) {
+          freeId++;
+        }
+      }
+      );
+      return freeId;
+    }
+
     /**
     * Called internally to inform the physics system that a joint has a change of core properties like ComponentRigidbody and needs to
     * be recreated.

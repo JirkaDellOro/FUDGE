@@ -109,7 +109,7 @@ namespace Fudge {
 
     let serialization: ƒ.Serialization = ƒ.Serializer.parse(content);
     let node: ƒ.Node = <ƒ.Node>ƒ.Serializer.deserialize(serialization);
-
+    
     console.groupCollapsed("Deserialized");
     console.log(node);
     console.groupEnd();

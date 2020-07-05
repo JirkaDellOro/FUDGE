@@ -130,6 +130,9 @@ namespace FudgeCore {
     /** Bodies that trigger this "trigger", only happening if this body is a trigger */
     public bodiesInTrigger: ComponentRigidbody[] = new Array();
 
+    /** ID to reference a specific ComponentRigidbody */
+    public id: number = 0;
+
     //Private informations - Mostly OimoPhysics variables that should not be exposed to the Fudge User and manipulated by them
     private rigidbody: OIMO.RigidBody;
     private massData: OIMO.MassData = new OIMO.MassData();
@@ -161,6 +164,7 @@ namespace FudgeCore {
       this.colMask = Physics.settings.defaultCollisionMask;
       //Create the actual rigidbody in the OimoPhysics Space
       this.createRigidbody(_mass, _type, this.colliderType, _transform, this.collisionGroup);
+      this.id = Physics.world.distributeBodyID();
       //Handling adding/removing the component
       this.addEventListener(EVENT.COMPONENT_ADD, this.addRigidbodyToWorld);
       this.addEventListener(EVENT.COMPONENT_REMOVE, this.removeRigidbodyFromWorld);
@@ -285,7 +289,7 @@ namespace FudgeCore {
    * Checks that the Rigidbody is positioned correctly and recreates the Collider with new scale/position/rotation
    */
     public updateFromWorld(): void {
-      let worldTransform: Matrix4x4 = super.getContainer() != null ? super.getContainer().mtxWorld : Matrix4x4.IDENTITY(); //The the world information about where to position/scale/rotate
+      let worldTransform: Matrix4x4 = super.getContainer().mtxWorld;//super.getContainer() != null ? super.getContainer().mtxWorld : Matrix4x4.IDENTITY(); //The the world information about where to position/scale/rotate
       let position: Vector3 = worldTransform.translation; //Adding the offsets from the pivot
       position.add(this.pivot.translation);
       let rotation: Vector3 = worldTransform.getEulerAngles();
@@ -660,5 +664,23 @@ namespace FudgeCore {
     }
     //#endregion
 
+    //#region Saving/Loading
+    public serialize(): Serialization {
+      let serialization: Serialization = {
+        pivot: this.pivot.serialize(),
+        id: this.id,
+        //physicsType: this.physicsType,
+        [super.constructor.name]: super.serialize()
+      };
+      return serialization;
+    }
+    public deserialize(_serialization: Serialization): Serializable {
+      this.pivot.deserialize(_serialization.pivot);
+      this.id = _serialization.id;
+      //this.physicsType = _serialization.physicsType;
+      super.deserialize(_serialization[super.constructor.name]);
+      return this;
+    }
+    //#endregion
   }
 }

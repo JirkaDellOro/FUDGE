@@ -315,20 +315,10 @@ namespace FudgePhysics_Communication {
     let posProjection: f.Vector2 = viewPort.pointClientToProjection(mouse);
 
     let ray: f.Ray = new f.Ray(new f.Vector3(-posProjection.x, posProjection.y, 1));
-    console.group("original");
-    f.Debug.log("origin", ray.origin.toString());
-    f.Debug.log("direction", ray.direction.toString());
-    console.groupEnd();
+
 
     ray.origin.transform(cmpCamera.pivot);
     ray.direction.transform(cmpCamera.pivot, false);
-    //ray.direction.scale(10);
-    let rayEnd: f.Vector3 = f.Vector3.SUM(ray.origin, ray.direction);
-    console.group("transformed");
-    f.Debug.log("origin", ray.origin.toString());
-    f.Debug.log("direction", ray.direction.toString());
-    f.Debug.log("end", rayEnd.toString());
-    console.groupEnd();
 
     //Ray
     let hitInfo: f.RayHitInfo = f.Physics.raycast(ray.origin, ray.direction, 20);
@@ -338,8 +328,6 @@ namespace FudgePhysics_Communication {
       f.Debug.log("miss");
     let pos: f.Vector3 = hitInfo.hitPoint;
     moveableTransform.local.translation = pos;
-    f.Debug.log("OriginActualRay: ", hitInfo.rayOrigin.toString());
-    f.Debug.log("EndActualRay:", hitInfo.rayEnd.toString());
   }
 
   function hndPointerUp(_event: f.EventPointer) {

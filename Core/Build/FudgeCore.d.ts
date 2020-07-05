@@ -4096,6 +4096,8 @@ declare namespace FudgeCore {
         triggers: ComponentRigidbody[];
         /** Bodies that trigger this "trigger", only happening if this body is a trigger */
         bodiesInTrigger: ComponentRigidbody[];
+        /** ID to reference a specific ComponentRigidbody */
+        id: number;
         private rigidbody;
         private massData;
         private collider;
@@ -4236,6 +4238,8 @@ declare namespace FudgeCore {
          * Events in case a body is in a trigger, so not only the body registers a triggerEvent but also the trigger itself.
          */
         private checkBodiesInTrigger;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace FudgeCore {
@@ -4571,6 +4575,8 @@ declare namespace FudgeCore {
          * if any of the two paired ComponentRigidbodies change.
          */
         connectJoints(): void;
+        /** Giving a ComponentRigidbody a specific identification number so it can be referenced in the loading process. And removed rb's can receive a new id. */
+        distributeBodyID(): number;
         /**
         * Called internally to inform the physics system that a joint has a change of core properties like ComponentRigidbody and needs to
         * be recreated.
