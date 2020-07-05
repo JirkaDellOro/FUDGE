@@ -54,9 +54,9 @@ namespace FudgeCore {
   * KINEMATIC is moved through transform and animation instead of physics code.
   */
   export enum PHYSICS_TYPE {
-    DYNAMIC = 1, // = OIMO.RigidBodyType.DYNAMIC,
-    STATIC = 2, // = OIMO.RigidBodyType.STATIC,
-    KINEMATIC = 3 // = OIMO.RigidBodyType.KINEMATIC
+    DYNAMIC, // = OIMO.RigidBodyType.DYNAMIC,
+    STATIC, // = OIMO.RigidBodyType.STATIC,
+    KINEMATIC // = OIMO.RigidBodyType.KINEMATIC
   }
 
   /**
@@ -65,7 +65,7 @@ namespace FudgeCore {
   * CONE = Vector(diameter, height, x), PYRAMID = Vector3(length, height, depth); x == unused.
   * CONVEX = ComponentMesh needs to be available in the RB Property convexMesh, the points of that component are used to create a collider that matches,
   * the closest possible representation of that form, in form of a hull. Convex is experimental and can produce unexpected behaviour when vertices
-  * are too close to one another and the given vertices do not form a in itself closed shape. Vertices in the ComponentMesh can be scaled differently 
+  * are too close to one another and the given vertices do not form a in itself closed shape and having a genus of 0 (no holes). Vertices in the ComponentMesh can be scaled differently 
   * for texturing/normal or other reasons, so the collider might be off compared to the visual shape, this can be corrected by changing the pivot scale of the ComponentRigidbody.  
   */
   export enum COLLIDER_TYPE {

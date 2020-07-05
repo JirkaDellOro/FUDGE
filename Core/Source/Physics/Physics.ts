@@ -243,6 +243,17 @@ namespace FudgeCore {
       return freeId;
     }
 
+    /** Returns the ComponentRigidbody with the given id. Used internally to reconnect joints on loading in the editor. */
+    public getBodyByID(_id: number): ComponentRigidbody {
+      let body: ComponentRigidbody = null;
+      this.bodyList.forEach((value: ComponentRigidbody): void => {
+        if (value.id == _id) {
+          body = value;
+        }
+      });
+      return body;
+    }
+
     /**
     * Called internally to inform the physics system that a joint has a change of core properties like ComponentRigidbody and needs to
     * be recreated.

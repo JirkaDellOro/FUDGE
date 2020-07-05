@@ -176,5 +176,28 @@ namespace FudgeCore {
       Physics.world.changeJointStatus(this);
     }
 
+    //#region Saving/Loading
+    public serialize(): Serialization {
+      let serialization: Serialization = {
+        attID: super.idAttachedRB,
+        conID: super.idConnectedRB,
+        anchor: this.anchor,
+        internalCollision: this.jointInternalCollision,
+        [super.constructor.name]: super.serialize()
+      };
+      return serialization;
+    }
+
+    public deserialize(_serialization: Serialization): Serializable {
+      super.idAttachedRB = _serialization.attID;
+      super.idConnectedRB = _serialization.conID;
+      super.setBodiesFromLoadedIDs();
+      this.anchor = _serialization.anchor;
+      this.internalCollision = _serialization.internalCollision;
+      super.deserialize(_serialization[super.constructor.name]);
+      return this;
+    }
+    //#endregion
+
   }
 }

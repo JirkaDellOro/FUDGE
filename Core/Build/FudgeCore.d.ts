@@ -3261,7 +3261,7 @@ declare namespace FudgeCore {
        */
     abstract class ComponentJoint extends Component {
         static readonly iSubclass: number;
-        /** Get/Set the first ComponentRigidbody of this connection. It should be the one that this component is attached too in the sceneTree. */
+        /** Get/Set the first ComponentRigidbody of this connection. It should always be the one that this component is attached too in the sceneTree. */
         get attachedRigidbody(): ComponentRigidbody;
         set attachedRigidbody(_cmpRB: ComponentRigidbody);
         /** Get/Set the second ComponentRigidbody of this connection. */
@@ -3272,6 +3272,8 @@ declare namespace FudgeCore {
          */
         get selfCollision(): boolean;
         set selfCollision(_value: boolean);
+        protected idAttachedRB: number;
+        protected idConnectedRB: number;
         protected attachedRB: ComponentRigidbody;
         protected connectedRB: ComponentRigidbody;
         protected connected: boolean;
@@ -3293,6 +3295,8 @@ declare namespace FudgeCore {
         protected addConstraintToWorld(cmpJoint: ComponentJoint): void;
         /** Removing the given Fudge ComponentJoint to the oimoPhysics World */
         protected removeConstraintFromWorld(cmpJoint: ComponentJoint): void;
+        /** Setting both bodies to the bodies that belong to the loaded IDs and reconnecting them */
+        protected setBodiesFromLoadedIDs(): void;
     }
 }
 declare namespace FudgeCore {
@@ -3443,6 +3447,8 @@ declare namespace FudgeCore {
         private superAdd;
         private superRemove;
         private dirtyStatus;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace FudgeCore {
@@ -3559,6 +3565,8 @@ declare namespace FudgeCore {
         private superRemove;
         /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
         private dirtyStatus;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace FudgeCore {
@@ -3709,6 +3717,8 @@ declare namespace FudgeCore {
         private superAdd;
         private superRemove;
         private dirtyStatus;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace FudgeCore {
@@ -3822,6 +3832,8 @@ declare namespace FudgeCore {
         private superAdd;
         private superRemove;
         private dirtyStatus;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace FudgeCore {
@@ -3905,6 +3917,8 @@ declare namespace FudgeCore {
         private superAdd;
         private superRemove;
         private dirtyStatus;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace FudgeCore {
@@ -4065,6 +4079,8 @@ declare namespace FudgeCore {
         private superAdd;
         private superRemove;
         private dirtyStatus;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace FudgeCore {
@@ -4122,7 +4138,7 @@ declare namespace FudgeCore {
         triggers: ComponentRigidbody[];
         /** Bodies that trigger this "trigger", only happening if this body is a trigger */
         bodiesInTrigger: ComponentRigidbody[];
-        /** ID to reference a specific ComponentRigidbody */
+        /** ID to reference this specific ComponentRigidbody */
         id: number;
         private rigidbody;
         private massData;
@@ -4435,9 +4451,9 @@ declare namespace FudgeCore {
     * KINEMATIC is moved through transform and animation instead of physics code.
     */
     enum PHYSICS_TYPE {
-        DYNAMIC = 1,
-        STATIC = 2,
-        KINEMATIC = 3
+        DYNAMIC = 0,
+        STATIC = 1,
+        KINEMATIC = 2
     }
     /**
     * Different types of collider shapes, with different options in scaling BOX = Vector3(length, height, depth),
@@ -4445,7 +4461,7 @@ declare namespace FudgeCore {
     * CONE = Vector(diameter, height, x), PYRAMID = Vector3(length, height, depth); x == unused.
     * CONVEX = ComponentMesh needs to be available in the RB Property convexMesh, the points of that component are used to create a collider that matches,
     * the closest possible representation of that form, in form of a hull. Convex is experimental and can produce unexpected behaviour when vertices
-    * are too close to one another and the given vertices do not form a in itself closed shape. Vertices in the ComponentMesh can be scaled differently
+    * are too close to one another and the given vertices do not form a in itself closed shape and having a genus of 0 (no holes). Vertices in the ComponentMesh can be scaled differently
     * for texturing/normal or other reasons, so the collider might be off compared to the visual shape, this can be corrected by changing the pivot scale of the ComponentRigidbody.
     */
     enum COLLIDER_TYPE {
@@ -4603,6 +4619,8 @@ declare namespace FudgeCore {
         connectJoints(): void;
         /** Giving a ComponentRigidbody a specific identification number so it can be referenced in the loading process. And removed rb's can receive a new id. */
         distributeBodyID(): number;
+        /** Returns the ComponentRigidbody with the given id. Used internally to reconnect joints on loading in the editor. */
+        getBodyByID(_id: number): ComponentRigidbody;
         /**
         * Called internally to inform the physics system that a joint has a change of core properties like ComponentRigidbody and needs to
         * be recreated.

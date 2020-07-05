@@ -34,6 +34,9 @@ namespace FudgeCore {
         case PHYSICS_TYPE.KINEMATIC:
           oimoType = OIMO.RigidBodyType.KINEMATIC;
           break;
+        default:
+          oimoType = OIMO.RigidBodyType.DYNAMIC;
+          break;
       }
       this.rigidbody.setType(oimoType);
     }
@@ -130,7 +133,7 @@ namespace FudgeCore {
     /** Bodies that trigger this "trigger", only happening if this body is a trigger */
     public bodiesInTrigger: ComponentRigidbody[] = new Array();
 
-    /** ID to reference a specific ComponentRigidbody */
+    /** ID to reference this specific ComponentRigidbody */
     public id: number = 0;
 
     //Private informations - Mostly OimoPhysics variables that should not be exposed to the Fudge User and manipulated by them
@@ -523,6 +526,9 @@ namespace FudgeCore {
         case PHYSICS_TYPE.KINEMATIC:
           oimoType = OIMO.RigidBodyType.KINEMATIC;
           break;
+        default:
+          oimoType = OIMO.RigidBodyType.DYNAMIC;
+          break;
       }
       let tmpTransform: Matrix4x4 = _transform == null ? super.getContainer() != null ? super.getContainer().mtxWorld : Matrix4x4.IDENTITY() : _transform; //Get transform informations from the world, since physics does not care about hierarchy
       //Convert informations from Fudge to OimoPhysics and creating a collider with it, while also adding a pivot to derivate from the transform informations if needed
@@ -664,20 +670,39 @@ namespace FudgeCore {
     }
     //#endregion
 
-    //#region Saving/Loading
+    //#region Saving/Loading - Some properties might be missing, e.g. convexMesh (Float32Array)
     public serialize(): Serialization {
       let serialization: Serialization = {
         pivot: this.pivot.serialize(),
         id: this.id,
-        //physicsType: this.physicsType,
+        physicsType: this.rbType,
+        mass: this.massData.mass,
+        colliderType: this.colType,
+        linearDamping: this.linDamping,
+        angularDamping: this.angDamping,
+        collisionGroup: this.colGroup,
+        rotationInfluence: this.rotationalInfluenceFactor,
+        gravityScale: this.gravityInfluenceFactor,
+        friction: this.friction,
+        restitution: this.restitution,
         [super.constructor.name]: super.serialize()
       };
       return serialization;
     }
+
     public deserialize(_serialization: Serialization): Serializable {
       this.pivot.deserialize(_serialization.pivot);
       this.id = _serialization.id;
-      //this.physicsType = _serialization.physicsType;
+      this.physicsType = _serialization.physicsType;
+      this.mass = _serialization.mass != null ? _serialization.mass : 1;
+      this.colliderType = _serialization.colliderType != null ? _serialization.colliderType : COLLIDER_TYPE.CUBE;
+      this.linearDamping = _serialization.linearDamping != null ? _serialization.linearDamping : this.linDamping;
+      this.angularDamping = _serialization.angularDamping != null ? _serialization.angularDamping : this.angDamping;
+      this.collisionGroup = _serialization.collisionGroup != null ? _serialization.collisionGroup : this.colGroup;
+      this.rotationInfluenceFactor = _serialization.rotationInfluence != null ? _serialization.rotationInfluence : this.rotationalInfluenceFactor;
+      this.gravityScale = _serialization.gravityScale != null ? _serialization.gravityScale : 1;
+      this.setFriction = _serialization.friction != null ? _serialization.friction : this.friction;
+      this.setRestitution = _serialization.restitution != null ? _serialization.restitution : this.restitution;
       super.deserialize(_serialization[super.constructor.name]);
       return this;
     }

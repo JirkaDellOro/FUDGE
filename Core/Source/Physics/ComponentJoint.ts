@@ -11,12 +11,13 @@ namespace FudgeCore {
   export abstract class ComponentJoint extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJoint);
 
-    /** Get/Set the first ComponentRigidbody of this connection. It should be the one that this component is attached too in the sceneTree. */
+    /** Get/Set the first ComponentRigidbody of this connection. It should always be the one that this component is attached too in the sceneTree. */
     get attachedRigidbody(): ComponentRigidbody {
       return this.attachedRB;
     }
     set attachedRigidbody(_cmpRB: ComponentRigidbody) {
       this.connected = false;
+      this.idAttachedRB = _cmpRB.id;
       this.attachedRB = _cmpRB;
     }
 
@@ -26,6 +27,7 @@ namespace FudgeCore {
     }
     set connectedRigidbody(_cmpRB: ComponentRigidbody) {
       this.connected = false;
+      this.idConnectedRB = _cmpRB.id;
       this.connectedRB = _cmpRB;
     }
 
@@ -38,6 +40,9 @@ namespace FudgeCore {
     set selfCollision(_value: boolean) {
       this.collisionBetweenConnectedBodies = _value;
     }
+
+    protected idAttachedRB: number;
+    protected idConnectedRB: number;
 
     protected attachedRB: ComponentRigidbody;
     protected connectedRB: ComponentRigidbody;
@@ -77,6 +82,12 @@ namespace FudgeCore {
     /** Removing the given Fudge ComponentJoint to the oimoPhysics World */
     protected removeConstraintFromWorld(cmpJoint: ComponentJoint): void {
       Physics.world.removeJoint(cmpJoint);
+    }
+
+    /** Setting both bodies to the bodies that belong to the loaded IDs and reconnecting them */
+    protected setBodiesFromLoadedIDs() {
+      this.attachedRigidbody = Physics.world.getBodyByID(this.idAttachedRB);
+      this.connectedRigidbody = Physics.world.getBodyByID(this.idConnectedRB);
     }
 
   }

@@ -140,7 +140,7 @@ namespace FudgeCore {
     }
     //#endregion
 
-    //Internally used variables
+    //Internally used variables - Joint Properties that are used even when no actual oimoJoint is currently existend
     private jointSpringDampingRatio: number = 0;
     private jointSpringFrequency: number = 0;
 
@@ -237,6 +237,48 @@ namespace FudgeCore {
     private dirtyStatus(): void {
       Physics.world.changeJointStatus(this);
     }
+
+    //#region Saving/Loading
+    public serialize(): Serialization {
+      let serialization: Serialization = {
+        attID: super.idAttachedRB,
+        conID: super.idConnectedRB,
+        axis: this.axis,
+        anchor: this.anchor,
+        internalCollision: this.jointInternalCollision,
+        springDamping: this.jointSpringDampingRatio,
+        springFrequency: this.jointSpringFrequency,
+        breakForce: this.jointBreakForce,
+        breakTorque: this.jointBreakTorque,
+        motorLimitUpper: this.jointMotorLimitUpper,
+        motorLimitLower: this.jointMotorLimitLower,
+        motorSpeed: this.jointMotorSpeed,
+        motorForce: this.jointMotorForce,
+        [super.constructor.name]: super.serialize()
+      };
+      return serialization;
+    }
+
+    public deserialize(_serialization: Serialization): Serializable {
+      super.idAttachedRB = _serialization.attID;
+      super.idConnectedRB = _serialization.conID;
+      if (_serialization.attID != null && _serialization.conID != null)
+        super.setBodiesFromLoadedIDs();
+      this.axis = _serialization.axis != null ? _serialization.axis : this.jointAxis;
+      this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
+      this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
+      this.springDamping = _serialization.springDamping != null ? _serialization.springDamping : this.jointSpringDampingRatio;
+      this.springFrequency = _serialization.springFrequency != null ? _serialization.springFrequency : this.jointSpringFrequency;
+      this.breakForce = _serialization.breakForce != null ? _serialization.breakForce : this.jointBreakForce;
+      this.breakTorque = _serialization.breakTorque != null ? _serialization.breakTorque : this.jointBreakTorque;
+      this.motorLimitUpper = _serialization.upperLimit != null ? _serialization.upperLimit : this.jointMotorLimitUpper;
+      this.motorLimitLower = _serialization.lowerLimit != null ? _serialization.lowerLimit : this.jointMotorLimitLower;
+      this.motorSpeed = _serialization.motorSpeed != null ? _serialization.motorSpeed : this.jointMotorSpeed;
+      this.motorForce = _serialization.motorForce != null ? _serialization.motorForce : this.jointMotorForce;
+      super.deserialize(_serialization[super.constructor.name]);
+      return this;
+    }
+    //#endregion
 
   }
 }
