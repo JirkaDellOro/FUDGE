@@ -276,5 +276,4 @@ namespace FudgeCore {
 
   }
 
-
 }

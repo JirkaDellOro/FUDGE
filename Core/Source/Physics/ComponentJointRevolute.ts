@@ -244,6 +244,14 @@ namespace FudgeCore {
         axis: this.axis,
         anchor: this.anchor,
         internalCollision: this.jointInternalCollision,
+        springDamping: this.jointSpringDampingRatio,
+        springFrequency: this.jointSpringFrequency,
+        breakForce: this.jointBreakForce,
+        breakTorque: this.jointBreakTorque,
+        motorLimitUpper: this.jointMotorLimitUpper,
+        motorLimitLower: this.jointMotorLimitLower,
+        motorSpeed: this.jointMotorSpeed,
+        motorTorque: this.jointmotorTorque,
         [super.constructor.name]: super.serialize()
       };
       return serialization;
@@ -252,10 +260,19 @@ namespace FudgeCore {
     public deserialize(_serialization: Serialization): Serializable {
       super.idAttachedRB = _serialization.attID;
       super.idConnectedRB = _serialization.conID;
-      super.setBodiesFromLoadedIDs();
-      this.axis = _serialization.axis;
-      this.anchor = _serialization.anchor;
-      this.internalCollision = _serialization.internalCollision;
+      if (_serialization.attID != null && _serialization.conID != null)
+        super.setBodiesFromLoadedIDs();
+      this.axis = _serialization.axis != null ? _serialization.axis : this.jointAxis;
+      this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
+      this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
+      this.springDamping = _serialization.springDamping != null ? _serialization.springDamping : this.jointSpringDampingRatio;
+      this.springFrequency = _serialization.springFrequency != null ? _serialization.springFrequency : this.jointSpringFrequency;
+      this.breakForce = _serialization.breakForce != null ? _serialization.breakForce : this.jointBreakForce;
+      this.breakTorque = _serialization.breakTorque != null ? _serialization.breakTorque : this.jointBreakTorque;
+      this.motorLimitUpper = _serialization.upperLimit != null ? _serialization.upperLimit : this.jointMotorLimitUpper;
+      this.motorLimitLower = _serialization.lowerLimit != null ? _serialization.lowerLimit : this.jointMotorLimitLower;
+      this.motorSpeed = _serialization.motorSpeed != null ? _serialization.motorSpeed : this.jointMotorSpeed;
+      this.motorTorque = _serialization.motorForce != null ? _serialization.motorForce : this.jointmotorTorque;
       super.deserialize(_serialization[super.constructor.name]);
       return this;
     }

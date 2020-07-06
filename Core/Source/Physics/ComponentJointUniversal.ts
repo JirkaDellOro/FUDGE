@@ -2,7 +2,7 @@ namespace FudgeCore {
   /**
      * A physical connection between two bodies with two defined axis (normally e.g. (0,0,1) and rotation(1,0,0)), they share the same anchor and have free rotation, but transfer the twist.
      * In reality used in cars to transfer the more stable stationary force on the velocity axis to the bumping, damped moving wheel. Two RigidBodies need to be defined to use it.
-     * The two motors can be defined for the two rotation axis, along with springs.
+     * The two motors can be defined for the two rotation axis, along with springs. 
      * ```plaintext        
      *                  
      *                      anchor - twist is transfered between bodies
@@ -341,6 +341,22 @@ namespace FudgeCore {
         conID: super.idConnectedRB,
         anchor: this.anchor,
         internalCollision: this.jointInternalCollision,
+        breakForce: this.jointBreakForce,
+        breakTorque: this.jointBreakTorque,
+        firstAxis: this.jointFirstAxis,
+        secondAxis: this.jointSecondAxis,
+        springDampingFirstAxis: this.jointFirstSpringDampingRatio,
+        springFrequencyFirstAxis: this.jointFirstSpringFrequency,
+        springDampingSecondAxis: this.jointSecondSpringDampingRatio,
+        springFrequencySecondAxis: this.jointSecondSpringFrequency,
+        motorLimitUpperFirstAxis: this.jointFirstMotorLimitUpper,
+        motorLimitLowerFirstAxis: this.jointFirstMotorLimitLower,
+        motorSpeedFirstAxis: this.jointFirstMotorSpeed,
+        motorTorqueFirstAxis: this.jointFirstMotorTorque,
+        motorLimitUpperSecondAxis: this.jointSecondMotorLimitUpper,
+        motorLimitLowerSecondAxis: this.jointSecondMotorLimitLower,
+        motorSpeedSecondAxis: this.jointSecondMotorSpeed,
+        motorTorqueSecondAxis: this.jointSecondMotorTorque,
         [super.constructor.name]: super.serialize()
       };
       return serialization;
@@ -349,9 +365,26 @@ namespace FudgeCore {
     public deserialize(_serialization: Serialization): Serializable {
       super.idAttachedRB = _serialization.attID;
       super.idConnectedRB = _serialization.conID;
-      super.setBodiesFromLoadedIDs();
-      this.anchor = _serialization.anchor;
-      this.internalCollision = _serialization.internalCollision;
+      if (_serialization.attID != null && _serialization.conID != null)
+        super.setBodiesFromLoadedIDs();
+      this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
+      this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
+      this.breakForce = _serialization.breakForce != null ? _serialization.breakForce : this.jointBreakForce;
+      this.breakTorque = _serialization.breakTorque != null ? _serialization.breakTorque : this.jointBreakTorque;
+      this.firstAxis = _serialization.firstAxis != null ? _serialization.firstAxis : this.jointFirstAxis;
+      this.secondAxis = _serialization.secondAxis != null ? _serialization.secondAxis : this.jointSecondAxis;
+      this.springDampingFirstAxis = _serialization.springDampingFirstAxis != null ? _serialization.springDampingFirstAxis : this.jointFirstSpringDampingRatio;
+      this.springFrequencyFirstAxis = _serialization.springFrequencyFirstAxis != null ? _serialization.springFrequencyFirstAxis : this.jointFirstSpringFrequency;
+      this.springDampingSecondAxis = _serialization.springDampingSecondAxis != null ? _serialization.springDampingSecondAxis : this.jointSecondSpringDampingRatio;
+      this.springFrequencySecondAxis = _serialization.springFrequencySecondAxis != null ? _serialization.springFrequencySecondAxis : this.jointSecondSpringFrequency;
+      this.motorLimitUpperFirstAxis = _serialization.motorLimitUpperFirstAxis != null ? _serialization.motorLimitUpperFirstAxis : this.jointFirstMotorLimitUpper;
+      this.motorLimitLowerFirstAxis = _serialization.motorLimitLowerFirstAxis != null ? _serialization.motorLimitLowerFirstAxis : this.jointFirstMotorLimitUpper;
+      this.motorSpeedFirstAxis = _serialization.motorSpeedFirstAxis != null ? _serialization.motorSpeedFirstAxis : this.jointFirstMotorSpeed;
+      this.motorTorqueFirstAxis = _serialization.motorTorqueFirstAxis != null ? _serialization.motorTorqueFirstAxis : this.jointFirstMotorTorque;
+      this.motorLimitUpperSecondAxis = _serialization.motorLimitUpperSecondAxis != null ? _serialization.motorLimitUpperSecondAxis : this.jointSecondMotorLimitUpper;
+      this.motorLimitLowerSecondAxis = _serialization.motorLimitLowerSecondAxis != null ? _serialization.motorLimitLowerSecondAxis : this.jointSecondMotorLimitUpper;
+      this.motorSpeedSecondAxis = _serialization.motorSpeedSecondAxis != null ? _serialization.motorSpeedSecondAxis : this.jointSecondMotorSpeed;
+      this.motorTorqueSecondAxis = _serialization.motorTorqueSecondAxis != null ? _serialization.motorTorqueSecondAxis : this.jointSecondMotorTorque;
       super.deserialize(_serialization[super.constructor.name]);
       return this;
     }

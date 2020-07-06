@@ -149,7 +149,6 @@ namespace FudgeCore {
 
     private constructJoint(): void {
       this.springDamper = new OIMO.SpringDamper().setSpring(this.jointSpringFrequency, this.jointSpringDampingRatio);
-
       this.config = new OIMO.SphericalJointConfig();
       let attachedRBPos: Vector3 = this.attachedRigidbody.getContainer().mtxWorld.translation;
       let worldAnchor: OIMO.Vec3 = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
@@ -183,6 +182,10 @@ namespace FudgeCore {
         conID: super.idConnectedRB,
         anchor: this.anchor,
         internalCollision: this.jointInternalCollision,
+        springDamping: this.jointSpringDampingRatio,
+        springFrequency: this.jointSpringFrequency,
+        breakForce: this.jointBreakForce,
+        breakTorque: this.jointBreakTorque,
         [super.constructor.name]: super.serialize()
       };
       return serialization;
@@ -191,9 +194,14 @@ namespace FudgeCore {
     public deserialize(_serialization: Serialization): Serializable {
       super.idAttachedRB = _serialization.attID;
       super.idConnectedRB = _serialization.conID;
-      super.setBodiesFromLoadedIDs();
-      this.anchor = _serialization.anchor;
-      this.internalCollision = _serialization.internalCollision;
+      if (_serialization.attID != null && _serialization.conID != null)
+        super.setBodiesFromLoadedIDs();
+      this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
+      this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
+      this.springDamping = _serialization.springDamping != null ? _serialization.springDamping : this.jointSpringDampingRatio;
+      this.springFrequency = _serialization.springFrequency != null ? _serialization.springFrequency : this.jointSpringFrequency;
+      this.breakForce = _serialization.breakForce != null ? _serialization.breakForce : this.jointBreakForce;
+      this.breakTorque = _serialization.breakTorque != null ? _serialization.breakTorque : this.jointBreakTorque;
       super.deserialize(_serialization[super.constructor.name]);
       return this;
     }

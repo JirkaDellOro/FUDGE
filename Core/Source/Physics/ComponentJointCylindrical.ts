@@ -324,6 +324,20 @@ namespace FudgeCore {
         axis: this.axis,
         anchor: this.anchor,
         internalCollision: this.jointInternalCollision,
+        springDamping: this.jointSpringDampingRatio,
+        springFrequency: this.jointSpringFrequency,
+        breakForce: this.jointBreakForce,
+        breakTorque: this.jointBreakTorque,
+        motorLimitUpper: this.jointMotorLimitUpper,
+        motorLimitLower: this.jointMotorLimitLower,
+        motorSpeed: this.jointMotorSpeed,
+        motorForce: this.jointMotorForce,
+        springDampingRotation: this.jointRotationSpringDampingRatio,
+        springFrequencyRotation: this.jointRotationSpringFrequency,
+        upperLimitRotation: this.jointRotationMotorLimitUpper,
+        lowerLimitRotation: this.jointRotationMotorLimitLower,
+        motorSpeedRotation: this.jointRotationMotorSpeed,
+        motorTorque: this.jointRotationMotorTorque,
         [super.constructor.name]: super.serialize()
       };
       return serialization;
@@ -332,10 +346,25 @@ namespace FudgeCore {
     public deserialize(_serialization: Serialization): Serializable {
       super.idAttachedRB = _serialization.attID;
       super.idConnectedRB = _serialization.conID;
-      super.setBodiesFromLoadedIDs();
-      this.axis = _serialization.axis;
-      this.anchor = _serialization.anchor;
-      this.internalCollision = _serialization.internalCollision;
+      if (_serialization.attID != null && _serialization.conID != null)
+        super.setBodiesFromLoadedIDs();
+      this.axis = _serialization.axis != null ? _serialization.axis : this.jointAxis;
+      this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
+      this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
+      this.springDamping = _serialization.springDamping != null ? _serialization.springDamping : this.jointSpringDampingRatio;
+      this.springFrequency = _serialization.springFrequency != null ? _serialization.springFrequency : this.jointSpringFrequency;
+      this.breakForce = _serialization.breakForce != null ? _serialization.breakForce : this.jointBreakForce;
+      this.breakTorque = _serialization.breakTorque != null ? _serialization.breakTorque : this.jointBreakTorque;
+      this.translationMotorLimitUpper = _serialization.upperLimitTranslation != null ? _serialization.upperLimitTranslation : this.jointMotorLimitUpper;
+      this.translationMotorLimitLower = _serialization.lowerLimitTranslation != null ? _serialization.lowerLimitTranslation : this.jointMotorLimitLower;
+      this.translationMotorSpeed = _serialization.motorSpeedTranslation != null ? _serialization.motorSpeedTranslation : this.jointMotorSpeed;
+      this.jointMotorForce = _serialization.motorForceTranslation != null ? _serialization.motorForceTranslation : this.jointMotorForce;
+      this.rotationSpringDamping = _serialization.springDampingRotation != null ? _serialization.springDampingRotation : this.jointRotationSpringDampingRatio;
+      this.rotationSpringFrequency = _serialization.springFrequencyRotation != null ? _serialization.springFrequencyRotation : this.jointRotationSpringFrequency;
+      this.rotationalMotorLimitUpper = _serialization.upperLimitRotation != null ? _serialization.upperLimitRotation : this.jointRotationMotorLimitUpper;
+      this.rotationalMotorLimitLower = _serialization.lowerLimitRotation != null ? _serialization.lowerLimitRotation : this.jointRotationMotorLimitLower;
+      this.rotationalMotorSpeed = _serialization.motorSpeedRotation != null ? _serialization.motorSpeedRotation : this.jointRotationMotorSpeed;
+      this.rotationalMotorTorque = _serialization.motorTorque != null ? _serialization.motorTorque : this.jointRotationMotorTorque;
       super.deserialize(_serialization[super.constructor.name]);
       return this;
     }
