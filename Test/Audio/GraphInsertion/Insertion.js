@@ -6,9 +6,12 @@ var AudioSounds;
     window.addEventListener("load", start);
     let cmpAudio;
     let distortion = ƒ.AudioManager.default.createWaveShaper();
+    let audioBeep;
+    let audioUfo;
     async function start(_event) {
         window.addEventListener("keydown", handleKeydown);
-        let audioBeep = await ƒ.Audio.load("Sound/Beep.mp3");
+        audioBeep = await ƒ.Audio.load("Sound/Beep.mp3");
+        audioUfo = await ƒ.Audio.load("Sound/Beat.mp3");
         cmpAudio = new ƒ.ComponentAudio(audioBeep, false, false);
         cmpAudio.connect(true);
         cmpAudio.volume = 30;
@@ -39,6 +42,14 @@ var AudioSounds;
             case ƒ.KEYBOARD_CODE.ARROW_DOWN:
                 ƒ.Debug.log("Remove");
                 cmpAudio.insertAudioNodes(null, null);
+                break;
+            case ƒ.KEYBOARD_CODE.ARROW_LEFT:
+                ƒ.Debug.log("Beep");
+                cmpAudio.audio = audioBeep;
+                break;
+            case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
+                ƒ.Debug.log("Ufo");
+                cmpAudio.audio = audioUfo;
                 break;
         }
     }

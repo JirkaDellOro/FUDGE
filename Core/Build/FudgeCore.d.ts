@@ -1077,9 +1077,6 @@ declare namespace FudgeCore {
     class CoatTextured extends Coat {
         color: Color;
         texture: TextureImage;
-        tilingX: number;
-        tilingY: number;
-        repetition: boolean;
     }
 }
 declare namespace FudgeCore {
