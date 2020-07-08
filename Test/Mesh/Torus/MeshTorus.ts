@@ -25,9 +25,9 @@ namespace MeshTest {
     torusFlat = Scenes.createCompleteMeshNode("torusFlat", matFlat, torusMesh1);
     torusTex = Scenes.createCompleteMeshNode("torusTexture", matTex, torusMesh2);
 
-    torusFlat.mtxLocal.translateX(0.6);
+    torusFlat.mtxLocal.translateX(0.7);
     torusFlat.mtxLocal.rotation = new ƒ.Vector3(12, 60, 20);
-    torusTex.mtxLocal.translateX(-0.6);
+    torusTex.mtxLocal.translateX(-0.7);
 
     graph.addChild(torusFlat);
     graph.addChild(torusTex);
