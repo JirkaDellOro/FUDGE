@@ -23,7 +23,7 @@
   "dependencies": {
     "@types/node": "^12.7.1",
     "@types/ws": "^6.0.2",
-    "electron": "^6.0.2",
+    "electron": "^9.1.0",
     "websocket": "^1.0.29",
     "ws": "^7.1.2"
   }
