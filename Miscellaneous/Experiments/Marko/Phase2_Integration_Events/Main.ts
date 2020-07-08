@@ -74,7 +74,7 @@ namespace FudgePhysics_Communication {
 
     viewPort.showSceneGraph();
     f.Loop.addEventListener(f.EVENT.LOOP_FRAME, update);
-    cubes[0].getComponent(f.ComponentRigidbody).setRestitution(1.3);
+    cubes[0].getComponent(f.ComponentRigidbody).restitution = 1.3;
     f.Physics.start(hierarchy);
     f.Loop.start();
   }

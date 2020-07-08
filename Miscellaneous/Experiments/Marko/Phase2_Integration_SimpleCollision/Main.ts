@@ -129,7 +129,7 @@ namespace FudgePhysics_Communication {
     bodies[11].mtxLocal.translateY(0.5);
     bodies[11].mtxLocal.scale(new f.Vector3(1, 0.5, 1));
     bodies[5].appendChild(bodies[11]);
-    bodies[5].getComponent(f.ComponentRigidbody).setRestitution(2);
+    bodies[5].getComponent(f.ComponentRigidbody).restitution = 2;
     //#endregion
 
 
@@ -184,14 +184,12 @@ namespace FudgePhysics_Communication {
 
     let cmpTransform: f.ComponentTransform = new f.ComponentTransform();
     let cmpRigidbody: f.ComponentRigidbody = new f.ComponentRigidbody(_mass, _physicsType, _colType, _group, null, _convexMesh);
-    cmpRigidbody.setRestitution(0.2);
-    cmpRigidbody.setFriction(0.8);
+    cmpRigidbody.restitution = 0.2;
+    cmpRigidbody.friction = 0.8;
     node.addComponent(cmpMesh);
     node.addComponent(cmpMaterial);
     node.addComponent(cmpTransform);
     node.addComponent(cmpRigidbody);
-    //f.Debug.log(cmpRigidbody.collisionGroup);
-    //f.Debug.log("Mask" + cmpRigidbody.getOimoRigidbody().getShapeList().getCollisionMask());
 
     return node;
   }

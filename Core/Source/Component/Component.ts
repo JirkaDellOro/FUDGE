@@ -16,7 +16,7 @@ namespace FudgeCore {
 
     protected singleton: boolean = true;
     private container: Node | null = null;
-    private active: boolean = true;
+    protected active: boolean = true;
 
     protected static registerSubclass(_subclass: typeof Component): number { return Component.subclasses.push(_subclass) - 1; }
 

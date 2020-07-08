@@ -118,8 +118,8 @@ namespace FudgePhysics_Communication {
 
 
     let cmpRigidbody: f.ComponentRigidbody = new f.ComponentRigidbody(_mass, _physicsType, _colType, _group);
-    cmpRigidbody.setRestitution(0.2);
-    cmpRigidbody.setFriction(0.8);
+    cmpRigidbody.restitution = 0.2;
+    cmpRigidbody.friction = 0.8;
     node.addComponent(cmpMesh);
     node.addComponent(cmpMaterial);
     node.addComponent(cmpTransform);

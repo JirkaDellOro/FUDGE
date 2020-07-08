@@ -126,6 +126,38 @@ namespace FudgeCore {
       if (this.rigidbody != null) this.rigidbody.setGravityScale(this.gravityInfluenceFactor);
     }
 
+    /**
+  * Get the friction of the rigidbody, which is the factor of sliding resistance of this rigidbody on surfaces
+  */
+    get friction(): number {
+      return this.bodyFriction;
+    }
+
+    /**
+   * Set the friction of the rigidbody, which is the factor of  sliding resistance of this rigidbody on surfaces
+   */
+    set friction(_friction: number) {
+      this.bodyFriction = _friction;
+      if (this.rigidbody.getShapeList() != null)
+        this.rigidbody.getShapeList().setFriction(this.bodyFriction);
+    }
+
+    /**
+  * Get the restitution of the rigidbody, which is the factor of bounciness of this rigidbody on surfaces
+  */
+    get restitution(): number {
+      return this.bodyRestitution;
+    }
+
+    /**
+   * Set the restitution of the rigidbody, which is the factor of bounciness of this rigidbody on surfaces
+   */
+    set restitution(_restitution: number) {
+      this.bodyRestitution = _restitution;
+      if (this.rigidbody.getShapeList() != null)
+        this.rigidbody.getShapeList().setRestitution(this.bodyRestitution);
+    }
+
     /** Collisions with rigidbodies happening to this body, can be used to build a custom onCollisionStay functionality. */
     public collisions: ComponentRigidbody[] = new Array();
     /** Triggers that are currently triggering this body */
@@ -146,8 +178,8 @@ namespace FudgeCore {
     private colType: COLLIDER_TYPE = COLLIDER_TYPE.CUBE;
     private colGroup: PHYSICS_GROUP = PHYSICS_GROUP.DEFAULT;
     private colMask: number;
-    private restitution: number;
-    private friction: number;
+    private bodyRestitution: number;
+    private bodyFriction: number;
     private linDamping: number = 0.1;
     private angDamping: number = 0.1;
     private rotationalInfluenceFactor: Vector3 = Vector3.ONE();
@@ -162,8 +194,8 @@ namespace FudgeCore {
       this.collisionGroup = _group;
       this.colliderType = _colliderType;
       this.mass = _mass;
-      this.restitution = Physics.settings.defaultRestitution;
-      this.friction = Physics.settings.defaultFriction;
+      this.bodyRestitution = Physics.settings.defaultRestitution;
+      this.bodyFriction = Physics.settings.defaultFriction;
       this.colMask = Physics.settings.defaultCollisionMask;
       //Create the actual rigidbody in the OimoPhysics Space
       this.createRigidbody(_mass, _type, this.colliderType, _transform, this.collisionGroup);
@@ -313,44 +345,12 @@ namespace FudgeCore {
       else
         this.collider.setCollisionMask(this.colMask);
       if (this.rigidbody.getShapeList() != null) { //reset the informations about physics handling, has to be done because the shape is new
-        this.rigidbody.getShapeList().setRestitution(this.restitution);
-        this.rigidbody.getShapeList().setFriction(this.friction);
+        this.rigidbody.getShapeList().setRestitution(this.bodyRestitution);
+        this.rigidbody.getShapeList().setFriction(this.bodyFriction);
       }
       this.rigidbody.setMassData(this.massData);
       this.setPosition(position); //set the actual new rotation/position for this Rb again since it's now updated
       this.setRotation(rotation);
-    }
-
-    /**
-   * Get the friction of the rigidbody, which is the factor of sliding resistance of this rigidbody on surfaces
-   */
-    public getFriction(): number {
-      return this.friction;
-    }
-
-    /**
-   * Set the friction of the rigidbody, which is the factor of  sliding resistance of this rigidbody on surfaces
-   */
-    public setFriction(_friction: number): void {
-      this.friction = _friction;
-      if (this.rigidbody.getShapeList() != null)
-        this.rigidbody.getShapeList().setFriction(this.friction);
-    }
-
-    /**
- * Get the restitution of the rigidbody, which is the factor of bounciness of this rigidbody on surfaces
- */
-    public getRestitution(): number {
-      return this.restitution;
-    }
-
-    /**
-   * Set the restitution of the rigidbody, which is the factor of bounciness of this rigidbody on surfaces
-   */
-    public setRestitution(_restitution: number): void {
-      this.restitution = _restitution;
-      if (this.rigidbody.getShapeList() != null)
-        this.rigidbody.getShapeList().setRestitution(this.restitution);
     }
 
     /**
@@ -553,8 +553,8 @@ namespace FudgeCore {
         this.collider.setCollisionMask(this.colMask);
       this.rigidbody.addShape(this.collider);
       this.rigidbody.setMassData(this.massData);
-      this.rigidbody.getShapeList().setRestitution(this.restitution);
-      this.rigidbody.getShapeList().setFriction(this.friction);
+      this.rigidbody.getShapeList().setRestitution(this.bodyRestitution);
+      this.rigidbody.getShapeList().setFriction(this.bodyFriction);
       this.rigidbody.setLinearDamping(this.linDamping);
       this.rigidbody.setAngularDamping(this.angDamping);
       this.rigidbody.setGravityScale(this.gravityInfluenceFactor);
@@ -683,8 +683,8 @@ namespace FudgeCore {
         collisionGroup: this.colGroup,
         rotationInfluence: this.rotationalInfluenceFactor,
         gravityScale: this.gravityInfluenceFactor,
-        friction: this.friction,
-        restitution: this.restitution,
+        friction: this.bodyFriction,
+        restitution: this.bodyRestitution,
         [super.constructor.name]: super.serialize()
       };
       return serialization;
@@ -701,8 +701,8 @@ namespace FudgeCore {
       this.collisionGroup = _serialization.collisionGroup != null ? _serialization.collisionGroup : this.colGroup;
       this.rotationInfluenceFactor = _serialization.rotationInfluence != null ? _serialization.rotationInfluence : this.rotationalInfluenceFactor;
       this.gravityScale = _serialization.gravityScale != null ? _serialization.gravityScale : 1;
-      this.setFriction = _serialization.friction != null ? _serialization.friction : this.friction;
-      this.setRestitution = _serialization.restitution != null ? _serialization.restitution : this.restitution;
+      this.friction = _serialization.friction != null ? _serialization.friction : this.bodyFriction;
+      this.restitution = _serialization.restitution != null ? _serialization.restitution : this.bodyRestitution;
       super.deserialize(_serialization[super.constructor.name]);
       return this;
     }

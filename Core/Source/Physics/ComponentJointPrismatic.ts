@@ -167,8 +167,8 @@ namespace FudgeCore {
       this.jointAxis = new OIMO.Vec3(_axis.x, _axis.y, _axis.z);
       this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
 
-      /*Tell the physics that there is a new joint? and on the physics start the actual joint is first created? Values can be set but the
-        actual constraint ain't existent until the game starts?
+      /*Tell the physics that there is a new joint and on the physics start the actual joint is first created. Values can be set but the
+        actual constraint ain't existent until the game starts
       */
       this.addEventListener(EVENT.COMPONENT_ADD, this.dirtyStatus);
       this.addEventListener(EVENT.COMPONENT_REMOVE, this.superRemove);

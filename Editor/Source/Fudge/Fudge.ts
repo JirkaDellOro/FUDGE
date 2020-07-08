@@ -94,13 +94,24 @@ namespace Fudge {
     let content: string = ƒ.Serializer.stringify(serialization);
 
     // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
-    let filename: string = remote.dialog.showSaveDialogSync(null, { title: "Save Graph", buttonLabel: "Save Graph", message: "ƒ-Message" });
+    // ADDED Filters to open/save dialog for user comfort and since FUDGE is set to open/save JSON files - Marko Fehrenbach, HFU 2020
+    let filename: string = remote.dialog.showSaveDialogSync(null, {
+      title: "Save Graph", buttonLabel: "Save Graph", message: "ƒ-Message", filters: [
+        { name: 'Fudge JSON Graphs', extensions: ['json'] },
+        { name: 'All Files', extensions: ['*'] }
+      ]
+    });
 
     fs.writeFileSync(filename, content);
   }
 
   function open(): ƒ.Node {
-    let filenames: string[] = remote.dialog.showOpenDialogSync(null, { title: "Load Graph", buttonLabel: "Load Graph", properties: ["openFile"] });
+    let filenames: string[] = remote.dialog.showOpenDialogSync(null, {
+      title: "Load Graph", buttonLabel: "Load Graph", properties: ["openFile"], filters: [
+        { name: 'Fudge JSON Graphs', extensions: ['json'] },
+        { name: 'All Files', extensions: ['*'] }
+      ]
+    });
 
     let content: string = fs.readFileSync(filenames[0], { encoding: "utf-8" });
     console.groupCollapsed("File content");
@@ -109,7 +120,7 @@ namespace Fudge {
 
     let serialization: ƒ.Serialization = ƒ.Serializer.parse(content);
     let node: ƒ.Node = <ƒ.Node>ƒ.Serializer.deserialize(serialization);
-    
+
     console.groupCollapsed("Deserialized");
     console.log(node);
     console.groupEnd();

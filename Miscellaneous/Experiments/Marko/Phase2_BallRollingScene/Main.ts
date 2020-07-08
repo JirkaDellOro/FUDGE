@@ -17,6 +17,7 @@ namespace FudgePhysics_Communication {
   let ballRB: f.ComponentRigidbody;
   let speedForce: number = 10;
 
+  let isForce: boolean = true;
 
 
   function init(_event: Event): void {
@@ -24,6 +25,7 @@ namespace FudgePhysics_Communication {
     hierarchy = new f.Node("Scene");
 
     document.addEventListener("keypress", hndKey);
+    document.addEventListener("keydown", hndKeyDown);
     let ground: f.Node = createCompleteMeshNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), "Cube", 0, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.GROUP_1);
     let cmpGroundMesh: f.ComponentTransform = ground.getComponent(f.ComponentTransform);
     cmpGroundMesh.local.scale(new f.Vector3(10, 0.3, 10));
@@ -128,9 +130,8 @@ namespace FudgePhysics_Communication {
 
 
     let cmpRigidbody: f.ComponentRigidbody = new f.ComponentRigidbody(_mass, _physicsType, meshType, _group);
-    //cmpRigidbody.setFriction(1);
-    cmpRigidbody.setRestitution(0.2);
-    cmpRigidbody.setFriction(0.8);
+    cmpRigidbody.restitution = 0.2;
+    cmpRigidbody.friction = 0.8;
     node.addComponent(cmpMesh);
     node.addComponent(cmpMaterial);
     node.addComponent(cmpTransform);
@@ -157,8 +158,17 @@ namespace FudgePhysics_Communication {
       //Backward
       vertical += 1;
     }
-    ballRB.applyForce(new f.Vector3(horizontal * speedForce, 0, vertical * speedForce));
-
+    if (isForce)
+      ballRB.applyForce(new f.Vector3(horizontal * speedForce, 0, vertical * speedForce));
+    else {
+      ballRB.applyImpulseAtPoint(new f.Vector3(horizontal * speedForce, 0, vertical * speedForce));
+    }
   }
 
+  function hndKeyDown(_event: KeyboardEvent): void {
+    //toggle between force applied and impulse applied
+    if (_event.code == f.KEYBOARD_CODE.T) {
+      isForce = !isForce;
+    }
+  }
 }

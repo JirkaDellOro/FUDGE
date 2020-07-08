@@ -10,6 +10,7 @@ namespace FudgeCore {
      */
   export abstract class ComponentJoint extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJoint);
+    protected singleton = false; //Multiple joints can be attached to one Node
 
     /** Get/Set the first ComponentRigidbody of this connection. It should always be the one that this component is attached too in the sceneTree. */
     get attachedRigidbody(): ComponentRigidbody {
@@ -17,7 +18,7 @@ namespace FudgeCore {
     }
     set attachedRigidbody(_cmpRB: ComponentRigidbody) {
       this.connected = false;
-      this.idAttachedRB = _cmpRB.id;
+      this.idAttachedRB = _cmpRB != null ? _cmpRB.id : 0;
       this.attachedRB = _cmpRB;
     }
 
@@ -27,7 +28,7 @@ namespace FudgeCore {
     }
     set connectedRigidbody(_cmpRB: ComponentRigidbody) {
       this.connected = false;
-      this.idConnectedRB = _cmpRB.id;
+      this.idConnectedRB = _cmpRB != null ? _cmpRB.id : 0;
       this.connectedRB = _cmpRB;
     }
 
@@ -41,8 +42,8 @@ namespace FudgeCore {
       this.collisionBetweenConnectedBodies = _value;
     }
 
-    protected idAttachedRB: number;
-    protected idConnectedRB: number;
+    protected idAttachedRB: number = 0;
+    protected idConnectedRB: number = 0;
 
     protected attachedRB: ComponentRigidbody;
     protected connectedRB: ComponentRigidbody;

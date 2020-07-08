@@ -1098,7 +1098,7 @@ declare namespace FudgeCore {
         static readonly subclasses: typeof Component[];
         protected singleton: boolean;
         private container;
-        private active;
+        protected active: boolean;
         protected static registerSubclass(_subclass: typeof Component): number;
         activate(_on: boolean): void;
         get isActive(): boolean;
@@ -3261,6 +3261,7 @@ declare namespace FudgeCore {
        */
     abstract class ComponentJoint extends Component {
         static readonly iSubclass: number;
+        protected singleton: boolean;
         /** Get/Set the first ComponentRigidbody of this connection. It should always be the one that this component is attached too in the sceneTree. */
         get attachedRigidbody(): ComponentRigidbody;
         set attachedRigidbody(_cmpRB: ComponentRigidbody);
@@ -4132,6 +4133,22 @@ declare namespace FudgeCore {
         /** The factor this rigidbody reacts to world gravity. Default = 1 e.g. 1*9.81 m/s. */
         get gravityScale(): number;
         set gravityScale(_influence: number);
+        /**
+      * Get the friction of the rigidbody, which is the factor of sliding resistance of this rigidbody on surfaces
+      */
+        get friction(): number;
+        /**
+       * Set the friction of the rigidbody, which is the factor of  sliding resistance of this rigidbody on surfaces
+       */
+        set friction(_friction: number);
+        /**
+      * Get the restitution of the rigidbody, which is the factor of bounciness of this rigidbody on surfaces
+      */
+        get restitution(): number;
+        /**
+       * Set the restitution of the rigidbody, which is the factor of bounciness of this rigidbody on surfaces
+       */
+        set restitution(_restitution: number);
         /** Collisions with rigidbodies happening to this body, can be used to build a custom onCollisionStay functionality. */
         collisions: ComponentRigidbody[];
         /** Triggers that are currently triggering this body */
@@ -4149,8 +4166,8 @@ declare namespace FudgeCore {
         private colType;
         private colGroup;
         private colMask;
-        private restitution;
-        private friction;
+        private bodyRestitution;
+        private bodyFriction;
         private linDamping;
         private angDamping;
         private rotationalInfluenceFactor;
@@ -4176,22 +4193,6 @@ declare namespace FudgeCore {
        * Checks that the Rigidbody is positioned correctly and recreates the Collider with new scale/position/rotation
        */
         updateFromWorld(): void;
-        /**
-       * Get the friction of the rigidbody, which is the factor of sliding resistance of this rigidbody on surfaces
-       */
-        getFriction(): number;
-        /**
-       * Set the friction of the rigidbody, which is the factor of  sliding resistance of this rigidbody on surfaces
-       */
-        setFriction(_friction: number): void;
-        /**
-     * Get the restitution of the rigidbody, which is the factor of bounciness of this rigidbody on surfaces
-     */
-        getRestitution(): number;
-        /**
-       * Set the restitution of the rigidbody, which is the factor of bounciness of this rigidbody on surfaces
-       */
-        setRestitution(_restitution: number): void;
         /**
        * Get the current POSITION of the [[Node]] in the physical space
        */
