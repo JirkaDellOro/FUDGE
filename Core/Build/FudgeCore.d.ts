@@ -3292,12 +3292,18 @@ declare namespace FudgeCore {
         abstract disconnect(): void;
         /** Get the actual joint in form of the physics engine OimoPhysics.joint. Used to expand functionality, normally no user interaction needed. */
         abstract getOimoJoint(): OIMO.Joint;
+        /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
+        protected abstract dirtyStatus(): void;
         /** Adding the given Fudge ComponentJoint to the oimoPhysics World */
         protected addConstraintToWorld(cmpJoint: ComponentJoint): void;
         /** Removing the given Fudge ComponentJoint to the oimoPhysics World */
         protected removeConstraintFromWorld(cmpJoint: ComponentJoint): void;
         /** Setting both bodies to the bodies that belong to the loaded IDs and reconnecting them */
         protected setBodiesFromLoadedIDs(): void;
+        /** Deserialize Base Class Information - Component, since Typescript does not give the ability to call super.super */
+        protected baseDeserialize(_serialization: Serialization): Serializable;
+        /** Serialize Base Class Information - Component, since Typescript does not give the ability to call super.super in Child classes of e.g. ComponentJointPrismatic */
+        protected baseSerialize(): Serialization;
     }
 }
 declare namespace FudgeCore {
@@ -3447,7 +3453,7 @@ declare namespace FudgeCore {
         private constructJoint;
         private superAdd;
         private superRemove;
-        private dirtyStatus;
+        protected dirtyStatus(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
     }
@@ -3565,7 +3571,7 @@ declare namespace FudgeCore {
         /** Removing this joint to the world through the general function of the base class ComponentJoint. Happening when this component is removed from the Node. */
         private superRemove;
         /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
-        private dirtyStatus;
+        protected dirtyStatus(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
     }
@@ -3717,7 +3723,7 @@ declare namespace FudgeCore {
         private constructJoint;
         private superAdd;
         private superRemove;
-        private dirtyStatus;
+        protected dirtyStatus(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
     }
@@ -3832,7 +3838,7 @@ declare namespace FudgeCore {
         private constructJoint;
         private superAdd;
         private superRemove;
-        private dirtyStatus;
+        protected dirtyStatus(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
     }
@@ -3917,7 +3923,7 @@ declare namespace FudgeCore {
         private constructJoint;
         private superAdd;
         private superRemove;
-        private dirtyStatus;
+        protected dirtyStatus(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
     }
@@ -4079,7 +4085,7 @@ declare namespace FudgeCore {
         private constructJoint;
         private superAdd;
         private superRemove;
-        private dirtyStatus;
+        protected dirtyStatus(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
     }
@@ -4618,15 +4624,15 @@ declare namespace FudgeCore {
          * if any of the two paired ComponentRigidbodies change.
          */
         connectJoints(): void;
+        /**
+      * Called internally to inform the physics system that a joint has a change of core properties like ComponentRigidbody and needs to
+      * be recreated.
+      */
+        changeJointStatus(_cmpJoint: ComponentJoint): void;
         /** Giving a ComponentRigidbody a specific identification number so it can be referenced in the loading process. And removed rb's can receive a new id. */
         distributeBodyID(): number;
         /** Returns the ComponentRigidbody with the given id. Used internally to reconnect joints on loading in the editor. */
         getBodyByID(_id: number): ComponentRigidbody;
-        /**
-        * Called internally to inform the physics system that a joint has a change of core properties like ComponentRigidbody and needs to
-        * be recreated.
-        */
-        changeJointStatus(_cmpJoint: ComponentJoint): void;
         /** Updates all to the Physics.world known Rigidbodies with their respective world positions/rotations/scalings */
         private updateWorldFromWorldMatrix;
         /** Create a oimoPhysics world. Called once at the beginning if none is existend yet. */

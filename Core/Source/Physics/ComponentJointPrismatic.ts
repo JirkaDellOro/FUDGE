@@ -183,6 +183,9 @@ namespace FudgeCore {
         this.constructJoint();
         this.connected = true;
         this.superAdd();
+        Debug.log("called Connection For: " + this.attachedRB.getContainer().name + " / " + this.connectedRB.getContainer().name);
+        Debug.log("Strength: " + this.springDamping + " / " + this.springFrequency);
+        Debug.log(this.oimoJoint);
       }
     }
 
@@ -234,7 +237,8 @@ namespace FudgeCore {
     }
 
     /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
-    private dirtyStatus(): void {
+    protected dirtyStatus(): void {
+      Debug.log("Dirty Status");
       Physics.world.changeJointStatus(this);
     }
 
@@ -254,7 +258,7 @@ namespace FudgeCore {
         motorLimitLower: this.jointMotorLimitLower,
         motorSpeed: this.jointMotorSpeed,
         motorForce: this.jointMotorForce,
-        [super.constructor.name]: super.serialize()
+        [super.constructor.name]: super.baseSerialize()
       };
       return serialization;
     }
@@ -271,11 +275,11 @@ namespace FudgeCore {
       this.springFrequency = _serialization.springFrequency != null ? _serialization.springFrequency : this.jointSpringFrequency;
       this.breakForce = _serialization.breakForce != null ? _serialization.breakForce : this.jointBreakForce;
       this.breakTorque = _serialization.breakTorque != null ? _serialization.breakTorque : this.jointBreakTorque;
-      this.motorLimitUpper = _serialization.upperLimit != null ? _serialization.upperLimit : this.jointMotorLimitUpper;
-      this.motorLimitLower = _serialization.lowerLimit != null ? _serialization.lowerLimit : this.jointMotorLimitLower;
+      this.motorLimitUpper = _serialization.motorLimitUpper != null ? _serialization.motorLimitUpper : this.jointMotorLimitUpper;
+      this.motorLimitLower = _serialization.motorLimitLower != null ? _serialization.motorLimitLower : this.jointMotorLimitLower;
       this.motorSpeed = _serialization.motorSpeed != null ? _serialization.motorSpeed : this.jointMotorSpeed;
       this.motorForce = _serialization.motorForce != null ? _serialization.motorForce : this.jointMotorForce;
-      super.deserialize(_serialization[super.constructor.name]);
+      super.baseDeserialize(_serialization); //Super, Super, Component != ComponentJoint
       return this;
     }
     //#endregion

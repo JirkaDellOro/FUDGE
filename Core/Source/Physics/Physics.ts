@@ -220,9 +220,18 @@ namespace FudgeCore {
       this.jointList.splice(0, this.jointList.length);
       jointsToConnect.forEach((value: ComponentJoint): void => {
         if (value.checkConnection() == false) {
+          Debug.log("connectBodies");
           value.connect();
         }
       });
+    }
+
+    /**
+  * Called internally to inform the physics system that a joint has a change of core properties like ComponentRigidbody and needs to
+  * be recreated.
+  */
+    public changeJointStatus(_cmpJoint: ComponentJoint): void {
+      this.jointList.push(_cmpJoint);
     }
 
     /** Giving a ComponentRigidbody a specific identification number so it can be referenced in the loading process. And removed rb's can receive a new id. */
@@ -252,14 +261,6 @@ namespace FudgeCore {
         }
       });
       return body;
-    }
-
-    /**
-    * Called internally to inform the physics system that a joint has a change of core properties like ComponentRigidbody and needs to
-    * be recreated.
-    */
-    public changeJointStatus(_cmpJoint: ComponentJoint): void {
-      this.jointList.push(_cmpJoint);
     }
 
     /** Updates all to the Physics.world known Rigidbodies with their respective world positions/rotations/scalings */

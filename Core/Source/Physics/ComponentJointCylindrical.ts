@@ -312,7 +312,7 @@ namespace FudgeCore {
       this.removeConstraintFromWorld(this);
     }
 
-    private dirtyStatus(): void {
+    protected dirtyStatus(): void {
       Physics.world.changeJointStatus(this);
     }
 
@@ -338,7 +338,7 @@ namespace FudgeCore {
         lowerLimitRotation: this.jointRotationMotorLimitLower,
         motorSpeedRotation: this.jointRotationMotorSpeed,
         motorTorque: this.jointRotationMotorTorque,
-        [super.constructor.name]: super.serialize()
+        [super.constructor.name]: super.baseSerialize()
       };
       return serialization;
     }
@@ -365,7 +365,7 @@ namespace FudgeCore {
       this.rotationalMotorLimitLower = _serialization.lowerLimitRotation != null ? _serialization.lowerLimitRotation : this.jointRotationMotorLimitLower;
       this.rotationalMotorSpeed = _serialization.motorSpeedRotation != null ? _serialization.motorSpeedRotation : this.jointRotationMotorSpeed;
       this.rotationalMotorTorque = _serialization.motorTorque != null ? _serialization.motorTorque : this.jointRotationMotorTorque;
-      super.deserialize(_serialization[super.constructor.name]);
+      super.baseDeserialize(_serialization);
       return this;
     }
     //#endregion

@@ -17,9 +17,10 @@ namespace FudgeCore {
       return this.attachedRB;
     }
     set attachedRigidbody(_cmpRB: ComponentRigidbody) {
-      this.connected = false;
       this.idAttachedRB = _cmpRB != null ? _cmpRB.id : 0;
       this.attachedRB = _cmpRB;
+      this.disconnect();
+      this.dirtyStatus();
     }
 
     /** Get/Set the second ComponentRigidbody of this connection. */
@@ -27,9 +28,10 @@ namespace FudgeCore {
       return this.connectedRB;
     }
     set connectedRigidbody(_cmpRB: ComponentRigidbody) {
-      this.connected = false;
       this.idConnectedRB = _cmpRB != null ? _cmpRB.id : 0;
       this.connectedRB = _cmpRB;
+      this.disconnect();
+      this.dirtyStatus();
     }
 
     /** Get/Set if the two bodies collide with each other or only with the world but not with themselves. Default = no internal collision.
@@ -75,6 +77,9 @@ namespace FudgeCore {
     /** Get the actual joint in form of the physics engine OimoPhysics.joint. Used to expand functionality, normally no user interaction needed. */
     public abstract getOimoJoint(): OIMO.Joint;
 
+    /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
+    protected abstract dirtyStatus(): void
+
     /** Adding the given Fudge ComponentJoint to the oimoPhysics World */
     protected addConstraintToWorld(cmpJoint: ComponentJoint): void {
       Physics.world.addJoint(cmpJoint);
@@ -85,10 +90,25 @@ namespace FudgeCore {
       Physics.world.removeJoint(cmpJoint);
     }
 
+
     /** Setting both bodies to the bodies that belong to the loaded IDs and reconnecting them */
     protected setBodiesFromLoadedIDs() {
+      Debug.log("Set From: " + this.idAttachedRB + " / " + this.idConnectedRB);
       this.attachedRigidbody = Physics.world.getBodyByID(this.idAttachedRB);
       this.connectedRigidbody = Physics.world.getBodyByID(this.idConnectedRB);
+    }
+
+    /** Deserialize Base Class Information - Component, since Typescript does not give the ability to call super.super */
+    protected baseDeserialize(_serialization: Serialization): Serializable {
+      super.deserialize(_serialization[super.constructor.name]);
+      return this;
+    }
+
+    /** Serialize Base Class Information - Component, since Typescript does not give the ability to call super.super in Child classes of e.g. ComponentJointPrismatic */
+    protected baseSerialize(): Serialization {
+      let serialization: Serialization;
+      serialization = super.serialize();
+      return serialization;
     }
 
   }

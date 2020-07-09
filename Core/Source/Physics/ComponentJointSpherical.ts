@@ -171,7 +171,7 @@ namespace FudgeCore {
       this.removeConstraintFromWorld(this);
     }
 
-    private dirtyStatus(): void {
+    protected dirtyStatus(): void {
       Physics.world.changeJointStatus(this);
     }
 
@@ -186,7 +186,7 @@ namespace FudgeCore {
         springFrequency: this.jointSpringFrequency,
         breakForce: this.jointBreakForce,
         breakTorque: this.jointBreakTorque,
-        [super.constructor.name]: super.serialize()
+        [super.constructor.name]: super.baseSerialize()
       };
       return serialization;
     }
@@ -202,7 +202,7 @@ namespace FudgeCore {
       this.springFrequency = _serialization.springFrequency != null ? _serialization.springFrequency : this.jointSpringFrequency;
       this.breakForce = _serialization.breakForce != null ? _serialization.breakForce : this.jointBreakForce;
       this.breakTorque = _serialization.breakTorque != null ? _serialization.breakTorque : this.jointBreakTorque;
-      super.deserialize(_serialization[super.constructor.name]);
+      super.baseDeserialize(_serialization);
       return this;
     }
     //#endregion
