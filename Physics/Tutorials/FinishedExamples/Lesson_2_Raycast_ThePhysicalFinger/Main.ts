@@ -46,11 +46,11 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
     bodies[1].mtxLocal.scale(new f.Vector3(14, 0.3, 7));
     bodies[1].mtxLocal.rotateX(90, true);
     hierarchy.appendChild(bodies[1]);
-    bodies[1] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC);
-    bodies[1].mtxLocal.translate(new f.Vector3(3.5, 7, 0));
-    bodies[1].mtxLocal.scale(new f.Vector3(7, 0.3, 14));
-    bodies[1].mtxLocal.rotateZ(90, true);
-    hierarchy.appendChild(bodies[1]);
+    bodies[2] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC);
+    bodies[2].mtxLocal.translate(new f.Vector3(3.5, 7, 0));
+    bodies[2].mtxLocal.scale(new f.Vector3(7, 0.3, 14));
+    bodies[2].mtxLocal.rotateZ(90, true);
+    hierarchy.appendChild(bodies[2]);
 
 
     //Creating some dynamic bodies to play with

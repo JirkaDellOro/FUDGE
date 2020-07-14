@@ -4224,6 +4224,14 @@ declare namespace FudgeCore {
          */
         setVelocity(_value: Vector3): void;
         /**
+        * Get the current ANGULAR - VELOCITY of the [[Node]]
+        */
+        getAngularVelocity(): Vector3;
+        /**
+         * Sets the current ANGULAR - VELOCITY of the [[Node]]
+         */
+        setAngularVelocity(_value: Vector3): void;
+        /**
          * Applies a continous FORCE at the center of the RIGIDBODY in the three dimensions. Considering the rigidbody's MASS.
          * The force is measured in newton, 1kg needs about 10 Newton to fight against gravity.
          */
@@ -4439,8 +4447,10 @@ declare namespace FudgeCore {
         binomalImpulse: number;
         /** The point where the collision/triggering initially happened. The collision point exists only on COLLISION_ENTER / TRIGGER_ENTER. */
         collisionPoint: Vector3;
+        /** The normal vector of the collision. Only existing on COLLISION_ENTER */
+        collisionNormal: Vector3;
         /** Creates a new event customized for physics. Holding informations about impulses. Collision point and the body that is colliding */
-        constructor(_type: EVENT_PHYSICS, _hitRigidbody: ComponentRigidbody, _normalImpulse: number, _tangentImpulse: number, _binormalImpulse: number, _collisionPoint?: Vector3);
+        constructor(_type: EVENT_PHYSICS, _hitRigidbody: ComponentRigidbody, _normalImpulse: number, _tangentImpulse: number, _binormalImpulse: number, _collisionPoint?: Vector3, _collisionNormal?: Vector3);
     }
     /**
   * Groups to place a node in, not every group should collide with every group. Use a Mask in to exclude collisions

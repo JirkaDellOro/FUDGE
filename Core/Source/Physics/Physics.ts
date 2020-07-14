@@ -220,7 +220,6 @@ namespace FudgeCore {
       this.jointList.splice(0, this.jointList.length);
       jointsToConnect.forEach((value: ComponentJoint): void => {
         if (value.checkConnection() == false) {
-          Debug.log("connectBodies");
           value.connect();
         }
       });

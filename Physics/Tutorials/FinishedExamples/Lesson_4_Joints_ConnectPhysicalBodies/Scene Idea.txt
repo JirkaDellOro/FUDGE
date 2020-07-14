@@ -1,0 +1,2 @@
+Have a ball rolling through every possible joint, each jonit has a specific usecase
+attach the camera to the ball, it's like a corridor of joints

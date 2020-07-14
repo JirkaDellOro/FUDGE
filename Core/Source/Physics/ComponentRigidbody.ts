@@ -39,6 +39,7 @@ namespace FudgeCore {
           break;
       }
       this.rigidbody.setType(oimoType);
+      this.rigidbody.setMassData(this.massData); //have to reset mass after changing the type, since Oimo is handling mass internally wrong when switching types
     }
 
     /** The shape that represents the [[Node]] in the physical world. Default is a Cube. */
@@ -86,8 +87,9 @@ namespace FudgeCore {
   */
     set mass(_value: number) {
       this.massData.mass = _value;
-      if (this.rigidbody != null)
-        this.rigidbody.setMassData(this.massData);
+      if (this.getContainer() != null)
+        if (this.rigidbody != null)
+          this.rigidbody.setMassData(this.massData);
     }
 
     /** Air reistance, when moving. A Body does slow down even on a surface without friction. */
@@ -237,6 +239,7 @@ namespace FudgeCore {
         if (objHit2 == null || list.getContact().isTouching() == false)
           return;
         let points: OIMO.ManifoldPoint[] = collisionManifold.getPoints(); //All points in the collision where the two bodies are touching, used to calculate the full impact
+        let normal: OIMO.Vec3 = collisionManifold.getNormal();
         normalImpulse = 0;
         binormalImpulse = 0;
         tangentImpulse = 0;
@@ -249,7 +252,7 @@ namespace FudgeCore {
             tangentImpulse += value.getTangentImpulse();
           });
           this.collisions.push(objHit); //Tell the object that the event for this object does not need to be fired again
-          event = new EventPhysics(EVENT_PHYSICS.COLLISION_ENTER, objHit, normalImpulse, tangentImpulse, binormalImpulse, colPoint); //Building the actual event, with what object did collide and informations about it
+          event = new EventPhysics(EVENT_PHYSICS.COLLISION_ENTER, objHit, normalImpulse, tangentImpulse, binormalImpulse, colPoint, new Vector3(normal.x, normal.y, normal.z)); //Building the actual event, with what object did collide and informations about it
           this.dispatchEvent(event); //Sending the given event
         }
         if (objHit2 != this && this.collisions.indexOf(objHit2) == -1) { //Same as the above but for the case the SECOND hit object is not the body itself
@@ -262,7 +265,7 @@ namespace FudgeCore {
           });
 
           this.collisions.push(objHit2);
-          event = new EventPhysics(EVENT_PHYSICS.COLLISION_ENTER, objHit2, normalImpulse, tangentImpulse, binormalImpulse, colPoint);
+          event = new EventPhysics(EVENT_PHYSICS.COLLISION_ENTER, objHit2, normalImpulse, tangentImpulse, binormalImpulse, colPoint, new Vector3(normal.x, normal.y, normal.z));
           this.dispatchEvent(event);
         }
         list = list.getNext(); //Start the same routine with the next collision in the list
@@ -402,6 +405,23 @@ namespace FudgeCore {
     public setVelocity(_value: Vector3): void {
       let velocity: OIMO.Vec3 = new OIMO.Vec3(_value.x, _value.y, _value.z);
       this.rigidbody.setLinearVelocity(velocity);
+    }
+
+    /**
+    * Get the current ANGULAR - VELOCITY of the [[Node]]
+    */
+    public getAngularVelocity(): Vector3 {
+      let velocity: OIMO.Vec3 = this.rigidbody.getAngularVelocity();
+      return new Vector3(velocity.x, velocity.y, velocity.z);
+    }
+
+
+    /**
+     * Sets the current ANGULAR - VELOCITY of the [[Node]]
+     */
+    public setAngularVelocity(_value: Vector3): void {
+      let velocity: OIMO.Vec3 = new OIMO.Vec3(_value.x, _value.y, _value.z);
+      this.rigidbody.setAngularVelocity(velocity);
     }
 
 
@@ -663,7 +683,7 @@ namespace FudgeCore {
         if (isTriggering == false) {
           let index: number = this.collisions.indexOf(value);
           this.bodiesInTrigger.splice(index);
-          event = new EventPhysics(EVENT_PHYSICS.TRIGGER_ENTER, value, 0, 0, 0);
+          event = new EventPhysics(EVENT_PHYSICS.TRIGGER_EXIT, value, 0, 0, 0);
           this.dispatchEvent(event);
         }
       });

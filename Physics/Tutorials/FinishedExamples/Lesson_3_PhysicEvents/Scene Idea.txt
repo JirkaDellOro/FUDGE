@@ -1,0 +1,5 @@
+Simple catch game
+
+move a trigger with forces and if something hits the trigger it's counted up
+
+on collision with anything else spawn minus points

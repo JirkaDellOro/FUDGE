@@ -25,15 +25,18 @@ namespace FudgeCore {
     public binomalImpulse: number;
     /** The point where the collision/triggering initially happened. The collision point exists only on COLLISION_ENTER / TRIGGER_ENTER. */
     public collisionPoint: Vector3;
+    /** The normal vector of the collision. Only existing on COLLISION_ENTER */
+    public collisionNormal: Vector3;
 
     /** Creates a new event customized for physics. Holding informations about impulses. Collision point and the body that is colliding */
-    constructor(_type: EVENT_PHYSICS, _hitRigidbody: ComponentRigidbody, _normalImpulse: number, _tangentImpulse: number, _binormalImpulse: number, _collisionPoint: Vector3 = null) {
+    constructor(_type: EVENT_PHYSICS, _hitRigidbody: ComponentRigidbody, _normalImpulse: number, _tangentImpulse: number, _binormalImpulse: number, _collisionPoint: Vector3 = null, _collisionNormal: Vector3 = null) {
       super(_type);
       this.cmpRigidbody = _hitRigidbody;
       this.normalImpulse = _normalImpulse;
       this.tangentImpulse = _tangentImpulse;
       this.binomalImpulse = _binormalImpulse;
       this.collisionPoint = _collisionPoint;
+      this.collisionNormal = _collisionNormal;
     }
   }
 
