@@ -1021,7 +1021,7 @@ declare namespace FudgeCore {
         /**
          * Determines FUDGE-graph to listen to. Each [[ComponentAudio]] in the graph will connect to this contexts master gain, all others disconnect.
          */
-        listenTo: (_graph: Node) => void;
+        listenTo: (_graph: Node | null) => void;
         /**
          * Retrieve the FUDGE-graph currently listening to
          */
@@ -1029,7 +1029,7 @@ declare namespace FudgeCore {
         /**
          * Set the [[ComponentAudioListener]] that serves the spatial location and orientation for this contexts listener
          */
-        listen: (_cmpListener: ComponentAudioListener) => void;
+        listen: (_cmpListener: ComponentAudioListener | null) => void;
         /**
          * Updates the spatial settings of the AudioNodes effected in the current FUDGE-graph
          */
@@ -2909,6 +2909,8 @@ declare namespace FudgeCore {
         create(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
+        /**Flip the Normals of a Mesh to render opposite side of each polygon*/
+        flipNormals(): void;
         protected calculateFaceNormals(): Float32Array;
         protected abstract createVertices(): Float32Array;
         protected abstract createTextureUVs(): Float32Array;

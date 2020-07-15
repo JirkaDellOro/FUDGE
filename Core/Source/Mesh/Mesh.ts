@@ -61,6 +61,23 @@ namespace FudgeCore {
       return this;
     }
 
+    /**Flip the Normals of a Mesh to render opposite side of each polygon*/
+    public flipNormals(): void {
+
+      //invertNormals
+      for (let n: number = 0; n < this.normalsFace.length; n++) {
+        this.normalsFace[n] = -this.normalsFace[n];
+      }
+
+      //flip indices direction
+      for (let i: number = 0; i < this.indices.length - 2; i += 3 ) {
+        let i0: number = this.indices[i];
+        this.indices[i] = this.indices[i + 1];
+        this.indices[i + 1] = i0;
+      }
+      this.createRenderBuffers();
+    }
+
     // public abstract create(): void;
 
     protected calculateFaceNormals(): Float32Array {
