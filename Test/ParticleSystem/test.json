@@ -1,21 +1,39 @@
 {
-  "transformations": [
-    {
+  "storage": {
+    "update": {
+      "timeMod1": {
+        "function": "modulo",
+        "parameters": [
+          "time",
+          1
+        ]
+      }
+    }
+  },
+  "transformations": {
+    "local": {
       "translate": {
-        "y": {
-          "function": "multiplication",
+        "x": {
+          "function": "addition",
           "parameters": [
-            "time",
+            "index",
             {
-              "function": "addition",
+              "function": "modulo",
               "parameters": [
-                1,
+                "time",
                 1
               ]
             }
           ]
+        },
+        "y": {
+          "function": "modulo",
+          "parameters": [
+            "time",
+            1
+          ]
         }
       }
     }
-  ]
+  }
 }

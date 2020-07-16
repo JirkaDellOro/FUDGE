@@ -7,10 +7,12 @@ namespace FudgeCore {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentMesh);
     public pivot: Matrix4x4 = Matrix4x4.IDENTITY();
     public mesh: Mesh = null;
+    public showToCamera: boolean = false;
 
-    public constructor(_mesh: Mesh = null) {
+    public constructor(_mesh: Mesh = null, _showToCamera: boolean = false) {
       super();
       this.mesh = _mesh;
+      this.showToCamera = _showToCamera;
     }
 
     //#region Transfer

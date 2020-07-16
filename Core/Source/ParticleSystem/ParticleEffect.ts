@@ -66,9 +66,11 @@ namespace FudgeCore {
 
       let dataStorage: ParticleEffectData = _data["storage"];
 
-      this.storageSystem = this.parseRecursively(dataStorage["system"]);
-      this.storageUpdate = this.parseRecursively(dataStorage["update"]);
-      this.storageParticle = this.parseRecursively(dataStorage["particle"]);
+      if (dataStorage) {
+        this.storageSystem = this.parseRecursively(dataStorage["system"]);
+        this.storageUpdate = this.parseRecursively(dataStorage["update"]);
+        this.storageParticle = this.parseRecursively(dataStorage["particle"]);
+      }
 
       let dataTransform: ParticleEffectData = _data["transformations"];
 

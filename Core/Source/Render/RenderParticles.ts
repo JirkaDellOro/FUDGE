@@ -14,13 +14,18 @@ namespace FudgeCore {
       let shader: typeof Shader = cmpMaterial.material.getShader();
       let coat: Coat = cmpMaterial.material.getCoat();
       shader.useProgram();
+
+      let translationCamera: Vector3 = _cmpCamera.pivot.translation;
+      try {
+        translationCamera = Matrix4x4.MULTIPLICATION(_cmpCamera.getContainer().mtxWorld, _cmpCamera.pivot).translation;
+      } catch (_error) {
+        // no container node or no world transformation found -> continue with pivot only
+      }
       let cameraViewProjectionMatrix: Matrix4x4 = _cmpCamera.ViewProjectionMatrix;
 
       let particleEffect: ParticleEffect = _cmpParticleSystem.particleEffect;
-
       let storedValues: StoredValues = particleEffect.storedValues;
       storedValues["time"] = Time.game.get() / 1000;
-
       let dataTransformLocal: ParticleEffectData = particleEffect.transformLocal;
       let dataTransformWorld: ParticleEffectData = particleEffect.transformWorld;
       let dataComponentMutations: ParticleEffectData = particleEffect.componentMutations;
@@ -53,18 +58,17 @@ namespace FudgeCore {
 
         // apply transformations
         let finalTransform: Matrix4x4 = Matrix4x4.IDENTITY();
+        finalTransform.multiply(_nodeTransform);
         this.applyTransform(finalTransform, dataTransformLocal, cachedMutators);
         finalTransform.multiply(_cmpMesh.pivot);
-        finalTransform.multiply(_nodeTransform, true);
         if (dataTransformWorld) {
           let transformWorld: Matrix4x4 = Matrix4x4.IDENTITY();
           this.applyTransform(transformWorld, dataTransformWorld, cachedMutators);
           finalTransform.multiply(transformWorld, true);
           Recycler.store(transformWorld);
         }
-
-        // TODO: check component mesh
-        // transformation.showTo(Matrix4x4.MULTIPLICATION(_cmpCamera.getContainer().mtxWorld, _cmpCamera.pivot).translation);
+        if (_cmpMesh.showToCamera)
+          finalTransform.showTo(translationCamera);
 
         // mutate components
         for (let i: number = 0; i < componentsLength; i++) {

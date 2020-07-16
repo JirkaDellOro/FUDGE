@@ -23,8 +23,7 @@ namespace FudgeCore {
       this.particleEffect = _particleEffect;
 
       // evaluate system storage
-      if (this.particleEffect.storageSystem)
-        this.evaluateClosureStorage(this.particleEffect.storageSystem);
+      this.evaluateClosureStorage(this.particleEffect.storageSystem);
     }
 
     // TODO: put this in ParticleEffect

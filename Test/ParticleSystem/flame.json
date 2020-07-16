@@ -1,0 +1,93 @@
+{
+  "storage": {
+    "system": {
+      "1/size": {
+        "function": "division",
+        "parameters": [
+          1,
+          "size"
+        ]
+      }
+    },
+    "particle": {
+      "inNormParticleTime": {
+        "function": "modulo",
+        "parameters": [
+          {
+            "function": "addition",
+            "parameters": [
+              {
+                "function": "multiplication",
+                "parameters": [
+                  "index",
+                  "1/size"
+                ]
+              },
+              "time"
+            ]
+          },
+          1
+        ]
+      }
+    }
+  },
+  "transformations": {
+    "local": {
+      "translate": {
+        "x": {
+          "function": "multiplication",
+          "parameters": [
+            {
+              "function": "polynomial",
+              "parameters": [
+                {
+                  "function": "subtraction",
+                  "parameters": [
+                    1,
+                    "inNormParticleTime"
+                  ]
+                },
+                -2,
+                2,
+                0,
+                0
+              ]
+            },
+            {
+              "function": "addition",
+              "parameters": [
+                {
+                  "function": "multiplication",
+                  "parameters": [
+                    2,
+                    {
+                      "function": "random",
+                      "parameters": [
+                        "index"
+                      ]
+                    }
+                  ]
+                },
+                -1
+              ]
+            }
+          ]
+        },
+        "y": "inNormParticleTime"
+      }
+    }
+  },
+  "components": {
+    "ComponentMaterial": {
+      "clrPrimary": {
+        "a": {
+          "function": "subtraction",
+          "parameters": [
+            1.5,
+            "inNormParticleTime"
+          ]
+        }
+      }
+    }
+  }
+}

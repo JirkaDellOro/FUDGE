@@ -13,13 +13,15 @@ var ParticleSystemTest;
     let camera;
     let speedCameraRotation = 0.2;
     let speedCameraTranslation = 0.02;
-    let input;
+    let inputParticleNum;
+    let inputEffectName;
     let particleSystem;
-    function hndLoad(_event) {
+    async function hndLoad(_event) {
         f.RenderManager.initialize(true, false);
         f.RenderManager.setDepthTest(false);
         f.RenderManager.setBlendMode(f.BLEND.PARTICLE);
-        input = document.getElementById("particleNum");
+        inputParticleNum = document.getElementById("particleNum");
+        inputEffectName = document.getElementById("effectName");
         const canvas = document.querySelector("canvas");
         f.Debug.log("Canvas", canvas);
         f.Debug.setFilter(f.DebugConsole, f.DEBUG_FILTER.ERROR);
@@ -51,27 +53,31 @@ var ParticleSystemTest;
         let material = new f.Material("Material", f.ShaderTexture, coat);
         // let material: ƒ.Material = new ƒ.Material("Material", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("WHITE")));
         let mesh = new f.MeshQuad();
-        particles = new fAid.Node("Particles", f.Matrix4x4.TRANSLATION(new f.Vector3(0, 1, 0)), material, mesh);
+        particles = new fAid.Node("Particles", f.Matrix4x4.TRANSLATION(new f.Vector3(0, 0, 0)), material, mesh);
         // particles.getComponent(f.ComponentMesh).pivot.translate(new f.Vector3(1, 0, 0));
-        particles.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.1, 0.1, 0.1));
-        particles.getComponent(f.ComponentMaterial).clrPrimary = new f.Color(1, 0.2, 0.2);
-        let particleEffect = new f.ParticleEffect(input.valueAsNumber);
-        particleEffect.load("data.json");
+        particles.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.2, 0.2, 0.2));
+        // particles.getComponent(f.ComponentMesh).showToCamera = true;
+        particles.getComponent(f.ComponentMaterial).clrPrimary = new f.Color(1, 0.5, 0.2);
+        let particleEffect = new f.ParticleEffect(inputParticleNum.valueAsNumber);
+        await particleEffect.load("test.json");
+        console.log(particleEffect);
         particleSystem = new f.ComponentParticleSystem(particleEffect);
         particles.addComponent(particleSystem);
         root.addChild(particles);
         // setup input
-        input.addEventListener("input", (_event) => {
-            let newParticleEffect = new f.ParticleEffect(input.valueAsNumber);
-            newParticleEffect.load("data.json");
+        let reStartParticleSystem = async (_event) => {
+            let newParticleEffect = new f.ParticleEffect(inputParticleNum.valueAsNumber);
+            await newParticleEffect.load(inputEffectName.value);
             let newParticleSystem = new f.ComponentParticleSystem(newParticleEffect);
             particles.removeComponent(particleSystem);
             particles.addComponent(newParticleSystem);
             particleSystem = newParticleSystem;
-        });
-        input.dispatchEvent(new Event("input"));
+        };
+        inputParticleNum.addEventListener("input", reStartParticleSystem);
+        // inputEffectName.addEventListener("input", reStartParticleSystem);
+        // inputParticleNum.dispatchEvent(new Event("input"));
         f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
-        f.Loop.start(f.LOOP_MODE.TIME_GAME, 30);
+        f.Loop.start(f.LOOP_MODE.TIME_GAME, 10);
         function update(_event) {
             // console.log(particles.getComponent(f.ComponentTransform).local);
             viewport.draw();
