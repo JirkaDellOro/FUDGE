@@ -244,7 +244,7 @@ namespace FudgeCore {
         binormalImpulse = 0;
         tangentImpulse = 0;
         if (objHit.getOimoRigidbody() != this.getOimoRigidbody() && this.collisions.indexOf(objHit) == -1) { //Fire, if the hit object is not the Body itself but another and it's not already fired.
-          let colPos: OIMO.Vec3 = points[0].getPosition2(); //THE point of collision is the first touching point (EXTENSION: could be the center of all touching points combined)
+          let colPos: OIMO.Vec3 = this.collisionCenterPoint(points, collisionManifold.getNumPoints()); //THE point of collision is the first touching point (EXTENSION: could be the center of all touching points combined)
           colPoint = new Vector3(colPos.x, colPos.y, colPos.z);
           points.forEach((value: OIMO.ManifoldPoint): void => { //The impact of the collision involving all touching points
             normalImpulse += value.getNormalImpulse();
@@ -256,7 +256,7 @@ namespace FudgeCore {
           this.dispatchEvent(event); //Sending the given event
         }
         if (objHit2 != this && this.collisions.indexOf(objHit2) == -1) { //Same as the above but for the case the SECOND hit object is not the body itself
-          let colPos: OIMO.Vec3 = points[0].getPosition2();
+          let colPos: OIMO.Vec3 = this.collisionCenterPoint(points, collisionManifold.getNumPoints());
           colPoint = new Vector3(colPos.x, colPos.y, colPos.z);
           points.forEach((value: OIMO.ManifoldPoint): void => {
             normalImpulse += value.getNormalImpulse();
@@ -643,7 +643,7 @@ namespace FudgeCore {
     }
 
 
-    //#region private EVENT functions
+    //#region private internal EVENT functions
     /** Check if two OimoPhysics Shapes collide with each other. By overlapping their approximations */
     private collidesWith(triggerRigidbody: OIMO.RigidBody, secondRigidbody: OIMO.RigidBody): boolean {
       let shape1: OIMO.Aabb = triggerRigidbody.getShapeList().getAabb();
@@ -687,6 +687,25 @@ namespace FudgeCore {
           this.dispatchEvent(event);
         }
       });
+    }
+
+    //Calculating the center of a collision as a singular point - in case there is more than one point - by getting the geometrical center of all colliding points
+    private collisionCenterPoint(_colPoints: OIMO.ManifoldPoint[], _numPoints: number): OIMO.Vec3 {
+      let center: OIMO.Vec3;
+      let totalPoints = 0;
+      let totalX = 0;
+      let totalY = 0;
+      let totalZ = 0;
+      _colPoints.forEach((value: OIMO.ManifoldPoint): void => {
+        if (totalPoints < _numPoints) {
+          totalPoints++;
+          totalX += value.getPosition2().x;
+          totalY += value.getPosition2().y;
+          totalZ += value.getPosition2().z;
+        }
+      });
+      center = new OIMO.Vec3(totalX / _numPoints, totalY / _numPoints, totalZ / _numPoints);
+      return center;
     }
     //#endregion
 

@@ -37,12 +37,6 @@ namespace FudgeCore {
     /** Get/Set if the two bodies collide with each other or only with the world but not with themselves. Default = no internal collision.
      *  In most cases it's prefered to declare a minimum and maximum angle/length the bodies can move from one another instead of having them collide.
      */
-    get selfCollision(): boolean {
-      return this.collisionBetweenConnectedBodies;
-    }
-    set selfCollision(_value: boolean) {
-      this.collisionBetweenConnectedBodies = _value;
-    }
 
     protected idAttachedRB: number = 0;
     protected idConnectedRB: number = 0;
@@ -51,7 +45,7 @@ namespace FudgeCore {
     protected connectedRB: ComponentRigidbody;
 
     protected connected: boolean = false;
-    private collisionBetweenConnectedBodies: boolean;
+    protected collisionBetweenConnectedBodies: boolean;
 
     /** Create a joint connection between the two given RigidbodyComponents. */
     constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null) {
@@ -93,7 +87,6 @@ namespace FudgeCore {
 
     /** Setting both bodies to the bodies that belong to the loaded IDs and reconnecting them */
     protected setBodiesFromLoadedIDs() {
-      Debug.log("Set From: " + this.idAttachedRB + " / " + this.idConnectedRB);
       this.attachedRigidbody = Physics.world.getBodyByID(this.idAttachedRB);
       this.connectedRigidbody = Physics.world.getBodyByID(this.idConnectedRB);
     }

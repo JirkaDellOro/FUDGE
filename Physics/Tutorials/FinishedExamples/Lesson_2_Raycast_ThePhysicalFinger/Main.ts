@@ -113,7 +113,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
   }
 
   //What happens when the left mouse button is pressed
-  function hndMouseDown(_event: f.EventPointer) {
+  function hndMouseDown(_event: f.EventPointer): void {
 
     let mouse: f.Vector2 = new f.Vector2(_event.pointerX, _event.pointerY); //Get the mouse position in the html window/client space
     let posProjection: f.Vector2 = viewPort.pointClientToProjection(mouse); //Convert the mouse position to the projection (ingame space)
@@ -160,7 +160,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
   }
 
   //What happens when the left mouse button is released
-  function hndMouseUp(_event: f.EventPointer) {
+  function hndMouseUp(_event: f.EventPointer): void {
     if (pickedBody != null) { //We unpick the body and therefore give it it's normal material back
       pickedBody.getContainer().getComponent(f.ComponentMaterial).material = standardMaterial;
       pickedBody = null;

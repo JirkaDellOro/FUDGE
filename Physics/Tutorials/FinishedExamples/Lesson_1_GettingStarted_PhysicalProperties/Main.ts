@@ -205,6 +205,20 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
       bodies[2].getComponent(f.ComponentRigidbody).applyImpulseAtPoint(new f.Vector3(0, 15, 0)); //15 kg Impulse about the same effect
     }
     // Hint --> Impulses are much stronger because of their instantaneous nature they do not use force to slowly push something it's a direct hit, so keep that value low
+
+
+    //You can influence the time in which the physics are calculated either in update when you change the default of 60 fps in f.Physics.world.simulate(timeDelta)
+    //or by changing the whole timescale of your Fudge App.
+    if (_event.code == f.KEYBOARD_CODE.I) {
+      f.Time.game.setScale(2);
+    }
+    if (_event.code == f.KEYBOARD_CODE.K) {
+      f.Time.game.setScale(1);
+    }
+    if (_event.code == f.KEYBOARD_CODE.M) {
+      f.Time.game.setScale(0.5);
+    }
+
   }
 
 }

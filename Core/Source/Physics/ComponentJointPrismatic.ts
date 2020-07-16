@@ -128,8 +128,8 @@ namespace FudgeCore {
       if (this.oimoJoint != null) this.oimoJoint.getLimitMotor().motorForce = this.jointMotorForce;
     }
 
-    /**
-      * If the two connected RigidBodies collide with eath other. (Default = false)
+    /** Get/Set if the two bodies collide with each other or only with the world but not with themselves. Default = no internal collision.
+     *  In most cases it's prefered to declare a minimum and maximum angle/length the bodies can move from one another instead of having them collide.
      */
     get internalCollision(): boolean {
       return this.jointInternalCollision;
@@ -183,9 +183,6 @@ namespace FudgeCore {
         this.constructJoint();
         this.connected = true;
         this.superAdd();
-        Debug.log("called Connection For: " + this.attachedRB.getContainer().name + " / " + this.connectedRB.getContainer().name);
-        Debug.log("Strength: " + this.springDamping + " / " + this.springFrequency);
-        Debug.log(this.oimoJoint);
       }
     }
 
@@ -238,7 +235,6 @@ namespace FudgeCore {
 
     /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
     protected dirtyStatus(): void {
-      Debug.log("Dirty Status");
       Physics.world.changeJointStatus(this);
     }
 

@@ -3271,14 +3271,12 @@ declare namespace FudgeCore {
         /** Get/Set if the two bodies collide with each other or only with the world but not with themselves. Default = no internal collision.
          *  In most cases it's prefered to declare a minimum and maximum angle/length the bodies can move from one another instead of having them collide.
          */
-        get selfCollision(): boolean;
-        set selfCollision(_value: boolean);
         protected idAttachedRB: number;
         protected idConnectedRB: number;
         protected attachedRB: ComponentRigidbody;
         protected connectedRB: ComponentRigidbody;
         protected connected: boolean;
-        private collisionBetweenConnectedBodies;
+        protected collisionBetweenConnectedBodies: boolean;
         /** Create a joint connection between the two given RigidbodyComponents. */
         constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody);
         /** Check if connection is dirty, so when either rb is changed disconnect and reconnect. Internally used no user interaction needed. */
@@ -3527,8 +3525,8 @@ declare namespace FudgeCore {
          */
         get motorForce(): number;
         set motorForce(_value: number);
-        /**
-          * If the two connected RigidBodies collide with eath other. (Default = false)
+        /** Get/Set if the two bodies collide with each other or only with the world but not with themselves. Default = no internal collision.
+         *  In most cases it's prefered to declare a minimum and maximum angle/length the bodies can move from one another instead of having them collide.
          */
         get internalCollision(): boolean;
         set internalCollision(_value: boolean);
@@ -4295,6 +4293,7 @@ declare namespace FudgeCore {
          * Events in case a body is in a trigger, so not only the body registers a triggerEvent but also the trigger itself.
          */
         private checkBodiesInTrigger;
+        private collisionCenterPoint;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
     }

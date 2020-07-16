@@ -183,7 +183,6 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
   }
 
   function resetBall() {
-    f.Debug.log(ball.mass);
     //ball.setPosition(ballStart); <-- Position can't be set by physics since you make the ball kinematic in the same frame
     ball.getContainer().mtxLocal.translation = ballStart; // Kinematic objects need to be set through normal transform
     ball.getContainer().mtxLocal.rotation = f.Vector3.ZERO();
