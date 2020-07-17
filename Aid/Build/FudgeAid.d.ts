@@ -3,6 +3,8 @@
 import ƒ = FudgeCore;
 import ƒAid = FudgeAid;
 declare namespace FudgeAid {
+}
+declare namespace FudgeAid {
     /**
      * Abstract class supporting versious arithmetical helper functions
      */

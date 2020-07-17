@@ -4,7 +4,7 @@ namespace FudgeCore {
      * @authors Simon Storl-Schulke, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     export class MeshTorus extends Mesh {
-        public static readonly iSubclass: number = Mesh.registerSubclass(MeshSphere);
+        public static readonly iSubclass: number = Mesh.registerSubclass(MeshTorus);
 
         public normals: Float32Array;
         
@@ -32,7 +32,8 @@ namespace FudgeCore {
             let normals: number[] = [];
             let textureUVs: number[] = [];
 
-            let center: number[] = [0, 0, 0];
+            let centerX: number;
+            let centerY: number;
 
 
             let x: number, y: number, z: number;
@@ -42,15 +43,16 @@ namespace FudgeCore {
                     let u: number = i / this._majorSegments * PI2;
                     let v: number = j / this._minorSegments * PI2;
 
-                    center[0] = Math.cos(u);
-                    center[1] = Math.sin(u);
+                    centerX = Math.cos(u);
+                    centerY = Math.sin(u);
 
                     x = (1 + this._thickness * Math.cos(v)) * Math.sin(u);
                     y = this._thickness * Math.sin(v);
                     z = (1 + this._thickness * Math.cos(v)) * Math.cos(u);
 
                     vertices.push(x, y, z);
-                    let normal: Vector3 = new Vector3(x - center[0], y - center[1], z);
+                    
+                    let normal: Vector3 = new Vector3(x - centerX, y - centerY, z);
                     normal.normalize();
                     normals.push(normal.x, normal.y, normal.z);
 
@@ -59,7 +61,7 @@ namespace FudgeCore {
             }
 
             // scale down
-            vertices = vertices.map(_value => _value / 2.5);
+            vertices = vertices.map(_value => _value / 2);
 
             this.textureUVs = new Float32Array(textureUVs);
             this.normals = new Float32Array(normals);

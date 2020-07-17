@@ -8,9 +8,9 @@ namespace FudgeCore {
     public color: Color = new Color(1, 1, 1, 1);
     public texture: TextureImage = null;
     // just ideas so far
-    public tilingX: number;
-    public tilingY: number;
-    public repetition: boolean;
+    // public tilingX: number;
+    // public tilingY: number;
+    // public repetition: boolean;
 
     // constructor(_texture: TextureImage, _color?: Color) {
     //   super();

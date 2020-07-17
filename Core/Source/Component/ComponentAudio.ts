@@ -31,9 +31,9 @@ namespace FudgeCore {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentAudio);
     /** places and directs the panner relative to the world transform of the [[Node]]  */
     public pivot: Matrix4x4 = Matrix4x4.IDENTITY();
-    
+
     protected singleton: boolean = false;
-    
+
     private gain: GainNode;
     private panner: PannerNode;
     private source: AudioBufferSourceNode;
@@ -54,7 +54,7 @@ namespace FudgeCore {
     }
 
     public set audio(_audio: Audio) {
-      this.source.buffer = _audio;
+      this.createSource(_audio, this.source.loop);
     }
 
     public get audio(): Audio {
@@ -180,7 +180,9 @@ namespace FudgeCore {
       this.source.connect(this.panner);
 
       if (_audio)
-        this.audio = _audio;
+        // this.audio = _audio;
+        this.source.buffer = _audio;
+
       this.source.loop = _loop;
     }
 
