@@ -291,9 +291,9 @@ namespace FudgeCore {
       this.triVBO.setAttribs(attribs);
       this.triVBO.loadAttribIndices(this.shader);
 
-      this.pointBufferSize = 4096;
-      this.lineBufferSize = 4096;
-      this.triBufferSize = 4096;
+      this.pointBufferSize = 8192;
+      this.lineBufferSize = 8192;
+      this.triBufferSize = 8192;
       this.pointData = new Float32Array(this.pointBufferSize * 9);
       this.lineData = new Float32Array(this.lineBufferSize * 9 * 2);
       this.triData = new Float32Array(this.triBufferSize * 9 * 3);

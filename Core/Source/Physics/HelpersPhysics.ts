@@ -196,6 +196,23 @@ namespace FudgeCore {
       OIMO.Setting.defaultCollisionGroup = _value;
     }
 
+    /** Change the type of joint solver algorithm. Default Iterative == 0, is faster but less stable. Direct == 1, slow but more stable, recommended for complex joint work. Change this setting only at the start of your game. */
+    get defaultConstraintSolverType(): number {
+      return OIMO.Setting.defaultJointConstraintSolverType;
+    }
+    set defaultConstraintSolverType(_value: number) {
+      OIMO.Setting.defaultJointConstraintSolverType = _value;
+    }
+
+    /** The correction algorithm used to correct physics calculations. Change this only at the beginning of your game. Each has different approaches, so if you have problems test another
+     *  Default 0 = Baumgarte (fast but less correct induces some energy errors), 1 = Split-Impulse (fast and no engery errors, but more inaccurate for joints), 2 = Non-linear Gauss Seidel (slowest but most accurate)*/
+    get defaultCorrectionAlgorithm(): number {
+      return OIMO.Setting.defaultJointPositionCorrectionAlgorithm;
+    }
+    set defaultCorrectionAlgorithm(_value: number) {
+      OIMO.Setting.defaultJointPositionCorrectionAlgorithm = _value;
+    }
+
     constructor(_defGroup: number, _defMask: number) {
       this.defaultCollisionGroup = _defGroup;
       this.defaultCollisionMask = _defMask;

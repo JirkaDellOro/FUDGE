@@ -4,6 +4,9 @@ import f = FudgeCore;
 
 namespace Turorials_FUDGEPhysics_Lesson1 {
 
+  //GOALS: Learning how to define shpes to create a not predefined collider shape.
+  //Built a simple physics car with wheel colliders (different approach than a raycast car (default))
+
   //Fudge Basic Variables
   window.addEventListener("load", init);
   const app: HTMLCanvasElement = document.querySelector("canvas"); // The html element where the scene is drawn to
@@ -13,9 +16,24 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
 
   //Physical Objects
   let bodies: f.Node[] = new Array(); // Array of all physical objects in the scene to have a quick reference
+  let carBody: f.ComponentRigidbody;
 
   //Setting Variables
-  let materialConvexShape: f.Material = new f.Material("MorningStar", f.ShaderFlat, new f.CoatColored(new f.Color(0.5, 0.4, 0.35, 1)));
+  let materialConvexShape: f.Material = new f.Material("MorningStarThingy", f.ShaderFlat, new f.CoatColored(new f.Color(0.5, 0.4, 0.35, 1)));
+  let materialPlayer: f.Material = new f.Material("Player", f.ShaderFlat, new f.CoatColored(new f.Color(0.7, 0.5, 0.35, 1)));
+
+  //Car Settings / Joints
+  let frontSuspensionRight: f.ComponentJointCylindrical;
+  let frontSuspensionLeft: f.ComponentJointCylindrical;
+  let backSuspensionRight: f.ComponentJointCylindrical;
+  let backSuspensionLeft: f.ComponentJointCylindrical;
+  let wheelJoint_frontR: f.ComponentJointRevolute;
+  let wheelJoint_frontL: f.ComponentJointRevolute;
+  let wheelJoint_backR: f.ComponentJointRevolute;
+  let wheelJoint_backL: f.ComponentJointRevolute;
+  let maxAngle: number = 30;
+  let currentAngle: number = 0;
+
 
   //Function to initialize the Fudge Scene with a camera, light, viewport and PHYSCIAL Objects
   function init(_event: Event): void {
@@ -23,25 +41,31 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
     hierarchy = new f.Node("Scene"); //create the root Node where every object is parented to. Should never be changed
 
     //#region PHYSICS
-    f.Physics.settings.defaultRestitution = 0.7;
-    f.Physics.settings.defaultFriction = 1;
+    //For this demo we want a higher accuracy since semi-real car physics are very delicate to calculate (thats why normally a raycast car is used for approximation)
+    //OimoPhysics which is integrated in Fudge is using a correctionAlgorithm on solver iterations instead of fully recalculate physics too often, 
+    //so you can crank the number of solver iterations higher than with most engines. But Oimo is in general less accurate.
+    f.Physics.world.setSolverIterations(1000);
+    f.Physics.settings.defaultRestitution = 0.15;
+    f.Physics.settings.defaultFriction = 0.95;
+    f.Physics.settings.defaultConstraintSolverType = 1; //Use most accurate joint solving, slower but needed for complex things like cars
+    //Experiment with defaultConstraintSolverType and defaultCorrectionAlgorithm
 
     //PHYSICS 
     //Creating a physically static ground plane for our physics playground. A simple scaled cube but with physics type set to static
-    bodies[0] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC);
+    bodies[0] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.GROUP_2);
     bodies[0].mtxLocal.scale(new f.Vector3(14, 0.3, 14)); //Scale the body with it's standard ComponentTransform
-    bodies[0].mtxLocal.rotateX(4, true); //Give it a slight rotation so the physical objects are sliding, always from left when it's after a scaling
+    //bodies[0].mtxLocal.rotateX(4, true); //Give it a slight rotation so the physical objects are sliding, always from left when it's after a scaling
     hierarchy.appendChild(bodies[0]); //Add the node to the scene by adding it to the scene-root
 
 
     //CONCEPT 1 - Convex Colliders / Compound Collider - A Collider Shape that is not predefined and has no holes in it
     //e.g. something like a morning star shape a cube with pyramides as spikes on the side
-    createConvexCompountCollider();
+    //createConvexCompountCollider();
 
     //CONCEPT 2 - Setting Up a physical player
     //A physical player is a standard physical object of the type dynamic, BUT, you only want to rotate on Y axis, and you want to setup things
     //like a grounded variable and other movement related stuff.
-    settingUpPhysicalPlayer();
+    settingUpCar();
 
     //#endregion PHYSICS
 
@@ -53,7 +77,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
 
     let cmpCamera: f.ComponentCamera = new f.ComponentCamera();
     cmpCamera.backgroundColor = f.Color.CSS("GREY");
-    cmpCamera.pivot.translate(new f.Vector3(2, 3.5, 17)); //Move camera far back so the whole scene is visible
+    cmpCamera.pivot.translate(new f.Vector3(17, 4, 17)); //Move camera far back so the whole scene is visible
     cmpCamera.pivot.lookAt(f.Vector3.ZERO()); //Set the camera matrix so that it looks at the center of the scene
 
     viewPort = new f.Viewport(); //Creating a viewport that is rendered onto the html canvas element
@@ -64,6 +88,8 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
     //PHYSICS - Start using physics by telling the physics the scene root object. Physics will recalculate every transform and initialize
     f.Physics.start(hierarchy);
 
+    f.Physics.settings.debugDraw = true;
+
     //Important start the game loop after starting physics, so physics can use the current transform before it's first iteration
     f.Loop.addEventListener(f.EVENT.LOOP_FRAME, update); //Tell the game loop to call the update function on each frame
     f.Loop.start(); //Stard the game loop
@@ -71,7 +97,9 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
 
   //Function to animate/update the Fudge scene, commonly known as gameloop
   function update(): void {
-    f.Physics.world.simulate(); //PHYSICS - Simulate physical changes each frame, parameter to set time between frames
+    //PHYSICS - Simulate physical changes each frame, parameter to set time between frames
+    f.Physics.world.simulate(f.Loop.timeFrameReal / 1000);
+
     viewPort.draw(); // Draw the current Fudge Scene to the canvas
   }
 
@@ -112,56 +140,195 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
 
     //Step 2 - define the visual nodes that are part of your whole shape, since we have a cube that is surounded by pyramids:
     //Main Shape
-    bodies[5] = createCompleteNode("Compound", materialConvexShape, new f.MeshCube, 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.CONVEX, colliderVertices);
+    bodies[5] = createCompleteNode("Compound", materialConvexShape, new f.MeshCube(), 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.CONVEX, colliderVertices);
     hierarchy.appendChild(bodies[5]);
     bodies[5].mtxLocal.translate(new f.Vector3(2.5, 4, 3.5));
     bodies[5].mtxLocal.rotateX(27);
     bodies[5].mtxLocal.rotateY(32);
     //Components - Removing the Physics component on each of them since they all build one shape on the main Node only the visual nodes need to be there
-    bodies[6] = createCompleteNode("CompoundUpper", materialConvexShape, new f.MeshPyramid, 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.PYRAMID);
+    bodies[6] = createCompleteNode("CompoundUpper", materialConvexShape, new f.MeshPyramid(), 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.PYRAMID);
     bodies[6].removeComponent(bodies[6].getComponent(f.ComponentRigidbody));
     bodies[6].mtxLocal.translateY(0.5);
     bodies[6].mtxLocal.scale(new f.Vector3(1, 0.5, 1));
     bodies[5].appendChild(bodies[6]); //appending the Node not to the main hierarchy but the Node it is part of
-    bodies[7] = createCompleteNode("CompoundLower", materialConvexShape, new f.MeshPyramid, 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.PYRAMID);
+    bodies[7] = createCompleteNode("CompoundLower", materialConvexShape, new f.MeshPyramid(), 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.PYRAMID);
     bodies[7].removeComponent(bodies[7].getComponent(f.ComponentRigidbody));
     bodies[7].mtxLocal.rotateX(180);
     bodies[7].mtxLocal.translateY(0.5);
     bodies[7].mtxLocal.scale(new f.Vector3(1, 0.5, 1));
     bodies[5].appendChild(bodies[7]);
-    bodies[8] = createCompleteNode("CompoundLeft", materialConvexShape, new f.MeshPyramid, 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.PYRAMID);
+    bodies[8] = createCompleteNode("CompoundLeft", materialConvexShape, new f.MeshPyramid(), 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.PYRAMID);
     bodies[8].removeComponent(bodies[8].getComponent(f.ComponentRigidbody));
     bodies[8].mtxLocal.rotateZ(90);
     bodies[8].mtxLocal.translateY(0.5);
     bodies[8].mtxLocal.scale(new f.Vector3(1, 0.5, 1));
     bodies[5].appendChild(bodies[8]);
-    bodies[9] = createCompleteNode("CompoundRight", materialConvexShape, new f.MeshPyramid, 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.PYRAMID);
+    bodies[9] = createCompleteNode("CompoundRight", materialConvexShape, new f.MeshPyramid(), 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.PYRAMID);
     bodies[9].removeComponent(bodies[9].getComponent(f.ComponentRigidbody));
     bodies[9].mtxLocal.rotateZ(-90);
     bodies[9].mtxLocal.translateY(0.5);
     bodies[9].mtxLocal.scale(new f.Vector3(1, 0.5, 1));
     bodies[5].appendChild(bodies[9]);
-    bodies[10] = createCompleteNode("CompoundFront", materialConvexShape, new f.MeshPyramid, 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.PYRAMID);
+    bodies[10] = createCompleteNode("CompoundFront", materialConvexShape, new f.MeshPyramid(), 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.PYRAMID);
     bodies[10].removeComponent(bodies[10].getComponent(f.ComponentRigidbody));
     bodies[10].mtxLocal.rotateX(90);
     bodies[10].mtxLocal.translateY(0.5);
     bodies[10].mtxLocal.scale(new f.Vector3(1, 0.5, 1));
     bodies[5].appendChild(bodies[10]);
-    bodies[11] = createCompleteNode("CompoundBack", materialConvexShape, new f.MeshPyramid, 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.PYRAMID);
+    bodies[11] = createCompleteNode("CompoundBack", materialConvexShape, new f.MeshPyramid(), 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.PYRAMID);
     bodies[11].removeComponent(bodies[11].getComponent(f.ComponentRigidbody));
     bodies[11].mtxLocal.rotateX(-90);
     bodies[11].mtxLocal.translateY(0.5);
     bodies[11].mtxLocal.scale(new f.Vector3(1, 0.5, 1));
     bodies[5].appendChild(bodies[11]);
-    bodies[5].getComponent(f.ComponentRigidbody).restitution = 0.8;
+    bodies[5].getComponent(f.ComponentRigidbody).restitution = 3;
   }
 
-  function settingUpPhysicalPlayer(): void {
+  function settingUpCar(): void {
+    //Setting up visuals
+    //Best practice to place the main body and place every suspension and wheel locally to the body. Not in this tutorial to make it more clear
+    //CarBody
+    bodies[12] = createCompleteNode("Car_Base", materialPlayer, new f.MeshCube(), 10, f.PHYSICS_TYPE.DYNAMIC);
+    carBody = bodies[12].getComponent(f.ComponentRigidbody);
+    bodies[12].mtxLocal.translate(new f.Vector3(0, 2.5, 0));
+    bodies[12].mtxLocal.scale(new f.Vector3(1, 0.5, 2));
+    hierarchy.appendChild(bodies[12]);
 
+    //CarWheels - Important to balance the car out correctly
+    bodies[13] = createCompleteNode("Car_WheelRight_Front", materialPlayer, new f.MeshCube(), 5, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.CYLINDER);
+    bodies[13].mtxLocal.translate(new f.Vector3(1, 1.50, -0.75));
+    bodies[13].mtxLocal.scale(new f.Vector3(0.5, 0.85, 0.85)); //Wheels the as a cylinder use the x, for the height of the cylinder, y for the diameter and z is just for the f.MeshCube to scale.
+    bodies[13].mtxLocal.rotateZ(90, false);
+    hierarchy.appendChild(bodies[13])
+
+    bodies[14] = createCompleteNode("Car_WheelRight_Back", materialPlayer, new f.MeshCube(), 5, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.CYLINDER);
+    bodies[14].mtxLocal.translate(new f.Vector3(1, 1.50, 0.75));
+    bodies[14].mtxLocal.scale(new f.Vector3(0.5, 0.85, 0.85));
+    bodies[14].mtxLocal.rotateZ(90, false);
+    hierarchy.appendChild(bodies[14])
+
+    bodies[15] = createCompleteNode("Car_WheelLeft_Front", materialPlayer, new f.MeshCube(), 5, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.CYLINDER);
+    bodies[15].mtxLocal.translate(new f.Vector3(-1, 1.50, -0.75));
+    bodies[15].mtxLocal.scale(new f.Vector3(0.5, 0.85, 0.85));
+    bodies[15].mtxLocal.rotateZ(90, false);
+    hierarchy.appendChild(bodies[15])
+
+    bodies[16] = createCompleteNode("Car_WheelLeft_Back", materialPlayer, new f.MeshCube(), 5, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.CYLINDER);
+    bodies[16].mtxLocal.translate(new f.Vector3(-1, 1.50, 0.75));
+    bodies[16].mtxLocal.scale(new f.Vector3(0.5, 0.85, 0.85));
+    bodies[16].mtxLocal.rotateZ(90, false);
+    hierarchy.appendChild(bodies[16])
+
+    //SuspensionHolders
+    bodies[17] = createCompleteNode("Car_HolderRight_Front", materialPlayer, new f.MeshCube(), 20, f.PHYSICS_TYPE.DYNAMIC);
+    bodies[17].mtxLocal.translate(new f.Vector3(0.4, 1.5, -0.75));
+    bodies[17].mtxLocal.scale(new f.Vector3(0.5, 0.5, 0.5));
+    hierarchy.appendChild(bodies[17])
+
+    bodies[18] = createCompleteNode("Car_HolderRight_Back", materialPlayer, new f.MeshCube(), 20, f.PHYSICS_TYPE.DYNAMIC);
+    bodies[18].mtxLocal.translate(new f.Vector3(0.4, 1.5, 0.75));
+    bodies[18].mtxLocal.scale(new f.Vector3(0.5, 0.5, 0.5));
+    hierarchy.appendChild(bodies[18])
+
+    bodies[19] = createCompleteNode("Car_HolderLeft_Front", materialPlayer, new f.MeshCube(), 20, f.PHYSICS_TYPE.DYNAMIC);
+    bodies[19].mtxLocal.translate(new f.Vector3(-0.4, 1.5, -0.75));
+    bodies[19].mtxLocal.scale(new f.Vector3(0.5, 0.5, 0.5));
+    hierarchy.appendChild(bodies[19])
+
+    bodies[20] = createCompleteNode("Car_HolderLeft_Back", materialPlayer, new f.MeshCube(), 20, f.PHYSICS_TYPE.DYNAMIC);
+    bodies[20].mtxLocal.translate(new f.Vector3(-0.4, 1.5, 0.75));
+    bodies[20].mtxLocal.scale(new f.Vector3(0.5, 0.5, 0.5));
+    hierarchy.appendChild(bodies[20])
+
+
+    //Connecting them with joints
+    //Sliding, Prismatic, Spring Joint between the body and the suspension
+    //In -Y-Axis positioned where the holder is located locally to the car_base
+    frontSuspensionRight = new f.ComponentJointCylindrical(carBody, bodies[17].getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(0.50, -1, -0.75));
+    carBody.getContainer().addComponent(frontSuspensionRight);
+    frontSuspensionRight.springDamping = 100;
+    frontSuspensionRight.springFrequency = 2;
+    frontSuspensionRight.translationMotorLimitUpper = 0;
+    frontSuspensionRight.translationMotorLimitLower = 0;
+    frontSuspensionRight.rotationalMotorLimitUpper = 0;
+    frontSuspensionRight.rotationalMotorLimitLower = 0;
+    frontSuspensionRight.internalCollision = true;
+    frontSuspensionLeft = new f.ComponentJointCylindrical(carBody, bodies[19].getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(-0.50, -1, -0.75));
+    carBody.getContainer().addComponent(frontSuspensionLeft);
+    frontSuspensionLeft.springDamping = 100;
+    frontSuspensionLeft.springFrequency = 2;
+    frontSuspensionLeft.translationMotorLimitUpper = 0;
+    frontSuspensionLeft.translationMotorLimitLower = 0;
+    frontSuspensionLeft.rotationalMotorLimitUpper = 0;
+    frontSuspensionLeft.rotationalMotorLimitLower = 0;
+    frontSuspensionLeft.internalCollision = true;
+    backSuspensionLeft = new f.ComponentJointCylindrical(carBody, bodies[20].getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(-0.50, -1, 0.75));
+    carBody.getContainer().addComponent(backSuspensionLeft);
+    backSuspensionLeft.springDamping = 100;
+    backSuspensionLeft.springFrequency = 2;
+    backSuspensionLeft.translationMotorLimitUpper = 0;
+    backSuspensionLeft.translationMotorLimitLower = 0;
+    backSuspensionLeft.rotationalMotorLimitUpper = 0;
+    backSuspensionLeft.rotationalMotorLimitLower = 0;
+    backSuspensionLeft.internalCollision = true;
+    backSuspensionRight = new f.ComponentJointCylindrical(carBody, bodies[18].getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(0.50, -1, 0.75));
+    carBody.getContainer().addComponent(backSuspensionRight);
+    backSuspensionRight.springDamping = 100;
+    backSuspensionRight.springFrequency = 2;
+    backSuspensionRight.translationMotorLimitUpper = 0;
+    backSuspensionRight.translationMotorLimitLower = 0;
+    backSuspensionRight.rotationalMotorLimitUpper = 0;
+    backSuspensionRight.rotationalMotorLimitLower = 0;
+    backSuspensionRight.internalCollision = true;
+
+    //Connect Wheels to suspension - Hinge (revolute) joints that can rotate 360° in X-Axis but not move
+    wheelJoint_frontR = new f.ComponentJointRevolute(bodies[17].getComponent(f.ComponentRigidbody), bodies[13].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
+    bodies[17].addComponent(wheelJoint_frontR);
+    wheelJoint_frontL = new f.ComponentJointRevolute(bodies[19].getComponent(f.ComponentRigidbody), bodies[15].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
+    bodies[19].addComponent(wheelJoint_frontL);
+    wheelJoint_backR = new f.ComponentJointRevolute(bodies[18].getComponent(f.ComponentRigidbody), bodies[14].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
+    bodies[18].addComponent(wheelJoint_backR);
+    wheelJoint_backL = new f.ComponentJointRevolute(bodies[20].getComponent(f.ComponentRigidbody), bodies[16].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
+    bodies[20].addComponent(wheelJoint_backL);
+
+    // wheelJoint_frontR.motorSpeed = -5;
+    wheelJoint_frontR.motorTorque = 10;
+    // wheelJoint_frontL.motorSpeed = -5;
+    wheelJoint_frontL.motorTorque = 10;
+    // wheelJoint_backR.motorSpeed = -5;
+    // wheelJoint_backR.motorTorque = 50;
+    // wheelJoint_backL.motorSpeed = -5;
+    // wheelJoint_backL.motorTorque = 50;
   }
+
 
   // Event Function handling keyboard input
   function hndKey(_event: KeyboardEvent): void {
+
+    if (_event.code == f.KEYBOARD_CODE.A) {
+      frontSuspensionLeft.rotationalMotorLimitUpper = currentAngle < maxAngle ? currentAngle++ : currentAngle;
+      frontSuspensionLeft.rotationalMotorLimitLower = currentAngle < maxAngle ? currentAngle++ : currentAngle;
+      frontSuspensionRight.rotationalMotorLimitUpper = currentAngle < maxAngle ? currentAngle++ : currentAngle;
+      frontSuspensionRight.rotationalMotorLimitLower = currentAngle < maxAngle ? currentAngle++ : currentAngle;
+    }
+    if (_event.code == f.KEYBOARD_CODE.W) {
+      bodies[12].getComponent(f.ComponentRigidbody).applyForce(new f.Vector3(0, 10, 0));
+      wheelJoint_frontR.motorSpeed++;
+      wheelJoint_frontL.motorSpeed++;
+    }
+    if (_event.code == f.KEYBOARD_CODE.S) {
+
+    }
+    if (_event.code == f.KEYBOARD_CODE.D) {
+      frontSuspensionLeft.rotationalMotorLimitUpper = currentAngle > -maxAngle ? currentAngle-- : currentAngle;
+      frontSuspensionLeft.rotationalMotorLimitLower = currentAngle > -maxAngle ? currentAngle-- : currentAngle;
+      frontSuspensionRight.rotationalMotorLimitUpper = currentAngle < maxAngle ? currentAngle-- : currentAngle;
+      frontSuspensionRight.rotationalMotorLimitLower = currentAngle < maxAngle ? currentAngle-- : currentAngle;
+    }
+
+    if (_event.code == f.KEYBOARD_CODE.T) {
+      f.Physics.settings.debugMode = f.Physics.settings.debugMode == f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER ? f.PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY : f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
+    }
 
 
   }

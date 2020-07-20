@@ -507,10 +507,10 @@ namespace FudgeCore {
       let hitInfo: RayHitInfo = new RayHitInfo();
       let geometry: OIMO.Geometry = this.rigidbody.getShapeList().getGeometry();
       let transform: OIMO.Transform = this.rigidbody.getTransform();
-      let scaledDirection: Vector3 = _direction;
-      scaledDirection.scale(length);
-      let endpoint: Vector3 = Vector3.SUM(scaledDirection, _origin);
-      let oimoRay: OIMO.RayCastHit;
+      let scaledDirection: Vector3 = _direction.copy;
+      scaledDirection.scale(_length);
+      let endpoint: Vector3 = Vector3.SUM(scaledDirection, _origin.copy);
+      let oimoRay: OIMO.RayCastHit = new OIMO.RayCastHit();
       let hit: boolean = geometry.rayCast(new OIMO.Vec3(_origin.x, _origin.y, _origin.z), new OIMO.Vec3(endpoint.x, endpoint.y, endpoint.z), transform, oimoRay); //the actual OimoPhysics Raycast
       if (hit) {  //If hit return a bunch of informations about the hit
         hitInfo.hit = true;
