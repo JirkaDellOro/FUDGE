@@ -33,19 +33,15 @@ namespace FudgeCore {
     public componentMutations: ParticleEffectData;
 
     // TODO: StoredValues and random number arrays should be stored inside each instance of ComponentParticleSystem and not per instance of ParticleEffect
-    public storedValues: StoredValues = {};
-    private randomNumbers: number[] = [];
+    public storedValues: StoredValues;
+    public randomNumbers: number[];
 
-    constructor(_numberOfParticles: number) {
+    constructor(_size: number) {
       this.storedValues = {
         "time": 0,
         "index": 0,
-        "size": _numberOfParticles
+        "size": _size
       };
-
-      for (let i: number = 0; i < _numberOfParticles + 10 /* so that its possible to have 10 different random numbers per index i.e. randomNumber(index + x) */; i++) {
-        this.randomNumbers.push(Math.random());
-      }
     }
 
     /**

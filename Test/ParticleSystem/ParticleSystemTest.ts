@@ -8,7 +8,8 @@ namespace ParticleSystemTest {
   window.addEventListener("load", hndLoad);
 
   let root: f.Node = new f.Node("Root");
-  let particles: f.Node;
+  let particlesSystem1: f.Node;
+  let particlesSystem2: f.Node;
   let viewport: f.Viewport;
   let camera: fAid.CameraOrbit;
   let speedCameraRotation: number = 0.2;
@@ -17,7 +18,8 @@ namespace ParticleSystemTest {
   let inputParticleNum: HTMLInputElement;
   let inputEffectName: HTMLInputElement;
 
-  let particleSystem: f.ComponentParticleSystem;
+  let cmpParticleSystem1: f.ComponentParticleSystem;
+  let cmpParticleSystem2: f.ComponentParticleSystem;
 
   async function hndLoad(_event: Event): Promise<void> {
     f.RenderManager.initialize(true, false);
@@ -64,36 +66,54 @@ namespace ParticleSystemTest {
     let material: f.Material = new f.Material("Material", f.ShaderTexture, coat);
     // let material: ƒ.Material = new ƒ.Material("Material", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("WHITE")));
     let mesh: f.Mesh = new f.MeshQuad();
-    particles = new fAid.Node("Particles", f.Matrix4x4.TRANSLATION(new f.Vector3(0, 0, 0)), material, mesh);
-    
-    // particles.getComponent(f.ComponentMesh).pivot.translate(new f.Vector3(1, 0, 0));
-    particles.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.2, 0.2, 0.2));
-    // particles.getComponent(f.ComponentMesh).showToCamera = true;
-    particles.getComponent(f.ComponentMaterial).clrPrimary = new f.Color(1, 0.5, 0.2);
+    particlesSystem1 = new fAid.Node("Particles", f.Matrix4x4.TRANSLATION(new f.Vector3(-1, 0, 0)), material, mesh);
+    particlesSystem2 = new fAid.Node("Particles", f.Matrix4x4.TRANSLATION(new f.Vector3(1, 0, 0)), material, mesh);
+
+    particlesSystem1.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.2, 0.2, 0.2));
+    particlesSystem1.getComponent(f.ComponentMesh).showToCamera = true;
+    particlesSystem1.getComponent(f.ComponentMaterial).clrPrimary = new f.Color(1, 0.5, 0.2);
+
+    particlesSystem2.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.2, 0.2, 0.2));
+    // particlesSystem2.getComponent(f.ComponentMesh).showToCamera = true;
+    particlesSystem2.getComponent(f.ComponentMaterial).clrPrimary = new f.Color(0.5, 1, 0.2);
 
     let particleEffect: f.ParticleEffect = new f.ParticleEffect(inputParticleNum.valueAsNumber);
     await particleEffect.load("test.json");
     console.log(particleEffect);
 
-    particleSystem = new f.ComponentParticleSystem(particleEffect);
-    particles.addComponent(particleSystem);
-    root.addChild(particles);
+    cmpParticleSystem1 = new f.ComponentParticleSystem(particleEffect);
+    cmpParticleSystem2 = new f.ComponentParticleSystem(particleEffect);
+    particlesSystem1.addComponent(cmpParticleSystem1);
+    particlesSystem2.addComponent(cmpParticleSystem2);
+    root.addChild(particlesSystem1);
+    root.addChild(particlesSystem2);
 
     // setup input
     let reStartParticleSystem: (_event: Event) => void = async (_event: Event) => {
       let newParticleEffect: f.ParticleEffect = new f.ParticleEffect(inputParticleNum.valueAsNumber);
       await newParticleEffect.load(inputEffectName.value);
-      let newParticleSystem: f.ComponentParticleSystem = new f.ComponentParticleSystem(newParticleEffect);
-      particles.removeComponent(particleSystem);
-      particles.addComponent(newParticleSystem);
-      particleSystem = newParticleSystem;
+
+      // cmpParticleSystem1.particleEffect = newParticleEffect;
+      // cmpParticleSystem2.particleEffect = newParticleEffect;
+      // cmpParticleSystem1.size = inputParticleNum.valueAsNumber;
+      // cmpParticleSystem2.size = inputParticleNum.valueAsNumber;
+      let newParticleSystemCmp1: f.ComponentParticleSystem = new f.ComponentParticleSystem(newParticleEffect);
+      particlesSystem1.removeComponent(cmpParticleSystem1);
+      particlesSystem1.addComponent(newParticleSystemCmp1);
+
+      let newParticleSystemCmp2: f.ComponentParticleSystem = new f.ComponentParticleSystem(newParticleEffect);
+      particlesSystem2.removeComponent(cmpParticleSystem2);
+      particlesSystem2.addComponent(newParticleSystemCmp2);
+
+      cmpParticleSystem1 = newParticleSystemCmp1;
+      cmpParticleSystem2 = newParticleSystemCmp2;
     };
 
     inputParticleNum.addEventListener("input", reStartParticleSystem);
-
-    // inputEffectName.addEventListener("input", reStartParticleSystem);
-
-    // inputParticleNum.dispatchEvent(new Event("input"));
+    inputEffectName.addEventListener("keydown", (_event: KeyboardEvent) => {
+      if (_event.key == "Enter")
+        reStartParticleSystem(_event);
+    });
 
     f.Loop.addEventListener(f.EVENT.LOOP_FRAME, update);
     f.Loop.start(f.LOOP_MODE.TIME_GAME, 10);

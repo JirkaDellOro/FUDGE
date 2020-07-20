@@ -28,6 +28,13 @@
           },
           1
         ]
+      },
+      "1-inNormParticleTime": {
+        "function": "subtraction",
+        "parameters": [
+          1,
+          "inNormParticleTime"
+        ]
       }
     }
   },
@@ -80,13 +87,7 @@
   "components": {
     "ComponentMaterial": {
       "clrPrimary": {
-        "a": {
-          "function": "subtraction",
-          "parameters": [
-            1.5,
-            "inNormParticleTime"
-          ]
-        }
+        "a": "1-inNormParticleTime"
       }
     }
   }

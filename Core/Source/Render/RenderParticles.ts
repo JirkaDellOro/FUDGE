@@ -26,6 +26,7 @@ namespace FudgeCore {
       let particleEffect: ParticleEffect = _cmpParticleSystem.particleEffect;
       let storedValues: StoredValues = particleEffect.storedValues;
       storedValues["time"] = Time.game.get() / 1000;
+      particleEffect.randomNumbers = _cmpParticleSystem.randomNumbers;
       let dataTransformLocal: ParticleEffectData = particleEffect.transformLocal;
       let dataTransformWorld: ParticleEffectData = particleEffect.transformWorld;
       let dataComponentMutations: ParticleEffectData = particleEffect.componentMutations;
@@ -60,6 +61,8 @@ namespace FudgeCore {
         let finalTransform: Matrix4x4 = Matrix4x4.IDENTITY();
         finalTransform.multiply(_nodeTransform);
         this.applyTransform(finalTransform, dataTransformLocal, cachedMutators);
+        if (_cmpMesh.showToCamera)
+          finalTransform.showTo(translationCamera);
         finalTransform.multiply(_cmpMesh.pivot);
         if (dataTransformWorld) {
           let transformWorld: Matrix4x4 = Matrix4x4.IDENTITY();
@@ -67,8 +70,6 @@ namespace FudgeCore {
           finalTransform.multiply(transformWorld, true);
           Recycler.store(transformWorld);
         }
-        if (_cmpMesh.showToCamera)
-          finalTransform.showTo(translationCamera);
 
         // mutate components
         for (let i: number = 0; i < componentsLength; i++) {

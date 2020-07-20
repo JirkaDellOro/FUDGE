@@ -14,13 +14,17 @@ namespace FudgeCore {
    */
   export class ComponentParticleSystem extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentParticleSystem);
-    public readonly particleEffect: ParticleEffect;
+    public particleEffect: ParticleEffect;
     // TODO: add color for the whole system
+    public randomNumbers: number[] = [];
 
     // TODO: instances of this class should how their own StoredValues and random number arrays
     constructor(_particleEffect: ParticleEffect = null) {
       super();
       this.particleEffect = _particleEffect;
+      for (let i: number = 0; i < _particleEffect.storedValues["size"] + 10 /* so that its possible to have 10 different random numbers per index i.e. randomNumber(index + x) */; i++) {
+        this.randomNumbers.push(Math.random());
+      }
 
       // evaluate system storage
       this.evaluateClosureStorage(this.particleEffect.storageSystem);

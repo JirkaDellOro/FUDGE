@@ -1428,7 +1428,8 @@ declare namespace FudgeCore {
      */
     class ComponentParticleSystem extends Component {
         static readonly iSubclass: number;
-        readonly particleEffect: ParticleEffect;
+        particleEffect: ParticleEffect;
+        randomNumbers: number[];
         constructor(_particleEffect?: ParticleEffect);
         evaluateClosureStorage(_storageData: ParticleEffectData): void;
     }
@@ -3258,8 +3259,8 @@ declare namespace FudgeCore {
         transformWorld: ParticleEffectData;
         componentMutations: ParticleEffectData;
         storedValues: StoredValues;
-        private randomNumbers;
-        constructor(_numberOfParticles: number);
+        randomNumbers: number[];
+        constructor(_size: number);
         /**
          * Asynchronously loads the json from the given url and parses it initializing this particle effect.
          */
