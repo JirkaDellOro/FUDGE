@@ -92,6 +92,7 @@ namespace ParticleSystemTest {
     let reStartParticleSystem: (_event: Event) => void = async (_event: Event) => {
       let newParticleEffect: f.ParticleEffect = new f.ParticleEffect(inputParticleNum.valueAsNumber);
       await newParticleEffect.load(inputEffectName.value);
+      console.log(newParticleEffect);
 
       // cmpParticleSystem1.particleEffect = newParticleEffect;
       // cmpParticleSystem2.particleEffect = newParticleEffect;
@@ -116,7 +117,7 @@ namespace ParticleSystemTest {
     });
 
     f.Loop.addEventListener(f.EVENT.LOOP_FRAME, update);
-    f.Loop.start(f.LOOP_MODE.TIME_GAME, 10);
+    f.Loop.start(f.LOOP_MODE.TIME_GAME, 30);
 
     function update(_event: f.Eventƒ): void {
       // console.log(particles.getComponent(f.ComponentTransform).local);

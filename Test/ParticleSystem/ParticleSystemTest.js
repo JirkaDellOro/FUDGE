@@ -76,6 +76,7 @@ var ParticleSystemTest;
         let reStartParticleSystem = async (_event) => {
             let newParticleEffect = new f.ParticleEffect(inputParticleNum.valueAsNumber);
             await newParticleEffect.load(inputEffectName.value);
+            console.log(newParticleEffect);
             // cmpParticleSystem1.particleEffect = newParticleEffect;
             // cmpParticleSystem2.particleEffect = newParticleEffect;
             // cmpParticleSystem1.size = inputParticleNum.valueAsNumber;
@@ -95,7 +96,7 @@ var ParticleSystemTest;
                 reStartParticleSystem(_event);
         });
         f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
-        f.Loop.start(f.LOOP_MODE.TIME_GAME, 10);
+        f.Loop.start(f.LOOP_MODE.TIME_GAME, 30);
         function update(_event) {
             // console.log(particles.getComponent(f.ComponentTransform).local);
             viewport.draw();

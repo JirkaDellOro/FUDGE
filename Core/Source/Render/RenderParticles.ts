@@ -30,7 +30,7 @@ namespace FudgeCore {
       let dataTransformLocal: ParticleEffectData = particleEffect.transformLocal;
       let dataTransformWorld: ParticleEffectData = particleEffect.transformWorld;
       let dataComponentMutations: ParticleEffectData = particleEffect.componentMutations;
-      let cachedMutators: Map<ParticleEffectData, Mutator> = particleEffect.cachedMutators;
+      let cachedMutators: {[key: string]: Mutator} = particleEffect.cachedMutators;
 
       // get relevant components
       let components: Component[] = [];
@@ -71,8 +71,8 @@ namespace FudgeCore {
         }
 
         // mutate components
-        for (let i: number = 0; i < componentsLength; i++) {
-          components[i].mutate(this.getMutatorFrom(dataComponentMutations[components[i].type], cachedMutators));
+        for (const component of components) {
+          component.mutate(this.evaluateMutatorWith(cachedMutators[component.type], dataComponentMutations[component.type]));
         }
 
         // render
@@ -91,17 +91,13 @@ namespace FudgeCore {
       }
     }
 
-    private static applyTransform(_transform: Matrix4x4, _dataTransform: ParticleEffectData, _mutatorMap: Map<ParticleEffectData, Mutator>): void {
+    private static applyTransform(_transform: Matrix4x4, _dataTransform: ParticleEffectData, _mutatorCache: {[key: string]: Mutator}): void {
       for (const key in _dataTransform) {
         let transformVector: Vector3 = key == "scale" ? Vector3.ONE() : Vector3.ZERO();
-        transformVector.mutate(this.getMutatorFrom(_dataTransform[key], _mutatorMap));
+        transformVector.mutate(this.evaluateMutatorWith(_mutatorCache[key], _dataTransform[key]));
         (<General>_transform)[key](transformVector);
         Recycler.store(transformVector);
       }
-    }
-
-    private static getMutatorFrom(_effectData: ParticleEffectData, _mutatorMap: Map<ParticleEffectData, Mutator>): Mutator {
-      return this.evaluateMutatorWith(_mutatorMap.get(_effectData), _effectData);
     }
 
     private static evaluateMutatorWith(_mutator: Mutator, _effectData: ParticleEffectData): Mutator {

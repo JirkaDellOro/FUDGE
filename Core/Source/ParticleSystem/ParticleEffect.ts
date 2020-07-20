@@ -36,7 +36,7 @@ namespace FudgeCore {
     public readonly storedValues: StoredValues;
     public randomNumbers: number[];
 
-    public cachedMutators: Map<ParticleEffectData, Mutator>;
+    public cachedMutators: {[key: string]: Mutator}; //Map<string, Mutator>;
 
     constructor(_size: number) {
       this.storedValues = {
@@ -77,22 +77,10 @@ namespace FudgeCore {
 
       this.componentMutations = this.parseRecursively(_data["components"]);
 
-      this.cachedMutators = new Map<ParticleEffectData, Mutator>();
-
-      for (const key in this.componentMutations) {
-        let effectData: ParticleEffectData = this.componentMutations[key];
-        this.cachedMutators.set(effectData, this.createEmptyMutatorFrom(effectData));
-      }
-
-      for (const key in this.transformLocal) {
-        let effectData: ParticleEffectData = this.transformLocal[key];
-        this.cachedMutators.set(effectData, this.createEmptyMutatorFrom(effectData));
-      }
-
-      for (const key in this.transformWorld) {
-        let effectData: ParticleEffectData = this.transformWorld[key];
-        this.cachedMutators.set(effectData, this.createEmptyMutatorFrom(effectData));
-      }
+      this.cachedMutators = {};
+      this.cacheMutators(this.transformLocal);
+      this.cacheMutators(this.transformWorld);
+      this.cacheMutators(this.componentMutations);
     }
 
     /**
@@ -170,10 +158,23 @@ namespace FudgeCore {
       }
     }
 
-    private createEmptyMutatorFrom(_effectData: ParticleEffectData): Mutator {
+    /**
+     * Create mutators from the given _data and cache them.
+     */
+    private cacheMutators(_data: ParticleEffectData): void {
+      for (const key in _data) {
+        let effectData: ParticleEffectData = _data[key];
+        this.cachedMutators[key] = this.createEmptyMutatorFrom(effectData);
+      }
+    }
+
+    /**
+     * Create an empty mutator from _data.
+     */
+    private createEmptyMutatorFrom(_data: ParticleEffectData): Mutator {
       let mutator: Mutator = {};
-      for (const attribute in _effectData) {
-        let value: Object = _effectData[attribute];
+      for (const attribute in _data) {
+        let value: Object = _data[attribute];
         if (typeof value === "function") {
           mutator[attribute] = null;
         } else {
