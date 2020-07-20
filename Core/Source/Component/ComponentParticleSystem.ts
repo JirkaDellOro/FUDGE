@@ -14,7 +14,7 @@ namespace FudgeCore {
    */
   export class ComponentParticleSystem extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentParticleSystem);
-    public particleEffect: ParticleEffect;
+    public readonly particleEffect: ParticleEffect;
     // TODO: add color for the whole system
     public randomNumbers: number[] = [];
 

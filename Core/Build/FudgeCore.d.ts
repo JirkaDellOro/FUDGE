@@ -1428,7 +1428,7 @@ declare namespace FudgeCore {
      */
     class ComponentParticleSystem extends Component {
         static readonly iSubclass: number;
-        particleEffect: ParticleEffect;
+        readonly particleEffect: ParticleEffect;
         randomNumbers: number[];
         constructor(_particleEffect?: ParticleEffect);
         evaluateClosureStorage(_storageData: ParticleEffectData): void;
@@ -3258,8 +3258,9 @@ declare namespace FudgeCore {
         transformLocal: ParticleEffectData;
         transformWorld: ParticleEffectData;
         componentMutations: ParticleEffectData;
-        storedValues: StoredValues;
+        readonly storedValues: StoredValues;
         randomNumbers: number[];
+        cachedMutators: Map<ParticleEffectData, Mutator>;
         constructor(_size: number);
         /**
          * Asynchronously loads the json from the given url and parses it initializing this particle effect.
@@ -3285,6 +3286,7 @@ declare namespace FudgeCore {
          * @param _data The closure data to parse recursively.
          */
         private parseClosure;
+        private createEmptyMutatorFrom;
     }
 }
 declare namespace FudgeCore {
@@ -3381,7 +3383,6 @@ declare namespace FudgeCore {
         static drawParticles(_node: Node, _nodeTransform: Matrix4x4, _cmpParticleSystem: ComponentParticleSystem, _cmpMesh: ComponentMesh, _cmpCamera: ComponentCamera): void;
         private static applyTransform;
         private static getMutatorFrom;
-        private static createMutatorFrom;
         private static evaluateMutatorWith;
     }
 }

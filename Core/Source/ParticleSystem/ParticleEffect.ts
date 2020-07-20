@@ -16,7 +16,7 @@ namespace FudgeCore {
     function: string;
     parameters: ClosureData[];
   }
-  
+
   /**
    * Holds all the information which defines the particle effect. Can load the said information out of a json file.
    * @authors Jonas Plotzky, HFU, 2020
@@ -33,8 +33,10 @@ namespace FudgeCore {
     public componentMutations: ParticleEffectData;
 
     // TODO: StoredValues and random number arrays should be stored inside each instance of ComponentParticleSystem and not per instance of ParticleEffect
-    public storedValues: StoredValues;
+    public readonly storedValues: StoredValues;
     public randomNumbers: number[];
+
+    public cachedMutators: Map<ParticleEffectData, Mutator>;
 
     constructor(_size: number) {
       this.storedValues = {
@@ -74,6 +76,23 @@ namespace FudgeCore {
       this.transformWorld = this.parseRecursively(dataTransform["world"]);
 
       this.componentMutations = this.parseRecursively(_data["components"]);
+
+      this.cachedMutators = new Map<ParticleEffectData, Mutator>();
+
+      for (const key in this.componentMutations) {
+        let effectData: ParticleEffectData = this.componentMutations[key];
+        this.cachedMutators.set(effectData, this.createEmptyMutatorFrom(effectData));
+      }
+
+      for (const key in this.transformLocal) {
+        let effectData: ParticleEffectData = this.transformLocal[key];
+        this.cachedMutators.set(effectData, this.createEmptyMutatorFrom(effectData));
+      }
+
+      for (const key in this.transformWorld) {
+        let effectData: ParticleEffectData = this.transformWorld[key];
+        this.cachedMutators.set(effectData, this.createEmptyMutatorFrom(effectData));
+      }
     }
 
     /**
@@ -149,6 +168,19 @@ namespace FudgeCore {
             return <number>_data;
           };
       }
+    }
+
+    private createEmptyMutatorFrom(_effectData: ParticleEffectData): Mutator {
+      let mutator: Mutator = {};
+      for (const attribute in _effectData) {
+        let value: Object = _effectData[attribute];
+        if (typeof value === "function") {
+          mutator[attribute] = null;
+        } else {
+          mutator[attribute] = this.createEmptyMutatorFrom(value);
+        }
+      }
+      return mutator;
     }
   }
 }

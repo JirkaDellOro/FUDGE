@@ -30,6 +30,7 @@ namespace FudgeCore {
       let dataTransformLocal: ParticleEffectData = particleEffect.transformLocal;
       let dataTransformWorld: ParticleEffectData = particleEffect.transformWorld;
       let dataComponentMutations: ParticleEffectData = particleEffect.componentMutations;
+      let cachedMutators: Map<ParticleEffectData, Mutator> = particleEffect.cachedMutators;
 
       // get relevant components
       let components: Component[] = [];
@@ -42,8 +43,6 @@ namespace FudgeCore {
       for (let i: number = 0; i < componentsLength; i++) {
         componentMutators.push(components[i].getMutator());
       }
-
-      let cachedMutators: Map<ParticleEffectData, Mutator> = new Map<ParticleEffectData, Mutator>();
 
       // evaluate update storage
       _cmpParticleSystem.evaluateClosureStorage(particleEffect.storageUpdate);
@@ -102,31 +101,10 @@ namespace FudgeCore {
     }
 
     private static getMutatorFrom(_effectData: ParticleEffectData, _mutatorMap: Map<ParticleEffectData, Mutator>): Mutator {
-      let mutator: Mutator = _mutatorMap.get(_effectData);
-      if (mutator) {
-        this.evaluateMutatorWith(mutator, _effectData);
-      } 
-      else {
-        mutator = this.createMutatorFrom(_effectData);
-        _mutatorMap.set(_effectData, mutator);
-      }
-      return mutator;
+      return this.evaluateMutatorWith(_mutatorMap.get(_effectData), _effectData);
     }
 
-    private static createMutatorFrom(_effectData: ParticleEffectData): Mutator {
-      let mutator: Mutator = {};
-      for (const attribute in _effectData) {
-        let value: Object = _effectData[attribute];
-        if (typeof value === "function") {
-          mutator[attribute] = (<Function>value)();
-        } else {
-          mutator[attribute] = this.createMutatorFrom(value);
-        }
-      }
-      return mutator;
-    }
-
-    private static evaluateMutatorWith(_mutator: Mutator, _effectData: ParticleEffectData): void {
+    private static evaluateMutatorWith(_mutator: Mutator, _effectData: ParticleEffectData): Mutator {
       for (const attribute in _effectData) {
         let value: Object = _effectData[attribute];
         if (typeof value === "function") {
@@ -135,6 +113,7 @@ namespace FudgeCore {
           this.evaluateMutatorWith(<Mutator>_mutator[attribute], value);
         }
       }
+      return _mutator;
     }
   }
 }
