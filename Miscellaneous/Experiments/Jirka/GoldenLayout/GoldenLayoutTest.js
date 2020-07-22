@@ -16,36 +16,44 @@ var GoldenLayoutTest;
                             type: "component",
                             componentName: "panel",
                             componentState: { text: "Panel 2" }
-                        }, {
-                            type: "component",
-                            componentName: "panel",
-                            componentState: { text: "Panel 3" }
                         }
                     ]
                 }]
         };
-        let configViews = {
-            type: "row",
-            content: [{
-                    type: "component",
-                    componentName: "example",
-                    componentState: { text: "1" }
-                }, {
-                    type: "component",
-                    componentName: "example",
-                    componentState: { text: "2" }
-                }]
-        };
-        function panel(_container, _state) {
-            let div = document.createElement("div");
-            div.style.height = "100%";
-            // document.body.appendChild(div);
-            _container.getElement().html(div);
-            let gl = new GoldenLayout(configViews, div);
-            gl.registerComponent("example", example);
-            // gl.registerComponent("panel", panel);
-            gl.init();
-        }
+        let Panel = /** @class */ (() => {
+            class Panel {
+                constructor(_container, _state) {
+                    let div = document.createElement("div");
+                    div.style.height = "100%";
+                    div.style.width = "100%";
+                    _container.getElement().append(div);
+                    let gl = new GoldenLayout(Panel.config, div);
+                    gl.registerComponent("example", example);
+                    gl.on("stateChanged", () => gl.updateSize());
+                    gl.init();
+                }
+            }
+            Panel.config = {
+                type: "row",
+                content: [{
+                        type: "stack",
+                        content: [{
+                                type: "component",
+                                componentName: "example",
+                                componentState: { text: "1" }
+                            }, {
+                                type: "component",
+                                componentName: "example",
+                                componentState: { text: "2" }
+                            }, {
+                                type: "component",
+                                componentName: "example",
+                                componentState: { text: "3" }
+                            }]
+                    }]
+            };
+            return Panel;
+        })();
         function example(_container, _state) {
             let div = document.createElement("div");
             div.style.backgroundColor = "red";
@@ -53,7 +61,7 @@ var GoldenLayoutTest;
             _container.getElement().html(div);
         }
         glDoc = new GoldenLayout(configPanel);
-        glDoc.registerComponent("panel", panel);
+        glDoc.registerComponent("panel", Panel);
         glDoc.init();
     }
 })(GoldenLayoutTest || (GoldenLayoutTest = {}));
