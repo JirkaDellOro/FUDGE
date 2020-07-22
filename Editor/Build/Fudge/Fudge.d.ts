@@ -106,9 +106,7 @@ declare namespace Fudge {
         addPanel(_p: Panel): void;
         /**
          * Add View to PanelManagers View List and add the view to the active panel
-         * @param _v View to be added
          */
-        addView(_v: View): void;
         /**
          * Returns the currently active Panel
          */

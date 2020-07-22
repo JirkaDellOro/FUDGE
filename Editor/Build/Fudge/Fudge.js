@@ -319,7 +319,7 @@ var Fudge;
                 this.views = [];
                 let id;
                 this.config = {
-                    type: "row",
+                    type: "column",
                     content: [],
                     title: _name,
                     id: this.generateID(_name)
@@ -336,9 +336,10 @@ var Fudge;
                 if (_pushConfig) {
                     this.config.content.push(_v.config);
                 }
-                if (_pushToPanelManager) {
-                    Fudge.PanelManager.instance.addView(_v);
-                }
+                // TODO: see if it makes sense to add single views to the panel manager
+                // if (_pushToPanelManager) {
+                //   PanelManager.instance.addView(_v);
+                // }
             }
             generateID(_name) {
                 return "Panel" + Panel.idCounter++ + "_" + _name;
@@ -382,16 +383,16 @@ var Fudge;
              */
             addPanel(_p) {
                 this.panels.push(_p);
-                this.editorLayout.root.contentItems[0].addChild(_p.config);
+                // this.editorLayout.root.contentItems[0].addChild(_p.config);
+                this.editorLayout.root.getItemsById("topstack")[0].addChild(_p.config);
                 this.activePanel = _p;
             }
             /**
              * Add View to PanelManagers View List and add the view to the active panel
-             * @param _v View to be added
              */
-            addView(_v) {
-                this.editorLayout.root.contentItems[0].getActiveContentItem().addChild(_v.config);
-            }
+            // addView(_v: View): void {
+            //   this.editorLayout.root.contentItems[0].getActiveContentItem().addChild(_v.config);
+            // }
             /**
              * Returns the currently active Panel
              */
@@ -403,23 +404,35 @@ var Fudge;
              */
             init() {
                 let config = {
+                    settings: {
+                        reorderEnabled: false,
+                        showPopoutIcon: false
+                    },
                     content: [{
-                            type: "stack",
+                            type: "column",
                             isClosable: false,
-                            content: [
-                                {
-                                    type: "component",
-                                    componentName: "welcome",
-                                    title: "Welcome",
-                                    componentState: {}
-                                }
-                            ]
+                            content: [{
+                                    id: "topstack",
+                                    type: "stack",
+                                    isClosable: false,
+                                    content: [
+                                        {
+                                            type: "component",
+                                            componentName: "Welcome",
+                                            title: "Welcome",
+                                            componentState: {}
+                                        }
+                                    ]
+                                }]
                         }]
                 };
                 this.editorLayout = new GoldenLayout(config); //This might be a problem because it can't use a specific place to put it.
-                this.editorLayout.registerComponent("welcome", welcome);
+                this.editorLayout.registerComponent("Welcome", welcome);
                 this.editorLayout.registerComponent("View", registerViewComponent);
                 this.editorLayout.init();
+                this.editorLayout.on("stateChanged", (_event) => {
+                    console.log(_event);
+                });
                 this.editorLayout.root.contentItems[0].on("activeContentItemChanged", this.setActivePanel);
             }
         }
@@ -428,19 +441,14 @@ var Fudge;
     })();
     Fudge.PanelManager = PanelManager;
     //TODO: Give these Factory Functions a better home
-    //TODO: Figure out a better way than any. So far it was the best way to get the attributes of componentState into it properly
     /**
      * Factory Function for the the "Welcome"-Component
-     * @param container
-     * @param state
      */
     function welcome(container, state) {
         container.getElement().html("<div>Welcome</div>");
     }
     /**
      * Factory Function for the generic "View"-Component
-     * @param container
-     * @param state
      */
     function registerViewComponent(container, state) {
         container.getElement().append(state["content"]);

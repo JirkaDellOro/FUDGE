@@ -23,12 +23,11 @@ namespace Fudge {
       super();
       let id: string;
       this.config = {
-        type: "row",
+        type: "column",
         content: [],
         title: _name,
         id: this.generateID(_name)
       };
-
     }
     /**
      * Adds given View to the list of views on the panel. 
@@ -41,9 +40,10 @@ namespace Fudge {
       if (_pushConfig) {
         this.config.content.push(_v.config);
       }
-      if (_pushToPanelManager) {
-        PanelManager.instance.addView(_v);
-      }
+      // TODO: see if it makes sense to add single views to the panel manager
+      // if (_pushToPanelManager) {
+      //   PanelManager.instance.addView(_v);
+      // }
     }
 
     private generateID(_name: string): string {

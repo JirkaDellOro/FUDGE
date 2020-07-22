@@ -4,11 +4,14 @@ var TestSerializer;
     window.addEventListener("DOMContentLoaded", init);
     function init() {
         Scenes.createMiniScene();
-        let mutator = Scenes.node.getComponent(ƒ.ComponentMesh).getMutator();
-        ƒ.Debug.log(mutator);
         let result = testSerialization(Scenes.node);
         console.group("Comparison");
         Compare.compare(Scenes.node, result);
+        console.groupEnd();
+        let v = new ƒ.Vector3(1, 2, 3);
+        let result2 = testSerialization(v);
+        console.group("Comparison");
+        Compare.compare(v, result2);
         console.groupEnd();
     }
     function testSerialization(_object) {

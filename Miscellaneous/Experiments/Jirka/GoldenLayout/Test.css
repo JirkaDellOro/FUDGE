@@ -1,0 +1,6 @@
+html,body {
+  height:100%;
+}
+div.lm_items {
+  border: 1px solid black;
+}
