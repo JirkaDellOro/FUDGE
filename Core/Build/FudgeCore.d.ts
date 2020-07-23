@@ -64,23 +64,23 @@ declare namespace FudgeCore {
         /**
          * Info(...) displays additional information with low priority
          */
-        static info(_message: Object, ..._args: Object[]): void;
+        static info(_message: unknown, ..._args: unknown[]): void;
         /**
          * Displays information with medium priority
          */
-        static log(_message: Object, ..._args: Object[]): void;
+        static log(_message: unknown, ..._args: unknown[]): void;
         /**
          * Displays information about non-conformities in usage, which is emphasized e.g. by color
          */
-        static warn(_message: Object, ..._args: Object[]): void;
+        static warn(_message: unknown, ..._args: unknown[]): void;
         /**
          * Displays critical information about failures, which is emphasized e.g. by color
          */
-        static error(_message: Object, ..._args: Object[]): void;
+        static error(_message: unknown, ..._args: unknown[]): void;
         /**
          * Displays messages from FUDGE
          */
-        static fudge(_message: Object, ..._args: Object[]): void;
+        static fudge(_message: unknown, ..._args: unknown[]): void;
         /**
          * Clears the output and removes previous messages if possible
          */
@@ -1021,7 +1021,7 @@ declare namespace FudgeCore {
         /**
          * Determines FUDGE-graph to listen to. Each [[ComponentAudio]] in the graph will connect to this contexts master gain, all others disconnect.
          */
-        listenTo: (_graph: Node | null) => void;
+        listenTo: (_graph: Node) => void;
         /**
          * Retrieve the FUDGE-graph currently listening to
          */
@@ -1029,7 +1029,7 @@ declare namespace FudgeCore {
         /**
          * Set the [[ComponentAudioListener]] that serves the spatial location and orientation for this contexts listener
          */
-        listen: (_cmpListener: ComponentAudioListener | null) => void;
+        listen: (_cmpListener: ComponentAudioListener) => void;
         /**
          * Updates the spatial settings of the AudioNodes effected in the current FUDGE-graph
          */

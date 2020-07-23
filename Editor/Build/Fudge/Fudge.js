@@ -307,47 +307,44 @@ var Fudge;
      * @author Monika Galkewitsch, HFU, 2019
      * @author Lukas Scheuerle, HFU, 2019
      */
-    let Panel = /** @class */ (() => {
-        class Panel extends EventTarget {
-            /**
-             * Constructor for panel Objects. Generates an empty panel with a single ViewData.
-             * @param _name Panel Name
-             * @param _template Optional. Template to be used in the construction of the panel.
-             */
-            constructor(_name) {
-                super();
-                this.views = [];
-                let id;
-                this.config = {
-                    type: "column",
-                    content: [],
-                    title: _name,
-                    id: this.generateID(_name)
-                };
-            }
-            /**
-             * Adds given View to the list of views on the panel.
-             * @param _v View to be added
-             * @param _pushToPanelManager Wether or not the View should also be pushed to the Panelmanagers list of views
-             * @param _pushConfig Wether or not the config of the view should be pushed into the panel config. If this is false, you will have to push the view config manually. This is helpful for creating custom structures in the panel config.
-             */
-            addView(_v, _pushToPanelManager = true, _pushConfig = true) {
-                this.views.push(_v);
-                if (_pushConfig) {
-                    this.config.content.push(_v.config);
-                }
-                // TODO: see if it makes sense to add single views to the panel manager
-                // if (_pushToPanelManager) {
-                //   PanelManager.instance.addView(_v);
-                // }
-            }
-            generateID(_name) {
-                return "Panel" + Panel.idCounter++ + "_" + _name;
-            }
+    class Panel extends EventTarget {
+        /**
+         * Constructor for panel Objects. Generates an empty panel with a single ViewData.
+         * @param _name Panel Name
+         * @param _template Optional. Template to be used in the construction of the panel.
+         */
+        constructor(_name) {
+            super();
+            this.views = [];
+            let id;
+            this.config = {
+                type: "column",
+                content: [],
+                title: _name,
+                id: this.generateID(_name)
+            };
         }
-        Panel.idCounter = 0;
-        return Panel;
-    })();
+        /**
+         * Adds given View to the list of views on the panel.
+         * @param _v View to be added
+         * @param _pushToPanelManager Wether or not the View should also be pushed to the Panelmanagers list of views
+         * @param _pushConfig Wether or not the config of the view should be pushed into the panel config. If this is false, you will have to push the view config manually. This is helpful for creating custom structures in the panel config.
+         */
+        addView(_v, _pushToPanelManager = true, _pushConfig = true) {
+            this.views.push(_v);
+            if (_pushConfig) {
+                this.config.content.push(_v.config);
+            }
+            // TODO: see if it makes sense to add single views to the panel manager
+            // if (_pushToPanelManager) {
+            //   PanelManager.instance.addView(_v);
+            // }
+        }
+        generateID(_name) {
+            return "Panel" + Panel.idCounter++ + "_" + _name;
+        }
+    }
+    Panel.idCounter = 0;
     Fudge.Panel = Panel;
 })(Fudge || (Fudge = {}));
 var Fudge;
@@ -357,88 +354,85 @@ var Fudge;
      * @author Monika Galkewitsch, 2019, HFU
      * @author Lukas Scheuerle, 2019, HFU
      */
-    let PanelManager = /** @class */ (() => {
-        class PanelManager extends EventTarget {
-            constructor() {
-                super();
-                this.panels = [];
-                /**
-                 * Sets the currently active panel. Shouldn't be called by itself. Rather, it should be called by a goldenLayout-Event (i.e. when a tab in the Layout is selected)
-                 * "activeContentItemChanged" Events usually come from the first ContentItem in the root-Attribute of the GoldenLayout-Instance or when a new Panel is
-                 * created and added to the Panel-List.
-                 * During Initialization and addPanel function, this method is called already.
-                 */
-                this.setActivePanel = () => {
-                    let activeTab = this.editorLayout.root.contentItems[0].getActiveContentItem();
-                    for (let panel of this.panels) {
-                        if (panel.config.id == activeTab.config.id) {
-                            this.activePanel = panel;
-                        }
+    class PanelManager extends EventTarget {
+        constructor() {
+            super();
+            this.panels = [];
+            /**
+             * Sets the currently active panel. Shouldn't be called by itself. Rather, it should be called by a goldenLayout-Event (i.e. when a tab in the Layout is selected)
+             * "activeContentItemChanged" Events usually come from the first ContentItem in the root-Attribute of the GoldenLayout-Instance or when a new Panel is
+             * created and added to the Panel-List.
+             * During Initialization and addPanel function, this method is called already.
+             */
+            this.setActivePanel = () => {
+                let activeTab = this.editorLayout.root.contentItems[0].getActiveContentItem();
+                for (let panel of this.panels) {
+                    if (panel.config.id == activeTab.config.id) {
+                        this.activePanel = panel;
                     }
-                };
-            }
-            /**
-             * Add Panel to PanelManagers Panel List and to the PanelManagers GoldenLayout Config
-             * @param _p Panel to be added
-             */
-            addPanel(_p) {
-                this.panels.push(_p);
-                // this.editorLayout.root.contentItems[0].addChild(_p.config);
-                this.editorLayout.root.getItemsById("topstack")[0].addChild(_p.config);
-                this.activePanel = _p;
-            }
-            /**
-             * Add View to PanelManagers View List and add the view to the active panel
-             */
-            // addView(_v: View): void {
-            //   this.editorLayout.root.contentItems[0].getActiveContentItem().addChild(_v.config);
-            // }
-            /**
-             * Returns the currently active Panel
-             */
-            getActivePanel() {
-                return this.activePanel;
-            }
-            /**
-             * Initialize GoldenLayout Context of the PanelManager Instance
-             */
-            init() {
-                let config = {
-                    settings: {
-                        reorderEnabled: false,
-                        showPopoutIcon: false
-                    },
-                    content: [{
-                            type: "column",
-                            isClosable: false,
-                            content: [{
-                                    id: "topstack",
-                                    type: "stack",
-                                    isClosable: false,
-                                    content: [
-                                        {
-                                            type: "component",
-                                            componentName: "Welcome",
-                                            title: "Welcome",
-                                            componentState: {}
-                                        }
-                                    ]
-                                }]
-                        }]
-                };
-                this.editorLayout = new GoldenLayout(config); //This might be a problem because it can't use a specific place to put it.
-                this.editorLayout.registerComponent("Welcome", welcome);
-                this.editorLayout.registerComponent("View", registerViewComponent);
-                this.editorLayout.init();
-                this.editorLayout.on("stateChanged", (_event) => {
-                    console.log(_event);
-                });
-                this.editorLayout.root.contentItems[0].on("activeContentItemChanged", this.setActivePanel);
-            }
+                }
+            };
         }
-        PanelManager.instance = new PanelManager();
-        return PanelManager;
-    })();
+        /**
+         * Add Panel to PanelManagers Panel List and to the PanelManagers GoldenLayout Config
+         * @param _p Panel to be added
+         */
+        addPanel(_p) {
+            this.panels.push(_p);
+            // this.editorLayout.root.contentItems[0].addChild(_p.config);
+            this.editorLayout.root.getItemsById("topstack")[0].addChild(_p.config);
+            this.activePanel = _p;
+        }
+        /**
+         * Add View to PanelManagers View List and add the view to the active panel
+         */
+        // addView(_v: View): void {
+        //   this.editorLayout.root.contentItems[0].getActiveContentItem().addChild(_v.config);
+        // }
+        /**
+         * Returns the currently active Panel
+         */
+        getActivePanel() {
+            return this.activePanel;
+        }
+        /**
+         * Initialize GoldenLayout Context of the PanelManager Instance
+         */
+        init() {
+            let config = {
+                settings: {
+                    reorderEnabled: false,
+                    showPopoutIcon: false
+                },
+                content: [{
+                        type: "column",
+                        isClosable: false,
+                        content: [{
+                                id: "topstack",
+                                type: "stack",
+                                isClosable: false,
+                                content: [
+                                    {
+                                        type: "component",
+                                        componentName: "Welcome",
+                                        title: "Welcome",
+                                        componentState: {}
+                                    }
+                                ]
+                            }]
+                    }]
+            };
+            this.editorLayout = new GoldenLayout(config); //This might be a problem because it can't use a specific place to put it.
+            this.editorLayout.registerComponent("Welcome", welcome);
+            this.editorLayout.registerComponent("View", registerViewComponent);
+            this.editorLayout.init();
+            this.editorLayout.on("stateChanged", (_event) => {
+                console.log(_event);
+            });
+            this.editorLayout.root.contentItems[0].on("activeContentItemChanged", this.setActivePanel);
+        }
+    }
+    PanelManager.instance = new PanelManager();
     Fudge.PanelManager = PanelManager;
     //TODO: Give these Factory Functions a better home
     /**

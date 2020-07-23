@@ -37,31 +37,31 @@ namespace FudgeCore {
     /**
      * Info(...) displays additional information with low priority
      */
-    public static info(_message: Object, ..._args: Object[]): void {
+    public static info(_message: unknown, ..._args: unknown[]): void {
       Debug.delegate(DEBUG_FILTER.INFO, _message, _args);
     }
     /**
      * Displays information with medium priority
      */
-    public static log(_message: Object, ..._args: Object[]): void {
+    public static log(_message: unknown, ..._args: unknown[]): void {
       Debug.delegate(DEBUG_FILTER.LOG, _message, _args);
     }
     /**
      * Displays information about non-conformities in usage, which is emphasized e.g. by color
      */
-    public static warn(_message: Object, ..._args: Object[]): void {
+    public static warn(_message: unknown, ..._args: unknown[]): void {
       Debug.delegate(DEBUG_FILTER.WARN, _message, _args);
     }
     /**
      * Displays critical information about failures, which is emphasized e.g. by color
      */
-    public static error(_message: Object, ..._args: Object[]): void {
+    public static error(_message: unknown, ..._args: unknown[]): void {
       Debug.delegate(DEBUG_FILTER.ERROR, _message, _args);
     }
     /**
      * Displays messages from FUDGE
      */
-    public static fudge(_message: Object, ..._args: Object[]): void {
+    public static fudge(_message: unknown, ..._args: unknown[]): void {
       Debug.delegate(DEBUG_FILTER.FUDGE, _message, _args);
     }
     /**
@@ -91,7 +91,7 @@ namespace FudgeCore {
     /**
      * Lookup all delegates registered to the filter and call them using the given arguments
      */
-    private static delegate(_filter: DEBUG_FILTER, _message: Object, _args: Object[]): void {
+    private static delegate(_filter: DEBUG_FILTER, _message: unknown, _args: unknown[]): void {
       let delegates: MapDebugTargetToDelegate = Debug.delegates[_filter];
       for (let delegate of delegates.values())
         if (delegate)
