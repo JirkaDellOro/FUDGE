@@ -1,15 +1,15 @@
 namespace Fudge {
   import ƒ = FudgeCore;
 
-  export enum VIEW {
-    // PROJECT = ViewProject,
-    NODE = "ViewNode",
+  export enum  VIEW {
+    GRAPH = "ViewGraph",
     ANIMATION = "ViewAnimation",
-    // SKETCH = ViewSketch,
-    // MESH = ViewMesh,
     RENDER = "ViewRender",
     COMPONENTS = "ViewComponents",
     CAMERA = "ViewCamera"
+    // PROJECT = ViewProject,
+    // SKETCH = ViewSketch,
+    // MESH = ViewMesh,
   }
 
   /**
@@ -19,43 +19,31 @@ namespace Fudge {
    */
   export abstract class View  {
 
-    config: GoldenLayout.ComponentConfig;
-    parentPanel: Panel;
-    content: HTMLElement;
-    type: string;
+    protected dom: HTMLElement;
+    // config: GoldenLayout.ComponentConfig;
+    // parentPanel: Panel;
+    // content: HTMLElement;
+    // type: string;
 
-    constructor(_parent: Panel) {
+    constructor(_container: GoldenLayout.Container, _state: Object) {
       ƒ.Debug.info("Create view " + this.constructor.name);
-      this.content = document.createElement("div");
-      this.content.style.height = "100%";
-      this.content.style.overflow = "auto";
-      this.content.setAttribute("view", this.constructor.name);
-      this.config = this.getLayout();
-      this.parentPanel = _parent;
-    }
-    /**
-     * Returns GoldenLayout ComponentConfig for the Views GoldenLayout Component.
-     * If not overridden by inherited class, gives generic config with its type as its name.
-     * If you want to use the "View"-Component, add {content: this.content} to componentState.
-     */
-    public getLayout(): GoldenLayout.ComponentConfig {
-      /* TODO: fix the golden-layout.d.ts to include componentName in ContentItem*/
-      const config: GoldenLayout.ComponentConfig = {
-        type: "component",
-        title: this.type,
-        componentName: "View",
-        componentState: { content: this.content }
-      };
-      return config;
+      this.dom = document.createElement("div");
+      this.dom.style.height = "100%";
+      this.dom.style.overflow = "auto";
+      this.dom.setAttribute("view", this.constructor.name);
+      _container.getElement().append(this.dom);
+      // this.config = this.getLayout();
+      // this.parentPanel = _parent;
     }
 
+    // /**
+    //  * Generates the Views content and pushs it into the views content
+    //  */
+    // abstract fillContent(): void;
+    
     /**
-     * Generates the Views content and pushs it into the views content
+     * Method to cleanup when user closes view
      */
-    abstract fillContent(): void;
-    /***
-     * Deconstructor for cleanup purposes
-     */
-    abstract deconstruct(): void;
+    abstract cleanup(): void;
   }
 }

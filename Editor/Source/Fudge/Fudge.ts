@@ -60,8 +60,7 @@ namespace Fudge {
     let node2: ƒ.Node = new ƒAid.NodeCoordinateSystem("WorldCooSys", ƒ.Matrix4x4.IDENTITY());
     node.addChild(node2);
     node2.cmpTransform.local.translateZ(2);
-    let nodePanel: PanelNode = new PanelNode("Node Panel", new NodePanelTemplate, node);
-    PanelManager.instance.addPanel(nodePanel);
+    PanelManager.add(PanelNode, "Node", Object({ node: node })); //Object.create(null,  {node: { writable: true, value: node }}));
   }
 
   // function openAnimationPanel(): void {

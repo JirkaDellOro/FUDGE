@@ -12,20 +12,23 @@ namespace Fudge {
     canvas: HTMLCanvasElement;
     graph: ƒ.Node;
 
-    constructor(_parent: PanelNode) {
-      super(_parent);
-      if (_parent instanceof PanelNode && _parent.getNode() != null)
-        this.graph = _parent.getNode();
-      else {
-        this.graph = new ƒ.Node("Scene");
-      }
-      this.fillContent();
+    constructor(_container: GoldenLayout.Container, _state: Object) {
+      super(_container, _state);
+      // if (_parent instanceof PanelNode && _parent.getNode() != null)
+      //   this.graph = _parent.getNode();
+      // else {
+      //   this.graph = new ƒ.Node("Scene");
+      // }
+      console.log(_state);
+      this.graph = <ƒ.Node><unknown>_state["node"];
+      this.createUserInterface();
     }
-    deconstruct(): void {
+
+    cleanup(): void {
       ƒ.Loop.removeEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
     }
 
-    fillContent(): void {
+    createUserInterface(): void {
       let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
       cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
       cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
@@ -39,14 +42,14 @@ namespace Fudge {
       this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
       this.viewport.draw();
 
-      this.content.append(this.canvas);
+      this.dom.append(this.canvas);
 
       ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
       ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
 
       //Focus cameracontrols on new viewport
       let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVEVIEWPORT, { detail: this.viewport.camera, bubbles: false });
-      this.parentPanel.dispatchEvent(event);
+      // this.parentPanel.dispatchEvent(event);
 
       this.canvas.addEventListener("click", this.activeViewport);
     }
@@ -73,7 +76,7 @@ namespace Fudge {
     
     private activeViewport = (_event: MouseEvent): void => {
       let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVEVIEWPORT, { detail: this.viewport.camera, bubbles: false });
-      this.parentPanel.dispatchEvent(event);
+      // this.parentPanel.dispatchEvent(event);
 
       _event.cancelBubble = true;
     }

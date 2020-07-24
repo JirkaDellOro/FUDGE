@@ -10,14 +10,14 @@ namespace Fudge {
 
   export class ViewComponents extends View {
     private data: ƒ.Node | ƒ.Mutable;
-    // TODO: adept view to selected object, update when selection changes etc.
-    constructor(_parent: Panel) {
-      super(_parent);
-      this.parentPanel.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setNode);
+
+    constructor(_container: GoldenLayout.Container, _state: Object) {
+      super(_container, _state);
+      // this.parentPanel.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setNode);
       this.fillContent();
     }
 
-    deconstruct(): void {
+    public cleanup(): void {
       //TODO: Deconstruct;
     }
 
@@ -29,19 +29,19 @@ namespace Fudge {
           // cntHeader.append(txtNodeName);
           let cntHeader: HTMLElement = document.createElement("span");
           cntHeader.textContent = this.data.name;
-          this.content.appendChild(cntHeader);
+          this.dom.appendChild(cntHeader);
 
           let nodeComponents: ƒ.Component[] = this.data.getAllComponents();
           for (let nodeComponent of nodeComponents) {
             let fieldset: ƒui.FoldableFieldSet = ƒui.Generator.createFieldSetFromMutable(nodeComponent);
             let uiComponent: ComponentController = new ComponentController(nodeComponent, fieldset);
-            this.content.append(uiComponent.domElement);
+            this.dom.append(uiComponent.domElement);
           }
         }
       }
       else {
         let cntEmpty: HTMLDivElement = document.createElement("div");
-        this.content.append(cntEmpty);
+        this.dom.append(cntEmpty);
       }
     }
 
@@ -60,8 +60,8 @@ namespace Fudge {
      */
     private setNode = (_event: CustomEvent): void => {
       this.data = _event.detail;
-      while (this.content.firstChild != null) {
-        this.content.removeChild(this.content.lastChild);
+      while (this.dom.firstChild != null) {
+        this.dom.removeChild(this.dom.lastChild);
       }
       this.fillContent();
     }
@@ -73,5 +73,6 @@ namespace Fudge {
       switch (_event.detail) {
       }
     }
+    
   }
 }
