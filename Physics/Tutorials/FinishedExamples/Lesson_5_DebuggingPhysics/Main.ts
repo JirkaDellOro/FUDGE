@@ -146,7 +146,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
 
     if (_event.code == f.KEYBOARD_CODE.T) { //Toggle between the physics debug view on/off
       //Accessing the settings of the physics simulation and changing the debugDraw to a inverse, to toggle between true/false
-      f.Physics.settings.debugDraw = !f.Physics.settings.debugDraw
+      f.Physics.settings.debugDraw = !f.Physics.settings.debugDraw;
     }
     if (_event.code == f.KEYBOARD_CODE.Y) { //Y == Z on german keyboards - Go through the different Physics Debug Modes
       let currentMode: number = f.Physics.settings.debugMode; //Get current mode

@@ -85,6 +85,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
     the other is the connectedRigidbody that body that is holding onto the body. Positioning of the anchor where this body is connected happens locally
     to the attachedRigidbody. */
     prismaticJoint = new f.ComponentJointPrismatic(bodies[1].getComponent(f.ComponentRigidbody), bodies[3].getComponent(f.ComponentRigidbody), new f.Vector3(0, 1, 0), new f.Vector3(0, 0.5, 0));
+    bodies[1].addComponent(prismaticJoint);
     //A joint is craeted by telling it which to bodies should connect, where they should connect, and in which axis (direction) the connection is not rigid.
     //e.g. we connect our holder_prismatic with the connected_prismatic half way up the holder and in the y axis to create a piston that can only move up/down.
 
@@ -94,6 +95,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
 
     //Adding a cylindrical joint is the same procedure like adding any other joint there acn be a few differences in the constructors you should watch out for.
     cylindricalJoint = new f.ComponentJointCylindrical(bodies[2].getComponent(f.ComponentRigidbody), bodies[4].getComponent(f.ComponentRigidbody));
+    bodies[2].addComponent(cylindricalJoint);
     //This time we will just connect the bodies since the default axis is up already and we want the anchor to be Vector(0,0,0) from the first body.
 
 

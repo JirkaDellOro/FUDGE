@@ -169,7 +169,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
     */
     if (_event.cmpRigidbody.getContainer().name == "Player") { //Our Event is happening with the body NODE called "Player"
       f.Debug.log("Player hit me - Collider");
-      //We let this collider act like a bumper through this event. We take the event normal and shoot the player away from the bumber on the contact point.
+      //We let this collider act like a bumper through this event. We take the event normal and shoot the player away from the bumper on the contact point.
       playerBody.getComponent(f.ComponentRigidbody).applyForceAtPoint(new f.Vector3(_event.collisionNormal.x * 500, _event.collisionNormal.y * 500, _event.collisionNormal.z * 500), _event.collisionPoint);
     }
   }

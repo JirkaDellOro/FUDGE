@@ -639,6 +639,9 @@ namespace FudgeCore {
 
     /** Removing this ComponentRigidbody from the Physiscs.world taking the informations from the oimoPhysics system */
     private removeRigidbodyFromWorld(): void {
+      if (this.colGroup == PHYSICS_GROUP.TRIGGER) { //Delete check for this trigger from world if this component is removed
+        Physics.world.unregisterTrigger(this);
+      }
       Physics.world.removeRigidbody(this);
     }
 
