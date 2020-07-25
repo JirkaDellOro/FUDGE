@@ -39,7 +39,6 @@ namespace Fudge {
       this.viewport.draw();
 
       this.content.append(this.canvas);
-
       ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
       ƒ.Physics.start(this.graph); //Starting for empty editor | recalculating physics depending on every transformation right before first draw @author Marko Fehrenbach | HFU 2020
 

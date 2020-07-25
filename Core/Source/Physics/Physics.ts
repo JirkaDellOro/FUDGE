@@ -28,7 +28,7 @@ namespace FudgeCore {
    * rigidbodies.
    */
     public static initializePhysics(): Physics {
-      if (typeof OIMO !== 'undefined' && this.world == null) { //Check if OIMO Namespace was loaded, else do not use any physics. Check is needed to ensure FUDGE can be used without Physics
+      if (typeof OIMO !== 'undefined') { //Check if OIMO Namespace was loaded, else do not use any physics. Check is needed to ensure FUDGE can be used without Physics
         this.world = new Physics();
         this.settings = new PhysicsSettings(PHYSICS_GROUP.DEFAULT, (PHYSICS_GROUP.DEFAULT | PHYSICS_GROUP.GROUP_1 | PHYSICS_GROUP.GROUP_2 | PHYSICS_GROUP.GROUP_3 | PHYSICS_GROUP.GROUP_4));
         this.world.createWorld(); //create the actual oimoPhysics World
@@ -271,6 +271,20 @@ namespace FudgeCore {
 
     /** Create a oimoPhysics world. Called once at the beginning if none is existend yet. */
     private createWorld(): void {
+      if (Physics.world.oimoWorld != null) {
+        //Resetting the world so a new world can be created, fix for re-opening a project in editor, making sure there are no old things calculated
+        let jointsWorld: number = Physics.world.oimoWorld.getNumJoints();
+        let bodiesWorld: number = Physics.world.oimoWorld.getNumRigidBodies();
+        this.bodyList = null;
+        this.jointList = null;
+        this.triggerBodyList = null;
+        for (let i = 0; i < jointsWorld; i++) {
+          Physics.world.oimoWorld.removeJoint(Physics.world.oimoWorld.getJointList());
+        }
+        for (let i = 0; i < bodiesWorld; i++) {
+          Physics.world.oimoWorld.removeRigidBody(Physics.world.oimoWorld.getRigidBodyList());
+        }
+      }
       Physics.world.oimoWorld = new OIMO.World();
     }
 

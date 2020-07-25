@@ -113,6 +113,8 @@ namespace Fudge {
       ]
     });
 
+    ƒ.Physics.initializePhysics(); //Re-initializing to unload old physics world if existent, needed to reopen physics projects | Marko Fehrenbach, HFU 2020
+
     let content: string = fs.readFileSync(filenames[0], { encoding: "utf-8" });
     console.groupCollapsed("File content");
     ƒ.Debug.log(content);

@@ -372,7 +372,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Get the current ROTATION of the [[Node]] in the physical space
+     * Get the current ROTATION of the [[Node]] in the physical space. Note this range from -pi to pi, so -90 to 90.
      */
     public getRotation(): Vector3 {
       let orientation: OIMO.Quat = this.rigidbody.getOrientation();
@@ -385,8 +385,27 @@ namespace FudgeCore {
      * Sets the current ROTATION of the [[Node]] in the physical space, in degree.
      */
     public setRotation(_value: Vector3): void {
-      this.rigidbody.setRotation(new OIMO.Mat3().fromEulerXyz(new OIMO.Vec3(_value.x * Math.PI / 180, _value.y * Math.PI / 180, _value.z * Math.PI / 180)));
+      // this.rigidbody.setRotationXyz(new OIMO.Vec3(_value.x * Math.PI / 180, _value.y * Math.PI / 180, _value.z * Math.PI / 180));
+      let rotInQuat: OIMO.Quat = new OIMO.Quat();
+      rotInQuat.fromMat3(new OIMO.Mat3().fromEulerXyz(new OIMO.Vec3(_value.x * Math.PI / 180, _value.y * Math.PI / 180, _value.z * Math.PI / 180)));
+      rotInQuat.normalize();
+      this.rigidbody.setOrientation(rotInQuat);
     }
+
+    /** Rotating the rigidbody therefore changing it's rotation over time directly in physics. This way physics is changing instead of transform. 
+     *  But you are able to incremental changing it instead of a direct rotation.  Although it's always prefered to use forces in physics.
+    */
+    public rotateBody(_rotationChange: Vector3): void {
+      this.rigidbody.rotateXyz(new OIMO.Vec3(_rotationChange.x * Math.PI / 180, _rotationChange.y * Math.PI / 180, _rotationChange.z * Math.PI / 180));
+    }
+
+    /** Translating the rigidbody therefore changing it's place over time directly in physics. This way physics is changing instead of transform. 
+     *  But you are able to incremental changing it instead of a direct position. Although it's always prefered to use forces in physics. */
+    public translateBody(_translationChange: Vector3): void {
+      this.rigidbody.translate(new OIMO.Vec3(_translationChange.x, _translationChange.y, _translationChange.z));
+    }
+
+
 
     //#region Velocity and Forces
 

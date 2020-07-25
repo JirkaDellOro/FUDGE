@@ -4205,13 +4205,20 @@ declare namespace FudgeCore {
       */
         setPosition(_value: Vector3): void;
         /**
-         * Get the current ROTATION of the [[Node]] in the physical space
+         * Get the current ROTATION of the [[Node]] in the physical space. Note this range from -pi to pi, so -90 to 90.
          */
         getRotation(): Vector3;
         /**
          * Sets the current ROTATION of the [[Node]] in the physical space, in degree.
          */
         setRotation(_value: Vector3): void;
+        /** Rotating the rigidbody therefore changing it's rotation over time directly in physics. This way physics is changing instead of transform.
+         *  But you are able to incremental changing it instead of a direct rotation.  Although it's always prefered to use forces in physics.
+        */
+        rotateBody(_rotationChange: Vector3): void;
+        /** Translating the rigidbody therefore changing it's place over time directly in physics. This way physics is changing instead of transform.
+         *  But you are able to incremental changing it instead of a direct position. Although it's always prefered to use forces in physics. */
+        translateBody(_translationChange: Vector3): void;
         /**
         * Get the current VELOCITY of the [[Node]]
         */

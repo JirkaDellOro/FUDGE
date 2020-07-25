@@ -5,7 +5,8 @@ import f = FudgeCore;
 namespace Turorials_FUDGEPhysics_Lesson1 {
 
   //GOALS: Learning how to define shpes to create a not predefined collider shape.
-  //Built a simple physics car with wheel colliders (different approach than a raycast car (default))
+  //Built a simple physical player like you would find in a adventure or 3d platformer.
+  //Hint! -> These concepts are only a basic start, expand on it yourself to improve on results.
 
   //Fudge Basic Variables
   window.addEventListener("load", init);
@@ -16,24 +17,23 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
 
   //Physical Objects
   let bodies: f.Node[] = new Array(); // Array of all physical objects in the scene to have a quick reference
-  let carBody: f.ComponentRigidbody;
+  let player: f.Node;
+  let playerBody: f.ComponentRigidbody;
 
   //Setting Variables
   let materialConvexShape: f.Material = new f.Material("MorningStarThingy", f.ShaderFlat, new f.CoatColored(new f.Color(0.5, 0.4, 0.35, 1)));
-  let materialPlayer: f.Material = new f.Material("Player", f.ShaderFlat, new f.CoatColored(new f.Color(0.7, 0.5, 0.35, 1)));
+  let materialPlayer: f.Material = new f.Material("Player", f.ShaderFlat, new f.CoatColored(new f.Color(0.7, 0.8, 0.6, 1)));
+  let environmentMat: f.Material = new f.Material("Environment", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1)));
 
-  //Car Settings / Joints
-  let frontSuspensionRight: f.ComponentJointCylindrical;
-  let frontSuspensionLeft: f.ComponentJointCylindrical;
-  let backSuspensionRight: f.ComponentJointCylindrical;
-  let backSuspensionLeft: f.ComponentJointCylindrical;
-  let wheelJoint_frontR: f.ComponentJointRevolute;
-  let wheelJoint_frontL: f.ComponentJointRevolute;
-  let wheelJoint_backR: f.ComponentJointRevolute;
-  let wheelJoint_backL: f.ComponentJointRevolute;
-  let maxAngle: number = 30;
-  let currentAngle: number = 0;
-
+  //Physical Player Variables
+  let isGrounded: boolean;
+  let movementspeed: number = 8;
+  let turningspeed: number = 80;
+  let playerWeight: number = 75;
+  let playerJumpForce: number = 500;
+  let cmpCamera: f.ComponentCamera; //We let the camera look at our player in update
+  let yTurn: number = 0; //How high the turning input currently is
+  let forwardMovement: number = 0; //How high the forward movement input currently is
 
   //Function to initialize the Fudge Scene with a camera, light, viewport and PHYSCIAL Objects
   function init(_event: Event): void {
@@ -41,18 +41,17 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
     hierarchy = new f.Node("Scene"); //create the root Node where every object is parented to. Should never be changed
 
     //#region PHYSICS
-    //For this demo we want a higher accuracy since semi-real car physics are very delicate to calculate (thats why normally a raycast car is used for approximation)
     //OimoPhysics which is integrated in Fudge is using a correctionAlgorithm on solver iterations instead of fully recalculate physics too often, 
     //so you can crank the number of solver iterations higher than with most engines. But Oimo is in general less accurate.
+    //This is not needed but we just do it to show it.
     f.Physics.world.setSolverIterations(1000);
     f.Physics.settings.defaultRestitution = 0.15;
-    f.Physics.settings.defaultFriction = 0.95;
-    f.Physics.settings.defaultConstraintSolverType = 1; //Use most accurate joint solving, slower but needed for complex things like cars
-    //Experiment with defaultConstraintSolverType and defaultCorrectionAlgorithm
+    f.Physics.settings.defaultFriction = 0.8;
+
 
     //PHYSICS 
     //Creating a physically static ground plane for our physics playground. A simple scaled cube but with physics type set to static
-    bodies[0] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.GROUP_2);
+    bodies[0] = createCompleteNode("Ground", environmentMat, new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.GROUP_2);
     bodies[0].mtxLocal.scale(new f.Vector3(14, 0.3, 14)); //Scale the body with it's standard ComponentTransform
     //bodies[0].mtxLocal.rotateX(4, true); //Give it a slight rotation so the physical objects are sliding, always from left when it's after a scaling
     hierarchy.appendChild(bodies[0]); //Add the node to the scene by adding it to the scene-root
@@ -60,13 +59,53 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
 
     //CONCEPT 1 - Convex Colliders / Compound Collider - A Collider Shape that is not predefined and has no holes in it
     //e.g. something like a morning star shape a cube with pyramides as spikes on the side
-    //createConvexCompountCollider();
+    createConvexCompountCollider();
 
     //CONCEPT 2 - Setting Up a physical player
     //A physical player is a standard physical object of the type dynamic, BUT, you only want to rotate on Y axis, and you want to setup things
     //like a grounded variable and other movement related stuff.
-    settingUpCar();
+    settingUpAPlayer();
 
+    //Setting up some environment objects for our player to jump on
+    bodies[100] = createCompleteNode("Envinroment", environmentMat, new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.GROUP_2);
+    bodies[100].mtxLocal.translate(new f.Vector3(5, 1, 3));
+    bodies[100].mtxLocal.scale(new f.Vector3(1, 1, 1));
+    //bodies[100].mtxLocal.rotateX(4, true); 
+    hierarchy.appendChild(bodies[100]); //Add the node to the scene by adding it to the scene-root
+
+    bodies[101] = createCompleteNode("Envinroment", environmentMat, new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.GROUP_2);
+    bodies[101].mtxLocal.translate(new f.Vector3(-3, 3.5, 2));
+    bodies[101].mtxLocal.scale(new f.Vector3(1, 1, 5));
+    bodies[101].mtxLocal.rotateX(40, true);
+    hierarchy.appendChild(bodies[101]);
+
+    /*Stairs, keep in mind our player is only able to walk up stars because he is a capsule but it's not easy for him because we do not lift any feet,
+    we are just pushing a capsule with force against a slope until it's pushed up, which we make easier by giving the player a low friction, the way
+    we set the player up he can not slide on the ground but it helps to get him up the stairs.
+    So you need to turn around a little while moving to climb these stairs
+    advanced stairwalking is something you need to figure out yourself. Keyword raycast is a good start. 
+    */
+    let slopeHeight: number = 0.20;
+    bodies[102] = createCompleteNode("Envinroment", environmentMat, new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.GROUP_2);
+    bodies[102].mtxLocal.translate(new f.Vector3(-3, slopeHeight, -2));
+    bodies[102].mtxLocal.scale(new f.Vector3(2, slopeHeight * 2, 0.35));
+    hierarchy.appendChild(bodies[102]);
+    bodies[103] = createCompleteNode("Envinroment", environmentMat, new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.GROUP_2);
+    bodies[103].mtxLocal.translate(new f.Vector3(-3, slopeHeight * 2, -2 - 0.35));
+    bodies[103].mtxLocal.scale(new f.Vector3(2, slopeHeight * 2, 0.35));
+    hierarchy.appendChild(bodies[103]);
+    bodies[104] = createCompleteNode("Envinroment", environmentMat, new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.GROUP_2);
+    bodies[104].mtxLocal.translate(new f.Vector3(-3, slopeHeight * 3, -2 - 0.35 * 2));
+    bodies[104].mtxLocal.scale(new f.Vector3(2, slopeHeight * 2, 0.35));
+    hierarchy.appendChild(bodies[104]);
+    bodies[105] = createCompleteNode("Envinroment", environmentMat, new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.GROUP_2);
+    bodies[105].mtxLocal.translate(new f.Vector3(-3, slopeHeight * 4, -2 - 0.35 * 3));
+    bodies[105].mtxLocal.scale(new f.Vector3(2, slopeHeight * 2, 0.35));
+    hierarchy.appendChild(bodies[105]);
+    bodies[106] = createCompleteNode("Envinroment", environmentMat, new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.GROUP_2);
+    bodies[106].mtxLocal.translate(new f.Vector3(-3, slopeHeight * 5, -2 - 0.35 * 4));
+    bodies[106].mtxLocal.scale(new f.Vector3(2, slopeHeight * 2, 0.35));
+    hierarchy.appendChild(bodies[106]);
     //#endregion PHYSICS
 
 
@@ -75,7 +114,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
     cmpLight.pivot.lookAt(new f.Vector3(0.5, -1, -0.8)); //Set light direction
     hierarchy.addComponent(cmpLight);
 
-    let cmpCamera: f.ComponentCamera = new f.ComponentCamera();
+    cmpCamera = new f.ComponentCamera();
     cmpCamera.backgroundColor = f.Color.CSS("GREY");
     cmpCamera.pivot.translate(new f.Vector3(17, 4, 17)); //Move camera far back so the whole scene is visible
     cmpCamera.pivot.lookAt(f.Vector3.ZERO()); //Set the camera matrix so that it looks at the center of the scene
@@ -84,6 +123,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
     viewPort.initialize("Viewport", hierarchy, cmpCamera, app); //initialize the viewport with the root node, camera and canvas
 
     document.addEventListener("keypress", hndKey); //Adding a listener for keypress handling
+    document.addEventListener("keyup", hndKeyUp); //Adding a listener for keyUp
 
     //PHYSICS - Start using physics by telling the physics the scene root object. Physics will recalculate every transform and initialize
     f.Physics.start(hierarchy);
@@ -99,6 +139,11 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
   function update(): void {
     //PHYSICS - Simulate physical changes each frame, parameter to set time between frames
     f.Physics.world.simulate(f.Loop.timeFrameReal / 1000);
+
+    //Player constant update functions do it after physics calculation is best practice
+    cmpCamera.pivot.lookAt(player.mtxWorld.translation);
+    playerIsGroundedRaycast();
+    playerMovement(f.Loop.timeFrameReal / 1000);
 
     viewPort.draw(); // Draw the current Fudge Scene to the canvas
   }
@@ -184,121 +229,35 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
     bodies[5].getComponent(f.ComponentRigidbody).restitution = 3;
   }
 
-  function settingUpCar(): void {
-    //Setting up visuals
-    //Best practice to place the main body and place every suspension and wheel locally to the body. Not in this tutorial to make it more clear
-    //CarBody
-    bodies[12] = createCompleteNode("Car_Base", materialPlayer, new f.MeshCube(), 10, f.PHYSICS_TYPE.DYNAMIC);
-    carBody = bodies[12].getComponent(f.ComponentRigidbody);
-    bodies[12].mtxLocal.translate(new f.Vector3(0, 2.5, 0));
-    bodies[12].mtxLocal.scale(new f.Vector3(1, 0.5, 2));
-    hierarchy.appendChild(bodies[12]);
+  //Setting up a physical player which is nothign but a cube but able to platform in our little world and reacting to stuff
+  function settingUpAPlayer(): void {
+    player = createCompleteNode("Player", materialPlayer, new f.MeshCube(), playerWeight, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.CAPSULE);
+    hierarchy.appendChild(player);
+    playerBody = player.getComponent(f.ComponentRigidbody);
+    player.mtxLocal.scale(new f.Vector3(0.5, 1.8, 0.3));
+    player.mtxLocal.translate(new f.Vector3(2.5, 4, 3.5));
+    playerBody.rotationInfluenceFactor = new f.Vector3(0, 0, 0); //Physics not turn our player we do it ourselves
+    //since our capsule collider is a box with half spheres on top and bottom it's a little higher than our box mesh, we need to scale the pivot on the rb itself
+    playerBody.pivot.scale(new f.Vector3(1, 0.85, 1));
+    playerBody.friction = 0.01; //lower the friction to make it easier climbing stairs - this is only needed in this kind of player structure
 
-    //CarWheels - Important to balance the car out correctly
-    bodies[13] = createCompleteNode("Car_WheelRight_Front", materialPlayer, new f.MeshCube(), 5, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.CYLINDER);
-    bodies[13].mtxLocal.translate(new f.Vector3(1, 1.50, -0.75));
-    bodies[13].mtxLocal.scale(new f.Vector3(0.5, 0.85, 0.85)); //Wheels the as a cylinder use the x, for the height of the cylinder, y for the diameter and z is just for the f.MeshCube to scale.
-    bodies[13].mtxLocal.rotateZ(90, false);
-    hierarchy.appendChild(bodies[13])
+    //addign a nose to our player so we know whats the forward direction - but it's not a physics object
+    let playerNose: f.Node = createCompleteNode("PlayerNose", materialPlayer, new f.MeshCube(), playerWeight, f.PHYSICS_TYPE.DYNAMIC);
+    playerNose.mtxLocal.translate(new f.Vector3(0, 0.2, 0.4));
+    playerNose.mtxLocal.scale(new f.Vector3(0.1, 0.2, 1.5));
+    playerNose.removeComponent(playerNose.getComponent(f.ComponentRigidbody));
+    player.addChild(playerNose);
+  }
 
-    bodies[14] = createCompleteNode("Car_WheelRight_Back", materialPlayer, new f.MeshCube(), 5, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.CYLINDER);
-    bodies[14].mtxLocal.translate(new f.Vector3(1, 1.50, 0.75));
-    bodies[14].mtxLocal.scale(new f.Vector3(0.5, 0.85, 0.85));
-    bodies[14].mtxLocal.rotateZ(90, false);
-    hierarchy.appendChild(bodies[14])
-
-    bodies[15] = createCompleteNode("Car_WheelLeft_Front", materialPlayer, new f.MeshCube(), 5, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.CYLINDER);
-    bodies[15].mtxLocal.translate(new f.Vector3(-1, 1.50, -0.75));
-    bodies[15].mtxLocal.scale(new f.Vector3(0.5, 0.85, 0.85));
-    bodies[15].mtxLocal.rotateZ(90, false);
-    hierarchy.appendChild(bodies[15])
-
-    bodies[16] = createCompleteNode("Car_WheelLeft_Back", materialPlayer, new f.MeshCube(), 5, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.CYLINDER);
-    bodies[16].mtxLocal.translate(new f.Vector3(-1, 1.50, 0.75));
-    bodies[16].mtxLocal.scale(new f.Vector3(0.5, 0.85, 0.85));
-    bodies[16].mtxLocal.rotateZ(90, false);
-    hierarchy.appendChild(bodies[16])
-
-    //SuspensionHolders
-    bodies[17] = createCompleteNode("Car_HolderRight_Front", materialPlayer, new f.MeshCube(), 20, f.PHYSICS_TYPE.DYNAMIC);
-    bodies[17].mtxLocal.translate(new f.Vector3(0.4, 1.5, -0.75));
-    bodies[17].mtxLocal.scale(new f.Vector3(0.5, 0.5, 0.5));
-    hierarchy.appendChild(bodies[17])
-
-    bodies[18] = createCompleteNode("Car_HolderRight_Back", materialPlayer, new f.MeshCube(), 20, f.PHYSICS_TYPE.DYNAMIC);
-    bodies[18].mtxLocal.translate(new f.Vector3(0.4, 1.5, 0.75));
-    bodies[18].mtxLocal.scale(new f.Vector3(0.5, 0.5, 0.5));
-    hierarchy.appendChild(bodies[18])
-
-    bodies[19] = createCompleteNode("Car_HolderLeft_Front", materialPlayer, new f.MeshCube(), 20, f.PHYSICS_TYPE.DYNAMIC);
-    bodies[19].mtxLocal.translate(new f.Vector3(-0.4, 1.5, -0.75));
-    bodies[19].mtxLocal.scale(new f.Vector3(0.5, 0.5, 0.5));
-    hierarchy.appendChild(bodies[19])
-
-    bodies[20] = createCompleteNode("Car_HolderLeft_Back", materialPlayer, new f.MeshCube(), 20, f.PHYSICS_TYPE.DYNAMIC);
-    bodies[20].mtxLocal.translate(new f.Vector3(-0.4, 1.5, 0.75));
-    bodies[20].mtxLocal.scale(new f.Vector3(0.5, 0.5, 0.5));
-    hierarchy.appendChild(bodies[20])
-
-
-    //Connecting them with joints
-    //Sliding, Prismatic, Spring Joint between the body and the suspension
-    //In -Y-Axis positioned where the holder is located locally to the car_base
-    frontSuspensionRight = new f.ComponentJointCylindrical(carBody, bodies[17].getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(0.50, -1, -0.75));
-    carBody.getContainer().addComponent(frontSuspensionRight);
-    frontSuspensionRight.springDamping = 100;
-    frontSuspensionRight.springFrequency = 2;
-    frontSuspensionRight.translationMotorLimitUpper = 0;
-    frontSuspensionRight.translationMotorLimitLower = 0;
-    frontSuspensionRight.rotationalMotorLimitUpper = 0;
-    frontSuspensionRight.rotationalMotorLimitLower = 0;
-    frontSuspensionRight.internalCollision = true;
-    frontSuspensionLeft = new f.ComponentJointCylindrical(carBody, bodies[19].getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(-0.50, -1, -0.75));
-    carBody.getContainer().addComponent(frontSuspensionLeft);
-    frontSuspensionLeft.springDamping = 100;
-    frontSuspensionLeft.springFrequency = 2;
-    frontSuspensionLeft.translationMotorLimitUpper = 0;
-    frontSuspensionLeft.translationMotorLimitLower = 0;
-    frontSuspensionLeft.rotationalMotorLimitUpper = 0;
-    frontSuspensionLeft.rotationalMotorLimitLower = 0;
-    frontSuspensionLeft.internalCollision = true;
-    backSuspensionLeft = new f.ComponentJointCylindrical(carBody, bodies[20].getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(-0.50, -1, 0.75));
-    carBody.getContainer().addComponent(backSuspensionLeft);
-    backSuspensionLeft.springDamping = 100;
-    backSuspensionLeft.springFrequency = 2;
-    backSuspensionLeft.translationMotorLimitUpper = 0;
-    backSuspensionLeft.translationMotorLimitLower = 0;
-    backSuspensionLeft.rotationalMotorLimitUpper = 0;
-    backSuspensionLeft.rotationalMotorLimitLower = 0;
-    backSuspensionLeft.internalCollision = true;
-    backSuspensionRight = new f.ComponentJointCylindrical(carBody, bodies[18].getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(0.50, -1, 0.75));
-    carBody.getContainer().addComponent(backSuspensionRight);
-    backSuspensionRight.springDamping = 100;
-    backSuspensionRight.springFrequency = 2;
-    backSuspensionRight.translationMotorLimitUpper = 0;
-    backSuspensionRight.translationMotorLimitLower = 0;
-    backSuspensionRight.rotationalMotorLimitUpper = 0;
-    backSuspensionRight.rotationalMotorLimitLower = 0;
-    backSuspensionRight.internalCollision = true;
-
-    //Connect Wheels to suspension - Hinge (revolute) joints that can rotate 360° in X-Axis but not move
-    wheelJoint_frontR = new f.ComponentJointRevolute(bodies[17].getComponent(f.ComponentRigidbody), bodies[13].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
-    bodies[17].addComponent(wheelJoint_frontR);
-    wheelJoint_frontL = new f.ComponentJointRevolute(bodies[19].getComponent(f.ComponentRigidbody), bodies[15].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
-    bodies[19].addComponent(wheelJoint_frontL);
-    wheelJoint_backR = new f.ComponentJointRevolute(bodies[18].getComponent(f.ComponentRigidbody), bodies[14].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
-    bodies[18].addComponent(wheelJoint_backR);
-    wheelJoint_backL = new f.ComponentJointRevolute(bodies[20].getComponent(f.ComponentRigidbody), bodies[16].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
-    bodies[20].addComponent(wheelJoint_backL);
-
-    // wheelJoint_frontR.motorSpeed = -5;
-    wheelJoint_frontR.motorTorque = 10;
-    // wheelJoint_frontL.motorSpeed = -5;
-    wheelJoint_frontL.motorTorque = 10;
-    // wheelJoint_backR.motorSpeed = -5;
-    // wheelJoint_backR.motorTorque = 50;
-    // wheelJoint_backL.motorSpeed = -5;
-    // wheelJoint_backL.motorTorque = 50;
+  //Check if our physical player is hitting a surface with his feed, if yo let him be able to jump
+  function playerIsGroundedRaycast(): void {
+    let hitInfo: f.RayHitInfo;
+    hitInfo = f.Physics.raycast(playerBody.getPosition(), new f.Vector3(0, -1, 0), 1.1);
+    if (hitInfo.hit) {
+      isGrounded = true;
+    } else {
+      isGrounded = false;
+    }
   }
 
 
@@ -306,31 +265,60 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
   function hndKey(_event: KeyboardEvent): void {
 
     if (_event.code == f.KEYBOARD_CODE.A) {
-      frontSuspensionLeft.rotationalMotorLimitUpper = currentAngle < maxAngle ? currentAngle++ : currentAngle;
-      frontSuspensionLeft.rotationalMotorLimitLower = currentAngle < maxAngle ? currentAngle++ : currentAngle;
-      frontSuspensionRight.rotationalMotorLimitUpper = currentAngle < maxAngle ? currentAngle++ : currentAngle;
-      frontSuspensionRight.rotationalMotorLimitLower = currentAngle < maxAngle ? currentAngle++ : currentAngle;
+      yTurn = 1;
     }
     if (_event.code == f.KEYBOARD_CODE.W) {
-      bodies[12].getComponent(f.ComponentRigidbody).applyForce(new f.Vector3(0, 10, 0));
-      wheelJoint_frontR.motorSpeed++;
-      wheelJoint_frontL.motorSpeed++;
+      forwardMovement = 1;
     }
     if (_event.code == f.KEYBOARD_CODE.S) {
-
+      forwardMovement = -1;
     }
     if (_event.code == f.KEYBOARD_CODE.D) {
-      frontSuspensionLeft.rotationalMotorLimitUpper = currentAngle > -maxAngle ? currentAngle-- : currentAngle;
-      frontSuspensionLeft.rotationalMotorLimitLower = currentAngle > -maxAngle ? currentAngle-- : currentAngle;
-      frontSuspensionRight.rotationalMotorLimitUpper = currentAngle < maxAngle ? currentAngle-- : currentAngle;
-      frontSuspensionRight.rotationalMotorLimitLower = currentAngle < maxAngle ? currentAngle-- : currentAngle;
+      yTurn = -1;
+    }
+    if (_event.code == f.KEYBOARD_CODE.SPACE) {
+      if (isGrounded) //Let the player only jumping when on the ground
+        playerBody.applyLinearImpulse(new f.Vector3(0, playerJumpForce, 0));
     }
 
     if (_event.code == f.KEYBOARD_CODE.T) {
       f.Physics.settings.debugMode = f.Physics.settings.debugMode == f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER ? f.PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY : f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
     }
+  }
 
+  //When the key is up we want to stop movement
+  function hndKeyUp(_event: KeyboardEvent): void {
+    if (_event.code == f.KEYBOARD_CODE.A) {
+      yTurn = 0;
+    }
+    if (_event.code == f.KEYBOARD_CODE.W) {
+      forwardMovement = 0;
+    }
+    if (_event.code == f.KEYBOARD_CODE.S) {
+      forwardMovement = 0;
+    }
+    if (_event.code == f.KEYBOARD_CODE.D) {
+      yTurn = 0;
+    }
+  }
 
+  //Actually moving the player
+  function playerMovement(_deltaTime: number) {
+    let playerForward: f.Vector3;
+    playerForward = f.Vector3.Z();
+    playerForward.transform(player.mtxWorld, false);
+
+    //You can rotate a body like you would rotate a transform, incremental but keep in mind, normally we use forces in physics,
+    //this is just a feature to make it easier to create player characters
+    playerBody.rotateBody(new f.Vector3(0, yTurn * turningspeed * _deltaTime, 0));
+
+    let movementVelocity: f.Vector3 = new f.Vector3();
+    movementVelocity.x = playerForward.x * forwardMovement * movementspeed;
+    movementVelocity.y = playerBody.getVelocity().y;
+    movementVelocity.z = playerForward.z * forwardMovement * movementspeed;
+    playerBody.setVelocity(movementVelocity);
+    //Since we are resetting the velocity when releasing the key to have a instant stop our player is not able to slide. We would have
+    //the player fade out have sliding instead you need to configure that for your own game.
   }
 
 }
