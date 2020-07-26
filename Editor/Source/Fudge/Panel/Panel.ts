@@ -2,7 +2,7 @@ namespace Fudge {
   import ƒ = FudgeCore;
 
   export enum PANEL {
-    NODE = "PanelNode"
+    GRAPH = "PanelGraph"
   }
 
 

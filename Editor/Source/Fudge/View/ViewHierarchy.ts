@@ -6,7 +6,7 @@ namespace Fudge {
    * View displaying a Node and the hierarchical relation to its parents and children.  
    * Consists of a viewport, a tree-control and . 
    */
-  export class ViewGraph extends View {
+  export class ViewHierarchy extends View {
     graph: ƒ.Node;
     selectedNode: ƒ.Node;
     tree: ƒui.Tree<ƒ.Node>;
@@ -14,13 +14,13 @@ namespace Fudge {
 
     constructor(_container: GoldenLayout.Container, _state: Object) {
       super(_container, _state);
-      // if (_parent instanceof PanelNode && (<PanelNode>_parent).getNode() != null)
-      //   this.setRoot((<PanelNode>_parent).getNode());
+      // if (_parent instanceof PanelGraph && (<PanelGraph>_parent).getNode() != null)
+      //   this.setRoot((<PanelGraph>_parent).getNode());
       // else
       //   this.setRoot(new ƒ.Node("Node"));
 
       // this.parentPanel.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setSelectedNode);
-      this.contextMenu = ContextMenu.getMenu(ViewGraph, this.contextMenuCallback);
+      this.contextMenu = ContextMenu.getMenu(ViewHierarchy, this.contextMenuCallback);
     }
 
 

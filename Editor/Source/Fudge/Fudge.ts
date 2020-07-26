@@ -28,7 +28,7 @@ namespace Fudge {
     ipcRenderer.on("save", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
       ƒ.Debug.log("Save");
       panel = PanelManager.instance.getActivePanel();
-      if (panel instanceof PanelNode) {
+      if (panel instanceof PanelGraph) {
         node = panel.getNode();
       }
       save(node);
@@ -37,7 +37,7 @@ namespace Fudge {
       ƒ.Debug.log("Open");
       node = open();
       panel = PanelManager.instance.getActivePanel();
-      if (panel instanceof PanelNode) {
+      if (panel instanceof PanelGraph) {
         panel.setNode(node);
       }
     });
@@ -60,7 +60,7 @@ namespace Fudge {
     let node2: ƒ.Node = new ƒAid.NodeCoordinateSystem("WorldCooSys", ƒ.Matrix4x4.IDENTITY());
     node.addChild(node2);
     node2.cmpTransform.local.translateZ(2);
-    PanelManager.add(PanelNode, "Node", Object({ node: node })); //Object.create(null,  {node: { writable: true, value: node }}));
+    PanelManager.add(PanelGraph, "Node", Object({ node: node })); //Object.create(null,  {node: { writable: true, value: node }}));
   }
 
   // function openAnimationPanel(): void {

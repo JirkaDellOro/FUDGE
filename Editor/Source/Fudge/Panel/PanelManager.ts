@@ -69,8 +69,8 @@ namespace Fudge {
       };
       this.editorLayout = new GoldenLayout(config);   //This might be a problem because it can't use a specific place to put it.
       this.editorLayout.registerComponent("Welcome", welcome);
-      this.editorLayout.registerComponent("View", registerViewComponent);
-      this.editorLayout.registerComponent(PANEL.NODE, PanelNode);
+      // this.editorLayout.registerComponent("View", registerViewComponent);
+      this.editorLayout.registerComponent(PANEL.GRAPH, PanelGraph);
       this.editorLayout.init();
       this.editorLayout.on("stateChanged", (_event) => {
         console.log(_event);

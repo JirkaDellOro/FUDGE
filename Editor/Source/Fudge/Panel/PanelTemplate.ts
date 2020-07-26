@@ -18,7 +18,7 @@ namespace Fudge {
             type: "column", content: [
               {
                 type: "component",
-                componentName: Fudge.VIEW.GRAPH,
+                componentName: Fudge.VIEW.HIERARCHY,
                 title: "Graph "
               },
               {

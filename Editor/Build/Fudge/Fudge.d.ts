@@ -60,7 +60,7 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     enum PANEL {
-        NODE = "PanelNode"
+        GRAPH = "PanelGraph"
     }
     /**
      * Holds various views into the currently processed Fudge-project.
@@ -78,6 +78,42 @@ declare namespace Fudge {
          * @param _template Optional. Template to be used in the construction of the panel.
          */
         constructor(_container: GoldenLayout.Container, _state: Object);
+    }
+}
+declare namespace Fudge {
+    enum VIEW {
+        HIERARCHY = "ViewHierarchy",
+        ANIMATION = "ViewAnimation",
+        RENDER = "ViewRender",
+        COMPONENTS = "ViewComponents",
+        CAMERA = "ViewCamera"
+    }
+    /**
+     * Base class for all Views to support generic functionality
+     * @author Monika Galkewitsch, HFU, 2019
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    abstract class View {
+        protected dom: HTMLElement;
+        constructor(_container: GoldenLayout.Container, _state: Object);
+        /**
+         * Method to cleanup when user closes view
+         */
+        abstract cleanup(): void;
+    }
+}
+declare namespace Fudge {
+    import ƒ = FudgeCore;
+    /**
+    * Panel that functions as a Node Editor. Uses ViewData, ViewPort and ViewNode.
+    * Use NodePanelTemplate to initialize the default NodePanel.
+    * @author Monika Galkewitsch, 2019, HFU
+    */
+    class PanelGraph extends Panel {
+        private node;
+        constructor(_container: GoldenLayout.Container, _state: Object);
+        setNode(_node: ƒ.Node): void;
+        getNode(): ƒ.Node;
     }
 }
 declare namespace Fudge {
@@ -116,43 +152,6 @@ declare namespace Fudge {
      * Factory Function for the generic "Panel"-Component
      */
     function registerPanelComponent(_container: GoldenLayout.Container, _state: Object): void;
-}
-declare namespace Fudge {
-    enum VIEW {
-        GRAPH = "ViewGraph",
-        ANIMATION = "ViewAnimation",
-        RENDER = "ViewRender",
-        COMPONENTS = "ViewComponents",
-        CAMERA = "ViewCamera"
-    }
-    /**
-     * Base class for all Views to support generic functionality
-     * @author Monika Galkewitsch, HFU, 2019
-     * @author Lukas Scheuerle, HFU, 2019
-     */
-    abstract class View {
-        protected dom: HTMLElement;
-        constructor(_container: GoldenLayout.Container, _state: Object);
-        /**
-         * Method to cleanup when user closes view
-         */
-        abstract cleanup(): void;
-    }
-}
-declare namespace Fudge {
-    import ƒ = FudgeCore;
-    /**
-    * Panel that functions as a Node Editor. Uses ViewData, ViewPort and ViewNode.
-    * Use NodePanelTemplate to initialize the default NodePanel.
-    * @author Monika Galkewitsch, 2019, HFU
-    */
-    class PanelNode extends Panel {
-        private static config;
-        private node;
-        constructor(_container: GoldenLayout.Container, _state: Object);
-        setNode(_node: ƒ.Node): void;
-        getNode(): ƒ.Node;
-    }
 }
 declare namespace Fudge {
     abstract class PanelTemplate {
@@ -300,7 +299,7 @@ declare namespace Fudge {
      * View displaying a Node and the hierarchical relation to its parents and children.
      * Consists of a viewport, a tree-control and .
      */
-    class ViewGraph extends View {
+    class ViewHierarchy extends View {
         graph: ƒ.Node;
         selectedNode: ƒ.Node;
         tree: ƒui.Tree<ƒ.Node>;

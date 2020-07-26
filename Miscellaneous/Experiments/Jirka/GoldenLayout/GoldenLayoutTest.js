@@ -12,11 +12,11 @@ var GoldenLayoutTest;
                         componentName: "Panel",
                         componentState: { text: "Panel 1" },
                         title: "Panel1"
-                    }, {
-                        type: "component",
-                        componentName: "Panel",
-                        componentState: { text: "Panel 2" },
-                        title: "Panel2"
+                        // }, {
+                        //   type: "component",
+                        //   componentName: "Panel",
+                        //   componentState: { text: "Panel 2" },
+                        //   title: "Panel2"
                     }
                 ]
             }]

@@ -15,8 +15,22 @@ var GoldenLayoutTest;
             this.registerComponent("ViewA", GoldenLayoutTest.ViewA);
             this.registerComponent("ViewB", GoldenLayoutTest.ViewB);
             this.registerComponent("ViewC", GoldenLayoutTest.ViewC);
-            this.on("stateChanged", () => this.updateSize());
+            this.on("stateChanged", this.hndStateChange.bind(this));
             this.init();
+            document.addEventListener("keydown", this.hndKeyDown.bind(this));
+            this.root.addChild({ type: "row", content: [] });
+            this.root.contentItems[0].addChild({
+                type: "column", content: [{
+                        type: "component", componentName: "ViewA", componentState: { text: "1" }, title: "View1"
+                    }]
+            });
+            this.root.contentItems[0].addChild({
+                type: "column", content: [
+                    { type: "component", componentName: "ViewB", componentState: { text: "2" }, title: "View2" },
+                    { type: "component", componentName: "ViewC", componentState: { text: "3" }, title: "View3" }
+                ]
+            });
+            // let column: GoldenLayout.ItemConfig = this.createContentItem({ type: "column", content: [] });
         }
         static add() {
             let config = {
@@ -30,28 +44,29 @@ var GoldenLayoutTest;
             };
             GoldenLayoutTest.glDoc.root.contentItems[0].addChild(config);
         }
+        hndStateChange() {
+            // console.log(this);
+            this.updateSize();
+        }
+        hndKeyDown() {
+            console.log(this.toConfig());
+        }
     }
     Panel.config = {
         type: "row",
-        content: [{
-                type: "stack",
-                content: [{
-                        type: "component",
-                        componentName: "ViewA",
-                        componentState: { text: "1" },
-                        title: "View1"
-                    }, {
-                        type: "component",
-                        componentName: "ViewB",
-                        componentState: { text: "2" },
-                        title: "View2"
-                    }, {
-                        type: "component",
-                        componentName: "ViewC",
-                        componentState: { text: "3" },
-                        title: "View3"
-                    }]
+        content: [ /*{
+          type: "column", content: [{
+            type: "column", content: [{
+              type: "component", componentName: "ViewA", componentState: { text: "1" }, title: "View1"
             }]
+          }, {
+            type: "row", content: [{
+              type: "component", componentName: "ViewB", componentState: { text: "2" }, title: "View2"
+            }, {
+              type: "component", componentName: "ViewC", componentState: { text: "3" }, title: "View3"
+            }]
+          }]
+        }*/]
     };
     GoldenLayoutTest.Panel = Panel;
 })(GoldenLayoutTest || (GoldenLayoutTest = {}));

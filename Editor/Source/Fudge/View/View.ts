@@ -2,7 +2,7 @@ namespace Fudge {
   import ƒ = FudgeCore;
 
   export enum  VIEW {
-    GRAPH = "ViewGraph",
+    HIERARCHY = "ViewHierarchy",
     ANIMATION = "ViewAnimation",
     RENDER = "ViewRender",
     COMPONENTS = "ViewComponents",

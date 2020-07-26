@@ -14,7 +14,7 @@ namespace Fudge {
 
     constructor(_container: GoldenLayout.Container, _state: Object) {
       super(_container, _state);
-      // if (_parent instanceof PanelNode && _parent.getNode() != null)
+      // if (_parent instanceof PanelGraph && _parent.getNode() != null)
       //   this.graph = _parent.getNode();
       // else {
       //   this.graph = new ƒ.Node("Scene");

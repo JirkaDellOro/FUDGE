@@ -9,18 +9,18 @@ namespace Fudge {
   * Use NodePanelTemplate to initialize the default NodePanel.
   * @author Monika Galkewitsch, 2019, HFU
   */
-  export class PanelNode extends Panel {
-    private static config: GoldenLayout.ItemConfig = {
-      type: "row", content: [{
-        type: "row", content: [
-          { type: "component", componentName: VIEW.RENDER, title: "Render" }, //, componentState: _state 
-          {
-            type: "column", content: [
-              { type: "component", componentName: VIEW.GRAPH, title: "Graph" }, //, componentState: _state },
-              { type: "component", componentName: VIEW.COMPONENTS, title: "Components" }] //, componentState: _state }]
-          }]
-      }]
-    };
+  export class PanelGraph extends Panel {
+    // private static config: GoldenLayout.ItemConfig = {
+    //   type: "row", content: [{
+    //     type: "column", content: [
+    //       { type: "component", componentName: VIEW.RENDER, title: "Render" }, //, componentState: _state 
+    //       {
+    //         type: "column", content: [
+    //           { type: "component", componentName: VIEW.GRAPH, title: "Graph" }, //, componentState: _state },
+    //           { type: "component", componentName: VIEW.COMPONENTS, title: "Components" }] //, componentState: _state }]
+    //       }]
+    //   }]
+    // };
     private node: ƒ.Node;
 
     // constructor(_name: string, _template?: PanelTemplate, _node?: ƒ.Node) {
@@ -42,13 +42,15 @@ namespace Fudge {
       let config: GoldenLayout.Config = {
         settings: { showPopoutIcon: false },
         content: [{
-          type: "row", content: [
-            { type: "component", componentName: VIEW.RENDER, title: "Render", componentState: _state },
-            {
-              type: "column", content: [
-                { type: "component", componentName: VIEW.GRAPH, title: "Graph" }, //, componentState: _state },
-                { type: "component", componentName: VIEW.COMPONENTS, title: "Components" }] //, componentState: _state }]
-            }]
+          type: "row", content: [{
+            type: "column", content: [
+              { type: "component", componentName: VIEW.HIERARCHY, title: "Hierarchy", componentState: _state }, //, componentState: _state },
+              { type: "component", componentName: VIEW.RENDER, title: "Render", componentState: _state }] //, componentState: _state }]
+          }, {
+            type: "column", content: [
+              { type: "component", componentName: VIEW.COMPONENTS, title: "Components", componentState: _state },]
+          },
+          ]
         }]
       };
       this.goldenLayout = new GoldenLayout(config, this.dom);
@@ -56,7 +58,7 @@ namespace Fudge {
 
       this.goldenLayout.registerComponent(VIEW.RENDER, ViewRender);
       this.goldenLayout.registerComponent(VIEW.COMPONENTS, ViewComponents);
-      this.goldenLayout.registerComponent(VIEW.GRAPH, ViewGraph);
+      this.goldenLayout.registerComponent(VIEW.HIERARCHY, ViewHierarchy);
 
       this.goldenLayout.on("stateChanged", () => this.goldenLayout.updateSize());
       this.goldenLayout.init();
@@ -67,7 +69,7 @@ namespace Fudge {
     //     type: "stack",
     //     content: [{
     //       type: "component",
-    //       componentName: "PanelNode",
+    //       componentName: "PanelGraph",
     //       componentState: { text: "Panel 3" },
     //       title: "Panel3"
     //     }]
