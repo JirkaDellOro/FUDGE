@@ -13,15 +13,15 @@ namespace GoldenLayoutTest {
     constructor(_container: GoldenLayout.Container, _state: Object) {
       super(_container, _state);
       this.container.style.backgroundColor = "red";
-      this.container.innerHTML = `<h2>${_state.text}</h2>`;
+      this.container.innerHTML = `<h2>${(<any>_state).text}</h2>`;
     }
   }
-  
+
   export class ViewB extends View {
     constructor(_container: GoldenLayout.Container, _state: Object) {
       super(_container, _state);
       this.container.style.backgroundColor = "blue";
-      this.container.innerHTML = `<h2>${_state.text}</h2>`;
+      this.container.innerHTML = `<h2>${(<any>_state).text}</h2>`;
     }
   }
 
@@ -29,7 +29,7 @@ namespace GoldenLayoutTest {
     constructor(_container: GoldenLayout.Container, _state: Object) {
       super(_container, _state);
       this.container.style.backgroundColor = "green";
-      this.container.innerHTML = `<h2>${_state.text}</h2>`;
+      this.container.innerHTML = `<h2>${(<any>_state).text}</h2>`;
     }
   }
 }
