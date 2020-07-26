@@ -56,7 +56,9 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
     //bodies[0].mtxLocal.rotateX(4, true); //Give it a slight rotation so the physical objects are sliding, always from left when it's after a scaling
     hierarchy.appendChild(bodies[0]); //Add the node to the scene by adding it to the scene-root
 
-
+    //A car is basically wheels on a suspension. A suspension is a prismatic spring and a wheel is on a revolute joint.
+    //But the joints, wheels need to be very well placed, could not get it done even in unity with this setup. 
+    //(Unity has wheelcolliders and things to make it easier), so different setup would be done there
     settingUpCar();
 
     //#endregion PHYSICS
@@ -114,7 +116,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
     //Setting up visuals
     //Best practice to place the main body and place every suspension and wheel locally to the body. Not in this tutorial to make it more clear
     //CarBody
-    bodies[12] = createCompleteNode("Car_Base", materialPlayer, new f.MeshCube(), 10, f.PHYSICS_TYPE.DYNAMIC);
+    bodies[12] = createCompleteNode("Car_Base", materialPlayer, new f.MeshCube(), 500, f.PHYSICS_TYPE.DYNAMIC);
     carBody = bodies[12].getComponent(f.ComponentRigidbody);
     bodies[12].mtxLocal.translate(new f.Vector3(0, 2.5, 0));
     bodies[12].mtxLocal.scale(new f.Vector3(1, 0.5, 2));
@@ -217,10 +219,10 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
     wheelJoint_backL = new f.ComponentJointRevolute(bodies[20].getComponent(f.ComponentRigidbody), bodies[16].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
     bodies[20].addComponent(wheelJoint_backL);
 
-    // wheelJoint_frontR.motorSpeed = -5;
-    wheelJoint_frontR.motorTorque = 10;
-    // wheelJoint_frontL.motorSpeed = -5;
-    wheelJoint_frontL.motorTorque = 10;
+    wheelJoint_frontR.motorSpeed = -5;
+    wheelJoint_frontR.motorTorque = 50;
+    wheelJoint_frontL.motorSpeed = -5;
+    wheelJoint_frontL.motorTorque = 50;
     // wheelJoint_backR.motorSpeed = -5;
     // wheelJoint_backR.motorTorque = 50;
     // wheelJoint_backL.motorSpeed = -5;
@@ -231,7 +233,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
   // Event Function handling keyboard input
   function hndKey(_event: KeyboardEvent): void {
 
-    if (_event.code == f.KEYBOARD_CODE.A) {
+    if (_event.code == f.KEYBOARD_CODE.A) { //Steering the wheels by giving them a new angle limit so they are fixed on this angle
       frontSuspensionLeft.rotationalMotorLimitUpper = currentAngle < maxAngle ? currentAngle++ : currentAngle;
       frontSuspensionLeft.rotationalMotorLimitLower = currentAngle < maxAngle ? currentAngle++ : currentAngle;
       frontSuspensionRight.rotationalMotorLimitUpper = currentAngle < maxAngle ? currentAngle++ : currentAngle;

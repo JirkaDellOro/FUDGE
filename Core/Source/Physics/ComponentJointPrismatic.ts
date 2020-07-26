@@ -44,7 +44,7 @@ namespace FudgeCore {
     }
 
     /**
-     * The damping of the spring. 1 equals completly damped.
+     * The damping of the spring.
      */
     get springDamping(): number {
       return this.jointSpringDampingRatio;
@@ -89,6 +89,7 @@ namespace FudgeCore {
 
     /**
       * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
+      * Setting limits upper 0 and lower 0 tries to keep the two bodies in place.
      */
     get motorLimitUpper(): number {
       return this.jointMotorLimitUpper;
@@ -108,7 +109,7 @@ namespace FudgeCore {
       if (this.oimoJoint != null) this.oimoJoint.getLimitMotor().lowerLimit = this.jointMotorLimitLower;
     }
     /**
-      * The target speed of the motor in m/s.
+      * The target speed of the motor in m/s, moving the second body along the axis of the first in minus/plus direction.
      */
     get motorSpeed(): number {
       return this.jointMotorSpeed;
@@ -243,8 +244,8 @@ namespace FudgeCore {
       let serialization: Serialization = {
         attID: super.idAttachedRB,
         conID: super.idConnectedRB,
-        axis: this.axis,
-        anchor: this.anchor,
+        axis: this.axis.serialize(),
+        anchor: this.anchor.serialize(),
         internalCollision: this.jointInternalCollision,
         springDamping: this.jointSpringDampingRatio,
         springFrequency: this.jointSpringFrequency,
@@ -264,8 +265,11 @@ namespace FudgeCore {
       super.idConnectedRB = _serialization.conID;
       if (_serialization.attID != null && _serialization.conID != null)
         super.setBodiesFromLoadedIDs();
-      this.axis = _serialization.axis != null ? _serialization.axis : this.jointAxis;
-      this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
+      let tempDeserializeVector: Vector3 = Recycler.get(Vector3);
+      _serialization.axis != null ? tempDeserializeVector.deserialize(_serialization.axis) : new Vector3(this.jointAxis.x, this.jointAxis.y, this.jointAxis.z);
+      this.axis = tempDeserializeVector;
+      _serialization.anchor != null ? tempDeserializeVector.deserialize(_serialization.anchor) : new Vector3(this.jointAnchor.x, this.jointAnchor.y, this.jointAnchor.z);
+      this.anchor = tempDeserializeVector;
       this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
       this.springDamping = _serialization.springDamping != null ? _serialization.springDamping : this.jointSpringDampingRatio;
       this.springFrequency = _serialization.springFrequency != null ? _serialization.springFrequency : this.jointSpringFrequency;

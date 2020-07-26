@@ -339,12 +339,12 @@ namespace FudgeCore {
       let serialization: Serialization = {
         attID: super.idAttachedRB,
         conID: super.idConnectedRB,
-        anchor: this.anchor,
+        anchor: this.anchor.serialize(),
         internalCollision: this.jointInternalCollision,
         breakForce: this.jointBreakForce,
         breakTorque: this.jointBreakTorque,
-        firstAxis: this.jointFirstAxis,
-        secondAxis: this.jointSecondAxis,
+        firstAxis: this.firstAxis.serialize(),
+        secondAxis: this.secondAxis.serialize(),
         springDampingFirstAxis: this.jointFirstSpringDampingRatio,
         springFrequencyFirstAxis: this.jointFirstSpringFrequency,
         springDampingSecondAxis: this.jointSecondSpringDampingRatio,
@@ -367,7 +367,13 @@ namespace FudgeCore {
       super.idConnectedRB = _serialization.conID;
       if (_serialization.attID != null && _serialization.conID != null)
         super.setBodiesFromLoadedIDs();
-      this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
+      let tempDeserializeVector: Vector3 = Recycler.get(Vector3);
+      _serialization.anchor != null ? tempDeserializeVector.deserialize(_serialization.anchor) : new Vector3(this.jointAnchor.x, this.jointAnchor.y, this.jointAnchor.z);
+      this.anchor = tempDeserializeVector;
+      _serialization.firstAxis != null ? tempDeserializeVector.deserialize(_serialization.firstAxis) : new Vector3(this.jointFirstAxis.x, this.jointFirstAxis.y, this.jointFirstAxis.z);
+      this.firstAxis = tempDeserializeVector;
+      _serialization.secondAxis != null ? tempDeserializeVector.deserialize(_serialization.secondAxis) : new Vector3(this.jointSecondAxis.x, this.jointSecondAxis.y, this.jointSecondAxis.z);
+      this.secondAxis = tempDeserializeVector;
       this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
       this.breakForce = _serialization.breakForce != null ? _serialization.breakForce : this.jointBreakForce;
       this.breakTorque = _serialization.breakTorque != null ? _serialization.breakTorque : this.jointBreakTorque;

@@ -1,0 +1,386 @@
+{
+  "ƒ.Node": {
+    "name": "AxisCross",
+    "components": {},
+    "children": [
+      {
+        "ƒ.Node": {
+          "name": "RedFalling",
+          "components": {
+            "ComponentMesh": [
+              {
+                "ƒ.ComponentMesh": {
+                  "mesh": {
+                    "ƒ.MeshCube": {}
+                  },
+                  "pivot": {
+                    "translation": {
+                      "x": 0,
+                      "y": 0,
+                      "z": 0
+                    },
+                    "rotation": {
+                      "x": 0,
+                      "y": 0,
+                      "z": 0
+                    },
+                    "scaling": {
+                      "x": 1,
+                      "y": 1,
+                      "z": 1
+                    }
+                  },
+                  "Component": {
+                    "active": true
+                  }
+                }
+              }
+            ],
+            "ComponentMaterial": [
+              {
+                "ƒ.ComponentMaterial": {
+                  "material": {
+                    "ƒ.Material": {
+                      "name": "Red",
+                      "idResource": "dummyId0",
+                      "shader": "ShaderUniColor",
+                      "coat": {
+                        "ƒ.CoatColored": {
+                          "name": "Coat",
+                          "color": {
+                            "r": 1,
+                            "g": 0,
+                            "b": 0,
+                            "a": 0.65
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "Component": {
+                    "active": true
+                  }
+                }
+              }
+            ],
+            "ComponentTransform": [
+              {
+                "ƒ.ComponentTransform": {
+                  "local": {
+                    "translation": {
+                      "x": 0,
+                      "y": 1,
+                      "z": -1
+                    },
+                    "rotation": {
+                      "x": 0,
+                      "y": 0,
+                      "z": 0
+                    },
+                    "scaling": {
+                      "x": 1,
+                      "y": 1,
+                      "z": 1
+                    }
+                  },
+                  "Component": {
+                    "active": true
+                  }
+                }
+              }
+            ],
+            "ComponentRigidbody": [
+              {
+                "ƒ.ComponentRigidbody": {
+                  "pivot": {
+                    "translation": {
+                      "x": 0,
+                      "y": 0,
+                      "z": 0
+                    },
+                    "rotation": {
+                      "x": 0,
+                      "y": 0,
+                      "z": 0
+                    },
+                    "scaling": {
+                      "x": 1,
+                      "y": 1,
+                      "z": 1
+                    }
+                  },
+                  "id": 15,
+                  "restitution": 1.5,
+                  "physicsType": 0,
+                  "Component": {
+                    "active": true
+                  }
+                }
+              }
+            ]
+          },
+          "children": []
+        }
+      },
+      {
+        "ƒ.Node": {
+          "name": "GreenFloor",
+          "components": {
+            "ComponentMesh": [
+              {
+                "ƒ.ComponentMesh": {
+                  "mesh": {
+                    "ƒ.MeshCube": {}
+                  },
+                  "pivot": {
+                    "translation": {
+                      "x": 0,
+                      "y": 0,
+                      "z": 0
+                    },
+                    "rotation": {
+                      "x": 0,
+                      "y": 0,
+                      "z": 0
+                    },
+                    "scaling": {
+                      "x": 1,
+                      "y": 1,
+                      "z": 1
+                    }
+                  },
+                  "Component": {
+                    "active": true
+                  }
+                }
+              }
+            ],
+            "ComponentMaterial": [
+              {
+                "ƒ.ComponentMaterial": {
+                  "material": {
+                    "ƒ.Material": {
+                      "name": "Green",
+                      "idResource": "dummyId1",
+                      "shader": "ShaderUniColor",
+                      "coat": {
+                        "ƒ.CoatColored": {
+                          "name": "Coat",
+                          "color": {
+                            "r": 0,
+                            "g": 1,
+                            "b": 0,
+                            "a": 0.65
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "Component": {
+                    "active": true
+                  }
+                }
+              }
+            ],
+            "ComponentTransform": [
+              {
+                "ƒ.ComponentTransform": {
+                  "local": {
+                    "translation": {
+                      "x": 0,
+                      "y": -1.5,
+                      "z": 0
+                    },
+                    "rotation": {
+                      "x": 0,
+                      "y": 0,
+                      "z": 0
+                    },
+                    "scaling": {
+                      "x": 10,
+                      "y": 1,
+                      "z": 10
+                    }
+                  },
+                  "Component": {
+                    "active": true
+                  }
+                }
+              }
+            ],
+            "ComponentRigidbody": [
+              {
+                "ƒ.ComponentRigidbody": {
+                  "pivot": {
+                    "translation": {
+                      "x": 0,
+                      "y": 0,
+                      "z": 0
+                    },
+                    "rotation": {
+                      "x": 0,
+                      "y": 0,
+                      "z": 0
+                    },
+                    "scaling": {
+                      "x": 1,
+                      "y": 1,
+                      "z": 1
+                    }
+                  },
+                  "id": 3,
+                  "physicsType": 1,
+                  "Component": {
+                    "active": true
+                  }
+                }
+              }
+            ]
+          },
+          "children": []
+        }
+      },
+      {
+        "ƒ.Node": {
+          "name": "GreenHolder",
+          "components": {
+            "ComponentMesh": [
+              {
+                "ƒ.ComponentMesh": {
+                  "mesh": {
+                    "ƒ.MeshCube": {}
+                  },
+                  "pivot": {
+                    "translation": {
+                      "x": 0,
+                      "y": 0,
+                      "z": 0
+                    },
+                    "rotation": {
+                      "x": 0,
+                      "y": 0,
+                      "z": 0
+                    },
+                    "scaling": {
+                      "x": 1,
+                      "y": 1,
+                      "z": 1
+                    }
+                  },
+                  "Component": {
+                    "active": true
+                  }
+                }
+              }
+            ],
+            "ComponentMaterial": [
+              {
+                "ƒ.ComponentMaterial": {
+                  "material": {
+                    "ƒ.Material": {
+                      "name": "GreenSpring",
+                      "idResource": "dummyId2",
+                      "shader": "ShaderUniColor",
+                      "coat": {
+                        "ƒ.CoatColored": {
+                          "name": "Coat",
+                          "color": {
+                            "r": 0,
+                            "g": 0.2,
+                            "b": 0.1,
+                            "a": 0.4
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "Component": {
+                    "active": true
+                  }
+                }
+              }
+            ],
+            "ComponentTransform": [
+              {
+                "ƒ.ComponentTransform": {
+                  "local": {
+                    "translation": {
+                      "x": 0,
+                      "y": 1,
+                      "z": 0
+                    },
+                    "rotation": {
+                      "x": 0,
+                      "y": 90,
+                      "z": 0
+                    },
+                    "scaling": {
+                      "x": 2,
+                      "y": 0.2,
+                      "z": 0.2
+                    }
+                  },
+                  "Component": {
+                    "active": true
+                  }
+                }
+              }
+            ],
+            "ComponentRigidbody": [
+              {
+                "ƒ.ComponentRigidbody": {
+                  "pivot": {
+                    "translation": {
+                      "x": 0,
+                      "y": 0,
+                      "z": 0
+                    },
+                    "rotation": {
+                      "x": 0,
+                      "y": 0,
+                      "z": 0
+                    },
+                    "scaling": {
+                      "x": 1,
+                      "y": 1,
+                      "z": 1
+                    }
+                  },
+                  "id": 5,
+                  "physicsType": 1,
+                  "Component": {
+                    "active": true
+                  }
+                }
+              }
+            ],
+            "ComponentJointPrismatic": [
+              {
+                "ƒ.ComponentJointPrismatic": {
+                  "attID": 5,
+                  "conID": 15,
+                  "axis": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 1
+                  },
+                  "internalCollision": false,
+                  "springDamping": 0,
+                  "springFrequency": 0,
+                  "motorLimitUpper": 2,
+                  "motorLimitLower": -2,
+                  "motorSpeed": 0.4,
+                  "motorForce": 15,
+                  "Component": {
+                    "active": true
+                  }
+                }
+              }
+            ]
+          },
+          "children": []
+        }
+      }
+    ]
+  }
+}

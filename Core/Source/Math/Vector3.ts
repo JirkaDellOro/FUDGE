@@ -346,6 +346,25 @@ namespace FudgeCore {
       };
       return mutator;
     }
+
+    public serialize(): Serialization {
+      let serialization: Serialization = this.getMutator();
+      return serialization;
+    }
+    public deserialize(_serialization: Serialization): Serializable {
+      this.mutate(_serialization);
+      return this;
+    }
+
+    public mutate(_mutator: Mutator): void {
+      let _x: number = <number>_mutator["x"];
+      let _y: number = <number>_mutator["y"];
+      let _z: number = <number>_mutator["z"];
+      this.x = _x;
+      this.y = _y;
+      this.z = _z;
+    }
+
     protected reduceMutator(_mutator: Mutator): void {/** */ }
   }
 }

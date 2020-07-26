@@ -321,8 +321,8 @@ namespace FudgeCore {
       let serialization: Serialization = {
         attID: super.idAttachedRB,
         conID: super.idConnectedRB,
-        axis: this.axis,
-        anchor: this.anchor,
+        axis: this.axis.serialize(),
+        anchor: this.anchor.serialize(),
         internalCollision: this.jointInternalCollision,
         springDamping: this.jointSpringDampingRatio,
         springFrequency: this.jointSpringFrequency,
@@ -348,8 +348,11 @@ namespace FudgeCore {
       super.idConnectedRB = _serialization.conID;
       if (_serialization.attID != null && _serialization.conID != null)
         super.setBodiesFromLoadedIDs();
-      this.axis = _serialization.axis != null ? _serialization.axis : this.jointAxis;
-      this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
+      let tempDeserializeVector: Vector3 = Recycler.get(Vector3);
+      _serialization.axis != null ? tempDeserializeVector.deserialize(_serialization.axis) : new Vector3(this.jointAxis.x, this.jointAxis.y, this.jointAxis.z);
+      this.axis = tempDeserializeVector;
+      _serialization.anchor != null ? tempDeserializeVector.deserialize(_serialization.anchor) : new Vector3(this.jointAnchor.x, this.jointAnchor.y, this.jointAnchor.z);
+      this.anchor = tempDeserializeVector;
       this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
       this.springDamping = _serialization.springDamping != null ? _serialization.springDamping : this.jointSpringDampingRatio;
       this.springFrequency = _serialization.springFrequency != null ? _serialization.springFrequency : this.jointSpringFrequency;

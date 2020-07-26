@@ -59,4 +59,4 @@ A collection of various other helpful documents and resources
 | Monika Galkewitsch | UI-Components                     |
 | Lea Stegk          | UI-Design                         |
 | Elke Scherffius    | Tutorials                         |
-
+| Marko Fehrenbach   | Physics-Components                |

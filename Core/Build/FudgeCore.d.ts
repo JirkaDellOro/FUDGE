@@ -2879,6 +2879,9 @@ declare namespace FudgeCore {
          */
         map(_function: (value: number, index: number, array: Float32Array) => number): Vector3;
         getMutator(): Mutator;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+        mutate(_mutator: Mutator): void;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -3485,7 +3488,7 @@ declare namespace FudgeCore {
         get anchor(): Vector3;
         set anchor(_value: Vector3);
         /**
-         * The damping of the spring. 1 equals completly damped.
+         * The damping of the spring.
          */
         get springDamping(): number;
         set springDamping(_value: number);
@@ -3506,6 +3509,7 @@ declare namespace FudgeCore {
         set breakTorque(_value: number);
         /**
           * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
+          * Setting limits upper 0 and lower 0 tries to keep the two bodies in place.
          */
         get motorLimitUpper(): number;
         set motorLimitUpper(_value: number);
@@ -3515,7 +3519,7 @@ declare namespace FudgeCore {
         get motorLimitLower(): number;
         set motorLimitLower(_value: number);
         /**
-          * The target speed of the motor in m/s.
+          * The target speed of the motor in m/s, moving the second body along the axis of the first in minus/plus direction.
          */
         get motorSpeed(): number;
         set motorSpeed(_value: number);

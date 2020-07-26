@@ -18,10 +18,10 @@ namespace FudgeCore {
     /** The type of interaction between the physical world and the transform hierarchy world. DYNAMIC means the body ignores hierarchy and moves by physics. KINEMATIC it's
      * reacting to a [[Node]] that is using physics but can still be controlled by animation or transform. And STATIC means its immovable.
      */
-    get physicsType(): PHYSICS_TYPE {
+    public get physicsType(): PHYSICS_TYPE {
       return this.rbType;
     }
-    set physicsType(_value: PHYSICS_TYPE) {
+    public set physicsType(_value: PHYSICS_TYPE) {
       this.rbType = _value;
       let oimoType: number;
       switch (this.rbType) {
@@ -43,20 +43,20 @@ namespace FudgeCore {
     }
 
     /** The shape that represents the [[Node]] in the physical world. Default is a Cube. */
-    get colliderType(): COLLIDER_TYPE {
+    public get colliderType(): COLLIDER_TYPE {
       return this.colType;
     }
-    set colliderType(_value: COLLIDER_TYPE) {
+    public set colliderType(_value: COLLIDER_TYPE) {
       if (_value != this.colType && this.rigidbody != null)
         this.updateFromWorld();
       this.colType = _value;
     }
 
     /** The physics group this [[Node]] belongs to it's the default group normally which means it physically collides with every group besides trigger. */
-    get collisionGroup(): PHYSICS_GROUP {
+    public get collisionGroup(): PHYSICS_GROUP {
       return this.colGroup;
     }
-    set collisionGroup(_value: PHYSICS_GROUP) {
+    public set collisionGroup(_value: PHYSICS_GROUP) {
       if (_value != PHYSICS_GROUP.TRIGGER && this.colGroup == PHYSICS_GROUP.TRIGGER) //Register/unregister triggers form the world
         Physics.world.unregisterTrigger(this);
       if (_value == PHYSICS_GROUP.TRIGGER)
@@ -69,23 +69,23 @@ namespace FudgeCore {
 
     /** The groups this object collides with. Groups must be writen in form of
      *  e.g. collisionMask = PHYSICS_GROUP.DEFAULT | PHYSICS_GROUP.GROUP_1 and so on to collide with multiple groups. */
-    get collisionMask(): number {
+    public get collisionMask(): number {
       return this.colMask;
     }
-    set collisionMask(_value: number) {
+    public set collisionMask(_value: number) {
       this.colMask = _value;
     }
 
     /**
    * Returns the physical weight of the [[Node]]
    */
-    get mass(): number {
+    public get mass(): number {
       return this.rigidbody.getMass();
     }
     /**
   * Setting the physical weight of the [[Node]] in kg
   */
-    set mass(_value: number) {
+    public set mass(_value: number) {
       this.massData.mass = _value;
       if (this.getContainer() != null)
         if (this.rigidbody != null)
@@ -93,37 +93,37 @@ namespace FudgeCore {
     }
 
     /** Air reistance, when moving. A Body does slow down even on a surface without friction. */
-    get linearDamping(): number {
+    public get linearDamping(): number {
       return this.rigidbody.getLinearDamping();
     }
-    set linearDamping(_value: number) {
+    public set linearDamping(_value: number) {
       this.linDamping = _value;
       this.rigidbody.setLinearDamping(_value);
     }
 
     /** Air resistance, when rotating. */
-    get angularDamping(): number {
+    public get angularDamping(): number {
       return this.rigidbody.getAngularDamping();
     }
-    set angularDamping(_value: number) {
+    public set angularDamping(_value: number) {
       this.angDamping = _value;
       this.rigidbody.setAngularDamping(_value);
     }
 
     /** The factor this rigidbody reacts rotations that happen in the physical world. 0 to lock rotation this axis. */
-    get rotationInfluenceFactor(): Vector3 {
+    public get rotationInfluenceFactor(): Vector3 {
       return this.rotationalInfluenceFactor;
     }
-    set rotationInfluenceFactor(_influence: Vector3) {
+    public set rotationInfluenceFactor(_influence: Vector3) {
       this.rotationalInfluenceFactor = _influence;
       this.rigidbody.setRotationFactor(new OIMO.Vec3(this.rotationalInfluenceFactor.x, this.rotationalInfluenceFactor.y, this.rotationalInfluenceFactor.z));
     }
 
     /** The factor this rigidbody reacts to world gravity. Default = 1 e.g. 1*9.81 m/s. */
-    get gravityScale(): number {
+    public get gravityScale(): number {
       return this.gravityInfluenceFactor;
     }
-    set gravityScale(_influence: number) {
+    public set gravityScale(_influence: number) {
       this.gravityInfluenceFactor = _influence;
       if (this.rigidbody != null) this.rigidbody.setGravityScale(this.gravityInfluenceFactor);
     }
@@ -131,14 +131,14 @@ namespace FudgeCore {
     /**
   * Get the friction of the rigidbody, which is the factor of sliding resistance of this rigidbody on surfaces
   */
-    get friction(): number {
+    public get friction(): number {
       return this.bodyFriction;
     }
 
     /**
    * Set the friction of the rigidbody, which is the factor of  sliding resistance of this rigidbody on surfaces
    */
-    set friction(_friction: number) {
+    public set friction(_friction: number) {
       this.bodyFriction = _friction;
       if (this.rigidbody.getShapeList() != null)
         this.rigidbody.getShapeList().setFriction(this.bodyFriction);
@@ -147,14 +147,14 @@ namespace FudgeCore {
     /**
   * Get the restitution of the rigidbody, which is the factor of bounciness of this rigidbody on surfaces
   */
-    get restitution(): number {
+    public get restitution(): number {
       return this.bodyRestitution;
     }
 
     /**
    * Set the restitution of the rigidbody, which is the factor of bounciness of this rigidbody on surfaces
    */
-    set restitution(_restitution: number) {
+    public set restitution(_restitution: number) {
       this.bodyRestitution = _restitution;
       if (this.rigidbody.getShapeList() != null)
         this.rigidbody.getShapeList().setRestitution(this.bodyRestitution);
