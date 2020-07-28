@@ -7,7 +7,7 @@ namespace Fudge {
   /**
   * Panel that functions as a Node Editor. Uses ViewData, ViewPort and ViewNode. 
   * Use NodePanelTemplate to initialize the default NodePanel.
-  * @author Monika Galkewitsch, 2019, HFU
+  * @authors Monika Galkewitsch, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
   */
   export class PanelGraph extends Panel {
     private node: ƒ.Node;

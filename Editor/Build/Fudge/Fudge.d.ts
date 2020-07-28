@@ -66,8 +66,7 @@ declare namespace Fudge {
      * Holds various views into the currently processed Fudge-project.
      * There must be only one ViewData in this panel, that displays data for the selected entity
      * Multiple panels may be created by the user, presets for different processing should be available
-     * @author Monika Galkewitsch, HFU, 2019
-     * @author Lukas Scheuerle, HFU, 2019
+     * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     abstract class Panel extends EventTarget {
         protected goldenLayout: GoldenLayout;
@@ -86,7 +85,7 @@ declare namespace Fudge {
     /**
     * Panel that functions as a Node Editor. Uses ViewData, ViewPort and ViewNode.
     * Use NodePanelTemplate to initialize the default NodePanel.
-    * @author Monika Galkewitsch, 2019, HFU
+    * @authors Monika Galkewitsch, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
     */
     class PanelGraph extends Panel {
         private node;
@@ -98,8 +97,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     /**
      * Manages all Panels used by Fudge at the time. Call the static instance Member to use its functions.
-     * @author Monika Galkewitsch, 2019, HFU
-     * @author Lukas Scheuerle, 2019, HFU
+     * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class PanelManager extends EventTarget {
         static idCounter: number;
@@ -141,8 +139,7 @@ declare namespace Fudge {
     }
     /**
      * Base class for all Views to support generic functionality
-     * @author Monika Galkewitsch, HFU, 2019
-     * @author Lukas Scheuerle, HFU, 2019
+     * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     abstract class View {
         dom: HTMLElement;

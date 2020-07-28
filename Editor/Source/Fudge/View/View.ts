@@ -14,8 +14,7 @@ namespace Fudge {
 
   /**
    * Base class for all Views to support generic functionality
-   * @author Monika Galkewitsch, HFU, 2019
-   * @author Lukas Scheuerle, HFU, 2019
+   * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
    */
   export abstract class View  {
 

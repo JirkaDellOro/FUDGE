@@ -10,8 +10,7 @@ namespace Fudge {
    * Holds various views into the currently processed Fudge-project.  
    * There must be only one ViewData in this panel, that displays data for the selected entity  
    * Multiple panels may be created by the user, presets for different processing should be available
-   * @author Monika Galkewitsch, HFU, 2019
-   * @author Lukas Scheuerle, HFU, 2019
+   * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
    */
 
   // TODO: class might become a customcomponent for HTML! = this.dom
