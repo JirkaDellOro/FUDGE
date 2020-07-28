@@ -7,7 +7,6 @@ namespace Fudge {
   export class PanelManager extends EventTarget {
     public static idCounter: number = 0;
     static instance: PanelManager = new PanelManager();
-    static templates: typeof PanelTemplate[];
     public editorLayout: GoldenLayout;
     private panels: Panel[] = [];
     private activePanel: Panel;

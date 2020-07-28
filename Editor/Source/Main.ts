@@ -6,11 +6,11 @@ namespace Main {
     QUIT,
     PROJECT_SAVE,
     PROJECT_OPEN,
-    VIEW_NODE_OPEN,
+    PANEL_GRAPH_OPEN,
     NODE_DELETE,
     NODE_UPDATE,
     DEVTOOLS_OPEN,
-    VIEW_ANIMATION
+    PANEL_ANIMATION_OPEN
   }
 
   const { app, BrowserWindow, Menu, ipcMain } = require("electron");
@@ -70,8 +70,8 @@ namespace Main {
       case MENU.PROJECT_SAVE:
         send(_window, "save", null);
         break;
-      case MENU.VIEW_NODE_OPEN:
-        send(_window, "openViewNode", null);
+      case MENU.PANEL_GRAPH_OPEN:
+        send(_window, "openPanelGraph", null);
         break;
       case MENU.NODE_UPDATE:
         send(_window, "updateNode", null);
@@ -79,8 +79,8 @@ namespace Main {
       case MENU.DEVTOOLS_OPEN:
         _window.webContents.openDevTools();
         break;
-      case MENU.VIEW_ANIMATION:
-        send(_window, "openAnimationPanel");
+      case MENU.PANEL_ANIMATION_OPEN:
+        send(_window, "openPanelAnimation");
         break;
       case MENU.QUIT:
         app.quit();
@@ -108,13 +108,13 @@ namespace Main {
       {
         label: "View", submenu: [
           {
-            label: "Node", id: String(MENU.VIEW_NODE_OPEN), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+N" : "Ctrl+N"
+            label: "Graph", id: String(MENU.PANEL_GRAPH_OPEN), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+G" : "Ctrl+G"
           },
           {
             label: "setRoot(testing)", id: String(MENU.NODE_UPDATE), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+U" : "Ctrl+U"
           },
           {
-            label: "Animation", id: String(MENU.VIEW_ANIMATION), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+I" : "Ctrl+I"
+            label: "Animation", id: String(MENU.PANEL_ANIMATION_OPEN), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+I" : "Ctrl+I"
           }
         ]
       },

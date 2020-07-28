@@ -20,6 +20,7 @@ namespace Fudge {
     // private config: GoldenLayout.ItemConfig;
     protected goldenLayout: GoldenLayout;
     protected dom: HTMLElement;
+    protected views: GoldenLayout.ContentItem;
 
     /**
      * Constructor for panel Objects. Generates an empty panel with a single ViewData.
@@ -31,6 +32,18 @@ namespace Fudge {
       this.dom = document.createElement("div");
       this.dom.style.height = "100%";
       this.dom.style.width = "100%";
+
+      let config: GoldenLayout.Config = {
+        settings: { showPopoutIcon: false },
+        content: [{
+          type: "row", content: []
+        }]
+      };
+      this.goldenLayout = new GoldenLayout(config, this.dom);
+      _container.getElement().append(this.dom);
+      this.goldenLayout.on("stateChanged", () => this.goldenLayout.updateSize());
+      this.goldenLayout.init();
+      this.views = this.goldenLayout.root.contentItems[0];
     }
 
 

@@ -137,17 +137,17 @@ var Fudge;
                 panel.setNode(node);
             }
         });
-        Fudge.ipcRenderer.on("openViewNode", (_event, _args) => {
-            ƒ.Debug.log("OpenViewNode");
+        Fudge.ipcRenderer.on("openPanelGraph", (_event, _args) => {
+            ƒ.Debug.log("openPanelGraph");
             openViewNode();
         });
-        Fudge.ipcRenderer.on("openAnimationPanel", (_event, _args) => {
-            ƒ.Debug.log("Open Animation Panel");
+        Fudge.ipcRenderer.on("openPanelAnimation", (_event, _args) => {
+            ƒ.Debug.log("openPanelAnimation");
             // openAnimationPanel();
         });
         // HACK!
         Fudge.ipcRenderer.on("updateNode", (_event, _args) => {
-            ƒ.Debug.log("UpdateViewNode");
+            ƒ.Debug.log("updateNode");
         });
     }
     function openViewNode() {
@@ -155,7 +155,7 @@ var Fudge;
         let node2 = new ƒAid.NodeCoordinateSystem("WorldCooSys", ƒ.Matrix4x4.IDENTITY());
         node.addChild(node2);
         node2.cmpTransform.local.translateZ(2);
-        Fudge.PanelManager.add(Fudge.PanelGraph, "Node", Object({ node: node })); //Object.create(null,  {node: { writable: true, value: node }}));
+        Fudge.PanelManager.add(Fudge.PanelGraph, "Graph", Object({ node: node })); //Object.create(null,  {node: { writable: true, value: node }}));
     }
     // function openAnimationPanel(): void {
     //   let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
@@ -322,52 +322,26 @@ var Fudge;
             this.dom = document.createElement("div");
             this.dom.style.height = "100%";
             this.dom.style.width = "100%";
+            let config = {
+                settings: { showPopoutIcon: false },
+                content: [{
+                        type: "row", content: []
+                    }]
+            };
+            this.goldenLayout = new GoldenLayout(config, this.dom);
+            _container.getElement().append(this.dom);
+            this.goldenLayout.on("stateChanged", () => this.goldenLayout.updateSize());
+            this.goldenLayout.init();
+            this.views = this.goldenLayout.root.contentItems[0];
         }
     }
     Fudge.Panel = Panel;
 })(Fudge || (Fudge = {}));
+// /<reference path="../View/View.ts"/>
+// /<reference path="../Panel/Panel.ts"/>
 var Fudge;
-(function (Fudge) {
-    var ƒ = FudgeCore;
-    let VIEW;
-    (function (VIEW) {
-        VIEW["HIERARCHY"] = "ViewHierarchy";
-        VIEW["ANIMATION"] = "ViewAnimation";
-        VIEW["RENDER"] = "ViewRender";
-        VIEW["COMPONENTS"] = "ViewComponents";
-        VIEW["CAMERA"] = "ViewCamera";
-        // PROJECT = ViewProject,
-        // SKETCH = ViewSketch,
-        // MESH = ViewMesh,
-    })(VIEW = Fudge.VIEW || (Fudge.VIEW = {}));
-    /**
-     * Base class for all Views to support generic functionality
-     * @author Monika Galkewitsch, HFU, 2019
-     * @author Lukas Scheuerle, HFU, 2019
-     */
-    class View {
-        // config: GoldenLayout.ComponentConfig;
-        // parentPanel: Panel;
-        // content: HTMLElement;
-        // type: string;
-        constructor(_container, _state) {
-            ƒ.Debug.info("Create view " + this.constructor.name);
-            this.dom = document.createElement("div");
-            this.dom.style.height = "100%";
-            this.dom.style.overflow = "auto";
-            this.dom.setAttribute("view", this.constructor.name);
-            _container.getElement().append(this.dom);
-            // this.config = this.getLayout();
-            // this.parentPanel = _parent;
-        }
-    }
-    Fudge.View = View;
-})(Fudge || (Fudge = {}));
-///<reference path="../View/View.ts"/>
-///<reference path="../Panel/Panel.ts"/>
-var Fudge;
-///<reference path="../View/View.ts"/>
-///<reference path="../Panel/Panel.ts"/>
+// /<reference path="../View/View.ts"/>
+// /<reference path="../Panel/Panel.ts"/>
 (function (Fudge) {
     /**
     * Panel that functions as a Node Editor. Uses ViewData, ViewPort and ViewNode.
@@ -375,44 +349,22 @@ var Fudge;
     * @author Monika Galkewitsch, 2019, HFU
     */
     class PanelGraph extends Fudge.Panel {
-        // constructor(_name: string, _template?: PanelTemplate, _node?: ƒ.Node) {
-        //   super(_name);
-        //   this.node = _node || new ƒ.Node("Scene");
-        //   if (_template) {
-        //     let id: string = this.config.id.toString();
-        //     this.config.content[0] = this.constructFromTemplate(_template.config, _template.config.type, id);
-        //   }
-        //   else {
-        //     let viewData: ViewComponents = new ViewComponents(this);
-        //     this.addView(viewData, false);
-        //   }
-        // }
         constructor(_container, _state) {
             super(_container, _state);
-            console.log(_state);
-            let config = {
-                settings: { showPopoutIcon: false },
-                content: [{
-                        type: "row", content: [{
-                                type: "column", content: [
-                                    { type: "component", componentName: Fudge.VIEW.HIERARCHY, title: "Hierarchy", componentState: _state },
-                                    { type: "component", componentName: Fudge.VIEW.RENDER, title: "Render", componentState: _state }
-                                ] //, componentState: _state }]
-                            }, {
-                                type: "column", content: [
-                                    { type: "component", componentName: Fudge.VIEW.COMPONENTS, title: "Components", componentState: _state },
-                                ]
-                            },
-                        ]
-                    }]
-            };
-            this.goldenLayout = new GoldenLayout(config, this.dom);
-            _container.getElement().append(this.dom);
             this.goldenLayout.registerComponent(Fudge.VIEW.RENDER, Fudge.ViewRender);
             this.goldenLayout.registerComponent(Fudge.VIEW.COMPONENTS, Fudge.ViewComponents);
             this.goldenLayout.registerComponent(Fudge.VIEW.HIERARCHY, Fudge.ViewHierarchy);
-            this.goldenLayout.on("stateChanged", () => this.goldenLayout.updateSize());
-            this.goldenLayout.init();
+            this.views.addChild({
+                type: "column", content: [{
+                        type: "component", componentName: Fudge.VIEW.RENDER, componentState: _state, title: "Render"
+                    }]
+            });
+            this.views.addChild({
+                type: "column", content: [
+                    { type: "component", componentName: Fudge.VIEW.HIERARCHY, componentState: _state, title: "Hierarchy" },
+                    { type: "component", componentName: Fudge.VIEW.COMPONENTS, componentState: _state, title: "Components" }
+                ]
+            });
         }
         // public static add(): void {
         //   let config: GoldenLayout.ItemConfig = {
@@ -538,39 +490,40 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    // Code by Monika Galkewitsch with a whole lot of Help by Lukas Scheuerle
-    class PanelTemplate {
-    }
-    Fudge.PanelTemplate = PanelTemplate;
-    class NodePanelTemplate extends PanelTemplate {
-        constructor() {
-            super();
-            this.config = {
-                type: "row", content: [
-                    {
-                        type: "component",
-                        componentName: Fudge.VIEW.RENDER,
-                        title: "Viewport"
-                    },
-                    {
-                        type: "column", content: [
-                            {
-                                type: "component",
-                                componentName: Fudge.VIEW.HIERARCHY,
-                                title: "Graph "
-                            },
-                            {
-                                type: "component",
-                                componentName: Fudge.VIEW.COMPONENTS,
-                                title: "Components"
-                            }
-                        ]
-                    }
-                ]
-            };
+    var ƒ = FudgeCore;
+    let VIEW;
+    (function (VIEW) {
+        VIEW["HIERARCHY"] = "ViewHierarchy";
+        VIEW["ANIMATION"] = "ViewAnimation";
+        VIEW["RENDER"] = "ViewRender";
+        VIEW["COMPONENTS"] = "ViewComponents";
+        VIEW["CAMERA"] = "ViewCamera";
+        // PROJECT = ViewProject,
+        // SKETCH = ViewSketch,
+        // MESH = ViewMesh,
+    })(VIEW = Fudge.VIEW || (Fudge.VIEW = {}));
+    /**
+     * Base class for all Views to support generic functionality
+     * @author Monika Galkewitsch, HFU, 2019
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    class View {
+        // config: GoldenLayout.ComponentConfig;
+        // parentPanel: Panel;
+        // content: HTMLElement;
+        // type: string;
+        constructor(_container, _state) {
+            ƒ.Debug.info("Create view " + this.constructor.name);
+            this.dom = document.createElement("div");
+            this.dom.style.height = "100%";
+            this.dom.style.overflow = "auto";
+            this.dom.setAttribute("view", this.constructor.name);
+            _container.getElement().append(this.dom);
+            // this.config = this.getLayout();
+            // this.parentPanel = _parent;
         }
     }
-    Fudge.NodePanelTemplate = NodePanelTemplate;
+    Fudge.View = View;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -1185,40 +1138,6 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    class ViewAnimationTemplate extends Fudge.PanelTemplate {
-        constructor() {
-            super();
-            this.config = {
-                type: "column",
-                content: [
-                    {
-                        type: "row",
-                        content: [
-                            {
-                                type: "component",
-                                componentName: Fudge.VIEW.RENDER,
-                                title: "Viewport"
-                            },
-                            {
-                                type: "component",
-                                componentName: Fudge.VIEW.COMPONENTS,
-                                title: "Inspector"
-                            }
-                        ]
-                    },
-                    {
-                        type: "component",
-                        componentName: Fudge.VIEW.ANIMATION,
-                        title: "Animator"
-                    }
-                ]
-            };
-        }
-    }
-    Fudge.ViewAnimationTemplate = ViewAnimationTemplate;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
     /**
      * View displaying all information of any selected entity and offering simple controls for manipulation
      */
@@ -1431,12 +1350,6 @@ var Fudge;
                 // this.parentPanel.dispatchEvent(event);
                 _event.cancelBubble = true;
             };
-            // if (_parent instanceof PanelGraph && _parent.getNode() != null)
-            //   this.graph = _parent.getNode();
-            // else {
-            //   this.graph = new ƒ.Node("Scene");
-            // }
-            console.log(_state);
             this.graph = _state["node"];
             this.createUserInterface();
         }

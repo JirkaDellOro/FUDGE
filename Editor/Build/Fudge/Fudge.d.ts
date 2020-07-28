@@ -72,34 +72,13 @@ declare namespace Fudge {
     abstract class Panel extends EventTarget {
         protected goldenLayout: GoldenLayout;
         protected dom: HTMLElement;
+        protected views: GoldenLayout.ContentItem;
         /**
          * Constructor for panel Objects. Generates an empty panel with a single ViewData.
          * @param _name Panel Name
          * @param _template Optional. Template to be used in the construction of the panel.
          */
         constructor(_container: GoldenLayout.Container, _state: Object);
-    }
-}
-declare namespace Fudge {
-    enum VIEW {
-        HIERARCHY = "ViewHierarchy",
-        ANIMATION = "ViewAnimation",
-        RENDER = "ViewRender",
-        COMPONENTS = "ViewComponents",
-        CAMERA = "ViewCamera"
-    }
-    /**
-     * Base class for all Views to support generic functionality
-     * @author Monika Galkewitsch, HFU, 2019
-     * @author Lukas Scheuerle, HFU, 2019
-     */
-    abstract class View {
-        protected dom: HTMLElement;
-        constructor(_container: GoldenLayout.Container, _state: Object);
-        /**
-         * Method to cleanup when user closes view
-         */
-        abstract cleanup(): void;
     }
 }
 declare namespace Fudge {
@@ -125,7 +104,6 @@ declare namespace Fudge {
     class PanelManager extends EventTarget {
         static idCounter: number;
         static instance: PanelManager;
-        static templates: typeof PanelTemplate[];
         editorLayout: GoldenLayout;
         private panels;
         private activePanel;
@@ -154,11 +132,25 @@ declare namespace Fudge {
     function registerPanelComponent(_container: GoldenLayout.Container, _state: Object): void;
 }
 declare namespace Fudge {
-    abstract class PanelTemplate {
-        config: GoldenLayout.ItemConfig;
+    enum VIEW {
+        HIERARCHY = "ViewHierarchy",
+        ANIMATION = "ViewAnimation",
+        RENDER = "ViewRender",
+        COMPONENTS = "ViewComponents",
+        CAMERA = "ViewCamera"
     }
-    class NodePanelTemplate extends PanelTemplate {
-        constructor();
+    /**
+     * Base class for all Views to support generic functionality
+     * @author Monika Galkewitsch, HFU, 2019
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    abstract class View {
+        protected dom: HTMLElement;
+        constructor(_container: GoldenLayout.Container, _state: Object);
+        /**
+         * Method to cleanup when user closes view
+         */
+        abstract cleanup(): void;
     }
 }
 declare namespace Fudge {
@@ -258,9 +250,6 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    class ViewAnimationTemplate extends PanelTemplate {
-        constructor();
-    }
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;

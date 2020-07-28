@@ -41,17 +41,17 @@ namespace Fudge {
         panel.setNode(node);
       }
     });
-    ipcRenderer.on("openViewNode", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-      ƒ.Debug.log("OpenViewNode");
+    ipcRenderer.on("openPanelGraph", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
+      ƒ.Debug.log("openPanelGraph");
       openViewNode();
     });
-    ipcRenderer.on("openAnimationPanel", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-      ƒ.Debug.log("Open Animation Panel");
+    ipcRenderer.on("openPanelAnimation", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
+      ƒ.Debug.log("openPanelAnimation");
       // openAnimationPanel();
     });
     // HACK!
     ipcRenderer.on("updateNode", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-      ƒ.Debug.log("UpdateViewNode");
+      ƒ.Debug.log("updateNode");
     });
   }
 
@@ -60,7 +60,7 @@ namespace Fudge {
     let node2: ƒ.Node = new ƒAid.NodeCoordinateSystem("WorldCooSys", ƒ.Matrix4x4.IDENTITY());
     node.addChild(node2);
     node2.cmpTransform.local.translateZ(2);
-    PanelManager.add(PanelGraph, "Node", Object({ node: node })); //Object.create(null,  {node: { writable: true, value: node }}));
+    PanelManager.add(PanelGraph, "Graph", Object({ node: node })); //Object.create(null,  {node: { writable: true, value: node }}));
   }
 
   // function openAnimationPanel(): void {
