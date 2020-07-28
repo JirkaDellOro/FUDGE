@@ -1,5 +1,6 @@
 // /<reference path="../View/View.ts"/>
 // /<reference path="../Panel/Panel.ts"/>
+import ƒui = FudgeUserInterface;
 
 namespace Fudge {
   import ƒ = FudgeCore;
@@ -30,6 +31,22 @@ namespace Fudge {
           { type: "component", componentName: VIEW.COMPONENTS, componentState: _state, title: "Components" }
         ]
       });
+
+      this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.hndSelectNode);
+    }
+
+    public setNode(_node: ƒ.Node): void {
+      this.node = _node;
+    }
+
+    public getNode(): ƒ.Node {
+      return this.node;
+    }
+
+    private hndSelectNode = (_event: CustomEvent): void => {
+      console.log(_event);
+      this.setNode(_event.detail);
+      this.broadcastEvent(_event);
     }
 
     // public static add(): void {
@@ -45,17 +62,5 @@ namespace Fudge {
     //   PanelManager.instance.editorLayout.root.contentItems[0].addChild(config);
     //   // glDoc.root.contentItems[0].addChild(config); 
     // }
-
-    public setNode(_node: ƒ.Node): void {
-      this.node = _node;
-      // for (let view of this.views) {
-      //   if (view["setRoot"])
-      //     view["setRoot"](this.node);
-      // }
-    }
-
-    public getNode(): ƒ.Node {
-      return this.node;
-    }
   }
 }

@@ -45,6 +45,13 @@ namespace Fudge {
       this.views = this.goldenLayout.root.contentItems[0];
     }
 
+    public broadcastEvent(_event: Event): void {
+      // overwrite event target and phase
+      Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.CAPTURING_PHASE });
+      Object.defineProperty(_event, "target", { writable: true, value: this });
+      this.views.callDownwards("receiveBroadcastEvent", [_event], false, true);
+    }
+
 
     // /**
     //  * Adds given View to the list of views on the panel. 

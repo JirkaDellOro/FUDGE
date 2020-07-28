@@ -14,23 +14,15 @@ namespace Fudge {
 
     constructor(_container: GoldenLayout.Container, _state: Object) {
       super(_container, _state);
-      // if (_parent instanceof PanelGraph && (<PanelGraph>_parent).getNode() != null)
-      //   this.setRoot((<PanelGraph>_parent).getNode());
-      // else
-      //   this.setRoot(new ƒ.Node("Node"));
+      this.contextMenu = ContextMenu.getMenu(ViewHierarchy, this.contextMenuCallback);
+
+      this.setRoot((<ƒ.General>_state).node);
 
       // this.parentPanel.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setSelectedNode);
-      this.contextMenu = ContextMenu.getMenu(ViewHierarchy, this.contextMenuCallback);
     }
-
-
 
     cleanup(): void {
       //TODO: desconstruct
-    }
-
-    fillContent(): void {
-      // remove?
     }
 
     /**
@@ -57,9 +49,10 @@ namespace Fudge {
     /**
      * Change the selected Node
      */
-    private setSelectedNode = (_event: CustomEvent): void => {
+    private setNode(_node: ƒ.Node): void {
+      console.log("Hierarchy", _node);
       // this.listController.setSelection(_event.detail);
-      this.selectedNode = _event.detail;
+      this.selectedNode = _node;
     }
 
     /**
@@ -68,13 +61,16 @@ namespace Fudge {
     private passEventToPanel = (_event: CustomEvent): void => {
       let eventToPass: CustomEvent;
       if (_event.type == ƒui.EVENT_TREE.SELECT)
-        eventToPass = new CustomEvent(ƒui.EVENT_USERINTERFACE.SELECT, { bubbles: false, detail: _event.detail.data });
+        eventToPass = new CustomEvent(ƒui.EVENT_USERINTERFACE.SELECT, { bubbles: true, detail: _event.detail.data });
       else
         eventToPass = new CustomEvent(_event.type, { bubbles: false, detail: _event.detail });
       _event.cancelBubble = true;
 
+      this.dom.dispatchEvent(eventToPass);
+
       // this.parentPanel.dispatchEvent(eventToPass);
       // this.dispatchEvent(eventToPass); <- if view was a subclass of HTMLElement or HTMLDivElement
+      // this.goldenLayout.emit(ƒui.EVENT_USERINTERFACE.SELECT, _event.detail.data);
     }
 
     private openContextMenu = (_event: Event): void => {

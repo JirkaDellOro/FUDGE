@@ -78,8 +78,10 @@ declare namespace Fudge {
          * @param _template Optional. Template to be used in the construction of the panel.
          */
         constructor(_container: GoldenLayout.Container, _state: Object);
+        broadcastEvent(_event: Event): void;
     }
 }
+import ƒui = FudgeUserInterface;
 declare namespace Fudge {
     import ƒ = FudgeCore;
     /**
@@ -92,6 +94,7 @@ declare namespace Fudge {
         constructor(_container: GoldenLayout.Container, _state: Object);
         setNode(_node: ƒ.Node): void;
         getNode(): ƒ.Node;
+        private hndSelectNode;
     }
 }
 declare namespace Fudge {
@@ -141,13 +144,15 @@ declare namespace Fudge {
      * Base class for all Views to support generic functionality
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
-    abstract class View {
+    abstract class View extends EventTarget {
         dom: HTMLElement;
+        protected goldenLayout: GoldenLayout;
         constructor(_container: GoldenLayout.Container, _state: Object);
         /**
          * Method to cleanup when user closes view
          */
         abstract cleanup(): void;
+        protected receiveBroadcastEvent(_events: Event[]): void;
     }
 }
 declare namespace Fudge {
@@ -282,7 +287,6 @@ declare namespace Fudge {
         contextMenu: Electron.Menu;
         constructor(_container: GoldenLayout.Container, _state: Object);
         cleanup(): void;
-        fillContent(): void;
         /**
          * Display structure of node
          * @param _node Node to be displayed
@@ -291,7 +295,7 @@ declare namespace Fudge {
         /**
          * Change the selected Node
          */
-        private setSelectedNode;
+        private setNode;
         /**
          * Pass Event to Panel
          */
