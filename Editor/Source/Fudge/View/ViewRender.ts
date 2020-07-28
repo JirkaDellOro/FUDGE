@@ -4,8 +4,8 @@ namespace Fudge {
   import ƒaid = FudgeAid;
 
   /**
-   * View displaying a Node and the hierarchical relation to its parents and children.  
-   * Consists of a viewport and a tree-control. 
+   * View the rendering of a graph in a viewport with an independent camera
+   * @author Jirka Dell'Oro-Friedl, HFU, 2020
    */
   export class ViewRender extends View {
     viewport: ƒ.Viewport;
@@ -43,15 +43,10 @@ namespace Fudge {
 
       //Focus cameracontrols on new viewport
       let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVEVIEWPORT, { detail: this.viewport.camera, bubbles: false });
-      // this.parentPanel.dispatchEvent(event);
 
       this.canvas.addEventListener("click", this.activeViewport);
     }
 
-    /**
-     * Set the root node for display in this view
-     * @param _node 
-     */
     public setRoot(_node: ƒ.Node): void {
       if (!_node)
         return;
@@ -59,9 +54,7 @@ namespace Fudge {
       this.viewport.setGraph(this.graph);
 
     }
-    /** 
-     * Update Viewport every frame
-     */
+    
     private animate = (_e: Event) => {
       this.viewport.setGraph(this.graph);
       if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
@@ -70,8 +63,6 @@ namespace Fudge {
     
     private activeViewport = (_event: MouseEvent): void => {
       let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVEVIEWPORT, { detail: this.viewport.camera, bubbles: false });
-      // this.parentPanel.dispatchEvent(event);
-
       _event.cancelBubble = true;
     }
   }

@@ -39,7 +39,7 @@ namespace Fudge {
       // for (let child of children) {
       //   this.mutator[(<ƒui.CollapsableAnimationList>child).name] = (<ƒui.CollapsableAnimationList>child).mutator;
       // }
-      console.log(this.mutator);
+      ƒ.Debug.info(this.mutator);
       return this.mutator;
     }
 

@@ -63,22 +63,18 @@ declare namespace Fudge {
         GRAPH = "PanelGraph"
     }
     /**
-     * Holds various views into the currently processed Fudge-project.
-     * There must be only one ViewData in this panel, that displays data for the selected entity
-     * Multiple panels may be created by the user, presets for different processing should be available
+     * Base class for all [[Panel]]s aggregating [[View]]s
+     * Subclasses are presets for common panels. A user might add or delete [[View]]s at runtime
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     abstract class Panel extends EventTarget {
         protected goldenLayout: GoldenLayout;
         protected dom: HTMLElement;
-        protected views: GoldenLayout.ContentItem;
-        /**
-         * Constructor for panel Objects. Generates an empty panel with a single ViewData.
-         * @param _name Panel Name
-         * @param _template Optional. Template to be used in the construction of the panel.
-         */
+        private views;
         constructor(_container: GoldenLayout.Container, _state: Object);
+        /** Send custom copies of the give event to the views */
         broadcastEvent(_event: Event): void;
+        private addViewComponent;
     }
 }
 import ƒui = FudgeUserInterface;
@@ -99,8 +95,9 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-     * Manages all Panels used by Fudge at the time. Call the static instance Member to use its functions.
+     * Manages all [[Panel]]s used by Fudge at the time. Call the static instance Member to use its functions.
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
+     * @author
      */
     class PanelManager extends EventTarget {
         static idCounter: number;
@@ -141,18 +138,14 @@ declare namespace Fudge {
         CAMERA = "ViewCamera"
     }
     /**
-     * Base class for all Views to support generic functionality
+     * Base class for all [[View]]s to support generic functionality
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     abstract class View extends EventTarget {
         dom: HTMLElement;
-        protected goldenLayout: GoldenLayout;
         constructor(_container: GoldenLayout.Container, _state: Object);
-        /**
-         * Method to cleanup when user closes view
-         */
+        /** Cleanup when user closes view */
         abstract cleanup(): void;
-        protected receiveBroadcastEvent(_events: Event[]): void;
     }
 }
 declare namespace Fudge {
@@ -254,22 +247,17 @@ declare namespace Fudge {
 declare namespace Fudge {
 }
 declare namespace Fudge {
+    /**
+     * View all components attached to a node
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020
+     */
     class ViewComponents extends View {
-        private data;
+        private node;
         constructor(_container: GoldenLayout.Container, _state: Object);
         cleanup(): void;
         fillContent(): void;
-        /**
-         * Changes the name of the displayed node
-         */
         private changeNodeName;
-        /**
-         * Change displayed node
-         */
         private setNode;
-        /**
-         * Add Component to displayed node
-         */
         private addComponent;
     }
 }
@@ -277,8 +265,8 @@ declare namespace Fudge {
     import ƒ = FudgeCore;
     import ƒui = FudgeUserInterface;
     /**
-     * View displaying a Node and the hierarchical relation to its parents and children.
-     * Consists of a viewport, a tree-control and .
+     * View the hierarchy of a graph as tree-control
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class ViewHierarchy extends View {
         graph: ƒ.Node;
@@ -287,18 +275,8 @@ declare namespace Fudge {
         contextMenu: Electron.Menu;
         constructor(_container: GoldenLayout.Container, _state: Object);
         cleanup(): void;
-        /**
-         * Display structure of node
-         * @param _node Node to be displayed
-         */
         setRoot(_node: ƒ.Node): void;
-        /**
-         * Change the selected Node
-         */
         private setNode;
-        /**
-         * Pass Event to Panel
-         */
         private passEventToPanel;
         private openContextMenu;
         private contextMenuCallback;
@@ -307,8 +285,8 @@ declare namespace Fudge {
 declare namespace Fudge {
     import ƒ = FudgeCore;
     /**
-     * View displaying a Node and the hierarchical relation to its parents and children.
-     * Consists of a viewport and a tree-control.
+     * View the rendering of a graph in a viewport with an independent camera
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class ViewRender extends View {
         viewport: ƒ.Viewport;
@@ -317,14 +295,7 @@ declare namespace Fudge {
         constructor(_container: GoldenLayout.Container, _state: Object);
         cleanup(): void;
         createUserInterface(): void;
-        /**
-         * Set the root node for display in this view
-         * @param _node
-         */
         setRoot(_node: ƒ.Node): void;
-        /**
-         * Update Viewport every frame
-         */
         private animate;
         private activeViewport;
     }

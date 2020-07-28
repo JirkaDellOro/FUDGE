@@ -5,27 +5,18 @@ namespace Fudge {
     GRAPH = "PanelGraph"
   }
 
-
   /**
-   * Holds various views into the currently processed Fudge-project.  
-   * There must be only one ViewData in this panel, that displays data for the selected entity  
-   * Multiple panels may be created by the user, presets for different processing should be available
+   * Base class for all [[Panel]]s aggregating [[View]]s
+   * Subclasses are presets for common panels. A user might add or delete [[View]]s at runtime
    * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
    */
 
   // TODO: class might become a customcomponent for HTML! = this.dom
   export abstract class Panel extends EventTarget {
-    // views: View[];
-    // private config: GoldenLayout.ItemConfig;
     protected goldenLayout: GoldenLayout;
     protected dom: HTMLElement;
-    protected views: GoldenLayout.ContentItem;
+    private views: View[] = [];
 
-    /**
-     * Constructor for panel Objects. Generates an empty panel with a single ViewData.
-     * @param _name Panel Name
-     * @param _template Optional. Template to be used in the construction of the panel.
-     */
     constructor(_container: GoldenLayout.Container, _state: Object) {
       super();
       this.dom = document.createElement("div");
@@ -41,33 +32,20 @@ namespace Fudge {
       this.goldenLayout = new GoldenLayout(config, this.dom);
       _container.getElement().append(this.dom);
       this.goldenLayout.on("stateChanged", () => this.goldenLayout.updateSize());
+      this.goldenLayout.on("componentCreated", this.addViewComponent);
       this.goldenLayout.init();
-      this.views = this.goldenLayout.root.contentItems[0];
     }
 
+    /** Send custom copies of the give event to the views */
     public broadcastEvent(_event: Event): void {
-      // overwrite event target and phase
-      Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.CAPTURING_PHASE });
-      Object.defineProperty(_event, "target", { writable: true, value: this });
-      this.views.callDownwards("receiveBroadcastEvent", [_event], false, true);
+      for (let view of this.views) {
+        let event: CustomEvent = new CustomEvent(_event.type, { bubbles: false, cancelable: true, detail: (<CustomEvent>_event).detail });
+        view.dispatchEvent(event);
+      }
     }
 
-
-    // /**
-    //  * Adds given View to the list of views on the panel. 
-    //  * @param _v View to be added
-    //  * @param _pushToPanelManager Wether or not the View should also be pushed to the Panelmanagers list of views
-    //  * @param _pushConfig Wether or not the config of the view should be pushed into the panel config. If this is false, you will have to push the view config manually. This is helpful for creating custom structures in the panel config.
-    //  */
-    // public addView(_v: View, _pushToPanelManager: boolean = true, _pushConfig: boolean = true): void {
-    //   this.views.push(_v);
-    //   if (_pushConfig) {
-    //     this.config.content.push(_v.config);
-    //   }
-    //   // TODO: see if it makes sense to add single views to the panel manager
-    //   // if (_pushToPanelManager) {
-    //   //   PanelManager.instance.addView(_v);
-    //   // }
-    // }
+    private addViewComponent = (_component: Object): void => {
+      this.views.push(<View>(<ƒ.General>_component).instance);
+    }
   }
 }

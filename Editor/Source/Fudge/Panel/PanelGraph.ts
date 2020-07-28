@@ -20,12 +20,13 @@ namespace Fudge {
       this.goldenLayout.registerComponent(VIEW.COMPONENTS, ViewComponents);
       this.goldenLayout.registerComponent(VIEW.HIERARCHY, ViewHierarchy);
 
-      this.views.addChild({
+      let inner: GoldenLayout.ContentItem = this.goldenLayout.root.contentItems[0];
+      inner.addChild({
         type: "column", content: [{
           type: "component", componentName: VIEW.RENDER, componentState: _state, title: "Render"
         }]
       });
-      this.views.addChild({
+      inner.addChild({
         type: "column", content: [
           { type: "component", componentName: VIEW.HIERARCHY, componentState: _state, title: "Hierarchy" },
           { type: "component", componentName: VIEW.COMPONENTS, componentState: _state, title: "Components" }
@@ -44,23 +45,8 @@ namespace Fudge {
     }
 
     private hndSelectNode = (_event: CustomEvent): void => {
-      console.log(_event);
       this.setNode(_event.detail);
       this.broadcastEvent(_event);
     }
-
-    // public static add(): void {
-    //   let config: GoldenLayout.ItemConfig = {
-    //     type: "stack",
-    //     content: [{
-    //       type: "component",
-    //       componentName: "PanelGraph",
-    //       componentState: { text: "Panel 3" },
-    //       title: "Panel3"
-    //     }]
-    //   };
-    //   PanelManager.instance.editorLayout.root.contentItems[0].addChild(config);
-    //   // glDoc.root.contentItems[0].addChild(config); 
-    // }
   }
 }

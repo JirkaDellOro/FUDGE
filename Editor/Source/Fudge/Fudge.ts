@@ -22,7 +22,7 @@ namespace Fudge {
   function initWindow(): void {
     ƒ.Debug.log("Fudge started");
     PanelManager.instance.init();
-    console.log("Panel Manager initialized");
+    ƒ.Debug.log("Panel Manager initialized");
     // TODO: create a new Panel containing a ViewData by default. More Views can be added by the user or by configuration
 
     ipcRenderer.on("save", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
@@ -82,16 +82,16 @@ namespace Fudge {
     let filenames: string[] = remote.dialog.showOpenDialogSync(null, { title: "Load Graph", buttonLabel: "Load Graph", properties: ["openFile"] });
 
     let content: string = fs.readFileSync(filenames[0], { encoding: "utf-8" });
-    console.groupCollapsed("File content");
-    ƒ.Debug.log(content);
-    console.groupEnd();
+    ƒ.Debug.groupCollapsed("File content");
+    ƒ.Debug.info(content);
+    ƒ.Debug.groupEnd();
 
     let serialization: ƒ.Serialization = ƒ.Serializer.parse(content);
     let node: ƒ.Node = <ƒ.Node>ƒ.Serializer.deserialize(serialization);
 
-    console.groupCollapsed("Deserialized");
-    console.log(node);
-    console.groupEnd();
+    ƒ.Debug.groupCollapsed("Deserialized");
+    ƒ.Debug.info(node);
+    ƒ.Debug.groupEnd();
 
     return node;
   }

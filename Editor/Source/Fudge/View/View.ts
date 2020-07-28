@@ -13,38 +13,23 @@ namespace Fudge {
   }
 
   /**
-   * Base class for all Views to support generic functionality
+   * Base class for all [[View]]s to support generic functionality
    * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
    */
   export abstract class View extends EventTarget {
 
     public dom: HTMLElement;
-    protected goldenLayout: GoldenLayout;
-    // config: GoldenLayout.ComponentConfig;
-    // parentPanel: Panel;
-    // content: HTMLElement;
-    // type: string;
 
     constructor(_container: GoldenLayout.Container, _state: Object) {
       super();
-      ƒ.Debug.info("Create view " + this.constructor.name);
       this.dom = document.createElement("div");
       this.dom.style.height = "100%";
       this.dom.style.overflow = "auto";
       this.dom.setAttribute("view", this.constructor.name);
       _container.getElement().append(this.dom);
-      // this.config = this.getLayout();
-      // this.parentPanel = _parent;
-      this.goldenLayout = _container.layoutManager;
     }
 
-    /**
-     * Method to cleanup when user closes view
-     */
+    /** Cleanup when user closes view */
     abstract cleanup(): void;
-
-    protected receiveBroadcastEvent(_events: Event[]): void {
-      this.dispatchEvent(_events[0]);
-    }
   }
 }

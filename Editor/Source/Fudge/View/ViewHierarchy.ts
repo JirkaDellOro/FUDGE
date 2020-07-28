@@ -3,8 +3,8 @@ namespace Fudge {
   import ƒui = FudgeUserInterface;
 
   /**
-   * View displaying a Node and the hierarchical relation to its parents and children.  
-   * Consists of a viewport, a tree-control and . 
+   * View the hierarchy of a graph as tree-control
+   * @author Jirka Dell'Oro-Friedl, HFU, 2020  
    */
   export class ViewHierarchy extends View {
     graph: ƒ.Node;
@@ -25,10 +25,6 @@ namespace Fudge {
       //TODO: desconstruct
     }
 
-    /**
-     * Display structure of node
-     * @param _node Node to be displayed
-     */
     public setRoot(_node: ƒ.Node): void {
       if (!_node)
         return;
@@ -46,18 +42,12 @@ namespace Fudge {
       this.dom.append(this.tree);
     }
 
-    /**
-     * Change the selected Node
-     */
     private setNode(_node: ƒ.Node): void {
-      console.log("Hierarchy", _node);
+      ƒ.Debug.info("Hierarchy", _node);
       // this.listController.setSelection(_event.detail);
       this.selectedNode = _node;
     }
-
-    /**
-     * Pass Event to Panel
-     */
+    
     private passEventToPanel = (_event: CustomEvent): void => {
       let eventToPass: CustomEvent;
       if (_event.type == ƒui.EVENT_TREE.SELECT)
@@ -67,10 +57,6 @@ namespace Fudge {
       _event.cancelBubble = true;
 
       this.dom.dispatchEvent(eventToPass);
-
-      // this.parentPanel.dispatchEvent(eventToPass);
-      // this.dispatchEvent(eventToPass); <- if view was a subclass of HTMLElement or HTMLDivElement
-      // this.goldenLayout.emit(ƒui.EVENT_USERINTERFACE.SELECT, _event.detail.data);
     }
 
     private openContextMenu = (_event: Event): void => {
@@ -78,7 +64,7 @@ namespace Fudge {
     }
 
     private contextMenuCallback = (_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void => {
-      console.log(`MenuSelect: Item-id=${MENU[_item.id]}`);
+      ƒ.Debug.info(`MenuSelect: Item-id=${MENU[_item.id]}`);
       let focus: ƒ.Node = this.tree.getFocussed();
 
       switch (Number(_item.id)) {
@@ -93,7 +79,7 @@ namespace Fudge {
           let component: typeof ƒ.Component = ƒ.Component.subclasses[iSubclass];
           //@ts-ignore
           let cmpNew: ƒ.Component = new component();
-          console.log(cmpNew.type, cmpNew);
+          ƒ.Debug.info(cmpNew.type, cmpNew);
 
           focus.addComponent(cmpNew);
           break;
