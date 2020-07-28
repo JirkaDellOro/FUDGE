@@ -19,7 +19,7 @@ namespace Fudge {
    */
   export abstract class View  {
 
-    protected dom: HTMLElement;
+    public dom: HTMLElement;
     // config: GoldenLayout.ComponentConfig;
     // parentPanel: Panel;
     // content: HTMLElement;

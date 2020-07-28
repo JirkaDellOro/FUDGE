@@ -14,7 +14,7 @@ namespace Fudge {
 
     protected drawSequence(_sequence: FudgeCore.AnimationSequence, _input: HTMLInputElement): void {
       let rect: DOMRect | ClientRect = _input.getBoundingClientRect();
-      let y: number = rect.top - this.view.content.getBoundingClientRect().top + rect.height / 2;
+      let y: number = rect.top - this.view.dom.getBoundingClientRect().top + rect.height / 2;
       let height: number = rect.height;
       let width: number = rect.height;
       let line: Path2D = new Path2D();

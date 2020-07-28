@@ -145,7 +145,7 @@ declare namespace Fudge {
      * @author Lukas Scheuerle, HFU, 2019
      */
     abstract class View {
-        protected dom: HTMLElement;
+        dom: HTMLElement;
         constructor(_container: GoldenLayout.Container, _state: Object);
         /**
          * Method to cleanup when user closes view
@@ -172,7 +172,7 @@ declare namespace Fudge {
         label: string;
         path2D: Path2D;
     }
-    class ViewAnimation extends Fudge.View {
+    class ViewAnimation extends View {
         node: FudgeCore.Node;
         animation: FudgeCore.Animation;
         cmpAnimator: FudgeCore.ComponentAnimator;
@@ -186,11 +186,11 @@ declare namespace Fudge {
         private hover;
         private time;
         private playing;
-        constructor(_parent: Panel);
+        constructor(_container: GoldenLayout.Container, _state: Object);
         openAnimation(): void;
         fillContent(): void;
         installListeners(): void;
-        deconstruct(): void;
+        cleanup(): void;
         mouseClick(_e: MouseEvent): void;
         mouseDown(_e: MouseEvent): void;
         mouseMove(_e: MouseEvent): void;
@@ -250,16 +250,6 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-}
-declare namespace Fudge {
-    import ƒ = FudgeCore;
-    class ViewCamera extends View {
-        camera: ƒ.ComponentCamera;
-        constructor(_panel: Panel);
-        fillContent(): void;
-        deconstruct(): void;
-        private setCamera;
-    }
 }
 declare namespace Fudge {
     class ViewComponents extends View {

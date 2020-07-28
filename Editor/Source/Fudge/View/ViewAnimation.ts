@@ -21,7 +21,7 @@ namespace Fudge {
   }
 
 
-  export class ViewAnimation extends Fudge.View {
+  export class ViewAnimation extends View {
     node: FudgeCore.Node;
     animation: FudgeCore.Animation;
     cmpAnimator: FudgeCore.ComponentAnimator;
@@ -36,8 +36,8 @@ namespace Fudge {
     private time: FudgeCore.Time = new FudgeCore.Time();
     private playing: boolean = false;
 
-    constructor(_parent: Panel) {
-      super(_parent);
+    constructor(_container: GoldenLayout.Container, _state: Object) {
+      super(_container, _state);
       this.playbackTime = 500;
 
       this.openAnimation();
@@ -120,11 +120,11 @@ namespace Fudge {
       this.hover.style.position = "absolute";
       this.hover.style.display = "none";
 
-      this.content.appendChild(this.toolbar);
-      this.content.appendChild(this.attributeList);
+      this.dom.appendChild(this.toolbar);
+      this.dom.appendChild(this.attributeList);
       // this.content.appendChild(this.canvasSheet);
-      this.content.appendChild(this.canvas);
-      this.content.appendChild(this.hover);
+      this.dom.appendChild(this.canvas);
+      this.dom.appendChild(this.hover);
 
       // this.sheet = new ViewAnimationSheetDope(this, this.crc, null, new FudgeCore.Vector2(.5, 0.5), new FudgeCore.Vector2(0, 0));
       this.sheet = new ViewAnimationSheetCurve(this, this.crc, null, new FudgeCore.Vector2(0.5, 2), new FudgeCore.Vector2(0, 200));
@@ -142,7 +142,7 @@ namespace Fudge {
       requestAnimationFrame(this.playAnimation.bind(this));
     }
 
-    deconstruct(): void {
+    cleanup(): void {
       //
     }
 
@@ -156,17 +156,19 @@ namespace Fudge {
       }
       let obj: ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent = this.sheet.getObjectAtPoint(_e.offsetX, _e.offsetY);
       if (!obj) return;
+
+      // TODO: events should bubble to panel
       if (obj["label"]) {
         console.log(obj["label"]);
-        this.parentPanel.dispatchEvent(new CustomEvent(FudgeUserInterface.EVENT_USERINTERFACE.SELECT, { detail: { name: obj["label"], time: this.animation.labels[obj["label"]] } }));
+        this.dom.dispatchEvent(new CustomEvent(FudgeUserInterface.EVENT_USERINTERFACE.SELECT, { detail: { name: obj["label"], time: this.animation.labels[obj["label"]] } }));
       }
       else if (obj["event"]) {
         console.log(obj["event"]);
-        this.parentPanel.dispatchEvent(new CustomEvent(FudgeUserInterface.EVENT_USERINTERFACE.SELECT, { detail: { name: obj["event"], time: this.animation.events[obj["event"]] } }));
+        this.dom.dispatchEvent(new CustomEvent(FudgeUserInterface.EVENT_USERINTERFACE.SELECT, { detail: { name: obj["event"], time: this.animation.events[obj["event"]] } }));
       }
       else if (obj["key"]) {
         console.log(obj["key"]);
-        this.parentPanel.dispatchEvent(new CustomEvent(FudgeUserInterface.EVENT_USERINTERFACE.SELECT, { detail: obj["key"] }));
+        this.dom.dispatchEvent(new CustomEvent(FudgeUserInterface.EVENT_USERINTERFACE.SELECT, { detail: obj["key"] }));
       }
       console.log(obj);
     }
