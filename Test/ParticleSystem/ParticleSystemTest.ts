@@ -15,7 +15,8 @@ namespace ParticleSystemTest {
   let speedCameraRotation: number = 0.2;
   let speedCameraTranslation: number = 0.02;
 
-  let inputParticleNum: HTMLInputElement;
+  let inputParticleNum1: HTMLInputElement;
+  let inputParticleNum2: HTMLInputElement;
   let inputEffectName: HTMLInputElement;
 
   let cmpParticleSystem1: f.ComponentParticleSystem;
@@ -26,7 +27,8 @@ namespace ParticleSystemTest {
     f.RenderManager.setDepthTest(false);
     f.RenderManager.setBlendMode(f.BLEND.PARTICLE);
 
-    inputParticleNum = <HTMLInputElement>document.getElementById("particleNum");
+    inputParticleNum1 = <HTMLInputElement>document.getElementById("particleNum1");
+    inputParticleNum2 = <HTMLInputElement>document.getElementById("particleNum2");
     inputEffectName = <HTMLInputElement>document.getElementById("effectName");
     const canvas: HTMLCanvasElement = document.querySelector("canvas");
     f.Debug.log("Canvas", canvas);
@@ -77,43 +79,39 @@ namespace ParticleSystemTest {
     // particlesSystem2.getComponent(f.ComponentMesh).showToCamera = true;
     particlesSystem2.getComponent(f.ComponentMaterial).clrPrimary = new f.Color(0.5, 1, 0.2);
 
-    let particleEffect: f.ParticleEffect = new f.ParticleEffect(inputParticleNum.valueAsNumber);
-    await particleEffect.load("test.json");
+    let particleEffect: f.ParticleEffect = new f.ParticleEffect();
+    await particleEffect.load(inputEffectName.value);
     console.log(particleEffect);
 
-    cmpParticleSystem1 = new f.ComponentParticleSystem(particleEffect);
-    cmpParticleSystem2 = new f.ComponentParticleSystem(particleEffect);
+    cmpParticleSystem1 = new f.ComponentParticleSystem(particleEffect, inputParticleNum1.valueAsNumber);
+    cmpParticleSystem2 = new f.ComponentParticleSystem(particleEffect, inputParticleNum2.valueAsNumber);
     particlesSystem1.addComponent(cmpParticleSystem1);
     particlesSystem2.addComponent(cmpParticleSystem2);
     root.addChild(particlesSystem1);
     root.addChild(particlesSystem2);
 
     // setup input
-    let reStartParticleSystem: (_event: Event) => void = async (_event: Event) => {
-      let newParticleEffect: f.ParticleEffect = new f.ParticleEffect(inputParticleNum.valueAsNumber);
+    let changeSize: (_event: Event) => void = async (_event: Event) => {
+      if (cmpParticleSystem1.size != inputParticleNum1.valueAsNumber)
+        cmpParticleSystem1.size = inputParticleNum1.valueAsNumber;
+      if (cmpParticleSystem2.size != inputParticleNum2.valueAsNumber)
+        cmpParticleSystem2.size = inputParticleNum2.valueAsNumber;
+    };
+
+    let changeEffect: (_event: Event) => void = async (_event: Event) => {
+      let newParticleEffect: f.ParticleEffect = new f.ParticleEffect();
       await newParticleEffect.load(inputEffectName.value);
       console.log(newParticleEffect);
 
-      // cmpParticleSystem1.particleEffect = newParticleEffect;
-      // cmpParticleSystem2.particleEffect = newParticleEffect;
-      // cmpParticleSystem1.size = inputParticleNum.valueAsNumber;
-      // cmpParticleSystem2.size = inputParticleNum.valueAsNumber;
-      let newParticleSystemCmp1: f.ComponentParticleSystem = new f.ComponentParticleSystem(newParticleEffect);
-      particlesSystem1.removeComponent(cmpParticleSystem1);
-      particlesSystem1.addComponent(newParticleSystemCmp1);
-
-      let newParticleSystemCmp2: f.ComponentParticleSystem = new f.ComponentParticleSystem(newParticleEffect);
-      particlesSystem2.removeComponent(cmpParticleSystem2);
-      particlesSystem2.addComponent(newParticleSystemCmp2);
-
-      cmpParticleSystem1 = newParticleSystemCmp1;
-      cmpParticleSystem2 = newParticleSystemCmp2;
+      cmpParticleSystem1.particleEffect = newParticleEffect;
+      cmpParticleSystem2.particleEffect = newParticleEffect;
     };
 
-    inputParticleNum.addEventListener("input", reStartParticleSystem);
+    inputParticleNum1.addEventListener("input", changeSize);
+    inputParticleNum2.addEventListener("input", changeSize);
     inputEffectName.addEventListener("keydown", (_event: KeyboardEvent) => {
       if (_event.key == "Enter")
-        reStartParticleSystem(_event);
+        changeEffect(_event);
     });
 
     f.Loop.addEventListener(f.EVENT.LOOP_FRAME, update);

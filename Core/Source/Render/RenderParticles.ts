@@ -24,8 +24,8 @@ namespace FudgeCore {
       let cameraViewProjectionMatrix: Matrix4x4 = _cmpCamera.ViewProjectionMatrix;
 
       let particleEffect: ParticleEffect = _cmpParticleSystem.particleEffect;
-      let storedValues: StoredValues = particleEffect.storedValues;
-      storedValues["time"] = Time.game.get() / 1000;
+      let inputFactors: ParticleInputFactors = _cmpParticleSystem.inputFactors;
+      inputFactors["time"] = Time.game.get() / 1000;
       particleEffect.randomNumbers = _cmpParticleSystem.randomNumbers;
       let dataTransformLocal: ParticleEffectData = particleEffect.transformLocal;
       let dataTransformWorld: ParticleEffectData = particleEffect.transformWorld;
@@ -45,34 +45,34 @@ namespace FudgeCore {
       }
 
       // evaluate update storage
-      _cmpParticleSystem.evaluateClosureStorage(particleEffect.storageUpdate);
+      _cmpParticleSystem.evaluateStorage(particleEffect.storageUpdate);
 
       let storageParticle: ParticleEffectData;
       storageParticle = particleEffect.storageParticle;
 
-      for (let i: number = 0, length: number = storedValues["size"]; i < length; i++) {
-        storedValues["index"] = i;
+      for (let i: number = 0, length: number = inputFactors["size"]; i < length; i++) {
+        inputFactors["index"] = i;
 
         // evaluate particle storage
-        _cmpParticleSystem.evaluateClosureStorage(storageParticle);
+        _cmpParticleSystem.evaluateStorage(storageParticle);
 
         // apply transformations
         let finalTransform: Matrix4x4 = Matrix4x4.IDENTITY();
         finalTransform.multiply(_nodeTransform);
-        this.applyTransform(finalTransform, dataTransformLocal, cachedMutators);
+        this.applyTransform(finalTransform, dataTransformLocal, cachedMutators, inputFactors);
         if (_cmpMesh.showToCamera)
           finalTransform.showTo(translationCamera);
         finalTransform.multiply(_cmpMesh.pivot);
         if (dataTransformWorld) {
           let transformWorld: Matrix4x4 = Matrix4x4.IDENTITY();
-          this.applyTransform(transformWorld, dataTransformWorld, cachedMutators);
+          this.applyTransform(transformWorld, dataTransformWorld, cachedMutators, inputFactors);
           finalTransform.multiply(transformWorld, true);
           Recycler.store(transformWorld);
         }
 
         // mutate components
         for (const component of components) {
-          component.mutate(this.evaluateMutatorWith(cachedMutators[component.type], dataComponentMutations[component.type]));
+          component.mutate(this.evaluateMutatorWith(cachedMutators[component.type], dataComponentMutations[component.type], inputFactors));
         }
 
         // render
@@ -91,22 +91,22 @@ namespace FudgeCore {
       }
     }
 
-    private static applyTransform(_transform: Matrix4x4, _dataTransform: ParticleEffectData, _mutatorCache: {[key: string]: Mutator}): void {
+    private static applyTransform(_transform: Matrix4x4, _dataTransform: ParticleEffectData, _mutatorCache: {[key: string]: Mutator}, _inputFactors: ParticleInputFactors): void {
       for (const key in _dataTransform) {
         let transformVector: Vector3 = key == "scale" ? Vector3.ONE() : Vector3.ZERO();
-        transformVector.mutate(this.evaluateMutatorWith(_mutatorCache[key], _dataTransform[key]));
+        transformVector.mutate(this.evaluateMutatorWith(_mutatorCache[key], _dataTransform[key], _inputFactors));
         (<General>_transform)[key](transformVector);
         Recycler.store(transformVector);
       }
     }
 
-    private static evaluateMutatorWith(_mutator: Mutator, _effectData: ParticleEffectData): Mutator {
+    private static evaluateMutatorWith(_mutator: Mutator, _effectData: ParticleEffectData, _inputFactors: ParticleInputFactors): Mutator {
       for (const attribute in _effectData) {
         let value: Object = _effectData[attribute];
         if (typeof value === "function") {
-          _mutator[attribute] = (<Function>value)();
+          _mutator[attribute] = (<ParticleClosure>value)(_inputFactors);
         } else {
-          this.evaluateMutatorWith(<Mutator>_mutator[attribute], value);
+          this.evaluateMutatorWith(<Mutator>_mutator[attribute], value, _inputFactors);
         }
       }
       return _mutator;

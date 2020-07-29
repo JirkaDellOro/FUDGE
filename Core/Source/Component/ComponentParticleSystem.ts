@@ -4,7 +4,7 @@ namespace FudgeCore {
   /**
    * Contains all the information which will be used to evaluate the closures of the particle effect. Current time and index, size and all the defined values of the storage partition of the effect will cached here while evaluating the effect. 
    */
-  export interface StoredValues {
+  export interface ParticleInputFactors {
     [key: string]: number;
   }
 
@@ -14,26 +14,57 @@ namespace FudgeCore {
    */
   export class ComponentParticleSystem extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentParticleSystem);
-    public readonly particleEffect: ParticleEffect;
+    public randomNumbers: number[];
+    public inputFactors: ParticleInputFactors;
+
+    private _particleEffect: ParticleEffect;
     // TODO: add color for the whole system
-    public randomNumbers: number[] = [];
+
 
     // TODO: instances of this class should how their own StoredValues and random number arrays
-    constructor(_particleEffect: ParticleEffect = null) {
+    constructor(_particleEffect: ParticleEffect = null, _size: number = null) {
       super();
-      this.particleEffect = _particleEffect;
-      for (let i: number = 0; i < _particleEffect.storedValues["size"] + 10 /* so that its possible to have 10 different random numbers per index i.e. randomNumber(index + x) */; i++) {
-        this.randomNumbers.push(Math.random());
-      }
+      this._particleEffect = _particleEffect;
+      this.inputFactors = {
+          "time": 0,
+          "index": 0,
+          "size": _size
+        };
+      this.initRandomNumbers(_size);
 
       // evaluate system storage
-      this.evaluateClosureStorage(this.particleEffect.storageSystem);
+      this.evaluateStorage(this._particleEffect.storageSystem);
     }
 
-    // TODO: put this in ParticleEffect
-    public evaluateClosureStorage(_storageData: ParticleEffectData): void {
+    public get particleEffect(): ParticleEffect {
+      return this._particleEffect;
+    }
+
+    public set particleEffect(_newParticleEffect: ParticleEffect) {
+      this._particleEffect = _newParticleEffect;
+      this.evaluateStorage(this._particleEffect.storageSystem);
+    }
+
+    public get size(): number {
+      return this.inputFactors["size"];
+    }
+
+    public set size(_newSize: number) {
+      this.inputFactors["size"] = _newSize;
+      this.initRandomNumbers(_newSize);
+      this.evaluateStorage(this._particleEffect.storageSystem);
+    }
+
+    public evaluateStorage(_storageData: ParticleEffectData): void {
       for (const key in _storageData) {
-        this.particleEffect.storedValues[key] = (<Function>_storageData[key])();
+        this.inputFactors[key] = (<ParticleClosure>_storageData[key])(this.inputFactors);
+      }
+    }
+
+    private initRandomNumbers(_size: number): void {
+      this.randomNumbers = [];
+      for (let i: number = 0; i < _size + 10 /* so that its possible to have 10 different random numbers per index i.e. randomNumber(index + x) */; i++) {
+        this.randomNumbers.push(Math.random());
       }
     }
   }

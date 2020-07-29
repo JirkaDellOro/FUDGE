@@ -4,6 +4,7 @@ namespace FudgeCore {
    * The data format used to parse and store the paticle effect
    */
   export interface ParticleEffectData {
+    //TODO: Refactor this to type ParticleEffectData | ParticleClosure
     [identifier: string]: General;
   }
 
@@ -25,26 +26,16 @@ namespace FudgeCore {
     public storageSystem: ParticleEffectData;
     public storageUpdate: ParticleEffectData;
     public storageParticle: ParticleEffectData;
-
     // ParticleEffectData could be replaced with Functions that take Mtx4/Components as arguments and know what to do with it.
     public transformLocal: ParticleEffectData;
     public transformWorld: ParticleEffectData;
-
     public componentMutations: ParticleEffectData;
-
-    // TODO: StoredValues and random number arrays should be stored inside each instance of ComponentParticleSystem and not per instance of ParticleEffect
-    public readonly storedValues: StoredValues;
+    //TODO: put randomNumbers in inputFactors???
     public randomNumbers: number[];
 
-    public cachedMutators: {[key: string]: Mutator}; //Map<string, Mutator>;
+    public cachedMutators: { [key: string]: Mutator };
 
-    constructor(_size: number) {
-      this.storedValues = {
-        "time": 0,
-        "index": 0,
-        "size": _size
-      };
-    }
+    private definedInputFactors: string[] = ["time", "index", "size"]; // these are used to throw errors only
 
     /**
      * Asynchronously loads the json from the given url and parses it initializing this particle effect.
@@ -60,11 +51,10 @@ namespace FudgeCore {
      * @param _data The paticle effect data to parse.
      */
     private parse(_data: ParticleEffectData): void {
-      this.preParseStorage(_data["storage"]);
-
       let dataStorage: ParticleEffectData = _data["storage"];
 
       if (dataStorage) {
+        this.preParseStorage(dataStorage);
         this.storageSystem = this.parseRecursively(dataStorage["system"]);
         this.storageUpdate = this.parseRecursively(dataStorage["update"]);
         this.storageParticle = this.parseRecursively(dataStorage["particle"]);
@@ -84,18 +74,18 @@ namespace FudgeCore {
     }
 
     /**
-     * Creates entries in [[storedValues]] for each defined closure in _data. Predefined values (time, index...) and previously defined ones (in json) can not be overwritten.
+     * Creates entries in [[definedInputFactors]] for each defined closure in _data. Predefined values (time, index...) and previously defined ones (in json) can not be overwritten.
      * @param _data The paticle effect data to parse.
      */
     private preParseStorage(_data: ParticleEffectData): void {
       for (const storagePartition in _data) {
         let storage: ParticleEffectData = _data[storagePartition];
         for (const storageValue in storage) {
-          if (storageValue in this.storedValues) {
+          if (this.definedInputFactors.includes(storageValue)) {
             throw `"${storageValue}" is already defined`;
           }
           else
-            this.storedValues[storageValue] = 0;
+            this.definedInputFactors.push(storageValue);
         }
       }
     }
@@ -140,15 +130,15 @@ namespace FudgeCore {
           return closure;
 
         case "string":
-          if (_data in this.storedValues) {
-            return () => {
-              Debug.log("Variable", `"${_data}"`, this.storedValues[<string>_data]);
-              return this.storedValues[<string>_data];
+          if (this.definedInputFactors.includes(_data))
+            return (_inputFactors: ParticleInputFactors) => {
+              Debug.log("Variable", `"${_data}"`, _inputFactors[<string>_data]);
+              return _inputFactors[<string>_data];
             };
-          }
-          else {
+          else
             throw `"${_data}" is not defined`;
-          }
+
+
 
         case "number":
           return function (): number {
