@@ -3207,7 +3207,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * The data format used to parse and store the paticle effect
+     * A function taking input factors (time, index, size and self defined ones) as the argument. Returning a number.
     */
     interface ParticleClosure {
         (_inputFactors: ParticleInputFactors): number;
@@ -3216,7 +3216,7 @@ declare namespace FudgeCore {
      * Factory class to create closures.
      * @author Jonas Plotzky, HFU, 2020
      */
-    class ClosureFactory {
+    class ParticleClosureFactory {
         private static closures;
         /**
          * Creates a closure of the given function type and passes the parameters to it.

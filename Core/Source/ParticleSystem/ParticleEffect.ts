@@ -117,31 +117,25 @@ namespace FudgeCore {
           for (let param of _data.parameters) {
             parameters.push(this.parseClosure(param));
           }
-
           // random closure needs to have the random numbers array as a parameter
           if (_data.function == "random") {
             parameters.push(() => {
               return this.randomNumbers;
             });
           }
-
-          let closure: Function = ClosureFactory.getClosure(_data.function, parameters);
-
-          return closure;
+          return ParticleClosureFactory.getClosure(_data.function, parameters);
 
         case "string":
           if (this.definedInputFactors.includes(_data))
-            return (_inputFactors: ParticleInputFactors) => {
+            return function (_inputFactors: ParticleInputFactors): number {
               Debug.log("Variable", `"${_data}"`, _inputFactors[<string>_data]);
               return _inputFactors[<string>_data];
             };
           else
             throw `"${_data}" is not defined`;
 
-
-
         case "number":
-          return function (): number {
+          return function (_inputFactors: ParticleInputFactors): number {
             Debug.log("Constant", _data);
             return <number>_data;
           };

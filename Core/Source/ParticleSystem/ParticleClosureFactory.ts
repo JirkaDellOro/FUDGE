@@ -1,7 +1,7 @@
 namespace FudgeCore {
 
   /**
-   * The data format used to parse and store the paticle effect
+   * A function taking input factors (time, index, size and self defined ones) as the argument. Returning a number.
   */
   export interface ParticleClosure {
     (_inputFactors: ParticleInputFactors): number;
@@ -11,17 +11,17 @@ namespace FudgeCore {
    * Factory class to create closures.
    * @author Jonas Plotzky, HFU, 2020
    */
-  export class ClosureFactory {
+  export class ParticleClosureFactory {
     private static closures: { [key: string]: Function } = {
-      "addition": ClosureFactory.createClosureAddition,
-      "subtraction": ClosureFactory.createClosureSubtraction,
-      "multiplication": ClosureFactory.createClosureMultiplication,
-      "division": ClosureFactory.createClosureDivision,
-      "modulo": ClosureFactory.createClosureModulo,
-      "linear": ClosureFactory.createClosureLinear,
-      "polynomial": ClosureFactory.createClosurePolynomial3,
-      "squareRoot": ClosureFactory.createClosureSquareRoot,
-      "random": ClosureFactory.createClosureRandom
+      "addition": ParticleClosureFactory.createClosureAddition,
+      "subtraction": ParticleClosureFactory.createClosureSubtraction,
+      "multiplication": ParticleClosureFactory.createClosureMultiplication,
+      "division": ParticleClosureFactory.createClosureDivision,
+      "modulo": ParticleClosureFactory.createClosureModulo,
+      "linear": ParticleClosureFactory.createClosureLinear,
+      "polynomial": ParticleClosureFactory.createClosurePolynomial3,
+      "squareRoot": ParticleClosureFactory.createClosureSquareRoot,
+      "random": ParticleClosureFactory.createClosureRandom
     };
 
     /**
@@ -33,7 +33,7 @@ namespace FudgeCore {
       let closure: Function = this.closures[_function];
       if (_function in this.closures)
         return closure(_parameters);
-      else 
+      else
         throw `"${_function}" is not an operation`;
     }
 
