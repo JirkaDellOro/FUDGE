@@ -1,6 +1,5 @@
 var Fudge;
 (function (Fudge) {
-    var ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
     let EVENT_EDITOR;
     (function (EVENT_EDITOR) {
@@ -8,87 +7,6 @@ var Fudge;
         EVENT_EDITOR["HIDE"] = "nodeHideEvent";
         EVENT_EDITOR["ACTIVEVIEWPORT"] = "activeViewport";
     })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
-    class UIAnimationList {
-        constructor(_mutator, _listContainer) {
-            this.collectMutator = () => {
-                let children = this.listRoot.children;
-                // for (let child of children) {
-                //   this.mutator[(<ƒui.CollapsableAnimationList>child).name] = (<ƒui.CollapsableAnimationList>child).mutator;
-                // }
-                ƒ.Debug.info(this.mutator);
-                return this.mutator;
-            };
-            this.toggleCollapse = (_event) => {
-                _event.preventDefault();
-                // console.log(_event.target instanceof ƒui.CollapsableAnimationList);
-                // if (_event.target instanceof ƒui.CollapsableAnimationList) {
-                //   let target: ƒui.CollapsableAnimationList = <ƒui.CollapsableAnimationList>_event.target;
-                //   target.collapse(target);
-                // }
-            };
-            this.mutator = _mutator;
-            this.listRoot = document.createElement("ul");
-            this.index = {};
-            this.listRoot = this.buildFromMutator(this.mutator);
-            _listContainer.append(this.listRoot);
-            _listContainer.addEventListener("collapse" /* COLLAPSE */, this.toggleCollapse);
-            _listContainer.addEventListener("update" /* UPDATE */, this.collectMutator);
-        }
-        getMutator() {
-            return this.mutator;
-        }
-        setMutator(_mutator) {
-            this.mutator = _mutator;
-            let hule = this.buildFromMutator(this.mutator);
-            this.listRoot.replaceWith(hule);
-            this.listRoot = hule;
-        }
-        getElementIndex() {
-            return this.index;
-        }
-        updateMutator(_update) {
-            this.mutator = this.updateMutatorEntry(_update, this.mutator);
-            this.updateEntry(this.mutator, this.index);
-        }
-        updateEntry(_update, _index) {
-            for (let key in _update) {
-                if (typeof _update[key] == "object") {
-                    this.updateEntry(_update[key], _index[key]);
-                }
-                else if (typeof _update[key] == "string" || "number") {
-                    let element = _index[key];
-                    element.value = _update[key];
-                }
-            }
-        }
-        updateMutatorEntry(_update, _toUpdate) {
-            let updatedMutator = _toUpdate;
-            for (let key in _update) {
-                if (typeof updatedMutator[key] == "object") {
-                    if (typeof updatedMutator[key] == "object") {
-                        updatedMutator[key] = this.updateMutatorEntry(_update[key], updatedMutator[key]);
-                    }
-                }
-                else if (typeof _update[key] == "string" || "number") {
-                    if (typeof updatedMutator[key] == "string" || "number") {
-                        updatedMutator[key] = _update[key];
-                    }
-                }
-            }
-            return updatedMutator;
-        }
-        buildFromMutator(_mutator) {
-            let listRoot = document.createElement("ul");
-            // for (let key in _mutator) {
-            //   let listElement: ƒui.CollapsableAnimationList = new ƒui.CollapsableAnimationList((<ƒ.Mutator>this.mutator[key]), key);
-            //   listRoot.append(listElement);
-            //   this.index[key] = listElement.getElementIndex();
-            //   console.log(this.index);
-            // }
-            return listRoot;
-        }
-    }
-    Fudge.UIAnimationList = UIAnimationList;
     class ComponentController extends ƒui.Controller {
         constructor(_mutable, _domElement) {
             super(_mutable, _domElement);
@@ -247,6 +165,90 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    class AnimationList {
+        constructor(_mutator, _listContainer) {
+            this.collectMutator = () => {
+                let children = this.listRoot.children;
+                // for (let child of children) {
+                //   this.mutator[(<ƒui.CollapsableAnimationList>child).name] = (<ƒui.CollapsableAnimationList>child).mutator;
+                // }
+                ƒ.Debug.info(this.mutator);
+                return this.mutator;
+            };
+            this.toggleCollapse = (_event) => {
+                _event.preventDefault();
+                // console.log(_event.target instanceof ƒui.CollapsableAnimationList);
+                // if (_event.target instanceof ƒui.CollapsableAnimationList) {
+                //   let target: ƒui.CollapsableAnimationList = <ƒui.CollapsableAnimationList>_event.target;
+                //   target.collapse(target);
+                // }
+            };
+            this.mutator = _mutator;
+            this.listRoot = document.createElement("ul");
+            this.index = {};
+            this.listRoot = this.buildFromMutator(this.mutator);
+            _listContainer.append(this.listRoot);
+            _listContainer.addEventListener("collapse" /* COLLAPSE */, this.toggleCollapse);
+            _listContainer.addEventListener("update" /* UPDATE */, this.collectMutator);
+        }
+        getMutator() {
+            return this.mutator;
+        }
+        setMutator(_mutator) {
+            this.mutator = _mutator;
+            let hule = this.buildFromMutator(this.mutator);
+            this.listRoot.replaceWith(hule);
+            this.listRoot = hule;
+        }
+        getElementIndex() {
+            return this.index;
+        }
+        updateMutator(_update) {
+            this.mutator = this.updateMutatorEntry(_update, this.mutator);
+            this.updateEntry(this.mutator, this.index);
+        }
+        updateEntry(_update, _index) {
+            for (let key in _update) {
+                if (typeof _update[key] == "object") {
+                    this.updateEntry(_update[key], _index[key]);
+                }
+                else if (typeof _update[key] == "string" || "number") {
+                    let element = _index[key];
+                    element.value = _update[key];
+                }
+            }
+        }
+        updateMutatorEntry(_update, _toUpdate) {
+            let updatedMutator = _toUpdate;
+            for (let key in _update) {
+                if (typeof updatedMutator[key] == "object") {
+                    if (typeof updatedMutator[key] == "object") {
+                        updatedMutator[key] = this.updateMutatorEntry(_update[key], updatedMutator[key]);
+                    }
+                }
+                else if (typeof _update[key] == "string" || "number") {
+                    if (typeof updatedMutator[key] == "string" || "number") {
+                        updatedMutator[key] = _update[key];
+                    }
+                }
+            }
+            return updatedMutator;
+        }
+        buildFromMutator(_mutator) {
+            let listRoot = document.createElement("ul");
+            // for (let key in _mutator) {
+            //   let listElement: ƒui.CollapsableAnimationList = new ƒui.CollapsableAnimationList((<ƒ.Mutator>this.mutator[key]), key);
+            //   listRoot.append(listElement);
+            //   this.index[key] = listElement.getElementIndex();
+            //   console.log(this.index);
+            // }
+            return listRoot;
+        }
+    }
+    Fudge.AnimationList = AnimationList;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
     var ƒ = FudgeCore;
     var ƒUi = FudgeUserInterface;
     class ControllerTreeNode extends ƒUi.TreeController {
@@ -300,6 +302,37 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    let VIEW;
+    (function (VIEW) {
+        VIEW["HIERARCHY"] = "ViewHierarchy";
+        VIEW["ANIMATION"] = "ViewAnimation";
+        VIEW["RENDER"] = "ViewRender";
+        VIEW["COMPONENTS"] = "ViewComponents";
+        VIEW["CAMERA"] = "ViewCamera";
+        // PROJECT = ViewProject,
+        // SKETCH = ViewSketch,
+        // MESH = ViewMesh,
+    })(VIEW = Fudge.VIEW || (Fudge.VIEW = {}));
+    /**
+     * Base class for all [[View]]s to support generic functionality
+     * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class View extends EventTarget {
+        constructor(_container, _state) {
+            super();
+            this.dom = document.createElement("div");
+            this.dom.style.height = "100%";
+            this.dom.style.overflow = "auto";
+            this.dom.setAttribute("view", this.constructor.name);
+            _container.getElement().append(this.dom);
+        }
+    }
+    Fudge.View = View;
+})(Fudge || (Fudge = {}));
+///<reference path="../View/View.ts"/>
+var Fudge;
+///<reference path="../View/View.ts"/>
+(function (Fudge) {
     let PANEL;
     (function (PANEL) {
         PANEL["GRAPH"] = "PanelGraph";
@@ -310,16 +343,17 @@ var Fudge;
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     // TODO: class might become a customcomponent for HTML! = this.dom
-    class Panel extends EventTarget {
+    class Panel extends Fudge.View {
         constructor(_container, _state) {
-            super();
+            super(_container, _state);
             this.views = [];
             this.addViewComponent = (_component) => {
                 this.views.push(_component.instance);
             };
-            this.dom = document.createElement("div");
-            this.dom.style.height = "100%";
             this.dom.style.width = "100%";
+            this.dom.style.overflow = "visible";
+            this.dom.removeAttribute("view");
+            this.dom.setAttribute("panel", this.constructor.name);
             let config = {
                 settings: { showPopoutIcon: false },
                 content: [{
@@ -327,7 +361,6 @@ var Fudge;
                     }]
             };
             this.goldenLayout = new GoldenLayout(config, this.dom);
-            _container.getElement().append(this.dom);
             this.goldenLayout.on("stateChanged", () => this.goldenLayout.updateSize());
             this.goldenLayout.on("componentCreated", this.addViewComponent);
             this.goldenLayout.init();
@@ -390,12 +423,10 @@ var Fudge;
     /**
      * Manages all [[Panel]]s used by Fudge at the time. Call the static instance Member to use its functions.
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
-     * @author
      */
     class PanelManager extends EventTarget {
         constructor() {
             super();
-            this.panels = [];
         }
         // /**
         //  * Add Panel to PanelManagers Panel List and to the PanelManagers GoldenLayout Config
@@ -483,35 +514,6 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    let VIEW;
-    (function (VIEW) {
-        VIEW["HIERARCHY"] = "ViewHierarchy";
-        VIEW["ANIMATION"] = "ViewAnimation";
-        VIEW["RENDER"] = "ViewRender";
-        VIEW["COMPONENTS"] = "ViewComponents";
-        VIEW["CAMERA"] = "ViewCamera";
-        // PROJECT = ViewProject,
-        // SKETCH = ViewSketch,
-        // MESH = ViewMesh,
-    })(VIEW = Fudge.VIEW || (Fudge.VIEW = {}));
-    /**
-     * Base class for all [[View]]s to support generic functionality
-     * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
-     */
-    class View extends EventTarget {
-        constructor(_container, _state) {
-            super();
-            this.dom = document.createElement("div");
-            this.dom.style.height = "100%";
-            this.dom.style.overflow = "auto";
-            this.dom.setAttribute("view", this.constructor.name);
-            _container.getElement().append(this.dom);
-        }
-    }
-    Fudge.View = View;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
     class ViewAnimation extends Fudge.View {
         constructor(_container, _state) {
             super(_container, _state);
@@ -575,7 +577,7 @@ var Fudge;
             this.attributeList.style.width = "300px";
             this.attributeList.addEventListener("update" /* UPDATE */, this.changeAttribute.bind(this));
             //TODO: Add Moni's custom Element here
-            this.controller = new Fudge.UIAnimationList(this.animation.getMutated(this.playbackTime, 0, FudgeCore.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS), this.attributeList);
+            this.controller = new Fudge.AnimationList(this.animation.getMutated(this.playbackTime, 0, FudgeCore.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS), this.attributeList);
             this.canvas = document.createElement("canvas");
             this.canvas.width = 1500;
             this.canvas.height = 500;

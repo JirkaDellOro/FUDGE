@@ -26,7 +26,7 @@ namespace Fudge {
     animation: FudgeCore.Animation;
     cmpAnimator: FudgeCore.ComponentAnimator;
     playbackTime: number;
-    controller: UIAnimationList;
+    controller: AnimationList;
     private canvas: HTMLCanvasElement;
     private attributeList: HTMLDivElement;
     private crc: CanvasRenderingContext2D;
@@ -103,7 +103,7 @@ namespace Fudge {
       this.attributeList.style.width = "300px";
       this.attributeList.addEventListener(FudgeUserInterface.EVENT_USERINTERFACE.UPDATE, this.changeAttribute.bind(this));
       //TODO: Add Moni's custom Element here
-      this.controller = new UIAnimationList(this.animation.getMutated(this.playbackTime, 0, FudgeCore.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS), this.attributeList);
+      this.controller = new AnimationList(this.animation.getMutated(this.playbackTime, 0, FudgeCore.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS), this.attributeList);
 
 
       this.canvas = document.createElement("canvas");

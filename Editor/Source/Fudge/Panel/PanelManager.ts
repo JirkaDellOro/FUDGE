@@ -2,13 +2,12 @@ namespace Fudge {
   /**
    * Manages all [[Panel]]s used by Fudge at the time. Call the static instance Member to use its functions.
    * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
-   * @author 
    */
   export class PanelManager extends EventTarget {
     public static idCounter: number = 0;
     static instance: PanelManager = new PanelManager();
     public editorLayout: GoldenLayout;
-    private panels: Panel[] = [];
+    // private panels: Panel[] = [];
     private activePanel: Panel;
 
 

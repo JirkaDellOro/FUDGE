@@ -1,5 +1,6 @@
 /// <reference types="../../../core/build/fudgecore" />
 /// <reference types="../../../userinterface/build/fudgeuserinterface" />
+/// <reference types="../../../aid/build/fudgeaid" />
 /// <reference types="golden-layout" />
 declare namespace Fudge {
     import ƒ = FudgeCore;
@@ -8,21 +9,6 @@ declare namespace Fudge {
         REMOVE = "nodeRemoveEvent",
         HIDE = "nodeHideEvent",
         ACTIVEVIEWPORT = "activeViewport"
-    }
-    class UIAnimationList {
-        listRoot: HTMLElement;
-        private mutator;
-        private index;
-        constructor(_mutator: ƒ.Mutator, _listContainer: HTMLElement);
-        getMutator(): ƒ.Mutator;
-        setMutator(_mutator: ƒ.Mutator): void;
-        collectMutator: () => ƒ.Mutator;
-        getElementIndex(): ƒ.Mutator;
-        updateMutator(_update: ƒ.Mutator): void;
-        private updateEntry;
-        private updateMutatorEntry;
-        private buildFromMutator;
-        private toggleCollapse;
     }
     class ComponentController extends ƒui.Controller {
         constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
@@ -46,6 +32,23 @@ declare namespace Fudge {
     export {};
 }
 declare namespace Fudge {
+    class AnimationList {
+        listRoot: HTMLElement;
+        private mutator;
+        private index;
+        constructor(_mutator: ƒ.Mutator, _listContainer: HTMLElement);
+        getMutator(): ƒ.Mutator;
+        setMutator(_mutator: ƒ.Mutator): void;
+        collectMutator: () => ƒ.Mutator;
+        getElementIndex(): ƒ.Mutator;
+        updateMutator(_update: ƒ.Mutator): void;
+        private updateEntry;
+        private updateMutatorEntry;
+        private buildFromMutator;
+        private toggleCollapse;
+    }
+}
+declare namespace Fudge {
     import ƒ = FudgeCore;
     import ƒUi = FudgeUserInterface;
     class ControllerTreeNode extends ƒUi.TreeController<ƒ.Node> {
@@ -59,6 +62,25 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    enum VIEW {
+        HIERARCHY = "ViewHierarchy",
+        ANIMATION = "ViewAnimation",
+        RENDER = "ViewRender",
+        COMPONENTS = "ViewComponents",
+        CAMERA = "ViewCamera"
+    }
+    /**
+     * Base class for all [[View]]s to support generic functionality
+     * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    abstract class View extends EventTarget {
+        dom: HTMLElement;
+        constructor(_container: GoldenLayout.Container, _state: Object);
+        /** Cleanup when user closes view */
+        abstract cleanup(): void;
+    }
+}
+declare namespace Fudge {
     enum PANEL {
         GRAPH = "PanelGraph"
     }
@@ -67,9 +89,8 @@ declare namespace Fudge {
      * Subclasses are presets for common panels. A user might add or delete [[View]]s at runtime
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
-    abstract class Panel extends EventTarget {
+    abstract class Panel extends View {
         protected goldenLayout: GoldenLayout;
-        protected dom: HTMLElement;
         private views;
         constructor(_container: GoldenLayout.Container, _state: Object);
         /** Send custom copies of the give event to the views */
@@ -97,13 +118,11 @@ declare namespace Fudge {
     /**
      * Manages all [[Panel]]s used by Fudge at the time. Call the static instance Member to use its functions.
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
-     * @author
      */
     class PanelManager extends EventTarget {
         static idCounter: number;
         static instance: PanelManager;
         editorLayout: GoldenLayout;
-        private panels;
         private activePanel;
         private constructor();
         /**
@@ -130,25 +149,6 @@ declare namespace Fudge {
     function registerPanelComponent(_container: GoldenLayout.Container, _state: Object): void;
 }
 declare namespace Fudge {
-    enum VIEW {
-        HIERARCHY = "ViewHierarchy",
-        ANIMATION = "ViewAnimation",
-        RENDER = "ViewRender",
-        COMPONENTS = "ViewComponents",
-        CAMERA = "ViewCamera"
-    }
-    /**
-     * Base class for all [[View]]s to support generic functionality
-     * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
-     */
-    abstract class View extends EventTarget {
-        dom: HTMLElement;
-        constructor(_container: GoldenLayout.Container, _state: Object);
-        /** Cleanup when user closes view */
-        abstract cleanup(): void;
-    }
-}
-declare namespace Fudge {
     interface ViewAnimationKey {
         key: FudgeCore.AnimationKey;
         path2D: Path2D;
@@ -172,7 +172,7 @@ declare namespace Fudge {
         animation: FudgeCore.Animation;
         cmpAnimator: FudgeCore.ComponentAnimator;
         playbackTime: number;
-        controller: UIAnimationList;
+        controller: AnimationList;
         private canvas;
         private attributeList;
         private crc;

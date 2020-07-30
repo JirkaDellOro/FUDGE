@@ -1,3 +1,4 @@
+///<reference path="../View/View.ts"/>
 namespace Fudge {
   import ƒ = FudgeCore;
 
@@ -12,16 +13,16 @@ namespace Fudge {
    */
 
   // TODO: class might become a customcomponent for HTML! = this.dom
-  export abstract class Panel extends EventTarget {
+  export abstract class Panel extends View {
     protected goldenLayout: GoldenLayout;
-    protected dom: HTMLElement;
     private views: View[] = [];
 
     constructor(_container: GoldenLayout.Container, _state: Object) {
-      super();
-      this.dom = document.createElement("div");
-      this.dom.style.height = "100%";
+      super(_container, _state);
       this.dom.style.width = "100%";
+      this.dom.style.overflow = "visible";
+      this.dom.removeAttribute("view");
+      this.dom.setAttribute("panel", this.constructor.name);
 
       let config: GoldenLayout.Config = {
         settings: { showPopoutIcon: false },
@@ -30,7 +31,6 @@ namespace Fudge {
         }]
       };
       this.goldenLayout = new GoldenLayout(config, this.dom);
-      _container.getElement().append(this.dom);
       this.goldenLayout.on("stateChanged", () => this.goldenLayout.updateSize());
       this.goldenLayout.on("componentCreated", this.addViewComponent);
       this.goldenLayout.init();
