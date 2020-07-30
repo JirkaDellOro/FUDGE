@@ -1,19 +1,11 @@
 var Fudge;
 (function (Fudge) {
-    var ƒui = FudgeUserInterface;
     let EVENT_EDITOR;
     (function (EVENT_EDITOR) {
         EVENT_EDITOR["REMOVE"] = "nodeRemoveEvent";
         EVENT_EDITOR["HIDE"] = "nodeHideEvent";
         EVENT_EDITOR["ACTIVEVIEWPORT"] = "activeViewport";
     })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
-    class ComponentController extends ƒui.Controller {
-        constructor(_mutable, _domElement) {
-            super(_mutable, _domElement);
-            this.domElement.addEventListener("input", this.mutateOnInput);
-        }
-    }
-    Fudge.ComponentController = ComponentController;
 })(Fudge || (Fudge = {}));
 ///<reference path="../../../node_modules/electron/Electron.d.ts"/>
 ///<reference types="../../../Core/Build/FudgeCore"/>
@@ -37,24 +29,21 @@ var Fudge;
     window.addEventListener("load", initWindow);
     function initWindow() {
         ƒ.Debug.log("Fudge started");
-        Fudge.PanelManager.instance.init();
+        Fudge.PanelManager.initialize();
         ƒ.Debug.log("Panel Manager initialized");
         // TODO: create a new Panel containing a ViewData by default. More Views can be added by the user or by configuration
         Fudge.ipcRenderer.on("save", (_event, _args) => {
             ƒ.Debug.log("Save");
-            panel = Fudge.PanelManager.instance.getActivePanel();
-            if (panel instanceof Fudge.PanelGraph) {
-                node = panel.getNode();
-            }
-            save(node);
+            // panel = PanelManager.instance.getActivePanel();
+            // if (panel instanceof PanelGraph) {
+            //   node = panel.getNode();
+            // }
+            // save(node);
         });
         Fudge.ipcRenderer.on("open", (_event, _args) => {
             ƒ.Debug.log("Open");
             node = open();
-            panel = Fudge.PanelManager.instance.getActivePanel();
-            if (panel instanceof Fudge.PanelGraph) {
-                panel.setNode(node);
-            }
+            Fudge.PanelManager.broadcastEvent(new CustomEvent("select" /* SELECT */, { detail: node }));
         });
         Fudge.ipcRenderer.on("openPanelGraph", (_event, _args) => {
             ƒ.Debug.log("openPanelGraph");
@@ -249,6 +238,17 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    var ƒui = FudgeUserInterface;
+    class ControllerComponent extends ƒui.Controller {
+        constructor(_mutable, _domElement) {
+            super(_mutable, _domElement);
+            this.domElement.addEventListener("input", this.mutateOnInput);
+        }
+    }
+    Fudge.ControllerComponent = ControllerComponent;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
     var ƒ = FudgeCore;
     var ƒUi = FudgeUserInterface;
     class ControllerTreeNode extends ƒUi.TreeController {
@@ -365,7 +365,7 @@ var Fudge;
             this.goldenLayout.on("componentCreated", this.addViewComponent);
             this.goldenLayout.init();
         }
-        /** Send custom copies of the give event to the views */
+        /** Send custom copies of the given event to the views */
         broadcastEvent(_event) {
             for (let view of this.views) {
                 let event = new CustomEvent(_event.type, { bubbles: false, cancelable: true, detail: _event.detail });
@@ -415,6 +415,9 @@ var Fudge;
         getNode() {
             return this.node;
         }
+        cleanup() {
+            //TODO: desconstruct
+        }
     }
     Fudge.PanelGraph = PanelGraph;
 })(Fudge || (Fudge = {}));
@@ -425,25 +428,6 @@ var Fudge;
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class PanelManager extends EventTarget {
-        constructor() {
-            super();
-        }
-        // /**
-        //  * Add Panel to PanelManagers Panel List and to the PanelManagers GoldenLayout Config
-        //  * @param _p Panel to be added
-        //  */
-        // addPanel(_p: Panel): void {
-        //   this.panels.push(_p);
-        //   // this.editorLayout.root.contentItems[0].addChild(_p.config);
-        //   this.editorLayout.root.getItemsById("root")[0].addChild(_p.config);
-        //   this.activePanel = _p;
-        // }
-        /**
-         * Add View to PanelManagers View List and add the view to the active panel
-         */
-        // addView(_v: View): void {
-        //   this.editorLayout.root.contentItems[0].getActiveContentItem().addChild(_v.config);
-        // }
         static add(_panel, _title, _state) {
             let config = {
                 type: "stack",
@@ -452,21 +436,12 @@ var Fudge;
                         title: _title, id: this.generateID(_panel.name)
                     }]
             };
-            PanelManager.instance.editorLayout.root.contentItems[0].addChild(config);
+            let inner = this.goldenLayout.root.contentItems[0];
+            let item = PanelManager.goldenLayout.createContentItem(config);
+            inner.addChild(item);
+            this.panels.push(item.getComponentsByName(_panel.name)[0]);
         }
-        static generateID(_name) {
-            return _name + PanelManager.idCounter++;
-        }
-        /**
-         * Returns the currently active Panel
-         */
-        getActivePanel() {
-            return this.activePanel;
-        }
-        /**
-         * Initialize GoldenLayout Context of the PanelManager Instance
-         */
-        init() {
+        static initialize() {
             let config = {
                 settings: { showPopoutIcon: false },
                 content: [{
@@ -476,41 +451,31 @@ var Fudge;
                         ]
                     }]
             };
-            this.editorLayout = new GoldenLayout(config); //This might be a problem because it can't use a specific place to put it.
-            this.editorLayout.registerComponent("Welcome", welcome);
-            // this.editorLayout.registerComponent("View", registerViewComponent);
-            this.editorLayout.registerComponent(Fudge.PANEL.GRAPH, Fudge.PanelGraph);
-            this.editorLayout.init();
-            this.editorLayout.on("stateChanged", (_event) => {
-                // console.log(_event);
-            });
-            // this.editorLayout.root.contentItems[0].on("activeContentItemChanged", this.setActivePanel);
+            this.goldenLayout = new GoldenLayout(config); //This might be a problem because it can't use a specific place to put it.
+            this.goldenLayout.registerComponent("Welcome", welcome);
+            this.goldenLayout.registerComponent(Fudge.PANEL.GRAPH, Fudge.PanelGraph);
+            this.goldenLayout.init();
+        }
+        /** Send custom copies of the given event to the views */
+        static broadcastEvent(_event) {
+            for (let panel of PanelManager.panels) {
+                let event = new CustomEvent(_event.type, { bubbles: false, cancelable: true, detail: _event.detail });
+                panel.dom.dispatchEvent(event);
+            }
+        }
+        static generateID(_name) {
+            return _name + PanelManager.idCounter++;
+        }
+        cleanup() {
+            //TODO: desconstruct
         }
     }
     PanelManager.idCounter = 0;
-    PanelManager.instance = new PanelManager();
+    PanelManager.panels = [];
     Fudge.PanelManager = PanelManager;
-    //TODO: Give these Factory Functions a better home
-    /**
-     * Factory Function for the the "Welcome"-Component
-     */
     function welcome(container, state) {
         container.getElement().html("<div>Welcome</div>");
     }
-    /**
-     * Factory Function for the generic "View"-Component
-     */
-    function registerViewComponent(_container, _state) {
-        _container.getElement().append(_state["content"]);
-    }
-    Fudge.registerViewComponent = registerViewComponent;
-    /**
-     * Factory Function for the generic "Panel"-Component
-     */
-    function registerPanelComponent(_container, _state) {
-        _container.getElement().append(_state["content"]);
-    }
-    Fudge.registerPanelComponent = registerPanelComponent;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -1171,7 +1136,7 @@ var Fudge;
                     let nodeComponents = this.node.getAllComponents();
                     for (let nodeComponent of nodeComponents) {
                         let fieldset = ƒui.Generator.createFieldSetFromMutable(nodeComponent);
-                        let uiComponent = new Fudge.ComponentController(nodeComponent, fieldset);
+                        let uiComponent = new Fudge.ControllerComponent(nodeComponent, fieldset);
                         this.dom.append(uiComponent.domElement);
                     }
                 }
@@ -1267,6 +1232,9 @@ var Fudge;
     class ViewRender extends Fudge.View {
         constructor(_container, _state) {
             super(_container, _state);
+            this.setNode = (_event) => {
+                this.setRoot(_event.detail);
+            };
             this.animate = (_e) => {
                 this.viewport.setGraph(this.graph);
                 if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
@@ -1278,6 +1246,7 @@ var Fudge;
             };
             this.graph = _state["node"];
             this.createUserInterface();
+            this.addEventListener("select" /* SELECT */, this.setNode);
         }
         cleanup() {
             ƒ.Loop.removeEventListener("loopFrame" /* LOOP_FRAME */, this.animate);

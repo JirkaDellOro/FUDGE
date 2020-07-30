@@ -36,7 +36,7 @@ namespace Fudge {
       this.goldenLayout.init();
     }
 
-    /** Send custom copies of the give event to the views */
+    /** Send custom copies of the given event to the views */
     public broadcastEvent(_event: Event): void {
       for (let view of this.views) {
         let event: CustomEvent = new CustomEvent(_event.type, { bubbles: false, cancelable: true, detail: (<CustomEvent>_event).detail });

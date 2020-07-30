@@ -21,34 +21,35 @@ namespace Fudge {
 
   function initWindow(): void {
     ƒ.Debug.log("Fudge started");
-    PanelManager.instance.init();
+    PanelManager.initialize();
     ƒ.Debug.log("Panel Manager initialized");
     // TODO: create a new Panel containing a ViewData by default. More Views can be added by the user or by configuration
 
     ipcRenderer.on("save", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
       ƒ.Debug.log("Save");
-      panel = PanelManager.instance.getActivePanel();
-      if (panel instanceof PanelGraph) {
-        node = panel.getNode();
-      }
-      save(node);
+      // panel = PanelManager.instance.getActivePanel();
+      // if (panel instanceof PanelGraph) {
+      //   node = panel.getNode();
+      // }
+      // save(node);
     });
+
     ipcRenderer.on("open", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
       ƒ.Debug.log("Open");
       node = open();
-      panel = PanelManager.instance.getActivePanel();
-      if (panel instanceof PanelGraph) {
-        panel.setNode(node);
-      }
+      PanelManager.broadcastEvent(new CustomEvent(ƒui.EVENT_USERINTERFACE.SELECT, { detail: node }));
     });
+
     ipcRenderer.on("openPanelGraph", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
       ƒ.Debug.log("openPanelGraph");
       openViewNode();
     });
+
     ipcRenderer.on("openPanelAnimation", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
       ƒ.Debug.log("openPanelAnimation");
       // openAnimationPanel();
     });
+    
     // HACK!
     ipcRenderer.on("updateNode", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
       ƒ.Debug.log("updateNode");

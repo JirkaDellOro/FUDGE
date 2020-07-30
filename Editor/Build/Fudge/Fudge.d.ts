@@ -1,17 +1,12 @@
 /// <reference types="../../../core/build/fudgecore" />
-/// <reference types="../../../userinterface/build/fudgeuserinterface" />
 /// <reference types="../../../aid/build/fudgeaid" />
+/// <reference types="../../../userinterface/build/fudgeuserinterface" />
 /// <reference types="golden-layout" />
 declare namespace Fudge {
-    import ƒ = FudgeCore;
-    import ƒui = FudgeUserInterface;
     enum EVENT_EDITOR {
         REMOVE = "nodeRemoveEvent",
         HIDE = "nodeHideEvent",
         ACTIVEVIEWPORT = "activeViewport"
-    }
-    class ComponentController extends ƒui.Controller {
-        constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
     }
 }
 declare namespace Fudge {
@@ -46,6 +41,13 @@ declare namespace Fudge {
         private updateMutatorEntry;
         private buildFromMutator;
         private toggleCollapse;
+    }
+}
+declare namespace Fudge {
+    import ƒ = FudgeCore;
+    import ƒui = FudgeUserInterface;
+    class ControllerComponent extends ƒui.Controller {
+        constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
     }
 }
 declare namespace Fudge {
@@ -93,7 +95,7 @@ declare namespace Fudge {
         protected goldenLayout: GoldenLayout;
         private views;
         constructor(_container: GoldenLayout.Container, _state: Object);
-        /** Send custom copies of the give event to the views */
+        /** Send custom copies of the given event to the views */
         broadcastEvent(_event: Event): void;
         private addViewComponent;
     }
@@ -111,6 +113,7 @@ declare namespace Fudge {
         constructor(_container: GoldenLayout.Container, _state: Object);
         setNode(_node: ƒ.Node): void;
         getNode(): ƒ.Node;
+        cleanup(): void;
         private hndSelectNode;
     }
 }
@@ -120,33 +123,16 @@ declare namespace Fudge {
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class PanelManager extends EventTarget {
-        static idCounter: number;
-        static instance: PanelManager;
-        editorLayout: GoldenLayout;
-        private activePanel;
-        private constructor();
-        /**
-         * Add View to PanelManagers View List and add the view to the active panel
-         */
+        private static idCounter;
+        private static goldenLayout;
+        private static panels;
         static add(_panel: typeof Panel, _title: string, _state?: Object): void;
+        static initialize(): void;
+        /** Send custom copies of the given event to the views */
+        static broadcastEvent(_event: Event): void;
         private static generateID;
-        /**
-         * Returns the currently active Panel
-         */
-        getActivePanel(): Panel;
-        /**
-         * Initialize GoldenLayout Context of the PanelManager Instance
-         */
-        init(): void;
+        cleanup(): void;
     }
-    /**
-     * Factory Function for the generic "View"-Component
-     */
-    function registerViewComponent(_container: GoldenLayout.Container, _state: Object): void;
-    /**
-     * Factory Function for the generic "Panel"-Component
-     */
-    function registerPanelComponent(_container: GoldenLayout.Container, _state: Object): void;
 }
 declare namespace Fudge {
     interface ViewAnimationKey {
@@ -296,6 +282,7 @@ declare namespace Fudge {
         cleanup(): void;
         createUserInterface(): void;
         setRoot(_node: ƒ.Node): void;
+        private setNode;
         private animate;
         private activeViewport;
     }

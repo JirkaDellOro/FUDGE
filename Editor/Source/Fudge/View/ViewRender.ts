@@ -16,6 +16,7 @@ namespace Fudge {
       super(_container, _state);
       this.graph = <ƒ.Node><unknown>_state["node"];
       this.createUserInterface();
+      this.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setNode);
     }
 
     cleanup(): void {
@@ -52,7 +53,10 @@ namespace Fudge {
         return;
       this.graph = _node;
       this.viewport.setGraph(this.graph);
-
+    }
+    
+    private setNode = (_event: CustomEvent): void => {
+      this.setRoot(_event.detail);
     }
     
     private animate = (_e: Event) => {

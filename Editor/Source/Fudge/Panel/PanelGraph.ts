@@ -44,6 +44,10 @@ namespace Fudge {
       return this.node;
     }
 
+    public cleanup(): void {
+      //TODO: desconstruct
+    }
+
     private hndSelectNode = (_event: CustomEvent): void => {
       this.setNode(_event.detail);
       this.broadcastEvent(_event);
