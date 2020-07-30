@@ -21,8 +21,8 @@ namespace Fudge {
 
   function initWindow(): void {
     ƒ.Debug.log("Fudge started");
-    PanelManager.initialize();
-    ƒ.Debug.log("Panel Manager initialized");
+    Editor.initialize();
+    ƒ.Debug.log("Editor initialized");
     // TODO: create a new Panel containing a ViewData by default. More Views can be added by the user or by configuration
 
     ipcRenderer.on("save", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
@@ -37,7 +37,7 @@ namespace Fudge {
     ipcRenderer.on("open", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
       ƒ.Debug.log("Open");
       node = open();
-      PanelManager.broadcastEvent(new CustomEvent(ƒui.EVENT_USERINTERFACE.SELECT, { detail: node }));
+      Editor.broadcastEvent(new CustomEvent(ƒui.EVENT_USERINTERFACE.SELECT, { detail: node }));
     });
 
     ipcRenderer.on("openPanelGraph", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
@@ -49,7 +49,7 @@ namespace Fudge {
       ƒ.Debug.log("openPanelAnimation");
       // openAnimationPanel();
     });
-    
+
     // HACK!
     ipcRenderer.on("updateNode", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
       ƒ.Debug.log("updateNode");
@@ -61,7 +61,7 @@ namespace Fudge {
     let node2: ƒ.Node = new ƒAid.NodeCoordinateSystem("WorldCooSys", ƒ.Matrix4x4.IDENTITY());
     node.addChild(node2);
     node2.cmpTransform.local.translateZ(2);
-    PanelManager.add(PanelGraph, "Graph", Object({ node: node })); //Object.create(null,  {node: { writable: true, value: node }}));
+    Editor.add(PanelGraph, "Graph", Object({ node: node })); //Object.create(null,  {node: { writable: true, value: node }}));
   }
 
   // function openAnimationPanel(): void {

@@ -8,6 +8,21 @@ declare namespace Fudge {
         HIDE = "nodeHideEvent",
         ACTIVEVIEWPORT = "activeViewport"
     }
+    /**
+     * Manages all [[Panel]]s used by Fudge at the time. Call the static instance Member to use its functions.
+     * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class Editor extends EventTarget {
+        private static idCounter;
+        private static goldenLayout;
+        private static panels;
+        static add(_panel: typeof Panel, _title: string, _state?: Object): void;
+        static initialize(): void;
+        /** Send custom copies of the given event to the views */
+        static broadcastEvent(_event: Event): void;
+        private static generateID;
+        cleanup(): void;
+    }
 }
 declare namespace Fudge {
     const ipcRenderer: Electron.IpcRenderer;
@@ -115,23 +130,6 @@ declare namespace Fudge {
         getNode(): ƒ.Node;
         cleanup(): void;
         private hndSelectNode;
-    }
-}
-declare namespace Fudge {
-    /**
-     * Manages all [[Panel]]s used by Fudge at the time. Call the static instance Member to use its functions.
-     * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
-     */
-    class PanelManager extends EventTarget {
-        private static idCounter;
-        private static goldenLayout;
-        private static panels;
-        static add(_panel: typeof Panel, _title: string, _state?: Object): void;
-        static initialize(): void;
-        /** Send custom copies of the given event to the views */
-        static broadcastEvent(_event: Event): void;
-        private static generateID;
-        cleanup(): void;
     }
 }
 declare namespace Fudge {
