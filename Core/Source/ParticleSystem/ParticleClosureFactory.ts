@@ -4,7 +4,7 @@ namespace FudgeCore {
    * A function taking input factors (time, index, size and self defined ones) as the argument. Returning a number.
   */
   export interface ParticleClosure {
-    (_inputFactors: ParticleInputFactors): number;
+    (_variables: ParticleVariables): number;
   }
 
   /**
@@ -13,15 +13,15 @@ namespace FudgeCore {
    */
   export class ParticleClosureFactory {
     private static closures: { [key: string]: Function } = {
-      "addition": ParticleClosureFactory.createClosureAddition,
-      "subtraction": ParticleClosureFactory.createClosureSubtraction,
-      "multiplication": ParticleClosureFactory.createClosureMultiplication,
-      "division": ParticleClosureFactory.createClosureDivision,
-      "modulo": ParticleClosureFactory.createClosureModulo,
-      "linear": ParticleClosureFactory.createClosureLinear,
-      "polynomial": ParticleClosureFactory.createClosurePolynomial3,
-      "squareRoot": ParticleClosureFactory.createClosureSquareRoot,
-      "random": ParticleClosureFactory.createClosureRandom
+      "addition": ParticleClosureFactory.createAddition,
+      "subtraction": ParticleClosureFactory.createSubtraction,
+      "multiplication": ParticleClosureFactory.createMultiplication,
+      "division": ParticleClosureFactory.createDivision,
+      "modulo": ParticleClosureFactory.createModulo,
+      "linear": ParticleClosureFactory.createLinear,
+      "polynomial": ParticleClosureFactory.createPolynomial3,
+      "squareRoot": ParticleClosureFactory.createSquareRoot,
+      "random": ParticleClosureFactory.createRandom
     };
 
     /**
@@ -41,12 +41,12 @@ namespace FudgeCore {
      * Creates a closure which will return the sum of the given parameters,  
      *  i.e. ```_parameters[0] + ... + _parameters[n]```.
      */
-    private static createClosureAddition(_parameters: Function[]): Function {
-      return function (_inputFactors: ParticleInputFactors): number {
+    private static createAddition(_parameters: Function[]): Function {
+      return function (_variables: ParticleVariables): number {
         Debug.group("ClosureAddition");
         let result: number = 0;
         for (const param of _parameters) {
-          result += param(_inputFactors);
+          result += param(_variables);
         }
         Debug.groupEnd();
         return result;
@@ -57,10 +57,10 @@ namespace FudgeCore {
      * Creates a closure which will return the subtraction of the given parameters,  
      *  i.e. ```_parameters[0] - _parameters[1]```.
      */
-    private static createClosureSubtraction(_parameters: Function[]): Function {
-      return function (_inputFactors: ParticleInputFactors): number {
+    private static createSubtraction(_parameters: Function[]): Function {
+      return function (_variables: ParticleVariables): number {
         Debug.group("ClosureSubtraction");
-        let result: number = _parameters[0](_inputFactors) - _parameters[1](_inputFactors);
+        let result: number = _parameters[0](_variables) - _parameters[1](_variables);
         Debug.groupEnd();
         return result;
       };
@@ -70,12 +70,12 @@ namespace FudgeCore {
       * Creates a closure which will return the product of the given parameters,  
       *  i.e. ```_parameters[0] * ... * _parameters[n]```.
       */
-    private static createClosureMultiplication(_parameters: Function[]): Function {
-      return function (_inputFactors: ParticleInputFactors): number {
+    private static createMultiplication(_parameters: Function[]): Function {
+      return function (_variables: ParticleVariables): number {
         Debug.log("ClosureMultiplication");
         let result: number = 1;
         for (const param of _parameters) {
-          result *= param(_inputFactors);
+          result *= param(_variables);
         }
         Debug.groupEnd();
         return result;
@@ -86,10 +86,10 @@ namespace FudgeCore {
      * Creates a closure which will return the division of the given parameters,  
      *  i.e. ```_parameters[0] / _parameters[1]```.
      */
-    private static createClosureDivision(_parameters: Function[]): Function {
-      return function (_inputFactors: ParticleInputFactors): number {
+    private static createDivision(_parameters: Function[]): Function {
+      return function (_variables: ParticleVariables): number {
         Debug.group("ClosureDivision");
-        let result: number = _parameters[0](_inputFactors) / _parameters[1](_inputFactors);
+        let result: number = _parameters[0](_variables) / _parameters[1](_variables);
         Debug.groupEnd();
         return result;
       };
@@ -99,10 +99,10 @@ namespace FudgeCore {
      * Creates a closure which will return the modulo of the given parameters,  
      *  i.e. ```_parameters[0] % _parameters[1]```.
      */
-    private static createClosureModulo(_parameters: Function[]): Function {
-      return function (_inputFactors: ParticleInputFactors): number {
+    private static createModulo(_parameters: Function[]): Function {
+      return function (_variables: ParticleVariables): number {
         Debug.group("ClosureModulo");
-        let result: number = _parameters[0](_inputFactors) % _parameters[1](_inputFactors);
+        let result: number = _parameters[0](_variables) % _parameters[1](_variables);
         Debug.groupEnd();
         return result;
       };
@@ -116,14 +116,14 @@ namespace FudgeCore {
      * - ```_parameters[3]``` x end value.
      * - ```_parameters[4]``` y end value.
      */
-    private static createClosureLinear(_parameters: Function[]): Function {
+    private static createLinear(_parameters: Function[]): Function {
       let xStart: number = _parameters[1]();
       let yStart: number = _parameters[2]();
       let xEnd: number = _parameters[3]();
       let yEnd: number = _parameters[4]();
-      return function (_inputFactors: ParticleInputFactors): number {
+      return function (_variables: ParticleVariables): number {
         Debug.group("ClosureLinear");
-        let x: number = _parameters[0](_inputFactors);
+        let x: number = _parameters[0](_variables);
         let y: number = yStart + (x - xStart) * (yEnd - yStart) / (xEnd - xStart);
         Debug.log(xEnd);
         Debug.groupEnd();
@@ -139,14 +139,14 @@ namespace FudgeCore {
      * - ```_parameters[3]``` c value.
      * - ```_parameters[4]``` d value.
      */
-    private static createClosurePolynomial3(_parameters: Function[]): Function {
+    private static createPolynomial3(_parameters: Function[]): Function {
       let a: number = _parameters[1]();
       let b: number = _parameters[2]();
       let c: number = _parameters[3]();
       let d: number = _parameters[4]();
-      return function (_inputFactors: ParticleInputFactors): number {
+      return function (_variables: ParticleVariables): number {
         Debug.group("ClosurePolynomial3");
-        let x: number = _parameters[0](_inputFactors);
+        let x: number = _parameters[0](_variables);
         let y: number = a * Math.pow(x, 3) + b * Math.pow(x, 2) + c * x + d;
         Debug.groupEnd();
         return y;
@@ -157,10 +157,10 @@ namespace FudgeCore {
      * Creates a closure which will return the square root of the given parameter,  
      * ```parameters[0]``` will be the input value for the function.
      */
-    private static createClosureSquareRoot(_parameters: Function[]): Function {
-      return function (_inputFactors: ParticleInputFactors): number {
+    private static createSquareRoot(_parameters: Function[]): Function {
+      return function (_variables: ParticleVariables): number {
         Debug.group("ClosureSquareRoot");
-        let x: number = _parameters[0](_inputFactors);
+        let x: number = _parameters[0](_variables);
         let y: number = Math.sqrt(x);
         Debug.groupEnd();
         return y;
@@ -168,13 +168,13 @@ namespace FudgeCore {
     }
 
     /**
-     * Creates a closure which will return a number chosen from the randomNumbers array in _inputFactors.
+     * Creates a closure which will return a number chosen from the randomNumbers array in _variables.
      * - ```_parameters[0]``` representing the index of the number which will be chosen.  
      */
-    private static createClosureRandom(_parameters: Function[]): Function {
-      return function (_inputFactors: ParticleInputFactors): number {
+    private static createRandom(_parameters: Function[]): Function {
+      return function (_variables: ParticleVariables): number {
         Debug.group("ClosureRandom");
-        let result: number = (<number[]>_inputFactors["randomNumbers"])[_parameters[0](_inputFactors)];
+        let result: number = (<number[]>_variables[PARTICLE_VARIBALE_NAMES.RANDOM_NUMBERS])[_parameters[0](_variables)];
         Debug.groupEnd();
         return result;
       };

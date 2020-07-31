@@ -15,6 +15,7 @@ namespace FudgeCore {
       let coat: Coat = cmpMaterial.material.getCoat();
       shader.useProgram();
 
+      //TODO: getting translationCamera is similiar to what happens in _cmpCamera.ViewProjectionMatrix. Further clean up is needed
       let translationCamera: Vector3 = _cmpCamera.pivot.translation;
       try {
         translationCamera = Matrix4x4.MULTIPLICATION(_cmpCamera.getContainer().mtxWorld, _cmpCamera.pivot).translation;
@@ -23,13 +24,13 @@ namespace FudgeCore {
       }
       let cameraViewProjectionMatrix: Matrix4x4 = _cmpCamera.ViewProjectionMatrix;
 
-      let particleEffect: ParticleEffect = _cmpParticleSystem.particleEffect;
-      let inputFactors: ParticleInputFactors = _cmpParticleSystem.inputFactors;
-      inputFactors["time"] = Time.game.get() / 1000;
-      let dataTransformLocal: ParticleEffectData = particleEffect.transformLocal;
-      let dataTransformWorld: ParticleEffectData = particleEffect.transformWorld;
-      let dataComponentMutations: ParticleEffectData = particleEffect.componentMutations;
-      let cachedMutators: {[key: string]: Mutator} = particleEffect.cachedMutators;
+      let effect: ParticleEffect = _cmpParticleSystem.particleEffect;
+      let variables: ParticleVariables = _cmpParticleSystem.variables;
+      variables[PARTICLE_VARIBALE_NAMES.TIME] = Time.game.get() / 1000;
+      let dataTransformLocal: ParticleEffectData = effect.transformLocal;
+      let dataTransformWorld: ParticleEffectData = effect.transformWorld;
+      let dataComponentMutations: ParticleEffectData = effect.componentMutations;
+      let cachedMutators: {[key: string]: Mutator} = effect.cachedMutators;
 
       // get relevant components
       let components: Component[] = [];
@@ -44,13 +45,12 @@ namespace FudgeCore {
       }
 
       // evaluate update storage
-      _cmpParticleSystem.evaluateStorage(particleEffect.storageUpdate);
+      _cmpParticleSystem.evaluateStorage(effect.storageUpdate);
 
-      let storageParticle: ParticleEffectData;
-      storageParticle = particleEffect.storageParticle;
+      let storageParticle: ParticleEffectData = effect.storageParticle;
 
-      for (let i: number = 0, length: number = <number>inputFactors["size"]; i < length; i++) {
-        inputFactors["index"] = i;
+      for (let i: number = 0, length: number = <number>variables[PARTICLE_VARIBALE_NAMES.SIZE]; i < length; i++) {
+        variables[PARTICLE_VARIBALE_NAMES.INDEX] = i;
 
         // evaluate particle storage
         _cmpParticleSystem.evaluateStorage(storageParticle);
@@ -58,20 +58,20 @@ namespace FudgeCore {
         // apply transformations
         let finalTransform: Matrix4x4 = Matrix4x4.IDENTITY();
         finalTransform.multiply(_nodeTransform);
-        this.applyTransform(finalTransform, dataTransformLocal, cachedMutators, inputFactors);
+        this.applyTransform(finalTransform, dataTransformLocal, cachedMutators, variables);
         if (_cmpMesh.showToCamera)
           finalTransform.showTo(translationCamera);
         finalTransform.multiply(_cmpMesh.pivot);
         if (dataTransformWorld) {
           let transformWorld: Matrix4x4 = Matrix4x4.IDENTITY();
-          this.applyTransform(transformWorld, dataTransformWorld, cachedMutators, inputFactors);
+          this.applyTransform(transformWorld, dataTransformWorld, cachedMutators, variables);
           finalTransform.multiply(transformWorld, true);
           Recycler.store(transformWorld);
         }
 
         // mutate components
         for (const component of components) {
-          component.mutate(this.evaluateMutatorWith(cachedMutators[component.type], dataComponentMutations[component.type], inputFactors));
+          component.mutate(this.evaluateMutatorWith(cachedMutators[component.type], dataComponentMutations[component.type], variables));
         }
 
         // render
@@ -90,22 +90,22 @@ namespace FudgeCore {
       }
     }
 
-    private static applyTransform(_transform: Matrix4x4, _dataTransform: ParticleEffectData, _mutatorCache: {[key: string]: Mutator}, _inputFactors: ParticleInputFactors): void {
+    private static applyTransform(_transform: Matrix4x4, _dataTransform: ParticleEffectData, _mutatorCache: {[key: string]: Mutator}, _variables: ParticleVariables): void {
       for (const key in _dataTransform) {
         let transformVector: Vector3 = key == "scale" ? Vector3.ONE() : Vector3.ZERO();
-        transformVector.mutate(this.evaluateMutatorWith(_mutatorCache[key], _dataTransform[key], _inputFactors));
+        transformVector.mutate(this.evaluateMutatorWith(_mutatorCache[key], _dataTransform[key], _variables));
         (<General>_transform)[key](transformVector);
         Recycler.store(transformVector);
       }
     }
 
-    private static evaluateMutatorWith(_mutator: Mutator, _effectData: ParticleEffectData, _inputFactors: ParticleInputFactors): Mutator {
+    private static evaluateMutatorWith(_mutator: Mutator, _effectData: ParticleEffectData, _variables: ParticleVariables): Mutator {
       for (const attribute in _effectData) {
         let value: Object = _effectData[attribute];
         if (typeof value === "function") {
-          _mutator[attribute] = (<ParticleClosure>value)(_inputFactors);
+          _mutator[attribute] = (<ParticleClosure>value)(_variables);
         } else {
-          this.evaluateMutatorWith(<Mutator>_mutator[attribute], value, _inputFactors);
+          this.evaluateMutatorWith(<Mutator>_mutator[attribute], value, _variables);
         }
       }
       return _mutator;

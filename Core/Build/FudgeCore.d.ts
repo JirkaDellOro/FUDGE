@@ -1419,7 +1419,7 @@ declare namespace FudgeCore {
     /**
      * Contains all the information which will be used to evaluate the closures of the particle effect. Current time and index, size and all the defined values of the storage partition of the effect will cached here while evaluating the effect.
      */
-    interface ParticleInputFactors {
+    interface ParticleVariables {
         [key: string]: number | number[];
     }
     /**
@@ -1428,10 +1428,13 @@ declare namespace FudgeCore {
      */
     class ComponentParticleSystem extends Component {
         static readonly iSubclass: number;
-        inputFactors: ParticleInputFactors;
-        private _particleEffect;
+        variables: ParticleVariables;
+        private effect;
         constructor(_particleEffect?: ParticleEffect, _size?: number);
         particleEffect: ParticleEffect;
+        /**
+        * Sets the size of the particle effect. Caution: Setting this will result in the reevaluation of the system storage of the effect and the reinitialization of the randomNumbers array.
+        */
         size: number;
         evaluateStorage(_storageData: ParticleEffectData): void;
         private initRandomNumbers;
@@ -3179,7 +3182,7 @@ declare namespace FudgeCore {
      * A function taking input factors (time, index, size and self defined ones) as the argument. Returning a number.
     */
     interface ParticleClosure {
-        (_inputFactors: ParticleInputFactors): number;
+        (_variables: ParticleVariables): number;
     }
     /**
      * Factory class to create closures.
@@ -3242,13 +3245,19 @@ declare namespace FudgeCore {
          */
         private static createClosureSquareRoot;
         /**
-         * Creates a closure which will return a number chosen from the randomNumbers array in _inputFactors.
+         * Creates a closure which will return a number chosen from the randomNumbers array in _variables.
          * - ```_parameters[0]``` representing the index of the number which will be chosen.
          */
         private static createClosureRandom;
     }
 }
 declare namespace FudgeCore {
+    enum PARTICLE_VARIBALE_NAMES {
+        TIME = "time",
+        INDEX = "index",
+        SIZE = "size",
+        RANDOM_NUMBERS = "randomNumbers"
+    }
     /**
      * The data format used to parse and store the paticle effect
      */
@@ -3269,7 +3278,7 @@ declare namespace FudgeCore {
         cachedMutators: {
             [key: string]: Mutator;
         };
-        private definedInputFactors;
+        private definedVariables;
         /**
          * Asynchronously loads the json from the given url and parses it initializing this particle effect.
          */
@@ -3280,7 +3289,7 @@ declare namespace FudgeCore {
          */
         private parse;
         /**
-         * Creates entries in [[definedInputFactors]] for each defined closure in _data. Predefined values (time, index...) and previously defined ones (in json) can not be overwritten.
+         * Creates entries in [[definedVariables]] for each defined closure in _data. Predefined variables (time, index...) and previously defined ones (in json) can not be overwritten.
          * @param _data The paticle effect data to parse.
          */
         private preParseStorage;

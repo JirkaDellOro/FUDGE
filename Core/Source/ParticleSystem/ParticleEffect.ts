@@ -1,5 +1,12 @@
 namespace FudgeCore {
 
+  export enum PARTICLE_VARIBALE_NAMES {
+    TIME = "time",
+    INDEX = "index",
+    SIZE = "size",
+    RANDOM_NUMBERS = "randomNumbers"
+  }
+
   /**
    * The data format used to parse and store the paticle effect
    */
@@ -30,7 +37,7 @@ namespace FudgeCore {
     public transformWorld: ParticleEffectData;
     public componentMutations: ParticleEffectData;
     public cachedMutators: { [key: string]: Mutator };
-    private definedInputFactors: string[] = ["time", "index", "size", "randomNumbers"]; // these are used to throw errors only
+    private definedVariables: string[]; // these are used to throw errors only
 
     /**
      * Asynchronously loads the json from the given url and parses it initializing this particle effect.
@@ -46,8 +53,8 @@ namespace FudgeCore {
      * @param _data The paticle effect data to parse.
      */
     private parse(_data: ParticleEffectData): void {
+      this.definedVariables = Object.values(PARTICLE_VARIBALE_NAMES);
       let dataStorage: ParticleEffectData = _data["storage"];
-
       if (dataStorage) {
         this.preParseStorage(dataStorage);
         this.storageSystem = this.parseRecursively(dataStorage["system"]);
@@ -56,10 +63,11 @@ namespace FudgeCore {
       }
 
       let dataTransform: ParticleEffectData = _data["transformations"];
-
-      this.transformLocal = this.parseRecursively(dataTransform["local"]);
-      this.transformWorld = this.parseRecursively(dataTransform["world"]);
-
+      if (dataTransform) {
+        this.transformLocal = this.parseRecursively(dataTransform["local"]);
+        this.transformWorld = this.parseRecursively(dataTransform["world"]);
+      }
+      
       this.componentMutations = this.parseRecursively(_data["components"]);
 
       this.cachedMutators = {};
@@ -69,18 +77,18 @@ namespace FudgeCore {
     }
 
     /**
-     * Creates entries in [[definedInputFactors]] for each defined closure in _data. Predefined values (time, index...) and previously defined ones (in json) can not be overwritten.
+     * Creates entries in [[definedVariables]] for each defined closure in _data. Predefined variables (time, index...) and previously defined ones (in json) can not be overwritten.
      * @param _data The paticle effect data to parse.
      */
     private preParseStorage(_data: ParticleEffectData): void {
       for (const storagePartition in _data) {
         let storage: ParticleEffectData = _data[storagePartition];
         for (const storageValue in storage) {
-          if (this.definedInputFactors.includes(storageValue)) {
+          if (this.definedVariables.includes(storageValue)) {
             throw `"${storageValue}" is already defined`;
           }
           else
-            this.definedInputFactors.push(storageValue);
+            this.definedVariables.push(storageValue);
         }
       }
     }
@@ -112,25 +120,19 @@ namespace FudgeCore {
           for (let param of _data.parameters) {
             parameters.push(this.parseClosure(param));
           }
-          // // random closure needs to have the random numbers array as a parameter
-          // if (_data.function == "random") {
-          //   parameters.push(() => {
-          //     return this.randomNumbers;
-          //   });
-          // }
           return ParticleClosureFactory.getClosure(_data.function, parameters);
 
         case "string":
-          if (this.definedInputFactors.includes(_data))
-            return function (_inputFactors: ParticleInputFactors): number {
-              Debug.log("Variable", `"${_data}"`, _inputFactors[<string>_data]);
-              return <number>_inputFactors[<string>_data];
+          if (this.definedVariables.includes(_data))
+            return function (_variables: ParticleVariables): number {
+              Debug.log("Variable", `"${_data}"`, _variables[<string>_data]);
+              return <number>_variables[<string>_data];
             };
           else
             throw `"${_data}" is not defined`;
 
         case "number":
-          return function (_inputFactors: ParticleInputFactors): number {
+          return function (_variables: ParticleVariables): number {
             Debug.log("Constant", _data);
             return <number>_data;
           };
