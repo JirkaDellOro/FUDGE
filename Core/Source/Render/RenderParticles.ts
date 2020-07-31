@@ -26,7 +26,6 @@ namespace FudgeCore {
       let particleEffect: ParticleEffect = _cmpParticleSystem.particleEffect;
       let inputFactors: ParticleInputFactors = _cmpParticleSystem.inputFactors;
       inputFactors["time"] = Time.game.get() / 1000;
-      particleEffect.randomNumbers = _cmpParticleSystem.randomNumbers;
       let dataTransformLocal: ParticleEffectData = particleEffect.transformLocal;
       let dataTransformWorld: ParticleEffectData = particleEffect.transformWorld;
       let dataComponentMutations: ParticleEffectData = particleEffect.componentMutations;
@@ -50,7 +49,7 @@ namespace FudgeCore {
       let storageParticle: ParticleEffectData;
       storageParticle = particleEffect.storageParticle;
 
-      for (let i: number = 0, length: number = inputFactors["size"]; i < length; i++) {
+      for (let i: number = 0, length: number = <number>inputFactors["size"]; i < length; i++) {
         inputFactors["index"] = i;
 
         // evaluate particle storage

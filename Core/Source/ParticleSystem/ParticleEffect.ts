@@ -4,7 +4,6 @@ namespace FudgeCore {
    * The data format used to parse and store the paticle effect
    */
   export interface ParticleEffectData {
-    //TODO: Refactor this to type ParticleEffectData | ParticleClosure
     [identifier: string]: General;
   }
 
@@ -30,12 +29,8 @@ namespace FudgeCore {
     public transformLocal: ParticleEffectData;
     public transformWorld: ParticleEffectData;
     public componentMutations: ParticleEffectData;
-    //TODO: put randomNumbers in inputFactors???
-    public randomNumbers: number[];
-
     public cachedMutators: { [key: string]: Mutator };
-
-    private definedInputFactors: string[] = ["time", "index", "size"]; // these are used to throw errors only
+    private definedInputFactors: string[] = ["time", "index", "size", "randomNumbers"]; // these are used to throw errors only
 
     /**
      * Asynchronously loads the json from the given url and parses it initializing this particle effect.
@@ -117,19 +112,19 @@ namespace FudgeCore {
           for (let param of _data.parameters) {
             parameters.push(this.parseClosure(param));
           }
-          // random closure needs to have the random numbers array as a parameter
-          if (_data.function == "random") {
-            parameters.push(() => {
-              return this.randomNumbers;
-            });
-          }
+          // // random closure needs to have the random numbers array as a parameter
+          // if (_data.function == "random") {
+          //   parameters.push(() => {
+          //     return this.randomNumbers;
+          //   });
+          // }
           return ParticleClosureFactory.getClosure(_data.function, parameters);
 
         case "string":
           if (this.definedInputFactors.includes(_data))
             return function (_inputFactors: ParticleInputFactors): number {
               Debug.log("Variable", `"${_data}"`, _inputFactors[<string>_data]);
-              return _inputFactors[<string>_data];
+              return <number>_inputFactors[<string>_data];
             };
           else
             throw `"${_data}" is not defined`;

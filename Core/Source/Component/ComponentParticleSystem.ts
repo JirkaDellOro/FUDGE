@@ -5,7 +5,7 @@ namespace FudgeCore {
    * Contains all the information which will be used to evaluate the closures of the particle effect. Current time and index, size and all the defined values of the storage partition of the effect will cached here while evaluating the effect. 
    */
   export interface ParticleInputFactors {
-    [key: string]: number;
+    [key: string]: number | number[];
   }
 
   /**
@@ -14,14 +14,11 @@ namespace FudgeCore {
    */
   export class ComponentParticleSystem extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentParticleSystem);
-    public randomNumbers: number[];
     public inputFactors: ParticleInputFactors;
 
     private _particleEffect: ParticleEffect;
     // TODO: add color for the whole system
 
-
-    // TODO: instances of this class should how their own StoredValues and random number arrays
     constructor(_particleEffect: ParticleEffect = null, _size: number = null) {
       super();
       this._particleEffect = _particleEffect;
@@ -46,7 +43,7 @@ namespace FudgeCore {
     }
 
     public get size(): number {
-      return this.inputFactors["size"];
+      return <number>this.inputFactors["size"];
     }
 
     public set size(_newSize: number) {
@@ -62,10 +59,11 @@ namespace FudgeCore {
     }
 
     private initRandomNumbers(_size: number): void {
-      this.randomNumbers = [];
+      let randomNumbers: number[] = [];
       for (let i: number = 0; i < _size + 10 /* so that its possible to have 10 different random numbers per index i.e. randomNumber(index + x) */; i++) {
-        this.randomNumbers.push(Math.random());
+        randomNumbers.push(Math.random());
       }
+      this.inputFactors["randomNumbers"] = randomNumbers;
     }
   }
 }

@@ -168,14 +168,13 @@ namespace FudgeCore {
     }
 
     /**
-     * Creates a closure which will return a number chosen from the given array of numbers.
+     * Creates a closure which will return a number chosen from the randomNumbers array in _inputFactors.
      * - ```_parameters[0]``` representing the index of the number which will be chosen.  
-     * - ```_parameters[1]``` representing the array of random numbers to choose from.
      */
     private static createClosureRandom(_parameters: Function[]): Function {
       return function (_inputFactors: ParticleInputFactors): number {
         Debug.group("ClosureRandom");
-        let result: number = _parameters[1]()[_parameters[0](_inputFactors)];
+        let result: number = (<number[]>_inputFactors["randomNumbers"])[_parameters[0](_inputFactors)];
         Debug.groupEnd();
         return result;
       };
