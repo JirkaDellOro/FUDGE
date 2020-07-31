@@ -40,7 +40,7 @@ namespace Fudge {
     public broadcastEvent(_event: Event): void {
       for (let view of this.views) {
         let event: CustomEvent = new CustomEvent(_event.type, { bubbles: false, cancelable: true, detail: (<CustomEvent>_event).detail });
-        view.dispatchEvent(event);
+        view.dom.dispatchEvent(event);
       }
     }
 

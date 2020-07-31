@@ -16,12 +16,11 @@ namespace Fudge {
    * Base class for all [[View]]s to support generic functionality
    * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
    */
-  export abstract class View extends EventTarget {
+  export abstract class View {
 
     public dom: HTMLElement;
 
     constructor(_container: GoldenLayout.Container, _state: Object) {
-      super();
       this.dom = document.createElement("div");
       this.dom.style.height = "100%";
       this.dom.style.overflow = "auto";

@@ -7,14 +7,13 @@ namespace Fudge {
 
   import ƒ = FudgeCore;
   import ƒAid = FudgeAid;
+
   export const ipcRenderer: Electron.IpcRenderer = require("electron").ipcRenderer;
   export const remote: Electron.Remote = require("electron").remote;
   const fs: ƒ.General = require("fs");
 
   // TODO: At this point of time, the project is just a single node. A project is much more complex...
   let node: ƒ.Node = null;
-  // TODO: At this point of time, there is just a single panel. Support multiple panels
-  let panel: Panel = null;
 
 
   window.addEventListener("load", initWindow);
@@ -37,7 +36,7 @@ namespace Fudge {
     ipcRenderer.on("open", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
       ƒ.Debug.log("Open");
       node = open();
-      Editor.broadcastEvent(new CustomEvent(ƒui.EVENT_USERINTERFACE.SELECT, { detail: node }));
+      Editor.broadcastEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, { detail: node }));
     });
 
     ipcRenderer.on("openPanelGraph", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {

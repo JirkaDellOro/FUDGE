@@ -2,15 +2,16 @@ var Fudge;
 (function (Fudge) {
     let EVENT_EDITOR;
     (function (EVENT_EDITOR) {
-        EVENT_EDITOR["REMOVE"] = "nodeRemoveEvent";
-        EVENT_EDITOR["HIDE"] = "nodeHideEvent";
-        EVENT_EDITOR["ACTIVEVIEWPORT"] = "activeViewport";
+        EVENT_EDITOR["REMOVE"] = "removeNode";
+        EVENT_EDITOR["HIDE"] = "hideNode";
+        EVENT_EDITOR["ACTIVATE_VIEWPORT"] = "activateViewport";
+        EVENT_EDITOR["SET_GRAPH"] = "setGraph";
     })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
     /**
-     * Manages all [[Panel]]s used by Fudge at the time. Call the static instance Member to use its functions.
+     * The uppermost container for all panels
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
-    class Editor extends EventTarget {
+    class Editor {
         static add(_panel, _title, _state) {
             let config = {
                 type: "stack",
@@ -77,8 +78,6 @@ var Fudge;
     const fs = require("fs");
     // TODO: At this point of time, the project is just a single node. A project is much more complex...
     let node = null;
-    // TODO: At this point of time, there is just a single panel. Support multiple panels
-    let panel = null;
     window.addEventListener("load", initWindow);
     function initWindow() {
         ƒ.Debug.log("Fudge started");
@@ -96,7 +95,7 @@ var Fudge;
         Fudge.ipcRenderer.on("open", (_event, _args) => {
             ƒ.Debug.log("Open");
             node = open();
-            Fudge.Editor.broadcastEvent(new CustomEvent("select" /* SELECT */, { detail: node }));
+            Fudge.Editor.broadcastEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { detail: node }));
         });
         Fudge.ipcRenderer.on("openPanelGraph", (_event, _args) => {
             ƒ.Debug.log("openPanelGraph");
@@ -230,8 +229,8 @@ var Fudge;
             this.index = {};
             this.listRoot = this.buildFromMutator(this.mutator);
             _listContainer.append(this.listRoot);
-            _listContainer.addEventListener("collapse" /* COLLAPSE */, this.toggleCollapse);
-            _listContainer.addEventListener("update" /* UPDATE */, this.collectMutator);
+            _listContainer.addEventListener(ƒui.EVENT_USERINTERFACE.COLLAPSE, this.toggleCollapse);
+            _listContainer.addEventListener(ƒui.EVENT_USERINTERFACE.UPDATE, this.collectMutator);
         }
         getMutator() {
             return this.mutator;
@@ -370,9 +369,8 @@ var Fudge;
      * Base class for all [[View]]s to support generic functionality
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
-    class View extends EventTarget {
+    class View {
         constructor(_container, _state) {
-            super();
             this.dom = document.createElement("div");
             this.dom.style.height = "100%";
             this.dom.style.overflow = "auto";
@@ -422,15 +420,12 @@ var Fudge;
         broadcastEvent(_event) {
             for (let view of this.views) {
                 let event = new CustomEvent(_event.type, { bubbles: false, cancelable: true, detail: _event.detail });
-                view.dispatchEvent(event);
+                view.dom.dispatchEvent(event);
             }
         }
     }
     Fudge.Panel = Panel;
 })(Fudge || (Fudge = {}));
-// /<reference path="../View/View.ts"/>
-// /<reference path="../Panel/Panel.ts"/>
-var ƒui = FudgeUserInterface;
 var Fudge;
 (function (Fudge) {
     /**
@@ -441,8 +436,9 @@ var Fudge;
     class PanelGraph extends Fudge.Panel {
         constructor(_container, _state) {
             super(_container, _state);
-            this.hndSelectNode = (_event) => {
-                this.setNode(_event.detail);
+            this.hndSetGraph = (_event) => {
+                if (_event.type == Fudge.EVENT_EDITOR.SET_GRAPH)
+                    this.setGraph(_event.detail);
                 this.broadcastEvent(_event);
             };
             this.goldenLayout.registerComponent(Fudge.VIEW.RENDER, Fudge.ViewRender);
@@ -460,9 +456,10 @@ var Fudge;
                     { type: "component", componentName: Fudge.VIEW.COMPONENTS, componentState: _state, title: "Components" }
                 ]
             });
-            this.dom.addEventListener("select" /* SELECT */, this.hndSelectNode);
+            this.dom.addEventListener("select" /* SELECT */, this.hndSetGraph);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndSetGraph);
         }
-        setNode(_node) {
+        setGraph(_node) {
             this.node = _node;
         }
         getNode() {
@@ -473,6 +470,22 @@ var Fudge;
         }
     }
     Fudge.PanelGraph = PanelGraph;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Display the project structure and offer functions for creation of resources
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class PanelProject extends Fudge.Panel {
+        constructor(_container, _state) {
+            super(_container, _state);
+        }
+        cleanup() {
+            //TODO: desconstruct
+        }
+    }
+    Fudge.PanelProject = PanelProject;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -1119,7 +1132,7 @@ var Fudge;
                 }
             };
             this.fillContent();
-            this.addEventListener("select" /* SELECT */, this.setNode);
+            this.dom.addEventListener("select" /* SELECT */, this.setNode);
         }
         cleanup() {
             //TODO: Deconstruct;
@@ -1157,6 +1170,11 @@ var Fudge;
     class ViewHierarchy extends Fudge.View {
         constructor(_container, _state) {
             super(_container, _state);
+            // private setNode(_node: ƒ.Node): void {
+            //   ƒ.Debug.info("Hierarchy", _node);
+            //   // this.listController.setSelection(_event.detail);
+            //   this.selectedNode = _node;
+            // }
             this.passEventToPanel = (_event) => {
                 let eventToPass;
                 if (_event.type == ƒui.EVENT_TREE.SELECT)
@@ -1189,19 +1207,23 @@ var Fudge;
                         break;
                 }
             };
+            this.hndEvent = (_event) => {
+                this.setGraph(_event.detail);
+            };
             this.contextMenu = Fudge.ContextMenu.getMenu(ViewHierarchy, this.contextMenuCallback);
-            this.setRoot(_state.node);
+            this.setGraph(_state.node);
             // this.parentPanel.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setSelectedNode);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
         }
         cleanup() {
             //TODO: desconstruct
         }
-        setRoot(_node) {
-            if (!_node)
+        setGraph(_graph) {
+            if (!_graph)
                 return;
             if (this.tree)
                 this.dom.removeChild(this.tree);
-            this.graph = _node;
+            this.graph = _graph;
             this.selectedNode = null;
             this.tree = new ƒui.Tree(new Fudge.ControllerTreeNode(), this.graph);
             // this.listController.listRoot.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.passEventToPanel);
@@ -1209,11 +1231,6 @@ var Fudge;
             this.tree.addEventListener(ƒui.EVENT_TREE.SELECT, this.passEventToPanel);
             this.tree.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.append(this.tree);
-        }
-        setNode(_node) {
-            ƒ.Debug.info("Hierarchy", _node);
-            // this.listController.setSelection(_event.detail);
-            this.selectedNode = _node;
         }
     }
     Fudge.ViewHierarchy = ViewHierarchy;
@@ -1229,8 +1246,9 @@ var Fudge;
     class ViewRender extends Fudge.View {
         constructor(_container, _state) {
             super(_container, _state);
-            this.setNode = (_event) => {
-                this.setRoot(_event.detail);
+            this.hndEvent = (_event) => {
+                if (_event.type == Fudge.EVENT_EDITOR.SET_GRAPH)
+                    this.setGraph(_event.detail);
             };
             this.animate = (_e) => {
                 this.viewport.setGraph(this.graph);
@@ -1238,12 +1256,13 @@ var Fudge;
                     this.viewport.draw();
             };
             this.activeViewport = (_event) => {
-                let event = new CustomEvent(Fudge.EVENT_EDITOR.ACTIVEVIEWPORT, { detail: this.viewport.camera, bubbles: false });
+                let event = new CustomEvent(Fudge.EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });
                 _event.cancelBubble = true;
             };
             this.graph = _state["node"];
             this.createUserInterface();
-            this.addEventListener("select" /* SELECT */, this.setNode);
+            this.dom.addEventListener("select" /* SELECT */, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
         }
         cleanup() {
             ƒ.Loop.removeEventListener("loopFrame" /* LOOP_FRAME */, this.animate);
@@ -1264,10 +1283,10 @@ var Fudge;
             ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
             ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, this.animate);
             //Focus cameracontrols on new viewport
-            let event = new CustomEvent(Fudge.EVENT_EDITOR.ACTIVEVIEWPORT, { detail: this.viewport.camera, bubbles: false });
+            // let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });
             this.canvas.addEventListener("click", this.activeViewport);
         }
-        setRoot(_node) {
+        setGraph(_node) {
             if (!_node)
                 return;
             this.graph = _node;

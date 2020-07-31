@@ -16,7 +16,8 @@ namespace Fudge {
       super(_container, _state);
       this.graph = <ƒ.Node><unknown>_state["node"];
       this.createUserInterface();
-      this.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setNode);
+      this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
     }
 
     cleanup(): void {
@@ -43,30 +44,31 @@ namespace Fudge {
       ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
 
       //Focus cameracontrols on new viewport
-      let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVEVIEWPORT, { detail: this.viewport.camera, bubbles: false });
+      // let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });
 
       this.canvas.addEventListener("click", this.activeViewport);
     }
 
-    public setRoot(_node: ƒ.Node): void {
+    public setGraph(_node: ƒ.Node): void {
       if (!_node)
         return;
       this.graph = _node;
       this.viewport.setGraph(this.graph);
     }
-    
-    private setNode = (_event: CustomEvent): void => {
-      this.setRoot(_event.detail);
+
+    private hndEvent = (_event: CustomEvent): void => {
+      if (_event.type == EVENT_EDITOR.SET_GRAPH)
+        this.setGraph(_event.detail);
     }
-    
+
     private animate = (_e: Event) => {
       this.viewport.setGraph(this.graph);
       if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
         this.viewport.draw();
     }
-    
+
     private activeViewport = (_event: MouseEvent): void => {
-      let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVEVIEWPORT, { detail: this.viewport.camera, bubbles: false });
+      let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });
       _event.cancelBubble = true;
     }
   }

@@ -1,4 +1,3 @@
-
 namespace Fudge {
   export class AnimationList {
     listRoot: HTMLElement;

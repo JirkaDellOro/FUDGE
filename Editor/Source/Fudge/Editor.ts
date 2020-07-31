@@ -1,14 +1,15 @@
 namespace Fudge {
   export enum EVENT_EDITOR {
-    REMOVE = "nodeRemoveEvent",
-    HIDE = "nodeHideEvent",
-    ACTIVEVIEWPORT = "activeViewport"
+    REMOVE = "removeNode",
+    HIDE = "hideNode",
+    ACTIVATE_VIEWPORT = "activateViewport",
+    SET_GRAPH = "setGraph"
   }
   /**
-   * Manages all [[Panel]]s used by Fudge at the time. Call the static instance Member to use its functions.
+   * The uppermost container for all panels 
    * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
    */
-  export class Editor extends EventTarget {
+  export class Editor {
     private static idCounter: number = 0;
     private static goldenLayout: GoldenLayout;
     private static panels: Panel[] = [];

@@ -17,7 +17,7 @@ namespace Fudge {
       super(_container, _state);
       this.fillContent();
 
-      this.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setNode);
+      this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setNode);
     }
 
     public cleanup(): void {

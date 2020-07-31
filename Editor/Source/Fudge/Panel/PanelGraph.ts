@@ -1,9 +1,6 @@
-// /<reference path="../View/View.ts"/>
-// /<reference path="../Panel/Panel.ts"/>
-import ƒui = FudgeUserInterface;
-
 namespace Fudge {
   import ƒ = FudgeCore;
+  import ƒui = FudgeUserInterface;
 
   /**
   * Panel that functions as a Node Editor. Uses ViewData, ViewPort and ViewNode. 
@@ -33,10 +30,11 @@ namespace Fudge {
         ]
       });
 
-      this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.hndSelectNode);
+      this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.hndSetGraph);
+      this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndSetGraph);
     }
 
-    public setNode(_node: ƒ.Node): void {
+    public setGraph(_node: ƒ.Node): void {
       this.node = _node;
     }
 
@@ -48,8 +46,9 @@ namespace Fudge {
       //TODO: desconstruct
     }
 
-    private hndSelectNode = (_event: CustomEvent): void => {
-      this.setNode(_event.detail);
+    private hndSetGraph = (_event: CustomEvent): void => {
+      if (_event.type == EVENT_EDITOR.SET_GRAPH)
+        this.setGraph(_event.detail);
       this.broadcastEvent(_event);
     }
   }

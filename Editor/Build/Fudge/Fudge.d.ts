@@ -4,15 +4,16 @@
 /// <reference types="golden-layout" />
 declare namespace Fudge {
     enum EVENT_EDITOR {
-        REMOVE = "nodeRemoveEvent",
-        HIDE = "nodeHideEvent",
-        ACTIVEVIEWPORT = "activeViewport"
+        REMOVE = "removeNode",
+        HIDE = "hideNode",
+        ACTIVATE_VIEWPORT = "activateViewport",
+        SET_GRAPH = "setGraph"
     }
     /**
-     * Manages all [[Panel]]s used by Fudge at the time. Call the static instance Member to use its functions.
+     * The uppermost container for all panels
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
-    class Editor extends EventTarget {
+    class Editor {
         private static idCounter;
         private static goldenLayout;
         private static panels;
@@ -90,7 +91,7 @@ declare namespace Fudge {
      * Base class for all [[View]]s to support generic functionality
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
-    abstract class View extends EventTarget {
+    abstract class View {
         dom: HTMLElement;
         constructor(_container: GoldenLayout.Container, _state: Object);
         /** Cleanup when user closes view */
@@ -115,7 +116,6 @@ declare namespace Fudge {
         private addViewComponent;
     }
 }
-import ƒui = FudgeUserInterface;
 declare namespace Fudge {
     import ƒ = FudgeCore;
     /**
@@ -126,10 +126,20 @@ declare namespace Fudge {
     class PanelGraph extends Panel {
         private node;
         constructor(_container: GoldenLayout.Container, _state: Object);
-        setNode(_node: ƒ.Node): void;
+        setGraph(_node: ƒ.Node): void;
         getNode(): ƒ.Node;
         cleanup(): void;
-        private hndSelectNode;
+        private hndSetGraph;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Display the project structure and offer functions for creation of resources
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class PanelProject extends Panel {
+        constructor(_container: GoldenLayout.Container, _state: Object);
+        cleanup(): void;
     }
 }
 declare namespace Fudge {
@@ -259,11 +269,11 @@ declare namespace Fudge {
         contextMenu: Electron.Menu;
         constructor(_container: GoldenLayout.Container, _state: Object);
         cleanup(): void;
-        setRoot(_node: ƒ.Node): void;
-        private setNode;
+        setGraph(_graph: ƒ.Node): void;
         private passEventToPanel;
         private openContextMenu;
         private contextMenuCallback;
+        private hndEvent;
     }
 }
 declare namespace Fudge {
@@ -279,8 +289,8 @@ declare namespace Fudge {
         constructor(_container: GoldenLayout.Container, _state: Object);
         cleanup(): void;
         createUserInterface(): void;
-        setRoot(_node: ƒ.Node): void;
-        private setNode;
+        setGraph(_node: ƒ.Node): void;
+        private hndEvent;
         private animate;
         private activeViewport;
     }

@@ -16,22 +16,23 @@ namespace Fudge {
       super(_container, _state);
       this.contextMenu = ContextMenu.getMenu(ViewHierarchy, this.contextMenuCallback);
 
-      this.setRoot((<ƒ.General>_state).node);
+      this.setGraph((<ƒ.General>_state).node);
 
       // this.parentPanel.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setSelectedNode);
+      this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
     }
 
     cleanup(): void {
       //TODO: desconstruct
     }
 
-    public setRoot(_node: ƒ.Node): void {
-      if (!_node)
+    public setGraph(_graph: ƒ.Node): void {
+      if (!_graph)
         return;
       if (this.tree)
         this.dom.removeChild(this.tree);
 
-      this.graph = _node;
+      this.graph = _graph;
       this.selectedNode = null;
 
       this.tree = new ƒui.Tree<ƒ.Node>(new ControllerTreeNode(), this.graph);
@@ -42,11 +43,11 @@ namespace Fudge {
       this.dom.append(this.tree);
     }
 
-    private setNode(_node: ƒ.Node): void {
-      ƒ.Debug.info("Hierarchy", _node);
-      // this.listController.setSelection(_event.detail);
-      this.selectedNode = _node;
-    }
+    // private setNode(_node: ƒ.Node): void {
+    //   ƒ.Debug.info("Hierarchy", _node);
+    //   // this.listController.setSelection(_event.detail);
+    //   this.selectedNode = _node;
+    // }
     
     private passEventToPanel = (_event: CustomEvent): void => {
       let eventToPass: CustomEvent;
@@ -84,6 +85,10 @@ namespace Fudge {
           focus.addComponent(cmpNew);
           break;
       }
+    }
+
+    private hndEvent = (_event: CustomEvent): void => {
+      this.setGraph(_event.detail);
     }
   }
 }
