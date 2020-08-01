@@ -114,7 +114,8 @@ input:focus, li:focus, li:focus>input[type="text"] {
 } */
 
 *:focus {
-  outline: 1px solid var(--color-highlight);
+  outline: 1px outset var(--color-focus);
+  /* background-color: var(--color-focus); */
 }
 
 input[type="number"] {

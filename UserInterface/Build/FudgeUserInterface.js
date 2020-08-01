@@ -622,8 +622,6 @@ var FudgeUserInterface;
                 let active = document.activeElement;
                 let numEntered = _event.key.charCodeAt(0) - 48;
                 _event.stopPropagation();
-                if (_event.code != ƒ.KEYBOARD_CODE.TABULATOR)
-                    _event.preventDefault();
                 // if focus is on stepper, enter it and focus digit
                 if (active == this) {
                     switch (_event.code) {
@@ -672,6 +670,8 @@ var FudgeUserInterface;
                     this.dispatchEvent(new Event("input", { bubbles: true }));
                     return;
                 }
+                if (_event.code != ƒ.KEYBOARD_CODE.TABULATOR)
+                    _event.preventDefault();
                 switch (_event.code) {
                     case ƒ.KEYBOARD_CODE.ARROW_DOWN:
                         this.changeDigitFocussed(-1);
@@ -703,6 +703,8 @@ var FudgeUserInterface;
                 }
             };
             this.hndWheel = (_event) => {
+                _event.stopPropagation();
+                _event.preventDefault();
                 let change = _event.deltaY < 0 ? +1 : -1;
                 this.changeDigitFocussed(change);
                 this.dispatchEvent(new Event("input", { bubbles: true }));
@@ -849,9 +851,14 @@ var FudgeUserInterface;
             let expDigit = parseInt(digit.getAttribute("exp"));
             // @ts-ignore (mantissa not used)
             let [mantissa, expValue] = this.getMantissaAndExponent();
+            let prev = this.value;
             this.value += _amount * Math.pow(10, expDigit + expValue);
+            // workaround precision problems of javascript
+            if (Math.abs(prev / this.value) > 1000)
+                this.value = 0;
             let expNew;
             [mantissa, expNew] = this.getMantissaAndExponent();
+            // console.log(mantissa);
             this.shiftFocus(expNew - expValue);
             this.display();
         }
