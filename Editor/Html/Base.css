@@ -41,17 +41,20 @@
 }
 
 /* Controls */
+
 .lm_header .lm_controls .lm_tabdropdown:before {
   color: var(--color-text);
 }
 
 /* Drag & Drop */
+
 .lm_dropTargetIndicator {
   outline: 1px dashed var(--color-dragdrop-outline);
   background-color: var(--color-background-main);
 }
 
 /* Tree Control */
+
 ul.tree {
   list-style: none;
 }
@@ -96,17 +99,22 @@ ul.tree .selected>input {
 }
 
 /* Components */
+
 input {
   background-color: var(--color-background-content);
   color: var(--color-text);
   border: none;
 }
 
+/* 
 input:focus, li:focus, li:focus>input[type="text"] {
   border: none;
-  /* outline: 1px solid var(--color-dragdrop-outline); */
-  outline: none;
+  outline: 1px solid var(--color-dragdrop-outline);
   text-decoration: underline;
+} */
+
+*:focus {
+  outline: 1px solid var(--color-highlight);
 }
 
 input[type="number"] {
@@ -122,6 +130,7 @@ label {
 }
 
 /* Fieldset */
+
 fieldset {
   border: none;
   padding-left: 1em;
@@ -148,6 +157,7 @@ fieldset>input[type=checkbox]:checked::before {
 fieldset>input[type=checkbox]::before {
   content: "►";
 }
+
 /* 
 custom-matrix4x4 input[type=checkbox]  {
   height: 0px;
