@@ -32,6 +32,7 @@ namespace Fudge {
 
       this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.hndSetGraph);
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndSetGraph);
+      this.dom.addEventListener(ƒui.EVENT_TREE.RENAME, this.broadcastEvent);
     }
 
     public setGraph(_node: ƒ.Node): void {

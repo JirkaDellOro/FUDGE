@@ -398,6 +398,14 @@ var Fudge;
         constructor(_container, _state) {
             super(_container, _state);
             this.views = [];
+            /** Send custom copies of the given event to the views */
+            this.broadcastEvent = (_event) => {
+                console.log("views", this.views);
+                for (let view of this.views) {
+                    let event = new CustomEvent(_event.type, { bubbles: false, cancelable: true, detail: _event.detail });
+                    view.dom.dispatchEvent(event);
+                }
+            };
             this.addViewComponent = (_component) => {
                 this.views.push(_component.instance);
             };
@@ -416,18 +424,12 @@ var Fudge;
             this.goldenLayout.on("componentCreated", this.addViewComponent);
             this.goldenLayout.init();
         }
-        /** Send custom copies of the given event to the views */
-        broadcastEvent(_event) {
-            for (let view of this.views) {
-                let event = new CustomEvent(_event.type, { bubbles: false, cancelable: true, detail: _event.detail });
-                view.dom.dispatchEvent(event);
-            }
-        }
     }
     Fudge.Panel = Panel;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    var ƒui = FudgeUserInterface;
     /**
     * Panel that functions as a Node Editor. Uses ViewData, ViewPort and ViewNode.
     * Use NodePanelTemplate to initialize the default NodePanel.
@@ -458,6 +460,7 @@ var Fudge;
             });
             this.dom.addEventListener("select" /* SELECT */, this.hndSetGraph);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndSetGraph);
+            this.dom.addEventListener(ƒui.EVENT_TREE.RENAME, this.broadcastEvent);
         }
         setGraph(_node) {
             this.node = _node;
@@ -1114,27 +1117,25 @@ var Fudge;
     class ViewComponents extends Fudge.View {
         constructor(_container, _state) {
             super(_container, _state);
-            this.changeNodeName = (_event) => {
-                if (this.node instanceof ƒ.Node) {
-                    let target = _event.target;
-                    this.node.name = target.value;
-                }
-            };
+            // private changeNodeName = (_event: Event) => {
+            //   if (this.node instanceof ƒ.Node) {
+            //     let target: HTMLInputElement = <HTMLInputElement>_event.target;
+            //     this.node.name = target.value;
+            //   }
+            // }
             this.hndEvent = (_event) => {
-                this.node = _event.detail;
+                if (_event.type != ƒui.EVENT_TREE.RENAME)
+                    this.node = _event.detail;
                 while (this.dom.firstChild != null) {
                     this.dom.removeChild(this.dom.lastChild);
                 }
                 this.fillContent();
             };
-            this.addComponent = (_event) => {
-                switch (_event.detail) {
-                }
-            };
             this.container = _container;
             this.fillContent();
             this.dom.addEventListener("select" /* SELECT */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
+            this.dom.addEventListener(ƒui.EVENT_TREE.RENAME, this.hndEvent);
         }
         cleanup() {
             //TODO: Deconstruct;

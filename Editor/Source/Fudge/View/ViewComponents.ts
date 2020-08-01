@@ -1,7 +1,7 @@
 namespace Fudge {
   import ƒ = FudgeCore;
   import ƒui = FudgeUserInterface;
-  
+
   enum Menu {
     COMPONENTMENU = "Add Components"
   }
@@ -22,6 +22,7 @@ namespace Fudge {
 
       this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
+      this.dom.addEventListener(ƒui.EVENT_TREE.RENAME, this.hndEvent);
     }
 
     public cleanup(): void {
@@ -51,24 +52,26 @@ namespace Fudge {
       }
     }
 
-    private changeNodeName = (_event: Event) => {
-      if (this.node instanceof ƒ.Node) {
-        let target: HTMLInputElement = <HTMLInputElement>_event.target;
-        this.node.name = target.value;
-      }
-    }
+    // private changeNodeName = (_event: Event) => {
+    //   if (this.node instanceof ƒ.Node) {
+    //     let target: HTMLInputElement = <HTMLInputElement>_event.target;
+    //     this.node.name = target.value;
+    //   }
+    // }
 
     private hndEvent = (_event: CustomEvent): void => {
-      this.node = _event.detail;
+      if (_event.type != ƒui.EVENT_TREE.RENAME)
+        this.node = _event.detail;
+
       while (this.dom.firstChild != null) {
         this.dom.removeChild(this.dom.lastChild);
       }
       this.fillContent();
     }
 
-    private addComponent = (_event: CustomEvent): void => {
-      switch (_event.detail) {
-      }
-    }
+    // private addComponent = (_event: CustomEvent): void => {
+    //   switch (_event.detail) {
+    //   }
+    // }
   }
 }

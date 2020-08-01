@@ -1769,6 +1769,8 @@ var FudgeUserInterface;
             };
             this.hndKey = (_event) => {
                 _event.stopPropagation();
+                if (!this.label.disabled)
+                    return;
                 let content = this.querySelector("ul");
                 switch (_event.code) {
                     case ƒ.KEYBOARD_CODE.ARROW_RIGHT:

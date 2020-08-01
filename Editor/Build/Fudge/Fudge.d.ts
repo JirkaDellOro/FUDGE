@@ -112,7 +112,7 @@ declare namespace Fudge {
         private views;
         constructor(_container: GoldenLayout.Container, _state: Object);
         /** Send custom copies of the given event to the views */
-        broadcastEvent(_event: Event): void;
+        broadcastEvent: (_event: Event) => void;
         private addViewComponent;
     }
 }
@@ -251,9 +251,7 @@ declare namespace Fudge {
         constructor(_container: GoldenLayout.Container, _state: Object);
         cleanup(): void;
         fillContent(): void;
-        private changeNodeName;
         private hndEvent;
-        private addComponent;
     }
 }
 declare namespace Fudge {
