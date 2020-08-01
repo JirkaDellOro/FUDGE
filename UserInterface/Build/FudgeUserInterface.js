@@ -1681,7 +1681,7 @@ var FudgeUserInterface;
         }
         // Callback / Eventhandler in Tree
         hndSelect(_event) {
-            _event.stopPropagation();
+            // _event.stopPropagation();
             let detail = _event.detail;
             let index = this.controller.selection.indexOf(detail.data);
             if (detail.interval) {

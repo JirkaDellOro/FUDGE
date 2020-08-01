@@ -6,6 +6,7 @@ var Fudge;
         EVENT_EDITOR["HIDE"] = "hideNode";
         EVENT_EDITOR["ACTIVATE_VIEWPORT"] = "activateViewport";
         EVENT_EDITOR["SET_GRAPH"] = "setGraph";
+        EVENT_EDITOR["FOCUS_NODE"] = "focusNode";
     })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
     /**
      * The uppermost container for all panels
@@ -443,6 +444,10 @@ var Fudge;
                     this.setGraph(_event.detail);
                 this.broadcastEvent(_event);
             };
+            this.hndFocusNode = (_event) => {
+                let event = new CustomEvent(Fudge.EVENT_EDITOR.FOCUS_NODE, { bubbles: false, detail: _event.detail.data });
+                this.broadcastEvent(event);
+            };
             this.goldenLayout.registerComponent(Fudge.VIEW.RENDER, Fudge.ViewRender);
             this.goldenLayout.registerComponent(Fudge.VIEW.COMPONENTS, Fudge.ViewComponents);
             this.goldenLayout.registerComponent(Fudge.VIEW.HIERARCHY, Fudge.ViewHierarchy);
@@ -458,8 +463,8 @@ var Fudge;
                     { type: "component", componentName: Fudge.VIEW.COMPONENTS, componentState: _state, title: "Components" }
                 ]
             });
-            this.dom.addEventListener("select" /* SELECT */, this.hndSetGraph);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndSetGraph);
+            this.dom.addEventListener(ƒui.EVENT_TREE.SELECT, this.hndFocusNode);
             this.dom.addEventListener(ƒui.EVENT_TREE.RENAME, this.broadcastEvent);
         }
         setGraph(_node) {
@@ -1133,8 +1138,8 @@ var Fudge;
             };
             this.container = _container;
             this.fillContent();
-            this.dom.addEventListener("select" /* SELECT */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
             this.dom.addEventListener(ƒui.EVENT_TREE.RENAME, this.hndEvent);
         }
         cleanup() {
@@ -1181,12 +1186,12 @@ var Fudge;
             // }
             this.passEventToPanel = (_event) => {
                 let eventToPass;
-                if (_event.type == ƒui.EVENT_TREE.SELECT)
-                    eventToPass = new CustomEvent("select" /* SELECT */, { bubbles: true, detail: _event.detail.data });
-                else
-                    eventToPass = new CustomEvent(_event.type, { bubbles: false, detail: _event.detail });
-                _event.cancelBubble = true;
-                this.dom.dispatchEvent(eventToPass);
+                // if (_event.type == ƒui.EVENT_TREE.SELECT)
+                //   eventToPass = new CustomEvent(ƒui.EVENT_USERINTERFACE.SELECT, { bubbles: true, detail: _event.detail.data });
+                // else
+                eventToPass = new CustomEvent(_event.type, { bubbles: true, detail: _event.detail });
+                // _event.cancelBubble = true;
+                // this.dom.dispatchEvent(eventToPass);
             };
             this.openContextMenu = (_event) => {
                 this.contextMenu.popup();

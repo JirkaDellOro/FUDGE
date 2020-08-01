@@ -7,7 +7,8 @@ declare namespace Fudge {
         REMOVE = "removeNode",
         HIDE = "hideNode",
         ACTIVATE_VIEWPORT = "activateViewport",
-        SET_GRAPH = "setGraph"
+        SET_GRAPH = "setGraph",
+        FOCUS_NODE = "focusNode"
     }
     /**
      * The uppermost container for all panels
@@ -130,6 +131,7 @@ declare namespace Fudge {
         getNode(): ƒ.Node;
         cleanup(): void;
         private hndSetGraph;
+        private hndFocusNode;
     }
 }
 declare namespace Fudge {

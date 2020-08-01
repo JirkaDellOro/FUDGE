@@ -48,16 +48,16 @@ namespace Fudge {
     //   // this.listController.setSelection(_event.detail);
     //   this.selectedNode = _node;
     // }
-    
+
     private passEventToPanel = (_event: CustomEvent): void => {
       let eventToPass: CustomEvent;
-      if (_event.type == ƒui.EVENT_TREE.SELECT)
-        eventToPass = new CustomEvent(ƒui.EVENT_USERINTERFACE.SELECT, { bubbles: true, detail: _event.detail.data });
-      else
-        eventToPass = new CustomEvent(_event.type, { bubbles: false, detail: _event.detail });
-      _event.cancelBubble = true;
+      // if (_event.type == ƒui.EVENT_TREE.SELECT)
+      //   eventToPass = new CustomEvent(ƒui.EVENT_USERINTERFACE.SELECT, { bubbles: true, detail: _event.detail.data });
+      // else
+      eventToPass = new CustomEvent(_event.type, { bubbles: true, detail: _event.detail });
+      // _event.cancelBubble = true;
 
-      this.dom.dispatchEvent(eventToPass);
+      // this.dom.dispatchEvent(eventToPass);
     }
 
     private openContextMenu = (_event: Event): void => {

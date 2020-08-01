@@ -20,8 +20,8 @@ namespace Fudge {
       this.container = _container;
       this.fillContent();
 
-      this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT_TREE.RENAME, this.hndEvent);
     }
 

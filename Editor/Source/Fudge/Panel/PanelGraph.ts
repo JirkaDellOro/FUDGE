@@ -30,8 +30,8 @@ namespace Fudge {
         ]
       });
 
-      this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.hndSetGraph);
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndSetGraph);
+      this.dom.addEventListener(ƒui.EVENT_TREE.SELECT, this.hndFocusNode);
       this.dom.addEventListener(ƒui.EVENT_TREE.RENAME, this.broadcastEvent);
     }
 
@@ -51,6 +51,10 @@ namespace Fudge {
       if (_event.type == EVENT_EDITOR.SET_GRAPH)
         this.setGraph(_event.detail);
       this.broadcastEvent(_event);
+    }
+    private hndFocusNode = (_event: CustomEvent): void => {
+      let event: CustomEvent = new CustomEvent(EVENT_EDITOR.FOCUS_NODE, {bubbles: false, detail: _event.detail.data});
+      this.broadcastEvent(event);
     }
   }
 }
