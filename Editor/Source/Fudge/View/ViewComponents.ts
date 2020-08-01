@@ -12,12 +12,16 @@ namespace Fudge {
    */
   export class ViewComponents extends View {
     private node: ƒ.Node | ƒ.Mutable;
+    private container: GoldenLayout.Container;
 
     constructor(_container: GoldenLayout.Container, _state: Object) {
       super(_container, _state);
+
+      this.container = _container;
       this.fillContent();
 
-      this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setNode);
+      this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
     }
 
     public cleanup(): void {
@@ -27,9 +31,11 @@ namespace Fudge {
     fillContent(): void {
       if (this.node) {
         if (this.node instanceof ƒ.Node) {
-          let cntHeader: HTMLElement = document.createElement("span");
-          cntHeader.textContent = this.node.name;
-          this.dom.appendChild(cntHeader);
+          // let cntHeader: HTMLElement = document.createElement("span");
+          // cntHeader.textContent = this.node.name;
+          // this.dom.appendChild(cntHeader);
+
+          this.container.setTitle(this.node.name);
 
           let nodeComponents: ƒ.Component[] = this.node.getAllComponents();
           for (let nodeComponent of nodeComponents) {
@@ -52,7 +58,7 @@ namespace Fudge {
       }
     }
 
-    private setNode = (_event: CustomEvent): void => {
+    private hndEvent = (_event: CustomEvent): void => {
       this.node = _event.detail;
       while (this.dom.firstChild != null) {
         this.dom.removeChild(this.dom.lastChild);

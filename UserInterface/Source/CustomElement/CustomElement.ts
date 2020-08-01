@@ -75,8 +75,11 @@ namespace FudgeUserInterface {
      * Add a label-element as child to this element
      */
     public appendLabel(): HTMLLabelElement {
+      let text: string = this.getAttribute("label");
+      if (!text)
+        return null;
       let label: HTMLLabelElement = document.createElement("label");
-      label.textContent = this.getAttribute("label");
+      label.textContent = text;// + "XX ";
       this.appendChild(label);
       return label;
     }

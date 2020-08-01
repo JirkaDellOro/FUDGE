@@ -216,71 +216,71 @@ var FudgeUserInterface;
      * Handles the mapping of CustomElements to their HTML-Tags via customElement.define
      * and to the data types and [[FudgeCore.Mutable]]s they render an interface for.
      */
-    let CustomElement = /** @class */ (() => {
-        class CustomElement extends HTMLElement {
-            constructor(_attributes) {
-                super();
-                this.initialized = false;
-                if (_attributes)
-                    for (let name in _attributes)
-                        this.setAttribute(name, _attributes[name]);
-            }
-            /**
-             * Return the key (name) of the attribute this element represents
-             */
-            get key() {
-                return this.getAttribute("key");
-            }
-            /**
-             * Retrieve an id to use for children of this element, needed e.g. for standard interaction with the label
-             */
-            static get nextId() {
-                return "ƒ" + CustomElement.idCounter++;
-            }
-            /**
-             * Register map the given element type to the given tag and the given type of data
-             */
-            static register(_tag, _typeCustomElement, _typeObject) {
-                // console.log(_tag, _class);
-                _typeCustomElement.tag = _tag;
-                // @ts-ignore
-                customElements.define(_tag, _typeCustomElement);
-                if (_typeObject)
-                    CustomElement.map(_typeObject.name, _typeCustomElement);
-            }
-            /**
-             * Retrieve the element representing the given data type (if registered)
-             */
-            static get(_type) {
-                let element = CustomElement.mapObjectToCustomElement.get(_type);
-                if (typeof (element) == "string")
-                    element = customElements.get(element);
-                return element;
-            }
-            static map(_type, _typeCustomElement) {
-                ƒ.Debug.fudge("Map", _type.constructor.name, _typeCustomElement.constructor.name);
-                CustomElement.mapObjectToCustomElement.set(_type, _typeCustomElement);
-            }
-            /**
-             * Add a label-element as child to this element
-             */
-            appendLabel() {
-                let label = document.createElement("label");
-                label.textContent = this.getAttribute("label");
-                this.appendChild(label);
-                return label;
-            }
-            /**
-             * Set the value of this element using a format compatible with [[FudgeCore.Mutator]]
-             */
-            setMutatorValue(_value) {
-                Reflect.set(this, "value", _value);
-            }
+    class CustomElement extends HTMLElement {
+        constructor(_attributes) {
+            super();
+            this.initialized = false;
+            if (_attributes)
+                for (let name in _attributes)
+                    this.setAttribute(name, _attributes[name]);
         }
-        CustomElement.mapObjectToCustomElement = new Map();
-        CustomElement.idCounter = 0;
-        return CustomElement;
-    })();
+        /**
+         * Return the key (name) of the attribute this element represents
+         */
+        get key() {
+            return this.getAttribute("key");
+        }
+        /**
+         * Retrieve an id to use for children of this element, needed e.g. for standard interaction with the label
+         */
+        static get nextId() {
+            return "ƒ" + CustomElement.idCounter++;
+        }
+        /**
+         * Register map the given element type to the given tag and the given type of data
+         */
+        static register(_tag, _typeCustomElement, _typeObject) {
+            // console.log(_tag, _class);
+            _typeCustomElement.tag = _tag;
+            // @ts-ignore
+            customElements.define(_tag, _typeCustomElement);
+            if (_typeObject)
+                CustomElement.map(_typeObject.name, _typeCustomElement);
+        }
+        /**
+         * Retrieve the element representing the given data type (if registered)
+         */
+        static get(_type) {
+            let element = CustomElement.mapObjectToCustomElement.get(_type);
+            if (typeof (element) == "string")
+                element = customElements.get(element);
+            return element;
+        }
+        static map(_type, _typeCustomElement) {
+            ƒ.Debug.fudge("Map", _type.constructor.name, _typeCustomElement.constructor.name);
+            CustomElement.mapObjectToCustomElement.set(_type, _typeCustomElement);
+        }
+        /**
+         * Add a label-element as child to this element
+         */
+        appendLabel() {
+            let text = this.getAttribute("label");
+            if (!text)
+                return null;
+            let label = document.createElement("label");
+            label.textContent = text; // + "XX ";
+            this.appendChild(label);
+            return label;
+        }
+        /**
+         * Set the value of this element using a format compatible with [[FudgeCore.Mutator]]
+         */
+        setMutatorValue(_value) {
+            Reflect.set(this, "value", _value);
+        }
+    }
+    CustomElement.mapObjectToCustomElement = new Map();
+    CustomElement.idCounter = 0;
     FudgeUserInterface.CustomElement = CustomElement;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
@@ -288,46 +288,43 @@ var FudgeUserInterface;
     /**
      * A standard checkbox with a label to it
      */
-    let CustomElementBoolean = /** @class */ (() => {
-        class CustomElementBoolean extends FudgeUserInterface.CustomElement {
-            constructor(_attributes) {
-                super(_attributes);
-                if (!_attributes.label)
-                    this.setAttribute("label", _attributes.key);
-            }
-            /**
-             * Creates the content of the element when connected the first time
-             */
-            connectedCallback() {
-                if (this.initialized)
-                    return;
-                this.initialized = true;
-                // TODO: delete tabindex from checkbox and get space-key on this
-                // this.tabIndex = 0;
-                let input = document.createElement("input");
-                input.type = "checkbox";
-                input.id = FudgeUserInterface.CustomElement.nextId;
-                input.checked = this.getAttribute("value") == "true";
-                this.appendChild(input);
-                this.appendLabel().htmlFor = input.id;
-            }
-            /**
-             * Retrieves the status of the checkbox as boolean value
-             */
-            getMutatorValue() {
-                return this.querySelector("input").checked;
-            }
-            /**
-             * Sets the status of the checkbox
-             */
-            setMutatorValue(_value) {
-                this.querySelector("input").checked = _value;
-            }
+    class CustomElementBoolean extends FudgeUserInterface.CustomElement {
+        constructor(_attributes) {
+            super(_attributes);
+            if (!_attributes.label)
+                this.setAttribute("label", _attributes.key);
         }
-        // @ts-ignore
-        CustomElementBoolean.customElement = FudgeUserInterface.CustomElement.register("fudge-boolean", CustomElementBoolean, Boolean);
-        return CustomElementBoolean;
-    })();
+        /**
+         * Creates the content of the element when connected the first time
+         */
+        connectedCallback() {
+            if (this.initialized)
+                return;
+            this.initialized = true;
+            // TODO: delete tabindex from checkbox and get space-key on this
+            // this.tabIndex = 0;
+            let input = document.createElement("input");
+            input.type = "checkbox";
+            input.id = FudgeUserInterface.CustomElement.nextId;
+            input.checked = this.getAttribute("value") == "true";
+            this.appendChild(input);
+            this.appendLabel().htmlFor = input.id;
+        }
+        /**
+         * Retrieves the status of the checkbox as boolean value
+         */
+        getMutatorValue() {
+            return this.querySelector("input").checked;
+        }
+        /**
+         * Sets the status of the checkbox
+         */
+        setMutatorValue(_value) {
+            this.querySelector("input").checked = _value;
+        }
+    }
+    // @ts-ignore
+    CustomElementBoolean.customElement = FudgeUserInterface.CustomElement.register("fudge-boolean", CustomElementBoolean, Boolean);
     FudgeUserInterface.CustomElementBoolean = CustomElementBoolean;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
@@ -336,57 +333,54 @@ var FudgeUserInterface;
     /**
      * A color picker with a label to it and a slider for opacity
      */
-    let CustomElementColor = /** @class */ (() => {
-        class CustomElementColor extends FudgeUserInterface.CustomElement {
-            constructor(_attributes) {
-                super(_attributes);
-                this.color = new ƒ.Color();
-                if (!_attributes.label)
-                    this.setAttribute("label", _attributes.key);
-            }
-            /**
-             * Creates the content of the element when connected the first time
-             */
-            connectedCallback() {
-                if (this.initialized)
-                    return;
-                this.initialized = true;
-                this.appendLabel();
-                let picker = document.createElement("input");
-                picker.type = "color";
-                picker.tabIndex = 0;
-                this.appendChild(picker);
-                let slider = document.createElement("input");
-                slider.type = "range";
-                slider.min = "0";
-                slider.max = "1";
-                slider.step = "0.01";
-                this.appendChild(slider);
-            }
-            /**
-             * Retrieves the values of picker and slider as ƒ.Mutator
-             */
-            getMutatorValue() {
-                let hex = this.querySelector("input[type=color").value;
-                let alpha = this.querySelector("input[type=range").value;
-                this.color.setHex(hex.substr(1, 6) + "ff");
-                this.color.a = parseFloat(alpha);
-                return this.color.getMutator();
-            }
-            /**
-             * Sets the values of color picker and slider
-             */
-            setMutatorValue(_value) {
-                this.color.mutate(_value);
-                let hex = this.color.getHex();
-                this.querySelector("input[type=color").value = "#" + hex.substr(0, 6);
-                this.querySelector("input[type=range").value = this.color.a.toString();
-            }
+    class CustomElementColor extends FudgeUserInterface.CustomElement {
+        constructor(_attributes) {
+            super(_attributes);
+            this.color = new ƒ.Color();
+            if (!_attributes.label)
+                this.setAttribute("label", _attributes.key);
         }
-        // @ts-ignore
-        CustomElementColor.customElement = FudgeUserInterface.CustomElement.register("fudge-color", CustomElementColor, ƒ.Color);
-        return CustomElementColor;
-    })();
+        /**
+         * Creates the content of the element when connected the first time
+         */
+        connectedCallback() {
+            if (this.initialized)
+                return;
+            this.initialized = true;
+            this.appendLabel();
+            let picker = document.createElement("input");
+            picker.type = "color";
+            picker.tabIndex = 0;
+            this.appendChild(picker);
+            let slider = document.createElement("input");
+            slider.type = "range";
+            slider.min = "0";
+            slider.max = "1";
+            slider.step = "0.01";
+            this.appendChild(slider);
+        }
+        /**
+         * Retrieves the values of picker and slider as ƒ.Mutator
+         */
+        getMutatorValue() {
+            let hex = this.querySelector("input[type=color").value;
+            let alpha = this.querySelector("input[type=range").value;
+            this.color.setHex(hex.substr(1, 6) + "ff");
+            this.color.a = parseFloat(alpha);
+            return this.color.getMutator();
+        }
+        /**
+         * Sets the values of color picker and slider
+         */
+        setMutatorValue(_value) {
+            this.color.mutate(_value);
+            let hex = this.color.getHex();
+            this.querySelector("input[type=color").value = "#" + hex.substr(0, 6);
+            this.querySelector("input[type=range").value = this.color.a.toString();
+        }
+    }
+    // @ts-ignore
+    CustomElementColor.customElement = FudgeUserInterface.CustomElement.register("fudge-color", CustomElementColor, ƒ.Color);
     FudgeUserInterface.CustomElementColor = CustomElementColor;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
@@ -395,60 +389,57 @@ var FudgeUserInterface;
      * Represents a single digit number to be used in groups to represent a multidigit value.
      * Is tabbable and in-/decreases previous sibling when flowing over/under.
      */
-    let CustomElementDigit = /** @class */ (() => {
-        class CustomElementDigit extends HTMLElement {
-            constructor() {
-                super();
-                this.initialized = false;
-            }
-            connectedCallback() {
-                if (this.initialized)
-                    return;
-                this.initialized = true;
-                this.value = 0;
-                this.tabIndex = -1;
-            }
-            set value(_value) {
-                _value = Math.trunc(_value);
-                if (_value > 9 || _value < 0)
-                    return;
-                this.textContent = _value.toString();
-            }
-            get value() {
-                return parseInt(this.textContent);
-            }
-            add(_addend) {
-                _addend = Math.trunc(_addend);
-                if (_addend == 0)
-                    return;
-                if (_addend > 0) {
-                    if (this.value < 9)
-                        this.value++;
-                    else {
-                        let prev = this.previousElementSibling;
-                        if (!(prev && prev instanceof CustomElementDigit))
-                            return;
-                        prev.add(1);
-                        this.value = 0;
-                    }
-                }
+    class CustomElementDigit extends HTMLElement {
+        constructor() {
+            super();
+            this.initialized = false;
+        }
+        connectedCallback() {
+            if (this.initialized)
+                return;
+            this.initialized = true;
+            this.value = 0;
+            this.tabIndex = -1;
+        }
+        set value(_value) {
+            _value = Math.trunc(_value);
+            if (_value > 9 || _value < 0)
+                return;
+            this.textContent = _value.toString();
+        }
+        get value() {
+            return parseInt(this.textContent);
+        }
+        add(_addend) {
+            _addend = Math.trunc(_addend);
+            if (_addend == 0)
+                return;
+            if (_addend > 0) {
+                if (this.value < 9)
+                    this.value++;
                 else {
-                    if (this.value > 0)
-                        this.value--;
-                    else {
-                        let prev = this.previousElementSibling;
-                        if (!(prev && prev instanceof CustomElementDigit))
-                            return;
-                        prev.add(-1);
-                        this.value = 9;
-                    }
+                    let prev = this.previousElementSibling;
+                    if (!(prev && prev instanceof CustomElementDigit))
+                        return;
+                    prev.add(1);
+                    this.value = 0;
+                }
+            }
+            else {
+                if (this.value > 0)
+                    this.value--;
+                else {
+                    let prev = this.previousElementSibling;
+                    if (!(prev && prev instanceof CustomElementDigit))
+                        return;
+                    prev.add(-1);
+                    this.value = 9;
                 }
             }
         }
-        // @ts-ignore
-        CustomElementDigit.customElement = FudgeUserInterface.CustomElement.register("fudge-digit", CustomElementDigit);
-        return CustomElementDigit;
-    })();
+    }
+    // @ts-ignore
+    CustomElementDigit.customElement = FudgeUserInterface.CustomElement.register("fudge-digit", CustomElementDigit);
     FudgeUserInterface.CustomElementDigit = CustomElementDigit;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 ///<reference path="CustomElement.ts"/>
@@ -459,45 +450,74 @@ var FudgeUserInterface;
     /**
      * Creates a CustomElement from an HTML-Template-Tag
      */
-    let CustomElementTemplate = /** @class */ (() => {
-        class CustomElementTemplate extends FudgeUserInterface.CustomElement {
-            constructor(_attributes) {
-                super(_attributes);
-            }
-            /**
-             * Browses through the templates in the current document and registers the one defining the given tagname.
-             * To be called from a script tag implemented with the template in HTML.
-             */
-            static register(_tagName) {
-                for (let template of document.querySelectorAll("template")) {
-                    if (template.content.firstElementChild.localName == _tagName) {
-                        ƒ.Debug.fudge("Register", template);
-                        CustomElementTemplate.fragment.set(_tagName, template.content);
-                    }
-                }
-            }
-            /**
-             * When connected the first time, the element gets constructed as a deep clone of the template.
-             */
-            connectedCallback() {
-                if (this.initialized)
-                    return;
-                this.initialized = true;
-                let fragment = CustomElementTemplate.fragment.get(Reflect.get(this.constructor, "tag"));
-                let content = fragment.firstElementChild;
-                let style = this.style;
-                for (let entry of content.style) {
-                    style.setProperty(entry, Reflect.get(content.style, entry));
-                }
-                for (let child of content.childNodes) {
-                    this.appendChild(child.cloneNode(true));
+    class CustomElementTemplate extends FudgeUserInterface.CustomElement {
+        constructor(_attributes) {
+            super(_attributes);
+        }
+        /**
+         * Browses through the templates in the current document and registers the one defining the given tagname.
+         * To be called from a script tag implemented with the template in HTML.
+         */
+        static register(_tagName) {
+            for (let template of document.querySelectorAll("template")) {
+                if (template.content.firstElementChild.localName == _tagName) {
+                    ƒ.Debug.fudge("Register", template);
+                    CustomElementTemplate.fragment.set(_tagName, template.content);
                 }
             }
         }
-        CustomElementTemplate.fragment = new Map();
-        return CustomElementTemplate;
-    })();
+        /**
+         * When connected the first time, the element gets constructed as a deep clone of the template.
+         */
+        connectedCallback() {
+            if (this.initialized)
+                return;
+            this.initialized = true;
+            let fragment = CustomElementTemplate.fragment.get(Reflect.get(this.constructor, "tag"));
+            let content = fragment.firstElementChild;
+            let style = this.style;
+            for (let entry of content.style) {
+                style.setProperty(entry, Reflect.get(content.style, entry));
+            }
+            for (let child of content.childNodes) {
+                this.appendChild(child.cloneNode(true));
+            }
+        }
+    }
+    CustomElementTemplate.fragment = new Map();
     FudgeUserInterface.CustomElementTemplate = CustomElementTemplate;
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+///<reference path="CustomElementTemplate.ts"/>
+var FudgeUserInterface;
+///<reference path="CustomElementTemplate.ts"/>
+(function (FudgeUserInterface) {
+    class CustomElementMatrix3x3 extends FudgeUserInterface.CustomElementTemplate {
+        getMutatorValue() {
+            let steppers = this.querySelectorAll("fudge-stepper");
+            let mutator = { translation: {}, scaling: {}, rotation: 0 };
+            let count = 0;
+            for (let vector of ["translation", "scaling"])
+                for (let dimension of ["x", "y"])
+                    mutator[vector][dimension] = steppers[count++].getMutatorValue();
+            mutator["rotation"] = steppers[count++].getMutatorValue();
+            return mutator;
+        }
+        setMutatorValue(_mutator) {
+            let steppers = this.querySelectorAll("fudge-stepper");
+            let count = 0;
+            for (let vector of ["translation", "scaling"])
+                for (let dimension of ["x", "y"])
+                    steppers[count++].setMutatorValue(Number(_mutator[vector][dimension]));
+            steppers[count++].setMutatorValue(Number(_mutator["rotation"]));
+        }
+        connectedCallback() {
+            super.connectedCallback();
+            // console.log("Matrix Callback");
+            let label = this.querySelector("label");
+            label.textContent = this.getAttribute("label");
+        }
+    }
+    FudgeUserInterface.CustomElementMatrix3x3 = CustomElementMatrix3x3;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 ///<reference path="CustomElementTemplate.ts"/>
 var FudgeUserInterface;
@@ -534,54 +554,51 @@ var FudgeUserInterface;
     /**
      * A dropdown menu to display enums
      */
-    let CustomElementSelect = /** @class */ (() => {
-        class CustomElementSelect extends FudgeUserInterface.CustomElement {
-            constructor(_attributes, _content = {}) {
-                super(_attributes);
-                if (!_attributes.label)
-                    this.setAttribute("label", _attributes.key);
-                this.content = _content;
-            }
-            /**
-             * Creates the content of the element when connected the first time
-             */
-            connectedCallback() {
-                if (this.initialized)
-                    return;
-                this.initialized = true;
-                this.appendLabel();
-                let select = document.createElement("select");
-                for (let key in this.content) {
-                    if (!isNaN(parseInt(key))) //key being a number will not be shown, assuming it's a simple enum with double entries
-                        continue;
-                    let entry = document.createElement("option");
-                    entry.text = key;
-                    entry.value = this.content[key];
-                    if (key == this.getAttribute("value")) {
-                        entry.selected = true;
-                    }
-                    select.add(entry);
-                }
-                select.tabIndex = 0;
-                this.appendChild(select);
-            }
-            /**
-             * Retrieves the status of the checkbox as boolean value
-             */
-            getMutatorValue() {
-                return this.querySelector("select").value;
-            }
-            /**
-             * Sets the status of the checkbox
-             */
-            setMutatorValue(_value) {
-                this.querySelector("select").value = _value;
-            }
+    class CustomElementSelect extends FudgeUserInterface.CustomElement {
+        constructor(_attributes, _content = {}) {
+            super(_attributes);
+            if (!_attributes.label)
+                this.setAttribute("label", _attributes.key);
+            this.content = _content;
         }
-        // @ts-ignore
-        CustomElementSelect.customElement = FudgeUserInterface.CustomElement.register("fudge-select", CustomElementSelect, Object);
-        return CustomElementSelect;
-    })();
+        /**
+         * Creates the content of the element when connected the first time
+         */
+        connectedCallback() {
+            if (this.initialized)
+                return;
+            this.initialized = true;
+            this.appendLabel();
+            let select = document.createElement("select");
+            for (let key in this.content) {
+                if (!isNaN(parseInt(key))) //key being a number will not be shown, assuming it's a simple enum with double entries
+                    continue;
+                let entry = document.createElement("option");
+                entry.text = key;
+                entry.value = this.content[key];
+                if (key == this.getAttribute("value")) {
+                    entry.selected = true;
+                }
+                select.add(entry);
+            }
+            select.tabIndex = 0;
+            this.appendChild(select);
+        }
+        /**
+         * Retrieves the status of the checkbox as boolean value
+         */
+        getMutatorValue() {
+            return this.querySelector("select").value;
+        }
+        /**
+         * Sets the status of the checkbox
+         */
+        setMutatorValue(_value) {
+            this.querySelector("select").value = _value;
+        }
+    }
+    // @ts-ignore
+    CustomElementSelect.customElement = FudgeUserInterface.CustomElement.register("fudge-select", CustomElementSelect, Object);
     FudgeUserInterface.CustomElementSelect = CustomElementSelect;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
@@ -590,265 +607,262 @@ var FudgeUserInterface;
     /**
      * An interactive number stepper with exponential display and complex handling using keyboard and mouse
      */
-    let CustomElementStepper = /** @class */ (() => {
-        class CustomElementStepper extends FudgeUserInterface.CustomElement {
-            constructor(_attributes) {
-                super(_attributes);
-                this.value = 0;
-                /**
-                 * Handle keyboard input on this element and its digits
-                 */
-                this.hndKey = (_event) => {
-                    let active = document.activeElement;
-                    let numEntered = _event.key.charCodeAt(0) - 48;
-                    _event.stopPropagation();
-                    // if focus is on stepper, enter it and focus digit
-                    if (active == this) {
-                        switch (_event.code) {
-                            case ƒ.KEYBOARD_CODE.ENTER:
-                            case ƒ.KEYBOARD_CODE.NUMPAD_ENTER:
-                            case ƒ.KEYBOARD_CODE.SPACE:
-                            case ƒ.KEYBOARD_CODE.ARROW_UP:
-                            case ƒ.KEYBOARD_CODE.ARROW_DOWN:
-                                this.activateInnerTabs(true);
-                                this.querySelectorAll("fudge-digit")[2].focus();
-                                break;
-                            case ƒ.KEYBOARD_CODE.F2:
-                                this.openInput(true);
-                                break;
-                        }
-                        if ((numEntered >= 0 && numEntered <= 9) || _event.key == "-" || _event.key == "+") {
+    class CustomElementStepper extends FudgeUserInterface.CustomElement {
+        constructor(_attributes) {
+            super(_attributes);
+            this.value = 0;
+            /**
+             * Handle keyboard input on this element and its digits
+             */
+            this.hndKey = (_event) => {
+                let active = document.activeElement;
+                let numEntered = _event.key.charCodeAt(0) - 48;
+                _event.stopPropagation();
+                // if focus is on stepper, enter it and focus digit
+                if (active == this) {
+                    switch (_event.code) {
+                        case ƒ.KEYBOARD_CODE.ENTER:
+                        case ƒ.KEYBOARD_CODE.NUMPAD_ENTER:
+                        case ƒ.KEYBOARD_CODE.SPACE:
+                        case ƒ.KEYBOARD_CODE.ARROW_UP:
+                        case ƒ.KEYBOARD_CODE.ARROW_DOWN:
+                            this.activateInnerTabs(true);
+                            this.querySelectorAll("fudge-digit")[2].focus();
+                            break;
+                        case ƒ.KEYBOARD_CODE.F2:
                             this.openInput(true);
-                            this.querySelector("input").value = "";
-                            // _event.stopImmediatePropagation();
-                        }
-                        return;
+                            break;
                     }
-                    // input field overlay is active
-                    if (active.getAttribute("type") == "number") {
-                        if (_event.key == ƒ.KEYBOARD_CODE.ENTER || _event.key == ƒ.KEYBOARD_CODE.NUMPAD_ENTER || _event.key == ƒ.KEYBOARD_CODE.TABULATOR) {
-                            this.value = Number(active.value);
-                            this.display();
-                            this.openInput(false);
-                            this.focus();
-                            this.dispatchEvent(new Event("input", { bubbles: true }));
-                        }
-                        return;
+                    if ((numEntered >= 0 && numEntered <= 9) || _event.key == "-" || _event.key == "+") {
+                        this.openInput(true);
+                        this.querySelector("input").value = "";
+                        // _event.stopImmediatePropagation();
                     }
-                    if (numEntered >= 0 && numEntered <= 9) {
-                        let difference = numEntered - Number(active.textContent) * (this.value < 0 ? -1 : 1);
-                        this.changeDigitFocussed(difference);
+                    return;
+                }
+                // input field overlay is active
+                if (active.getAttribute("type") == "number") {
+                    if (_event.key == ƒ.KEYBOARD_CODE.ENTER || _event.key == ƒ.KEYBOARD_CODE.NUMPAD_ENTER || _event.key == ƒ.KEYBOARD_CODE.TABULATOR) {
+                        this.value = Number(active.value);
+                        this.display();
+                        this.openInput(false);
+                        this.focus();
+                        this.dispatchEvent(new Event("input", { bubbles: true }));
+                    }
+                    return;
+                }
+                if (numEntered >= 0 && numEntered <= 9) {
+                    let difference = numEntered - Number(active.textContent) * (this.value < 0 ? -1 : 1);
+                    this.changeDigitFocussed(difference);
+                    let next = active.nextElementSibling;
+                    if (next)
+                        next.focus();
+                    this.dispatchEvent(new Event("input", { bubbles: true }));
+                    return;
+                }
+                if (_event.key == "-" || _event.key == "+") {
+                    this.value = (_event.key == "-" ? -1 : 1) * Math.abs(this.value);
+                    this.display();
+                    this.dispatchEvent(new Event("input", { bubbles: true }));
+                    return;
+                }
+                switch (_event.code) {
+                    case ƒ.KEYBOARD_CODE.ARROW_DOWN:
+                        this.changeDigitFocussed(-1);
+                        this.dispatchEvent(new Event("input", { bubbles: true }));
+                        break;
+                    case ƒ.KEYBOARD_CODE.ARROW_UP:
+                        this.changeDigitFocussed(+1);
+                        this.dispatchEvent(new Event("input", { bubbles: true }));
+                        break;
+                    case ƒ.KEYBOARD_CODE.ARROW_LEFT:
+                        active.previousElementSibling.focus();
+                        break;
+                    case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
                         let next = active.nextElementSibling;
                         if (next)
                             next.focus();
-                        this.dispatchEvent(new Event("input", { bubbles: true }));
-                        return;
-                    }
-                    if (_event.key == "-" || _event.key == "+") {
-                        this.value = (_event.key == "-" ? -1 : 1) * Math.abs(this.value);
-                        this.display();
-                        this.dispatchEvent(new Event("input", { bubbles: true }));
-                        return;
-                    }
-                    switch (_event.code) {
-                        case ƒ.KEYBOARD_CODE.ARROW_DOWN:
-                            this.changeDigitFocussed(-1);
-                            this.dispatchEvent(new Event("input", { bubbles: true }));
-                            break;
-                        case ƒ.KEYBOARD_CODE.ARROW_UP:
-                            this.changeDigitFocussed(+1);
-                            this.dispatchEvent(new Event("input", { bubbles: true }));
-                            break;
-                        case ƒ.KEYBOARD_CODE.ARROW_LEFT:
-                            active.previousElementSibling.focus();
-                            break;
-                        case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
-                            let next = active.nextElementSibling;
-                            if (next)
-                                next.focus();
-                            break;
-                        case ƒ.KEYBOARD_CODE.ENTER:
-                        case ƒ.KEYBOARD_CODE.NUMPAD_ENTER:
-                            this.activateInnerTabs(false);
-                            this.focus();
-                            break;
-                        case ƒ.KEYBOARD_CODE.F2:
-                            this.activateInnerTabs(false);
-                            this.openInput(true);
-                            break;
-                        default:
-                            break;
-                    }
-                };
-                this.hndWheel = (_event) => {
-                    let change = _event.deltaY < 0 ? +1 : -1;
-                    this.changeDigitFocussed(change);
-                    this.dispatchEvent(new Event("input", { bubbles: true }));
-                };
-                this.hndInput = (_event) => {
-                    this.openInput(false);
-                };
-                this.hndFocus = (_event) => {
-                    if (this.contains(document.activeElement))
-                        return;
-                    this.activateInnerTabs(false);
-                };
-                if (_attributes && _attributes["value"])
-                    this.value = parseFloat(_attributes["value"]);
-            }
-            /**
-             * Creates the content of the element when connected the first time
-             */
-            connectedCallback() {
-                if (this.initialized)
+                        break;
+                    case ƒ.KEYBOARD_CODE.ENTER:
+                    case ƒ.KEYBOARD_CODE.NUMPAD_ENTER:
+                        this.activateInnerTabs(false);
+                        this.focus();
+                        break;
+                    case ƒ.KEYBOARD_CODE.F2:
+                        this.activateInnerTabs(false);
+                        this.openInput(true);
+                        break;
+                    default:
+                        break;
+                }
+            };
+            this.hndWheel = (_event) => {
+                let change = _event.deltaY < 0 ? +1 : -1;
+                this.changeDigitFocussed(change);
+                this.dispatchEvent(new Event("input", { bubbles: true }));
+            };
+            this.hndInput = (_event) => {
+                this.openInput(false);
+            };
+            this.hndFocus = (_event) => {
+                if (this.contains(document.activeElement))
                     return;
-                this.initialized = true;
-                this.tabIndex = 0;
-                this.appendLabel();
-                let input = document.createElement("input");
-                input.type = "number";
-                input.style.position = "absolute";
+                this.activateInnerTabs(false);
+            };
+            if (_attributes && _attributes["value"])
+                this.value = parseFloat(_attributes["value"]);
+        }
+        /**
+         * Creates the content of the element when connected the first time
+         */
+        connectedCallback() {
+            if (this.initialized)
+                return;
+            this.initialized = true;
+            this.tabIndex = 0;
+            this.appendLabel();
+            let input = document.createElement("input");
+            input.type = "number";
+            input.style.position = "absolute";
+            input.style.display = "none";
+            input.addEventListener("input", (_event) => { event.stopPropagation(); });
+            this.appendChild(input);
+            let sign = document.createElement("span");
+            sign.textContent = "+";
+            this.appendChild(sign);
+            for (let exp = 2; exp > -4; exp--) {
+                let digit = new FudgeUserInterface.CustomElementDigit();
+                digit.setAttribute("exp", exp.toString());
+                this.appendChild(digit);
+                if (exp == 0)
+                    this.innerHTML += ".";
+            }
+            this.innerHTML += "e";
+            let exp = document.createElement("span");
+            exp.textContent = "+0";
+            exp.tabIndex = -1;
+            exp.setAttribute("name", "exp");
+            this.appendChild(exp);
+            // input.addEventListener("change", this.hndInput);
+            input.addEventListener("blur", this.hndInput);
+            this.addEventListener("blur", this.hndFocus);
+            this.addEventListener("keydown", this.hndKey);
+            this.addEventListener("wheel", this.hndWheel);
+        }
+        /**
+         * De-/Activates tabbing for the inner digits
+         */
+        activateInnerTabs(_on) {
+            let index = _on ? 0 : -1;
+            let spans = this.querySelectorAll("span");
+            spans[1].tabIndex = index;
+            let digits = this.querySelectorAll("fudge-digit");
+            for (let digit of digits)
+                digit.tabIndex = index;
+        }
+        /**
+         * Opens/Closes a standard number input for typing the value at once
+         */
+        openInput(_open) {
+            let input = this.querySelector("input");
+            if (_open) {
+                input.style.display = "inline";
+                input.value = this.value.toString();
+                input.focus();
+            }
+            else {
                 input.style.display = "none";
-                input.addEventListener("input", (_event) => { event.stopPropagation(); });
-                this.appendChild(input);
-                let sign = document.createElement("span");
-                sign.textContent = "+";
-                this.appendChild(sign);
-                for (let exp = 2; exp > -4; exp--) {
-                    let digit = new FudgeUserInterface.CustomElementDigit();
-                    digit.setAttribute("exp", exp.toString());
-                    this.appendChild(digit);
-                    if (exp == 0)
-                        this.innerHTML += ".";
-                }
-                this.innerHTML += "e";
-                let exp = document.createElement("span");
-                exp.textContent = "+0";
-                exp.tabIndex = -1;
-                exp.setAttribute("name", "exp");
-                this.appendChild(exp);
-                // input.addEventListener("change", this.hndInput);
-                input.addEventListener("blur", this.hndInput);
-                this.addEventListener("blur", this.hndFocus);
-                this.addEventListener("keydown", this.hndKey);
-                this.addEventListener("wheel", this.hndWheel);
-            }
-            /**
-             * De-/Activates tabbing for the inner digits
-             */
-            activateInnerTabs(_on) {
-                let index = _on ? 0 : -1;
-                let spans = this.querySelectorAll("span");
-                spans[1].tabIndex = index;
-                let digits = this.querySelectorAll("fudge-digit");
-                for (let digit of digits)
-                    digit.tabIndex = index;
-            }
-            /**
-             * Opens/Closes a standard number input for typing the value at once
-             */
-            openInput(_open) {
-                let input = this.querySelector("input");
-                if (_open) {
-                    input.style.display = "inline";
-                    input.value = this.value.toString();
-                    input.focus();
-                }
-                else {
-                    input.style.display = "none";
-                }
-            }
-            /**
-             * Retrieve the value of this
-             */
-            getMutatorValue() {
-                return this.value;
-            }
-            /**
-             * Sets its value and displays it
-             */
-            setMutatorValue(_value) {
-                this.value = _value;
-                this.display();
-            }
-            /**
-             * Retrieve mantissa and exponent separately as an array of two members
-             */
-            getMantissaAndExponent() {
-                let prec = this.value.toExponential(6);
-                let exp = parseInt(prec.split("e")[1]);
-                let exp3 = Math.trunc(exp / 3);
-                let mantissa = this.value / Math.pow(10, exp3 * 3);
-                mantissa = Math.round(mantissa * 1000) / 1000;
-                return [mantissa, exp3 * 3];
-            }
-            /**
-             * Retrieves this value as a string
-             */
-            toString() {
-                let [mantissa, exp] = this.getMantissaAndExponent();
-                let prefixMantissa = (mantissa < 0) ? "" : "+";
-                let prefixExp = (exp < 0) ? "" : "+";
-                return prefixMantissa + mantissa.toFixed(3) + "e" + prefixExp + exp;
-            }
-            /**
-             * Displays this value by setting the contents of the digits and the exponent
-             */
-            display() {
-                let [mantissa, exp] = this.toString().split("e");
-                let spans = this.querySelectorAll("span");
-                spans[0].textContent = this.value < 0 ? "-" : "+";
-                spans[1].textContent = exp;
-                let digits = this.querySelectorAll("fudge-digit");
-                mantissa = mantissa.substring(1);
-                mantissa = mantissa.replace(".", "");
-                for (let pos = 0; pos < digits.length; pos++) {
-                    let digit = digits[5 - pos];
-                    if (pos < mantissa.length) {
-                        let char = mantissa.charAt(mantissa.length - 1 - pos);
-                        digit.textContent = char;
-                    }
-                    else
-                        digit.innerHTML = "&nbsp;";
-                }
-            }
-            changeDigitFocussed(_amount) {
-                let digit = document.activeElement;
-                if (!this.contains(digit))
-                    return;
-                _amount = Math.round(_amount);
-                if (_amount == 0)
-                    return;
-                if (digit == this.querySelector("[name=exp]")) {
-                    this.value *= Math.pow(10, _amount);
-                    this.display();
-                    return;
-                }
-                let expDigit = parseInt(digit.getAttribute("exp"));
-                // @ts-ignore (mantissa not used)
-                let [mantissa, expValue] = this.getMantissaAndExponent();
-                this.value += _amount * Math.pow(10, expDigit + expValue);
-                let expNew;
-                [mantissa, expNew] = this.getMantissaAndExponent();
-                this.shiftFocus(expNew - expValue);
-                this.display();
-            }
-            shiftFocus(_nDigits) {
-                let shiftFocus = document.activeElement;
-                if (_nDigits) {
-                    for (let i = 0; i < 3; i++)
-                        if (_nDigits > 0)
-                            shiftFocus = shiftFocus.nextElementSibling;
-                        else
-                            shiftFocus = shiftFocus.previousElementSibling;
-                    shiftFocus.focus();
-                }
             }
         }
-        // @ts-ignore
-        CustomElementStepper.customElement = FudgeUserInterface.CustomElement.register("fudge-stepper", CustomElementStepper, Number);
-        return CustomElementStepper;
-    })();
+        /**
+         * Retrieve the value of this
+         */
+        getMutatorValue() {
+            return this.value;
+        }
+        /**
+         * Sets its value and displays it
+         */
+        setMutatorValue(_value) {
+            this.value = _value;
+            this.display();
+        }
+        /**
+         * Retrieve mantissa and exponent separately as an array of two members
+         */
+        getMantissaAndExponent() {
+            let prec = this.value.toExponential(6);
+            let exp = parseInt(prec.split("e")[1]);
+            let exp3 = Math.trunc(exp / 3);
+            let mantissa = this.value / Math.pow(10, exp3 * 3);
+            mantissa = Math.round(mantissa * 1000) / 1000;
+            return [mantissa, exp3 * 3];
+        }
+        /**
+         * Retrieves this value as a string
+         */
+        toString() {
+            let [mantissa, exp] = this.getMantissaAndExponent();
+            let prefixMantissa = (mantissa < 0) ? "" : "+";
+            let prefixExp = (exp < 0) ? "" : "+";
+            return prefixMantissa + mantissa.toFixed(3) + "e" + prefixExp + exp;
+        }
+        /**
+         * Displays this value by setting the contents of the digits and the exponent
+         */
+        display() {
+            let [mantissa, exp] = this.toString().split("e");
+            let spans = this.querySelectorAll("span");
+            spans[0].textContent = this.value < 0 ? "-" : "+";
+            spans[1].textContent = exp;
+            let digits = this.querySelectorAll("fudge-digit");
+            mantissa = mantissa.substring(1);
+            mantissa = mantissa.replace(".", "");
+            for (let pos = 0; pos < digits.length; pos++) {
+                let digit = digits[5 - pos];
+                if (pos < mantissa.length) {
+                    let char = mantissa.charAt(mantissa.length - 1 - pos);
+                    digit.textContent = char;
+                }
+                else
+                    digit.innerHTML = "&nbsp;";
+            }
+        }
+        changeDigitFocussed(_amount) {
+            let digit = document.activeElement;
+            if (!this.contains(digit))
+                return;
+            _amount = Math.round(_amount);
+            if (_amount == 0)
+                return;
+            if (digit == this.querySelector("[name=exp]")) {
+                this.value *= Math.pow(10, _amount);
+                this.display();
+                return;
+            }
+            let expDigit = parseInt(digit.getAttribute("exp"));
+            // @ts-ignore (mantissa not used)
+            let [mantissa, expValue] = this.getMantissaAndExponent();
+            this.value += _amount * Math.pow(10, expDigit + expValue);
+            let expNew;
+            [mantissa, expNew] = this.getMantissaAndExponent();
+            this.shiftFocus(expNew - expValue);
+            this.display();
+        }
+        shiftFocus(_nDigits) {
+            let shiftFocus = document.activeElement;
+            if (_nDigits) {
+                for (let i = 0; i < 3; i++)
+                    if (_nDigits > 0)
+                        shiftFocus = shiftFocus.nextElementSibling;
+                    else
+                        shiftFocus = shiftFocus.previousElementSibling;
+                shiftFocus.focus();
+            }
+        }
+    }
+    // @ts-ignore
+    CustomElementStepper.customElement = FudgeUserInterface.CustomElement.register("fudge-stepper", CustomElementStepper, Number);
     FudgeUserInterface.CustomElementStepper = CustomElementStepper;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
@@ -856,41 +870,38 @@ var FudgeUserInterface;
     /**
      * A standard text input field with a label to it.
      */
-    let CustomElementTextInput = /** @class */ (() => {
-        class CustomElementTextInput extends FudgeUserInterface.CustomElement {
-            constructor(_attributes) {
-                super(_attributes);
-            }
-            /**
-             * Creates the content of the element when connected the first time
-             */
-            connectedCallback() {
-                if (this.initialized)
-                    return;
-                this.initialized = true;
-                this.appendLabel();
-                let input = document.createElement("input");
-                input.id = FudgeUserInterface.CustomElement.nextId;
-                input.value = this.getAttribute("value");
-                this.appendChild(input);
-            }
-            /**
-             * Retrieves the content of the input element
-             */
-            getMutatorValue() {
-                return this.querySelector("input").value;
-            }
-            /**
-             * Sets the content of the input element
-             */
-            setMutatorValue(_value) {
-                this.querySelector("input").value = _value;
-            }
+    class CustomElementTextInput extends FudgeUserInterface.CustomElement {
+        constructor(_attributes) {
+            super(_attributes);
         }
-        // @ts-ignore
-        CustomElementTextInput.customElement = FudgeUserInterface.CustomElement.register("fudge-textinput", CustomElementTextInput, String);
-        return CustomElementTextInput;
-    })();
+        /**
+         * Creates the content of the element when connected the first time
+         */
+        connectedCallback() {
+            if (this.initialized)
+                return;
+            this.initialized = true;
+            this.appendLabel();
+            let input = document.createElement("input");
+            input.id = FudgeUserInterface.CustomElement.nextId;
+            input.value = this.getAttribute("value");
+            this.appendChild(input);
+        }
+        /**
+         * Retrieves the content of the input element
+         */
+        getMutatorValue() {
+            return this.querySelector("input").value;
+        }
+        /**
+         * Sets the content of the input element
+         */
+        setMutatorValue(_value) {
+            this.querySelector("input").value = _value;
+        }
+    }
+    // @ts-ignore
+    CustomElementTextInput.customElement = FudgeUserInterface.CustomElement.register("fudge-textinput", CustomElementTextInput, String);
     FudgeUserInterface.CustomElementTextInput = CustomElementTextInput;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 // namespace FudgeUserInterface {

@@ -229,8 +229,8 @@ var Fudge;
             this.index = {};
             this.listRoot = this.buildFromMutator(this.mutator);
             _listContainer.append(this.listRoot);
-            _listContainer.addEventListener(ƒui.EVENT_USERINTERFACE.COLLAPSE, this.toggleCollapse);
-            _listContainer.addEventListener(ƒui.EVENT_USERINTERFACE.UPDATE, this.collectMutator);
+            _listContainer.addEventListener("collapse" /* COLLAPSE */, this.toggleCollapse);
+            _listContainer.addEventListener("update" /* UPDATE */, this.collectMutator);
         }
         getMutator() {
             return this.mutator;
@@ -1120,7 +1120,7 @@ var Fudge;
                     this.node.name = target.value;
                 }
             };
-            this.setNode = (_event) => {
+            this.hndEvent = (_event) => {
                 this.node = _event.detail;
                 while (this.dom.firstChild != null) {
                     this.dom.removeChild(this.dom.lastChild);
@@ -1131,8 +1131,10 @@ var Fudge;
                 switch (_event.detail) {
                 }
             };
+            this.container = _container;
             this.fillContent();
-            this.dom.addEventListener("select" /* SELECT */, this.setNode);
+            this.dom.addEventListener("select" /* SELECT */, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
         }
         cleanup() {
             //TODO: Deconstruct;
@@ -1140,9 +1142,10 @@ var Fudge;
         fillContent() {
             if (this.node) {
                 if (this.node instanceof ƒ.Node) {
-                    let cntHeader = document.createElement("span");
-                    cntHeader.textContent = this.node.name;
-                    this.dom.appendChild(cntHeader);
+                    // let cntHeader: HTMLElement = document.createElement("span");
+                    // cntHeader.textContent = this.node.name;
+                    // this.dom.appendChild(cntHeader);
+                    this.container.setTitle(this.node.name);
                     let nodeComponents = this.node.getAllComponents();
                     for (let nodeComponent of nodeComponents) {
                         let fieldset = ƒui.Generator.createFieldSetFromMutable(nodeComponent);

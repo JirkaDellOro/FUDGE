@@ -1,4 +1,6 @@
 namespace Fudge {
+  import ƒui = FudgeUserInterface;
+
   export class AnimationList {
     listRoot: HTMLElement;
     private mutator: ƒ.Mutator;

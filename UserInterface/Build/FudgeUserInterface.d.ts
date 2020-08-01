@@ -188,6 +188,14 @@ declare namespace FudgeUserInterface {
 }
 declare namespace FudgeUserInterface {
     import ƒ = FudgeCore;
+    class CustomElementMatrix3x3 extends CustomElementTemplate {
+        getMutatorValue(): Object;
+        setMutatorValue(_mutator: ƒ.Mutator): void;
+        protected connectedCallback(): void;
+    }
+}
+declare namespace FudgeUserInterface {
+    import ƒ = FudgeCore;
     class CustomElementMatrix4x4 extends CustomElementTemplate {
         getMutatorValue(): Object;
         setMutatorValue(_mutator: ƒ.Mutator): void;

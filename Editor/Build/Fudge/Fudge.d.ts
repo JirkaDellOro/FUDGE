@@ -247,11 +247,12 @@ declare namespace Fudge {
      */
     class ViewComponents extends View {
         private node;
+        private container;
         constructor(_container: GoldenLayout.Container, _state: Object);
         cleanup(): void;
         fillContent(): void;
         private changeNodeName;
-        private setNode;
+        private hndEvent;
         private addComponent;
     }
 }

@@ -41,45 +41,17 @@
 }
 
 /* Controls */
-
 .lm_header .lm_controls .lm_tabdropdown:before {
   color: var(--color-text);
 }
 
 /* Drag & Drop */
-
 .lm_dropTargetIndicator {
   outline: 1px dashed var(--color-dragdrop-outline);
   background-color: var(--color-background-main);
 }
 
-/* popin/popout (must be supported differently, if at all */
-
-/* 
-.lm_popin {
-  cursor: pointer
-}
-
-.lm_popin .lm_bg {
-  background: #ffffff;
-  opacity: .3
-}
-
-.lm_popin .lm_icon {
-  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAJCAYAAADpeqZqAAAAWklEQVR4nJWOyw3AIAxDHcQC7L8jbwT3AlJBfNp3SiI7dtRaLSlKKeoA1oEsKSQZCEluexw8Tm3ohk+E7bnOUHUGcNh+HwbBygw4AZ7FN/Lt84p0l+yTflV8AKQyLdcCRJi/AAAAAElFTkSuQmCC);
-  background-position: center center;
-  background-repeat: no-repeat;
-  border-left: 1px solid #eeeeee;
-  border-top: 1px solid #eeeeee;
-  opacity: .7
-}
-
-.lm_popin:hover .lm_icon {
-  opacity: 1
-} */
-
 /* Tree Control */
-
 ul.tree {
   list-style: none;
 }
@@ -124,7 +96,6 @@ ul.tree .selected>input {
 }
 
 /* Components */
-
 input {
   background-color: var(--color-background-content);
   color: var(--color-text);
@@ -146,8 +117,11 @@ input[type="number"] {
   width: 6em;
 }
 
-/* Fieldset */
+label {
+  padding-right: 0.5em;
+}
 
+/* Fieldset */
 fieldset {
   border: none;
   padding-left: 1em;
