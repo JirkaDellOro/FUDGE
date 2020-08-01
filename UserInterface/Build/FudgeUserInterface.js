@@ -194,18 +194,6 @@ var FudgeUserInterface;
             cntFoldFieldset.setAttribute("key", _key);
             return cntFoldFieldset;
         }
-        //TODO: delete
-        static createLabelElement(_name, _parent, params = {}) {
-            let label = document.createElement("label");
-            if (params.value == undefined)
-                params.value = _name;
-            label.innerText = params.value;
-            if (params.cssClass != undefined)
-                label.classList.add(params.cssClass);
-            label.setAttribute("name", _name);
-            _parent.appendChild(label);
-            return label;
-        }
     }
     FudgeUserInterface.Generator = Generator;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
@@ -268,7 +256,7 @@ var FudgeUserInterface;
             if (!text)
                 return null;
             let label = document.createElement("label");
-            label.textContent = text; // + "XX ";
+            label.textContent = text;
             this.appendChild(label);
             return label;
         }
@@ -339,6 +327,7 @@ var FudgeUserInterface;
             this.color = new ƒ.Color();
             if (!_attributes.label)
                 this.setAttribute("label", _attributes.key);
+            this.addEventListener("keydown", this.hndKey);
         }
         /**
          * Creates the content of the element when connected the first time
@@ -358,6 +347,7 @@ var FudgeUserInterface;
             slider.max = "1";
             slider.step = "0.01";
             this.appendChild(slider);
+            slider.addEventListener("wheel", this.hndWheel);
         }
         /**
          * Retrieves the values of picker and slider as ƒ.Mutator
@@ -377,6 +367,20 @@ var FudgeUserInterface;
             let hex = this.color.getHex();
             this.querySelector("input[type=color").value = "#" + hex.substr(0, 6);
             this.querySelector("input[type=range").value = this.color.a.toString();
+        }
+        hndKey(_event) {
+            _event.stopPropagation();
+        }
+        hndWheel(_event) {
+            let slider = _event.target;
+            if (slider != document.activeElement)
+                return;
+            _event.stopPropagation();
+            _event.preventDefault();
+            console.log(_event.deltaY / 1000);
+            let currentValue = Number(slider.value);
+            slider.value = String(currentValue - _event.deltaY / 1000);
+            slider.dispatchEvent(new Event("input", { bubbles: true }));
         }
     }
     // @ts-ignore
@@ -618,6 +622,8 @@ var FudgeUserInterface;
                 let active = document.activeElement;
                 let numEntered = _event.key.charCodeAt(0) - 48;
                 _event.stopPropagation();
+                if (_event.code != ƒ.KEYBOARD_CODE.TABULATOR)
+                    _event.preventDefault();
                 // if focus is on stepper, enter it and focus digit
                 if (active == this) {
                     switch (_event.code) {

@@ -51,10 +51,6 @@ declare namespace FudgeUserInterface {
          */
         static createDropdown(_name: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement;
         static createFoldableFieldset(_key: string): FoldableFieldSet;
-        static createLabelElement(_name: string, _parent: HTMLElement, params?: {
-            value?: string;
-            cssClass?: string;
-        }): HTMLLabelElement;
     }
 }
 declare namespace FudgeUserInterface {
@@ -151,6 +147,8 @@ declare namespace FudgeUserInterface {
          * Sets the values of color picker and slider
          */
         setMutatorValue(_value: ƒ.Mutator): void;
+        private hndKey;
+        private hndWheel;
     }
 }
 declare namespace FudgeUserInterface {

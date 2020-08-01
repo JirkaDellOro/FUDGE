@@ -156,6 +156,8 @@ namespace FudgeUserInterface {
       let numEntered: number = _event.key.charCodeAt(0) - 48;
 
       _event.stopPropagation();
+      if (_event.code != ƒ.KEYBOARD_CODE.TABULATOR)
+        _event.preventDefault();
 
       // if focus is on stepper, enter it and focus digit
       if (active == this) {

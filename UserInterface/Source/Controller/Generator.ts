@@ -108,18 +108,18 @@ namespace FudgeUserInterface {
     }
 
     //TODO: delete
-    public static createLabelElement(_name: string, _parent: HTMLElement, params: { value?: string, cssClass?: string } = {}): HTMLLabelElement {
-      let label: HTMLLabelElement = document.createElement("label");
-      if (params.value == undefined)
-        params.value = _name;
-      label.innerText = params.value;
-      if (params.cssClass != undefined)
-        label.classList.add(params.cssClass);
-      label.setAttribute("name", _name);
-      _parent.appendChild(label);
+    // public static createLabelElement(_name: string, _parent: HTMLElement, params: { value?: string, cssClass?: string } = {}): HTMLLabelElement {
+    //   let label: HTMLLabelElement = document.createElement("label");
+    //   if (params.value == undefined)
+    //     params.value = _name;
+    //   label.innerText = params.value;
+    //   if (params.cssClass != undefined)
+    //     label.classList.add(params.cssClass);
+    //   label.setAttribute("name", _name);
+    //   _parent.appendChild(label);
 
-      return label;
-    }
+    //   return label;
+    // }
 
 
     // public static createFieldset(_legend: string, _parent: HTMLElement, _cssClass?: string): HTMLFieldSetElement {

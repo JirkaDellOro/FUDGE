@@ -79,7 +79,7 @@ namespace FudgeUserInterface {
       if (!text)
         return null;
       let label: HTMLLabelElement = document.createElement("label");
-      label.textContent = text;// + "XX ";
+      label.textContent = text;
       this.appendChild(label);
       return label;
     }
