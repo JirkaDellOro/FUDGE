@@ -43,7 +43,7 @@ namespace Fudge {
       return this.node;
     }
 
-    public cleanup(): void {
+    protected cleanup(): void {
       //TODO: desconstruct
     }
 

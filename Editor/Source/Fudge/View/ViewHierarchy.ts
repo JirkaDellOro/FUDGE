@@ -7,23 +7,18 @@ namespace Fudge {
    * @author Jirka Dell'Oro-Friedl, HFU, 2020  
    */
   export class ViewHierarchy extends View {
-    graph: ƒ.Node;
-    selectedNode: ƒ.Node;
-    tree: ƒui.Tree<ƒ.Node>;
-    contextMenu: Electron.Menu;
+    private graph: ƒ.Node;
+    // private selectedNode: ƒ.Node;
+    private tree: ƒui.Tree<ƒ.Node>;
 
     constructor(_container: GoldenLayout.Container, _state: Object) {
       super(_container, _state);
-      this.contextMenu = ContextMenu.getMenu(ViewHierarchy, this.contextMenuCallback);
+      // this.contextMenu = this.getContextMenu(this.contextMenuCallback);
 
       this.setGraph((<ƒ.General>_state).node);
 
       // this.parentPanel.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setSelectedNode);
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
-    }
-
-    cleanup(): void {
-      //TODO: desconstruct
     }
 
     public setGraph(_graph: ƒ.Node): void {
@@ -33,38 +28,40 @@ namespace Fudge {
         this.dom.removeChild(this.tree);
 
       this.graph = _graph;
-      this.selectedNode = null;
+      // this.selectedNode = null;
 
       this.tree = new ƒui.Tree<ƒ.Node>(new ControllerTreeNode(), this.graph);
       // this.listController.listRoot.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.passEventToPanel);
       //TODO: examine if tree should fire common UI-EVENT for selection instead
-      this.tree.addEventListener(ƒui.EVENT_TREE.SELECT, this.passEventToPanel);
+      // this.tree.addEventListener(ƒui.EVENT_TREE.SELECT, this.passEventToPanel);
       this.tree.addEventListener(ƒui.EVENT_USERINTERFACE.CONTEXTMENU, this.openContextMenu);
       this.dom.append(this.tree);
     }
 
-    // private setNode(_node: ƒ.Node): void {
-    //   ƒ.Debug.info("Hierarchy", _node);
-    //   // this.listController.setSelection(_event.detail);
-    //   this.selectedNode = _node;
-    // }
-
-    private passEventToPanel = (_event: CustomEvent): void => {
-      let eventToPass: CustomEvent;
-      // if (_event.type == ƒui.EVENT_TREE.SELECT)
-      //   eventToPass = new CustomEvent(ƒui.EVENT_USERINTERFACE.SELECT, { bubbles: true, detail: _event.detail.data });
-      // else
-      eventToPass = new CustomEvent(_event.type, { bubbles: true, detail: _event.detail });
-      // _event.cancelBubble = true;
-
-      // this.dom.dispatchEvent(eventToPass);
+    protected cleanup(): void {
+      //TODO: desconstruct
     }
 
-    private openContextMenu = (_event: Event): void => {
-      this.contextMenu.popup();
+    //#region  ContextMenu
+    protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
+      const menu: Electron.Menu = new remote.Menu();
+      let item: Electron.MenuItem;
+
+      item = new remote.MenuItem({ label: "Add Node", id: String(MENU.ADD_NODE), click: _callback, accelerator: process.platform == "darwin" ? "N" : "N" });
+      menu.append(item);
+
+      item = new remote.MenuItem({ label: "Add Component", submenu: [] });
+      for (let subItem of ContextMenu.getComponents(_callback))
+        item.submenu.append(subItem);
+      menu.append(item);
+
+      ContextMenu.appendCopyPaste(menu);
+
+      // menu.addListener("menu-will-close", (_event: Electron.Event) => { console.log(_event); });
+      return menu;
     }
 
-    private contextMenuCallback = (_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void => {
+    protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
       ƒ.Debug.info(`MenuSelect: Item-id=${MENU[_item.id]}`);
       let focus: ƒ.Node = this.tree.getFocussed();
 
@@ -72,7 +69,7 @@ namespace Fudge {
         case MENU.ADD_NODE:
           let child: ƒ.Node = new ƒ.Node("New Node");
           focus.addChild(child);
-          this.tree.findItem(focus).open(true);
+          this.tree.findOpen(focus).open(true);
           this.tree.findOpen(child).focus();
           break;
         case MENU.ADD_COMPONENT:
@@ -83,12 +80,27 @@ namespace Fudge {
           ƒ.Debug.info(cmpNew.type, cmpNew);
 
           focus.addComponent(cmpNew);
+          this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT_TREE.SELECT, { bubbles: true, detail: { data: focus } }));
           break;
       }
     }
+    //#endregion
 
+    //#region EventHandlers
     private hndEvent = (_event: CustomEvent): void => {
       this.setGraph(_event.detail);
     }
+
+    // private setNode(_node: ƒ.Node): void {
+    //   ƒ.Debug.info("Hierarchy", _node);
+    //   // this.listController.setSelection(_event.detail);
+    //   this.selectedNode = _node;
+    // }
+
+    // private passEventToPanel = (_event: CustomEvent): void => {
+    //   let eventToPass: CustomEvent;
+    //   eventToPass = new CustomEvent(_event.type, { bubbles: true, detail: _event.detail });
+    // }
+    //#endregion
   }
 }

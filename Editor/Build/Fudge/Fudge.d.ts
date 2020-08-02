@@ -31,17 +31,15 @@ declare namespace Fudge {
     const remote: Electron.Remote;
 }
 declare namespace Fudge {
-    export enum MENU {
+    enum MENU {
         ADD_NODE = 0,
         ADD_COMPONENT = 1
     }
     type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
-    export class ContextMenu {
-        static getMenu(_for: typeof View, _callback: ContextMenuCallback): Electron.Menu;
-        private static appendCopyPaste;
-        private static getComponents;
+    class ContextMenu {
+        static appendCopyPaste(_menu: Electron.Menu): void;
+        static getComponents(_callback: ContextMenuCallback): Electron.MenuItem[];
     }
-    export {};
 }
 declare namespace Fudge {
     class AnimationList {
@@ -94,9 +92,15 @@ declare namespace Fudge {
      */
     abstract class View {
         dom: HTMLElement;
+        protected contextMenu: Electron.Menu;
+        private container;
         constructor(_container: GoldenLayout.Container, _state: Object);
+        setTitle(_title: string): void;
         /** Cleanup when user closes view */
-        abstract cleanup(): void;
+        protected abstract cleanup(): void;
+        protected openContextMenu: (_event: Event) => void;
+        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
+        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
     }
 }
 declare namespace Fudge {
@@ -129,7 +133,7 @@ declare namespace Fudge {
         constructor(_container: GoldenLayout.Container, _state: Object);
         setGraph(_node: ƒ.Node): void;
         getNode(): ƒ.Node;
-        cleanup(): void;
+        protected cleanup(): void;
         private hndSetGraph;
         private hndFocusNode;
     }
@@ -249,31 +253,28 @@ declare namespace Fudge {
      */
     class ViewComponents extends View {
         private node;
-        private container;
         constructor(_container: GoldenLayout.Container, _state: Object);
-        cleanup(): void;
-        fillContent(): void;
+        protected cleanup(): void;
+        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
+        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        private fillContent;
         private hndEvent;
     }
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
-    import ƒui = FudgeUserInterface;
     /**
      * View the hierarchy of a graph as tree-control
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class ViewHierarchy extends View {
-        graph: ƒ.Node;
-        selectedNode: ƒ.Node;
-        tree: ƒui.Tree<ƒ.Node>;
-        contextMenu: Electron.Menu;
+        private graph;
+        private tree;
         constructor(_container: GoldenLayout.Container, _state: Object);
-        cleanup(): void;
         setGraph(_graph: ƒ.Node): void;
-        private passEventToPanel;
-        private openContextMenu;
-        private contextMenuCallback;
+        protected cleanup(): void;
+        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
+        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         private hndEvent;
     }
 }

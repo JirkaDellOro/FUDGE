@@ -11,32 +11,58 @@ namespace Fudge {
    * @author Jirka Dell'Oro-Friedl, HFU, 2020
    */
   export class ViewComponents extends View {
-    private node: ƒ.Node | ƒ.Mutable;
-    private container: GoldenLayout.Container;
+    private node: ƒ.Node;
 
     constructor(_container: GoldenLayout.Container, _state: Object) {
       super(_container, _state);
-
-      this.container = _container;
       this.fillContent();
 
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT_TREE.RENAME, this.hndEvent);
+      this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.CONTEXTMENU, this.openContextMenu);
     }
 
-    public cleanup(): void {
+    protected cleanup(): void {
       //TODO: Deconstruct;
     }
 
-    fillContent(): void {
+    //#region  ContextMenu
+    protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
+      const menu: Electron.Menu = new remote.Menu();
+      let item: Electron.MenuItem;
+
+      item = new remote.MenuItem({ label: "Add Component", submenu: [] });
+      for (let subItem of ContextMenu.getComponents(_callback))
+        item.submenu.append(subItem);
+      menu.append(item);
+
+      ContextMenu.appendCopyPaste(menu);
+      return menu;
+    }
+
+    protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
+      ƒ.Debug.info(`MenuSelect: Item-id=${MENU[_item.id]}`);
+
+      switch (Number(_item.id)) {
+        case MENU.ADD_COMPONENT:
+          let iSubclass: number = _item["iSubclass"];
+          let component: typeof ƒ.Component = ƒ.Component.subclasses[iSubclass];
+          //@ts-ignore
+          let cmpNew: ƒ.Component = new component();
+          ƒ.Debug.info(cmpNew.type, cmpNew);
+
+          this.node.addComponent(cmpNew);
+          this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT_TREE.SELECT, { bubbles: true, detail: { data: this.node } }));
+          break;
+      }
+    }
+    //#endregion
+
+    private fillContent(): void {
       if (this.node) {
         if (this.node instanceof ƒ.Node) {
-          // let cntHeader: HTMLElement = document.createElement("span");
-          // cntHeader.textContent = this.node.name;
-          // this.dom.appendChild(cntHeader);
-
-          this.container.setTitle(this.node.name);
+          this.setTitle(this.node.name);
 
           let nodeComponents: ƒ.Component[] = this.node.getAllComponents();
           for (let nodeComponent of nodeComponents) {
@@ -52,12 +78,6 @@ namespace Fudge {
       }
     }
 
-    // private changeNodeName = (_event: Event) => {
-    //   if (this.node instanceof ƒ.Node) {
-    //     let target: HTMLInputElement = <HTMLInputElement>_event.target;
-    //     this.node.name = target.value;
-    //   }
-    // }
 
     private hndEvent = (_event: CustomEvent): void => {
       if (_event.type != ƒui.EVENT_TREE.RENAME)
@@ -68,10 +88,5 @@ namespace Fudge {
       }
       this.fillContent();
     }
-
-    // private addComponent = (_event: CustomEvent): void => {
-    //   switch (_event.detail) {
-    //   }
-    // }
   }
 }

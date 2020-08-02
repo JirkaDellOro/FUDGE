@@ -164,19 +164,6 @@ var Fudge;
         //   let menu: Electron.Menu = remote.Menu.buildFromTemplate(template);
         //   return menu;
         // }
-        static getMenu(_for, _callback) {
-            const menu = new Fudge.remote.Menu();
-            let item;
-            item = new Fudge.remote.MenuItem({ label: "Add Node", id: String(MENU.ADD_NODE), click: _callback, accelerator: process.platform == "darwin" ? "N" : "N" });
-            menu.append(item);
-            item = new Fudge.remote.MenuItem({ label: "Add Component", submenu: [] });
-            for (let subItem of ContextMenu.getComponents(_callback))
-                item.submenu.append(subItem);
-            menu.append(item);
-            this.appendCopyPaste(menu);
-            // menu.addListener("menu-will-close", (_event: Electron.Event) => { console.log(_event); });
-            return menu;
-        }
         static appendCopyPaste(_menu) {
             _menu.append(new Fudge.remote.MenuItem({ role: "copy" }));
             _menu.append(new Fudge.remote.MenuItem({ role: "cut" }));
@@ -189,15 +176,6 @@ var Fudge;
                 // @ts-ignore
                 item.overrideProperty("iSubclass", subclass.iSubclass);
                 item["iSubclass"] = subclass.iSubclass;
-                // // Object.defineProperty(item, "subclass", {value: subclass, writable: true});
-                // // item["subclass"] = subclass;
-                // // console.log(subclass);
-                //  function (): ƒ.Component {
-                //   console.log(this);
-                //   // @ts-ignore
-                //   this.Fudge.newComponent = new subclass();
-                //   // item.overrideProperty("component", new subclass());
-                // });
                 menuItems.push(item);
             }
             return menuItems;
@@ -355,6 +333,7 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    var ƒ = FudgeCore;
     let VIEW;
     (function (VIEW) {
         VIEW["HIERARCHY"] = "ViewHierarchy";
@@ -372,11 +351,29 @@ var Fudge;
      */
     class View {
         constructor(_container, _state) {
+            //#region  ContextMenu
+            this.openContextMenu = (_event) => {
+                this.contextMenu.popup();
+            };
             this.dom = document.createElement("div");
             this.dom.style.height = "100%";
             this.dom.style.overflow = "auto";
             this.dom.setAttribute("view", this.constructor.name);
             _container.getElement().append(this.dom);
+            this.container = _container;
+            console.log(this.contextMenuCallback);
+            this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
+        }
+        setTitle(_title) {
+            this.container.setTitle(_title);
+        }
+        getContextMenu(_callback) {
+            const menu = new Fudge.remote.Menu();
+            Fudge.ContextMenu.appendCopyPaste(menu);
+            return menu;
+        }
+        contextMenuCallback(_item, _window, _event) {
+            ƒ.Debug.info(`ContextMenu: Item-id=${Fudge.MENU[_item.id]}`);
         }
     }
     Fudge.View = View;
@@ -1122,12 +1119,6 @@ var Fudge;
     class ViewComponents extends Fudge.View {
         constructor(_container, _state) {
             super(_container, _state);
-            // private changeNodeName = (_event: Event) => {
-            //   if (this.node instanceof ƒ.Node) {
-            //     let target: HTMLInputElement = <HTMLInputElement>_event.target;
-            //     this.node.name = target.value;
-            //   }
-            // }
             this.hndEvent = (_event) => {
                 if (_event.type != ƒui.EVENT_TREE.RENAME)
                     this.node = _event.detail;
@@ -1136,22 +1127,45 @@ var Fudge;
                 }
                 this.fillContent();
             };
-            this.container = _container;
             this.fillContent();
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
             this.dom.addEventListener(ƒui.EVENT_TREE.RENAME, this.hndEvent);
+            this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
         }
         cleanup() {
             //TODO: Deconstruct;
         }
+        //#region  ContextMenu
+        getContextMenu(_callback) {
+            const menu = new Fudge.remote.Menu();
+            let item;
+            item = new Fudge.remote.MenuItem({ label: "Add Component", submenu: [] });
+            for (let subItem of Fudge.ContextMenu.getComponents(_callback))
+                item.submenu.append(subItem);
+            menu.append(item);
+            Fudge.ContextMenu.appendCopyPaste(menu);
+            return menu;
+        }
+        contextMenuCallback(_item, _window, _event) {
+            ƒ.Debug.info(`MenuSelect: Item-id=${Fudge.MENU[_item.id]}`);
+            switch (Number(_item.id)) {
+                case Fudge.MENU.ADD_COMPONENT:
+                    let iSubclass = _item["iSubclass"];
+                    let component = ƒ.Component.subclasses[iSubclass];
+                    //@ts-ignore
+                    let cmpNew = new component();
+                    ƒ.Debug.info(cmpNew.type, cmpNew);
+                    this.node.addComponent(cmpNew);
+                    this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT_TREE.SELECT, { bubbles: true, detail: { data: this.node } }));
+                    break;
+            }
+        }
+        //#endregion
         fillContent() {
             if (this.node) {
                 if (this.node instanceof ƒ.Node) {
-                    // let cntHeader: HTMLElement = document.createElement("span");
-                    // cntHeader.textContent = this.node.name;
-                    // this.dom.appendChild(cntHeader);
-                    this.container.setTitle(this.node.name);
+                    this.setTitle(this.node.name);
                     let nodeComponents = this.node.getAllComponents();
                     for (let nodeComponent of nodeComponents) {
                         let fieldset = ƒui.Generator.createFieldSetFromMutable(nodeComponent);
@@ -1179,53 +1193,15 @@ var Fudge;
     class ViewHierarchy extends Fudge.View {
         constructor(_container, _state) {
             super(_container, _state);
-            // private setNode(_node: ƒ.Node): void {
-            //   ƒ.Debug.info("Hierarchy", _node);
-            //   // this.listController.setSelection(_event.detail);
-            //   this.selectedNode = _node;
-            // }
-            this.passEventToPanel = (_event) => {
-                let eventToPass;
-                // if (_event.type == ƒui.EVENT_TREE.SELECT)
-                //   eventToPass = new CustomEvent(ƒui.EVENT_USERINTERFACE.SELECT, { bubbles: true, detail: _event.detail.data });
-                // else
-                eventToPass = new CustomEvent(_event.type, { bubbles: true, detail: _event.detail });
-                // _event.cancelBubble = true;
-                // this.dom.dispatchEvent(eventToPass);
-            };
-            this.openContextMenu = (_event) => {
-                this.contextMenu.popup();
-            };
-            this.contextMenuCallback = (_item, _window, _event) => {
-                ƒ.Debug.info(`MenuSelect: Item-id=${Fudge.MENU[_item.id]}`);
-                let focus = this.tree.getFocussed();
-                switch (Number(_item.id)) {
-                    case Fudge.MENU.ADD_NODE:
-                        let child = new ƒ.Node("New Node");
-                        focus.addChild(child);
-                        this.tree.findItem(focus).open(true);
-                        this.tree.findOpen(child).focus();
-                        break;
-                    case Fudge.MENU.ADD_COMPONENT:
-                        let iSubclass = _item["iSubclass"];
-                        let component = ƒ.Component.subclasses[iSubclass];
-                        //@ts-ignore
-                        let cmpNew = new component();
-                        ƒ.Debug.info(cmpNew.type, cmpNew);
-                        focus.addComponent(cmpNew);
-                        break;
-                }
-            };
+            //#endregion
+            //#region EventHandlers
             this.hndEvent = (_event) => {
                 this.setGraph(_event.detail);
             };
-            this.contextMenu = Fudge.ContextMenu.getMenu(ViewHierarchy, this.contextMenuCallback);
+            // this.contextMenu = this.getContextMenu(this.contextMenuCallback);
             this.setGraph(_state.node);
             // this.parentPanel.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setSelectedNode);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
-        }
-        cleanup() {
-            //TODO: desconstruct
         }
         setGraph(_graph) {
             if (!_graph)
@@ -1233,13 +1209,51 @@ var Fudge;
             if (this.tree)
                 this.dom.removeChild(this.tree);
             this.graph = _graph;
-            this.selectedNode = null;
+            // this.selectedNode = null;
             this.tree = new ƒui.Tree(new Fudge.ControllerTreeNode(), this.graph);
             // this.listController.listRoot.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.passEventToPanel);
             //TODO: examine if tree should fire common UI-EVENT for selection instead
-            this.tree.addEventListener(ƒui.EVENT_TREE.SELECT, this.passEventToPanel);
+            // this.tree.addEventListener(ƒui.EVENT_TREE.SELECT, this.passEventToPanel);
             this.tree.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.append(this.tree);
+        }
+        cleanup() {
+            //TODO: desconstruct
+        }
+        //#region  ContextMenu
+        getContextMenu(_callback) {
+            const menu = new Fudge.remote.Menu();
+            let item;
+            item = new Fudge.remote.MenuItem({ label: "Add Node", id: String(Fudge.MENU.ADD_NODE), click: _callback, accelerator: process.platform == "darwin" ? "N" : "N" });
+            menu.append(item);
+            item = new Fudge.remote.MenuItem({ label: "Add Component", submenu: [] });
+            for (let subItem of Fudge.ContextMenu.getComponents(_callback))
+                item.submenu.append(subItem);
+            menu.append(item);
+            Fudge.ContextMenu.appendCopyPaste(menu);
+            // menu.addListener("menu-will-close", (_event: Electron.Event) => { console.log(_event); });
+            return menu;
+        }
+        contextMenuCallback(_item, _window, _event) {
+            ƒ.Debug.info(`MenuSelect: Item-id=${Fudge.MENU[_item.id]}`);
+            let focus = this.tree.getFocussed();
+            switch (Number(_item.id)) {
+                case Fudge.MENU.ADD_NODE:
+                    let child = new ƒ.Node("New Node");
+                    focus.addChild(child);
+                    this.tree.findOpen(focus).open(true);
+                    this.tree.findOpen(child).focus();
+                    break;
+                case Fudge.MENU.ADD_COMPONENT:
+                    let iSubclass = _item["iSubclass"];
+                    let component = ƒ.Component.subclasses[iSubclass];
+                    //@ts-ignore
+                    let cmpNew = new component();
+                    ƒ.Debug.info(cmpNew.type, cmpNew);
+                    focus.addComponent(cmpNew);
+                    this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT_TREE.SELECT, { bubbles: true, detail: { data: focus } }));
+                    break;
+            }
         }
     }
     Fudge.ViewHierarchy = ViewHierarchy;

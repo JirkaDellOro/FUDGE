@@ -6,7 +6,7 @@ namespace Fudge {
     ADD_NODE, ADD_COMPONENT
   }
 
-  type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
+  export type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
 
   // TODO: figure out how to subclass MenuItem
   // export class MenuItem extends remote.MenuItem {
@@ -24,32 +24,13 @@ namespace Fudge {
     //   return menu;
     // }
 
-    public static getMenu(_for: typeof View, _callback: ContextMenuCallback): Electron.Menu {
-      const menu: Electron.Menu = new remote.Menu();
-      let item: Electron.MenuItem;
-
-      item = new remote.MenuItem({ label: "Add Node", id: String(MENU.ADD_NODE), click: _callback, accelerator: process.platform == "darwin" ? "N" : "N" });
-      menu.append(item);
-
-      item = new remote.MenuItem({ label: "Add Component", submenu: [] });
-      for (let subItem of ContextMenu.getComponents(_callback))
-        item.submenu.append(subItem);
-      menu.append(item);
-
-      this.appendCopyPaste(menu);
-
-      // menu.addListener("menu-will-close", (_event: Electron.Event) => { console.log(_event); });
-
-      return menu;
-    }
-
-    private static appendCopyPaste(_menu: Electron.Menu): void {
+    public static appendCopyPaste(_menu: Electron.Menu): void {
       _menu.append(new remote.MenuItem({ role: "copy" }));
       _menu.append(new remote.MenuItem({ role: "cut" }));
       _menu.append(new remote.MenuItem({ role: "paste" }));
     }
 
-    private static getComponents(_callback: ContextMenuCallback): Electron.MenuItem[] {
+    public static getComponents(_callback: ContextMenuCallback): Electron.MenuItem[] {
       const menuItems: Electron.MenuItem[] = [];
       for (let subclass of ƒ.Component.subclasses) {
         let item: Electron.MenuItem = new remote.MenuItem(
@@ -58,15 +39,6 @@ namespace Fudge {
         // @ts-ignore
         item.overrideProperty("iSubclass", subclass.iSubclass);
         item["iSubclass"] = subclass.iSubclass;
-        // // Object.defineProperty(item, "subclass", {value: subclass, writable: true});
-        // // item["subclass"] = subclass;
-        // // console.log(subclass);
-        //  function (): ƒ.Component {
-        //   console.log(this);
-        //   // @ts-ignore
-        //   this.Fudge.newComponent = new subclass();
-        //   // item.overrideProperty("component", new subclass());
-        // });
         menuItems.push(item);
       }
       return menuItems;
