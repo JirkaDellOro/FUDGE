@@ -3195,32 +3195,32 @@ declare namespace FudgeCore {
          * @param _function The function type of the closure you want to create.
          * @param _parameters The parameters, which should be functions themselves, passed to the created closure.
          */
-        static getClosure(_function: string, _parameters: Function[]): ParticleClosure;
+        static createClosure(_function: string, _parameters: Function[]): ParticleClosure;
         /**
          * Creates a closure which will return the sum of the given parameters,
          *  i.e. ```_parameters[0] + ... + _parameters[n]```.
          */
-        private static createClosureAddition;
+        private static createAddition;
         /**
          * Creates a closure which will return the subtraction of the given parameters,
          *  i.e. ```_parameters[0] - _parameters[1]```.
          */
-        private static createClosureSubtraction;
+        private static createSubtraction;
         /**
           * Creates a closure which will return the product of the given parameters,
           *  i.e. ```_parameters[0] * ... * _parameters[n]```.
           */
-        private static createClosureMultiplication;
+        private static createMultiplication;
         /**
          * Creates a closure which will return the division of the given parameters,
          *  i.e. ```_parameters[0] / _parameters[1]```.
          */
-        private static createClosureDivision;
+        private static createDivision;
         /**
          * Creates a closure which will return the modulo of the given parameters,
          *  i.e. ```_parameters[0] % _parameters[1]```.
          */
-        private static createClosureModulo;
+        private static createModulo;
         /**
          * Interpolates a linear function between two given points.
          * - ```_parameters[0]``` will be the input value for the function.
@@ -3229,7 +3229,7 @@ declare namespace FudgeCore {
          * - ```_parameters[3]``` x end value.
          * - ```_parameters[4]``` y end value.
          */
-        private static createClosureLinear;
+        private static createLinear;
         /**
          * Creates a polynomial function of third degree. A,b,c and d will be evaluated while parsing.
          * - ```_parameters[0]``` will be the input value for the function.
@@ -3238,17 +3238,17 @@ declare namespace FudgeCore {
          * - ```_parameters[3]``` c value.
          * - ```_parameters[4]``` d value.
          */
-        private static createClosurePolynomial3;
+        private static createPolynomial3;
         /**
          * Creates a closure which will return the square root of the given parameter,
          * ```parameters[0]``` will be the input value for the function.
          */
-        private static createClosureSquareRoot;
+        private static createSquareRoot;
         /**
          * Creates a closure which will return a number chosen from the randomNumbers array in _variables.
          * - ```_parameters[0]``` representing the index of the number which will be chosen.
          */
-        private static createClosureRandom;
+        private static createRandom;
     }
 }
 declare namespace FudgeCore {

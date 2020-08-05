@@ -29,10 +29,9 @@ namespace FudgeCore {
      * @param _function The function type of the closure you want to create.
      * @param _parameters The parameters, which should be functions themselves, passed to the created closure.
      */
-    public static getClosure(_function: string, _parameters: Function[]): ParticleClosure {
-      let closure: Function = this.closures[_function];
+    public static createClosure(_function: string, _parameters: Function[]): ParticleClosure {
       if (_function in this.closures)
-        return closure(_parameters);
+        return this.closures[_function](_parameters);
       else
         throw `"${_function}" is not an operation`;
     }

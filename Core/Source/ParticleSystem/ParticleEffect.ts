@@ -120,7 +120,7 @@ namespace FudgeCore {
           for (let param of _data.parameters) {
             parameters.push(this.parseClosure(param));
           }
-          return ParticleClosureFactory.getClosure(_data.function, parameters);
+          return ParticleClosureFactory.createClosure(_data.function, parameters);
 
         case "string":
           if (this.definedVariables.includes(_data))
