@@ -10,7 +10,7 @@
       }
     },
     "particle": {
-      "inNormParticleTime": {
+      "particleTime": {
         "function": "modulo",
         "parameters": [
           {
@@ -29,11 +29,11 @@
           1
         ]
       },
-      "1-inNormParticleTime": {
+      "1-particleTime": {
         "function": "subtraction",
         "parameters": [
           1,
-          "inNormParticleTime"
+          "particleTime"
         ]
       }
     }
@@ -47,13 +47,7 @@
             {
               "function": "polynomial",
               "parameters": [
-                {
-                  "function": "subtraction",
-                  "parameters": [
-                    1,
-                    "inNormParticleTime"
-                  ]
-                },
+                "1-particleTime",
                 -2,
                 2,
                 0,
@@ -61,7 +55,7 @@
               ]
             },
             {
-              "function": "addition",
+              "function": "subtraction",
               "parameters": [
                 {
                   "function": "multiplication",
@@ -75,19 +69,19 @@
                     }
                   ]
                 },
-                -1
+                1
               ]
             }
           ]
         },
-        "y": "inNormParticleTime"
+        "y": "particleTime"
       }
     }
   },
   "components": {
     "ComponentMaterial": {
       "clrPrimary": {
-        "a": "1-inNormParticleTime"
+        "a": "1-particleTime"
       }
     }
   }
