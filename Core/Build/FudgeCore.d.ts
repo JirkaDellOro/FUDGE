@@ -4304,6 +4304,8 @@ declare namespace FudgeCore {
          */
         private checkBodiesInTrigger;
         private collisionCenterPoint;
+        /** Change properties thorugh a associative array */
+        mutate(_mutator: Mutator): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
     }

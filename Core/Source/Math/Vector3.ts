@@ -357,12 +357,11 @@ namespace FudgeCore {
     }
 
     public mutate(_mutator: Mutator): void {
-      let _x: number = <number>_mutator["x"];
-      let _y: number = <number>_mutator["y"];
-      let _z: number = <number>_mutator["z"];
-      this.x = _x;
-      this.y = _y;
-      this.z = _z;
+      this.set(
+        <number>_mutator["x"] || this.data[0],
+        <number>_mutator["y"] || this.data[1],
+        <number>_mutator["z"] || this.data[2]
+      )
     }
 
     protected reduceMutator(_mutator: Mutator): void {/** */ }

@@ -359,6 +359,11 @@
                 "ƒ.ComponentJointPrismatic": {
                   "attID": 5,
                   "conID": 3,
+                  "axis": {
+                    "x": 0,
+                    "y": 1,
+                    "z": 0
+                  },
                   "internalCollision": true,
                   "springDamping": 0,
                   "springFrequency": 1,

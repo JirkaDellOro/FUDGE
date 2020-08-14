@@ -13,6 +13,8 @@ Contains the core functionality of FUDGE needed to create games. For many games 
 Comtains the classes for easy and even automatic creation of graphical interfaces using the mutator concept (see Wiki). This module is heavily used in the editor and can be used and extended for games.
 ## Network
 Contains components for gaming over networks. This module is not fully evaluated yet.
+## Physics
+Contains the integrated physics engine for simulating physics in fudge games. Used in core components. And learning material to help getting started with physics.
 ## Aid
 Contains collections of classes for convenience, bundling and simplifying common procedures.
 ## Editor

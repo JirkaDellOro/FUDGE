@@ -731,6 +731,22 @@ namespace FudgeCore {
     }
     //#endregion
 
+    /** Change properties thorugh a associative array */
+    public mutate(_mutator: Mutator): void {
+      if (_mutator["friction"])
+        this.friction = <number>_mutator["friction"];
+      if (_mutator["restitution"])
+        this.restitution = <number>_mutator["restituion"];
+      if (_mutator["mass"])
+        this.mass = <number>_mutator["mass"];
+      if (_mutator["linearDamping"])
+        this.linearDamping = <number>_mutator["linearDamping"];
+      if (_mutator["angularDamping"])
+        this.angularDamping = <number>_mutator["angularDamping"];
+      if (_mutator["gravityScale"])
+        this.gravityScale = <number>_mutator["gravityScale"];
+    }
+
     //#region Saving/Loading - Some properties might be missing, e.g. convexMesh (Float32Array)
     public serialize(): Serialization {
       let serialization: Serialization = {
