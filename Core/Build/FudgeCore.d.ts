@@ -3278,7 +3278,6 @@ declare namespace FudgeCore {
         protected attachedRB: ComponentRigidbody;
         protected connectedRB: ComponentRigidbody;
         protected connected: boolean;
-        protected collisionBetweenConnectedBodies: boolean;
         /** Create a joint connection between the two given RigidbodyComponents. */
         constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody);
         /** Check if connection is dirty, so when either rb is changed disconnect and reconnect. Internally used no user interaction needed. */
@@ -3295,15 +3294,15 @@ declare namespace FudgeCore {
         /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
         protected abstract dirtyStatus(): void;
         /** Adding the given Fudge ComponentJoint to the oimoPhysics World */
-        protected addConstraintToWorld(cmpJoint: ComponentJoint): void;
+        protected addConstraintToWorld(_cmpJoint: ComponentJoint): void;
         /** Removing the given Fudge ComponentJoint to the oimoPhysics World */
-        protected removeConstraintFromWorld(cmpJoint: ComponentJoint): void;
+        protected removeConstraintFromWorld(_cmpJoint: ComponentJoint): void;
         /** Setting both bodies to the bodies that belong to the loaded IDs and reconnecting them */
         protected setBodiesFromLoadedIDs(): void;
-        /** Deserialize Base Class Information - Component, since Typescript does not give the ability to call super.super */
-        protected baseDeserialize(_serialization: Serialization): Serializable;
         /** Serialize Base Class Information - Component, since Typescript does not give the ability to call super.super in Child classes of e.g. ComponentJointPrismatic */
         protected baseSerialize(): Serialization;
+        /** Deserialize Base Class Information - Component, since Typescript does not give the ability to call super.super */
+        protected baseDeserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace FudgeCore {
@@ -4104,7 +4103,7 @@ declare namespace FudgeCore {
         /** The pivot of the physics itself. Default the pivot is identical to the transform. It's used like an offset. */
         pivot: Matrix4x4;
         /** Vertices that build a convex mesh (form that is in itself closed). Needs to set in the construction of the rb if none of the standard colliders is used. */
-        convexMesh: Float32Array;
+        private convexMesh;
         /** The type of interaction between the physical world and the transform hierarchy world. DYNAMIC means the body ignores hierarchy and moves by physics. KINEMATIC it's
          * reacting to a [[Node]] that is using physics but can still be controlled by animation or transform. And STATIC means its immovable.
          */
@@ -4156,14 +4155,14 @@ declare namespace FudgeCore {
        * Set the restitution of the rigidbody, which is the factor of bounciness of this rigidbody on surfaces
        */
         set restitution(_restitution: number);
-        /** Collisions with rigidbodies happening to this body, can be used to build a custom onCollisionStay functionality. */
-        collisions: ComponentRigidbody[];
-        /** Triggers that are currently triggering this body */
-        triggers: ComponentRigidbody[];
-        /** Bodies that trigger this "trigger", only happening if this body is a trigger */
-        bodiesInTrigger: ComponentRigidbody[];
         /** ID to reference this specific ComponentRigidbody */
         id: number;
+        /** Collisions with rigidbodies happening to this body, can be used to build a custom onCollisionStay functionality. */
+        private collisions;
+        /** Triggers that are currently triggering this body */
+        private triggers;
+        /** Bodies that trigger this "trigger", only happening if this body is a trigger */
+        private bodiesInTrigger;
         private rigidbody;
         private massData;
         private collider;
@@ -4216,6 +4215,10 @@ declare namespace FudgeCore {
          * Sets the current ROTATION of the [[Node]] in the physical space, in degree.
          */
         setRotation(_value: Vector3): void;
+        /** Get the current SCALING in the physical space. */
+        getScaling(): Vector3;
+        /** Sets the current SCALING of the [[Node]] in the physical space. Also applying this scaling to the node itself. */
+        setScaling(_value: Vector3): void;
         /** Rotating the rigidbody therefore changing it's rotation over time directly in physics. This way physics is changing instead of transform.
          *  But you are able to incremental changing it instead of a direct rotation.  Although it's always prefered to use forces in physics.
         */
@@ -4306,6 +4309,7 @@ declare namespace FudgeCore {
         private collisionCenterPoint;
         /** Change properties thorugh a associative array */
         mutate(_mutator: Mutator): void;
+        reduceMutator(_mutator: Mutator): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
     }
@@ -4554,8 +4558,8 @@ declare namespace FudgeCore {
         get defaultCollisionMask(): number;
         set defaultCollisionMask(_value: number);
         /** The group that this rigidbody belongs to. Default is the DEFAULT Group which means its just a normal Rigidbody not a trigger nor anything special. */
-        get defaultCollisionGroup(): number;
-        set defaultCollisionGroup(_value: number);
+        get defaultCollisionGroup(): PHYSICS_GROUP;
+        set defaultCollisionGroup(_value: PHYSICS_GROUP);
         /** Change the type of joint solver algorithm. Default Iterative == 0, is faster but less stable. Direct == 1, slow but more stable, recommended for complex joint work. Change this setting only at the start of your game. */
         get defaultConstraintSolverType(): number;
         set defaultConstraintSolverType(_value: number);
@@ -4640,6 +4644,8 @@ declare namespace FudgeCore {
         * Removing a OIMO Joint/Constraint to the OIMO World, happens automatically when removeing a FUDGE Joint Component
         */
         removeJoint(_cmpJoint: ComponentJoint): void;
+        /** Returns the actual used world of the OIMO physics engine. No user interaction needed.*/
+        getOimoWorld(): OIMO.World;
         /**
       * Simulates the physical world. _deltaTime is the amount of time between physical steps, default is 60 frames per second ~17ms
       */
@@ -4699,7 +4705,7 @@ declare namespace FudgeCore {
         /**
          * Returns the euler angles in radians as Vector3 from this quaternion.
          */
-        toEulerangles(): Vector3;
+        toEulerAngles(): Vector3;
         /**
          * Return angles in degrees as vector3 from this. quaterion
          */

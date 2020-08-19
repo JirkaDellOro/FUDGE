@@ -217,6 +217,11 @@ namespace FudgePhysics_Communication {
     if (_event.code == f.KEYBOARD_CODE.E) {
       height -= 1 * stepWidth;
     }
+
+    if (_event.code == f.KEYBOARD_CODE.Z) {
+      bodies[2].getComponent(f.ComponentRigidbody).setScaling(new f.Vector3(3, 3, 3));
+    }
+
     let pos: f.Vector3 = moveableTransform.local.translation;
     pos.add(new f.Vector3(horizontal, height, vertical));
     moveableTransform.local.translation = pos;

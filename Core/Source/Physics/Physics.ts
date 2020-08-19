@@ -184,13 +184,19 @@ namespace FudgeCore {
       Physics.world.oimoWorld.removeJoint(_cmpJoint.getOimoJoint());
     }
 
+    /** Returns the actual used world of the OIMO physics engine. No user interaction needed.*/
+    public getOimoWorld(): OIMO.World {
+      return this.oimoWorld;
+    }
+
     /**
   * Simulates the physical world. _deltaTime is the amount of time between physical steps, default is 60 frames per second ~17ms
   */
     public simulate(_deltaTime: number = 1 / 60): void {
       if (this.jointList.length > 0)
         this.connectJoints(); //Connect joints if anything has happened between the last call to any of the two paired rigidbodies
-      Physics.world.oimoWorld.step(_deltaTime * Time.game.getScale());  //Update the simulation by the given deltaTime and the Fudge internal TimeScale
+      if (Time.game.getScale() != 0) //If time is stopped do not simulate to avoid misbehaviour
+        Physics.world.oimoWorld.step(_deltaTime * Time.game.getScale());  //Update the simulation by the given deltaTime and the Fudge internal TimeScale
       if (Physics.world.mainCam != null && Physics.settings.debugDraw == true) { //Get Cam from viewport instead of setting it for physics
         Physics.world.debugDraw.begin();  //Updates info about the current projection, resetting the points/lines/triangles that need to be drawn from debug
         Physics.world.oimoWorld.debugDraw(); //Filling the physics world debug informations into the debug rendering handler

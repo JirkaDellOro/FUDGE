@@ -45,7 +45,6 @@ namespace FudgeCore {
     protected connectedRB: ComponentRigidbody;
 
     protected connected: boolean = false;
-    protected collisionBetweenConnectedBodies: boolean;
 
     /** Create a joint connection between the two given RigidbodyComponents. */
     constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null) {
@@ -75,13 +74,13 @@ namespace FudgeCore {
     protected abstract dirtyStatus(): void
 
     /** Adding the given Fudge ComponentJoint to the oimoPhysics World */
-    protected addConstraintToWorld(cmpJoint: ComponentJoint): void {
-      Physics.world.addJoint(cmpJoint);
+    protected addConstraintToWorld(_cmpJoint: ComponentJoint): void {
+      Physics.world.addJoint(_cmpJoint);
     }
 
     /** Removing the given Fudge ComponentJoint to the oimoPhysics World */
-    protected removeConstraintFromWorld(cmpJoint: ComponentJoint): void {
-      Physics.world.removeJoint(cmpJoint);
+    protected removeConstraintFromWorld(_cmpJoint: ComponentJoint): void {
+      Physics.world.removeJoint(_cmpJoint);
     }
 
 
@@ -91,12 +90,6 @@ namespace FudgeCore {
       this.connectedRigidbody = Physics.world.getBodyByID(this.idConnectedRB);
     }
 
-    /** Deserialize Base Class Information - Component, since Typescript does not give the ability to call super.super */
-    protected baseDeserialize(_serialization: Serialization): Serializable {
-      super.deserialize(_serialization[super.constructor.name]);
-      return this;
-    }
-
     /** Serialize Base Class Information - Component, since Typescript does not give the ability to call super.super in Child classes of e.g. ComponentJointPrismatic */
     protected baseSerialize(): Serialization {
       let serialization: Serialization;
@@ -104,6 +97,11 @@ namespace FudgeCore {
       return serialization;
     }
 
+    /** Deserialize Base Class Information - Component, since Typescript does not give the ability to call super.super */
+    protected baseDeserialize(_serialization: Serialization): Serializable {
+      super.deserialize(_serialization[super.constructor.name]);
+      return this;
+    }
   }
 
 }

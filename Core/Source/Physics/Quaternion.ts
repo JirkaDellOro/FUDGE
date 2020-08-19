@@ -70,7 +70,7 @@ namespace FudgeCore {
     /**
      * Returns the euler angles in radians as Vector3 from this quaternion.
      */
-    public toEulerangles(): Vector3 { //Singularities possible
+    public toEulerAngles(): Vector3 { //Singularities possible
       let angles: Vector3 = new Vector3();
 
       // roll (x-axis rotation)
@@ -97,7 +97,7 @@ namespace FudgeCore {
      * Return angles in degrees as vector3 from this. quaterion
      */
     public toDegrees(): Vector3 {
-      let angles: Vector3 = this.toEulerangles();
+      let angles: Vector3 = this.toEulerAngles();
       angles.x = angles.x * (180 / Math.PI);
       angles.y = angles.y * (180 / Math.PI);
       angles.z = angles.z * (180 / Math.PI);

@@ -189,10 +189,10 @@ namespace FudgeCore {
     }
 
     /** The group that this rigidbody belongs to. Default is the DEFAULT Group which means its just a normal Rigidbody not a trigger nor anything special. */
-    get defaultCollisionGroup(): number {
-      return OIMO.Setting.defaultCollisionGroup;
+    get defaultCollisionGroup(): PHYSICS_GROUP {
+      return <PHYSICS_GROUP>OIMO.Setting.defaultCollisionGroup;
     }
-    set defaultCollisionGroup(_value: number) {
+    set defaultCollisionGroup(_value: PHYSICS_GROUP) {
       OIMO.Setting.defaultCollisionGroup = _value;
     }
 

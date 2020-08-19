@@ -13,7 +13,7 @@ namespace FudgeCore {
     public pivot: Matrix4x4 = Matrix4x4.IDENTITY();
 
     /** Vertices that build a convex mesh (form that is in itself closed). Needs to set in the construction of the rb if none of the standard colliders is used. */
-    public convexMesh: Float32Array;
+    private convexMesh: Float32Array = null;
 
     /** The type of interaction between the physical world and the transform hierarchy world. DYNAMIC means the body ignores hierarchy and moves by physics. KINEMATIC it's
      * reacting to a [[Node]] that is using physics but can still be controlled by animation or transform. And STATIC means its immovable.
@@ -160,15 +160,15 @@ namespace FudgeCore {
         this.rigidbody.getShapeList().setRestitution(this.bodyRestitution);
     }
 
-    /** Collisions with rigidbodies happening to this body, can be used to build a custom onCollisionStay functionality. */
-    public collisions: ComponentRigidbody[] = new Array();
-    /** Triggers that are currently triggering this body */
-    public triggers: ComponentRigidbody[] = new Array();
-    /** Bodies that trigger this "trigger", only happening if this body is a trigger */
-    public bodiesInTrigger: ComponentRigidbody[] = new Array();
-
     /** ID to reference this specific ComponentRigidbody */
     public id: number = 0;
+
+    /** Collisions with rigidbodies happening to this body, can be used to build a custom onCollisionStay functionality. */
+    private collisions: ComponentRigidbody[] = new Array();
+    /** Triggers that are currently triggering this body */
+    private triggers: ComponentRigidbody[] = new Array();
+    /** Bodies that trigger this "trigger", only happening if this body is a trigger */
+    private bodiesInTrigger: ComponentRigidbody[] = new Array();
 
     //Private informations - Mostly OimoPhysics variables that should not be exposed to the Fudge User and manipulated by them
     private rigidbody: OIMO.RigidBody;
@@ -390,6 +390,41 @@ namespace FudgeCore {
       rotInQuat.fromMat3(new OIMO.Mat3().fromEulerXyz(new OIMO.Vec3(_value.x * Math.PI / 180, _value.y * Math.PI / 180, _value.z * Math.PI / 180)));
       rotInQuat.normalize();
       this.rigidbody.setOrientation(rotInQuat);
+    }
+
+    /** Get the current SCALING in the physical space. */
+    public getScaling(): Vector3 {
+      let scaling: Vector3 = this.getContainer().mtxWorld.scaling.copy;
+      scaling.x *= this.pivot.scaling.x;
+      scaling.y *= this.pivot.scaling.y;
+      scaling.z *= this.pivot.scaling.z;
+      return scaling;
+    }
+
+    /** Sets the current SCALING of the [[Node]] in the physical space. Also applying this scaling to the node itself. */
+    public setScaling(_value: Vector3): void {
+      let scaling: Vector3 = _value.copy;
+      scaling.x *= this.pivot.scaling.x;
+      scaling.y *= this.pivot.scaling.y;
+      scaling.z *= this.pivot.scaling.z;
+      this.createCollider(new OIMO.Vec3(scaling.x / 2, scaling.y / 2, scaling.z / 2), this.colliderType); //recreate the collider
+      this.collider = new OIMO.Shape(this.colliderInfo);
+      let oldCollider: OIMO.Shape = this.rigidbody.getShapeList();
+      this.rigidbody.addShape(this.collider); //add new collider, before removing the old, so the rb is never active with 0 colliders
+      this.rigidbody.removeShape(oldCollider); //remove the old collider
+      this.collider.userData = this; //reset the extra information so that this collider knows to which Fudge Component it's connected
+      this.collider.setCollisionGroup(this.collisionGroup);
+      if (this.collisionGroup == PHYSICS_GROUP.TRIGGER) //Trigger not collidering with anythign so their mask is only colliding with trigger
+        this.collider.setCollisionMask(PHYSICS_GROUP.TRIGGER);
+      else
+        this.collider.setCollisionMask(this.colMask);
+      if (this.rigidbody.getShapeList() != null) { //reset the informations about physics handling, has to be done because the shape is new
+        this.rigidbody.getShapeList().setRestitution(this.bodyRestitution);
+        this.rigidbody.getShapeList().setFriction(this.bodyFriction);
+      }
+      let mutator: Mutator = {};
+      mutator["scaling"] = _value;
+      this.getContainer().mtxLocal.mutate(mutator);
     }
 
     /** Rotating the rigidbody therefore changing it's rotation over time directly in physics. This way physics is changing instead of transform. 
@@ -745,6 +780,11 @@ namespace FudgeCore {
         this.angularDamping = <number>_mutator["angularDamping"];
       if (_mutator["gravityScale"])
         this.gravityScale = <number>_mutator["gravityScale"];
+    }
+
+    public reduceMutator(_mutator: Mutator): void {
+      delete _mutator.convexMesh; //Convex Mesh can't be shown in the editor because float32Array is not a viable mutator
+      delete _mutator.colMask;
     }
 
     //#region Saving/Loading - Some properties might be missing, e.g. convexMesh (Float32Array)
