@@ -1,4 +1,4 @@
-///<reference types="../../node_modules/electron/Electron"/>
+///<reference types="../../node_modules/electron"/>
 
 namespace Main {
   //#region Types and Data
@@ -12,7 +12,7 @@ namespace Main {
     DEVTOOLS_OPEN,
     PANEL_ANIMATION_OPEN
   }
-
+ 
   const { app, BrowserWindow, Menu, ipcMain } = require("electron");
 
   let fudge: Electron.BrowserWindow;
@@ -48,7 +48,8 @@ namespace Main {
   function addWindow(_url: string, width: number = defaultWidth, height: number = defaultHeight): Electron.BrowserWindow {
     let window: Electron.BrowserWindow = new BrowserWindow({
       width: width, height: height, webPreferences: {        // preload: path.join(__dirname, "preload.js"),
-        nodeIntegration: true
+        nodeIntegration: true,
+        enableRemoteModule: true
       }
     });
 

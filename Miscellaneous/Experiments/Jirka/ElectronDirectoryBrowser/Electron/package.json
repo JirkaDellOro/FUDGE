@@ -2,7 +2,7 @@
   "name": "electron_directory_browser",
   "version": "0.0.0",
   "description": "Experimental directory browser with electron",
-  "main": "../Build/DirectoryBrowser.js",
+  "main": "../Build/Main.js",
   "scripts": {
     "start": "electron ."
   },

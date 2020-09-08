@@ -1,6 +1,6 @@
-///<reference types="../../node_modules/electron/Electron"/>
+///<reference types="../../node_modules/electron"/>
 var Main;
-///<reference types="../../node_modules/electron/Electron"/>
+///<reference types="../../node_modules/electron"/>
 (function (Main) {
     //#region Types and Data
     let MENU;
@@ -46,7 +46,8 @@ var Main;
     function addWindow(_url, width = defaultWidth, height = defaultHeight) {
         let window = new BrowserWindow({
             width: width, height: height, webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                enableRemoteModule: true
             }
         });
         window.webContents.openDevTools();
