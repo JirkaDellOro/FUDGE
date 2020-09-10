@@ -1,4 +1,3 @@
-///<reference types="../../../../../node_modules/electron/Electron"/>
 var DirectoryBrowser;
 (function (DirectoryBrowser) {
     const { app, BrowserWindow, Menu, ipcMain } = require("electron");

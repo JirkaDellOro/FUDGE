@@ -1,11 +1,9 @@
-///<reference types="../../../../../Core/Build/FudgeCore"/>
-///<reference types="../../../../../node_modules/electron"/>
 var DirectoryBrowser;
 (function (DirectoryBrowser) {
     var ƒ = FudgeCore;
     const ipcRenderer = require("electron").ipcRenderer;
     const remote = require("electron").remote;
-    const { readdirSync, Dirent } = require("fs");
+    const { readdirSync } = require("fs");
     ipcRenderer.on("Open", (_event, _args) => {
         ƒ.Debug.log("openPanelGraph");
         console.log("Remote", remote);
@@ -14,9 +12,10 @@ var DirectoryBrowser;
         let div = document.querySelector("div");
         div.innerHTML = "";
         for (let entry of entries) {
-            ƒ.Debug.log(entry.name);
-            div.innerHTML += entry.name + "<br/>";
+            ƒ.Debug.log(entry);
+            div.innerHTML += (entry.isDirectory() ? "+" : "") + entry.name + "<br/>";
         }
     });
 })(DirectoryBrowser || (DirectoryBrowser = {}));
+export {};
 //# sourceMappingURL=DirectoryBrowser.js.map

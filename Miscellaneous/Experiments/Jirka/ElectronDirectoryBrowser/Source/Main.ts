@@ -1,5 +1,3 @@
-///<reference types="../../../../../node_modules/electron/Electron"/>
-
 namespace DirectoryBrowser {
   const { app, BrowserWindow, Menu, ipcMain } = require("electron");
   let window: Electron.BrowserWindow;
