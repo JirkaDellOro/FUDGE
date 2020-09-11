@@ -1,4 +1,4 @@
-///<reference types="../../../../../node_modules/@types/node/fs"/>
+// /<reference types="../../../../../node_modules/@types/node/fs"/>
 
 namespace DirectoryBrowser {
   const { Dirent, PathLike, renameSync, removeSync, readdirSync, copyFileSync, copySync } = require("fs-extra");
@@ -24,7 +24,10 @@ namespace DirectoryBrowser {
       return this.dirent.name;
     }
     public set name(_name: string) {
-      renameSync(this.path, _name);
+      let newPath: typeof PathLike = join(dirname(this.path), _name);
+      renameSync(this.path, newPath);
+      this.path = newPath;
+      this.dirent.name = _name;
     }
 
     public get isDirectory(): boolean {

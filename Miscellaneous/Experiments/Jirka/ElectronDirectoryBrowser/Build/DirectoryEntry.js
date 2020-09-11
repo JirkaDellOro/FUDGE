@@ -1,4 +1,4 @@
-///<reference types="../../../../../node_modules/@types/node/fs"/>
+// /<reference types="../../../../../node_modules/@types/node/fs"/>
 var DirectoryBrowser;
 (function (DirectoryBrowser) {
     const { Dirent, PathLike, renameSync, removeSync, readdirSync, copyFileSync, copySync } = require("fs-extra");
@@ -18,7 +18,10 @@ var DirectoryBrowser;
             return this.dirent.name;
         }
         set name(_name) {
-            renameSync(this.path, _name);
+            let newPath = join(dirname(this.path), _name);
+            renameSync(this.path, newPath);
+            this.path = newPath;
+            this.dirent.name = _name;
         }
         get isDirectory() {
             return this.dirent.isDirectory() || this.dirent.isRoot;
