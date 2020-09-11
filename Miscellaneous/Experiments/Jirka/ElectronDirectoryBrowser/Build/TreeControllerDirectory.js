@@ -32,23 +32,25 @@ var DirectoryBrowser;
             // disallow drop for sources being ancestor to target
             let move = [];
             for (let entry of _entries)
-                if (!_target.isDescendantOf(entry))
-                    move.push(entry);
-            for (let entry of move)
+                // if (!_target.isDescendantOf(entry))
+                move.push(entry);
+            for (let entry of move) {
                 _target.addEntry(entry);
+                entry.delete();
+            }
             return move;
         }
         copy(_originals) {
             // try to create copies and return them for paste operation
-            let copies = [];
-            for (let original of _originals) {
-                // TODO: copy files to directory
-                // let serialization: ƒ.Serialization = ƒ.Serializer.serialize(original);
-                // let copy: ƒ.Node = <ƒ.Node>ƒ.Serializer.deserialize(serialization);
-                // copies.push(copy);
-                //fs.copyFile(src, dest[, mode], callback)
-            }
-            return copies;
+            // let copies: DirectoryEntry[] = [];
+            // for (let original of _originals) {
+            //   // TODO: copy files to directory
+            //   // let serialization: ƒ.Serialization = ƒ.Serializer.serialize(original);
+            //   // let copy: ƒ.Node = <ƒ.Node>ƒ.Serializer.deserialize(serialization);
+            //   // copies.push(copy);
+            //   // original.copy()
+            // }
+            return _originals;
         }
     }
     DirectoryBrowser.TreeControllerDirectory = TreeControllerDirectory;

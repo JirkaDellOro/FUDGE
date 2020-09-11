@@ -1,7 +1,7 @@
 ///<reference types="../../../../../node_modules/@types/node/fs"/>
 var DirectoryBrowser;
 (function (DirectoryBrowser) {
-    const { Dirent, PathLike, renameSync, rmdirSync, unlinkSync, readdirSync } = require("fs");
+    const { Dirent, PathLike, renameSync, rmdirSync, unlinkSync, readdirSync, copyFileSync } = require("fs");
     const { basename, dirname, join } = require("path");
     // console.log(basename("C:/Hello.txt"));
     class DirectoryEntry {
@@ -46,8 +46,7 @@ var DirectoryBrowser;
             return false;
         }
         addEntry(_entry) {
-            // TODO: add file/directory to this, return succes/fail
-            return true;
+            copyFileSync(_entry.path, join(this.path, _entry.name));
         }
     }
     DirectoryBrowser.DirectoryEntry = DirectoryEntry;

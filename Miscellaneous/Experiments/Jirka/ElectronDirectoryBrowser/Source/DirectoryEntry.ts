@@ -2,7 +2,7 @@
 
 namespace DirectoryBrowser {
   import ƒ = FudgeCore;
-  const { Dirent, PathLike, renameSync, rmdirSync, unlinkSync, readdirSync } = require("fs");
+  const { Dirent, PathLike, renameSync, rmdirSync, unlinkSync, readdirSync, copyFileSync } = require("fs");
   const { basename, dirname, join } = require("path");
   // console.log(basename("C:/Hello.txt"));
 
@@ -57,9 +57,8 @@ namespace DirectoryBrowser {
       return false;
     }
 
-    public addEntry(_entry: DirectoryEntry): boolean {
-      // TODO: add file/directory to this, return succes/fail
-      return true;
+    public addEntry(_entry: DirectoryEntry): void {
+      copyFileSync(_entry.path, join(this.path, _entry.name));
     }
   }
 }
