@@ -6,15 +6,13 @@ var DirectoryBrowser;
             return _entry.name;
         }
         rename(_entry, _new) {
-            // _entry.name = _new;
-            // TODO: change filename!
+            _entry.name = _new;
             return true;
         }
         hasChildren(_entry) {
-            return !_entry.isFile;
+            return _entry.isDirectory;
         }
         getChildren(_entry) {
-            //TODO: fs.readdirSync of this entry
             return _entry.getContent();
         }
         delete(_focussed) {
@@ -29,27 +27,14 @@ var DirectoryBrowser;
             return deleted;
         }
         addChildren(_entries, _target) {
-            // disallow drop for sources being ancestor to target
-            let move = [];
-            for (let entry of _entries)
-                // if (!_target.isDescendantOf(entry))
-                move.push(entry);
-            for (let entry of move) {
+            for (let entry of _entries) {
                 _target.addEntry(entry);
                 entry.delete();
             }
-            return move;
+            return _entries;
         }
         copy(_originals) {
-            // try to create copies and return them for paste operation
-            // let copies: DirectoryEntry[] = [];
-            // for (let original of _originals) {
-            //   // TODO: copy files to directory
-            //   // let serialization: ƒ.Serialization = ƒ.Serializer.serialize(original);
-            //   // let copy: ƒ.Node = <ƒ.Node>ƒ.Serializer.deserialize(serialization);
-            //   // copies.push(copy);
-            //   // original.copy()
-            // }
+            // copies can not be created at this point, but when copying the files. See addChildren
             return _originals;
         }
     }

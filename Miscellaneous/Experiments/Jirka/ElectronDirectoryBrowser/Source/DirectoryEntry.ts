@@ -1,10 +1,8 @@
 ///<reference types="../../../../../node_modules/@types/node/fs"/>
 
 namespace DirectoryBrowser {
-  import ƒ = FudgeCore;
-  const { Dirent, PathLike, renameSync, rmdirSync, unlinkSync, readdirSync, copyFileSync } = require("fs");
+  const { Dirent, PathLike, renameSync, removeSync, readdirSync, copyFileSync, copySync } = require("fs-extra");
   const { basename, dirname, join } = require("path");
-  // console.log(basename("C:/Hello.txt"));
 
   export class DirectoryEntry {
     public path: typeof PathLike;
@@ -18,6 +16,7 @@ namespace DirectoryBrowser {
     public static createRoot(_path: typeof PathLike): DirectoryEntry {
       let dirent: typeof Dirent = new Dirent();
       dirent.name = basename(<string>_path);
+      dirent.isRoot = true;
       return new DirectoryEntry(_path, dirent);
     }
 
@@ -25,21 +24,15 @@ namespace DirectoryBrowser {
       return this.dirent.name;
     }
     public set name(_name: string) {
-      renameSync(this.path, dirname(<string>this.path) + _name);
+      renameSync(this.path, _name);
     }
 
     public get isDirectory(): boolean {
-      return this.dirent.isDirectory();
-    }
-    public get isFile(): boolean {
-      return this.dirent.isFile();
+      return this.dirent.isDirectory() || this.dirent.isRoot;
     }
 
     public delete(): void {
-      if (this.isDirectory)
-        rmdirSync(this.path);
-      else
-        unlinkSync(this.path);
+      removeSync(this.path);
     }
 
     public getContent(): DirectoryEntry[] {
@@ -52,13 +45,8 @@ namespace DirectoryBrowser {
       return content;
     }
 
-    public isDescendantOf(_entry: DirectoryEntry): boolean {
-      // TODO: return true if this is contained within entry (Check path)
-      return false;
-    }
-
     public addEntry(_entry: DirectoryEntry): void {
-      copyFileSync(_entry.path, join(this.path, _entry.name));
+      copySync(_entry.path, join(this.path, _entry.name));
     }
   }
 }

@@ -8,17 +8,15 @@ namespace DirectoryBrowser {
       return _entry.name;
     }
     public rename(_entry: DirectoryEntry, _new: string): boolean {
-      // _entry.name = _new;
-      // TODO: change filename!
+      _entry.name = _new;
       return true;
     }
 
     public hasChildren(_entry: DirectoryEntry): boolean {
-      return !_entry.isFile;
+      return _entry.isDirectory;
     }
 
     public getChildren(_entry: DirectoryEntry): DirectoryEntry[] {
-      //TODO: fs.readdirSync of this entry
       return _entry.getContent();
     }
 
@@ -35,33 +33,15 @@ namespace DirectoryBrowser {
     }
 
     public addChildren(_entries: DirectoryEntry[], _target: DirectoryEntry): DirectoryEntry[] {
-      // disallow drop for sources being ancestor to target
-      let move: DirectoryEntry[] = [];
-      for (let entry of _entries)
-        // if (!_target.isDescendantOf(entry))
-        move.push(entry);
-
-      for (let entry of move) {
+      for (let entry of _entries) {
         _target.addEntry(entry);
         entry.delete();
       }
-
-      return move;
+      return _entries;
     }
 
     public copy(_originals: DirectoryEntry[]): DirectoryEntry[] {
-      // try to create copies and return them for paste operation
-      // let copies: DirectoryEntry[] = [];
-      // for (let original of _originals) {
-      //   // TODO: copy files to directory
-      //   // let serialization: ƒ.Serialization = ƒ.Serializer.serialize(original);
-      //   // let copy: ƒ.Node = <ƒ.Node>ƒ.Serializer.deserialize(serialization);
-      //   // copies.push(copy);
-
-
-      //   // original.copy()
-      // }
-      
+      // copies can not be created at this point, but when copying the files. See addChildren
       return _originals;
     }
   }
