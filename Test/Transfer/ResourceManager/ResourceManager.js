@@ -1,8 +1,10 @@
 var ResourceManager;
 (function (ResourceManager) {
     var ƒ = FudgeCore;
+    // register namespace of custom resources
     ƒ.Serializer.registerNamespace(ResourceManager);
     window.addEventListener("DOMContentLoaded", init);
+    // Test custom resource
     class Resource {
         constructor() {
             this.idResource = null;
@@ -22,11 +24,10 @@ var ResourceManager;
         }
     }
     ResourceManager.Resource = Resource;
-    function init() {
-        // let material: ƒ.Material = new ƒ.Material("Material_1", ƒ.ShaderFlat, new ƒ.CoatColored(new ƒ.Color(1, 1, 1, 1)));
-        // ƒ.ResourceManager.register(material);
-        // let mesh: ƒ.Mesh = new ƒ.MeshPyramid();
-        // ƒ.ResourceManager.register(mesh);
+    function init(_event) {
+        CreateTestScene();
+    }
+    function TestCustomResource() {
         let a = new Resource();
         let c = new Resource();
         let b = new Resource();
@@ -36,17 +37,34 @@ var ResourceManager;
         a.reference = b;
         c.reference = b;
         // b.reference = b; // cyclic references disallowed at this point in time
-        // let node: ƒ.Node = new ƒ.Node("Node_1");
-        // let nodeResource: ƒ.NodeResource = ƒ.ResourceManager.registerNodeAsResource(node);
-        // ƒ.Debug.log(node);
-        // ƒ.Debug.log(nodeResource);
+        let result = testSerialization();
+        console.group("Comparison");
+        Compare.compare(ƒ.ResourceManager.resources, result);
+        console.groupEnd();
+    }
+    function CreateTestScene() {
+        let material = new ƒ.Material("TestMaterial", ƒ.ShaderFlat, new ƒ.CoatColored(new ƒ.Color(1, 1, 1, 1)));
+        ƒ.ResourceManager.register(material);
+        let mesh = new ƒ.MeshPyramid();
+        ƒ.ResourceManager.register(mesh);
+        let node = new ƒ.Node("TestNode");
+        node.addComponent(new ƒ.ComponentMesh(mesh));
+        node.addComponent(new ƒ.ComponentMaterial(material));
+        node.addComponent(new ResourceManager.Script());
+        let nodeResource = ƒ.ResourceManager.registerNodeAsResource(node, true);
+        ƒ.Debug.log(node);
+        ƒ.Debug.log(nodeResource);
         // let instance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(nodeResource);
         // ƒ.Debug.log(instance);
         let result = testSerialization();
         console.group("Comparison");
-        // Compare.compare(node, instance); 
         Compare.compare(ƒ.ResourceManager.resources, result);
         console.groupEnd();
+        let s;
+        s = node.getComponent(ResourceManager.Script);
+        node.removeComponent(s);
+        s = nodeResource.getComponent(ResourceManager.Script);
+        nodeResource.removeComponent(s);
     }
     function testSerialization() {
         console.group("Original");

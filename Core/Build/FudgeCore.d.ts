@@ -1096,12 +1096,12 @@ declare namespace FudgeCore {
         private container;
         private active;
         protected static registerSubclass(_subclass: typeof Component): number;
-        activate(_on: boolean): void;
         get isActive(): boolean;
         /**
          * Is true, when only one instance of the component class can be attached to a node
          */
         get isSingleton(): boolean;
+        activate(_on: boolean): void;
         /**
          * Retrieves the node, this component is currently attached to
          * @returns The container node or null, if the component is not attached to
@@ -1746,10 +1746,12 @@ declare namespace FudgeCore {
         static resources: Resources;
         static serialization: SerializationOfResources;
         /**
-         * Generates an id for the resources and registers it with the list of resources
-         * @param _resource
+         * Registers the resource and generates an id for it by default.
+         * If the resource already has an id, thus having been registered, its deleted from the list and registered anew.
+         * It's possible to pass an id, but should not be done except by the Serializer.
          */
-        static register(_resource: SerializableResource): void;
+        static register(_resource: SerializableResource, _idResource?: string): void;
+        static deregister(_resource: SerializableResource): void;
         /**
          * Generate a user readable and unique id using the type of the resource, the date and random numbers
          * @param _resource
@@ -1762,7 +1764,6 @@ declare namespace FudgeCore {
         static isResource(_object: Serializable): boolean;
         /**
          * Retrieves the resource stored with the given id
-         * @param _idResource
          */
         static get(_idResource: string): SerializableResource;
         /**

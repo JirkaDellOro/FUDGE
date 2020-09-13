@@ -8,11 +8,11 @@ var TestSerializer;
         console.group("Comparison");
         Compare.compare(Scenes.node, result);
         console.groupEnd();
-        let v = new ƒ.Vector3(1, 2, 3);
-        let result2 = testSerialization(v);
-        console.group("Comparison");
-        Compare.compare(v, result2);
-        console.groupEnd();
+        // let v: ƒ.Vector3 = new ƒ.Vector3(1, 2, 3);
+        // let result2: ƒ.Serializable = testSerialization(v);
+        // console.group("Comparison");
+        // Compare.compare(v, result2);
+        // console.groupEnd();
     }
     function testSerialization(_object) {
         console.group("Original");

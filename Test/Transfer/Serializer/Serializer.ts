@@ -11,11 +11,11 @@ namespace TestSerializer {
     Compare.compare(Scenes.node, result);
     console.groupEnd();
 
-    let v: ƒ.Vector3 = new ƒ.Vector3(1, 2, 3);
-    let result2: ƒ.Serializable = testSerialization(v);
-    console.group("Comparison");
-    Compare.compare(v, result2);
-    console.groupEnd();
+    // let v: ƒ.Vector3 = new ƒ.Vector3(1, 2, 3);
+    // let result2: ƒ.Serializable = testSerialization(v);
+    // console.group("Comparison");
+    // Compare.compare(v, result2);
+    // console.groupEnd();
   }
 
   function testSerialization(_object: ƒ.Serializable): ƒ.Serializable {
