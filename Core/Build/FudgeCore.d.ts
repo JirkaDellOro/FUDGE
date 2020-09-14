@@ -989,11 +989,13 @@ declare namespace FudgeCore {
      * Extension of AudioBuffer with a load method that creates a buffer in the [[AudioManager]].default to be used with [[ComponentAudio]]
      * @authors Thomas Dorner, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
-    class Audio implements SerializableResource {
+    class Audio extends EventTarget implements SerializableResource {
         idResource: string;
         buffer: AudioBuffer;
         private url;
+        private ready;
         constructor(_url?: string);
+        get isReady(): boolean;
         /**
          * Asynchronously loads the audio (mp3) from the given url
          */
@@ -1298,6 +1300,7 @@ declare namespace FudgeCore {
         connect(_on: boolean): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
+        private hndAudioReady;
         private install;
         private createSource;
         private updateConnection;
@@ -1964,7 +1967,8 @@ declare namespace FudgeCore {
         /** broadcast to a [[Node]] and all its descendants in the graph just before its being removed from its parent */
         CHILD_REMOVE = "childRemoveFromAudioGraph",
         /** broadcast to a [[Node]] and all its descendants in the graph to update the panners in AudioComponents */
-        UPDATE = "updateAudioGraph"
+        UPDATE = "updateAudioGraph",
+        READY = "ready"
     }
 }
 declare namespace FudgeCore {

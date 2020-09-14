@@ -10,9 +10,9 @@ var AudioGraph;
         window.removeEventListener("click", start);
         window.addEventListener("keydown", handleKeydown);
         let audioMario = new ƒ.Audio("Sound/mario_piano.mp3");
-        await audioMario.load("Sound/mario_piano.mp3");
         let audioTrancy = new ƒ.Audio("Sound/trancyvania.mp3");
         let audioHypno = new ƒ.Audio("Sound/hypnotic.mp3");
+        // await audioHypno.asyncLoad("Sound/hypnotic.mp3");
         for (let i = 0; i < 10; i++)
             nodes.push(new ƒ.Node("Node" + i));
         let cmpAudio = new ƒ.ComponentAudio(audioHypno, true, true);
@@ -47,8 +47,10 @@ var AudioGraph;
             nodeControlled = nodes[_event.keyCode - 48];
         switch (_event.code) {
             case ƒ.KEYBOARD_CODE.A:
-                if (cmpAudio)
+                if (cmpAudio) {
                     cmpAudio.activate(!cmpAudio.isActive);
+                    // cmpAudio.play(cmpAudio.isActive);
+                }
                 break;
             case ƒ.KEYBOARD_CODE.P:
                 let parent = parseInt(prompt("Enter the number of the node that will become the parent", "0"));

@@ -10,9 +10,9 @@ namespace AudioGraph {
     window.removeEventListener("click", start);
     window.addEventListener("keydown", handleKeydown);
     let audioMario: ƒ.Audio = new ƒ.Audio("Sound/mario_piano.mp3");
-    await audioMario.load("Sound/mario_piano.mp3");
     let audioTrancy: ƒ.Audio = new ƒ.Audio("Sound/trancyvania.mp3");
     let audioHypno: ƒ.Audio = new ƒ.Audio("Sound/hypnotic.mp3");
+    // await audioHypno.asyncLoad("Sound/hypnotic.mp3");
 
 
     for (let i: number = 0; i < 10; i++)
@@ -21,11 +21,11 @@ namespace AudioGraph {
     let cmpAudio: ƒ.ComponentAudio = new ƒ.ComponentAudio(audioHypno, true, true);
     cmpAudio.pivot.translateX(2);
     nodes[0].addComponent(cmpAudio);
-
+    
     cmpAudio = new ƒ.ComponentAudio(audioTrancy, true, true);
     cmpAudio.pivot.translateX(-2);
     nodes[1].addComponent(cmpAudio);
-
+    
     cmpAudio = new ƒ.ComponentAudio(audioMario, true, true);
     cmpAudio.pivot.translateX(0);
     nodes[2].addComponent(cmpAudio);
@@ -57,8 +57,10 @@ namespace AudioGraph {
       nodeControlled = nodes[_event.keyCode - 48];
     switch (_event.code) {
       case ƒ.KEYBOARD_CODE.A:
-        if (cmpAudio)
+        if (cmpAudio){
           cmpAudio.activate(!cmpAudio.isActive);
+          // cmpAudio.play(cmpAudio.isActive);
+        }
         break;
       case ƒ.KEYBOARD_CODE.P:
         let parent: number = parseInt(prompt("Enter the number of the node that will become the parent", "0"));

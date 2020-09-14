@@ -77,11 +77,6 @@ namespace FudgeCore {
       this.createSource(_audio, this.source.loop);
     }
 
-    // public getAudio(): Audio {
-    //   // return <Audio>(Reflect.get(this.source.buffer, "audio").value);
-    //   return this.audio;
-    // }
-
     /**
      * Set the property of the panner to the given value. Use to manipulate range and rolloff etc.
      */
@@ -112,13 +107,18 @@ namespace FudgeCore {
      */
     public play(_on: boolean): void {
       if (_on) {
-        this.createSource(this.audio, this.source.loop);
-        this.source.start(0, 0);
+        if (this.audio.isReady) {
+          this.createSource(this.audio, this.source.loop);
+          this.source.start(0, 0);
+        }
+        else
+          this.audio.addEventListener(EVENT_AUDIO.READY, this.hndAudioReady);
       }
       else
         this.source.stop();
       this.playing = _on;
     }
+
     /**
      * Inserts AudioNodes between the panner and the local gain of this [[ComponentAudio]]
      * _input and _output may be the same AudioNode, if there is only one to insert,
@@ -174,6 +174,13 @@ namespace FudgeCore {
       return this;
     }
     //#endregion
+
+
+    private hndAudioReady: EventListener = (_event: Event) => {
+      console.log("Ready called");
+      if (this.playing)
+        this.play(true);
+    }
 
     private install(_audioManager: AudioManager = AudioManager.default): void {
       let active: boolean = this.isActive;

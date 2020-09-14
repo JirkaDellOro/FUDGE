@@ -3,15 +3,21 @@ namespace FudgeCore {
    * Extension of AudioBuffer with a load method that creates a buffer in the [[AudioManager]].default to be used with [[ComponentAudio]]
    * @authors Thomas Dorner, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
    */
-  export class Audio implements SerializableResource {
+  export class Audio extends EventTarget implements SerializableResource {
     public idResource: string = undefined;
     public buffer: AudioBuffer = undefined;
     private url: string = undefined;
+    private ready: boolean = false;
 
     constructor(_url?: string) {
+      super();
       if (_url)
         this.load(_url);
       ResourceManager.register(this);
+    }
+
+    get isReady(): boolean {
+      return this.ready;
     }
 
     /**
@@ -19,16 +25,15 @@ namespace FudgeCore {
      */
     public async load(_url: string): Promise<void> {
       this.url = _url;
+      this.ready = false;
       const response: Response = await window.fetch(this.url);
       const arrayBuffer: ArrayBuffer = await response.arrayBuffer();
       let buffer: AudioBuffer = await AudioManager.default.decodeAudioData(arrayBuffer);
       this.buffer = buffer;
+      this.ready = true;
+      this.dispatchEvent(new Event(EVENT_AUDIO.READY));
     }
-
-    // public async asyncLoad(_url: string): Promise<void> {
-    //   await this.load(_url);
-    // }
-
+    
     //#region Transfer
     public serialize(): Serialization {
       return { url: this.url };
