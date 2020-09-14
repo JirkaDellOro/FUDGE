@@ -1,77 +1,92 @@
 namespace Fudge {
   import ƒ = FudgeCore;
   import ƒui = FudgeUserInterface;
-  /**
-   * View displaying all information of any selected entity and offering simple controls for manipulation
-   */
+
   enum Menu {
     COMPONENTMENU = "Add Components"
   }
 
+  /**
+   * View all components attached to a node
+   * @author Jirka Dell'Oro-Friedl, HFU, 2020
+   */
   export class ViewComponents extends View {
-    private data: ƒ.Node | ƒ.Mutable;
-    // TODO: adept view to selected object, update when selection changes etc.
-    constructor(_parent: Panel) {
-      super(_parent);
-      this.parentPanel.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setNode);
+    private node: ƒ.Node;
+
+    constructor(_container: GoldenLayout.Container, _state: Object) {
+      super(_container, _state);
       this.fillContent();
+
+      this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
+      this.dom.addEventListener(ƒui.EVENT_TREE.RENAME, this.hndEvent);
+      this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.CONTEXTMENU, this.openContextMenu);
     }
 
-    deconstruct(): void {
+    protected cleanup(): void {
       //TODO: Deconstruct;
     }
 
-    fillContent(): void {
-      if (this.data) {
-        if (this.data instanceof ƒ.Node) {
-          // let txtNodeName: HTMLInputElement = document.createElement("input");
-          // txtNodeName.addEventListener("input", this.changeNodeName);
-          // cntHeader.append(txtNodeName);
-          let cntHeader: HTMLElement = document.createElement("span");
-          cntHeader.textContent = this.data.name;
-          this.content.appendChild(cntHeader);
+    //#region  ContextMenu
+    protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
+      const menu: Electron.Menu = new remote.Menu();
+      let item: Electron.MenuItem;
 
-          let nodeComponents: ƒ.Component[] = this.data.getAllComponents();
+      item = new remote.MenuItem({ label: "Add Component", submenu: [] });
+      for (let subItem of ContextMenu.getComponents(_callback))
+        item.submenu.append(subItem);
+      menu.append(item);
+
+      ContextMenu.appendCopyPaste(menu);
+      return menu;
+    }
+
+    protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
+      ƒ.Debug.info(`MenuSelect: Item-id=${MENU[_item.id]}`);
+
+      switch (Number(_item.id)) {
+        case MENU.ADD_COMPONENT:
+          let iSubclass: number = _item["iSubclass"];
+          let component: typeof ƒ.Component = ƒ.Component.subclasses[iSubclass];
+          //@ts-ignore
+          let cmpNew: ƒ.Component = new component();
+          ƒ.Debug.info(cmpNew.type, cmpNew);
+
+          this.node.addComponent(cmpNew);
+          this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT_TREE.SELECT, { bubbles: true, detail: { data: this.node } }));
+          break;
+      }
+    }
+    //#endregion
+
+    private fillContent(): void {
+      if (this.node) {
+        if (this.node instanceof ƒ.Node) {
+          this.setTitle(this.node.name);
+
+          let nodeComponents: ƒ.Component[] = this.node.getAllComponents();
           for (let nodeComponent of nodeComponents) {
             let fieldset: ƒui.FoldableFieldSet = ƒui.Generator.createFieldSetFromMutable(nodeComponent);
-            let uiComponent: ComponentController = new ComponentController(nodeComponent, fieldset);
-            this.content.append(uiComponent.domElement);
+            let uiComponent: ControllerComponent = new ControllerComponent(nodeComponent, fieldset);
+            this.dom.append(uiComponent.domElement);
           }
         }
       }
       else {
         let cntEmpty: HTMLDivElement = document.createElement("div");
-        this.content.append(cntEmpty);
+        this.dom.append(cntEmpty);
       }
     }
 
-    /**
-     * Changes the name of the displayed node
-     */
-    private changeNodeName = (_event: Event) => {
-      if (this.data instanceof ƒ.Node) {
-        let target: HTMLInputElement = <HTMLInputElement>_event.target;
-        this.data.name = target.value;
-      }
-    }
 
-    /**
-     * Change displayed node
-     */
-    private setNode = (_event: CustomEvent): void => {
-      this.data = _event.detail;
-      while (this.content.firstChild != null) {
-        this.content.removeChild(this.content.lastChild);
+    private hndEvent = (_event: CustomEvent): void => {
+      if (_event.type != ƒui.EVENT_TREE.RENAME)
+        this.node = _event.detail;
+
+      while (this.dom.firstChild != null) {
+        this.dom.removeChild(this.dom.lastChild);
       }
       this.fillContent();
-    }
-
-    /**
-     * Add Component to displayed node
-     */
-    private addComponent = (_event: CustomEvent): void => {
-      switch (_event.detail) {
-      }
     }
   }
 }

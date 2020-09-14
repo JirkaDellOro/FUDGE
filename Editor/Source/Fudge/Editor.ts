@@ -1,109 +1,69 @@
 namespace Fudge {
-
-  import ƒ = FudgeCore;
-  import ƒui = FudgeUserInterface;
-
   export enum EVENT_EDITOR {
-    REMOVE = "nodeRemoveEvent",
-    HIDE = "nodeHideEvent",
-    ACTIVEVIEWPORT = "activeViewport"
+    REMOVE = "removeNode",
+    HIDE = "hideNode",
+    ACTIVATE_VIEWPORT = "activateViewport",
+    SET_GRAPH = "setGraph",
+    FOCUS_NODE = "focusNode"
   }
+  /**
+   * The uppermost container for all panels 
+   * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
+   */
+  export class Editor {
+    private static idCounter: number = 0;
+    private static goldenLayout: GoldenLayout;
+    private static panels: Panel[] = [];
 
-  export class UIAnimationList {
-    listRoot: HTMLElement;
-    private mutator: ƒ.Mutator;
-    private index: ƒ.Mutator;
+    public static add(_panel: typeof Panel, _title: string, _state?: Object): void {
+      let config: GoldenLayout.ItemConfig = {
+        type: "stack",
+        content: [{
+          type: "component", componentName: _panel.name, componentState: _state,
+          title: _title, id: this.generateID(_panel.name)
+        }]
+      };
 
-    constructor(_mutator: ƒ.Mutator, _listContainer: HTMLElement) {
-      this.mutator = _mutator;
-      this.listRoot = document.createElement("ul");
-      this.index = {};
-      this.listRoot = this.buildFromMutator(this.mutator);
-      _listContainer.append(this.listRoot);
-      _listContainer.addEventListener(ƒui.EVENT_USERINTERFACE.COLLAPSE, this.toggleCollapse);
-      _listContainer.addEventListener(ƒui.EVENT_USERINTERFACE.UPDATE, this.collectMutator);
-    }
-    public getMutator(): ƒ.Mutator {
-      return this.mutator;
-    }
-
-    public setMutator(_mutator: ƒ.Mutator): void {
-      this.mutator = _mutator;
-      let hule: HTMLUListElement = this.buildFromMutator(this.mutator);
-      this.listRoot.replaceWith(hule);
-      this.listRoot = hule;
+      let inner: GoldenLayout.ContentItem = this.goldenLayout.root.contentItems[0];
+      let item: GoldenLayout.ContentItem = Editor.goldenLayout.createContentItem(config);
+      inner.addChild(item);
+      this.panels.push(item.getComponentsByName(_panel.name)[0]);
     }
 
-    public collectMutator = (): ƒ.Mutator => {
-      let children: HTMLCollection = this.listRoot.children;
-      // for (let child of children) {
-      //   this.mutator[(<ƒui.CollapsableAnimationList>child).name] = (<ƒui.CollapsableAnimationList>child).mutator;
-      // }
-      console.log(this.mutator);
-      return this.mutator;
+    public static initialize(): void {
+      let config: GoldenLayout.Config = {
+        settings: { showPopoutIcon: false },
+        content: [{
+          id: "root", type: "row", isClosable: false,
+          content: [
+            { type: "component", componentName: "Welcome", title: "Welcome", componentState: {} }]
+        }]
+      };
+      this.goldenLayout = new GoldenLayout(config);   //This might be a problem because it can't use a specific place to put it.
+
+      this.goldenLayout.registerComponent("Welcome", welcome);
+      this.goldenLayout.registerComponent(PANEL.GRAPH, PanelGraph);
+      this.goldenLayout.init();
     }
 
-    public getElementIndex(): ƒ.Mutator {
-      return this.index;
-    }
-    public updateMutator(_update: ƒ.Mutator): void {
-      this.mutator = this.updateMutatorEntry(_update, this.mutator);
-      this.updateEntry(this.mutator, this.index);
-    }
-
-    private updateEntry(_update: ƒ.Mutator, _index: ƒ.Mutator): void {
-      for (let key in _update) {
-        if (typeof _update[key] == "object") {
-          this.updateEntry(<ƒ.Mutator>_update[key], <ƒ.Mutator>_index[key]);
-        }
-        else if (typeof _update[key] == "string" || "number") {
-          let element: HTMLInputElement = <HTMLInputElement>_index[key];
-          element.value = <string>_update[key];
-        }
+    /** Send custom copies of the given event to the views */
+    public static broadcastEvent(_event: Event): void {
+      for (let panel of Editor.panels) {
+        let event: CustomEvent = new CustomEvent(_event.type, { bubbles: false, cancelable: true, detail: (<CustomEvent>_event).detail });
+        panel.dom.dispatchEvent(event);
       }
     }
 
-    private updateMutatorEntry(_update: ƒ.Mutator, _toUpdate: ƒ.Mutator): ƒ.Mutator {
-      let updatedMutator: ƒ.Mutator = _toUpdate;
-      for (let key in _update) {
-        if (typeof updatedMutator[key] == "object") {
-          if (typeof updatedMutator[key] == "object") {
-            updatedMutator[key] = this.updateMutatorEntry(<ƒ.Mutator>_update[key], <ƒ.Mutator>updatedMutator[key]);
-          }
-        }
-        else if (typeof _update[key] == "string" || "number") {
-          if (typeof updatedMutator[key] == "string" || "number") {
-            updatedMutator[key] = _update[key];
-          }
-        }
-      }
-      return updatedMutator;
-    }
-    private buildFromMutator(_mutator: ƒ.Mutator): HTMLUListElement {
-      let listRoot: HTMLUListElement = document.createElement("ul");
-      // for (let key in _mutator) {
-      //   let listElement: ƒui.CollapsableAnimationList = new ƒui.CollapsableAnimationList((<ƒ.Mutator>this.mutator[key]), key);
-      //   listRoot.append(listElement);
-      //   this.index[key] = listElement.getElementIndex();
-      //   console.log(this.index);
-      // }
-      return listRoot;
+    private static generateID(_name: string): string {
+      return _name + Editor.idCounter++;
     }
 
-    private toggleCollapse = (_event: Event): void => {
-      _event.preventDefault();
-      // console.log(_event.target instanceof ƒui.CollapsableAnimationList);
-      // if (_event.target instanceof ƒui.CollapsableAnimationList) {
-      //   let target: ƒui.CollapsableAnimationList = <ƒui.CollapsableAnimationList>_event.target;
-      //   target.collapse(target);
-      // }
+    public cleanup(): void {
+      //TODO: desconstruct
     }
   }
 
-  export class ComponentController extends ƒui.Controller {
-    public constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement) {
-      super(_mutable, _domElement);
-      this.domElement.addEventListener("input", this.mutateOnInput);
-    }
+  function welcome(container: GoldenLayout.Container, state: Object): void {
+    container.getElement().html("<div>Welcome</div>");
   }
 }

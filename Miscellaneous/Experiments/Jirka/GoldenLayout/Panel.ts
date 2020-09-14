@@ -2,33 +2,12 @@ namespace GoldenLayoutTest {
   export class Panel extends GoldenLayout {
     public static config: GoldenLayout.ItemConfig = {
       type: "row",
-      content: [{
-        type: "stack",
-        content: [{
-          type: "component",
-          componentName: "ViewA",
-          componentState: { text: "1" },
-          title: "View1"
-        }, {
-          type: "component",
-          componentName: "ViewB",
-          componentState: { text: "2" },
-          title: "View2"
-        }, {
-          type: "component",
-          componentName: "ViewC",
-          componentState: { text: "3" },
-          title: "View3"
-        }]
-      }]
+      content: []
     };
 
     constructor(_container: GoldenLayout.Container, _state: { text: string }) {
-      // let gl: GoldenLayout = new GoldenLayout(Panel.config, div);
       let div: HTMLDivElement = document.createElement("div");
       super(Panel.config, div);
-      // let div: HTMLDivElement = document.createElement("div");
-      // console.log(div, this.container);
       console.log(_container);
       div.style.height = "100%";
       div.style.width = "100%";
@@ -38,9 +17,24 @@ namespace GoldenLayoutTest {
       this.registerComponent("ViewB", ViewB);
       this.registerComponent("ViewC", ViewC);
 
-      this.on("stateChanged", () => this.updateSize());
+      this.on("stateChanged", this.hndStateChange.bind(this));
       this.init();
+
+      document.addEventListener("keydown", this.hndKeyDown.bind(this));
+      this.root.addChild({ type: "row", content: [] });
+      this.root.contentItems[0].addChild({
+        type: "column", content: [{
+          type: "component", componentName: "ViewA", componentState: { text: "1" }, title: "View1"
+        }]
+      });
+      this.root.contentItems[0].addChild({
+        type: "column", content: [
+          { type: "component", componentName: "ViewB", componentState: { text: "2" }, title: "View2" },
+          { type: "component", componentName: "ViewC", componentState: { text: "3" }, title: "View3" }
+        ]
+      });
     }
+
 
     public static add(): void {
       let config: GoldenLayout.ItemConfig = {
@@ -53,6 +47,15 @@ namespace GoldenLayoutTest {
         }]
       };
       glDoc.root.contentItems[0].addChild(config);
+    }
+
+    private hndStateChange(): void {
+      // console.log(this);
+      this.updateSize();
+    }
+
+    private hndKeyDown(): void {
+      console.log(this.toConfig());
     }
   }
 

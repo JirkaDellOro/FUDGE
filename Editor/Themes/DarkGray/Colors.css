@@ -11,5 +11,6 @@
   --color-text: var(--color-bright);
   --color-dragdrop-outline: var(--color-brightest);
   --color-highlight: var(--color-brightest);
-  --color-signal: var(--color-darkest)
+  --color-signal: var(--color-darkest);
+  --color-focus: var(--color-dark);
 }

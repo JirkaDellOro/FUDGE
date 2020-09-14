@@ -4,28 +4,27 @@ namespace Fudge {
   import ƒaid = FudgeAid;
 
   /**
-   * View displaying a Node and the hierarchical relation to its parents and children.  
-   * Consists of a viewport and a tree-control. 
+   * View the rendering of a graph in a viewport with an independent camera
+   * @author Jirka Dell'Oro-Friedl, HFU, 2020
    */
   export class ViewRender extends View {
     viewport: ƒ.Viewport;
     canvas: HTMLCanvasElement;
     graph: ƒ.Node;
 
-    constructor(_parent: PanelNode) {
-      super(_parent);
-      if (_parent instanceof PanelNode && _parent.getNode() != null)
-        this.graph = _parent.getNode();
-      else {
-        this.graph = new ƒ.Node("Scene");
-      }
-      this.fillContent();
+    constructor(_container: GoldenLayout.Container, _state: Object) {
+      super(_container, _state);
+      this.graph = <ƒ.Node><unknown>_state["node"];
+      this.createUserInterface();
+      this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
     }
-    deconstruct(): void {
+
+    cleanup(): void {
       ƒ.Loop.removeEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
     }
 
-    fillContent(): void {
+    createUserInterface(): void {
       let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
       cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
       cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
@@ -39,42 +38,37 @@ namespace Fudge {
       this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
       this.viewport.draw();
 
-      this.content.append(this.canvas);
+      this.dom.append(this.canvas);
 
       ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
       ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
 
       //Focus cameracontrols on new viewport
-      let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVEVIEWPORT, { detail: this.viewport.camera, bubbles: false });
-      this.parentPanel.dispatchEvent(event);
+      // let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });
 
       this.canvas.addEventListener("click", this.activeViewport);
     }
 
-    /**
-     * Set the root node for display in this view
-     * @param _node 
-     */
-    public setRoot(_node: ƒ.Node): void {
+    public setGraph(_node: ƒ.Node): void {
       if (!_node)
         return;
       this.graph = _node;
       this.viewport.setGraph(this.graph);
-
     }
-    /** 
-     * Update Viewport every frame
-     */
+
+    private hndEvent = (_event: CustomEvent): void => {
+      if (_event.type == EVENT_EDITOR.SET_GRAPH)
+        this.setGraph(_event.detail);
+    }
+
     private animate = (_e: Event) => {
       this.viewport.setGraph(this.graph);
       if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
         this.viewport.draw();
     }
-    
-    private activeViewport = (_event: MouseEvent): void => {
-      let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVEVIEWPORT, { detail: this.viewport.camera, bubbles: false });
-      this.parentPanel.dispatchEvent(event);
 
+    private activeViewport = (_event: MouseEvent): void => {
+      let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });
       _event.cancelBubble = true;
     }
   }

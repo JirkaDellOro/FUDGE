@@ -20,15 +20,18 @@ namespace Fudge {
       this.scale = _scale;
       this.position = _pos;
     }
-    moveTo(_time: number, _value: number = this.position.y): void {
+
+    public moveTo(_time: number, _value: number = this.position.y): void {
       this.position.x = _time;
       this.position.y = _value;
     }
-    translate(): void {
+
+    public translate(): void {
       this.crc2.translate(this.position.x, this.position.y);
       this.crc2.scale(this.scale.x, this.scale.y);
     }
-    redraw(_time: number): void {
+
+    public redraw(_time: number): void {
       this.clear();
       this.translate();
       this.drawKeys();
@@ -36,12 +39,14 @@ namespace Fudge {
       this.drawEventsAndLabels();
       this.drawCursor(_time);
     }
-    clear(): void {
+
+    public clear(): void {
       this.crc2.resetTransform();
       let maxDistance: number = 10000;
       this.crc2.clearRect(0, 0, maxDistance, this.crc2.canvas.height);
     }
-    drawTimeline(): void {
+
+    public drawTimeline(): void {
       this.crc2.resetTransform();
       let timelineHeight: number = 50;
       let maxDistance: number = 10000;
@@ -79,7 +84,7 @@ namespace Fudge {
       this.crc2.stroke(timeline);
     }
 
-    drawCursor(_time: number): void {
+    public drawCursor(_time: number): void {
       _time *= this.scale.x;
       let cursor: Path2D = new Path2D();
       cursor.rect(_time - 3, 0, 6, 50);
@@ -91,7 +96,7 @@ namespace Fudge {
       this.crc2.fill(cursor);
     }
 
-    drawKeys(): void {
+    public drawKeys(): void {
       let inputMutator: FudgeCore.Mutator = this.view.controller.getElementIndex();
 
       //TODO: stop recreating the sequence elements all the time
@@ -100,7 +105,7 @@ namespace Fudge {
       this.traverseStructures(this.view.animation.animationStructure, inputMutator);
     }
 
-    getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent {
+    public getObjectAtPoint(_x: number, _y: number): ViewAnimationLabel | ViewAnimationKey | ViewAnimationEvent {
       for (let l of this.labels) {
         if (this.crc2.isPointInPath(l.path2D, _x, _y)) {
           return l;
@@ -120,7 +125,6 @@ namespace Fudge {
       }
       return null;
     }
-
 
     protected traverseStructures(_animation: FudgeCore.AnimationStructure, _inputs: FudgeCore.Mutator): void {
       for (let i in _animation) {

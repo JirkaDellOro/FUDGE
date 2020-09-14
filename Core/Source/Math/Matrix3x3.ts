@@ -383,7 +383,7 @@ namespace FudgeCore {
     public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {
       let types: MutatorAttributeTypes = {};
       if (_mutator.translation) types.translation = "Vector2";
-      if (_mutator.rotation) types.rotation = "number";
+      if (_mutator.rotation != undefined  ) types.rotation = "number";
       if (_mutator.scaling) types.scaling = "Vector2";
       return types;
     }

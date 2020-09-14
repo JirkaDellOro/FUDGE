@@ -7,51 +7,51 @@ namespace Fudge {
 
   import ƒ = FudgeCore;
   import ƒAid = FudgeAid;
+
   export const ipcRenderer: Electron.IpcRenderer = require("electron").ipcRenderer;
   export const remote: Electron.Remote = require("electron").remote;
   const fs: ƒ.General = require("fs");
 
   // TODO: At this point of time, the project is just a single node. A project is much more complex...
   let node: ƒ.Node = null;
-  // TODO: At this point of time, there is just a single panel. Support multiple panels
-  let panel: Panel = null;
 
 
   window.addEventListener("load", initWindow);
 
   function initWindow(): void {
     ƒ.Debug.log("Fudge started");
-    PanelManager.instance.init();
-    console.log("Panel Manager initialized");
+    Editor.initialize();
+    ƒ.Debug.log("Editor initialized");
     // TODO: create a new Panel containing a ViewData by default. More Views can be added by the user or by configuration
 
     ipcRenderer.on("save", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
       ƒ.Debug.log("Save");
-      panel = PanelManager.instance.getActivePanel();
-      if (panel instanceof PanelNode) {
-        node = panel.getNode();
-      }
-      save(node);
+      // panel = PanelManager.instance.getActivePanel();
+      // if (panel instanceof PanelGraph) {
+      //   node = panel.getNode();
+      // }
+      // save(node);
     });
+
     ipcRenderer.on("open", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
       ƒ.Debug.log("Open");
       node = open();
-      panel = PanelManager.instance.getActivePanel();
-      if (panel instanceof PanelNode) {
-        panel.setNode(node);
-      }
+      Editor.broadcastEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, { detail: node }));
     });
-    ipcRenderer.on("openViewNode", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-      ƒ.Debug.log("OpenViewNode");
+
+    ipcRenderer.on("openPanelGraph", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
+      ƒ.Debug.log("openPanelGraph");
       openViewNode();
     });
-    ipcRenderer.on("openAnimationPanel", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-      ƒ.Debug.log("Open Animation Panel");
+
+    ipcRenderer.on("openPanelAnimation", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
+      ƒ.Debug.log("openPanelAnimation");
       // openAnimationPanel();
     });
+
     // HACK!
     ipcRenderer.on("updateNode", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-      ƒ.Debug.log("UpdateViewNode");
+      ƒ.Debug.log("updateNode");
     });
   }
 
@@ -60,8 +60,7 @@ namespace Fudge {
     let node2: ƒ.Node = new ƒAid.NodeCoordinateSystem("WorldCooSys", ƒ.Matrix4x4.IDENTITY());
     node.addChild(node2);
     node2.cmpTransform.local.translateZ(2);
-    let nodePanel: PanelNode = new PanelNode("Node Panel", new NodePanelTemplate, node);
-    PanelManager.instance.addPanel(nodePanel);
+    Editor.add(PanelGraph, "Graph", Object({ node: node })); //Object.create(null,  {node: { writable: true, value: node }}));
   }
 
   // function openAnimationPanel(): void {
@@ -83,16 +82,16 @@ namespace Fudge {
     let filenames: string[] = remote.dialog.showOpenDialogSync(null, { title: "Load Graph", buttonLabel: "Load Graph", properties: ["openFile"] });
 
     let content: string = fs.readFileSync(filenames[0], { encoding: "utf-8" });
-    console.groupCollapsed("File content");
-    ƒ.Debug.log(content);
-    console.groupEnd();
+    ƒ.Debug.groupCollapsed("File content");
+    ƒ.Debug.info(content);
+    ƒ.Debug.groupEnd();
 
     let serialization: ƒ.Serialization = ƒ.Serializer.parse(content);
     let node: ƒ.Node = <ƒ.Node>ƒ.Serializer.deserialize(serialization);
 
-    console.groupCollapsed("Deserialized");
-    console.log(node);
-    console.groupEnd();
+    ƒ.Debug.groupCollapsed("Deserialized");
+    ƒ.Debug.info(node);
+    ƒ.Debug.groupEnd();
 
     return node;
   }

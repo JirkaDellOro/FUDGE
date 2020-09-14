@@ -113,7 +113,7 @@ namespace FudgeUserInterface {
 
     // Callback / Eventhandler in Tree
     private hndSelect(_event: Event): void {
-      _event.stopPropagation();
+      // _event.stopPropagation();
       let detail: { data: Object, interval: boolean, additive: boolean } = (<CustomEvent>_event).detail;
       let index: number = this.controller.selection.indexOf(<T>detail.data);
 

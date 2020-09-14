@@ -53,31 +53,6 @@
   background-color: var(--color-background-main);
 }
 
-/* popin/popout (must be supported differently, if at all */
-
-/* 
-.lm_popin {
-  cursor: pointer
-}
-
-.lm_popin .lm_bg {
-  background: #ffffff;
-  opacity: .3
-}
-
-.lm_popin .lm_icon {
-  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAJCAYAAADpeqZqAAAAWklEQVR4nJWOyw3AIAxDHcQC7L8jbwT3AlJBfNp3SiI7dtRaLSlKKeoA1oEsKSQZCEluexw8Tm3ohk+E7bnOUHUGcNh+HwbBygw4AZ7FN/Lt84p0l+yTflV8AKQyLdcCRJi/AAAAAElFTkSuQmCC);
-  background-position: center center;
-  background-repeat: no-repeat;
-  border-left: 1px solid #eeeeee;
-  border-top: 1px solid #eeeeee;
-  opacity: .7
-}
-
-.lm_popin:hover .lm_icon {
-  opacity: 1
-} */
-
 /* Tree Control */
 
 ul.tree {
@@ -131,11 +106,16 @@ input {
   border: none;
 }
 
+/* 
 input:focus, li:focus, li:focus>input[type="text"] {
   border: none;
-  /* outline: 1px solid var(--color-dragdrop-outline); */
-  outline: none;
+  outline: 1px solid var(--color-dragdrop-outline);
   text-decoration: underline;
+} */
+
+*:focus {
+  outline: 1px outset var(--color-focus);
+  /* background-color: var(--color-focus); */
 }
 
 input[type="number"] {
@@ -144,6 +124,10 @@ input[type="number"] {
   /* border-bottom: 1px solid var(--color-text); */
   text-align: center;
   width: 6em;
+}
+
+label {
+  padding-right: 0.5em;
 }
 
 /* Fieldset */
@@ -174,6 +158,7 @@ fieldset>input[type=checkbox]:checked::before {
 fieldset>input[type=checkbox]::before {
   content: "►";
 }
+
 /* 
 custom-matrix4x4 input[type=checkbox]  {
   height: 0px;

@@ -168,6 +168,8 @@ namespace FudgeUserInterface {
 
     private hndKey = (_event: KeyboardEvent): void => {
       _event.stopPropagation();
+      if (!this.label.disabled)
+        return;
       let content: TreeList<T> = <TreeList<T>>this.querySelector("ul");
 
       switch (_event.code) {

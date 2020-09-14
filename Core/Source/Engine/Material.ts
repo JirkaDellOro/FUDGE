@@ -84,7 +84,8 @@ namespace FudgeCore {
     }
     public deserialize(_serialization: Serialization): Serializable {
       this.name = _serialization.name;
-      this.idResource = _serialization.idResource;
+      ResourceManager.register(this, _serialization.idResource);
+      // this.idResource = _serialization.idResource;
       // TODO: provide for shaders in the users namespace. See Serializer fullpath etc.
       // tslint:disable-next-line: no-any
       this.shaderType = (<any>FudgeCore)[_serialization.shader];
