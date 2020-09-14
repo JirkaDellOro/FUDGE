@@ -57,9 +57,9 @@ namespace FudgeCore {
       this.createSource(_audio, this.source.loop);
     }
 
-    public get audio(): Audio {
-      return <Audio>this.source.buffer;
-    }
+    // public get audio(): Audio {
+    //   return <Audio>this.source.buffer;
+    // }
 
     public set volume(_value: number) {
       this.gain.gain.value = _value;
@@ -67,6 +67,16 @@ namespace FudgeCore {
 
     public get volume(): number {
       return this.gain.gain.value;
+    }
+
+    public get isPlaying(): boolean {
+      return this.playing;
+    }
+    public get isAttached(): boolean {
+      return this.getContainer() != null;
+    }
+    public get isListened(): boolean {
+      return this.listened;
     }
 
     /**
@@ -105,16 +115,6 @@ namespace FudgeCore {
       else
         this.source.stop();
       this.playing = _on;
-    }
-
-    public get isPlaying(): boolean {
-      return this.playing;
-    }
-    public get isAttached(): boolean {
-      return this.getContainer() != null;
-    }
-    public get isListened(): boolean {
-      return this.listened;
     }
     /**
      * Inserts AudioNodes between the panner and the local gain of this [[ComponentAudio]]
@@ -160,6 +160,18 @@ namespace FudgeCore {
         this.gain.disconnect(this.audioManager.gain);
     }
 
+    //#region Transfer
+    public serialize(): Serialization {
+      console.log(this.getMutator());
+      console.log(this.getMutatorOfNode(AUDIO_NODE_TYPE.SOURCE));
+      return super.serialize();
+    }
+    public deserialize(_serialization: Serialization): Serializable {
+      super.deserialize(_serialization);
+      return this;
+    }
+    //#endregion
+
     private install(_audioManager: AudioManager = AudioManager.default): void {
       let active: boolean = this.isActive;
       this.activate(false);
@@ -181,7 +193,7 @@ namespace FudgeCore {
 
       if (_audio)
         // this.audio = _audio;
-        this.source.buffer = _audio;
+        this.source.buffer = _audio.buffer;
 
       this.source.loop = _loop;
     }

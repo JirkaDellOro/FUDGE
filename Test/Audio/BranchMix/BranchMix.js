@@ -9,9 +9,9 @@ var AudioGraph;
     async function start(_event) {
         window.removeEventListener("click", start);
         window.addEventListener("keydown", handleKeydown);
-        let audioMario = await ƒ.Audio.load("Sound/mario_piano.mp3");
-        let audioTrancy = await ƒ.Audio.load("Sound/trancyvania.mp3");
-        let audioHypno = await ƒ.Audio.load("Sound/hypnotic.mp3");
+        let audioMario = new ƒ.Audio("Sound/mario_piano.mp3");
+        let audioTrancy = new ƒ.Audio("Sound/trancyvania.mp3");
+        let audioHypno = new ƒ.Audio("Sound/hypnotic.mp3");
         for (let i = 0; i < 10; i++)
             nodes.push(new ƒ.Node("Node" + i));
         let cmpAudio = new ƒ.ComponentAudio(audioHypno, true, true);

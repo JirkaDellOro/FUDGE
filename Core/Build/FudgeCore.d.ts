@@ -989,11 +989,17 @@ declare namespace FudgeCore {
      * Extension of AudioBuffer with a load method that creates a buffer in the [[AudioManager]].default to be used with [[ComponentAudio]]
      * @authors Thomas Dorner, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
-    class Audio extends AudioBuffer {
+    class Audio implements SerializableResource {
+        idResource: string;
+        buffer: AudioBuffer;
+        private url;
+        constructor(_url?: string);
         /**
          * Asynchronously loads the audio (mp3) from the given url
          */
-        static load(_url: string): Promise<Audio>;
+        load(_url: string): Promise<void>;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace FudgeCore {
@@ -1246,9 +1252,11 @@ declare namespace FudgeCore {
         private listened;
         constructor(_audio?: Audio, _loop?: boolean, _start?: boolean, _audioManager?: AudioManager);
         set audio(_audio: Audio);
-        get audio(): Audio;
         set volume(_value: number);
         get volume(): number;
+        get isPlaying(): boolean;
+        get isAttached(): boolean;
+        get isListened(): boolean;
         /**
          * Set the property of the panner to the given value. Use to manipulate range and rolloff etc.
          */
@@ -1262,9 +1270,6 @@ declare namespace FudgeCore {
          * Start or stop playing the audio
          */
         play(_on: boolean): void;
-        get isPlaying(): boolean;
-        get isAttached(): boolean;
-        get isListened(): boolean;
         /**
          * Inserts AudioNodes between the panner and the local gain of this [[ComponentAudio]]
          * _input and _output may be the same AudioNode, if there is only one to insert,
@@ -1290,6 +1295,8 @@ declare namespace FudgeCore {
          * Only call this method if the component is not attached to a [[Node]] but needs to be heard.
          */
         connect(_on: boolean): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
         private install;
         private createSource;
         private updateConnection;

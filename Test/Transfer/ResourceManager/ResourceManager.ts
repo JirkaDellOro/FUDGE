@@ -49,7 +49,7 @@ namespace ResourceManager {
   }
 
 
-  function CreateTestScene(): void {
+  async function CreateTestScene(): Promise<void> {
     let material: ƒ.Material = new ƒ.Material("TestMaterial", ƒ.ShaderFlat, new ƒ.CoatColored(new ƒ.Color(1, 1, 1, 1)));
     ƒ.ResourceManager.register(material);
 
@@ -61,19 +61,25 @@ namespace ResourceManager {
     node.addComponent(new ƒ.ComponentMaterial(material));
     node.addComponent(new Script());
 
+    let audio: ƒ.Audio = new ƒ.Audio("Audio/hypnotic.mp3");
+    let cmpAudio: ƒ.ComponentAudio = new ƒ.ComponentAudio(audio, true, true);
+    node.addComponent(cmpAudio);
+
     let nodeResource: ƒ.NodeResource = ƒ.ResourceManager.registerNodeAsResource(node, true);
-    
-    ƒ.Debug.log(node);
-    ƒ.Debug.log(nodeResource);
+
+    // ƒ.Debug.log(node);
+    // ƒ.Debug.log(nodeResource);
 
     // let instance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(nodeResource);
     // ƒ.Debug.log(instance);
 
 
     let result: ƒ.Resources = testSerialization();
-    console.group("Comparison");
-    Compare.compare(ƒ.ResourceManager.resources, result);
+    console.groupCollapsed("Comparison");
+    let comparison: boolean = Compare.compare(ƒ.ResourceManager.resources, result);
     console.groupEnd();
+    if (!comparison)
+    console.error("Comparison failed");
 
     let s: Script;
     s = node.getComponent(Script);
@@ -83,26 +89,26 @@ namespace ResourceManager {
   }
 
   function testSerialization(): ƒ.Resources {
-    console.group("Original");
+    console.groupCollapsed("Original");
     console.log(ƒ.ResourceManager.resources);
     console.groupEnd();
 
-    console.group("Serialized");
+    console.groupCollapsed("Serialized");
     let serialization: ƒ.SerializationOfResources = ƒ.ResourceManager.serialize();
     console.log(serialization);
     console.groupEnd();
 
-    console.groupCollapsed("Stringified");
+    console.group("Stringified");
     let json: string = ƒ.Serializer.stringify(serialization);
     console.log(json);
     console.groupEnd();
 
-    console.group("Parsed");
+    console.groupCollapsed("Parsed");
     serialization = ƒ.Serializer.parse(json);
     console.log(serialization);
     console.groupEnd();
 
-    console.group("Reconstructed");
+    console.groupCollapsed("Reconstructed");
     let reconstruction: ƒ.Resources = ƒ.ResourceManager.deserialize(serialization);
     console.log(reconstruction);
     console.groupEnd();
