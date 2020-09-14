@@ -10,6 +10,7 @@ namespace AudioGraph {
     window.removeEventListener("click", start);
     window.addEventListener("keydown", handleKeydown);
     let audioMario: ƒ.Audio = new ƒ.Audio("Sound/mario_piano.mp3");
+    await audioMario.load("Sound/mario_piano.mp3");
     let audioTrancy: ƒ.Audio = new ƒ.Audio("Sound/trancyvania.mp3");
     let audioHypno: ƒ.Audio = new ƒ.Audio("Sound/hypnotic.mp3");
 

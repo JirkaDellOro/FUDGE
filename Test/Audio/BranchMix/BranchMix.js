@@ -10,6 +10,7 @@ var AudioGraph;
         window.removeEventListener("click", start);
         window.addEventListener("keydown", handleKeydown);
         let audioMario = new ƒ.Audio("Sound/mario_piano.mp3");
+        await audioMario.load("Sound/mario_piano.mp3");
         let audioTrancy = new ƒ.Audio("Sound/trancyvania.mp3");
         let audioHypno = new ƒ.Audio("Sound/hypnotic.mp3");
         for (let i = 0; i < 10; i++)

@@ -9,8 +9,10 @@ namespace AudioSounds {
 
   async function start(_event: Event): Promise<void> {
     window.addEventListener("keydown", handleKeydown);
-    audioBeep = await ƒ.Audio.load("Sound/Beep.mp3");
-    audioUfo = await ƒ.Audio.load("Sound/Beat.mp3");
+    audioBeep = new ƒ.Audio("Sound/Beep.mp3");
+    // await audioBeep.asyncLoad("Sound/Beep.mp3")
+    audioUfo = new ƒ.Audio("Sound/Beat.mp3");
+    // await audioUfo.asyncLoad("Sound/Beat.mp3")
     cmpAudio = new ƒ.ComponentAudio(audioBeep, false, false);
     cmpAudio.connect(true);
     cmpAudio.volume = 30;
@@ -47,11 +49,11 @@ namespace AudioSounds {
         break;
       case ƒ.KEYBOARD_CODE.ARROW_LEFT:
         ƒ.Debug.log("Beep");
-        cmpAudio.audio = audioBeep;
+        cmpAudio.setAudio(audioBeep);
         break;
       case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
         ƒ.Debug.log("Ufo");
-        cmpAudio.audio = audioUfo;
+        cmpAudio.setAudio(audioUfo);
         break;
     }
   }
