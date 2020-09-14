@@ -1245,6 +1245,7 @@ declare namespace FudgeCore {
         /** places and directs the panner relative to the world transform of the [[Node]]  */
         pivot: Matrix4x4;
         protected singleton: boolean;
+        private audio;
         private gain;
         private panner;
         private source;
@@ -1252,12 +1253,12 @@ declare namespace FudgeCore {
         private playing;
         private listened;
         constructor(_audio?: Audio, _loop?: boolean, _start?: boolean, _audioManager?: AudioManager);
-        set audio(_audio: Audio);
         set volume(_value: number);
         get volume(): number;
         get isPlaying(): boolean;
         get isAttached(): boolean;
         get isListened(): boolean;
+        setAudio(_audio: Audio): void;
         /**
          * Set the property of the panner to the given value. Use to manipulate range and rolloff etc.
          */

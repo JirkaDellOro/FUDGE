@@ -34,6 +34,7 @@ namespace FudgeCore {
 
     protected singleton: boolean = false;
 
+    private audio: Audio;
     private gain: GainNode;
     private panner: PannerNode;
     private source: AudioBufferSourceNode;
@@ -53,13 +54,6 @@ namespace FudgeCore {
         this.play(_start);
     }
 
-    public set audio(_audio: Audio) {
-      this.createSource(_audio, this.source.loop);
-    }
-
-    // public get audio(): Audio {
-    //   return <Audio>this.source.buffer;
-    // }
 
     public set volume(_value: number) {
       this.gain.gain.value = _value;
@@ -78,6 +72,15 @@ namespace FudgeCore {
     public get isListened(): boolean {
       return this.listened;
     }
+
+    public setAudio(_audio: Audio): void {
+      this.createSource(_audio, this.source.loop);
+    }
+
+    // public getAudio(): Audio {
+    //   // return <Audio>(Reflect.get(this.source.buffer, "audio").value);
+    //   return this.audio;
+    // }
 
     /**
      * Set the property of the panner to the given value. Use to manipulate range and rolloff etc.
@@ -191,9 +194,10 @@ namespace FudgeCore {
       this.source = this.audioManager.createBufferSource();
       this.source.connect(this.panner);
 
-      if (_audio)
-        // this.audio = _audio;
+      if (_audio) {
+        this.audio = _audio;
         this.source.buffer = _audio.buffer;
+      }
 
       this.source.loop = _loop;
     }

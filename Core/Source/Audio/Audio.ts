@@ -9,8 +9,8 @@ namespace FudgeCore {
     private url: string = undefined;
 
     constructor(_url?: string) {
-      if (_url)
-        this.asyncLoad(_url);
+      // if (_url)
+      //   this.asyncLoad(_url);
       ResourceManager.register(this);
     }
 
@@ -23,6 +23,7 @@ namespace FudgeCore {
       const arrayBuffer: ArrayBuffer = await response.arrayBuffer();
       let buffer: AudioBuffer = await AudioManager.default.decodeAudioData(arrayBuffer);
       this.buffer = buffer;
+      // Reflect.defineProperty(this.buffer, "audio", { value: this });
     }
 
     public async asyncLoad(_url: string): Promise<void> {
