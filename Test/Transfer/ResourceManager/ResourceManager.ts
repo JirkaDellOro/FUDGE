@@ -1,5 +1,6 @@
+///<reference path="Script.ts"/>
 namespace ResourceManager {
-  import ƒ = FudgeCore;
+  export import ƒ = FudgeCore;
 
   // register namespace of custom resources
   ƒ.Serializer.registerNamespace(ResourceManager);
