@@ -59,7 +59,7 @@ namespace AudioSpace {
     mtxOuter = outer.mtxLocal;
 
     // audio setup
-    const audio: ƒ.Audio = await ƒ.Audio.load("hypnotic.mp3");
+    const audio: ƒ.Audio = new ƒ.Audio("hypnotic.mp3");
     cmpAudio = new ƒ.ComponentAudio(audio, true);
     speaker.addComponent(cmpAudio);
     cmpAudio.setPanner(ƒ.AUDIO_PANNER.CONE_OUTER_ANGLE, 180);

@@ -998,6 +998,7 @@ declare namespace FudgeCore {
          * Asynchronously loads the audio (mp3) from the given url
          */
         load(_url: string): Promise<void>;
+        asyncLoad(_url: string): Promise<void>;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
     }

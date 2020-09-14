@@ -10,7 +10,7 @@ namespace FudgeCore {
 
     constructor(_url?: string) {
       if (_url)
-        this.load(_url);
+        this.asyncLoad(_url);
       ResourceManager.register(this);
     }
 
@@ -25,13 +25,16 @@ namespace FudgeCore {
       this.buffer = buffer;
     }
 
+    public async asyncLoad(_url: string): Promise<void> {
+      await this.load(_url);
+    }
 
     //#region Transfer
     public serialize(): Serialization {
       return { url: this.url };
     }
     public deserialize(_serialization: Serialization): Serializable {
-      this.load(_serialization.url);
+      this.asyncLoad(_serialization.url);
       return this;
     }
     //#endregion
