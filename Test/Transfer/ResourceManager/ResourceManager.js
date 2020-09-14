@@ -5,7 +5,8 @@ var ResourceManager;
     ResourceManager.ƒ = FudgeCore;
     // register namespace of custom resources
     ResourceManager.ƒ.Serializer.registerNamespace(ResourceManager);
-    window.addEventListener("DOMContentLoaded", init);
+    // window.addEventListener("DOMContentLoaded", init);
+    document.addEventListener("click", init);
     // Test custom resource
     class Resource {
         constructor() {
@@ -59,7 +60,7 @@ var ResourceManager;
         let nodeResource = ResourceManager.ƒ.ResourceManager.registerNodeAsResource(node, true);
         // ƒ.Debug.log(node);
         // ƒ.Debug.log(nodeResource);
-        // let instance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(nodeResource);
+        let instance = new ResourceManager.ƒ.NodeResourceInstance(nodeResource);
         // ƒ.Debug.log(instance);
         let result = testSerialization();
         console.groupCollapsed("Comparison");
@@ -67,11 +68,15 @@ var ResourceManager;
         console.groupEnd();
         if (!comparison)
             console.error("Comparison failed");
-        let s;
-        s = node.getComponent(ResourceManager.Script);
-        node.removeComponent(s);
-        s = nodeResource.getComponent(ResourceManager.Script);
-        nodeResource.removeComponent(s);
+        // let s: Script;
+        // s = node.getComponent(Script);
+        // node.removeComponent(s);
+        // s = nodeResource.getComponent(Script);
+        // nodeResource.removeComponent(s);
+        // node.getComponent(ƒ.ComponentAudio).activate(false);
+        ResourceManager.ƒ.AudioManager.default.listenTo(instance);
+        // console.log(instance);
+        console.log(ResourceManager.ƒ.Serializer.stringify(instance.serialize()));
     }
     function testSerialization() {
         console.groupCollapsed("Original");

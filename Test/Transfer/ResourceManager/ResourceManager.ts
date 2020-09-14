@@ -5,7 +5,8 @@ namespace ResourceManager {
   // register namespace of custom resources
   ƒ.Serializer.registerNamespace(ResourceManager);
 
-  window.addEventListener("DOMContentLoaded", init);
+  // window.addEventListener("DOMContentLoaded", init);
+  document.addEventListener("click", init);
 
   // Test custom resource
   export class Resource implements ƒ.SerializableResource {
@@ -70,7 +71,7 @@ namespace ResourceManager {
     // ƒ.Debug.log(node);
     // ƒ.Debug.log(nodeResource);
 
-    // let instance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(nodeResource);
+    let instance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(nodeResource);
     // ƒ.Debug.log(instance);
 
 
@@ -81,11 +82,16 @@ namespace ResourceManager {
     if (!comparison)
     console.error("Comparison failed");
 
-    let s: Script;
-    s = node.getComponent(Script);
-    node.removeComponent(s);
-    s = nodeResource.getComponent(Script);
-    nodeResource.removeComponent(s);
+    // let s: Script;
+    // s = node.getComponent(Script);
+    // node.removeComponent(s);
+    // s = nodeResource.getComponent(Script);
+    // nodeResource.removeComponent(s);
+    // node.getComponent(ƒ.ComponentAudio).activate(false);
+
+    ƒ.AudioManager.default.listenTo(instance);
+    // console.log(instance);
+    console.log(ƒ.Serializer.stringify(instance.serialize()));
   }
 
   function testSerialization(): ƒ.Resources {

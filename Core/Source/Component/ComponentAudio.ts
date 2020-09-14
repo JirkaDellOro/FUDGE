@@ -165,19 +165,27 @@ namespace FudgeCore {
 
     //#region Transfer
     public serialize(): Serialization {
-      console.log(this.getMutator());
-      console.log(this.getMutatorOfNode(AUDIO_NODE_TYPE.SOURCE));
-      return super.serialize();
+      let serialization: Serialization = super.serialize();
+      serialization.idResource = this.audio.idResource;
+      serialization.playing = this.playing;
+      serialization.loop = this.source.loop;
+      serialization.volume = this.gain.gain.value;
+      // console.log(this.getMutatorOfNode(AUDIO_NODE_TYPE.PANNER));
+      // TODO: serialize panner parameters
+      return serialization;
     }
     public deserialize(_serialization: Serialization): Serializable {
       super.deserialize(_serialization);
+      let audio: Audio = <Audio>ResourceManager.get(_serialization.idResource);
+      this.createSource(audio, _serialization.loop);
+      this.volume = _serialization.volume;
+      this.play(_serialization.playing);
       return this;
     }
     //#endregion
 
 
     private hndAudioReady: EventListener = (_event: Event) => {
-      console.log("Ready called");
       if (this.playing)
         this.play(true);
     }
