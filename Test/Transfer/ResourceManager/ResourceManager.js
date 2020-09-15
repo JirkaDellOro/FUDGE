@@ -46,16 +46,22 @@ var ResourceManager;
         console.groupEnd();
     }
     async function CreateTestScene() {
-        let material = new ResourceManager.ƒ.Material("TestMaterial", ResourceManager.ƒ.ShaderFlat, new ResourceManager.ƒ.CoatColored(new ResourceManager.ƒ.Color(1, 1, 1, 1)));
-        ResourceManager.ƒ.ResourceManager.register(material);
+        let texture = new ResourceManager.ƒ.TextureImage();
+        await texture.load("Image/Fudge_360.png");
+        document.body.appendChild(texture.image);
+        let coatTextured = new ResourceManager.ƒ.CoatTextured();
+        coatTextured.texture = texture;
+        let material = new ResourceManager.ƒ.Material("Textured", ResourceManager.ƒ.ShaderTexture, coatTextured);
+        // let material: ƒ.Material = new ƒ.Material("TestMaterial", ƒ.ShaderFlat, new ƒ.CoatColored(new ƒ.Color(1, 1, 1, 1)));
+        // ƒ.ResourceManager.register(material);
         let mesh = new ResourceManager.ƒ.MeshPyramid();
         ResourceManager.ƒ.ResourceManager.register(mesh);
+        let audio = new ResourceManager.ƒ.Audio("Audio/hypnotic.mp3");
+        let cmpAudio = new ResourceManager.ƒ.ComponentAudio(audio, true, true);
         let node = new ResourceManager.ƒ.Node("TestNode");
         node.addComponent(new ResourceManager.ƒ.ComponentMesh(mesh));
         node.addComponent(new ResourceManager.ƒ.ComponentMaterial(material));
         node.addComponent(new ResourceManager.Script());
-        let audio = new ResourceManager.ƒ.Audio("Audio/hypnotic.mp3");
-        let cmpAudio = new ResourceManager.ƒ.ComponentAudio(audio, true, true);
         node.addComponent(cmpAudio);
         let nodeResource = ResourceManager.ƒ.ResourceManager.registerNodeAsResource(node, true);
         // ƒ.Debug.log(node);

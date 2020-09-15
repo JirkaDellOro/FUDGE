@@ -51,19 +51,28 @@ namespace ResourceManager {
 
 
   async function CreateTestScene(): Promise<void> {
-    let material: ƒ.Material = new ƒ.Material("TestMaterial", ƒ.ShaderFlat, new ƒ.CoatColored(new ƒ.Color(1, 1, 1, 1)));
-    ƒ.ResourceManager.register(material);
+    let texture: ƒ.TextureImage = new ƒ.TextureImage();
+    await texture.load("Image/Fudge_360.png");
+    document.body.appendChild(texture.image);
+    
+    let coatTextured: ƒ.CoatTextured = new ƒ.CoatTextured();
+    coatTextured.texture = texture;
+    let material: ƒ.Material = new ƒ.Material("Textured", ƒ.ShaderTexture, coatTextured);
+
+    // let material: ƒ.Material = new ƒ.Material("TestMaterial", ƒ.ShaderFlat, new ƒ.CoatColored(new ƒ.Color(1, 1, 1, 1)));
+    // ƒ.ResourceManager.register(material);
 
     let mesh: ƒ.Mesh = new ƒ.MeshPyramid();
     ƒ.ResourceManager.register(mesh);
 
+    let audio: ƒ.Audio = new ƒ.Audio("Audio/hypnotic.mp3");
+    let cmpAudio: ƒ.ComponentAudio = new ƒ.ComponentAudio(audio, true, true);
+    
+    
     let node: ƒ.Node = new ƒ.Node("TestNode");
     node.addComponent(new ƒ.ComponentMesh(mesh));
     node.addComponent(new ƒ.ComponentMaterial(material));
     node.addComponent(new Script());
-
-    let audio: ƒ.Audio = new ƒ.Audio("Audio/hypnotic.mp3");
-    let cmpAudio: ƒ.ComponentAudio = new ƒ.ComponentAudio(audio, true, true);
     node.addComponent(cmpAudio);
 
     let nodeResource: ƒ.NodeResource = ƒ.ResourceManager.registerNodeAsResource(node, true);
@@ -80,7 +89,7 @@ namespace ResourceManager {
     let comparison: boolean = Compare.compare(ƒ.ResourceManager.resources, result);
     console.groupEnd();
     if (!comparison)
-    console.error("Comparison failed");
+      console.error("Comparison failed");
 
     // let s: Script;
     // s = node.getComponent(Script);

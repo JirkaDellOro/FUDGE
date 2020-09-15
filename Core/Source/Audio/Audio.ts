@@ -6,10 +6,10 @@ namespace FudgeCore {
   export class Audio extends EventTarget implements SerializableResource {
     public idResource: string = undefined;
     public buffer: AudioBuffer = undefined;
-    private url: string = undefined;
+    private url: RequestInfo = undefined;
     private ready: boolean = false;
 
-    constructor(_url?: string) {
+    constructor(_url?: RequestInfo) {
       super();
       if (_url)
         this.load(_url);
@@ -23,7 +23,7 @@ namespace FudgeCore {
     /**
      * Asynchronously loads the audio (mp3) from the given url
      */
-    public async load(_url: string): Promise<void> {
+    public async load(_url: RequestInfo): Promise<void> {
       this.url = _url;
       this.ready = false;
       const response: Response = await window.fetch(this.url);

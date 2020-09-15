@@ -7,6 +7,20 @@ namespace FudgeCore {
     // TODO: see if color should be generalized
     public color: Color = new Color(1, 1, 1, 1);
     public texture: TextureImage = null;
+
+    //#region Transfer
+    public serialize(): Serialization {
+      let serialization: Serialization = super.serialize();
+      delete serialization.texture;
+      serialization.idTexture = this.texture.idResource;
+      return serialization;
+    }
+    public deserialize(_serialization: Serialization): Serializable {
+      this.mutate(_serialization);
+      return this;
+    }
+    //#endregion
+
     // just ideas so far
     // public tilingX: number;
     // public tilingY: number;

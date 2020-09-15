@@ -19,15 +19,19 @@ namespace FudgeCore {
 
     //#region Transfer
     public serialize(): Serialization {
-      let serialization: Serialization;
+      let serialization: Serialization = {
+        clrPrimary: this.clrPrimary,
+        clrSecondary: this.clrSecondary,
+        pivot: this.pivot.serialize(),
+        [super.constructor.name]: super.serialize()
+      };
       /* at this point of time, serialization as resource and as inline object is possible. TODO: check if inline becomes obsolete */
       let idMaterial: string = this.material.idResource;
       if (idMaterial)
-        serialization = { idMaterial: idMaterial };
+        serialization.idMaterial = idMaterial;
       else
-        serialization = { material: Serializer.serialize(this.material) };
+        serialization.material = Serializer.serialize(this.material);
 
-      serialization[super.constructor.name] = super.serialize();
       return serialization;
     }
     public deserialize(_serialization: Serialization): Serializable {

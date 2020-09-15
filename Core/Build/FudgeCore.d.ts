@@ -210,9 +210,11 @@ declare namespace FudgeCore {
          */
         get type(): string;
         /**
-         * Collect applicable attributes of the instance and copies of their values in a Mutator-object
+         * Collect applicable attributes of the instance and copies of their values in a Mutator-object.
+         * By default, a mutator cannot extended, since extensions are not available in the object the mutator belongs to.
+         * A mutator may be reduced by the descendants of [[Mutable]] to contain only the properties needed.
          */
-        getMutator(): Mutator;
+        getMutator(_extendable?: boolean): Mutator;
         /**
          * Collect the attributes of the instance and their values applicable for animation.
          * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
@@ -994,12 +996,12 @@ declare namespace FudgeCore {
         buffer: AudioBuffer;
         private url;
         private ready;
-        constructor(_url?: string);
+        constructor(_url?: RequestInfo);
         get isReady(): boolean;
         /**
          * Asynchronously loads the audio (mp3) from the given url
          */
-        load(_url: string): Promise<void>;
+        load(_url: RequestInfo): Promise<void>;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Serializable;
     }
@@ -1085,6 +1087,8 @@ declare namespace FudgeCore {
     class CoatTextured extends Coat {
         color: Color;
         texture: TextureImage;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace FudgeCore {
@@ -3451,8 +3455,17 @@ declare namespace FudgeCore {
     /**
      * Texture created from an existing image
      */
-    class TextureImage extends Texture {
+    class TextureImage extends Texture implements SerializableResource {
         image: HTMLImageElement;
+        url: RequestInfo;
+        idResource: string;
+        constructor(_url?: string);
+        /**
+         * Asynchronously loads the image from the given url
+         */
+        load(_url: string): Promise<void>;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
     }
     /**
      * Texture created from a canvas

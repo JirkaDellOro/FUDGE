@@ -16,7 +16,7 @@ namespace FudgeCore {
         
         //#region Transfer
         public serialize(): Serialization {
-            let serialization: Serialization = this.getMutator(); 
+            let serialization: Serialization = this.getMutator(true); 
             return serialization;
         }
         public deserialize(_serialization: Serialization): Serializable {
