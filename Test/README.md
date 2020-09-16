@@ -34,9 +34,9 @@ To be described
 Die Dimension und Auflösung des Viewport soll auf Änderungen in den Transformationsfeldern auf der rechten Seite reagieren. Entsprechend des Framings, siehe [Framing](../Documentation/Design/Framing.svg)  
 
 ## Resources
-- [NodeResource](Resources/NodeResource/Test.html)   
+- [NodeResource](Transfer/NodeResource/Test.html)   
 Im Viewport sollen viele Pyramiden angezeigt werden, um die ein anderes Objekt kreist.  
-- [ResourceManager](Resources/ResourceManager/Test.html)   
+- [ResourceManager](Transfer/ResourceManager/Test.html)   
 Graph und interne Resourcen speichern und zusammen mit externen laden und Graph rekonstruieren  
 
 ## Shading
