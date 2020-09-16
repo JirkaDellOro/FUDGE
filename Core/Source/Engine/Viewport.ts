@@ -31,6 +31,15 @@ namespace FudgeCore {
     private crc2: CanvasRenderingContext2D = null;
     private canvas: HTMLCanvasElement = null;
     private pickBuffers: PickBuffer[] = [];
+    //#endregion
+
+    // #region Events (passing from canvas to viewport and from there into graph)
+    /**
+     * Returns true if this viewport currently has focus and thus receives keyboard events
+     */
+    public get hasFocus(): boolean {
+      return (Viewport.focus == this);
+    }
 
     /**
      * Connects the viewport to the given canvas to render the given graph to using the given camera-component, and names the viewport as given.
@@ -182,7 +191,7 @@ namespace FudgeCore {
       // ray.direction.scale(camera.distance);
       ray.origin.transform(this.camera.pivot);
       ray.direction.transform(this.camera.pivot, false);
-      let cameraNode: Node = this.camera.getContainer()
+      let cameraNode: Node = this.camera.getContainer();
       if (cameraNode) {
         ray.origin.transform(cameraNode.mtxWorld);
         ray.direction.transform(cameraNode.mtxWorld, false);
@@ -272,15 +281,6 @@ namespace FudgeCore {
     public pointClientToScreen(_client: Vector2): Vector2 {
       let screen: Vector2 = new Vector2(this.canvas.offsetLeft + _client.x, this.canvas.offsetTop + _client.y);
       return screen;
-    }
-    //#endregion
-
-    // #region Events (passing from canvas to viewport and from there into graph)
-    /**
-     * Returns true if this viewport currently has focus and thus receives keyboard events
-     */
-    public get hasFocus(): boolean {
-      return (Viewport.focus == this);
     }
     /**
      * Switch the viewports focus on or off. Only one viewport in one FUDGE instance can have the focus, thus receiving keyboard events. 

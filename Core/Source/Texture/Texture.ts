@@ -28,12 +28,17 @@ namespace FudgeCore {
      */
     public async load(_url: string): Promise<void> {
       this.url = _url;
-      this.image = document.createElement("img");
+      this.image = new Image();
+      // const response: Response = await window.fetch(this.url);
+      // const blob: Blob = await response.blob();
+      // let objectURL: string = URL.createObjectURL(blob);
+      // this.image.src = objectURL;
 
-      const response: Response = await window.fetch(this.url);
-      const blob: Blob = await response.blob();
-      let objectURL: string = URL.createObjectURL(blob);
-      this.image.src = objectURL;
+      return new Promise((resolve, reject) => {
+        this.image.addEventListener("load", () => resolve());
+        this.image.addEventListener("error", () => reject());
+        this.image.src = _url;
+      });
     }
 
     //#region Transfer

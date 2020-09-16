@@ -1824,6 +1824,10 @@ declare namespace FudgeCore {
         private canvas;
         private pickBuffers;
         /**
+         * Returns true if this viewport currently has focus and thus receives keyboard events
+         */
+        get hasFocus(): boolean;
+        /**
          * Connects the viewport to the given canvas to render the given graph to using the given camera-component, and names the viewport as given.
          */
         initialize(_name: string, _graph: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void;
@@ -1899,10 +1903,6 @@ declare namespace FudgeCore {
          */
         pointClipToCanvas(_normed: Vector2): Vector2;
         pointClientToScreen(_client: Vector2): Vector2;
-        /**
-         * Returns true if this viewport currently has focus and thus receives keyboard events
-         */
-        get hasFocus(): boolean;
         /**
          * Switch the viewports focus on or off. Only one viewport in one FUDGE instance can have the focus, thus receiving keyboard events.
          * So a viewport currently having the focus will lose it, when another one receives it. The viewports fire [[Event]]s accordingly.

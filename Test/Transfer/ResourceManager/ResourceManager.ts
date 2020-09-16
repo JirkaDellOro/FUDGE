@@ -1,12 +1,12 @@
-///<reference path="Script.ts"/>
+///<reference path="Script/Script.ts"/>
 namespace ResourceManager {
   export import ƒ = FudgeCore;
 
   // register namespace of custom resources
   ƒ.Serializer.registerNamespace(ResourceManager);
 
-  // window.addEventListener("DOMContentLoaded", init);
-  document.addEventListener("click", init);
+  window.addEventListener("DOMContentLoaded", init);
+  // document.addEventListener("click", init);
 
   // Test custom resource
   export class Resource implements ƒ.SerializableResource {
@@ -53,25 +53,22 @@ namespace ResourceManager {
   async function CreateTestScene(): Promise<void> {
     let texture: ƒ.TextureImage = new ƒ.TextureImage();
     await texture.load("Image/Fudge_360.png");
-    document.body.appendChild(texture.image);
-    
+
     let coatTextured: ƒ.CoatTextured = new ƒ.CoatTextured();
     coatTextured.texture = texture;
     let material: ƒ.Material = new ƒ.Material("Textured", ƒ.ShaderTexture, coatTextured);
 
-    // let material: ƒ.Material = new ƒ.Material("TestMaterial", ƒ.ShaderFlat, new ƒ.CoatColored(new ƒ.Color(1, 1, 1, 1)));
-    // ƒ.ResourceManager.register(material);
-
     let mesh: ƒ.Mesh = new ƒ.MeshPyramid();
-    ƒ.ResourceManager.register(mesh);
+    // ƒ.ResourceManager.register(mesh);
 
     let audio: ƒ.Audio = new ƒ.Audio("Audio/hypnotic.mp3");
     let cmpAudio: ƒ.ComponentAudio = new ƒ.ComponentAudio(audio, true, true);
-    
-    
+
+
     let node: ƒ.Node = new ƒ.Node("TestNode");
     node.addComponent(new ƒ.ComponentMesh(mesh));
     node.addComponent(new ƒ.ComponentMaterial(material));
+    // TODO: dynamically load Script! Is it among Resources?
     node.addComponent(new Script());
     node.addComponent(cmpAudio);
 
@@ -99,8 +96,22 @@ namespace ResourceManager {
     // node.getComponent(ƒ.ComponentAudio).activate(false);
 
     ƒ.AudioManager.default.listenTo(instance);
-    // console.log(instance);
+    console.groupCollapsed("Serialized instance");
     console.log(ƒ.Serializer.stringify(instance.serialize()));
+    console.groupEnd();
+
+    let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
+    cmpCamera.pivot.translate(new ƒ.Vector3(1, 1, -2));
+    cmpCamera.pivot.lookAt(ƒ.Vector3.Y(0.4));
+
+    for (let graph of [node, instance]) {
+      let viewport: ƒ.Viewport = new ƒ.Viewport();
+      let canvas: HTMLCanvasElement = document.createElement("canvas");
+      canvas.style.display = "block";
+      viewport.initialize(graph.name, node, cmpCamera, canvas);
+      document.body.appendChild(canvas);
+      viewport.draw();
+    }
   }
 
   function testSerialization(): ƒ.Resources {
