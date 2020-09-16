@@ -1,34 +1,5 @@
 {
-  "TextureImage|2020-09-16T08:42:38.261Z|62784": {
-    "ƒ.TextureImage": {
-      "url": "Image/Fudge_360.png"
-    }
-  },
-  "Material|2020-09-16T08:42:38.266Z|17140": {
-    "ƒ.Material": {
-      "name": "Textured",
-      "idResource": "Material|2020-09-16T08:42:38.266Z|17140",
-      "shader": "ShaderTexture",
-      "coat": {
-        "ƒ.CoatTextured": {
-          "name": "Coat",
-          "color": {
-            "r": 1,
-            "g": 1,
-            "b": 1,
-            "a": 1
-          },
-          "idTexture": "TextureImage|2020-09-16T08:42:38.261Z|62784"
-        }
-      }
-    }
-  },
-  "Audio|2020-09-16T08:42:38.267Z|59192": {
-    "ƒ.Audio": {
-      "url": "Audio/hypnotic.mp3"
-    }
-  },
-  "NodeResource|2020-09-16T08:42:38.274Z|99192": {
+  "NodeResource|2020-09-16T16:34:55.302Z|11570": {
     "ƒ.NodeResource": {
       "name": "Resource",
       "components": {
@@ -90,7 +61,7 @@
               "Component": {
                 "active": true
               },
-              "idMaterial": "Material|2020-09-16T08:42:38.266Z|17140"
+              "idMaterial": "Material|2020-09-16T16:34:55.292Z|94542"
             }
           }
         ],
@@ -107,7 +78,7 @@
           {
             "ƒ.ComponentAudio": {
               "active": true,
-              "idResource": "Audio|2020-09-16T08:42:38.267Z|59192",
+              "idResource": "Audio|2020-09-16T16:34:55.293Z|50583",
               "playing": true,
               "loop": true,
               "volume": 1
@@ -116,6 +87,37 @@
         ]
       },
       "children": []
+    }
+  },
+  "TextureImage|2020-09-16T16:34:55.286Z|84488": {
+    "ƒ.TextureImage": {
+      "url": "Image/Fudge_360.png",
+      "idResource": "TextureImage|2020-09-16T16:34:55.286Z|84488"
+    }
+  },
+  "Material|2020-09-16T16:34:55.292Z|94542": {
+    "ƒ.Material": {
+      "name": "Textured",
+      "idResource": "Material|2020-09-16T16:34:55.292Z|94542",
+      "shader": "ShaderTexture",
+      "coat": {
+        "ƒ.CoatTextured": {
+          "name": "Coat",
+          "color": {
+            "r": 1,
+            "g": 0,
+            "b": 0,
+            "a": 1
+          },
+          "idTexture": "TextureImage|2020-09-16T16:34:55.286Z|84488"
+        }
+      }
+    }
+  },
+  "Audio|2020-09-16T16:34:55.293Z|50583": {
+    "ƒ.Audio": {
+      "url": "Audio/hypnotic.mp3",
+      "idResource": "Audio|2020-09-16T16:34:55.293Z|50583"
     }
   }
 }

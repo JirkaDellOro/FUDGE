@@ -27,7 +27,10 @@ namespace FudgeCore {
      */
     public static register(_resource: SerializableResource, _idResource?: string): void {
       if (_resource.idResource)
-        this.deregister(_resource);
+        if (_resource.idResource == _idResource)
+          return;
+        else
+          this.deregister(_resource);
       _resource.idResource = _idResource || ResourceManager.generateId(_resource);
       ResourceManager.resources[_resource.idResource] = _resource;
     }

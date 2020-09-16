@@ -28,9 +28,13 @@ namespace ResourceManager {
   }
 
   function init(_event: Event): void {
-    // TestCustomResource();
-    CreateTestScene();
-    // LoadScene();
+    for (let call of [TestCustomResource, CreateTestScene, LoadScene]) {
+      let button: HTMLButtonElement = document.createElement("button");
+      button.addEventListener("click", call);
+      button.innerText = call.name;
+      document.body.appendChild(button);
+    }
+    document.body.appendChild(document.createElement("hr"));
   }
 
   function TestCustomResource(): void {
@@ -112,13 +116,42 @@ namespace ResourceManager {
     instance.getComponent(ƒ.ComponentMesh).pivot.rotateX(30);
     reconstrucedGraph.getComponent(ƒ.ComponentMesh).pivot.rotateX(40);
     reconstructedInstance.getComponent(ƒ.ComponentMesh).pivot.rotateX(50);
-    
+
     showGraphs([original, graph, instance, reconstrucedGraph, reconstructedInstance]);
   }
 
 
-  function LoadScene(): void {
-    //
+  async function LoadScene(): Promise<ƒ.Resources> {
+    let response: Response = await fetch("Test.json");
+    let content: string = await response.text();
+
+    console.groupCollapsed("Content");
+    console.log(content);
+    console.groupEnd();
+
+    let serialization: ƒ.Serialization = ƒ.Serializer.parse(content);
+
+    console.groupCollapsed("Parsed");
+    console.log(serialization);
+    console.groupEnd();
+
+    console.groupCollapsed("Reconstructed");
+    let reconstruction: ƒ.Resources = ƒ.ResourceManager.deserialize(serialization);
+    console.log(reconstruction);
+    console.groupEnd();
+
+    for (let id in reconstruction) {
+      let resource: ƒ.SerializableResource = reconstruction[id];
+      if (resource instanceof ƒ.NodeResource) {
+        let reconstrucedGraph: ƒ.NodeResource = resource;
+        reconstrucedGraph.name = "ReconstructedGraph";
+        let reconstructedInstance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(reconstrucedGraph);
+        reconstructedInstance.name = "ReconstructedInstance";
+
+        showGraphs([reconstrucedGraph, reconstructedInstance]);
+      }
+    }
+    return reconstruction;
   }
 
   function showGraphs(_graphs: ƒ.Node[]): void {

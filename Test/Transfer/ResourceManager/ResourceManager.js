@@ -28,9 +28,13 @@ var ResourceManager;
     }
     ResourceManager.Resource = Resource;
     function init(_event) {
-        // TestCustomResource();
-        CreateTestScene();
-        // LoadScene();
+        for (let call of [TestCustomResource, CreateTestScene, LoadScene]) {
+            let button = document.createElement("button");
+            button.addEventListener("click", call);
+            button.innerText = call.name;
+            document.body.appendChild(button);
+        }
+        document.body.appendChild(document.createElement("hr"));
     }
     function TestCustomResource() {
         let a = new Resource();
@@ -96,8 +100,31 @@ var ResourceManager;
         reconstructedInstance.getComponent(ResourceManager.ƒ.ComponentMesh).pivot.rotateX(50);
         showGraphs([original, graph, instance, reconstrucedGraph, reconstructedInstance]);
     }
-    function LoadScene() {
-        //
+    async function LoadScene() {
+        let response = await fetch("Test.json");
+        let content = await response.text();
+        console.groupCollapsed("Content");
+        console.log(content);
+        console.groupEnd();
+        let serialization = ResourceManager.ƒ.Serializer.parse(content);
+        console.groupCollapsed("Parsed");
+        console.log(serialization);
+        console.groupEnd();
+        console.groupCollapsed("Reconstructed");
+        let reconstruction = ResourceManager.ƒ.ResourceManager.deserialize(serialization);
+        console.log(reconstruction);
+        console.groupEnd();
+        for (let id in reconstruction) {
+            let resource = reconstruction[id];
+            if (resource instanceof ResourceManager.ƒ.NodeResource) {
+                let reconstrucedGraph = resource;
+                reconstrucedGraph.name = "ReconstructedGraph";
+                let reconstructedInstance = new ResourceManager.ƒ.NodeResourceInstance(reconstrucedGraph);
+                reconstructedInstance.name = "ReconstructedInstance";
+                showGraphs([reconstrucedGraph, reconstructedInstance]);
+            }
+        }
+        return reconstruction;
     }
     function showGraphs(_graphs) {
         let cmpCamera = new ResourceManager.ƒ.ComponentCamera();

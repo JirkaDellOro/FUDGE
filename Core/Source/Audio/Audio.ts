@@ -33,12 +33,16 @@ namespace FudgeCore {
       this.ready = true;
       this.dispatchEvent(new Event(EVENT_AUDIO.READY));
     }
-    
+
     //#region Transfer
     public serialize(): Serialization {
-      return { url: this.url };
+      return {
+        url: this.url,
+        idResource: this.idResource
+      };
     }
     public deserialize(_serialization: Serialization): Serializable {
+      ResourceManager.register(this, _serialization.idResource);
       this.load(_serialization.url);
       return this;
     }
