@@ -15,7 +15,6 @@ namespace FudgeCore {
     public url: RequestInfo;
     public idResource: string = undefined;
 
-
     constructor(_url?: string) {
       super();
       if (_url)

@@ -1,35 +1,43 @@
 {
-  "Material|2020-09-13T17:31:00.214Z|02550": {
+  "TextureImage|2020-09-16T08:42:38.261Z|62784": {
+    "ƒ.TextureImage": {
+      "url": "Image/Fudge_360.png"
+    }
+  },
+  "Material|2020-09-16T08:42:38.266Z|17140": {
     "ƒ.Material": {
-      "name": "TestMaterial",
-      "idResource": "Material|2020-09-13T17:31:00.214Z|02550",
-      "shader": "ShaderFlat",
+      "name": "Textured",
+      "idResource": "Material|2020-09-16T08:42:38.266Z|17140",
+      "shader": "ShaderTexture",
       "coat": {
-        "ƒ.CoatColored": {
+        "ƒ.CoatTextured": {
           "name": "Coat",
           "color": {
             "r": 1,
             "g": 1,
             "b": 1,
             "a": 1
-          }
+          },
+          "idTexture": "TextureImage|2020-09-16T08:42:38.261Z|62784"
         }
       }
     }
   },
-  "MeshPyramid|2020-09-13T17:31:00.216Z|80186": {
-    "ƒ.MeshPyramid": {
-      "idResource": "MeshPyramid|2020-09-13T17:31:00.216Z|80186"
+  "Audio|2020-09-16T08:42:38.267Z|59192": {
+    "ƒ.Audio": {
+      "url": "Audio/hypnotic.mp3"
     }
   },
-  "NodeResource|2020-09-13T17:31:00.219Z|50129": {
+  "NodeResource|2020-09-16T08:42:38.274Z|99192": {
     "ƒ.NodeResource": {
-      "name": "TestNode",
+      "name": "Resource",
       "components": {
         "ComponentMesh": [
           {
             "ƒ.ComponentMesh": {
-              "idMesh": "MeshPyramid|2020-09-13T17:31:00.216Z|80186",
+              "mesh": {
+                "ƒ.MeshPyramid": {}
+              },
               "pivot": {
                 "translation": {
                   "x": 0,
@@ -56,10 +64,33 @@
         "ComponentMaterial": [
           {
             "ƒ.ComponentMaterial": {
-              "idMaterial": "Material|2020-09-13T17:31:00.214Z|02550",
+              "clrPrimary": {
+                "r": 1,
+                "g": 1,
+                "b": 1,
+                "a": 1
+              },
+              "clrSecondary": {
+                "r": 1,
+                "g": 1,
+                "b": 1,
+                "a": 1
+              },
+              "pivot": {
+                "translation": {
+                  "x": 0,
+                  "y": 0
+                },
+                "rotation": 0,
+                "scaling": {
+                  "x": 1,
+                  "y": 1
+                }
+              },
               "Component": {
                 "active": true
-              }
+              },
+              "idMaterial": "Material|2020-09-16T08:42:38.266Z|17140"
             }
           }
         ],
@@ -69,6 +100,17 @@
               "active": true,
               "prefix": "Script: ",
               "count": 0
+            }
+          }
+        ],
+        "ComponentAudio": [
+          {
+            "ƒ.ComponentAudio": {
+              "active": true,
+              "idResource": "Audio|2020-09-16T08:42:38.267Z|59192",
+              "playing": true,
+              "loop": true,
+              "volume": 1
             }
           }
         ]

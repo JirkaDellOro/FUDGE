@@ -5,8 +5,8 @@ var ResourceManager;
     ResourceManager.ƒ = FudgeCore;
     // register namespace of custom resources
     ResourceManager.ƒ.Serializer.registerNamespace(ResourceManager);
-    // window.addEventListener("DOMContentLoaded", init);
-    document.addEventListener("click", init);
+    window.addEventListener("DOMContentLoaded", init);
+    // document.addEventListener("click", init);
     // Test custom resource
     class Resource {
         constructor() {
@@ -28,7 +28,9 @@ var ResourceManager;
     }
     ResourceManager.Resource = Resource;
     function init(_event) {
+        TestCustomResource();
         CreateTestScene();
+        LoadScene();
     }
     function TestCustomResource() {
         let a = new Resource();
@@ -50,6 +52,7 @@ var ResourceManager;
         await texture.load("Image/Fudge_360.png");
         let coatTextured = new ResourceManager.ƒ.CoatTextured();
         coatTextured.texture = texture;
+        coatTextured.color = ResourceManager.ƒ.Color.CSS("red");
         let material = new ResourceManager.ƒ.Material("Textured", ResourceManager.ƒ.ShaderTexture, coatTextured);
         let mesh = new ResourceManager.ƒ.MeshPyramid();
         // ƒ.ResourceManager.register(mesh);
@@ -61,13 +64,14 @@ var ResourceManager;
         // TODO: dynamically load Script! Is it among Resources?
         original.addComponent(new ResourceManager.Script());
         original.addComponent(cmpAudio);
-        let resource = ResourceManager.ƒ.ResourceManager.registerNodeAsResource(original, true);
-        let instance = new ResourceManager.ƒ.NodeResourceInstance(resource);
-        resource.name = "Resource";
+        let graph = ResourceManager.ƒ.ResourceManager.registerNodeAsResource(original, true);
+        let instance = new ResourceManager.ƒ.NodeResourceInstance(graph);
+        graph.name = "Resource";
         instance.name = "Instance";
-        let result = testSerialization();
+        let id = graph.idResource;
+        let reconstruction = testSerialization();
         console.groupCollapsed("Comparison");
-        let comparison = Compare.compare(ResourceManager.ƒ.ResourceManager.resources, result);
+        let comparison = Compare.compare(ResourceManager.ƒ.ResourceManager.resources, reconstruction);
         console.groupEnd();
         if (!comparison)
             console.error("Comparison failed");
@@ -81,21 +85,25 @@ var ResourceManager;
         console.groupCollapsed("Serialized instance");
         console.log(ResourceManager.ƒ.Serializer.stringify(instance.serialize()));
         console.groupEnd();
+        let reconstrucedGraph = reconstruction[id];
+        reconstrucedGraph.name = "ReconstructedGraph";
         let cmpCamera = new ResourceManager.ƒ.ComponentCamera();
         cmpCamera.pivot.translate(new ResourceManager.ƒ.Vector3(1, 1, -2));
         cmpCamera.pivot.lookAt(ResourceManager.ƒ.Vector3.Y(0.4));
-        for (let graph of [original, resource, instance]) {
+        for (let node of [original, graph, instance, reconstrucedGraph]) {
             let viewport = new ResourceManager.ƒ.Viewport();
             let canvas = document.createElement("canvas");
             let figure = document.createElement("figure");
             let caption = document.createElement("figcaption");
-            caption.textContent = graph.name;
+            caption.textContent = node.name;
             figure.appendChild(canvas);
             figure.appendChild(caption);
             document.body.appendChild(figure);
-            viewport.initialize(graph.name, graph, cmpCamera, canvas);
+            viewport.initialize(node.name, node, cmpCamera, canvas);
             viewport.draw();
         }
+    }
+    function LoadScene() {
     }
     function testSerialization() {
         console.groupCollapsed("Original");
@@ -105,6 +113,11 @@ var ResourceManager;
         let serialization = ResourceManager.ƒ.ResourceManager.serialize();
         console.log(serialization);
         console.groupEnd();
+        console.log(ResourceManager.ƒ.ResourceManager.resources);
+        console.log(ResourceManager.ƒ.ResourceManager.serialization);
+        ResourceManager.ƒ.ResourceManager.clear();
+        console.log(ResourceManager.ƒ.ResourceManager.resources);
+        console.log(ResourceManager.ƒ.ResourceManager.serialization);
         console.group("Stringified");
         let json = ResourceManager.ƒ.Serializer.stringify(serialization);
         console.log(json);

@@ -5,8 +5,8 @@ namespace ResourceManager {
   // register namespace of custom resources
   ƒ.Serializer.registerNamespace(ResourceManager);
 
-  // window.addEventListener("DOMContentLoaded", init);
-  document.addEventListener("click", init);
+  window.addEventListener("DOMContentLoaded", init);
+  // document.addEventListener("click", init);
 
   // Test custom resource
   export class Resource implements ƒ.SerializableResource {
@@ -28,7 +28,9 @@ namespace ResourceManager {
   }
 
   function init(_event: Event): void {
+    TestCustomResource();
     CreateTestScene();
+    LoadScene();
   }
 
   function TestCustomResource(): void {
@@ -56,6 +58,7 @@ namespace ResourceManager {
 
     let coatTextured: ƒ.CoatTextured = new ƒ.CoatTextured();
     coatTextured.texture = texture;
+    coatTextured.color = ƒ.Color.CSS("red");
     let material: ƒ.Material = new ƒ.Material("Textured", ƒ.ShaderTexture, coatTextured);
 
     let mesh: ƒ.Mesh = new ƒ.MeshPyramid();
@@ -72,15 +75,16 @@ namespace ResourceManager {
     original.addComponent(new Script());
     original.addComponent(cmpAudio);
 
-    let resource: ƒ.NodeResource = ƒ.ResourceManager.registerNodeAsResource(original, true);
-    let instance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(resource);
+    let graph: ƒ.NodeResource = ƒ.ResourceManager.registerNodeAsResource(original, true);
+    let instance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(graph);
 
-    resource.name = "Resource";
+    graph.name = "Resource";
     instance.name = "Instance";
+    let id: string = graph.idResource;
 
-    let result: ƒ.Resources = testSerialization();
+    let reconstruction: ƒ.Resources = testSerialization();
     console.groupCollapsed("Comparison");
-    let comparison: boolean = Compare.compare(ƒ.ResourceManager.resources, result);
+    let comparison: boolean = Compare.compare(ƒ.ResourceManager.resources, reconstruction);
     console.groupEnd();
     if (!comparison)
       console.error("Comparison failed");
@@ -97,22 +101,30 @@ namespace ResourceManager {
     console.log(ƒ.Serializer.stringify(instance.serialize()));
     console.groupEnd();
 
+    
+    let reconstrucedGraph: ƒ.NodeResource = <ƒ.NodeResource>reconstruction[id];
+    reconstrucedGraph.name = "ReconstructedGraph"
+
     let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
     cmpCamera.pivot.translate(new ƒ.Vector3(1, 1, -2));
     cmpCamera.pivot.lookAt(ƒ.Vector3.Y(0.4));
 
-    for (let graph of [original, resource, instance]) {
+    for (let node of [original, graph, instance, reconstrucedGraph]) {
       let viewport: ƒ.Viewport = new ƒ.Viewport();
       let canvas: HTMLCanvasElement = document.createElement("canvas");
       let figure: HTMLElement = document.createElement("figure");
       let caption: HTMLElement = document.createElement("figcaption");
-      caption.textContent = graph.name;
+      caption.textContent = node.name;
       figure.appendChild(canvas);
       figure.appendChild(caption);
       document.body.appendChild(figure);
-      viewport.initialize(graph.name, graph, cmpCamera, canvas);
+      viewport.initialize(node.name, node, cmpCamera, canvas);
       viewport.draw();
     }
+  }
+
+  function LoadScene(): void {
+
   }
 
   function testSerialization(): ƒ.Resources {
@@ -124,6 +136,12 @@ namespace ResourceManager {
     let serialization: ƒ.SerializationOfResources = ƒ.ResourceManager.serialize();
     console.log(serialization);
     console.groupEnd();
+    
+    console.log(ƒ.ResourceManager.resources);
+    console.log(ƒ.ResourceManager.serialization);
+    ƒ.ResourceManager.clear();
+    console.log(ƒ.ResourceManager.resources);
+    console.log(ƒ.ResourceManager.serialization);
 
     console.group("Stringified");
     let json: string = ƒ.Serializer.stringify(serialization);

@@ -37,6 +37,11 @@ namespace FudgeCore {
       delete (ResourceManager.serialization[_resource.idResource]);
     }
 
+    public static clear(): void {
+      ResourceManager.resources = {};
+      ResourceManager.serialization = {};
+    }
+
 
     /**
      * Generate a user readable and unique id using the type of the resource, the date and random numbers
