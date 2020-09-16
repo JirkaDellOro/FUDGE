@@ -12,15 +12,15 @@ namespace FudgeCore {
 
     constructor(_nodeResource: NodeResource) {
       super("NodeResourceInstance");
-      if (_nodeResource)
-        this.set(_nodeResource);
+      // if (_nodeResource)
+      //   this.set(_nodeResource);
     }
 
     /**
      * Recreate this node from the [[NodeResource]] referenced
      */
-    public reset(): void {
-      let resource: NodeResource = <NodeResource>ResourceManager.get(this.idSource);
+    public async reset(): Promise<void> {
+      let resource: NodeResource = <NodeResource> await ResourceManager.get(this.idSource);
       this.set(resource);
     }
 
@@ -31,8 +31,8 @@ namespace FudgeCore {
       return serialization;
     }
 
-    public deserialize(_serialization: Serialization): Serializable {
-      super.deserialize(_serialization);
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      await super.deserialize(_serialization);
       this.idSource = _serialization.idSource;
       return this;
     }
@@ -41,18 +41,16 @@ namespace FudgeCore {
      * Set this node to be a recreation of the [[NodeResource]] given
      * @param _nodeResource
      */
-    private set(_nodeResource: NodeResource): void {
+    public async set(_nodeResource: NodeResource): Promise<void> {
       // TODO: examine, if the serialization should be stored in the NodeResource for optimization
       let serialization: Serialization = Serializer.serialize(_nodeResource);
       //Serializer.deserialize(serialization);
       for (let path in serialization) {
-        this.deserialize(serialization[path]);
+        await this.deserialize(serialization[path]);
         break;
       }
       this.idSource = _nodeResource.idResource;
       this.dispatchEvent(new Event(EVENT.NODERESOURCE_INSTANTIATED));
     }
-
-
   }
 }

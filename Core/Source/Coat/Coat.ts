@@ -19,7 +19,7 @@ namespace FudgeCore {
             let serialization: Serialization = this.getMutator(true); 
             return serialization;
         }
-        public deserialize(_serialization: Serialization): Serializable {
+        public async deserialize(_serialization: Serialization): Promise<Serializable> {
             this.mutate(_serialization);
             return this;
         }

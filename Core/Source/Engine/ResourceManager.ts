@@ -70,7 +70,7 @@ namespace FudgeCore {
     /**
      * Retrieves the resource stored with the given id
      */
-    public static get(_idResource: string): SerializableResource {
+    public static async get(_idResource: string): Promise<SerializableResource> {
       let resource: SerializableResource = ResourceManager.resources[_idResource];
       if (!resource) {
         let serialization: Serialization = ResourceManager.serialization[_idResource];
@@ -78,7 +78,7 @@ namespace FudgeCore {
           Debug.error("Resource not found", _idResource);
           return null;
         }
-        resource = ResourceManager.deserializeResource(serialization);
+        resource = await ResourceManager.deserializeResource(serialization);
       }
       return resource;
     }
@@ -88,10 +88,10 @@ namespace FudgeCore {
      * @param _node A node to create the resource from
      * @param _replaceWithInstance if true (default), the node used as origin is replaced by a [[NodeResourceInstance]] of the [[NodeResource]] created
      */
-    public static registerNodeAsResource(_node: Node, _replaceWithInstance: boolean = true): NodeResource {
+    public static async registerNodeAsResource(_node: Node, _replaceWithInstance: boolean = true): Promise<NodeResource> {
       let serialization: Serialization = _node.serialize();
       let nodeResource: NodeResource = new NodeResource("NodeResource");
-      nodeResource.deserialize(serialization);
+      await nodeResource.deserialize(serialization);
       ResourceManager.register(nodeResource);
 
       if (_replaceWithInstance && _node.getParent()) {
@@ -100,6 +100,12 @@ namespace FudgeCore {
       }
 
       return nodeResource;
+    }
+
+    public static async createGraphInstance(_graph: NodeResource): Promise<NodeResourceInstance> {
+      let instance: NodeResourceInstance = new NodeResourceInstance(null); // TODO: cleanup since creation moved here
+      await instance.set(_graph);
+      return instance;
     }
 
     /**
@@ -120,20 +126,20 @@ namespace FudgeCore {
      * Create resources from a serialization, deleting all resources previously registered
      * @param _serialization 
      */
-    public static deserialize(_serialization: SerializationOfResources): Resources {
+    public static async deserialize(_serialization: SerializationOfResources): Promise<Resources> {
       ResourceManager.serialization = _serialization;
       ResourceManager.resources = {};
       for (let idResource in _serialization) {
         let serialization: Serialization = _serialization[idResource];
-        let resource: SerializableResource = ResourceManager.deserializeResource(serialization);
+        let resource: SerializableResource = await ResourceManager.deserializeResource(serialization);
         if (resource)
           ResourceManager.resources[idResource] = resource;
       }
       return ResourceManager.resources;
     }
 
-    private static deserializeResource(_serialization: Serialization): SerializableResource {
-      return <SerializableResource>Serializer.deserialize(_serialization);
+    private static async deserializeResource(_serialization: Serialization): Promise<SerializableResource> {
+      return <Promise<SerializableResource>>Serializer.deserialize(_serialization);
     }
   }
 }

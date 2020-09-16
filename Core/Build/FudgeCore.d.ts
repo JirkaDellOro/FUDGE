@@ -259,7 +259,7 @@ declare namespace FudgeCore {
     }
     interface Serializable {
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
     /**
      * Handles the external serialization and deserialization of [[Serializable]] objects. The internal process is handled by the objects themselves.
@@ -308,7 +308,7 @@ declare namespace FudgeCore {
          * including attached components, children, superclass-objects
          * @param _serialization
          */
-        static deserialize(_serialization: Serialization): Serializable;
+        static deserialize(_serialization: Serialization): Promise<Serializable>;
         static prettify(_json: string): string;
         /**
          * Returns a formatted, human readable JSON-String, representing the given [[Serializaion]] that may have been created by [[Serializer]].serialize
@@ -744,6 +744,9 @@ declare namespace FudgeCore {
         private eventsProcessed;
         private animationStructuresProcessed;
         constructor(_name: string, _animStructure?: AnimationStructure, _fps?: number);
+        get getLabels(): Enumerator;
+        get fps(): number;
+        set fps(_fps: number);
         /**
          * Generates a new "Mutator" with the information to apply to the [[Node]] the [[ComponentAnimator]] is attached to with [[Node.applyAnimation()]].
          * @param _time The time at which the animation currently is at
@@ -772,15 +775,12 @@ declare namespace FudgeCore {
          * @param _name name of the event to remove.
          */
         removeEvent(_name: string): void;
-        get getLabels(): Enumerator;
-        get fps(): number;
-        set fps(_fps: number);
         /**
          * (Re-)Calculate the total time of the Animation. Calculation-heavy, use only if actually needed.
          */
         calculateTotalTime(): void;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
         /**
@@ -917,6 +917,13 @@ declare namespace FudgeCore {
         private slopeIn;
         private slopeOut;
         constructor(_time?: number, _value?: number, _slopeIn?: number, _slopeOut?: number, _constant?: boolean);
+        /**
+         * Static comparation function to use in an array sort function to sort the keys by their time.
+         * @param _a the animation key to check
+         * @param _b the animation key to check against
+         * @returns >0 if a>b, 0 if a=b, <0 if a<b
+         */
+        static compare(_a: AnimationKey, _b: AnimationKey): number;
         get Time(): number;
         set Time(_time: number);
         get Value(): number;
@@ -927,15 +934,8 @@ declare namespace FudgeCore {
         set SlopeIn(_slope: number);
         get SlopeOut(): number;
         set SlopeOut(_slope: number);
-        /**
-         * Static comparation function to use in an array sort function to sort the keys by their time.
-         * @param _a the animation key to check
-         * @param _b the animation key to check against
-         * @returns >0 if a>b, 0 if a=b, <0 if a<b
-         */
-        static compare(_a: AnimationKey, _b: AnimationKey): number;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
     }
@@ -948,6 +948,7 @@ declare namespace FudgeCore {
      */
     class AnimationSequence extends Mutable implements Serializable {
         private keys;
+        get length(): number;
         /**
          * Evaluates the sequence at the given point in time.
          * @param _time the point in time at which to evaluate the sequence in milliseconds.
@@ -976,9 +977,8 @@ declare namespace FudgeCore {
          * @returns the AnimationKey at the index if it exists, null otherwise.
          */
         getKey(_index: number): AnimationKey;
-        get length(): number;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
         /**
          * Utility function that (re-)generates all functions in the sequence.
@@ -1003,7 +1003,7 @@ declare namespace FudgeCore {
          */
         load(_url: RequestInfo): Promise<void>;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 }
 declare namespace FudgeCore {
@@ -1060,7 +1060,7 @@ declare namespace FudgeCore {
         mutate(_mutator: Mutator): void;
         useRenderData(_shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(): void;
     }
     /**
@@ -1088,7 +1088,7 @@ declare namespace FudgeCore {
         color: Color;
         texture: TextureImage;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 }
 declare namespace FudgeCore {
@@ -1125,7 +1125,7 @@ declare namespace FudgeCore {
          */
         setContainer(_container: Node | null): void;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -1185,7 +1185,7 @@ declare namespace FudgeCore {
          */
         updateAnimation(_time: number): [Mutator, number];
         serialize(): Serialization;
-        deserialize(_s: Serialization): Serializable;
+        deserialize(_s: Serialization): Promise<Serializable>;
         /**
          * Updates the Animation.
          * Gets called every time the Loop fires the LOOP_FRAME Event.
@@ -1303,7 +1303,7 @@ declare namespace FudgeCore {
          */
         connect(_on: boolean): void;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         private hndAudioReady;
         private install;
         private createSource;
@@ -1368,16 +1368,16 @@ declare namespace FudgeCore {
         private aspectRatio;
         private direction;
         private backgroundEnabled;
-        getProjection(): PROJECTION;
-        getBackgroundEnabled(): boolean;
-        getAspect(): number;
-        getFieldOfView(): number;
-        getDirection(): FIELD_OF_VIEW;
         /**
          * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
          * @returns the world-projection-matrix
          */
         get ViewProjectionMatrix(): Matrix4x4;
+        getProjection(): PROJECTION;
+        getBackgroundEnabled(): boolean;
+        getAspect(): number;
+        getFieldOfView(): number;
+        getDirection(): FIELD_OF_VIEW;
         /**
          * Set the camera to perspective projection. The world origin is in the center of the canvaselement.
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
@@ -1399,7 +1399,7 @@ declare namespace FudgeCore {
         getProjectionRectangle(): Rectangle;
         project(_pointInWorldSpace: Vector3): Vector3;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         mutate(_mutator: Mutator): void;
         protected reduceMutator(_mutator: Mutator): void;
@@ -1434,7 +1434,7 @@ declare namespace FudgeCore {
         pivot: Matrix3x3;
         constructor(_material?: Material);
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 }
 declare namespace FudgeCore {
@@ -1448,7 +1448,7 @@ declare namespace FudgeCore {
         mesh: Mesh;
         constructor(_mesh?: Mesh);
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorForUserInterface(): MutatorForUserInterface;
     }
 }
@@ -1462,7 +1462,7 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         constructor();
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 }
 declare namespace FudgeCore {
@@ -1500,7 +1500,7 @@ declare namespace FudgeCore {
          */
         transform(_transform: Matrix4x4, _base?: BASE, _node?: Node): void;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -1738,7 +1738,7 @@ declare namespace FudgeCore {
          */
         getShader(): typeof Shader;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -1781,13 +1781,14 @@ declare namespace FudgeCore {
         /**
          * Retrieves the resource stored with the given id
          */
-        static get(_idResource: string): SerializableResource;
+        static get(_idResource: string): Promise<SerializableResource>;
         /**
          * Creates and registers a resource from a [[Node]], copying the complete graph starting with it
          * @param _node A node to create the resource from
          * @param _replaceWithInstance if true (default), the node used as origin is replaced by a [[NodeResourceInstance]] of the [[NodeResource]] created
          */
-        static registerNodeAsResource(_node: Node, _replaceWithInstance?: boolean): NodeResource;
+        static registerNodeAsResource(_node: Node, _replaceWithInstance?: boolean): Promise<NodeResource>;
+        static createGraphInstance(_graph: NodeResource): Promise<NodeResourceInstance>;
         /**
          * Serialize all resources
          */
@@ -1796,7 +1797,7 @@ declare namespace FudgeCore {
          * Create resources from a serialization, deleting all resources previously registered
          * @param _serialization
          */
-        static deserialize(_serialization: SerializationOfResources): Resources;
+        static deserialize(_serialization: SerializationOfResources): Promise<Resources>;
         private static deserializeResource;
     }
 }
@@ -2439,7 +2440,7 @@ declare namespace FudgeCore {
          */
         get copy(): Matrix3x3;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutator(): Mutator;
         mutate(_mutator: Mutator): void;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
@@ -2665,7 +2666,7 @@ declare namespace FudgeCore {
         get copy(): Matrix4x4;
         getTranslationTo(_target: Matrix4x4): Vector3;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutator(): Mutator;
         mutate(_mutator: Mutator): void;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
@@ -2926,7 +2927,7 @@ declare namespace FudgeCore {
         getIndexCount(): number;
         create(): void;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         /**Flip the Normals of a Mesh to render opposite side of each polygon*/
         flipNormals(): void;
         protected calculateFaceNormals(): Float32Array;
@@ -3099,7 +3100,6 @@ declare namespace FudgeCore {
          * @param _name The name by which the node can be called.
          */
         constructor(_name: string);
-        activate(_on: boolean): void;
         get isActive(): boolean;
         /**
          * Shortcut to retrieve this nodes [[ComponentTransform]]
@@ -3112,6 +3112,15 @@ declare namespace FudgeCore {
         get mtxLocal(): Matrix4x4;
         get mtxWorldInverse(): Matrix4x4;
         /**
+         * Returns the number of children attached to this
+         */
+        get nChildren(): number;
+        /**
+         * Generator yielding the node and all decendants in the graph below for iteration
+         */
+        get graph(): IterableIterator<Node>;
+        activate(_on: boolean): void;
+        /**
          * Returns a reference to this nodes parent node
          */
         getParent(): Node | null;
@@ -3119,10 +3128,6 @@ declare namespace FudgeCore {
          * Traces back the ancestors of this node and returns the first
          */
         getAncestor(): Node | null;
-        /**
-         * Returns the number of children attached to this
-         */
-        get nChildren(): number;
         /**
          * Returns child at the given index in the list of children
          */
@@ -3161,10 +3166,6 @@ declare namespace FudgeCore {
          * @param _with The node to replace with
          */
         replaceChild(_replace: Node, _with: Node): boolean;
-        /**
-         * Generator yielding the node and all decendants in the graph below for iteration
-         */
-        get graph(): IterableIterator<Node>;
         isUpdated(_timestampUpdate: number): boolean;
         isDescendantOf(_ancestor: Node): boolean;
         /**
@@ -3198,7 +3199,7 @@ declare namespace FudgeCore {
          */
         removeComponent(_component: Component): void;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         /**
          * Adds an event listener to the node. The given handler will be called when a matching event is passed to the node.
          * Deviating from the standard EventTarget, here the _handler must be a function and _capture is the only option.
@@ -3255,14 +3256,14 @@ declare namespace FudgeCore {
         /**
          * Recreate this node from the [[NodeResource]] referenced
          */
-        reset(): void;
+        reset(): Promise<void>;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         /**
          * Set this node to be a recreation of the [[NodeResource]] given
          * @param _nodeResource
          */
-        private set;
+        set(_nodeResource: NodeResource): Promise<void>;
     }
 }
 declare namespace FudgeCore {
@@ -3466,7 +3467,7 @@ declare namespace FudgeCore {
          */
         load(_url: string): Promise<void>;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
     /**
      * Texture created from a canvas

@@ -15,9 +15,9 @@ namespace FudgeCore {
       serialization.idTexture = this.texture.idResource;
       return serialization;
     }
-    public deserialize(_serialization: Serialization): Serializable {
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.mutate(_serialization);
-      this.texture = <TextureImage>ResourceManager.get(_serialization.idTexture);
+      this.texture = <TextureImage> await ResourceManager.get(_serialization.idTexture);
       return this;
     }
     //#endregion

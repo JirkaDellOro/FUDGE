@@ -34,12 +34,6 @@ namespace FudgeCore {
       this.name = _name;
     }
 
-    public activate(_on: boolean): void {
-      this.active = _on;
-      // TODO: check if COMPONENT_ACTIVATE/DEACTIVATE is the correct event to dispatch. Shouldn't it be something like NODE_ACTIVATE/DEACTIVATE?
-      this.dispatchEvent(new Event(_on ? EVENT.COMPONENT_ACTIVATE : EVENT.COMPONENT_DEACTIVATE));
-    }
-
     public get isActive(): boolean {
       return this.active;
     }
@@ -56,15 +50,35 @@ namespace FudgeCore {
      * Fails if no [[ComponentTransform]] is attached
      */
     public get mtxLocal(): Matrix4x4 {
-            return this.cmpTransform.local;
+      return this.cmpTransform.local;
     }
-    
+
     public get mtxWorldInverse(): Matrix4x4 {
       if (this.worldInverseUpdated != this.timestampUpdate)
         this.worldInverse = Matrix4x4.INVERSION(this.mtxWorld);
 
       this.worldInverseUpdated = this.timestampUpdate;
       return this.worldInverse;
+    }
+
+    /**
+     * Returns the number of children attached to this
+     */
+    public get nChildren(): number {
+      return this.children.length;
+    }
+    
+    /**
+     * Generator yielding the node and all decendants in the graph below for iteration
+     */
+    public get graph(): IterableIterator<Node> {
+      return this.getGraphGenerator();
+    }
+    
+    public activate(_on: boolean): void {
+      this.active = _on;
+      // TODO: check if COMPONENT_ACTIVATE/DEACTIVATE is the correct event to dispatch. Shouldn't it be something like NODE_ACTIVATE/DEACTIVATE?
+      this.dispatchEvent(new Event(_on ? EVENT.COMPONENT_ACTIVATE : EVENT.COMPONENT_DEACTIVATE));
     }
 
     // #region Scenetree
@@ -85,12 +99,6 @@ namespace FudgeCore {
       return ancestor;
     }
 
-    /**
-     * Returns the number of children attached to this
-     */
-    public get nChildren(): number {
-      return this.children.length;
-    }
 
     /**
      * Returns child at the given index in the list of children
@@ -202,12 +210,6 @@ namespace FudgeCore {
       return true;
     }
 
-    /**
-     * Generator yielding the node and all decendants in the graph below for iteration
-     */
-    public get graph(): IterableIterator<Node> {
-      return this.getGraphGenerator();
-    }
 
     public isUpdated(_timestampUpdate: number): boolean {
       return (this.timestampUpdate == _timestampUpdate);
@@ -350,20 +352,20 @@ namespace FudgeCore {
       return serialization;
     }
 
-    public deserialize(_serialization: Serialization): Serializable {
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.name = _serialization.name;
       // this.parent = is set when the nodes are added
 
       // deserialize components first so scripts can react to children being appended
       for (let type in _serialization.components) {
         for (let serializedComponent of _serialization.components[type]) {
-          let deserializedComponent: Component = <Component>Serializer.deserialize(serializedComponent);
+          let deserializedComponent: Component = <Component> await Serializer.deserialize(serializedComponent);
           this.addComponent(deserializedComponent);
         }
       }
 
       for (let serializedChild of _serialization.children) {
-        let deserializedChild: Node = <Node>Serializer.deserialize(serializedChild);
+        let deserializedChild: Node = <Node> await Serializer.deserialize(serializedChild);
         this.appendChild(deserializedChild);
       }
 

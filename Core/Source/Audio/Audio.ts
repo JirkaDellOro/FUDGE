@@ -41,9 +41,9 @@ namespace FudgeCore {
         idResource: this.idResource
       };
     }
-    public deserialize(_serialization: Serialization): Serializable {
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
       ResourceManager.register(this, _serialization.idResource);
-      this.load(_serialization.url);
+      await this.load(_serialization.url);
       return this;
     }
     //#endregion

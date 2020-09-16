@@ -108,7 +108,7 @@ namespace FudgeCore {
       return s;
     }
 
-    deserialize(_s: Serialization): Serializable {
+    public async deserialize(_s: Serialization): Promise<Serializable> {
       this.animation = new Animation("");
       this.animation.deserialize(_s.animation);
       this.playback = _s.playback;

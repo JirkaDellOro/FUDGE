@@ -111,7 +111,7 @@ namespace FudgeCore {
       };
       return serialization;
     }
-    public deserialize(_serialization: Serialization): Serializable {
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
       super.deserialize(_serialization[super.constructor.name]);
       this.local.deserialize(_serialization.local);
       return this;

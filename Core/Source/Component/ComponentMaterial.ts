@@ -34,12 +34,12 @@ namespace FudgeCore {
 
       return serialization;
     }
-    public deserialize(_serialization: Serialization): Serializable {
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
       let material: Material;
       if (_serialization.idMaterial)
-        material = <Material>ResourceManager.get(_serialization.idMaterial);
+        material = <Material> await ResourceManager.get(_serialization.idMaterial);
       else
-        material = <Material>Serializer.deserialize(_serialization.material);
+        material = <Material> await Serializer.deserialize(_serialization.material);
       this.material = material;
       super.deserialize(_serialization[super.constructor.name]);
       return this;

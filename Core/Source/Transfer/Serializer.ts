@@ -7,7 +7,7 @@ namespace FudgeCore {
     }
     export interface Serializable {
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 
     interface NamespaceRegister {
@@ -94,14 +94,14 @@ namespace FudgeCore {
          * including attached components, children, superclass-objects
          * @param _serialization 
          */
-        public static deserialize(_serialization: Serialization): Serializable {
+        public static async deserialize(_serialization: Serialization): Promise<Serializable> {
             let reconstruct: Serializable;
             try {
                 // loop constructed solely to access type-property. Only one expected!
                 for (let path in _serialization) {
                     // reconstruct = new (<General>Fudge)[typeName];
                     reconstruct = Serializer.reconstruct(path);
-                    reconstruct = reconstruct.deserialize(_serialization[path]);
+                    reconstruct = await reconstruct.deserialize(_serialization[path]);
                     return reconstruct;
                 }
             } catch (_error) {

@@ -19,10 +19,10 @@ var ResourceManager;
                 idReference: (this.reference) ? this.reference.idResource : null
             };
         }
-        deserialize(_serialization) {
+        async deserialize(_serialization) {
             this.idResource = _serialization.idResource;
             if (_serialization.idReference)
-                this.reference = ResourceManager.ƒ.ResourceManager.get(_serialization.idReference);
+                this.reference = await ResourceManager.ƒ.ResourceManager.get(_serialization.idReference);
             return this;
         }
     }
@@ -36,7 +36,7 @@ var ResourceManager;
         }
         document.body.appendChild(document.createElement("hr"));
     }
-    function TestCustomResource() {
+    async function TestCustomResource() {
         let a = new Resource();
         let c = new Resource();
         let b = new Resource();
@@ -46,7 +46,7 @@ var ResourceManager;
         a.reference = b;
         c.reference = b;
         // b.reference = b; // cyclic references disallowed at this point in time
-        let result = testSerialization();
+        let result = await testSerialization();
         console.group("Comparison");
         Compare.compare(ResourceManager.ƒ.ResourceManager.resources, result);
         console.groupEnd();
@@ -59,46 +59,49 @@ var ResourceManager;
         coatTextured.color = ResourceManager.ƒ.Color.CSS("red");
         let material = new ResourceManager.ƒ.Material("Textured", ResourceManager.ƒ.ShaderTexture, coatTextured);
         let mesh = new ResourceManager.ƒ.MeshPyramid();
-        // ƒ.ResourceManager.register(mesh);
+        ResourceManager.ƒ.ResourceManager.register(mesh);
         let audio = new ResourceManager.ƒ.Audio("Audio/hypnotic.mp3");
         let cmpAudio = new ResourceManager.ƒ.ComponentAudio(audio, true, true);
-        let original = new ResourceManager.ƒ.Node("Original");
-        original.addComponent(new ResourceManager.ƒ.ComponentMesh(mesh));
-        original.addComponent(new ResourceManager.ƒ.ComponentMaterial(material));
+        let source = new ResourceManager.ƒ.Node("Source");
+        source.addComponent(new ResourceManager.ƒ.ComponentMesh(mesh));
+        source.addComponent(new ResourceManager.ƒ.ComponentMaterial(material));
         // TODO: dynamically load Script! Is it among Resources?
-        original.addComponent(new ResourceManager.Script());
-        original.addComponent(cmpAudio);
-        let graph = ResourceManager.ƒ.ResourceManager.registerNodeAsResource(original, true);
-        let instance = new ResourceManager.ƒ.NodeResourceInstance(graph);
-        graph.name = "Resource";
+        source.addComponent(new ResourceManager.Script());
+        source.addComponent(cmpAudio);
+        let graph = await ResourceManager.ƒ.ResourceManager.registerNodeAsResource(source, true);
+        let instance = await ResourceManager.ƒ.ResourceManager.createGraphInstance(graph);
+        console.log("Source", source);
+        console.log("Graph", graph);
+        console.log("Instance", instance);
+        graph.name = "Graph";
         instance.name = "Instance";
         let id = graph.idResource;
-        let reconstruction = testSerialization();
+        let reconstruction = await testSerialization();
         console.groupCollapsed("Comparison");
         let comparison = Compare.compare(ResourceManager.ƒ.ResourceManager.resources, reconstruction);
         console.groupEnd();
         if (!comparison)
             console.error("Comparison failed");
-        // let s: Script;
-        // s = node.getComponent(Script);
-        // node.removeComponent(s);
-        // s = nodeResource.getComponent(Script);
-        // nodeResource.removeComponent(s);
-        // node.getComponent(ƒ.ComponentAudio).activate(false);
+        // // let s: Script;
+        // // s = node.getComponent(Script);
+        // // node.removeComponent(s);
+        // // s = nodeResource.getComponent(Script);
+        // // nodeResource.removeComponent(s);
+        // // node.getComponent(ƒ.ComponentAudio).activate(false);
         ResourceManager.ƒ.AudioManager.default.listenTo(instance);
         console.groupCollapsed("Serialized instance");
         console.log(ResourceManager.ƒ.Serializer.stringify(instance.serialize()));
         console.groupEnd();
         let reconstrucedGraph = reconstruction[id];
         reconstrucedGraph.name = "ReconstructedGraph";
-        let reconstructedInstance = new ResourceManager.ƒ.NodeResourceInstance(reconstrucedGraph);
+        let reconstructedInstance = await ResourceManager.ƒ.ResourceManager.createGraphInstance(reconstrucedGraph);
         reconstructedInstance.name = "ReconstructedInstance";
-        original.getComponent(ResourceManager.ƒ.ComponentMesh).pivot.rotateX(10);
+        source.getComponent(ResourceManager.ƒ.ComponentMesh).pivot.rotateX(10);
         graph.getComponent(ResourceManager.ƒ.ComponentMesh).pivot.rotateX(20);
         instance.getComponent(ResourceManager.ƒ.ComponentMesh).pivot.rotateX(30);
         reconstrucedGraph.getComponent(ResourceManager.ƒ.ComponentMesh).pivot.rotateX(40);
         reconstructedInstance.getComponent(ResourceManager.ƒ.ComponentMesh).pivot.rotateX(50);
-        showGraphs([original, graph, instance, reconstrucedGraph, reconstructedInstance]);
+        showGraphs([source, graph, instance, reconstrucedGraph, reconstructedInstance]);
     }
     async function LoadScene() {
         let response = await fetch("Test.json");
@@ -111,14 +114,14 @@ var ResourceManager;
         console.log(serialization);
         console.groupEnd();
         console.groupCollapsed("Reconstructed");
-        let reconstruction = ResourceManager.ƒ.ResourceManager.deserialize(serialization);
+        let reconstruction = await ResourceManager.ƒ.ResourceManager.deserialize(serialization);
         console.log(reconstruction);
         console.groupEnd();
         for (let id in reconstruction) {
             let resource = reconstruction[id];
             if (resource instanceof ResourceManager.ƒ.NodeResource) {
                 resource.name = "ReconstructedGraph";
-                let reconstructedInstance = new ResourceManager.ƒ.NodeResourceInstance(resource);
+                let reconstructedInstance = await ResourceManager.ƒ.ResourceManager.createGraphInstance(resource);
                 reconstructedInstance.name = "ReconstructedInstance";
                 showGraphs([resource, reconstructedInstance]);
                 ResourceManager.ƒ.AudioManager.default.listenTo(reconstructedInstance);
@@ -131,6 +134,7 @@ var ResourceManager;
         cmpCamera.pivot.translate(new ResourceManager.ƒ.Vector3(1, 1, -2));
         cmpCamera.pivot.lookAt(ResourceManager.ƒ.Vector3.Y(0.4));
         for (let node of _graphs) {
+            console.log(node.name, node);
             let viewport = new ResourceManager.ƒ.Viewport();
             let canvas = document.createElement("canvas");
             let figure = document.createElement("figure");
@@ -143,7 +147,7 @@ var ResourceManager;
             viewport.draw();
         }
     }
-    function testSerialization() {
+    async function testSerialization() {
         console.groupCollapsed("Original");
         console.log(ResourceManager.ƒ.ResourceManager.resources);
         console.groupEnd();
@@ -165,7 +169,7 @@ var ResourceManager;
         console.log(serialization);
         console.groupEnd();
         console.groupCollapsed("Reconstructed");
-        let reconstruction = ResourceManager.ƒ.ResourceManager.deserialize(serialization);
+        let reconstruction = await ResourceManager.ƒ.ResourceManager.deserialize(serialization);
         console.log(reconstruction);
         console.groupEnd();
         return reconstruction;

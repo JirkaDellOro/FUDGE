@@ -7,6 +7,10 @@ namespace FudgeCore {
   export class AnimationSequence extends Mutable implements Serializable {
     private keys: AnimationKey[] = [];
 
+    get length(): number {
+      return this.keys.length;
+    }
+    
     /**
      * Evaluates the sequence at the given point in time.
      * @param _time the point in time at which to evaluate the sequence in milliseconds.
@@ -77,9 +81,6 @@ namespace FudgeCore {
       return this.keys[_index];
     }
 
-    get length(): number {
-      return this.keys.length;
-    }
 
     //#region transfer
     serialize(): Serialization {
@@ -92,7 +93,7 @@ namespace FudgeCore {
       }
       return s;
     }
-    deserialize(_serialization: Serialization): Serializable {
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
       for (let i: number = 0; i < _serialization.keys.length; i++) {
         // this.keys.push(<AnimationKey>Serializer.deserialize(_serialization.keys[i]));
         let k: AnimationKey = new AnimationKey();

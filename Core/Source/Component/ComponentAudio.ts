@@ -174,9 +174,9 @@ namespace FudgeCore {
       // TODO: serialize panner parameters
       return serialization;
     }
-    public deserialize(_serialization: Serialization): Serializable {
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
       super.deserialize(_serialization);
-      let audio: Audio = <Audio>ResourceManager.get(_serialization.idResource);
+      let audio: Audio = <Audio>await ResourceManager.get(_serialization.idResource);
       this.createSource(audio, _serialization.loop);
       this.volume = _serialization.volume;
       this.play(_serialization.playing);
@@ -186,6 +186,7 @@ namespace FudgeCore {
 
 
     private hndAudioReady: EventListener = (_event: Event) => {
+      console.log("Start Audio!");
       if (this.playing)
         this.play(true);
     }

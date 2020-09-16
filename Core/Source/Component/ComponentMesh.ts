@@ -28,12 +28,12 @@ namespace FudgeCore {
       return serialization;
     }
 
-    public deserialize(_serialization: Serialization): Serializable {
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
       let mesh: Mesh;
       if (_serialization.idMesh)
-        mesh = <Mesh>ResourceManager.get(_serialization.idMesh);
+        mesh = <Mesh> await ResourceManager.get(_serialization.idMesh);
       else
-        mesh = <Mesh>Serializer.deserialize(_serialization.mesh);
+        mesh = <Mesh> await Serializer.deserialize(_serialization.mesh);
       this.mesh = mesh;
 
       this.pivot.deserialize(_serialization.pivot);

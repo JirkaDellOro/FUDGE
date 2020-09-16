@@ -19,10 +19,10 @@ namespace ResourceManager {
         idReference: (this.reference) ? this.reference.idResource : null
       };
     }
-    public deserialize(_serialization: ƒ.Serialization): Resource {
+    public async deserialize(_serialization: ƒ.Serialization): Promise<Resource> {
       this.idResource = _serialization.idResource;
       if (_serialization.idReference)
-        this.reference = <Resource>ƒ.ResourceManager.get(_serialization.idReference);
+        this.reference = <Resource> await ƒ.ResourceManager.get(_serialization.idReference);
       return this;
     }
   }
@@ -37,7 +37,7 @@ namespace ResourceManager {
     document.body.appendChild(document.createElement("hr"));
   }
 
-  function TestCustomResource(): void {
+  async function TestCustomResource(): Promise<void> {
     let a: Resource = new Resource();
     let c: Resource = new Resource();
     let b: Resource = new Resource();
@@ -49,7 +49,7 @@ namespace ResourceManager {
     c.reference = b;
     // b.reference = b; // cyclic references disallowed at this point in time
 
-    let result: ƒ.Resources = testSerialization();
+    let result: ƒ.Resources = await testSerialization();
     console.group("Comparison");
     Compare.compare(ƒ.ResourceManager.resources, result);
     console.groupEnd();
@@ -66,39 +66,42 @@ namespace ResourceManager {
     let material: ƒ.Material = new ƒ.Material("Textured", ƒ.ShaderTexture, coatTextured);
 
     let mesh: ƒ.Mesh = new ƒ.MeshPyramid();
-    // ƒ.ResourceManager.register(mesh);
+    ƒ.ResourceManager.register(mesh);
 
     let audio: ƒ.Audio = new ƒ.Audio("Audio/hypnotic.mp3");
     let cmpAudio: ƒ.ComponentAudio = new ƒ.ComponentAudio(audio, true, true);
 
 
-    let original: ƒ.Node = new ƒ.Node("Original");
-    original.addComponent(new ƒ.ComponentMesh(mesh));
-    original.addComponent(new ƒ.ComponentMaterial(material));
+    let source: ƒ.Node = new ƒ.Node("Source");
+    source.addComponent(new ƒ.ComponentMesh(mesh));
+    source.addComponent(new ƒ.ComponentMaterial(material));
     // TODO: dynamically load Script! Is it among Resources?
-    original.addComponent(new Script());
-    original.addComponent(cmpAudio);
+    source.addComponent(new Script());
+    source.addComponent(cmpAudio);
 
-    let graph: ƒ.NodeResource = ƒ.ResourceManager.registerNodeAsResource(original, true);
-    let instance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(graph);
+    let graph: ƒ.NodeResource = await ƒ.ResourceManager.registerNodeAsResource(source, true);
+    let instance: ƒ.NodeResourceInstance = await ƒ.ResourceManager.createGraphInstance(graph);
+    console.log("Source", source);
+    console.log("Graph", graph);
+    console.log("Instance", instance);
 
-    graph.name = "Resource";
+    graph.name = "Graph";
     instance.name = "Instance";
     let id: string = graph.idResource;
 
-    let reconstruction: ƒ.Resources = testSerialization();
+    let reconstruction: ƒ.Resources = await testSerialization();
     console.groupCollapsed("Comparison");
     let comparison: boolean = Compare.compare(ƒ.ResourceManager.resources, reconstruction);
     console.groupEnd();
     if (!comparison)
       console.error("Comparison failed");
 
-    // let s: Script;
-    // s = node.getComponent(Script);
-    // node.removeComponent(s);
-    // s = nodeResource.getComponent(Script);
-    // nodeResource.removeComponent(s);
-    // node.getComponent(ƒ.ComponentAudio).activate(false);
+    // // let s: Script;
+    // // s = node.getComponent(Script);
+    // // node.removeComponent(s);
+    // // s = nodeResource.getComponent(Script);
+    // // nodeResource.removeComponent(s);
+    // // node.getComponent(ƒ.ComponentAudio).activate(false);
 
     ƒ.AudioManager.default.listenTo(instance);
     console.groupCollapsed("Serialized instance");
@@ -108,16 +111,16 @@ namespace ResourceManager {
 
     let reconstrucedGraph: ƒ.NodeResource = <ƒ.NodeResource>reconstruction[id];
     reconstrucedGraph.name = "ReconstructedGraph";
-    let reconstructedInstance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(reconstrucedGraph);
+    let reconstructedInstance: ƒ.NodeResourceInstance = await ƒ.ResourceManager.createGraphInstance(reconstrucedGraph);
     reconstructedInstance.name = "ReconstructedInstance";
 
-    original.getComponent(ƒ.ComponentMesh).pivot.rotateX(10);
+    source.getComponent(ƒ.ComponentMesh).pivot.rotateX(10);
     graph.getComponent(ƒ.ComponentMesh).pivot.rotateX(20);
     instance.getComponent(ƒ.ComponentMesh).pivot.rotateX(30);
     reconstrucedGraph.getComponent(ƒ.ComponentMesh).pivot.rotateX(40);
     reconstructedInstance.getComponent(ƒ.ComponentMesh).pivot.rotateX(50);
 
-    showGraphs([original, graph, instance, reconstrucedGraph, reconstructedInstance]);
+    showGraphs([source, graph, instance, reconstrucedGraph, reconstructedInstance]);
   }
 
 
@@ -136,7 +139,7 @@ namespace ResourceManager {
     console.groupEnd();
 
     console.groupCollapsed("Reconstructed");
-    let reconstruction: ƒ.Resources = ƒ.ResourceManager.deserialize(serialization);
+    let reconstruction: ƒ.Resources = await ƒ.ResourceManager.deserialize(serialization);
     console.log(reconstruction);
     console.groupEnd();
 
@@ -144,7 +147,7 @@ namespace ResourceManager {
       let resource: ƒ.SerializableResource = reconstruction[id];
       if (resource instanceof ƒ.NodeResource) {
         resource.name = "ReconstructedGraph";
-        let reconstructedInstance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(resource);
+        let reconstructedInstance: ƒ.NodeResourceInstance = await ƒ.ResourceManager.createGraphInstance(resource);
         reconstructedInstance.name = "ReconstructedInstance";
 
         showGraphs([resource, reconstructedInstance]);
@@ -160,6 +163,7 @@ namespace ResourceManager {
     cmpCamera.pivot.lookAt(ƒ.Vector3.Y(0.4));
 
     for (let node of _graphs) {
+      console.log(node.name, node);
       let viewport: ƒ.Viewport = new ƒ.Viewport();
       let canvas: HTMLCanvasElement = document.createElement("canvas");
       let figure: HTMLElement = document.createElement("figure");
@@ -173,7 +177,7 @@ namespace ResourceManager {
     }
   }
 
-  function testSerialization(): ƒ.Resources {
+  async function testSerialization(): Promise<ƒ.Resources> {
     console.groupCollapsed("Original");
     console.log(ƒ.ResourceManager.resources);
     console.groupEnd();
@@ -200,7 +204,7 @@ namespace ResourceManager {
     console.groupEnd();
 
     console.groupCollapsed("Reconstructed");
-    let reconstruction: ƒ.Resources = ƒ.ResourceManager.deserialize(serialization);
+    let reconstruction: ƒ.Resources = await ƒ.ResourceManager.deserialize(serialization);
     console.log(reconstruction);
     console.groupEnd();
 
