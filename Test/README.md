@@ -29,14 +29,15 @@ To be described
 
 ## Rendering
 - [MultiVieportMultiCanvas](WebGL/MultiViewportMultiCanvas/Test.html)  
-  Ein gleiches Objekt soll in 4 verschiedenen Viewports aus 4 Blickrichtungen angezeigt werden.
-
+  Ein gleiches Objekt soll in 4 verschiedenen Viewports aus 4 Blickrichtungen angezeigt werden.  
 - [RectMapping](WebGL/TestRectMapping/Test.html)  
 Die Dimension und Auflösung des Viewport soll auf Änderungen in den Transformationsfeldern auf der rechten Seite reagieren. Entsprechend des Framings, siehe [Framing](../Documentation/Design/Framing.svg)  
 
 ## Resources
 - [NodeResource](Resources/NodeResource/Test.html)   
 Im Viewport sollen viele Pyramiden angezeigt werden, um die ein anderes Objekt kreist.  
+- [ResourceManager](Resources/ResourceManager/Test.html)   
+Graph und interne Resourcen speichern und zusammen mit externen laden und Graph rekonstruieren  
 
 ## Shading
 - [Light](Shading/Light/Light.html)  
