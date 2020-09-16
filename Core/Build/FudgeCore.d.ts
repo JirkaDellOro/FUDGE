@@ -2939,6 +2939,20 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    class MeshCylinder extends Mesh {
+        static readonly iSubclass: number;
+        private segments;
+        normals: Float32Array;
+        constructor(_segments?: number);
+        create(): void;
+        private getUnitVertices;
+        protected createVertices(): Float32Array;
+        protected createTextureUVs(): Float32Array;
+        protected createIndices(): Uint16Array;
+        protected createFaceNormals(): Float32Array;
+    }
+}
+declare namespace FudgeCore {
     /** This function type takes x and z as Parameters and returns a number - to be used as a heightmap.
      * x and z are mapped from 0 to 1 when used to generate a Heightmap Mesh
      * @authors Simon Storl-Schulke, HFU, 2020*/

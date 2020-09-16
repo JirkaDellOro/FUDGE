@@ -1,7 +1,7 @@
-///<reference path="../../../node_modules/electron/Electron.d.ts"/>
-///<reference types="../../../Core/Build/FudgeCore"/>
-///<reference types="../../../Aid/Build/FudgeAid"/>
-///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
+///<reference path="../../../node_modules/electron/electron.d.ts"/>
+// ///<reference types="../../../Core/Build/FudgeCore"/>
+// ///<reference types="../../../Aid/Build/FudgeAid"/>
+// ///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
 
 namespace Fudge {
 
@@ -49,6 +49,11 @@ namespace Fudge {
       // openAnimationPanel();
     });
 
+    ipcRenderer.on("openPanelModeller", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
+      ƒ.Debug.log("openPanelModeller");
+      openModeller();
+    });
+
     // HACK!
     ipcRenderer.on("updateNode", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
       ƒ.Debug.log("updateNode");
@@ -61,6 +66,15 @@ namespace Fudge {
     node.addChild(node2);
     node2.cmpTransform.local.translateZ(2);
     Editor.add(PanelGraph, "Graph", Object({ node: node })); //Object.create(null,  {node: { writable: true, value: node }}));
+  }
+
+  function openModeller(): void {
+    node = new ƒ.Node("graph");
+    let cooSys: ƒ.Node = new ƒAid.NodeCoordinateSystem("WorldCooSys");
+    let cube: ƒ.Node = new ƒAid.Node("cube", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderUniColor, new ƒ.CoatColored()), new ƒ.MeshCube());
+    node.addChild(cooSys);
+    node.addChild(cube);
+    Editor.add(PanelModeller, "Modeller", Object({ node: node }));
   }
 
   // function openAnimationPanel(): void {
@@ -95,5 +109,4 @@ namespace Fudge {
 
     return node;
   }
-
 }

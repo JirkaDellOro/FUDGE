@@ -39,6 +39,7 @@ var Fudge;
             this.goldenLayout = new GoldenLayout(config); //This might be a problem because it can't use a specific place to put it.
             this.goldenLayout.registerComponent("Welcome", welcome);
             this.goldenLayout.registerComponent(Fudge.PANEL.GRAPH, Fudge.PanelGraph);
+            this.goldenLayout.registerComponent(Fudge.PANEL.MODELLER, Fudge.PanelModeller);
             this.goldenLayout.init();
         }
         /** Send custom copies of the given event to the views */
@@ -62,15 +63,15 @@ var Fudge;
         container.getElement().html("<div>Welcome</div>");
     }
 })(Fudge || (Fudge = {}));
-///<reference path="../../../node_modules/electron/Electron.d.ts"/>
-///<reference types="../../../Core/Build/FudgeCore"/>
-///<reference types="../../../Aid/Build/FudgeAid"/>
-///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
+///<reference path="../../../node_modules/electron/electron.d.ts"/>
+// ///<reference types="../../../Core/Build/FudgeCore"/>
+// ///<reference types="../../../Aid/Build/FudgeAid"/>
+// ///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
 var Fudge;
-///<reference path="../../../node_modules/electron/Electron.d.ts"/>
-///<reference types="../../../Core/Build/FudgeCore"/>
-///<reference types="../../../Aid/Build/FudgeAid"/>
-///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
+///<reference path="../../../node_modules/electron/electron.d.ts"/>
+// ///<reference types="../../../Core/Build/FudgeCore"/>
+// ///<reference types="../../../Aid/Build/FudgeAid"/>
+// ///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒAid = FudgeAid;
@@ -106,6 +107,10 @@ var Fudge;
             ƒ.Debug.log("openPanelAnimation");
             // openAnimationPanel();
         });
+        Fudge.ipcRenderer.on("openPanelModeller", (_event, _args) => {
+            ƒ.Debug.log("openPanelModeller");
+            openModeller();
+        });
         // HACK!
         Fudge.ipcRenderer.on("updateNode", (_event, _args) => {
             ƒ.Debug.log("updateNode");
@@ -117,6 +122,14 @@ var Fudge;
         node.addChild(node2);
         node2.cmpTransform.local.translateZ(2);
         Fudge.Editor.add(Fudge.PanelGraph, "Graph", Object({ node: node })); //Object.create(null,  {node: { writable: true, value: node }}));
+    }
+    function openModeller() {
+        node = new ƒ.Node("graph");
+        let cooSys = new ƒAid.NodeCoordinateSystem("WorldCooSys");
+        let cube = new ƒAid.Node("cube", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderUniColor, new ƒ.CoatColored()), new ƒ.MeshCube());
+        node.addChild(cooSys);
+        node.addChild(cube);
+        Fudge.Editor.add(Fudge.PanelModeller, "Modeller", Object({ node: node }));
     }
     // function openAnimationPanel(): void {
     //   let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
@@ -281,6 +294,33 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
+    class ControllerModeller {
+        constructor(viewport) {
+            this.onclick = (_event) => {
+                this.viewport.createPickBuffers();
+                let mousePos = new ƒ.Vector2(_event.canvasX, _event.canvasY);
+                // console.log(_event);
+                let posRender = this.viewport.pointClientToRender(new ƒ.Vector2(mousePos.x, this.viewport.getClientRectangle().height - mousePos.y));
+                //this.viewport.getRayFromClient(mousePos);
+                let hits = this.viewport.pickNodeAt(posRender);
+                for (let hit of hits) {
+                    if (hit.zBuffer != 0)
+                        console.log(hit);
+                }
+                this.viewport.draw();
+            };
+            this.viewport = viewport;
+            this.viewport.adjustingFrames = true;
+            this.viewport.addEventListener("\u0192pointerdown" /* DOWN */, this.onclick);
+            this.viewport.activatePointerEvent("\u0192pointerdown" /* DOWN */, true);
+            console.log("controller called");
+        }
+    }
+    Fudge.ControllerModeller = ControllerModeller;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    var ƒ = FudgeCore;
     var ƒUi = FudgeUserInterface;
     class ControllerTreeNode extends ƒUi.TreeController {
         getLabel(_node) {
@@ -341,6 +381,7 @@ var Fudge;
         VIEW["RENDER"] = "ViewRender";
         VIEW["COMPONENTS"] = "ViewComponents";
         VIEW["CAMERA"] = "ViewCamera";
+        VIEW["MODELLER"] = "ViewModeller";
         // PROJECT = ViewProject,
         // SKETCH = ViewSketch,
         // MESH = ViewMesh,
@@ -368,6 +409,7 @@ var Fudge;
             this.container.setTitle(_title);
         }
         getContextMenu(_callback) {
+            console.log(Fudge.ipcRenderer);
             const menu = new Fudge.remote.Menu();
             Fudge.ContextMenu.appendCopyPaste(menu);
             return menu;
@@ -385,6 +427,7 @@ var Fudge;
     let PANEL;
     (function (PANEL) {
         PANEL["GRAPH"] = "PanelGraph";
+        PANEL["MODELLER"] = "PanelModeller";
     })(PANEL = Fudge.PANEL || (Fudge.PANEL = {}));
     /**
      * Base class for all [[Panel]]s aggregating [[View]]s
@@ -475,6 +518,31 @@ var Fudge;
         }
     }
     Fudge.PanelGraph = PanelGraph;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class PanelModeller extends Fudge.Panel {
+        constructor(_container, _state) {
+            super(_container, _state);
+            this.goldenLayout.registerComponent(Fudge.VIEW.MODELLER, Fudge.ViewModellerScene);
+            this.goldenLayout.registerComponent(Fudge.VIEW.HIERARCHY, Fudge.ViewHierarchy);
+            let inner = this.goldenLayout.root.contentItems[0];
+            inner.addChild({
+                type: "column", content: [{
+                        type: "component", componentName: Fudge.VIEW.MODELLER, componentState: _state, title: "Modeller"
+                    }]
+            });
+            inner.addChild({
+                type: "column", content: [{
+                        type: "component", componentName: Fudge.VIEW.HIERARCHY, componentState: _state, title: "Hierarchy"
+                    }]
+            });
+        }
+        cleanup() {
+            throw new Error("Method not implemented.");
+        }
+    }
+    Fudge.PanelModeller = PanelModeller;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -1257,6 +1325,46 @@ var Fudge;
         }
     }
     Fudge.ViewHierarchy = ViewHierarchy;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    var ƒ = FudgeCore;
+    var ƒaid = FudgeAid;
+    class ViewModellerScene extends Fudge.View {
+        constructor(_container, _state) {
+            super(_container, _state);
+            this.animate = (_e) => {
+                this.viewport.setGraph(this.graph);
+                if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
+                    this.viewport.draw();
+            };
+            this.graph = _state["node"];
+            this.createUserInterface();
+            new Fudge.ControllerModeller(this.viewport);
+            // this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.hndEvent);
+            // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
+        }
+        createUserInterface() {
+            let cmpCamera = new ƒ.ComponentCamera();
+            cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
+            cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
+            cmpCamera.projectCentral(1, 45);
+            this.canvas = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
+            let container = document.createElement("div");
+            container.style.borderWidth = "0px";
+            document.body.appendChild(this.canvas);
+            this.viewport = new ƒ.Viewport();
+            this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
+            this.viewport.draw();
+            this.dom.append(this.canvas);
+            // ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
+            // ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
+        }
+        cleanup() {
+            ƒ.Loop.removeEventListener("loopFrame" /* LOOP_FRAME */, this.animate);
+        }
+    }
+    Fudge.ViewModellerScene = ViewModellerScene;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {

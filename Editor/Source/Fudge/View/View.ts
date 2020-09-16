@@ -7,7 +7,8 @@ namespace Fudge {
     ANIMATION = "ViewAnimation",
     RENDER = "ViewRender",
     COMPONENTS = "ViewComponents",
-    CAMERA = "ViewCamera"
+    CAMERA = "ViewCamera",
+    MODELLER = "ViewModeller"
     // PROJECT = ViewProject,
     // SKETCH = ViewSketch,
     // MESH = ViewMesh,
@@ -46,6 +47,7 @@ namespace Fudge {
     }
 
     protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
+      console.log(ipcRenderer);
       const menu: Electron.Menu = new remote.Menu();
       ContextMenu.appendCopyPaste(menu);
       return menu;

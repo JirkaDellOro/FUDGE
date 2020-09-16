@@ -13,6 +13,7 @@ var Main;
         MENU[MENU["NODE_UPDATE"] = 5] = "NODE_UPDATE";
         MENU[MENU["DEVTOOLS_OPEN"] = 6] = "DEVTOOLS_OPEN";
         MENU[MENU["PANEL_ANIMATION_OPEN"] = 7] = "PANEL_ANIMATION_OPEN";
+        MENU[MENU["PANEL_MODELLER_OPEN"] = 8] = "PANEL_MODELLER_OPEN";
     })(MENU || (MENU = {}));
     const { app, BrowserWindow, Menu, ipcMain } = require("electron");
     let fudge;
@@ -46,7 +47,8 @@ var Main;
     function addWindow(_url, width = defaultWidth, height = defaultHeight) {
         let window = new BrowserWindow({
             width: width, height: height, webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                enableRemoteModule: true
             }
         });
         window.webContents.openDevTools();
@@ -75,6 +77,9 @@ var Main;
                 break;
             case MENU.PANEL_ANIMATION_OPEN:
                 send(_window, "openPanelAnimation");
+                break;
+            case MENU.PANEL_MODELLER_OPEN:
+                send(_window, "openPanelModeller");
                 break;
             case MENU.QUIT:
                 app.quit();
@@ -108,6 +113,9 @@ var Main;
                     },
                     {
                         label: "Animation", id: String(MENU.PANEL_ANIMATION_OPEN), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+I" : "Ctrl+I"
+                    },
+                    {
+                        label: "Modeller", id: String(MENU.PANEL_MODELLER_OPEN), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+M" : "Ctrl+M"
                     }
                 ]
             },

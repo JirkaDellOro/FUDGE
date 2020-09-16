@@ -1,6 +1,3 @@
-/// <reference types="../../../core/build/fudgecore" />
-/// <reference types="../../../aid/build/fudgeaid" />
-/// <reference types="../../../userinterface/build/fudgeuserinterface" />
 /// <reference types="golden-layout" />
 declare namespace Fudge {
     enum EVENT_EDITOR {
@@ -67,6 +64,14 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
+    class ControllerModeller {
+        viewport: ƒ.Viewport;
+        constructor(viewport: ƒ.Viewport);
+        private onclick;
+    }
+}
+declare namespace Fudge {
+    import ƒ = FudgeCore;
     import ƒUi = FudgeUserInterface;
     class ControllerTreeNode extends ƒUi.TreeController<ƒ.Node> {
         getLabel(_node: ƒ.Node): string;
@@ -84,7 +89,8 @@ declare namespace Fudge {
         ANIMATION = "ViewAnimation",
         RENDER = "ViewRender",
         COMPONENTS = "ViewComponents",
-        CAMERA = "ViewCamera"
+        CAMERA = "ViewCamera",
+        MODELLER = "ViewModeller"
     }
     /**
      * Base class for all [[View]]s to support generic functionality
@@ -105,7 +111,8 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     enum PANEL {
-        GRAPH = "PanelGraph"
+        GRAPH = "PanelGraph",
+        MODELLER = "PanelModeller"
     }
     /**
      * Base class for all [[Panel]]s aggregating [[View]]s
@@ -136,6 +143,12 @@ declare namespace Fudge {
         protected cleanup(): void;
         private hndSetGraph;
         private hndFocusNode;
+    }
+}
+declare namespace Fudge {
+    class PanelModeller extends Panel {
+        constructor(_container: GoldenLayout.Container, _state: Object);
+        protected cleanup(): void;
     }
 }
 declare namespace Fudge {
@@ -276,6 +289,18 @@ declare namespace Fudge {
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         private hndEvent;
+    }
+}
+declare namespace Fudge {
+    import ƒ = FudgeCore;
+    class ViewModellerScene extends View {
+        viewport: ƒ.Viewport;
+        canvas: HTMLCanvasElement;
+        graph: ƒ.Node;
+        constructor(_container: GoldenLayout.Container, _state: Object);
+        createUserInterface(): void;
+        private animate;
+        protected cleanup(): void;
     }
 }
 declare namespace Fudge {

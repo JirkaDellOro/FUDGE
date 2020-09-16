@@ -43,6 +43,7 @@ namespace Fudge {
 
       this.goldenLayout.registerComponent("Welcome", welcome);
       this.goldenLayout.registerComponent(PANEL.GRAPH, PanelGraph);
+      this.goldenLayout.registerComponent(PANEL.MODELLER, PanelModeller);
       this.goldenLayout.init();
     }
 

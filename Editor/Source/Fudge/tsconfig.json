@@ -16,6 +16,11 @@
     // "sourceRoot": "./",
     //"rootDir": ".",                         /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
     "composite": true,                        /* Enable project compilation */
-  },
-  "exclude": []
+  },"include": [
+    "../../../Core/Build",
+    "../../../Aid/Build",
+    "../../../UserInterface/Build",
+    "./"
+  ], 
+ "exclude": []
 }

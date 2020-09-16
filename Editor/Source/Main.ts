@@ -10,7 +10,8 @@ namespace Main {
     NODE_DELETE,
     NODE_UPDATE,
     DEVTOOLS_OPEN,
-    PANEL_ANIMATION_OPEN
+    PANEL_ANIMATION_OPEN,
+    PANEL_MODELLER_OPEN
   }
 
   const { app, BrowserWindow, Menu, ipcMain } = require("electron");
@@ -48,7 +49,10 @@ namespace Main {
   function addWindow(_url: string, width: number = defaultWidth, height: number = defaultHeight): Electron.BrowserWindow {
     let window: Electron.BrowserWindow = new BrowserWindow({
       width: width, height: height, webPreferences: {        // preload: path.join(__dirname, "preload.js"),
-        nodeIntegration: true
+        nodeIntegration: true,
+        /* the remote module is deprecated and automatically disabled in electron 10. This flag can be used to enable the remote module
+        enableRemoteModule: true
+        */
       }
     });
 
@@ -81,6 +85,9 @@ namespace Main {
         break;
       case MENU.PANEL_ANIMATION_OPEN:
         send(_window, "openPanelAnimation");
+        break;
+      case MENU.PANEL_MODELLER_OPEN:
+        send(_window, "openPanelModeller");
         break;
       case MENU.QUIT:
         app.quit();
@@ -115,7 +122,11 @@ namespace Main {
           },
           {
             label: "Animation", id: String(MENU.PANEL_ANIMATION_OPEN), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+I" : "Ctrl+I"
+          },
+          {
+            label: "Modeller", id: String(MENU.PANEL_MODELLER_OPEN), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+M" : "Ctrl+M"
           }
+
         ]
       },
       {
