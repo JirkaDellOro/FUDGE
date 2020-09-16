@@ -101,15 +101,32 @@ namespace ResourceManager {
     console.log(ƒ.Serializer.stringify(instance.serialize()));
     console.groupEnd();
 
-    
-    let reconstrucedGraph: ƒ.NodeResource = <ƒ.NodeResource>reconstruction[id];
-    reconstrucedGraph.name = "ReconstructedGraph"
 
+    let reconstrucedGraph: ƒ.NodeResource = <ƒ.NodeResource>reconstruction[id];
+    reconstrucedGraph.name = "ReconstructedGraph";
+    let reconstructedInstance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(reconstrucedGraph);
+    reconstructedInstance.name = "ReconstructedInstance";
+
+    original.getComponent(ƒ.ComponentMesh).pivot.rotateX(10);
+    graph.getComponent(ƒ.ComponentMesh).pivot.rotateX(20);
+    instance.getComponent(ƒ.ComponentMesh).pivot.rotateX(30);
+    reconstrucedGraph.getComponent(ƒ.ComponentMesh).pivot.rotateX(40);
+    reconstructedInstance.getComponent(ƒ.ComponentMesh).pivot.rotateX(50);
+    
+    showGraphs([original, graph, instance, reconstrucedGraph, reconstructedInstance]);
+  }
+
+
+  function LoadScene(): void {
+    //
+  }
+
+  function showGraphs(_graphs: ƒ.Node[]): void {
     let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
     cmpCamera.pivot.translate(new ƒ.Vector3(1, 1, -2));
     cmpCamera.pivot.lookAt(ƒ.Vector3.Y(0.4));
 
-    for (let node of [original, graph, instance, reconstrucedGraph]) {
+    for (let node of _graphs) {
       let viewport: ƒ.Viewport = new ƒ.Viewport();
       let canvas: HTMLCanvasElement = document.createElement("canvas");
       let figure: HTMLElement = document.createElement("figure");
@@ -123,10 +140,6 @@ namespace ResourceManager {
     }
   }
 
-  function LoadScene(): void {
-
-  }
-
   function testSerialization(): ƒ.Resources {
     console.groupCollapsed("Original");
     console.log(ƒ.ResourceManager.resources);
@@ -136,7 +149,7 @@ namespace ResourceManager {
     let serialization: ƒ.SerializationOfResources = ƒ.ResourceManager.serialize();
     console.log(serialization);
     console.groupEnd();
-    
+
     console.log(ƒ.ResourceManager.resources);
     console.log(ƒ.ResourceManager.serialization);
     ƒ.ResourceManager.clear();

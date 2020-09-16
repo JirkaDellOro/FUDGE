@@ -87,10 +87,23 @@ var ResourceManager;
         console.groupEnd();
         let reconstrucedGraph = reconstruction[id];
         reconstrucedGraph.name = "ReconstructedGraph";
+        let reconstructedInstance = new ResourceManager.ƒ.NodeResourceInstance(reconstrucedGraph);
+        reconstructedInstance.name = "ReconstructedInstance";
+        original.getComponent(ResourceManager.ƒ.ComponentMesh).pivot.rotateX(10);
+        graph.getComponent(ResourceManager.ƒ.ComponentMesh).pivot.rotateX(20);
+        instance.getComponent(ResourceManager.ƒ.ComponentMesh).pivot.rotateX(30);
+        reconstrucedGraph.getComponent(ResourceManager.ƒ.ComponentMesh).pivot.rotateX(40);
+        reconstructedInstance.getComponent(ResourceManager.ƒ.ComponentMesh).pivot.rotateX(50);
+        showGraphs([original, graph, instance, reconstrucedGraph, reconstructedInstance]);
+    }
+    function LoadScene() {
+        //
+    }
+    function showGraphs(_graphs) {
         let cmpCamera = new ResourceManager.ƒ.ComponentCamera();
         cmpCamera.pivot.translate(new ResourceManager.ƒ.Vector3(1, 1, -2));
         cmpCamera.pivot.lookAt(ResourceManager.ƒ.Vector3.Y(0.4));
-        for (let node of [original, graph, instance, reconstrucedGraph]) {
+        for (let node of _graphs) {
             let viewport = new ResourceManager.ƒ.Viewport();
             let canvas = document.createElement("canvas");
             let figure = document.createElement("figure");
@@ -102,8 +115,6 @@ var ResourceManager;
             viewport.initialize(node.name, node, cmpCamera, canvas);
             viewport.draw();
         }
-    }
-    function LoadScene() {
     }
     function testSerialization() {
         console.groupCollapsed("Original");
