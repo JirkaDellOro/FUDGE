@@ -117,11 +117,11 @@ var ResourceManager;
         for (let id in reconstruction) {
             let resource = reconstruction[id];
             if (resource instanceof ResourceManager.ƒ.NodeResource) {
-                let reconstrucedGraph = resource;
-                reconstrucedGraph.name = "ReconstructedGraph";
-                let reconstructedInstance = new ResourceManager.ƒ.NodeResourceInstance(reconstrucedGraph);
+                resource.name = "ReconstructedGraph";
+                let reconstructedInstance = new ResourceManager.ƒ.NodeResourceInstance(resource);
                 reconstructedInstance.name = "ReconstructedInstance";
-                showGraphs([reconstrucedGraph, reconstructedInstance]);
+                showGraphs([resource, reconstructedInstance]);
+                ResourceManager.ƒ.AudioManager.default.listenTo(reconstructedInstance);
             }
         }
         return reconstruction;

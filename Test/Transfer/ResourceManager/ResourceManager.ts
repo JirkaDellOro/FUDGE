@@ -143,12 +143,12 @@ namespace ResourceManager {
     for (let id in reconstruction) {
       let resource: ƒ.SerializableResource = reconstruction[id];
       if (resource instanceof ƒ.NodeResource) {
-        let reconstrucedGraph: ƒ.NodeResource = resource;
-        reconstrucedGraph.name = "ReconstructedGraph";
-        let reconstructedInstance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(reconstrucedGraph);
+        resource.name = "ReconstructedGraph";
+        let reconstructedInstance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(resource);
         reconstructedInstance.name = "ReconstructedInstance";
 
-        showGraphs([reconstrucedGraph, reconstructedInstance]);
+        showGraphs([resource, reconstructedInstance]);
+        ƒ.AudioManager.default.listenTo(reconstructedInstance);
       }
     }
     return reconstruction;
