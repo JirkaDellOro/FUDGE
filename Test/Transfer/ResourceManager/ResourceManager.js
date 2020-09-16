@@ -5,8 +5,8 @@ var ResourceManager;
     ResourceManager.ƒ = FudgeCore;
     // register namespace of custom resources
     ResourceManager.ƒ.Serializer.registerNamespace(ResourceManager);
-    window.addEventListener("DOMContentLoaded", init);
-    // document.addEventListener("click", init);
+    // window.addEventListener("DOMContentLoaded", init);
+    document.addEventListener("click", init);
     // Test custom resource
     class Resource {
         constructor() {
@@ -55,17 +55,16 @@ var ResourceManager;
         // ƒ.ResourceManager.register(mesh);
         let audio = new ResourceManager.ƒ.Audio("Audio/hypnotic.mp3");
         let cmpAudio = new ResourceManager.ƒ.ComponentAudio(audio, true, true);
-        let node = new ResourceManager.ƒ.Node("TestNode");
-        node.addComponent(new ResourceManager.ƒ.ComponentMesh(mesh));
-        node.addComponent(new ResourceManager.ƒ.ComponentMaterial(material));
+        let original = new ResourceManager.ƒ.Node("Original");
+        original.addComponent(new ResourceManager.ƒ.ComponentMesh(mesh));
+        original.addComponent(new ResourceManager.ƒ.ComponentMaterial(material));
         // TODO: dynamically load Script! Is it among Resources?
-        node.addComponent(new ResourceManager.Script());
-        node.addComponent(cmpAudio);
-        let nodeResource = ResourceManager.ƒ.ResourceManager.registerNodeAsResource(node, true);
-        // ƒ.Debug.log(node);
-        // ƒ.Debug.log(nodeResource);
-        let instance = new ResourceManager.ƒ.NodeResourceInstance(nodeResource);
-        // ƒ.Debug.log(instance);
+        original.addComponent(new ResourceManager.Script());
+        original.addComponent(cmpAudio);
+        let resource = ResourceManager.ƒ.ResourceManager.registerNodeAsResource(original, true);
+        let instance = new ResourceManager.ƒ.NodeResourceInstance(resource);
+        resource.name = "Resource";
+        instance.name = "Instance";
         let result = testSerialization();
         console.groupCollapsed("Comparison");
         let comparison = Compare.compare(ResourceManager.ƒ.ResourceManager.resources, result);
@@ -85,12 +84,16 @@ var ResourceManager;
         let cmpCamera = new ResourceManager.ƒ.ComponentCamera();
         cmpCamera.pivot.translate(new ResourceManager.ƒ.Vector3(1, 1, -2));
         cmpCamera.pivot.lookAt(ResourceManager.ƒ.Vector3.Y(0.4));
-        for (let graph of [node, instance]) {
+        for (let graph of [original, resource, instance]) {
             let viewport = new ResourceManager.ƒ.Viewport();
             let canvas = document.createElement("canvas");
-            canvas.style.display = "block";
-            viewport.initialize(graph.name, node, cmpCamera, canvas);
-            document.body.appendChild(canvas);
+            let figure = document.createElement("figure");
+            let caption = document.createElement("figcaption");
+            caption.textContent = graph.name;
+            figure.appendChild(canvas);
+            figure.appendChild(caption);
+            document.body.appendChild(figure);
+            viewport.initialize(graph.name, graph, cmpCamera, canvas);
             viewport.draw();
         }
     }

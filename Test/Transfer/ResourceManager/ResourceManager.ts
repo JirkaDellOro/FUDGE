@@ -5,8 +5,8 @@ namespace ResourceManager {
   // register namespace of custom resources
   ƒ.Serializer.registerNamespace(ResourceManager);
 
-  window.addEventListener("DOMContentLoaded", init);
-  // document.addEventListener("click", init);
+  // window.addEventListener("DOMContentLoaded", init);
+  document.addEventListener("click", init);
 
   // Test custom resource
   export class Resource implements ƒ.SerializableResource {
@@ -65,21 +65,18 @@ namespace ResourceManager {
     let cmpAudio: ƒ.ComponentAudio = new ƒ.ComponentAudio(audio, true, true);
 
 
-    let node: ƒ.Node = new ƒ.Node("TestNode");
-    node.addComponent(new ƒ.ComponentMesh(mesh));
-    node.addComponent(new ƒ.ComponentMaterial(material));
+    let original: ƒ.Node = new ƒ.Node("Original");
+    original.addComponent(new ƒ.ComponentMesh(mesh));
+    original.addComponent(new ƒ.ComponentMaterial(material));
     // TODO: dynamically load Script! Is it among Resources?
-    node.addComponent(new Script());
-    node.addComponent(cmpAudio);
+    original.addComponent(new Script());
+    original.addComponent(cmpAudio);
 
-    let nodeResource: ƒ.NodeResource = ƒ.ResourceManager.registerNodeAsResource(node, true);
+    let resource: ƒ.NodeResource = ƒ.ResourceManager.registerNodeAsResource(original, true);
+    let instance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(resource);
 
-    // ƒ.Debug.log(node);
-    // ƒ.Debug.log(nodeResource);
-
-    let instance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(nodeResource);
-    // ƒ.Debug.log(instance);
-
+    resource.name = "Resource";
+    instance.name = "Instance";
 
     let result: ƒ.Resources = testSerialization();
     console.groupCollapsed("Comparison");
@@ -104,12 +101,16 @@ namespace ResourceManager {
     cmpCamera.pivot.translate(new ƒ.Vector3(1, 1, -2));
     cmpCamera.pivot.lookAt(ƒ.Vector3.Y(0.4));
 
-    for (let graph of [node, instance]) {
+    for (let graph of [original, resource, instance]) {
       let viewport: ƒ.Viewport = new ƒ.Viewport();
       let canvas: HTMLCanvasElement = document.createElement("canvas");
-      canvas.style.display = "block";
-      viewport.initialize(graph.name, node, cmpCamera, canvas);
-      document.body.appendChild(canvas);
+      let figure: HTMLElement = document.createElement("figure");
+      let caption: HTMLElement = document.createElement("figcaption");
+      caption.textContent = graph.name;
+      figure.appendChild(canvas);
+      figure.appendChild(caption);
+      document.body.appendChild(figure);
+      viewport.initialize(graph.name, graph, cmpCamera, canvas);
       viewport.draw();
     }
   }
