@@ -28,9 +28,9 @@ namespace ResourceManager {
   }
 
   function init(_event: Event): void {
-    TestCustomResource();
+    // TestCustomResource();
     CreateTestScene();
-    LoadScene();
+    // LoadScene();
   }
 
   function TestCustomResource(): void {

@@ -28,9 +28,9 @@ var ResourceManager;
     }
     ResourceManager.Resource = Resource;
     function init(_event) {
-        TestCustomResource();
+        // TestCustomResource();
         CreateTestScene();
-        LoadScene();
+        // LoadScene();
     }
     function TestCustomResource() {
         let a = new Resource();
