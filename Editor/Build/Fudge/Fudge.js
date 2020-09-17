@@ -136,11 +136,16 @@ var Fudge;
         ƒ.Debug.info(content);
         ƒ.Debug.groupEnd();
         let serialization = ƒ.Serializer.parse(content);
-        let node = await ƒ.Serializer.deserialize(serialization);
+        let reconstruction = await ƒ.ResourceManager.deserialize(serialization);
         ƒ.Debug.groupCollapsed("Deserialized");
-        ƒ.Debug.info(node);
+        ƒ.Debug.info(reconstruction);
         ƒ.Debug.groupEnd();
-        return node;
+        // TODO: this is a hack to get first NodeResource to display -> move all to project view
+        for (let id in reconstruction) {
+            if (id.startsWith("Node"))
+                return reconstruction[id];
+        }
+        return null;
     }
 })(Fudge || (Fudge = {}));
 var Fudge;

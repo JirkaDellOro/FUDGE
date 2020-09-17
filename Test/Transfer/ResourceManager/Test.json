@@ -1,14 +1,14 @@
 {
-  "TextureImage|2020-09-17T09:11:05.992Z|56419": {
+  "TextureImage|2020-09-17T13:45:49:208Z|63205": {
     "ƒ.TextureImage": {
       "url": "Image/Fudge_360.png",
-      "idResource": "TextureImage|2020-09-17T09:11:05.992Z|56419"
+      "idResource": "TextureImage|2020-09-17T13:45:49:208Z|63205"
     }
   },
-  "Material|2020-09-17T09:11:05.998Z|19471": {
+  "Material|2020-09-17T13:45:49:213Z|86118": {
     "ƒ.Material": {
       "name": "Textured",
-      "idResource": "Material|2020-09-17T09:11:05.998Z|19471",
+      "idResource": "Material|2020-09-17T13:45:49:213Z|86118",
       "shader": "ShaderTexture",
       "coat": {
         "ƒ.CoatTextured": {
@@ -19,25 +19,25 @@
             "b": 0,
             "a": 1
           },
-          "idTexture": "TextureImage|2020-09-17T09:11:05.992Z|56419"
+          "idTexture": "TextureImage|2020-09-17T13:45:49:208Z|63205"
         }
       }
     }
   },
-  "MeshPyramid|2020-09-17T09:11:05.998Z|51960": {
+  "MeshPyramid|2020-09-17T13:45:49:214Z|02793": {
     "ƒ.MeshPyramid": {
-      "idResource": "MeshPyramid|2020-09-17T09:11:05.998Z|51960"
+      "idResource": "MeshPyramid|2020-09-17T13:45:49:214Z|02793"
     }
   },
-  "MeshCube|2020-09-17T09:11:05.999Z|16881": {
+  "MeshCube|2020-09-17T13:45:49:214Z|68011": {
     "ƒ.MeshCube": {
-      "idResource": "MeshCube|2020-09-17T09:11:05.999Z|16881"
+      "idResource": "MeshCube|2020-09-17T13:45:49:214Z|68011"
     }
   },
-  "Material|2020-09-17T09:11:05.999Z|44759": {
+  "Material|2020-09-17T13:45:49:214Z|06759": {
     "ƒ.Material": {
       "name": "Flat",
-      "idResource": "Material|2020-09-17T09:11:05.999Z|44759",
+      "idResource": "Material|2020-09-17T13:45:49:214Z|06759",
       "shader": "ShaderUniColor",
       "coat": {
         "ƒ.CoatColored": {
@@ -52,13 +52,13 @@
       }
     }
   },
-  "Audio|2020-09-17T09:11:05.999Z|80761": {
+  "Audio|2020-09-17T13:45:49:215Z|31014": {
     "ƒ.Audio": {
       "url": "Audio/hypnotic.mp3",
-      "idResource": "Audio|2020-09-17T09:11:05.999Z|80761"
+      "idResource": "Audio|2020-09-17T13:45:49:215Z|31014"
     }
   },
-  "NodeResource|2020-09-17T09:11:06.008Z|70303": {
+  "NodeResource|2020-09-17T13:45:49:223Z|59033": {
     "ƒ.NodeResource": {
       "name": "Graph",
       "components": {
@@ -117,14 +117,14 @@
               "Component": {
                 "active": true
               },
-              "idMaterial": "Material|2020-09-17T09:11:05.998Z|19471"
+              "idMaterial": "Material|2020-09-17T13:45:49:213Z|86118"
             }
           }
         ],
         "ComponentMesh": [
           {
             "ƒ.ComponentMesh": {
-              "idMesh": "MeshPyramid|2020-09-17T09:11:05.998Z|51960",
+              "idMesh": "MeshPyramid|2020-09-17T13:45:49:214Z|02793",
               "pivot": {
                 "translation": {
                   "x": 0,
@@ -161,7 +161,7 @@
           {
             "ƒ.ComponentAudio": {
               "active": true,
-              "idResource": "Audio|2020-09-17T09:11:05.999Z|80761",
+              "idResource": "Audio|2020-09-17T13:45:49:215Z|31014",
               "playing": true,
               "loop": true,
               "volume": 1
@@ -229,14 +229,14 @@
                     "Component": {
                       "active": true
                     },
-                    "idMaterial": "Material|2020-09-17T09:11:05.999Z|44759"
+                    "idMaterial": "Material|2020-09-17T13:45:49:214Z|06759"
                   }
                 }
               ],
               "ComponentMesh": [
                 {
                   "ƒ.ComponentMesh": {
-                    "idMesh": "MeshCube|2020-09-17T09:11:05.999Z|16881",
+                    "idMesh": "MeshCube|2020-09-17T13:45:49:214Z|68011",
                     "pivot": {
                       "translation": {
                         "x": 0,
@@ -264,7 +264,8 @@
             "children": []
           }
         }
-      ]
+      ],
+      "idResource": "NodeResource|2020-09-17T13:45:49:223Z|59033"
     }
   }
 }

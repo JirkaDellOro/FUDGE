@@ -58,13 +58,13 @@ namespace ResourceManager {
 
 
   async function CreateTestScene(): Promise<void> {
-    // let texture: ƒ.TextureImage = new ƒ.TextureImage();
-    // await texture.load("Image/Fudge_360.png");
+    let texture: ƒ.TextureImage = new ƒ.TextureImage();
+    await texture.load("Image/Fudge_360.png");
 
-    // let coatTextured: ƒ.CoatTextured = new ƒ.CoatTextured();
-    // coatTextured.texture = texture;
-    // coatTextured.color = ƒ.Color.CSS("red");
-    // let mtrTexture: ƒ.Material = new ƒ.Material("Textured", ƒ.ShaderTexture, coatTextured);
+    let coatTextured: ƒ.CoatTextured = new ƒ.CoatTextured();
+    coatTextured.texture = texture;
+    coatTextured.color = ƒ.Color.CSS("red");
+    let mtrTexture: ƒ.Material = new ƒ.Material("Textured", ƒ.ShaderTexture, coatTextured);
 
     let pyramid: ƒ.Mesh = new ƒ.MeshPyramid();
     ƒ.ResourceManager.register(pyramid);
@@ -79,7 +79,7 @@ namespace ResourceManager {
     let cmpAudio: ƒ.ComponentAudio = new ƒ.ComponentAudio(audio, true, true);
 
 
-    let source: ƒAid.Node = new ƒAid.Node("Source", ƒ.Matrix4x4.IDENTITY(), mtrFlat, pyramid);
+    let source: ƒAid.Node = new ƒAid.Node("Source", ƒ.Matrix4x4.IDENTITY(), mtrTexture, pyramid);
     // TODO: dynamically load Script! Is it among Resources?
     source.addComponent(new Script());
     source.addComponent(cmpAudio);

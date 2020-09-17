@@ -87,13 +87,18 @@ namespace Fudge {
     ƒ.Debug.groupEnd();
 
     let serialization: ƒ.Serialization = ƒ.Serializer.parse(content);
-    let node: ƒ.Node = <ƒ.Node> await ƒ.Serializer.deserialize(serialization);
+    let reconstruction: ƒ.Resources = await ƒ.ResourceManager.deserialize(serialization);
 
     ƒ.Debug.groupCollapsed("Deserialized");
-    ƒ.Debug.info(node);
+    ƒ.Debug.info(reconstruction);
     ƒ.Debug.groupEnd();
 
-    return node;
-  }
+    // TODO: this is a hack to get first NodeResource to display -> move all to project view
+    for (let id in reconstruction) {
+      if (id.startsWith("Node"))
+        return <ƒ.NodeResource>reconstruction[id];
+    }
 
+    return null;
+  }
 }
