@@ -3,7 +3,7 @@ var ScriptSerialization;
     var ƒ = FudgeCore;
     ƒ.Serializer.registerNamespace(ScriptSerialization);
     window.addEventListener("DOMContentLoaded", init);
-    function init() {
+    async function init() {
         ƒ.Debug.log("Start");
         let root = new ƒ.Node("Root");
         let graph = new ƒ.Node("Graph");
@@ -15,7 +15,7 @@ var ScriptSerialization;
         let test = createTest();
         graph.addChild(test);
         test.name = "Original";
-        let resource = ƒ.ResourceManager.registerNodeAsResource(test, false);
+        let resource = await ƒ.ResourceManager.registerNodeAsResource(test, false);
         resource.name = "Resource";
         let instance = new ƒ.NodeResourceInstance(resource);
         instance.name = "Instance";
@@ -40,7 +40,7 @@ var ScriptSerialization;
         console.groupEnd();
         let parsed = ƒ.Serializer.parse(json);
         ƒ.Debug.log("Parsed", parsed);
-        let reconstruct = ƒ.Serializer.deserialize(parsed);
+        let reconstruct = await ƒ.Serializer.deserialize(parsed);
         ƒ.Debug.log("Reconstructed graph", reconstruct);
         console.groupEnd();
         root.addChild(reconstruct);

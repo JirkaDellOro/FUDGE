@@ -3,10 +3,10 @@ namespace TestSerializer {
 
   window.addEventListener("DOMContentLoaded", init);
 
-  function init(): void {
+  async function init(): Promise<void> {
     Scenes.createMiniScene();
 
-    let result: ƒ.Serializable = testSerialization(Scenes.node);
+    let result: ƒ.Serializable = await testSerialization(Scenes.node);
     console.group("Comparison");
     Compare.compare(Scenes.node, result);
     console.groupEnd();
@@ -18,7 +18,7 @@ namespace TestSerializer {
     // console.groupEnd();
   }
 
-  function testSerialization(_object: ƒ.Serializable): ƒ.Serializable {
+  async function testSerialization(_object: ƒ.Serializable): Promise<ƒ.Serializable> {
     console.group("Original");
     console.log(_object);
     console.groupEnd();
@@ -39,7 +39,7 @@ namespace TestSerializer {
     console.groupEnd();
 
     console.group("Reconstructed");
-    let reconstruction: ƒ.Serializable = ƒ.Serializer.deserialize(serialization);
+    let reconstruction: ƒ.Serializable = await ƒ.Serializer.deserialize(serialization);
     console.log(reconstruction);
     console.groupEnd();
 

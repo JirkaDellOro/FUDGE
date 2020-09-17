@@ -23,8 +23,8 @@ var ElectronFileIo;
         ipcRenderer.on("save", (event, arg) => {
             save(graph);
         });
-        ipcRenderer.on("open", (event, arg) => {
-            let node = open();
+        ipcRenderer.on("open", async (event, arg) => {
+            let node = await open();
             displayNode(node);
         });
     }
@@ -43,7 +43,7 @@ var ElectronFileIo;
         fs.writeFileSync(filename, content);
     }
     ElectronFileIo.save = save;
-    function open() {
+    async function open() {
         // @ts-ignore
         let filenames = dialog.showOpenDialogSync(null, { title: "Load Graph", buttonLabel: "Load Graph", properties: ["openFile"] });
         let content = fs.readFileSync(filenames[0], { encoding: "utf-8" });
@@ -51,7 +51,7 @@ var ElectronFileIo;
         ƒ.Debug.log(content);
         console.groupEnd();
         let serialization = ƒ.Serializer.parse(content);
-        let node = ƒ.Serializer.deserialize(serialization);
+        let node = await ƒ.Serializer.deserialize(serialization);
         console.groupCollapsed("Deserialized");
         console.log(node);
         console.groupEnd();

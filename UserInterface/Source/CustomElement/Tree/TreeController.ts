@@ -41,6 +41,6 @@ namespace FudgeUserInterface {
      * Return a list of copies of the objects given for copy & paste
      * @param _focussed The object currently having focus
      */
-    public abstract copy(_originals: T[]): T[];
+    public abstract async copy(_originals: T[]): Promise<T[]>;
   }
 }

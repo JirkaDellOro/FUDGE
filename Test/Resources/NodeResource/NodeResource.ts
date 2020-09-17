@@ -4,7 +4,7 @@ namespace NodeResource {
   ƒ.Serializer.registerNamespace(NodeResource);
   window.addEventListener("DOMContentLoaded", init);
 
-  function init(): void {
+  async function init(): Promise<void> {
     ƒ.Debug.log("Start");
 
     let graph: ƒ.Node = new ƒ.Node("Root");
@@ -19,7 +19,7 @@ namespace NodeResource {
 
     // Fudge["AnimateSatellite"] = AnimateSatellite;
     // console.log(AnimateSatellite["namespaceX"]);
-    let resource: ƒ.NodeResource = ƒ.ResourceManager.registerNodeAsResource(center, false);
+    let resource: ƒ.NodeResource = await ƒ.ResourceManager.registerNodeAsResource(center, false);
 
     let dim: ƒ.Vector3 = new ƒ.Vector3(2, 2, 2);
 

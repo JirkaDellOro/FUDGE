@@ -1,4 +1,4 @@
-///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../../Core/Build/FudgeCore"/>
 namespace ResourceManager {
   import ƒ = FudgeCore;
 

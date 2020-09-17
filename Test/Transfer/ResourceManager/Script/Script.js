@@ -1,6 +1,6 @@
-///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../../Core/Build/FudgeCore"/>
 var ResourceManager;
-///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../../Core/Build/FudgeCore"/>
 (function (ResourceManager) {
     var ƒ = FudgeCore;
     class Script extends ƒ.ComponentScript {

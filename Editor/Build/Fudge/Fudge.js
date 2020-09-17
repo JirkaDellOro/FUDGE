@@ -93,9 +93,9 @@ var Fudge;
             // }
             // save(node);
         });
-        Fudge.ipcRenderer.on("open", (_event, _args) => {
+        Fudge.ipcRenderer.on("open", async (_event, _args) => {
             ƒ.Debug.log("Open");
-            node = open();
+            node = await open();
             Fudge.Editor.broadcastEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { detail: node }));
         });
         Fudge.ipcRenderer.on("openPanelGraph", (_event, _args) => {
@@ -129,14 +129,14 @@ var Fudge;
         let filename = Fudge.remote.dialog.showSaveDialogSync(null, { title: "Save Graph", buttonLabel: "Save Graph", message: "ƒ-Message" });
         fs.writeFileSync(filename, content);
     }
-    function open() {
+    async function open() {
         let filenames = Fudge.remote.dialog.showOpenDialogSync(null, { title: "Load Graph", buttonLabel: "Load Graph", properties: ["openFile"] });
         let content = fs.readFileSync(filenames[0], { encoding: "utf-8" });
         ƒ.Debug.groupCollapsed("File content");
         ƒ.Debug.info(content);
         ƒ.Debug.groupEnd();
         let serialization = ƒ.Serializer.parse(content);
-        let node = ƒ.Serializer.deserialize(serialization);
+        let node = await ƒ.Serializer.deserialize(serialization);
         ƒ.Debug.groupCollapsed("Deserialized");
         ƒ.Debug.info(node);
         ƒ.Debug.groupEnd();
@@ -318,12 +318,12 @@ var Fudge;
                 _target.addChild(node);
             return move;
         }
-        copy(_originals) {
+        async copy(_originals) {
             // try to create copies and return them for paste operation
             let copies = [];
             for (let original of _originals) {
                 let serialization = ƒ.Serializer.serialize(original);
-                let copy = ƒ.Serializer.deserialize(serialization);
+                let copy = await ƒ.Serializer.deserialize(serialization);
                 copies.push(copy);
             }
             return copies;

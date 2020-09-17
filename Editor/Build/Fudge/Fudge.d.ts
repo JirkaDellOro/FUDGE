@@ -75,7 +75,7 @@ declare namespace Fudge {
         getChildren(_node: ƒ.Node): ƒ.Node[];
         delete(_focussed: ƒ.Node[]): ƒ.Node[];
         addChildren(_children: ƒ.Node[], _target: ƒ.Node): ƒ.Node[];
-        copy(_originals: ƒ.Node[]): ƒ.Node[];
+        copy(_originals: ƒ.Node[]): Promise<ƒ.Node[]>;
     }
 }
 declare namespace Fudge {

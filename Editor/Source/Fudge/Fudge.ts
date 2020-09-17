@@ -33,9 +33,9 @@ namespace Fudge {
       // save(node);
     });
 
-    ipcRenderer.on("open", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
+    ipcRenderer.on("open", async (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
       ƒ.Debug.log("Open");
-      node = open();
+      node = await open();
       Editor.broadcastEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, { detail: node }));
     });
 
@@ -78,7 +78,7 @@ namespace Fudge {
     fs.writeFileSync(filename, content);
   }
 
-  function open(): ƒ.Node {
+  async function open(): Promise<ƒ.Node> {
     let filenames: string[] = remote.dialog.showOpenDialogSync(null, { title: "Load Graph", buttonLabel: "Load Graph", properties: ["openFile"] });
 
     let content: string = fs.readFileSync(filenames[0], { encoding: "utf-8" });
@@ -87,7 +87,7 @@ namespace Fudge {
     ƒ.Debug.groupEnd();
 
     let serialization: ƒ.Serialization = ƒ.Serializer.parse(content);
-    let node: ƒ.Node = <ƒ.Node>ƒ.Serializer.deserialize(serialization);
+    let node: ƒ.Node = <ƒ.Node> await ƒ.Serializer.deserialize(serialization);
 
     ƒ.Debug.groupCollapsed("Deserialized");
     ƒ.Debug.info(node);

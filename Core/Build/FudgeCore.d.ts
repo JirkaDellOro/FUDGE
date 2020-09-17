@@ -2356,6 +2356,22 @@ declare namespace FudgeCore {
         private mutator;
         private vectors;
         constructor();
+        static PROJECTION(_width: number, _height: number): Matrix3x3;
+        static IDENTITY(): Matrix3x3;
+        /**
+         * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given vector.
+         */
+        static TRANSLATION(_translate: Vector2): Matrix3x3;
+        /**
+         * Returns a matrix that rotates coordinates on the z-axis when multiplied by.
+         * @param _angleInDegrees The value of the rotation.
+         */
+        static ROTATION(_angleInDegrees: number): Matrix3x3;
+        /**
+         * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
+         */
+        static SCALING(_scalar: Vector2): Matrix3x3;
+        static MULTIPLICATION(_a: Matrix3x3, _b: Matrix3x3): Matrix3x3;
         /**
          * - get: a copy of the calculated translation vector
          * - set: effect the matrix ignoring its rotation and scaling
@@ -2374,22 +2390,10 @@ declare namespace FudgeCore {
          */
         get scaling(): Vector2;
         set scaling(_scaling: Vector2);
-        static PROJECTION(_width: number, _height: number): Matrix3x3;
-        static IDENTITY(): Matrix3x3;
         /**
-         * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given vector.
+         * Return a copy of this
          */
-        static TRANSLATION(_translate: Vector2): Matrix3x3;
-        /**
-         * Returns a matrix that rotates coordinates on the z-axis when multiplied by.
-         * @param _angleInDegrees The value of the rotation.
-         */
-        static ROTATION(_angleInDegrees: number): Matrix3x3;
-        /**
-         * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
-         */
-        static SCALING(_scalar: Vector2): Matrix3x3;
-        static MULTIPLICATION(_a: Matrix3x3, _b: Matrix3x3): Matrix3x3;
+        get copy(): Matrix3x3;
         /**
          * Add a translation by the given vector to this matrix
          */
@@ -2435,10 +2439,6 @@ declare namespace FudgeCore {
          * Return the elements of this matrix as a Float32Array
          */
         get(): Float32Array;
-        /**
-         * Return a copy of this
-         */
-        get copy(): Matrix3x3;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutator(): Mutator;
@@ -3240,6 +3240,8 @@ declare namespace FudgeCore {
      */
     class NodeResource extends Node implements SerializableResource {
         idResource: string;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 }
 declare namespace FudgeCore {

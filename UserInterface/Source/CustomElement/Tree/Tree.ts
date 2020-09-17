@@ -181,19 +181,19 @@ namespace FudgeUserInterface {
       this.clearSelection();
     }
 
-    private hndCopyPaste = (_event: Event): void => {
+    private hndCopyPaste = async (_event: Event): Promise<void> => {
       // console.log(_event);
       _event.stopPropagation();
       let target: TreeItem<T> = <TreeItem<T>>_event.target;
       switch (_event.type) {
         case EVENT_TREE.COPY:
-          this.controller.copyPaste.sources = this.controller.copy([...this.controller.selection]);
+          this.controller.copyPaste.sources = await this.controller.copy([...this.controller.selection]);
           break;
         case EVENT_TREE.PASTE:
           this.addChildren(this.controller.copyPaste.sources, target.data);
           break;
         case EVENT_TREE.CUT:
-          this.controller.copyPaste.sources = this.controller.copy([...this.controller.selection]);
+          this.controller.copyPaste.sources = await this.controller.copy([...this.controller.selection]);
           let cut: T[] = this.controller.delete(this.controller.selection);
           this.delete(cut);
           break;

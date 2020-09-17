@@ -1592,19 +1592,19 @@ var FudgeUserInterface;
             this.hndEscape = (_event) => {
                 this.clearSelection();
             };
-            this.hndCopyPaste = (_event) => {
+            this.hndCopyPaste = async (_event) => {
                 // console.log(_event);
                 _event.stopPropagation();
                 let target = _event.target;
                 switch (_event.type) {
                     case EVENT_TREE.COPY:
-                        this.controller.copyPaste.sources = this.controller.copy([...this.controller.selection]);
+                        this.controller.copyPaste.sources = await this.controller.copy([...this.controller.selection]);
                         break;
                     case EVENT_TREE.PASTE:
                         this.addChildren(this.controller.copyPaste.sources, target.data);
                         break;
                     case EVENT_TREE.CUT:
-                        this.controller.copyPaste.sources = this.controller.copy([...this.controller.selection]);
+                        this.controller.copyPaste.sources = await this.controller.copy([...this.controller.selection]);
                         let cut = this.controller.delete(this.controller.selection);
                         this.delete(cut);
                         break;

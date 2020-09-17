@@ -472,7 +472,7 @@ declare namespace FudgeUserInterface {
          * Return a list of copies of the objects given for copy & paste
          * @param _focussed The object currently having focus
          */
-        abstract copy(_originals: T[]): T[];
+        abstract copy(_originals: T[]): Promise<T[]>;
     }
 }
 declare namespace FudgeUserInterface {

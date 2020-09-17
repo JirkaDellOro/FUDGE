@@ -40,7 +40,7 @@ var FileIo;
         ƒ.FileIoBrowserLocal.addEventListener("fileLoaded" /* FILE_LOADED */, handleLoad);
         await ƒ.FileIoBrowserLocal.load();
         console.groupEnd();
-        function handleLoad(_event) {
+        async function handleLoad(_event) {
             map = _event.detail.mapFilenameToContent;
             console.log("Map", map);
             for (let filename in map) {
@@ -51,7 +51,7 @@ var FileIo;
                 console.log(deserialization);
                 console.groupEnd();
                 console.group("Reconstructed");
-                let reconstruction = ƒ.Serializer.deserialize(serialization);
+                let reconstruction = await ƒ.Serializer.deserialize(serialization);
                 console.log(reconstruction);
                 console.groupEnd();
                 console.group("Comparison");

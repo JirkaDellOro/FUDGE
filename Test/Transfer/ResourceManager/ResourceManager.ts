@@ -58,13 +58,13 @@ namespace ResourceManager {
 
 
   async function CreateTestScene(): Promise<void> {
-    let texture: ƒ.TextureImage = new ƒ.TextureImage();
-    await texture.load("Image/Fudge_360.png");
+    // let texture: ƒ.TextureImage = new ƒ.TextureImage();
+    // await texture.load("Image/Fudge_360.png");
 
-    let coatTextured: ƒ.CoatTextured = new ƒ.CoatTextured();
-    coatTextured.texture = texture;
-    coatTextured.color = ƒ.Color.CSS("red");
-    let mtrTexture: ƒ.Material = new ƒ.Material("Textured", ƒ.ShaderTexture, coatTextured);
+    // let coatTextured: ƒ.CoatTextured = new ƒ.CoatTextured();
+    // coatTextured.texture = texture;
+    // coatTextured.color = ƒ.Color.CSS("red");
+    // let mtrTexture: ƒ.Material = new ƒ.Material("Textured", ƒ.ShaderTexture, coatTextured);
 
     let pyramid: ƒ.Mesh = new ƒ.MeshPyramid();
     ƒ.ResourceManager.register(pyramid);
@@ -79,7 +79,7 @@ namespace ResourceManager {
     let cmpAudio: ƒ.ComponentAudio = new ƒ.ComponentAudio(audio, true, true);
 
 
-    let source: ƒAid.Node = new ƒAid.Node("Source", ƒ.Matrix4x4.IDENTITY(), mtrTexture, pyramid);
+    let source: ƒAid.Node = new ƒAid.Node("Source", ƒ.Matrix4x4.IDENTITY(), mtrFlat, pyramid);
     // TODO: dynamically load Script! Is it among Resources?
     source.addComponent(new Script());
     source.addComponent(cmpAudio);
@@ -98,12 +98,25 @@ namespace ResourceManager {
     instance.name = "Instance";
     let id: string = graph.idResource;
 
+    let old: ƒ.Resources = ƒ.ResourceManager.resources;
     let reconstruction: ƒ.Resources = await testSerialization();
+    // for (let id in old) {
+    //   if (id.startsWith("Node"))
+    //     old[id]["name"] = "Test";
+    // }
+
     console.groupCollapsed("Comparison");
-    let comparison: boolean = Compare.compare(ƒ.ResourceManager.resources, reconstruction);
+    // console.group("Comparison");
+    ƒ.Debug.setFilter(ƒ.DebugConsole, ƒ.DEBUG_FILTER.WARN | ƒ.DEBUG_FILTER.ERROR);
+    let comparison: boolean = await Compare.compare(old, reconstruction);
+    ƒ.Debug.setFilter(ƒ.DebugConsole, ƒ.DEBUG_FILTER.ALL);
+    // console.log("Originael resources: ", old);
+    // console.log("Reconstructed: ", reconstruction);
     console.groupEnd();
-    if (!comparison)
+    if (comparison)
       console.error("Comparison failed");
+    else
+      console.log("Comparison succeeded");
 
     ƒ.AudioManager.default.listenTo(instance);
 
@@ -150,7 +163,6 @@ namespace ResourceManager {
     }
     return reconstruction;
   }
-
 
   function tweakGraphs(_angleIncrement: number, _keepScript: ƒ.Node, _graphs: ƒ.Node[]): void {
     let angle: number = 0;

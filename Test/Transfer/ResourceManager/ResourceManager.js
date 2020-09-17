@@ -53,12 +53,12 @@ var ResourceManager;
         console.groupEnd();
     }
     async function CreateTestScene() {
-        let texture = new ResourceManager.ƒ.TextureImage();
-        await texture.load("Image/Fudge_360.png");
-        let coatTextured = new ResourceManager.ƒ.CoatTextured();
-        coatTextured.texture = texture;
-        coatTextured.color = ResourceManager.ƒ.Color.CSS("red");
-        let mtrTexture = new ResourceManager.ƒ.Material("Textured", ResourceManager.ƒ.ShaderTexture, coatTextured);
+        // let texture: ƒ.TextureImage = new ƒ.TextureImage();
+        // await texture.load("Image/Fudge_360.png");
+        // let coatTextured: ƒ.CoatTextured = new ƒ.CoatTextured();
+        // coatTextured.texture = texture;
+        // coatTextured.color = ƒ.Color.CSS("red");
+        // let mtrTexture: ƒ.Material = new ƒ.Material("Textured", ƒ.ShaderTexture, coatTextured);
         let pyramid = new ResourceManager.ƒ.MeshPyramid();
         ResourceManager.ƒ.ResourceManager.register(pyramid);
         let cube = new ResourceManager.ƒ.MeshCube();
@@ -66,7 +66,7 @@ var ResourceManager;
         let mtrFlat = new ResourceManager.ƒ.Material("Flat", ResourceManager.ƒ.ShaderUniColor, new ResourceManager.ƒ.CoatColored(ResourceManager.ƒ.Color.CSS("lightblue")));
         let audio = new ResourceManager.ƒ.Audio("Audio/hypnotic.mp3");
         let cmpAudio = new ResourceManager.ƒ.ComponentAudio(audio, true, true);
-        let source = new ResourceManager.ƒAid.Node("Source", ResourceManager.ƒ.Matrix4x4.IDENTITY(), mtrTexture, pyramid);
+        let source = new ResourceManager.ƒAid.Node("Source", ResourceManager.ƒ.Matrix4x4.IDENTITY(), mtrFlat, pyramid);
         // TODO: dynamically load Script! Is it among Resources?
         source.addComponent(new ResourceManager.Script());
         source.addComponent(cmpAudio);
@@ -81,12 +81,24 @@ var ResourceManager;
         graph.name = "Graph";
         instance.name = "Instance";
         let id = graph.idResource;
+        let old = ResourceManager.ƒ.ResourceManager.resources;
         let reconstruction = await testSerialization();
+        // for (let id in old) {
+        //   if (id.startsWith("Node"))
+        //     old[id]["name"] = "Test";
+        // }
         console.groupCollapsed("Comparison");
-        let comparison = Compare.compare(ResourceManager.ƒ.ResourceManager.resources, reconstruction);
+        // console.group("Comparison");
+        ResourceManager.ƒ.Debug.setFilter(ResourceManager.ƒ.DebugConsole, ResourceManager.ƒ.DEBUG_FILTER.WARN | ResourceManager.ƒ.DEBUG_FILTER.ERROR);
+        let comparison = await Compare.compare(old, reconstruction);
+        ResourceManager.ƒ.Debug.setFilter(ResourceManager.ƒ.DebugConsole, ResourceManager.ƒ.DEBUG_FILTER.ALL);
+        // console.log("Originael resources: ", old);
+        // console.log("Reconstructed: ", reconstruction);
         console.groupEnd();
-        if (!comparison)
+        if (comparison)
             console.error("Comparison failed");
+        else
+            console.log("Comparison succeeded");
         ResourceManager.ƒ.AudioManager.default.listenTo(instance);
         let reconstrucedGraph = reconstruction[id];
         reconstrucedGraph.name = "ReconstructedGraph";

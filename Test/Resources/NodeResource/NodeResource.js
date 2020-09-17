@@ -3,7 +3,7 @@ var NodeResource;
     var ƒ = FudgeCore;
     ƒ.Serializer.registerNamespace(NodeResource);
     window.addEventListener("DOMContentLoaded", init);
-    function init() {
+    async function init() {
         ƒ.Debug.log("Start");
         let graph = new ƒ.Node("Root");
         let cmpCamera = Scenes.createCamera(new ƒ.Vector3(5, 7, 20));
@@ -14,7 +14,7 @@ var NodeResource;
         let center = createCenterAndSatellite();
         // Fudge["AnimateSatellite"] = AnimateSatellite;
         // console.log(AnimateSatellite["namespaceX"]);
-        let resource = ƒ.ResourceManager.registerNodeAsResource(center, false);
+        let resource = await ƒ.ResourceManager.registerNodeAsResource(center, false);
         let dim = new ƒ.Vector3(2, 2, 2);
         for (let z = -dim.z; z < dim.z + 1; z++)
             for (let y = -dim.y; y < dim.y + 1; y++)

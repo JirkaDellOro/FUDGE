@@ -5,7 +5,7 @@ namespace ScriptSerialization {
   ƒ.Serializer.registerNamespace(ScriptSerialization);
   window.addEventListener("DOMContentLoaded", init);
 
-  function init(): void {
+  async function init(): Promise<void> {
     ƒ.Debug.log("Start");
 
     let root: ƒ.Node = new ƒ.Node("Root");
@@ -20,7 +20,7 @@ namespace ScriptSerialization {
     graph.addChild(test);
     test.name = "Original";
 
-    let resource: ƒ.NodeResource = ƒ.ResourceManager.registerNodeAsResource(test, false);
+    let resource: ƒ.NodeResource = await ƒ.ResourceManager.registerNodeAsResource(test, false);
     resource.name = "Resource";
 
     let instance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(resource);
@@ -51,7 +51,7 @@ namespace ScriptSerialization {
     console.groupEnd();
     let parsed: ƒ.Serialization = ƒ.Serializer.parse(json);
     ƒ.Debug.log("Parsed", parsed);
-    let reconstruct: ƒ.Node = <ƒ.Node>ƒ.Serializer.deserialize(parsed);
+    let reconstruct: ƒ.Node = <ƒ.Node> await ƒ.Serializer.deserialize(parsed);
     ƒ.Debug.log("Reconstructed graph", reconstruct);
     console.groupEnd();
 

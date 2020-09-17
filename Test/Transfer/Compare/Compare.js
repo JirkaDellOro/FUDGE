@@ -1,37 +1,42 @@
 var Compare;
 (function (Compare) {
-    function compare(_object1, _object2, _level = 0, _checked = []) {
+    var ƒ = FudgeCore;
+    async function compare(_object1, _object2, _level = 0, _checked = [], _path = [], _mismatch = false) {
         if (_checked.indexOf(_object1) >= 0 || _checked.indexOf(_object2) >= 0)
-            return true;
+            return _mismatch;
         _checked.push(_object1);
         _checked.push(_object2);
         for (var prefix = "", i = 0; i <= _level; prefix += "-", i++)
             ;
         for (let prop in _object1) {
-            // if (prop == "ComponentMaterial")
-            //     continue;
+            _path.push(prop);
+            let path = _path.toString();
             if (Number(prop).toString() != prop)
-                console.log(`${prefix} Comparing ${prop}`);
+                ƒ.Debug.log(`${prefix} Comparing ${prop}`);
             //Check property exists on both objects
             if (_object1.hasOwnProperty(prop) !== _object2.hasOwnProperty(prop)) {
-                console.warn(`Property mismatch ${prop}`);
+                ƒ.Debug.warn(`Property mismatch ${path}`);
                 return true;
             }
             try {
                 if ((typeof _object1[prop]) != (typeof _object2[prop])) {
-                    console.warn(`Type mismatch ${typeof _object1[prop]} : ${typeof _object2[prop]}`);
+                    ƒ.Debug.warn(`Type mismatch at ${path} -> ${typeof _object1[prop]} | ${typeof _object2[prop]}`);
+                    // ƒ.Debug.warn(_object1, _object2);
                     return true;
                 }
             }
             catch (error) {
-                console.log(error, prop);
+                ƒ.Debug.log(error, path);
+                _path.pop();
                 continue;
             }
             switch (typeof (_object1[prop])) {
                 //Deep compare objects
                 case "object":
-                    if (!compare(_object1[prop], _object2[prop], _level + 1, _checked)) {
-                        console.log(`Found in ${prop}`);
+                    _mismatch ||= await compare(_object1[prop], _object2[prop], _level + 1, _checked, _path, _mismatch);
+                    // _path.pop();
+                    if (_mismatch) {
+                        // ƒ.Debug.warn(`Found in ${path}`);
                         return true;
                     }
                     break;
@@ -40,31 +45,34 @@ var Compare;
                         break;
                 case "function":
                     if (_object1[prop].prototype != _object2[prop].prototype)
-                        console.error(`Function prototype mismatch ${prop}`);
+                        ƒ.Debug.error(`Function prototype mismatch ${path}`);
                     break;
                 //Compare values
                 default:
                     if (_object1[prop] != _object2[prop]) {
-                        console.warn(`Value mismatch ${_object1[prop]} | ${_object2[prop]}`);
+                        ƒ.Debug.warn(`Value mismatch at ${path} -> ${_object1[prop]} | ${_object2[prop]}`);
+                        // ƒ.Debug.warn(_object1, _object2);
                         return true;
                     }
             }
+            _path.pop();
         }
         //Check object 2 for any extra properties
         for (let prop in _object2) {
+            _path.push(prop);
             try {
                 if (typeof (_object1[prop]) == "undefined" && typeof (_object2[prop]) != "undefined") {
                     // if (!_object1.hasOwnProperty(prop)) {
-                    console.error(`Property mismatch ${prop} | ${_object1} : ${_object2}`);
+                    ƒ.Debug.error(`Property mismatch ${_path} | ${_object1} : ${_object2}`);
                     return true;
                 }
             }
             catch (error) {
-                console.log(error, prop);
-                continue;
+                ƒ.Debug.log(error, _path);
             }
+            _path.pop();
         }
-        return true;
+        return _mismatch;
     }
     Compare.compare = compare;
 })(Compare || (Compare = {}));
