@@ -1,15 +1,71 @@
 {
-  "NodeResource|2020-09-16T16:34:55.302Z|11570": {
+  "TextureImage|2020-09-17T09:11:05.992Z|56419": {
+    "ƒ.TextureImage": {
+      "url": "Image/Fudge_360.png",
+      "idResource": "TextureImage|2020-09-17T09:11:05.992Z|56419"
+    }
+  },
+  "Material|2020-09-17T09:11:05.998Z|19471": {
+    "ƒ.Material": {
+      "name": "Textured",
+      "idResource": "Material|2020-09-17T09:11:05.998Z|19471",
+      "shader": "ShaderTexture",
+      "coat": {
+        "ƒ.CoatTextured": {
+          "name": "Coat",
+          "color": {
+            "r": 1,
+            "g": 0,
+            "b": 0,
+            "a": 1
+          },
+          "idTexture": "TextureImage|2020-09-17T09:11:05.992Z|56419"
+        }
+      }
+    }
+  },
+  "MeshPyramid|2020-09-17T09:11:05.998Z|51960": {
+    "ƒ.MeshPyramid": {
+      "idResource": "MeshPyramid|2020-09-17T09:11:05.998Z|51960"
+    }
+  },
+  "MeshCube|2020-09-17T09:11:05.999Z|16881": {
+    "ƒ.MeshCube": {
+      "idResource": "MeshCube|2020-09-17T09:11:05.999Z|16881"
+    }
+  },
+  "Material|2020-09-17T09:11:05.999Z|44759": {
+    "ƒ.Material": {
+      "name": "Flat",
+      "idResource": "Material|2020-09-17T09:11:05.999Z|44759",
+      "shader": "ShaderUniColor",
+      "coat": {
+        "ƒ.CoatColored": {
+          "name": "Coat",
+          "color": {
+            "r": 0.6784313725490196,
+            "g": 0.8470588235294118,
+            "b": 0.9019607843137255,
+            "a": 1
+          }
+        }
+      }
+    }
+  },
+  "Audio|2020-09-17T09:11:05.999Z|80761": {
+    "ƒ.Audio": {
+      "url": "Audio/hypnotic.mp3",
+      "idResource": "Audio|2020-09-17T09:11:05.999Z|80761"
+    }
+  },
+  "NodeResource|2020-09-17T09:11:06.008Z|70303": {
     "ƒ.NodeResource": {
-      "name": "Resource",
+      "name": "Graph",
       "components": {
-        "ComponentMesh": [
+        "ComponentTransform": [
           {
-            "ƒ.ComponentMesh": {
-              "mesh": {
-                "ƒ.MeshPyramid": {}
-              },
-              "pivot": {
+            "ƒ.ComponentTransform": {
+              "local": {
                 "translation": {
                   "x": 0,
                   "y": 0,
@@ -61,7 +117,34 @@
               "Component": {
                 "active": true
               },
-              "idMaterial": "Material|2020-09-16T16:34:55.292Z|94542"
+              "idMaterial": "Material|2020-09-17T09:11:05.998Z|19471"
+            }
+          }
+        ],
+        "ComponentMesh": [
+          {
+            "ƒ.ComponentMesh": {
+              "idMesh": "MeshPyramid|2020-09-17T09:11:05.998Z|51960",
+              "pivot": {
+                "translation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scaling": {
+                  "x": 1,
+                  "y": 1,
+                  "z": 1
+                }
+              },
+              "Component": {
+                "active": true
+              }
             }
           }
         ],
@@ -78,7 +161,7 @@
           {
             "ƒ.ComponentAudio": {
               "active": true,
-              "idResource": "Audio|2020-09-16T16:34:55.293Z|50583",
+              "idResource": "Audio|2020-09-17T09:11:05.999Z|80761",
               "playing": true,
               "loop": true,
               "volume": 1
@@ -86,38 +169,102 @@
           }
         ]
       },
-      "children": []
-    }
-  },
-  "TextureImage|2020-09-16T16:34:55.286Z|84488": {
-    "ƒ.TextureImage": {
-      "url": "Image/Fudge_360.png",
-      "idResource": "TextureImage|2020-09-16T16:34:55.286Z|84488"
-    }
-  },
-  "Material|2020-09-16T16:34:55.292Z|94542": {
-    "ƒ.Material": {
-      "name": "Textured",
-      "idResource": "Material|2020-09-16T16:34:55.292Z|94542",
-      "shader": "ShaderTexture",
-      "coat": {
-        "ƒ.CoatTextured": {
-          "name": "Coat",
-          "color": {
-            "r": 1,
-            "g": 1,
-            "b": 0.5,
-            "a": 1
-          },
-          "idTexture": "TextureImage|2020-09-16T16:34:55.286Z|84488"
+      "children": [
+        {
+          "ƒ.Node": {
+            "name": "Cube",
+            "components": {
+              "ComponentTransform": [
+                {
+                  "ƒ.ComponentTransform": {
+                    "local": {
+                      "translation": {
+                        "x": 0,
+                        "y": 1,
+                        "z": 0
+                      },
+                      "rotation": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "scaling": {
+                        "x": 1,
+                        "y": 1,
+                        "z": 1
+                      }
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentMaterial": [
+                {
+                  "ƒ.ComponentMaterial": {
+                    "clrPrimary": {
+                      "r": 1,
+                      "g": 1,
+                      "b": 1,
+                      "a": 1
+                    },
+                    "clrSecondary": {
+                      "r": 1,
+                      "g": 1,
+                      "b": 1,
+                      "a": 1
+                    },
+                    "pivot": {
+                      "translation": {
+                        "x": 0,
+                        "y": 0
+                      },
+                      "rotation": 0,
+                      "scaling": {
+                        "x": 1,
+                        "y": 1
+                      }
+                    },
+                    "Component": {
+                      "active": true
+                    },
+                    "idMaterial": "Material|2020-09-17T09:11:05.999Z|44759"
+                  }
+                }
+              ],
+              "ComponentMesh": [
+                {
+                  "ƒ.ComponentMesh": {
+                    "idMesh": "MeshCube|2020-09-17T09:11:05.999Z|16881",
+                    "pivot": {
+                      "translation": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "rotation": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                      },
+                      "scaling": {
+                        "x": 0.5,
+                        "y": 0.5,
+                        "z": 0.5
+                      }
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ]
+            },
+            "children": []
+          }
         }
-      }
-    }
-  },
-  "Audio|2020-09-16T16:34:55.293Z|50583": {
-    "ƒ.Audio": {
-      "url": "Audio/hypnotic.mp3",
-      "idResource": "Audio|2020-09-16T16:34:55.293Z|50583"
+      ]
     }
   }
 }

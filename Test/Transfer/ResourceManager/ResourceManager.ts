@@ -1,6 +1,7 @@
 ///<reference path="Script/Script.ts"/>
 namespace ResourceManager {
   export import ƒ = FudgeCore;
+  export import ƒAid = FudgeAid;
 
   // register namespace of custom resources
   ƒ.Serializer.registerNamespace(ResourceManager);
@@ -22,7 +23,7 @@ namespace ResourceManager {
     public async deserialize(_serialization: ƒ.Serialization): Promise<Resource> {
       this.idResource = _serialization.idResource;
       if (_serialization.idReference)
-        this.reference = <Resource> await ƒ.ResourceManager.get(_serialization.idReference);
+        this.reference = <Resource>await ƒ.ResourceManager.get(_serialization.idReference);
       return this;
     }
   }
@@ -63,21 +64,29 @@ namespace ResourceManager {
     let coatTextured: ƒ.CoatTextured = new ƒ.CoatTextured();
     coatTextured.texture = texture;
     coatTextured.color = ƒ.Color.CSS("red");
-    let material: ƒ.Material = new ƒ.Material("Textured", ƒ.ShaderTexture, coatTextured);
+    let mtrTexture: ƒ.Material = new ƒ.Material("Textured", ƒ.ShaderTexture, coatTextured);
 
-    let mesh: ƒ.Mesh = new ƒ.MeshPyramid();
-    ƒ.ResourceManager.register(mesh);
+    let pyramid: ƒ.Mesh = new ƒ.MeshPyramid();
+    ƒ.ResourceManager.register(pyramid);
+
+    let cube: ƒ.Mesh = new ƒ.MeshCube();
+    ƒ.ResourceManager.register(cube);
+    let mtrFlat: ƒ.Material = new ƒ.Material("Flat", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("lightblue")));
+
+
 
     let audio: ƒ.Audio = new ƒ.Audio("Audio/hypnotic.mp3");
     let cmpAudio: ƒ.ComponentAudio = new ƒ.ComponentAudio(audio, true, true);
 
 
-    let source: ƒ.Node = new ƒ.Node("Source");
-    source.addComponent(new ƒ.ComponentMesh(mesh));
-    source.addComponent(new ƒ.ComponentMaterial(material));
+    let source: ƒAid.Node = new ƒAid.Node("Source", ƒ.Matrix4x4.IDENTITY(), mtrTexture, pyramid);
     // TODO: dynamically load Script! Is it among Resources?
     source.addComponent(new Script());
     source.addComponent(cmpAudio);
+    let child: ƒ.Node = new ƒAid.Node("Cube", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y()), mtrFlat, cube);
+    child.getComponent(ƒ.ComponentMesh).pivot.scale(ƒ.Vector3.ONE(0.5));
+    source.addChild(child);
+
 
     let graph: ƒ.NodeResource = await ƒ.ResourceManager.registerNodeAsResource(source, true);
     let instance: ƒ.NodeResourceInstance = await ƒ.ResourceManager.createGraphInstance(graph);
@@ -96,30 +105,14 @@ namespace ResourceManager {
     if (!comparison)
       console.error("Comparison failed");
 
-    // // let s: Script;
-    // // s = node.getComponent(Script);
-    // // node.removeComponent(s);
-    // // s = nodeResource.getComponent(Script);
-    // // nodeResource.removeComponent(s);
-    // // node.getComponent(ƒ.ComponentAudio).activate(false);
-
     ƒ.AudioManager.default.listenTo(instance);
-    console.groupCollapsed("Serialized instance");
-    console.log(ƒ.Serializer.stringify(instance.serialize()));
-    console.groupEnd();
-
 
     let reconstrucedGraph: ƒ.NodeResource = <ƒ.NodeResource>reconstruction[id];
     reconstrucedGraph.name = "ReconstructedGraph";
     let reconstructedInstance: ƒ.NodeResourceInstance = await ƒ.ResourceManager.createGraphInstance(reconstrucedGraph);
     reconstructedInstance.name = "ReconstructedInstance";
 
-    source.getComponent(ƒ.ComponentMesh).pivot.rotateX(10);
-    graph.getComponent(ƒ.ComponentMesh).pivot.rotateX(20);
-    instance.getComponent(ƒ.ComponentMesh).pivot.rotateX(30);
-    reconstrucedGraph.getComponent(ƒ.ComponentMesh).pivot.rotateX(40);
-    reconstructedInstance.getComponent(ƒ.ComponentMesh).pivot.rotateX(50);
-
+    tweakGraphs(10, reconstructedInstance, [source, graph, instance, reconstrucedGraph, reconstructedInstance]);
     showGraphs([source, graph, instance, reconstrucedGraph, reconstructedInstance]);
   }
 
@@ -150,11 +143,24 @@ namespace ResourceManager {
         let reconstructedInstance: ƒ.NodeResourceInstance = await ƒ.ResourceManager.createGraphInstance(resource);
         reconstructedInstance.name = "ReconstructedInstance";
 
+        tweakGraphs(10, reconstructedInstance, [resource, reconstructedInstance]);
         showGraphs([resource, reconstructedInstance]);
         ƒ.AudioManager.default.listenTo(reconstructedInstance);
       }
     }
     return reconstruction;
+  }
+
+
+  function tweakGraphs(_angleIncrement: number, _keepScript: ƒ.Node, _graphs: ƒ.Node[]): void {
+    let angle: number = 0;
+    for (let node of _graphs) {
+      node.getChild(0).getComponent(ƒ.ComponentMesh).pivot.rotateX(angle);
+      node.mtxLocal.rotateY(angle);
+      angle += _angleIncrement;
+      if (node != _keepScript)
+        node.removeComponent(node.getComponent(Script));
+    }
   }
 
   function showGraphs(_graphs: ƒ.Node[]): void {

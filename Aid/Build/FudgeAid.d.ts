@@ -101,7 +101,7 @@ declare namespace FudgeAid {
         constructor(_name?: string, _transform?: ƒ.Matrix4x4, _material?: ƒ.Material, _mesh?: ƒ.Mesh);
         private static getNextName;
         get pivot(): ƒ.Matrix4x4;
-        deserialize(_serialization: ƒ.Serialization): ƒ.Serializable;
+        deserialize(_serialization: ƒ.Serialization): Promise<ƒ.Serializable>;
     }
 }
 declare namespace FudgeAid {

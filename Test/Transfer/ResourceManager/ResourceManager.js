@@ -3,6 +3,7 @@ var ResourceManager;
 ///<reference path="Script/Script.ts"/>
 (function (ResourceManager) {
     ResourceManager.ƒ = FudgeCore;
+    ResourceManager.ƒAid = FudgeAid;
     // register namespace of custom resources
     ResourceManager.ƒ.Serializer.registerNamespace(ResourceManager);
     window.addEventListener("DOMContentLoaded", init);
@@ -57,17 +58,21 @@ var ResourceManager;
         let coatTextured = new ResourceManager.ƒ.CoatTextured();
         coatTextured.texture = texture;
         coatTextured.color = ResourceManager.ƒ.Color.CSS("red");
-        let material = new ResourceManager.ƒ.Material("Textured", ResourceManager.ƒ.ShaderTexture, coatTextured);
-        let mesh = new ResourceManager.ƒ.MeshPyramid();
-        ResourceManager.ƒ.ResourceManager.register(mesh);
+        let mtrTexture = new ResourceManager.ƒ.Material("Textured", ResourceManager.ƒ.ShaderTexture, coatTextured);
+        let pyramid = new ResourceManager.ƒ.MeshPyramid();
+        ResourceManager.ƒ.ResourceManager.register(pyramid);
+        let cube = new ResourceManager.ƒ.MeshCube();
+        ResourceManager.ƒ.ResourceManager.register(cube);
+        let mtrFlat = new ResourceManager.ƒ.Material("Flat", ResourceManager.ƒ.ShaderUniColor, new ResourceManager.ƒ.CoatColored(ResourceManager.ƒ.Color.CSS("lightblue")));
         let audio = new ResourceManager.ƒ.Audio("Audio/hypnotic.mp3");
         let cmpAudio = new ResourceManager.ƒ.ComponentAudio(audio, true, true);
-        let source = new ResourceManager.ƒ.Node("Source");
-        source.addComponent(new ResourceManager.ƒ.ComponentMesh(mesh));
-        source.addComponent(new ResourceManager.ƒ.ComponentMaterial(material));
+        let source = new ResourceManager.ƒAid.Node("Source", ResourceManager.ƒ.Matrix4x4.IDENTITY(), mtrTexture, pyramid);
         // TODO: dynamically load Script! Is it among Resources?
         source.addComponent(new ResourceManager.Script());
         source.addComponent(cmpAudio);
+        let child = new ResourceManager.ƒAid.Node("Cube", ResourceManager.ƒ.Matrix4x4.TRANSLATION(ResourceManager.ƒ.Vector3.Y()), mtrFlat, cube);
+        child.getComponent(ResourceManager.ƒ.ComponentMesh).pivot.scale(ResourceManager.ƒ.Vector3.ONE(0.5));
+        source.addChild(child);
         let graph = await ResourceManager.ƒ.ResourceManager.registerNodeAsResource(source, true);
         let instance = await ResourceManager.ƒ.ResourceManager.createGraphInstance(graph);
         console.log("Source", source);
@@ -82,25 +87,12 @@ var ResourceManager;
         console.groupEnd();
         if (!comparison)
             console.error("Comparison failed");
-        // // let s: Script;
-        // // s = node.getComponent(Script);
-        // // node.removeComponent(s);
-        // // s = nodeResource.getComponent(Script);
-        // // nodeResource.removeComponent(s);
-        // // node.getComponent(ƒ.ComponentAudio).activate(false);
         ResourceManager.ƒ.AudioManager.default.listenTo(instance);
-        console.groupCollapsed("Serialized instance");
-        console.log(ResourceManager.ƒ.Serializer.stringify(instance.serialize()));
-        console.groupEnd();
         let reconstrucedGraph = reconstruction[id];
         reconstrucedGraph.name = "ReconstructedGraph";
         let reconstructedInstance = await ResourceManager.ƒ.ResourceManager.createGraphInstance(reconstrucedGraph);
         reconstructedInstance.name = "ReconstructedInstance";
-        source.getComponent(ResourceManager.ƒ.ComponentMesh).pivot.rotateX(10);
-        graph.getComponent(ResourceManager.ƒ.ComponentMesh).pivot.rotateX(20);
-        instance.getComponent(ResourceManager.ƒ.ComponentMesh).pivot.rotateX(30);
-        reconstrucedGraph.getComponent(ResourceManager.ƒ.ComponentMesh).pivot.rotateX(40);
-        reconstructedInstance.getComponent(ResourceManager.ƒ.ComponentMesh).pivot.rotateX(50);
+        tweakGraphs(10, reconstructedInstance, [source, graph, instance, reconstrucedGraph, reconstructedInstance]);
         showGraphs([source, graph, instance, reconstrucedGraph, reconstructedInstance]);
     }
     async function LoadScene() {
@@ -123,11 +115,22 @@ var ResourceManager;
                 resource.name = "ReconstructedGraph";
                 let reconstructedInstance = await ResourceManager.ƒ.ResourceManager.createGraphInstance(resource);
                 reconstructedInstance.name = "ReconstructedInstance";
+                tweakGraphs(10, reconstructedInstance, [resource, reconstructedInstance]);
                 showGraphs([resource, reconstructedInstance]);
                 ResourceManager.ƒ.AudioManager.default.listenTo(reconstructedInstance);
             }
         }
         return reconstruction;
+    }
+    function tweakGraphs(_angleIncrement, _keepScript, _graphs) {
+        let angle = 0;
+        for (let node of _graphs) {
+            node.getChild(0).getComponent(ResourceManager.ƒ.ComponentMesh).pivot.rotateX(angle);
+            node.mtxLocal.rotateY(angle);
+            angle += _angleIncrement;
+            if (node != _keepScript)
+                node.removeComponent(node.getComponent(ResourceManager.Script));
+        }
     }
     function showGraphs(_graphs) {
         let cmpCamera = new ResourceManager.ƒ.ComponentCamera();
