@@ -1,14 +1,14 @@
 {
-  "TextureImage|2020-09-17T13:45:49:208Z|63205": {
+  "TextureImage|2020-09-18T17:22:17.401Z|34063": {
     "ƒ.TextureImage": {
       "url": "Image/Fudge_360.png",
-      "idResource": "TextureImage|2020-09-17T13:45:49:208Z|63205"
+      "idResource": "TextureImage|2020-09-18T17:22:17.401Z|34063"
     }
   },
-  "Material|2020-09-17T13:45:49:213Z|86118": {
+  "Material|2020-09-18T17:22:17.406Z|01063": {
     "ƒ.Material": {
       "name": "Textured",
-      "idResource": "Material|2020-09-17T13:45:49:213Z|86118",
+      "idResource": "Material|2020-09-18T17:22:17.406Z|01063",
       "shader": "ShaderTexture",
       "coat": {
         "ƒ.CoatTextured": {
@@ -19,25 +19,25 @@
             "b": 0,
             "a": 1
           },
-          "idTexture": "TextureImage|2020-09-17T13:45:49:208Z|63205"
+          "idTexture": "TextureImage|2020-09-18T17:22:17.401Z|34063"
         }
       }
     }
   },
-  "MeshPyramid|2020-09-17T13:45:49:214Z|02793": {
+  "MeshPyramid|2020-09-18T17:22:17.407Z|49504": {
     "ƒ.MeshPyramid": {
-      "idResource": "MeshPyramid|2020-09-17T13:45:49:214Z|02793"
+      "idResource": "MeshPyramid|2020-09-18T17:22:17.407Z|49504"
     }
   },
-  "MeshCube|2020-09-17T13:45:49:214Z|68011": {
+  "MeshCube|2020-09-18T17:22:17.407Z|78753": {
     "ƒ.MeshCube": {
-      "idResource": "MeshCube|2020-09-17T13:45:49:214Z|68011"
+      "idResource": "MeshCube|2020-09-18T17:22:17.407Z|78753"
     }
   },
-  "Material|2020-09-17T13:45:49:214Z|06759": {
+  "Material|2020-09-18T17:22:17.407Z|81490": {
     "ƒ.Material": {
       "name": "Flat",
-      "idResource": "Material|2020-09-17T13:45:49:214Z|06759",
+      "idResource": "Material|2020-09-18T17:22:17.407Z|81490",
       "shader": "ShaderUniColor",
       "coat": {
         "ƒ.CoatColored": {
@@ -52,13 +52,13 @@
       }
     }
   },
-  "Audio|2020-09-17T13:45:49:215Z|31014": {
+  "Audio|2020-09-18T17:22:17.408Z|52110": {
     "ƒ.Audio": {
       "url": "Audio/hypnotic.mp3",
-      "idResource": "Audio|2020-09-17T13:45:49:215Z|31014"
+      "idResource": "Audio|2020-09-18T17:22:17.408Z|52110"
     }
   },
-  "NodeResource|2020-09-17T13:45:49:223Z|59033": {
+  "NodeResource|2020-09-18T17:22:17.419Z|31608": {
     "ƒ.NodeResource": {
       "name": "Graph",
       "components": {
@@ -117,14 +117,14 @@
               "Component": {
                 "active": true
               },
-              "idMaterial": "Material|2020-09-17T13:45:49:213Z|86118"
+              "idMaterial": "Material|2020-09-18T17:22:17.406Z|01063"
             }
           }
         ],
         "ComponentMesh": [
           {
             "ƒ.ComponentMesh": {
-              "idMesh": "MeshPyramid|2020-09-17T13:45:49:214Z|02793",
+              "idMesh": "MeshPyramid|2020-09-18T17:22:17.407Z|49504",
               "pivot": {
                 "translation": {
                   "x": 0,
@@ -148,9 +148,9 @@
             }
           }
         ],
-        "Script": [
+        "TimerMessage": [
           {
-            "ResourceManager.Script": {
+            "Script.TimerMessage": {
               "active": true,
               "prefix": "Script: ",
               "count": 0
@@ -161,7 +161,7 @@
           {
             "ƒ.ComponentAudio": {
               "active": true,
-              "idResource": "Audio|2020-09-17T13:45:49:215Z|31014",
+              "idResource": "Audio|2020-09-18T17:22:17.408Z|52110",
               "playing": true,
               "loop": true,
               "volume": 1
@@ -229,14 +229,14 @@
                     "Component": {
                       "active": true
                     },
-                    "idMaterial": "Material|2020-09-17T13:45:49:214Z|06759"
+                    "idMaterial": "Material|2020-09-18T17:22:17.407Z|81490"
                   }
                 }
               ],
               "ComponentMesh": [
                 {
                   "ƒ.ComponentMesh": {
-                    "idMesh": "MeshCube|2020-09-17T13:45:49:214Z|68011",
+                    "idMesh": "MeshCube|2020-09-18T17:22:17.407Z|78753",
                     "pivot": {
                       "translation": {
                         "x": 0,
@@ -265,7 +265,7 @@
           }
         }
       ],
-      "idResource": "NodeResource|2020-09-17T13:45:49:223Z|59033"
+      "idResource": "NodeResource|2020-09-18T17:22:17.419Z|31608"
     }
   }
 }

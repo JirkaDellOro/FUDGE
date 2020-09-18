@@ -1,4 +1,4 @@
-///<reference path="Script/Script.ts"/>
+///<reference path="./Script/Build/Script.d.ts"/>
 namespace ResourceManager {
   export import ƒ = FudgeCore;
   export import ƒAid = FudgeAid;
@@ -81,7 +81,7 @@ namespace ResourceManager {
 
     let source: ƒAid.Node = new ƒAid.Node("Source", ƒ.Matrix4x4.IDENTITY(), mtrTexture, pyramid);
     // TODO: dynamically load Script! Is it among Resources?
-    source.addComponent(new Script());
+    source.addComponent(new Script.TimerMessage());
     source.addComponent(cmpAudio);
     let child: ƒ.Node = new ƒAid.Node("Cube", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y()), mtrFlat, cube);
     child.getComponent(ƒ.ComponentMesh).pivot.scale(ƒ.Vector3.ONE(0.5));
@@ -171,7 +171,7 @@ namespace ResourceManager {
       node.mtxLocal.rotateY(angle);
       angle += _angleIncrement;
       if (node != _keepScript)
-        node.removeComponent(node.getComponent(Script));
+        node.removeComponent(node.getComponent(Script.TimerMessage));
     }
   }
 

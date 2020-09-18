@@ -1,8 +1,9 @@
-///<reference types="../../../../Core/Build/FudgeCore"/>
-namespace ResourceManager {
+///<reference types="../../../../../Core/Build/FudgeCore"/>
+namespace Script {
   import ƒ = FudgeCore;
+  ƒ.Serializer.registerNamespace(Script);
 
-  export class Script extends ƒ.ComponentScript {
+  export class TimerMessage extends ƒ.ComponentScript {
     public prefix: string = "Script: ";
     public count: number = 0;
     private timer: ƒ.Timer;

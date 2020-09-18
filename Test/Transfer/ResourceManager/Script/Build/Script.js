@@ -1,9 +1,11 @@
-///<reference types="../../../../Core/Build/FudgeCore"/>
-var ResourceManager;
-///<reference types="../../../../Core/Build/FudgeCore"/>
-(function (ResourceManager) {
+"use strict";
+///<reference types="../../../../../Core/Build/FudgeCore"/>
+var Script;
+///<reference types="../../../../../Core/Build/FudgeCore"/>
+(function (Script) {
     var ƒ = FudgeCore;
-    class Script extends ƒ.ComponentScript {
+    ƒ.Serializer.registerNamespace(Script);
+    class TimerMessage extends ƒ.ComponentScript {
         constructor() {
             super();
             this.prefix = "Script: ";
@@ -21,6 +23,6 @@ var ResourceManager;
             this.addEventListener("componentRemove" /* COMPONENT_REMOVE */, this.hndRemoveComponent);
         }
     }
-    ResourceManager.Script = Script;
-})(ResourceManager || (ResourceManager = {}));
+    Script.TimerMessage = TimerMessage;
+})(Script || (Script = {}));
 //# sourceMappingURL=Script.js.map

@@ -1,6 +1,6 @@
-///<reference path="Script/Script.ts"/>
+///<reference path="./Script/Build/Script.d.ts"/>
 var ResourceManager;
-///<reference path="Script/Script.ts"/>
+///<reference path="./Script/Build/Script.d.ts"/>
 (function (ResourceManager) {
     ResourceManager.ƒ = FudgeCore;
     ResourceManager.ƒAid = FudgeAid;
@@ -68,7 +68,7 @@ var ResourceManager;
         let cmpAudio = new ResourceManager.ƒ.ComponentAudio(audio, true, true);
         let source = new ResourceManager.ƒAid.Node("Source", ResourceManager.ƒ.Matrix4x4.IDENTITY(), mtrTexture, pyramid);
         // TODO: dynamically load Script! Is it among Resources?
-        source.addComponent(new ResourceManager.Script());
+        source.addComponent(new Script.TimerMessage());
         source.addComponent(cmpAudio);
         let child = new ResourceManager.ƒAid.Node("Cube", ResourceManager.ƒ.Matrix4x4.TRANSLATION(ResourceManager.ƒ.Vector3.Y()), mtrFlat, cube);
         child.getComponent(ResourceManager.ƒ.ComponentMesh).pivot.scale(ResourceManager.ƒ.Vector3.ONE(0.5));
@@ -141,7 +141,7 @@ var ResourceManager;
             node.mtxLocal.rotateY(angle);
             angle += _angleIncrement;
             if (node != _keepScript)
-                node.removeComponent(node.getComponent(ResourceManager.Script));
+                node.removeComponent(node.getComponent(Script.TimerMessage));
         }
     }
     function showGraphs(_graphs) {
