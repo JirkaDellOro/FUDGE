@@ -15,7 +15,7 @@ namespace FudgeCore {
     public url: RequestInfo;
     public idResource: string = undefined;
 
-    constructor(_url?: string) {
+    constructor(_url?: RequestInfo) {
       super();
       if (_url)
         this.load(_url);
@@ -25,7 +25,7 @@ namespace FudgeCore {
     /**
      * Asynchronously loads the image from the given url
      */
-    public async load(_url: string): Promise<void> {
+    public async load(_url: RequestInfo): Promise<void> {
       this.url = _url;
       this.image = new Image();
       // const response: Response = await window.fetch(this.url);
@@ -36,7 +36,7 @@ namespace FudgeCore {
       return new Promise((resolve, reject) => {
         this.image.addEventListener("load", () => resolve());
         this.image.addEventListener("error", () => reject());
-        this.image.src = _url;
+        this.image.src = _url.toString();
       });
     }
 
@@ -49,7 +49,8 @@ namespace FudgeCore {
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       ResourceManager.register(this, _serialization.idResource);
-      this.load(_serialization.url);
+      let url: URL = new URL(_serialization.url, ResourceManager.baseURL);
+      this.load(url.href);
       return this;
     }
     //#endregion

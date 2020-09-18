@@ -43,7 +43,8 @@ namespace FudgeCore {
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       ResourceManager.register(this, _serialization.idResource);
-      await this.load(_serialization.url);
+      let url: URL = new URL(_serialization.url, ResourceManager.baseURL);
+      await this.load(url.href);
       return this;
     }
     //#endregion

@@ -81,12 +81,18 @@ namespace Fudge {
   async function open(): Promise<ƒ.Node> {
     let filenames: string[] = remote.dialog.showOpenDialogSync(null, { title: "Load Graph", buttonLabel: "Load Graph", properties: ["openFile"] });
 
+    console.log(filenames);
+    let base: URL = new URL(filenames[0]);
+    let file: RequestInfo = "Image/Fudge_360.png";
+    console.log(new URL(file, base));
+
     let content: string = fs.readFileSync(filenames[0], { encoding: "utf-8" });
     ƒ.Debug.groupCollapsed("File content");
     ƒ.Debug.info(content);
     ƒ.Debug.groupEnd();
 
     let serialization: ƒ.Serialization = ƒ.Serializer.parse(content);
+    ƒ.ResourceManager.baseURL = base;
     let reconstruction: ƒ.Resources = await ƒ.ResourceManager.deserialize(serialization);
 
     ƒ.Debug.groupCollapsed("Deserialized");

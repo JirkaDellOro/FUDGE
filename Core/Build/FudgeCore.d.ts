@@ -1760,6 +1760,7 @@ declare namespace FudgeCore {
     abstract class ResourceManager {
         static resources: Resources;
         static serialization: SerializationOfResources;
+        static baseURL: URL;
         /**
          * Registers the resource and generates an id for it by default.
          * If the resource already has an id, thus having been registered, its deleted from the list and registered anew.
@@ -3463,11 +3464,11 @@ declare namespace FudgeCore {
         image: HTMLImageElement;
         url: RequestInfo;
         idResource: string;
-        constructor(_url?: string);
+        constructor(_url?: RequestInfo);
         /**
          * Asynchronously loads the image from the given url
          */
-        load(_url: string): Promise<void>;
+        load(_url: RequestInfo): Promise<void>;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }

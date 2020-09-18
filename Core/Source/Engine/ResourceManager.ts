@@ -19,6 +19,7 @@ namespace FudgeCore {
   export abstract class ResourceManager {
     public static resources: Resources = {};
     public static serialization: SerializationOfResources = {};
+    public static baseURL: URL = new URL(location.toString());
 
     /**
      * Registers the resource and generates an id for it by default.  

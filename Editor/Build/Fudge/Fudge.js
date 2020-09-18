@@ -131,11 +131,16 @@ var Fudge;
     }
     async function open() {
         let filenames = Fudge.remote.dialog.showOpenDialogSync(null, { title: "Load Graph", buttonLabel: "Load Graph", properties: ["openFile"] });
+        console.log(filenames);
+        let base = new URL(filenames[0]);
+        let file = "Image/Fudge_360.png";
+        console.log(new URL(file, base));
         let content = fs.readFileSync(filenames[0], { encoding: "utf-8" });
         ƒ.Debug.groupCollapsed("File content");
         ƒ.Debug.info(content);
         ƒ.Debug.groupEnd();
         let serialization = ƒ.Serializer.parse(content);
+        ƒ.ResourceManager.baseURL = base;
         let reconstruction = await ƒ.ResourceManager.deserialize(serialization);
         ƒ.Debug.groupCollapsed("Deserialized");
         ƒ.Debug.info(reconstruction);
