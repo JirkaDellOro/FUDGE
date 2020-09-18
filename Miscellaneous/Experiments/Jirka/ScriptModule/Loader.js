@@ -1,17 +1,15 @@
-console.log("Loader starts");
-let filename = "./Script.js";
-start();
-async function start() {
-    try {
-        let A = await import("./Script.js");
-        // let A: typeof import(filename) = await import(filename);
-        console.log(A.Test);
-        let x = new A.Test("Hallo");
-        console.log(x.content);
+var Loader;
+(function (Loader) {
+    console.log("Loader starts");
+    start();
+    async function start() {
+        try {
+            let test0 = new Test.Test0("Hallo");
+            let try0 = new Try.Try("Hallo");
+        }
+        catch (_error) {
+            console.log(_error);
+        }
     }
-    catch (_error) {
-        console.log(_error);
-    }
-}
-export {};
+})(Loader || (Loader = {}));
 //# sourceMappingURL=Loader.js.map

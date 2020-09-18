@@ -1,17 +1,13 @@
-import { Test } from "./Script.js";
+namespace Loader { 
+  console.log("Loader starts");
+  start();
 
-console.log("Loader starts");
-let filename: string = "./Script.js";
-start();
-
-async function start(): Promise<void> {
-  try {
-    let A: typeof import("./Script.js") = await import("./Script.js");
-    // let A: typeof import(filename) = await import(filename);
-    console.log(A.Test);
-    let x: Test = new A.Test("Hallo");
-    console.log(x.content);
-  } catch (_error: unknown) {
-    console.log(_error);
+  async function start(): Promise<void> {
+    try {
+      let test0: Test.Test0 = new Test.Test0("Hallo");
+      let try0: Try.Try = new Try.Try("Hallo");
+    } catch (_error: unknown) {
+      console.log(_error);
+    }
   }
 }
