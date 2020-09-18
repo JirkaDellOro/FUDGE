@@ -148,15 +148,6 @@
             }
           }
         ],
-        "TimerMessage": [
-          {
-            "Script.TimerMessage": {
-              "active": true,
-              "prefix": "Script: ",
-              "count": 0
-            }
-          }
-        ],
         "ComponentAudio": [
           {
             "ƒ.ComponentAudio": {
