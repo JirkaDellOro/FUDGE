@@ -426,18 +426,6 @@ declare namespace FudgeCore {
     class Vector2 extends Mutable {
         private data;
         constructor(_x?: number, _y?: number);
-        get x(): number;
-        get y(): number;
-        set x(_x: number);
-        set y(_y: number);
-        /**
-         * Returns the length of the vector
-         */
-        get magnitude(): number;
-        /**
-         * Returns the square of the magnitude of the vector without calculating a square root. Faster for simple proximity evaluation.
-         */
-        get magnitudeSquared(): number;
         /**
          * A shorthand for writing `new Vector2(0, 0)`.
          * @returns A new vector with the values (0, 0)
@@ -513,6 +501,22 @@ declare namespace FudgeCore {
          * @returns A Vector that is orthogonal to and has the same magnitude as the given Vector.
          */
         static ORTHOGONAL(_vector: Vector2, _clockwise?: boolean): Vector2;
+        get x(): number;
+        get y(): number;
+        set x(_x: number);
+        set y(_y: number);
+        /**
+         * Returns the length of the vector
+         */
+        get magnitude(): number;
+        /**
+         * Returns the square of the magnitude of the vector without calculating a square root. Faster for simple proximity evaluation.
+         */
+        get magnitudeSquared(): number;
+        /**
+         * @returns A deep copy of the vector.
+         */
+        get copy(): Vector2;
         /**
          * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
          * TODO: examine, if tolerance as criterium for the difference is appropriate with very large coordinate values or if _tolerance should be multiplied by coordinate value
@@ -548,10 +552,6 @@ declare namespace FudgeCore {
          * @returns An array of the data of the vector
          */
         get(): Float32Array;
-        /**
-         * @returns A deep copy of the vector.
-         */
-        get copy(): Vector2;
         transform(_matrix: Matrix3x3, _includeTranslation?: boolean): void;
         /**
          * Adds a z-component of the given magnitude (default=0) to the vector and returns a new Vector3
@@ -2755,20 +2755,6 @@ declare namespace FudgeCore {
     class Vector3 extends Mutable {
         private data;
         constructor(_x?: number, _y?: number, _z?: number);
-        get x(): number;
-        get y(): number;
-        get z(): number;
-        set x(_x: number);
-        set y(_y: number);
-        set z(_z: number);
-        /**
-         * Returns the length of the vector
-         */
-        get magnitude(): number;
-        /**
-         * Returns the square of the magnitude of the vector without calculating a square root. Faster for simple proximity evaluation.
-         */
-        get magnitudeSquared(): number;
         /**
          * Creates and returns a vector with the given length pointing in x-direction
          */
@@ -2831,6 +2817,24 @@ declare namespace FudgeCore {
          * Divides the dividend by the divisor component by component and returns the result
          */
         static RATIO(_dividend: Vector3, _divisor: Vector3): Vector3;
+        get x(): number;
+        get y(): number;
+        get z(): number;
+        set x(_x: number);
+        set y(_y: number);
+        set z(_z: number);
+        /**
+         * Returns the length of the vector
+         */
+        get magnitude(): number;
+        /**
+         * Returns the square of the magnitude of the vector without calculating a square root. Faster for simple proximity evaluation.
+         */
+        get magnitudeSquared(): number;
+        /**
+         * Returns a copy of this vector
+         */
+        get copy(): Vector3;
         /**
          * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
          * TODO: examine, if tolerance as criterium for the difference is appropriate with very large coordinate values or if _tolerance should be multiplied by coordinate value
@@ -2868,10 +2872,6 @@ declare namespace FudgeCore {
          * Returns this vector as a new Float32Array (copy)
          */
         get(): Float32Array;
-        /**
-         * Returns a copy of this vector
-         */
-        get copy(): Vector3;
         /**
          * Transforms this vector by the given matrix, including or exluding the translation.
          * Including is the default, excluding will only rotate and scale this vector.
