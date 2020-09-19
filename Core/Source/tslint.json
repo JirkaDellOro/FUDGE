@@ -54,7 +54,7 @@
 				"property-declaration": "nospace",
 				"variable-declaration": "nospace"
 			}
-		],
+    ],
 		"use-strict": [false, "check-module", "check-function"],
 		"variable-name": [true, "check-format", "allow-leading-underscore"],
 		"whitespace": [true, "check-branch", "check-decl", "check-operator", "check-separator", "check-type"],

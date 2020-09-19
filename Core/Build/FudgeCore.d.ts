@@ -1057,7 +1057,6 @@ declare namespace FudgeCore {
         protected renderData: {
             [key: string]: unknown;
         };
-        mutate(_mutator: Mutator): void;
         useRenderData(_shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;

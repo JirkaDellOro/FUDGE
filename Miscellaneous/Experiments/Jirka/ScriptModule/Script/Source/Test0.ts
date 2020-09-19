@@ -1,4 +1,4 @@
-module Test {
+namespace Test {
   console.log("Load Test0");
   //   export module ScriptModule {
   export class Test0 {

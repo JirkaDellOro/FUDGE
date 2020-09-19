@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var Scripttest;
 (function (Scripttest) {
     // list of scripts to load
-    let load = ["GameObject", "Script", "ScriptExtended"];
+    let load = ["GameObject", "Script", "ScriptExtended", "../ScriptModule/Script/Build/Script"];
     // call init when everything including the scripts is loaded
     window.addEventListener("load", init);
     function init(_event) {

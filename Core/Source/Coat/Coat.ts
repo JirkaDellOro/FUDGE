@@ -8,10 +8,6 @@ namespace FudgeCore {
         public name: string = "Coat";
         protected renderData: {[key: string]: unknown};
 
-        public mutate(_mutator: Mutator): void {
-            super.mutate(_mutator);
-        }
-
         public useRenderData(_shader: typeof Shader, _cmpMaterial: ComponentMaterial): void {/* injected by RenderInjector*/ }
         
         //#region Transfer

@@ -1,6 +1,6 @@
 namespace Scripttest {
   // list of scripts to load
-  let load: string[] = ["GameObject", "Script", "ScriptExtended"];
+  let load: string[] = ["GameObject", "Script", "ScriptExtended", "../ScriptModule/Script/Build/Script"];
   // call init when everything including the scripts is loaded
   window.addEventListener("load", init);
 
