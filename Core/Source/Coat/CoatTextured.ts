@@ -3,12 +3,13 @@ namespace FudgeCore {
    * A [[Coat]] providing a texture and additional data for texturing
    */
   @RenderInjectorCoat.decorate
-  export class CoatTextured extends Coat {
+  export class CoatTextured extends CoatColored {
     // TODO: see if color should be generalized
-    public color: Color = new Color(1, 1, 1, 1);
+    // public color: Color = new Color(1, 1, 1, 1);
     public texture: TextureImage = null;
 
     //#region Transfer
+    //TODO: examine using super in serialization is works with decorators... should.
     public serialize(): Serialization {
       let serialization: Serialization = super.serialize();
       delete serialization.texture;
@@ -16,7 +17,7 @@ namespace FudgeCore {
       return serialization;
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.mutate(_serialization);
+      super.deserialize(_serialization);
       this.texture = <TextureImage> await Project.getResource(_serialization.idTexture);
       return this;
     }

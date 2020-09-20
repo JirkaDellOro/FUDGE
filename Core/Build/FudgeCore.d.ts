@@ -1068,6 +1068,9 @@ declare namespace FudgeCore {
     class CoatColored extends Coat {
         color: Color;
         constructor(_color?: Color);
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        protected reduceMutator(): void;
     }
     /**
      * A [[Coat]] to be used by the MatCap Shader providing a texture, a tint color (0.5 grey is neutral). Set shadeSmooth to 1 for smooth shading.
@@ -1083,8 +1086,7 @@ declare namespace FudgeCore {
     /**
      * A [[Coat]] providing a texture and additional data for texturing
      */
-    class CoatTextured extends Coat {
-        color: Color;
+    class CoatTextured extends CoatColored {
         texture: TextureImage;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
@@ -1678,7 +1680,7 @@ declare namespace FudgeCore {
     /**
      * Defines a color as values in the range of 0 to 1 for the four channels red, green, blue and alpha (for opacity)
      */
-    class Color extends Mutable {
+    class Color extends Mutable implements Serializable {
         private static crc2;
         r: number;
         g: number;
@@ -1698,6 +1700,8 @@ declare namespace FudgeCore {
         getCSS(): string;
         getHex(): string;
         setHex(_hex: string): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }

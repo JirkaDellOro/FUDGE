@@ -20,8 +20,8 @@ namespace FudgeCore {
     //#region Transfer
     public serialize(): Serialization {
       let serialization: Serialization = {
-        clrPrimary: this.clrPrimary,
-        clrSecondary: this.clrSecondary,
+        clrPrimary: this.clrPrimary.serialize(),
+        clrSecondary: this.clrSecondary.serialize(),
         pivot: this.pivot.serialize(),
         [super.constructor.name]: super.serialize()
       };
@@ -41,8 +41,8 @@ namespace FudgeCore {
       // else
       //   material = <Material>await Serializer.deserialize(_serialization.material);
       this.material = material;
-      this.clrPrimary = _serialization.clrPrimary;
-      this.clrSecondary = _serialization.clrSecondary;
+      this.clrPrimary.deserialize(_serialization.clrPrimary);
+      this.clrSecondary.deserialize(_serialization.clrSecondary);
       this.pivot.deserialize(_serialization.pivot);
       super.deserialize(_serialization[super.constructor.name]);
       return this;

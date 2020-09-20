@@ -31,13 +31,30 @@ var Project;
     }
     Project.Resource = Resource;
     function init(_event) {
-        for (let call of [TestCustomResource, CreateTestScene, LoadScene]) {
+        for (let call of [TestCustomResource, CreateTestScene, LoadScene, TestColor]) {
             let button = document.createElement("button");
             button.addEventListener("click", call);
             button.innerText = call.name;
             document.body.appendChild(button);
         }
         document.body.appendChild(document.createElement("hr"));
+    }
+    async function TestColor() {
+        let color = new Project.ƒ.Color(0.1, 0.2, 0.3, 0.4);
+        console.log("Source", color);
+        console.log("Mutator", color.getMutator());
+        let serialization = color.serialize();
+        console.log("Serialization", serialization);
+        let json = Project.ƒ.Serializer.stringify(serialization);
+        // let json: string = JSON.stringify(serialization);
+        console.log("Stringified", json);
+        serialization = JSON.parse(json);
+        // serialization = JSON.parse(serialization.toString());
+        console.log("Parsed", serialization);
+        let reconstruct = new Project.ƒ.Color();
+        console.log("Empty Reconstruction", reconstruct);
+        reconstruct.deserialize(serialization);
+        console.log("Reconstruction", reconstruct);
     }
     async function TestCustomResource() {
         let a = new Resource();
@@ -68,10 +85,14 @@ var Project;
         let mtrFlat = new Project.ƒ.Material("Flat", Project.ƒ.ShaderUniColor, new Project.ƒ.CoatColored(Project.ƒ.Color.CSS("lightblue")));
         let audio = new Project.ƒ.Audio("Audio/hypnotic.mp3");
         let cmpAudio = new Project.ƒ.ComponentAudio(audio, true, true);
+        let lightAmbient = new Project.ƒ.ComponentLight(new Project.ƒ.LightAmbient(Project.ƒ.Color.CSS("grey")));
+        let lightDirectional = new Project.ƒ.ComponentLight(new Project.ƒ.LightDirectional(Project.ƒ.Color.CSS("yellow")));
         let source = new Project.ƒAid.Node("Source", Project.ƒ.Matrix4x4.IDENTITY(), mtrTexture, pyramid);
         // TODO: dynamically load Script! Is it among Resources?
         source.addComponent(new Script.TimerMessage());
         source.addComponent(cmpAudio);
+        source.addComponent(lightAmbient);
+        source.addComponent(lightDirectional);
         let child = new Project.ƒAid.Node("Cube", Project.ƒ.Matrix4x4.TRANSLATION(Project.ƒ.Vector3.Y()), mtrFlat, cube);
         child.getComponent(Project.ƒ.ComponentMesh).pivot.scale(Project.ƒ.Vector3.ONE(0.5));
         source.addChild(child);
