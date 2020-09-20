@@ -1,10 +1,12 @@
-///<reference path="./Script/Build/Script.d.ts"/>
-namespace ResourceManager {
+///<reference path="./Code/Build/Compiled.d.ts"/>
+namespace Project {
   export import ƒ = FudgeCore;
   export import ƒAid = FudgeAid;
 
   // register namespace of custom resources
-  ƒ.Serializer.registerNamespace(ResourceManager);
+  ƒ.Serializer.registerNamespace(Project);
+  ƒ.Project.baseURL = new URL(location.href);
+  console.log(ƒ.Project.baseURL);
 
   window.addEventListener("DOMContentLoaded", init);
   // document.addEventListener("click", init);
@@ -23,7 +25,7 @@ namespace ResourceManager {
     public async deserialize(_serialization: ƒ.Serialization): Promise<Resource> {
       this.idResource = _serialization.idResource;
       if (_serialization.idReference)
-        this.reference = <Resource>await ƒ.ResourceManager.get(_serialization.idReference);
+        this.reference = <Resource>await ƒ.Project.getResource(_serialization.idReference);
       return this;
     }
   }
@@ -43,16 +45,16 @@ namespace ResourceManager {
     let c: Resource = new Resource();
     let b: Resource = new Resource();
 
-    ƒ.ResourceManager.register(a);
-    ƒ.ResourceManager.register(c);
-    ƒ.ResourceManager.register(b);
+    ƒ.Project.register(a);
+    ƒ.Project.register(c);
+    ƒ.Project.register(b);
     a.reference = b;
     c.reference = b;
     // b.reference = b; // cyclic references disallowed at this point in time
 
     let result: ƒ.Resources = await testSerialization();
     console.group("Comparison");
-    Compare.compare(ƒ.ResourceManager.resources, result);
+    Compare.compare(ƒ.Project.resources, result);
     console.groupEnd();
   }
 
@@ -67,10 +69,10 @@ namespace ResourceManager {
     let mtrTexture: ƒ.Material = new ƒ.Material("Textured", ƒ.ShaderTexture, coatTextured);
 
     let pyramid: ƒ.Mesh = new ƒ.MeshPyramid();
-    ƒ.ResourceManager.register(pyramid);
+    ƒ.Project.register(pyramid);
 
     let cube: ƒ.Mesh = new ƒ.MeshCube();
-    ƒ.ResourceManager.register(cube);
+    ƒ.Project.register(cube);
     let mtrFlat: ƒ.Material = new ƒ.Material("Flat", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("lightblue")));
 
 
@@ -88,8 +90,8 @@ namespace ResourceManager {
     source.addChild(child);
 
 
-    let graph: ƒ.NodeResource = await ƒ.ResourceManager.registerNodeAsResource(source, true);
-    let instance: ƒ.NodeResourceInstance = await ƒ.ResourceManager.createGraphInstance(graph);
+    let graph: ƒ.NodeResource = await ƒ.Project.registerNodeAsResource(source, true);
+    let instance: ƒ.NodeResourceInstance = await ƒ.Project.createGraphInstance(graph);
     console.log("Source", source);
     console.log("Graph", graph);
     console.log("Instance", instance);
@@ -98,7 +100,7 @@ namespace ResourceManager {
     instance.name = "Instance";
     let id: string = graph.idResource;
 
-    let old: ƒ.Resources = ƒ.ResourceManager.resources;
+    let old: ƒ.Resources = ƒ.Project.resources;
     let reconstruction: ƒ.Resources = await testSerialization();
     // for (let id in old) {
     //   if (id.startsWith("Node"))
@@ -122,7 +124,7 @@ namespace ResourceManager {
 
     let reconstrucedGraph: ƒ.NodeResource = <ƒ.NodeResource>reconstruction[id];
     reconstrucedGraph.name = "ReconstructedGraph";
-    let reconstructedInstance: ƒ.NodeResourceInstance = await ƒ.ResourceManager.createGraphInstance(reconstrucedGraph);
+    let reconstructedInstance: ƒ.NodeResourceInstance = await ƒ.Project.createGraphInstance(reconstrucedGraph);
     reconstructedInstance.name = "ReconstructedInstance";
 
     tweakGraphs(10, reconstructedInstance, [source, graph, instance, reconstrucedGraph, reconstructedInstance]);
@@ -145,7 +147,7 @@ namespace ResourceManager {
     console.groupEnd();
 
     console.groupCollapsed("Reconstructed");
-    let reconstruction: ƒ.Resources = await ƒ.ResourceManager.deserialize(serialization);
+    let reconstruction: ƒ.Resources = await ƒ.Project.deserialize(serialization);
     console.log(reconstruction);
     console.groupEnd();
 
@@ -153,7 +155,7 @@ namespace ResourceManager {
       let resource: ƒ.SerializableResource = reconstruction[id];
       if (resource instanceof ƒ.NodeResource) {
         resource.name = "ReconstructedGraph";
-        let reconstructedInstance: ƒ.NodeResourceInstance = await ƒ.ResourceManager.createGraphInstance(resource);
+        let reconstructedInstance: ƒ.NodeResourceInstance = await ƒ.Project.createGraphInstance(resource);
         reconstructedInstance.name = "ReconstructedInstance";
 
         tweakGraphs(10, reconstructedInstance, [resource, reconstructedInstance]);
@@ -197,19 +199,19 @@ namespace ResourceManager {
 
   async function testSerialization(): Promise<ƒ.Resources> {
     console.groupCollapsed("Original");
-    console.log(ƒ.ResourceManager.resources);
+    console.log(ƒ.Project.resources);
     console.groupEnd();
 
     console.groupCollapsed("Serialized");
-    let serialization: ƒ.SerializationOfResources = ƒ.ResourceManager.serialize();
+    let serialization: ƒ.SerializationOfResources = ƒ.Project.serialize();
     console.log(serialization);
     console.groupEnd();
 
-    console.log(ƒ.ResourceManager.resources);
-    console.log(ƒ.ResourceManager.serialization);
-    ƒ.ResourceManager.clear();
-    console.log(ƒ.ResourceManager.resources);
-    console.log(ƒ.ResourceManager.serialization);
+    console.log(ƒ.Project.resources);
+    console.log(ƒ.Project.serialization);
+    ƒ.Project.clear();
+    console.log(ƒ.Project.resources);
+    console.log(ƒ.Project.serialization);
 
     console.group("Stringified");
     let json: string = ƒ.Serializer.stringify(serialization);
@@ -222,7 +224,7 @@ namespace ResourceManager {
     console.groupEnd();
 
     console.groupCollapsed("Reconstructed");
-    let reconstruction: ƒ.Resources = await ƒ.ResourceManager.deserialize(serialization);
+    let reconstruction: ƒ.Resources = await ƒ.Project.deserialize(serialization);
     console.log(reconstruction);
     console.groupEnd();
 

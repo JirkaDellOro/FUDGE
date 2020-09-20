@@ -1756,7 +1756,7 @@ declare namespace FudgeCore {
      * Keeps a list of the resources and generates ids to retrieve them.
      * Resources are objects referenced multiple times but supposed to be stored only once
      */
-    abstract class ResourceManager {
+    abstract class Project {
         static resources: Resources;
         static serialization: SerializationOfResources;
         static baseURL: URL;
@@ -1781,7 +1781,7 @@ declare namespace FudgeCore {
         /**
          * Retrieves the resource stored with the given id
          */
-        static get(_idResource: string): Promise<SerializableResource>;
+        static getResource(_idResource: string): Promise<SerializableResource>;
         /**
          * Creates and registers a resource from a [[Node]], copying the complete graph starting with it
          * @param _node A node to create the resource from

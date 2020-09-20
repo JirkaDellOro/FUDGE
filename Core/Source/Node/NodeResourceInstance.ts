@@ -20,7 +20,7 @@ namespace FudgeCore {
      * Recreate this node from the [[NodeResource]] referenced
      */
     public async reset(): Promise<void> {
-      let resource: NodeResource = <NodeResource> await ResourceManager.get(this.idSource);
+      let resource: NodeResource = <NodeResource> await Project.getResource(this.idSource);
       this.set(resource);
     }
 

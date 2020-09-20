@@ -16,7 +16,7 @@ namespace FudgeCore {
    * Keeps a list of the resources and generates ids to retrieve them.  
    * Resources are objects referenced multiple times but supposed to be stored only once
    */
-  export abstract class ResourceManager {
+  export abstract class Project {
     public static resources: Resources = {};
     public static serialization: SerializationOfResources = {};
     public static baseURL: URL = new URL(location.toString());
@@ -32,18 +32,18 @@ namespace FudgeCore {
           return;
         else
           this.deregister(_resource);
-      _resource.idResource = _idResource || ResourceManager.generateId(_resource);
-      ResourceManager.resources[_resource.idResource] = _resource;
+      _resource.idResource = _idResource || Project.generateId(_resource);
+      Project.resources[_resource.idResource] = _resource;
     }
 
     public static deregister(_resource: SerializableResource): void {
-      delete (ResourceManager.resources[_resource.idResource]);
-      delete (ResourceManager.serialization[_resource.idResource]);
+      delete (Project.resources[_resource.idResource]);
+      delete (Project.serialization[_resource.idResource]);
     }
 
     public static clear(): void {
-      ResourceManager.resources = {};
-      ResourceManager.serialization = {};
+      Project.resources = {};
+      Project.serialization = {};
     }
 
 
@@ -56,7 +56,7 @@ namespace FudgeCore {
       let idResource: string;
       do
         idResource = _resource.constructor.name + "|" + new Date().toISOString() + "|" + Math.random().toPrecision(5).substr(2, 5);
-      while (ResourceManager.resources[idResource]);
+      while (Project.resources[idResource]);
       return idResource;
     }
 
@@ -71,15 +71,15 @@ namespace FudgeCore {
     /**
      * Retrieves the resource stored with the given id
      */
-    public static async get(_idResource: string): Promise<SerializableResource> {
-      let resource: SerializableResource = ResourceManager.resources[_idResource];
+    public static async getResource(_idResource: string): Promise<SerializableResource> {
+      let resource: SerializableResource = Project.resources[_idResource];
       if (!resource) {
-        let serialization: Serialization = ResourceManager.serialization[_idResource];
+        let serialization: Serialization = Project.serialization[_idResource];
         if (!serialization) {
           Debug.error("Resource not found", _idResource);
           return null;
         }
-        resource = await ResourceManager.deserializeResource(serialization);
+        resource = await Project.deserializeResource(serialization);
       }
       return resource;
     }
@@ -93,7 +93,7 @@ namespace FudgeCore {
       let serialization: Serialization = _node.serialize();
       let nodeResource: NodeResource = new NodeResource("NodeResource");
       await nodeResource.deserialize(serialization);
-      ResourceManager.register(nodeResource);
+      Project.register(nodeResource);
 
       if (_replaceWithInstance && _node.getParent()) {
         let instance: NodeResourceInstance = new NodeResourceInstance(nodeResource);
@@ -114,8 +114,8 @@ namespace FudgeCore {
      */
     public static serialize(): SerializationOfResources {
       let serialization: SerializationOfResources = {};
-      for (let idResource in ResourceManager.resources) {
-        let resource: SerializableResource = ResourceManager.resources[idResource];
+      for (let idResource in Project.resources) {
+        let resource: SerializableResource = Project.resources[idResource];
         if (idResource != resource.idResource)
           Debug.error("Resource-id mismatch", resource);
         serialization[idResource] = Serializer.serialize(resource);
@@ -128,15 +128,15 @@ namespace FudgeCore {
      * @param _serialization 
      */
     public static async deserialize(_serialization: SerializationOfResources): Promise<Resources> {
-      ResourceManager.serialization = _serialization;
-      ResourceManager.resources = {};
+      Project.serialization = _serialization;
+      Project.resources = {};
       for (let idResource in _serialization) {
         let serialization: Serialization = _serialization[idResource];
-        let resource: SerializableResource = await ResourceManager.deserializeResource(serialization);
+        let resource: SerializableResource = await Project.deserializeResource(serialization);
         if (resource)
-          ResourceManager.resources[idResource] = resource;
+          Project.resources[idResource] = resource;
       }
-      return ResourceManager.resources;
+      return Project.resources;
     }
 
     private static async deserializeResource(_serialization: Serialization): Promise<SerializableResource> {

@@ -20,7 +20,7 @@ namespace FudgeCore {
         else
           this.setCoat(this.createCoatMatchingShader());
       }
-      ResourceManager.register(this);
+      Project.register(this);
     }
 
     /**
@@ -84,7 +84,7 @@ namespace FudgeCore {
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.name = _serialization.name;
-      ResourceManager.register(this, _serialization.idResource);
+      Project.register(this, _serialization.idResource);
       // this.idResource = _serialization.idResource;
       // TODO: provide for shaders in the users namespace. See Serializer fullpath etc.
       // tslint:disable-next-line: no-any

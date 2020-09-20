@@ -8,14 +8,14 @@ namespace FileIo {
   }
   async function handleStart(): Promise<void> {
     let material: ƒ.Material = new ƒ.Material("Material_1", ƒ.ShaderFlat, new ƒ.CoatColored(new ƒ.Color(1, 1, 1, 1)));
-    // ƒ.ResourceManager.register(material);
+    // ƒ.Project.register(material);
 
     let mesh: ƒ.Mesh = new ƒ.MeshPyramid();
-    // ƒ.ResourceManager.register(mesh);
+    // ƒ.Project.register(mesh);
 
     let node: ƒ.Node;
     node = Scenes.createCompleteMeshNode("Node", material, mesh);
-    // let nodeResource: ƒ.NodeResource = ƒ.ResourceManager.registerNodeAsResource(node);
+    // let nodeResource: ƒ.NodeResource = ƒ.Project.registerNodeAsResource(node);
 
     // let instance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(nodeResource);
     // ƒ.Debug.log(instance);

@@ -1,4 +1,3 @@
-/// <reference types="../../../../../core/build/fudgecore" />
 declare namespace Script {
     import ƒ = FudgeCore;
     class TimerMessage extends ƒ.ComponentScript {

@@ -19,7 +19,7 @@ namespace FudgeCore {
       super();
       if (_url)
         this.load(_url);
-      ResourceManager.register(this);
+      Project.register(this);
     }
 
     /**
@@ -36,7 +36,7 @@ namespace FudgeCore {
       return new Promise((resolve, reject) => {
         this.image.addEventListener("load", () => resolve());
         this.image.addEventListener("error", () => reject());
-        this.image.src = _url.toString();
+        this.image.src = new URL(this.url.toString(), Project.baseURL).toString();
       });
     }
 
@@ -48,9 +48,8 @@ namespace FudgeCore {
       };
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      ResourceManager.register(this, _serialization.idResource);
-      let url: URL = new URL(_serialization.url, ResourceManager.baseURL);
-      this.load(url.href);
+      Project.register(this, _serialization.idResource);
+      this.load(_serialization.url);
       return this;
     }
     //#endregion

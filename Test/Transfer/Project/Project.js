@@ -1,11 +1,13 @@
-///<reference path="./Script/Build/Script.d.ts"/>
-var ResourceManager;
-///<reference path="./Script/Build/Script.d.ts"/>
-(function (ResourceManager) {
-    ResourceManager.ƒ = FudgeCore;
-    ResourceManager.ƒAid = FudgeAid;
+///<reference path="./Code/Build/Compiled.d.ts"/>
+var Project;
+///<reference path="./Code/Build/Compiled.d.ts"/>
+(function (Project) {
+    Project.ƒ = FudgeCore;
+    Project.ƒAid = FudgeAid;
     // register namespace of custom resources
-    ResourceManager.ƒ.Serializer.registerNamespace(ResourceManager);
+    Project.ƒ.Serializer.registerNamespace(Project);
+    Project.ƒ.Project.baseURL = new URL(location.href);
+    console.log(Project.ƒ.Project.baseURL);
     window.addEventListener("DOMContentLoaded", init);
     // document.addEventListener("click", init);
     // Test custom resource
@@ -23,11 +25,11 @@ var ResourceManager;
         async deserialize(_serialization) {
             this.idResource = _serialization.idResource;
             if (_serialization.idReference)
-                this.reference = await ResourceManager.ƒ.ResourceManager.get(_serialization.idReference);
+                this.reference = await Project.ƒ.Project.getResource(_serialization.idReference);
             return this;
         }
     }
-    ResourceManager.Resource = Resource;
+    Project.Resource = Resource;
     function init(_event) {
         for (let call of [TestCustomResource, CreateTestScene, LoadScene]) {
             let button = document.createElement("button");
@@ -41,47 +43,47 @@ var ResourceManager;
         let a = new Resource();
         let c = new Resource();
         let b = new Resource();
-        ResourceManager.ƒ.ResourceManager.register(a);
-        ResourceManager.ƒ.ResourceManager.register(c);
-        ResourceManager.ƒ.ResourceManager.register(b);
+        Project.ƒ.Project.register(a);
+        Project.ƒ.Project.register(c);
+        Project.ƒ.Project.register(b);
         a.reference = b;
         c.reference = b;
         // b.reference = b; // cyclic references disallowed at this point in time
         let result = await testSerialization();
         console.group("Comparison");
-        Compare.compare(ResourceManager.ƒ.ResourceManager.resources, result);
+        Compare.compare(Project.ƒ.Project.resources, result);
         console.groupEnd();
     }
     async function CreateTestScene() {
-        let texture = new ResourceManager.ƒ.TextureImage();
+        let texture = new Project.ƒ.TextureImage();
         await texture.load("Image/Fudge_360.png");
-        let coatTextured = new ResourceManager.ƒ.CoatTextured();
+        let coatTextured = new Project.ƒ.CoatTextured();
         coatTextured.texture = texture;
-        coatTextured.color = ResourceManager.ƒ.Color.CSS("red");
-        let mtrTexture = new ResourceManager.ƒ.Material("Textured", ResourceManager.ƒ.ShaderTexture, coatTextured);
-        let pyramid = new ResourceManager.ƒ.MeshPyramid();
-        ResourceManager.ƒ.ResourceManager.register(pyramid);
-        let cube = new ResourceManager.ƒ.MeshCube();
-        ResourceManager.ƒ.ResourceManager.register(cube);
-        let mtrFlat = new ResourceManager.ƒ.Material("Flat", ResourceManager.ƒ.ShaderUniColor, new ResourceManager.ƒ.CoatColored(ResourceManager.ƒ.Color.CSS("lightblue")));
-        let audio = new ResourceManager.ƒ.Audio("Audio/hypnotic.mp3");
-        let cmpAudio = new ResourceManager.ƒ.ComponentAudio(audio, true, true);
-        let source = new ResourceManager.ƒAid.Node("Source", ResourceManager.ƒ.Matrix4x4.IDENTITY(), mtrTexture, pyramid);
+        coatTextured.color = Project.ƒ.Color.CSS("red");
+        let mtrTexture = new Project.ƒ.Material("Textured", Project.ƒ.ShaderTexture, coatTextured);
+        let pyramid = new Project.ƒ.MeshPyramid();
+        Project.ƒ.Project.register(pyramid);
+        let cube = new Project.ƒ.MeshCube();
+        Project.ƒ.Project.register(cube);
+        let mtrFlat = new Project.ƒ.Material("Flat", Project.ƒ.ShaderUniColor, new Project.ƒ.CoatColored(Project.ƒ.Color.CSS("lightblue")));
+        let audio = new Project.ƒ.Audio("Audio/hypnotic.mp3");
+        let cmpAudio = new Project.ƒ.ComponentAudio(audio, true, true);
+        let source = new Project.ƒAid.Node("Source", Project.ƒ.Matrix4x4.IDENTITY(), mtrTexture, pyramid);
         // TODO: dynamically load Script! Is it among Resources?
         source.addComponent(new Script.TimerMessage());
         source.addComponent(cmpAudio);
-        let child = new ResourceManager.ƒAid.Node("Cube", ResourceManager.ƒ.Matrix4x4.TRANSLATION(ResourceManager.ƒ.Vector3.Y()), mtrFlat, cube);
-        child.getComponent(ResourceManager.ƒ.ComponentMesh).pivot.scale(ResourceManager.ƒ.Vector3.ONE(0.5));
+        let child = new Project.ƒAid.Node("Cube", Project.ƒ.Matrix4x4.TRANSLATION(Project.ƒ.Vector3.Y()), mtrFlat, cube);
+        child.getComponent(Project.ƒ.ComponentMesh).pivot.scale(Project.ƒ.Vector3.ONE(0.5));
         source.addChild(child);
-        let graph = await ResourceManager.ƒ.ResourceManager.registerNodeAsResource(source, true);
-        let instance = await ResourceManager.ƒ.ResourceManager.createGraphInstance(graph);
+        let graph = await Project.ƒ.Project.registerNodeAsResource(source, true);
+        let instance = await Project.ƒ.Project.createGraphInstance(graph);
         console.log("Source", source);
         console.log("Graph", graph);
         console.log("Instance", instance);
         graph.name = "Graph";
         instance.name = "Instance";
         let id = graph.idResource;
-        let old = ResourceManager.ƒ.ResourceManager.resources;
+        let old = Project.ƒ.Project.resources;
         let reconstruction = await testSerialization();
         // for (let id in old) {
         //   if (id.startsWith("Node"))
@@ -89,9 +91,9 @@ var ResourceManager;
         // }
         console.groupCollapsed("Comparison");
         // console.group("Comparison");
-        ResourceManager.ƒ.Debug.setFilter(ResourceManager.ƒ.DebugConsole, ResourceManager.ƒ.DEBUG_FILTER.WARN | ResourceManager.ƒ.DEBUG_FILTER.ERROR);
+        Project.ƒ.Debug.setFilter(Project.ƒ.DebugConsole, Project.ƒ.DEBUG_FILTER.WARN | Project.ƒ.DEBUG_FILTER.ERROR);
         let comparison = await Compare.compare(old, reconstruction);
-        ResourceManager.ƒ.Debug.setFilter(ResourceManager.ƒ.DebugConsole, ResourceManager.ƒ.DEBUG_FILTER.ALL);
+        Project.ƒ.Debug.setFilter(Project.ƒ.DebugConsole, Project.ƒ.DEBUG_FILTER.ALL);
         // console.log("Originael resources: ", old);
         // console.log("Reconstructed: ", reconstruction);
         console.groupEnd();
@@ -99,10 +101,10 @@ var ResourceManager;
             console.error("Comparison failed");
         else
             console.log("Comparison succeeded");
-        ResourceManager.ƒ.AudioManager.default.listenTo(instance);
+        Project.ƒ.AudioManager.default.listenTo(instance);
         let reconstrucedGraph = reconstruction[id];
         reconstrucedGraph.name = "ReconstructedGraph";
-        let reconstructedInstance = await ResourceManager.ƒ.ResourceManager.createGraphInstance(reconstrucedGraph);
+        let reconstructedInstance = await Project.ƒ.Project.createGraphInstance(reconstrucedGraph);
         reconstructedInstance.name = "ReconstructedInstance";
         tweakGraphs(10, reconstructedInstance, [source, graph, instance, reconstrucedGraph, reconstructedInstance]);
         showGraphs([source, graph, instance, reconstrucedGraph, reconstructedInstance]);
@@ -113,23 +115,23 @@ var ResourceManager;
         console.groupCollapsed("Content");
         console.log(content);
         console.groupEnd();
-        let serialization = ResourceManager.ƒ.Serializer.parse(content);
+        let serialization = Project.ƒ.Serializer.parse(content);
         console.groupCollapsed("Parsed");
         console.log(serialization);
         console.groupEnd();
         console.groupCollapsed("Reconstructed");
-        let reconstruction = await ResourceManager.ƒ.ResourceManager.deserialize(serialization);
+        let reconstruction = await Project.ƒ.Project.deserialize(serialization);
         console.log(reconstruction);
         console.groupEnd();
         for (let id in reconstruction) {
             let resource = reconstruction[id];
-            if (resource instanceof ResourceManager.ƒ.NodeResource) {
+            if (resource instanceof Project.ƒ.NodeResource) {
                 resource.name = "ReconstructedGraph";
-                let reconstructedInstance = await ResourceManager.ƒ.ResourceManager.createGraphInstance(resource);
+                let reconstructedInstance = await Project.ƒ.Project.createGraphInstance(resource);
                 reconstructedInstance.name = "ReconstructedInstance";
                 tweakGraphs(10, reconstructedInstance, [resource, reconstructedInstance]);
                 showGraphs([resource, reconstructedInstance]);
-                ResourceManager.ƒ.AudioManager.default.listenTo(reconstructedInstance);
+                Project.ƒ.AudioManager.default.listenTo(reconstructedInstance);
             }
         }
         return reconstruction;
@@ -137,7 +139,7 @@ var ResourceManager;
     function tweakGraphs(_angleIncrement, _keepScript, _graphs) {
         let angle = 0;
         for (let node of _graphs) {
-            node.getChild(0).getComponent(ResourceManager.ƒ.ComponentMesh).pivot.rotateX(angle);
+            node.getChild(0).getComponent(Project.ƒ.ComponentMesh).pivot.rotateX(angle);
             node.mtxLocal.rotateY(angle);
             angle += _angleIncrement;
             if (node != _keepScript)
@@ -145,12 +147,12 @@ var ResourceManager;
         }
     }
     function showGraphs(_graphs) {
-        let cmpCamera = new ResourceManager.ƒ.ComponentCamera();
-        cmpCamera.pivot.translate(new ResourceManager.ƒ.Vector3(1, 1, -2));
-        cmpCamera.pivot.lookAt(ResourceManager.ƒ.Vector3.Y(0.4));
+        let cmpCamera = new Project.ƒ.ComponentCamera();
+        cmpCamera.pivot.translate(new Project.ƒ.Vector3(1, 1, -2));
+        cmpCamera.pivot.lookAt(Project.ƒ.Vector3.Y(0.4));
         for (let node of _graphs) {
             console.log(node.name, node);
-            let viewport = new ResourceManager.ƒ.Viewport();
+            let viewport = new Project.ƒ.Viewport();
             let canvas = document.createElement("canvas");
             let figure = document.createElement("figure");
             let caption = document.createElement("figcaption");
@@ -164,30 +166,30 @@ var ResourceManager;
     }
     async function testSerialization() {
         console.groupCollapsed("Original");
-        console.log(ResourceManager.ƒ.ResourceManager.resources);
+        console.log(Project.ƒ.Project.resources);
         console.groupEnd();
         console.groupCollapsed("Serialized");
-        let serialization = ResourceManager.ƒ.ResourceManager.serialize();
+        let serialization = Project.ƒ.Project.serialize();
         console.log(serialization);
         console.groupEnd();
-        console.log(ResourceManager.ƒ.ResourceManager.resources);
-        console.log(ResourceManager.ƒ.ResourceManager.serialization);
-        ResourceManager.ƒ.ResourceManager.clear();
-        console.log(ResourceManager.ƒ.ResourceManager.resources);
-        console.log(ResourceManager.ƒ.ResourceManager.serialization);
+        console.log(Project.ƒ.Project.resources);
+        console.log(Project.ƒ.Project.serialization);
+        Project.ƒ.Project.clear();
+        console.log(Project.ƒ.Project.resources);
+        console.log(Project.ƒ.Project.serialization);
         console.group("Stringified");
-        let json = ResourceManager.ƒ.Serializer.stringify(serialization);
+        let json = Project.ƒ.Serializer.stringify(serialization);
         console.log(json);
         console.groupEnd();
         console.groupCollapsed("Parsed");
-        serialization = ResourceManager.ƒ.Serializer.parse(json);
+        serialization = Project.ƒ.Serializer.parse(json);
         console.log(serialization);
         console.groupEnd();
         console.groupCollapsed("Reconstructed");
-        let reconstruction = await ResourceManager.ƒ.ResourceManager.deserialize(serialization);
+        let reconstruction = await Project.ƒ.Project.deserialize(serialization);
         console.log(reconstruction);
         console.groupEnd();
         return reconstruction;
     }
-})(ResourceManager || (ResourceManager = {}));
-//# sourceMappingURL=ResourceManager.js.map
+})(Project || (Project = {}));
+//# sourceMappingURL=Project.js.map

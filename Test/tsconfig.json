@@ -55,7 +55,7 @@
     // "emitDecoratorMetadata": true,         /* Enables experimental support for emitting type metadata for decorators. */
   },
   "exclude": [
-    "Transfer/ResourceManager/Script/Source/**",
-    "Transfer/ResourceManager/Script/Build/**"
+    "Transfer/Project/Code/Source/**",
+    "Transfer/Project/Code/Build/**"
   ]
 }

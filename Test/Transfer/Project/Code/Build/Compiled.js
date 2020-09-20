@@ -1,7 +1,7 @@
 "use strict";
-///<reference types="../../../../../Core/Build/FudgeCore"/>
+// /<reference types="../../../../../Core/Build/FudgeCore"/>
 var Script;
-///<reference types="../../../../../Core/Build/FudgeCore"/>
+// /<reference types="../../../../../Core/Build/FudgeCore"/>
 (function (Script) {
     var ƒ = FudgeCore;
     ƒ.Serializer.registerNamespace(Script);
@@ -25,4 +25,4 @@ var Script;
     }
     Script.TimerMessage = TimerMessage;
 })(Script || (Script = {}));
-//# sourceMappingURL=Script.js.map
+//# sourceMappingURL=Compiled.js.map

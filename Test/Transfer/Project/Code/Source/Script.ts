@@ -1,4 +1,4 @@
-///<reference types="../../../../../Core/Build/FudgeCore"/>
+// /<reference types="../../../../../Core/Build/FudgeCore"/>
 namespace Script {
   import ƒ = FudgeCore;
   ƒ.Serializer.registerNamespace(Script);

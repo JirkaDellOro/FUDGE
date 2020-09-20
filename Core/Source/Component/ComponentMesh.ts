@@ -31,7 +31,7 @@ namespace FudgeCore {
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       let mesh: Mesh;
       if (_serialization.idMesh)
-        mesh = <Mesh> await ResourceManager.get(_serialization.idMesh);
+        mesh = <Mesh> await Project.getResource(_serialization.idMesh);
       else
         mesh = <Mesh> await Serializer.deserialize(_serialization.mesh);
       this.mesh = mesh;

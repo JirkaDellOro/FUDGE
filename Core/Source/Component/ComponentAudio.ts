@@ -176,7 +176,7 @@ namespace FudgeCore {
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       super.deserialize(_serialization);
-      let audio: Audio = <Audio>await ResourceManager.get(_serialization.idResource);
+      let audio: Audio = <Audio>await Project.getResource(_serialization.idResource);
       this.createSource(audio, _serialization.loop);
       this.volume = _serialization.volume;
       this.play(_serialization.playing);

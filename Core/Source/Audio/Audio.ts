@@ -13,7 +13,7 @@ namespace FudgeCore {
       super();
       if (_url)
         this.load(_url);
-      ResourceManager.register(this);
+      Project.register(this);
     }
 
     get isReady(): boolean {
@@ -26,7 +26,8 @@ namespace FudgeCore {
     public async load(_url: RequestInfo): Promise<void> {
       this.url = _url;
       this.ready = false;
-      const response: Response = await window.fetch(this.url);
+      let url: URL = new URL(this.url.toString(), Project.baseURL);
+      const response: Response = await window.fetch(url. toString());
       const arrayBuffer: ArrayBuffer = await response.arrayBuffer();
       let buffer: AudioBuffer = await AudioManager.default.decodeAudioData(arrayBuffer);
       this.buffer = buffer;
@@ -42,9 +43,8 @@ namespace FudgeCore {
       };
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      ResourceManager.register(this, _serialization.idResource);
-      let url: URL = new URL(_serialization.url, ResourceManager.baseURL);
-      await this.load(url.href);
+      Project.register(this, _serialization.idResource);
+      await this.load(_serialization.url);
       return this;
     }
     //#endregion

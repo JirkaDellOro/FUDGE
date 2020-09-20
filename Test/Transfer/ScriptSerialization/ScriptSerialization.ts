@@ -20,7 +20,7 @@ namespace ScriptSerialization {
     graph.addChild(test);
     test.name = "Original";
 
-    let resource: ƒ.NodeResource = await ƒ.ResourceManager.registerNodeAsResource(test, false);
+    let resource: ƒ.NodeResource = await ƒ.Project.registerNodeAsResource(test, false);
     resource.name = "Resource";
 
     let instance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(resource);
@@ -33,7 +33,7 @@ namespace ScriptSerialization {
     cmpScript.mutate(mutator);
 
 
-    let srlResources: ƒ.SerializationOfResources = ƒ.ResourceManager.serialize();
+    let srlResources: ƒ.SerializationOfResources = ƒ.Project.serialize();
     let srlGraph: ƒ.Serialization = ƒ.Serializer.serialize(graph);
 
     console.groupCollapsed("Resources");
@@ -74,10 +74,10 @@ namespace ScriptSerialization {
     let mtrCyan: ƒ.Material = new ƒ.Material("Cyan", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(0, 0.5, 1, 1)));
     let pyramid: ƒ.MeshPyramid = new ƒ.MeshPyramid();
     let cube: ƒ.MeshCube = new ƒ.MeshCube();
-    ƒ.ResourceManager.register(pyramid);
-    ƒ.ResourceManager.register(cube);
-    ƒ.ResourceManager.register(mtrOrange);
-    ƒ.ResourceManager.register(mtrCyan);
+    ƒ.Project.register(pyramid);
+    ƒ.Project.register(cube);
+    ƒ.Project.register(mtrOrange);
+    ƒ.Project.register(mtrCyan);
     let node: ƒ.Node = Scenes.createCompleteMeshNode("Test", mtrOrange, pyramid);
     // (<ƒ.ComponentMesh>center.getComponent(ƒ.ComponentMesh)).pivot.scale(ƒ.Vector3.ONE(0.5));
     // let satellite: ƒ.Node = Scenes.createCompleteMeshNode("Satellite", mtrCyan, cube);

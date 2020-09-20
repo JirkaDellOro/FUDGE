@@ -15,7 +15,7 @@ namespace FudgeCore {
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       await super.deserialize(_serialization);
-      ResourceManager.register(this, _serialization.idResource);
+      Project.register(this, _serialization.idResource);
       return this;
     }
   }

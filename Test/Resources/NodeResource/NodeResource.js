@@ -14,7 +14,7 @@ var NodeResource;
         let center = createCenterAndSatellite();
         // Fudge["AnimateSatellite"] = AnimateSatellite;
         // console.log(AnimateSatellite["namespaceX"]);
-        let resource = await ƒ.ResourceManager.registerNodeAsResource(center, false);
+        let resource = await ƒ.Project.registerNodeAsResource(center, false);
         let dim = new ƒ.Vector3(2, 2, 2);
         for (let z = -dim.z; z < dim.z + 1; z++)
             for (let y = -dim.y; y < dim.y + 1; y++)
@@ -25,7 +25,7 @@ var NodeResource;
                     instance.getComponent(ƒ.ComponentMesh).pivot.scale(ƒ.Vector3.ONE(1));
                     instance.broadcastEvent(new Event("startSatellite"));
                 }
-        let srlResources = ƒ.ResourceManager.serialize();
+        let srlResources = ƒ.Project.serialize();
         let srlInstance = ƒ.Serializer.serialize(new ƒ.NodeResourceInstance(resource));
         console.groupCollapsed("Resources");
         console.log(ƒ.Serializer.stringify(srlResources));
@@ -45,10 +45,10 @@ var NodeResource;
         let mtrCyan = new ƒ.Material("Cyan", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(0, 0.5, 1, 1)));
         let pyramid = new ƒ.MeshPyramid();
         let cube = new ƒ.MeshCube();
-        ƒ.ResourceManager.register(pyramid);
-        ƒ.ResourceManager.register(cube);
-        ƒ.ResourceManager.register(mtrOrange);
-        ƒ.ResourceManager.register(mtrCyan);
+        ƒ.Project.register(pyramid);
+        ƒ.Project.register(cube);
+        ƒ.Project.register(mtrOrange);
+        ƒ.Project.register(mtrCyan);
         let center = Scenes.createCompleteMeshNode("Center", mtrOrange, pyramid);
         center.getComponent(ƒ.ComponentMesh).pivot.scale(ƒ.Vector3.ONE(0.5));
         let satellite = Scenes.createCompleteMeshNode("Satellite", mtrCyan, cube);

@@ -83,17 +83,17 @@ namespace Fudge {
 
     console.log(filenames);
     let base: URL = new URL(filenames[0]);
-    let file: RequestInfo = "Image/Fudge_360.png";
-    console.log(new URL(file, base));
+    // let file: RequestInfo = "Test.json";
+    // let resourceFile: URL = new URL(file, base);
 
-    let content: string = fs.readFileSync(filenames[0], { encoding: "utf-8" });
+    let content: string = fs.readFileSync(base, { encoding: "utf-8" });
     ƒ.Debug.groupCollapsed("File content");
     ƒ.Debug.info(content);
     ƒ.Debug.groupEnd();
 
     let serialization: ƒ.Serialization = ƒ.Serializer.parse(content);
-    ƒ.ResourceManager.baseURL = base;
-    let reconstruction: ƒ.Resources = await ƒ.ResourceManager.deserialize(serialization);
+    ƒ.Project.baseURL = base;
+    let reconstruction: ƒ.Resources = await ƒ.Project.deserialize(serialization);
 
     ƒ.Debug.groupCollapsed("Deserialized");
     ƒ.Debug.info(reconstruction);
