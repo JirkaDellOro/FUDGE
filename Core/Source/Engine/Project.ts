@@ -135,13 +135,13 @@ namespace FudgeCore {
       // TODO: support given url and multiple resource files
       let url: RequestInfo;
       if (_url)
-        url = _url;
+        url = new URL(_url.toString(), Project.baseURL).toString();
       else {
         const head: HTMLHeadElement = document.head;
         console.log(head);
         url = head.querySelector("link").getAttribute("src");
       }
-      
+
       const response: Response = await fetch(url);
       const resourceFileContent: string = await response.text();
 

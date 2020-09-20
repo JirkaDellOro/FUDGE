@@ -18,7 +18,11 @@ var Script;
             };
             this.hndRemoveComponent = (_event) => {
                 this.timer.clear();
+                this.removeEventListener("componentAdd" /* COMPONENT_ADD */, this.hndAddComponent);
+                this.removeEventListener("componentRemove" /* COMPONENT_REMOVE */, this.hndRemoveComponent);
             };
+            if (ƒ.Project.mode == ƒ.MODE.EDITOR)
+                return;
             this.addEventListener("componentAdd" /* COMPONENT_ADD */, this.hndAddComponent);
             this.addEventListener("componentRemove" /* COMPONENT_REMOVE */, this.hndRemoveComponent);
         }

@@ -10,8 +10,11 @@ namespace Script {
 
     constructor() {
       super();
+      if (ƒ.Project.mode == ƒ.MODE.EDITOR)
+        return;
       this.addEventListener(ƒ.EVENT.COMPONENT_ADD, this.hndAddComponent);
       this.addEventListener(ƒ.EVENT.COMPONENT_REMOVE, this.hndRemoveComponent);
+
     }
 
     public hndTimer = (_event: ƒ.EventTimer) => {
@@ -23,6 +26,8 @@ namespace Script {
     }
     public hndRemoveComponent = (_event: Event) => {
       this.timer.clear();
+      this.removeEventListener(ƒ.EVENT.COMPONENT_ADD, this.hndAddComponent);
+      this.removeEventListener(ƒ.EVENT.COMPONENT_REMOVE, this.hndRemoveComponent);
     }
 
     // protected reduceMutator(_mutator: ƒ.Mutator): void {
