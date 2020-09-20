@@ -79,19 +79,42 @@ namespace Fudge {
   }
 
   async function open(): Promise<ƒ.Node> {
-    let filenames: string[] = remote.dialog.showOpenDialogSync(null, { title: "Load Graph", buttonLabel: "Load Graph", properties: ["openFile"] });
+    let filenames: string[] = remote.dialog.showOpenDialogSync(null, {
+      title: "Load Project", buttonLabel: "Load Project", properties: ["openFile"],
+      filters: [{ name: "HTML-File", extensions: ["html", "htm"] }]
+    });
 
     console.log(filenames);
     let base: URL = new URL(filenames[0]);
     // let file: RequestInfo = "Test.json";
-    // let resourceFile: URL = new URL(file, base);
 
     let content: string = fs.readFileSync(base, { encoding: "utf-8" });
     ƒ.Debug.groupCollapsed("File content");
     ƒ.Debug.info(content);
     ƒ.Debug.groupEnd();
 
-    let serialization: ƒ.Serialization = ƒ.Serializer.parse(content);
+    const parser: DOMParser = new DOMParser();
+    const dom: Document = parser.parseFromString(content, "application/xhtml+xml");
+    const head: HTMLHeadElement = dom.getElementsByTagName("head")[0];
+    console.log(head);
+
+    const scripts: NodeListOf<HTMLScriptElement> = head.querySelectorAll("script");
+    for (let script of scripts) {
+      if (script.getAttribute("editor") == "true") {
+        let url: string = script.getAttribute("src");
+        await ƒ.Project.loadScript(new URL(url, base).toString());
+      }
+    }
+    // .getAttribute("src");
+    // const resourceFileContent: string = fs.readFileSync(new URL(resourceFile, base) , { encoding: "utf-8" });
+    // console.log(resourceFileContent);
+
+    // support multiple resourcefiles
+    const resourceFile: string = head.querySelector("link").getAttribute("src");
+    const resourceFileContent: string = fs.readFileSync(new URL(resourceFile, base), { encoding: "utf-8" });
+    // console.log(resourceFileContent);
+
+    let serialization: ƒ.Serialization = ƒ.Serializer.parse(resourceFileContent);
     ƒ.Project.baseURL = base;
     let reconstruction: ƒ.Resources = await ƒ.Project.deserialize(serialization);
 

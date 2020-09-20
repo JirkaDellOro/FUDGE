@@ -109,6 +109,23 @@ namespace FudgeCore {
       return instance;
     }
 
+    public static async loadScript(_url: RequestInfo): Promise<void> {
+      let script: HTMLScriptElement = document.createElement("script");
+      script.type = "text/javascript";
+      // script.type = "module";
+      script.async = false;
+      // script.addEventListener("load", handleLoadedScript)
+      let head: HTMLHeadElement = document.head;
+      head.appendChild(script);
+      console.log("Loading: ", _url);
+
+      return new Promise((resolve, reject) => {
+        script.addEventListener("load", () => resolve());
+        script.addEventListener("error", () => reject());
+        script.src = _url.toString();
+      });
+    }
+    
     /**
      * Serialize all resources
      */

@@ -130,16 +130,36 @@ var Fudge;
         fs.writeFileSync(filename, content);
     }
     async function open() {
-        let filenames = Fudge.remote.dialog.showOpenDialogSync(null, { title: "Load Graph", buttonLabel: "Load Graph", properties: ["openFile"] });
+        let filenames = Fudge.remote.dialog.showOpenDialogSync(null, {
+            title: "Load Project", buttonLabel: "Load Project", properties: ["openFile"],
+            filters: [{ name: "HTML-File", extensions: ["html", "htm"] }]
+        });
         console.log(filenames);
         let base = new URL(filenames[0]);
         // let file: RequestInfo = "Test.json";
-        // let resourceFile: URL = new URL(file, base);
         let content = fs.readFileSync(base, { encoding: "utf-8" });
         ƒ.Debug.groupCollapsed("File content");
         ƒ.Debug.info(content);
         ƒ.Debug.groupEnd();
-        let serialization = ƒ.Serializer.parse(content);
+        const parser = new DOMParser();
+        const dom = parser.parseFromString(content, "application/xhtml+xml");
+        const head = dom.getElementsByTagName("head")[0];
+        console.log(head);
+        const scripts = head.querySelectorAll("script");
+        for (let script of scripts) {
+            if (script.getAttribute("editor") == "true") {
+                let url = script.getAttribute("src");
+                await ƒ.Project.loadScript(new URL(url, base).toString());
+            }
+        }
+        // .getAttribute("src");
+        // const resourceFileContent: string = fs.readFileSync(new URL(resourceFile, base) , { encoding: "utf-8" });
+        // console.log(resourceFileContent);
+        // support multiple resourcefiles
+        const resourceFile = head.querySelector("link").getAttribute("src");
+        const resourceFileContent = fs.readFileSync(new URL(resourceFile, base), { encoding: "utf-8" });
+        // console.log(resourceFileContent);
+        let serialization = ƒ.Serializer.parse(resourceFileContent);
         ƒ.Project.baseURL = base;
         let reconstruction = await ƒ.Project.deserialize(serialization);
         ƒ.Debug.groupCollapsed("Deserialized");

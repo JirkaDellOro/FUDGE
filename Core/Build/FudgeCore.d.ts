@@ -1789,6 +1789,7 @@ declare namespace FudgeCore {
          */
         static registerNodeAsResource(_node: Node, _replaceWithInstance?: boolean): Promise<NodeResource>;
         static createGraphInstance(_graph: NodeResource): Promise<NodeResourceInstance>;
+        static loadScript(_url: RequestInfo): Promise<void>;
         /**
          * Serialize all resources
          */
