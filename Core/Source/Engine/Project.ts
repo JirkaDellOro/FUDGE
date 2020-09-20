@@ -125,7 +125,25 @@ namespace FudgeCore {
         script.src = _url.toString();
       });
     }
-    
+
+    public static async loadResources(_url?: RequestInfo): Promise<Resources> {
+      // TODO: support given url and multiple resource files
+      if (_url)
+        return null;
+
+      // const parser: DOMParser = new DOMParser();
+      // const dom: Document = parser.parseFromString(content, "application/xhtml+xml");
+      const head: HTMLHeadElement = document.head;
+      console.log(head);
+      const resourceFile: string = head.querySelector("link").getAttribute("src");
+      const response: Response = await fetch(resourceFile);
+      const resourceFileContent: string = await response.text();
+
+      let serialization: Serialization = Serializer.parse(resourceFileContent);
+      let reconstruction: Resources = await Project.deserialize(serialization);
+      return reconstruction;
+    }
+
     /**
      * Serialize all resources
      */

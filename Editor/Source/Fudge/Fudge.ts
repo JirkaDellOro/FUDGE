@@ -105,18 +105,16 @@ namespace Fudge {
         await ƒ.Project.loadScript(new URL(url, base).toString());
       }
     }
-    // .getAttribute("src");
-    // const resourceFileContent: string = fs.readFileSync(new URL(resourceFile, base) , { encoding: "utf-8" });
-    // console.log(resourceFileContent);
 
     // support multiple resourcefiles
-    const resourceFile: string = head.querySelector("link").getAttribute("src");
-    const resourceFileContent: string = fs.readFileSync(new URL(resourceFile, base), { encoding: "utf-8" });
-    // console.log(resourceFileContent);
+    // const resourceFile: string = head.querySelector("link").getAttribute("src");
+    // const resourceFileContent: string = fs.readFileSync(new URL(resourceFile, base), { encoding: "utf-8" });
 
-    let serialization: ƒ.Serialization = ƒ.Serializer.parse(resourceFileContent);
-    ƒ.Project.baseURL = base;
-    let reconstruction: ƒ.Resources = await ƒ.Project.deserialize(serialization);
+    // let serialization: ƒ.Serialization = ƒ.Serializer.parse(resourceFileContent);
+    // ƒ.Project.baseURL = base;
+    // let reconstruction: ƒ.Resources = await ƒ.Project.deserialize(serialization);
+    
+    let reconstruction: ƒ.Resources = await ƒ.Project.loadResources();
 
     ƒ.Debug.groupCollapsed("Deserialized");
     ƒ.Debug.info(reconstruction);

@@ -152,16 +152,13 @@ var Fudge;
                 await ƒ.Project.loadScript(new URL(url, base).toString());
             }
         }
-        // .getAttribute("src");
-        // const resourceFileContent: string = fs.readFileSync(new URL(resourceFile, base) , { encoding: "utf-8" });
-        // console.log(resourceFileContent);
         // support multiple resourcefiles
-        const resourceFile = head.querySelector("link").getAttribute("src");
-        const resourceFileContent = fs.readFileSync(new URL(resourceFile, base), { encoding: "utf-8" });
-        // console.log(resourceFileContent);
-        let serialization = ƒ.Serializer.parse(resourceFileContent);
-        ƒ.Project.baseURL = base;
-        let reconstruction = await ƒ.Project.deserialize(serialization);
+        // const resourceFile: string = head.querySelector("link").getAttribute("src");
+        // const resourceFileContent: string = fs.readFileSync(new URL(resourceFile, base), { encoding: "utf-8" });
+        // let serialization: ƒ.Serialization = ƒ.Serializer.parse(resourceFileContent);
+        // ƒ.Project.baseURL = base;
+        // let reconstruction: ƒ.Resources = await ƒ.Project.deserialize(serialization);
+        let reconstruction = await ƒ.Project.loadResources();
         ƒ.Debug.groupCollapsed("Deserialized");
         ƒ.Debug.info(reconstruction);
         ƒ.Debug.groupEnd();
