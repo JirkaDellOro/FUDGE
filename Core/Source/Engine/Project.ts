@@ -1,4 +1,8 @@
 namespace FudgeCore {
+  export enum MODE {
+    EDITOR, RUNTIME
+  }
+
   export interface SerializableResource extends Serializable {
     idResource: string;
   }
@@ -20,6 +24,7 @@ namespace FudgeCore {
     public static resources: Resources = {};
     public static serialization: SerializationOfResources = {};
     public static baseURL: URL = new URL(location.toString());
+    public static mode: MODE = MODE.RUNTIME;
 
     /**
      * Registers the resource and generates an id for it by default.  
@@ -128,15 +133,16 @@ namespace FudgeCore {
 
     public static async loadResources(_url?: RequestInfo): Promise<Resources> {
       // TODO: support given url and multiple resource files
+      let url: RequestInfo;
       if (_url)
-        return null;
-
-      // const parser: DOMParser = new DOMParser();
-      // const dom: Document = parser.parseFromString(content, "application/xhtml+xml");
-      const head: HTMLHeadElement = document.head;
-      console.log(head);
-      const resourceFile: string = head.querySelector("link").getAttribute("src");
-      const response: Response = await fetch(resourceFile);
+        url = _url;
+      else {
+        const head: HTMLHeadElement = document.head;
+        console.log(head);
+        url = head.querySelector("link").getAttribute("src");
+      }
+      
+      const response: Response = await fetch(url);
       const resourceFileContent: string = await response.text();
 
       let serialization: Serialization = Serializer.parse(resourceFileContent);

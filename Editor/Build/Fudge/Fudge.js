@@ -83,6 +83,7 @@ var Fudge;
     function initWindow() {
         ƒ.Debug.log("Fudge started");
         Fudge.Editor.initialize();
+        ƒ.Project.mode = ƒ.MODE.EDITOR;
         ƒ.Debug.log("Editor initialized");
         // TODO: create a new Panel containing a ViewData by default. More Views can be added by the user or by configuration
         Fudge.ipcRenderer.on("save", (_event, _args) => {
@@ -153,12 +154,9 @@ var Fudge;
             }
         }
         // support multiple resourcefiles
-        // const resourceFile: string = head.querySelector("link").getAttribute("src");
-        // const resourceFileContent: string = fs.readFileSync(new URL(resourceFile, base), { encoding: "utf-8" });
-        // let serialization: ƒ.Serialization = ƒ.Serializer.parse(resourceFileContent);
-        // ƒ.Project.baseURL = base;
-        // let reconstruction: ƒ.Resources = await ƒ.Project.deserialize(serialization);
-        let reconstruction = await ƒ.Project.loadResources();
+        const resourceFile = head.querySelector("link").getAttribute("src");
+        ƒ.Project.baseURL = base;
+        let reconstruction = await ƒ.Project.loadResources(new URL(resourceFile, base).toString());
         ƒ.Debug.groupCollapsed("Deserialized");
         ƒ.Debug.info(reconstruction);
         ƒ.Debug.groupEnd();

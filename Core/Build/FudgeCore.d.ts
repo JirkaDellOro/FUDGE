@@ -1742,6 +1742,10 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    enum MODE {
+        EDITOR = 0,
+        RUNTIME = 1
+    }
     interface SerializableResource extends Serializable {
         idResource: string;
     }
@@ -1760,6 +1764,7 @@ declare namespace FudgeCore {
         static resources: Resources;
         static serialization: SerializationOfResources;
         static baseURL: URL;
+        static mode: MODE;
         /**
          * Registers the resource and generates an id for it by default.
          * If the resource already has an id, thus having been registered, its deleted from the list and registered anew.
