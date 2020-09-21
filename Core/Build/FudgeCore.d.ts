@@ -3044,7 +3044,9 @@ declare namespace FudgeCore {
         private sectors;
         private stacks;
         constructor(_sectors?: number, _stacks?: number);
-        create(): void;
+        create(_sectors?: number, _stacks?: number): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         protected createIndices(): Uint16Array;
         protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;

@@ -17,9 +17,13 @@ namespace FudgeCore {
     // private textureUVs: Array<number> = [];
     // public textureUVs: Float32Array;
 
-    public constructor(_sectors: number = 12, _stacks: number = 8) {
+    public constructor(_sectors: number = 3, _stacks: number = 2) {
       super();
 
+      this.create(_sectors, _stacks);
+    }
+
+    public create(_sectors: number = 3, _stacks: number = 2): void {
       //Clamp resolution to prevent performance issues
       this.sectors = Math.min(_sectors, 128);
       this.stacks = Math.min(_stacks, 128);
@@ -30,10 +34,6 @@ namespace FudgeCore {
         this.stacks = Math.max(2, _stacks);
       }
 
-      this.create();
-    }
-
-    public create(): void {
       let vertices: Array<number> = [];
       let normals: number[] = [];
       let textureUVs: number[] = [];
@@ -85,6 +85,19 @@ namespace FudgeCore {
       this.normalsFace = this.createFaceNormals();
       this.indices = this.createIndices();
       this.createRenderBuffers();
+    }
+
+    //#region Transfer
+    public serialize(): Serialization {
+      let serialization: Serialization = super.serialize();
+      serialization.sectors = this.sectors;
+      serialization.stacks = this.stacks;
+      return serialization;
+    }
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      super.deserialize(_serialization);
+      this.create(_serialization.sectors, _serialization.stacks);
+      return this;
     }
 
     protected createIndices(): Uint16Array {

@@ -56,7 +56,6 @@ namespace FudgeCore {
       return serialization;
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.create(); // TODO: must not be created, if an identical mesh already exists
       this.idResource = _serialization.idResource;
       return this;
     }
