@@ -92,15 +92,16 @@ namespace Project {
     let pyramid: ƒ.Mesh = new ƒ.MeshPyramid();
     ƒ.Project.register(pyramid);
 
-    let cube: ƒ.Mesh = new ƒ.MeshCube();
-    ƒ.Project.register(cube);
-    let mtrFlat: ƒ.Material = new ƒ.Material("Flat", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("lightblue")));
+    let sphere: ƒ.Mesh = new ƒ.MeshSphere(8, 5);
+    ƒ.Project.register(sphere);
+    let mtrFlat: ƒ.Material = new ƒ.Material("Flat", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("white")));
 
     let audio: ƒ.Audio = new ƒ.Audio("Audio/hypnotic.mp3");
     let cmpAudio: ƒ.ComponentAudio = new ƒ.ComponentAudio(audio, true, true);
 
     let lightAmbient: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightAmbient(ƒ.Color.CSS("grey")));
     let lightDirectional: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.CSS("yellow")));
+    lightDirectional.pivot.lookAt(new ƒ.Vector3(1, -1, 1), ƒ.Vector3.X());
 
     let source: ƒAid.Node = new ƒAid.Node("Source", ƒ.Matrix4x4.IDENTITY(), mtrTexture, pyramid);
     // TODO: dynamically load Script! Is it among Resources?
@@ -109,7 +110,7 @@ namespace Project {
     source.addComponent(lightAmbient);
     source.addComponent(lightDirectional);
 
-    let child: ƒ.Node = new ƒAid.Node("Cube", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y()), mtrFlat, cube);
+    let child: ƒ.Node = new ƒAid.Node("Cube", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y()), mtrFlat, sphere);
     child.getComponent(ƒ.ComponentMesh).pivot.scale(ƒ.Vector3.ONE(0.5));
     source.addChild(child);
 
@@ -203,7 +204,7 @@ namespace Project {
 
   function showGraphs(_graphs: ƒ.Node[]): void {
     let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
-    cmpCamera.pivot.translate(new ƒ.Vector3(1, 1, -2));
+    cmpCamera.pivot.translate(new ƒ.Vector3(0, 1, -2));
     cmpCamera.pivot.lookAt(ƒ.Vector3.Y(0.4));
 
     for (let node of _graphs) {

@@ -1420,6 +1420,8 @@ declare namespace FudgeCore {
         light: Light;
         constructor(_light?: Light);
         setType<T extends Light>(_class: new () => T): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 }
 declare namespace FudgeCore {
@@ -2237,10 +2239,12 @@ declare namespace FudgeCore {
      * Baseclass for different kinds of lights.
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    abstract class Light extends Mutable {
+    abstract class Light extends Mutable implements Serializable {
         color: Color;
         constructor(_color?: Color);
         getType(): TypeOfLight;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(): void;
     }
     /**

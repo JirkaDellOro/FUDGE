@@ -80,20 +80,21 @@ var Project;
         let mtrTexture = new Project.ƒ.Material("Textured", Project.ƒ.ShaderTexture, coatTextured);
         let pyramid = new Project.ƒ.MeshPyramid();
         Project.ƒ.Project.register(pyramid);
-        let cube = new Project.ƒ.MeshCube();
-        Project.ƒ.Project.register(cube);
-        let mtrFlat = new Project.ƒ.Material("Flat", Project.ƒ.ShaderUniColor, new Project.ƒ.CoatColored(Project.ƒ.Color.CSS("lightblue")));
+        let sphere = new Project.ƒ.MeshSphere(8, 5);
+        Project.ƒ.Project.register(sphere);
+        let mtrFlat = new Project.ƒ.Material("Flat", Project.ƒ.ShaderFlat, new Project.ƒ.CoatColored(Project.ƒ.Color.CSS("white")));
         let audio = new Project.ƒ.Audio("Audio/hypnotic.mp3");
         let cmpAudio = new Project.ƒ.ComponentAudio(audio, true, true);
         let lightAmbient = new Project.ƒ.ComponentLight(new Project.ƒ.LightAmbient(Project.ƒ.Color.CSS("grey")));
         let lightDirectional = new Project.ƒ.ComponentLight(new Project.ƒ.LightDirectional(Project.ƒ.Color.CSS("yellow")));
+        lightDirectional.pivot.lookAt(new Project.ƒ.Vector3(1, -1, 1), Project.ƒ.Vector3.X());
         let source = new Project.ƒAid.Node("Source", Project.ƒ.Matrix4x4.IDENTITY(), mtrTexture, pyramid);
         // TODO: dynamically load Script! Is it among Resources?
         source.addComponent(new Script.TimerMessage());
         source.addComponent(cmpAudio);
         source.addComponent(lightAmbient);
         source.addComponent(lightDirectional);
-        let child = new Project.ƒAid.Node("Cube", Project.ƒ.Matrix4x4.TRANSLATION(Project.ƒ.Vector3.Y()), mtrFlat, cube);
+        let child = new Project.ƒAid.Node("Cube", Project.ƒ.Matrix4x4.TRANSLATION(Project.ƒ.Vector3.Y()), mtrFlat, sphere);
         child.getComponent(Project.ƒ.ComponentMesh).pivot.scale(Project.ƒ.Vector3.ONE(0.5));
         source.addChild(child);
         let graph = await Project.ƒ.Project.registerNodeAsResource(source, true);
@@ -169,7 +170,7 @@ var Project;
     }
     function showGraphs(_graphs) {
         let cmpCamera = new Project.ƒ.ComponentCamera();
-        cmpCamera.pivot.translate(new Project.ƒ.Vector3(1, 1, -2));
+        cmpCamera.pivot.translate(new Project.ƒ.Vector3(0, 1, -2));
         cmpCamera.pivot.lookAt(Project.ƒ.Vector3.Y(0.4));
         for (let node of _graphs) {
             console.log(node.name, node);
