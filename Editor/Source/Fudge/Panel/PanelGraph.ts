@@ -3,8 +3,7 @@ namespace Fudge {
   import ƒui = FudgeUserInterface;
 
   /**
-  * Panel that functions as a Node Editor. Uses ViewData, ViewPort and ViewNode. 
-  * Use NodePanelTemplate to initialize the default NodePanel.
+  * Shows a graph and offers means for manipulation
   * @authors Monika Galkewitsch, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
   */
   export class PanelGraph extends Panel {
@@ -41,10 +40,6 @@ namespace Fudge {
 
     public getNode(): ƒ.Node {
       return this.node;
-    }
-
-    protected cleanup(): void {
-      //TODO: desconstruct
     }
 
     private hndSetGraph = (_event: CustomEvent): void => {

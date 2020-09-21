@@ -6,13 +6,14 @@ namespace Main {
     QUIT,
     PROJECT_SAVE,
     PROJECT_OPEN,
-    PANEL_GRAPH_OPEN,
     NODE_DELETE,
     NODE_UPDATE,
     DEVTOOLS_OPEN,
-    PANEL_ANIMATION_OPEN
+    PANEL_GRAPH_OPEN,
+    PANEL_ANIMATION_OPEN,
+    PANEL_PROJECT_OPEN
   }
- 
+
   const { app, BrowserWindow, Menu, ipcMain } = require("electron");
 
   let fudge: Electron.BrowserWindow;
@@ -64,12 +65,16 @@ namespace Main {
 
   function menuSelect(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.KeyboardEvent): void {
     console.log(`MenuSelect: Item-id=${MENU[_item.id]}`);
+    // TODO: simplify switch by usinge enums as messages
     switch (Number(_item.id)) {
       case MENU.PROJECT_OPEN:
         send(_window, "open", null);
         break;
       case MENU.PROJECT_SAVE:
         send(_window, "save", null);
+        break;
+      case MENU.PANEL_PROJECT_OPEN:
+        send(_window, "openPanelProject", null);
         break;
       case MENU.PANEL_GRAPH_OPEN:
         send(_window, "openPanelGraph", null);
@@ -107,7 +112,10 @@ namespace Main {
         ]
       },
       {
-        label: "View", submenu: [
+        label: "Edit", submenu: [
+          {
+            label: "Project", id: String(MENU.PANEL_PROJECT_OPEN), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+G" : "Ctrl+P"
+          },
           {
             label: "Graph", id: String(MENU.PANEL_GRAPH_OPEN), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+G" : "Ctrl+G"
           },

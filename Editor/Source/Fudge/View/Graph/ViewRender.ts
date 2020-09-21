@@ -20,10 +20,6 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
     }
 
-    cleanup(): void {
-      ƒ.Loop.removeEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
-    }
-
     createUserInterface(): void {
       let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
       cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));

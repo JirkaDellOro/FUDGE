@@ -23,10 +23,6 @@ namespace Fudge {
       this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.CONTEXTMENU, this.openContextMenu);
     }
 
-    protected cleanup(): void {
-      //TODO: Deconstruct;
-    }
-
     //#region  ContextMenu
     protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
       const menu: Electron.Menu = new remote.Menu();

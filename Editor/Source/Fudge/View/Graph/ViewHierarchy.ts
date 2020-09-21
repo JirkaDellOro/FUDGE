@@ -38,10 +38,6 @@ namespace Fudge {
       this.dom.append(this.tree);
     }
 
-    protected cleanup(): void {
-      //TODO: desconstruct
-    }
-
     //#region  ContextMenu
     protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
       const menu: Electron.Menu = new remote.Menu();

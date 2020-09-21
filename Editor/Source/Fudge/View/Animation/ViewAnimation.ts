@@ -142,10 +142,6 @@ namespace Fudge {
       requestAnimationFrame(this.playAnimation.bind(this));
     }
 
-    cleanup(): void {
-      //
-    }
-
     mouseClick(_e: MouseEvent): void {
       // console.log(_e);
     }

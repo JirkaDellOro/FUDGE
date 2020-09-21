@@ -42,7 +42,12 @@ namespace Fudge {
 
     ipcRenderer.on("openPanelGraph", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
       ƒ.Debug.log("openPanelGraph");
-      openViewNode();
+      openPanelGraph();
+    });
+
+    ipcRenderer.on("openPanelProject", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
+      ƒ.Debug.log("openPanelProject");
+      openPanelProject();
     });
 
     ipcRenderer.on("openPanelAnimation", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
@@ -56,7 +61,11 @@ namespace Fudge {
     });
   }
 
-  function openViewNode(): void {
+  function openPanelProject(): void {
+    Editor.add(PanelProject, "Project", null); //Object.create(null,  {node: { writable: true, value: node }}));
+  }
+
+  function openPanelGraph(): void {
     node = new ƒAid.NodeCoordinateSystem("WorldCooSys");
     let node2: ƒ.Node = new ƒAid.NodeCoordinateSystem("WorldCooSys", ƒ.Matrix4x4.IDENTITY());
     node.addChild(node2);

@@ -8,11 +8,12 @@ var Main;
         MENU[MENU["QUIT"] = 0] = "QUIT";
         MENU[MENU["PROJECT_SAVE"] = 1] = "PROJECT_SAVE";
         MENU[MENU["PROJECT_OPEN"] = 2] = "PROJECT_OPEN";
-        MENU[MENU["PANEL_GRAPH_OPEN"] = 3] = "PANEL_GRAPH_OPEN";
-        MENU[MENU["NODE_DELETE"] = 4] = "NODE_DELETE";
-        MENU[MENU["NODE_UPDATE"] = 5] = "NODE_UPDATE";
-        MENU[MENU["DEVTOOLS_OPEN"] = 6] = "DEVTOOLS_OPEN";
+        MENU[MENU["NODE_DELETE"] = 3] = "NODE_DELETE";
+        MENU[MENU["NODE_UPDATE"] = 4] = "NODE_UPDATE";
+        MENU[MENU["DEVTOOLS_OPEN"] = 5] = "DEVTOOLS_OPEN";
+        MENU[MENU["PANEL_GRAPH_OPEN"] = 6] = "PANEL_GRAPH_OPEN";
         MENU[MENU["PANEL_ANIMATION_OPEN"] = 7] = "PANEL_ANIMATION_OPEN";
+        MENU[MENU["PANEL_PROJECT_OPEN"] = 8] = "PANEL_PROJECT_OPEN";
     })(MENU || (MENU = {}));
     const { app, BrowserWindow, Menu, ipcMain } = require("electron");
     let fudge;
@@ -58,12 +59,16 @@ var Main;
     //#region Menus  
     function menuSelect(_item, _window, _event) {
         console.log(`MenuSelect: Item-id=${MENU[_item.id]}`);
+        // TODO: simplify switch by usinge enums as messages
         switch (Number(_item.id)) {
             case MENU.PROJECT_OPEN:
                 send(_window, "open", null);
                 break;
             case MENU.PROJECT_SAVE:
                 send(_window, "save", null);
+                break;
+            case MENU.PANEL_PROJECT_OPEN:
+                send(_window, "openPanelProject", null);
                 break;
             case MENU.PANEL_GRAPH_OPEN:
                 send(_window, "openPanelGraph", null);
@@ -100,7 +105,10 @@ var Main;
                 ]
             },
             {
-                label: "View", submenu: [
+                label: "Edit", submenu: [
+                    {
+                        label: "Project", id: String(MENU.PANEL_PROJECT_OPEN), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+G" : "Ctrl+P"
+                    },
                     {
                         label: "Graph", id: String(MENU.PANEL_GRAPH_OPEN), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+G" : "Ctrl+G"
                     },

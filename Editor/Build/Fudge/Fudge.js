@@ -39,6 +39,7 @@ var Fudge;
             this.goldenLayout = new GoldenLayout(config); //This might be a problem because it can't use a specific place to put it.
             this.goldenLayout.registerComponent("Welcome", welcome);
             this.goldenLayout.registerComponent(Fudge.PANEL.GRAPH, Fudge.PanelGraph);
+            this.goldenLayout.registerComponent(Fudge.PANEL.PROJECT, Fudge.PanelProject);
             this.goldenLayout.init();
         }
         /** Send custom copies of the given event to the views */
@@ -50,9 +51,6 @@ var Fudge;
         }
         static generateID(_name) {
             return _name + Editor.idCounter++;
-        }
-        cleanup() {
-            //TODO: desconstruct
         }
     }
     Editor.idCounter = 0;
@@ -101,7 +99,11 @@ var Fudge;
         });
         Fudge.ipcRenderer.on("openPanelGraph", (_event, _args) => {
             ƒ.Debug.log("openPanelGraph");
-            openViewNode();
+            openPanelGraph();
+        });
+        Fudge.ipcRenderer.on("openPanelProject", (_event, _args) => {
+            ƒ.Debug.log("openPanelProject");
+            openPanelProject();
         });
         Fudge.ipcRenderer.on("openPanelAnimation", (_event, _args) => {
             ƒ.Debug.log("openPanelAnimation");
@@ -112,7 +114,10 @@ var Fudge;
             ƒ.Debug.log("updateNode");
         });
     }
-    function openViewNode() {
+    function openPanelProject() {
+        Fudge.Editor.add(Fudge.PanelProject, "Project", null); //Object.create(null,  {node: { writable: true, value: node }}));
+    }
+    function openPanelGraph() {
         node = new ƒAid.NodeCoordinateSystem("WorldCooSys");
         let node2 = new ƒAid.NodeCoordinateSystem("WorldCooSys", ƒ.Matrix4x4.IDENTITY());
         node.addChild(node2);
@@ -366,6 +371,10 @@ var Fudge;
         VIEW["RENDER"] = "ViewRender";
         VIEW["COMPONENTS"] = "ViewComponents";
         VIEW["CAMERA"] = "ViewCamera";
+        VIEW["INTERNAL"] = "ViewInternal";
+        VIEW["EXTERNAL"] = "ViewExternal";
+        VIEW["PROPERTIES"] = "ViewProperties";
+        VIEW["PREVIEW"] = "ViewPreview";
         // PROJECT = ViewProject,
         // SKETCH = ViewSketch,
         // MESH = ViewMesh,
@@ -410,6 +419,7 @@ var Fudge;
     let PANEL;
     (function (PANEL) {
         PANEL["GRAPH"] = "PanelGraph";
+        PANEL["PROJECT"] = "PanelProject";
     })(PANEL = Fudge.PANEL || (Fudge.PANEL = {}));
     /**
      * Base class for all [[Panel]]s aggregating [[View]]s
@@ -454,8 +464,7 @@ var Fudge;
 (function (Fudge) {
     var ƒui = FudgeUserInterface;
     /**
-    * Panel that functions as a Node Editor. Uses ViewData, ViewPort and ViewNode.
-    * Use NodePanelTemplate to initialize the default NodePanel.
+    * Shows a graph and offers means for manipulation
     * @authors Monika Galkewitsch, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
     */
     class PanelGraph extends Fudge.Panel {
@@ -495,24 +504,35 @@ var Fudge;
         getNode() {
             return this.node;
         }
-        cleanup() {
-            //TODO: desconstruct
-        }
     }
     Fudge.PanelGraph = PanelGraph;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
     /**
-     * Display the project structure and offer functions for creation of resources
+     * Display the project structure and offer functions for creation, deletion and adjustment of resources
      * @authors Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class PanelProject extends Fudge.Panel {
         constructor(_container, _state) {
             super(_container, _state);
-        }
-        cleanup() {
-            //TODO: desconstruct
+            this.goldenLayout.registerComponent(Fudge.VIEW.INTERNAL, Fudge.ViewInternal);
+            this.goldenLayout.registerComponent(Fudge.VIEW.EXTERNAL, Fudge.ViewExternal);
+            this.goldenLayout.registerComponent(Fudge.VIEW.PROPERTIES, Fudge.ViewProperties);
+            this.goldenLayout.registerComponent(Fudge.VIEW.PREVIEW, Fudge.ViewPreview);
+            let inner = this.goldenLayout.root.contentItems[0];
+            inner.addChild({
+                type: "column", content: [
+                    { type: "component", componentName: Fudge.VIEW.PREVIEW, componentState: _state, title: "Preview" },
+                    { type: "component", componentName: Fudge.VIEW.PROPERTIES, componentState: _state, title: "Properties" }
+                ]
+            });
+            inner.addChild({
+                type: "column", content: [
+                    { type: "component", componentName: Fudge.VIEW.INTERNAL, componentState: _state, title: "Internal" },
+                    { type: "component", componentName: Fudge.VIEW.EXTERNAL, componentState: _state, title: "External" }
+                ]
+            });
         }
     }
     Fudge.PanelProject = PanelProject;
@@ -614,9 +634,6 @@ var Fudge;
             this.toolbar.addEventListener("click", this.toolbarClick.bind(this));
             this.toolbar.addEventListener("change", this.toolbarChange.bind(this));
             requestAnimationFrame(this.playAnimation.bind(this));
-        }
-        cleanup() {
-            //
         }
         mouseClick(_e) {
             // console.log(_e);
@@ -1158,9 +1175,6 @@ var Fudge;
             this.dom.addEventListener(ƒui.EVENT_TREE.RENAME, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
         }
-        cleanup() {
-            //TODO: Deconstruct;
-        }
         //#region  ContextMenu
         getContextMenu(_callback) {
             const menu = new Fudge.remote.Menu();
@@ -1242,9 +1256,6 @@ var Fudge;
             this.tree.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.append(this.tree);
         }
-        cleanup() {
-            //TODO: desconstruct
-        }
         //#region  ContextMenu
         getContextMenu(_callback) {
             const menu = new Fudge.remote.Menu();
@@ -1312,9 +1323,6 @@ var Fudge;
             this.dom.addEventListener("select" /* SELECT */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
         }
-        cleanup() {
-            ƒ.Loop.removeEventListener("loopFrame" /* LOOP_FRAME */, this.animate);
-        }
         createUserInterface() {
             let cmpCamera = new ƒ.ComponentCamera();
             cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
@@ -1342,5 +1350,57 @@ var Fudge;
         }
     }
     Fudge.ViewRender = ViewRender;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * List the external resources
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class ViewExternal extends Fudge.View {
+        constructor(_container, _state) {
+            super(_container, _state);
+        }
+    }
+    Fudge.ViewExternal = ViewExternal;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * List the internal resources
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class ViewInternal extends Fudge.View {
+        constructor(_container, _state) {
+            super(_container, _state);
+        }
+    }
+    Fudge.ViewInternal = ViewInternal;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * Preview a resource
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class ViewPreview extends Fudge.View {
+        constructor(_container, _state) {
+            super(_container, _state);
+        }
+    }
+    Fudge.ViewPreview = ViewPreview;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+     * View the properties of a resource
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class ViewProperties extends Fudge.View {
+        constructor(_container, _state) {
+            super(_container, _state);
+        }
+    }
+    Fudge.ViewProperties = ViewProperties;
 })(Fudge || (Fudge = {}));
 //# sourceMappingURL=Fudge.js.map

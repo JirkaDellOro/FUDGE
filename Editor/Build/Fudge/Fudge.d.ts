@@ -23,7 +23,6 @@ declare namespace Fudge {
         /** Send custom copies of the given event to the views */
         static broadcastEvent(_event: Event): void;
         private static generateID;
-        cleanup(): void;
     }
 }
 declare namespace Fudge {
@@ -84,7 +83,11 @@ declare namespace Fudge {
         ANIMATION = "ViewAnimation",
         RENDER = "ViewRender",
         COMPONENTS = "ViewComponents",
-        CAMERA = "ViewCamera"
+        CAMERA = "ViewCamera",
+        INTERNAL = "ViewInternal",
+        EXTERNAL = "ViewExternal",
+        PROPERTIES = "ViewProperties",
+        PREVIEW = "ViewPreview"
     }
     /**
      * Base class for all [[View]]s to support generic functionality
@@ -96,8 +99,6 @@ declare namespace Fudge {
         private container;
         constructor(_container: GoldenLayout.Container, _state: Object);
         setTitle(_title: string): void;
-        /** Cleanup when user closes view */
-        protected abstract cleanup(): void;
         protected openContextMenu: (_event: Event) => void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
@@ -105,7 +106,8 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     enum PANEL {
-        GRAPH = "PanelGraph"
+        GRAPH = "PanelGraph",
+        PROJECT = "PanelProject"
     }
     /**
      * Base class for all [[Panel]]s aggregating [[View]]s
@@ -124,8 +126,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     import ƒ = FudgeCore;
     /**
-    * Panel that functions as a Node Editor. Uses ViewData, ViewPort and ViewNode.
-    * Use NodePanelTemplate to initialize the default NodePanel.
+    * Shows a graph and offers means for manipulation
     * @authors Monika Galkewitsch, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
     */
     class PanelGraph extends Panel {
@@ -133,19 +134,17 @@ declare namespace Fudge {
         constructor(_container: GoldenLayout.Container, _state: Object);
         setGraph(_node: ƒ.Node): void;
         getNode(): ƒ.Node;
-        protected cleanup(): void;
         private hndSetGraph;
         private hndFocusNode;
     }
 }
 declare namespace Fudge {
     /**
-     * Display the project structure and offer functions for creation of resources
+     * Display the project structure and offer functions for creation, deletion and adjustment of resources
      * @authors Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class PanelProject extends Panel {
         constructor(_container: GoldenLayout.Container, _state: Object);
-        cleanup(): void;
     }
 }
 declare namespace Fudge {
@@ -185,7 +184,6 @@ declare namespace Fudge {
         openAnimation(): void;
         fillContent(): void;
         installListeners(): void;
-        cleanup(): void;
         mouseClick(_e: MouseEvent): void;
         mouseDown(_e: MouseEvent): void;
         mouseMove(_e: MouseEvent): void;
@@ -254,7 +252,6 @@ declare namespace Fudge {
     class ViewComponents extends View {
         private node;
         constructor(_container: GoldenLayout.Container, _state: Object);
-        protected cleanup(): void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         private fillContent;
@@ -272,7 +269,6 @@ declare namespace Fudge {
         private tree;
         constructor(_container: GoldenLayout.Container, _state: Object);
         setGraph(_graph: ƒ.Node): void;
-        protected cleanup(): void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         private hndEvent;
@@ -289,11 +285,46 @@ declare namespace Fudge {
         canvas: HTMLCanvasElement;
         graph: ƒ.Node;
         constructor(_container: GoldenLayout.Container, _state: Object);
-        cleanup(): void;
         createUserInterface(): void;
         setGraph(_node: ƒ.Node): void;
         private hndEvent;
         private animate;
         private activeViewport;
+    }
+}
+declare namespace Fudge {
+    /**
+     * List the external resources
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class ViewExternal extends View {
+        constructor(_container: GoldenLayout.Container, _state: Object);
+    }
+}
+declare namespace Fudge {
+    /**
+     * List the internal resources
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class ViewInternal extends View {
+        constructor(_container: GoldenLayout.Container, _state: Object);
+    }
+}
+declare namespace Fudge {
+    /**
+     * Preview a resource
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class ViewPreview extends View {
+        constructor(_container: GoldenLayout.Container, _state: Object);
+    }
+}
+declare namespace Fudge {
+    /**
+     * View the properties of a resource
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class ViewProperties extends View {
+        constructor(_container: GoldenLayout.Container, _state: Object);
     }
 }

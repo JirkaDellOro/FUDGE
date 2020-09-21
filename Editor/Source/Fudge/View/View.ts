@@ -7,7 +7,11 @@ namespace Fudge {
     ANIMATION = "ViewAnimation",
     RENDER = "ViewRender",
     COMPONENTS = "ViewComponents",
-    CAMERA = "ViewCamera"
+    CAMERA = "ViewCamera",
+    INTERNAL = "ViewInternal",
+    EXTERNAL = "ViewExternal",
+    PROPERTIES = "ViewProperties",
+    PREVIEW = "ViewPreview"
     // PROJECT = ViewProject,
     // SKETCH = ViewSketch,
     // MESH = ViewMesh,
@@ -36,9 +40,6 @@ namespace Fudge {
     public setTitle(_title: string): void {
       this.container.setTitle(_title);
     }
-
-    /** Cleanup when user closes view */
-    protected abstract cleanup(): void;
 
     //#region  ContextMenu
     protected openContextMenu = (_event: Event): void => {

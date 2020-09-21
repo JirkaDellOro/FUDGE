@@ -43,6 +43,7 @@ namespace Fudge {
 
       this.goldenLayout.registerComponent("Welcome", welcome);
       this.goldenLayout.registerComponent(PANEL.GRAPH, PanelGraph);
+      this.goldenLayout.registerComponent(PANEL.PROJECT, PanelProject);
       this.goldenLayout.init();
     }
 
@@ -56,10 +57,6 @@ namespace Fudge {
 
     private static generateID(_name: string): string {
       return _name + Editor.idCounter++;
-    }
-
-    public cleanup(): void {
-      //TODO: desconstruct
     }
   }
 
