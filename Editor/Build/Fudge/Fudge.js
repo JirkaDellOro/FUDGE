@@ -1,5 +1,22 @@
 var Fudge;
 (function (Fudge) {
+    let CONTEXTMENU;
+    (function (CONTEXTMENU) {
+        CONTEXTMENU[CONTEXTMENU["ADD_NODE"] = 0] = "ADD_NODE";
+        CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT"] = 1] = "ADD_COMPONENT";
+    })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
+    let MENU;
+    (function (MENU) {
+        MENU["QUIT"] = "quit";
+        MENU["PROJECT_SAVE"] = "projectSave";
+        MENU["PROJECT_OPEN"] = "projectOpen";
+        MENU["NODE_DELETE"] = "nodeDelete";
+        MENU["NODE_UPDATE"] = "nodeUpdate";
+        MENU["DEVTOOLS_OPEN"] = "devtoolsOpen";
+        MENU["PANEL_GRAPH_OPEN"] = "panelGraphOpen";
+        MENU["PANEL_ANIMATION_OPEN"] = "panelAnimationOpen";
+        MENU["PANEL_PROJECT_OPEN"] = "panelProjectOpen";
+    })(MENU = Fudge.MENU || (Fudge.MENU = {}));
     let EVENT_EDITOR;
     (function (EVENT_EDITOR) {
         EVENT_EDITOR["REMOVE"] = "removeNode";
@@ -8,6 +25,31 @@ var Fudge;
         EVENT_EDITOR["SET_GRAPH"] = "setGraph";
         EVENT_EDITOR["FOCUS_NODE"] = "focusNode";
     })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
+    let PANEL;
+    (function (PANEL) {
+        PANEL["GRAPH"] = "PanelGraph";
+        PANEL["PROJECT"] = "PanelProject";
+    })(PANEL = Fudge.PANEL || (Fudge.PANEL = {}));
+    let VIEW;
+    (function (VIEW) {
+        VIEW["HIERARCHY"] = "ViewHierarchy";
+        VIEW["ANIMATION"] = "ViewAnimation";
+        VIEW["RENDER"] = "ViewRender";
+        VIEW["COMPONENTS"] = "ViewComponents";
+        VIEW["CAMERA"] = "ViewCamera";
+        VIEW["INTERNAL"] = "ViewInternal";
+        VIEW["EXTERNAL"] = "ViewExternal";
+        VIEW["PROPERTIES"] = "ViewProperties";
+        VIEW["PREVIEW"] = "ViewPreview";
+        // PROJECT = ViewProject,
+        // SKETCH = ViewSketch,
+        // MESH = ViewMesh,
+    })(VIEW = Fudge.VIEW || (Fudge.VIEW = {}));
+})(Fudge || (Fudge = {}));
+// /<reference path="./Panel/Panel.ts"/>
+var Fudge;
+// /<reference path="./Panel/Panel.ts"/>
+(function (Fudge) {
     /**
      * The uppermost container for all panels
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
@@ -60,74 +102,9 @@ var Fudge;
         container.getElement().html("<div>Welcome</div>");
     }
 })(Fudge || (Fudge = {}));
-///<reference path="../../../node_modules/electron/Electron.d.ts"/>
-///<reference types="../../../Core/Build/FudgeCore"/>
-///<reference types="../../../Aid/Build/FudgeAid"/>
-///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
 var Fudge;
-///<reference path="../../../node_modules/electron/Electron.d.ts"/>
-///<reference types="../../../Core/Build/FudgeCore"/>
-///<reference types="../../../Aid/Build/FudgeAid"/>
-///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
 (function (Fudge) {
-    var ƒ = FudgeCore;
-    var ƒAid = FudgeAid;
-    Fudge.ipcRenderer = require("electron").ipcRenderer;
-    Fudge.remote = require("electron").remote;
     const fs = require("fs");
-    // TODO: At this point of time, the project is just a single node. A project is much more complex...
-    let node = null;
-    window.addEventListener("load", initWindow);
-    function initWindow() {
-        ƒ.Debug.log("Fudge started");
-        Fudge.Editor.initialize();
-        ƒ.Project.mode = ƒ.MODE.EDITOR;
-        ƒ.Debug.log("Editor initialized");
-        // TODO: create a new Panel containing a ViewData by default. More Views can be added by the user or by configuration
-        Fudge.ipcRenderer.on("save", (_event, _args) => {
-            ƒ.Debug.log("Save");
-            // panel = PanelManager.instance.getActivePanel();
-            // if (panel instanceof PanelGraph) {
-            //   node = panel.getNode();
-            // }
-            // save(node);
-        });
-        Fudge.ipcRenderer.on("open", async (_event, _args) => {
-            ƒ.Debug.log("Open");
-            node = await open();
-            Fudge.Editor.broadcastEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { detail: node }));
-        });
-        Fudge.ipcRenderer.on("openPanelGraph", (_event, _args) => {
-            ƒ.Debug.log("openPanelGraph");
-            openPanelGraph();
-        });
-        Fudge.ipcRenderer.on("openPanelProject", (_event, _args) => {
-            ƒ.Debug.log("openPanelProject");
-            openPanelProject();
-        });
-        Fudge.ipcRenderer.on("openPanelAnimation", (_event, _args) => {
-            ƒ.Debug.log("openPanelAnimation");
-            // openAnimationPanel();
-        });
-        // HACK!
-        Fudge.ipcRenderer.on("updateNode", (_event, _args) => {
-            ƒ.Debug.log("updateNode");
-        });
-    }
-    function openPanelProject() {
-        Fudge.Editor.add(Fudge.PanelProject, "Project", null); //Object.create(null,  {node: { writable: true, value: node }}));
-    }
-    function openPanelGraph() {
-        node = new ƒAid.NodeCoordinateSystem("WorldCooSys");
-        let node2 = new ƒAid.NodeCoordinateSystem("WorldCooSys", ƒ.Matrix4x4.IDENTITY());
-        node.addChild(node2);
-        node2.cmpTransform.local.translateZ(2);
-        Fudge.Editor.add(Fudge.PanelGraph, "Graph", Object({ node: node })); //Object.create(null,  {node: { writable: true, value: node }}));
-    }
-    // function openAnimationPanel(): void {
-    //   let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
-    //   PanelManager.instance.addPanel(panel);
-    // }
     function save(_node) {
         let serialization = ƒ.Serializer.serialize(_node);
         let content = ƒ.Serializer.stringify(serialization);
@@ -135,6 +112,7 @@ var Fudge;
         let filename = Fudge.remote.dialog.showSaveDialogSync(null, { title: "Save Graph", buttonLabel: "Save Graph", message: "ƒ-Message" });
         fs.writeFileSync(filename, content);
     }
+    Fudge.save = save;
     async function open() {
         let filenames = Fudge.remote.dialog.showOpenDialogSync(null, {
             title: "Load Project", buttonLabel: "Load Project", properties: ["openFile"],
@@ -172,15 +150,71 @@ var Fudge;
         }
         return null;
     }
+    Fudge.open = open;
+})(Fudge || (Fudge = {}));
+///<reference path="../../../node_modules/electron/Electron.d.ts"/>
+///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../Aid/Build/FudgeAid"/>
+///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
+// /<reference path="../Main.ts"/>
+var Fudge;
+///<reference path="../../../node_modules/electron/Electron.d.ts"/>
+///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../Aid/Build/FudgeAid"/>
+///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
+// /<reference path="../Main.ts"/>
+(function (Fudge) {
+    var ƒ = FudgeCore;
+    var ƒAid = FudgeAid;
+    Fudge.ipcRenderer = require("electron").ipcRenderer;
+    Fudge.remote = require("electron").remote;
+    // TODO: At this point of time, the project is just a single node. A project is much more complex...
+    let node = null;
+    window.addEventListener("load", initWindow);
+    /**
+     * Set up listeners to receive events from the main menu and trigger the appropriate operations like opening panels
+     */
+    function initWindow() {
+        ƒ.Debug.log("Fudge started");
+        Fudge.Editor.initialize();
+        ƒ.Project.mode = ƒ.MODE.EDITOR;
+        ƒ.Debug.log("Editor initialized");
+        // TODO: create a new Panel containing a ViewData by default. More Views can be added by the user or by configuration
+        Fudge.ipcRenderer.on("save", (_event, _args) => {
+            ƒ.Debug.log("Save");
+            // panel = PanelManager.instance.getActivePanel();
+            // if (panel instanceof PanelGraph) {
+            //   node = panel.getNode();
+            // }
+            // save(node);
+        });
+        Fudge.ipcRenderer.on(Fudge.MENU.PROJECT_OPEN, async (_event, _args) => {
+            node = await Fudge.open();
+            Fudge.Editor.broadcastEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { detail: node }));
+        });
+        Fudge.ipcRenderer.on(Fudge.MENU.PANEL_GRAPH_OPEN, (_event, _args) => {
+            node = new ƒAid.NodeCoordinateSystem("WorldCooSys");
+            let node2 = new ƒAid.NodeCoordinateSystem("WorldCooSys", ƒ.Matrix4x4.IDENTITY());
+            node.addChild(node2);
+            node2.cmpTransform.local.translateZ(2);
+            Fudge.Editor.add(Fudge.PanelGraph, "Graph", Object({ node: node })); //Object.create(null,  {node: { writable: true, value: node }}));
+        });
+        Fudge.ipcRenderer.on(Fudge.MENU.PANEL_PROJECT_OPEN, (_event, _args) => {
+            Fudge.Editor.add(Fudge.PanelProject, "Project", null); //Object.create(null,  {node: { writable: true, value: node }}));
+        });
+        Fudge.ipcRenderer.on(Fudge.MENU.PANEL_ANIMATION_OPEN, (_event, _args) => {
+            //   let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
+            //   PanelManager.instance.addPanel(panel);
+        });
+        // HACK!
+        Fudge.ipcRenderer.on(Fudge.MENU.NODE_UPDATE, (_event, _args) => {
+            ƒ.Debug.log("updateNode");
+        });
+    }
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
-    let MENU;
-    (function (MENU) {
-        MENU[MENU["ADD_NODE"] = 0] = "ADD_NODE";
-        MENU[MENU["ADD_COMPONENT"] = 1] = "ADD_COMPONENT";
-    })(MENU = Fudge.MENU || (Fudge.MENU = {}));
     // TODO: figure out how to subclass MenuItem
     // export class MenuItem extends remote.MenuItem {
     //   public subclass: Function = null;
@@ -202,7 +236,7 @@ var Fudge;
         static getComponents(_callback) {
             const menuItems = [];
             for (let subclass of ƒ.Component.subclasses) {
-                let item = new Fudge.remote.MenuItem({ label: subclass.name, id: String(MENU.ADD_COMPONENT), click: _callback });
+                let item = new Fudge.remote.MenuItem({ label: subclass.name, id: String(Fudge.CONTEXTMENU.ADD_COMPONENT), click: _callback });
                 // @ts-ignore
                 item.overrideProperty("iSubclass", subclass.iSubclass);
                 item["iSubclass"] = subclass.iSubclass;
@@ -364,21 +398,6 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
-    let VIEW;
-    (function (VIEW) {
-        VIEW["HIERARCHY"] = "ViewHierarchy";
-        VIEW["ANIMATION"] = "ViewAnimation";
-        VIEW["RENDER"] = "ViewRender";
-        VIEW["COMPONENTS"] = "ViewComponents";
-        VIEW["CAMERA"] = "ViewCamera";
-        VIEW["INTERNAL"] = "ViewInternal";
-        VIEW["EXTERNAL"] = "ViewExternal";
-        VIEW["PROPERTIES"] = "ViewProperties";
-        VIEW["PREVIEW"] = "ViewPreview";
-        // PROJECT = ViewProject,
-        // SKETCH = ViewSketch,
-        // MESH = ViewMesh,
-    })(VIEW = Fudge.VIEW || (Fudge.VIEW = {}));
     /**
      * Base class for all [[View]]s to support generic functionality
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
@@ -407,7 +426,7 @@ var Fudge;
             return menu;
         }
         contextMenuCallback(_item, _window, _event) {
-            ƒ.Debug.info(`ContextMenu: Item-id=${Fudge.MENU[_item.id]}`);
+            ƒ.Debug.info(`ContextMenu: Item-id=${Fudge.CONTEXTMENU[_item.id]}`);
         }
     }
     Fudge.View = View;
@@ -416,11 +435,6 @@ var Fudge;
 var Fudge;
 ///<reference path="../View/View.ts"/>
 (function (Fudge) {
-    let PANEL;
-    (function (PANEL) {
-        PANEL["GRAPH"] = "PanelGraph";
-        PANEL["PROJECT"] = "PanelProject";
-    })(PANEL = Fudge.PANEL || (Fudge.PANEL = {}));
     /**
      * Base class for all [[Panel]]s aggregating [[View]]s
      * Subclasses are presets for common panels. A user might add or delete [[View]]s at runtime
@@ -1187,9 +1201,9 @@ var Fudge;
             return menu;
         }
         contextMenuCallback(_item, _window, _event) {
-            ƒ.Debug.info(`MenuSelect: Item-id=${Fudge.MENU[_item.id]}`);
+            ƒ.Debug.info(`MenuSelect: Item-id=${Fudge.CONTEXTMENU[_item.id]}`);
             switch (Number(_item.id)) {
-                case Fudge.MENU.ADD_COMPONENT:
+                case Fudge.CONTEXTMENU.ADD_COMPONENT:
                     let iSubclass = _item["iSubclass"];
                     let component = ƒ.Component.subclasses[iSubclass];
                     //@ts-ignore
@@ -1260,7 +1274,7 @@ var Fudge;
         getContextMenu(_callback) {
             const menu = new Fudge.remote.Menu();
             let item;
-            item = new Fudge.remote.MenuItem({ label: "Add Node", id: String(Fudge.MENU.ADD_NODE), click: _callback, accelerator: process.platform == "darwin" ? "N" : "N" });
+            item = new Fudge.remote.MenuItem({ label: "Add Node", id: String(Fudge.CONTEXTMENU.ADD_NODE), click: _callback, accelerator: process.platform == "darwin" ? "N" : "N" });
             menu.append(item);
             item = new Fudge.remote.MenuItem({ label: "Add Component", submenu: [] });
             for (let subItem of Fudge.ContextMenu.getComponents(_callback))
@@ -1271,16 +1285,16 @@ var Fudge;
             return menu;
         }
         contextMenuCallback(_item, _window, _event) {
-            ƒ.Debug.info(`MenuSelect: Item-id=${Fudge.MENU[_item.id]}`);
+            ƒ.Debug.info(`MenuSelect: Item-id=${Fudge.CONTEXTMENU[_item.id]}`);
             let focus = this.tree.getFocussed();
             switch (Number(_item.id)) {
-                case Fudge.MENU.ADD_NODE:
+                case Fudge.CONTEXTMENU.ADD_NODE:
                     let child = new ƒ.Node("New Node");
                     focus.addChild(child);
                     this.tree.findOpen(focus).open(true);
                     this.tree.findOpen(child).focus();
                     break;
-                case Fudge.MENU.ADD_COMPONENT:
+                case Fudge.CONTEXTMENU.ADD_COMPONENT:
                     let iSubclass = _item["iSubclass"];
                     let component = ƒ.Component.subclasses[iSubclass];
                     //@ts-ignore

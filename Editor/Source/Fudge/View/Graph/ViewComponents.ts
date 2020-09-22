@@ -38,10 +38,10 @@ namespace Fudge {
     }
 
     protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
-      ƒ.Debug.info(`MenuSelect: Item-id=${MENU[_item.id]}`);
+      ƒ.Debug.info(`MenuSelect: Item-id=${CONTEXTMENU[_item.id]}`);
 
       switch (Number(_item.id)) {
-        case MENU.ADD_COMPONENT:
+        case CONTEXTMENU.ADD_COMPONENT:
           let iSubclass: number = _item["iSubclass"];
           let component: typeof ƒ.Component = ƒ.Component.subclasses[iSubclass];
           //@ts-ignore

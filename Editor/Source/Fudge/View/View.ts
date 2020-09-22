@@ -1,21 +1,5 @@
 namespace Fudge {
   import ƒ = FudgeCore;
-  import ƒui = FudgeUserInterface;
-
-  export enum VIEW {
-    HIERARCHY = "ViewHierarchy",
-    ANIMATION = "ViewAnimation",
-    RENDER = "ViewRender",
-    COMPONENTS = "ViewComponents",
-    CAMERA = "ViewCamera",
-    INTERNAL = "ViewInternal",
-    EXTERNAL = "ViewExternal",
-    PROPERTIES = "ViewProperties",
-    PREVIEW = "ViewPreview"
-    // PROJECT = ViewProject,
-    // SKETCH = ViewSketch,
-    // MESH = ViewMesh,
-  }
 
   /**
    * Base class for all [[View]]s to support generic functionality
@@ -53,7 +37,7 @@ namespace Fudge {
     }
 
     protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
-      ƒ.Debug.info(`ContextMenu: Item-id=${MENU[_item.id]}`);
+      ƒ.Debug.info(`ContextMenu: Item-id=${CONTEXTMENU[_item.id]}`);
     }
   }
 }

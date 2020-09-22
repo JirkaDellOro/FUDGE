@@ -43,7 +43,7 @@ namespace Fudge {
       const menu: Electron.Menu = new remote.Menu();
       let item: Electron.MenuItem;
 
-      item = new remote.MenuItem({ label: "Add Node", id: String(MENU.ADD_NODE), click: _callback, accelerator: process.platform == "darwin" ? "N" : "N" });
+      item = new remote.MenuItem({ label: "Add Node", id: String(CONTEXTMENU.ADD_NODE), click: _callback, accelerator: process.platform == "darwin" ? "N" : "N" });
       menu.append(item);
 
       item = new remote.MenuItem({ label: "Add Component", submenu: [] });
@@ -58,17 +58,17 @@ namespace Fudge {
     }
 
     protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
-      ƒ.Debug.info(`MenuSelect: Item-id=${MENU[_item.id]}`);
+      ƒ.Debug.info(`MenuSelect: Item-id=${CONTEXTMENU[_item.id]}`);
       let focus: ƒ.Node = this.tree.getFocussed();
 
       switch (Number(_item.id)) {
-        case MENU.ADD_NODE:
+        case CONTEXTMENU.ADD_NODE:
           let child: ƒ.Node = new ƒ.Node("New Node");
           focus.addChild(child);
           this.tree.findOpen(focus).open(true);
           this.tree.findOpen(child).focus();
           break;
-        case MENU.ADD_COMPONENT:
+        case CONTEXTMENU.ADD_COMPONENT:
           let iSubclass: number = _item["iSubclass"];
           let component: typeof ƒ.Component = ƒ.Component.subclasses[iSubclass];
           //@ts-ignore

@@ -2,10 +2,6 @@ namespace Fudge {
   import ƒui = FudgeUserInterface;
   import ƒ = FudgeCore;
 
-  export enum MENU {
-    ADD_NODE, ADD_COMPONENT
-  }
-
   export type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
 
   // TODO: figure out how to subclass MenuItem
@@ -34,7 +30,7 @@ namespace Fudge {
       const menuItems: Electron.MenuItem[] = [];
       for (let subclass of ƒ.Component.subclasses) {
         let item: Electron.MenuItem = new remote.MenuItem(
-          { label: subclass.name, id: String(MENU.ADD_COMPONENT), click: _callback }
+          { label: subclass.name, id: String(CONTEXTMENU.ADD_COMPONENT), click: _callback }
         );
         // @ts-ignore
         item.overrideProperty("iSubclass", subclass.iSubclass);

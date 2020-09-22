@@ -3,6 +3,21 @@
 /// <reference types="../../../userinterface/build/fudgeuserinterface" />
 /// <reference types="golden-layout" />
 declare namespace Fudge {
+    enum CONTEXTMENU {
+        ADD_NODE = 0,
+        ADD_COMPONENT = 1
+    }
+    enum MENU {
+        QUIT = "quit",
+        PROJECT_SAVE = "projectSave",
+        PROJECT_OPEN = "projectOpen",
+        NODE_DELETE = "nodeDelete",
+        NODE_UPDATE = "nodeUpdate",
+        DEVTOOLS_OPEN = "devtoolsOpen",
+        PANEL_GRAPH_OPEN = "panelGraphOpen",
+        PANEL_ANIMATION_OPEN = "panelAnimationOpen",
+        PANEL_PROJECT_OPEN = "panelProjectOpen"
+    }
     enum EVENT_EDITOR {
         REMOVE = "removeNode",
         HIDE = "hideNode",
@@ -10,6 +25,23 @@ declare namespace Fudge {
         SET_GRAPH = "setGraph",
         FOCUS_NODE = "focusNode"
     }
+    enum PANEL {
+        GRAPH = "PanelGraph",
+        PROJECT = "PanelProject"
+    }
+    enum VIEW {
+        HIERARCHY = "ViewHierarchy",
+        ANIMATION = "ViewAnimation",
+        RENDER = "ViewRender",
+        COMPONENTS = "ViewComponents",
+        CAMERA = "ViewCamera",
+        INTERNAL = "ViewInternal",
+        EXTERNAL = "ViewExternal",
+        PROPERTIES = "ViewProperties",
+        PREVIEW = "ViewPreview"
+    }
+}
+declare namespace Fudge {
     /**
      * The uppermost container for all panels
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
@@ -26,14 +58,14 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    function save(_node: ƒ.Node): void;
+    function open(): Promise<ƒ.Node>;
+}
+declare namespace Fudge {
     const ipcRenderer: Electron.IpcRenderer;
     const remote: Electron.Remote;
 }
 declare namespace Fudge {
-    enum MENU {
-        ADD_NODE = 0,
-        ADD_COMPONENT = 1
-    }
     type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
     class ContextMenu {
         static appendCopyPaste(_menu: Electron.Menu): void;
@@ -78,17 +110,6 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    enum VIEW {
-        HIERARCHY = "ViewHierarchy",
-        ANIMATION = "ViewAnimation",
-        RENDER = "ViewRender",
-        COMPONENTS = "ViewComponents",
-        CAMERA = "ViewCamera",
-        INTERNAL = "ViewInternal",
-        EXTERNAL = "ViewExternal",
-        PROPERTIES = "ViewProperties",
-        PREVIEW = "ViewPreview"
-    }
     /**
      * Base class for all [[View]]s to support generic functionality
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
@@ -105,10 +126,6 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    enum PANEL {
-        GRAPH = "PanelGraph",
-        PROJECT = "PanelProject"
-    }
     /**
      * Base class for all [[Panel]]s aggregating [[View]]s
      * Subclasses are presets for common panels. A user might add or delete [[View]]s at runtime

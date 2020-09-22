@@ -1,26 +1,69 @@
-///<reference types="../../node_modules/electron"/>
-var Main;
-///<reference types="../../node_modules/electron"/>
-(function (Main) {
-    //#region Types and Data
+var Fudge;
+(function (Fudge) {
+    let CONTEXTMENU;
+    (function (CONTEXTMENU) {
+        CONTEXTMENU[CONTEXTMENU["ADD_NODE"] = 0] = "ADD_NODE";
+        CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT"] = 1] = "ADD_COMPONENT";
+    })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
-        MENU[MENU["QUIT"] = 0] = "QUIT";
-        MENU[MENU["PROJECT_SAVE"] = 1] = "PROJECT_SAVE";
-        MENU[MENU["PROJECT_OPEN"] = 2] = "PROJECT_OPEN";
-        MENU[MENU["NODE_DELETE"] = 3] = "NODE_DELETE";
-        MENU[MENU["NODE_UPDATE"] = 4] = "NODE_UPDATE";
-        MENU[MENU["DEVTOOLS_OPEN"] = 5] = "DEVTOOLS_OPEN";
-        MENU[MENU["PANEL_GRAPH_OPEN"] = 6] = "PANEL_GRAPH_OPEN";
-        MENU[MENU["PANEL_ANIMATION_OPEN"] = 7] = "PANEL_ANIMATION_OPEN";
-        MENU[MENU["PANEL_PROJECT_OPEN"] = 8] = "PANEL_PROJECT_OPEN";
-    })(MENU || (MENU = {}));
+        MENU["QUIT"] = "quit";
+        MENU["PROJECT_SAVE"] = "projectSave";
+        MENU["PROJECT_OPEN"] = "projectOpen";
+        MENU["NODE_DELETE"] = "nodeDelete";
+        MENU["NODE_UPDATE"] = "nodeUpdate";
+        MENU["DEVTOOLS_OPEN"] = "devtoolsOpen";
+        MENU["PANEL_GRAPH_OPEN"] = "panelGraphOpen";
+        MENU["PANEL_ANIMATION_OPEN"] = "panelAnimationOpen";
+        MENU["PANEL_PROJECT_OPEN"] = "panelProjectOpen";
+    })(MENU = Fudge.MENU || (Fudge.MENU = {}));
+    let EVENT_EDITOR;
+    (function (EVENT_EDITOR) {
+        EVENT_EDITOR["REMOVE"] = "removeNode";
+        EVENT_EDITOR["HIDE"] = "hideNode";
+        EVENT_EDITOR["ACTIVATE_VIEWPORT"] = "activateViewport";
+        EVENT_EDITOR["SET_GRAPH"] = "setGraph";
+        EVENT_EDITOR["FOCUS_NODE"] = "focusNode";
+    })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
+    let PANEL;
+    (function (PANEL) {
+        PANEL["GRAPH"] = "PanelGraph";
+        PANEL["PROJECT"] = "PanelProject";
+    })(PANEL = Fudge.PANEL || (Fudge.PANEL = {}));
+    let VIEW;
+    (function (VIEW) {
+        VIEW["HIERARCHY"] = "ViewHierarchy";
+        VIEW["ANIMATION"] = "ViewAnimation";
+        VIEW["RENDER"] = "ViewRender";
+        VIEW["COMPONENTS"] = "ViewComponents";
+        VIEW["CAMERA"] = "ViewCamera";
+        VIEW["INTERNAL"] = "ViewInternal";
+        VIEW["EXTERNAL"] = "ViewExternal";
+        VIEW["PROPERTIES"] = "ViewProperties";
+        VIEW["PREVIEW"] = "ViewPreview";
+        // PROJECT = ViewProject,
+        // SKETCH = ViewSketch,
+        // MESH = ViewMesh,
+    })(VIEW = Fudge.VIEW || (Fudge.VIEW = {}));
+})(Fudge || (Fudge = {}));
+///<reference types="../../node_modules/electron"/>
+/**
+ * Main electron application running node. Starts the browser window to contain Fudge and sets up the main menu.
+ * See subfolder Fudge for most of the other functionality
+ */
+var Main;
+///<reference types="../../node_modules/electron"/>
+/**
+ * Main electron application running node. Starts the browser window to contain Fudge and sets up the main menu.
+ * See subfolder Fudge for most of the other functionality
+ */
+(function (Main) {
     const { app, BrowserWindow, Menu, ipcMain } = require("electron");
     let fudge;
     let defaultWidth = 800;
     let defaultHeight = 600;
     //#endregion
-    //#region Events
+    //#region Events 
     app.addListener("ready", createFudge);
     app.addListener("window-all-closed", function () {
         console.log("Quit");
@@ -58,34 +101,17 @@ var Main;
     // #endregion
     //#region Menus  
     function menuSelect(_item, _window, _event) {
-        console.log(`MenuSelect: Item-id=${MENU[_item.id]}`);
+        console.log(`MenuSelect: Item-id=${Fudge.MENU[_item.id]}`);
         // TODO: simplify switch by usinge enums as messages
-        switch (Number(_item.id)) {
-            case MENU.PROJECT_OPEN:
-                send(_window, "open", null);
-                break;
-            case MENU.PROJECT_SAVE:
-                send(_window, "save", null);
-                break;
-            case MENU.PANEL_PROJECT_OPEN:
-                send(_window, "openPanelProject", null);
-                break;
-            case MENU.PANEL_GRAPH_OPEN:
-                send(_window, "openPanelGraph", null);
-                break;
-            case MENU.NODE_UPDATE:
-                send(_window, "updateNode", null);
-                break;
-            case MENU.DEVTOOLS_OPEN:
+        switch (_item.id) {
+            case Fudge.MENU.DEVTOOLS_OPEN:
                 _window.webContents.openDevTools();
                 break;
-            case MENU.PANEL_ANIMATION_OPEN:
-                send(_window, "openPanelAnimation");
-                break;
-            case MENU.QUIT:
+            case Fudge.MENU.QUIT:
                 app.quit();
                 break;
             default:
+                send(_window, _item.id, null);
                 break;
         }
     }
@@ -93,38 +119,22 @@ var Main;
         const menu = [
             {
                 label: "Project", submenu: [
-                    {
-                        label: "Save", id: String(MENU.PROJECT_SAVE), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+S" : "Ctrl+S"
-                    },
-                    {
-                        label: "Open", id: String(MENU.PROJECT_OPEN), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+O" : "Ctrl+O"
-                    },
-                    {
-                        label: "Quit", id: String(MENU.QUIT), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+Q" : "Ctrl+Q"
-                    }
+                    { label: "Save", id: Fudge.MENU.PROJECT_SAVE, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+S" : "Ctrl+S" },
+                    { label: "Open", id: Fudge.MENU.PROJECT_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+O" : "Ctrl+O" },
+                    { label: "Quit", id: Fudge.MENU.QUIT, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+Q" : "Ctrl+Q" }
                 ]
             },
             {
                 label: "Edit", submenu: [
-                    {
-                        label: "Project", id: String(MENU.PANEL_PROJECT_OPEN), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+G" : "Ctrl+P"
-                    },
-                    {
-                        label: "Graph", id: String(MENU.PANEL_GRAPH_OPEN), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+G" : "Ctrl+G"
-                    },
-                    {
-                        label: "setRoot(testing)", id: String(MENU.NODE_UPDATE), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+U" : "Ctrl+U"
-                    },
-                    {
-                        label: "Animation", id: String(MENU.PANEL_ANIMATION_OPEN), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+I" : "Ctrl+I"
-                    }
+                    { label: "Project", id: Fudge.MENU.PANEL_PROJECT_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+G" : "Ctrl+P" },
+                    { label: "Graph", id: Fudge.MENU.PANEL_GRAPH_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+G" : "Ctrl+G" },
+                    { label: "Animation", id: Fudge.MENU.PANEL_ANIMATION_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+I" : "Ctrl+I" },
+                    { label: "setRoot(testing)", id: Fudge.MENU.NODE_UPDATE, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+U" : "Ctrl+U" }
                 ]
             },
             {
                 label: "Debug", submenu: [
-                    {
-                        label: "DevTool", id: String(MENU.DEVTOOLS_OPEN), click: menuSelect, accelerator: process.platform == "darwin" ? "F12" : "F12"
-                    }
+                    { label: "DevTool", id: Fudge.MENU.DEVTOOLS_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "F12" : "F12" }
                 ]
             }
         ];

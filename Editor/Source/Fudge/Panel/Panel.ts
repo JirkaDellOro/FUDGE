@@ -2,11 +2,6 @@
 namespace Fudge {
   import ƒ = FudgeCore;
 
-  export enum PANEL {
-    GRAPH = "PanelGraph",
-    PROJECT = "PanelProject"
-  }
-
   /**
    * Base class for all [[Panel]]s aggregating [[View]]s
    * Subclasses are presets for common panels. A user might add or delete [[View]]s at runtime
