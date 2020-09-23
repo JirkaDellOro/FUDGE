@@ -1,4 +1,5 @@
-/// <reference types="../../../core/build/fudgecore" />
+/// <reference types="../../core/build/fudgecore" />
+/// <reference types="../../../node_modules/electron/electron" />
 /// <reference types="../../../aid/build/fudgeaid" />
 /// <reference types="../../../userinterface/build/fudgeuserinterface" />
 /// <reference types="golden-layout" />
@@ -97,6 +98,18 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    import ƒUi = FudgeUserInterface;
+    class ControllerTreeDirectory extends ƒUi.TreeController<DirectoryEntry> {
+        getLabel(_entry: DirectoryEntry): string;
+        rename(_entry: DirectoryEntry, _new: string): boolean;
+        hasChildren(_entry: DirectoryEntry): boolean;
+        getChildren(_entry: DirectoryEntry): DirectoryEntry[];
+        delete(_focussed: DirectoryEntry[]): DirectoryEntry[];
+        addChildren(_entries: DirectoryEntry[], _target: DirectoryEntry): DirectoryEntry[];
+        copy(_originals: DirectoryEntry[]): Promise<DirectoryEntry[]>;
+    }
+}
+declare namespace Fudge {
     import ƒ = FudgeCore;
     import ƒUi = FudgeUserInterface;
     class ControllerTreeNode extends ƒUi.TreeController<ƒ.Node> {
@@ -108,6 +121,22 @@ declare namespace Fudge {
         addChildren(_children: ƒ.Node[], _target: ƒ.Node): ƒ.Node[];
         copy(_originals: ƒ.Node[]): Promise<ƒ.Node[]>;
     }
+}
+declare namespace Fudge {
+    const fs: ƒ.General;
+    export class DirectoryEntry {
+        path: typeof fs.PathLike;
+        dirent: typeof fs.Dirent;
+        constructor(_path: typeof fs.PathLike, _dirent: typeof fs.Dirent);
+        static createRoot(_path: typeof fs.PathLike): DirectoryEntry;
+        get name(): string;
+        set name(_name: string);
+        get isDirectory(): boolean;
+        delete(): void;
+        getContent(): DirectoryEntry[];
+        addEntry(_entry: DirectoryEntry): void;
+    }
+    export {};
 }
 declare namespace Fudge {
     /**

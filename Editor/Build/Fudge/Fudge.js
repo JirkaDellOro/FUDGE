@@ -152,17 +152,13 @@ var Fudge;
     }
     Fudge.open = open;
 })(Fudge || (Fudge = {}));
-///<reference path="../../../node_modules/electron/Electron.d.ts"/>
-///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../node_modules/electron/Electron"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
 ///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
-// /<reference path="../Main.ts"/>
 var Fudge;
-///<reference path="../../../node_modules/electron/Electron.d.ts"/>
-///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../node_modules/electron/Electron"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
 ///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
-// /<reference path="../Main.ts"/>
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒAid = FudgeAid;
@@ -344,6 +340,48 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    var ƒUi = FudgeUserInterface;
+    class ControllerTreeDirectory extends ƒUi.TreeController {
+        getLabel(_entry) {
+            return _entry.name;
+        }
+        rename(_entry, _new) {
+            _entry.name = _new;
+            return true;
+        }
+        hasChildren(_entry) {
+            return _entry.isDirectory;
+        }
+        getChildren(_entry) {
+            return _entry.getContent();
+        }
+        delete(_focussed) {
+            // delete selection independend of focussed item
+            let deleted = [];
+            let expend = this.selection.length > 0 ? this.selection : _focussed;
+            for (let entry of this.selection || expend) {
+                entry.delete();
+                deleted.push(entry);
+            }
+            this.selection.splice(0);
+            return deleted;
+        }
+        addChildren(_entries, _target) {
+            for (let entry of _entries) {
+                _target.addEntry(entry);
+                entry.delete();
+            }
+            return _entries;
+        }
+        async copy(_originals) {
+            // copies can not be created at this point, but when copying the files. See addChildren
+            return _originals;
+        }
+    }
+    Fudge.ControllerTreeDirectory = ControllerTreeDirectory;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
     var ƒ = FudgeCore;
     var ƒUi = FudgeUserInterface;
     class ControllerTreeNode extends ƒUi.TreeController {
@@ -394,6 +432,54 @@ var Fudge;
         }
     }
     Fudge.ControllerTreeNode = ControllerTreeNode;
+})(Fudge || (Fudge = {}));
+///<reference types="../../../../node_modules/@types/node/fs"/>
+var Fudge;
+///<reference types="../../../../node_modules/@types/node/fs"/>
+(function (Fudge) {
+    const fs = require("fs");
+    const { Dirent, PathLike, renameSync, removeSync, readdirSync, copyFileSync, copySync } = require("fs");
+    const { basename, dirname, join } = require("path");
+    class DirectoryEntry {
+        constructor(_path, _dirent) {
+            this.path = _path;
+            this.dirent = _dirent;
+        }
+        static createRoot(_path) {
+            let dirent = new Dirent();
+            dirent.name = basename(_path);
+            dirent.isRoot = true;
+            return new DirectoryEntry(_path, dirent);
+        }
+        get name() {
+            return this.dirent.name;
+        }
+        set name(_name) {
+            let newPath = join(dirname(this.path), _name);
+            renameSync(this.path, newPath);
+            this.path = newPath;
+            this.dirent.name = _name;
+        }
+        get isDirectory() {
+            return this.dirent.isDirectory() || this.dirent.isRoot;
+        }
+        delete() {
+            removeSync(this.path);
+        }
+        getContent() {
+            let dirents = readdirSync(this.path, { withFileTypes: true });
+            let content = [];
+            for (let dirent of dirents) {
+                let entry = new DirectoryEntry(join(this.path, dirent.name), dirent);
+                content.push(entry);
+            }
+            return content;
+        }
+        addEntry(_entry) {
+            copySync(_entry.path, join(this.path, _entry.name));
+        }
+    }
+    Fudge.DirectoryEntry = DirectoryEntry;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {

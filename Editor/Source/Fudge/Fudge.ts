@@ -1,8 +1,6 @@
-///<reference path="../../../node_modules/electron/Electron.d.ts"/>
-///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../node_modules/electron/Electron"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
 ///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
-// /<reference path="../Main.ts"/>
 
 namespace Fudge {
   import ƒ = FudgeCore;

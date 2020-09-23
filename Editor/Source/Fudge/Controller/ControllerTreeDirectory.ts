@@ -1,9 +1,9 @@
-namespace DirectoryBrowser {
+namespace Fudge {
 
   import ƒ = FudgeCore;
   import ƒUi = FudgeUserInterface;
 
-  export class TreeControllerDirectory extends ƒUi.TreeController<DirectoryEntry> {
+  export class ControllerTreeDirectory extends ƒUi.TreeController<DirectoryEntry> {
     public getLabel(_entry: DirectoryEntry): string {
       return _entry.name;
     }

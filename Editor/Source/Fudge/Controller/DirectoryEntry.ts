@@ -1,17 +1,20 @@
-namespace DirectoryBrowser {
-  const { Dirent, PathLike, renameSync, removeSync, readdirSync, copyFileSync, copySync } = require("fs-extra");
+///<reference types="../../../../node_modules/@types/node/fs"/>
+
+namespace Fudge {
+  const fs: ƒ.General = require("fs");
+  const { Dirent, PathLike, renameSync, removeSync, readdirSync, copyFileSync, copySync } = require("fs");
   const { basename, dirname, join } = require("path");
 
   export class DirectoryEntry {
-    public path: typeof PathLike;
-    public dirent: typeof Dirent;
+    public path: typeof fs.PathLike;
+    public dirent: typeof fs.Dirent;
 
-    constructor(_path: typeof PathLike, _dirent: typeof Dirent) {
+    constructor(_path: typeof fs.PathLike, _dirent: typeof fs.Dirent) {
       this.path = _path;
       this.dirent = _dirent;
     }
 
-    public static createRoot(_path: typeof PathLike): DirectoryEntry {
+    public static createRoot(_path: typeof fs.PathLike): DirectoryEntry {
       let dirent: typeof Dirent = new Dirent();
       dirent.name = basename(<string>_path);
       dirent.isRoot = true;
