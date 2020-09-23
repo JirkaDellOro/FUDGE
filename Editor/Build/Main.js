@@ -48,7 +48,6 @@ var Main;
         let window = new BrowserWindow({
             width: width, height: height, webPreferences: {
                 nodeIntegration: true,
-                enableRemoteModule: true
             }
         });
         window.webContents.openDevTools();

@@ -66,8 +66,18 @@ declare namespace Fudge {
     import ƒ = FudgeCore;
     class ControllerModeller {
         viewport: ƒ.Viewport;
+        currentRotation: ƒ.Vector3;
+        target: ƒ.Vector3;
+        selectedNodes: ƒ.Node[];
         constructor(viewport: ƒ.Viewport);
         private onclick;
+        private pickNode;
+        private zoom;
+        private handleMove;
+        private handleKeyboard;
+        private rotateCamera;
+        private moveCamera;
+        private multiplyMatrixes;
     }
 }
 declare namespace Fudge {

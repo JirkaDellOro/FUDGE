@@ -22,6 +22,7 @@ namespace Fudge {
       cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
       cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
       cmpCamera.projectCentral(1, 45);
+      //cmpCamera.pivot.rotateX(90);
 
       this.canvas = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
       let container: HTMLDivElement = document.createElement("div");
@@ -34,8 +35,8 @@ namespace Fudge {
 
       this.dom.append(this.canvas);
 
-      // ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
-      // ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
+      ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
+      ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
     } 
 
     private animate = (_e: Event) => {

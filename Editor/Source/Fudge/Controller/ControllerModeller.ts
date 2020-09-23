@@ -3,30 +3,137 @@ namespace Fudge {
 
   export class ControllerModeller {
     viewport: ƒ.Viewport;
+    currentRotation: ƒ.Vector3;
+    target: ƒ.Vector3;
+    selectedNodes: ƒ.Node[];
 
     constructor (viewport: ƒ.Viewport) {
       this.viewport = viewport;
 
       this.viewport.adjustingFrames = true;
+      this.currentRotation = viewport.camera.pivot.rotation;
+      console.log(this.viewport.camera.pivot.rotation);
 
       this.viewport.addEventListener(ƒ.EVENT_POINTER.DOWN, this.onclick);
       this.viewport.activatePointerEvent(ƒ.EVENT_POINTER.DOWN, true);
-      console.log("controller called");
+
+      this.viewport.addEventListener(ƒ.EVENT_POINTER.MOVE, this.handleMove);
+      this.viewport.activatePointerEvent(ƒ.EVENT_POINTER.MOVE, true);
+
+      this.viewport.addEventListener(ƒ.EVENT_WHEEL.WHEEL, this.zoom);
+      this.viewport.activateWheelEvent(ƒ.EVENT_WHEEL.WHEEL, true);
+
+      this.viewport.addEventListener(ƒ.EVENT_KEYBOARD.DOWN, this.handleKeyboard);
+      this.viewport.activateKeyboardEvent(ƒ.EVENT_KEYBOARD.DOWN, true);
+      viewport.setFocus(true);
     }
 
     private onclick = (_event: ƒ.EventPointer) => {
+      switch (_event.button) {
+        case 0: this.pickNode(_event.canvasX, _event.canvasY);
+                break;
+        case 1: this.currentRotation = this.viewport.camera.pivot.rotation;
+      }
+    }
+
+    private pickNode(_canvasX: number, _canvasY: number): void {
+      this.selectedNodes = [];
       this.viewport.createPickBuffers();
-      let mousePos: ƒ.Vector2 = new ƒ.Vector2(_event.canvasX, _event.canvasY);
-      // console.log(_event);
+      let mousePos: ƒ.Vector2 = new ƒ.Vector2(_canvasX, _canvasY);
       let posRender: ƒ.Vector2 = this.viewport.pointClientToRender(new ƒ.Vector2(mousePos.x, this.viewport.getClientRectangle().height - mousePos.y));
-  
-      //this.viewport.getRayFromClient(mousePos);
       let hits: ƒ.RayHit[] = this.viewport.pickNodeAt(posRender);
       for (let hit of hits) {
         if (hit.zBuffer != 0) 
-          console.log(hit);
+          this.selectedNodes.push(hit.node);
+      }  
+    }
+
+    private zoom = (_event: ƒ.EventWheel) => {
+      _event.preventDefault();
+      let cameraPivot: ƒ.Matrix4x4 = this.viewport.camera.pivot;
+      let delta: number = _event.deltaY * 0.01;
+      try {
+        let normTrans: ƒ.Vector3 = ƒ.Vector3.NORMALIZATION(cameraPivot.translation);
+        cameraPivot.translation = new ƒ.Vector3(
+          cameraPivot.translation.x + (normTrans.x - this.target.x) * delta, 
+          cameraPivot.translation.y + (normTrans.y - this.target.y) * delta, 
+          cameraPivot.translation.z + (normTrans.z - this.target.z) * delta);
+      } catch (_error) {
+        ƒ.Debug.log(_error);
       }
-      this.viewport.draw();
+    }
+
+    private handleMove = (_event: ƒ.EventPointer) => {
+      if ((_event.buttons & 4) === 4) {
+        _event.preventDefault();
+        if (_event.shiftKey) {
+          this.moveCamera(_event);
+        } else {
+          this.rotateCamera(_event);
+        }
+      }
+    }
+
+    private handleKeyboard = (_event: ƒ.EventKeyboard) => {
+      if (_event.key == ƒ.KEYBOARD_CODE.DELETE) {
+        for (let node of this.selectedNodes) {
+          this.viewport.getGraph().removeChild(node);
+        }
+      }
+    }
+
+    private rotateCamera(_event: ƒ.EventPointer): void {
+      let magicalScaleDivisor: number = 4;
+      let angleYaxis: number = _event.movementX / magicalScaleDivisor;
+      let mtxYrot: ƒ.Matrix4x4 = ƒ.Matrix4x4.ROTATION_Y(angleYaxis);
+      let cameraTrans: ƒ.Vector3 = this.viewport.camera.pivot.translation;
+      cameraTrans = this.multiplyMatrixes(mtxYrot, cameraTrans);
+
+      let cameraRotation: ƒ.Vector3 = this.viewport.camera.pivot.rotation;
+      let degreeToRad: number = Math.PI / 180;
+      let angleZAxis: number = Math.sin(degreeToRad * cameraRotation.y) * (_event.movementY / magicalScaleDivisor);
+      let angleXAxis: number = -(Math.cos(degreeToRad * cameraRotation.y) * (_event.movementY / magicalScaleDivisor));
+
+      let mtxXrot: ƒ.Matrix4x4 = ƒ.Matrix4x4.ROTATION_X(angleXAxis);
+      cameraTrans = this.multiplyMatrixes(mtxXrot, cameraTrans);
+
+      let mtxZrot: ƒ.Matrix4x4 = ƒ.Matrix4x4.ROTATION_Z(angleZAxis);
+      this.viewport.camera.pivot.translation = this.multiplyMatrixes(mtxZrot, cameraTrans);
+
+      let rotation: ƒ.Vector3 = ƒ.Matrix4x4.MULTIPLICATION(ƒ.Matrix4x4.MULTIPLICATION(mtxYrot, mtxXrot), mtxZrot).rotation;
+      this.viewport.camera.pivot.rotation = rotation;
+
+      let target: ƒ.Vector3 = ƒ.Vector3.ZERO();
+      this.viewport.camera.pivot.lookAt(target);
+      this.target = target;
+    }
+
+    private moveCamera(_event: ƒ.EventPointer): void {
+      let cameraRotation: ƒ.Vector3 = this.viewport.camera.pivot.rotation;
+      let degreeToRad: number = Math.PI / 180;
+      let cosX: number = Math.cos(cameraRotation.x * degreeToRad);
+      let cosY: number = Math.cos(cameraRotation.y * degreeToRad);
+      let sinX: number = Math.sin(cameraRotation.x * degreeToRad);
+      let sinY: number = Math.sin(cameraRotation.y * degreeToRad);
+      let movementXscaled: number = _event.movementX / 100;
+      let movementYscaled: number = _event.movementY / 100;     
+      let translationChange: ƒ.Vector3 = new ƒ.Vector3(
+        -cosY * movementXscaled - sinX * sinY * movementYscaled,
+        -cosX * movementYscaled,
+        sinY * movementXscaled - sinX * cosY * movementYscaled);
+
+      let currentTranslation: ƒ.Vector3 = this.viewport.camera.pivot.translation;
+      this.viewport.camera.pivot.translation = new ƒ.Vector3(
+        currentTranslation.x + translationChange.x, 
+        currentTranslation.y + translationChange.y, 
+        currentTranslation.z + translationChange.z);
+    }
+
+    private multiplyMatrixes(mtx: ƒ.Matrix4x4, vector: ƒ.Vector3): ƒ.Vector3 {
+      let x: number = ƒ.Vector3.DOT(mtx.getX(), vector);
+      let y: number = ƒ.Vector3.DOT(mtx.getY(), vector);
+      let z: number = ƒ.Vector3.DOT(mtx.getZ(), vector);
+      return new ƒ.Vector3(x, y, z);
     }
   }
 }

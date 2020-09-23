@@ -297,23 +297,106 @@ var Fudge;
     class ControllerModeller {
         constructor(viewport) {
             this.onclick = (_event) => {
-                this.viewport.createPickBuffers();
-                let mousePos = new ƒ.Vector2(_event.canvasX, _event.canvasY);
-                // console.log(_event);
-                let posRender = this.viewport.pointClientToRender(new ƒ.Vector2(mousePos.x, this.viewport.getClientRectangle().height - mousePos.y));
-                //this.viewport.getRayFromClient(mousePos);
-                let hits = this.viewport.pickNodeAt(posRender);
-                for (let hit of hits) {
-                    if (hit.zBuffer != 0)
-                        console.log(hit);
+                switch (_event.button) {
+                    case 0:
+                        this.pickNode(_event.canvasX, _event.canvasY);
+                        break;
+                    case 1: this.currentRotation = this.viewport.camera.pivot.rotation;
                 }
-                this.viewport.draw();
+            };
+            this.zoom = (_event) => {
+                _event.preventDefault();
+                let cameraPivot = this.viewport.camera.pivot;
+                let delta = _event.deltaY * 0.01;
+                try {
+                    let normTrans = ƒ.Vector3.NORMALIZATION(cameraPivot.translation);
+                    cameraPivot.translation = new ƒ.Vector3(cameraPivot.translation.x + (normTrans.x - this.target.x) * delta, cameraPivot.translation.y + (normTrans.y - this.target.y) * delta, cameraPivot.translation.z + (normTrans.z - this.target.z) * delta);
+                }
+                catch (_error) {
+                    ƒ.Debug.log(_error);
+                }
+            };
+            this.handleMove = (_event) => {
+                if ((_event.buttons & 4) === 4) {
+                    _event.preventDefault();
+                    if (_event.shiftKey) {
+                        this.moveCamera(_event);
+                    }
+                    else {
+                        this.rotateCamera(_event);
+                    }
+                }
+            };
+            this.handleKeyboard = (_event) => {
+                if (_event.key == ƒ.KEYBOARD_CODE.DELETE) {
+                    for (let node of this.selectedNodes) {
+                        this.viewport.getGraph().removeChild(node);
+                    }
+                }
             };
             this.viewport = viewport;
             this.viewport.adjustingFrames = true;
+            this.currentRotation = viewport.camera.pivot.rotation;
+            console.log(this.viewport.camera.pivot.rotation);
             this.viewport.addEventListener("\u0192pointerdown" /* DOWN */, this.onclick);
             this.viewport.activatePointerEvent("\u0192pointerdown" /* DOWN */, true);
-            console.log("controller called");
+            this.viewport.addEventListener("\u0192pointermove" /* MOVE */, this.handleMove);
+            this.viewport.activatePointerEvent("\u0192pointermove" /* MOVE */, true);
+            this.viewport.addEventListener("\u0192wheel" /* WHEEL */, this.zoom);
+            this.viewport.activateWheelEvent("\u0192wheel" /* WHEEL */, true);
+            this.viewport.addEventListener("\u0192keydown" /* DOWN */, this.handleKeyboard);
+            this.viewport.activateKeyboardEvent("\u0192keydown" /* DOWN */, true);
+            viewport.setFocus(true);
+        }
+        pickNode(_canvasX, _canvasY) {
+            this.selectedNodes = [];
+            this.viewport.createPickBuffers();
+            let mousePos = new ƒ.Vector2(_canvasX, _canvasY);
+            let posRender = this.viewport.pointClientToRender(new ƒ.Vector2(mousePos.x, this.viewport.getClientRectangle().height - mousePos.y));
+            let hits = this.viewport.pickNodeAt(posRender);
+            for (let hit of hits) {
+                if (hit.zBuffer != 0)
+                    this.selectedNodes.push(hit.node);
+            }
+        }
+        rotateCamera(_event) {
+            let magicalScaleDivisor = 4;
+            let angleYaxis = _event.movementX / magicalScaleDivisor;
+            let mtxYrot = ƒ.Matrix4x4.ROTATION_Y(angleYaxis);
+            let cameraTrans = this.viewport.camera.pivot.translation;
+            cameraTrans = this.multiplyMatrixes(mtxYrot, cameraTrans);
+            let cameraRotation = this.viewport.camera.pivot.rotation;
+            let degreeToRad = Math.PI / 180;
+            let angleZAxis = Math.sin(degreeToRad * cameraRotation.y) * (_event.movementY / magicalScaleDivisor);
+            let angleXAxis = -(Math.cos(degreeToRad * cameraRotation.y) * (_event.movementY / magicalScaleDivisor));
+            let mtxXrot = ƒ.Matrix4x4.ROTATION_X(angleXAxis);
+            cameraTrans = this.multiplyMatrixes(mtxXrot, cameraTrans);
+            let mtxZrot = ƒ.Matrix4x4.ROTATION_Z(angleZAxis);
+            this.viewport.camera.pivot.translation = this.multiplyMatrixes(mtxZrot, cameraTrans);
+            let rotation = ƒ.Matrix4x4.MULTIPLICATION(ƒ.Matrix4x4.MULTIPLICATION(mtxYrot, mtxXrot), mtxZrot).rotation;
+            this.viewport.camera.pivot.rotation = rotation;
+            let target = ƒ.Vector3.ZERO();
+            this.viewport.camera.pivot.lookAt(target);
+            this.target = target;
+        }
+        moveCamera(_event) {
+            let cameraRotation = this.viewport.camera.pivot.rotation;
+            let degreeToRad = Math.PI / 180;
+            let cosX = Math.cos(cameraRotation.x * degreeToRad);
+            let cosY = Math.cos(cameraRotation.y * degreeToRad);
+            let sinX = Math.sin(cameraRotation.x * degreeToRad);
+            let sinY = Math.sin(cameraRotation.y * degreeToRad);
+            let movementXscaled = _event.movementX / 100;
+            let movementYscaled = _event.movementY / 100;
+            let translationChange = new ƒ.Vector3(-cosY * movementXscaled - sinX * sinY * movementYscaled, -cosX * movementYscaled, sinY * movementXscaled - sinX * cosY * movementYscaled);
+            let currentTranslation = this.viewport.camera.pivot.translation;
+            this.viewport.camera.pivot.translation = new ƒ.Vector3(currentTranslation.x + translationChange.x, currentTranslation.y + translationChange.y, currentTranslation.z + translationChange.z);
+        }
+        multiplyMatrixes(mtx, vector) {
+            let x = ƒ.Vector3.DOT(mtx.getX(), vector);
+            let y = ƒ.Vector3.DOT(mtx.getY(), vector);
+            let z = ƒ.Vector3.DOT(mtx.getZ(), vector);
+            return new ƒ.Vector3(x, y, z);
         }
     }
     Fudge.ControllerModeller = ControllerModeller;
@@ -1349,6 +1432,7 @@ var Fudge;
             cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
             cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
             cmpCamera.projectCentral(1, 45);
+            //cmpCamera.pivot.rotateX(90);
             this.canvas = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
             let container = document.createElement("div");
             container.style.borderWidth = "0px";
@@ -1357,8 +1441,8 @@ var Fudge;
             this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
             this.viewport.draw();
             this.dom.append(this.canvas);
-            // ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
-            // ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
+            ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
+            ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, this.animate);
         }
         cleanup() {
             ƒ.Loop.removeEventListener("loopFrame" /* LOOP_FRAME */, this.animate);
