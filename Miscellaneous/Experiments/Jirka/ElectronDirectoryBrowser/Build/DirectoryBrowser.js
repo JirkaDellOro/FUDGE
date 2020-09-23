@@ -9,6 +9,7 @@ var DirectoryBrowser;
         ƒ.Debug.log("openPanelGraph");
         console.log("Remote", remote);
         let paths = remote.dialog.showOpenDialogSync(null, { title: "Load Project", buttonLabel: "Load Project", properties: ["openDirectory"] });
+        console.log(paths[0]);
         let root = DirectoryBrowser.DirectoryEntry.createRoot(paths[0]);
         // root.dirent["type"] = 2;
         // console.log(root, root.isFile, root.dirent[Symbol("type")]);

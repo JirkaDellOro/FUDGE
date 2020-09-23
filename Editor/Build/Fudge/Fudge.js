@@ -24,6 +24,7 @@ var Fudge;
         EVENT_EDITOR["ACTIVATE_VIEWPORT"] = "activateViewport";
         EVENT_EDITOR["SET_GRAPH"] = "setGraph";
         EVENT_EDITOR["FOCUS_NODE"] = "focusNode";
+        EVENT_EDITOR["SET_PROJECT"] = "setProject";
     })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
     let PANEL;
     (function (PANEL) {
@@ -45,6 +46,54 @@ var Fudge;
         // SKETCH = ViewSketch,
         // MESH = ViewMesh,
     })(VIEW = Fudge.VIEW || (Fudge.VIEW = {}));
+})(Fudge || (Fudge = {}));
+// /<reference types="../../../node_modules/@types/node/fs"/>
+var Fudge;
+// /<reference types="../../../node_modules/@types/node/fs"/>
+(function (Fudge) {
+    const fs = require("fs");
+    const { Dirent, PathLike, renameSync, removeSync, readdirSync, copyFileSync, copySync } = require("fs");
+    const { basename, dirname, join } = require("path");
+    class DirectoryEntry {
+        constructor(_path, _dirent) {
+            this.path = _path;
+            this.dirent = _dirent;
+        }
+        static createRoot(_path) {
+            let dirent = new Dirent();
+            dirent.name = basename(_path);
+            dirent.isRoot = true;
+            return new DirectoryEntry(_path, dirent);
+        }
+        get name() {
+            return this.dirent.name;
+        }
+        set name(_name) {
+            let newPath = join(dirname(this.path), _name);
+            renameSync(this.path, newPath);
+            this.path = newPath;
+            this.dirent.name = _name;
+        }
+        get isDirectory() {
+            return this.dirent.isDirectory() || this.dirent.isRoot;
+        }
+        delete() {
+            removeSync(this.path);
+        }
+        getContent() {
+            let dirents = readdirSync(this.path, { withFileTypes: true });
+            let content = [];
+            for (let dirent of dirents) {
+                let entry = new DirectoryEntry(join(this.path, dirent.name), dirent);
+                content.push(entry);
+            }
+            return content;
+        }
+        addEntry(_entry) {
+            copySync(_entry.path, join(this.path, _entry.name));
+        }
+    }
+    Fudge.DirectoryEntry = DirectoryEntry;
 })(Fudge || (Fudge = {}));
 // /<reference path="./Panel/Panel.ts"/>
 var Fudge;
@@ -144,10 +193,10 @@ var Fudge;
         ƒ.Debug.info(reconstruction);
         ƒ.Debug.groupEnd();
         // TODO: this is a hack to get first NodeResource to display -> move all to project view
-        for (let id in reconstruction) {
-            if (id.startsWith("Node"))
-                return reconstruction[id];
-        }
+        // for (let id in reconstruction) {
+        //   if (id.startsWith("Node"))
+        //     return <ƒ.NodeResource>reconstruction[id];
+        // }
         return null;
     }
     Fudge.open = open;
@@ -187,6 +236,7 @@ var Fudge;
         Fudge.ipcRenderer.on(Fudge.MENU.PROJECT_OPEN, async (_event, _args) => {
             node = await Fudge.open();
             Fudge.Editor.broadcastEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { detail: node }));
+            Fudge.Editor.broadcastEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_PROJECT));
         });
         Fudge.ipcRenderer.on(Fudge.MENU.PANEL_GRAPH_OPEN, (_event, _args) => {
             node = new ƒAid.NodeCoordinateSystem("WorldCooSys");
@@ -433,54 +483,6 @@ var Fudge;
     }
     Fudge.ControllerTreeNode = ControllerTreeNode;
 })(Fudge || (Fudge = {}));
-///<reference types="../../../../node_modules/@types/node/fs"/>
-var Fudge;
-///<reference types="../../../../node_modules/@types/node/fs"/>
-(function (Fudge) {
-    const fs = require("fs");
-    const { Dirent, PathLike, renameSync, removeSync, readdirSync, copyFileSync, copySync } = require("fs");
-    const { basename, dirname, join } = require("path");
-    class DirectoryEntry {
-        constructor(_path, _dirent) {
-            this.path = _path;
-            this.dirent = _dirent;
-        }
-        static createRoot(_path) {
-            let dirent = new Dirent();
-            dirent.name = basename(_path);
-            dirent.isRoot = true;
-            return new DirectoryEntry(_path, dirent);
-        }
-        get name() {
-            return this.dirent.name;
-        }
-        set name(_name) {
-            let newPath = join(dirname(this.path), _name);
-            renameSync(this.path, newPath);
-            this.path = newPath;
-            this.dirent.name = _name;
-        }
-        get isDirectory() {
-            return this.dirent.isDirectory() || this.dirent.isRoot;
-        }
-        delete() {
-            removeSync(this.path);
-        }
-        getContent() {
-            let dirents = readdirSync(this.path, { withFileTypes: true });
-            let content = [];
-            for (let dirent of dirents) {
-                let entry = new DirectoryEntry(join(this.path, dirent.name), dirent);
-                content.push(entry);
-            }
-            return content;
-        }
-        addEntry(_entry) {
-            copySync(_entry.path, join(this.path, _entry.name));
-        }
-    }
-    Fudge.DirectoryEntry = DirectoryEntry;
-})(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
@@ -616,6 +618,11 @@ var Fudge;
     class PanelProject extends Fudge.Panel {
         constructor(_container, _state) {
             super(_container, _state);
+            this.hndEvent = (_event) => {
+                // if (_event.type == EVENT_EDITOR.SET_PROJECT)
+                //   this.setGraph(_event.detail);
+                this.broadcastEvent(_event);
+            };
             this.goldenLayout.registerComponent(Fudge.VIEW.INTERNAL, Fudge.ViewInternal);
             this.goldenLayout.registerComponent(Fudge.VIEW.EXTERNAL, Fudge.ViewExternal);
             this.goldenLayout.registerComponent(Fudge.VIEW.PROPERTIES, Fudge.ViewProperties);
@@ -633,6 +640,7 @@ var Fudge;
                     { type: "component", componentName: Fudge.VIEW.EXTERNAL, componentState: _state, title: "External" }
                 ]
             });
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
         }
     }
     Fudge.PanelProject = PanelProject;
@@ -1453,6 +1461,8 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    var ƒ = FudgeCore;
+    var ƒui = FudgeUserInterface;
     /**
      * List the external resources
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
@@ -1460,6 +1470,19 @@ var Fudge;
     class ViewExternal extends Fudge.View {
         constructor(_container, _state) {
             super(_container, _state);
+            this.hndEvent = (_event) => {
+                this.setProject();
+            };
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
+        }
+        setProject() {
+            let path = new URL(".", ƒ.Project.baseURL).pathname;
+            path = path.substr(1); // strip leading slash
+            let root = Fudge.DirectoryEntry.createRoot(path);
+            this.dom.innerHTML = "";
+            let tree = new ƒui.Tree(new Fudge.ControllerTreeDirectory(), root);
+            this.dom.appendChild(tree);
+            tree.getItems()[0].open(true);
         }
     }
     Fudge.ViewExternal = ViewExternal;

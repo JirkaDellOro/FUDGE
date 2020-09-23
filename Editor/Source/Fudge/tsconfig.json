@@ -22,6 +22,7 @@
     "electron",
     "golden-layout",
     "JQuery",
-    "node" 
+    "node",
+    "node/fs"
   ],
 }

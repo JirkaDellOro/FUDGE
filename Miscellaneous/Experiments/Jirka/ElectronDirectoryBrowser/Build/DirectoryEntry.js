@@ -1,4 +1,3 @@
-// /<reference types="../../../../../node_modules/@types/node/fs"/>
 var DirectoryBrowser;
 (function (DirectoryBrowser) {
     const { Dirent, PathLike, renameSync, removeSync, readdirSync, copyFileSync, copySync } = require("fs-extra");

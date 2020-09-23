@@ -24,6 +24,7 @@ var Fudge;
         EVENT_EDITOR["ACTIVATE_VIEWPORT"] = "activateViewport";
         EVENT_EDITOR["SET_GRAPH"] = "setGraph";
         EVENT_EDITOR["FOCUS_NODE"] = "focusNode";
+        EVENT_EDITOR["SET_PROJECT"] = "setProject";
     })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
     let PANEL;
     (function (PANEL) {

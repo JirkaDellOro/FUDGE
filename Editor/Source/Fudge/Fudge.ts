@@ -36,6 +36,7 @@ namespace Fudge {
     ipcRenderer.on(MENU.PROJECT_OPEN, async (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
       node = await open();
       Editor.broadcastEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, { detail: node }));
+      Editor.broadcastEvent(new CustomEvent(EVENT_EDITOR.SET_PROJECT));
     });
 
     ipcRenderer.on(MENU.PANEL_GRAPH_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {

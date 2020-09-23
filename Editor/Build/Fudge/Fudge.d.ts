@@ -24,7 +24,8 @@ declare namespace Fudge {
         HIDE = "hideNode",
         ACTIVATE_VIEWPORT = "activateViewport",
         SET_GRAPH = "setGraph",
-        FOCUS_NODE = "focusNode"
+        FOCUS_NODE = "focusNode",
+        SET_PROJECT = "setProject"
     }
     enum PANEL {
         GRAPH = "PanelGraph",
@@ -41,6 +42,22 @@ declare namespace Fudge {
         PROPERTIES = "ViewProperties",
         PREVIEW = "ViewPreview"
     }
+}
+declare namespace Fudge {
+    const fs: ƒ.General;
+    export class DirectoryEntry {
+        path: typeof fs.PathLike;
+        dirent: typeof fs.Dirent;
+        constructor(_path: typeof fs.PathLike, _dirent: typeof fs.Dirent);
+        static createRoot(_path: typeof fs.PathLike): DirectoryEntry;
+        get name(): string;
+        set name(_name: string);
+        get isDirectory(): boolean;
+        delete(): void;
+        getContent(): DirectoryEntry[];
+        addEntry(_entry: DirectoryEntry): void;
+    }
+    export {};
 }
 declare namespace Fudge {
     /**
@@ -123,22 +140,6 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    const fs: ƒ.General;
-    export class DirectoryEntry {
-        path: typeof fs.PathLike;
-        dirent: typeof fs.Dirent;
-        constructor(_path: typeof fs.PathLike, _dirent: typeof fs.Dirent);
-        static createRoot(_path: typeof fs.PathLike): DirectoryEntry;
-        get name(): string;
-        set name(_name: string);
-        get isDirectory(): boolean;
-        delete(): void;
-        getContent(): DirectoryEntry[];
-        addEntry(_entry: DirectoryEntry): void;
-    }
-    export {};
-}
-declare namespace Fudge {
     /**
      * Base class for all [[View]]s to support generic functionality
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
@@ -191,6 +192,7 @@ declare namespace Fudge {
      */
     class PanelProject extends Panel {
         constructor(_container: GoldenLayout.Container, _state: Object);
+        private hndEvent;
     }
 }
 declare namespace Fudge {
@@ -345,6 +347,8 @@ declare namespace Fudge {
      */
     class ViewExternal extends View {
         constructor(_container: GoldenLayout.Container, _state: Object);
+        setProject(): void;
+        private hndEvent;
     }
 }
 declare namespace Fudge {

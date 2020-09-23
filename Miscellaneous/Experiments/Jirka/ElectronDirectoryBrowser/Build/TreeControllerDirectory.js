@@ -33,7 +33,7 @@ var DirectoryBrowser;
             }
             return _entries;
         }
-        copy(_originals) {
+        async copy(_originals) {
             // copies can not be created at this point, but when copying the files. See addChildren
             return _originals;
         }

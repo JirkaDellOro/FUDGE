@@ -18,7 +18,7 @@ namespace Fudge {
       let inner: GoldenLayout.ContentItem = this.goldenLayout.root.contentItems[0];
       inner.addChild({
         type: "column", content: [
-          { type: "component", componentName: VIEW.PREVIEW, componentState: _state, title: "Preview"},
+          { type: "component", componentName: VIEW.PREVIEW, componentState: _state, title: "Preview" },
           { type: "component", componentName: VIEW.PROPERTIES, componentState: _state, title: "Properties" }
         ]
       });
@@ -28,6 +28,14 @@ namespace Fudge {
           { type: "component", componentName: VIEW.EXTERNAL, componentState: _state, title: "External" }
         ]
       });
+
+      this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
+    }
+
+    private hndEvent = (_event: CustomEvent): void => {
+      // if (_event.type == EVENT_EDITOR.SET_PROJECT)
+      //   this.setGraph(_event.detail);
+      this.broadcastEvent(_event);
     }
   }
 }

@@ -16,12 +16,14 @@ namespace Fudge {
     PANEL_PROJECT_OPEN = "panelProjectOpen"
   }
 
+
   export enum EVENT_EDITOR {
     REMOVE = "removeNode",
     HIDE = "hideNode",
     ACTIVATE_VIEWPORT = "activateViewport",
     SET_GRAPH = "setGraph",
-    FOCUS_NODE = "focusNode"
+    FOCUS_NODE = "focusNode",
+    SET_PROJECT = "setProject"
   }
 
   export enum PANEL {

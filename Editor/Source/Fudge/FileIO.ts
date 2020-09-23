@@ -49,10 +49,10 @@ namespace Fudge {
     ƒ.Debug.groupEnd();
 
     // TODO: this is a hack to get first NodeResource to display -> move all to project view
-    for (let id in reconstruction) {
-      if (id.startsWith("Node"))
-        return <ƒ.NodeResource>reconstruction[id];
-    }
+    // for (let id in reconstruction) {
+    //   if (id.startsWith("Node"))
+    //     return <ƒ.NodeResource>reconstruction[id];
+    // }
 
     return null;
   }

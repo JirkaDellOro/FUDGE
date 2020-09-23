@@ -1,4 +1,4 @@
-///<reference types="../../../../node_modules/@types/node/fs"/>
+// /<reference types="../../../node_modules/@types/node/fs"/>
 
 namespace Fudge {
   const fs: ƒ.General = require("fs");
