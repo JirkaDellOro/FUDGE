@@ -331,6 +331,81 @@ declare namespace FudgeUserInterface {
 declare namespace FudgeUserInterface {
 }
 declare namespace FudgeUserInterface {
+    enum EVENT_TABLE {
+        SORT = "sort",
+        CHANGE = "change"
+    }
+    interface TABLE {
+        label: string;
+        key: string | symbol | number;
+        editable: boolean;
+        sortable: boolean;
+    }
+    /**
+     * Manages a sortable table of data given as simple array of flat objects
+     * ```plaintext
+     * Key0  Key1 Key2
+     * ```
+     */
+    class Table<T extends Object> extends HTMLTableElement {
+        controller: TableController<T>;
+        data: T[];
+        constructor(_controller: TableController<T>, _data: T[]);
+        /**
+         * Create the table
+         */
+        create(): void;
+        /**
+         * Clear the current selection
+         */
+        clearSelection(): void;
+        /**
+         * Return the object in focus
+         */
+        getFocussed(): T;
+        private getSortButtons;
+        private hndSort;
+    }
+}
+declare namespace FudgeUserInterface {
+    /**
+     * Subclass this to create a broker between your data and a [[Tree]] to display and manipulate it.
+     * The [[Tree]] doesn't know how your data is structured and how to handle it, the controller implements the methods needed
+     */
+    abstract class TableController<T> {
+        /** Stores references to selected objects. Override with a reference in outer scope, if selection should also operate outside of tree */
+        selection: T[];
+        /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
+        dragDrop: {
+            sources: T[];
+            target: T;
+        };
+        /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
+        copyPaste: {
+            sources: T[];
+            target: T;
+        };
+        /** Retrieve a string to create a label for the tree item representing the object  */
+        abstract getLabel(_object: T): string;
+        /** Return false to disallow renaming the item/object, or processes the proposed new label */
+        abstract rename(_object: T, _new: string): boolean;
+        abstract delete(_focussed: T[]): T[];
+        /**
+         * Return a list of copies of the objects given for copy & paste
+         * @param _focussed The object currently having focus
+         */
+        abstract copy(_originals: T[]): Promise<T[]>;
+        /**
+         * Return a list of TABLE-objects describing the head-titles and according properties
+         */
+        abstract getHead(): TABLE[];
+        /**
+         * Sort data by given key and direction
+         */
+        abstract sort(_data: T[], _key: string, _direction: boolean): void;
+    }
+}
+declare namespace FudgeUserInterface {
     /**
     * Extension of ul-element that keeps a list of [[TreeItem]]s to represent a branch in a tree
     */

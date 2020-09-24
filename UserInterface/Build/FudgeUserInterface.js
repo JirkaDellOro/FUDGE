@@ -1412,6 +1412,129 @@ var FudgeUserInterface;
     }
     FudgeUserInterface.MultiLevelMenuManager = MultiLevelMenuManager;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
+    // export enum TREE_CLASS {
+    //   SELECTED = "selected",
+    //   INACTIVE = "inactive"
+    // }
+    let EVENT_TABLE;
+    (function (EVENT_TABLE) {
+        EVENT_TABLE["SORT"] = "sort";
+        EVENT_TABLE["CHANGE"] = "change";
+    })(EVENT_TABLE = FudgeUserInterface.EVENT_TABLE || (FudgeUserInterface.EVENT_TABLE = {}));
+    /**
+     * Manages a sortable table of data given as simple array of flat objects
+     * ```plaintext
+     * Key0  Key1 Key2
+     * ```
+     */
+    class Table extends HTMLTableElement {
+        constructor(_controller, _data) {
+            super();
+            this.controller = _controller;
+            this.data = _data;
+            this.create();
+            // this.addEventListener(EVENT_TABLE.CHANGE, this.hndSort);
+            // this.addEventListener(EVENT_TABLE.SORT, this.hndSort);
+            // this.addEventListener(EVENT_TREE.RENAME, this.hndRename);
+            // this.addEventListener(EVENT_TREE.SELECT, this.hndSelect);
+            // this.addEventListener(EVENT_TREE.DROP, this.hndDrop);
+            // this.addEventListener(EVENT_TREE.DELETE, this.hndDelete);
+            // this.addEventListener(EVENT_TREE.ESCAPE, this.hndEscape);
+            // this.addEventListener(EVENT_TREE.COPY, this.hndCopyPaste);
+            // this.addEventListener(EVENT_TREE.PASTE, this.hndCopyPaste);
+            // this.addEventListener(EVENT_TREE.CUT, this.hndCopyPaste);
+            // @ts-ignore
+            // this.addEventListener(EVENT_TREE.FOCUS_NEXT, this.hndFocus);
+            // @ts-ignore
+            // this.addEventListener(EVENT_TREE.FOCUS_PREVIOUS, this.hndFocus);
+        }
+        /**
+         * Create the table
+         */
+        create() {
+            this.innerHTML = "";
+            // create head
+            let head = this.controller.getHead();
+            let tr = document.createElement("tr");
+            for (let entry of head) {
+                let th = document.createElement("th");
+                th.textContent = entry.label;
+                th.setAttribute("key", entry.key.toString());
+                if (entry.sortable) {
+                    th.appendChild(this.getSortButtons());
+                    th.addEventListener(EVENT_TABLE.CHANGE, this.hndSort);
+                }
+                tr.appendChild(th);
+            }
+            this.appendChild(tr);
+            for (let row of this.data) {
+                tr = document.createElement("tr");
+                for (let entry of head) {
+                    let value = Reflect.get(row, entry.key);
+                    let td = document.createElement("td");
+                    td.innerHTML = value.toString();
+                    tr.appendChild(td);
+                }
+                this.appendChild(tr);
+            }
+        }
+        /**
+         * Clear the current selection
+         */
+        clearSelection() {
+            this.controller.selection.splice(0);
+            // this.displaySelection(<T[]>this.controller.selection);
+        }
+        /**
+         * Return the object in focus
+         */
+        getFocussed() {
+            // let items: TreeItem<T>[] = <TreeItem<T>[]>Array.from(this.querySelectorAll("li"));
+            // let found: number = items.indexOf(<TreeItem<T>>document.activeElement);
+            // if (found > -1)
+            //   return items[found].data;
+            return null;
+        }
+        getSortButtons() {
+            let result = document.createElement("span");
+            for (let direction of ["up", "down"]) {
+                let button = document.createElement("input");
+                button.type = "radio";
+                button.name = "sort";
+                button.value = direction;
+                result.appendChild(button);
+            }
+            return result;
+        }
+        hndSort(_event) {
+            let direction = _event.target.value;
+            let key = _event.currentTarget.getAttribute("key");
+            this.controller.sort(this.data, key, direction == "up");
+        }
+    }
+    FudgeUserInterface.Table = Table;
+    customElements.define("table-fudge", Table, { extends: "table" });
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
+    /**
+     * Subclass this to create a broker between your data and a [[Tree]] to display and manipulate it.
+     * The [[Tree]] doesn't know how your data is structured and how to handle it, the controller implements the methods needed
+     */
+    class TableController {
+        constructor() {
+            /** Stores references to selected objects. Override with a reference in outer scope, if selection should also operate outside of tree */
+            this.selection = [];
+            /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
+            this.dragDrop = { sources: [], target: null };
+            /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
+            this.copyPaste = { sources: [], target: null };
+        }
+    }
+    FudgeUserInterface.TableController = TableController;
+})(FudgeUserInterface || (FudgeUserInterface = {}));
 ///<reference path="../../../../Core/Build/FudgeCore.d.ts"/>
 var FudgeUserInterface;
 ///<reference path="../../../../Core/Build/FudgeCore.d.ts"/>
