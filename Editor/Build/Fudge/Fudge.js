@@ -564,7 +564,6 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    var ƒui = FudgeUserInterface;
     /**
     * Shows a graph and offers means for manipulation
     * @authors Monika Galkewitsch, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
@@ -597,8 +596,8 @@ var Fudge;
                 ]
             });
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndSetGraph);
-            this.dom.addEventListener(ƒui.EVENT_TREE.SELECT, this.hndFocusNode);
-            this.dom.addEventListener(ƒui.EVENT_TREE.RENAME, this.broadcastEvent);
+            this.dom.addEventListener("itemselect" /* SELECT */, this.hndFocusNode);
+            this.dom.addEventListener("rename" /* RENAME */, this.broadcastEvent);
         }
         setGraph(_node) {
             this.node = _node;
@@ -757,15 +756,15 @@ var Fudge;
             // TODO: events should bubble to panel
             if (obj["label"]) {
                 console.log(obj["label"]);
-                this.dom.dispatchEvent(new CustomEvent("select" /* SELECT */, { detail: { name: obj["label"], time: this.animation.labels[obj["label"]] } }));
+                this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { detail: { name: obj["label"], time: this.animation.labels[obj["label"]] } }));
             }
             else if (obj["event"]) {
                 console.log(obj["event"]);
-                this.dom.dispatchEvent(new CustomEvent("select" /* SELECT */, { detail: { name: obj["event"], time: this.animation.events[obj["event"]] } }));
+                this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { detail: { name: obj["event"], time: this.animation.events[obj["event"]] } }));
             }
             else if (obj["key"]) {
                 console.log(obj["key"]);
-                this.dom.dispatchEvent(new CustomEvent("select" /* SELECT */, { detail: obj["key"] }));
+                this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { detail: obj["key"] }));
             }
             console.log(obj);
         }
@@ -1270,7 +1269,7 @@ var Fudge;
         constructor(_container, _state) {
             super(_container, _state);
             this.hndEvent = (_event) => {
-                if (_event.type != ƒui.EVENT_TREE.RENAME)
+                if (_event.type != "rename" /* RENAME */)
                     this.node = _event.detail;
                 while (this.dom.firstChild != null) {
                     this.dom.removeChild(this.dom.lastChild);
@@ -1280,7 +1279,7 @@ var Fudge;
             this.fillContent();
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
-            this.dom.addEventListener(ƒui.EVENT_TREE.RENAME, this.hndEvent);
+            this.dom.addEventListener("rename" /* RENAME */, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
         }
         //#region  ContextMenu
@@ -1304,7 +1303,7 @@ var Fudge;
                     let cmpNew = new component();
                     ƒ.Debug.info(cmpNew.type, cmpNew);
                     this.node.addComponent(cmpNew);
-                    this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT_TREE.SELECT, { bubbles: true, detail: { data: this.node } }));
+                    this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { bubbles: true, detail: { data: this.node } }));
                     break;
             }
         }
@@ -1347,7 +1346,7 @@ var Fudge;
             };
             // this.contextMenu = this.getContextMenu(this.contextMenuCallback);
             this.setGraph(_state.node);
-            // this.parentPanel.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setSelectedNode);
+            // this.parentPanel.addEventListener(ƒui.EVENT.SELECT, this.setSelectedNode);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
         }
         setGraph(_graph) {
@@ -1358,9 +1357,9 @@ var Fudge;
             this.graph = _graph;
             // this.selectedNode = null;
             this.tree = new ƒui.Tree(new Fudge.ControllerTreeNode(), this.graph);
-            // this.listController.listRoot.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.passEventToPanel);
+            // this.listController.listRoot.addEventListener(ƒui.EVENT.SELECT, this.passEventToPanel);
             //TODO: examine if tree should fire common UI-EVENT for selection instead
-            // this.tree.addEventListener(ƒui.EVENT_TREE.SELECT, this.passEventToPanel);
+            // this.tree.addEventListener(ƒui.EVENT.SELECT, this.passEventToPanel);
             this.tree.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.append(this.tree);
         }
@@ -1395,7 +1394,7 @@ var Fudge;
                     let cmpNew = new component();
                     ƒ.Debug.info(cmpNew.type, cmpNew);
                     focus.addComponent(cmpNew);
-                    this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT_TREE.SELECT, { bubbles: true, detail: { data: focus } }));
+                    this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { bubbles: true, detail: { data: focus } }));
                     break;
             }
         }
@@ -1428,7 +1427,7 @@ var Fudge;
             };
             this.graph = _state["node"];
             this.createUserInterface();
-            this.dom.addEventListener("select" /* SELECT */, this.hndEvent);
+            this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
         }
         createUserInterface() {

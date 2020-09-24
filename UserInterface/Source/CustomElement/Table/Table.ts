@@ -1,36 +1,4 @@
 namespace FudgeUserInterface {
-  // export enum TREE_CLASS {
-  //   SELECTED = "selected",
-  //   INACTIVE = "inactive"
-  // }
-
-  export enum EVENT_TABLE {
-    SORT = "sort",
-    CHANGE = "change"
-  }
-  //   RENAME = "rename",
-  //   OPEN = "open",
-  //   FOCUS_NEXT = "focusNext",
-  //   FOCUS_PREVIOUS = "focusPrevious",
-  //   FOCUS_IN = "focusin",
-  //   FOCUS_OUT = "focusout",
-  //   DELETE = "delete",
-  //   CHANGE = "change",
-  //   DOUBLE_CLICK = "dblclick",
-  //   KEY_DOWN = "keydown",
-  //   DRAG_START = "dragstart",
-  //   DRAG_OVER = "dragover",
-  //   DROP = "drop",
-  //   POINTER_UP = "pointerup",
-  //   SELECT = "itemselect",
-  //   UPDATE = "update",
-  //   ESCAPE = "escape",
-  //   COPY = "copy",
-  //   CUT = "cut",
-  //   PASTE = "paste",
-  //   FOCUS_SET = "focusSet"
-  // }
-
   export interface TABLE {
     label: string;
     key: string | symbol | number;
@@ -54,7 +22,7 @@ namespace FudgeUserInterface {
       this.data = _data;
       this.create();
 
-      this.addEventListener(EVENT_TABLE.SORT, <EventListener>this.hndSort);
+      this.addEventListener(EVENT.SORT, <EventListener>this.hndSort);
       // this.addEventListener(EVENT_TABLE.CHANGE, this.hndSort);
       // this.addEventListener(EVENT_TREE.RENAME, this.hndRename);
       // this.addEventListener(EVENT_TREE.SELECT, this.hndSelect);
@@ -75,35 +43,13 @@ namespace FudgeUserInterface {
      */
     public create(): void {
       this.innerHTML = "";
-
-      // create head
       let head: TABLE[] = this.controller.getHead();
-      let tr: HTMLTableRowElement = document.createElement("tr");
-      for (let entry of head) {
-        let th: HTMLTableHeaderCellElement = document.createElement("th");
-        th.textContent = entry.label;
-        th.setAttribute("key", entry.key.toString());
 
-        if (entry.sortable) {
-          th.appendChild(this.getSortButtons());
-          th.addEventListener(
-            EVENT_TABLE.CHANGE,
-            (_event: Event) => th.dispatchEvent(new CustomEvent(EVENT_TABLE.SORT, { detail: _event.target, bubbles: true }))
-          );
-        }
-
-        tr.appendChild(th);
-      }
+      let tr: HTMLTableRowElement = this.createHead(head);
       this.appendChild(tr);
 
       for (let row of this.data) {
-        tr = document.createElement("tr");
-        for (let entry of head) {
-          let value: Object = Reflect.get(row, entry.key);
-          let td: HTMLTableCellElement = document.createElement("td");
-          td.innerHTML = value.toString();
-          tr.appendChild(td);
-        }
+        tr = this.createRow(row, head);
         this.appendChild(tr);
       }
     }
@@ -128,6 +74,25 @@ namespace FudgeUserInterface {
       return null;
     }
 
+    private createHead(_headInfo: TABLE[]): HTMLTableRowElement {
+      let tr: HTMLTableRowElement = document.createElement("tr");
+      for (let entry of _headInfo) {
+        let th: HTMLTableHeaderCellElement = document.createElement("th");
+        th.textContent = entry.label;
+        th.setAttribute("key", entry.key.toString());
+
+        if (entry.sortable) {
+          th.appendChild(this.getSortButtons());
+          th.addEventListener(
+          EVENT.CHANGE,
+          (_event: Event) => th.dispatchEvent(new CustomEvent(EVENT.SORT, { detail: _event.target, bubbles: true }))
+          );
+        }
+        tr.appendChild(th);
+      }
+      return tr;
+    }
+
     private getSortButtons(): HTMLElement {
       let result: HTMLElement = document.createElement("span");
       for (let direction of ["up", "down"]) {
@@ -140,12 +105,32 @@ namespace FudgeUserInterface {
       return result;
     }
 
+    private createRow(_data: T, _filter: TABLE[]): HTMLTableRowElement {
+      let tr: HTMLTableRowElement = document.createElement("tr");
+      for (let entry of _filter) {
+        let value: Object = Reflect.get(_data, entry.key);
+        let td: HTMLTableCellElement = document.createElement("td");
+        td.innerHTML = value.toString();
+        tr.appendChild(td);
+      }
+
+      tr.addEventListener(EVENT.CLICK, this.hndEvent);
+      tr.addEventListener(EVENT.DOUBLE_CLICK, this.hndEvent);
+      tr.addEventListener(EVENT.KEY_DOWN, this.hndEvent);
+
+      return tr;
+    }
+
     private hndSort(_event: CustomEvent): void {
       let value: string = (<HTMLInputElement>_event.detail).value;
       let key: string = (<HTMLElement>_event.target).getAttribute("key");
       let direction: number = (value == "up") ? 1 : -1;
       this.controller.sort(this.data, key, direction);
       this.create();
+    }
+
+    private hndEvent(_event: Event): void {
+      console.log(_event.currentTarget);
     }
 
     // private hndRename(_event: Event): void {

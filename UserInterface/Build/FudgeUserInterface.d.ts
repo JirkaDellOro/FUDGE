@@ -306,18 +306,6 @@ declare namespace FudgeUserInterface {
     }
 }
 declare namespace FudgeUserInterface {
-    import ƒ = FudgeCore;
-    class DropMenu extends HTMLDivElement {
-        name: string;
-        private content;
-        private signature;
-        constructor(_name: string, _contentList: ƒ.Mutator, params: {
-            _parentSignature?: string;
-            _text?: string;
-        });
-        private toggleFoldContent;
-        private collapseMenu;
-    }
 }
 declare namespace FudgeUserInterface {
     /**
@@ -331,10 +319,6 @@ declare namespace FudgeUserInterface {
 declare namespace FudgeUserInterface {
 }
 declare namespace FudgeUserInterface {
-    enum EVENT_TABLE {
-        SORT = "sort",
-        CHANGE = "change"
-    }
     interface TABLE {
         label: string;
         key: string | symbol | number;
@@ -363,8 +347,11 @@ declare namespace FudgeUserInterface {
          * Return the object in focus
          */
         getFocussed(): T;
+        private createHead;
         private getSortButtons;
+        private createRow;
         private hndSort;
+        private hndEvent;
     }
 }
 declare namespace FudgeUserInterface {
@@ -442,32 +429,9 @@ declare namespace FudgeUserInterface {
     }
 }
 declare namespace FudgeUserInterface {
-    enum TREE_CLASS {
+    enum CSS_CLASS {
         SELECTED = "selected",
         INACTIVE = "inactive"
-    }
-    enum EVENT_TREE {
-        RENAME = "rename",
-        OPEN = "open",
-        FOCUS_NEXT = "focusNext",
-        FOCUS_PREVIOUS = "focusPrevious",
-        FOCUS_IN = "focusin",
-        FOCUS_OUT = "focusout",
-        DELETE = "delete",
-        CHANGE = "change",
-        DOUBLE_CLICK = "dblclick",
-        KEY_DOWN = "keydown",
-        DRAG_START = "dragstart",
-        DRAG_OVER = "dragover",
-        DROP = "drop",
-        POINTER_UP = "pointerup",
-        SELECT = "itemselect",
-        UPDATE = "update",
-        ESCAPE = "escape",
-        COPY = "copy",
-        CUT = "cut",
-        PASTE = "paste",
-        FOCUS_SET = "focusSet"
     }
     /**
      * Extension of [[TreeList]] that represents the root of a tree control
@@ -557,7 +521,7 @@ declare namespace FudgeUserInterface {
      */
     class TreeItem<T> extends HTMLLIElement {
         display: string;
-        classes: TREE_CLASS[];
+        classes: CSS_CLASS[];
         data: T;
         controller: TreeController<T>;
         private checkbox;
@@ -571,6 +535,14 @@ declare namespace FudgeUserInterface {
          * Shows or hides the checkbox for opening the subsequent branch
          */
         set hasChildren(_has: boolean);
+        /**
+         * Returns attaches or detaches the [[TREE_CLASS.SELECTED]] to this item
+         */
+        set selected(_on: boolean);
+        /**
+         * Returns true if the [[TREE_CLASSES.SELECTED]] is attached to this item
+         */
+        get selected(): boolean;
         /**
          * Set the label text to show
          */
@@ -599,14 +571,6 @@ declare namespace FudgeUserInterface {
          */
         getBranch(): TreeList<T>;
         /**
-         * Returns attaches or detaches the [[TREE_CLASS.SELECTED]] to this item
-         */
-        set selected(_on: boolean);
-        /**
-         * Returns true if the [[TREE_CLASSES.SELECTED]] is attached to this item
-         */
-        get selected(): boolean;
-        /**
          * Dispatches the [[EVENT_TREE.SELECT]] event
          * @param _additive For multiple selection (+Ctrl)
          * @param _interval For selection over interval (+Shift)
@@ -629,12 +593,31 @@ declare namespace FudgeUserInterface {
     }
 }
 declare namespace FudgeUserInterface {
-    const enum EVENT_USERINTERFACE {
-        SELECT = "select",
-        COLLAPSE = "collapse",
+    const enum EVENT {
+        CLICK = "click",
+        DOUBLE_CLICK = "dblclick",
+        KEY_DOWN = "keydown",
+        DRAG_START = "dragstart",
+        DRAG_OVER = "dragover",
+        DROP = "drop",
+        POINTER_UP = "pointerup",
+        FOCUS_NEXT = "focusNext",
+        FOCUS_PREVIOUS = "focusPrevious",
+        FOCUS_IN = "focusin",
+        FOCUS_OUT = "focusout",
+        FOCUS_SET = "focusSet",
+        CHANGE = "change",
+        DELETE = "delete",
+        RENAME = "rename",
+        OPEN = "open",
+        SELECT = "itemselect",
         UPDATE = "update",
-        DROPMENUCLICK = "dropMenuClick",
-        DROPMENUCOLLAPSE = "dropMenuCollapse",
+        ESCAPE = "escape",
+        COPY = "copy",
+        CUT = "cut",
+        PASTE = "paste",
+        SORT = "sort",
+        COLLAPSE = "collapse",
         CONTEXTMENU = "contextmenu"
     }
 }

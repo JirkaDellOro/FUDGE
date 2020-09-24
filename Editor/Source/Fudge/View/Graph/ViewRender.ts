@@ -16,7 +16,7 @@ namespace Fudge {
       super(_container, _state);
       this.graph = <ƒ.Node><unknown>_state["node"];
       this.createUserInterface();
-      this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.hndEvent);
+      this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
     }
 

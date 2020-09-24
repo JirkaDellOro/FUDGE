@@ -30,8 +30,8 @@ namespace Fudge {
       });
 
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndSetGraph);
-      this.dom.addEventListener(ƒui.EVENT_TREE.SELECT, this.hndFocusNode);
-      this.dom.addEventListener(ƒui.EVENT_TREE.RENAME, this.broadcastEvent);
+      this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndFocusNode);
+      this.dom.addEventListener(ƒui.EVENT.RENAME, this.broadcastEvent);
     }
 
     public setGraph(_node: ƒ.Node): void {

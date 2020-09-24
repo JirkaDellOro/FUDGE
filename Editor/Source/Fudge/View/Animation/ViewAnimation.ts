@@ -101,7 +101,7 @@ namespace Fudge {
       this.attributeList = document.createElement("div");
       this.attributeList.id = "attributeList";
       this.attributeList.style.width = "300px";
-      this.attributeList.addEventListener(FudgeUserInterface.EVENT_USERINTERFACE.UPDATE, this.changeAttribute.bind(this));
+      this.attributeList.addEventListener(FudgeUserInterface.EVENT.UPDATE, this.changeAttribute.bind(this));
       //TODO: Add Moni's custom Element here
       this.controller = new AnimationList(this.animation.getMutated(this.playbackTime, 0, FudgeCore.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS), this.attributeList);
 
@@ -156,15 +156,15 @@ namespace Fudge {
       // TODO: events should bubble to panel
       if (obj["label"]) {
         console.log(obj["label"]);
-        this.dom.dispatchEvent(new CustomEvent(FudgeUserInterface.EVENT_USERINTERFACE.SELECT, { detail: { name: obj["label"], time: this.animation.labels[obj["label"]] } }));
+        this.dom.dispatchEvent(new CustomEvent(FudgeUserInterface.EVENT.SELECT, { detail: { name: obj["label"], time: this.animation.labels[obj["label"]] } }));
       }
       else if (obj["event"]) {
         console.log(obj["event"]);
-        this.dom.dispatchEvent(new CustomEvent(FudgeUserInterface.EVENT_USERINTERFACE.SELECT, { detail: { name: obj["event"], time: this.animation.events[obj["event"]] } }));
+        this.dom.dispatchEvent(new CustomEvent(FudgeUserInterface.EVENT.SELECT, { detail: { name: obj["event"], time: this.animation.events[obj["event"]] } }));
       }
       else if (obj["key"]) {
         console.log(obj["key"]);
-        this.dom.dispatchEvent(new CustomEvent(FudgeUserInterface.EVENT_USERINTERFACE.SELECT, { detail: obj["key"] }));
+        this.dom.dispatchEvent(new CustomEvent(FudgeUserInterface.EVENT.SELECT, { detail: obj["key"] }));
       }
       console.log(obj);
     }

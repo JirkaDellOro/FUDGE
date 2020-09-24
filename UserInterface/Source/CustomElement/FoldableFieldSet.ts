@@ -24,10 +24,10 @@ namespace FudgeUserInterface {
       this.appendChild(this.content);
 
       this.tabIndex = 0;
-      this.addEventListener(EVENT_TREE.KEY_DOWN, this.hndKey);
-      this.addEventListener(EVENT_TREE.FOCUS_NEXT, this.hndFocus);
-      this.addEventListener(EVENT_TREE.FOCUS_PREVIOUS, this.hndFocus);
-      this.addEventListener(EVENT_TREE.FOCUS_SET, this.hndFocus);
+      this.addEventListener(EVENT.KEY_DOWN, this.hndKey);
+      this.addEventListener(EVENT.FOCUS_NEXT, this.hndFocus);
+      this.addEventListener(EVENT.FOCUS_PREVIOUS, this.hndFocus);
+      this.addEventListener(EVENT.FOCUS_SET, this.hndFocus);
       // this.checkbox.addEventListener(EVENT_TREE.KEY_DOWN, this.hndKey);
     }
 
@@ -40,14 +40,14 @@ namespace FudgeUserInterface {
 
     private hndFocus = (_event: Event): void => {
       switch (_event.type) {
-        case EVENT_TREE.FOCUS_NEXT:
+        case EVENT.FOCUS_NEXT:
           let next: HTMLElement = <HTMLElement>this.nextElementSibling;
           if (next && next.tabIndex > -1) {
             next.focus();
             _event.stopPropagation();
           }
           break;
-        case EVENT_TREE.FOCUS_PREVIOUS:
+        case EVENT.FOCUS_PREVIOUS:
           let previous: HTMLElement = <HTMLElement>this.previousElementSibling;
           if (previous && previous.tabIndex > -1) {
             let fieldsets: NodeListOf<HTMLFieldSetElement> = previous.querySelectorAll("fieldset");
@@ -63,7 +63,7 @@ namespace FudgeUserInterface {
             _event.stopPropagation();
           }
           break;
-        case EVENT_TREE.FOCUS_SET:
+        case EVENT.FOCUS_SET:
           if (_event.target != this) {
             this.focus();
             _event.stopPropagation();
@@ -95,7 +95,7 @@ namespace FudgeUserInterface {
             next.focus();
           // next.dispatchEvent(new KeyboardEvent(EVENT_TREE.FOCUS_NEXT, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
           else
-            this.dispatchEvent(new KeyboardEvent(EVENT_TREE.FOCUS_NEXT, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+            this.dispatchEvent(new KeyboardEvent(EVENT.FOCUS_NEXT, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
           break;
         case ƒ.KEYBOARD_CODE.ARROW_LEFT:
           if (this.isOpen) {
@@ -110,11 +110,11 @@ namespace FudgeUserInterface {
 
           if (previous)
             if ((<FoldableFieldSet>previous).isOpen)
-              this.dispatchEvent(new KeyboardEvent(EVENT_TREE.FOCUS_PREVIOUS, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+              this.dispatchEvent(new KeyboardEvent(EVENT.FOCUS_PREVIOUS, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
             else
               previous.focus();
           else
-            this.parentElement.dispatchEvent(new KeyboardEvent(EVENT_TREE.FOCUS_SET, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+            this.parentElement.dispatchEvent(new KeyboardEvent(EVENT.FOCUS_SET, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
           break;
       }
     }

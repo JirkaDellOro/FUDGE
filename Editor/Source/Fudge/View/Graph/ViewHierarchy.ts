@@ -17,7 +17,7 @@ namespace Fudge {
 
       this.setGraph((<ƒ.General>_state).node);
 
-      // this.parentPanel.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setSelectedNode);
+      // this.parentPanel.addEventListener(ƒui.EVENT.SELECT, this.setSelectedNode);
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
     }
 
@@ -31,10 +31,10 @@ namespace Fudge {
       // this.selectedNode = null;
 
       this.tree = new ƒui.Tree<ƒ.Node>(new ControllerTreeNode(), this.graph);
-      // this.listController.listRoot.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.passEventToPanel);
+      // this.listController.listRoot.addEventListener(ƒui.EVENT.SELECT, this.passEventToPanel);
       //TODO: examine if tree should fire common UI-EVENT for selection instead
-      // this.tree.addEventListener(ƒui.EVENT_TREE.SELECT, this.passEventToPanel);
-      this.tree.addEventListener(ƒui.EVENT_USERINTERFACE.CONTEXTMENU, this.openContextMenu);
+      // this.tree.addEventListener(ƒui.EVENT.SELECT, this.passEventToPanel);
+      this.tree.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.append(this.tree);
     }
 
@@ -76,7 +76,7 @@ namespace Fudge {
           ƒ.Debug.info(cmpNew.type, cmpNew);
 
           focus.addComponent(cmpNew);
-          this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT_TREE.SELECT, { bubbles: true, detail: { data: focus } }));
+          this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.SELECT, { bubbles: true, detail: { data: focus } }));
           break;
       }
     }

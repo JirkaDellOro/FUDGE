@@ -19,8 +19,8 @@ namespace Fudge {
 
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
-      this.dom.addEventListener(ƒui.EVENT_TREE.RENAME, this.hndEvent);
-      this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.CONTEXTMENU, this.openContextMenu);
+      this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
+      this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
     }
 
     //#region  ContextMenu
@@ -49,7 +49,7 @@ namespace Fudge {
           ƒ.Debug.info(cmpNew.type, cmpNew);
 
           this.node.addComponent(cmpNew);
-          this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT_TREE.SELECT, { bubbles: true, detail: { data: this.node } }));
+          this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.SELECT, { bubbles: true, detail: { data: this.node } }));
           break;
       }
     }
@@ -76,7 +76,7 @@ namespace Fudge {
 
 
     private hndEvent = (_event: CustomEvent): void => {
-      if (_event.type != ƒui.EVENT_TREE.RENAME)
+      if (_event.type != ƒui.EVENT.RENAME)
         this.node = _event.detail;
 
       while (this.dom.firstChild != null) {
