@@ -15,8 +15,12 @@ namespace TableControl {
       return head;
     }
 
-    public sort(_data: DATA[], _key: string, _direction: boolean): void {
-      
+    public sort(_data: DATA[], _key: string, _direction: number): void {
+      function compare(_a: DATA, _b: DATA): number {
+        return _direction * (_a[_key] == _b[_key] ? 0 : (_a[_key] > _b[_key] ? 1 : -1));
+      }
+
+      _data.sort(compare);
     }
   }
 }

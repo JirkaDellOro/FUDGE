@@ -402,7 +402,7 @@ declare namespace FudgeUserInterface {
         /**
          * Sort data by given key and direction
          */
-        abstract sort(_data: T[], _key: string, _direction: boolean): void;
+        abstract sort(_data: T[], _key: string, _direction: number): void;
     }
 }
 declare namespace FudgeUserInterface {

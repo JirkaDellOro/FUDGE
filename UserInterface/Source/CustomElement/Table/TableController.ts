@@ -33,6 +33,6 @@ namespace FudgeUserInterface {
     /**
      * Sort data by given key and direction
      */
-    public abstract sort(_data: T[], _key: string, _direction: boolean): void;
+    public abstract sort(_data: T[], _key: string, _direction: number): void;
   }
 }

@@ -1435,8 +1435,8 @@ var FudgeUserInterface;
             this.controller = _controller;
             this.data = _data;
             this.create();
+            this.addEventListener(EVENT_TABLE.SORT, this.hndSort);
             // this.addEventListener(EVENT_TABLE.CHANGE, this.hndSort);
-            // this.addEventListener(EVENT_TABLE.SORT, this.hndSort);
             // this.addEventListener(EVENT_TREE.RENAME, this.hndRename);
             // this.addEventListener(EVENT_TREE.SELECT, this.hndSelect);
             // this.addEventListener(EVENT_TREE.DROP, this.hndDrop);
@@ -1464,7 +1464,7 @@ var FudgeUserInterface;
                 th.setAttribute("key", entry.key.toString());
                 if (entry.sortable) {
                     th.appendChild(this.getSortButtons());
-                    th.addEventListener(EVENT_TABLE.CHANGE, this.hndSort);
+                    th.addEventListener(EVENT_TABLE.CHANGE, (_event) => th.dispatchEvent(new CustomEvent(EVENT_TABLE.SORT, { detail: _event.target, bubbles: true })));
                 }
                 tr.appendChild(th);
             }
@@ -1509,9 +1509,11 @@ var FudgeUserInterface;
             return result;
         }
         hndSort(_event) {
-            let direction = _event.target.value;
-            let key = _event.currentTarget.getAttribute("key");
-            this.controller.sort(this.data, key, direction == "up");
+            let value = _event.detail.value;
+            let key = _event.target.getAttribute("key");
+            let direction = (value == "up") ? 1 : -1;
+            this.controller.sort(this.data, key, direction);
+            this.create();
         }
     }
     FudgeUserInterface.Table = Table;
@@ -2136,3 +2138,4 @@ var FudgeUserInterface;
     FudgeUserInterface.TreeItem = TreeItem;
     customElements.define("li-tree-item", TreeItem, { extends: "li" });
 })(FudgeUserInterface || (FudgeUserInterface = {}));
+//# sourceMappingURL=FudgeUserInterface.js.map

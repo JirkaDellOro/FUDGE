@@ -14,6 +14,10 @@ var TableControl;
             return head;
         }
         sort(_data, _key, _direction) {
+            function compare(_a, _b) {
+                return _direction * (_a[_key] == _b[_key] ? 0 : (_a[_key] > _b[_key] ? 1 : -1));
+            }
+            _data.sort(compare);
         }
     }
     TableControl.TableControlData = TableControlData;

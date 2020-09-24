@@ -54,8 +54,8 @@ namespace FudgeUserInterface {
       this.data = _data;
       this.create();
 
+      this.addEventListener(EVENT_TABLE.SORT, <EventListener>this.hndSort);
       // this.addEventListener(EVENT_TABLE.CHANGE, this.hndSort);
-      // this.addEventListener(EVENT_TABLE.SORT, this.hndSort);
       // this.addEventListener(EVENT_TREE.RENAME, this.hndRename);
       // this.addEventListener(EVENT_TREE.SELECT, this.hndSelect);
       // this.addEventListener(EVENT_TREE.DROP, this.hndDrop);
@@ -86,7 +86,10 @@ namespace FudgeUserInterface {
 
         if (entry.sortable) {
           th.appendChild(this.getSortButtons());
-          th.addEventListener(EVENT_TABLE.CHANGE, this.hndSort);
+          th.addEventListener(
+            EVENT_TABLE.CHANGE,
+            (_event: Event) => th.dispatchEvent(new CustomEvent(EVENT_TABLE.SORT, { detail: _event.target, bubbles: true }))
+          );
         }
 
         tr.appendChild(th);
@@ -137,11 +140,12 @@ namespace FudgeUserInterface {
       return result;
     }
 
-    private hndSort(_event: Event): void {
-      let direction: string = (<HTMLInputElement>_event.target).value;
-      let key: string = (<HTMLElement>_event.currentTarget).getAttribute("key");
-
-      this.controller.sort(this.data, key, direction == "up");
+    private hndSort(_event: CustomEvent): void {
+      let value: string = (<HTMLInputElement>_event.detail).value;
+      let key: string = (<HTMLElement>_event.target).getAttribute("key");
+      let direction: number = (value == "up") ? 1 : -1;
+      this.controller.sort(this.data, key, direction);
+      this.create();
     }
 
     // private hndRename(_event: Event): void {
