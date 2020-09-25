@@ -321,7 +321,7 @@ declare namespace FudgeUserInterface {
 declare namespace FudgeUserInterface {
     interface TABLE {
         label: string;
-        key: string | symbol | number;
+        key: string;
         editable: boolean;
         sortable: boolean;
     }
@@ -353,6 +353,7 @@ declare namespace FudgeUserInterface {
         private getSortButtons;
         private hndSort;
         private hndSelect;
+        private hndFocus;
     }
 }
 declare namespace FudgeUserInterface {
@@ -397,7 +398,7 @@ declare namespace FudgeUserInterface {
     /**
      * Extension of tr-element that represents an object in a [[Table]]
      */
-    class TableItem<T> extends HTMLTableRowElement {
+    class TableItem<T extends Object> extends HTMLTableRowElement {
         data: T;
         controller: TableController<T>;
         constructor(_controller: TableController<T>, _data: T);
@@ -416,6 +417,11 @@ declare namespace FudgeUserInterface {
          */
         select(_additive: boolean, _interval?: boolean): void;
         private create;
+        private hndInputEvent;
+        private hndChange;
+        private hndKey;
+        private hndDragStart;
+        private hndDragOver;
         private hndPointerUp;
     }
 }

@@ -1,7 +1,7 @@
 namespace FudgeUserInterface {
   export interface TABLE {
     label: string;
-    key: string | symbol | number;
+    key: string;
     editable: boolean;
     sortable: boolean;
   }
@@ -24,6 +24,8 @@ namespace FudgeUserInterface {
 
       this.addEventListener(EVENT.SORT, <EventListener>this.hndSort);
       this.addEventListener(EVENT.SELECT, this.hndSelect);
+      this.addEventListener(EVENT.FOCUS_NEXT, <EventListener>this.hndFocus);
+      this.addEventListener(EVENT.FOCUS_PREVIOUS, <EventListener>this.hndFocus);
       // this.addEventListener(EVENT_TABLE.CHANGE, this.hndSort);
       // this.addEventListener(EVENT_TREE.RENAME, this.hndRename);
       // this.addEventListener(EVENT_TREE.DROP, this.hndDrop);
@@ -32,10 +34,6 @@ namespace FudgeUserInterface {
       // this.addEventListener(EVENT_TREE.COPY, this.hndCopyPaste);
       // this.addEventListener(EVENT_TREE.PASTE, this.hndCopyPaste);
       // this.addEventListener(EVENT_TREE.CUT, this.hndCopyPaste);
-      // @ts-ignore
-      // this.addEventListener(EVENT_TREE.FOCUS_NEXT, this.hndFocus);
-      // @ts-ignore
-      // this.addEventListener(EVENT_TREE.FOCUS_PREVIOUS, this.hndFocus);
     }
 
     /**
@@ -109,7 +107,7 @@ namespace FudgeUserInterface {
       for (let entry of _headInfo) {
         let th: HTMLTableHeaderCellElement = document.createElement("th");
         th.textContent = entry.label;
-        th.setAttribute("key", entry.key.toString());
+        th.setAttribute("key", entry.key);
 
         if (entry.sortable) {
           th.appendChild(this.getSortButtons());
@@ -219,35 +217,35 @@ namespace FudgeUserInterface {
     //   // }
     // }
 
-    // private hndFocus = (_event: KeyboardEvent): void => {
-    //   // _event.stopPropagation();
-    //   // let items: TreeItem<T>[] = <TreeItem<T>[]>Array.from(this.querySelectorAll("li"));
-    //   // let target: TreeItem<T> = <TreeItem<T>>_event.target;
-    //   // let index: number = items.indexOf(target);
-    //   // if (index < 0)
-    //   //   return;
+    private hndFocus = (_event: KeyboardEvent): void => {
+      _event.stopPropagation();
+      let items: TableItem<T>[] = <TableItem<T>[]>Array.from(this.querySelectorAll("tr"));
+      let target: TableItem<T> = <TableItem<T>>_event.target;
+      let index: number = items.indexOf(target);
+      if (index < 0)
+        return;
 
-    //   // if (_event.shiftKey && this.controller.selection.length == 0)
-    //   //   target.select(true);
+      if (_event.shiftKey && this.controller.selection.length == 0)
+        target.select(true);
 
-    //   // switch (_event.type) {
-    //   //   case EVENT_TREE.FOCUS_NEXT:
-    //   //     if (++index < items.length)
-    //   //       items[index].focus();
-    //   //     break;
-    //   //   case EVENT_TREE.FOCUS_PREVIOUS:
-    //   //     if (--index >= 0)
-    //   //       items[index].focus();
-    //   //     break;
-    //   //   default:
-    //   //     break;
-    //   // }
+      switch (_event.type) {
+        case EVENT.FOCUS_NEXT:
+          if (++index < items.length)
+            items[index].focus();
+          break;
+        case EVENT.FOCUS_PREVIOUS:
+          if (--index >= 0)
+            items[index].focus();
+          break;
+        default:
+          break;
+      }
 
-    //   // if (_event.shiftKey)
-    //   //   (<TreeItem<T>>document.activeElement).select(true);
-    //   // else if (!_event.ctrlKey)
-    //   //   this.clearSelection();
-    // }
+      if (_event.shiftKey)
+        (<TreeItem<T>>document.activeElement).select(true);
+      else if (!_event.ctrlKey)
+        this.clearSelection();
+    }
   }
 
   customElements.define("table-sortable", Table, { extends: "table" });

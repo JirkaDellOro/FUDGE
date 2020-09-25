@@ -6,7 +6,7 @@ var TableControl;
             let head = [];
             head.push({ label: "Name", key: "name", sortable: true, editable: true });
             head.push({ label: "Type", key: "type", sortable: true, editable: false });
-            head.push({ label: "Id", key: "id", sortable: false, editable: false });
+            head.push({ label: "Id", key: "id", sortable: false, editable: true });
             return head;
         }
         getHead() {

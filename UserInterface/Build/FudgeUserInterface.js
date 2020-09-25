@@ -1337,11 +1337,70 @@ var FudgeUserInterface;
     class Table extends HTMLTableElement {
         constructor(_controller, _data) {
             super();
+            // private hndDrop(_event: DragEvent): void {
+            //   // _event.stopPropagation();
+            //   // this.addChildren(this.controller.dragDrop.sources, this.controller.dragDrop.target);
+            // }
+            // private hndDelete = (_event: Event): void => {
+            //   // let target: TreeItem<T> = <TreeItem<T>>_event.target;
+            //   // _event.stopPropagation();
+            //   // let remove: T[] = this.controller.delete([target.data]);
+            //   // this.delete(remove);
+            // }
+            // private hndEscape = (_event: Event): void => {
+            //   this.clearSelection();
+            // }
+            // private hndCopyPaste = async (_event: Event): Promise<void> => {
+            //   // // console.log(_event);
+            //   // _event.stopPropagation();
+            //   // let target: TreeItem<T> = <TreeItem<T>>_event.target;
+            //   // switch (_event.type) {
+            //   //   case EVENT_TREE.COPY:
+            //   //     this.controller.copyPaste.sources = await this.controller.copy([...this.controller.selection]);
+            //   //     break;
+            //   //   case EVENT_TREE.PASTE:
+            //   //     this.addChildren(this.controller.copyPaste.sources, target.data);
+            //   //     break;
+            //   //   case EVENT_TREE.CUT:
+            //   //     this.controller.copyPaste.sources = await this.controller.copy([...this.controller.selection]);
+            //   //     let cut: T[] = this.controller.delete(this.controller.selection);
+            //   //     this.delete(cut);
+            //   //     break;
+            //   // }
+            // }
+            this.hndFocus = (_event) => {
+                _event.stopPropagation();
+                let items = Array.from(this.querySelectorAll("tr"));
+                let target = _event.target;
+                let index = items.indexOf(target);
+                if (index < 0)
+                    return;
+                if (_event.shiftKey && this.controller.selection.length == 0)
+                    target.select(true);
+                switch (_event.type) {
+                    case "focusNext" /* FOCUS_NEXT */:
+                        if (++index < items.length)
+                            items[index].focus();
+                        break;
+                    case "focusPrevious" /* FOCUS_PREVIOUS */:
+                        if (--index >= 0)
+                            items[index].focus();
+                        break;
+                    default:
+                        break;
+                }
+                if (_event.shiftKey)
+                    document.activeElement.select(true);
+                else if (!_event.ctrlKey)
+                    this.clearSelection();
+            };
             this.controller = _controller;
             this.data = _data;
             this.create();
             this.addEventListener("sort" /* SORT */, this.hndSort);
             this.addEventListener("itemselect" /* SELECT */, this.hndSelect);
+            this.addEventListener("focusNext" /* FOCUS_NEXT */, this.hndFocus);
+            this.addEventListener("focusPrevious" /* FOCUS_PREVIOUS */, this.hndFocus);
             // this.addEventListener(EVENT_TABLE.CHANGE, this.hndSort);
             // this.addEventListener(EVENT_TREE.RENAME, this.hndRename);
             // this.addEventListener(EVENT_TREE.DROP, this.hndDrop);
@@ -1350,10 +1409,6 @@ var FudgeUserInterface;
             // this.addEventListener(EVENT_TREE.COPY, this.hndCopyPaste);
             // this.addEventListener(EVENT_TREE.PASTE, this.hndCopyPaste);
             // this.addEventListener(EVENT_TREE.CUT, this.hndCopyPaste);
-            // @ts-ignore
-            // this.addEventListener(EVENT_TREE.FOCUS_NEXT, this.hndFocus);
-            // @ts-ignore
-            // this.addEventListener(EVENT_TREE.FOCUS_PREVIOUS, this.hndFocus);
         }
         /**
          * Create the table
@@ -1418,7 +1473,7 @@ var FudgeUserInterface;
             for (let entry of _headInfo) {
                 let th = document.createElement("th");
                 th.textContent = entry.label;
-                th.setAttribute("key", entry.key.toString());
+                th.setAttribute("key", entry.key);
                 if (entry.sortable) {
                     th.appendChild(this.getSortButtons());
                     th.addEventListener("change" /* CHANGE */, (_event) => th.dispatchEvent(new CustomEvent("sort" /* SORT */, { detail: _event.target, bubbles: true })));
@@ -1503,6 +1558,7 @@ var FudgeUserInterface;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
+    var ƒ = FudgeCore;
     /**
      * Extension of tr-element that represents an object in a [[Table]]
      */
@@ -1510,7 +1566,80 @@ var FudgeUserInterface;
         constructor(_controller, _data) {
             super();
             this.data = null;
+            this.hndInputEvent = (_event) => {
+                if (_event instanceof KeyboardEvent && _event.code != ƒ.KEYBOARD_CODE.F2)
+                    return;
+                let input = _event.target;
+                input.readOnly = false;
+                input.focus();
+            };
+            this.hndChange = (_event) => {
+                let target = _event.target;
+                target.readOnly = true;
+                let key = target.getAttribute("key");
+                Reflect.set(this.data, key, target.value);
+            };
+            this.hndKey = (_event) => {
+                _event.stopPropagation();
+                // if (!this.label.disabled)
+                //   return;
+                // let content: TreeList<T> = <TreeList<T>>this.querySelector("ul");
+                switch (_event.code) {
+                    // case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
+                    //   this.dispatchEvent(new KeyboardEvent(EVENT.FOCUS_NEXT, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                    //   break;
+                    // case ƒ.KEYBOARD_CODE.ARROW_LEFT:
+                    //   this.dispatchEvent(new KeyboardEvent(EVENT.FOCUS_PREVIOUS, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                    //   break;
+                    case ƒ.KEYBOARD_CODE.ARROW_DOWN:
+                        this.dispatchEvent(new KeyboardEvent("focusNext" /* FOCUS_NEXT */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                        break;
+                    case ƒ.KEYBOARD_CODE.ARROW_UP:
+                        this.dispatchEvent(new KeyboardEvent("focusPrevious" /* FOCUS_PREVIOUS */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                        break;
+                    case ƒ.KEYBOARD_CODE.SPACE:
+                        this.select(_event.ctrlKey, _event.shiftKey);
+                        break;
+                    case ƒ.KEYBOARD_CODE.DELETE:
+                        this.dispatchEvent(new Event("delete" /* DELETE */, { bubbles: true }));
+                        break;
+                    case ƒ.KEYBOARD_CODE.C:
+                        if (!_event.ctrlKey)
+                            break;
+                        _event.preventDefault();
+                        this.dispatchEvent(new Event("copy" /* COPY */, { bubbles: true }));
+                        break;
+                    case ƒ.KEYBOARD_CODE.V:
+                        if (!_event.ctrlKey)
+                            break;
+                        _event.preventDefault();
+                        this.dispatchEvent(new Event("paste" /* PASTE */, { bubbles: true }));
+                        break;
+                    case ƒ.KEYBOARD_CODE.X:
+                        if (!_event.ctrlKey)
+                            break;
+                        _event.preventDefault();
+                        this.dispatchEvent(new Event("cut" /* CUT */, { bubbles: true }));
+                        break;
+                }
+            };
+            this.hndDragStart = (_event) => {
+                _event.stopPropagation();
+                this.controller.dragDrop.sources = [];
+                if (this.selected)
+                    this.controller.dragDrop.sources = this.controller.selection;
+                else
+                    this.controller.dragDrop.sources = [this.data];
+                _event.dataTransfer.effectAllowed = "all";
+            };
+            this.hndDragOver = (_event) => {
+                _event.stopPropagation();
+                _event.preventDefault();
+                this.controller.dragDrop.target = this.data;
+                _event.dataTransfer.dropEffect = "move";
+            };
             this.hndPointerUp = (_event) => {
+                _event.stopPropagation();
                 this.select(_event.ctrlKey, _event.shiftKey);
             };
             this.controller = _controller;
@@ -1519,15 +1648,14 @@ var FudgeUserInterface;
             // TODO: handle cssClasses
             this.create(this.controller.getHead());
             this.addEventListener("pointerup" /* POINTER_UP */, this.hndPointerUp);
-            // this.addEventListener(EVENT.CHANGE, this.hndChange);
+            this.addEventListener("keydown" /* KEY_DOWN */, this.hndKey);
+            this.addEventListener("change" /* CHANGE */, this.hndChange);
             // this.addEventListener(EVENT.DOUBLE_CLICK, this.hndDblClick);
-            // this.addEventListener(EVENT.FOCUS_OUT, this.hndFocus);
-            // this.addEventListener(EVENT.KEY_DOWN, this.hndKey);
             // this.addEventListener(EVENT_TREE.FOCUS_NEXT, this.hndFocus);
             // this.addEventListener(EVENT_TREE.FOCUS_PREVIOUS, this.hndFocus);
-            // this.draggable = true;
-            // this.addEventListener(EVENT.DRAG_START, this.hndDragStart);
-            // this.addEventListener(EVENT.DRAG_OVER, this.hndDragOver);
+            this.draggable = true;
+            this.addEventListener("dragstart" /* DRAG_START */, this.hndDragStart);
+            this.addEventListener("dragover" /* DRAG_OVER */, this.hndDragOver);
             // this.addEventListener(EVENT.UPDATE, this.hndUpdate);
         }
         /**
@@ -1558,7 +1686,15 @@ var FudgeUserInterface;
             for (let entry of _filter) {
                 let value = Reflect.get(this.data, entry.key);
                 let td = document.createElement("td");
-                td.innerHTML = value.toString();
+                let input = document.createElement("input");
+                input.disabled = !entry.editable;
+                input.readOnly = true;
+                input.value = value.toString();
+                input.setAttribute("key", entry.key);
+                input.addEventListener("keydown" /* KEY_DOWN */, this.hndInputEvent);
+                input.addEventListener("dblclick" /* DOUBLE_CLICK */, this.hndInputEvent);
+                input.addEventListener("focusout" /* FOCUS_OUT */, this.hndChange);
+                td.appendChild(input);
                 this.appendChild(td);
             }
             this.tabIndex = 0;

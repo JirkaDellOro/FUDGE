@@ -1,8 +1,9 @@
 namespace FudgeUserInterface {
+  import ƒ = FudgeCore;
   /**
    * Extension of tr-element that represents an object in a [[Table]]
    */
-  export class TableItem<T> extends HTMLTableRowElement {
+  export class TableItem<T extends Object> extends HTMLTableRowElement {
     public data: T = null;
     public controller: TableController<T>;
 
@@ -15,16 +16,15 @@ namespace FudgeUserInterface {
       this.create(this.controller.getHead());
 
       this.addEventListener(EVENT.POINTER_UP, this.hndPointerUp);
-      // this.addEventListener(EVENT.CHANGE, this.hndChange);
+      this.addEventListener(EVENT.KEY_DOWN, this.hndKey);
+      this.addEventListener(EVENT.CHANGE, this.hndChange);
       // this.addEventListener(EVENT.DOUBLE_CLICK, this.hndDblClick);
-      // this.addEventListener(EVENT.FOCUS_OUT, this.hndFocus);
-      // this.addEventListener(EVENT.KEY_DOWN, this.hndKey);
       // this.addEventListener(EVENT_TREE.FOCUS_NEXT, this.hndFocus);
       // this.addEventListener(EVENT_TREE.FOCUS_PREVIOUS, this.hndFocus);
 
-      // this.draggable = true;
-      // this.addEventListener(EVENT.DRAG_START, this.hndDragStart);
-      // this.addEventListener(EVENT.DRAG_OVER, this.hndDragOver);
+      this.draggable = true;
+      this.addEventListener(EVENT.DRAG_START, this.hndDragStart);
+      this.addEventListener(EVENT.DRAG_OVER, this.hndDragOver);
 
       // this.addEventListener(EVENT.UPDATE, this.hndUpdate);
     }
@@ -45,7 +45,7 @@ namespace FudgeUserInterface {
     public get selected(): boolean {
       return this.classList.contains(CSS_CLASS.SELECTED);
     }
-    
+
     /**
      * Dispatches the [[EVENT.SELECT]] event
      * @param _additive For multiple selection (+Ctrl) 
@@ -58,15 +58,105 @@ namespace FudgeUserInterface {
 
     private create(_filter: TABLE[]): void {
       for (let entry of _filter) {
-        let value: Object = Reflect.get(<Object>this.data, entry.key);
+        let value: Object = Reflect.get(this.data, entry.key);
         let td: HTMLTableCellElement = document.createElement("td");
-        td.innerHTML = value.toString();
+        let input: HTMLInputElement = document.createElement("input");
+        input.disabled = !entry.editable;
+        input.readOnly = true;
+        input.value = value.toString();
+        input.setAttribute("key", entry.key);
+
+        input.addEventListener(EVENT.KEY_DOWN, this.hndInputEvent);
+        input.addEventListener(EVENT.DOUBLE_CLICK, this.hndInputEvent);
+        input.addEventListener(EVENT.FOCUS_OUT, this.hndChange);
+
+        td.appendChild(input);
         this.appendChild(td);
       }
       this.tabIndex = 0;
     }
 
+    private hndInputEvent = (_event: KeyboardEvent | MouseEvent): void => {
+      if (_event instanceof KeyboardEvent && _event.code != ƒ.KEYBOARD_CODE.F2)
+        return;
+
+      let input: HTMLInputElement = <HTMLInputElement>_event.target;
+      input.readOnly = false;
+      input.focus();
+    }
+
+    private hndChange = (_event: Event): void => {
+      let target: HTMLInputElement = <HTMLInputElement>_event.target;
+      target.readOnly = true;
+      let key: string = target.getAttribute("key");
+      Reflect.set(this.data, key, target.value);
+    }
+
+    private hndKey = (_event: KeyboardEvent): void => {
+      _event.stopPropagation();
+      // if (!this.label.disabled)
+      //   return;
+      // let content: TreeList<T> = <TreeList<T>>this.querySelector("ul");
+
+      switch (_event.code) {
+        // case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
+        //   this.dispatchEvent(new KeyboardEvent(EVENT.FOCUS_NEXT, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+        //   break;
+        // case ƒ.KEYBOARD_CODE.ARROW_LEFT:
+        //   this.dispatchEvent(new KeyboardEvent(EVENT.FOCUS_PREVIOUS, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+        //   break;
+        case ƒ.KEYBOARD_CODE.ARROW_DOWN:
+          this.dispatchEvent(new KeyboardEvent(EVENT.FOCUS_NEXT, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+          break;
+        case ƒ.KEYBOARD_CODE.ARROW_UP:
+          this.dispatchEvent(new KeyboardEvent(EVENT.FOCUS_PREVIOUS, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+          break;
+        case ƒ.KEYBOARD_CODE.SPACE:
+          this.select(_event.ctrlKey, _event.shiftKey);
+          break;
+        case ƒ.KEYBOARD_CODE.DELETE:
+          this.dispatchEvent(new Event(EVENT.DELETE, { bubbles: true }));
+          break;
+        case ƒ.KEYBOARD_CODE.C:
+          if (!_event.ctrlKey)
+            break;
+          _event.preventDefault();
+          this.dispatchEvent(new Event(EVENT.COPY, { bubbles: true }));
+          break;
+        case ƒ.KEYBOARD_CODE.V:
+          if (!_event.ctrlKey)
+            break;
+          _event.preventDefault();
+          this.dispatchEvent(new Event(EVENT.PASTE, { bubbles: true }));
+          break;
+        case ƒ.KEYBOARD_CODE.X:
+          if (!_event.ctrlKey)
+            break;
+          _event.preventDefault();
+          this.dispatchEvent(new Event(EVENT.CUT, { bubbles: true }));
+          break;
+      }
+    }
+
+    private hndDragStart = (_event: DragEvent): void => {
+      _event.stopPropagation();
+      this.controller.dragDrop.sources = [];
+      if (this.selected)
+        this.controller.dragDrop.sources = this.controller.selection;
+      else
+        this.controller.dragDrop.sources = [this.data];
+      _event.dataTransfer.effectAllowed = "all";
+    }
+
+    private hndDragOver = (_event: DragEvent): void => {
+      _event.stopPropagation();
+      _event.preventDefault();
+      this.controller.dragDrop.target = this.data;
+      _event.dataTransfer.dropEffect = "move";
+    }
+
     private hndPointerUp = (_event: PointerEvent): void => {
+      _event.stopPropagation();
       this.select(_event.ctrlKey, _event.shiftKey);
     }
   }
