@@ -2,18 +2,25 @@ namespace TableControl {
   import ƒui = FudgeUserInterface;
 
   export class TableControlData extends ƒui.TableController<DATA> {
-    public getLabel(_object: DATA): string { return ""; }
-    public rename(_object: DATA, _new: string): boolean { return false; }
-    public delete(_focussed: DATA[]): DATA[] { return null; }
-    public copy(_originals: DATA[]): Promise<DATA[]> { return null; }
+    private static head: ƒui.TABLE[] = TableControlData.getHead();
 
-    public getHead(): ƒui.TABLE[] {
+    private static getHead(): ƒui.TABLE[] {
       let head: ƒui.TABLE[] = [];
       head.push({ label: "Name", key: "name", sortable: true, editable: true });
       head.push({ label: "Type", key: "type", sortable: true, editable: false });
       head.push({ label: "Id", key: "id", sortable: false, editable: false });
       return head;
     }
+
+    public getHead(): ƒui.TABLE[] {
+        return TableControlData.head;
+    }
+
+    public getLabel(_object: DATA): string { return ""; }
+    public rename(_object: DATA, _new: string): boolean { return false; }
+    public delete(_focussed: DATA[]): DATA[] { return null; }
+    public copy(_originals: DATA[]): Promise<DATA[]> { return null; }
+
 
     public sort(_data: DATA[], _key: string, _direction: number): void {
       function compare(_a: DATA, _b: DATA): number {

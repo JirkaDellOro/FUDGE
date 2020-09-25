@@ -23,9 +23,9 @@ namespace FudgeUserInterface {
       this.create();
 
       this.addEventListener(EVENT.SORT, <EventListener>this.hndSort);
+      this.addEventListener(EVENT.SELECT, this.hndSelect);
       // this.addEventListener(EVENT_TABLE.CHANGE, this.hndSort);
       // this.addEventListener(EVENT_TREE.RENAME, this.hndRename);
-      // this.addEventListener(EVENT_TREE.SELECT, this.hndSelect);
       // this.addEventListener(EVENT_TREE.DROP, this.hndDrop);
       // this.addEventListener(EVENT_TREE.DELETE, this.hndDelete);
       // this.addEventListener(EVENT_TREE.ESCAPE, this.hndEscape);
@@ -45,12 +45,12 @@ namespace FudgeUserInterface {
       this.innerHTML = "";
       let head: TABLE[] = this.controller.getHead();
 
-      let tr: HTMLTableRowElement = this.createHead(head);
-      this.appendChild(tr);
+      this.appendChild(this.createHead(head));
 
       for (let row of this.data) {
-        tr = this.createRow(row, head);
-        this.appendChild(tr);
+        // tr = this.createRow(row, head);
+        let item: TableItem<T> = new TableItem<T>(this.controller, row);
+        this.appendChild(item);
       }
     }
 
@@ -74,6 +74,36 @@ namespace FudgeUserInterface {
       return null;
     }
 
+    public selectInterval(_dataStart: T, _dataEnd: T): void {
+      let items: NodeListOf<TableItem<T>> = <NodeListOf<TableItem<T>>>this.querySelectorAll("tr");
+      let selecting: boolean = false;
+      let end: T = null;
+      for (let item of items) {
+        if (!selecting) {
+          selecting = true;
+          if (item.data == _dataStart)
+            end = _dataEnd;
+          else if (item.data == _dataEnd)
+            end = _dataStart;
+          else
+            selecting = false;
+        }
+        if (selecting) {
+          item.select(true, false);
+          if (item.data == end)
+            break;
+        }
+      }
+      // console.log(_dataStart, _dataEnd);
+    }
+
+    public displaySelection(_data: T[]): void {
+      console.log(_data);
+      let items: NodeListOf<TableItem<T>> = <NodeListOf<TableItem<T>>>this.querySelectorAll("tr");
+      for (let item of items)
+        item.selected = (_data != null && _data.indexOf(item.data) > -1);
+    }
+
     private createHead(_headInfo: TABLE[]): HTMLTableRowElement {
       let tr: HTMLTableRowElement = document.createElement("tr");
       for (let entry of _headInfo) {
@@ -84,8 +114,8 @@ namespace FudgeUserInterface {
         if (entry.sortable) {
           th.appendChild(this.getSortButtons());
           th.addEventListener(
-          EVENT.CHANGE,
-          (_event: Event) => th.dispatchEvent(new CustomEvent(EVENT.SORT, { detail: _event.target, bubbles: true }))
+            EVENT.CHANGE,
+            (_event: Event) => th.dispatchEvent(new CustomEvent(EVENT.SORT, { detail: _event.target, bubbles: true }))
           );
         }
         tr.appendChild(th);
@@ -105,22 +135,6 @@ namespace FudgeUserInterface {
       return result;
     }
 
-    private createRow(_data: T, _filter: TABLE[]): HTMLTableRowElement {
-      let tr: HTMLTableRowElement = document.createElement("tr");
-      for (let entry of _filter) {
-        let value: Object = Reflect.get(_data, entry.key);
-        let td: HTMLTableCellElement = document.createElement("td");
-        td.innerHTML = value.toString();
-        tr.appendChild(td);
-      }
-
-      tr.addEventListener(EVENT.CLICK, this.hndEvent);
-      tr.addEventListener(EVENT.DOUBLE_CLICK, this.hndEvent);
-      tr.addEventListener(EVENT.KEY_DOWN, this.hndEvent);
-
-      return tr;
-    }
-
     private hndSort(_event: CustomEvent): void {
       let value: string = (<HTMLInputElement>_event.detail).value;
       let key: string = (<HTMLElement>_event.target).getAttribute("key");
@@ -129,9 +143,14 @@ namespace FudgeUserInterface {
       this.create();
     }
 
-    private hndEvent(_event: Event): void {
-      console.log(_event.currentTarget);
-    }
+    // private hndEvent(_event: Event): void {
+    //   console.log(_event.currentTarget);
+    //   switch (_event.type) {
+    //     case EVENT.CLICK:
+    //       let event: CustomEvent = new CustomEvent(EVENT.SELECT, { bubbles: true });
+    //       this.dispatchEvent(event);
+    //   }
+    // }
 
     // private hndRename(_event: Event): void {
     //   // let item: TreeItem<T> = <TreeItem<T>>(<HTMLInputElement>_event.target).parentNode;
@@ -140,30 +159,29 @@ namespace FudgeUserInterface {
     //   //   item.setLabel(this.controller.getLabel(item.data));
     // }
 
-    // // Callback / Eventhandler in Tree
-    // private hndSelect(_event: Event): void {
-    //   // // _event.stopPropagation();
-    //   // let detail: { data: Object, interval: boolean, additive: boolean } = (<CustomEvent>_event).detail;
-    //   // let index: number = this.controller.selection.indexOf(<T>detail.data);
+    private hndSelect(_event: Event): void {
+      // _event.stopPropagation();
+      let detail: { data: Object, interval: boolean, additive: boolean } = (<CustomEvent>_event).detail;
+      let index: number = this.controller.selection.indexOf(<T>detail.data);
 
-    //   // if (detail.interval) {
-    //   //   let dataStart: T = <T>this.controller.selection[0];
-    //   //   let dataEnd: T = <T>detail.data;
-    //   //   this.clearSelection();
-    //   //   this.selectInterval(dataStart, dataEnd);
-    //   //   return;
-    //   // }
+      if (detail.interval) {
+        let dataStart: T = <T>this.controller.selection[0];
+        let dataEnd: T = <T>detail.data;
+        this.clearSelection();
+        this.selectInterval(dataStart, dataEnd);
+        return;
+      }
 
-    //   // if (index >= 0 && detail.additive)
-    //   //   this.controller.selection.splice(index, 1);
-    //   // else {
-    //   //   if (!detail.additive)
-    //   //     this.clearSelection();
-    //   //   this.controller.selection.push(<T>detail.data);
-    //   // }
+      if (index >= 0 && detail.additive)
+        this.controller.selection.splice(index, 1);
+      else {
+        if (!detail.additive)
+          this.clearSelection();
+        this.controller.selection.push(<T>detail.data);
+      }
 
-    //   // this.displaySelection(<T[]>this.controller.selection);
-    // }
+      this.displaySelection(<T[]>this.controller.selection);
+    }
 
     // private hndDrop(_event: DragEvent): void {
     //   // _event.stopPropagation();
@@ -232,5 +250,5 @@ namespace FudgeUserInterface {
     // }
   }
 
-  customElements.define("table-fudge", Table, { extends: "table" });
+  customElements.define("table-sortable", Table, { extends: "table" });
 }

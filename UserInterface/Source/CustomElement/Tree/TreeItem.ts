@@ -128,7 +128,7 @@ namespace FudgeUserInterface {
 
 
     /**
-     * Dispatches the [[EVENT_TREE.SELECT]] event
+     * Dispatches the [[EVENT.SELECT]] event
      * @param _additive For multiple selection (+Ctrl) 
      * @param _interval For selection over interval (+Shift)
      */

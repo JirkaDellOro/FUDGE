@@ -347,11 +347,12 @@ declare namespace FudgeUserInterface {
          * Return the object in focus
          */
         getFocussed(): T;
+        selectInterval(_dataStart: T, _dataEnd: T): void;
+        displaySelection(_data: T[]): void;
         private createHead;
         private getSortButtons;
-        private createRow;
         private hndSort;
-        private hndEvent;
+        private hndSelect;
     }
 }
 declare namespace FudgeUserInterface {
@@ -390,6 +391,32 @@ declare namespace FudgeUserInterface {
          * Sort data by given key and direction
          */
         abstract sort(_data: T[], _key: string, _direction: number): void;
+    }
+}
+declare namespace FudgeUserInterface {
+    /**
+     * Extension of tr-element that represents an object in a [[Table]]
+     */
+    class TableItem<T> extends HTMLTableRowElement {
+        data: T;
+        controller: TableController<T>;
+        constructor(_controller: TableController<T>, _data: T);
+        /**
+         * Returns attaches or detaches the [[CSS_CLASS.SELECTED]] to this item
+         */
+        set selected(_on: boolean);
+        /**
+         * Returns true if the [[TREE_CLASSES.SELECTED]] is attached to this item
+         */
+        get selected(): boolean;
+        /**
+         * Dispatches the [[EVENT.SELECT]] event
+         * @param _additive For multiple selection (+Ctrl)
+         * @param _interval For selection over interval (+Shift)
+         */
+        select(_additive: boolean, _interval?: boolean): void;
+        private create;
+        private hndPointerUp;
     }
 }
 declare namespace FudgeUserInterface {
@@ -571,7 +598,7 @@ declare namespace FudgeUserInterface {
          */
         getBranch(): TreeList<T>;
         /**
-         * Dispatches the [[EVENT_TREE.SELECT]] event
+         * Dispatches the [[EVENT.SELECT]] event
          * @param _additive For multiple selection (+Ctrl)
          * @param _interval For selection over interval (+Shift)
          */

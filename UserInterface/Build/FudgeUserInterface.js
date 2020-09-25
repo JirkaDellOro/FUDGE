@@ -1341,9 +1341,9 @@ var FudgeUserInterface;
             this.data = _data;
             this.create();
             this.addEventListener("sort" /* SORT */, this.hndSort);
+            this.addEventListener("itemselect" /* SELECT */, this.hndSelect);
             // this.addEventListener(EVENT_TABLE.CHANGE, this.hndSort);
             // this.addEventListener(EVENT_TREE.RENAME, this.hndRename);
-            // this.addEventListener(EVENT_TREE.SELECT, this.hndSelect);
             // this.addEventListener(EVENT_TREE.DROP, this.hndDrop);
             // this.addEventListener(EVENT_TREE.DELETE, this.hndDelete);
             // this.addEventListener(EVENT_TREE.ESCAPE, this.hndEscape);
@@ -1361,11 +1361,11 @@ var FudgeUserInterface;
         create() {
             this.innerHTML = "";
             let head = this.controller.getHead();
-            let tr = this.createHead(head);
-            this.appendChild(tr);
+            this.appendChild(this.createHead(head));
             for (let row of this.data) {
-                tr = this.createRow(row, head);
-                this.appendChild(tr);
+                // tr = this.createRow(row, head);
+                let item = new FudgeUserInterface.TableItem(this.controller, row);
+                this.appendChild(item);
             }
         }
         /**
@@ -1384,6 +1384,34 @@ var FudgeUserInterface;
             // if (found > -1)
             //   return items[found].data;
             return null;
+        }
+        selectInterval(_dataStart, _dataEnd) {
+            let items = this.querySelectorAll("tr");
+            let selecting = false;
+            let end = null;
+            for (let item of items) {
+                if (!selecting) {
+                    selecting = true;
+                    if (item.data == _dataStart)
+                        end = _dataEnd;
+                    else if (item.data == _dataEnd)
+                        end = _dataStart;
+                    else
+                        selecting = false;
+                }
+                if (selecting) {
+                    item.select(true, false);
+                    if (item.data == end)
+                        break;
+                }
+            }
+            // console.log(_dataStart, _dataEnd);
+        }
+        displaySelection(_data) {
+            console.log(_data);
+            let items = this.querySelectorAll("tr");
+            for (let item of items)
+                item.selected = (_data != null && _data.indexOf(item.data) > -1);
         }
         createHead(_headInfo) {
             let tr = document.createElement("tr");
@@ -1410,19 +1438,6 @@ var FudgeUserInterface;
             }
             return result;
         }
-        createRow(_data, _filter) {
-            let tr = document.createElement("tr");
-            for (let entry of _filter) {
-                let value = Reflect.get(_data, entry.key);
-                let td = document.createElement("td");
-                td.innerHTML = value.toString();
-                tr.appendChild(td);
-            }
-            tr.addEventListener("click" /* CLICK */, this.hndEvent);
-            tr.addEventListener("dblclick" /* DOUBLE_CLICK */, this.hndEvent);
-            tr.addEventListener("keydown" /* KEY_DOWN */, this.hndEvent);
-            return tr;
-        }
         hndSort(_event) {
             let value = _event.detail.value;
             let key = _event.target.getAttribute("key");
@@ -1430,12 +1445,43 @@ var FudgeUserInterface;
             this.controller.sort(this.data, key, direction);
             this.create();
         }
-        hndEvent(_event) {
-            console.log(_event.currentTarget);
+        // private hndEvent(_event: Event): void {
+        //   console.log(_event.currentTarget);
+        //   switch (_event.type) {
+        //     case EVENT.CLICK:
+        //       let event: CustomEvent = new CustomEvent(EVENT.SELECT, { bubbles: true });
+        //       this.dispatchEvent(event);
+        //   }
+        // }
+        // private hndRename(_event: Event): void {
+        //   // let item: TreeItem<T> = <TreeItem<T>>(<HTMLInputElement>_event.target).parentNode;
+        //   // let renamed: boolean = this.controller.rename(item.data, item.getLabel());
+        //   // if (renamed)
+        //   //   item.setLabel(this.controller.getLabel(item.data));
+        // }
+        hndSelect(_event) {
+            // _event.stopPropagation();
+            let detail = _event.detail;
+            let index = this.controller.selection.indexOf(detail.data);
+            if (detail.interval) {
+                let dataStart = this.controller.selection[0];
+                let dataEnd = detail.data;
+                this.clearSelection();
+                this.selectInterval(dataStart, dataEnd);
+                return;
+            }
+            if (index >= 0 && detail.additive)
+                this.controller.selection.splice(index, 1);
+            else {
+                if (!detail.additive)
+                    this.clearSelection();
+                this.controller.selection.push(detail.data);
+            }
+            this.displaySelection(this.controller.selection);
         }
     }
     FudgeUserInterface.Table = Table;
-    customElements.define("table-fudge", Table, { extends: "table" });
+    customElements.define("table-sortable", Table, { extends: "table" });
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
@@ -1454,6 +1500,72 @@ var FudgeUserInterface;
         }
     }
     FudgeUserInterface.TableController = TableController;
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
+    /**
+     * Extension of tr-element that represents an object in a [[Table]]
+     */
+    class TableItem extends HTMLTableRowElement {
+        constructor(_controller, _data) {
+            super();
+            this.data = null;
+            this.hndPointerUp = (_event) => {
+                this.select(_event.ctrlKey, _event.shiftKey);
+            };
+            this.controller = _controller;
+            this.data = _data;
+            // this.display = this.controller.getLabel(_data);
+            // TODO: handle cssClasses
+            this.create(this.controller.getHead());
+            this.addEventListener("pointerup" /* POINTER_UP */, this.hndPointerUp);
+            // this.addEventListener(EVENT.CHANGE, this.hndChange);
+            // this.addEventListener(EVENT.DOUBLE_CLICK, this.hndDblClick);
+            // this.addEventListener(EVENT.FOCUS_OUT, this.hndFocus);
+            // this.addEventListener(EVENT.KEY_DOWN, this.hndKey);
+            // this.addEventListener(EVENT_TREE.FOCUS_NEXT, this.hndFocus);
+            // this.addEventListener(EVENT_TREE.FOCUS_PREVIOUS, this.hndFocus);
+            // this.draggable = true;
+            // this.addEventListener(EVENT.DRAG_START, this.hndDragStart);
+            // this.addEventListener(EVENT.DRAG_OVER, this.hndDragOver);
+            // this.addEventListener(EVENT.UPDATE, this.hndUpdate);
+        }
+        /**
+         * Returns attaches or detaches the [[CSS_CLASS.SELECTED]] to this item
+         */
+        set selected(_on) {
+            if (_on)
+                this.classList.add(FudgeUserInterface.CSS_CLASS.SELECTED);
+            else
+                this.classList.remove(FudgeUserInterface.CSS_CLASS.SELECTED);
+        }
+        /**
+         * Returns true if the [[TREE_CLASSES.SELECTED]] is attached to this item
+         */
+        get selected() {
+            return this.classList.contains(FudgeUserInterface.CSS_CLASS.SELECTED);
+        }
+        /**
+         * Dispatches the [[EVENT.SELECT]] event
+         * @param _additive For multiple selection (+Ctrl)
+         * @param _interval For selection over interval (+Shift)
+         */
+        select(_additive, _interval = false) {
+            let event = new CustomEvent("itemselect" /* SELECT */, { bubbles: true, detail: { data: this.data, additive: _additive, interval: _interval } });
+            this.dispatchEvent(event);
+        }
+        create(_filter) {
+            for (let entry of _filter) {
+                let value = Reflect.get(this.data, entry.key);
+                let td = document.createElement("td");
+                td.innerHTML = value.toString();
+                this.appendChild(td);
+            }
+            this.tabIndex = 0;
+        }
+    }
+    FudgeUserInterface.TableItem = TableItem;
+    customElements.define("table-item", TableItem, { extends: "tr" });
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 ///<reference path="../../../../Core/Build/FudgeCore.d.ts"/>
 var FudgeUserInterface;
@@ -1996,7 +2108,7 @@ var FudgeUserInterface;
             return this.querySelector("ul");
         }
         /**
-         * Dispatches the [[EVENT_TREE.SELECT]] event
+         * Dispatches the [[EVENT.SELECT]] event
          * @param _additive For multiple selection (+Ctrl)
          * @param _interval For selection over interval (+Shift)
          */
