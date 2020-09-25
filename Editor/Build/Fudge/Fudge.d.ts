@@ -115,6 +115,19 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    import ƒui = FudgeUserInterface;
+    class ControllerTableResource extends ƒui.TableController<ƒ.SerializableResource> {
+        private static head;
+        private static getHead;
+        getHead(): ƒui.TABLE[];
+        getLabel(_object: ƒ.SerializableResource): string;
+        rename(_object: ƒ.SerializableResource, _new: string): boolean;
+        delete(_focussed: ƒ.SerializableResource[]): ƒ.SerializableResource[];
+        copy(_originals: ƒ.SerializableResource[]): Promise<ƒ.SerializableResource[]>;
+        sort(_data: ƒ.SerializableResource[], _key: string, _direction: number): void;
+    }
+}
+declare namespace Fudge {
     import ƒUi = FudgeUserInterface;
     class ControllerTreeDirectory extends ƒUi.TreeController<DirectoryEntry> {
         getLabel(_entry: DirectoryEntry): string;
@@ -358,6 +371,8 @@ declare namespace Fudge {
      */
     class ViewInternal extends View {
         constructor(_container: GoldenLayout.Container, _state: Object);
+        listResources(): void;
+        private hndEvent;
     }
 }
 declare namespace Fudge {

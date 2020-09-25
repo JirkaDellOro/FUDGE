@@ -4,6 +4,8 @@ namespace FudgeCore {
   }
 
   export interface SerializableResource extends Serializable {
+    name: string;
+    type: string;
     idResource: string;
   }
 

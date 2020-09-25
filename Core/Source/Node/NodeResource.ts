@@ -6,10 +6,12 @@ namespace FudgeCore {
    */
   export class NodeResource extends Node implements SerializableResource {
     public idResource: string = undefined;
+    public type: string = "Graph";
 
     public serialize(): Serialization {
       let serialization: Serialization = super.serialize();
       serialization.idResource = this.idResource;
+      serialization.type = this.type;
       return serialization;
     }
 

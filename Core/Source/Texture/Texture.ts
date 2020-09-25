@@ -4,6 +4,7 @@ namespace FudgeCore {
    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
    */
   export abstract class Texture extends Mutable {
+    public name: string = "Texture";
     protected reduceMutator(): void {/**/ }
   }
 
@@ -17,8 +18,11 @@ namespace FudgeCore {
 
     constructor(_url?: RequestInfo) {
       super();
-      if (_url)
+      if (_url) {
         this.load(_url);
+        this.name = _url.toString().split("/").pop();
+      }
+
       Project.register(this);
     }
 
@@ -44,12 +48,16 @@ namespace FudgeCore {
     public serialize(): Serialization {
       return {
         url: this.url,
-        idResource: this.idResource
+        idResource: this.idResource,
+        name: this.name,
+        type: this.type // serialize for editor views
       };
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       Project.register(this, _serialization.idResource);
       this.load(_serialization.url);
+      this.name = _serialization.name;
+      // this.type is an accessor of Mutable doesn't need to be deserialized
       return this;
     }
     //#endregion

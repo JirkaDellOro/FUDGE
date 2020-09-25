@@ -58,12 +58,12 @@ namespace FudgeUserInterface {
 
     private create(_filter: TABLE[]): void {
       for (let entry of _filter) {
-        let value: Object = Reflect.get(this.data, entry.key);
+        let value: string = Reflect.get(this.data, entry.key);
         let td: HTMLTableCellElement = document.createElement("td");
         let input: HTMLInputElement = document.createElement("input");
         input.disabled = !entry.editable;
         input.readOnly = true;
-        input.value = value.toString();
+        input.value = value;
         input.setAttribute("key", entry.key);
 
         input.addEventListener(EVENT.KEY_DOWN, this.hndInputEvent);
@@ -90,6 +90,7 @@ namespace FudgeUserInterface {
       target.readOnly = true;
       let key: string = target.getAttribute("key");
       Reflect.set(this.data, key, target.value);
+      this.focus();
     }
 
     private hndKey = (_event: KeyboardEvent): void => {

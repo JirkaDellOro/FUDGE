@@ -19,6 +19,7 @@ namespace FudgeCore {
     public normalsFace: Float32Array;
 
     public idResource: string = undefined;
+    public name: string = "Mesh";
 
     public renderBuffers: RenderBuffers; /* defined by RenderInjector*/
 
@@ -28,6 +29,9 @@ namespace FudgeCore {
 
     protected static registerSubclass(_subClass: typeof Mesh): number { return Mesh.subclasses.push(_subClass) - 1; }
 
+    public get type(): string {
+      return this.constructor.name;
+    }
 
     public useRenderBuffers(_shader: typeof Shader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void {/* injected by RenderInjector*/ }
     public createRenderBuffers(): void {/* injected by RenderInjector*/ }
@@ -51,12 +55,16 @@ namespace FudgeCore {
     // Serialize/Deserialize for all meshes that calculate without parameters
     public serialize(): Serialization {
       let serialization: Serialization = {
-        idResource: this.idResource
+        idResource: this.idResource,
+        name: this.name,
+        type: this.type // store for editor view
       }; // no data needed ...
       return serialization;
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.idResource = _serialization.idResource;
+      this.name = _serialization.name;
+      // type is an accessor and must not be deserialized
       return this;
     }
 

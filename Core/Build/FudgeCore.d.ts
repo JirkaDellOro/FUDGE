@@ -992,6 +992,8 @@ declare namespace FudgeCore {
      * @authors Thomas Dorner, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class Audio extends EventTarget implements SerializableResource {
+        name: string;
+        type: string;
         idResource: string;
         buffer: AudioBuffer;
         private url;
@@ -1753,6 +1755,8 @@ declare namespace FudgeCore {
         RUNTIME = 1
     }
     interface SerializableResource extends Serializable {
+        name: string;
+        type: string;
         idResource: string;
     }
     interface Resources {
@@ -2932,9 +2936,11 @@ declare namespace FudgeCore {
         textureUVs: Float32Array;
         normalsFace: Float32Array;
         idResource: string;
+        name: string;
         renderBuffers: RenderBuffers;
         static getBufferSpecification(): BufferSpecification;
         protected static registerSubclass(_subClass: typeof Mesh): number;
+        get type(): string;
         useRenderBuffers(_shader: typeof Shader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void;
         createRenderBuffers(): void;
         deleteRenderBuffers(_shader: typeof Shader): void;
@@ -3257,6 +3263,7 @@ declare namespace FudgeCore {
      */
     class NodeResource extends Node implements SerializableResource {
         idResource: string;
+        type: string;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }
@@ -3471,6 +3478,7 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     abstract class Texture extends Mutable {
+        name: string;
         protected reduceMutator(): void;
     }
     /**

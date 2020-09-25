@@ -390,6 +390,34 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    var ƒui = FudgeUserInterface;
+    class ControllerTableResource extends ƒui.TableController {
+        static getHead() {
+            let head = [];
+            head.push({ label: "Name", key: "name", sortable: true, editable: true });
+            head.push({ label: "Type", key: "type", sortable: true, editable: false });
+            head.push({ label: "Id", key: "idResource", sortable: false, editable: false });
+            return head;
+        }
+        getHead() {
+            return ControllerTableResource.head;
+        }
+        getLabel(_object) { return ""; }
+        rename(_object, _new) { return false; }
+        delete(_focussed) { return null; }
+        copy(_originals) { return null; }
+        sort(_data, _key, _direction) {
+            function compare(_a, _b) {
+                return _direction * (_a[_key] == _b[_key] ? 0 : (_a[_key] > _b[_key] ? 1 : -1));
+            }
+            _data.sort(compare);
+        }
+    }
+    ControllerTableResource.head = ControllerTableResource.getHead();
+    Fudge.ControllerTableResource = ControllerTableResource;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
     var ƒUi = FudgeUserInterface;
     class ControllerTreeDirectory extends ƒUi.TreeController {
         getLabel(_entry) {
@@ -1488,6 +1516,8 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    var ƒ = FudgeCore;
+    var ƒui = FudgeUserInterface;
     /**
      * List the internal resources
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
@@ -1495,6 +1525,16 @@ var Fudge;
     class ViewInternal extends Fudge.View {
         constructor(_container, _state) {
             super(_container, _state);
+            this.hndEvent = (_event) => {
+                this.listResources();
+            };
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
+        }
+        listResources() {
+            this.dom.innerHTML = "";
+            let table;
+            table = new ƒui.Table(new Fudge.ControllerTableResource(), Object.values(ƒ.Project.resources));
+            this.dom.appendChild(table);
         }
     }
     Fudge.ViewInternal = ViewInternal;

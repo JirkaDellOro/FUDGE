@@ -1,40 +1,46 @@
 {
-  "TextureImage|2020-09-21T08:52:08.735Z|45296": {
+  "TextureImage|2020-09-25T16:07:24.118Z|86659": {
     "ƒ.TextureImage": {
       "url": "Image/Fudge_360.png",
-      "idResource": "TextureImage|2020-09-21T08:52:08.735Z|45296"
+      "idResource": "TextureImage|2020-09-25T16:07:24.118Z|86659",
+      "name": "Texture",
+      "type": "TextureImage"
     }
   },
-  "Material|2020-09-21T08:52:08.747Z|62213": {
+  "Material|2020-09-25T16:07:24.124Z|27449": {
     "ƒ.Material": {
       "name": "Textured",
-      "idResource": "Material|2020-09-21T08:52:08.747Z|62213",
+      "idResource": "Material|2020-09-25T16:07:24.124Z|27449",
       "shader": "ShaderTexture",
       "coat": {
         "ƒ.CoatTextured": {
           "name": "Coat",
           "color": "[1, 0, 0, 1]",
-          "idTexture": "TextureImage|2020-09-21T08:52:08.735Z|45296"
+          "idTexture": "TextureImage|2020-09-25T16:07:24.118Z|86659"
         }
       }
     }
   },
-  "MeshPyramid|2020-09-21T08:52:08.748Z|40607": {
+  "MeshPyramid|2020-09-25T16:07:24.125Z|50877": {
     "ƒ.MeshPyramid": {
-      "idResource": "MeshPyramid|2020-09-21T08:52:08.748Z|40607"
+      "idResource": "MeshPyramid|2020-09-25T16:07:24.125Z|50877",
+      "name": "Mesh",
+      "type": "MeshPyramid"
     }
   },
-  "MeshSphere|2020-09-21T08:52:08.749Z|99645": {
+  "MeshSphere|2020-09-25T16:07:24.126Z|24486": {
     "ƒ.MeshSphere": {
-      "idResource": "MeshSphere|2020-09-21T08:52:08.749Z|99645",
+      "idResource": "MeshSphere|2020-09-25T16:07:24.126Z|24486",
+      "name": "Mesh",
+      "type": "MeshSphere",
       "sectors": 8,
       "stacks": 5
     }
   },
-  "Material|2020-09-21T08:52:08.749Z|98744": {
+  "Material|2020-09-25T16:07:24.126Z|87421": {
     "ƒ.Material": {
       "name": "Flat",
-      "idResource": "Material|2020-09-21T08:52:08.749Z|98744",
+      "idResource": "Material|2020-09-25T16:07:24.126Z|87421",
       "shader": "ShaderFlat",
       "coat": {
         "ƒ.CoatColored": {
@@ -44,13 +50,15 @@
       }
     }
   },
-  "Audio|2020-09-21T08:52:08.750Z|80199": {
+  "Audio|2020-09-25T16:07:24.127Z|67563": {
     "ƒ.Audio": {
       "url": "Audio/hypnotic.mp3",
-      "idResource": "Audio|2020-09-21T08:52:08.750Z|80199"
+      "idResource": "Audio|2020-09-25T16:07:24.127Z|67563",
+      "name": "hypnotic.mp3",
+      "type": "Audio"
     }
   },
-  "NodeResource|2020-09-21T08:52:08.764Z|83411": {
+  "NodeResource|2020-09-25T16:07:24.143Z|54379": {
     "ƒ.NodeResource": {
       "name": "Graph",
       "components": {
@@ -99,14 +107,14 @@
               "Component": {
                 "active": true
               },
-              "idMaterial": "Material|2020-09-21T08:52:08.747Z|62213"
+              "idMaterial": "Material|2020-09-25T16:07:24.124Z|27449"
             }
           }
         ],
         "ComponentMesh": [
           {
             "ƒ.ComponentMesh": {
-              "idMesh": "MeshPyramid|2020-09-21T08:52:08.748Z|40607",
+              "idMesh": "MeshPyramid|2020-09-25T16:07:24.125Z|50877",
               "pivot": {
                 "translation": {
                   "x": 0,
@@ -143,7 +151,7 @@
           {
             "ƒ.ComponentAudio": {
               "active": true,
-              "idResource": "Audio|2020-09-21T08:52:08.750Z|80199",
+              "idResource": "Audio|2020-09-25T16:07:24.127Z|67563",
               "playing": true,
               "loop": true,
               "volume": 1
@@ -255,14 +263,14 @@
                     "Component": {
                       "active": true
                     },
-                    "idMaterial": "Material|2020-09-21T08:52:08.749Z|98744"
+                    "idMaterial": "Material|2020-09-25T16:07:24.126Z|87421"
                   }
                 }
               ],
               "ComponentMesh": [
                 {
                   "ƒ.ComponentMesh": {
-                    "idMesh": "MeshSphere|2020-09-21T08:52:08.749Z|99645",
+                    "idMesh": "MeshSphere|2020-09-25T16:07:24.126Z|24486",
                     "pivot": {
                       "translation": {
                         "x": 0,
@@ -291,7 +299,8 @@
           }
         }
       ],
-      "idResource": "NodeResource|2020-09-21T08:52:08.764Z|83411"
+      "idResource": "NodeResource|2020-09-25T16:07:24.143Z|54379",
+      "type": "Graph"
     }
   }
 }

@@ -1578,6 +1578,7 @@ var FudgeUserInterface;
                 target.readOnly = true;
                 let key = target.getAttribute("key");
                 Reflect.set(this.data, key, target.value);
+                this.focus();
             };
             this.hndKey = (_event) => {
                 _event.stopPropagation();
@@ -1689,7 +1690,7 @@ var FudgeUserInterface;
                 let input = document.createElement("input");
                 input.disabled = !entry.editable;
                 input.readOnly = true;
-                input.value = value.toString();
+                input.value = value;
                 input.setAttribute("key", entry.key);
                 input.addEventListener("keydown" /* KEY_DOWN */, this.hndInputEvent);
                 input.addEventListener("dblclick" /* DOUBLE_CLICK */, this.hndInputEvent);
