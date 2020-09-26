@@ -1591,7 +1591,7 @@ var Fudge;
             return mtrStandard;
         }
         static createStandardMesh() {
-            let meshStandard = new ƒ.MeshSphere();
+            let meshStandard = new ƒ.MeshSphere(6, 5);
             ƒ.Project.deregister(meshStandard);
             return meshStandard;
         }
@@ -1629,14 +1629,18 @@ var Fudge;
             if (this.resource instanceof ƒ.Mesh)
                 type = "Mesh";
             console.log(type);
+            let graph;
             switch (type) {
                 case "Mesh":
-                    let graph = new ƒ.Node("PreviewScene");
-                    ƒaid.addStandardLightComponents(graph);
+                    graph = this.createStandardGraph();
                     graph.addComponent(new ƒ.ComponentMesh(this.resource));
                     graph.addComponent(new ƒ.ComponentMaterial(ViewPreview.mtrStandard));
-                    this.viewport.setGraph(graph);
-                    this.dom.appendChild(this.viewport.getCanvas());
+                    this.viewport.draw();
+                    break;
+                case "Material":
+                    graph = this.createStandardGraph();
+                    graph.addComponent(new ƒ.ComponentMesh(ViewPreview.meshStandard));
+                    graph.addComponent(new ƒ.ComponentMaterial(this.resource));
                     this.viewport.draw();
                     break;
                 case "Graph":
@@ -1646,6 +1650,13 @@ var Fudge;
                     break;
                 default: break;
             }
+        }
+        createStandardGraph() {
+            let graph = new ƒ.Node("PreviewScene");
+            ƒaid.addStandardLightComponents(graph);
+            this.viewport.setGraph(graph);
+            this.dom.appendChild(this.viewport.getCanvas());
+            return graph;
         }
     }
     ViewPreview.mtrStandard = ViewPreview.createStandardMaterial();

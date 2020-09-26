@@ -40,7 +40,7 @@ namespace Fudge {
     }
 
     private static createStandardMesh(): ƒ.Mesh {
-      let meshStandard: ƒ.MeshSphere = new ƒ.MeshSphere();
+      let meshStandard: ƒ.MeshSphere = new ƒ.MeshSphere(6, 5);
       ƒ.Project.deregister(meshStandard);
       return meshStandard;
     }
@@ -87,15 +87,18 @@ namespace Fudge {
         type = "Mesh";
 
       console.log(type);
-
+      let graph: ƒ.Node;
       switch (type) {
         case "Mesh":
-          let graph: ƒ.Node = new ƒ.Node("PreviewScene");
-          ƒaid.addStandardLightComponents(graph);
+          graph = this.createStandardGraph();
           graph.addComponent(new ƒ.ComponentMesh(<ƒ.Mesh>this.resource));
           graph.addComponent(new ƒ.ComponentMaterial(ViewPreview.mtrStandard));
-          this.viewport.setGraph(graph);
-          this.dom.appendChild(this.viewport.getCanvas());
+          this.viewport.draw();
+          break;
+        case "Material":
+          graph = this.createStandardGraph();
+          graph.addComponent(new ƒ.ComponentMesh(ViewPreview.meshStandard));
+          graph.addComponent(new ƒ.ComponentMaterial(<ƒ.Material>this.resource));
           this.viewport.draw();
           break;
         case "Graph":
@@ -105,6 +108,14 @@ namespace Fudge {
           break;
         default: break;
       }
+    }
+
+    private createStandardGraph(): ƒ.Node {
+      let graph: ƒ.Node = new ƒ.Node("PreviewScene");
+      ƒaid.addStandardLightComponents(graph);
+      this.viewport.setGraph(graph);
+      this.dom.appendChild(this.viewport.getCanvas());
+      return graph;
     }
 
     private hndEvent = (_event: CustomEvent): void => {
