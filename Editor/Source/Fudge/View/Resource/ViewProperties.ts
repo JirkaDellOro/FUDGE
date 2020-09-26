@@ -12,7 +12,7 @@ namespace Fudge {
     constructor(_container: GoldenLayout.Container, _state: Object) {
       super(_container, _state); this.fillContent();
 
-      this.dom.addEventListener(EVENT_EDITOR.FOCUS_RESOURCE, this.hndEvent);
+      // this.dom.addEventListener(EVENT_EDITOR.FOCUS_RESOURCE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);

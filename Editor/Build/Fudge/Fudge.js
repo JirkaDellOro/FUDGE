@@ -25,7 +25,6 @@ var Fudge;
         EVENT_EDITOR["SET_GRAPH"] = "setGraph";
         EVENT_EDITOR["FOCUS_NODE"] = "focusNode";
         EVENT_EDITOR["SET_PROJECT"] = "setProject";
-        EVENT_EDITOR["FOCUS_RESOURCE"] = "focusResource";
     })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
     let PANEL;
     (function (PANEL) {
@@ -1555,6 +1554,8 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    var ƒ = FudgeCore;
+    var ƒaid = FudgeAid;
     /**
      * Preview a resource
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
@@ -1562,8 +1563,93 @@ var Fudge;
     class ViewPreview extends Fudge.View {
         constructor(_container, _state) {
             super(_container, _state);
+            this.hndEvent = (_event) => {
+                switch (_event.type) {
+                    default:
+                        this.resource = _event.detail.data;
+                        this.fillContent();
+                        break;
+                }
+            };
+            // create viewport for 3D-resources
+            let cmpCamera = new ƒ.ComponentCamera();
+            cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
+            cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
+            cmpCamera.projectCentral(1, 45);
+            let canvas = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
+            this.viewport = new ƒ.Viewport();
+            this.viewport.initialize("Preview", null, cmpCamera, canvas);
+            this.fillContent();
+            this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
+            this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
+            // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
+            // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
+        }
+        static createStandardMaterial() {
+            let mtrStandard = new ƒ.Material("StandardMaterial", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("white")));
+            ƒ.Project.deregister(mtrStandard);
+            return mtrStandard;
+        }
+        static createStandardMesh() {
+            let meshStandard = new ƒ.MeshSphere();
+            ƒ.Project.deregister(meshStandard);
+            return meshStandard;
+        }
+        //#region  ContextMenu
+        getContextMenu(_callback) {
+            const menu = new Fudge.remote.Menu();
+            let item;
+            item = new Fudge.remote.MenuItem({ label: "Add Component", submenu: [] });
+            for (let subItem of Fudge.ContextMenu.getComponents(_callback))
+                item.submenu.append(subItem);
+            menu.append(item);
+            Fudge.ContextMenu.appendCopyPaste(menu);
+            return menu;
+        }
+        contextMenuCallback(_item, _window, _event) {
+            ƒ.Debug.info(`MenuSelect: Item-id=${Fudge.CONTEXTMENU[_item.id]}`);
+            switch (Number(_item.id)) {
+                case Fudge.CONTEXTMENU.ADD_COMPONENT:
+                    let iSubclass = _item["iSubclass"];
+                    let component = ƒ.Component.subclasses[iSubclass];
+                    //@ts-ignore
+                    let cmpNew = new component();
+                    ƒ.Debug.info(cmpNew.type, cmpNew);
+                    // this.node.addComponent(cmpNew);
+                    this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { bubbles: true, detail: { data: this.resource } }));
+                    break;
+            }
+        }
+        //#endregion
+        fillContent() {
+            this.dom.innerHTML = "";
+            if (!this.resource)
+                return;
+            let type = this.resource.type;
+            if (this.resource instanceof ƒ.Mesh)
+                type = "Mesh";
+            console.log(type);
+            switch (type) {
+                case "Mesh":
+                    let graph = new ƒ.Node("PreviewScene");
+                    ƒaid.addStandardLightComponents(graph);
+                    graph.addComponent(new ƒ.ComponentMesh(this.resource));
+                    graph.addComponent(new ƒ.ComponentMaterial(ViewPreview.mtrStandard));
+                    this.viewport.setGraph(graph);
+                    this.dom.appendChild(this.viewport.getCanvas());
+                    this.viewport.draw();
+                    break;
+                case "Graph":
+                    this.viewport.setGraph(this.resource);
+                    this.dom.appendChild(this.viewport.getCanvas());
+                    this.viewport.draw();
+                    break;
+                default: break;
+            }
         }
     }
+    ViewPreview.mtrStandard = ViewPreview.createStandardMaterial();
+    ViewPreview.meshStandard = ViewPreview.createStandardMesh();
     Fudge.ViewPreview = ViewPreview;
 })(Fudge || (Fudge = {}));
 var Fudge;
@@ -1587,7 +1673,7 @@ var Fudge;
                 }
             };
             this.fillContent();
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS_RESOURCE, this.hndEvent);
+            // this.dom.addEventListener(EVENT_EDITOR.FOCUS_RESOURCE, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);

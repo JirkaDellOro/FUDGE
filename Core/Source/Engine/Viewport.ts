@@ -56,6 +56,12 @@ namespace FudgeCore {
       this.setGraph(_graph);
     }
     /**
+     * Retrieve the destination canvas
+     */
+    public getCanvas(): HTMLCanvasElement {
+      return this.canvas;
+    }
+    /**
      * Retrieve the 2D-context attached to the destination canvas
      */
     public getContext(): CanvasRenderingContext2D {

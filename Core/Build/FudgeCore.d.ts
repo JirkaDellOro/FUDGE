@@ -1850,6 +1850,10 @@ declare namespace FudgeCore {
          */
         initialize(_name: string, _graph: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void;
         /**
+         * Retrieve the destination canvas
+         */
+        getCanvas(): HTMLCanvasElement;
+        /**
          * Retrieve the 2D-context attached to the destination canvas
          */
         getContext(): CanvasRenderingContext2D;
