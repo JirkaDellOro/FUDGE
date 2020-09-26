@@ -161,16 +161,15 @@ namespace FudgeCore {
      * @param _mutator
      */
     public mutate(_mutator: Mutator): void {
-      // TODO: don't assign unknown properties
       for (let attribute in _mutator) {
-        let mutant: Object = (<General>this)[attribute];
-        if (!mutant)
+        if (!Reflect.has(this, attribute))
           continue;
+        let mutant: Object = Reflect.get(this, attribute);
         let value: Mutator = <Mutator>_mutator[attribute];
         if (mutant instanceof Mutable)
           mutant.mutate(value);
         else
-          (<General>this)[attribute] = value;
+          Reflect.set(this, attribute, value);
       }
       this.dispatchEvent(new Event(EVENT.MUTATE));
     }

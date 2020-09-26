@@ -1072,7 +1072,6 @@ declare namespace FudgeCore {
         constructor(_color?: Color);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
-        protected reduceMutator(): void;
     }
     /**
      * A [[Coat]] to be used by the MatCap Shader providing a texture, a tint color (0.5 grey is neutral). Set shadeSmooth to 1 for smooth shading.

@@ -47,8 +47,6 @@ namespace FudgeCore {
       this.color.deserialize(_serialization.color);
       return this;
     }
-
-    protected reduceMutator(): void { /**/ }
     //#endregion
   }
 

@@ -30,13 +30,6 @@ namespace FudgeUserInterface {
     }
 
     /**
-     * Return the key (name) of the attribute this element represents
-     */
-    public get key(): string {
-      return this.getAttribute("key");
-    }
-
-    /**
      * Retrieve an id to use for children of this element, needed e.g. for standard interaction with the label
      */
     protected static get nextId(): string {
@@ -69,6 +62,13 @@ namespace FudgeUserInterface {
     private static map(_type: string, _typeCustomElement: typeof CustomElement): void {
       ƒ.Debug.fudge("Map", _type.constructor.name, _typeCustomElement.constructor.name);
       CustomElement.mapObjectToCustomElement.set(_type, _typeCustomElement);
+    }
+
+    /**
+     * Return the key (name) of the attribute this element represents
+     */
+    public get key(): string {
+      return this.getAttribute("key");
     }
 
     /**

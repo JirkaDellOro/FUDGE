@@ -75,10 +75,6 @@ declare namespace FudgeUserInterface {
         protected initialized: boolean;
         constructor(_attributes?: CustomElementAttributes);
         /**
-         * Return the key (name) of the attribute this element represents
-         */
-        get key(): string;
-        /**
          * Retrieve an id to use for children of this element, needed e.g. for standard interaction with the label
          */
         protected static get nextId(): string;
@@ -91,6 +87,10 @@ declare namespace FudgeUserInterface {
          */
         static get(_type: string): typeof CustomElement;
         private static map;
+        /**
+         * Return the key (name) of the attribute this element represents
+         */
+        get key(): string;
         /**
          * Add a label-element as child to this element
          */

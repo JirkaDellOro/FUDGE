@@ -213,12 +213,6 @@ var FudgeUserInterface;
                     this.setAttribute(name, _attributes[name]);
         }
         /**
-         * Return the key (name) of the attribute this element represents
-         */
-        get key() {
-            return this.getAttribute("key");
-        }
-        /**
          * Retrieve an id to use for children of this element, needed e.g. for standard interaction with the label
          */
         static get nextId() {
@@ -247,6 +241,12 @@ var FudgeUserInterface;
         static map(_type, _typeCustomElement) {
             ƒ.Debug.fudge("Map", _type.constructor.name, _typeCustomElement.constructor.name);
             CustomElement.mapObjectToCustomElement.set(_type, _typeCustomElement);
+        }
+        /**
+         * Return the key (name) of the attribute this element represents
+         */
+        get key() {
+            return this.getAttribute("key");
         }
         /**
          * Add a label-element as child to this element
