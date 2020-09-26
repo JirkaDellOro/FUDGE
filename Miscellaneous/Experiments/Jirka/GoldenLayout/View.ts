@@ -16,7 +16,7 @@ namespace GoldenLayoutTest {
       this.container.innerHTML = `<h2>${(<any>_state).text}</h2>`;
     }
   }
-  
+
   export class ViewB extends View {
     constructor(_container: GoldenLayout.Container, _state: Object) {
       super(_container, _state);
