@@ -3,9 +3,8 @@ namespace FudgeCore {
    * Extension of AudioBuffer with a load method that creates a buffer in the [[AudioManager]].default to be used with [[ComponentAudio]]
    * @authors Thomas Dorner, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
    */
-  export class Audio extends EventTarget implements SerializableResource {
+  export class Audio extends Mutable implements SerializableResource {
     public name: string = "Audio";
-    public type: string = "Audio";
     public idResource: string = undefined;
     public buffer: AudioBuffer = undefined;
     private url: RequestInfo = undefined;
@@ -52,8 +51,12 @@ namespace FudgeCore {
       Project.register(this, _serialization.idResource);
       await this.load(_serialization.url);
       this.name = _serialization.name;
-      this.type = _serialization.type;
       return this;
+    }
+
+    protected reduceMutator(_mutator: Mutator): void { 
+      delete _mutator.idResource; 
+      delete _mutator.ready;
     }
     //#endregion
   }

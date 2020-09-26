@@ -377,7 +377,7 @@ var FudgeUserInterface;
                 return;
             _event.stopPropagation();
             _event.preventDefault();
-            console.log(_event.deltaY / 1000);
+            // console.log(_event.deltaY / 1000);
             let currentValue = Number(slider.value);
             slider.value = String(currentValue - _event.deltaY / 1000);
             slider.dispatchEvent(new Event("input", { bubbles: true }));
@@ -1464,7 +1464,7 @@ var FudgeUserInterface;
             // console.log(_dataStart, _dataEnd);
         }
         displaySelection(_data) {
-            console.log(_data);
+            // console.log(_data);
             let items = this.querySelectorAll("tr");
             for (let item of items)
                 item.selected = (_data != null && _data.indexOf(item.data) > -1);

@@ -991,9 +991,8 @@ declare namespace FudgeCore {
      * Extension of AudioBuffer with a load method that creates a buffer in the [[AudioManager]].default to be used with [[ComponentAudio]]
      * @authors Thomas Dorner, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
-    class Audio extends EventTarget implements SerializableResource {
+    class Audio extends Mutable implements SerializableResource {
         name: string;
-        type: string;
         idResource: string;
         buffer: AudioBuffer;
         private url;
@@ -1006,6 +1005,7 @@ declare namespace FudgeCore {
         load(_url: RequestInfo): Promise<void>;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace FudgeCore {
@@ -3479,7 +3479,7 @@ declare namespace FudgeCore {
      */
     abstract class Texture extends Mutable {
         name: string;
-        protected reduceMutator(): void;
+        protected reduceMutator(_mutator: Mutator): void;
     }
     /**
      * Texture created from an existing image

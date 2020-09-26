@@ -55,18 +55,19 @@ namespace Fudge {
       while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild));
       if (this.resource) {
         this.setTitle(this.resource.name);
-        if (this.resource instanceof ƒ.NodeResource) {
-          let components: ƒ.Component[] = this.resource.getAllComponents();
-          for (let component of components) {
-            let fieldset: ƒui.FoldableFieldSet = ƒui.Generator.createFieldSetFromMutable(component);
-            let uiComponent: ControllerComponent = new ControllerComponent(component, fieldset);
-            this.dom.append(uiComponent.domElement);
-          }
+        //   let components: ƒ.Component[] = this.resource.getAllComponents();
+        //   for (let component of components) {
+        if (this.resource instanceof ƒ.Mutable) {
+          let fieldset: ƒui.FoldableFieldSet = ƒui.Generator.createFieldSetFromMutable(this.resource);
+          let uiMutable: ControllerComponent = new ControllerComponent(this.resource, fieldset);
+          this.dom.append(uiMutable.domElement);
+          //   }
+          // }
         }
-      }
-      else {
-        let cntEmpty: HTMLDivElement = document.createElement("div");
-        this.dom.append(cntEmpty);
+        else {
+          let cntEmpty: HTMLDivElement = document.createElement("div");
+          this.dom.append(cntEmpty);
+        }
       }
     }
 

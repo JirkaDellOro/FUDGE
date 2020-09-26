@@ -94,10 +94,7 @@ namespace FudgeCore {
       return this;
     }
 
-
-    protected reduceMutator(_mutator: Mutator): void {
-      //
-    }
+    protected reduceMutator(_mutator: Mutator): void { delete _mutator.idResource; }
     //#endregion
   }
 }

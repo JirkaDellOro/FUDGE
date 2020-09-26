@@ -97,7 +97,7 @@ namespace FudgeUserInterface {
     }
 
     public displaySelection(_data: T[]): void {
-      console.log(_data);
+      // console.log(_data);
       let items: NodeListOf<TableItem<T>> = <NodeListOf<TableItem<T>>>this.querySelectorAll("tr");
       for (let item of items)
         item.selected = (_data != null && _data.indexOf(item.data) > -1);
