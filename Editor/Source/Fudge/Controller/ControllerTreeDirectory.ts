@@ -17,7 +17,7 @@ namespace Fudge {
     }
 
     public getChildren(_entry: DirectoryEntry): DirectoryEntry[] {
-      return _entry.getContent();
+      return _entry.getDirectoryContent();
     }
 
     public delete(_focussed: DirectoryEntry[]): DirectoryEntry[] {

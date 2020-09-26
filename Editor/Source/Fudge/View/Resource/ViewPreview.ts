@@ -10,7 +10,7 @@ namespace Fudge {
   export class ViewPreview extends View {
     private static mtrStandard: ƒ.Material = ViewPreview.createStandardMaterial();
     private static meshStandard: ƒ.Mesh = ViewPreview.createStandardMesh();
-    private resource: ƒ.SerializableResource;
+    private resource: ƒ.SerializableResource | DirectoryEntry;
     private viewport: ƒ.Viewport;
 
     constructor(_container: GoldenLayout.Container, _state: Object) {
@@ -91,6 +91,12 @@ namespace Fudge {
       // console.log(type);
       let graph: ƒ.Node;
       switch (type) {
+        case "File":
+          let extension: string = this.resource.name.split(".").pop();
+          if (["ts", "json", "html", "htm", "css", "js", "txt"].indexOf(extension) > -1) {
+            this.dom.appendChild(this.createTextPreview(<DirectoryEntry>this.resource));
+          }
+          break;
         case "Mesh":
           graph = this.createStandardGraph();
           graph.addComponent(new ƒ.ComponentMesh(<ƒ.Mesh>this.resource));
@@ -118,6 +124,12 @@ namespace Fudge {
       this.viewport.setGraph(graph);
       this.dom.appendChild(this.viewport.getCanvas());
       return graph;
+    }
+
+    private createTextPreview(_resource: DirectoryEntry): HTMLPreElement {
+      let pre: HTMLPreElement = document.createElement("pre");
+      pre.textContent = _resource.getFileContent();
+      return pre;
     }
 
     private hndEvent = (_event: CustomEvent): void => {

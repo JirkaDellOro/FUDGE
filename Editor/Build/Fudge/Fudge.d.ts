@@ -54,8 +54,10 @@ declare namespace Fudge {
         get name(): string;
         set name(_name: string);
         get isDirectory(): boolean;
+        get type(): string;
         delete(): void;
-        getContent(): DirectoryEntry[];
+        getDirectoryContent(): DirectoryEntry[];
+        getFileContent(): string;
         addEntry(_entry: DirectoryEntry): void;
     }
     export {};
@@ -393,6 +395,7 @@ declare namespace Fudge {
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         private fillContent;
         private createStandardGraph;
+        private createTextPreview;
         private hndEvent;
         private redraw;
     }

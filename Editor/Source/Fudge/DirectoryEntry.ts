@@ -2,7 +2,7 @@
 
 namespace Fudge {
   const fs: ƒ.General = require("fs");
-  const { Dirent, PathLike, renameSync, removeSync, readdirSync, copyFileSync, copySync } = require("fs");
+  const { Dirent, PathLike, renameSync, removeSync, readdirSync, readFileSync, copySync } = require("fs");
   const { basename, dirname, join } = require("path");
 
   export class DirectoryEntry {
@@ -37,11 +37,15 @@ namespace Fudge {
       return this.dirent.isDirectory() || this.dirent.isRoot;
     }
 
+    public get type(): string {
+      return this.isDirectory ? "Directory" : "File";
+    }
+
     public delete(): void {
       removeSync(this.path);
     }
 
-    public getContent(): DirectoryEntry[] {
+    public getDirectoryContent(): DirectoryEntry[] {
       let dirents: (typeof Dirent)[] = readdirSync(this.path, { withFileTypes: true });
       let content: DirectoryEntry[] = [];
       for (let dirent of dirents) {
@@ -50,6 +54,11 @@ namespace Fudge {
         let entry: DirectoryEntry = new DirectoryEntry(path, dirent, stats);
         content.push(entry);
       }
+      return content;
+    }
+
+    public getFileContent(): string {
+      let content: string = readFileSync(this.path, "utf8");
       return content;
     }
 

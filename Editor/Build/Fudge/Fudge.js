@@ -52,7 +52,7 @@ var Fudge;
 // /<reference types="../../../node_modules/@types/node/fs"/>
 (function (Fudge) {
     const fs = require("fs");
-    const { Dirent, PathLike, renameSync, removeSync, readdirSync, copyFileSync, copySync } = require("fs");
+    const { Dirent, PathLike, renameSync, removeSync, readdirSync, readFileSync, copySync } = require("fs");
     const { basename, dirname, join } = require("path");
     class DirectoryEntry {
         constructor(_path, _dirent, _stats) {
@@ -78,10 +78,13 @@ var Fudge;
         get isDirectory() {
             return this.dirent.isDirectory() || this.dirent.isRoot;
         }
+        get type() {
+            return this.isDirectory ? "Directory" : "File";
+        }
         delete() {
             removeSync(this.path);
         }
-        getContent() {
+        getDirectoryContent() {
             let dirents = readdirSync(this.path, { withFileTypes: true });
             let content = [];
             for (let dirent of dirents) {
@@ -90,6 +93,10 @@ var Fudge;
                 let entry = new DirectoryEntry(path, dirent, stats);
                 content.push(entry);
             }
+            return content;
+        }
+        getFileContent() {
+            let content = readFileSync(this.path, "utf8");
             return content;
         }
         addEntry(_entry) {
@@ -434,7 +441,7 @@ var Fudge;
             return _entry.isDirectory;
         }
         getChildren(_entry) {
-            return _entry.getContent();
+            return _entry.getDirectoryContent();
         }
         delete(_focussed) {
             // delete selection independend of focussed item
@@ -1665,6 +1672,12 @@ var Fudge;
             // console.log(type);
             let graph;
             switch (type) {
+                case "File":
+                    let extension = this.resource.name.split(".").pop();
+                    if (["ts", "json", "html", "htm", "css", "js", "txt"].indexOf(extension) > -1) {
+                        this.dom.appendChild(this.createTextPreview(this.resource));
+                    }
+                    break;
                 case "Mesh":
                     graph = this.createStandardGraph();
                     graph.addComponent(new ƒ.ComponentMesh(this.resource));
@@ -1691,6 +1704,11 @@ var Fudge;
             this.viewport.setGraph(graph);
             this.dom.appendChild(this.viewport.getCanvas());
             return graph;
+        }
+        createTextPreview(_resource) {
+            let pre = document.createElement("pre");
+            pre.textContent = _resource.getFileContent();
+            return pre;
         }
     }
     ViewPreview.mtrStandard = ViewPreview.createStandardMaterial();
