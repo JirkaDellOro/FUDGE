@@ -25,7 +25,8 @@ declare namespace Fudge {
         ACTIVATE_VIEWPORT = "activateViewport",
         SET_GRAPH = "setGraph",
         FOCUS_NODE = "focusNode",
-        SET_PROJECT = "setProject"
+        SET_PROJECT = "setProject",
+        FOCUS_RESOURCE = "focusResource"
     }
     enum PANEL {
         GRAPH = "PanelGraph",
@@ -390,6 +391,11 @@ declare namespace Fudge {
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class ViewProperties extends View {
+        private resource;
         constructor(_container: GoldenLayout.Container, _state: Object);
+        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
+        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        private fillContent;
+        private hndEvent;
     }
 }

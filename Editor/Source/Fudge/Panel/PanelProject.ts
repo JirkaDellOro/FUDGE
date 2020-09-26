@@ -1,5 +1,6 @@
 namespace Fudge {
   import ƒ = FudgeCore;
+  import ƒui = FudgeUserInterface;
 
   /**
    * Display the project structure and offer functions for creation, deletion and adjustment of resources
@@ -30,6 +31,7 @@ namespace Fudge {
       });
 
       this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
+      this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
     }
 
     private hndEvent = (_event: CustomEvent): void => {

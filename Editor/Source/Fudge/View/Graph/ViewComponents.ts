@@ -56,6 +56,7 @@ namespace Fudge {
     //#endregion
 
     private fillContent(): void {
+      while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild));
       if (this.node) {
         if (this.node instanceof ƒ.Node) {
           this.setTitle(this.node.name);
@@ -74,15 +75,14 @@ namespace Fudge {
       }
     }
 
-
     private hndEvent = (_event: CustomEvent): void => {
-      if (_event.type != ƒui.EVENT.RENAME)
-        this.node = _event.detail;
-
-      while (this.dom.firstChild != null) {
-        this.dom.removeChild(this.dom.lastChild);
+      switch (_event.type) {
+        case ƒui.EVENT.RENAME: break;
+        default:
+          this.node = _event.detail;
+          this.fillContent();
+          break;
       }
-      this.fillContent();
     }
   }
 }

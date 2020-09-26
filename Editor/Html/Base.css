@@ -129,6 +129,7 @@ table.sortable input[type="text"] {
 }
 
 table.sortable .selected input {
+  color: var(--color-highlight);
   font-weight: bold;
 }
 
@@ -137,13 +138,8 @@ table.sortable td>input:read-only {
   cursor: default;
 }
 
-table.sortable .selected {
-  color: var(--color-highlight);
-  font-weight: bold;
-}
 
 /* Text input */
-
 ul.tree .selected>input {
   color: var(--color-highlight);
   font-weight: bold;

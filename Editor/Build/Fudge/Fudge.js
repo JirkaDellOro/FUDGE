@@ -25,6 +25,7 @@ var Fudge;
         EVENT_EDITOR["SET_GRAPH"] = "setGraph";
         EVENT_EDITOR["FOCUS_NODE"] = "focusNode";
         EVENT_EDITOR["SET_PROJECT"] = "setProject";
+        EVENT_EDITOR["FOCUS_RESOURCE"] = "focusResource";
     })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
     let PANEL;
     (function (PANEL) {
@@ -668,6 +669,7 @@ var Fudge;
                 ]
             });
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
+            this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
         }
     }
     Fudge.PanelProject = PanelProject;
@@ -1297,12 +1299,13 @@ var Fudge;
         constructor(_container, _state) {
             super(_container, _state);
             this.hndEvent = (_event) => {
-                if (_event.type != "rename" /* RENAME */)
-                    this.node = _event.detail;
-                while (this.dom.firstChild != null) {
-                    this.dom.removeChild(this.dom.lastChild);
+                switch (_event.type) {
+                    case "rename" /* RENAME */: break;
+                    default:
+                        this.node = _event.detail;
+                        this.fillContent();
+                        break;
                 }
-                this.fillContent();
             };
             this.fillContent();
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
@@ -1337,6 +1340,8 @@ var Fudge;
         }
         //#endregion
         fillContent() {
+            while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
+                ;
             if (this.node) {
                 if (this.node instanceof ƒ.Node) {
                     this.setTitle(this.node.name);
@@ -1503,10 +1508,11 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
         }
         setProject() {
+            while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
+                ;
             let path = new URL(".", ƒ.Project.baseURL).pathname;
             path = path.substr(1); // strip leading slash
             let root = Fudge.DirectoryEntry.createRoot(path);
-            this.dom.innerHTML = "";
             let tree = new ƒui.Tree(new Fudge.ControllerTreeDirectory(), root);
             this.dom.appendChild(tree);
             tree.getItems()[0].open(true);
@@ -1526,12 +1532,20 @@ var Fudge;
         constructor(_container, _state) {
             super(_container, _state);
             this.hndEvent = (_event) => {
-                this.listResources();
+                switch (_event.type) {
+                    case Fudge.EVENT_EDITOR.SET_PROJECT:
+                        this.listResources();
+                        break;
+                    // case ƒui.EVENT.SELECT:
+                    //   console.log(_event.detail.data);
+                    //   break;
+                }
             };
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
         }
         listResources() {
-            this.dom.innerHTML = "";
+            while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
+                ;
             let table;
             table = new ƒui.Table(new Fudge.ControllerTableResource(), Object.values(ƒ.Project.resources));
             this.dom.appendChild(table);
@@ -1554,6 +1568,8 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    var ƒ = FudgeCore;
+    var ƒui = FudgeUserInterface;
     /**
      * View the properties of a resource
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
@@ -1561,6 +1577,66 @@ var Fudge;
     class ViewProperties extends Fudge.View {
         constructor(_container, _state) {
             super(_container, _state);
+            this.hndEvent = (_event) => {
+                switch (_event.type) {
+                    case "rename" /* RENAME */: break;
+                    default:
+                        this.resource = _event.detail.data;
+                        this.fillContent();
+                        break;
+                }
+            };
+            this.fillContent();
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS_RESOURCE, this.hndEvent);
+            this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
+            this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
+            // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
+            // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
+        }
+        //#region  ContextMenu
+        getContextMenu(_callback) {
+            const menu = new Fudge.remote.Menu();
+            let item;
+            item = new Fudge.remote.MenuItem({ label: "Add Component", submenu: [] });
+            for (let subItem of Fudge.ContextMenu.getComponents(_callback))
+                item.submenu.append(subItem);
+            menu.append(item);
+            Fudge.ContextMenu.appendCopyPaste(menu);
+            return menu;
+        }
+        contextMenuCallback(_item, _window, _event) {
+            ƒ.Debug.info(`MenuSelect: Item-id=${Fudge.CONTEXTMENU[_item.id]}`);
+            switch (Number(_item.id)) {
+                case Fudge.CONTEXTMENU.ADD_COMPONENT:
+                    let iSubclass = _item["iSubclass"];
+                    let component = ƒ.Component.subclasses[iSubclass];
+                    //@ts-ignore
+                    let cmpNew = new component();
+                    ƒ.Debug.info(cmpNew.type, cmpNew);
+                    // this.node.addComponent(cmpNew);
+                    this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { bubbles: true, detail: { data: this.resource } }));
+                    break;
+            }
+        }
+        //#endregion
+        fillContent() {
+            while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
+                ;
+            if (this.resource) {
+                this.setTitle(this.resource.name);
+                if (this.resource instanceof ƒ.NodeResource) {
+                    let components = this.resource.getAllComponents();
+                    for (let component of components) {
+                        let fieldset = ƒui.Generator.createFieldSetFromMutable(component);
+                        let uiComponent = new Fudge.ControllerComponent(component, fieldset);
+                        this.dom.append(uiComponent.domElement);
+                    }
+                }
+            }
+            else {
+                let cntEmpty = document.createElement("div");
+                this.dom.append(cntEmpty);
+            }
         }
     }
     Fudge.ViewProperties = ViewProperties;

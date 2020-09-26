@@ -14,14 +14,21 @@ namespace Fudge {
     }
 
     public listResources(): void {
-      this.dom.innerHTML = "";
+      while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild));
       let table: ƒui.Table<ƒ.SerializableResource>;
       table = new ƒui.Table<ƒ.SerializableResource>(new ControllerTableResource(), Object.values(ƒ.Project.resources));
       this.dom.appendChild(table);
     }
-    
+
     private hndEvent = (_event: CustomEvent): void => {
-      this.listResources();
+      switch (_event.type) {
+        case EVENT_EDITOR.SET_PROJECT:
+          this.listResources();
+          break;
+        // case ƒui.EVENT.SELECT:
+        //   console.log(_event.detail.data);
+        //   break;
+      }
     }
   }
 }

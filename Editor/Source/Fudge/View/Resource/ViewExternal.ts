@@ -14,10 +14,10 @@ namespace Fudge {
     }
 
     public setProject(): void {
+      while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild));
       let path: string = new URL(".", ƒ.Project.baseURL).pathname;
       path = path.substr(1); // strip leading slash
       let root: DirectoryEntry = DirectoryEntry.createRoot(path);
-      this.dom.innerHTML = "";
       let tree: ƒui.Tree<DirectoryEntry> = new ƒui.Tree<DirectoryEntry>(new ControllerTreeDirectory(), root);
       this.dom.appendChild(tree);
       tree.getItems()[0].open(true);
