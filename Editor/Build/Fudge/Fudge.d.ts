@@ -100,7 +100,8 @@ declare namespace Fudge {
         RENDER = "ViewRender",
         COMPONENTS = "ViewComponents",
         CAMERA = "ViewCamera",
-        MODELLER = "ViewModeller"
+        MODELLER = "ViewModeller",
+        OBJECT_PROPERTIES = "ViewObjectProperties"
     }
     /**
      * Base class for all [[View]]s to support generic functionality
@@ -303,18 +304,6 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
-    class ViewModellerScene extends View {
-        viewport: ƒ.Viewport;
-        canvas: HTMLCanvasElement;
-        graph: ƒ.Node;
-        constructor(_container: GoldenLayout.Container, _state: Object);
-        createUserInterface(): void;
-        private animate;
-        protected cleanup(): void;
-    }
-}
-declare namespace Fudge {
-    import ƒ = FudgeCore;
     /**
      * View the rendering of a graph in a viewport with an independent camera
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
@@ -330,5 +319,27 @@ declare namespace Fudge {
         private hndEvent;
         private animate;
         private activeViewport;
+    }
+}
+declare namespace Fudge {
+    import ƒ = FudgeCore;
+    class ViewModellerScene extends View {
+        viewport: ƒ.Viewport;
+        canvas: HTMLCanvasElement;
+        graph: ƒ.Node;
+        constructor(_container: GoldenLayout.Container, _state: Object);
+        createUserInterface(): void;
+        private animate;
+        protected cleanup(): void;
+    }
+}
+declare namespace Fudge {
+    import ƒ = FudgeCore;
+    class ViewObjectProperties extends View {
+        private currentNode;
+        constructor(_container: GoldenLayout.Container, _state: Object);
+        protected setObject(_object: ƒ.Node): void;
+        private fillContent;
+        protected cleanup(): void;
     }
 }

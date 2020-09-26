@@ -71,7 +71,7 @@ namespace Fudge {
   function openModeller(): void {
     node = new ƒ.Node("graph");
     let cooSys: ƒ.Node = new ƒAid.NodeCoordinateSystem("WorldCooSys");
-    let cube: ƒ.Node = new ƒAid.Node("cube", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderUniColor, new ƒ.CoatColored()), new ƒ.MeshCube());
+    let cube: ƒ.Node = new ƒAid.Node("Cube", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderUniColor, new ƒ.CoatColored()), new ƒ.MeshCube());
     node.addChild(cooSys);
     node.addChild(cube);
     Editor.add(PanelModeller, "Modeller", Object({ node: node }));

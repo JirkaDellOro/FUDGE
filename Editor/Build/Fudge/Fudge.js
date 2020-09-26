@@ -126,7 +126,7 @@ var Fudge;
     function openModeller() {
         node = new ƒ.Node("graph");
         let cooSys = new ƒAid.NodeCoordinateSystem("WorldCooSys");
-        let cube = new ƒAid.Node("cube", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderUniColor, new ƒ.CoatColored()), new ƒ.MeshCube());
+        let cube = new ƒAid.Node("Cube", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderUniColor, new ƒ.CoatColored()), new ƒ.MeshCube());
         node.addChild(cooSys);
         node.addChild(cube);
         Fudge.Editor.add(Fudge.PanelModeller, "Modeller", Object({ node: node }));
@@ -296,6 +296,7 @@ var Fudge;
     var ƒ = FudgeCore;
     class ControllerModeller {
         constructor(viewport) {
+            this.target = ƒ.Vector3.ZERO();
             this.onclick = (_event) => {
                 switch (_event.button) {
                     case 0:
@@ -337,7 +338,6 @@ var Fudge;
             this.viewport = viewport;
             this.viewport.adjustingFrames = true;
             this.currentRotation = viewport.camera.pivot.rotation;
-            console.log(this.viewport.camera.pivot.rotation);
             this.viewport.addEventListener("\u0192pointerdown" /* DOWN */, this.onclick);
             this.viewport.activatePointerEvent("\u0192pointerdown" /* DOWN */, true);
             this.viewport.addEventListener("\u0192pointermove" /* MOVE */, this.handleMove);
@@ -360,26 +360,26 @@ var Fudge;
             }
         }
         rotateCamera(_event) {
+            let currentTranslation = this.viewport.camera.pivot.translation;
             let magicalScaleDivisor = 4;
             let angleYaxis = _event.movementX / magicalScaleDivisor;
             let mtxYrot = ƒ.Matrix4x4.ROTATION_Y(angleYaxis);
-            let cameraTrans = this.viewport.camera.pivot.translation;
-            cameraTrans = this.multiplyMatrixes(mtxYrot, cameraTrans);
+            currentTranslation = this.multiplyMatrixes(mtxYrot, currentTranslation);
             let cameraRotation = this.viewport.camera.pivot.rotation;
             let degreeToRad = Math.PI / 180;
             let angleZAxis = Math.sin(degreeToRad * cameraRotation.y) * (_event.movementY / magicalScaleDivisor);
             let angleXAxis = -(Math.cos(degreeToRad * cameraRotation.y) * (_event.movementY / magicalScaleDivisor));
             let mtxXrot = ƒ.Matrix4x4.ROTATION_X(angleXAxis);
-            cameraTrans = this.multiplyMatrixes(mtxXrot, cameraTrans);
+            currentTranslation = this.multiplyMatrixes(mtxXrot, currentTranslation);
             let mtxZrot = ƒ.Matrix4x4.ROTATION_Z(angleZAxis);
-            this.viewport.camera.pivot.translation = this.multiplyMatrixes(mtxZrot, cameraTrans);
+            this.viewport.camera.pivot.translation = this.multiplyMatrixes(mtxZrot, currentTranslation);
             let rotation = ƒ.Matrix4x4.MULTIPLICATION(ƒ.Matrix4x4.MULTIPLICATION(mtxYrot, mtxXrot), mtxZrot).rotation;
             this.viewport.camera.pivot.rotation = rotation;
-            let target = ƒ.Vector3.ZERO();
-            this.viewport.camera.pivot.lookAt(target);
-            this.target = target;
+            this.viewport.camera.pivot.lookAt(this.target);
         }
         moveCamera(_event) {
+            let currentTranslation = this.viewport.camera.pivot.translation;
+            let distanceToTarget = ƒ.Vector3.DIFFERENCE(currentTranslation, this.target).magnitude;
             let cameraRotation = this.viewport.camera.pivot.rotation;
             let degreeToRad = Math.PI / 180;
             let cosX = Math.cos(cameraRotation.x * degreeToRad);
@@ -389,8 +389,11 @@ var Fudge;
             let movementXscaled = _event.movementX / 100;
             let movementYscaled = _event.movementY / 100;
             let translationChange = new ƒ.Vector3(-cosY * movementXscaled - sinX * sinY * movementYscaled, -cosX * movementYscaled, sinY * movementXscaled - sinX * cosY * movementYscaled);
-            let currentTranslation = this.viewport.camera.pivot.translation;
             this.viewport.camera.pivot.translation = new ƒ.Vector3(currentTranslation.x + translationChange.x, currentTranslation.y + translationChange.y, currentTranslation.z + translationChange.z);
+            let rayToCenter = this.viewport.getRayFromClient(new ƒ.Vector2(this.viewport.getCanvasRectangle().width / 2, this.viewport.getCanvasRectangle().height / 2));
+            rayToCenter.direction.scale(distanceToTarget);
+            let rayEnd = ƒ.Vector3.SUM(rayToCenter.origin, rayToCenter.direction);
+            this.target = rayEnd;
         }
         multiplyMatrixes(mtx, vector) {
             let x = ƒ.Vector3.DOT(mtx.getX(), vector);
@@ -465,6 +468,7 @@ var Fudge;
         VIEW["COMPONENTS"] = "ViewComponents";
         VIEW["CAMERA"] = "ViewCamera";
         VIEW["MODELLER"] = "ViewModeller";
+        VIEW["OBJECT_PROPERTIES"] = "ViewObjectProperties";
         // PROJECT = ViewProject,
         // SKETCH = ViewSketch,
         // MESH = ViewMesh,
@@ -609,16 +613,18 @@ var Fudge;
             super(_container, _state);
             this.goldenLayout.registerComponent(Fudge.VIEW.MODELLER, Fudge.ViewModellerScene);
             this.goldenLayout.registerComponent(Fudge.VIEW.HIERARCHY, Fudge.ViewHierarchy);
+            this.goldenLayout.registerComponent(Fudge.VIEW.OBJECT_PROPERTIES, Fudge.ViewObjectProperties);
             let inner = this.goldenLayout.root.contentItems[0];
             inner.addChild({
                 type: "column", content: [{
-                        type: "component", componentName: Fudge.VIEW.MODELLER, componentState: _state, title: "Modeller"
+                        type: "component", componentName: Fudge.VIEW.MODELLER, componentState: _state, title: "Scene"
                     }]
             });
             inner.addChild({
-                type: "column", content: [{
-                        type: "component", componentName: Fudge.VIEW.HIERARCHY, componentState: _state, title: "Hierarchy"
-                    }]
+                type: "column", content: [
+                    { type: "component", componentName: Fudge.VIEW.HIERARCHY, componentState: _state, title: "Hierarchy" },
+                    { type: "component", componentName: Fudge.VIEW.OBJECT_PROPERTIES, componentState: _state }
+                ]
             });
         }
         cleanup() {
@@ -1413,47 +1419,6 @@ var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒaid = FudgeAid;
-    class ViewModellerScene extends Fudge.View {
-        constructor(_container, _state) {
-            super(_container, _state);
-            this.animate = (_e) => {
-                this.viewport.setGraph(this.graph);
-                if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
-                    this.viewport.draw();
-            };
-            this.graph = _state["node"];
-            this.createUserInterface();
-            new Fudge.ControllerModeller(this.viewport);
-            // this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.hndEvent);
-            // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
-        }
-        createUserInterface() {
-            let cmpCamera = new ƒ.ComponentCamera();
-            cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
-            cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
-            cmpCamera.projectCentral(1, 45);
-            //cmpCamera.pivot.rotateX(90);
-            this.canvas = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
-            let container = document.createElement("div");
-            container.style.borderWidth = "0px";
-            document.body.appendChild(this.canvas);
-            this.viewport = new ƒ.Viewport();
-            this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
-            this.viewport.draw();
-            this.dom.append(this.canvas);
-            ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
-            ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, this.animate);
-        }
-        cleanup() {
-            ƒ.Loop.removeEventListener("loopFrame" /* LOOP_FRAME */, this.animate);
-        }
-    }
-    Fudge.ViewModellerScene = ViewModellerScene;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    var ƒ = FudgeCore;
-    var ƒaid = FudgeAid;
     /**
      * View the rendering of a graph in a viewport with an independent camera
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
@@ -1509,5 +1474,78 @@ var Fudge;
         }
     }
     Fudge.ViewRender = ViewRender;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    var ƒ = FudgeCore;
+    var ƒaid = FudgeAid;
+    class ViewModellerScene extends Fudge.View {
+        constructor(_container, _state) {
+            super(_container, _state);
+            this.animate = (_e) => {
+                this.viewport.setGraph(this.graph);
+                if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
+                    this.viewport.draw();
+            };
+            this.graph = _state["node"];
+            this.createUserInterface();
+            // tslint:disable-next-line: no-unused-expression
+            new Fudge.ControllerModeller(this.viewport);
+            // this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.hndEvent);
+            // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
+        }
+        createUserInterface() {
+            let cmpCamera = new ƒ.ComponentCamera();
+            cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
+            cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
+            cmpCamera.projectCentral(1, 45);
+            //cmpCamera.pivot.rotateX(90);
+            this.canvas = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
+            let container = document.createElement("div");
+            container.style.borderWidth = "0px";
+            document.body.appendChild(this.canvas);
+            this.viewport = new ƒ.Viewport();
+            this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
+            this.viewport.draw();
+            this.dom.append(this.canvas);
+            ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
+            ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, this.animate);
+        }
+        cleanup() {
+            ƒ.Loop.removeEventListener("loopFrame" /* LOOP_FRAME */, this.animate);
+        }
+    }
+    Fudge.ViewModellerScene = ViewModellerScene;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    var ƒui = FudgeUserInterface;
+    class ViewObjectProperties extends Fudge.View {
+        constructor(_container, _state) {
+            super(_container, _state);
+            // this.contextMenu = this.getContextMenu(this.contextMenuCallback);
+            this.setObject(_state.node.getChildrenByName("Cube")[0]);
+            this.fillContent();
+            // this.parentPanel.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setSelectedNode);
+            // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
+        }
+        setObject(_object) {
+            if (!_object)
+                return;
+            this.currentNode = _object;
+        }
+        fillContent() {
+            this.setTitle(this.currentNode.name);
+            let fieldset = ƒui.Generator.createFieldSetFromMutable(this.currentNode.cmpTransform);
+            let uiComponent = new Fudge.ControllerComponent(this.currentNode.cmpTransform, fieldset);
+            this.dom.append(uiComponent.domElement);
+        }
+        // protected update = () => {
+        // }
+        cleanup() {
+            throw new Error("Method not implemented.");
+        }
+    }
+    Fudge.ViewObjectProperties = ViewObjectProperties;
 })(Fudge || (Fudge = {}));
 //# sourceMappingURL=Fudge.js.map

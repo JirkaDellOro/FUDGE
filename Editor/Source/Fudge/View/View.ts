@@ -8,7 +8,8 @@ namespace Fudge {
     RENDER = "ViewRender",
     COMPONENTS = "ViewComponents",
     CAMERA = "ViewCamera",
-    MODELLER = "ViewModeller"
+    MODELLER = "ViewModeller", 
+    OBJECT_PROPERTIES = "ViewObjectProperties"
     // PROJECT = ViewProject,
     // SKETCH = ViewSketch,
     // MESH = ViewMesh,

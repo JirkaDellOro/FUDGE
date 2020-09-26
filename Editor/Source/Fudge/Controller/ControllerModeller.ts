@@ -4,7 +4,7 @@ namespace Fudge {
   export class ControllerModeller {
     viewport: ƒ.Viewport;
     currentRotation: ƒ.Vector3;
-    target: ƒ.Vector3;
+    target: ƒ.Vector3 = ƒ.Vector3.ZERO();
     selectedNodes: ƒ.Node[];
 
     constructor (viewport: ƒ.Viewport) {
@@ -12,7 +12,6 @@ namespace Fudge {
 
       this.viewport.adjustingFrames = true;
       this.currentRotation = viewport.camera.pivot.rotation;
-      console.log(this.viewport.camera.pivot.rotation);
 
       this.viewport.addEventListener(ƒ.EVENT_POINTER.DOWN, this.onclick);
       this.viewport.activatePointerEvent(ƒ.EVENT_POINTER.DOWN, true);
@@ -83,11 +82,13 @@ namespace Fudge {
     }
 
     private rotateCamera(_event: ƒ.EventPointer): void {
+      let currentTranslation: ƒ.Vector3 = this.viewport.camera.pivot.translation;
+
       let magicalScaleDivisor: number = 4;
       let angleYaxis: number = _event.movementX / magicalScaleDivisor;
       let mtxYrot: ƒ.Matrix4x4 = ƒ.Matrix4x4.ROTATION_Y(angleYaxis);
-      let cameraTrans: ƒ.Vector3 = this.viewport.camera.pivot.translation;
-      cameraTrans = this.multiplyMatrixes(mtxYrot, cameraTrans);
+
+      currentTranslation = this.multiplyMatrixes(mtxYrot, currentTranslation);
 
       let cameraRotation: ƒ.Vector3 = this.viewport.camera.pivot.rotation;
       let degreeToRad: number = Math.PI / 180;
@@ -95,20 +96,20 @@ namespace Fudge {
       let angleXAxis: number = -(Math.cos(degreeToRad * cameraRotation.y) * (_event.movementY / magicalScaleDivisor));
 
       let mtxXrot: ƒ.Matrix4x4 = ƒ.Matrix4x4.ROTATION_X(angleXAxis);
-      cameraTrans = this.multiplyMatrixes(mtxXrot, cameraTrans);
+      currentTranslation = this.multiplyMatrixes(mtxXrot, currentTranslation);
 
       let mtxZrot: ƒ.Matrix4x4 = ƒ.Matrix4x4.ROTATION_Z(angleZAxis);
-      this.viewport.camera.pivot.translation = this.multiplyMatrixes(mtxZrot, cameraTrans);
+      this.viewport.camera.pivot.translation = this.multiplyMatrixes(mtxZrot, currentTranslation);
 
       let rotation: ƒ.Vector3 = ƒ.Matrix4x4.MULTIPLICATION(ƒ.Matrix4x4.MULTIPLICATION(mtxYrot, mtxXrot), mtxZrot).rotation;
       this.viewport.camera.pivot.rotation = rotation;
 
-      let target: ƒ.Vector3 = ƒ.Vector3.ZERO();
-      this.viewport.camera.pivot.lookAt(target);
-      this.target = target;
+      this.viewport.camera.pivot.lookAt(this.target);
     }
 
     private moveCamera(_event: ƒ.EventPointer): void {
+      let currentTranslation: ƒ.Vector3 = this.viewport.camera.pivot.translation;
+      let distanceToTarget: number = ƒ.Vector3.DIFFERENCE(currentTranslation, this.target).magnitude;
       let cameraRotation: ƒ.Vector3 = this.viewport.camera.pivot.rotation;
       let degreeToRad: number = Math.PI / 180;
       let cosX: number = Math.cos(cameraRotation.x * degreeToRad);
@@ -116,17 +117,22 @@ namespace Fudge {
       let sinX: number = Math.sin(cameraRotation.x * degreeToRad);
       let sinY: number = Math.sin(cameraRotation.y * degreeToRad);
       let movementXscaled: number = _event.movementX / 100;
-      let movementYscaled: number = _event.movementY / 100;     
+      let movementYscaled: number = _event.movementY / 100;  
+         
       let translationChange: ƒ.Vector3 = new ƒ.Vector3(
         -cosY * movementXscaled - sinX * sinY * movementYscaled,
         -cosX * movementYscaled,
         sinY * movementXscaled - sinX * cosY * movementYscaled);
 
-      let currentTranslation: ƒ.Vector3 = this.viewport.camera.pivot.translation;
       this.viewport.camera.pivot.translation = new ƒ.Vector3(
         currentTranslation.x + translationChange.x, 
         currentTranslation.y + translationChange.y, 
         currentTranslation.z + translationChange.z);
+
+      let rayToCenter: ƒ.Ray =  this.viewport.getRayFromClient(new ƒ.Vector2(this.viewport.getCanvasRectangle().width / 2, this.viewport.getCanvasRectangle().height / 2));
+      rayToCenter.direction.scale(distanceToTarget);
+      let rayEnd: ƒ.Vector3 = ƒ.Vector3.SUM(rayToCenter.origin, rayToCenter.direction);
+      this.target = rayEnd;
     }
 
     private multiplyMatrixes(mtx: ƒ.Matrix4x4, vector: ƒ.Vector3): ƒ.Vector3 {
