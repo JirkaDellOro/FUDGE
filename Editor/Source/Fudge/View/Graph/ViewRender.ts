@@ -77,8 +77,11 @@ namespace Fudge {
     }
 
     private redraw = () => {
-      if (this.viewport.getGraph() && this.viewport.getCanvas())
+      try {
         this.viewport.draw();
+      } catch (_error: unknown) {
+        //nop
+      }
     }
   }
 }

@@ -48,7 +48,8 @@ declare namespace Fudge {
     export class DirectoryEntry {
         path: typeof fs.PathLike;
         dirent: typeof fs.Dirent;
-        constructor(_path: typeof fs.PathLike, _dirent: typeof fs.Dirent);
+        stats: Object;
+        constructor(_path: typeof fs.PathLike, _dirent: typeof fs.Dirent, _stats: Object);
         static createRoot(_path: typeof fs.PathLike): DirectoryEntry;
         get name(): string;
         set name(_name: string);

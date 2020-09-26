@@ -53,20 +53,22 @@ namespace Fudge {
 
     private fillContent(): void {
       while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild));
+      // console.log(this.resource);
       if (this.resource) {
         this.setTitle(this.resource.name);
-        //   let components: ƒ.Component[] = this.resource.getAllComponents();
-        //   for (let component of components) {
         if (this.resource instanceof ƒ.Mutable) {
           let fieldset: ƒui.FoldableFieldSet = ƒui.Generator.createFieldSetFromMutable(this.resource);
           let uiMutable: ControllerComponent = new ControllerComponent(this.resource, fieldset);
           this.dom.append(uiMutable.domElement);
-          //   }
-          // }
         }
         else {
-          let cntEmpty: HTMLDivElement = document.createElement("div");
-          this.dom.append(cntEmpty);
+          let div: HTMLDivElement = document.createElement("div");
+          this.dom.append(div);
+          if (this.resource instanceof DirectoryEntry && this.resource.stats) {
+            div.innerHTML += "Size: " + (this.resource.stats["size"] / 1024).toFixed(2) + " KiB<br/>";
+            div.innerHTML += "Created: " + this.resource.stats["birthtime"].toLocaleString() + "<br/>";
+            div.innerHTML += "Modified: " + this.resource.stats["ctime"].toLocaleString() + "<br/>";
+          }
         }
       }
     }

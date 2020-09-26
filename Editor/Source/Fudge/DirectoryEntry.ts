@@ -8,17 +8,19 @@ namespace Fudge {
   export class DirectoryEntry {
     public path: typeof fs.PathLike;
     public dirent: typeof fs.Dirent;
+    public stats: Object;
 
-    constructor(_path: typeof fs.PathLike, _dirent: typeof fs.Dirent) {
+    constructor(_path: typeof fs.PathLike, _dirent: typeof fs.Dirent, _stats: Object) {
       this.path = _path;
       this.dirent = _dirent;
+      this.stats = _stats;
     }
 
     public static createRoot(_path: typeof fs.PathLike): DirectoryEntry {
       let dirent: typeof Dirent = new Dirent();
       dirent.name = basename(<string>_path);
       dirent.isRoot = true;
-      return new DirectoryEntry(_path, dirent);
+      return new DirectoryEntry(_path, dirent, null);
     }
 
     public get name(): string {
@@ -43,7 +45,9 @@ namespace Fudge {
       let dirents: (typeof Dirent)[] = readdirSync(this.path, { withFileTypes: true });
       let content: DirectoryEntry[] = [];
       for (let dirent of dirents) {
-        let entry: DirectoryEntry = new DirectoryEntry(join(this.path, dirent.name), dirent);
+        let path: string = join(this.path, dirent.name);
+        let stats: Object = fs.statSync(path);
+        let entry: DirectoryEntry = new DirectoryEntry(path, dirent, stats);
         content.push(entry);
       }
       return content;

@@ -88,7 +88,7 @@ namespace Fudge {
       if (this.resource instanceof ƒ.Mesh)
         type = "Mesh";
 
-      console.log(type);
+      // console.log(type);
       let graph: ƒ.Node;
       switch (type) {
         case "Mesh":
@@ -121,7 +121,7 @@ namespace Fudge {
     }
 
     private hndEvent = (_event: CustomEvent): void => {
-      console.log(_event.type);
+      // console.log(_event.type);
       switch (_event.type) {
         case ƒui.EVENT.UPDATE:
           this.redraw();
@@ -134,8 +134,11 @@ namespace Fudge {
     }
 
     private redraw = () => {
-      if (this.viewport.getGraph() && this.viewport.getCanvas())
+      try {
         this.viewport.draw();
+      } catch (_error: unknown) {
+        //nop
+      }
     }
   }
 }

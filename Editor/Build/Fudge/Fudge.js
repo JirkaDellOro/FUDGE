@@ -55,15 +55,16 @@ var Fudge;
     const { Dirent, PathLike, renameSync, removeSync, readdirSync, copyFileSync, copySync } = require("fs");
     const { basename, dirname, join } = require("path");
     class DirectoryEntry {
-        constructor(_path, _dirent) {
+        constructor(_path, _dirent, _stats) {
             this.path = _path;
             this.dirent = _dirent;
+            this.stats = _stats;
         }
         static createRoot(_path) {
             let dirent = new Dirent();
             dirent.name = basename(_path);
             dirent.isRoot = true;
-            return new DirectoryEntry(_path, dirent);
+            return new DirectoryEntry(_path, dirent, null);
         }
         get name() {
             return this.dirent.name;
@@ -84,7 +85,9 @@ var Fudge;
             let dirents = readdirSync(this.path, { withFileTypes: true });
             let content = [];
             for (let dirent of dirents) {
-                let entry = new DirectoryEntry(join(this.path, dirent.name), dirent);
+                let path = join(this.path, dirent.name);
+                let stats = fs.statSync(path);
+                let entry = new DirectoryEntry(path, dirent, stats);
                 content.push(entry);
             }
             return content;
@@ -1465,8 +1468,12 @@ var Fudge;
                 _event.cancelBubble = true;
             };
             this.redraw = () => {
-                if (this.viewport.getGraph() && this.viewport.getCanvas())
+                try {
                     this.viewport.draw();
+                }
+                catch (_error) {
+                    //nop
+                }
             };
             this.graph = _state["node"];
             this.createUserInterface();
@@ -1577,7 +1584,7 @@ var Fudge;
         constructor(_container, _state) {
             super(_container, _state);
             this.hndEvent = (_event) => {
-                console.log(_event.type);
+                // console.log(_event.type);
                 switch (_event.type) {
                     case "update" /* UPDATE */:
                         this.redraw();
@@ -1589,8 +1596,12 @@ var Fudge;
                 }
             };
             this.redraw = () => {
-                if (this.viewport.getGraph() && this.viewport.getCanvas())
+                try {
                     this.viewport.draw();
+                }
+                catch (_error) {
+                    //nop
+                }
             };
             // create viewport for 3D-resources
             let cmpCamera = new ƒ.ComponentCamera();
@@ -1651,7 +1662,7 @@ var Fudge;
             let type = this.resource.type;
             if (this.resource instanceof ƒ.Mesh)
                 type = "Mesh";
-            console.log(type);
+            // console.log(type);
             let graph;
             switch (type) {
                 case "Mesh":
@@ -1742,20 +1753,22 @@ var Fudge;
         fillContent() {
             while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
                 ;
+            // console.log(this.resource);
             if (this.resource) {
                 this.setTitle(this.resource.name);
-                //   let components: ƒ.Component[] = this.resource.getAllComponents();
-                //   for (let component of components) {
                 if (this.resource instanceof ƒ.Mutable) {
                     let fieldset = ƒui.Generator.createFieldSetFromMutable(this.resource);
                     let uiMutable = new Fudge.ControllerComponent(this.resource, fieldset);
                     this.dom.append(uiMutable.domElement);
-                    //   }
-                    // }
                 }
                 else {
-                    let cntEmpty = document.createElement("div");
-                    this.dom.append(cntEmpty);
+                    let div = document.createElement("div");
+                    this.dom.append(div);
+                    if (this.resource instanceof Fudge.DirectoryEntry && this.resource.stats) {
+                        div.innerHTML += "Size: " + (this.resource.stats["size"] / 1024).toFixed(2) + " KiB<br/>";
+                        div.innerHTML += "Created: " + this.resource.stats["birthtime"].toLocaleString() + "<br/>";
+                        div.innerHTML += "Modified: " + this.resource.stats["ctime"].toLocaleString() + "<br/>";
+                    }
                 }
             }
         }
