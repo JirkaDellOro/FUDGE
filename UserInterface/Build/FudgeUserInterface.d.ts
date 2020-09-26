@@ -353,6 +353,7 @@ declare namespace FudgeUserInterface {
         private getSortButtons;
         private hndSort;
         private hndSelect;
+        private hndEscape;
         private hndFocus;
     }
 }

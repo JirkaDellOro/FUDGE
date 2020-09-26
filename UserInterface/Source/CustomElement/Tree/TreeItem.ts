@@ -198,6 +198,9 @@ namespace FudgeUserInterface {
         case ƒ.KEYBOARD_CODE.SPACE:
           this.select(_event.ctrlKey, _event.shiftKey);
           break;
+        case ƒ.KEYBOARD_CODE.ESC:
+          this.dispatchEvent(new Event(EVENT.ESCAPE, { bubbles: true }));
+          break;
         case ƒ.KEYBOARD_CODE.DELETE:
           this.dispatchEvent(new Event(EVENT.DELETE, { bubbles: true }));
           break;

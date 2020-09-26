@@ -1347,9 +1347,9 @@ var FudgeUserInterface;
             //   // let remove: T[] = this.controller.delete([target.data]);
             //   // this.delete(remove);
             // }
-            // private hndEscape = (_event: Event): void => {
-            //   this.clearSelection();
-            // }
+            this.hndEscape = (_event) => {
+                this.clearSelection();
+            };
             // private hndCopyPaste = async (_event: Event): Promise<void> => {
             //   // // console.log(_event);
             //   // _event.stopPropagation();
@@ -1397,15 +1397,16 @@ var FudgeUserInterface;
             this.controller = _controller;
             this.data = _data;
             this.create();
+            this.className = "sortable";
             this.addEventListener("sort" /* SORT */, this.hndSort);
             this.addEventListener("itemselect" /* SELECT */, this.hndSelect);
             this.addEventListener("focusNext" /* FOCUS_NEXT */, this.hndFocus);
             this.addEventListener("focusPrevious" /* FOCUS_PREVIOUS */, this.hndFocus);
+            this.addEventListener("escape" /* ESCAPE */, this.hndEscape);
             // this.addEventListener(EVENT_TABLE.CHANGE, this.hndSort);
             // this.addEventListener(EVENT_TREE.RENAME, this.hndRename);
             // this.addEventListener(EVENT_TREE.DROP, this.hndDrop);
             // this.addEventListener(EVENT_TREE.DELETE, this.hndDelete);
-            // this.addEventListener(EVENT_TREE.ESCAPE, this.hndEscape);
             // this.addEventListener(EVENT_TREE.COPY, this.hndCopyPaste);
             // this.addEventListener(EVENT_TREE.PASTE, this.hndCopyPaste);
             // this.addEventListener(EVENT_TREE.CUT, this.hndCopyPaste);
@@ -1428,7 +1429,7 @@ var FudgeUserInterface;
          */
         clearSelection() {
             this.controller.selection.splice(0);
-            // this.displaySelection(<T[]>this.controller.selection);
+            this.displaySelection(this.controller.selection);
         }
         /**
          * Return the object in focus
@@ -1601,6 +1602,9 @@ var FudgeUserInterface;
                     case ƒ.KEYBOARD_CODE.SPACE:
                         this.select(_event.ctrlKey, _event.shiftKey);
                         break;
+                    case ƒ.KEYBOARD_CODE.ESC:
+                        this.dispatchEvent(new Event("escape" /* ESCAPE */, { bubbles: true }));
+                        break;
                     case ƒ.KEYBOARD_CODE.DELETE:
                         this.dispatchEvent(new Event("delete" /* DELETE */, { bubbles: true }));
                         break;
@@ -1641,6 +1645,7 @@ var FudgeUserInterface;
             };
             this.hndPointerUp = (_event) => {
                 _event.stopPropagation();
+                this.focus();
                 this.select(_event.ctrlKey, _event.shiftKey);
             };
             this.controller = _controller;
@@ -1648,6 +1653,7 @@ var FudgeUserInterface;
             // this.display = this.controller.getLabel(_data);
             // TODO: handle cssClasses
             this.create(this.controller.getHead());
+            this.className = "table";
             this.addEventListener("pointerup" /* POINTER_UP */, this.hndPointerUp);
             this.addEventListener("keydown" /* KEY_DOWN */, this.hndKey);
             this.addEventListener("change" /* CHANGE */, this.hndChange);
@@ -1688,6 +1694,7 @@ var FudgeUserInterface;
                 let value = Reflect.get(this.data, entry.key);
                 let td = document.createElement("td");
                 let input = document.createElement("input");
+                input.type = "text";
                 input.disabled = !entry.editable;
                 input.readOnly = true;
                 input.value = value;
@@ -2077,6 +2084,9 @@ var FudgeUserInterface;
                         break;
                     case ƒ.KEYBOARD_CODE.SPACE:
                         this.select(_event.ctrlKey, _event.shiftKey);
+                        break;
+                    case ƒ.KEYBOARD_CODE.ESC:
+                        this.dispatchEvent(new Event("escape" /* ESCAPE */, { bubbles: true }));
                         break;
                     case ƒ.KEYBOARD_CODE.DELETE:
                         this.dispatchEvent(new Event("delete" /* DELETE */, { bubbles: true }));

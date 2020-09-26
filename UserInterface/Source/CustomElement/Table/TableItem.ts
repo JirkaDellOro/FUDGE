@@ -14,6 +14,7 @@ namespace FudgeUserInterface {
       // this.display = this.controller.getLabel(_data);
       // TODO: handle cssClasses
       this.create(this.controller.getHead());
+      this.className = "table";
 
       this.addEventListener(EVENT.POINTER_UP, this.hndPointerUp);
       this.addEventListener(EVENT.KEY_DOWN, this.hndKey);
@@ -61,6 +62,7 @@ namespace FudgeUserInterface {
         let value: string = Reflect.get(this.data, entry.key);
         let td: HTMLTableCellElement = document.createElement("td");
         let input: HTMLInputElement = document.createElement("input");
+        input.type = "text";
         input.disabled = !entry.editable;
         input.readOnly = true;
         input.value = value;
@@ -115,6 +117,9 @@ namespace FudgeUserInterface {
         case ƒ.KEYBOARD_CODE.SPACE:
           this.select(_event.ctrlKey, _event.shiftKey);
           break;
+        case ƒ.KEYBOARD_CODE.ESC:
+          this.dispatchEvent(new Event(EVENT.ESCAPE, { bubbles: true }));
+          break;
         case ƒ.KEYBOARD_CODE.DELETE:
           this.dispatchEvent(new Event(EVENT.DELETE, { bubbles: true }));
           break;
@@ -158,6 +163,7 @@ namespace FudgeUserInterface {
 
     private hndPointerUp = (_event: PointerEvent): void => {
       _event.stopPropagation();
+      this.focus();
       this.select(_event.ctrlKey, _event.shiftKey);
     }
   }

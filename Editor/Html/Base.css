@@ -91,6 +91,57 @@ ul.tree input[type="checkbox"]~ul {
   display: none;
 }
 
+/* Table */
+
+table.sortable {
+  width: 100%;
+}
+
+table.sortable th {
+  text-align: left;
+}
+
+table.sortable th>span {
+  display: inline-block;
+  width: 50px;
+  text-align: center;
+}
+
+table.sortable th>span>input {
+  height: 0px;
+  top: -1em;
+  display: inline-block;
+  position: relative;
+  color: var(--color-text);
+}
+
+table.sortable th>span>input[value="up"]::before {
+  content: "▲";
+}
+
+table.sortable th>span>input[value="down"]::before {
+  content: "▼";
+}
+
+table.sortable input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+table.sortable .selected input {
+  font-weight: bold;
+}
+
+table.sortable td>input:read-only {
+  /* TODO: indicate that enabled (not disabled) fields can be doubleclicked to alter content */
+  cursor: default;
+}
+
+table.sortable .selected {
+  color: var(--color-highlight);
+  font-weight: bold;
+}
+
 /* Text input */
 
 ul.tree .selected>input {

@@ -21,16 +21,17 @@ namespace FudgeUserInterface {
       this.controller = _controller;
       this.data = _data;
       this.create();
+      this.className = "sortable";
 
       this.addEventListener(EVENT.SORT, <EventListener>this.hndSort);
       this.addEventListener(EVENT.SELECT, this.hndSelect);
       this.addEventListener(EVENT.FOCUS_NEXT, <EventListener>this.hndFocus);
       this.addEventListener(EVENT.FOCUS_PREVIOUS, <EventListener>this.hndFocus);
+      this.addEventListener(EVENT.ESCAPE, this.hndEscape);
       // this.addEventListener(EVENT_TABLE.CHANGE, this.hndSort);
       // this.addEventListener(EVENT_TREE.RENAME, this.hndRename);
       // this.addEventListener(EVENT_TREE.DROP, this.hndDrop);
       // this.addEventListener(EVENT_TREE.DELETE, this.hndDelete);
-      // this.addEventListener(EVENT_TREE.ESCAPE, this.hndEscape);
       // this.addEventListener(EVENT_TREE.COPY, this.hndCopyPaste);
       // this.addEventListener(EVENT_TREE.PASTE, this.hndCopyPaste);
       // this.addEventListener(EVENT_TREE.CUT, this.hndCopyPaste);
@@ -57,7 +58,7 @@ namespace FudgeUserInterface {
      */
     public clearSelection(): void {
       this.controller.selection.splice(0);
-      // this.displaySelection(<T[]>this.controller.selection);
+      this.displaySelection(<T[]>this.controller.selection);
     }
 
     /**
@@ -194,9 +195,9 @@ namespace FudgeUserInterface {
     //   // this.delete(remove);
     // }
 
-    // private hndEscape = (_event: Event): void => {
-    //   this.clearSelection();
-    // }
+    private hndEscape = (_event: Event): void => {
+      this.clearSelection();
+    }
 
     // private hndCopyPaste = async (_event: Event): Promise<void> => {
     //   // // console.log(_event);
