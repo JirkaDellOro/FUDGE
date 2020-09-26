@@ -17,6 +17,7 @@ var FudgeUserInterface;
                 this.mutator = this.getMutator();
                 this.mutable.mutate(this.mutator);
                 _event.stopPropagation();
+                this.domElement.dispatchEvent(new Event("update" /* UPDATE */, { bubbles: true }));
             };
             this.refresh = (_event) => {
                 this.updateUserInterface();

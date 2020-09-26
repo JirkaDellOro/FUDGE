@@ -669,6 +669,7 @@ var Fudge;
             });
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
+            this.dom.addEventListener("update" /* UPDATE */, this.hndEvent);
         }
     }
     Fudge.PanelProject = PanelProject;
@@ -1564,24 +1565,34 @@ var Fudge;
         constructor(_container, _state) {
             super(_container, _state);
             this.hndEvent = (_event) => {
+                console.log(_event.type);
                 switch (_event.type) {
+                    case "update" /* UPDATE */:
+                        this.redraw();
+                        break;
                     default:
                         this.resource = _event.detail.data;
                         this.fillContent();
                         break;
                 }
             };
+            this.redraw = () => {
+                if (this.viewport.getGraph() && this.viewport.getCanvas())
+                    this.viewport.draw();
+            };
             // create viewport for 3D-resources
             let cmpCamera = new ƒ.ComponentCamera();
-            cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
+            cmpCamera.pivot.translate(new ƒ.Vector3(1, 2, 1));
             cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
             cmpCamera.projectCentral(1, 45);
             let canvas = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
             this.viewport = new ƒ.Viewport();
             this.viewport.initialize("Preview", null, cmpCamera, canvas);
             this.fillContent();
+            _container.on("resize", this.redraw);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
+            this.dom.addEventListener("update" /* UPDATE */, this.hndEvent);
             // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
             // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
         }

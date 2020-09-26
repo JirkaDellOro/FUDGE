@@ -97,6 +97,8 @@ namespace FudgeUserInterface {
       this.mutator = this.getMutator();
       this.mutable.mutate(this.mutator);
       _event.stopPropagation();
+      
+      this.domElement.dispatchEvent(new Event(EVENT.UPDATE, { bubbles: true }));
     }
 
     protected refresh = (_event: Event) => {

@@ -393,6 +393,7 @@ declare namespace Fudge {
         private fillContent;
         private createStandardGraph;
         private hndEvent;
+        private redraw;
     }
 }
 declare namespace Fudge {

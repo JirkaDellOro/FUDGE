@@ -18,7 +18,7 @@ namespace Fudge {
 
       // create viewport for 3D-resources
       let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
-      cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
+      cmpCamera.pivot.translate(new ƒ.Vector3(1, 2, 1));
       cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
       cmpCamera.projectCentral(1, 45);
       let canvas: HTMLCanvasElement = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
@@ -27,8 +27,10 @@ namespace Fudge {
 
       this.fillContent();
 
+      _container.on("resize", this.redraw);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
+      this.dom.addEventListener(ƒui.EVENT.UPDATE, this.hndEvent);
       // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
       // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
     }
@@ -119,12 +121,21 @@ namespace Fudge {
     }
 
     private hndEvent = (_event: CustomEvent): void => {
+      console.log(_event.type);
       switch (_event.type) {
+        case ƒui.EVENT.UPDATE:
+          this.redraw();
+          break;
         default:
           this.resource = _event.detail.data;
           this.fillContent();
           break;
       }
+    }
+
+    private redraw = () => {
+      if (this.viewport.getGraph() && this.viewport.getCanvas())
+        this.viewport.draw();
     }
   }
 }
