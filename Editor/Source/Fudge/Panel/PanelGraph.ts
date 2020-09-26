@@ -29,9 +29,10 @@ namespace Fudge {
         ]
       });
 
-      this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndSetGraph);
+      this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndFocusNode);
       this.dom.addEventListener(ƒui.EVENT.RENAME, this.broadcastEvent);
+      this.dom.addEventListener(ƒui.EVENT.UPDATE, this.hndEvent);
     }
 
     public setGraph(_node: ƒ.Node): void {
@@ -42,7 +43,7 @@ namespace Fudge {
       return this.node;
     }
 
-    private hndSetGraph = (_event: CustomEvent): void => {
+    private hndEvent = (_event: CustomEvent): void => {
       if (_event.type == EVENT_EDITOR.SET_GRAPH)
         this.setGraph(_event.detail);
       this.broadcastEvent(_event);

@@ -599,7 +599,7 @@ var Fudge;
     class PanelGraph extends Fudge.Panel {
         constructor(_container, _state) {
             super(_container, _state);
-            this.hndSetGraph = (_event) => {
+            this.hndEvent = (_event) => {
                 if (_event.type == Fudge.EVENT_EDITOR.SET_GRAPH)
                     this.setGraph(_event.detail);
                 this.broadcastEvent(_event);
@@ -623,9 +623,10 @@ var Fudge;
                     { type: "component", componentName: Fudge.VIEW.COMPONENTS, componentState: _state, title: "Components" }
                 ]
             });
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndSetGraph);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndFocusNode);
             this.dom.addEventListener("rename" /* RENAME */, this.broadcastEvent);
+            this.dom.addEventListener("update" /* UPDATE */, this.hndEvent);
         }
         setGraph(_node) {
             this.node = _node;
@@ -1446,20 +1447,31 @@ var Fudge;
         constructor(_container, _state) {
             super(_container, _state);
             this.hndEvent = (_event) => {
-                if (_event.type == Fudge.EVENT_EDITOR.SET_GRAPH)
-                    this.setGraph(_event.detail);
+                switch (_event.type) {
+                    case Fudge.EVENT_EDITOR.SET_GRAPH:
+                        this.setGraph(_event.detail);
+                        break;
+                    case "update" /* UPDATE */:
+                        this.redraw();
+                }
             };
-            this.animate = (_e) => {
-                this.viewport.setGraph(this.graph);
-                if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
-                    this.viewport.draw();
-            };
+            // private animate = (_e: Event) => {
+            //   this.viewport.setGraph(this.graph);
+            //   if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
+            //     this.viewport.draw();
+            // }
             this.activeViewport = (_event) => {
-                let event = new CustomEvent(Fudge.EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });
+                // let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });
                 _event.cancelBubble = true;
+            };
+            this.redraw = () => {
+                if (this.viewport.getGraph() && this.viewport.getCanvas())
+                    this.viewport.draw();
             };
             this.graph = _state["node"];
             this.createUserInterface();
+            _container.on("resize", this.redraw);
+            this.dom.addEventListener("update" /* UPDATE */, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
         }
@@ -1476,8 +1488,8 @@ var Fudge;
             this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
             this.viewport.draw();
             this.dom.append(this.canvas);
-            ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
-            ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, this.animate);
+            // ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
+            // ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
             //Focus cameracontrols on new viewport
             // let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });
             this.canvas.addEventListener("click", this.activeViewport);

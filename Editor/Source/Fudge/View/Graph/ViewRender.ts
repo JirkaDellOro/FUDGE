@@ -16,6 +16,9 @@ namespace Fudge {
       super(_container, _state);
       this.graph = <ƒ.Node><unknown>_state["node"];
       this.createUserInterface();
+
+      _container.on("resize", this.redraw);
+      this.dom.addEventListener(ƒui.EVENT.UPDATE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
     }
@@ -36,8 +39,8 @@ namespace Fudge {
 
       this.dom.append(this.canvas);
 
-      ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
-      ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
+      // ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
+      // ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
 
       //Focus cameracontrols on new viewport
       // let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });
@@ -53,19 +56,29 @@ namespace Fudge {
     }
 
     private hndEvent = (_event: CustomEvent): void => {
-      if (_event.type == EVENT_EDITOR.SET_GRAPH)
-        this.setGraph(_event.detail);
+      switch (_event.type) {
+        case EVENT_EDITOR.SET_GRAPH:
+          this.setGraph(_event.detail);
+          break;
+        case ƒui.EVENT.UPDATE:
+          this.redraw();
+      }
     }
 
-    private animate = (_e: Event) => {
-      this.viewport.setGraph(this.graph);
-      if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
-        this.viewport.draw();
-    }
+    // private animate = (_e: Event) => {
+    //   this.viewport.setGraph(this.graph);
+    //   if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
+    //     this.viewport.draw();
+    // }
 
     private activeViewport = (_event: MouseEvent): void => {
-      let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });
+      // let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });
       _event.cancelBubble = true;
+    }
+
+    private redraw = () => {
+      if (this.viewport.getGraph() && this.viewport.getCanvas())
+        this.viewport.draw();
     }
   }
 }

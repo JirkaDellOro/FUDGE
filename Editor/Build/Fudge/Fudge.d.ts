@@ -194,7 +194,7 @@ declare namespace Fudge {
         constructor(_container: GoldenLayout.Container, _state: Object);
         setGraph(_node: ƒ.Node): void;
         getNode(): ƒ.Node;
-        private hndSetGraph;
+        private hndEvent;
         private hndFocusNode;
     }
 }
@@ -349,8 +349,8 @@ declare namespace Fudge {
         createUserInterface(): void;
         setGraph(_node: ƒ.Node): void;
         private hndEvent;
-        private animate;
         private activeViewport;
+        private redraw;
     }
 }
 declare namespace Fudge {
