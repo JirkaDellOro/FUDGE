@@ -384,10 +384,10 @@ namespace FudgeCore {
 
       let prefix: string = "+".repeat(_level);
 
-      let output: string = prefix + _node.name + " [";
+      let output: string = prefix + " " + _node.name + " | ";
       for (let type in _node.components)
         output += _node.components[type].length + " " + type.split("Component").pop() + ", ";
-      output = output.slice(0, -2) + "]</br>";
+      output = output.slice(0, -2) + "</br>";
       for (let child of _node.children) {
         output += this.toHierarchyString(child, _level + 1);
       }
