@@ -1980,11 +1980,6 @@ declare namespace FudgeCore {
         private hndWheelEvent;
         private activateEvent;
         private hndComponentEvent;
-        /**
-         * Creates an outputstring as visual representation of this viewports scenegraph. Called for the passed node and recursive for all its children.
-         * @param _fudgeNode The node to create a scenegraphentry for.
-         */
-        private createSceneGraph;
     }
 }
 declare namespace FudgeCore {
@@ -3227,6 +3222,10 @@ declare namespace FudgeCore {
         removeComponent(_component: Component): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        /**
+         * Creates a string as representation of this node and its descendants
+         */
+        toHierarchyString(_node?: Node, _level?: number): string;
         /**
          * Adds an event listener to the node. The given handler will be called when a matching event is passed to the node.
          * Deviating from the standard EventTarget, here the _handler must be a function and _capture is the only option.

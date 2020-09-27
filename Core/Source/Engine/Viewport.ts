@@ -109,7 +109,7 @@ namespace FudgeCore {
       let output: string = "SceneGraph for this viewport:";
       output += "\n \n";
       output += this.graph.name;
-      Debug.log(output + "   => ROOTNODE" + this.createSceneGraph(this.graph));
+      Debug.log(output + "   => ROOTNODE" + this.graph.toHierarchyString());
     }
 
     // #region Drawing
@@ -412,31 +412,5 @@ namespace FudgeCore {
       Debug.fudge(_event);
     }
     // #endregion
-
-
-    /**
-     * Creates an outputstring as visual representation of this viewports scenegraph. Called for the passed node and recursive for all its children.
-     * @param _fudgeNode The node to create a scenegraphentry for.
-     */
-    private createSceneGraph(_fudgeNode: Node): string {
-      // TODO: move to debug-class
-      let output: string = "";
-      for (let name in _fudgeNode.getChildren()) {
-        let child: Node = _fudgeNode.getChildren()[name];
-        output += "\n";
-        let current: Node = child;
-        if (current.getParent() && current.getParent().getParent())
-          output += "|";
-        while (current.getParent() && current.getParent().getParent()) {
-          output += "   ";
-          current = current.getParent();
-        }
-        output += "'--";
-
-        output += child.name;
-        output += this.createSceneGraph(child);
-      }
-      return output;
-    }
   }
 }

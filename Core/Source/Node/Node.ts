@@ -67,14 +67,14 @@ namespace FudgeCore {
     public get nChildren(): number {
       return this.children.length;
     }
-    
+
     /**
      * Generator yielding the node and all decendants in the graph below for iteration
      */
     public get graph(): IterableIterator<Node> {
       return this.getGraphGenerator();
     }
-    
+
     public activate(_on: boolean): void {
       this.active = _on;
       // TODO: check if COMPONENT_ACTIVATE/DEACTIVATE is the correct event to dispatch. Shouldn't it be something like NODE_ACTIVATE/DEACTIVATE?
@@ -359,13 +359,13 @@ namespace FudgeCore {
       // deserialize components first so scripts can react to children being appended
       for (let type in _serialization.components) {
         for (let serializedComponent of _serialization.components[type]) {
-          let deserializedComponent: Component = <Component> await Serializer.deserialize(serializedComponent);
+          let deserializedComponent: Component = <Component>await Serializer.deserialize(serializedComponent);
           this.addComponent(deserializedComponent);
         }
       }
 
       for (let serializedChild of _serialization.children) {
-        let deserializedChild: Node = <Node> await Serializer.deserialize(serializedChild);
+        let deserializedChild: Node = <Node>await Serializer.deserialize(serializedChild);
         this.appendChild(deserializedChild);
       }
 
@@ -373,6 +373,26 @@ namespace FudgeCore {
       return this;
     }
     // #endregion
+
+    /**
+     * Creates a string as representation of this node and its descendants
+     */
+    public toHierarchyString(_node: Node = null, _level: number = 0): string {
+      // TODO: refactor for better readability
+      if (!_node)
+        _node = this;
+
+      let prefix: string = "+".repeat(_level);
+
+      let output: string = prefix + _node.name + " [";
+      for (let type in _node.components)
+        output += _node.components[type].length + " " + type.split("Component").pop() + ", ";
+      output = output.slice(0, -2) + "]</br>";
+      for (let child of _node.children) {
+        output += this.toHierarchyString(child, _level + 1);
+      }
+      return output;
+    }
 
     // #region Events
     /**

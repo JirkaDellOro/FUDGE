@@ -1808,22 +1808,24 @@ var Fudge;
             while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
                 ;
             // console.log(this.resource);
+            let content = document.createElement("div");
+            content.style.whiteSpace = "nowrap";
             if (this.resource) {
                 this.setTitle(this.resource.name);
                 if (this.resource instanceof ƒ.Mutable) {
                     let fieldset = ƒui.Generator.createFieldSetFromMutable(this.resource);
                     let uiMutable = new Fudge.ControllerComponent(this.resource, fieldset);
-                    this.dom.append(uiMutable.domElement);
+                    content = uiMutable.domElement;
                 }
-                else {
-                    let div = document.createElement("div");
-                    this.dom.append(div);
-                    if (this.resource instanceof Fudge.DirectoryEntry && this.resource.stats) {
-                        div.innerHTML += "Size: " + (this.resource.stats["size"] / 1024).toFixed(2) + " KiB<br/>";
-                        div.innerHTML += "Created: " + this.resource.stats["birthtime"].toLocaleString() + "<br/>";
-                        div.innerHTML += "Modified: " + this.resource.stats["ctime"].toLocaleString() + "<br/>";
-                    }
+                else if (this.resource instanceof Fudge.DirectoryEntry && this.resource.stats) {
+                    content.innerHTML += "Size: " + (this.resource.stats["size"] / 1024).toFixed(2) + " KiB<br/>";
+                    content.innerHTML += "Created: " + this.resource.stats["birthtime"].toLocaleString() + "<br/>";
+                    content.innerHTML += "Modified: " + this.resource.stats["ctime"].toLocaleString() + "<br/>";
                 }
+                else if (this.resource instanceof ƒ.NodeResource) {
+                    content.innerHTML = this.resource.toHierarchyString();
+                }
+                this.dom.append(content);
             }
         }
     }
