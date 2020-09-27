@@ -7,6 +7,7 @@ namespace FudgeCore {
     public name: string = "Audio";
     public idResource: string = undefined;
     public buffer: AudioBuffer = undefined;
+    public path: URL = undefined;
     private url: RequestInfo = undefined;
     private ready: boolean = false;
 
@@ -29,8 +30,8 @@ namespace FudgeCore {
     public async load(_url: RequestInfo): Promise<void> {
       this.url = _url;
       this.ready = false;
-      let url: URL = new URL(this.url.toString(), Project.baseURL);
-      const response: Response = await window.fetch(url.toString());
+      this.path = new URL(this.url.toString(), Project.baseURL);
+      const response: Response = await window.fetch(this.path.toString());
       const arrayBuffer: ArrayBuffer = await response.arrayBuffer();
       let buffer: AudioBuffer = await AudioManager.default.decodeAudioData(arrayBuffer);
       this.buffer = buffer;

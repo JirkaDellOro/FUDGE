@@ -1583,6 +1583,11 @@ var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒaid = FudgeAid;
+    let extensions = {
+        text: ["ts", "json", "html", "htm", "css", "js", "txt"],
+        audio: ["mp3", "wav", "ogg"],
+        image: ["png", "jpg", "jpeg", "tif", "tga", "gif"]
+    };
     /**
      * Preview a resource
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
@@ -1673,10 +1678,9 @@ var Fudge;
             let graph;
             switch (type) {
                 case "File":
-                    let extension = this.resource.name.split(".").pop();
-                    if (["ts", "json", "html", "htm", "css", "js", "txt"].indexOf(extension) > -1) {
-                        this.dom.appendChild(this.createTextPreview(this.resource));
-                    }
+                    let preview = this.createFilePreview(this.resource);
+                    if (preview)
+                        this.dom.appendChild(preview);
                     break;
                 case "Mesh":
                     graph = this.createStandardGraph();
@@ -1695,6 +1699,15 @@ var Fudge;
                     this.dom.appendChild(this.viewport.getCanvas());
                     this.viewport.draw();
                     break;
+                case "TextureImage":
+                    let img = this.resource.image;
+                    img.style.border = "1px solid black";
+                    this.dom.appendChild(img);
+                    break;
+                case "Audio":
+                    let entry = new Fudge.DirectoryEntry(this.resource.path, null, null);
+                    this.dom.appendChild(this.createAudioPreview(entry));
+                    break;
                 default: break;
             }
         }
@@ -1705,10 +1718,33 @@ var Fudge;
             this.dom.appendChild(this.viewport.getCanvas());
             return graph;
         }
-        createTextPreview(_resource) {
+        createFilePreview(_entry) {
+            let extension = _entry.name.split(".").pop();
+            if (extensions.text.indexOf(extension) > -1)
+                return this.createTextPreview(_entry);
+            if (extensions.audio.indexOf(extension) > -1)
+                return this.createAudioPreview(_entry);
+            if (extensions.image.indexOf(extension) > -1)
+                return this.createImagePreview(_entry);
+            return null;
+        }
+        createTextPreview(_entry) {
             let pre = document.createElement("pre");
-            pre.textContent = _resource.getFileContent();
+            pre.textContent = _entry.getFileContent();
             return pre;
+        }
+        createImagePreview(_entry) {
+            let img = document.createElement("img");
+            img.src = _entry.path;
+            img.style.border = "1px solid black";
+            return img;
+        }
+        createAudioPreview(_entry) {
+            let audio = document.createElement("audio");
+            audio.src = _entry.path;
+            audio.play();
+            audio.controls = true;
+            return audio;
         }
     }
     ViewPreview.mtrStandard = ViewPreview.createStandardMaterial();

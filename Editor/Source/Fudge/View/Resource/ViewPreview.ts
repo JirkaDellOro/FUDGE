@@ -3,6 +3,12 @@ namespace Fudge {
   import ƒui = FudgeUserInterface;
   import ƒaid = FudgeAid;
 
+  let extensions: { [type: string]: string[] } = {
+    text: ["ts", "json", "html", "htm", "css", "js", "txt"],
+    audio: ["mp3", "wav", "ogg"],
+    image: ["png", "jpg", "jpeg", "tif", "tga", "gif"]
+  };
+
   /**
    * Preview a resource
    * @author Jirka Dell'Oro-Friedl, HFU, 2020  
@@ -92,10 +98,9 @@ namespace Fudge {
       let graph: ƒ.Node;
       switch (type) {
         case "File":
-          let extension: string = this.resource.name.split(".").pop();
-          if (["ts", "json", "html", "htm", "css", "js", "txt"].indexOf(extension) > -1) {
-            this.dom.appendChild(this.createTextPreview(<DirectoryEntry>this.resource));
-          }
+          let preview: HTMLElement = this.createFilePreview(<DirectoryEntry>this.resource);
+          if (preview)
+            this.dom.appendChild(preview);
           break;
         case "Mesh":
           graph = this.createStandardGraph();
@@ -114,6 +119,15 @@ namespace Fudge {
           this.dom.appendChild(this.viewport.getCanvas());
           this.viewport.draw();
           break;
+        case "TextureImage":
+          let img: HTMLImageElement = (<ƒ.TextureImage>this.resource).image;
+          img.style.border = "1px solid black";
+          this.dom.appendChild(img);
+          break;
+        case "Audio":
+          let entry: DirectoryEntry = new DirectoryEntry((<ƒ.Audio>this.resource).path, null, null);
+          this.dom.appendChild(this.createAudioPreview(entry));
+          break;
         default: break;
       }
     }
@@ -126,10 +140,35 @@ namespace Fudge {
       return graph;
     }
 
-    private createTextPreview(_resource: DirectoryEntry): HTMLPreElement {
+    private createFilePreview(_entry: DirectoryEntry): HTMLElement {
+      let extension: string = _entry.name.split(".").pop();
+      if (extensions.text.indexOf(extension) > -1)
+        return this.createTextPreview(_entry);
+      if (extensions.audio.indexOf(extension) > -1)
+        return this.createAudioPreview(_entry);
+      if (extensions.image.indexOf(extension) > -1)
+        return this.createImagePreview(_entry);
+
+      return null;
+    }
+
+    private createTextPreview(_entry: DirectoryEntry): HTMLElement {
       let pre: HTMLPreElement = document.createElement("pre");
-      pre.textContent = _resource.getFileContent();
+      pre.textContent = _entry.getFileContent();
       return pre;
+    }
+    private createImagePreview(_entry: DirectoryEntry): HTMLElement {
+      let img: HTMLImageElement = document.createElement("img");
+      img.src = _entry.path;
+      img.style.border = "1px solid black";
+      return img;
+    }
+    private createAudioPreview(_entry: DirectoryEntry): HTMLElement {
+      let audio: HTMLAudioElement = document.createElement("audio");
+      audio.src = _entry.path;
+      audio.play();
+      audio.controls = true;
+      return audio;
     }
 
     private hndEvent = (_event: CustomEvent): void => {

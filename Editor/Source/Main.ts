@@ -11,6 +11,8 @@ namespace Main {
   let defaultWidth: number = 800;
   let defaultHeight: number = 600;
   //#endregion
+
+  app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
   
   //#region Events 
   app.addListener("ready", createFudge);

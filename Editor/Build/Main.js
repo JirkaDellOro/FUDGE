@@ -64,6 +64,7 @@ var Main;
     let defaultWidth = 800;
     let defaultHeight = 600;
     //#endregion
+    app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
     //#region Events 
     app.addListener("ready", createFudge);
     app.addListener("window-all-closed", function () {

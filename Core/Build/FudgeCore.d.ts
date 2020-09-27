@@ -995,6 +995,7 @@ declare namespace FudgeCore {
         name: string;
         idResource: string;
         buffer: AudioBuffer;
+        path: URL;
         private url;
         private ready;
         constructor(_url?: RequestInfo);

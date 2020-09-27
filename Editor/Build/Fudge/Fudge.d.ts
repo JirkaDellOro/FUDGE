@@ -395,7 +395,10 @@ declare namespace Fudge {
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         private fillContent;
         private createStandardGraph;
+        private createFilePreview;
         private createTextPreview;
+        private createImagePreview;
+        private createAudioPreview;
         private hndEvent;
         private redraw;
     }
