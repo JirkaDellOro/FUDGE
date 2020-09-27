@@ -1,12 +1,13 @@
 declare namespace Fudge {
     enum CONTEXTMENU {
         ADD_NODE = 0,
-        ADD_COMPONENT = 1
+        ADD_COMPONENT = 1,
+        EDIT = 2
     }
     enum MENU {
         QUIT = "quit",
         PROJECT_SAVE = "projectSave",
-        PROJECT_OPEN = "projectOpen",
+        PROJECT_LOAD = "projectLoad",
         NODE_DELETE = "nodeDelete",
         NODE_UPDATE = "nodeUpdate",
         DEVTOOLS_OPEN = "devtoolsOpen",

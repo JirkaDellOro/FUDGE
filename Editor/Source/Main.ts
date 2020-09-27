@@ -12,7 +12,7 @@ namespace Main {
   let defaultHeight: number = 600;
   //#endregion
 
-  app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
+  // app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
   
   //#region Events 
   app.addListener("ready", createFudge);
@@ -76,7 +76,7 @@ namespace Main {
       {
         label: "Project", submenu: [
           { label: "Save", id: Fudge.MENU.PROJECT_SAVE, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+S" : "Ctrl+S" },
-          { label: "Open", id: Fudge.MENU.PROJECT_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+O" : "Ctrl+O" },
+          { label: "Open", id: Fudge.MENU.PROJECT_LOAD, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+O" : "Ctrl+O" },
           { label: "Quit", id: Fudge.MENU.QUIT, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+Q" : "Ctrl+Q" }
         ]
       },

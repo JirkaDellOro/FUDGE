@@ -20,6 +20,7 @@
   <script type="text/javascript" src="../../UserInterface/Build/FudgeUserInterface.js"></script>
   <!-- Editor -->
   <script type="text/javascript" src="../Build/Fudge/Fudge.js"></script>
+  <script>window.addEventListener("load", Fudge.Page.start);</script>
 </head>
 
 <body>
@@ -66,7 +67,7 @@
     FudgeUserInterface.CustomElement.register("custom-matrix4x4", FudgeUserInterface.CustomElementMatrix4x4);
     FudgeUserInterface.CustomElement.map("Matrix4x4", "custom-matrix4x4");
   </script>
-  
+
   <template>
     <custom-matrix3x3 style="text-align: center; display: grid; column-gap: 1em;
         grid-template-columns: min-content min-content min-content; 
@@ -85,7 +86,7 @@
       <fudge-stepper key="sy"></fudge-stepper>
       <span style="text-align: right;">rotation</span>
       <fudge-stepper key="r"></fudge-stepper>
-    </custom-matrix4x4>
+      </custom-matrix4x4>
   </template>
   <script>
     FudgeUserInterface.CustomElementTemplate.register("custom-matrix3x3");

@@ -2,14 +2,16 @@ var Fudge;
 (function (Fudge) {
     let CONTEXTMENU;
     (function (CONTEXTMENU) {
+        // SKETCH = ViewSketch,
         CONTEXTMENU[CONTEXTMENU["ADD_NODE"] = 0] = "ADD_NODE";
         CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT"] = 1] = "ADD_COMPONENT";
+        CONTEXTMENU[CONTEXTMENU["EDIT"] = 2] = "EDIT";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
         MENU["QUIT"] = "quit";
         MENU["PROJECT_SAVE"] = "projectSave";
-        MENU["PROJECT_OPEN"] = "projectOpen";
+        MENU["PROJECT_LOAD"] = "projectLoad";
         MENU["NODE_DELETE"] = "nodeDelete";
         MENU["NODE_UPDATE"] = "nodeUpdate";
         MENU["DEVTOOLS_OPEN"] = "devtoolsOpen";
@@ -64,7 +66,7 @@ var Main;
     let defaultWidth = 800;
     let defaultHeight = 600;
     //#endregion
-    app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
+    // app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
     //#region Events 
     app.addListener("ready", createFudge);
     app.addListener("window-all-closed", function () {
@@ -122,7 +124,7 @@ var Main;
             {
                 label: "Project", submenu: [
                     { label: "Save", id: Fudge.MENU.PROJECT_SAVE, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+S" : "Ctrl+S" },
-                    { label: "Open", id: Fudge.MENU.PROJECT_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+O" : "Ctrl+O" },
+                    { label: "Open", id: Fudge.MENU.PROJECT_LOAD, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+O" : "Ctrl+O" },
                     { label: "Quit", id: Fudge.MENU.QUIT, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+Q" : "Ctrl+Q" }
                 ]
             },

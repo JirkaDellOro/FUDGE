@@ -13,42 +13,42 @@ namespace Fudge {
       super(_container, _state); this.fillContent();
 
       // this.dom.addEventListener(EVENT_EDITOR.FOCUS_RESOURCE, this.hndEvent);
-      this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
+      // this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
       // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
     }
 
     //#region  ContextMenu
-    protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
-      const menu: Electron.Menu = new remote.Menu();
-      let item: Electron.MenuItem;
+    // protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
+    //   const menu: Electron.Menu = new remote.Menu();
+    //   let item: Electron.MenuItem;
 
-      item = new remote.MenuItem({ label: "Add Component", submenu: [] });
-      for (let subItem of ContextMenu.getComponents(_callback))
-        item.submenu.append(subItem);
-      menu.append(item);
+    //   item = new remote.MenuItem({ label: "Add Component", submenu: [] });
+    //   for (let subItem of ContextMenu.getComponents(_callback))
+    //     item.submenu.append(subItem);
+    //   menu.append(item);
 
-      ContextMenu.appendCopyPaste(menu);
-      return menu;
-    }
+    //   ContextMenu.appendCopyPaste(menu);
+    //   return menu;
+    // }
 
-    protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
-      ƒ.Debug.info(`MenuSelect: Item-id=${CONTEXTMENU[_item.id]}`);
+    // protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
+    //   ƒ.Debug.info(`MenuSelect: Item-id=${CONTEXTMENU[_item.id]}`);
 
-      switch (Number(_item.id)) {
-        case CONTEXTMENU.ADD_COMPONENT:
-          let iSubclass: number = _item["iSubclass"];
-          let component: typeof ƒ.Component = ƒ.Component.subclasses[iSubclass];
-          //@ts-ignore
-          let cmpNew: ƒ.Component = new component();
-          ƒ.Debug.info(cmpNew.type, cmpNew);
+    //   switch (Number(_item.id)) {
+    //     case CONTEXTMENU.ADD_COMPONENT:
+    //       let iSubclass: number = _item["iSubclass"];
+    //       let component: typeof ƒ.Component = ƒ.Component.subclasses[iSubclass];
+    //       //@ts-ignore
+    //       let cmpNew: ƒ.Component = new component();
+    //       ƒ.Debug.info(cmpNew.type, cmpNew);
 
-          // this.node.addComponent(cmpNew);
-          this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.SELECT, { bubbles: true, detail: { data: this.resource } }));
-          break;
-      }
-    }
+    //       // this.node.addComponent(cmpNew);
+    //       this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.SELECT, { bubbles: true, detail: { data: this.resource } }));
+    //       break;
+    //   }
+    // }
     //#endregion
 
     private fillContent(): void {

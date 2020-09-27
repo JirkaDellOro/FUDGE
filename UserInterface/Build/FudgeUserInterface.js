@@ -1329,6 +1329,7 @@ var FudgeUserInterface;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
+    // TODO: duplicated code in Table and Tree, may be optimized...
     /**
      * Manages a sortable table of data given as simple array of flat objects
      * ```plaintext
@@ -1436,10 +1437,10 @@ var FudgeUserInterface;
          * Return the object in focus
          */
         getFocussed() {
-            // let items: TreeItem<T>[] = <TreeItem<T>[]>Array.from(this.querySelectorAll("li"));
-            // let found: number = items.indexOf(<TreeItem<T>>document.activeElement);
-            // if (found > -1)
-            //   return items[found].data;
+            let items = Array.from(this.querySelectorAll("tr"));
+            let found = items.indexOf(document.activeElement);
+            if (found > -1)
+                return items[found].data;
             return null;
         }
         selectInterval(_dataStart, _dataEnd) {

@@ -17,9 +17,7 @@
     "composite": true,                        /* Enable project compilation */
   },
   "types": [
-    "../../../UserInterface/Build/FudgeUserInterface",
-    "../../../Core/Build/FudgeCore",
-    "electron",
+    "electron", 
     "golden-layout",
     "JQuery",
     "node",

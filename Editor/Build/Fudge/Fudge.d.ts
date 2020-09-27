@@ -6,12 +6,13 @@
 declare namespace Fudge {
     enum CONTEXTMENU {
         ADD_NODE = 0,
-        ADD_COMPONENT = 1
+        ADD_COMPONENT = 1,
+        EDIT = 2
     }
     enum MENU {
         QUIT = "quit",
         PROJECT_SAVE = "projectSave",
-        PROJECT_OPEN = "projectOpen",
+        PROJECT_LOAD = "projectLoad",
         NODE_DELETE = "nodeDelete",
         NODE_UPDATE = "nodeUpdate",
         DEVTOOLS_OPEN = "devtoolsOpen",
@@ -63,34 +64,38 @@ declare namespace Fudge {
     export {};
 }
 declare namespace Fudge {
-    /**
-     * The uppermost container for all panels
-     * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
-     */
-    class Editor {
-        private static idCounter;
-        private static goldenLayout;
-        private static panels;
-        static add(_panel: typeof Panel, _title: string, _state?: Object): void;
-        static initialize(): void;
-        /** Send custom copies of the given event to the views */
-        static broadcastEvent(_event: Event): void;
-        private static generateID;
-    }
-}
-declare namespace Fudge {
-    function save(_node: ƒ.Node): void;
-    function open(): Promise<ƒ.Node>;
-}
-declare namespace Fudge {
-    const ipcRenderer: Electron.IpcRenderer;
-    const remote: Electron.Remote;
+    function saveProject(_node: ƒ.Node): void;
+    function promptLoadProject(): Promise<URL>;
+    function loadProject(_url: URL): Promise<void>;
 }
 declare namespace Fudge {
     type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
     class ContextMenu {
         static appendCopyPaste(_menu: Electron.Menu): void;
         static getComponents(_callback: ContextMenuCallback): Electron.MenuItem[];
+    }
+}
+declare namespace Fudge {
+    const ipcRenderer: Electron.IpcRenderer;
+    const remote: Electron.Remote;
+    /**
+     * The uppermost container for all panels controlling data flow between.
+     * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class Page {
+        private static idCounter;
+        private static goldenLayout;
+        private static panels;
+        static start(): void;
+        static setupGoldenLayout(): void;
+        static add(_panel: typeof Panel, _title: string, _state?: Object): void;
+        static find(_type: typeof Panel): Panel[];
+        private static generateID;
+        private static setupPageListeners;
+        /** Send custom copies of the given event to the views */
+        private static broadcastEvent;
+        private static hndEvent;
+        private static setupMainListeners;
     }
 }
 declare namespace Fudge {
@@ -373,8 +378,11 @@ declare namespace Fudge {
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class ViewInternal extends View {
+        private table;
         constructor(_container: GoldenLayout.Container, _state: Object);
         listResources(): void;
+        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
+        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         private hndEvent;
     }
 }
@@ -391,8 +399,6 @@ declare namespace Fudge {
         constructor(_container: GoldenLayout.Container, _state: Object);
         private static createStandardMaterial;
         private static createStandardMesh;
-        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
-        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         private fillContent;
         private createStandardGraph;
         private createFilePreview;
@@ -411,8 +417,6 @@ declare namespace Fudge {
     class ViewProperties extends View {
         private resource;
         constructor(_container: GoldenLayout.Container, _state: Object);
-        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
-        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         private fillContent;
         private hndEvent;
     }

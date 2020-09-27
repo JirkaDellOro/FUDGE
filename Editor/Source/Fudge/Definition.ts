@@ -1,13 +1,15 @@
 namespace Fudge {
   export enum CONTEXTMENU {
+    // SKETCH = ViewSketch,
     ADD_NODE,
-    ADD_COMPONENT
+    ADD_COMPONENT,
+    EDIT
   }
 
   export enum MENU {
     QUIT = "quit",
     PROJECT_SAVE = "projectSave",
-    PROJECT_OPEN = "projectOpen",
+    PROJECT_LOAD = "projectLoad",
     NODE_DELETE = "nodeDelete",
     NODE_UPDATE = "nodeUpdate",
     DEVTOOLS_OPEN = "devtoolsOpen",

@@ -1,4 +1,7 @@
 namespace FudgeUserInterface {
+
+  // TODO: duplicated code in Table and Tree, may be optimized...
+
   export interface TABLE {
     label: string;
     key: string;
@@ -65,10 +68,10 @@ namespace FudgeUserInterface {
      * Return the object in focus
      */
     public getFocussed(): T {
-      // let items: TreeItem<T>[] = <TreeItem<T>[]>Array.from(this.querySelectorAll("li"));
-      // let found: number = items.indexOf(<TreeItem<T>>document.activeElement);
-      // if (found > -1)
-      //   return items[found].data;
+      let items: TableItem<T>[] = <TableItem<T>[]>Array.from(this.querySelectorAll("tr"));
+      let found: number = items.indexOf(<TableItem<T>>document.activeElement);
+      if (found > -1)
+        return items[found].data;
 
       return null;
     }

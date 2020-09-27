@@ -1,7 +1,7 @@
 namespace Fudge {
   const fs: ƒ.General = require("fs");
 
-  export function save(_node: ƒ.Node): void {
+  export function saveProject(_node: ƒ.Node): void {
     let serialization: ƒ.Serialization = ƒ.Serializer.serialize(_node);
     let content: string = ƒ.Serializer.stringify(serialization);
 
@@ -11,17 +11,19 @@ namespace Fudge {
     fs.writeFileSync(filename, content);
   }
 
-  export async function open(): Promise<ƒ.Node> {
+  export async function promptLoadProject(): Promise<URL> {
     let filenames: string[] = remote.dialog.showOpenDialogSync(null, {
       title: "Load Project", buttonLabel: "Load Project", properties: ["openFile"],
       filters: [{ name: "HTML-File", extensions: ["html", "htm"] }]
     });
+    if (!filenames)
+      return null;
 
-    console.log(filenames);
-    let base: URL = new URL(filenames[0]);
-    // let file: RequestInfo = "Test.json";
+    return new URL(filenames[0]);
+  }
 
-    let content: string = fs.readFileSync(base, { encoding: "utf-8" });
+  export async function loadProject(_url: URL): Promise<void> {
+    let content: string = fs.readFileSync(_url, { encoding: "utf-8" });
     ƒ.Debug.groupCollapsed("File content");
     ƒ.Debug.info(content);
     ƒ.Debug.groupEnd();
@@ -31,18 +33,20 @@ namespace Fudge {
     const head: HTMLHeadElement = dom.getElementsByTagName("head")[0];
     console.log(head);
 
+    //TODO: should old scripts be removed from memory first? How?
     const scripts: NodeListOf<HTMLScriptElement> = head.querySelectorAll("script");
     for (let script of scripts) {
       if (script.getAttribute("editor") == "true") {
         let url: string = script.getAttribute("src");
-        await ƒ.Project.loadScript(new URL(url, base).toString());
+        await ƒ.Project.loadScript(new URL(url, _url).toString());
       }
     }
 
-    // support multiple resourcefiles
+    // TODO: support multiple resourcefiles
+    ƒ.Project.clear();
     const resourceFile: string = head.querySelector("link").getAttribute("src");
-    ƒ.Project.baseURL = base;
-    let reconstruction: ƒ.Resources = await ƒ.Project.loadResources(new URL(resourceFile, base).toString());
+    ƒ.Project.baseURL = _url;
+    let reconstruction: ƒ.Resources = await ƒ.Project.loadResources(new URL(resourceFile, _url).toString());
 
     ƒ.Debug.groupCollapsed("Deserialized");
     ƒ.Debug.info(reconstruction);
@@ -53,7 +57,5 @@ namespace Fudge {
     //   if (id.startsWith("Node"))
     //     return <ƒ.NodeResource>reconstruction[id];
     // }
-
-    return null;
   }
 }

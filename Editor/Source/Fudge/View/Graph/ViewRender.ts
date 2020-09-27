@@ -53,6 +53,7 @@ namespace Fudge {
         return;
       this.graph = _node;
       this.viewport.setGraph(this.graph);
+      this.redraw();
     }
 
     private hndEvent = (_event: CustomEvent): void => {
