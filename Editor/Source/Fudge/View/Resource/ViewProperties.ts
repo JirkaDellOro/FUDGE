@@ -66,7 +66,7 @@ namespace Fudge {
           content.innerHTML += "Size: " + (this.resource.stats["size"] / 1024).toFixed(2) + " KiB<br/>";
           content.innerHTML += "Created: " + this.resource.stats["birthtime"].toLocaleString() + "<br/>";
           content.innerHTML += "Modified: " + this.resource.stats["ctime"].toLocaleString() + "<br/>";
-        } else if (this.resource instanceof ƒ.NodeResource) {
+        } else if (this.resource instanceof ƒ.Graph) {
           content.innerHTML = this.resource.toHierarchyString();
         }
 

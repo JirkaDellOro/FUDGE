@@ -15,6 +15,8 @@ namespace Project {
   export class Resource implements ƒ.SerializableResource {
     public idResource: string = null;
     public reference: Resource = null;
+    public name: string;
+    public type: string;
 
     public serialize(): ƒ.Serialization {
       return {
@@ -110,13 +112,13 @@ namespace Project {
     source.addComponent(lightAmbient);
     source.addComponent(lightDirectional);
 
-    let child: ƒ.Node = new ƒAid.Node("Cube", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y()), mtrFlat, sphere);
+    let child: ƒ.Node = new ƒAid.Node("Ball", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y()), mtrFlat, sphere);
     child.getComponent(ƒ.ComponentMesh).pivot.scale(ƒ.Vector3.ONE(0.5));
     source.addChild(child);
 
 
-    let graph: ƒ.NodeResource = await ƒ.Project.registerNodeAsResource(source, true);
-    let instance: ƒ.NodeResourceInstance = await ƒ.Project.createGraphInstance(graph);
+    let graph: ƒ.Graph = await ƒ.Project.registerAsGraph(source, true);
+    let instance: ƒ.GraphInstance = await ƒ.Project.createGraphInstance(graph);
     console.log("Source", source);
     console.log("Graph", graph);
     console.log("Instance", instance);
@@ -147,9 +149,9 @@ namespace Project {
 
     ƒ.AudioManager.default.listenTo(instance);
 
-    let reconstrucedGraph: ƒ.NodeResource = <ƒ.NodeResource>reconstruction[id];
+    let reconstrucedGraph: ƒ.Graph = <ƒ.Graph>reconstruction[id];
     reconstrucedGraph.name = "ReconstructedGraph";
-    let reconstructedInstance: ƒ.NodeResourceInstance = await ƒ.Project.createGraphInstance(reconstrucedGraph);
+    let reconstructedInstance: ƒ.GraphInstance = await ƒ.Project.createGraphInstance(reconstrucedGraph);
     reconstructedInstance.name = "ReconstructedInstance";
 
     tweakGraphs(10, reconstructedInstance, [source, graph, instance, reconstrucedGraph, reconstructedInstance]);
@@ -178,9 +180,9 @@ namespace Project {
 
     for (let id in reconstruction) {
       let resource: ƒ.SerializableResource = reconstruction[id];
-      if (resource instanceof ƒ.NodeResource) {
+      if (resource instanceof ƒ.Graph) {
         resource.name = "ReconstructedGraph";
-        let reconstructedInstance: ƒ.NodeResourceInstance = await ƒ.Project.createGraphInstance(resource);
+        let reconstructedInstance: ƒ.GraphInstance = await ƒ.Project.createGraphInstance(resource);
         reconstructedInstance.name = "ReconstructedInstance";
 
         tweakGraphs(10, reconstructedInstance, [resource, reconstructedInstance]);

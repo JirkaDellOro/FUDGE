@@ -1878,7 +1878,7 @@ var Fudge;
                     content.innerHTML += "Created: " + this.resource.stats["birthtime"].toLocaleString() + "<br/>";
                     content.innerHTML += "Modified: " + this.resource.stats["ctime"].toLocaleString() + "<br/>";
                 }
-                else if (this.resource instanceof ƒ.NodeResource) {
+                else if (this.resource instanceof ƒ.Graph) {
                     content.innerHTML = this.resource.toHierarchyString();
                 }
                 this.dom.append(content);

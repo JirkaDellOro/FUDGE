@@ -115,7 +115,7 @@ namespace Fudge {
           this.viewport.draw();
           break;
         case "Graph":
-          this.viewport.setGraph(<ƒ.NodeResource>this.resource);
+          this.viewport.setGraph(<ƒ.Graph>this.resource);
           this.dom.appendChild(this.viewport.getCanvas());
           this.viewport.draw();
           break;

@@ -1,7 +1,7 @@
-namespace NodeResource {
+namespace Graph {
   import ƒ = FudgeCore;
   
-  ƒ.Serializer.registerNamespace(NodeResource);
+  ƒ.Serializer.registerNamespace(Graph);
   window.addEventListener("DOMContentLoaded", init);
 
   async function init(): Promise<void> {
@@ -19,14 +19,14 @@ namespace NodeResource {
 
     // Fudge["AnimateSatellite"] = AnimateSatellite;
     // console.log(AnimateSatellite["namespaceX"]);
-    let resource: ƒ.NodeResource = await ƒ.Project.registerNodeAsResource(center, false);
+    let resource: ƒ.Graph = await ƒ.Project.registerAsGraph(center, false);
 
     let dim: ƒ.Vector3 = new ƒ.Vector3(2, 2, 2);
 
     for (let z: number = -dim.z; z < dim.z + 1; z++)
       for (let y: number = -dim.y; y < dim.y + 1; y++)
         for (let x: number = -dim.x; x < dim.x + 1; x++) {
-          let instance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(resource);
+          let instance: ƒ.GraphInstance = new ƒ.GraphInstance(resource);
           graph.addChild(instance);
           instance.mtxLocal.translate(new ƒ.Vector3(2 * x, 2 * y, 2 * z));
           (<ƒ.ComponentMesh>instance.getComponent(ƒ.ComponentMesh)).pivot.scale(ƒ.Vector3.ONE(1));
@@ -34,7 +34,7 @@ namespace NodeResource {
         }
 
     let srlResources: ƒ.SerializationOfResources = ƒ.Project.serialize();
-    let srlInstance: ƒ.Serialization = ƒ.Serializer.serialize(new ƒ.NodeResourceInstance(resource));
+    let srlInstance: ƒ.Serialization = ƒ.Serializer.serialize(new ƒ.GraphInstance(resource));
     console.groupCollapsed("Resources");
     console.log(ƒ.Serializer.stringify(srlResources));
     console.groupEnd();

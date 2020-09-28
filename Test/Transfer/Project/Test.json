@@ -1,46 +1,46 @@
 {
-  "TextureImage|2020-09-25T16:07:24.118Z|86659": {
+  "TextureImage|2020-09-28T16:56:03.251Z|17124": {
     "ƒ.TextureImage": {
       "url": "Image/Fudge_360.png",
-      "idResource": "TextureImage|2020-09-25T16:07:24.118Z|86659",
+      "idResource": "TextureImage|2020-09-28T16:56:03.251Z|17124",
       "name": "Texture",
       "type": "TextureImage"
     }
   },
-  "Material|2020-09-25T16:07:24.124Z|27449": {
+  "Material|2020-09-28T16:56:03.257Z|33686": {
     "ƒ.Material": {
       "name": "Textured",
-      "idResource": "Material|2020-09-25T16:07:24.124Z|27449",
+      "idResource": "Material|2020-09-28T16:56:03.257Z|33686",
       "shader": "ShaderTexture",
       "coat": {
         "ƒ.CoatTextured": {
           "name": "Coat",
           "color": "[1, 0, 0, 1]",
-          "idTexture": "TextureImage|2020-09-25T16:07:24.118Z|86659"
+          "idTexture": "TextureImage|2020-09-28T16:56:03.251Z|17124"
         }
       }
     }
   },
-  "MeshPyramid|2020-09-25T16:07:24.125Z|50877": {
+  "MeshPyramid|2020-09-28T16:56:03.258Z|88787": {
     "ƒ.MeshPyramid": {
-      "idResource": "MeshPyramid|2020-09-25T16:07:24.125Z|50877",
+      "idResource": "MeshPyramid|2020-09-28T16:56:03.258Z|88787",
       "name": "Mesh",
       "type": "MeshPyramid"
     }
   },
-  "MeshSphere|2020-09-25T16:07:24.126Z|24486": {
+  "MeshSphere|2020-09-28T16:56:03.259Z|95941": {
     "ƒ.MeshSphere": {
-      "idResource": "MeshSphere|2020-09-25T16:07:24.126Z|24486",
+      "idResource": "MeshSphere|2020-09-28T16:56:03.259Z|95941",
       "name": "Mesh",
       "type": "MeshSphere",
       "sectors": 8,
       "stacks": 5
     }
   },
-  "Material|2020-09-25T16:07:24.126Z|87421": {
+  "Material|2020-09-28T16:56:03.259Z|41561": {
     "ƒ.Material": {
       "name": "Flat",
-      "idResource": "Material|2020-09-25T16:07:24.126Z|87421",
+      "idResource": "Material|2020-09-28T16:56:03.259Z|41561",
       "shader": "ShaderFlat",
       "coat": {
         "ƒ.CoatColored": {
@@ -50,16 +50,16 @@
       }
     }
   },
-  "Audio|2020-09-25T16:07:24.127Z|67563": {
+  "Audio|2020-09-28T16:56:03.260Z|42751": {
     "ƒ.Audio": {
       "url": "Audio/hypnotic.mp3",
-      "idResource": "Audio|2020-09-25T16:07:24.127Z|67563",
+      "idResource": "Audio|2020-09-28T16:56:03.260Z|42751",
       "name": "hypnotic.mp3",
       "type": "Audio"
     }
   },
-  "NodeResource|2020-09-25T16:07:24.143Z|54379": {
-    "ƒ.NodeResource": {
+  "Graph|2020-09-28T16:56:03.275Z|77173": {
+    "ƒ.Graph": {
       "name": "Graph",
       "components": {
         "ComponentTransform": [
@@ -107,14 +107,14 @@
               "Component": {
                 "active": true
               },
-              "idMaterial": "Material|2020-09-25T16:07:24.124Z|27449"
+              "idMaterial": "Material|2020-09-28T16:56:03.257Z|33686"
             }
           }
         ],
         "ComponentMesh": [
           {
             "ƒ.ComponentMesh": {
-              "idMesh": "MeshPyramid|2020-09-25T16:07:24.125Z|50877",
+              "idMesh": "MeshPyramid|2020-09-28T16:56:03.258Z|88787",
               "pivot": {
                 "translation": {
                   "x": 0,
@@ -151,7 +151,7 @@
           {
             "ƒ.ComponentAudio": {
               "active": true,
-              "idResource": "Audio|2020-09-25T16:07:24.127Z|67563",
+              "idResource": "Audio|2020-09-28T16:56:03.260Z|42751",
               "playing": true,
               "loop": true,
               "volume": 1
@@ -216,7 +216,7 @@
       "children": [
         {
           "ƒ.Node": {
-            "name": "Cube",
+            "name": "Ball",
             "components": {
               "ComponentTransform": [
                 {
@@ -263,14 +263,14 @@
                     "Component": {
                       "active": true
                     },
-                    "idMaterial": "Material|2020-09-25T16:07:24.126Z|87421"
+                    "idMaterial": "Material|2020-09-28T16:56:03.259Z|41561"
                   }
                 }
               ],
               "ComponentMesh": [
                 {
                   "ƒ.ComponentMesh": {
-                    "idMesh": "MeshSphere|2020-09-25T16:07:24.126Z|24486",
+                    "idMesh": "MeshSphere|2020-09-28T16:56:03.259Z|95941",
                     "pivot": {
                       "translation": {
                         "x": 0,
@@ -299,7 +299,7 @@
           }
         }
       ],
-      "idResource": "NodeResource|2020-09-25T16:07:24.143Z|54379",
+      "idResource": "Graph|2020-09-28T16:56:03.275Z|77173",
       "type": "Graph"
     }
   }

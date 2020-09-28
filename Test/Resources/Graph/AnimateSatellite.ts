@@ -1,4 +1,4 @@
-namespace NodeResource {
+namespace Graph {
     import ƒ = FudgeCore;
 
     export class AnimateSatellite extends ƒ.ComponentScript {

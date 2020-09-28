@@ -15,12 +15,6 @@ namespace FileIo {
 
     let node: ƒ.Node;
     node = Scenes.createCompleteMeshNode("Node", material, mesh);
-    // let nodeResource: ƒ.NodeResource = ƒ.Project.registerNodeAsResource(node);
-
-    // let instance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(nodeResource);
-    // ƒ.Debug.log(instance);
-
-    // let result: ƒ.Resources = testFileIo(node);
     testFileIo(node);
   }
 

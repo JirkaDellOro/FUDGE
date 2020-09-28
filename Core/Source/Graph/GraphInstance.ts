@@ -1,26 +1,24 @@
 namespace FudgeCore {
   /**
-   * An instance of a [[NodeResource]].  
+   * An instance of a [[Graph]].  
    * This node keeps a reference to its resource an can thus optimize serialization
    * @author Jirka Dell'Oro-Friedl, HFU, 2019
    * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource
    */
-  export class NodeResourceInstance extends Node {
+  export class GraphInstance extends Node {
     /** id of the resource that instance was created from */
     // TODO: examine, if this should be a direct reference to the NodeResource, instead of the id
     private idSource: string = undefined;
 
-    constructor(_nodeResource: NodeResource) {
+    constructor(_graph: Graph) {
       super("NodeResourceInstance");
-      // if (_nodeResource)
-      //   this.set(_nodeResource);
     }
 
     /**
      * Recreate this node from the [[NodeResource]] referenced
      */
     public async reset(): Promise<void> {
-      let resource: NodeResource = <NodeResource> await Project.getResource(this.idSource);
+      let resource: Graph = <Graph> await Project.getResource(this.idSource);
       this.set(resource);
     }
 
@@ -41,7 +39,7 @@ namespace FudgeCore {
      * Set this node to be a recreation of the [[NodeResource]] given
      * @param _nodeResource
      */
-    public async set(_nodeResource: NodeResource): Promise<void> {
+    public async set(_nodeResource: Graph): Promise<void> {
       // TODO: examine, if the serialization should be stored in the NodeResource for optimization
       let serialization: Serialization = Serializer.serialize(_nodeResource);
       //Serializer.deserialize(serialization);
@@ -50,7 +48,7 @@ namespace FudgeCore {
         break;
       }
       this.idSource = _nodeResource.idResource;
-      this.dispatchEvent(new Event(EVENT.NODERESOURCE_INSTANTIATED));
+      this.dispatchEvent(new Event(EVENT.GRAPH_INSTANTIATED));
     }
   }
 }

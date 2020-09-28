@@ -1,5 +1,5 @@
-var NodeResource;
-(function (NodeResource) {
+var Graph;
+(function (Graph) {
     var ƒ = FudgeCore;
     class AnimateSatellite extends ƒ.ComponentScript {
         constructor() {
@@ -34,6 +34,6 @@ var NodeResource;
     // tpo: test performance optimization
     AnimateSatellite.mtxRotY = ƒ.Matrix4x4.ROTATION_Y(1);
     AnimateSatellite.mtxRotX = ƒ.Matrix4x4.ROTATION_X(5);
-    NodeResource.AnimateSatellite = AnimateSatellite;
-})(NodeResource || (NodeResource = {}));
+    Graph.AnimateSatellite = AnimateSatellite;
+})(Graph || (Graph = {}));
 //# sourceMappingURL=AnimateSatellite.js.map

@@ -94,10 +94,10 @@ var Project;
         source.addComponent(cmpAudio);
         source.addComponent(lightAmbient);
         source.addComponent(lightDirectional);
-        let child = new Project.ƒAid.Node("Cube", Project.ƒ.Matrix4x4.TRANSLATION(Project.ƒ.Vector3.Y()), mtrFlat, sphere);
+        let child = new Project.ƒAid.Node("Ball", Project.ƒ.Matrix4x4.TRANSLATION(Project.ƒ.Vector3.Y()), mtrFlat, sphere);
         child.getComponent(Project.ƒ.ComponentMesh).pivot.scale(Project.ƒ.Vector3.ONE(0.5));
         source.addChild(child);
-        let graph = await Project.ƒ.Project.registerNodeAsResource(source, true);
+        let graph = await Project.ƒ.Project.registerAsGraph(source, true);
         let instance = await Project.ƒ.Project.createGraphInstance(graph);
         console.log("Source", source);
         console.log("Graph", graph);
@@ -147,7 +147,7 @@ var Project;
         console.groupEnd();
         for (let id in reconstruction) {
             let resource = reconstruction[id];
-            if (resource instanceof Project.ƒ.NodeResource) {
+            if (resource instanceof Project.ƒ.Graph) {
                 resource.name = "ReconstructedGraph";
                 let reconstructedInstance = await Project.ƒ.Project.createGraphInstance(resource);
                 reconstructedInstance.name = "ReconstructedInstance";

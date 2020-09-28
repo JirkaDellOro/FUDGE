@@ -20,10 +20,10 @@ namespace ScriptSerialization {
     graph.addChild(test);
     test.name = "Original";
 
-    let resource: ƒ.NodeResource = await ƒ.Project.registerNodeAsResource(test, false);
+    let resource: ƒ.Graph = await ƒ.Project.registerAsGraph(test, false);
     resource.name = "Resource";
 
-    let instance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(resource);
+    let instance: ƒ.GraphInstance = new ƒ.GraphInstance(resource);
     instance.name = "Instance";
     graph.addChild(instance);
 

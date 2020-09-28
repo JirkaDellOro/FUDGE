@@ -23,7 +23,7 @@ namespace FudgeUserInterface {
       super();
       this.controller = _controller;
       this.data = _data;
-      this.create();
+      this.create(); 
       this.className = "sortable";
 
       this.addEventListener(EVENT.SORT, <EventListener>this.hndSort);

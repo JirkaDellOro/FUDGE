@@ -1,10 +1,10 @@
 namespace FudgeCore {
   /**
-   * A node managed by [[ResourceManager]] that functions as a template for [[NodeResourceInstance]]s 
+   * A node managed by [[Project]] that functions as a template for [[GraphInstance]]s 
    * @author Jirka Dell'Oro-Friedl, HFU, 2019
    * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource
    */
-  export class NodeResource extends Node implements SerializableResource {
+  export class Graph extends Node implements SerializableResource {
     public idResource: string = undefined;
     public type: string = "Graph";
 

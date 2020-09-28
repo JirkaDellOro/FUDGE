@@ -31,8 +31,8 @@ namespace FudgeCore {
         NODE_SERIALIZED = "nodeSerialized",
         /** dispatched to [[Node]] when it's done deserializing, so all components, children and attributes are available */
         NODE_DESERIALIZED = "nodeDeserialized",
-        /** dispatched to [[NodeResourceInstance]] when it's content is set according to a serialization of a [[NodeResource]]  */
-        NODERESOURCE_INSTANTIATED = "nodeResourceInstantiated",
+        /** dispatched to [[GraphInstance]] when it's content is set according to a serialization of a [[Graph]]  */
+        GRAPH_INSTANTIATED = "graphInstantiated",
         /** dispatched to [[Time]] when it's scaling changed  */
         TIME_SCALED = "timeScaled",
         /** dispatched to [[FileIo]] when a list of files has been loaded  */

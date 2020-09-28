@@ -1,7 +1,7 @@
-var NodeResource;
-(function (NodeResource) {
+var Graph;
+(function (Graph) {
     var ƒ = FudgeCore;
-    ƒ.Serializer.registerNamespace(NodeResource);
+    ƒ.Serializer.registerNamespace(Graph);
     window.addEventListener("DOMContentLoaded", init);
     async function init() {
         ƒ.Debug.log("Start");
@@ -14,19 +14,19 @@ var NodeResource;
         let center = createCenterAndSatellite();
         // Fudge["AnimateSatellite"] = AnimateSatellite;
         // console.log(AnimateSatellite["namespaceX"]);
-        let resource = await ƒ.Project.registerNodeAsResource(center, false);
+        let resource = await ƒ.Project.registerAsGraph(center, false);
         let dim = new ƒ.Vector3(2, 2, 2);
         for (let z = -dim.z; z < dim.z + 1; z++)
             for (let y = -dim.y; y < dim.y + 1; y++)
                 for (let x = -dim.x; x < dim.x + 1; x++) {
-                    let instance = new ƒ.NodeResourceInstance(resource);
+                    let instance = new ƒ.GraphInstance(resource);
                     graph.addChild(instance);
                     instance.mtxLocal.translate(new ƒ.Vector3(2 * x, 2 * y, 2 * z));
                     instance.getComponent(ƒ.ComponentMesh).pivot.scale(ƒ.Vector3.ONE(1));
                     instance.broadcastEvent(new Event("startSatellite"));
                 }
         let srlResources = ƒ.Project.serialize();
-        let srlInstance = ƒ.Serializer.serialize(new ƒ.NodeResourceInstance(resource));
+        let srlInstance = ƒ.Serializer.serialize(new ƒ.GraphInstance(resource));
         console.groupCollapsed("Resources");
         console.log(ƒ.Serializer.stringify(srlResources));
         console.groupEnd();
@@ -53,8 +53,8 @@ var NodeResource;
         center.getComponent(ƒ.ComponentMesh).pivot.scale(ƒ.Vector3.ONE(0.5));
         let satellite = Scenes.createCompleteMeshNode("Satellite", mtrCyan, cube);
         center.addChild(satellite);
-        satellite.addComponent(new NodeResource.AnimateSatellite());
+        satellite.addComponent(new Graph.AnimateSatellite());
         return center;
     }
-})(NodeResource || (NodeResource = {}));
-//# sourceMappingURL=NodeResource.js.map
+})(Graph || (Graph = {}));
+//# sourceMappingURL=Graph.js.map

@@ -139,8 +139,8 @@ declare namespace FudgeCore {
         NODE_SERIALIZED = "nodeSerialized",
         /** dispatched to [[Node]] when it's done deserializing, so all components, children and attributes are available */
         NODE_DESERIALIZED = "nodeDeserialized",
-        /** dispatched to [[NodeResourceInstance]] when it's content is set according to a serialization of a [[NodeResource]]  */
-        NODERESOURCE_INSTANTIATED = "nodeResourceInstantiated",
+        /** dispatched to [[GraphInstance]] when it's content is set according to a serialization of a [[Graph]]  */
+        GRAPH_INSTANTIATED = "graphInstantiated",
         /** dispatched to [[Time]] when it's scaling changed  */
         TIME_SCALED = "timeScaled",
         /** dispatched to [[FileIo]] when a list of files has been loaded  */
@@ -701,6 +701,168 @@ declare namespace FudgeCore {
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
         protected static draw(_mesh: Mesh, cmpMaterial: ComponentMaterial, _final: Matrix4x4, _projection: Matrix4x4): void;
+    }
+}
+declare namespace FudgeCore {
+    interface MapClassToComponents {
+        [className: string]: Component[];
+    }
+    /**
+     * Represents a node in the scenetree.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Graph
+     */
+    class Node extends EventTargetƒ implements Serializable {
+        name: string;
+        readonly mtxWorld: Matrix4x4;
+        timestampUpdate: number;
+        private parent;
+        private children;
+        private components;
+        private listeners;
+        private captures;
+        private active;
+        private worldInverseUpdated;
+        private worldInverse;
+        /**
+         * Creates a new node with a name and initializes all attributes
+         * @param _name The name by which the node can be called.
+         */
+        constructor(_name: string);
+        get isActive(): boolean;
+        /**
+         * Shortcut to retrieve this nodes [[ComponentTransform]]
+         */
+        get cmpTransform(): ComponentTransform;
+        /**
+         * Shortcut to retrieve the local [[Matrix4x4]] attached to this nodes [[ComponentTransform]]
+         * Fails if no [[ComponentTransform]] is attached
+         */
+        get mtxLocal(): Matrix4x4;
+        get mtxWorldInverse(): Matrix4x4;
+        /**
+         * Returns the number of children attached to this
+         */
+        get nChildren(): number;
+        /**
+         * Generator yielding the node and all decendants in the graph below for iteration
+         */
+        get graph(): IterableIterator<Node>;
+        activate(_on: boolean): void;
+        /**
+         * Returns a reference to this nodes parent node
+         */
+        getParent(): Node | null;
+        /**
+         * Traces back the ancestors of this node and returns the first
+         */
+        getAncestor(): Node | null;
+        /**
+         * Returns child at the given index in the list of children
+         */
+        getChild(_index: number): Node;
+        /**
+         * Returns a clone of the list of children
+         */
+        getChildren(): Node[];
+        /**
+         * Returns an array of references to childnodes with the supplied name.
+         */
+        getChildrenByName(_name: string): Node[];
+        /**
+         * Simply calls [[addChild]]. This reference is here solely because appendChild is the equivalent method in DOM.
+         * See and preferably use [[addChild]]
+         */
+        readonly appendChild: (_child: Node) => void;
+        /**
+         * Adds the given reference to a node to the list of children, if not already in
+         * @throws Error when trying to add an ancestor of this
+         */
+        addChild(_child: Node): void;
+        /**
+         * Removes the reference to the give node from the list of children
+         * @param _child The node to be removed.
+         */
+        removeChild(_child: Node): void;
+        /**
+         * Returns the position of the node in the list of children or -1 if not found
+         * @param _search The node to be found.
+         */
+        findChild(_search: Node): number;
+        /**
+         * Replaces a child node with another, preserving the position in the list of children
+         * @param _replace The node to be replaced
+         * @param _with The node to replace with
+         */
+        replaceChild(_replace: Node, _with: Node): boolean;
+        isUpdated(_timestampUpdate: number): boolean;
+        isDescendantOf(_ancestor: Node): boolean;
+        /**
+         * Applies a Mutator from [[Animation]] to all its components and transfers it to its children.
+         * @param _mutator The mutator generated from an [[Animation]]
+         */
+        applyAnimation(_mutator: Mutator): void;
+        /**
+         * Returns a list of all components attached to this node, independent of type.
+         */
+        getAllComponents(): Component[];
+        /**
+         * Returns a clone of the list of components of the given class attached to this node.
+         * @param _class The class of the components to be found.
+         */
+        getComponents<T extends Component>(_class: new () => T): T[];
+        /**
+         * Returns the first compontent found of the given class attached this node or null, if list is empty or doesn't exist
+         * @param _class The class of the components to be found.
+         */
+        getComponent<T extends Component>(_class: new () => T): T;
+        /**
+         * Adds the supplied component into the nodes component map.
+         * @param _component The component to be pushed into the array.
+         */
+        addComponent(_component: Component): void;
+        /**
+         * Removes the given component from the node, if it was attached, and sets its parent to null.
+         * @param _component The component to be removed
+         * @throws Exception when component is not found
+         */
+        removeComponent(_component: Component): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        /**
+         * Creates a string as representation of this node and its descendants
+         */
+        toHierarchyString(_node?: Node, _level?: number): string;
+        /**
+         * Adds an event listener to the node. The given handler will be called when a matching event is passed to the node.
+         * Deviating from the standard EventTarget, here the _handler must be a function and _capture is the only option.
+         * @param _type The type of the event, should be an enumerated value of NODE_EVENT, can be any string
+         * @param _handler The function to call when the event reaches this node
+         * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
+         */
+        addEventListener(_type: EVENT | string, _handler: EventListener, _capture?: boolean): void;
+        /**
+         * Removes an event listener from the node. The signatur must match the one used with addEventListener
+         * @param _type The type of the event, should be an enumerated value of NODE_EVENT, can be any string
+         * @param _handler The function to call when the event reaches this node
+         * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
+         */
+        removeEventListener(_type: EVENT | string, _handler: EventListener, _capture?: boolean): void;
+        /**
+         * Dispatches a synthetic event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
+         * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase,
+         * than the matching handler of the target node in the target phase, and back out of the hierarchy in the bubbling phase, invoking appropriate handlers of the anvestors
+         * @param _event The event to dispatch
+         */
+        dispatchEvent(_event: Event): boolean;
+        /**
+         * Broadcasts a synthetic event to this node and from there to all nodes deeper in the hierarchy,
+         * invoking matching handlers of the nodes listening to the capture phase. Watch performance when there are many nodes involved
+         * @param _event The event to broadcast
+         */
+        broadcastEvent(_event: Event): void;
+        private broadcastEventRecursive;
+        private getGraphGenerator;
     }
 }
 declare namespace FudgeCore {
@@ -1801,10 +1963,10 @@ declare namespace FudgeCore {
         /**
          * Creates and registers a resource from a [[Node]], copying the complete graph starting with it
          * @param _node A node to create the resource from
-         * @param _replaceWithInstance if true (default), the node used as origin is replaced by a [[NodeResourceInstance]] of the [[NodeResource]] created
+         * @param _replaceWithInstance if true (default), the node used as origin is replaced by a [[GraphInstance]] of the [[Graph]] created
          */
-        static registerNodeAsResource(_node: Node, _replaceWithInstance?: boolean): Promise<NodeResource>;
-        static createGraphInstance(_graph: NodeResource): Promise<NodeResourceInstance>;
+        static registerAsGraph(_node: Node, _replaceWithInstance?: boolean): Promise<Graph>;
+        static createGraphInstance(_graph: Graph): Promise<GraphInstance>;
         static loadScript(_url: RequestInfo): Promise<void>;
         static loadResources(_url?: RequestInfo): Promise<Resources>;
         /**
@@ -2235,6 +2397,43 @@ declare namespace FudgeCore {
     }
     class EventWheel extends WheelEvent {
         constructor(type: string, _event: EventWheel);
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * A node managed by [[Project]] that functions as a template for [[GraphInstance]]s
+     * @author Jirka Dell'Oro-Friedl, HFU, 2019
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource
+     */
+    class Graph extends Node implements SerializableResource {
+        idResource: string;
+        type: string;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * An instance of a [[Graph]].
+     * This node keeps a reference to its resource an can thus optimize serialization
+     * @author Jirka Dell'Oro-Friedl, HFU, 2019
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource
+     */
+    class GraphInstance extends Node {
+        /** id of the resource that instance was created from */
+        private idSource;
+        constructor(_graph: Graph);
+        /**
+         * Recreate this node from the [[NodeResource]] referenced
+         */
+        reset(): Promise<void>;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        /**
+         * Set this node to be a recreation of the [[NodeResource]] given
+         * @param _nodeResource
+         */
+        set(_nodeResource: Graph): Promise<void>;
     }
 }
 declare namespace FudgeCore {
@@ -3097,205 +3296,6 @@ declare namespace FudgeCore {
         protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;
         protected createFaceNormals(): Float32Array;
-    }
-}
-declare namespace FudgeCore {
-    interface MapClassToComponents {
-        [className: string]: Component[];
-    }
-    /**
-     * Represents a node in the scenetree.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Graph
-     */
-    class Node extends EventTargetƒ implements Serializable {
-        name: string;
-        readonly mtxWorld: Matrix4x4;
-        timestampUpdate: number;
-        private parent;
-        private children;
-        private components;
-        private listeners;
-        private captures;
-        private active;
-        private worldInverseUpdated;
-        private worldInverse;
-        /**
-         * Creates a new node with a name and initializes all attributes
-         * @param _name The name by which the node can be called.
-         */
-        constructor(_name: string);
-        get isActive(): boolean;
-        /**
-         * Shortcut to retrieve this nodes [[ComponentTransform]]
-         */
-        get cmpTransform(): ComponentTransform;
-        /**
-         * Shortcut to retrieve the local [[Matrix4x4]] attached to this nodes [[ComponentTransform]]
-         * Fails if no [[ComponentTransform]] is attached
-         */
-        get mtxLocal(): Matrix4x4;
-        get mtxWorldInverse(): Matrix4x4;
-        /**
-         * Returns the number of children attached to this
-         */
-        get nChildren(): number;
-        /**
-         * Generator yielding the node and all decendants in the graph below for iteration
-         */
-        get graph(): IterableIterator<Node>;
-        activate(_on: boolean): void;
-        /**
-         * Returns a reference to this nodes parent node
-         */
-        getParent(): Node | null;
-        /**
-         * Traces back the ancestors of this node and returns the first
-         */
-        getAncestor(): Node | null;
-        /**
-         * Returns child at the given index in the list of children
-         */
-        getChild(_index: number): Node;
-        /**
-         * Returns a clone of the list of children
-         */
-        getChildren(): Node[];
-        /**
-         * Returns an array of references to childnodes with the supplied name.
-         */
-        getChildrenByName(_name: string): Node[];
-        /**
-         * Simply calls [[addChild]]. This reference is here solely because appendChild is the equivalent method in DOM.
-         * See and preferably use [[addChild]]
-         */
-        readonly appendChild: (_child: Node) => void;
-        /**
-         * Adds the given reference to a node to the list of children, if not already in
-         * @throws Error when trying to add an ancestor of this
-         */
-        addChild(_child: Node): void;
-        /**
-         * Removes the reference to the give node from the list of children
-         * @param _child The node to be removed.
-         */
-        removeChild(_child: Node): void;
-        /**
-         * Returns the position of the node in the list of children or -1 if not found
-         * @param _search The node to be found.
-         */
-        findChild(_search: Node): number;
-        /**
-         * Replaces a child node with another, preserving the position in the list of children
-         * @param _replace The node to be replaced
-         * @param _with The node to replace with
-         */
-        replaceChild(_replace: Node, _with: Node): boolean;
-        isUpdated(_timestampUpdate: number): boolean;
-        isDescendantOf(_ancestor: Node): boolean;
-        /**
-         * Applies a Mutator from [[Animation]] to all its components and transfers it to its children.
-         * @param _mutator The mutator generated from an [[Animation]]
-         */
-        applyAnimation(_mutator: Mutator): void;
-        /**
-         * Returns a list of all components attached to this node, independent of type.
-         */
-        getAllComponents(): Component[];
-        /**
-         * Returns a clone of the list of components of the given class attached to this node.
-         * @param _class The class of the components to be found.
-         */
-        getComponents<T extends Component>(_class: new () => T): T[];
-        /**
-         * Returns the first compontent found of the given class attached this node or null, if list is empty or doesn't exist
-         * @param _class The class of the components to be found.
-         */
-        getComponent<T extends Component>(_class: new () => T): T;
-        /**
-         * Adds the supplied component into the nodes component map.
-         * @param _component The component to be pushed into the array.
-         */
-        addComponent(_component: Component): void;
-        /**
-         * Removes the given component from the node, if it was attached, and sets its parent to null.
-         * @param _component The component to be removed
-         * @throws Exception when component is not found
-         */
-        removeComponent(_component: Component): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
-        /**
-         * Creates a string as representation of this node and its descendants
-         */
-        toHierarchyString(_node?: Node, _level?: number): string;
-        /**
-         * Adds an event listener to the node. The given handler will be called when a matching event is passed to the node.
-         * Deviating from the standard EventTarget, here the _handler must be a function and _capture is the only option.
-         * @param _type The type of the event, should be an enumerated value of NODE_EVENT, can be any string
-         * @param _handler The function to call when the event reaches this node
-         * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
-         */
-        addEventListener(_type: EVENT | string, _handler: EventListener, _capture?: boolean): void;
-        /**
-         * Removes an event listener from the node. The signatur must match the one used with addEventListener
-         * @param _type The type of the event, should be an enumerated value of NODE_EVENT, can be any string
-         * @param _handler The function to call when the event reaches this node
-         * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
-         */
-        removeEventListener(_type: EVENT | string, _handler: EventListener, _capture?: boolean): void;
-        /**
-         * Dispatches a synthetic event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
-         * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase,
-         * than the matching handler of the target node in the target phase, and back out of the hierarchy in the bubbling phase, invoking appropriate handlers of the anvestors
-         * @param _event The event to dispatch
-         */
-        dispatchEvent(_event: Event): boolean;
-        /**
-         * Broadcasts a synthetic event to this node and from there to all nodes deeper in the hierarchy,
-         * invoking matching handlers of the nodes listening to the capture phase. Watch performance when there are many nodes involved
-         * @param _event The event to broadcast
-         */
-        broadcastEvent(_event: Event): void;
-        private broadcastEventRecursive;
-        private getGraphGenerator;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * A node managed by [[ResourceManager]] that functions as a template for [[NodeResourceInstance]]s
-     * @author Jirka Dell'Oro-Friedl, HFU, 2019
-     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource
-     */
-    class NodeResource extends Node implements SerializableResource {
-        idResource: string;
-        type: string;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * An instance of a [[NodeResource]].
-     * This node keeps a reference to its resource an can thus optimize serialization
-     * @author Jirka Dell'Oro-Friedl, HFU, 2019
-     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource
-     */
-    class NodeResourceInstance extends Node {
-        /** id of the resource that instance was created from */
-        private idSource;
-        constructor(_nodeResource: NodeResource);
-        /**
-         * Recreate this node from the [[NodeResource]] referenced
-         */
-        reset(): Promise<void>;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
-        /**
-         * Set this node to be a recreation of the [[NodeResource]] given
-         * @param _nodeResource
-         */
-        set(_nodeResource: NodeResource): Promise<void>;
     }
 }
 declare namespace FudgeCore {

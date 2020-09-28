@@ -94,24 +94,24 @@ namespace FudgeCore {
     /**
      * Creates and registers a resource from a [[Node]], copying the complete graph starting with it
      * @param _node A node to create the resource from
-     * @param _replaceWithInstance if true (default), the node used as origin is replaced by a [[NodeResourceInstance]] of the [[NodeResource]] created
+     * @param _replaceWithInstance if true (default), the node used as origin is replaced by a [[GraphInstance]] of the [[Graph]] created
      */
-    public static async registerNodeAsResource(_node: Node, _replaceWithInstance: boolean = true): Promise<NodeResource> {
+    public static async registerAsGraph(_node: Node, _replaceWithInstance: boolean = true): Promise<Graph> {
       let serialization: Serialization = _node.serialize();
-      let nodeResource: NodeResource = new NodeResource("NodeResource");
-      await nodeResource.deserialize(serialization);
-      Project.register(nodeResource);
+      let graph: Graph = new Graph(_node.name);
+      await graph.deserialize(serialization);
+      Project.register(graph);
 
       if (_replaceWithInstance && _node.getParent()) {
-        let instance: NodeResourceInstance = new NodeResourceInstance(nodeResource);
+        let instance: GraphInstance = new GraphInstance(graph);
         _node.getParent().replaceChild(_node, instance);
       }
 
-      return nodeResource;
+      return graph;
     }
 
-    public static async createGraphInstance(_graph: NodeResource): Promise<NodeResourceInstance> {
-      let instance: NodeResourceInstance = new NodeResourceInstance(null); // TODO: cleanup since creation moved here
+    public static async createGraphInstance(_graph: Graph): Promise<GraphInstance> {
+      let instance: GraphInstance = new GraphInstance(null); // TODO: cleanup since creation moved here
       await instance.set(_graph);
       return instance;
     }
