@@ -40,7 +40,7 @@ namespace Fudge {
       switch (Number(_item.id)) {
         case CONTEXTMENU.EDIT:
           let resource: ƒ.SerializableResource = this.table.getFocussed();
-          console.log(resource);
+          console.log("Edit", resource);
           this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: resource }));
           break;
       }

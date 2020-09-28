@@ -5,7 +5,9 @@ namespace FudgeCore {
    */
   export abstract class Texture extends Mutable {
     public name: string = "Texture";
-    protected reduceMutator(_mutator: Mutator): void { delete _mutator.idResource; }
+    protected reduceMutator(_mutator: Mutator): void {
+      // delete _mutator.idResource; 
+    }
   }
 
   /**

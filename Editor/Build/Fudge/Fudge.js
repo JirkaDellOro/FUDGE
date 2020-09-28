@@ -18,6 +18,7 @@ var Fudge;
         MENU["PANEL_GRAPH_OPEN"] = "panelGraphOpen";
         MENU["PANEL_ANIMATION_OPEN"] = "panelAnimationOpen";
         MENU["PANEL_PROJECT_OPEN"] = "panelProjectOpen";
+        MENU["FULLSCREEN"] = "fullscreen";
     })(MENU = Fudge.MENU || (Fudge.MENU = {}));
     let EVENT_EDITOR;
     (function (EVENT_EDITOR) {
@@ -223,6 +224,12 @@ var Fudge;
             // TODO: create a new Panel containing a ViewData by default. More Views can be added by the user or by configuration
             Page.setupMainListeners();
             Page.setupPageListeners();
+            // for testing:
+            console.log("Sending");
+            Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_PROJECT_OPEN);
+            Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_GRAPH_OPEN);
+            Fudge.ipcRenderer.emit(Fudge.MENU.PROJECT_LOAD);
+            // ipcRenderer.emit
         }
         static setupGoldenLayout() {
             let config = {
@@ -230,7 +237,7 @@ var Fudge;
                 content: [{
                         id: "root", type: "row", isClosable: false,
                         content: [
-                            { type: "component", componentName: "Welcome", title: "Welcome", componentState: {} }
+                        // { type: "component", componentName: "Welcome", title: "Welcome", componentState: {} }
                         ]
                     }]
             };
@@ -567,7 +574,7 @@ var Fudge;
             this.dom.setAttribute("view", this.constructor.name);
             _container.getElement().append(this.dom);
             this.container = _container;
-            console.log(this.contextMenuCallback);
+            // console.log(this.contextMenuCallback);
             this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
         }
         setTitle(_title) {
@@ -1620,7 +1627,7 @@ var Fudge;
             switch (Number(_item.id)) {
                 case Fudge.CONTEXTMENU.EDIT:
                     let resource = this.table.getFocussed();
-                    console.log(resource);
+                    console.log("Edit", resource);
                     this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: resource }));
                     break;
             }

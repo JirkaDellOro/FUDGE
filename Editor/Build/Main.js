@@ -18,6 +18,7 @@ var Fudge;
         MENU["PANEL_GRAPH_OPEN"] = "panelGraphOpen";
         MENU["PANEL_ANIMATION_OPEN"] = "panelAnimationOpen";
         MENU["PANEL_PROJECT_OPEN"] = "panelProjectOpen";
+        MENU["FULLSCREEN"] = "fullscreen";
     })(MENU = Fudge.MENU || (Fudge.MENU = {}));
     let EVENT_EDITOR;
     (function (EVENT_EDITOR) {
@@ -93,13 +94,17 @@ var Main;
     }
     function addWindow(_url, width = defaultWidth, height = defaultHeight) {
         let window = new BrowserWindow({
-            width: width, height: height, webPreferences: {
+            width: width,
+            height: height,
+            // fullscreen: true,
+            webPreferences: {
                 nodeIntegration: true,
                 enableRemoteModule: true
             }
         });
         window.webContents.openDevTools();
         window.loadFile(_url);
+        window.maximize();
         return window;
     }
     // #endregion
@@ -110,6 +115,9 @@ var Main;
         switch (_item.id) {
             case Fudge.MENU.DEVTOOLS_OPEN:
                 _window.webContents.openDevTools();
+                break;
+            case Fudge.MENU.FULLSCREEN:
+                _window.fullScreen = !_window.isFullScreen();
                 break;
             case Fudge.MENU.QUIT:
                 app.quit();
@@ -133,12 +141,12 @@ var Main;
                     { label: "Project", id: Fudge.MENU.PANEL_PROJECT_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+G" : "Ctrl+P" },
                     { label: "Graph", id: Fudge.MENU.PANEL_GRAPH_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+G" : "Ctrl+G" },
                     { label: "Animation", id: Fudge.MENU.PANEL_ANIMATION_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+I" : "Ctrl+I" },
-                    { label: "setRoot(testing)", id: Fudge.MENU.NODE_UPDATE, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+U" : "Ctrl+U" }
                 ]
             },
             {
                 label: "Debug", submenu: [
-                    { label: "DevTool", id: Fudge.MENU.DEVTOOLS_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "F12" : "F12" }
+                    { label: "DevTool", id: Fudge.MENU.DEVTOOLS_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "F12" : "F12" },
+                    { label: "Fullscreen", id: Fudge.MENU.FULLSCREEN, click: menuSelect, accelerator: process.platform == "darwin" ? "F11" : "F11" }
                 ]
             }
         ];

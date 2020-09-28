@@ -30,6 +30,13 @@ namespace Fudge {
       // TODO: create a new Panel containing a ViewData by default. More Views can be added by the user or by configuration
       Page.setupMainListeners();
       Page.setupPageListeners();
+
+      // for testing:
+      console.log("Sending");
+      ipcRenderer.emit(MENU.PANEL_PROJECT_OPEN);
+      ipcRenderer.emit(MENU.PANEL_GRAPH_OPEN);
+      ipcRenderer.emit(MENU.PROJECT_LOAD);
+      // ipcRenderer.emit
     }
 
     public static setupGoldenLayout(): void {
@@ -38,7 +45,8 @@ namespace Fudge {
         content: [{
           id: "root", type: "row", isClosable: false,
           content: [
-            { type: "component", componentName: "Welcome", title: "Welcome", componentState: {} }]
+            // { type: "component", componentName: "Welcome", title: "Welcome", componentState: {} }
+          ]
         }]
       };
       this.goldenLayout = new GoldenLayout(config);   //This might be a problem because it can't use a specific place to put it.
@@ -97,7 +105,7 @@ namespace Fudge {
           let panel: Panel[] = Page.find(PanelGraph);
           if (!panel.length)
             Page.add(PanelGraph, "Graph", Object({ node: new ƒAid.NodeCoordinateSystem("WorldCooSys") }));
-          // break;
+        // break;
         default:
           Page.broadcastEvent(_event);
           break;

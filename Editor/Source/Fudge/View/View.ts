@@ -17,7 +17,7 @@ namespace Fudge {
       this.dom.setAttribute("view", this.constructor.name);
       _container.getElement().append(this.dom);
       this.container = _container;
-      console.log(this.contextMenuCallback);
+      // console.log(this.contextMenuCallback);
       this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
     }
 

@@ -50,5 +50,10 @@ namespace FudgeCore {
           return this;
         }
     
+        public getMutator(): Mutator {
+          let mutator: Mutator = super.getMutator(true);
+          mutator.type = this.light.getType().name;
+          return mutator;
+        }
     }
 }

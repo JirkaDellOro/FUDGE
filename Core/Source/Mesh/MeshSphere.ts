@@ -99,6 +99,12 @@ namespace FudgeCore {
       this.create(_serialization.sectors, _serialization.stacks);
       return this;
     }
+    
+    public mutate(_mutator: Mutator): void {
+      let sectors: number = Math.round(_mutator.sectors);
+      let stacks: number = Math.round(_mutator.stacks);
+      this.create(sectors, stacks);
+    }
 
     protected createIndices(): Uint16Array {
       let inds: Array<number> = [];

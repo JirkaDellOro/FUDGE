@@ -6,7 +6,7 @@ namespace FudgeCore {
    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
    */
   @RenderInjectorMesh.decorate
-  export abstract class Mesh implements SerializableResource {
+  export abstract class Mesh extends Mutable implements SerializableResource {
     /** refers back to this class from any subclass e.g. in order to find compatible other resources*/
     public static readonly baseClass: typeof Mesh = Mesh;
     /** list of all the subclasses derived from this class, if they registered properly*/
@@ -112,5 +112,9 @@ namespace FudgeCore {
     protected abstract createTextureUVs(): Float32Array;
     protected abstract createIndices(): Uint16Array;
     protected abstract createFaceNormals(): Float32Array;
+
+    protected reduceMutator(_mutator: Mutator): void { 
+      // delete _mutator.idResource; 
+    }
   }
 }

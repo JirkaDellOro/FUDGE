@@ -1424,6 +1424,7 @@ declare namespace FudgeCore {
         setType<T extends Light>(_class: new () => T): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        getMutator(): Mutator;
     }
 }
 declare namespace FudgeCore {
@@ -2925,7 +2926,7 @@ declare namespace FudgeCore {
      *
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    abstract class Mesh implements SerializableResource {
+    abstract class Mesh extends Mutable implements SerializableResource {
         /** refers back to this class from any subclass e.g. in order to find compatible other resources*/
         static readonly baseClass: typeof Mesh;
         /** list of all the subclasses derived from this class, if they registered properly*/
@@ -2955,6 +2956,7 @@ declare namespace FudgeCore {
         protected abstract createTextureUVs(): Float32Array;
         protected abstract createIndices(): Uint16Array;
         protected abstract createFaceNormals(): Float32Array;
+        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace FudgeCore {
@@ -3052,6 +3054,7 @@ declare namespace FudgeCore {
         create(_sectors?: number, _stacks?: number): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): void;
         protected createIndices(): Uint16Array;
         protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;

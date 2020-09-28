@@ -6,6 +6,7 @@ namespace Fudge {
     EDIT
   }
 
+
   export enum MENU {
     QUIT = "quit",
     PROJECT_SAVE = "projectSave",
@@ -15,7 +16,8 @@ namespace Fudge {
     DEVTOOLS_OPEN = "devtoolsOpen",
     PANEL_GRAPH_OPEN = "panelGraphOpen",
     PANEL_ANIMATION_OPEN = "panelAnimationOpen",
-    PANEL_PROJECT_OPEN = "panelProjectOpen"
+    PANEL_PROJECT_OPEN = "panelProjectOpen",
+    FULLSCREEN = "fullscreen"
   }
 
 
