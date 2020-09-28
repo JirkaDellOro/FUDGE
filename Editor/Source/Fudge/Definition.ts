@@ -12,7 +12,7 @@ namespace Fudge {
     PROJECT_SAVE = "projectSave",
     PROJECT_LOAD = "projectLoad",
     NODE_DELETE = "nodeDelete",
-    NODE_UPDATE = "nodeUpdate",
+    NODE_UPDATE = "nodeUpdate", // obsolete?
     DEVTOOLS_OPEN = "devtoolsOpen",
     PANEL_GRAPH_OPEN = "panelGraphOpen",
     PANEL_ANIMATION_OPEN = "panelAnimationOpen",
@@ -29,7 +29,8 @@ namespace Fudge {
     ACTIVATE_VIEWPORT = "activateViewport",
     SET_GRAPH = "setGraph",
     FOCUS_NODE = "focusNode",
-    SET_PROJECT = "setProject"
+    SET_PROJECT = "setProject",
+    UPDATE = "update"
   }
 
   export enum PANEL {

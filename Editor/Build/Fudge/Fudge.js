@@ -28,6 +28,7 @@ var Fudge;
         EVENT_EDITOR["SET_GRAPH"] = "setGraph";
         EVENT_EDITOR["FOCUS_NODE"] = "focusNode";
         EVENT_EDITOR["SET_PROJECT"] = "setProject";
+        EVENT_EDITOR["UPDATE"] = "update";
     })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
     let PANEL;
     (function (PANEL) {
@@ -206,7 +207,7 @@ var Fudge;
 ///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
 (function (Fudge) {
     var ƒ = FudgeCore;
-    var ƒAid = FudgeAid;
+    var ƒaid = FudgeAid;
     Fudge.ipcRenderer = require("electron").ipcRenderer;
     Fudge.remote = require("electron").remote;
     // TODO: At this point of time, the project is just a single node. A project is much more complex...
@@ -275,6 +276,7 @@ var Fudge;
         //#region Page-Events from DOM
         static setupPageListeners() {
             document.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, Page.hndEvent);
+            document.addEventListener("update" /* UPDATE */, Page.hndEvent);
         }
         /** Send custom copies of the given event to the views */
         static broadcastEvent(_event) {
@@ -288,7 +290,7 @@ var Fudge;
                 case Fudge.EVENT_EDITOR.SET_GRAPH:
                     let panel = Page.find(Fudge.PanelGraph);
                     if (!panel.length)
-                        Page.add(Fudge.PanelGraph, "Graph", Object({ node: new ƒAid.NodeCoordinateSystem("WorldCooSys") }));
+                        Page.add(Fudge.PanelGraph, "Graph", Object({ node: new ƒaid.NodeCoordinateSystem("WorldCooSys") }));
                 // break;
                 default:
                     Page.broadcastEvent(_event);
@@ -314,7 +316,7 @@ var Fudge;
                 Page.broadcastEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_PROJECT));
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_GRAPH_OPEN, (_event, _args) => {
-                node = new ƒAid.NodeCoordinateSystem("WorldCooSys");
+                node = new ƒaid.NodeCoordinateSystem("WorldCooSys");
                 Page.add(Fudge.PanelGraph, "Graph", Object({ node: node }));
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_PROJECT_OPEN, (_event, _args) => {
@@ -1497,6 +1499,7 @@ var Fudge;
                         this.setGraph(_event.detail);
                         break;
                     case "update" /* UPDATE */:
+                    case Fudge.EVENT_EDITOR.UPDATE:
                         this.redraw();
                 }
             };
@@ -1521,6 +1524,7 @@ var Fudge;
             this.createUserInterface();
             _container.on("resize", this.redraw);
             this.dom.addEventListener("update" /* UPDATE */, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
         }

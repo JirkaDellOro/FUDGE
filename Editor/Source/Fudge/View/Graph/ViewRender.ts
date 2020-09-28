@@ -19,6 +19,7 @@ namespace Fudge {
 
       _container.on("resize", this.redraw);
       this.dom.addEventListener(ƒui.EVENT.UPDATE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
     }
@@ -62,6 +63,7 @@ namespace Fudge {
           this.setGraph(_event.detail);
           break;
         case ƒui.EVENT.UPDATE:
+        case EVENT_EDITOR.UPDATE:
           this.redraw();
       }
     }

@@ -4,7 +4,8 @@
 
 namespace Fudge {
   import ƒ = FudgeCore;
-  import ƒAid = FudgeAid;
+  import ƒaid = FudgeAid;
+  import ƒui = FudgeUserInterface;
 
   export const ipcRenderer: Electron.IpcRenderer = require("electron").ipcRenderer;
   export const remote: Electron.Remote = require("electron").remote;
@@ -89,6 +90,7 @@ namespace Fudge {
     //#region Page-Events from DOM
     private static setupPageListeners(): void {
       document.addEventListener(EVENT_EDITOR.SET_GRAPH, Page.hndEvent);
+      document.addEventListener(ƒui.EVENT.UPDATE, Page.hndEvent);
     }
 
     /** Send custom copies of the given event to the views */
@@ -104,7 +106,7 @@ namespace Fudge {
         case EVENT_EDITOR.SET_GRAPH:
           let panel: Panel[] = Page.find(PanelGraph);
           if (!panel.length)
-            Page.add(PanelGraph, "Graph", Object({ node: new ƒAid.NodeCoordinateSystem("WorldCooSys") }));
+            Page.add(PanelGraph, "Graph", Object({ node: new ƒaid.NodeCoordinateSystem("WorldCooSys") }));
         // break;
         default:
           Page.broadcastEvent(_event);
@@ -133,7 +135,7 @@ namespace Fudge {
       });
 
       ipcRenderer.on(MENU.PANEL_GRAPH_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-        node = new ƒAid.NodeCoordinateSystem("WorldCooSys");
+        node = new ƒaid.NodeCoordinateSystem("WorldCooSys");
         Page.add(PanelGraph, "Graph", Object({ node: node }));
       });
 

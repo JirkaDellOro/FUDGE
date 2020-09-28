@@ -27,7 +27,8 @@ declare namespace Fudge {
         ACTIVATE_VIEWPORT = "activateViewport",
         SET_GRAPH = "setGraph",
         FOCUS_NODE = "focusNode",
-        SET_PROJECT = "setProject"
+        SET_PROJECT = "setProject",
+        UPDATE = "update"
     }
     enum PANEL {
         GRAPH = "PanelGraph",
