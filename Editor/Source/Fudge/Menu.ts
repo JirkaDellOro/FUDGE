@@ -30,7 +30,7 @@ namespace Fudge {
       const menuItems: Electron.MenuItem[] = [];
       for (let subclass of ƒ.Component.subclasses) {
         let item: Electron.MenuItem = new remote.MenuItem(
-          { label: subclass.name, id: String(CONTEXTMENU.ADD_COMPONENT), click: _callback }
+          { label: subclass.name, id: String(CONTEXTMENU.ADD_COMPONENT), click: _callback, submenu: ContextMenu.getSubMenu(subclass, _callback) }
         );
         // @ts-ignore
         item.overrideProperty("iSubclass", subclass.iSubclass);
@@ -38,6 +38,33 @@ namespace Fudge {
         menuItems.push(item);
       }
       return menuItems;
+    }
+
+    public static getSubMenu(_object: Object, _callback: ContextMenuCallback): Electron.Menu {
+      let menu: Electron.Menu;
+      if (_object == ƒ.ComponentScript) {
+        menu = new remote.Menu();
+        let scripts: ƒ.ComponentScripts = ƒ.Project.getComponentScripts();
+        for (let namespace in scripts) {
+          // @ts-ignore
+          // console.log(script.name, script);
+          let item: Electron.MenuItem = new remote.MenuItem(
+            { label: namespace, id: null, click: null, submenu: [] }
+          );
+
+          for (let script of scripts[namespace]) {
+            let name: string = Reflect.get(script, "name");
+            let subitem: Electron.MenuItem = new remote.MenuItem(
+              { label: name, id: String(CONTEXTMENU.ADD_COMPONENT_SCRIPT), click: _callback }
+            );
+            // @ts-ignore
+            subitem.overrideProperty("Script", namespace + "." + name);
+            item.submenu.append(subitem);
+          }
+          menu.append(item);
+        }
+      }
+      return menu;
     }
   }
 }

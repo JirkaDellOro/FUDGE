@@ -78,6 +78,15 @@ namespace Fudge {
           focus.addComponent(cmpNew);
           this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.SELECT, { bubbles: true, detail: { data: focus } }));
           break;
+        case CONTEXTMENU.ADD_COMPONENT_SCRIPT:
+          // let script: typeof ƒ.ComponentScript = <typeof ƒ.ComponentScript>_item["Script"];
+          let cmpScript: ƒ.ComponentScript = <ƒ.ComponentScript>ƒ.Serializer.reconstruct(_item["Script"]);
+          // let cmpScript: ƒ.ComponentScript = new script(); //Reflect.construct(script); //
+          ƒ.Debug.info(cmpScript.type, cmpScript);
+
+          focus.addComponent(cmpScript);
+          this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.SELECT, { bubbles: true, detail: { data: focus } }));
+          break;
       }
     }
     //#endregion

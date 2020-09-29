@@ -7,7 +7,8 @@ declare namespace Fudge {
     enum CONTEXTMENU {
         ADD_NODE = 0,
         ADD_COMPONENT = 1,
-        EDIT = 2
+        ADD_COMPONENT_SCRIPT = 2,
+        EDIT = 3
     }
     enum MENU {
         QUIT = "quit",
@@ -75,6 +76,7 @@ declare namespace Fudge {
     class ContextMenu {
         static appendCopyPaste(_menu: Electron.Menu): void;
         static getComponents(_callback: ContextMenuCallback): Electron.MenuItem[];
+        static getSubMenu(_object: Object, _callback: ContextMenuCallback): Electron.Menu;
     }
 }
 declare namespace Fudge {

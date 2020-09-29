@@ -21,6 +21,10 @@ namespace FudgeCore {
     [name: string]: Object;
   }
 
+  export interface ComponentScripts {
+    [namespace: string]: ComponentScript[];
+  }
+
   /**
    * Static class handling the resources used with the current FUDGE-instance.  
    * Keeps a list of the resources and generates ids to retrieve them.  
@@ -128,9 +132,10 @@ namespace FudgeCore {
         Project.scriptNamespaces[name] = _namespace;
     }
 
-    public static getScripts(): ComponentScript[] {
-      let scripts: ComponentScript[] = [];
+    public static getComponentScripts(): ComponentScripts {
+      let compoments: ComponentScripts = {};
       for (let namespace in Project.scriptNamespaces) {
+        compoments[namespace] = [];
         for (let name in Project.scriptNamespaces[namespace]) {
           let script: ComponentScript = Reflect.get(Project.scriptNamespaces[namespace], name);
 
@@ -148,10 +153,10 @@ namespace FudgeCore {
           // Using Object.create doesn't call the constructor, but instanceof can be used. More elegant than the loop above, though maybe not as performant. 
           let o: General = Object.create(script);
           if (o.prototype instanceof ComponentScript)
-            scripts.push(script);
+            compoments[namespace].push(script);
         }
       }
-      return scripts;
+      return compoments;
     }
 
     public static async loadScript(_url: RequestInfo): Promise<void> {

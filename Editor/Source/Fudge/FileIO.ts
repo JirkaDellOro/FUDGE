@@ -33,19 +33,20 @@ namespace Fudge {
     const head: HTMLHeadElement = dom.getElementsByTagName("head")[0];
     console.log(head);
 
+    ƒ.Project.clear();
+
     //TODO: should old scripts be removed from memory first? How?
     const scripts: NodeListOf<HTMLScriptElement> = head.querySelectorAll("script");
     for (let script of scripts) {
       if (script.getAttribute("editor") == "true") {
         let url: string = script.getAttribute("src");
         await ƒ.Project.loadScript(new URL(url, _url).toString());
-        console.log("ComponentScripts", ƒ.Project.getScripts());  
+        console.log("ComponentScripts", ƒ.Project.getComponentScripts());  
         console.log("Script Namespaces", ƒ.Project.scriptNamespaces);  
       }
     }
 
     // TODO: support multiple resourcefiles
-    ƒ.Project.clear();
     const resourceFile: string = head.querySelector("link").getAttribute("src");
     ƒ.Project.baseURL = _url;
     let reconstruction: ƒ.Resources = await ƒ.Project.loadResources(new URL(resourceFile, _url).toString());

@@ -2,7 +2,8 @@ declare namespace Fudge {
     enum CONTEXTMENU {
         ADD_NODE = 0,
         ADD_COMPONENT = 1,
-        EDIT = 2
+        ADD_COMPONENT_SCRIPT = 2,
+        EDIT = 3
     }
     enum MENU {
         QUIT = "quit",

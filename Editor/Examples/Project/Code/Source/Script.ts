@@ -5,6 +5,7 @@ namespace Script {
   ƒ.Project.registerScriptNamespace(Script);
 
   export class TimerMessage extends ƒ.ComponentScript {
+    public static readonly iSubclass: number = ƒ.Component.registerSubclass(TimerMessage);
     public prefix: string = "Script: ";
     public count: number = 0;
     private timer: ƒ.Timer;

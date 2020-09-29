@@ -324,7 +324,7 @@ declare namespace FudgeCore {
          * Creates an object of the class defined with the full path including the namespaceName(s) and the className seperated by dots(.)
          * @param _path
          */
-        private static reconstruct;
+        static reconstruct(_path: string): Serializable;
         /**
          * Returns the full path to the class of the object, if found in the registered namespaces
          * @param _object
@@ -1931,6 +1931,9 @@ declare namespace FudgeCore {
     interface ScriptNamespaces {
         [name: string]: Object;
     }
+    interface ComponentScripts {
+        [namespace: string]: ComponentScript[];
+    }
     /**
      * Static class handling the resources used with the current FUDGE-instance.
      * Keeps a list of the resources and generates ids to retrieve them.
@@ -1972,7 +1975,7 @@ declare namespace FudgeCore {
         static registerAsGraph(_node: Node, _replaceWithInstance?: boolean): Promise<Graph>;
         static createGraphInstance(_graph: Graph): Promise<GraphInstance>;
         static registerScriptNamespace(_namespace: Object): void;
-        static getScripts(): ComponentScript[];
+        static getComponentScripts(): ComponentScripts;
         static loadScript(_url: RequestInfo): Promise<void>;
         static loadResources(_url?: RequestInfo): Promise<Resources>;
         /**

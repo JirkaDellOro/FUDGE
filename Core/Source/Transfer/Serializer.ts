@@ -137,7 +137,7 @@ namespace FudgeCore {
          * Creates an object of the class defined with the full path including the namespaceName(s) and the className seperated by dots(.) 
          * @param _path 
          */
-        private static reconstruct(_path: string): Serializable {
+        public static reconstruct(_path: string): Serializable {
             let typeName: string = _path.substr(_path.lastIndexOf(".") + 1);
             let namespace: Object = Serializer.getNamespace(_path);
             if (!namespace)

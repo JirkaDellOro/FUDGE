@@ -5,7 +5,8 @@ var Fudge;
         // SKETCH = ViewSketch,
         CONTEXTMENU[CONTEXTMENU["ADD_NODE"] = 0] = "ADD_NODE";
         CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT"] = 1] = "ADD_COMPONENT";
-        CONTEXTMENU[CONTEXTMENU["EDIT"] = 2] = "EDIT";
+        CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT_SCRIPT"] = 2] = "ADD_COMPONENT_SCRIPT";
+        CONTEXTMENU[CONTEXTMENU["EDIT"] = 3] = "EDIT";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -139,18 +140,18 @@ var Fudge;
         const dom = parser.parseFromString(content, "application/xhtml+xml");
         const head = dom.getElementsByTagName("head")[0];
         console.log(head);
+        ƒ.Project.clear();
         //TODO: should old scripts be removed from memory first? How?
         const scripts = head.querySelectorAll("script");
         for (let script of scripts) {
             if (script.getAttribute("editor") == "true") {
                 let url = script.getAttribute("src");
                 await ƒ.Project.loadScript(new URL(url, _url).toString());
-                console.log("ComponentScripts", ƒ.Project.getScripts());
+                console.log("ComponentScripts", ƒ.Project.getComponentScripts());
                 console.log("Script Namespaces", ƒ.Project.scriptNamespaces);
             }
         }
         // TODO: support multiple resourcefiles
-        ƒ.Project.clear();
         const resourceFile = head.querySelector("link").getAttribute("src");
         ƒ.Project.baseURL = _url;
         let reconstruction = await ƒ.Project.loadResources(new URL(resourceFile, _url).toString());
@@ -189,13 +190,34 @@ var Fudge;
         static getComponents(_callback) {
             const menuItems = [];
             for (let subclass of ƒ.Component.subclasses) {
-                let item = new Fudge.remote.MenuItem({ label: subclass.name, id: String(Fudge.CONTEXTMENU.ADD_COMPONENT), click: _callback });
+                let item = new Fudge.remote.MenuItem({ label: subclass.name, id: String(Fudge.CONTEXTMENU.ADD_COMPONENT), click: _callback, submenu: ContextMenu.getSubMenu(subclass, _callback) });
                 // @ts-ignore
                 item.overrideProperty("iSubclass", subclass.iSubclass);
                 item["iSubclass"] = subclass.iSubclass;
                 menuItems.push(item);
             }
             return menuItems;
+        }
+        static getSubMenu(_object, _callback) {
+            let menu;
+            if (_object == ƒ.ComponentScript) {
+                menu = new Fudge.remote.Menu();
+                let scripts = ƒ.Project.getComponentScripts();
+                for (let namespace in scripts) {
+                    // @ts-ignore
+                    // console.log(script.name, script);
+                    let item = new Fudge.remote.MenuItem({ label: namespace, id: null, click: null, submenu: [] });
+                    for (let script of scripts[namespace]) {
+                        let name = Reflect.get(script, "name");
+                        let subitem = new Fudge.remote.MenuItem({ label: name, id: String(Fudge.CONTEXTMENU.ADD_COMPONENT_SCRIPT), click: _callback });
+                        // @ts-ignore
+                        subitem.overrideProperty("Script", namespace + "." + name);
+                        item.submenu.append(subitem);
+                    }
+                    menu.append(item);
+                }
+            }
+            return menu;
         }
     }
     Fudge.ContextMenu = ContextMenu;
@@ -1477,6 +1499,14 @@ var Fudge;
                     let cmpNew = new component();
                     ƒ.Debug.info(cmpNew.type, cmpNew);
                     focus.addComponent(cmpNew);
+                    this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { bubbles: true, detail: { data: focus } }));
+                    break;
+                case Fudge.CONTEXTMENU.ADD_COMPONENT_SCRIPT:
+                    // let script: typeof ƒ.ComponentScript = <typeof ƒ.ComponentScript>_item["Script"];
+                    let cmpScript = ƒ.Serializer.reconstruct(_item["Script"]);
+                    // let cmpScript: ƒ.ComponentScript = new script(); //Reflect.construct(script); //
+                    ƒ.Debug.info(cmpScript.type, cmpScript);
+                    focus.addComponent(cmpScript);
                     this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { bubbles: true, detail: { data: focus } }));
                     break;
             }
