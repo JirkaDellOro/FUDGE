@@ -39,7 +39,8 @@ namespace Fudge {
       if (script.getAttribute("editor") == "true") {
         let url: string = script.getAttribute("src");
         await ƒ.Project.loadScript(new URL(url, _url).toString());
-        console.log("Scripts loaded", ƒ.Project.getScripts());  
+        console.log("ComponentScripts", ƒ.Project.getScripts());  
+        console.log("Script Namespaces", ƒ.Project.scriptNamespaces);  
       }
     }
 

@@ -1928,6 +1928,9 @@ declare namespace FudgeCore {
     interface SerializationOfResources {
         [idResource: string]: Serialization;
     }
+    interface ScriptNamespaces {
+        [name: string]: Object;
+    }
     /**
      * Static class handling the resources used with the current FUDGE-instance.
      * Keeps a list of the resources and generates ids to retrieve them.
@@ -1936,7 +1939,7 @@ declare namespace FudgeCore {
     abstract class Project {
         static resources: Resources;
         static serialization: SerializationOfResources;
-        static scriptNamespaces: Object[];
+        static scriptNamespaces: ScriptNamespaces;
         static baseURL: URL;
         static mode: MODE;
         /**

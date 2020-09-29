@@ -17,6 +17,10 @@ namespace FudgeCore {
     [idResource: string]: Serialization;
   }
 
+  export interface ScriptNamespaces {
+    [name: string]: Object;
+  }
+
   /**
    * Static class handling the resources used with the current FUDGE-instance.  
    * Keeps a list of the resources and generates ids to retrieve them.  
@@ -25,7 +29,7 @@ namespace FudgeCore {
   export abstract class Project {
     public static resources: Resources = {};
     public static serialization: SerializationOfResources = {};
-    public static scriptNamespaces: Object[] = [];
+    public static scriptNamespaces: ScriptNamespaces = {};
     public static baseURL: URL = new URL(location.toString());
     public static mode: MODE = MODE.RUNTIME;
 
@@ -52,7 +56,7 @@ namespace FudgeCore {
     public static clear(): void {
       Project.resources = {};
       Project.serialization = {};
-      Project.scriptNamespaces = [];
+      Project.scriptNamespaces = {};
     }
 
 
@@ -120,14 +124,15 @@ namespace FudgeCore {
 
     public static registerScriptNamespace(_namespace: Object): void {
       let name: string = Serializer.registerNamespace(_namespace);
-      Project.scriptNamespaces.push(_namespace);
+      if (!Project.scriptNamespaces[name])
+        Project.scriptNamespaces[name] = _namespace;
     }
 
     public static getScripts(): ComponentScript[] {
       let scripts: ComponentScript[] = [];
-      for (let namespace of Project.scriptNamespaces) {
-        for (let name in namespace) {
-          let script: ComponentScript = Reflect.get(namespace, name);
+      for (let namespace in Project.scriptNamespaces) {
+        for (let name in Project.scriptNamespaces[namespace]) {
+          let script: ComponentScript = Reflect.get(Project.scriptNamespaces[namespace], name);
 
           // is script a subclass of ComponentScript? instanceof doesn't work, since no instance is created
 
