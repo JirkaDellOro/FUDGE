@@ -4,7 +4,8 @@ var Script;
 // /<reference types="../../../../../Core/Build/FudgeCore"/>
 (function (Script) {
     var ƒ = FudgeCore;
-    ƒ.Serializer.registerNamespace(Script);
+    // ƒ.Serializer.registerNamespace(Script);
+    ƒ.Project.registerScriptNamespace(Script);
     class TimerMessage extends ƒ.ComponentScript {
         constructor() {
             super();
@@ -28,5 +29,15 @@ var Script;
         }
     }
     Script.TimerMessage = TimerMessage;
+    class NoComponentScript {
+        static showCompileMessage() {
+            let message = "I've been compiled! But I won't show in the ComponentScripts...";
+            NoComponentScript.message = message;
+            console.log(NoComponentScript.message);
+            return message;
+        }
+    }
+    NoComponentScript.message = NoComponentScript.showCompileMessage();
+    Script.NoComponentScript = NoComponentScript;
 })(Script || (Script = {}));
 //# sourceMappingURL=Compiled.js.map

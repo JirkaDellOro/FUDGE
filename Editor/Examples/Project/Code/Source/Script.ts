@@ -1,7 +1,8 @@
 // /<reference types="../../../../../Core/Build/FudgeCore"/>
 namespace Script {
   import ƒ = FudgeCore;
-  ƒ.Serializer.registerNamespace(Script);
+  // ƒ.Serializer.registerNamespace(Script);
+  ƒ.Project.registerScriptNamespace(Script);
 
   export class TimerMessage extends ƒ.ComponentScript {
     public prefix: string = "Script: ";
@@ -34,5 +35,16 @@ namespace Script {
     //   // delete properties that should not be mutated
     //   // undefined properties with not be included by default
     // }
+  }
+
+  export class NoComponentScript {
+    private static message: string = NoComponentScript.showCompileMessage();
+
+    private static showCompileMessage(): string {
+      let message: string = "I've been compiled! But I won't show in the ComponentScripts...";
+      NoComponentScript.message = message;
+      console.log(NoComponentScript.message);
+      return message;
+    }
   }
 }

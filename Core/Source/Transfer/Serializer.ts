@@ -50,10 +50,10 @@ namespace FudgeCore {
          * Registers a namespace to the [[Serializer]], to enable automatic instantiation of classes defined within
          * @param _namespace 
          */
-        public static registerNamespace(_namespace: Object): void {
+        public static registerNamespace(_namespace: Object): string {
             for (let name in Serializer.namespaces)
                 if (Serializer.namespaces[name] == _namespace)
-                    return;
+                    return name;
 
             let name: string = Serializer.findNamespaceIn(_namespace, window);
             if (!name)
@@ -69,6 +69,7 @@ namespace FudgeCore {
                 throw new Error("Namespace not found. Maybe parent namespace hasn't been registered before?");
 
             Serializer.namespaces[name] = _namespace;
+            return name;
         }
 
 

@@ -296,7 +296,7 @@ declare namespace FudgeCore {
          * Registers a namespace to the [[Serializer]], to enable automatic instantiation of classes defined within
          * @param _namespace
          */
-        static registerNamespace(_namespace: Object): void;
+        static registerNamespace(_namespace: Object): string;
         /**
          * Returns a javascript object representing the serializable FUDGE-object given,
          * including attached components, children, superclass-objects all information needed for reconstruction
@@ -1936,6 +1936,7 @@ declare namespace FudgeCore {
     abstract class Project {
         static resources: Resources;
         static serialization: SerializationOfResources;
+        static scriptNamespaces: Object[];
         static baseURL: URL;
         static mode: MODE;
         /**
@@ -1967,6 +1968,8 @@ declare namespace FudgeCore {
          */
         static registerAsGraph(_node: Node, _replaceWithInstance?: boolean): Promise<Graph>;
         static createGraphInstance(_graph: Graph): Promise<GraphInstance>;
+        static registerScriptNamespace(_namespace: Object): void;
+        static getScripts(): ComponentScript[];
         static loadScript(_url: RequestInfo): Promise<void>;
         static loadResources(_url?: RequestInfo): Promise<Resources>;
         /**

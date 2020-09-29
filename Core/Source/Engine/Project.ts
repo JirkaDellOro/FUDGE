@@ -25,6 +25,7 @@ namespace FudgeCore {
   export abstract class Project {
     public static resources: Resources = {};
     public static serialization: SerializationOfResources = {};
+    public static scriptNamespaces: Object[] = [];
     public static baseURL: URL = new URL(location.toString());
     public static mode: MODE = MODE.RUNTIME;
 
@@ -51,6 +52,7 @@ namespace FudgeCore {
     public static clear(): void {
       Project.resources = {};
       Project.serialization = {};
+      Project.scriptNamespaces = [];
     }
 
 
@@ -114,6 +116,37 @@ namespace FudgeCore {
       let instance: GraphInstance = new GraphInstance(null); // TODO: cleanup since creation moved here
       await instance.set(_graph);
       return instance;
+    }
+
+    public static registerScriptNamespace(_namespace: Object): void {
+      let name: string = Serializer.registerNamespace(_namespace);
+      Project.scriptNamespaces.push(_namespace);
+    }
+
+    public static getScripts(): ComponentScript[] {
+      let scripts: ComponentScript[] = [];
+      for (let namespace of Project.scriptNamespaces) {
+        for (let name in namespace) {
+          let script: ComponentScript = Reflect.get(namespace, name);
+
+          // is script a subclass of ComponentScript? instanceof doesn't work, since no instance is created
+
+          // let superclass: Object = script;
+          // while (superclass) {
+          //   superclass = Reflect.getPrototypeOf(superclass);
+          //   if (superclass == ComponentScript) {
+          //     scripts.push(script);
+          //     break;
+          //   }
+          // }
+
+          // Using Object.create doesn't call the constructor, but instanceof can be used. More elegant than the loop above, though maybe not as performant. 
+          let o: General = Object.create(script);
+          if (o.prototype instanceof ComponentScript)
+            scripts.push(script);
+        }
+      }
+      return scripts;
     }
 
     public static async loadScript(_url: RequestInfo): Promise<void> {

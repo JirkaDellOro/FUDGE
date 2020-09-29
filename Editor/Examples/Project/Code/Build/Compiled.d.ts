@@ -9,4 +9,8 @@ declare namespace Script {
         hndAddComponent: (_event: Event) => void;
         hndRemoveComponent: (_event: Event) => void;
     }
+    class NoComponentScript {
+        private static message;
+        private static showCompileMessage;
+    }
 }
