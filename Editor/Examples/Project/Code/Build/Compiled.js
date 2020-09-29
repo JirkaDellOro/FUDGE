@@ -1,4 +1,36 @@
 "use strict";
+var Script;
+(function (Script) {
+    var ƒ = FudgeCore;
+    class ComponentCustom extends ƒ.Component {
+        constructor() {
+            super();
+            console.log("I've even been constructed");
+        }
+        static showCompileMessage() {
+            let message = "I've been compiled and should show up in the context menus";
+            ComponentCustom.message = message;
+            console.log(ComponentCustom.message);
+            return message;
+        }
+    }
+    ComponentCustom.iSubclass = ƒ.Component.registerSubclass(ComponentCustom);
+    ComponentCustom.message = ComponentCustom.showCompileMessage();
+    Script.ComponentCustom = ComponentCustom;
+})(Script || (Script = {}));
+var Script;
+(function (Script) {
+    class NoComponentScript {
+        static showCompileMessage() {
+            let message = "I've been compiled! But I won't show in the Component...";
+            NoComponentScript.message = message;
+            console.log(NoComponentScript.message);
+            return message;
+        }
+    }
+    NoComponentScript.message = NoComponentScript.showCompileMessage();
+    Script.NoComponentScript = NoComponentScript;
+})(Script || (Script = {}));
 // /<reference types="../../../../../Core/Build/FudgeCore"/>
 var Script;
 // /<reference types="../../../../../Core/Build/FudgeCore"/>
@@ -9,6 +41,7 @@ var Script;
     class TimerMessage extends ƒ.ComponentScript {
         constructor() {
             super();
+            // public static readonly iSubclass: number = ƒ.Component.registerSubclass(TimerMessage);
             this.prefix = "Script: ";
             this.count = 0;
             this.hndTimer = (_event) => {
@@ -29,15 +62,5 @@ var Script;
         }
     }
     Script.TimerMessage = TimerMessage;
-    class NoComponentScript {
-        static showCompileMessage() {
-            let message = "I've been compiled! But I won't show in the ComponentScripts...";
-            NoComponentScript.message = message;
-            console.log(NoComponentScript.message);
-            return message;
-        }
-    }
-    NoComponentScript.message = NoComponentScript.showCompileMessage();
-    Script.NoComponentScript = NoComponentScript;
 })(Script || (Script = {}));
 //# sourceMappingURL=Compiled.js.map

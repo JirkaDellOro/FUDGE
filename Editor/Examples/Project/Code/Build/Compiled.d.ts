@@ -1,5 +1,20 @@
 declare namespace Script {
     import ƒ = FudgeCore;
+    class ComponentCustom extends ƒ.Component {
+        static readonly iSubclass: number;
+        private static message;
+        constructor();
+        private static showCompileMessage;
+    }
+}
+declare namespace Script {
+    class NoComponentScript {
+        private static message;
+        private static showCompileMessage;
+    }
+}
+declare namespace Script {
+    import ƒ = FudgeCore;
     class TimerMessage extends ƒ.ComponentScript {
         prefix: string;
         count: number;
@@ -8,9 +23,5 @@ declare namespace Script {
         hndTimer: (_event: ƒ.EventTimer) => void;
         hndAddComponent: (_event: Event) => void;
         hndRemoveComponent: (_event: Event) => void;
-    }
-    class NoComponentScript {
-        private static message;
-        private static showCompileMessage;
     }
 }

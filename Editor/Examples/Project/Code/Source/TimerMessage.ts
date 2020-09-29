@@ -5,12 +5,12 @@ namespace Script {
   ƒ.Project.registerScriptNamespace(Script);
 
   export class TimerMessage extends ƒ.ComponentScript {
-    public static readonly iSubclass: number = ƒ.Component.registerSubclass(TimerMessage);
+    // public static readonly iSubclass: number = ƒ.Component.registerSubclass(TimerMessage);
     public prefix: string = "Script: ";
     public count: number = 0;
     private timer: ƒ.Timer;
 
-    constructor() {
+    constructor() { 
       super();
       if (ƒ.Project.mode == ƒ.MODE.EDITOR)
         return;
@@ -36,16 +36,5 @@ namespace Script {
     //   // delete properties that should not be mutated
     //   // undefined properties with not be included by default
     // }
-  }
-
-  export class NoComponentScript {
-    private static message: string = NoComponentScript.showCompileMessage();
-
-    private static showCompileMessage(): string {
-      let message: string = "I've been compiled! But I won't show in the ComponentScripts...";
-      NoComponentScript.message = message;
-      console.log(NoComponentScript.message);
-      return message;
-    }
   }
 }
