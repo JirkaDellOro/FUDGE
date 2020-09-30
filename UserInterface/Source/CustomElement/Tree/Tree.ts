@@ -1,32 +1,8 @@
 ///<reference path="TreeList.ts"/>
 namespace FudgeUserInterface {
-  export enum TREE_CLASS {
+  export enum CSS_CLASS {
     SELECTED = "selected",
     INACTIVE = "inactive"
-  }
-
-  export enum EVENT_TREE {
-    RENAME = "rename",
-    OPEN = "open",
-    FOCUS_NEXT = "focusNext",
-    FOCUS_PREVIOUS = "focusPrevious",
-    FOCUS_IN = "focusin",
-    FOCUS_OUT = "focusout",
-    DELETE = "delete",
-    CHANGE = "change",
-    DOUBLE_CLICK = "dblclick",
-    KEY_DOWN = "keydown",
-    DRAG_START = "dragstart",
-    DRAG_OVER = "dragover",
-    DROP = "drop",
-    POINTER_UP = "pointerup",
-    SELECT = "itemselect",
-    UPDATE = "update",
-    ESCAPE = "escape",
-    COPY = "copy",
-    CUT = "cut",
-    PASTE = "paste",
-    FOCUS_SET = "focusSet"
   }
 
   /**
@@ -50,19 +26,19 @@ namespace FudgeUserInterface {
       let root: TreeItem<T> = new TreeItem<T>(this.controller, _root);
       this.appendChild(root);
 
-      this.addEventListener(EVENT_TREE.OPEN, this.hndOpen);
-      this.addEventListener(EVENT_TREE.RENAME, this.hndRename);
-      this.addEventListener(EVENT_TREE.SELECT, this.hndSelect);
-      this.addEventListener(EVENT_TREE.DROP, this.hndDrop);
-      this.addEventListener(EVENT_TREE.DELETE, this.hndDelete);
-      this.addEventListener(EVENT_TREE.ESCAPE, this.hndEscape);
-      this.addEventListener(EVENT_TREE.COPY, this.hndCopyPaste);
-      this.addEventListener(EVENT_TREE.PASTE, this.hndCopyPaste);
-      this.addEventListener(EVENT_TREE.CUT, this.hndCopyPaste);
+      this.addEventListener(EVENT.OPEN, this.hndOpen);
+      this.addEventListener(EVENT.RENAME, this.hndRename);
+      this.addEventListener(EVENT.SELECT, this.hndSelect);
+      this.addEventListener(EVENT.DROP, this.hndDrop);
+      this.addEventListener(EVENT.DELETE, this.hndDelete);
+      this.addEventListener(EVENT.ESCAPE, this.hndEscape);
+      this.addEventListener(EVENT.COPY, this.hndCopyPaste);
+      this.addEventListener(EVENT.PASTE, this.hndCopyPaste);
+      this.addEventListener(EVENT.CUT, this.hndCopyPaste);
       // @ts-ignore
-      this.addEventListener(EVENT_TREE.FOCUS_NEXT, this.hndFocus);
+      this.addEventListener(EVENT.FOCUS_NEXT, this.hndFocus);
       // @ts-ignore
-      this.addEventListener(EVENT_TREE.FOCUS_PREVIOUS, this.hndFocus);
+      this.addEventListener(EVENT.FOCUS_PREVIOUS, this.hndFocus);
     }
 
     /**
@@ -181,19 +157,19 @@ namespace FudgeUserInterface {
       this.clearSelection();
     }
 
-    private hndCopyPaste = (_event: Event): void => {
+    private hndCopyPaste = async (_event: Event): Promise<void> => {
       // console.log(_event);
       _event.stopPropagation();
       let target: TreeItem<T> = <TreeItem<T>>_event.target;
       switch (_event.type) {
-        case EVENT_TREE.COPY:
-          this.controller.copyPaste.sources = this.controller.copy([...this.controller.selection]);
+        case EVENT.COPY:
+          this.controller.copyPaste.sources = await this.controller.copy([...this.controller.selection]);
           break;
-        case EVENT_TREE.PASTE:
+        case EVENT.PASTE:
           this.addChildren(this.controller.copyPaste.sources, target.data);
           break;
-        case EVENT_TREE.CUT:
-          this.controller.copyPaste.sources = this.controller.copy([...this.controller.selection]);
+        case EVENT.CUT:
+          this.controller.copyPaste.sources = await this.controller.copy([...this.controller.selection]);
           let cut: T[] = this.controller.delete(this.controller.selection);
           this.delete(cut);
           break;
@@ -212,11 +188,11 @@ namespace FudgeUserInterface {
         target.select(true);
 
       switch (_event.type) {
-        case EVENT_TREE.FOCUS_NEXT:
+        case EVENT.FOCUS_NEXT:
           if (++index < items.length)
             items[index].focus();
           break;
-        case EVENT_TREE.FOCUS_PREVIOUS:
+        case EVENT.FOCUS_PREVIOUS:
           if (--index >= 0)
             items[index].focus();
           break;

@@ -23,10 +23,10 @@ namespace FudgeAid {
       return cmpMesh ? cmpMesh.pivot : null;
     }
 
-    public deserialize(_serialization: ƒ.Serialization): ƒ.Serializable {
+    public async deserialize(_serialization: ƒ.Serialization): Promise<ƒ.Serializable> {
       // Quick and maybe hacky solution. Created node is completely dismissed and a recreation of the baseclass gets return. Otherwise, components will be doubled...
       let node: ƒ.Node = new ƒ.Node(_serialization.name);
-      node.deserialize(_serialization);
+      await node.deserialize(_serialization);
       // console.log(node);
       return node;
     }

@@ -50,7 +50,7 @@ var AudioSpace;
         mtxInner = inner.mtxLocal;
         mtxOuter = outer.mtxLocal;
         // audio setup
-        const audio = await ƒ.Audio.load("hypnotic.mp3");
+        const audio = new ƒ.Audio("hypnotic.mp3");
         cmpAudio = new ƒ.ComponentAudio(audio, true);
         speaker.addComponent(cmpAudio);
         cmpAudio.setPanner(ƒ.AUDIO_PANNER.CONE_OUTER_ANGLE, 180);

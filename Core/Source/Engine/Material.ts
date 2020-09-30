@@ -20,7 +20,7 @@ namespace FudgeCore {
         else
           this.setCoat(this.createCoatMatchingShader());
       }
-      ResourceManager.register(this);
+      Project.register(this);
     }
 
     /**
@@ -82,20 +82,20 @@ namespace FudgeCore {
       };
       return serialization;
     }
-    public deserialize(_serialization: Serialization): Serializable {
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.name = _serialization.name;
-      this.idResource = _serialization.idResource;
+      Project.register(this, _serialization.idResource);
+      // this.idResource = _serialization.idResource;
       // TODO: provide for shaders in the users namespace. See Serializer fullpath etc.
       // tslint:disable-next-line: no-any
       this.shaderType = (<any>FudgeCore)[_serialization.shader];
-      let coat: Coat = <Coat>Serializer.deserialize(_serialization.coat);
+      let coat: Coat = await <Promise<Coat>>Serializer.deserialize(_serialization.coat);
       this.setCoat(coat);
       return this;
     }
 
-
     protected reduceMutator(_mutator: Mutator): void {
-      //
+      // delete _mutator.idResource;
     }
     //#endregion
   }

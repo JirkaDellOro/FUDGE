@@ -28,53 +28,6 @@ namespace FudgeCore {
       this.resetCache();
     }
 
-    /** 
-     * - get: a copy of the calculated translation vector   
-     * - set: effect the matrix ignoring its rotation and scaling
-     */
-    public get translation(): Vector2 {
-      if (!this.vectors.translation)
-        this.vectors.translation = new Vector2(this.data[6], this.data[7]);
-      return this.vectors.translation.copy;
-    }
-    public set translation(_translation: Vector2) {
-      this.data.set(_translation.get(), 12);
-      // no full cache reset required
-      this.vectors.translation = _translation;
-      this.mutator = null;
-    }
-
-    /** 
-     * - get: a copy of the calculated rotation vector   
-     * - set: effect the matrix
-     */
-    public get rotation(): number {
-      if (!this.vectors.rotation)
-        this.vectors.rotation = this.getEulerAngles();
-      return this.vectors.rotation;
-    }
-    public set rotation(_rotation: number) {
-      this.mutate({ "rotation": _rotation });
-      this.resetCache();
-    }
-
-    /** 
-     * - get: a copy of the calculated scale vector   
-     * - set: effect the matrix
-     */
-    public get scaling(): Vector2 {
-      if (!this.vectors.scaling)
-        this.vectors.scaling = new Vector2(
-          Math.hypot(this.data[0], this.data[1]),
-          Math.hypot(this.data[3], this.data[4])
-        );
-      return this.vectors.scaling.copy;
-    }
-    public set scaling(_scaling: Vector2) {
-      this.mutate({ "scaling": _scaling });
-      this.resetCache();
-    }
-
 
     //TODO: figure out what this is used for
     public static PROJECTION(_width: number, _height: number): Matrix3x3 {
@@ -178,6 +131,61 @@ namespace FudgeCore {
       return matrix;
     }
 
+    /** 
+     * - get: a copy of the calculated translation vector   
+     * - set: effect the matrix ignoring its rotation and scaling
+     */
+    public get translation(): Vector2 {
+      if (!this.vectors.translation)
+        this.vectors.translation = new Vector2(this.data[6], this.data[7]);
+      return this.vectors.translation.copy;
+    }
+    public set translation(_translation: Vector2) {
+      this.data.set(_translation.get(), 12);
+      // no full cache reset required
+      this.vectors.translation = _translation;
+      this.mutator = null;
+    }
+
+    /** 
+     * - get: a copy of the calculated rotation vector   
+     * - set: effect the matrix
+     */
+    public get rotation(): number {
+      if (!this.vectors.rotation)
+        this.vectors.rotation = this.getEulerAngles();
+      return this.vectors.rotation;
+    }
+    public set rotation(_rotation: number) {
+      this.mutate({ "rotation": _rotation });
+      this.resetCache();
+    }
+
+    /** 
+     * - get: a copy of the calculated scale vector   
+     * - set: effect the matrix
+     */
+    public get scaling(): Vector2 {
+      if (!this.vectors.scaling)
+        this.vectors.scaling = new Vector2(
+          Math.hypot(this.data[0], this.data[1]),
+          Math.hypot(this.data[3], this.data[4])
+        );
+      return this.vectors.scaling.copy;
+    }
+    public set scaling(_scaling: Vector2) {
+      this.mutate({ "scaling": _scaling });
+      this.resetCache();
+    }
+    
+    /**
+     * Return a copy of this
+     */
+    public get copy(): Matrix3x3 {
+      let copy: Matrix3x3 = new Matrix3x3();
+      copy.set(this);
+      return copy;
+    }
 
     //#region Translation
     /**
@@ -308,21 +316,12 @@ namespace FudgeCore {
       return new Float32Array(this.data);
     }
 
-    /**
-     * Return a copy of this
-     */
-    public get copy(): Matrix3x3 {
-      let copy: Matrix3x3 = new Matrix3x3();
-      copy.set(this);
-      return copy;
-    }
-
     public serialize(): Serialization {
       // TODO: save translation, rotation and scale as vectors for readability and manipulation
       let serialization: Serialization = this.getMutator();
       return serialization;
     }
-    public deserialize(_serialization: Serialization): Serializable {
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.mutate(_serialization);
       return this;
     }
@@ -383,7 +382,7 @@ namespace FudgeCore {
     public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {
       let types: MutatorAttributeTypes = {};
       if (_mutator.translation) types.translation = "Vector2";
-      if (_mutator.rotation != undefined  ) types.rotation = "number";
+      if (_mutator.rotation != undefined) types.rotation = "number";
       if (_mutator.scaling) types.scaling = "Vector2";
       return types;
     }

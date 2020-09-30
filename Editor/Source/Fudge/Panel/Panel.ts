@@ -2,11 +2,6 @@
 namespace Fudge {
   import ƒ = FudgeCore;
 
-  export enum PANEL {
-    GRAPH = "PanelGraph", 
-    MODELLER = "PanelModeller"
-  }
-
   /**
    * Base class for all [[Panel]]s aggregating [[View]]s
    * Subclasses are presets for common panels. A user might add or delete [[View]]s at runtime
@@ -39,7 +34,7 @@ namespace Fudge {
 
     /** Send custom copies of the given event to the views */
     public broadcastEvent = (_event: Event): void => {
-      console.log("views", this.views);
+      // console.log("views", this.views);
       for (let view of this.views) {
         let event: CustomEvent = new CustomEvent(_event.type, { bubbles: false, cancelable: true, detail: (<CustomEvent>_event).detail });
         view.dom.dispatchEvent(event);

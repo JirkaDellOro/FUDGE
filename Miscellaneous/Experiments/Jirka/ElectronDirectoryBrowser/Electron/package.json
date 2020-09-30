@@ -1,0 +1,17 @@
+{
+  "name": "electron_directory_browser",
+  "version": "0.0.0",
+  "description": "Experimental directory browser with electron",
+  "main": "../Build/Main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Jirka Dell'Oro-Friedl",
+  "license": "CC0-1.0",
+  "devDependencies": {
+    "electron": "^6.0.1"
+  },
+  "dependencies": {
+    "@types/electron": "^1.6.10"
+  }
+}

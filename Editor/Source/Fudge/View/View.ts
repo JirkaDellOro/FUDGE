@@ -1,19 +1,5 @@
 namespace Fudge {
   import ƒ = FudgeCore;
-  import ƒui = FudgeUserInterface;
-
-  export enum VIEW {
-    HIERARCHY = "ViewHierarchy",
-    ANIMATION = "ViewAnimation",
-    RENDER = "ViewRender",
-    COMPONENTS = "ViewComponents",
-    CAMERA = "ViewCamera",
-    MODELLER = "ViewModeller", 
-    OBJECT_PROPERTIES = "ViewObjectProperties"
-    // PROJECT = ViewProject,
-    // SKETCH = ViewSketch,
-    // MESH = ViewMesh,
-  }
 
   /**
    * Base class for all [[View]]s to support generic functionality
@@ -31,16 +17,14 @@ namespace Fudge {
       this.dom.setAttribute("view", this.constructor.name);
       _container.getElement().append(this.dom);
       this.container = _container;
-      console.log(this.contextMenuCallback);
+      // console.log(this.contextMenuCallback);
       this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
+      this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEventCommon);
     }
 
     public setTitle(_title: string): void {
       this.container.setTitle(_title);
     }
-
-    /** Cleanup when user closes view */
-    protected abstract cleanup(): void;
 
     //#region  ContextMenu
     protected openContextMenu = (_event: Event): void => {
@@ -55,7 +39,15 @@ namespace Fudge {
     }
 
     protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
-      ƒ.Debug.info(`ContextMenu: Item-id=${MENU[_item.id]}`);
+      ƒ.Debug.info(`ContextMenu: Item-id=${CONTEXTMENU[_item.id]}`);
+    }
+
+    private hndEventCommon = (_event: Event): void => {
+      switch (_event.type) {
+        case EVENT_EDITOR.SET_PROJECT:
+          this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
+          break;
+      }
     }
   }
 }

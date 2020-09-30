@@ -117,7 +117,7 @@ namespace FudgeUserInterface {
 
       for (let item of items)
         if (_data.indexOf(item.data) > -1) {
-          item.dispatchEvent(new Event(EVENT_TREE.UPDATE, { bubbles: true }));
+          item.dispatchEvent(new Event(EVENT.UPDATE, { bubbles: true }));
           deleted.push(item.parentNode.removeChild(item));
         }
 

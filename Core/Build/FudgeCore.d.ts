@@ -139,8 +139,8 @@ declare namespace FudgeCore {
         NODE_SERIALIZED = "nodeSerialized",
         /** dispatched to [[Node]] when it's done deserializing, so all components, children and attributes are available */
         NODE_DESERIALIZED = "nodeDeserialized",
-        /** dispatched to [[NodeResourceInstance]] when it's content is set according to a serialization of a [[NodeResource]]  */
-        NODERESOURCE_INSTANTIATED = "nodeResourceInstantiated",
+        /** dispatched to [[GraphInstance]] when it's content is set according to a serialization of a [[Graph]]  */
+        GRAPH_INSTANTIATED = "graphInstantiated",
         /** dispatched to [[Time]] when it's scaling changed  */
         TIME_SCALED = "timeScaled",
         /** dispatched to [[FileIo]] when a list of files has been loaded  */
@@ -210,9 +210,11 @@ declare namespace FudgeCore {
          */
         get type(): string;
         /**
-         * Collect applicable attributes of the instance and copies of their values in a Mutator-object
+         * Collect applicable attributes of the instance and copies of their values in a Mutator-object.
+         * By default, a mutator cannot extended, since extensions are not available in the object the mutator belongs to.
+         * A mutator may be reduced by the descendants of [[Mutable]] to contain only the properties needed.
          */
-        getMutator(): Mutator;
+        getMutator(_extendable?: boolean): Mutator;
         /**
          * Collect the attributes of the instance and their values applicable for animation.
          * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
@@ -257,7 +259,7 @@ declare namespace FudgeCore {
     }
     interface Serializable {
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
     /**
      * Handles the external serialization and deserialization of [[Serializable]] objects. The internal process is handled by the objects themselves.
@@ -294,7 +296,7 @@ declare namespace FudgeCore {
          * Registers a namespace to the [[Serializer]], to enable automatic instantiation of classes defined within
          * @param _namespace
          */
-        static registerNamespace(_namespace: Object): void;
+        static registerNamespace(_namespace: Object): string;
         /**
          * Returns a javascript object representing the serializable FUDGE-object given,
          * including attached components, children, superclass-objects all information needed for reconstruction
@@ -306,7 +308,7 @@ declare namespace FudgeCore {
          * including attached components, children, superclass-objects
          * @param _serialization
          */
-        static deserialize(_serialization: Serialization): Serializable;
+        static deserialize(_serialization: Serialization): Promise<Serializable>;
         static prettify(_json: string): string;
         /**
          * Returns a formatted, human readable JSON-String, representing the given [[Serializaion]] that may have been created by [[Serializer]].serialize
@@ -322,7 +324,7 @@ declare namespace FudgeCore {
          * Creates an object of the class defined with the full path including the namespaceName(s) and the className seperated by dots(.)
          * @param _path
          */
-        private static reconstruct;
+        static reconstruct(_path: string): Serializable;
         /**
          * Returns the full path to the class of the object, if found in the registered namespaces
          * @param _object
@@ -424,18 +426,6 @@ declare namespace FudgeCore {
     class Vector2 extends Mutable {
         private data;
         constructor(_x?: number, _y?: number);
-        get x(): number;
-        get y(): number;
-        set x(_x: number);
-        set y(_y: number);
-        /**
-         * Returns the length of the vector
-         */
-        get magnitude(): number;
-        /**
-         * Returns the square of the magnitude of the vector without calculating a square root. Faster for simple proximity evaluation.
-         */
-        get magnitudeSquared(): number;
         /**
          * A shorthand for writing `new Vector2(0, 0)`.
          * @returns A new vector with the values (0, 0)
@@ -511,6 +501,22 @@ declare namespace FudgeCore {
          * @returns A Vector that is orthogonal to and has the same magnitude as the given Vector.
          */
         static ORTHOGONAL(_vector: Vector2, _clockwise?: boolean): Vector2;
+        get x(): number;
+        get y(): number;
+        set x(_x: number);
+        set y(_y: number);
+        /**
+         * Returns the length of the vector
+         */
+        get magnitude(): number;
+        /**
+         * Returns the square of the magnitude of the vector without calculating a square root. Faster for simple proximity evaluation.
+         */
+        get magnitudeSquared(): number;
+        /**
+         * @returns A deep copy of the vector.
+         */
+        get copy(): Vector2;
         /**
          * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
          * TODO: examine, if tolerance as criterium for the difference is appropriate with very large coordinate values or if _tolerance should be multiplied by coordinate value
@@ -546,10 +552,6 @@ declare namespace FudgeCore {
          * @returns An array of the data of the vector
          */
         get(): Float32Array;
-        /**
-         * @returns A deep copy of the vector.
-         */
-        get copy(): Vector2;
         transform(_matrix: Matrix3x3, _includeTranslation?: boolean): void;
         /**
          * Adds a z-component of the given magnitude (default=0) to the vector and returns a new Vector3
@@ -702,6 +704,168 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    interface MapClassToComponents {
+        [className: string]: Component[];
+    }
+    /**
+     * Represents a node in the scenetree.
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Graph
+     */
+    class Node extends EventTargetƒ implements Serializable {
+        name: string;
+        readonly mtxWorld: Matrix4x4;
+        timestampUpdate: number;
+        private parent;
+        private children;
+        private components;
+        private listeners;
+        private captures;
+        private active;
+        private worldInverseUpdated;
+        private worldInverse;
+        /**
+         * Creates a new node with a name and initializes all attributes
+         * @param _name The name by which the node can be called.
+         */
+        constructor(_name: string);
+        get isActive(): boolean;
+        /**
+         * Shortcut to retrieve this nodes [[ComponentTransform]]
+         */
+        get cmpTransform(): ComponentTransform;
+        /**
+         * Shortcut to retrieve the local [[Matrix4x4]] attached to this nodes [[ComponentTransform]]
+         * Fails if no [[ComponentTransform]] is attached
+         */
+        get mtxLocal(): Matrix4x4;
+        get mtxWorldInverse(): Matrix4x4;
+        /**
+         * Returns the number of children attached to this
+         */
+        get nChildren(): number;
+        /**
+         * Generator yielding the node and all decendants in the graph below for iteration
+         */
+        get graph(): IterableIterator<Node>;
+        activate(_on: boolean): void;
+        /**
+         * Returns a reference to this nodes parent node
+         */
+        getParent(): Node | null;
+        /**
+         * Traces back the ancestors of this node and returns the first
+         */
+        getAncestor(): Node | null;
+        /**
+         * Returns child at the given index in the list of children
+         */
+        getChild(_index: number): Node;
+        /**
+         * Returns a clone of the list of children
+         */
+        getChildren(): Node[];
+        /**
+         * Returns an array of references to childnodes with the supplied name.
+         */
+        getChildrenByName(_name: string): Node[];
+        /**
+         * Simply calls [[addChild]]. This reference is here solely because appendChild is the equivalent method in DOM.
+         * See and preferably use [[addChild]]
+         */
+        readonly appendChild: (_child: Node) => void;
+        /**
+         * Adds the given reference to a node to the list of children, if not already in
+         * @throws Error when trying to add an ancestor of this
+         */
+        addChild(_child: Node): void;
+        /**
+         * Removes the reference to the give node from the list of children
+         * @param _child The node to be removed.
+         */
+        removeChild(_child: Node): void;
+        /**
+         * Returns the position of the node in the list of children or -1 if not found
+         * @param _search The node to be found.
+         */
+        findChild(_search: Node): number;
+        /**
+         * Replaces a child node with another, preserving the position in the list of children
+         * @param _replace The node to be replaced
+         * @param _with The node to replace with
+         */
+        replaceChild(_replace: Node, _with: Node): boolean;
+        isUpdated(_timestampUpdate: number): boolean;
+        isDescendantOf(_ancestor: Node): boolean;
+        /**
+         * Applies a Mutator from [[Animation]] to all its components and transfers it to its children.
+         * @param _mutator The mutator generated from an [[Animation]]
+         */
+        applyAnimation(_mutator: Mutator): void;
+        /**
+         * Returns a list of all components attached to this node, independent of type.
+         */
+        getAllComponents(): Component[];
+        /**
+         * Returns a clone of the list of components of the given class attached to this node.
+         * @param _class The class of the components to be found.
+         */
+        getComponents<T extends Component>(_class: new () => T): T[];
+        /**
+         * Returns the first compontent found of the given class attached this node or null, if list is empty or doesn't exist
+         * @param _class The class of the components to be found.
+         */
+        getComponent<T extends Component>(_class: new () => T): T;
+        /**
+         * Adds the supplied component into the nodes component map.
+         * @param _component The component to be pushed into the array.
+         */
+        addComponent(_component: Component): void;
+        /**
+         * Removes the given component from the node, if it was attached, and sets its parent to null.
+         * @param _component The component to be removed
+         * @throws Exception when component is not found
+         */
+        removeComponent(_component: Component): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        /**
+         * Creates a string as representation of this node and its descendants
+         */
+        toHierarchyString(_node?: Node, _level?: number): string;
+        /**
+         * Adds an event listener to the node. The given handler will be called when a matching event is passed to the node.
+         * Deviating from the standard EventTarget, here the _handler must be a function and _capture is the only option.
+         * @param _type The type of the event, should be an enumerated value of NODE_EVENT, can be any string
+         * @param _handler The function to call when the event reaches this node
+         * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
+         */
+        addEventListener(_type: EVENT | string, _handler: EventListener, _capture?: boolean): void;
+        /**
+         * Removes an event listener from the node. The signatur must match the one used with addEventListener
+         * @param _type The type of the event, should be an enumerated value of NODE_EVENT, can be any string
+         * @param _handler The function to call when the event reaches this node
+         * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
+         */
+        removeEventListener(_type: EVENT | string, _handler: EventListener, _capture?: boolean): void;
+        /**
+         * Dispatches a synthetic event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
+         * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase,
+         * than the matching handler of the target node in the target phase, and back out of the hierarchy in the bubbling phase, invoking appropriate handlers of the anvestors
+         * @param _event The event to dispatch
+         */
+        dispatchEvent(_event: Event): boolean;
+        /**
+         * Broadcasts a synthetic event to this node and from there to all nodes deeper in the hierarchy,
+         * invoking matching handlers of the nodes listening to the capture phase. Watch performance when there are many nodes involved
+         * @param _event The event to broadcast
+         */
+        broadcastEvent(_event: Event): void;
+        private broadcastEventRecursive;
+        private getGraphGenerator;
+    }
+}
+declare namespace FudgeCore {
     /**
      * Holds information about the AnimationStructure that the Animation uses to map the Sequences to the Attributes.
      * Built out of a [[Node]]'s serialsation, it swaps the values with [[AnimationSequence]]s.
@@ -742,6 +906,9 @@ declare namespace FudgeCore {
         private eventsProcessed;
         private animationStructuresProcessed;
         constructor(_name: string, _animStructure?: AnimationStructure, _fps?: number);
+        get getLabels(): Enumerator;
+        get fps(): number;
+        set fps(_fps: number);
         /**
          * Generates a new "Mutator" with the information to apply to the [[Node]] the [[ComponentAnimator]] is attached to with [[Node.applyAnimation()]].
          * @param _time The time at which the animation currently is at
@@ -770,15 +937,12 @@ declare namespace FudgeCore {
          * @param _name name of the event to remove.
          */
         removeEvent(_name: string): void;
-        get getLabels(): Enumerator;
-        get fps(): number;
-        set fps(_fps: number);
         /**
          * (Re-)Calculate the total time of the Animation. Calculation-heavy, use only if actually needed.
          */
         calculateTotalTime(): void;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
         /**
@@ -915,6 +1079,13 @@ declare namespace FudgeCore {
         private slopeIn;
         private slopeOut;
         constructor(_time?: number, _value?: number, _slopeIn?: number, _slopeOut?: number, _constant?: boolean);
+        /**
+         * Static comparation function to use in an array sort function to sort the keys by their time.
+         * @param _a the animation key to check
+         * @param _b the animation key to check against
+         * @returns >0 if a>b, 0 if a=b, <0 if a<b
+         */
+        static compare(_a: AnimationKey, _b: AnimationKey): number;
         get Time(): number;
         set Time(_time: number);
         get Value(): number;
@@ -925,15 +1096,8 @@ declare namespace FudgeCore {
         set SlopeIn(_slope: number);
         get SlopeOut(): number;
         set SlopeOut(_slope: number);
-        /**
-         * Static comparation function to use in an array sort function to sort the keys by their time.
-         * @param _a the animation key to check
-         * @param _b the animation key to check against
-         * @returns >0 if a>b, 0 if a=b, <0 if a<b
-         */
-        static compare(_a: AnimationKey, _b: AnimationKey): number;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
     }
@@ -946,6 +1110,7 @@ declare namespace FudgeCore {
      */
     class AnimationSequence extends Mutable implements Serializable {
         private keys;
+        get length(): number;
         /**
          * Evaluates the sequence at the given point in time.
          * @param _time the point in time at which to evaluate the sequence in milliseconds.
@@ -974,9 +1139,8 @@ declare namespace FudgeCore {
          * @returns the AnimationKey at the index if it exists, null otherwise.
          */
         getKey(_index: number): AnimationKey;
-        get length(): number;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
         /**
          * Utility function that (re-)generates all functions in the sequence.
@@ -989,11 +1153,22 @@ declare namespace FudgeCore {
      * Extension of AudioBuffer with a load method that creates a buffer in the [[AudioManager]].default to be used with [[ComponentAudio]]
      * @authors Thomas Dorner, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
-    class Audio extends AudioBuffer {
+    class Audio extends Mutable implements SerializableResource {
+        name: string;
+        idResource: string;
+        buffer: AudioBuffer;
+        path: URL;
+        private url;
+        private ready;
+        constructor(_url?: RequestInfo);
+        get isReady(): boolean;
         /**
          * Asynchronously loads the audio (mp3) from the given url
          */
-        static load(_url: string): Promise<Audio>;
+        load(_url: RequestInfo): Promise<void>;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace FudgeCore {
@@ -1021,7 +1196,7 @@ declare namespace FudgeCore {
         /**
          * Determines FUDGE-graph to listen to. Each [[ComponentAudio]] in the graph will connect to this contexts master gain, all others disconnect.
          */
-        listenTo: (_graph: Node | null) => void;
+        listenTo: (_graph: Node) => void;
         /**
          * Retrieve the FUDGE-graph currently listening to
          */
@@ -1029,7 +1204,7 @@ declare namespace FudgeCore {
         /**
          * Set the [[ComponentAudioListener]] that serves the spatial location and orientation for this contexts listener
          */
-        listen: (_cmpListener: ComponentAudioListener | null) => void;
+        listen: (_cmpListener: ComponentAudioListener) => void;
         /**
          * Updates the spatial settings of the AudioNodes effected in the current FUDGE-graph
          */
@@ -1047,10 +1222,9 @@ declare namespace FudgeCore {
         protected renderData: {
             [key: string]: unknown;
         };
-        mutate(_mutator: Mutator): void;
         useRenderData(_shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(): void;
     }
     /**
@@ -1059,6 +1233,8 @@ declare namespace FudgeCore {
     class CoatColored extends Coat {
         color: Color;
         constructor(_color?: Color);
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
     /**
      * A [[Coat]] to be used by the MatCap Shader providing a texture, a tint color (0.5 grey is neutral). Set shadeSmooth to 1 for smooth shading.
@@ -1074,9 +1250,10 @@ declare namespace FudgeCore {
     /**
      * A [[Coat]] providing a texture and additional data for texturing
      */
-    class CoatTextured extends Coat {
-        color: Color;
+    class CoatTextured extends CoatColored {
         texture: TextureImage;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 }
 declare namespace FudgeCore {
@@ -1096,12 +1273,12 @@ declare namespace FudgeCore {
         private container;
         private active;
         protected static registerSubclass(_subclass: typeof Component): number;
-        activate(_on: boolean): void;
         get isActive(): boolean;
         /**
          * Is true, when only one instance of the component class can be attached to a node
          */
         get isSingleton(): boolean;
+        activate(_on: boolean): void;
         /**
          * Retrieves the node, this component is currently attached to
          * @returns The container node or null, if the component is not attached to
@@ -1113,7 +1290,7 @@ declare namespace FudgeCore {
          */
         setContainer(_container: Node | null): void;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -1173,7 +1350,7 @@ declare namespace FudgeCore {
          */
         updateAnimation(_time: number): [Mutator, number];
         serialize(): Serialization;
-        deserialize(_s: Serialization): Serializable;
+        deserialize(_s: Serialization): Promise<Serializable>;
         /**
          * Updates the Animation.
          * Gets called every time the Loop fires the LOOP_FRAME Event.
@@ -1238,6 +1415,7 @@ declare namespace FudgeCore {
         /** places and directs the panner relative to the world transform of the [[Node]]  */
         pivot: Matrix4x4;
         protected singleton: boolean;
+        private audio;
         private gain;
         private panner;
         private source;
@@ -1245,10 +1423,12 @@ declare namespace FudgeCore {
         private playing;
         private listened;
         constructor(_audio?: Audio, _loop?: boolean, _start?: boolean, _audioManager?: AudioManager);
-        set audio(_audio: Audio);
-        get audio(): Audio;
         set volume(_value: number);
         get volume(): number;
+        get isPlaying(): boolean;
+        get isAttached(): boolean;
+        get isListened(): boolean;
+        setAudio(_audio: Audio): void;
         /**
          * Set the property of the panner to the given value. Use to manipulate range and rolloff etc.
          */
@@ -1262,9 +1442,6 @@ declare namespace FudgeCore {
          * Start or stop playing the audio
          */
         play(_on: boolean): void;
-        get isPlaying(): boolean;
-        get isAttached(): boolean;
-        get isListened(): boolean;
         /**
          * Inserts AudioNodes between the panner and the local gain of this [[ComponentAudio]]
          * _input and _output may be the same AudioNode, if there is only one to insert,
@@ -1290,6 +1467,9 @@ declare namespace FudgeCore {
          * Only call this method if the component is not attached to a [[Node]] but needs to be heard.
          */
         connect(_on: boolean): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        private hndAudioReady;
         private install;
         private createSource;
         private updateConnection;
@@ -1353,16 +1533,16 @@ declare namespace FudgeCore {
         private aspectRatio;
         private direction;
         private backgroundEnabled;
-        getProjection(): PROJECTION;
-        getBackgroundEnabled(): boolean;
-        getAspect(): number;
-        getFieldOfView(): number;
-        getDirection(): FIELD_OF_VIEW;
         /**
          * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
          * @returns the world-projection-matrix
          */
         get ViewProjectionMatrix(): Matrix4x4;
+        getProjection(): PROJECTION;
+        getBackgroundEnabled(): boolean;
+        getAspect(): number;
+        getFieldOfView(): number;
+        getDirection(): FIELD_OF_VIEW;
         /**
          * Set the camera to perspective projection. The world origin is in the center of the canvaselement.
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
@@ -1384,7 +1564,7 @@ declare namespace FudgeCore {
         getProjectionRectangle(): Rectangle;
         project(_pointInWorldSpace: Vector3): Vector3;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         mutate(_mutator: Mutator): void;
         protected reduceMutator(_mutator: Mutator): void;
@@ -1404,6 +1584,9 @@ declare namespace FudgeCore {
         light: Light;
         constructor(_light?: Light);
         setType<T extends Light>(_class: new () => T): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        getMutator(): Mutator;
     }
 }
 declare namespace FudgeCore {
@@ -1419,7 +1602,7 @@ declare namespace FudgeCore {
         pivot: Matrix3x3;
         constructor(_material?: Material);
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 }
 declare namespace FudgeCore {
@@ -1433,7 +1616,7 @@ declare namespace FudgeCore {
         mesh: Mesh;
         constructor(_mesh?: Mesh);
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorForUserInterface(): MutatorForUserInterface;
     }
 }
@@ -1447,7 +1630,7 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         constructor();
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 }
 declare namespace FudgeCore {
@@ -1485,7 +1668,7 @@ declare namespace FudgeCore {
          */
         transform(_transform: Matrix4x4, _base?: BASE, _node?: Node): void;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -1664,7 +1847,7 @@ declare namespace FudgeCore {
     /**
      * Defines a color as values in the range of 0 to 1 for the four channels red, green, blue and alpha (for opacity)
      */
-    class Color extends Mutable {
+    class Color extends Mutable implements Serializable {
         private static crc2;
         r: number;
         g: number;
@@ -1684,6 +1867,8 @@ declare namespace FudgeCore {
         getCSS(): string;
         getHex(): string;
         setHex(_hex: string): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -1723,12 +1908,18 @@ declare namespace FudgeCore {
          */
         getShader(): typeof Shader;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace FudgeCore {
+    enum MODE {
+        EDITOR = 0,
+        RUNTIME = 1
+    }
     interface SerializableResource extends Serializable {
+        name: string;
+        type: string;
         idResource: string;
     }
     interface Resources {
@@ -1737,19 +1928,31 @@ declare namespace FudgeCore {
     interface SerializationOfResources {
         [idResource: string]: Serialization;
     }
+    interface ScriptNamespaces {
+        [name: string]: Object;
+    }
+    interface ComponentScripts {
+        [namespace: string]: ComponentScript[];
+    }
     /**
      * Static class handling the resources used with the current FUDGE-instance.
      * Keeps a list of the resources and generates ids to retrieve them.
      * Resources are objects referenced multiple times but supposed to be stored only once
      */
-    abstract class ResourceManager {
+    abstract class Project {
         static resources: Resources;
         static serialization: SerializationOfResources;
+        static scriptNamespaces: ScriptNamespaces;
+        static baseURL: URL;
+        static mode: MODE;
         /**
-         * Generates an id for the resources and registers it with the list of resources
-         * @param _resource
+         * Registers the resource and generates an id for it by default.
+         * If the resource already has an id, thus having been registered, its deleted from the list and registered anew.
+         * It's possible to pass an id, but should not be done except by the Serializer.
          */
-        static register(_resource: SerializableResource): void;
+        static register(_resource: SerializableResource, _idResource?: string): void;
+        static deregister(_resource: SerializableResource): void;
+        static clear(): void;
         /**
          * Generate a user readable and unique id using the type of the resource, the date and random numbers
          * @param _resource
@@ -1762,15 +1965,19 @@ declare namespace FudgeCore {
         static isResource(_object: Serializable): boolean;
         /**
          * Retrieves the resource stored with the given id
-         * @param _idResource
          */
-        static get(_idResource: string): SerializableResource;
+        static getResource(_idResource: string): Promise<SerializableResource>;
         /**
          * Creates and registers a resource from a [[Node]], copying the complete graph starting with it
          * @param _node A node to create the resource from
-         * @param _replaceWithInstance if true (default), the node used as origin is replaced by a [[NodeResourceInstance]] of the [[NodeResource]] created
+         * @param _replaceWithInstance if true (default), the node used as origin is replaced by a [[GraphInstance]] of the [[Graph]] created
          */
-        static registerNodeAsResource(_node: Node, _replaceWithInstance?: boolean): NodeResource;
+        static registerAsGraph(_node: Node, _replaceWithInstance?: boolean): Promise<Graph>;
+        static createGraphInstance(_graph: Graph): Promise<GraphInstance>;
+        static registerScriptNamespace(_namespace: Object): void;
+        static getComponentScripts(): ComponentScripts;
+        static loadScript(_url: RequestInfo): Promise<void>;
+        static loadResources(_url?: RequestInfo): Promise<Resources>;
         /**
          * Serialize all resources
          */
@@ -1779,7 +1986,7 @@ declare namespace FudgeCore {
          * Create resources from a serialization, deleting all resources previously registered
          * @param _serialization
          */
-        static deserialize(_serialization: SerializationOfResources): Resources;
+        static deserialize(_serialization: SerializationOfResources): Promise<Resources>;
         private static deserializeResource;
     }
 }
@@ -1808,9 +2015,17 @@ declare namespace FudgeCore {
         private canvas;
         private pickBuffers;
         /**
+         * Returns true if this viewport currently has focus and thus receives keyboard events
+         */
+        get hasFocus(): boolean;
+        /**
          * Connects the viewport to the given canvas to render the given graph to using the given camera-component, and names the viewport as given.
          */
         initialize(_name: string, _graph: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void;
+        /**
+         * Retrieve the destination canvas
+         */
+        getCanvas(): HTMLCanvasElement;
         /**
          * Retrieve the 2D-context attached to the destination canvas
          */
@@ -1884,10 +2099,6 @@ declare namespace FudgeCore {
         pointClipToCanvas(_normed: Vector2): Vector2;
         pointClientToScreen(_client: Vector2): Vector2;
         /**
-         * Returns true if this viewport currently has focus and thus receives keyboard events
-         */
-        get hasFocus(): boolean;
-        /**
          * Switch the viewports focus on or off. Only one viewport in one FUDGE instance can have the focus, thus receiving keyboard events.
          * So a viewport currently having the focus will lose it, when another one receives it. The viewports fire [[Event]]s accordingly.
          * // TODO: examine, if this can be achieved by regular DOM-Focus and tabindex=0
@@ -1941,11 +2152,6 @@ declare namespace FudgeCore {
         private hndWheelEvent;
         private activateEvent;
         private hndComponentEvent;
-        /**
-         * Creates an outputstring as visual representation of this viewports scenegraph. Called for the passed node and recursive for all its children.
-         * @param _fudgeNode The node to create a scenegraphentry for.
-         */
-        private createSceneGraph;
     }
 }
 declare namespace FudgeCore {
@@ -1955,7 +2161,8 @@ declare namespace FudgeCore {
         /** broadcast to a [[Node]] and all its descendants in the graph just before its being removed from its parent */
         CHILD_REMOVE = "childRemoveFromAudioGraph",
         /** broadcast to a [[Node]] and all its descendants in the graph to update the panners in AudioComponents */
-        UPDATE = "updateAudioGraph"
+        UPDATE = "updateAudioGraph",
+        READY = "ready"
     }
 }
 declare namespace FudgeCore {
@@ -2202,15 +2409,54 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * A node managed by [[Project]] that functions as a template for [[GraphInstance]]s
+     * @author Jirka Dell'Oro-Friedl, HFU, 2019
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource
+     */
+    class Graph extends Node implements SerializableResource {
+        idResource: string;
+        type: string;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * An instance of a [[Graph]].
+     * This node keeps a reference to its resource an can thus optimize serialization
+     * @author Jirka Dell'Oro-Friedl, HFU, 2019
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource
+     */
+    class GraphInstance extends Node {
+        /** id of the resource that instance was created from */
+        private idSource;
+        constructor(_graph: Graph);
+        /**
+         * Recreate this node from the [[NodeResource]] referenced
+         */
+        reset(): Promise<void>;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        /**
+         * Set this node to be a recreation of the [[NodeResource]] given
+         * @param _nodeResource
+         */
+        set(_nodeResource: Graph): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
     type TypeOfLight = new () => Light;
     /**
      * Baseclass for different kinds of lights.
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    abstract class Light extends Mutable {
+    abstract class Light extends Mutable implements Serializable {
         color: Color;
         constructor(_color?: Color);
         getType(): TypeOfLight;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(): void;
     }
     /**
@@ -2337,6 +2583,22 @@ declare namespace FudgeCore {
         private mutator;
         private vectors;
         constructor();
+        static PROJECTION(_width: number, _height: number): Matrix3x3;
+        static IDENTITY(): Matrix3x3;
+        /**
+         * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given vector.
+         */
+        static TRANSLATION(_translate: Vector2): Matrix3x3;
+        /**
+         * Returns a matrix that rotates coordinates on the z-axis when multiplied by.
+         * @param _angleInDegrees The value of the rotation.
+         */
+        static ROTATION(_angleInDegrees: number): Matrix3x3;
+        /**
+         * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
+         */
+        static SCALING(_scalar: Vector2): Matrix3x3;
+        static MULTIPLICATION(_a: Matrix3x3, _b: Matrix3x3): Matrix3x3;
         /**
          * - get: a copy of the calculated translation vector
          * - set: effect the matrix ignoring its rotation and scaling
@@ -2355,22 +2617,10 @@ declare namespace FudgeCore {
          */
         get scaling(): Vector2;
         set scaling(_scaling: Vector2);
-        static PROJECTION(_width: number, _height: number): Matrix3x3;
-        static IDENTITY(): Matrix3x3;
         /**
-         * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given vector.
+         * Return a copy of this
          */
-        static TRANSLATION(_translate: Vector2): Matrix3x3;
-        /**
-         * Returns a matrix that rotates coordinates on the z-axis when multiplied by.
-         * @param _angleInDegrees The value of the rotation.
-         */
-        static ROTATION(_angleInDegrees: number): Matrix3x3;
-        /**
-         * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
-         */
-        static SCALING(_scalar: Vector2): Matrix3x3;
-        static MULTIPLICATION(_a: Matrix3x3, _b: Matrix3x3): Matrix3x3;
+        get copy(): Matrix3x3;
         /**
          * Add a translation by the given vector to this matrix
          */
@@ -2416,12 +2666,8 @@ declare namespace FudgeCore {
          * Return the elements of this matrix as a Float32Array
          */
         get(): Float32Array;
-        /**
-         * Return a copy of this
-         */
-        get copy(): Matrix3x3;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutator(): Mutator;
         mutate(_mutator: Mutator): void;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
@@ -2647,7 +2893,7 @@ declare namespace FudgeCore {
         get copy(): Matrix4x4;
         getTranslationTo(_target: Matrix4x4): Vector3;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutator(): Mutator;
         mutate(_mutator: Mutator): void;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
@@ -2735,20 +2981,6 @@ declare namespace FudgeCore {
     class Vector3 extends Mutable {
         private data;
         constructor(_x?: number, _y?: number, _z?: number);
-        get x(): number;
-        get y(): number;
-        get z(): number;
-        set x(_x: number);
-        set y(_y: number);
-        set z(_z: number);
-        /**
-         * Returns the length of the vector
-         */
-        get magnitude(): number;
-        /**
-         * Returns the square of the magnitude of the vector without calculating a square root. Faster for simple proximity evaluation.
-         */
-        get magnitudeSquared(): number;
         /**
          * Creates and returns a vector with the given length pointing in x-direction
          */
@@ -2811,6 +3043,24 @@ declare namespace FudgeCore {
          * Divides the dividend by the divisor component by component and returns the result
          */
         static RATIO(_dividend: Vector3, _divisor: Vector3): Vector3;
+        get x(): number;
+        get y(): number;
+        get z(): number;
+        set x(_x: number);
+        set y(_y: number);
+        set z(_z: number);
+        /**
+         * Returns the length of the vector
+         */
+        get magnitude(): number;
+        /**
+         * Returns the square of the magnitude of the vector without calculating a square root. Faster for simple proximity evaluation.
+         */
+        get magnitudeSquared(): number;
+        /**
+         * Returns a copy of this vector
+         */
+        get copy(): Vector3;
         /**
          * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
          * TODO: examine, if tolerance as criterium for the difference is appropriate with very large coordinate values or if _tolerance should be multiplied by coordinate value
@@ -2849,10 +3099,6 @@ declare namespace FudgeCore {
          */
         get(): Float32Array;
         /**
-         * Returns a copy of this vector
-         */
-        get copy(): Vector3;
-        /**
          * Transforms this vector by the given matrix, including or exluding the translation.
          * Including is the default, excluding will only rotate and scale this vector.
          */
@@ -2888,7 +3134,7 @@ declare namespace FudgeCore {
      *
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    abstract class Mesh implements SerializableResource {
+    abstract class Mesh extends Mutable implements SerializableResource {
         /** refers back to this class from any subclass e.g. in order to find compatible other resources*/
         static readonly baseClass: typeof Mesh;
         /** list of all the subclasses derived from this class, if they registered properly*/
@@ -2898,9 +3144,11 @@ declare namespace FudgeCore {
         textureUVs: Float32Array;
         normalsFace: Float32Array;
         idResource: string;
+        name: string;
         renderBuffers: RenderBuffers;
         static getBufferSpecification(): BufferSpecification;
         protected static registerSubclass(_subClass: typeof Mesh): number;
+        get type(): string;
         useRenderBuffers(_shader: typeof Shader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void;
         createRenderBuffers(): void;
         deleteRenderBuffers(_shader: typeof Shader): void;
@@ -2908,7 +3156,7 @@ declare namespace FudgeCore {
         getIndexCount(): number;
         create(): void;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         /**Flip the Normals of a Mesh to render opposite side of each polygon*/
         flipNormals(): void;
         protected calculateFaceNormals(): Float32Array;
@@ -2916,6 +3164,7 @@ declare namespace FudgeCore {
         protected abstract createTextureUVs(): Float32Array;
         protected abstract createIndices(): Uint16Array;
         protected abstract createFaceNormals(): Float32Array;
+        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace FudgeCore {
@@ -3024,7 +3273,10 @@ declare namespace FudgeCore {
         private sectors;
         private stacks;
         constructor(_sectors?: number, _stacks?: number);
-        create(): void;
+        create(_sectors?: number, _stacks?: number): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): void;
         protected createIndices(): Uint16Array;
         protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;
@@ -3067,198 +3319,6 @@ declare namespace FudgeCore {
         protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;
         protected createFaceNormals(): Float32Array;
-    }
-}
-declare namespace FudgeCore {
-    interface MapClassToComponents {
-        [className: string]: Component[];
-    }
-    /**
-     * Represents a node in the scenetree.
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Graph
-     */
-    class Node extends EventTargetƒ implements Serializable {
-        name: string;
-        readonly mtxWorld: Matrix4x4;
-        timestampUpdate: number;
-        private parent;
-        private children;
-        private components;
-        private listeners;
-        private captures;
-        private active;
-        private worldInverseUpdated;
-        private worldInverse;
-        /**
-         * Creates a new node with a name and initializes all attributes
-         * @param _name The name by which the node can be called.
-         */
-        constructor(_name: string);
-        activate(_on: boolean): void;
-        get isActive(): boolean;
-        /**
-         * Shortcut to retrieve this nodes [[ComponentTransform]]
-         */
-        get cmpTransform(): ComponentTransform;
-        /**
-         * Shortcut to retrieve the local [[Matrix4x4]] attached to this nodes [[ComponentTransform]]
-         * Fails if no [[ComponentTransform]] is attached
-         */
-        get mtxLocal(): Matrix4x4;
-        get mtxWorldInverse(): Matrix4x4;
-        /**
-         * Returns a reference to this nodes parent node
-         */
-        getParent(): Node | null;
-        /**
-         * Traces back the ancestors of this node and returns the first
-         */
-        getAncestor(): Node | null;
-        /**
-         * Returns the number of children attached to this
-         */
-        get nChildren(): number;
-        /**
-         * Returns child at the given index in the list of children
-         */
-        getChild(_index: number): Node;
-        /**
-         * Returns a clone of the list of children
-         */
-        getChildren(): Node[];
-        /**
-         * Returns an array of references to childnodes with the supplied name.
-         */
-        getChildrenByName(_name: string): Node[];
-        /**
-         * Simply calls [[addChild]]. This reference is here solely because appendChild is the equivalent method in DOM.
-         * See and preferably use [[addChild]]
-         */
-        readonly appendChild: (_child: Node) => void;
-        /**
-         * Adds the given reference to a node to the list of children, if not already in
-         * @throws Error when trying to add an ancestor of this
-         */
-        addChild(_child: Node): void;
-        /**
-         * Removes the reference to the give node from the list of children
-         * @param _child The node to be removed.
-         */
-        removeChild(_child: Node): void;
-        /**
-         * Returns the position of the node in the list of children or -1 if not found
-         * @param _search The node to be found.
-         */
-        findChild(_search: Node): number;
-        /**
-         * Replaces a child node with another, preserving the position in the list of children
-         * @param _replace The node to be replaced
-         * @param _with The node to replace with
-         */
-        replaceChild(_replace: Node, _with: Node): boolean;
-        /**
-         * Generator yielding the node and all decendants in the graph below for iteration
-         */
-        get graph(): IterableIterator<Node>;
-        isUpdated(_timestampUpdate: number): boolean;
-        isDescendantOf(_ancestor: Node): boolean;
-        /**
-         * Applies a Mutator from [[Animation]] to all its components and transfers it to its children.
-         * @param _mutator The mutator generated from an [[Animation]]
-         */
-        applyAnimation(_mutator: Mutator): void;
-        /**
-         * Returns a list of all components attached to this node, independent of type.
-         */
-        getAllComponents(): Component[];
-        /**
-         * Returns a clone of the list of components of the given class attached to this node.
-         * @param _class The class of the components to be found.
-         */
-        getComponents<T extends Component>(_class: new () => T): T[];
-        /**
-         * Returns the first compontent found of the given class attached this node or null, if list is empty or doesn't exist
-         * @param _class The class of the components to be found.
-         */
-        getComponent<T extends Component>(_class: new () => T): T;
-        /**
-         * Adds the supplied component into the nodes component map.
-         * @param _component The component to be pushed into the array.
-         */
-        addComponent(_component: Component): void;
-        /**
-         * Removes the given component from the node, if it was attached, and sets its parent to null.
-         * @param _component The component to be removed
-         * @throws Exception when component is not found
-         */
-        removeComponent(_component: Component): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
-        /**
-         * Adds an event listener to the node. The given handler will be called when a matching event is passed to the node.
-         * Deviating from the standard EventTarget, here the _handler must be a function and _capture is the only option.
-         * @param _type The type of the event, should be an enumerated value of NODE_EVENT, can be any string
-         * @param _handler The function to call when the event reaches this node
-         * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
-         */
-        addEventListener(_type: EVENT | string, _handler: EventListener, _capture?: boolean): void;
-        /**
-         * Removes an event listener from the node. The signatur must match the one used with addEventListener
-         * @param _type The type of the event, should be an enumerated value of NODE_EVENT, can be any string
-         * @param _handler The function to call when the event reaches this node
-         * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
-         */
-        removeEventListener(_type: EVENT | string, _handler: EventListener, _capture?: boolean): void;
-        /**
-         * Dispatches a synthetic event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
-         * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase,
-         * than the matching handler of the target node in the target phase, and back out of the hierarchy in the bubbling phase, invoking appropriate handlers of the anvestors
-         * @param _event The event to dispatch
-         */
-        dispatchEvent(_event: Event): boolean;
-        /**
-         * Broadcasts a synthetic event to this node and from there to all nodes deeper in the hierarchy,
-         * invoking matching handlers of the nodes listening to the capture phase. Watch performance when there are many nodes involved
-         * @param _event The event to broadcast
-         */
-        broadcastEvent(_event: Event): void;
-        private broadcastEventRecursive;
-        private getGraphGenerator;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * A node managed by [[ResourceManager]] that functions as a template for [[NodeResourceInstance]]s
-     * @author Jirka Dell'Oro-Friedl, HFU, 2019
-     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource
-     */
-    class NodeResource extends Node implements SerializableResource {
-        idResource: string;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * An instance of a [[NodeResource]].
-     * This node keeps a reference to its resource an can thus optimize serialization
-     * @author Jirka Dell'Oro-Friedl, HFU, 2019
-     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource
-     */
-    class NodeResourceInstance extends Node {
-        /** id of the resource that instance was created from */
-        private idSource;
-        constructor(_nodeResource: NodeResource);
-        /**
-         * Recreate this node from the [[NodeResource]] referenced
-         */
-        reset(): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
-        /**
-         * Set this node to be a recreation of the [[NodeResource]] given
-         * @param _nodeResource
-         */
-        private set;
     }
 }
 declare namespace FudgeCore {
@@ -3447,13 +3507,23 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     abstract class Texture extends Mutable {
-        protected reduceMutator(): void;
+        name: string;
+        protected reduceMutator(_mutator: Mutator): void;
     }
     /**
      * Texture created from an existing image
      */
-    class TextureImage extends Texture {
+    class TextureImage extends Texture implements SerializableResource {
         image: HTMLImageElement;
+        url: RequestInfo;
+        idResource: string;
+        constructor(_url?: RequestInfo);
+        /**
+         * Asynchronously loads the image from the given url
+         */
+        load(_url: RequestInfo): Promise<void>;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
     /**
      * Texture created from a canvas

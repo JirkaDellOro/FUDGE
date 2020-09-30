@@ -3,8 +3,7 @@ namespace Fudge {
   import ƒui = FudgeUserInterface;
 
   /**
-  * Panel that functions as a Node Editor. Uses ViewData, ViewPort and ViewNode. 
-  * Use NodePanelTemplate to initialize the default NodePanel.
+  * Shows a graph and offers means for manipulation
   * @authors Monika Galkewitsch, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
   */
   export class PanelGraph extends Panel {
@@ -30,9 +29,11 @@ namespace Fudge {
         ]
       });
 
-      this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndSetGraph);
-      this.dom.addEventListener(ƒui.EVENT_TREE.SELECT, this.hndFocusNode);
-      this.dom.addEventListener(ƒui.EVENT_TREE.RENAME, this.broadcastEvent);
+      this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
+      this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndFocusNode);
+      this.dom.addEventListener(ƒui.EVENT.RENAME, this.broadcastEvent);
+      this.dom.addEventListener(ƒui.EVENT.UPDATE, this.hndEvent);
     }
 
     public setGraph(_node: ƒ.Node): void {
@@ -43,11 +44,7 @@ namespace Fudge {
       return this.node;
     }
 
-    protected cleanup(): void {
-      //TODO: desconstruct
-    }
-
-    private hndSetGraph = (_event: CustomEvent): void => {
+    private hndEvent = (_event: CustomEvent): void => {
       if (_event.type == EVENT_EDITOR.SET_GRAPH)
         this.setGraph(_event.detail);
       this.broadcastEvent(_event);

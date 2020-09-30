@@ -70,7 +70,7 @@ namespace FudgeUserInterface {
         return;
       _event.stopPropagation();
       _event.preventDefault();
-      console.log(_event.deltaY / 1000);
+      // console.log(_event.deltaY / 1000);
       let currentValue: number = Number(slider.value);
       slider.value = String(currentValue - _event.deltaY / 1000);
       slider.dispatchEvent(new Event("input", { bubbles: true }));

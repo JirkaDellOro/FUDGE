@@ -1,12 +1,75 @@
+/// <reference types="../../../aid/build/fudgeaid" />
+/// <reference types="../../../node_modules/electron/electron" />
+/// <reference types="../../../userinterface/build/fudgeuserinterface" />
 /// <reference types="golden-layout" />
 declare namespace Fudge {
+    enum CONTEXTMENU {
+        ADD_NODE = 0,
+        ADD_COMPONENT = 1,
+        ADD_COMPONENT_SCRIPT = 2,
+        EDIT = 3
+    }
+    enum MENU {
+        QUIT = "quit",
+        PROJECT_SAVE = "projectSave",
+        PROJECT_LOAD = "projectLoad",
+        NODE_DELETE = "nodeDelete",
+        NODE_UPDATE = "nodeUpdate",
+        DEVTOOLS_OPEN = "devtoolsOpen",
+        PANEL_GRAPH_OPEN = "panelGraphOpen",
+        PANEL_ANIMATION_OPEN = "panelAnimationOpen",
+        PANEL_PROJECT_OPEN = "panelProjectOpen",
+        FULLSCREEN = "fullscreen",
+        PANEL_MODELLER_OPEN = "panelModellerOpen"
+    }
     enum EVENT_EDITOR {
         REMOVE = "removeNode",
         HIDE = "hideNode",
         ACTIVATE_VIEWPORT = "activateViewport",
         SET_GRAPH = "setGraph",
-        FOCUS_NODE = "focusNode"
+        FOCUS_NODE = "focusNode",
+        SET_PROJECT = "setProject",
+        UPDATE = "update"
     }
+    enum PANEL {
+        GRAPH = "PanelGraph",
+        PROJECT = "PanelProject",
+        MODELLER = "PanelModeller"
+    }
+    enum VIEW {
+        HIERARCHY = "ViewHierarchy",
+        ANIMATION = "ViewAnimation",
+        RENDER = "ViewRender",
+        COMPONENTS = "ViewComponents",
+        CAMERA = "ViewCamera",
+        INTERNAL = "ViewInternal",
+        EXTERNAL = "ViewExternal",
+        PROPERTIES = "ViewProperties",
+        PREVIEW = "ViewPreview",
+        MODELLER = "ViewModeller",
+        OBJECT_PROPERTIES = "ViewObjectProperties"
+    }
+}
+declare namespace Fudge {
+    const fs: ƒ.General;
+    export class DirectoryEntry {
+        path: typeof fs.PathLike;
+        dirent: typeof fs.Dirent;
+        stats: Object;
+        constructor(_path: typeof fs.PathLike, _dirent: typeof fs.Dirent, _stats: Object);
+        static createRoot(_path: typeof fs.PathLike): DirectoryEntry;
+        get name(): string;
+        set name(_name: string);
+        get isDirectory(): boolean;
+        get type(): string;
+        delete(): void;
+        getDirectoryContent(): DirectoryEntry[];
+        getFileContent(): string;
+        addEntry(_entry: DirectoryEntry): void;
+    }
+    export {};
+}
+declare namespace Fudge {
     /**
      * The uppermost container for all panels
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
@@ -24,18 +87,39 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    const ipcRenderer: Electron.IpcRenderer;
-    const remote: Electron.Remote;
+    function saveProject(_node: ƒ.Node): void;
+    function promptLoadProject(): Promise<URL>;
+    function loadProject(_url: URL): Promise<void>;
 }
 declare namespace Fudge {
-    enum MENU {
-        ADD_NODE = 0,
-        ADD_COMPONENT = 1
-    }
     type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
     class ContextMenu {
         static appendCopyPaste(_menu: Electron.Menu): void;
         static getComponents(_callback: ContextMenuCallback): Electron.MenuItem[];
+        static getSubMenu(_object: Object, _callback: ContextMenuCallback): Electron.Menu;
+    }
+}
+declare namespace Fudge {
+    const ipcRenderer: Electron.IpcRenderer;
+    const remote: Electron.Remote;
+    /**
+     * The uppermost container for all panels controlling data flow between.
+     * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class Page {
+        private static idCounter;
+        private static goldenLayout;
+        private static panels;
+        static start(): void;
+        static setupGoldenLayout(): void;
+        static add(_panel: typeof Panel, _title: string, _state?: Object): void;
+        static find(_type: typeof Panel): Panel[];
+        private static generateID;
+        private static setupPageListeners;
+        /** Send custom copies of the given event to the views */
+        private static broadcastEvent;
+        private static hndEvent;
+        private static setupMainListeners;
     }
 }
 declare namespace Fudge {
@@ -81,6 +165,31 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    import ƒui = FudgeUserInterface;
+    class ControllerTableResource extends ƒui.TableController<ƒ.SerializableResource> {
+        private static head;
+        private static getHead;
+        getHead(): ƒui.TABLE[];
+        getLabel(_object: ƒ.SerializableResource): string;
+        rename(_object: ƒ.SerializableResource, _new: string): boolean;
+        delete(_focussed: ƒ.SerializableResource[]): ƒ.SerializableResource[];
+        copy(_originals: ƒ.SerializableResource[]): Promise<ƒ.SerializableResource[]>;
+        sort(_data: ƒ.SerializableResource[], _key: string, _direction: number): void;
+    }
+}
+declare namespace Fudge {
+    import ƒUi = FudgeUserInterface;
+    class ControllerTreeDirectory extends ƒUi.TreeController<DirectoryEntry> {
+        getLabel(_entry: DirectoryEntry): string;
+        rename(_entry: DirectoryEntry, _new: string): boolean;
+        hasChildren(_entry: DirectoryEntry): boolean;
+        getChildren(_entry: DirectoryEntry): DirectoryEntry[];
+        delete(_focussed: DirectoryEntry[]): DirectoryEntry[];
+        addChildren(_entries: DirectoryEntry[], _target: DirectoryEntry): DirectoryEntry[];
+        copy(_originals: DirectoryEntry[]): Promise<DirectoryEntry[]>;
+    }
+}
+declare namespace Fudge {
     import ƒ = FudgeCore;
     import ƒUi = FudgeUserInterface;
     class ControllerTreeNode extends ƒUi.TreeController<ƒ.Node> {
@@ -90,19 +199,10 @@ declare namespace Fudge {
         getChildren(_node: ƒ.Node): ƒ.Node[];
         delete(_focussed: ƒ.Node[]): ƒ.Node[];
         addChildren(_children: ƒ.Node[], _target: ƒ.Node): ƒ.Node[];
-        copy(_originals: ƒ.Node[]): ƒ.Node[];
+        copy(_originals: ƒ.Node[]): Promise<ƒ.Node[]>;
     }
 }
 declare namespace Fudge {
-    enum VIEW {
-        HIERARCHY = "ViewHierarchy",
-        ANIMATION = "ViewAnimation",
-        RENDER = "ViewRender",
-        COMPONENTS = "ViewComponents",
-        CAMERA = "ViewCamera",
-        MODELLER = "ViewModeller",
-        OBJECT_PROPERTIES = "ViewObjectProperties"
-    }
     /**
      * Base class for all [[View]]s to support generic functionality
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
@@ -113,18 +213,13 @@ declare namespace Fudge {
         private container;
         constructor(_container: GoldenLayout.Container, _state: Object);
         setTitle(_title: string): void;
-        /** Cleanup when user closes view */
-        protected abstract cleanup(): void;
         protected openContextMenu: (_event: Event) => void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        private hndEventCommon;
     }
 }
 declare namespace Fudge {
-    enum PANEL {
-        GRAPH = "PanelGraph",
-        MODELLER = "PanelModeller"
-    }
     /**
      * Base class for all [[Panel]]s aggregating [[View]]s
      * Subclasses are presets for common panels. A user might add or delete [[View]]s at runtime
@@ -142,8 +237,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     import ƒ = FudgeCore;
     /**
-    * Panel that functions as a Node Editor. Uses ViewData, ViewPort and ViewNode.
-    * Use NodePanelTemplate to initialize the default NodePanel.
+    * Shows a graph and offers means for manipulation
     * @authors Monika Galkewitsch, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
     */
     class PanelGraph extends Panel {
@@ -151,8 +245,7 @@ declare namespace Fudge {
         constructor(_container: GoldenLayout.Container, _state: Object);
         setGraph(_node: ƒ.Node): void;
         getNode(): ƒ.Node;
-        protected cleanup(): void;
-        private hndSetGraph;
+        private hndEvent;
         private hndFocusNode;
     }
 }
@@ -164,12 +257,12 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-     * Display the project structure and offer functions for creation of resources
+     * Display the project structure and offer functions for creation, deletion and adjustment of resources
      * @authors Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class PanelProject extends Panel {
         constructor(_container: GoldenLayout.Container, _state: Object);
-        cleanup(): void;
+        private hndEvent;
     }
 }
 declare namespace Fudge {
@@ -209,7 +302,6 @@ declare namespace Fudge {
         openAnimation(): void;
         fillContent(): void;
         installListeners(): void;
-        cleanup(): void;
         mouseClick(_e: MouseEvent): void;
         mouseDown(_e: MouseEvent): void;
         mouseMove(_e: MouseEvent): void;
@@ -278,7 +370,6 @@ declare namespace Fudge {
     class ViewComponents extends View {
         private node;
         constructor(_container: GoldenLayout.Container, _state: Object);
-        protected cleanup(): void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         private fillContent;
@@ -296,7 +387,6 @@ declare namespace Fudge {
         private tree;
         constructor(_container: GoldenLayout.Container, _state: Object);
         setGraph(_graph: ƒ.Node): void;
-        protected cleanup(): void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         private hndEvent;
@@ -313,12 +403,11 @@ declare namespace Fudge {
         canvas: HTMLCanvasElement;
         graph: ƒ.Node;
         constructor(_container: GoldenLayout.Container, _state: Object);
-        cleanup(): void;
         createUserInterface(): void;
         setGraph(_node: ƒ.Node): void;
         private hndEvent;
-        private animate;
         private activeViewport;
+        private redraw;
     }
 }
 declare namespace Fudge {
@@ -341,5 +430,65 @@ declare namespace Fudge {
         protected setObject(_object: ƒ.Node): void;
         private fillContent;
         protected cleanup(): void;
+    }
+}
+declare namespace Fudge {
+    /**
+     * List the external resources
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class ViewExternal extends View {
+        constructor(_container: GoldenLayout.Container, _state: Object);
+        setProject(): void;
+        private hndEvent;
+    }
+}
+declare namespace Fudge {
+    /**
+     * List the internal resources
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class ViewInternal extends View {
+        private table;
+        constructor(_container: GoldenLayout.Container, _state: Object);
+        listResources(): void;
+        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
+        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        private hndEvent;
+    }
+}
+declare namespace Fudge {
+    /**
+     * Preview a resource
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class ViewPreview extends View {
+        private static mtrStandard;
+        private static meshStandard;
+        private resource;
+        private viewport;
+        constructor(_container: GoldenLayout.Container, _state: Object);
+        private static createStandardMaterial;
+        private static createStandardMesh;
+        private fillContent;
+        private createStandardGraph;
+        private createFilePreview;
+        private createTextPreview;
+        private createImagePreview;
+        private createAudioPreview;
+        private hndEvent;
+        private redraw;
+    }
+}
+declare namespace Fudge {
+    /**
+     * View the properties of a resource
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class ViewProperties extends View {
+        private resource;
+        constructor(_container: GoldenLayout.Container, _state: Object);
+        private fillContent;
+        private hndEvent;
     }
 }

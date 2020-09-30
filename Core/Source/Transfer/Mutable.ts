@@ -68,9 +68,11 @@ namespace FudgeCore {
       return this.constructor.name;
     }
     /**
-     * Collect applicable attributes of the instance and copies of their values in a Mutator-object
+     * Collect applicable attributes of the instance and copies of their values in a Mutator-object.
+     * By default, a mutator cannot extended, since extensions are not available in the object the mutator belongs to.
+     * A mutator may be reduced by the descendants of [[Mutable]] to contain only the properties needed.
      */
-    public getMutator(): Mutator {
+    public getMutator(_extendable: boolean = false): Mutator {
       let mutator: Mutator = {};
 
       // collect primitive and mutable attributes
@@ -83,8 +85,9 @@ namespace FudgeCore {
         mutator[attribute] = this[attribute];
       }
 
-      // mutator can be reduced but not extended!
-      Object.preventExtensions(mutator);
+      if (!_extendable)
+        // mutator can be reduced but not extended!
+        Object.preventExtensions(mutator);
       // delete unwanted attributes
       this.reduceMutator(mutator);
 
@@ -158,14 +161,15 @@ namespace FudgeCore {
      * @param _mutator
      */
     public mutate(_mutator: Mutator): void {
-      // TODO: don't assign unknown properties
       for (let attribute in _mutator) {
+        if (!Reflect.has(this, attribute))
+          continue;
+        let mutant: Object = Reflect.get(this, attribute);
         let value: Mutator = <Mutator>_mutator[attribute];
-        let mutant: Object = (<General>this)[attribute];
         if (mutant instanceof Mutable)
           mutant.mutate(value);
         else
-          (<General>this)[attribute] = value;
+          Reflect.set(this, attribute, value);
       }
       this.dispatchEvent(new Event(EVENT.MUTATE));
     }

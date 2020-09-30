@@ -34,6 +34,7 @@ namespace FudgeCore {
 
     protected singleton: boolean = false;
 
+    private audio: Audio;
     private gain: GainNode;
     private panner: PannerNode;
     private source: AudioBufferSourceNode;
@@ -53,13 +54,6 @@ namespace FudgeCore {
         this.play(_start);
     }
 
-    public set audio(_audio: Audio) {
-      this.createSource(_audio, this.source.loop);
-    }
-
-    public get audio(): Audio {
-      return <Audio>this.source.buffer;
-    }
 
     public set volume(_value: number) {
       this.gain.gain.value = _value;
@@ -67,6 +61,20 @@ namespace FudgeCore {
 
     public get volume(): number {
       return this.gain.gain.value;
+    }
+
+    public get isPlaying(): boolean {
+      return this.playing;
+    }
+    public get isAttached(): boolean {
+      return this.getContainer() != null;
+    }
+    public get isListened(): boolean {
+      return this.listened;
+    }
+
+    public setAudio(_audio: Audio): void {
+      this.createSource(_audio, this.source.loop);
     }
 
     /**
@@ -99,23 +107,18 @@ namespace FudgeCore {
      */
     public play(_on: boolean): void {
       if (_on) {
-        this.createSource(this.audio, this.source.loop);
-        this.source.start(0, 0);
+        if (this.audio.isReady) {
+          this.createSource(this.audio, this.source.loop);
+          this.source.start(0, 0);
+        }
+        else
+          this.audio.addEventListener(EVENT_AUDIO.READY, this.hndAudioReady);
       }
       else
         this.source.stop();
       this.playing = _on;
     }
 
-    public get isPlaying(): boolean {
-      return this.playing;
-    }
-    public get isAttached(): boolean {
-      return this.getContainer() != null;
-    }
-    public get isListened(): boolean {
-      return this.listened;
-    }
     /**
      * Inserts AudioNodes between the panner and the local gain of this [[ComponentAudio]]
      * _input and _output may be the same AudioNode, if there is only one to insert,
@@ -160,6 +163,34 @@ namespace FudgeCore {
         this.gain.disconnect(this.audioManager.gain);
     }
 
+    //#region Transfer
+    public serialize(): Serialization {
+      let serialization: Serialization = super.serialize();
+      serialization.idResource = this.audio.idResource;
+      serialization.playing = this.playing;
+      serialization.loop = this.source.loop;
+      serialization.volume = this.gain.gain.value;
+      // console.log(this.getMutatorOfNode(AUDIO_NODE_TYPE.PANNER));
+      // TODO: serialize panner parameters
+      return serialization;
+    }
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      super.deserialize(_serialization);
+      let audio: Audio = <Audio> await Project.getResource(_serialization.idResource);
+      this.createSource(audio, _serialization.loop);
+      this.volume = _serialization.volume;
+      this.play(_serialization.playing);
+      return this;
+    }
+    //#endregion
+
+
+    private hndAudioReady: EventListener = (_event: Event) => {
+      console.log("Start Audio!");
+      if (this.playing)
+        this.play(true);
+    }
+
     private install(_audioManager: AudioManager = AudioManager.default): void {
       let active: boolean = this.isActive;
       this.activate(false);
@@ -179,9 +210,10 @@ namespace FudgeCore {
       this.source = this.audioManager.createBufferSource();
       this.source.connect(this.panner);
 
-      if (_audio)
-        // this.audio = _audio;
-        this.source.buffer = _audio;
+      if (_audio) {
+        this.audio = _audio;
+        this.source.buffer = _audio.buffer;
+      }
 
       this.source.loop = _loop;
     }

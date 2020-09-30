@@ -1,11 +1,4 @@
 namespace Fudge {
-  export enum EVENT_EDITOR {
-    REMOVE = "removeNode",
-    HIDE = "hideNode",
-    ACTIVATE_VIEWPORT = "activateViewport",
-    SET_GRAPH = "setGraph",
-    FOCUS_NODE = "focusNode"
-  }
   /**
    * The uppermost container for all panels 
    * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020

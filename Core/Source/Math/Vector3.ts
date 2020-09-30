@@ -17,41 +17,6 @@ namespace FudgeCore {
       this.data = new Float32Array([_x, _y, _z]);
     }
 
-    // TODO: implement equals-functions
-    get x(): number {
-      return this.data[0];
-    }
-    get y(): number {
-      return this.data[1];
-    }
-    get z(): number {
-      return this.data[2];
-    }
-
-    set x(_x: number) {
-      this.data[0] = _x;
-    }
-    set y(_y: number) {
-      this.data[1] = _y;
-    }
-    set z(_z: number) {
-      this.data[2] = _z;
-    }
-
-    /**
-     * Returns the length of the vector
-     */
-    get magnitude(): number {
-      return Math.hypot(...this.data);
-    }
-
-    /**
-     * Returns the square of the magnitude of the vector without calculating a square root. Faster for simple proximity evaluation.
-     */
-    get magnitudeSquared(): number {
-      return Vector3.DOT(this, this);
-    }
-
     /**
      * Creates and returns a vector with the given length pointing in x-direction
      */
@@ -204,6 +169,50 @@ namespace FudgeCore {
       vector.data = new Float32Array([_dividend.x / _divisor.x, _dividend.y / _divisor.y, _dividend.z / _divisor.z]);
       return vector;
     }
+    
+    // TODO: implement equals-functions
+    get x(): number {
+      return this.data[0];
+    }
+    get y(): number {
+      return this.data[1];
+    }
+    get z(): number {
+      return this.data[2];
+    }
+
+    set x(_x: number) {
+      this.data[0] = _x;
+    }
+    set y(_y: number) {
+      this.data[1] = _y;
+    }
+    set z(_z: number) {
+      this.data[2] = _z;
+    }
+
+    /**
+     * Returns the length of the vector
+     */
+    get magnitude(): number {
+      return Math.hypot(...this.data);
+    }
+
+    /**
+     * Returns the square of the magnitude of the vector without calculating a square root. Faster for simple proximity evaluation.
+     */
+    get magnitudeSquared(): number {
+      return Vector3.DOT(this, this);
+    }
+
+    /**
+     * Returns a copy of this vector
+     */
+    public get copy(): Vector3 {
+      let copy: Vector3 = Recycler.get(Vector3);
+      copy.data.set(this.data);
+      return copy;
+    }
 
     /**
      * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
@@ -280,15 +289,6 @@ namespace FudgeCore {
      */
     public get(): Float32Array {
       return new Float32Array(this.data);
-    }
-
-    /**
-     * Returns a copy of this vector
-     */
-    public get copy(): Vector3 {
-      let copy: Vector3 = Recycler.get(Vector3);
-      copy.data.set(this.data);
-      return copy;
     }
 
     /**

@@ -30,6 +30,23 @@ namespace FudgeCore {
     private backgroundEnabled: boolean = true; // Determines whether or not the background of this camera will be rendered.
     // TODO: examine, if background should be an attribute of Camera or Viewport
 
+    /**
+     * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
+     * @returns the world-projection-matrix
+     */
+    public get ViewProjectionMatrix(): Matrix4x4 {
+      //TODO: optimize, no need to recalculate if neither mtxWorld nor pivot have changed
+      let mtxCamera: Matrix4x4 = this.pivot;
+      try {
+        mtxCamera = Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.pivot);
+      } catch (_error) {
+        // no container node or no world transformation found -> continue with pivot only
+      }
+      let mtxWorldProjection: Matrix4x4 = Matrix4x4.INVERSION(mtxCamera);
+      mtxWorldProjection = Matrix4x4.MULTIPLICATION(this.transform, mtxWorldProjection);
+      return mtxWorldProjection;
+    }
+
     public getProjection(): PROJECTION {
       return this.projection;
     }
@@ -48,23 +65,6 @@ namespace FudgeCore {
 
     public getDirection(): FIELD_OF_VIEW {
       return this.direction;
-    }
-
-    /**
-     * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
-     * @returns the world-projection-matrix
-     */
-    public get ViewProjectionMatrix(): Matrix4x4 {
-      //TODO: optimize, no need to recalculate if neither mtxWorld nor pivot have changed
-      let mtxCamera: Matrix4x4 = this.pivot;
-      try {
-        mtxCamera = Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.pivot);
-      } catch (_error) {
-        // no container node or no world transformation found -> continue with pivot only
-      }
-      let mtxWorldProjection: Matrix4x4 = Matrix4x4.INVERSION(mtxCamera);
-      mtxWorldProjection = Matrix4x4.MULTIPLICATION(this.transform, mtxWorldProjection);
-      return mtxWorldProjection;
     }
 
     /**
@@ -141,7 +141,7 @@ namespace FudgeCore {
       return serialization;
     }
 
-    public deserialize(_serialization: Serialization): Serializable {
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.backgroundColor = _serialization.backgroundColor;
       this.backgroundEnabled = _serialization.backgroundEnabled;
       this.projection = _serialization.projection;

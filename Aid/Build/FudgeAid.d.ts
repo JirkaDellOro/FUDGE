@@ -100,7 +100,7 @@ declare namespace FudgeAid {
         constructor(_name?: string, _transform?: ƒ.Matrix4x4, _material?: ƒ.Material, _mesh?: ƒ.Mesh);
         private static getNextName;
         get pivot(): ƒ.Matrix4x4;
-        deserialize(_serialization: ƒ.Serialization): ƒ.Serializable;
+        deserialize(_serialization: ƒ.Serialization): Promise<ƒ.Serializable>;
     }
 }
 declare namespace FudgeAid {
@@ -122,10 +122,6 @@ declare namespace FudgeAid {
      * Exept of the node to become the container, all parameters are optional and provided default values for general purpose.
      */
     function addStandardLightComponents(_node: ƒ.Node, _clrAmbient?: ƒ.Color, _clrKey?: ƒ.Color, _clrBack?: ƒ.Color, _posKey?: ƒ.Vector3, _posBack?: ƒ.Vector3): void;
-    /** Three Point Light setup that by default illuminates the Scene from +Z */
-    class NodeThreePointLights extends Node {
-        constructor(_name: string, _rotationY?: number);
-    }
 }
 declare namespace FudgeAid {
     /**

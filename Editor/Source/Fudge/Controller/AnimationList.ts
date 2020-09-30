@@ -12,8 +12,8 @@ namespace Fudge {
       this.index = {};
       this.listRoot = this.buildFromMutator(this.mutator);
       _listContainer.append(this.listRoot);
-      _listContainer.addEventListener(ƒui.EVENT_USERINTERFACE.COLLAPSE, this.toggleCollapse);
-      _listContainer.addEventListener(ƒui.EVENT_USERINTERFACE.UPDATE, this.collectMutator);
+      _listContainer.addEventListener(ƒui.EVENT.COLLAPSE, this.toggleCollapse);
+      _listContainer.addEventListener(ƒui.EVENT.UPDATE, this.collectMutator);
     }
     public getMutator(): ƒ.Mutator {
       return this.mutator;

@@ -4,3 +4,4 @@
 /// <reference path="Transfer/Mutable.ts"/>  
 /// <reference path="Transfer/Serializer.ts"/> 
 /// <reference path="Render/RenderOperator.ts"/>
+/// <reference path="Graph/Node.ts"/>

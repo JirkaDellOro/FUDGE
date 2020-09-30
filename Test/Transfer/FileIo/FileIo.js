@@ -8,15 +8,11 @@ var FileIo;
     }
     async function handleStart() {
         let material = new ƒ.Material("Material_1", ƒ.ShaderFlat, new ƒ.CoatColored(new ƒ.Color(1, 1, 1, 1)));
-        // ƒ.ResourceManager.register(material);
+        // ƒ.Project.register(material);
         let mesh = new ƒ.MeshPyramid();
-        // ƒ.ResourceManager.register(mesh);
+        // ƒ.Project.register(mesh);
         let node;
         node = Scenes.createCompleteMeshNode("Node", material, mesh);
-        // let nodeResource: ƒ.NodeResource = ƒ.ResourceManager.registerNodeAsResource(node);
-        // let instance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(nodeResource);
-        // ƒ.Debug.log(instance);
-        // let result: ƒ.Resources = testFileIo(node);
         testFileIo(node);
     }
     async function testFileIo(_graph) {
@@ -40,7 +36,7 @@ var FileIo;
         ƒ.FileIoBrowserLocal.addEventListener("fileLoaded" /* FILE_LOADED */, handleLoad);
         await ƒ.FileIoBrowserLocal.load();
         console.groupEnd();
-        function handleLoad(_event) {
+        async function handleLoad(_event) {
             map = _event.detail.mapFilenameToContent;
             console.log("Map", map);
             for (let filename in map) {
@@ -51,7 +47,7 @@ var FileIo;
                 console.log(deserialization);
                 console.groupEnd();
                 console.group("Reconstructed");
-                let reconstruction = ƒ.Serializer.deserialize(serialization);
+                let reconstruction = await ƒ.Serializer.deserialize(serialization);
                 console.log(reconstruction);
                 console.groupEnd();
                 console.group("Comparison");

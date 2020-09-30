@@ -19,24 +19,31 @@ namespace FudgeCore {
 
     //#region Transfer
     public serialize(): Serialization {
-      let serialization: Serialization;
+      let serialization: Serialization = {
+        clrPrimary: this.clrPrimary.serialize(),
+        clrSecondary: this.clrSecondary.serialize(),
+        pivot: this.pivot.serialize(),
+        [super.constructor.name]: super.serialize()
+      };
       /* at this point of time, serialization as resource and as inline object is possible. TODO: check if inline becomes obsolete */
       let idMaterial: string = this.material.idResource;
-      if (idMaterial)
-        serialization = { idMaterial: idMaterial };
-      else
-        serialization = { material: Serializer.serialize(this.material) };
+      // if (idMaterial)
+      serialization.idMaterial = idMaterial;
+      // else
+      //   serialization.material = Serializer.serialize(this.material);
 
-      serialization[super.constructor.name] = super.serialize();
       return serialization;
     }
-    public deserialize(_serialization: Serialization): Serializable {
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
       let material: Material;
-      if (_serialization.idMaterial)
-        material = <Material>ResourceManager.get(_serialization.idMaterial);
-      else
-        material = <Material>Serializer.deserialize(_serialization.material);
+      // if (_serialization.idMaterial)
+      material = <Material>await Project.getResource(_serialization.idMaterial);
+      // else
+      //   material = <Material>await Serializer.deserialize(_serialization.material);
       this.material = material;
+      this.clrPrimary.deserialize(_serialization.clrPrimary);
+      this.clrSecondary.deserialize(_serialization.clrSecondary);
+      this.pivot.deserialize(_serialization.pivot);
       super.deserialize(_serialization[super.constructor.name]);
       return this;
     }

@@ -7,7 +7,7 @@ namespace FudgeCore {
     }
     export interface Serializable {
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 
     interface NamespaceRegister {
@@ -50,10 +50,10 @@ namespace FudgeCore {
          * Registers a namespace to the [[Serializer]], to enable automatic instantiation of classes defined within
          * @param _namespace 
          */
-        public static registerNamespace(_namespace: Object): void {
+        public static registerNamespace(_namespace: Object): string {
             for (let name in Serializer.namespaces)
                 if (Serializer.namespaces[name] == _namespace)
-                    return;
+                    return name;
 
             let name: string = Serializer.findNamespaceIn(_namespace, window);
             if (!name)
@@ -69,6 +69,7 @@ namespace FudgeCore {
                 throw new Error("Namespace not found. Maybe parent namespace hasn't been registered before?");
 
             Serializer.namespaces[name] = _namespace;
+            return name;
         }
 
 
@@ -94,14 +95,14 @@ namespace FudgeCore {
          * including attached components, children, superclass-objects
          * @param _serialization 
          */
-        public static deserialize(_serialization: Serialization): Serializable {
+        public static async deserialize(_serialization: Serialization): Promise<Serializable> {
             let reconstruct: Serializable;
             try {
                 // loop constructed solely to access type-property. Only one expected!
                 for (let path in _serialization) {
                     // reconstruct = new (<General>Fudge)[typeName];
                     reconstruct = Serializer.reconstruct(path);
-                    reconstruct = reconstruct.deserialize(_serialization[path]);
+                    reconstruct = await reconstruct.deserialize(_serialization[path]);
                     return reconstruct;
                 }
             } catch (_error) {
@@ -136,7 +137,7 @@ namespace FudgeCore {
          * Creates an object of the class defined with the full path including the namespaceName(s) and the className seperated by dots(.) 
          * @param _path 
          */
-        private static reconstruct(_path: string): Serializable {
+        public static reconstruct(_path: string): Serializable {
             let typeName: string = _path.substr(_path.lastIndexOf(".") + 1);
             let namespace: Object = Serializer.getNamespace(_path);
             if (!namespace)

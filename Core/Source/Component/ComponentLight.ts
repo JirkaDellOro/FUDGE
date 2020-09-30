@@ -35,5 +35,25 @@ namespace FudgeCore {
             this.light = new _class();
             this.light.mutate(mtrOld);
         }
+
+        public serialize(): Serialization {
+          let serialization: Serialization = {
+            pivot: this.pivot.serialize(),
+            light: Serializer.serialize(this.light)
+          };
+          return serialization;
+        }
+    
+        public async deserialize(_serialization: Serialization): Promise<Serializable> {
+          this.pivot.deserialize(_serialization.pivot);
+          this.light = await <Promise<Light>>Serializer.deserialize(_serialization.light);
+          return this;
+        }
+    
+        public getMutator(): Mutator {
+          let mutator: Mutator = super.getMutator(true);
+          mutator.type = this.light.getType().name;
+          return mutator;
+        }
     }
 }
