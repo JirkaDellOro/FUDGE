@@ -13,23 +13,28 @@ var Fudge;
         MENU["QUIT"] = "quit";
         MENU["PROJECT_SAVE"] = "projectSave";
         MENU["PROJECT_LOAD"] = "projectLoad";
-        MENU["NODE_DELETE"] = "nodeDelete";
-        MENU["NODE_UPDATE"] = "nodeUpdate";
         MENU["DEVTOOLS_OPEN"] = "devtoolsOpen";
         MENU["PANEL_GRAPH_OPEN"] = "panelGraphOpen";
         MENU["PANEL_ANIMATION_OPEN"] = "panelAnimationOpen";
         MENU["PANEL_PROJECT_OPEN"] = "panelProjectOpen";
         MENU["FULLSCREEN"] = "fullscreen";
+        /* obsolete ?
+        NODE_DELETE = "nodeDelete",
+        NODE_UPDATE = "nodeUpdate",
+        */
     })(MENU = Fudge.MENU || (Fudge.MENU = {}));
     let EVENT_EDITOR;
     (function (EVENT_EDITOR) {
-        EVENT_EDITOR["REMOVE"] = "removeNode";
-        EVENT_EDITOR["HIDE"] = "hideNode";
-        EVENT_EDITOR["ACTIVATE_VIEWPORT"] = "activateViewport";
         EVENT_EDITOR["SET_GRAPH"] = "setGraph";
         EVENT_EDITOR["FOCUS_NODE"] = "focusNode";
         EVENT_EDITOR["SET_PROJECT"] = "setProject";
         EVENT_EDITOR["UPDATE"] = "update";
+        EVENT_EDITOR["DESTROY"] = "destroy";
+        /* obsolete ?
+        REMOVE = "removeNode",
+        HIDE = "hideNode",
+        ACTIVATE_VIEWPORT = "activateViewport",
+        */
     })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
     let PANEL;
     (function (PANEL) {
@@ -47,7 +52,6 @@ var Fudge;
         VIEW["EXTERNAL"] = "ViewExternal";
         VIEW["PROPERTIES"] = "ViewProperties";
         VIEW["PREVIEW"] = "ViewPreview";
-        // PROJECT = ViewProject,
         // SKETCH = ViewSketch,
         // MESH = ViewMesh,
     })(VIEW = Fudge.VIEW || (Fudge.VIEW = {}));

@@ -91,18 +91,26 @@ namespace Fudge {
     private static setupPageListeners(): void {
       document.addEventListener(EVENT_EDITOR.SET_GRAPH, Page.hndEvent);
       document.addEventListener(ƒui.EVENT.UPDATE, Page.hndEvent);
+      document.addEventListener(EVENT_EDITOR.DESTROY, Page.hndEvent);
     }
 
     /** Send custom copies of the given event to the views */
     private static broadcastEvent(_event: Event): void {
+      console.log("Current number of panels: " + Page.panels.length);
       for (let panel of Page.panels) {
         let event: CustomEvent = new CustomEvent(_event.type, { bubbles: false, cancelable: true, detail: (<CustomEvent>_event).detail });
         panel.dom.dispatchEvent(event);
       }
     }
 
-    private static hndEvent(_event: Event): void {
+    private static hndEvent(_event: CustomEvent): void {
       switch (_event.type) {
+        case EVENT_EDITOR.DESTROY:
+          let view: View = _event.detail;
+          console.log("Page received DESTROY", view);
+          if (view instanceof Panel)
+            Page.panels.splice(Page.panels.indexOf(view), 1);
+          break;
         case EVENT_EDITOR.SET_GRAPH:
           let panel: Panel[] = Page.find(PanelGraph);
           if (!panel.length)
@@ -146,11 +154,6 @@ namespace Fudge {
       ipcRenderer.on(MENU.PANEL_ANIMATION_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
         //   let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
         //   PanelManager.instance.addPanel(panel);
-      });
-
-      // HACK!
-      ipcRenderer.on(MENU.NODE_UPDATE, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-        ƒ.Debug.log("updateNode");
       });
     }
   }

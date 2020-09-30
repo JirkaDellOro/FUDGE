@@ -12,26 +12,30 @@ namespace Fudge {
     QUIT = "quit",
     PROJECT_SAVE = "projectSave",
     PROJECT_LOAD = "projectLoad",
-    NODE_DELETE = "nodeDelete",
-    NODE_UPDATE = "nodeUpdate", // obsolete?
     DEVTOOLS_OPEN = "devtoolsOpen",
     PANEL_GRAPH_OPEN = "panelGraphOpen",
     PANEL_ANIMATION_OPEN = "panelAnimationOpen",
     PANEL_PROJECT_OPEN = "panelProjectOpen",
     FULLSCREEN = "fullscreen"
+
+    /* obsolete ?
+    NODE_DELETE = "nodeDelete",
+    NODE_UPDATE = "nodeUpdate", 
+    */
   }
 
-
-
-
   export enum EVENT_EDITOR {
-    REMOVE = "removeNode",
-    HIDE = "hideNode",
-    ACTIVATE_VIEWPORT = "activateViewport",
     SET_GRAPH = "setGraph",
     FOCUS_NODE = "focusNode",
     SET_PROJECT = "setProject",
-    UPDATE = "update"
+    UPDATE = "update",
+    DESTROY = "destroy"
+
+    /* obsolete ?
+    REMOVE = "removeNode",
+    HIDE = "hideNode",
+    ACTIVATE_VIEWPORT = "activateViewport",
+    */
   }
 
   export enum PANEL {
@@ -49,7 +53,6 @@ namespace Fudge {
     EXTERNAL = "ViewExternal",
     PROPERTIES = "ViewProperties",
     PREVIEW = "ViewPreview"
-    // PROJECT = ViewProject,
     // SKETCH = ViewSketch,
     // MESH = ViewMesh,
   }

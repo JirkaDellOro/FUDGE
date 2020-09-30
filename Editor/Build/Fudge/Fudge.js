@@ -13,23 +13,28 @@ var Fudge;
         MENU["QUIT"] = "quit";
         MENU["PROJECT_SAVE"] = "projectSave";
         MENU["PROJECT_LOAD"] = "projectLoad";
-        MENU["NODE_DELETE"] = "nodeDelete";
-        MENU["NODE_UPDATE"] = "nodeUpdate";
         MENU["DEVTOOLS_OPEN"] = "devtoolsOpen";
         MENU["PANEL_GRAPH_OPEN"] = "panelGraphOpen";
         MENU["PANEL_ANIMATION_OPEN"] = "panelAnimationOpen";
         MENU["PANEL_PROJECT_OPEN"] = "panelProjectOpen";
         MENU["FULLSCREEN"] = "fullscreen";
+        /* obsolete ?
+        NODE_DELETE = "nodeDelete",
+        NODE_UPDATE = "nodeUpdate",
+        */
     })(MENU = Fudge.MENU || (Fudge.MENU = {}));
     let EVENT_EDITOR;
     (function (EVENT_EDITOR) {
-        EVENT_EDITOR["REMOVE"] = "removeNode";
-        EVENT_EDITOR["HIDE"] = "hideNode";
-        EVENT_EDITOR["ACTIVATE_VIEWPORT"] = "activateViewport";
         EVENT_EDITOR["SET_GRAPH"] = "setGraph";
         EVENT_EDITOR["FOCUS_NODE"] = "focusNode";
         EVENT_EDITOR["SET_PROJECT"] = "setProject";
         EVENT_EDITOR["UPDATE"] = "update";
+        EVENT_EDITOR["DESTROY"] = "destroy";
+        /* obsolete ?
+        REMOVE = "removeNode",
+        HIDE = "hideNode",
+        ACTIVATE_VIEWPORT = "activateViewport",
+        */
     })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
     let PANEL;
     (function (PANEL) {
@@ -47,7 +52,6 @@ var Fudge;
         VIEW["EXTERNAL"] = "ViewExternal";
         VIEW["PROPERTIES"] = "ViewProperties";
         VIEW["PREVIEW"] = "ViewPreview";
-        // PROJECT = ViewProject,
         // SKETCH = ViewSketch,
         // MESH = ViewMesh,
     })(VIEW = Fudge.VIEW || (Fudge.VIEW = {}));
@@ -301,9 +305,11 @@ var Fudge;
         static setupPageListeners() {
             document.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, Page.hndEvent);
             document.addEventListener("update" /* UPDATE */, Page.hndEvent);
+            document.addEventListener(Fudge.EVENT_EDITOR.DESTROY, Page.hndEvent);
         }
         /** Send custom copies of the given event to the views */
         static broadcastEvent(_event) {
+            console.log("Current number of panels: " + Page.panels.length);
             for (let panel of Page.panels) {
                 let event = new CustomEvent(_event.type, { bubbles: false, cancelable: true, detail: _event.detail });
                 panel.dom.dispatchEvent(event);
@@ -311,6 +317,12 @@ var Fudge;
         }
         static hndEvent(_event) {
             switch (_event.type) {
+                case Fudge.EVENT_EDITOR.DESTROY:
+                    let view = _event.detail;
+                    console.log("Page received DESTROY", view);
+                    if (view instanceof Fudge.Panel)
+                        Page.panels.splice(Page.panels.indexOf(view), 1);
+                    break;
                 case Fudge.EVENT_EDITOR.SET_GRAPH:
                     let panel = Page.find(Fudge.PanelGraph);
                     if (!panel.length)
@@ -349,10 +361,6 @@ var Fudge;
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_ANIMATION_OPEN, (_event, _args) => {
                 //   let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
                 //   PanelManager.instance.addPanel(panel);
-            });
-            // HACK!
-            Fudge.ipcRenderer.on(Fudge.MENU.NODE_UPDATE, (_event, _args) => {
-                ƒ.Debug.log("updateNode");
             });
         }
     }
@@ -607,6 +615,7 @@ var Fudge;
             this.dom.setAttribute("view", this.constructor.name);
             _container.getElement().append(this.dom);
             this.container = _container;
+            this.container.on("destroy", (_e) => this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.DESTROY, { bubbles: true, detail: _e["instance"] })));
             // console.log(this.contextMenuCallback);
             this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEventCommon);

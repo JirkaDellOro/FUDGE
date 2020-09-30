@@ -15,8 +15,13 @@ namespace Fudge {
       this.dom.style.height = "100%";
       this.dom.style.overflow = "auto";
       this.dom.setAttribute("view", this.constructor.name);
+      
       _container.getElement().append(this.dom);
       this.container = _container;
+      this.container.on("destroy", (_e: Object) => this.dom.dispatchEvent(
+        new CustomEvent(EVENT_EDITOR.DESTROY, { bubbles: true, detail: _e["instance"] }))
+      );
+
       // console.log(this.contextMenuCallback);
       this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
       this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEventCommon);
