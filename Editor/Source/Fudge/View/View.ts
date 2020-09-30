@@ -19,6 +19,7 @@ namespace Fudge {
       this.container = _container;
       // console.log(this.contextMenuCallback);
       this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
+      this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEventCommon);
     }
 
     public setTitle(_title: string): void {
@@ -38,6 +39,14 @@ namespace Fudge {
 
     protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
       ƒ.Debug.info(`ContextMenu: Item-id=${CONTEXTMENU[_item.id]}`);
+    }
+
+    private hndEventCommon = (_event: Event): void => {
+      switch (_event.type) {
+        case EVENT_EDITOR.SET_PROJECT:
+          this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
+          break;
+      }
     }
   }
 }

@@ -253,7 +253,7 @@ var Fudge;
             console.log("Sending");
             Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_PROJECT_OPEN);
             Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_GRAPH_OPEN);
-            Fudge.ipcRenderer.emit(Fudge.MENU.PROJECT_LOAD);
+            // ipcRenderer.emit(MENU.PROJECT_LOAD);
             // ipcRenderer.emit
         }
         static setupGoldenLayout() {
@@ -594,6 +594,13 @@ var Fudge;
             this.openContextMenu = (_event) => {
                 this.contextMenu.popup();
             };
+            this.hndEventCommon = (_event) => {
+                switch (_event.type) {
+                    case Fudge.EVENT_EDITOR.SET_PROJECT:
+                        this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
+                        break;
+                }
+            };
             this.dom = document.createElement("div");
             this.dom.style.height = "100%";
             this.dom.style.overflow = "auto";
@@ -602,6 +609,7 @@ var Fudge;
             this.container = _container;
             // console.log(this.contextMenuCallback);
             this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEventCommon);
         }
         setTitle(_title) {
             this.container.setTitle(_title);
@@ -694,6 +702,7 @@ var Fudge;
                 ]
             });
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndFocusNode);
             this.dom.addEventListener("rename" /* RENAME */, this.broadcastEvent);
             this.dom.addEventListener("update" /* UPDATE */, this.hndEvent);

@@ -36,7 +36,7 @@ namespace Fudge {
       console.log("Sending");
       ipcRenderer.emit(MENU.PANEL_PROJECT_OPEN);
       ipcRenderer.emit(MENU.PANEL_GRAPH_OPEN);
-      ipcRenderer.emit(MENU.PROJECT_LOAD);
+      // ipcRenderer.emit(MENU.PROJECT_LOAD);
       // ipcRenderer.emit
     }
 

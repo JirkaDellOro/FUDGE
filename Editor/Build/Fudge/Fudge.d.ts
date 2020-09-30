@@ -178,6 +178,7 @@ declare namespace Fudge {
         protected openContextMenu: (_event: Event) => void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        private hndEventCommon;
     }
 }
 declare namespace Fudge {
