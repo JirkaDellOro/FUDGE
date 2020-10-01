@@ -1,12 +1,14 @@
 namespace Fudge {
   import ƒ = FudgeCore;
+  import ƒui = FudgeUserInterface;
 
+  type Views = { [id: string]: View };
   /**
    * Base class for all [[View]]s to support generic functionality
    * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
    */
   export abstract class View {
-    private static views: { [id: string]: View } = {};
+    private static views: Views = {};
     private static idCount: number = 0;
 
     public dom: HTMLElement;
@@ -15,9 +17,6 @@ namespace Fudge {
     private id: number;
 
     constructor(_container: GoldenLayout.Container, _state: Object) {
-      this.id = View.idCount;
-      View.views[View.idCount++] = this;
-
       this.dom = document.createElement("div");
       this.dom.style.height = "100%";
       this.dom.style.overflow = "auto";
@@ -33,16 +32,35 @@ namespace Fudge {
       this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
       this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEventCommon);
 
-      this.dom.addEventListener("dragover", (_event: DragEvent) => _event.preventDefault());
-      this.dom.addEventListener("dragstart", (_event: DragEvent) => {
-        _event.dataTransfer.setData("View", this.id.toString());
+      this.id = View.registerViewForDragDrop(this);
+    }
+
+    private static registerViewForDragDrop(_this: View): number {
+      View.views[View.idCount] = _this;
+
+      _this.dom.addEventListener(ƒui.EVENT.DRAG_START, (_event: DragEvent) => {
+        _event.stopPropagation();
+        _event.dataTransfer.setData("View", _this.id.toString());
         _event.stopPropagation();
       });
-      this.dom.addEventListener("drop", (_event: DragEvent) => {
+      _this.dom.addEventListener(ƒui.EVENT.DRAG_OVER, (_event: DragEvent) => {
         _event.stopPropagation();
-        console.log(_event.dataTransfer.getData("View"))
+        let viewSource: View = getViewSource(_event);
+        _this.hndDragOver(_event, viewSource);
+      });
+      _this.dom.addEventListener(ƒui.EVENT.DROP, (_event: DragEvent) => {
+        _event.stopPropagation();
+        let viewSource: View = getViewSource(_event);
+        _this.hndDrop(_event, viewSource);
+      });
+
+      function getViewSource(_event: DragEvent): View {        
+        let idViewSource: string = _event.dataTransfer.getData("View");
+        let viewSource: View = View.views[idViewSource];
+        return viewSource;
       }
-      );
+
+      return View.idCount++;
     }
 
     public setTitle(_title: string): void {
@@ -63,6 +81,16 @@ namespace Fudge {
     protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
       ƒ.Debug.info(`ContextMenu: Item-id=${CONTEXTMENU[_item.id]}`);
     }
+    //#endregion
+
+    //#region Events
+    protected hndDrop(_event: DragEvent, _source: View): void {
+      // console.log(_source, _event);
+    }
+
+    protected hndDragOver(_event: DragEvent, _source: View): void {
+      // _event.dataTransfer.dropEffect = "link";
+    }
 
     private hndEventCommon = (_event: Event): void => {
       switch (_event.type) {
@@ -71,5 +99,7 @@ namespace Fudge {
           break;
       }
     }
+    //#endregion
+
   }
 }

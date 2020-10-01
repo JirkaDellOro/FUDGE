@@ -31,11 +31,12 @@ namespace FudgeUserInterface {
       // this.checkbox.addEventListener(EVENT_TREE.KEY_DOWN, this.hndKey);
     }
 
-    private open(_open: boolean): void {
-      this.checkbox.checked = _open;
-    }
     private get isOpen(): boolean {
       return this.checkbox.checked;
+    }
+    
+    private open(_open: boolean): void {
+      this.checkbox.checked = _open;
     }
 
     private hndFocus = (_event: Event): void => {

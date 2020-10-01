@@ -462,7 +462,18 @@ var Fudge;
     class ControllerComponent extends ƒui.Controller {
         constructor(_mutable, _domElement) {
             super(_mutable, _domElement);
+            this.hndDragOver = (_event) => {
+                let target = _event.target;
+                let typeElement = target;
+                while (!typeElement.getAttribute("type"))
+                    typeElement = typeElement.parentElement;
+                if (target.parentElement.getAttribute("key") == "url") {
+                    console.log(typeElement.getAttribute("type"));
+                    console.log("URL!");
+                }
+            };
             this.domElement.addEventListener("input", this.mutateOnInput);
+            this.domElement.addEventListener("dragover" /* DRAG_OVER */, this.hndDragOver);
         }
     }
     Fudge.ControllerComponent = ControllerComponent;
@@ -610,8 +621,6 @@ var Fudge;
                         break;
                 }
             };
-            this.id = View.idCount;
-            View.views[View.idCount++] = this;
             this.dom = document.createElement("div");
             this.dom.style.height = "100%";
             this.dom.style.overflow = "auto";
@@ -622,15 +631,31 @@ var Fudge;
             // console.log(this.contextMenuCallback);
             this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEventCommon);
-            this.dom.addEventListener("dragover", (_event) => _event.preventDefault());
-            this.dom.addEventListener("dragstart", (_event) => {
-                _event.dataTransfer.setData("View", this.id.toString());
+            this.id = View.registerViewForDragDrop(this);
+        }
+        static registerViewForDragDrop(_this) {
+            View.views[View.idCount] = _this;
+            _this.dom.addEventListener("dragstart" /* DRAG_START */, (_event) => {
+                _event.stopPropagation();
+                _event.dataTransfer.setData("View", _this.id.toString());
                 _event.stopPropagation();
             });
-            this.dom.addEventListener("drop", (_event) => {
+            _this.dom.addEventListener("dragover" /* DRAG_OVER */, (_event) => {
                 _event.stopPropagation();
-                console.log(_event.dataTransfer.getData("View"));
+                let viewSource = getViewSource(_event);
+                _this.hndDragOver(_event, viewSource);
             });
+            _this.dom.addEventListener("drop" /* DROP */, (_event) => {
+                _event.stopPropagation();
+                let viewSource = getViewSource(_event);
+                _this.hndDrop(_event, viewSource);
+            });
+            function getViewSource(_event) {
+                let idViewSource = _event.dataTransfer.getData("View");
+                let viewSource = View.views[idViewSource];
+                return viewSource;
+            }
+            return View.idCount++;
         }
         setTitle(_title) {
             this.container.setTitle(_title);
@@ -642,6 +667,14 @@ var Fudge;
         }
         contextMenuCallback(_item, _window, _event) {
             ƒ.Debug.info(`ContextMenu: Item-id=${Fudge.CONTEXTMENU[_item.id]}`);
+        }
+        //#endregion
+        //#region Events
+        hndDrop(_event, _source) {
+            // console.log(_source, _event);
+        }
+        hndDragOver(_event, _source) {
+            // _event.dataTransfer.dropEffect = "link";
         }
     }
     View.views = {};
@@ -1954,6 +1987,12 @@ var Fudge;
         //   }
         // }
         //#endregion
+        hndDragOver(_event, _source) {
+            // console.log(_event.target, _event.currentTarget);
+            _event.dataTransfer.dropEffect = "link";
+            _event.preventDefault();
+            // console.log("DragOver");
+        }
         fillContent() {
             while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
                 ;

@@ -116,7 +116,7 @@ var FudgeUserInterface;
             let name = _name || _mutable.constructor.name;
             let mutator = _mutator || _mutable.getMutator();
             let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
-            let fieldset = Generator.createFoldableFieldset(name);
+            let fieldset = Generator.createFoldableFieldset(name, _mutable.type);
             for (let key in mutatorTypes) {
                 let type = mutatorTypes[key];
                 let value = mutator[key];
@@ -188,11 +188,12 @@ var FudgeUserInterface;
             return dropdown;
         }
         // TODO: implement CustomFieldSet and replace this
-        static createFoldableFieldset(_key) {
+        static createFoldableFieldset(_key, _type) {
             let cntFoldFieldset = new FudgeUserInterface.FoldableFieldSet(_key);
             //TODO: unique ids
             // cntFoldFieldset.id = _legend;
             cntFoldFieldset.setAttribute("key", _key);
+            cntFoldFieldset.setAttribute("type", _type);
             return cntFoldFieldset;
         }
     }
@@ -1182,11 +1183,11 @@ var FudgeUserInterface;
             this.addEventListener("focusSet" /* FOCUS_SET */, this.hndFocus);
             // this.checkbox.addEventListener(EVENT_TREE.KEY_DOWN, this.hndKey);
         }
-        open(_open) {
-            this.checkbox.checked = _open;
-        }
         get isOpen() {
             return this.checkbox.checked;
+        }
+        open(_open) {
+            this.checkbox.checked = _open;
         }
     }
     FudgeUserInterface.FoldableFieldSet = FoldableFieldSet;

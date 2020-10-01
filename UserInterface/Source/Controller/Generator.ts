@@ -23,7 +23,7 @@ namespace FudgeUserInterface {
       let name: string = _name || _mutable.constructor.name;
       let mutator: ƒ.Mutator = _mutator || _mutable.getMutator();
       let mutatorTypes: ƒ.MutatorAttributeTypes = _mutable.getMutatorAttributeTypes(mutator);
-      let fieldset: FoldableFieldSet = Generator.createFoldableFieldset(name);
+      let fieldset: FoldableFieldSet = Generator.createFoldableFieldset(name, _mutable.type);
 
       for (let key in mutatorTypes) {
         let type: Object = mutatorTypes[key];
@@ -99,11 +99,12 @@ namespace FudgeUserInterface {
     }
 
     // TODO: implement CustomFieldSet and replace this
-    public static createFoldableFieldset(_key: string): FoldableFieldSet {
+    public static createFoldableFieldset(_key: string, _type: string): FoldableFieldSet {
       let cntFoldFieldset: FoldableFieldSet = new FoldableFieldSet(_key);
       //TODO: unique ids
       // cntFoldFieldset.id = _legend;
       cntFoldFieldset.setAttribute("key", _key);
+      cntFoldFieldset.setAttribute("type", _type);
       return cntFoldFieldset;
     }
 

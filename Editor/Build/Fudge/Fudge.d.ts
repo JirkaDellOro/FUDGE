@@ -124,6 +124,7 @@ declare namespace Fudge {
     import ƒui = FudgeUserInterface;
     class ControllerComponent extends ƒui.Controller {
         constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
+        private hndDragOver;
     }
 }
 declare namespace Fudge {
@@ -177,10 +178,13 @@ declare namespace Fudge {
         private container;
         private id;
         constructor(_container: GoldenLayout.Container, _state: Object);
+        private static registerViewForDragDrop;
         setTitle(_title: string): void;
         protected openContextMenu: (_event: Event) => void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        protected hndDrop(_event: DragEvent, _source: View): void;
+        protected hndDragOver(_event: DragEvent, _source: View): void;
         private hndEventCommon;
     }
 }
@@ -427,6 +431,7 @@ declare namespace Fudge {
     class ViewProperties extends View {
         private resource;
         constructor(_container: GoldenLayout.Container, _state: Object);
+        protected hndDragOver(_event: DragEvent, _source: View): void;
         private fillContent;
         private hndEvent;
     }

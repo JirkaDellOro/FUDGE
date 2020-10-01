@@ -50,7 +50,7 @@ declare namespace FudgeUserInterface {
          * TODO: refactor for enums
          */
         static createDropdown(_name: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement;
-        static createFoldableFieldset(_key: string): FoldableFieldSet;
+        static createFoldableFieldset(_key: string, _type: string): FoldableFieldSet;
     }
 }
 declare namespace FudgeUserInterface {
@@ -299,8 +299,8 @@ declare namespace FudgeUserInterface {
         content: HTMLDivElement;
         private checkbox;
         constructor(_legend?: string);
-        private open;
         private get isOpen();
+        private open;
         private hndFocus;
         private hndKey;
     }

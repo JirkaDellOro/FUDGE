@@ -51,6 +51,13 @@ namespace Fudge {
     // }
     //#endregion
 
+    protected hndDragOver(_event: DragEvent, _source: View): void {
+      // console.log(_event.target, _event.currentTarget);
+      _event.dataTransfer.dropEffect = "link";
+      _event.preventDefault();
+      // console.log("DragOver");
+    }
+
     private fillContent(): void {
       while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild));
       // console.log(this.resource);
