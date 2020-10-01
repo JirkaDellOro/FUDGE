@@ -2,6 +2,10 @@ namespace Fudge {
   import ƒui = FudgeUserInterface;
   import ƒ = FudgeCore;
 
+  // export enum MENU {
+  //   ADD_NODE, ADD_COMPONENT, DELETE_NODE
+  // }
+
   export type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
 
   // TODO: figure out how to subclass MenuItem

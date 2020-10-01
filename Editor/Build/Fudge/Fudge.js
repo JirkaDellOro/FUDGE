@@ -6,7 +6,8 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["ADD_NODE"] = 0] = "ADD_NODE";
         CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT"] = 1] = "ADD_COMPONENT";
         CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT_SCRIPT"] = 2] = "ADD_COMPONENT_SCRIPT";
-        CONTEXTMENU[CONTEXTMENU["EDIT"] = 3] = "EDIT";
+        CONTEXTMENU[CONTEXTMENU["DELETE_NODE"] = 3] = "DELETE_NODE";
+        CONTEXTMENU[CONTEXTMENU["EDIT"] = 4] = "EDIT";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -116,63 +117,6 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    /**
-     * The uppermost container for all panels
-     * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
-     */
-    class Editor {
-        static add(_panel, _title, _state) {
-            let config = {
-                type: "stack",
-                content: [{
-                        type: "component", componentName: _panel.name, componentState: _state,
-                        title: _title, id: this.generateID(_panel.name)
-                    }]
-            };
-            let inner = this.goldenLayout.root.contentItems[0];
-            let item = Editor.goldenLayout.createContentItem(config);
-            inner.addChild(item);
-            this.panels.push(item.getComponentsByName(_panel.name)[0]);
-        }
-        static initialize() {
-            let config = {
-                settings: { showPopoutIcon: false },
-                content: [{
-                        id: "root", type: "row", isClosable: false,
-                        content: [
-                            { type: "component", componentName: "Welcome", title: "Welcome", componentState: {} }
-                        ]
-                    }]
-            };
-            this.goldenLayout = new GoldenLayout(config); //This might be a problem because it can't use a specific place to put it.
-            this.goldenLayout.registerComponent("Welcome", welcome);
-            this.goldenLayout.registerComponent(Fudge.PANEL.GRAPH, Fudge.PanelGraph);
-            this.goldenLayout.registerComponent(Fudge.PANEL.MODELLER, Fudge.PanelModeller);
-            this.goldenLayout.init();
-        }
-        /** Send custom copies of the given event to the views */
-        static broadcastEvent(_event) {
-            for (let panel of Editor.panels) {
-                let event = new CustomEvent(_event.type, { bubbles: false, cancelable: true, detail: _event.detail });
-                panel.dom.dispatchEvent(event);
-            }
-        }
-        static generateID(_name) {
-            return _name + Editor.idCounter++;
-        }
-        cleanup() {
-            //TODO: desconstruct
-        }
-    }
-    Editor.idCounter = 0;
-    Editor.panels = [];
-    Fudge.Editor = Editor;
-    function welcome(container, state) {
-        container.getElement().html("<div>Welcome</div>");
-    }
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
     const fs = require("fs");
     function saveProject(_node) {
         let serialization = ƒ.Serializer.serialize(_node);
@@ -227,94 +171,6 @@ var Fudge;
     }
     Fudge.loadProject = loadProject;
 })(Fudge || (Fudge = {}));
-// ///<reference path="../../../node_modules/electron/electron.d.ts"/>
-// // ///<reference types="../../../Core/Build/FudgeCore"/>
-// // ///<reference types="../../../Aid/Build/FudgeAid"/>
-// // ///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
-// namespace Fudge {
-//   import ƒ = FudgeCore;
-//   import ƒAid = FudgeAid;
-//   export const ipcRenderer: Electron.IpcRenderer = require("electron").ipcRenderer;
-//   export const remote: Electron.Remote = require("electron").remote;
-//   const fs: ƒ.General = require("fs");
-//   // TODO: At this point of time, the project is just a single node. A project is much more complex...
-//   let node: ƒ.Node = null;
-//   window.addEventListener("load", initWindow);
-//   function initWindow(): void {
-//     ƒ.Debug.log("Fudge started");
-//     Editor.initialize();
-//     ƒ.Debug.log("Editor initialized");
-//     // TODO: create a new Panel containing a ViewData by default. More Views can be added by the user or by configuration
-//     ipcRenderer.on("save", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-//       ƒ.Debug.log("Save");
-//       // panel = PanelManager.instance.getActivePanel();
-//       // if (panel instanceof PanelGraph) {
-//       //   node = panel.getNode();
-//       // }
-//       // save(node);
-//     });
-//     ipcRenderer.on("open", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-//       ƒ.Debug.log("Open");
-//       node = open();
-//       Editor.broadcastEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, { detail: node }));
-//     });
-//     ipcRenderer.on("openPanelGraph", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-//       ƒ.Debug.log("openPanelGraph");
-//       openViewNode();
-//     });
-//     ipcRenderer.on("openPanelAnimation", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-//       ƒ.Debug.log("openPanelAnimation");
-//       // openAnimationPanel();
-//     });
-//     ipcRenderer.on("openPanelModeller", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-//       ƒ.Debug.log("openPanelModeller");
-//       openModeller();
-//     });
-//     // HACK!
-//     ipcRenderer.on("updateNode", (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-//       ƒ.Debug.log("updateNode");
-//     });
-//   }
-//   function openViewNode(): void {
-//     node = new ƒAid.NodeCoordinateSystem("WorldCooSys");
-//     let node2: ƒ.Node = new ƒAid.NodeCoordinateSystem("WorldCooSys", ƒ.Matrix4x4.IDENTITY());
-//     node.addChild(node2);
-//     node2.cmpTransform.local.translateZ(2);
-//     Editor.add(PanelGraph, "Graph", Object({ node: node })); //Object.create(null,  {node: { writable: true, value: node }}));
-//   }
-//   function openModeller(): void {
-//     node = new ƒ.Node("graph");
-//     let cooSys: ƒ.Node = new ƒAid.NodeCoordinateSystem("WorldCooSys");
-//     let cube: ƒ.Node = new ƒAid.Node("Cube", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderUniColor, new ƒ.CoatColored()), new ƒ.MeshCube());
-//     node.addChild(cooSys);
-//     node.addChild(cube);
-//     Editor.add(PanelModeller, "Modeller", Object({ node: node }));
-//   }
-//   // function openAnimationPanel(): void {
-//   //   let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
-//   //   PanelManager.instance.addPanel(panel);
-//   // }
-//   function save(_node: ƒ.Node): void {
-//     let serialization: ƒ.Serialization = ƒ.Serializer.serialize(_node);
-//     let content: string = ƒ.Serializer.stringify(serialization);
-//     // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
-//     let filename: string = remote.dialog.showSaveDialogSync(null, { title: "Save Graph", buttonLabel: "Save Graph", message: "ƒ-Message" });
-//     fs.writeFileSync(filename, content);
-//   }
-//   function open(): ƒ.Node {
-//     let filenames: string[] = remote.dialog.showOpenDialogSync(null, { title: "Load Graph", buttonLabel: "Load Graph", properties: ["openFile"] });
-//     let content: string = fs.readFileSync(filenames[0], { encoding: "utf-8" });
-//     ƒ.Debug.groupCollapsed("File content");
-//     ƒ.Debug.info(content);
-//     ƒ.Debug.groupEnd();
-//     let serialization: ƒ.Serialization = ƒ.Serializer.parse(content);
-//     let node: ƒ.Node = <ƒ.Node>ƒ.Serializer.deserialize(serialization);
-//     ƒ.Debug.groupCollapsed("Deserialized");
-//     ƒ.Debug.info(node);
-//     ƒ.Debug.groupEnd();
-//     return node;
-//   }
-// }
 var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
@@ -402,6 +258,7 @@ var Fudge;
             console.log("Sending");
             Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_PROJECT_OPEN);
             Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_GRAPH_OPEN);
+            //ipcRenderer.emit(MENU.PANEL_MODELLER_OPEN);
             // ipcRenderer.emit(MENU.PROJECT_LOAD);
             // ipcRenderer.emit
         }
@@ -419,6 +276,7 @@ var Fudge;
             this.goldenLayout.registerComponent("Welcome", welcome);
             this.goldenLayout.registerComponent(Fudge.PANEL.GRAPH, Fudge.PanelGraph);
             this.goldenLayout.registerComponent(Fudge.PANEL.PROJECT, Fudge.PanelProject);
+            this.goldenLayout.registerComponent(Fudge.PANEL.MODELLER, Fudge.PanelModeller);
             this.goldenLayout.init();
         }
         static add(_panel, _title, _state) {
@@ -498,6 +356,14 @@ var Fudge;
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_ANIMATION_OPEN, (_event, _args) => {
                 //   let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
                 //   PanelManager.instance.addPanel(panel);
+            });
+            Fudge.ipcRenderer.on(Fudge.MENU.PANEL_MODELLER_OPEN, (_event, _args) => {
+                node = new ƒ.Node("graph");
+                let cooSys = new ƒaid.NodeCoordinateSystem("WorldCooSys");
+                let cube = new ƒaid.Node("Cube", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderUniColor, new ƒ.CoatColored()), new ƒ.MeshSphere(8, 5));
+                node.addChild(cooSys);
+                node.addChild(cube);
+                Page.add(Fudge.PanelModeller, "Modeller", Object({ node: node }));
             });
             // HACK!
             Fudge.ipcRenderer.on(Fudge.MENU.NODE_UPDATE, (_event, _args) => {
@@ -685,6 +551,8 @@ var Fudge;
             let degreeToRad = Math.PI / 180;
             let angleZAxis = Math.sin(degreeToRad * cameraRotation.y) * (_event.movementY / magicalScaleDivisor);
             let angleXAxis = -(Math.cos(degreeToRad * cameraRotation.y) * (_event.movementY / magicalScaleDivisor));
+            angleZAxis = Math.min(Math.max(-89, angleZAxis), 89);
+            angleXAxis = Math.min(Math.max(-89, angleXAxis), 89);
             let mtxXrot = ƒ.Matrix4x4.ROTATION_X(angleXAxis);
             currentTranslation = this.multiplyMatrixes(mtxXrot, currentTranslation);
             let mtxZrot = ƒ.Matrix4x4.ROTATION_Z(angleZAxis);
@@ -986,7 +854,7 @@ var Fudge;
             super(_container, _state);
             this.goldenLayout.registerComponent(Fudge.VIEW.MODELLER, Fudge.ViewModellerScene);
             this.goldenLayout.registerComponent(Fudge.VIEW.HIERARCHY, Fudge.ViewHierarchy);
-            this.goldenLayout.registerComponent(Fudge.VIEW.OBJECT_PROPERTIES, Fudge.ViewObjectProperties);
+            this.goldenLayout.registerComponent(Fudge.VIEW.PROPERTIES, Fudge.ViewProperties);
             let inner = this.goldenLayout.root.contentItems[0];
             inner.addChild({
                 type: "column", content: [{
@@ -996,7 +864,7 @@ var Fudge;
             inner.addChild({
                 type: "column", content: [
                     { type: "component", componentName: Fudge.VIEW.HIERARCHY, componentState: _state, title: "Hierarchy" },
-                    { type: "component", componentName: Fudge.VIEW.OBJECT_PROPERTIES, componentState: _state }
+                    { type: "component", componentName: Fudge.VIEW.PROPERTIES, componentState: _state }
                 ]
             });
         }
@@ -1777,6 +1645,8 @@ var Fudge;
             for (let subItem of Fudge.ContextMenu.getComponents(_callback))
                 item.submenu.append(subItem);
             menu.append(item);
+            item = new Fudge.remote.MenuItem({ label: "Delete Node", id: String(Fudge.CONTEXTMENU.DELETE_NODE), click: _callback, accelerator: "D" });
+            menu.append(item);
             Fudge.ContextMenu.appendCopyPaste(menu);
             // menu.addListener("menu-will-close", (_event: Electron.Event) => { console.log(_event); });
             return menu;
@@ -1807,6 +1677,9 @@ var Fudge;
                     ƒ.Debug.info(cmpScript.type, cmpScript);
                     focus.addComponent(cmpScript);
                     this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { bubbles: true, detail: { data: focus } }));
+                    break;
+                case Fudge.CONTEXTMENU.DELETE_NODE:
+                    focus.getParent().removeChild(focus);
                     break;
             }
         }
@@ -1912,6 +1785,7 @@ var Fudge;
             cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
             cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
             cmpCamera.projectCentral(1, 45);
+            //new ƒaid.CameraOrbit(cmpCamera);
             //cmpCamera.pivot.rotateX(90);
             this.canvas = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
             let container = document.createElement("div");

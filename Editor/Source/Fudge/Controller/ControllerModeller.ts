@@ -95,6 +95,9 @@ namespace Fudge {
       let angleZAxis: number = Math.sin(degreeToRad * cameraRotation.y) * (_event.movementY / magicalScaleDivisor);
       let angleXAxis: number = -(Math.cos(degreeToRad * cameraRotation.y) * (_event.movementY / magicalScaleDivisor));
 
+      angleZAxis = Math.min(Math.max(-89, angleZAxis), 89);
+      angleXAxis = Math.min(Math.max(-89, angleXAxis), 89);
+
       let mtxXrot: ƒ.Matrix4x4 = ƒ.Matrix4x4.ROTATION_X(angleXAxis);
       currentTranslation = this.multiplyMatrixes(mtxXrot, currentTranslation);
 

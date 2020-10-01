@@ -36,6 +36,8 @@ namespace Fudge {
       console.log("Sending");
       ipcRenderer.emit(MENU.PANEL_PROJECT_OPEN);
       ipcRenderer.emit(MENU.PANEL_GRAPH_OPEN);
+      //ipcRenderer.emit(MENU.PANEL_MODELLER_OPEN);
+
       // ipcRenderer.emit(MENU.PROJECT_LOAD);
       // ipcRenderer.emit
     }
@@ -55,6 +57,8 @@ namespace Fudge {
       this.goldenLayout.registerComponent("Welcome", welcome);
       this.goldenLayout.registerComponent(PANEL.GRAPH, PanelGraph);
       this.goldenLayout.registerComponent(PANEL.PROJECT, PanelProject);
+      this.goldenLayout.registerComponent(PANEL.MODELLER, PanelModeller);
+
       this.goldenLayout.init();
     }
 
@@ -147,6 +151,16 @@ namespace Fudge {
         //   let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
         //   PanelManager.instance.addPanel(panel);
       });
+
+      ipcRenderer.on(MENU.PANEL_MODELLER_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
+        node = new ƒ.Node("graph");
+        let cooSys: ƒ.Node = new ƒaid.NodeCoordinateSystem("WorldCooSys");
+        let cube: ƒ.Node = new ƒaid.Node("Cube", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderUniColor, new ƒ.CoatColored()), new ƒ.MeshSphere(8, 5));
+        node.addChild(cooSys);
+        node.addChild(cube);
+        Page.add(PanelModeller, "Modeller", Object({ node: node }));
+      });
+
 
       // HACK!
       ipcRenderer.on(MENU.NODE_UPDATE, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {

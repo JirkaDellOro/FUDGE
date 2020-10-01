@@ -7,7 +7,8 @@ declare namespace Fudge {
         ADD_NODE = 0,
         ADD_COMPONENT = 1,
         ADD_COMPONENT_SCRIPT = 2,
-        EDIT = 3
+        DELETE_NODE = 3,
+        EDIT = 4
     }
     enum MENU {
         QUIT = "quit",
@@ -68,23 +69,6 @@ declare namespace Fudge {
         addEntry(_entry: DirectoryEntry): void;
     }
     export {};
-}
-declare namespace Fudge {
-    /**
-     * The uppermost container for all panels
-     * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
-     */
-    class Editor {
-        private static idCounter;
-        private static goldenLayout;
-        private static panels;
-        static add(_panel: typeof Panel, _title: string, _state?: Object): void;
-        static initialize(): void;
-        /** Send custom copies of the given event to the views */
-        static broadcastEvent(_event: Event): void;
-        private static generateID;
-        cleanup(): void;
-    }
 }
 declare namespace Fudge {
     function saveProject(_node: ƒ.Node): void;

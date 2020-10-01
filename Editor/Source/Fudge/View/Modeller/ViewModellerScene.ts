@@ -23,7 +23,9 @@ namespace Fudge {
       cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
       cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
       cmpCamera.projectCentral(1, 45);
+      //new ƒaid.CameraOrbit(cmpCamera);
       //cmpCamera.pivot.rotateX(90);
+
 
       this.canvas = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
       let container: HTMLDivElement = document.createElement("div");

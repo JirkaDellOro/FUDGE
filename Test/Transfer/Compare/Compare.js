@@ -33,7 +33,8 @@ var Compare;
             switch (typeof (_object1[prop])) {
                 //Deep compare objects
                 case "object":
-                    _mismatch ||= await compare(_object1[prop], _object2[prop], _level + 1, _checked, _path, _mismatch);
+                    _mismatch || ;
+                    await compare(_object1[prop], _object2[prop], _level + 1, _checked, _path, _mismatch);
                     // _path.pop();
                     if (_mismatch) {
                         // ƒ.Debug.warn(`Found in ${path}`);

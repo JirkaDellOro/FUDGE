@@ -3,7 +3,8 @@ declare namespace Fudge {
         ADD_NODE = 0,
         ADD_COMPONENT = 1,
         ADD_COMPONENT_SCRIPT = 2,
-        EDIT = 3
+        DELETE_NODE = 3,
+        EDIT = 4
     }
     enum MENU {
         QUIT = "quit",

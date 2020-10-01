@@ -80,7 +80,7 @@ var Project;
         let mtrTexture = new Project.ƒ.Material("Textured", Project.ƒ.ShaderTexture, coatTextured);
         let pyramid = new Project.ƒ.MeshPyramid();
         Project.ƒ.Project.register(pyramid);
-        let sphere = new Project.ƒ.MeshSphere(8, 5);
+        let sphere = new Project.ƒ.MeshCylinder(8);
         Project.ƒ.Project.register(sphere);
         let mtrFlat = new Project.ƒ.Material("Flat", Project.ƒ.ShaderFlat, new Project.ƒ.CoatColored(Project.ƒ.Color.CSS("white")));
         let audio = new Project.ƒ.Audio("Audio/hypnotic.mp3");

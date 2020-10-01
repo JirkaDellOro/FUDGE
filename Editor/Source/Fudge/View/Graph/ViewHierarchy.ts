@@ -51,6 +51,9 @@ namespace Fudge {
         item.submenu.append(subItem);
       menu.append(item);
 
+      item = new remote.MenuItem({ label: "Delete Node", id: String(CONTEXTMENU.DELETE_NODE), click: _callback, accelerator: "D" });
+      menu.append(item);
+
       ContextMenu.appendCopyPaste(menu);
 
       // menu.addListener("menu-will-close", (_event: Electron.Event) => { console.log(_event); });
@@ -86,6 +89,9 @@ namespace Fudge {
 
           focus.addComponent(cmpScript);
           this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.SELECT, { bubbles: true, detail: { data: focus } }));
+          break;
+        case CONTEXTMENU.DELETE_NODE:
+          focus.getParent().removeChild(focus);
           break;
       }
     }

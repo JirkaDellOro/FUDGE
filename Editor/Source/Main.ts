@@ -68,9 +68,6 @@ namespace Main {
       case Fudge.MENU.FULLSCREEN:
         _window.fullScreen = !_window.isFullScreen();
         break;
-      case Fudge.MENU.PANEL_MODELLER_OPEN:
-        send(_window, "openPanelModeller");
-        break;
       case Fudge.MENU.QUIT:
         app.quit();
         break;

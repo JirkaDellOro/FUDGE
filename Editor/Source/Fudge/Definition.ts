@@ -4,6 +4,7 @@ namespace Fudge {
     ADD_NODE,
     ADD_COMPONENT,
     ADD_COMPONENT_SCRIPT,
+    DELETE_NODE,
     EDIT
   }
 

@@ -28,13 +28,12 @@
       "type": "MeshPyramid"
     }
   },
-  "MeshSphere|2020-09-28T16:56:03.259Z|95941": {
-    "ƒ.MeshSphere": {
-      "idResource": "MeshSphere|2020-09-28T16:56:03.259Z|95941",
+  "MeshCylinder|2020-09-28T16:56:03.259Z|95941": {
+    "ƒ.MeshCylinder": {
+      "idResource": "MeshCylinder|2020-09-28T16:56:03.259Z|95941",
       "name": "Mesh",
-      "type": "MeshSphere",
-      "sectors": 8,
-      "stacks": 5
+      "type": "MeshCylinder",
+      "sectors": 8
     }
   },
   "Material|2020-09-28T16:56:03.259Z|41561": {
@@ -270,7 +269,7 @@
               "ComponentMesh": [
                 {
                   "ƒ.ComponentMesh": {
-                    "idMesh": "MeshSphere|2020-09-28T16:56:03.259Z|95941",
+                    "idMesh": "MeshCylinder|2020-09-28T16:56:03.259Z|95941",
                     "pivot": {
                       "translation": {
                         "x": 0,

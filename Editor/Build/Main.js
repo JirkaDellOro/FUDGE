@@ -6,7 +6,8 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["ADD_NODE"] = 0] = "ADD_NODE";
         CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT"] = 1] = "ADD_COMPONENT";
         CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT_SCRIPT"] = 2] = "ADD_COMPONENT_SCRIPT";
-        CONTEXTMENU[CONTEXTMENU["EDIT"] = 3] = "EDIT";
+        CONTEXTMENU[CONTEXTMENU["DELETE_NODE"] = 3] = "DELETE_NODE";
+        CONTEXTMENU[CONTEXTMENU["EDIT"] = 4] = "EDIT";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -124,9 +125,6 @@ var Main;
                 break;
             case Fudge.MENU.FULLSCREEN:
                 _window.fullScreen = !_window.isFullScreen();
-                break;
-            case Fudge.MENU.PANEL_MODELLER_OPEN:
-                send(_window, "openPanelModeller");
                 break;
             case Fudge.MENU.QUIT:
                 app.quit();
