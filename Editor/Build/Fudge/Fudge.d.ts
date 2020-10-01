@@ -72,7 +72,9 @@ declare namespace Fudge {
     type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
     class ContextMenu {
         static appendCopyPaste(_menu: Electron.Menu): void;
-        static getComponents(_callback: ContextMenuCallback): Electron.Menu;
+        static getSubclassMenu<T extends {
+            name: string;
+        }>(_id: CONTEXTMENU, _superclass: T[], _callback: ContextMenuCallback): Electron.Menu;
         static getResources(_callback: ContextMenuCallback): Electron.Menu;
         static getSubMenu(_object: Object, _callback: ContextMenuCallback): Electron.Menu;
     }

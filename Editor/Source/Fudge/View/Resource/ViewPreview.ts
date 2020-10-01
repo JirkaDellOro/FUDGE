@@ -37,6 +37,7 @@ namespace Fudge {
       // this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.UPDATE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
       // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
       // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
     }
@@ -175,6 +176,7 @@ namespace Fudge {
       // console.log(_event.type);
       switch (_event.type) {
         case ƒui.EVENT.UPDATE:
+        case EVENT_EDITOR.UPDATE:
           this.redraw();
           break;
         default:

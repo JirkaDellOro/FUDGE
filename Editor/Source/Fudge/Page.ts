@@ -91,12 +91,12 @@ namespace Fudge {
     private static setupPageListeners(): void {
       document.addEventListener(EVENT_EDITOR.SET_GRAPH, Page.hndEvent);
       document.addEventListener(ƒui.EVENT.UPDATE, Page.hndEvent);
+      document.addEventListener(EVENT_EDITOR.UPDATE, Page.hndEvent);
       document.addEventListener(EVENT_EDITOR.DESTROY, Page.hndEvent);
     }
 
     /** Send custom copies of the given event to the views */
     private static broadcastEvent(_event: Event): void {
-      console.log("Current number of panels: " + Page.panels.length);
       for (let panel of Page.panels) {
         let event: CustomEvent = new CustomEvent(_event.type, { bubbles: false, cancelable: true, detail: (<CustomEvent>_event).detail });
         panel.dom.dispatchEvent(event);
@@ -104,6 +104,7 @@ namespace Fudge {
     }
 
     private static hndEvent(_event: CustomEvent): void {
+      ƒ.Debug.fudge("Page received", _event.type, _event);
       switch (_event.type) {
         case EVENT_EDITOR.DESTROY:
           let view: View = _event.detail;

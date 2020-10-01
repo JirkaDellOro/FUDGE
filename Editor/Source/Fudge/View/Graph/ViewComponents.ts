@@ -27,10 +27,10 @@ namespace Fudge {
     protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
       const menu: Electron.Menu = new remote.Menu();
       let item: Electron.MenuItem;
-
-      item = new remote.MenuItem({ label: "Add Component", submenu: ContextMenu.getComponents(_callback) });
-      // for (let subItem of ContextMenu.getComponents(_callback))
-      //   item.submenu.append(subItem);
+      item = new remote.MenuItem({
+        label: "Add Component",
+        submenu: ContextMenu.getSubclassMenu<typeof ƒ.Component>(CONTEXTMENU.ADD_COMPONENT, ƒ.Component.subclasses, _callback)
+      });
       menu.append(item);
 
       ContextMenu.appendCopyPaste(menu);
