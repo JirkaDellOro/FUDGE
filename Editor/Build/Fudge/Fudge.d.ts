@@ -8,7 +8,8 @@ declare namespace Fudge {
         ADD_NODE = 0,
         ADD_COMPONENT = 1,
         ADD_COMPONENT_SCRIPT = 2,
-        EDIT = 3
+        EDIT = 3,
+        CREATE = 4
     }
     enum MENU {
         QUIT = "quit",
@@ -71,7 +72,8 @@ declare namespace Fudge {
     type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
     class ContextMenu {
         static appendCopyPaste(_menu: Electron.Menu): void;
-        static getComponents(_callback: ContextMenuCallback): Electron.MenuItem[];
+        static getComponents(_callback: ContextMenuCallback): Electron.Menu;
+        static getResources(_callback: ContextMenuCallback): Electron.Menu;
         static getSubMenu(_object: Object, _callback: ContextMenuCallback): Electron.Menu;
     }
 }
@@ -374,6 +376,8 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    import ƒ = FudgeCore;
+    let typesOfResources: ƒ.General[];
     /**
      * List the internal resources
      * @author Jirka Dell'Oro-Friedl, HFU, 2020

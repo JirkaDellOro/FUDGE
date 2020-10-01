@@ -4,9 +4,9 @@ namespace Fudge {
     ADD_NODE,
     ADD_COMPONENT,
     ADD_COMPONENT_SCRIPT,
-    EDIT
+    EDIT,
+    CREATE
   }
-
 
   export enum MENU {
     QUIT = "quit",

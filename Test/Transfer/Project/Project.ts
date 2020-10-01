@@ -92,10 +92,10 @@ namespace Project {
     let mtrTexture: ƒ.Material = new ƒ.Material("Textured", ƒ.ShaderTexture, coatTextured);
 
     let pyramid: ƒ.Mesh = new ƒ.MeshPyramid();
-    ƒ.Project.register(pyramid);
+    // ƒ.Project.register(pyramid);
 
-    let sphere: ƒ.Mesh = new ƒ.MeshSphere(8, 5);
-    ƒ.Project.register(sphere);
+    let sphere: ƒ.Mesh = new ƒ.MeshSphere("Sphere", 8, 5);
+    // ƒ.Project.register(sphere);
     let mtrFlat: ƒ.Material = new ƒ.Material("Flat", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("white")));
 
     let audio: ƒ.Audio = new ƒ.Audio("Audio/hypnotic.mp3");

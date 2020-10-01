@@ -28,9 +28,9 @@ namespace Fudge {
       const menu: Electron.Menu = new remote.Menu();
       let item: Electron.MenuItem;
 
-      item = new remote.MenuItem({ label: "Add Component", submenu: [] });
-      for (let subItem of ContextMenu.getComponents(_callback))
-        item.submenu.append(subItem);
+      item = new remote.MenuItem({ label: "Add Component", submenu: ContextMenu.getComponents(_callback) });
+      // for (let subItem of ContextMenu.getComponents(_callback))
+      //   item.submenu.append(subItem);
       menu.append(item);
 
       ContextMenu.appendCopyPaste(menu);

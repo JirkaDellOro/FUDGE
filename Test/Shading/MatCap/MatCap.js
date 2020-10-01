@@ -17,7 +17,7 @@ var MatCapTest;
         let mtl1 = new ƒ.Material("Material_Matcap1", ƒ.ShaderMatCap, ctMatcap1);
         let mtl2 = new ƒ.Material("Material_Matcap2", ƒ.ShaderMatCap, ctMatcap2);
         let pyramid = Scenes.createCompleteMeshNode("Cube", mtl1, new ƒ.MeshCube());
-        let sphere = Scenes.createCompleteMeshNode("Cube", mtl2, new ƒ.MeshSphere(32, 32));
+        let sphere = Scenes.createCompleteMeshNode("Cube", mtl2, new ƒ.MeshSphere("Sphere", 32, 32));
         sphere.mtxLocal.translateX(1);
         pyramid.mtxLocal.translateX(-1);
         graph.addChild(pyramid);

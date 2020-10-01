@@ -7,6 +7,7 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT"] = 1] = "ADD_COMPONENT";
         CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT_SCRIPT"] = 2] = "ADD_COMPONENT_SCRIPT";
         CONTEXTMENU[CONTEXTMENU["EDIT"] = 3] = "EDIT";
+        CONTEXTMENU[CONTEXTMENU["CREATE"] = 4] = "CREATE";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -192,34 +193,55 @@ var Fudge;
             _menu.append(new Fudge.remote.MenuItem({ role: "paste" }));
         }
         static getComponents(_callback) {
-            const menuItems = [];
+            const menu = new Fudge.remote.Menu();
             for (let subclass of ƒ.Component.subclasses) {
                 let item = new Fudge.remote.MenuItem({ label: subclass.name, id: String(Fudge.CONTEXTMENU.ADD_COMPONENT), click: _callback, submenu: ContextMenu.getSubMenu(subclass, _callback) });
                 // @ts-ignore
                 item.overrideProperty("iSubclass", subclass.iSubclass);
                 item["iSubclass"] = subclass.iSubclass;
-                menuItems.push(item);
+                menu.append(item);
             }
-            return menuItems;
+            return menu;
+        }
+        static getResources(_callback) {
+            const menu = new Fudge.remote.Menu();
+            for (let type of Fudge.typesOfResources) {
+                let item = new Fudge.remote.MenuItem({ label: type.name, id: String(Fudge.CONTEXTMENU.CREATE), click: _callback, submenu: ContextMenu.getSubMenu(type, _callback) });
+                // @ts-ignore
+                // item.overrideProperty("iSubclass", subclass.iSubclass);
+                // item["iSubclass"] = subclass.iSubclass;
+                menu.push(item);
+            }
+            return menu;
         }
         static getSubMenu(_object, _callback) {
             let menu;
-            if (_object == ƒ.ComponentScript) {
-                menu = new Fudge.remote.Menu();
-                let scripts = ƒ.Project.getComponentScripts();
-                for (let namespace in scripts) {
-                    // @ts-ignore
-                    // console.log(script.name, script);
-                    let item = new Fudge.remote.MenuItem({ label: namespace, id: null, click: null, submenu: [] });
-                    for (let script of scripts[namespace]) {
-                        let name = Reflect.get(script, "name");
-                        let subitem = new Fudge.remote.MenuItem({ label: name, id: String(Fudge.CONTEXTMENU.ADD_COMPONENT_SCRIPT), click: _callback });
-                        // @ts-ignore
-                        subitem.overrideProperty("Script", namespace + "." + name);
-                        item.submenu.append(subitem);
+            switch (_object) {
+                case ƒ.ComponentScript:
+                    menu = new Fudge.remote.Menu();
+                    let scripts = ƒ.Project.getComponentScripts();
+                    for (let namespace in scripts) {
+                        let item = new Fudge.remote.MenuItem({ label: namespace, id: null, click: null, submenu: [] });
+                        for (let script of scripts[namespace]) {
+                            let name = Reflect.get(script, "name");
+                            let subitem = new Fudge.remote.MenuItem({ label: name, id: String(Fudge.CONTEXTMENU.ADD_COMPONENT_SCRIPT), click: _callback });
+                            // @ts-ignore
+                            subitem.overrideProperty("Script", namespace + "." + name);
+                            item.submenu.append(subitem);
+                        }
+                        menu.append(item);
                     }
-                    menu.append(item);
-                }
+                    break;
+                case ƒ.Mesh:
+                    menu = new Fudge.remote.Menu();
+                    for (let iSubclass in ƒ.Mesh.subclasses) {
+                        let subclass = ƒ.Mesh.subclasses[iSubclass];
+                        let item = new Fudge.remote.MenuItem({ label: subclass.name, id: String(Fudge.CONTEXTMENU.CREATE), click: _callback });
+                        //@ts-ignore
+                        item.overrideProperty("iSubclass", iSubclass);
+                        menu.append(item);
+                    }
+                    break;
             }
             return menu;
         }
@@ -1407,9 +1429,9 @@ var Fudge;
         getContextMenu(_callback) {
             const menu = new Fudge.remote.Menu();
             let item;
-            item = new Fudge.remote.MenuItem({ label: "Add Component", submenu: [] });
-            for (let subItem of Fudge.ContextMenu.getComponents(_callback))
-                item.submenu.append(subItem);
+            item = new Fudge.remote.MenuItem({ label: "Add Component", submenu: Fudge.ContextMenu.getComponents(_callback) });
+            // for (let subItem of ContextMenu.getComponents(_callback))
+            //   item.submenu.append(subItem);
             menu.append(item);
             Fudge.ContextMenu.appendCopyPaste(menu);
             return menu;
@@ -1492,9 +1514,9 @@ var Fudge;
             let item;
             item = new Fudge.remote.MenuItem({ label: "Add Node", id: String(Fudge.CONTEXTMENU.ADD_NODE), click: _callback, accelerator: process.platform == "darwin" ? "N" : "N" });
             menu.append(item);
-            item = new Fudge.remote.MenuItem({ label: "Add Component", submenu: [] });
-            for (let subItem of Fudge.ContextMenu.getComponents(_callback))
-                item.submenu.append(subItem);
+            item = new Fudge.remote.MenuItem({ label: "Add Component", submenu: Fudge.ContextMenu.getComponents(_callback) });
+            // for (let subItem of ContextMenu.getComponents(_callback))
+            //   item.submenu.append(subItem);
             menu.append(item);
             Fudge.ContextMenu.appendCopyPaste(menu);
             // menu.addListener("menu-will-close", (_event: Electron.Event) => { console.log(_event); });
@@ -1640,6 +1662,9 @@ var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
+    Fudge.typesOfResources = [
+        ƒ.Mesh
+    ];
     /**
      * List the internal resources
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
@@ -1673,12 +1698,23 @@ var Fudge;
             let item;
             item = new Fudge.remote.MenuItem({ label: "Edit", id: String(Fudge.CONTEXTMENU.EDIT), click: _callback, accelerator: process.platform == "darwin" ? "E" : "E" });
             menu.append(item);
+            item = new Fudge.remote.MenuItem({ label: "Create", submenu: Fudge.ContextMenu.getSubMenu(ƒ.Mesh, _callback) });
+            // item.submenu = ContextMenu.getSubMenu(ƒ.Mesh, _callback);
+            menu.append(item);
             // ContextMenu.appendCopyPaste(menu);
             return menu;
         }
         contextMenuCallback(_item, _window, _event) {
             ƒ.Debug.info(`MenuSelect: Item-id=${Fudge.CONTEXTMENU[_item.id]}`);
             switch (Number(_item.id)) {
+                case Fudge.CONTEXTMENU.CREATE:
+                    let iSubclass = _item["iSubclass"];
+                    let type = ƒ.Mesh.subclasses[iSubclass];
+                    //@ts-ignore
+                    let meshNew = new type();
+                    ƒ.Debug.info(meshNew.type, meshNew);
+                    // this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.SELECT, { bubbles: true, detail: { data: this.node } }));
+                    break;
                 case Fudge.CONTEXTMENU.EDIT:
                     let resource = this.table.getFocussed();
                     console.log("Edit", resource);
@@ -1747,7 +1783,7 @@ var Fudge;
             return mtrStandard;
         }
         static createStandardMesh() {
-            let meshStandard = new ƒ.MeshSphere(6, 5);
+            let meshStandard = new ƒ.MeshSphere("Sphere", 6, 5);
             ƒ.Project.deregister(meshStandard);
             return meshStandard;
         }

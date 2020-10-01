@@ -2,6 +2,10 @@ namespace Fudge {
   import ƒ = FudgeCore;
   import ƒui = FudgeUserInterface;
 
+  export let typesOfResources: ƒ.General[] = [
+    ƒ.Mesh
+  ];
+
   /**
    * List the internal resources
    * @author Jirka Dell'Oro-Friedl, HFU, 2020  
@@ -29,6 +33,9 @@ namespace Fudge {
 
       item = new remote.MenuItem({ label: "Edit", id: String(CONTEXTMENU.EDIT), click: _callback, accelerator: process.platform == "darwin" ? "E" : "E" });
       menu.append(item);
+      item = new remote.MenuItem({ label: "Create" , submenu: ContextMenu.getSubMenu(ƒ.Mesh, _callback)});
+      // item.submenu = ContextMenu.getSubMenu(ƒ.Mesh, _callback);
+      menu.append(item);
 
       // ContextMenu.appendCopyPaste(menu);
       return menu;
@@ -38,6 +45,15 @@ namespace Fudge {
       ƒ.Debug.info(`MenuSelect: Item-id=${CONTEXTMENU[_item.id]}`);
 
       switch (Number(_item.id)) {
+        case CONTEXTMENU.CREATE:
+          let iSubclass: number = _item["iSubclass"];
+          let type: typeof ƒ.Mesh = ƒ.Mesh.subclasses[iSubclass];
+          //@ts-ignore
+          let meshNew: ƒ.Mesh = new type();
+          ƒ.Debug.info(meshNew.type, meshNew);
+          
+          // this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.SELECT, { bubbles: true, detail: { data: this.node } }));
+          break;
         case CONTEXTMENU.EDIT:
           let resource: ƒ.SerializableResource = this.table.getFocussed();
           console.log("Edit", resource);

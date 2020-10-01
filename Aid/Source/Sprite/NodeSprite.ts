@@ -3,7 +3,7 @@ namespace FudgeAid {
    * Handles the animation cycle of a sprite on a [[Node]]
    */
   export class NodeSprite extends ƒ.Node {
-    private static mesh: ƒ.MeshSprite = new ƒ.MeshSprite();
+    private static mesh: ƒ.MeshSprite = NodeSprite.createInternalResource();
     public framerate: number = 12; // animation frames per second, single frames can be shorter or longer based on their timescale
 
     private cmpMesh: ƒ.ComponentMesh;
@@ -21,6 +21,12 @@ namespace FudgeAid {
       this.cmpMaterial = new ƒ.ComponentMaterial(new ƒ.Material(_name, ƒ.ShaderTexture, null));
       this.addComponent(this.cmpMesh);
       this.addComponent(this.cmpMaterial);
+    }
+
+    private static createInternalResource(): ƒ.MeshSprite {
+      let mesh: ƒ.MeshSprite = new ƒ.MeshSprite("Sprite");
+      ƒ.Project.deregister(mesh);
+      return mesh;
     }
 
     public setAnimation(_animation: SpriteSheetAnimation): void {
