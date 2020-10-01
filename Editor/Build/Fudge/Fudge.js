@@ -1734,6 +1734,8 @@ var Fudge;
                     case "update" /* UPDATE */:
                     case Fudge.EVENT_EDITOR.UPDATE:
                         this.redraw();
+                        if (this.resource instanceof ƒ.Audio)
+                            this.fillContent();
                         break;
                     default:
                         this.resource = _event.detail.data;

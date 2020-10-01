@@ -1168,6 +1168,7 @@ declare namespace FudgeCore {
         load(_url: RequestInfo): Promise<void>;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): void;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
