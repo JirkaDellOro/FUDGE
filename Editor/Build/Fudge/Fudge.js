@@ -610,6 +610,8 @@ var Fudge;
                         break;
                 }
             };
+            this.id = View.idCount;
+            View.views[View.idCount++] = this;
             this.dom = document.createElement("div");
             this.dom.style.height = "100%";
             this.dom.style.overflow = "auto";
@@ -620,6 +622,15 @@ var Fudge;
             // console.log(this.contextMenuCallback);
             this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEventCommon);
+            this.dom.addEventListener("dragover", (_event) => _event.preventDefault());
+            this.dom.addEventListener("dragstart", (_event) => {
+                _event.dataTransfer.setData("View", this.id.toString());
+                _event.stopPropagation();
+            });
+            this.dom.addEventListener("drop", (_event) => {
+                _event.stopPropagation();
+                console.log(_event.dataTransfer.getData("View"));
+            });
         }
         setTitle(_title) {
             this.container.setTitle(_title);
@@ -633,6 +644,8 @@ var Fudge;
             ƒ.Debug.info(`ContextMenu: Item-id=${Fudge.CONTEXTMENU[_item.id]}`);
         }
     }
+    View.views = {};
+    View.idCount = 0;
     Fudge.View = View;
 })(Fudge || (Fudge = {}));
 ///<reference path="../View/View.ts"/>

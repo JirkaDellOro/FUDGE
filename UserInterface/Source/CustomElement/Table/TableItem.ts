@@ -145,7 +145,7 @@ namespace FudgeUserInterface {
     }
 
     private hndDragStart = (_event: DragEvent): void => {
-      _event.stopPropagation();
+      //_event.stopPropagation();
       this.controller.dragDrop.sources = [];
       if (this.selected)
         this.controller.dragDrop.sources = this.controller.selection;

@@ -1631,7 +1631,7 @@ var FudgeUserInterface;
                 }
             };
             this.hndDragStart = (_event) => {
-                _event.stopPropagation();
+                //_event.stopPropagation();
                 this.controller.dragDrop.sources = [];
                 if (this.selected)
                     this.controller.dragDrop.sources = this.controller.selection;
@@ -2137,7 +2137,7 @@ var FudgeUserInterface;
                 }
             };
             this.hndDragStart = (_event) => {
-                _event.stopPropagation();
+                // _event.stopPropagation();
                 this.controller.dragDrop.sources = [];
                 if (this.selected)
                     this.controller.dragDrop.sources = this.controller.selection;

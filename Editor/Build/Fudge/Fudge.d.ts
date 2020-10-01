@@ -170,9 +170,12 @@ declare namespace Fudge {
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     abstract class View {
+        private static views;
+        private static idCount;
         dom: HTMLElement;
         protected contextMenu: Electron.Menu;
         private container;
+        private id;
         constructor(_container: GoldenLayout.Container, _state: Object);
         setTitle(_title: string): void;
         protected openContextMenu: (_event: Event) => void;
