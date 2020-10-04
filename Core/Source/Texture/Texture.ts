@@ -57,10 +57,20 @@ namespace FudgeCore {
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       Project.register(this, _serialization.idResource);
-      this.load(_serialization.url);
+      await this.load(_serialization.url);
       this.name = _serialization.name;
       // this.type is an accessor of Mutable doesn't need to be deserialized
       return this;
+    }
+
+    public mutate(_mutator: Mutator): void {
+      if (_mutator.url != this.url.toString())
+        this.load(_mutator.url);
+      // except url from mutator for further processing
+      delete (_mutator.url);
+      super.mutate(_mutator);
+      // TODO: examine necessity to reconstruct, if mutator is kept by caller
+      // _mutator.url = this.url; 
     }
     //#endregion
   }

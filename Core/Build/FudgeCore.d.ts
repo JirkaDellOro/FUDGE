@@ -3512,6 +3512,7 @@ declare namespace FudgeCore {
         load(_url: RequestInfo): Promise<void>;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): void;
     }
     /**
      * Texture created from a canvas
