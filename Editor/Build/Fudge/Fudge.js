@@ -608,27 +608,45 @@ var Fudge;
 (function (Fudge) {
     var ƒui = FudgeUserInterface;
     let filter = {
-        UrlOnTexture: { onElementType: "url", onComponentType: "TextureImage", fromViews: [Fudge.ViewExternal], ofType: Fudge.DirectoryEntry, dropEffect: "link" }
+        UrlOnTexture: { onElementType: "url", onComponentType: "TextureImage", fromViews: [Fudge.ViewExternal], ofType: Fudge.DirectoryEntry, dropEffect: "link" },
+        UrlOnAudio: { onElementType: "url", onComponentType: "Audio", fromViews: [Fudge.ViewExternal], ofType: Fudge.DirectoryEntry, dropEffect: "link" }
     };
     class ControllerComponent extends ƒui.Controller {
         constructor(_mutable, _domElement) {
             super(_mutable, _domElement);
             this.hndDragOver = (_event) => {
-                this.filterDragDrop(_event, filter.UrlOnTexture, (_sources) => {
+                // texture
+                if (this.filterDragDrop(_event, filter.UrlOnTexture, checkMimeType(Fudge.MIME.IMAGE)))
+                    return;
+                // audio
+                if (this.filterDragDrop(_event, filter.UrlOnAudio, checkMimeType(Fudge.MIME.AUDIO)))
+                    return;
+                function checkMimeType(_mime) {
+                    return (_sources) => {
+                        let sources = _sources;
+                        return (sources.length == 1 && sources[0].getMimeType() == _mime);
+                    };
+                }
+            };
+            this.hndDrop = (_event) => {
+                let setExternalLink = (_sources) => {
                     let sources = _sources;
-                    if (sources.length == 1 && !sources[0].isDirectory) {
-                        console.log(sources[0].pathRelative);
-                        console.log(sources[0].getMimeType());
-                        if (sources[0].getMimeType() == Fudge.MIME.IMAGE)
-                            return true;
-                    }
-                    return false;
-                });
+                    _event.target.value = sources[0].pathRelative;
+                    this.mutateOnInput(_event);
+                    return true;
+                };
+                // texture
+                if (this.filterDragDrop(_event, filter.UrlOnTexture, setExternalLink))
+                    return;
+                // audio
+                if (this.filterDragDrop(_event, filter.UrlOnAudio, setExternalLink))
+                    return;
             };
             this.domElement.addEventListener("input", this.mutateOnInput);
             this.domElement.addEventListener("dragover" /* DRAG_OVER */, this.hndDragOver);
+            this.domElement.addEventListener("drop" /* DROP */, this.hndDrop);
         }
-        filterDragDrop(_event, _filter, _callback) {
+        filterDragDrop(_event, _filter, _callback = () => true) {
             let target = _event.target;
             let typeElement = target.parentElement.getAttribute("key");
             let typeComponent = this.getComponentType(target);
@@ -645,6 +663,7 @@ var Fudge;
             _event.dataTransfer.dropEffect = "link";
             _event.preventDefault();
             _event.stopPropagation();
+            return true;
         }
         getComponentType(_target) {
             let element = _target;

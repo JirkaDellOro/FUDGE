@@ -15,7 +15,8 @@ namespace Fudge {
   }
 
   let filter: { [name: string]: DragDropFilter } = {
-    UrlOnTexture: { onElementType: "url", onComponentType: "TextureImage", fromViews: [ViewExternal], ofType: DirectoryEntry, dropEffect: "link" }
+    UrlOnTexture: { onElementType: "url", onComponentType: "TextureImage", fromViews: [ViewExternal], ofType: DirectoryEntry, dropEffect: "link" },
+    UrlOnAudio: { onElementType: "url", onComponentType: "Audio", fromViews: [ViewExternal], ofType: DirectoryEntry, dropEffect: "link" }
   };
 
   export class ControllerComponent extends ƒui.Controller {
@@ -23,23 +24,46 @@ namespace Fudge {
       super(_mutable, _domElement);
       this.domElement.addEventListener("input", this.mutateOnInput);
       this.domElement.addEventListener(ƒui.EVENT.DRAG_OVER, this.hndDragOver);
+      this.domElement.addEventListener(ƒui.EVENT.DROP, this.hndDrop);
     }
 
     private hndDragOver = (_event: DragEvent): void => {
+      // texture
+      if (this.filterDragDrop(_event, filter.UrlOnTexture, checkMimeType(MIME.IMAGE)))
+        return;
 
-      this.filterDragDrop(_event, filter.UrlOnTexture, (_sources: Object[]): boolean => {
-        let sources: DirectoryEntry[] = <DirectoryEntry[]>_sources;
-        if (sources.length == 1 && !sources[0].isDirectory) {
-          console.log(sources[0].pathRelative);
-          console.log(sources[0].getMimeType());
-          if (sources[0].getMimeType() == MIME.IMAGE)
-            return true;
-        }
-        return false;
-      });
+      // audio
+      if (this.filterDragDrop(_event, filter.UrlOnAudio, checkMimeType(MIME.AUDIO)))
+        return;
+
+      function checkMimeType(_mime: MIME): (_sources: Object[]) => boolean {
+        return (_sources: Object[]): boolean => {
+          let sources: DirectoryEntry[] = <DirectoryEntry[]>_sources;
+          return (sources.length == 1 && sources[0].getMimeType() == _mime);
+        };
+      }
     }
 
-    private filterDragDrop(_event: DragEvent, _filter: DragDropFilter, _callback: (_sources: Object[]) => boolean): boolean {
+    private hndDrop = (_event: DragEvent): void => {
+      let setExternalLink: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
+        let sources: DirectoryEntry[] = <DirectoryEntry[]>_sources;
+        (<HTMLInputElement>_event.target).value = sources[0].pathRelative;
+        this.mutateOnInput(_event);
+        return true;
+      };
+
+      // texture
+      if (this.filterDragDrop(_event, filter.UrlOnTexture, setExternalLink))
+        return;
+
+      // audio
+      if (this.filterDragDrop(_event, filter.UrlOnAudio, setExternalLink))
+        return;
+
+    }
+
+
+    private filterDragDrop(_event: DragEvent, _filter: DragDropFilter, _callback: (_sources: Object[]) => boolean = () => true): boolean {
       let target: HTMLElement = <HTMLElement>_event.target;
       let typeElement: string = target.parentElement.getAttribute("key");
       let typeComponent: string = this.getComponentType(target);
@@ -61,6 +85,8 @@ namespace Fudge {
       _event.dataTransfer.dropEffect = "link";
       _event.preventDefault();
       _event.stopPropagation();
+
+      return true;
     }
 
     private getComponentType(_target: HTMLElement): string {

@@ -172,6 +172,7 @@ declare namespace Fudge {
     class ControllerComponent extends ƒui.Controller {
         constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
         private hndDragOver;
+        private hndDrop;
         private filterDragDrop;
         private getComponentType;
     }
