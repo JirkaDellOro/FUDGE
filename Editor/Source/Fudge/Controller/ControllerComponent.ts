@@ -11,16 +11,31 @@ namespace Fudge {
 
     private hndDragOver = (_event: DragEvent): void => {
       let target: HTMLElement = <HTMLElement>_event.target;
-      
-      let typeElement: HTMLElement = target;
-      while (!typeElement.getAttribute("type"))
-        typeElement = typeElement.parentElement;
-      if (!typeElement)
-        return;
-        
-      if (target.parentElement.getAttribute("key") == "url") {
-        console.log(typeElement.getAttribute("type"), View.getViewSource(_event));
+      let typeComponent: string = this.getComponentType(target);
+      let viewSource: View = View.getViewSource(_event);
+      let typeElement: string = target.parentElement.getAttribute("key");
+
+      if (typeElement == "url" && viewSource instanceof ViewExternal) {
+        let selected: DirectoryEntry[] = viewSource.getSelection();
+        if (selected.length == 1 && !selected[0].isDirectory) {
+          _event.dataTransfer.dropEffect = "link";
+          _event.preventDefault();
+          _event.stopPropagation();
+          console.log(selected[0].name);
+        }
       }
+    }
+
+    private getComponentType(_target: HTMLElement): string {
+      let element: HTMLElement = _target;
+      while (element) {
+        let type: string = element.getAttribute("type");
+        if (type)
+          return type;
+        element = element.parentElement;
+      }
+
+      return undefined;
     }
   }
 }

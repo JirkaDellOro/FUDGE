@@ -464,17 +464,31 @@ var Fudge;
             super(_mutable, _domElement);
             this.hndDragOver = (_event) => {
                 let target = _event.target;
-                let typeElement = target;
-                while (!typeElement.getAttribute("type"))
-                    typeElement = typeElement.parentElement;
-                if (!typeElement)
-                    return;
-                if (target.parentElement.getAttribute("key") == "url") {
-                    console.log(typeElement.getAttribute("type"), Fudge.View.getViewSource(_event));
+                let typeComponent = this.getComponentType(target);
+                let viewSource = Fudge.View.getViewSource(_event);
+                let typeElement = target.parentElement.getAttribute("key");
+                if (typeElement == "url" && viewSource instanceof Fudge.ViewExternal) {
+                    let selected = viewSource.getSelection();
+                    if (selected.length == 1 && !selected[0].isDirectory) {
+                        _event.dataTransfer.dropEffect = "link";
+                        _event.preventDefault();
+                        _event.stopPropagation();
+                        console.log(selected[0].name);
+                    }
                 }
             };
             this.domElement.addEventListener("input", this.mutateOnInput);
             this.domElement.addEventListener("dragover" /* DRAG_OVER */, this.hndDragOver);
+        }
+        getComponentType(_target) {
+            let element = _target;
+            while (element) {
+                let type = element.getAttribute("type");
+                if (type)
+                    return type;
+                element = element.parentElement;
+            }
+            return undefined;
         }
     }
     Fudge.ControllerComponent = ControllerComponent;
@@ -1683,9 +1697,12 @@ var Fudge;
             let path = new URL(".", ƒ.Project.baseURL).pathname;
             path = path.substr(1); // strip leading slash
             let root = Fudge.DirectoryEntry.createRoot(path);
-            let tree = new ƒui.Tree(new Fudge.ControllerTreeDirectory(), root);
-            this.dom.appendChild(tree);
-            tree.getItems()[0].open(true);
+            this.tree = new ƒui.Tree(new Fudge.ControllerTreeDirectory(), root);
+            this.dom.appendChild(this.tree);
+            this.tree.getItems()[0].open(true);
+        }
+        getSelection() {
+            return this.tree.controller.selection;
         }
     }
     Fudge.ViewExternal = ViewExternal;
@@ -1994,8 +2011,8 @@ var Fudge;
         //#endregion
         hndDragOver(_event, _source) {
             // console.log(_event.target, _event.currentTarget);
-            _event.dataTransfer.dropEffect = "link";
-            _event.preventDefault();
+            // _event.dataTransfer.dropEffect = "link";
+            // _event.preventDefault();
             // console.log("DragOver");
         }
         fillContent() {

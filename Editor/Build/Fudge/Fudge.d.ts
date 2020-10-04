@@ -125,6 +125,7 @@ declare namespace Fudge {
     class ControllerComponent extends ƒui.Controller {
         constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
         private hndDragOver;
+        private getComponentType;
     }
 }
 declare namespace Fudge {
@@ -380,8 +381,10 @@ declare namespace Fudge {
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class ViewExternal extends View {
+        private tree;
         constructor(_container: GoldenLayout.Container, _state: Object);
         setProject(): void;
+        getSelection(): DirectoryEntry[];
         private hndEvent;
     }
 }
