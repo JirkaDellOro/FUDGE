@@ -61,12 +61,25 @@ var Fudge;
 var Fudge;
 // /<reference types="../../../node_modules/@types/node/fs"/>
 (function (Fudge) {
+    let MIME;
+    (function (MIME) {
+        MIME["TEXT"] = "text";
+        MIME["AUDIO"] = "audio";
+        MIME["IMAGE"] = "image";
+        MIME["UNKNOWN"] = "unknown";
+    })(MIME = Fudge.MIME || (Fudge.MIME = {}));
+    let mime = new Map([
+        [MIME.TEXT, ["ts", "json", "html", "htm", "css", "js", "txt"]],
+        [MIME.AUDIO, ["mp3", "wav", "ogg"]],
+        [MIME.IMAGE, ["png", "jpg", "jpeg", "tif", "tga", "gif"]]
+    ]);
     const fs = require("fs");
     const { Dirent, PathLike, renameSync, removeSync, readdirSync, readFileSync, copySync } = require("fs");
     const { basename, dirname, join } = require("path");
     class DirectoryEntry {
-        constructor(_path, _dirent, _stats) {
+        constructor(_path, _pathRelative, _dirent, _stats) {
             this.path = _path;
+            this.pathRelative = _pathRelative;
             this.dirent = _dirent;
             this.stats = _stats;
         }
@@ -74,7 +87,7 @@ var Fudge;
             let dirent = new Dirent();
             dirent.name = basename(_path);
             dirent.isRoot = true;
-            return new DirectoryEntry(_path, dirent, null);
+            return new DirectoryEntry(_path, "", dirent, null);
         }
         get name() {
             return this.dirent.name;
@@ -99,8 +112,9 @@ var Fudge;
             let content = [];
             for (let dirent of dirents) {
                 let path = join(this.path, dirent.name);
+                let pathRelative = join(this.pathRelative, dirent.name);
                 let stats = fs.statSync(path);
-                let entry = new DirectoryEntry(path, dirent, stats);
+                let entry = new DirectoryEntry(path, pathRelative, dirent, stats);
                 content.push(entry);
             }
             return content;
@@ -111,6 +125,14 @@ var Fudge;
         }
         addEntry(_entry) {
             copySync(_entry.path, join(this.path, _entry.name));
+        }
+        getMimeType() {
+            let extension = this.name.split(".").pop();
+            for (let type of mime) {
+                if (type[1].indexOf(extension) > -1)
+                    return type[0];
+            }
+            return MIME.UNKNOWN;
         }
     }
     Fudge.DirectoryEntry = DirectoryEntry;
@@ -458,27 +480,171 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    var ƒ = FudgeCore;
+    /**
+     * Base class for all [[View]]s to support generic functionality
+     * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class View {
+        constructor(_container, _state) {
+            //#region  ContextMenu
+            this.openContextMenu = (_event) => {
+                this.contextMenu.popup();
+            };
+            this.hndEventCommon = (_event) => {
+                switch (_event.type) {
+                    case Fudge.EVENT_EDITOR.SET_PROJECT:
+                        this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
+                        break;
+                }
+            };
+            this.dom = document.createElement("div");
+            this.dom.style.height = "100%";
+            this.dom.style.overflow = "auto";
+            this.dom.setAttribute("view", this.constructor.name);
+            _container.getElement().append(this.dom);
+            this.container = _container;
+            this.container.on("destroy", (_e) => this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.DESTROY, { bubbles: true, detail: _e["instance"] })));
+            // console.log(this.contextMenuCallback);
+            this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEventCommon);
+            this.id = View.registerViewForDragDrop(this);
+        }
+        static getViewSource(_event) {
+            for (let item of _event.dataTransfer.items)
+                if (item.type.startsWith("sourceview"))
+                    return View.views[item.type.split(":").pop()];
+            return null;
+        }
+        static registerViewForDragDrop(_this) {
+            View.views[View.idCount] = _this;
+            // when drag starts, add identifier to the event in a way that allows dragover to process the soure
+            _this.dom.addEventListener("dragstart" /* DRAG_START */, (_event) => {
+                _event.stopPropagation();
+                _event.dataTransfer.setData("SourceView:" + _this.id.toString(), "typesHack");
+            });
+            // when dragging over a view, get the original source view for dragging and call hndDragOver
+            _this.dom.addEventListener("dragover" /* DRAG_OVER */, (_event) => {
+                _event.stopPropagation();
+                let viewSource = View.getViewSource(_event);
+                _this.hndDragOver(_event, viewSource);
+            });
+            // when dropping into a view, get the original source view for dragging and call hndDrop
+            _this.dom.addEventListener("drop" /* DROP */, (_event) => {
+                _event.stopPropagation();
+                let viewSource = View.getViewSource(_event);
+                _this.hndDrop(_event, viewSource);
+            });
+            return View.idCount++;
+        }
+        setTitle(_title) {
+            this.container.setTitle(_title);
+        }
+        getDragDropSources() {
+            return [];
+        }
+        getContextMenu(_callback) {
+            const menu = new Fudge.remote.Menu();
+            Fudge.ContextMenu.appendCopyPaste(menu);
+            return menu;
+        }
+        contextMenuCallback(_item, _window, _event) {
+            ƒ.Debug.info(`ContextMenu: Item-id=${Fudge.CONTEXTMENU[_item.id]}`);
+        }
+        //#endregion
+        //#region Events
+        hndDrop(_event, _source) {
+            // console.log(_source, _event);
+            console.log(_event, _source);
+        }
+        hndDragOver(_event, _source) {
+            // _event.dataTransfer.dropEffect = "link";
+        }
+    }
+    View.views = {};
+    View.idCount = 0;
+    Fudge.View = View;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    var ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
+    /**
+     * List the external resources
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class ViewExternal extends Fudge.View {
+        constructor(_container, _state) {
+            super(_container, _state);
+            this.hndEvent = (_event) => {
+                this.setProject();
+            };
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
+        }
+        setProject() {
+            while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
+                ;
+            let path = new URL(".", ƒ.Project.baseURL).pathname;
+            path = path.substr(1); // strip leading slash
+            let root = Fudge.DirectoryEntry.createRoot(path);
+            this.tree = new ƒui.Tree(new Fudge.ControllerTreeDirectory(), root);
+            this.dom.appendChild(this.tree);
+            this.tree.getItems()[0].open(true);
+        }
+        getSelection() {
+            return this.tree.controller.selection;
+        }
+        getDragDropSources() {
+            return this.tree.controller.dragDrop.sources;
+        }
+    }
+    Fudge.ViewExternal = ViewExternal;
+})(Fudge || (Fudge = {}));
+///<reference path="../View/View.ts"/>
+///<reference path="../View/Resource/ViewExternal.ts"/>
+var Fudge;
+///<reference path="../View/View.ts"/>
+///<reference path="../View/Resource/ViewExternal.ts"/>
+(function (Fudge) {
+    var ƒui = FudgeUserInterface;
+    let filter = {
+        UrlOnTexture: { onElementType: "url", onComponentType: "TextureImage", fromViews: [Fudge.ViewExternal], ofType: Fudge.DirectoryEntry, dropEffect: "link" }
+    };
     class ControllerComponent extends ƒui.Controller {
         constructor(_mutable, _domElement) {
             super(_mutable, _domElement);
             this.hndDragOver = (_event) => {
-                let target = _event.target;
-                let typeComponent = this.getComponentType(target);
-                let viewSource = Fudge.View.getViewSource(_event);
-                let typeElement = target.parentElement.getAttribute("key");
-                if (typeElement == "url" && viewSource instanceof Fudge.ViewExternal) {
-                    let selected = viewSource.getSelection();
-                    if (selected.length == 1 && !selected[0].isDirectory) {
-                        _event.dataTransfer.dropEffect = "link";
-                        _event.preventDefault();
-                        _event.stopPropagation();
-                        console.log(selected[0].name);
+                this.filterDragDrop(_event, filter.UrlOnTexture, (_sources) => {
+                    let sources = _sources;
+                    if (sources.length == 1 && !sources[0].isDirectory) {
+                        console.log(sources[0].pathRelative);
+                        console.log(sources[0].getMimeType());
+                        if (sources[0].getMimeType() == Fudge.MIME.IMAGE)
+                            return true;
                     }
-                }
+                    return false;
+                });
             };
             this.domElement.addEventListener("input", this.mutateOnInput);
             this.domElement.addEventListener("dragover" /* DRAG_OVER */, this.hndDragOver);
+        }
+        filterDragDrop(_event, _filter, _callback) {
+            let target = _event.target;
+            let typeElement = target.parentElement.getAttribute("key");
+            let typeComponent = this.getComponentType(target);
+            if (typeElement != _filter.onElementType || typeComponent != _filter.onComponentType)
+                return false;
+            let viewSource = Fudge.View.getViewSource(_event);
+            if (!_filter.fromViews.find((_view) => viewSource instanceof _view))
+                return false;
+            let sources = viewSource.getDragDropSources();
+            if (!(sources[0] instanceof _filter.ofType))
+                return false;
+            if (!_callback(sources))
+                return false;
+            _event.dataTransfer.dropEffect = "link";
+            _event.preventDefault();
+            _event.stopPropagation();
         }
         getComponentType(_target) {
             let element = _target;
@@ -615,90 +781,6 @@ var Fudge;
         }
     }
     Fudge.ControllerTreeNode = ControllerTreeNode;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    var ƒ = FudgeCore;
-    /**
-     * Base class for all [[View]]s to support generic functionality
-     * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
-     */
-    class View {
-        constructor(_container, _state) {
-            //#region  ContextMenu
-            this.openContextMenu = (_event) => {
-                this.contextMenu.popup();
-            };
-            this.hndEventCommon = (_event) => {
-                switch (_event.type) {
-                    case Fudge.EVENT_EDITOR.SET_PROJECT:
-                        this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
-                        break;
-                }
-            };
-            this.dom = document.createElement("div");
-            this.dom.style.height = "100%";
-            this.dom.style.overflow = "auto";
-            this.dom.setAttribute("view", this.constructor.name);
-            _container.getElement().append(this.dom);
-            this.container = _container;
-            this.container.on("destroy", (_e) => this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.DESTROY, { bubbles: true, detail: _e["instance"] })));
-            // console.log(this.contextMenuCallback);
-            this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEventCommon);
-            this.id = View.registerViewForDragDrop(this);
-        }
-        static getViewSource(_event) {
-            for (let item of _event.dataTransfer.items)
-                if (item.type.startsWith("sourceview"))
-                    return View.views[item.type.split(":").pop()];
-            return null;
-        }
-        static registerViewForDragDrop(_this) {
-            View.views[View.idCount] = _this;
-            // when drag starts, add identifier to the event in a way that allows dragover to process the soure
-            _this.dom.addEventListener("dragstart" /* DRAG_START */, (_event) => {
-                _event.stopPropagation();
-                _event.dataTransfer.setData("SourceView:" + _this.id.toString(), "typesHack");
-            });
-            // when dragging over a view, get the original source view for dragging and call hndDragOver
-            _this.dom.addEventListener("dragover" /* DRAG_OVER */, (_event) => {
-                _event.stopPropagation();
-                let viewSource = View.getViewSource(_event);
-                _this.hndDragOver(_event, viewSource);
-            });
-            // when dropping into a view, get the original source view for dragging and call hndDrop
-            _this.dom.addEventListener("drop" /* DROP */, (_event) => {
-                _event.stopPropagation();
-                let viewSource = View.getViewSource(_event);
-                _this.hndDrop(_event, viewSource);
-            });
-            return View.idCount++;
-        }
-        setTitle(_title) {
-            this.container.setTitle(_title);
-        }
-        getContextMenu(_callback) {
-            const menu = new Fudge.remote.Menu();
-            Fudge.ContextMenu.appendCopyPaste(menu);
-            return menu;
-        }
-        contextMenuCallback(_item, _window, _event) {
-            ƒ.Debug.info(`ContextMenu: Item-id=${Fudge.CONTEXTMENU[_item.id]}`);
-        }
-        //#endregion
-        //#region Events
-        hndDrop(_event, _source) {
-            // console.log(_source, _event);
-            console.log(_event, _source);
-        }
-        hndDragOver(_event, _source) {
-            // _event.dataTransfer.dropEffect = "link";
-        }
-    }
-    View.views = {};
-    View.idCount = 0;
-    Fudge.View = View;
 })(Fudge || (Fudge = {}));
 ///<reference path="../View/View.ts"/>
 var Fudge;
@@ -1679,38 +1761,6 @@ var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
-    /**
-     * List the external resources
-     * @author Jirka Dell'Oro-Friedl, HFU, 2020
-     */
-    class ViewExternal extends Fudge.View {
-        constructor(_container, _state) {
-            super(_container, _state);
-            this.hndEvent = (_event) => {
-                this.setProject();
-            };
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
-        }
-        setProject() {
-            while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
-                ;
-            let path = new URL(".", ƒ.Project.baseURL).pathname;
-            path = path.substr(1); // strip leading slash
-            let root = Fudge.DirectoryEntry.createRoot(path);
-            this.tree = new ƒui.Tree(new Fudge.ControllerTreeDirectory(), root);
-            this.dom.appendChild(this.tree);
-            this.tree.getItems()[0].open(true);
-        }
-        getSelection() {
-            return this.tree.controller.selection;
-        }
-    }
-    Fudge.ViewExternal = ViewExternal;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    var ƒ = FudgeCore;
-    var ƒui = FudgeUserInterface;
     Fudge.typesOfResources = [
         ƒ.Mesh
     ];
@@ -1784,11 +1834,6 @@ var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒaid = FudgeAid;
-    let extensions = {
-        text: ["ts", "json", "html", "htm", "css", "js", "txt"],
-        audio: ["mp3", "wav", "ogg"],
-        image: ["png", "jpg", "jpeg", "tif", "tga", "gif"]
-    };
     /**
      * Preview a resource
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
@@ -1910,7 +1955,7 @@ var Fudge;
                     this.dom.appendChild(img);
                     break;
                 case "Audio":
-                    let entry = new Fudge.DirectoryEntry(this.resource.path, null, null);
+                    let entry = new Fudge.DirectoryEntry(this.resource.path, "", null, null);
                     this.dom.appendChild(this.createAudioPreview(entry));
                     break;
                 default: break;
@@ -1924,13 +1969,12 @@ var Fudge;
             return graph;
         }
         createFilePreview(_entry) {
-            let extension = _entry.name.split(".").pop();
-            if (extensions.text.indexOf(extension) > -1)
-                return this.createTextPreview(_entry);
-            if (extensions.audio.indexOf(extension) > -1)
-                return this.createAudioPreview(_entry);
-            if (extensions.image.indexOf(extension) > -1)
-                return this.createImagePreview(_entry);
+            let mime = _entry.getMimeType();
+            switch (mime) {
+                case Fudge.MIME.TEXT: return this.createTextPreview(_entry);
+                case Fudge.MIME.AUDIO: return this.createAudioPreview(_entry);
+                case Fudge.MIME.IMAGE: return this.createImagePreview(_entry);
+            }
             return null;
         }
         createTextPreview(_entry) {

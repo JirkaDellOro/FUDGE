@@ -1,4 +1,5 @@
 namespace Fudge {
+
   export enum CONTEXTMENU {
     // SKETCH = ViewSketch,
     ADD_NODE,

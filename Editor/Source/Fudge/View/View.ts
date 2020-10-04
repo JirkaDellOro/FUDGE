@@ -72,6 +72,10 @@ namespace Fudge {
       this.container.setTitle(_title);
     }
 
+    public getDragDropSources(): Object[] {
+      return [];
+    }
+
     //#region  ContextMenu
     protected openContextMenu = (_event: Event): void => {
       this.contextMenu.popup();

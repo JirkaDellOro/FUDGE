@@ -1,8 +1,8 @@
 /// <reference types="../../core/build/fudgecore" />
 /// <reference types="../../../node_modules/electron/electron" />
 /// <reference types="../../../aid/build/fudgeaid" />
-/// <reference types="../../../userinterface/build/fudgeuserinterface" />
 /// <reference types="golden-layout" />
+/// <reference types="../../../userinterface/build/fudgeuserinterface" />
 declare namespace Fudge {
     enum CONTEXTMENU {
         ADD_NODE = 0,
@@ -45,12 +45,19 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    export enum MIME {
+        TEXT = "text",
+        AUDIO = "audio",
+        IMAGE = "image",
+        UNKNOWN = "unknown"
+    }
     const fs: ƒ.General;
     export class DirectoryEntry {
         path: typeof fs.PathLike;
+        pathRelative: typeof fs.PathLike;
         dirent: typeof fs.Dirent;
         stats: Object;
-        constructor(_path: typeof fs.PathLike, _dirent: typeof fs.Dirent, _stats: Object);
+        constructor(_path: typeof fs.PathLike, _pathRelative: typeof fs.PathLike, _dirent: typeof fs.Dirent, _stats: Object);
         static createRoot(_path: typeof fs.PathLike): DirectoryEntry;
         get name(): string;
         set name(_name: string);
@@ -60,6 +67,7 @@ declare namespace Fudge {
         getDirectoryContent(): DirectoryEntry[];
         getFileContent(): string;
         addEntry(_entry: DirectoryEntry): void;
+        getMimeType(): MIME;
     }
     export {};
 }
@@ -120,11 +128,51 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    /**
+     * Base class for all [[View]]s to support generic functionality
+     * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    abstract class View {
+        private static views;
+        private static idCount;
+        dom: HTMLElement;
+        protected contextMenu: Electron.Menu;
+        private container;
+        private id;
+        constructor(_container: GoldenLayout.Container, _state: Object);
+        static getViewSource(_event: DragEvent): View;
+        private static registerViewForDragDrop;
+        setTitle(_title: string): void;
+        getDragDropSources(): Object[];
+        protected openContextMenu: (_event: Event) => void;
+        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
+        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        protected hndDrop(_event: DragEvent, _source: View): void;
+        protected hndDragOver(_event: DragEvent, _source: View): void;
+        private hndEventCommon;
+    }
+}
+declare namespace Fudge {
+    /**
+     * List the external resources
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class ViewExternal extends View {
+        private tree;
+        constructor(_container: GoldenLayout.Container, _state: Object);
+        setProject(): void;
+        getSelection(): DirectoryEntry[];
+        getDragDropSources(): DirectoryEntry[];
+        private hndEvent;
+    }
+}
+declare namespace Fudge {
     import ƒ = FudgeCore;
     import ƒui = FudgeUserInterface;
     class ControllerComponent extends ƒui.Controller {
         constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
         private hndDragOver;
+        private filterDragDrop;
         private getComponentType;
     }
 }
@@ -164,30 +212,6 @@ declare namespace Fudge {
         delete(_focussed: ƒ.Node[]): ƒ.Node[];
         addChildren(_children: ƒ.Node[], _target: ƒ.Node): ƒ.Node[];
         copy(_originals: ƒ.Node[]): Promise<ƒ.Node[]>;
-    }
-}
-declare namespace Fudge {
-    /**
-     * Base class for all [[View]]s to support generic functionality
-     * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
-     */
-    abstract class View {
-        private static views;
-        private static idCount;
-        dom: HTMLElement;
-        protected contextMenu: Electron.Menu;
-        private container;
-        private id;
-        constructor(_container: GoldenLayout.Container, _state: Object);
-        static getViewSource(_event: DragEvent): View;
-        private static registerViewForDragDrop;
-        setTitle(_title: string): void;
-        protected openContextMenu: (_event: Event) => void;
-        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
-        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
-        protected hndDrop(_event: DragEvent, _source: View): void;
-        protected hndDragOver(_event: DragEvent, _source: View): void;
-        private hndEventCommon;
     }
 }
 declare namespace Fudge {
@@ -373,19 +397,6 @@ declare namespace Fudge {
         private hndEvent;
         private activeViewport;
         private redraw;
-    }
-}
-declare namespace Fudge {
-    /**
-     * List the external resources
-     * @author Jirka Dell'Oro-Friedl, HFU, 2020
-     */
-    class ViewExternal extends View {
-        private tree;
-        constructor(_container: GoldenLayout.Container, _state: Object);
-        setProject(): void;
-        getSelection(): DirectoryEntry[];
-        private hndEvent;
     }
 }
 declare namespace Fudge {

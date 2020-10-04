@@ -28,6 +28,10 @@ namespace Fudge {
     public getSelection(): DirectoryEntry[] {
       return this.tree.controller.selection;
     }
+    
+    public getDragDropSources(): DirectoryEntry[] {
+      return this.tree.controller.dragDrop.sources;
+    }
 
     private hndEvent = (_event: CustomEvent): void => {
       this.setProject();

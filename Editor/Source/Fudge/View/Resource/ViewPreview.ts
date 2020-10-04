@@ -3,12 +3,6 @@ namespace Fudge {
   import ƒui = FudgeUserInterface;
   import ƒaid = FudgeAid;
 
-  let extensions: { [type: string]: string[] } = {
-    text: ["ts", "json", "html", "htm", "css", "js", "txt"],
-    audio: ["mp3", "wav", "ogg"],
-    image: ["png", "jpg", "jpeg", "tif", "tga", "gif"]
-  };
-
   /**
    * Preview a resource
    * @author Jirka Dell'Oro-Friedl, HFU, 2020  
@@ -126,7 +120,7 @@ namespace Fudge {
           this.dom.appendChild(img);
           break;
         case "Audio":
-          let entry: DirectoryEntry = new DirectoryEntry((<ƒ.Audio>this.resource).path, null, null);
+          let entry: DirectoryEntry = new DirectoryEntry((<ƒ.Audio>this.resource).path, "", null, null);
           this.dom.appendChild(this.createAudioPreview(entry));
           break;
         default: break;
@@ -142,14 +136,12 @@ namespace Fudge {
     }
 
     private createFilePreview(_entry: DirectoryEntry): HTMLElement {
-      let extension: string = _entry.name.split(".").pop();
-      if (extensions.text.indexOf(extension) > -1)
-        return this.createTextPreview(_entry);
-      if (extensions.audio.indexOf(extension) > -1)
-        return this.createAudioPreview(_entry);
-      if (extensions.image.indexOf(extension) > -1)
-        return this.createImagePreview(_entry);
-
+      let mime: MIME = _entry.getMimeType();
+      switch (mime) {
+        case MIME.TEXT: return this.createTextPreview(_entry);
+        case MIME.AUDIO: return this.createAudioPreview(_entry);
+        case MIME.IMAGE: return this.createImagePreview(_entry);
+      }
       return null;
     }
 
