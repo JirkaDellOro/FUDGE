@@ -178,6 +178,7 @@ declare namespace Fudge {
         private container;
         private id;
         constructor(_container: GoldenLayout.Container, _state: Object);
+        static getViewSource(_event: DragEvent): View;
         private static registerViewForDragDrop;
         setTitle(_title: string): void;
         protected openContextMenu: (_event: Event) => void;

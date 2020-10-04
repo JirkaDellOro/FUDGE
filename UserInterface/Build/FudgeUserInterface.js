@@ -1632,7 +1632,7 @@ var FudgeUserInterface;
                 }
             };
             this.hndDragStart = (_event) => {
-                //_event.stopPropagation();
+                _event.stopPropagation();
                 this.controller.dragDrop.sources = [];
                 if (this.selected)
                     this.controller.dragDrop.sources = this.controller.selection;
@@ -1644,7 +1644,7 @@ var FudgeUserInterface;
                 _event.stopPropagation();
                 _event.preventDefault();
                 this.controller.dragDrop.target = this.data;
-                _event.dataTransfer.dropEffect = "move";
+                _event.dataTransfer.dropEffect = "link";
             };
             this.hndPointerUp = (_event) => {
                 _event.stopPropagation();
@@ -2139,18 +2139,26 @@ var FudgeUserInterface;
             };
             this.hndDragStart = (_event) => {
                 // _event.stopPropagation();
+                if (_event.dataTransfer.getData("dragstart"))
+                    return;
                 this.controller.dragDrop.sources = [];
                 if (this.selected)
                     this.controller.dragDrop.sources = this.controller.selection;
                 else
                     this.controller.dragDrop.sources = [this.data];
                 _event.dataTransfer.effectAllowed = "all";
+                // mark as already processed by this tree item to ignore it in further propagation through the tree
+                _event.dataTransfer.setData("dragstart", this.label.value);
             };
             this.hndDragOver = (_event) => {
                 _event.stopPropagation();
+                if (_event.dataTransfer.getData("dragover"))
+                    return;
                 _event.preventDefault();
                 this.controller.dragDrop.target = this.data;
                 _event.dataTransfer.dropEffect = "move";
+                // mark as already processed by this tree item to ignore it in further propagation through the tree
+                _event.dataTransfer.setData("dragover", this.label.value);
             };
             this.hndPointerUp = (_event) => {
                 _event.stopPropagation();

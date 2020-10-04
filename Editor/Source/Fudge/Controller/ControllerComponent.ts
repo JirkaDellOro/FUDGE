@@ -11,12 +11,15 @@ namespace Fudge {
 
     private hndDragOver = (_event: DragEvent): void => {
       let target: HTMLElement = <HTMLElement>_event.target;
+      
       let typeElement: HTMLElement = target;
       while (!typeElement.getAttribute("type"))
-       typeElement = typeElement.parentElement;
+        typeElement = typeElement.parentElement;
+      if (!typeElement)
+        return;
+        
       if (target.parentElement.getAttribute("key") == "url") {
-        console.log(typeElement.getAttribute("type"));
-        console.log("URL!");
+        console.log(typeElement.getAttribute("type"), View.getViewSource(_event));
       }
     }
   }

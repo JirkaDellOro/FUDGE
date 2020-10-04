@@ -35,30 +35,35 @@ namespace Fudge {
       this.id = View.registerViewForDragDrop(this);
     }
 
+    public static getViewSource(_event: DragEvent): View {
+      for (let item of _event.dataTransfer.items)
+        if (item.type.startsWith("sourceview"))
+          return View.views[item.type.split(":").pop()];
+      return null;
+    }
+
     private static registerViewForDragDrop(_this: View): number {
       View.views[View.idCount] = _this;
 
+      // when drag starts, add identifier to the event in a way that allows dragover to process the soure
       _this.dom.addEventListener(ƒui.EVENT.DRAG_START, (_event: DragEvent) => {
         _event.stopPropagation();
-        _event.dataTransfer.setData("View", _this.id.toString());
-        _event.stopPropagation();
-      });
-      _this.dom.addEventListener(ƒui.EVENT.DRAG_OVER, (_event: DragEvent) => {
-        _event.stopPropagation();
-        let viewSource: View = getViewSource(_event);
-        _this.hndDragOver(_event, viewSource);
-      });
-      _this.dom.addEventListener(ƒui.EVENT.DROP, (_event: DragEvent) => {
-        _event.stopPropagation();
-        let viewSource: View = getViewSource(_event);
-        _this.hndDrop(_event, viewSource);
+        _event.dataTransfer.setData("SourceView:" + _this.id.toString(), "typesHack");
       });
 
-      function getViewSource(_event: DragEvent): View {        
-        let idViewSource: string = _event.dataTransfer.getData("View");
-        let viewSource: View = View.views[idViewSource];
-        return viewSource;
-      }
+      // when dragging over a view, get the original source view for dragging and call hndDragOver
+      _this.dom.addEventListener(ƒui.EVENT.DRAG_OVER, (_event: DragEvent) => {
+        _event.stopPropagation();
+        let viewSource: View = View.getViewSource(_event);
+        _this.hndDragOver(_event, viewSource);
+      });
+
+      // when dropping into a view, get the original source view for dragging and call hndDrop
+      _this.dom.addEventListener(ƒui.EVENT.DROP, (_event: DragEvent) => {
+        _event.stopPropagation();
+        let viewSource: View = View.getViewSource(_event);
+        _this.hndDrop(_event, viewSource);
+      });
 
       return View.idCount++;
     }
@@ -86,6 +91,7 @@ namespace Fudge {
     //#region Events
     protected hndDrop(_event: DragEvent, _source: View): void {
       // console.log(_source, _event);
+      console.log(_event, _source);
     }
 
     protected hndDragOver(_event: DragEvent, _source: View): void {

@@ -467,9 +467,10 @@ var Fudge;
                 let typeElement = target;
                 while (!typeElement.getAttribute("type"))
                     typeElement = typeElement.parentElement;
+                if (!typeElement)
+                    return;
                 if (target.parentElement.getAttribute("key") == "url") {
-                    console.log(typeElement.getAttribute("type"));
-                    console.log("URL!");
+                    console.log(typeElement.getAttribute("type"), Fudge.View.getViewSource(_event));
                 }
             };
             this.domElement.addEventListener("input", this.mutateOnInput);
@@ -633,28 +634,31 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEventCommon);
             this.id = View.registerViewForDragDrop(this);
         }
+        static getViewSource(_event) {
+            for (let item of _event.dataTransfer.items)
+                if (item.type.startsWith("sourceview"))
+                    return View.views[item.type.split(":").pop()];
+            return null;
+        }
         static registerViewForDragDrop(_this) {
             View.views[View.idCount] = _this;
+            // when drag starts, add identifier to the event in a way that allows dragover to process the soure
             _this.dom.addEventListener("dragstart" /* DRAG_START */, (_event) => {
                 _event.stopPropagation();
-                _event.dataTransfer.setData("View", _this.id.toString());
-                _event.stopPropagation();
+                _event.dataTransfer.setData("SourceView:" + _this.id.toString(), "typesHack");
             });
+            // when dragging over a view, get the original source view for dragging and call hndDragOver
             _this.dom.addEventListener("dragover" /* DRAG_OVER */, (_event) => {
                 _event.stopPropagation();
-                let viewSource = getViewSource(_event);
+                let viewSource = View.getViewSource(_event);
                 _this.hndDragOver(_event, viewSource);
             });
+            // when dropping into a view, get the original source view for dragging and call hndDrop
             _this.dom.addEventListener("drop" /* DROP */, (_event) => {
                 _event.stopPropagation();
-                let viewSource = getViewSource(_event);
+                let viewSource = View.getViewSource(_event);
                 _this.hndDrop(_event, viewSource);
             });
-            function getViewSource(_event) {
-                let idViewSource = _event.dataTransfer.getData("View");
-                let viewSource = View.views[idViewSource];
-                return viewSource;
-            }
             return View.idCount++;
         }
         setTitle(_title) {
@@ -672,6 +676,7 @@ var Fudge;
         //#region Events
         hndDrop(_event, _source) {
             // console.log(_source, _event);
+            console.log(_event, _source);
         }
         hndDragOver(_event, _source) {
             // _event.dataTransfer.dropEffect = "link";
