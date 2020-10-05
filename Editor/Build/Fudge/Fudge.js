@@ -632,6 +632,7 @@ var Fudge;
                 let setExternalLink = (_sources) => {
                     let sources = _sources;
                     _event.target.value = sources[0].pathRelative;
+                    this.mutable.addEventListener("done" /* DONE */, (_event) => this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true })));
                     this.mutateOnInput(_event);
                     return true;
                 };

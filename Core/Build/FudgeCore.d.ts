@@ -146,7 +146,9 @@ declare namespace FudgeCore {
         /** dispatched to [[FileIo]] when a list of files has been loaded  */
         FILE_LOADED = "fileLoaded",
         /** dispatched to [[FileIo]] when a list of files has been saved */
-        FILE_SAVED = "fileSaved"
+        FILE_SAVED = "fileSaved",
+        /** generic event to be dispatch when some process is completed */
+        DONE = "done"
     }
     type Eventƒ = EventPointer | EventDragDrop | EventWheel | EventKeyboard | Event;
     type EventListenerƒ = ((_event: EventPointer) => void) | ((_event: EventDragDrop) => void) | ((_event: EventWheel) => void) | ((_event: EventKeyboard) => void) | ((_event: Eventƒ) => void) | EventListenerObject;
@@ -704,6 +706,12 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    class RenderInjectorTexture extends RenderInjector {
+        static decorate(_constructor: Function): void;
+        protected static injectTextureImage(this: Texture): void;
+    }
+}
+declare namespace FudgeCore {
     interface MapClassToComponents {
         [className: string]: Component[];
     }
@@ -1253,6 +1261,7 @@ declare namespace FudgeCore {
      */
     class CoatTextured extends CoatColored {
         texture: TextureImage;
+        constructor(_color?: Color);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }
@@ -3496,6 +3505,10 @@ declare namespace FudgeCore {
      */
     abstract class Texture extends Mutable {
         name: string;
+        protected renderData: {
+            [key: string]: unknown;
+        };
+        useRenderData(): void;
         protected reduceMutator(_mutator: Mutator): void;
     }
     /**

@@ -5,6 +5,10 @@ namespace FudgeCore {
    */
   export abstract class Texture extends Mutable {
     public name: string = "Texture";
+    protected renderData: { [key: string]: unknown };
+
+    public useRenderData(): void {/* injected by RenderInjector*/ }
+
     protected reduceMutator(_mutator: Mutator): void {
       // delete _mutator.idResource; 
     }
@@ -13,10 +17,12 @@ namespace FudgeCore {
   /**
    * Texture created from an existing image
    */
+  @RenderInjectorTexture.decorate
   export class TextureImage extends Texture implements SerializableResource {
     public image: HTMLImageElement = null;
     public url: RequestInfo;
     public idResource: string = undefined;
+
 
     constructor(_url?: RequestInfo) {
       super();
@@ -40,7 +46,11 @@ namespace FudgeCore {
       // this.image.src = objectURL;
 
       return new Promise((resolve, reject) => {
-        this.image.addEventListener("load", () => resolve());
+        this.image.addEventListener("load", () => {
+          this.renderData = null; // refresh render data on next draw call
+          resolve();
+          this.dispatchEvent(new Event(EVENT.DONE));
+        });
         this.image.addEventListener("error", () => reject());
         this.image.src = new URL(this.url.toString(), Project.baseURL).toString();
       });
