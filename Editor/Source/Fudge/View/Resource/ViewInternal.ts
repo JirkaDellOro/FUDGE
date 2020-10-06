@@ -27,6 +27,14 @@ namespace Fudge {
       this.dom.appendChild(this.table);
     }
 
+    public getSelection(): ƒ.SerializableResource[] {
+      return this.table.controller.selection;
+    }
+    
+    public getDragDropSources(): ƒ.SerializableResource[] {
+      return this.table.controller.dragDrop.sources;
+    }
+
     // #region  ContextMenu
     protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
       const menu: Electron.Menu = new remote.Menu();

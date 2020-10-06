@@ -168,13 +168,31 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
+    let typesOfResources: ƒ.General[];
+    /**
+     * List the internal resources
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class ViewInternal extends View {
+        private table;
+        constructor(_container: GoldenLayout.Container, _state: Object);
+        listResources(): void;
+        getSelection(): ƒ.SerializableResource[];
+        getDragDropSources(): ƒ.SerializableResource[];
+        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
+        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        private hndEvent;
+    }
+}
+declare namespace Fudge {
+    import ƒ = FudgeCore;
     import ƒui = FudgeUserInterface;
     class ControllerComponent extends ƒui.Controller {
         constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
         private hndDragOver;
         private hndDrop;
         private filterDragDrop;
-        private getComponentType;
+        private getAncestorWithType;
     }
 }
 declare namespace Fudge {
@@ -398,22 +416,6 @@ declare namespace Fudge {
         private hndEvent;
         private activeViewport;
         private redraw;
-    }
-}
-declare namespace Fudge {
-    import ƒ = FudgeCore;
-    let typesOfResources: ƒ.General[];
-    /**
-     * List the internal resources
-     * @author Jirka Dell'Oro-Friedl, HFU, 2020
-     */
-    class ViewInternal extends View {
-        private table;
-        constructor(_container: GoldenLayout.Container, _state: Object);
-        listResources(): void;
-        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
-        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
-        private hndEvent;
     }
 }
 declare namespace Fudge {

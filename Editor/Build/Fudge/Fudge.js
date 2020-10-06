@@ -279,7 +279,7 @@ var Fudge;
             console.log("Sending");
             Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_PROJECT_OPEN);
             Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_GRAPH_OPEN);
-            // ipcRenderer.emit(MENU.PROJECT_LOAD);
+            Fudge.ipcRenderer.emit(Fudge.MENU.PROJECT_LOAD);
             // ipcRenderer.emit
         }
         static setupGoldenLayout() {
@@ -600,26 +600,112 @@ var Fudge;
     }
     Fudge.ViewExternal = ViewExternal;
 })(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    var ƒ = FudgeCore;
+    var ƒui = FudgeUserInterface;
+    Fudge.typesOfResources = [
+        ƒ.Mesh
+    ];
+    /**
+     * List the internal resources
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class ViewInternal extends Fudge.View {
+        constructor(_container, _state) {
+            super(_container, _state);
+            //#endregion
+            this.hndEvent = (_event) => {
+                switch (_event.type) {
+                    case Fudge.EVENT_EDITOR.SET_PROJECT:
+                    case Fudge.EVENT_EDITOR.UPDATE:
+                        this.listResources();
+                        break;
+                    // case ƒui.EVENT.SELECT:
+                    //   console.log(_event.detail.data);
+                    //   break;
+                }
+            };
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
+            this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
+        }
+        listResources() {
+            while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
+                ;
+            this.table = new ƒui.Table(new Fudge.ControllerTableResource(), Object.values(ƒ.Project.resources));
+            this.dom.appendChild(this.table);
+        }
+        getSelection() {
+            return this.table.controller.selection;
+        }
+        getDragDropSources() {
+            return this.table.controller.dragDrop.sources;
+        }
+        // #region  ContextMenu
+        getContextMenu(_callback) {
+            const menu = new Fudge.remote.Menu();
+            let item;
+            item = new Fudge.remote.MenuItem({ label: "Edit", id: String(Fudge.CONTEXTMENU.EDIT), click: _callback, accelerator: process.platform == "darwin" ? "E" : "E" });
+            menu.append(item);
+            item = new Fudge.remote.MenuItem({
+                label: "Create",
+                submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE, ƒ.Mesh.subclasses, _callback)
+            });
+            // item.submenu = ContextMenu.getSubMenu(ƒ.Mesh, _callback);
+            menu.append(item);
+            // ContextMenu.appendCopyPaste(menu);
+            return menu;
+        }
+        contextMenuCallback(_item, _window, _event) {
+            ƒ.Debug.fudge(`MenuSelect | id: ${Fudge.CONTEXTMENU[_item.id]} | event: ${_event}`);
+            switch (Number(_item.id)) {
+                case Fudge.CONTEXTMENU.CREATE:
+                    let iSubclass = _item["iSubclass"];
+                    let type = ƒ.Mesh.subclasses[iSubclass];
+                    //@ts-ignore
+                    let meshNew = new type();
+                    // ƒ.Debug.info(meshNew.type, meshNew);
+                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                    this.table.selectInterval(meshNew, meshNew);
+                    break;
+                case Fudge.CONTEXTMENU.EDIT:
+                    let resource = this.table.getFocussed();
+                    console.log("Edit", resource);
+                    this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: resource }));
+                    break;
+            }
+        }
+    }
+    Fudge.ViewInternal = ViewInternal;
+})(Fudge || (Fudge = {}));
 ///<reference path="../View/View.ts"/>
 ///<reference path="../View/Resource/ViewExternal.ts"/>
+///<reference path="../View/Resource/ViewInternal.ts"/>
 var Fudge;
 ///<reference path="../View/View.ts"/>
 ///<reference path="../View/Resource/ViewExternal.ts"/>
+///<reference path="../View/Resource/ViewInternal.ts"/>
 (function (Fudge) {
+    var ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
     let filter = {
-        UrlOnTexture: { onElementType: "url", onComponentType: "TextureImage", fromViews: [Fudge.ViewExternal], ofType: Fudge.DirectoryEntry, dropEffect: "link" },
-        UrlOnAudio: { onElementType: "url", onComponentType: "Audio", fromViews: [Fudge.ViewExternal], ofType: Fudge.DirectoryEntry, dropEffect: "link" }
+        UrlOnTexture: { fromViews: [Fudge.ViewExternal], onKeyAttribute: "url", onTypeAttribute: "TextureImage", ofType: Fudge.DirectoryEntry, dropEffect: "link" },
+        UrlOnAudio: { fromViews: [Fudge.ViewExternal], onKeyAttribute: "url", onTypeAttribute: "Audio", ofType: Fudge.DirectoryEntry, dropEffect: "link" },
+        MaterialOnComponentMaterial: { fromViews: [Fudge.ViewInternal], onTypeAttribute: "Material", onType: ƒ.ComponentMaterial, ofType: ƒ.Material, dropEffect: "link" }
     };
     class ControllerComponent extends ƒui.Controller {
         constructor(_mutable, _domElement) {
             super(_mutable, _domElement);
             this.hndDragOver = (_event) => {
-                // texture
+                // url on texture
                 if (this.filterDragDrop(_event, filter.UrlOnTexture, checkMimeType(Fudge.MIME.IMAGE)))
                     return;
-                // audio
+                // url on audio
                 if (this.filterDragDrop(_event, filter.UrlOnAudio, checkMimeType(Fudge.MIME.AUDIO)))
+                    return;
+                // Material on ComponentMaterial
+                if (this.filterDragDrop(_event, filter.MaterialOnComponentMaterial))
                     return;
                 function checkMimeType(_mime) {
                     return (_sources) => {
@@ -641,6 +727,15 @@ var Fudge;
                 // audio
                 if (this.filterDragDrop(_event, filter.UrlOnAudio, setExternalLink))
                     return;
+                // Material on ComponentMaterial
+                if (this.filterDragDrop(_event, filter.MaterialOnComponentMaterial, (_sources) => {
+                    let ancestor = this.getAncestorWithType(_event.target);
+                    let key = ancestor.getAttribute("key");
+                    this.mutable[key] = _sources[0];
+                    this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                    return true;
+                }))
+                    return;
             };
             this.domElement.addEventListener("input", this.mutateOnInput);
             this.domElement.addEventListener("dragover" /* DRAG_OVER */, this.hndDragOver);
@@ -649,12 +744,18 @@ var Fudge;
         filterDragDrop(_event, _filter, _callback = () => true) {
             let target = _event.target;
             let typeElement = target.parentElement.getAttribute("key");
-            let typeComponent = this.getComponentType(target);
-            if (typeElement != _filter.onElementType || typeComponent != _filter.onComponentType)
+            let typeComponent = this.getAncestorWithType(target).getAttribute("type");
+            if (_filter.onKeyAttribute && typeElement != _filter.onKeyAttribute)
+                return false;
+            if (_filter.onTypeAttribute && typeComponent != _filter.onTypeAttribute)
+                return false;
+            if (_filter.onType && !(this.mutable instanceof _filter.onType))
                 return false;
             let viewSource = Fudge.View.getViewSource(_event);
-            if (!_filter.fromViews.find((_view) => viewSource instanceof _view))
-                return false;
+            if (filter.fromViews) {
+                if (!_filter.fromViews.find((_view) => viewSource instanceof _view))
+                    return false;
+            }
             let sources = viewSource.getDragDropSources();
             if (!(sources[0] instanceof _filter.ofType))
                 return false;
@@ -665,15 +766,15 @@ var Fudge;
             _event.stopPropagation();
             return true;
         }
-        getComponentType(_target) {
+        getAncestorWithType(_target) {
             let element = _target;
             while (element) {
                 let type = element.getAttribute("type");
                 if (type)
-                    return type;
+                    return element;
                 element = element.parentElement;
             }
-            return undefined;
+            return null;
         }
     }
     Fudge.ControllerComponent = ControllerComponent;
@@ -1775,79 +1876,6 @@ var Fudge;
         }
     }
     Fudge.ViewRender = ViewRender;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    var ƒ = FudgeCore;
-    var ƒui = FudgeUserInterface;
-    Fudge.typesOfResources = [
-        ƒ.Mesh
-    ];
-    /**
-     * List the internal resources
-     * @author Jirka Dell'Oro-Friedl, HFU, 2020
-     */
-    class ViewInternal extends Fudge.View {
-        constructor(_container, _state) {
-            super(_container, _state);
-            //#endregion
-            this.hndEvent = (_event) => {
-                switch (_event.type) {
-                    case Fudge.EVENT_EDITOR.SET_PROJECT:
-                    case Fudge.EVENT_EDITOR.UPDATE:
-                        this.listResources();
-                        break;
-                    // case ƒui.EVENT.SELECT:
-                    //   console.log(_event.detail.data);
-                    //   break;
-                }
-            };
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
-            this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
-        }
-        listResources() {
-            while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
-                ;
-            this.table = new ƒui.Table(new Fudge.ControllerTableResource(), Object.values(ƒ.Project.resources));
-            this.dom.appendChild(this.table);
-        }
-        // #region  ContextMenu
-        getContextMenu(_callback) {
-            const menu = new Fudge.remote.Menu();
-            let item;
-            item = new Fudge.remote.MenuItem({ label: "Edit", id: String(Fudge.CONTEXTMENU.EDIT), click: _callback, accelerator: process.platform == "darwin" ? "E" : "E" });
-            menu.append(item);
-            item = new Fudge.remote.MenuItem({
-                label: "Create",
-                submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE, ƒ.Mesh.subclasses, _callback)
-            });
-            // item.submenu = ContextMenu.getSubMenu(ƒ.Mesh, _callback);
-            menu.append(item);
-            // ContextMenu.appendCopyPaste(menu);
-            return menu;
-        }
-        contextMenuCallback(_item, _window, _event) {
-            ƒ.Debug.fudge(`MenuSelect | id: ${Fudge.CONTEXTMENU[_item.id]} | event: ${_event}`);
-            switch (Number(_item.id)) {
-                case Fudge.CONTEXTMENU.CREATE:
-                    let iSubclass = _item["iSubclass"];
-                    let type = ƒ.Mesh.subclasses[iSubclass];
-                    //@ts-ignore
-                    let meshNew = new type();
-                    // ƒ.Debug.info(meshNew.type, meshNew);
-                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
-                    this.table.selectInterval(meshNew, meshNew);
-                    break;
-                case Fudge.CONTEXTMENU.EDIT:
-                    let resource = this.table.getFocussed();
-                    console.log("Edit", resource);
-                    this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: resource }));
-                    break;
-            }
-        }
-    }
-    Fudge.ViewInternal = ViewInternal;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {

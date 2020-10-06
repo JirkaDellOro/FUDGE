@@ -1,22 +1,25 @@
 
 ///<reference path="../View/View.ts"/>
 ///<reference path="../View/Resource/ViewExternal.ts"/>
+///<reference path="../View/Resource/ViewInternal.ts"/>
 
 namespace Fudge {
   import ƒ = FudgeCore;
   import ƒui = FudgeUserInterface;
 
   interface DragDropFilter {
-    onElementType: string;
-    onComponentType: string;
-    fromViews: (typeof View)[];
-    ofType: Function;
+    onKeyAttribute?: string;
+    onTypeAttribute?: string;
+    fromViews?: (typeof View)[];
+    onType?: Function;
+    ofType?: Function;
     dropEffect: "copy" | "link" | "move" | "none";
   }
 
   let filter: { [name: string]: DragDropFilter } = {
-    UrlOnTexture: { onElementType: "url", onComponentType: "TextureImage", fromViews: [ViewExternal], ofType: DirectoryEntry, dropEffect: "link" },
-    UrlOnAudio: { onElementType: "url", onComponentType: "Audio", fromViews: [ViewExternal], ofType: DirectoryEntry, dropEffect: "link" }
+    UrlOnTexture: { fromViews: [ViewExternal], onKeyAttribute: "url", onTypeAttribute: "TextureImage", ofType: DirectoryEntry, dropEffect: "link" },
+    UrlOnAudio: { fromViews: [ViewExternal], onKeyAttribute: "url", onTypeAttribute: "Audio", ofType: DirectoryEntry, dropEffect: "link" },
+    MaterialOnComponentMaterial: { fromViews: [ViewInternal], onTypeAttribute: "Material", onType: ƒ.ComponentMaterial, ofType: ƒ.Material, dropEffect: "link" }
   };
 
   export class ControllerComponent extends ƒui.Controller {
@@ -28,12 +31,16 @@ namespace Fudge {
     }
 
     private hndDragOver = (_event: DragEvent): void => {
-      // texture
+      // url on texture
       if (this.filterDragDrop(_event, filter.UrlOnTexture, checkMimeType(MIME.IMAGE)))
         return;
 
-      // audio
+      // url on audio
       if (this.filterDragDrop(_event, filter.UrlOnAudio, checkMimeType(MIME.AUDIO)))
+        return;
+
+      // Material on ComponentMaterial
+      if (this.filterDragDrop(_event, filter.MaterialOnComponentMaterial))
         return;
 
       function checkMimeType(_mime: MIME): (_sources: Object[]) => boolean {
@@ -53,27 +60,37 @@ namespace Fudge {
       };
 
       // texture
-      if (this.filterDragDrop(_event, filter.UrlOnTexture, setExternalLink))
-        return;
+      if (this.filterDragDrop(_event, filter.UrlOnTexture, setExternalLink)) return;
 
       // audio
-      if (this.filterDragDrop(_event, filter.UrlOnAudio, setExternalLink))
-        return;
+      if (this.filterDragDrop(_event, filter.UrlOnAudio, setExternalLink)) return;
 
+      // Material on ComponentMaterial
+      if (this.filterDragDrop(_event, filter.MaterialOnComponentMaterial, (_sources: Object[]): boolean => {
+        let ancestor: HTMLElement = this.getAncestorWithType(<HTMLElement>_event.target);
+        let key: string = ancestor.getAttribute("key");
+        this.mutable[key] = _sources[0];
+        this.domElement.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+        return true;
+      })) return;
     }
 
 
     private filterDragDrop(_event: DragEvent, _filter: DragDropFilter, _callback: (_sources: Object[]) => boolean = () => true): boolean {
       let target: HTMLElement = <HTMLElement>_event.target;
       let typeElement: string = target.parentElement.getAttribute("key");
-      let typeComponent: string = this.getComponentType(target);
+      let typeComponent: string = this.getAncestorWithType(target).getAttribute("type");
 
-      if (typeElement != _filter.onElementType || typeComponent != _filter.onComponentType)
-        return false;
+      if (_filter.onKeyAttribute && typeElement != _filter.onKeyAttribute) return false;
+      if (_filter.onTypeAttribute && typeComponent != _filter.onTypeAttribute) return false;
+      if (_filter.onType && !(this.mutable instanceof _filter.onType)) return false;
 
       let viewSource: View = View.getViewSource(_event);
-      if (!_filter.fromViews.find((_view) => viewSource instanceof _view))
-        return false;
+
+      if (filter.fromViews) {
+        if (!_filter.fromViews.find((_view) => viewSource instanceof _view))
+          return false;
+      }
 
       let sources: Object[] = viewSource.getDragDropSources();
       if (!(sources[0] instanceof _filter.ofType))
@@ -89,16 +106,16 @@ namespace Fudge {
       return true;
     }
 
-    private getComponentType(_target: HTMLElement): string {
+    private getAncestorWithType(_target: HTMLElement): HTMLElement {
       let element: HTMLElement = _target;
       while (element) {
         let type: string = element.getAttribute("type");
         if (type)
-          return type;
+          return element;
         element = element.parentElement;
       }
 
-      return undefined;
+      return null;
     }
   }
 }
