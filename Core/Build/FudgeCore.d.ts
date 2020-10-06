@@ -189,10 +189,6 @@ declare namespace FudgeCore {
      * Collect applicable attributes of the instance and copies of their values in a Mutator-object
      */
     function getMutatorOfArbitrary(_object: Object): Mutator;
-    interface MutableForUserInterface {
-        getMutator(): Mutator;
-        updateMutator(_mutator: Mutator): void;
-    }
     /**
      * Base class for all types being mutable using [[Mutator]]-objects, thus providing and using interfaces created at runtime.
      * Mutables provide a [[Mutator]] that is build by collecting all object-properties that are either of a primitive type or again Mutable.

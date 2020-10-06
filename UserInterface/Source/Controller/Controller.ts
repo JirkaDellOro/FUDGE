@@ -17,10 +17,10 @@ namespace FudgeUserInterface {
     /** [[FudgeCore.Mutator]] used to store the data types of the mutator attributes*/
     protected mutatorTypes: ƒ.Mutator = null;
 
-    constructor(_mutable: ƒ.Mutable | ƒ.MutableForUserInterface, _domElement: HTMLElement) {
+    constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement) {
       this.domElement = _domElement;
-      this.mutable = <ƒ.Mutable>_mutable;
-      this.mutator = _mutable.getMutator();
+      this.mutable = _mutable;
+      this.mutator = _mutable.getMutatorForUserInterface();
       if (_mutable instanceof ƒ.Mutable)
         this.mutatorTypes = _mutable.getMutatorAttributeTypes(this.mutator);
       // TODO: examine, if this should register to one common interval, instead of each installing its own.
@@ -34,7 +34,7 @@ namespace FudgeUserInterface {
      */
     public getMutator(_mutable: ƒ.Mutable = this.mutable, _domElement: HTMLElement = this.domElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator {
       // TODO: examine if this.mutator should also be addressed in some way...
-      let mutator: ƒ.Mutator = _mutator || _mutable.getMutator();
+      let mutator: ƒ.Mutator = _mutator || _mutable.getMutatorForUserInterface();
       // TODO: Mutator type now only used for enums. Examine if there is another way
       let mutatorTypes: ƒ.MutatorAttributeTypes = _types || _mutable.getMutatorAttributeTypes(mutator);
 
@@ -66,7 +66,7 @@ namespace FudgeUserInterface {
       // TODO: should get Mutator for UI or work with this.mutator (examine)
       this.mutable.updateMutator(this.mutator);
 
-      let mutator: ƒ.Mutator = _mutable.getMutator();
+      let mutator: ƒ.Mutator = _mutable.getMutatorForUserInterface();
       let mutatorTypes: ƒ.MutatorAttributeTypes = {};
       if (_mutable instanceof ƒ.Mutable)
         mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);

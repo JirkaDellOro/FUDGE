@@ -1,4 +1,3 @@
-// / <reference path="../Event/Event.ts"/>
 namespace FudgeCore {
   /**
    * Interface describing the datatypes of the attributes a mutator as strings 
@@ -36,11 +35,7 @@ namespace FudgeCore {
     }
     return mutator;
   }
-
-  export interface MutableForUserInterface {
-    getMutator(): Mutator;
-    updateMutator(_mutator: Mutator): void;
-  }
+  
   /**
    * Base class for all types being mutable using [[Mutator]]-objects, thus providing and using interfaces created at runtime.  
    * Mutables provide a [[Mutator]] that is build by collecting all object-properties that are either of a primitive type or again Mutable.

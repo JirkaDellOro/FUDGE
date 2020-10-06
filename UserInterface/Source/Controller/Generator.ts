@@ -21,7 +21,7 @@ namespace FudgeUserInterface {
      */
     public static createFieldSetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): FoldableFieldSet {
       let name: string = _name || _mutable.constructor.name;
-      let mutator: ƒ.Mutator = _mutator || _mutable.getMutator();
+      let mutator: ƒ.Mutator = _mutator || _mutable.getMutatorForUserInterface();
       let mutatorTypes: ƒ.MutatorAttributeTypes = _mutable.getMutatorAttributeTypes(mutator);
       let fieldset: FoldableFieldSet = Generator.createFoldableFieldset(name, _mutable.type);
 
