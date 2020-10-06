@@ -692,7 +692,8 @@ var Fudge;
     let filter = {
         UrlOnTexture: { fromViews: [Fudge.ViewExternal], onKeyAttribute: "url", onTypeAttribute: "TextureImage", ofType: Fudge.DirectoryEntry, dropEffect: "link" },
         UrlOnAudio: { fromViews: [Fudge.ViewExternal], onKeyAttribute: "url", onTypeAttribute: "Audio", ofType: Fudge.DirectoryEntry, dropEffect: "link" },
-        MaterialOnComponentMaterial: { fromViews: [Fudge.ViewInternal], onTypeAttribute: "Material", onType: ƒ.ComponentMaterial, ofType: ƒ.Material, dropEffect: "link" }
+        MaterialOnComponentMaterial: { fromViews: [Fudge.ViewInternal], onTypeAttribute: "Material", onType: ƒ.ComponentMaterial, ofType: ƒ.Material, dropEffect: "link" },
+        MeshOnComponentMesh: { fromViews: [Fudge.ViewInternal], onType: ƒ.ComponentMesh, ofType: ƒ.Mesh, dropEffect: "link" }
     };
     class ControllerComponent extends ƒui.Controller {
         constructor(_mutable, _domElement) {
@@ -706,6 +707,12 @@ var Fudge;
                     return;
                 // Material on ComponentMaterial
                 if (this.filterDragDrop(_event, filter.MaterialOnComponentMaterial))
+                    return;
+                // Mesh on ComponentMesh
+                if (this.filterDragDrop(_event, filter.MeshOnComponentMesh, (_sources) => {
+                    let key = this.getAncestorWithType(_event.target).getAttribute("key");
+                    return (key == "mesh");
+                }))
                     return;
                 function checkMimeType(_mime) {
                     return (_sources) => {
@@ -721,6 +728,13 @@ var Fudge;
                     this.mutateOnInput(_event);
                     return true;
                 };
+                let setResource = (_sources) => {
+                    let ancestor = this.getAncestorWithType(_event.target);
+                    let key = ancestor.getAttribute("key");
+                    this.mutable[key] = _sources[0];
+                    this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                    return true;
+                };
                 // texture
                 if (this.filterDragDrop(_event, filter.UrlOnTexture, setExternalLink))
                     return;
@@ -728,13 +742,10 @@ var Fudge;
                 if (this.filterDragDrop(_event, filter.UrlOnAudio, setExternalLink))
                     return;
                 // Material on ComponentMaterial
-                if (this.filterDragDrop(_event, filter.MaterialOnComponentMaterial, (_sources) => {
-                    let ancestor = this.getAncestorWithType(_event.target);
-                    let key = ancestor.getAttribute("key");
-                    this.mutable[key] = _sources[0];
-                    this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
-                    return true;
-                }))
+                if (this.filterDragDrop(_event, filter.MaterialOnComponentMaterial, setResource))
+                    return;
+                // Mesh on ComponentMesh
+                if (this.filterDragDrop(_event, filter.MeshOnComponentMesh, setResource))
                     return;
             };
             this.domElement.addEventListener("input", this.mutateOnInput);

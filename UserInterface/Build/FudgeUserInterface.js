@@ -24,7 +24,7 @@ var FudgeUserInterface;
             };
             this.domElement = _domElement;
             this.mutable = _mutable;
-            this.mutator = _mutable.getMutator();
+            this.mutator = _mutable.getMutatorForUserInterface();
             if (_mutable instanceof ƒ.Mutable)
                 this.mutatorTypes = _mutable.getMutatorAttributeTypes(this.mutator);
             // TODO: examine, if this should register to one common interval, instead of each installing its own.
@@ -37,7 +37,7 @@ var FudgeUserInterface;
          */
         getMutator(_mutable = this.mutable, _domElement = this.domElement, _mutator, _types) {
             // TODO: examine if this.mutator should also be addressed in some way...
-            let mutator = _mutator || _mutable.getMutator();
+            let mutator = _mutator || _mutable.getMutatorForUserInterface();
             // TODO: Mutator type now only used for enums. Examine if there is another way
             let mutatorTypes = _types || _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
@@ -65,7 +65,7 @@ var FudgeUserInterface;
         updateUserInterface(_mutable = this.mutable, _domElement = this.domElement) {
             // TODO: should get Mutator for UI or work with this.mutator (examine)
             this.mutable.updateMutator(this.mutator);
-            let mutator = _mutable.getMutator();
+            let mutator = _mutable.getMutatorForUserInterface();
             let mutatorTypes = {};
             if (_mutable instanceof ƒ.Mutable)
                 mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
@@ -114,7 +114,7 @@ var FudgeUserInterface;
          */
         static createFieldSetFromMutable(_mutable, _name, _mutator) {
             let name = _name || _mutable.constructor.name;
-            let mutator = _mutator || _mutable.getMutator();
+            let mutator = _mutator || _mutable.getMutatorForUserInterface();
             let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
             let fieldset = Generator.createFoldableFieldset(name, _mutable.type);
             for (let key in mutatorTypes) {
@@ -359,7 +359,7 @@ var FudgeUserInterface;
             let alpha = this.querySelector("input[type=range").value;
             this.color.setHex(hex.substr(1, 6) + "ff");
             this.color.a = parseFloat(alpha);
-            return this.color.getMutator();
+            return this.color.getMutatorForUserInterface();
         }
         /**
          * Sets the values of color picker and slider

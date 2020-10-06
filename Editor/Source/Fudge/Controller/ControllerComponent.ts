@@ -19,7 +19,8 @@ namespace Fudge {
   let filter: { [name: string]: DragDropFilter } = {
     UrlOnTexture: { fromViews: [ViewExternal], onKeyAttribute: "url", onTypeAttribute: "TextureImage", ofType: DirectoryEntry, dropEffect: "link" },
     UrlOnAudio: { fromViews: [ViewExternal], onKeyAttribute: "url", onTypeAttribute: "Audio", ofType: DirectoryEntry, dropEffect: "link" },
-    MaterialOnComponentMaterial: { fromViews: [ViewInternal], onTypeAttribute: "Material", onType: ƒ.ComponentMaterial, ofType: ƒ.Material, dropEffect: "link" }
+    MaterialOnComponentMaterial: { fromViews: [ViewInternal], onTypeAttribute: "Material", onType: ƒ.ComponentMaterial, ofType: ƒ.Material, dropEffect: "link" },
+    MeshOnComponentMesh: { fromViews: [ViewInternal], onType: ƒ.ComponentMesh, ofType: ƒ.Mesh, dropEffect: "link" }
   };
 
   export class ControllerComponent extends ƒui.Controller {
@@ -32,16 +33,17 @@ namespace Fudge {
 
     private hndDragOver = (_event: DragEvent): void => {
       // url on texture
-      if (this.filterDragDrop(_event, filter.UrlOnTexture, checkMimeType(MIME.IMAGE)))
-        return;
-
+      if (this.filterDragDrop(_event, filter.UrlOnTexture, checkMimeType(MIME.IMAGE))) return;
       // url on audio
-      if (this.filterDragDrop(_event, filter.UrlOnAudio, checkMimeType(MIME.AUDIO)))
-        return;
+      if (this.filterDragDrop(_event, filter.UrlOnAudio, checkMimeType(MIME.AUDIO))) return;
 
       // Material on ComponentMaterial
-      if (this.filterDragDrop(_event, filter.MaterialOnComponentMaterial))
-        return;
+      if (this.filterDragDrop(_event, filter.MaterialOnComponentMaterial)) return;
+      // Mesh on ComponentMesh
+      if (this.filterDragDrop(_event, filter.MeshOnComponentMesh, (_sources: Object[]) => {
+        let key: string = this.getAncestorWithType(_event.target).getAttribute("key");
+        return (key == "mesh");
+      })) return;
 
       function checkMimeType(_mime: MIME): (_sources: Object[]) => boolean {
         return (_sources: Object[]): boolean => {
@@ -58,21 +60,23 @@ namespace Fudge {
         this.mutateOnInput(_event);
         return true;
       };
-
-      // texture
-      if (this.filterDragDrop(_event, filter.UrlOnTexture, setExternalLink)) return;
-
-      // audio
-      if (this.filterDragDrop(_event, filter.UrlOnAudio, setExternalLink)) return;
-
-      // Material on ComponentMaterial
-      if (this.filterDragDrop(_event, filter.MaterialOnComponentMaterial, (_sources: Object[]): boolean => {
-        let ancestor: HTMLElement = this.getAncestorWithType(<HTMLElement>_event.target);
+      let setResource: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
+        let ancestor: HTMLElement = this.getAncestorWithType(_event.target);
         let key: string = ancestor.getAttribute("key");
         this.mutable[key] = _sources[0];
         this.domElement.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
         return true;
-      })) return;
+      };
+
+      // texture
+      if (this.filterDragDrop(_event, filter.UrlOnTexture, setExternalLink)) return;
+      // audio
+      if (this.filterDragDrop(_event, filter.UrlOnAudio, setExternalLink)) return;
+
+      // Material on ComponentMaterial
+      if (this.filterDragDrop(_event, filter.MaterialOnComponentMaterial, setResource)) return;
+      // Mesh on ComponentMesh
+      if (this.filterDragDrop(_event, filter.MeshOnComponentMesh, setResource)) return;
     }
 
 
@@ -106,8 +110,8 @@ namespace Fudge {
       return true;
     }
 
-    private getAncestorWithType(_target: HTMLElement): HTMLElement {
-      let element: HTMLElement = _target;
+    private getAncestorWithType(_target: EventTarget): HTMLElement {
+      let element: HTMLElement = <HTMLElement>_target;
       while (element) {
         let type: string = element.getAttribute("type");
         if (type)
