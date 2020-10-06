@@ -93,9 +93,9 @@ namespace FudgeUserInterface {
       }
     }
 
-    protected mutateOnInput = (_event: Event) => {
+    protected  mutateOnInput = async(_event: Event) => {
       this.mutator = this.getMutator();
-      this.mutable.mutate(this.mutator);
+      await this.mutable.mutate(this.mutator);
       _event.stopPropagation();
       
       this.domElement.dispatchEvent(new Event(EVENT.UPDATE, { bubbles: true }));

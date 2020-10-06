@@ -160,14 +160,14 @@ namespace FudgeCore {
      * Updates the attribute values of the instance according to the state of the mutator. Must be protected...!
      * @param _mutator
      */
-    public mutate(_mutator: Mutator): void {
+    public async mutate(_mutator: Mutator): Promise<void> {
       for (let attribute in _mutator) {
         if (!Reflect.has(this, attribute))
           continue;
         let mutant: Object = Reflect.get(this, attribute);
         let value: Mutator = <Mutator>_mutator[attribute];
         if (mutant instanceof Mutable)
-          mutant.mutate(value);
+          await mutant.mutate(value);
         else
           Reflect.set(this, attribute, value);
       }

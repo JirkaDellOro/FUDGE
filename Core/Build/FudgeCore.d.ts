@@ -146,9 +146,7 @@ declare namespace FudgeCore {
         /** dispatched to [[FileIo]] when a list of files has been loaded  */
         FILE_LOADED = "fileLoaded",
         /** dispatched to [[FileIo]] when a list of files has been saved */
-        FILE_SAVED = "fileSaved",
-        /** generic event to be dispatch when some process is completed */
-        DONE = "done"
+        FILE_SAVED = "fileSaved"
     }
     type Eventƒ = EventPointer | EventDragDrop | EventWheel | EventKeyboard | Event;
     type EventListenerƒ = ((_event: EventPointer) => void) | ((_event: EventDragDrop) => void) | ((_event: EventWheel) => void) | ((_event: EventKeyboard) => void) | ((_event: Eventƒ) => void) | EventListenerObject;
@@ -246,7 +244,7 @@ declare namespace FudgeCore {
          * Updates the attribute values of the instance according to the state of the mutator. Must be protected...!
          * @param _mutator
          */
-        mutate(_mutator: Mutator): void;
+        mutate(_mutator: Mutator): Promise<void>;
         /**
          * Reduces the attributes of the general mutator according to desired options for mutation. To be implemented in subclasses
          * @param _mutator
@@ -1176,7 +1174,7 @@ declare namespace FudgeCore {
         load(_url: RequestInfo): Promise<void>;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
-        mutate(_mutator: Mutator): void;
+        mutate(_mutator: Mutator): Promise<void>;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -1576,7 +1574,7 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
-        mutate(_mutator: Mutator): void;
+        mutate(_mutator: Mutator): Promise<void>;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -2679,7 +2677,7 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutator(): Mutator;
-        mutate(_mutator: Mutator): void;
+        mutate(_mutator: Mutator): Promise<void>;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         protected reduceMutator(_mutator: Mutator): void;
         private resetCache;
@@ -2905,7 +2903,7 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutator(): Mutator;
-        mutate(_mutator: Mutator): void;
+        mutate(_mutator: Mutator): Promise<void>;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         protected reduceMutator(_mutator: Mutator): void;
         private resetCache;
@@ -3273,7 +3271,7 @@ declare namespace FudgeCore {
         create(_sectors?: number, _stacks?: number): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
-        mutate(_mutator: Mutator): void;
+        mutate(_mutator: Mutator): Promise<void>;
         protected createIndices(): Uint16Array;
         protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;
@@ -3525,7 +3523,7 @@ declare namespace FudgeCore {
         load(_url: RequestInfo): Promise<void>;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
-        mutate(_mutator: Mutator): void;
+        mutate(_mutator: Mutator): Promise<void>;
     }
     /**
      * Texture created from a canvas

@@ -49,7 +49,6 @@ namespace FudgeCore {
         this.image.addEventListener("load", () => {
           this.renderData = null; // refresh render data on next draw call
           resolve();
-          this.dispatchEvent(new Event(EVENT.DONE));
         });
         this.image.addEventListener("error", () => reject());
         this.image.src = new URL(this.url.toString(), Project.baseURL).toString();
@@ -73,9 +72,9 @@ namespace FudgeCore {
       return this;
     }
 
-    public mutate(_mutator: Mutator): void {
+    public async mutate(_mutator: Mutator): Promise<void> {
       if (_mutator.url != this.url.toString())
-        this.load(_mutator.url);
+        await this.load(_mutator.url);
       // except url from mutator for further processing
       delete (_mutator.url);
       super.mutate(_mutator);

@@ -48,9 +48,6 @@ namespace Fudge {
       let setExternalLink: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
         let sources: DirectoryEntry[] = <DirectoryEntry[]>_sources;
         (<HTMLInputElement>_event.target).value = sources[0].pathRelative;
-        this.mutable.addEventListener(ƒ.EVENT.DONE, (_event: Event) =>
-          this.domElement.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }))
-        );
         this.mutateOnInput(_event);
         return true;
       };

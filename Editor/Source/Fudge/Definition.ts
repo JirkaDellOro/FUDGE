@@ -25,6 +25,7 @@ namespace Fudge {
     */
   }
 
+
   export enum EVENT_EDITOR {
     SET_GRAPH = "setGraph",
     FOCUS_NODE = "focusNode",

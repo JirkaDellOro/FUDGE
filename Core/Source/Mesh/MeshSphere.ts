@@ -100,7 +100,7 @@ namespace FudgeCore {
       return this;
     }
     
-    public mutate(_mutator: Mutator): void {
+    public async mutate(_mutator: Mutator): Promise<void> {
       super.mutate(_mutator);
       let sectors: number = Math.round(_mutator.sectors);
       let stacks: number = Math.round(_mutator.stacks);

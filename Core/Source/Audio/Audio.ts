@@ -56,7 +56,7 @@ namespace FudgeCore {
       return this;
     }
 
-    public mutate(_mutator: Mutator): void {
+    public async mutate(_mutator: Mutator): Promise<void> {
       if (_mutator.url != this.url.toString())
         this.load(_mutator.url);
       // except url from mutator for further processing

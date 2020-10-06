@@ -13,9 +13,9 @@ var FudgeUserInterface;
             this.timeUpdate = 190;
             /** [[FudgeCore.Mutator]] used to store the data types of the mutator attributes*/
             this.mutatorTypes = null;
-            this.mutateOnInput = (_event) => {
+            this.mutateOnInput = async (_event) => {
                 this.mutator = this.getMutator();
-                this.mutable.mutate(this.mutator);
+                await this.mutable.mutate(this.mutator);
                 _event.stopPropagation();
                 this.domElement.dispatchEvent(new Event("update" /* UPDATE */, { bubbles: true }));
             };

@@ -341,7 +341,7 @@ namespace FudgeCore {
       return mutator;
     }
 
-    public mutate(_mutator: Mutator): void {
+    public async mutate(_mutator: Mutator): Promise<void> {
       let oldTranslation: Vector2 = this.translation;
       let oldRotation: number = this.rotation;
       let oldScaling: Vector2 = this.scaling;

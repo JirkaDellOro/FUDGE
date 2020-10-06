@@ -24,7 +24,7 @@ declare namespace FudgeUserInterface {
          * Recursive method taking the [[ƒ.Mutator]] of a [[ƒ.Mutable]] and updating the UI-domElement accordingly
          */
         updateUserInterface(_mutable?: ƒ.Mutable, _domElement?: HTMLElement): void;
-        protected mutateOnInput: (_event: Event) => void;
+        protected mutateOnInput: (_event: Event) => Promise<void>;
         protected refresh: (_event: Event) => void;
     }
 }

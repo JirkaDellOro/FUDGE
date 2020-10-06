@@ -170,7 +170,7 @@ namespace FudgeCore {
       return types;
     }
 
-    public mutate(_mutator: Mutator): void {
+    public async mutate(_mutator: Mutator): Promise<void> {
       super.mutate(_mutator);
 
       switch (this.projection) {

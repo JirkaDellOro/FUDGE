@@ -38,9 +38,7 @@ namespace FudgeCore {
         /** dispatched to [[FileIo]] when a list of files has been loaded  */
         FILE_LOADED = "fileLoaded",
         /** dispatched to [[FileIo]] when a list of files has been saved */
-        FILE_SAVED = "fileSaved",
-        /** generic event to be dispatch when some process is completed */
-        DONE = "done"
+        FILE_SAVED = "fileSaved"
     }
 
 
