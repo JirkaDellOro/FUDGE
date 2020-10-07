@@ -41,7 +41,8 @@ declare namespace Fudge {
         INTERNAL = "ViewInternal",
         EXTERNAL = "ViewExternal",
         PROPERTIES = "ViewProperties",
-        PREVIEW = "ViewPreview"
+        PREVIEW = "ViewPreview",
+        SCRIPT = "ViewScript"
     }
 }
 declare namespace Fudge {
@@ -206,6 +207,25 @@ declare namespace Fudge {
         delete(_focussed: ƒ.SerializableResource[]): ƒ.SerializableResource[];
         copy(_originals: ƒ.SerializableResource[]): Promise<ƒ.SerializableResource[]>;
         sort(_data: ƒ.SerializableResource[], _key: string, _direction: number): void;
+    }
+}
+declare namespace Fudge {
+    import ƒui = FudgeUserInterface;
+    interface ScriptInfo {
+        name: string;
+        namespace: string;
+        super: string;
+        script: Function;
+    }
+    class ControllerTableScript extends ƒui.TableController<ScriptInfo> {
+        private static head;
+        private static getHead;
+        getHead(): ƒui.TABLE[];
+        getLabel(_object: ScriptInfo): string;
+        rename(_object: ScriptInfo, _new: string): boolean;
+        delete(_focussed: ScriptInfo[]): ScriptInfo[];
+        copy(_originals: ScriptInfo[]): Promise<ScriptInfo[]>;
+        sort(_data: ScriptInfo[], _key: string, _direction: number): void;
     }
 }
 declare namespace Fudge {
@@ -451,6 +471,22 @@ declare namespace Fudge {
         constructor(_container: GoldenLayout.Container, _state: Object);
         protected hndDragOver(_event: DragEvent, _source: View): void;
         private fillContent;
+        private hndEvent;
+    }
+}
+declare namespace Fudge {
+    /**
+     * List the scripts loaded
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class ViewScript extends View {
+        private table;
+        constructor(_container: GoldenLayout.Container, _state: Object);
+        listScripts(): void;
+        getSelection(): ScriptInfo[];
+        getDragDropSources(): ScriptInfo[];
+        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
+        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         private hndEvent;
     }
 }

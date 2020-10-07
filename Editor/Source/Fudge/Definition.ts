@@ -45,6 +45,7 @@ namespace Fudge {
     PROJECT = "PanelProject"
   }
 
+
   export enum VIEW {
     HIERARCHY = "ViewHierarchy",
     ANIMATION = "ViewAnimation",
@@ -54,7 +55,9 @@ namespace Fudge {
     INTERNAL = "ViewInternal",
     EXTERNAL = "ViewExternal",
     PROPERTIES = "ViewProperties",
-    PREVIEW = "ViewPreview"
+    PREVIEW = "ViewPreview",
+    SCRIPT = "ViewScript"
+    
     // SKETCH = ViewSketch,
     // MESH = ViewMesh,
   }

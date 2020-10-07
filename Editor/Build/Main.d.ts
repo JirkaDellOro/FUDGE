@@ -36,7 +36,8 @@ declare namespace Fudge {
         INTERNAL = "ViewInternal",
         EXTERNAL = "ViewExternal",
         PROPERTIES = "ViewProperties",
-        PREVIEW = "ViewPreview"
+        PREVIEW = "ViewPreview",
+        SCRIPT = "ViewScript"
     }
 }
 /**

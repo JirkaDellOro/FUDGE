@@ -53,6 +53,7 @@ var Fudge;
         VIEW["EXTERNAL"] = "ViewExternal";
         VIEW["PROPERTIES"] = "ViewProperties";
         VIEW["PREVIEW"] = "ViewPreview";
+        VIEW["SCRIPT"] = "ViewScript";
         // SKETCH = ViewSketch,
         // MESH = ViewMesh,
     })(VIEW = Fudge.VIEW || (Fudge.VIEW = {}));
@@ -680,12 +681,12 @@ var Fudge;
     Fudge.ViewInternal = ViewInternal;
 })(Fudge || (Fudge = {}));
 ///<reference path="../View/View.ts"/>
-///<reference path="../View/Resource/ViewExternal.ts"/>
-///<reference path="../View/Resource/ViewInternal.ts"/>
+///<reference path="../View/Project/ViewExternal.ts"/>
+///<reference path="../View/Project/ViewInternal.ts"/>
 var Fudge;
 ///<reference path="../View/View.ts"/>
-///<reference path="../View/Resource/ViewExternal.ts"/>
-///<reference path="../View/Resource/ViewInternal.ts"/>
+///<reference path="../View/Project/ViewExternal.ts"/>
+///<reference path="../View/Project/ViewInternal.ts"/>
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
@@ -817,6 +818,34 @@ var Fudge;
     }
     ControllerTableResource.head = ControllerTableResource.getHead();
     Fudge.ControllerTableResource = ControllerTableResource;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    var ƒui = FudgeUserInterface;
+    class ControllerTableScript extends ƒui.TableController {
+        static getHead() {
+            let head = [];
+            head.push({ label: "Name", key: "name", sortable: true, editable: false });
+            head.push({ label: "Super", key: "super", sortable: true, editable: false });
+            head.push({ label: "Namespace", key: "namespace", sortable: true, editable: false });
+            return head;
+        }
+        getHead() {
+            return ControllerTableScript.head;
+        }
+        getLabel(_object) { return ""; }
+        rename(_object, _new) { return false; }
+        delete(_focussed) { return null; }
+        copy(_originals) { return null; }
+        sort(_data, _key, _direction) {
+            function compare(_a, _b) {
+                return _direction * (_a[_key] == _b[_key] ? 0 : (_a[_key] > _b[_key] ? 1 : -1));
+            }
+            _data.sort(compare);
+        }
+    }
+    ControllerTableScript.head = ControllerTableScript.getHead();
+    Fudge.ControllerTableScript = ControllerTableScript;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -1022,6 +1051,7 @@ var Fudge;
             this.goldenLayout.registerComponent(Fudge.VIEW.EXTERNAL, Fudge.ViewExternal);
             this.goldenLayout.registerComponent(Fudge.VIEW.PROPERTIES, Fudge.ViewProperties);
             this.goldenLayout.registerComponent(Fudge.VIEW.PREVIEW, Fudge.ViewPreview);
+            this.goldenLayout.registerComponent(Fudge.VIEW.SCRIPT, Fudge.ViewScript);
             let inner = this.goldenLayout.root.contentItems[0];
             inner.addChild({
                 type: "column", content: [
@@ -1032,6 +1062,7 @@ var Fudge;
             inner.addChild({
                 type: "column", content: [
                     { type: "component", componentName: Fudge.VIEW.INTERNAL, componentState: _state, title: "Internal" },
+                    { type: "component", componentName: Fudge.VIEW.SCRIPT, componentState: _state, title: "Script" },
                     { type: "component", componentName: Fudge.VIEW.EXTERNAL, componentState: _state, title: "External" }
                 ]
             });
@@ -2143,5 +2174,88 @@ var Fudge;
         }
     }
     Fudge.ViewProperties = ViewProperties;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    var ƒ = FudgeCore;
+    var ƒui = FudgeUserInterface;
+    /**
+     * List the scripts loaded
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class ViewScript extends Fudge.View {
+        constructor(_container, _state) {
+            super(_container, _state);
+            //#endregion
+            this.hndEvent = (_event) => {
+                switch (_event.type) {
+                    case Fudge.EVENT_EDITOR.SET_PROJECT:
+                    case Fudge.EVENT_EDITOR.UPDATE:
+                        this.listScripts();
+                        break;
+                    // case ƒui.EVENT.SELECT:
+                    //   console.log(_event.detail.data);
+                    //   break;
+                }
+            };
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
+            this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
+        }
+        listScripts() {
+            while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
+                ;
+            let scriptinfos = [];
+            for (let namespace in ƒ.Project.scriptNamespaces) {
+                for (let index in ƒ.Project.scriptNamespaces[namespace]) {
+                    let script = ƒ.Project.scriptNamespaces[namespace][index];
+                    scriptinfos.push({ name: script.name, namespace: namespace, script: script, super: script["__proto__"].name });
+                }
+            }
+            this.table = new ƒui.Table(new Fudge.ControllerTableScript(), scriptinfos);
+            this.dom.appendChild(this.table);
+        }
+        getSelection() {
+            return this.table.controller.selection;
+        }
+        getDragDropSources() {
+            return this.table.controller.dragDrop.sources;
+        }
+        // #region  ContextMenu
+        getContextMenu(_callback) {
+            const menu = new Fudge.remote.Menu();
+            let item;
+            item = new Fudge.remote.MenuItem({ label: "Edit", id: String(Fudge.CONTEXTMENU.EDIT), click: _callback, accelerator: process.platform == "darwin" ? "E" : "E" });
+            menu.append(item);
+            item = new Fudge.remote.MenuItem({
+                label: "Create",
+                submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE, ƒ.Mesh.subclasses, _callback)
+            });
+            // item.submenu = ContextMenu.getSubMenu(ƒ.Mesh, _callback);
+            menu.append(item);
+            // ContextMenu.appendCopyPaste(menu);
+            return menu;
+        }
+        contextMenuCallback(_item, _window, _event) {
+            ƒ.Debug.fudge(`MenuSelect | id: ${Fudge.CONTEXTMENU[_item.id]} | event: ${_event}`);
+            switch (Number(_item.id)) {
+                // case CONTEXTMENU.CREATE:
+                //   let iSubclass: number = _item["iSubclass"];
+                //   let type: typeof ƒ.Mesh = ƒ.Mesh.subclasses[iSubclass];
+                //   //@ts-ignore
+                //   let meshNew: ƒ.Mesh = new type();
+                //   // ƒ.Debug.info(meshNew.type, meshNew);
+                //   this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+                //   this.table.selectInterval(meshNew, meshNew);
+                //   break;
+                // case CONTEXTMENU.EDIT:
+                //   let resource: ƒ.SerializableResource = this.table.getFocussed();
+                //   console.log("Edit", resource);
+                //   this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: resource }));
+                //   break;
+            }
+        }
+    }
+    Fudge.ViewScript = ViewScript;
 })(Fudge || (Fudge = {}));
 //# sourceMappingURL=Fudge.js.map

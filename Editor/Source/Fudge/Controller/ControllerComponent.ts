@@ -1,7 +1,7 @@
 
 ///<reference path="../View/View.ts"/>
-///<reference path="../View/Resource/ViewExternal.ts"/>
-///<reference path="../View/Resource/ViewInternal.ts"/>
+///<reference path="../View/Project/ViewExternal.ts"/>
+///<reference path="../View/Project/ViewInternal.ts"/>
 
 namespace Fudge {
   import ƒ = FudgeCore;
