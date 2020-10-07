@@ -25,7 +25,7 @@ namespace FudgeUserInterface {
       this.domElement.addEventListener("input", this.mutateOnInput);
     }
 
-    private setMutable(_mutable: ƒ.Mutable): void {
+    public setMutable(_mutable: ƒ.Mutable): void {
       this.mutable = _mutable;
       this.mutator = _mutable.getMutatorForUserInterface();
       if (_mutable instanceof ƒ.Mutable)
@@ -102,7 +102,7 @@ namespace FudgeUserInterface {
       await this.mutable.mutate(this.mutator);
       _event.stopPropagation();
 
-      this.domElement.dispatchEvent(new Event(EVENT.UPDATE, { bubbles: true }));
+      this.domElement.dispatchEvent(new Event(EVENT.MUTATE, { bubbles: true }));
     }
 
     protected refresh = (_event: Event) => {

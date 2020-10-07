@@ -17,7 +17,7 @@ var FudgeUserInterface;
                 this.mutator = this.getMutator();
                 await this.mutable.mutate(this.mutator);
                 _event.stopPropagation();
-                this.domElement.dispatchEvent(new Event("update" /* UPDATE */, { bubbles: true }));
+                this.domElement.dispatchEvent(new Event("mutate" /* MUTATE */, { bubbles: true }));
             };
             this.refresh = (_event) => {
                 this.updateUserInterface();
@@ -192,7 +192,7 @@ var FudgeUserInterface;
         }
         // TODO: implement CustomFieldSet and replace this
         static createFoldableFieldset(_key, _type) {
-            let cntFoldFieldset = new FudgeUserInterface.FoldableFieldSet(_key);
+            let cntFoldFieldset = new FudgeUserInterface.ExpandableFieldSet(_key);
             //TODO: unique ids
             // cntFoldFieldset.id = _legend;
             cntFoldFieldset.setAttribute("key", _key);
@@ -1090,9 +1090,14 @@ var FudgeUserInterface;
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
     var ƒ = FudgeCore;
-    class FoldableFieldSet extends HTMLFieldSetElement {
+    class ExpandableFieldSet extends HTMLFieldSetElement {
         constructor(_legend = "") {
             super();
+            this.hndToggle = (_event) => {
+                if (_event)
+                    _event.stopPropagation();
+                this.dispatchEvent(new Event(this.isExpanded ? "expand" /* EXPAND */ : "collapse" /* COLLAPSE */, { bubbles: true }));
+            };
             this.hndFocus = (_event) => {
                 switch (_event.type) {
                     case "focusNext" /* FOCUS_NEXT */:
@@ -1129,13 +1134,13 @@ var FudgeUserInterface;
                 // let target: HTMLElement = <HTMLElement>_event.target;
                 switch (_event.code) {
                     case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
-                        if (!this.isOpen) {
-                            this.open(true);
+                        if (!this.isExpanded) {
+                            this.expand(true);
                             return;
                         }
                     case ƒ.KEYBOARD_CODE.ARROW_DOWN:
                         let next = this;
-                        if (this.isOpen)
+                        if (this.isExpanded)
                             next = this.querySelector("fieldset");
                         else
                             do {
@@ -1148,17 +1153,17 @@ var FudgeUserInterface;
                             this.dispatchEvent(new KeyboardEvent("focusNext" /* FOCUS_NEXT */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
                         break;
                     case ƒ.KEYBOARD_CODE.ARROW_LEFT:
-                        if (this.isOpen) {
-                            this.open(false);
+                        if (this.isExpanded) {
+                            this.expand(false);
                             return;
                         }
                     case ƒ.KEYBOARD_CODE.ARROW_UP:
                         let previous = this;
                         do {
                             previous = previous.previousElementSibling;
-                        } while (previous && !(previous instanceof FoldableFieldSet));
+                        } while (previous && !(previous instanceof ExpandableFieldSet));
                         if (previous)
-                            if (previous.isOpen)
+                            if (previous.isExpanded)
                                 this.dispatchEvent(new KeyboardEvent("focusPrevious" /* FOCUS_PREVIOUS */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
                             else
                                 previous.focus();
@@ -1168,13 +1173,13 @@ var FudgeUserInterface;
                 }
             };
             let cntLegend = document.createElement("legend");
-            this.checkbox = document.createElement("input");
-            this.checkbox.type = "checkbox";
-            this.checkbox.checked = true;
-            this.checkbox.tabIndex = -1;
+            this.expander = document.createElement("input");
+            this.expander.type = "checkbox";
+            this.expander.checked = true;
+            this.expander.tabIndex = -1;
             let lblTitle = document.createElement("span");
             lblTitle.textContent = _legend;
-            this.appendChild(this.checkbox);
+            this.appendChild(this.expander);
             cntLegend.appendChild(lblTitle);
             this.content = document.createElement("div");
             this.appendChild(cntLegend);
@@ -1184,17 +1189,19 @@ var FudgeUserInterface;
             this.addEventListener("focusNext" /* FOCUS_NEXT */, this.hndFocus);
             this.addEventListener("focusPrevious" /* FOCUS_PREVIOUS */, this.hndFocus);
             this.addEventListener("focusSet" /* FOCUS_SET */, this.hndFocus);
-            // this.checkbox.addEventListener(EVENT_TREE.KEY_DOWN, this.hndKey);
+            this.expander.addEventListener("input", this.hndToggle);
+            // this.expander.addEventListener("change", this.hndToggle);
         }
-        get isOpen() {
-            return this.checkbox.checked;
+        get isExpanded() {
+            return this.expander.checked;
         }
-        open(_open) {
-            this.checkbox.checked = _open;
+        expand(_expand) {
+            this.expander.checked = _expand;
+            this.hndToggle(null);
         }
     }
-    FudgeUserInterface.FoldableFieldSet = FoldableFieldSet;
-    customElements.define("ui-fold-fieldset", FoldableFieldSet, { extends: "fieldset" });
+    FudgeUserInterface.ExpandableFieldSet = ExpandableFieldSet;
+    customElements.define("ui-fold-fieldset", ExpandableFieldSet, { extends: "fieldset" });
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 // namespace FudgeUserInterface {
 //     import ƒ = FudgeCore;
@@ -1731,7 +1738,7 @@ var FudgeUserInterface;
             this.className = "tree";
         }
         /**
-         * Opens the tree along the given path to show the objects the path includes
+         * Expands the tree along the given path to show the objects the path includes
          * @param _path An array of objects starting with one being contained in this treelist and following the correct hierarchy of successors
          * @param _focus If true (default) the last object found in the tree gets the focus
          */
@@ -1742,7 +1749,7 @@ var FudgeUserInterface;
                 item.focus();
                 let content = item.getBranch();
                 if (!content) {
-                    item.open(true);
+                    item.expand(true);
                     content = item.getBranch();
                 }
                 currentTree = content;
@@ -1761,7 +1768,7 @@ var FudgeUserInterface;
                     found.setLabel(item.display);
                     found.hasChildren = item.hasChildren;
                     if (!found.hasChildren)
-                        found.open(false);
+                        found.expand(false);
                     items.push(found);
                 }
                 else
@@ -1824,12 +1831,13 @@ var FudgeUserInterface;
             let deleted = [];
             for (let item of items)
                 if (_data.indexOf(item.data) > -1) {
-                    item.dispatchEvent(new Event("update" /* UPDATE */, { bubbles: true }));
+                    // item.dispatchEvent(new Event(EVENT.UPDATE, { bubbles: true }));
+                    item.dispatchEvent(new Event("removeChild" /* REMOVE_CHILD */, { bubbles: true }));
                     deleted.push(item.parentNode.removeChild(item));
                 }
             return deleted;
         }
-        findOpen(_data) {
+        findVisible(_data) {
             let items = this.querySelectorAll("li");
             for (let item of items)
                 if (_data == item.data)
@@ -1920,7 +1928,7 @@ var FudgeUserInterface;
             this.controller = _controller;
             let root = new FudgeUserInterface.TreeItem(this.controller, _root);
             this.appendChild(root);
-            this.addEventListener("open" /* OPEN */, this.hndOpen);
+            this.addEventListener("expand" /* EXPAND */, this.hndExpand);
             this.addEventListener("rename" /* RENAME */, this.hndRename);
             this.addEventListener("itemselect" /* SELECT */, this.hndSelect);
             this.addEventListener("drop" /* DROP */, this.hndDrop);
@@ -1951,7 +1959,7 @@ var FudgeUserInterface;
                 return items[found].data;
             return null;
         }
-        hndOpen(_event) {
+        hndExpand(_event) {
             let item = _event.target;
             let children = this.controller.getChildren(item.data);
             if (!children || children.length == 0)
@@ -2009,14 +2017,14 @@ var FudgeUserInterface;
             // TODO: don't, when copying or coming from another source
             this.delete(move);
             let targetData = _target;
-            let targetItem = this.findOpen(targetData);
+            let targetItem = this.findVisible(targetData);
             let branch = this.createBranch(this.controller.getChildren(targetData));
             let old = targetItem.getBranch();
             targetItem.hasChildren = true;
             if (old)
                 old.restructure(branch);
             else
-                targetItem.open(true);
+                targetItem.expand(true);
             _children = [];
             _target = null;
         }
@@ -2069,13 +2077,13 @@ var FudgeUserInterface;
                 switch (_event.code) {
                     case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
                         if (this.hasChildren && !content)
-                            this.open(true);
+                            this.expand(true);
                         else
                             this.dispatchEvent(new KeyboardEvent("focusNext" /* FOCUS_NEXT */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
                         break;
                     case ƒ.KEYBOARD_CODE.ARROW_LEFT:
                         if (content)
-                            this.open(false);
+                            this.expand(false);
                         else
                             this.dispatchEvent(new KeyboardEvent("focusPrevious" /* FOCUS_PREVIOUS */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
                         break;
@@ -2128,7 +2136,7 @@ var FudgeUserInterface;
                 _event.stopPropagation();
                 switch (target.type) {
                     case "checkbox":
-                        this.open(target.checked);
+                        this.expand(target.checked);
                         break;
                     case "text":
                         target.disabled = true;
@@ -2169,7 +2177,7 @@ var FudgeUserInterface;
                     return;
                 this.select(_event.ctrlKey, _event.shiftKey);
             };
-            this.hndUpdate = (_event) => {
+            this.hndRemove = (_event) => {
                 if (_event.currentTarget == _event.target)
                     return;
                 _event.stopPropagation();
@@ -2191,16 +2199,16 @@ var FudgeUserInterface;
             this.addEventListener("dragstart" /* DRAG_START */, this.hndDragStart);
             this.addEventListener("dragover" /* DRAG_OVER */, this.hndDragOver);
             this.addEventListener("pointerup" /* POINTER_UP */, this.hndPointerUp);
-            this.addEventListener("update" /* UPDATE */, this.hndUpdate);
+            this.addEventListener("removeChild" /* REMOVE_CHILD */, this.hndRemove);
         }
         /**
-         * Returns true, when this item has a visible checkbox in front to open the subsequent branch
+         * Returns true, when this item has a visible checkbox in front to expand the subsequent branch
          */
         get hasChildren() {
             return this.checkbox.style.visibility != "hidden";
         }
         /**
-         * Shows or hides the checkbox for opening the subsequent branch
+         * Shows or hides the checkbox for expanding the subsequent branch
          */
         set hasChildren(_has) {
             this.checkbox.style.visibility = _has ? "visible" : "hidden";
@@ -2233,21 +2241,20 @@ var FudgeUserInterface;
             return this.label.value;
         }
         /**
-         * Tries to open the [[TreeList]] of children, by dispatching [[EVENT_TREE.OPEN]].
+         * Tries to expanding the [[TreeList]] of children, by dispatching [[EVENT.EXPAND]].
          * The user of the tree needs to add an event listener to the tree
          * in order to create that [[TreeList]] and add it as branch to this item
-         * @param _open If false, the item will be closed
          */
-        open(_open) {
+        expand(_expand) {
             this.removeBranch();
-            if (_open)
-                this.dispatchEvent(new Event("open" /* OPEN */, { bubbles: true }));
-            this.querySelector("input[type='checkbox']").checked = _open;
+            if (_expand)
+                this.dispatchEvent(new Event("expand" /* EXPAND */, { bubbles: true }));
+            this.querySelector("input[type='checkbox']").checked = _expand;
         }
         /**
          * Returns a list of all data referenced by the items succeeding this
          */
-        getOpenData() {
+        getVisibleData() {
             let list = this.querySelectorAll("li");
             let data = [];
             for (let item of list)

@@ -26,7 +26,7 @@ namespace FudgeUserInterface {
       let root: TreeItem<T> = new TreeItem<T>(this.controller, _root);
       this.appendChild(root);
 
-      this.addEventListener(EVENT.OPEN, this.hndOpen);
+      this.addEventListener(EVENT.EXPAND, this.hndExpand);
       this.addEventListener(EVENT.RENAME, this.hndRename);
       this.addEventListener(EVENT.SELECT, this.hndSelect);
       this.addEventListener(EVENT.DROP, this.hndDrop);
@@ -61,7 +61,7 @@ namespace FudgeUserInterface {
       return null;
     }
 
-    private hndOpen(_event: Event): void {
+    private hndExpand(_event: Event): void {
       let item: TreeItem<T> = <TreeItem<T>>_event.target;
       let children: T[] = this.controller.getChildren(item.data);
       if (!children || children.length == 0)
@@ -131,7 +131,7 @@ namespace FudgeUserInterface {
       this.delete(move);
 
       let targetData: T = <T>_target;
-      let targetItem: TreeItem<T> = this.findOpen(targetData);
+      let targetItem: TreeItem<T> = this.findVisible(targetData);
 
       let branch: TreeList<T> = this.createBranch(this.controller.getChildren(targetData));
       let old: TreeList<T> = targetItem.getBranch();
@@ -139,7 +139,7 @@ namespace FudgeUserInterface {
       if (old)
         old.restructure(branch);
       else
-        targetItem.open(true);
+        targetItem.expand(true);
 
       _children = [];
       _target = null;

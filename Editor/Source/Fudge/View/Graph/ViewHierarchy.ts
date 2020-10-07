@@ -66,8 +66,8 @@ namespace Fudge {
         case CONTEXTMENU.ADD_NODE:
           let child: ƒ.Node = new ƒ.Node("New Node");
           focus.addChild(child);
-          this.tree.findOpen(focus).open(true);
-          this.tree.findOpen(child).focus();
+          this.tree.findVisible(focus).expand(true);
+          this.tree.findVisible(child).focus();
           break;
         case CONTEXTMENU.ADD_COMPONENT:
           let iSubclass: number = _item["iSubclass"];

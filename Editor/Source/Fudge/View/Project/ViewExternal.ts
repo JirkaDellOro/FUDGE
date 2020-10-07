@@ -22,7 +22,7 @@ namespace Fudge {
       let root: DirectoryEntry = DirectoryEntry.createRoot(path);
       this.tree = new ƒui.Tree<DirectoryEntry>(new ControllerTreeDirectory(), root);
       this.dom.appendChild(this.tree);
-      this.tree.getItems()[0].open(true);
+      this.tree.getItems()[0].expand(true);
     }
 
     public getSelection(): DirectoryEntry[] {

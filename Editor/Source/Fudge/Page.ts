@@ -90,7 +90,7 @@ namespace Fudge {
     //#region Page-Events from DOM
     private static setupPageListeners(): void {
       document.addEventListener(EVENT_EDITOR.SET_GRAPH, Page.hndEvent);
-      document.addEventListener(ƒui.EVENT.UPDATE, Page.hndEvent);
+      document.addEventListener(ƒui.EVENT.MUTATE, Page.hndEvent);
       document.addEventListener(EVENT_EDITOR.UPDATE, Page.hndEvent);
       document.addEventListener(EVENT_EDITOR.DESTROY, Page.hndEvent);
     }
@@ -104,7 +104,7 @@ namespace Fudge {
     }
 
     private static hndEvent(_event: CustomEvent): void {
-      ƒ.Debug.fudge("Page received", _event.type, _event);
+      // ƒ.Debug.fudge("Page received", _event.type, _event);
       switch (_event.type) {
         case EVENT_EDITOR.DESTROY:
           let view: View = _event.detail;

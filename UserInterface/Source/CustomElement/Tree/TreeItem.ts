@@ -36,18 +36,18 @@ namespace FudgeUserInterface {
       this.addEventListener(EVENT.DRAG_OVER, this.hndDragOver);
 
       this.addEventListener(EVENT.POINTER_UP, this.hndPointerUp);
-      this.addEventListener(EVENT.UPDATE, this.hndUpdate);
+      this.addEventListener(EVENT.REMOVE_CHILD, this.hndRemove);
     }
 
     /**
-     * Returns true, when this item has a visible checkbox in front to open the subsequent branch 
+     * Returns true, when this item has a visible checkbox in front to expand the subsequent branch 
      */
     public get hasChildren(): boolean {
       return this.checkbox.style.visibility != "hidden";
     }
 
     /**
-     * Shows or hides the checkbox for opening the subsequent branch
+     * Shows or hides the checkbox for expanding the subsequent branch
      */
     public set hasChildren(_has: boolean) {
       this.checkbox.style.visibility = _has ? "visible" : "hidden";
@@ -85,24 +85,23 @@ namespace FudgeUserInterface {
     }
 
     /**
-     * Tries to open the [[TreeList]] of children, by dispatching [[EVENT_TREE.OPEN]].
+     * Tries to expanding the [[TreeList]] of children, by dispatching [[EVENT.EXPAND]].
      * The user of the tree needs to add an event listener to the tree 
      * in order to create that [[TreeList]] and add it as branch to this item
-     * @param _open If false, the item will be closed
      */
-    public open(_open: boolean): void {
+    public expand(_expand: boolean): void {
       this.removeBranch();
 
-      if (_open)
-        this.dispatchEvent(new Event(EVENT.OPEN, { bubbles: true }));
+      if (_expand)
+        this.dispatchEvent(new Event(EVENT.EXPAND, { bubbles: true }));
 
-      (<HTMLInputElement>this.querySelector("input[type='checkbox']")).checked = _open;
+      (<HTMLInputElement>this.querySelector("input[type='checkbox']")).checked = _expand;
     }
 
     /**
      * Returns a list of all data referenced by the items succeeding this
      */
-    public getOpenData(): T[] {
+    public getVisibleData(): T[] {
       let list: NodeListOf<HTMLLIElement> = this.querySelectorAll("li");
       let data: T[] = [];
       for (let item of list)
@@ -176,13 +175,13 @@ namespace FudgeUserInterface {
       switch (_event.code) {
         case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
           if (this.hasChildren && !content)
-            this.open(true);
+            this.expand(true);
           else
             this.dispatchEvent(new KeyboardEvent(EVENT.FOCUS_NEXT, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
           break;
         case ƒ.KEYBOARD_CODE.ARROW_LEFT:
           if (content)
-            this.open(false);
+            this.expand(false);
           else
             this.dispatchEvent(new KeyboardEvent(EVENT.FOCUS_PREVIOUS, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
           break;
@@ -243,7 +242,7 @@ namespace FudgeUserInterface {
 
       switch (target.type) {
         case "checkbox":
-          this.open(target.checked);
+          this.expand(target.checked);
           break;
         case "text":
           target.disabled = true;
@@ -291,7 +290,7 @@ namespace FudgeUserInterface {
       this.select(_event.ctrlKey, _event.shiftKey);
     }
 
-    private hndUpdate = (_event: Event): void => {
+    private hndRemove = (_event: Event): void => {
       if (_event.currentTarget == _event.target)
         return;
       _event.stopPropagation();

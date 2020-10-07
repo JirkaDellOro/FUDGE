@@ -19,11 +19,11 @@ namespace FudgeUserInterface {
     /**
      * Create a custom fieldset for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
      */
-    public static createFieldSetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): FoldableFieldSet {
+    public static createFieldSetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): ExpandableFieldSet {
       let name: string = _name || _mutable.constructor.name;
       let mutator: ƒ.Mutator = _mutator || _mutable.getMutatorForUserInterface();
       let mutatorTypes: ƒ.MutatorAttributeTypes = _mutable.getMutatorAttributeTypes(mutator);
-      let fieldset: FoldableFieldSet = Generator.createFoldableFieldset(name, _mutable.type);
+      let fieldset: ExpandableFieldSet = Generator.createFoldableFieldset(name, _mutable.type);
 
       for (let key in mutatorTypes) {
         let type: Object = mutatorTypes[key];
@@ -99,8 +99,8 @@ namespace FudgeUserInterface {
     }
 
     // TODO: implement CustomFieldSet and replace this
-    public static createFoldableFieldset(_key: string, _type: string): FoldableFieldSet {
-      let cntFoldFieldset: FoldableFieldSet = new FoldableFieldSet(_key);
+    public static createFoldableFieldset(_key: string, _type: string): ExpandableFieldSet {
+      let cntFoldFieldset: ExpandableFieldSet = new ExpandableFieldSet(_key);
       //TODO: unique ids
       // cntFoldFieldset.id = _legend;
       cntFoldFieldset.setAttribute("key", _key);

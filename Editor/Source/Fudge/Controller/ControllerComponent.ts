@@ -27,9 +27,10 @@ namespace Fudge {
   export class ControllerComponent extends ƒui.Controller {
     public constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement) {
       super(_mutable, _domElement);
-      this.domElement.addEventListener("input", this.mutateOnInput);
+      this.domElement.addEventListener("input", this.mutateOnInput); // this should be obsolete
       this.domElement.addEventListener(ƒui.EVENT.DRAG_OVER, this.hndDragOver);
       this.domElement.addEventListener(ƒui.EVENT.DROP, this.hndDrop);
+      // this.domElement.addEventListener(ƒui.EVENT.UPDATE, this.hndUpdate);
     }
 
     private hndDragOver = (_event: DragEvent): void => {
@@ -73,7 +74,6 @@ namespace Fudge {
       };
       let setMesh: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
         this.mutable["mesh"] = _sources[0];
-        // this.setMutable(this.mutable); //reset this to match structural change
         this.domElement.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
         return true;
       };

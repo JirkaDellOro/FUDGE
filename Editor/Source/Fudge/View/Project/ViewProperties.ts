@@ -66,7 +66,7 @@ namespace Fudge {
       if (this.resource) {
         this.setTitle(this.resource.name);
         if (this.resource instanceof ƒ.Mutable) {
-          let fieldset: ƒui.FoldableFieldSet = ƒui.Generator.createFieldSetFromMutable(this.resource);
+          let fieldset: ƒui.ExpandableFieldSet = ƒui.Generator.createFieldSetFromMutable(this.resource);
           let uiMutable: ControllerComponent = new ControllerComponent(this.resource, fieldset);
           content = uiMutable.domElement;
         } else if (this.resource instanceof DirectoryEntry && this.resource.stats) {

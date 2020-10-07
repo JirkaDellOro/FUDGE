@@ -398,6 +398,7 @@ declare namespace Fudge {
      */
     class ViewComponents extends View {
         private node;
+        private expanded;
         constructor(_container: GoldenLayout.Container, _state: Object);
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;

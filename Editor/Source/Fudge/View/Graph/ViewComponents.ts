@@ -12,6 +12,7 @@ namespace Fudge {
    */
   export class ViewComponents extends View {
     private node: ƒ.Node;
+    private expanded: { [type: string]: boolean } = {ComponentTransform: true};
 
     constructor(_container: GoldenLayout.Container, _state: Object) {
       super(_container, _state);
@@ -21,6 +22,8 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
+      this.dom.addEventListener(ƒui.EVENT.EXPAND, this.hndEvent);
+      this.dom.addEventListener(ƒui.EVENT.COLLAPSE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
     }
 
@@ -64,9 +67,9 @@ namespace Fudge {
 
           let nodeComponents: ƒ.Component[] = this.node.getAllComponents();
           for (let nodeComponent of nodeComponents) {
-            let fieldset: ƒui.FoldableFieldSet = ƒui.Generator.createFieldSetFromMutable(nodeComponent);
+            let fieldset: ƒui.ExpandableFieldSet = ƒui.Generator.createFieldSetFromMutable(nodeComponent);
             let uiComponent: ControllerComponent = new ControllerComponent(nodeComponent, fieldset);
-            // fieldset.open(nodeComponent instanceof ƒ.ComponentTransform);
+            fieldset.expand(this.expanded[nodeComponent.type]);
             this.dom.append(uiComponent.domElement);
           }
         }
@@ -85,6 +88,10 @@ namespace Fudge {
           this.node = _event.detail;
         case EVENT_EDITOR.UPDATE:
           this.fillContent();
+          break;
+        case ƒui.EVENT.EXPAND:
+        case ƒui.EVENT.COLLAPSE:
+          this.expanded[(<ƒui.ExpandableFieldSet>_event.target).getAttribute("type")] = (_event.type == ƒui.EVENT.EXPAND);
         default:
           break;
       }

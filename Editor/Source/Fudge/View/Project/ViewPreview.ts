@@ -30,7 +30,7 @@ namespace Fudge {
       _container.on("resize", this.redraw);
       // this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
-      this.dom.addEventListener(ƒui.EVENT.UPDATE, this.hndEvent);
+      this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
       // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
       // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
@@ -181,7 +181,8 @@ namespace Fudge {
     private hndEvent = (_event: CustomEvent): void => {
       // console.log(_event.type);
       switch (_event.type) {
-        case ƒui.EVENT.UPDATE:
+        case ƒui.EVENT.CHANGE:
+        case ƒui.EVENT.MUTATE:
         case EVENT_EDITOR.UPDATE:
           this.redraw();
           if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture || this.resource instanceof ƒ.Material)
