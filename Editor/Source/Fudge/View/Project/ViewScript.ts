@@ -24,7 +24,7 @@ namespace Fudge {
       for (let namespace in ƒ.Project.scriptNamespaces) {
         for (let index in ƒ.Project.scriptNamespaces[namespace]) {
           let script: Function = ƒ.Project.scriptNamespaces[namespace][index];
-          scriptinfos.push({ name: script.name, namespace: namespace, script: script, super: script["__proto__"].name});
+          scriptinfos.push(new ScriptInfo(script.name, namespace, script, script["__proto__"].name));
         }
       }
       this.table = new ƒui.Table<ScriptInfo>(new ControllerTableScript(), scriptinfos);

@@ -1,11 +1,18 @@
 namespace Fudge {
   import ƒui = FudgeUserInterface;
 
-  export interface ScriptInfo {
-    name: string;
-    namespace: string;
-    super: string;
-    script: Function;
+  export class ScriptInfo {
+    public name: string;
+    public namespace: string;
+    public superClass: string;
+    public script: Function;
+
+    public constructor(_name: string, _namespace: string, _script: Function, _superClass: string) {
+      this.name = _name;
+      this.namespace = _namespace;
+      this.superClass = _superClass;
+      this.script = _script;
+    }
   }
 
   export class ControllerTableScript extends ƒui.TableController<ScriptInfo> {
@@ -14,7 +21,7 @@ namespace Fudge {
     private static getHead(): ƒui.TABLE[] {
       let head: ƒui.TABLE[] = [];
       head.push({ label: "Name", key: "name", sortable: true, editable: false });
-      head.push({ label: "Super", key: "super", sortable: true, editable: false });
+      head.push({ label: "Super", key: "superClass", sortable: true, editable: false });
       head.push({ label: "Namespace", key: "namespace", sortable: true, editable: false });
       return head;
     }

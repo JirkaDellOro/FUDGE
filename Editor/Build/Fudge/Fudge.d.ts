@@ -211,11 +211,12 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒui = FudgeUserInterface;
-    interface ScriptInfo {
+    class ScriptInfo {
         name: string;
         namespace: string;
-        super: string;
+        superClass: string;
         script: Function;
+        constructor(_name: string, _namespace: string, _script: Function, _superClass: string);
     }
     class ControllerTableScript extends ƒui.TableController<ScriptInfo> {
         private static head;
@@ -457,6 +458,7 @@ declare namespace Fudge {
         private createTextPreview;
         private createImagePreview;
         private createAudioPreview;
+        private createScriptPreview;
         private hndEvent;
         private redraw;
     }

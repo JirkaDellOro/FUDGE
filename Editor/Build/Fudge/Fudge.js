@@ -822,11 +822,20 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     var ƒui = FudgeUserInterface;
+    class ScriptInfo {
+        constructor(_name, _namespace, _script, _superClass) {
+            this.name = _name;
+            this.namespace = _namespace;
+            this.superClass = _superClass;
+            this.script = _script;
+        }
+    }
+    Fudge.ScriptInfo = ScriptInfo;
     class ControllerTableScript extends ƒui.TableController {
         static getHead() {
             let head = [];
             head.push({ label: "Name", key: "name", sortable: true, editable: false });
-            head.push({ label: "Super", key: "super", sortable: true, editable: false });
+            head.push({ label: "Super", key: "superClass", sortable: true, editable: false });
             head.push({ label: "Namespace", key: "namespace", sortable: true, editable: false });
             return head;
         }
@@ -1940,7 +1949,10 @@ var Fudge;
                             this.fillContent();
                         break;
                     default:
-                        this.resource = _event.detail.data;
+                        if (_event.detail.data instanceof Fudge.ScriptInfo)
+                            this.resource = _event.detail.data.script;
+                        else
+                            this.resource = _event.detail.data;
                         this.fillContent();
                         break;
                 }
@@ -2010,14 +2022,21 @@ var Fudge;
             this.dom.innerHTML = "";
             if (!this.resource)
                 return;
-            let type = this.resource.type;
+            //@ts-ignore
+            let type = this.resource.type || "Function";
             if (this.resource instanceof ƒ.Mesh)
                 type = "Mesh";
             // console.log(type);
             let graph;
+            let preview;
             switch (type) {
+                case "Function":
+                    preview = this.createScriptPreview(this.resource);
+                    if (preview)
+                        this.dom.appendChild(preview);
+                    break;
                 case "File":
-                    let preview = this.createFilePreview(this.resource);
+                    preview = this.createFilePreview(this.resource);
                     if (preview)
                         this.dom.appendChild(preview);
                     break;
@@ -2083,6 +2102,13 @@ var Fudge;
             audio.play();
             audio.controls = true;
             return audio;
+        }
+        createScriptPreview(_script) {
+            let pre = document.createElement("pre");
+            let code = _script.toString();
+            code = code.replaceAll("    ", " ");
+            pre.textContent = code;
+            return pre;
         }
     }
     ViewPreview.mtrStandard = ViewPreview.createStandardMaterial();
@@ -2209,7 +2235,7 @@ var Fudge;
             for (let namespace in ƒ.Project.scriptNamespaces) {
                 for (let index in ƒ.Project.scriptNamespaces[namespace]) {
                     let script = ƒ.Project.scriptNamespaces[namespace][index];
-                    scriptinfos.push({ name: script.name, namespace: namespace, script: script, super: script["__proto__"].name });
+                    scriptinfos.push(new Fudge.ScriptInfo(script.name, namespace, script, script["__proto__"].name));
                 }
             }
             this.table = new ƒui.Table(new Fudge.ControllerTableScript(), scriptinfos);

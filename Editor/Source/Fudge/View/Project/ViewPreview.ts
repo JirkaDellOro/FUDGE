@@ -10,7 +10,7 @@ namespace Fudge {
   export class ViewPreview extends View {
     private static mtrStandard: ƒ.Material = ViewPreview.createStandardMaterial();
     private static meshStandard: ƒ.Mesh = ViewPreview.createStandardMesh();
-    private resource: ƒ.SerializableResource | DirectoryEntry;
+    private resource: ƒ.SerializableResource | DirectoryEntry | Function;
     private viewport: ƒ.Viewport;
 
     constructor(_container: GoldenLayout.Container, _state: Object) {
@@ -85,15 +85,22 @@ namespace Fudge {
       if (!this.resource)
         return;
 
-      let type: string = this.resource.type;
+      //@ts-ignore
+      let type: string = this.resource.type || "Function";
       if (this.resource instanceof ƒ.Mesh)
         type = "Mesh";
 
       // console.log(type);
       let graph: ƒ.Node;
+      let preview: HTMLElement;
       switch (type) {
+        case "Function":
+          preview = this.createScriptPreview(<Function>this.resource);
+          if (preview)
+            this.dom.appendChild(preview);
+          break;
         case "File":
-          let preview: HTMLElement = this.createFilePreview(<DirectoryEntry>this.resource);
+          preview = this.createFilePreview(<DirectoryEntry>this.resource);
           if (preview)
             this.dom.appendChild(preview);
           break;
@@ -163,6 +170,13 @@ namespace Fudge {
       audio.controls = true;
       return audio;
     }
+    private createScriptPreview(_script: Function): HTMLElement {
+      let pre: HTMLPreElement = document.createElement("pre");
+      let code: string = _script.toString();
+      code = code.replaceAll("    ", " ");
+      pre.textContent = code;
+      return pre;
+    }
 
     private hndEvent = (_event: CustomEvent): void => {
       // console.log(_event.type);
@@ -174,7 +188,10 @@ namespace Fudge {
             this.fillContent();
           break;
         default:
-          this.resource = _event.detail.data;
+          if (_event.detail.data instanceof ScriptInfo)
+            this.resource = _event.detail.data.script;
+          else
+            this.resource = _event.detail.data;
           this.fillContent();
           break;
       }
