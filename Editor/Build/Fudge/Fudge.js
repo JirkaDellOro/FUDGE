@@ -2195,6 +2195,16 @@ var Fudge;
                 else if (this.resource instanceof ƒ.Graph) {
                     content.innerHTML = this.resource.toHierarchyString();
                 }
+                else if (this.resource instanceof Fudge.ScriptInfo) {
+                    for (let key in this.resource.script) {
+                        let value = this.resource.script[key];
+                        if (value instanceof Function)
+                            value = value.name;
+                        if (value instanceof Array)
+                            value = "Array(" + value.length + ")";
+                        content.innerHTML += key + ": " + value + "<br/>";
+                    }
+                }
                 this.dom.append(content);
             }
         }

@@ -75,6 +75,15 @@ namespace Fudge {
           content.innerHTML += "Modified: " + this.resource.stats["ctime"].toLocaleString() + "<br/>";
         } else if (this.resource instanceof ƒ.Graph) {
           content.innerHTML = this.resource.toHierarchyString();
+        } else if (this.resource instanceof ScriptInfo) {
+          for (let key in this.resource.script) {
+            let value: ƒ.General = this.resource.script[key];
+            if (value instanceof Function)
+              value = value.name;
+            if (value instanceof Array)
+              value = "Array(" + value.length + ")";
+            content.innerHTML += key + ": " + value + "<br/>";
+          }
         }
 
         this.dom.append(content);
