@@ -65,6 +65,7 @@ namespace Fudge {
           for (let nodeComponent of nodeComponents) {
             let fieldset: ƒui.FoldableFieldSet = ƒui.Generator.createFieldSetFromMutable(nodeComponent);
             let uiComponent: ControllerComponent = new ControllerComponent(nodeComponent, fieldset);
+            fieldset.open(nodeComponent instanceof ƒ.ComponentTransform);
             this.dom.append(uiComponent.domElement);
           }
         }

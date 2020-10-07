@@ -1759,6 +1759,7 @@ var Fudge;
                     for (let nodeComponent of nodeComponents) {
                         let fieldset = ƒui.Generator.createFieldSetFromMutable(nodeComponent);
                         let uiComponent = new Fudge.ControllerComponent(nodeComponent, fieldset);
+                        fieldset.open(nodeComponent instanceof ƒ.ComponentTransform);
                         this.dom.append(uiComponent.domElement);
                     }
                 }

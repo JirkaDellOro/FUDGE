@@ -299,8 +299,8 @@ declare namespace FudgeUserInterface {
         content: HTMLDivElement;
         private checkbox;
         constructor(_legend?: string);
-        private get isOpen();
-        private open;
+        get isOpen(): boolean;
+        open(_open: boolean): void;
         private hndFocus;
         private hndKey;
     }
