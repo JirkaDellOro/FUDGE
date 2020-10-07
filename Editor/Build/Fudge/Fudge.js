@@ -694,7 +694,8 @@ var Fudge;
         UrlOnTexture: { fromViews: [Fudge.ViewExternal], onKeyAttribute: "url", onTypeAttribute: "TextureImage", ofType: Fudge.DirectoryEntry, dropEffect: "link" },
         UrlOnAudio: { fromViews: [Fudge.ViewExternal], onKeyAttribute: "url", onTypeAttribute: "Audio", ofType: Fudge.DirectoryEntry, dropEffect: "link" },
         MaterialOnComponentMaterial: { fromViews: [Fudge.ViewInternal], onTypeAttribute: "Material", onType: ƒ.ComponentMaterial, ofType: ƒ.Material, dropEffect: "link" },
-        MeshOnComponentMesh: { fromViews: [Fudge.ViewInternal], onType: ƒ.ComponentMesh, ofType: ƒ.Mesh, dropEffect: "link" }
+        MeshOnComponentMesh: { fromViews: [Fudge.ViewInternal], onType: ƒ.ComponentMesh, ofType: ƒ.Mesh, dropEffect: "link" },
+        MeshOnMeshLabel: { fromViews: [Fudge.ViewInternal], onKeyAttribute: "mesh", ofType: ƒ.Mesh, dropEffect: "link" }
     };
     class ControllerComponent extends ƒui.Controller {
         constructor(_mutable, _domElement) {
@@ -715,6 +716,9 @@ var Fudge;
                     return (key == "mesh");
                 }))
                     return;
+                // Mesh on MeshLabel
+                if (this.filterDragDrop(_event, filter.MeshOnMeshLabel))
+                    return;
                 function checkMimeType(_mime) {
                     return (_sources) => {
                         let sources = _sources;
@@ -732,7 +736,15 @@ var Fudge;
                 let setResource = (_sources) => {
                     let ancestor = this.getAncestorWithType(_event.target);
                     let key = ancestor.getAttribute("key");
+                    if (!this.mutable[key])
+                        return false;
                     this.mutable[key] = _sources[0];
+                    this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                    return true;
+                };
+                let setMesh = (_sources) => {
+                    this.mutable["mesh"] = _sources[0];
+                    // this.setMutable(this.mutable); //reset this to match structural change
                     this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
                     return true;
                 };
@@ -747,6 +759,9 @@ var Fudge;
                     return;
                 // Mesh on ComponentMesh
                 if (this.filterDragDrop(_event, filter.MeshOnComponentMesh, setResource))
+                    return;
+                // Mesh on MeshLabel
+                if (this.filterDragDrop(_event, filter.MeshOnMeshLabel, setMesh))
                     return;
             };
             this.domElement.addEventListener("input", this.mutateOnInput);
@@ -1709,16 +1724,20 @@ var Fudge;
             super(_container, _state);
             this.hndEvent = (_event) => {
                 switch (_event.type) {
-                    case "rename" /* RENAME */: break;
-                    default:
+                    // case ƒui.EVENT.RENAME: break;
+                    case Fudge.EVENT_EDITOR.SET_GRAPH:
+                    case Fudge.EVENT_EDITOR.FOCUS_NODE:
                         this.node = _event.detail;
+                    case Fudge.EVENT_EDITOR.UPDATE:
                         this.fillContent();
+                    default:
                         break;
                 }
             };
             this.fillContent();
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             this.dom.addEventListener("rename" /* RENAME */, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
         }
@@ -1759,7 +1778,7 @@ var Fudge;
                     for (let nodeComponent of nodeComponents) {
                         let fieldset = ƒui.Generator.createFieldSetFromMutable(nodeComponent);
                         let uiComponent = new Fudge.ControllerComponent(nodeComponent, fieldset);
-                        fieldset.open(nodeComponent instanceof ƒ.ComponentTransform);
+                        // fieldset.open(nodeComponent instanceof ƒ.ComponentTransform);
                         this.dom.append(uiComponent.domElement);
                     }
                 }

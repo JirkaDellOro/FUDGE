@@ -15,6 +15,7 @@ declare namespace FudgeUserInterface {
         /** [[FudgeCore.Mutator]] used to store the data types of the mutator attributes*/
         protected mutatorTypes: ƒ.Mutator;
         constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
+        private setMutable;
         /**
          * Recursive method taking the [[ƒ.Mutator]] of a [[ƒ.Mutable]] or another existing [[ƒ.Mutator]]
          * as a template and updating its values with those found in the given UI-domElement.

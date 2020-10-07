@@ -20,7 +20,8 @@ namespace Fudge {
     UrlOnTexture: { fromViews: [ViewExternal], onKeyAttribute: "url", onTypeAttribute: "TextureImage", ofType: DirectoryEntry, dropEffect: "link" },
     UrlOnAudio: { fromViews: [ViewExternal], onKeyAttribute: "url", onTypeAttribute: "Audio", ofType: DirectoryEntry, dropEffect: "link" },
     MaterialOnComponentMaterial: { fromViews: [ViewInternal], onTypeAttribute: "Material", onType: ƒ.ComponentMaterial, ofType: ƒ.Material, dropEffect: "link" },
-    MeshOnComponentMesh: { fromViews: [ViewInternal], onType: ƒ.ComponentMesh, ofType: ƒ.Mesh, dropEffect: "link" }
+    MeshOnComponentMesh: { fromViews: [ViewInternal], onType: ƒ.ComponentMesh, ofType: ƒ.Mesh, dropEffect: "link" },
+    MeshOnMeshLabel: { fromViews: [ViewInternal], onKeyAttribute: "mesh", ofType: ƒ.Mesh, dropEffect: "link" }
   };
 
   export class ControllerComponent extends ƒui.Controller {
@@ -44,6 +45,8 @@ namespace Fudge {
         let key: string = this.getAncestorWithType(_event.target).getAttribute("key");
         return (key == "mesh");
       })) return;
+      // Mesh on MeshLabel
+      if (this.filterDragDrop(_event, filter.MeshOnMeshLabel)) return;
 
       function checkMimeType(_mime: MIME): (_sources: Object[]) => boolean {
         return (_sources: Object[]): boolean => {
@@ -63,7 +66,14 @@ namespace Fudge {
       let setResource: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
         let ancestor: HTMLElement = this.getAncestorWithType(_event.target);
         let key: string = ancestor.getAttribute("key");
+        if (!this.mutable[key]) return false;
         this.mutable[key] = _sources[0];
+        this.domElement.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+        return true;
+      };
+      let setMesh: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
+        this.mutable["mesh"] = _sources[0];
+        // this.setMutable(this.mutable); //reset this to match structural change
         this.domElement.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
         return true;
       };
@@ -77,6 +87,8 @@ namespace Fudge {
       if (this.filterDragDrop(_event, filter.MaterialOnComponentMaterial, setResource)) return;
       // Mesh on ComponentMesh
       if (this.filterDragDrop(_event, filter.MeshOnComponentMesh, setResource)) return;
+      // Mesh on MeshLabel
+      if (this.filterDragDrop(_event, filter.MeshOnMeshLabel, setMesh)) return;
     }
 
 

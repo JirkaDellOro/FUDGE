@@ -19,13 +19,17 @@ namespace FudgeUserInterface {
 
     constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement) {
       this.domElement = _domElement;
+      this.setMutable(_mutable);
+      // TODO: examine, if this should register to one common interval, instead of each installing its own.
+      window.setInterval(this.refresh, this.timeUpdate);
+      this.domElement.addEventListener("input", this.mutateOnInput);
+    }
+
+    private setMutable(_mutable: ƒ.Mutable): void {
       this.mutable = _mutable;
       this.mutator = _mutable.getMutatorForUserInterface();
       if (_mutable instanceof ƒ.Mutable)
         this.mutatorTypes = _mutable.getMutatorAttributeTypes(this.mutator);
-      // TODO: examine, if this should register to one common interval, instead of each installing its own.
-      window.setInterval(this.refresh, this.timeUpdate);
-      this.domElement.addEventListener("input", this.mutateOnInput);
     }
 
     /**
@@ -93,11 +97,11 @@ namespace FudgeUserInterface {
       }
     }
 
-    protected  mutateOnInput = async(_event: Event) => {
+    protected mutateOnInput = async (_event: Event) => {
       this.mutator = this.getMutator();
       await this.mutable.mutate(this.mutator);
       _event.stopPropagation();
-      
+
       this.domElement.dispatchEvent(new Event(EVENT.UPDATE, { bubbles: true }));
     }
 

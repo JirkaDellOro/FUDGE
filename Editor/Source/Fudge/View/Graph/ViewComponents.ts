@@ -19,6 +19,7 @@ namespace Fudge {
 
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
     }
@@ -65,7 +66,7 @@ namespace Fudge {
           for (let nodeComponent of nodeComponents) {
             let fieldset: ƒui.FoldableFieldSet = ƒui.Generator.createFieldSetFromMutable(nodeComponent);
             let uiComponent: ControllerComponent = new ControllerComponent(nodeComponent, fieldset);
-            fieldset.open(nodeComponent instanceof ƒ.ComponentTransform);
+            // fieldset.open(nodeComponent instanceof ƒ.ComponentTransform);
             this.dom.append(uiComponent.domElement);
           }
         }
@@ -78,10 +79,13 @@ namespace Fudge {
 
     private hndEvent = (_event: CustomEvent): void => {
       switch (_event.type) {
-        case ƒui.EVENT.RENAME: break;
-        default:
+        // case ƒui.EVENT.RENAME: break;
+        case EVENT_EDITOR.SET_GRAPH:
+        case EVENT_EDITOR.FOCUS_NODE:
           this.node = _event.detail;
+        case EVENT_EDITOR.UPDATE:
           this.fillContent();
+        default:
           break;
       }
     }

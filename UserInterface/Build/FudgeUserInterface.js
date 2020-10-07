@@ -23,13 +23,16 @@ var FudgeUserInterface;
                 this.updateUserInterface();
             };
             this.domElement = _domElement;
+            this.setMutable(_mutable);
+            // TODO: examine, if this should register to one common interval, instead of each installing its own.
+            window.setInterval(this.refresh, this.timeUpdate);
+            this.domElement.addEventListener("input", this.mutateOnInput);
+        }
+        setMutable(_mutable) {
             this.mutable = _mutable;
             this.mutator = _mutable.getMutatorForUserInterface();
             if (_mutable instanceof ƒ.Mutable)
                 this.mutatorTypes = _mutable.getMutatorAttributeTypes(this.mutator);
-            // TODO: examine, if this should register to one common interval, instead of each installing its own.
-            window.setInterval(this.refresh, this.timeUpdate);
-            this.domElement.addEventListener("input", this.mutateOnInput);
         }
         /**
          * Recursive method taking the [[ƒ.Mutator]] of a [[ƒ.Mutable]] or another existing [[ƒ.Mutator]]
@@ -126,8 +129,8 @@ var FudgeUserInterface;
                     subMutable = Reflect.get(_mutable, key);
                     if (subMutable instanceof ƒ.Mutable)
                         element = Generator.createFieldSetFromMutable(subMutable, key, mutator[key]);
-                    else //HACK! Display an enumerated select here
-                        element = new FudgeUserInterface.CustomElementTextInput({ key: key, label: key, value: type.toString() });
+                    else //Idea: Display an enumerated select here
+                        element = new FudgeUserInterface.CustomElementTextInput({ key: key, label: key, value: type ? type.toString() : "?" });
                     // let fieldset: FoldableFieldSet = Generator.createFieldsetFromMutable(subMutable, key, <ƒ.Mutator>_mutator[key]);
                     // _parent.appendChild(fieldset);
                 }
