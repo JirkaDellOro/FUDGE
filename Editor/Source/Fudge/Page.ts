@@ -146,6 +146,7 @@ namespace Fudge {
       ipcRenderer.on(MENU.PANEL_GRAPH_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
         node = new ƒaid.NodeCoordinateSystem("WorldCooSys");
         Page.add(PanelGraph, "Graph", Object({ node: node }));
+        Page.broadcastEvent(new CustomEvent(EVENT_EDITOR.UPDATE, {detail: node}));
       });
 
       ipcRenderer.on(MENU.PANEL_PROJECT_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {

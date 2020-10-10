@@ -216,7 +216,9 @@ declare namespace Fudge {
         namespace: string;
         superClass: string;
         script: Function;
-        constructor(_name: string, _namespace: string, _script: Function, _superClass: string);
+        isComponent: boolean;
+        isComponentScript: boolean;
+        constructor(_script: Function, _namespace: string);
     }
     class ControllerTableScript extends ƒui.TableController<ScriptInfo> {
         private static head;
@@ -402,8 +404,12 @@ declare namespace Fudge {
         constructor(_container: GoldenLayout.Container, _state: Object);
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        protected hndDragOver: (_event: DragEvent) => void;
+        protected hndDrop: (_event: DragEvent) => void;
         private fillContent;
         private hndEvent;
+        private createComponent;
+        private findComponentType;
     }
 }
 declare namespace Fudge {

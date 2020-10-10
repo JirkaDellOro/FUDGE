@@ -6,12 +6,20 @@ namespace Fudge {
     public namespace: string;
     public superClass: string;
     public script: Function;
+    public isComponent: boolean = false;
+    public isComponentScript: boolean = false;
 
-    public constructor(_name: string, _namespace: string, _script: Function, _superClass: string) {
-      this.name = _name;
-      this.namespace = _namespace;
-      this.superClass = _superClass;
+    public constructor(_script: Function, _namespace: string) {
       this.script = _script;
+      this.name = _script.name;
+      this.namespace = _namespace;
+      let chain: Function = _script["__proto__"];
+      this.superClass = chain.name;
+      do {
+        this.isComponent ||= (chain.name == "Component");
+        this.isComponentScript ||= (chain.name == "ComponentScript");
+        chain = chain["__proto__"];
+      } while (chain);
     }
   }
 

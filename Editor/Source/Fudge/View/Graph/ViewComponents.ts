@@ -6,13 +6,20 @@ namespace Fudge {
     COMPONENTMENU = "Add Components"
   }
 
+  // TODO: examin problem with ƒ.Material when using "typeof ƒ.Mutable" as key to the map
+  let resourceToComponent: Map<Function, typeof ƒ.Component> = new Map<Function, typeof ƒ.Component>([
+    [ƒ.Audio, ƒ.ComponentAudio],
+    [ƒ.Material, ƒ.ComponentMaterial],
+    [ƒ.Mesh, ƒ.ComponentMesh]
+  ]);
+
   /**
    * View all components attached to a node
    * @author Jirka Dell'Oro-Friedl, HFU, 2020
    */
   export class ViewComponents extends View {
     private node: ƒ.Node;
-    private expanded: { [type: string]: boolean } = {ComponentTransform: true};
+    private expanded: { [type: string]: boolean } = { ComponentTransform: true };
 
     constructor(_container: GoldenLayout.Container, _state: Object) {
       super(_container, _state);
@@ -24,6 +31,7 @@ namespace Fudge {
       this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.EXPAND, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.COLLAPSE, this.hndEvent);
+      this.dom.addEventListener(ƒui.EVENT.DRAG_OVER, this.hndDragOver);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
     }
 
@@ -58,6 +66,39 @@ namespace Fudge {
       }
     }
     //#endregion
+
+    protected hndDragOver = (_event: DragEvent): void => {
+      if (!this.node)
+        return;
+      if (this.dom != _event.target)
+        return;
+
+      let viewSource: View = View.getViewSource(_event);
+      if (!(viewSource instanceof ViewInternal || viewSource instanceof ViewScript))
+        return;
+
+      for (let source of viewSource.getDragDropSources()) {
+        if (source instanceof ScriptInfo) {
+          if (!source.isComponent)
+            return;
+        } else if (!this.findComponentType(source))
+          return;
+      }
+
+      _event.dataTransfer.dropEffect = "link";
+      _event.preventDefault();
+      _event.stopPropagation();
+    }
+
+    protected hndDrop = (_event: DragEvent): void => {
+      let viewSource: View = View.getViewSource(_event);
+      for (let source of viewSource.getDragDropSources()) {
+        let cmpNew: ƒ.Component = this.createComponent(source);
+        this.node.addComponent(cmpNew);
+        this.expanded[cmpNew.type] = true;
+      }
+      this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+    }
 
     private fillContent(): void {
       while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild));
@@ -95,6 +136,21 @@ namespace Fudge {
         default:
           break;
       }
+    }
+
+    private createComponent(_resource: Object): ƒ.Component {
+      if (_resource instanceof ScriptInfo)
+        if (_resource.isComponent)
+          return new (<ƒ.General>_resource.script)();
+
+      let typeComponent: typeof ƒ.Component = this.findComponentType(_resource);
+      return new (<ƒ.General>typeComponent)(_resource);
+    }
+
+    private findComponentType(_resource: Object): typeof ƒ.Component {
+      for (let entry of resourceToComponent)
+        if (_resource instanceof entry[0])
+          return entry[1];
     }
   }
 }

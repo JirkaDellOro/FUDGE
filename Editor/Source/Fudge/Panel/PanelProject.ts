@@ -27,8 +27,8 @@ namespace Fudge {
       inner.addChild({
         type: "column", content: [
           { type: "component", componentName: VIEW.INTERNAL, componentState: _state, title: "Internal" },
-          { type: "component", componentName: VIEW.SCRIPT, componentState: _state, title: "Script" },
-          { type: "component", componentName: VIEW.EXTERNAL, componentState: _state, title: "External" }
+          { type: "component", componentName: VIEW.EXTERNAL, componentState: _state, title: "External" },
+          { type: "component", componentName: VIEW.SCRIPT, componentState: _state, title: "Script" }
         ]
       });
 

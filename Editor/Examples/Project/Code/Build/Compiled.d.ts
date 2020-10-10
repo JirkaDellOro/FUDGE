@@ -13,6 +13,12 @@ declare namespace Script {
         private static showCompileMessage;
     }
 }
+declare namespace Script2 {
+    class SubScript {
+        private static message;
+        private static showCompileMessage;
+    }
+}
 declare namespace Script {
     import ƒ = FudgeCore;
     class TimerMessage extends ƒ.ComponentScript {

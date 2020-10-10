@@ -378,6 +378,7 @@ var Fudge;
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_GRAPH_OPEN, (_event, _args) => {
                 node = new ƒaid.NodeCoordinateSystem("WorldCooSys");
                 Page.add(Fudge.PanelGraph, "Graph", Object({ node: node }));
+                Page.broadcastEvent(new CustomEvent(Fudge.EVENT_EDITOR.UPDATE, { detail: node }));
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_PROJECT_OPEN, (_event, _args) => {
                 Page.add(Fudge.PanelProject, "Project", null); //Object.create(null,  {node: { writable: true, value: node }}));
@@ -838,11 +839,19 @@ var Fudge;
 (function (Fudge) {
     var ƒui = FudgeUserInterface;
     class ScriptInfo {
-        constructor(_name, _namespace, _script, _superClass) {
-            this.name = _name;
-            this.namespace = _namespace;
-            this.superClass = _superClass;
+        constructor(_script, _namespace) {
+            this.isComponent = false;
+            this.isComponentScript = false;
             this.script = _script;
+            this.name = _script.name;
+            this.namespace = _namespace;
+            let chain = _script["__proto__"];
+            this.superClass = chain.name;
+            do {
+                this.isComponent ||= (chain.name == "Component");
+                this.isComponentScript ||= (chain.name == "ComponentScript");
+                chain = chain["__proto__"];
+            } while (chain);
         }
     }
     Fudge.ScriptInfo = ScriptInfo;
@@ -1087,8 +1096,8 @@ var Fudge;
             inner.addChild({
                 type: "column", content: [
                     { type: "component", componentName: Fudge.VIEW.INTERNAL, componentState: _state, title: "Internal" },
-                    { type: "component", componentName: Fudge.VIEW.SCRIPT, componentState: _state, title: "Script" },
-                    { type: "component", componentName: Fudge.VIEW.EXTERNAL, componentState: _state, title: "External" }
+                    { type: "component", componentName: Fudge.VIEW.EXTERNAL, componentState: _state, title: "External" },
+                    { type: "component", componentName: Fudge.VIEW.SCRIPT, componentState: _state, title: "Script" }
                 ]
             });
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
@@ -1718,6 +1727,12 @@ var Fudge;
     (function (Menu) {
         Menu["COMPONENTMENU"] = "Add Components";
     })(Menu || (Menu = {}));
+    // TODO: examin problem with ƒ.Material when using "typeof ƒ.Mutable" as key to the map
+    let resourceToComponent = new Map([
+        [ƒ.Audio, ƒ.ComponentAudio],
+        [ƒ.Material, ƒ.ComponentMaterial],
+        [ƒ.Mesh, ƒ.ComponentMesh]
+    ]);
     /**
      * View all components attached to a node
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
@@ -1726,6 +1741,36 @@ var Fudge;
         constructor(_container, _state) {
             super(_container, _state);
             this.expanded = { ComponentTransform: true };
+            //#endregion
+            this.hndDragOver = (_event) => {
+                if (!this.node)
+                    return;
+                if (this.dom != _event.target)
+                    return;
+                let viewSource = Fudge.View.getViewSource(_event);
+                if (!(viewSource instanceof Fudge.ViewInternal || viewSource instanceof Fudge.ViewScript))
+                    return;
+                for (let source of viewSource.getDragDropSources()) {
+                    if (source instanceof Fudge.ScriptInfo) {
+                        if (!source.isComponent)
+                            return;
+                    }
+                    else if (!this.findComponentType(source))
+                        return;
+                }
+                _event.dataTransfer.dropEffect = "link";
+                _event.preventDefault();
+                _event.stopPropagation();
+            };
+            this.hndDrop = (_event) => {
+                let viewSource = Fudge.View.getViewSource(_event);
+                for (let source of viewSource.getDragDropSources()) {
+                    let cmpNew = this.createComponent(source);
+                    this.node.addComponent(cmpNew);
+                    this.expanded[cmpNew.type] = true;
+                }
+                this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+            };
             this.hndEvent = (_event) => {
                 switch (_event.type) {
                     // case ƒui.EVENT.RENAME: break;
@@ -1749,6 +1794,7 @@ var Fudge;
             this.dom.addEventListener("rename" /* RENAME */, this.hndEvent);
             this.dom.addEventListener("expand" /* EXPAND */, this.hndEvent);
             this.dom.addEventListener("collapse" /* COLLAPSE */, this.hndEvent);
+            this.dom.addEventListener("dragover" /* DRAG_OVER */, this.hndDragOver);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
         }
         //#region  ContextMenu
@@ -1777,7 +1823,6 @@ var Fudge;
                     break;
             }
         }
-        //#endregion
         fillContent() {
             while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
                 ;
@@ -1797,6 +1842,18 @@ var Fudge;
                 let cntEmpty = document.createElement("div");
                 this.dom.append(cntEmpty);
             }
+        }
+        createComponent(_resource) {
+            if (_resource instanceof Fudge.ScriptInfo)
+                if (_resource.isComponent)
+                    return new _resource.script();
+            let typeComponent = this.findComponentType(_resource);
+            return new typeComponent(_resource);
+        }
+        findComponentType(_resource) {
+            for (let entry of resourceToComponent)
+                if (_resource instanceof entry[0])
+                    return entry[1];
         }
     }
     Fudge.ViewComponents = ViewComponents;
@@ -2276,7 +2333,7 @@ var Fudge;
             for (let namespace in ƒ.Project.scriptNamespaces) {
                 for (let index in ƒ.Project.scriptNamespaces[namespace]) {
                     let script = ƒ.Project.scriptNamespaces[namespace][index];
-                    scriptinfos.push(new Fudge.ScriptInfo(script.name, namespace, script, script["__proto__"].name));
+                    scriptinfos.push(new Fudge.ScriptInfo(script, namespace));
                 }
             }
             this.table = new ƒui.Table(new Fudge.ControllerTableScript(), scriptinfos);
