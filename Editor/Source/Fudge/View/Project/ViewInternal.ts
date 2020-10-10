@@ -19,6 +19,8 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
+      // this.dom.addEventListener(ƒui.EVENT.DRAG_OVER, this.hndDragOver);
+      // this.dom.addEventListener(ƒui.EVENT.DROP, this.hndDrop);
     }
 
     public listResources(): void {
@@ -30,7 +32,7 @@ namespace Fudge {
     public getSelection(): ƒ.SerializableResource[] {
       return this.table.controller.selection;
     }
-    
+
     public getDragDropSources(): ƒ.SerializableResource[] {
       return this.table.controller.dragDrop.sources;
     }
@@ -74,6 +76,35 @@ namespace Fudge {
       }
     }
     //#endregion
+
+    protected hndDragOver = (_event: DragEvent): void => {
+      _event.dataTransfer.dropEffect = "none";
+      if (this.dom != _event.target)
+        return;
+
+      let viewSource: View = View.getViewSource(_event);
+      if (!(viewSource instanceof ViewExternal || viewSource instanceof ViewHierarchy))
+        return;
+
+      _event.dataTransfer.dropEffect = "link";
+      _event.preventDefault();
+      _event.stopPropagation();
+    }
+
+    protected hndDrop = async (_event: DragEvent): Promise<void> => {
+      let viewSource: View = View.getViewSource(_event);
+
+      if (viewSource instanceof ViewHierarchy) {
+        let sources: ƒ.Node[] = viewSource.getDragDropSources();
+        for (let source of sources) {
+          await ƒ.Project.registerAsGraph(source, true);
+        }
+      }
+      else
+        console.log("External");
+      
+      this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, {bubbles: true}));
+    }
 
     private hndEvent = (_event: CustomEvent): void => {
       switch (_event.type) {

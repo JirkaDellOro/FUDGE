@@ -182,6 +182,8 @@ declare namespace Fudge {
         getDragDropSources(): ƒ.SerializableResource[];
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        protected hndDragOver: (_event: DragEvent) => void;
+        protected hndDrop: (_event: DragEvent) => Promise<void>;
         private hndEvent;
     }
 }
@@ -423,6 +425,8 @@ declare namespace Fudge {
         private tree;
         constructor(_container: GoldenLayout.Container, _state: Object);
         setGraph(_graph: ƒ.Node): void;
+        getSelection(): ƒ.Node[];
+        getDragDropSources(): ƒ.Node[];
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         private hndEvent;

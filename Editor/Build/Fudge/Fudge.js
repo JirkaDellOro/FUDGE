@@ -618,6 +618,29 @@ var Fudge;
         constructor(_container, _state) {
             super(_container, _state);
             //#endregion
+            this.hndDragOver = (_event) => {
+                _event.dataTransfer.dropEffect = "none";
+                if (this.dom != _event.target)
+                    return;
+                let viewSource = Fudge.View.getViewSource(_event);
+                if (!(viewSource instanceof Fudge.ViewExternal || viewSource instanceof Fudge.ViewHierarchy))
+                    return;
+                _event.dataTransfer.dropEffect = "link";
+                _event.preventDefault();
+                _event.stopPropagation();
+            };
+            this.hndDrop = async (_event) => {
+                let viewSource = Fudge.View.getViewSource(_event);
+                if (viewSource instanceof Fudge.ViewHierarchy) {
+                    let sources = viewSource.getDragDropSources();
+                    for (let source of sources) {
+                        await ƒ.Project.registerAsGraph(source, true);
+                    }
+                }
+                else
+                    console.log("External");
+                this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+            };
             this.hndEvent = (_event) => {
                 switch (_event.type) {
                     case Fudge.EVENT_EDITOR.SET_PROJECT:
@@ -632,6 +655,8 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
+            // this.dom.addEventListener(ƒui.EVENT.DRAG_OVER, this.hndDragOver);
+            // this.dom.addEventListener(ƒui.EVENT.DROP, this.hndDrop);
         }
         listResources() {
             while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
@@ -1794,7 +1819,6 @@ var Fudge;
             this.dom.addEventListener("rename" /* RENAME */, this.hndEvent);
             this.dom.addEventListener("expand" /* EXPAND */, this.hndEvent);
             this.dom.addEventListener("collapse" /* COLLAPSE */, this.hndEvent);
-            this.dom.addEventListener("dragover" /* DRAG_OVER */, this.hndDragOver);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
         }
         //#region  ContextMenu
@@ -1893,18 +1917,24 @@ var Fudge;
             this.tree.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.append(this.tree);
         }
+        getSelection() {
+            return this.tree.controller.selection;
+        }
+        getDragDropSources() {
+            return this.tree.controller.dragDrop.sources;
+        }
         //#region  ContextMenu
         getContextMenu(_callback) {
             const menu = new Fudge.remote.Menu();
             let item;
             item = new Fudge.remote.MenuItem({ label: "Add Node", id: String(Fudge.CONTEXTMENU.ADD_NODE), click: _callback, accelerator: process.platform == "darwin" ? "N" : "N" });
             menu.append(item);
-            item = new Fudge.remote.MenuItem({
-                label: "Add Component",
-                submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.ADD_COMPONENT, ƒ.Component.subclasses, _callback)
-            });
-            menu.append(item);
-            Fudge.ContextMenu.appendCopyPaste(menu);
+            // item = new remote.MenuItem({
+            //   label: "Add Component",
+            //   submenu: ContextMenu.getSubclassMenu<typeof ƒ.Component>(CONTEXTMENU.ADD_COMPONENT, ƒ.Component.subclasses, _callback)
+            // });
+            // menu.append(item);
+            // ContextMenu.appendCopyPaste(menu);
             // menu.addListener("menu-will-close", (_event: Electron.Event) => { console.log(_event); });
             return menu;
         }

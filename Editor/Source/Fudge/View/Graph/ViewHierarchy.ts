@@ -38,6 +38,14 @@ namespace Fudge {
       this.dom.append(this.tree);
     }
 
+    public getSelection(): ƒ.Node[] {
+      return this.tree.controller.selection;
+    }
+
+    public getDragDropSources(): ƒ.Node[] {
+      return this.tree.controller.dragDrop.sources;
+    }
+
     //#region  ContextMenu
     protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
       const menu: Electron.Menu = new remote.Menu();
@@ -46,13 +54,13 @@ namespace Fudge {
       item = new remote.MenuItem({ label: "Add Node", id: String(CONTEXTMENU.ADD_NODE), click: _callback, accelerator: process.platform == "darwin" ? "N" : "N" });
       menu.append(item);
 
-      item = new remote.MenuItem({
-        label: "Add Component",
-        submenu: ContextMenu.getSubclassMenu<typeof ƒ.Component>(CONTEXTMENU.ADD_COMPONENT, ƒ.Component.subclasses, _callback)
-      });
-      menu.append(item);
+      // item = new remote.MenuItem({
+      //   label: "Add Component",
+      //   submenu: ContextMenu.getSubclassMenu<typeof ƒ.Component>(CONTEXTMENU.ADD_COMPONENT, ƒ.Component.subclasses, _callback)
+      // });
+      // menu.append(item);
 
-      ContextMenu.appendCopyPaste(menu);
+      // ContextMenu.appendCopyPaste(menu);
 
       // menu.addListener("menu-will-close", (_event: Electron.Event) => { console.log(_event); });
       return menu;

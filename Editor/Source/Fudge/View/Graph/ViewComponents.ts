@@ -31,7 +31,6 @@ namespace Fudge {
       this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.EXPAND, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.COLLAPSE, this.hndEvent);
-      this.dom.addEventListener(ƒui.EVENT.DRAG_OVER, this.hndDragOver);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
     }
 

@@ -2437,16 +2437,15 @@ declare namespace FudgeCore {
         private idSource;
         constructor(_graph: Graph);
         /**
-         * Recreate this node from the [[NodeResource]] referenced
+         * Recreate this node from the [[Graph]] referenced
          */
         reset(): Promise<void>;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         /**
-         * Set this node to be a recreation of the [[NodeResource]] given
-         * @param _nodeResource
+         * Set this node to be a recreation of the [[Graph]] given
          */
-        set(_nodeResource: Graph): Promise<void>;
+        set(_graph: Graph): Promise<void>;
     }
 }
 declare namespace FudgeCore {

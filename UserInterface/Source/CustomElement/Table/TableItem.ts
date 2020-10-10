@@ -158,7 +158,7 @@ namespace FudgeUserInterface {
       // _event.stopPropagation();
       _event.preventDefault();
       this.controller.dragDrop.target = this.data;
-      _event.dataTransfer.dropEffect = "link";
+      // _event.dataTransfer.dropEffect = "link";
     }
 
     private hndPointerUp = (_event: PointerEvent): void => {

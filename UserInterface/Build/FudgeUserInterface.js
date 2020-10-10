@@ -1654,7 +1654,7 @@ var FudgeUserInterface;
                 // _event.stopPropagation();
                 _event.preventDefault();
                 this.controller.dragDrop.target = this.data;
-                _event.dataTransfer.dropEffect = "link";
+                // _event.dataTransfer.dropEffect = "link";
             };
             this.hndPointerUp = (_event) => {
                 _event.stopPropagation();
