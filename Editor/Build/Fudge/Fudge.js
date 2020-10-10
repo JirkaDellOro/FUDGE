@@ -625,6 +625,12 @@ var Fudge;
                 let viewSource = Fudge.View.getViewSource(_event);
                 if (!(viewSource instanceof Fudge.ViewExternal || viewSource instanceof Fudge.ViewHierarchy))
                     return;
+                if (viewSource instanceof Fudge.ViewExternal) {
+                    let sources = viewSource.getDragDropSources();
+                    for (let source of sources)
+                        if (source.getMimeType() != Fudge.MIME.AUDIO && source.getMimeType() != Fudge.MIME.IMAGE)
+                            return;
+                }
                 _event.dataTransfer.dropEffect = "link";
                 _event.preventDefault();
                 _event.stopPropagation();
@@ -637,8 +643,20 @@ var Fudge;
                         await ƒ.Project.registerAsGraph(source, true);
                     }
                 }
-                else
-                    console.log("External");
+                else if (viewSource instanceof Fudge.ViewExternal) {
+                    let sources = viewSource.getDragDropSources();
+                    for (let source of sources) {
+                        switch (source.getMimeType()) {
+                            case Fudge.MIME.AUDIO:
+                                console.log(new ƒ.Audio(source.pathRelative));
+                                break;
+                            case Fudge.MIME.IMAGE:
+                                console.log(new ƒ.TextureImage(source.pathRelative));
+                                break;
+                        }
+                    }
+                    // console.log("External");
+                }
                 this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
             };
             this.hndEvent = (_event) => {

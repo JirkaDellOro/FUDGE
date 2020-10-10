@@ -86,6 +86,13 @@ namespace Fudge {
       if (!(viewSource instanceof ViewExternal || viewSource instanceof ViewHierarchy))
         return;
 
+      if (viewSource instanceof ViewExternal) {
+        let sources: DirectoryEntry[] = viewSource.getDragDropSources();
+        for (let source of sources)
+          if (source.getMimeType() != MIME.AUDIO && source.getMimeType() != MIME.IMAGE)
+            return;
+      }
+
       _event.dataTransfer.dropEffect = "link";
       _event.preventDefault();
       _event.stopPropagation();
@@ -99,11 +106,22 @@ namespace Fudge {
         for (let source of sources) {
           await ƒ.Project.registerAsGraph(source, true);
         }
+      } else if (viewSource instanceof ViewExternal) {
+        let sources: DirectoryEntry[] = viewSource.getDragDropSources();
+        for (let source of sources) {
+          switch (source.getMimeType()) {
+            case MIME.AUDIO:
+              console.log(new ƒ.Audio(source.pathRelative));
+              break;
+            case MIME.IMAGE:
+              console.log(new ƒ.TextureImage(source.pathRelative));
+              break;
+          }
+        }
+        // console.log("External");
       }
-      else
-        console.log("External");
-      
-      this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, {bubbles: true}));
+
+      this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
     }
 
     private hndEvent = (_event: CustomEvent): void => {
