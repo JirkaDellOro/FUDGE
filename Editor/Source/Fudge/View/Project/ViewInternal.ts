@@ -100,17 +100,16 @@ namespace Fudge {
     }
     //#endregion
 
-    protected hndDragOver = (_event: DragEvent): void => {
+    protected hndDragOver(_event: DragEvent, _viewSource: View): void {
       _event.dataTransfer.dropEffect = "none";
       if (this.dom != _event.target)
         return;
 
-      let viewSource: View = View.getViewSource(_event);
-      if (!(viewSource instanceof ViewExternal || viewSource instanceof ViewHierarchy))
+      if (!(_viewSource instanceof ViewExternal || _viewSource instanceof ViewHierarchy))
         return;
 
-      if (viewSource instanceof ViewExternal) {
-        let sources: DirectoryEntry[] = viewSource.getDragDropSources();
+      if (_viewSource instanceof ViewExternal) {
+        let sources: DirectoryEntry[] = _viewSource.getDragDropSources();
         for (let source of sources)
           if (source.getMimeType() != MIME.AUDIO && source.getMimeType() != MIME.IMAGE)
             return;
@@ -121,16 +120,14 @@ namespace Fudge {
       _event.stopPropagation();
     }
 
-    protected hndDrop = async (_event: DragEvent): Promise<void> => {
-      let viewSource: View = View.getViewSource(_event);
-
-      if (viewSource instanceof ViewHierarchy) {
-        let sources: ƒ.Node[] = viewSource.getDragDropSources();
+    protected async hndDrop(_event: DragEvent, _viewSource: View): Promise<void> {
+      if (_viewSource instanceof ViewHierarchy) {
+        let sources: ƒ.Node[] = _viewSource.getDragDropSources();
         for (let source of sources) {
           await ƒ.Project.registerAsGraph(source, true);
         }
-      } else if (viewSource instanceof ViewExternal) {
-        let sources: DirectoryEntry[] = viewSource.getDragDropSources();
+      } else if (_viewSource instanceof ViewExternal) {
+        let sources: DirectoryEntry[] = _viewSource.getDragDropSources();
         for (let source of sources) {
           switch (source.getMimeType()) {
             case MIME.AUDIO:
@@ -141,7 +138,6 @@ namespace Fudge {
               break;
           }
         }
-        // console.log("External");
       }
 
       this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));

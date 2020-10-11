@@ -1931,7 +1931,7 @@ var FudgeUserInterface;
             this.addEventListener("expand" /* EXPAND */, this.hndExpand);
             this.addEventListener("rename" /* RENAME */, this.hndRename);
             this.addEventListener("itemselect" /* SELECT */, this.hndSelect);
-            this.addEventListener("drop" /* DROP */, this.hndDrop);
+            this.addEventListener("drop" /* DROP */, this.hndDrop, true);
             this.addEventListener("delete" /* DELETE */, this.hndDelete);
             this.addEventListener("escape" /* ESCAPE */, this.hndEscape);
             this.addEventListener("copy" /* COPY */, this.hndCopyPaste);
@@ -2003,7 +2003,8 @@ var FudgeUserInterface;
             this.displaySelection(this.controller.selection);
         }
         hndDrop(_event) {
-            _event.stopPropagation();
+            // _event.stopPropagation();
+            console.log(_event.dataTransfer);
             this.addChildren(this.controller.dragDrop.sources, this.controller.dragDrop.target);
         }
         addChildren(_children, _target) {
@@ -2046,6 +2047,13 @@ var FudgeUserInterface;
             this.dragDrop = { sources: [], target: null };
             /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
             this.copyPaste = { sources: [], target: null };
+            // public abstract hndDragOver = (_event: DragEvent): void => {
+            //   _event.stopPropagation();
+            //   _event.preventDefault();
+            //   this.dragDrop.target = (<TreeItem<T>>_event.currentTarget).data;
+            //   console.log(_event.currentTarget);
+            //   _event.dataTransfer.dropEffect = "move";
+            // }
         }
     }
     FudgeUserInterface.TreeController = TreeController;
@@ -2158,18 +2166,19 @@ var FudgeUserInterface;
                 else
                     this.controller.dragDrop.sources = [this.data];
                 _event.dataTransfer.effectAllowed = "all";
+                this.controller.dragDrop.target = null;
                 // mark as already processed by this tree item to ignore it in further propagation through the tree
                 _event.dataTransfer.setData("dragstart", this.label.value);
             };
             this.hndDragOver = (_event) => {
-                _event.stopPropagation();
-                if (_event.dataTransfer.getData("dragover"))
+                // this.controller.hndDragOver(_event);
+                if (Reflect.get(_event, "dragoverDone"))
                     return;
+                Reflect.set(_event, "dragoverDone", true);
+                // _event.stopPropagation();
                 _event.preventDefault();
                 this.controller.dragDrop.target = this.data;
                 _event.dataTransfer.dropEffect = "move";
-                // mark as already processed by this tree item to ignore it in further propagation through the tree
-                _event.dataTransfer.setData("dragover", this.label.value);
             };
             this.hndPointerUp = (_event) => {
                 _event.stopPropagation();

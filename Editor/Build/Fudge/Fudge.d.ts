@@ -184,8 +184,8 @@ declare namespace Fudge {
         getDragDropSources(): ƒ.SerializableResource[];
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): Promise<void>;
-        protected hndDragOver: (_event: DragEvent) => void;
-        protected hndDrop: (_event: DragEvent) => Promise<void>;
+        protected hndDragOver(_event: DragEvent, _viewSource: View): void;
+        protected hndDrop(_event: DragEvent, _viewSource: View): Promise<void>;
         private hndEvent;
     }
 }
@@ -408,8 +408,8 @@ declare namespace Fudge {
         constructor(_container: GoldenLayout.Container, _state: Object);
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
-        protected hndDragOver: (_event: DragEvent) => void;
-        protected hndDrop: (_event: DragEvent) => void;
+        protected hndDragOver(_event: DragEvent, _viewSource: View): void;
+        protected hndDrop(_event: DragEvent, _viewSource: View): void;
         private fillContent;
         private hndEvent;
         private createComponent;
@@ -429,6 +429,8 @@ declare namespace Fudge {
         setGraph(_graph: ƒ.Node): void;
         getSelection(): ƒ.Node[];
         getDragDropSources(): ƒ.Node[];
+        protected hndDragOver(_event: DragEvent, _viewSource: View): void;
+        protected hndDrop(_event: DragEvent, _viewSource: View): Promise<void>;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         private hndEvent;
@@ -447,8 +449,8 @@ declare namespace Fudge {
         constructor(_container: GoldenLayout.Container, _state: Object);
         createUserInterface(): void;
         setGraph(_node: ƒ.Node): void;
-        protected hndDragOver: (_event: DragEvent) => void;
-        protected hndDrop: (_event: DragEvent) => void;
+        protected hndDragOver(_event: DragEvent, _viewSource: View): void;
+        protected hndDrop(_event: DragEvent, _viewSource: View): void;
         private hndEvent;
         private activeViewport;
         private redraw;
@@ -486,7 +488,7 @@ declare namespace Fudge {
     class ViewProperties extends View {
         private resource;
         constructor(_container: GoldenLayout.Container, _state: Object);
-        protected hndDragOver(_event: DragEvent, _source: View): void;
+        protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         private fillContent;
         private hndEvent;
     }

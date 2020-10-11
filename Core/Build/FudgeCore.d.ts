@@ -2435,7 +2435,7 @@ declare namespace FudgeCore {
     class GraphInstance extends Node {
         /** id of the resource that instance was created from */
         private idSource;
-        constructor(_graph: Graph);
+        constructor(_graph?: Graph);
         /**
          * Recreate this node from the [[Graph]] referenced
          */

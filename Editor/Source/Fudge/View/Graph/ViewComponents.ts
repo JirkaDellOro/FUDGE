@@ -66,17 +66,16 @@ namespace Fudge {
     }
     //#endregion
 
-    protected hndDragOver = (_event: DragEvent): void => {
+    protected hndDragOver(_event: DragEvent, _viewSource: View): void {
       if (!this.node)
         return;
       if (this.dom != _event.target)
         return;
 
-      let viewSource: View = View.getViewSource(_event);
-      if (!(viewSource instanceof ViewInternal || viewSource instanceof ViewScript))
+      if (!(_viewSource instanceof ViewInternal || _viewSource instanceof ViewScript))
         return;
 
-      for (let source of viewSource.getDragDropSources()) {
+      for (let source of _viewSource.getDragDropSources()) {
         if (source instanceof ScriptInfo) {
           if (!source.isComponent)
             return;
@@ -89,9 +88,8 @@ namespace Fudge {
       _event.stopPropagation();
     }
 
-    protected hndDrop = (_event: DragEvent): void => {
-      let viewSource: View = View.getViewSource(_event);
-      for (let source of viewSource.getDragDropSources()) {
+    protected hndDrop(_event: DragEvent, _viewSource: View): void {
+      for (let source of _viewSource.getDragDropSources()) {
         let cmpNew: ƒ.Component = this.createComponent(source);
         this.node.addComponent(cmpNew);
         this.expanded[cmpNew.type] = true;

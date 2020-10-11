@@ -57,16 +57,15 @@ namespace Fudge {
       this.redraw();
     }
 
-    protected hndDragOver = (_event: DragEvent): void => {
+    protected hndDragOver(_event: DragEvent, _viewSource: View): void {
       _event.dataTransfer.dropEffect = "none";
       // if (this.dom != _event.target)
       //   return;
 
-      let viewSource: View = View.getViewSource(_event);
-      if (!(viewSource instanceof ViewInternal))
+      if (!(_viewSource instanceof ViewInternal))
         return;
 
-      let source: Object = viewSource.getDragDropSources()[0];
+      let source: Object = _viewSource.getDragDropSources()[0];
       if (!(source instanceof ƒ.Graph))
         return;
 
@@ -75,11 +74,10 @@ namespace Fudge {
       _event.stopPropagation();
     }
 
-    protected hndDrop = (_event: DragEvent): void => {
-      let viewSource: View = View.getViewSource(_event);
-      let source: Object = viewSource.getDragDropSources()[0];
+    protected hndDrop(_event: DragEvent, _viewSource: View): void {
+      let source: Object = _viewSource.getDragDropSources()[0];
       // this.setGraph(<ƒ.Node>source);
-      this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, {bubbles: true, detail: source}));
+      this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: source }));
     }
 
     private hndEvent = (_event: CustomEvent): void => {

@@ -52,7 +52,7 @@ namespace Fudge {
     // }
     //#endregion
 
-    protected hndDragOver(_event: DragEvent, _source: View): void {
+    protected hndDragOver(_event: DragEvent, _viewSource: View): void {
       // console.log(_event.target, _event.currentTarget);
       // _event.dataTransfer.dropEffect = "link";
       // _event.preventDefault();

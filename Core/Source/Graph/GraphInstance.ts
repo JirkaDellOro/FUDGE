@@ -10,8 +10,10 @@ namespace FudgeCore {
     // TODO: examine, if this should be a direct reference to the Graph, instead of the id
     private idSource: string = undefined;
 
-    constructor(_graph: Graph) {
-      super(_graph.name);
+    constructor(_graph?: Graph) {
+      super("Graph");
+      if (!_graph)
+        return;
       this.idSource = _graph.idResource;
       this.reset();
     }
@@ -20,7 +22,7 @@ namespace FudgeCore {
      * Recreate this node from the [[Graph]] referenced
      */
     public async reset(): Promise<void> {
-      let resource: Graph = <Graph> await Project.getResource(this.idSource);
+      let resource: Graph = <Graph>await Project.getResource(this.idSource);
       await this.set(resource);
     }
 

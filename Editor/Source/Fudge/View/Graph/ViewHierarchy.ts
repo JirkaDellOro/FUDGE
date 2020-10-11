@@ -46,6 +46,42 @@ namespace Fudge {
       return this.tree.controller.dragDrop.sources;
     }
 
+    protected hndDragOver(_event: DragEvent, _viewSource: View): void {
+      if (_viewSource == this) {
+        _event.stopPropagation();
+        return; // continue with standard tree behaviour
+      }
+
+      _event.dataTransfer.dropEffect = "none";
+      if (_event.target == this.dom)
+        return;
+
+      if (!(_viewSource instanceof ViewInternal))
+        return;
+
+      let source: Object = _viewSource.getDragDropSources()[0];
+      if (!(source instanceof ƒ.Graph))
+        return;
+
+      _event.dataTransfer.dropEffect = "copy";
+      _event.preventDefault();
+      _event.stopPropagation();
+    }
+
+    protected async hndDrop(_event: DragEvent, _viewSource: View): Promise<void> {
+      if (_viewSource == this)
+        return; // continue with standard tree behaviour
+
+      _event.stopPropagation(); // capture phase, don't pass further down
+      let graph: ƒ.Graph = <ƒ.Graph>_viewSource.getDragDropSources()[0];
+      let instance: ƒ.GraphInstance = await ƒ.Project.createGraphInstance(graph);
+      let target: ƒ.Node = this.tree.controller.dragDrop.target;
+      target.appendChild(instance);
+      this.tree.findVisible(target).expand(true);
+
+      this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+    }
+
     //#region  ContextMenu
     protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
       const menu: Electron.Menu = new remote.Menu();
@@ -77,16 +113,16 @@ namespace Fudge {
           this.tree.findVisible(focus).expand(true);
           this.tree.findVisible(child).focus();
           break;
-        case CONTEXTMENU.ADD_COMPONENT:
-          let iSubclass: number = _item["iSubclass"];
-          let component: typeof ƒ.Component = ƒ.Component.subclasses[iSubclass];
-          //@ts-ignore
-          let cmpNew: ƒ.Component = new component();
-          ƒ.Debug.info(cmpNew.type, cmpNew);
+        // case CONTEXTMENU.ADD_COMPONENT:
+        //   let iSubclass: number = _item["iSubclass"];
+        //   let component: typeof ƒ.Component = ƒ.Component.subclasses[iSubclass];
+        //   //@ts-ignore
+        //   let cmpNew: ƒ.Component = new component();
+        //   ƒ.Debug.info(cmpNew.type, cmpNew);
 
-          focus.addComponent(cmpNew);
-          this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.SELECT, { bubbles: true, detail: { data: focus } }));
-          break;
+        //   focus.addComponent(cmpNew);
+        //   this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.SELECT, { bubbles: true, detail: { data: focus } }));
+        //   break;
         case CONTEXTMENU.ADD_COMPONENT_SCRIPT:
           // let script: typeof ƒ.ComponentScript = <typeof ƒ.ComponentScript>_item["Script"];
           let cmpScript: ƒ.ComponentScript = <ƒ.ComponentScript>ƒ.Serializer.reconstruct(_item["Script"]);

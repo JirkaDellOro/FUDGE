@@ -59,11 +59,14 @@ namespace Fudge {
       });
 
       // when dropping into a view, get the original source view for dragging and call hndDrop
-      _this.dom.addEventListener(ƒui.EVENT.DROP, (_event: DragEvent) => {
-        _event.stopPropagation();
-        let viewSource: View = View.getViewSource(_event);
-        _this.hndDrop(_event, viewSource);
-      });
+      _this.dom.addEventListener(
+        ƒui.EVENT.DROP,
+        (_event: DragEvent) => {
+          // _event.stopPropagation();
+          let viewSource: View = View.getViewSource(_event);
+          _this.hndDrop(_event, viewSource);
+        },
+        true);
 
       return View.idCount++;
     }
@@ -95,7 +98,6 @@ namespace Fudge {
     //#region Events
     protected hndDrop(_event: DragEvent, _source: View): void {
       // console.log(_source, _event);
-      console.log(_event, _source);
     }
 
     protected hndDragOver(_event: DragEvent, _source: View): void {

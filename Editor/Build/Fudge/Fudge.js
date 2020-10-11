@@ -536,10 +536,10 @@ var Fudge;
             });
             // when dropping into a view, get the original source view for dragging and call hndDrop
             _this.dom.addEventListener("drop" /* DROP */, (_event) => {
-                _event.stopPropagation();
+                // _event.stopPropagation();
                 let viewSource = View.getViewSource(_event);
                 _this.hndDrop(_event, viewSource);
-            });
+            }, true);
             return View.idCount++;
         }
         setTitle(_title) {
@@ -560,7 +560,6 @@ var Fudge;
         //#region Events
         hndDrop(_event, _source) {
             // console.log(_source, _event);
-            console.log(_event, _source);
         }
         hndDragOver(_event, _source) {
             // _event.dataTransfer.dropEffect = "link";
@@ -619,48 +618,6 @@ var Fudge;
     class ViewInternal extends Fudge.View {
         constructor(_container, _state) {
             super(_container, _state);
-            //#endregion
-            this.hndDragOver = (_event) => {
-                _event.dataTransfer.dropEffect = "none";
-                if (this.dom != _event.target)
-                    return;
-                let viewSource = Fudge.View.getViewSource(_event);
-                if (!(viewSource instanceof Fudge.ViewExternal || viewSource instanceof Fudge.ViewHierarchy))
-                    return;
-                if (viewSource instanceof Fudge.ViewExternal) {
-                    let sources = viewSource.getDragDropSources();
-                    for (let source of sources)
-                        if (source.getMimeType() != Fudge.MIME.AUDIO && source.getMimeType() != Fudge.MIME.IMAGE)
-                            return;
-                }
-                _event.dataTransfer.dropEffect = "link";
-                _event.preventDefault();
-                _event.stopPropagation();
-            };
-            this.hndDrop = async (_event) => {
-                let viewSource = Fudge.View.getViewSource(_event);
-                if (viewSource instanceof Fudge.ViewHierarchy) {
-                    let sources = viewSource.getDragDropSources();
-                    for (let source of sources) {
-                        await ƒ.Project.registerAsGraph(source, true);
-                    }
-                }
-                else if (viewSource instanceof Fudge.ViewExternal) {
-                    let sources = viewSource.getDragDropSources();
-                    for (let source of sources) {
-                        switch (source.getMimeType()) {
-                            case Fudge.MIME.AUDIO:
-                                console.log(new ƒ.Audio(source.pathRelative));
-                                break;
-                            case Fudge.MIME.IMAGE:
-                                console.log(new ƒ.TextureImage(source.pathRelative));
-                                break;
-                        }
-                    }
-                    // console.log("External");
-                }
-                this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
-            };
             this.hndEvent = (_event) => {
                 switch (_event.type) {
                     case Fudge.EVENT_EDITOR.SET_PROJECT:
@@ -742,6 +699,45 @@ var Fudge;
                 //   this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: resource }));
                 //   break;
             }
+        }
+        //#endregion
+        hndDragOver(_event, _viewSource) {
+            _event.dataTransfer.dropEffect = "none";
+            if (this.dom != _event.target)
+                return;
+            if (!(_viewSource instanceof Fudge.ViewExternal || _viewSource instanceof Fudge.ViewHierarchy))
+                return;
+            if (_viewSource instanceof Fudge.ViewExternal) {
+                let sources = _viewSource.getDragDropSources();
+                for (let source of sources)
+                    if (source.getMimeType() != Fudge.MIME.AUDIO && source.getMimeType() != Fudge.MIME.IMAGE)
+                        return;
+            }
+            _event.dataTransfer.dropEffect = "link";
+            _event.preventDefault();
+            _event.stopPropagation();
+        }
+        async hndDrop(_event, _viewSource) {
+            if (_viewSource instanceof Fudge.ViewHierarchy) {
+                let sources = _viewSource.getDragDropSources();
+                for (let source of sources) {
+                    await ƒ.Project.registerAsGraph(source, true);
+                }
+            }
+            else if (_viewSource instanceof Fudge.ViewExternal) {
+                let sources = _viewSource.getDragDropSources();
+                for (let source of sources) {
+                    switch (source.getMimeType()) {
+                        case Fudge.MIME.AUDIO:
+                            console.log(new ƒ.Audio(source.pathRelative));
+                            break;
+                        case Fudge.MIME.IMAGE:
+                            console.log(new ƒ.TextureImage(source.pathRelative));
+                            break;
+                    }
+                }
+            }
+            this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
         }
     }
     Fudge.ViewInternal = ViewInternal;
@@ -1108,7 +1104,7 @@ var Fudge;
                 if (_event.type == Fudge.EVENT_EDITOR.SET_GRAPH)
                     this.setGraph(_event.detail);
                 this.broadcastEvent(_event);
-                _event.stopPropagation();
+                // _event.stopPropagation();
             };
             this.hndFocusNode = (_event) => {
                 let event = new CustomEvent(Fudge.EVENT_EDITOR.FOCUS_NODE, { bubbles: false, detail: _event.detail.data });
@@ -1819,36 +1815,6 @@ var Fudge;
         constructor(_container, _state) {
             super(_container, _state);
             this.expanded = { ComponentTransform: true };
-            //#endregion
-            this.hndDragOver = (_event) => {
-                if (!this.node)
-                    return;
-                if (this.dom != _event.target)
-                    return;
-                let viewSource = Fudge.View.getViewSource(_event);
-                if (!(viewSource instanceof Fudge.ViewInternal || viewSource instanceof Fudge.ViewScript))
-                    return;
-                for (let source of viewSource.getDragDropSources()) {
-                    if (source instanceof Fudge.ScriptInfo) {
-                        if (!source.isComponent)
-                            return;
-                    }
-                    else if (!this.findComponentType(source))
-                        return;
-                }
-                _event.dataTransfer.dropEffect = "link";
-                _event.preventDefault();
-                _event.stopPropagation();
-            };
-            this.hndDrop = (_event) => {
-                let viewSource = Fudge.View.getViewSource(_event);
-                for (let source of viewSource.getDragDropSources()) {
-                    let cmpNew = this.createComponent(source);
-                    this.node.addComponent(cmpNew);
-                    this.expanded[cmpNew.type] = true;
-                }
-                this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
-            };
             this.hndEvent = (_event) => {
                 switch (_event.type) {
                     // case ƒui.EVENT.RENAME: break;
@@ -1899,6 +1865,34 @@ var Fudge;
                     this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { bubbles: true, detail: { data: this.node } }));
                     break;
             }
+        }
+        //#endregion
+        hndDragOver(_event, _viewSource) {
+            if (!this.node)
+                return;
+            if (this.dom != _event.target)
+                return;
+            if (!(_viewSource instanceof Fudge.ViewInternal || _viewSource instanceof Fudge.ViewScript))
+                return;
+            for (let source of _viewSource.getDragDropSources()) {
+                if (source instanceof Fudge.ScriptInfo) {
+                    if (!source.isComponent)
+                        return;
+                }
+                else if (!this.findComponentType(source))
+                    return;
+            }
+            _event.dataTransfer.dropEffect = "link";
+            _event.preventDefault();
+            _event.stopPropagation();
+        }
+        hndDrop(_event, _viewSource) {
+            for (let source of _viewSource.getDragDropSources()) {
+                let cmpNew = this.createComponent(source);
+                this.node.addComponent(cmpNew);
+                this.expanded[cmpNew.type] = true;
+            }
+            this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
         }
         fillContent() {
             while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
@@ -1976,6 +1970,34 @@ var Fudge;
         getDragDropSources() {
             return this.tree.controller.dragDrop.sources;
         }
+        hndDragOver(_event, _viewSource) {
+            if (_viewSource == this) {
+                _event.stopPropagation();
+                return; // continue with standard tree behaviour
+            }
+            _event.dataTransfer.dropEffect = "none";
+            if (_event.target == this.dom)
+                return;
+            if (!(_viewSource instanceof Fudge.ViewInternal))
+                return;
+            let source = _viewSource.getDragDropSources()[0];
+            if (!(source instanceof ƒ.Graph))
+                return;
+            _event.dataTransfer.dropEffect = "copy";
+            _event.preventDefault();
+            _event.stopPropagation();
+        }
+        async hndDrop(_event, _viewSource) {
+            if (_viewSource == this)
+                return; // continue with standard tree behaviour
+            _event.stopPropagation(); // capture phase, don't pass further down
+            let graph = _viewSource.getDragDropSources()[0];
+            let instance = await ƒ.Project.createGraphInstance(graph);
+            let target = this.tree.controller.dragDrop.target;
+            target.appendChild(instance);
+            this.tree.findVisible(target).expand(true);
+            this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+        }
         //#region  ContextMenu
         getContextMenu(_callback) {
             const menu = new Fudge.remote.Menu();
@@ -2001,15 +2023,15 @@ var Fudge;
                     this.tree.findVisible(focus).expand(true);
                     this.tree.findVisible(child).focus();
                     break;
-                case Fudge.CONTEXTMENU.ADD_COMPONENT:
-                    let iSubclass = _item["iSubclass"];
-                    let component = ƒ.Component.subclasses[iSubclass];
-                    //@ts-ignore
-                    let cmpNew = new component();
-                    ƒ.Debug.info(cmpNew.type, cmpNew);
-                    focus.addComponent(cmpNew);
-                    this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { bubbles: true, detail: { data: focus } }));
-                    break;
+                // case CONTEXTMENU.ADD_COMPONENT:
+                //   let iSubclass: number = _item["iSubclass"];
+                //   let component: typeof ƒ.Component = ƒ.Component.subclasses[iSubclass];
+                //   //@ts-ignore
+                //   let cmpNew: ƒ.Component = new component();
+                //   ƒ.Debug.info(cmpNew.type, cmpNew);
+                //   focus.addComponent(cmpNew);
+                //   this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.SELECT, { bubbles: true, detail: { data: focus } }));
+                //   break;
                 case Fudge.CONTEXTMENU.ADD_COMPONENT_SCRIPT:
                     // let script: typeof ƒ.ComponentScript = <typeof ƒ.ComponentScript>_item["Script"];
                     let cmpScript = ƒ.Serializer.reconstruct(_item["Script"]);
@@ -2034,26 +2056,6 @@ var Fudge;
     class ViewRender extends Fudge.View {
         constructor(_container, _state) {
             super(_container, _state);
-            this.hndDragOver = (_event) => {
-                _event.dataTransfer.dropEffect = "none";
-                // if (this.dom != _event.target)
-                //   return;
-                let viewSource = Fudge.View.getViewSource(_event);
-                if (!(viewSource instanceof Fudge.ViewInternal))
-                    return;
-                let source = viewSource.getDragDropSources()[0];
-                if (!(source instanceof ƒ.Graph))
-                    return;
-                _event.dataTransfer.dropEffect = "link";
-                _event.preventDefault();
-                _event.stopPropagation();
-            };
-            this.hndDrop = (_event) => {
-                let viewSource = Fudge.View.getViewSource(_event);
-                let source = viewSource.getDragDropSources()[0];
-                // this.setGraph(<ƒ.Node>source);
-                this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: source }));
-            };
             this.hndEvent = (_event) => {
                 switch (_event.type) {
                     case Fudge.EVENT_EDITOR.SET_GRAPH:
@@ -2114,6 +2116,24 @@ var Fudge;
             this.graph = _node;
             this.viewport.setGraph(this.graph);
             this.redraw();
+        }
+        hndDragOver(_event, _viewSource) {
+            _event.dataTransfer.dropEffect = "none";
+            // if (this.dom != _event.target)
+            //   return;
+            if (!(_viewSource instanceof Fudge.ViewInternal))
+                return;
+            let source = _viewSource.getDragDropSources()[0];
+            if (!(source instanceof ƒ.Graph))
+                return;
+            _event.dataTransfer.dropEffect = "link";
+            _event.preventDefault();
+            _event.stopPropagation();
+        }
+        hndDrop(_event, _viewSource) {
+            let source = _viewSource.getDragDropSources()[0];
+            // this.setGraph(<ƒ.Node>source);
+            this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: source }));
         }
     }
     Fudge.ViewRender = ViewRender;
@@ -2360,7 +2380,7 @@ var Fudge;
         //   }
         // }
         //#endregion
-        hndDragOver(_event, _source) {
+        hndDragOver(_event, _viewSource) {
             // console.log(_event.target, _event.currentTarget);
             // _event.dataTransfer.dropEffect = "link";
             // _event.preventDefault();

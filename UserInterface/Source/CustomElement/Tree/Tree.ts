@@ -29,7 +29,7 @@ namespace FudgeUserInterface {
       this.addEventListener(EVENT.EXPAND, this.hndExpand);
       this.addEventListener(EVENT.RENAME, this.hndRename);
       this.addEventListener(EVENT.SELECT, this.hndSelect);
-      this.addEventListener(EVENT.DROP, this.hndDrop);
+      this.addEventListener(EVENT.DROP, this.hndDrop, true);
       this.addEventListener(EVENT.DELETE, this.hndDelete);
       this.addEventListener(EVENT.ESCAPE, this.hndEscape);
       this.addEventListener(EVENT.COPY, this.hndCopyPaste);
@@ -113,7 +113,8 @@ namespace FudgeUserInterface {
     }
 
     private hndDrop(_event: DragEvent): void {
-      _event.stopPropagation();
+      // _event.stopPropagation();
+      console.log(_event.dataTransfer);
       this.addChildren(this.controller.dragDrop.sources, this.controller.dragDrop.target);
     }
 
