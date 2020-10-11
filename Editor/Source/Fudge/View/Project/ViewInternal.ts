@@ -40,8 +40,6 @@ namespace Fudge {
       const menu: Electron.Menu = new remote.Menu();
       let item: Electron.MenuItem;
 
-      // item = new remote.MenuItem({ label: "Edit", id: String(CONTEXTMENU.EDIT), click: _callback, accelerator: process.platform == "darwin" ? "E" : "E" });
-      // menu.append(item);
 
       item = new remote.MenuItem({
         label: "Create Mesh",
@@ -55,11 +53,14 @@ namespace Fudge {
       });
       menu.append(item);
 
+      item = new remote.MenuItem({ label: "Create Graph", id: String(CONTEXTMENU.CREATE_GRAPH), click: _callback, accelerator: process.platform == "darwin" ? "G" : "G" });
+      menu.append(item);
+
       // ContextMenu.appendCopyPaste(menu);
       return menu;
     }
 
-    protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
+    protected async contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): Promise<void> {
       ƒ.Debug.fudge(`MenuSelect | id: ${CONTEXTMENU[_item.id]} | event: ${_event}`);
       let iSubclass: number = _item["iSubclass"];
 
@@ -86,10 +87,15 @@ namespace Fudge {
           this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
           this.table.selectInterval(mtrNew, mtrNew);
           break;
-        case CONTEXTMENU.EDIT:
-          let resource: ƒ.SerializableResource = this.table.getFocussed();
-          this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: resource }));
+        case CONTEXTMENU.CREATE_GRAPH:
+          let graph: ƒ.Graph = await ƒ.Project.registerAsGraph(new ƒ.Node("NewGraph"));
+          this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+          this.table.selectInterval(graph, graph);
           break;
+        // case CONTEXTMENU.EDIT:
+        //   let resource: ƒ.SerializableResource = this.table.getFocussed();
+        //   this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: resource }));
+        //   break;
       }
     }
     //#endregion

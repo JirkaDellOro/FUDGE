@@ -10,7 +10,8 @@ declare namespace Fudge {
         ADD_COMPONENT_SCRIPT = 2,
         EDIT = 3,
         CREATE_MESH = 4,
-        CREATE_MATERIAL = 5
+        CREATE_MATERIAL = 5,
+        CREATE_GRAPH = 6
     }
     enum MENU {
         QUIT = "quit",
@@ -182,7 +183,7 @@ declare namespace Fudge {
         getSelection(): ƒ.SerializableResource[];
         getDragDropSources(): ƒ.SerializableResource[];
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
-        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): Promise<void>;
         protected hndDragOver: (_event: DragEvent) => void;
         protected hndDrop: (_event: DragEvent) => Promise<void>;
         private hndEvent;

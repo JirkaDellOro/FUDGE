@@ -1,6 +1,8 @@
 namespace Fudge {
 
 
+
+
   export enum CONTEXTMENU {
     // SKETCH = ViewSketch,
     ADD_NODE,
@@ -8,7 +10,8 @@ namespace Fudge {
     ADD_COMPONENT_SCRIPT,
     EDIT,
     CREATE_MESH,
-    CREATE_MATERIAL
+    CREATE_MATERIAL,
+    CREATE_GRAPH
   }
 
   export enum MENU {

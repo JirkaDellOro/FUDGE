@@ -5,7 +5,8 @@ declare namespace Fudge {
         ADD_COMPONENT_SCRIPT = 2,
         EDIT = 3,
         CREATE_MESH = 4,
-        CREATE_MATERIAL = 5
+        CREATE_MATERIAL = 5,
+        CREATE_GRAPH = 6
     }
     enum MENU {
         QUIT = "quit",

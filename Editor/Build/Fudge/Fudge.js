@@ -9,6 +9,7 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["EDIT"] = 3] = "EDIT";
         CONTEXTMENU[CONTEXTMENU["CREATE_MESH"] = 4] = "CREATE_MESH";
         CONTEXTMENU[CONTEXTMENU["CREATE_MATERIAL"] = 5] = "CREATE_MATERIAL";
+        CONTEXTMENU[CONTEXTMENU["CREATE_GRAPH"] = 6] = "CREATE_GRAPH";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -691,8 +692,6 @@ var Fudge;
         getContextMenu(_callback) {
             const menu = new Fudge.remote.Menu();
             let item;
-            // item = new remote.MenuItem({ label: "Edit", id: String(CONTEXTMENU.EDIT), click: _callback, accelerator: process.platform == "darwin" ? "E" : "E" });
-            // menu.append(item);
             item = new Fudge.remote.MenuItem({
                 label: "Create Mesh",
                 submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE_MESH, ƒ.Mesh.subclasses, _callback)
@@ -703,10 +702,12 @@ var Fudge;
                 submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE_MATERIAL, ƒ.Shader.subclasses, _callback)
             });
             menu.append(item);
+            item = new Fudge.remote.MenuItem({ label: "Create Graph", id: String(Fudge.CONTEXTMENU.CREATE_GRAPH), click: _callback, accelerator: process.platform == "darwin" ? "G" : "G" });
+            menu.append(item);
             // ContextMenu.appendCopyPaste(menu);
             return menu;
         }
-        contextMenuCallback(_item, _window, _event) {
+        async contextMenuCallback(_item, _window, _event) {
             ƒ.Debug.fudge(`MenuSelect | id: ${Fudge.CONTEXTMENU[_item.id]} | event: ${_event}`);
             let iSubclass = _item["iSubclass"];
             switch (Number(_item.id)) {
@@ -731,10 +732,15 @@ var Fudge;
                     this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
                     this.table.selectInterval(mtrNew, mtrNew);
                     break;
-                case Fudge.CONTEXTMENU.EDIT:
-                    let resource = this.table.getFocussed();
-                    this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: resource }));
+                case Fudge.CONTEXTMENU.CREATE_GRAPH:
+                    let graph = await ƒ.Project.registerAsGraph(new ƒ.Node("NewGraph"));
+                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                    this.table.selectInterval(graph, graph);
                     break;
+                // case CONTEXTMENU.EDIT:
+                //   let resource: ƒ.SerializableResource = this.table.getFocussed();
+                //   this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: resource }));
+                //   break;
             }
         }
     }
