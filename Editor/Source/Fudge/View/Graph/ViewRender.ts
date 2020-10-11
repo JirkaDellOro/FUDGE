@@ -57,6 +57,31 @@ namespace Fudge {
       this.redraw();
     }
 
+    protected hndDragOver = (_event: DragEvent): void => {
+      _event.dataTransfer.dropEffect = "none";
+      // if (this.dom != _event.target)
+      //   return;
+
+      let viewSource: View = View.getViewSource(_event);
+      if (!(viewSource instanceof ViewInternal))
+        return;
+
+      let source: Object = viewSource.getDragDropSources()[0];
+      if (!(source instanceof ƒ.Graph))
+        return;
+
+      _event.dataTransfer.dropEffect = "link";
+      _event.preventDefault();
+      _event.stopPropagation();
+    }
+
+    protected hndDrop = (_event: DragEvent): void => {
+      let viewSource: View = View.getViewSource(_event);
+      let source: Object = viewSource.getDragDropSources()[0];
+      // this.setGraph(<ƒ.Node>source);
+      this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, {bubbles: true, detail: source}));
+    }
+
     private hndEvent = (_event: CustomEvent): void => {
       switch (_event.type) {
         case EVENT_EDITOR.SET_GRAPH:

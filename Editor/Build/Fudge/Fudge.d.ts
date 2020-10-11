@@ -446,6 +446,8 @@ declare namespace Fudge {
         constructor(_container: GoldenLayout.Container, _state: Object);
         createUserInterface(): void;
         setGraph(_node: ƒ.Node): void;
+        protected hndDragOver: (_event: DragEvent) => void;
+        protected hndDrop: (_event: DragEvent) => void;
         private hndEvent;
         private activeViewport;
         private redraw;
@@ -499,8 +501,6 @@ declare namespace Fudge {
         listScripts(): void;
         getSelection(): ScriptInfo[];
         getDragDropSources(): ScriptInfo[];
-        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
-        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         private hndEvent;
     }
 }

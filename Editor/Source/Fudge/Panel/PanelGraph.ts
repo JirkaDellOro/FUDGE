@@ -49,6 +49,7 @@ namespace Fudge {
       if (_event.type == EVENT_EDITOR.SET_GRAPH)
         this.setGraph(_event.detail);
       this.broadcastEvent(_event);
+      _event.stopPropagation();
     }
     private hndFocusNode = (_event: CustomEvent): void => {
       let event: CustomEvent = new CustomEvent(EVENT_EDITOR.FOCUS_NODE, {bubbles: false, detail: _event.detail.data});

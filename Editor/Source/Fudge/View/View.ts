@@ -83,7 +83,7 @@ namespace Fudge {
 
     protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
       const menu: Electron.Menu = new remote.Menu();
-      ContextMenu.appendCopyPaste(menu);
+      // ContextMenu.appendCopyPaste(menu);
       return menu;
     }
 

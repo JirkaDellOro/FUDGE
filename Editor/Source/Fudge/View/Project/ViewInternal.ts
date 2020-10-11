@@ -19,8 +19,6 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
-      // this.dom.addEventListener(ƒui.EVENT.DRAG_OVER, this.hndDragOver);
-      // this.dom.addEventListener(ƒui.EVENT.DROP, this.hndDrop);
     }
 
     public listResources(): void {
@@ -42,8 +40,8 @@ namespace Fudge {
       const menu: Electron.Menu = new remote.Menu();
       let item: Electron.MenuItem;
 
-      item = new remote.MenuItem({ label: "Edit", id: String(CONTEXTMENU.EDIT), click: _callback, accelerator: process.platform == "darwin" ? "E" : "E" });
-      menu.append(item);
+      // item = new remote.MenuItem({ label: "Edit", id: String(CONTEXTMENU.EDIT), click: _callback, accelerator: process.platform == "darwin" ? "E" : "E" });
+      // menu.append(item);
 
       item = new remote.MenuItem({
         label: "Create Mesh",
