@@ -28,10 +28,10 @@ namespace Fudge {
       this.fillContent();
 
       _container.on("resize", this.redraw);
-      // this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent, true);
+      // this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
       // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
       // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
     }
@@ -184,9 +184,9 @@ namespace Fudge {
         case ƒui.EVENT.CHANGE:
         case ƒui.EVENT.MUTATE:
         case EVENT_EDITOR.UPDATE:
-          this.redraw();
           if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture || this.resource instanceof ƒ.Material)
             this.fillContent();
+          this.redraw();
           break;
         default:
           if (_event.detail.data instanceof ScriptInfo)

@@ -21,7 +21,8 @@ namespace Fudge {
     UrlOnAudio: { fromViews: [ViewExternal], onKeyAttribute: "url", onTypeAttribute: "Audio", ofType: DirectoryEntry, dropEffect: "link" },
     MaterialOnComponentMaterial: { fromViews: [ViewInternal], onTypeAttribute: "Material", onType: ƒ.ComponentMaterial, ofType: ƒ.Material, dropEffect: "link" },
     MeshOnComponentMesh: { fromViews: [ViewInternal], onType: ƒ.ComponentMesh, ofType: ƒ.Mesh, dropEffect: "link" },
-    MeshOnMeshLabel: { fromViews: [ViewInternal], onKeyAttribute: "mesh", ofType: ƒ.Mesh, dropEffect: "link" }
+    MeshOnMeshLabel: { fromViews: [ViewInternal], onKeyAttribute: "mesh", ofType: ƒ.Mesh, dropEffect: "link" },
+    TextureOnMaterial: { fromViews: [ViewInternal], onType: ƒ.Material, ofType: ƒ.Texture, dropEffect: "link" }
   };
 
   export class ControllerComponent extends ƒui.Controller {
@@ -48,6 +49,8 @@ namespace Fudge {
       })) return;
       // Mesh on MeshLabel
       if (this.filterDragDrop(_event, filter.MeshOnMeshLabel)) return;
+      // Texture on Material
+      if (this.filterDragDrop(_event, filter.TextureOnMaterial)) return;
 
       function checkMimeType(_mime: MIME): (_sources: Object[]) => boolean {
         return (_sources: Object[]): boolean => {
@@ -77,6 +80,11 @@ namespace Fudge {
         this.domElement.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
         return true;
       };
+      let setTexture: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
+        this.mutable["coat"]["texture"] = _sources[0];
+        this.domElement.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+        return true;
+      };
 
       // texture
       if (this.filterDragDrop(_event, filter.UrlOnTexture, setExternalLink)) return;
@@ -89,6 +97,8 @@ namespace Fudge {
       if (this.filterDragDrop(_event, filter.MeshOnComponentMesh, setResource)) return;
       // Mesh on MeshLabel
       if (this.filterDragDrop(_event, filter.MeshOnMeshLabel, setMesh)) return;
+      // Texture on Material
+      if (this.filterDragDrop(_event, filter.TextureOnMaterial, setTexture)) return;
     }
 
 

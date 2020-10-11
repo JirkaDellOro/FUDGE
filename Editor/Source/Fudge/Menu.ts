@@ -31,7 +31,7 @@ namespace Fudge {
       for (let type of typesOfResources) {
         let item: Electron.MenuItem = new remote.MenuItem(          { 
           label: type.name, 
-          submenu: ContextMenu.getSubclassMenu<typeof type>(CONTEXTMENU.CREATE, type, _callback) }
+          submenu: ContextMenu.getSubclassMenu<typeof type>(CONTEXTMENU.CREATE_MESH, type, _callback) }
         );
         menu.append(item);
       }

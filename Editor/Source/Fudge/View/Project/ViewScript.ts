@@ -48,7 +48,7 @@ namespace Fudge {
       menu.append(item);
       item = new remote.MenuItem({
         label: "Create",
-        submenu: ContextMenu.getSubclassMenu<typeof ƒ.Mesh>(CONTEXTMENU.CREATE, ƒ.Mesh.subclasses, _callback)
+        submenu: ContextMenu.getSubclassMenu<typeof ƒ.Mesh>(CONTEXTMENU.CREATE_MESH, ƒ.Mesh.subclasses, _callback)
       });
       // item.submenu = ContextMenu.getSubMenu(ƒ.Mesh, _callback);
       menu.append(item);

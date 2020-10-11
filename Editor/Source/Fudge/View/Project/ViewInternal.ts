@@ -44,11 +44,17 @@ namespace Fudge {
 
       item = new remote.MenuItem({ label: "Edit", id: String(CONTEXTMENU.EDIT), click: _callback, accelerator: process.platform == "darwin" ? "E" : "E" });
       menu.append(item);
+
       item = new remote.MenuItem({
-        label: "Create",
-        submenu: ContextMenu.getSubclassMenu<typeof ƒ.Mesh>(CONTEXTMENU.CREATE, ƒ.Mesh.subclasses, _callback)
+        label: "Create Mesh",
+        submenu: ContextMenu.getSubclassMenu<typeof ƒ.Mesh>(CONTEXTMENU.CREATE_MESH, ƒ.Mesh.subclasses, _callback)
       });
-      // item.submenu = ContextMenu.getSubMenu(ƒ.Mesh, _callback);
+      menu.append(item);
+
+      item = new remote.MenuItem({
+        label: "Create Material",
+        submenu: ContextMenu.getSubclassMenu<typeof ƒ.Shader>(CONTEXTMENU.CREATE_MATERIAL, ƒ.Shader.subclasses, _callback)
+      });
       menu.append(item);
 
       // ContextMenu.appendCopyPaste(menu);
@@ -57,17 +63,30 @@ namespace Fudge {
 
     protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
       ƒ.Debug.fudge(`MenuSelect | id: ${CONTEXTMENU[_item.id]} | event: ${_event}`);
+      let iSubclass: number = _item["iSubclass"];
 
       switch (Number(_item.id)) {
-        case CONTEXTMENU.CREATE:
-          let iSubclass: number = _item["iSubclass"];
-          let type: typeof ƒ.Mesh = ƒ.Mesh.subclasses[iSubclass];
-          //@ts-ignore
-          let meshNew: ƒ.Mesh = new type();
-          // ƒ.Debug.info(meshNew.type, meshNew);
+        case CONTEXTMENU.CREATE_MESH:
+          if (!iSubclass) {
+            alert("Funky Electron-Error... please try again");
+            return;
+          }
 
+          let typeMesh: typeof ƒ.Mesh = ƒ.Mesh.subclasses[iSubclass];
+          //@ts-ignore
+          let meshNew: ƒ.Mesh = new typeMesh();
           this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
           this.table.selectInterval(meshNew, meshNew);
+          break;
+        case CONTEXTMENU.CREATE_MATERIAL:
+          if (!iSubclass) {
+            alert("Funky Electron-Error... please try again");
+            return;
+          }
+          let typeShader: typeof ƒ.Shader = ƒ.Shader.subclasses[iSubclass];
+          let mtrNew: ƒ.Material = new ƒ.Material("NewMaterial", typeShader);
+          this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+          this.table.selectInterval(mtrNew, mtrNew);
           break;
         case CONTEXTMENU.EDIT:
           let resource: ƒ.SerializableResource = this.table.getFocussed();

@@ -7,7 +7,8 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT"] = 1] = "ADD_COMPONENT";
         CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT_SCRIPT"] = 2] = "ADD_COMPONENT_SCRIPT";
         CONTEXTMENU[CONTEXTMENU["EDIT"] = 3] = "EDIT";
-        CONTEXTMENU[CONTEXTMENU["CREATE"] = 4] = "CREATE";
+        CONTEXTMENU[CONTEXTMENU["CREATE_MESH"] = 4] = "CREATE_MESH";
+        CONTEXTMENU[CONTEXTMENU["CREATE_MATERIAL"] = 5] = "CREATE_MATERIAL";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -219,7 +220,7 @@ var Fudge;
             for (let type of Fudge.typesOfResources) {
                 let item = new Fudge.remote.MenuItem({
                     label: type.name,
-                    submenu: ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE, type, _callback)
+                    submenu: ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE_MESH, type, _callback)
                 });
                 menu.append(item);
             }
@@ -695,25 +696,42 @@ var Fudge;
             item = new Fudge.remote.MenuItem({ label: "Edit", id: String(Fudge.CONTEXTMENU.EDIT), click: _callback, accelerator: process.platform == "darwin" ? "E" : "E" });
             menu.append(item);
             item = new Fudge.remote.MenuItem({
-                label: "Create",
-                submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE, ƒ.Mesh.subclasses, _callback)
+                label: "Create Mesh",
+                submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE_MESH, ƒ.Mesh.subclasses, _callback)
             });
-            // item.submenu = ContextMenu.getSubMenu(ƒ.Mesh, _callback);
+            menu.append(item);
+            item = new Fudge.remote.MenuItem({
+                label: "Create Material",
+                submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE_MATERIAL, ƒ.Shader.subclasses, _callback)
+            });
             menu.append(item);
             // ContextMenu.appendCopyPaste(menu);
             return menu;
         }
         contextMenuCallback(_item, _window, _event) {
             ƒ.Debug.fudge(`MenuSelect | id: ${Fudge.CONTEXTMENU[_item.id]} | event: ${_event}`);
+            let iSubclass = _item["iSubclass"];
             switch (Number(_item.id)) {
-                case Fudge.CONTEXTMENU.CREATE:
-                    let iSubclass = _item["iSubclass"];
-                    let type = ƒ.Mesh.subclasses[iSubclass];
+                case Fudge.CONTEXTMENU.CREATE_MESH:
+                    if (!iSubclass) {
+                        alert("Funky Electron-Error... please try again");
+                        return;
+                    }
+                    let typeMesh = ƒ.Mesh.subclasses[iSubclass];
                     //@ts-ignore
-                    let meshNew = new type();
-                    // ƒ.Debug.info(meshNew.type, meshNew);
+                    let meshNew = new typeMesh();
                     this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
                     this.table.selectInterval(meshNew, meshNew);
+                    break;
+                case Fudge.CONTEXTMENU.CREATE_MATERIAL:
+                    if (!iSubclass) {
+                        alert("Funky Electron-Error... please try again");
+                        return;
+                    }
+                    let typeShader = ƒ.Shader.subclasses[iSubclass];
+                    let mtrNew = new ƒ.Material("NewMaterial", typeShader);
+                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                    this.table.selectInterval(mtrNew, mtrNew);
                     break;
                 case Fudge.CONTEXTMENU.EDIT:
                     let resource = this.table.getFocussed();
@@ -739,7 +757,8 @@ var Fudge;
         UrlOnAudio: { fromViews: [Fudge.ViewExternal], onKeyAttribute: "url", onTypeAttribute: "Audio", ofType: Fudge.DirectoryEntry, dropEffect: "link" },
         MaterialOnComponentMaterial: { fromViews: [Fudge.ViewInternal], onTypeAttribute: "Material", onType: ƒ.ComponentMaterial, ofType: ƒ.Material, dropEffect: "link" },
         MeshOnComponentMesh: { fromViews: [Fudge.ViewInternal], onType: ƒ.ComponentMesh, ofType: ƒ.Mesh, dropEffect: "link" },
-        MeshOnMeshLabel: { fromViews: [Fudge.ViewInternal], onKeyAttribute: "mesh", ofType: ƒ.Mesh, dropEffect: "link" }
+        MeshOnMeshLabel: { fromViews: [Fudge.ViewInternal], onKeyAttribute: "mesh", ofType: ƒ.Mesh, dropEffect: "link" },
+        TextureOnMaterial: { fromViews: [Fudge.ViewInternal], onType: ƒ.Material, ofType: ƒ.Texture, dropEffect: "link" }
     };
     class ControllerComponent extends ƒui.Controller {
         constructor(_mutable, _domElement) {
@@ -762,6 +781,9 @@ var Fudge;
                     return;
                 // Mesh on MeshLabel
                 if (this.filterDragDrop(_event, filter.MeshOnMeshLabel))
+                    return;
+                // Texture on Material
+                if (this.filterDragDrop(_event, filter.TextureOnMaterial))
                     return;
                 function checkMimeType(_mime) {
                     return (_sources) => {
@@ -791,6 +813,11 @@ var Fudge;
                     this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
                     return true;
                 };
+                let setTexture = (_sources) => {
+                    this.mutable["coat"]["texture"] = _sources[0];
+                    this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                    return true;
+                };
                 // texture
                 if (this.filterDragDrop(_event, filter.UrlOnTexture, setExternalLink))
                     return;
@@ -805,6 +832,9 @@ var Fudge;
                     return;
                 // Mesh on MeshLabel
                 if (this.filterDragDrop(_event, filter.MeshOnMeshLabel, setMesh))
+                    return;
+                // Texture on Material
+                if (this.filterDragDrop(_event, filter.TextureOnMaterial, setTexture))
                     return;
             };
             this.domElement.addEventListener("input", this.mutateOnInput); // this should be obsolete
@@ -2080,9 +2110,9 @@ var Fudge;
                     case "change" /* CHANGE */:
                     case "mutate" /* MUTATE */:
                     case Fudge.EVENT_EDITOR.UPDATE:
-                        this.redraw();
                         if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture || this.resource instanceof ƒ.Material)
                             this.fillContent();
+                        this.redraw();
                         break;
                     default:
                         if (_event.detail.data instanceof Fudge.ScriptInfo)
@@ -2111,10 +2141,10 @@ var Fudge;
             this.viewport.initialize("Preview", null, cmpCamera, canvas);
             this.fillContent();
             _container.on("resize", this.redraw);
-            // this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
-            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent, true);
+            // this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
             // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
             // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
         }
@@ -2264,17 +2294,18 @@ var Fudge;
             super(_container, _state);
             this.hndEvent = (_event) => {
                 switch (_event.type) {
-                    case "rename" /* RENAME */: break;
-                    default:
+                    case "itemselect" /* SELECT */:
                         this.resource = _event.detail.data;
+                    default:
                         this.fillContent();
                         break;
                 }
             };
             this.fillContent();
+            this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent, true);
             // this.dom.addEventListener(EVENT_EDITOR.FOCUS_RESOURCE, this.hndEvent);
             // this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
-            this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
             // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
         }
@@ -2401,7 +2432,7 @@ var Fudge;
             menu.append(item);
             item = new Fudge.remote.MenuItem({
                 label: "Create",
-                submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE, ƒ.Mesh.subclasses, _callback)
+                submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE_MESH, ƒ.Mesh.subclasses, _callback)
             });
             // item.submenu = ContextMenu.getSubMenu(ƒ.Mesh, _callback);
             menu.append(item);
