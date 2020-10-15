@@ -182,7 +182,8 @@ namespace FudgeCore {
      */
     public adjustCamera(): void {
       let rect: Rectangle = RenderManager.getViewportRectangle();
-      this.camera.projectCentral(rect.width / rect.height, this.camera.getFieldOfView());
+      this.camera.projectCentral(
+        rect.width / rect.height, this.camera.getFieldOfView(), this.camera.getDirection(), this.camera.getNear(), this.camera.getFar());
     }
     // #endregion
 
