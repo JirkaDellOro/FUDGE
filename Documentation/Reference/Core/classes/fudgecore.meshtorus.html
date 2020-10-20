@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>MeshPyramid | Fudge Core</title>
+	<title>MeshTorus | Fudge Core</title>
 	<meta name="description" content="Documentation for Fudge Core">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -59,10 +59,10 @@
 					<a href="../modules/fudgecore.html">FudgeCore</a>
 				</li>
 				<li>
-					<a href="fudgecore.meshpyramid.html">MeshPyramid</a>
+					<a href="fudgecore.meshtorus.html">MeshTorus</a>
 				</li>
 			</ul>
-			<h1>Class MeshPyramid</h1>
+			<h1>Class MeshTorus</h1>
 		</div>
 	</div>
 </header>
@@ -72,15 +72,11 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>Generate a simple pyramid with edges at the base of length 1 and a height of 1. The sides consisting of one, the base of two trigons</p>
-						<pre><code class="language-plaintext">              4
-             /\`.
-           3/__\_\ 2
-          0/____\/1</code></pre>
+						<p>Generate a Torus with a given thickness and the number of major- and minor segments</p>
 					</div>
 					<dl class="tsd-comment-tags">
 						<dt>authors</dt>
-						<dd><p>Jirka Dell&#39;Oro-Friedl, HFU, 2019</p>
+						<dd><p>Simon Storl-Schulke, HFU, 2020 | Jirka Dell&#39;Oro-Friedl, HFU, 2020</p>
 						</dd>
 					</dl>
 				</div>
@@ -92,7 +88,7 @@
 						<a href="fudgecore.mesh.html" class="tsd-signature-type">Mesh</a>
 						<ul class="tsd-hierarchy">
 							<li>
-								<span class="target">MeshPyramid</span>
+								<span class="target">MeshTorus</span>
 							</li>
 						</ul>
 					</li>
@@ -111,52 +107,53 @@
 						<section class="tsd-index-section ">
 							<h3>Constructors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite"><a href="fudgecore.meshpyramid.html#constructor" class="tsd-kind-icon">constructor</a></li>
+								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite"><a href="fudgecore.meshtorus.html#constructor" class="tsd-kind-icon">constructor</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#idresource" class="tsd-kind-icon">id<wbr>Resource</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#indices" class="tsd-kind-icon">indices</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#name" class="tsd-kind-icon">name</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#normalsface" class="tsd-kind-icon">normals<wbr>Face</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#renderbuffers" class="tsd-kind-icon">render<wbr>Buffers</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#textureuvs" class="tsd-kind-icon">textureUVs</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#vertices" class="tsd-kind-icon">vertices</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.meshpyramid.html#baseclass" class="tsd-kind-icon">base<wbr>Class</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><a href="fudgecore.meshpyramid.html#isubclass" class="tsd-kind-icon">i<wbr>Subclass</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.meshpyramid.html#subclasses" class="tsd-kind-icon">subclasses</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshtorus.html#idresource" class="tsd-kind-icon">id<wbr>Resource</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshtorus.html#indices" class="tsd-kind-icon">indices</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshtorus.html#name" class="tsd-kind-icon">name</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.meshtorus.html#normals" class="tsd-kind-icon">normals</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshtorus.html#normalsface" class="tsd-kind-icon">normals<wbr>Face</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshtorus.html#renderbuffers" class="tsd-kind-icon">render<wbr>Buffers</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshtorus.html#textureuvs" class="tsd-kind-icon">textureUVs</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshtorus.html#vertices" class="tsd-kind-icon">vertices</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.meshtorus.html#baseclass" class="tsd-kind-icon">base<wbr>Class</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><a href="fudgecore.meshtorus.html#isubclass" class="tsd-kind-icon">i<wbr>Subclass</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.meshtorus.html#subclasses" class="tsd-kind-icon">subclasses</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section tsd-is-inherited">
 							<h3>Accessors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="fudgecore.meshpyramid.html#type" class="tsd-kind-icon">type</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="fudgecore.meshtorus.html#type" class="tsd-kind-icon">type</a></li>
 							</ul>
 						</section>
-						<section class="tsd-index-section tsd-is-inherited">
+						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="fudgecore.meshpyramid.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#create" class="tsd-kind-icon">create</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#createrenderbuffers" class="tsd-kind-icon">create<wbr>Render<wbr>Buffers</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#deleterenderbuffers" class="tsd-kind-icon">delete<wbr>Render<wbr>Buffers</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#deserialize" class="tsd-kind-icon">deserialize</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="fudgecore.meshpyramid.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#flipnormals" class="tsd-kind-icon">flip<wbr>Normals</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#getindexcount" class="tsd-kind-icon">get<wbr>Index<wbr>Count</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#getmutator" class="tsd-kind-icon">get<wbr>Mutator</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#getmutatorattributetypes" class="tsd-kind-icon">get<wbr>Mutator<wbr>Attribute<wbr>Types</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#getmutatorforanimation" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>Animation</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#getmutatorforuserinterface" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>User<wbr>Interface</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#getvertexcount" class="tsd-kind-icon">get<wbr>Vertex<wbr>Count</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#mutate" class="tsd-kind-icon">mutate</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="fudgecore.meshpyramid.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#serialize" class="tsd-kind-icon">serialize</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#updatemutator" class="tsd-kind-icon">update<wbr>Mutator</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshpyramid.html#userenderbuffers" class="tsd-kind-icon">use<wbr>Render<wbr>Buffers</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.meshpyramid.html#getbufferspecification" class="tsd-kind-icon">get<wbr>Buffer<wbr>Specification</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="fudgecore.meshtorus.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="fudgecore.meshtorus.html#create" class="tsd-kind-icon">create</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshtorus.html#createrenderbuffers" class="tsd-kind-icon">create<wbr>Render<wbr>Buffers</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshtorus.html#deleterenderbuffers" class="tsd-kind-icon">delete<wbr>Render<wbr>Buffers</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshtorus.html#deserialize" class="tsd-kind-icon">deserialize</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="fudgecore.meshtorus.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshtorus.html#flipnormals" class="tsd-kind-icon">flip<wbr>Normals</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshtorus.html#getindexcount" class="tsd-kind-icon">get<wbr>Index<wbr>Count</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshtorus.html#getmutator" class="tsd-kind-icon">get<wbr>Mutator</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshtorus.html#getmutatorattributetypes" class="tsd-kind-icon">get<wbr>Mutator<wbr>Attribute<wbr>Types</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshtorus.html#getmutatorforanimation" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>Animation</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshtorus.html#getmutatorforuserinterface" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>User<wbr>Interface</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshtorus.html#getvertexcount" class="tsd-kind-icon">get<wbr>Vertex<wbr>Count</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshtorus.html#mutate" class="tsd-kind-icon">mutate</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="fudgecore.meshtorus.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshtorus.html#serialize" class="tsd-kind-icon">serialize</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshtorus.html#updatemutator" class="tsd-kind-icon">update<wbr>Mutator</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshtorus.html#userenderbuffers" class="tsd-kind-icon">use<wbr>Render<wbr>Buffers</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.meshtorus.html#getbufferspecification" class="tsd-kind-icon">get<wbr>Buffer<wbr>Specification</a></li>
 							</ul>
 						</section>
 					</div>
@@ -168,23 +165,32 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Mesh<wbr>Pyramid<span class="tsd-signature-symbol">(</span>_name<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.meshpyramid.html" class="tsd-signature-type">MeshPyramid</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Mesh<wbr>Torus<span class="tsd-signature-symbol">(</span>_name<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span>, _thickness<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _majorSegments<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _minorSegments<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.meshtorus.html" class="tsd-signature-type">MeshTorus</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Overrides <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#constructor">constructor</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f5e7d07/Core/Source/Mesh/MeshPyramid.ts#L13">Documents/HFU/FUDGE/Core/Source/Mesh/MeshPyramid.ts:13</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f5e7d07/Core/Source/Mesh/MeshTorus.ts#L11">Documents/HFU/FUDGE/Core/Source/Mesh/MeshTorus.ts:11</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _name: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;MeshPyramid&quot;</span></h5>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _name: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;MeshTorus&quot;</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _thickness: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0.25</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _majorSegments: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 32</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _minorSegments: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 12</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.meshpyramid.html" class="tsd-signature-type">MeshPyramid</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.meshtorus.html" class="tsd-signature-type">MeshTorus</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -223,6 +229,16 @@
 						<p>Inherited from <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#name">name</a></p>
 						<ul>
 							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f5e7d07/Core/Source/Mesh/Mesh.ts#L22">Documents/HFU/FUDGE/Core/Source/Mesh/Mesh.ts:22</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="normals" class="tsd-anchor"></a>
+					<h3>normals</h3>
+					<div class="tsd-signature tsd-kind-icon">normals<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Float32Array</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f5e7d07/Core/Source/Mesh/MeshTorus.ts#L8">Documents/HFU/FUDGE/Core/Source/Mesh/MeshTorus.ts:8</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -289,10 +305,10 @@
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-static">
 					<a name="isubclass" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> <span class="tsd-flag ts-flagReadonly">Readonly</span> i<wbr>Subclass</h3>
-					<div class="tsd-signature tsd-kind-icon">i<wbr>Subclass<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = Mesh.registerSubclass(MeshPyramid)</span></div>
+					<div class="tsd-signature tsd-kind-icon">i<wbr>Subclass<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = Mesh.registerSubclass(MeshTorus)</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f5e7d07/Core/Source/Mesh/MeshPyramid.ts#L13">Documents/HFU/FUDGE/Core/Source/Mesh/MeshPyramid.ts:13</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f5e7d07/Core/Source/Mesh/MeshTorus.ts#L7">Documents/HFU/FUDGE/Core/Source/Mesh/MeshTorus.ts:7</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -335,7 +351,7 @@
 					</ul>
 				</section>
 			</section>
-			<section class="tsd-panel-group tsd-member-group tsd-is-inherited">
+			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
 					<a name="addeventlistener" class="tsd-anchor"></a>
@@ -368,18 +384,18 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
 					<a name="create" class="tsd-anchor"></a>
 					<h3>create</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
 						<li class="tsd-signature tsd-kind-icon">create<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#create">create</a></p>
+								<p>Overrides <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#create">create</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f5e7d07/Core/Source/Mesh/Mesh.ts#L53">Documents/HFU/FUDGE/Core/Source/Mesh/Mesh.ts:53</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f5e7d07/Core/Source/Mesh/MeshTorus.ts#L29">Documents/HFU/FUDGE/Core/Source/Mesh/MeshTorus.ts:29</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -599,7 +615,7 @@
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
 									<p>Collect the attributes of the instance and their values applicable for animation.
-									Basic functionality is identical to <a href="fudgecore.meshpyramid.html#getmutator">getMutator</a>, returned mutator should then be reduced by the subclassed instance</p>
+									Basic functionality is identical to <a href="fudgecore.meshtorus.html#getmutator">getMutator</a>, returned mutator should then be reduced by the subclassed instance</p>
 								</div>
 							</div>
 							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutatorforanimation.html" class="tsd-signature-type">MutatorForAnimation</a></h4>
@@ -623,7 +639,7 @@
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
 									<p>Collect the attributes of the instance and their values applicable for the user interface.
-									Basic functionality is identical to <a href="fudgecore.meshpyramid.html#getmutator">getMutator</a>, returned mutator should then be reduced by the subclassed instance</p>
+									Basic functionality is identical to <a href="fudgecore.meshtorus.html#getmutator">getMutator</a>, returned mutator should then be reduced by the subclassed instance</p>
 								</div>
 							</div>
 							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutatorforuserinterface.html" class="tsd-signature-type">MutatorForUserInterface</a></h4>
@@ -829,100 +845,103 @@
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-class tsd-parent-kind-namespace">
-						<a href="fudgecore.meshpyramid.html" class="tsd-kind-icon">Mesh<wbr>Pyramid</a>
+						<a href="fudgecore.meshtorus.html" class="tsd-kind-icon">Mesh<wbr>Torus</a>
 						<ul>
 							<li class=" tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
-								<a href="fudgecore.meshpyramid.html#constructor" class="tsd-kind-icon">constructor</a>
+								<a href="fudgecore.meshtorus.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#idresource" class="tsd-kind-icon">id<wbr>Resource</a>
+								<a href="fudgecore.meshtorus.html#idresource" class="tsd-kind-icon">id<wbr>Resource</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#indices" class="tsd-kind-icon">indices</a>
+								<a href="fudgecore.meshtorus.html#indices" class="tsd-kind-icon">indices</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#name" class="tsd-kind-icon">name</a>
+								<a href="fudgecore.meshtorus.html#name" class="tsd-kind-icon">name</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.meshtorus.html#normals" class="tsd-kind-icon">normals</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#normalsface" class="tsd-kind-icon">normals<wbr>Face</a>
+								<a href="fudgecore.meshtorus.html#normalsface" class="tsd-kind-icon">normals<wbr>Face</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#renderbuffers" class="tsd-kind-icon">render<wbr>Buffers</a>
+								<a href="fudgecore.meshtorus.html#renderbuffers" class="tsd-kind-icon">render<wbr>Buffers</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#textureuvs" class="tsd-kind-icon">textureUVs</a>
+								<a href="fudgecore.meshtorus.html#textureuvs" class="tsd-kind-icon">textureUVs</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#vertices" class="tsd-kind-icon">vertices</a>
+								<a href="fudgecore.meshtorus.html#vertices" class="tsd-kind-icon">vertices</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-								<a href="fudgecore.meshpyramid.html#baseclass" class="tsd-kind-icon">base<wbr>Class</a>
+								<a href="fudgecore.meshtorus.html#baseclass" class="tsd-kind-icon">base<wbr>Class</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-static">
-								<a href="fudgecore.meshpyramid.html#isubclass" class="tsd-kind-icon">i<wbr>Subclass</a>
+								<a href="fudgecore.meshtorus.html#isubclass" class="tsd-kind-icon">i<wbr>Subclass</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-								<a href="fudgecore.meshpyramid.html#subclasses" class="tsd-kind-icon">subclasses</a>
+								<a href="fudgecore.meshtorus.html#subclasses" class="tsd-kind-icon">subclasses</a>
 							</li>
 							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#type" class="tsd-kind-icon">type</a>
+								<a href="fudgecore.meshtorus.html#type" class="tsd-kind-icon">type</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a>
+								<a href="fudgecore.meshtorus.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+								<a href="fudgecore.meshtorus.html#create" class="tsd-kind-icon">create</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#create" class="tsd-kind-icon">create</a>
+								<a href="fudgecore.meshtorus.html#createrenderbuffers" class="tsd-kind-icon">create<wbr>Render<wbr>Buffers</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#createrenderbuffers" class="tsd-kind-icon">create<wbr>Render<wbr>Buffers</a>
+								<a href="fudgecore.meshtorus.html#deleterenderbuffers" class="tsd-kind-icon">delete<wbr>Render<wbr>Buffers</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#deleterenderbuffers" class="tsd-kind-icon">delete<wbr>Render<wbr>Buffers</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#deserialize" class="tsd-kind-icon">deserialize</a>
+								<a href="fudgecore.meshtorus.html#deserialize" class="tsd-kind-icon">deserialize</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a>
+								<a href="fudgecore.meshtorus.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#flipnormals" class="tsd-kind-icon">flip<wbr>Normals</a>
+								<a href="fudgecore.meshtorus.html#flipnormals" class="tsd-kind-icon">flip<wbr>Normals</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#getindexcount" class="tsd-kind-icon">get<wbr>Index<wbr>Count</a>
+								<a href="fudgecore.meshtorus.html#getindexcount" class="tsd-kind-icon">get<wbr>Index<wbr>Count</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#getmutator" class="tsd-kind-icon">get<wbr>Mutator</a>
+								<a href="fudgecore.meshtorus.html#getmutator" class="tsd-kind-icon">get<wbr>Mutator</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#getmutatorattributetypes" class="tsd-kind-icon">get<wbr>Mutator<wbr>Attribute<wbr>Types</a>
+								<a href="fudgecore.meshtorus.html#getmutatorattributetypes" class="tsd-kind-icon">get<wbr>Mutator<wbr>Attribute<wbr>Types</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#getmutatorforanimation" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>Animation</a>
+								<a href="fudgecore.meshtorus.html#getmutatorforanimation" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>Animation</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#getmutatorforuserinterface" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>User<wbr>Interface</a>
+								<a href="fudgecore.meshtorus.html#getmutatorforuserinterface" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>User<wbr>Interface</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#getvertexcount" class="tsd-kind-icon">get<wbr>Vertex<wbr>Count</a>
+								<a href="fudgecore.meshtorus.html#getvertexcount" class="tsd-kind-icon">get<wbr>Vertex<wbr>Count</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#mutate" class="tsd-kind-icon">mutate</a>
+								<a href="fudgecore.meshtorus.html#mutate" class="tsd-kind-icon">mutate</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a>
+								<a href="fudgecore.meshtorus.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#serialize" class="tsd-kind-icon">serialize</a>
+								<a href="fudgecore.meshtorus.html#serialize" class="tsd-kind-icon">serialize</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#updatemutator" class="tsd-kind-icon">update<wbr>Mutator</a>
+								<a href="fudgecore.meshtorus.html#updatemutator" class="tsd-kind-icon">update<wbr>Mutator</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshpyramid.html#userenderbuffers" class="tsd-kind-icon">use<wbr>Render<wbr>Buffers</a>
+								<a href="fudgecore.meshtorus.html#userenderbuffers" class="tsd-kind-icon">use<wbr>Render<wbr>Buffers</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-								<a href="fudgecore.meshpyramid.html#getbufferspecification" class="tsd-kind-icon">get<wbr>Buffer<wbr>Specification</a>
+								<a href="fudgecore.meshtorus.html#getbufferspecification" class="tsd-kind-icon">get<wbr>Buffer<wbr>Specification</a>
 							</li>
 						</ul>
 					</li>
@@ -938,11 +957,13 @@
 		<h2>Legend</h2>
 		<div class="tsd-legend-group">
 			<ul class="tsd-legend">
-				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
-				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
 			</ul>
 			<ul class="tsd-legend">
-				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
 			</ul>
 			<ul class="tsd-legend">
 				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>

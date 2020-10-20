@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>LOOP_MODE | Fudge Core</title>
+	<title>MODE | Fudge Core</title>
 	<meta name="description" content="Documentation for Fudge Core">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -59,23 +59,16 @@
 					<a href="../modules/fudgecore.html">FudgeCore</a>
 				</li>
 				<li>
-					<a href="fudgecore.loop_mode.html">LOOP_MODE</a>
+					<a href="fudgecore.mode.html">MODE</a>
 				</li>
 			</ul>
-			<h1>Enumeration LOOP_MODE</h1>
+			<h1>Enumeration MODE</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
-			<section class="tsd-panel tsd-comment">
-				<div class="tsd-comment tsd-typography">
-					<div class="lead">
-						<p>Determines the mode a loop runs in</p>
-					</div>
-				</div>
-			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
@@ -83,9 +76,8 @@
 						<section class="tsd-index-section ">
 							<h3>Enumeration members</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudgecore.loop_mode.html#frame_request" class="tsd-kind-icon">FRAME_<wbr>REQUEST</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudgecore.loop_mode.html#time_game" class="tsd-kind-icon">TIME_<wbr>GAME</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudgecore.loop_mode.html#time_real" class="tsd-kind-icon">TIME_<wbr>REAL</a></li>
+								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudgecore.mode.html#editor" class="tsd-kind-icon">EDITOR</a></li>
+								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudgecore.mode.html#runtime" class="tsd-kind-icon">RUNTIME</a></li>
 							</ul>
 						</section>
 					</div>
@@ -94,49 +86,24 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Enumeration members</h2>
 				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="frame_request" class="tsd-anchor"></a>
-					<h3>FRAME_<wbr>REQUEST</h3>
-					<div class="tsd-signature tsd-kind-icon">FRAME_<wbr>REQUEST<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;frameRequest&quot;</span></div>
+					<a name="editor" class="tsd-anchor"></a>
+					<h3>EDITOR</h3>
+					<div class="tsd-signature tsd-kind-icon">EDITOR<span class="tsd-signature-symbol">:</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f5e7d07/Core/Source/Time/Loop.ts#L9">Documents/HFU/FUDGE/Core/Source/Time/Loop.ts:9</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f5e7d07/Core/Source/Engine/Project.ts#L3">Documents/HFU/FUDGE/Core/Source/Engine/Project.ts:3</a></li>
 						</ul>
 					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>Loop cycles controlled by window.requestAnimationFrame</p>
-						</div>
-					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="time_game" class="tsd-anchor"></a>
-					<h3>TIME_<wbr>GAME</h3>
-					<div class="tsd-signature tsd-kind-icon">TIME_<wbr>GAME<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;timeGame&quot;</span></div>
+					<a name="runtime" class="tsd-anchor"></a>
+					<h3>RUNTIME</h3>
+					<div class="tsd-signature tsd-kind-icon">RUNTIME<span class="tsd-signature-symbol">:</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f5e7d07/Core/Source/Time/Loop.ts#L11">Documents/HFU/FUDGE/Core/Source/Time/Loop.ts:11</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f5e7d07/Core/Source/Engine/Project.ts#L3">Documents/HFU/FUDGE/Core/Source/Engine/Project.ts:3</a></li>
 						</ul>
 					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>Loop cycles with the given framerate in <a href="../classes/fudgecore.time.html">Time</a>.game</p>
-						</div>
-					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="time_real" class="tsd-anchor"></a>
-					<h3>TIME_<wbr>REAL</h3>
-					<div class="tsd-signature tsd-kind-icon">TIME_<wbr>REAL<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;timeReal&quot;</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/7f5e7d07/Core/Source/Time/Loop.ts#L13">Documents/HFU/FUDGE/Core/Source/Time/Loop.ts:13</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>Loop cycles with the given framerate in realtime, independent of <a href="../classes/fudgecore.time.html">Time</a>.game</p>
-						</div>
-					</div>
 				</section>
 			</section>
 		</div>
@@ -156,16 +123,13 @@
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-enum tsd-parent-kind-namespace">
-						<a href="fudgecore.loop_mode.html" class="tsd-kind-icon">LOOP_<wbr>MODE</a>
+						<a href="fudgecore.mode.html" class="tsd-kind-icon">MODE</a>
 						<ul>
 							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="fudgecore.loop_mode.html#frame_request" class="tsd-kind-icon">FRAME_<wbr>REQUEST</a>
+								<a href="fudgecore.mode.html#editor" class="tsd-kind-icon">EDITOR</a>
 							</li>
 							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="fudgecore.loop_mode.html#time_game" class="tsd-kind-icon">TIME_<wbr>GAME</a>
-							</li>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="fudgecore.loop_mode.html#time_real" class="tsd-kind-icon">TIME_<wbr>REAL</a>
+								<a href="fudgecore.mode.html#runtime" class="tsd-kind-icon">RUNTIME</a>
 							</li>
 						</ul>
 					</li>
