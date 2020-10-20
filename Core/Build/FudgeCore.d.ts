@@ -624,7 +624,18 @@ declare namespace FudgeCore {
          * @param _point
          */
         isInside(_point: Vector2): boolean;
+        /**
+         * Returns true if this rectangle collides with the rectangle given
+         * @param _rect
+         */
         collides(_rect: Rectangle): boolean;
+        /**
+         * Returns the rectangle created by the intersection of this and the given rectangle or null, if they don't collide
+         */
+        getIntersection(_rect: Rectangle): Rectangle;
+        /**
+         * Creates a string representation of this rectangle
+         */
         toString(): string;
         protected reduceMutator(_mutator: Mutator): void;
     }

@@ -14,7 +14,7 @@ var Scripts;
             ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, this.hndLoopFrame); // when using arrow-function
             this.addEventListener("mutate" /* MUTATE */, this.hndMutation);
         }
-        mutate(_mutator) {
+        async mutate(_mutator) {
             super.mutate(_mutator);
         }
         hndComponentAdd(_event) {
