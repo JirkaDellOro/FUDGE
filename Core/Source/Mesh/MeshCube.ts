@@ -12,8 +12,8 @@ namespace FudgeCore {
   export class MeshCube extends Mesh {
     public static readonly iSubclass: number = Mesh.registerSubclass(MeshCube);
    
-    public constructor() {
-      super();
+    public constructor(_name: string = "MeshCube") {
+      super(_name);
       this.create();
     }
 

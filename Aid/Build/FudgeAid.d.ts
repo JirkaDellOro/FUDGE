@@ -106,7 +106,9 @@ declare namespace FudgeAid {
 declare namespace FudgeAid {
     import ƒ = FudgeCore;
     class NodeArrow extends Node {
+        private static internalResources;
         constructor(_name: string, _color: ƒ.Color);
+        private static createInternalResources;
     }
 }
 declare namespace FudgeAid {
@@ -137,6 +139,7 @@ declare namespace FudgeAid {
         private direction;
         private timer;
         constructor(_name: string);
+        private static createInternalResource;
         setAnimation(_animation: SpriteSheetAnimation): void;
         /**
          * Show a specific frame of the sequence

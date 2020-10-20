@@ -4,8 +4,8 @@ namespace FudgeCore {
     public normals: Float32Array;
 
     private sectors: number;
-    public constructor(_sectors: number = 8) {
-      super();
+    public constructor(_name: string = "MeshCylinder", _sectors: number = 8) {
+      super(_name);
       this.create(_sectors);
     }
     
@@ -102,6 +102,12 @@ namespace FudgeCore {
         unitVertices.push(0);
       }
       return unitVertices;
+    }
+
+    public mutate(_mutator: Mutator): void {
+      super.mutate(_mutator);
+      let sectors: number = Math.round(_mutator.sectors);
+      this.create(sectors);
     }
 
     protected createVertices(): Float32Array {

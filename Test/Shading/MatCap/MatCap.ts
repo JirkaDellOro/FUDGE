@@ -26,7 +26,7 @@ namespace MatCapTest {
     let mtl2: ƒ.Material = new ƒ.Material("Material_Matcap2", ƒ.ShaderMatCap, ctMatcap2);
 
     let pyramid: ƒ.Node = Scenes.createCompleteMeshNode("Cube", mtl1, new ƒ.MeshCube());
-    let sphere: ƒ.Node = Scenes.createCompleteMeshNode("Cube", mtl2, new ƒ.MeshSphere(32, 32));
+    let sphere: ƒ.Node = Scenes.createCompleteMeshNode("Cube", mtl2, new ƒ.MeshSphere("Sphere", 32, 32));
     sphere.mtxLocal.translateX(1);
     pyramid.mtxLocal.translateX(-1);
     graph.addChild(pyramid);

@@ -46,9 +46,10 @@ namespace Fudge {
       item = new remote.MenuItem({ label: "Add Node", id: String(CONTEXTMENU.ADD_NODE), click: _callback, accelerator: process.platform == "darwin" ? "N" : "N" });
       menu.append(item);
 
-      item = new remote.MenuItem({ label: "Add Component", submenu: [] });
-      for (let subItem of ContextMenu.getComponents(_callback))
-        item.submenu.append(subItem);
+      item = new remote.MenuItem({
+        label: "Add Component",
+        submenu: ContextMenu.getSubclassMenu<typeof ƒ.Component>(CONTEXTMENU.ADD_COMPONENT, ƒ.Component.subclasses, _callback)
+      });
       menu.append(item);
 
       item = new remote.MenuItem({ label: "Delete Node", id: String(CONTEXTMENU.DELETE_NODE), click: _callback, accelerator: "D" });

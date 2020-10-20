@@ -16,7 +16,7 @@
   padding: 0.5em;
 }
 
-*[view="ViewRender"] {
+*[view="ViewRender"], *[view="ViewPreview"] {
   padding: 0em;
 }
 

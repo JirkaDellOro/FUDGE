@@ -23,6 +23,12 @@ namespace FudgeCore {
 
     public renderBuffers: RenderBuffers; /* defined by RenderInjector*/
 
+    public constructor(_name: string = "Mesh") {
+      super();
+      this.name = _name;
+      Project.register(this);
+    }
+
     public static getBufferSpecification(): BufferSpecification {
       return { size: 3, dataType: WebGL2RenderingContext.FLOAT, normalize: false, stride: 0, offset: 0 };
     }
@@ -30,7 +36,7 @@ namespace FudgeCore {
     protected static registerSubclass(_subClass: typeof Mesh): number { return Mesh.subclasses.push(_subClass) - 1; }
 
     public get type(): string {
-      return this.constructor.name;
+      return this.constructor.name; 
     }
 
     public useRenderBuffers(_shader: typeof Shader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void {/* injected by RenderInjector*/ }
@@ -62,7 +68,7 @@ namespace FudgeCore {
       return serialization;
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.idResource = _serialization.idResource;
+      Project.register(this, _serialization.idResource);
       this.name = _serialization.name;
       // type is an accessor and must not be deserialized
       return this;

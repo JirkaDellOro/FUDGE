@@ -24,7 +24,7 @@ namespace Fudge {
 
       // create viewport for 3D-resources
       let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
-      cmpCamera.pivot.translate(new ƒ.Vector3(1, 2, 1));
+      cmpCamera.pivot.translate(new ƒ.Vector3(2, 4, 2));
       cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
       cmpCamera.projectCentral(1, 45);
       let canvas: HTMLCanvasElement = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
@@ -37,6 +37,7 @@ namespace Fudge {
       // this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.UPDATE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
       // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
       // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
     }
@@ -48,7 +49,7 @@ namespace Fudge {
     }
 
     private static createStandardMesh(): ƒ.Mesh {
-      let meshStandard: ƒ.MeshSphere = new ƒ.MeshSphere(6, 5);
+      let meshStandard: ƒ.MeshSphere = new ƒ.MeshSphere("Sphere", 6, 5);
       ƒ.Project.deregister(meshStandard);
       return meshStandard;
     }
@@ -175,7 +176,10 @@ namespace Fudge {
       // console.log(_event.type);
       switch (_event.type) {
         case ƒui.EVENT.UPDATE:
+        case EVENT_EDITOR.UPDATE:
           this.redraw();
+          if (this.resource instanceof ƒ.Audio)
+            this.fillContent();
           break;
         default:
           this.resource = _event.detail.data;

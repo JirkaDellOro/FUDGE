@@ -1,23 +1,35 @@
 namespace FudgeAid {
   import ƒ = FudgeCore;
 
+
   export class NodeArrow extends Node {
+    private static internalResources: Map<string, ƒ.SerializableResource> = NodeArrow.createInternalResources();
+
     constructor(_name: string, _color: ƒ.Color) {
       super(_name, ƒ.Matrix4x4.IDENTITY());
-      let coat: ƒ.CoatColored = new ƒ.CoatColored(_color);
-      let material: ƒ.Material = new ƒ.Material("Arrow", ƒ.ShaderUniColor, coat);
 
-      let meshCube: ƒ.MeshCube = new ƒ.MeshCube();
-      let meshPyramid: ƒ.MeshPyramid = new ƒ.MeshPyramid();
-
-      let shaft: Node = new Node("Shaft", ƒ.Matrix4x4.IDENTITY(), material, meshCube);
-      let head: Node = new Node("Head", ƒ.Matrix4x4.IDENTITY(), material, meshPyramid);
+      let shaft: Node = new Node("Shaft", ƒ.Matrix4x4.IDENTITY(), <ƒ.Material>NodeArrow.internalResources.get("Material"), <ƒ.Mesh>NodeArrow.internalResources.get("Shaft"));
+      let head: Node = new Node("Head", ƒ.Matrix4x4.IDENTITY(), <ƒ.Material>NodeArrow.internalResources.get("Material"), <ƒ.Mesh>NodeArrow.internalResources.get("Head"));
       shaft.mtxLocal.scale(new ƒ.Vector3(0.01, 1, 0.01));
       head.mtxLocal.translateY(0.5);
       head.mtxLocal.scale(new ƒ.Vector3(0.05, 0.1, 0.05));
 
+      shaft.getComponent(ƒ.ComponentMaterial).clrPrimary = _color;
+      head.getComponent(ƒ.ComponentMaterial).clrPrimary = _color;
+
       this.addChild(shaft);
       this.addChild(head);
+    }
+
+    private static createInternalResources(): Map<string, ƒ.SerializableResource> {
+      let map: Map<string, ƒ.SerializableResource> = new Map();
+      map.set("Shaft",  new ƒ.MeshCube("ArrowShaft"));
+      map.set("Head", new ƒ.MeshPyramid("ArrowHead"));
+      let coat: ƒ.CoatColored = new ƒ.CoatColored(ƒ.Color.CSS("white"));
+      map.set("Material", new ƒ.Material("Arrow", ƒ.ShaderUniColor, coat));
+
+      map.forEach((_resource) => ƒ.Project.deregister(_resource));
+      return map;
     }
   }
 }

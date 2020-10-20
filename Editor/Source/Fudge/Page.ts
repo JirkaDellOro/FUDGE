@@ -95,6 +95,8 @@ namespace Fudge {
     private static setupPageListeners(): void {
       document.addEventListener(EVENT_EDITOR.SET_GRAPH, Page.hndEvent);
       document.addEventListener(ƒui.EVENT.UPDATE, Page.hndEvent);
+      document.addEventListener(EVENT_EDITOR.UPDATE, Page.hndEvent);
+      document.addEventListener(EVENT_EDITOR.DESTROY, Page.hndEvent);
     }
 
     /** Send custom copies of the given event to the views */
@@ -105,8 +107,15 @@ namespace Fudge {
       }
     }
 
-    private static hndEvent(_event: Event): void {
+    private static hndEvent(_event: CustomEvent): void {
+      ƒ.Debug.fudge("Page received", _event.type, _event);
       switch (_event.type) {
+        case EVENT_EDITOR.DESTROY:
+          let view: View = _event.detail;
+          console.log("Page received DESTROY", view);
+          if (view instanceof Panel)
+            Page.panels.splice(Page.panels.indexOf(view), 1);
+          break;
         case EVENT_EDITOR.SET_GRAPH:
           let panel: Panel[] = Page.find(PanelGraph);
           if (!panel.length)
@@ -154,17 +163,12 @@ namespace Fudge {
 
       ipcRenderer.on(MENU.PANEL_MODELLER_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
         node = new ƒ.Node("graph");
+        ƒaid.addStandardLightComponents(node, new ƒ.Color(0.5, 0.5, 0.5));
         let cooSys: ƒ.Node = new ƒaid.NodeCoordinateSystem("WorldCooSys");
-        let cube: ƒ.Node = new ƒaid.Node("Cube", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderUniColor, new ƒ.CoatColored()), new ƒ.MeshSphere(8, 5));
-        node.addChild(cooSys);
+        let cube: ƒ.Node = new ƒaid.Node("Default", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderFlat, new ƒ.CoatColored()), new ƒ.MeshCustom("MeshCustom", new ƒ.MeshCube));
         node.addChild(cube);
+        node.addChild(cooSys);
         Page.add(PanelModeller, "Modeller", Object({ node: node }));
-      });
-
-
-      // HACK!
-      ipcRenderer.on(MENU.NODE_UPDATE, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-        ƒ.Debug.log("updateNode");
       });
     }
   }

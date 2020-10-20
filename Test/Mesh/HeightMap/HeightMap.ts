@@ -25,8 +25,8 @@ namespace MeshTest {
       return Math.sin(x * y * Math.PI * 2) * 0.2;
     };
 
-    let gridMeshFlat: ƒ.Mesh = new ƒ.MeshHeightMap(20, 20, myHeightMapFunction);
-    let gridMeshTex: ƒ.Mesh = new ƒ.MeshHeightMap(20, 20, myHeightMapFunction);
+    let gridMeshFlat: ƒ.Mesh = new ƒ.MeshHeightMap("HeightMap", 20, 20, myHeightMapFunction);
+    let gridMeshTex: ƒ.Mesh = new ƒ.MeshHeightMap("HeightMap", 20, 20, myHeightMapFunction);
 
     gridFlat = Scenes.createCompleteMeshNode("Grid", matFlat, gridMeshFlat);
     gridTex = Scenes.createCompleteMeshNode("Grid", matTex, gridMeshTex);
@@ -39,8 +39,7 @@ namespace MeshTest {
 
     let body: ƒ.Node = new ƒ.Node("k");
 
-    let lights: ƒ.Node = new ƒAid.NodeThreePointLights("lights", 110);
-    graph.addChild(lights);
+    ƒAid.addStandardLightComponents(graph);
 
     graph.addChild(body);
 

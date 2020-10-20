@@ -8,30 +8,38 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT_SCRIPT"] = 2] = "ADD_COMPONENT_SCRIPT";
         CONTEXTMENU[CONTEXTMENU["DELETE_NODE"] = 3] = "DELETE_NODE";
         CONTEXTMENU[CONTEXTMENU["EDIT"] = 4] = "EDIT";
+        CONTEXTMENU[CONTEXTMENU["CREATE"] = 5] = "CREATE";
+        CONTEXTMENU[CONTEXTMENU["CONTROL_MODE"] = 6] = "CONTROL_MODE";
+        CONTEXTMENU[CONTEXTMENU["INTERACTION_MODE"] = 7] = "INTERACTION_MODE";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
         MENU["QUIT"] = "quit";
         MENU["PROJECT_SAVE"] = "projectSave";
         MENU["PROJECT_LOAD"] = "projectLoad";
-        MENU["NODE_DELETE"] = "nodeDelete";
-        MENU["NODE_UPDATE"] = "nodeUpdate";
         MENU["DEVTOOLS_OPEN"] = "devtoolsOpen";
         MENU["PANEL_GRAPH_OPEN"] = "panelGraphOpen";
         MENU["PANEL_ANIMATION_OPEN"] = "panelAnimationOpen";
         MENU["PANEL_PROJECT_OPEN"] = "panelProjectOpen";
         MENU["FULLSCREEN"] = "fullscreen";
         MENU["PANEL_MODELLER_OPEN"] = "panelModellerOpen";
+        /* obsolete ?
+    NODE_DELETE = "nodeDelete",
+    NODE_UPDATE = "nodeUpdate",
+    */
     })(MENU = Fudge.MENU || (Fudge.MENU = {}));
     let EVENT_EDITOR;
     (function (EVENT_EDITOR) {
-        EVENT_EDITOR["REMOVE"] = "removeNode";
-        EVENT_EDITOR["HIDE"] = "hideNode";
-        EVENT_EDITOR["ACTIVATE_VIEWPORT"] = "activateViewport";
         EVENT_EDITOR["SET_GRAPH"] = "setGraph";
         EVENT_EDITOR["FOCUS_NODE"] = "focusNode";
         EVENT_EDITOR["SET_PROJECT"] = "setProject";
         EVENT_EDITOR["UPDATE"] = "update";
+        EVENT_EDITOR["DESTROY"] = "destroy";
+        /* obsolete ?
+        REMOVE = "removeNode",
+        HIDE = "hideNode",
+        ACTIVATE_VIEWPORT = "activateViewport",
+        */
     })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
     let PANEL;
     (function (PANEL) {
@@ -174,53 +182,52 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
-    // TODO: figure out how to subclass MenuItem
-    // export class MenuItem extends remote.MenuItem {
-    //   public subclass: Function = null;
-    //   constructor(_options: Electron.MenuItemConstructorOptions) {
-    //     super(_options);
-    //   }
-    // }
     class ContextMenu {
-        // public static build(_for: typeof View, _callback: ContextMenuCallback): Electron.Menu {
-        //   let template: Electron.MenuItemConstructorOptions[] = ContextMenu.getMenu(_for, _callback);
-        //   let menu: Electron.Menu = remote.Menu.buildFromTemplate(template);
-        //   return menu;
-        // }
         static appendCopyPaste(_menu) {
             _menu.append(new Fudge.remote.MenuItem({ role: "copy" }));
             _menu.append(new Fudge.remote.MenuItem({ role: "cut" }));
             _menu.append(new Fudge.remote.MenuItem({ role: "paste" }));
         }
-        static getComponents(_callback) {
-            const menuItems = [];
-            for (let subclass of ƒ.Component.subclasses) {
-                let item = new Fudge.remote.MenuItem({ label: subclass.name, id: String(Fudge.CONTEXTMENU.ADD_COMPONENT), click: _callback, submenu: ContextMenu.getSubMenu(subclass, _callback) });
-                // @ts-ignore
-                item.overrideProperty("iSubclass", subclass.iSubclass);
-                item["iSubclass"] = subclass.iSubclass;
-                menuItems.push(item);
+        static getSubclassMenu(_id, _superclass, _callback) {
+            const menu = new Fudge.remote.Menu();
+            for (let iSubclass in _superclass) {
+                let subclass = _superclass[iSubclass];
+                let item = new Fudge.remote.MenuItem({ label: subclass.name, id: String(_id), click: _callback });
+                //@ts-ignore
+                item.overrideProperty("iSubclass", iSubclass);
+                menu.append(item);
             }
-            return menuItems;
+            return menu;
+        }
+        static getResources(_callback) {
+            const menu = new Fudge.remote.Menu();
+            for (let type of Fudge.typesOfResources) {
+                let item = new Fudge.remote.MenuItem({
+                    label: type.name,
+                    submenu: ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE, type, _callback)
+                });
+                menu.append(item);
+            }
+            return menu;
         }
         static getSubMenu(_object, _callback) {
             let menu;
-            if (_object == ƒ.ComponentScript) {
-                menu = new Fudge.remote.Menu();
-                let scripts = ƒ.Project.getComponentScripts();
-                for (let namespace in scripts) {
-                    // @ts-ignore
-                    // console.log(script.name, script);
-                    let item = new Fudge.remote.MenuItem({ label: namespace, id: null, click: null, submenu: [] });
-                    for (let script of scripts[namespace]) {
-                        let name = Reflect.get(script, "name");
-                        let subitem = new Fudge.remote.MenuItem({ label: name, id: String(Fudge.CONTEXTMENU.ADD_COMPONENT_SCRIPT), click: _callback });
-                        // @ts-ignore
-                        subitem.overrideProperty("Script", namespace + "." + name);
-                        item.submenu.append(subitem);
+            switch (_object) {
+                case ƒ.ComponentScript:
+                    menu = new Fudge.remote.Menu();
+                    let scripts = ƒ.Project.getComponentScripts();
+                    for (let namespace in scripts) {
+                        let item = new Fudge.remote.MenuItem({ label: namespace, id: null, click: null, submenu: [] });
+                        for (let script of scripts[namespace]) {
+                            let name = Reflect.get(script, "name");
+                            let subitem = new Fudge.remote.MenuItem({ label: name, id: String(Fudge.CONTEXTMENU.ADD_COMPONENT_SCRIPT), click: _callback });
+                            // @ts-ignore
+                            subitem.overrideProperty("Script", namespace + "." + name);
+                            item.submenu.append(subitem);
+                        }
+                        menu.append(item);
                     }
-                    menu.append(item);
-                }
+                    break;
             }
             return menu;
         }
@@ -308,6 +315,8 @@ var Fudge;
         static setupPageListeners() {
             document.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, Page.hndEvent);
             document.addEventListener("update" /* UPDATE */, Page.hndEvent);
+            document.addEventListener(Fudge.EVENT_EDITOR.UPDATE, Page.hndEvent);
+            document.addEventListener(Fudge.EVENT_EDITOR.DESTROY, Page.hndEvent);
         }
         /** Send custom copies of the given event to the views */
         static broadcastEvent(_event) {
@@ -317,7 +326,14 @@ var Fudge;
             }
         }
         static hndEvent(_event) {
+            ƒ.Debug.fudge("Page received", _event.type, _event);
             switch (_event.type) {
+                case Fudge.EVENT_EDITOR.DESTROY:
+                    let view = _event.detail;
+                    console.log("Page received DESTROY", view);
+                    if (view instanceof Fudge.Panel)
+                        Page.panels.splice(Page.panels.indexOf(view), 1);
+                    break;
                 case Fudge.EVENT_EDITOR.SET_GRAPH:
                     let panel = Page.find(Fudge.PanelGraph);
                     if (!panel.length)
@@ -359,15 +375,12 @@ var Fudge;
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_MODELLER_OPEN, (_event, _args) => {
                 node = new ƒ.Node("graph");
+                ƒaid.addStandardLightComponents(node, new ƒ.Color(0.5, 0.5, 0.5));
                 let cooSys = new ƒaid.NodeCoordinateSystem("WorldCooSys");
-                let cube = new ƒaid.Node("Cube", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderUniColor, new ƒ.CoatColored()), new ƒ.MeshSphere(8, 5));
-                node.addChild(cooSys);
+                let cube = new ƒaid.Node("Default", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderFlat, new ƒ.CoatColored()), new ƒ.MeshCustom("MeshCustom", new ƒ.MeshCube));
                 node.addChild(cube);
+                node.addChild(cooSys);
                 Page.add(Fudge.PanelModeller, "Modeller", Object({ node: node }));
-            });
-            // HACK!
-            Fudge.ipcRenderer.on(Fudge.MENU.NODE_UPDATE, (_event, _args) => {
-                ƒ.Debug.log("updateNode");
             });
         }
     }
@@ -481,22 +494,9 @@ var Fudge;
             this.target = ƒ.Vector3.ZERO();
             this.onclick = (_event) => {
                 switch (_event.button) {
-                    case 0:
-                        this.pickNode(_event.canvasX, _event.canvasY);
+                    case 0: //this.pickNode(_event.canvasX, _event.canvasY); 
                         break;
                     case 1: this.currentRotation = this.viewport.camera.pivot.rotation;
-                }
-            };
-            this.zoom = (_event) => {
-                _event.preventDefault();
-                let cameraPivot = this.viewport.camera.pivot;
-                let delta = _event.deltaY * 0.01;
-                try {
-                    let normTrans = ƒ.Vector3.NORMALIZATION(cameraPivot.translation);
-                    cameraPivot.translation = new ƒ.Vector3(cameraPivot.translation.x + (normTrans.x - this.target.x) * delta, cameraPivot.translation.y + (normTrans.y - this.target.y) * delta, cameraPivot.translation.z + (normTrans.z - this.target.z) * delta);
-                }
-                catch (_error) {
-                    ƒ.Debug.log(_error);
                 }
             };
             this.handleMove = (_event) => {
@@ -517,6 +517,18 @@ var Fudge;
                     }
                 }
             };
+            this.zoom = (_event) => {
+                _event.preventDefault();
+                let cameraPivot = this.viewport.camera.pivot;
+                let delta = _event.deltaY * 0.01;
+                try {
+                    let normTrans = ƒ.Vector3.NORMALIZATION(cameraPivot.translation);
+                    cameraPivot.translation = new ƒ.Vector3(cameraPivot.translation.x + (normTrans.x - this.target.x) * delta, cameraPivot.translation.y + (normTrans.y - this.target.y) * delta, cameraPivot.translation.z + (normTrans.z - this.target.z) * delta);
+                }
+                catch (_error) {
+                    ƒ.Debug.log(_error);
+                }
+            };
             this.viewport = viewport;
             this.viewport.adjustingFrames = true;
             this.currentRotation = viewport.camera.pivot.rotation;
@@ -529,17 +541,6 @@ var Fudge;
             this.viewport.addEventListener("\u0192keydown" /* DOWN */, this.handleKeyboard);
             this.viewport.activateKeyboardEvent("\u0192keydown" /* DOWN */, true);
             viewport.setFocus(true);
-        }
-        pickNode(_canvasX, _canvasY) {
-            this.selectedNodes = [];
-            this.viewport.createPickBuffers();
-            let mousePos = new ƒ.Vector2(_canvasX, _canvasY);
-            let posRender = this.viewport.pointClientToRender(new ƒ.Vector2(mousePos.x, this.viewport.getClientRectangle().height - mousePos.y));
-            let hits = this.viewport.pickNodeAt(posRender);
-            for (let hit of hits) {
-                if (hit.zBuffer != 0)
-                    this.selectedNodes.push(hit.node);
-            }
         }
         rotateCamera(_event) {
             let currentTranslation = this.viewport.camera.pivot.translation;
@@ -579,6 +580,26 @@ var Fudge;
             let rayEnd = ƒ.Vector3.SUM(rayToCenter.origin, rayToCenter.direction);
             this.target = rayEnd;
         }
+        // private pickNode(_canvasX: number, _canvasY: number): void {
+        //   this.selectedNodes = [];
+        //   this.viewport.createPickBuffers();
+        //   let mousePos: ƒ.Vector2 = new ƒ.Vector2(_canvasX, _canvasY);
+        //   let posRender: ƒ.Vector2 = this.viewport.pointClientToRender(new ƒ.Vector2(mousePos.x, this.viewport.getClientRectangle().height - mousePos.y));
+        //   let hits: ƒ.RayHit[] = this.viewport.pickNodeAt(posRender);
+        //   for (let hit of hits) {
+        //     if (hit.zBuffer != 0) 
+        //       this.selectedNodes.push(hit.node);
+        //   } 
+        //   let ray: ƒ.Ray = this.viewport.getRayFromClient(mousePos);
+        //   let vertices: Float32Array = this.selectedNodes[0].getComponent(ƒ.ComponentMesh).mesh.vertices;
+        //   for (let i: number = 0; i < vertices.length / 2; i += 3) {
+        //     let vertex: ƒ.Vector3 = new ƒ.Vector3(vertices[i], vertices[i + 1], vertices[i + 2]);
+        //     let objTranslation: ƒ.Vector3 = this.selectedNodes[0].mtxLocal.translation;
+        //     let vertexTranslation: ƒ.Vector3 = ƒ.Vector3.SUM(objTranslation, vertex);
+        //     console.log(ray.getDistance(vertexTranslation).magnitude);
+        //   }
+        //   console.log("---------------------------");
+        // }
         multiplyMatrixes(mtx, vector) {
             let x = ƒ.Vector3.DOT(mtx.getX(), vector);
             let y = ƒ.Vector3.DOT(mtx.getY(), vector);
@@ -713,6 +734,337 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    class Controller {
+        constructor(viewport, editableNode) {
+            this.viewport = viewport;
+            this.controlMode = new Fudge.ObjectMode();
+            this.editableNode = editableNode;
+            this.setInteractionMode(Fudge.InteractionMode.IDLE);
+        }
+        get ControlMode() {
+            return this.controlMode;
+        }
+        onmouseup(_event) {
+            this.interactionMode.onmouseup(_event);
+        }
+        onmousedown(_event) {
+            this.interactionMode.onmousedown(_event);
+        }
+        onmove(_event) {
+            this.interactionMode.onmove(_event);
+        }
+        switchMode(_event) {
+            if (_event.ctrlKey) {
+                switch (_event.key) {
+                    case "e":
+                        this.setControlMode(new Fudge.EditMode());
+                        break;
+                    case "n":
+                        this.setControlMode(new Fudge.ObjectMode());
+                        break;
+                    default:
+                        let selectedMode;
+                        for (let mode in this.controlMode.modes) {
+                            if (this.controlMode.modes[mode] === _event.key) {
+                                selectedMode = mode;
+                            }
+                        }
+                        if (selectedMode)
+                            this.setInteractionMode(selectedMode);
+                        break;
+                }
+            }
+        }
+        setControlMode(mode) {
+            this.controlMode = mode;
+            console.log(mode);
+            this.setInteractionMode(this.interactionMode.type);
+        }
+        setInteractionMode(mode) {
+            let selection = this.interactionMode?.selection;
+            this.interactionMode = this.controlMode.setInteractionMode(mode);
+            this.interactionMode.viewport = this.viewport;
+            this.interactionMode.editableNode = this.editableNode;
+            if (selection)
+                this.interactionMode.selection = selection;
+            console.log("Current Mode: " + this.interactionMode.type);
+        }
+    }
+    Fudge.Controller = Controller;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    let ControlMode;
+    (function (ControlMode) {
+        ControlMode[ControlMode["OBJECT_MODE"] = 0] = "OBJECT_MODE";
+        ControlMode[ControlMode["EDIT_MODE"] = 1] = "EDIT_MODE";
+    })(ControlMode = Fudge.ControlMode || (Fudge.ControlMode = {}));
+    let InteractionMode;
+    (function (InteractionMode) {
+        InteractionMode["SELECT"] = "Select";
+        InteractionMode["TRANSLATE"] = "Translate";
+        InteractionMode["ROTATE"] = "Rotate";
+        InteractionMode["SCALE"] = "Scale";
+        InteractionMode["EXTRUDE"] = "Extrude";
+        InteractionMode["IDLE"] = "Idle";
+    })(InteractionMode = Fudge.InteractionMode || (Fudge.InteractionMode = {}));
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class AbstractControlMode {
+        static registerSubclass(_subClass) { return AbstractControlMode.subclasses.push(_subClass) - 1; }
+    }
+    AbstractControlMode.subclasses = [];
+    Fudge.AbstractControlMode = AbstractControlMode;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class EditMode extends Fudge.AbstractControlMode {
+        constructor() {
+            super(...arguments);
+            this.modes = { [Fudge.InteractionMode.SELECT]: "s", [Fudge.InteractionMode.ROTATE]: "r", [Fudge.InteractionMode.TRANSLATE]: "t" };
+        }
+        setInteractionMode(mode) {
+            let interactionMode;
+            switch (mode) {
+                case Fudge.InteractionMode.SELECT:
+                    interactionMode = new Fudge.EditSelection();
+                    break;
+                case Fudge.InteractionMode.ROTATE:
+                    interactionMode = new Fudge.EditRotation();
+                case Fudge.InteractionMode.TRANSLATE:
+                    interactionMode = new Fudge.EditTranslation();
+                    break;
+                default:
+                    interactionMode = new Fudge.IdleMode();
+                    break;
+            }
+            return interactionMode;
+        }
+    }
+    EditMode.iSubclass = Fudge.AbstractControlMode.registerSubclass(EditMode);
+    Fudge.EditMode = EditMode;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class ObjectMode extends Fudge.AbstractControlMode {
+        constructor() {
+            super(...arguments);
+            this.modes = { [Fudge.InteractionMode.ROTATE]: "r", [Fudge.InteractionMode.TRANSLATE]: "t" };
+        }
+        //[InteractionMode.SELECT]: "s", 
+        setInteractionMode(mode) {
+            let interactionMode;
+            switch (mode) {
+                case Fudge.InteractionMode.ROTATE:
+                    interactionMode = new Fudge.ObjectRotation();
+                    break;
+                case Fudge.InteractionMode.TRANSLATE:
+                    interactionMode = new Fudge.ObjectTranslation();
+                    break;
+                default:
+                    interactionMode = new Fudge.IdleMode();
+                    break;
+            }
+            return interactionMode;
+        }
+    }
+    ObjectMode.iSubclass = Fudge.AbstractControlMode.registerSubclass(ObjectMode);
+    Fudge.ObjectMode = ObjectMode;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class IdleMode {
+        constructor() {
+            this.type = Fudge.InteractionMode.IDLE;
+        }
+        onmousedown(_event) {
+            //@ts-ignore
+        }
+        onmouseup(_event) {
+            //@ts-ignore
+        }
+        onmove(_event) {
+            //@ts-ignore
+        }
+    }
+    Fudge.IdleMode = IdleMode;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class AbstractRotation {
+        constructor() {
+            this.type = Fudge.InteractionMode.ROTATE;
+        }
+    }
+    Fudge.AbstractRotation = AbstractRotation;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class EditRotation extends Fudge.AbstractRotation {
+        onmousedown(_event) {
+            console.log("EditRotation activated");
+            console.log(this.selection);
+        }
+        onmouseup(_event) {
+            throw new Error("Method not implemented.");
+        }
+        onmove(_event) {
+            throw new Error("Method not implemented.");
+        }
+    }
+    Fudge.EditRotation = EditRotation;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class ObjectRotation extends Fudge.AbstractRotation {
+        onmousedown(_event) {
+            console.log("ObjectRotation activated");
+        }
+        onmouseup(_event) {
+            throw new Error("Method not implemented.");
+        }
+        onmove(_event) {
+            throw new Error("Method not implemented.");
+        }
+    }
+    Fudge.ObjectRotation = ObjectRotation;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class AbstractSelection {
+        constructor() {
+            this.type = Fudge.InteractionMode.SELECT;
+        }
+    }
+    Fudge.AbstractSelection = AbstractSelection;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    var ƒ = FudgeCore;
+    class EditSelection extends Fudge.AbstractSelection {
+        constructor() {
+            super(...arguments);
+            this.selection = [];
+        }
+        onmousedown(_event) {
+            let vertices = this.editableNode.getComponent(ƒ.ComponentMesh).mesh.vertices;
+            let nearestVertexIndex;
+            let shortestDistance = Number.MAX_VALUE;
+            let mousePos = new ƒ.Vector2(_event.canvasX, _event.canvasY);
+            let ray = this.viewport.getRayFromClient(mousePos);
+            for (let i = 0; i < vertices.length / 2; i += 3) {
+                let vertex = new ƒ.Vector3(vertices[i], vertices[i + 1], vertices[i + 2]);
+                let objTranslation = this.editableNode.mtxLocal.translation;
+                let vertexTranslation = ƒ.Vector3.SUM(objTranslation, vertex);
+                let distance = ray.getDistance(vertexTranslation).magnitude;
+                if (distance < shortestDistance && distance < 0.1) {
+                    shortestDistance = distance;
+                    nearestVertexIndex = i;
+                }
+            }
+            if (!nearestVertexIndex)
+                this.selection = [];
+            this.selection.push(nearestVertexIndex);
+            console.log("vertex selected: " + nearestVertexIndex);
+        }
+        onmouseup(_event) {
+            //@ts-ignore
+        }
+        onmove(_event) {
+            //@ts-ignore
+        }
+    }
+    Fudge.EditSelection = EditSelection;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    var ƒ = FudgeCore;
+    class ObjectSelection extends Fudge.AbstractSelection {
+        onmousedown(_event) {
+            console.log("ObjectSelection activated");
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.X])) {
+                console.log("x is pressed");
+            }
+        }
+        onmouseup(_event) {
+            //@ts-ignore
+        }
+        onmove(_event) {
+            //@ts-ignore
+        }
+    }
+    Fudge.ObjectSelection = ObjectSelection;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class AbstractTranslation {
+        constructor() {
+            this.type = Fudge.InteractionMode.TRANSLATE;
+            this.dragging = false;
+        }
+    }
+    Fudge.AbstractTranslation = AbstractTranslation;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class EditTranslation extends Fudge.AbstractTranslation {
+        onmousedown(_event) {
+            this.dragging = true;
+            this.distance = ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, this.viewport.camera.pivot.translation).magnitude;
+        }
+        onmouseup(_event) {
+            this.dragging = false;
+        }
+        onmove(_event) {
+            // console.log("vertices: " + this.selection);
+            // if (this.dragging) {
+            //   let ray: ƒ.Ray = this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY));
+            //   let diffTranslation: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, ƒ.Vector3.SUM(ray.origin, ƒ.Vector3.SCALE(ray.direction, this.distance)));
+            //   //this.editableNode.mtxLocal.translation = ƒ.Vector3.SUM(ray.origin, ƒ.Vector3.SCALE(ray.direction, this.distance));
+            //   let mesh: ƒ.Mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+            //   let verts = mesh.vertices;
+            //   for (let selection of this.selection) {
+            //     let currentVertex: ƒ.Vector3 = new ƒ.Vector3(verts[selection], verts[selection + 1], verts[selection + 2]);
+            //     currentVertex.add(diffTranslation);
+            //     verts[selection] = currentVertex.x;
+            //     verts[selection + 1] = currentVertex.y;
+            //     verts[selection + 2] = currentVertex.z; 
+            //   }
+            //   mesh.vertices = verts;
+            // }
+        }
+    }
+    Fudge.EditTranslation = EditTranslation;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class ObjectTranslation extends Fudge.AbstractTranslation {
+        onmouseup(_event) {
+            this.dragging = false;
+        }
+        onmousedown(_event) {
+            this.viewport.createPickBuffers();
+            let mousePos = new ƒ.Vector2(_event.canvasX, _event.canvasY);
+            let posRender = this.viewport.pointClientToRender(new ƒ.Vector2(mousePos.x, this.viewport.getClientRectangle().height - mousePos.y));
+            let hits = this.viewport.pickNodeAt(posRender);
+            for (let hit of hits) {
+                if (hit.zBuffer != 0 && hit.node == this.editableNode)
+                    this.dragging = true;
+            }
+            this.distance = ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, this.viewport.camera.pivot.translation).magnitude; //
+        }
+        onmove(_event) {
+            if (this.dragging) {
+                let ray = this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY));
+                this.editableNode.mtxLocal.translation = ƒ.Vector3.SUM(ray.origin, ƒ.Vector3.SCALE(ray.direction, this.distance));
+            }
+        }
+    }
+    Fudge.ObjectTranslation = ObjectTranslation;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
     var ƒ = FudgeCore;
     /**
      * Base class for all [[View]]s to support generic functionality
@@ -737,6 +1089,7 @@ var Fudge;
             this.dom.setAttribute("view", this.constructor.name);
             _container.getElement().append(this.dom);
             this.container = _container;
+            this.container.on("destroy", (_e) => this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.DESTROY, { bubbles: true, detail: _e["instance"] })));
             // console.log(this.contextMenuCallback);
             this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEventCommon);
@@ -1556,9 +1909,10 @@ var Fudge;
         getContextMenu(_callback) {
             const menu = new Fudge.remote.Menu();
             let item;
-            item = new Fudge.remote.MenuItem({ label: "Add Component", submenu: [] });
-            for (let subItem of Fudge.ContextMenu.getComponents(_callback))
-                item.submenu.append(subItem);
+            item = new Fudge.remote.MenuItem({
+                label: "Add Component",
+                submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.ADD_COMPONENT, ƒ.Component.subclasses, _callback)
+            });
             menu.append(item);
             Fudge.ContextMenu.appendCopyPaste(menu);
             return menu;
@@ -1641,9 +1995,10 @@ var Fudge;
             let item;
             item = new Fudge.remote.MenuItem({ label: "Add Node", id: String(Fudge.CONTEXTMENU.ADD_NODE), click: _callback, accelerator: process.platform == "darwin" ? "N" : "N" });
             menu.append(item);
-            item = new Fudge.remote.MenuItem({ label: "Add Component", submenu: [] });
-            for (let subItem of Fudge.ContextMenu.getComponents(_callback))
-                item.submenu.append(subItem);
+            item = new Fudge.remote.MenuItem({
+                label: "Add Component",
+                submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.ADD_COMPONENT, ƒ.Component.subclasses, _callback)
+            });
             menu.append(item);
             item = new Fudge.remote.MenuItem({ label: "Delete Node", id: String(Fudge.CONTEXTMENU.DELETE_NODE), click: _callback, accelerator: "D" });
             menu.append(item);
@@ -1773,12 +2128,41 @@ var Fudge;
                 if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
                     this.viewport.draw();
             };
+            this.onmove = (_event) => {
+                this.controller.onmove(_event);
+            };
+            this.onmouseup = (_event) => {
+                switch (_event.button) {
+                    case 0: this.controller.onmouseup(_event);
+                }
+            };
+            this.onmousedown = (_event) => {
+                switch (_event.button) {
+                    case 0: this.controller.onmousedown(_event);
+                }
+            };
+            this.handleKeyboard = (_event) => {
+                this.controller.switchMode(_event);
+            };
             this.graph = _state["node"];
             this.createUserInterface();
+            this.node = this.graph.getChildrenByName("Default")[0];
+            this.controller = new Fudge.Controller(this.viewport, this.node);
             // tslint:disable-next-line: no-unused-expression
             new Fudge.ControllerModeller(this.viewport);
             // this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.hndEvent);
             // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
+            this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
+            this.viewport.addEventListener("\u0192pointermove" /* MOVE */, this.onmove);
+            this.viewport.activatePointerEvent("\u0192pointermove" /* MOVE */, true);
+            this.viewport.addEventListener("\u0192pointerup" /* UP */, this.onmouseup);
+            this.viewport.activatePointerEvent("\u0192pointerup" /* UP */, true);
+            this.viewport.addEventListener("\u0192pointerdown" /* DOWN */, this.onmousedown);
+            this.viewport.activatePointerEvent("\u0192pointerdown" /* DOWN */, true);
+            this.viewport.addEventListener("\u0192keydown" /* DOWN */, this.handleKeyboard);
+            this.viewport.activateKeyboardEvent("\u0192keydown" /* DOWN */, true);
+            this.viewport.setFocus(true);
+            this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
         }
         createUserInterface() {
             let cmpCamera = new ƒ.ComponentCamera();
@@ -1797,6 +2181,62 @@ var Fudge;
             this.dom.append(this.canvas);
             ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
             ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, this.animate);
+        }
+        getContextMenu(_callback) {
+            const menu = new Fudge.remote.Menu();
+            let item;
+            let submenu = new Fudge.remote.Menu();
+            submenu.append(new Fudge.remote.MenuItem({ label: "Object" }));
+            item = new Fudge.remote.MenuItem({
+                label: "Control Mode",
+                submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CONTROL_MODE, Fudge.AbstractControlMode.subclasses, _callback)
+            });
+            menu.append(item);
+            // let currentControl: typeof AbstractControlMode;
+            // for (let subclass of AbstractControlMode.subclasses) {
+            //   if (subclass == this.controller.ControlMode.constructor) {
+            //     currentControl = subclass;
+            //   }
+            // }
+            // item = new remote.MenuItem({
+            //   label: "Mode",
+            //   submenu: ContextMenu.getSubclassMenu<typeof IInteractionMode>(CONTEXTMENU.CREATE, currentControl.modes, _callback)
+            // });
+            if (!this.controller) {
+                return menu;
+            }
+            submenu = new Fudge.remote.Menu();
+            for (let mode in this.controller.ControlMode.modes) {
+                let subitem = new Fudge.remote.MenuItem({ label: mode, id: String(Fudge.CONTEXTMENU.INTERACTION_MODE), click: _callback, accelerator: process.platform == "darwin" ? "Command+" + this.controller.ControlMode.modes[mode] : "ctrl+" + this.controller.ControlMode.modes[mode] });
+                //@ts-ignore
+                subitem.overrideProperty("interactionMode", mode);
+                submenu.append(subitem);
+            }
+            item = new Fudge.remote.MenuItem({
+                label: "Interaction Mode",
+                submenu: submenu
+            });
+            menu.append(item);
+            return menu;
+        }
+        contextMenuCallback(_item, _window, _event) {
+            switch (Number(_item.id)) {
+                case Fudge.CONTEXTMENU.CONTROL_MODE:
+                    let iSubclass = _item["iSubclass"];
+                    let type = Fudge.AbstractControlMode.subclasses[iSubclass];
+                    //@ts-ignore
+                    let controlModeNew = new type();
+                    this.controller.setControlMode(controlModeNew);
+                    // ƒ.Debug.info(meshNew.type, meshNew);
+                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                    this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
+                    break;
+                case Fudge.CONTEXTMENU.INTERACTION_MODE:
+                    let mode = _item["interactionMode"];
+                    this.controller.setInteractionMode(mode);
+                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                    break;
+            }
         }
         cleanup() {
             ƒ.Loop.removeEventListener("loopFrame" /* LOOP_FRAME */, this.animate);
@@ -1868,6 +2308,9 @@ var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
+    Fudge.typesOfResources = [
+        ƒ.Mesh
+    ];
     /**
      * List the internal resources
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
@@ -1879,6 +2322,7 @@ var Fudge;
             this.hndEvent = (_event) => {
                 switch (_event.type) {
                     case Fudge.EVENT_EDITOR.SET_PROJECT:
+                    case Fudge.EVENT_EDITOR.UPDATE:
                         this.listResources();
                         break;
                     // case ƒui.EVENT.SELECT:
@@ -1887,6 +2331,7 @@ var Fudge;
                 }
             };
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
         }
         listResources() {
@@ -1901,12 +2346,27 @@ var Fudge;
             let item;
             item = new Fudge.remote.MenuItem({ label: "Edit", id: String(Fudge.CONTEXTMENU.EDIT), click: _callback, accelerator: process.platform == "darwin" ? "E" : "E" });
             menu.append(item);
+            item = new Fudge.remote.MenuItem({
+                label: "Create",
+                submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE, ƒ.Mesh.subclasses, _callback)
+            });
+            // item.submenu = ContextMenu.getSubMenu(ƒ.Mesh, _callback);
+            menu.append(item);
             // ContextMenu.appendCopyPaste(menu);
             return menu;
         }
         contextMenuCallback(_item, _window, _event) {
-            ƒ.Debug.info(`MenuSelect: Item-id=${Fudge.CONTEXTMENU[_item.id]}`);
+            ƒ.Debug.fudge(`MenuSelect | id: ${Fudge.CONTEXTMENU[_item.id]} | event: ${_event}`);
             switch (Number(_item.id)) {
+                case Fudge.CONTEXTMENU.CREATE:
+                    let iSubclass = _item["iSubclass"];
+                    let type = ƒ.Mesh.subclasses[iSubclass];
+                    //@ts-ignore
+                    let meshNew = new type();
+                    // ƒ.Debug.info(meshNew.type, meshNew);
+                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                    this.table.selectInterval(meshNew, meshNew);
+                    break;
                 case Fudge.CONTEXTMENU.EDIT:
                     let resource = this.table.getFocussed();
                     console.log("Edit", resource);
@@ -1937,7 +2397,10 @@ var Fudge;
                 // console.log(_event.type);
                 switch (_event.type) {
                     case "update" /* UPDATE */:
+                    case Fudge.EVENT_EDITOR.UPDATE:
                         this.redraw();
+                        if (this.resource instanceof ƒ.Audio)
+                            this.fillContent();
                         break;
                     default:
                         this.resource = _event.detail.data;
@@ -1955,7 +2418,7 @@ var Fudge;
             };
             // create viewport for 3D-resources
             let cmpCamera = new ƒ.ComponentCamera();
-            cmpCamera.pivot.translate(new ƒ.Vector3(1, 2, 1));
+            cmpCamera.pivot.translate(new ƒ.Vector3(2, 4, 2));
             cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
             cmpCamera.projectCentral(1, 45);
             let canvas = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
@@ -1966,6 +2429,7 @@ var Fudge;
             // this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener("update" /* UPDATE */, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
             // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
         }
@@ -1975,7 +2439,7 @@ var Fudge;
             return mtrStandard;
         }
         static createStandardMesh() {
-            let meshStandard = new ƒ.MeshSphere(6, 5);
+            let meshStandard = new ƒ.MeshSphere("Sphere", 6, 5);
             ƒ.Project.deregister(meshStandard);
             return meshStandard;
         }

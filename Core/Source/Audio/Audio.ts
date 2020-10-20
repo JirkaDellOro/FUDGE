@@ -28,6 +28,7 @@ namespace FudgeCore {
      * Asynchronously loads the audio (mp3) from the given url
      */
     public async load(_url: RequestInfo): Promise<void> {
+      console.log("AudioLoad", _url);
       this.url = _url;
       this.ready = false;
       this.path = new URL(this.url.toString(), Project.baseURL);
@@ -55,7 +56,14 @@ namespace FudgeCore {
       return this;
     }
 
-    protected reduceMutator(_mutator: Mutator): void { 
+    public mutate(_mutator: Mutator): void {
+      if (_mutator.url != this.url.toString())
+        this.load(_mutator.url);
+      delete(_mutator.url);
+      super.mutate(_mutator);
+    }
+
+    protected reduceMutator(_mutator: Mutator): void {
       // delete _mutator.idResource; 
       delete _mutator.ready;
     }

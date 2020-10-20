@@ -20,8 +20,8 @@ namespace MeshTest {
     let matTex: ƒ.Material = new ƒ.Material("Textured", ƒ.ShaderTexture, coatTextured);
     let matFlat: ƒ.Material = new ƒ.Material("White", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("WHITE")));
 
-    let torusMesh1: ƒ.Mesh = new ƒ.MeshTorus(0.25);
-    let torusMesh2: ƒ.Mesh = new ƒ.MeshTorus(0.5, 32, 24);
+    let torusMesh1: ƒ.Mesh = new ƒ.MeshTorus("Torus", 0.25);
+    let torusMesh2: ƒ.Mesh = new ƒ.MeshTorus("Torus", 0.5, 32, 24);
     torusFlat = Scenes.createCompleteMeshNode("torusFlat", matFlat, torusMesh1);
     torusTex = Scenes.createCompleteMeshNode("torusTexture", matTex, torusMesh2);
 
@@ -34,8 +34,7 @@ namespace MeshTest {
 
     let body: ƒ.Node = new ƒ.Node("k");
 
-    let lights: ƒ.Node = new ƒAid.NodeThreePointLights("lights", 0);
-    graph.addChild(lights);
+    ƒAid.addStandardLightComponents(graph);
 
     graph.addChild(body);
 

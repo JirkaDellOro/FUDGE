@@ -8,14 +8,15 @@ declare namespace Fudge {
         ADD_COMPONENT = 1,
         ADD_COMPONENT_SCRIPT = 2,
         DELETE_NODE = 3,
-        EDIT = 4
+        EDIT = 4,
+        CREATE = 5,
+        CONTROL_MODE = 6,
+        INTERACTION_MODE = 7
     }
     enum MENU {
         QUIT = "quit",
         PROJECT_SAVE = "projectSave",
         PROJECT_LOAD = "projectLoad",
-        NODE_DELETE = "nodeDelete",
-        NODE_UPDATE = "nodeUpdate",
         DEVTOOLS_OPEN = "devtoolsOpen",
         PANEL_GRAPH_OPEN = "panelGraphOpen",
         PANEL_ANIMATION_OPEN = "panelAnimationOpen",
@@ -24,13 +25,11 @@ declare namespace Fudge {
         PANEL_MODELLER_OPEN = "panelModellerOpen"
     }
     enum EVENT_EDITOR {
-        REMOVE = "removeNode",
-        HIDE = "hideNode",
-        ACTIVATE_VIEWPORT = "activateViewport",
         SET_GRAPH = "setGraph",
         FOCUS_NODE = "focusNode",
         SET_PROJECT = "setProject",
-        UPDATE = "update"
+        UPDATE = "update",
+        DESTROY = "destroy"
     }
     enum PANEL {
         GRAPH = "PanelGraph",
@@ -79,7 +78,10 @@ declare namespace Fudge {
     type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
     class ContextMenu {
         static appendCopyPaste(_menu: Electron.Menu): void;
-        static getComponents(_callback: ContextMenuCallback): Electron.MenuItem[];
+        static getSubclassMenu<T extends {
+            name: string;
+        }>(_id: CONTEXTMENU, _superclass: T[], _callback: ContextMenuCallback): Electron.Menu;
+        static getResources(_callback: ContextMenuCallback): Electron.Menu;
         static getSubMenu(_object: Object, _callback: ContextMenuCallback): Electron.Menu;
     }
 }
@@ -139,10 +141,9 @@ declare namespace Fudge {
         selectedNodes: ƒ.Node[];
         constructor(viewport: ƒ.Viewport);
         private onclick;
-        private pickNode;
-        private zoom;
         private handleMove;
         private handleKeyboard;
+        private zoom;
         private rotateCamera;
         private moveCamera;
         private multiplyMatrixes;
@@ -184,6 +185,174 @@ declare namespace Fudge {
         delete(_focussed: ƒ.Node[]): ƒ.Node[];
         addChildren(_children: ƒ.Node[], _target: ƒ.Node): ƒ.Node[];
         copy(_originals: ƒ.Node[]): Promise<ƒ.Node[]>;
+    }
+}
+declare namespace Fudge {
+    import ƒ = FudgeCore;
+    class Controller {
+        private interactionMode;
+        private controlMode;
+        private viewport;
+        private editableNode;
+        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
+        get ControlMode(): AbstractControlMode;
+        onmouseup(_event: ƒ.EventPointer): void;
+        onmousedown(_event: ƒ.EventPointer): void;
+        onmove(_event: ƒ.EventPointer): void;
+        switchMode(_event: ƒ.EventKeyboard): void;
+        setControlMode(mode: AbstractControlMode): void;
+        setInteractionMode(mode: InteractionMode): void;
+    }
+}
+declare namespace Fudge {
+    enum ControlMode {
+        OBJECT_MODE = 0,
+        EDIT_MODE = 1
+    }
+    enum InteractionMode {
+        SELECT = "Select",
+        TRANSLATE = "Translate",
+        ROTATE = "Rotate",
+        SCALE = "Scale",
+        EXTRUDE = "Extrude",
+        IDLE = "Idle"
+    }
+}
+declare namespace Fudge {
+    abstract class AbstractControlMode {
+        static readonly subclasses: typeof AbstractControlMode[];
+        modes: {
+            [mode in InteractionMode]?: string;
+        };
+        protected static registerSubclass(_subClass: typeof AbstractControlMode): number;
+        abstract setInteractionMode(mode: InteractionMode): IInteractionMode;
+    }
+}
+declare namespace Fudge {
+    class EditMode extends AbstractControlMode {
+        static readonly iSubclass: number;
+        modes: {
+            [mode in InteractionMode]?: string;
+        };
+        setInteractionMode(mode: InteractionMode): IInteractionMode;
+    }
+}
+declare namespace Fudge {
+    class ObjectMode extends AbstractControlMode {
+        static readonly iSubclass: number;
+        modes: {
+            [mode in InteractionMode]?: string;
+        };
+        setInteractionMode(mode: InteractionMode): IInteractionMode;
+    }
+}
+declare namespace Fudge {
+    import ƒ = FudgeCore;
+    interface IInteractionMode {
+        type: InteractionMode;
+        selection: Object;
+        viewport: ƒ.Viewport;
+        editableNode: ƒ.Node;
+        onmousedown(_event: ƒ.EventPointer): void;
+        onmouseup(_event: ƒ.EventPointer): void;
+        onmove(_event: ƒ.EventPointer): void;
+    }
+}
+declare namespace Fudge {
+    class IdleMode implements IInteractionMode {
+        readonly type: InteractionMode;
+        selection: Object;
+        viewport: ƒ.Viewport;
+        editableNode: ƒ.Node;
+        onmousedown(_event: ƒ.EventPointer): void;
+        onmouseup(_event: ƒ.EventPointer): void;
+        onmove(_event: ƒ.EventPointer): void;
+    }
+}
+declare namespace Fudge {
+    abstract class AbstractRotation implements IInteractionMode {
+        readonly type: InteractionMode;
+        viewport: ƒ.Viewport;
+        selection: Object;
+        editableNode: ƒ.Node;
+        abstract onmousedown(_event: ƒ.EventPointer): void;
+        abstract onmouseup(_event: ƒ.EventPointer): void;
+        abstract onmove(_event: ƒ.EventPointer): void;
+    }
+}
+declare namespace Fudge {
+    import ƒ = FudgeCore;
+    class EditRotation extends AbstractRotation {
+        selection: ƒ.Node;
+        onmousedown(_event: ƒ.EventPointer): void;
+        onmouseup(_event: ƒ.EventPointer): void;
+        onmove(_event: ƒ.EventPointer): void;
+    }
+}
+declare namespace Fudge {
+    import ƒ = FudgeCore;
+    class ObjectRotation extends AbstractRotation {
+        selection: ƒ.Node;
+        onmousedown(_event: ƒ.EventPointer): void;
+        onmouseup(_event: ƒ.EventPointer): void;
+        onmove(_event: ƒ.EventPointer): void;
+    }
+}
+declare namespace Fudge {
+    abstract class AbstractSelection implements IInteractionMode {
+        readonly type: InteractionMode;
+        viewport: ƒ.Viewport;
+        selection: Object;
+        editableNode: ƒ.Node;
+        abstract onmousedown(_event: ƒ.EventPointer): void;
+        abstract onmouseup(_event: ƒ.EventPointer): void;
+        abstract onmove(_event: ƒ.EventPointer): void;
+    }
+}
+declare namespace Fudge {
+    import ƒ = FudgeCore;
+    class EditSelection extends AbstractSelection {
+        selection: Array<number>;
+        onmousedown(_event: ƒ.EventPointer): void;
+        onmouseup(_event: ƒ.EventPointer): void;
+        onmove(_event: ƒ.EventPointer): void;
+    }
+}
+declare namespace Fudge {
+    import ƒ = FudgeCore;
+    class ObjectSelection extends AbstractSelection {
+        selection: ƒ.Node;
+        onmousedown(_event: ƒ.EventPointer): void;
+        onmouseup(_event: ƒ.EventPointer): void;
+        onmove(_event: ƒ.EventPointer): void;
+    }
+}
+declare namespace Fudge {
+    abstract class AbstractTranslation implements IInteractionMode {
+        readonly type: InteractionMode;
+        viewport: ƒ.Viewport;
+        selection: Object;
+        editableNode: ƒ.Node;
+        protected dragging: boolean;
+        protected distance: number;
+        abstract onmousedown(_event: ƒ.EventPointer): void;
+        abstract onmouseup(_event: ƒ.EventPointer): void;
+        abstract onmove(_event: ƒ.EventPointer): void;
+    }
+}
+declare namespace Fudge {
+    class EditTranslation extends AbstractTranslation {
+        selection: Array<number>;
+        onmousedown(_event: ƒ.EventPointer): void;
+        onmouseup(_event: ƒ.EventPointer): void;
+        onmove(_event: ƒ.EventPointer): void;
+    }
+}
+declare namespace Fudge {
+    class ObjectTranslation extends AbstractTranslation {
+        onmouseup(_event: ƒ.EventPointer): void;
+        onmousedown(_event: ƒ.EventPointer): void;
+        onmove(_event: ƒ.EventPointer): void;
     }
 }
 declare namespace Fudge {
@@ -400,9 +569,17 @@ declare namespace Fudge {
         viewport: ƒ.Viewport;
         canvas: HTMLCanvasElement;
         graph: ƒ.Node;
+        controller: Controller;
+        node: ƒ.Node;
         constructor(_container: GoldenLayout.Container, _state: Object);
         createUserInterface(): void;
+        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
+        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         private animate;
+        private onmove;
+        private onmouseup;
+        private onmousedown;
+        private handleKeyboard;
         protected cleanup(): void;
     }
 }
@@ -428,6 +605,8 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    import ƒ = FudgeCore;
+    let typesOfResources: ƒ.General[];
     /**
      * List the internal resources
      * @author Jirka Dell'Oro-Friedl, HFU, 2020

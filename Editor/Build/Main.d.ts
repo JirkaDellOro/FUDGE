@@ -4,14 +4,15 @@ declare namespace Fudge {
         ADD_COMPONENT = 1,
         ADD_COMPONENT_SCRIPT = 2,
         DELETE_NODE = 3,
-        EDIT = 4
+        EDIT = 4,
+        CREATE = 5,
+        CONTROL_MODE = 6,
+        INTERACTION_MODE = 7
     }
     enum MENU {
         QUIT = "quit",
         PROJECT_SAVE = "projectSave",
         PROJECT_LOAD = "projectLoad",
-        NODE_DELETE = "nodeDelete",
-        NODE_UPDATE = "nodeUpdate",
         DEVTOOLS_OPEN = "devtoolsOpen",
         PANEL_GRAPH_OPEN = "panelGraphOpen",
         PANEL_ANIMATION_OPEN = "panelAnimationOpen",
@@ -20,13 +21,11 @@ declare namespace Fudge {
         PANEL_MODELLER_OPEN = "panelModellerOpen"
     }
     enum EVENT_EDITOR {
-        REMOVE = "removeNode",
-        HIDE = "hideNode",
-        ACTIVATE_VIEWPORT = "activateViewport",
         SET_GRAPH = "setGraph",
         FOCUS_NODE = "focusNode",
         SET_PROJECT = "setProject",
-        UPDATE = "update"
+        UPDATE = "update",
+        DESTROY = "destroy"
     }
     enum PANEL {
         GRAPH = "PanelGraph",
