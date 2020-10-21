@@ -310,6 +310,12 @@ declare namespace FudgeUserInterface {
     }
 }
 declare namespace FudgeUserInterface {
+    import ƒ = FudgeCore;
+    class Dialog {
+        static prompt(_mutator: ƒ.Mutator | Object, _modal?: boolean, _head?: string, _callToAction?: string, _ok?: string, _cancel?: string): Promise<boolean>;
+    }
+}
+declare namespace FudgeUserInterface {
     class ExpandableFieldSet extends HTMLFieldSetElement {
         content: HTMLDivElement;
         private expander;

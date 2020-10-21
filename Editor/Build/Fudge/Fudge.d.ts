@@ -57,14 +57,6 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    import ƒ = FudgeCore;
-    class Dialog {
-        private static dom;
-        static prompt(_mutator: ƒ.Mutator | Object, _head?: string, _callToAction?: string): Promise<boolean>;
-        static create(): void;
-    }
-}
-declare namespace Fudge {
     export enum MIME {
         TEXT = "text",
         AUDIO = "audio",

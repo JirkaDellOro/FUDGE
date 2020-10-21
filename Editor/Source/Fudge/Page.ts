@@ -32,16 +32,14 @@ namespace Fudge {
       Page.setupMainListeners();
       Page.setupPageListeners();
 
-      Dialog.create();
-
       // for testing:
       ipcRenderer.emit(MENU.PANEL_PROJECT_OPEN);
       ipcRenderer.emit(MENU.PANEL_GRAPH_OPEN);
       // ipcRenderer.emit(MENU.PROJECT_LOAD);
 
-      // let test: Object = { name: "Test", filenameInternalResources: "abc", toggle: true, value: 1, sub: { sub1: 123, sub2: "Hallo" } };
-      // if (await Dialog.prompt(test))
-      //   console.log(test);
+      let test: Object = { text: "abc", toggle: true, value: 1, sub: { sub1: 123, sub2: "Hallo" } };
+      if (await ƒui.Dialog.prompt(test, false, "Eingabe erforderlich", "Gib ein", "Los geht's", "Abbruch"))
+      console.log(test);
     }
 
     public static setupGoldenLayout(): void {

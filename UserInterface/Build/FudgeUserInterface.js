@@ -968,6 +968,46 @@ var FudgeUserInterface;
     CustomElementTextInput.customElement = FudgeUserInterface.CustomElement.register("fudge-textinput", CustomElementTextInput, String);
     FudgeUserInterface.CustomElementTextInput = CustomElementTextInput;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
+    class Dialog {
+        static async prompt(_mutator, _modal = true, _head = "Headline", _callToAction = "Instruction", _ok = "OK", _cancel = "Cancel") {
+            let dom = document.createElement("dialog");
+            document.body.appendChild(dom);
+            dom.innerHTML = "<h1>" + _head + "</h1>";
+            let content;
+            content = FudgeUserInterface.Generator.createInterfaceFromMutator(_mutator);
+            content.id = "content";
+            dom.appendChild(content);
+            let div = document.createElement("div");
+            div.innerHTML = "<p>" + _callToAction + "</p>";
+            let btnCancel = document.createElement("button");
+            btnCancel.innerHTML = _cancel;
+            div.appendChild(btnCancel);
+            let btnOk = document.createElement("button");
+            btnOk.innerHTML = _ok;
+            div.appendChild(btnOk);
+            dom.appendChild(div);
+            if (_modal)
+                dom.showModal();
+            else
+                dom.show();
+            return new Promise((_resolve) => {
+                let hndButton = (_event) => {
+                    btnCancel.removeEventListener("click", hndButton);
+                    btnOk.removeEventListener("click", hndButton);
+                    FudgeUserInterface.Controller.getMutator(content, _mutator);
+                    dom.close();
+                    document.body.removeChild(dom);
+                    _resolve(_event.target == btnOk);
+                };
+                btnCancel.addEventListener("click", hndButton);
+                btnOk.addEventListener("click", hndButton);
+            });
+        }
+    }
+    FudgeUserInterface.Dialog = Dialog;
+})(FudgeUserInterface || (FudgeUserInterface = {}));
 // namespace FudgeUserInterface {
 //     /**
 //      * <select><option>Hallo</option></select>

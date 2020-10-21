@@ -35,7 +35,7 @@ namespace FudgeUserInterface {
         if (element == null)
           continue;
 
-        if (element instanceof CustomElement)
+        if (element instanceof CustomElement) 
           _mutator[key] = element.getMutatorValue();
         else if (_mutator[key] instanceof Object)
           _mutator[key] = Controller.getMutator(element, _mutator[key]);

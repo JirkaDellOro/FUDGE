@@ -84,45 +84,6 @@ var Fudge;
         // MESH = ViewMesh,
     })(VIEW = Fudge.VIEW || (Fudge.VIEW = {}));
 })(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    var ƒui = FudgeUserInterface;
-    class Dialog {
-        static async prompt(_mutator, _head = "Headline", _callToAction = "Instruction") {
-            this.dom.innerHTML = "<h1>" + _head + "</h1>";
-            let content;
-            content = ƒui.Generator.createInterfaceFromMutator(_mutator);
-            content.id = "content";
-            this.dom.appendChild(content);
-            let div = document.createElement("div");
-            div.innerHTML = "<p>" + _callToAction + "</p>";
-            let cancel = document.createElement("button");
-            cancel.innerHTML = "Cancel";
-            div.appendChild(cancel);
-            let ok = document.createElement("button");
-            ok.innerHTML = "OK";
-            div.appendChild(ok);
-            this.dom.appendChild(div);
-            this.dom.showModal();
-            return new Promise((_resolve) => {
-                let hndButton = (_event) => {
-                    cancel.removeEventListener("click", hndButton);
-                    ok.removeEventListener("click", hndButton);
-                    ƒui.Controller.getMutator(content, _mutator);
-                    this.dom.close();
-                    _resolve(_event.target == ok);
-                };
-                cancel.addEventListener("click", hndButton);
-                ok.addEventListener("click", hndButton);
-            });
-        }
-        static create() {
-            this.dom = document.createElement("dialog");
-            document.body.appendChild(this.dom);
-        }
-    }
-    Fudge.Dialog = Dialog;
-})(Fudge || (Fudge = {}));
 // /<reference types="../../../node_modules/@types/node/fs"/>
 var Fudge;
 // /<reference types="../../../node_modules/@types/node/fs"/>
@@ -269,6 +230,7 @@ var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒaid = FudgeAid;
+    var ƒui = FudgeUserInterface;
     Fudge.ipcRenderer = require("electron").ipcRenderer;
     Fudge.remote = require("electron").remote;
     // TODO: At this point of time, the project is just a single node. A project is much more complex...
@@ -286,14 +248,13 @@ var Fudge;
             // TODO: create a new Panel containing a ViewData by default. More Views can be added by the user or by configuration
             Page.setupMainListeners();
             Page.setupPageListeners();
-            Fudge.Dialog.create();
             // for testing:
             Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_PROJECT_OPEN);
             Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_GRAPH_OPEN);
             // ipcRenderer.emit(MENU.PROJECT_LOAD);
-            // let test: Object = { name: "Test", filenameInternalResources: "abc", toggle: true, value: 1, sub: { sub1: 123, sub2: "Hallo" } };
-            // if (await Dialog.prompt(test))
-            //   console.log(test);
+            let test = { text: "abc", toggle: true, value: 1, sub: { sub1: 123, sub2: "Hallo" } };
+            if (await ƒui.Dialog.prompt(test, false, "Eingabe erforderlich", "Gib ein", "Los geht's", "Abbruch"))
+                console.log(test);
         }
         static setupGoldenLayout() {
             let config = {
