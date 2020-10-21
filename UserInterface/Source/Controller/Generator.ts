@@ -21,8 +21,8 @@ namespace FudgeUserInterface {
      */
     public static createFieldSetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): ExpandableFieldSet {
       let name: string = _name || _mutable.constructor.name;
-      let fieldset: ExpandableFieldSet = Generator.createExtendableFieldset(name, _mutable.type);
-      fieldset.content = Generator.createInterfaceFromMutable(_mutable, _name, _mutator);
+      let fieldset: ExpandableFieldSet = Generator.createExpendableFieldset(name, _mutable.type);
+      fieldset.content.appendChild(Generator.createInterfaceFromMutable(_mutable, _name, _mutator));
       return fieldset;
     }
 
@@ -55,13 +55,20 @@ namespace FudgeUserInterface {
     }
 
     /**
-     * Create a div-Elements containing the interface for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+     * Create a div-Element containing the interface for the [[FudgeCore.Mutator]] 
+     * Does not support nested mutators!
      */
     public static createInterfaceFromMutator(_mutator: ƒ.Mutator | Object): HTMLDivElement {
       let div: HTMLDivElement = document.createElement("div");
       for (let key in _mutator) {
         let value: Object = Reflect.get(_mutator, key);
-        div.appendChild(this.createMutatorElement(key, value.constructor.name, value));
+        if (value instanceof Object) {
+          let fieldset: ExpandableFieldSet = Generator.createExpendableFieldset(key, "Hallo");
+          fieldset.content.appendChild(Generator.createInterfaceFromMutator(value));
+          div.appendChild(fieldset);
+        } 
+        else
+          div.appendChild(this.createMutatorElement(key, (<Object>value).constructor.name, value));
         div.appendChild(document.createElement("br"));
       }
       return div;
@@ -121,7 +128,7 @@ namespace FudgeUserInterface {
     }
 
     // TODO: implement CustomFieldSet and replace this
-    public static createExtendableFieldset(_key: string, _type: string): ExpandableFieldSet {
+    public static createExpendableFieldset(_key: string, _type: string): ExpandableFieldSet {
       let cntFoldFieldset: ExpandableFieldSet = new ExpandableFieldSet(_key);
       //TODO: unique ids
       // cntFoldFieldset.id = _legend;

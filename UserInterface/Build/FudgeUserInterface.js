@@ -136,8 +136,8 @@ var FudgeUserInterface;
          */
         static createFieldSetFromMutable(_mutable, _name, _mutator) {
             let name = _name || _mutable.constructor.name;
-            let fieldset = Generator.createExtendableFieldset(name, _mutable.type);
-            fieldset.content = Generator.createInterfaceFromMutable(_mutable, _name, _mutator);
+            let fieldset = Generator.createExpendableFieldset(name, _mutable.type);
+            fieldset.content.appendChild(Generator.createInterfaceFromMutable(_mutable, _name, _mutator));
             return fieldset;
         }
         /**
@@ -167,13 +167,20 @@ var FudgeUserInterface;
             return div;
         }
         /**
-         * Create a div-Elements containing the interface for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+         * Create a div-Element containing the interface for the [[FudgeCore.Mutator]]
+         * Does not support nested mutators!
          */
         static createInterfaceFromMutator(_mutator) {
             let div = document.createElement("div");
             for (let key in _mutator) {
                 let value = Reflect.get(_mutator, key);
-                div.appendChild(this.createMutatorElement(key, value.constructor.name, value));
+                if (value instanceof Object) {
+                    let fieldset = Generator.createExpendableFieldset(key, "Hallo");
+                    fieldset.content.appendChild(Generator.createInterfaceFromMutator(value));
+                    div.appendChild(fieldset);
+                }
+                else
+                    div.appendChild(this.createMutatorElement(key, value.constructor.name, value));
                 div.appendChild(document.createElement("br"));
             }
             return div;
@@ -230,7 +237,7 @@ var FudgeUserInterface;
             return dropdown;
         }
         // TODO: implement CustomFieldSet and replace this
-        static createExtendableFieldset(_key, _type) {
+        static createExpendableFieldset(_key, _type) {
             let cntFoldFieldset = new FudgeUserInterface.ExpandableFieldSet(_key);
             //TODO: unique ids
             // cntFoldFieldset.id = _legend;

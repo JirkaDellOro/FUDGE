@@ -53,7 +53,8 @@ declare namespace FudgeUserInterface {
          */
         static createInterfaceFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): HTMLDivElement;
         /**
-         * Create a div-Elements containing the interface for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+         * Create a div-Element containing the interface for the [[FudgeCore.Mutator]]
+         * Does not support nested mutators!
          */
         static createInterfaceFromMutator(_mutator: ƒ.Mutator | Object): HTMLDivElement;
         /**
@@ -64,7 +65,7 @@ declare namespace FudgeUserInterface {
          * TODO: refactor for enums
          */
         static createDropdown(_name: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement;
-        static createExtendableFieldset(_key: string, _type: string): ExpandableFieldSet;
+        static createExpendableFieldset(_key: string, _type: string): ExpandableFieldSet;
     }
 }
 declare namespace FudgeUserInterface {

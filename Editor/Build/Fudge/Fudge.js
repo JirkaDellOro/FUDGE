@@ -291,9 +291,9 @@ var Fudge;
             Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_PROJECT_OPEN);
             Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_GRAPH_OPEN);
             // ipcRenderer.emit(MENU.PROJECT_LOAD);
-            let test = { name: "Test", filenameInternalResources: "abc", toggle: true, value: 1 };
-            if (await Fudge.Dialog.prompt(test))
-                console.log(test);
+            // let test: Object = { name: "Test", filenameInternalResources: "abc", toggle: true, value: 1, sub: { sub1: 123, sub2: "Hallo" } };
+            // if (await Dialog.prompt(test))
+            //   console.log(test);
         }
         static setupGoldenLayout() {
             let config = {
