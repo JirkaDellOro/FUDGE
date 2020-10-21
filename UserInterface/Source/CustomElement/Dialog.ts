@@ -1,7 +1,14 @@
 namespace FudgeUserInterface {
   import ƒ = FudgeCore;
 
+  /**
+   * Static class to display a modal or non-modal dialog with an interface for the given mutator.
+   */
   export class Dialog {
+    /**
+     * Prompt the dialog to the user with the given headline, call to action and labels for the cancel- and ok-button
+     * Use `await` on call, to continue after the user has pressed one of the buttons.
+     */
     public static async prompt(_mutator: ƒ.Mutator | Object, _modal: boolean = true, _head: string = "Headline", _callToAction: string = "Instruction", _ok: string = "OK", _cancel: string = "Cancel"): Promise<boolean> {
       let dom: HTMLDialogElement = document.createElement("dialog");
       document.body.appendChild(dom);

@@ -230,7 +230,6 @@ var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒaid = FudgeAid;
-    var ƒui = FudgeUserInterface;
     Fudge.ipcRenderer = require("electron").ipcRenderer;
     Fudge.remote = require("electron").remote;
     // TODO: At this point of time, the project is just a single node. A project is much more complex...
@@ -252,9 +251,9 @@ var Fudge;
             Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_PROJECT_OPEN);
             Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_GRAPH_OPEN);
             // ipcRenderer.emit(MENU.PROJECT_LOAD);
-            let test = { text: "abc", toggle: true, value: 1, sub: { sub1: 123, sub2: "Hallo" } };
-            if (await ƒui.Dialog.prompt(test, false, "Eingabe erforderlich", "Gib ein", "Los geht's", "Abbruch"))
-                console.log(test);
+            // let test: Object = { text: "abc", toggle: true, value: 1, sub: { sub1: 123, sub2: "Hallo" } };
+            // if (await ƒui.Dialog.prompt(test, false, "Eingabe erforderlich", "Gib ein", "Los geht's", "Abbruch"))
+            // console.log(test);
         }
         static setupGoldenLayout() {
             let config = {

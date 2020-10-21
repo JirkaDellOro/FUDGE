@@ -970,7 +970,14 @@ var FudgeUserInterface;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
+    /**
+     * Static class to display a modal or non-modal dialog with an interface for the given mutator.
+     */
     class Dialog {
+        /**
+         * Prompt the dialog to the user with the given headline, call to action and labels for the cancel- and ok-button
+         * Use `await` on call, to continue after the user has pressed one of the buttons.
+         */
         static async prompt(_mutator, _modal = true, _head = "Headline", _callToAction = "Instruction", _ok = "OK", _cancel = "Cancel") {
             let dom = document.createElement("dialog");
             document.body.appendChild(dom);

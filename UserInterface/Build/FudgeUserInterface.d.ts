@@ -311,7 +311,14 @@ declare namespace FudgeUserInterface {
 }
 declare namespace FudgeUserInterface {
     import ƒ = FudgeCore;
+    /**
+     * Static class to display a modal or non-modal dialog with an interface for the given mutator.
+     */
     class Dialog {
+        /**
+         * Prompt the dialog to the user with the given headline, call to action and labels for the cancel- and ok-button
+         * Use `await` on call, to continue after the user has pressed one of the buttons.
+         */
         static prompt(_mutator: ƒ.Mutator | Object, _modal?: boolean, _head?: string, _callToAction?: string, _ok?: string, _cancel?: string): Promise<boolean>;
     }
 }
