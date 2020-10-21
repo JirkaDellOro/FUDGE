@@ -1,8 +1,17 @@
-/// <reference types="../../core/build/fudgecore" />
 /// <reference types="../../../node_modules/electron/electron" />
+/// <reference types="../../core/build/fudgecore" />
 /// <reference types="../../../aid/build/fudgeaid" />
 /// <reference types="golden-layout" />
 /// <reference types="../../../userinterface/build/fudgeuserinterface" />
+declare namespace Fudge {
+    type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
+    class ContextMenu {
+        static appendCopyPaste(_menu: Electron.Menu): void;
+        static getSubclassMenu<T extends {
+            name: string;
+        }>(_id: CONTEXTMENU, _superclass: T[], _callback: ContextMenuCallback): Electron.Menu;
+    }
+}
 declare namespace Fudge {
     enum CONTEXTMENU {
         ADD_NODE = 0,
@@ -48,6 +57,18 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    import ƒ = FudgeCore;
+    class Dialog {
+        private static dom;
+        static prompt(_mutable: ƒ.Mutable, _head?: string, _callToAction?: string): Promise<boolean>;
+        static create(): void;
+    }
+    class DialogMutable extends ƒ.Mutable {
+        constructor(_object: Object);
+        protected reduceMutator(_mutator: ƒ.Mutator): void;
+    }
+}
+declare namespace Fudge {
     export enum MIME {
         TEXT = "text",
         AUDIO = "audio",
@@ -78,17 +99,6 @@ declare namespace Fudge {
     function saveProject(_node: ƒ.Node): void;
     function promptLoadProject(): Promise<URL>;
     function loadProject(_url: URL): Promise<void>;
-}
-declare namespace Fudge {
-    type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
-    class ContextMenu {
-        static appendCopyPaste(_menu: Electron.Menu): void;
-        static getSubclassMenu<T extends {
-            name: string;
-        }>(_id: CONTEXTMENU, _superclass: T[], _callback: ContextMenuCallback): Electron.Menu;
-        static getResources(_callback: ContextMenuCallback): Electron.Menu;
-        static getSubMenu(_object: Object, _callback: ContextMenuCallback): Electron.Menu;
-    }
 }
 declare namespace Fudge {
     const ipcRenderer: Electron.IpcRenderer;

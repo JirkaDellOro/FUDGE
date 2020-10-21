@@ -32,12 +32,15 @@ namespace Fudge {
       Page.setupMainListeners();
       Page.setupPageListeners();
 
+      Dialog.create();
+
       // for testing:
-      console.log("Sending");
       ipcRenderer.emit(MENU.PANEL_PROJECT_OPEN);
       ipcRenderer.emit(MENU.PANEL_GRAPH_OPEN);
-      ipcRenderer.emit(MENU.PROJECT_LOAD);
-      // ipcRenderer.emit
+      // ipcRenderer.emit(MENU.PROJECT_LOAD);
+
+      let dialogTest: DialogMutable = new DialogMutable({ name: "Test", filenameInternalResources: "abc", toggle: true, value: 1 });
+      // Dialog.prompt(dialogTest);
     }
 
     public static setupGoldenLayout(): void {
@@ -146,7 +149,7 @@ namespace Fudge {
       ipcRenderer.on(MENU.PANEL_GRAPH_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
         node = new ƒaid.NodeCoordinateSystem("WorldCooSys");
         Page.add(PanelGraph, "Graph", Object({ node: node }));
-        Page.broadcastEvent(new CustomEvent(EVENT_EDITOR.UPDATE, {detail: node}));
+        Page.broadcastEvent(new CustomEvent(EVENT_EDITOR.UPDATE, { detail: node }));
       });
 
       ipcRenderer.on(MENU.PANEL_PROJECT_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {

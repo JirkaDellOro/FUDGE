@@ -1,5 +1,29 @@
 var Fudge;
 (function (Fudge) {
+    // import ƒui = FudgeUserInterface;
+    // import ƒ = FudgeCore;
+    class ContextMenu {
+        static appendCopyPaste(_menu) {
+            _menu.append(new Fudge.remote.MenuItem({ role: "copy" }));
+            _menu.append(new Fudge.remote.MenuItem({ role: "cut" }));
+            _menu.append(new Fudge.remote.MenuItem({ role: "paste" }));
+        }
+        static getSubclassMenu(_id, _superclass, _callback) {
+            const menu = new Fudge.remote.Menu();
+            for (let iSubclass in _superclass) {
+                let subclass = _superclass[iSubclass];
+                let item = new Fudge.remote.MenuItem({ label: subclass.name, id: String(_id), click: _callback });
+                //@ts-ignore
+                item.overrideProperty("iSubclass", iSubclass);
+                menu.append(item);
+            }
+            return menu;
+        }
+    }
+    Fudge.ContextMenu = ContextMenu;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
     let CONTEXTMENU;
     (function (CONTEXTMENU) {
         // SKETCH = ViewSketch,
@@ -59,6 +83,38 @@ var Fudge;
         // SKETCH = ViewSketch,
         // MESH = ViewMesh,
     })(VIEW = Fudge.VIEW || (Fudge.VIEW = {}));
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    var ƒui = FudgeUserInterface;
+    var ƒ = FudgeCore;
+    class Dialog {
+        static async prompt(_mutable, _head = "Additional information needed", _callToAction = "Enter information and hit OK") {
+            this.dom.innerHTML = "<h1>" + _head + "</h1>";
+            let content = ƒui.Generator.createFieldSetFromMutable(_mutable);
+            this.dom.appendChild(content);
+            let div = document.createElement("div");
+            div.innerHTML = "<p>" + _callToAction + "</p>";
+            div.innerHTML += "<button type='button'>Cancel</Button><button type='button'>OK</button>";
+            this.dom.appendChild(div);
+            this.dom.showModal();
+            return true;
+        }
+        static create() {
+            this.dom = document.createElement("dialog");
+            document.body.appendChild(this.dom);
+        }
+    }
+    Fudge.Dialog = Dialog;
+    class DialogMutable extends ƒ.Mutable {
+        constructor(_object) {
+            super();
+            for (let key in _object)
+                this[key] = _object[key];
+        }
+        reduceMutator(_mutator) { }
+    }
+    Fudge.DialogMutable = DialogMutable;
 })(Fudge || (Fudge = {}));
 // /<reference types="../../../node_modules/@types/node/fs"/>
 var Fudge;
@@ -196,61 +252,6 @@ var Fudge;
     }
     Fudge.loadProject = loadProject;
 })(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    var ƒ = FudgeCore;
-    class ContextMenu {
-        static appendCopyPaste(_menu) {
-            _menu.append(new Fudge.remote.MenuItem({ role: "copy" }));
-            _menu.append(new Fudge.remote.MenuItem({ role: "cut" }));
-            _menu.append(new Fudge.remote.MenuItem({ role: "paste" }));
-        }
-        static getSubclassMenu(_id, _superclass, _callback) {
-            const menu = new Fudge.remote.Menu();
-            for (let iSubclass in _superclass) {
-                let subclass = _superclass[iSubclass];
-                let item = new Fudge.remote.MenuItem({ label: subclass.name, id: String(_id), click: _callback });
-                //@ts-ignore
-                item.overrideProperty("iSubclass", iSubclass);
-                menu.append(item);
-            }
-            return menu;
-        }
-        static getResources(_callback) {
-            const menu = new Fudge.remote.Menu();
-            for (let type of Fudge.typesOfResources) {
-                let item = new Fudge.remote.MenuItem({
-                    label: type.name,
-                    submenu: ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE_MESH, type, _callback)
-                });
-                menu.append(item);
-            }
-            return menu;
-        }
-        static getSubMenu(_object, _callback) {
-            let menu;
-            switch (_object) {
-                case ƒ.ComponentScript:
-                    menu = new Fudge.remote.Menu();
-                    let scripts = ƒ.Project.getComponentScripts();
-                    for (let namespace in scripts) {
-                        let item = new Fudge.remote.MenuItem({ label: namespace, id: null, click: null, submenu: [] });
-                        for (let script of scripts[namespace]) {
-                            let name = Reflect.get(script, "name");
-                            let subitem = new Fudge.remote.MenuItem({ label: name, id: String(Fudge.CONTEXTMENU.ADD_COMPONENT_SCRIPT), click: _callback });
-                            // @ts-ignore
-                            subitem.overrideProperty("Script", namespace + "." + name);
-                            item.submenu.append(subitem);
-                        }
-                        menu.append(item);
-                    }
-                    break;
-            }
-            return menu;
-        }
-    }
-    Fudge.ContextMenu = ContextMenu;
-})(Fudge || (Fudge = {}));
 ///<reference types="../../../node_modules/electron/Electron"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
 ///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
@@ -278,12 +279,13 @@ var Fudge;
             // TODO: create a new Panel containing a ViewData by default. More Views can be added by the user or by configuration
             Page.setupMainListeners();
             Page.setupPageListeners();
+            Fudge.Dialog.create();
             // for testing:
-            console.log("Sending");
             Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_PROJECT_OPEN);
             Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_GRAPH_OPEN);
-            Fudge.ipcRenderer.emit(Fudge.MENU.PROJECT_LOAD);
-            // ipcRenderer.emit
+            // ipcRenderer.emit(MENU.PROJECT_LOAD);
+            let dialogTest = new Fudge.DialogMutable({ name: "Test", filenameInternalResources: "abc", toggle: true, value: 1 });
+            // Dialog.prompt(dialogTest);
         }
         static setupGoldenLayout() {
             let config = {
