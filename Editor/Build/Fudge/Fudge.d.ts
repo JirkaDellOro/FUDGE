@@ -112,6 +112,20 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    class Project extends ƒ.Mutable {
+        private title;
+        private internalResourceFile;
+        private htmlProjectFile;
+        private scriptFile;
+        private graph;
+        private includePhysics;
+        private option;
+        constructor();
+        getMutatorAttributeTypes(_mutator: ƒ.Mutator): ƒ.MutatorAttributeTypes;
+        protected reduceMutator(_mutator: ƒ.Mutator): void;
+    }
+}
+declare namespace Fudge {
     class AnimationList {
         listRoot: HTMLElement;
         private mutator;

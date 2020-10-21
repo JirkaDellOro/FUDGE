@@ -9,13 +9,16 @@ namespace FudgeUserInterface {
      * Prompt the dialog to the user with the given headline, call to action and labels for the cancel- and ok-button
      * Use `await` on call, to continue after the user has pressed one of the buttons.
      */
-    public static async prompt(_mutator: ƒ.Mutator | Object, _modal: boolean = true, _head: string = "Headline", _callToAction: string = "Instruction", _ok: string = "OK", _cancel: string = "Cancel"): Promise<boolean> {
+    public static async prompt(_data: ƒ.Mutable | ƒ.Mutator | Object, _modal: boolean = true, _head: string = "Headline", _callToAction: string = "Instruction", _ok: string = "OK", _cancel: string = "Cancel"): Promise<boolean> {
       let dom: HTMLDialogElement = document.createElement("dialog");
       document.body.appendChild(dom);
       dom.innerHTML = "<h1>" + _head + "</h1>";
 
       let content: HTMLDivElement;
-      content = Generator.createInterfaceFromMutator(_mutator);
+      if (_data instanceof ƒ.Mutable)
+        content = Generator.createInterfaceFromMutable(_data);
+      else
+        content = Generator.createInterfaceFromMutator(_data);
       content.id = "content";
       dom.appendChild(content);
 
@@ -37,7 +40,7 @@ namespace FudgeUserInterface {
         let hndButton: (_event: Event) => void = (_event: Event) => {
           btnCancel.removeEventListener("click", hndButton);
           btnOk.removeEventListener("click", hndButton);
-          Controller.getMutator(content, _mutator);
+          Controller.getMutator(content, _data);
           dom.close();
           document.body.removeChild(dom);
           _resolve(_event.target == btnOk);

@@ -230,6 +230,7 @@ var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒaid = FudgeAid;
+    var ƒui = FudgeUserInterface;
     Fudge.ipcRenderer = require("electron").ipcRenderer;
     Fudge.remote = require("electron").remote;
     // TODO: At this point of time, the project is just a single node. A project is much more complex...
@@ -251,9 +252,10 @@ var Fudge;
             Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_PROJECT_OPEN);
             Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_GRAPH_OPEN);
             // ipcRenderer.emit(MENU.PROJECT_LOAD);
+            let project = new Fudge.Project();
             // let test: Object = { text: "abc", toggle: true, value: 1, sub: { sub1: 123, sub2: "Hallo" } };
-            // if (await ƒui.Dialog.prompt(test, false, "Eingabe erforderlich", "Gib ein", "Los geht's", "Abbruch"))
-            // console.log(test);
+            if (await ƒui.Dialog.prompt(project, false, "Review project settings", "Adjust settings and press OK", "OK", "Cancel"))
+                console.log(project);
         }
         static setupGoldenLayout() {
             let config = {
@@ -367,6 +369,31 @@ var Fudge;
     function welcome(container, state) {
         container.getElement().html("<div>Welcome</div>");
     }
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    let PROJECT;
+    (function (PROJECT) {
+        PROJECT["OPT1"] = "option1";
+        PROJECT["OPT2"] = "option2";
+        PROJECT["OPT3"] = "option3";
+    })(PROJECT || (PROJECT = {}));
+    class Project extends ƒ.Mutable {
+        constructor() {
+            super();
+            this.title = "Fudge Project";
+            this.includePhysics = false;
+            this.option = PROJECT.OPT3;
+        }
+        getMutatorAttributeTypes(_mutator) {
+            let types = super.getMutatorAttributeTypes(_mutator);
+            if (types.option)
+                types.option = PROJECT;
+            return types;
+        }
+        reduceMutator(_mutator) { }
+    }
+    Fudge.Project = Project;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {

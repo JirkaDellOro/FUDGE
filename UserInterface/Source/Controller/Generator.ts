@@ -89,6 +89,7 @@ namespace FudgeUserInterface {
           let elementType: typeof CustomElement = CustomElement.get("Object");
           // @ts-ignore: instantiate abstract class
           element = new elementType({ key: _key, label: _key, value: _value.toString() }, _type);
+          // (<CustomElement>element).setMutatorValue(_value);
         }
         else {
           // TODO: remove switch and use registered custom elements instead

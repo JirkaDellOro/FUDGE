@@ -199,6 +199,7 @@ var FudgeUserInterface;
                     let elementType = FudgeUserInterface.CustomElement.get("Object");
                     // @ts-ignore: instantiate abstract class
                     element = new elementType({ key: _key, label: _key, value: _value.toString() }, _type);
+                    // (<CustomElement>element).setMutatorValue(_value);
                 }
                 else {
                     // TODO: remove switch and use registered custom elements instead
@@ -631,7 +632,8 @@ var FudgeUserInterface;
                 let entry = document.createElement("option");
                 entry.text = key;
                 entry.value = this.content[key];
-                if (key == this.getAttribute("value")) {
+                // console.log(this.getAttribute("value"));
+                if (entry.value == this.getAttribute("value")) {
                     entry.selected = true;
                 }
                 select.add(entry);
@@ -650,6 +652,7 @@ var FudgeUserInterface;
          */
         setMutatorValue(_value) {
             this.querySelector("select").value = _value;
+            // this.value = _value;
         }
     }
     // @ts-ignore
@@ -970,6 +973,7 @@ var FudgeUserInterface;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
+    var ƒ = FudgeCore;
     /**
      * Static class to display a modal or non-modal dialog with an interface for the given mutator.
      */
@@ -978,12 +982,15 @@ var FudgeUserInterface;
          * Prompt the dialog to the user with the given headline, call to action and labels for the cancel- and ok-button
          * Use `await` on call, to continue after the user has pressed one of the buttons.
          */
-        static async prompt(_mutator, _modal = true, _head = "Headline", _callToAction = "Instruction", _ok = "OK", _cancel = "Cancel") {
+        static async prompt(_data, _modal = true, _head = "Headline", _callToAction = "Instruction", _ok = "OK", _cancel = "Cancel") {
             let dom = document.createElement("dialog");
             document.body.appendChild(dom);
             dom.innerHTML = "<h1>" + _head + "</h1>";
             let content;
-            content = FudgeUserInterface.Generator.createInterfaceFromMutator(_mutator);
+            if (_data instanceof ƒ.Mutable)
+                content = FudgeUserInterface.Generator.createInterfaceFromMutable(_data);
+            else
+                content = FudgeUserInterface.Generator.createInterfaceFromMutator(_data);
             content.id = "content";
             dom.appendChild(content);
             let div = document.createElement("div");
@@ -1003,7 +1010,7 @@ var FudgeUserInterface;
                 let hndButton = (_event) => {
                     btnCancel.removeEventListener("click", hndButton);
                     btnOk.removeEventListener("click", hndButton);
-                    FudgeUserInterface.Controller.getMutator(content, _mutator);
+                    FudgeUserInterface.Controller.getMutator(content, _data);
                     dom.close();
                     document.body.removeChild(dom);
                     _resolve(_event.target == btnOk);

@@ -37,9 +37,11 @@ namespace Fudge {
       ipcRenderer.emit(MENU.PANEL_GRAPH_OPEN);
       // ipcRenderer.emit(MENU.PROJECT_LOAD);
 
+      let project: Project = new Project();
+
       // let test: Object = { text: "abc", toggle: true, value: 1, sub: { sub1: 123, sub2: "Hallo" } };
-      // if (await ƒui.Dialog.prompt(test, false, "Eingabe erforderlich", "Gib ein", "Los geht's", "Abbruch"))
-      // console.log(test);
+      if (await ƒui.Dialog.prompt(project, false, "Review project settings", "Adjust settings and press OK", "OK", "Cancel"))
+        console.log(project);
     }
 
     public static setupGoldenLayout(): void {

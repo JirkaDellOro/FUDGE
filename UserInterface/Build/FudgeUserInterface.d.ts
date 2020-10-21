@@ -319,7 +319,7 @@ declare namespace FudgeUserInterface {
          * Prompt the dialog to the user with the given headline, call to action and labels for the cancel- and ok-button
          * Use `await` on call, to continue after the user has pressed one of the buttons.
          */
-        static prompt(_mutator: ƒ.Mutator | Object, _modal?: boolean, _head?: string, _callToAction?: string, _ok?: string, _cancel?: string): Promise<boolean>;
+        static prompt(_data: ƒ.Mutable | ƒ.Mutator | Object, _modal?: boolean, _head?: string, _callToAction?: string, _ok?: string, _cancel?: string): Promise<boolean>;
     }
 }
 declare namespace FudgeUserInterface {
