@@ -220,11 +220,6 @@ dialog {
   transform: translateX(-50%) translateY(-50%);
 }
 
-dialog legend, dialog>fieldset>input {
-  display: none;
-}
-
-dialog>fieldset {
+dialog>div#content {
   background-color: var(--color-background-content);
-
 }

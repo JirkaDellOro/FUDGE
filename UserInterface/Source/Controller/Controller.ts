@@ -25,6 +25,27 @@ namespace FudgeUserInterface {
       this.domElement.addEventListener("input", this.mutateOnInput);
     }
 
+    /**
+     * Recursive method taking an existing [[ƒ.Mutator]] as a template 
+     * and updating its values with those found in the given UI-domElement. 
+     */
+    public static getMutator(_domElement: HTMLElement, _mutator: ƒ.Mutator): ƒ.Mutator {
+      for (let key in _mutator) {
+        let element: HTMLInputElement = <HTMLInputElement>_domElement.querySelector(`[key=${key}]`);
+        if (element == null)
+          continue;
+
+        if (element instanceof CustomElement)
+          _mutator[key] = element.getMutatorValue();
+        else if (_mutator[key] instanceof Object)
+          _mutator[key] = Controller.getMutator(element, _mutator[key]);
+        else
+          _mutator[key] = element.value;
+      }
+
+      return _mutator;
+    }
+
     public setMutable(_mutable: ƒ.Mutable): void {
       this.mutable = _mutable;
       this.mutator = _mutable.getMutatorForUserInterface();
@@ -50,7 +71,8 @@ namespace FudgeUserInterface {
         if (element instanceof CustomElement)
           mutator[key] = (<CustomElement>element).getMutatorValue();
         else if (mutatorTypes[key] instanceof Object)
-          (<HTMLSelectElement>element).value = <string>mutator[key];
+          // TODO: setting a value of the dom element doesn't make sense... examine what this line was supposed to do. Assumably enums
+          mutator[key] = (<HTMLSelectElement>element).value;
         else {
           let subMutator: ƒ.Mutator = Reflect.get(mutator, key);
           let subMutable: ƒ.Mutable;

@@ -15,6 +15,11 @@ declare namespace FudgeUserInterface {
         /** [[FudgeCore.Mutator]] used to store the data types of the mutator attributes*/
         protected mutatorTypes: ƒ.Mutator;
         constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
+        /**
+         * Recursive method taking an existing [[ƒ.Mutator]] as a template
+         * and updating its values with those found in the given UI-domElement.
+         */
+        static getMutator(_domElement: HTMLElement, _mutator: ƒ.Mutator): ƒ.Mutator;
         setMutable(_mutable: ƒ.Mutable): void;
         /**
          * Recursive method taking the [[ƒ.Mutator]] of a [[ƒ.Mutable]] or another existing [[ƒ.Mutator]]
@@ -40,9 +45,17 @@ declare namespace FudgeUserInterface {
          */
         static createController(_mutable: ƒ.Mutable, _name?: string): Controller;
         /**
-         * Create a custom fieldset for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+         * Create a extendable fieldset for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
          */
         static createFieldSetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): ExpandableFieldSet;
+        /**
+         * Create a div-Elements containing the interface for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+         */
+        static createInterfaceFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): HTMLDivElement;
+        /**
+         * Create a div-Elements containing the interface for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+         */
+        static createInterfaceFromMutator(_mutator: ƒ.Mutator | Object): HTMLDivElement;
         /**
          * Create a specific CustomElement for the given data, using _key as identification
          */
@@ -51,7 +64,7 @@ declare namespace FudgeUserInterface {
          * TODO: refactor for enums
          */
         static createDropdown(_name: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement;
-        static createFoldableFieldset(_key: string, _type: string): ExpandableFieldSet;
+        static createExtendableFieldset(_key: string, _type: string): ExpandableFieldSet;
     }
 }
 declare namespace FudgeUserInterface {

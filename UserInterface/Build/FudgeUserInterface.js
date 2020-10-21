@@ -28,6 +28,24 @@ var FudgeUserInterface;
             window.setInterval(this.refresh, this.timeUpdate);
             this.domElement.addEventListener("input", this.mutateOnInput);
         }
+        /**
+         * Recursive method taking an existing [[ƒ.Mutator]] as a template
+         * and updating its values with those found in the given UI-domElement.
+         */
+        static getMutator(_domElement, _mutator) {
+            for (let key in _mutator) {
+                let element = _domElement.querySelector(`[key=${key}]`);
+                if (element == null)
+                    continue;
+                if (element instanceof FudgeUserInterface.CustomElement)
+                    _mutator[key] = element.getMutatorValue();
+                else if (_mutator[key] instanceof Object)
+                    _mutator[key] = Controller.getMutator(element, _mutator[key]);
+                else
+                    _mutator[key] = element.value;
+            }
+            return _mutator;
+        }
         setMutable(_mutable) {
             this.mutable = _mutable;
             this.mutator = _mutable.getMutatorForUserInterface();
@@ -50,7 +68,8 @@ var FudgeUserInterface;
                 if (element instanceof FudgeUserInterface.CustomElement)
                     mutator[key] = element.getMutatorValue();
                 else if (mutatorTypes[key] instanceof Object)
-                    element.value = mutator[key];
+                    // TODO: setting a value of the dom element doesn't make sense... examine what this line was supposed to do. Assumably enums
+                    mutator[key] = element.value;
                 else {
                     let subMutator = Reflect.get(mutator, key);
                     let subMutable;
@@ -113,13 +132,21 @@ var FudgeUserInterface;
             return controller;
         }
         /**
-         * Create a custom fieldset for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+         * Create a extendable fieldset for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
          */
         static createFieldSetFromMutable(_mutable, _name, _mutator) {
             let name = _name || _mutable.constructor.name;
+            let fieldset = Generator.createExtendableFieldset(name, _mutable.type);
+            fieldset.content = Generator.createInterfaceFromMutable(_mutable, _name, _mutator);
+            return fieldset;
+        }
+        /**
+         * Create a div-Elements containing the interface for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+         */
+        static createInterfaceFromMutable(_mutable, _name, _mutator) {
             let mutator = _mutator || _mutable.getMutatorForUserInterface();
             let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
-            let fieldset = Generator.createFoldableFieldset(name, _mutable.type);
+            let div = document.createElement("div");
             for (let key in mutatorTypes) {
                 let type = mutatorTypes[key];
                 let value = mutator[key];
@@ -134,10 +161,22 @@ var FudgeUserInterface;
                     // let fieldset: FoldableFieldSet = Generator.createFieldsetFromMutable(subMutable, key, <ƒ.Mutator>_mutator[key]);
                     // _parent.appendChild(fieldset);
                 }
-                fieldset.content.appendChild(element);
-                fieldset.content.appendChild(document.createElement("br"));
+                div.appendChild(element);
+                div.appendChild(document.createElement("br"));
             }
-            return fieldset;
+            return div;
+        }
+        /**
+         * Create a div-Elements containing the interface for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+         */
+        static createInterfaceFromMutator(_mutator) {
+            let div = document.createElement("div");
+            for (let key in _mutator) {
+                let value = Reflect.get(_mutator, key);
+                div.appendChild(this.createMutatorElement(key, value.constructor.name, value));
+                div.appendChild(document.createElement("br"));
+            }
+            return div;
         }
         /**
          * Create a specific CustomElement for the given data, using _key as identification
@@ -191,7 +230,7 @@ var FudgeUserInterface;
             return dropdown;
         }
         // TODO: implement CustomFieldSet and replace this
-        static createFoldableFieldset(_key, _type) {
+        static createExtendableFieldset(_key, _type) {
             let cntFoldFieldset = new FudgeUserInterface.ExpandableFieldSet(_key);
             //TODO: unique ids
             // cntFoldFieldset.id = _legend;

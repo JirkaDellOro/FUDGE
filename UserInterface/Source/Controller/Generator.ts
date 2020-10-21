@@ -17,13 +17,22 @@ namespace FudgeUserInterface {
     }
 
     /**
-     * Create a custom fieldset for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+     * Create a extendable fieldset for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
      */
     public static createFieldSetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): ExpandableFieldSet {
       let name: string = _name || _mutable.constructor.name;
+      let fieldset: ExpandableFieldSet = Generator.createExtendableFieldset(name, _mutable.type);
+      fieldset.content = Generator.createInterfaceFromMutable(_mutable, _name, _mutator);
+      return fieldset;
+    }
+
+    /**
+     * Create a div-Elements containing the interface for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+     */
+    public static createInterfaceFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): HTMLDivElement {
       let mutator: ƒ.Mutator = _mutator || _mutable.getMutatorForUserInterface();
       let mutatorTypes: ƒ.MutatorAttributeTypes = _mutable.getMutatorAttributeTypes(mutator);
-      let fieldset: ExpandableFieldSet = Generator.createFoldableFieldset(name, _mutable.type);
+      let div: HTMLDivElement = document.createElement("div");
 
       for (let key in mutatorTypes) {
         let type: Object = mutatorTypes[key];
@@ -39,10 +48,23 @@ namespace FudgeUserInterface {
           // let fieldset: FoldableFieldSet = Generator.createFieldsetFromMutable(subMutable, key, <ƒ.Mutator>_mutator[key]);
           // _parent.appendChild(fieldset);
         }
-        fieldset.content.appendChild(element);
-        fieldset.content.appendChild(document.createElement("br"));
+        div.appendChild(element);
+        div.appendChild(document.createElement("br"));
       }
-      return fieldset;
+      return div;
+    }
+
+    /**
+     * Create a div-Elements containing the interface for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+     */
+    public static createInterfaceFromMutator(_mutator: ƒ.Mutator | Object): HTMLDivElement {
+      let div: HTMLDivElement = document.createElement("div");
+      for (let key in _mutator) {
+        let value: Object = Reflect.get(_mutator, key);
+        div.appendChild(this.createMutatorElement(key, value.constructor.name, value));
+        div.appendChild(document.createElement("br"));
+      }
+      return div;
     }
 
     /**
@@ -99,7 +121,7 @@ namespace FudgeUserInterface {
     }
 
     // TODO: implement CustomFieldSet and replace this
-    public static createFoldableFieldset(_key: string, _type: string): ExpandableFieldSet {
+    public static createExtendableFieldset(_key: string, _type: string): ExpandableFieldSet {
       let cntFoldFieldset: ExpandableFieldSet = new ExpandableFieldSet(_key);
       //TODO: unique ids
       // cntFoldFieldset.id = _legend;

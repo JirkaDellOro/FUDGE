@@ -87,18 +87,34 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     var ƒui = FudgeUserInterface;
-    var ƒ = FudgeCore;
     class Dialog {
-        static async prompt(_mutable, _head = "Additional information needed", _callToAction = "Enter information and hit OK") {
+        static async prompt(_mutator, _head = "Headline", _callToAction = "Instruction") {
             this.dom.innerHTML = "<h1>" + _head + "</h1>";
-            let content = ƒui.Generator.createFieldSetFromMutable(_mutable);
+            let content;
+            content = ƒui.Generator.createInterfaceFromMutator(_mutator);
+            content.id = "content";
             this.dom.appendChild(content);
             let div = document.createElement("div");
             div.innerHTML = "<p>" + _callToAction + "</p>";
-            div.innerHTML += "<button type='button'>Cancel</Button><button type='button'>OK</button>";
+            let cancel = document.createElement("button");
+            cancel.innerHTML = "Cancel";
+            div.appendChild(cancel);
+            let ok = document.createElement("button");
+            ok.innerHTML = "OK";
+            div.appendChild(ok);
             this.dom.appendChild(div);
             this.dom.showModal();
-            return true;
+            return new Promise((_resolve) => {
+                let hndButton = (_event) => {
+                    cancel.removeEventListener("click", hndButton);
+                    ok.removeEventListener("click", hndButton);
+                    ƒui.Controller.getMutator(content, _mutator);
+                    this.dom.close();
+                    _resolve(_event.target == ok);
+                };
+                cancel.addEventListener("click", hndButton);
+                ok.addEventListener("click", hndButton);
+            });
         }
         static create() {
             this.dom = document.createElement("dialog");
@@ -106,15 +122,6 @@ var Fudge;
         }
     }
     Fudge.Dialog = Dialog;
-    class DialogMutable extends ƒ.Mutable {
-        constructor(_object) {
-            super();
-            for (let key in _object)
-                this[key] = _object[key];
-        }
-        reduceMutator(_mutator) { }
-    }
-    Fudge.DialogMutable = DialogMutable;
 })(Fudge || (Fudge = {}));
 // /<reference types="../../../node_modules/@types/node/fs"/>
 var Fudge;
@@ -271,7 +278,7 @@ var Fudge;
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class Page {
-        static start() {
+        static async start() {
             // TODO: At this point of time, the project is just a single node. A project is much more complex...
             let node = null;
             Page.setupGoldenLayout();
@@ -284,8 +291,9 @@ var Fudge;
             Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_PROJECT_OPEN);
             Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_GRAPH_OPEN);
             // ipcRenderer.emit(MENU.PROJECT_LOAD);
-            let dialogTest = new Fudge.DialogMutable({ name: "Test", filenameInternalResources: "abc", toggle: true, value: 1 });
-            // Dialog.prompt(dialogTest);
+            let test = { name: "Test", filenameInternalResources: "abc", toggle: true, value: 1 };
+            if (await Fudge.Dialog.prompt(test))
+                console.log(test);
         }
         static setupGoldenLayout() {
             let config = {

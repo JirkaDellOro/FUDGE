@@ -22,7 +22,7 @@ namespace Fudge {
     private static goldenLayout: GoldenLayout;
     private static panels: Panel[] = [];
 
-    public static start(): void {
+    public static async start(): Promise<void> {
       // TODO: At this point of time, the project is just a single node. A project is much more complex...
       let node: ƒ.Node = null;
 
@@ -39,8 +39,9 @@ namespace Fudge {
       ipcRenderer.emit(MENU.PANEL_GRAPH_OPEN);
       // ipcRenderer.emit(MENU.PROJECT_LOAD);
 
-      let dialogTest: DialogMutable = new DialogMutable({ name: "Test", filenameInternalResources: "abc", toggle: true, value: 1 });
-      // Dialog.prompt(dialogTest);
+      let test: Object = { name: "Test", filenameInternalResources: "abc", toggle: true, value: 1 }
+      if (await Dialog.prompt(test))
+        console.log(test);
     }
 
     public static setupGoldenLayout(): void {

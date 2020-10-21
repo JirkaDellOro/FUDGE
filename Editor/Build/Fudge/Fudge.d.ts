@@ -60,12 +60,8 @@ declare namespace Fudge {
     import ƒ = FudgeCore;
     class Dialog {
         private static dom;
-        static prompt(_mutable: ƒ.Mutable, _head?: string, _callToAction?: string): Promise<boolean>;
+        static prompt(_mutator: ƒ.Mutator | Object, _head?: string, _callToAction?: string): Promise<boolean>;
         static create(): void;
-    }
-    class DialogMutable extends ƒ.Mutable {
-        constructor(_object: Object);
-        protected reduceMutator(_mutator: ƒ.Mutator): void;
     }
 }
 declare namespace Fudge {
@@ -111,7 +107,7 @@ declare namespace Fudge {
         private static idCounter;
         private static goldenLayout;
         private static panels;
-        static start(): void;
+        static start(): Promise<void>;
         static setupGoldenLayout(): void;
         static add(_panel: typeof Panel, _title: string, _state?: Object): void;
         static find(_type: typeof Panel): Panel[];
