@@ -167,12 +167,14 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     const fs = require("fs");
-    function saveProject(_node) {
-        let serialization = ƒ.Serializer.serialize(_node);
-        let content = ƒ.Serializer.stringify(serialization);
-        // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
-        let filename = Fudge.remote.dialog.showSaveDialogSync(null, { title: "Save Graph", buttonLabel: "Save Graph", message: "ƒ-Message" });
-        fs.writeFileSync(filename, content);
+    function saveProject() {
+        // let serialization: ƒ.Serialization = ƒ.Serializer.serialize(_node);
+        // let content: string = ƒ.Serializer.stringify(serialization);
+        // // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
+        // let filename: string = remote.dialog.showSaveDialogSync(null, { title: "Save Graph", buttonLabel: "Save Graph", message: "ƒ-Message" });
+        // fs.writeFileSync(filename, content);
+        let html = Fudge.project.getProjectHTML();
+        console.log(html);
     }
     Fudge.saveProject = saveProject;
     async function promptLoadProject() {
@@ -220,21 +222,64 @@ var Fudge;
     }
     Fudge.loadProject = loadProject;
 })(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    let PROJECT;
+    (function (PROJECT) {
+        PROJECT["OPT1"] = "option1";
+        PROJECT["OPT2"] = "option2";
+        PROJECT["OPT3"] = "option3";
+    })(PROJECT || (PROJECT = {}));
+    class Project extends ƒ.Mutable {
+        constructor() {
+            super();
+            this.title = "Fudge Project";
+            this.includePhysics = false;
+            this.option = PROJECT.OPT3;
+        }
+        getProjectHTML() {
+            let html = document.implementation.createHTMLDocument("TestDoc");
+            let child;
+            html.head.appendChild(createTag("meta", { charset: "utf-8" }));
+            html.head.appendChild(createTag("script", { type: "text/javascript", src: "../../../Core/Build/FudgeCore.js" }));
+            html.head.appendChild(createTag("script", { type: "text/javascript", src: "../../../Aid/Build/FudgeAid.js" }));
+            html.head.appendChild(createTag("script", { type: "text/javascript", src: "Code/Build/Compiled.js", editor: "true" }));
+            html.head.appendChild(createTag("link", { type: "resources", src: "InternalResources.json" }));
+            function createTag(_tag, _attributes, _content) {
+                let element = document.createElement(_tag);
+                for (let attribute in _attributes)
+                    element.setAttribute(attribute, _attributes[attribute]);
+                if (_content)
+                    element.innerHTML = _content;
+                return element;
+            }
+            return (new XMLSerializer()).serializeToString(html);
+        }
+        getMutatorAttributeTypes(_mutator) {
+            let types = super.getMutatorAttributeTypes(_mutator);
+            if (types.option)
+                types.option = PROJECT;
+            return types;
+        }
+        reduceMutator(_mutator) { }
+    }
+    Fudge.Project = Project;
+})(Fudge || (Fudge = {}));
 ///<reference types="../../../node_modules/electron/Electron"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
 ///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
+///<reference path="Project.ts"/>
 var Fudge;
 ///<reference types="../../../node_modules/electron/Electron"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
 ///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
+///<reference path="Project.ts"/>
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒaid = FudgeAid;
-    var ƒui = FudgeUserInterface;
     Fudge.ipcRenderer = require("electron").ipcRenderer;
     Fudge.remote = require("electron").remote;
-    // TODO: At this point of time, the project is just a single node. A project is much more complex...
-    let node = null;
+    Fudge.project = new Fudge.Project();
     /**
      * The uppermost container for all panels controlling data flow between.
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
@@ -252,10 +297,10 @@ var Fudge;
             Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_PROJECT_OPEN);
             Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_GRAPH_OPEN);
             // ipcRenderer.emit(MENU.PROJECT_LOAD);
-            let project = new Fudge.Project();
+            Fudge.saveProject();
             // let test: Object = { text: "abc", toggle: true, value: 1, sub: { sub1: 123, sub2: "Hallo" } };
-            if (await ƒui.Dialog.prompt(project, false, "Review project settings", "Adjust settings and press OK", "OK", "Cancel"))
-                console.log(project);
+            // if (await ƒui.Dialog.prompt(project, false, "Review project settings", "Adjust settings and press OK", "OK", "Cancel"))
+            //   console.log(project);
         }
         static setupGoldenLayout() {
             let config = {
@@ -335,12 +380,7 @@ var Fudge;
         //#region Main-Events from Electron
         static setupMainListeners() {
             Fudge.ipcRenderer.on(Fudge.MENU.PROJECT_SAVE, (_event, _args) => {
-                // ƒ.Debug.log("Save");
-                // panel = PanelManager.instance.getActivePanel();
-                // if (panel instanceof PanelGraph) {
-                //   node = panel.getNode();
-                // }
-                // save(node);
+                Fudge.saveProject();
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PROJECT_LOAD, async (_event, _args) => {
                 let url = await Fudge.promptLoadProject();
@@ -350,7 +390,7 @@ var Fudge;
                 Page.broadcastEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_PROJECT));
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_GRAPH_OPEN, (_event, _args) => {
-                node = new ƒaid.NodeCoordinateSystem("WorldCooSys");
+                let node = new ƒaid.NodeCoordinateSystem("WorldCooSys");
                 Page.add(Fudge.PanelGraph, "Graph", Object({ node: node }));
                 Page.broadcastEvent(new CustomEvent(Fudge.EVENT_EDITOR.UPDATE, { detail: node }));
             });
@@ -369,31 +409,6 @@ var Fudge;
     function welcome(container, state) {
         container.getElement().html("<div>Welcome</div>");
     }
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    let PROJECT;
-    (function (PROJECT) {
-        PROJECT["OPT1"] = "option1";
-        PROJECT["OPT2"] = "option2";
-        PROJECT["OPT3"] = "option3";
-    })(PROJECT || (PROJECT = {}));
-    class Project extends ƒ.Mutable {
-        constructor() {
-            super();
-            this.title = "Fudge Project";
-            this.includePhysics = false;
-            this.option = PROJECT.OPT3;
-        }
-        getMutatorAttributeTypes(_mutator) {
-            let types = super.getMutatorAttributeTypes(_mutator);
-            if (types.option)
-                types.option = PROJECT;
-            return types;
-        }
-        reduceMutator(_mutator) { }
-    }
-    Fudge.Project = Project;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {

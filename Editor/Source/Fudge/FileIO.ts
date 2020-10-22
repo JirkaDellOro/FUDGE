@@ -1,14 +1,16 @@
 namespace Fudge {
   const fs: ƒ.General = require("fs");
 
-  export function saveProject(_node: ƒ.Node): void {
-    let serialization: ƒ.Serialization = ƒ.Serializer.serialize(_node);
-    let content: string = ƒ.Serializer.stringify(serialization);
+  export function saveProject(): void {
+    // let serialization: ƒ.Serialization = ƒ.Serializer.serialize(_node);
+    // let content: string = ƒ.Serializer.stringify(serialization);
 
-    // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
-    let filename: string = remote.dialog.showSaveDialogSync(null, { title: "Save Graph", buttonLabel: "Save Graph", message: "ƒ-Message" });
+    // // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
+    // let filename: string = remote.dialog.showSaveDialogSync(null, { title: "Save Graph", buttonLabel: "Save Graph", message: "ƒ-Message" });
 
-    fs.writeFileSync(filename, content);
+    // fs.writeFileSync(filename, content);
+    let html: string = project.getProjectHTML();
+    console.log(html);
   }
 
   export async function promptLoadProject(): Promise<URL> {
@@ -41,8 +43,8 @@ namespace Fudge {
       if (script.getAttribute("editor") == "true") {
         let url: string = script.getAttribute("src");
         await ƒ.Project.loadScript(new URL(url, _url).toString());
-        console.log("ComponentScripts", ƒ.Project.getComponentScripts());  
-        console.log("Script Namespaces", ƒ.Project.scriptNamespaces);  
+        console.log("ComponentScripts", ƒ.Project.getComponentScripts());
+        console.log("Script Namespaces", ƒ.Project.scriptNamespaces);
       }
     }
 

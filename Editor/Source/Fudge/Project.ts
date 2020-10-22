@@ -18,6 +18,30 @@ namespace Fudge {
       super();
     }
 
+    public getProjectHTML(): string {
+      let html: Document = document.implementation.createHTMLDocument("TestDoc");
+      let child: HTMLElement;
+
+      html.head.appendChild(createTag("meta", { charset: "utf-8" }));
+      html.head.appendChild(createTag("script", { type: "text/javascript", src: "../../../Core/Build/FudgeCore.js" }));
+      html.head.appendChild(createTag("script", { type: "text/javascript", src: "../../../Aid/Build/FudgeAid.js" }));
+
+      html.head.appendChild(createTag("script", { type: "text/javascript", src: "Code/Build/Compiled.js", editor: "true" }));
+      html.head.appendChild(createTag("link", { type: "resources", src: "InternalResources.json" }));
+
+
+      function createTag(_tag: string, _attributes: { [key: string]: string }, _content?: string): HTMLElement {
+        let element: HTMLElement = document.createElement(_tag);
+        for (let attribute in _attributes)
+          element.setAttribute(attribute, _attributes[attribute]);
+        if (_content)
+          element.innerHTML = _content;
+        return element;
+      }
+      
+      return (new XMLSerializer()).serializeToString(html);
+    }
+
     public getMutatorAttributeTypes(_mutator: ƒ.Mutator): ƒ.MutatorAttributeTypes {
       let types: ƒ.MutatorAttributeTypes = super.getMutatorAttributeTypes(_mutator);
       if (types.option)

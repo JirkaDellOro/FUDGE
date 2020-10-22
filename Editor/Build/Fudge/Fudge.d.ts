@@ -84,13 +84,29 @@ declare namespace Fudge {
     export {};
 }
 declare namespace Fudge {
-    function saveProject(_node: ƒ.Node): void;
+    function saveProject(): void;
     function promptLoadProject(): Promise<URL>;
     function loadProject(_url: URL): Promise<void>;
 }
 declare namespace Fudge {
+    class Project extends ƒ.Mutable {
+        private title;
+        private internalResourceFile;
+        private htmlProjectFile;
+        private scriptFile;
+        private graph;
+        private includePhysics;
+        private option;
+        constructor();
+        getProjectHTML(): string;
+        getMutatorAttributeTypes(_mutator: ƒ.Mutator): ƒ.MutatorAttributeTypes;
+        protected reduceMutator(_mutator: ƒ.Mutator): void;
+    }
+}
+declare namespace Fudge {
     const ipcRenderer: Electron.IpcRenderer;
     const remote: Electron.Remote;
+    let project: Project;
     /**
      * The uppermost container for all panels controlling data flow between.
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
@@ -109,20 +125,6 @@ declare namespace Fudge {
         private static broadcastEvent;
         private static hndEvent;
         private static setupMainListeners;
-    }
-}
-declare namespace Fudge {
-    class Project extends ƒ.Mutable {
-        private title;
-        private internalResourceFile;
-        private htmlProjectFile;
-        private scriptFile;
-        private graph;
-        private includePhysics;
-        private option;
-        constructor();
-        getMutatorAttributeTypes(_mutator: ƒ.Mutator): ƒ.MutatorAttributeTypes;
-        protected reduceMutator(_mutator: ƒ.Mutator): void;
     }
 }
 declare namespace Fudge {
