@@ -89,18 +89,29 @@ declare namespace Fudge {
     function loadProject(_url: URL): Promise<void>;
 }
 declare namespace Fudge {
+    import ƒ = FudgeCore;
+    class FileInfo extends ƒ.Mutable {
+        overwrite: boolean;
+        filename: string;
+        constructor(_overwrite: boolean, _filename: string);
+        protected reduceMutator(_mutator: ƒ.Mutator): void;
+    }
     class Project extends ƒ.Mutable {
         private title;
-        private internalResourceFile;
-        private htmlProjectFile;
-        private scriptFile;
-        private graph;
+        private index;
+        private style;
+        private internal;
+        private script;
+        private graphToStartWith;
         private includePhysics;
         private option;
         constructor();
+        openDialog(): Promise<void>;
+        hndChange: (_event: Event) => void;
         getProjectHTML(): string;
         getMutatorAttributeTypes(_mutator: ƒ.Mutator): ƒ.MutatorAttributeTypes;
         protected reduceMutator(_mutator: ƒ.Mutator): void;
+        private updateFilenames;
     }
 }
 declare namespace Fudge {

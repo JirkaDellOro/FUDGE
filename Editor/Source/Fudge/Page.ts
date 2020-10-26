@@ -37,8 +37,10 @@ namespace Fudge {
       ipcRenderer.emit(MENU.PANEL_GRAPH_OPEN);
       // ipcRenderer.emit(MENU.PROJECT_LOAD);
 
+      // if (project.openDialog())
+      //   console.log(project);
 
-      saveProject();
+      // saveProject();
       // let test: Object = { text: "abc", toggle: true, value: 1, sub: { sub1: 123, sub2: "Hallo" } };
       // if (await ƒui.Dialog.prompt(project, false, "Review project settings", "Adjust settings and press OK", "OK", "Cancel"))
       //   console.log(project);

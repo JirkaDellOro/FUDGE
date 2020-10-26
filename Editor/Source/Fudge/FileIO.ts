@@ -49,7 +49,7 @@ namespace Fudge {
     }
 
     // TODO: support multiple resourcefiles
-    const resourceFile: string = head.querySelector("link").getAttribute("src");
+    const resourceFile: string = head.querySelector("link[type=resources]").getAttribute("src");
     ƒ.Project.baseURL = _url;
     let reconstruction: ƒ.Resources = await ƒ.Project.loadResources(new URL(resourceFile, _url).toString());
 

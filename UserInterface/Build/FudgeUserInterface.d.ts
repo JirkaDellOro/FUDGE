@@ -19,17 +19,20 @@ declare namespace FudgeUserInterface {
          * Recursive method taking an existing [[ƒ.Mutator]] as a template
          * and updating its values with those found in the given UI-domElement.
          */
-        static getMutator(_domElement: HTMLElement, _mutator: ƒ.Mutator): ƒ.Mutator;
+        static updateMutator(_domElement: HTMLElement, _mutator: ƒ.Mutator): ƒ.Mutator;
+        /**
+         * Recursive method taking the a [[ƒ.Mutable]] as a template to create a [[ƒ.Mutator]] or update the given [[ƒ.Mutator]]
+         * with the values in the given UI-domElement
+         */
+        static getMutator(_mutable: ƒ.Mutable, _domElement: HTMLElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
+        /**
+         * Recursive method taking the [[ƒ.Mutator]] of a [[ƒ.Mutable]] and updating the UI-domElement accordingly.
+         * If an additional [[ƒ.Mutator]] is passed, its values are used instead of those of the [[ƒ.Mutable]].
+         */
+        static updateUserInterface(_mutable: ƒ.Mutable, _domElement: HTMLElement, _mutator?: ƒ.Mutator): void;
+        getMutator(_mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
+        updateUserInterface(): void;
         setMutable(_mutable: ƒ.Mutable): void;
-        /**
-         * Recursive method taking the [[ƒ.Mutator]] of a [[ƒ.Mutable]] or another existing [[ƒ.Mutator]]
-         * as a template and updating its values with those found in the given UI-domElement.
-         */
-        getMutator(_mutable?: ƒ.Mutable, _domElement?: HTMLElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
-        /**
-         * Recursive method taking the [[ƒ.Mutator]] of a [[ƒ.Mutable]] and updating the UI-domElement accordingly
-         */
-        updateUserInterface(_mutable?: ƒ.Mutable, _domElement?: HTMLElement): void;
         protected mutateOnInput: (_event: Event) => Promise<void>;
         protected refresh: (_event: Event) => void;
     }
@@ -315,6 +318,7 @@ declare namespace FudgeUserInterface {
      * Static class to display a modal or non-modal dialog with an interface for the given mutator.
      */
     class Dialog {
+        static dom: HTMLDialogElement;
         /**
          * Prompt the dialog to the user with the given headline, call to action and labels for the cancel- and ok-button
          * Use `await` on call, to continue after the user has pressed one of the buttons.

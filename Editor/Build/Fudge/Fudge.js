@@ -208,7 +208,7 @@ var Fudge;
             }
         }
         // TODO: support multiple resourcefiles
-        const resourceFile = head.querySelector("link").getAttribute("src");
+        const resourceFile = head.querySelector("link[type=resources]").getAttribute("src");
         ƒ.Project.baseURL = _url;
         let reconstruction = await ƒ.Project.loadResources(new URL(resourceFile, _url).toString());
         ƒ.Debug.groupCollapsed("Deserialized");
@@ -224,27 +224,62 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    var ƒ = FudgeCore;
+    var ƒui = FudgeUserInterface;
     let PROJECT;
     (function (PROJECT) {
         PROJECT["OPT1"] = "option1";
         PROJECT["OPT2"] = "option2";
         PROJECT["OPT3"] = "option3";
     })(PROJECT || (PROJECT = {}));
+    class FileInfo extends ƒ.Mutable {
+        constructor(_overwrite, _filename) {
+            super();
+            this.overwrite = _overwrite;
+            this.filename = _filename;
+        }
+        reduceMutator(_mutator) { }
+    }
+    Fudge.FileInfo = FileInfo;
     class Project extends ƒ.Mutable {
         constructor() {
             super();
-            this.title = "Fudge Project";
+            this.title = "NewProject";
+            this.index = new FileInfo(true, "");
+            this.style = new FileInfo(true, "");
+            this.internal = new FileInfo(true, "");
+            this.graphToStartWith = "";
             this.includePhysics = false;
             this.option = PROJECT.OPT3;
+            this.hndChange = (_event) => {
+                let mutator = ƒui.Controller.getMutator(this, ƒui.Dialog.dom, this.getMutator());
+                console.log(mutator, this);
+                if (mutator.title != this.title) {
+                    this.updateFilenames(mutator.title, false, mutator);
+                    ƒui.Controller.updateUserInterface(this, ƒui.Dialog.dom, mutator);
+                }
+            };
+            this.updateFilenames("NewProject", true, this);
+            this.script = "NewProject.js";
+        }
+        async openDialog() {
+            let promise = ƒui.Dialog.prompt(Fudge.project, false, "Review project settings", "Adjust settings and press OK", "OK", "Cancel");
+            ƒui.Dialog.dom.addEventListener("change" /* CHANGE */, this.hndChange);
+            if (await promise)
+                console.log("OK");
         }
         getProjectHTML() {
             let html = document.implementation.createHTMLDocument("TestDoc");
-            let child;
             html.head.appendChild(createTag("meta", { charset: "utf-8" }));
+            html.head.appendChild(createTag("title", {}, this.title));
+            html.head.appendChild(createTag("link", { rel: "stylesheet", href: "TestProject.css" }));
             html.head.appendChild(createTag("script", { type: "text/javascript", src: "../../../Core/Build/FudgeCore.js" }));
             html.head.appendChild(createTag("script", { type: "text/javascript", src: "../../../Aid/Build/FudgeAid.js" }));
             html.head.appendChild(createTag("script", { type: "text/javascript", src: "Code/Build/Compiled.js", editor: "true" }));
             html.head.appendChild(createTag("link", { type: "resources", src: "InternalResources.json" }));
+            html.body.appendChild(createTag("h1", {}, this.title));
+            html.body.appendChild(createTag("p", {}, "click to start"));
+            html.body.appendChild(createTag("canvas"));
             function createTag(_tag, _attributes, _content) {
                 let element = document.createElement(_tag);
                 for (let attribute in _attributes)
@@ -262,6 +297,15 @@ var Fudge;
             return types;
         }
         reduceMutator(_mutator) { }
+        updateFilenames(_title, _all = false, _mutator) {
+            let files = { html: _mutator.index, css: _mutator.style, json: _mutator.internal };
+            for (let key in files) {
+                let fileInfo = files[key];
+                fileInfo.overwrite = _all || fileInfo.overwrite;
+                if (fileInfo.overwrite)
+                    fileInfo.filename = _title + "." + key;
+            }
+        }
     }
     Fudge.Project = Project;
 })(Fudge || (Fudge = {}));
@@ -297,7 +341,9 @@ var Fudge;
             Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_PROJECT_OPEN);
             Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_GRAPH_OPEN);
             // ipcRenderer.emit(MENU.PROJECT_LOAD);
-            Fudge.saveProject();
+            // if (project.openDialog())
+            //   console.log(project);
+            // saveProject();
             // let test: Object = { text: "abc", toggle: true, value: 1, sub: { sub1: 123, sub2: "Hallo" } };
             // if (await ƒui.Dialog.prompt(project, false, "Review project settings", "Adjust settings and press OK", "OK", "Cancel"))
             //   console.log(project);
