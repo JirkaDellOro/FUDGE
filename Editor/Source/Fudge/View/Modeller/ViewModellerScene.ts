@@ -94,7 +94,7 @@ namespace Fudge {
 
       for (let mode in this.controller.ControlMode.modes) {
         let subitem: Electron.MenuItem = new remote.MenuItem(
-          { label: mode, id: String(CONTEXTMENU.INTERACTION_MODE), click: _callback, accelerator: process.platform == "darwin" ? "Command+" + this.controller.ControlMode.modes[mode] : "ctrl+" + this.controller.ControlMode.modes[mode]  }
+          { label: mode, id: String(CONTEXTMENU.INTERACTION_MODE), click: _callback, accelerator: process.platform == "darwin" ? "Command+" + this.controller.ControlMode.modes[mode].shortcut : "ctrl+" + this.controller.ControlMode.modes[mode].shortcut  }
         );
         //@ts-ignore
         subitem.overrideProperty("interactionMode", mode);

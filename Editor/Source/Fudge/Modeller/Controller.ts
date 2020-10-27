@@ -41,7 +41,7 @@ namespace Fudge {
           default: 
             let selectedMode: InteractionMode;
             for (let mode in this.controlMode.modes) {
-              if (this.controlMode.modes[mode] === _event.key) {
+              if (this.controlMode.modes[mode].shortcut === _event.key) {
                 selectedMode = <InteractionMode> mode;
               }
             }
@@ -51,6 +51,7 @@ namespace Fudge {
         }
       }
     }
+    
     public setControlMode(mode: AbstractControlMode): void {
       this.controlMode = mode;
       console.log(mode);
@@ -58,11 +59,12 @@ namespace Fudge {
     }
 
     public setInteractionMode(mode: InteractionMode): void {
+      // mode = InteractionMode.ROTATE;
+      this.interactionMode?.cleanup();
+      let type: any = this.controlMode.modes[mode]?.type || IdleMode;
       let selection: Object  = this.interactionMode?.selection;        
-      this.interactionMode = this.controlMode.setInteractionMode(mode);
+      this.interactionMode = new type(this.viewport, this.editableNode);
 
-      this.interactionMode.viewport = this.viewport;
-      this.interactionMode.editableNode = this.editableNode;
       if (selection)
         this.interactionMode.selection = selection;
       

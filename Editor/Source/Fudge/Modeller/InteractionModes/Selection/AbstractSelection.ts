@@ -1,5 +1,5 @@
 namespace Fudge {
-  export abstract class AbstractSelection implements IInteractionMode {
+  export abstract class AbstractSelection extends IInteractionMode {
     public readonly type: InteractionMode = InteractionMode.SELECT;
     viewport: ƒ.Viewport;
     selection: Object;
@@ -9,5 +9,8 @@ namespace Fudge {
     abstract onmouseup(_event: ƒ.EventPointer): void;
     // abstract onclick(_event: ƒ.EventPointer): void;
     abstract onmove(_event: ƒ.EventPointer): void;
+    cleanup(): void {
+      //
+    }
   }
 }

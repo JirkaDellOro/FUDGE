@@ -13,9 +13,11 @@ namespace FudgeCore {
     protected createVertices(): Float32Array {
       return this.baseMesh.vertices;
     }
+
     protected createTextureUVs(): Float32Array {
       return this.baseMesh.textureUVs;
     }
+    
     protected createIndices(): Uint16Array {
       return this.baseMesh.indices;
     }

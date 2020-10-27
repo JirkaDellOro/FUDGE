@@ -377,7 +377,7 @@ var Fudge;
                 node = new ƒ.Node("graph");
                 ƒaid.addStandardLightComponents(node, new ƒ.Color(0.5, 0.5, 0.5));
                 let cooSys = new ƒaid.NodeCoordinateSystem("WorldCooSys");
-                let cube = new ƒaid.Node("Default", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderFlat, new ƒ.CoatColored()), new ƒ.MeshCustom("MeshCustom", new ƒ.MeshCube));
+                let cube = new ƒaid.Node("Default", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderFlat, new ƒ.CoatColored(new ƒ.Color(0.5, 0.5, 0.5, 0.3))), new ƒ.MeshCustom("MeshCustom", new ƒ.MeshCube));
                 node.addChild(cube);
                 node.addChild(cooSys);
                 Page.add(Fudge.PanelModeller, "Modeller", Object({ node: node }));
@@ -765,7 +765,7 @@ var Fudge;
                     default:
                         let selectedMode;
                         for (let mode in this.controlMode.modes) {
-                            if (this.controlMode.modes[mode] === _event.key) {
+                            if (this.controlMode.modes[mode].shortcut === _event.key) {
                                 selectedMode = mode;
                             }
                         }
@@ -781,10 +781,11 @@ var Fudge;
             this.setInteractionMode(this.interactionMode.type);
         }
         setInteractionMode(mode) {
+            // mode = InteractionMode.ROTATE;
+            this.interactionMode?.cleanup();
+            let type = this.controlMode.modes[mode]?.type || Fudge.IdleMode;
             let selection = this.interactionMode?.selection;
-            this.interactionMode = this.controlMode.setInteractionMode(mode);
-            this.interactionMode.viewport = this.viewport;
-            this.interactionMode.editableNode = this.editableNode;
+            this.interactionMode = new type(this.viewport, this.editableNode);
             if (selection)
                 this.interactionMode.selection = selection;
             console.log("Current Mode: " + this.interactionMode.type);
@@ -822,24 +823,29 @@ var Fudge;
     class EditMode extends Fudge.AbstractControlMode {
         constructor() {
             super(...arguments);
-            this.modes = { [Fudge.InteractionMode.SELECT]: "s", [Fudge.InteractionMode.ROTATE]: "r", [Fudge.InteractionMode.TRANSLATE]: "t" };
-        }
-        setInteractionMode(mode) {
-            let interactionMode;
-            switch (mode) {
-                case Fudge.InteractionMode.SELECT:
-                    interactionMode = new Fudge.EditSelection();
-                    break;
-                case Fudge.InteractionMode.ROTATE:
-                    interactionMode = new Fudge.EditRotation();
-                case Fudge.InteractionMode.TRANSLATE:
-                    interactionMode = new Fudge.EditTranslation();
-                    break;
-                default:
-                    interactionMode = new Fudge.IdleMode();
-                    break;
-            }
-            return interactionMode;
+            //public modes: {[mode in InteractionMode]?: string} = {[InteractionMode.SELECT]: "s", [InteractionMode.ROTATE]: "r", [InteractionMode.TRANSLATE]: "t"};
+            this.modes = {
+                [Fudge.InteractionMode.SELECT]: { type: Fudge.EditSelection, shortcut: "s" },
+                [Fudge.InteractionMode.ROTATE]: { type: Fudge.EditRotation, shortcut: "r" },
+                [Fudge.InteractionMode.TRANSLATE]: { type: Fudge.EditTranslation, shortcut: "t" }
+            };
+            // public setInteractionMode(mode: InteractionMode): IInteractionMode {
+            //   let interactionMode: IInteractionMode;
+            //   switch (mode) {
+            //     case InteractionMode.SELECT:
+            //       interactionMode = new EditSelection();
+            //       break;
+            //     case InteractionMode.ROTATE:
+            //       interactionMode = new EditRotation();
+            //     case InteractionMode.TRANSLATE:
+            //       interactionMode = new EditTranslation();
+            //       break;
+            //     default:
+            //       interactionMode = new IdleMode();
+            //       break;
+            //   }
+            //   return interactionMode;
+            // }
         }
     }
     EditMode.iSubclass = Fudge.AbstractControlMode.registerSubclass(EditMode);
@@ -850,23 +856,26 @@ var Fudge;
     class ObjectMode extends Fudge.AbstractControlMode {
         constructor() {
             super(...arguments);
-            this.modes = { [Fudge.InteractionMode.ROTATE]: "r", [Fudge.InteractionMode.TRANSLATE]: "t" };
-        }
-        //[InteractionMode.SELECT]: "s", 
-        setInteractionMode(mode) {
-            let interactionMode;
-            switch (mode) {
-                case Fudge.InteractionMode.ROTATE:
-                    interactionMode = new Fudge.ObjectRotation();
-                    break;
-                case Fudge.InteractionMode.TRANSLATE:
-                    interactionMode = new Fudge.ObjectTranslation();
-                    break;
-                default:
-                    interactionMode = new Fudge.IdleMode();
-                    break;
-            }
-            return interactionMode;
+            // public modes: {[mode in InteractionMode]?: string} = {[InteractionMode.ROTATE]: "r", [InteractionMode.TRANSLATE]: "t"};
+            this.modes = {
+                [Fudge.InteractionMode.ROTATE]: { type: Fudge.ObjectRotation, shortcut: "r" },
+                [Fudge.InteractionMode.TRANSLATE]: { type: Fudge.ObjectTranslation, shortcut: "t" }
+            };
+            // public setInteractionMode(mode: InteractionMode): IInteractionMode {
+            //   let interactionMode: IInteractionMode;
+            //   switch (mode) {
+            //     case InteractionMode.ROTATE:
+            //       interactionMode = new ObjectRotation();
+            //       break;
+            //     case InteractionMode.TRANSLATE:
+            //       interactionMode = new ObjectTranslation();
+            //       break;
+            //     default:
+            //       interactionMode = new IdleMode();
+            //       break;
+            //   }
+            //   return interactionMode;
+            // }
         }
     }
     ObjectMode.iSubclass = Fudge.AbstractControlMode.registerSubclass(ObjectMode);
@@ -874,8 +883,24 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    class IdleMode {
-        constructor() {
+    var ƒ = FudgeCore;
+    class IInteractionMode {
+        constructor(viewport, editableNode) {
+            this.viewport = viewport;
+            this.editableNode = editableNode;
+        }
+        getPosRenderFrom(_event) {
+            let mousePos = new ƒ.Vector2(_event.canvasX, _event.canvasY);
+            return this.viewport.pointClientToRender(new ƒ.Vector2(mousePos.x, this.viewport.getClientRectangle().height - mousePos.y));
+        }
+    }
+    Fudge.IInteractionMode = IInteractionMode;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class IdleMode extends Fudge.IInteractionMode {
+        constructor(viewport, editableNode) {
+            super(viewport, editableNode);
             this.type = Fudge.InteractionMode.IDLE;
         }
         onmousedown(_event) {
@@ -887,14 +912,21 @@ var Fudge;
         onmove(_event) {
             //@ts-ignore
         }
+        cleanup() {
+            //@ts-ignore
+        }
     }
     Fudge.IdleMode = IdleMode;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    class AbstractRotation {
+    class AbstractRotation extends Fudge.IInteractionMode {
         constructor() {
+            super(...arguments);
             this.type = Fudge.InteractionMode.ROTATE;
+        }
+        cleanup() {
+            this.viewport.getGraph().removeChild(this.widget);
         }
     }
     Fudge.AbstractRotation = AbstractRotation;
@@ -917,24 +949,98 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    var ƒ = FudgeCore;
     class ObjectRotation extends Fudge.AbstractRotation {
+        constructor(viewport, editableNode) {
+            super(viewport, editableNode);
+            let widget = new Fudge.RotationWidget();
+            let mtx = new ƒ.Matrix4x4();
+            mtx.translation = this.editableNode.mtxLocal.translation;
+            mtx.rotation = this.editableNode.mtxLocal.rotation;
+            widget.addComponent(new ƒ.ComponentTransform(mtx));
+            this.viewport.getGraph().addChild(widget);
+            this.widget = widget;
+        }
         onmousedown(_event) {
-            console.log("ObjectRotation activated");
+            this.viewport.createPickBuffers();
+            let posRender = this.getPosRenderFrom(_event);
+            let lowestZBuffer = Number.MAX_VALUE;
+            let wasPicked = false;
+            for (let hit of this.viewport.pickNodeAt(posRender)) {
+                if (hit.zBuffer != 0) {
+                    for (let circle of this.widget.getChildren()) {
+                        if (circle == hit.node) {
+                            if (hit.zBuffer > lowestZBuffer)
+                                continue;
+                            wasPicked = true;
+                            this.pickedCircle = circle;
+                            lowestZBuffer = hit.zBuffer;
+                            this.previousIntersection = this.getIntersection(posRender);
+                        }
+                    }
+                }
+            }
+            if (wasPicked) {
+                this.oldColor = this.pickedCircle.getComponent(ƒ.ComponentMaterial).clrPrimary;
+                this.pickedCircle.getComponent(ƒ.ComponentMaterial).clrPrimary = new ƒ.Color(1, 1, 1, 1);
+            }
+            console.log("cross: " + this.viewport.camera.pivot.translation);
         }
         onmouseup(_event) {
-            throw new Error("Method not implemented.");
+            if (!this.pickedCircle)
+                return;
+            for (let circle of this.widget.getChildren()) {
+                if (circle == this.pickedCircle) {
+                    circle.getComponent(ƒ.ComponentMaterial).clrPrimary = this.oldColor;
+                }
+            }
+            this.pickedCircle = null;
         }
         onmove(_event) {
-            throw new Error("Method not implemented.");
+            if (!this.pickedCircle)
+                return;
+            let intersection = this.getIntersection(this.getPosRenderFrom(_event));
+            //let angle: number = this.getAngle(new ƒ.Vector2(intersection.y, intersection.x), new ƒ.Vector2(this.previousIntersection.y, this.previousIntersection.x)); 
+            let cameraNorm = ƒ.Vector3.NORMALIZATION(this.viewport.camera.pivot.translation);
+            let angle = this.getAngle(new ƒ.Vector2(intersection.y + intersection.z * cameraNorm.y, (-intersection.z * cameraNorm.x) + (intersection.x * cameraNorm.z) + (-intersection.x * cameraNorm.y)), new ƒ.Vector2(this.previousIntersection.y + this.previousIntersection.z * cameraNorm.y, (-this.previousIntersection.z * cameraNorm.x) + (this.previousIntersection.x * cameraNorm.z) + (-this.previousIntersection.x * cameraNorm.y))); // Math.atan2(intersection.y, intersection.x) - Math.atan2(this.previousIntersection.y, this.previousIntersection.x);
+            //let angle: number = this.getAngle(new ƒ.Vector2(intersection.z, -intersection.x), new ƒ.Vector2(this.previousIntersection.z, -this.previousIntersection.x)); 
+            console.log("inter: " + intersection + " angle: " + angle);
+            switch (this.pickedCircle.name) {
+                case "Z_Rotation":
+                    this.widget.mtxLocal.rotateZ(-angle * (180 / Math.PI));
+                    this.editableNode.mtxLocal.rotateZ(-angle * (180 / Math.PI));
+                    break;
+                case "Y_Rotation":
+                    this.editableNode.mtxLocal.rotateY(-angle * (180 / Math.PI));
+                    this.widget.mtxLocal.rotateY(-angle * (180 / Math.PI));
+                    break;
+                case "X_Rotation":
+                    this.editableNode.mtxLocal.rotateX(-angle * (180 / Math.PI));
+                    this.widget.mtxLocal.rotateX(-angle * (180 / Math.PI));
+                    break;
+            }
+            this.previousIntersection = intersection;
+        }
+        getIntersection(posRender) {
+            let ray = this.viewport.getRayFromClient(posRender);
+            return ray.intersectPlane(this.editableNode.mtxLocal.translation, this.viewport.camera.pivot.translation);
+        }
+        getAngle(first, second) {
+            console.log("y1: " + first.x + " | x1: " + first.y + " | y2: " + second.x + " | x2: " + second.y);
+            return Math.atan2(first.x, first.y) - Math.atan2(second.x, second.y);
         }
     }
     Fudge.ObjectRotation = ObjectRotation;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    class AbstractSelection {
+    class AbstractSelection extends Fudge.IInteractionMode {
         constructor() {
+            super(...arguments);
             this.type = Fudge.InteractionMode.SELECT;
+        }
+        cleanup() {
+            //
         }
     }
     Fudge.AbstractSelection = AbstractSelection;
@@ -998,10 +1104,14 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    class AbstractTranslation {
+    class AbstractTranslation extends Fudge.IInteractionMode {
         constructor() {
+            super(...arguments);
             this.type = Fudge.InteractionMode.TRANSLATE;
             this.dragging = false;
+        }
+        cleanup() {
+            this.viewport.getGraph().removeChild(this.widget);
         }
     }
     Fudge.AbstractTranslation = AbstractTranslation;
@@ -1017,51 +1127,153 @@ var Fudge;
             this.dragging = false;
         }
         onmove(_event) {
-            // console.log("vertices: " + this.selection);
-            // if (this.dragging) {
-            //   let ray: ƒ.Ray = this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY));
-            //   let diffTranslation: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, ƒ.Vector3.SUM(ray.origin, ƒ.Vector3.SCALE(ray.direction, this.distance)));
-            //   //this.editableNode.mtxLocal.translation = ƒ.Vector3.SUM(ray.origin, ƒ.Vector3.SCALE(ray.direction, this.distance));
-            //   let mesh: ƒ.Mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
-            //   let verts = mesh.vertices;
-            //   for (let selection of this.selection) {
-            //     let currentVertex: ƒ.Vector3 = new ƒ.Vector3(verts[selection], verts[selection + 1], verts[selection + 2]);
-            //     currentVertex.add(diffTranslation);
-            //     verts[selection] = currentVertex.x;
-            //     verts[selection + 1] = currentVertex.y;
-            //     verts[selection + 2] = currentVertex.z; 
-            //   }
-            //   mesh.vertices = verts;
-            // }
+            console.log("vertices: " + this.selection);
+            if (this.dragging) {
+                let ray = this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY));
+                let diffTranslation = ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, ƒ.Vector3.SUM(ray.origin, ƒ.Vector3.SCALE(ray.direction, this.distance)));
+                //this.editableNode.mtxLocal.translation = ƒ.Vector3.SUM(ray.origin, ƒ.Vector3.SCALE(ray.direction, this.distance));
+                let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+                let verts = mesh.vertices;
+                for (let selection of this.selection) {
+                    let currentVertex = new ƒ.Vector3(verts[selection], verts[selection + 1], verts[selection + 2]);
+                    currentVertex.add(diffTranslation);
+                    verts[selection] = currentVertex.x;
+                    verts[selection + 1] = currentVertex.y;
+                    verts[selection + 2] = currentVertex.z;
+                }
+                mesh.vertices = verts;
+            }
         }
     }
     Fudge.EditTranslation = EditTranslation;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    var ƒAid = FudgeAid;
     class ObjectTranslation extends Fudge.AbstractTranslation {
+        constructor(viewport, editableNode) {
+            super(viewport, editableNode);
+            let widget = new ƒAid.NodeCoordinateSystem("TranslateWidget");
+            let mtx = new ƒ.Matrix4x4();
+            mtx.translation = this.editableNode.mtxLocal.translation;
+            mtx.rotation = this.editableNode.mtxLocal.rotation;
+            widget.addComponent(new ƒ.ComponentTransform(mtx));
+            this.viewport.getGraph().addChild(widget);
+            this.widget = widget;
+        }
         onmouseup(_event) {
             this.dragging = false;
+            this.pickedArrow = null;
         }
         onmousedown(_event) {
             this.viewport.createPickBuffers();
-            let mousePos = new ƒ.Vector2(_event.canvasX, _event.canvasY);
-            let posRender = this.viewport.pointClientToRender(new ƒ.Vector2(mousePos.x, this.viewport.getClientRectangle().height - mousePos.y));
-            let hits = this.viewport.pickNodeAt(posRender);
-            for (let hit of hits) {
-                if (hit.zBuffer != 0 && hit.node == this.editableNode)
-                    this.dragging = true;
+            let posRender = this.getPosRenderFrom(_event);
+            let arrowWasPicked = false;
+            let nodeWasPicked = false;
+            for (let hit of this.viewport.pickNodeAt(posRender)) {
+                if (hit.zBuffer != 0) {
+                    let hitIsArrow = this.isArrow(hit);
+                    if (hitIsArrow) {
+                        arrowWasPicked = true;
+                        this.distanceBetweenWidgetPivotAndPointer = this.distanceBetweenWidgetPivotAndPointer = this.calculateWidgetDistanceFrom(this.getPosRenderFrom(_event));
+                    }
+                    if (hit.node == this.editableNode)
+                        nodeWasPicked = true;
+                }
             }
-            this.distance = ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, this.viewport.camera.pivot.translation).magnitude; //
+            if (nodeWasPicked && !arrowWasPicked) {
+                this.dragging = true;
+                this.distance = ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, this.viewport.camera.pivot.translation).magnitude; //
+            }
+            // console.log("")
         }
         onmove(_event) {
+            let ray = this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY));
+            let newPos = ƒ.Vector3.SUM(ray.origin, ƒ.Vector3.SCALE(ray.direction, this.distance));
             if (this.dragging) {
-                let ray = this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY));
-                this.editableNode.mtxLocal.translation = ƒ.Vector3.SUM(ray.origin, ƒ.Vector3.SCALE(ray.direction, this.distance));
+                this.editableNode.mtxLocal.translation = newPos;
             }
+            else {
+                switch (this.pickedArrow) {
+                    case "ArrowGreen":
+                        this.editableNode.mtxLocal.translation = new ƒ.Vector3(this.editableNode.mtxLocal.translation.x, newPos.y, // - this.distanceBetweenWidgetPivotAndPointer.y, 
+                        this.editableNode.mtxLocal.translation.z);
+                        break;
+                    case "ArrowRed":
+                        this.editableNode.mtxLocal.translation = new ƒ.Vector3(newPos.x, // + this.distanceBetweenWidgetPivotAndPointer.x, 
+                        this.editableNode.mtxLocal.translation.y, this.editableNode.mtxLocal.translation.z);
+                        break;
+                    case "ArrowBlue":
+                        this.editableNode.mtxLocal.translation = new ƒ.Vector3(this.editableNode.mtxLocal.translation.x, this.editableNode.mtxLocal.translation.y, newPos.z); // + this.distanceBetweenWidgetPivotAndPointer.z);
+                        break;
+                }
+                // if (this.pickedArrow == "ArrowGreen") {
+                //   this.editableNode.mtxLocal.translation = new ƒ.Vector3(
+                //     this.editableNode.mtxLocal.translation.x, 
+                //     newPos.y - this.distanceBetweenWidgetPivotAndPointer.y, 
+                //     this.editableNode.mtxLocal.translation.z);
+                // this.distanceBetweenWidgetPivotAndPointer = this.calculateWidgetDistanceFrom(this.getPosRenderFrom(_event));
+                //  .y = newPos.y;
+                //let translation: number = Math.sin(rot.x) * Math.sin(rot.z) * _event.movementX / randomScale - Math.cos(rot.x) * Math.cos(rot.z) * _event.movementY / randomScale;
+                //this.editableNode.mtxLocal.translateY(translation);
+                // this.widget.mtxLocal.translateY(translation);
+                //}
+            }
+            this.widget.mtxLocal.translation = this.editableNode.mtxLocal.translation;
+            // console.log("movementX: " + _event.movementX + " | movementY: " + _event.movementY);
+            // console.log("canvas width: " + this.viewport.getCanvas().width + " | height: " + this.viewport.getCanvas().height);
+            // console.log("canvasX: " + _event.canvasX + " | canvasY: " + _event.canvasY);
+        }
+        isArrow(hit) {
+            let shaftWasPicked = false;
+            for (let arrow of this.widget.getChildren()) {
+                for (let child of arrow.getChildren()) {
+                    if (hit.node == child) {
+                        this.pickedArrow = arrow.name;
+                        this.distance = ƒ.Vector3.DIFFERENCE(arrow.mtxLocal.translation, this.viewport.camera.pivot.translation).magnitude;
+                        shaftWasPicked = true;
+                    }
+                }
+            }
+            return shaftWasPicked;
+        }
+        calculateWidgetDistanceFrom(_renderPos) {
+            let ray = this.viewport.getRayFromClient(_renderPos);
+            return ƒ.Vector3.DIFFERENCE(this.widget.mtxLocal.translation, ray.intersectPlane(this.widget.mtxLocal.translation, ray.direction));
         }
     }
     Fudge.ObjectTranslation = ObjectTranslation;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    var ƒ = FudgeCore;
+    class RotationWidget extends ƒ.Node {
+        constructor(_name = "RotationWidget", _transform) {
+            super(_name);
+            let yRotWidget = new Fudge.WidgetCircle("Y_Rotation", new ƒ.Color(0, 1, 0), new ƒ.Matrix4x4());
+            let xRotWidget = new Fudge.WidgetCircle("X_Rotation", new ƒ.Color(1, 0, 0), ƒ.Matrix4x4.ROTATION_Z(90));
+            let zRotWidget = new Fudge.WidgetCircle("Z_Rotation", new ƒ.Color(0, 0, 1), ƒ.Matrix4x4.ROTATION_X(90));
+            this.addChild(yRotWidget);
+            this.addChild(xRotWidget);
+            this.addChild(zRotWidget);
+        }
+    }
+    Fudge.RotationWidget = RotationWidget;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    var ƒ = FudgeCore;
+    class WidgetCircle extends ƒ.Node {
+        constructor(_name, _color, _transform) {
+            super(_name);
+            this.addComponent(new ƒ.ComponentMesh(new ƒ.MeshTorus("MeshTorus", 0.03)));
+            let compMat = new ƒ.ComponentMaterial(new ƒ.Material("Circle", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("white"))));
+            compMat.clrPrimary = _color;
+            this.addComponent(compMat);
+            this.addComponent(new ƒ.ComponentTransform(_transform));
+        }
+    }
+    Fudge.WidgetCircle = WidgetCircle;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -2207,7 +2419,7 @@ var Fudge;
             }
             submenu = new Fudge.remote.Menu();
             for (let mode in this.controller.ControlMode.modes) {
-                let subitem = new Fudge.remote.MenuItem({ label: mode, id: String(Fudge.CONTEXTMENU.INTERACTION_MODE), click: _callback, accelerator: process.platform == "darwin" ? "Command+" + this.controller.ControlMode.modes[mode] : "ctrl+" + this.controller.ControlMode.modes[mode] });
+                let subitem = new Fudge.remote.MenuItem({ label: mode, id: String(Fudge.CONTEXTMENU.INTERACTION_MODE), click: _callback, accelerator: process.platform == "darwin" ? "Command+" + this.controller.ControlMode.modes[mode].shortcut : "ctrl+" + this.controller.ControlMode.modes[mode].shortcut });
                 //@ts-ignore
                 subitem.overrideProperty("interactionMode", mode);
                 submenu.append(subitem);

@@ -222,62 +222,75 @@ declare namespace Fudge {
     abstract class AbstractControlMode {
         static readonly subclasses: typeof AbstractControlMode[];
         modes: {
-            [mode in InteractionMode]?: string;
+            [mode in InteractionMode]?: {
+                type: typeof IInteractionMode;
+                shortcut: string;
+            };
         };
         protected static registerSubclass(_subClass: typeof AbstractControlMode): number;
-        abstract setInteractionMode(mode: InteractionMode): IInteractionMode;
     }
 }
 declare namespace Fudge {
     class EditMode extends AbstractControlMode {
         static readonly iSubclass: number;
         modes: {
-            [mode in InteractionMode]?: string;
+            [mode in InteractionMode]?: {
+                type: typeof IInteractionMode;
+                shortcut: string;
+            };
         };
-        setInteractionMode(mode: InteractionMode): IInteractionMode;
     }
 }
 declare namespace Fudge {
     class ObjectMode extends AbstractControlMode {
         static readonly iSubclass: number;
         modes: {
-            [mode in InteractionMode]?: string;
+            [mode in InteractionMode]?: {
+                type: typeof IInteractionMode;
+                shortcut: string;
+            };
         };
-        setInteractionMode(mode: InteractionMode): IInteractionMode;
     }
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
-    interface IInteractionMode {
+    abstract class IInteractionMode {
         type: InteractionMode;
         selection: Object;
         viewport: ƒ.Viewport;
         editableNode: ƒ.Node;
-        onmousedown(_event: ƒ.EventPointer): void;
-        onmouseup(_event: ƒ.EventPointer): void;
-        onmove(_event: ƒ.EventPointer): void;
-    }
-}
-declare namespace Fudge {
-    class IdleMode implements IInteractionMode {
-        readonly type: InteractionMode;
-        selection: Object;
-        viewport: ƒ.Viewport;
-        editableNode: ƒ.Node;
-        onmousedown(_event: ƒ.EventPointer): void;
-        onmouseup(_event: ƒ.EventPointer): void;
-        onmove(_event: ƒ.EventPointer): void;
-    }
-}
-declare namespace Fudge {
-    abstract class AbstractRotation implements IInteractionMode {
-        readonly type: InteractionMode;
-        viewport: ƒ.Viewport;
-        selection: Object;
-        editableNode: ƒ.Node;
+        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
         abstract onmousedown(_event: ƒ.EventPointer): void;
         abstract onmouseup(_event: ƒ.EventPointer): void;
         abstract onmove(_event: ƒ.EventPointer): void;
+        abstract cleanup(): void;
+        protected getPosRenderFrom(_event: ƒ.EventPointer): ƒ.Vector2;
+    }
+}
+declare namespace Fudge {
+    class IdleMode extends IInteractionMode {
+        readonly type: InteractionMode;
+        selection: Object;
+        viewport: ƒ.Viewport;
+        editableNode: ƒ.Node;
+        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
+        onmousedown(_event: ƒ.EventPointer): void;
+        onmouseup(_event: ƒ.EventPointer): void;
+        onmove(_event: ƒ.EventPointer): void;
+        cleanup(): void;
+    }
+}
+declare namespace Fudge {
+    abstract class AbstractRotation extends IInteractionMode {
+        readonly type: InteractionMode;
+        viewport: ƒ.Viewport;
+        selection: Object;
+        editableNode: ƒ.Node;
+        protected widget: RotationWidget;
+        abstract onmousedown(_event: ƒ.EventPointer): void;
+        abstract onmouseup(_event: ƒ.EventPointer): void;
+        abstract onmove(_event: ƒ.EventPointer): void;
+        cleanup(): void;
     }
 }
 declare namespace Fudge {
@@ -293,13 +306,19 @@ declare namespace Fudge {
     import ƒ = FudgeCore;
     class ObjectRotation extends AbstractRotation {
         selection: ƒ.Node;
+        private pickedCircle;
+        private previousIntersection;
+        private oldColor;
+        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
         onmousedown(_event: ƒ.EventPointer): void;
         onmouseup(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
+        private getIntersection;
+        private getAngle;
     }
 }
 declare namespace Fudge {
-    abstract class AbstractSelection implements IInteractionMode {
+    abstract class AbstractSelection extends IInteractionMode {
         readonly type: InteractionMode;
         viewport: ƒ.Viewport;
         selection: Object;
@@ -307,6 +326,7 @@ declare namespace Fudge {
         abstract onmousedown(_event: ƒ.EventPointer): void;
         abstract onmouseup(_event: ƒ.EventPointer): void;
         abstract onmove(_event: ƒ.EventPointer): void;
+        cleanup(): void;
     }
 }
 declare namespace Fudge {
@@ -328,16 +348,18 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    abstract class AbstractTranslation implements IInteractionMode {
+    abstract class AbstractTranslation extends IInteractionMode {
         readonly type: InteractionMode;
         viewport: ƒ.Viewport;
         selection: Object;
         editableNode: ƒ.Node;
         protected dragging: boolean;
         protected distance: number;
+        protected widget: ƒ.Node;
         abstract onmousedown(_event: ƒ.EventPointer): void;
         abstract onmouseup(_event: ƒ.EventPointer): void;
         abstract onmove(_event: ƒ.EventPointer): void;
+        cleanup(): void;
     }
 }
 declare namespace Fudge {
@@ -350,9 +372,26 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     class ObjectTranslation extends AbstractTranslation {
+        private pickedArrow;
+        private distanceBetweenWidgetPivotAndPointer;
+        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
         onmouseup(_event: ƒ.EventPointer): void;
         onmousedown(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
+        private isArrow;
+        private calculateWidgetDistanceFrom;
+    }
+}
+declare namespace Fudge {
+    import ƒ = FudgeCore;
+    class RotationWidget extends ƒ.Node {
+        constructor(_name?: string, _transform?: ƒ.Matrix4x4);
+    }
+}
+declare namespace Fudge {
+    import ƒ = FudgeCore;
+    class WidgetCircle extends ƒ.Node {
+        constructor(_name: string, _color: ƒ.Color, _transform: ƒ.Matrix4x4);
     }
 }
 declare namespace Fudge {
