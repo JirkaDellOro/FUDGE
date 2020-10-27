@@ -13,10 +13,31 @@ namespace Fudge {
     if (!await project.openDialog())
       return;
 
-    let html: string = project.getProjectHTML();
-    console.log(html);
-    let filename: string = remote.dialog.showSaveDialogSync(null, { title: "Save Project", buttonLabel: "Save Project", message: "ƒ-Message", defaultPath: project.files.index.filename });
-    fs.writeFileSync(filename, html);
+    let filename: string | string[] = remote.dialog.showOpenDialogSync(null, {
+      properties: ["openDirectory", "createDirectory"], title: "Select a folder to save the project to", buttonLabel: "Save Project"
+    });
+    if (!filename)
+      return;
+
+    filename = filename[0] + "/a.b";
+    console.log(filename);
+
+    if (project.files.index.overwrite) {
+      let html: string = project.getProjectHTML();
+      let htmlFileName: URL = new URL(project.files.index.filename, filename);
+      fs.writeFileSync(htmlFileName, html);
+    }
+
+    if (project.files.style.overwrite) {
+      let cssFileName: URL = new URL(project.files.style.filename, filename);
+      fs.writeFileSync(cssFileName, project.getProjectCSS());
+    }
+
+    if (project.files.internal.overwrite) {
+      let jsonFileName: URL = new URL(project.files.internal.filename, filename);
+      console.log(jsonFileName);
+      fs.writeFileSync(jsonFileName, project.getProjectJSON());
+    }
   }
 
   export async function promptLoadProject(): Promise<URL> {

@@ -1976,6 +1976,7 @@ declare namespace FudgeCore {
         static register(_resource: SerializableResource, _idResource?: string): void;
         static deregister(_resource: SerializableResource): void;
         static clear(): void;
+        static getResourcesOfType<T>(_type: new (_args: General) => T): Resources;
         /**
          * Generate a user readable and unique id using the type of the resource, the date and random numbers
          * @param _resource

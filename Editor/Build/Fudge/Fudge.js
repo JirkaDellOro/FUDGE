@@ -175,10 +175,27 @@ var Fudge;
         // fs.writeFileSync(filename, content);
         if (!await Fudge.project.openDialog())
             return;
-        let html = Fudge.project.getProjectHTML();
-        console.log(html);
-        let filename = Fudge.remote.dialog.showSaveDialogSync(null, { title: "Save Project", buttonLabel: "Save Project", message: "ƒ-Message", defaultPath: Fudge.project.files.index.filename });
-        fs.writeFileSync(filename, html);
+        let filename = Fudge.remote.dialog.showOpenDialogSync(null, {
+            properties: ["openDirectory", "createDirectory"], title: "Select a folder to save the project to", buttonLabel: "Save Project"
+        });
+        if (!filename)
+            return;
+        filename = filename[0] + "/a.b";
+        console.log(filename);
+        if (Fudge.project.files.index.overwrite) {
+            let html = Fudge.project.getProjectHTML();
+            let htmlFileName = new URL(Fudge.project.files.index.filename, filename);
+            fs.writeFileSync(htmlFileName, html);
+        }
+        if (Fudge.project.files.style.overwrite) {
+            let cssFileName = new URL(Fudge.project.files.style.filename, filename);
+            fs.writeFileSync(cssFileName, Fudge.project.getProjectCSS());
+        }
+        if (Fudge.project.files.internal.overwrite) {
+            let jsonFileName = new URL(Fudge.project.files.internal.filename, filename);
+            console.log(jsonFileName);
+            fs.writeFileSync(jsonFileName, Fudge.project.getProjectJSON());
+        }
     }
     Fudge.saveProject = saveProject;
     async function promptLoadProject() {
@@ -247,7 +264,9 @@ var Fudge;
             this.index = new FileInfo(true, "");
             this.style = new FileInfo(true, "");
             this.internal = new FileInfo(true, "");
-            this.script = "NewProject.js";
+            this.script = new FileInfo(true, "");
+            Reflect.deleteProperty(this.script, "overwrite");
+            Reflect.set(this.script, "include", true);
         }
         reduceMutator(_mutator) { }
     }
@@ -282,6 +301,17 @@ var Fudge;
             else
                 return false;
         }
+        getProjectJSON() {
+            let serialization = ƒ.Project.serialize();
+            let json = ƒ.Serializer.stringify(serialization);
+            return json;
+        }
+        getProjectCSS() {
+            let content = "";
+            content += "html, body {\n  padding: 0px;\n  margin: 0px;\n  width: 100%;\n  height: 100%;\n overflow: auto;\n}\n\n";
+            content += "canvas.fullscreen { \n  width: 100vw; \n  height: 100vh; \n}";
+            return content;
+        }
         getProjectHTML() {
             let html = document.implementation.createHTMLDocument(this.title);
             html.head.appendChild(createTag("meta", { charset: "utf-8" }));
@@ -289,7 +319,8 @@ var Fudge;
             html.head.appendChild(createTag("script", { type: "text/javascript", src: "../../../Aid/Build/FudgeAid.js" }));
             html.head.appendChild(createTag("link", { rel: "stylesheet", href: this.files.style.filename }));
             html.head.appendChild(createTag("link", { type: "resources", src: this.files.internal.filename }));
-            html.head.appendChild(createTag("script", { type: "text/javascript", src: this.files.script, editor: "true" }));
+            if (Reflect.get(this.files.script, "include"))
+                html.head.appendChild(createTag("script", { type: "text/javascript", src: this.files.script.filename, editor: "true" }));
             html.body.appendChild(createTag("h1", {}, this.title));
             html.body.appendChild(createTag("p", {}, "click to start"));
             html.body.appendChild(createTag("hr"));
@@ -305,11 +336,12 @@ var Fudge;
             return (new XMLSerializer()).serializeToString(html);
         }
         getGraphs() {
-            let result = {
-                Ball: "ball",
-                Triangle: "triangle",
-                Xyz: "xyz"
-            };
+            let graphs = ƒ.Project.getResourcesOfType(ƒ.Graph);
+            let result = {};
+            for (let id in graphs) {
+                let graph = graphs[id];
+                result[graph.name] = id;
+            }
             return result;
         }
         getMutatorAttributeTypes(_mutator) {

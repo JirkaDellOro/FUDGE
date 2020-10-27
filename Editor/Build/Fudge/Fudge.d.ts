@@ -100,7 +100,7 @@ declare namespace Fudge {
         index: FileInfo;
         style: FileInfo;
         internal: FileInfo;
-        script: string;
+        script: FileInfo;
         constructor();
         protected reduceMutator(_mutator: ƒ.Mutator): void;
     }
@@ -112,6 +112,8 @@ declare namespace Fudge {
         constructor();
         openDialog(): Promise<boolean>;
         hndChange: (_event: Event) => void;
+        getProjectJSON(): string;
+        getProjectCSS(): string;
         getProjectHTML(): string;
         getGraphs(): Object;
         getMutatorAttributeTypes(_mutator: ƒ.Mutator): ƒ.MutatorAttributeTypes;

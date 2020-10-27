@@ -23,10 +23,12 @@ namespace Fudge {
     public index: FileInfo = new FileInfo(true, "");
     public style: FileInfo = new FileInfo(true, "");
     public internal: FileInfo = new FileInfo(true, "");
-    public script: string = "NewProject.js";
+    public script: FileInfo = new FileInfo(true, "");
 
     constructor() {
       super();
+      Reflect.deleteProperty(this.script, "overwrite");
+      Reflect.set(this.script, "include", true);
     }
     protected reduceMutator(_mutator: ƒ.Mutator): void {/* */ }
   }
@@ -65,18 +67,34 @@ namespace Fudge {
       }
     }
 
+    public getProjectJSON(): string {
+      let serialization: ƒ.SerializationOfResources = ƒ.Project.serialize();
+      let json: string = ƒ.Serializer.stringify(serialization);
+      return json;
+    }
+
+    public getProjectCSS(): string {
+      let content: string = "";
+
+      content += "html, body {\n  padding: 0px;\n  margin: 0px;\n  width: 100%;\n  height: 100%;\n overflow: auto;\n}\n\n";
+      content += "canvas.fullscreen { \n  width: 100vw; \n  height: 100vh; \n}";
+
+      return content;
+    }
+
     public getProjectHTML(): string {
       let html: Document = document.implementation.createHTMLDocument(this.title);
 
       html.head.appendChild(createTag("meta", { charset: "utf-8" }));
-      
+
       html.head.appendChild(createTag("script", { type: "text/javascript", src: "../../../Core/Build/FudgeCore.js" }));
       html.head.appendChild(createTag("script", { type: "text/javascript", src: "../../../Aid/Build/FudgeAid.js" }));
-      
+
       html.head.appendChild(createTag("link", { rel: "stylesheet", href: this.files.style.filename }));
       html.head.appendChild(createTag("link", { type: "resources", src: this.files.internal.filename }));
-      
-      html.head.appendChild(createTag("script", { type: "text/javascript", src: this.files.script, editor: "true" }));
+
+      if (Reflect.get(this.files.script, "include"))
+        html.head.appendChild(createTag("script", { type: "text/javascript", src: this.files.script.filename, editor: "true" }));
 
       html.body.appendChild(createTag("h1", {}, this.title));
       html.body.appendChild(createTag("p", {}, "click to start"));
@@ -96,10 +114,11 @@ namespace Fudge {
     }
 
     public getGraphs(): Object {
-      let result: Object = {
-        Ball: "ball",
-        Triangle: "triangle",
-        Xyz: "xyz"
+      let graphs: ƒ.Resources = ƒ.Project.getResourcesOfType(ƒ.Graph);
+      let result: Object = {};
+      for (let id in graphs) {
+        let graph: ƒ.Graph = <ƒ.Graph>graphs[id];
+        result[graph.name] = id;
       }
       return result;
     }
