@@ -207,18 +207,15 @@ var Fudge;
                 console.log("Script Namespaces", ƒ.Project.scriptNamespaces);
             }
         }
-        // TODO: support multiple resourcefiles
-        const resourceFile = head.querySelector("link[type=resources]").getAttribute("src");
-        ƒ.Project.baseURL = _url;
-        let reconstruction = await ƒ.Project.loadResources(new URL(resourceFile, _url).toString());
-        ƒ.Debug.groupCollapsed("Deserialized");
-        ƒ.Debug.info(reconstruction);
-        ƒ.Debug.groupEnd();
-        // TODO: this is a hack to get first NodeResource to display -> move all to project view
-        // for (let id in reconstruction) {
-        //   if (id.startsWith("Node"))
-        //     return <ƒ.NodeResource>reconstruction[id];
-        // }
+        const resourceLinks = head.querySelectorAll("link[type=resources]");
+        for (let resourceLink of resourceLinks) {
+            let resourceFile = resourceLink.getAttribute("src");
+            ƒ.Project.baseURL = _url;
+            let reconstruction = await ƒ.Project.loadResources(new URL(resourceFile, _url).toString());
+            ƒ.Debug.groupCollapsed("Deserialized");
+            ƒ.Debug.info(reconstruction);
+            ƒ.Debug.groupEnd();
+        }
     }
     Fudge.loadProject = loadProject;
 })(Fudge || (Fudge = {}));
