@@ -84,7 +84,7 @@ declare namespace Fudge {
     export {};
 }
 declare namespace Fudge {
-    function saveProject(): void;
+    function saveProject(): Promise<void>;
     function promptLoadProject(): Promise<URL>;
     function loadProject(_url: URL): Promise<void>;
 }
@@ -96,23 +96,29 @@ declare namespace Fudge {
         constructor(_overwrite: boolean, _filename: string);
         protected reduceMutator(_mutator: ƒ.Mutator): void;
     }
-    class Project extends ƒ.Mutable {
-        private title;
-        private index;
-        private style;
-        private internal;
-        private script;
-        private graphToStartWith;
-        private includePhysics;
-        private option;
+    export class Files extends ƒ.Mutable {
+        index: FileInfo;
+        style: FileInfo;
+        internal: FileInfo;
+        script: string;
         constructor();
-        openDialog(): Promise<void>;
+        protected reduceMutator(_mutator: ƒ.Mutator): void;
+    }
+    export class Project extends ƒ.Mutable {
+        files: Files;
+        private title;
+        private includePhysics;
+        private graphToStartWith;
+        constructor();
+        openDialog(): Promise<boolean>;
         hndChange: (_event: Event) => void;
         getProjectHTML(): string;
+        getGraphs(): Object;
         getMutatorAttributeTypes(_mutator: ƒ.Mutator): ƒ.MutatorAttributeTypes;
         protected reduceMutator(_mutator: ƒ.Mutator): void;
         private updateFilenames;
     }
+    export {};
 }
 declare namespace Fudge {
     const ipcRenderer: Electron.IpcRenderer;

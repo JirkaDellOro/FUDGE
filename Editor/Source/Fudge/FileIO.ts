@@ -1,7 +1,7 @@
 namespace Fudge {
   const fs: ƒ.General = require("fs");
 
-  export function saveProject(): void {
+  export async function saveProject(): Promise<void> {
     // let serialization: ƒ.Serialization = ƒ.Serializer.serialize(_node);
     // let content: string = ƒ.Serializer.stringify(serialization);
 
@@ -9,8 +9,14 @@ namespace Fudge {
     // let filename: string = remote.dialog.showSaveDialogSync(null, { title: "Save Graph", buttonLabel: "Save Graph", message: "ƒ-Message" });
 
     // fs.writeFileSync(filename, content);
+
+    if (!await project.openDialog())
+      return;
+
     let html: string = project.getProjectHTML();
     console.log(html);
+    let filename: string = remote.dialog.showSaveDialogSync(null, { title: "Save Project", buttonLabel: "Save Project", message: "ƒ-Message", defaultPath: project.files.index.filename });
+    fs.writeFileSync(filename, html);
   }
 
   export async function promptLoadProject(): Promise<URL> {
@@ -53,7 +59,7 @@ namespace Fudge {
       let resourceFile: string = resourceLink.getAttribute("src");
       ƒ.Project.baseURL = _url;
       let reconstruction: ƒ.Resources = await ƒ.Project.loadResources(new URL(resourceFile, _url).toString());
-      
+
       ƒ.Debug.groupCollapsed("Deserialized");
       ƒ.Debug.info(reconstruction);
       ƒ.Debug.groupEnd();

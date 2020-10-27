@@ -8,7 +8,7 @@ namespace Fudge {
     OPT3 = "option3"
   }
 
-  export class FileInfo extends ƒ.Mutable {
+  class FileInfo extends ƒ.Mutable {
     overwrite: boolean;
     filename: string;
     constructor(_overwrite: boolean, _filename: string) {
@@ -19,28 +19,41 @@ namespace Fudge {
     protected reduceMutator(_mutator: ƒ.Mutator): void {/* */ }
   }
 
+  export class Files extends ƒ.Mutable {
+    public index: FileInfo = new FileInfo(true, "");
+    public style: FileInfo = new FileInfo(true, "");
+    public internal: FileInfo = new FileInfo(true, "");
+    public script: string = "NewProject.js";
+
+    constructor() {
+      super();
+    }
+    protected reduceMutator(_mutator: ƒ.Mutator): void {/* */ }
+  }
+
   export class Project extends ƒ.Mutable {
+    public files: Files = new Files();
     private title: string = "NewProject";
-    private index: FileInfo = new FileInfo(true, "");
-    private style: FileInfo = new FileInfo(true, "");
-    private internal: FileInfo = new FileInfo(true, "");
-    private script: string;
-    private graphToStartWith: string = "";
     private includePhysics: boolean = false;
-    private option: PROJECT = PROJECT.OPT3;
+    private graphToStartWith: string = "";
+    // private option: PROJECT = PROJECT.OPT3;
 
     public constructor() {
       super();
       this.updateFilenames("NewProject", true, this);
-      this.script = "NewProject.js";
     }
 
-    public async openDialog(): Promise<void> {
+    public async openDialog(): Promise<boolean> {
       let promise: Promise<boolean> = ƒui.Dialog.prompt(project, false, "Review project settings", "Adjust settings and press OK", "OK", "Cancel");
 
       ƒui.Dialog.dom.addEventListener(ƒui.EVENT.CHANGE, this.hndChange);
-      if (await promise)
+      if (await promise) {
         console.log("OK");
+        let mutator: ƒ.Mutator = ƒui.Controller.getMutator(this, ƒui.Dialog.dom, this.getMutator());
+        this.mutate(mutator);
+        return true;
+      } else
+        return false;
     }
 
     public hndChange = (_event: Event): void => {
@@ -53,23 +66,24 @@ namespace Fudge {
     }
 
     public getProjectHTML(): string {
-      let html: Document = document.implementation.createHTMLDocument("TestDoc");
+      let html: Document = document.implementation.createHTMLDocument(this.title);
 
       html.head.appendChild(createTag("meta", { charset: "utf-8" }));
-      html.head.appendChild(createTag("title", {}, this.title));
-      html.head.appendChild(createTag("link", { rel: "stylesheet", href: "TestProject.css" }));
-
+      
       html.head.appendChild(createTag("script", { type: "text/javascript", src: "../../../Core/Build/FudgeCore.js" }));
       html.head.appendChild(createTag("script", { type: "text/javascript", src: "../../../Aid/Build/FudgeAid.js" }));
-
-      html.head.appendChild(createTag("script", { type: "text/javascript", src: "Code/Build/Compiled.js", editor: "true" }));
-      html.head.appendChild(createTag("link", { type: "resources", src: "InternalResources.json" }));
+      
+      html.head.appendChild(createTag("link", { rel: "stylesheet", href: this.files.style.filename }));
+      html.head.appendChild(createTag("link", { type: "resources", src: this.files.internal.filename }));
+      
+      html.head.appendChild(createTag("script", { type: "text/javascript", src: this.files.script, editor: "true" }));
 
       html.body.appendChild(createTag("h1", {}, this.title));
       html.body.appendChild(createTag("p", {}, "click to start"));
+      html.body.appendChild(createTag("hr"));
       html.body.appendChild(createTag("canvas"));
 
-      function createTag(_tag: string, _attributes?: { [key: string]: string }, _content?: string): HTMLElement {
+      function createTag(_tag: string, _attributes: { [key: string]: string } = {}, _content?: string): HTMLElement {
         let element: HTMLElement = document.createElement(_tag);
         for (let attribute in _attributes)
           element.setAttribute(attribute, _attributes[attribute]);
@@ -81,17 +95,28 @@ namespace Fudge {
       return (new XMLSerializer()).serializeToString(html);
     }
 
+    public getGraphs(): Object {
+      let result: Object = {
+        Ball: "ball",
+        Triangle: "triangle",
+        Xyz: "xyz"
+      }
+      return result;
+    }
+
     public getMutatorAttributeTypes(_mutator: ƒ.Mutator): ƒ.MutatorAttributeTypes {
       let types: ƒ.MutatorAttributeTypes = super.getMutatorAttributeTypes(_mutator);
       if (types.option)
         types.option = PROJECT;
+      if (types.graphToStartWith)
+        types.graphToStartWith = this.getGraphs();
       return types;
     }
 
     protected reduceMutator(_mutator: ƒ.Mutator): void {/* */ }
 
     private updateFilenames(_title: string, _all: boolean = false, _mutator: ƒ.Mutator): void {
-      let files: { [key: string]: FileInfo } = { html: _mutator.index, css: _mutator.style, json: _mutator.internal };
+      let files: { [key: string]: FileInfo } = { html: _mutator.files.index, css: _mutator.files.style, json: _mutator.files.internal };
       for (let key in files) {
         let fileInfo: FileInfo = files[key];
         fileInfo.overwrite = _all || fileInfo.overwrite;

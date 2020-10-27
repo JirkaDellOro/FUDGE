@@ -167,14 +167,18 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     const fs = require("fs");
-    function saveProject() {
+    async function saveProject() {
         // let serialization: ƒ.Serialization = ƒ.Serializer.serialize(_node);
         // let content: string = ƒ.Serializer.stringify(serialization);
         // // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
         // let filename: string = remote.dialog.showSaveDialogSync(null, { title: "Save Graph", buttonLabel: "Save Graph", message: "ƒ-Message" });
         // fs.writeFileSync(filename, content);
+        if (!await Fudge.project.openDialog())
+            return;
         let html = Fudge.project.getProjectHTML();
         console.log(html);
+        let filename = Fudge.remote.dialog.showSaveDialogSync(null, { title: "Save Project", buttonLabel: "Save Project", message: "ƒ-Message", defaultPath: Fudge.project.files.index.filename });
+        fs.writeFileSync(filename, html);
     }
     Fudge.saveProject = saveProject;
     async function promptLoadProject() {
@@ -237,17 +241,25 @@ var Fudge;
         }
         reduceMutator(_mutator) { }
     }
-    Fudge.FileInfo = FileInfo;
-    class Project extends ƒ.Mutable {
+    class Files extends ƒ.Mutable {
         constructor() {
             super();
-            this.title = "NewProject";
             this.index = new FileInfo(true, "");
             this.style = new FileInfo(true, "");
             this.internal = new FileInfo(true, "");
-            this.graphToStartWith = "";
+            this.script = "NewProject.js";
+        }
+        reduceMutator(_mutator) { }
+    }
+    Fudge.Files = Files;
+    class Project extends ƒ.Mutable {
+        // private option: PROJECT = PROJECT.OPT3;
+        constructor() {
+            super();
+            this.files = new Files();
+            this.title = "NewProject";
             this.includePhysics = false;
-            this.option = PROJECT.OPT3;
+            this.graphToStartWith = "";
             this.hndChange = (_event) => {
                 let mutator = ƒui.Controller.getMutator(this, ƒui.Dialog.dom, this.getMutator());
                 console.log(mutator, this);
@@ -257,27 +269,32 @@ var Fudge;
                 }
             };
             this.updateFilenames("NewProject", true, this);
-            this.script = "NewProject.js";
         }
         async openDialog() {
             let promise = ƒui.Dialog.prompt(Fudge.project, false, "Review project settings", "Adjust settings and press OK", "OK", "Cancel");
             ƒui.Dialog.dom.addEventListener("change" /* CHANGE */, this.hndChange);
-            if (await promise)
+            if (await promise) {
                 console.log("OK");
+                let mutator = ƒui.Controller.getMutator(this, ƒui.Dialog.dom, this.getMutator());
+                this.mutate(mutator);
+                return true;
+            }
+            else
+                return false;
         }
         getProjectHTML() {
-            let html = document.implementation.createHTMLDocument("TestDoc");
+            let html = document.implementation.createHTMLDocument(this.title);
             html.head.appendChild(createTag("meta", { charset: "utf-8" }));
-            html.head.appendChild(createTag("title", {}, this.title));
-            html.head.appendChild(createTag("link", { rel: "stylesheet", href: "TestProject.css" }));
             html.head.appendChild(createTag("script", { type: "text/javascript", src: "../../../Core/Build/FudgeCore.js" }));
             html.head.appendChild(createTag("script", { type: "text/javascript", src: "../../../Aid/Build/FudgeAid.js" }));
-            html.head.appendChild(createTag("script", { type: "text/javascript", src: "Code/Build/Compiled.js", editor: "true" }));
-            html.head.appendChild(createTag("link", { type: "resources", src: "InternalResources.json" }));
+            html.head.appendChild(createTag("link", { rel: "stylesheet", href: this.files.style.filename }));
+            html.head.appendChild(createTag("link", { type: "resources", src: this.files.internal.filename }));
+            html.head.appendChild(createTag("script", { type: "text/javascript", src: this.files.script, editor: "true" }));
             html.body.appendChild(createTag("h1", {}, this.title));
             html.body.appendChild(createTag("p", {}, "click to start"));
+            html.body.appendChild(createTag("hr"));
             html.body.appendChild(createTag("canvas"));
-            function createTag(_tag, _attributes, _content) {
+            function createTag(_tag, _attributes = {}, _content) {
                 let element = document.createElement(_tag);
                 for (let attribute in _attributes)
                     element.setAttribute(attribute, _attributes[attribute]);
@@ -287,15 +304,25 @@ var Fudge;
             }
             return (new XMLSerializer()).serializeToString(html);
         }
+        getGraphs() {
+            let result = {
+                Ball: "ball",
+                Triangle: "triangle",
+                Xyz: "xyz"
+            };
+            return result;
+        }
         getMutatorAttributeTypes(_mutator) {
             let types = super.getMutatorAttributeTypes(_mutator);
             if (types.option)
                 types.option = PROJECT;
+            if (types.graphToStartWith)
+                types.graphToStartWith = this.getGraphs();
             return types;
         }
         reduceMutator(_mutator) { }
         updateFilenames(_title, _all = false, _mutator) {
-            let files = { html: _mutator.index, css: _mutator.style, json: _mutator.internal };
+            let files = { html: _mutator.files.index, css: _mutator.files.style, json: _mutator.files.internal };
             for (let key in files) {
                 let fileInfo = files[key];
                 fileInfo.overwrite = _all || fileInfo.overwrite;
@@ -338,12 +365,6 @@ var Fudge;
             Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_PROJECT_OPEN);
             Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_GRAPH_OPEN);
             // ipcRenderer.emit(MENU.PROJECT_LOAD);
-            // if (project.openDialog())
-            //   console.log(project);
-            // saveProject();
-            // let test: Object = { text: "abc", toggle: true, value: 1, sub: { sub1: 123, sub2: "Hallo" } };
-            // if (await ƒui.Dialog.prompt(project, false, "Review project settings", "Adjust settings and press OK", "OK", "Cancel"))
-            //   console.log(project);
         }
         static setupGoldenLayout() {
             let config = {
