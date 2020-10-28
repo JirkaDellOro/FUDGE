@@ -27,6 +27,8 @@ namespace FudgeCore {
     private fieldOfView: number = 45; // The camera's sensorangle.
     private aspectRatio: number = 1.0;
     private direction: FIELD_OF_VIEW = FIELD_OF_VIEW.DIAGONAL;
+    private near: number = 1;
+    private far: number = 2000;
     private backgroundEnabled: boolean = true; // Determines whether or not the background of this camera will be rendered.
     // TODO: examine, if background should be an attribute of Camera or Viewport
 
@@ -67,18 +69,27 @@ namespace FudgeCore {
       return this.direction;
     }
 
+    public getNear(): number  {
+      return this.near;
+    }
+    public getFar(): number  {
+      return this.far;
+    }
+
     /**
      * Set the camera to perspective projection. The world origin is in the center of the canvaselement.
      * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
      * @param _fieldOfView The field of view in Degrees. (Default = 45)
      * @param _direction The plane on which the fieldOfView-Angle is given 
      */
-    public projectCentral(_aspect: number = this.aspectRatio, _fieldOfView: number = this.fieldOfView, _direction: FIELD_OF_VIEW = this.direction): void {
+    public projectCentral(_aspect: number = this.aspectRatio, _fieldOfView: number = this.fieldOfView, _direction: FIELD_OF_VIEW = this.direction, _near: number = 1, _far: number = 2000): void {
       this.aspectRatio = _aspect;
       this.fieldOfView = _fieldOfView;
       this.direction = _direction;
       this.projection = PROJECTION.CENTRAL;
-      this.transform = Matrix4x4.PROJECTION_CENTRAL(_aspect, this.fieldOfView, 1, 2000, this.direction); // TODO: remove magic numbers
+      this.near = _near;
+      this.far = _far;
+      this.transform = Matrix4x4.PROJECTION_CENTRAL(_aspect, this.fieldOfView, _near, _far, this.direction); // TODO: remove magic numbers
     }
     /**
      * Set the camera to orthographic projection. The origin is in the top left corner of the canvas.

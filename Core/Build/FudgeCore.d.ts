@@ -624,7 +624,18 @@ declare namespace FudgeCore {
          * @param _point
          */
         isInside(_point: Vector2): boolean;
+        /**
+         * Returns true if this rectangle collides with the rectangle given
+         * @param _rect
+         */
         collides(_rect: Rectangle): boolean;
+        /**
+         * Returns the rectangle created by the intersection of this and the given rectangle or null, if they don't collide
+         */
+        getIntersection(_rect: Rectangle): Rectangle;
+        /**
+         * Creates a string representation of this rectangle
+         */
         toString(): string;
         protected reduceMutator(_mutator: Mutator): void;
     }
@@ -786,6 +797,10 @@ declare namespace FudgeCore {
          * @param _child The node to be removed.
          */
         removeChild(_child: Node): void;
+        /**
+         * Removes all references in the list of children
+         */
+        removeAllChildren(): void;
         /**
          * Returns the position of the node in the list of children or -1 if not found
          * @param _search The node to be found.
@@ -1536,6 +1551,8 @@ declare namespace FudgeCore {
         private fieldOfView;
         private aspectRatio;
         private direction;
+        private near;
+        private far;
         private backgroundEnabled;
         /**
          * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
@@ -1547,13 +1564,15 @@ declare namespace FudgeCore {
         getAspect(): number;
         getFieldOfView(): number;
         getDirection(): FIELD_OF_VIEW;
+        getNear(): number;
+        getFar(): number;
         /**
          * Set the camera to perspective projection. The world origin is in the center of the canvaselement.
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
          * @param _fieldOfView The field of view in Degrees. (Default = 45)
          * @param _direction The plane on which the fieldOfView-Angle is given
          */
-        projectCentral(_aspect?: number, _fieldOfView?: number, _direction?: FIELD_OF_VIEW): void;
+        projectCentral(_aspect?: number, _fieldOfView?: number, _direction?: FIELD_OF_VIEW, _near?: number, _far?: number): void;
         /**
          * Set the camera to orthographic projection. The origin is in the top left corner of the canvas.
          * @param _left The positionvalue of the projectionspace's left border. (Default = 0)
@@ -1957,6 +1976,7 @@ declare namespace FudgeCore {
         static register(_resource: SerializableResource, _idResource?: string): void;
         static deregister(_resource: SerializableResource): void;
         static clear(): void;
+        static getResourcesOfType<T>(_type: new (_args: General) => T): Resources;
         /**
          * Generate a user readable and unique id using the type of the resource, the date and random numbers
          * @param _resource

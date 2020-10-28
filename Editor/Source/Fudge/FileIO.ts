@@ -1,14 +1,43 @@
 namespace Fudge {
   const fs: ƒ.General = require("fs");
 
-  export function saveProject(_node: ƒ.Node): void {
-    let serialization: ƒ.Serialization = ƒ.Serializer.serialize(_node);
-    let content: string = ƒ.Serializer.stringify(serialization);
+  export async function saveProject(): Promise<void> {
+    // let serialization: ƒ.Serialization = ƒ.Serializer.serialize(_node);
+    // let content: string = ƒ.Serializer.stringify(serialization);
 
-    // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
-    let filename: string = remote.dialog.showSaveDialogSync(null, { title: "Save Graph", buttonLabel: "Save Graph", message: "ƒ-Message" });
+    // // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
+    // let filename: string = remote.dialog.showSaveDialogSync(null, { title: "Save Graph", buttonLabel: "Save Graph", message: "ƒ-Message" });
 
-    fs.writeFileSync(filename, content);
+    // fs.writeFileSync(filename, content);
+
+    if (!await project.openDialog())
+      return;
+
+    let filename: string | string[] = remote.dialog.showOpenDialogSync(null, {
+      properties: ["openDirectory", "createDirectory"], title: "Select a folder to save the project to", buttonLabel: "Save Project"
+    });
+    if (!filename)
+      return;
+
+    filename = filename[0] + "/a.b";
+    console.log(filename);
+
+    if (project.files.index.overwrite) {
+      let html: string = project.getProjectHTML();
+      let htmlFileName: URL = new URL(project.files.index.filename, filename);
+      fs.writeFileSync(htmlFileName, html);
+    }
+
+    if (project.files.style.overwrite) {
+      let cssFileName: URL = new URL(project.files.style.filename, filename);
+      fs.writeFileSync(cssFileName, project.getProjectCSS());
+    }
+
+    if (project.files.internal.overwrite) {
+      let jsonFileName: URL = new URL(project.files.internal.filename, filename);
+      console.log(jsonFileName);
+      fs.writeFileSync(jsonFileName, project.getProjectJSON());
+    }
   }
 
   export async function promptLoadProject(): Promise<URL> {
@@ -41,24 +70,20 @@ namespace Fudge {
       if (script.getAttribute("editor") == "true") {
         let url: string = script.getAttribute("src");
         await ƒ.Project.loadScript(new URL(url, _url).toString());
-        console.log("ComponentScripts", ƒ.Project.getComponentScripts());  
-        console.log("Script Namespaces", ƒ.Project.scriptNamespaces);  
+        console.log("ComponentScripts", ƒ.Project.getComponentScripts());
+        console.log("Script Namespaces", ƒ.Project.scriptNamespaces);
       }
     }
 
-    // TODO: support multiple resourcefiles
-    const resourceFile: string = head.querySelector("link").getAttribute("src");
-    ƒ.Project.baseURL = _url;
-    let reconstruction: ƒ.Resources = await ƒ.Project.loadResources(new URL(resourceFile, _url).toString());
+    const resourceLinks: NodeListOf<HTMLLinkElement> = head.querySelectorAll("link[type=resources]");
+    for (let resourceLink of resourceLinks) {
+      let resourceFile: string = resourceLink.getAttribute("src");
+      ƒ.Project.baseURL = _url;
+      let reconstruction: ƒ.Resources = await ƒ.Project.loadResources(new URL(resourceFile, _url).toString());
 
-    ƒ.Debug.groupCollapsed("Deserialized");
-    ƒ.Debug.info(reconstruction);
-    ƒ.Debug.groupEnd();
-
-    // TODO: this is a hack to get first NodeResource to display -> move all to project view
-    // for (let id in reconstruction) {
-    //   if (id.startsWith("Node"))
-    //     return <ƒ.NodeResource>reconstruction[id];
-    // }
+      ƒ.Debug.groupCollapsed("Deserialized");
+      ƒ.Debug.info(reconstruction);
+      ƒ.Debug.groupEnd();
+    }
   }
 }

@@ -28,17 +28,29 @@ var FudgeUserInterface;
             window.setInterval(this.refresh, this.timeUpdate);
             this.domElement.addEventListener("input", this.mutateOnInput);
         }
-        setMutable(_mutable) {
-            this.mutable = _mutable;
-            this.mutator = _mutable.getMutatorForUserInterface();
-            if (_mutable instanceof ƒ.Mutable)
-                this.mutatorTypes = _mutable.getMutatorAttributeTypes(this.mutator);
+        /**
+         * Recursive method taking an existing [[ƒ.Mutator]] as a template
+         * and updating its values with those found in the given UI-domElement.
+         */
+        static updateMutator(_domElement, _mutator) {
+            for (let key in _mutator) {
+                let element = _domElement.querySelector(`[key=${key}]`);
+                if (element == null)
+                    continue;
+                if (element instanceof FudgeUserInterface.CustomElement)
+                    _mutator[key] = element.getMutatorValue();
+                else if (_mutator[key] instanceof Object)
+                    _mutator[key] = Controller.updateMutator(element, _mutator[key]);
+                else
+                    _mutator[key] = element.value;
+            }
+            return _mutator;
         }
         /**
-         * Recursive method taking the [[ƒ.Mutator]] of a [[ƒ.Mutable]] or another existing [[ƒ.Mutator]]
-         * as a template and updating its values with those found in the given UI-domElement.
+         * Recursive method taking the a [[ƒ.Mutable]] as a template to create a [[ƒ.Mutator]] or update the given [[ƒ.Mutator]]
+         * with the values in the given UI-domElement
          */
-        getMutator(_mutable = this.mutable, _domElement = this.domElement, _mutator, _types) {
+        static getMutator(_mutable, _domElement, _mutator, _types) {
             // TODO: examine if this.mutator should also be addressed in some way...
             let mutator = _mutator || _mutable.getMutatorForUserInterface();
             // TODO: Mutator type now only used for enums. Examine if there is another way
@@ -50,7 +62,8 @@ var FudgeUserInterface;
                 if (element instanceof FudgeUserInterface.CustomElement)
                     mutator[key] = element.getMutatorValue();
                 else if (mutatorTypes[key] instanceof Object)
-                    element.value = mutator[key];
+                    // TODO: setting a value of the dom element doesn't make sense... examine what this line was supposed to do. Assumably enums
+                    mutator[key] = element.value;
                 else {
                     let subMutator = Reflect.get(mutator, key);
                     let subMutable;
@@ -63,12 +76,11 @@ var FudgeUserInterface;
             return mutator;
         }
         /**
-         * Recursive method taking the [[ƒ.Mutator]] of a [[ƒ.Mutable]] and updating the UI-domElement accordingly
+         * Recursive method taking the [[ƒ.Mutator]] of a [[ƒ.Mutable]] and updating the UI-domElement accordingly.
+         * If an additional [[ƒ.Mutator]] is passed, its values are used instead of those of the [[ƒ.Mutable]].
          */
-        updateUserInterface(_mutable = this.mutable, _domElement = this.domElement) {
-            // TODO: should get Mutator for UI or work with this.mutator (examine)
-            this.mutable.updateMutator(this.mutator);
-            let mutator = _mutable.getMutatorForUserInterface();
+        static updateUserInterface(_mutable, _domElement, _mutator) {
+            let mutator = _mutator || _mutable.getMutatorForUserInterface();
             let mutatorTypes = {};
             if (_mutable instanceof ƒ.Mutable)
                 mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
@@ -85,12 +97,26 @@ var FudgeUserInterface;
                     // let fieldset: HTMLFieldSetElement = <HTMLFieldSetElement><HTMLElement>element;
                     let subMutable = Reflect.get(_mutable, key);
                     if (subMutable instanceof ƒ.Mutable)
-                        this.updateUserInterface(subMutable, element);
+                        this.updateUserInterface(subMutable, element, mutator[key]);
                     else
                         //element.setMutatorValue(value);
                         Reflect.set(element, "value", value);
                 }
             }
+        }
+        getMutator(_mutator, _types) {
+            // TODO: should get Mutator for UI or work with this.mutator (examine)
+            this.mutable.updateMutator(this.mutator);
+            return Controller.getMutator(this.mutable, this.domElement);
+        }
+        updateUserInterface() {
+            Controller.updateUserInterface(this.mutable, this.domElement);
+        }
+        setMutable(_mutable) {
+            this.mutable = _mutable;
+            this.mutator = _mutable.getMutatorForUserInterface();
+            if (_mutable instanceof ƒ.Mutable)
+                this.mutatorTypes = _mutable.getMutatorAttributeTypes(this.mutator);
         }
     }
     FudgeUserInterface.Controller = Controller;
@@ -113,13 +139,21 @@ var FudgeUserInterface;
             return controller;
         }
         /**
-         * Create a custom fieldset for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+         * Create a extendable fieldset for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
          */
         static createFieldSetFromMutable(_mutable, _name, _mutator) {
             let name = _name || _mutable.constructor.name;
+            let fieldset = Generator.createExpendableFieldset(name, _mutable.type);
+            fieldset.content.appendChild(Generator.createInterfaceFromMutable(_mutable, _name, _mutator));
+            return fieldset;
+        }
+        /**
+         * Create a div-Elements containing the interface for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+         */
+        static createInterfaceFromMutable(_mutable, _name, _mutator) {
             let mutator = _mutator || _mutable.getMutatorForUserInterface();
             let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
-            let fieldset = Generator.createFoldableFieldset(name, _mutable.type);
+            let div = document.createElement("div");
             for (let key in mutatorTypes) {
                 let type = mutatorTypes[key];
                 let value = mutator[key];
@@ -134,10 +168,29 @@ var FudgeUserInterface;
                     // let fieldset: FoldableFieldSet = Generator.createFieldsetFromMutable(subMutable, key, <ƒ.Mutator>_mutator[key]);
                     // _parent.appendChild(fieldset);
                 }
-                fieldset.content.appendChild(element);
-                fieldset.content.appendChild(document.createElement("br"));
+                div.appendChild(element);
+                div.appendChild(document.createElement("br"));
             }
-            return fieldset;
+            return div;
+        }
+        /**
+         * Create a div-Element containing the interface for the [[FudgeCore.Mutator]]
+         * Does not support nested mutators!
+         */
+        static createInterfaceFromMutator(_mutator) {
+            let div = document.createElement("div");
+            for (let key in _mutator) {
+                let value = Reflect.get(_mutator, key);
+                if (value instanceof Object) {
+                    let fieldset = Generator.createExpendableFieldset(key, "Hallo");
+                    fieldset.content.appendChild(Generator.createInterfaceFromMutator(value));
+                    div.appendChild(fieldset);
+                }
+                else
+                    div.appendChild(this.createMutatorElement(key, value.constructor.name, value));
+                div.appendChild(document.createElement("br"));
+            }
+            return div;
         }
         /**
          * Create a specific CustomElement for the given data, using _key as identification
@@ -153,6 +206,7 @@ var FudgeUserInterface;
                     let elementType = FudgeUserInterface.CustomElement.get("Object");
                     // @ts-ignore: instantiate abstract class
                     element = new elementType({ key: _key, label: _key, value: _value.toString() }, _type);
+                    // (<CustomElement>element).setMutatorValue(_value);
                 }
                 else {
                     // TODO: remove switch and use registered custom elements instead
@@ -191,7 +245,7 @@ var FudgeUserInterface;
             return dropdown;
         }
         // TODO: implement CustomFieldSet and replace this
-        static createFoldableFieldset(_key, _type) {
+        static createExpendableFieldset(_key, _type) {
             let cntFoldFieldset = new FudgeUserInterface.ExpandableFieldSet(_key);
             //TODO: unique ids
             // cntFoldFieldset.id = _legend;
@@ -585,7 +639,8 @@ var FudgeUserInterface;
                 let entry = document.createElement("option");
                 entry.text = key;
                 entry.value = this.content[key];
-                if (key == this.getAttribute("value")) {
+                // console.log(this.getAttribute("value"));
+                if (entry.value == this.getAttribute("value")) {
                     entry.selected = true;
                 }
                 select.add(entry);
@@ -604,6 +659,7 @@ var FudgeUserInterface;
          */
         setMutatorValue(_value) {
             this.querySelector("select").value = _value;
+            // this.value = _value;
         }
     }
     // @ts-ignore
@@ -921,6 +977,58 @@ var FudgeUserInterface;
     // @ts-ignore
     CustomElementTextInput.customElement = FudgeUserInterface.CustomElement.register("fudge-textinput", CustomElementTextInput, String);
     FudgeUserInterface.CustomElementTextInput = CustomElementTextInput;
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
+    var ƒ = FudgeCore;
+    /**
+     * Static class to display a modal or non-modal dialog with an interface for the given mutator.
+     */
+    class Dialog {
+        /**
+         * Prompt the dialog to the user with the given headline, call to action and labels for the cancel- and ok-button
+         * Use `await` on call, to continue after the user has pressed one of the buttons.
+         */
+        static async prompt(_data, _modal = true, _head = "Headline", _callToAction = "Instruction", _ok = "OK", _cancel = "Cancel") {
+            Dialog.dom = document.createElement("dialog");
+            document.body.appendChild(Dialog.dom);
+            Dialog.dom.innerHTML = "<h1>" + _head + "</h1>";
+            let content;
+            if (_data instanceof ƒ.Mutable)
+                content = FudgeUserInterface.Generator.createInterfaceFromMutable(_data);
+            else
+                content = FudgeUserInterface.Generator.createInterfaceFromMutator(_data);
+            content.id = "content";
+            Dialog.dom.appendChild(content);
+            let div = document.createElement("div");
+            div.innerHTML = "<p>" + _callToAction + "</p>";
+            let btnCancel = document.createElement("button");
+            btnCancel.innerHTML = _cancel;
+            div.appendChild(btnCancel);
+            let btnOk = document.createElement("button");
+            btnOk.innerHTML = _ok;
+            div.appendChild(btnOk);
+            Dialog.dom.appendChild(div);
+            if (_modal)
+                Dialog.dom.showModal();
+            else
+                Dialog.dom.show();
+            return new Promise((_resolve) => {
+                let hndButton = (_event) => {
+                    btnCancel.removeEventListener("click", hndButton);
+                    btnOk.removeEventListener("click", hndButton);
+                    if (_event.target == btnOk)
+                        FudgeUserInterface.Controller.updateMutator(content, _data);
+                    Dialog.dom.close();
+                    document.body.removeChild(Dialog.dom);
+                    _resolve(_event.target == btnOk);
+                };
+                btnCancel.addEventListener("click", hndButton);
+                btnOk.addEventListener("click", hndButton);
+            });
+        }
+    }
+    FudgeUserInterface.Dialog = Dialog;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 // namespace FudgeUserInterface {
 //     /**

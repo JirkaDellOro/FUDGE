@@ -1,5 +1,29 @@
 var Fudge;
 (function (Fudge) {
+    // import ƒui = FudgeUserInterface;
+    // import ƒ = FudgeCore;
+    class ContextMenu {
+        static appendCopyPaste(_menu) {
+            _menu.append(new Fudge.remote.MenuItem({ role: "copy" }));
+            _menu.append(new Fudge.remote.MenuItem({ role: "cut" }));
+            _menu.append(new Fudge.remote.MenuItem({ role: "paste" }));
+        }
+        static getSubclassMenu(_id, _superclass, _callback) {
+            const menu = new Fudge.remote.Menu();
+            for (let iSubclass in _superclass) {
+                let subclass = _superclass[iSubclass];
+                let item = new Fudge.remote.MenuItem({ label: subclass.name, id: String(_id), click: _callback });
+                //@ts-ignore
+                item.overrideProperty("iSubclass", iSubclass);
+                menu.append(item);
+            }
+            return menu;
+        }
+    }
+    Fudge.ContextMenu = ContextMenu;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
     let CONTEXTMENU;
     (function (CONTEXTMENU) {
         // SKETCH = ViewSketch,
@@ -143,12 +167,35 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     const fs = require("fs");
-    function saveProject(_node) {
-        let serialization = ƒ.Serializer.serialize(_node);
-        let content = ƒ.Serializer.stringify(serialization);
-        // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
-        let filename = Fudge.remote.dialog.showSaveDialogSync(null, { title: "Save Graph", buttonLabel: "Save Graph", message: "ƒ-Message" });
-        fs.writeFileSync(filename, content);
+    async function saveProject() {
+        // let serialization: ƒ.Serialization = ƒ.Serializer.serialize(_node);
+        // let content: string = ƒ.Serializer.stringify(serialization);
+        // // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
+        // let filename: string = remote.dialog.showSaveDialogSync(null, { title: "Save Graph", buttonLabel: "Save Graph", message: "ƒ-Message" });
+        // fs.writeFileSync(filename, content);
+        if (!await Fudge.project.openDialog())
+            return;
+        let filename = Fudge.remote.dialog.showOpenDialogSync(null, {
+            properties: ["openDirectory", "createDirectory"], title: "Select a folder to save the project to", buttonLabel: "Save Project"
+        });
+        if (!filename)
+            return;
+        filename = filename[0] + "/a.b";
+        console.log(filename);
+        if (Fudge.project.files.index.overwrite) {
+            let html = Fudge.project.getProjectHTML();
+            let htmlFileName = new URL(Fudge.project.files.index.filename, filename);
+            fs.writeFileSync(htmlFileName, html);
+        }
+        if (Fudge.project.files.style.overwrite) {
+            let cssFileName = new URL(Fudge.project.files.style.filename, filename);
+            fs.writeFileSync(cssFileName, Fudge.project.getProjectCSS());
+        }
+        if (Fudge.project.files.internal.overwrite) {
+            let jsonFileName = new URL(Fudge.project.files.internal.filename, filename);
+            console.log(jsonFileName);
+            fs.writeFileSync(jsonFileName, Fudge.project.getProjectJSON());
+        }
     }
     Fudge.saveProject = saveProject;
     async function promptLoadProject() {
@@ -181,96 +228,164 @@ var Fudge;
                 console.log("Script Namespaces", ƒ.Project.scriptNamespaces);
             }
         }
-        // TODO: support multiple resourcefiles
-        const resourceFile = head.querySelector("link").getAttribute("src");
-        ƒ.Project.baseURL = _url;
-        let reconstruction = await ƒ.Project.loadResources(new URL(resourceFile, _url).toString());
-        ƒ.Debug.groupCollapsed("Deserialized");
-        ƒ.Debug.info(reconstruction);
-        ƒ.Debug.groupEnd();
-        // TODO: this is a hack to get first NodeResource to display -> move all to project view
-        // for (let id in reconstruction) {
-        //   if (id.startsWith("Node"))
-        //     return <ƒ.NodeResource>reconstruction[id];
-        // }
+        const resourceLinks = head.querySelectorAll("link[type=resources]");
+        for (let resourceLink of resourceLinks) {
+            let resourceFile = resourceLink.getAttribute("src");
+            ƒ.Project.baseURL = _url;
+            let reconstruction = await ƒ.Project.loadResources(new URL(resourceFile, _url).toString());
+            ƒ.Debug.groupCollapsed("Deserialized");
+            ƒ.Debug.info(reconstruction);
+            ƒ.Debug.groupEnd();
+        }
     }
     Fudge.loadProject = loadProject;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
-    class ContextMenu {
-        static appendCopyPaste(_menu) {
-            _menu.append(new Fudge.remote.MenuItem({ role: "copy" }));
-            _menu.append(new Fudge.remote.MenuItem({ role: "cut" }));
-            _menu.append(new Fudge.remote.MenuItem({ role: "paste" }));
+    var ƒui = FudgeUserInterface;
+    let PROJECT;
+    (function (PROJECT) {
+        PROJECT["OPT1"] = "option1";
+        PROJECT["OPT2"] = "option2";
+        PROJECT["OPT3"] = "option3";
+    })(PROJECT || (PROJECT = {}));
+    class FileInfo extends ƒ.Mutable {
+        constructor(_overwrite, _filename) {
+            super();
+            this.overwrite = _overwrite;
+            this.filename = _filename;
         }
-        static getSubclassMenu(_id, _superclass, _callback) {
-            const menu = new Fudge.remote.Menu();
-            for (let iSubclass in _superclass) {
-                let subclass = _superclass[iSubclass];
-                let item = new Fudge.remote.MenuItem({ label: subclass.name, id: String(_id), click: _callback });
-                //@ts-ignore
-                item.overrideProperty("iSubclass", iSubclass);
-                menu.append(item);
-            }
-            return menu;
+        reduceMutator(_mutator) { }
+    }
+    class Files extends ƒ.Mutable {
+        constructor() {
+            super();
+            this.index = new FileInfo(true, "");
+            this.style = new FileInfo(true, "");
+            this.internal = new FileInfo(true, "");
+            this.script = new FileInfo(true, "");
+            Reflect.deleteProperty(this.script, "overwrite");
+            Reflect.set(this.script, "include", true);
         }
-        static getResources(_callback) {
-            const menu = new Fudge.remote.Menu();
-            for (let type of Fudge.typesOfResources) {
-                let item = new Fudge.remote.MenuItem({
-                    label: type.name,
-                    submenu: ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE_MESH, type, _callback)
-                });
-                menu.append(item);
-            }
-            return menu;
+        reduceMutator(_mutator) { }
+    }
+    Fudge.Files = Files;
+    class Project extends ƒ.Mutable {
+        // private option: PROJECT = PROJECT.OPT3;
+        constructor() {
+            super();
+            this.files = new Files();
+            this.title = "NewProject";
+            this.includePhysics = false;
+            this.graphToStartWith = "";
+            this.hndChange = (_event) => {
+                let mutator = ƒui.Controller.getMutator(this, ƒui.Dialog.dom, this.getMutator());
+                console.log(mutator, this);
+                if (mutator.title != this.title) {
+                    this.updateFilenames(mutator.title, false, mutator);
+                    ƒui.Controller.updateUserInterface(this, ƒui.Dialog.dom, mutator);
+                }
+            };
+            this.updateFilenames("NewProject", true, this);
         }
-        static getSubMenu(_object, _callback) {
-            let menu;
-            switch (_object) {
-                case ƒ.ComponentScript:
-                    menu = new Fudge.remote.Menu();
-                    let scripts = ƒ.Project.getComponentScripts();
-                    for (let namespace in scripts) {
-                        let item = new Fudge.remote.MenuItem({ label: namespace, id: null, click: null, submenu: [] });
-                        for (let script of scripts[namespace]) {
-                            let name = Reflect.get(script, "name");
-                            let subitem = new Fudge.remote.MenuItem({ label: name, id: String(Fudge.CONTEXTMENU.ADD_COMPONENT_SCRIPT), click: _callback });
-                            // @ts-ignore
-                            subitem.overrideProperty("Script", namespace + "." + name);
-                            item.submenu.append(subitem);
-                        }
-                        menu.append(item);
-                    }
-                    break;
+        async openDialog() {
+            let promise = ƒui.Dialog.prompt(Fudge.project, false, "Review project settings", "Adjust settings and press OK", "OK", "Cancel");
+            ƒui.Dialog.dom.addEventListener("change" /* CHANGE */, this.hndChange);
+            if (await promise) {
+                console.log("OK");
+                let mutator = ƒui.Controller.getMutator(this, ƒui.Dialog.dom, this.getMutator());
+                this.mutate(mutator);
+                return true;
             }
-            return menu;
+            else
+                return false;
+        }
+        getProjectJSON() {
+            let serialization = ƒ.Project.serialize();
+            let json = ƒ.Serializer.stringify(serialization);
+            return json;
+        }
+        getProjectCSS() {
+            let content = "";
+            content += "html, body {\n  padding: 0px;\n  margin: 0px;\n  width: 100%;\n  height: 100%;\n overflow: auto;\n}\n\n";
+            content += "canvas.fullscreen { \n  width: 100vw; \n  height: 100vh; \n}";
+            return content;
+        }
+        getProjectHTML() {
+            let html = document.implementation.createHTMLDocument(this.title);
+            html.head.appendChild(createTag("meta", { charset: "utf-8" }));
+            html.head.appendChild(createTag("script", { type: "text/javascript", src: "../../../Core/Build/FudgeCore.js" }));
+            html.head.appendChild(createTag("script", { type: "text/javascript", src: "../../../Aid/Build/FudgeAid.js" }));
+            html.head.appendChild(createTag("link", { rel: "stylesheet", href: this.files.style.filename }));
+            html.head.appendChild(createTag("link", { type: "resources", src: this.files.internal.filename }));
+            if (Reflect.get(this.files.script, "include"))
+                html.head.appendChild(createTag("script", { type: "text/javascript", src: this.files.script.filename, editor: "true" }));
+            html.body.appendChild(createTag("h1", {}, this.title));
+            html.body.appendChild(createTag("p", {}, "click to start"));
+            html.body.appendChild(createTag("hr"));
+            html.body.appendChild(createTag("canvas"));
+            function createTag(_tag, _attributes = {}, _content) {
+                let element = document.createElement(_tag);
+                for (let attribute in _attributes)
+                    element.setAttribute(attribute, _attributes[attribute]);
+                if (_content)
+                    element.innerHTML = _content;
+                return element;
+            }
+            return (new XMLSerializer()).serializeToString(html);
+        }
+        getGraphs() {
+            let graphs = ƒ.Project.getResourcesOfType(ƒ.Graph);
+            let result = {};
+            for (let id in graphs) {
+                let graph = graphs[id];
+                result[graph.name] = id;
+            }
+            return result;
+        }
+        getMutatorAttributeTypes(_mutator) {
+            let types = super.getMutatorAttributeTypes(_mutator);
+            if (types.option)
+                types.option = PROJECT;
+            if (types.graphToStartWith)
+                types.graphToStartWith = this.getGraphs();
+            return types;
+        }
+        reduceMutator(_mutator) { }
+        updateFilenames(_title, _all = false, _mutator) {
+            let files = { html: _mutator.files.index, css: _mutator.files.style, json: _mutator.files.internal };
+            for (let key in files) {
+                let fileInfo = files[key];
+                fileInfo.overwrite = _all || fileInfo.overwrite;
+                if (fileInfo.overwrite)
+                    fileInfo.filename = _title + "." + key;
+            }
         }
     }
-    Fudge.ContextMenu = ContextMenu;
+    Fudge.Project = Project;
 })(Fudge || (Fudge = {}));
 ///<reference types="../../../node_modules/electron/Electron"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
 ///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
+///<reference path="Project.ts"/>
 var Fudge;
 ///<reference types="../../../node_modules/electron/Electron"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
 ///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
+///<reference path="Project.ts"/>
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒaid = FudgeAid;
     Fudge.ipcRenderer = require("electron").ipcRenderer;
     Fudge.remote = require("electron").remote;
-    // TODO: At this point of time, the project is just a single node. A project is much more complex...
-    let node = null;
+    Fudge.project = new Fudge.Project();
     /**
      * The uppermost container for all panels controlling data flow between.
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class Page {
-        static start() {
+        static async start() {
             // TODO: At this point of time, the project is just a single node. A project is much more complex...
             let node = null;
             Page.setupGoldenLayout();
@@ -279,11 +394,9 @@ var Fudge;
             Page.setupMainListeners();
             Page.setupPageListeners();
             // for testing:
-            console.log("Sending");
             Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_PROJECT_OPEN);
             Fudge.ipcRenderer.emit(Fudge.MENU.PANEL_GRAPH_OPEN);
-            Fudge.ipcRenderer.emit(Fudge.MENU.PROJECT_LOAD);
-            // ipcRenderer.emit
+            // ipcRenderer.emit(MENU.PROJECT_LOAD);
         }
         static setupGoldenLayout() {
             let config = {
@@ -363,12 +476,7 @@ var Fudge;
         //#region Main-Events from Electron
         static setupMainListeners() {
             Fudge.ipcRenderer.on(Fudge.MENU.PROJECT_SAVE, (_event, _args) => {
-                // ƒ.Debug.log("Save");
-                // panel = PanelManager.instance.getActivePanel();
-                // if (panel instanceof PanelGraph) {
-                //   node = panel.getNode();
-                // }
-                // save(node);
+                Fudge.saveProject();
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PROJECT_LOAD, async (_event, _args) => {
                 let url = await Fudge.promptLoadProject();
@@ -378,7 +486,7 @@ var Fudge;
                 Page.broadcastEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_PROJECT));
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_GRAPH_OPEN, (_event, _args) => {
-                node = new ƒaid.NodeCoordinateSystem("WorldCooSys");
+                let node = new ƒaid.NodeCoordinateSystem("WorldCooSys");
                 Page.add(Fudge.PanelGraph, "Graph", Object({ node: node }));
                 Page.broadcastEvent(new CustomEvent(Fudge.EVENT_EDITOR.UPDATE, { detail: node }));
             });

@@ -1,8 +1,17 @@
-/// <reference types="../../core/build/fudgecore" />
 /// <reference types="../../../node_modules/electron/electron" />
+/// <reference types="../../core/build/fudgecore" />
 /// <reference types="../../../aid/build/fudgeaid" />
 /// <reference types="golden-layout" />
 /// <reference types="../../../userinterface/build/fudgeuserinterface" />
+declare namespace Fudge {
+    type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
+    class ContextMenu {
+        static appendCopyPaste(_menu: Electron.Menu): void;
+        static getSubclassMenu<T extends {
+            name: string;
+        }>(_id: CONTEXTMENU, _superclass: T[], _callback: ContextMenuCallback): Electron.Menu;
+    }
+}
 declare namespace Fudge {
     enum CONTEXTMENU {
         ADD_NODE = 0,
@@ -75,24 +84,48 @@ declare namespace Fudge {
     export {};
 }
 declare namespace Fudge {
-    function saveProject(_node: ƒ.Node): void;
+    function saveProject(): Promise<void>;
     function promptLoadProject(): Promise<URL>;
     function loadProject(_url: URL): Promise<void>;
 }
 declare namespace Fudge {
-    type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
-    class ContextMenu {
-        static appendCopyPaste(_menu: Electron.Menu): void;
-        static getSubclassMenu<T extends {
-            name: string;
-        }>(_id: CONTEXTMENU, _superclass: T[], _callback: ContextMenuCallback): Electron.Menu;
-        static getResources(_callback: ContextMenuCallback): Electron.Menu;
-        static getSubMenu(_object: Object, _callback: ContextMenuCallback): Electron.Menu;
+    import ƒ = FudgeCore;
+    class FileInfo extends ƒ.Mutable {
+        overwrite: boolean;
+        filename: string;
+        constructor(_overwrite: boolean, _filename: string);
+        protected reduceMutator(_mutator: ƒ.Mutator): void;
     }
+    export class Files extends ƒ.Mutable {
+        index: FileInfo;
+        style: FileInfo;
+        internal: FileInfo;
+        script: FileInfo;
+        constructor();
+        protected reduceMutator(_mutator: ƒ.Mutator): void;
+    }
+    export class Project extends ƒ.Mutable {
+        files: Files;
+        private title;
+        private includePhysics;
+        private graphToStartWith;
+        constructor();
+        openDialog(): Promise<boolean>;
+        hndChange: (_event: Event) => void;
+        getProjectJSON(): string;
+        getProjectCSS(): string;
+        getProjectHTML(): string;
+        getGraphs(): Object;
+        getMutatorAttributeTypes(_mutator: ƒ.Mutator): ƒ.MutatorAttributeTypes;
+        protected reduceMutator(_mutator: ƒ.Mutator): void;
+        private updateFilenames;
+    }
+    export {};
 }
 declare namespace Fudge {
     const ipcRenderer: Electron.IpcRenderer;
     const remote: Electron.Remote;
+    let project: Project;
     /**
      * The uppermost container for all panels controlling data flow between.
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
@@ -101,7 +134,7 @@ declare namespace Fudge {
         private static idCounter;
         private static goldenLayout;
         private static panels;
-        static start(): void;
+        static start(): Promise<void>;
         static setupGoldenLayout(): void;
         static add(_panel: typeof Panel, _title: string, _state?: Object): void;
         static find(_type: typeof Panel): Panel[];

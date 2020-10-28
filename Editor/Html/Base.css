@@ -176,6 +176,8 @@ input[type="number"] {
 
 label {
   padding-right: 0.5em;
+  /* text-decoration: wavy; */
+  /* text-shadow: 1px 1px var(--color-background-main) ; */
 }
 
 /* Fieldset */
@@ -207,18 +209,18 @@ fieldset>input[type=checkbox]::before {
   content: "►";
 }
 
-/* 
-custom-matrix4x4 input[type=checkbox]  {
-  height: 0px;
-  top: -0.9em;
-  position: relative;
+/* Dialog */
+dialog {
+  background-color: var(--color-background-main);
+  border: none;
   color: var(--color-text);
+  box-shadow: 0px 0px 10px 5px var(--color-background-main);
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  z-index: 10;
 }
 
-custom-matrix4x4 input[type=checkbox]:checked::before {
-  content: "▼";
+dialog>div#content {
+  background-color: var(--color-background-content);
 }
-
-custom-matrix4x4 input[type=checkbox]::before {
-  content: "►";
-} */

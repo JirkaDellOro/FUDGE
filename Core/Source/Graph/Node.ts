@@ -176,6 +176,14 @@ namespace FudgeCore {
       this.children.splice(found, 1);
       _child.parent = null;
     }
+    
+    /**
+     * Removes all references in the list of children
+     */
+    public removeAllChildren(): void {
+      while (this.children.length)
+        this.removeChild(this.children[0]);
+    }
 
     /**
      * Returns the position of the node in the list of children or -1 if not found

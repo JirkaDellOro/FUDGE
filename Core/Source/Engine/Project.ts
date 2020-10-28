@@ -63,6 +63,20 @@ namespace FudgeCore {
       Project.scriptNamespaces = {};
     }
 
+    // <T extends Component>(_class: new () => T): T[] {
+    //   return <T[]>(this.components[_class.name] || []).slice(0);
+    // }
+
+    public static getResourcesOfType<T>(_type: new (_args: General) => T): Resources {
+      let found: Resources = {};
+      for (let resourceId in Project.resources) {
+        let resource: SerializableResource = Project.resources[resourceId];
+        if (resource instanceof _type)
+          found[resourceId] = resource;
+      }
+      return found;
+    }
+
 
     /**
      * Generate a user readable and unique id using the type of the resource, the date and random numbers

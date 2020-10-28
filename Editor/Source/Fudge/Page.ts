@@ -1,6 +1,7 @@
 ///<reference types="../../../node_modules/electron/Electron"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
 ///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
+///<reference path="Project.ts"/>
 
 namespace Fudge {
   import ƒ = FudgeCore;
@@ -10,8 +11,7 @@ namespace Fudge {
   export const ipcRenderer: Electron.IpcRenderer = require("electron").ipcRenderer;
   export const remote: Electron.Remote = require("electron").remote;
 
-  // TODO: At this point of time, the project is just a single node. A project is much more complex...
-  let node: ƒ.Node = null;
+  export let project: Project = new Project();
 
   /**
    * The uppermost container for all panels controlling data flow between. 
@@ -22,7 +22,7 @@ namespace Fudge {
     private static goldenLayout: GoldenLayout;
     private static panels: Panel[] = [];
 
-    public static start(): void {
+    public static async start(): Promise<void> {
       // TODO: At this point of time, the project is just a single node. A project is much more complex...
       let node: ƒ.Node = null;
 
@@ -33,11 +33,9 @@ namespace Fudge {
       Page.setupPageListeners();
 
       // for testing:
-      console.log("Sending");
       ipcRenderer.emit(MENU.PANEL_PROJECT_OPEN);
       ipcRenderer.emit(MENU.PANEL_GRAPH_OPEN);
-      ipcRenderer.emit(MENU.PROJECT_LOAD);
-      // ipcRenderer.emit
+      // ipcRenderer.emit(MENU.PROJECT_LOAD);
     }
 
     public static setupGoldenLayout(): void {
@@ -127,12 +125,7 @@ namespace Fudge {
     //#region Main-Events from Electron
     private static setupMainListeners(): void {
       ipcRenderer.on(MENU.PROJECT_SAVE, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-        // ƒ.Debug.log("Save");
-        // panel = PanelManager.instance.getActivePanel();
-        // if (panel instanceof PanelGraph) {
-        //   node = panel.getNode();
-        // }
-        // save(node);
+        saveProject();
       });
 
       ipcRenderer.on(MENU.PROJECT_LOAD, async (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
@@ -144,9 +137,9 @@ namespace Fudge {
       });
 
       ipcRenderer.on(MENU.PANEL_GRAPH_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-        node = new ƒaid.NodeCoordinateSystem("WorldCooSys");
+        let node: ƒ.Node = new ƒaid.NodeCoordinateSystem("WorldCooSys");
         Page.add(PanelGraph, "Graph", Object({ node: node }));
-        Page.broadcastEvent(new CustomEvent(EVENT_EDITOR.UPDATE, {detail: node}));
+        Page.broadcastEvent(new CustomEvent(EVENT_EDITOR.UPDATE, { detail: node }));
       });
 
       ipcRenderer.on(MENU.PANEL_PROJECT_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
