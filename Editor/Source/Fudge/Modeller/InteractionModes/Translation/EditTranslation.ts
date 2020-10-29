@@ -26,6 +26,7 @@ namespace Fudge {
           verts[selection + 2] = currentVertex.z; 
         }
         mesh.vertices = verts;
+        mesh.createRenderBuffers();
       }
     }
   }

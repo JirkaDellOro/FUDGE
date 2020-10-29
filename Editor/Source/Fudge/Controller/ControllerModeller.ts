@@ -21,9 +21,6 @@ namespace Fudge {
 
       this.viewport.addEventListener(ƒ.EVENT_WHEEL.WHEEL, this.zoom);
       this.viewport.activateWheelEvent(ƒ.EVENT_WHEEL.WHEEL, true);
-
-      this.viewport.addEventListener(ƒ.EVENT_KEYBOARD.DOWN, this.handleKeyboard);
-      this.viewport.activateKeyboardEvent(ƒ.EVENT_KEYBOARD.DOWN, true);
       viewport.setFocus(true);
     }
 
@@ -44,14 +41,6 @@ namespace Fudge {
           this.rotateCamera(_event);
         }
       }
-    }
-
-    private handleKeyboard = (_event: ƒ.EventKeyboard) => {
-      if (_event.key == ƒ.KEYBOARD_CODE.DELETE) {
-        for (let node of this.selectedNodes) {
-          this.viewport.getGraph().removeChild(node);
-        }
-      } 
     }
 
     private zoom = (_event: ƒ.EventWheel) => {

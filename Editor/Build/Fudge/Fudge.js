@@ -377,7 +377,7 @@ var Fudge;
                 node = new ƒ.Node("graph");
                 ƒaid.addStandardLightComponents(node, new ƒ.Color(0.5, 0.5, 0.5));
                 let cooSys = new ƒaid.NodeCoordinateSystem("WorldCooSys");
-                let cube = new ƒaid.Node("Default", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderFlat, new ƒ.CoatColored(new ƒ.Color(0.5, 0.5, 0.5, 0.3))), new ƒ.MeshCustom("MeshCustom", new ƒ.MeshCube));
+                let cube = new ƒaid.Node("Default", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderFlat, new ƒ.CoatColored()), new ƒ.MeshCustom("MeshCustom", new ƒ.MeshCube));
                 node.addChild(cube);
                 node.addChild(cooSys);
                 Page.add(Fudge.PanelModeller, "Modeller", Object({ node: node }));
@@ -510,13 +510,6 @@ var Fudge;
                     }
                 }
             };
-            this.handleKeyboard = (_event) => {
-                if (_event.key == ƒ.KEYBOARD_CODE.DELETE) {
-                    for (let node of this.selectedNodes) {
-                        this.viewport.getGraph().removeChild(node);
-                    }
-                }
-            };
             this.zoom = (_event) => {
                 _event.preventDefault();
                 let cameraPivot = this.viewport.camera.pivot;
@@ -538,8 +531,6 @@ var Fudge;
             this.viewport.activatePointerEvent("\u0192pointermove" /* MOVE */, true);
             this.viewport.addEventListener("\u0192wheel" /* WHEEL */, this.zoom);
             this.viewport.activateWheelEvent("\u0192wheel" /* WHEEL */, true);
-            this.viewport.addEventListener("\u0192keydown" /* DOWN */, this.handleKeyboard);
-            this.viewport.activateKeyboardEvent("\u0192keydown" /* DOWN */, true);
             viewport.setFocus(true);
         }
         rotateCamera(_event) {
@@ -1000,25 +991,28 @@ var Fudge;
             if (!this.pickedCircle)
                 return;
             let intersection = this.getIntersection(this.getPosRenderFrom(_event));
-            //let angle: number = this.getAngle(new ƒ.Vector2(intersection.y, intersection.x), new ƒ.Vector2(this.previousIntersection.y, this.previousIntersection.x)); 
             let cameraNorm = ƒ.Vector3.NORMALIZATION(this.viewport.camera.pivot.translation);
-            let angle = this.getAngle(new ƒ.Vector2(intersection.y + intersection.z * cameraNorm.y, (-intersection.z * cameraNorm.x) + (intersection.x * cameraNorm.z) + (-intersection.x * cameraNorm.y)), new ƒ.Vector2(this.previousIntersection.y + this.previousIntersection.z * cameraNorm.y, (-this.previousIntersection.z * cameraNorm.x) + (this.previousIntersection.x * cameraNorm.z) + (-this.previousIntersection.x * cameraNorm.y))); // Math.atan2(intersection.y, intersection.x) - Math.atan2(this.previousIntersection.y, this.previousIntersection.x);
-            //let angle: number = this.getAngle(new ƒ.Vector2(intersection.z, -intersection.x), new ƒ.Vector2(this.previousIntersection.z, -this.previousIntersection.x)); 
+            let angle = this.getAngle(this.getOrthogonalVector(intersection, cameraNorm), this.getOrthogonalVector(this.previousIntersection, cameraNorm));
+            //             new ƒ.Vector2(intersection.y + intersection.z * cameraNorm.y, 
+            //               (-intersection.z * cameraNorm.x) + (intersection.x * cameraNorm.z) + (-intersection.x * cameraNorm.y)), 
+            // new ƒ.Vector2(this.previousIntersection.y + this.previousIntersection.z * cameraNorm.y,
+            //               (-this.previousIntersection.z * cameraNorm.x) + (this.previousIntersection.x * cameraNorm.z) + (-this.previousIntersection.x * cameraNorm.y))); // Math.atan2(intersection.y, intersection.x) - Math.atan2(this.previousIntersection.y, this.previousIntersection.x);
+            angle = angle * (180 / Math.PI);
             console.log("inter: " + intersection + " angle: " + angle);
+            console.log("camera: " + cameraNorm);
+            console.log("obj_rot: " + this.editableNode.mtxLocal.rotation);
             switch (this.pickedCircle.name) {
                 case "Z_Rotation":
-                    this.widget.mtxLocal.rotateZ(-angle * (180 / Math.PI));
-                    this.editableNode.mtxLocal.rotateZ(-angle * (180 / Math.PI));
+                    this.widget.mtxLocal.rotateZ(angle);
                     break;
                 case "Y_Rotation":
-                    this.editableNode.mtxLocal.rotateY(-angle * (180 / Math.PI));
-                    this.widget.mtxLocal.rotateY(-angle * (180 / Math.PI));
+                    this.widget.mtxLocal.rotateY(angle);
                     break;
                 case "X_Rotation":
-                    this.editableNode.mtxLocal.rotateX(-angle * (180 / Math.PI));
-                    this.widget.mtxLocal.rotateX(-angle * (180 / Math.PI));
+                    this.widget.mtxLocal.rotateX(angle);
                     break;
             }
+            this.editableNode.mtxLocal.rotation = this.widget.mtxLocal.rotation;
             this.previousIntersection = intersection;
         }
         getIntersection(posRender) {
@@ -1026,8 +1020,21 @@ var Fudge;
             return ray.intersectPlane(this.editableNode.mtxLocal.translation, this.viewport.camera.pivot.translation);
         }
         getAngle(first, second) {
-            console.log("y1: " + first.x + " | x1: " + first.y + " | y2: " + second.x + " | x2: " + second.y);
             return Math.atan2(first.x, first.y) - Math.atan2(second.x, second.y);
+        }
+        getOrthogonalVector(posAtIntersection, cameraTranslationNorm) {
+            return new ƒ.Vector2(+posAtIntersection.y + posAtIntersection.z * cameraTranslationNorm.y, +posAtIntersection.z * Math.abs(cameraTranslationNorm.x)
+                - posAtIntersection.x * Math.abs(cameraTranslationNorm.z)
+                + posAtIntersection.x * cameraTranslationNorm.y);
+            // posAtIntersection.y + posAtIntersection.z * cameraTranslationNorm.y, 
+            // (-posAtIntersection.z * cameraTranslationNorm.x) + (posAtIntersection.x * cameraTranslationNorm.z) + (-posAtIntersection.x * cameraTranslationNorm.y));
+            // (Math.abs(objrotation.y) > 90 ? posAtIntersection.z * Math.abs(cameraTranslationNorm.x) : - posAtIntersection.z * Math.abs(cameraTranslationNorm.x)
+            // (cameraTranslationNorm.x > 0 ? -(posAtIntersection.z * cameraTranslationNorm.x) : (posAtIntersection.z * cameraTranslationNorm.x))
+            // (cameraTranslationNorm.z > 0 ? (posAtIntersection.x * cameraTranslationNorm.z) : -(posAtIntersection.x * cameraTranslationNorm.z))
+            // - posAtIntersection.y - posAtIntersection.z * cameraTranslationNorm.y, 
+            // - posAtIntersection.z * Math.abs(cameraTranslationNorm.x)
+            // - posAtIntersection.x * Math.abs(cameraTranslationNorm.z) 
+            // + posAtIntersection.x * cameraTranslationNorm.y);
         }
     }
     Fudge.ObjectRotation = ObjectRotation;
@@ -1057,28 +1064,43 @@ var Fudge;
             let vertices = this.editableNode.getComponent(ƒ.ComponentMesh).mesh.vertices;
             let nearestVertexIndex;
             let shortestDistance = Number.MAX_VALUE;
-            let mousePos = new ƒ.Vector2(_event.canvasX, _event.canvasY);
-            let ray = this.viewport.getRayFromClient(mousePos);
+            let vertexWasPicked = false;
+            let ray = this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY));
             for (let i = 0; i < vertices.length / 2; i += 3) {
                 let vertex = new ƒ.Vector3(vertices[i], vertices[i + 1], vertices[i + 2]);
-                let objTranslation = this.editableNode.mtxLocal.translation;
-                let vertexTranslation = ƒ.Vector3.SUM(objTranslation, vertex);
+                let vertexTranslation = ƒ.Vector3.SUM(this.editableNode.mtxLocal.translation, vertex);
                 let distance = ray.getDistance(vertexTranslation).magnitude;
                 if (distance < shortestDistance && distance < 0.1) {
+                    vertexWasPicked = true;
                     shortestDistance = distance;
                     nearestVertexIndex = i;
                 }
             }
-            if (!nearestVertexIndex)
+            if (!vertexWasPicked) {
                 this.selection = [];
-            this.selection.push(nearestVertexIndex);
-            console.log("vertex selected: " + nearestVertexIndex);
+            }
+            else {
+                let wasSelectedAlready = this.removeSelectedVertexIfAlreadySelected(nearestVertexIndex);
+                if (!wasSelectedAlready)
+                    this.selection.push(nearestVertexIndex);
+            }
+            console.log("vertices selected: " + this.selection);
         }
         onmouseup(_event) {
             //@ts-ignore
         }
         onmove(_event) {
             //@ts-ignore
+        }
+        removeSelectedVertexIfAlreadySelected(selectedVertex) {
+            let wasSelectedAlready = false;
+            for (let i = 0; i < this.selection.length; i++) {
+                if (this.selection[i] == selectedVertex) {
+                    this.selection.splice(i, 1);
+                    wasSelectedAlready = true;
+                }
+            }
+            return wasSelectedAlready;
         }
     }
     Fudge.EditSelection = EditSelection;
@@ -1142,6 +1164,7 @@ var Fudge;
                     verts[selection + 2] = currentVertex.z;
                 }
                 mesh.vertices = verts;
+                mesh.createRenderBuffers();
             }
         }
     }

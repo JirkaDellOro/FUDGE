@@ -61,28 +61,29 @@ namespace Fudge {
       if (!this.pickedCircle) 
         return;
       let intersection: ƒ.Vector3 = this.getIntersection(this.getPosRenderFrom(_event));
-      //let angle: number = this.getAngle(new ƒ.Vector2(intersection.y, intersection.x), new ƒ.Vector2(this.previousIntersection.y, this.previousIntersection.x)); 
       let cameraNorm: ƒ.Vector3 = ƒ.Vector3.NORMALIZATION(this.viewport.camera.pivot.translation);
-      let angle: number = this.getAngle(
-      new ƒ.Vector2(intersection.y + intersection.z * cameraNorm.y, 
-                    (-intersection.z * cameraNorm.x) + (intersection.x * cameraNorm.z) + (-intersection.x * cameraNorm.y)), 
-      new ƒ.Vector2(this.previousIntersection.y + this.previousIntersection.z * cameraNorm.y, (-this.previousIntersection.z * cameraNorm.x) + (this.previousIntersection.x * cameraNorm.z) + (-this.previousIntersection.x * cameraNorm.y))); // Math.atan2(intersection.y, intersection.x) - Math.atan2(this.previousIntersection.y, this.previousIntersection.x);
-      //let angle: number = this.getAngle(new ƒ.Vector2(intersection.z, -intersection.x), new ƒ.Vector2(this.previousIntersection.z, -this.previousIntersection.x)); 
+      let angle: number = this.getAngle(this.getOrthogonalVector(intersection, cameraNorm), this.getOrthogonalVector(this.previousIntersection, cameraNorm));      
+      //             new ƒ.Vector2(intersection.y + intersection.z * cameraNorm.y, 
+      //               (-intersection.z * cameraNorm.x) + (intersection.x * cameraNorm.z) + (-intersection.x * cameraNorm.y)), 
+      // new ƒ.Vector2(this.previousIntersection.y + this.previousIntersection.z * cameraNorm.y,
+      //               (-this.previousIntersection.z * cameraNorm.x) + (this.previousIntersection.x * cameraNorm.z) + (-this.previousIntersection.x * cameraNorm.y))); // Math.atan2(intersection.y, intersection.x) - Math.atan2(this.previousIntersection.y, this.previousIntersection.x);
+  
+      angle = angle * (180 / Math.PI);
       console.log("inter: " + intersection + " angle: " + angle);
+      console.log("camera: " + cameraNorm);
+      console.log("obj_rot: " + this.editableNode.mtxLocal.rotation);
       switch (this.pickedCircle.name) {
         case "Z_Rotation":
-          this.widget.mtxLocal.rotateZ(-angle * (180 / Math.PI));
-          this.editableNode.mtxLocal.rotateZ(-angle * (180 / Math.PI));
+          this.widget.mtxLocal.rotateZ(angle);
           break;
         case "Y_Rotation":
-          this.editableNode.mtxLocal.rotateY(-angle * (180 / Math.PI));
-          this.widget.mtxLocal.rotateY(-angle * (180 / Math.PI));
+          this.widget.mtxLocal.rotateY(angle);
           break;
         case "X_Rotation":
-          this.editableNode.mtxLocal.rotateX(-angle * (180 / Math.PI));
-          this.widget.mtxLocal.rotateX(-angle * (180 / Math.PI));
+          this.widget.mtxLocal.rotateX(angle);
           break;
       }
+      this.editableNode.mtxLocal.rotation = this.widget.mtxLocal.rotation;
       this.previousIntersection = intersection;
     }
 
@@ -92,8 +93,28 @@ namespace Fudge {
     }
 
     private getAngle(first: ƒ.Vector2, second: ƒ.Vector2): number {
-      console.log("y1: " + first.x + " | x1: " + first.y + " | y2: " + second.x + " | x2: " + second.y)
       return Math.atan2(first.x, first.y) - Math.atan2(second.x, second.y);
     }
+
+    private getOrthogonalVector(posAtIntersection: ƒ.Vector3, cameraTranslationNorm: ƒ.Vector3): ƒ.Vector2 {
+      return new ƒ.Vector2(
+        + posAtIntersection.y + posAtIntersection.z * cameraTranslationNorm.y, 
+        + posAtIntersection.z * Math.abs(cameraTranslationNorm.x)
+        - posAtIntersection.x * Math.abs(cameraTranslationNorm.z) 
+        + posAtIntersection.x * cameraTranslationNorm.y);
+        // posAtIntersection.y + posAtIntersection.z * cameraTranslationNorm.y, 
+        // (-posAtIntersection.z * cameraTranslationNorm.x) + (posAtIntersection.x * cameraTranslationNorm.z) + (-posAtIntersection.x * cameraTranslationNorm.y));
+        // (Math.abs(objrotation.y) > 90 ? posAtIntersection.z * Math.abs(cameraTranslationNorm.x) : - posAtIntersection.z * Math.abs(cameraTranslationNorm.x)
+        
+        // (cameraTranslationNorm.x > 0 ? -(posAtIntersection.z * cameraTranslationNorm.x) : (posAtIntersection.z * cameraTranslationNorm.x))
+        // (cameraTranslationNorm.z > 0 ? (posAtIntersection.x * cameraTranslationNorm.z) : -(posAtIntersection.x * cameraTranslationNorm.z))
+      
+      
+        // - posAtIntersection.y - posAtIntersection.z * cameraTranslationNorm.y, 
+        // - posAtIntersection.z * Math.abs(cameraTranslationNorm.x)
+        // - posAtIntersection.x * Math.abs(cameraTranslationNorm.z) 
+        // + posAtIntersection.x * cameraTranslationNorm.y);
+
+      }
   }
 }

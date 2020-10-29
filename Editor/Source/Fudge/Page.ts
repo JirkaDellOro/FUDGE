@@ -165,7 +165,7 @@ namespace Fudge {
         node = new ƒ.Node("graph");
         ƒaid.addStandardLightComponents(node, new ƒ.Color(0.5, 0.5, 0.5));
         let cooSys: ƒ.Node = new ƒaid.NodeCoordinateSystem("WorldCooSys");
-        let cube: ƒ.Node = new ƒaid.Node("Default", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderFlat, new ƒ.CoatColored(new ƒ.Color(0.5, 0.5, 0.5, 0.3))), new ƒ.MeshCustom("MeshCustom", new ƒ.MeshCube));
+        let cube: ƒ.Node = new ƒaid.Node("Default", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderFlat, new ƒ.CoatColored()), new ƒ.MeshCustom("MeshCustom", new ƒ.MeshCube));
         node.addChild(cube);
         node.addChild(cooSys);
         Page.add(PanelModeller, "Modeller", Object({ node: node }));

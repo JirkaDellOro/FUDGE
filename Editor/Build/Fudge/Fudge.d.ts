@@ -142,7 +142,6 @@ declare namespace Fudge {
         constructor(viewport: ƒ.Viewport);
         private onclick;
         private handleMove;
-        private handleKeyboard;
         private zoom;
         private rotateCamera;
         private moveCamera;
@@ -315,6 +314,7 @@ declare namespace Fudge {
         onmove(_event: ƒ.EventPointer): void;
         private getIntersection;
         private getAngle;
+        private getOrthogonalVector;
     }
 }
 declare namespace Fudge {
@@ -336,6 +336,7 @@ declare namespace Fudge {
         onmousedown(_event: ƒ.EventPointer): void;
         onmouseup(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
+        private removeSelectedVertexIfAlreadySelected;
     }
 }
 declare namespace Fudge {
