@@ -28,7 +28,8 @@ namespace Fudge {
     constructor() {
       super();
       Reflect.deleteProperty(this.script, "overwrite");
-      Reflect.set(this.script, "include", true);
+      Reflect.set(this.script, "include", false);
+      this.script.filename = "?.js"
     }
     protected reduceMutator(_mutator: ƒ.Mutator): void {/* */ }
   }
@@ -110,7 +111,9 @@ namespace Fudge {
         return element;
       }
 
-      return (new XMLSerializer()).serializeToString(html);
+      let result: string = (new XMLSerializer()).serializeToString(html);
+      result = result.replaceAll("><", ">\n<");
+      return result;
     }
 
     public getGraphs(): Object {

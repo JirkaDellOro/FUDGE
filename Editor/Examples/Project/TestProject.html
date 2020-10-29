@@ -13,26 +13,19 @@
   <link type="resources" src="InternalResources.json" />
 
   <script>
-    window.addEventListener("click", showFirstGraph);
-    async function showFirstGraph(_event) {
-      await FudgeCore.Project.loadResources();
+    window.addEventListener("click", startInteractiveViewport);
 
-      let node = null;
-      for (let resource in FudgeCore.Project.resources) {
-        if (resource.startsWith("Graph")) {
-          node = FudgeCore.Project.resources[resource];
+    async function startInteractiveViewport(_event) {
+      window.removeEventListener("click", startInteractiveViewport);
+      await FudgeCore.Project.loadResourcesFromHTML();
+
+      let graphs = FudgeCore.Project.getResourcesOfType(FudgeCore.Graph);
+      for (let id in graphs) {
+        if (graphs[id].name = "Graph") {
+          FudgeAid.Viewport.createInteractive(graphs[id], document.querySelector("canvas"));
           break;
         }
       }
-
-      let cmpCamera = new FudgeCore.ComponentCamera();
-      cmpCamera.pivot.translate(new FudgeCore.Vector3(2, 1, 3));
-      cmpCamera.pivot.lookAt(FudgeCore.Vector3.ZERO());
-
-      let viewport = new FudgeCore.Viewport();
-      viewport.initialize("View", node, cmpCamera, document.querySelector("canvas"));
-      viewport.draw();
-      ƒ.AudioManager.default.listenTo(node);
     }
   </script>
 </head>

@@ -2001,7 +2001,8 @@ declare namespace FudgeCore {
         static registerScriptNamespace(_namespace: Object): void;
         static getComponentScripts(): ComponentScripts;
         static loadScript(_url: RequestInfo): Promise<void>;
-        static loadResources(_url?: RequestInfo): Promise<Resources>;
+        static loadResources(_url: RequestInfo): Promise<Resources>;
+        static loadResourcesFromHTML(): Promise<void>;
         /**
          * Serialize all resources
          */

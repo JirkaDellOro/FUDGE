@@ -223,6 +223,7 @@ var Fudge;
         for (let script of scripts) {
             if (script.getAttribute("editor") == "true") {
                 let url = script.getAttribute("src");
+                ƒ.Debug.fudge("Load script: ", url);
                 await ƒ.Project.loadScript(new URL(url, _url).toString());
                 console.log("ComponentScripts", ƒ.Project.getComponentScripts());
                 console.log("Script Namespaces", ƒ.Project.scriptNamespaces);
@@ -266,7 +267,8 @@ var Fudge;
             this.internal = new FileInfo(true, "");
             this.script = new FileInfo(true, "");
             Reflect.deleteProperty(this.script, "overwrite");
-            Reflect.set(this.script, "include", true);
+            Reflect.set(this.script, "include", false);
+            this.script.filename = "?.js";
         }
         reduceMutator(_mutator) { }
     }
@@ -333,7 +335,9 @@ var Fudge;
                     element.innerHTML = _content;
                 return element;
             }
-            return (new XMLSerializer()).serializeToString(html);
+            let result = (new XMLSerializer()).serializeToString(html);
+            result = result.replaceAll("><", ">\n<");
+            return result;
         }
         getGraphs() {
             let graphs = ƒ.Project.getResourcesOfType(ƒ.Graph);

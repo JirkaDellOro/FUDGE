@@ -257,3 +257,8 @@ declare namespace FudgeAid {
     }
     export {};
 }
+declare namespace FudgeAid {
+    class Viewport {
+        static createInteractive(_node: ƒ.Node, _canvas: HTMLCanvasElement): void;
+    }
+}
