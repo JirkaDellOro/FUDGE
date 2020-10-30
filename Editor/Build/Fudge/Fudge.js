@@ -280,6 +280,7 @@ var Fudge;
             this.files = new Files();
             this.title = "NewProject";
             this.includePhysics = false;
+            this.includeAutoViewScript = true;
             this.graphToStartWith = "";
             this.hndChange = (_event) => {
                 let mutator = ƒui.Controller.getMutator(this, ƒui.Dialog.dom, this.getMutator());
@@ -323,6 +324,8 @@ var Fudge;
             html.head.appendChild(createTag("link", { type: "resources", src: this.files.internal.filename }));
             if (Reflect.get(this.files.script, "include"))
                 html.head.appendChild(createTag("script", { type: "text/javascript", src: this.files.script.filename, editor: "true" }));
+            if (this.includeAutoViewScript)
+                html.head.appendChild(this.getAutoViewScript(this.graphToStartWith));
             html.body.appendChild(createTag("h1", {}, this.title));
             html.body.appendChild(createTag("p", {}, "click to start"));
             html.body.appendChild(createTag("hr"));
@@ -365,6 +368,22 @@ var Fudge;
                 if (fileInfo.overwrite)
                     fileInfo.filename = _title + "." + key;
             }
+        }
+        getAutoViewScript(_graphId) {
+            let code;
+            code = (function (_graphId) {
+                window.addEventListener("click", startInteractiveViewport);
+                async function startInteractiveViewport(_event) {
+                    window.removeEventListener("click", startInteractiveViewport);
+                    await FudgeCore.Project.loadResourcesFromHTML();
+                    let graph = FudgeCore.Project.resources[_graphId];
+                    FudgeAid.Viewport.createInteractive(graph, document.querySelector("canvas"));
+                }
+            }).toString();
+            code = "(" + code + `)("${_graphId}");\n`;
+            let script = document.createElement("script");
+            script.textContent = code;
+            return script;
         }
     }
     Fudge.Project = Project;

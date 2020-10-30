@@ -3344,6 +3344,10 @@ declare namespace FudgeCore {
          * must be relative to the same coordinate system, preferably the world
          */
         intersectPlane(_origin: Vector3, _normal: Vector3): Vector3;
+        /**
+         * Returns the shortest distance from the ray to the given target point.
+         * All values and calculations must be relative to the same coordinate system, preferably the world.
+         */
         getDistance(_target: Vector3): Vector3;
     }
 }

@@ -9,6 +9,16 @@
 </script>
 <link rel="stylesheet" href="NewProject.css" />
 <link type="resources" src="NewProject.json" />
+<script>(function (_graphId) {
+                window.addEventListener("click", startInteractiveViewport);
+                async function startInteractiveViewport(_event) {
+                    window.removeEventListener("click", startInteractiveViewport);
+                    await FudgeCore.Project.loadResourcesFromHTML();
+                    let graph = FudgeCore.Project.resources[_graphId];
+                    FudgeAid.Viewport.createInteractive(graph, document.querySelector("canvas"));
+                }
+            })("Graph|2020-10-30T16:46:07.510Z|21011");
+</script>
 </head>
 <body>
 <h1>NewProject</h1>

@@ -108,6 +108,7 @@ declare namespace Fudge {
         files: Files;
         private title;
         private includePhysics;
+        private includeAutoViewScript;
         private graphToStartWith;
         constructor();
         openDialog(): Promise<boolean>;
@@ -119,6 +120,7 @@ declare namespace Fudge {
         getMutatorAttributeTypes(_mutator: ƒ.Mutator): ƒ.MutatorAttributeTypes;
         protected reduceMutator(_mutator: ƒ.Mutator): void;
         private updateFilenames;
+        private getAutoViewScript;
     }
     export {};
 }

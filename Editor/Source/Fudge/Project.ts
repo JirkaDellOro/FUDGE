@@ -29,7 +29,7 @@ namespace Fudge {
       super();
       Reflect.deleteProperty(this.script, "overwrite");
       Reflect.set(this.script, "include", false);
-      this.script.filename = "?.js"
+      this.script.filename = "?.js";
     }
     protected reduceMutator(_mutator: ƒ.Mutator): void {/* */ }
   }
@@ -38,6 +38,7 @@ namespace Fudge {
     public files: Files = new Files();
     private title: string = "NewProject";
     private includePhysics: boolean = false;
+    private includeAutoViewScript: boolean = true;
     private graphToStartWith: string = "";
     // private option: PROJECT = PROJECT.OPT3;
 
@@ -97,6 +98,9 @@ namespace Fudge {
       if (Reflect.get(this.files.script, "include"))
         html.head.appendChild(createTag("script", { type: "text/javascript", src: this.files.script.filename, editor: "true" }));
 
+      if (this.includeAutoViewScript)
+        html.head.appendChild(this.getAutoViewScript(this.graphToStartWith));
+
       html.body.appendChild(createTag("h1", {}, this.title));
       html.body.appendChild(createTag("p", {}, "click to start"));
       html.body.appendChild(createTag("hr"));
@@ -145,6 +149,26 @@ namespace Fudge {
         if (fileInfo.overwrite)
           fileInfo.filename = _title + "." + key;
       }
+    }
+
+    private getAutoViewScript(_graphId: string): HTMLScriptElement {
+      let code: string;
+      code = (function (_graphId: string): void {
+        window.addEventListener("click", startInteractiveViewport);
+
+        async function startInteractiveViewport(_event: Event): Promise<void> {
+          window.removeEventListener("click", startInteractiveViewport);
+          await FudgeCore.Project.loadResourcesFromHTML();
+
+          let graph: ƒ.Graph = <ƒ.Graph>FudgeCore.Project.resources[_graphId];
+          FudgeAid.Viewport.createInteractive(graph, document.querySelector("canvas"));
+        }
+      }).toString();
+
+      code = "(" + code + `)("${_graphId}");\n`;
+      let script: HTMLScriptElement = document.createElement("script");
+      script.textContent = code;
+      return script;
     }
   }
 }
