@@ -66,7 +66,6 @@ declare namespace FudgeAid {
         private rotatorX;
         private translator;
         constructor(_cmpCamera: ƒ.ComponentCamera, _distanceStart?: number, _maxRotX?: number, _minDistance?: number, _maxDistance?: number);
-        hndAxisOutput: EventListener;
         get component(): ƒ.ComponentCamera;
         get node(): ƒ.Node;
         set distance(_distance: number);
@@ -77,6 +76,7 @@ declare namespace FudgeAid {
         get rotationX(): number;
         rotateY(_delta: number): void;
         rotateX(_delta: number): void;
+        hndAxisOutput: EventListener;
     }
 }
 declare namespace FudgeAid {
@@ -259,6 +259,6 @@ declare namespace FudgeAid {
 }
 declare namespace FudgeAid {
     class Viewport {
-        static createInteractive(_node: ƒ.Node, _canvas: HTMLCanvasElement): void;
+        static expandCameraToInteractiveOrbit(_viewport: ƒ.Viewport, _speedCameraRotation?: number, _speedCameraTranslation?: number): CameraOrbit;
     }
 }

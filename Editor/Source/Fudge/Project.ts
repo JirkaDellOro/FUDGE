@@ -2,12 +2,6 @@ namespace Fudge {
   import ƒ = FudgeCore;
   import ƒui = FudgeUserInterface;
 
-  enum PROJECT {
-    OPT1 = "option1",
-    OPT2 = "option2",
-    OPT3 = "option3"
-  }
-
   class FileInfo extends ƒ.Mutable {
     overwrite: boolean;
     filename: string;
@@ -40,7 +34,6 @@ namespace Fudge {
     private includePhysics: boolean = false;
     private includeAutoViewScript: boolean = true;
     private graphToStartWith: string = "";
-    // private option: PROJECT = PROJECT.OPT3;
 
     public constructor() {
       super();
@@ -78,7 +71,8 @@ namespace Fudge {
     public getProjectCSS(): string {
       let content: string = "";
 
-      content += "html, body {\n  padding: 0px;\n  margin: 0px;\n  width: 100%;\n  height: 100%;\n overflow: auto;\n}\n\n";
+      content += "html, body {\n  padding: 0px;\n  margin: 0px;\n  width: 100%;\n  height: 100%;\n overflow: hidden;\n}\n\n";
+      content += "dialog { \n  text-align: center; \n}\n\n";
       content += "canvas.fullscreen { \n  width: 100vw; \n  height: 100vh; \n}";
 
       return content;
@@ -89,22 +83,32 @@ namespace Fudge {
 
       html.head.appendChild(createTag("meta", { charset: "utf-8" }));
 
+      html.head.appendChild(html.createComment("Load FUDGE"));
       html.head.appendChild(createTag("script", { type: "text/javascript", src: "../../../Core/Build/FudgeCore.js" }));
       html.head.appendChild(createTag("script", { type: "text/javascript", src: "../../../Aid/Build/FudgeAid.js" }));
 
+      html.head.appendChild(html.createComment("Link stylesheet and internal resources"));
       html.head.appendChild(createTag("link", { rel: "stylesheet", href: this.files.style.filename }));
       html.head.appendChild(createTag("link", { type: "resources", src: this.files.internal.filename }));
 
-      if (Reflect.get(this.files.script, "include"))
+      if (Reflect.get(this.files.script, "include")) {
+        html.head.appendChild(html.createComment("Load custom scripts"));
         html.head.appendChild(createTag("script", { type: "text/javascript", src: this.files.script.filename, editor: "true" }));
+      }
 
-      if (this.includeAutoViewScript)
+      if (this.includeAutoViewScript) {
+        html.head.appendChild(html.createComment("Auto-View"));
         html.head.appendChild(this.getAutoViewScript(this.graphToStartWith));
+      }
 
-      html.body.appendChild(createTag("h1", {}, this.title));
-      html.body.appendChild(createTag("p", {}, "click to start"));
-      html.body.appendChild(createTag("hr"));
-      html.body.appendChild(createTag("canvas"));
+      html.body.appendChild(html.createComment("Dialog shown at startup only"));
+      let dialog: HTMLElement = createTag("dialog");
+      dialog.appendChild(createTag("h1", {}, this.title));
+      dialog.appendChild(createTag("p", {}, "click to start"));
+      html.body.appendChild(dialog);
+
+      html.body.appendChild(html.createComment("Canvas for FUDGE to render to"));
+      html.body.appendChild(createTag("canvas", { class: "fullscreen" }));
 
       function createTag(_tag: string, _attributes: { [key: string]: string } = {}, _content?: string): HTMLElement {
         let element: HTMLElement = document.createElement(_tag);
@@ -132,8 +136,6 @@ namespace Fudge {
 
     public getMutatorAttributeTypes(_mutator: ƒ.Mutator): ƒ.MutatorAttributeTypes {
       let types: ƒ.MutatorAttributeTypes = super.getMutatorAttributeTypes(_mutator);
-      if (types.option)
-        types.option = PROJECT;
       if (types.graphToStartWith)
         types.graphToStartWith = this.getGraphs();
       return types;
@@ -154,14 +156,43 @@ namespace Fudge {
     private getAutoViewScript(_graphId: string): HTMLScriptElement {
       let code: string;
       code = (function (_graphId: string): void {
-        window.addEventListener("click", startInteractiveViewport);
+        window.addEventListener("load", init);
 
-        async function startInteractiveViewport(_event: Event): Promise<void> {
-          window.removeEventListener("click", startInteractiveViewport);
+        // show dialog for startup
+        let dialog: HTMLDialogElement;
+        function init(_event: Event): void {
+          dialog = document.querySelector("dialog");
+          dialog.addEventListener("click", function (_event: Event): void {
+            dialog.close();
+            startInteractiveViewport();
+          });
+          dialog.showModal();
+        }
+
+        // setup and start interactive viewport
+        async function startInteractiveViewport(): Promise<void> {
+          // load resources referenced in the link-tag
           await FudgeCore.Project.loadResourcesFromHTML();
 
+          // pick the graph to show
           let graph: ƒ.Graph = <ƒ.Graph>FudgeCore.Project.resources[_graphId];
-          FudgeAid.Viewport.createInteractive(graph, document.querySelector("canvas"));
+
+          // setup the viewport
+          let cmpCamera: ƒ.ComponentCamera = new FudgeCore.ComponentCamera();
+          let viewport: ƒ.Viewport = new FudgeCore.Viewport();
+          viewport.initialize("InteractiveViewport", graph, cmpCamera, document.querySelector("canvas"));
+
+          // make the camera interactive (complex method in FudgeAid)
+          FudgeAid.Viewport.expandCameraToInteractiveOrbit(viewport);
+
+          // setup audio
+          let cmpListener: ƒ.ComponentAudioListener = new ƒ.ComponentAudioListener();
+          cmpCamera.getContainer().addComponent(cmpListener);
+          FudgeCore.AudioManager.default.listenWith(cmpListener);
+          FudgeCore.AudioManager.default.listenTo(graph);
+
+          // draw viewport once for immediate feedback
+          viewport.draw();
         }
       }).toString();
 

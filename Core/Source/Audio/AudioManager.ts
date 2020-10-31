@@ -54,7 +54,7 @@ namespace FudgeCore {
     /**
      * Set the [[ComponentAudioListener]] that serves the spatial location and orientation for this contexts listener
      */
-    public listen = (_cmpListener: ComponentAudioListener | null): void => {
+    public listenWith = (_cmpListener: ComponentAudioListener | null): void => {
       this.cmpListener = _cmpListener;
     }
 

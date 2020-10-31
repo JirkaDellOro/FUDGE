@@ -1222,7 +1222,7 @@ declare namespace FudgeCore {
         /**
          * Set the [[ComponentAudioListener]] that serves the spatial location and orientation for this contexts listener
          */
-        listen: (_cmpListener: ComponentAudioListener | null) => void;
+        listenWith: (_cmpListener: ComponentAudioListener | null) => void;
         /**
          * Updates the spatial settings of the AudioNodes effected in the current FUDGE-graph
          */

@@ -245,12 +245,6 @@ var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒui = FudgeUserInterface;
-    let PROJECT;
-    (function (PROJECT) {
-        PROJECT["OPT1"] = "option1";
-        PROJECT["OPT2"] = "option2";
-        PROJECT["OPT3"] = "option3";
-    })(PROJECT || (PROJECT = {}));
     class FileInfo extends ƒ.Mutable {
         constructor(_overwrite, _filename) {
             super();
@@ -274,7 +268,6 @@ var Fudge;
     }
     Fudge.Files = Files;
     class Project extends ƒ.Mutable {
-        // private option: PROJECT = PROJECT.OPT3;
         constructor() {
             super();
             this.files = new Files();
@@ -311,25 +304,35 @@ var Fudge;
         }
         getProjectCSS() {
             let content = "";
-            content += "html, body {\n  padding: 0px;\n  margin: 0px;\n  width: 100%;\n  height: 100%;\n overflow: auto;\n}\n\n";
+            content += "html, body {\n  padding: 0px;\n  margin: 0px;\n  width: 100%;\n  height: 100%;\n overflow: hidden;\n}\n\n";
+            content += "dialog { \n  text-align: center; \n}\n\n";
             content += "canvas.fullscreen { \n  width: 100vw; \n  height: 100vh; \n}";
             return content;
         }
         getProjectHTML() {
             let html = document.implementation.createHTMLDocument(this.title);
             html.head.appendChild(createTag("meta", { charset: "utf-8" }));
+            html.head.appendChild(html.createComment("Load FUDGE"));
             html.head.appendChild(createTag("script", { type: "text/javascript", src: "../../../Core/Build/FudgeCore.js" }));
             html.head.appendChild(createTag("script", { type: "text/javascript", src: "../../../Aid/Build/FudgeAid.js" }));
+            html.head.appendChild(html.createComment("Link stylesheet and internal resources"));
             html.head.appendChild(createTag("link", { rel: "stylesheet", href: this.files.style.filename }));
             html.head.appendChild(createTag("link", { type: "resources", src: this.files.internal.filename }));
-            if (Reflect.get(this.files.script, "include"))
+            if (Reflect.get(this.files.script, "include")) {
+                html.head.appendChild(html.createComment("Load custom scripts"));
                 html.head.appendChild(createTag("script", { type: "text/javascript", src: this.files.script.filename, editor: "true" }));
-            if (this.includeAutoViewScript)
+            }
+            if (this.includeAutoViewScript) {
+                html.head.appendChild(html.createComment("Auto-View"));
                 html.head.appendChild(this.getAutoViewScript(this.graphToStartWith));
-            html.body.appendChild(createTag("h1", {}, this.title));
-            html.body.appendChild(createTag("p", {}, "click to start"));
-            html.body.appendChild(createTag("hr"));
-            html.body.appendChild(createTag("canvas"));
+            }
+            html.body.appendChild(html.createComment("Dialog shown at startup only"));
+            let dialog = createTag("dialog");
+            dialog.appendChild(createTag("h1", {}, this.title));
+            dialog.appendChild(createTag("p", {}, "click to start"));
+            html.body.appendChild(dialog);
+            html.body.appendChild(html.createComment("Canvas for FUDGE to render to"));
+            html.body.appendChild(createTag("canvas", { class: "fullscreen" }));
             function createTag(_tag, _attributes = {}, _content) {
                 let element = document.createElement(_tag);
                 for (let attribute in _attributes)
@@ -353,8 +356,6 @@ var Fudge;
         }
         getMutatorAttributeTypes(_mutator) {
             let types = super.getMutatorAttributeTypes(_mutator);
-            if (types.option)
-                types.option = PROJECT;
             if (types.graphToStartWith)
                 types.graphToStartWith = this.getGraphs();
             return types;
@@ -372,12 +373,36 @@ var Fudge;
         getAutoViewScript(_graphId) {
             let code;
             code = (function (_graphId) {
-                window.addEventListener("click", startInteractiveViewport);
-                async function startInteractiveViewport(_event) {
-                    window.removeEventListener("click", startInteractiveViewport);
+                window.addEventListener("load", init);
+                // show dialog for startup
+                let dialog;
+                function init(_event) {
+                    dialog = document.querySelector("dialog");
+                    dialog.addEventListener("click", function (_event) {
+                        dialog.close();
+                        startInteractiveViewport();
+                    });
+                    dialog.showModal();
+                }
+                // setup and start interactive viewport
+                async function startInteractiveViewport() {
+                    // load resources referenced in the link-tag
                     await FudgeCore.Project.loadResourcesFromHTML();
+                    // pick the graph to show
                     let graph = FudgeCore.Project.resources[_graphId];
-                    FudgeAid.Viewport.createInteractive(graph, document.querySelector("canvas"));
+                    // setup the viewport
+                    let cmpCamera = new FudgeCore.ComponentCamera();
+                    let viewport = new FudgeCore.Viewport();
+                    viewport.initialize("InteractiveViewport", graph, cmpCamera, document.querySelector("canvas"));
+                    // make the camera interactive (complex method in FudgeAid)
+                    FudgeAid.Viewport.expandCameraToInteractiveOrbit(viewport);
+                    // setup audio
+                    let cmpListener = new ƒ.ComponentAudioListener();
+                    cmpCamera.getContainer().addComponent(cmpListener);
+                    FudgeCore.AudioManager.default.listenWith(cmpListener);
+                    FudgeCore.AudioManager.default.listenTo(graph);
+                    // draw viewport once for immediate feedback
+                    viewport.draw();
                 }
             }).toString();
             code = "(" + code + `)("${_graphId}");\n`;
