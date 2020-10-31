@@ -106,7 +106,7 @@ declare namespace Fudge {
     }
     export class Project extends ƒ.Mutable {
         files: Files;
-        private title;
+        title: string;
         private includePhysics;
         private includeAutoViewScript;
         private graphToStartWith;

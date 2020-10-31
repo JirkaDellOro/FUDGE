@@ -30,7 +30,7 @@ namespace Fudge {
 
   export class Project extends ƒ.Mutable {
     public files: Files = new Files();
-    private title: string = "NewProject";
+    public title: string = "NewProject";
     private includePhysics: boolean = false;
     private includeAutoViewScript: boolean = true;
     private graphToStartWith: string = "";

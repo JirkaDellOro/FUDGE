@@ -168,11 +168,6 @@ var Fudge;
 (function (Fudge) {
     const fs = require("fs");
     async function saveProject() {
-        // let serialization: ƒ.Serialization = ƒ.Serializer.serialize(_node);
-        // let content: string = ƒ.Serializer.stringify(serialization);
-        // // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
-        // let filename: string = remote.dialog.showSaveDialogSync(null, { title: "Save Graph", buttonLabel: "Save Graph", message: "ƒ-Message" });
-        // fs.writeFileSync(filename, content);
         if (!await Fudge.project.openDialog())
             return;
         let filename = Fudge.remote.dialog.showOpenDialogSync(null, {
@@ -215,9 +210,15 @@ var Fudge;
         ƒ.Debug.groupEnd();
         const parser = new DOMParser();
         const dom = parser.parseFromString(content, "application/xhtml+xml");
-        const head = dom.getElementsByTagName("head")[0];
+        const head = dom.querySelector("head");
         console.log(head);
         ƒ.Project.clear();
+        Fudge.project.title = head.querySelector("title").textContent;
+        Fudge.project.files.index.filename = _url.toString().split("/").pop();
+        Fudge.project.files.index.overwrite = false;
+        let css = head.querySelector("link[rel=stylesheet]");
+        Fudge.project.files.style.filename = css.getAttribute("href");
+        Fudge.project.files.style.overwrite = false;
         //TODO: should old scripts be removed from memory first? How?
         const scripts = head.querySelectorAll("script");
         for (let script of scripts) {
@@ -227,6 +228,8 @@ var Fudge;
                 await ƒ.Project.loadScript(new URL(url, _url).toString());
                 console.log("ComponentScripts", ƒ.Project.getComponentScripts());
                 console.log("Script Namespaces", ƒ.Project.scriptNamespaces);
+                Fudge.project.files.script.filename = url;
+                Reflect.set(Fudge.project.files.script, "include", true);
             }
         }
         const resourceLinks = head.querySelectorAll("link[type=resources]");
@@ -237,6 +240,8 @@ var Fudge;
             ƒ.Debug.groupCollapsed("Deserialized");
             ƒ.Debug.info(reconstruction);
             ƒ.Debug.groupEnd();
+            Fudge.project.files.internal.filename = resourceFile;
+            Fudge.project.files.internal.overwrite = true;
         }
     }
     Fudge.loadProject = loadProject;

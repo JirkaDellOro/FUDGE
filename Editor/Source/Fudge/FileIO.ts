@@ -2,14 +2,6 @@ namespace Fudge {
   const fs: ƒ.General = require("fs");
 
   export async function saveProject(): Promise<void> {
-    // let serialization: ƒ.Serialization = ƒ.Serializer.serialize(_node);
-    // let content: string = ƒ.Serializer.stringify(serialization);
-
-    // // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
-    // let filename: string = remote.dialog.showSaveDialogSync(null, { title: "Save Graph", buttonLabel: "Save Graph", message: "ƒ-Message" });
-
-    // fs.writeFileSync(filename, content);
-
     if (!await project.openDialog())
       return;
 
@@ -59,10 +51,19 @@ namespace Fudge {
 
     const parser: DOMParser = new DOMParser();
     const dom: Document = parser.parseFromString(content, "application/xhtml+xml");
-    const head: HTMLHeadElement = dom.getElementsByTagName("head")[0];
+    const head: HTMLHeadElement = dom.querySelector("head");
     console.log(head);
 
     ƒ.Project.clear();
+
+    project.title = head.querySelector("title").textContent;
+    
+    project.files.index.filename = _url.toString().split("/").pop();
+    project.files.index.overwrite = false;
+
+    let css: HTMLLinkElement = head.querySelector("link[rel=stylesheet]");
+    project.files.style.filename = css.getAttribute("href");  
+    project.files.style.overwrite = false;
 
     //TODO: should old scripts be removed from memory first? How?
     const scripts: NodeListOf<HTMLScriptElement> = head.querySelectorAll("script");
@@ -73,6 +74,9 @@ namespace Fudge {
         await ƒ.Project.loadScript(new URL(url, _url).toString());
         console.log("ComponentScripts", ƒ.Project.getComponentScripts());
         console.log("Script Namespaces", ƒ.Project.scriptNamespaces);
+        
+        project.files.script.filename = url;
+        Reflect.set(project.files.script, "include", true);
       }
     }
 
@@ -85,6 +89,9 @@ namespace Fudge {
       ƒ.Debug.groupCollapsed("Deserialized");
       ƒ.Debug.info(reconstruction);
       ƒ.Debug.groupEnd();
+      
+      project.files.internal.filename = resourceFile;
+      project.files.internal.overwrite = true;
     }
   }
 }
