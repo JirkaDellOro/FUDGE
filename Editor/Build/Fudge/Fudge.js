@@ -397,8 +397,12 @@ var Fudge;
                     let graph = FudgeCore.Project.resources[_graphId];
                     // setup the viewport
                     let cmpCamera = new FudgeCore.ComponentCamera();
+                    let canvas = document.querySelector("canvas");
                     let viewport = new FudgeCore.Viewport();
-                    viewport.initialize("InteractiveViewport", graph, cmpCamera, document.querySelector("canvas"));
+                    viewport.initialize("InteractiveViewport", graph, cmpCamera, canvas);
+                    // hide the cursor when interacting, also suppressing right-click menu
+                    canvas.addEventListener("mousedown", canvas.requestPointerLock);
+                    canvas.addEventListener("mouseup", function () { document.exitPointerLock(); });
                     // make the camera interactive (complex method in FudgeAid)
                     FudgeAid.Viewport.expandCameraToInteractiveOrbit(viewport);
                     // setup audio

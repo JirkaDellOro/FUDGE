@@ -85,7 +85,7 @@ namespace AudioSpace {
     const canvas: HTMLCanvasElement = document.querySelector("canvas");
     viewport.initialize("Viewport", graph, cmpCamera, canvas);
     ƒ.AudioManager.default.listenTo(graph);
-    ƒ.AudioManager.default.listen(camera.node.getComponent(ƒ.ComponentAudioListener));
+    ƒ.AudioManager.default.listenWith(camera.node.getComponent(ƒ.ComponentAudioListener));
 
     // setup event handling
     viewport.setFocus(true);

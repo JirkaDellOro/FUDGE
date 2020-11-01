@@ -179,8 +179,13 @@ namespace Fudge {
 
           // setup the viewport
           let cmpCamera: ƒ.ComponentCamera = new FudgeCore.ComponentCamera();
+          let canvas: HTMLCanvasElement = document.querySelector("canvas");
           let viewport: ƒ.Viewport = new FudgeCore.Viewport();
-          viewport.initialize("InteractiveViewport", graph, cmpCamera, document.querySelector("canvas"));
+          viewport.initialize("InteractiveViewport", graph, cmpCamera, canvas);
+
+          // hide the cursor when interacting, also suppressing right-click menu
+          canvas.addEventListener("mousedown", canvas.requestPointerLock);
+          canvas.addEventListener("mouseup", function (): void { document.exitPointerLock(); });
 
           // make the camera interactive (complex method in FudgeAid)
           FudgeAid.Viewport.expandCameraToInteractiveOrbit(viewport);

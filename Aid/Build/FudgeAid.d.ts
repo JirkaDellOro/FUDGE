@@ -80,6 +80,19 @@ declare namespace FudgeAid {
     }
 }
 declare namespace FudgeAid {
+    import ƒ = FudgeCore;
+    class CameraOrbitMovingFocus extends CameraOrbit {
+        readonly axisTranslateX: ƒ.Axis;
+        readonly axisTranslateY: ƒ.Axis;
+        readonly axisTranslateZ: ƒ.Axis;
+        constructor(_cmpCamera: ƒ.ComponentCamera, _distanceStart?: number, _maxRotX?: number, _minDistance?: number, _maxDistance?: number);
+        translateX(_delta: number): void;
+        translateY(_delta: number): void;
+        translateZ(_delta: number): void;
+        hndAxisOutput: EventListener;
+    }
+}
+declare namespace FudgeAid {
     enum IMAGE_RENDERING {
         AUTO = "auto",
         SMOOTH = "smooth",
@@ -259,6 +272,6 @@ declare namespace FudgeAid {
 }
 declare namespace FudgeAid {
     class Viewport {
-        static expandCameraToInteractiveOrbit(_viewport: ƒ.Viewport, _speedCameraRotation?: number, _speedCameraTranslation?: number): CameraOrbit;
+        static expandCameraToInteractiveOrbit(_viewport: ƒ.Viewport, _showFocus?: boolean, _speedCameraRotation?: number, _speedCameraTranslation?: number, _speedCameraDistance?: number): CameraOrbit;
     }
 }
