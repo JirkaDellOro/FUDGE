@@ -171,20 +171,20 @@ namespace FudgeCore {
         output = this.calculateOutput();
       let outputChanged: boolean = (output != this.outputPrevious);
 
-      if (timer)
+      if (timer) {
         timer.active = outputChanged;
+        if (!outputChanged)
+          return;
+      }
 
-      if (!outputChanged)
-        return;
-      
       this.outputPrevious = output;
-      
+
       let event: CustomEvent = new CustomEvent(EVENT_CONTROL.OUTPUT, {
         detail: {
           output: output
         }
       });
-      
+
       this.dispatchEvent(event);
     }
   }

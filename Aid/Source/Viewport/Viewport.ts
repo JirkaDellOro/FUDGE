@@ -39,12 +39,12 @@ namespace FudgeAid {
           return;
 
         if (_event.shiftKey) {
-          cntMouseTranslationX.pulse(_event.movementX);
-          cntMouseTranslationY.pulse(-_event.movementY);
+          cntMouseTranslationX.setInput(_event.movementX);
+          cntMouseTranslationY.setInput(-_event.movementY);
         }
         else {
-          cntMouseRotationX.pulse(_event.movementX);
-          cntMouseRotationY.pulse(_event.movementY);
+          cntMouseRotationX.setInput(_event.movementX);
+          cntMouseRotationY.setInput(_event.movementY);
         }
 
         focus.mtxLocal.translation = camera.mtxLocal.translation;
@@ -53,7 +53,7 @@ namespace FudgeAid {
 
       function hndWheelMove(_event: WheelEvent): void {
         if (_event.shiftKey) {
-          cntMouseTranslationZ.pulse(_event.deltaY);
+          cntMouseTranslationZ.setInput(_event.deltaY);
         }
         else
           camera.distance += _event.deltaY * _speedCameraDistance;
