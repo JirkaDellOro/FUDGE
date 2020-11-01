@@ -12,6 +12,8 @@ namespace FudgeAid {
       let cntMouseTranslationX: ƒ.Control = new ƒ.Control("MouseX", _speedCameraTranslation);
       let cntMouseTranslationY: ƒ.Control = new ƒ.Control("MouseY", _speedCameraTranslation);
       let cntMouseTranslationZ: ƒ.Control = new ƒ.Control("MouseZ", _speedCameraDistance);
+      // cntMouseTranslationZ.setDelay(50);
+      // cntMouseTranslationZ.setRateDispatchOutput(50);
 
       // camera setup
       let camera: CameraOrbitMovingFocus;
@@ -37,12 +39,12 @@ namespace FudgeAid {
           return;
 
         if (_event.shiftKey) {
-          cntMouseTranslationX.setInput(_event.movementX);
-          cntMouseTranslationY.setInput(-_event.movementY);
+          cntMouseTranslationX.pulse(_event.movementX);
+          cntMouseTranslationY.pulse(-_event.movementY);
         }
         else {
-          cntMouseRotationX.setInput(_event.movementX);
-          cntMouseRotationY.setInput(_event.movementY);
+          cntMouseRotationX.pulse(_event.movementX);
+          cntMouseRotationY.pulse(_event.movementY);
         }
 
         focus.mtxLocal.translation = camera.mtxLocal.translation;
@@ -51,8 +53,7 @@ namespace FudgeAid {
 
       function hndWheelMove(_event: WheelEvent): void {
         if (_event.shiftKey) {
-          cntMouseTranslationZ.setInput(_event.deltaY);
-          cntMouseTranslationZ.dispatchEvent(new CustomEvent(ƒ.EVENT_CONTROL.OUTPUT, {detail: cntMouseTranslationZ.getOutput}));
+          cntMouseTranslationZ.pulse(_event.deltaY);
         }
         else
           camera.distance += _event.deltaY * _speedCameraDistance;

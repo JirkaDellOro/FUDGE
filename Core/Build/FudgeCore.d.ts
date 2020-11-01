@@ -1743,6 +1743,7 @@ declare namespace FudgeCore {
          * Feed an input value into this control and fire the events [[EVENT_CONTROL.INPUT]] and [[EVENT_CONTROL.OUTPUT]]
          */
         setInput(_input: number): void;
+        pulse(_input: number): void;
         /**
          * Set the time to take for the internal linear dampening until the final ouput value is reached
          */

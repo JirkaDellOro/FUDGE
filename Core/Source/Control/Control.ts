@@ -80,6 +80,11 @@ namespace FudgeCore {
         this.dispatchOutput(null);
     }
 
+    public pulse(_input: number): void {
+      this.setInput(_input);
+      this.setInput(0);
+    }
+
     /**
      * Set the time to take for the internal linear dampening until the final ouput value is reached
      */
@@ -171,15 +176,15 @@ namespace FudgeCore {
 
       if (!outputChanged)
         return;
-
+      
       this.outputPrevious = output;
-
+      
       let event: CustomEvent = new CustomEvent(EVENT_CONTROL.OUTPUT, {
         detail: {
           output: output
         }
       });
-
+      
       this.dispatchEvent(event);
     }
   }

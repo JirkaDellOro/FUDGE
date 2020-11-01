@@ -24,7 +24,6 @@ namespace FudgeAid {
     }
 
     public translateZ(_delta: number): void {
-      console.log(_delta);
       this.mtxLocal.translateZ(_delta);
     }
 
