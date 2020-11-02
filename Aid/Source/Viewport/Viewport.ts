@@ -7,22 +7,30 @@ namespace FudgeAid {
       _viewport.addEventListener(ƒ.EVENT_POINTER.MOVE, hndPointerMove);
       _viewport.addEventListener(ƒ.EVENT_WHEEL.WHEEL, hndWheelMove);
 
-      let cntMouseRotationX: ƒ.Control = new ƒ.Control("MouseX", _speedCameraRotation);
-      let cntMouseRotationY: ƒ.Control = new ƒ.Control("MouseY", _speedCameraRotation);
-      let cntMouseTranslationX: ƒ.Control = new ƒ.Control("MouseX", _speedCameraTranslation);
-      let cntMouseTranslationY: ƒ.Control = new ƒ.Control("MouseY", _speedCameraTranslation);
-      let cntMouseTranslationZ: ƒ.Control = new ƒ.Control("MouseZ", _speedCameraDistance);
-      // cntMouseTranslationZ.setDelay(50);
-      // cntMouseTranslationZ.setRateDispatchOutput(50);
+      let cntMouseHorizontal: ƒ.Control = new ƒ.Control("MouseHorizontal");
+      let cntMouseVertical: ƒ.Control = new ƒ.Control("MouseVertical");
+      let cntMouseWheel: ƒ.Control = new ƒ.Control("MouseWheel");
 
       // camera setup
       let camera: CameraOrbitMovingFocus;
       camera = new CameraOrbitMovingFocus(_viewport.camera, 3, 80, 0.1, 50);
-      camera.axisRotateX.addControl(cntMouseRotationY);
-      camera.axisRotateY.addControl(cntMouseRotationX);
-      camera.axisTranslateX.addControl(cntMouseTranslationX);
-      camera.axisTranslateY.addControl(cntMouseTranslationY);
-      camera.axisTranslateZ.addControl(cntMouseTranslationZ);
+      
+      // set up axis to control
+      camera.axisRotateX.addControl(cntMouseVertical);
+      camera.axisRotateX.setFactor(_speedCameraRotation);
+
+      camera.axisRotateY.addControl(cntMouseHorizontal);
+      camera.axisRotateY.setFactor(_speedCameraRotation);
+
+      camera.axisTranslateX.addControl(cntMouseHorizontal);
+      camera.axisTranslateX.setFactor(_speedCameraTranslation);
+
+      camera.axisTranslateY.addControl(cntMouseVertical);
+      camera.axisTranslateY.setFactor(_speedCameraTranslation);
+
+      camera.axisTranslateZ.addControl(cntMouseWheel);
+      camera.axisTranslateZ.setFactor(_speedCameraDistance);
+
       _viewport.getGraph().addChild(camera);
 
       let focus: ƒ.Node;
@@ -38,14 +46,15 @@ namespace FudgeAid {
         if (!_event.buttons)
           return;
 
-        if (_event.shiftKey) {
-          cntMouseTranslationX.setInput(_event.movementX);
-          cntMouseTranslationY.setInput(-_event.movementY);
-        }
-        else {
-          cntMouseRotationX.setInput(_event.movementX);
-          cntMouseRotationY.setInput(_event.movementY);
-        }
+        camera.axisTranslateX.active = _event.shiftKey;
+        camera.axisTranslateY.active = _event.shiftKey;
+        camera.axisTranslateZ.active = _event.shiftKey;
+
+        camera.axisRotateX.active = !_event.shiftKey;
+        camera.axisRotateY.active = !_event.shiftKey;
+
+        cntMouseHorizontal.setInput(_event.movementX);
+        cntMouseVertical.setInput(-_event.movementY);
 
         focus.mtxLocal.translation = camera.mtxLocal.translation;
         _viewport.draw();
@@ -53,7 +62,7 @@ namespace FudgeAid {
 
       function hndWheelMove(_event: WheelEvent): void {
         if (_event.shiftKey) {
-          cntMouseTranslationZ.setInput(_event.deltaY);
+          cntMouseWheel.setInput(_event.deltaY);
         }
         else
           camera.distance += _event.deltaY * _speedCameraDistance;

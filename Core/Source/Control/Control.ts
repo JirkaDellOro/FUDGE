@@ -62,6 +62,9 @@ namespace FudgeCore {
      * Feed an input value into this control and fire the events [[EVENT_CONTROL.INPUT]] and [[EVENT_CONTROL.OUTPUT]]
      */
     public setInput(_input: number): void {
+      if (!this.active)
+        return;
+        
       this.outputBase = this.calculateOutput();
       this.valuePrevious = this.getValueDelayed();
       this.outputTarget = this.factor * _input;
@@ -163,6 +166,9 @@ namespace FudgeCore {
     }
 
     private dispatchOutput = (_eventOrValue: EventTimer | number): void => {
+      if (!this.active)
+        return;
+        
       let timer: Timer = this.time.getTimer(this.idTimer);
       let output: number;
       if (typeof (_eventOrValue) == "number")
