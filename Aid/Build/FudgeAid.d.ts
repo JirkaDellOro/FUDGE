@@ -60,11 +60,11 @@ declare namespace FudgeAid {
         readonly axisRotateX: ƒ.Axis;
         readonly axisRotateY: ƒ.Axis;
         readonly axisDistance: ƒ.Axis;
+        protected translator: ƒ.Node;
+        protected rotatorX: ƒ.Node;
         private maxRotX;
         private minDistance;
         private maxDistance;
-        private rotatorX;
-        private translator;
         constructor(_cmpCamera: ƒ.ComponentCamera, _distanceStart?: number, _maxRotX?: number, _minDistance?: number, _maxDistance?: number);
         get component(): ƒ.ComponentCamera;
         get node(): ƒ.Node;

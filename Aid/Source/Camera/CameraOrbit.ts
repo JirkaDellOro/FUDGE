@@ -6,11 +6,11 @@ namespace FudgeAid {
     public readonly axisRotateY: ƒ.Axis = new ƒ.Axis("RotateY", 1, ƒ.CONTROL_TYPE.PROPORTIONAL, true);
     public readonly axisDistance: ƒ.Axis = new ƒ.Axis("Distance", 1, ƒ.CONTROL_TYPE.PROPORTIONAL, true);
 
+    protected translator: ƒ.Node;
+    protected rotatorX: ƒ.Node;
     private maxRotX: number;
     private minDistance: number;
     private maxDistance: number;
-    private rotatorX: ƒ.Node;
-    private translator: ƒ.Node;
 
 
 

@@ -20,11 +20,16 @@ namespace FudgeAid {
     }
     
     public translateY(_delta: number): void {
-      this.mtxLocal.translateY(_delta);
+      let translation: ƒ.Vector3 = this.rotatorX.mtxWorld.getY();
+      translation.normalize(_delta);
+      this.mtxLocal.translate(translation, false);
     }
 
     public translateZ(_delta: number): void {
-      this.mtxLocal.translateZ(_delta);
+      // this.mtxLocal.translateZ(_delta);
+      let translation: ƒ.Vector3 = this.rotatorX.mtxWorld.getZ();
+      translation.normalize(_delta);
+      this.mtxLocal.translate(translation, false);
     }
 
     public hndAxisOutput: EventListener = (_event: Event): void => {
