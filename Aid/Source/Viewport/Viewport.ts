@@ -14,7 +14,7 @@ namespace FudgeAid {
       // camera setup
       let camera: CameraOrbitMovingFocus;
       camera = new CameraOrbitMovingFocus(_viewport.camera, 3, 80, 0.1, 50);
-      
+
       // set up axis to control
       camera.axisRotateX.addControl(cntMouseVertical);
       camera.axisRotateX.setFactor(_speedCameraRotation);
@@ -46,21 +46,28 @@ namespace FudgeAid {
         if (!_event.buttons)
           return;
 
-        camera.axisTranslateX.active = _event.shiftKey;
-        camera.axisTranslateY.active = _event.shiftKey;
-        camera.axisTranslateZ.active = _event.shiftKey;
-
-        camera.axisRotateX.active = !_event.shiftKey;
-        camera.axisRotateY.active = !_event.shiftKey;
+        activateAxis(_event);
+        let posCamera: ƒ.Vector3 = camera.node.mtxWorld.translation.copy;
 
         cntMouseHorizontal.setInput(_event.movementX);
-        cntMouseVertical.setInput(-_event.movementY);
+        cntMouseVertical.setInput((_event.shiftKey ? -1 : 1) * _event.movementY);
+
 
         focus.mtxLocal.translation = camera.mtxLocal.translation;
         _viewport.draw();
+        
+        if (_event.altKey && !_event.shiftKey) {
+          let offset: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(posCamera, camera.node.mtxWorld.translation);
+          // console.log(posCamera.toString(), camera.node.mtxWorld.translation.toString());
+          camera.mtxLocal.translate(offset, false);
+          focus.mtxLocal.translation = camera.mtxLocal.translation;
+          _viewport.draw();
+        }
       }
 
       function hndWheelMove(_event: WheelEvent): void {
+        activateAxis(_event);
+
         if (_event.shiftKey) {
           cntMouseWheel.setInput(_event.deltaY);
         }
@@ -69,6 +76,15 @@ namespace FudgeAid {
 
         focus.mtxLocal.translation = camera.mtxLocal.translation;
         _viewport.draw();
+      }
+
+      function activateAxis(_event: PointerEvent | WheelEvent): void {
+        camera.axisTranslateX.active = _event.shiftKey;
+        camera.axisTranslateY.active = _event.shiftKey;
+        camera.axisTranslateZ.active = _event.shiftKey;
+
+        camera.axisRotateX.active = !_event.shiftKey;
+        camera.axisRotateY.active = !_event.shiftKey;
       }
     }
   }
