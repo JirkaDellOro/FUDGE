@@ -36,8 +36,9 @@ A collection of various other helpful documents and resources
 - Primitve 3D-Models and 2D-Shapes 
 - Importer for standard file formats
 - Light and Shadow
-- Diegetic User-Interface
+- :pencil: Diegetic User-Interface
 - Runtime-Recording for Replay
+- Undo/Rollback
 - Grapheditor/Wiring for Shader and Animation
 - Input-Manager
 - Selection-Sets to store temporary Groups
@@ -59,4 +60,6 @@ A collection of various other helpful documents and resources
 | Monika Galkewitsch | UI-Components                     |
 | Lea Stegk          | UI-Design                         |
 | Elke Scherffius    | Tutorials                         |
+| Marko Fehrenbach   | Physics                         |
+| Jonas Plotzky      | Particlesystem                         |
 
