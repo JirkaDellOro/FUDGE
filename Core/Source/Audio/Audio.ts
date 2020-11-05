@@ -57,13 +57,14 @@ namespace FudgeCore {
     }
 
     public async mutate(_mutator: Mutator): Promise<void> {
+      let url: string = _mutator.url; // save url for reconstruction after exclusion
       if (_mutator.url != this.url.toString())
         this.load(_mutator.url);
       // except url from mutator for further processing
       delete(_mutator.url);
       super.mutate(_mutator);
-      // TODO: examine necessity to reconstruct, if mutator is kept by caller
-      // _mutator.url = this.url;
+      // reconstruct, for mutator may be kept by caller
+      _mutator.url = url;
     }
 
     protected reduceMutator(_mutator: Mutator): void {
