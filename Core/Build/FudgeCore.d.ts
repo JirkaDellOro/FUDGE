@@ -556,6 +556,8 @@ declare namespace FudgeCore {
          */
         toVector3(_z?: number): Vector3;
         toString(): string;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
     }

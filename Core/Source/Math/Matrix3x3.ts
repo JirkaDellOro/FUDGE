@@ -317,12 +317,21 @@ namespace FudgeCore {
     }
 
     public serialize(): Serialization {
-      // TODO: save translation, rotation and scale as vectors for readability and manipulation
-      let serialization: Serialization = this.getMutator();
+      // this.getMutator();
+      let serialization: Serialization = {
+        translation: this.translation.serialize(),
+        rotation: this.rotation,
+        scaling: this.scaling.serialize()
+      };
       return serialization;
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.mutate(_serialization);
+      let mutator: Mutator = {
+        translation: await this.translation.deserialize(_serialization.translation),
+        rotation: _serialization.rotation,
+        scaling: await this.scaling.deserialize(_serialization.scaling)
+      };
+      this.mutate(mutator);
       return this;
     }
 

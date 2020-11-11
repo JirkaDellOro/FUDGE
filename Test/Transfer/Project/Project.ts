@@ -111,6 +111,9 @@ namespace Project {
     source.addComponent(cmpAudio);
     source.addComponent(lightAmbient);
     source.addComponent(lightDirectional);
+    source.getComponent(ƒ.ComponentMaterial).pivot.translate(ƒ.Vector2.ONE(0.5));
+    source.getComponent(ƒ.ComponentMaterial).pivot.rotate(45);
+    source.getComponent(ƒ.ComponentMaterial).pivot.scale(new ƒ.Vector2(12, 5));
 
     let child: ƒ.Node = new ƒAid.Node("Ball", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y()), mtrFlat, sphere);
     child.getComponent(ƒ.ComponentMesh).pivot.scale(ƒ.Vector3.ONE(0.5));

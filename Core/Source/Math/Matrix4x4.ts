@@ -817,7 +817,7 @@ namespace FudgeCore {
         translation: await this.translation.deserialize(_serialization.translation),
         rotation: await this.rotation.deserialize(_serialization.rotation),
         scaling: await this.scaling.deserialize(_serialization.scaling)
-      }
+      };
       this.mutate(mutator);
       return this;
     }
