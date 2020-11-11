@@ -3418,6 +3418,31 @@ declare namespace FudgeCore {
        */
     class ComponentJointCylindrical extends ComponentJoint {
         static readonly iSubclass: number;
+        private jointSpringDampingRatio;
+        private jointSpringFrequency;
+        private jointRotationSpringDampingRatio;
+        private jointRotationSpringFrequency;
+        private jointMotorLimitUpper;
+        private jointMotorLimitLower;
+        private jointMotorForce;
+        private jointMotorSpeed;
+        private jointRotationMotorLimitUpper;
+        private jointRotationMotorLimitLower;
+        private jointRotationMotorTorque;
+        private jointRotationMotorSpeed;
+        private jointBreakForce;
+        private jointBreakTorque;
+        private config;
+        private rotationalMotor;
+        private translationMotor;
+        private springDamper;
+        private rotationSpringDamper;
+        private jointAnchor;
+        private jointAxis;
+        private jointInternalCollision;
+        private oimoJoint;
+        /** Creating a cylindrical joint between two ComponentRigidbodies moving on one axis and rotating around another bound on a local anchorpoint. */
+        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
          * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
          *  When changed after initialization the joint needs to be reconnected.
@@ -3504,31 +3529,6 @@ declare namespace FudgeCore {
          */
         get internalCollision(): boolean;
         set internalCollision(_value: boolean);
-        private jointSpringDampingRatio;
-        private jointSpringFrequency;
-        private jointRotationSpringDampingRatio;
-        private jointRotationSpringFrequency;
-        private jointMotorLimitUpper;
-        private jointMotorLimitLower;
-        private jointMotorForce;
-        private jointMotorSpeed;
-        private jointRotationMotorLimitUpper;
-        private jointRotationMotorLimitLower;
-        private jointRotationMotorTorque;
-        private jointRotationMotorSpeed;
-        private jointBreakForce;
-        private jointBreakTorque;
-        private config;
-        private rotationalMotor;
-        private translationMotor;
-        private springDamper;
-        private rotationSpringDamper;
-        private jointAnchor;
-        private jointAxis;
-        private jointInternalCollision;
-        private oimoJoint;
-        /** Creating a cylindrical joint between two ComponentRigidbodies moving on one axis and rotating around another bound on a local anchorpoint. */
-        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
          * Initializing and connecting the two rigidbodies with the configured joint properties
          * is automatically called by the physics system. No user interaction needed.
@@ -3544,12 +3544,12 @@ declare namespace FudgeCore {
          * Only to be used when functionality that is not added within Fudge is needed.
         */
         getOimoJoint(): OIMO.Joint;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        protected dirtyStatus(): void;
         private constructJoint;
         private superAdd;
         private superRemove;
-        protected dirtyStatus(): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace FudgeCore {
@@ -3570,6 +3570,23 @@ declare namespace FudgeCore {
        */
     class ComponentJointPrismatic extends ComponentJoint {
         static readonly iSubclass: number;
+        private jointSpringDampingRatio;
+        private jointSpringFrequency;
+        private jointMotorLimitUpper;
+        private jointMotorLimitLower;
+        private jointMotorForce;
+        private jointMotorSpeed;
+        private jointBreakForce;
+        private jointBreakTorque;
+        private config;
+        private translationalMotor;
+        private springDamper;
+        private jointAnchor;
+        private jointAxis;
+        private jointInternalCollision;
+        private oimoJoint;
+        /** Creating a prismatic joint between two ComponentRigidbodies only moving on one axis bound on a local anchorpoint. */
+        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
          * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
          *  When changed after initialization the joint needs to be reconnected.
@@ -3626,23 +3643,6 @@ declare namespace FudgeCore {
          */
         get internalCollision(): boolean;
         set internalCollision(_value: boolean);
-        private jointSpringDampingRatio;
-        private jointSpringFrequency;
-        private jointMotorLimitUpper;
-        private jointMotorLimitLower;
-        private jointMotorForce;
-        private jointMotorSpeed;
-        private jointBreakForce;
-        private jointBreakTorque;
-        private config;
-        private translationalMotor;
-        private springDamper;
-        private jointAnchor;
-        private jointAxis;
-        private jointInternalCollision;
-        private oimoJoint;
-        /** Creating a prismatic joint between two ComponentRigidbodies only moving on one axis bound on a local anchorpoint. */
-        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
          * Initializing and connecting the two rigidbodies with the configured joint properties
          * is automatically called by the physics system. No user interaction needed.
@@ -3658,16 +3658,16 @@ declare namespace FudgeCore {
          * Only to be used when functionality that is not added within Fudge is needed.
         */
         getOimoJoint(): OIMO.Joint;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
+        protected dirtyStatus(): void;
         /** Actual creation of a joint in the OimoPhysics system */
         private constructJoint;
         /** Adding this joint to the world through the general function of the base class ComponentJoint. Happening when the joint is connecting.  */
         private superAdd;
         /** Removing this joint to the world through the general function of the base class ComponentJoint. Happening when this component is removed from the Node. */
         private superRemove;
-        /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
-        protected dirtyStatus(): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace FudgeCore {
@@ -3695,6 +3695,28 @@ declare namespace FudgeCore {
         */
     class ComponentJointRagdoll extends ComponentJoint {
         static readonly iSubclass: number;
+        private jointTwistSpringDampingRatio;
+        private jointTwistSpringFrequency;
+        private jointSwingSpringDampingRatio;
+        private jointSwingSpringFrequency;
+        private jointTwistMotorLimitUpper;
+        private jointTwistMotorLimitLower;
+        private jointTwistMotorTorque;
+        private jointTwistMotorSpeed;
+        private jointBreakForce;
+        private jointBreakTorque;
+        private config;
+        private jointTwistMotor;
+        private jointTwistSpringDamper;
+        private jointSwingSpringDamper;
+        private jointAnchor;
+        private jointFirstAxis;
+        private jointSecondAxis;
+        private jointInternalCollision;
+        private jointMaxAngle1;
+        private jointMaxAngle2;
+        private oimoJoint;
+        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _firstAxis?: Vector3, _secondAxis?: Vector3, _localAnchor?: Vector3);
         /**
          * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
          *  When changed after initialization the joint needs to be reconnected.
@@ -3777,28 +3799,6 @@ declare namespace FudgeCore {
          */
         get internalCollision(): boolean;
         set internalCollision(_value: boolean);
-        private jointTwistSpringDampingRatio;
-        private jointTwistSpringFrequency;
-        private jointSwingSpringDampingRatio;
-        private jointSwingSpringFrequency;
-        private jointTwistMotorLimitUpper;
-        private jointTwistMotorLimitLower;
-        private jointTwistMotorTorque;
-        private jointTwistMotorSpeed;
-        private jointBreakForce;
-        private jointBreakTorque;
-        private config;
-        private jointTwistMotor;
-        private jointTwistSpringDamper;
-        private jointSwingSpringDamper;
-        private jointAnchor;
-        private jointFirstAxis;
-        private jointSecondAxis;
-        private jointInternalCollision;
-        private jointMaxAngle1;
-        private jointMaxAngle2;
-        private oimoJoint;
-        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _firstAxis?: Vector3, _secondAxis?: Vector3, _localAnchor?: Vector3);
         /**
          * Initializing and connecting the two rigidbodies with the configured joint properties
          * is automatically called by the physics system. No user interaction needed.
@@ -3814,12 +3814,12 @@ declare namespace FudgeCore {
          * Only to be used when functionality that is not added within Fudge is needed.
         */
         getOimoJoint(): OIMO.Joint;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        protected dirtyStatus(): void;
         private constructJoint;
         private superAdd;
         private superRemove;
-        protected dirtyStatus(): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace FudgeCore {
@@ -3842,6 +3842,22 @@ declare namespace FudgeCore {
        */
     class ComponentJointRevolute extends ComponentJoint {
         static readonly iSubclass: number;
+        private jointSpringDampingRatio;
+        private jointSpringFrequency;
+        private jointMotorLimitUpper;
+        private jointMotorLimitLower;
+        private jointmotorTorque;
+        private jointMotorSpeed;
+        private jointBreakForce;
+        private jointBreakTorque;
+        private config;
+        private rotationalMotor;
+        private springDamper;
+        private jointAnchor;
+        private jointAxis;
+        private jointInternalCollision;
+        private oimoJoint;
+        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
          * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
          *  When changed after initialization the joint needs to be reconnected.
@@ -3898,22 +3914,6 @@ declare namespace FudgeCore {
          */
         get internalCollision(): boolean;
         set internalCollision(_value: boolean);
-        private jointSpringDampingRatio;
-        private jointSpringFrequency;
-        private jointMotorLimitUpper;
-        private jointMotorLimitLower;
-        private jointmotorTorque;
-        private jointMotorSpeed;
-        private jointBreakForce;
-        private jointBreakTorque;
-        private config;
-        private rotationalMotor;
-        private springDamper;
-        private jointAnchor;
-        private jointAxis;
-        private jointInternalCollision;
-        private oimoJoint;
-        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
          * Initializing and connecting the two rigidbodies with the configured joint properties
          * is automatically called by the physics system. No user interaction needed.
@@ -3929,12 +3929,12 @@ declare namespace FudgeCore {
          * Only to be used when functionality that is not added within Fudge is needed.
         */
         getOimoJoint(): OIMO.Joint;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        protected dirtyStatus(): void;
         private constructJoint;
         private superAdd;
         private superRemove;
-        protected dirtyStatus(): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace FudgeCore {
@@ -3957,6 +3957,16 @@ declare namespace FudgeCore {
        */
     class ComponentJointSpherical extends ComponentJoint {
         static readonly iSubclass: number;
+        private jointSpringDampingRatio;
+        private jointSpringFrequency;
+        private jointBreakForce;
+        private jointBreakTorque;
+        private config;
+        private springDamper;
+        private jointAnchor;
+        private jointInternalCollision;
+        private oimoJoint;
+        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _localAnchor?: Vector3);
         /**
     
         /**
@@ -3989,16 +3999,6 @@ declare namespace FudgeCore {
          */
         get internalCollision(): boolean;
         set internalCollision(_value: boolean);
-        private jointSpringDampingRatio;
-        private jointSpringFrequency;
-        private jointBreakForce;
-        private jointBreakTorque;
-        private config;
-        private springDamper;
-        private jointAnchor;
-        private jointInternalCollision;
-        private oimoJoint;
-        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _localAnchor?: Vector3);
         /**
          * Initializing and connecting the two rigidbodies with the configured joint properties
          * is automatically called by the physics system. No user interaction needed.
@@ -4014,12 +4014,12 @@ declare namespace FudgeCore {
          * Only to be used when functionality that is not added within Fudge is needed.
         */
         getOimoJoint(): OIMO.Joint;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        protected dirtyStatus(): void;
         private constructJoint;
         private superAdd;
         private superRemove;
-        protected dirtyStatus(): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace FudgeCore {
@@ -4044,6 +4044,31 @@ declare namespace FudgeCore {
        */
     class ComponentJointUniversal extends ComponentJoint {
         static readonly iSubclass: number;
+        private jointFirstSpringDampingRatio;
+        private jointFirstSpringFrequency;
+        private jointSecondSpringDampingRatio;
+        private jointSecondSpringFrequency;
+        private jointFirstMotorLimitUpper;
+        private jointFirstMotorLimitLower;
+        private jointFirstMotorTorque;
+        private jointFirstMotorSpeed;
+        private jointSecondMotorLimitUpper;
+        private jointSecondMotorLimitLower;
+        private jointSecondMotorTorque;
+        private jointSecondMotorSpeed;
+        private jointBreakForce;
+        private jointBreakTorque;
+        private config;
+        private firstAxisMotor;
+        private secondAxisMotor;
+        private firstAxisSpringDamper;
+        private secondAxisSpringDamper;
+        private jointAnchor;
+        private jointFirstAxis;
+        private jointSecondAxis;
+        private jointInternalCollision;
+        private oimoJoint;
+        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _firstAxis?: Vector3, _secondAxis?: Vector3, _localAnchor?: Vector3);
         /**
          * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
          *  When changed after initialization the joint needs to be reconnected.
@@ -4136,31 +4161,6 @@ declare namespace FudgeCore {
          */
         get internalCollision(): boolean;
         set internalCollision(_value: boolean);
-        private jointFirstSpringDampingRatio;
-        private jointFirstSpringFrequency;
-        private jointSecondSpringDampingRatio;
-        private jointSecondSpringFrequency;
-        private jointFirstMotorLimitUpper;
-        private jointFirstMotorLimitLower;
-        private jointFirstMotorTorque;
-        private jointFirstMotorSpeed;
-        private jointSecondMotorLimitUpper;
-        private jointSecondMotorLimitLower;
-        private jointSecondMotorTorque;
-        private jointSecondMotorSpeed;
-        private jointBreakForce;
-        private jointBreakTorque;
-        private config;
-        private firstAxisMotor;
-        private secondAxisMotor;
-        private firstAxisSpringDamper;
-        private secondAxisSpringDamper;
-        private jointAnchor;
-        private jointFirstAxis;
-        private jointSecondAxis;
-        private jointInternalCollision;
-        private oimoJoint;
-        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _firstAxis?: Vector3, _secondAxis?: Vector3, _localAnchor?: Vector3);
         /**
          * Initializing and connecting the two rigidbodies with the configured joint properties
          * is automatically called by the physics system. No user interaction needed.
@@ -4176,12 +4176,12 @@ declare namespace FudgeCore {
          * Only to be used when functionality that is not added within Fudge is needed.
         */
         getOimoJoint(): OIMO.Joint;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        protected dirtyStatus(): void;
         private constructJoint;
         private superAdd;
         private superRemove;
-        protected dirtyStatus(): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace FudgeCore {
@@ -4198,6 +4198,31 @@ declare namespace FudgeCore {
         pivot: Matrix4x4;
         /** Vertices that build a convex mesh (form that is in itself closed). Needs to set in the construction of the rb if none of the standard colliders is used. */
         convexMesh: Float32Array;
+        /** Collisions with rigidbodies happening to this body, can be used to build a custom onCollisionStay functionality. */
+        collisions: ComponentRigidbody[];
+        /** Triggers that are currently triggering this body */
+        triggers: ComponentRigidbody[];
+        /** Bodies that trigger this "trigger", only happening if this body is a trigger */
+        bodiesInTrigger: ComponentRigidbody[];
+        /** ID to reference this specific ComponentRigidbody */
+        id: number;
+        private rigidbody;
+        private massData;
+        private collider;
+        private colliderInfo;
+        private rigidbodyInfo;
+        private rbType;
+        private colType;
+        private colGroup;
+        private colMask;
+        private bodyRestitution;
+        private bodyFriction;
+        private linDamping;
+        private angDamping;
+        private rotationalInfluenceFactor;
+        private gravityInfluenceFactor;
+        /** Creating a new rigidbody with a weight in kg, a physics type (default = dynamic), a collider type what physical form has the collider, to what group does it belong, is there a transform Matrix that should be used, and is the collider defined as a group of points that represent a convex mesh. */
+        constructor(_mass?: number, _type?: PHYSICS_TYPE, _colliderType?: COLLIDER_TYPE, _group?: PHYSICS_GROUP, _transform?: Matrix4x4, _convexMesh?: Float32Array);
         /** The type of interaction between the physical world and the transform hierarchy world. DYNAMIC means the body ignores hierarchy and moves by physics. KINEMATIC it's
          * reacting to a [[Node]] that is using physics but can still be controlled by animation or transform. And STATIC means its immovable.
          */
@@ -4249,31 +4274,6 @@ declare namespace FudgeCore {
        * Set the restitution of the rigidbody, which is the factor of bounciness of this rigidbody on surfaces
        */
         set restitution(_restitution: number);
-        /** Collisions with rigidbodies happening to this body, can be used to build a custom onCollisionStay functionality. */
-        collisions: ComponentRigidbody[];
-        /** Triggers that are currently triggering this body */
-        triggers: ComponentRigidbody[];
-        /** Bodies that trigger this "trigger", only happening if this body is a trigger */
-        bodiesInTrigger: ComponentRigidbody[];
-        /** ID to reference this specific ComponentRigidbody */
-        id: number;
-        private rigidbody;
-        private massData;
-        private collider;
-        private colliderInfo;
-        private rigidbodyInfo;
-        private rbType;
-        private colType;
-        private colGroup;
-        private colMask;
-        private bodyRestitution;
-        private bodyFriction;
-        private linDamping;
-        private angDamping;
-        private rotationalInfluenceFactor;
-        private gravityInfluenceFactor;
-        /** Creating a new rigidbody with a weight in kg, a physics type (default = dynamic), a collider type what physical form has the collider, to what group does it belong, is there a transform Matrix that should be used, and is the collider defined as a group of points that represent a convex mesh. */
-        constructor(_mass?: number, _type?: PHYSICS_TYPE, _colliderType?: COLLIDER_TYPE, _group?: PHYSICS_GROUP, _transform?: Matrix4x4, _convexMesh?: Float32Array);
         /**
         * Returns the rigidbody in the form the physics engine is using it, should not be used unless a functionality
         * is not provided through the FUDGE Integration.
@@ -4361,6 +4361,8 @@ declare namespace FudgeCore {
          * returning info about the hit. Provides the same functionality and information a regular raycast does but the ray is only testing against this specific body.
          */
         raycastThisBody(_origin: Vector3, _direction: Vector3, _length: number): RayHitInfo;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         /** Creates the actual OimoPhysics Rigidbody out of informations the Fudge Component has. */
         private createRigidbody;
         /** Creates a collider a shape that represents the object in the physical world.  */
@@ -4381,8 +4383,6 @@ declare namespace FudgeCore {
          * Events in case a body is in a trigger, so not only the body registers a triggerEvent but also the trigger itself.
          */
         private checkBodiesInTrigger;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Serializable;
     }
 }
 declare namespace FudgeCore {
@@ -4838,6 +4838,11 @@ declare namespace FudgeCore {
          */
         static pickNodeAt(_pos: Vector2, _pickBuffers: PickBuffer[], _rect: Rectangle): RayHit[];
         /**
+         * Recursively iterates over the graph starting with the node given, recalculates all world transforms,
+         * collects all lights and feeds all shaders used in the graph with these lights
+         */
+        static setupTransformAndLights(_node: Node, _world?: Matrix4x4, _lights?: MapLightTypeToLightList, _shadersUsed?: (typeof Shader)[]): void;
+        /**
          * The main rendering function to be called from [[Viewport]].
          * Draws the graph starting with the given [[Node]] using the camera given [[ComponentCamera]].
          */
@@ -4858,11 +4863,6 @@ declare namespace FudgeCore {
          * Creates a texture buffer to be uses as pick-buffer
          */
         private static getRayCastTexture;
-        /**
-         * Recursively iterates over the graph starting with the node given, recalculates all world transforms,
-         * collects all lights and feeds all shaders used in the graph with these lights
-         */
-        static setupTransformAndLights(_node: Node, _world?: Matrix4x4, _lights?: MapLightTypeToLightList, _shadersUsed?: (typeof Shader)[]): void;
         /**
          * Set light data in shaders
          */

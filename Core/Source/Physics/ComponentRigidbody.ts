@@ -15,6 +15,53 @@ namespace FudgeCore {
     /** Vertices that build a convex mesh (form that is in itself closed). Needs to set in the construction of the rb if none of the standard colliders is used. */
     public convexMesh: Float32Array;
 
+    /** Collisions with rigidbodies happening to this body, can be used to build a custom onCollisionStay functionality. */
+    public collisions: ComponentRigidbody[] = new Array();
+    /** Triggers that are currently triggering this body */
+    public triggers: ComponentRigidbody[] = new Array();
+    /** Bodies that trigger this "trigger", only happening if this body is a trigger */
+    public bodiesInTrigger: ComponentRigidbody[] = new Array();
+
+    /** ID to reference this specific ComponentRigidbody */
+    public id: number = 0;
+
+    //Private informations - Mostly OimoPhysics variables that should not be exposed to the Fudge User and manipulated by them
+    private rigidbody: OIMO.RigidBody;
+    private massData: OIMO.MassData = new OIMO.MassData();
+    private collider: OIMO.Shape;
+    private colliderInfo: OIMO.ShapeConfig;
+    private rigidbodyInfo: OIMO.RigidBodyConfig = new OIMO.RigidBodyConfig();
+    private rbType: PHYSICS_TYPE = PHYSICS_TYPE.DYNAMIC;
+    private colType: COLLIDER_TYPE = COLLIDER_TYPE.CUBE;
+    private colGroup: PHYSICS_GROUP = PHYSICS_GROUP.DEFAULT;
+    private colMask: number;
+    private bodyRestitution: number;
+    private bodyFriction: number;
+    private linDamping: number = 0.1;
+    private angDamping: number = 0.1;
+    private rotationalInfluenceFactor: Vector3 = Vector3.ONE();
+    private gravityInfluenceFactor: number = 1;
+
+    /** Creating a new rigidbody with a weight in kg, a physics type (default = dynamic), a collider type what physical form has the collider, to what group does it belong, is there a transform Matrix that should be used, and is the collider defined as a group of points that represent a convex mesh. */
+    constructor(_mass: number = 1, _type: PHYSICS_TYPE = PHYSICS_TYPE.DYNAMIC, _colliderType: COLLIDER_TYPE = COLLIDER_TYPE.CUBE, _group: PHYSICS_GROUP = Physics.settings.defaultCollisionGroup, _transform: Matrix4x4 = null, _convexMesh: Float32Array = null) {
+      super();
+      //Setting up all incoming values to be internal values
+      this.convexMesh = _convexMesh;
+      this.rbType = _type;
+      this.collisionGroup = _group;
+      this.colliderType = _colliderType;
+      this.mass = _mass;
+      this.bodyRestitution = Physics.settings.defaultRestitution;
+      this.bodyFriction = Physics.settings.defaultFriction;
+      this.colMask = Physics.settings.defaultCollisionMask;
+      //Create the actual rigidbody in the OimoPhysics Space
+      this.createRigidbody(_mass, _type, this.colliderType, _transform, this.collisionGroup);
+      this.id = Physics.world.distributeBodyID();
+      //Handling adding/removing the component
+      this.addEventListener(EVENT.COMPONENT_ADD, this.addRigidbodyToWorld);
+      this.addEventListener(EVENT.COMPONENT_REMOVE, this.removeRigidbodyFromWorld);
+    }
+
     /** The type of interaction between the physical world and the transform hierarchy world. DYNAMIC means the body ignores hierarchy and moves by physics. KINEMATIC it's
      * reacting to a [[Node]] that is using physics but can still be controlled by animation or transform. And STATIC means its immovable.
      */
@@ -158,53 +205,6 @@ namespace FudgeCore {
         this.rigidbody.getShapeList().setRestitution(this.bodyRestitution);
     }
 
-    /** Collisions with rigidbodies happening to this body, can be used to build a custom onCollisionStay functionality. */
-    public collisions: ComponentRigidbody[] = new Array();
-    /** Triggers that are currently triggering this body */
-    public triggers: ComponentRigidbody[] = new Array();
-    /** Bodies that trigger this "trigger", only happening if this body is a trigger */
-    public bodiesInTrigger: ComponentRigidbody[] = new Array();
-
-    /** ID to reference this specific ComponentRigidbody */
-    public id: number = 0;
-
-    //Private informations - Mostly OimoPhysics variables that should not be exposed to the Fudge User and manipulated by them
-    private rigidbody: OIMO.RigidBody;
-    private massData: OIMO.MassData = new OIMO.MassData();
-    private collider: OIMO.Shape;
-    private colliderInfo: OIMO.ShapeConfig;
-    private rigidbodyInfo: OIMO.RigidBodyConfig = new OIMO.RigidBodyConfig();
-    private rbType: PHYSICS_TYPE = PHYSICS_TYPE.DYNAMIC;
-    private colType: COLLIDER_TYPE = COLLIDER_TYPE.CUBE;
-    private colGroup: PHYSICS_GROUP = PHYSICS_GROUP.DEFAULT;
-    private colMask: number;
-    private bodyRestitution: number;
-    private bodyFriction: number;
-    private linDamping: number = 0.1;
-    private angDamping: number = 0.1;
-    private rotationalInfluenceFactor: Vector3 = Vector3.ONE();
-    private gravityInfluenceFactor: number = 1;
-
-    /** Creating a new rigidbody with a weight in kg, a physics type (default = dynamic), a collider type what physical form has the collider, to what group does it belong, is there a transform Matrix that should be used, and is the collider defined as a group of points that represent a convex mesh. */
-    constructor(_mass: number = 1, _type: PHYSICS_TYPE = PHYSICS_TYPE.DYNAMIC, _colliderType: COLLIDER_TYPE = COLLIDER_TYPE.CUBE, _group: PHYSICS_GROUP = Physics.settings.defaultCollisionGroup, _transform: Matrix4x4 = null, _convexMesh: Float32Array = null) {
-      super();
-      //Setting up all incoming values to be internal values
-      this.convexMesh = _convexMesh;
-      this.rbType = _type;
-      this.collisionGroup = _group;
-      this.colliderType = _colliderType;
-      this.mass = _mass;
-      this.bodyRestitution = Physics.settings.defaultRestitution;
-      this.bodyFriction = Physics.settings.defaultFriction;
-      this.colMask = Physics.settings.defaultCollisionMask;
-      //Create the actual rigidbody in the OimoPhysics Space
-      this.createRigidbody(_mass, _type, this.colliderType, _transform, this.collisionGroup);
-      this.id = Physics.world.distributeBodyID();
-      //Handling adding/removing the component
-      this.addEventListener(EVENT.COMPONENT_ADD, this.addRigidbodyToWorld);
-      this.addEventListener(EVENT.COMPONENT_REMOVE, this.removeRigidbodyFromWorld);
-    }
-
     /**
     * Returns the rigidbody in the form the physics engine is using it, should not be used unless a functionality
     * is not provided through the FUDGE Integration.
@@ -324,7 +324,7 @@ namespace FudgeCore {
    * Checks that the Rigidbody is positioned correctly and recreates the Collider with new scale/position/rotation
    */
     public updateFromWorld(): void {
-      let worldTransform: Matrix4x4 = super.getContainer().mtxWorld;//super.getContainer() != null ? super.getContainer().mtxWorld : Matrix4x4.IDENTITY(); //The the world information about where to position/scale/rotate
+      let worldTransform: Matrix4x4 = super.getContainer().mtxWorld; //super.getContainer() != null ? super.getContainer().mtxWorld : Matrix4x4.IDENTITY(); //The the world information about where to position/scale/rotate
       let position: Vector3 = worldTransform.translation; //Adding the offsets from the pivot
       position.add(this.pivot.translation);
       let rotation: Vector3 = worldTransform.getEulerAngles();
@@ -513,6 +513,45 @@ namespace FudgeCore {
       return hitInfo;
     }
 
+
+    //#region Saving/Loading - Some properties might be missing, e.g. convexMesh (Float32Array)
+    public serialize(): Serialization {
+      let serialization: Serialization = {
+        pivot: this.pivot.serialize(),
+        id: this.id,
+        physicsType: this.rbType,
+        mass: this.massData.mass,
+        colliderType: this.colType,
+        linearDamping: this.linDamping,
+        angularDamping: this.angDamping,
+        collisionGroup: this.colGroup,
+        rotationInfluence: this.rotationalInfluenceFactor,
+        gravityScale: this.gravityInfluenceFactor,
+        friction: this.bodyFriction,
+        restitution: this.bodyRestitution,
+        [super.constructor.name]: super.serialize()
+      };
+      return serialization;
+    }
+
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      this.pivot.deserialize(_serialization.pivot);
+      this.id = _serialization.id;
+      this.physicsType = _serialization.physicsType;
+      this.mass = _serialization.mass != null ? _serialization.mass : 1;
+      this.colliderType = _serialization.colliderType != null ? _serialization.colliderType : COLLIDER_TYPE.CUBE;
+      this.linearDamping = _serialization.linearDamping != null ? _serialization.linearDamping : this.linDamping;
+      this.angularDamping = _serialization.angularDamping != null ? _serialization.angularDamping : this.angDamping;
+      this.collisionGroup = _serialization.collisionGroup != null ? _serialization.collisionGroup : this.colGroup;
+      this.rotationInfluenceFactor = _serialization.rotationInfluence != null ? _serialization.rotationInfluence : this.rotationalInfluenceFactor;
+      this.gravityScale = _serialization.gravityScale != null ? _serialization.gravityScale : 1;
+      this.friction = _serialization.friction != null ? _serialization.friction : this.bodyFriction;
+      this.restitution = _serialization.restitution != null ? _serialization.restitution : this.bodyRestitution;
+      super.deserialize(_serialization[super.constructor.name]);
+      return this;
+    }
+    //#endregion
+
     /** Creates the actual OimoPhysics Rigidbody out of informations the Fudge Component has. */
     private createRigidbody(_mass: number, _type: PHYSICS_TYPE, _colliderType: COLLIDER_TYPE, _transform: Matrix4x4, _collisionGroup: PHYSICS_GROUP = PHYSICS_GROUP.DEFAULT): void {
       let oimoType: number; //Need the conversion from simple enum to number because if enum is defined as Oimo.RigidyBodyType you have to include Oimo to use FUDGE at all
@@ -667,44 +706,6 @@ namespace FudgeCore {
           this.dispatchEvent(event);
         }
       });
-    }
-    //#endregion
-
-    //#region Saving/Loading - Some properties might be missing, e.g. convexMesh (Float32Array)
-    public serialize(): Serialization {
-      let serialization: Serialization = {
-        pivot: this.pivot.serialize(),
-        id: this.id,
-        physicsType: this.rbType,
-        mass: this.massData.mass,
-        colliderType: this.colType,
-        linearDamping: this.linDamping,
-        angularDamping: this.angDamping,
-        collisionGroup: this.colGroup,
-        rotationInfluence: this.rotationalInfluenceFactor,
-        gravityScale: this.gravityInfluenceFactor,
-        friction: this.bodyFriction,
-        restitution: this.bodyRestitution,
-        [super.constructor.name]: super.serialize()
-      };
-      return serialization;
-    }
-
-    public deserialize(_serialization: Serialization): Serializable {
-      this.pivot.deserialize(_serialization.pivot);
-      this.id = _serialization.id;
-      this.physicsType = _serialization.physicsType;
-      this.mass = _serialization.mass != null ? _serialization.mass : 1;
-      this.colliderType = _serialization.colliderType != null ? _serialization.colliderType : COLLIDER_TYPE.CUBE;
-      this.linearDamping = _serialization.linearDamping != null ? _serialization.linearDamping : this.linDamping;
-      this.angularDamping = _serialization.angularDamping != null ? _serialization.angularDamping : this.angDamping;
-      this.collisionGroup = _serialization.collisionGroup != null ? _serialization.collisionGroup : this.colGroup;
-      this.rotationInfluenceFactor = _serialization.rotationInfluence != null ? _serialization.rotationInfluence : this.rotationalInfluenceFactor;
-      this.gravityScale = _serialization.gravityScale != null ? _serialization.gravityScale : 1;
-      this.friction = _serialization.friction != null ? _serialization.friction : this.bodyFriction;
-      this.restitution = _serialization.restitution != null ? _serialization.restitution : this.bodyRestitution;
-      super.deserialize(_serialization[super.constructor.name]);
-      return this;
     }
     //#endregion
   }

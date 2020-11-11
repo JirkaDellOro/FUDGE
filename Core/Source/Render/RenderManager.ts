@@ -73,6 +73,54 @@ namespace FudgeCore {
     }
     //#endregion
 
+    //#region Transformation & Lights
+    /**
+     * Recursively iterates over the graph starting with the node given, recalculates all world transforms, 
+     * collects all lights and feeds all shaders used in the graph with these lights
+     */
+    public static setupTransformAndLights(_node: Node, _world: Matrix4x4 = Matrix4x4.IDENTITY(), _lights: MapLightTypeToLightList = new Map(), _shadersUsed: (typeof Shader)[] = null): void {
+      RenderManager.timestampUpdate = performance.now();
+      let firstLevel: boolean = (_shadersUsed == null);
+      if (firstLevel)
+        _shadersUsed = [];
+
+      let world: Matrix4x4 = _world;
+
+      let cmpTransform: ComponentTransform = _node.cmpTransform;
+      if (cmpTransform)
+        world = Matrix4x4.MULTIPLICATION(_world, cmpTransform.local);
+
+      _node.mtxWorld.set(world); // overwrite readonly mtxWorld of node
+      _node.timestampUpdate = RenderManager.timestampUpdate;
+
+      let cmpLights: ComponentLight[] = _node.getComponents(ComponentLight);
+      for (let cmpLight of cmpLights) {
+        let type: TypeOfLight = cmpLight.light.getType();
+        let lightsOfType: ComponentLight[] = _lights.get(type);
+        if (!lightsOfType) {
+          lightsOfType = [];
+          _lights.set(type, lightsOfType);
+        }
+        lightsOfType.push(cmpLight);
+      }
+
+      let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
+      if (cmpMaterial) {
+        let shader: typeof Shader = cmpMaterial.material.getShader();
+        if (_shadersUsed.indexOf(shader) < 0)
+          _shadersUsed.push(shader);
+      }
+
+      for (let child of _node.getChildren()) {
+        RenderManager.setupTransformAndLights(child, world, _lights, _shadersUsed);
+      }
+
+      if (firstLevel)
+        for (let shader of _shadersUsed)
+          RenderManager.setLightsInShader(shader, _lights);
+    }
+    //#endregion
+
     //#region Drawing
     /**
      * The main rendering function to be called from [[Viewport]].
@@ -83,15 +131,17 @@ namespace FudgeCore {
       if (_node.getParent())
         matrix = _node.getParent().mtxWorld;
 
-      if (Physics.world.mainCam != _cmpCamera) Physics.world.mainCam = _cmpCamera; //DebugDraw needs to know the main camera beforehand, _cmpCamera is the viewport camera. | Marko Fehrenbach, HFU 2020
+      // TODO: Move physics rendering to RenderPhysics extension of RenderManager
+      if (Physics.world && Physics.world.mainCam != _cmpCamera)
+        Physics.world.mainCam = _cmpCamera; //DebugDraw needs to know the main camera beforehand, _cmpCamera is the viewport camera. | Marko Fehrenbach, HFU 2020
       RenderManager.setupPhysicalTransform(_node);
 
       RenderManager.setupTransformAndLights(_node, matrix);
 
-      if (Physics.settings != null && Physics.settings.debugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY) //Give users the possibility to only show physics displayed | Marko Fehrenbach, HFU 2020
-        RenderManager.drawGraphRecursive(_node, _cmpCamera, _drawNode);
+      //if (Physics.settings && Physics.settings.debugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY) //Give users the possibility to only show physics displayed | Marko Fehrenbach, HFU 2020
+      RenderManager.drawGraphRecursive(_node, _cmpCamera, _drawNode);
 
-      if (Physics.settings.debugDraw == true) {
+      if (Physics.settings && Physics.settings.debugDraw == true) {
         Physics.world.debugDraw.end();
       }
     }
@@ -204,53 +254,7 @@ namespace FudgeCore {
     }
     //#endregion
 
-    //#region Transformation & Lights
-    /**
-     * Recursively iterates over the graph starting with the node given, recalculates all world transforms, 
-     * collects all lights and feeds all shaders used in the graph with these lights
-     */
-    public static setupTransformAndLights(_node: Node, _world: Matrix4x4 = Matrix4x4.IDENTITY(), _lights: MapLightTypeToLightList = new Map(), _shadersUsed: (typeof Shader)[] = null): void {
-      RenderManager.timestampUpdate = performance.now();
-      let firstLevel: boolean = (_shadersUsed == null);
-      if (firstLevel)
-        _shadersUsed = [];
-
-      let world: Matrix4x4 = _world;
-
-      let cmpTransform: ComponentTransform = _node.cmpTransform;
-      if (cmpTransform)
-        world = Matrix4x4.MULTIPLICATION(_world, cmpTransform.local);
-
-      _node.mtxWorld.set(world); // overwrite readonly mtxWorld of node
-      _node.timestampUpdate = RenderManager.timestampUpdate;
-
-      let cmpLights: ComponentLight[] = _node.getComponents(ComponentLight);
-      for (let cmpLight of cmpLights) {
-        let type: TypeOfLight = cmpLight.light.getType();
-        let lightsOfType: ComponentLight[] = _lights.get(type);
-        if (!lightsOfType) {
-          lightsOfType = [];
-          _lights.set(type, lightsOfType);
-        }
-        lightsOfType.push(cmpLight);
-      }
-
-      let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
-      if (cmpMaterial) {
-        let shader: typeof Shader = cmpMaterial.material.getShader();
-        if (_shadersUsed.indexOf(shader) < 0)
-          _shadersUsed.push(shader);
-      }
-
-      for (let child of _node.getChildren()) {
-        RenderManager.setupTransformAndLights(child, world, _lights, _shadersUsed);
-      }
-
-      if (firstLevel)
-        for (let shader of _shadersUsed)
-          RenderManager.setLightsInShader(shader, _lights);
-    }
-
+    //#region Lights
     /**
      * Set light data in shaders
      */

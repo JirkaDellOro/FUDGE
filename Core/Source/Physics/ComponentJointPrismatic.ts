@@ -17,6 +17,39 @@ namespace FudgeCore {
   export class ComponentJointPrismatic extends ComponentJoint {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointPrismatic);
 
+    //Internally used variables - Joint Properties that are used even when no actual oimoJoint is currently existend
+    private jointSpringDampingRatio: number = 0;
+    private jointSpringFrequency: number = 0;
+
+    private jointMotorLimitUpper: number = 10;
+    private jointMotorLimitLower: number = -10;
+    private jointMotorForce: number = 0;
+    private jointMotorSpeed: number = 0;
+
+    private jointBreakForce: number = 0;
+    private jointBreakTorque: number = 0;
+
+    private config: OIMO.PrismaticJointConfig = new OIMO.PrismaticJointConfig();
+    private translationalMotor: OIMO.TranslationalLimitMotor;
+    private springDamper: OIMO.SpringDamper;
+    private jointAnchor: OIMO.Vec3;
+    private jointAxis: OIMO.Vec3;
+
+    private jointInternalCollision: boolean;
+    private oimoJoint: OIMO.PrismaticJoint;
+
+    /** Creating a prismatic joint between two ComponentRigidbodies only moving on one axis bound on a local anchorpoint. */
+    constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null, _axis: Vector3 = new Vector3(0, 1, 0), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
+      super(_attachedRigidbody, _connectedRigidbody);
+      this.jointAxis = new OIMO.Vec3(_axis.x, _axis.y, _axis.z);
+      this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
+
+      /*Tell the physics that there is a new joint and on the physics start the actual joint is first created. Values can be set but the
+        actual constraint ain't existent until the game starts
+      */
+      this.addEventListener(EVENT.COMPONENT_ADD, this.dirtyStatus);
+      this.addEventListener(EVENT.COMPONENT_REMOVE, this.superRemove);
+    }
     //#region Get/Set transfor of fudge properties to the physics engine
     /**
      * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
@@ -140,40 +173,6 @@ namespace FudgeCore {
     }
     //#endregion
 
-    //Internally used variables - Joint Properties that are used even when no actual oimoJoint is currently existend
-    private jointSpringDampingRatio: number = 0;
-    private jointSpringFrequency: number = 0;
-
-    private jointMotorLimitUpper: number = 10;
-    private jointMotorLimitLower: number = -10;
-    private jointMotorForce: number = 0;
-    private jointMotorSpeed: number = 0;
-
-    private jointBreakForce: number = 0;
-    private jointBreakTorque: number = 0;
-
-    private config: OIMO.PrismaticJointConfig = new OIMO.PrismaticJointConfig();
-    private translationalMotor: OIMO.TranslationalLimitMotor;
-    private springDamper: OIMO.SpringDamper;
-    private jointAnchor: OIMO.Vec3;
-    private jointAxis: OIMO.Vec3;
-
-    private jointInternalCollision: boolean;
-    private oimoJoint: OIMO.PrismaticJoint;
-
-    /** Creating a prismatic joint between two ComponentRigidbodies only moving on one axis bound on a local anchorpoint. */
-    constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null, _axis: Vector3 = new Vector3(0, 1, 0), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
-      super(_attachedRigidbody, _connectedRigidbody);
-      this.jointAxis = new OIMO.Vec3(_axis.x, _axis.y, _axis.z);
-      this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
-
-      /*Tell the physics that there is a new joint and on the physics start the actual joint is first created. Values can be set but the
-        actual constraint ain't existent until the game starts
-      */
-      this.addEventListener(EVENT.COMPONENT_ADD, this.dirtyStatus);
-      this.addEventListener(EVENT.COMPONENT_REMOVE, this.superRemove);
-    }
-
     /**
      * Initializing and connecting the two rigidbodies with the configured joint properties
      * is automatically called by the physics system. No user interaction needed.
@@ -208,6 +207,54 @@ namespace FudgeCore {
       return this.oimoJoint;
     }
 
+    //#region Saving/Loading
+    public serialize(): Serialization {
+      let serialization: Serialization = {
+        attID: super.idAttachedRB,
+        conID: super.idConnectedRB,
+        axis: this.axis,
+        anchor: this.anchor,
+        internalCollision: this.jointInternalCollision,
+        springDamping: this.jointSpringDampingRatio,
+        springFrequency: this.jointSpringFrequency,
+        breakForce: this.jointBreakForce,
+        breakTorque: this.jointBreakTorque,
+        motorLimitUpper: this.jointMotorLimitUpper,
+        motorLimitLower: this.jointMotorLimitLower,
+        motorSpeed: this.jointMotorSpeed,
+        motorForce: this.jointMotorForce,
+        [super.constructor.name]: super.baseSerialize()
+      };
+      return serialization;
+    }
+
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      super.idAttachedRB = _serialization.attID;
+      super.idConnectedRB = _serialization.conID;
+      if (_serialization.attID != null && _serialization.conID != null)
+        super.setBodiesFromLoadedIDs();
+      this.axis = _serialization.axis != null ? _serialization.axis : this.jointAxis;
+      this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
+      this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
+      this.springDamping = _serialization.springDamping != null ? _serialization.springDamping : this.jointSpringDampingRatio;
+      this.springFrequency = _serialization.springFrequency != null ? _serialization.springFrequency : this.jointSpringFrequency;
+      this.breakForce = _serialization.breakForce != null ? _serialization.breakForce : this.jointBreakForce;
+      this.breakTorque = _serialization.breakTorque != null ? _serialization.breakTorque : this.jointBreakTorque;
+      this.motorLimitUpper = _serialization.motorLimitUpper != null ? _serialization.motorLimitUpper : this.jointMotorLimitUpper;
+      this.motorLimitLower = _serialization.motorLimitLower != null ? _serialization.motorLimitLower : this.jointMotorLimitLower;
+      this.motorSpeed = _serialization.motorSpeed != null ? _serialization.motorSpeed : this.jointMotorSpeed;
+      this.motorForce = _serialization.motorForce != null ? _serialization.motorForce : this.jointMotorForce;
+      super.baseDeserialize(_serialization); //Super, Super, Component != ComponentJoint
+      return this;
+    }
+    //#endregion
+
+    /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
+    protected dirtyStatus(): void {
+      Debug.log("Dirty Status");
+      Physics.world.changeJointStatus(this);
+    }
+
     /** Actual creation of a joint in the OimoPhysics system */
     private constructJoint(): void {
       this.springDamper = new OIMO.SpringDamper().setSpring(this.jointSpringFrequency, this.jointSpringDampingRatio); //Create spring settings, either as a spring or totally rigid
@@ -235,54 +282,5 @@ namespace FudgeCore {
     private superRemove(): void {
       this.removeConstraintFromWorld(this);
     }
-
-    /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
-    protected dirtyStatus(): void {
-      Debug.log("Dirty Status");
-      Physics.world.changeJointStatus(this);
-    }
-
-    //#region Saving/Loading
-    public serialize(): Serialization {
-      let serialization: Serialization = {
-        attID: super.idAttachedRB,
-        conID: super.idConnectedRB,
-        axis: this.axis,
-        anchor: this.anchor,
-        internalCollision: this.jointInternalCollision,
-        springDamping: this.jointSpringDampingRatio,
-        springFrequency: this.jointSpringFrequency,
-        breakForce: this.jointBreakForce,
-        breakTorque: this.jointBreakTorque,
-        motorLimitUpper: this.jointMotorLimitUpper,
-        motorLimitLower: this.jointMotorLimitLower,
-        motorSpeed: this.jointMotorSpeed,
-        motorForce: this.jointMotorForce,
-        [super.constructor.name]: super.baseSerialize()
-      };
-      return serialization;
-    }
-
-    public deserialize(_serialization: Serialization): Serializable {
-      super.idAttachedRB = _serialization.attID;
-      super.idConnectedRB = _serialization.conID;
-      if (_serialization.attID != null && _serialization.conID != null)
-        super.setBodiesFromLoadedIDs();
-      this.axis = _serialization.axis != null ? _serialization.axis : this.jointAxis;
-      this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
-      this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
-      this.springDamping = _serialization.springDamping != null ? _serialization.springDamping : this.jointSpringDampingRatio;
-      this.springFrequency = _serialization.springFrequency != null ? _serialization.springFrequency : this.jointSpringFrequency;
-      this.breakForce = _serialization.breakForce != null ? _serialization.breakForce : this.jointBreakForce;
-      this.breakTorque = _serialization.breakTorque != null ? _serialization.breakTorque : this.jointBreakTorque;
-      this.motorLimitUpper = _serialization.motorLimitUpper != null ? _serialization.motorLimitUpper : this.jointMotorLimitUpper;
-      this.motorLimitLower = _serialization.motorLimitLower != null ? _serialization.motorLimitLower : this.jointMotorLimitLower;
-      this.motorSpeed = _serialization.motorSpeed != null ? _serialization.motorSpeed : this.jointMotorSpeed;
-      this.motorForce = _serialization.motorForce != null ? _serialization.motorForce : this.jointMotorForce;
-      super.baseDeserialize(_serialization); //Super, Super, Component != ComponentJoint
-      return this;
-    }
-    //#endregion
-
   }
 }

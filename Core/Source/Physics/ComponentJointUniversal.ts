@@ -21,6 +21,52 @@ namespace FudgeCore {
   export class ComponentJointUniversal extends ComponentJoint {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointUniversal);
 
+    private jointFirstSpringDampingRatio: number = 0;
+    private jointFirstSpringFrequency: number = 0;
+
+    private jointSecondSpringDampingRatio: number = 0;
+    private jointSecondSpringFrequency: number = 0;
+
+    private jointFirstMotorLimitUpper: number = 360;
+    private jointFirstMotorLimitLower: number = 0;
+    private jointFirstMotorTorque: number = 0;
+    private jointFirstMotorSpeed: number = 0;
+
+    private jointSecondMotorLimitUpper: number = 360;
+    private jointSecondMotorLimitLower: number = 0;
+    private jointSecondMotorTorque: number = 0;
+    private jointSecondMotorSpeed: number = 0;
+
+    private jointBreakForce: number = 0;
+    private jointBreakTorque: number = 0;
+
+    private config: OIMO.UniversalJointConfig = new OIMO.UniversalJointConfig();
+    private firstAxisMotor: OIMO.RotationalLimitMotor;
+    private secondAxisMotor: OIMO.RotationalLimitMotor;
+    private firstAxisSpringDamper: OIMO.SpringDamper;
+    private secondAxisSpringDamper: OIMO.SpringDamper;
+    private jointAnchor: OIMO.Vec3;
+    private jointFirstAxis: OIMO.Vec3;
+    private jointSecondAxis: OIMO.Vec3;
+
+    private jointInternalCollision: boolean;
+
+    private oimoJoint: OIMO.UniversalJoint;
+
+
+    constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null, _firstAxis: Vector3 = new Vector3(1, 0, 0), _secondAxis: Vector3 = new Vector3(0, 0, 1), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
+      super(_attachedRigidbody, _connectedRigidbody);
+      this.jointFirstAxis = new OIMO.Vec3(_firstAxis.x, _firstAxis.y, _firstAxis.z);
+      this.jointSecondAxis = new OIMO.Vec3(_secondAxis.x, _secondAxis.y, _secondAxis.z);
+      this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
+
+      /*Tell the physics that there is a new joint and on the physics start the actual joint is first created. Values can be set but the
+        actual constraint ain't existent until the game starts
+      */
+      this.addEventListener(EVENT.COMPONENT_ADD, this.dirtyStatus);
+      this.addEventListener(EVENT.COMPONENT_REMOVE, this.superRemove);
+    }
+
     //#region Get/Set transfor of fudge properties to the physics engine
     /**
      * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
@@ -219,52 +265,6 @@ namespace FudgeCore {
     }
     //#endregion
 
-    private jointFirstSpringDampingRatio: number = 0;
-    private jointFirstSpringFrequency: number = 0;
-
-    private jointSecondSpringDampingRatio: number = 0;
-    private jointSecondSpringFrequency: number = 0;
-
-    private jointFirstMotorLimitUpper: number = 360;
-    private jointFirstMotorLimitLower: number = 0;
-    private jointFirstMotorTorque: number = 0;
-    private jointFirstMotorSpeed: number = 0;
-
-    private jointSecondMotorLimitUpper: number = 360;
-    private jointSecondMotorLimitLower: number = 0;
-    private jointSecondMotorTorque: number = 0;
-    private jointSecondMotorSpeed: number = 0;
-
-    private jointBreakForce: number = 0;
-    private jointBreakTorque: number = 0;
-
-    private config: OIMO.UniversalJointConfig = new OIMO.UniversalJointConfig();
-    private firstAxisMotor: OIMO.RotationalLimitMotor;
-    private secondAxisMotor: OIMO.RotationalLimitMotor;
-    private firstAxisSpringDamper: OIMO.SpringDamper;
-    private secondAxisSpringDamper: OIMO.SpringDamper;
-    private jointAnchor: OIMO.Vec3;
-    private jointFirstAxis: OIMO.Vec3;
-    private jointSecondAxis: OIMO.Vec3;
-
-    private jointInternalCollision: boolean;
-
-    private oimoJoint: OIMO.UniversalJoint;
-
-
-    constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null, _firstAxis: Vector3 = new Vector3(1, 0, 0), _secondAxis: Vector3 = new Vector3(0, 0, 1), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
-      super(_attachedRigidbody, _connectedRigidbody);
-      this.jointFirstAxis = new OIMO.Vec3(_firstAxis.x, _firstAxis.y, _firstAxis.z);
-      this.jointSecondAxis = new OIMO.Vec3(_secondAxis.x, _secondAxis.y, _secondAxis.z);
-      this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
-
-      /*Tell the physics that there is a new joint and on the physics start the actual joint is first created. Values can be set but the
-        actual constraint ain't existent until the game starts
-      */
-      this.addEventListener(EVENT.COMPONENT_ADD, this.dirtyStatus);
-      this.addEventListener(EVENT.COMPONENT_REMOVE, this.superRemove);
-    }
-
     /**
      * Initializing and connecting the two rigidbodies with the configured joint properties
      * is automatically called by the physics system. No user interaction needed.
@@ -294,6 +294,67 @@ namespace FudgeCore {
     */
     public getOimoJoint(): OIMO.Joint {
       return this.oimoJoint;
+    }
+    
+    //#region Saving/Loading
+    public serialize(): Serialization {
+      let serialization: Serialization = {
+        attID: super.idAttachedRB,
+        conID: super.idConnectedRB,
+        anchor: this.anchor,
+        internalCollision: this.jointInternalCollision,
+        breakForce: this.jointBreakForce,
+        breakTorque: this.jointBreakTorque,
+        firstAxis: this.jointFirstAxis,
+        secondAxis: this.jointSecondAxis,
+        springDampingFirstAxis: this.jointFirstSpringDampingRatio,
+        springFrequencyFirstAxis: this.jointFirstSpringFrequency,
+        springDampingSecondAxis: this.jointSecondSpringDampingRatio,
+        springFrequencySecondAxis: this.jointSecondSpringFrequency,
+        motorLimitUpperFirstAxis: this.jointFirstMotorLimitUpper,
+        motorLimitLowerFirstAxis: this.jointFirstMotorLimitLower,
+        motorSpeedFirstAxis: this.jointFirstMotorSpeed,
+        motorTorqueFirstAxis: this.jointFirstMotorTorque,
+        motorLimitUpperSecondAxis: this.jointSecondMotorLimitUpper,
+        motorLimitLowerSecondAxis: this.jointSecondMotorLimitLower,
+        motorSpeedSecondAxis: this.jointSecondMotorSpeed,
+        motorTorqueSecondAxis: this.jointSecondMotorTorque,
+        [super.constructor.name]: super.baseSerialize()
+      };
+      return serialization;
+    }
+
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      super.idAttachedRB = _serialization.attID;
+      super.idConnectedRB = _serialization.conID;
+      if (_serialization.attID != null && _serialization.conID != null)
+        super.setBodiesFromLoadedIDs();
+      this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
+      this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
+      this.breakForce = _serialization.breakForce != null ? _serialization.breakForce : this.jointBreakForce;
+      this.breakTorque = _serialization.breakTorque != null ? _serialization.breakTorque : this.jointBreakTorque;
+      this.firstAxis = _serialization.firstAxis != null ? _serialization.firstAxis : this.jointFirstAxis;
+      this.secondAxis = _serialization.secondAxis != null ? _serialization.secondAxis : this.jointSecondAxis;
+      this.springDampingFirstAxis = _serialization.springDampingFirstAxis != null ? _serialization.springDampingFirstAxis : this.jointFirstSpringDampingRatio;
+      this.springFrequencyFirstAxis = _serialization.springFrequencyFirstAxis != null ? _serialization.springFrequencyFirstAxis : this.jointFirstSpringFrequency;
+      this.springDampingSecondAxis = _serialization.springDampingSecondAxis != null ? _serialization.springDampingSecondAxis : this.jointSecondSpringDampingRatio;
+      this.springFrequencySecondAxis = _serialization.springFrequencySecondAxis != null ? _serialization.springFrequencySecondAxis : this.jointSecondSpringFrequency;
+      this.motorLimitUpperFirstAxis = _serialization.motorLimitUpperFirstAxis != null ? _serialization.motorLimitUpperFirstAxis : this.jointFirstMotorLimitUpper;
+      this.motorLimitLowerFirstAxis = _serialization.motorLimitLowerFirstAxis != null ? _serialization.motorLimitLowerFirstAxis : this.jointFirstMotorLimitUpper;
+      this.motorSpeedFirstAxis = _serialization.motorSpeedFirstAxis != null ? _serialization.motorSpeedFirstAxis : this.jointFirstMotorSpeed;
+      this.motorTorqueFirstAxis = _serialization.motorTorqueFirstAxis != null ? _serialization.motorTorqueFirstAxis : this.jointFirstMotorTorque;
+      this.motorLimitUpperSecondAxis = _serialization.motorLimitUpperSecondAxis != null ? _serialization.motorLimitUpperSecondAxis : this.jointSecondMotorLimitUpper;
+      this.motorLimitLowerSecondAxis = _serialization.motorLimitLowerSecondAxis != null ? _serialization.motorLimitLowerSecondAxis : this.jointSecondMotorLimitUpper;
+      this.motorSpeedSecondAxis = _serialization.motorSpeedSecondAxis != null ? _serialization.motorSpeedSecondAxis : this.jointSecondMotorSpeed;
+      this.motorTorqueSecondAxis = _serialization.motorTorqueSecondAxis != null ? _serialization.motorTorqueSecondAxis : this.jointSecondMotorTorque;
+      super.baseDeserialize(_serialization);
+      return this;
+    }
+    //#endregion
+
+
+    protected dirtyStatus(): void {
+      Physics.world.changeJointStatus(this);
     }
 
     private constructJoint(): void {
@@ -329,66 +390,5 @@ namespace FudgeCore {
     private superRemove(): void {
       this.removeConstraintFromWorld(this);
     }
-
-    protected dirtyStatus(): void {
-      Physics.world.changeJointStatus(this);
-    }
-
-    //#region Saving/Loading
-    public serialize(): Serialization {
-      let serialization: Serialization = {
-        attID: super.idAttachedRB,
-        conID: super.idConnectedRB,
-        anchor: this.anchor,
-        internalCollision: this.jointInternalCollision,
-        breakForce: this.jointBreakForce,
-        breakTorque: this.jointBreakTorque,
-        firstAxis: this.jointFirstAxis,
-        secondAxis: this.jointSecondAxis,
-        springDampingFirstAxis: this.jointFirstSpringDampingRatio,
-        springFrequencyFirstAxis: this.jointFirstSpringFrequency,
-        springDampingSecondAxis: this.jointSecondSpringDampingRatio,
-        springFrequencySecondAxis: this.jointSecondSpringFrequency,
-        motorLimitUpperFirstAxis: this.jointFirstMotorLimitUpper,
-        motorLimitLowerFirstAxis: this.jointFirstMotorLimitLower,
-        motorSpeedFirstAxis: this.jointFirstMotorSpeed,
-        motorTorqueFirstAxis: this.jointFirstMotorTorque,
-        motorLimitUpperSecondAxis: this.jointSecondMotorLimitUpper,
-        motorLimitLowerSecondAxis: this.jointSecondMotorLimitLower,
-        motorSpeedSecondAxis: this.jointSecondMotorSpeed,
-        motorTorqueSecondAxis: this.jointSecondMotorTorque,
-        [super.constructor.name]: super.baseSerialize()
-      };
-      return serialization;
-    }
-
-    public deserialize(_serialization: Serialization): Serializable {
-      super.idAttachedRB = _serialization.attID;
-      super.idConnectedRB = _serialization.conID;
-      if (_serialization.attID != null && _serialization.conID != null)
-        super.setBodiesFromLoadedIDs();
-      this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
-      this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
-      this.breakForce = _serialization.breakForce != null ? _serialization.breakForce : this.jointBreakForce;
-      this.breakTorque = _serialization.breakTorque != null ? _serialization.breakTorque : this.jointBreakTorque;
-      this.firstAxis = _serialization.firstAxis != null ? _serialization.firstAxis : this.jointFirstAxis;
-      this.secondAxis = _serialization.secondAxis != null ? _serialization.secondAxis : this.jointSecondAxis;
-      this.springDampingFirstAxis = _serialization.springDampingFirstAxis != null ? _serialization.springDampingFirstAxis : this.jointFirstSpringDampingRatio;
-      this.springFrequencyFirstAxis = _serialization.springFrequencyFirstAxis != null ? _serialization.springFrequencyFirstAxis : this.jointFirstSpringFrequency;
-      this.springDampingSecondAxis = _serialization.springDampingSecondAxis != null ? _serialization.springDampingSecondAxis : this.jointSecondSpringDampingRatio;
-      this.springFrequencySecondAxis = _serialization.springFrequencySecondAxis != null ? _serialization.springFrequencySecondAxis : this.jointSecondSpringFrequency;
-      this.motorLimitUpperFirstAxis = _serialization.motorLimitUpperFirstAxis != null ? _serialization.motorLimitUpperFirstAxis : this.jointFirstMotorLimitUpper;
-      this.motorLimitLowerFirstAxis = _serialization.motorLimitLowerFirstAxis != null ? _serialization.motorLimitLowerFirstAxis : this.jointFirstMotorLimitUpper;
-      this.motorSpeedFirstAxis = _serialization.motorSpeedFirstAxis != null ? _serialization.motorSpeedFirstAxis : this.jointFirstMotorSpeed;
-      this.motorTorqueFirstAxis = _serialization.motorTorqueFirstAxis != null ? _serialization.motorTorqueFirstAxis : this.jointFirstMotorTorque;
-      this.motorLimitUpperSecondAxis = _serialization.motorLimitUpperSecondAxis != null ? _serialization.motorLimitUpperSecondAxis : this.jointSecondMotorLimitUpper;
-      this.motorLimitLowerSecondAxis = _serialization.motorLimitLowerSecondAxis != null ? _serialization.motorLimitLowerSecondAxis : this.jointSecondMotorLimitUpper;
-      this.motorSpeedSecondAxis = _serialization.motorSpeedSecondAxis != null ? _serialization.motorSpeedSecondAxis : this.jointSecondMotorSpeed;
-      this.motorTorqueSecondAxis = _serialization.motorTorqueSecondAxis != null ? _serialization.motorTorqueSecondAxis : this.jointSecondMotorTorque;
-      super.baseDeserialize(_serialization);
-      return this;
-    }
-    //#endregion
-
   }
 }

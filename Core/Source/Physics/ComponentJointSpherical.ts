@@ -19,6 +19,32 @@ namespace FudgeCore {
   export class ComponentJointSpherical extends ComponentJoint {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointSpherical);
 
+    private jointSpringDampingRatio: number = 0;
+    private jointSpringFrequency: number = 0;
+
+    private jointBreakForce: number = 0;
+    private jointBreakTorque: number = 0;
+
+    private config: OIMO.SphericalJointConfig = new OIMO.SphericalJointConfig();
+    private springDamper: OIMO.SpringDamper;
+    private jointAnchor: OIMO.Vec3;
+
+    private jointInternalCollision: boolean;
+
+    private oimoJoint: OIMO.SphericalJoint;
+
+
+    constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null, _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
+      super(_attachedRigidbody, _connectedRigidbody);
+      this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
+
+      /*Tell the physics that there is a new joint and on the physics start the actual joint is first created. Values can be set but the
+       actual constraint ain't existent until the game starts
+     */
+      this.addEventListener(EVENT.COMPONENT_ADD, this.dirtyStatus);
+      this.addEventListener(EVENT.COMPONENT_REMOVE, this.superRemove);
+    }
+
     //#region Get/Set transfor of fudge properties to the physics engine
     /**
 
@@ -90,32 +116,6 @@ namespace FudgeCore {
     }
     //#endregion
 
-    private jointSpringDampingRatio: number = 0;
-    private jointSpringFrequency: number = 0;
-
-    private jointBreakForce: number = 0;
-    private jointBreakTorque: number = 0;
-
-    private config: OIMO.SphericalJointConfig = new OIMO.SphericalJointConfig();
-    private springDamper: OIMO.SpringDamper;
-    private jointAnchor: OIMO.Vec3;
-
-    private jointInternalCollision: boolean;
-
-    private oimoJoint: OIMO.SphericalJoint;
-
-
-    constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null, _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
-      super(_attachedRigidbody, _connectedRigidbody);
-      this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
-
-      /*Tell the physics that there is a new joint and on the physics start the actual joint is first created. Values can be set but the
-       actual constraint ain't existent until the game starts
-     */
-      this.addEventListener(EVENT.COMPONENT_ADD, this.dirtyStatus);
-      this.addEventListener(EVENT.COMPONENT_REMOVE, this.superRemove);
-    }
-
     /**
      * Initializing and connecting the two rigidbodies with the configured joint properties
      * is automatically called by the physics system. No user interaction needed.
@@ -147,6 +147,42 @@ namespace FudgeCore {
       return this.oimoJoint;
     }
 
+    //#region Saving/Loading
+    public serialize(): Serialization {
+      let serialization: Serialization = {
+        attID: super.idAttachedRB,
+        conID: super.idConnectedRB,
+        anchor: this.anchor,
+        internalCollision: this.jointInternalCollision,
+        springDamping: this.jointSpringDampingRatio,
+        springFrequency: this.jointSpringFrequency,
+        breakForce: this.jointBreakForce,
+        breakTorque: this.jointBreakTorque,
+        [super.constructor.name]: super.baseSerialize()
+      };
+      return serialization;
+    }
+
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      super.idAttachedRB = _serialization.attID;
+      super.idConnectedRB = _serialization.conID;
+      if (_serialization.attID != null && _serialization.conID != null)
+        super.setBodiesFromLoadedIDs();
+      this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
+      this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
+      this.springDamping = _serialization.springDamping != null ? _serialization.springDamping : this.jointSpringDampingRatio;
+      this.springFrequency = _serialization.springFrequency != null ? _serialization.springFrequency : this.jointSpringFrequency;
+      this.breakForce = _serialization.breakForce != null ? _serialization.breakForce : this.jointBreakForce;
+      this.breakTorque = _serialization.breakTorque != null ? _serialization.breakTorque : this.jointBreakTorque;
+      super.baseDeserialize(_serialization);
+      return this;
+    }
+    //#endregion
+
+    protected dirtyStatus(): void {
+      Physics.world.changeJointStatus(this);
+    }
+
     private constructJoint(): void {
       this.springDamper = new OIMO.SpringDamper().setSpring(this.jointSpringFrequency, this.jointSpringDampingRatio);
       this.config = new OIMO.SphericalJointConfig();
@@ -170,42 +206,5 @@ namespace FudgeCore {
     private superRemove(): void {
       this.removeConstraintFromWorld(this);
     }
-
-    protected dirtyStatus(): void {
-      Physics.world.changeJointStatus(this);
-    }
-
-    //#region Saving/Loading
-    public serialize(): Serialization {
-      let serialization: Serialization = {
-        attID: super.idAttachedRB,
-        conID: super.idConnectedRB,
-        anchor: this.anchor,
-        internalCollision: this.jointInternalCollision,
-        springDamping: this.jointSpringDampingRatio,
-        springFrequency: this.jointSpringFrequency,
-        breakForce: this.jointBreakForce,
-        breakTorque: this.jointBreakTorque,
-        [super.constructor.name]: super.baseSerialize()
-      };
-      return serialization;
-    }
-
-    public deserialize(_serialization: Serialization): Serializable {
-      super.idAttachedRB = _serialization.attID;
-      super.idConnectedRB = _serialization.conID;
-      if (_serialization.attID != null && _serialization.conID != null)
-        super.setBodiesFromLoadedIDs();
-      this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
-      this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
-      this.springDamping = _serialization.springDamping != null ? _serialization.springDamping : this.jointSpringDampingRatio;
-      this.springFrequency = _serialization.springFrequency != null ? _serialization.springFrequency : this.jointSpringFrequency;
-      this.breakForce = _serialization.breakForce != null ? _serialization.breakForce : this.jointBreakForce;
-      this.breakTorque = _serialization.breakTorque != null ? _serialization.breakTorque : this.jointBreakTorque;
-      super.baseDeserialize(_serialization);
-      return this;
-    }
-    //#endregion
-
   }
 }
