@@ -13,7 +13,8 @@ namespace Fudge {
       this.listRoot = this.buildFromMutator(this.mutator);
       _listContainer.append(this.listRoot);
       _listContainer.addEventListener(ƒui.EVENT.COLLAPSE, this.toggleCollapse);
-      _listContainer.addEventListener(ƒui.EVENT.UPDATE, this.collectMutator);
+      // _listContainer.addEventListener(ƒui.EVENT.UPDATE, this.collectMutator);
+      _listContainer.addEventListener(ƒui.EVENT.MUTATE, this.collectMutator);
     }
     public getMutator(): ƒ.Mutator {
       return this.mutator;

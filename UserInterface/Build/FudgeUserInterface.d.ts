@@ -14,17 +14,26 @@ declare namespace FudgeUserInterface {
         protected mutator: ƒ.Mutator;
         /** [[FudgeCore.Mutator]] used to store the data types of the mutator attributes*/
         protected mutatorTypes: ƒ.Mutator;
-        constructor(_mutable: ƒ.Mutable | ƒ.MutableForUserInterface, _domElement: HTMLElement);
+        constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
         /**
-         * Recursive method taking the [[ƒ.Mutator]] of a [[ƒ.Mutable]] or another existing [[ƒ.Mutator]]
-         * as a template and updating its values with those found in the given UI-domElement.
+         * Recursive method taking an existing [[ƒ.Mutator]] as a template
+         * and updating its values with those found in the given UI-domElement.
          */
-        getMutator(_mutable?: ƒ.Mutable, _domElement?: HTMLElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
+        static updateMutator(_domElement: HTMLElement, _mutator: ƒ.Mutator): ƒ.Mutator;
         /**
-         * Recursive method taking the [[ƒ.Mutator]] of a [[ƒ.Mutable]] and updating the UI-domElement accordingly
+         * Recursive method taking the a [[ƒ.Mutable]] as a template to create a [[ƒ.Mutator]] or update the given [[ƒ.Mutator]]
+         * with the values in the given UI-domElement
          */
-        updateUserInterface(_mutable?: ƒ.Mutable, _domElement?: HTMLElement): void;
-        protected mutateOnInput: (_event: Event) => void;
+        static getMutator(_mutable: ƒ.Mutable, _domElement: HTMLElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
+        /**
+         * Recursive method taking the [[ƒ.Mutator]] of a [[ƒ.Mutable]] and updating the UI-domElement accordingly.
+         * If an additional [[ƒ.Mutator]] is passed, its values are used instead of those of the [[ƒ.Mutable]].
+         */
+        static updateUserInterface(_mutable: ƒ.Mutable, _domElement: HTMLElement, _mutator?: ƒ.Mutator): void;
+        getMutator(_mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
+        updateUserInterface(): void;
+        setMutable(_mutable: ƒ.Mutable): void;
+        protected mutateOnInput: (_event: Event) => Promise<void>;
         protected refresh: (_event: Event) => void;
     }
 }
@@ -39,9 +48,18 @@ declare namespace FudgeUserInterface {
          */
         static createController(_mutable: ƒ.Mutable, _name?: string): Controller;
         /**
-         * Create a custom fieldset for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+         * Create a extendable fieldset for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
          */
-        static createFieldSetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): FoldableFieldSet;
+        static createFieldSetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): ExpandableFieldSet;
+        /**
+         * Create a div-Elements containing the interface for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+         */
+        static createInterfaceFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): HTMLDivElement;
+        /**
+         * Create a div-Element containing the interface for the [[FudgeCore.Mutator]]
+         * Does not support nested mutators!
+         */
+        static createInterfaceFromMutator(_mutator: ƒ.Mutator | Object): HTMLDivElement;
         /**
          * Create a specific CustomElement for the given data, using _key as identification
          */
@@ -50,7 +68,7 @@ declare namespace FudgeUserInterface {
          * TODO: refactor for enums
          */
         static createDropdown(_name: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement;
-        static createFoldableFieldset(_key: string): FoldableFieldSet;
+        static createExpendableFieldset(_key: string, _type: string): ExpandableFieldSet;
     }
 }
 declare namespace FudgeUserInterface {
@@ -295,12 +313,27 @@ declare namespace FudgeUserInterface {
     }
 }
 declare namespace FudgeUserInterface {
-    class FoldableFieldSet extends HTMLFieldSetElement {
+    import ƒ = FudgeCore;
+    /**
+     * Static class to display a modal or non-modal dialog with an interface for the given mutator.
+     */
+    class Dialog {
+        static dom: HTMLDialogElement;
+        /**
+         * Prompt the dialog to the user with the given headline, call to action and labels for the cancel- and ok-button
+         * Use `await` on call, to continue after the user has pressed one of the buttons.
+         */
+        static prompt(_data: ƒ.Mutable | ƒ.Mutator | Object, _modal?: boolean, _head?: string, _callToAction?: string, _ok?: string, _cancel?: string): Promise<boolean>;
+    }
+}
+declare namespace FudgeUserInterface {
+    class ExpandableFieldSet extends HTMLFieldSetElement {
         content: HTMLDivElement;
-        private checkbox;
+        private expander;
         constructor(_legend?: string);
-        private open;
-        private get isOpen();
+        get isExpanded(): boolean;
+        expand(_expand: boolean): void;
+        private hndToggle;
         private hndFocus;
         private hndKey;
     }
@@ -433,7 +466,7 @@ declare namespace FudgeUserInterface {
     class TreeList<T> extends HTMLUListElement {
         constructor(_items?: TreeItem<T>[]);
         /**
-         * Opens the tree along the given path to show the objects the path includes
+         * Expands the tree along the given path to show the objects the path includes
          * @param _path An array of objects starting with one being contained in this treelist and following the correct hierarchy of successors
          * @param _focus If true (default) the last object found in the tree gets the focus
          */
@@ -459,7 +492,7 @@ declare namespace FudgeUserInterface {
         displaySelection(_data: T[]): void;
         selectInterval(_dataStart: T, _dataEnd: T): void;
         delete(_data: T[]): TreeItem<T>[];
-        findOpen(_data: T): TreeItem<T>;
+        findVisible(_data: T): TreeItem<T>;
     }
 }
 declare namespace FudgeUserInterface {
@@ -490,7 +523,7 @@ declare namespace FudgeUserInterface {
          * Return the object in focus
          */
         getFocussed(): T;
-        private hndOpen;
+        private hndExpand;
         private createBranch;
         private hndRename;
         private hndSelect;
@@ -562,11 +595,11 @@ declare namespace FudgeUserInterface {
         private label;
         constructor(_controller: TreeController<T>, _data: T);
         /**
-         * Returns true, when this item has a visible checkbox in front to open the subsequent branch
+         * Returns true, when this item has a visible checkbox in front to expand the subsequent branch
          */
         get hasChildren(): boolean;
         /**
-         * Shows or hides the checkbox for opening the subsequent branch
+         * Shows or hides the checkbox for expanding the subsequent branch
          */
         set hasChildren(_has: boolean);
         /**
@@ -586,16 +619,15 @@ declare namespace FudgeUserInterface {
          */
         getLabel(): string;
         /**
-         * Tries to open the [[TreeList]] of children, by dispatching [[EVENT_TREE.OPEN]].
+         * Tries to expanding the [[TreeList]] of children, by dispatching [[EVENT.EXPAND]].
          * The user of the tree needs to add an event listener to the tree
          * in order to create that [[TreeList]] and add it as branch to this item
-         * @param _open If false, the item will be closed
          */
-        open(_open: boolean): void;
+        expand(_expand: boolean): void;
         /**
          * Returns a list of all data referenced by the items succeeding this
          */
-        getOpenData(): T[];
+        getVisibleData(): T[];
         /**
          * Sets the branch of children of this item. The branch must be a previously compiled [[TreeList]]
          */
@@ -623,7 +655,7 @@ declare namespace FudgeUserInterface {
         private hndDragStart;
         private hndDragOver;
         private hndPointerUp;
-        private hndUpdate;
+        private hndRemove;
     }
 }
 declare namespace FudgeUserInterface {
@@ -643,15 +675,16 @@ declare namespace FudgeUserInterface {
         CHANGE = "change",
         DELETE = "delete",
         RENAME = "rename",
-        OPEN = "open",
         SELECT = "itemselect",
-        UPDATE = "update",
         ESCAPE = "escape",
         COPY = "copy",
         CUT = "cut",
         PASTE = "paste",
         SORT = "sort",
+        CONTEXTMENU = "contextmenu",
+        MUTATE = "mutate",
+        REMOVE_CHILD = "removeChild",
         COLLAPSE = "collapse",
-        CONTEXTMENU = "contextmenu"
+        EXPAND = "expand"
     }
 }

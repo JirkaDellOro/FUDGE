@@ -22,6 +22,10 @@ namespace FudgeCore {
       return intersect;
     }
 
+    /**
+     * Returns the shortest distance from the ray to the given target point.
+     * All values and calculations must be relative to the same coordinate system, preferably the world.
+     */
     public getDistance(_target: Vector3): Vector3 {
       let originToTarget: Vector3 = Vector3.DIFFERENCE(_target, this.origin);
       let raySection: Vector3 = Vector3.NORMALIZATION(this.direction, 1);

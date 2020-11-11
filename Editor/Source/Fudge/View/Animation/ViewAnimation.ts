@@ -101,7 +101,8 @@ namespace Fudge {
       this.attributeList = document.createElement("div");
       this.attributeList.id = "attributeList";
       this.attributeList.style.width = "300px";
-      this.attributeList.addEventListener(FudgeUserInterface.EVENT.UPDATE, this.changeAttribute.bind(this));
+      // this.attributeList.addEventListener(FudgeUserInterface.EVENT.UPDATE, this.changeAttribute.bind(this));
+      this.attributeList.addEventListener(FudgeUserInterface.EVENT.CHANGE, this.changeAttribute.bind(this));
       //TODO: Add Moni's custom Element here
       this.controller = new AnimationList(this.animation.getMutated(this.playbackTime, 0, FudgeCore.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS), this.attributeList);
 

@@ -70,6 +70,9 @@ namespace FudgeCore {
     }
 
     private hndOutputEvent: EventListener = (_event: Event): void => {
+      if (!this.active)
+        return;
+
       let control: Control = (<Control>_event.target);
       let event: CustomEvent = new CustomEvent(EVENT_CONTROL.OUTPUT, {detail: {
         control: control, 
@@ -80,6 +83,9 @@ namespace FudgeCore {
     }
 
     private hndInputEvent: EventListener = (_event: Event): void => {
+      if (!this.active)
+        return;
+        
       let event: Event = new Event(EVENT_CONTROL.INPUT, _event);
       this.dispatchEvent(event);
     }

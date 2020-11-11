@@ -17,13 +17,22 @@ namespace FudgeUserInterface {
     }
 
     /**
-     * Create a custom fieldset for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+     * Create a extendable fieldset for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
      */
-    public static createFieldSetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): FoldableFieldSet {
+    public static createFieldSetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): ExpandableFieldSet {
       let name: string = _name || _mutable.constructor.name;
-      let mutator: ƒ.Mutator = _mutator || _mutable.getMutator();
+      let fieldset: ExpandableFieldSet = Generator.createExpendableFieldset(name, _mutable.type);
+      fieldset.content.appendChild(Generator.createInterfaceFromMutable(_mutable, _name, _mutator));
+      return fieldset;
+    }
+
+    /**
+     * Create a div-Elements containing the interface for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+     */
+    public static createInterfaceFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): HTMLDivElement {
+      let mutator: ƒ.Mutator = _mutator || _mutable.getMutatorForUserInterface();
       let mutatorTypes: ƒ.MutatorAttributeTypes = _mutable.getMutatorAttributeTypes(mutator);
-      let fieldset: FoldableFieldSet = Generator.createFoldableFieldset(name);
+      let div: HTMLDivElement = document.createElement("div");
 
       for (let key in mutatorTypes) {
         let type: Object = mutatorTypes[key];
@@ -34,15 +43,35 @@ namespace FudgeUserInterface {
           subMutable = Reflect.get(_mutable, key);
           if (subMutable instanceof ƒ.Mutable)
             element = Generator.createFieldSetFromMutable(subMutable, key, <ƒ.Mutator>mutator[key]);
-          else //HACK! Display an enumerated select here
-            element = new CustomElementTextInput({ key: key, label: key, value: type.toString() });
+          else //Idea: Display an enumerated select here
+            element = new CustomElementTextInput({ key: key, label: key, value: type ? type.toString() : "?" });
           // let fieldset: FoldableFieldSet = Generator.createFieldsetFromMutable(subMutable, key, <ƒ.Mutator>_mutator[key]);
           // _parent.appendChild(fieldset);
         }
-        fieldset.content.appendChild(element);
-        fieldset.content.appendChild(document.createElement("br"));
+        div.appendChild(element);
+        div.appendChild(document.createElement("br"));
       }
-      return fieldset;
+      return div;
+    }
+
+    /**
+     * Create a div-Element containing the interface for the [[FudgeCore.Mutator]] 
+     * Does not support nested mutators!
+     */
+    public static createInterfaceFromMutator(_mutator: ƒ.Mutator | Object): HTMLDivElement {
+      let div: HTMLDivElement = document.createElement("div");
+      for (let key in _mutator) {
+        let value: Object = Reflect.get(_mutator, key);
+        if (value instanceof Object) {
+          let fieldset: ExpandableFieldSet = Generator.createExpendableFieldset(key, "Hallo");
+          fieldset.content.appendChild(Generator.createInterfaceFromMutator(value));
+          div.appendChild(fieldset);
+        } 
+        else
+          div.appendChild(this.createMutatorElement(key, (<Object>value).constructor.name, value));
+        div.appendChild(document.createElement("br"));
+      }
+      return div;
     }
 
     /**
@@ -60,6 +89,7 @@ namespace FudgeUserInterface {
           let elementType: typeof CustomElement = CustomElement.get("Object");
           // @ts-ignore: instantiate abstract class
           element = new elementType({ key: _key, label: _key, value: _value.toString() }, _type);
+          // (<CustomElement>element).setMutatorValue(_value);
         }
         else {
           // TODO: remove switch and use registered custom elements instead
@@ -99,11 +129,12 @@ namespace FudgeUserInterface {
     }
 
     // TODO: implement CustomFieldSet and replace this
-    public static createFoldableFieldset(_key: string): FoldableFieldSet {
-      let cntFoldFieldset: FoldableFieldSet = new FoldableFieldSet(_key);
+    public static createExpendableFieldset(_key: string, _type: string): ExpandableFieldSet {
+      let cntFoldFieldset: ExpandableFieldSet = new ExpandableFieldSet(_key);
       //TODO: unique ids
       // cntFoldFieldset.id = _legend;
       cntFoldFieldset.setAttribute("key", _key);
+      cntFoldFieldset.setAttribute("type", _type);
       return cntFoldFieldset;
     }
 

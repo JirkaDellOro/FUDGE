@@ -5,7 +5,6 @@ namespace FudgeUserInterface {
   //   DROPMENUCLICK = "dropMenuClick",
   //   DROPMENUCOLLAPSE = "dropMenuCollapse",
   // }
-
   export const enum EVENT {
     CLICK = "click",
     DOUBLE_CLICK = "dblclick",
@@ -22,15 +21,16 @@ namespace FudgeUserInterface {
     CHANGE = "change",
     DELETE = "delete",
     RENAME = "rename",
-    OPEN = "open",
     SELECT = "itemselect",
-    UPDATE = "update",
     ESCAPE = "escape",
     COPY = "copy",
     CUT = "cut",
     PASTE = "paste",
     SORT = "sort",
+    CONTEXTMENU = "contextmenu",
+    MUTATE = "mutate",
+    REMOVE_CHILD = "removeChild",
     COLLAPSE = "collapse",
-    CONTEXTMENU = "contextmenu"
+    EXPAND = "expand"
   }
 }

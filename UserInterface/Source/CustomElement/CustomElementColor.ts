@@ -49,7 +49,7 @@ namespace FudgeUserInterface {
       let alpha: string = (<HTMLInputElement>this.querySelector("input[type=range")).value;
       this.color.setHex(hex.substr(1, 6) + "ff");
       this.color.a = parseFloat(alpha);
-      return this.color.getMutator();
+      return this.color.getMutatorForUserInterface();
     }
     /**
      * Sets the values of color picker and slider

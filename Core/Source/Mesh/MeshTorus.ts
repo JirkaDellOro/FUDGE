@@ -73,7 +73,7 @@ namespace FudgeCore {
     }
 
 
-    public mutate(_mutator: Mutator): void {
+    public async mutate(_mutator: Mutator): Promise<void> {
       super.mutate(_mutator);
       let thickness: number = _mutator.thickness;
       let majorSegments: number = Math.round(_mutator.majorSegments);

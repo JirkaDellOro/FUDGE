@@ -2,6 +2,10 @@ This folder contains the logs of the core-developer meetings. Filenames must sta
 
 This readme-file describes in a few words the contents of each log and the major issues discussed  
 
+# April 16th 2020
+Discussion on a stateless particle system as a graph of functions
+ [Whiteboard](200416_Whiteboard_ParticleSystem.jpg)
+
 # September 2nd 2019
 Views should deriviate from an (abstract) base class called View. Those are contained within the Panel, which are managed by the PanelManager.  
 Communication of the Views should be done by adding an EventListener to the parent Panel Object (the Class Instance, not the DOM Object) and dispatching the events on the Panel as well. Same structure for Panel Communication: Attach Eventlistener and dispatch events on the PanelManager. [diagrams](190902_Views.svg)  

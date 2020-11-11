@@ -104,7 +104,7 @@ namespace FudgeCore {
       return unitVertices;
     }
 
-    public mutate(_mutator: Mutator): void {
+    public async mutate(_mutator: Mutator): Promise<void> {
       super.mutate(_mutator);
       let sectors: number = Math.round(_mutator.sectors);
       this.create(sectors);

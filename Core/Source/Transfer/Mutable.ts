@@ -1,4 +1,3 @@
-// / <reference path="../Event/Event.ts"/>
 namespace FudgeCore {
   /**
    * Interface describing the datatypes of the attributes a mutator as strings 
@@ -36,11 +35,7 @@ namespace FudgeCore {
     }
     return mutator;
   }
-
-  export interface MutableForUserInterface {
-    getMutator(): Mutator;
-    updateMutator(_mutator: Mutator): void;
-  }
+  
   /**
    * Base class for all types being mutable using [[Mutator]]-objects, thus providing and using interfaces created at runtime.  
    * Mutables provide a [[Mutator]] that is build by collecting all object-properties that are either of a primitive type or again Mutable.
@@ -160,14 +155,14 @@ namespace FudgeCore {
      * Updates the attribute values of the instance according to the state of the mutator. Must be protected...!
      * @param _mutator
      */
-    public mutate(_mutator: Mutator): void {
+    public async mutate(_mutator: Mutator): Promise<void> {
       for (let attribute in _mutator) {
         if (!Reflect.has(this, attribute))
           continue;
         let mutant: Object = Reflect.get(this, attribute);
         let value: Mutator = <Mutator>_mutator[attribute];
         if (mutant instanceof Mutable)
-          mutant.mutate(value);
+          await mutant.mutate(value);
         else
           Reflect.set(this, attribute, value);
       }

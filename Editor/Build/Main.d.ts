@@ -7,7 +7,10 @@ declare namespace Fudge {
         EDIT = 4,
         CREATE = 5,
         CONTROL_MODE = 6,
-        INTERACTION_MODE = 7
+        INTERACTION_MODE = 7,
+        CREATE_MESH = 8,
+        CREATE_MATERIAL = 9,
+        CREATE_GRAPH = 10
     }
     enum MENU {
         QUIT = "quit",
@@ -43,7 +46,8 @@ declare namespace Fudge {
         PROPERTIES = "ViewProperties",
         PREVIEW = "ViewPreview",
         MODELLER = "ViewModeller",
-        OBJECT_PROPERTIES = "ViewObjectProperties"
+        OBJECT_PROPERTIES = "ViewObjectProperties",
+        SCRIPT = "ViewScript"
     }
 }
 /**

@@ -28,7 +28,7 @@ namespace Fudge {
     private fillContent(): void {
       this.setTitle(this.currentNode.name);
 
-      let fieldset: ƒui.FoldableFieldSet = ƒui.Generator.createFieldSetFromMutable(this.currentNode.cmpTransform);
+      let fieldset: ƒui.ExpandableFieldSet = ƒui.Generator.createFieldSetFromMutable(this.currentNode.cmpTransform);
       let uiComponent: ControllerComponent = new ControllerComponent(this.currentNode.cmpTransform, fieldset);
       this.dom.append(uiComponent.domElement);
     }

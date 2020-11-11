@@ -18,7 +18,7 @@ namespace Fudge {
       this.createUserInterface();
 
       _container.on("resize", this.redraw);
-      this.dom.addEventListener(ƒui.EVENT.UPDATE, this.hndEvent);
+      this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
@@ -57,12 +57,35 @@ namespace Fudge {
       this.redraw();
     }
 
+    protected hndDragOver(_event: DragEvent, _viewSource: View): void {
+      _event.dataTransfer.dropEffect = "none";
+      // if (this.dom != _event.target)
+      //   return;
+
+      if (!(_viewSource instanceof ViewInternal))
+        return;
+
+      let source: Object = _viewSource.getDragDropSources()[0];
+      if (!(source instanceof ƒ.Graph))
+        return;
+
+      _event.dataTransfer.dropEffect = "link";
+      _event.preventDefault();
+      _event.stopPropagation();
+    }
+
+    protected hndDrop(_event: DragEvent, _viewSource: View): void {
+      let source: Object = _viewSource.getDragDropSources()[0];
+      // this.setGraph(<ƒ.Node>source);
+      this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: source }));
+    }
+
     private hndEvent = (_event: CustomEvent): void => {
       switch (_event.type) {
         case EVENT_EDITOR.SET_GRAPH:
           this.setGraph(_event.detail);
           break;
-        case ƒui.EVENT.UPDATE:
+        case ƒui.EVENT.MUTATE:
         case EVENT_EDITOR.UPDATE:
           this.redraw();
       }

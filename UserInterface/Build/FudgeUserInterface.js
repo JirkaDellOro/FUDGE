@@ -13,31 +13,46 @@ var FudgeUserInterface;
             this.timeUpdate = 190;
             /** [[FudgeCore.Mutator]] used to store the data types of the mutator attributes*/
             this.mutatorTypes = null;
-            this.mutateOnInput = (_event) => {
+            this.mutateOnInput = async (_event) => {
                 this.mutator = this.getMutator();
-                this.mutable.mutate(this.mutator);
+                await this.mutable.mutate(this.mutator);
                 _event.stopPropagation();
-                this.domElement.dispatchEvent(new Event("update" /* UPDATE */, { bubbles: true }));
+                this.domElement.dispatchEvent(new Event("mutate" /* MUTATE */, { bubbles: true }));
             };
             this.refresh = (_event) => {
                 this.updateUserInterface();
             };
             this.domElement = _domElement;
-            this.mutable = _mutable;
-            this.mutator = _mutable.getMutator();
-            if (_mutable instanceof ƒ.Mutable)
-                this.mutatorTypes = _mutable.getMutatorAttributeTypes(this.mutator);
+            this.setMutable(_mutable);
             // TODO: examine, if this should register to one common interval, instead of each installing its own.
             window.setInterval(this.refresh, this.timeUpdate);
             this.domElement.addEventListener("input", this.mutateOnInput);
         }
         /**
-         * Recursive method taking the [[ƒ.Mutator]] of a [[ƒ.Mutable]] or another existing [[ƒ.Mutator]]
-         * as a template and updating its values with those found in the given UI-domElement.
+         * Recursive method taking an existing [[ƒ.Mutator]] as a template
+         * and updating its values with those found in the given UI-domElement.
          */
-        getMutator(_mutable = this.mutable, _domElement = this.domElement, _mutator, _types) {
+        static updateMutator(_domElement, _mutator) {
+            for (let key in _mutator) {
+                let element = _domElement.querySelector(`[key=${key}]`);
+                if (element == null)
+                    continue;
+                if (element instanceof FudgeUserInterface.CustomElement)
+                    _mutator[key] = element.getMutatorValue();
+                else if (_mutator[key] instanceof Object)
+                    _mutator[key] = Controller.updateMutator(element, _mutator[key]);
+                else
+                    _mutator[key] = element.value;
+            }
+            return _mutator;
+        }
+        /**
+         * Recursive method taking the a [[ƒ.Mutable]] as a template to create a [[ƒ.Mutator]] or update the given [[ƒ.Mutator]]
+         * with the values in the given UI-domElement
+         */
+        static getMutator(_mutable, _domElement, _mutator, _types) {
             // TODO: examine if this.mutator should also be addressed in some way...
-            let mutator = _mutator || _mutable.getMutator();
+            let mutator = _mutator || _mutable.getMutatorForUserInterface();
             // TODO: Mutator type now only used for enums. Examine if there is another way
             let mutatorTypes = _types || _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
@@ -47,7 +62,8 @@ var FudgeUserInterface;
                 if (element instanceof FudgeUserInterface.CustomElement)
                     mutator[key] = element.getMutatorValue();
                 else if (mutatorTypes[key] instanceof Object)
-                    element.value = mutator[key];
+                    // TODO: setting a value of the dom element doesn't make sense... examine what this line was supposed to do. Assumably enums
+                    mutator[key] = element.value;
                 else {
                     let subMutator = Reflect.get(mutator, key);
                     let subMutable;
@@ -60,12 +76,11 @@ var FudgeUserInterface;
             return mutator;
         }
         /**
-         * Recursive method taking the [[ƒ.Mutator]] of a [[ƒ.Mutable]] and updating the UI-domElement accordingly
+         * Recursive method taking the [[ƒ.Mutator]] of a [[ƒ.Mutable]] and updating the UI-domElement accordingly.
+         * If an additional [[ƒ.Mutator]] is passed, its values are used instead of those of the [[ƒ.Mutable]].
          */
-        updateUserInterface(_mutable = this.mutable, _domElement = this.domElement) {
-            // TODO: should get Mutator for UI or work with this.mutator (examine)
-            this.mutable.updateMutator(this.mutator);
-            let mutator = _mutable.getMutator();
+        static updateUserInterface(_mutable, _domElement, _mutator) {
+            let mutator = _mutator || _mutable.getMutatorForUserInterface();
             let mutatorTypes = {};
             if (_mutable instanceof ƒ.Mutable)
                 mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
@@ -82,12 +97,26 @@ var FudgeUserInterface;
                     // let fieldset: HTMLFieldSetElement = <HTMLFieldSetElement><HTMLElement>element;
                     let subMutable = Reflect.get(_mutable, key);
                     if (subMutable instanceof ƒ.Mutable)
-                        this.updateUserInterface(subMutable, element);
+                        this.updateUserInterface(subMutable, element, mutator[key]);
                     else
                         //element.setMutatorValue(value);
                         Reflect.set(element, "value", value);
                 }
             }
+        }
+        getMutator(_mutator, _types) {
+            // TODO: should get Mutator for UI or work with this.mutator (examine)
+            this.mutable.updateMutator(this.mutator);
+            return Controller.getMutator(this.mutable, this.domElement);
+        }
+        updateUserInterface() {
+            Controller.updateUserInterface(this.mutable, this.domElement);
+        }
+        setMutable(_mutable) {
+            this.mutable = _mutable;
+            this.mutator = _mutable.getMutatorForUserInterface();
+            if (_mutable instanceof ƒ.Mutable)
+                this.mutatorTypes = _mutable.getMutatorAttributeTypes(this.mutator);
         }
     }
     FudgeUserInterface.Controller = Controller;
@@ -110,13 +139,21 @@ var FudgeUserInterface;
             return controller;
         }
         /**
-         * Create a custom fieldset for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+         * Create a extendable fieldset for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
          */
         static createFieldSetFromMutable(_mutable, _name, _mutator) {
             let name = _name || _mutable.constructor.name;
-            let mutator = _mutator || _mutable.getMutator();
+            let fieldset = Generator.createExpendableFieldset(name, _mutable.type);
+            fieldset.content.appendChild(Generator.createInterfaceFromMutable(_mutable, _name, _mutator));
+            return fieldset;
+        }
+        /**
+         * Create a div-Elements containing the interface for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+         */
+        static createInterfaceFromMutable(_mutable, _name, _mutator) {
+            let mutator = _mutator || _mutable.getMutatorForUserInterface();
             let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
-            let fieldset = Generator.createFoldableFieldset(name);
+            let div = document.createElement("div");
             for (let key in mutatorTypes) {
                 let type = mutatorTypes[key];
                 let value = mutator[key];
@@ -126,15 +163,34 @@ var FudgeUserInterface;
                     subMutable = Reflect.get(_mutable, key);
                     if (subMutable instanceof ƒ.Mutable)
                         element = Generator.createFieldSetFromMutable(subMutable, key, mutator[key]);
-                    else //HACK! Display an enumerated select here
-                        element = new FudgeUserInterface.CustomElementTextInput({ key: key, label: key, value: type.toString() });
+                    else //Idea: Display an enumerated select here
+                        element = new FudgeUserInterface.CustomElementTextInput({ key: key, label: key, value: type ? type.toString() : "?" });
                     // let fieldset: FoldableFieldSet = Generator.createFieldsetFromMutable(subMutable, key, <ƒ.Mutator>_mutator[key]);
                     // _parent.appendChild(fieldset);
                 }
-                fieldset.content.appendChild(element);
-                fieldset.content.appendChild(document.createElement("br"));
+                div.appendChild(element);
+                div.appendChild(document.createElement("br"));
             }
-            return fieldset;
+            return div;
+        }
+        /**
+         * Create a div-Element containing the interface for the [[FudgeCore.Mutator]]
+         * Does not support nested mutators!
+         */
+        static createInterfaceFromMutator(_mutator) {
+            let div = document.createElement("div");
+            for (let key in _mutator) {
+                let value = Reflect.get(_mutator, key);
+                if (value instanceof Object) {
+                    let fieldset = Generator.createExpendableFieldset(key, "Hallo");
+                    fieldset.content.appendChild(Generator.createInterfaceFromMutator(value));
+                    div.appendChild(fieldset);
+                }
+                else
+                    div.appendChild(this.createMutatorElement(key, value.constructor.name, value));
+                div.appendChild(document.createElement("br"));
+            }
+            return div;
         }
         /**
          * Create a specific CustomElement for the given data, using _key as identification
@@ -150,6 +206,7 @@ var FudgeUserInterface;
                     let elementType = FudgeUserInterface.CustomElement.get("Object");
                     // @ts-ignore: instantiate abstract class
                     element = new elementType({ key: _key, label: _key, value: _value.toString() }, _type);
+                    // (<CustomElement>element).setMutatorValue(_value);
                 }
                 else {
                     // TODO: remove switch and use registered custom elements instead
@@ -188,11 +245,12 @@ var FudgeUserInterface;
             return dropdown;
         }
         // TODO: implement CustomFieldSet and replace this
-        static createFoldableFieldset(_key) {
-            let cntFoldFieldset = new FudgeUserInterface.FoldableFieldSet(_key);
+        static createExpendableFieldset(_key, _type) {
+            let cntFoldFieldset = new FudgeUserInterface.ExpandableFieldSet(_key);
             //TODO: unique ids
             // cntFoldFieldset.id = _legend;
             cntFoldFieldset.setAttribute("key", _key);
+            cntFoldFieldset.setAttribute("type", _type);
             return cntFoldFieldset;
         }
     }
@@ -358,7 +416,7 @@ var FudgeUserInterface;
             let alpha = this.querySelector("input[type=range").value;
             this.color.setHex(hex.substr(1, 6) + "ff");
             this.color.a = parseFloat(alpha);
-            return this.color.getMutator();
+            return this.color.getMutatorForUserInterface();
         }
         /**
          * Sets the values of color picker and slider
@@ -581,7 +639,8 @@ var FudgeUserInterface;
                 let entry = document.createElement("option");
                 entry.text = key;
                 entry.value = this.content[key];
-                if (key == this.getAttribute("value")) {
+                // console.log(this.getAttribute("value"));
+                if (entry.value == this.getAttribute("value")) {
                     entry.selected = true;
                 }
                 select.add(entry);
@@ -600,6 +659,7 @@ var FudgeUserInterface;
          */
         setMutatorValue(_value) {
             this.querySelector("select").value = _value;
+            // this.value = _value;
         }
     }
     // @ts-ignore
@@ -918,6 +978,58 @@ var FudgeUserInterface;
     CustomElementTextInput.customElement = FudgeUserInterface.CustomElement.register("fudge-textinput", CustomElementTextInput, String);
     FudgeUserInterface.CustomElementTextInput = CustomElementTextInput;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
+    var ƒ = FudgeCore;
+    /**
+     * Static class to display a modal or non-modal dialog with an interface for the given mutator.
+     */
+    class Dialog {
+        /**
+         * Prompt the dialog to the user with the given headline, call to action and labels for the cancel- and ok-button
+         * Use `await` on call, to continue after the user has pressed one of the buttons.
+         */
+        static async prompt(_data, _modal = true, _head = "Headline", _callToAction = "Instruction", _ok = "OK", _cancel = "Cancel") {
+            Dialog.dom = document.createElement("dialog");
+            document.body.appendChild(Dialog.dom);
+            Dialog.dom.innerHTML = "<h1>" + _head + "</h1>";
+            let content;
+            if (_data instanceof ƒ.Mutable)
+                content = FudgeUserInterface.Generator.createInterfaceFromMutable(_data);
+            else
+                content = FudgeUserInterface.Generator.createInterfaceFromMutator(_data);
+            content.id = "content";
+            Dialog.dom.appendChild(content);
+            let div = document.createElement("div");
+            div.innerHTML = "<p>" + _callToAction + "</p>";
+            let btnCancel = document.createElement("button");
+            btnCancel.innerHTML = _cancel;
+            div.appendChild(btnCancel);
+            let btnOk = document.createElement("button");
+            btnOk.innerHTML = _ok;
+            div.appendChild(btnOk);
+            Dialog.dom.appendChild(div);
+            if (_modal)
+                Dialog.dom.showModal();
+            else
+                Dialog.dom.show();
+            return new Promise((_resolve) => {
+                let hndButton = (_event) => {
+                    btnCancel.removeEventListener("click", hndButton);
+                    btnOk.removeEventListener("click", hndButton);
+                    if (_event.target == btnOk)
+                        FudgeUserInterface.Controller.updateMutator(content, _data);
+                    Dialog.dom.close();
+                    document.body.removeChild(Dialog.dom);
+                    _resolve(_event.target == btnOk);
+                };
+                btnCancel.addEventListener("click", hndButton);
+                btnOk.addEventListener("click", hndButton);
+            });
+        }
+    }
+    FudgeUserInterface.Dialog = Dialog;
+})(FudgeUserInterface || (FudgeUserInterface = {}));
 // namespace FudgeUserInterface {
 //     /**
 //      * <select><option>Hallo</option></select>
@@ -1086,9 +1198,14 @@ var FudgeUserInterface;
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
     var ƒ = FudgeCore;
-    class FoldableFieldSet extends HTMLFieldSetElement {
+    class ExpandableFieldSet extends HTMLFieldSetElement {
         constructor(_legend = "") {
             super();
+            this.hndToggle = (_event) => {
+                if (_event)
+                    _event.stopPropagation();
+                this.dispatchEvent(new Event(this.isExpanded ? "expand" /* EXPAND */ : "collapse" /* COLLAPSE */, { bubbles: true }));
+            };
             this.hndFocus = (_event) => {
                 switch (_event.type) {
                     case "focusNext" /* FOCUS_NEXT */:
@@ -1125,13 +1242,13 @@ var FudgeUserInterface;
                 // let target: HTMLElement = <HTMLElement>_event.target;
                 switch (_event.code) {
                     case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
-                        if (!this.isOpen) {
-                            this.open(true);
+                        if (!this.isExpanded) {
+                            this.expand(true);
                             return;
                         }
                     case ƒ.KEYBOARD_CODE.ARROW_DOWN:
                         let next = this;
-                        if (this.isOpen)
+                        if (this.isExpanded)
                             next = this.querySelector("fieldset");
                         else
                             do {
@@ -1144,17 +1261,17 @@ var FudgeUserInterface;
                             this.dispatchEvent(new KeyboardEvent("focusNext" /* FOCUS_NEXT */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
                         break;
                     case ƒ.KEYBOARD_CODE.ARROW_LEFT:
-                        if (this.isOpen) {
-                            this.open(false);
+                        if (this.isExpanded) {
+                            this.expand(false);
                             return;
                         }
                     case ƒ.KEYBOARD_CODE.ARROW_UP:
                         let previous = this;
                         do {
                             previous = previous.previousElementSibling;
-                        } while (previous && !(previous instanceof FoldableFieldSet));
+                        } while (previous && !(previous instanceof ExpandableFieldSet));
                         if (previous)
-                            if (previous.isOpen)
+                            if (previous.isExpanded)
                                 this.dispatchEvent(new KeyboardEvent("focusPrevious" /* FOCUS_PREVIOUS */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
                             else
                                 previous.focus();
@@ -1164,13 +1281,13 @@ var FudgeUserInterface;
                 }
             };
             let cntLegend = document.createElement("legend");
-            this.checkbox = document.createElement("input");
-            this.checkbox.type = "checkbox";
-            this.checkbox.checked = true;
-            this.checkbox.tabIndex = -1;
+            this.expander = document.createElement("input");
+            this.expander.type = "checkbox";
+            this.expander.checked = true;
+            this.expander.tabIndex = -1;
             let lblTitle = document.createElement("span");
             lblTitle.textContent = _legend;
-            this.appendChild(this.checkbox);
+            this.appendChild(this.expander);
             cntLegend.appendChild(lblTitle);
             this.content = document.createElement("div");
             this.appendChild(cntLegend);
@@ -1180,17 +1297,19 @@ var FudgeUserInterface;
             this.addEventListener("focusNext" /* FOCUS_NEXT */, this.hndFocus);
             this.addEventListener("focusPrevious" /* FOCUS_PREVIOUS */, this.hndFocus);
             this.addEventListener("focusSet" /* FOCUS_SET */, this.hndFocus);
-            // this.checkbox.addEventListener(EVENT_TREE.KEY_DOWN, this.hndKey);
+            this.expander.addEventListener("input", this.hndToggle);
+            // this.expander.addEventListener("change", this.hndToggle);
         }
-        open(_open) {
-            this.checkbox.checked = _open;
+        get isExpanded() {
+            return this.expander.checked;
         }
-        get isOpen() {
-            return this.checkbox.checked;
+        expand(_expand) {
+            this.expander.checked = _expand;
+            this.hndToggle(null);
         }
     }
-    FudgeUserInterface.FoldableFieldSet = FoldableFieldSet;
-    customElements.define("ui-fold-fieldset", FoldableFieldSet, { extends: "fieldset" });
+    FudgeUserInterface.ExpandableFieldSet = ExpandableFieldSet;
+    customElements.define("ui-fold-fieldset", ExpandableFieldSet, { extends: "fieldset" });
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 // namespace FudgeUserInterface {
 //     import ƒ = FudgeCore;
@@ -1631,7 +1750,7 @@ var FudgeUserInterface;
                 }
             };
             this.hndDragStart = (_event) => {
-                _event.stopPropagation();
+                // _event.stopPropagation();
                 this.controller.dragDrop.sources = [];
                 if (this.selected)
                     this.controller.dragDrop.sources = this.controller.selection;
@@ -1640,10 +1759,10 @@ var FudgeUserInterface;
                 _event.dataTransfer.effectAllowed = "all";
             };
             this.hndDragOver = (_event) => {
-                _event.stopPropagation();
+                // _event.stopPropagation();
                 _event.preventDefault();
                 this.controller.dragDrop.target = this.data;
-                _event.dataTransfer.dropEffect = "move";
+                // _event.dataTransfer.dropEffect = "link";
             };
             this.hndPointerUp = (_event) => {
                 _event.stopPropagation();
@@ -1727,7 +1846,7 @@ var FudgeUserInterface;
             this.className = "tree";
         }
         /**
-         * Opens the tree along the given path to show the objects the path includes
+         * Expands the tree along the given path to show the objects the path includes
          * @param _path An array of objects starting with one being contained in this treelist and following the correct hierarchy of successors
          * @param _focus If true (default) the last object found in the tree gets the focus
          */
@@ -1738,7 +1857,7 @@ var FudgeUserInterface;
                 item.focus();
                 let content = item.getBranch();
                 if (!content) {
-                    item.open(true);
+                    item.expand(true);
                     content = item.getBranch();
                 }
                 currentTree = content;
@@ -1757,7 +1876,7 @@ var FudgeUserInterface;
                     found.setLabel(item.display);
                     found.hasChildren = item.hasChildren;
                     if (!found.hasChildren)
-                        found.open(false);
+                        found.expand(false);
                     items.push(found);
                 }
                 else
@@ -1820,12 +1939,13 @@ var FudgeUserInterface;
             let deleted = [];
             for (let item of items)
                 if (_data.indexOf(item.data) > -1) {
-                    item.dispatchEvent(new Event("update" /* UPDATE */, { bubbles: true }));
+                    // item.dispatchEvent(new Event(EVENT.UPDATE, { bubbles: true }));
+                    item.dispatchEvent(new Event("removeChild" /* REMOVE_CHILD */, { bubbles: true }));
                     deleted.push(item.parentNode.removeChild(item));
                 }
             return deleted;
         }
-        findOpen(_data) {
+        findVisible(_data) {
             let items = this.querySelectorAll("li");
             for (let item of items)
                 if (_data == item.data)
@@ -1916,10 +2036,10 @@ var FudgeUserInterface;
             this.controller = _controller;
             let root = new FudgeUserInterface.TreeItem(this.controller, _root);
             this.appendChild(root);
-            this.addEventListener("open" /* OPEN */, this.hndOpen);
+            this.addEventListener("expand" /* EXPAND */, this.hndExpand);
             this.addEventListener("rename" /* RENAME */, this.hndRename);
             this.addEventListener("itemselect" /* SELECT */, this.hndSelect);
-            this.addEventListener("drop" /* DROP */, this.hndDrop);
+            this.addEventListener("drop" /* DROP */, this.hndDrop, true);
             this.addEventListener("delete" /* DELETE */, this.hndDelete);
             this.addEventListener("escape" /* ESCAPE */, this.hndEscape);
             this.addEventListener("copy" /* COPY */, this.hndCopyPaste);
@@ -1947,7 +2067,7 @@ var FudgeUserInterface;
                 return items[found].data;
             return null;
         }
-        hndOpen(_event) {
+        hndExpand(_event) {
             let item = _event.target;
             let children = this.controller.getChildren(item.data);
             if (!children || children.length == 0)
@@ -1991,7 +2111,8 @@ var FudgeUserInterface;
             this.displaySelection(this.controller.selection);
         }
         hndDrop(_event) {
-            _event.stopPropagation();
+            // _event.stopPropagation();
+            console.log(_event.dataTransfer);
             this.addChildren(this.controller.dragDrop.sources, this.controller.dragDrop.target);
         }
         addChildren(_children, _target) {
@@ -2005,14 +2126,14 @@ var FudgeUserInterface;
             // TODO: don't, when copying or coming from another source
             this.delete(move);
             let targetData = _target;
-            let targetItem = this.findOpen(targetData);
+            let targetItem = this.findVisible(targetData);
             let branch = this.createBranch(this.controller.getChildren(targetData));
             let old = targetItem.getBranch();
             targetItem.hasChildren = true;
             if (old)
                 old.restructure(branch);
             else
-                targetItem.open(true);
+                targetItem.expand(true);
             _children = [];
             _target = null;
         }
@@ -2034,6 +2155,13 @@ var FudgeUserInterface;
             this.dragDrop = { sources: [], target: null };
             /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
             this.copyPaste = { sources: [], target: null };
+            // public abstract hndDragOver = (_event: DragEvent): void => {
+            //   _event.stopPropagation();
+            //   _event.preventDefault();
+            //   this.dragDrop.target = (<TreeItem<T>>_event.currentTarget).data;
+            //   console.log(_event.currentTarget);
+            //   _event.dataTransfer.dropEffect = "move";
+            // }
         }
     }
     FudgeUserInterface.TreeController = TreeController;
@@ -2065,13 +2193,13 @@ var FudgeUserInterface;
                 switch (_event.code) {
                     case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
                         if (this.hasChildren && !content)
-                            this.open(true);
+                            this.expand(true);
                         else
                             this.dispatchEvent(new KeyboardEvent("focusNext" /* FOCUS_NEXT */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
                         break;
                     case ƒ.KEYBOARD_CODE.ARROW_LEFT:
                         if (content)
-                            this.open(false);
+                            this.expand(false);
                         else
                             this.dispatchEvent(new KeyboardEvent("focusPrevious" /* FOCUS_PREVIOUS */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
                         break;
@@ -2124,7 +2252,7 @@ var FudgeUserInterface;
                 _event.stopPropagation();
                 switch (target.type) {
                     case "checkbox":
-                        this.open(target.checked);
+                        this.expand(target.checked);
                         break;
                     case "text":
                         target.disabled = true;
@@ -2137,16 +2265,25 @@ var FudgeUserInterface;
                 }
             };
             this.hndDragStart = (_event) => {
-                _event.stopPropagation();
+                // _event.stopPropagation();
+                if (_event.dataTransfer.getData("dragstart"))
+                    return;
                 this.controller.dragDrop.sources = [];
                 if (this.selected)
                     this.controller.dragDrop.sources = this.controller.selection;
                 else
                     this.controller.dragDrop.sources = [this.data];
                 _event.dataTransfer.effectAllowed = "all";
+                this.controller.dragDrop.target = null;
+                // mark as already processed by this tree item to ignore it in further propagation through the tree
+                _event.dataTransfer.setData("dragstart", this.label.value);
             };
             this.hndDragOver = (_event) => {
-                _event.stopPropagation();
+                // this.controller.hndDragOver(_event);
+                if (Reflect.get(_event, "dragoverDone"))
+                    return;
+                Reflect.set(_event, "dragoverDone", true);
+                // _event.stopPropagation();
                 _event.preventDefault();
                 this.controller.dragDrop.target = this.data;
                 _event.dataTransfer.dropEffect = "move";
@@ -2157,7 +2294,7 @@ var FudgeUserInterface;
                     return;
                 this.select(_event.ctrlKey, _event.shiftKey);
             };
-            this.hndUpdate = (_event) => {
+            this.hndRemove = (_event) => {
                 if (_event.currentTarget == _event.target)
                     return;
                 _event.stopPropagation();
@@ -2179,16 +2316,16 @@ var FudgeUserInterface;
             this.addEventListener("dragstart" /* DRAG_START */, this.hndDragStart);
             this.addEventListener("dragover" /* DRAG_OVER */, this.hndDragOver);
             this.addEventListener("pointerup" /* POINTER_UP */, this.hndPointerUp);
-            this.addEventListener("update" /* UPDATE */, this.hndUpdate);
+            this.addEventListener("removeChild" /* REMOVE_CHILD */, this.hndRemove);
         }
         /**
-         * Returns true, when this item has a visible checkbox in front to open the subsequent branch
+         * Returns true, when this item has a visible checkbox in front to expand the subsequent branch
          */
         get hasChildren() {
             return this.checkbox.style.visibility != "hidden";
         }
         /**
-         * Shows or hides the checkbox for opening the subsequent branch
+         * Shows or hides the checkbox for expanding the subsequent branch
          */
         set hasChildren(_has) {
             this.checkbox.style.visibility = _has ? "visible" : "hidden";
@@ -2221,21 +2358,20 @@ var FudgeUserInterface;
             return this.label.value;
         }
         /**
-         * Tries to open the [[TreeList]] of children, by dispatching [[EVENT_TREE.OPEN]].
+         * Tries to expanding the [[TreeList]] of children, by dispatching [[EVENT.EXPAND]].
          * The user of the tree needs to add an event listener to the tree
          * in order to create that [[TreeList]] and add it as branch to this item
-         * @param _open If false, the item will be closed
          */
-        open(_open) {
+        expand(_expand) {
             this.removeBranch();
-            if (_open)
-                this.dispatchEvent(new Event("open" /* OPEN */, { bubbles: true }));
-            this.querySelector("input[type='checkbox']").checked = _open;
+            if (_expand)
+                this.dispatchEvent(new Event("expand" /* EXPAND */, { bubbles: true }));
+            this.querySelector("input[type='checkbox']").checked = _expand;
         }
         /**
          * Returns a list of all data referenced by the items succeeding this
          */
-        getOpenData() {
+        getVisibleData() {
             let list = this.querySelectorAll("li");
             let data = [];
             for (let item of list)

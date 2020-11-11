@@ -7,22 +7,26 @@ namespace FudgeCore {
    */
   export class GraphInstance extends Node {
     /** id of the resource that instance was created from */
-    // TODO: examine, if this should be a direct reference to the NodeResource, instead of the id
+    // TODO: examine, if this should be a direct reference to the Graph, instead of the id
     private idSource: string = undefined;
 
-    constructor(_graph: Graph) {
-      super("NodeResourceInstance");
+    constructor(_graph?: Graph) {
+      super("Graph");
+      if (!_graph)
+        return;
+      this.idSource = _graph.idResource;
+      this.reset();
     }
 
     /**
-     * Recreate this node from the [[NodeResource]] referenced
+     * Recreate this node from the [[Graph]] referenced
      */
     public async reset(): Promise<void> {
-      let resource: Graph = <Graph> await Project.getResource(this.idSource);
-      this.set(resource);
+      let resource: Graph = <Graph>await Project.getResource(this.idSource);
+      await this.set(resource);
     }
 
-    //TODO: optimize using the referenced NodeResource, serialize/deserialize only the differences
+    //TODO: optimize using the referenced Graph, serialize/deserialize only the differences
     public serialize(): Serialization {
       let serialization: Serialization = super.serialize();
       serialization.idSource = this.idSource;
@@ -36,18 +40,17 @@ namespace FudgeCore {
     }
 
     /**
-     * Set this node to be a recreation of the [[NodeResource]] given
-     * @param _nodeResource
+     * Set this node to be a recreation of the [[Graph]] given
      */
-    public async set(_nodeResource: Graph): Promise<void> {
-      // TODO: examine, if the serialization should be stored in the NodeResource for optimization
-      let serialization: Serialization = Serializer.serialize(_nodeResource);
+    public async set(_graph: Graph): Promise<void> {
+      // TODO: examine, if the serialization should be stored in the Graph for optimization
+      let serialization: Serialization = Serializer.serialize(_graph);
       //Serializer.deserialize(serialization);
       for (let path in serialization) {
         await this.deserialize(serialization[path]);
         break;
       }
-      this.idSource = _nodeResource.idResource;
+      this.idSource = _graph.idResource;
       this.dispatchEvent(new Event(EVENT.GRAPH_INSTANTIATED));
     }
   }

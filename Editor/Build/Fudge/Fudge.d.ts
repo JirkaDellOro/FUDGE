@@ -1,7 +1,16 @@
-/// <reference types="../../../aid/build/fudgeaid" />
 /// <reference types="../../../node_modules/electron/electron" />
-/// <reference types="../../../userinterface/build/fudgeuserinterface" />
+/// <reference types="../../../aid/build/fudgeaid" />
 /// <reference types="golden-layout" />
+/// <reference types="../../../userinterface/build/fudgeuserinterface" />
+declare namespace Fudge {
+    type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
+    class ContextMenu {
+        static appendCopyPaste(_menu: Electron.Menu): void;
+        static getSubclassMenu<T extends {
+            name: string;
+        }>(_id: CONTEXTMENU, _superclass: T[], _callback: ContextMenuCallback): Electron.Menu;
+    }
+}
 declare namespace Fudge {
     enum CONTEXTMENU {
         ADD_NODE = 0,
@@ -11,7 +20,10 @@ declare namespace Fudge {
         EDIT = 4,
         CREATE = 5,
         CONTROL_MODE = 6,
-        INTERACTION_MODE = 7
+        INTERACTION_MODE = 7,
+        CREATE_MESH = 8,
+        CREATE_MATERIAL = 9,
+        CREATE_GRAPH = 10
     }
     enum MENU {
         QUIT = "quit",
@@ -47,16 +59,24 @@ declare namespace Fudge {
         PROPERTIES = "ViewProperties",
         PREVIEW = "ViewPreview",
         MODELLER = "ViewModeller",
-        OBJECT_PROPERTIES = "ViewObjectProperties"
+        OBJECT_PROPERTIES = "ViewObjectProperties",
+        SCRIPT = "ViewScript"
     }
 }
 declare namespace Fudge {
+    export enum MIME {
+        TEXT = "text",
+        AUDIO = "audio",
+        IMAGE = "image",
+        UNKNOWN = "unknown"
+    }
     const fs: ƒ.General;
     export class DirectoryEntry {
         path: typeof fs.PathLike;
+        pathRelative: typeof fs.PathLike;
         dirent: typeof fs.Dirent;
         stats: Object;
-        constructor(_path: typeof fs.PathLike, _dirent: typeof fs.Dirent, _stats: Object);
+        constructor(_path: typeof fs.PathLike, _pathRelative: typeof fs.PathLike, _dirent: typeof fs.Dirent, _stats: Object);
         static createRoot(_path: typeof fs.PathLike): DirectoryEntry;
         get name(): string;
         set name(_name: string);
@@ -66,28 +86,55 @@ declare namespace Fudge {
         getDirectoryContent(): DirectoryEntry[];
         getFileContent(): string;
         addEntry(_entry: DirectoryEntry): void;
+        getMimeType(): MIME;
     }
     export {};
 }
 declare namespace Fudge {
-    function saveProject(_node: ƒ.Node): void;
+    function saveProject(): Promise<void>;
     function promptLoadProject(): Promise<URL>;
     function loadProject(_url: URL): Promise<void>;
 }
 declare namespace Fudge {
-    type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
-    class ContextMenu {
-        static appendCopyPaste(_menu: Electron.Menu): void;
-        static getSubclassMenu<T extends {
-            name: string;
-        }>(_id: CONTEXTMENU, _superclass: T[], _callback: ContextMenuCallback): Electron.Menu;
-        static getResources(_callback: ContextMenuCallback): Electron.Menu;
-        static getSubMenu(_object: Object, _callback: ContextMenuCallback): Electron.Menu;
+    import ƒ = FudgeCore;
+    class FileInfo extends ƒ.Mutable {
+        overwrite: boolean;
+        filename: string;
+        constructor(_overwrite: boolean, _filename: string);
+        protected reduceMutator(_mutator: ƒ.Mutator): void;
     }
+    export class Files extends ƒ.Mutable {
+        index: FileInfo;
+        style: FileInfo;
+        internal: FileInfo;
+        script: FileInfo;
+        constructor();
+        protected reduceMutator(_mutator: ƒ.Mutator): void;
+    }
+    export class Project extends ƒ.Mutable {
+        files: Files;
+        title: string;
+        private includePhysics;
+        private includeAutoViewScript;
+        private graphToStartWith;
+        constructor();
+        openDialog(): Promise<boolean>;
+        hndChange: (_event: Event) => void;
+        getProjectJSON(): string;
+        getProjectCSS(): string;
+        getProjectHTML(): string;
+        getGraphs(): Object;
+        getMutatorAttributeTypes(_mutator: ƒ.Mutator): ƒ.MutatorAttributeTypes;
+        protected reduceMutator(_mutator: ƒ.Mutator): void;
+        private updateFilenames;
+        private getAutoViewScript;
+    }
+    export {};
 }
 declare namespace Fudge {
     const ipcRenderer: Electron.IpcRenderer;
     const remote: Electron.Remote;
+    let project: Project;
     /**
      * The uppermost container for all panels controlling data flow between.
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
@@ -96,7 +143,7 @@ declare namespace Fudge {
         private static idCounter;
         private static goldenLayout;
         private static panels;
-        static start(): void;
+        static start(): Promise<void>;
         static setupGoldenLayout(): void;
         static add(_panel: typeof Panel, _title: string, _state?: Object): void;
         static find(_type: typeof Panel): Panel[];
@@ -126,10 +173,73 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    /**
+     * Base class for all [[View]]s to support generic functionality
+     * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    abstract class View {
+        private static views;
+        private static idCount;
+        dom: HTMLElement;
+        protected contextMenu: Electron.Menu;
+        private container;
+        private id;
+        constructor(_container: GoldenLayout.Container, _state: Object);
+        static getViewSource(_event: DragEvent): View;
+        private static registerViewForDragDrop;
+        setTitle(_title: string): void;
+        getDragDropSources(): Object[];
+        protected openContextMenu: (_event: Event) => void;
+        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
+        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        protected hndDrop(_event: DragEvent, _source: View): void;
+        protected hndDragOver(_event: DragEvent, _source: View): void;
+        private hndEventCommon;
+    }
+}
+declare namespace Fudge {
+    /**
+     * List the external resources
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class ViewExternal extends View {
+        private tree;
+        constructor(_container: GoldenLayout.Container, _state: Object);
+        setProject(): void;
+        getSelection(): DirectoryEntry[];
+        getDragDropSources(): DirectoryEntry[];
+        private hndEvent;
+    }
+}
+declare namespace Fudge {
+    import ƒ = FudgeCore;
+    let typesOfResources: ƒ.General[];
+    /**
+     * List the internal resources
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class ViewInternal extends View {
+        private table;
+        constructor(_container: GoldenLayout.Container, _state: Object);
+        listResources(): void;
+        getSelection(): ƒ.SerializableResource[];
+        getDragDropSources(): ƒ.SerializableResource[];
+        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
+        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): Promise<void>;
+        protected hndDragOver(_event: DragEvent, _viewSource: View): void;
+        protected hndDrop(_event: DragEvent, _viewSource: View): Promise<void>;
+        private hndEvent;
+    }
+}
+declare namespace Fudge {
     import ƒ = FudgeCore;
     import ƒui = FudgeUserInterface;
     class ControllerComponent extends ƒui.Controller {
         constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
+        private hndDragOver;
+        private hndDrop;
+        private filterDragDrop;
+        private getAncestorWithType;
     }
 }
 declare namespace Fudge {
@@ -159,6 +269,28 @@ declare namespace Fudge {
         delete(_focussed: ƒ.SerializableResource[]): ƒ.SerializableResource[];
         copy(_originals: ƒ.SerializableResource[]): Promise<ƒ.SerializableResource[]>;
         sort(_data: ƒ.SerializableResource[], _key: string, _direction: number): void;
+    }
+}
+declare namespace Fudge {
+    import ƒui = FudgeUserInterface;
+    class ScriptInfo {
+        name: string;
+        namespace: string;
+        superClass: string;
+        script: Function;
+        isComponent: boolean;
+        isComponentScript: boolean;
+        constructor(_script: Function, _namespace: string);
+    }
+    class ControllerTableScript extends ƒui.TableController<ScriptInfo> {
+        private static head;
+        private static getHead;
+        getHead(): ƒui.TABLE[];
+        getLabel(_object: ScriptInfo): string;
+        rename(_object: ScriptInfo, _new: string): boolean;
+        delete(_focussed: ScriptInfo[]): ScriptInfo[];
+        copy(_originals: ScriptInfo[]): Promise<ScriptInfo[]>;
+        sort(_data: ScriptInfo[], _key: string, _direction: number): void;
     }
 }
 declare namespace Fudge {
@@ -398,6 +530,7 @@ declare namespace Fudge {
         protected createTextureUVs(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createFaceNormals(): Float32Array;
+        private updateNormals;
         private update;
     }
 }
@@ -418,23 +551,6 @@ declare namespace Fudge {
     import ƒ = FudgeCore;
     class WidgetCircle extends ƒ.Node {
         constructor(_name: string, _color: ƒ.Color, _transform: ƒ.Matrix4x4);
-    }
-}
-declare namespace Fudge {
-    /**
-     * Base class for all [[View]]s to support generic functionality
-     * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
-     */
-    abstract class View {
-        dom: HTMLElement;
-        protected contextMenu: Electron.Menu;
-        private container;
-        constructor(_container: GoldenLayout.Container, _state: Object);
-        setTitle(_title: string): void;
-        protected openContextMenu: (_event: Event) => void;
-        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
-        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
-        private hndEventCommon;
     }
 }
 declare namespace Fudge {
@@ -587,11 +703,16 @@ declare namespace Fudge {
      */
     class ViewComponents extends View {
         private node;
+        private expanded;
         constructor(_container: GoldenLayout.Container, _state: Object);
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        protected hndDragOver(_event: DragEvent, _viewSource: View): void;
+        protected hndDrop(_event: DragEvent, _viewSource: View): void;
         private fillContent;
         private hndEvent;
+        private createComponent;
+        private findComponentType;
     }
 }
 declare namespace Fudge {
@@ -605,6 +726,10 @@ declare namespace Fudge {
         private tree;
         constructor(_container: GoldenLayout.Container, _state: Object);
         setGraph(_graph: ƒ.Node): void;
+        getSelection(): ƒ.Node[];
+        getDragDropSources(): ƒ.Node[];
+        protected hndDragOver(_event: DragEvent, _viewSource: View): void;
+        protected hndDrop(_event: DragEvent, _viewSource: View): Promise<void>;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         private hndEvent;
@@ -623,6 +748,8 @@ declare namespace Fudge {
         constructor(_container: GoldenLayout.Container, _state: Object);
         createUserInterface(): void;
         setGraph(_node: ƒ.Node): void;
+        protected hndDragOver(_event: DragEvent, _viewSource: View): void;
+        protected hndDrop(_event: DragEvent, _viewSource: View): void;
         private hndEvent;
         private activeViewport;
         private redraw;
@@ -660,33 +787,6 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
-     * List the external resources
-     * @author Jirka Dell'Oro-Friedl, HFU, 2020
-     */
-    class ViewExternal extends View {
-        constructor(_container: GoldenLayout.Container, _state: Object);
-        setProject(): void;
-        private hndEvent;
-    }
-}
-declare namespace Fudge {
-    import ƒ = FudgeCore;
-    let typesOfResources: ƒ.General[];
-    /**
-     * List the internal resources
-     * @author Jirka Dell'Oro-Friedl, HFU, 2020
-     */
-    class ViewInternal extends View {
-        private table;
-        constructor(_container: GoldenLayout.Container, _state: Object);
-        listResources(): void;
-        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
-        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
-        private hndEvent;
-    }
-}
-declare namespace Fudge {
-    /**
      * Preview a resource
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
      */
@@ -704,6 +804,7 @@ declare namespace Fudge {
         private createTextPreview;
         private createImagePreview;
         private createAudioPreview;
+        private createScriptPreview;
         private hndEvent;
         private redraw;
     }
@@ -716,7 +817,22 @@ declare namespace Fudge {
     class ViewProperties extends View {
         private resource;
         constructor(_container: GoldenLayout.Container, _state: Object);
+        protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         private fillContent;
+        private hndEvent;
+    }
+}
+declare namespace Fudge {
+    /**
+     * List the scripts loaded
+     * @author Jirka Dell'Oro-Friedl, HFU, 2020
+     */
+    class ViewScript extends View {
+        private table;
+        constructor(_container: GoldenLayout.Container, _state: Object);
+        listScripts(): void;
+        getSelection(): ScriptInfo[];
+        getDragDropSources(): ScriptInfo[];
         private hndEvent;
     }
 }

@@ -83,9 +83,17 @@ namespace FudgeCore {
       if (_node.getParent())
         matrix = _node.getParent().mtxWorld;
 
+      if (Physics.world.mainCam != _cmpCamera) Physics.world.mainCam = _cmpCamera; //DebugDraw needs to know the main camera beforehand, _cmpCamera is the viewport camera. | Marko Fehrenbach, HFU 2020
+      RenderManager.setupPhysicalTransform(_node);
+
       RenderManager.setupTransformAndLights(_node, matrix);
 
-      RenderManager.drawGraphRecursive(_node, _cmpCamera, _drawNode);
+      if (Physics.settings != null && Physics.settings.debugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY) //Give users the possibility to only show physics displayed | Marko Fehrenbach, HFU 2020
+        RenderManager.drawGraphRecursive(_node, _cmpCamera, _drawNode);
+
+      if (Physics.settings.debugDraw == true) {
+        Physics.world.debugDraw.end();
+      }
     }
 
     /**
@@ -106,7 +114,6 @@ namespace FudgeCore {
 
       // multiply camera matrix
       let projection: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.ViewProjectionMatrix, finalTransform);
-
       // TODO: create drawNode method for particle system using _node.mtxWorld instead of finalTransform
       _drawNode(_node, finalTransform, projection);
       // RenderParticles.drawParticles();
@@ -115,16 +122,16 @@ namespace FudgeCore {
         let childNode: Node = _node.getChildren()[name];
         RenderManager.drawGraphRecursive(childNode, _cmpCamera, _drawNode); //, world);
       }
-
       Recycler.store(projection);
       if (finalTransform != _node.mtxWorld)
         Recycler.store(finalTransform);
+
     }
 
     /**
      * The standard render function for drawing a single node
      */
-    private static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4, _lights: MapLightTypeToLightList): void {
+    private static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4, _lights: MapLightTypeToLightList, _cmpCamera: ComponentCamera): void {
       try {
         let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
         let mesh: Mesh = _node.getComponent(ComponentMesh).mesh;
@@ -133,6 +140,10 @@ namespace FudgeCore {
       } catch (_error) {
         // Debug.error(_error);
       }
+      //Should be drawn only once, last after anything else, which i believe it does because graphic card only draws each pixel in a certain depth once | Marko Fehrenbach
+      // if (Physics.settings.debugDraw == true) {
+      //   Physics.world.debugDraw.end();
+      // }
     }
     //#endregion
 
@@ -198,9 +209,8 @@ namespace FudgeCore {
      * Recursively iterates over the graph starting with the node given, recalculates all world transforms, 
      * collects all lights and feeds all shaders used in the graph with these lights
      */
-    private static setupTransformAndLights(_node: Node, _world: Matrix4x4 = Matrix4x4.IDENTITY(), _lights: MapLightTypeToLightList = new Map(), _shadersUsed: (typeof Shader)[] = null): void {
+    public static setupTransformAndLights(_node: Node, _world: Matrix4x4 = Matrix4x4.IDENTITY(), _lights: MapLightTypeToLightList = new Map(), _shadersUsed: (typeof Shader)[] = null): void {
       RenderManager.timestampUpdate = performance.now();
-      
       let firstLevel: boolean = (_shadersUsed == null);
       if (firstLevel)
         _shadersUsed = [];
@@ -275,6 +285,37 @@ namespace FudgeCore {
             direction.transform(cmpLight.pivot, false);
             direction.transform(cmpLight.getContainer().mtxWorld);
             RenderOperator.crc3.uniform3fv(uni[`u_directional[${i}].direction`], direction.get());
+          }
+        }
+      }
+    }
+    //#endregion
+
+    //#region Physics
+    /**
+    * Physics Part -> Take all nodes with cmpRigidbody, and overwrite their local position/rotation with the one coming from 
+    * the rb component, which is the new "local" WORLD position.
+    */
+    private static setupPhysicalTransform(_node: Node): void {
+      if (Physics.world != null && Physics.world.getBodyList().length >= 1) {
+        let mutator: Mutator = {};
+        for (let name in _node.getChildren()) {
+          let childNode: Node = _node.getChildren()[name];
+          RenderManager.setupPhysicalTransform(childNode);
+          let cmpRigidbody: ComponentRigidbody = childNode.getComponent(ComponentRigidbody);
+          if (childNode.getComponent(ComponentTransform) != null && cmpRigidbody != null) {
+            cmpRigidbody.checkCollisionEvents();
+            cmpRigidbody.checkTriggerEvents();
+            if (cmpRigidbody.physicsType != PHYSICS_TYPE.KINEMATIC) { //Case of Dynamic/Static Rigidbody
+              //Override any position/rotation, Physical Objects do not know hierachy unless it's established through physics
+              mutator["rotation"] = cmpRigidbody.getRotation();
+              mutator["translation"] = cmpRigidbody.getPosition();
+              childNode.mtxLocal.mutate(mutator);
+            }
+            if (cmpRigidbody.physicsType == PHYSICS_TYPE.KINEMATIC) { //Case of Kinematic Rigidbody
+              cmpRigidbody.setPosition(childNode.mtxWorld.translation);
+              cmpRigidbody.setRotation(childNode.mtxWorld.rotation);
+            }
           }
         }
       }

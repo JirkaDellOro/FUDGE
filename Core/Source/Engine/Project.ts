@@ -63,6 +63,20 @@ namespace FudgeCore {
       Project.scriptNamespaces = {};
     }
 
+    // <T extends Component>(_class: new () => T): T[] {
+    //   return <T[]>(this.components[_class.name] || []).slice(0);
+    // }
+
+    public static getResourcesOfType<T>(_type: new (_args: General) => T): Resources {
+      let found: Resources = {};
+      for (let resourceId in Project.resources) {
+        let resource: SerializableResource = Project.resources[resourceId];
+        if (resource instanceof _type)
+          found[resourceId] = resource;
+      }
+      return found;
+    }
+
 
     /**
      * Generate a user readable and unique id using the type of the resource, the date and random numbers
@@ -171,28 +185,30 @@ namespace FudgeCore {
 
       return new Promise((resolve, reject) => {
         script.addEventListener("load", () => resolve());
-        script.addEventListener("error", () => reject());
+        script.addEventListener("error", () => {
+          Debug.error("Loading script", _url);
+          reject();
+        });
         script.src = _url.toString();
       });
     }
 
-    public static async loadResources(_url?: RequestInfo): Promise<Resources> {
-      // TODO: support given url and multiple resource files
-      let url: RequestInfo;
-      if (_url)
-        url = new URL(_url.toString(), Project.baseURL).toString();
-      else {
-        const head: HTMLHeadElement = document.head;
-        console.log(head);
-        url = head.querySelector("link").getAttribute("src");
-      }
-
-      const response: Response = await fetch(url);
+    public static async loadResources(_url: RequestInfo): Promise<Resources> {
+      const response: Response = await fetch(_url);
       const resourceFileContent: string = await response.text();
 
       let serialization: Serialization = Serializer.parse(resourceFileContent);
       let reconstruction: Resources = await Project.deserialize(serialization);
       return reconstruction;
+    }
+
+    public static async loadResourcesFromHTML(): Promise<void> {
+      const head: HTMLHeadElement = document.head;
+      let links: NodeListOf<HTMLLinkElement> = head.querySelectorAll("link[type=resources");
+      for (let link of links) {
+        let url: RequestInfo = link.getAttribute("src");
+        await Project.loadResources(url);
+      }
     }
 
     /**

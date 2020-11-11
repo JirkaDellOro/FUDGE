@@ -5,6 +5,10 @@ namespace FudgeCore {
    */
   export abstract class Texture extends Mutable {
     public name: string = "Texture";
+    protected renderData: { [key: string]: unknown };
+
+    public useRenderData(): void {/* injected by RenderInjector*/ }
+
     protected reduceMutator(_mutator: Mutator): void {
       // delete _mutator.idResource; 
     }
@@ -13,10 +17,12 @@ namespace FudgeCore {
   /**
    * Texture created from an existing image
    */
+  @RenderInjectorTexture.decorate
   export class TextureImage extends Texture implements SerializableResource {
     public image: HTMLImageElement = null;
     public url: RequestInfo;
     public idResource: string = undefined;
+
 
     constructor(_url?: RequestInfo) {
       super();
@@ -40,7 +46,10 @@ namespace FudgeCore {
       // this.image.src = objectURL;
 
       return new Promise((resolve, reject) => {
-        this.image.addEventListener("load", () => resolve());
+        this.image.addEventListener("load", () => {
+          this.renderData = null; // refresh render data on next draw call
+          resolve();
+        });
         this.image.addEventListener("error", () => reject());
         this.image.src = new URL(this.url.toString(), Project.baseURL).toString();
       });
@@ -57,10 +66,20 @@ namespace FudgeCore {
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       Project.register(this, _serialization.idResource);
-      this.load(_serialization.url);
+      await this.load(_serialization.url);
       this.name = _serialization.name;
       // this.type is an accessor of Mutable doesn't need to be deserialized
       return this;
+    }
+
+    public async mutate(_mutator: Mutator): Promise<void> {
+      if (_mutator.url != this.url.toString())
+        await this.load(_mutator.url);
+      // except url from mutator for further processing
+      delete (_mutator.url);
+      super.mutate(_mutator);
+      // TODO: examine necessity to reconstruct, if mutator is kept by caller
+      // _mutator.url = this.url; 
     }
     //#endregion
   }

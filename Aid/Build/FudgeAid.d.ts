@@ -59,13 +59,12 @@ declare namespace FudgeAid {
         readonly axisRotateX: ƒ.Axis;
         readonly axisRotateY: ƒ.Axis;
         readonly axisDistance: ƒ.Axis;
+        protected translator: ƒ.Node;
+        protected rotatorX: ƒ.Node;
         private maxRotX;
         private minDistance;
         private maxDistance;
-        private rotatorX;
-        private translator;
         constructor(_cmpCamera: ƒ.ComponentCamera, _distanceStart?: number, _maxRotX?: number, _minDistance?: number, _maxDistance?: number);
-        hndAxisOutput: EventListener;
         get component(): ƒ.ComponentCamera;
         get node(): ƒ.Node;
         set distance(_distance: number);
@@ -76,6 +75,20 @@ declare namespace FudgeAid {
         get rotationX(): number;
         rotateY(_delta: number): void;
         rotateX(_delta: number): void;
+        hndAxisOutput: EventListener;
+    }
+}
+declare namespace FudgeAid {
+    import ƒ = FudgeCore;
+    class CameraOrbitMovingFocus extends CameraOrbit {
+        readonly axisTranslateX: ƒ.Axis;
+        readonly axisTranslateY: ƒ.Axis;
+        readonly axisTranslateZ: ƒ.Axis;
+        constructor(_cmpCamera: ƒ.ComponentCamera, _distanceStart?: number, _maxRotX?: number, _minDistance?: number, _maxDistance?: number);
+        translateX(_delta: number): void;
+        translateY(_delta: number): void;
+        translateZ(_delta: number): void;
+        hndAxisOutput: EventListener;
     }
 }
 declare namespace FudgeAid {
@@ -255,4 +268,9 @@ declare namespace FudgeAid {
         private getStateMethods;
     }
     export {};
+}
+declare namespace FudgeAid {
+    class Viewport {
+        static expandCameraToInteractiveOrbit(_viewport: ƒ.Viewport, _showFocus?: boolean, _speedCameraRotation?: number, _speedCameraTranslation?: number, _speedCameraDistance?: number): CameraOrbit;
+    }
 }

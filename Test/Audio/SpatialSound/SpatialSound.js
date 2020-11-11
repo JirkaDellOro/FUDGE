@@ -73,7 +73,7 @@ var AudioSpace;
         const canvas = document.querySelector("canvas");
         viewport.initialize("Viewport", graph, cmpCamera, canvas);
         ƒ.AudioManager.default.listenTo(graph);
-        ƒ.AudioManager.default.listen(camera.node.getComponent(ƒ.ComponentAudioListener));
+        ƒ.AudioManager.default.listenWith(camera.node.getComponent(ƒ.ComponentAudioListener));
         // setup event handling
         viewport.setFocus(true);
         viewport.activatePointerEvent("\u0192pointermove" /* MOVE */, true);

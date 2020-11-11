@@ -15,7 +15,7 @@ namespace Scripts {
         }
 
 
-        public mutate(_mutator: ƒ.Mutator): void {
+        public async mutate(_mutator: ƒ.Mutator): Promise<void> {
             super.mutate(_mutator);
         }
 

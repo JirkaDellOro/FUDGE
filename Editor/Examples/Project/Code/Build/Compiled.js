@@ -31,6 +31,21 @@ var Script;
     NoComponentScript.message = NoComponentScript.showCompileMessage();
     Script.NoComponentScript = NoComponentScript;
 })(Script || (Script = {}));
+var Script2;
+(function (Script2) {
+    var ƒ = FudgeCore;
+    ƒ.Project.registerScriptNamespace(Script2);
+    class SubScript {
+        static showCompileMessage() {
+            let message = "I've been compiled! But I won't show in the Component...";
+            SubScript.message = message;
+            console.log(SubScript.message);
+            return message;
+        }
+    }
+    SubScript.message = SubScript.showCompileMessage();
+    Script2.SubScript = SubScript;
+})(Script2 || (Script2 = {}));
 // /<reference types="../../../../../Core/Build/FudgeCore"/>
 var Script;
 // /<reference types="../../../../../Core/Build/FudgeCore"/>

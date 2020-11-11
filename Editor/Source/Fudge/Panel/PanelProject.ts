@@ -15,6 +15,7 @@ namespace Fudge {
       this.goldenLayout.registerComponent(VIEW.EXTERNAL, ViewExternal);
       this.goldenLayout.registerComponent(VIEW.PROPERTIES, ViewProperties);
       this.goldenLayout.registerComponent(VIEW.PREVIEW, ViewPreview);
+      this.goldenLayout.registerComponent(VIEW.SCRIPT, ViewScript);
 
       let inner: GoldenLayout.ContentItem = this.goldenLayout.root.contentItems[0];
       inner.addChild({
@@ -26,13 +27,15 @@ namespace Fudge {
       inner.addChild({
         type: "column", content: [
           { type: "component", componentName: VIEW.INTERNAL, componentState: _state, title: "Internal" },
-          { type: "component", componentName: VIEW.EXTERNAL, componentState: _state, title: "External" }
+          { type: "component", componentName: VIEW.EXTERNAL, componentState: _state, title: "External" },
+          { type: "component", componentName: VIEW.SCRIPT, componentState: _state, title: "Script" }
         ]
       });
 
       this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
-      this.dom.addEventListener(ƒui.EVENT.UPDATE, this.hndEvent);
+      this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
+      // this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
 
       this.broadcastEvent(new Event(EVENT_EDITOR.SET_PROJECT));
     }

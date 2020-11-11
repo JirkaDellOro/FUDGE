@@ -1,4 +1,8 @@
 namespace Fudge {
+
+
+
+
   export enum CONTEXTMENU {
     // SKETCH = ViewSketch,
     ADD_NODE,
@@ -8,7 +12,10 @@ namespace Fudge {
     EDIT,
     CREATE,
     CONTROL_MODE,
-    INTERACTION_MODE
+    INTERACTION_MODE,
+    CREATE_MESH,
+    CREATE_MATERIAL,
+    CREATE_GRAPH
   }
 
   export enum MENU {
@@ -27,6 +34,7 @@ namespace Fudge {
     NODE_UPDATE = "nodeUpdate", 
     */
   }
+
 
   export enum EVENT_EDITOR {
     SET_GRAPH = "setGraph",
@@ -48,6 +56,7 @@ namespace Fudge {
     MODELLER = "PanelModeller"
   }
 
+
   export enum VIEW {
     HIERARCHY = "ViewHierarchy",
     ANIMATION = "ViewAnimation",
@@ -59,8 +68,10 @@ namespace Fudge {
     PROPERTIES = "ViewProperties",
     PREVIEW = "ViewPreview",
     MODELLER = "ViewModeller",
-    OBJECT_PROPERTIES = "ViewObjectProperties"
+    OBJECT_PROPERTIES = "ViewObjectProperties",
     // PROJECT = ViewProject,
+    SCRIPT = "ViewScript"
+    
     // SKETCH = ViewSketch,
     // MESH = ViewMesh,
   }

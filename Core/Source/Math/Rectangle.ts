@@ -118,10 +118,10 @@ namespace FudgeCore {
       this.position.y = _y;
     }
     set width(_width: number) {
-      this.position.x = _width;
+      this.size.x = _width;
     }
     set height(_height: number) {
-      this.position.y = _height;
+      this.size.y = _height;
     }
     set left(_value: number) {
       this.size.x = this.right - _value;
@@ -150,6 +150,10 @@ namespace FudgeCore {
       return (_point.x >= this.left && _point.x <= this.right && _point.y >= this.top && _point.y <= this.bottom);
     }
 
+    /**
+     * Returns true if this rectangle collides with the rectangle given
+     * @param _rect 
+     */
     public collides(_rect: Rectangle): boolean {
       if (this.left > _rect.right) return false;
       if (this.right < _rect.left) return false;
@@ -158,6 +162,25 @@ namespace FudgeCore {
       return true;
     }
 
+    /**
+     * Returns the rectangle created by the intersection of this and the given rectangle or null, if they don't collide
+     */
+    public getIntersection(_rect: Rectangle): Rectangle {
+      if (!this.collides(_rect))
+        return null;
+
+      let intersection: Rectangle = new Rectangle();
+      intersection.x = Math.max(this.left, _rect.left);
+      intersection.y = Math.max(this.top, _rect.top);
+      intersection.width = Math.min(this.right, _rect.right) - intersection.x;
+      intersection.height = Math.min(this.bottom, _rect.bottom) - intersection.y;
+
+      return intersection;
+    }
+
+    /**
+     * Creates a string representation of this rectangle
+     */
     public toString(): string {
       let result: string = `ƒ.Rectangle(position:${this.position.toString()}, size:${this.size.toString()}`;
       result += `, left:${this.left.toPrecision(5)}, top:${this.top.toPrecision(5)}, right:${this.right.toPrecision(5)}, bottom:${this.bottom.toPrecision(5)}`;
