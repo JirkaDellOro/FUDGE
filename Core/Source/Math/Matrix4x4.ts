@@ -37,58 +37,6 @@ namespace FudgeCore {
       this.resetCache();
     }
 
-    /** 
-     * - get: a copy of the calculated translation vector   
-     * - set: effect the matrix ignoring its rotation and scaling
-     */
-    public get translation(): Vector3 {
-      if (!this.vectors.translation) {
-        this.vectors.translation = Recycler.get(Vector3);
-        this.vectors.translation.set(this.data[12], this.data[13], this.data[14]);
-      }
-      return this.vectors.translation.copy;
-    }
-    public set translation(_translation: Vector3) {
-      this.data.set(_translation.get(), 12);
-      // no full cache reset required
-      this.vectors.translation = _translation.copy;
-      this.mutator = null;
-    }
-
-    /** 
-     * - get: a copy of the calculated rotation vector   
-     * - set: effect the matrix
-     */
-    public get rotation(): Vector3 {
-      if (!this.vectors.rotation)
-        this.vectors.rotation = this.getEulerAngles();
-      return this.vectors.rotation.copy;
-    }
-    public set rotation(_rotation: Vector3) {
-      this.mutate({ "rotation": _rotation });
-      this.resetCache();
-    }
-
-    /** 
-     * - get: a copy of the calculated scale vector   
-     * - set: effect the matrix
-     */
-    public get scaling(): Vector3 {
-      if (!this.vectors.scaling) {
-        this.vectors.scaling = Recycler.get(Vector3);
-        this.vectors.scaling.set(
-          Math.hypot(this.data[0], this.data[1], this.data[2]),
-          Math.hypot(this.data[4], this.data[5], this.data[6]),
-          Math.hypot(this.data[8], this.data[9], this.data[10])
-        );
-      }
-      return this.vectors.scaling.copy;
-    }
-    public set scaling(_scaling: Vector3) {
-      this.mutate({ "scaling": _scaling });
-      this.resetCache();
-    }
-
     //#region STATICS
     /**
      * Retrieve a new identity matrix
@@ -462,6 +410,69 @@ namespace FudgeCore {
     }
     //#endregion
 
+    //#region  Accessors
+    /** 
+     * - get: a copy of the calculated translation vector   
+     * - set: effect the matrix ignoring its rotation and scaling
+     */
+    public get translation(): Vector3 {
+      if (!this.vectors.translation) {
+        this.vectors.translation = Recycler.get(Vector3);
+        this.vectors.translation.set(this.data[12], this.data[13], this.data[14]);
+      }
+      return this.vectors.translation.copy;
+    }
+    public set translation(_translation: Vector3) {
+      this.data.set(_translation.get(), 12);
+      // no full cache reset required
+      this.vectors.translation = _translation.copy;
+      this.mutator = null;
+    }
+
+    /** 
+     * - get: a copy of the calculated rotation vector   
+     * - set: effect the matrix
+     */
+    public get rotation(): Vector3 {
+      if (!this.vectors.rotation)
+        this.vectors.rotation = this.getEulerAngles();
+      return this.vectors.rotation.copy;
+    }
+    public set rotation(_rotation: Vector3) {
+      this.mutate({ "rotation": _rotation });
+      this.resetCache();
+    }
+
+    /** 
+     * - get: a copy of the calculated scale vector   
+     * - set: effect the matrix
+     */
+    public get scaling(): Vector3 {
+      if (!this.vectors.scaling) {
+        this.vectors.scaling = Recycler.get(Vector3);
+        this.vectors.scaling.set(
+          Math.hypot(this.data[0], this.data[1], this.data[2]),
+          Math.hypot(this.data[4], this.data[5], this.data[6]),
+          Math.hypot(this.data[8], this.data[9], this.data[10])
+        );
+      }
+      return this.vectors.scaling.copy;
+    }
+    public set scaling(_scaling: Vector3) {
+      this.mutate({ "scaling": _scaling });
+      this.resetCache();
+    }
+    
+    /**
+     * Return a copy of this
+     */
+    public get copy(): Matrix4x4 {
+      let copy: Matrix4x4 = new Matrix4x4();
+      copy.set(this);
+      return copy;
+    }
+    //#endregion
+
     //#region Rotation
     /**
      * Rotate this matrix by given vector in the order Z, Y, X. Right hand rotation is used, thumb points in axis direction, fingers curling indicate rotation
@@ -784,15 +795,6 @@ namespace FudgeCore {
       this.data.set([this.data[8], this.data[9], this.data[10]], 4); // overwrite y-axis with z-axis
       this.data.set(temp, 8); // overwrite Z with temp
       this.data.set([-this.data[0], -this.data[1], -this.data[2]], 0); // reverse x-axis
-    }
-
-    /**
-     * Return a copy of this
-     */
-    public get copy(): Matrix4x4 {
-      let copy: Matrix4x4 = new Matrix4x4();
-      copy.set(this);
-      return copy;
     }
 
     public getTranslationTo(_target: Matrix4x4): Vector3 {

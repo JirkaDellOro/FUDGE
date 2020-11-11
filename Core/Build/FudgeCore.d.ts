@@ -2728,24 +2728,6 @@ declare namespace FudgeCore {
         private vectors;
         constructor();
         /**
-         * - get: a copy of the calculated translation vector
-         * - set: effect the matrix ignoring its rotation and scaling
-         */
-        get translation(): Vector3;
-        set translation(_translation: Vector3);
-        /**
-         * - get: a copy of the calculated rotation vector
-         * - set: effect the matrix
-         */
-        get rotation(): Vector3;
-        set rotation(_rotation: Vector3);
-        /**
-         * - get: a copy of the calculated scale vector
-         * - set: effect the matrix
-         */
-        get scaling(): Vector3;
-        set scaling(_scaling: Vector3);
-        /**
          * Retrieve a new identity matrix
          */
         static IDENTITY(): Matrix4x4;
@@ -2817,6 +2799,28 @@ declare namespace FudgeCore {
          * @param _far The positionvalue of the projectionspace's far border
          */
         static PROJECTION_ORTHOGRAPHIC(_left: number, _right: number, _bottom: number, _top: number, _near?: number, _far?: number): Matrix4x4;
+        /**
+         * - get: a copy of the calculated translation vector
+         * - set: effect the matrix ignoring its rotation and scaling
+         */
+        get translation(): Vector3;
+        set translation(_translation: Vector3);
+        /**
+         * - get: a copy of the calculated rotation vector
+         * - set: effect the matrix
+         */
+        get rotation(): Vector3;
+        set rotation(_rotation: Vector3);
+        /**
+         * - get: a copy of the calculated scale vector
+         * - set: effect the matrix
+         */
+        get scaling(): Vector3;
+        set scaling(_scaling: Vector3);
+        /**
+         * Return a copy of this
+         */
+        get copy(): Matrix4x4;
         /**
          * Rotate this matrix by given vector in the order Z, Y, X. Right hand rotation is used, thumb points in axis direction, fingers curling indicate rotation
          * The rotation is appended to already applied transforms, thus multiplied from the right. Set _fromLeft to true to switch and put it in front.
@@ -2922,10 +2926,6 @@ declare namespace FudgeCore {
          * Swaps the two cardinal axis and reverses the third, effectively rotating the transform 180 degrees around one and 90 degrees around a second axis
          */
         swapYZ(): void;
-        /**
-         * Return a copy of this
-         */
-        get copy(): Matrix4x4;
         getTranslationTo(_target: Matrix4x4): Vector3;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
