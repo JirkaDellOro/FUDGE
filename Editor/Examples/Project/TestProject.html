@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>TestProject</title>
+  <link rel="stylesheet" href="TestProject.css">
+
+  <script type="text/javascript" src="../../../Core/Build/FudgeCore.js"></script>
+  <script type="text/javascript" src="../../../Aid/Build/FudgeAid.js"></script>
+
+  <script src="Code/Build/Compiled.js" editor="true"></script>
+  <link type="resources" src="InternalResources.json" />
+
+  <script>
+    window.addEventListener("click", startInteractiveViewport);
+
+    async function startInteractiveViewport(_event) {
+      window.removeEventListener("click", startInteractiveViewport);
+      await FudgeCore.Project.loadResourcesFromHTML();
+
+      let graphs = FudgeCore.Project.getResourcesOfType(FudgeCore.Graph);
+      for (let id in graphs) {
+        if (graphs[id].name = "Graph") {
+          FudgeAid.Viewport.createInteractive(graphs[id], document.querySelector("canvas"));
+          break;
+        }
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <h1>Show TestProject</h1>
+  <div>click to start</div>
+  <canvas></canvas>
+</body>
+
+</html>

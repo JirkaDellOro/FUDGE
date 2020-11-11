@@ -28,6 +28,8 @@ namespace FudgeCore {
      * @param _count The desired number of calls to _handler, Timer deinstalls automatically after last call. Passing 0 invokes infinite calls
      * @param _handler The [[TimerHandler]] instance to call
      * @param _arguments Additional arguments to pass to _handler
+     * 
+     * TODO: for proper handling and deletion, use Time.setTimer instead of instantiating timers yourself.
      */
     constructor(_time: Time, _elapse: number, _count: number, _handler: TimerHandler, ..._arguments: Object[]) {
       this.time = _time;
@@ -62,6 +64,7 @@ namespace FudgeCore {
 
       this.idWindow = window.setInterval(callback, this.timeoutReal, _arguments);
       this.active = true;
+      _time.addTimer(this);
     }
 
     /**

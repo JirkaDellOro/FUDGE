@@ -31,6 +31,15 @@ namespace FudgeCore {
     private crc2: CanvasRenderingContext2D = null;
     private canvas: HTMLCanvasElement = null;
     private pickBuffers: PickBuffer[] = [];
+    //#endregion
+
+    // #region Events (passing from canvas to viewport and from there into graph)
+    /**
+     * Returns true if this viewport currently has focus and thus receives keyboard events
+     */
+    public get hasFocus(): boolean {
+      return (Viewport.focus == this);
+    }
 
     /**
      * Connects the viewport to the given canvas to render the given graph to using the given camera-component, and names the viewport as given.
@@ -45,6 +54,12 @@ namespace FudgeCore {
       this.rectDestination = this.getClientRectangle();
 
       this.setGraph(_graph);
+    }
+    /**
+     * Retrieve the destination canvas
+     */
+    public getCanvas(): HTMLCanvasElement {
+      return this.canvas;
     }
     /**
      * Retrieve the 2D-context attached to the destination canvas
@@ -94,7 +109,7 @@ namespace FudgeCore {
       let output: string = "SceneGraph for this viewport:";
       output += "\n \n";
       output += this.graph.name;
-      Debug.log(output + "   => ROOTNODE" + this.createSceneGraph(this.graph));
+      Debug.log(output + "   => ROOTNODE" + this.graph.toHierarchyString());
     }
 
     // #region Drawing
@@ -167,7 +182,8 @@ namespace FudgeCore {
      */
     public adjustCamera(): void {
       let rect: Rectangle = RenderManager.getViewportRectangle();
-      this.camera.projectCentral(rect.width / rect.height, this.camera.getFieldOfView());
+      this.camera.projectCentral(
+        rect.width / rect.height, this.camera.getFieldOfView(), this.camera.getDirection(), this.camera.getNear(), this.camera.getFar());
     }
     // #endregion
 
@@ -182,7 +198,7 @@ namespace FudgeCore {
       // ray.direction.scale(camera.distance);
       ray.origin.transform(this.camera.pivot);
       ray.direction.transform(this.camera.pivot, false);
-      let cameraNode: Node = this.camera.getContainer()
+      let cameraNode: Node = this.camera.getContainer();
       if (cameraNode) {
         ray.origin.transform(cameraNode.mtxWorld);
         ray.direction.transform(cameraNode.mtxWorld, false);
@@ -273,19 +289,10 @@ namespace FudgeCore {
       let screen: Vector2 = new Vector2(this.canvas.offsetLeft + _client.x, this.canvas.offsetTop + _client.y);
       return screen;
     }
-    //#endregion
-
-    // #region Events (passing from canvas to viewport and from there into graph)
-    /**
-     * Returns true if this viewport currently has focus and thus receives keyboard events
-     */
-    public get hasFocus(): boolean {
-      return (Viewport.focus == this);
-    }
     /**
      * Switch the viewports focus on or off. Only one viewport in one FUDGE instance can have the focus, thus receiving keyboard events. 
      * So a viewport currently having the focus will lose it, when another one receives it. The viewports fire [[Event]]s accordingly.
-     *  
+     * // TODO: examine, if this can be achieved by regular DOM-Focus and tabindex=0
      * @param _on 
      */
     public setFocus(_on: boolean): void {
@@ -395,7 +402,7 @@ namespace FudgeCore {
     }
 
     private activateEvent(_target: EventTarget, _type: string, _handler: EventListener, _on: boolean): void {
-      _type = _type.slice(1); // chip the ƒlorentin
+      _type = _type.slice(1); // chip the ƒlorin
       if (_on)
         _target.addEventListener(_type, _handler);
       else
@@ -406,31 +413,5 @@ namespace FudgeCore {
       Debug.fudge(_event);
     }
     // #endregion
-
-
-    /**
-     * Creates an outputstring as visual representation of this viewports scenegraph. Called for the passed node and recursive for all its children.
-     * @param _fudgeNode The node to create a scenegraphentry for.
-     */
-    private createSceneGraph(_fudgeNode: Node): string {
-      // TODO: move to debug-class
-      let output: string = "";
-      for (let name in _fudgeNode.getChildren()) {
-        let child: Node = _fudgeNode.getChildren()[name];
-        output += "\n";
-        let current: Node = child;
-        if (current.getParent() && current.getParent().getParent())
-          output += "|";
-        while (current.getParent() && current.getParent().getParent()) {
-          output += "   ";
-          current = current.getParent();
-        }
-        output += "'--";
-
-        output += child.name;
-        output += this.createSceneGraph(child);
-      }
-      return output;
-    }
   }
 }

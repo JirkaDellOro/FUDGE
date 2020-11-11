@@ -6,7 +6,7 @@ namespace FudgeCore {
    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
    */
   @RenderInjectorMesh.decorate
-  export abstract class Mesh implements SerializableResource {
+  export abstract class Mesh extends Mutable implements SerializableResource {
     /** refers back to this class from any subclass e.g. in order to find compatible other resources*/
     public static readonly baseClass: typeof Mesh = Mesh;
     /** list of all the subclasses derived from this class, if they registered properly*/
@@ -19,8 +19,15 @@ namespace FudgeCore {
     public normalsFace: Float32Array;
 
     public idResource: string = undefined;
+    public name: string = "Mesh";
 
     public renderBuffers: RenderBuffers; /* defined by RenderInjector*/
+
+    public constructor(_name: string = "Mesh") {
+      super();
+      this.name = _name;
+      Project.register(this);
+    }
 
     public static getBufferSpecification(): BufferSpecification {
       return { size: 3, dataType: WebGL2RenderingContext.FLOAT, normalize: false, stride: 0, offset: 0 };
@@ -28,6 +35,9 @@ namespace FudgeCore {
 
     protected static registerSubclass(_subClass: typeof Mesh): number { return Mesh.subclasses.push(_subClass) - 1; }
 
+    public get type(): string {
+      return this.constructor.name; 
+    }
 
     public useRenderBuffers(_shader: typeof Shader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void {/* injected by RenderInjector*/ }
     public createRenderBuffers(): void {/* injected by RenderInjector*/ }
@@ -51,14 +61,34 @@ namespace FudgeCore {
     // Serialize/Deserialize for all meshes that calculate without parameters
     public serialize(): Serialization {
       let serialization: Serialization = {
-        idResource: this.idResource
+        idResource: this.idResource,
+        name: this.name,
+        type: this.type // store for editor view
       }; // no data needed ...
       return serialization;
     }
-    public deserialize(_serialization: Serialization): Serializable {
-      this.create(); // TODO: must not be created, if an identical mesh already exists
-      this.idResource = _serialization.idResource;
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      Project.register(this, _serialization.idResource);
+      this.name = _serialization.name;
+      // type is an accessor and must not be deserialized
       return this;
+    }
+
+    /**Flip the Normals of a Mesh to render opposite side of each polygon*/
+    public flipNormals(): void {
+
+      //invertNormals
+      for (let n: number = 0; n < this.normalsFace.length; n++) {
+        this.normalsFace[n] = -this.normalsFace[n];
+      }
+
+      //flip indices direction
+      for (let i: number = 0; i < this.indices.length - 2; i += 3 ) {
+        let i0: number = this.indices[i];
+        this.indices[i] = this.indices[i + 1];
+        this.indices[i + 1] = i0;
+      }
+      this.createRenderBuffers();
     }
 
     // public abstract create(): void;
@@ -88,5 +118,9 @@ namespace FudgeCore {
     protected abstract createTextureUVs(): Float32Array;
     protected abstract createIndices(): Uint16Array;
     protected abstract createFaceNormals(): Float32Array;
+
+    protected reduceMutator(_mutator: Mutator): void { 
+      // delete _mutator.idResource; 
+    }
   }
 }

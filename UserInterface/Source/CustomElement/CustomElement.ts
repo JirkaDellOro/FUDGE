@@ -30,13 +30,6 @@ namespace FudgeUserInterface {
     }
 
     /**
-     * Return the key (name) of the attribute this element represents
-     */
-    public get key(): string {
-      return this.getAttribute("key");
-    }
-
-    /**
      * Retrieve an id to use for children of this element, needed e.g. for standard interaction with the label
      */
     protected static get nextId(): string {
@@ -70,13 +63,23 @@ namespace FudgeUserInterface {
       ƒ.Debug.fudge("Map", _type.constructor.name, _typeCustomElement.constructor.name);
       CustomElement.mapObjectToCustomElement.set(_type, _typeCustomElement);
     }
-    
+
+    /**
+     * Return the key (name) of the attribute this element represents
+     */
+    public get key(): string {
+      return this.getAttribute("key");
+    }
+
     /**
      * Add a label-element as child to this element
      */
     public appendLabel(): HTMLLabelElement {
+      let text: string = this.getAttribute("label");
+      if (!text)
+        return null;
       let label: HTMLLabelElement = document.createElement("label");
-      label.textContent = this.getAttribute("label");
+      label.textContent = text;
       this.appendChild(label);
       return label;
     }
@@ -89,6 +92,8 @@ namespace FudgeUserInterface {
     /**
      * Set the value of this element using a format compatible with [[FudgeCore.Mutator]]
      */
-    public abstract setMutatorValue(_value: Object): void;
+    public setMutatorValue(_value: Object): void {
+      Reflect.set(this, "value", _value);
+    }
   }
 }

@@ -5,7 +5,7 @@ namespace ScriptSerialization {
   ƒ.Serializer.registerNamespace(ScriptSerialization);
   window.addEventListener("DOMContentLoaded", init);
 
-  function init(): void {
+  async function init(): Promise<void> {
     ƒ.Debug.log("Start");
 
     let root: ƒ.Node = new ƒ.Node("Root");
@@ -20,10 +20,10 @@ namespace ScriptSerialization {
     graph.addChild(test);
     test.name = "Original";
 
-    let resource: ƒ.NodeResource = ƒ.ResourceManager.registerNodeAsResource(test, false);
+    let resource: ƒ.Graph = await ƒ.Project.registerAsGraph(test, false);
     resource.name = "Resource";
 
-    let instance: ƒ.NodeResourceInstance = new ƒ.NodeResourceInstance(resource);
+    let instance: ƒ.GraphInstance = new ƒ.GraphInstance(resource);
     instance.name = "Instance";
     graph.addChild(instance);
 
@@ -33,7 +33,7 @@ namespace ScriptSerialization {
     cmpScript.mutate(mutator);
 
 
-    let srlResources: ƒ.SerializationOfResources = ƒ.ResourceManager.serialize();
+    let srlResources: ƒ.SerializationOfResources = ƒ.Project.serialize();
     let srlGraph: ƒ.Serialization = ƒ.Serializer.serialize(graph);
 
     console.groupCollapsed("Resources");
@@ -51,7 +51,7 @@ namespace ScriptSerialization {
     console.groupEnd();
     let parsed: ƒ.Serialization = ƒ.Serializer.parse(json);
     ƒ.Debug.log("Parsed", parsed);
-    let reconstruct: ƒ.Node = <ƒ.Node>ƒ.Serializer.deserialize(parsed);
+    let reconstruct: ƒ.Node = <ƒ.Node> await ƒ.Serializer.deserialize(parsed);
     ƒ.Debug.log("Reconstructed graph", reconstruct);
     console.groupEnd();
 
@@ -74,10 +74,10 @@ namespace ScriptSerialization {
     let mtrCyan: ƒ.Material = new ƒ.Material("Cyan", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(0, 0.5, 1, 1)));
     let pyramid: ƒ.MeshPyramid = new ƒ.MeshPyramid();
     let cube: ƒ.MeshCube = new ƒ.MeshCube();
-    ƒ.ResourceManager.register(pyramid);
-    ƒ.ResourceManager.register(cube);
-    ƒ.ResourceManager.register(mtrOrange);
-    ƒ.ResourceManager.register(mtrCyan);
+    ƒ.Project.register(pyramid);
+    ƒ.Project.register(cube);
+    ƒ.Project.register(mtrOrange);
+    ƒ.Project.register(mtrCyan);
     let node: ƒ.Node = Scenes.createCompleteMeshNode("Test", mtrOrange, pyramid);
     // (<ƒ.ComponentMesh>center.getComponent(ƒ.ComponentMesh)).pivot.scale(ƒ.Vector3.ONE(0.5));
     // let satellite: ƒ.Node = Scenes.createCompleteMeshNode("Satellite", mtrCyan, cube);

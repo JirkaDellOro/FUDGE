@@ -70,6 +70,22 @@ namespace FudgeCore {
       this.calculateTotalTime();
     }
 
+    get getLabels(): Enumerator {
+      //TODO: this actually needs testing
+      let en: Enumerator = new Enumerator(this.labels);
+      return en;
+    }
+
+    get fps(): number {
+      return this.framesPerSecond;
+    }
+
+    set fps(_fps: number) {
+      this.framesPerSecond = _fps;
+      this.eventsProcessed.clear();
+      this.animationStructuresProcessed.clear();
+    }
+    
     /**
      * Generates a new "Mutator" with the information to apply to the [[Node]] the [[ComponentAnimator]] is attached to with [[Node.applyAnimation()]].
      * @param _time The time at which the animation currently is at
@@ -144,21 +160,6 @@ namespace FudgeCore {
       this.eventsProcessed.clear();
     }
 
-    get getLabels(): Enumerator {
-      //TODO: this actually needs testing
-      let en: Enumerator = new Enumerator(this.labels);
-      return en;
-    }
-
-    get fps(): number {
-      return this.framesPerSecond;
-    }
-
-    set fps(_fps: number) {
-      this.framesPerSecond = _fps;
-      this.eventsProcessed.clear();
-      this.animationStructuresProcessed.clear();
-    }
 
     /**
      * (Re-)Calculate the total time of the Animation. Calculation-heavy, use only if actually needed.
@@ -187,7 +188,7 @@ namespace FudgeCore {
       s.animationStructure = this.traverseStructureForSerialisation(this.animationStructure);
       return s;
     }
-    deserialize(_serialization: Serialization): Serializable {
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.idResource = _serialization.idResource;
       this.name = _serialization.name;
       this.framesPerSecond = _serialization.fps;

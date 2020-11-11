@@ -2,7 +2,7 @@ namespace FudgeCore {
   /**
    * Defines a color as values in the range of 0 to 1 for the four channels red, green, blue and alpha (for opacity)
    */
-  export class Color extends Mutable { //implements Serializable {
+  export class Color extends Mutable implements Serializable {
     // crc2 only used for converting colors from strings predefined by CSS
     private static crc2: CanvasRenderingContext2D = document.createElement("canvas").getContext("2d");
 
@@ -89,6 +89,23 @@ namespace FudgeCore {
       for (let byte in bytes)
         bytes[byte] = parseInt(_hex.substr(channel++ * 2, 2), 16);
       this.setArrayBytesRGBA(bytes);
+    }
+
+    //#region Transfer
+    public serialize(): Serialization {
+      let serialization: Serialization = this.getMutator(true);
+      // serialization.toJSON = () => { return `{ "r": ${this.r}, "g": ${this.g}, "b": ${this.b}, "a": ${this.a}}`; };
+      serialization.toJSON = () => { return `[${this.r}, ${this.g}, ${this.b}, ${this.a}]`; };
+      return serialization;
+    }
+
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      if (typeof (_serialization) == "string") {
+        [this.r, this.g, this.b, this.a] = JSON.parse(<string><unknown>_serialization);
+      }
+      else
+        this.mutate(_serialization);
+      return this;
     }
 
     protected reduceMutator(_mutator: Mutator): void {/** */ }

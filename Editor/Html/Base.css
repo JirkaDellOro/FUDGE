@@ -14,9 +14,10 @@
 
 *[view] {
   padding: 0.5em;
+  padding-bottom: 0em;
 }
 
-*[view="ViewRender"] {
+*[view="ViewRender"], *[view="ViewPreview"] {
   padding: 0em;
 }
 
@@ -52,31 +53,6 @@
   outline: 1px dashed var(--color-dragdrop-outline);
   background-color: var(--color-background-main);
 }
-
-/* popin/popout (must be supported differently, if at all */
-
-/* 
-.lm_popin {
-  cursor: pointer
-}
-
-.lm_popin .lm_bg {
-  background: #ffffff;
-  opacity: .3
-}
-
-.lm_popin .lm_icon {
-  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAJCAYAAADpeqZqAAAAWklEQVR4nJWOyw3AIAxDHcQC7L8jbwT3AlJBfNp3SiI7dtRaLSlKKeoA1oEsKSQZCEluexw8Tm3ohk+E7bnOUHUGcNh+HwbBygw4AZ7FN/Lt84p0l+yTflV8AKQyLdcCRJi/AAAAAElFTkSuQmCC);
-  background-position: center center;
-  background-repeat: no-repeat;
-  border-left: 1px solid #eeeeee;
-  border-top: 1px solid #eeeeee;
-  opacity: .7
-}
-
-.lm_popin:hover .lm_icon {
-  opacity: 1
-} */
 
 /* Tree Control */
 
@@ -116,8 +92,55 @@ ul.tree input[type="checkbox"]~ul {
   display: none;
 }
 
-/* Text input */
+/* Table */
 
+table.sortable {
+  width: 100%;
+}
+
+table.sortable th {
+  text-align: left;
+}
+
+table.sortable th>span {
+  display: inline-block;
+  width: 50px;
+  text-align: center;
+}
+
+table.sortable th>span>input {
+  height: 0px;
+  top: -1em;
+  display: inline-block;
+  position: relative;
+  color: var(--color-text);
+}
+
+table.sortable th>span>input[value="up"]::before {
+  content: "▲";
+}
+
+table.sortable th>span>input[value="down"]::before {
+  content: "▼";
+}
+
+table.sortable input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+table.sortable .selected input {
+  color: var(--color-highlight);
+  font-weight: bold;
+}
+
+table.sortable td>input:read-only {
+  /* TODO: indicate that enabled (not disabled) fields can be doubleclicked to alter content */
+  cursor: default;
+}
+
+
+/* Text input */
 ul.tree .selected>input {
   color: var(--color-highlight);
   font-weight: bold;
@@ -131,11 +154,16 @@ input {
   border: none;
 }
 
+/* 
 input:focus, li:focus, li:focus>input[type="text"] {
   border: none;
-  /* outline: 1px solid var(--color-dragdrop-outline); */
-  outline: none;
+  outline: 1px solid var(--color-dragdrop-outline);
   text-decoration: underline;
+} */
+
+*:focus {
+  outline: 1px outset var(--color-focus);
+  /* background-color: var(--color-focus); */
 }
 
 input[type="number"] {
@@ -144,6 +172,12 @@ input[type="number"] {
   /* border-bottom: 1px solid var(--color-text); */
   text-align: center;
   width: 6em;
+}
+
+label {
+  padding-right: 0.5em;
+  /* text-decoration: wavy; */
+  /* text-shadow: 1px 1px var(--color-background-main) ; */
 }
 
 /* Fieldset */
@@ -174,18 +208,19 @@ fieldset>input[type=checkbox]:checked::before {
 fieldset>input[type=checkbox]::before {
   content: "►";
 }
-/* 
-custom-matrix4x4 input[type=checkbox]  {
-  height: 0px;
-  top: -0.9em;
-  position: relative;
+
+/* Dialog */
+dialog {
+  background-color: var(--color-background-main);
+  border: none;
   color: var(--color-text);
+  box-shadow: 0px 0px 10px 5px var(--color-background-main);
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  z-index: 10;
 }
 
-custom-matrix4x4 input[type=checkbox]:checked::before {
-  content: "▼";
+dialog>div#content {
+  background-color: var(--color-background-content);
 }
-
-custom-matrix4x4 input[type=checkbox]::before {
-  content: "►";
-} */

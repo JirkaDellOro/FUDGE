@@ -14,23 +14,45 @@ namespace FudgeUserInterface {
     protected mutable: ƒ.Mutable;
     /** [[FudgeCore.Mutator]] used to convey data to and from the mutable*/
     protected mutator: ƒ.Mutator;
+    /** [[FudgeCore.Mutator]] used to store the data types of the mutator attributes*/
+    protected mutatorTypes: ƒ.Mutator = null;
 
     constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement) {
       this.domElement = _domElement;
-      this.mutable = _mutable;
-      this.mutator = _mutable.getMutator();
+      this.setMutable(_mutable);
       // TODO: examine, if this should register to one common interval, instead of each installing its own.
       window.setInterval(this.refresh, this.timeUpdate);
       this.domElement.addEventListener("input", this.mutateOnInput);
     }
 
     /**
-     * Recursive method taking the [[ƒ.Mutator]] of a [[ƒ.Mutable]] or another existing [[ƒ.Mutator]] 
-     * as a template and updating its values with those found in the given UI-domElement. 
+     * Recursive method taking an existing [[ƒ.Mutator]] as a template 
+     * and updating its values with those found in the given UI-domElement. 
      */
-    public getMutator(_mutable: ƒ.Mutable = this.mutable, _domElement: HTMLElement = this.domElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator {
+    public static updateMutator(_domElement: HTMLElement, _mutator: ƒ.Mutator): ƒ.Mutator {
+      for (let key in _mutator) {
+        let element: HTMLInputElement = <HTMLInputElement>_domElement.querySelector(`[key=${key}]`);
+        if (element == null)
+          continue;
+
+        if (element instanceof CustomElement)
+          _mutator[key] = element.getMutatorValue();
+        else if (_mutator[key] instanceof Object)
+          _mutator[key] = Controller.updateMutator(element, _mutator[key]);
+        else
+          _mutator[key] = element.value;
+      }
+
+      return _mutator;
+    }
+
+    /**
+     * Recursive method taking the a [[ƒ.Mutable]] as a template to create a [[ƒ.Mutator]] or update the given [[ƒ.Mutator]] 
+     * with the values in the given UI-domElement
+     */
+    public static getMutator(_mutable: ƒ.Mutable, _domElement: HTMLElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator {
       // TODO: examine if this.mutator should also be addressed in some way...
-      let mutator: ƒ.Mutator = _mutator || _mutable.getMutator();
+      let mutator: ƒ.Mutator = _mutator || _mutable.getMutatorForUserInterface();
       // TODO: Mutator type now only used for enums. Examine if there is another way
       let mutatorTypes: ƒ.MutatorAttributeTypes = _types || _mutable.getMutatorAttributeTypes(mutator);
 
@@ -42,53 +64,78 @@ namespace FudgeUserInterface {
         if (element instanceof CustomElement)
           mutator[key] = (<CustomElement>element).getMutatorValue();
         else if (mutatorTypes[key] instanceof Object)
-          (<HTMLSelectElement>element).value = <string>mutator[key];
+          // TODO: setting a value of the dom element doesn't make sense... examine what this line was supposed to do. Assumably enums
+          mutator[key] = (<HTMLSelectElement>element).value;
         else {
           let subMutator: ƒ.Mutator = Reflect.get(mutator, key);
           let subMutable: ƒ.Mutable;
           subMutable = Reflect.get(_mutable, key);
-          let subTypes: ƒ.Mutator = subMutable.getMutatorAttributeTypes(subMutator);
+          // let subTypes: ƒ.Mutator = subMutable.getMutatorAttributeTypes(subMutator);
           if (subMutable instanceof ƒ.Mutable)
-            mutator[key] = this.getMutator(subMutable, element, subMutator, subTypes);
+            mutator[key] = this.getMutator(subMutable, element, subMutator); //, subTypes);
         }
       }
       return mutator;
     }
 
     /**
-     * Recursive method taking the [[ƒ.Mutator]] of a [[ƒ.Mutable]] and updating the UI-domElement accordingly
+     * Recursive method taking the [[ƒ.Mutator]] of a [[ƒ.Mutable]] and updating the UI-domElement accordingly.
+     * If an additional [[ƒ.Mutator]] is passed, its values are used instead of those of the [[ƒ.Mutable]].
      */
-    public updateUserInterface(_mutable: ƒ.Mutable = this.mutable, _domElement: HTMLElement = this.domElement): void {
-      // TODO: should get Mutator for UI or work with this.mutator (examine)
-      let mutator: ƒ.Mutator = _mutable.getMutator();
-      let mutatorTypes: ƒ.MutatorAttributeTypes = _mutable.getMutatorAttributeTypes(mutator);
+    public static updateUserInterface(_mutable: ƒ.Mutable, _domElement: HTMLElement, _mutator?: ƒ.Mutator): void {
+      let mutator: ƒ.Mutator = _mutator || _mutable.getMutatorForUserInterface();
+      let mutatorTypes: ƒ.MutatorAttributeTypes = {};
+      if (_mutable instanceof ƒ.Mutable)
+        mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
       for (let key in mutator) {
         let element: CustomElement = <CustomElement>_domElement.querySelector(`[key=${key}]`);
         if (!element)
           continue;
 
+        let value: ƒ.General = mutator[key];
+
         if (element instanceof CustomElement && element != document.activeElement)
-          element.setMutatorValue(mutator[key]);
+          element.setMutatorValue(value);
         else if (mutatorTypes[key] instanceof Object)
-          element.setMutatorValue(mutator[key]);
+          element.setMutatorValue(value);
         else {
-          let fieldset: HTMLFieldSetElement = <HTMLFieldSetElement><HTMLElement>element;
+          // let fieldset: HTMLFieldSetElement = <HTMLFieldSetElement><HTMLElement>element;
           let subMutable: ƒ.Mutable = Reflect.get(_mutable, key);
           if (subMutable instanceof ƒ.Mutable)
-            this.updateUserInterface(subMutable, fieldset);
+            this.updateUserInterface(subMutable, element, mutator[key]);
+          else
+            //element.setMutatorValue(value);
+            Reflect.set(element, "value", value);
         }
       }
     }
 
-    protected mutateOnInput = (_event: Event) => {
+    public getMutator(_mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator {
+      // TODO: should get Mutator for UI or work with this.mutator (examine)
+      this.mutable.updateMutator(this.mutator);
+      return Controller.getMutator(this.mutable, this.domElement);
+    }
+
+    public updateUserInterface(): void {
+      Controller.updateUserInterface(this.mutable, this.domElement);
+    }
+
+    public setMutable(_mutable: ƒ.Mutable): void {
+      this.mutable = _mutable;
+      this.mutator = _mutable.getMutatorForUserInterface();
+      if (_mutable instanceof ƒ.Mutable)
+        this.mutatorTypes = _mutable.getMutatorAttributeTypes(this.mutator);
+    }
+
+    protected mutateOnInput = async (_event: Event) => {
       this.mutator = this.getMutator();
-      this.mutable.mutate(this.mutator);
+      await this.mutable.mutate(this.mutator);
       _event.stopPropagation();
+
+      this.domElement.dispatchEvent(new Event(EVENT.MUTATE, { bubbles: true }));
     }
 
     protected refresh = (_event: Event) => {
-      //TODO: this.mutator is updated but then not used in updateUserInterface. Instead, the mutator is created again there...
-      this.mutable.updateMutator(this.mutator);
       this.updateUserInterface();
     }
   }

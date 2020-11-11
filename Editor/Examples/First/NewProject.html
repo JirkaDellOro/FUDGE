@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>NewProject</title>
+<meta charset="utf-8" />
+<!--Load FUDGE-->
+<script type="text/javascript" src="../../../Core/Build/FudgeCore.js">
+</script>
+<script type="text/javascript" src="../../../Aid/Build/FudgeAid.js">
+</script>
+<!--Link stylesheet and internal resources-->
+<link rel="stylesheet" href="NewProject.css" />
+<link type="resources" src="NewProject.json" />
+<!--Auto-View-->
+<script>(function (_graphId) {
+                window.addEventListener("load", init);
+                // show dialog for startup
+                let dialog;
+                function init(_event) {
+                    dialog = document.querySelector("dialog");
+                    dialog.addEventListener("click", function (_event) {
+                        dialog.close();
+                        startInteractiveViewport();
+                    });
+                    dialog.showModal();
+                }
+                // setup and start interactive viewport
+                async function startInteractiveViewport() {
+                    // load resources referenced in the link-tag
+                    await FudgeCore.Project.loadResourcesFromHTML();
+                    // pick the graph to show
+                    let graph = FudgeCore.Project.resources[_graphId];
+                    // setup the viewport
+                    let cmpCamera = new FudgeCore.ComponentCamera();
+                    let canvas = document.querySelector("canvas");
+                    let viewport = new FudgeCore.Viewport();
+                    viewport.initialize("InteractiveViewport", graph, cmpCamera, canvas);
+                    // hide the cursor when interacting, also suppressing right-click menu
+                    canvas.addEventListener("mousedown", canvas.requestPointerLock);
+                    canvas.addEventListener("mouseup", function(){document.exitPointerLock()});
+                    // make the camera interactive (complex method in FudgeAid)
+                    FudgeAid.Viewport.expandCameraToInteractiveOrbit(viewport);
+                    // setup audio
+                    let cmpListener = new ƒ.ComponentAudioListener();
+                    cmpCamera.getContainer().addComponent(cmpListener);
+                    FudgeCore.AudioManager.default.listenWith(cmpListener);
+                    FudgeCore.AudioManager.default.listenTo(graph);
+                    // draw viewport once for immediate feedback
+                    viewport.draw();
+                }
+            })("Graph|2020-10-30T16:46:07.510Z|21011");
+</script>
+</head>
+<body>
+<!--Dialog shown at startup only-->
+<dialog>
+<h1>NewProject</h1>
+<p>click to start</p>
+</dialog>
+<!--Canvas for FUDGE to render to-->
+<canvas class="fullscreen">
+</canvas>
+</body>
+</html>

@@ -1,12 +1,32 @@
 "use strict";
+// /<reference path="Panel.ts"/>
 var GoldenLayoutTest;
 (function (GoldenLayoutTest) {
-    let dim1 = { borderWidth: 10 };
-    let dim2 = { borderWidth: 10 };
-    let config = { dimensions: dim1 };
-    let golden = new GoldenLayout(config);
-    console.log(dim1);
-    console.log(dim2);
-    console.log(golden);
+    window.addEventListener("load", start);
+    let configPanel = {
+        content: [{
+                type: "row",
+                content: [
+                    {
+                        type: "component",
+                        componentName: "Panel",
+                        componentState: { text: "Panel 1" },
+                        title: "Panel1"
+                        // }, {
+                        //   type: "component",
+                        //   componentName: "Panel",
+                        //   componentState: { text: "Panel 2" },
+                        //   title: "Panel2"
+                    }
+                ]
+            }]
+    };
+    function start() {
+        let btnAdd = document.querySelector("button");
+        btnAdd.addEventListener("click", GoldenLayoutTest.Panel.add);
+        GoldenLayoutTest.glDoc = new GoldenLayout(configPanel);
+        GoldenLayoutTest.glDoc.registerComponent("Panel", GoldenLayoutTest.Panel);
+        GoldenLayoutTest.glDoc.init();
+    }
 })(GoldenLayoutTest || (GoldenLayoutTest = {}));
 //# sourceMappingURL=GoldenLayoutTest.js.map

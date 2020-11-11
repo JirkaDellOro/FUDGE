@@ -41,6 +41,14 @@ namespace FudgeUserInterface {
      * Return a list of copies of the objects given for copy & paste
      * @param _focussed The object currently having focus
      */
-    public abstract copy(_originals: T[]): T[];
+    public abstract async copy(_originals: T[]): Promise<T[]>;
+
+    // public abstract hndDragOver = (_event: DragEvent): void => {
+    //   _event.stopPropagation();
+    //   _event.preventDefault();
+    //   this.dragDrop.target = (<TreeItem<T>>_event.currentTarget).data;
+    //   console.log(_event.currentTarget);
+    //   _event.dataTransfer.dropEffect = "move";
+    // }
   }
 }

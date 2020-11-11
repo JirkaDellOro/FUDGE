@@ -29,14 +29,15 @@ To be described
 
 ## Rendering
 - [MultiVieportMultiCanvas](WebGL/MultiViewportMultiCanvas/Test.html)  
-  Ein gleiches Objekt soll in 4 verschiedenen Viewports aus 4 Blickrichtungen angezeigt werden.
-
+  Ein gleiches Objekt soll in 4 verschiedenen Viewports aus 4 Blickrichtungen angezeigt werden.  
 - [RectMapping](WebGL/TestRectMapping/Test.html)  
 Die Dimension und Auflösung des Viewport soll auf Änderungen in den Transformationsfeldern auf der rechten Seite reagieren. Entsprechend des Framings, siehe [Framing](../Documentation/Design/Framing.svg)  
 
 ## Resources
-- [NodeResource](Resources/NodeResource/Test.html)   
+- [NodeResource](Transfer/NodeResource/Test.html)   
 Im Viewport sollen viele Pyramiden angezeigt werden, um die ein anderes Objekt kreist.  
+- [ResourceManager](Transfer/ResourceManager/Test.html)   
+Graph und interne Resourcen speichern und zusammen mit externen laden und Graph rekonstruieren  
 
 ## Shading
 - [Light](Shading/Light/Light.html)  
@@ -76,6 +77,9 @@ Hier soll in der Console eine Matrix als Unterpunkt verschiedener Funktionen zu 
 ## Mesh Generierung
 - [Sphere](Mesh/Sphere/Test.html)  
 Hier sollen zwei Kugeln zu sehen sein - eine mit Flat Shading und die andere mit einer Erde-Textur.
+
+- [Torus](Mesh/Torus/Test.html)  
+Hier sollen zwei Tori zu sehen sein - einer mit Flat Shading und der andere mit einer Erde-Textur.
 
 - [HeightMap](Mesh/HeightMap/Test.html)  
 Hier sollen zwei durch eine Sinusfunktion (anhand von X und Z Koordinaten des Grids) generierte Gridmeshes angezeigt werden. Eine mit Flat Shading und eines mit einer Erde-Textur.

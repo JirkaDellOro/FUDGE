@@ -1,0 +1,155 @@
+{
+  "MeshCube|2020-10-30T16:45:54.028Z|91659": {
+    "ƒ.MeshCube": {
+      "idResource": "MeshCube|2020-10-30T16:45:54.028Z|91659",
+      "name": "MeshCube",
+      "type": "MeshCube"
+    }
+  },
+  "Material|2020-10-30T16:45:58.180Z|68131": {
+    "ƒ.Material": {
+      "name": "Red",
+      "idResource": "Material|2020-10-30T16:45:58.180Z|68131",
+      "shader": "ShaderUniColor",
+      "coat": {
+        "ƒ.CoatColored": {
+          "name": "Coat",
+          "color": "[1, 0, 0, 1]"
+        }
+      }
+    }
+  },
+  "Graph|2020-10-30T16:46:07.510Z|21011": {
+    "ƒ.Graph": {
+      "name": "RedCube",
+      "components": {
+        "ComponentMesh": [
+          {
+            "ƒ.ComponentMesh": {
+              "idMesh": "MeshCube|2020-10-30T16:45:54.028Z|91659",
+              "pivot": {
+                "translation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scaling": {
+                  "x": 1,
+                  "y": 1,
+                  "z": 1
+                }
+              },
+              "Component": {
+                "active": true
+              }
+            }
+          }
+        ],
+        "ComponentMaterial": [
+          {
+            "ƒ.ComponentMaterial": {
+              "clrPrimary": "[1, 1, 1, 1]",
+              "clrSecondary": "[1, 1, 1, 1]",
+              "pivot": {
+                "translation": {
+                  "x": 0,
+                  "y": 0
+                },
+                "rotation": 0,
+                "scaling": {
+                  "x": 1,
+                  "y": 1
+                }
+              },
+              "Component": {
+                "active": true
+              },
+              "idMaterial": "Material|2020-10-30T16:45:58.180Z|68131"
+            }
+          }
+        ]
+      },
+      "children": [],
+      "idResource": "Graph|2020-10-30T16:46:07.510Z|21011",
+      "type": "Graph"
+    }
+  },
+  "Material|2020-10-30T17:36:42.521Z|70050": {
+    "ƒ.Material": {
+      "name": "Cyan",
+      "idResource": "Material|2020-10-30T17:36:42.521Z|70050",
+      "shader": "ShaderUniColor",
+      "coat": {
+        "ƒ.CoatColored": {
+          "name": "Coat",
+          "color": "[0.07058823529411765, 0.9921568627450981, 0.9294117647058824, 1]"
+        }
+      }
+    }
+  },
+  "Graph|2020-10-30T17:37:05.295Z|22157": {
+    "ƒ.Graph": {
+      "name": "CyanCube",
+      "components": {
+        "ComponentMesh": [
+          {
+            "ƒ.ComponentMesh": {
+              "idMesh": "MeshCube|2020-10-30T16:45:54.028Z|91659",
+              "pivot": {
+                "translation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                },
+                "scaling": {
+                  "x": 1,
+                  "y": 1,
+                  "z": 1
+                }
+              },
+              "Component": {
+                "active": true
+              }
+            }
+          }
+        ],
+        "ComponentMaterial": [
+          {
+            "ƒ.ComponentMaterial": {
+              "clrPrimary": "[1, 1, 1, 1]",
+              "clrSecondary": "[1, 1, 1, 1]",
+              "pivot": {
+                "translation": {
+                  "x": 0,
+                  "y": 0
+                },
+                "rotation": 0,
+                "scaling": {
+                  "x": 1,
+                  "y": 1
+                }
+              },
+              "Component": {
+                "active": true
+              },
+              "idMaterial": "Material|2020-10-30T17:36:42.521Z|70050"
+            }
+          }
+        ]
+      },
+      "children": [],
+      "idResource": "Graph|2020-10-30T17:37:05.295Z|22157",
+      "type": "Graph"
+    }
+  }
+}

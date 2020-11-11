@@ -1,25 +1,84 @@
-///<reference types="../../node_modules/electron/Electron"/>
-var Main;
-///<reference types="../../node_modules/electron/Electron"/>
-(function (Main) {
-    //#region Types and Data
+var Fudge;
+(function (Fudge) {
+    let CONTEXTMENU;
+    (function (CONTEXTMENU) {
+        // SKETCH = ViewSketch,
+        CONTEXTMENU[CONTEXTMENU["ADD_NODE"] = 0] = "ADD_NODE";
+        CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT"] = 1] = "ADD_COMPONENT";
+        CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT_SCRIPT"] = 2] = "ADD_COMPONENT_SCRIPT";
+        CONTEXTMENU[CONTEXTMENU["EDIT"] = 3] = "EDIT";
+        CONTEXTMENU[CONTEXTMENU["CREATE_MESH"] = 4] = "CREATE_MESH";
+        CONTEXTMENU[CONTEXTMENU["CREATE_MATERIAL"] = 5] = "CREATE_MATERIAL";
+        CONTEXTMENU[CONTEXTMENU["CREATE_GRAPH"] = 6] = "CREATE_GRAPH";
+    })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
-        MENU[MENU["QUIT"] = 0] = "QUIT";
-        MENU[MENU["PROJECT_SAVE"] = 1] = "PROJECT_SAVE";
-        MENU[MENU["PROJECT_OPEN"] = 2] = "PROJECT_OPEN";
-        MENU[MENU["VIEW_NODE_OPEN"] = 3] = "VIEW_NODE_OPEN";
-        MENU[MENU["NODE_DELETE"] = 4] = "NODE_DELETE";
-        MENU[MENU["NODE_UPDATE"] = 5] = "NODE_UPDATE";
-        MENU[MENU["DEVTOOLS_OPEN"] = 6] = "DEVTOOLS_OPEN";
-        MENU[MENU["VIEW_ANIMATION"] = 7] = "VIEW_ANIMATION";
-    })(MENU || (MENU = {}));
+        MENU["QUIT"] = "quit";
+        MENU["PROJECT_SAVE"] = "projectSave";
+        MENU["PROJECT_LOAD"] = "projectLoad";
+        MENU["DEVTOOLS_OPEN"] = "devtoolsOpen";
+        MENU["PANEL_GRAPH_OPEN"] = "panelGraphOpen";
+        MENU["PANEL_ANIMATION_OPEN"] = "panelAnimationOpen";
+        MENU["PANEL_PROJECT_OPEN"] = "panelProjectOpen";
+        MENU["FULLSCREEN"] = "fullscreen";
+        /* obsolete ?
+        NODE_DELETE = "nodeDelete",
+        NODE_UPDATE = "nodeUpdate",
+        */
+    })(MENU = Fudge.MENU || (Fudge.MENU = {}));
+    let EVENT_EDITOR;
+    (function (EVENT_EDITOR) {
+        EVENT_EDITOR["SET_GRAPH"] = "setGraph";
+        EVENT_EDITOR["FOCUS_NODE"] = "focusNode";
+        EVENT_EDITOR["SET_PROJECT"] = "setProject";
+        EVENT_EDITOR["UPDATE"] = "update";
+        EVENT_EDITOR["DESTROY"] = "destroy";
+        /* obsolete ?
+        REMOVE = "removeNode",
+        HIDE = "hideNode",
+        ACTIVATE_VIEWPORT = "activateViewport",
+        */
+    })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
+    let PANEL;
+    (function (PANEL) {
+        PANEL["GRAPH"] = "PanelGraph";
+        PANEL["PROJECT"] = "PanelProject";
+    })(PANEL = Fudge.PANEL || (Fudge.PANEL = {}));
+    let VIEW;
+    (function (VIEW) {
+        VIEW["HIERARCHY"] = "ViewHierarchy";
+        VIEW["ANIMATION"] = "ViewAnimation";
+        VIEW["RENDER"] = "ViewRender";
+        VIEW["COMPONENTS"] = "ViewComponents";
+        VIEW["CAMERA"] = "ViewCamera";
+        VIEW["INTERNAL"] = "ViewInternal";
+        VIEW["EXTERNAL"] = "ViewExternal";
+        VIEW["PROPERTIES"] = "ViewProperties";
+        VIEW["PREVIEW"] = "ViewPreview";
+        VIEW["SCRIPT"] = "ViewScript";
+        // SKETCH = ViewSketch,
+        // MESH = ViewMesh,
+    })(VIEW = Fudge.VIEW || (Fudge.VIEW = {}));
+})(Fudge || (Fudge = {}));
+///<reference types="../../node_modules/electron"/>
+/**
+ * Main electron application running node. Starts the browser window to contain Fudge and sets up the main menu.
+ * See subfolder Fudge for most of the other functionality
+ */
+var Main;
+///<reference types="../../node_modules/electron"/>
+/**
+ * Main electron application running node. Starts the browser window to contain Fudge and sets up the main menu.
+ * See subfolder Fudge for most of the other functionality
+ */
+(function (Main) {
     const { app, BrowserWindow, Menu, ipcMain } = require("electron");
     let fudge;
     let defaultWidth = 800;
     let defaultHeight = 600;
     //#endregion
-    //#region Events
+    // app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
+    //#region Events 
     app.addListener("ready", createFudge);
     app.addListener("window-all-closed", function () {
         console.log("Quit");
@@ -45,41 +104,36 @@ var Main;
     }
     function addWindow(_url, width = defaultWidth, height = defaultHeight) {
         let window = new BrowserWindow({
-            width: width, height: height, webPreferences: {
-                nodeIntegration: true
+            width: width,
+            height: height,
+            // fullscreen: true,
+            webPreferences: {
+                nodeIntegration: true,
+                enableRemoteModule: true
             }
         });
         window.webContents.openDevTools();
         window.loadFile(_url);
+        window.maximize();
         return window;
     }
     // #endregion
     //#region Menus  
     function menuSelect(_item, _window, _event) {
-        console.log(`MenuSelect: Item-id=${MENU[_item.id]}`);
-        switch (Number(_item.id)) {
-            case MENU.PROJECT_OPEN:
-                send(_window, "open", null);
-                break;
-            case MENU.PROJECT_SAVE:
-                send(_window, "save", null);
-                break;
-            case MENU.VIEW_NODE_OPEN:
-                send(_window, "openViewNode", null);
-                break;
-            case MENU.NODE_UPDATE:
-                send(_window, "updateNode", null);
-                break;
-            case MENU.DEVTOOLS_OPEN:
+        console.log(`MenuSelect: Item-id=${Fudge.MENU[_item.id]}`);
+        // TODO: simplify switch by usinge enums as messages
+        switch (_item.id) {
+            case Fudge.MENU.DEVTOOLS_OPEN:
                 _window.webContents.openDevTools();
                 break;
-            case MENU.VIEW_ANIMATION:
-                send(_window, "openAnimationPanel");
+            case Fudge.MENU.FULLSCREEN:
+                _window.fullScreen = !_window.isFullScreen();
                 break;
-            case MENU.QUIT:
+            case Fudge.MENU.QUIT:
                 app.quit();
                 break;
             default:
+                send(_window, _item.id, null);
                 break;
         }
     }
@@ -87,35 +141,22 @@ var Main;
         const menu = [
             {
                 label: "Project", submenu: [
-                    {
-                        label: "Save", id: String(MENU.PROJECT_SAVE), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+S" : "Ctrl+S"
-                    },
-                    {
-                        label: "Open", id: String(MENU.PROJECT_OPEN), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+O" : "Ctrl+O"
-                    },
-                    {
-                        label: "Quit", id: String(MENU.QUIT), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+Q" : "Ctrl+Q"
-                    }
+                    { label: "Save", id: Fudge.MENU.PROJECT_SAVE, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+S" : "Ctrl+S" },
+                    { label: "Open", id: Fudge.MENU.PROJECT_LOAD, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+O" : "Ctrl+O" },
+                    { label: "Quit", id: Fudge.MENU.QUIT, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+Q" : "Ctrl+Q" }
                 ]
             },
             {
-                label: "View", submenu: [
-                    {
-                        label: "Node", id: String(MENU.VIEW_NODE_OPEN), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+N" : "Ctrl+N"
-                    },
-                    {
-                        label: "setRoot(testing)", id: String(MENU.NODE_UPDATE), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+U" : "Ctrl+U"
-                    },
-                    {
-                        label: "Animation", id: String(MENU.VIEW_ANIMATION), click: menuSelect, accelerator: process.platform == "darwin" ? "Command+I" : "Ctrl+I"
-                    }
+                label: "Edit", submenu: [
+                    { label: "Project", id: Fudge.MENU.PANEL_PROJECT_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+G" : "Ctrl+P" },
+                    { label: "Graph", id: Fudge.MENU.PANEL_GRAPH_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+G" : "Ctrl+G" },
+                    { label: "Animation", id: Fudge.MENU.PANEL_ANIMATION_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+I" : "Ctrl+I" }
                 ]
             },
             {
                 label: "Debug", submenu: [
-                    {
-                        label: "DevTool", id: String(MENU.DEVTOOLS_OPEN), click: menuSelect, accelerator: process.platform == "darwin" ? "F12" : "F12"
-                    }
+                    { label: "DevTool", id: Fudge.MENU.DEVTOOLS_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "F12" : "F12" },
+                    { label: "Fullscreen", id: Fudge.MENU.FULLSCREEN, click: menuSelect, accelerator: process.platform == "darwin" ? "F11" : "F11" }
                 ]
             }
         ];

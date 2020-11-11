@@ -2,16 +2,19 @@ var TestSerializer;
 (function (TestSerializer) {
     var ƒ = FudgeCore;
     window.addEventListener("DOMContentLoaded", init);
-    function init() {
+    async function init() {
         Scenes.createMiniScene();
-        let mutator = Scenes.node.getComponent(ƒ.ComponentMesh).getMutator();
-        ƒ.Debug.log(mutator);
-        let result = testSerialization(Scenes.node);
+        let result = await testSerialization(Scenes.node);
         console.group("Comparison");
         Compare.compare(Scenes.node, result);
         console.groupEnd();
+        // let v: ƒ.Vector3 = new ƒ.Vector3(1, 2, 3);
+        // let result2: ƒ.Serializable = testSerialization(v);
+        // console.group("Comparison");
+        // Compare.compare(v, result2);
+        // console.groupEnd();
     }
-    function testSerialization(_object) {
+    async function testSerialization(_object) {
         console.group("Original");
         console.log(_object);
         console.groupEnd();
@@ -28,7 +31,7 @@ var TestSerializer;
         console.log(serialization);
         console.groupEnd();
         console.group("Reconstructed");
-        let reconstruction = ƒ.Serializer.deserialize(serialization);
+        let reconstruction = await ƒ.Serializer.deserialize(serialization);
         console.log(reconstruction);
         console.groupEnd();
         return reconstruction;

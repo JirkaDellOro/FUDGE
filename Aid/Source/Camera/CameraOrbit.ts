@@ -6,11 +6,11 @@ namespace FudgeAid {
     public readonly axisRotateY: ƒ.Axis = new ƒ.Axis("RotateY", 1, ƒ.CONTROL_TYPE.PROPORTIONAL, true);
     public readonly axisDistance: ƒ.Axis = new ƒ.Axis("Distance", 1, ƒ.CONTROL_TYPE.PROPORTIONAL, true);
 
+    protected translator: ƒ.Node;
+    protected rotatorX: ƒ.Node;
     private maxRotX: number;
     private minDistance: number;
     private maxDistance: number;
-    private rotatorX: ƒ.Node;
-    private translator: ƒ.Node;
 
 
 
@@ -38,20 +38,6 @@ namespace FudgeAid {
       this.axisRotateX.addEventListener(ƒ.EVENT_CONTROL.OUTPUT, this.hndAxisOutput);
       this.axisRotateY.addEventListener(ƒ.EVENT_CONTROL.OUTPUT, this.hndAxisOutput);
       this.axisDistance.addEventListener(ƒ.EVENT_CONTROL.OUTPUT, this.hndAxisOutput);
-    }
-
-    public hndAxisOutput: EventListener = (_event: Event): void => {
-      let output: number = (<CustomEvent>_event).detail.output;
-      switch ((<ƒ.Axis>_event.target).name) {
-        case "RotateX":
-          this.rotateX(output);
-          break;
-        case "RotateY":
-          this.rotateY(output);
-          break;
-        case "Distance":
-          this.distance += output;
-      }
     }
 
     public get component(): ƒ.ComponentCamera {
@@ -94,6 +80,20 @@ namespace FudgeAid {
 
     public rotateX(_delta: number): void {
       this.rotationX = this.rotatorX.mtxLocal.rotation.x + _delta;
+    }
+
+    public hndAxisOutput: EventListener = (_event: Event): void => {
+      let output: number = (<CustomEvent>_event).detail.output;
+      switch ((<ƒ.Axis>_event.target).name) {
+        case "RotateX":
+          this.rotateX(output);
+          break;
+        case "RotateY":
+          this.rotateY(output);
+          break;
+        case "Distance":
+          this.distance += output;
+      }
     }
   }
 }

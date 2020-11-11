@@ -38,12 +38,12 @@ var UI_Tree;
                 _target.addChild(node);
             return move;
         }
-        copy(_originals) {
+        async copy(_originals) {
             // try to create copies and return them for paste operation
             let copies = [];
             for (let original of _originals) {
                 let serialization = ƒ.Serializer.serialize(original);
-                let copy = ƒ.Serializer.deserialize(serialization);
+                let copy = await ƒ.Serializer.deserialize(serialization);
                 copies.push(copy);
             }
             return copies;

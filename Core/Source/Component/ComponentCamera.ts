@@ -27,8 +27,27 @@ namespace FudgeCore {
     private fieldOfView: number = 45; // The camera's sensorangle.
     private aspectRatio: number = 1.0;
     private direction: FIELD_OF_VIEW = FIELD_OF_VIEW.DIAGONAL;
+    private near: number = 1;
+    private far: number = 2000;
     private backgroundEnabled: boolean = true; // Determines whether or not the background of this camera will be rendered.
     // TODO: examine, if background should be an attribute of Camera or Viewport
+
+    /**
+     * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
+     * @returns the world-projection-matrix
+     */
+    public get ViewProjectionMatrix(): Matrix4x4 {
+      //TODO: optimize, no need to recalculate if neither mtxWorld nor pivot have changed
+      let mtxCamera: Matrix4x4 = this.pivot;
+      try {
+        mtxCamera = Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.pivot);
+      } catch (_error) {
+        // no container node or no world transformation found -> continue with pivot only
+      }
+      let mtxWorldProjection: Matrix4x4 = Matrix4x4.INVERSION(mtxCamera);
+      mtxWorldProjection = Matrix4x4.MULTIPLICATION(this.transform, mtxWorldProjection);
+      return mtxWorldProjection;
+    }
 
     public getProjection(): PROJECTION {
       return this.projection;
@@ -50,21 +69,11 @@ namespace FudgeCore {
       return this.direction;
     }
 
-    /**
-     * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
-     * @returns the world-projection-matrix
-     */
-    public get ViewProjectionMatrix(): Matrix4x4 {
-      //TODO: optimize, no need to recalculate if neither mtxWorld nor pivot have changed
-      let mtxCamera: Matrix4x4 = this.pivot;
-      try {
-        mtxCamera = Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.pivot);
-      } catch (_error) {
-        // no container node or no world transformation found -> continue with pivot only
-      }
-      let mtxWorldProjection: Matrix4x4 = Matrix4x4.INVERSION(mtxCamera);
-      mtxWorldProjection = Matrix4x4.MULTIPLICATION(this.transform, mtxWorldProjection);
-      return mtxWorldProjection;
+    public getNear(): number  {
+      return this.near;
+    }
+    public getFar(): number  {
+      return this.far;
     }
 
     /**
@@ -73,12 +82,14 @@ namespace FudgeCore {
      * @param _fieldOfView The field of view in Degrees. (Default = 45)
      * @param _direction The plane on which the fieldOfView-Angle is given 
      */
-    public projectCentral(_aspect: number = this.aspectRatio, _fieldOfView: number = this.fieldOfView, _direction: FIELD_OF_VIEW = this.direction): void {
+    public projectCentral(_aspect: number = this.aspectRatio, _fieldOfView: number = this.fieldOfView, _direction: FIELD_OF_VIEW = this.direction, _near: number = 1, _far: number = 2000): void {
       this.aspectRatio = _aspect;
       this.fieldOfView = _fieldOfView;
       this.direction = _direction;
       this.projection = PROJECTION.CENTRAL;
-      this.transform = Matrix4x4.PROJECTION_CENTRAL(_aspect, this.fieldOfView, 1, 2000, this.direction); // TODO: remove magic numbers
+      this.near = _near;
+      this.far = _far;
+      this.transform = Matrix4x4.PROJECTION_CENTRAL(_aspect, this.fieldOfView, _near, _far, this.direction); // TODO: remove magic numbers
     }
     /**
      * Set the camera to orthographic projection. The origin is in the top left corner of the canvas.
@@ -141,7 +152,7 @@ namespace FudgeCore {
       return serialization;
     }
 
-    public deserialize(_serialization: Serialization): Serializable {
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.backgroundColor = _serialization.backgroundColor;
       this.backgroundEnabled = _serialization.backgroundEnabled;
       this.projection = _serialization.projection;
@@ -170,7 +181,7 @@ namespace FudgeCore {
       return types;
     }
 
-    public mutate(_mutator: Mutator): void {
+    public async mutate(_mutator: Mutator): Promise<void> {
       super.mutate(_mutator);
 
       switch (this.projection) {

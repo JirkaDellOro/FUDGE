@@ -806,7 +806,7 @@ namespace FudgeCore {
       let serialization: Serialization = this.getMutator();
       return serialization;
     }
-    public deserialize(_serialization: Serialization): Serializable {
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.mutate(_serialization);
       return this;
     }
@@ -826,7 +826,7 @@ namespace FudgeCore {
       return mutator;
     }
 
-    public mutate(_mutator: Mutator): void {
+    public async mutate(_mutator: Mutator): Promise<void> {
       let oldTranslation: Vector3 = this.translation;
       let oldRotation: Vector3 = this.rotation;
       let oldScaling: Vector3 = this.scaling;

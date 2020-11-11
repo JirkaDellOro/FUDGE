@@ -211,6 +211,9 @@ namespace FudgeUserInterface {
         return;
       }
 
+      if (_event.code != ƒ.KEYBOARD_CODE.TABULATOR)
+        _event.preventDefault();
+
       switch (_event.code) {
         case ƒ.KEYBOARD_CODE.ARROW_DOWN:
           this.changeDigitFocussed(-1);
@@ -243,6 +246,8 @@ namespace FudgeUserInterface {
     }
 
     private hndWheel = (_event: WheelEvent): void => {
+      _event.stopPropagation();
+      _event.preventDefault();
       let change: number = _event.deltaY < 0 ? +1 : -1;
       this.changeDigitFocussed(change);
       this.dispatchEvent(new Event("input", { bubbles: true }));
@@ -278,10 +283,16 @@ namespace FudgeUserInterface {
       // @ts-ignore (mantissa not used)
       let [mantissa, expValue]: number[] = this.getMantissaAndExponent();
 
+      let prev: number = this.value;
       this.value += _amount * Math.pow(10, expDigit + expValue);
+      // workaround precision problems of javascript
+      if (Math.abs(prev / this.value) > 1000)
+        this.value = 0;
+
 
       let expNew: number;
       [mantissa, expNew] = this.getMantissaAndExponent();
+      // console.log(mantissa);
       this.shiftFocus(expNew - expValue);
       this.display();
     }

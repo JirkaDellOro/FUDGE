@@ -19,8 +19,8 @@ namespace ElectronFileIo {
         ipcRenderer.on("save", (event, arg) => {
             save(graph);
         });
-        ipcRenderer.on("open", (event, arg) => {
-            let node: ƒ.Node = open();
+        ipcRenderer.on("open", async (event, arg) => {
+            let node: ƒ.Node = await open();
             displayNode(node);
         });
     }
@@ -44,7 +44,7 @@ namespace ElectronFileIo {
         fs.writeFileSync(filename, content);
     }
 
-    export function open(): ƒ.Node {
+    export async function open(): Promise<ƒ.Node> {
         // @ts-ignore
         let filenames: string[] = dialog.showOpenDialogSync(null, { title: "Load Graph", buttonLabel: "Load Graph", properties: ["openFile"] });
 
@@ -54,7 +54,7 @@ namespace ElectronFileIo {
         console.groupEnd();
 
         let serialization: ƒ.Serialization = ƒ.Serializer.parse(content);
-        let node: ƒ.Node = <ƒ.Node>ƒ.Serializer.deserialize(serialization);
+        let node: ƒ.Node = <ƒ.Node> await ƒ.Serializer.deserialize(serialization);
 
         console.groupCollapsed("Deserialized");
         console.log(node);

@@ -1,7 +1,8 @@
+///<reference path="../../../Core/Build/FudgeCore.d.ts"/>
 namespace ComponentParameters {
   import ƒ = FudgeCore;
   ƒ.RenderManager.initialize(true, true);
-  
+
   window.addEventListener("DOMContentLoaded", init);
 
   function init(): void {
@@ -38,18 +39,21 @@ namespace ComponentParameters {
 
     ƒ.Loop.start();
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, (_event: ƒ.Eventƒ) => {
-      coatTextured.pivot.rotate(0.1);
-      coatTextured.pivot.translateX(0.01);
-      let s: number = 1.5 + Math.sin(coatTextured.pivot.translation.x);
-      coatTextured.pivot.scaling = ƒ.Vector2.ONE(s);
-      viewport.draw();
-      // let mutator: ƒ.Mutator = cmpMaterial.mutatorCoat;
-      // mutator.rotation = (<number>mutator.rotation) + 0.1;
-      // mutator.translation["x"] += 0.01;
-      // let s: number = 1.5 + Math.sin(mutator.translation["x"]);
-      // mutator.scaling = { x: s, y: s };
-      // coatTextured.mutate(<ƒ.MutatorForComponent>mutator);
-      // viewport.draw();
+      for (let node of root.getChildren()) {
+        let cmpMaterial: ƒ.ComponentMaterial = node.getComponent(ƒ.ComponentMaterial);
+        cmpMaterial.pivot.rotate(0.1);
+        cmpMaterial.pivot.translateX(0.01);
+        let s: number = 1.5 + Math.sin(cmpMaterial.pivot.translation.x);
+        cmpMaterial.pivot.scaling = ƒ.Vector2.ONE(s);
+        viewport.draw();
+        // let mutator: ƒ.Mutator = cmpMaterial.mutatorCoat;
+        // mutator.rotation = (<number>mutator.rotation) + 0.1;
+        // mutator.translation["x"] += 0.01;
+        // let s: number = 1.5 + Math.sin(mutator.translation["x"]);
+        // mutator.scaling = { x: s, y: s };
+        // coatTextured.mutate(<ƒ.MutatorForComponent>mutator);
+        // viewport.draw();
+      }
     });
   }
 }

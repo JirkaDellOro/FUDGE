@@ -31,7 +31,8 @@ namespace FudgeUserInterface {
         let entry: HTMLOptionElement = document.createElement("option");
         entry.text = key;
         entry.value = (<{ [key: string]: string }>this.content)[key];
-        if (key == this.getAttribute("value")) {
+        // console.log(this.getAttribute("value"));
+        if (entry.value == this.getAttribute("value")) {
           entry.selected = true;
         }
         select.add(entry);
@@ -51,6 +52,7 @@ namespace FudgeUserInterface {
      */
     public setMutatorValue(_value: string): void {
       this.querySelector("select").value = _value;
+      // this.value = _value;
     }
   }
 }

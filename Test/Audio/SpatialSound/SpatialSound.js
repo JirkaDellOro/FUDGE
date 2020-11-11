@@ -50,7 +50,7 @@ var AudioSpace;
         mtxInner = inner.mtxLocal;
         mtxOuter = outer.mtxLocal;
         // audio setup
-        const audio = await ƒ.Audio.load("hypnotic.mp3");
+        const audio = new ƒ.Audio("hypnotic.mp3");
         cmpAudio = new ƒ.ComponentAudio(audio, true);
         speaker.addComponent(cmpAudio);
         cmpAudio.setPanner(ƒ.AUDIO_PANNER.CONE_OUTER_ANGLE, 180);
@@ -73,7 +73,7 @@ var AudioSpace;
         const canvas = document.querySelector("canvas");
         viewport.initialize("Viewport", graph, cmpCamera, canvas);
         ƒ.AudioManager.default.listenTo(graph);
-        ƒ.AudioManager.default.listen(camera.node.getComponent(ƒ.ComponentAudioListener));
+        ƒ.AudioManager.default.listenWith(camera.node.getComponent(ƒ.ComponentAudioListener));
         // setup event handling
         viewport.setFocus(true);
         viewport.activatePointerEvent("\u0192pointermove" /* MOVE */, true);

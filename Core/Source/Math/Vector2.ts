@@ -15,34 +15,6 @@ namespace FudgeCore {
       this.data = new Float32Array([_x, _y]);
     }
 
-    get x(): number {
-      return this.data[0];
-    }
-    get y(): number {
-      return this.data[1];
-    }
-
-    set x(_x: number) {
-      this.data[0] = _x;
-    }
-    set y(_y: number) {
-      this.data[1] = _y;
-    }
-
-    /**
-     * Returns the length of the vector
-     */
-    get magnitude(): number {
-      return Math.hypot(...this.data);
-    }
-
-    /**
-     * Returns the square of the magnitude of the vector without calculating a square root. Faster for simple proximity evaluation.
-     */
-    get magnitudeSquared(): number {
-      return Vector2.DOT(this, this);
-    }
-
     /** 
      * A shorthand for writing `new Vector2(0, 0)`.
      * @returns A new vector with the values (0, 0)
@@ -185,6 +157,41 @@ namespace FudgeCore {
       else return new Vector2(-_vector.y, _vector.x);
     }
 
+    get x(): number {
+      return this.data[0];
+    }
+    get y(): number {
+      return this.data[1];
+    }
+
+    set x(_x: number) {
+      this.data[0] = _x;
+    }
+    set y(_y: number) {
+      this.data[1] = _y;
+    }
+
+    /**
+     * Returns the length of the vector
+     */
+    get magnitude(): number {
+      return Math.hypot(...this.data);
+    }
+
+    /**
+     * Returns the square of the magnitude of the vector without calculating a square root. Faster for simple proximity evaluation.
+     */
+    get magnitudeSquared(): number {
+      return Vector2.DOT(this, this);
+    }
+
+    /**
+     * @returns A deep copy of the vector.
+     */
+    public get copy(): Vector2 {
+      return new Vector2(this.x, this.y);
+    }
+
     /**
      * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
      * TODO: examine, if tolerance as criterium for the difference is appropriate with very large coordinate values or if _tolerance should be multiplied by coordinate value
@@ -241,13 +248,6 @@ namespace FudgeCore {
      */
     public get(): Float32Array {
       return new Float32Array(this.data);
-    }
-
-    /**
-     * @returns A deep copy of the vector.
-     */
-    public get copy(): Vector2 {
-      return new Vector2(this.x, this.y);
     }
 
     public transform(_matrix: Matrix3x3, _includeTranslation: boolean = true): void {
