@@ -1271,7 +1271,7 @@ declare namespace FudgeCore {
      */
     class CoatTextured extends CoatColored {
         texture: TextureImage;
-        constructor(_color?: Color);
+        constructor(_color?: Color, _texture?: TextureImage);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }

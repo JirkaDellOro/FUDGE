@@ -8,8 +8,10 @@ namespace FudgeCore {
     // public color: Color = new Color(1, 1, 1, 1);
     public texture: TextureImage = null;
 
-    constructor(_color?: Color) {
+    constructor(_color?: Color, _texture?: TextureImage) {
       super(_color);
+      if (_texture)
+        this.texture = _texture;
     }
 
     //#region Transfer
