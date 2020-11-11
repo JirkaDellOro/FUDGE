@@ -246,6 +246,123 @@ var Fudge;
     }
     Fudge.loadProject = loadProject;
 })(Fudge || (Fudge = {}));
+///<reference path="../../../node_modules/electron/Electron.d.ts"/>
+///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../Aid/Build/FudgeAid"/>
+///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
+var Fudge;
+///<reference path="../../../node_modules/electron/Electron.d.ts"/>
+///<reference types="../../../Core/Build/FudgeCore"/>
+///<reference types="../../../Aid/Build/FudgeAid"/>
+///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
+(function (Fudge) {
+    var ƒ = FudgeCore;
+    var ƒAid = FudgeAid;
+    Fudge.ipcRenderer = require("electron").ipcRenderer;
+    Fudge.remote = require("electron").remote;
+    const fs = require("fs");
+    // TODO: At this point of time, the project is just a single node. A project is much more complex...
+    let node = null;
+    // TODO: At this point of time, there is just a single panel. Support multiple panels
+    let panel = null;
+    window.addEventListener("load", initWindow);
+    function initWindow() {
+        ƒ.Debug.log("Fudge started");
+        PanelManager.instance.init();
+        console.log("Panel Manager initialized");
+        // TODO: create a new Panel containing a ViewData by default. More Views can be added by the user or by configuration
+        Fudge.ipcRenderer.on("save", (_event, _args) => {
+            ƒ.Debug.log("Save");
+            panel = PanelManager.instance.getActivePanel();
+            if (panel instanceof PanelNode) {
+                node = panel.getNode();
+            }
+            save(node);
+        });
+        Fudge.ipcRenderer.on("open", (_event, _args) => {
+            ƒ.Debug.log("Open");
+            node = open();
+            panel = PanelManager.instance.getActivePanel();
+            if (panel instanceof PanelNode) {
+                panel.setNode(node);
+            }
+        });
+        Fudge.ipcRenderer.on("openViewNode", (_event, _args) => {
+            ƒ.Debug.log("OpenViewNode");
+            openViewNode();
+        });
+        Fudge.ipcRenderer.on("openAnimationPanel", (_event, _args) => {
+            ƒ.Debug.log("Open Animation Panel");
+            // openAnimationPanel();
+        });
+        // HACK!
+        Fudge.ipcRenderer.on("updateNode", (_event, _args) => {
+            ƒ.Debug.log("UpdateViewNode");
+        });
+        //Physics Menu Items | Marko Fehrenbach, HFU 2020
+        Fudge.ipcRenderer.on("togglePhysicsDebugView", (_event, _args) => {
+            ƒ.Physics.settings.debugDraw = !ƒ.Physics.settings.debugDraw;
+        });
+        Fudge.ipcRenderer.on("PhysicsViewMode_1", (_event, _args) => {
+            ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
+        });
+        Fudge.ipcRenderer.on("PhysicsViewMode_2", (_event, _args) => {
+            ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
+        });
+        Fudge.ipcRenderer.on("PhysicsViewMode_3", (_event, _args) => {
+            ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.BOUNDING_BOXES;
+        });
+        Fudge.ipcRenderer.on("PhysicsViewMode_4", (_event, _args) => {
+            ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.CONTACTS;
+        });
+        Fudge.ipcRenderer.on("PhysicsViewMode_5", (_event, _args) => {
+            ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY;
+        });
+    }
+    function openViewNode() {
+        node = new ƒAid.NodeCoordinateSystem("WorldCooSys");
+        let node2 = new ƒAid.NodeCoordinateSystem("WorldCooSys", ƒ.Matrix4x4.IDENTITY());
+        node.addChild(node2);
+        node2.cmpTransform.local.translateZ(2);
+        let nodePanel = new PanelNode("Node Panel", new NodePanelTemplate, node);
+        PanelManager.instance.addPanel(nodePanel);
+    }
+    // function openAnimationPanel(): void {
+    //   let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
+    //   PanelManager.instance.addPanel(panel);
+    // }
+    function save(_node) {
+        let serialization = ƒ.Serializer.serialize(_node);
+        let content = ƒ.Serializer.stringify(serialization);
+        // You can obviously give a direct path without use the dialog (C:/Program Files/path/myfileexample.txt)
+        // ADDED Filters to open/save dialog for user comfort and since FUDGE is set to open/save JSON files - Marko Fehrenbach, HFU 2020
+        let filename = Fudge.remote.dialog.showSaveDialogSync(null, {
+            title: "Save Graph", buttonLabel: "Save Graph", message: "ƒ-Message", filters: [
+                { name: 'Fudge JSON Graphs', extensions: ['json'] },
+                { name: 'All Files', extensions: ['*'] }
+            ]
+        });
+        fs.writeFileSync(filename, content);
+    }
+    function open() {
+        let filenames = Fudge.remote.dialog.showOpenDialogSync(null, {
+            title: "Load Graph", buttonLabel: "Load Graph", properties: ["openFile"], filters: [
+                { name: 'Fudge JSON Graphs', extensions: ['json'] },
+                { name: 'All Files', extensions: ['*'] }
+            ]
+        });
+        let content = fs.readFileSync(filenames[0], { encoding: "utf-8" });
+        console.groupCollapsed("File content");
+        ƒ.Debug.log(content);
+        console.groupEnd();
+        let serialization = ƒ.Serializer.parse(content);
+        let node = ƒ.Serializer.deserialize(serialization);
+        console.groupCollapsed("Deserialized");
+        console.log(node);
+        console.groupEnd();
+        return node;
+    }
+})(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
@@ -1347,6 +1464,78 @@ var Fudge;
         }
     }
     Fudge.PanelProject = PanelProject;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    var ƒ = FudgeCore;
+    var ƒaid = FudgeAid;
+    /**
+     * View displaying a Node and the hierarchical relation to its parents and children.
+     * Consists of a viewport and a tree-control.
+     */
+    class ViewRender extends Fudge.View {
+        constructor(_parent) {
+            super(_parent);
+            /**
+             * Update Viewport every frame
+             */
+            this.animate = (_e) => {
+                this.viewport.setGraph(this.graph);
+                if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0) {
+                    this.viewport.draw();
+                    if (ƒ.Physics.world.getBodyList().length >= 1)
+                        ƒ.Physics.world.simulate(); //added for physics, but should only be called when there is at least 1 RB @author Marko Fehrenbach | HFU 2020
+                }
+            };
+            this.activeViewport = (_event) => {
+                let event = new CustomEvent(Fudge.EVENT_EDITOR.ACTIVEVIEWPORT, { detail: this.viewport.camera, bubbles: false });
+                this.parentPanel.dispatchEvent(event);
+                _event.cancelBubble = true;
+            };
+            if (_parent instanceof PanelNode && _parent.getNode() != null)
+                this.graph = _parent.getNode();
+            else {
+                this.graph = new ƒ.Node("Scene");
+            }
+            this.fillContent();
+        }
+        deconstruct() {
+            ƒ.Loop.removeEventListener("loopFrame" /* LOOP_FRAME */, this.animate);
+        }
+        fillContent() {
+            let cmpCamera = new ƒ.ComponentCamera();
+            cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
+            cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
+            cmpCamera.projectCentral(1, 45);
+            this.canvas = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
+            let container = document.createElement("div");
+            container.style.borderWidth = "0px";
+            document.body.appendChild(this.canvas);
+            this.viewport = new ƒ.Viewport();
+            this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
+            this.viewport.draw();
+            this.content.append(this.canvas);
+            ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
+            ƒ.Physics.start(this.graph); //Starting for empty editor | recalculating physics depending on every transformation right before first draw @author Marko Fehrenbach | HFU 2020
+            ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, this.animate);
+            //Focus cameracontrols on new viewport
+            let event = new CustomEvent(Fudge.EVENT_EDITOR.ACTIVEVIEWPORT, { detail: this.viewport.camera, bubbles: false });
+            this.parentPanel.dispatchEvent(event);
+            this.canvas.addEventListener("click", this.activeViewport);
+        }
+        /**
+         * Set the root node for display in this view
+         * @param _node
+         */
+        setRoot(_node) {
+            if (!_node)
+                return;
+            this.graph = _node;
+            this.viewport.setGraph(this.graph);
+            ƒ.Physics.start(this.graph); //Starting after new load | recalculating physics depending on every transformation right before first draw @author Marko Fehrenbach | HFU 2020
+        }
+    }
+    Fudge.ViewRender = ViewRender;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {

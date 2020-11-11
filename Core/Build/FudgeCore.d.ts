@@ -1,3 +1,4 @@
+/// <reference path="../../Physics/OIMOPhysics.d.ts" />
 declare namespace FudgeCore {
     /**
      * Base class for the different DebugTargets, mainly for technical purpose of inheritance
@@ -148,8 +149,8 @@ declare namespace FudgeCore {
         /** dispatched to [[FileIo]] when a list of files has been saved */
         FILE_SAVED = "fileSaved"
     }
-    type Eventƒ = EventPointer | EventDragDrop | EventWheel | EventKeyboard | Event;
-    type EventListenerƒ = ((_event: EventPointer) => void) | ((_event: EventDragDrop) => void) | ((_event: EventWheel) => void) | ((_event: EventKeyboard) => void) | ((_event: Eventƒ) => void) | EventListenerObject;
+    type Eventƒ = EventPointer | EventDragDrop | EventWheel | EventKeyboard | Event | EventPhysics;
+    type EventListenerƒ = ((_event: EventPointer) => void) | ((_event: EventDragDrop) => void) | ((_event: EventWheel) => void) | ((_event: EventKeyboard) => void) | ((_event: Eventƒ) => void) | ((_event: EventPhysics) => void) | EventListenerObject;
     class EventTargetƒ extends EventTarget {
         addEventListener(_type: string, _handler: EventListenerƒ, _options?: boolean | AddEventListenerOptions): void;
         removeEventListener(_type: string, _handler: EventListenerƒ, _options?: boolean | AddEventListenerOptions): void;
@@ -1291,7 +1292,7 @@ declare namespace FudgeCore {
         static readonly subclasses: typeof Component[];
         protected singleton: boolean;
         private container;
-        private active;
+        protected active: boolean;
         protected static registerSubclass(_subclass: typeof Component): number;
         get isActive(): boolean;
         /**
@@ -3343,6 +3344,1439 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+       * Acts as the physical representation of a connection between two [[Node]]'s.
+       * The type of conncetion is defined by the subclasses like prismatic joint, cylinder joint etc.
+       * A Rigidbody on the [[Node]] that this component is added to is needed. Setting the connectedRigidbody and
+       * initializing the connection creates a physical connection between them. This differs from a connection through hierarchy
+       * in the node structure of fudge. Joints can have different DOF's (Degrees Of Freedom), 1 Axis that can either twist or swing is a degree of freedom.
+       * A joint typically consists of a motor that limits movement/rotation or is activly trying to move to a limit. And a spring which defines the rigidity.
+       * @author Marko Fehrenbach, HFU 2020
+       */
+    abstract class ComponentJoint extends Component {
+        static readonly iSubclass: number;
+        protected singleton: boolean;
+        /** Get/Set the first ComponentRigidbody of this connection. It should always be the one that this component is attached too in the sceneTree. */
+        get attachedRigidbody(): ComponentRigidbody;
+        set attachedRigidbody(_cmpRB: ComponentRigidbody);
+        /** Get/Set the second ComponentRigidbody of this connection. */
+        get connectedRigidbody(): ComponentRigidbody;
+        set connectedRigidbody(_cmpRB: ComponentRigidbody);
+        /** Get/Set if the two bodies collide with each other or only with the world but not with themselves. Default = no internal collision.
+         *  In most cases it's prefered to declare a minimum and maximum angle/length the bodies can move from one another instead of having them collide.
+         */
+        get selfCollision(): boolean;
+        set selfCollision(_value: boolean);
+        protected idAttachedRB: number;
+        protected idConnectedRB: number;
+        protected attachedRB: ComponentRigidbody;
+        protected connectedRB: ComponentRigidbody;
+        protected connected: boolean;
+        private collisionBetweenConnectedBodies;
+        /** Create a joint connection between the two given RigidbodyComponents. */
+        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody);
+        /** Check if connection is dirty, so when either rb is changed disconnect and reconnect. Internally used no user interaction needed. */
+        checkConnection(): boolean;
+        /** Connect when both bodies are set, and it was not connected yet, or if any of the bodies has changed. This needs to be handled this way to ensure there are no errors
+         * in the simulation because a ComponentRigidbody was not yet fully created or any other piece like ComponentTransform is missing. But values are also remembered correctly.
+         */
+        abstract connect(): void;
+        /** Disconnect on any changes to the two bodies, so they can potentially reconnect if the component is not removed.
+        */
+        abstract disconnect(): void;
+        /** Get the actual joint in form of the physics engine OimoPhysics.joint. Used to expand functionality, normally no user interaction needed. */
+        abstract getOimoJoint(): OIMO.Joint;
+        /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
+        protected abstract dirtyStatus(): void;
+        /** Adding the given Fudge ComponentJoint to the oimoPhysics World */
+        protected addConstraintToWorld(cmpJoint: ComponentJoint): void;
+        /** Removing the given Fudge ComponentJoint to the oimoPhysics World */
+        protected removeConstraintFromWorld(cmpJoint: ComponentJoint): void;
+        /** Setting both bodies to the bodies that belong to the loaded IDs and reconnecting them */
+        protected setBodiesFromLoadedIDs(): void;
+        /** Deserialize Base Class Information - Component, since Typescript does not give the ability to call super.super */
+        protected baseDeserialize(_serialization: Serialization): Serializable;
+        /** Serialize Base Class Information - Component, since Typescript does not give the ability to call super.super in Child classes of e.g. ComponentJointPrismatic */
+        protected baseSerialize(): Serialization;
+    }
+}
+declare namespace FudgeCore {
+    /**
+       * A physical connection between two bodies with a defined axe of rotation and rotation. Two Degrees of Freedom in the defined axis.
+       * Two RigidBodies need to be defined to use it. A motor can be defined for rotation and translation, along with spring settings.
+       *
+       * ```plaintext
+       *          JointHolder - attachedRigidbody
+       *                    ----------  ↑
+       *                    |        |  |
+       *          <---------|        |--------------> connectedRigidbody, sliding on one Axis, 1st Degree of Freedom
+       *                    |        |  |
+       *                    ----------  ↓ rotating on one Axis, 2nd Degree of Freedom
+       * ```
+       *
+       * @author Marko Fehrenbach, HFU 2020
+       */
+    class ComponentJointCylindrical extends ComponentJoint {
+        static readonly iSubclass: number;
+        /**
+         * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
+         *  When changed after initialization the joint needs to be reconnected.
+         */
+        get axis(): Vector3;
+        set axis(_value: Vector3);
+        /**
+         * The exact position where the two [[Node]]s are connected. When changed after initialization the joint needs to be reconnected.
+         */
+        get anchor(): Vector3;
+        set anchor(_value: Vector3);
+        /**
+         * The damping of the spring. 1 equals completly damped.
+         */
+        get springDamping(): number;
+        set springDamping(_value: number);
+        /**
+         * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. The smaller the value the less restrictive is the spring.
+        */
+        get springFrequency(): number;
+        set springFrequency(_value: number);
+        /**
+        * The damping of the spring. 1 equals completly damped. Influencing TORQUE / ROTATION
+        */
+        get rotationSpringDamping(): number;
+        set rotationSpringDamping(_value: number);
+        /**
+         * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. Influencing TORQUE / ROTATION
+        */
+        get rotationSpringFrequency(): number;
+        set rotationSpringFrequency(_value: number);
+        /**
+         * The amount of force needed to break the JOINT, in Newton. 0 equals unbreakable (default)
+        */
+        get breakForce(): number;
+        set breakForce(_value: number);
+        /**
+           * The amount of force needed to break the JOINT, while rotating, in Newton. 0 equals unbreakable (default)
+          */
+        get breakTorque(): number;
+        set breakTorque(_value: number);
+        /**
+          * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
+         */
+        get rotationalMotorLimitUpper(): number;
+        set rotationalMotorLimitUpper(_value: number);
+        /**
+          * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
+         */
+        get rotationalMotorLimitLower(): number;
+        set rotationalMotorLimitLower(_value: number);
+        /**
+          * The target rotational speed of the motor in m/s.
+         */
+        get rotationalMotorSpeed(): number;
+        set rotationalMotorSpeed(_value: number);
+        /**
+          * The maximum motor torque in Newton. force <= 0 equals disabled.
+         */
+        get rotationalMotorTorque(): number;
+        set rotationalMotorTorque(_value: number);
+        /**
+          * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
+         */
+        get translationMotorLimitUpper(): number;
+        set translationMotorLimitUpper(_value: number);
+        /**
+          * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
+         */
+        get translationMotorLimitLower(): number;
+        set translationMotorLimitLower(_value: number);
+        /**
+          * The target speed of the motor in m/s.
+         */
+        get translationMotorSpeed(): number;
+        set translationMotorSpeed(_value: number);
+        /**
+          * The maximum motor force in Newton. force <= 0 equals disabled.
+         */
+        get translationMotorForce(): number;
+        set translationMotorForce(_value: number);
+        /**
+          * If the two connected RigidBodies collide with eath other. (Default = false)
+         */
+        get internalCollision(): boolean;
+        set internalCollision(_value: boolean);
+        private jointSpringDampingRatio;
+        private jointSpringFrequency;
+        private jointRotationSpringDampingRatio;
+        private jointRotationSpringFrequency;
+        private jointMotorLimitUpper;
+        private jointMotorLimitLower;
+        private jointMotorForce;
+        private jointMotorSpeed;
+        private jointRotationMotorLimitUpper;
+        private jointRotationMotorLimitLower;
+        private jointRotationMotorTorque;
+        private jointRotationMotorSpeed;
+        private jointBreakForce;
+        private jointBreakTorque;
+        private config;
+        private rotationalMotor;
+        private translationMotor;
+        private springDamper;
+        private rotationSpringDamper;
+        private jointAnchor;
+        private jointAxis;
+        private jointInternalCollision;
+        private oimoJoint;
+        /** Creating a cylindrical joint between two ComponentRigidbodies moving on one axis and rotating around another bound on a local anchorpoint. */
+        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
+        /**
+         * Initializing and connecting the two rigidbodies with the configured joint properties
+         * is automatically called by the physics system. No user interaction needed.
+         */
+        connect(): void;
+        /**
+         * Disconnecting the two rigidbodies and removing them from the physics system,
+         * is automatically called by the physics system. No user interaction needed.
+         */
+        disconnect(): void;
+        /**
+         * Returns the original Joint used by the physics engine. Used internally no user interaction needed.
+         * Only to be used when functionality that is not added within Fudge is needed.
+        */
+        getOimoJoint(): OIMO.Joint;
+        private constructJoint;
+        private superAdd;
+        private superRemove;
+        protected dirtyStatus(): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+    }
+}
+declare namespace FudgeCore {
+    /**
+       * A physical connection between two bodies with a defined axe movement.
+       * Used to create a sliding joint along one axis. Two RigidBodies need to be defined to use it.
+       * A motor can be defined to move the connected along the defined axis. Great to construct standard springs or physical sliders.
+       *
+       * ```plaintext
+       *          JointHolder - attachedRigidbody
+       *                    --------
+       *                    |      |
+       *          <---------|      |--------------> connectedRigidbody, sliding on one Axis, 1 Degree of Freedom
+       *                    |      |
+       *                    --------
+       * ```
+       * @author Marko Fehrenbach, HFU 2020
+       */
+    class ComponentJointPrismatic extends ComponentJoint {
+        static readonly iSubclass: number;
+        /**
+         * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
+         *  When changed after initialization the joint needs to be reconnected.
+         */
+        get axis(): Vector3;
+        set axis(_value: Vector3);
+        /**
+         * The exact position where the two [[Node]]s are connected. When changed after initialization the joint needs to be reconnected.
+         */
+        get anchor(): Vector3;
+        set anchor(_value: Vector3);
+        /**
+         * The damping of the spring. 1 equals completly damped.
+         */
+        get springDamping(): number;
+        set springDamping(_value: number);
+        /**
+         * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. The smaller the value the less restrictive is the spring.
+        */
+        get springFrequency(): number;
+        set springFrequency(_value: number);
+        /**
+         * The amount of force needed to break the JOINT, in Newton. 0 equals unbreakable (default)
+        */
+        get breakForce(): number;
+        set breakForce(_value: number);
+        /**
+           * The amount of force needed to break the JOINT, while rotating, in Newton. 0 equals unbreakable (default)
+          */
+        get breakTorque(): number;
+        set breakTorque(_value: number);
+        /**
+          * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
+         */
+        get motorLimitUpper(): number;
+        set motorLimitUpper(_value: number);
+        /**
+          * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
+         */
+        get motorLimitLower(): number;
+        set motorLimitLower(_value: number);
+        /**
+          * The target speed of the motor in m/s.
+         */
+        get motorSpeed(): number;
+        set motorSpeed(_value: number);
+        /**
+          * The maximum motor force in Newton. force <= 0 equals disabled. This is the force that the motor is using to hold the position, or reach it if a motorSpeed is defined.
+         */
+        get motorForce(): number;
+        set motorForce(_value: number);
+        /**
+          * If the two connected RigidBodies collide with eath other. (Default = false)
+         */
+        get internalCollision(): boolean;
+        set internalCollision(_value: boolean);
+        private jointSpringDampingRatio;
+        private jointSpringFrequency;
+        private jointMotorLimitUpper;
+        private jointMotorLimitLower;
+        private jointMotorForce;
+        private jointMotorSpeed;
+        private jointBreakForce;
+        private jointBreakTorque;
+        private config;
+        private translationalMotor;
+        private springDamper;
+        private jointAnchor;
+        private jointAxis;
+        private jointInternalCollision;
+        private oimoJoint;
+        /** Creating a prismatic joint between two ComponentRigidbodies only moving on one axis bound on a local anchorpoint. */
+        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
+        /**
+         * Initializing and connecting the two rigidbodies with the configured joint properties
+         * is automatically called by the physics system. No user interaction needed.
+         */
+        connect(): void;
+        /**
+         * Disconnecting the two rigidbodies and removing them from the physics system,
+         * is automatically called by the physics system. No user interaction needed.
+         */
+        disconnect(): void;
+        /**
+         * Returns the original Joint used by the physics engine. Used internally no user interaction needed.
+         * Only to be used when functionality that is not added within Fudge is needed.
+        */
+        getOimoJoint(): OIMO.Joint;
+        /** Actual creation of a joint in the OimoPhysics system */
+        private constructJoint;
+        /** Adding this joint to the world through the general function of the base class ComponentJoint. Happening when the joint is connecting.  */
+        private superAdd;
+        /** Removing this joint to the world through the general function of the base class ComponentJoint. Happening when this component is removed from the Node. */
+        private superRemove;
+        /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
+        protected dirtyStatus(): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+    }
+}
+declare namespace FudgeCore {
+    /**
+        * A physical connection between two bodies, designed to simulate behaviour within a real body. It has two axis, a swing and twist axis, and also the perpendicular axis,
+        * similar to a Spherical joint, but more restrictive in it's angles and only two degrees of freedom. Two RigidBodies need to be defined to use it. Mostly used to create humanlike joints that behave like a
+        * lifeless body.
+        * ```plaintext
+        *
+        *                      anchor - it can twist on one axis and swing on another
+        *         z                   |
+        *         ↑            -----  |  ------------
+        *         |           |     | ↓ |            |        e.g. z = TwistAxis, it can rotate in-itself around this axis
+        *  -x <---|---> x     |     | x |            |        e.g. x = SwingAxis, it can rotate anchored around the base on this axis
+        *         |           |     |   |            |
+        *         ↓            -----     ------------         e.g. you can twist the leg in-itself to a certain degree,
+        *        -z                                           but also rotate it forward/backward/left/right to a certain degree
+        *                attachedRB          connectedRB
+        *              (e.g. upper-leg)         (e.g. pelvis)
+        *
+        * ```
+        * Twist equals a rotation around a point without moving on an axis.
+        * Swing equals a rotation on a point with a moving local axis.
+        * @author Marko Fehrenbach, HFU, 2020
+        */
+    class ComponentJointRagdoll extends ComponentJoint {
+        static readonly iSubclass: number;
+        /**
+         * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
+         *  When changed after initialization the joint needs to be reconnected.
+         */
+        get firstAxis(): Vector3;
+        set firstAxis(_value: Vector3);
+        /**
+        * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
+        *  When changed after initialization the joint needs to be reconnected.
+        */
+        get secondAxis(): Vector3;
+        set secondAxis(_value: Vector3);
+        /**
+         * The exact position where the two [[Node]]s are connected. When changed after initialization the joint needs to be reconnected.
+         */
+        get anchor(): Vector3;
+        set anchor(_value: Vector3);
+        /**
+         * The maximum angle of rotation along the first axis. Value needs to be positive. Changes do rebuild the joint
+         */
+        get maxAngleFirstAxis(): number;
+        set maxAngleFirstAxis(_value: number);
+        /**
+         * The maximum angle of rotation along the second axis. Value needs to be positive. Changes do rebuild the joint
+         */
+        get maxAngleSecondAxis(): number;
+        set maxAngleSecondAxis(_value: number);
+        /**
+         * The damping of the spring. 1 equals completly damped.
+         */
+        get springDampingTwist(): number;
+        set springDampingTwist(_value: number);
+        /**
+         * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. The smaller the value the less restrictive is the spring.
+        */
+        get springFrequencyTwist(): number;
+        set springFrequencyTwist(_value: number);
+        /**
+         * The damping of the spring. 1 equals completly damped.
+         */
+        get springDampingSwing(): number;
+        set springDampingSwing(_value: number);
+        /**
+         * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. The smaller the value the less restrictive is the spring.
+        */
+        get springFrequencySwing(): number;
+        set springFrequencySwing(_value: number);
+        /**
+         * The amount of force needed to break the JOINT, in Newton. 0 equals unbreakable (default)
+        */
+        get breakForce(): number;
+        set breakForce(_value: number);
+        /**
+           * The amount of force needed to break the JOINT, while rotating, in Newton. 0 equals unbreakable (default)
+          */
+        get breakTorque(): number;
+        set breakTorque(_value: number);
+        /**
+          * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
+         */
+        get twistMotorLimitUpper(): number;
+        set twistMotorLimitUpper(_value: number);
+        /**
+          * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
+         */
+        get twistMotorLimitLower(): number;
+        set twistMotorLimitLower(_value: number);
+        /**
+          * The target rotational speed of the motor in m/s.
+         */
+        get twistMotorSpeed(): number;
+        set twistMotorSpeed(_value: number);
+        /**
+          * The maximum motor torque in Newton. force <= 0 equals disabled.
+         */
+        get twistMotorTorque(): number;
+        set twistMotorTorque(_value: number);
+        /**
+          * If the two connected RigidBodies collide with eath other. (Default = false)
+         */
+        get internalCollision(): boolean;
+        set internalCollision(_value: boolean);
+        private jointTwistSpringDampingRatio;
+        private jointTwistSpringFrequency;
+        private jointSwingSpringDampingRatio;
+        private jointSwingSpringFrequency;
+        private jointTwistMotorLimitUpper;
+        private jointTwistMotorLimitLower;
+        private jointTwistMotorTorque;
+        private jointTwistMotorSpeed;
+        private jointBreakForce;
+        private jointBreakTorque;
+        private config;
+        private jointTwistMotor;
+        private jointTwistSpringDamper;
+        private jointSwingSpringDamper;
+        private jointAnchor;
+        private jointFirstAxis;
+        private jointSecondAxis;
+        private jointInternalCollision;
+        private jointMaxAngle1;
+        private jointMaxAngle2;
+        private oimoJoint;
+        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _firstAxis?: Vector3, _secondAxis?: Vector3, _localAnchor?: Vector3);
+        /**
+         * Initializing and connecting the two rigidbodies with the configured joint properties
+         * is automatically called by the physics system. No user interaction needed.
+         */
+        connect(): void;
+        /**
+         * Disconnecting the two rigidbodies and removing them from the physics system,
+         * is automatically called by the physics system. No user interaction needed.
+         */
+        disconnect(): void;
+        /**
+         * Returns the original Joint used by the physics engine. Used internally no user interaction needed.
+         * Only to be used when functionality that is not added within Fudge is needed.
+        */
+        getOimoJoint(): OIMO.Joint;
+        private constructJoint;
+        private superAdd;
+        private superRemove;
+        protected dirtyStatus(): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+    }
+}
+declare namespace FudgeCore {
+    /**
+       * A physical connection between two bodies with a defined axe of rotation. Also known as HINGE joint.
+       * Two RigidBodies need to be defined to use it. A motor can be defined to rotate the connected along the defined axis.
+       *
+       * ```plaintext
+       *                  rotation axis, 1st Degree of freedom
+       *                    ↑
+       *              ---   |   ------------
+       *             |   |  |  |            |
+       *             |   |  |  |            |
+       *             |   |  |  |            |
+       *              ---   |   ------------
+       *      attachedRB    ↓    connectedRB
+       *   (e.g. Doorhinge)       (e.g. Door)
+       * ```
+       * @author Marko Fehrenbach, HFU, 2020
+       */
+    class ComponentJointRevolute extends ComponentJoint {
+        static readonly iSubclass: number;
+        /**
+         * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
+         *  When changed after initialization the joint needs to be reconnected.
+         */
+        get axis(): Vector3;
+        set axis(_value: Vector3);
+        /**
+         * The exact position where the two [[Node]]s are connected. When changed after initialization the joint needs to be reconnected.
+         */
+        get anchor(): Vector3;
+        set anchor(_value: Vector3);
+        /**
+         * The damping of the spring. 1 equals completly damped.
+         */
+        get springDamping(): number;
+        set springDamping(_value: number);
+        /**
+         * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. The smaller the value the less restrictive is the spring.
+        */
+        get springFrequency(): number;
+        set springFrequency(_value: number);
+        /**
+         * The amount of force needed to break the JOINT, in Newton. 0 equals unbreakable (default)
+        */
+        get breakForce(): number;
+        set breakForce(_value: number);
+        /**
+           * The amount of force needed to break the JOINT, while rotating, in Newton. 0 equals unbreakable (default)
+          */
+        get breakTorque(): number;
+        set breakTorque(_value: number);
+        /**
+          * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
+         */
+        get motorLimitUpper(): number;
+        set motorLimitUpper(_value: number);
+        /**
+          * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
+         */
+        get motorLimitLower(): number;
+        set motorLimitLower(_value: number);
+        /**
+          * The target speed of the motor in m/s.
+         */
+        get motorSpeed(): number;
+        set motorSpeed(_value: number);
+        /**
+          * The maximum motor force in Newton. force <= 0 equals disabled.
+         */
+        get motorTorque(): number;
+        set motorTorque(_value: number);
+        /**
+          * If the two connected RigidBodies collide with eath other. (Default = false)
+         */
+        get internalCollision(): boolean;
+        set internalCollision(_value: boolean);
+        private jointSpringDampingRatio;
+        private jointSpringFrequency;
+        private jointMotorLimitUpper;
+        private jointMotorLimitLower;
+        private jointmotorTorque;
+        private jointMotorSpeed;
+        private jointBreakForce;
+        private jointBreakTorque;
+        private config;
+        private rotationalMotor;
+        private springDamper;
+        private jointAnchor;
+        private jointAxis;
+        private jointInternalCollision;
+        private oimoJoint;
+        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
+        /**
+         * Initializing and connecting the two rigidbodies with the configured joint properties
+         * is automatically called by the physics system. No user interaction needed.
+         */
+        connect(): void;
+        /**
+         * Disconnecting the two rigidbodies and removing them from the physics system,
+         * is automatically called by the physics system. No user interaction needed.
+         */
+        disconnect(): void;
+        /**
+         * Returns the original Joint used by the physics engine. Used internally no user interaction needed.
+         * Only to be used when functionality that is not added within Fudge is needed.
+        */
+        getOimoJoint(): OIMO.Joint;
+        private constructJoint;
+        private superAdd;
+        private superRemove;
+        protected dirtyStatus(): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+    }
+}
+declare namespace FudgeCore {
+    /**
+       * A physical connection between two bodies with three Degrees of Freedom, also known as ball and socket joint. Two bodies connected at their anchor but free to rotate.
+       * Used for things like the connection of bones in the human shoulder (if simplified, else better use JointRagdoll). Two RigidBodies need to be defined to use it. Only spring settings can be defined.
+       * 3 Degrees are swing horizontal, swing vertical and twist.
+       *
+       * ```plaintext
+       *              JointHolder - attachedRigidbody (e.g. Human-Shoulder)
+       *         z                             -------
+       *      y  ↑                            |      |
+       *        \|            ----------------|      |
+       *  -x <---|---> x     |                |      |
+       *         |\           ----------------|      |
+       *         ↓ -y       conntectedRb      |      |
+       *        -z         (e.g. Upper-Arm)    -------
+       * ```
+       * @authors Marko Fehrenbach, HFU, 2020
+       */
+    class ComponentJointSpherical extends ComponentJoint {
+        static readonly iSubclass: number;
+        /**
+    
+        /**
+         * The exact position where the two [[Node]]s are connected. When changed after initialization the joint needs to be reconnected.
+         */
+        get anchor(): Vector3;
+        set anchor(_value: Vector3);
+        /**
+         * The damping of the spring. 1 equals completly damped.
+         */
+        get springDamping(): number;
+        set springDamping(_value: number);
+        /**
+         * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. The smaller the value the less restrictive is the spring.
+        */
+        get springFrequency(): number;
+        set springFrequency(_value: number);
+        /**
+         * The amount of force needed to break the JOINT, in Newton. 0 equals unbreakable (default)
+        */
+        get breakForce(): number;
+        set breakForce(_value: number);
+        /**
+           * The amount of force needed to break the JOINT, while rotating, in Newton. 0 equals unbreakable (default)
+          */
+        get breakTorque(): number;
+        set breakTorque(_value: number);
+        /**
+          * If the two connected RigidBodies collide with eath other. (Default = false)
+         */
+        get internalCollision(): boolean;
+        set internalCollision(_value: boolean);
+        private jointSpringDampingRatio;
+        private jointSpringFrequency;
+        private jointBreakForce;
+        private jointBreakTorque;
+        private config;
+        private springDamper;
+        private jointAnchor;
+        private jointInternalCollision;
+        private oimoJoint;
+        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _localAnchor?: Vector3);
+        /**
+         * Initializing and connecting the two rigidbodies with the configured joint properties
+         * is automatically called by the physics system. No user interaction needed.
+         */
+        connect(): void;
+        /**
+         * Disconnecting the two rigidbodies and removing them from the physics system,
+         * is automatically called by the physics system. No user interaction needed.
+         */
+        disconnect(): void;
+        /**
+         * Returns the original Joint used by the physics engine. Used internally no user interaction needed.
+         * Only to be used when functionality that is not added within Fudge is needed.
+        */
+        getOimoJoint(): OIMO.Joint;
+        private constructJoint;
+        private superAdd;
+        private superRemove;
+        protected dirtyStatus(): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+    }
+}
+declare namespace FudgeCore {
+    /**
+       * A physical connection between two bodies with two defined axis (normally e.g. (0,0,1) and rotation(1,0,0)), they share the same anchor and have free rotation, but transfer the twist.
+       * In reality used in cars to transfer the more stable stationary force on the velocity axis to the bumping, damped moving wheel. Two RigidBodies need to be defined to use it.
+       * The two motors can be defined for the two rotation axis, along with springs.
+       * ```plaintext
+       *
+       *                      anchor - twist is transfered between bodies
+       *         z                   |
+       *         ↑            -----  |  ------------
+       *         |           |     | ↓ |            |
+       *  -x <---|---> x     |     | x |            |           e.g. wheel can still turn up/down,
+       *         |           |     |   |            |           left right but transfering it's rotation on to the wheel-axis.
+       *         ↓            -----     ------------
+       *        -z
+       *                 attachedRB          connectedRB
+       *                (e.g. wheel)       (e.g. wheel-axis)
+       * ```
+       * @author Marko Fehrenbach, HFU 2020
+       */
+    class ComponentJointUniversal extends ComponentJoint {
+        static readonly iSubclass: number;
+        /**
+         * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
+         *  When changed after initialization the joint needs to be reconnected.
+         */
+        get firstAxis(): Vector3;
+        set firstAxis(_value: Vector3);
+        /**
+        * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
+        *  When changed after initialization the joint needs to be reconnected.
+        */
+        get secondAxis(): Vector3;
+        set secondAxis(_value: Vector3);
+        /**
+         * The exact position where the two [[Node]]s are connected. When changed after initialization the joint needs to be reconnected.
+         */
+        get anchor(): Vector3;
+        set anchor(_value: Vector3);
+        /**
+         * The damping of the spring. 1 equals completly damped.
+         */
+        get springDampingFirstAxis(): number;
+        set springDampingFirstAxis(_value: number);
+        /**
+         * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. The smaller the value the less restrictive is the spring.
+        */
+        get springFrequencyFirstAxis(): number;
+        set springFrequencyFirstAxis(_value: number);
+        /**
+         * The damping of the spring. 1 equals completly damped.
+         */
+        get springDampingSecondAxis(): number;
+        set springDampingSecondAxis(_value: number);
+        /**
+         * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. The smaller the value the less restrictive is the spring.
+        */
+        get springFrequencySecondAxis(): number;
+        set springFrequencySecondAxis(_value: number);
+        /**
+         * The amount of force needed to break the JOINT, in Newton. 0 equals unbreakable (default)
+        */
+        get breakForce(): number;
+        set breakForce(_value: number);
+        /**
+           * The amount of force needed to break the JOINT, while rotating, in Newton. 0 equals unbreakable (default)
+          */
+        get breakTorque(): number;
+        set breakTorque(_value: number);
+        /**
+          * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
+         */
+        get motorLimitUpperFirstAxis(): number;
+        set motorLimitUpperFirstAxis(_value: number);
+        /**
+          * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
+         */
+        get motorLimitLowerFirstAxis(): number;
+        set motorLimitLowerFirstAxis(_value: number);
+        /**
+          * The target rotational speed of the motor in m/s.
+         */
+        get motorSpeedFirstAxis(): number;
+        set motorSpeedFirstAxis(_value: number);
+        /**
+          * The maximum motor torque in Newton. force <= 0 equals disabled.
+         */
+        get motorTorqueFirstAxis(): number;
+        set motorTorqueFirstAxis(_value: number);
+        /**
+        * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
+       */
+        get motorLimitUpperSecondAxis(): number;
+        set motorLimitUpperSecondAxis(_value: number);
+        /**
+          * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
+         */
+        get motorLimitLowerSecondAxis(): number;
+        set motorLimitLowerSecondAxis(_value: number);
+        /**
+          * The target rotational speed of the motor in m/s.
+         */
+        get motorSpeedSecondAxis(): number;
+        set motorSpeedSecondAxis(_value: number);
+        /**
+          * The maximum motor torque in Newton. force <= 0 equals disabled.
+         */
+        get motorTorqueSecondAxis(): number;
+        set motorTorqueSecondAxis(_value: number);
+        /**
+          * If the two connected RigidBodies collide with eath other. (Default = false)
+         */
+        get internalCollision(): boolean;
+        set internalCollision(_value: boolean);
+        private jointFirstSpringDampingRatio;
+        private jointFirstSpringFrequency;
+        private jointSecondSpringDampingRatio;
+        private jointSecondSpringFrequency;
+        private jointFirstMotorLimitUpper;
+        private jointFirstMotorLimitLower;
+        private jointFirstMotorTorque;
+        private jointFirstMotorSpeed;
+        private jointSecondMotorLimitUpper;
+        private jointSecondMotorLimitLower;
+        private jointSecondMotorTorque;
+        private jointSecondMotorSpeed;
+        private jointBreakForce;
+        private jointBreakTorque;
+        private config;
+        private firstAxisMotor;
+        private secondAxisMotor;
+        private firstAxisSpringDamper;
+        private secondAxisSpringDamper;
+        private jointAnchor;
+        private jointFirstAxis;
+        private jointSecondAxis;
+        private jointInternalCollision;
+        private oimoJoint;
+        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _firstAxis?: Vector3, _secondAxis?: Vector3, _localAnchor?: Vector3);
+        /**
+         * Initializing and connecting the two rigidbodies with the configured joint properties
+         * is automatically called by the physics system. No user interaction needed.
+         */
+        connect(): void;
+        /**
+         * Disconnecting the two rigidbodies and removing them from the physics system,
+         * is automatically called by the physics system. No user interaction needed.
+         */
+        disconnect(): void;
+        /**
+         * Returns the original Joint used by the physics engine. Used internally no user interaction needed.
+         * Only to be used when functionality that is not added within Fudge is needed.
+        */
+        getOimoJoint(): OIMO.Joint;
+        private constructJoint;
+        private superAdd;
+        private superRemove;
+        protected dirtyStatus(): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+    }
+}
+declare namespace FudgeCore {
+    /**
+       * Acts as the physical representation of the [[Node]] it's attached to.
+       * It's the connection between the Fudge Rendered world and the Physics world.
+       * For the physics to correctly get the transformations rotations need to be applied with from left = true.
+       * Or rotations need to happen before scaling.
+       * @author Marko Fehrenbach, HFU 2020
+       */
+    class ComponentRigidbody extends Component {
+        static readonly iSubclass: number;
+        /** The pivot of the physics itself. Default the pivot is identical to the transform. It's used like an offset. */
+        pivot: Matrix4x4;
+        /** Vertices that build a convex mesh (form that is in itself closed). Needs to set in the construction of the rb if none of the standard colliders is used. */
+        convexMesh: Float32Array;
+        /** The type of interaction between the physical world and the transform hierarchy world. DYNAMIC means the body ignores hierarchy and moves by physics. KINEMATIC it's
+         * reacting to a [[Node]] that is using physics but can still be controlled by animation or transform. And STATIC means its immovable.
+         */
+        get physicsType(): PHYSICS_TYPE;
+        set physicsType(_value: PHYSICS_TYPE);
+        /** The shape that represents the [[Node]] in the physical world. Default is a Cube. */
+        get colliderType(): COLLIDER_TYPE;
+        set colliderType(_value: COLLIDER_TYPE);
+        /** The physics group this [[Node]] belongs to it's the default group normally which means it physically collides with every group besides trigger. */
+        get collisionGroup(): PHYSICS_GROUP;
+        set collisionGroup(_value: PHYSICS_GROUP);
+        /** The groups this object collides with. Groups must be writen in form of
+         *  e.g. collisionMask = PHYSICS_GROUP.DEFAULT | PHYSICS_GROUP.GROUP_1 and so on to collide with multiple groups. */
+        get collisionMask(): number;
+        set collisionMask(_value: number);
+        /**
+       * Returns the physical weight of the [[Node]]
+       */
+        get mass(): number;
+        /**
+      * Setting the physical weight of the [[Node]] in kg
+      */
+        set mass(_value: number);
+        /** Air reistance, when moving. A Body does slow down even on a surface without friction. */
+        get linearDamping(): number;
+        set linearDamping(_value: number);
+        /** Air resistance, when rotating. */
+        get angularDamping(): number;
+        set angularDamping(_value: number);
+        /** The factor this rigidbody reacts rotations that happen in the physical world. 0 to lock rotation this axis. */
+        get rotationInfluenceFactor(): Vector3;
+        set rotationInfluenceFactor(_influence: Vector3);
+        /** The factor this rigidbody reacts to world gravity. Default = 1 e.g. 1*9.81 m/s. */
+        get gravityScale(): number;
+        set gravityScale(_influence: number);
+        /**
+      * Get the friction of the rigidbody, which is the factor of sliding resistance of this rigidbody on surfaces
+      */
+        get friction(): number;
+        /**
+       * Set the friction of the rigidbody, which is the factor of  sliding resistance of this rigidbody on surfaces
+       */
+        set friction(_friction: number);
+        /**
+      * Get the restitution of the rigidbody, which is the factor of bounciness of this rigidbody on surfaces
+      */
+        get restitution(): number;
+        /**
+       * Set the restitution of the rigidbody, which is the factor of bounciness of this rigidbody on surfaces
+       */
+        set restitution(_restitution: number);
+        /** Collisions with rigidbodies happening to this body, can be used to build a custom onCollisionStay functionality. */
+        collisions: ComponentRigidbody[];
+        /** Triggers that are currently triggering this body */
+        triggers: ComponentRigidbody[];
+        /** Bodies that trigger this "trigger", only happening if this body is a trigger */
+        bodiesInTrigger: ComponentRigidbody[];
+        /** ID to reference this specific ComponentRigidbody */
+        id: number;
+        private rigidbody;
+        private massData;
+        private collider;
+        private colliderInfo;
+        private rigidbodyInfo;
+        private rbType;
+        private colType;
+        private colGroup;
+        private colMask;
+        private bodyRestitution;
+        private bodyFriction;
+        private linDamping;
+        private angDamping;
+        private rotationalInfluenceFactor;
+        private gravityInfluenceFactor;
+        /** Creating a new rigidbody with a weight in kg, a physics type (default = dynamic), a collider type what physical form has the collider, to what group does it belong, is there a transform Matrix that should be used, and is the collider defined as a group of points that represent a convex mesh. */
+        constructor(_mass?: number, _type?: PHYSICS_TYPE, _colliderType?: COLLIDER_TYPE, _group?: PHYSICS_GROUP, _transform?: Matrix4x4, _convexMesh?: Float32Array);
+        /**
+        * Returns the rigidbody in the form the physics engine is using it, should not be used unless a functionality
+        * is not provided through the FUDGE Integration.
+        */
+        getOimoRigidbody(): OIMO.RigidBody;
+        /**
+       * Checking for Collision with other Colliders and dispatches a custom event with information about the collider.
+       * Automatically called in the RenderManager, no interaction needed.
+       */
+        checkCollisionEvents(): void;
+        /**
+          * Checking for Collision with Triggers with a overlapping test, dispatching a custom event with information about the trigger,
+          * or triggered [[Node]]. Automatically called in the RenderManager, no interaction needed.
+          */
+        checkTriggerEvents(): void;
+        /**
+       * Checks that the Rigidbody is positioned correctly and recreates the Collider with new scale/position/rotation
+       */
+        updateFromWorld(): void;
+        /**
+       * Get the current POSITION of the [[Node]] in the physical space
+       */
+        getPosition(): Vector3;
+        /**
+      * Sets the current POSITION of the [[Node]] in the physical space
+      */
+        setPosition(_value: Vector3): void;
+        /**
+         * Get the current ROTATION of the [[Node]] in the physical space
+         */
+        getRotation(): Vector3;
+        /**
+         * Sets the current ROTATION of the [[Node]] in the physical space, in degree.
+         */
+        setRotation(_value: Vector3): void;
+        /**
+        * Get the current VELOCITY of the [[Node]]
+        */
+        getVelocity(): Vector3;
+        /**
+         * Sets the current VELOCITY of the [[Node]]
+         */
+        setVelocity(_value: Vector3): void;
+        /**
+         * Applies a continous FORCE at the center of the RIGIDBODY in the three dimensions. Considering the rigidbody's MASS.
+         * The force is measured in newton, 1kg needs about 10 Newton to fight against gravity.
+         */
+        applyForce(_force: Vector3): void;
+        /**
+        * Applies a continous FORCE at a specific point in the world to the RIGIDBODY in the three dimensions. Considering the rigidbody's MASS
+        */
+        applyForceAtPoint(_force: Vector3, _worldPoint: Vector3): void;
+        /**
+        * Applies a continous ROTATIONAL FORCE (Torque) to the RIGIDBODY in the three dimensions. Considering the rigidbody's MASS
+        */
+        applyTorque(_rotationalForce: Vector3): void;
+        /**
+        * Applies a instant FORCE at a point/rigidbodycenter to the RIGIDBODY in the three dimensions. Considering the rigidbod's MASS
+        * Influencing the angular speed and the linear speed.
+        */
+        applyImpulseAtPoint(_impulse: Vector3, _worldPoint?: Vector3): void;
+        /**
+        * Applies a instant FORCE to the RIGIDBODY in the three dimensions. Considering the rigidbody's MASS
+        * Only influencing it's speed not rotation.
+        */
+        applyLinearImpulse(_impulse: Vector3): void;
+        /**
+       * Applies a instant ROTATIONAL-FORCE to the RIGIDBODY in the three dimensions. Considering the rigidbody's MASS
+       * Only influencing it's rotation.
+       */
+        applyAngularImpulse(_rotationalImpulse: Vector3): void;
+        /**
+       * Changing the VELOCITY of the RIGIDBODY. Only influencing the linear speed not angular
+       */
+        addVelocity(_value: Vector3): void;
+        /**
+       * Changing the VELOCITY of the RIGIDBODY. Only influencing the angular speed not the linear
+       */
+        addAngularVelocity(_value: Vector3): void;
+        /** Stops the rigidbody from sleeping when movement is too minimal. Decreasing performance, for rarely more precise physics results */
+        deactivateAutoSleep(): void;
+        activateAutoSleep(): void;
+        /**
+         * Sends a ray through this specific body ignoring the rest of the world and checks if this body was hit by the ray,
+         * returning info about the hit. Provides the same functionality and information a regular raycast does but the ray is only testing against this specific body.
+         */
+        raycastThisBody(_origin: Vector3, _direction: Vector3, _length: number): RayHitInfo;
+        /** Creates the actual OimoPhysics Rigidbody out of informations the Fudge Component has. */
+        private createRigidbody;
+        /** Creates a collider a shape that represents the object in the physical world.  */
+        private createCollider;
+        /** Creating a shape that represents a in itself closed form, out of the given vertices. */
+        private createConvexGeometryCollider;
+        /** Internal implementation of vertices that construct a pyramid. The vertices of the implemented pyramid mesh can be used too. But they are halfed and double sided, so it's more performant to use this. */
+        private createPyramidVertices;
+        /** Adding this ComponentRigidbody to the Physiscs.world giving the oimoPhysics system the information needed */
+        private addRigidbodyToWorld;
+        /** Removing this ComponentRigidbody from the Physiscs.world taking the informations from the oimoPhysics system */
+        private removeRigidbodyFromWorld;
+        /** Check if two OimoPhysics Shapes collide with each other. By overlapping their approximations */
+        private collidesWith;
+        /** Find the approximated entry point of a trigger event. To give the event a approximated information where to put something in the world when a triggerEvent has happened */
+        private getTriggerEnterPoint;
+        /**
+         * Events in case a body is in a trigger, so not only the body registers a triggerEvent but also the trigger itself.
+         */
+        private checkBodiesInTrigger;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Serializable;
+    }
+}
+declare namespace FudgeCore {
+    /** Internal class for holding data about physics debug vertices.*/
+    class PhysicsDebugVertexBuffer {
+        gl: WebGL2RenderingContext;
+        numVertices: number;
+        attribs: Array<PhysicsDebugVertexAttribute>;
+        indices: Array<number>;
+        offsets: Array<number>;
+        stride: number;
+        buffer: WebGLBuffer;
+        dataLength: number;
+        /** Setup the rendering context for this buffer and create the actual buffer for this context. */
+        constructor(_renderingContext: WebGL2RenderingContext);
+        /** Fill the bound buffer with data. Used at buffer initialization */
+        setData(array: Array<number>): void;
+        /** Update the data in the buffer */
+        updateData(array: Array<number>): void;
+        /** Update the buffer with the specific type of Float32Array */
+        updateDataFloat32Array(array: Float32Array): void;
+        /** Set Shader Attributes informations by getting their position in the shader, setting the offset, stride and size. For later use in the binding process */
+        setAttribs(attribs: Array<PhysicsDebugVertexAttribute>): void;
+        /** Get the position of the attribute in the shader */
+        loadAttribIndices(_program: PhysicsDebugShader): void;
+        /** Enable a attribute in a shader for this context, */
+        bindAttribs(): void;
+    }
+    /** Internal class for holding data about PhysicsDebugVertexBuffers */
+    class PhysicsDebugIndexBuffer {
+        gl: WebGL2RenderingContext;
+        buffer: WebGLBuffer;
+        count: number;
+        /** Setup the rendering context for this buffer and create the actual buffer for this context. */
+        constructor(_renderingContext: WebGL2RenderingContext);
+        /** Fill the bound buffer with data amount. Used at buffer initialization */
+        setData(array: Array<number>): void;
+        /** Update the actual data in the buffer */
+        updateData(array: Array<number>): void;
+        /** Update the buffer with the specific type of Int16Array */
+        updateDataInt16Array(array: Int16Array): void;
+        /** The actual DrawCall for physicsDebugDraw Buffers. This is where the information from the debug is actually drawn. */
+        draw(_mode?: number, _count?: number): void;
+    }
+    /** Internal class for managing data about webGL Attributes */
+    class PhysicsDebugVertexAttribute {
+        float32Count: number;
+        name: string;
+        constructor(_float32Count: number, _name: string);
+    }
+    /** Internal class for Shaders used only by the physics debugDraw */
+    class PhysicsDebugShader {
+        gl: WebGL2RenderingContext;
+        program: WebGLProgram;
+        vertexShader: WebGLShader;
+        fragmentShader: WebGLShader;
+        uniformLocationMap: Map<string, WebGLUniformLocation>;
+        /** Introduce the Fudge Rendering Context to this class, creating a program and vertex/fragment shader in this context */
+        constructor(_renderingContext: WebGL2RenderingContext);
+        /** Take glsl shaders as strings and compile them, attaching the compiled shaders to a program thats used by this rendering context. */
+        compile(vertexSource: string, fragmentSource: string): void;
+        /** Get index of a attribute in a shader in this program */
+        getAttribIndex(_name: string): number;
+        /** Get the location of a uniform in a shader in this program */
+        getUniformLocation(_name: string): WebGLUniformLocation;
+        /** Get all indices for every attribute in the shaders of this program */
+        getAttribIndices(_attribs: Array<PhysicsDebugVertexAttribute>): Array<number>;
+        /** Tell the Fudge Rendering Context to use this program to draw. */
+        use(): void;
+        /** Compile a shader out of a string and validate it. */
+        compileShader(shader: WebGLShader, source: string): void;
+    }
+    /** Internal Class used to draw debugInformations about the physics simulation onto the renderContext. No user interaction needed. @author Marko Fehrenbach, HFU 2020 //Based on OimoPhysics Haxe DebugDrawDemo */
+    class PhysicsDebugDraw extends RenderOperator {
+        oimoDebugDraw: OIMO.DebugDraw;
+        style: OIMO.DebugDrawStyle;
+        gl: WebGL2RenderingContext;
+        program: WebGLProgram;
+        shader: PhysicsDebugShader;
+        pointVBO: PhysicsDebugVertexBuffer;
+        pointIBO: PhysicsDebugIndexBuffer;
+        lineVBO: PhysicsDebugVertexBuffer;
+        lineIBO: PhysicsDebugIndexBuffer;
+        triVBO: PhysicsDebugVertexBuffer;
+        triIBO: PhysicsDebugIndexBuffer;
+        pointBufferSize: number;
+        pointData: Float32Array;
+        numPointData: number;
+        lineBufferSize: number;
+        lineData: Float32Array;
+        numLineData: number;
+        triBufferSize: number;
+        triData: Float32Array;
+        numTriData: number;
+        /** Creating the debug for physics in Fudge. Tell it to draw only wireframe objects, since Fudge is handling rendering of the objects besides physics.
+         * Override OimoPhysics Functions with own rendering. Initialize buffers and connect them with the context for later use. */
+        constructor();
+        /** Receive the current DebugMode from the physics settings and set the OimoPhysics.DebugDraw booleans to show only certain informations.
+         * Needed since some debug informations exclude others, and can't be drawn at the same time, by OimoPhysics. And for users it provides more readability
+         * to debug only what they need and is commonly debugged.
+         */
+        getDebugModeFromSettings(): void;
+        /** Creating the render buffers for later use. Defining the attributes used in shaders.
+         * Needs to create empty buffers to already have them ready to draw later on, linking is only possible with existing buffers. No performance loss because empty buffers are not drawn.*/
+        initializeBuffers(): void;
+        /** Fill an array with empty values */
+        private initFloatArray;
+        /** Overriding the existing functions from OimoPhysics.DebugDraw without actually inherit from the class, to avoid compiler problems.
+         * Overriding them to receive debugInformations in the format the physic engine provides them but handling the rendering in the fudge context. */
+        private initializeOverride;
+        /** Before OimoPhysics.world is filling the debug. Make sure the buffers are reset. Also receiving the debugMode from settings and updating the current projection for the vertexShader. */
+        begin(): void;
+        /** After OimoPhysics.world filled the debug. Rendering calls. Setting this program to be used by the Fudge rendering context. And draw each updated buffer and resetting them. */
+        end(): void;
+        /** Drawing the ray into the debugDraw Call. By using the overwritten line rendering functions and drawing a point (pointSize defined in the shader) at the end of the ray. */
+        debugRay(_origin: Vector3, _end: Vector3, _color: Color): void;
+        /** The source code (string) of the in physicsDebug used very simple vertexShader.
+         *  Handling the projection (which includes, view/world[is always identity in this case]/projection in Fudge). Increasing the size of single points drawn.
+         *  And transfer position color to the fragmentShader. */
+        private vertexShaderSource;
+        /** The source code (string) of the in physicsDebug used super simple fragmentShader. Unlit - only colorizing the drawn pixels, normals/position are given to make it expandable */
+        private fragmentShaderSource;
+    }
+}
+declare namespace FudgeCore {
+    const enum EVENT_PHYSICS {
+        /** broadcast to a [[Node]] and all [[Nodes]] in the branch it's the root of */
+        TRIGGER_ENTER = "TriggerEnteredCollision",
+        /** broadcast to a [[Node]] and all [[Nodes]] in the branch it's the root of */
+        TRIGGER_EXIT = "TriggerLeftCollision",
+        /** broadcast to a [[Node]] and all [[Nodes]] in the branch it's the root of */
+        COLLISION_ENTER = "ColliderEnteredCollision",
+        /** broadcast to a [[Node]] and all [[Nodes]] in the branch it's the root of */
+        COLLISION_EXIT = "ColliderLeftCollision"
+    }
+    class EventPhysics extends Event {
+        /**
+         * ComponentRigidbody that collided with this ComponentRigidbody
+         */
+        cmpRigidbody: ComponentRigidbody;
+        /**
+         * The normal impulse between the two colliding objects. Normal represents the default impulse.
+         * Impulse is only happening on COLLISION_ENTER, so there is no impulse on exit nor on triggers.
+         * Use the velocity of the cmpRigidbody to determine the intensity of the EVENT instead.
+         */
+        normalImpulse: number;
+        tangentImpulse: number;
+        binomalImpulse: number;
+        /** The point where the collision/triggering initially happened. The collision point exists only on COLLISION_ENTER / TRIGGER_ENTER. */
+        collisionPoint: Vector3;
+        /** Creates a new event customized for physics. Holding informations about impulses. Collision point and the body that is colliding */
+        constructor(_type: EVENT_PHYSICS, _hitRigidbody: ComponentRigidbody, _normalImpulse: number, _tangentImpulse: number, _binormalImpulse: number, _collisionPoint?: Vector3);
+    }
+    /**
+  * Groups to place a node in, not every group should collide with every group. Use a Mask in to exclude collisions
+  */
+    enum PHYSICS_GROUP {
+        DEFAULT = 1,
+        TRIGGER = 60000,
+        GROUP_1 = 2,
+        GROUP_2 = 4,
+        GROUP_3 = 8,
+        GROUP_4 = 16
+    }
+    /**
+    * Different types of physical interaction, DYNAMIC is fully influenced by physics and only physics, STATIC means immovable,
+    * KINEMATIC is moved through transform and animation instead of physics code.
+    */
+    enum PHYSICS_TYPE {
+        DYNAMIC = 0,
+        STATIC = 1,
+        KINEMATIC = 2
+    }
+    /**
+    * Different types of collider shapes, with different options in scaling BOX = Vector3(length, height, depth),
+    * SPHERE = Vector3(diameter, x, x), CAPSULE = Vector3(diameter, height, x), CYLINDER = Vector3(diameter, height, x),
+    * CONE = Vector(diameter, height, x), PYRAMID = Vector3(length, height, depth); x == unused.
+    * CONVEX = ComponentMesh needs to be available in the RB Property convexMesh, the points of that component are used to create a collider that matches,
+    * the closest possible representation of that form, in form of a hull. Convex is experimental and can produce unexpected behaviour when vertices
+    * are too close to one another and the given vertices do not form a in itself closed shape and having a genus of 0 (no holes). Vertices in the ComponentMesh can be scaled differently
+    * for texturing/normal or other reasons, so the collider might be off compared to the visual shape, this can be corrected by changing the pivot scale of the ComponentRigidbody.
+    */
+    enum COLLIDER_TYPE {
+        CUBE = 0,
+        SPHERE = 1,
+        CAPSULE = 2,
+        CYLINDER = 3,
+        CONE = 4,
+        PYRAMID = 5,
+        CONVEX = 6
+    }
+    /** Displaying different types of debug information about different physic features. Default = JOINTS_AND_COLLIDER. debugDraw in the settings must be active to see anything. */
+    enum PHYSICS_DEBUGMODE {
+        COLLIDERS = 0,
+        JOINTS_AND_COLLIDER = 1,
+        BOUNDING_BOXES = 2,
+        CONTACTS = 3,
+        PHYSIC_OBJECTS_ONLY = 4
+    }
+    /** Info about Raycasts shot from the physics system. */
+    class RayHitInfo {
+        hit: boolean;
+        hitDistance: number;
+        hitPoint: Vector3;
+        rigidbodyComponent: ComponentRigidbody;
+        hitNormal: Vector3;
+        rayOrigin: Vector3;
+        rayEnd: Vector3;
+        constructor();
+    }
+    /** General settings for the physic simulation and the debug of it. */
+    class PhysicsSettings {
+        /** Whether the debug informations of the physics should be displayed or not (default = false) */
+        debugDraw: boolean;
+        private physicsDebugMode;
+        get debugMode(): PHYSICS_DEBUGMODE;
+        set debugMode(_value: PHYSICS_DEBUGMODE);
+        /** Change if rigidbodies are able to sleep (don't be considered in physical calculations) when their movement is below a threshold. Deactivation is decreasing performance for minor advantage in precision. */
+        get disableSleeping(): boolean;
+        set disableSleeping(_value: boolean);
+        /** Sleeping Threshold for Movement Veloctiy. */
+        get sleepingVelocityThreshold(): number;
+        set sleepingVelocityThreshold(_value: number);
+        /** Sleeping Threshold for Rotation Velocity. */
+        get sleepingAngularVelocityThreshold(): number;
+        set sleepingAngularVelocityThreshold(_value: number);
+        /** Threshold how long the Rigidbody must be below/above the threshold to count as sleeping. */
+        get sleepingTimeThreshold(): number;
+        set sleepingTimeThreshold(_value: number);
+        /** Error threshold. Default is 0.05. The higher the more likely collisions get detected before actual impact at high speeds but it's visually less accurate. */
+        get defaultCollisionMargin(): number;
+        set defaultCollisionMargin(_thickness: number);
+        /** The default applied friction between two rigidbodies with the default value. How much velocity is slowed down when moving accross this surface. */
+        get defaultFriction(): number;
+        set defaultFriction(_value: number);
+        /** Bounciness of rigidbodies. How much of the impact is restituted. */
+        get defaultRestitution(): number;
+        set defaultRestitution(_value: number);
+        /** Groups the default rigidbody will collide with. Set it like: (PHYSICS_GROUP.DEFAULT | PHYSICS_GROUP.GROUP_1 | PHYSICS_GROUP.GROUP_2 | PHYSICS_GROUP.GROUP_3)
+         * to collide with multiple groups. Default is collision with everything but triggers.
+        */
+        get defaultCollisionMask(): number;
+        set defaultCollisionMask(_value: number);
+        /** The group that this rigidbody belongs to. Default is the DEFAULT Group which means its just a normal Rigidbody not a trigger nor anything special. */
+        get defaultCollisionGroup(): number;
+        set defaultCollisionGroup(_value: number);
+        constructor(_defGroup: number, _defMask: number);
+    }
+}
+declare namespace FudgeCore {
+    /**
+    * Main Physics Class to hold information about the physical representation of the scene
+    * @author Marko Fehrenbach, HFU 2020
+    */
+    class Physics {
+        /** The PHYSICAL WORLD that gives every [[Node]] with a ComponentRigidbody a physical representation and moves them accordingly to the laws of the physical world. */
+        static world: Physics;
+        /** The SETTINGS that apply to the physical world. Ranging from things like sleeping, collisionShapeThickness and others */
+        static settings: PhysicsSettings;
+        /** The rendering of physical debug informations. Used internally no interaction needed.*/
+        debugDraw: PhysicsDebugDraw;
+        /** The camera/viewport the physics are debugged to. Used internally no interaction needed. */
+        mainCam: ComponentCamera;
+        private oimoWorld;
+        private bodyList;
+        private triggerBodyList;
+        private jointList;
+        /**
+       * Creating a physical world to represent the [[Node]] Scene Tree. Call once before using any physics functions or
+       * rigidbodies.
+       */
+        static initializePhysics(): Physics;
+        /**
+      * Cast a RAY into the physical world from a origin point in a certain direction. Receiving informations about the hit object and the
+      * hit point. Do not specify a _group to raycast the whole world, else only bodies within the specific group can be hit.
+      */
+        static raycast(_origin: Vector3, _direction: Vector3, _length?: number, _group?: PHYSICS_GROUP): RayHitInfo;
+        /**
+      * Starts the physical world by checking that each body has the correct values from the Scene Tree
+      */
+        static start(_sceneTree: Node): void;
+        /** Internal function to calculate the endpoint of mathematical ray. By adding the multiplied direction to the origin.
+         * Used because OimoPhysics defines ray by start/end. But GameEngines commonly use origin/direction.
+         */
+        private static getRayEndPoint;
+        /** Internal function to get the distance in which a ray hit by subtracting points from each other and get the square root of the squared product of each component. */
+        private static getRayDistance;
+        /** Returns all the ComponentRigidbodies that are known to the physical space. */
+        getBodyList(): ComponentRigidbody[];
+        /** Returns all the ComponentRigidbodies that are in the specific group of triggers. */
+        getTriggerList(): ComponentRigidbody[];
+        /**
+      * Getting the solver iterations of the physics engine. Higher iteration numbers increase accuracy but decrease performance
+      */
+        getSolverIterations(): number;
+        /**
+      * Setting the solver iterations of the physics engine. Higher iteration numbers increase accuracy but decrease performance
+      */
+        setSolverIterations(_value: number): void;
+        /**
+      * Get the applied gravitational force to physical objects. Default earth gravity = 9.81 m/s
+      */
+        getGravity(): Vector3;
+        /**
+      * Set the applied gravitational force to physical objects. Default earth gravity = 9.81 m/s
+      */
+        setGravity(_value: Vector3): void;
+        /**
+      * Adding a new OIMO Rigidbody to the OIMO World, happens automatically when adding a FUDGE Rigidbody Component
+      */
+        addRigidbody(_cmpRB: ComponentRigidbody): void;
+        /**
+      * Removing a OIMO Rigidbody to the OIMO World, happens automatically when removing a FUDGE Rigidbody Component
+      */
+        removeRigidbody(_cmpRB: ComponentRigidbody): void;
+        /**
+    * Adding a new OIMO Joint/Constraint to the OIMO World, happens automatically when adding a FUDGE Joint Component
+    */
+        addJoint(_cmpJoint: ComponentJoint): void;
+        /**
+        * Removing a OIMO Joint/Constraint to the OIMO World, happens automatically when removeing a FUDGE Joint Component
+        */
+        removeJoint(_cmpJoint: ComponentJoint): void;
+        /**
+      * Simulates the physical world. _deltaTime is the amount of time between physical steps, default is 60 frames per second ~17ms
+      */
+        simulate(_deltaTime?: number): void;
+        /** Make the given ComponentRigidbody known to the world as a body that is not colliding, but only triggering events. Used internally no interaction needed. */
+        registerTrigger(_rigidbody: ComponentRigidbody): void;
+        /** Remove the given ComponentRigidbody the world as viable triggeringBody. Used internally no interaction needed. */
+        unregisterTrigger(_rigidbody: ComponentRigidbody): void;
+        /** Connect all joints that are not connected yet. Used internally no user interaction needed. This functionality is called and needed to make sure joints connect/disconnect
+         * if any of the two paired ComponentRigidbodies change.
+         */
+        connectJoints(): void;
+        /**
+      * Called internally to inform the physics system that a joint has a change of core properties like ComponentRigidbody and needs to
+      * be recreated.
+      */
+        changeJointStatus(_cmpJoint: ComponentJoint): void;
+        /** Giving a ComponentRigidbody a specific identification number so it can be referenced in the loading process. And removed rb's can receive a new id. */
+        distributeBodyID(): number;
+        /** Returns the ComponentRigidbody with the given id. Used internally to reconnect joints on loading in the editor. */
+        getBodyByID(_id: number): ComponentRigidbody;
+        /** Updates all to the Physics.world known Rigidbodies with their respective world positions/rotations/scalings */
+        private updateWorldFromWorldMatrix;
+        /** Create a oimoPhysics world. Called once at the beginning if none is existend yet. */
+        private createWorld;
+    }
+}
+declare namespace FudgeCore {
+    /**
+      * Storing and manipulating rotations in the form of quaternions.
+      * Constructed out of the 4 components x,y,z,w. Commonly used to calculate rotations in physics engines.
+      * Class mostly used internally to bridge the in FUDGE commonly used angles in degree to OimoPhysics quaternion system.
+      * @authors Marko Fehrenbach, HFU, 2020
+      */
+    class Quaternion extends Mutable {
+        private x;
+        private y;
+        private z;
+        private w;
+        constructor(_x?: number, _y?: number, _z?: number, _w?: number);
+        /** Get/Set the X component of the Quaternion. Real Part */
+        get X(): number;
+        set X(_x: number);
+        /** Get/Set the Y component of the Quaternion. Real Part */
+        get Y(): number;
+        set Y(_y: number);
+        /** Get/Set the Z component of the Quaternion. Real Part */
+        get Z(): number;
+        set Z(_z: number);
+        /** Get/Set the Y component of the Quaternion. Imaginary Part */
+        get W(): number;
+        set W(_w: number);
+        /**
+         * Create quaternion from vector3 angles in degree
+         */
+        setFromVector3(rollX: number, pitchY: number, yawZ: number): void;
+        /**
+         * Returns the euler angles in radians as Vector3 from this quaternion.
+         */
+        toEulerangles(): Vector3;
+        /**
+         * Return angles in degrees as vector3 from this. quaterion
+         */
+        toDegrees(): Vector3;
+        getMutator(): Mutator;
+        protected reduceMutator(_mutator: Mutator): void;
+        /** Copying the sign of a to b */
+        private copysign;
+    }
+}
+declare namespace FudgeCore {
     class Ray {
         origin: Vector3;
         direction: Vector3;
@@ -3428,11 +4862,16 @@ declare namespace FudgeCore {
          * Recursively iterates over the graph starting with the node given, recalculates all world transforms,
          * collects all lights and feeds all shaders used in the graph with these lights
          */
-        private static setupTransformAndLights;
+        static setupTransformAndLights(_node: Node, _world?: Matrix4x4, _lights?: MapLightTypeToLightList, _shadersUsed?: (typeof Shader)[]): void;
         /**
          * Set light data in shaders
          */
         private static setLightsInShader;
+        /**
+        * Physics Part -> Take all nodes with cmpRigidbody, and overwrite their local position/rotation with the one coming from
+        * the rb component, which is the new "local" WORLD position.
+        */
+        private static setupPhysicalTransform;
     }
 }
 declare namespace FudgeCore {
