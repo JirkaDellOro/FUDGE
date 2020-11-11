@@ -3158,6 +3158,8 @@ declare namespace FudgeCore {
          * Uses the standard array.map functionality to perform the given function on all components of this vector
          */
         map(_function: (value: number, index: number, array: Float32Array) => number): Vector3;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
     }

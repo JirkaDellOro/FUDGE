@@ -340,6 +340,23 @@ namespace FudgeCore {
       return copy;
     }
 
+    //#region Transfer
+    public serialize(): Serialization {
+      let serialization: Serialization = this.getMutator();
+      // serialization.toJSON = () => { return `{ "r": ${this.r}, "g": ${this.g}, "b": ${this.b}, "a": ${this.a}}`; };
+      serialization.toJSON = () => { return `[${this.x}, ${this.y}, ${this.z}]`; };
+      return serialization;
+    }
+
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      if (typeof (_serialization) == "string") {
+        [this.x, this.y, this.z] = JSON.parse(<string><unknown>_serialization);
+      }
+      else
+        this.mutate(_serialization);
+      return this;
+    }
+
     public getMutator(): Mutator {
       let mutator: Mutator = {
         x: this.data[0], y: this.data[1], z: this.data[2]
@@ -347,5 +364,6 @@ namespace FudgeCore {
       return mutator;
     }
     protected reduceMutator(_mutator: Mutator): void {/** */ }
+    //#endregion Transfer
   }
 }
