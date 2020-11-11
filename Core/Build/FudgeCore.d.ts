@@ -4602,6 +4602,7 @@ declare namespace FudgeCore {
         /** Whether the debug informations of the physics should be displayed or not (default = false) */
         debugDraw: boolean;
         private physicsDebugMode;
+        constructor(_defGroup: number, _defMask: number);
         get debugMode(): PHYSICS_DEBUGMODE;
         set debugMode(_value: PHYSICS_DEBUGMODE);
         /** Change if rigidbodies are able to sleep (don't be considered in physical calculations) when their movement is below a threshold. Deactivation is decreasing performance for minor advantage in precision. */
@@ -4633,7 +4634,6 @@ declare namespace FudgeCore {
         /** The group that this rigidbody belongs to. Default is the DEFAULT Group which means its just a normal Rigidbody not a trigger nor anything special. */
         get defaultCollisionGroup(): number;
         set defaultCollisionGroup(_value: number);
-        constructor(_defGroup: number, _defMask: number);
     }
 }
 declare namespace FudgeCore {

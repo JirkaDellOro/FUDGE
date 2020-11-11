@@ -1,0 +1,103 @@
+{
+  "Graph|2020-11-11T14:45:27.492Z|55222": {
+    "ƒ.Graph": {
+      "name": "NewGraph",
+      "components": {},
+      "children": [
+        {
+          "ƒ.Node": {
+            "name": "Cube",
+            "components": {
+              "ComponentMaterial": [
+                {
+                  "ƒ.ComponentMaterial": {
+                    "clrPrimary": "[1, 0, 0, 1]",
+                    "clrSecondary": "[1, 1, 1, 1]",
+                    "pivot": {
+                      "translation": "[0, 0]",
+                      "rotation": 0,
+                      "scaling": "[1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    },
+                    "idMaterial": "Material|2020-11-11T14:46:07.797Z|18308"
+                  }
+                }
+              ],
+              "ComponentMesh": [
+                {
+                  "ƒ.ComponentMesh": {
+                    "idMesh": "MeshCube|2020-11-11T14:46:12.004Z|24766",
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentRigidbody": [
+                {
+                  "ƒ.ComponentRigidbody": {
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "id": 0,
+                    "physicsType": 0,
+                    "mass": 1,
+                    "colliderType": 0,
+                    "linearDamping": 0.1,
+                    "angularDamping": 0.1,
+                    "collisionGroup": 1,
+                    "rotationInfluence": {
+                      "data": {
+                        "0": 1,
+                        "1": 1,
+                        "2": 1
+                      }
+                    },
+                    "gravityScale": 1,
+                    "friction": 0.2,
+                    "restitution": 0.2,
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ]
+            },
+            "children": []
+          }
+        }
+      ],
+      "idResource": "Graph|2020-11-11T14:45:27.492Z|55222",
+      "type": "Graph"
+    }
+  },
+  "Material|2020-11-11T14:46:07.797Z|18308": {
+    "ƒ.Material": {
+      "name": "NewMaterial",
+      "idResource": "Material|2020-11-11T14:46:07.797Z|18308",
+      "shader": "ShaderUniColor",
+      "coat": {
+        "ƒ.CoatColored": {
+          "name": "Coat",
+          "color": "[1, 1, 1, 1]"
+        }
+      }
+    }
+  },
+  "MeshCube|2020-11-11T14:46:12.004Z|24766": {
+    "ƒ.MeshCube": {
+      "idResource": "MeshCube|2020-11-11T14:46:12.004Z|24766",
+      "name": "MeshCube",
+      "type": "MeshCube"
+    }
+  }
+}
