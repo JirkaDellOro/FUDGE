@@ -375,11 +375,8 @@ var Fudge;
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_MODELLER_OPEN, (_event, _args) => {
                 node = new ƒ.Node("graph");
-                ƒaid.addStandardLightComponents(node, new ƒ.Color(0.5, 0.5, 0.5));
-                let cooSys = new ƒaid.NodeCoordinateSystem("WorldCooSys");
-                let cube = new ƒaid.Node("Default", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderFlat, new ƒ.CoatColored()), new ƒ.MeshCustom("MeshCustom", new ƒ.MeshCube));
-                node.addChild(cube);
-                node.addChild(cooSys);
+                let defaultNode = new ƒaid.Node("Default", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderFlat, new ƒ.CoatColored()), new Fudge.ModifiableMesh());
+                node.addChild(defaultNode);
                 Page.add(Fudge.PanelModeller, "Modeller", Object({ node: node }));
             });
         }
@@ -727,13 +724,20 @@ var Fudge;
 (function (Fudge) {
     class Controller {
         constructor(viewport, editableNode) {
+            this.controlModesMap = {
+                [Fudge.ControlMode.OBJECT_MODE]: new Fudge.ObjectMode(),
+                [Fudge.ControlMode.EDIT_MODE]: new Fudge.EditMode()
+            };
             this.viewport = viewport;
-            this.controlMode = new Fudge.ObjectMode();
+            this.currentControlMode = this.controlModesMap[Fudge.ControlMode.OBJECT_MODE];
             this.editableNode = editableNode;
             this.setInteractionMode(Fudge.InteractionMode.IDLE);
         }
-        get ControlMode() {
-            return this.controlMode;
+        get controlMode() {
+            return this.currentControlMode;
+        }
+        get controlModes() {
+            return this.controlModesMap;
         }
         onmouseup(_event) {
             this.interactionMode.onmouseup(_event);
@@ -748,15 +752,15 @@ var Fudge;
             if (_event.ctrlKey) {
                 switch (_event.key) {
                     case "e":
-                        this.setControlMode(new Fudge.EditMode());
+                        this.setControlMode(Fudge.ControlMode.EDIT_MODE);
                         break;
                     case "n":
-                        this.setControlMode(new Fudge.ObjectMode());
+                        this.setControlMode(Fudge.ControlMode.OBJECT_MODE);
                         break;
                     default:
                         let selectedMode;
-                        for (let mode in this.controlMode.modes) {
-                            if (this.controlMode.modes[mode].shortcut === _event.key) {
+                        for (let mode in this.currentControlMode.modes) {
+                            if (this.currentControlMode.modes[mode].shortcut === _event.key) {
                                 selectedMode = mode;
                             }
                         }
@@ -767,14 +771,17 @@ var Fudge;
             }
         }
         setControlMode(mode) {
-            this.controlMode = mode;
+            this.currentControlMode.formerMode = this.interactionMode;
+            this.currentControlMode = this.controlModesMap[mode];
             console.log(mode);
-            this.setInteractionMode(this.interactionMode.type);
+            this.interactionMode?.cleanup();
+            this.interactionMode = this.currentControlMode.formerMode || new Fudge.IdleMode(this.viewport, this.editableNode);
+            this.interactionMode.initialize();
+            console.log("Current Mode: " + this.interactionMode.type);
         }
         setInteractionMode(mode) {
-            // mode = InteractionMode.ROTATE;
             this.interactionMode?.cleanup();
-            let type = this.controlMode.modes[mode]?.type || Fudge.IdleMode;
+            let type = this.currentControlMode.modes[mode]?.type || Fudge.IdleMode;
             let selection = this.interactionMode?.selection;
             this.interactionMode = new type(this.viewport, this.editableNode);
             if (selection)
@@ -788,8 +795,8 @@ var Fudge;
 (function (Fudge) {
     let ControlMode;
     (function (ControlMode) {
-        ControlMode[ControlMode["OBJECT_MODE"] = 0] = "OBJECT_MODE";
-        ControlMode[ControlMode["EDIT_MODE"] = 1] = "EDIT_MODE";
+        ControlMode["OBJECT_MODE"] = "ObjectMode";
+        ControlMode["EDIT_MODE"] = "EditMode";
     })(ControlMode = Fudge.ControlMode || (Fudge.ControlMode = {}));
     let InteractionMode;
     (function (InteractionMode) {
@@ -879,6 +886,7 @@ var Fudge;
         constructor(viewport, editableNode) {
             this.viewport = viewport;
             this.editableNode = editableNode;
+            this.initialize();
         }
         getPosRenderFrom(_event) {
             let mousePos = new ƒ.Vector2(_event.canvasX, _event.canvasY);
@@ -893,6 +901,9 @@ var Fudge;
         constructor(viewport, editableNode) {
             super(viewport, editableNode);
             this.type = Fudge.InteractionMode.IDLE;
+        }
+        initialize() {
+            //@ts-ignore
         }
         onmousedown(_event) {
             //@ts-ignore
@@ -925,6 +936,9 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     class EditRotation extends Fudge.AbstractRotation {
+        initialize() {
+            throw new Error("Method not implemented.");
+        }
         onmousedown(_event) {
             console.log("EditRotation activated");
             console.log(this.selection);
@@ -944,6 +958,8 @@ var Fudge;
     class ObjectRotation extends Fudge.AbstractRotation {
         constructor(viewport, editableNode) {
             super(viewport, editableNode);
+        }
+        initialize() {
             let widget = new Fudge.RotationWidget();
             let mtx = new ƒ.Matrix4x4();
             mtx.translation = this.editableNode.mtxLocal.translation;
@@ -1029,8 +1045,7 @@ var Fudge;
             // posAtIntersection.y + posAtIntersection.z * cameraTranslationNorm.y, 
             // (-posAtIntersection.z * cameraTranslationNorm.x) + (posAtIntersection.x * cameraTranslationNorm.z) + (-posAtIntersection.x * cameraTranslationNorm.y));
             // (Math.abs(objrotation.y) > 90 ? posAtIntersection.z * Math.abs(cameraTranslationNorm.x) : - posAtIntersection.z * Math.abs(cameraTranslationNorm.x)
-            // (cameraTranslationNorm.x > 0 ? -(posAtIntersection.z * cameraTranslationNorm.x) : (posAtIntersection.z * cameraTranslationNorm.x))
-            // (cameraTranslationNorm.z > 0 ? (posAtIntersection.x * cameraTranslationNorm.z) : -(posAtIntersection.x * cameraTranslationNorm.z))
+            // swapped signs, should work too
             // - posAtIntersection.y - posAtIntersection.z * cameraTranslationNorm.y, 
             // - posAtIntersection.z * Math.abs(cameraTranslationNorm.x)
             // - posAtIntersection.x * Math.abs(cameraTranslationNorm.z) 
@@ -1060,20 +1075,33 @@ var Fudge;
             super(...arguments);
             this.selection = [];
         }
+        initialize() {
+        }
         onmousedown(_event) {
-            let vertices = this.editableNode.getComponent(ƒ.ComponentMesh).mesh.vertices;
+            let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+            let vertices = mesh.uniqueVertices;
             let nearestVertexIndex;
-            let shortestDistance = Number.MAX_VALUE;
+            let shortestDistanceToCam = Number.MAX_VALUE;
+            let shortestDistanceToRay = Number.MAX_VALUE;
             let vertexWasPicked = false;
             let ray = this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY));
-            for (let i = 0; i < vertices.length / 2; i += 3) {
-                let vertex = new ƒ.Vector3(vertices[i], vertices[i + 1], vertices[i + 2]);
+            for (let i = 0; i < vertices.length; i++) {
+                let vertex = vertices[i].position;
                 let vertexTranslation = ƒ.Vector3.SUM(this.editableNode.mtxLocal.translation, vertex);
-                let distance = ray.getDistance(vertexTranslation).magnitude;
-                if (distance < shortestDistance && distance < 0.1) {
+                let distanceToRay = ray.getDistance(vertexTranslation).magnitude;
+                let distanceToCam = ƒ.Vector3.DIFFERENCE(this.viewport.camera.pivot.translation, vertexTranslation).magnitude;
+                if (distanceToRay < 0.1) {
                     vertexWasPicked = true;
-                    shortestDistance = distance;
-                    nearestVertexIndex = i;
+                    if (distanceToRay - shortestDistanceToRay < -0.05) {
+                        shortestDistanceToCam = distanceToCam;
+                        shortestDistanceToRay = distanceToRay;
+                        nearestVertexIndex = i;
+                    }
+                    else if (distanceToRay - shortestDistanceToRay < 0.03 && distanceToCam < shortestDistanceToCam) {
+                        shortestDistanceToCam = distanceToCam;
+                        shortestDistanceToRay = distanceToRay;
+                        nearestVertexIndex = i;
+                    }
                 }
             }
             if (!vertexWasPicked) {
@@ -1107,25 +1135,6 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    var ƒ = FudgeCore;
-    class ObjectSelection extends Fudge.AbstractSelection {
-        onmousedown(_event) {
-            console.log("ObjectSelection activated");
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.X])) {
-                console.log("x is pressed");
-            }
-        }
-        onmouseup(_event) {
-            //@ts-ignore
-        }
-        onmove(_event) {
-            //@ts-ignore
-        }
-    }
-    Fudge.ObjectSelection = ObjectSelection;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
     class AbstractTranslation extends Fudge.IInteractionMode {
         constructor() {
             super(...arguments);
@@ -1140,32 +1149,87 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    var ƒAid = FudgeAid;
     class EditTranslation extends Fudge.AbstractTranslation {
+        constructor() {
+            super(...arguments);
+            this.copyOfSelectedVertices = {};
+        }
+        initialize() {
+            this.createNormalArrows();
+        }
+        createNormalArrows() {
+            for (let node of this.viewport.getGraph().getChildrenByName("normal")) {
+                this.viewport.getGraph().removeChild(node);
+            }
+            let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+            for (let i = 0; i < mesh.vertices.length; i += 3) {
+                let vertex = new ƒ.Vector3(mesh.vertices[i], mesh.vertices[i + 1], mesh.vertices[i + 2]);
+                let normal = new ƒ.Vector3(mesh.normalsFace[i], mesh.normalsFace[i + 1], mesh.normalsFace[i + 2]);
+                let normalArrow = new ƒAid.Node("normal", ƒ.Matrix4x4.IDENTITY(), new ƒ.Material("NormalMtr", ƒ.ShaderFlat));
+                let shaft = new ƒAid.Node("Shaft", ƒ.Matrix4x4.IDENTITY(), new ƒ.Material("NormalMtr", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("yellow"))), new ƒ.MeshCube());
+                let head = new ƒAid.Node("Head", ƒ.Matrix4x4.IDENTITY(), new ƒ.Material("NormalMtr", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("yellow"))), new ƒ.MeshPyramid());
+                shaft.mtxLocal.scale(new ƒ.Vector3(0.01, 0.01, 1));
+                head.mtxLocal.translateZ(0.5);
+                head.mtxLocal.rotateX(90);
+                head.mtxLocal.scale(new ƒ.Vector3(0.05, 0.05, 0.1));
+                shaft.getComponent(ƒ.ComponentMaterial).clrPrimary = ƒ.Color.CSS("yellow");
+                head.getComponent(ƒ.ComponentMaterial).clrPrimary = ƒ.Color.CSS("yellow");
+                normalArrow.addChild(shaft);
+                normalArrow.addChild(head);
+                normalArrow.mtxLocal.translation = vertex;
+                let vector = ƒ.Vector3.SUM(vertex, normal);
+                try {
+                    normalArrow.mtxLocal.lookAt(vector);
+                }
+                catch {
+                    if (normal.y > 0) {
+                        normalArrow.mtxLocal.rotateX(-90);
+                    }
+                    else {
+                        normalArrow.mtxLocal.rotateX(90);
+                    }
+                }
+                this.viewport.getGraph().addChild(normalArrow);
+                // normalArrow.addComponent(new ƒ.ComponentTransform())
+                //this.viewport.draw();
+            }
+        }
         onmousedown(_event) {
+            if (!this.selection)
+                return;
             this.dragging = true;
             this.distance = ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, this.viewport.camera.pivot.translation).magnitude;
+            this.copyOfSelectedVertices = {};
+            let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+            let vertices = mesh.uniqueVertices;
+            for (let vertexIndex of this.selection) {
+                this.copyOfSelectedVertices[vertexIndex] = new ƒ.Vector3(vertices[vertexIndex].position.x, vertices[vertexIndex].position.y, vertices[vertexIndex].position.z);
+            }
         }
         onmouseup(_event) {
             this.dragging = false;
+            this.createNormalArrows();
         }
         onmove(_event) {
             console.log("vertices: " + this.selection);
-            if (this.dragging) {
-                let ray = this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY));
-                let diffTranslation = ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, ƒ.Vector3.SUM(ray.origin, ƒ.Vector3.SCALE(ray.direction, this.distance)));
-                //this.editableNode.mtxLocal.translation = ƒ.Vector3.SUM(ray.origin, ƒ.Vector3.SCALE(ray.direction, this.distance));
-                let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
-                let verts = mesh.vertices;
-                for (let selection of this.selection) {
-                    let currentVertex = new ƒ.Vector3(verts[selection], verts[selection + 1], verts[selection + 2]);
-                    currentVertex.add(diffTranslation);
-                    verts[selection] = currentVertex.x;
-                    verts[selection + 1] = currentVertex.y;
-                    verts[selection + 2] = currentVertex.z;
-                }
-                mesh.vertices = verts;
-                mesh.createRenderBuffers();
-            }
+            if (!this.dragging)
+                return;
+            let ray = this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY));
+            let newPos = ƒ.Vector3.SUM(ray.origin, ƒ.Vector3.SCALE(ray.direction, this.distance));
+            let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+            let diff = ƒ.Vector3.DIFFERENCE(newPos, this.editableNode.mtxLocal.translation);
+            // console.log("newPos: " + newPos + " | trans: " + this.editableNode.mtxLocal.translation);
+            mesh.updatePositionOfVertices(this.selection, diff, this.copyOfSelectedVertices);
+            //this.createNormalArrows();
+            // for (let selection of this.selection) {
+            //   let currentVertex: ƒ.Vector3 = this.copyOfSelectedVertices[selection];
+            //   mesh.updatePositionOfVertex(selection, new ƒ.Vector3(currentVertex.x + diff.x, currentVertex.y + diff.y, currentVertex.z + diff.z));
+            //   // verts[selection] = currentVertex.x + diff.x;
+            //   // verts[selection + 1] = currentVertex.y + diff.y;
+            //   // verts[selection + 2] = currentVertex.z + diff.z; 
+            // }
+            // mesh.vertices = verts;
         }
     }
     Fudge.EditTranslation = EditTranslation;
@@ -1176,6 +1240,8 @@ var Fudge;
     class ObjectTranslation extends Fudge.AbstractTranslation {
         constructor(viewport, editableNode) {
             super(viewport, editableNode);
+        }
+        initialize() {
             let widget = new ƒAid.NodeCoordinateSystem("TranslateWidget");
             let mtx = new ƒ.Matrix4x4();
             mtx.translation = this.editableNode.mtxLocal.translation;
@@ -1206,9 +1272,8 @@ var Fudge;
             }
             if (nodeWasPicked && !arrowWasPicked) {
                 this.dragging = true;
-                this.distance = ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, this.viewport.camera.pivot.translation).magnitude; //
+                this.distance = ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, this.viewport.camera.pivot.translation).magnitude;
             }
-            // console.log("")
         }
         onmove(_event) {
             let ray = this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY));
@@ -1266,6 +1331,213 @@ var Fudge;
         }
     }
     Fudge.ObjectTranslation = ObjectTranslation;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class ModifiableMesh extends ƒ.Mesh {
+        constructor() {
+            super();
+            this._uniqueVertices = [
+                new Fudge.UniqueVertex(new ƒ.Vector3(-1, 1, 1), { 0: [2, 5], 8: [22], 16: [31] }),
+                new Fudge.UniqueVertex(new ƒ.Vector3(-1, -1, 1), { 1: [0], 9: [19, 21], 17: [26, 29] }),
+                new Fudge.UniqueVertex(new ƒ.Vector3(1, -1, 1), { 2: [1, 3], 10: [12], 18: [28] }),
+                new Fudge.UniqueVertex(new ƒ.Vector3(1, 1, 1), { 3: [4], 11: [14, 17], 19: [32, 35] }),
+                new Fudge.UniqueVertex(new ƒ.Vector3(-1, 1, -1), { 4: [10], 12: [20, 23], 20: [30, 34] }),
+                new Fudge.UniqueVertex(new ƒ.Vector3(-1, -1, -1), { 5: [7, 9], 13: [18], 21: [24] }),
+                new Fudge.UniqueVertex(new ƒ.Vector3(1, -1, -1), { 6: [6], 14: [13, 15], 22: [25, 27] }),
+                new Fudge.UniqueVertex(new ƒ.Vector3(1, 1, -1), { 7: [8, 11], 15: [16], 23: [33] })
+            ];
+            // this._uniqueVertices = [
+            //   new UniqueVertex(new ƒ.Vector3(-1, 1, 1), [0, 8, 16]),
+            //   new UniqueVertex(new ƒ.Vector3(-1, -1, 1), [1, 9, 17]),
+            //   new UniqueVertex(new ƒ.Vector3(1, -1, 1), [2, 10, 18]),
+            //   new UniqueVertex(new ƒ.Vector3(1, 1, 1), [3, 11, 19]),
+            //   new UniqueVertex(new ƒ.Vector3(-1, 1, -1), [4, 12, 20]),
+            //   new UniqueVertex(new ƒ.Vector3(-1, -1, -1), [5, 13, 21]),
+            //   new UniqueVertex(new ƒ.Vector3(1, -1, -1), [6, 14, 22]),
+            //   new UniqueVertex(new ƒ.Vector3(1, 1, -1), [7, 15, 23])
+            // ];
+            // TODO: maybe get around looping at bit less here
+            for (let vertex of this._uniqueVertices) {
+                vertex.position.x = vertex.position.x / 2;
+                vertex.position.y = vertex.position.y / 2;
+                vertex.position.z = vertex.position.z / 2;
+            }
+            this.create();
+        }
+        get uniqueVertices() {
+            return this._uniqueVertices;
+        }
+        updatePositionOfVertices(selectedIndices, diffToOldPosition, oldVertexPositions) {
+            if (!selectedIndices)
+                return;
+            for (let selection of selectedIndices) {
+                let currentVertex = oldVertexPositions[selection];
+                this.updatePositionOfVertex(selection, new ƒ.Vector3(currentVertex.x + diffToOldPosition.x, currentVertex.y + diffToOldPosition.y, currentVertex.z + diffToOldPosition.z));
+            }
+            let trigons = this.findOrderOfTrigonFromSelectedVertex(selectedIndices);
+            // update normals
+            for (let trigon of trigons) {
+                let vertexA = new ƒ.Vector3(this.vertices[3 * trigon[0]], this.vertices[3 * trigon[0] + 1], this.vertices[3 * trigon[0] + 2]);
+                let vertexB = new ƒ.Vector3(this.vertices[3 * trigon[1]], this.vertices[3 * trigon[1] + 1], this.vertices[3 * trigon[1] + 2]);
+                let vertexC = new ƒ.Vector3(this.vertices[3 * trigon[2]], this.vertices[3 * trigon[2] + 1], this.vertices[3 * trigon[2] + 2]);
+                let newNormal = ƒ.Vector3.NORMALIZATION(ƒ.Vector3.CROSS(ƒ.Vector3.DIFFERENCE(vertexB, vertexA), ƒ.Vector3.DIFFERENCE(vertexC, vertexB)));
+                this.normalsFace.set([newNormal.x, newNormal.y, newNormal.z], 3 * trigon[0]);
+                this.normalsFace.set([newNormal.x, newNormal.y, newNormal.z], 3 * trigon[1]);
+                this.normalsFace.set([newNormal.x, newNormal.y, newNormal.z], 3 * trigon[2]);
+            }
+            this.createRenderBuffers();
+        }
+        /*
+          finds the ordering of the trigons by searching for the selected vertex in the indices array
+          returns an array with another array, that stores the correct ordering
+        */
+        findOrderOfTrigonFromSelectedVertex(selectedIndices) {
+            // let trigons: Array<Array<number>> = [];
+            // // TODO maybe get around looping here too with better data format
+            // for (let index: number = 0; index < this.indices.length; index++) {
+            //   for (let selectedIndex of selectedIndices) {
+            //     for (let actualIndex of this._uniqueVertices[selectedIndex].indices) {
+            //       if (this.indices[index] === actualIndex) {
+            //         let trigon: Array<number> = [];
+            //         switch (index % 3) {
+            //           case 0: 
+            //             trigon.push(this.indices[index], this.indices[index + 1], this.indices[index + 2]);
+            //             break;
+            //           case 1:
+            //             trigon.push(this.indices[index - 1], this.indices[index], this.indices[index + 1]);
+            //             break;
+            //           case 2:
+            //             trigon.push(this.indices[index - 2], this.indices[index - 1], this.indices[index]);
+            //             break;
+            //         }
+            //         trigons.push(trigon);  
+            //       }
+            //     }
+            //   }
+            // }
+            let trigons = [];
+            for (let selectedIndex of selectedIndices) {
+                for (let vertexIndex in this._uniqueVertices[selectedIndex].indices) {
+                    for (let indexInIndicesArray of this._uniqueVertices[selectedIndex].indices[vertexIndex]) {
+                        let trigon = [];
+                        switch (indexInIndicesArray % 3) {
+                            case 0:
+                                trigon.push(this.indices[indexInIndicesArray], this.indices[indexInIndicesArray + 1], this.indices[indexInIndicesArray + 2]);
+                                break;
+                            case 1:
+                                trigon.push(this.indices[indexInIndicesArray - 1], this.indices[indexInIndicesArray], this.indices[indexInIndicesArray + 1]);
+                                break;
+                            case 2:
+                                trigon.push(this.indices[indexInIndicesArray - 2], this.indices[indexInIndicesArray - 1], this.indices[indexInIndicesArray]);
+                                break;
+                        }
+                        trigons.push(trigon);
+                    }
+                }
+            }
+            return trigons;
+        }
+        updatePositionOfVertex(vertexIndex, newPosition) {
+            this._uniqueVertices[vertexIndex].position = newPosition;
+            for (let index in this._uniqueVertices[vertexIndex].indices) {
+                this.vertices.set([this._uniqueVertices[vertexIndex].position.x, this._uniqueVertices[vertexIndex].position.y, this._uniqueVertices[vertexIndex].position.z], index * 3);
+            }
+            // this.update();
+        }
+        createVertices() {
+            // TODO maybe don't loop here too somehow?
+            // let length: number = 0;
+            // for (let vertex of this._uniqueVertices) {
+            //   length += vertex.indices.length;
+            // }
+            // let vertices: Float32Array = new Float32Array(length * 3);
+            // for (let vertex of this._uniqueVertices) {
+            //   for (let index of vertex.indices) {
+            //     vertices.set([vertex.position.x, vertex.position.y, vertex.position.z], index * 3);
+            //   }
+            // }
+            // TODO use dynamic length here (or rather use new array as parameter)
+            let vertices = new Float32Array(8 * 3 * 3);
+            for (let vertex of this._uniqueVertices) {
+                for (let index of Object.keys(vertex.indices)) {
+                    vertices.set([vertex.position.x, vertex.position.y, vertex.position.z], index * 3);
+                }
+            }
+            return vertices;
+        }
+        createTextureUVs() {
+            let textureUVs = new Float32Array([
+                // front
+                /*0*/ 0, 0, /*1*/ 0, 1, /*2*/ 1, 1, /*3*/ 1, 0,
+                // back
+                /*4*/ 3, 0, /*5*/ 3, 1, /*6*/ 2, 1, /*7*/ 2, 0,
+                // right / left
+                /*0,8*/ 0, 0, /*1,9*/ 0, 1, /*2,10*/ 1, 1, /*3,11*/ 1, 0,
+                /*4,12*/ -1, 0, /*5,13*/ -1, 1, /*6,14*/ 2, 1, /*7,15*/ 2, 0,
+                // bottom / top
+                /*0,16*/ 1, 0, /*1,17*/ 1, 1, /*2,18*/ 1, 2, /*3,19*/ 1, -1,
+                /*4,20*/ 0, 0, /*5,21*/ 0, 1, /*6,22*/ 0, 2, /*7,23*/ 0, -1
+            ]);
+            return textureUVs;
+        }
+        createIndices() {
+            // let indices: Uint16Array = new Uint16Array([
+            //   // front 0-5
+            //   1, 2, 0, 2, 3, 0,
+            //   // back 6-11
+            //   6, 5, 7, 5, 4, 7,
+            //   // right 12-17
+            //   2 + 8, 6 + 8, 3 + 8, 6 + 8, 7 + 8, 3 + 8,
+            //   // left 18-23
+            //   5 + 8, 1 + 8, 4 + 8, 1 + 8, 0 + 8, 4 + 8,
+            //   // bottom 24-29
+            //   5 + 16, 6 + 16, 1 + 16, 6 + 16, 2 + 16, 1 + 16,
+            //   // top 30-35
+            //   4 + 16, 0 + 16, 3 + 16, 7 + 16, 4 + 16, 3 + 16
+            // ]);
+            let indexArray = [];
+            for (let vertex of this._uniqueVertices) {
+                for (let index in vertex.indices) {
+                    for (let value of vertex.indices[index]) {
+                        indexArray[value] = index;
+                    }
+                }
+            }
+            return new Uint16Array(indexArray);
+        }
+        createFaceNormals() {
+            let normals = new Float32Array([
+                // front
+                /*0*/ 0, 0, 1, /*1*/ 0, 0, 1, /*2*/ 0, 0, 1, /*3*/ 0, 0, 1,
+                // back
+                /*4*/ 0, 0, -1, /*5*/ 0, 0, -1, /*6*/ 0, 0, -1, /*7*/ 0, 0, -1,
+                // right
+                /*8*/ 1, 0, 0, /*9*/ 1, 0, 0, /*10*/ 1, 0, 0, /*11*/ 1, 0, 0,
+                // left
+                /*12*/ -1, 0, 0, /*13*/ -1, 0, 0, /*14*/ -1, 0, 0, /*15*/ -1, 0, 0,
+                // bottom
+                /*16*/ 0, -1, 0, /*17*/ 0, -1, 0, /*18*/ 0, -1, 0, /*19*/ 0, -1, 0,
+                // top 
+                /*20*/ 0, 1, 0, /*21*/ 0, 1, 0, /*22*/ 0, 1, 0, /*23*/ 0, 1, 0
+            ]);
+            return normals;
+        }
+        update() {
+            this.createRenderBuffers();
+        }
+    }
+    Fudge.ModifiableMesh = ModifiableMesh;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class UniqueVertex {
+        constructor(_position, _indices) {
+            this.position = _position;
+            this.indices = _indices;
+        }
+    }
+    Fudge.UniqueVertex = UniqueVertex;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -1442,7 +1714,7 @@ var Fudge;
             super(_container, _state);
             this.goldenLayout.registerComponent(Fudge.VIEW.MODELLER, Fudge.ViewModellerScene);
             this.goldenLayout.registerComponent(Fudge.VIEW.HIERARCHY, Fudge.ViewHierarchy);
-            this.goldenLayout.registerComponent(Fudge.VIEW.PROPERTIES, Fudge.ViewProperties);
+            this.goldenLayout.registerComponent(Fudge.VIEW.PROPERTIES, Fudge.ViewObjectProperties);
             let inner = this.goldenLayout.root.contentItems[0];
             inner.addChild({
                 type: "column", content: [{
@@ -1452,7 +1724,7 @@ var Fudge;
             inner.addChild({
                 type: "column", content: [
                     { type: "component", componentName: Fudge.VIEW.HIERARCHY, componentState: _state, title: "Hierarchy" },
-                    { type: "component", componentName: Fudge.VIEW.PROPERTIES, componentState: _state }
+                    { type: "component", componentName: Fudge.VIEW.PROPERTIES, componentState: _state, title: "Properties" }
                 ]
             });
         }
@@ -2381,6 +2653,8 @@ var Fudge;
             };
             this.graph = _state["node"];
             this.createUserInterface();
+            ƒaid.addStandardLightComponents(this.graph, new ƒ.Color(0.5, 0.5, 0.5));
+            this.graph.addChild(new ƒaid.NodeCoordinateSystem("WorldCooSys"));
             this.node = this.graph.getChildrenByName("Default")[0];
             this.controller = new Fudge.Controller(this.viewport, this.node);
             // tslint:disable-next-line: no-unused-expression
@@ -2421,28 +2695,29 @@ var Fudge;
             const menu = new Fudge.remote.Menu();
             let item;
             let submenu = new Fudge.remote.Menu();
-            submenu.append(new Fudge.remote.MenuItem({ label: "Object" }));
-            item = new Fudge.remote.MenuItem({
-                label: "Control Mode",
-                submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CONTROL_MODE, Fudge.AbstractControlMode.subclasses, _callback)
-            });
-            menu.append(item);
-            // let currentControl: typeof AbstractControlMode;
-            // for (let subclass of AbstractControlMode.subclasses) {
-            //   if (subclass == this.controller.ControlMode.constructor) {
-            //     currentControl = subclass;
-            //   }
-            // }
+            // submenu.append(new remote.MenuItem({label: "Object"}));
             // item = new remote.MenuItem({
-            //   label: "Mode",
-            //   submenu: ContextMenu.getSubclassMenu<typeof IInteractionMode>(CONTEXTMENU.CREATE, currentControl.modes, _callback)
+            //   label: "Control Mode",
+            //   submenu: ContextMenu.getSubclassMenu<typeof AbstractControlMode>(CONTEXTMENU.CONTROL_MODE, AbstractControlMode.subclasses, _callback)
             // });
             if (!this.controller) {
                 return menu;
             }
+            for (let mode in this.controller.controlModes) {
+                let subitem = new Fudge.remote.MenuItem({ label: mode, id: String(Fudge.CONTEXTMENU.CONTROL_MODE), click: _callback });
+                //@ts-ignore
+                subitem.overrideProperty("controlMode", mode);
+                submenu.append(subitem);
+            }
+            item = new Fudge.remote.MenuItem({
+                label: "Control Mode",
+                submenu: submenu
+            });
+            menu.append(item);
             submenu = new Fudge.remote.Menu();
-            for (let mode in this.controller.ControlMode.modes) {
-                let subitem = new Fudge.remote.MenuItem({ label: mode, id: String(Fudge.CONTEXTMENU.INTERACTION_MODE), click: _callback, accelerator: process.platform == "darwin" ? "Command+" + this.controller.ControlMode.modes[mode].shortcut : "ctrl+" + this.controller.ControlMode.modes[mode].shortcut });
+            // TODO: fix tight coupling here, only retrieve the shortcut from the controller
+            for (let mode in this.controller.controlMode.modes) {
+                let subitem = new Fudge.remote.MenuItem({ label: mode, id: String(Fudge.CONTEXTMENU.INTERACTION_MODE), click: _callback, accelerator: process.platform == "darwin" ? "Command+" + this.controller.controlMode.modes[mode].shortcut : "ctrl+" + this.controller.controlMode.modes[mode].shortcut });
                 //@ts-ignore
                 subitem.overrideProperty("interactionMode", mode);
                 submenu.append(subitem);
@@ -2457,10 +2732,10 @@ var Fudge;
         contextMenuCallback(_item, _window, _event) {
             switch (Number(_item.id)) {
                 case Fudge.CONTEXTMENU.CONTROL_MODE:
-                    let iSubclass = _item["iSubclass"];
-                    let type = Fudge.AbstractControlMode.subclasses[iSubclass];
-                    //@ts-ignore
-                    let controlModeNew = new type();
+                    let controlModeNew = _item["controlMode"];
+                    // let type: typeof AbstractControlMode = AbstractControlMode.subclasses[iSubclass];
+                    // //@ts-ignore
+                    // let controlModeNew: AbstractControlMode = new type();
                     this.controller.setControlMode(controlModeNew);
                     // ƒ.Debug.info(meshNew.type, meshNew);
                     this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
@@ -2486,7 +2761,7 @@ var Fudge;
         constructor(_container, _state) {
             super(_container, _state);
             // this.contextMenu = this.getContextMenu(this.contextMenuCallback);
-            this.setObject(_state.node.getChildrenByName("Cube")[0]);
+            this.setObject(_state.node.getChildrenByName("Default")[0]);
             this.fillContent();
             // this.parentPanel.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setSelectedNode);
             // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);

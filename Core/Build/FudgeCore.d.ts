@@ -3193,7 +3193,7 @@ declare namespace FudgeCore {
     class MeshCustom extends Mesh {
         static readonly iSubclass: number;
         private baseMesh;
-        constructor(_name: string, _baseMesh: Mesh);
+        constructor(_name?: string, _baseMesh?: Mesh);
         protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;
         protected createIndices(): Uint16Array;
@@ -3315,6 +3315,15 @@ declare namespace FudgeCore {
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
+        protected createFaceNormals(): Float32Array;
+    }
+}
+declare namespace FudgeCore {
+    class MeshTest extends Mesh {
+        constructor(_name?: string);
+        protected createVertices(): Float32Array;
+        protected createTextureUVs(): Float32Array;
+        protected createIndices(): Uint16Array;
         protected createFaceNormals(): Float32Array;
     }
 }

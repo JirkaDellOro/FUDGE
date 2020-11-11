@@ -6,6 +6,9 @@ namespace Fudge {
 
     constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node) {
       super(viewport, editableNode);
+    }
+
+    initialize(): void {
       let widget: ƒ.Node = new ƒAid.NodeCoordinateSystem("TranslateWidget");
       let mtx: ƒ.Matrix4x4 = new ƒ.Matrix4x4();
       mtx.translation = this.editableNode.mtxLocal.translation;
@@ -41,11 +44,8 @@ namespace Fudge {
 
       if (nodeWasPicked && !arrowWasPicked) {
         this.dragging = true;
-        this.distance = ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, this.viewport.camera.pivot.translation).magnitude;  //
+        this.distance = ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, this.viewport.camera.pivot.translation).magnitude;
       }
-
-      // console.log("")
-
     }
 
     onmove(_event: ƒ.EventPointer): void {
@@ -113,7 +113,5 @@ namespace Fudge {
       let ray: ƒ.Ray = this.viewport.getRayFromClient(_renderPos);
       return ƒ.Vector3.DIFFERENCE(this.widget.mtxLocal.translation, ray.intersectPlane(this.widget.mtxLocal.translation, ray.direction));
     }
-
-
   }
 }

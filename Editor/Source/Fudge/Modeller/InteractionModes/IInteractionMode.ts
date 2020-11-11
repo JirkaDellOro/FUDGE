@@ -10,13 +10,14 @@ namespace Fudge {
     constructor (viewport: ƒ.Viewport, editableNode: ƒ.Node) {
       this.viewport = viewport;
       this.editableNode = editableNode;
+      this.initialize();
     }
-
 
     abstract onmousedown(_event: ƒ.EventPointer): void;
     abstract onmouseup(_event: ƒ.EventPointer): void;
     // onclick(_event: ƒ.EventPointer): void;
     abstract onmove(_event: ƒ.EventPointer): void;
+    abstract initialize(): void;
     abstract cleanup(): void;
 
     protected getPosRenderFrom(_event: ƒ.EventPointer): ƒ.Vector2 {

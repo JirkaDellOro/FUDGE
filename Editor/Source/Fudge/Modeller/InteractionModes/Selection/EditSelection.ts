@@ -3,22 +3,36 @@ namespace Fudge {
   export class EditSelection extends AbstractSelection {
     selection: Array<number> = [];
 
+    initialize(): void {
+      
+    }
+
     onmousedown(_event: ƒ.EventPointer): void {
-      let vertices: Float32Array = this.editableNode.getComponent(ƒ.ComponentMesh).mesh.vertices;
+      let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+      let vertices: UniqueVertex[] = mesh.uniqueVertices;
       let nearestVertexIndex: number;
-      let shortestDistance: number = Number.MAX_VALUE;
+      let shortestDistanceToCam: number = Number.MAX_VALUE;
+      let shortestDistanceToRay: number = Number.MAX_VALUE;
       let vertexWasPicked: boolean = false;
 
       let ray: ƒ.Ray = this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY));
 
-      for (let i: number = 0; i < vertices.length / 2; i += 3) {
-        let vertex: ƒ.Vector3 = new ƒ.Vector3(vertices[i], vertices[i + 1], vertices[i + 2]);
+      for (let i: number = 0; i < vertices.length; i++) {
+        let vertex: ƒ.Vector3 = vertices[i].position;
         let vertexTranslation: ƒ.Vector3 = ƒ.Vector3.SUM(this.editableNode.mtxLocal.translation, vertex);
-        let distance: number = ray.getDistance(vertexTranslation).magnitude;
-        if (distance < shortestDistance && distance < 0.1) {
+        let distanceToRay: number = ray.getDistance(vertexTranslation).magnitude;
+        let distanceToCam: number = ƒ.Vector3.DIFFERENCE(this.viewport.camera.pivot.translation, vertexTranslation).magnitude;
+        if (distanceToRay < 0.1) {
           vertexWasPicked = true;
-          shortestDistance = distance;
-          nearestVertexIndex = i;
+          if (distanceToRay - shortestDistanceToRay < -0.05) {
+            shortestDistanceToCam = distanceToCam;
+            shortestDistanceToRay = distanceToRay;
+            nearestVertexIndex = i;  
+          } else if (distanceToRay - shortestDistanceToRay < 0.03 && distanceToCam < shortestDistanceToCam) {
+            shortestDistanceToCam = distanceToCam;
+            shortestDistanceToRay = distanceToRay;
+            nearestVertexIndex = i;  
+          }
         } 
       }
       if (!vertexWasPicked) {
@@ -28,7 +42,6 @@ namespace Fudge {
         if (!wasSelectedAlready) 
           this.selection.push(nearestVertexIndex);
       }
-
       console.log("vertices selected: " + this.selection);
     }
 

@@ -1,7 +1,7 @@
 namespace Fudge {
   export enum ControlMode {
-    OBJECT_MODE,
-    EDIT_MODE
+    OBJECT_MODE = "ObjectMode",
+    EDIT_MODE = "EditMode"
   }
 
   export enum InteractionMode {

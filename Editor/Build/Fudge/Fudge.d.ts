@@ -190,23 +190,25 @@ declare namespace Fudge {
     import ƒ = FudgeCore;
     class Controller {
         private interactionMode;
-        private controlMode;
+        private currentControlMode;
         private viewport;
         private editableNode;
+        private controlModesMap;
         constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
-        get ControlMode(): AbstractControlMode;
+        get controlMode(): AbstractControlMode;
+        get controlModes(): Record<ControlMode, AbstractControlMode>;
         onmouseup(_event: ƒ.EventPointer): void;
         onmousedown(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
         switchMode(_event: ƒ.EventKeyboard): void;
-        setControlMode(mode: AbstractControlMode): void;
+        setControlMode(mode: ControlMode): void;
         setInteractionMode(mode: InteractionMode): void;
     }
 }
 declare namespace Fudge {
     enum ControlMode {
-        OBJECT_MODE = 0,
-        EDIT_MODE = 1
+        OBJECT_MODE = "ObjectMode",
+        EDIT_MODE = "EditMode"
     }
     enum InteractionMode {
         SELECT = "Select",
@@ -220,6 +222,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     abstract class AbstractControlMode {
         static readonly subclasses: typeof AbstractControlMode[];
+        formerMode: IInteractionMode;
         modes: {
             [mode in InteractionMode]?: {
                 type: typeof IInteractionMode;
@@ -262,6 +265,7 @@ declare namespace Fudge {
         abstract onmousedown(_event: ƒ.EventPointer): void;
         abstract onmouseup(_event: ƒ.EventPointer): void;
         abstract onmove(_event: ƒ.EventPointer): void;
+        abstract initialize(): void;
         abstract cleanup(): void;
         protected getPosRenderFrom(_event: ƒ.EventPointer): ƒ.Vector2;
     }
@@ -273,6 +277,7 @@ declare namespace Fudge {
         viewport: ƒ.Viewport;
         editableNode: ƒ.Node;
         constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
+        initialize(): void;
         onmousedown(_event: ƒ.EventPointer): void;
         onmouseup(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
@@ -296,6 +301,7 @@ declare namespace Fudge {
     import ƒ = FudgeCore;
     class EditRotation extends AbstractRotation {
         selection: ƒ.Node;
+        initialize(): void;
         onmousedown(_event: ƒ.EventPointer): void;
         onmouseup(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
@@ -309,6 +315,7 @@ declare namespace Fudge {
         private previousIntersection;
         private oldColor;
         constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
+        initialize(): void;
         onmousedown(_event: ƒ.EventPointer): void;
         onmouseup(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
@@ -333,19 +340,11 @@ declare namespace Fudge {
     import ƒ = FudgeCore;
     class EditSelection extends AbstractSelection {
         selection: Array<number>;
+        initialize(): void;
         onmousedown(_event: ƒ.EventPointer): void;
         onmouseup(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
         private removeSelectedVertexIfAlreadySelected;
-    }
-}
-declare namespace Fudge {
-    import ƒ = FudgeCore;
-    class ObjectSelection extends AbstractSelection {
-        selection: ƒ.Node;
-        onmousedown(_event: ƒ.EventPointer): void;
-        onmouseup(_event: ƒ.EventPointer): void;
-        onmove(_event: ƒ.EventPointer): void;
     }
 }
 declare namespace Fudge {
@@ -366,6 +365,9 @@ declare namespace Fudge {
 declare namespace Fudge {
     class EditTranslation extends AbstractTranslation {
         selection: Array<number>;
+        private copyOfSelectedVertices;
+        initialize(): void;
+        createNormalArrows(): void;
         onmousedown(_event: ƒ.EventPointer): void;
         onmouseup(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
@@ -376,11 +378,34 @@ declare namespace Fudge {
         private pickedArrow;
         private distanceBetweenWidgetPivotAndPointer;
         constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
+        initialize(): void;
         onmouseup(_event: ƒ.EventPointer): void;
         onmousedown(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
         private isArrow;
         private calculateWidgetDistanceFrom;
+    }
+}
+declare namespace Fudge {
+    class ModifiableMesh extends ƒ.Mesh {
+        private _uniqueVertices;
+        constructor();
+        get uniqueVertices(): UniqueVertex[];
+        updatePositionOfVertices(selectedIndices: number[], diffToOldPosition: ƒ.Vector3, oldVertexPositions: Record<number, ƒ.Vector3>): void;
+        protected findOrderOfTrigonFromSelectedVertex(selectedIndices: number[]): Array<Array<number>>;
+        protected updatePositionOfVertex(vertexIndex: number, newPosition: ƒ.Vector3): void;
+        protected createVertices(): Float32Array;
+        protected createTextureUVs(): Float32Array;
+        protected createIndices(): Uint16Array;
+        protected createFaceNormals(): Float32Array;
+        private update;
+    }
+}
+declare namespace Fudge {
+    class UniqueVertex {
+        position: ƒ.Vector3;
+        indices: Record<number, number[]>;
+        constructor(_position: ƒ.Vector3, _indices: Record<number, number[]>);
     }
 }
 declare namespace Fudge {

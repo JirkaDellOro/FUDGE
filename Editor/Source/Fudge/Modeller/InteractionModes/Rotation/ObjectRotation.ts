@@ -8,6 +8,9 @@ namespace Fudge {
 
     constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node) {
       super(viewport, editableNode);
+    }
+
+    initialize(): void {
       let widget: RotationWidget = new RotationWidget();
       let mtx: ƒ.Matrix4x4 = new ƒ.Matrix4x4();
       mtx.translation = this.editableNode.mtxLocal.translation;
@@ -105,16 +108,12 @@ namespace Fudge {
         // posAtIntersection.y + posAtIntersection.z * cameraTranslationNorm.y, 
         // (-posAtIntersection.z * cameraTranslationNorm.x) + (posAtIntersection.x * cameraTranslationNorm.z) + (-posAtIntersection.x * cameraTranslationNorm.y));
         // (Math.abs(objrotation.y) > 90 ? posAtIntersection.z * Math.abs(cameraTranslationNorm.x) : - posAtIntersection.z * Math.abs(cameraTranslationNorm.x)
-        
-        // (cameraTranslationNorm.x > 0 ? -(posAtIntersection.z * cameraTranslationNorm.x) : (posAtIntersection.z * cameraTranslationNorm.x))
-        // (cameraTranslationNorm.z > 0 ? (posAtIntersection.x * cameraTranslationNorm.z) : -(posAtIntersection.x * cameraTranslationNorm.z))
-      
-      
+
+        // swapped signs, should work too
         // - posAtIntersection.y - posAtIntersection.z * cameraTranslationNorm.y, 
         // - posAtIntersection.z * Math.abs(cameraTranslationNorm.x)
         // - posAtIntersection.x * Math.abs(cameraTranslationNorm.z) 
         // + posAtIntersection.x * cameraTranslationNorm.y);
-
       }
   }
 }

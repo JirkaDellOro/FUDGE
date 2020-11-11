@@ -9,7 +9,7 @@ namespace Fudge {
 
       this.goldenLayout.registerComponent(VIEW.MODELLER, ViewModellerScene);
       this.goldenLayout.registerComponent(VIEW.HIERARCHY, ViewHierarchy);
-      this.goldenLayout.registerComponent(VIEW.PROPERTIES, ViewProperties);
+      this.goldenLayout.registerComponent(VIEW.PROPERTIES, ViewObjectProperties);
 
 
       let inner: GoldenLayout.ContentItem = this.goldenLayout.root.contentItems[0];
@@ -21,7 +21,7 @@ namespace Fudge {
       inner.addChild({
         type: "column", content: [
           { type: "component", componentName: VIEW.HIERARCHY, componentState: _state, title: "Hierarchy" },
-          { type: "component", componentName: VIEW.PROPERTIES, componentState: _state }
+          { type: "component", componentName: VIEW.PROPERTIES, componentState: _state, title: "Properties" }
       ]
       });
     }

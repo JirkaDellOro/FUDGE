@@ -2,19 +2,27 @@ namespace Fudge {
   import ƒ = FudgeCore;
   export class Controller {
     private interactionMode: IInteractionMode;
-    private controlMode: AbstractControlMode;
+    private currentControlMode: AbstractControlMode;
     private viewport: ƒ.Viewport;
     private editableNode: ƒ.Node;
+    private controlModesMap: Record<ControlMode, AbstractControlMode> = {
+      [ControlMode.OBJECT_MODE]: new ObjectMode(),
+      [ControlMode.EDIT_MODE]: new EditMode()
+    };
 
     constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node) {
       this.viewport = viewport;
-      this.controlMode = new ObjectMode();
+      this.currentControlMode = this.controlModesMap[ControlMode.OBJECT_MODE];
       this.editableNode = editableNode;
       this.setInteractionMode(InteractionMode.IDLE);
     }
 
-    public get ControlMode(): AbstractControlMode {
-      return this.controlMode;
+    public get controlMode(): AbstractControlMode {
+      return this.currentControlMode;
+    }
+
+    public get controlModes(): Record<ControlMode, AbstractControlMode> {
+      return this.controlModesMap;
     }
 
     public onmouseup(_event: ƒ.EventPointer): void {
@@ -33,15 +41,15 @@ namespace Fudge {
       if (_event.ctrlKey) {
         switch (_event.key) {
           case "e": 
-            this.setControlMode(new EditMode());
+            this.setControlMode(ControlMode.EDIT_MODE);
             break;
           case "n": 
-            this.setControlMode(new ObjectMode());
+            this.setControlMode(ControlMode.OBJECT_MODE);
             break;
           default: 
             let selectedMode: InteractionMode;
-            for (let mode in this.controlMode.modes) {
-              if (this.controlMode.modes[mode].shortcut === _event.key) {
+            for (let mode in this.currentControlMode.modes) {
+              if (this.currentControlMode.modes[mode].shortcut === _event.key) {
                 selectedMode = <InteractionMode> mode;
               }
             }
@@ -52,16 +60,19 @@ namespace Fudge {
       }
     }
     
-    public setControlMode(mode: AbstractControlMode): void {
-      this.controlMode = mode;
+    public setControlMode(mode: ControlMode): void {
+      this.currentControlMode.formerMode = this.interactionMode;
+      this.currentControlMode = this.controlModesMap[mode];
       console.log(mode);
-      this.setInteractionMode(this.interactionMode.type);
+      this.interactionMode?.cleanup();
+      this.interactionMode = this.currentControlMode.formerMode || new IdleMode(this.viewport, this.editableNode);
+      this.interactionMode.initialize();
+      console.log("Current Mode: " + this.interactionMode.type);
     }
 
     public setInteractionMode(mode: InteractionMode): void {
-      // mode = InteractionMode.ROTATE;
       this.interactionMode?.cleanup();
-      let type: any = this.controlMode.modes[mode]?.type || IdleMode;
+      let type: any = this.currentControlMode.modes[mode]?.type || IdleMode;
       let selection: Object  = this.interactionMode?.selection;        
       this.interactionMode = new type(this.viewport, this.editableNode);
 

@@ -14,6 +14,8 @@ namespace Fudge {
       super(_container, _state);
       this.graph = <ƒ.Node><unknown>_state["node"];
       this.createUserInterface();
+      ƒaid.addStandardLightComponents(this.graph, new ƒ.Color(0.5, 0.5, 0.5));
+      this.graph.addChild(new ƒaid.NodeCoordinateSystem("WorldCooSys"));
       this.node = this.graph.getChildrenByName("Default")[0];
       this.controller = new Controller(this.viewport, this.node);
       // tslint:disable-next-line: no-unused-expression
@@ -65,36 +67,38 @@ namespace Fudge {
       let item: Electron.MenuItem;
 
       let submenu: Electron.Menu = new remote.Menu();
-      submenu.append(new remote.MenuItem({label: "Object"}));
-
-      item = new remote.MenuItem({
-        label: "Control Mode",
-        submenu: ContextMenu.getSubclassMenu<typeof AbstractControlMode>(CONTEXTMENU.CONTROL_MODE, AbstractControlMode.subclasses, _callback)
-      });
-
-      menu.append(item);
-
-      // let currentControl: typeof AbstractControlMode;
-      // for (let subclass of AbstractControlMode.subclasses) {
-      //   if (subclass == this.controller.ControlMode.constructor) {
-      //     currentControl = subclass;
-      //   }
-      // }
+      // submenu.append(new remote.MenuItem({label: "Object"}));
 
       // item = new remote.MenuItem({
-      //   label: "Mode",
-      //   submenu: ContextMenu.getSubclassMenu<typeof IInteractionMode>(CONTEXTMENU.CREATE, currentControl.modes, _callback)
+      //   label: "Control Mode",
+      //   submenu: ContextMenu.getSubclassMenu<typeof AbstractControlMode>(CONTEXTMENU.CONTROL_MODE, AbstractControlMode.subclasses, _callback)
       // });
 
       if (!this.controller) {
         return menu;
       }
 
+      for (let mode in this.controller.controlModes) {
+        let subitem: Electron.MenuItem = new remote.MenuItem(
+          { label: mode, id: String(CONTEXTMENU.CONTROL_MODE), click: _callback}
+        );
+        //@ts-ignore
+        subitem.overrideProperty("controlMode", mode);
+        submenu.append(subitem);
+      }
+      item = new remote.MenuItem({
+        label: "Control Mode",
+        submenu: submenu
+      });
+      menu.append(item);
+
+
       submenu = new remote.Menu();
 
-      for (let mode in this.controller.ControlMode.modes) {
+      // TODO: fix tight coupling here, only retrieve the shortcut from the controller
+      for (let mode in this.controller.controlMode.modes) {
         let subitem: Electron.MenuItem = new remote.MenuItem(
-          { label: mode, id: String(CONTEXTMENU.INTERACTION_MODE), click: _callback, accelerator: process.platform == "darwin" ? "Command+" + this.controller.ControlMode.modes[mode].shortcut : "ctrl+" + this.controller.ControlMode.modes[mode].shortcut  }
+          { label: mode, id: String(CONTEXTMENU.INTERACTION_MODE), click: _callback, accelerator: process.platform == "darwin" ? "Command+" + this.controller.controlMode.modes[mode].shortcut : "ctrl+" + this.controller.controlMode.modes[mode].shortcut  }
         );
         //@ts-ignore
         subitem.overrideProperty("interactionMode", mode);
@@ -112,10 +116,10 @@ namespace Fudge {
     protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void { 
       switch (Number(_item.id)) {
         case CONTEXTMENU.CONTROL_MODE: 
-          let iSubclass: number = _item["iSubclass"];
-          let type: typeof AbstractControlMode = AbstractControlMode.subclasses[iSubclass];
-          //@ts-ignore
-          let controlModeNew: AbstractControlMode = new type();
+          let controlModeNew: ControlMode = _item["controlMode"];
+          // let type: typeof AbstractControlMode = AbstractControlMode.subclasses[iSubclass];
+          // //@ts-ignore
+          // let controlModeNew: AbstractControlMode = new type();
           this.controller.setControlMode(controlModeNew);
           // ƒ.Debug.info(meshNew.type, meshNew);
 

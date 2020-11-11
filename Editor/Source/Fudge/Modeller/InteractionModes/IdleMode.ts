@@ -9,6 +9,10 @@ namespace Fudge {
       super(viewport, editableNode);
     }
 
+    initialize(): void {
+      //@ts-ignore
+    }
+
     onmousedown(_event: ƒ.EventPointer): void {
       //@ts-ignore
     }
