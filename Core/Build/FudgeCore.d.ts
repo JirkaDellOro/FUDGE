@@ -1887,6 +1887,11 @@ declare namespace FudgeCore {
     abstract class Keyboard {
         private static keysPressed;
         /**
+         * Returns true if the given key is currently being pressed
+         * @param _code The keycode of the key to be checked
+         */
+        static isPressed(_code: KEYBOARD_CODE): boolean;
+        /**
          * Returns true if one of the given keys is is currently being pressed.
          */
         static isPressedOne(_keys: KEYBOARD_CODE[]): boolean;
@@ -1899,8 +1904,28 @@ declare namespace FudgeCore {
          * Returns the value given as _inactive if not.
          */
         static mapToValue<T>(_active: T, _inactive: T, _keys: KEYBOARD_CODE[], _combo?: boolean): T;
+        /**
+         * Returns the value given as _actibe if _key is pressed.
+         * Returns the value given as _inactive if not.
+         * @param _active The value which is returned when _key is pressed
+         * @param _inactive The value which is returned when _key is not pressed
+         * @param _key The keycode to map the values to
+         */
+        static mapToValueOne<T>(_active: T, _inactive: T, _key: KEYBOARD_CODE): T;
         private static initialize;
         private static hndKeyInteraction;
+    }
+}
+declare namespace FudgeCore {
+    class Listener extends Control {
+        protected keyPressed: boolean;
+        protected key: KEYBOARD_CODE;
+        protected mappedInactive: number;
+        protected mappedActive: number;
+        constructor(_name: string, _factor: number, _key: KEYBOARD_CODE, _type?: CONTROL_TYPE, _active?: boolean);
+        setInputMapped(_active: number, _inactive: number): void;
+        getOutput(): number;
+        protected hndLoop: () => void;
     }
 }
 declare namespace FudgeCore {

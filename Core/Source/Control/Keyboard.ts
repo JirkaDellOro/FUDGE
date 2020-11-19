@@ -11,10 +11,12 @@ namespace FudgeCore {
 
     /**
      * Returns true if the given key is currently being pressed
-     * @param _key The keycode of the key to be checked
+     * @param _code The keycode of the key to be checked
      */
-    public static isPressed(_key: KEYBOARD_CODE): boolean {
-      return Keyboard.keysPressed[_key];
+    public static isPressed(_code: KEYBOARD_CODE): boolean {
+      if (Keyboard.keysPressed[_code])
+        return true;
+      return false;
     }
 
     /**
