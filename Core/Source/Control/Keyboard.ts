@@ -10,6 +10,16 @@ namespace FudgeCore {
     private static keysPressed: KeyPressed = Keyboard.initialize();
 
     /**
+     * Returns true if the given key is currently being pressed
+     * @param _code The keycode of the key to be checked
+     */
+    public static isPressed(_code: KEYBOARD_CODE): boolean {
+      if (Keyboard.keysPressed[_code])
+        return true;
+      return false;
+    }
+
+    /**
      * Returns true if one of the given keys is is currently being pressed.
      */
     public static isPressedOne(_keys: KEYBOARD_CODE[]): boolean {
@@ -39,6 +49,19 @@ namespace FudgeCore {
       if (!_combo && Keyboard.isPressedOne(_keys))
         return _active;
       if (Keyboard.isPressedCombo(_keys))
+        return _active;
+      return _inactive;
+    }
+
+    /**
+     * Returns the value given as _actibe if _key is pressed.
+     * Returns the value given as _inactive if not.
+     * @param _active The value which is returned when _key is pressed
+     * @param _inactive The value which is returned when _key is not pressed
+     * @param _key The keycode to map the values to
+     */
+    public static mapToValueOne<T>(_active: T, _inactive: T, _key: KEYBOARD_CODE): T {
+      if (Keyboard.isPressed(_key))
         return _active;
       return _inactive;
     }
