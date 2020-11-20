@@ -537,6 +537,7 @@ declare namespace Fudge {
         get uniqueVertices(): UniqueVertex[];
         testNormals(): void;
         extrude(selectedIndices: number[]): number[];
+        private addIndicesToNewVertices;
         private getNewVertices;
         private findEdgesFrom;
         private findCorrectFace;
