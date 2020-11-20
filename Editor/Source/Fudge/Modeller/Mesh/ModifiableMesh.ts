@@ -56,6 +56,18 @@ namespace Fudge {
       this.normalsFace = this.calculateFaceNormals();
     }
 
+    public rotateBy(matrix: ƒ.Matrix4x4, center: ƒ.Vector3, selection: number[] = Array.from(Array(this.uniqueVertices.length).keys())): void {
+      // TODO: actually rotate around world coordinates here
+      for (let vertexIndex of selection) {
+        let newVertexPos: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(this.uniqueVertices[vertexIndex].position, center);
+        newVertexPos.transform(matrix);
+        this.uniqueVertices[vertexIndex].position = ƒ.Vector3.SUM(newVertexPos, center);
+      }
+      this.vertices = this.createVertices();
+      this.updateNormals(this.findOrderOfTrigonFromSelectedVertex(selection));
+      this.createRenderBuffers();
+    }
+
     public extrude(selectedIndices: number[]): number[] {
       let faceVertices: Map<number, number> = this.findCorrectFace(selectedIndices);
       this.addIndicesToNewVertices(this.findEdgesFrom(faceVertices), this.getNewVertices(faceVertices));

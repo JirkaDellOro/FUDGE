@@ -19,7 +19,6 @@ namespace Fudge {
       for (let vertexIndex of this.selection) {
         this.copyOfSelectedVertices.set(vertexIndex, new ƒ.Vector3(vertices[vertexIndex].position.x, vertices[vertexIndex].position.y, vertices[vertexIndex].position.z));
       }
-
     }
 
     onmouseup(_event: ƒ.EventPointer): void {

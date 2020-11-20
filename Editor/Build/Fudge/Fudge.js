@@ -1602,7 +1602,6 @@ var Fudge;
                 return;
             let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
             this.selection = mesh.extrude(this.selection);
-            this.createNormalArrows();
             this.isExtruded = true;
             this.distance = ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, this.viewport.camera.pivot.translation).magnitude;
             this.copyOfSelectedVertices = new Map();
@@ -1613,6 +1612,7 @@ var Fudge;
         }
         onmouseup(_event) {
             this.isExtruded = false;
+            this.createNormalArrows();
         }
         onmove(_event) {
             if (!this.isExtruded)
@@ -1631,41 +1631,10 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     class AbstractRotation extends Fudge.IInteractionMode {
-        constructor() {
-            super(...arguments);
-            this.type = Fudge.InteractionMode.ROTATE;
-        }
-        cleanup() {
-            this.viewport.getGraph().removeChild(this.widget);
-        }
-    }
-    Fudge.AbstractRotation = AbstractRotation;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    class EditRotation extends Fudge.AbstractRotation {
-        initialize() {
-            throw new Error("Method not implemented.");
-        }
-        onmousedown(_event) {
-            console.log("EditRotation activated");
-            console.log(this.selection);
-        }
-        onmouseup(_event) {
-            throw new Error("Method not implemented.");
-        }
-        onmove(_event) {
-            throw new Error("Method not implemented.");
-        }
-    }
-    Fudge.EditRotation = EditRotation;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    var ƒ = FudgeCore;
-    class ObjectRotation extends Fudge.AbstractRotation {
         constructor(viewport, editableNode) {
             super(viewport, editableNode);
+            // TODO: maybe get rid of type properties, only useful for debugging anyways
+            this.type = Fudge.InteractionMode.ROTATE;
         }
         initialize() {
             let widget = new Fudge.RotationWidget();
@@ -1711,33 +1680,38 @@ var Fudge;
             }
             this.pickedCircle = null;
         }
-        onmove(_event) {
-            if (!this.pickedCircle)
-                return;
+        getRotationVector(_event) {
             let intersection = this.getIntersection(this.getPosRenderFrom(_event));
             let cameraNorm = ƒ.Vector3.NORMALIZATION(this.viewport.camera.pivot.translation);
             let angle = this.getAngle(this.getOrthogonalVector(intersection, cameraNorm), this.getOrthogonalVector(this.previousIntersection, cameraNorm));
-            //             new ƒ.Vector2(intersection.y + intersection.z * cameraNorm.y, 
-            //               (-intersection.z * cameraNorm.x) + (intersection.x * cameraNorm.z) + (-intersection.x * cameraNorm.y)), 
-            // new ƒ.Vector2(this.previousIntersection.y + this.previousIntersection.z * cameraNorm.y,
-            //               (-this.previousIntersection.z * cameraNorm.x) + (this.previousIntersection.x * cameraNorm.z) + (-this.previousIntersection.x * cameraNorm.y))); // Math.atan2(intersection.y, intersection.x) - Math.atan2(this.previousIntersection.y, this.previousIntersection.x);
             angle = angle * (180 / Math.PI);
-            console.log("inter: " + intersection + " angle: " + angle);
-            console.log("camera: " + cameraNorm);
-            console.log("obj_rot: " + this.editableNode.mtxLocal.rotation);
+            // console.log("intersection: " + intersection + " angle: " + angle);
+            // console.log("camera: " + cameraNorm);
+            // console.log("obj_rot: " + this.editableNode.mtxLocal.rotation);
+            let rotationVector;
+            let rotationMatrix;
             switch (this.pickedCircle.name) {
                 case "Z_Rotation":
                     this.widget.mtxLocal.rotateZ(angle);
+                    rotationVector = new ƒ.Vector3(0, 0, angle);
+                    rotationMatrix = ƒ.Matrix4x4.ROTATION_Z(angle);
                     break;
                 case "Y_Rotation":
                     this.widget.mtxLocal.rotateY(angle);
+                    rotationVector = new ƒ.Vector3(0, angle, 0);
+                    rotationMatrix = ƒ.Matrix4x4.ROTATION_Y(angle);
                     break;
                 case "X_Rotation":
+                    rotationVector = new ƒ.Vector3(angle, 0, 0);
                     this.widget.mtxLocal.rotateX(angle);
+                    rotationMatrix = ƒ.Matrix4x4.ROTATION_X(angle);
                     break;
+                default:
+                    console.log(this.pickedCircle.name);
             }
-            this.editableNode.mtxLocal.rotation = this.widget.mtxLocal.rotation;
             this.previousIntersection = intersection;
+            //this.editableNode.mtxLocal.rotation = this.widget.mtxLocal.rotation;
+            return rotationMatrix;
         }
         getIntersection(posRender) {
             let ray = this.viewport.getRayFromClient(posRender);
@@ -1758,6 +1732,91 @@ var Fudge;
             // - posAtIntersection.z * Math.abs(cameraTranslationNorm.x)
             // - posAtIntersection.x * Math.abs(cameraTranslationNorm.z) 
             // + posAtIntersection.x * cameraTranslationNorm.y);
+        }
+        cleanup() {
+            this.viewport.getGraph().removeChild(this.widget);
+        }
+    }
+    Fudge.AbstractRotation = AbstractRotation;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    var ƒ = FudgeCore;
+    class EditRotation extends Fudge.AbstractRotation {
+        constructor() {
+            super(...arguments);
+            this.selection = [];
+        }
+        onmove(_event) {
+            if (!this.pickedCircle)
+                return;
+            let rotationMatrix = super.getRotationVector(_event);
+            let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+            mesh.rotateBy(rotationMatrix, this.editableNode.mtxLocal.translation, this.selection);
+        }
+    }
+    Fudge.EditRotation = EditRotation;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    var ƒ = FudgeCore;
+    class ObjectRotation extends Fudge.AbstractRotation {
+        // private pickedCircle: WidgetCircle;
+        // private previousIntersection: ƒ.Vector3;
+        // private oldColor: ƒ.Color;
+        constructor(viewport, editableNode) {
+            super(viewport, editableNode);
+        }
+        // initialize(): void {
+        //   let widget: RotationWidget = new RotationWidget();
+        //   let mtx: ƒ.Matrix4x4 = new ƒ.Matrix4x4();
+        //   mtx.translation = this.editableNode.mtxLocal.translation;
+        //   mtx.rotation = this.editableNode.mtxLocal.rotation;
+        //   widget.addComponent(new ƒ.ComponentTransform(mtx));
+        //   this.viewport.getGraph().addChild(widget);
+        //   this.widget = widget;
+        // }
+        // onmousedown(_event: ƒ.EventPointer): void {
+        //   this.viewport.createPickBuffers();
+        //   let posRender: ƒ.Vector2 = this.getPosRenderFrom(_event);
+        //   let lowestZBuffer: number = Number.MAX_VALUE;
+        //   let wasPicked: boolean = false;
+        //   for (let hit of this.viewport.pickNodeAt(posRender)) {
+        //     if (hit.zBuffer != 0) {
+        //       for (let circle of this.widget.getChildren()) {
+        //         if (circle == hit.node) {
+        //           if (hit.zBuffer > lowestZBuffer)
+        //             continue;
+        //           wasPicked = true;
+        //           this.pickedCircle = circle;
+        //           lowestZBuffer = hit.zBuffer;
+        //           this.previousIntersection = this.getIntersection(posRender);
+        //         }
+        //       }
+        //     }
+        //   }
+        //   if (wasPicked) {
+        //     this.oldColor = this.pickedCircle.getComponent(ƒ.ComponentMaterial).clrPrimary;
+        //     this.pickedCircle.getComponent(ƒ.ComponentMaterial).clrPrimary = new ƒ.Color(1, 1, 1, 1);
+        //   }
+        //   console.log("cross: " + this.viewport.camera.pivot.translation);
+        // }
+        // onmouseup(_event: ƒ.EventPointer): void {
+        //   if (!this.pickedCircle)
+        //     return;
+        //   for (let circle of this.widget.getChildren()) {
+        //     if (circle == this.pickedCircle) {
+        //       circle.getComponent(ƒ.ComponentMaterial).clrPrimary = this.oldColor;
+        //     }
+        //   }
+        //   this.pickedCircle = null;
+        // }
+        onmove(_event) {
+            if (!this.pickedCircle)
+                return;
+            let rotationMatrix = super.getRotationVector(_event);
+            let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+            mesh.rotateBy(rotationMatrix, this.editableNode.mtxLocal.translation);
         }
     }
     Fudge.ObjectRotation = ObjectRotation;
@@ -2046,6 +2105,17 @@ var Fudge;
         }
         testNormals() {
             this.normalsFace = this.calculateFaceNormals();
+        }
+        rotateBy(matrix, center, selection = Array.from(Array(this.uniqueVertices.length).keys())) {
+            // TODO: actually rotate around world coordinates here
+            for (let vertexIndex of selection) {
+                let newVertexPos = ƒ.Vector3.DIFFERENCE(this.uniqueVertices[vertexIndex].position, center);
+                newVertexPos.transform(matrix);
+                this.uniqueVertices[vertexIndex].position = ƒ.Vector3.SUM(newVertexPos, center);
+            }
+            this.vertices = this.createVertices();
+            this.updateNormals(this.findOrderOfTrigonFromSelectedVertex(selection));
+            this.createRenderBuffers();
         }
         extrude(selectedIndices) {
             let faceVertices = this.findCorrectFace(selectedIndices);

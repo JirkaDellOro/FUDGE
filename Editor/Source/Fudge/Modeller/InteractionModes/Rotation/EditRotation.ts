@@ -1,23 +1,16 @@
 namespace Fudge {
   import ƒ = FudgeCore;
   export class EditRotation extends AbstractRotation {
-    selection: ƒ.Node;
-
-    initialize(): void {
-      throw new Error("Method not implemented.");
-    }
-
-    onmousedown(_event: ƒ.EventPointer): void {
-      console.log("EditRotation activated");
-      console.log(this.selection);
-    }
-
-    onmouseup(_event: ƒ.EventPointer): void {
-      throw new Error("Method not implemented.");
-    }
+    selection: Array<number> = [];
 
     onmove(_event: ƒ.EventPointer): void {
-      throw new Error("Method not implemented.");
+      if (!this.pickedCircle)
+        return;
+
+      let rotationMatrix: ƒ.Matrix4x4 = super.getRotationVector(_event);
+
+      let mesh: ModifiableMesh = <ModifiableMesh>this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+      mesh.rotateBy(rotationMatrix, this.editableNode.mtxLocal.translation, this.selection);
     }
   }
 }

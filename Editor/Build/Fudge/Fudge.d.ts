@@ -440,8 +440,17 @@ declare namespace Fudge {
         selection: Object;
         editableNode: ƒ.Node;
         protected widget: RotationWidget;
-        abstract onmousedown(_event: ƒ.EventPointer): void;
-        abstract onmouseup(_event: ƒ.EventPointer): void;
+        protected pickedCircle: WidgetCircle;
+        protected previousIntersection: ƒ.Vector3;
+        protected oldColor: ƒ.Color;
+        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
+        initialize(): void;
+        onmousedown(_event: ƒ.EventPointer): void;
+        onmouseup(_event: ƒ.EventPointer): void;
+        protected getRotationVector(_event: ƒ.EventPointer): ƒ.Matrix4x4;
+        private getIntersection;
+        private getAngle;
+        private getOrthogonalVector;
         abstract onmove(_event: ƒ.EventPointer): void;
         cleanup(): void;
     }
@@ -449,10 +458,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     import ƒ = FudgeCore;
     class EditRotation extends AbstractRotation {
-        selection: ƒ.Node;
-        initialize(): void;
-        onmousedown(_event: ƒ.EventPointer): void;
-        onmouseup(_event: ƒ.EventPointer): void;
+        selection: Array<number>;
         onmove(_event: ƒ.EventPointer): void;
     }
 }
@@ -460,17 +466,8 @@ declare namespace Fudge {
     import ƒ = FudgeCore;
     class ObjectRotation extends AbstractRotation {
         selection: ƒ.Node;
-        private pickedCircle;
-        private previousIntersection;
-        private oldColor;
         constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
-        initialize(): void;
-        onmousedown(_event: ƒ.EventPointer): void;
-        onmouseup(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
-        private getIntersection;
-        private getAngle;
-        private getOrthogonalVector;
     }
 }
 declare namespace Fudge {
@@ -540,6 +537,7 @@ declare namespace Fudge {
         constructor();
         get uniqueVertices(): UniqueVertex[];
         testNormals(): void;
+        rotateBy(matrix: ƒ.Matrix4x4, center: ƒ.Vector3, selection?: number[]): void;
         extrude(selectedIndices: number[]): number[];
         private addIndicesToNewVertices;
         private getNewVertices;
