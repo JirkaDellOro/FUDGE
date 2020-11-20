@@ -401,6 +401,7 @@ declare namespace Fudge {
         abstract cleanup(): void;
         protected getPosRenderFrom(_event: ƒ.EventPointer): ƒ.Vector2;
         protected createNormalArrows(): void;
+        protected translateVertices(_event: ƒ.EventPointer, distance: number): ƒ.Vector3;
     }
 }
 declare namespace Fudge {
@@ -422,6 +423,9 @@ declare namespace Fudge {
         selection: Array<number>;
         viewport: ƒ.Viewport;
         editableNode: ƒ.Node;
+        private isExtruded;
+        private distance;
+        private copyOfSelectedVertices;
         onmousedown(_event: ƒ.EventPointer): void;
         onmouseup(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
@@ -541,7 +545,7 @@ declare namespace Fudge {
         private getNewVertices;
         private findEdgesFrom;
         private findCorrectFace;
-        updatePositionOfVertices(selectedIndices: number[], diffToOldPosition: ƒ.Vector3, oldVertexPositions: Record<number, ƒ.Vector3>): void;
+        updatePositionOfVertices(selectedIndices: number[], diffToOldPosition: ƒ.Vector3, oldVertexPositions: Map<number, ƒ.Vector3>): void;
         protected findOrderOfTrigonFromSelectedVertex(selectedIndices: number[]): Array<Array<number>>;
         protected updatePositionOfVertex(vertexIndex: number, newPosition: ƒ.Vector3): void;
         protected createVertices(): Float32Array;

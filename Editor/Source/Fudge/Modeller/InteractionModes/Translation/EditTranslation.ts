@@ -2,7 +2,7 @@ namespace Fudge {
   import ƒAid = FudgeAid;
   export class EditTranslation extends AbstractTranslation {
     selection: Array<number>;
-    private copyOfSelectedVertices: Record<number, ƒ.Vector3> = {};
+    private copyOfSelectedVertices: Map<number, ƒ.Vector3>;
 
     initialize(): void {
       this.createNormalArrows();
@@ -13,11 +13,11 @@ namespace Fudge {
         return;
       this.dragging = true;
       this.distance = ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, this.viewport.camera.pivot.translation).magnitude;
-      this.copyOfSelectedVertices = {};
+      this.copyOfSelectedVertices = new Map();
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
       let vertices: UniqueVertex[] = mesh.uniqueVertices;
       for (let vertexIndex of this.selection) {
-        this.copyOfSelectedVertices[vertexIndex] = new ƒ.Vector3(vertices[vertexIndex].position.x, vertices[vertexIndex].position.y, vertices[vertexIndex].position.z);
+        this.copyOfSelectedVertices.set(vertexIndex, new ƒ.Vector3(vertices[vertexIndex].position.x, vertices[vertexIndex].position.y, vertices[vertexIndex].position.z));
       }
     }
 

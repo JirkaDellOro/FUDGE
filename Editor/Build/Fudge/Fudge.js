@@ -1556,6 +1556,12 @@ var Fudge;
                 this.viewport.getGraph().addChild(normalArrow);
             }
         }
+        translateVertices(_event, distance) {
+            let ray = this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY));
+            let newPos = ƒ.Vector3.SUM(ray.origin, ƒ.Vector3.SCALE(ray.direction, distance));
+            let diff = ƒ.Vector3.DIFFERENCE(newPos, this.editableNode.mtxLocal.translation);
+            return diff;
+        }
     }
     Fudge.IInteractionMode = IInteractionMode;
 })(Fudge || (Fudge = {}));
@@ -1587,14 +1593,32 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     class Extrude extends Fudge.IInteractionMode {
+        constructor() {
+            super(...arguments);
+            this.isExtruded = false;
+        }
         onmousedown(_event) {
+            if (!this.selection)
+                return;
             let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
             this.selection = mesh.extrude(this.selection);
             this.createNormalArrows();
+            this.isExtruded = true;
+            this.distance = ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, this.viewport.camera.pivot.translation).magnitude;
+            this.copyOfSelectedVertices = new Map();
+            let vertices = mesh.uniqueVertices;
+            for (let vertexIndex of this.selection) {
+                this.copyOfSelectedVertices.set(vertexIndex, new ƒ.Vector3(vertices[vertexIndex].position.x, vertices[vertexIndex].position.y, vertices[vertexIndex].position.z));
+            }
         }
         onmouseup(_event) {
+            this.isExtruded = false;
         }
         onmove(_event) {
+            if (!this.isExtruded)
+                return;
+            let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+            mesh.updatePositionOfVertices(this.selection, this.translateVertices(_event, this.distance), this.copyOfSelectedVertices);
         }
         initialize() {
             this.createNormalArrows();
@@ -1834,10 +1858,6 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     class EditTranslation extends Fudge.AbstractTranslation {
-        constructor() {
-            super(...arguments);
-            this.copyOfSelectedVertices = {};
-        }
         initialize() {
             this.createNormalArrows();
         }
@@ -1846,11 +1866,11 @@ var Fudge;
                 return;
             this.dragging = true;
             this.distance = ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, this.viewport.camera.pivot.translation).magnitude;
-            this.copyOfSelectedVertices = {};
+            this.copyOfSelectedVertices = new Map();
             let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
             let vertices = mesh.uniqueVertices;
             for (let vertexIndex of this.selection) {
-                this.copyOfSelectedVertices[vertexIndex] = new ƒ.Vector3(vertices[vertexIndex].position.x, vertices[vertexIndex].position.y, vertices[vertexIndex].position.z);
+                this.copyOfSelectedVertices.set(vertexIndex, new ƒ.Vector3(vertices[vertexIndex].position.x, vertices[vertexIndex].position.y, vertices[vertexIndex].position.z));
             }
         }
         onmouseup(_event) {
@@ -2035,8 +2055,8 @@ var Fudge;
             let newSelection = [];
             for (let i = 0; i < faceVertices.size; i++)
                 newSelection.push(this.uniqueVertices.length - faceVertices.size + i);
-            let trigons = this.findOrderOfTrigonFromSelectedVertex(newSelection);
-            this.updateNormals(trigons);
+            // let trigons: Array<Array<number>> = this.findOrderOfTrigonFromSelectedVertex(newSelection);
+            // this.updateNormals(trigons);
             this.createRenderBuffers();
             return newSelection;
         }
@@ -2047,28 +2067,34 @@ var Fudge;
             let newTriangles = [];
             let isLowMap = new Map();
             for (let edge of edges.keys()) {
-                let a = reverse.get(edge);
-                let b = reverse.get(edges.get(edge));
+                let aPlusNArray = reverse.get(edge);
+                let bPlusNArray = reverse.get(edges.get(edge));
+                let a;
+                let b;
+                let aPlusN;
+                let bPlusN;
                 if (isLowMap.get(edge) || isLowMap.get(edges.get(edge))) {
-                    newTriangles.push(originalToNewVertex.get(edge));
-                    newTriangles.push(originalToNewVertex.get(edges.get(edge)));
-                    newTriangles.push(b[2]);
-                    newTriangles.push(b[2]);
-                    newTriangles.push(a[2]);
-                    newTriangles.push(originalToNewVertex.get(edge));
+                    a = originalToNewVertex.get(edge);
+                    b = originalToNewVertex.get(edges.get(edge));
+                    aPlusN = aPlusNArray[2];
+                    bPlusN = bPlusNArray[2];
                     isLowMap.set(edge, false);
                     isLowMap.set(edges.get(edge), false);
                 }
                 else {
-                    newTriangles.push(edge);
-                    newTriangles.push(edges.get(edge));
-                    newTriangles.push(b[1]);
-                    newTriangles.push(b[1]);
-                    newTriangles.push(a[1]);
-                    newTriangles.push(edge);
+                    a = edge;
+                    b = edges.get(edge);
+                    aPlusN = aPlusNArray[1];
+                    bPlusN = bPlusNArray[1];
                     isLowMap.set(edge, true);
                     isLowMap.set(edges.get(edge), true);
                 }
+                newTriangles.push(a);
+                newTriangles.push(b);
+                newTriangles.push(bPlusN);
+                newTriangles.push(bPlusN);
+                newTriangles.push(aPlusN);
+                newTriangles.push(a);
             }
             for (let i = 0; i < newTriangles.length; i++) {
                 this.uniqueVertices[vertexToUniqueVertexMap.get(newTriangles[i])].indices.get(newTriangles[i]).push(this.indices.length + i);
@@ -2089,7 +2115,7 @@ var Fudge;
                 // get the indices from the original face; they will be deleted later
                 let indexArray = this._uniqueVertices[faceVertices.get(faceVertex)].indices.get(faceVertex);
                 // TODO: set position to old position and only move in onmove function
-                let newVertex = new Fudge.UniqueVertex(new ƒ.Vector3(2, this.vertices[faceVertex * 3 + 1], this.vertices[faceVertex * 3 + 2]), new Map());
+                let newVertex = new Fudge.UniqueVertex(new ƒ.Vector3(this.vertices[faceVertex * 3 + 0], this.vertices[faceVertex * 3 + 1], this.vertices[faceVertex * 3 + 2]), new Map());
                 reverse.set(faceVertex, []);
                 let lengthOffset = faceVertices.size;
                 // one index is added for the new vertex for every index of the original vertex
@@ -2171,7 +2197,7 @@ var Fudge;
             if (!selectedIndices)
                 return;
             for (let selection of selectedIndices) {
-                let currentVertex = oldVertexPositions[selection];
+                let currentVertex = oldVertexPositions.get(selection);
                 this.updatePositionOfVertex(selection, new ƒ.Vector3(currentVertex.x + diffToOldPosition.x, currentVertex.y + diffToOldPosition.y, currentVertex.z + diffToOldPosition.z));
             }
             let trigons = this.findOrderOfTrigonFromSelectedVertex(selectedIndices);

@@ -66,8 +66,8 @@ namespace Fudge {
       for (let i: number = 0; i < faceVertices.size; i++) 
         newSelection.push(this.uniqueVertices.length - faceVertices.size + i);
 
-      let trigons: Array<Array<number>> = this.findOrderOfTrigonFromSelectedVertex(newSelection);
-      this.updateNormals(trigons);
+      // let trigons: Array<Array<number>> = this.findOrderOfTrigonFromSelectedVertex(newSelection);
+      // this.updateNormals(trigons);
 
       this.createRenderBuffers();
       return newSelection;
@@ -77,33 +77,38 @@ namespace Fudge {
       let vertexToUniqueVertexMap: Map<number, number> = mapping.vertexToUniqueVertex;
       let reverse: Map<number, number[]> = mapping.reverse;
       let originalToNewVertex: Map<number, number> = mapping.originalToNewVertex;
-
       let newTriangles: number[] = [];
       let isLowMap: Map<number, boolean> = new Map();
 
       for (let edge of edges.keys()) {
-        let a: number[] = reverse.get(edge);
-        let b: number[] = reverse.get(edges.get(edge));
+        let aPlusNArray: number[] = reverse.get(edge);
+        let bPlusNArray: number[] = reverse.get(edges.get(edge));
+        let a: number;
+        let b: number;
+        let aPlusN: number;
+        let bPlusN: number;
 
         if (isLowMap.get(edge) || isLowMap.get(edges.get(edge))) {
-          newTriangles.push(originalToNewVertex.get(edge));
-          newTriangles.push(originalToNewVertex.get(edges.get(edge)));
-          newTriangles.push(b[2]);
-          newTriangles.push(b[2]);
-          newTriangles.push(a[2]);
-          newTriangles.push(originalToNewVertex.get(edge));
+          a = originalToNewVertex.get(edge);
+          b = originalToNewVertex.get(edges.get(edge));
+          aPlusN = aPlusNArray[2];
+          bPlusN = bPlusNArray[2];
           isLowMap.set(edge, false);
           isLowMap.set(edges.get(edge), false);  
         } else {
-          newTriangles.push(edge);
-          newTriangles.push(edges.get(edge));
-          newTriangles.push(b[1]);
-          newTriangles.push(b[1]);
-          newTriangles.push(a[1]);
-          newTriangles.push(edge);
+          a = edge;
+          b = edges.get(edge);
+          aPlusN = aPlusNArray[1];
+          bPlusN = bPlusNArray[1];
           isLowMap.set(edge, true);
           isLowMap.set(edges.get(edge), true);  
         }
+        newTriangles.push(a);
+        newTriangles.push(b);
+        newTriangles.push(bPlusN);
+        newTriangles.push(bPlusN);
+        newTriangles.push(aPlusN);
+        newTriangles.push(a);
       }
 
       for (let i: number = 0; i < newTriangles.length; i++) {
@@ -127,7 +132,7 @@ namespace Fudge {
         // get the indices from the original face; they will be deleted later
         let indexArray: number[] = this._uniqueVertices[faceVertices.get(faceVertex)].indices.get(faceVertex);
         // TODO: set position to old position and only move in onmove function
-        let newVertex: UniqueVertex = new UniqueVertex(new ƒ.Vector3(2, this.vertices[faceVertex * 3 + 1], this.vertices[faceVertex * 3 + 2]), new Map());
+        let newVertex: UniqueVertex = new UniqueVertex(new ƒ.Vector3(this.vertices[faceVertex * 3 + 0], this.vertices[faceVertex * 3 + 1], this.vertices[faceVertex * 3 + 2]), new Map());
         
         reverse.set(faceVertex, []);
         let lengthOffset: number = faceVertices.size;
@@ -214,12 +219,12 @@ namespace Fudge {
     }
 
     // tslint:disable-next-line: member-ordering
-    public updatePositionOfVertices(selectedIndices: number[], diffToOldPosition: ƒ.Vector3, oldVertexPositions: Record<number, ƒ.Vector3>): void {
+    public updatePositionOfVertices(selectedIndices: number[], diffToOldPosition: ƒ.Vector3, oldVertexPositions: Map<number, ƒ.Vector3>): void {
       if (!selectedIndices) 
         return;
       
       for (let selection of selectedIndices) {
-        let currentVertex: ƒ.Vector3 = oldVertexPositions[selection];
+        let currentVertex: ƒ.Vector3 = oldVertexPositions.get(selection);
         this.updatePositionOfVertex(selection, new ƒ.Vector3(currentVertex.x + diffToOldPosition.x, currentVertex.y + diffToOldPosition.y, currentVertex.z + diffToOldPosition.z));
       }
 

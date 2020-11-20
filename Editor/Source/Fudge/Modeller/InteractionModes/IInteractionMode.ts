@@ -63,5 +63,12 @@ namespace Fudge {
       }
     }
 
+    protected translateVertices(_event: ƒ.EventPointer, distance: number): ƒ.Vector3 {
+      let ray: ƒ.Ray = this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY));
+      let newPos: ƒ.Vector3 = ƒ.Vector3.SUM(ray.origin, ƒ.Vector3.SCALE(ray.direction, distance));
+      let diff: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(newPos, this.editableNode.mtxLocal.translation);
+      return diff;
+    }
+
   }
 }
