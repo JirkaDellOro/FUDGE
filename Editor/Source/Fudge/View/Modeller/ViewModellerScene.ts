@@ -116,10 +116,9 @@ namespace Fudge {
     protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void { 
       switch (Number(_item.id)) {
         case CONTEXTMENU.CONTROL_MODE: 
+          // BUG: Sometimes _item does not contain a controlMode property, find out why and fix
           let controlModeNew: ControlMode = _item["controlMode"];
-          // let type: typeof AbstractControlMode = AbstractControlMode.subclasses[iSubclass];
           // //@ts-ignore
-          // let controlModeNew: AbstractControlMode = new type();
           this.controller.setControlMode(controlModeNew);
           // ƒ.Debug.info(meshNew.type, meshNew);
 

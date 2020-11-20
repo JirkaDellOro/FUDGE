@@ -6,7 +6,8 @@ namespace Fudge {
     {
       [InteractionMode.SELECT]: {type: EditSelection, shortcut: "s"}, 
       [InteractionMode.ROTATE]: {type: EditRotation, shortcut: "r"},
-      [InteractionMode.TRANSLATE]: {type: EditTranslation, shortcut: "t"}
+      [InteractionMode.TRANSLATE]: {type: EditTranslation, shortcut: "t"},
+      [InteractionMode.EXTRUDE]: {type: Extrude, shortcut: "e"}
     };
     
     // public setInteractionMode(mode: InteractionMode): IInteractionMode {

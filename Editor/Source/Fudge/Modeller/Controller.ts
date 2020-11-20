@@ -61,6 +61,8 @@ namespace Fudge {
     }
     
     public setControlMode(mode: ControlMode): void {
+      if (!mode)
+        return;
       this.currentControlMode.formerMode = this.interactionMode;
       this.currentControlMode = this.controlModesMap[mode];
       console.log(mode);

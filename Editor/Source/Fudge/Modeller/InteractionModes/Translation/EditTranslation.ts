@@ -7,45 +7,7 @@ namespace Fudge {
     initialize(): void {
       this.createNormalArrows();
     }
-
-    createNormalArrows(): void {
-      for (let node of this.viewport.getGraph().getChildrenByName("normal")) {
-        this.viewport.getGraph().removeChild(node);
-      }
-      let mesh: ƒ.Mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
-      for (let i: number = 0; i < mesh.vertices.length; i += 3) {
-        let vertex: ƒ.Vector3 = new ƒ.Vector3(mesh.vertices[i], mesh.vertices[i + 1], mesh.vertices[i + 2]);
-        let normal: ƒ.Vector3 = new ƒ.Vector3(mesh.normalsFace[i], mesh.normalsFace[i + 1], mesh.normalsFace[i + 2]);
-        let normalArrow: ƒ.Node = new ƒAid.Node("normal", ƒ.Matrix4x4.IDENTITY(), new ƒ.Material("NormalMtr", ƒ.ShaderFlat));
-        let shaft: ƒ.Node = new ƒAid.Node("Shaft", ƒ.Matrix4x4.IDENTITY(), new ƒ.Material("NormalMtr", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("yellow"))), new ƒ.MeshCube());
-        let head: ƒ.Node = new ƒAid.Node("Head", ƒ.Matrix4x4.IDENTITY(), new ƒ.Material("NormalMtr", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("yellow"))), new ƒ.MeshPyramid());
-        shaft.mtxLocal.scale(new ƒ.Vector3(0.01, 0.01, 1));
-        head.mtxLocal.translateZ(0.5);
-        head.mtxLocal.rotateX(90);
-        head.mtxLocal.scale(new ƒ.Vector3(0.05, 0.05, 0.1));
-  
-        shaft.getComponent(ƒ.ComponentMaterial).clrPrimary = ƒ.Color.CSS("yellow");
-        head.getComponent(ƒ.ComponentMaterial).clrPrimary = ƒ.Color.CSS("yellow");
-  
-        normalArrow.addChild(shaft);
-        normalArrow.addChild(head);
-        normalArrow.mtxLocal.translation = vertex;
-        let vector = ƒ.Vector3.SUM(vertex, normal);
-        try {
-          normalArrow.mtxLocal.lookAt(vector);
-        } catch {
-          if (normal.y > 0) {
-            normalArrow.mtxLocal.rotateX(-90);
-          } else {
-            normalArrow.mtxLocal.rotateX(90);
-          }
-        }
-        this.viewport.getGraph().addChild(normalArrow);
-        // normalArrow.addComponent(new ƒ.ComponentTransform())
-        //this.viewport.draw();
-      }
-    }
-
+    
     onmousedown(_event: ƒ.EventPointer): void {
       if (!this.selection) 
         return;

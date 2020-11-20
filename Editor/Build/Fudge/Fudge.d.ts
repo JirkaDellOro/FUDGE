@@ -400,6 +400,7 @@ declare namespace Fudge {
         abstract initialize(): void;
         abstract cleanup(): void;
         protected getPosRenderFrom(_event: ƒ.EventPointer): ƒ.Vector2;
+        protected createNormalArrows(): void;
     }
 }
 declare namespace Fudge {
@@ -413,6 +414,18 @@ declare namespace Fudge {
         onmousedown(_event: ƒ.EventPointer): void;
         onmouseup(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
+        cleanup(): void;
+    }
+}
+declare namespace Fudge {
+    class Extrude extends IInteractionMode {
+        selection: Array<number>;
+        viewport: ƒ.Viewport;
+        editableNode: ƒ.Node;
+        onmousedown(_event: ƒ.EventPointer): void;
+        onmouseup(_event: ƒ.EventPointer): void;
+        onmove(_event: ƒ.EventPointer): void;
+        initialize(): void;
         cleanup(): void;
     }
 }
@@ -499,7 +512,6 @@ declare namespace Fudge {
         selection: Array<number>;
         private copyOfSelectedVertices;
         initialize(): void;
-        createNormalArrows(): void;
         onmousedown(_event: ƒ.EventPointer): void;
         onmouseup(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
@@ -523,6 +535,11 @@ declare namespace Fudge {
         private _uniqueVertices;
         constructor();
         get uniqueVertices(): UniqueVertex[];
+        testNormals(): void;
+        extrude(selectedIndices: number[]): number[];
+        private getNewVertices;
+        private findEdgesFrom;
+        private findCorrectFace;
         updatePositionOfVertices(selectedIndices: number[], diffToOldPosition: ƒ.Vector3, oldVertexPositions: Record<number, ƒ.Vector3>): void;
         protected findOrderOfTrigonFromSelectedVertex(selectedIndices: number[]): Array<Array<number>>;
         protected updatePositionOfVertex(vertexIndex: number, newPosition: ƒ.Vector3): void;
@@ -537,8 +554,8 @@ declare namespace Fudge {
 declare namespace Fudge {
     class UniqueVertex {
         position: ƒ.Vector3;
-        indices: Record<number, number[]>;
-        constructor(_position: ƒ.Vector3, _indices: Record<number, number[]>);
+        indices: Map<number, number[]>;
+        constructor(_position: ƒ.Vector3, _indices: Map<number, number[]>);
     }
 }
 declare namespace Fudge {

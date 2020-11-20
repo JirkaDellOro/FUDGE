@@ -126,7 +126,7 @@ namespace FudgeCore {
       // starting index for bottom/top vertices
       let k: number = baseCenterIndex + 1;
 
-      for (let i = 0; i < this.sectors; i++, k++) {
+      for (let i: number = 0; i < this.sectors; i++, k++) {
         if (i < this.sectors - 1) {
           // bottom indices right -> center -> left
           indices.push(baseCenterIndex);
@@ -142,7 +142,7 @@ namespace FudgeCore {
 
       k = topCenterIndex + 1;
 
-      for (let i = 0; i < this.sectors; i++, k++) {
+      for (let i: number = 0; i < this.sectors; i++, k++) {
         if (i < this.sectors - 1) {
           // top indices right -> center -> left
           indices.push(topCenterIndex);
@@ -161,7 +161,7 @@ namespace FudgeCore {
       // save k1 here for the wraparound on the last triangle
       k = k1;
 
-      for (let i = 0; i < this.sectors; i++, k1++, k2++) {
+      for (let i: number = 0; i < this.sectors; i++, k1++, k2++) {
         // side indices: top right -> top left -> bottom right
         indices.push(k1);
         indices.push(k1 + 1);

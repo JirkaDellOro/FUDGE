@@ -156,7 +156,7 @@ namespace Fudge {
       });
 
       ipcRenderer.on(MENU.PANEL_MODELLER_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-        let node = new ƒ.Node("graph");
+        let node: ƒ.Node = new ƒ.Node("graph");
         let defaultNode: ƒ.Node = new ƒaid.Node("Default", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderFlat, new ƒ.CoatColored()), new ModifiableMesh());
         node.addChild(defaultNode);  
 
