@@ -49,7 +49,7 @@ namespace Fudge {
         normalArrow.addChild(shaft);
         normalArrow.addChild(head);
         normalArrow.mtxLocal.translation = vertex;
-        let vector = ƒ.Vector3.SUM(vertex, normal);
+        let vector: ƒ.Vector3 = ƒ.Vector3.SUM(vertex, normal);
         try {
           normalArrow.mtxLocal.lookAt(vector);
         } catch {

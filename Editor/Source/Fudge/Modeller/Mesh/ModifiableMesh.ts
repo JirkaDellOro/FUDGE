@@ -52,8 +52,16 @@ namespace Fudge {
       return this._uniqueVertices;
     }
 
-    public testNormals() {
-      this.normalsFace = this.calculateFaceNormals();
+    public export(): string {
+      let serialization: Object = {
+        vertices: Array.from(this.vertices),
+        indices: Array.from(this.indices),
+        normals: Array.from(this.normalsFace),
+        textureCoordinates: Array.from(this.textureUVs)
+      };
+      return JSON.stringify(serialization, null, 2);
+       
+      // console.log(serialization);
     }
 
     public rotateBy(matrix: ƒ.Matrix4x4, center: ƒ.Vector3, selection: number[] = Array.from(Array(this.uniqueVertices.length).keys())): void {
@@ -177,7 +185,7 @@ namespace Fudge {
     }
 
     /* 
-      find the boundary corresponding edges from the selection
+      find the boundary edges from selection
     */
     private findEdgesFrom(selection: Map<number, number>): Map<number, number> {
       let indices: number[] = [];
@@ -247,7 +255,7 @@ namespace Fudge {
 
     /*
       finds the ordering of the trigons by searching for the selected vertex in the indices array
-      returns an array with another array, that stores the correct ordering
+      returns an array with another array which stores the correct ordering
     */
     // tslint:disable-next-line: member-ordering
     protected findOrderOfTrigonFromSelectedVertex(selectedIndices: number[]): Array<Array<number>> {
@@ -286,16 +294,6 @@ namespace Fudge {
     // tslint:disable-next-line: member-ordering
     protected createVertices(): Float32Array {
       // TODO maybe don't loop here too somehow?
-      // let length: number = 0;
-      // for (let vertex of this._uniqueVertices) {
-      //   length += vertex.indices.length;
-      // }
-      // let vertices: Float32Array = new Float32Array(length * 3);
-      // for (let vertex of this._uniqueVertices) {
-      //   for (let index of vertex.indices) {
-      //     vertices.set([vertex.position.x, vertex.position.y, vertex.position.z], index * 3);
-      //   }
-      // }
       let length: number = 0;
       for (let vertex of this._uniqueVertices) {
         length += vertex.indices.size * 3;
@@ -380,7 +378,7 @@ namespace Fudge {
 
     private updateNormals(trigons: Array<Array<number>>): void {
       let newNormals: Float32Array = new Float32Array(this.vertices.length);
-      // fix incase length of vertices decreases
+      // TODO: fix incase length of vertices decreases
       newNormals.set(this.normalsFace);
       for (let trigon of trigons) {
         let vertexA: ƒ.Vector3 = new ƒ.Vector3(this.vertices[3 * trigon[0]], this.vertices[3 * trigon[0] + 1], this.vertices[3 * trigon[0] + 2]);

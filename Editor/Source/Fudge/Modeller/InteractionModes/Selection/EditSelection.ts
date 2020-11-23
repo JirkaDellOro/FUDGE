@@ -63,6 +63,5 @@ namespace Fudge {
       }
       return wasSelectedAlready;
     }
-
   }
 }

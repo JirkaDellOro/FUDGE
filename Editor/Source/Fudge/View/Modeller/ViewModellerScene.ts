@@ -19,7 +19,7 @@ namespace Fudge {
       this.node = this.graph.getChildrenByName("Default")[0];
       this.controller = new Controller(this.viewport, this.node);
       // tslint:disable-next-line: no-unused-expression
-      new ControllerModeller(this.viewport);
+      //new ControllerModeller(this.viewport);
       // this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.hndEvent);
       // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
       this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
@@ -41,9 +41,9 @@ namespace Fudge {
 
     createUserInterface(): void {
       let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
-      cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
-      cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
-      cmpCamera.projectCentral(1, 45);
+      // cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
+      // cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
+      // cmpCamera.projectCentral(1, 45);
       //new ƒaid.CameraOrbit(cmpCamera);
       //cmpCamera.pivot.rotateX(90);
 
@@ -53,7 +53,8 @@ namespace Fudge {
       document.body.appendChild(this.canvas);
 
       this.viewport = new ƒ.Viewport();
-      this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
+      this.viewport.initialize("Viewport", this.graph, cmpCamera, this.canvas);
+      ƒaid.Viewport.expandCameraToInteractiveOrbit(this.viewport);
       this.viewport.draw();
 
       this.dom.append(this.canvas);

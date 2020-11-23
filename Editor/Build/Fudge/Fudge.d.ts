@@ -92,6 +92,7 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     function saveProject(): Promise<void>;
+    function saveMesh(jsonString: string): Promise<void>;
     function promptLoadProject(): Promise<URL>;
     function loadProject(_url: URL): Promise<void>;
 }
@@ -143,6 +144,7 @@ declare namespace Fudge {
         private static idCounter;
         private static goldenLayout;
         private static panels;
+        private static currentPanel;
         static start(): Promise<void>;
         static setupGoldenLayout(): void;
         static add(_panel: typeof Panel, _title: string, _state?: Object): void;
@@ -536,7 +538,7 @@ declare namespace Fudge {
         private _uniqueVertices;
         constructor();
         get uniqueVertices(): UniqueVertex[];
-        testNormals(): void;
+        export(): string;
         rotateBy(matrix: ƒ.Matrix4x4, center: ƒ.Vector3, selection?: number[]): void;
         extrude(selectedIndices: number[]): number[];
         private addIndicesToNewVertices;

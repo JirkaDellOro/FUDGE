@@ -5,6 +5,7 @@ namespace Fudge {
     private currentControlMode: AbstractControlMode;
     private viewport: ƒ.Viewport;
     private editableNode: ƒ.Node;
+    // TODO: change this to a map probably
     private controlModesMap: Record<ControlMode, AbstractControlMode> = {
       [ControlMode.OBJECT_MODE]: new ObjectMode(),
       [ControlMode.EDIT_MODE]: new EditMode()

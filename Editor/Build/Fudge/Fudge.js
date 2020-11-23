@@ -202,6 +202,16 @@ var Fudge;
         }
     }
     Fudge.saveProject = saveProject;
+    async function saveMesh(jsonString) {
+        let filename = Fudge.remote.dialog.showOpenDialogSync(null, {
+            properties: ["openDirectory", "createDirectory"], title: "Select a folder to save the project to", buttonLabel: "Save Project"
+        });
+        if (!filename)
+            return;
+        let url = new URL("mesh.json", filename[0] + "\\");
+        fs.writeFileSync(url, jsonString);
+    }
+    Fudge.saveMesh = saveMesh;
     async function promptLoadProject() {
         let filenames = Fudge.remote.dialog.showOpenDialogSync(null, {
             title: "Load Project", buttonLabel: "Load Project", properties: ["openFile"],
@@ -446,6 +456,7 @@ var Fudge;
     Fudge.ipcRenderer = require("electron").ipcRenderer;
     Fudge.remote = require("electron").remote;
     Fudge.project = new Fudge.Project();
+    let modellerNode;
     /**
      * The uppermost container for all panels controlling data flow between.
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
@@ -544,7 +555,16 @@ var Fudge;
         //#region Main-Events from Electron
         static setupMainListeners() {
             Fudge.ipcRenderer.on(Fudge.MENU.PROJECT_SAVE, (_event, _args) => {
-                Fudge.saveProject();
+                //saveProject();
+                switch (this.currentPanel) {
+                    case Fudge.PANEL.PROJECT:
+                        Fudge.saveProject();
+                        break;
+                    case Fudge.PANEL.MODELLER:
+                        let mesh = modellerNode.getComponent(ƒ.ComponentMesh).mesh;
+                        Fudge.saveMesh(mesh.export());
+                        break;
+                }
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PROJECT_LOAD, async (_event, _args) => {
                 let url = await Fudge.promptLoadProject();
@@ -559,6 +579,7 @@ var Fudge;
                 Page.broadcastEvent(new CustomEvent(Fudge.EVENT_EDITOR.UPDATE, { detail: node }));
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_PROJECT_OPEN, (_event, _args) => {
+                this.currentPanel = Fudge.PANEL.PROJECT;
                 Page.add(Fudge.PanelProject, "Project", null); //Object.create(null,  {node: { writable: true, value: node }}));
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_ANIMATION_OPEN, (_event, _args) => {
@@ -568,13 +589,16 @@ var Fudge;
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_MODELLER_OPEN, (_event, _args) => {
                 let node = new ƒ.Node("graph");
                 let defaultNode = new ƒaid.Node("Default", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderFlat, new ƒ.CoatColored()), new Fudge.ModifiableMesh());
+                modellerNode = defaultNode;
                 node.addChild(defaultNode);
+                this.currentPanel = Fudge.PANEL.MODELLER;
                 Page.add(Fudge.PanelModeller, "Modeller", Object({ node: node }));
             });
         }
     }
     Page.idCounter = 0;
     Page.panels = [];
+    Page.currentPanel = Fudge.PANEL.PROJECT;
     Fudge.Page = Page;
     function welcome(container, state) {
         container.getElement().html("<div>Welcome</div>");
@@ -1349,6 +1373,7 @@ var Fudge;
 (function (Fudge) {
     class Controller {
         constructor(viewport, editableNode) {
+            // TODO: change this to a map probably
             this.controlModesMap = {
                 [Fudge.ControlMode.OBJECT_MODE]: new Fudge.ObjectMode(),
                 [Fudge.ControlMode.EDIT_MODE]: new Fudge.EditMode()
@@ -2103,8 +2128,15 @@ var Fudge;
         get uniqueVertices() {
             return this._uniqueVertices;
         }
-        testNormals() {
-            this.normalsFace = this.calculateFaceNormals();
+        export() {
+            let serialization = {
+                vertices: Array.from(this.vertices),
+                indices: Array.from(this.indices),
+                normals: Array.from(this.normalsFace),
+                textureCoordinates: Array.from(this.textureUVs)
+            };
+            return JSON.stringify(serialization, null, 2);
+            // console.log(serialization);
         }
         rotateBy(matrix, center, selection = Array.from(Array(this.uniqueVertices.length).keys())) {
             // TODO: actually rotate around world coordinates here
@@ -2212,7 +2244,7 @@ var Fudge;
             return { vertexToUniqueVertex: vertexToUniqueVertex, reverse: reverse, originalToNewVertex: originalToNewVertexMap };
         }
         /*
-          find the boundary corresponding edges from the selection
+          find the boundary edges from selection
         */
         findEdgesFrom(selection) {
             let indices = [];
@@ -2276,7 +2308,7 @@ var Fudge;
         }
         /*
           finds the ordering of the trigons by searching for the selected vertex in the indices array
-          returns an array with another array, that stores the correct ordering
+          returns an array with another array which stores the correct ordering
         */
         // tslint:disable-next-line: member-ordering
         findOrderOfTrigonFromSelectedVertex(selectedIndices) {
@@ -2313,16 +2345,6 @@ var Fudge;
         // tslint:disable-next-line: member-ordering
         createVertices() {
             // TODO maybe don't loop here too somehow?
-            // let length: number = 0;
-            // for (let vertex of this._uniqueVertices) {
-            //   length += vertex.indices.length;
-            // }
-            // let vertices: Float32Array = new Float32Array(length * 3);
-            // for (let vertex of this._uniqueVertices) {
-            //   for (let index of vertex.indices) {
-            //     vertices.set([vertex.position.x, vertex.position.y, vertex.position.z], index * 3);
-            //   }
-            // }
             let length = 0;
             for (let vertex of this._uniqueVertices) {
                 length += vertex.indices.size * 3;
@@ -2398,7 +2420,7 @@ var Fudge;
         }
         updateNormals(trigons) {
             let newNormals = new Float32Array(this.vertices.length);
-            // fix incase length of vertices decreases
+            // TODO: fix incase length of vertices decreases
             newNormals.set(this.normalsFace);
             for (let trigon of trigons) {
                 let vertexA = new ƒ.Vector3(this.vertices[3 * trigon[0]], this.vertices[3 * trigon[0] + 1], this.vertices[3 * trigon[0] + 2]);
@@ -3666,7 +3688,7 @@ var Fudge;
             this.node = this.graph.getChildrenByName("Default")[0];
             this.controller = new Fudge.Controller(this.viewport, this.node);
             // tslint:disable-next-line: no-unused-expression
-            new Fudge.ControllerModeller(this.viewport);
+            //new ControllerModeller(this.viewport);
             // this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.hndEvent);
             // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
             this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
@@ -3683,9 +3705,9 @@ var Fudge;
         }
         createUserInterface() {
             let cmpCamera = new ƒ.ComponentCamera();
-            cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
-            cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
-            cmpCamera.projectCentral(1, 45);
+            // cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
+            // cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
+            // cmpCamera.projectCentral(1, 45);
             //new ƒaid.CameraOrbit(cmpCamera);
             //cmpCamera.pivot.rotateX(90);
             this.canvas = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
@@ -3693,7 +3715,8 @@ var Fudge;
             container.style.borderWidth = "0px";
             document.body.appendChild(this.canvas);
             this.viewport = new ƒ.Viewport();
-            this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
+            this.viewport.initialize("Viewport", this.graph, cmpCamera, this.canvas);
+            ƒaid.Viewport.expandCameraToInteractiveOrbit(this.viewport);
             this.viewport.draw();
             this.dom.append(this.canvas);
             ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);

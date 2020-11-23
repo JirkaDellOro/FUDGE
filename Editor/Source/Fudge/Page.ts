@@ -12,6 +12,7 @@ namespace Fudge {
   export const remote: Electron.Remote = require("electron").remote;
 
   export let project: Project = new Project();
+  let modellerNode: ƒ.Node;
 
   /**
    * The uppermost container for all panels controlling data flow between. 
@@ -21,6 +22,7 @@ namespace Fudge {
     private static idCounter: number = 0;
     private static goldenLayout: GoldenLayout;
     private static panels: Panel[] = [];
+    private static currentPanel: PANEL = PANEL.PROJECT;
 
     public static async start(): Promise<void> {
       // TODO: At this point of time, the project is just a single node. A project is much more complex...
@@ -129,7 +131,17 @@ namespace Fudge {
     //#region Main-Events from Electron
     private static setupMainListeners(): void {
       ipcRenderer.on(MENU.PROJECT_SAVE, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-        saveProject();
+        //saveProject();
+
+        switch (this.currentPanel) {
+          case PANEL.PROJECT:
+            saveProject();
+            break;
+          case PANEL.MODELLER:
+            let mesh: ModifiableMesh =  <ModifiableMesh> modellerNode.getComponent(ƒ.ComponentMesh).mesh;
+            saveMesh(mesh.export());
+            break;
+        }
       });
 
       ipcRenderer.on(MENU.PROJECT_LOAD, async (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
@@ -147,6 +159,7 @@ namespace Fudge {
       });
 
       ipcRenderer.on(MENU.PANEL_PROJECT_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
+        this.currentPanel = PANEL.PROJECT;
         Page.add(PanelProject, "Project", null); //Object.create(null,  {node: { writable: true, value: node }}));
       });
 
@@ -158,7 +171,9 @@ namespace Fudge {
       ipcRenderer.on(MENU.PANEL_MODELLER_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
         let node: ƒ.Node = new ƒ.Node("graph");
         let defaultNode: ƒ.Node = new ƒaid.Node("Default", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderFlat, new ƒ.CoatColored()), new ModifiableMesh());
+        modellerNode = defaultNode;
         node.addChild(defaultNode);  
+        this.currentPanel = PANEL.MODELLER;
 
         Page.add(PanelModeller, "Modeller", Object({ node: node }));
       });

@@ -32,6 +32,17 @@ namespace Fudge {
     }
   }
 
+  export async function saveMesh(jsonString: string): Promise<void> {
+    let filename: string | string[] = remote.dialog.showOpenDialogSync(null, {
+      properties: ["openDirectory", "createDirectory"], title: "Select a folder to save the project to", buttonLabel: "Save Project"
+    });
+    if (!filename)
+      return;
+
+    let url: URL = new URL("mesh.json", filename[0] + "\\");
+    fs.writeFileSync(url, jsonString);
+  }
+
   export async function promptLoadProject(): Promise<URL> {
     let filenames: string[] = remote.dialog.showOpenDialogSync(null, {
       title: "Load Project", buttonLabel: "Load Project", properties: ["openFile"],

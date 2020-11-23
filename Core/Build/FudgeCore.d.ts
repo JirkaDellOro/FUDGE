@@ -1216,7 +1216,7 @@ declare namespace FudgeCore {
         /**
          * Determines FUDGE-graph to listen to. Each [[ComponentAudio]] in the graph will connect to this contexts master gain, all others disconnect.
          */
-        listenTo: (_graph: Node) => void;
+        listenTo: (_graph: Node | null) => void;
         /**
          * Retrieve the FUDGE-graph currently listening to
          */
@@ -1224,7 +1224,7 @@ declare namespace FudgeCore {
         /**
          * Set the [[ComponentAudioListener]] that serves the spatial location and orientation for this contexts listener
          */
-        listenWith: (_cmpListener: ComponentAudioListener) => void;
+        listenWith: (_cmpListener: ComponentAudioListener | null) => void;
         /**
          * Updates the spatial settings of the AudioNodes effected in the current FUDGE-graph
          */
@@ -3226,8 +3226,8 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     class MeshCustom extends Mesh {
         static readonly iSubclass: number;
-        private baseMesh;
-        constructor(_name?: string, _baseMesh?: Mesh);
+        constructor(_name?: string);
+        asyncLoad(_url: RequestInfo): Promise<void>;
         protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;
         protected createIndices(): Uint16Array;
