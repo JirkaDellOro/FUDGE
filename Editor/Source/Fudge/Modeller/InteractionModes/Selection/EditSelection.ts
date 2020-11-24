@@ -7,7 +7,7 @@ namespace Fudge {
       
     }
 
-    onmousedown(_event: ƒ.EventPointer): void {
+    onmousedown(_event: ƒ.EventPointer): string {
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
       let vertices: UniqueVertex[] = mesh.uniqueVertices;
       let nearestVertexIndex: number;
@@ -43,10 +43,11 @@ namespace Fudge {
           this.selection.push(nearestVertexIndex);
       }
       console.log("vertices selected: " + this.selection);
+      return null;
     }
 
     onmouseup(_event: ƒ.EventPointer): void {
-      //@ts-ignore
+      //
     }
 
     onmove(_event: ƒ.EventPointer): void {

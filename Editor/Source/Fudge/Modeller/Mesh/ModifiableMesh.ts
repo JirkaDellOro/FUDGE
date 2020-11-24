@@ -52,6 +52,41 @@ namespace Fudge {
       return this._uniqueVertices;
     }
 
+    public getState(): string {
+      let serializable: Array<Object> = [];
+      for (let vertex of this._uniqueVertices) {
+        let vertexSerialization: any = {};
+        vertexSerialization.position = [vertex.position.x, vertex.position.y, vertex.position.z];
+        let indicesSerialized: Array<Object> = [];
+        for (let index of vertex.indices.keys()) {
+          indicesSerialized.push({
+            vertexIndex: index,
+            triangleIndices: vertex.indices.get(index)
+          });
+        } 
+        vertexSerialization.indices = indicesSerialized;
+        serializable.push(vertexSerialization);
+      }
+      return JSON.stringify(serializable);
+    }
+
+    public retrieveState(state: string): void {
+      let data: Array<any> = JSON.parse(state);
+      let result: Array<UniqueVertex> = [];
+      for (let vertex of data) {
+        let position: ƒ.Vector3 = new ƒ.Vector3(vertex.position[0], vertex.position[1], vertex.position[2]);
+        let indicesMap: Map<number, number[]> = new Map();
+        for (let indices of vertex.indices) {
+          indicesMap.set(indices.vertexIndex, indices.triangleIndices);
+        }
+        let uniqueVertex: UniqueVertex = new UniqueVertex(position, indicesMap);
+        result.push(uniqueVertex);
+      }
+      this._uniqueVertices = result;
+      this.create();
+      console.log(result);
+    }
+
     public export(): string {
       let serialization: Object = {
         vertices: Array.from(this.vertices),
@@ -64,6 +99,11 @@ namespace Fudge {
       // console.log(serialization);
     }
 
+    public updateNormals(): void {
+      this.createFaceNormals();
+      this.createRenderBuffers();
+    }
+
     public rotateBy(matrix: ƒ.Matrix4x4, center: ƒ.Vector3, selection: number[] = Array.from(Array(this.uniqueVertices.length).keys())): void {
       // TODO: actually rotate around world coordinates here
       for (let vertexIndex of selection) {
@@ -72,7 +112,7 @@ namespace Fudge {
         this.uniqueVertices[vertexIndex].position = ƒ.Vector3.SUM(newVertexPos, center);
       }
       this.vertices = this.createVertices();
-      this.updateNormals(this.findOrderOfTrigonFromSelectedVertex(selection));
+      // this.updateNormals(this.findOrderOfTrigonFromSelectedVertex(selection));
       this.createRenderBuffers();
     }
 
@@ -248,8 +288,8 @@ namespace Fudge {
         this.updatePositionOfVertex(selection, new ƒ.Vector3(currentVertex.x + diffToOldPosition.x, currentVertex.y + diffToOldPosition.y, currentVertex.z + diffToOldPosition.z));
       }
 
-      let trigons: Array<Array<number>> = this.findOrderOfTrigonFromSelectedVertex(selectedIndices);
-      this.updateNormals(trigons);
+      let trigons: Array<number> = this.findOrderOfTrigonFromSelectedVertex(selectedIndices);
+      // this.updateNormals(trigons);
       this.createRenderBuffers();
     }
 
@@ -258,24 +298,25 @@ namespace Fudge {
       returns an array with another array which stores the correct ordering
     */
     // tslint:disable-next-line: member-ordering
-    protected findOrderOfTrigonFromSelectedVertex(selectedIndices: number[]): Array<Array<number>> {
-      let trigons: Array<Array<number>> = [];
+    protected findOrderOfTrigonFromSelectedVertex(selectedIndices: number[]): Array<number> {
+      // let trigons: Array<Array<number>> = [];
+      let trigons: Array<number> = [];
       for (let selectedIndex of selectedIndices) {
         for (let vertexIndex of this._uniqueVertices[selectedIndex].indices.keys()) {
           for (let indexInIndicesArray of this._uniqueVertices[selectedIndex].indices.get(vertexIndex)) {
-            let trigon: Array<number> = [];
+            // let trigon: Array<number> = [];
             switch (indexInIndicesArray % 3) {
               case 0: 
-                trigon.push(this.indices[indexInIndicesArray], this.indices[indexInIndicesArray + 1], this.indices[indexInIndicesArray + 2]);
+                trigons.push(this.indices[indexInIndicesArray], this.indices[indexInIndicesArray + 1], this.indices[indexInIndicesArray + 2]);
                 break;
               case 1:
-                trigon.push(this.indices[indexInIndicesArray - 1], this.indices[indexInIndicesArray], this.indices[indexInIndicesArray + 1]);
+                trigons.push(this.indices[indexInIndicesArray - 1], this.indices[indexInIndicesArray], this.indices[indexInIndicesArray + 1]);
                 break;
               case 2:
-                trigon.push(this.indices[indexInIndicesArray - 2], this.indices[indexInIndicesArray - 1], this.indices[indexInIndicesArray]);
+                trigons.push(this.indices[indexInIndicesArray - 2], this.indices[indexInIndicesArray - 1], this.indices[indexInIndicesArray]);
                 break;
             }
-            trigons.push(trigon);  
+            // trigons.push(trigon);  
           }
         }
       }
@@ -288,7 +329,6 @@ namespace Fudge {
       for (let index of this._uniqueVertices[vertexIndex].indices.keys()) {
         this.vertices.set([this._uniqueVertices[vertexIndex].position.x, this._uniqueVertices[vertexIndex].position.y, this._uniqueVertices[vertexIndex].position.z], index * 3);
       }
-      // this.update();
     }
 
     // tslint:disable-next-line: member-ordering
@@ -357,46 +397,59 @@ namespace Fudge {
     }
 
     // tslint:disable-next-line: member-ordering
-    protected createFaceNormals(): Float32Array {
-      let normals: Float32Array = new Float32Array([
-        // front
-        /*0*/ 0, 0, 1, /*1*/ 0, 0, 1, /*2*/ 0, 0, 1, /*3*/ 0, 0, 1,
-        // back
-        /*4*/ 0, 0, -1, /*5*/ 0, 0, -1, /*6*/ 0, 0, -1, /*7*/ 0, 0, -1,
-        // right
-        /*8*/ -1, 0, 0, /*9*/ -1, 0, 0, /*10*/ 1, 0, 0, /*11*/ 1, 0, 0,
-        // left
-        /*12*/ -1, 0, 0, /*13*/ -1, 0, 0, /*14*/ 1, 0, 0, /*15*/ 1, 0, 0,
-        // bottom
-        /*16*/ 0, 1, 0, /*17*/ 0, -1, 0, /*18*/ 0, -1, 0, /*19*/ 0, 1, 0,
-        // top 
-        /*20*/ 0, 1, 0, /*21*/ 0, -1, 0, /*22*/ 0, -1, 0, /*23*/ 0, 1, 0
-      ]);
+    protected createFaceNormals(trigons: Array<number> = Array.from(this.indices)): Float32Array {
+      // let normals: Float32Array = new Float32Array([
+      //   // front
+      //   /*0*/ 0, 0, 1, /*1*/ 0, 0, 1, /*2*/ 0, 0, 1, /*3*/ 0, 0, 1,
+      //   // back
+      //   /*4*/ 0, 0, -1, /*5*/ 0, 0, -1, /*6*/ 0, 0, -1, /*7*/ 0, 0, -1,
+      //   // right
+      //   /*8*/ -1, 0, 0, /*9*/ -1, 0, 0, /*10*/ 1, 0, 0, /*11*/ 1, 0, 0,
+      //   // left
+      //   /*12*/ -1, 0, 0, /*13*/ -1, 0, 0, /*14*/ 1, 0, 0, /*15*/ 1, 0, 0,
+      //   // bottom
+      //   /*16*/ 0, 1, 0, /*17*/ 0, -1, 0, /*18*/ 0, -1, 0, /*19*/ 0, 1, 0,
+      //   // top 
+      //   /*20*/ 0, 1, 0, /*21*/ 0, -1, 0, /*22*/ 0, -1, 0, /*23*/ 0, 1, 0
+      // ]);
+      return this.calculateNormals(trigons);
+    }
 
+    /* 
+      likely a small performance optimization for very big meshes
+      does not work anymore
+    */
+    // private updateNormals(trigons: Array<number>): void { // Array<Array<number>>
+    //   let newNormals: Float32Array = new Float32Array(this.vertices.length);
+    //   // TODO: fix incase length of vertices decreases
+    //   newNormals.set(this.normalsFace);
+    //   this.normalsFace = this.calculateNormals(trigons, newNormals);
+    //   // for (let trigon of trigons) {
+    //   //   let vertexA: ƒ.Vector3 = new ƒ.Vector3(this.vertices[3 * trigon[0]], this.vertices[3 * trigon[0] + 1], this.vertices[3 * trigon[0] + 2]);
+    //   //   let vertexB: ƒ.Vector3 = new ƒ.Vector3(this.vertices[3 * trigon[1]], this.vertices[3 * trigon[1] + 1], this.vertices[3 * trigon[1] + 2]);
+    //   //   let vertexC: ƒ.Vector3 = new ƒ.Vector3(this.vertices[3 * trigon[2]], this.vertices[3 * trigon[2] + 1], this.vertices[3 * trigon[2] + 2]);
+      
+    //   //   let newNormal: ƒ.Vector3 = ƒ.Vector3.NORMALIZATION(ƒ.Vector3.CROSS(ƒ.Vector3.DIFFERENCE(vertexB, vertexA), ƒ.Vector3.DIFFERENCE(vertexC, vertexB)));
+    //   //   newNormals.set([newNormal.x, newNormal.y, newNormal.z], 3 * trigon[0]);
+    //   //   newNormals.set([newNormal.x, newNormal.y, newNormal.z], 3 * trigon[1]);
+    //   //   newNormals.set([newNormal.x, newNormal.y, newNormal.z], 3 * trigon[2]);
+    //   // }
+    //   // this.normalsFace = newNormals;
+    // }
+
+    private calculateNormals(trigons: Array<number>, normals: Float32Array = new Float32Array(this.vertices.length)): Float32Array {
+      for (let index: number = 0; index < trigons.length; index += 3) {
+        let vertexA: ƒ.Vector3 = new ƒ.Vector3(this.vertices[3 * trigons[index]], this.vertices[3 * trigons[index] + 1], this.vertices[3 * this.indices[index] + 2]);
+        let vertexB: ƒ.Vector3 = new ƒ.Vector3(this.vertices[3 * trigons[index + 1]], this.vertices[3 * trigons[index + 1] + 1], this.vertices[3 * this.indices[index + 1] + 2]);
+        let vertexC: ƒ.Vector3 = new ƒ.Vector3(this.vertices[3 * trigons[index + 2]], this.vertices[3 * trigons[index + 2] + 1], this.vertices[3 * this.indices[index + 2] + 2]);
+        
+        let newNormal: ƒ.Vector3 = ƒ.Vector3.NORMALIZATION(ƒ.Vector3.CROSS(ƒ.Vector3.DIFFERENCE(vertexB, vertexA), ƒ.Vector3.DIFFERENCE(vertexC, vertexB)));
+        normals.set([newNormal.x, newNormal.y, newNormal.z], 3 * trigons[index]);
+        normals.set([newNormal.x, newNormal.y, newNormal.z], 3 * trigons[index + 1]);
+        normals.set([newNormal.x, newNormal.y, newNormal.z], 3 * trigons[index + 2]);
+      }
       return normals;
     }
-
-    private updateNormals(trigons: Array<Array<number>>): void {
-      let newNormals: Float32Array = new Float32Array(this.vertices.length);
-      // TODO: fix incase length of vertices decreases
-      newNormals.set(this.normalsFace);
-      for (let trigon of trigons) {
-        let vertexA: ƒ.Vector3 = new ƒ.Vector3(this.vertices[3 * trigon[0]], this.vertices[3 * trigon[0] + 1], this.vertices[3 * trigon[0] + 2]);
-        let vertexB: ƒ.Vector3 = new ƒ.Vector3(this.vertices[3 * trigon[1]], this.vertices[3 * trigon[1] + 1], this.vertices[3 * trigon[1] + 2]);
-        let vertexC: ƒ.Vector3 = new ƒ.Vector3(this.vertices[3 * trigon[2]], this.vertices[3 * trigon[2] + 1], this.vertices[3 * trigon[2] + 2]);
-      
-        let newNormal: ƒ.Vector3 = ƒ.Vector3.NORMALIZATION(ƒ.Vector3.CROSS(ƒ.Vector3.DIFFERENCE(vertexB, vertexA), ƒ.Vector3.DIFFERENCE(vertexC, vertexB)));
-        newNormals.set([newNormal.x, newNormal.y, newNormal.z], 3 * trigon[0]);
-        newNormals.set([newNormal.x, newNormal.y, newNormal.z], 3 * trigon[1]);
-        newNormals.set([newNormal.x, newNormal.y, newNormal.z], 3 * trigon[2]);
-      }
-      this.normalsFace = newNormals;
-    }
-
-    private update(): void {
-      this.createRenderBuffers();      
-    }
-
   }
 }
 

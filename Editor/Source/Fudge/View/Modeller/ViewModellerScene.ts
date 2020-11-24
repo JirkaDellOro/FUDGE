@@ -19,7 +19,7 @@ namespace Fudge {
       this.node = this.graph.getChildrenByName("Default")[0];
       this.controller = new Controller(this.viewport, this.node);
       // tslint:disable-next-line: no-unused-expression
-      //new ControllerModeller(this.viewport);
+      new ControllerModeller(this.viewport);
       // this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.hndEvent);
       // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
       this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
@@ -41,9 +41,9 @@ namespace Fudge {
 
     createUserInterface(): void {
       let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
-      // cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
-      // cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
-      // cmpCamera.projectCentral(1, 45);
+      cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
+      cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
+      cmpCamera.projectCentral(1, 45);
       //new ƒaid.CameraOrbit(cmpCamera);
       //cmpCamera.pivot.rotateX(90);
 
@@ -54,7 +54,7 @@ namespace Fudge {
 
       this.viewport = new ƒ.Viewport();
       this.viewport.initialize("Viewport", this.graph, cmpCamera, this.canvas);
-      ƒaid.Viewport.expandCameraToInteractiveOrbit(this.viewport);
+      // ƒaid.Viewport.expandCameraToInteractiveOrbit(this.viewport);
       this.viewport.draw();
 
       this.dom.append(this.canvas);
@@ -79,9 +79,9 @@ namespace Fudge {
         return menu;
       }
 
-      for (let mode in this.controller.controlModes) {
+      for (let mode of this.controller.controlModes.keys()) {
         let subitem: Electron.MenuItem = new remote.MenuItem(
-          { label: mode, id: String(CONTEXTMENU.CONTROL_MODE), click: _callback}
+          { label: mode, id: String(CONTEXTMENU.CONTROL_MODE), click: _callback, accelerator: process.platform == "darwin" ? "Command+" + this.controller.controlModes.get(mode).shortcut : "ctrl+" + this.controller.controlModes.get(mode).shortcut}
         );
         //@ts-ignore
         subitem.overrideProperty("controlMode", mode);

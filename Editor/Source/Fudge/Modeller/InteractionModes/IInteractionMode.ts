@@ -14,7 +14,8 @@ namespace Fudge {
       this.initialize();
     }
 
-    abstract onmousedown(_event: ƒ.EventPointer): void;
+    /* returns its state in json or null, if nothing was altered */
+    abstract onmousedown(_event: ƒ.EventPointer): string;
     abstract onmouseup(_event: ƒ.EventPointer): void;
     // onclick(_event: ƒ.EventPointer): void;
     abstract onmove(_event: ƒ.EventPointer): void;

@@ -5,16 +5,19 @@ namespace Fudge {
     private currentControlMode: AbstractControlMode;
     private viewport: ƒ.Viewport;
     private editableNode: ƒ.Node;
-    // TODO: change this to a map probably
-    private controlModesMap: Record<ControlMode, AbstractControlMode> = {
-      [ControlMode.OBJECT_MODE]: new ObjectMode(),
-      [ControlMode.EDIT_MODE]: new EditMode()
-    };
+    // could make an array of Array<{someinterface, string}> to support undo for different objects
+    private states: Array<string> = [];
+    // TODO: change those shortcuts
+    private controlModesMap: Map<ControlMode, {type: AbstractControlMode, shortcut: string}> = new Map([
+      [ControlMode.OBJECT_MODE, {type: new ObjectMode(), shortcut: "p"}],
+      [ControlMode.EDIT_MODE, {type: new EditMode(), shortcut: "d"}]
+    ]); 
 
     constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node) {
       this.viewport = viewport;
-      this.currentControlMode = this.controlModesMap[ControlMode.OBJECT_MODE];
+      this.currentControlMode = this.controlModesMap.get(ControlMode.OBJECT_MODE).type;
       this.editableNode = editableNode;
+      this.saveState((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState());
       this.setInteractionMode(InteractionMode.IDLE);
     }
 
@@ -22,7 +25,7 @@ namespace Fudge {
       return this.currentControlMode;
     }
 
-    public get controlModes(): Record<ControlMode, AbstractControlMode> {
+    public get controlModes(): Map<ControlMode, {type: AbstractControlMode, shortcut: string}> {
       return this.controlModesMap;
     }
 
@@ -31,7 +34,10 @@ namespace Fudge {
     }
 
     public onmousedown(_event: ƒ.EventPointer): void {
-      this.interactionMode.onmousedown(_event);
+      let state: string = this.interactionMode.onmousedown(_event);
+      if (state != null) {
+        this.saveState(state);
+      };
     }
 
     public onmove(_event: ƒ.EventPointer): void {
@@ -40,24 +46,25 @@ namespace Fudge {
 
     public switchMode(_event: ƒ.EventKeyboard): void {
       if (_event.ctrlKey) {
-        switch (_event.key) {
-          case "e": 
-            this.setControlMode(ControlMode.EDIT_MODE);
-            break;
-          case "n": 
-            this.setControlMode(ControlMode.OBJECT_MODE);
-            break;
-          default: 
-            let selectedMode: InteractionMode;
-            for (let mode in this.currentControlMode.modes) {
-              if (this.currentControlMode.modes[mode].shortcut === _event.key) {
-                selectedMode = <InteractionMode> mode;
-              }
-            }
-            if (selectedMode)
-              this.setInteractionMode(selectedMode);
-            break;
+        if (_event.key === "z") {
+          this.loadState();
         }
+
+        for (let controlMode of this.controlModesMap.keys()) {
+          if (this.controlModesMap.get(controlMode).shortcut === _event.key) {
+            this.setControlMode(controlMode);
+            break;
+          }
+        }
+
+        let selectedMode: InteractionMode;
+        for (let interactionMode in this.currentControlMode.modes) {
+          if (this.currentControlMode.modes[interactionMode].shortcut === _event.key) {
+            selectedMode = <InteractionMode> interactionMode;
+          }
+        }
+        if (selectedMode)
+          this.setInteractionMode(selectedMode);
       }
     }
     
@@ -65,7 +72,7 @@ namespace Fudge {
       if (!mode)
         return;
       this.currentControlMode.formerMode = this.interactionMode;
-      this.currentControlMode = this.controlModesMap[mode];
+      this.currentControlMode = this.controlModesMap.get(mode).type;
       console.log(mode);
       this.interactionMode?.cleanup();
       this.interactionMode = this.currentControlMode.formerMode || new IdleMode(this.viewport, this.editableNode);
@@ -83,6 +90,21 @@ namespace Fudge {
         this.interactionMode.selection = selection;
       
       console.log("Current Mode: " + this.interactionMode.type);
+    }
+
+    private loadState(): void {
+      if (this.states.length <= 0) 
+        return;
+      let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+      mesh.retrieveState(this.states[this.states.length - 1]);
+      this.states.pop();
+    }
+
+    private saveState(state: string): void {
+      this.states.push(state);
+      if (this.states.length > 20) {
+        this.states.shift();
+      }
     }
   }
 }

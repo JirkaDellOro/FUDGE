@@ -25,7 +25,7 @@ namespace Fudge {
       this.widget = widget;
     }
 
-    onmousedown(_event: ƒ.EventPointer): void {
+    onmousedown(_event: ƒ.EventPointer): string {
       this.viewport.createPickBuffers();
       let posRender: ƒ.Vector2 = this.getPosRenderFrom(_event);
       let lowestZBuffer: number = Number.MAX_VALUE;
@@ -50,6 +50,7 @@ namespace Fudge {
         this.pickedCircle.getComponent(ƒ.ComponentMaterial).clrPrimary = new ƒ.Color(1, 1, 1, 1);
       }
       console.log("cross: " + this.viewport.camera.pivot.translation);
+      return (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
     }
 
     onmouseup(_event: ƒ.EventPointer): void {
@@ -63,6 +64,9 @@ namespace Fudge {
       }
 
       this.pickedCircle = null;
+      let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+      mesh.updateNormals();
+      this.createNormalArrows();
     }
 
     protected getRotationVector(_event: ƒ.EventPointer): ƒ.Matrix4x4 {

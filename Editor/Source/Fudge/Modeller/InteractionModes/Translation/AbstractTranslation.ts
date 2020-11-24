@@ -4,6 +4,7 @@ namespace Fudge {
     viewport: ƒ.Viewport;
     selection: Object;
     editableNode: ƒ.Node;
+    protected pickedArrow: string;
     protected dragging: boolean = false;
     protected distance: number;
     protected widget: ƒ.Node;
@@ -13,8 +14,15 @@ namespace Fudge {
     //   super(viewport, editableNode);
     // }
 
-    abstract onmousedown(_event: ƒ.EventPointer): void;
-    abstract onmouseup(_event: ƒ.EventPointer): void;
+    abstract onmousedown(_event: ƒ.EventPointer): string;
+
+    onmouseup(_event: ƒ.EventPointer): void {
+      this.dragging = false;
+      this.pickedArrow = null;
+      let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+      mesh.updateNormals();
+      this.createNormalArrows();
+    }
     // abstract onclick(_event: ƒ.EventPointer): void;
     abstract onmove(_event: ƒ.EventPointer): void;
 

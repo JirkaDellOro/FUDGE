@@ -5,7 +5,7 @@ namespace Fudge {
     selection: Object;
     editableNode: ƒ.Node;
 
-    abstract onmousedown(_event: ƒ.EventPointer): void;
+    abstract onmousedown(_event: ƒ.EventPointer): string;
     abstract onmouseup(_event: ƒ.EventPointer): void;
     // abstract onclick(_event: ƒ.EventPointer): void;
     abstract onmove(_event: ƒ.EventPointer): void;

@@ -327,16 +327,22 @@ declare namespace Fudge {
         private currentControlMode;
         private viewport;
         private editableNode;
+        private states;
         private controlModesMap;
         constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
         get controlMode(): AbstractControlMode;
-        get controlModes(): Record<ControlMode, AbstractControlMode>;
+        get controlModes(): Map<ControlMode, {
+            type: AbstractControlMode;
+            shortcut: string;
+        }>;
         onmouseup(_event: ƒ.EventPointer): void;
         onmousedown(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
         switchMode(_event: ƒ.EventKeyboard): void;
         setControlMode(mode: ControlMode): void;
         setInteractionMode(mode: InteractionMode): void;
+        private loadState;
+        private saveState;
     }
 }
 declare namespace Fudge {
@@ -396,7 +402,7 @@ declare namespace Fudge {
         viewport: ƒ.Viewport;
         editableNode: ƒ.Node;
         constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
-        abstract onmousedown(_event: ƒ.EventPointer): void;
+        abstract onmousedown(_event: ƒ.EventPointer): string;
         abstract onmouseup(_event: ƒ.EventPointer): void;
         abstract onmove(_event: ƒ.EventPointer): void;
         abstract initialize(): void;
@@ -414,7 +420,7 @@ declare namespace Fudge {
         editableNode: ƒ.Node;
         constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
         initialize(): void;
-        onmousedown(_event: ƒ.EventPointer): void;
+        onmousedown(_event: ƒ.EventPointer): string;
         onmouseup(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
         cleanup(): void;
@@ -422,13 +428,14 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     class Extrude extends IInteractionMode {
+        readonly type: InteractionMode;
         selection: Array<number>;
         viewport: ƒ.Viewport;
         editableNode: ƒ.Node;
         private isExtruded;
         private distance;
         private copyOfSelectedVertices;
-        onmousedown(_event: ƒ.EventPointer): void;
+        onmousedown(_event: ƒ.EventPointer): string;
         onmouseup(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
         initialize(): void;
@@ -447,7 +454,7 @@ declare namespace Fudge {
         protected oldColor: ƒ.Color;
         constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
         initialize(): void;
-        onmousedown(_event: ƒ.EventPointer): void;
+        onmousedown(_event: ƒ.EventPointer): string;
         onmouseup(_event: ƒ.EventPointer): void;
         protected getRotationVector(_event: ƒ.EventPointer): ƒ.Matrix4x4;
         private getIntersection;
@@ -478,7 +485,7 @@ declare namespace Fudge {
         viewport: ƒ.Viewport;
         selection: Object;
         editableNode: ƒ.Node;
-        abstract onmousedown(_event: ƒ.EventPointer): void;
+        abstract onmousedown(_event: ƒ.EventPointer): string;
         abstract onmouseup(_event: ƒ.EventPointer): void;
         abstract onmove(_event: ƒ.EventPointer): void;
         cleanup(): void;
@@ -489,7 +496,7 @@ declare namespace Fudge {
     class EditSelection extends AbstractSelection {
         selection: Array<number>;
         initialize(): void;
-        onmousedown(_event: ƒ.EventPointer): void;
+        onmousedown(_event: ƒ.EventPointer): string;
         onmouseup(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
         private removeSelectedVertexIfAlreadySelected;
@@ -501,11 +508,12 @@ declare namespace Fudge {
         viewport: ƒ.Viewport;
         selection: Object;
         editableNode: ƒ.Node;
+        protected pickedArrow: string;
         protected dragging: boolean;
         protected distance: number;
         protected widget: ƒ.Node;
-        abstract onmousedown(_event: ƒ.EventPointer): void;
-        abstract onmouseup(_event: ƒ.EventPointer): void;
+        abstract onmousedown(_event: ƒ.EventPointer): string;
+        onmouseup(_event: ƒ.EventPointer): void;
         abstract onmove(_event: ƒ.EventPointer): void;
         cleanup(): void;
     }
@@ -515,19 +523,16 @@ declare namespace Fudge {
         selection: Array<number>;
         private copyOfSelectedVertices;
         initialize(): void;
-        onmousedown(_event: ƒ.EventPointer): void;
-        onmouseup(_event: ƒ.EventPointer): void;
+        onmousedown(_event: ƒ.EventPointer): string;
         onmove(_event: ƒ.EventPointer): void;
     }
 }
 declare namespace Fudge {
     class ObjectTranslation extends AbstractTranslation {
-        private pickedArrow;
         private distanceBetweenWidgetPivotAndPointer;
         constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
         initialize(): void;
-        onmouseup(_event: ƒ.EventPointer): void;
-        onmousedown(_event: ƒ.EventPointer): void;
+        onmousedown(_event: ƒ.EventPointer): string;
         onmove(_event: ƒ.EventPointer): void;
         private isArrow;
         private calculateWidgetDistanceFrom;
@@ -538,7 +543,10 @@ declare namespace Fudge {
         private _uniqueVertices;
         constructor();
         get uniqueVertices(): UniqueVertex[];
+        getState(): string;
+        retrieveState(state: string): void;
         export(): string;
+        updateNormals(): void;
         rotateBy(matrix: ƒ.Matrix4x4, center: ƒ.Vector3, selection?: number[]): void;
         extrude(selectedIndices: number[]): number[];
         private addIndicesToNewVertices;
@@ -546,14 +554,13 @@ declare namespace Fudge {
         private findEdgesFrom;
         private findCorrectFace;
         updatePositionOfVertices(selectedIndices: number[], diffToOldPosition: ƒ.Vector3, oldVertexPositions: Map<number, ƒ.Vector3>): void;
-        protected findOrderOfTrigonFromSelectedVertex(selectedIndices: number[]): Array<Array<number>>;
+        protected findOrderOfTrigonFromSelectedVertex(selectedIndices: number[]): Array<number>;
         protected updatePositionOfVertex(vertexIndex: number, newPosition: ƒ.Vector3): void;
         protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;
         protected createIndices(): Uint16Array;
-        protected createFaceNormals(): Float32Array;
-        private updateNormals;
-        private update;
+        protected createFaceNormals(trigons?: Array<number>): Float32Array;
+        private calculateNormals;
     }
 }
 declare namespace Fudge {

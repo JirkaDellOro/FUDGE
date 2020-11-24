@@ -8,7 +8,7 @@ namespace Fudge {
       this.createNormalArrows();
     }
     
-    onmousedown(_event: ƒ.EventPointer): void {
+    onmousedown(_event: ƒ.EventPointer): string {
       if (!this.selection) 
         return;
       this.dragging = true;
@@ -19,11 +19,7 @@ namespace Fudge {
       for (let vertexIndex of this.selection) {
         this.copyOfSelectedVertices.set(vertexIndex, new ƒ.Vector3(vertices[vertexIndex].position.x, vertices[vertexIndex].position.y, vertices[vertexIndex].position.z));
       }
-    }
-
-    onmouseup(_event: ƒ.EventPointer): void {
-      this.dragging = false;
-      this.createNormalArrows();
+      return mesh.getState();
     }
 
     onmove(_event: ƒ.EventPointer): void {

@@ -1371,16 +1371,20 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    var ƒ = FudgeCore;
     class Controller {
         constructor(viewport, editableNode) {
-            // TODO: change this to a map probably
-            this.controlModesMap = {
-                [Fudge.ControlMode.OBJECT_MODE]: new Fudge.ObjectMode(),
-                [Fudge.ControlMode.EDIT_MODE]: new Fudge.EditMode()
-            };
+            // could make an array of Array<{someinterface, string}> to support undo for different objects
+            this.states = [];
+            // TODO: change those shortcuts
+            this.controlModesMap = new Map([
+                [Fudge.ControlMode.OBJECT_MODE, { type: new Fudge.ObjectMode(), shortcut: "p" }],
+                [Fudge.ControlMode.EDIT_MODE, { type: new Fudge.EditMode(), shortcut: "d" }]
+            ]);
             this.viewport = viewport;
-            this.currentControlMode = this.controlModesMap[Fudge.ControlMode.OBJECT_MODE];
+            this.currentControlMode = this.controlModesMap.get(Fudge.ControlMode.OBJECT_MODE).type;
             this.editableNode = editableNode;
+            this.saveState(this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getState());
             this.setInteractionMode(Fudge.InteractionMode.IDLE);
         }
         get controlMode() {
@@ -1393,38 +1397,41 @@ var Fudge;
             this.interactionMode.onmouseup(_event);
         }
         onmousedown(_event) {
-            this.interactionMode.onmousedown(_event);
+            let state = this.interactionMode.onmousedown(_event);
+            if (state != null) {
+                this.saveState(state);
+            }
+            ;
         }
         onmove(_event) {
             this.interactionMode.onmove(_event);
         }
         switchMode(_event) {
             if (_event.ctrlKey) {
-                switch (_event.key) {
-                    case "e":
-                        this.setControlMode(Fudge.ControlMode.EDIT_MODE);
-                        break;
-                    case "n":
-                        this.setControlMode(Fudge.ControlMode.OBJECT_MODE);
-                        break;
-                    default:
-                        let selectedMode;
-                        for (let mode in this.currentControlMode.modes) {
-                            if (this.currentControlMode.modes[mode].shortcut === _event.key) {
-                                selectedMode = mode;
-                            }
-                        }
-                        if (selectedMode)
-                            this.setInteractionMode(selectedMode);
-                        break;
+                if (_event.key === "z") {
+                    this.loadState();
                 }
+                for (let controlMode of this.controlModesMap.keys()) {
+                    if (this.controlModesMap.get(controlMode).shortcut === _event.key) {
+                        this.setControlMode(controlMode);
+                        break;
+                    }
+                }
+                let selectedMode;
+                for (let interactionMode in this.currentControlMode.modes) {
+                    if (this.currentControlMode.modes[interactionMode].shortcut === _event.key) {
+                        selectedMode = interactionMode;
+                    }
+                }
+                if (selectedMode)
+                    this.setInteractionMode(selectedMode);
             }
         }
         setControlMode(mode) {
             if (!mode)
                 return;
             this.currentControlMode.formerMode = this.interactionMode;
-            this.currentControlMode = this.controlModesMap[mode];
+            this.currentControlMode = this.controlModesMap.get(mode).type;
             console.log(mode);
             this.interactionMode?.cleanup();
             this.interactionMode = this.currentControlMode.formerMode || new Fudge.IdleMode(this.viewport, this.editableNode);
@@ -1439,6 +1446,19 @@ var Fudge;
             if (selection)
                 this.interactionMode.selection = selection;
             console.log("Current Mode: " + this.interactionMode.type);
+        }
+        loadState() {
+            if (this.states.length <= 0)
+                return;
+            let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+            mesh.retrieveState(this.states[this.states.length - 1]);
+            this.states.pop();
+        }
+        saveState(state) {
+            this.states.push(state);
+            if (this.states.length > 20) {
+                this.states.shift();
+            }
         }
     }
     Fudge.Controller = Controller;
@@ -1601,7 +1621,7 @@ var Fudge;
             //@ts-ignore
         }
         onmousedown(_event) {
-            //@ts-ignore
+            return null;
         }
         onmouseup(_event) {
             //@ts-ignore
@@ -1620,12 +1640,14 @@ var Fudge;
     class Extrude extends Fudge.IInteractionMode {
         constructor() {
             super(...arguments);
+            this.type = Fudge.InteractionMode.EXTRUDE;
             this.isExtruded = false;
         }
         onmousedown(_event) {
             if (!this.selection)
                 return;
             let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+            let state = mesh.getState();
             this.selection = mesh.extrude(this.selection);
             this.isExtruded = true;
             this.distance = ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, this.viewport.camera.pivot.translation).magnitude;
@@ -1634,9 +1656,14 @@ var Fudge;
             for (let vertexIndex of this.selection) {
                 this.copyOfSelectedVertices.set(vertexIndex, new ƒ.Vector3(vertices[vertexIndex].position.x, vertices[vertexIndex].position.y, vertices[vertexIndex].position.z));
             }
+            return state;
         }
         onmouseup(_event) {
+            if (!this.isExtruded)
+                return;
             this.isExtruded = false;
+            let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+            mesh.updateNormals();
             this.createNormalArrows();
         }
         onmove(_event) {
@@ -1649,6 +1676,9 @@ var Fudge;
             this.createNormalArrows();
         }
         cleanup() {
+            for (let node of this.viewport.getGraph().getChildrenByName("normal")) {
+                this.viewport.getGraph().removeChild(node);
+            }
         }
     }
     Fudge.Extrude = Extrude;
@@ -1694,6 +1724,7 @@ var Fudge;
                 this.pickedCircle.getComponent(ƒ.ComponentMaterial).clrPrimary = new ƒ.Color(1, 1, 1, 1);
             }
             console.log("cross: " + this.viewport.camera.pivot.translation);
+            return this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getState();
         }
         onmouseup(_event) {
             if (!this.pickedCircle)
@@ -1704,6 +1735,9 @@ var Fudge;
                 }
             }
             this.pickedCircle = null;
+            let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+            mesh.updateNormals();
+            this.createNormalArrows();
         }
         getRotationVector(_event) {
             let intersection = this.getIntersection(this.getPosRenderFrom(_event));
@@ -1905,9 +1939,10 @@ var Fudge;
                     this.selection.push(nearestVertexIndex);
             }
             console.log("vertices selected: " + this.selection);
+            return null;
         }
         onmouseup(_event) {
-            //@ts-ignore
+            //
         }
         onmove(_event) {
             //@ts-ignore
@@ -1933,6 +1968,13 @@ var Fudge;
             this.type = Fudge.InteractionMode.TRANSLATE;
             this.dragging = false;
         }
+        onmouseup(_event) {
+            this.dragging = false;
+            this.pickedArrow = null;
+            let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+            mesh.updateNormals();
+            this.createNormalArrows();
+        }
         cleanup() {
             this.viewport.getGraph().removeChild(this.widget);
         }
@@ -1956,10 +1998,7 @@ var Fudge;
             for (let vertexIndex of this.selection) {
                 this.copyOfSelectedVertices.set(vertexIndex, new ƒ.Vector3(vertices[vertexIndex].position.x, vertices[vertexIndex].position.y, vertices[vertexIndex].position.z));
             }
-        }
-        onmouseup(_event) {
-            this.dragging = false;
-            this.createNormalArrows();
+            return mesh.getState();
         }
         onmove(_event) {
             console.log("vertices: " + this.selection);
@@ -2000,10 +2039,6 @@ var Fudge;
             this.viewport.getGraph().addChild(widget);
             this.widget = widget;
         }
-        onmouseup(_event) {
-            this.dragging = false;
-            this.pickedArrow = null;
-        }
         onmousedown(_event) {
             this.viewport.createPickBuffers();
             let posRender = this.getPosRenderFrom(_event);
@@ -2024,6 +2059,7 @@ var Fudge;
                 this.dragging = true;
                 this.distance = ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, this.viewport.camera.pivot.translation).magnitude;
             }
+            return this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getState();
         }
         onmove(_event) {
             let ray = this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY));
@@ -2057,10 +2093,8 @@ var Fudge;
                 // this.widget.mtxLocal.translateY(translation);
                 //}
             }
+            // TODO: change to vertex change
             this.widget.mtxLocal.translation = this.editableNode.mtxLocal.translation;
-            // console.log("movementX: " + _event.movementX + " | movementY: " + _event.movementY);
-            // console.log("canvas width: " + this.viewport.getCanvas().width + " | height: " + this.viewport.getCanvas().height);
-            // console.log("canvasX: " + _event.canvasX + " | canvasY: " + _event.canvasY);
         }
         isArrow(hit) {
             let shaftWasPicked = false;
@@ -2128,6 +2162,39 @@ var Fudge;
         get uniqueVertices() {
             return this._uniqueVertices;
         }
+        getState() {
+            let serializable = [];
+            for (let vertex of this._uniqueVertices) {
+                let vertexSerialization = {};
+                vertexSerialization.position = [vertex.position.x, vertex.position.y, vertex.position.z];
+                let indicesSerialized = [];
+                for (let index of vertex.indices.keys()) {
+                    indicesSerialized.push({
+                        vertexIndex: index,
+                        triangleIndices: vertex.indices.get(index)
+                    });
+                }
+                vertexSerialization.indices = indicesSerialized;
+                serializable.push(vertexSerialization);
+            }
+            return JSON.stringify(serializable);
+        }
+        retrieveState(state) {
+            let data = JSON.parse(state);
+            let result = [];
+            for (let vertex of data) {
+                let position = new ƒ.Vector3(vertex.position[0], vertex.position[1], vertex.position[2]);
+                let indicesMap = new Map();
+                for (let indices of vertex.indices) {
+                    indicesMap.set(indices.vertexIndex, indices.triangleIndices);
+                }
+                let uniqueVertex = new Fudge.UniqueVertex(position, indicesMap);
+                result.push(uniqueVertex);
+            }
+            this._uniqueVertices = result;
+            this.create();
+            console.log(result);
+        }
         export() {
             let serialization = {
                 vertices: Array.from(this.vertices),
@@ -2138,6 +2205,10 @@ var Fudge;
             return JSON.stringify(serialization, null, 2);
             // console.log(serialization);
         }
+        updateNormals() {
+            this.createFaceNormals();
+            this.createRenderBuffers();
+        }
         rotateBy(matrix, center, selection = Array.from(Array(this.uniqueVertices.length).keys())) {
             // TODO: actually rotate around world coordinates here
             for (let vertexIndex of selection) {
@@ -2146,7 +2217,7 @@ var Fudge;
                 this.uniqueVertices[vertexIndex].position = ƒ.Vector3.SUM(newVertexPos, center);
             }
             this.vertices = this.createVertices();
-            this.updateNormals(this.findOrderOfTrigonFromSelectedVertex(selection));
+            // this.updateNormals(this.findOrderOfTrigonFromSelectedVertex(selection));
             this.createRenderBuffers();
         }
         extrude(selectedIndices) {
@@ -2303,7 +2374,7 @@ var Fudge;
                 this.updatePositionOfVertex(selection, new ƒ.Vector3(currentVertex.x + diffToOldPosition.x, currentVertex.y + diffToOldPosition.y, currentVertex.z + diffToOldPosition.z));
             }
             let trigons = this.findOrderOfTrigonFromSelectedVertex(selectedIndices);
-            this.updateNormals(trigons);
+            // this.updateNormals(trigons);
             this.createRenderBuffers();
         }
         /*
@@ -2312,23 +2383,24 @@ var Fudge;
         */
         // tslint:disable-next-line: member-ordering
         findOrderOfTrigonFromSelectedVertex(selectedIndices) {
+            // let trigons: Array<Array<number>> = [];
             let trigons = [];
             for (let selectedIndex of selectedIndices) {
                 for (let vertexIndex of this._uniqueVertices[selectedIndex].indices.keys()) {
                     for (let indexInIndicesArray of this._uniqueVertices[selectedIndex].indices.get(vertexIndex)) {
-                        let trigon = [];
+                        // let trigon: Array<number> = [];
                         switch (indexInIndicesArray % 3) {
                             case 0:
-                                trigon.push(this.indices[indexInIndicesArray], this.indices[indexInIndicesArray + 1], this.indices[indexInIndicesArray + 2]);
+                                trigons.push(this.indices[indexInIndicesArray], this.indices[indexInIndicesArray + 1], this.indices[indexInIndicesArray + 2]);
                                 break;
                             case 1:
-                                trigon.push(this.indices[indexInIndicesArray - 1], this.indices[indexInIndicesArray], this.indices[indexInIndicesArray + 1]);
+                                trigons.push(this.indices[indexInIndicesArray - 1], this.indices[indexInIndicesArray], this.indices[indexInIndicesArray + 1]);
                                 break;
                             case 2:
-                                trigon.push(this.indices[indexInIndicesArray - 2], this.indices[indexInIndicesArray - 1], this.indices[indexInIndicesArray]);
+                                trigons.push(this.indices[indexInIndicesArray - 2], this.indices[indexInIndicesArray - 1], this.indices[indexInIndicesArray]);
                                 break;
                         }
-                        trigons.push(trigon);
+                        // trigons.push(trigon);  
                     }
                 }
             }
@@ -2340,7 +2412,6 @@ var Fudge;
             for (let index of this._uniqueVertices[vertexIndex].indices.keys()) {
                 this.vertices.set([this._uniqueVertices[vertexIndex].position.x, this._uniqueVertices[vertexIndex].position.y, this._uniqueVertices[vertexIndex].position.z], index * 3);
             }
-            // this.update();
         }
         // tslint:disable-next-line: member-ordering
         createVertices() {
@@ -2401,40 +2472,54 @@ var Fudge;
             return new Uint16Array(indexArray);
         }
         // tslint:disable-next-line: member-ordering
-        createFaceNormals() {
-            let normals = new Float32Array([
-                // front
-                /*0*/ 0, 0, 1, /*1*/ 0, 0, 1, /*2*/ 0, 0, 1, /*3*/ 0, 0, 1,
-                // back
-                /*4*/ 0, 0, -1, /*5*/ 0, 0, -1, /*6*/ 0, 0, -1, /*7*/ 0, 0, -1,
-                // right
-                /*8*/ -1, 0, 0, /*9*/ -1, 0, 0, /*10*/ 1, 0, 0, /*11*/ 1, 0, 0,
-                // left
-                /*12*/ -1, 0, 0, /*13*/ -1, 0, 0, /*14*/ 1, 0, 0, /*15*/ 1, 0, 0,
-                // bottom
-                /*16*/ 0, 1, 0, /*17*/ 0, -1, 0, /*18*/ 0, -1, 0, /*19*/ 0, 1, 0,
-                // top 
-                /*20*/ 0, 1, 0, /*21*/ 0, -1, 0, /*22*/ 0, -1, 0, /*23*/ 0, 1, 0
-            ]);
-            return normals;
+        createFaceNormals(trigons = Array.from(this.indices)) {
+            // let normals: Float32Array = new Float32Array([
+            //   // front
+            //   /*0*/ 0, 0, 1, /*1*/ 0, 0, 1, /*2*/ 0, 0, 1, /*3*/ 0, 0, 1,
+            //   // back
+            //   /*4*/ 0, 0, -1, /*5*/ 0, 0, -1, /*6*/ 0, 0, -1, /*7*/ 0, 0, -1,
+            //   // right
+            //   /*8*/ -1, 0, 0, /*9*/ -1, 0, 0, /*10*/ 1, 0, 0, /*11*/ 1, 0, 0,
+            //   // left
+            //   /*12*/ -1, 0, 0, /*13*/ -1, 0, 0, /*14*/ 1, 0, 0, /*15*/ 1, 0, 0,
+            //   // bottom
+            //   /*16*/ 0, 1, 0, /*17*/ 0, -1, 0, /*18*/ 0, -1, 0, /*19*/ 0, 1, 0,
+            //   // top 
+            //   /*20*/ 0, 1, 0, /*21*/ 0, -1, 0, /*22*/ 0, -1, 0, /*23*/ 0, 1, 0
+            // ]);
+            return this.calculateNormals(trigons);
         }
-        updateNormals(trigons) {
-            let newNormals = new Float32Array(this.vertices.length);
-            // TODO: fix incase length of vertices decreases
-            newNormals.set(this.normalsFace);
-            for (let trigon of trigons) {
-                let vertexA = new ƒ.Vector3(this.vertices[3 * trigon[0]], this.vertices[3 * trigon[0] + 1], this.vertices[3 * trigon[0] + 2]);
-                let vertexB = new ƒ.Vector3(this.vertices[3 * trigon[1]], this.vertices[3 * trigon[1] + 1], this.vertices[3 * trigon[1] + 2]);
-                let vertexC = new ƒ.Vector3(this.vertices[3 * trigon[2]], this.vertices[3 * trigon[2] + 1], this.vertices[3 * trigon[2] + 2]);
+        /*
+          likely a small performance optimization for very big meshes
+          does not work anymore
+        */
+        // private updateNormals(trigons: Array<number>): void { // Array<Array<number>>
+        //   let newNormals: Float32Array = new Float32Array(this.vertices.length);
+        //   // TODO: fix incase length of vertices decreases
+        //   newNormals.set(this.normalsFace);
+        //   this.normalsFace = this.calculateNormals(trigons, newNormals);
+        //   // for (let trigon of trigons) {
+        //   //   let vertexA: ƒ.Vector3 = new ƒ.Vector3(this.vertices[3 * trigon[0]], this.vertices[3 * trigon[0] + 1], this.vertices[3 * trigon[0] + 2]);
+        //   //   let vertexB: ƒ.Vector3 = new ƒ.Vector3(this.vertices[3 * trigon[1]], this.vertices[3 * trigon[1] + 1], this.vertices[3 * trigon[1] + 2]);
+        //   //   let vertexC: ƒ.Vector3 = new ƒ.Vector3(this.vertices[3 * trigon[2]], this.vertices[3 * trigon[2] + 1], this.vertices[3 * trigon[2] + 2]);
+        //   //   let newNormal: ƒ.Vector3 = ƒ.Vector3.NORMALIZATION(ƒ.Vector3.CROSS(ƒ.Vector3.DIFFERENCE(vertexB, vertexA), ƒ.Vector3.DIFFERENCE(vertexC, vertexB)));
+        //   //   newNormals.set([newNormal.x, newNormal.y, newNormal.z], 3 * trigon[0]);
+        //   //   newNormals.set([newNormal.x, newNormal.y, newNormal.z], 3 * trigon[1]);
+        //   //   newNormals.set([newNormal.x, newNormal.y, newNormal.z], 3 * trigon[2]);
+        //   // }
+        //   // this.normalsFace = newNormals;
+        // }
+        calculateNormals(trigons, normals = new Float32Array(this.vertices.length)) {
+            for (let index = 0; index < trigons.length; index += 3) {
+                let vertexA = new ƒ.Vector3(this.vertices[3 * trigons[index]], this.vertices[3 * trigons[index] + 1], this.vertices[3 * this.indices[index] + 2]);
+                let vertexB = new ƒ.Vector3(this.vertices[3 * trigons[index + 1]], this.vertices[3 * trigons[index + 1] + 1], this.vertices[3 * this.indices[index + 1] + 2]);
+                let vertexC = new ƒ.Vector3(this.vertices[3 * trigons[index + 2]], this.vertices[3 * trigons[index + 2] + 1], this.vertices[3 * this.indices[index + 2] + 2]);
                 let newNormal = ƒ.Vector3.NORMALIZATION(ƒ.Vector3.CROSS(ƒ.Vector3.DIFFERENCE(vertexB, vertexA), ƒ.Vector3.DIFFERENCE(vertexC, vertexB)));
-                newNormals.set([newNormal.x, newNormal.y, newNormal.z], 3 * trigon[0]);
-                newNormals.set([newNormal.x, newNormal.y, newNormal.z], 3 * trigon[1]);
-                newNormals.set([newNormal.x, newNormal.y, newNormal.z], 3 * trigon[2]);
+                normals.set([newNormal.x, newNormal.y, newNormal.z], 3 * trigons[index]);
+                normals.set([newNormal.x, newNormal.y, newNormal.z], 3 * trigons[index + 1]);
+                normals.set([newNormal.x, newNormal.y, newNormal.z], 3 * trigons[index + 2]);
             }
-            this.normalsFace = newNormals;
-        }
-        update() {
-            this.createRenderBuffers();
+            return normals;
         }
     }
     Fudge.ModifiableMesh = ModifiableMesh;
@@ -3688,7 +3773,7 @@ var Fudge;
             this.node = this.graph.getChildrenByName("Default")[0];
             this.controller = new Fudge.Controller(this.viewport, this.node);
             // tslint:disable-next-line: no-unused-expression
-            //new ControllerModeller(this.viewport);
+            new Fudge.ControllerModeller(this.viewport);
             // this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.hndEvent);
             // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
             this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
@@ -3705,9 +3790,9 @@ var Fudge;
         }
         createUserInterface() {
             let cmpCamera = new ƒ.ComponentCamera();
-            // cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
-            // cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
-            // cmpCamera.projectCentral(1, 45);
+            cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
+            cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
+            cmpCamera.projectCentral(1, 45);
             //new ƒaid.CameraOrbit(cmpCamera);
             //cmpCamera.pivot.rotateX(90);
             this.canvas = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
@@ -3716,7 +3801,7 @@ var Fudge;
             document.body.appendChild(this.canvas);
             this.viewport = new ƒ.Viewport();
             this.viewport.initialize("Viewport", this.graph, cmpCamera, this.canvas);
-            ƒaid.Viewport.expandCameraToInteractiveOrbit(this.viewport);
+            // ƒaid.Viewport.expandCameraToInteractiveOrbit(this.viewport);
             this.viewport.draw();
             this.dom.append(this.canvas);
             ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
@@ -3734,8 +3819,8 @@ var Fudge;
             if (!this.controller) {
                 return menu;
             }
-            for (let mode in this.controller.controlModes) {
-                let subitem = new Fudge.remote.MenuItem({ label: mode, id: String(Fudge.CONTEXTMENU.CONTROL_MODE), click: _callback });
+            for (let mode of this.controller.controlModes.keys()) {
+                let subitem = new Fudge.remote.MenuItem({ label: mode, id: String(Fudge.CONTEXTMENU.CONTROL_MODE), click: _callback, accelerator: process.platform == "darwin" ? "Command+" + this.controller.controlModes.get(mode).shortcut : "ctrl+" + this.controller.controlModes.get(mode).shortcut });
                 //@ts-ignore
                 subitem.overrideProperty("controlMode", mode);
                 submenu.append(subitem);

@@ -13,8 +13,8 @@ namespace Fudge {
       //@ts-ignore
     }
 
-    onmousedown(_event: ƒ.EventPointer): void {
-      //@ts-ignore
+    onmousedown(_event: ƒ.EventPointer): string {
+      return null;
     }
     onmouseup(_event: ƒ.EventPointer): void {
       //@ts-ignore

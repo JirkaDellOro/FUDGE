@@ -1,7 +1,6 @@
 namespace Fudge {
   import ƒAid = FudgeAid;
   export class ObjectTranslation extends AbstractTranslation {
-    private pickedArrow: string;
     private distanceBetweenWidgetPivotAndPointer: ƒ.Vector3;
 
     constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node) {
@@ -18,12 +17,7 @@ namespace Fudge {
       this.widget = widget;
     }
 
-    onmouseup(_event: ƒ.EventPointer): void {
-      this.dragging = false;
-      this.pickedArrow = null;
-    }
-
-    onmousedown(_event: ƒ.EventPointer): void {
+    onmousedown(_event: ƒ.EventPointer): string {
       this.viewport.createPickBuffers();
       let posRender: ƒ.Vector2 = this.getPosRenderFrom(_event);
       let arrowWasPicked: boolean = false;
@@ -46,6 +40,7 @@ namespace Fudge {
         this.dragging = true;
         this.distance = ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, this.viewport.camera.pivot.translation).magnitude;
       }
+      return (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
     }
 
     onmove(_event: ƒ.EventPointer): void {
@@ -88,11 +83,8 @@ namespace Fudge {
           // this.widget.mtxLocal.translateY(translation);
         //}
       }
+      // TODO: change to vertex change
       this.widget.mtxLocal.translation = this.editableNode.mtxLocal.translation;
-
-      // console.log("movementX: " + _event.movementX + " | movementY: " + _event.movementY);
-      // console.log("canvas width: " + this.viewport.getCanvas().width + " | height: " + this.viewport.getCanvas().height);
-      // console.log("canvasX: " + _event.canvasX + " | canvasY: " + _event.canvasY);
     }
 
     private isArrow(hit: ƒ.RayHit): boolean {
