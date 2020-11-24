@@ -692,6 +692,98 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
+    class CameraControl {
+        constructor(viewport) {
+            this.target = ƒ.Vector3.ZERO();
+            this.onclick = (_event) => {
+                switch (_event.button) {
+                    case 1: this.currentRotation = this.viewport.camera.pivot.rotation;
+                }
+            };
+            this.handleMove = (_event) => {
+                if ((_event.buttons & 4) === 4) {
+                    _event.preventDefault();
+                    if (_event.shiftKey) {
+                        this.moveCamera(_event);
+                    }
+                    else {
+                        this.rotateCamera(_event);
+                    }
+                }
+            };
+            this.zoom = (_event) => {
+                _event.preventDefault();
+                let cameraPivot = this.viewport.camera.pivot;
+                let delta = _event.deltaY * 0.01;
+                try {
+                    let normTrans = ƒ.Vector3.NORMALIZATION(cameraPivot.translation);
+                    cameraPivot.translation = new ƒ.Vector3(cameraPivot.translation.x + (normTrans.x - this.target.x) * delta, cameraPivot.translation.y + (normTrans.y - this.target.y) * delta, cameraPivot.translation.z + (normTrans.z - this.target.z) * delta);
+                }
+                catch (_error) {
+                    ƒ.Debug.log(_error);
+                }
+            };
+            this.viewport = viewport;
+            this.viewport.adjustingFrames = true;
+            this.currentRotation = viewport.camera.pivot.rotation;
+            this.viewport.addEventListener("\u0192pointerdown" /* DOWN */, this.onclick);
+            this.viewport.activatePointerEvent("\u0192pointerdown" /* DOWN */, true);
+            this.viewport.addEventListener("\u0192pointermove" /* MOVE */, this.handleMove);
+            this.viewport.activatePointerEvent("\u0192pointermove" /* MOVE */, true);
+            this.viewport.addEventListener("\u0192wheel" /* WHEEL */, this.zoom);
+            this.viewport.activateWheelEvent("\u0192wheel" /* WHEEL */, true);
+            viewport.setFocus(true);
+        }
+        rotateCamera(_event) {
+            let currentTranslation = this.viewport.camera.pivot.translation;
+            let magicalScaleDivisor = 4;
+            let angleYaxis = _event.movementX / magicalScaleDivisor;
+            let mtxYrot = ƒ.Matrix4x4.ROTATION_Y(angleYaxis);
+            currentTranslation = this.multiplyMatrixes(mtxYrot, currentTranslation);
+            let cameraRotation = this.viewport.camera.pivot.rotation;
+            let degreeToRad = Math.PI / 180;
+            let angleZAxis = Math.sin(degreeToRad * cameraRotation.y) * (_event.movementY / magicalScaleDivisor);
+            let angleXAxis = -(Math.cos(degreeToRad * cameraRotation.y) * (_event.movementY / magicalScaleDivisor));
+            angleZAxis = Math.min(Math.max(-89, angleZAxis), 89);
+            angleXAxis = Math.min(Math.max(-89, angleXAxis), 89);
+            let mtxXrot = ƒ.Matrix4x4.ROTATION_X(angleXAxis);
+            currentTranslation = this.multiplyMatrixes(mtxXrot, currentTranslation);
+            let mtxZrot = ƒ.Matrix4x4.ROTATION_Z(angleZAxis);
+            this.viewport.camera.pivot.translation = this.multiplyMatrixes(mtxZrot, currentTranslation);
+            let rotation = ƒ.Matrix4x4.MULTIPLICATION(ƒ.Matrix4x4.MULTIPLICATION(mtxYrot, mtxXrot), mtxZrot).rotation;
+            this.viewport.camera.pivot.rotation = rotation;
+            this.viewport.camera.pivot.lookAt(this.target);
+        }
+        moveCamera(_event) {
+            let currentTranslation = this.viewport.camera.pivot.translation;
+            let distanceToTarget = ƒ.Vector3.DIFFERENCE(currentTranslation, this.target).magnitude;
+            let cameraRotation = this.viewport.camera.pivot.rotation;
+            let degreeToRad = Math.PI / 180;
+            let cosX = Math.cos(cameraRotation.x * degreeToRad);
+            let cosY = Math.cos(cameraRotation.y * degreeToRad);
+            let sinX = Math.sin(cameraRotation.x * degreeToRad);
+            let sinY = Math.sin(cameraRotation.y * degreeToRad);
+            let movementXscaled = _event.movementX / 100;
+            let movementYscaled = _event.movementY / 100;
+            let translationChange = new ƒ.Vector3(-cosY * movementXscaled - sinX * sinY * movementYscaled, -cosX * movementYscaled, sinY * movementXscaled - sinX * cosY * movementYscaled);
+            this.viewport.camera.pivot.translation = new ƒ.Vector3(currentTranslation.x + translationChange.x, currentTranslation.y + translationChange.y, currentTranslation.z + translationChange.z);
+            let rayToCenter = this.viewport.getRayFromClient(new ƒ.Vector2(this.viewport.getCanvasRectangle().width / 2, this.viewport.getCanvasRectangle().height / 2));
+            rayToCenter.direction.scale(distanceToTarget);
+            let rayEnd = ƒ.Vector3.SUM(rayToCenter.origin, rayToCenter.direction);
+            this.target = rayEnd;
+        }
+        multiplyMatrixes(mtx, vector) {
+            let x = ƒ.Vector3.DOT(mtx.getX(), vector);
+            let y = ƒ.Vector3.DOT(mtx.getY(), vector);
+            let z = ƒ.Vector3.DOT(mtx.getZ(), vector);
+            return new ƒ.Vector3(x, y, z);
+        }
+    }
+    Fudge.CameraControl = CameraControl;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    var ƒ = FudgeCore;
     /**
      * Base class for all [[View]]s to support generic functionality
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
@@ -1086,120 +1178,6 @@ var Fudge;
         }
     }
     Fudge.ControllerComponent = ControllerComponent;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    var ƒ = FudgeCore;
-    class ControllerModeller {
-        constructor(viewport) {
-            this.target = ƒ.Vector3.ZERO();
-            this.onclick = (_event) => {
-                switch (_event.button) {
-                    case 0: //this.pickNode(_event.canvasX, _event.canvasY); 
-                        break;
-                    case 1: this.currentRotation = this.viewport.camera.pivot.rotation;
-                }
-            };
-            this.handleMove = (_event) => {
-                if ((_event.buttons & 4) === 4) {
-                    _event.preventDefault();
-                    if (_event.shiftKey) {
-                        this.moveCamera(_event);
-                    }
-                    else {
-                        this.rotateCamera(_event);
-                    }
-                }
-            };
-            this.zoom = (_event) => {
-                _event.preventDefault();
-                let cameraPivot = this.viewport.camera.pivot;
-                let delta = _event.deltaY * 0.01;
-                try {
-                    let normTrans = ƒ.Vector3.NORMALIZATION(cameraPivot.translation);
-                    cameraPivot.translation = new ƒ.Vector3(cameraPivot.translation.x + (normTrans.x - this.target.x) * delta, cameraPivot.translation.y + (normTrans.y - this.target.y) * delta, cameraPivot.translation.z + (normTrans.z - this.target.z) * delta);
-                }
-                catch (_error) {
-                    ƒ.Debug.log(_error);
-                }
-            };
-            this.viewport = viewport;
-            this.viewport.adjustingFrames = true;
-            this.currentRotation = viewport.camera.pivot.rotation;
-            this.viewport.addEventListener("\u0192pointerdown" /* DOWN */, this.onclick);
-            this.viewport.activatePointerEvent("\u0192pointerdown" /* DOWN */, true);
-            this.viewport.addEventListener("\u0192pointermove" /* MOVE */, this.handleMove);
-            this.viewport.activatePointerEvent("\u0192pointermove" /* MOVE */, true);
-            this.viewport.addEventListener("\u0192wheel" /* WHEEL */, this.zoom);
-            this.viewport.activateWheelEvent("\u0192wheel" /* WHEEL */, true);
-            viewport.setFocus(true);
-        }
-        rotateCamera(_event) {
-            let currentTranslation = this.viewport.camera.pivot.translation;
-            let magicalScaleDivisor = 4;
-            let angleYaxis = _event.movementX / magicalScaleDivisor;
-            let mtxYrot = ƒ.Matrix4x4.ROTATION_Y(angleYaxis);
-            currentTranslation = this.multiplyMatrixes(mtxYrot, currentTranslation);
-            let cameraRotation = this.viewport.camera.pivot.rotation;
-            let degreeToRad = Math.PI / 180;
-            let angleZAxis = Math.sin(degreeToRad * cameraRotation.y) * (_event.movementY / magicalScaleDivisor);
-            let angleXAxis = -(Math.cos(degreeToRad * cameraRotation.y) * (_event.movementY / magicalScaleDivisor));
-            angleZAxis = Math.min(Math.max(-89, angleZAxis), 89);
-            angleXAxis = Math.min(Math.max(-89, angleXAxis), 89);
-            let mtxXrot = ƒ.Matrix4x4.ROTATION_X(angleXAxis);
-            currentTranslation = this.multiplyMatrixes(mtxXrot, currentTranslation);
-            let mtxZrot = ƒ.Matrix4x4.ROTATION_Z(angleZAxis);
-            this.viewport.camera.pivot.translation = this.multiplyMatrixes(mtxZrot, currentTranslation);
-            let rotation = ƒ.Matrix4x4.MULTIPLICATION(ƒ.Matrix4x4.MULTIPLICATION(mtxYrot, mtxXrot), mtxZrot).rotation;
-            this.viewport.camera.pivot.rotation = rotation;
-            this.viewport.camera.pivot.lookAt(this.target);
-        }
-        moveCamera(_event) {
-            let currentTranslation = this.viewport.camera.pivot.translation;
-            let distanceToTarget = ƒ.Vector3.DIFFERENCE(currentTranslation, this.target).magnitude;
-            let cameraRotation = this.viewport.camera.pivot.rotation;
-            let degreeToRad = Math.PI / 180;
-            let cosX = Math.cos(cameraRotation.x * degreeToRad);
-            let cosY = Math.cos(cameraRotation.y * degreeToRad);
-            let sinX = Math.sin(cameraRotation.x * degreeToRad);
-            let sinY = Math.sin(cameraRotation.y * degreeToRad);
-            let movementXscaled = _event.movementX / 100;
-            let movementYscaled = _event.movementY / 100;
-            let translationChange = new ƒ.Vector3(-cosY * movementXscaled - sinX * sinY * movementYscaled, -cosX * movementYscaled, sinY * movementXscaled - sinX * cosY * movementYscaled);
-            this.viewport.camera.pivot.translation = new ƒ.Vector3(currentTranslation.x + translationChange.x, currentTranslation.y + translationChange.y, currentTranslation.z + translationChange.z);
-            let rayToCenter = this.viewport.getRayFromClient(new ƒ.Vector2(this.viewport.getCanvasRectangle().width / 2, this.viewport.getCanvasRectangle().height / 2));
-            rayToCenter.direction.scale(distanceToTarget);
-            let rayEnd = ƒ.Vector3.SUM(rayToCenter.origin, rayToCenter.direction);
-            this.target = rayEnd;
-        }
-        // private pickNode(_canvasX: number, _canvasY: number): void {
-        //   this.selectedNodes = [];
-        //   this.viewport.createPickBuffers();
-        //   let mousePos: ƒ.Vector2 = new ƒ.Vector2(_canvasX, _canvasY);
-        //   let posRender: ƒ.Vector2 = this.viewport.pointClientToRender(new ƒ.Vector2(mousePos.x, this.viewport.getClientRectangle().height - mousePos.y));
-        //   let hits: ƒ.RayHit[] = this.viewport.pickNodeAt(posRender);
-        //   for (let hit of hits) {
-        //     if (hit.zBuffer != 0) 
-        //       this.selectedNodes.push(hit.node);
-        //   } 
-        //   let ray: ƒ.Ray = this.viewport.getRayFromClient(mousePos);
-        //   let vertices: Float32Array = this.selectedNodes[0].getComponent(ƒ.ComponentMesh).mesh.vertices;
-        //   for (let i: number = 0; i < vertices.length / 2; i += 3) {
-        //     let vertex: ƒ.Vector3 = new ƒ.Vector3(vertices[i], vertices[i + 1], vertices[i + 2]);
-        //     let objTranslation: ƒ.Vector3 = this.selectedNodes[0].mtxLocal.translation;
-        //     let vertexTranslation: ƒ.Vector3 = ƒ.Vector3.SUM(objTranslation, vertex);
-        //     console.log(ray.getDistance(vertexTranslation).magnitude);
-        //   }
-        //   console.log("---------------------------");
-        // }
-        multiplyMatrixes(mtx, vector) {
-            let x = ƒ.Vector3.DOT(mtx.getX(), vector);
-            let y = ƒ.Vector3.DOT(mtx.getY(), vector);
-            let z = ƒ.Vector3.DOT(mtx.getZ(), vector);
-            return new ƒ.Vector3(x, y, z);
-        }
-    }
-    Fudge.ControllerModeller = ControllerModeller;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -1670,7 +1648,8 @@ var Fudge;
             if (!this.isExtruded)
                 return;
             let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
-            mesh.updatePositionOfVertices(this.selection, this.translateVertices(_event, this.distance), this.copyOfSelectedVertices);
+            // TODO fix this later
+            //mesh.updatePositionOfVertices(this.selection, this.translateVertices(_event, this.distance), this.copyOfSelectedVertices);
         }
         initialize() {
             this.createNormalArrows();
@@ -1992,6 +1971,7 @@ var Fudge;
                 return;
             this.dragging = true;
             this.distance = ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, this.viewport.camera.pivot.translation).magnitude;
+            this.offset = this.getDistanceFromRayToCenterOfNode(_event);
             this.copyOfSelectedVertices = new Map();
             let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
             let vertices = mesh.uniqueVertices;
@@ -2004,21 +1984,15 @@ var Fudge;
             console.log("vertices: " + this.selection);
             if (!this.dragging)
                 return;
+            let diff = this.getDistanceFromRayToCenterOfNode(_event);
+            let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+            // console.log("newPos: " + newPos + " | trans: " + this.editableNode.mtxLocal.translation);
+            mesh.updatePositionOfVertices(this.selection, this.copyOfSelectedVertices, diff, this.offset);
+        }
+        getDistanceFromRayToCenterOfNode(_event) {
             let ray = this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY));
             let newPos = ƒ.Vector3.SUM(ray.origin, ƒ.Vector3.SCALE(ray.direction, this.distance));
-            let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
-            let diff = ƒ.Vector3.DIFFERENCE(newPos, this.editableNode.mtxLocal.translation);
-            // console.log("newPos: " + newPos + " | trans: " + this.editableNode.mtxLocal.translation);
-            mesh.updatePositionOfVertices(this.selection, diff, this.copyOfSelectedVertices);
-            //this.createNormalArrows();
-            // for (let selection of this.selection) {
-            //   let currentVertex: ƒ.Vector3 = this.copyOfSelectedVertices[selection];
-            //   mesh.updatePositionOfVertex(selection, new ƒ.Vector3(currentVertex.x + diff.x, currentVertex.y + diff.y, currentVertex.z + diff.z));
-            //   // verts[selection] = currentVertex.x + diff.x;
-            //   // verts[selection + 1] = currentVertex.y + diff.y;
-            //   // verts[selection + 2] = currentVertex.z + diff.z; 
-            // }
-            // mesh.vertices = verts;
+            return ƒ.Vector3.DIFFERENCE(newPos, this.editableNode.mtxLocal.translation);
         }
     }
     Fudge.EditTranslation = EditTranslation;
@@ -2366,20 +2340,28 @@ var Fudge;
             return faceVerticesMap;
         }
         // tslint:disable-next-line: member-ordering
-        updatePositionOfVertices(selectedIndices, diffToOldPosition, oldVertexPositions) {
+        updatePositionOfVertices(selectedIndices, oldVertexPositions, diffToOldPosition, offset) {
             if (!selectedIndices)
                 return;
             for (let selection of selectedIndices) {
                 let currentVertex = oldVertexPositions.get(selection);
-                this.updatePositionOfVertex(selection, new ƒ.Vector3(currentVertex.x + diffToOldPosition.x, currentVertex.y + diffToOldPosition.y, currentVertex.z + diffToOldPosition.z));
+                this.updatePositionOfVertex(selection, new ƒ.Vector3(currentVertex.x + diffToOldPosition.x - offset.x, currentVertex.y + diffToOldPosition.y - offset.y, currentVertex.z + diffToOldPosition.z - offset.z));
             }
-            let trigons = this.findOrderOfTrigonFromSelectedVertex(selectedIndices);
+            // let trigons: Array<number> = this.findOrderOfTrigonFromSelectedVertex(selectedIndices);
             // this.updateNormals(trigons);
             this.createRenderBuffers();
+        }
+        // tslint:disable-next-line: member-ordering
+        updatePositionOfVertex(vertexIndex, newPosition) {
+            this._uniqueVertices[vertexIndex].position = newPosition;
+            for (let index of this._uniqueVertices[vertexIndex].indices.keys()) {
+                this.vertices.set([this._uniqueVertices[vertexIndex].position.x, this._uniqueVertices[vertexIndex].position.y, this._uniqueVertices[vertexIndex].position.z], index * 3);
+            }
         }
         /*
           finds the ordering of the trigons by searching for the selected vertex in the indices array
           returns an array with another array which stores the correct ordering
+          not used anymore since we just recompute all the normals at the end
         */
         // tslint:disable-next-line: member-ordering
         findOrderOfTrigonFromSelectedVertex(selectedIndices) {
@@ -2405,13 +2387,6 @@ var Fudge;
                 }
             }
             return trigons;
-        }
-        // tslint:disable-next-line: member-ordering
-        updatePositionOfVertex(vertexIndex, newPosition) {
-            this._uniqueVertices[vertexIndex].position = newPosition;
-            for (let index of this._uniqueVertices[vertexIndex].indices.keys()) {
-                this.vertices.set([this._uniqueVertices[vertexIndex].position.x, this._uniqueVertices[vertexIndex].position.y, this._uniqueVertices[vertexIndex].position.z], index * 3);
-            }
         }
         // tslint:disable-next-line: member-ordering
         createVertices() {
@@ -3773,7 +3748,7 @@ var Fudge;
             this.node = this.graph.getChildrenByName("Default")[0];
             this.controller = new Fudge.Controller(this.viewport, this.node);
             // tslint:disable-next-line: no-unused-expression
-            new Fudge.ControllerModeller(this.viewport);
+            new Fudge.CameraControl(this.viewport);
             // this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.hndEvent);
             // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
             this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));

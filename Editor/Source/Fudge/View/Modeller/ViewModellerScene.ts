@@ -19,7 +19,7 @@ namespace Fudge {
       this.node = this.graph.getChildrenByName("Default")[0];
       this.controller = new Controller(this.viewport, this.node);
       // tslint:disable-next-line: no-unused-expression
-      new ControllerModeller(this.viewport);
+      new CameraControl(this.viewport);
       // this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.hndEvent);
       // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
       this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));

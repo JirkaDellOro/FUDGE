@@ -279,23 +279,32 @@ namespace Fudge {
     }
 
     // tslint:disable-next-line: member-ordering
-    public updatePositionOfVertices(selectedIndices: number[], diffToOldPosition: ƒ.Vector3, oldVertexPositions: Map<number, ƒ.Vector3>): void {
+    public updatePositionOfVertices(selectedIndices: number[], oldVertexPositions: Map<number, ƒ.Vector3>, diffToOldPosition: ƒ.Vector3, offset: ƒ.Vector3): void {
       if (!selectedIndices) 
         return;
       
       for (let selection of selectedIndices) {
         let currentVertex: ƒ.Vector3 = oldVertexPositions.get(selection);
-        this.updatePositionOfVertex(selection, new ƒ.Vector3(currentVertex.x + diffToOldPosition.x, currentVertex.y + diffToOldPosition.y, currentVertex.z + diffToOldPosition.z));
+        this.updatePositionOfVertex(selection, new ƒ.Vector3(currentVertex.x + diffToOldPosition.x - offset.x, currentVertex.y + diffToOldPosition.y - offset.y, currentVertex.z + diffToOldPosition.z - offset.z));
       }
 
-      let trigons: Array<number> = this.findOrderOfTrigonFromSelectedVertex(selectedIndices);
+      // let trigons: Array<number> = this.findOrderOfTrigonFromSelectedVertex(selectedIndices);
       // this.updateNormals(trigons);
       this.createRenderBuffers();
     }
 
+    // tslint:disable-next-line: member-ordering
+    protected updatePositionOfVertex(vertexIndex: number, newPosition: ƒ.Vector3): void {
+      this._uniqueVertices[vertexIndex].position = newPosition;
+      for (let index of this._uniqueVertices[vertexIndex].indices.keys()) {
+        this.vertices.set([this._uniqueVertices[vertexIndex].position.x, this._uniqueVertices[vertexIndex].position.y, this._uniqueVertices[vertexIndex].position.z], index * 3);
+      }
+    }    
+
     /*
       finds the ordering of the trigons by searching for the selected vertex in the indices array
       returns an array with another array which stores the correct ordering
+      not used anymore since we just recompute all the normals at the end
     */
     // tslint:disable-next-line: member-ordering
     protected findOrderOfTrigonFromSelectedVertex(selectedIndices: number[]): Array<number> {
@@ -323,13 +332,6 @@ namespace Fudge {
       return trigons;
     }
 
-    // tslint:disable-next-line: member-ordering
-    protected updatePositionOfVertex(vertexIndex: number, newPosition: ƒ.Vector3): void {
-      this._uniqueVertices[vertexIndex].position = newPosition;
-      for (let index of this._uniqueVertices[vertexIndex].indices.keys()) {
-        this.vertices.set([this._uniqueVertices[vertexIndex].position.x, this._uniqueVertices[vertexIndex].position.y, this._uniqueVertices[vertexIndex].position.z], index * 3);
-      }
-    }
 
     // tslint:disable-next-line: member-ordering
     protected createVertices(): Float32Array {

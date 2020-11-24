@@ -9,7 +9,6 @@ namespace Fudge {
     protected distance: number;
     protected widget: ƒ.Node;
 
-
     // constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node) {
     //   super(viewport, editableNode);
     // }

@@ -38,7 +38,8 @@ namespace Fudge {
         return;
 
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
-      mesh.updatePositionOfVertices(this.selection, this.translateVertices(_event, this.distance), this.copyOfSelectedVertices);
+      // TODO fix this later
+      //mesh.updatePositionOfVertices(this.selection, this.translateVertices(_event, this.distance), this.copyOfSelectedVertices);
     }
 
     initialize(): void {

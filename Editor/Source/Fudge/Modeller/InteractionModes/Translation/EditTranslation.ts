@@ -3,6 +3,7 @@ namespace Fudge {
   export class EditTranslation extends AbstractTranslation {
     selection: Array<number>;
     private copyOfSelectedVertices: Map<number, ƒ.Vector3>;
+    private offset: ƒ.Vector3;
 
     initialize(): void {
       this.createNormalArrows();
@@ -13,6 +14,7 @@ namespace Fudge {
         return;
       this.dragging = true;
       this.distance = ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, this.viewport.camera.pivot.translation).magnitude;
+      this.offset = this.getDistanceFromRayToCenterOfNode(_event);
       this.copyOfSelectedVertices = new Map();
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
       let vertices: UniqueVertex[] = mesh.uniqueVertices;
@@ -27,21 +29,17 @@ namespace Fudge {
       if (!this.dragging) 
         return;
       
+      let diff: ƒ.Vector3 = this.getDistanceFromRayToCenterOfNode(_event);
+      let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+      // console.log("newPos: " + newPos + " | trans: " + this.editableNode.mtxLocal.translation);
+      mesh.updatePositionOfVertices(this.selection, this.copyOfSelectedVertices, diff, this.offset);
+    }
+
+
+    private getDistanceFromRayToCenterOfNode(_event: ƒ.EventPointer): ƒ.Vector3 {
       let ray: ƒ.Ray = this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY));
       let newPos: ƒ.Vector3 = ƒ.Vector3.SUM(ray.origin, ƒ.Vector3.SCALE(ray.direction, this.distance));
-      let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
-      let diff: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(newPos, this.editableNode.mtxLocal.translation);
-      // console.log("newPos: " + newPos + " | trans: " + this.editableNode.mtxLocal.translation);
-      mesh.updatePositionOfVertices(this.selection, diff, this.copyOfSelectedVertices);
-      //this.createNormalArrows();
-      // for (let selection of this.selection) {
-      //   let currentVertex: ƒ.Vector3 = this.copyOfSelectedVertices[selection];
-      //   mesh.updatePositionOfVertex(selection, new ƒ.Vector3(currentVertex.x + diff.x, currentVertex.y + diff.y, currentVertex.z + diff.z));
-      //   // verts[selection] = currentVertex.x + diff.x;
-      //   // verts[selection + 1] = currentVertex.y + diff.y;
-      //   // verts[selection + 2] = currentVertex.z + diff.z; 
-      // }
-      // mesh.vertices = verts;
+      return ƒ.Vector3.DIFFERENCE(newPos, this.editableNode.mtxLocal.translation);
     }
   }
 }

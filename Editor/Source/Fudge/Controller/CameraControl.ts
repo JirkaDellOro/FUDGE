@@ -1,7 +1,7 @@
 namespace Fudge {
   import ƒ = FudgeCore;
 
-  export class ControllerModeller {
+  export class CameraControl {
     viewport: ƒ.Viewport;
     currentRotation: ƒ.Vector3;
     target: ƒ.Vector3 = ƒ.Vector3.ZERO();
@@ -26,8 +26,6 @@ namespace Fudge {
 
     private onclick = (_event: ƒ.EventPointer) => {
       switch (_event.button) {
-        case 0: //this.pickNode(_event.canvasX, _event.canvasY); 
-        break;
         case 1: this.currentRotation = this.viewport.camera.pivot.rotation;
       }
     }
@@ -115,28 +113,6 @@ namespace Fudge {
       let rayEnd: ƒ.Vector3 = ƒ.Vector3.SUM(rayToCenter.origin, rayToCenter.direction);
       this.target = rayEnd;
     }
-
-    // private pickNode(_canvasX: number, _canvasY: number): void {
-    //   this.selectedNodes = [];
-    //   this.viewport.createPickBuffers();
-    //   let mousePos: ƒ.Vector2 = new ƒ.Vector2(_canvasX, _canvasY);
-    //   let posRender: ƒ.Vector2 = this.viewport.pointClientToRender(new ƒ.Vector2(mousePos.x, this.viewport.getClientRectangle().height - mousePos.y));
-    //   let hits: ƒ.RayHit[] = this.viewport.pickNodeAt(posRender);
-    //   for (let hit of hits) {
-    //     if (hit.zBuffer != 0) 
-    //       this.selectedNodes.push(hit.node);
-    //   } 
-    //   let ray: ƒ.Ray = this.viewport.getRayFromClient(mousePos);
-    //   let vertices: Float32Array = this.selectedNodes[0].getComponent(ƒ.ComponentMesh).mesh.vertices;
-    //   for (let i: number = 0; i < vertices.length / 2; i += 3) {
-    //     let vertex: ƒ.Vector3 = new ƒ.Vector3(vertices[i], vertices[i + 1], vertices[i + 2]);
-    //     let objTranslation: ƒ.Vector3 = this.selectedNodes[0].mtxLocal.translation;
-    //     let vertexTranslation: ƒ.Vector3 = ƒ.Vector3.SUM(objTranslation, vertex);
-    //     console.log(ray.getDistance(vertexTranslation).magnitude);
-    //   }
-    //   console.log("---------------------------");
-    // }
-
 
     private multiplyMatrixes(mtx: ƒ.Matrix4x4, vector: ƒ.Vector3): ƒ.Vector3 {
       let x: number = ƒ.Vector3.DOT(mtx.getX(), vector);

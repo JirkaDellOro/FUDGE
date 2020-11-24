@@ -175,6 +175,22 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    import ƒ = FudgeCore;
+    class CameraControl {
+        viewport: ƒ.Viewport;
+        currentRotation: ƒ.Vector3;
+        target: ƒ.Vector3;
+        selectedNodes: ƒ.Node[];
+        constructor(viewport: ƒ.Viewport);
+        private onclick;
+        private handleMove;
+        private zoom;
+        private rotateCamera;
+        private moveCamera;
+        private multiplyMatrixes;
+    }
+}
+declare namespace Fudge {
     /**
      * Base class for all [[View]]s to support generic functionality
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
@@ -242,22 +258,6 @@ declare namespace Fudge {
         private hndDrop;
         private filterDragDrop;
         private getAncestorWithType;
-    }
-}
-declare namespace Fudge {
-    import ƒ = FudgeCore;
-    class ControllerModeller {
-        viewport: ƒ.Viewport;
-        currentRotation: ƒ.Vector3;
-        target: ƒ.Vector3;
-        selectedNodes: ƒ.Node[];
-        constructor(viewport: ƒ.Viewport);
-        private onclick;
-        private handleMove;
-        private zoom;
-        private rotateCamera;
-        private moveCamera;
-        private multiplyMatrixes;
     }
 }
 declare namespace Fudge {
@@ -522,9 +522,11 @@ declare namespace Fudge {
     class EditTranslation extends AbstractTranslation {
         selection: Array<number>;
         private copyOfSelectedVertices;
+        private offset;
         initialize(): void;
         onmousedown(_event: ƒ.EventPointer): string;
         onmove(_event: ƒ.EventPointer): void;
+        private getDistanceFromRayToCenterOfNode;
     }
 }
 declare namespace Fudge {
@@ -553,9 +555,9 @@ declare namespace Fudge {
         private getNewVertices;
         private findEdgesFrom;
         private findCorrectFace;
-        updatePositionOfVertices(selectedIndices: number[], diffToOldPosition: ƒ.Vector3, oldVertexPositions: Map<number, ƒ.Vector3>): void;
-        protected findOrderOfTrigonFromSelectedVertex(selectedIndices: number[]): Array<number>;
+        updatePositionOfVertices(selectedIndices: number[], oldVertexPositions: Map<number, ƒ.Vector3>, diffToOldPosition: ƒ.Vector3, offset: ƒ.Vector3): void;
         protected updatePositionOfVertex(vertexIndex: number, newPosition: ƒ.Vector3): void;
+        protected findOrderOfTrigonFromSelectedVertex(selectedIndices: number[]): Array<number>;
         protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;
         protected createIndices(): Uint16Array;
