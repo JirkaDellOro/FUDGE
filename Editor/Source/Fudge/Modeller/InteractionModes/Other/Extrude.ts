@@ -7,6 +7,7 @@ namespace Fudge {
     private isExtruded: boolean = false;
     private distance: number;
     private copyOfSelectedVertices: Map<number, ƒ.Vector3>;
+    private offset: ƒ.Vector3;
 
     onmousedown(_event: ƒ.EventPointer): string {
       if (!this.selection)
@@ -16,6 +17,7 @@ namespace Fudge {
       this.selection = mesh.extrude(this.selection);
       this.isExtruded = true;
       this.distance = ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, this.viewport.camera.pivot.translation).magnitude;
+      this.offset = this.getDistanceFromRayToCenterOfNode(_event, this.distance);
       this.copyOfSelectedVertices = new Map();
       let vertices: UniqueVertex[] = mesh.uniqueVertices;
       for (let vertexIndex of this.selection) {
@@ -29,6 +31,7 @@ namespace Fudge {
         return;
       this.isExtruded = false;
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+      // maybe change this after all idk looks weird atm
       mesh.updateNormals();
       this.createNormalArrows();
     }
@@ -38,8 +41,7 @@ namespace Fudge {
         return;
 
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
-      // TODO fix this later
-      //mesh.updatePositionOfVertices(this.selection, this.translateVertices(_event, this.distance), this.copyOfSelectedVertices);
+      mesh.updatePositionOfVertices(this.selection, this.copyOfSelectedVertices, this.getDistanceFromRayToCenterOfNode(_event, this.distance), this.offset);
     }
 
     initialize(): void {
@@ -51,6 +53,5 @@ namespace Fudge {
         this.viewport.getGraph().removeChild(node);
       }
     }
-    
   }
 }

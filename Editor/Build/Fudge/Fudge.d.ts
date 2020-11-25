@@ -409,7 +409,8 @@ declare namespace Fudge {
         abstract cleanup(): void;
         protected getPosRenderFrom(_event: ƒ.EventPointer): ƒ.Vector2;
         protected createNormalArrows(): void;
-        protected translateVertices(_event: ƒ.EventPointer, distance: number): ƒ.Vector3;
+        protected getNewPosition(_event: ƒ.EventPointer, distance: number): ƒ.Vector3;
+        protected getDistanceFromRayToCenterOfNode(_event: ƒ.EventPointer, distance: number): ƒ.Vector3;
     }
 }
 declare namespace Fudge {
@@ -435,6 +436,7 @@ declare namespace Fudge {
         private isExtruded;
         private distance;
         private copyOfSelectedVertices;
+        private offset;
         onmousedown(_event: ƒ.EventPointer): string;
         onmouseup(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
@@ -506,34 +508,33 @@ declare namespace Fudge {
     abstract class AbstractTranslation extends IInteractionMode {
         readonly type: InteractionMode;
         viewport: ƒ.Viewport;
-        selection: Object;
+        selection: Array<number>;
         editableNode: ƒ.Node;
         protected pickedArrow: string;
         protected dragging: boolean;
         protected distance: number;
         protected widget: ƒ.Node;
+        protected offset: ƒ.Vector3;
+        protected copyOfSelectedVertices: Map<number, ƒ.Vector3>;
+        initialize(): void;
         abstract onmousedown(_event: ƒ.EventPointer): string;
         onmouseup(_event: ƒ.EventPointer): void;
         abstract onmove(_event: ƒ.EventPointer): void;
+        protected copyVerticesAndCalculateDistance(_event: ƒ.EventPointer): void;
+        protected updateVertices(_event: ƒ.EventPointer): void;
         cleanup(): void;
     }
 }
 declare namespace Fudge {
     class EditTranslation extends AbstractTranslation {
-        selection: Array<number>;
-        private copyOfSelectedVertices;
-        private offset;
-        initialize(): void;
         onmousedown(_event: ƒ.EventPointer): string;
         onmove(_event: ƒ.EventPointer): void;
-        private getDistanceFromRayToCenterOfNode;
     }
 }
 declare namespace Fudge {
     class ObjectTranslation extends AbstractTranslation {
         private distanceBetweenWidgetPivotAndPointer;
         constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
-        initialize(): void;
         onmousedown(_event: ƒ.EventPointer): string;
         onmove(_event: ƒ.EventPointer): void;
         private isArrow;
@@ -542,12 +543,14 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     class ModifiableMesh extends ƒ.Mesh {
+        private static vertexSize;
         private _uniqueVertices;
         constructor();
         get uniqueVertices(): UniqueVertex[];
         getState(): string;
         retrieveState(state: string): void;
         export(): string;
+        getCentroid(selection?: number[]): ƒ.Vector3;
         updateNormals(): void;
         rotateBy(matrix: ƒ.Matrix4x4, center: ƒ.Vector3, selection?: number[]): void;
         extrude(selectedIndices: number[]): number[];

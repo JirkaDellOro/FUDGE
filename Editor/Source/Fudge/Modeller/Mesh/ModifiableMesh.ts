@@ -1,5 +1,6 @@
 namespace Fudge {
   export class ModifiableMesh extends ƒ.Mesh {
+    private static vertexSize: number = ƒ.Mesh.getBufferSpecification().size;
     private _uniqueVertices: UniqueVertex[];
 
     constructor() {
@@ -99,8 +100,23 @@ namespace Fudge {
       // console.log(serialization);
     }
 
+    public getCentroid(selection: number[] = Array.from(Array(this.uniqueVertices.length).keys())): ƒ.Vector3 {
+      let sum: ƒ.Vector3 = new ƒ.Vector3();
+      let numberOfVertices: number = 0;
+      for (let index of selection) {
+        sum.x += (this._uniqueVertices[index].position.x * this._uniqueVertices[index].indices.size);
+        sum.y += (this._uniqueVertices[index].position.y * this._uniqueVertices[index].indices.size);
+        sum.z += (this._uniqueVertices[index].position.z * this._uniqueVertices[index].indices.size);
+        numberOfVertices += this._uniqueVertices[index].indices.size;
+      }
+      sum.x /= numberOfVertices;
+      sum.y /= numberOfVertices;
+      sum.z /= numberOfVertices;
+      return sum;
+    }
+
     public updateNormals(): void {
-      this.createFaceNormals();
+      this.normalsFace = this.createFaceNormals();
       this.createRenderBuffers();
     }
 
@@ -187,31 +203,30 @@ namespace Fudge {
       let vertexToUniqueVertex: Map<number, number> = new Map();
       let reverse: Map<number, number[]> = new Map();
       let originalToNewVertexMap: Map<number, number> = new Map();
-
       for (let faceVertex of faceVertices.keys()) {
         // get the indices from the original face; they will be deleted later
         let indexArray: number[] = this._uniqueVertices[faceVertices.get(faceVertex)].indices.get(faceVertex);
         // TODO: set position to old position and only move in onmove function
-        let newVertex: UniqueVertex = new UniqueVertex(new ƒ.Vector3(this.vertices[faceVertex * 3 + 0], this.vertices[faceVertex * 3 + 1], this.vertices[faceVertex * 3 + 2]), new Map());
+        let newVertex: UniqueVertex = new UniqueVertex(new ƒ.Vector3(this.vertices[faceVertex * ModifiableMesh.vertexSize + 0], this.vertices[faceVertex * ModifiableMesh.vertexSize + 1], this.vertices[faceVertex * ModifiableMesh.vertexSize + 2]), new Map());
         
         reverse.set(faceVertex, []);
         let lengthOffset: number = faceVertices.size;
         // one index is added for the new vertex for every index of the original vertex
         for (let oldVertex of this.uniqueVertices[faceVertices.get(faceVertex)].indices.keys()) {
-          newVertex.indices.set(this.vertices.length / 3 + iterator + lengthOffset, []);
-          vertexToUniqueVertex.set(this.vertices.length / 3 + iterator + lengthOffset, originalLength + iterator);
-          reverse.get(faceVertex).push(this.vertices.length / 3 + iterator + lengthOffset);
+          newVertex.indices.set(this.vertices.length / ModifiableMesh.vertexSize + iterator + lengthOffset, []);
+          vertexToUniqueVertex.set(this.vertices.length / ModifiableMesh.vertexSize + iterator + lengthOffset, originalLength + iterator);
+          reverse.get(faceVertex).push(this.vertices.length / ModifiableMesh.vertexSize + iterator + lengthOffset);
           lengthOffset += faceVertices.size;
         }
 
         // add one more set of vertices to the original face
         this.uniqueVertices[faceVertices.get(faceVertex)].indices.set(this.vertices.length / 3 + iterator, []);
-        vertexToUniqueVertex.set(this.vertices.length / 3 + iterator, faceVertices.get(faceVertex));
-        originalToNewVertexMap.set(faceVertex, this.vertices.length / 3 + iterator);
+        vertexToUniqueVertex.set(this.vertices.length / ModifiableMesh.vertexSize + iterator, faceVertices.get(faceVertex));
+        originalToNewVertexMap.set(faceVertex, this.vertices.length / ModifiableMesh.vertexSize + iterator);
 
         // the new front face has the indices of the original face
         for (let index of indexArray) {
-          newVertex.indices.get(this.vertices.length / 3 + iterator + faceVertices.size).push(index);
+          newVertex.indices.get(this.vertices.length / ModifiableMesh.vertexSize + iterator + faceVertices.size).push(index);
         }
 
         // the old front face is deleted
@@ -260,7 +275,7 @@ namespace Fudge {
       // this will likely not work after some processing because of floating point precision 
       for (let selectedIndex of selectedIndices) {
         for (let vertexIndex of this._uniqueVertices[selectedIndex].indices.keys()) {
-          let normal: ƒ.Vector3 = new ƒ.Vector3(this.normalsFace[vertexIndex * 3], this.normalsFace[vertexIndex * 3 + 1], this.normalsFace[vertexIndex * 3 + 2]);        
+          let normal: ƒ.Vector3 = new ƒ.Vector3(this.normalsFace[vertexIndex * ModifiableMesh.vertexSize], this.normalsFace[vertexIndex * ModifiableMesh.vertexSize + 1], this.normalsFace[vertexIndex * ModifiableMesh.vertexSize + 2]);        
           if (!normalToVertexTable.has(normal.toString())) {
             normalToVertexTable.set(normal.toString(), [{selectedIndex: selectedIndex, vertexIndex: vertexIndex}]);
           } else {
@@ -297,7 +312,7 @@ namespace Fudge {
     protected updatePositionOfVertex(vertexIndex: number, newPosition: ƒ.Vector3): void {
       this._uniqueVertices[vertexIndex].position = newPosition;
       for (let index of this._uniqueVertices[vertexIndex].indices.keys()) {
-        this.vertices.set([this._uniqueVertices[vertexIndex].position.x, this._uniqueVertices[vertexIndex].position.y, this._uniqueVertices[vertexIndex].position.z], index * 3);
+        this.vertices.set([this._uniqueVertices[vertexIndex].position.x, this._uniqueVertices[vertexIndex].position.y, this._uniqueVertices[vertexIndex].position.z], index * ModifiableMesh.vertexSize);
       }
     }    
 
@@ -338,12 +353,12 @@ namespace Fudge {
       // TODO maybe don't loop here too somehow?
       let length: number = 0;
       for (let vertex of this._uniqueVertices) {
-        length += vertex.indices.size * 3;
+        length += vertex.indices.size * ModifiableMesh.vertexSize;
       }
       let vertices: Float32Array = new Float32Array(length);
       for (let vertex of this._uniqueVertices) {
         for (let index of vertex.indices.keys()) {
-          vertices.set([vertex.position.x, vertex.position.y, vertex.position.z], index * 3);
+          vertices.set([vertex.position.x, vertex.position.y, vertex.position.z], index * ModifiableMesh.vertexSize);
         }
       }
 
@@ -440,15 +455,15 @@ namespace Fudge {
     // }
 
     private calculateNormals(trigons: Array<number>, normals: Float32Array = new Float32Array(this.vertices.length)): Float32Array {
-      for (let index: number = 0; index < trigons.length; index += 3) {
-        let vertexA: ƒ.Vector3 = new ƒ.Vector3(this.vertices[3 * trigons[index]], this.vertices[3 * trigons[index] + 1], this.vertices[3 * this.indices[index] + 2]);
-        let vertexB: ƒ.Vector3 = new ƒ.Vector3(this.vertices[3 * trigons[index + 1]], this.vertices[3 * trigons[index + 1] + 1], this.vertices[3 * this.indices[index + 1] + 2]);
-        let vertexC: ƒ.Vector3 = new ƒ.Vector3(this.vertices[3 * trigons[index + 2]], this.vertices[3 * trigons[index + 2] + 1], this.vertices[3 * this.indices[index + 2] + 2]);
+      for (let index: number = 0; index < trigons.length; index += ModifiableMesh.vertexSize) {
+        let vertexA: ƒ.Vector3 = new ƒ.Vector3(this.vertices[ModifiableMesh.vertexSize * trigons[index]], this.vertices[ModifiableMesh.vertexSize * trigons[index] + 1], this.vertices[3 * this.indices[index] + 2]);
+        let vertexB: ƒ.Vector3 = new ƒ.Vector3(this.vertices[ModifiableMesh.vertexSize * trigons[index + 1]], this.vertices[ModifiableMesh.vertexSize * trigons[index + 1] + 1], this.vertices[3 * this.indices[index + 1] + 2]);
+        let vertexC: ƒ.Vector3 = new ƒ.Vector3(this.vertices[ModifiableMesh.vertexSize * trigons[index + 2]], this.vertices[ModifiableMesh.vertexSize * trigons[index + 2] + 1], this.vertices[3 * this.indices[index + 2] + 2]);
         
         let newNormal: ƒ.Vector3 = ƒ.Vector3.NORMALIZATION(ƒ.Vector3.CROSS(ƒ.Vector3.DIFFERENCE(vertexB, vertexA), ƒ.Vector3.DIFFERENCE(vertexC, vertexB)));
-        normals.set([newNormal.x, newNormal.y, newNormal.z], 3 * trigons[index]);
-        normals.set([newNormal.x, newNormal.y, newNormal.z], 3 * trigons[index + 1]);
-        normals.set([newNormal.x, newNormal.y, newNormal.z], 3 * trigons[index + 2]);
+        normals.set([newNormal.x, newNormal.y, newNormal.z], ModifiableMesh.vertexSize * trigons[index]);
+        normals.set([newNormal.x, newNormal.y, newNormal.z], ModifiableMesh.vertexSize * trigons[index + 1]);
+        normals.set([newNormal.x, newNormal.y, newNormal.z], ModifiableMesh.vertexSize * trigons[index + 2]);
       }
       return normals;
     }

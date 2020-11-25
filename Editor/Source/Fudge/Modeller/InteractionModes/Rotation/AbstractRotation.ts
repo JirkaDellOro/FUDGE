@@ -82,18 +82,15 @@ namespace Fudge {
 
       switch (this.pickedCircle.name) {
         case "Z_Rotation":
-          this.widget.mtxLocal.rotateZ(angle);
           rotationVector = new ƒ.Vector3(0, 0, angle);
           rotationMatrix = ƒ.Matrix4x4.ROTATION_Z(angle);
           break;
         case "Y_Rotation":
-          this.widget.mtxLocal.rotateY(angle);
           rotationVector = new ƒ.Vector3(0, angle, 0);
           rotationMatrix = ƒ.Matrix4x4.ROTATION_Y(angle);
           break;
         case "X_Rotation":
           rotationVector = new ƒ.Vector3(angle, 0, 0);
-          this.widget.mtxLocal.rotateX(angle);
           rotationMatrix = ƒ.Matrix4x4.ROTATION_X(angle);
           break;
         default: 

@@ -1,5 +1,4 @@
 namespace Fudge {
-  import ƒAid = FudgeAid;
   export class ObjectTranslation extends AbstractTranslation {
     private distanceBetweenWidgetPivotAndPointer: ƒ.Vector3;
 
@@ -7,21 +6,12 @@ namespace Fudge {
       super(viewport, editableNode);
     }
 
-    initialize(): void {
-      let widget: ƒ.Node = new ƒAid.NodeCoordinateSystem("TranslateWidget");
-      let mtx: ƒ.Matrix4x4 = new ƒ.Matrix4x4();
-      mtx.translation = this.editableNode.mtxLocal.translation;
-      mtx.rotation = this.editableNode.mtxLocal.rotation;
-      widget.addComponent(new ƒ.ComponentTransform(mtx));
-      this.viewport.getGraph().addChild(widget);
-      this.widget = widget;
-    }
-
     onmousedown(_event: ƒ.EventPointer): string {
       this.viewport.createPickBuffers();
       let posRender: ƒ.Vector2 = this.getPosRenderFrom(_event);
       let arrowWasPicked: boolean = false;
       let nodeWasPicked: boolean = false;
+
       for (let hit of this.viewport.pickNodeAt(posRender)) {
         if (hit.zBuffer != 0) {
           let hitIsArrow: boolean = this.isArrow(hit);
@@ -37,8 +27,17 @@ namespace Fudge {
       } 
 
       if (nodeWasPicked && !arrowWasPicked) {
-        this.dragging = true;
-        this.distance = ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, this.viewport.camera.pivot.translation).magnitude;
+        this.selection = Array.from(Array((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices.length).keys());
+        this.copyVerticesAndCalculateDistance(_event);
+        // this.dragging = true;
+        // this.distance = ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, this.viewport.camera.pivot.translation).magnitude;
+        // this.offset = this.getDistanceFromRayToCenterOfNode(_event, this.distance);
+        // let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+        // let vertices: UniqueVertex[] = mesh.uniqueVertices;
+        // this.copyOfSelectedVertices = new Map();
+        // for (let vertexIndex of Array.from(Array(mesh.uniqueVertices.length).keys())) {
+        //   this.copyOfSelectedVertices.set(vertexIndex, new ƒ.Vector3(vertices[vertexIndex].position.x, vertices[vertexIndex].position.y, vertices[vertexIndex].position.z));
+        // }
       }
       return (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
     }
@@ -47,7 +46,10 @@ namespace Fudge {
       let ray: ƒ.Ray = this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY));
       let newPos: ƒ.Vector3 = ƒ.Vector3.SUM(ray.origin, ƒ.Vector3.SCALE(ray.direction, this.distance));
       if (this.dragging) {
-        this.editableNode.mtxLocal.translation = newPos;
+        this.updateVertices(_event);
+        // let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+        // mesh.updatePositionOfVertices(this.selection, this.copyOfSelectedVertices, this.getDistanceFromRayToCenterOfNode(_event, this.distance), this.offset);
+        // this.editableNode.mtxLocal.translation = newPos;
       } else {
         switch (this.pickedArrow) {
           case "ArrowGreen":
@@ -84,7 +86,7 @@ namespace Fudge {
         //}
       }
       // TODO: change to vertex change
-      this.widget.mtxLocal.translation = this.editableNode.mtxLocal.translation;
+      //this.widget.mtxLocal.translation = this.editableNode.mtxLocal.translation;
     }
 
     private isArrow(hit: ƒ.RayHit): boolean {

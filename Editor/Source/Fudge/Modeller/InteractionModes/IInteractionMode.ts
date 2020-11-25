@@ -27,7 +27,6 @@ namespace Fudge {
       return this.viewport.pointClientToRender(new ƒ.Vector2(mousePos.x, this.viewport.getClientRectangle().height - mousePos.y));
     }
 
-
     protected createNormalArrows(): void {
       for (let node of this.viewport.getGraph().getChildrenByName("normal")) {
         this.viewport.getGraph().removeChild(node);
@@ -64,12 +63,13 @@ namespace Fudge {
       }
     }
 
-    protected translateVertices(_event: ƒ.EventPointer, distance: number): ƒ.Vector3 {
+    protected getNewPosition(_event: ƒ.EventPointer, distance: number): ƒ.Vector3 {
       let ray: ƒ.Ray = this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY));
-      let newPos: ƒ.Vector3 = ƒ.Vector3.SUM(ray.origin, ƒ.Vector3.SCALE(ray.direction, distance));
-      let diff: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(newPos, this.editableNode.mtxLocal.translation);
-      return diff;
+      return ƒ.Vector3.SUM(ray.origin, ƒ.Vector3.SCALE(ray.direction, distance));
     }
 
+    protected getDistanceFromRayToCenterOfNode(_event: ƒ.EventPointer, distance: number): ƒ.Vector3 {
+      return ƒ.Vector3.DIFFERENCE(this.getNewPosition(_event, distance), this.editableNode.mtxLocal.translation);
+    }
   }
 }
