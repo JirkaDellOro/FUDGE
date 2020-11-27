@@ -1975,7 +1975,6 @@ var Fudge;
         constructor() {
             super(...arguments);
             this.type = Fudge.InteractionMode.TRANSLATE;
-            //protected pickedArrow: string;
             this.dragging = false;
             // private isArrow(hit: ƒ.RayHit): boolean {
             //   let shaftWasPicked: boolean = false;
@@ -2074,8 +2073,10 @@ var Fudge;
             this.oldPosition = newPos;
         }
         onkeydown(_event) {
+            this.axesSelectionHandler.addAxisOf(_event.key);
         }
         onkeyup(_event) {
+            this.axesSelectionHandler.removeAxisOf(_event.key);
         }
         cleanup() {
             this.viewport.getGraph().removeChild(this.axesSelectionHandler.widget);

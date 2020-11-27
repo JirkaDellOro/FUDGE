@@ -5,13 +5,10 @@ namespace Fudge {
     viewport: ƒ.Viewport;
     selection: Array<number>;
     editableNode: ƒ.Node;
-    //protected pickedArrow: string;
     protected dragging: boolean = false;
     protected distance: number;
-    //protected widget: ƒ.Node;
     protected offset: ƒ.Vector3;
     protected copyOfSelectedVertices: Map<number, ƒ.Vector3>;
-    //protected isSelected: boolean = false;
     protected oldPosition: ƒ.Vector3;
     private axesSelectionHandler: AxesSelectionHandler;
 
@@ -110,9 +107,11 @@ namespace Fudge {
     }
 
     onkeydown(_event: ƒ.EventKeyboard): void {
+      this.axesSelectionHandler.addAxisOf(_event.key);
     }
     
     onkeyup(_event: ƒ.EventKeyboard): void {
+      this.axesSelectionHandler.removeAxisOf(_event.key);
     }
 
     cleanup(): void {
