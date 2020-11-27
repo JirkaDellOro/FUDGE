@@ -62,5 +62,12 @@ namespace FudgeAid {
     public setFrameDirection(_direction: number): void {
       this.direction = Math.floor(_direction);
     }
+
+    /**
+     * 
+     */
+    public flip(_reverse: boolean): void {
+      this.cmpMesh.pivot.rotation = ƒ.Vector3.Y(_reverse ? 180 : 0);
+    }
   }
 }

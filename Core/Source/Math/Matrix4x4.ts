@@ -55,12 +55,12 @@ namespace FudgeCore {
 
     /**
      * Computes and returns the product of two passed matrices.
-     * @param _a The matrix to multiply.
-     * @param _b The matrix to multiply by.
+     * @param _left The matrix to multiply.
+     * @param _right The matrix to multiply by.
      */
-    public static MULTIPLICATION(_a: Matrix4x4, _b: Matrix4x4): Matrix4x4 {
-      let a: Float32Array = _a.data;
-      let b: Float32Array = _b.data;
+    public static MULTIPLICATION(_left: Matrix4x4, _right: Matrix4x4): Matrix4x4 {
+      let a: Float32Array = _left.data;
+      let b: Float32Array = _right.data;
       // let matrix: Matrix4x4 = new Matrix4x4();
       const matrix: Matrix4x4 = Recycler.get(Matrix4x4);
       let a00: number = a[0 * 4 + 0];

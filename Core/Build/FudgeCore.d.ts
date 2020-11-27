@@ -589,11 +589,6 @@ declare namespace FudgeCore {
          * Returns a new rectangle created with the given parameters
          */
         static GET(_x?: number, _y?: number, _width?: number, _height?: number, _origin?: ORIGIN2D): Rectangle;
-        /**
-         * Sets the position and size of the rectangle according to the given parameters
-         */
-        setPositionAndSize(_x?: number, _y?: number, _width?: number, _height?: number, _origin?: ORIGIN2D): void;
-        pointToRect(_point: Vector2, _target: Rectangle): Vector2;
         get x(): number;
         get y(): number;
         get width(): number;
@@ -624,6 +619,11 @@ declare namespace FudgeCore {
         set bottom(_value: number);
         get copy(): Rectangle;
         /**
+         * Sets the position and size of the rectangle according to the given parameters
+         */
+        setPositionAndSize(_x?: number, _y?: number, _width?: number, _height?: number, _origin?: ORIGIN2D): void;
+        pointToRect(_point: Vector2, _target: Rectangle): Vector2;
+        /**
          * Returns true if the given point is inside of this rectangle or on the border
          * @param _point
          */
@@ -637,6 +637,10 @@ declare namespace FudgeCore {
          * Returns the rectangle created by the intersection of this and the given rectangle or null, if they don't collide
          */
         getIntersection(_rect: Rectangle): Rectangle;
+        /**
+     * Returns the rectangle created by the intersection of this and the given rectangle or null, if they don't collide
+     */
+        covers(_rect: Rectangle): boolean;
         /**
          * Creates a string representation of this rectangle
          */
@@ -2492,6 +2496,7 @@ declare namespace FudgeCore {
         arguments: Object[];
         firstCall: boolean;
         lastCall: boolean;
+        count: number;
         constructor(_timer: Timer, ..._arguments: Object[]);
     }
 }
@@ -2635,7 +2640,7 @@ declare namespace FudgeCore {
          * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
          */
         static SCALING(_scalar: Vector2): Matrix3x3;
-        static MULTIPLICATION(_a: Matrix3x3, _b: Matrix3x3): Matrix3x3;
+        static MULTIPLICATION(_left: Matrix3x3, _right: Matrix3x3): Matrix3x3;
         /**
          * - get: a copy of the calculated translation vector
          * - set: effect the matrix ignoring its rotation and scaling
@@ -2735,10 +2740,10 @@ declare namespace FudgeCore {
         static IDENTITY(): Matrix4x4;
         /**
          * Computes and returns the product of two passed matrices.
-         * @param _a The matrix to multiply.
-         * @param _b The matrix to multiply by.
+         * @param _left The matrix to multiply.
+         * @param _right The matrix to multiply by.
          */
-        static MULTIPLICATION(_a: Matrix4x4, _b: Matrix4x4): Matrix4x4;
+        static MULTIPLICATION(_left: Matrix4x4, _right: Matrix4x4): Matrix4x4;
         /**
          * Computes and returns the inverse of a passed matrix.
          * @param _matrix The matrix to compute the inverse of.
