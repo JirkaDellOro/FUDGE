@@ -15,7 +15,7 @@ namespace Fudge {
       this.graph = <ƒ.Node><unknown>_state["node"];
       this.createUserInterface();
       ƒaid.addStandardLightComponents(this.graph, new ƒ.Color(0.5, 0.5, 0.5));
-      this.graph.addChild(new ƒaid.NodeCoordinateSystem("WorldCooSys"));
+      // this.graph.addChild(new ƒaid.NodeCoordinateSystem("WorldCooSys"));
       this.node = this.graph.getChildrenByName("Default")[0];
       this.controller = new Controller(this.viewport, this.node);
       // tslint:disable-next-line: no-unused-expression
@@ -32,8 +32,15 @@ namespace Fudge {
       this.viewport.addEventListener(ƒ.EVENT_POINTER.DOWN, this.onmousedown);
       this.viewport.activatePointerEvent(ƒ.EVENT_POINTER.DOWN, true);
 
-      this.viewport.addEventListener(ƒ.EVENT_KEYBOARD.DOWN, this.handleKeyboard);
+      this.viewport.addEventListener(ƒ.EVENT_KEYBOARD.PRESS, this.handleKeyboard);
+      this.viewport.activateKeyboardEvent(ƒ.EVENT_KEYBOARD.PRESS, true);
+
+      this.viewport.addEventListener(ƒ.EVENT_KEYBOARD.DOWN, this.onkeydown);
       this.viewport.activateKeyboardEvent(ƒ.EVENT_KEYBOARD.DOWN, true);
+
+      this.viewport.addEventListener(ƒ.EVENT_KEYBOARD.UP, this.onkeyup);
+      this.viewport.activateKeyboardEvent(ƒ.EVENT_KEYBOARD.UP, true);
+
       this.viewport.setFocus(true);
 
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
@@ -159,6 +166,15 @@ namespace Fudge {
     private handleKeyboard = (_event: ƒ.EventKeyboard): void => {
       this.controller.switchMode(_event);
     }
+
+    private onkeydown = (_event: ƒ.EventKeyboard): void => {
+      this.controller.onkeydown(_event);
+    }
+
+    private onkeyup = (_event: ƒ.EventKeyboard): void => {
+      this.controller.onkeyup(_event);
+    }
+
 
     protected cleanup(): void {
       ƒ.Loop.removeEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);

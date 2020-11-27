@@ -4,7 +4,7 @@ namespace Fudge {
 
   export abstract class IInteractionMode {
     type: InteractionMode;
-    selection: Object;
+    selection: Array<number>;
     viewport: ƒ.Viewport;
     editableNode: ƒ.Node;
 
@@ -19,6 +19,9 @@ namespace Fudge {
     abstract onmouseup(_event: ƒ.EventPointer): void;
     // onclick(_event: ƒ.EventPointer): void;
     abstract onmove(_event: ƒ.EventPointer): void;
+    abstract onkeydown(_event: ƒ.EventKeyboard): void;
+    abstract onkeyup(_event: ƒ.EventKeyboard): void;
+
     abstract initialize(): void;
     abstract cleanup(): void;
 
@@ -63,13 +66,28 @@ namespace Fudge {
       }
     }
 
+    protected copyVertices(): Map<number, ƒ.Vector3> {
+      let vertices: UniqueVertex[] = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices;
+      let copyOfSelectedVertices: Map<number, ƒ.Vector3> = new Map();
+      for (let vertexIndex of this.selection) {
+        copyOfSelectedVertices.set(vertexIndex, new ƒ.Vector3(vertices[vertexIndex].position.x, vertices[vertexIndex].position.y, vertices[vertexIndex].position.z));
+      }
+      return copyOfSelectedVertices;
+    }
+
     protected getNewPosition(_event: ƒ.EventPointer, distance: number): ƒ.Vector3 {
       let ray: ƒ.Ray = this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY));
       return ƒ.Vector3.SUM(ray.origin, ƒ.Vector3.SCALE(ray.direction, distance));
     }
 
     protected getDistanceFromRayToCenterOfNode(_event: ƒ.EventPointer, distance: number): ƒ.Vector3 {
-      return ƒ.Vector3.DIFFERENCE(this.getNewPosition(_event, distance), this.editableNode.mtxLocal.translation);
+      return ƒ.Vector3.DIFFERENCE(this.getNewPosition(_event, distance), (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid());
     }
+    
+    protected getDistanceFromCameraToCenterOfNode(): number {
+      return ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, this.viewport.camera.pivot.translation).magnitude;
+    }
+
+    //(<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid()
   }
 }

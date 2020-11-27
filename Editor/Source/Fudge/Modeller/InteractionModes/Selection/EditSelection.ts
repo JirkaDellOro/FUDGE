@@ -54,6 +54,12 @@ namespace Fudge {
       //@ts-ignore
     }
 
+    onkeydown(_event: ƒ.EventKeyboard): void {
+    }
+    onkeyup(_event: ƒ.EventKeyboard): void {
+    }
+
+
     private removeSelectedVertexIfAlreadySelected(selectedVertex: number): boolean {
       let wasSelectedAlready: boolean = false;
       for (let i: number = 0; i < this.selection.length; i++) {

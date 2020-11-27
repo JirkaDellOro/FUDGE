@@ -37,11 +37,21 @@ namespace Fudge {
       let state: string = this.interactionMode.onmousedown(_event);
       if (state != null) {
         this.saveState(state);
-      };
+      }
     }
 
     public onmove(_event: ƒ.EventPointer): void {
       this.interactionMode.onmove(_event);
+    }
+
+    public onkeydown(_event: ƒ.EventKeyboard): void {
+      if (_event.ctrlKey) 
+        return;
+      this.interactionMode.onkeydown(_event);
+    }
+
+    public onkeyup(_event: ƒ.EventKeyboard): void {
+      this.interactionMode.onkeyup(_event);
     }
 
     public switchMode(_event: ƒ.EventKeyboard): void {
@@ -83,7 +93,7 @@ namespace Fudge {
     public setInteractionMode(mode: InteractionMode): void {
       this.interactionMode?.cleanup();
       let type: any = this.currentControlMode.modes[mode]?.type || IdleMode;
-      let selection: Object  = this.interactionMode?.selection;        
+      let selection: Array<number> = this.interactionMode?.selection;        
       this.interactionMode = new type(this.viewport, this.editableNode);
 
       if (selection)

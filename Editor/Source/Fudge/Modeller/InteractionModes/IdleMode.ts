@@ -1,7 +1,7 @@
 namespace Fudge {
   export class IdleMode extends IInteractionMode {
     public readonly type: InteractionMode = InteractionMode.IDLE;
-    selection: Object;
+    selection: Array<number>;
     viewport: ƒ.Viewport;
     editableNode: ƒ.Node;
 
@@ -22,6 +22,13 @@ namespace Fudge {
     onmove(_event: ƒ.EventPointer): void {
       //@ts-ignore
     }
+
+    onkeydown(_event: ƒ.EventKeyboard): void {
+    }
+    
+    onkeyup(_event: ƒ.EventKeyboard): void {
+    }
+
     
     cleanup(): void {
       //@ts-ignore

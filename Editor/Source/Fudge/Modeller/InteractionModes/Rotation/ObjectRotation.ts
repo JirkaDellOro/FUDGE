@@ -1,13 +1,9 @@
 namespace Fudge {
   import ƒ = FudgeCore;
   export class ObjectRotation extends AbstractRotation {
-    selection: ƒ.Node;
-    // private pickedCircle: WidgetCircle;
-    // private previousIntersection: ƒ.Vector3;
-    // private oldColor: ƒ.Color;
-
     constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node) {
       super(viewport, editableNode);
+      this.selection = Array.from(Array((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices.length).keys());
     }
 
     // initialize(): void {
@@ -60,14 +56,14 @@ namespace Fudge {
     //   this.pickedCircle = null;
     // }
 
-    onmove(_event: ƒ.EventPointer): void {
-      if (!this.pickedCircle)
-        return;
+    // onmove(_event: ƒ.EventPointer): void {
+    //   if (!this.pickedCircle)
+    //     return;
 
-      let rotationMatrix: ƒ.Matrix4x4 = super.getRotationVector(_event);
-      let mesh: ModifiableMesh = <ModifiableMesh>this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
-      mesh.rotateBy(rotationMatrix, this.editableNode.mtxLocal.translation);
-    }
+    //   let rotationMatrix: ƒ.Matrix4x4 = super.getRotationVector(_event);
+    //   let mesh: ModifiableMesh = <ModifiableMesh>this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+    //   mesh.rotateBy(rotationMatrix, this.editableNode.mtxLocal.translation);
+    // }
 
     // onmove(_event: ƒ.EventPointer): void {
     //   if (!this.pickedCircle)

@@ -44,6 +44,13 @@ namespace Fudge {
       mesh.updatePositionOfVertices(this.selection, this.copyOfSelectedVertices, this.getDistanceFromRayToCenterOfNode(_event, this.distance), this.offset);
     }
 
+    onkeydown(_event: ƒ.EventKeyboard): void {
+    }
+    
+    onkeyup(_event: ƒ.EventKeyboard): void {
+    }
+
+
     initialize(): void {
       this.createNormalArrows();
     }

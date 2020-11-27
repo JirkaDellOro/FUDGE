@@ -96,7 +96,6 @@ namespace Fudge {
         textureCoordinates: Array.from(this.textureUVs)
       };
       return JSON.stringify(serialization, null, 2);
-       
       // console.log(serialization);
     }
 
@@ -117,6 +116,25 @@ namespace Fudge {
 
     public updateNormals(): void {
       this.normalsFace = this.createFaceNormals();
+      this.createRenderBuffers();
+    }
+
+    public scaleBy(matrix: ƒ.Matrix4x4, oldVertices: Map<number, ƒ.Vector3>, selection: number[] = Array.from(Array(this.uniqueVertices.length).keys())): void {
+      for (let vertexIndex of selection) {
+        let currentVertex: ƒ.Vector3 =  oldVertices.get(vertexIndex);
+        let newVertex: ƒ.Vector3 = new ƒ.Vector3(currentVertex.x, currentVertex.y, currentVertex.z);
+        newVertex.transform(matrix);
+        this._uniqueVertices[vertexIndex].position = newVertex;
+      }
+      this.vertices = this.createVertices();
+      this.createRenderBuffers();
+    }
+
+    public translateVertices(difference: ƒ.Vector3, selection: number[]): void {
+      for (let vertexIndex of selection) {
+        this._uniqueVertices[vertexIndex].position.add(difference);
+      }
+      this.vertices = this.createVertices();
       this.createRenderBuffers();
     }
 
@@ -148,6 +166,21 @@ namespace Fudge {
       this.createRenderBuffers();
       return newSelection;
     }
+
+    public updatePositionOfVertices(selectedIndices: number[], oldVertexPositions: Map<number, ƒ.Vector3>, diffToOldPosition: ƒ.Vector3, offset: ƒ.Vector3): void {
+      if (!selectedIndices) 
+        return;
+      
+      for (let selection of selectedIndices) {
+        let currentVertex: ƒ.Vector3 = oldVertexPositions.get(selection);
+        this.updatePositionOfVertex(selection, new ƒ.Vector3(currentVertex.x + diffToOldPosition.x - offset.x, currentVertex.y + diffToOldPosition.y - offset.y, currentVertex.z + diffToOldPosition.z - offset.z));
+      }
+
+      // let trigons: Array<number> = this.findOrderOfTrigonFromSelectedVertex(selectedIndices);
+      // this.updateNormals(trigons);
+      this.createRenderBuffers();
+    }
+    
 
     private addIndicesToNewVertices(edges: Map<number, number>, mapping: {vertexToUniqueVertex: Map<number, number>, reverse: Map<number, number[]>, originalToNewVertex: Map<number, number>}): void {
       let vertexToUniqueVertexMap: Map<number, number> = mapping.vertexToUniqueVertex;
@@ -293,20 +326,6 @@ namespace Fudge {
       return faceVerticesMap;
     }
 
-    // tslint:disable-next-line: member-ordering
-    public updatePositionOfVertices(selectedIndices: number[], oldVertexPositions: Map<number, ƒ.Vector3>, diffToOldPosition: ƒ.Vector3, offset: ƒ.Vector3): void {
-      if (!selectedIndices) 
-        return;
-      
-      for (let selection of selectedIndices) {
-        let currentVertex: ƒ.Vector3 = oldVertexPositions.get(selection);
-        this.updatePositionOfVertex(selection, new ƒ.Vector3(currentVertex.x + diffToOldPosition.x - offset.x, currentVertex.y + diffToOldPosition.y - offset.y, currentVertex.z + diffToOldPosition.z - offset.z));
-      }
-
-      // let trigons: Array<number> = this.findOrderOfTrigonFromSelectedVertex(selectedIndices);
-      // this.updateNormals(trigons);
-      this.createRenderBuffers();
-    }
 
     // tslint:disable-next-line: member-ordering
     protected updatePositionOfVertex(vertexIndex: number, newPosition: ƒ.Vector3): void {
@@ -434,7 +453,7 @@ namespace Fudge {
 
     /* 
       likely a small performance optimization for very big meshes
-      does not work anymore
+      TODO: needs fix
     */
     // private updateNormals(trigons: Array<number>): void { // Array<Array<number>>
     //   let newNormals: Float32Array = new Float32Array(this.vertices.length);

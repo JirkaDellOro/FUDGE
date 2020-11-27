@@ -5,19 +5,20 @@ namespace Fudge {
     //   this.createNormalArrows();
     // }
     
-    onmousedown(_event: ƒ.EventPointer): string {
-      if (!this.selection) 
-        return;
-      this.copyVerticesAndCalculateDistance(_event);
-      return (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
-    }
+    // onmousedown(_event: ƒ.EventPointer): string {
+    //   if (!this.selection) 
+    //     return;
+    //   this.dragging = true;
+    //   this.copyVerticesAndCalculateDistance(_event);
+    //   return (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
+    // }
 
-    onmove(_event: ƒ.EventPointer): void {
-      console.log("vertices: " + this.selection);
-      if (!this.dragging) 
-        return;
+    // onmove(_event: ƒ.EventPointer): void {
+    //   console.log("vertices: " + this.selection);
+    //   if (!this.dragging) 
+    //     return;
 
-      this.updateVertices(_event);
-    }
+    //   this.updateVertices(_event);
+    // }
   }
 }
