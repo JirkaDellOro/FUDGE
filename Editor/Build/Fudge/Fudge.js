@@ -1580,8 +1580,8 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     class IdleMode extends Fudge.IInteractionMode {
-        constructor(viewport, editableNode) {
-            super(viewport, editableNode);
+        constructor() {
+            super(...arguments);
             this.type = Fudge.InteractionMode.IDLE;
         }
         initialize() {
@@ -1597,8 +1597,10 @@ var Fudge;
             //@ts-ignore
         }
         onkeydown(_event) {
+            //
         }
         onkeyup(_event) {
+            //
         }
         cleanup() {
             //@ts-ignore
@@ -1679,22 +1681,11 @@ var Fudge;
         onmousedown(_event) {
             this.viewport.createPickBuffers();
             let posRender = this.getPosRenderFrom(_event);
+            this.previousMousePos = new ƒ.Vector2(_event.clientX, _event.clientY);
             this.axesSelectionHandler.pickWidget(this.viewport.pickNodeAt(posRender));
-            if (this.axesSelectionHandler.isValidSelection()) {
-                this.previousIntersection = this.getIntersection(posRender);
-            }
-            console.log("cross: " + this.viewport.camera.pivot.translation);
             return this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getState();
         }
         onmouseup(_event) {
-            // if (!this.axesSelectionHandler.isValidSelection())
-            //   return;
-            // for (let circle of this.widget.getChildren()) {
-            //   if (circle == this.pickedCircle) {
-            //     circle.getComponent(ƒ.ComponentMaterial).clrPrimary = this.oldColor;
-            //   }
-            // }
-            // this.pickedCircle = null;
             this.axesSelectionHandler.releaseComponent();
             let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
             mesh.updateNormals();
@@ -1703,7 +1694,7 @@ var Fudge;
         onmove(_event) {
             if (!this.axesSelectionHandler.wasPicked && !this.axesSelectionHandler.isSelectedViaKeyboard) {
                 if (this.axesSelectionHandler.isAxisSelectedViaKeyboard()) {
-                    this.previousIntersection = this.getIntersection(this.getPosRenderFrom(_event));
+                    this.previousMousePos = new ƒ.Vector2(_event.clientX, _event.clientY);
                     this.axesSelectionHandler.isSelectedViaKeyboard = true;
                 }
                 return;
@@ -1723,9 +1714,15 @@ var Fudge;
             this.viewport.getGraph().removeChild(this.axesSelectionHandler.widget);
         }
         getRotationVector(_event) {
-            let intersection = this.getIntersection(this.getPosRenderFrom(_event));
-            let cameraNorm = ƒ.Vector3.NORMALIZATION(this.viewport.camera.pivot.translation);
-            let angle = this.getAngle(this.getOrthogonalVector(intersection, cameraNorm), this.getOrthogonalVector(this.previousIntersection, cameraNorm));
+            let mousePos = new ƒ.Vector2(_event.clientX, _event.clientY);
+            let meshCenterClient = this.viewport.pointWorldToClient(this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid());
+            //let intersection: ƒ.Vector3 = this.getIntersection(renderPos);
+            //let cameraNorm: ƒ.Vector3 = ƒ.Vector3.NORMALIZATION(this.viewport.camera.pivot.translation);
+            // let angle: number = this.getAngle(this.getOrthogonalVector(intersection, cameraNorm), this.getOrthogonalVector(this.previousIntersection, cameraNorm));
+            // angle = angle * (180 / Math.PI);
+            let newClientPosition = new ƒ.Vector2(mousePos.x - meshCenterClient.x, mousePos.y - meshCenterClient.y);
+            let oldClientPosition = new ƒ.Vector2(this.previousMousePos.x - meshCenterClient.x, this.previousMousePos.y - meshCenterClient.y);
+            let angle = this.getAngle(newClientPosition, oldClientPosition);
             angle = angle * (180 / Math.PI);
             let selectedAxes = this.axesSelectionHandler.getSelectedAxes();
             let rotationMatrix;
@@ -1744,31 +1741,29 @@ var Fudge;
                 case Fudge.Axis.Z:
                     rotationMatrix = ƒ.Matrix4x4.ROTATION_Z(angle);
                     break;
-                default:
             }
-            this.previousIntersection = intersection;
+            this.previousMousePos = mousePos;
             return rotationMatrix;
-        }
-        getIntersection(posRender) {
-            let ray = this.viewport.getRayFromClient(posRender);
-            return ray.intersectPlane(this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid(), this.viewport.camera.pivot.translation);
         }
         getAngle(first, second) {
             return Math.atan2(first.x, first.y) - Math.atan2(second.x, second.y);
         }
+        /*
+          those functions are not used anymore since angle calculation is now done in client space, could get removed later
+        */
         getOrthogonalVector(posAtIntersection, cameraTranslationNorm) {
-            // posAtIntersection = ƒ.Vector3.SUM(posAtIntersection, (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid());
             return new ƒ.Vector2(+posAtIntersection.y + posAtIntersection.z * cameraTranslationNorm.y, +posAtIntersection.z * Math.abs(cameraTranslationNorm.x)
                 - posAtIntersection.x * Math.abs(cameraTranslationNorm.z)
                 + posAtIntersection.x * cameraTranslationNorm.y);
-            // posAtIntersection.y + posAtIntersection.z * cameraTranslationNorm.y, 
-            // (-posAtIntersection.z * cameraTranslationNorm.x) + (posAtIntersection.x * cameraTranslationNorm.z) + (-posAtIntersection.x * cameraTranslationNorm.y));
-            // (Math.abs(objrotation.y) > 90 ? posAtIntersection.z * Math.abs(cameraTranslationNorm.x) : - posAtIntersection.z * Math.abs(cameraTranslationNorm.x)
             // swapped signs, should work too
             // - posAtIntersection.y - posAtIntersection.z * cameraTranslationNorm.y, 
             // - posAtIntersection.z * Math.abs(cameraTranslationNorm.x)
             // - posAtIntersection.x * Math.abs(cameraTranslationNorm.z) 
             // + posAtIntersection.x * cameraTranslationNorm.y);
+        }
+        getIntersection(posRender) {
+            let ray = this.viewport.getRayFromClient(posRender);
+            return ray.intersectPlane(new ƒ.Vector3(0, 0, 0), this.viewport.camera.pivot.translation);
         }
     }
     Fudge.AbstractRotation = AbstractRotation;
@@ -1815,7 +1810,7 @@ var Fudge;
         onmouseup(_event) {
             // if (!this.wasPicked) 
             //   return;
-            this.axesSelectionHandler.wasPicked = false;
+            this.axesSelectionHandler.releaseComponent();
         }
         onmove(_event) {
             if (!this.axesSelectionHandler.wasPicked && !this.axesSelectionHandler.isSelectedViaKeyboard) {
@@ -1976,19 +1971,6 @@ var Fudge;
             super(...arguments);
             this.type = Fudge.InteractionMode.TRANSLATE;
             this.dragging = false;
-            // private isArrow(hit: ƒ.RayHit): boolean {
-            //   let shaftWasPicked: boolean = false;
-            //   for (let arrow of this.widget.getChildren()) {
-            //     for (let child of arrow.getChildren()) {
-            //       if (hit.node == child) {
-            //         this.pickedArrow = arrow.name;
-            //         this.distance = ƒ.Vector3.DIFFERENCE(arrow.mtxLocal.translation, this.viewport.camera.pivot.translation).magnitude;
-            //         shaftWasPicked = true;
-            //       }  
-            //     }
-            //   }
-            //   return shaftWasPicked;
-            // }
         }
         initialize() {
             let widget = new Fudge.TranslationWidget();
@@ -2003,18 +1985,6 @@ var Fudge;
             this.viewport.createPickBuffers();
             let posRender = this.getPosRenderFrom(_event);
             let nodeWasPicked = false;
-            // for (let hit of this.viewport.pickNodeAt(posRender)) {
-            //   if (hit.zBuffer != 0) {
-            //     let hitIsArrow: boolean = this.isArrow(hit);
-            //     if (hitIsArrow) {
-            //       arrowWasPicked = true;
-            //       // this.distanceBetweenWidgetPivotAndPointer = this.distanceBetweenWidgetPivotAndPointer = this.calculateWidgetDistanceFrom(this.getPosRenderFrom(_event));
-            //     }
-            //     if (hit.node == this.editableNode) 
-            //       nodeWasPicked = true;
-            //     this.isSelected = true;
-            //   }
-            // }
             let additionalNodes = this.axesSelectionHandler.pickWidget(this.viewport.pickNodeAt(posRender));
             for (let node of additionalNodes) {
                 if (node === this.editableNode)
@@ -2029,8 +1999,6 @@ var Fudge;
         }
         onmouseup(_event) {
             this.dragging = false;
-            // this.isSelected = false;
-            // this.pickedArrow = null;
             let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
             this.axesSelectionHandler.releaseComponent();
             mesh.updateNormals();
@@ -2090,9 +2058,6 @@ var Fudge;
             for (let vertexIndex of this.selection) {
                 this.copyOfSelectedVertices.set(vertexIndex, new ƒ.Vector3(vertices[vertexIndex].position.x, vertices[vertexIndex].position.y, vertices[vertexIndex].position.z));
             }
-        }
-        updateVertices(_event) {
-            this.editableNode.getComponent(ƒ.ComponentMesh).mesh.updatePositionOfVertices(this.selection, this.copyOfSelectedVertices, this.getDistanceFromRayToCenterOfNode(_event, this.distance), this.offset);
         }
     }
     Fudge.AbstractTranslation = AbstractTranslation;

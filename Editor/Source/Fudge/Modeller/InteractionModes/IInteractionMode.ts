@@ -17,7 +17,6 @@ namespace Fudge {
     /* returns its state in json or null, if nothing was altered */
     abstract onmousedown(_event: ƒ.EventPointer): string;
     abstract onmouseup(_event: ƒ.EventPointer): void;
-    // onclick(_event: ƒ.EventPointer): void;
     abstract onmove(_event: ƒ.EventPointer): void;
     abstract onkeydown(_event: ƒ.EventKeyboard): void;
     abstract onkeyup(_event: ƒ.EventKeyboard): void;
@@ -87,7 +86,5 @@ namespace Fudge {
     protected getDistanceFromCameraToCenterOfNode(): number {
       return ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, this.viewport.camera.pivot.translation).magnitude;
     }
-
-    //(<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid()
   }
 }

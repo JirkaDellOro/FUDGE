@@ -38,8 +38,8 @@ namespace Fudge {
     onmouseup(_event: ƒ.EventPointer): void {
       // if (!this.wasPicked) 
       //   return;
-      
-      this.axesSelectionHandler.wasPicked = false;
+
+      this.axesSelectionHandler.releaseComponent();
     }
 
     onmove(_event: ƒ.EventPointer): void {
@@ -92,10 +92,10 @@ namespace Fudge {
       this.viewport.getGraph().removeChild(this.axesSelectionHandler.widget);
     }
 
-    private setValues(_event): void {
+    private setValues(_event: ƒ.EventPointer): void {
       this.distanceToCenterOfNode = this.getDistanceFromCameraToCenterOfNode();
       this.oldPosition = this.getNewPosition(_event, this.distanceToCenterOfNode);
-      this.distanceRayToCenter = ƒ.Vector3.DIFFERENCE(this.oldPosition, (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid())
+      this.distanceRayToCenter = ƒ.Vector3.DIFFERENCE(this.oldPosition, (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid());
       this.copyOfSelectedVertices = this.copyVertices();
     }
   }

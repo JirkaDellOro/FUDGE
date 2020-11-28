@@ -423,10 +423,6 @@ declare namespace Fudge {
 declare namespace Fudge {
     class IdleMode extends IInteractionMode {
         readonly type: InteractionMode;
-        selection: Array<number>;
-        viewport: ƒ.Viewport;
-        editableNode: ƒ.Node;
-        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
         initialize(): void;
         onmousedown(_event: ƒ.EventPointer): string;
         onmouseup(_event: ƒ.EventPointer): void;
@@ -461,8 +457,8 @@ declare namespace Fudge {
         viewport: ƒ.Viewport;
         selection: Array<number>;
         editableNode: ƒ.Node;
-        protected previousIntersection: ƒ.Vector3;
         private axesSelectionHandler;
+        private previousMousePos;
         constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
         initialize(): void;
         onmousedown(_event: ƒ.EventPointer): string;
@@ -472,9 +468,9 @@ declare namespace Fudge {
         onkeyup(_event: ƒ.EventKeyboard): void;
         cleanup(): void;
         private getRotationVector;
-        private getIntersection;
         private getAngle;
         private getOrthogonalVector;
+        private getIntersection;
     }
 }
 declare namespace Fudge {
@@ -558,7 +554,6 @@ declare namespace Fudge {
         onkeyup(_event: ƒ.EventKeyboard): void;
         cleanup(): void;
         protected copyVerticesAndCalculateDistance(_event: ƒ.EventPointer): void;
-        protected updateVertices(_event: ƒ.EventPointer): void;
     }
 }
 declare namespace Fudge {

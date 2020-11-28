@@ -26,23 +26,6 @@ namespace Fudge {
       this.viewport.createPickBuffers();
       let posRender: ƒ.Vector2 = this.getPosRenderFrom(_event);
       let nodeWasPicked: boolean = false;
-
-      // for (let hit of this.viewport.pickNodeAt(posRender)) {
-      //   if (hit.zBuffer != 0) {
-      //     let hitIsArrow: boolean = this.isArrow(hit);
-
-      //     if (hitIsArrow) {
-      //       arrowWasPicked = true;
-      //       // this.distanceBetweenWidgetPivotAndPointer = this.distanceBetweenWidgetPivotAndPointer = this.calculateWidgetDistanceFrom(this.getPosRenderFrom(_event));
-      //     }
-          
-      //     if (hit.node == this.editableNode) 
-      //       nodeWasPicked = true;
-
-      //     this.isSelected = true;
-      //   }
-      // }
-
       let additionalNodes: ƒ.Node[] = this.axesSelectionHandler.pickWidget(this.viewport.pickNodeAt(posRender));
 
       for (let node of additionalNodes) {
@@ -61,8 +44,6 @@ namespace Fudge {
 
     onmouseup(_event: ƒ.EventPointer): void {
       this.dragging = false;
-      // this.isSelected = false;
-      // this.pickedArrow = null;
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
       this.axesSelectionHandler.releaseComponent();
       mesh.updateNormals();
@@ -128,27 +109,5 @@ namespace Fudge {
         this.copyOfSelectedVertices.set(vertexIndex, new ƒ.Vector3(vertices[vertexIndex].position.x, vertices[vertexIndex].position.y, vertices[vertexIndex].position.z));
       }
     }
-
-    protected updateVertices(_event: ƒ.EventPointer): void {
-      (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).updatePositionOfVertices(this.selection, this.copyOfSelectedVertices, this.getDistanceFromRayToCenterOfNode(_event, this.distance), this.offset);
-    }
-
-
-    // private isArrow(hit: ƒ.RayHit): boolean {
-    //   let shaftWasPicked: boolean = false;
-    //   for (let arrow of this.widget.getChildren()) {
-    //     for (let child of arrow.getChildren()) {
-    //       if (hit.node == child) {
-    //         this.pickedArrow = arrow.name;
-    //         this.distance = ƒ.Vector3.DIFFERENCE(arrow.mtxLocal.translation, this.viewport.camera.pivot.translation).magnitude;
-    //         shaftWasPicked = true;
-    //       }  
-    //     }
-    //   }
-    //   return shaftWasPicked;
-    // }
-
-
-
   }
 }

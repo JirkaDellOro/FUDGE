@@ -6,7 +6,6 @@ namespace Fudge {
 
     abstract onmousedown(_event: ƒ.EventPointer): string;
     abstract onmouseup(_event: ƒ.EventPointer): void;
-    // abstract onclick(_event: ƒ.EventPointer): void;
     abstract onmove(_event: ƒ.EventPointer): void;
     cleanup(): void {
       //

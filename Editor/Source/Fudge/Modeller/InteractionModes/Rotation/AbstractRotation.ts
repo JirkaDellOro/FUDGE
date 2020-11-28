@@ -6,10 +6,8 @@ namespace Fudge {
     selection: Array<number>;
     editableNode: ƒ.Node;
 
-    // protected pickedCircle: WidgetCircle;
-    protected previousIntersection: ƒ.Vector3;
-    // protected oldColor: ƒ.Color;
     private axesSelectionHandler: AxesSelectionHandler;
+    private previousMousePos: ƒ.Vector2;
 
     constructor (viewport: ƒ.Viewport, editableNode: ƒ.Node) {
       super(viewport, editableNode);
@@ -27,26 +25,12 @@ namespace Fudge {
     onmousedown(_event: ƒ.EventPointer): string {
       this.viewport.createPickBuffers();
       let posRender: ƒ.Vector2 = this.getPosRenderFrom(_event);
+      this.previousMousePos = new ƒ.Vector2(_event.clientX, _event.clientY);
       this.axesSelectionHandler.pickWidget(this.viewport.pickNodeAt(posRender));
-
-      if (this.axesSelectionHandler.isValidSelection()) {
-        this.previousIntersection = this.getIntersection(posRender);
-      }
-      console.log("cross: " + this.viewport.camera.pivot.translation);
       return (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
     }
 
     onmouseup(_event: ƒ.EventPointer): void {
-      // if (!this.axesSelectionHandler.isValidSelection())
-      //   return;
-
-      // for (let circle of this.widget.getChildren()) {
-      //   if (circle == this.pickedCircle) {
-      //     circle.getComponent(ƒ.ComponentMaterial).clrPrimary = this.oldColor;
-      //   }
-      // }
-
-      // this.pickedCircle = null;
       this.axesSelectionHandler.releaseComponent();
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
       mesh.updateNormals();
@@ -56,7 +40,7 @@ namespace Fudge {
     onmove(_event: ƒ.EventPointer): void {
       if (!this.axesSelectionHandler.wasPicked && !this.axesSelectionHandler.isSelectedViaKeyboard) {
         if (this.axesSelectionHandler.isAxisSelectedViaKeyboard()) {
-          this.previousIntersection = this.getIntersection(this.getPosRenderFrom(_event));
+          this.previousMousePos = new ƒ.Vector2(_event.clientX, _event.clientY);
           this.axesSelectionHandler.isSelectedViaKeyboard = true;
         }
         return;
@@ -81,11 +65,16 @@ namespace Fudge {
     }
 
     private getRotationVector(_event: ƒ.EventPointer): ƒ.Matrix4x4 {
-      let intersection: ƒ.Vector3 = this.getIntersection(this.getPosRenderFrom(_event));
-      let cameraNorm: ƒ.Vector3 = ƒ.Vector3.NORMALIZATION(this.viewport.camera.pivot.translation);
-      let angle: number = this.getAngle(this.getOrthogonalVector(intersection, cameraNorm), this.getOrthogonalVector(this.previousIntersection, cameraNorm));
+      let mousePos: ƒ.Vector2 = new ƒ.Vector2(_event.clientX, _event.clientY);
+      let meshCenterClient: ƒ.Vector2 = this.viewport.pointWorldToClient((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid())
+      //let intersection: ƒ.Vector3 = this.getIntersection(renderPos);
+      //let cameraNorm: ƒ.Vector3 = ƒ.Vector3.NORMALIZATION(this.viewport.camera.pivot.translation);
+      // let angle: number = this.getAngle(this.getOrthogonalVector(intersection, cameraNorm), this.getOrthogonalVector(this.previousIntersection, cameraNorm));
+      // angle = angle * (180 / Math.PI);
+      let newClientPosition: ƒ.Vector2 = new ƒ.Vector2(mousePos.x - meshCenterClient.x, mousePos.y - meshCenterClient.y);
+      let oldClientPosition: ƒ.Vector2 = new ƒ.Vector2(this.previousMousePos.x - meshCenterClient.x, this.previousMousePos.y - meshCenterClient.y);
+      let angle: number = this.getAngle(newClientPosition, oldClientPosition);
       angle = angle * (180 / Math.PI);
-
       let selectedAxes: Axis[] = this.axesSelectionHandler.getSelectedAxes();
       let rotationMatrix: ƒ.Matrix4x4;
       /*
@@ -103,33 +92,24 @@ namespace Fudge {
         case Axis.Z:
           rotationMatrix = ƒ.Matrix4x4.ROTATION_Z(angle);
           break;
-        default: 
       }
-      this.previousIntersection = intersection;
+      this.previousMousePos = mousePos;
       return rotationMatrix;
-    }
-
-
-    private getIntersection(posRender: ƒ.Vector2): ƒ.Vector3 {
-      let ray: ƒ.Ray = this.viewport.getRayFromClient(posRender);
-      return ray.intersectPlane((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(), this.viewport.camera.pivot.translation);
     }
 
     private getAngle(first: ƒ.Vector2, second: ƒ.Vector2): number {
       return Math.atan2(first.x, first.y) - Math.atan2(second.x, second.y);
     }
 
+    /*
+      those functions are not used anymore since angle calculation is now done in client space, could get removed later 
+    */
     private getOrthogonalVector(posAtIntersection: ƒ.Vector3, cameraTranslationNorm: ƒ.Vector3): ƒ.Vector2 {
-      // posAtIntersection = ƒ.Vector3.SUM(posAtIntersection, (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid());
       return new ƒ.Vector2(
         + posAtIntersection.y + posAtIntersection.z * cameraTranslationNorm.y,
         + posAtIntersection.z * Math.abs(cameraTranslationNorm.x)
         - posAtIntersection.x * Math.abs(cameraTranslationNorm.z)
         + posAtIntersection.x * cameraTranslationNorm.y);
-      // posAtIntersection.y + posAtIntersection.z * cameraTranslationNorm.y, 
-      // (-posAtIntersection.z * cameraTranslationNorm.x) + (posAtIntersection.x * cameraTranslationNorm.z) + (-posAtIntersection.x * cameraTranslationNorm.y));
-      // (Math.abs(objrotation.y) > 90 ? posAtIntersection.z * Math.abs(cameraTranslationNorm.x) : - posAtIntersection.z * Math.abs(cameraTranslationNorm.x)
-
       // swapped signs, should work too
       // - posAtIntersection.y - posAtIntersection.z * cameraTranslationNorm.y, 
       // - posAtIntersection.z * Math.abs(cameraTranslationNorm.x)
@@ -137,8 +117,10 @@ namespace Fudge {
       // + posAtIntersection.x * cameraTranslationNorm.y);
     }
 
-    // abstract onmousedown(_event: ƒ.EventPointer): void;
-    // abstract onmouseup(_event: ƒ.EventPointer): void;
+    private getIntersection(posRender: ƒ.Vector2): ƒ.Vector3 {
+      let ray: ƒ.Ray = this.viewport.getRayFromClient(posRender);
+      return ray.intersectPlane(new ƒ.Vector3(0, 0, 0), this.viewport.camera.pivot.translation);
+    }
 
   }
 }
