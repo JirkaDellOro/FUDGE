@@ -18,10 +18,6 @@ namespace Fudge {
       return this.axisIsPicked;
     }
 
-    public set wasPicked(state: boolean) {
-      this.axisIsPicked = state;
-    }
-
     public releaseComponent(): void {
       if (this.axisIsPicked) {
         this.axisIsPicked = false;
@@ -50,44 +46,18 @@ namespace Fudge {
     }
 
     public addAxisOf(_key: string): void {
-      let validSelection: boolean = true;
-      switch (_key) {
-        case "x": 
-          if (!this.selectedAxes.includes(Axis.X)) {
-            this.selectedAxes.push(Axis.X);
-          }
-          break;
-        case "y": 
-          if (!this.selectedAxes.includes(Axis.Y)) {
-            this.selectedAxes.push(Axis.Y);
-          }
-          break;
-        case "z":
-          if (!this.selectedAxes.includes(Axis.Z)) {
-            this.selectedAxes.push(Axis.Z);
-          }
-          break;
-        default:
-          validSelection = false;
+      let selectedAxis: Axis = this.getSelectedAxisBy(_key);
+      if (!this.selectedAxes.includes(selectedAxis)) {
+        this.selectedAxes.push(selectedAxis);
+        this._widget.updateWidget(selectedAxis);
       }
-      // if (validSelection)
-      //   this.isSelectedViaKeyboard = true;
     }
 
     public removeAxisOf(_key: string): void {
-      let index: number;
-      switch (_key) {
-        case "x": 
-          index = this.selectedAxes.indexOf(Axis.X);
-          break;
-        case "y": 
-          index = this.selectedAxes.indexOf(Axis.Y);
-          break;
-        case "z":
-          index = this.selectedAxes.indexOf(Axis.Z);
-          break;
-      }     
+      let selectedAxis: Axis = this.getSelectedAxisBy(_key);
+      let index: number = this.selectedAxes.indexOf(selectedAxis);
       if (index != -1) {
+        this._widget.removeUnselectedAxis(this.selectedAxes[index]);
         this.selectedAxes.splice(index, 1);
         if (!this.isAxisSelectedViaKeyboard()) 
           this.isSelectedViaKeyboard = false;
@@ -96,6 +66,22 @@ namespace Fudge {
 
     public isAxisSelectedViaKeyboard(): boolean {
       return this.selectedAxes.length > 0;
+    }
+
+    private getSelectedAxisBy(_key: string): Axis {
+      let selectedAxis: Axis;
+      switch (_key) {
+        case "x": 
+          selectedAxis = Axis.X;
+          break;
+        case "y": 
+          selectedAxis = Axis.Y;
+          break;
+        case "z":
+          selectedAxis = Axis.Z;
+          break;
+      }
+      return selectedAxis;
     }
   }
 }

@@ -16,6 +16,8 @@ namespace Fudge {
       this.addChild(yRotWidget);
       this.addChild(xRotWidget);
       this.addChild(zRotWidget);
+      this.fillColorDict();
+
     }
 
     public isHitWidgetComponent(_hits: ƒ.RayHit[]): {axis: Axis, additionalNodes: ƒ.Node[]} {
@@ -43,10 +45,19 @@ namespace Fudge {
 
       if (wasPicked) {
         pickedAxis = this.getAxisFromWidgetComponent(this.pickedComponent);
-        this.oldColor = this.pickedComponent.getComponent(ƒ.ComponentMaterial).clrPrimary;
-        this.pickedComponent.getComponent(ƒ.ComponentMaterial).clrPrimary = new ƒ.Color(1, 1, 1, 1);
+        this.changeColorOfComponent(this.pickedComponent);
       }
       return {axis: pickedAxis, additionalNodes: additionalNodes};
+    }
+
+    public changeColorOfComponent(component: ƒ.Node): void {
+      component.getComponent(ƒ.ComponentMaterial).clrPrimary = new ƒ.Color(1, 1, 1, 1);
+    }
+
+    private fillColorDict(): void {
+      for (let circle of this.getChildren()) {
+        this.componentToOriginalColorMap.set(circle, circle.getComponent(ƒ.ComponentMaterial).clrPrimary);
+      }
     }
 
   }

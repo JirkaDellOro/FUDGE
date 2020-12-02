@@ -19,6 +19,7 @@ namespace Fudge {
       this.addChild(yScaleWidget);
       this.addChild(xScaleWidget);
       this.addChild(zScaleWidget);
+      this.fillColorDict();
     }
 
     public isHitWidgetComponent(_hits: ƒ.RayHit[]): {axis: Axis, additionalNodes: ƒ.Node[]} {
@@ -47,16 +48,25 @@ namespace Fudge {
       }
       if (wasPicked) {
         pickedAxis = this.getAxisFromWidgetComponent(this.pickedComponent);
-        this.oldColor = this.pickedComponent.getChildren()[0].getComponent(ƒ.ComponentMaterial).clrPrimary;
-        this.pickedComponent.getChildren().forEach(child => child.getComponent(ƒ.ComponentMaterial).clrPrimary = new ƒ.Color(1, 1, 1, 1));
+        this.changeColorOfComponent(this.pickedComponent);
       }
       
       return {axis: pickedAxis, additionalNodes: additionalNodes};
     }
 
-    public releaseComponent(): void {
-      this.pickedComponent.getChildren().forEach(child => child.getComponent(ƒ.ComponentMaterial).clrPrimary = this.oldColor);
+    public changeColorOfComponent(component: ƒ.Node): void {
+      component.getChildren().forEach(child => child.getComponent(ƒ.ComponentMaterial).clrPrimary = new ƒ.Color(1, 1, 1, 1));
     }
 
+
+    public releaseComponent(pickedComponent: ƒ.Node = this.pickedComponent): void {
+      pickedComponent.getChildren().forEach(child => child.getComponent(ƒ.ComponentMaterial).clrPrimary = this.componentToOriginalColorMap.get(pickedComponent));
+    }
+
+    private fillColorDict(): void {
+      for (let circle of this.getChildren()) {
+        this.componentToOriginalColorMap.set(circle, circle.getChildren()[0].getComponent(ƒ.ComponentMaterial).clrPrimary);
+      }
+    }
   }
 }

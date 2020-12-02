@@ -66,7 +66,7 @@ namespace Fudge {
 
     private getRotationVector(_event: ƒ.EventPointer): ƒ.Matrix4x4 {
       let mousePos: ƒ.Vector2 = new ƒ.Vector2(_event.clientX, _event.clientY);
-      let meshCenterClient: ƒ.Vector2 = this.viewport.pointWorldToClient((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid())
+      let meshCenterClient: ƒ.Vector2 = this.viewport.pointWorldToClient((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid());
       //let intersection: ƒ.Vector3 = this.getIntersection(renderPos);
       //let cameraNorm: ƒ.Vector3 = ƒ.Vector3.NORMALIZATION(this.viewport.camera.pivot.translation);
       // let angle: number = this.getAngle(this.getOrthogonalVector(intersection, cameraNorm), this.getOrthogonalVector(this.previousIntersection, cameraNorm));

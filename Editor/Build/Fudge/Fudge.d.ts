@@ -612,7 +612,6 @@ declare namespace Fudge {
         constructor(widget: IWidget);
         get widget(): ƒ.Node;
         get wasPicked(): boolean;
-        set wasPicked(state: boolean);
         releaseComponent(): void;
         pickWidget(_hits: ƒ.RayHit[]): ƒ.Node[];
         isValidSelection(): boolean;
@@ -620,19 +619,24 @@ declare namespace Fudge {
         addAxisOf(_key: string): void;
         removeAxisOf(_key: string): void;
         isAxisSelectedViaKeyboard(): boolean;
+        private getSelectedAxisBy;
     }
 }
 declare namespace Fudge {
     abstract class IWidget extends ƒ.Node {
         protected abstract componentToAxisMap: Map<ƒ.Node, Axis>;
+        protected componentToOriginalColorMap: Map<ƒ.Node, ƒ.Color>;
         protected pickedComponent: ƒ.Node;
-        protected oldColor: ƒ.Color;
         getAxisFromWidgetComponent(_component: ƒ.Node): Axis;
         abstract isHitWidgetComponent(_hits: ƒ.RayHit[]): {
             axis: Axis;
             additionalNodes: ƒ.Node[];
         };
-        releaseComponent(): void;
+        releaseComponent(pickedComponent?: ƒ.Node): void;
+        getComponentFromAxis(_axis: Axis): ƒ.Node;
+        updateWidget(_axis: Axis): void;
+        abstract changeColorOfComponent(component: ƒ.Node): void;
+        removeUnselectedAxis(_axis: Axis): void;
     }
 }
 declare namespace Fudge {
@@ -644,6 +648,8 @@ declare namespace Fudge {
             axis: Axis;
             additionalNodes: ƒ.Node[];
         };
+        changeColorOfComponent(component: ƒ.Node): void;
+        private fillColorDict;
     }
 }
 declare namespace Fudge {
@@ -655,7 +661,9 @@ declare namespace Fudge {
             axis: Axis;
             additionalNodes: ƒ.Node[];
         };
-        releaseComponent(): void;
+        changeColorOfComponent(component: ƒ.Node): void;
+        releaseComponent(pickedComponent?: ƒ.Node): void;
+        private fillColorDict;
     }
 }
 declare namespace Fudge {
@@ -666,7 +674,9 @@ declare namespace Fudge {
             axis: Axis;
             additionalNodes: ƒ.Node[];
         };
-        releaseComponent(): void;
+        releaseComponent(pickedComponent?: ƒ.Node): void;
+        changeColorOfComponent(component: ƒ.Node): void;
+        private fillColorDict;
     }
 }
 declare namespace Fudge {

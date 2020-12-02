@@ -2596,9 +2596,6 @@ var Fudge;
         get wasPicked() {
             return this.axisIsPicked;
         }
-        set wasPicked(state) {
-            this.axisIsPicked = state;
-        }
         releaseComponent() {
             if (this.axisIsPicked) {
                 this.axisIsPicked = false;
@@ -2623,43 +2620,17 @@ var Fudge;
             return selectedAxes;
         }
         addAxisOf(_key) {
-            let validSelection = true;
-            switch (_key) {
-                case "x":
-                    if (!this.selectedAxes.includes(Fudge.Axis.X)) {
-                        this.selectedAxes.push(Fudge.Axis.X);
-                    }
-                    break;
-                case "y":
-                    if (!this.selectedAxes.includes(Fudge.Axis.Y)) {
-                        this.selectedAxes.push(Fudge.Axis.Y);
-                    }
-                    break;
-                case "z":
-                    if (!this.selectedAxes.includes(Fudge.Axis.Z)) {
-                        this.selectedAxes.push(Fudge.Axis.Z);
-                    }
-                    break;
-                default:
-                    validSelection = false;
+            let selectedAxis = this.getSelectedAxisBy(_key);
+            if (!this.selectedAxes.includes(selectedAxis)) {
+                this.selectedAxes.push(selectedAxis);
+                this._widget.updateWidget(selectedAxis);
             }
-            // if (validSelection)
-            //   this.isSelectedViaKeyboard = true;
         }
         removeAxisOf(_key) {
-            let index;
-            switch (_key) {
-                case "x":
-                    index = this.selectedAxes.indexOf(Fudge.Axis.X);
-                    break;
-                case "y":
-                    index = this.selectedAxes.indexOf(Fudge.Axis.Y);
-                    break;
-                case "z":
-                    index = this.selectedAxes.indexOf(Fudge.Axis.Z);
-                    break;
-            }
+            let selectedAxis = this.getSelectedAxisBy(_key);
+            let index = this.selectedAxes.indexOf(selectedAxis);
             if (index != -1) {
+                this._widget.removeUnselectedAxis(this.selectedAxes[index]);
                 this.selectedAxes.splice(index, 1);
                 if (!this.isAxisSelectedViaKeyboard())
                     this.isSelectedViaKeyboard = false;
@@ -2668,17 +2639,50 @@ var Fudge;
         isAxisSelectedViaKeyboard() {
             return this.selectedAxes.length > 0;
         }
+        getSelectedAxisBy(_key) {
+            let selectedAxis;
+            switch (_key) {
+                case "x":
+                    selectedAxis = Fudge.Axis.X;
+                    break;
+                case "y":
+                    selectedAxis = Fudge.Axis.Y;
+                    break;
+                case "z":
+                    selectedAxis = Fudge.Axis.Z;
+                    break;
+            }
+            return selectedAxis;
+        }
     }
     Fudge.AxesSelectionHandler = AxesSelectionHandler;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
     class IWidget extends ƒ.Node {
+        constructor() {
+            super(...arguments);
+            this.componentToOriginalColorMap = new Map();
+        }
         getAxisFromWidgetComponent(_component) {
             return this.componentToAxisMap.get(_component);
         }
-        releaseComponent() {
-            this.pickedComponent.getComponent(ƒ.ComponentMaterial).clrPrimary = this.oldColor;
+        releaseComponent(pickedComponent = this.pickedComponent) {
+            pickedComponent.getComponent(ƒ.ComponentMaterial).clrPrimary = this.componentToOriginalColorMap.get(pickedComponent);
+        }
+        getComponentFromAxis(_axis) {
+            for (let component of this.componentToAxisMap.keys()) {
+                if (this.componentToAxisMap.get(component) == _axis)
+                    return component;
+            }
+            return null;
+        }
+        updateWidget(_axis) {
+            this.changeColorOfComponent(this.getComponentFromAxis(_axis));
+        }
+        removeUnselectedAxis(_axis) {
+            let component = this.getComponentFromAxis(_axis);
+            this.releaseComponent(component);
         }
     }
     Fudge.IWidget = IWidget;
@@ -2699,6 +2703,7 @@ var Fudge;
             this.addChild(yRotWidget);
             this.addChild(xRotWidget);
             this.addChild(zRotWidget);
+            this.fillColorDict();
         }
         isHitWidgetComponent(_hits) {
             let additionalNodes = [];
@@ -2724,10 +2729,17 @@ var Fudge;
             }
             if (wasPicked) {
                 pickedAxis = this.getAxisFromWidgetComponent(this.pickedComponent);
-                this.oldColor = this.pickedComponent.getComponent(ƒ.ComponentMaterial).clrPrimary;
-                this.pickedComponent.getComponent(ƒ.ComponentMaterial).clrPrimary = new ƒ.Color(1, 1, 1, 1);
+                this.changeColorOfComponent(this.pickedComponent);
             }
             return { axis: pickedAxis, additionalNodes: additionalNodes };
+        }
+        changeColorOfComponent(component) {
+            component.getComponent(ƒ.ComponentMaterial).clrPrimary = new ƒ.Color(1, 1, 1, 1);
+        }
+        fillColorDict() {
+            for (let circle of this.getChildren()) {
+                this.componentToOriginalColorMap.set(circle, circle.getComponent(ƒ.ComponentMaterial).clrPrimary);
+            }
         }
     }
     Fudge.RotationWidget = RotationWidget;
@@ -2750,6 +2762,7 @@ var Fudge;
             this.addChild(yScaleWidget);
             this.addChild(xScaleWidget);
             this.addChild(zScaleWidget);
+            this.fillColorDict();
         }
         isHitWidgetComponent(_hits) {
             let additionalNodes = [];
@@ -2777,13 +2790,20 @@ var Fudge;
             }
             if (wasPicked) {
                 pickedAxis = this.getAxisFromWidgetComponent(this.pickedComponent);
-                this.oldColor = this.pickedComponent.getChildren()[0].getComponent(ƒ.ComponentMaterial).clrPrimary;
-                this.pickedComponent.getChildren().forEach(child => child.getComponent(ƒ.ComponentMaterial).clrPrimary = new ƒ.Color(1, 1, 1, 1));
+                this.changeColorOfComponent(this.pickedComponent);
             }
             return { axis: pickedAxis, additionalNodes: additionalNodes };
         }
-        releaseComponent() {
-            this.pickedComponent.getChildren().forEach(child => child.getComponent(ƒ.ComponentMaterial).clrPrimary = this.oldColor);
+        changeColorOfComponent(component) {
+            component.getChildren().forEach(child => child.getComponent(ƒ.ComponentMaterial).clrPrimary = new ƒ.Color(1, 1, 1, 1));
+        }
+        releaseComponent(pickedComponent = this.pickedComponent) {
+            pickedComponent.getChildren().forEach(child => child.getComponent(ƒ.ComponentMaterial).clrPrimary = this.componentToOriginalColorMap.get(pickedComponent));
+        }
+        fillColorDict() {
+            for (let circle of this.getChildren()) {
+                this.componentToOriginalColorMap.set(circle, circle.getChildren()[0].getComponent(ƒ.ComponentMaterial).clrPrimary);
+            }
         }
     }
     Fudge.ScalationWidget = ScalationWidget;
@@ -2806,6 +2826,7 @@ var Fudge;
             this.addChild(arrowRed);
             this.addChild(arrowGreen);
             this.addChild(arrowBlue);
+            this.fillColorDict();
         }
         isHitWidgetComponent(_hits) {
             let additionalNodes = [];
@@ -2833,13 +2854,20 @@ var Fudge;
             }
             if (wasPicked) {
                 pickedAxis = this.getAxisFromWidgetComponent(this.pickedComponent);
-                this.oldColor = this.pickedComponent.getChildren()[0].getComponent(ƒ.ComponentMaterial).clrPrimary;
-                this.pickedComponent.getChildren().forEach(child => child.getComponent(ƒ.ComponentMaterial).clrPrimary = new ƒ.Color(1, 1, 1, 1));
+                this.changeColorOfComponent(this.pickedComponent);
             }
             return { axis: pickedAxis, additionalNodes: additionalNodes };
         }
-        releaseComponent() {
-            this.pickedComponent.getChildren().forEach(child => child.getComponent(ƒ.ComponentMaterial).clrPrimary = this.oldColor);
+        releaseComponent(pickedComponent = this.pickedComponent) {
+            pickedComponent.getChildren().forEach(child => child.getComponent(ƒ.ComponentMaterial).clrPrimary = this.componentToOriginalColorMap.get(pickedComponent));
+        }
+        changeColorOfComponent(component) {
+            component.getChildren().forEach(child => child.getComponent(ƒ.ComponentMaterial).clrPrimary = new ƒ.Color(1, 1, 1, 1));
+        }
+        fillColorDict() {
+            for (let circle of this.getChildren()) {
+                this.componentToOriginalColorMap.set(circle, circle.getChildren()[0].getComponent(ƒ.ComponentMaterial).clrPrimary);
+            }
         }
     }
     Fudge.TranslationWidget = TranslationWidget;
