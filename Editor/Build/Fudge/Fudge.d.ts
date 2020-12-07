@@ -343,6 +343,7 @@ declare namespace Fudge {
         switchMode(_event: ƒ.EventKeyboard): void;
         setControlMode(mode: ControlMode): void;
         setInteractionMode(mode: InteractionMode): void;
+        drawSelection(): void;
         private loadState;
         private saveState;
     }
@@ -368,6 +369,7 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     abstract class AbstractControlMode {
+        type: ControlMode;
         formerMode: IInteractionMode;
         modes: {
             [mode in InteractionMode]?: {
@@ -379,6 +381,7 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     class EditMode extends AbstractControlMode {
+        type: ControlMode;
         modes: {
             [mode in InteractionMode]?: {
                 type: typeof IInteractionMode;
@@ -389,6 +392,7 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     class ObjectMode extends AbstractControlMode {
+        type: ControlMode;
         modes: {
             [mode in InteractionMode]?: {
                 type: typeof IInteractionMode;
@@ -408,10 +412,11 @@ declare namespace Fudge {
         abstract onmousedown(_event: ƒ.EventPointer): string;
         abstract onmouseup(_event: ƒ.EventPointer): void;
         abstract onmove(_event: ƒ.EventPointer): void;
-        abstract onkeydown(_event: ƒ.EventKeyboard): void;
+        abstract onkeydown(_event: ƒ.EventKeyboard): string;
         abstract onkeyup(_event: ƒ.EventKeyboard): void;
         abstract initialize(): void;
         abstract cleanup(): void;
+        drawCircleAtSelection(): void;
         protected getPosRenderFrom(_event: ƒ.EventPointer): ƒ.Vector2;
         protected createNormalArrows(): void;
         protected copyVertices(): Map<number, ƒ.Vector3>;
@@ -427,7 +432,7 @@ declare namespace Fudge {
         onmousedown(_event: ƒ.EventPointer): string;
         onmouseup(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
-        onkeydown(_event: ƒ.EventKeyboard): void;
+        onkeydown(_event: ƒ.EventKeyboard): string;
         onkeyup(_event: ƒ.EventKeyboard): void;
         cleanup(): void;
     }
@@ -445,7 +450,7 @@ declare namespace Fudge {
         onmousedown(_event: ƒ.EventPointer): string;
         onmouseup(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
-        onkeydown(_event: ƒ.EventKeyboard): void;
+        onkeydown(_event: ƒ.EventKeyboard): string;
         onkeyup(_event: ƒ.EventKeyboard): void;
         initialize(): void;
         cleanup(): void;
@@ -464,7 +469,7 @@ declare namespace Fudge {
         onmousedown(_event: ƒ.EventPointer): string;
         onmouseup(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
-        onkeydown(_event: ƒ.EventKeyboard): void;
+        onkeydown(_event: ƒ.EventKeyboard): string;
         onkeyup(_event: ƒ.EventKeyboard): void;
         cleanup(): void;
         private getRotationVector;
@@ -495,7 +500,7 @@ declare namespace Fudge {
         onmousedown(_event: ƒ.EventPointer): string;
         onmouseup(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
-        onkeydown(_event: ƒ.EventKeyboard): void;
+        onkeydown(_event: ƒ.EventKeyboard): string;
         onkeyup(_event: ƒ.EventKeyboard): void;
         cleanup(): void;
         private setValues;
@@ -529,7 +534,7 @@ declare namespace Fudge {
         onmousedown(_event: ƒ.EventPointer): string;
         onmouseup(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
-        onkeydown(_event: ƒ.EventKeyboard): void;
+        onkeydown(_event: ƒ.EventKeyboard): string;
         onkeyup(_event: ƒ.EventKeyboard): void;
         private removeSelectedVertexIfAlreadySelected;
     }
@@ -550,7 +555,7 @@ declare namespace Fudge {
         onmousedown(_event: ƒ.EventPointer): string;
         onmouseup(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
-        onkeydown(_event: ƒ.EventKeyboard): void;
+        onkeydown(_event: ƒ.EventKeyboard): string;
         onkeyup(_event: ƒ.EventKeyboard): void;
         cleanup(): void;
         protected copyVerticesAndCalculateDistance(_event: ƒ.EventPointer): void;
@@ -562,7 +567,6 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     class ObjectTranslation extends AbstractTranslation {
-        private distanceBetweenWidgetPivotAndPointer;
         constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
     }
 }
@@ -576,6 +580,7 @@ declare namespace Fudge {
         retrieveState(state: string): void;
         export(): string;
         getCentroid(selection?: number[]): ƒ.Vector3;
+        removeFace(selection: number[]): void;
         updateNormals(): void;
         scaleBy(matrix: ƒ.Matrix4x4, oldVertices: Map<number, ƒ.Vector3>, selection?: number[]): void;
         translateVertices(difference: ƒ.Vector3, selection: number[]): void;
@@ -616,7 +621,7 @@ declare namespace Fudge {
         pickWidget(_hits: ƒ.RayHit[]): ƒ.Node[];
         isValidSelection(): boolean;
         getSelectedAxes(): Axis[];
-        addAxisOf(_key: string): void;
+        addAxisOf(_key: string): boolean;
         removeAxisOf(_key: string): void;
         isAxisSelectedViaKeyboard(): boolean;
         private getSelectedAxisBy;

@@ -2,10 +2,10 @@ namespace Fudge {
   export class ModifiableMesh extends ƒ.Mesh {
     private static vertexSize: number = ƒ.Mesh.getBufferSpecification().size;
     private _uniqueVertices: UniqueVertex[];
+    private faces: Array<Array<number>> = [];
 
     constructor() {
       super();
-
       this._uniqueVertices = [
         new UniqueVertex(new ƒ.Vector3(-1, 1, 1),   new Map([[0, [2, 5]], [8, [22]], [16, [31]]])),
         new UniqueVertex(new ƒ.Vector3(-1, -1, 1),  new Map([[1, [0]], [9, [19, 21]], [17, [26, 29]]])), 
@@ -16,6 +16,19 @@ namespace Fudge {
         new UniqueVertex(new ƒ.Vector3(1, -1, -1),  new Map([[6, [6]], [14, [13, 15]], [22, [25, 27]]])), 
         new UniqueVertex(new ƒ.Vector3(1, 1, -1),   new Map([[7, [8, 11]], [15, [16]], [23, [33]]])) 
       ];
+
+      // this._uniqueVertices = [
+      //   new UniqueVertex(new ƒ.Vector3(-1, 1, 1),   new Map([[0, [2, 5]], [8, [22]], [16, [31]]])),
+      //   new UniqueVertex(new ƒ.Vector3(-1, -1, 1),  new Map([[1, [0]], [9, [19, 21]], [17, [26, 29]]])), 
+      //   new UniqueVertex(new ƒ.Vector3(1, -1, 1),   new Map([[2, [1, 3]], [10, [12]], [18, [28]]])), 
+      //   new UniqueVertex(new ƒ.Vector3(1, 1, 1),    new Map([[3, [4]], [11, [14, 17]], [19, [32, 35]]])), 
+      //   new UniqueVertex(new ƒ.Vector3(-1, 1, -1),  new Map([[4, [10]], [12, [20, 23]], [20, [30, 34]]])), 
+      //   new UniqueVertex(new ƒ.Vector3(-1, -1, -1), new Map([[5, [7, 9]], [13, [18]], [21, [24]]])), 
+      //   new UniqueVertex(new ƒ.Vector3(1, -1, -1),  new Map([[6, [6]], [14, [13, 15]], [22, [25, 27]]])), 
+      //   new UniqueVertex(new ƒ.Vector3(1, 1, -1),   new Map([[7, [8, 11]], [15, [16]], [23, [33]]])) 
+      // ];
+
+      // this.faces = [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 12, 13], [10, 11, 14, 15], [17, 18, 21, 22], [16, 19, 20, 23]];
 
       // this._uniqueVertices = [
       //   new UniqueVertex(new ƒ.Vector3(-1, 1, 1),   {0: [2, 5 ], 8:  [22    ], 16: [31    ]}),
@@ -114,6 +127,52 @@ namespace Fudge {
       return sum;
     }
 
+    public removeFace(selection: number[]): void {
+      let starttime: number = new Date().getTime();
+      let correctVertices: Map<number, number> = this.findCorrectFace(selection);
+      let removedIndices: number[] = [];
+      for (let vertex of correctVertices.keys()) {
+        let result: number[] = this._uniqueVertices[correctVertices.get(vertex)].indices.get(vertex);
+        removedIndices.push(...result);
+        this._uniqueVertices[correctVertices.get(vertex)].indices.delete(vertex);
+      }
+      removedIndices.sort();
+      for (let vertex of this._uniqueVertices) {
+        let tempMap: Map<number, number[]> = new Map(vertex.indices);
+        //let keys: IterableIterator<number> = vertex.indices.keys();
+        for (let [vertexIndex, indicesIndex] of tempMap) {
+          for (let i: number = 0; i < indicesIndex.length; i++) {
+            let index: number = indicesIndex[i];
+            let subtraction: number = 0;
+            for (let removedIndex of removedIndices) {
+              if (removedIndex < index) 
+                subtraction++;
+            }
+            index -= subtraction;
+            indicesIndex[i] = index;
+          }
+
+          let vertexSubtraction: number = 0;
+          for (let removedVertex of correctVertices.keys()) {
+            if (removedVertex < vertexIndex) 
+              vertexSubtraction++;
+          }
+
+          if (vertexSubtraction != 0) {
+            let indicesTemp: number[] = indicesIndex;
+            vertex.indices.delete(vertexIndex);
+            vertex.indices.set(vertexIndex - vertexSubtraction, indicesTemp);
+          }
+        }
+      }
+      this.vertices = this.createVertices();
+      this.indices = this.createIndices();
+      this.normalsFace = this.calculateFaceNormals();
+      this.createRenderBuffers();
+      
+      console.log(new Date().getTime() - starttime);
+    }
+
     public updateNormals(): void {
       this.normalsFace = this.createFaceNormals();
       this.createRenderBuffers();
@@ -121,7 +180,7 @@ namespace Fudge {
 
     public scaleBy(matrix: ƒ.Matrix4x4, oldVertices: Map<number, ƒ.Vector3>, selection: number[] = Array.from(Array(this.uniqueVertices.length).keys())): void {
       for (let vertexIndex of selection) {
-        let currentVertex: ƒ.Vector3 =  oldVertices.get(vertexIndex);
+        let currentVertex: ƒ.Vector3 = oldVertices.get(vertexIndex);
         let newVertex: ƒ.Vector3 = new ƒ.Vector3(currentVertex.x, currentVertex.y, currentVertex.z);
         newVertex.transform(matrix);
         this._uniqueVertices[vertexIndex].position = newVertex;
@@ -299,6 +358,22 @@ namespace Fudge {
       }
       return edges;
     }
+
+    
+    // private findCorrectFaceWithoutNormals(selectedIndices: number[]): Map<number, number> {
+    //   let faceVerticesMap: Map<number, number> = new Map();
+
+    //   for (let face of this.faces) {
+    //     for (let vertex of face) {
+    //       for (let selectedIndex of selectedIndices) {
+
+    //       }
+    //     }
+    //   }
+
+
+    //   return faceVerticesMap;
+    // }
 
     // hacky method needs revamp
     private findCorrectFace(selectedIndices: number[]): Map<number, number> {

@@ -10,7 +10,7 @@ namespace Importer_Tests {
     let graph: ƒ.Node = new ƒ.Node("Graph");
   
     let mesh: ƒ.MeshCustom = new ƒ.MeshCustom();
-    await mesh.asyncLoad("mesh.json")
+    await mesh.asyncLoad("mesh.json");
     let cube: ƒ.MeshCube = new ƒ.MeshCube();
 
     //await new Promise(r => setTimeout(r, 2000));
@@ -22,7 +22,6 @@ namespace Importer_Tests {
     // cmpCamera.projectCentral(1, 45);
     cmpCamera.pivot.translateZ(20); 
     cmpCamera.pivot.rotateY(180);
-
 
     let mtr: ƒ.Material = new ƒ.Material("Material", ƒ.ShaderUniColor, new ƒ.CoatColored());
     let mtrCmp: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(mtr);

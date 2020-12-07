@@ -15,7 +15,7 @@ namespace Fudge {
       this.graph = <ƒ.Node><unknown>_state["node"];
       this.createUserInterface();
       ƒaid.addStandardLightComponents(this.graph, new ƒ.Color(0.5, 0.5, 0.5));
-      // this.graph.addChild(new ƒaid.NodeCoordinateSystem("WorldCooSys"));
+      ƒ.RenderOperator.setBackfaceCulling(false);
       this.node = this.graph.getChildrenByName("Default")[0];
       this.controller = new Controller(this.viewport, this.node);
       // tslint:disable-next-line: no-unused-expression
@@ -32,8 +32,8 @@ namespace Fudge {
       this.viewport.addEventListener(ƒ.EVENT_POINTER.DOWN, this.onmousedown);
       this.viewport.activatePointerEvent(ƒ.EVENT_POINTER.DOWN, true);
 
-      this.viewport.addEventListener(ƒ.EVENT_KEYBOARD.PRESS, this.handleKeyboard);
-      this.viewport.activateKeyboardEvent(ƒ.EVENT_KEYBOARD.PRESS, true);
+      this.viewport.addEventListener(ƒ.EVENT_KEYBOARD.DOWN, this.handleKeyboard);
+      this.viewport.activateKeyboardEvent(ƒ.EVENT_KEYBOARD.DOWN, true);
 
       this.viewport.addEventListener(ƒ.EVENT_KEYBOARD.DOWN, this.onkeydown);
       this.viewport.activateKeyboardEvent(ƒ.EVENT_KEYBOARD.DOWN, true);
@@ -145,6 +145,7 @@ namespace Fudge {
       this.viewport.setGraph(this.graph);
       if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
         this.viewport.draw();
+      this.controller.drawSelection();
     }
 
     private onmove = (_event: ƒ.EventPointer): void => {

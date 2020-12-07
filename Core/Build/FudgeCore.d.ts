@@ -705,6 +705,7 @@ declare namespace FudgeCore {
          */
         static getViewportRectangle(): Rectangle;
         static setDepthTest(_test: boolean): void;
+        static setBackfaceCulling(_enable: boolean): void;
         static setBlendMode(_mode: BLEND): void;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix

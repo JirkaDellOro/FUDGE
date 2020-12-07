@@ -35,9 +35,8 @@ namespace Fudge {
 
     public onmousedown(_event: ƒ.EventPointer): void {
       let state: string = this.interactionMode.onmousedown(_event);
-      if (state != null) {
+      if (state != null) 
         this.saveState(state);
-      }
     }
 
     public onmove(_event: ƒ.EventPointer): void {
@@ -47,7 +46,9 @@ namespace Fudge {
     public onkeydown(_event: ƒ.EventKeyboard): void {
       if (_event.ctrlKey) 
         return;
-      this.interactionMode.onkeydown(_event);
+      let state: string = this.interactionMode.onkeydown(_event);
+      if (state != null) 
+        this.saveState(state);
     }
 
     public onkeyup(_event: ƒ.EventKeyboard): void {
@@ -90,16 +91,21 @@ namespace Fudge {
       console.log("Current Mode: " + this.interactionMode.type);
     }
 
+    // maybe add type attributes to the interaction modes to alter behaviour based on those attributes
     public setInteractionMode(mode: InteractionMode): void {
       this.interactionMode?.cleanup();
       let type: any = this.currentControlMode.modes[mode]?.type || IdleMode;
       let selection: Array<number> = this.interactionMode?.selection;        
       this.interactionMode = new type(this.viewport, this.editableNode);
 
-      if (selection)
+      if (selection && this.controlMode.type === ControlMode.EDIT_MODE)
         this.interactionMode.selection = selection;
       
       console.log("Current Mode: " + this.interactionMode.type);
+    }
+
+    public drawSelection(): void {
+      this.interactionMode.drawCircleAtSelection();
     }
 
     private loadState(): void {

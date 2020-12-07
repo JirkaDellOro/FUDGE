@@ -42,6 +42,7 @@ namespace Fudge {
         if (!wasSelectedAlready) 
           this.selection.push(nearestVertexIndex);
       }
+      this.drawCircleAtSelection();
       console.log("vertices selected: " + this.selection);
       return null;
     }
@@ -54,9 +55,15 @@ namespace Fudge {
       //@ts-ignore
     }
 
-    onkeydown(_event: ƒ.EventKeyboard): void {
+    onkeydown(_event: ƒ.EventKeyboard): string {
+      if (_event.key === "Delete") {
+        (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).removeFace(this.selection);
+        this.selection = [];
+      }
+      return null;
     }
     onkeyup(_event: ƒ.EventKeyboard): void {
+      //
     }
 
 

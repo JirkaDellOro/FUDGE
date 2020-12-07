@@ -16,8 +16,8 @@ namespace Fudge {
       //@ts-ignore
     }
 
-    onkeydown(_event: ƒ.EventKeyboard): void {
-      //
+    onkeydown(_event: ƒ.EventKeyboard): string {
+      return null;
     }
     
     onkeyup(_event: ƒ.EventKeyboard): void {

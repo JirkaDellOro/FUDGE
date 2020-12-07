@@ -130,6 +130,13 @@ namespace FudgeCore {
         RenderOperator.crc3.disable(WebGL2RenderingContext.DEPTH_TEST);
     }
 
+    public static setBackfaceCulling(_enable: boolean): void {
+      if (_enable)
+        RenderOperator.crc3.enable(WebGL2RenderingContext.CULL_FACE);
+      else 
+        RenderOperator.crc3.disable(WebGL2RenderingContext.CULL_FACE);
+    }
+
     public static setBlendMode(_mode: BLEND): void {
       switch (_mode) {
         case BLEND.OPAQUE:

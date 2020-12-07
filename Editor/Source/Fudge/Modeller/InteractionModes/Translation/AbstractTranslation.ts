@@ -52,7 +52,7 @@ namespace Fudge {
     }
 
     onmove(_event: ƒ.EventPointer): void {
-      if (!this.axesSelectionHandler.wasPicked && !this.axesSelectionHandler.isSelectedViaKeyboard && !this.dragging) {
+      if (!this.axesSelectionHandler.isValidSelection() && !this.dragging) {
         if (this.axesSelectionHandler.isAxisSelectedViaKeyboard()) {
           this.copyVerticesAndCalculateDistance(_event);
           this.oldPosition = this.getNewPosition(_event, this.distance);
@@ -87,8 +87,12 @@ namespace Fudge {
       this.oldPosition = newPos;
     }
 
-    onkeydown(_event: ƒ.EventKeyboard): void {
-      this.axesSelectionHandler.addAxisOf(_event.key);
+    onkeydown(_event: ƒ.EventKeyboard): string {
+      let result: string = null;
+      if (this.axesSelectionHandler.addAxisOf(_event.key)) {
+        result = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
+      }
+      return result;
     }
     
     onkeyup(_event: ƒ.EventKeyboard): void {

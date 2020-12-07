@@ -34,8 +34,9 @@ namespace Fudge {
     } 
 
     public isValidSelection(): boolean {
-      return this.axisIsPicked || this.selectedAxes.length > 0;
+      return this.axisIsPicked || this.isSelectedViaKeyboard;
     }
+
     
     public getSelectedAxes(): Axis[] {
       let selectedAxes: Axis[] = this.selectedAxes.slice();
@@ -45,16 +46,21 @@ namespace Fudge {
       return selectedAxes;
     }
 
-    public addAxisOf(_key: string): void {
+    public addAxisOf(_key: string): boolean {
+      let isNewSelection: boolean = false;
       let selectedAxis: Axis = this.getSelectedAxisBy(_key);
-      if (!this.selectedAxes.includes(selectedAxis)) {
+      if (!this.selectedAxes.includes(selectedAxis) && selectedAxis) {
         this.selectedAxes.push(selectedAxis);
         this._widget.updateWidget(selectedAxis);
+        isNewSelection = true;
       }
+      return isNewSelection;
     }
 
     public removeAxisOf(_key: string): void {
       let selectedAxis: Axis = this.getSelectedAxisBy(_key);
+      if (!selectedAxis) 
+        return;
       let index: number = this.selectedAxes.indexOf(selectedAxis);
       if (index != -1) {
         this._widget.removeUnselectedAxis(this.selectedAxes[index]);

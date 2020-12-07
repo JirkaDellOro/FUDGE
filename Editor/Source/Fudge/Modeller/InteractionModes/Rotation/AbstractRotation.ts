@@ -38,7 +38,7 @@ namespace Fudge {
     }
 
     onmove(_event: ƒ.EventPointer): void {
-      if (!this.axesSelectionHandler.wasPicked && !this.axesSelectionHandler.isSelectedViaKeyboard) {
+      if (!this.axesSelectionHandler.isValidSelection()) {
         if (this.axesSelectionHandler.isAxisSelectedViaKeyboard()) {
           this.previousMousePos = new ƒ.Vector2(_event.clientX, _event.clientY);
           this.axesSelectionHandler.isSelectedViaKeyboard = true;
@@ -51,8 +51,12 @@ namespace Fudge {
       mesh.rotateBy(rotationMatrix, (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(), this.selection);
     }
 
-    onkeydown(_event: ƒ.EventKeyboard): void {
-      this.axesSelectionHandler.addAxisOf(_event.key);
+    onkeydown(_event: ƒ.EventKeyboard): string {
+      let result: string = null;
+      if (this.axesSelectionHandler.addAxisOf(_event.key)) {
+        result = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
+      }
+      return result;
     }
 
     onkeyup(_event: ƒ.EventKeyboard): void {

@@ -5,8 +5,6 @@ namespace FudgeCore {
       super(_name);
     }
 
-
-
     public async asyncLoad(_url: RequestInfo): Promise<void> {
       let path: URL = new URL(_url.toString(), Project.baseURL);
       const response: Response = await window.fetch(path.toString());
@@ -16,7 +14,6 @@ namespace FudgeCore {
       this.textureUVs = new Float32Array(json.textureCoordinates);
       this.normalsFace = new Float32Array(json.normals);
       this.createRenderBuffers();
-      console.log(json);
     }
 
     protected createVertices(): Float32Array {

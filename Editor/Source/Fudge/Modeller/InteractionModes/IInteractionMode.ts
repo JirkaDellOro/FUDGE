@@ -11,6 +11,7 @@ namespace Fudge {
     constructor (viewport: ƒ.Viewport, editableNode: ƒ.Node) {
       this.viewport = viewport;
       this.editableNode = editableNode;
+      this.selection = [];
       this.initialize();
     }
 
@@ -18,11 +19,22 @@ namespace Fudge {
     abstract onmousedown(_event: ƒ.EventPointer): string;
     abstract onmouseup(_event: ƒ.EventPointer): void;
     abstract onmove(_event: ƒ.EventPointer): void;
-    abstract onkeydown(_event: ƒ.EventKeyboard): void;
+    abstract onkeydown(_event: ƒ.EventKeyboard): string;
     abstract onkeyup(_event: ƒ.EventKeyboard): void;
 
     abstract initialize(): void;
     abstract cleanup(): void;
+
+    public drawCircleAtSelection(): void {
+      let crx2d: CanvasRenderingContext2D = this.viewport.getCanvas().getContext("2d");
+      for (let vertex of this.selection) {
+        let pos: ƒ.Vector2 = this.viewport.pointWorldToClient((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices[vertex].position);
+        crx2d.beginPath();
+        crx2d.arc(pos.x, pos.y, 5, 0, 2 * Math.PI);
+        crx2d.fillStyle = "white";
+        crx2d.fill();
+      }
+    }
 
     protected getPosRenderFrom(_event: ƒ.EventPointer): ƒ.Vector2 {
       let mousePos: ƒ.Vector2 = new ƒ.Vector2(_event.canvasX, _event.canvasY);
@@ -64,6 +76,8 @@ namespace Fudge {
         this.viewport.getGraph().addChild(normalArrow);
       }
     }
+
+    
 
     protected copyVertices(): Map<number, ƒ.Vector3> {
       let vertices: UniqueVertex[] = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices;
