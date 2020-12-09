@@ -8,10 +8,10 @@ namespace Fudge {
     viewport: ƒ.Viewport;
     editableNode: ƒ.Node;
 
-    constructor (viewport: ƒ.Viewport, editableNode: ƒ.Node) {
+    constructor (viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number> = []) {
       this.viewport = viewport;
       this.editableNode = editableNode;
-      this.selection = [];
+      this.selection = selection;
       this.initialize();
     }
 
@@ -33,6 +33,15 @@ namespace Fudge {
         crx2d.arc(pos.x, pos.y, 5, 0, 2 * Math.PI);
         crx2d.fillStyle = "white";
         crx2d.fill();
+      }
+    }
+
+    public updateSelection(): void {
+      for (let i: number = 0; i < this.selection.length; i++) {
+        if (this.selection[i] >= (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices.length) {
+          this.selection.splice(i, 1);
+          i--;
+        }
       }
     }
 
@@ -76,9 +85,7 @@ namespace Fudge {
         this.viewport.getGraph().addChild(normalArrow);
       }
     }
-
     
-
     protected copyVertices(): Map<number, ƒ.Vector3> {
       let vertices: UniqueVertex[] = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices;
       let copyOfSelectedVertices: Map<number, ƒ.Vector3> = new Map();
@@ -94,11 +101,11 @@ namespace Fudge {
     }
 
     protected getDistanceFromRayToCenterOfNode(_event: ƒ.EventPointer, distance: number): ƒ.Vector3 {
-      return ƒ.Vector3.DIFFERENCE(this.getNewPosition(_event, distance), (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid());
+      return ƒ.Vector3.DIFFERENCE(this.getNewPosition(_event, distance), (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection));
     }
     
     protected getDistanceFromCameraToCenterOfNode(): number {
-      return ƒ.Vector3.DIFFERENCE(this.editableNode.mtxLocal.translation, this.viewport.camera.pivot.translation).magnitude;
+      return ƒ.Vector3.DIFFERENCE((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection), this.viewport.camera.pivot.translation).magnitude;
     }
   }
 }

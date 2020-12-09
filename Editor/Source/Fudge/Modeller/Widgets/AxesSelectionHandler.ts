@@ -6,7 +6,7 @@ namespace Fudge {
     private pickedAxis: Axis;
     private axisIsPicked: boolean = false;
 
-    constructor(widget: IWidget) {
+    constructor(widget: IWidget = null) {
       this._widget = widget;
     }
 
@@ -51,7 +51,8 @@ namespace Fudge {
       let selectedAxis: Axis = this.getSelectedAxisBy(_key);
       if (!this.selectedAxes.includes(selectedAxis) && selectedAxis) {
         this.selectedAxes.push(selectedAxis);
-        this._widget.updateWidget(selectedAxis);
+        if (this._widget) 
+          this._widget.updateWidget(selectedAxis);
         isNewSelection = true;
       }
       return isNewSelection;
@@ -63,7 +64,8 @@ namespace Fudge {
         return;
       let index: number = this.selectedAxes.indexOf(selectedAxis);
       if (index != -1) {
-        this._widget.removeUnselectedAxis(this.selectedAxes[index]);
+        if (this._widget) 
+          this._widget.removeUnselectedAxis(this.selectedAxes[index]);
         this.selectedAxes.splice(index, 1);
         if (!this.isAxisSelectedViaKeyboard()) 
           this.isSelectedViaKeyboard = false;

@@ -96,7 +96,7 @@ namespace Fudge {
       this.interactionMode?.cleanup();
       let type: any = this.currentControlMode.modes[mode]?.type || IdleMode;
       let selection: Array<number> = this.interactionMode?.selection;        
-      this.interactionMode = new type(this.viewport, this.editableNode);
+      this.interactionMode = new type(this.viewport, this.editableNode, selection);
 
       if (selection && this.controlMode.type === ControlMode.EDIT_MODE)
         this.interactionMode.selection = selection;
@@ -114,6 +114,7 @@ namespace Fudge {
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
       mesh.retrieveState(this.states[this.states.length - 1]);
       this.states.pop();
+      this.interactionMode.updateSelection();
     }
 
     private saveState(state: string): void {

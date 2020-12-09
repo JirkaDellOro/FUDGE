@@ -1,6 +1,6 @@
 namespace Fudge {
   export class ObjectTranslation extends AbstractTranslation {
-    constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node) {
+    constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>) {
       super(viewport, editableNode);
       this.selection = Array.from(Array((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices.length).keys());
     }

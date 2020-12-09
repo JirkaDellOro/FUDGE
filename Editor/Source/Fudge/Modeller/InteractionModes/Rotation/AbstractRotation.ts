@@ -9,9 +9,6 @@ namespace Fudge {
     private axesSelectionHandler: AxesSelectionHandler;
     private previousMousePos: ƒ.Vector2;
 
-    constructor (viewport: ƒ.Viewport, editableNode: ƒ.Node) {
-      super(viewport, editableNode);
-    }
 
     initialize(): void {
       let widget: RotationWidget = new RotationWidget();

@@ -7,15 +7,14 @@ namespace Fudge {
     editableNode: ƒ.Node;
     protected dragging: boolean = false;
     protected distance: number;
-    protected offset: ƒ.Vector3;
-    protected copyOfSelectedVertices: Map<number, ƒ.Vector3>;
+    // protected copyOfSelectedVertices: Map<number, ƒ.Vector3>;
     protected oldPosition: ƒ.Vector3;
     private axesSelectionHandler: AxesSelectionHandler;
 
     initialize(): void {
       let widget: IWidget = new TranslationWidget();
       let mtx: ƒ.Matrix4x4 = new ƒ.Matrix4x4();
-      mtx.translation = this.editableNode.mtxLocal.translation;
+      mtx.translation = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection);
       //mtx.rotation = this.editableNode.mtxLocal.rotation;
       widget.addComponent(new ƒ.ComponentTransform(mtx));
       this.viewport.getGraph().addChild(widget);
@@ -36,8 +35,8 @@ namespace Fudge {
       if (nodeWasPicked && !this.axesSelectionHandler.wasPicked) {
         this.dragging = true;
       }
-
-      this.copyVerticesAndCalculateDistance(_event);
+      // this.copyOfSelectedVertices = this.copyVertices();
+      this.distance = this.getDistanceFromCameraToCenterOfNode();
       this.oldPosition = this.getNewPosition(_event, this.distance);
       return (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
     }
@@ -54,7 +53,8 @@ namespace Fudge {
     onmove(_event: ƒ.EventPointer): void {
       if (!this.axesSelectionHandler.isValidSelection() && !this.dragging) {
         if (this.axesSelectionHandler.isAxisSelectedViaKeyboard()) {
-          this.copyVerticesAndCalculateDistance(_event);
+          // this.copyOfSelectedVertices = this.copyVertices();
+          this.distance = this.getDistanceFromCameraToCenterOfNode();
           this.oldPosition = this.getNewPosition(_event, this.distance);
           this.axesSelectionHandler.isSelectedViaKeyboard = true;
         }
@@ -97,21 +97,22 @@ namespace Fudge {
     
     onkeyup(_event: ƒ.EventKeyboard): void {
       this.axesSelectionHandler.removeAxisOf(_event.key);
+      this.axesSelectionHandler.widget.mtxLocal.translation = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection);
     }
 
     cleanup(): void {
       this.viewport.getGraph().removeChild(this.axesSelectionHandler.widget);
     }
 
-    protected copyVerticesAndCalculateDistance(_event: ƒ.EventPointer): void {
-      this.distance = this.getDistanceFromCameraToCenterOfNode();
-      this.offset = this.getDistanceFromRayToCenterOfNode(_event, this.distance);
-      let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
-      let vertices: UniqueVertex[] = mesh.uniqueVertices;
-      this.copyOfSelectedVertices = new Map();
-      for (let vertexIndex of this.selection) {
-        this.copyOfSelectedVertices.set(vertexIndex, new ƒ.Vector3(vertices[vertexIndex].position.x, vertices[vertexIndex].position.y, vertices[vertexIndex].position.z));
-      }
-    }
+    // protected copyVerticesAndCalculateDistance(_event: ƒ.EventPointer): void {
+    //   this.distance = this.getDistanceFromCameraToCenterOfNode();
+    //   let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+    //   let vertices: UniqueVertex[] = mesh.uniqueVertices;
+    //   this.copyOfSelectedVertices = new Map();
+    //   for (let vertexIndex of this.selection) {
+    //     this.copyOfSelectedVertices.set(vertexIndex, new ƒ.Vector3(vertices[vertexIndex].position.x, vertices[vertexIndex].position.y, vertices[vertexIndex].position.z));
+    //   }
+    // }
+
   }
 }

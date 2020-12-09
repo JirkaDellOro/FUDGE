@@ -408,7 +408,7 @@ declare namespace Fudge {
         selection: Array<number>;
         viewport: ƒ.Viewport;
         editableNode: ƒ.Node;
-        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
+        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection?: Array<number>);
         abstract onmousedown(_event: ƒ.EventPointer): string;
         abstract onmouseup(_event: ƒ.EventPointer): void;
         abstract onmove(_event: ƒ.EventPointer): void;
@@ -417,6 +417,7 @@ declare namespace Fudge {
         abstract initialize(): void;
         abstract cleanup(): void;
         drawCircleAtSelection(): void;
+        updateSelection(): void;
         protected getPosRenderFrom(_event: ƒ.EventPointer): ƒ.Vector2;
         protected createNormalArrows(): void;
         protected copyVertices(): Map<number, ƒ.Vector3>;
@@ -445,8 +446,8 @@ declare namespace Fudge {
         editableNode: ƒ.Node;
         private isExtruded;
         private distance;
-        private copyOfSelectedVertices;
-        private offset;
+        private oldPosition;
+        private axesSelectionHandler;
         onmousedown(_event: ƒ.EventPointer): string;
         onmouseup(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
@@ -464,7 +465,6 @@ declare namespace Fudge {
         editableNode: ƒ.Node;
         private axesSelectionHandler;
         private previousMousePos;
-        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
         initialize(): void;
         onmousedown(_event: ƒ.EventPointer): string;
         onmouseup(_event: ƒ.EventPointer): void;
@@ -485,7 +485,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     import ƒ = FudgeCore;
     class ObjectRotation extends AbstractRotation {
-        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
+        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>);
     }
 }
 declare namespace Fudge {
@@ -512,7 +512,7 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     class ObjectScalation extends AbstractScalation {
-        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
+        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>);
     }
 }
 declare namespace Fudge {
@@ -547,8 +547,6 @@ declare namespace Fudge {
         editableNode: ƒ.Node;
         protected dragging: boolean;
         protected distance: number;
-        protected offset: ƒ.Vector3;
-        protected copyOfSelectedVertices: Map<number, ƒ.Vector3>;
         protected oldPosition: ƒ.Vector3;
         private axesSelectionHandler;
         initialize(): void;
@@ -558,7 +556,6 @@ declare namespace Fudge {
         onkeydown(_event: ƒ.EventKeyboard): string;
         onkeyup(_event: ƒ.EventKeyboard): void;
         cleanup(): void;
-        protected copyVerticesAndCalculateDistance(_event: ƒ.EventPointer): void;
     }
 }
 declare namespace Fudge {
@@ -567,13 +564,14 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     class ObjectTranslation extends AbstractTranslation {
-        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
+        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>);
     }
 }
 declare namespace Fudge {
     class ModifiableMesh extends ƒ.Mesh {
         private static vertexSize;
         private _uniqueVertices;
+        private faces;
         constructor();
         get uniqueVertices(): UniqueVertex[];
         getState(): string;
@@ -590,6 +588,7 @@ declare namespace Fudge {
         private addIndicesToNewVertices;
         private getNewVertices;
         private findEdgesFrom;
+        private findCorrectFaceWithoutNormals;
         private findCorrectFace;
         protected updatePositionOfVertex(vertexIndex: number, newPosition: ƒ.Vector3): void;
         protected findOrderOfTrigonFromSelectedVertex(selectedIndices: number[]): Array<number>;
@@ -603,8 +602,14 @@ declare namespace Fudge {
 declare namespace Fudge {
     class UniqueVertex {
         position: ƒ.Vector3;
-        indices: Map<number, number[]>;
-        constructor(_position: ƒ.Vector3, _indices: Map<number, number[]>);
+        vertexToIndices: Map<number, {
+            indices: number[];
+            face?: number;
+        }>;
+        constructor(_position: ƒ.Vector3, _vertexToIndices: Map<number, {
+            indices: number[];
+            face?: number;
+        }>);
     }
 }
 declare namespace Fudge {
@@ -614,7 +619,7 @@ declare namespace Fudge {
         private selectedAxes;
         private pickedAxis;
         private axisIsPicked;
-        constructor(widget: IWidget);
+        constructor(widget?: IWidget);
         get widget(): ƒ.Node;
         get wasPicked(): boolean;
         releaseComponent(): void;
