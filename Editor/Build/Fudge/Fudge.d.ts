@@ -416,7 +416,7 @@ declare namespace Fudge {
         abstract onkeyup(_event: ƒ.EventKeyboard): void;
         abstract initialize(): void;
         abstract cleanup(): void;
-        drawCircleAtSelection(): void;
+        animate: () => void;
         updateSelection(): void;
         protected getPosRenderFrom(_event: ƒ.EventPointer): ƒ.Vector2;
         protected createNormalArrows(): void;
@@ -424,6 +424,8 @@ declare namespace Fudge {
         protected getNewPosition(_event: ƒ.EventPointer, distance: number): ƒ.Vector3;
         protected getDistanceFromRayToCenterOfNode(_event: ƒ.EventPointer, distance: number): ƒ.Vector3;
         protected getDistanceFromCameraToCenterOfNode(): number;
+        private drawCircleAtVertex;
+        private drawCircleAtSelection;
     }
 }
 declare namespace Fudge {
@@ -448,6 +450,7 @@ declare namespace Fudge {
         private distance;
         private oldPosition;
         private axesSelectionHandler;
+        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>);
         onmousedown(_event: ƒ.EventPointer): string;
         onmouseup(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
@@ -479,7 +482,9 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    import ƒ = FudgeCore;
     class EditRotation extends AbstractRotation {
+        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>);
     }
 }
 declare namespace Fudge {
@@ -508,6 +513,7 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     class EditScalation extends AbstractScalation {
+        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>);
     }
 }
 declare namespace Fudge {
@@ -560,11 +566,26 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     class EditTranslation extends AbstractTranslation {
+        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>);
     }
 }
 declare namespace Fudge {
     class ObjectTranslation extends AbstractTranslation {
         constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>);
+    }
+}
+declare namespace Fudge {
+    class MeshUtils {
+        private numberOfFaces;
+        private vertexCount;
+        private uniqueVertices;
+        private newTriangles;
+        private numberOfIndices;
+        private vertexToUniqueVertexMap;
+        private originalVertexToNewVertexMap;
+        constructor(_numberOfFaces: number, _vertexCount: number, _uniqueVertices: UniqueVertex[], _numberOfIndices: number);
+        extrude2Vertices(selection: number[]): number[];
+        addNewTriangles(): void;
     }
 }
 declare namespace Fudge {
@@ -585,11 +606,12 @@ declare namespace Fudge {
         rotateBy(matrix: ƒ.Matrix4x4, center: ƒ.Vector3, selection?: number[]): void;
         extrude(selectedIndices: number[]): number[];
         updatePositionOfVertices(selectedIndices: number[], oldVertexPositions: Map<number, ƒ.Vector3>, diffToOldPosition: ƒ.Vector3, offset: ƒ.Vector3): void;
+        private extrude3Vertices;
         private addIndicesToNewVertices;
         private getNewVertices;
         private findEdgesFrom;
+        private countNumberOfFaces;
         private findCorrectFaceWithoutNormals;
-        private findCorrectFace;
         protected updatePositionOfVertex(vertexIndex: number, newPosition: ƒ.Vector3): void;
         protected findOrderOfTrigonFromSelectedVertex(selectedIndices: number[]): Array<number>;
         protected createVertices(): Float32Array;
@@ -912,6 +934,7 @@ declare namespace Fudge {
         controller: Controller;
         node: ƒ.Node;
         constructor(_container: GoldenLayout.Container, _state: Object);
+        addEventListeners(): void;
         createUserInterface(): void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;

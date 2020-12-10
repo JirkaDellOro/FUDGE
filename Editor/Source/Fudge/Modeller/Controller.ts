@@ -105,7 +105,7 @@ namespace Fudge {
     }
 
     public drawSelection(): void {
-      this.interactionMode.drawCircleAtSelection();
+      this.interactionMode.animate();
     }
 
     private loadState(): void {

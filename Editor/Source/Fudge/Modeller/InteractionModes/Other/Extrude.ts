@@ -9,6 +9,11 @@ namespace Fudge {
     private oldPosition: ƒ.Vector3;
     private axesSelectionHandler: AxesSelectionHandler;
 
+    constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>) {
+      super(viewport, editableNode, selection);
+      this.initialize();
+    }
+
     onmousedown(_event: ƒ.EventPointer): string {
       if (!this.selection)
         return;

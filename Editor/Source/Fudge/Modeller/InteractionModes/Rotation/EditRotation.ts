@@ -1,6 +1,11 @@
 namespace Fudge {
   import ƒ = FudgeCore;
   export class EditRotation extends AbstractRotation {
+
+    constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>) {
+      super(viewport, editableNode, selection);
+      this.initialize();
+    }
     // onmove(_event: ƒ.EventPointer): void {
     //   if (!this.pickedCircle)
     //     return;

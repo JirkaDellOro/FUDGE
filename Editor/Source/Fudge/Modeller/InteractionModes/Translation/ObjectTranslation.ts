@@ -3,6 +3,7 @@ namespace Fudge {
     constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>) {
       super(viewport, editableNode);
       this.selection = Array.from(Array((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices.length).keys());
+      this.initialize();
     }
 
 

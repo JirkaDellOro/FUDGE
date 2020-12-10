@@ -13,7 +13,7 @@ namespace Fudge {
     initialize(): void {
       let widget: RotationWidget = new RotationWidget();
       let mtx: ƒ.Matrix4x4 = new ƒ.Matrix4x4();
-      mtx.translation = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid();
+      mtx.translation = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection);
       widget.addComponent(new ƒ.ComponentTransform(mtx));
       this.viewport.getGraph().addChild(widget);
       this.axesSelectionHandler = new AxesSelectionHandler(widget);
@@ -45,7 +45,7 @@ namespace Fudge {
 
       let rotationMatrix: ƒ.Matrix4x4 = this.getRotationVector(_event);
       let mesh: ModifiableMesh = <ModifiableMesh>this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
-      mesh.rotateBy(rotationMatrix, (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(), this.selection);
+      mesh.rotateBy(rotationMatrix, this.axesSelectionHandler.widget.mtxLocal.translation, this.selection);
     }
 
     onkeydown(_event: ƒ.EventKeyboard): string {
@@ -67,7 +67,7 @@ namespace Fudge {
 
     private getRotationVector(_event: ƒ.EventPointer): ƒ.Matrix4x4 {
       let mousePos: ƒ.Vector2 = new ƒ.Vector2(_event.clientX, _event.clientY);
-      let meshCenterClient: ƒ.Vector2 = this.viewport.pointWorldToClient((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid());
+      let meshCenterClient: ƒ.Vector2 = this.viewport.pointWorldToClient(this.axesSelectionHandler.widget.mtxLocal.translation);
       //let intersection: ƒ.Vector3 = this.getIntersection(renderPos);
       //let cameraNorm: ƒ.Vector3 = ƒ.Vector3.NORMALIZATION(this.viewport.camera.pivot.translation);
       // let angle: number = this.getAngle(this.getOrthogonalVector(intersection, cameraNorm), this.getOrthogonalVector(this.previousIntersection, cameraNorm));

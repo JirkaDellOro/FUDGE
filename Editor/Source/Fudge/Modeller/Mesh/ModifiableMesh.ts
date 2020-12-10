@@ -198,6 +198,8 @@ namespace Fudge {
       this.createRenderBuffers();
     }
 
+
+    // double clicking makes normal caclulation impossible right now because old and new vertices are at the same position, maybe add some small increment initially?
     public extrude(selectedIndices: number[]): number[] {
       switch (selectedIndices.length) {
         case 4:
@@ -205,7 +207,12 @@ namespace Fudge {
           this.addIndicesToNewVertices(this.findEdgesFrom(faceVertices), this.getNewVertices(faceVertices));
           break;
         case 2:
-          this.extrude2(selectedIndices);
+          let meshUtils: MeshUtils = new MeshUtils(this.countNumberOfFaces(), this.vertices.length / ModifiableMesh.vertexSize, this._uniqueVertices, this.indices.length);
+          meshUtils.extrude2Vertices(selectedIndices);
+          meshUtils.addNewTriangles();
+          break;
+        case 3:
+          this.extrude3Vertices(selectedIndices);
           break;
       }
       this.vertices = this.createVertices();
@@ -217,19 +224,6 @@ namespace Fudge {
 
       // let trigons: Array<Array<number>> = this.findOrderOfTrigonFromSelectedVertex(newSelection);
       // this.updateNormals(trigons);
-
-      let test: Map<number, number[]> = new Map();
-      for (let vertex of this._uniqueVertices) {
-        for (let vertexKey of vertex.vertexToIndices.keys()) {
-          if (test.has(vertex.vertexToIndices.get(vertexKey).face)) {
-            test.get(vertex.vertexToIndices.get(vertexKey).face).push(vertexKey);
-          } else {
-            test.set(vertex.vertexToIndices.get(vertexKey).face, [vertexKey]);
-          }
-        }
-      }
-
-      console.log(test);
       console.log(this.uniqueVertices);
 
       this.createRenderBuffers();
@@ -250,11 +244,84 @@ namespace Fudge {
       this.createRenderBuffers();
     }
 
-    // private extrude2(selection: number[]): void {
+
+    // method moved to MeshUtils to take better care of the vertex state, could get removed later
+    // private extrude2Vertices(selection: number[]): void {
+    //   let numberOfFaces: number = this.countNumberOfFaces();
+
+    //   let newTriangles: Array<number> = [];
+    //   let originalVertexToNewVertexMap: Map<number, number> = new Map();
+    //   let vertexToUniqueVertexMap: Map<number, number> = new Map();
+    //   let reverseVertices: Map<number, number> = new Map();
+    //   let iterator: number = 0;
     //   for (let vertex of selection) {
-    //     this._uniqueVertices[vertex]
+    //     this._uniqueVertices[vertex].vertexToIndices.set(this.vertices.length / ModifiableMesh.vertexSize + iterator, {indices: [], face: numberOfFaces});
+    //     originalVertexToNewVertexMap.set(vertex, this.vertices.length / ModifiableMesh.vertexSize + iterator + selection.length);
+    //     reverseVertices.set(vertex, this.vertices.length / ModifiableMesh.vertexSize + iterator);
+    //     vertexToUniqueVertexMap.set(this.vertices.length / ModifiableMesh.vertexSize + iterator, vertex);
+    //     let newVertex: UniqueVertex = new UniqueVertex(new ƒ.Vector3(this._uniqueVertices[vertex].position.x, this._uniqueVertices[vertex].position.y, this._uniqueVertices[vertex].position.z), new Map([[this.vertices.length / ModifiableMesh.vertexSize + iterator + selection.length, {indices: [], face: numberOfFaces}]]));
+    //     vertexToUniqueVertexMap.set(this.vertices.length / ModifiableMesh.vertexSize + iterator + selection.length, this._uniqueVertices.length);
+    //     this._uniqueVertices.push(newVertex);
+    //     iterator++;
+    //   }
+
+    //   newTriangles.push(reverseVertices.get(selection[0]));
+    //   newTriangles.push(reverseVertices.get(selection[1]));
+    //   newTriangles.push(originalVertexToNewVertexMap.get(selection[1]));
+    //   newTriangles.push(originalVertexToNewVertexMap.get(selection[1]));
+    //   newTriangles.push(originalVertexToNewVertexMap.get(selection[0]));
+    //   newTriangles.push(reverseVertices.get(selection[0]));
+
+    //   for (let i: number = 0; i < newTriangles.length; i++) {
+    //     this.uniqueVertices[vertexToUniqueVertexMap.get(newTriangles[i])].vertexToIndices.get(newTriangles[i]).indices.push(this.indices.length + i);
     //   }
     // }
+
+    private extrude3Vertices(selection: number[]): void {
+      let indices: number[] = [];
+      let vertexToOriginalVertexMap: Map<number, number> = new Map();
+      let indexToVertexMap: Map<number, number> = new Map();
+      for (let selectedVertex of selection) {
+        for (let vertex of this._uniqueVertices[selectedVertex].vertexToIndices.keys()) {
+          // vertexToIndicesMap.set(vertex, this._uniqueVertices[selectedVertex].vertexToIndices.get(vertex).indices);
+          vertexToOriginalVertexMap.set(vertex, selectedVertex);
+          for (let index of this._uniqueVertices[selectedVertex].vertexToIndices.get(vertex).indices) {
+            indices.push(index);
+            indexToVertexMap.set(index, vertex);
+          }
+        }
+      }
+
+      let edges: {start: number, end: number}[] = [];
+      indices.sort((a, b) => a - b);
+
+      for (let i: number = 0; i < indices.length - 1; i++) {
+        if (indices[i + 1] % 3 !== 0) {
+          if (indices[i + 1] - indices[i] === 1) {
+            // only add when the reverse edge isn't found already
+            let isAddable: boolean = true;
+            for (let j: number = 0; j < edges.length; j++) {
+              if ((edges[j].start === getVertexFromIndex(indices[i]) && edges[j].end === getVertexFromIndex(indices[i + 1]))) {
+                isAddable = false;
+              }
+            }
+
+            if (isAddable) {
+              edges.push({start: getVertexFromIndex(indices[i + 1]), end: getVertexFromIndex(indices[i])});
+            }
+          }
+        }
+      }
+      let meshUtils: MeshUtils = new MeshUtils(this.countNumberOfFaces(), this.vertices.length / ModifiableMesh.vertexSize, this._uniqueVertices, this.indices.length);
+      for (let edge of edges) {
+        meshUtils.extrude2Vertices([edge.start, edge.end]);
+      }
+      meshUtils.addNewTriangles();
+
+      function getVertexFromIndex(index: number): number {
+        return vertexToOriginalVertexMap.get(indexToVertexMap.get(index));
+      }
+    }
     
     private addIndicesToNewVertices(edges: {start: number, end: number}[], mapping: {vertexToUniqueVertex: Map<number, number>, reverse: Map<number, number[]>, originalToNewVertex: Map<number, number>}): void {
       let vertexToUniqueVertexMap: Map<number, number> = mapping.vertexToUniqueVertex;
@@ -262,17 +329,7 @@ namespace Fudge {
       let originalToNewVertex: Map<number, number> = mapping.originalToNewVertex;
       let isLowMap: Map<number, boolean> = new Map();
 
-      let numberOfFaces: number = -1;
-
-      for (let vertex of this._uniqueVertices) {
-        for (let key of vertex.vertexToIndices.keys()) {
-          if (vertex.vertexToIndices.get(key).face > numberOfFaces) {
-            numberOfFaces = vertex.vertexToIndices.get(key).face;
-          }
-        }
-      }
-      numberOfFaces++;
-
+      let numberOfFaces: number = this.countNumberOfFaces();
       let newTriangles: Array<{index: number, face: number}> = [];
 
       for (let edge of edges) {
@@ -307,7 +364,6 @@ namespace Fudge {
         numberOfFaces++;
       }
 
-      // adjust this later too
       for (let i: number = 0; i < newTriangles.length; i++) {
         this.uniqueVertices[vertexToUniqueVertexMap.get(newTriangles[i].index)].vertexToIndices.get(newTriangles[i].index).indices.push(this.indices.length + i);
         this.uniqueVertices[vertexToUniqueVertexMap.get(newTriangles[i].index)].vertexToIndices.get(newTriangles[i].index).face = newTriangles[i].face;
@@ -375,8 +431,7 @@ namespace Fudge {
         }
       }
       indices.sort();
-      let edges: Map<number, number> = new Map();
-      //let triangles: Array<number> = [];
+      // let edges: Map<number, number> = new Map();
       let triangles: number[][] = [];
 
       for (let i: number = 0; i < indices.length; i += 3) {
@@ -418,6 +473,16 @@ namespace Fudge {
       return edgesObject;
     }
 
+    // maybe just store the number of faces somewhere
+    private countNumberOfFaces(): number {
+      let faces: Set<number> = new Set();
+      for (let vertex of this._uniqueVertices) {
+        for (let vertexIndex of vertex.vertexToIndices.keys()) {
+          faces.add(vertex.vertexToIndices.get(vertexIndex).face);
+        }
+      }
+      return faces.size;
+    }
     
     private findCorrectFaceWithoutNormals(selectedIndices: number[]): Map<number, number> {
       let faceVerticesMap: Map<number, number> = new Map();
@@ -443,31 +508,31 @@ namespace Fudge {
       return faceVerticesMap;
     }
 
-    // hacky method needs revamp
-    private findCorrectFace(selectedIndices: number[]): Map<number, number> {
-      let faceVerticesMap: Map<number, number> = new Map();
-      let normalToVertexTable: Map<string, Array<{selectedIndex: number, vertexIndex: number}>> = new Map();
+    // not needed anymore because we store faces now, can be deleted later
+    // private findCorrectFace(selectedIndices: number[]): Map<number, number> {
+    //   let faceVerticesMap: Map<number, number> = new Map();
+    //   let normalToVertexTable: Map<string, Array<{selectedIndex: number, vertexIndex: number}>> = new Map();
 
-      // this will likely not work after some processing because of floating point precision 
-      for (let selectedIndex of selectedIndices) {
-        for (let vertexIndex of this._uniqueVertices[selectedIndex].vertexToIndices.keys()) {
-          let normal: ƒ.Vector3 = new ƒ.Vector3(this.normalsFace[vertexIndex * ModifiableMesh.vertexSize], this.normalsFace[vertexIndex * ModifiableMesh.vertexSize + 1], this.normalsFace[vertexIndex * ModifiableMesh.vertexSize + 2]);        
-          if (!normalToVertexTable.has(normal.toString())) {
-            normalToVertexTable.set(normal.toString(), [{selectedIndex: selectedIndex, vertexIndex: vertexIndex}]);
-          } else {
-            normalToVertexTable.get(normal.toString()).push({selectedIndex: selectedIndex, vertexIndex: vertexIndex});
-          }
-        }
-      }
-      for (let normal of normalToVertexTable.keys()) {
-        if (normalToVertexTable.get(normal).length == selectedIndices.length) {
-          for (let indices of normalToVertexTable.get(normal)) {
-            faceVerticesMap.set(indices.vertexIndex, indices.selectedIndex);
-          }
-        }
-      }
-      return faceVerticesMap;
-    }
+    //   // this will likely not work after some processing because of floating point precision 
+    //   for (let selectedIndex of selectedIndices) {
+    //     for (let vertexIndex of this._uniqueVertices[selectedIndex].vertexToIndices.keys()) {
+    //       let normal: ƒ.Vector3 = new ƒ.Vector3(this.normalsFace[vertexIndex * ModifiableMesh.vertexSize], this.normalsFace[vertexIndex * ModifiableMesh.vertexSize + 1], this.normalsFace[vertexIndex * ModifiableMesh.vertexSize + 2]);        
+    //       if (!normalToVertexTable.has(normal.toString())) {
+    //         normalToVertexTable.set(normal.toString(), [{selectedIndex: selectedIndex, vertexIndex: vertexIndex}]);
+    //       } else {
+    //         normalToVertexTable.get(normal.toString()).push({selectedIndex: selectedIndex, vertexIndex: vertexIndex});
+    //       }
+    //     }
+    //   }
+    //   for (let normal of normalToVertexTable.keys()) {
+    //     if (normalToVertexTable.get(normal).length == selectedIndices.length) {
+    //       for (let indices of normalToVertexTable.get(normal)) {
+    //         faceVerticesMap.set(indices.vertexIndex, indices.selectedIndex);
+    //       }
+    //     }
+    //   }
+    //   return faceVerticesMap;
+    // }
 
 
     // tslint:disable-next-line: member-ordering
@@ -631,58 +696,3 @@ namespace Fudge {
     }
   }
 }
-
-      // let test: Array<{vertexIndex: number, indices: number[]}> = [];
-      // for (let selectedIndex of selectedIndices) {
-      //   for (let vertexIndex in this._uniqueVertices[selectedIndex].indices) {
-      //     for (let indexInIndicesArray of this._uniqueVertices[selectedIndex].indices[vertexIndex]) {
-      //       let arrayToCheck: number[] = [];
-      //       switch (indexInIndicesArray % 3) {
-      //         case 0: 
-      //           arrayToCheck.push(this.indices[indexInIndicesArray + 1]);
-      //           arrayToCheck.push(this.indices[indexInIndicesArray + 2]);
-      //           break;
-      //         case 1:
-      //           arrayToCheck.push(this.indices[indexInIndicesArray - 1]);
-      //           arrayToCheck.push(this.indices[indexInIndicesArray + 1]);
-      //           break;
-      //         case 2:
-      //           arrayToCheck.push(this.indices[indexInIndicesArray - 1]);
-      //           arrayToCheck.push(this.indices[indexInIndicesArray - 2]);
-      //           break;
-      //       }
-
-      //       test.push({vertexIndex: Number.parseInt(vertexIndex), indices: arrayToCheck});
-      //     }
-      //   }
-      // }
-      // // for (let obj of test) {
-      // //   for (let selectedIndex of selectedIndices) {
-      // //     let wasSelected: boolean = true;
-      // //     let index: number;
-      // //     for (let vertexIndex in this.uniqueVertices[selectedIndex].indices) {
-      // //       if (!obj.indices.includes(Number.parseInt(vertexIndex))) {
-      // //         index = Number.parseInt(vertexIndex);
-      // //         wasSelected = false;
-      // //       } 
-      // //     }
-      // //     if (wasSelected) 
-      // //       faceVertices.push(index);
-      // //   }
-      // // } 
-      // for (let i: number = 0; i < test.length; i++) {
-      //   for (let j: number = 0; j < test.length; i++) {
-      //     if (i == j)
-      //       continue;
-      //     if (test[i].indices[0] == test[j].indices[0] || 
-      //       test[i].indices[1] == test[j].indices[1] || 
-      //       test[i].indices[1] == test[j].indices[0] ||
-      //       test[i].indices[0] == test[j].indices[1] || 
-      //       test[i].indices[0] == test[j].vertexIndex ||
-      //       test[i].indices[1] == test[j].vertexIndex ||
-      //       test[i].vertexIndex == test[j].indices[0] ||
-      //       test[i].vertexIndex == test[j].indices[1] ||
-      //       test[i].vertexIndex == test[j].vertexIndex) 
-      //       faceVertices.push(test[i].vertexIndex);
-      //   }
-      // }

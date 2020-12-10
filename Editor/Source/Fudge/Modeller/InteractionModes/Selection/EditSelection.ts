@@ -42,7 +42,7 @@ namespace Fudge {
         if (!wasSelectedAlready) 
           this.selection.push(nearestVertexIndex);
       }
-      this.drawCircleAtSelection();
+      // this.drawCircleAtSelection();
       console.log("vertices selected: " + this.selection);
       return null;
     }

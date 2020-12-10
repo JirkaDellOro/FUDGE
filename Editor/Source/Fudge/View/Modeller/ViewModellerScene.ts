@@ -14,6 +14,7 @@ namespace Fudge {
       super(_container, _state);
       this.graph = <ƒ.Node><unknown>_state["node"];
       this.createUserInterface();
+
       ƒaid.addStandardLightComponents(this.graph, new ƒ.Color(0.5, 0.5, 0.5));
       ƒ.RenderOperator.setBackfaceCulling(false);
       this.node = this.graph.getChildrenByName("Default")[0];
@@ -23,6 +24,10 @@ namespace Fudge {
       // this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.hndEvent);
       // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
       this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
+      this.addEventListeners();
+    }
+
+    addEventListeners(): void {
       this.viewport.addEventListener(ƒ.EVENT_POINTER.MOVE, this.onmove);
       this.viewport.activatePointerEvent(ƒ.EVENT_POINTER.MOVE, true);
 
@@ -40,6 +45,9 @@ namespace Fudge {
 
       this.viewport.addEventListener(ƒ.EVENT_KEYBOARD.UP, this.onkeyup);
       this.viewport.activateKeyboardEvent(ƒ.EVENT_KEYBOARD.UP, true);
+
+      ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
+      ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
 
       this.viewport.setFocus(true);
 
@@ -66,8 +74,6 @@ namespace Fudge {
 
       this.dom.append(this.canvas);
 
-      ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
-      ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
     } 
 
     protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {

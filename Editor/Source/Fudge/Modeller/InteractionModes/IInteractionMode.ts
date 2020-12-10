@@ -12,7 +12,10 @@ namespace Fudge {
       this.viewport = viewport;
       this.editableNode = editableNode;
       this.selection = selection;
-      this.initialize();
+
+      // ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
+      // ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
+
     }
 
     /* returns its state in json or null, if nothing was altered */
@@ -25,16 +28,12 @@ namespace Fudge {
     abstract initialize(): void;
     abstract cleanup(): void;
 
-    public drawCircleAtSelection(): void {
-      let crx2d: CanvasRenderingContext2D = this.viewport.getCanvas().getContext("2d");
-      for (let vertex of this.selection) {
-        let pos: ƒ.Vector2 = this.viewport.pointWorldToClient((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices[vertex].position);
-        crx2d.beginPath();
-        crx2d.arc(pos.x, pos.y, 5, 0, 2 * Math.PI);
-        crx2d.fillStyle = "white";
-        crx2d.fill();
-      }
+    public animate = () => {
+      this.drawCircleAtVertex();
+      this.drawCircleAtSelection();
     }
+
+
 
     public updateSelection(): void {
       for (let i: number = 0; i < this.selection.length; i++) {
@@ -107,5 +106,29 @@ namespace Fudge {
     protected getDistanceFromCameraToCenterOfNode(): number {
       return ƒ.Vector3.DIFFERENCE((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection), this.viewport.camera.pivot.translation).magnitude;
     }
+
+    private drawCircleAtVertex(): void {
+      let crx2d: CanvasRenderingContext2D = this.viewport.getCanvas().getContext("2d");
+      for (let vertex of (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices) {
+        let pos: ƒ.Vector2 = this.viewport.pointWorldToClient(vertex.position);
+        crx2d.beginPath();
+        crx2d.arc(pos.x, pos.y, 3, 0, 2 * Math.PI);
+        crx2d.fillStyle = "black";
+        crx2d.fill();
+      }
+    }
+
+    private drawCircleAtSelection(): void {
+      let crx2d: CanvasRenderingContext2D = this.viewport.getCanvas().getContext("2d");
+      for (let vertex of this.selection) {
+        let pos: ƒ.Vector2 = this.viewport.pointWorldToClient((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices[vertex].position);
+        crx2d.beginPath();
+        crx2d.arc(pos.x, pos.y, 5, 0, 2 * Math.PI);
+        crx2d.fillStyle = "white";
+        crx2d.fill();
+      }
+    }
+
+
   }
 }
