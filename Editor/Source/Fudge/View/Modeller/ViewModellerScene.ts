@@ -106,7 +106,6 @@ namespace Fudge {
       });
       menu.append(item);
 
-
       submenu = new remote.Menu();
 
       // TODO: fix tight coupling here, only retrieve the shortcut from the controller
@@ -134,7 +133,6 @@ namespace Fudge {
           let controlModeNew: ControlMode = _item["controlMode"];
           // //@ts-ignore
           this.controller.setControlMode(controlModeNew);
-          // ƒ.Debug.info(meshNew.type, meshNew);
 
           this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
           this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));

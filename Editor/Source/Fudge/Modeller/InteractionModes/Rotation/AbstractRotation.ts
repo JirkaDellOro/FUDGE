@@ -80,7 +80,7 @@ namespace Fudge {
       let rotationMatrix: ƒ.Matrix4x4;
       /*
         TODO: check if we can make this work with multiple axis, but seems very hard to predict and utilize
-        maybe free rotate like in blender is a better option
+        maybe free rotation like in blender is a better option
         at the moment the last selected axis is used, maybe find a better solution here too
       */
       switch (selectedAxes[selectedAxes.length - 1]) {

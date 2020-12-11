@@ -1799,7 +1799,7 @@ var Fudge;
             let rotationMatrix;
             /*
               TODO: check if we can make this work with multiple axis, but seems very hard to predict and utilize
-              maybe free rotate like in blender is a better option
+              maybe free rotation like in blender is a better option
               at the moment the last selected axis is used, maybe find a better solution here too
             */
             switch (selectedAxes[selectedAxes.length - 1]) {
@@ -1989,6 +1989,11 @@ var Fudge;
             super(...arguments);
             this.selection = [];
             this.selectionMode = SelectionMode.VERTEX;
+            this.drawBox = () => {
+                let crx2d = this.viewport.getCanvas().getContext("2d");
+                crx2d.strokeStyle = `rgb(220, 220, 220)`;
+                crx2d.strokeRect(this.boxStart.x, this.boxStart.y, this.clientPos.x - this.boxStart.x, this.clientPos.y - this.boxStart.y);
+            };
         }
         initialize() {
             //
@@ -2000,7 +2005,10 @@ var Fudge;
                     this.selectVertices(ray);
                     break;
                 case SelectionMode.BOX:
-                    this.boxStart = new ƒ.Vector2(_event.clientX, _event.clientY);
+                    this.boxStart = new ƒ.Vector2(_event.canvasX, _event.canvasY);
+                    this.clientPos = new ƒ.Vector2(_event.canvasX, _event.canvasY);
+                    ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, this.drawBox);
+                    break;
             }
             console.log(this.selectionMode);
             return null;
@@ -2008,7 +2016,7 @@ var Fudge;
         onmouseup(_event) {
             if (this.selectionMode !== SelectionMode.BOX)
                 return;
-            let boxEnd = new ƒ.Vector2(_event.clientX, _event.clientY);
+            let boxEnd = new ƒ.Vector2(_event.canvasX, _event.canvasY);
             let box = new ƒ.Rectangle(this.boxStart.x, this.boxStart.y, boxEnd.x - this.boxStart.x, boxEnd.y - this.boxStart.y);
             let uniqueVertices = this.editableNode.getComponent(ƒ.ComponentMesh).mesh.uniqueVertices;
             this.selection = [];
@@ -2017,18 +2025,24 @@ var Fudge;
                     this.selection.push(i);
                 }
             }
+            ƒ.Loop.removeEventListener("loopFrame" /* LOOP_FRAME */, this.drawBox);
         }
         onmove(_event) {
-            //@ts-ignore
+            this.clientPos = new ƒ.Vector2(_event.canvasX, _event.canvasY);
         }
         onkeydown(_event) {
             //let state: string = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
-            if (_event.key === "Delete") {
-                this.editableNode.getComponent(ƒ.ComponentMesh).mesh.removeFace(this.selection);
-                this.selection = [];
-            }
-            else if (_event.key === "l") {
-                this.selectionMode = SelectionMode.BOX;
+            switch (_event.key) {
+                case "Delete":
+                    this.editableNode.getComponent(ƒ.ComponentMesh).mesh.removeFace(this.selection);
+                    this.selection = [];
+                    break;
+                case "l":
+                    this.selectionMode = SelectionMode.BOX;
+                    break;
+                case "v":
+                    this.selectionMode = SelectionMode.VERTEX;
+                    break;
             }
             return null;
         }
@@ -4478,7 +4492,6 @@ var Fudge;
                     let controlModeNew = _item["controlMode"];
                     // //@ts-ignore
                     this.controller.setControlMode(controlModeNew);
-                    // ƒ.Debug.info(meshNew.type, meshNew);
                     this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
                     this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
                     break;

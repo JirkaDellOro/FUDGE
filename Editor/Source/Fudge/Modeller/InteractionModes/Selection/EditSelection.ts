@@ -9,6 +9,7 @@ namespace Fudge {
     selection: Array<number> = [];
     private selectionMode: SelectionMode = SelectionMode.VERTEX;
     private boxStart: ƒ.Vector2;
+    private clientPos: ƒ.Vector2;
 
     initialize(): void {
       //
@@ -21,7 +22,10 @@ namespace Fudge {
           this.selectVertices(ray);
           break;
         case SelectionMode.BOX:
-          this.boxStart = new ƒ.Vector2(_event.clientX, _event.clientY);
+          this.boxStart = new ƒ.Vector2(_event.canvasX, _event.canvasY);
+          this.clientPos = new ƒ.Vector2(_event.canvasX, _event.canvasY);
+          ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.drawBox);
+          break;
       }
       console.log(this.selectionMode);
       return null;
@@ -31,7 +35,7 @@ namespace Fudge {
       if (this.selectionMode !== SelectionMode.BOX) 
         return;
       
-      let boxEnd: ƒ.Vector2 = new ƒ.Vector2(_event.clientX, _event.clientY);
+      let boxEnd: ƒ.Vector2 = new ƒ.Vector2(_event.canvasX, _event.canvasY);
       let box: ƒ.Rectangle = new ƒ.Rectangle(this.boxStart.x, this.boxStart.y, boxEnd.x - this.boxStart.x, boxEnd.y - this.boxStart.y);
 
       let uniqueVertices: UniqueVertex[] = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices;
@@ -41,25 +45,40 @@ namespace Fudge {
           this.selection.push(i);
         }
       }
+
+      ƒ.Loop.removeEventListener(ƒ.EVENT.LOOP_FRAME, this.drawBox);
     }
 
     onmove(_event: ƒ.EventPointer): void {
-      //@ts-ignore
+      this.clientPos = new ƒ.Vector2(_event.canvasX, _event.canvasY);
     }
 
     onkeydown(_event: ƒ.EventKeyboard): string {
       //let state: string = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
-      if (_event.key === "Delete") {
-        (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).removeFace(this.selection);
-        this.selection = [];
-      } else if (_event.key === "l") {
-        this.selectionMode = SelectionMode.BOX;
+
+      switch (_event.key) {
+        case "Delete": 
+          (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).removeFace(this.selection);
+          this.selection = [];
+          break;
+        case "l": 
+          this.selectionMode = SelectionMode.BOX;
+          break;
+        case "v":
+          this.selectionMode = SelectionMode.VERTEX;
+          break;
       }
       return null;
     }
 
     onkeyup(_event: ƒ.EventKeyboard): void {
       //
+    }
+
+    private drawBox = () => {
+      let crx2d: CanvasRenderingContext2D = this.viewport.getCanvas().getContext("2d");
+      crx2d.strokeStyle = `rgb(220, 220, 220)`;
+      crx2d.strokeRect(this.boxStart.x, this.boxStart.y, this.clientPos.x - this.boxStart.x, this.clientPos.y - this.boxStart.y);
     }
 
     private selectVertices(_ray: ƒ.Ray): void {
