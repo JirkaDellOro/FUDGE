@@ -536,12 +536,15 @@ declare namespace Fudge {
     import ƒ = FudgeCore;
     class EditSelection extends AbstractSelection {
         selection: Array<number>;
+        private selectionMode;
+        private boxStart;
         initialize(): void;
         onmousedown(_event: ƒ.EventPointer): string;
         onmouseup(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
         onkeydown(_event: ƒ.EventKeyboard): string;
         onkeyup(_event: ƒ.EventKeyboard): void;
+        private selectVertices;
         private removeSelectedVertexIfAlreadySelected;
     }
 }

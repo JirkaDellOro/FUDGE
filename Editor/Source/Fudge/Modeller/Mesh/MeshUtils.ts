@@ -34,7 +34,6 @@ namespace Fudge {
         reverseVertices.set(vertex, this.vertexCount + iterator);
         iterator++;
       }
-
       this.vertexCount += 4;
       this.numberOfFaces++;
 

@@ -1979,25 +1979,73 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
+    let SelectionMode;
+    (function (SelectionMode) {
+        SelectionMode[SelectionMode["VERTEX"] = 0] = "VERTEX";
+        SelectionMode[SelectionMode["BOX"] = 1] = "BOX";
+    })(SelectionMode || (SelectionMode = {}));
     class EditSelection extends Fudge.AbstractSelection {
         constructor() {
             super(...arguments);
             this.selection = [];
+            this.selectionMode = SelectionMode.VERTEX;
         }
         initialize() {
+            //
         }
         onmousedown(_event) {
+            switch (this.selectionMode) {
+                case SelectionMode.VERTEX:
+                    let ray = this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY));
+                    this.selectVertices(ray);
+                    break;
+                case SelectionMode.BOX:
+                    this.boxStart = new ƒ.Vector2(_event.clientX, _event.clientY);
+            }
+            console.log(this.selectionMode);
+            return null;
+        }
+        onmouseup(_event) {
+            if (this.selectionMode !== SelectionMode.BOX)
+                return;
+            let boxEnd = new ƒ.Vector2(_event.clientX, _event.clientY);
+            let box = new ƒ.Rectangle(this.boxStart.x, this.boxStart.y, boxEnd.x - this.boxStart.x, boxEnd.y - this.boxStart.y);
+            let uniqueVertices = this.editableNode.getComponent(ƒ.ComponentMesh).mesh.uniqueVertices;
+            this.selection = [];
+            for (let i = 0; i < uniqueVertices.length; i++) {
+                if (box.isInside(this.viewport.pointWorldToClient(uniqueVertices[i].position))) {
+                    this.selection.push(i);
+                }
+            }
+        }
+        onmove(_event) {
+            //@ts-ignore
+        }
+        onkeydown(_event) {
+            //let state: string = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
+            if (_event.key === "Delete") {
+                this.editableNode.getComponent(ƒ.ComponentMesh).mesh.removeFace(this.selection);
+                this.selection = [];
+            }
+            else if (_event.key === "l") {
+                this.selectionMode = SelectionMode.BOX;
+            }
+            return null;
+        }
+        onkeyup(_event) {
+            //
+        }
+        selectVertices(_ray) {
             let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
             let vertices = mesh.uniqueVertices;
             let nearestVertexIndex;
             let shortestDistanceToCam = Number.MAX_VALUE;
             let shortestDistanceToRay = Number.MAX_VALUE;
             let vertexWasPicked = false;
-            let ray = this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY));
             for (let i = 0; i < vertices.length; i++) {
                 let vertex = vertices[i].position;
                 let vertexTranslation = ƒ.Vector3.SUM(this.editableNode.mtxLocal.translation, vertex);
-                let distanceToRay = ray.getDistance(vertexTranslation).magnitude;
+                let distanceToRay = _ray.getDistance(vertexTranslation).magnitude;
                 let distanceToCam = ƒ.Vector3.DIFFERENCE(this.viewport.camera.pivot.translation, vertexTranslation).magnitude;
                 if (distanceToRay < 0.1) {
                     vertexWasPicked = true;
@@ -2021,25 +2069,7 @@ var Fudge;
                 if (!wasSelectedAlready)
                     this.selection.push(nearestVertexIndex);
             }
-            // this.drawCircleAtSelection();
             console.log("vertices selected: " + this.selection);
-            return null;
-        }
-        onmouseup(_event) {
-            //
-        }
-        onmove(_event) {
-            //@ts-ignore
-        }
-        onkeydown(_event) {
-            if (_event.key === "Delete") {
-                this.editableNode.getComponent(ƒ.ComponentMesh).mesh.removeFace(this.selection);
-                this.selection = [];
-            }
-            return null;
-        }
-        onkeyup(_event) {
-            //
         }
         removeSelectedVertexIfAlreadySelected(selectedVertex) {
             let wasSelectedAlready = false;
@@ -2350,14 +2380,14 @@ var Fudge;
                 //let keys: IterableIterator<number> = vertex.indices.keys();
                 for (let [vertexIndex, indicesIndex] of tempMap) {
                     for (let i = 0; i < indicesIndex.indices.length; i++) {
-                        let index = indicesIndex[i];
+                        let index = indicesIndex.indices[i];
                         let subtraction = 0;
                         for (let removedIndex of removedIndices) {
                             if (removedIndex < index)
                                 subtraction++;
                         }
                         index -= subtraction;
-                        indicesIndex[i] = index;
+                        indicesIndex.indices[i] = index;
                     }
                     let vertexSubtraction = 0;
                     for (let removedVertex of correctVertices.keys()) {
@@ -2618,22 +2648,22 @@ var Fudge;
             for (let i = 0; i < indices.length; i += 3) {
                 triangles.push([this.indices[indices[(i)]], this.indices[indices[(i + 1)]], this.indices[indices[(i + 2)]]]);
             }
-            let edgesObject = [];
+            let edges = [];
             for (let triangle of triangles) {
                 for (let i = 0; i < triangle.length; i++) {
                     let isInObjectReversed = false;
                     let indexOfEdge = -1;
-                    for (let j = 0; j < edgesObject.length; j++) {
-                        if (edgesObject[j].start === triangle[(i + 1) % triangle.length] && edgesObject[j].end === triangle[i]) {
+                    for (let j = 0; j < edges.length; j++) {
+                        if (edges[j].start === triangle[(i + 1) % triangle.length] && edges[j].end === triangle[i]) {
                             isInObjectReversed = true;
                             indexOfEdge = j;
                         }
                     }
                     if (isInObjectReversed) {
-                        edgesObject.splice(indexOfEdge, 1);
+                        edges.splice(indexOfEdge, 1);
                     }
                     else {
-                        edgesObject.push({ start: triangle[i], end: triangle[(i + 1) % triangle.length] });
+                        edges.push({ start: triangle[i], end: triangle[(i + 1) % triangle.length] });
                     }
                     // if (edges.get(triangle[(i + 1) % triangle.length]) === triangle[i]) {
                     //   edges.delete(triangle[(i + 1) % triangle.length]);
@@ -2651,7 +2681,7 @@ var Fudge;
             //   }
             //   //triangles.push(this.indices[indices[i]]);
             // }
-            return edgesObject;
+            return edges;
         }
         // maybe just store the number of faces somewhere
         countNumberOfFaces() {

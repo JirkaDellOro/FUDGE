@@ -131,14 +131,14 @@ namespace Fudge {
         //let keys: IterableIterator<number> = vertex.indices.keys();
         for (let [vertexIndex, indicesIndex] of tempMap) {
           for (let i: number = 0; i < indicesIndex.indices.length; i++) {
-            let index: number = indicesIndex[i];
+            let index: number = indicesIndex.indices[i];
             let subtraction: number = 0;
             for (let removedIndex of removedIndices) {
               if (removedIndex < index) 
                 subtraction++;
             }
             index -= subtraction;
-            indicesIndex[i] = index;
+            indicesIndex.indices[i] = index;
           }
 
           let vertexSubtraction: number = 0;
@@ -437,22 +437,22 @@ namespace Fudge {
       for (let i: number = 0; i < indices.length; i += 3) {
         triangles.push([this.indices[indices[(i)]], this.indices[indices[(i + 1)]], this.indices[indices[(i + 2)]]]);
       }
-      let edgesObject: {start: number, end: number}[] = [];
+      let edges: {start: number, end: number}[] = [];
 
       for (let triangle of triangles) {
         for (let i: number = 0; i < triangle.length; i++) {
           let isInObjectReversed: boolean = false;
           let indexOfEdge: number = -1;
-          for (let j: number = 0; j < edgesObject.length; j++) {
-            if (edgesObject[j].start === triangle[(i + 1) % triangle.length] && edgesObject[j].end === triangle[i]) {
+          for (let j: number = 0; j < edges.length; j++) {
+            if (edges[j].start === triangle[(i + 1) % triangle.length] && edges[j].end === triangle[i]) {
               isInObjectReversed = true;
               indexOfEdge = j;
             }
           }
           if (isInObjectReversed) {
-            edgesObject.splice(indexOfEdge, 1);
+            edges.splice(indexOfEdge, 1);
           } else {
-            edgesObject.push({start: triangle[i], end: triangle[(i + 1) % triangle.length]});
+            edges.push({start: triangle[i], end: triangle[(i + 1) % triangle.length]});
           }
           // if (edges.get(triangle[(i + 1) % triangle.length]) === triangle[i]) {
           //   edges.delete(triangle[(i + 1) % triangle.length]);
@@ -470,7 +470,7 @@ namespace Fudge {
       //   }
       //   //triangles.push(this.indices[indices[i]]);
       // }
-      return edgesObject;
+      return edges;
     }
 
     // maybe just store the number of faces somewhere
