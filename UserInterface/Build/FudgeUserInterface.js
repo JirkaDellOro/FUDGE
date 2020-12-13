@@ -61,6 +61,8 @@ var FudgeUserInterface;
                     return mutator;
                 if (element instanceof FudgeUserInterface.CustomElement)
                     mutator[key] = element.getMutatorValue();
+                else if (element instanceof HTMLInputElement)
+                    mutator[key] = element.value;
                 else if (mutatorTypes[key] instanceof Object)
                     // TODO: setting a value of the dom element doesn't make sense... examine what this line was supposed to do. Assumably enums
                     mutator[key] = element.value;

@@ -167,10 +167,6 @@ declare namespace FudgeAid {
          * Sets the direction for animation playback, negativ numbers make it play backwards.
          */
         setFrameDirection(_direction: number): void;
-        /**
-         *
-         */
-        flip(_reverse: boolean): void;
     }
 }
 declare namespace FudgeAid {
@@ -222,7 +218,7 @@ declare namespace FudgeAid {
     class ComponentStateMachine<State> extends ƒ.ComponentScript implements StateMachine<State> {
         stateCurrent: State;
         stateNext: State;
-        stateMachine: StateMachineInstructions<State>;
+        instructions: StateMachineInstructions<State>;
         transit(_next: State): void;
         act(): void;
     }
@@ -248,7 +244,7 @@ declare namespace FudgeAid {
     export class StateMachine<State> {
         stateCurrent: State;
         stateNext: State;
-        stateMachine: StateMachineInstructions<State>;
+        instructions: StateMachineInstructions<State>;
         transit(_next: State): void;
         act(): void;
     }

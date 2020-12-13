@@ -13,7 +13,7 @@ namespace StateMachine {
 
     public constructor() {
       super();
-      this.stateMachine = Guard.stateMachine;
+      this.instructions = Guard.stateMachine;
     }
 
     public static transit(_machine: Guard): void {
@@ -55,7 +55,7 @@ namespace StateMachine {
 
     public constructor() {
       super();
-      this.stateMachine = ComponentGuard.stateMachine;
+      this.instructions = ComponentGuard.stateMachine;
     }
 
     public static transit(_machine: ComponentGuard): void {

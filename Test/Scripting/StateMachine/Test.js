@@ -14,7 +14,7 @@ var StateMachine;
     class Guard extends ƒaid.StateMachine {
         constructor() {
             super();
-            this.stateMachine = Guard.stateMachine;
+            this.instructions = Guard.stateMachine;
         }
         static transit(_machine) {
             console.log(`${JOB[_machine.stateCurrent]} -> ${JOB[_machine.stateNext]} | Dedicated Transition`);
@@ -49,7 +49,7 @@ var StateMachine;
     class ComponentGuard extends ƒaid.ComponentStateMachine {
         constructor() {
             super();
-            this.stateMachine = ComponentGuard.stateMachine;
+            this.instructions = ComponentGuard.stateMachine;
         }
         static transit(_machine) {
             console.log("ComponentGuard transits from ", _machine.stateCurrent);

@@ -4,14 +4,14 @@ namespace FudgeAid {
   export class ComponentStateMachine<State> extends ƒ.ComponentScript implements StateMachine<State> {
     public stateCurrent: State;
     public stateNext: State;
-    public stateMachine: StateMachineInstructions<State>;
+    public instructions: StateMachineInstructions<State>;
 
     public transit(_next: State): void {
-      this.stateMachine.transit(this.stateCurrent, _next, this);
+      this.instructions.transit(this.stateCurrent, _next, this);
     }
 
     public act(): void {
-      this.stateMachine.act(this.stateCurrent, this);
+      this.instructions.act(this.stateCurrent, this);
     }
   }
 }
