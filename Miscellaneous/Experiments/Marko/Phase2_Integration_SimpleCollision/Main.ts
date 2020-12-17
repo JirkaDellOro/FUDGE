@@ -132,7 +132,6 @@ namespace FudgePhysics_Communication {
     bodies[5].getComponent(f.ComponentRigidbody).restitution = 2;
     //#endregion
 
-
     //Rest initialization
     let cmpLight: f.ComponentLight = new f.ComponentLight(new f.LightDirectional(f.Color.CSS("WHITE")));
     cmpLight.pivot.lookAt(new f.Vector3(0.5, -1, -0.8));
@@ -153,6 +152,7 @@ namespace FudgePhysics_Communication {
     f.Loop.start();
     f.Physics.settings.debugDraw = true;
   }
+
 
   function update(): void {
     f.Physics.world.simulate();

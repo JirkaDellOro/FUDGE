@@ -1022,7 +1022,7 @@ declare namespace FudgeCore {
         /**
          * Determines FUDGE-graph to listen to. Each [[ComponentAudio]] in the graph will connect to this contexts master gain, all others disconnect.
          */
-        listenTo: (_graph: Node) => void;
+        listenTo: (_graph: Node | null) => void;
         /**
          * Retrieve the FUDGE-graph currently listening to
          */
@@ -1030,7 +1030,7 @@ declare namespace FudgeCore {
         /**
          * Set the [[ComponentAudioListener]] that serves the spatial location and orientation for this contexts listener
          */
-        listen: (_cmpListener: ComponentAudioListener) => void;
+        listen: (_cmpListener: ComponentAudioListener | null) => void;
         /**
          * Updates the spatial settings of the AudioNodes effected in the current FUDGE-graph
          */
@@ -3252,6 +3252,16 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /** Base Class for different collider types */
+    class ComponentCollider extends Component {
+        static readonly iSubclass: number;
+        /** The pivot of the physics itself. Default the pivot is identical to the transform. It's used like an offset. */
+        pivot: Matrix4x4;
+        colType: COLLIDER_TYPE;
+        constructor(_colliderType?: COLLIDER_TYPE);
+    }
+}
+declare namespace FudgeCore {
     /**
        * Acts as the physical representation of a connection between two [[Node]]'s.
        * The type of conncetion is defined by the subclasses like prismatic joint, cylinder joint etc.
@@ -4329,10 +4339,6 @@ declare namespace FudgeCore {
         constructor(_renderingContext: WebGL2RenderingContext);
         /** Fill the bound buffer with data. Used at buffer initialization */
         setData(array: Array<number>): void;
-        /** Update the data in the buffer */
-        updateData(array: Array<number>): void;
-        /** Update the buffer with the specific type of Float32Array */
-        updateDataFloat32Array(array: Float32Array): void;
         /** Set Shader Attributes informations by getting their position in the shader, setting the offset, stride and size. For later use in the binding process */
         setAttribs(attribs: Array<PhysicsDebugVertexAttribute>): void;
         /** Get the position of the attribute in the shader */
@@ -4349,10 +4355,6 @@ declare namespace FudgeCore {
         constructor(_renderingContext: WebGL2RenderingContext);
         /** Fill the bound buffer with data amount. Used at buffer initialization */
         setData(array: Array<number>): void;
-        /** Update the actual data in the buffer */
-        updateData(array: Array<number>): void;
-        /** Update the buffer with the specific type of Int16Array */
-        updateDataInt16Array(array: Int16Array): void;
         /** The actual DrawCall for physicsDebugDraw Buffers. This is where the information from the debug is actually drawn. */
         draw(_mode?: number, _count?: number): void;
     }
@@ -4397,14 +4399,14 @@ declare namespace FudgeCore {
         lineIBO: PhysicsDebugIndexBuffer;
         triVBO: PhysicsDebugVertexBuffer;
         triIBO: PhysicsDebugIndexBuffer;
-        pointBufferSize: number;
-        pointData: Float32Array;
+        pointData: Array<number>;
+        pointIboData: Array<number>;
         numPointData: number;
-        lineBufferSize: number;
-        lineData: Float32Array;
+        lineData: Array<number>;
+        lineIboData: Array<number>;
         numLineData: number;
-        triBufferSize: number;
-        triData: Float32Array;
+        triData: Array<number>;
+        triIboData: Array<number>;
         numTriData: number;
         /** Creating the debug for physics in Fudge. Tell it to draw only wireframe objects, since Fudge is handling rendering of the objects besides physics.
          * Override OimoPhysics Functions with own rendering. Initialize buffers and connect them with the context for later use. */
@@ -4414,11 +4416,9 @@ declare namespace FudgeCore {
          * to debug only what they need and is commonly debugged.
          */
         getDebugModeFromSettings(): void;
-        /** Creating the render buffers for later use. Defining the attributes used in shaders.
-         * Needs to create empty buffers to already have them ready to draw later on, linking is only possible with existing buffers. No performance loss because empty buffers are not drawn.*/
+        /** Creating the empty render buffers. Defining the attributes used in shaders.
+         * Needs to create empty buffers to already have them ready to draw later on, linking is only possible with existing buffers. */
         initializeBuffers(): void;
-        /** Fill an array with empty values */
-        private initFloatArray;
         /** Overriding the existing functions from OimoPhysics.DebugDraw without actually inherit from the class, to avoid compiler problems.
          * Overriding them to receive debugInformations in the format the physic engine provides them but handling the rendering in the fudge context. */
         private initializeOverride;
