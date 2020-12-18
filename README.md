@@ -33,15 +33,15 @@ A collection of various other helpful documents and resources
 - :pencil: Modeller
 - :pencil: Cameratransformation, Axonometry and VR
 - :pencil: Diegetic User-Interface
-- Redesign Golden Layout
+- :pencil: Redesign Golden Layout
+- :pencil: Input-Manager
 - Shader
+- Grapheditor/Wiring for Shader and Animation
+- Light and Shadow
 - Primitve 3D-Models and 2D-Shapes 
 - Importer for standard file formats
-- Light and Shadow
 - Runtime-Recording for Replay
 - Undo/Rollback
-- Grapheditor/Wiring for Shader and Animation
-- Input-Manager
 - Selection-Sets to store temporary Groups
 - Advanced texturing
 
