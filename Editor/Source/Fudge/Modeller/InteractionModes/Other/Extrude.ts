@@ -1,4 +1,5 @@
 namespace Fudge {
+  import ƒui = FudgeUserInterface;
   export class Extrude extends IInteractionMode {
     public readonly type: InteractionMode = InteractionMode.EXTRUDE;
     selection: Array<number>;
@@ -8,13 +9,20 @@ namespace Fudge {
     private distance: number;
     private oldPosition: ƒ.Vector3;
     private axesSelectionHandler: AxesSelectionHandler;
+    private vertexSelected: boolean = false;
 
     constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>) {
       super(viewport, editableNode, selection);
-      this.initialize();
+      this.selector = new Selector(this.editableNode, this.viewport.camera.pivot.translation);
+      // this.initialize();
     }
 
     onmousedown(_event: ƒ.EventPointer): string {
+      if (this.selector.selectVertices(this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY)), this.selection)) {
+        this.vertexSelected = true;
+        return null;
+      }
+
       if (!this.selection)
         return;
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
@@ -24,11 +32,17 @@ namespace Fudge {
         return;
       let state: string = mesh.getState();
       this.selection = mesh.extrude(this.selection);
+      let event: CustomEvent = new CustomEvent(ƒui.EVENT.CHANGE, { bubbles: true, detail: this.selection });
+      ƒ.EventTargetStatic.dispatchEvent(event);
       this.isExtruded = true;
       return state;
     }
 
     onmouseup(_event: ƒ.EventPointer): void {
+      if (this.vertexSelected) {
+        this.vertexSelected = false;
+        return;
+      }
       if (!this.isExtruded)
         return;
       this.isExtruded = false;
@@ -39,6 +53,9 @@ namespace Fudge {
     }
 
     onmove(_event: ƒ.EventPointer): void {
+      if (this.vertexSelected)
+        return;
+
       if (!this.isExtruded) 
         return;
 

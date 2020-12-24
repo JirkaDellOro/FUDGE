@@ -138,7 +138,7 @@ namespace Fudge {
             saveProject();
             break;
           case PANEL.MODELLER:
-            let mesh: ModifiableMesh =  <ModifiableMesh> modellerNode.getComponent(ƒ.ComponentMesh).mesh;
+            let mesh: ModifiableMesh = <ModifiableMesh> modellerNode.getComponent(ƒ.ComponentMesh).mesh;
             saveMesh(mesh.export());
             break;
         }

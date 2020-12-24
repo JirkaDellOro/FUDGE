@@ -101,6 +101,12 @@ namespace Fudge {
       return JSON.stringify(serialization, null, 2);
     }
 
+    public updateMesh(): void {
+      this.vertices = this.createVertices();
+      this.normalsFace = this.createFaceNormals();
+      this.createRenderBuffers();
+    }
+
     public getCentroid(selection: number[] = Array.from(Array(this.uniqueVertices.length).keys())): ƒ.Vector3 {
       let sum: ƒ.Vector3 = new ƒ.Vector3();
       let numberOfVertices: number = 0;
@@ -167,11 +173,19 @@ namespace Fudge {
       this.createRenderBuffers();
     }
 
-    public scaleBy(matrix: ƒ.Matrix4x4, oldVertices: Map<number, ƒ.Vector3>, selection: number[] = Array.from(Array(this.uniqueVertices.length).keys())): void {
+    public scaleBy(matrix: ƒ.Matrix4x4, oldVertices: Map<number, ƒ.Vector3>, centroid: ƒ.Vector3, selection: number[] = Array.from(Array(this.uniqueVertices.length).keys())): void {
+      // let centroid: ƒ.Vector3 = this.getCentroid(selection);
       for (let vertexIndex of selection) {
         let currentVertex: ƒ.Vector3 = oldVertices.get(vertexIndex);
-        let newVertex: ƒ.Vector3 = new ƒ.Vector3(currentVertex.x, currentVertex.y, currentVertex.z);
+        let newVertex: ƒ.Vector3 = new ƒ.Vector3(currentVertex.x - centroid.x, currentVertex.y - centroid.y, currentVertex.z - centroid.z);
         newVertex.transform(matrix);
+        newVertex.x += centroid.x;
+        newVertex.y += centroid.y;
+        newVertex.z += centroid.z;
+        console.log("new vertex: " + newVertex);
+        console.log("old vertex: " + currentVertex);
+        console.log("matrix: " + matrix);
+        console.log("centroid: " + centroid);
         this._uniqueVertices[vertexIndex].position = newVertex;
       }
       this.vertices = this.createVertices();
@@ -507,33 +521,6 @@ namespace Fudge {
       } 
       return faceVerticesMap;
     }
-
-    // not needed anymore because we store faces now, can be deleted later
-    // private findCorrectFace(selectedIndices: number[]): Map<number, number> {
-    //   let faceVerticesMap: Map<number, number> = new Map();
-    //   let normalToVertexTable: Map<string, Array<{selectedIndex: number, vertexIndex: number}>> = new Map();
-
-    //   // this will likely not work after some processing because of floating point precision 
-    //   for (let selectedIndex of selectedIndices) {
-    //     for (let vertexIndex of this._uniqueVertices[selectedIndex].vertexToIndices.keys()) {
-    //       let normal: ƒ.Vector3 = new ƒ.Vector3(this.normalsFace[vertexIndex * ModifiableMesh.vertexSize], this.normalsFace[vertexIndex * ModifiableMesh.vertexSize + 1], this.normalsFace[vertexIndex * ModifiableMesh.vertexSize + 2]);        
-    //       if (!normalToVertexTable.has(normal.toString())) {
-    //         normalToVertexTable.set(normal.toString(), [{selectedIndex: selectedIndex, vertexIndex: vertexIndex}]);
-    //       } else {
-    //         normalToVertexTable.get(normal.toString()).push({selectedIndex: selectedIndex, vertexIndex: vertexIndex});
-    //       }
-    //     }
-    //   }
-    //   for (let normal of normalToVertexTable.keys()) {
-    //     if (normalToVertexTable.get(normal).length == selectedIndices.length) {
-    //       for (let indices of normalToVertexTable.get(normal)) {
-    //         faceVerticesMap.set(indices.vertexIndex, indices.selectedIndex);
-    //       }
-    //     }
-    //   }
-    //   return faceVerticesMap;
-    // }
-
 
     // tslint:disable-next-line: member-ordering
     protected updatePositionOfVertex(vertexIndex: number, newPosition: ƒ.Vector3): void {

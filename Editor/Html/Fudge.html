@@ -26,7 +26,7 @@
 
 <body>
   <template>
-    <custom-vector3 style="background-color: antiquewhite;">
+    <custom-vector3 style="background-color: black;">
       <fudge-stepper key="x" label="x"></fudge-stepper>
       <fudge-stepper key="y" label="x"></fudge-stepper>
       <fudge-stepper key="z" label="x"></fudge-stepper>
@@ -34,7 +34,7 @@
   </template>
   <script>
     FudgeUserInterface.CustomElementTemplate.register("custom-vector3");
-    FudgeUserInterface.CustomElement.register("custom-vector3", class CustomVector3 extends FudgeUserInterface.CustomElementTemplate { });
+    FudgeUserInterface.CustomElement.register("custom-vector3", FudgeUserInterface.CustomElementVector3);
     FudgeUserInterface.CustomElement.map("Vector3", "custom-vector3");
   </script>
 
@@ -94,6 +94,14 @@
     FudgeUserInterface.CustomElement.register("custom-matrix3x3", FudgeUserInterface.CustomElementMatrix3x3);
     FudgeUserInterface.CustomElement.map("Matrix3x3", "custom-matrix3x3");
   </script>
+
+  <template id="dropdown-template">
+    <div class="dropdown">
+      <button class="dropbtn">Dropdown</button>
+      <div class="dropdown-content">
+      </div>
+    </div>  
+  </template>
 </body>
 
 </html>

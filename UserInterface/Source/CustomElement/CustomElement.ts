@@ -28,7 +28,7 @@ namespace FudgeUserInterface {
         for (let name in _attributes)
           this.setAttribute(name, _attributes[name]);
     }
-
+    
     /**
      * Retrieve an id to use for children of this element, needed e.g. for standard interaction with the label
      */

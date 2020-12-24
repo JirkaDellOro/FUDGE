@@ -36,7 +36,6 @@ namespace Fudge {
     public isValidSelection(): boolean {
       return this.axisIsPicked || this.isSelectedViaKeyboard;
     }
-
     
     public getSelectedAxes(): Axis[] {
       let selectedAxes: Axis[] = this.selectedAxes.slice();

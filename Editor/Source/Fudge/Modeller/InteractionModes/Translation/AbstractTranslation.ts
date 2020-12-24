@@ -9,13 +9,12 @@ namespace Fudge {
     protected distance: number;
     // protected copyOfSelectedVertices: Map<number, ƒ.Vector3>;
     protected oldPosition: ƒ.Vector3;
-    private axesSelectionHandler: AxesSelectionHandler;
+    protected axesSelectionHandler: AxesSelectionHandler;
 
     initialize(): void {
       let widget: IWidget = new TranslationWidget();
       let mtx: ƒ.Matrix4x4 = new ƒ.Matrix4x4();
       mtx.translation = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection);
-      //mtx.rotation = this.editableNode.mtxLocal.rotation;
       widget.addComponent(new ƒ.ComponentTransform(mtx));
       this.viewport.getGraph().addChild(widget);
       this.axesSelectionHandler = new AxesSelectionHandler(widget);

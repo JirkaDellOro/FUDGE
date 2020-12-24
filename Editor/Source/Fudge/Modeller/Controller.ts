@@ -1,11 +1,13 @@
 namespace Fudge {
   import ƒ = FudgeCore;
+  
   export class Controller {
     private interactionMode: IInteractionMode;
     private currentControlMode: AbstractControlMode;
     private viewport: ƒ.Viewport;
     private editableNode: ƒ.Node;
     // could make an array of Array<{someinterface, string}> to support undo for different objects
+    // or just think of some smarter  way of doing undo, e.g. storing the reverse functions
     private states: Array<string> = [];
     // TODO: change those shortcuts
     private controlModesMap: Map<ControlMode, {type: AbstractControlMode, shortcut: string}> = new Map([
@@ -44,6 +46,9 @@ namespace Fudge {
     }
 
     public onkeydown(_event: ƒ.EventKeyboard): void {
+      // let eTarget: EventTarget = new EventTarget();
+      // eTarget.dispatchEvent(event);
+
       if (_event.ctrlKey) 
         return;
       let state: string = this.interactionMode.onkeydown(_event);
@@ -53,6 +58,14 @@ namespace Fudge {
 
     public onkeyup(_event: ƒ.EventKeyboard): void {
       this.interactionMode.onkeyup(_event);
+    }
+
+    public getSelection(): number[] {
+      return this.interactionMode.selection;
+    }
+    
+    public getInteractionModeType(): InteractionMode {
+      return this.interactionMode.type;
     }
 
     public switchMode(_event: ƒ.EventKeyboard): void {
@@ -101,6 +114,7 @@ namespace Fudge {
       if (selection && this.controlMode.type === ControlMode.EDIT_MODE)
         this.interactionMode.selection = selection;
       
+      this.interactionMode.initialize();
       console.log("Current Mode: " + this.interactionMode.type);
     }
 

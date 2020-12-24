@@ -978,6 +978,34 @@ var FudgeUserInterface;
     CustomElementTextInput.customElement = FudgeUserInterface.CustomElement.register("fudge-textinput", CustomElementTextInput, String);
     FudgeUserInterface.CustomElementTextInput = CustomElementTextInput;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
+///<reference path="CustomElementTemplate.ts"/>
+var FudgeUserInterface;
+///<reference path="CustomElementTemplate.ts"/>
+(function (FudgeUserInterface) {
+    class CustomElementVector3 extends FudgeUserInterface.CustomElementTemplate {
+        getMutatorValue() {
+            let steppers = this.querySelectorAll("fudge-stepper");
+            let mutator = {};
+            let count = 0;
+            for (let dimension of ["x", "y", "z"])
+                mutator[dimension] = steppers[count++].getMutatorValue();
+            return mutator;
+        }
+        setMutatorValue(_mutator) {
+            let steppers = this.querySelectorAll("fudge-stepper");
+            let count = 0;
+            for (let dimension of ["x", "y", "z"])
+                steppers[count++].setMutatorValue(Number(_mutator[dimension]));
+        }
+        connectedCallback() {
+            super.connectedCallback();
+            // console.log("Matrix Callback");
+            let label = this.querySelector("label");
+            label.textContent = this.getAttribute("label");
+        }
+    }
+    FudgeUserInterface.CustomElementVector3 = CustomElementVector3;
+})(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
     var ƒ = FudgeCore;

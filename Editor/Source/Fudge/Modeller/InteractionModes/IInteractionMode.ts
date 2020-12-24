@@ -3,10 +3,11 @@ namespace Fudge {
   import ƒAid = FudgeAid;
 
   export abstract class IInteractionMode {
-    type: InteractionMode;
+    public readonly type: InteractionMode;
     selection: Array<number>;
     viewport: ƒ.Viewport;
     editableNode: ƒ.Node;
+    protected selector: Selector;
 
     constructor (viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number> = []) {
       this.viewport = viewport;
@@ -15,7 +16,6 @@ namespace Fudge {
 
       // ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
       // ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
-
     }
 
     /* returns its state in json or null, if nothing was altered */
@@ -33,8 +33,6 @@ namespace Fudge {
       this.drawCircleAtSelection();
     }
 
-
-
     public updateSelection(): void {
       for (let i: number = 0; i < this.selection.length; i++) {
         if (this.selection[i] >= (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices.length) {
@@ -46,7 +44,7 @@ namespace Fudge {
 
     protected getPosRenderFrom(_event: ƒ.EventPointer): ƒ.Vector2 {
       let mousePos: ƒ.Vector2 = new ƒ.Vector2(_event.canvasX, _event.canvasY);
-      return this.viewport.pointClientToRender(new ƒ.Vector2(mousePos.x, this.viewport.getClientRectangle().height - mousePos.y));
+      return this.viewport.pointClientToRender(new ƒ.Vector2(mousePos.x, this.viewport.getCanvasRectangle().height - mousePos.y));
     }
 
     protected createNormalArrows(): void {

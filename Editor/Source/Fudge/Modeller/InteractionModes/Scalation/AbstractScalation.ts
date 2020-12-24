@@ -2,18 +2,19 @@ namespace Fudge {
 
   export class AbstractScalation extends IInteractionMode {
     //protected widget: ƒ.Node;
+    public readonly type: InteractionMode = InteractionMode.SCALE;
     protected oldPosition: ƒ.Vector3;
     protected distanceToCenterOfNode: number;
-    protected oldColor: ƒ.Color;
     protected distanceRayToCenter: ƒ.Vector3;
     protected copyOfSelectedVertices: Map<number, ƒ.Vector3>;
-    private axesSelectionHandler: AxesSelectionHandler;
+    protected axesSelectionHandler: AxesSelectionHandler;
+    private centroid: ƒ.Vector3;
 
     initialize(): void {
       let widget: ScalationWidget = new ScalationWidget();
-      // mtx.translation = this.editableNode.mtxLocal.translation;
-      // mtx.rotation = this.editableNode.mtxLocal.rotation;
-      // widget.addComponent(new ƒ.ComponentTransform(mtx));
+      let mtx: ƒ.Matrix4x4 = new ƒ.Matrix4x4();
+      mtx.translation = mtx.translation = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection);
+      widget.addComponent(new ƒ.ComponentTransform(mtx));
       this.viewport.getGraph().addChild(widget);
       this.axesSelectionHandler = new AxesSelectionHandler(widget);
     }
@@ -47,15 +48,15 @@ namespace Fudge {
       if (selectedAxes.length <= 0) 
         return;
       
-      let newPosition: ƒ.Vector3 = this.getNewPosition(_event, this.distanceToCenterOfNode);
-      let diff: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(newPosition, this.oldPosition);
+      let currentPosition: ƒ.Vector3 = this.getNewPosition(_event, this.distanceToCenterOfNode);
+      let diff: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(currentPosition, this.oldPosition);
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
 
       let scaleMatrix: ƒ.Matrix4x4;
       // let abs: number = ƒ.Vector3.DIFFERENCE(diff, this.distanceRayToCenter);
 
       // TODO: Fix offset and this should be correct
-      let abs: number = ƒ.Vector3.DIFFERENCE(newPosition, mesh.getCentroid()).magnitude;
+      let abs: number = ƒ.Vector3.DIFFERENCE(currentPosition, this.centroid).magnitude;
 
       // let abs: number = ƒ.Vector3.DOT(newPosition, this.distanceRayToCenter);
       let scaleVector: ƒ.Vector3 = ƒ.Vector3.ONE();
@@ -73,7 +74,7 @@ namespace Fudge {
         }
       }
       scaleMatrix = ƒ.Matrix4x4.SCALING(scaleVector);
-      mesh.scaleBy(scaleMatrix, this.copyOfSelectedVertices, this.selection);
+      mesh.scaleBy(scaleMatrix, this.copyOfSelectedVertices, this.centroid, this.selection);
     }
 
     onkeydown (_event: ƒ.EventKeyboard): string {
@@ -95,7 +96,8 @@ namespace Fudge {
     private setValues(_event: ƒ.EventPointer): void {
       this.distanceToCenterOfNode = this.getDistanceFromCameraToCenterOfNode();
       this.oldPosition = this.getNewPosition(_event, this.distanceToCenterOfNode);
-      this.distanceRayToCenter = ƒ.Vector3.DIFFERENCE(this.oldPosition, (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid());
+      this.centroid = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection);
+      this.distanceRayToCenter = ƒ.Vector3.DIFFERENCE(this.oldPosition, this.centroid);
       this.copyOfSelectedVertices = this.copyVertices();
     }
   }

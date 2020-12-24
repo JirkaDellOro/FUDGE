@@ -314,6 +314,14 @@ declare namespace FudgeUserInterface {
 }
 declare namespace FudgeUserInterface {
     import ƒ = FudgeCore;
+    class CustomElementVector3 extends CustomElementTemplate {
+        getMutatorValue(): Object;
+        setMutatorValue(_mutator: ƒ.Mutator): void;
+        protected connectedCallback(): void;
+    }
+}
+declare namespace FudgeUserInterface {
+    import ƒ = FudgeCore;
     /**
      * Static class to display a modal or non-modal dialog with an interface for the given mutator.
      */

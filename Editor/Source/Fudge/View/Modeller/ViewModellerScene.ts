@@ -9,6 +9,8 @@ namespace Fudge {
     graph: ƒ.Node;
     controller: Controller;
     node: ƒ.Node;
+    content: HTMLDivElement;
+    private dropdownWasCreated: boolean = false;
 
     constructor(_container: GoldenLayout.Container, _state: Object) {
       super(_container, _state);
@@ -23,6 +25,17 @@ namespace Fudge {
       new CameraControl(this.viewport);
       // this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.hndEvent);
       // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
+      // this.content = document.createElement("div");
+      // this.content.classList.add("box");
+
+      // this.canvas.style.flex = "0 1 auto";
+      // this.content.append(this.canvas);
+
+
+      this.dom.addEventListener("headerchange", this.changeHeader);
+      // document.addEventListener("headerchange", this.changeHeader);
+
+      this.dom.append(this.canvas);
       this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
       this.addEventListeners();
     }
@@ -50,7 +63,6 @@ namespace Fudge {
       ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
 
       this.viewport.setFocus(true);
-
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
     }
 
@@ -63,17 +75,15 @@ namespace Fudge {
       //cmpCamera.pivot.rotateX(90);
 
       this.canvas = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
-      let container: HTMLDivElement = document.createElement("div");
-      container.style.borderWidth = "0px";
+      // let container: HTMLDivElement = document.createElement("div");
+      // container.style.borderWidth = "0px";
+      // container.append(this.canvas);
       document.body.appendChild(this.canvas);
 
       this.viewport = new ƒ.Viewport();
       this.viewport.initialize("Viewport", this.graph, cmpCamera, this.canvas);
-      // ƒaid.Viewport.expandCameraToInteractiveOrbit(this.viewport);
       this.viewport.draw();
-
-      this.dom.append(this.canvas);
-
+      // ƒaid.Viewport.expandCameraToInteractiveOrbit(this.viewport);
     } 
 
     protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
@@ -180,6 +190,17 @@ namespace Fudge {
       this.controller.onkeyup(_event);
     }
 
+    private changeHeader = (_event: CustomEvent): void => {
+      // TODO: find out why event is fired multiple times and fix this properly
+      // if (this.dropdownWasCreated)
+      //   return;
+      let _stack = _event.detail;
+
+      let dropdownHandler: DropdownHandler = new DropdownHandler(this.content, this.controller);
+      _stack.header.controlsContainer.prepend(dropdownHandler.getInteractionDropdown());
+      _stack.header.controlsContainer.prepend(dropdownHandler.getControlDropdown());
+      this.dropdownWasCreated = true;
+    }
 
     protected cleanup(): void {
       ƒ.Loop.removeEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);

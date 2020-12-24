@@ -6,7 +6,7 @@ namespace Fudge {
     selection: Array<number>;
     editableNode: ƒ.Node;
 
-    private axesSelectionHandler: AxesSelectionHandler;
+    protected axesSelectionHandler: AxesSelectionHandler;
     private previousMousePos: ƒ.Vector2;
 
 
@@ -31,7 +31,7 @@ namespace Fudge {
       this.axesSelectionHandler.releaseComponent();
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
       mesh.updateNormals();
-      this.createNormalArrows();
+      // this.createNormalArrows();
     }
 
     onmove(_event: ƒ.EventPointer): void {
