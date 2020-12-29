@@ -21,7 +21,6 @@ namespace FudgeUserInterface {
 
     protected connectedCallback(): void {
       super.connectedCallback();
-      // console.log("Matrix Callback");
       let label: HTMLLabelElement = this.querySelector("label");
       label.textContent = this.getAttribute("label");
     }

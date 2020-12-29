@@ -999,7 +999,6 @@ var FudgeUserInterface;
         }
         connectedCallback() {
             super.connectedCallback();
-            // console.log("Matrix Callback");
             let label = this.querySelector("label");
             label.textContent = this.getAttribute("label");
         }

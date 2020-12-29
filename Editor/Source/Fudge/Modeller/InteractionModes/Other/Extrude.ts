@@ -27,7 +27,7 @@ namespace Fudge {
         return;
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
       this.distance = this.getDistanceFromCameraToCenterOfNode();
-      this.oldPosition = this.getNewPosition(_event, this.distance);
+      this.oldPosition = this.getPointerPosition(_event, this.distance);
       if (this.getDistanceFromRayToCenterOfNode(_event, this.distance).magnitude > 1)
         return;
       let state: string = mesh.getState();
@@ -49,17 +49,17 @@ namespace Fudge {
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
       // maybe change this after all idk looks weird atm
       mesh.updateNormals();
-      //this.createNormalArrows();
+      this.createNormalArrows();
     }
 
     onmove(_event: ƒ.EventPointer): void {
       if (this.vertexSelected)
         return;
 
-      if (!this.isExtruded) 
+      if (!this.isExtruded)  
         return;
 
-      let newPos: ƒ.Vector3 = this.getNewPosition(_event, this.distance);
+      let newPos: ƒ.Vector3 = this.getPointerPosition(_event, this.distance);
       let diff: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(newPos, this.oldPosition);
 
       let translationVector: ƒ.Vector3 = new ƒ.Vector3(0, 0, 0);

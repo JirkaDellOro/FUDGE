@@ -3,7 +3,7 @@ namespace Fudge {
   export class TranslationWidget extends IWidget {
     protected componentToAxisMap: Map<ƒ.Node, Axis> = new Map();
 
-    constructor(_name: string = "CoordinateSystem", _transform?: ƒ.Matrix4x4) {
+    constructor(_name: string = "TranslationWidget", _transform?: ƒ.Matrix4x4) {
       super(_name);
       let arrowRed: ƒ.Node = new ƒAid.NodeArrow("ArrowRed", new ƒ.Color(1, 0, 0, 1));
       let arrowGreen: ƒ.Node = new ƒAid.NodeArrow("ArrowGreen", new ƒ.Color(0, 1, 0, 1));

@@ -14,8 +14,9 @@ namespace Fudge {
       this.setObject((<ƒ.Node>(<ƒ.General>_state).node).getChildrenByName("Default")[0]);
       this.setTitle("Vertices");
 
-      this.fillContent();
+      //this.fillContent();
       ƒ.EventTargetStatic.addEventListener(ƒui.EVENT.CHANGE, this.hndEvent);
+      _container.on("destroy", this.cleanup);
       // this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       // this.parentPanel.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setSelectedNode);
       // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
@@ -51,8 +52,9 @@ namespace Fudge {
     // }
 
 
-    protected cleanup(): void {
-      throw new Error("Method not implemented.");
+    protected cleanup = (): void => {
+      while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild));
+      this.dom.remove();
     }
 
     private hndEvent = (_event: CustomEvent): void => {

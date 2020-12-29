@@ -1365,9 +1365,6 @@ var Fudge;
                 this.node.getComponent(ƒ.ComponentMesh).mesh.updateMesh();
             };
             this.domElement.addEventListener("input", this.handleInput); // this should be obsolete
-            // this.domElement.addEventListener(ƒui.EVENT.DRAG_OVER, this.hndDragOver);
-            // this.domElement.addEventListener(ƒui.EVENT.DROP, this.hndDrop);
-            // this.domElement.addEventListener(ƒui.EVENT.UPDATE, this.hndUpdate);
         }
     }
     Fudge.ControllerVertices = ControllerVertices;
@@ -1621,15 +1618,18 @@ var Fudge;
             }
             return copyOfSelectedVertices;
         }
-        getNewPosition(_event, distance) {
+        getPointerPosition(_event, distance) {
             let ray = this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY));
             return ƒ.Vector3.SUM(ray.origin, ƒ.Vector3.SCALE(ray.direction, distance));
         }
         getDistanceFromRayToCenterOfNode(_event, distance) {
-            return ƒ.Vector3.DIFFERENCE(this.getNewPosition(_event, distance), this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid(this.selection));
+            return ƒ.Vector3.DIFFERENCE(this.getPointerPosition(_event, distance), this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid(this.selection));
         }
+        // protected getDistanceFromCameraToCenterOfNode(): number {
+        //   return ƒ.Vector3.DIFFERENCE((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection), this.viewport.camera.pivot.translation).magnitude;
+        // }
         getDistanceFromCameraToCenterOfNode() {
-            return ƒ.Vector3.DIFFERENCE(this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid(this.selection), this.viewport.camera.pivot.translation).magnitude;
+            return ƒ.Vector3.DIFFERENCE(this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid(this.selection), this.viewport.camera.getContainer().mtxWorld.translation).magnitude;
         }
         drawCircleAtVertex() {
             let crx2d = this.viewport.getCanvas().getContext("2d");
@@ -1705,7 +1705,7 @@ var Fudge;
                 return;
             let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
             this.distance = this.getDistanceFromCameraToCenterOfNode();
-            this.oldPosition = this.getNewPosition(_event, this.distance);
+            this.oldPosition = this.getPointerPosition(_event, this.distance);
             if (this.getDistanceFromRayToCenterOfNode(_event, this.distance).magnitude > 1)
                 return;
             let state = mesh.getState();
@@ -1726,14 +1726,14 @@ var Fudge;
             let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
             // maybe change this after all idk looks weird atm
             mesh.updateNormals();
-            //this.createNormalArrows();
+            this.createNormalArrows();
         }
         onmove(_event) {
             if (this.vertexSelected)
                 return;
             if (!this.isExtruded)
                 return;
-            let newPos = this.getNewPosition(_event, this.distance);
+            let newPos = this.getPointerPosition(_event, this.distance);
             let diff = ƒ.Vector3.DIFFERENCE(newPos, this.oldPosition);
             let translationVector = new ƒ.Vector3(0, 0, 0);
             let selectedAxes = this.axesSelectionHandler.getSelectedAxes();
@@ -1971,7 +1971,7 @@ var Fudge;
             let selectedAxes = this.axesSelectionHandler.getSelectedAxes();
             if (selectedAxes.length <= 0)
                 return;
-            let currentPosition = this.getNewPosition(_event, this.distanceToCenterOfNode);
+            let currentPosition = this.getPointerPosition(_event, this.distanceToCenterOfNode);
             let diff = ƒ.Vector3.DIFFERENCE(currentPosition, this.oldPosition);
             let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
             let scaleMatrix;
@@ -2011,7 +2011,7 @@ var Fudge;
         }
         setValues(_event) {
             this.distanceToCenterOfNode = this.getDistanceFromCameraToCenterOfNode();
-            this.oldPosition = this.getNewPosition(_event, this.distanceToCenterOfNode);
+            this.oldPosition = this.getPointerPosition(_event, this.distanceToCenterOfNode);
             this.centroid = this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid(this.selection);
             this.distanceRayToCenter = ƒ.Vector3.DIFFERENCE(this.oldPosition, this.centroid);
             this.copyOfSelectedVertices = this.copyVertices();
@@ -2135,6 +2135,8 @@ var Fudge;
                     this.selection.push(i);
                 }
             }
+            let event = new CustomEvent("change" /* CHANGE */, { bubbles: true, detail: this.selection });
+            ƒ.EventTargetStatic.dispatchEvent(event);
             ƒ.Loop.removeEventListener("loopFrame" /* LOOP_FRAME */, this.drawBox);
         }
         onmove(_event) {
@@ -2204,7 +2206,7 @@ var Fudge;
             }
             // this.copyOfSelectedVertices = this.copyVertices();
             this.distance = this.getDistanceFromCameraToCenterOfNode();
-            this.oldPosition = this.getNewPosition(_event, this.distance);
+            this.oldPosition = this.getPointerPosition(_event, this.distance);
             return this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getState();
         }
         onmouseup(_event) {
@@ -2220,12 +2222,12 @@ var Fudge;
                 if (this.axesSelectionHandler.isAxisSelectedViaKeyboard()) {
                     // this.copyOfSelectedVertices = this.copyVertices();
                     this.distance = this.getDistanceFromCameraToCenterOfNode();
-                    this.oldPosition = this.getNewPosition(_event, this.distance);
+                    this.oldPosition = this.getPointerPosition(_event, this.distance);
                     this.axesSelectionHandler.isSelectedViaKeyboard = true;
                 }
                 return;
             }
-            let newPos = this.getNewPosition(_event, this.distance);
+            let newPos = this.getPointerPosition(_event, this.distance);
             let diff = ƒ.Vector3.DIFFERENCE(newPos, this.oldPosition);
             let translationVector = new ƒ.Vector3(0, 0, 0);
             let selectedAxes = this.axesSelectionHandler.getSelectedAxes();
@@ -2494,7 +2496,6 @@ var Fudge;
             //   new UniqueVertex(new ƒ.Vector3(1, -1, -1),  new Map([[6, [6]], [14, [13, 15]], [22, [25, 27]]])), 
             //   new UniqueVertex(new ƒ.Vector3(1, 1, -1),   new Map([[7, [8, 11]], [15, [16]], [23, [33]]])) 
             // ];
-            // this.faces = [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 12, 13], [10, 11, 14, 15], [17, 18, 21, 22], [16, 19, 20, 23]];
             // this._uniqueVertices = [
             //   new UniqueVertex(new ƒ.Vector3(-1, 1, 1),   {0: [2, 5 ], 8:  [22    ], 16: [31    ]}),
             //   new UniqueVertex(new ƒ.Vector3(-1, -1, 1),  {1: [0    ], 9:  [19, 21], 17: [26, 29]}),
@@ -2672,7 +2673,7 @@ var Fudge;
                     meshUtils.extrude2Vertices(selectedIndices);
                     meshUtils.addNewTriangles();
                     break;
-                case 3:
+                default:
                     this.extrude3Vertices(selectedIndices);
                     break;
             }
@@ -2726,46 +2727,114 @@ var Fudge;
         //     this.uniqueVertices[vertexToUniqueVertexMap.get(newTriangles[i])].vertexToIndices.get(newTriangles[i]).indices.push(this.indices.length + i);
         //   }
         // }
-        extrude3Vertices(selection) {
-            let indices = [];
+        findEdgesNew(selection) {
+            let pickedIndices = new Array(this.indices.length).fill(false);
             let vertexToOriginalVertexMap = new Map();
             let indexToVertexMap = new Map();
             for (let selectedVertex of selection) {
-                for (let vertex of this._uniqueVertices[selectedVertex].vertexToIndices.keys()) {
-                    // vertexToIndicesMap.set(vertex, this._uniqueVertices[selectedVertex].vertexToIndices.get(vertex).indices);
-                    vertexToOriginalVertexMap.set(vertex, selectedVertex);
-                    for (let index of this._uniqueVertices[selectedVertex].vertexToIndices.get(vertex).indices) {
-                        indices.push(index);
-                        indexToVertexMap.set(index, vertex);
+                for (let [vertexIndex, data] of this._uniqueVertices[selectedVertex].vertexToIndices) {
+                    vertexToOriginalVertexMap.set(vertexIndex, selectedVertex);
+                    for (let index of data.indices) {
+                        pickedIndices[index] = true;
+                        indexToVertexMap.set(index, vertexIndex);
                     }
                 }
+            }
+            while (pickedIndices.length % 3 !== 0) {
+                pickedIndices.push(false);
             }
             let edges = [];
-            indices.sort((a, b) => a - b);
-            for (let i = 0; i < indices.length - 1; i++) {
-                if (indices[i + 1] % 3 !== 0) {
-                    if (indices[i + 1] - indices[i] === 1) {
-                        // only add when the reverse edge isn't found already
-                        let isAddable = true;
-                        for (let j = 0; j < edges.length; j++) {
-                            if ((edges[j].start === getVertexFromIndex(indices[i]) && edges[j].end === getVertexFromIndex(indices[i + 1]))) {
-                                isAddable = false;
-                            }
-                        }
-                        if (isAddable) {
-                            edges.push({ start: getVertexFromIndex(indices[i + 1]), end: getVertexFromIndex(indices[i]) });
-                        }
+            for (let index = 0; index < pickedIndices.length; index++) {
+                // if (index % 3 === 2) {
+                //   if (pickedIndices[index] && pickedIndices[index - 2]) {
+                //     addEdge(index - 2, index);
+                //   }
+                // }
+                if (index % 3 !== 2) {
+                    if (pickedIndices[index] && pickedIndices[index + 1]) {
+                        addEdge(index, index + 1);
                     }
                 }
             }
+            // quick hack
+            for (let edge of edges) {
+                edge.start = vertexToOriginalVertexMap.get(edge.start);
+                edge.end = vertexToOriginalVertexMap.get(edge.end);
+            }
+            return edges;
+            function getUniqueVertexFromIndex(index) {
+                return vertexToOriginalVertexMap.get(indexToVertexMap.get(index));
+            }
+            function getVertexFromIndex(index) {
+                return indexToVertexMap.get(index);
+            }
+            function addEdge(start, end) {
+                let isAddable = true;
+                for (let i = 0; i < edges.length; i++) {
+                    // delete the reverse (interior) edges
+                    if (edges[i].end === getVertexFromIndex(start) && edges[i].start === getVertexFromIndex(end)) {
+                        edges.splice(i, 1);
+                        isAddable = false;
+                    }
+                    // don't add duplicate edges of a different face again
+                    if ((edges[i].start === getUniqueVertexFromIndex(start) && edges[i].end === getUniqueVertexFromIndex(end)) ||
+                        (edges[i].end === getUniqueVertexFromIndex(start) && edges[i].start === getUniqueVertexFromIndex(end))) {
+                        isAddable = false;
+                    }
+                }
+                if (isAddable) {
+                    edges.push({ start: getVertexFromIndex(start), end: getVertexFromIndex(end) });
+                }
+            }
+        }
+        extrude3Vertices(selection) {
+            // let indices: number[] = [];
+            // let vertexToOriginalVertexMap: Map<number, number> = new Map();
+            // let indexToVertexMap: Map<number, number> = new Map();
+            // for (let selectedVertex of selection) {
+            //   for (let [vertexIndex, data] of this._uniqueVertices[selectedVertex].vertexToIndices) {
+            //     // vertexToIndicesMap.set(vertex, this._uniqueVertices[selectedVertex].vertexToIndices.get(vertex).indices);
+            //     vertexToOriginalVertexMap.set(vertexIndex, selectedVertex);
+            //     for (let index of data.indices) {
+            //       indices.push(index);
+            //       indexToVertexMap.set(index, vertexIndex);
+            //     }
+            //   }
+            // }
+            // let edges: {start: number, end: number}[] = [];
+            // indices.sort((a, b) => a - b);
+            // for (let i: number = 0; i < indices.length - 1; i++) {
+            //   if (indices[i] % 3 !== 2) {
+            //     if (indices[i + 1] - indices[i] === 1) {
+            //       // only add when the reverse edge isn't found already
+            //       addEdge(i, i + 1);
+            //     }
+            //   } else {
+            //     if (indices[i] - indices[i - 2] === 2) {
+            //       addEdge(i, i - 2);
+            //     }
+            //   }
+            // }
+            let edges = this.findEdgesNew(selection);
             let meshUtils = new Fudge.MeshUtils(this.countNumberOfFaces(), this.vertices.length / ModifiableMesh.vertexSize, this._uniqueVertices, this.indices.length);
             for (let edge of edges) {
                 meshUtils.extrude2Vertices([edge.start, edge.end]);
             }
             meshUtils.addNewTriangles();
-            function getVertexFromIndex(index) {
-                return vertexToOriginalVertexMap.get(indexToVertexMap.get(index));
-            }
+            // function getVertexFromIndex(index: number): number {
+            //   return vertexToOriginalVertexMap.get(indexToVertexMap.get(index));
+            // }
+            // function addEdge(start: number, end: number): void {
+            //   let isAddable: boolean = true;
+            //   for (let j: number = 0; j < edges.length; j++) {
+            //     if ((edges[j].start === getVertexFromIndex(indices[start]) && edges[j].end === getVertexFromIndex(indices[end]))) {
+            //       isAddable = false;
+            //     }
+            //   }
+            //   if (isAddable) {
+            //     edges.push({start: getVertexFromIndex(indices[end]), end: getVertexFromIndex(indices[start])});
+            //   }
+            // }
         }
         addIndicesToNewVertices(edges, mapping) {
             let vertexToUniqueVertexMap = mapping.vertexToUniqueVertex;
@@ -3392,7 +3461,7 @@ var Fudge;
 (function (Fudge) {
     var ƒAid = FudgeAid;
     class TranslationWidget extends Fudge.IWidget {
-        constructor(_name = "CoordinateSystem", _transform) {
+        constructor(_name = "TranslationWidget", _transform) {
             super(_name);
             this.componentToAxisMap = new Map();
             let arrowRed = new ƒAid.NodeArrow("ArrowRed", new ƒ.Color(1, 0, 0, 1));
@@ -4638,7 +4707,6 @@ var Fudge;
     class ViewModellerScene extends Fudge.View {
         constructor(_container, _state) {
             super(_container, _state);
-            this.dropdownWasCreated = false;
             this.animate = (_e) => {
                 this.viewport.setGraph(this.graph);
                 if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
@@ -4668,14 +4736,10 @@ var Fudge;
                 this.controller.onkeyup(_event);
             };
             this.changeHeader = (_event) => {
-                // TODO: find out why event is fired multiple times and fix this properly
-                // if (this.dropdownWasCreated)
-                //   return;
                 let _stack = _event.detail;
                 let dropdownHandler = new Fudge.DropdownHandler(this.content, this.controller);
                 _stack.header.controlsContainer.prepend(dropdownHandler.getInteractionDropdown());
                 _stack.header.controlsContainer.prepend(dropdownHandler.getControlDropdown());
-                this.dropdownWasCreated = true;
             };
             this.graph = _state["node"];
             this.createUserInterface();
@@ -4684,15 +4748,8 @@ var Fudge;
             this.node = this.graph.getChildrenByName("Default")[0];
             this.controller = new Fudge.Controller(this.viewport, this.node);
             // tslint:disable-next-line: no-unused-expression
-            new Fudge.CameraControl(this.viewport);
-            // this.dom.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.hndEvent);
-            // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
-            // this.content = document.createElement("div");
-            // this.content.classList.add("box");
-            // this.canvas.style.flex = "0 1 auto";
-            // this.content.append(this.canvas);
+            //new CameraControl(this.viewport);
             this.dom.addEventListener("headerchange", this.changeHeader);
-            // document.addEventListener("headerchange", this.changeHeader);
             this.dom.append(this.canvas);
             this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
             this.addEventListeners();
@@ -4717,10 +4774,10 @@ var Fudge;
         }
         createUserInterface() {
             let cmpCamera = new ƒ.ComponentCamera();
-            cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
-            cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
-            cmpCamera.projectCentral(1, 45);
-            //new ƒaid.CameraOrbit(cmpCamera);
+            // cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
+            // cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
+            // cmpCamera.projectCentral(1, 45);
+            new ƒaid.CameraOrbit(cmpCamera);
             //cmpCamera.pivot.rotateX(90);
             this.canvas = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
             // let container: HTMLDivElement = document.createElement("div");
@@ -4730,7 +4787,7 @@ var Fudge;
             this.viewport = new ƒ.Viewport();
             this.viewport.initialize("Viewport", this.graph, cmpCamera, this.canvas);
             this.viewport.draw();
-            // ƒaid.Viewport.expandCameraToInteractiveOrbit(this.viewport);
+            ƒaid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false, 0.2, 0.01, 0.003);
         }
         getContextMenu(_callback) {
             const menu = new Fudge.remote.Menu();
@@ -4800,14 +4857,22 @@ var Fudge;
     class ViewObjectProperties extends Fudge.View {
         constructor(_container, _state) {
             super(_container, _state);
+            // protected update = () => {
+            // }
+            this.cleanup = () => {
+                while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
+                    ;
+                this.dom.remove();
+            };
             this.hndEvent = (_event) => {
                 this.fillContent(_event.detail);
             };
             // this.contextMenu = this.getContextMenu(this.contextMenuCallback);
             this.setObject(_state.node.getChildrenByName("Default")[0]);
             this.setTitle("Vertices");
-            this.fillContent();
+            //this.fillContent();
             ƒ.EventTargetStatic.addEventListener("change" /* CHANGE */, this.hndEvent);
+            _container.on("destroy", this.cleanup);
             // this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
             // this.parentPanel.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setSelectedNode);
             // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
@@ -4830,11 +4895,6 @@ var Fudge;
                 uiComponent.node = this.currentNode;
                 this.dom.append(uiComponent.domElement);
             }
-        }
-        // protected update = () => {
-        // }
-        cleanup() {
-            throw new Error("Method not implemented.");
         }
     }
     Fudge.ViewObjectProperties = ViewObjectProperties;

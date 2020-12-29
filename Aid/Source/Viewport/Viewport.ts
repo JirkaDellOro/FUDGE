@@ -43,7 +43,7 @@ namespace FudgeAid {
       return camera;
 
       function hndPointerMove(_event: ƒ.EventPointer): void {
-        if (!_event.buttons)
+        if (!((_event.buttons & 4) === 4))
           return;
 
         activateAxis(_event);
@@ -52,16 +52,16 @@ namespace FudgeAid {
         cntMouseHorizontal.setInput(_event.movementX);
         cntMouseVertical.setInput((_event.shiftKey ? -1 : 1) * _event.movementY);
 
-
-        focus.mtxLocal.translation = camera.mtxLocal.translation;
-        _viewport.draw();
+        if (_showFocus)
+          focus.mtxLocal.translation = camera.mtxLocal.translation;
+        //_viewport.draw();
         
         if (_event.altKey && !_event.shiftKey) {
           let offset: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(posCamera, camera.node.mtxWorld.translation);
           // console.log(posCamera.toString(), camera.node.mtxWorld.translation.toString());
           camera.mtxLocal.translate(offset, false);
           focus.mtxLocal.translation = camera.mtxLocal.translation;
-          _viewport.draw();
+          //_viewport.draw();
         }
       }
 
@@ -74,8 +74,9 @@ namespace FudgeAid {
         else
           camera.distance += _event.deltaY * _speedCameraDistance;
 
-        focus.mtxLocal.translation = camera.mtxLocal.translation;
-        _viewport.draw();
+        if (_showFocus)
+          focus.mtxLocal.translation = camera.mtxLocal.translation;
+        //_viewport.draw();
       }
 
       function activateAxis(_event: PointerEvent | WheelEvent): void {

@@ -48,7 +48,7 @@ namespace Fudge {
       if (selectedAxes.length <= 0) 
         return;
       
-      let currentPosition: ƒ.Vector3 = this.getNewPosition(_event, this.distanceToCenterOfNode);
+      let currentPosition: ƒ.Vector3 = this.getPointerPosition(_event, this.distanceToCenterOfNode);
       let diff: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(currentPosition, this.oldPosition);
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
 
@@ -95,7 +95,7 @@ namespace Fudge {
 
     private setValues(_event: ƒ.EventPointer): void {
       this.distanceToCenterOfNode = this.getDistanceFromCameraToCenterOfNode();
-      this.oldPosition = this.getNewPosition(_event, this.distanceToCenterOfNode);
+      this.oldPosition = this.getPointerPosition(_event, this.distanceToCenterOfNode);
       this.centroid = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection);
       this.distanceRayToCenter = ƒ.Vector3.DIFFERENCE(this.oldPosition, this.centroid);
       this.copyOfSelectedVertices = this.copyVertices();

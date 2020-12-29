@@ -92,17 +92,21 @@ namespace Fudge {
       return copyOfSelectedVertices;
     }
 
-    protected getNewPosition(_event: ƒ.EventPointer, distance: number): ƒ.Vector3 {
+    protected getPointerPosition(_event: ƒ.EventPointer, distance: number): ƒ.Vector3 {
       let ray: ƒ.Ray = this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY));
       return ƒ.Vector3.SUM(ray.origin, ƒ.Vector3.SCALE(ray.direction, distance));
     }
 
     protected getDistanceFromRayToCenterOfNode(_event: ƒ.EventPointer, distance: number): ƒ.Vector3 {
-      return ƒ.Vector3.DIFFERENCE(this.getNewPosition(_event, distance), (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection));
+      return ƒ.Vector3.DIFFERENCE(this.getPointerPosition(_event, distance), (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection));
     }
     
+    // protected getDistanceFromCameraToCenterOfNode(): number {
+    //   return ƒ.Vector3.DIFFERENCE((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection), this.viewport.camera.pivot.translation).magnitude;
+    // }
+
     protected getDistanceFromCameraToCenterOfNode(): number {
-      return ƒ.Vector3.DIFFERENCE((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection), this.viewport.camera.pivot.translation).magnitude;
+      return ƒ.Vector3.DIFFERENCE((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection), this.viewport.camera.getContainer().mtxWorld.translation).magnitude;
     }
 
     private drawCircleAtVertex(): void {
@@ -126,7 +130,5 @@ namespace Fudge {
         crx2d.fill();
       }
     }
-
-
   }
 }

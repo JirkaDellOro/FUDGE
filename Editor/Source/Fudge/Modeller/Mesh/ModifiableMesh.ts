@@ -2,7 +2,7 @@ namespace Fudge {
   export class ModifiableMesh extends ƒ.Mesh {
     private static vertexSize: number = ƒ.Mesh.getBufferSpecification().size;
     private _uniqueVertices: UniqueVertex[];
-    private faces: Array<Array<number>> = [];
+
     constructor() {
       super();
       
@@ -27,8 +27,6 @@ namespace Fudge {
       //   new UniqueVertex(new ƒ.Vector3(1, -1, -1),  new Map([[6, [6]], [14, [13, 15]], [22, [25, 27]]])), 
       //   new UniqueVertex(new ƒ.Vector3(1, 1, -1),   new Map([[7, [8, 11]], [15, [16]], [23, [33]]])) 
       // ];
-
-      // this.faces = [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 12, 13], [10, 11, 14, 15], [17, 18, 21, 22], [16, 19, 20, 23]];
 
       // this._uniqueVertices = [
       //   new UniqueVertex(new ƒ.Vector3(-1, 1, 1),   {0: [2, 5 ], 8:  [22    ], 16: [31    ]}),
@@ -225,7 +223,7 @@ namespace Fudge {
           meshUtils.extrude2Vertices(selectedIndices);
           meshUtils.addNewTriangles();
           break;
-        case 3:
+        default:
           this.extrude3Vertices(selectedIndices);
           break;
       }
@@ -291,50 +289,127 @@ namespace Fudge {
     //   }
     // }
 
-    private extrude3Vertices(selection: number[]): void {
-      let indices: number[] = [];
+
+    private findEdgesNew(selection: number[]): {start: number, end: number}[] {
+      let pickedIndices: boolean[] = new Array(this.indices.length).fill(false);
       let vertexToOriginalVertexMap: Map<number, number> = new Map();
       let indexToVertexMap: Map<number, number> = new Map();
       for (let selectedVertex of selection) {
-        for (let vertex of this._uniqueVertices[selectedVertex].vertexToIndices.keys()) {
-          // vertexToIndicesMap.set(vertex, this._uniqueVertices[selectedVertex].vertexToIndices.get(vertex).indices);
-          vertexToOriginalVertexMap.set(vertex, selectedVertex);
-          for (let index of this._uniqueVertices[selectedVertex].vertexToIndices.get(vertex).indices) {
-            indices.push(index);
-            indexToVertexMap.set(index, vertex);
+        for (let [vertexIndex, data] of this._uniqueVertices[selectedVertex].vertexToIndices) {
+          vertexToOriginalVertexMap.set(vertexIndex, selectedVertex);
+          for (let index of data.indices) {
+            pickedIndices[index] = true;
+            indexToVertexMap.set(index, vertexIndex);
           }
         }
       }
-
+      while (pickedIndices.length % 3 !== 0) {
+        pickedIndices.push(false);
+      }
       let edges: {start: number, end: number}[] = [];
-      indices.sort((a, b) => a - b);
 
-      for (let i: number = 0; i < indices.length - 1; i++) {
-        if (indices[i + 1] % 3 !== 0) {
-          if (indices[i + 1] - indices[i] === 1) {
-            // only add when the reverse edge isn't found already
-            let isAddable: boolean = true;
-            for (let j: number = 0; j < edges.length; j++) {
-              if ((edges[j].start === getVertexFromIndex(indices[i]) && edges[j].end === getVertexFromIndex(indices[i + 1]))) {
-                isAddable = false;
-              }
-            }
-
-            if (isAddable) {
-              edges.push({start: getVertexFromIndex(indices[i + 1]), end: getVertexFromIndex(indices[i])});
-            }
+      for (let index: number = 0; index < pickedIndices.length; index++) {
+        // if (index % 3 === 2) {
+        //   if (pickedIndices[index] && pickedIndices[index - 2]) {
+        //     addEdge(index - 2, index);
+        //   }
+        // }
+        if (index % 3 !== 2) {
+          if (pickedIndices[index] && pickedIndices[index + 1]) {
+            addEdge(index, index + 1);
           }
         }
       }
+
+      // quick hack
+      for (let edge of edges) {
+        edge.start = vertexToOriginalVertexMap.get(edge.start);
+        edge.end = vertexToOriginalVertexMap.get(edge.end);
+      }
+
+      return edges;
+
+      function getUniqueVertexFromIndex(index: number): number {
+        return vertexToOriginalVertexMap.get(indexToVertexMap.get(index));
+      }
+
+      function getVertexFromIndex(index: number): number {
+        return indexToVertexMap.get(index);
+      }
+
+      function addEdge(start: number, end: number): void {
+        let isAddable: boolean = true;
+        for (let i: number = 0; i < edges.length; i++) {
+          // delete the reverse (interior) edges
+          if (edges[i].end === getVertexFromIndex(start) && edges[i].start === getVertexFromIndex(end)) {
+            edges.splice(i, 1);
+            isAddable = false;
+          }
+          // don't add duplicate edges of a different face again
+          if ((edges[i].start === getUniqueVertexFromIndex(start) && edges[i].end === getUniqueVertexFromIndex(end)) ||
+          (edges[i].end === getUniqueVertexFromIndex(start) && edges[i].start === getUniqueVertexFromIndex(end))) {
+            isAddable = false;
+          }
+        }
+        if (isAddable) {
+          edges.push({start: getVertexFromIndex(start), end: getVertexFromIndex(end)});
+        }
+      }
+    }
+
+    private extrude3Vertices(selection: number[]): void {
+      // let indices: number[] = [];
+      // let vertexToOriginalVertexMap: Map<number, number> = new Map();
+      // let indexToVertexMap: Map<number, number> = new Map();
+      // for (let selectedVertex of selection) {
+      //   for (let [vertexIndex, data] of this._uniqueVertices[selectedVertex].vertexToIndices) {
+      //     // vertexToIndicesMap.set(vertex, this._uniqueVertices[selectedVertex].vertexToIndices.get(vertex).indices);
+      //     vertexToOriginalVertexMap.set(vertexIndex, selectedVertex);
+      //     for (let index of data.indices) {
+      //       indices.push(index);
+      //       indexToVertexMap.set(index, vertexIndex);
+      //     }
+      //   }
+      // }
+
+      // let edges: {start: number, end: number}[] = [];
+      // indices.sort((a, b) => a - b);
+
+      // for (let i: number = 0; i < indices.length - 1; i++) {
+      //   if (indices[i] % 3 !== 2) {
+      //     if (indices[i + 1] - indices[i] === 1) {
+      //       // only add when the reverse edge isn't found already
+      //       addEdge(i, i + 1);
+      //     }
+      //   } else {
+      //     if (indices[i] - indices[i - 2] === 2) {
+      //       addEdge(i, i - 2);
+      //     }
+      //   }
+      // }
+      let edges: {start: number, end: number}[] = this.findEdgesNew(selection);
       let meshUtils: MeshUtils = new MeshUtils(this.countNumberOfFaces(), this.vertices.length / ModifiableMesh.vertexSize, this._uniqueVertices, this.indices.length);
       for (let edge of edges) {
         meshUtils.extrude2Vertices([edge.start, edge.end]);
       }
       meshUtils.addNewTriangles();
 
-      function getVertexFromIndex(index: number): number {
-        return vertexToOriginalVertexMap.get(indexToVertexMap.get(index));
-      }
+      // function getVertexFromIndex(index: number): number {
+      //   return vertexToOriginalVertexMap.get(indexToVertexMap.get(index));
+      // }
+
+      // function addEdge(start: number, end: number): void {
+      //   let isAddable: boolean = true;
+      //   for (let j: number = 0; j < edges.length; j++) {
+      //     if ((edges[j].start === getVertexFromIndex(indices[start]) && edges[j].end === getVertexFromIndex(indices[end]))) {
+      //       isAddable = false;
+      //     }
+      //   }
+
+      //   if (isAddable) {
+      //     edges.push({start: getVertexFromIndex(indices[end]), end: getVertexFromIndex(indices[start])});
+      //   }
+      // }
     }
     
     private addIndicesToNewVertices(edges: {start: number, end: number}[], mapping: {vertexToUniqueVertex: Map<number, number>, reverse: Map<number, number[]>, originalToNewVertex: Map<number, number>}): void {
@@ -500,7 +575,6 @@ namespace Fudge {
     
     private findCorrectFaceWithoutNormals(selectedIndices: number[]): Map<number, number> {
       let faceVerticesMap: Map<number, number> = new Map();
-
       let faceToVerticesMap: Map<number, Array<{selectedIndex: number, vertexIndex: number}>> = new Map();
        
       for (let selectedIndex of selectedIndices) {
@@ -575,7 +649,6 @@ namespace Fudge {
           vertices.set([vertex.position.x, vertex.position.y, vertex.position.z], index * ModifiableMesh.vertexSize);
         }
       }
-
       return vertices;
     }
 

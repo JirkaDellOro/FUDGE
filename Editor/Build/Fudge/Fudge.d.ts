@@ -433,7 +433,7 @@ declare namespace Fudge {
         protected getPosRenderFrom(_event: ƒ.EventPointer): ƒ.Vector2;
         protected createNormalArrows(): void;
         protected copyVertices(): Map<number, ƒ.Vector3>;
-        protected getNewPosition(_event: ƒ.EventPointer, distance: number): ƒ.Vector3;
+        protected getPointerPosition(_event: ƒ.EventPointer, distance: number): ƒ.Vector3;
         protected getDistanceFromRayToCenterOfNode(_event: ƒ.EventPointer, distance: number): ƒ.Vector3;
         protected getDistanceFromCameraToCenterOfNode(): number;
         private drawCircleAtVertex;
@@ -653,6 +653,7 @@ declare namespace Fudge {
         rotateBy(matrix: ƒ.Matrix4x4, center: ƒ.Vector3, selection?: number[]): void;
         extrude(selectedIndices: number[]): number[];
         updatePositionOfVertices(selectedIndices: number[], oldVertexPositions: Map<number, ƒ.Vector3>, diffToOldPosition: ƒ.Vector3, offset: ƒ.Vector3): void;
+        private findEdgesNew;
         private extrude3Vertices;
         private addIndicesToNewVertices;
         private getNewVertices;
@@ -992,7 +993,6 @@ declare namespace Fudge {
         controller: Controller;
         node: ƒ.Node;
         content: HTMLDivElement;
-        private dropdownWasCreated;
         constructor(_container: GoldenLayout.Container, _state: Object);
         addEventListeners(): void;
         createUserInterface(): void;
@@ -1017,7 +1017,7 @@ declare namespace Fudge {
         constructor(_container: GoldenLayout.Container, _state: Object);
         protected setObject(_object: ƒ.Node): void;
         private fillContent;
-        protected cleanup(): void;
+        protected cleanup: () => void;
         private hndEvent;
     }
 }

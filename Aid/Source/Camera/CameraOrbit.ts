@@ -12,8 +12,6 @@ namespace FudgeAid {
     private minDistance: number;
     private maxDistance: number;
 
-
-
     public constructor(_cmpCamera: ƒ.ComponentCamera, _distanceStart: number = 2, _maxRotX: number = 75, _minDistance: number = 1, _maxDistance: number = 10) {
       super("CameraOrbit");
 

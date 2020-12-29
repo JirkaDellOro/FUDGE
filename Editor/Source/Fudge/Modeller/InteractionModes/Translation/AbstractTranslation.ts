@@ -36,7 +36,7 @@ namespace Fudge {
       }
       // this.copyOfSelectedVertices = this.copyVertices();
       this.distance = this.getDistanceFromCameraToCenterOfNode();
-      this.oldPosition = this.getNewPosition(_event, this.distance);
+      this.oldPosition = this.getPointerPosition(_event, this.distance);
       return (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
     }
 
@@ -54,12 +54,12 @@ namespace Fudge {
         if (this.axesSelectionHandler.isAxisSelectedViaKeyboard()) {
           // this.copyOfSelectedVertices = this.copyVertices();
           this.distance = this.getDistanceFromCameraToCenterOfNode();
-          this.oldPosition = this.getNewPosition(_event, this.distance);
+          this.oldPosition = this.getPointerPosition(_event, this.distance);
           this.axesSelectionHandler.isSelectedViaKeyboard = true;
         }
         return;
       }
-      let newPos: ƒ.Vector3 = this.getNewPosition(_event, this.distance);
+      let newPos: ƒ.Vector3 = this.getPointerPosition(_event, this.distance);
       let diff: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(newPos, this.oldPosition);
       let translationVector: ƒ.Vector3 = new ƒ.Vector3(0, 0, 0);
       let selectedAxes: Axis[] = this.axesSelectionHandler.getSelectedAxes();

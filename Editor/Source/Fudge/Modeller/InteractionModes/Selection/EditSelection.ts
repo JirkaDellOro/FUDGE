@@ -65,6 +65,9 @@ namespace Fudge {
         }
       }
 
+      let event: CustomEvent = new CustomEvent(ƒui.EVENT.CHANGE, { bubbles: true, detail: this.selection });
+      ƒ.EventTargetStatic.dispatchEvent(event);
+
       ƒ.Loop.removeEventListener(ƒ.EVENT.LOOP_FRAME, this.drawBox);
     }
 
