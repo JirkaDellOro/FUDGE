@@ -627,18 +627,25 @@ declare namespace Fudge {
         private uniqueVertices;
         private newTriangles;
         private numberOfIndices;
-        private vertexToUniqueVertexMap;
+        private newVertexToOriginalVertexMap;
         private originalVertexToNewVertexMap;
+        private vertexToUniqueVertexMap;
         constructor(_numberOfFaces: number, _vertexCount: number, _uniqueVertices: UniqueVertex[], _numberOfIndices: number);
-        extrude2Vertices(selection: number[]): number[];
+        findEdgesFromData(selection: number[]): {
+            start: number;
+            end: number;
+        }[];
+        extrudeEdge(selection: number[]): number[];
         addNewTriangles(): void;
+        private fillVertexDict;
+        private removeInteriorEdges;
+        private removeDuplicateEdges;
     }
 }
 declare namespace Fudge {
     class ModifiableMesh extends ƒ.Mesh {
         private static vertexSize;
         private _uniqueVertices;
-        private faces;
         constructor();
         get uniqueVertices(): UniqueVertex[];
         getState(): string;
@@ -675,10 +682,12 @@ declare namespace Fudge {
         vertexToIndices: Map<number, {
             indices: number[];
             face?: number;
+            edges?: number[];
         }>;
         constructor(_position: ƒ.Vector3, _vertexToIndices: Map<number, {
             indices: number[];
             face?: number;
+            edges?: number[];
         }>);
         protected reduceMutator(_mutator: ƒ.Mutator): void;
     }

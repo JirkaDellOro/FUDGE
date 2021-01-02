@@ -58,7 +58,7 @@ namespace Fudge {
     }
 
     private hndEvent = (_event: CustomEvent): void => {
-      this.fillContent(_event.detail);
+      //this.fillContent(_event.detail);
     }
     
   }

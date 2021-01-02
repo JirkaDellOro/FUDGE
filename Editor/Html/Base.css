@@ -233,11 +233,11 @@ dialog>div#content {
   background-color: rgb(45, 45, 45);
   color: white;
   padding: 4px 10px;
-  font-size: 12px;
+  font-size: 11px;
   border: none;
   cursor: pointer;
-  margin-bottom: 3px;
-  min-width: 120px;
+  margin-bottom: 0px;
+  min-width: 100px;
 }
 
 .box {
@@ -281,7 +281,7 @@ dialog>div#content {
   background-color: rgb(45, 45, 45);
   color: white;
   padding: 6px 10px;
-  font-size: 12px;
+  font-size: 11px;
   border: none;
   cursor: pointer;
   width: 100%;
