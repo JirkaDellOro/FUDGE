@@ -5251,8 +5251,8 @@ declare namespace FudgeCore {
      */
     class FileIoBrowserLocal extends EventTargetStatic {
         private static selector;
-        static load(): void;
-        static save(_toSave: MapFilenameToContent): void;
+        static load(_multiple?: boolean): Promise<MapFilenameToContent>;
+        static save(_toSave: MapFilenameToContent, _type?: string): Promise<MapFilenameToContent>;
         static handleFileSelect(_event: Event): Promise<void>;
         static loadFiles(_fileList: FileList, _loaded: MapFilenameToContent): Promise<void>;
     }
