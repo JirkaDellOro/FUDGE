@@ -2,17 +2,15 @@ namespace FudgeCore {
 
   /** This function type takes x and z as Parameters and returns a number - to be used as a heightmap. 
    * x and z are mapped from 0 to 1 when used to generate a Heightmap Mesh
-   * x * z represent the amout of faces whiche are created. As a result you get 1 Vertice more in each direction (x and z achsis)
-   * For Example: x = 4, z = 4, 16 squares (32 Faces), 25 vertices 
    * @authors Simon Storl-Schulke, HFU, 2020*/
-  export type heightMapFunction = (x: number, z: number) => number;
+  // export type heightMapFunction = (x: number, z: number) => number;
 
   /**
    * Generates a planar Grid and applies a Heightmap-Function to it.
    * @authors Jirka Dell'Oro-Friedl, Simon Storl-Schulke, HFU, 2020
    */
-  export class MeshHeightMap extends Mesh {
-    public static readonly iSubclass: number = Mesh.registerSubclass(MeshHeightMap);
+  export class OldMeshHeightMap extends Mesh {
+    public static readonly iSubclass: number = Mesh.registerSubclass(OldMeshHeightMap);
 
     public resolutionX: number;
     public resolutionZ: number;
@@ -22,8 +20,6 @@ namespace FudgeCore {
       super(_name);
       this.resolutionX = _resolutionX;
       this.resolutionZ = _resolutionZ;
-
-      // this.indices = new Uint16Array(this.resolutionX * this.resolutionZ * 6);
 
       if (_resolutionZ || _resolutionX <= 0) {
         Debug.warn("HeightMap Mesh cannot have resolution values < 1. ");
@@ -59,45 +55,25 @@ namespace FudgeCore {
       let vert: number = 0;
       let tris: number = 0;
 
-      this.indices = new Uint16Array(this.resolutionX * this.resolutionZ * 6);
-
-      let switchOrientation: Boolean = false;
-
+      let indices: Uint16Array = new Uint16Array(this.resolutionX * this.resolutionZ * 6);
       for (let z: number = 0; z < this.resolutionZ; z++) {
         for (let x: number = 0; x < this.resolutionX; x++) {
 
-          if (!switchOrientation){
-            // First triangle of each uneven grid-cell
-            this.indices[tris + 0] = vert + 0;
-            this.indices[tris + 1] = vert + this.resolutionX + 1;
-            this.indices[tris + 2] = vert + 1;
+          // First triangle of each grid-cell
+          indices[tris + 0] = vert + 0;
+          indices[tris + 1] = vert + this.resolutionX + 1;
+          indices[tris + 2] = vert + 1;
 
-            // Second triangle of each uneven grid-cell
-            this.indices[tris + 3] = vert + 1;
-            this.indices[tris + 4] = vert + this.resolutionX + 1;
-            this.indices[tris + 5] = vert + this.resolutionX + 2;
-          }
-          else {
-            // First triangle of each even grid-cell
-            this.indices[tris + 0] = vert + 0;
-            this.indices[tris + 1] = vert + this.resolutionX + 1;
-            this.indices[tris + 2] = vert + this.resolutionX + 2;
-
-            // Second triangle of each even grid-cell
-            this.indices[tris + 3] = vert + 0;
-            this.indices[tris + 4] = vert + this.resolutionX + 2;
-            this.indices[tris + 5] = vert + 1;
-          }
-
-          switchOrientation = !switchOrientation;
+          // Second triangle of each grid-cell
+          indices[tris + 3] = vert + 1;
+          indices[tris + 4] = vert + this.resolutionX + 1;
+          indices[tris + 5] = vert + this.resolutionX + 2;
           vert++;
           tris += 6;
         }
-        if(this.resolutionX % 2 == 0)
-          switchOrientation = !switchOrientation;
         vert++;
       }
-      return this.indices;
+      return indices;
     }
 
     protected createTextureUVs(): Float32Array {

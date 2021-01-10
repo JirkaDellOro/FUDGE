@@ -3235,6 +3235,8 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /** This function type takes x and z as Parameters and returns a number - to be used as a heightmap.
      * x and z are mapped from 0 to 1 when used to generate a Heightmap Mesh
+     * x * z represent the amout of faces whiche are created. As a result you get 1 Vertice more in each direction (x and z achsis)
+     * For Example: x = 4, z = 4, 16 squares (32 Faces), 25 vertices
      * @authors Simon Storl-Schulke, HFU, 2020*/
     type heightMapFunction = (x: number, z: number) => number;
     /**
@@ -3243,8 +3245,8 @@ declare namespace FudgeCore {
      */
     class MeshHeightMap extends Mesh {
         static readonly iSubclass: number;
-        private resolutionX;
-        private resolutionZ;
+        resolutionX: number;
+        resolutionZ: number;
         private heightMapFunction;
         constructor(_name?: string, _resolutionX?: number, _resolutionZ?: number, _heightMapFunction?: heightMapFunction);
         protected createVertices(): Float32Array;
@@ -3348,6 +3350,26 @@ declare namespace FudgeCore {
         create(): void;
         protected createIndices(): Uint16Array;
         protected createVertices(): Float32Array;
+        protected createTextureUVs(): Float32Array;
+        protected createFaceNormals(): Float32Array;
+    }
+}
+declare namespace FudgeCore {
+    /** This function type takes x and z as Parameters and returns a number - to be used as a heightmap.
+     * x and z are mapped from 0 to 1 when used to generate a Heightmap Mesh
+     * @authors Simon Storl-Schulke, HFU, 2020*/
+    /**
+     * Generates a planar Grid and applies a Heightmap-Function to it.
+     * @authors Jirka Dell'Oro-Friedl, Simon Storl-Schulke, HFU, 2020
+     */
+    class OldMeshHeightMap extends Mesh {
+        static readonly iSubclass: number;
+        resolutionX: number;
+        resolutionZ: number;
+        private heightMapFunction;
+        constructor(_name?: string, _resolutionX?: number, _resolutionZ?: number, _heightMapFunction?: heightMapFunction);
+        protected createVertices(): Float32Array;
+        protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
         protected createFaceNormals(): Float32Array;
     }
