@@ -24,7 +24,7 @@ namespace Fudge {
       // tslint:disable-next-line: no-unused-expression
       //new CameraControl(this.viewport);
 
-      this.dom.addEventListener("headerchange", this.changeHeader);
+      this.dom.addEventListener(ModellerEvents.HEADER_APPEND, this.changeHeader);
 
       this.dom.append(this.canvas);
       this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
@@ -74,7 +74,7 @@ namespace Fudge {
       this.viewport = new ƒ.Viewport();
       this.viewport.initialize("Viewport", this.graph, cmpCamera, this.canvas);
       this.viewport.draw();
-      ƒaid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false, 0.2, 0.01, 0.003);
+      ƒaid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false, -0.15, 0.005, 0.003);
     } 
 
     protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
@@ -184,7 +184,7 @@ namespace Fudge {
     private changeHeader = (_event: CustomEvent): void => {
       let _stack = _event.detail;
 
-      let dropdownHandler: DropdownHandler = new DropdownHandler(this.content, this.controller);
+      let dropdownHandler: DropdownHandler = new DropdownHandler(this.controller);
       _stack.header.controlsContainer.prepend(dropdownHandler.getInteractionDropdown());
       _stack.header.controlsContainer.prepend(dropdownHandler.getControlDropdown());
     }

@@ -175,22 +175,6 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    import ƒ = FudgeCore;
-    class CameraControl {
-        viewport: ƒ.Viewport;
-        currentRotation: ƒ.Vector3;
-        target: ƒ.Vector3;
-        selectedNodes: ƒ.Node[];
-        constructor(viewport: ƒ.Viewport);
-        private onclick;
-        private handleMove;
-        private zoom;
-        private rotateCamera;
-        private moveCamera;
-        private multiplyMatrixes;
-    }
-}
-declare namespace Fudge {
     /**
      * Base class for all [[View]]s to support generic functionality
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
@@ -331,6 +315,22 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
+    class CameraControl {
+        viewport: ƒ.Viewport;
+        currentRotation: ƒ.Vector3;
+        target: ƒ.Vector3;
+        selectedNodes: ƒ.Node[];
+        constructor(viewport: ƒ.Viewport);
+        private onclick;
+        private handleMove;
+        private zoom;
+        private rotateCamera;
+        private moveCamera;
+        private multiplyMatrixes;
+    }
+}
+declare namespace Fudge {
+    import ƒ = FudgeCore;
     class Controller {
         private interactionMode;
         private currentControlMode;
@@ -365,7 +365,7 @@ declare namespace Fudge {
         EDIT_MODE = "Edit-Mode"
     }
     enum InteractionMode {
-        SELECT = "Select",
+        SELECT = "Box-Select",
         TRANSLATE = "Translate",
         ROTATE = "Rotate",
         SCALE = "Scale",
@@ -376,6 +376,10 @@ declare namespace Fudge {
         X = "X",
         Y = "Y",
         Z = "Z"
+    }
+    enum ModellerEvents {
+        HEADER_APPEND = "headerappend",
+        SELECTION_UPDATE = "selectionupdate"
     }
 }
 declare namespace Fudge {
@@ -607,9 +611,8 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     class DropdownHandler {
-        private dom;
         private controller;
-        constructor(_dom: HTMLElement, _controller: Controller);
+        constructor(_controller: Controller);
         getControlDropdown(): HTMLDivElement;
         getInteractionDropdown(): HTMLDivElement;
         private openDropdownControl;
@@ -635,9 +638,10 @@ declare namespace Fudge {
             start: number;
             end: number;
         }[];
+        private removeInnerEdges;
         extrudeEdge(selection: number[]): number[];
         addNewTriangles(): void;
-        private fillVertexDict;
+        private fillVertexMap;
         private removeInteriorEdges;
         private removeDuplicateEdges;
     }
@@ -679,12 +683,12 @@ declare namespace Fudge {
 declare namespace Fudge {
     class UniqueVertex extends ƒ.Mutable {
         position: ƒ.Vector3;
-        vertexToIndices: Map<number, {
+        vertexToData: Map<number, {
             indices: number[];
             face?: number;
             edges?: number[];
         }>;
-        constructor(_position: ƒ.Vector3, _vertexToIndices: Map<number, {
+        constructor(_position: ƒ.Vector3, _vertexToData: Map<number, {
             indices: number[];
             face?: number;
             edges?: number[];
@@ -824,7 +828,6 @@ declare namespace Fudge {
     class PanelModeller extends Panel {
         constructor(_container: GoldenLayout.Container, _state: Object);
         protected cleanup(): void;
-        private addHeaderControl;
     }
 }
 declare namespace Fudge {
@@ -1022,7 +1025,6 @@ declare namespace Fudge {
     import ƒ = FudgeCore;
     class ViewObjectProperties extends View {
         private currentNode;
-        private selection;
         constructor(_container: GoldenLayout.Container, _state: Object);
         protected setObject(_object: ƒ.Node): void;
         private fillContent;

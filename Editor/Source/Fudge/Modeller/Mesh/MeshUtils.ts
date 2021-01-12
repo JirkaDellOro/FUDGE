@@ -16,7 +16,6 @@ namespace Fudge {
       this.numberOfIndices = _numberOfIndices;
     }
 
-
     /*
       loop over the stored (half-)edges and find the correct ones  
     */
@@ -25,7 +24,7 @@ namespace Fudge {
       let edges: {start: number, end: number}[] = [];
 
       for (let [vertexIndex, uniqueIndex] of this.vertexToUniqueVertexMap) {
-        for (let endPoint of this.uniqueVertices[uniqueIndex].vertexToIndices.get(vertexIndex).edges) {
+        for (let endPoint of this.uniqueVertices[uniqueIndex].vertexToData.get(vertexIndex).edges) {
           let isAddable: boolean = false;
           for (let vertex of selection) {
             if (vertex === this.vertexToUniqueVertexMap.get(endPoint) || vertex === endPoint) 
@@ -33,51 +32,72 @@ namespace Fudge {
           }
 
           if (isAddable) {
-            if (getDirectionOfEdge(this.uniqueVertices[uniqueIndex].vertexToIndices.get(vertexIndex), this.uniqueVertices[this.vertexToUniqueVertexMap.get(endPoint)].vertexToIndices.get(endPoint))) {
-              edges.push({start: vertexIndex, end: endPoint});
-            } else {
-              edges.push({start: endPoint, end: vertexIndex});
-            }
+            edges.push({start: vertexIndex, end: endPoint});
           }
         }
       }
 
       this.removeInteriorEdges(edges);
-      this.removeDuplicateEdges(edges);
+      let faceToEdgesMap: Map<number, {edge: {start: number, end: number}, index: number}[]> = this.removeInnerEdges(edges);
+
+      for (let [face, edgesOfFace] of faceToEdgesMap) {
+        if (edgesOfFace.length === 4) {
+
+        } else if (edgesOfFace.length === 2) {
+          edges.splice(edgesOfFace[0].index, 1);
+          edges.splice(edgesOfFace[1].index, 1);
+        }
+      }
+
+      // this.removeDuplicateEdges(edges);
       let newEdges: {start: number, end: number}[] = [];
 
       for (let edge of edges) {
         edge.start = this.vertexToUniqueVertexMap.get(edge.start);
         edge.end = this.vertexToUniqueVertexMap.get(edge.end);
-        newEdges.push({start: edge.end, end: edge.start});
+        // newEdges.push({start: edge.end, end: edge.start});
         newEdges.push(edge);
       }
 
       return newEdges;
+    }
 
-      /*
-        get the direction of the edges, i.e. if the edge is clockwise or counterclockwise
-        @return whether the first vertex is the start or the end of the edge
-      */
-      function getDirectionOfEdge(vertex1: {indices: number[]; face?: number; edges?: number[]}, vertex2: {indices: number[]; face?: number; edges?: number[]}): boolean {
-        let vertex1IsStart: boolean = false;
-        for (let index1 of vertex1.indices) {
-          for (let index2 of vertex2.indices) {
-            if (index1 % 3 === 2) {
-              if (index1 - index2 === 2) {
-                vertex1IsStart = true;
-              } else if (index1 - index2 === 1) {
-                vertex1IsStart = false;
-              }
+    // there can only be 2 and 4
+    private removeInnerEdges(edges: {start: number, end: number}[]): Map<number, {edge: {start: number, end: number}, index: number}[]> {
+      let faceToEdgesMap: Map<number, {edge: {start: number, end: number}, index: number}[]> = new Map();
+      for (let i: number = 0; i < edges.length; i++) {
+        for (let j: number = 0; j < edges.length; j++) {
+          if (edges[i] === edges[j])
+            continue;
+          
+          let faceOfEdge1: number = this.uniqueVertices[this.vertexToUniqueVertexMap.get(edges[i].start)].vertexToData.get(edges[i].start).face;
+          let faceOfEdge2: number = this.uniqueVertices[this.vertexToUniqueVertexMap.get(edges[j].start)].vertexToData.get(edges[j].start).face;
+
+          if (faceOfEdge1 === faceOfEdge2) {
+            let isAlreadyInDict: boolean = false;
+            if (!faceToEdgesMap.has(faceOfEdge1)) {
+              faceToEdgesMap.set(faceOfEdge1, []);
             } else {
-              if (index2 - index1 === 1) {
-                vertex1IsStart = true;
+              for (let [face, edgesOfFace] of faceToEdgesMap) {
+                if (edgesOfFace[0].edge === edges[i] || edgesOfFace[1].edge === edges[i])
+                  isAlreadyInDict = true;
               }
+            }
+
+            if (isAlreadyInDict)
+              continue;
+
+            if (j > i) {
+              faceToEdgesMap.get(faceOfEdge1).push({edge: edges[j], index: j});
+              faceToEdgesMap.get(faceOfEdge1).push({edge: edges[i], index: i});
+            } else {
+              faceToEdgesMap.get(faceOfEdge1).push({edge: edges[i], index: i});
+              faceToEdgesMap.get(faceOfEdge1).push({edge: edges[j], index: j});
             }
           }
         }
-        return vertex1IsStart;
-      }
+      } 
+      return faceToEdgesMap;
     }
 
 
@@ -86,14 +106,16 @@ namespace Fudge {
       let reverseVertices: Map<number, number> = new Map();
       let iterator: number = 0;
       for (let vertex of selection) {
-        this.uniqueVertices[vertex].vertexToIndices.set(this.vertexCount + iterator, {indices: [], face: this.numberOfFaces, edges: []});
+        this.uniqueVertices[vertex].vertexToData.set(this.vertexCount + iterator, {indices: [], face: this.numberOfFaces, edges: []});
         this.newVertexToOriginalVertexMap.set(this.vertexCount + iterator, vertex);
         if (!this.originalVertexToNewVertexMap.has(vertex)) {
-          let newVertex: UniqueVertex = new UniqueVertex(new ƒ.Vector3(this.uniqueVertices[vertex].position.x, this.uniqueVertices[vertex].position.y, this.uniqueVertices[vertex].position.z), new Map([[this.vertexCount + iterator + selection.length, {indices: [], face: this.numberOfFaces, edges: []}]]));
+          let newVertex: UniqueVertex = new UniqueVertex(
+            new ƒ.Vector3(this.uniqueVertices[vertex].position.x, this.uniqueVertices[vertex].position.y, this.uniqueVertices[vertex].position.z), 
+            new Map([[this.vertexCount + iterator + selection.length, {indices: [], face: this.numberOfFaces, edges: []}]]));
           this.newVertexToOriginalVertexMap.set(this.vertexCount + iterator + selection.length, this.uniqueVertices.length);
           this.uniqueVertices.push(newVertex);
         } else {
-          this.uniqueVertices[this.newVertexToOriginalVertexMap.get(this.originalVertexToNewVertexMap.get(vertex))].vertexToIndices.set(this.vertexCount + iterator + selection.length, {indices: [], face: this.numberOfFaces, edges: []});
+          this.uniqueVertices[this.newVertexToOriginalVertexMap.get(this.originalVertexToNewVertexMap.get(vertex))].vertexToData.set(this.vertexCount + iterator + selection.length, {indices: [], face: this.numberOfFaces, edges: []});
           this.newVertexToOriginalVertexMap.set(this.vertexCount + iterator + selection.length, this.newVertexToOriginalVertexMap.get(this.originalVertexToNewVertexMap.get(vertex)));
         }
         this.originalVertexToNewVertexMap.set(vertex, this.vertexCount + iterator + selection.length);
@@ -103,12 +125,16 @@ namespace Fudge {
       this.vertexCount += 4;
       this.numberOfFaces++;
 
+      // a, a + n, b + n
       this.newTriangles.push(reverseVertices.get(selection[0]));
-      this.newTriangles.push(reverseVertices.get(selection[1]));
-      this.newTriangles.push(this.originalVertexToNewVertexMap.get(selection[1]));
-      this.newTriangles.push(this.originalVertexToNewVertexMap.get(selection[1]));
       this.newTriangles.push(this.originalVertexToNewVertexMap.get(selection[0]));
+      this.newTriangles.push(this.originalVertexToNewVertexMap.get(selection[1]));
+      // a, b + n, b
       this.newTriangles.push(reverseVertices.get(selection[0]));
+      this.newTriangles.push(this.originalVertexToNewVertexMap.get(selection[1]));
+      this.newTriangles.push(reverseVertices.get(selection[1]));
+      //this.newTriangles.push(this.originalVertexToNewVertexMap.get(selection[0]));
+      //this.newTriangles.push(reverseVertices.get(selection[0]));
 
       return newTriangles;
     }
@@ -118,11 +144,11 @@ namespace Fudge {
     */
     public addNewTriangles(): void {
       for (let i: number = 0; i < this.newTriangles.length; i++) {
-        this.uniqueVertices[this.newVertexToOriginalVertexMap.get(this.newTriangles[i])].vertexToIndices.get(this.newTriangles[i]).indices.push(this.numberOfIndices);
+        this.uniqueVertices[this.newVertexToOriginalVertexMap.get(this.newTriangles[i])].vertexToData.get(this.newTriangles[i]).indices.push(this.numberOfIndices);
         if (this.numberOfIndices % 3 !== 2) {
-          this.uniqueVertices[this.newVertexToOriginalVertexMap.get(this.newTriangles[i])].vertexToIndices.get(this.newTriangles[i]).edges.push(this.newTriangles[i + 1]);
+          this.uniqueVertices[this.newVertexToOriginalVertexMap.get(this.newTriangles[i])].vertexToData.get(this.newTriangles[i]).edges.push(this.newTriangles[i + 1]);
         } else {
-          this.uniqueVertices[this.newVertexToOriginalVertexMap.get(this.newTriangles[i])].vertexToIndices.get(this.newTriangles[i]).edges.push(this.newTriangles[i - 2]);
+          this.uniqueVertices[this.newVertexToOriginalVertexMap.get(this.newTriangles[i])].vertexToData.get(this.newTriangles[i]).edges.push(this.newTriangles[i - 2]);
         }
         this.numberOfIndices++;
       }
@@ -130,10 +156,10 @@ namespace Fudge {
 
     private fillVertexMap(selection: number[]): void {
       for (let selectedVertex of selection) {
-        for (let vertexIndex of this.uniqueVertices[selectedVertex].vertexToIndices.keys()) {
+        for (let [vertexIndex, data] of this.uniqueVertices[selectedVertex].vertexToData) {
           this.vertexToUniqueVertexMap.set(vertexIndex, selectedVertex);
         }
-      }  
+      }
     }
 
     /*

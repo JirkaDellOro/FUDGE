@@ -32,29 +32,12 @@ namespace Fudge {
       ]
       });
 
-      let event: CustomEvent = new CustomEvent("headerchange", { bubbles: false, detail: stack });
+      let event: CustomEvent = new CustomEvent(ModellerEvents.HEADER_APPEND, { bubbles: false, detail: stack });
       this.broadcastEvent(event);
     }
 
     protected cleanup(): void {
       throw new Error("Method not implemented.");
-    }
-
-    private addHeaderControl = (_stack): void => {
-      for (let component of _stack.contentItems) {
-        if (component.componentName === VIEW.MODELLER) {
-          let event: CustomEvent = new CustomEvent("headerchange", { bubbles: false, detail: _stack });
-          this.broadcastEvent(event);
-          // document.dispatchEvent(event);
-          // console.log(_stack);
-
-          // let template: HTMLTemplateElement = document.querySelector("#dropdown-template");
-          // let dropdownControl: HTMLDivElement = <HTMLDivElement> template.content.cloneNode(true);
-          // dropdownControl.querySelector(".dropdown-content").id = "control-dropdown";
-          
-          // _stack.header.controlsContainer.prepend(dropdownControl);
-        }
-      }
     }
   }
 }

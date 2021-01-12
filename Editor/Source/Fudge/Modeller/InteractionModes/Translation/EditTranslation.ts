@@ -5,7 +5,6 @@ namespace Fudge {
     constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>) {
       super(viewport, editableNode);
       this.selector = new Selector(this.editableNode, this.viewport.camera.pivot.translation);
-      // this.initialize();
     }
 
     onmousedown (_event: ƒ.EventPointer): string {

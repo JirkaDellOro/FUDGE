@@ -1,6 +1,5 @@
 namespace Fudge {
   export abstract class AbstractRotation extends IInteractionMode {
-    // TODO: maybe get rid of type properties, only useful for debugging anyways
     public readonly type: InteractionMode = InteractionMode.ROTATE;
     viewport: ƒ.Viewport;
     selection: Array<number>;

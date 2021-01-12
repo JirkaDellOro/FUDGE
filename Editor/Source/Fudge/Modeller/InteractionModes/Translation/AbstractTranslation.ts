@@ -1,5 +1,4 @@
 namespace Fudge {
-  import ƒAid = FudgeAid;
   export abstract class AbstractTranslation extends IInteractionMode {
     public readonly type: InteractionMode = InteractionMode.TRANSLATE;
     viewport: ƒ.Viewport;
@@ -7,7 +6,6 @@ namespace Fudge {
     editableNode: ƒ.Node;
     protected dragging: boolean = false;
     protected distance: number;
-    // protected copyOfSelectedVertices: Map<number, ƒ.Vector3>;
     protected oldPosition: ƒ.Vector3;
     protected axesSelectionHandler: AxesSelectionHandler;
 
@@ -34,7 +32,6 @@ namespace Fudge {
       if (nodeWasPicked && !this.axesSelectionHandler.wasPicked) {
         this.dragging = true;
       }
-      // this.copyOfSelectedVertices = this.copyVertices();
       this.distance = this.getDistanceFromCameraToCenterOfNode();
       this.oldPosition = this.getPointerPosition(_event, this.distance);
       return (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
@@ -52,7 +49,6 @@ namespace Fudge {
     onmove(_event: ƒ.EventPointer): void {
       if (!this.axesSelectionHandler.isValidSelection() && !this.dragging) {
         if (this.axesSelectionHandler.isAxisSelectedViaKeyboard()) {
-          // this.copyOfSelectedVertices = this.copyVertices();
           this.distance = this.getDistanceFromCameraToCenterOfNode();
           this.oldPosition = this.getPointerPosition(_event, this.distance);
           this.axesSelectionHandler.isSelectedViaKeyboard = true;

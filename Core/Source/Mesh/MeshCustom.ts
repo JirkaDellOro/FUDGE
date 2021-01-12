@@ -5,7 +5,7 @@ namespace FudgeCore {
       super(_name);
     }
 
-    public async asyncLoad(_url: RequestInfo): Promise<void> {
+    public async load(_url: RequestInfo): Promise<void> {
       let path: URL = new URL(_url.toString(), Project.baseURL);
       const response: Response = await window.fetch(path.toString());
       const json = await response.json();

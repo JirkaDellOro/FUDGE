@@ -1,34 +1,12 @@
 namespace Fudge {
   export class DropdownHandler {
 
-    private dom: HTMLElement;
     private controller: Controller;
 
-    constructor(_dom: HTMLElement, _controller: Controller) {
-      this.dom = _dom;
+    constructor(_controller: Controller) {
       this.controller = _controller;
       let container: HTMLDivElement = document.createElement("div");
       container.style.borderWidth = "0px";
-      // let template: HTMLTemplateElement = document.querySelector("#dropdown-template");
-      // let dropdownControl: HTMLDivElement = <HTMLDivElement> template.content.cloneNode(true);
-      // dropdownControl.querySelector(".dropdown-content").id = "control-dropdown";
-      // let button: HTMLButtonElement = dropdownControl.querySelector(".dropbtn");
-      // button.addEventListener("click", this.openDropdownControl);
-      // button.id = "control-button";
-      // button.innerHTML = this.controller.controlMode.type;
-      // container.append(dropdownControl);
-      // // this.dom.append(dropdownControl);
-
-
-      // let dropdownInteraction: HTMLDivElement = <HTMLDivElement> template.content.cloneNode(true);
-      // dropdownInteraction.querySelector(".dropdown-content").id = "interaction-dropdown";
-      // let buttonInteraction: HTMLButtonElement = dropdownInteraction.querySelector(".dropbtn");
-      // buttonInteraction.addEventListener("click", this.openDropdownInteraction);
-      // buttonInteraction.id = "interaction-button";
-      // buttonInteraction.innerHTML = this.controller.getInteractionModeType();
-      // container.append(dropdownInteraction);
-      // container.style.flex = "0 1 25px";
-      // this.dom.append(container);
 
       window.addEventListener("click", this.closeMenu);
     }

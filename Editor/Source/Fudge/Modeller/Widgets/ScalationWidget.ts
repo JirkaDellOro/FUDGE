@@ -60,7 +60,7 @@ namespace Fudge {
 
 
     public releaseComponent(pickedComponent: ƒ.Node = this.pickedComponent): void {
-      pickedComponent.getChildren().forEach(child => child.getComponent(ƒ.ComponentMaterial).clrPrimary = this.componentToOriginalColorMap.get(pickedComponent));
+      this.pickedComponent.getChildren().forEach(child => child.getComponent(ƒ.ComponentMaterial).clrPrimary = this.componentToOriginalColorMap.get(pickedComponent));
     }
 
     private fillColorDict(): void {

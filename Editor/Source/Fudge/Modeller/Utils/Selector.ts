@@ -1,6 +1,5 @@
 namespace Fudge {
   import ƒ = FudgeCore;
-  import ƒui = FudgeUserInterface;
 
   export class Selector {
     private node: ƒ.Node;
@@ -11,7 +10,6 @@ namespace Fudge {
       this.cameraPivot = _cameraPivot;
     }
 
-
     public selectVertices(_ray: ƒ.Ray, selection: number[]): boolean {
       let mesh: ModifiableMesh = <ModifiableMesh> this.node.getComponent(ƒ.ComponentMesh).mesh;
       let vertices: UniqueVertex[] = mesh.uniqueVertices;
@@ -20,21 +18,23 @@ namespace Fudge {
       let shortestDistanceToRay: number = Number.MAX_VALUE;
       let vertexWasPicked: boolean = false;
 
-      for (let i: number = 0; i < vertices.length; i++) {
-        let vertex: ƒ.Vector3 = vertices[i].position;
-        let vertexTranslation: ƒ.Vector3 = ƒ.Vector3.SUM(this.node.mtxLocal.translation, vertex);
+      for (let index: number = 0; index < vertices.length; index++) {
+        let vertex: ƒ.Vector3 = vertices[index].position;
+        let vertexTranslation: ƒ.Vector3 = ƒ.Vector3.SUM(this.node.mtxWorld.translation, vertex);
         let distanceToRay: number = _ray.getDistance(vertexTranslation).magnitude;
         let distanceToCam: number = ƒ.Vector3.DIFFERENCE(this.cameraPivot, vertexTranslation).magnitude;
         if (distanceToRay < 0.1) {
           vertexWasPicked = true;
           if (distanceToRay - shortestDistanceToRay < -0.05) {
-            shortestDistanceToCam = distanceToCam;
-            shortestDistanceToRay = distanceToRay;
-            nearestVertexIndex = i;  
+            updateValues();
           } else if (distanceToRay - shortestDistanceToRay < 0.03 && distanceToCam < shortestDistanceToCam) {
+            updateValues();
+          }
+          
+          function updateValues(): void {
             shortestDistanceToCam = distanceToCam;
             shortestDistanceToRay = distanceToRay;
-            nearestVertexIndex = i;  
+            nearestVertexIndex = index;  
           }
         } 
       }
@@ -45,18 +45,10 @@ namespace Fudge {
         }
         selection.push(nearestVertexIndex);
 
-        let event: CustomEvent = new CustomEvent(ƒui.EVENT.CHANGE, { bubbles: true, detail: selection });
+        let event: CustomEvent = new CustomEvent(ModellerEvents.SELECTION_UPDATE, { bubbles: true, detail: selection });
         ƒ.EventTargetStatic.dispatchEvent(event);
       }
       return vertexWasPicked;
-      // if (!vertexWasPicked) {
-      //   this.selection = [];
-      // } else {
-      //   let wasSelectedAlready: boolean = this.removeSelectedVertexIfAlreadySelected(nearestVertexIndex);
-      //   if (!wasSelectedAlready) 
-      //     this.selection.push(nearestVertexIndex);
-      // }
-      // console.log("vertices selected: " + this.selection);
     }
 
   }

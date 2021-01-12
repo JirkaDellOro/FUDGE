@@ -2,12 +2,12 @@ namespace Fudge {
   export class UniqueVertex extends ƒ.Mutable {
     public position: ƒ.Vector3;
     // key is the index of the vertex in the vertices array, value is the position of the key in the indices
-    public vertexToIndices: Map<number, {indices: number[], face?: number, edges?: number[]}>;
+    public vertexToData: Map<number, {indices: number[], face?: number, edges?: number[]}>;
 
-    constructor(_position: ƒ.Vector3, _vertexToIndices: Map<number, {indices: number[], face?: number, edges?: number[]}>) {
+    constructor(_position: ƒ.Vector3, _vertexToData: Map<number, {indices: number[], face?: number, edges?: number[]}>) {
       super();
       this.position = _position;
-      this.vertexToIndices = _vertexToIndices;
+      this.vertexToData = _vertexToData;
     }
 
     protected reduceMutator(_mutator: ƒ.Mutator): void {

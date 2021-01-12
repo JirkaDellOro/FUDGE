@@ -5,7 +5,7 @@ namespace Fudge {
   }
 
   export enum InteractionMode {
-    SELECT = "Select",
+    SELECT = "Box-Select",
     TRANSLATE = "Translate",
     ROTATE = "Rotate",
     SCALE = "Scale",
@@ -17,6 +17,11 @@ namespace Fudge {
     X = "X",
     Y = "Y",
     Z = "Z"
+  }
+
+  export enum ModellerEvents {
+    HEADER_APPEND = "headerappend",
+    SELECTION_UPDATE = "selectionupdate"
   }
 
 }

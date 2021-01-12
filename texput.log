@@ -1,12 +1,12 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/W32TeX) (preloaded format=pdflatex 2020.9.23)  7 NOV 2020 13:40
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/W32TeX) (preloaded format=pdflatex 2020.9.23)  4 JAN 2021 19:20
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**main
+**main.tex
 
 ! Emergency stop.
-<*> main
-        
+<*> main.tex
+            
 End of file on the terminal!
 
  

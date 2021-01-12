@@ -6,6 +6,8 @@ namespace Fudge {
     private pickedAxis: Axis;
     private axisIsPicked: boolean = false;
 
+
+    // TODO: check if we could define the event listeners here, so that the whole process of using the selection handler is fully automatic
     constructor(widget: IWidget = null) {
       this._widget = widget;
     }

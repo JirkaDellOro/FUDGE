@@ -23,6 +23,7 @@ namespace Fudge {
     }
 
     initialize(): void {
+      //
     }
 
     onmousedown(_event: ƒ.EventPointer): string {
@@ -45,7 +46,6 @@ namespace Fudge {
       //     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.drawBox);
       //     break;
       // }
-      console.log(this.selectionMode);
       return null;
     }
 
@@ -65,7 +65,7 @@ namespace Fudge {
         }
       }
 
-      let event: CustomEvent = new CustomEvent(ƒui.EVENT.CHANGE, { bubbles: true, detail: this.selection });
+      let event: CustomEvent = new CustomEvent(ModellerEvents.SELECTION_UPDATE, { bubbles: true, detail: this.selection });
       ƒ.EventTargetStatic.dispatchEvent(event);
 
       ƒ.Loop.removeEventListener(ƒ.EVENT.LOOP_FRAME, this.drawBox);
@@ -87,12 +87,12 @@ namespace Fudge {
           this.selection = [];
           state = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
           break;
-        case "l": 
-          this.selectionMode = SelectionMode.BOX;
-          break;
-        case "v":
-          this.selectionMode = SelectionMode.VERTEX;
-          break;
+        // case "l": 
+        //   this.selectionMode = SelectionMode.BOX;
+        //   break;
+        // case "v":
+        //   this.selectionMode = SelectionMode.VERTEX;
+        //   break;
       }
       return state;
     }

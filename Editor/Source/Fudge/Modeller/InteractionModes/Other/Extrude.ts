@@ -13,8 +13,8 @@ namespace Fudge {
 
     constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>) {
       super(viewport, editableNode, selection);
+      // TODO: check if pivot is still correct or if we need to use the container
       this.selector = new Selector(this.editableNode, this.viewport.camera.pivot.translation);
-      // this.initialize();
     }
 
     onmousedown(_event: ƒ.EventPointer): string {

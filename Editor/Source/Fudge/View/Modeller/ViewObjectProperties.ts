@@ -5,7 +5,6 @@ namespace Fudge {
 
   export class ViewObjectProperties extends View {
     private currentNode: ƒ.Node;
-    private selection: Array<number>;
 
     constructor(_container: GoldenLayout.Container, _state: Object) {
       super(_container, _state);
@@ -14,8 +13,8 @@ namespace Fudge {
       this.setObject((<ƒ.Node>(<ƒ.General>_state).node).getChildrenByName("Default")[0]);
       this.setTitle("Vertices");
 
-      //this.fillContent();
-      ƒ.EventTargetStatic.addEventListener(ƒui.EVENT.CHANGE, this.hndEvent);
+      // this.fillContent();
+      ƒ.EventTargetStatic.addEventListener(ModellerEvents.SELECTION_UPDATE, this.hndEvent);
       _container.on("destroy", this.cleanup);
       // this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       // this.parentPanel.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setSelectedNode);
@@ -58,7 +57,7 @@ namespace Fudge {
     }
 
     private hndEvent = (_event: CustomEvent): void => {
-      //this.fillContent(_event.detail);
+      // this.fillContent(_event.detail);
     }
     
   }
