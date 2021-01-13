@@ -19,6 +19,9 @@ var HeightMap;
     function init(_event) {
         setupScene();
         setupControls();
+        // controlled.height = getHeightOnTerrain(gridMeshFlat, controlled);
+        console.log(gridMeshFlat.indices);
+        console.log(gridMeshFlat.vertices);
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, hndLoop);
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 120);
         console.log("mtxWorld controlled translation: " + controlled.mtxWorld.translation);
@@ -41,7 +44,7 @@ var HeightMap;
         let matRed = new f.Material("Red", f.ShaderFlat, new f.CoatColored(f.Color.CSS("RED")));
         let meshCube = new f.MeshCube("CubeMesh");
         controlled = new HeightMap.Controlled("Cube", f.Matrix4x4.IDENTITY(), matRed, new f.MeshCube());
-        controlled.mtxLocal.translation = new f.Vector3(0.5, 0.1, 0);
+        controlled.mtxLocal.translation = new f.Vector3(0.4, 0.1, 0.43);
         controlled.mtxLocal.scale(new f.Vector3(0.05, 0.05, 0.05));
         m1 = Scenes.createCompleteMeshNode("M1", matRed, meshCube);
         m2 = Scenes.createCompleteMeshNode("M2", matRed, meshCube);
@@ -67,6 +70,7 @@ var HeightMap;
         viewport.setFocus(true);
         Scenes.dollyViewportCamera(viewport);
         viewport.draw();
+        console.log(controlled);
     }
     function moreVertices(_event) {
         if (_event.code == f.KEYBOARD_CODE.M) {
@@ -85,27 +89,42 @@ var HeightMap;
         }
     }
     function getHeightOnTerrain(terrain, object) {
-        var splitVertices = terrain.vertices;
-        let nearestVerices = new Array;
-        for (let i = 0; i < splitVertices.length; i = i + 3) {
-            let vertex = new f.Vector3(splitVertices[i], splitVertices[i + 1], splitVertices[i + 2]);
-            let distance = new f.Vector2(vertex.x, vertex.z);
-            distance.subtract(new f.Vector2(object.mtxWorld.translation.x, object.mtxWorld.translation.z));
-            nearestVerices.push({ vertex: vertex, distance: distance.magnitude });
+        let indices = terrain.indices;
+        let vertices = terrain.vertices;
+        let nearestFaces = new Array;
+        for (let i = 0; i < indices.length; i = i + 3) {
+            let vertexONE = new f.Vector3(vertices[indices[i] * 3], vertices[indices[i] * 3 + 1], vertices[indices[i] * 3 + 2]);
+            let vertexTWO = new f.Vector3(vertices[indices[i + 1] * 3], vertices[indices[i + 1] * 3 + 1], vertices[indices[i + 1] * 3 + 2]);
+            let vertexTHREE = new f.Vector3(vertices[indices[i + 2] * 3], vertices[indices[i + 2] * 3 + 1], vertices[indices[i + 2] * 3 + 2]);
+            let face = new distanceToFaceVertices(vertexONE, vertexTWO, vertexTHREE, object);
+            nearestFaces.push(face);
         }
-        nearestVerices.sort((n1, n2) => {
+        nearestFaces.sort((n1, n2) => {
             return n1.distance - n2.distance;
         });
-        return calculateHeight(nearestVerices[0], nearestVerices[1], nearestVerices[2]);
+        return calculateHeight(nearestFaces[0], object);
     }
-    function calculateHeight(vertEXONE, vertexTWO, vertexTHREE) {
-        m1.mtxLocal.translation = vertEXONE.vertex;
-        m2.mtxLocal.translation = vertexTWO.vertex;
-        m3.mtxLocal.translation = vertexTHREE.vertex;
-        if (vertEXONE.distance == 0)
-            return vertEXONE.vertex.y;
-        return ((1 / vertEXONE.distance) * vertEXONE.vertex.y + (1 / vertexTWO.distance) * vertexTWO.vertex.y + (1 / vertexTHREE.distance) * vertexTHREE.vertex.y) /
-            (1 / vertEXONE.distance + 1 / vertexTWO.distance + 1 / vertexTHREE.distance);
+    function calculateHeight(face, object) {
+        m1.mtxLocal.translation = face.vertexONE;
+        m2.mtxLocal.translation = face.vertexTWO;
+        m3.mtxLocal.translation = face.vertexTHREE;
+        let ray = new f.Ray(new f.Vector3(0, 1, 0), object.mtxWorld.translation);
+        let v1 = f.Vector3.DIFFERENCE(face.vertexTWO, face.vertexONE);
+        let v2 = f.Vector3.DIFFERENCE(face.vertexTHREE, face.vertexONE);
+        let intersection = ray.intersectPlane(face.vertexONE, f.Vector3.CROSS(v1, v2));
+        if (face.distanceONE == 0)
+            return face.vertexONE.y;
+        if (face.distanceTWO == 0)
+            return face.vertexTWO.y;
+        if (face.distanceTHREE == 0)
+            return face.vertexTHREE.y;
+        console.log("Ray: " + ray);
+        console.log("Vektoren: v1 " + v1 + " v2 " + v2);
+        console.log("Intersection: " + intersection);
+        return intersection.y;
+        // console.log(face);
+        //   return ( (1/face.distanceONE) * face.vertexONE.y + (1/face.distanceTWO) * face.vertexTWO.y + (1/face.distanceTHREE) * face.vertexTHREE.y ) /
+        //       (1/face.distanceONE + 1/face.distanceTWO + 1/face.distanceTHREE);
     }
     function setupControls() {
         controlled.axisSpeed.addControl(cntKeyVertical);
@@ -118,6 +137,15 @@ var HeightMap;
         cntKeyHorizontal.setInput(f.Keyboard.mapToValue(1, 0, [f.KEYBOARD_CODE.J])
             + f.Keyboard.mapToValue(-1, 0, [f.KEYBOARD_CODE.L]));
     }
-    class distanceToVertice {
+    class distanceToFaceVertices {
+        constructor(vertexONE, vertexTWO, vertexTHREE, object) {
+            this.vertexONE = vertexONE;
+            this.vertexTWO = vertexTWO;
+            this.vertexTHREE = vertexTHREE;
+            this.distanceONE = new f.Vector2(vertexONE.x - object.mtxLocal.translation.x, vertexONE.z - object.mtxWorld.translation.z).magnitude;
+            this.distanceTWO = new f.Vector2(vertexTWO.x - object.mtxLocal.translation.x, vertexTWO.z - object.mtxWorld.translation.z).magnitude;
+            this.distanceTHREE = new f.Vector2(vertexTHREE.x - object.mtxLocal.translation.x, vertexTHREE.z - object.mtxWorld.translation.z).magnitude;
+            this.distance = this.distanceONE + this.distanceTWO + this.distanceTHREE;
+        }
     }
 })(HeightMap || (HeightMap = {}));

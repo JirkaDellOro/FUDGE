@@ -23,8 +23,6 @@ namespace FudgeCore {
       this.resolutionX = _resolutionX;
       this.resolutionZ = _resolutionZ;
 
-      // this.indices = new Uint16Array(this.resolutionX * this.resolutionZ * 6);
-
       if (_resolutionZ || _resolutionX <= 0) {
         Debug.warn("HeightMap Mesh cannot have resolution values < 1. ");
         this.resolutionX = Math.max(1, this.resolutionX);
@@ -59,7 +57,7 @@ namespace FudgeCore {
       let vert: number = 0;
       let tris: number = 0;
 
-      this.indices = new Uint16Array(this.resolutionX * this.resolutionZ * 6);
+      let indices = new Uint16Array(this.resolutionX * this.resolutionZ * 6);
 
       let switchOrientation: Boolean = false;
 
@@ -68,25 +66,25 @@ namespace FudgeCore {
 
           if (!switchOrientation){
             // First triangle of each uneven grid-cell
-            this.indices[tris + 0] = vert + 0;
-            this.indices[tris + 1] = vert + this.resolutionX + 1;
-            this.indices[tris + 2] = vert + 1;
+            indices[tris + 0] = vert + 0;
+            indices[tris + 1] = vert + this.resolutionX + 1;
+            indices[tris + 2] = vert + 1;
 
             // Second triangle of each uneven grid-cell
-            this.indices[tris + 3] = vert + 1;
-            this.indices[tris + 4] = vert + this.resolutionX + 1;
-            this.indices[tris + 5] = vert + this.resolutionX + 2;
+            indices[tris + 3] = vert + 1;
+            indices[tris + 4] = vert + this.resolutionX + 1;
+            indices[tris + 5] = vert + this.resolutionX + 2;
           }
           else {
             // First triangle of each even grid-cell
-            this.indices[tris + 0] = vert + 0;
-            this.indices[tris + 1] = vert + this.resolutionX + 1;
-            this.indices[tris + 2] = vert + this.resolutionX + 2;
+            indices[tris + 0] = vert + 0;
+            indices[tris + 1] = vert + this.resolutionX + 1;
+            indices[tris + 2] = vert + this.resolutionX + 2;
 
             // Second triangle of each even grid-cell
-            this.indices[tris + 3] = vert + 0;
-            this.indices[tris + 4] = vert + this.resolutionX + 2;
-            this.indices[tris + 5] = vert + 1;
+            indices[tris + 3] = vert + 0;
+            indices[tris + 4] = vert + this.resolutionX + 2;
+            indices[tris + 5] = vert + 1;
           }
 
           switchOrientation = !switchOrientation;
@@ -97,7 +95,7 @@ namespace FudgeCore {
           switchOrientation = !switchOrientation;
         vert++;
       }
-      return this.indices;
+      return indices;
     }
 
     protected createTextureUVs(): Float32Array {
