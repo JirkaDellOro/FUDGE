@@ -8,6 +8,8 @@ namespace HeightMap {
     public maxSpeed: number = 5; // units per second
     public maxRotSpeed: number = 180; // degrees per second
     public height: number;
+    public rotationX: number;
+    public rotationY: number;
 
     public setUpAxis(): void {
       this.axisSpeed.setDelay(500);
@@ -18,7 +20,7 @@ namespace HeightMap {
       let distance: number = this.axisSpeed.getOutput() * this.maxSpeed * _timeFrame;
       let angle: number = this.axisRotation.getOutput() * this.maxRotSpeed * _timeFrame;
       this.mtxLocal.translateZ(distance);
-      this.mtxLocal.translation = new ƒ.Vector3(this.mtxLocal.translation.x, this.height, this.mtxLocal.translation.z);
+      this.mtxLocal.translation = new ƒ.Vector3(this.mtxLocal.translation.x, this.height + 0.025, this.mtxLocal.translation.z);
       this.mtxLocal.rotateY(angle);
     }
   }

@@ -11,6 +11,8 @@ namespace HeightMap {
   let m2: f.Node = new f.Node("M1");
   let m3: f.Node = new f.Node("M1");
 
+  let testCube = new f.Node("Test");
+
   let gridMeshFlat: f.MeshHeightMap;
   let gridFlat: f.Node = new f.Node("Map");
 
@@ -42,11 +44,7 @@ namespace HeightMap {
 
     // f.RenderManager.setupTransformAndLights(graph);
 
-    ƒAid.addStandardLightComponents(graph);  
-
-    // console.log(heightMarker.mtxLocal.translation.x);
-    // console.log(heightMarker.mtxLocal.translation.z);
-
+    ƒAid.addStandardLightComponents(graph);
   }
 
   function hndLoop(_event: Event): void {
@@ -65,7 +63,7 @@ namespace HeightMap {
     let meshCube = new f.MeshCube("CubeMesh");
 
     controlled = new Controlled("Cube", f.Matrix4x4.IDENTITY(), matRed, new f.MeshCube());
-    controlled.mtxLocal.translation = new f.Vector3(0.4,0.1,0.43);
+    controlled.mtxLocal.translation = new f.Vector3(0,0.1,0);
     controlled.mtxLocal.scale(new f.Vector3(0.05,0.05,0.05));
 
     m1 = Scenes.createCompleteMeshNode("M1", matRed, meshCube);
@@ -83,6 +81,14 @@ namespace HeightMap {
     gridMeshFlat = new f.MeshHeightMap("HeightMap", 4, 4, myHeightMapFunction);
     gridFlat = Scenes.createCompleteMeshNode("Grid", matFlat, gridMeshFlat);
 
+    testCube = Scenes.createCompleteMeshNode("Test", matRed, meshCube);
+    let testMat = new f.Matrix4x4;
+    testMat.translateY(0.5);
+    testMat.rotateX(45);
+    testMat.rotateZ(45);
+    testCube.mtxLocal.set(testMat);
+    testCube.mtxLocal.scale(new f.Vector3(0.1,0.1,0.1));
+
     let s = 0.01;
 
     m1.mtxLocal.scale(new f.Vector3(s,s,s));
@@ -94,6 +100,7 @@ namespace HeightMap {
     graph.addChild(m1);
     graph.addChild(m2);
     graph.addChild(m3);
+    graph.addChild(testCube);
 
     viewport.initialize("Viewport", graph, cmpCamera, document.querySelector("canvas"));
     viewport.setFocus(true);
@@ -129,9 +136,40 @@ namespace HeightMap {
 
   }
 
-  function getHeightOnTerrain(terrain: f.MeshHeightMap, object: f.Node): number{
-    let indices = terrain.indices;
+  function getPositionOnTerrain(terrain: f.MeshHeightMap, object: f.Node, calculateRotation: boolean = false): f.Matrix4x4{
+    let i: number = 0;
+    
+    if ( calculateRotation )
+      i = 4;
+    
+    
+    let nearestFaces: distanceToFaceVertices = findNearestFace(terrain, object);
+
+
+    let matrix = new f.Matrix4x4;
+    matrix.translateY(calculateHeight(nearestFaces, object));
+
+    return matrix;
+  }
+
+  function calculateHeight (face: distanceToFaceVertices, object: f.Node): number{
+
+    m1.mtxLocal.translation = face.vertexONE;
+    m2.mtxLocal.translation = face.vertexTWO;
+    m3.mtxLocal.translation = face.vertexTHREE;
+
+    let ray = new f.Ray(new f.Vector3(0,1,0), object.mtxWorld.translation);
+    let v1 = f.Vector3.DIFFERENCE(face.vertexTWO, face.vertexONE);
+    let v2 = f.Vector3.DIFFERENCE(face.vertexTHREE, face.vertexONE);
+
+    let intersection = ray.intersectPlane(face.vertexONE, f.Vector3.CROSS(v1, v2))
+
+    return intersection.y;
+  }
+
+  function findNearestFace(terrain: f.MeshHeightMap, object: f.Node): distanceToFaceVertices{
     let vertices = terrain.vertices;
+    let indices = terrain.indices;
 
     let nearestFaces: Array<distanceToFaceVertices> = new Array;
 
@@ -149,40 +187,8 @@ namespace HeightMap {
       return n1.distance - n2.distance;
     });
 
-    return calculateHeight(nearestFaces[0], object);
-  }
+    return nearestFaces[0];
 
-  function calculateHeight (face: distanceToFaceVertices, object: f.Node): number{
-
-    m1.mtxLocal.translation = face.vertexONE;
-    m2.mtxLocal.translation = face.vertexTWO;
-    m3.mtxLocal.translation = face.vertexTHREE;
-
-    let ray = new f.Ray(new f.Vector3(0,1,0), object.mtxWorld.translation);
-    let v1 = f.Vector3.DIFFERENCE(face.vertexTWO, face.vertexONE);
-    let v2 = f.Vector3.DIFFERENCE(face.vertexTHREE, face.vertexONE);
-
-    let intersection = ray.intersectPlane(face.vertexONE, f.Vector3.CROSS(v1, v2))
-
-    if ( face.distanceONE == 0)
-      return face.vertexONE.y;
-    
-    if ( face.distanceTWO == 0)
-      return face.vertexTWO.y;
-
-    if ( face.distanceTHREE == 0)
-      return face.vertexTHREE.y;
-
-    console.log("Ray: " + ray);
-    console.log("Vektoren: v1 " + v1 + " v2 " + v2);
-    console.log("Intersection: " + intersection);
-
-    return intersection.y;
-
-    // console.log(face);
-
-  //   return ( (1/face.distanceONE) * face.vertexONE.y + (1/face.distanceTWO) * face.vertexTWO.y + (1/face.distanceTHREE) * face.vertexTHREE.y ) /
-  //       (1/face.distanceONE + 1/face.distanceTWO + 1/face.distanceTHREE);
   }
 
   function setupControls(): void {
@@ -191,7 +197,7 @@ namespace HeightMap {
   }
 
   function hndKeyboardControls(): void {
-    controlled.height = getHeightOnTerrain(gridMeshFlat, controlled);
+    controlled.height = getPositionOnTerrain(gridMeshFlat, controlled).translation.y;
     cntKeyVertical.setInput(
       f.Keyboard.mapToValue(1, 0, [f.KEYBOARD_CODE.I])
       + f.Keyboard.mapToValue(-1, 0, [f.KEYBOARD_CODE.K])

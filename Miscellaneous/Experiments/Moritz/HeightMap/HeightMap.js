@@ -8,6 +8,7 @@ var HeightMap;
     let m1 = new f.Node("M1");
     let m2 = new f.Node("M1");
     let m3 = new f.Node("M1");
+    let testCube = new f.Node("Test");
     let gridMeshFlat;
     let gridFlat = new f.Node("Map");
     let viewport;
@@ -29,8 +30,6 @@ var HeightMap;
         console.log("mtxWorld controlled scaling: " + controlled.mtxWorld.scaling);
         // f.RenderManager.setupTransformAndLights(graph);
         ƒAid.addStandardLightComponents(graph);
-        // console.log(heightMarker.mtxLocal.translation.x);
-        // console.log(heightMarker.mtxLocal.translation.z);
     }
     function hndLoop(_event) {
         hndKeyboardControls();
@@ -44,7 +43,7 @@ var HeightMap;
         let matRed = new f.Material("Red", f.ShaderFlat, new f.CoatColored(f.Color.CSS("RED")));
         let meshCube = new f.MeshCube("CubeMesh");
         controlled = new HeightMap.Controlled("Cube", f.Matrix4x4.IDENTITY(), matRed, new f.MeshCube());
-        controlled.mtxLocal.translation = new f.Vector3(0.4, 0.1, 0.43);
+        controlled.mtxLocal.translation = new f.Vector3(0, 0.1, 0);
         controlled.mtxLocal.scale(new f.Vector3(0.05, 0.05, 0.05));
         m1 = Scenes.createCompleteMeshNode("M1", matRed, meshCube);
         m2 = Scenes.createCompleteMeshNode("M2", matRed, meshCube);
@@ -57,6 +56,13 @@ var HeightMap;
         let cmpCamera = Scenes.createCamera(new f.Vector3(0, 2, 1), new f.Vector3(0, 0, 0));
         gridMeshFlat = new f.MeshHeightMap("HeightMap", 4, 4, myHeightMapFunction);
         gridFlat = Scenes.createCompleteMeshNode("Grid", matFlat, gridMeshFlat);
+        testCube = Scenes.createCompleteMeshNode("Test", matRed, meshCube);
+        let testMat = new f.Matrix4x4;
+        testMat.translateY(0.5);
+        testMat.rotateX(45);
+        testMat.rotateZ(45);
+        testCube.mtxLocal.set(testMat);
+        testCube.mtxLocal.scale(new f.Vector3(0.1, 0.1, 0.1));
         let s = 0.01;
         m1.mtxLocal.scale(new f.Vector3(s, s, s));
         m2.mtxLocal.scale(new f.Vector3(s, s, s));
@@ -66,6 +72,7 @@ var HeightMap;
         graph.addChild(m1);
         graph.addChild(m2);
         graph.addChild(m3);
+        graph.addChild(testCube);
         viewport.initialize("Viewport", graph, cmpCamera, document.querySelector("canvas"));
         viewport.setFocus(true);
         Scenes.dollyViewportCamera(viewport);
@@ -88,9 +95,28 @@ var HeightMap;
             console.log(gridMeshFlat.resolutionX);
         }
     }
-    function getHeightOnTerrain(terrain, object) {
-        let indices = terrain.indices;
+    function getPositionOnTerrain(terrain, object, calculateRotation = false) {
+        let i = 0;
+        if (calculateRotation)
+            i = 4;
+        let nearestFaces = findNearestFace(terrain, object);
+        let matrix = new f.Matrix4x4;
+        matrix.translateY(calculateHeight(nearestFaces, object));
+        return matrix;
+    }
+    function calculateHeight(face, object) {
+        m1.mtxLocal.translation = face.vertexONE;
+        m2.mtxLocal.translation = face.vertexTWO;
+        m3.mtxLocal.translation = face.vertexTHREE;
+        let ray = new f.Ray(new f.Vector3(0, 1, 0), object.mtxWorld.translation);
+        let v1 = f.Vector3.DIFFERENCE(face.vertexTWO, face.vertexONE);
+        let v2 = f.Vector3.DIFFERENCE(face.vertexTHREE, face.vertexONE);
+        let intersection = ray.intersectPlane(face.vertexONE, f.Vector3.CROSS(v1, v2));
+        return intersection.y;
+    }
+    function findNearestFace(terrain, object) {
         let vertices = terrain.vertices;
+        let indices = terrain.indices;
         let nearestFaces = new Array;
         for (let i = 0; i < indices.length; i = i + 3) {
             let vertexONE = new f.Vector3(vertices[indices[i] * 3], vertices[indices[i] * 3 + 1], vertices[indices[i] * 3 + 2]);
@@ -102,36 +128,14 @@ var HeightMap;
         nearestFaces.sort((n1, n2) => {
             return n1.distance - n2.distance;
         });
-        return calculateHeight(nearestFaces[0], object);
-    }
-    function calculateHeight(face, object) {
-        m1.mtxLocal.translation = face.vertexONE;
-        m2.mtxLocal.translation = face.vertexTWO;
-        m3.mtxLocal.translation = face.vertexTHREE;
-        let ray = new f.Ray(new f.Vector3(0, 1, 0), object.mtxWorld.translation);
-        let v1 = f.Vector3.DIFFERENCE(face.vertexTWO, face.vertexONE);
-        let v2 = f.Vector3.DIFFERENCE(face.vertexTHREE, face.vertexONE);
-        let intersection = ray.intersectPlane(face.vertexONE, f.Vector3.CROSS(v1, v2));
-        if (face.distanceONE == 0)
-            return face.vertexONE.y;
-        if (face.distanceTWO == 0)
-            return face.vertexTWO.y;
-        if (face.distanceTHREE == 0)
-            return face.vertexTHREE.y;
-        console.log("Ray: " + ray);
-        console.log("Vektoren: v1 " + v1 + " v2 " + v2);
-        console.log("Intersection: " + intersection);
-        return intersection.y;
-        // console.log(face);
-        //   return ( (1/face.distanceONE) * face.vertexONE.y + (1/face.distanceTWO) * face.vertexTWO.y + (1/face.distanceTHREE) * face.vertexTHREE.y ) /
-        //       (1/face.distanceONE + 1/face.distanceTWO + 1/face.distanceTHREE);
+        return nearestFaces[0];
     }
     function setupControls() {
         controlled.axisSpeed.addControl(cntKeyVertical);
         controlled.axisRotation.addControl(cntKeyHorizontal);
     }
     function hndKeyboardControls() {
-        controlled.height = getHeightOnTerrain(gridMeshFlat, controlled);
+        controlled.height = getPositionOnTerrain(gridMeshFlat, controlled).translation.y;
         cntKeyVertical.setInput(f.Keyboard.mapToValue(1, 0, [f.KEYBOARD_CODE.I])
             + f.Keyboard.mapToValue(-1, 0, [f.KEYBOARD_CODE.K]));
         cntKeyHorizontal.setInput(f.Keyboard.mapToValue(1, 0, [f.KEYBOARD_CODE.J])

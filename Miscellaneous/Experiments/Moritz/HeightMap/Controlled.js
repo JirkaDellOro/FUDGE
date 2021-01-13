@@ -19,7 +19,7 @@ var HeightMap;
             let distance = this.axisSpeed.getOutput() * this.maxSpeed * _timeFrame;
             let angle = this.axisRotation.getOutput() * this.maxRotSpeed * _timeFrame;
             this.mtxLocal.translateZ(distance);
-            this.mtxLocal.translation = new ƒ.Vector3(this.mtxLocal.translation.x, this.height, this.mtxLocal.translation.z);
+            this.mtxLocal.translation = new ƒ.Vector3(this.mtxLocal.translation.x, this.height + 0.025, this.mtxLocal.translation.z);
             this.mtxLocal.rotateY(angle);
         }
     }
