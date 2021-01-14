@@ -1,6 +1,6 @@
 <img src="https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/FudgeLogoText.png" onload="document.querySelector('h1').style.visibility='hidden'"/>
 
-<a href="https://beaumo.github.io/Thesis/Miscellaneous/Experiments/Moritz/HeightMap/Test.html">PONG</a>
+<a href="https://beaumo.github.io/Thesis/Miscellaneous/Experiments/Moritz/HeightMap/Test.html">App</a>
 
 
 # Welcome!
