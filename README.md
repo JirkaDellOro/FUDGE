@@ -1,6 +1,7 @@
 <img src="https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/FudgeLogoText.png" onload="document.querySelector('h1').style.visibility='hidden'"/>
 
-<a href="https://beaumo.github.io/Thesis/Miscellaneous/Experiments/Moritz/HeightMap/Test.html">App<a>
+<a href="https://beaumo.github.io/Thesis/Miscellaneous/Experiments/Moritz/HeightMap/Test.html">PONG</a>
+
 
 # Welcome!
 FUDGE is a lightweight open-source game engine and editor created for educating students in an academic environment in the field of design and development of games and highly interactive applications. It may also be used as a rapid prototyping tool to easly convey and evaluate ideas for applications and games and as a tool to create educational games.
