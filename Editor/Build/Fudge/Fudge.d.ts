@@ -634,6 +634,7 @@ declare namespace Fudge {
         private originalVertexToNewVertexMap;
         private vertexToUniqueVertexMap;
         private vertices;
+        private originalVertexToNewUniqueVertexMap;
         constructor(_numberOfFaces: number, _vertexCount: number, _uniqueVertices: UniqueVertex[], _numberOfIndices: number, _vertices: Float32Array);
         extrude(selection: number[]): void;
         private findEdgesFromData;

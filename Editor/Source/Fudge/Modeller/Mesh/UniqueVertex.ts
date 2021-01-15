@@ -13,6 +13,5 @@ namespace Fudge {
     protected reduceMutator(_mutator: ƒ.Mutator): void {
       delete _mutator.vertexToIndices;
     }
-
   }
 }

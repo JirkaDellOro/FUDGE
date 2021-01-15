@@ -16,18 +16,6 @@ namespace Fudge {
         new UniqueVertex(new ƒ.Vector3(1, -1, -1),  new Map([[6, {indices: [6], face: 1, edges: [5]}], [14, {indices: [13, 15], face: 3, edges: [11, 15]}], [22, {indices: [25, 27], face: 4, edges: [17, 18]}]])), 
         new UniqueVertex(new ƒ.Vector3(1, 1, -1),   new Map([[7, {indices: [8, 11], face: 1, edges: [5, 6]}], [15, {indices: [16], face: 3, edges: [11]}], [23, {indices: [33], face: 5, edges: [20]}]])) 
       ];
-
-      // this._uniqueVertices = [
-      //   new UniqueVertex(new ƒ.Vector3(-1, 1, 1),   new Map([[0, [2, 5]], [8, [22]], [16, [31]]])),
-      //   new UniqueVertex(new ƒ.Vector3(-1, -1, 1),  new Map([[1, [0]], [9, [19, 21]], [17, [26, 29]]])), 
-      //   new UniqueVertex(new ƒ.Vector3(1, -1, 1),   new Map([[2, [1, 3]], [10, [12]], [18, [28]]])), 
-      //   new UniqueVertex(new ƒ.Vector3(1, 1, 1),    new Map([[3, [4]], [11, [14, 17]], [19, [32, 35]]])), 
-      //   new UniqueVertex(new ƒ.Vector3(-1, 1, -1),  new Map([[4, [10]], [12, [20, 23]], [20, [30, 34]]])), 
-      //   new UniqueVertex(new ƒ.Vector3(-1, -1, -1), new Map([[5, [7, 9]], [13, [18]], [21, [24]]])), 
-      //   new UniqueVertex(new ƒ.Vector3(1, -1, -1),  new Map([[6, [6]], [14, [13, 15]], [22, [25, 27]]])), 
-      //   new UniqueVertex(new ƒ.Vector3(1, 1, -1),   new Map([[7, [8, 11]], [15, [16]], [23, [33]]])) 
-      // ];
-
       // TODO: maybe get around looping at bit less here
       for (let vertex of this._uniqueVertices) {
         vertex.position.x = vertex.position.x / 2;
@@ -47,30 +35,31 @@ namespace Fudge {
       for (let vertex of this._uniqueVertices) {
         let vertexSerialization: any = {};
         vertexSerialization.position = [vertex.position.x, vertex.position.y, vertex.position.z];
-        let indicesSerialized: Array<Object> = [];
+        let dataSerialized: Array<Object> = [];
         for (let index of vertex.vertexToData.keys()) {
-          indicesSerialized.push({
+          dataSerialized.push({
             vertexIndex: index,
             triangleIndices: vertex.vertexToData.get(index).indices,
-            faceIndex: vertex.vertexToData.get(index).face
+            faceIndex: vertex.vertexToData.get(index).face,
+            edges: vertex.vertexToData.get(index).edges
           });
         } 
-        vertexSerialization.indices = indicesSerialized;
+        vertexSerialization.data = dataSerialized;
         serializable.push(vertexSerialization);
       }
       return JSON.stringify(serializable);
     }
 
     public retrieveState(state: string): void {
-      let data: Array<any> = JSON.parse(state);
+      let json: Array<any> = JSON.parse(state);
       let result: Array<UniqueVertex> = [];
-      for (let vertex of data) {
+      for (let vertex of json) {
         let position: ƒ.Vector3 = new ƒ.Vector3(vertex.position[0], vertex.position[1], vertex.position[2]);
-        let indicesMap: Map<number, {indices: number[], face?: number}> = new Map();
-        for (let indices of vertex.indices) {
-          indicesMap.set(indices.vertexIndex, {indices: indices.triangleIndices, face: indices.faceIndex});
+        let dataMap: Map<number, {indices: number[], face?: number, edges?: number[]}> = new Map();
+        for (let data of vertex.data) {
+          dataMap.set(data.vertexIndex, {indices: data.triangleIndices, face: data.faceIndex, edges: data.edges});
         }
-        let uniqueVertex: UniqueVertex = new UniqueVertex(position, indicesMap);
+        let uniqueVertex: UniqueVertex = new UniqueVertex(position, dataMap);
         result.push(uniqueVertex);
       }
       this._uniqueVertices = result;

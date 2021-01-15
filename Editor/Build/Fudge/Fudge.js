@@ -2409,6 +2409,7 @@ var Fudge;
             this.newVertexToOriginalVertexMap = new Map();
             this.originalVertexToNewVertexMap = new Map();
             this.vertexToUniqueVertexMap = new Map();
+            this.originalVertexToNewUniqueVertexMap = new Map();
             this.numberOfFaces = _numberOfFaces;
             this.vertexCount = _vertexCount;
             this.uniqueVertices = _uniqueVertices;
@@ -2475,6 +2476,7 @@ var Fudge;
             this.removeInteriorEdges(edges);
             return edges;
         }
+        // vertexcount is 4 too high at one point Sadge 
         extrudeEdge(selection) {
             let newTriangles = [];
             let reverseVertices = new Map();
@@ -2482,14 +2484,15 @@ var Fudge;
             for (let vertex of selection) {
                 this.uniqueVertices[vertex].vertexToData.set(this.vertexCount + iterator, { indices: [], face: this.numberOfFaces, edges: [] });
                 this.newVertexToOriginalVertexMap.set(this.vertexCount + iterator, vertex);
-                if (!this.originalVertexToNewVertexMap.has(vertex)) {
+                if (!this.originalVertexToNewUniqueVertexMap.has(this.vertexToUniqueVertexMap.get(vertex))) {
                     let newVertex = new Fudge.UniqueVertex(new ƒ.Vector3(this.uniqueVertices[vertex].position.x, this.uniqueVertices[vertex].position.y, this.uniqueVertices[vertex].position.z), new Map([[this.vertexCount + iterator + selection.length, { indices: [], face: this.numberOfFaces, edges: [] }]]));
                     this.newVertexToOriginalVertexMap.set(this.vertexCount + iterator + selection.length, this.uniqueVertices.length);
+                    this.originalVertexToNewUniqueVertexMap.set(this.vertexToUniqueVertexMap.get(vertex), this.uniqueVertices.length);
                     this.uniqueVertices.push(newVertex);
                 }
                 else {
-                    this.uniqueVertices[this.newVertexToOriginalVertexMap.get(this.originalVertexToNewVertexMap.get(vertex))].vertexToData.set(this.vertexCount + iterator + selection.length, { indices: [], face: this.numberOfFaces, edges: [] });
-                    this.newVertexToOriginalVertexMap.set(this.vertexCount + iterator + selection.length, this.newVertexToOriginalVertexMap.get(this.originalVertexToNewVertexMap.get(vertex)));
+                    this.uniqueVertices[this.originalVertexToNewUniqueVertexMap.get(this.vertexToUniqueVertexMap.get(vertex))].vertexToData.set(this.vertexCount + iterator + selection.length, { indices: [], face: this.numberOfFaces, edges: [] });
+                    this.newVertexToOriginalVertexMap.set(this.vertexCount + iterator + selection.length, this.originalVertexToNewUniqueVertexMap.get(this.vertexToUniqueVertexMap.get(vertex))); // this.newVertexToOriginalVertexMap.get(this.originalVertexToNewVertexMap.get(vertex)));
                 }
                 this.originalVertexToNewVertexMap.set(vertex, this.vertexCount + iterator + selection.length);
                 reverseVertices.set(vertex, this.vertexCount + iterator);
@@ -2547,7 +2550,6 @@ var Fudge;
                                 if (edgesOfFace.edge === edges[j]) {
                                     isAlreadyInDict = true;
                                 }
-                                // if (edgesOfFace[0].edge === edges[i] || edgesOfFace[1].edge === edges[i])
                             }
                         }
                         if (isAlreadyInDict)
@@ -2633,12 +2635,8 @@ var Fudge;
                 vertexToUniqueVertex.set(this.vertexCount + iterator, this.vertexToUniqueVertexMap.get(selectedVertex));
                 originalToNewVertexMap.set(selectedVertex, this.vertexCount + iterator);
                 this.originalVertexToNewVertexMap.set(selectedVertex, this.vertexCount + iterator);
+                this.originalVertexToNewUniqueVertexMap.set(this.vertexToUniqueVertexMap.get(selectedVertex), this.uniqueVertices.length);
                 // the new front face has the indices of the original face
-                // for (let index of originalvertexToData.indices) {
-                //   newVertex.vertexToData.get(originalVertexCount + iterator + selectedVertices.length).indices.push(index);
-                // }
-                // for (let edge of originalvertexToData.edges) {
-                // }
                 newVertex.vertexToData.get(originalVertexCount + iterator + selectedVertices.length).indices = originalvertexToData.indices;
                 newVertex.vertexToData.get(originalVertexCount + iterator + selectedVertices.length).edges = originalvertexToData.edges;
                 newVertex.vertexToData.get(originalVertexCount + iterator + selectedVertices.length).face = originalvertexToData.face;
@@ -2647,17 +2645,18 @@ var Fudge;
                 // the old front face is deleted
                 vertexToUniqueVertex.set(selectedVertex, this.vertexToUniqueVertexMap.get(selectedVertex));
                 this.uniqueVertices[this.vertexToUniqueVertexMap.get(selectedVertex)].vertexToData.set(selectedVertex, { indices: [], edges: [] });
+                this.uniqueVertices.push(newVertex);
                 newVertices.push(newVertex);
                 iterator++;
             }
+            // add the edges of the new front face
             for (let newVertex of newVertices) {
                 let edgesOfNewVertex = newVertex.vertexToData.get(newVertexToFrontVertexMap.get(newVertex)).edges;
                 for (let i = 0; i < edgesOfNewVertex.length; i++) {
                     edgesOfNewVertex[i] = selectedVertexToNewVertexMap.get(edgesOfNewVertex[i]);
                 }
-                this.uniqueVertices.push(newVertex);
             }
-            this.vertexCount += 5 * selectedVertices.length;
+            this.vertexCount += 4 * selectedVertices.length;
             return { vertexToUniqueVertex: vertexToUniqueVertex, reverse: reverse, originalToNewVertex: originalToNewVertexMap };
         }
         addIndicesToNewVertices(edges, mapping) {
@@ -2733,16 +2732,6 @@ var Fudge;
                 new Fudge.UniqueVertex(new ƒ.Vector3(1, -1, -1), new Map([[6, { indices: [6], face: 1, edges: [5] }], [14, { indices: [13, 15], face: 3, edges: [11, 15] }], [22, { indices: [25, 27], face: 4, edges: [17, 18] }]])),
                 new Fudge.UniqueVertex(new ƒ.Vector3(1, 1, -1), new Map([[7, { indices: [8, 11], face: 1, edges: [5, 6] }], [15, { indices: [16], face: 3, edges: [11] }], [23, { indices: [33], face: 5, edges: [20] }]]))
             ];
-            // this._uniqueVertices = [
-            //   new UniqueVertex(new ƒ.Vector3(-1, 1, 1),   new Map([[0, [2, 5]], [8, [22]], [16, [31]]])),
-            //   new UniqueVertex(new ƒ.Vector3(-1, -1, 1),  new Map([[1, [0]], [9, [19, 21]], [17, [26, 29]]])), 
-            //   new UniqueVertex(new ƒ.Vector3(1, -1, 1),   new Map([[2, [1, 3]], [10, [12]], [18, [28]]])), 
-            //   new UniqueVertex(new ƒ.Vector3(1, 1, 1),    new Map([[3, [4]], [11, [14, 17]], [19, [32, 35]]])), 
-            //   new UniqueVertex(new ƒ.Vector3(-1, 1, -1),  new Map([[4, [10]], [12, [20, 23]], [20, [30, 34]]])), 
-            //   new UniqueVertex(new ƒ.Vector3(-1, -1, -1), new Map([[5, [7, 9]], [13, [18]], [21, [24]]])), 
-            //   new UniqueVertex(new ƒ.Vector3(1, -1, -1),  new Map([[6, [6]], [14, [13, 15]], [22, [25, 27]]])), 
-            //   new UniqueVertex(new ƒ.Vector3(1, 1, -1),   new Map([[7, [8, 11]], [15, [16]], [23, [33]]])) 
-            // ];
             // TODO: maybe get around looping at bit less here
             for (let vertex of this._uniqueVertices) {
                 vertex.position.x = vertex.position.x / 2;
@@ -2759,29 +2748,30 @@ var Fudge;
             for (let vertex of this._uniqueVertices) {
                 let vertexSerialization = {};
                 vertexSerialization.position = [vertex.position.x, vertex.position.y, vertex.position.z];
-                let indicesSerialized = [];
+                let dataSerialized = [];
                 for (let index of vertex.vertexToData.keys()) {
-                    indicesSerialized.push({
+                    dataSerialized.push({
                         vertexIndex: index,
                         triangleIndices: vertex.vertexToData.get(index).indices,
-                        faceIndex: vertex.vertexToData.get(index).face
+                        faceIndex: vertex.vertexToData.get(index).face,
+                        edges: vertex.vertexToData.get(index).edges
                     });
                 }
-                vertexSerialization.indices = indicesSerialized;
+                vertexSerialization.data = dataSerialized;
                 serializable.push(vertexSerialization);
             }
             return JSON.stringify(serializable);
         }
         retrieveState(state) {
-            let data = JSON.parse(state);
+            let json = JSON.parse(state);
             let result = [];
-            for (let vertex of data) {
+            for (let vertex of json) {
                 let position = new ƒ.Vector3(vertex.position[0], vertex.position[1], vertex.position[2]);
-                let indicesMap = new Map();
-                for (let indices of vertex.indices) {
-                    indicesMap.set(indices.vertexIndex, { indices: indices.triangleIndices, face: indices.faceIndex });
+                let dataMap = new Map();
+                for (let data of vertex.data) {
+                    dataMap.set(data.vertexIndex, { indices: data.triangleIndices, face: data.faceIndex, edges: data.edges });
                 }
-                let uniqueVertex = new Fudge.UniqueVertex(position, indicesMap);
+                let uniqueVertex = new Fudge.UniqueVertex(position, dataMap);
                 result.push(uniqueVertex);
             }
             this._uniqueVertices = result;
