@@ -1,6 +1,6 @@
 namespace Fudge {
   export class ModifiableMesh extends ƒ.Mesh {
-    private static vertexSize: number = ƒ.Mesh.getBufferSpecification().size;
+    public static readonly vertexSize: number = ƒ.Mesh.getBufferSpecification().size;
     private _uniqueVertices: UniqueVertex[];
 
     constructor() {
@@ -203,20 +203,25 @@ namespace Fudge {
 
     // double clicking makes normal caclulation impossible right now because old and new vertices are at the same position, maybe add some small increment initially?
     public extrude(selectedIndices: number[]): number[] {
-      switch (selectedIndices.length) {
-        case 4:
-          let faceVertices: Map<number, number> = this.findCorrectFaceWithoutNormals(selectedIndices);
-          this.addIndicesToNewVertices(this.findEdgesFrom(faceVertices), this.getNewVertices(faceVertices));
-          break;
-        case 2:
-          let meshUtils: MeshUtils = new MeshUtils(this.countNumberOfFaces(), this.vertices.length / ModifiableMesh.vertexSize, this._uniqueVertices, this.indices.length);
-          meshUtils.extrudeEdge(selectedIndices);
-          meshUtils.addNewTriangles();
-          break;
-        default:
-          this.extrude3Vertices(selectedIndices);
-          break;
-      }
+      let meshUtils: MeshUtils = new MeshUtils(this.countNumberOfFaces(), this.vertices.length / ModifiableMesh.vertexSize, this._uniqueVertices, this.indices.length, this.vertices);
+      // we prolly need to fix this for selection.length == 2
+      meshUtils.extrude(selectedIndices);
+
+      // switch (selectedIndices.length) {
+      //   case 4:
+      //     let faceVertices: Map<number, number> = this.findCorrectFaceWithoutNormals(selectedIndices);
+      //     this.addIndicesToNewVertices(this.findEdgesFrom(faceVertices), this.getNewVertices(faceVertices));
+      //     break;
+      //   default:
+      //     let meshUtils: MeshUtils = new MeshUtils(this.countNumberOfFaces(), this.vertices.length / ModifiableMesh.vertexSize, this._uniqueVertices, this.indices.length, this.vertices);
+      //     // we prolly need to fix this for selection.length == 2
+      //     meshUtils.extrude(selectedIndices);
+      //     // meshUtils.extrudeEdge(selectedIndices);
+      //     // meshUtils.addNewTriangles();
+
+      //     //this.extrude3Vertices(selectedIndices);
+      //     break;
+      // }
       this.vertices = this.createVertices();
       this.indices = this.createIndices();
 
@@ -314,12 +319,13 @@ namespace Fudge {
     }
 
     private extrude3Vertices(selection: number[]): void {
-      let meshUtils: MeshUtils = new MeshUtils(this.countNumberOfFaces(), this.vertices.length / ModifiableMesh.vertexSize, this._uniqueVertices, this.indices.length);
-      let edges: {start: number, end: number}[] = meshUtils.findEdgesFromData(selection);
-      for (let edge of edges) {
-        meshUtils.extrudeEdge([edge.start, edge.end]);
-      }
-      meshUtils.addNewTriangles();
+      let meshUtils: MeshUtils = new MeshUtils(this.countNumberOfFaces(), this.vertices.length / ModifiableMesh.vertexSize, this._uniqueVertices, this.indices.length, this.vertices);
+      meshUtils.extrude(selection);
+      // let edges: {start: number, end: number}[] = meshUtils.findEdgesFromData(selection);
+      // for (let edge of edges) {
+      //   meshUtils.extrudeEdge([edge.start, edge.end]);
+      // }
+      // meshUtils.addNewTriangles();
     }
     
     private addIndicesToNewVertices(edges: {start: number, end: number}[], mapping: {vertexToUniqueVertex: Map<number, number>, reverse: Map<number, number[]>, originalToNewVertex: Map<number, number>}): void {

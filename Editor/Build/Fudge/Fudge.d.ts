@@ -633,22 +633,23 @@ declare namespace Fudge {
         private newVertexToOriginalVertexMap;
         private originalVertexToNewVertexMap;
         private vertexToUniqueVertexMap;
-        constructor(_numberOfFaces: number, _vertexCount: number, _uniqueVertices: UniqueVertex[], _numberOfIndices: number);
-        findEdgesFromData(selection: number[]): {
-            start: number;
-            end: number;
-        }[];
-        private removeInnerEdges;
-        extrudeEdge(selection: number[]): number[];
-        addNewTriangles(): void;
+        private vertices;
+        constructor(_numberOfFaces: number, _vertexCount: number, _uniqueVertices: UniqueVertex[], _numberOfIndices: number, _vertices: Float32Array);
+        extrude(selection: number[]): void;
+        private findEdgesFromData;
+        private extrudeEdge;
+        private addNewTriangles;
         private fillVertexMap;
+        private removeInnerEdges;
         private removeInteriorEdges;
-        private removeDuplicateEdges;
+        private getNewVertices;
+        private addIndicesToNewVertices;
+        private isEdgeDuplicate;
     }
 }
 declare namespace Fudge {
     class ModifiableMesh extends ƒ.Mesh {
-        private static vertexSize;
+        static readonly vertexSize: number;
         private _uniqueVertices;
         constructor();
         get uniqueVertices(): UniqueVertex[];

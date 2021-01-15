@@ -8,19 +8,70 @@ namespace Fudge {
     private newVertexToOriginalVertexMap: Map<number, number> = new Map();
     private originalVertexToNewVertexMap: Map<number, number> = new Map();
     private vertexToUniqueVertexMap: Map<number, number> = new Map();
+    private vertices: Float32Array;
 
-    constructor(_numberOfFaces: number, _vertexCount: number, _uniqueVertices: UniqueVertex[], _numberOfIndices: number) {
+    constructor(_numberOfFaces: number, _vertexCount: number, _uniqueVertices: UniqueVertex[], _numberOfIndices: number, _vertices: Float32Array) {
       this.numberOfFaces = _numberOfFaces;
       this.vertexCount = _vertexCount;
       this.uniqueVertices = _uniqueVertices;
       this.numberOfIndices = _numberOfIndices;
+      this.vertices = _vertices;
+    }
+
+    public extrude(selection: number[]): void {
+      this.fillVertexMap(selection);
+      let edges: {start: number, end: number}[] = this.findEdgesFromData(selection);
+      let faceToEdgesMap: Map<number, {edge: {start: number, end: number}, index: number}[]> = this.removeInnerEdges(edges);
+      
+      for (let [face, edgesOfFace] of faceToEdgesMap) {
+        edgesOfFace.sort((a, b) => b.index - a.index);
+
+        if (edgesOfFace.length !== 1) {
+          for (let i: number = 0; i < edgesOfFace.length; i++) {
+            edges.splice(edgesOfFace[i].index, 1);
+          }
+        }
+        if (edgesOfFace.length === 4) {
+          for (let edgeData of edgesOfFace) {
+            for (let i: number = edges.length - 1; i >= 0; i--) {
+              if (this.isEdgeDuplicate(edges[i], edgeData.edge)) {
+                edges.splice(i, 1);
+              }
+            }
+          }
+
+          let faceVertices: number[] = [];
+          let faceEdges: {start: number, end: number}[] = [];
+          for (let edgeData of edgesOfFace) {
+            faceVertices.push(edgeData.edge.start);
+            faceEdges.push(edgeData.edge);
+          }
+          let data: {
+            vertexToUniqueVertex: Map<number, number>;
+            reverse: Map<number, number[]>;
+            originalToNewVertex: Map<number, number>;
+          } = this.getNewVertices(faceVertices);
+          this.addIndicesToNewVertices(faceEdges, data);
+        } 
+      }
+      // take care of the remaining edges that aren't part of a face
+      for (let edge of edges) {
+        edge.start = this.vertexToUniqueVertexMap.get(edge.start);
+        edge.end = this.vertexToUniqueVertexMap.get(edge.end);
+      }
+
+      // improve this so that it takes the edge as argument
+      for (let edge of edges) {
+        this.extrudeEdge([edge.start, edge.end]);
+      }
+
+      this.addNewTriangles();
     }
 
     /*
       loop over the stored (half-)edges and find the correct ones  
     */
-    public findEdgesFromData(selection: number[]): {start: number, end: number}[] {
-      this.fillVertexMap(selection);
+    private findEdgesFromData(selection: number[]): {start: number, end: number}[] {
       let edges: {start: number, end: number}[] = [];
 
       for (let [vertexIndex, uniqueIndex] of this.vertexToUniqueVertexMap) {
@@ -38,70 +89,10 @@ namespace Fudge {
       }
 
       this.removeInteriorEdges(edges);
-      let faceToEdgesMap: Map<number, {edge: {start: number, end: number}, index: number}[]> = this.removeInnerEdges(edges);
-
-      for (let [face, edgesOfFace] of faceToEdgesMap) {
-        if (edgesOfFace.length === 4) {
-
-        } else if (edgesOfFace.length === 2) {
-          edges.splice(edgesOfFace[0].index, 1);
-          edges.splice(edgesOfFace[1].index, 1);
-        }
-      }
-
-      // this.removeDuplicateEdges(edges);
-      let newEdges: {start: number, end: number}[] = [];
-
-      for (let edge of edges) {
-        edge.start = this.vertexToUniqueVertexMap.get(edge.start);
-        edge.end = this.vertexToUniqueVertexMap.get(edge.end);
-        // newEdges.push({start: edge.end, end: edge.start});
-        newEdges.push(edge);
-      }
-
-      return newEdges;
+      return edges;
     }
 
-    // there can only be 2 and 4
-    private removeInnerEdges(edges: {start: number, end: number}[]): Map<number, {edge: {start: number, end: number}, index: number}[]> {
-      let faceToEdgesMap: Map<number, {edge: {start: number, end: number}, index: number}[]> = new Map();
-      for (let i: number = 0; i < edges.length; i++) {
-        for (let j: number = 0; j < edges.length; j++) {
-          if (edges[i] === edges[j])
-            continue;
-          
-          let faceOfEdge1: number = this.uniqueVertices[this.vertexToUniqueVertexMap.get(edges[i].start)].vertexToData.get(edges[i].start).face;
-          let faceOfEdge2: number = this.uniqueVertices[this.vertexToUniqueVertexMap.get(edges[j].start)].vertexToData.get(edges[j].start).face;
-
-          if (faceOfEdge1 === faceOfEdge2) {
-            let isAlreadyInDict: boolean = false;
-            if (!faceToEdgesMap.has(faceOfEdge1)) {
-              faceToEdgesMap.set(faceOfEdge1, []);
-            } else {
-              for (let [face, edgesOfFace] of faceToEdgesMap) {
-                if (edgesOfFace[0].edge === edges[i] || edgesOfFace[1].edge === edges[i])
-                  isAlreadyInDict = true;
-              }
-            }
-
-            if (isAlreadyInDict)
-              continue;
-
-            if (j > i) {
-              faceToEdgesMap.get(faceOfEdge1).push({edge: edges[j], index: j});
-              faceToEdgesMap.get(faceOfEdge1).push({edge: edges[i], index: i});
-            } else {
-              faceToEdgesMap.get(faceOfEdge1).push({edge: edges[i], index: i});
-              faceToEdgesMap.get(faceOfEdge1).push({edge: edges[j], index: j});
-            }
-          }
-        }
-      } 
-      return faceToEdgesMap;
-    }
-
-
-    public extrudeEdge(selection: number[]): number[] {
+    private extrudeEdge(selection: number[]): number[] {
       let newTriangles: Array<number> = [];
       let reverseVertices: Map<number, number> = new Map();
       let iterator: number = 0;
@@ -133,8 +124,6 @@ namespace Fudge {
       this.newTriangles.push(reverseVertices.get(selection[0]));
       this.newTriangles.push(this.originalVertexToNewVertexMap.get(selection[1]));
       this.newTriangles.push(reverseVertices.get(selection[1]));
-      //this.newTriangles.push(this.originalVertexToNewVertexMap.get(selection[0]));
-      //this.newTriangles.push(reverseVertices.get(selection[0]));
 
       return newTriangles;
     }
@@ -142,7 +131,7 @@ namespace Fudge {
     /*
       update the indices and edges of the newly created vertices according to the data in the newTriangles array
     */
-    public addNewTriangles(): void {
+    private addNewTriangles(): void {
       for (let i: number = 0; i < this.newTriangles.length; i++) {
         this.uniqueVertices[this.newVertexToOriginalVertexMap.get(this.newTriangles[i])].vertexToData.get(this.newTriangles[i]).indices.push(this.numberOfIndices);
         if (this.numberOfIndices % 3 !== 2) {
@@ -161,6 +150,40 @@ namespace Fudge {
         }
       }
     }
+
+    private removeInnerEdges(edges: {start: number, end: number}[]): Map<number, {edge: {start: number, end: number}, index: number}[]> {
+      let faceToEdgesMap: Map<number, {edge: {start: number, end: number}, index: number}[]> = new Map();
+      for (let i: number = 0; i < edges.length; i++) {
+        for (let j: number = 0; j < edges.length; j++) {
+          if (edges[i] === edges[j])
+            continue;
+          
+          let faceOfEdge1: number = this.uniqueVertices[this.vertexToUniqueVertexMap.get(edges[i].start)].vertexToData.get(edges[i].start).face;
+          let faceOfEdge2: number = this.uniqueVertices[this.vertexToUniqueVertexMap.get(edges[j].start)].vertexToData.get(edges[j].start).face;
+
+          if (faceOfEdge1 === faceOfEdge2) {
+            let isAlreadyInDict: boolean = false;
+            if (!faceToEdgesMap.has(faceOfEdge1)) {
+              faceToEdgesMap.set(faceOfEdge1, []);
+            } else {
+              for (let edgesOfFace of faceToEdgesMap.get(faceOfEdge1)) {
+                if (edgesOfFace.edge === edges[j]) {
+                  isAlreadyInDict = true;
+                }
+                // if (edgesOfFace[0].edge === edges[i] || edgesOfFace[1].edge === edges[i])
+              }
+            }
+
+            if (isAlreadyInDict)
+              continue;
+
+            faceToEdgesMap.get(faceOfEdge1).push({edge: edges[j], index: j});
+          }
+        }
+      } 
+      return faceToEdgesMap;
+    }
+
 
     /*
       remove the interior edges, i.e. the duplicate edges in opposite directions
@@ -183,26 +206,155 @@ namespace Fudge {
       }
     }
 
-    // remove duplicate edges with different indices
-    private removeDuplicateEdges(edges: {start: number, end: number}[]): void {
-      for (let i: number = 0; i < edges.length; i++) {
-        for (let j: number = 0; j < edges.length; j++) {
-          if (i === j) 
-            continue;
-          let edgeStartI: number = this.vertexToUniqueVertexMap.get(edges[i].start);
-          let edgeStartJ: number = this.vertexToUniqueVertexMap.get(edges[j].start);
-          let edgeEndI: number = this.vertexToUniqueVertexMap.get(edges[i].end);
-          let edgeEndJ: number = this.vertexToUniqueVertexMap.get(edges[j].end);
-          if (
-            ((edgeStartI === edgeStartJ && edgeEndI === edgeEndJ) || 
-              (edgeStartI === edgeEndJ && edgeEndI === edgeStartJ)) && 
-            (!((edges[i].start === edges[j].start && edges[i].end === edges[j].end) || 
-              (edges[i].start === edges[j].end && edges[i].end === edges[j].start)))) {
-            edges.splice(j, 1);
-          }
+    // remove duplicate edges with different indices, we likely don't need this anymore
+    // private removeDuplicateEdges(edges: {start: number, end: number}[]): void {
+    //   for (let i: number = 0; i < edges.length; i++) {
+    //     for (let j: number = 0; j < edges.length; j++) {
+    //       if (i === j) 
+    //         continue;
+    //       let edgeStartI: number = this.vertexToUniqueVertexMap.get(edges[i].start);
+    //       let edgeStartJ: number = this.vertexToUniqueVertexMap.get(edges[j].start);
+    //       let edgeEndI: number = this.vertexToUniqueVertexMap.get(edges[i].end);
+    //       let edgeEndJ: number = this.vertexToUniqueVertexMap.get(edges[j].end);
+    //       if (
+    //         ((edgeStartI === edgeStartJ && edgeEndI === edgeEndJ) || 
+    //           (edgeStartI === edgeEndJ && edgeEndI === edgeStartJ)) && 
+    //         (!((edges[i].start === edges[j].start && edges[i].end === edges[j].end) || 
+    //           (edges[i].start === edges[j].end && edges[i].end === edges[j].start)))) {
+    //         edges.splice(j, 1);
+    //       }
+    //     }
+    //   }
+    // }
+
+    /*
+      loops over the selection and adds a new vertex for every selected vertex
+      which new vertex belongs to which original vertex is then stored in an object and returned for further processing
+      faceVertices: key = vertexIndex, value = uniqueVertexIndex
+    */
+   private getNewVertices(selectedVertices: Array<number>): {vertexToUniqueVertex: Map<number, number>, reverse: Map<number, number[]>, originalToNewVertex: Map<number, number>} {       
+    let originalLength: number = this.uniqueVertices.length;
+    // use an index here to take care of ordering
+    let iterator: number = 0;
+    let vertexToUniqueVertex: Map<number, number> = new Map();
+    let reverse: Map<number, number[]> = new Map();
+    let originalToNewVertexMap: Map<number, number> = new Map();
+    let originalVertexCount: number = this.vertexCount;
+    let newVertices: UniqueVertex[] = [];
+    let newVertexToFrontVertexMap: Map<UniqueVertex, number> = new Map();
+    let selectedVertexToNewVertexMap: Map<number, number> = new Map();
+
+    for (let selectedVertex of selectedVertices) {
+      // get the indices from the original face; they will be deleted later
+      let originalvertexToData: {indices: number[], face?: number, edges?: number[]} = this.uniqueVertices[this.vertexToUniqueVertexMap.get(selectedVertex)].vertexToData.get(selectedVertex);
+      let newVertex: UniqueVertex = new UniqueVertex(new ƒ.Vector3(this.vertices[selectedVertex * ModifiableMesh.vertexSize + 0], this.vertices[selectedVertex * ModifiableMesh.vertexSize + 1], this.vertices[selectedVertex * ModifiableMesh.vertexSize + 2]), new Map());
+      
+      reverse.set(selectedVertex, []);
+      let lengthOffset: number = selectedVertices.length;
+      // one index is added for the new vertex for every index of the original vertex
+      for (let i: number = 0; i < 3; i++) {
+        newVertex.vertexToData.set(this.vertexCount + iterator + lengthOffset, {indices: [], edges: []});
+        vertexToUniqueVertex.set(this.vertexCount + iterator + lengthOffset, originalLength + iterator);
+        reverse.get(selectedVertex).push(this.vertexCount + iterator + lengthOffset);
+        lengthOffset += selectedVertices.length;
+      }
+      // add one more set of vertices to the original face
+      this.uniqueVertices[this.vertexToUniqueVertexMap.get(selectedVertex)].vertexToData.set(this.vertexCount + iterator, {indices: [], edges: []});
+      vertexToUniqueVertex.set(this.vertexCount + iterator, this.vertexToUniqueVertexMap.get(selectedVertex));
+      originalToNewVertexMap.set(selectedVertex, this.vertexCount + iterator);
+      this.originalVertexToNewVertexMap.set(selectedVertex, this.vertexCount + iterator);
+
+      // the new front face has the indices of the original face
+      // for (let index of originalvertexToData.indices) {
+      //   newVertex.vertexToData.get(originalVertexCount + iterator + selectedVertices.length).indices.push(index);
+      // }
+      // for (let edge of originalvertexToData.edges) {
+      // }
+      newVertex.vertexToData.get(originalVertexCount + iterator + selectedVertices.length).indices = originalvertexToData.indices;
+      newVertex.vertexToData.get(originalVertexCount + iterator + selectedVertices.length).edges = originalvertexToData.edges;
+      newVertex.vertexToData.get(originalVertexCount + iterator + selectedVertices.length).face = originalvertexToData.face;
+      newVertexToFrontVertexMap.set(newVertex, originalVertexCount + iterator + selectedVertices.length);
+      selectedVertexToNewVertexMap.set(selectedVertex, originalVertexCount + iterator + selectedVertices.length);
+
+      // the old front face is deleted
+      vertexToUniqueVertex.set(selectedVertex, this.vertexToUniqueVertexMap.get(selectedVertex));
+      this.uniqueVertices[this.vertexToUniqueVertexMap.get(selectedVertex)].vertexToData.set(selectedVertex, {indices: [], edges: []});
+      
+      newVertices.push(newVertex);
+      iterator++;
+    }
+
+    for (let newVertex of newVertices) {
+      let edgesOfNewVertex: number[] = newVertex.vertexToData.get(newVertexToFrontVertexMap.get(newVertex)).edges;
+      for (let i: number = 0; i < edgesOfNewVertex.length; i++) {
+        edgesOfNewVertex[i] = selectedVertexToNewVertexMap.get(edgesOfNewVertex[i]);
+      }
+
+      this.uniqueVertices.push(newVertex);
+    }
+
+    this.vertexCount += 5 * selectedVertices.length;
+    return {vertexToUniqueVertex: vertexToUniqueVertex, reverse: reverse, originalToNewVertex: originalToNewVertexMap};
+  }
+
+
+    private addIndicesToNewVertices(edges: {start: number, end: number}[], mapping: {vertexToUniqueVertex: Map<number, number>, reverse: Map<number, number[]>, originalToNewVertex: Map<number, number>}): void {
+      let vertexToUniqueVertexMap: Map<number, number> = mapping.vertexToUniqueVertex;
+      let reverse: Map<number, number[]> = mapping.reverse;
+      let originalToNewVertex: Map<number, number> = mapping.originalToNewVertex;
+      let isLowMap: Map<number, boolean> = new Map();
+
+      let newTriangles: Array<{index: number, face: number}> = [];
+
+      for (let edge of edges) {
+        let aPlusNArray: number[] = reverse.get(edge.start);
+        let bPlusNArray: number[] = reverse.get(edge.end);
+        let a: number;
+        let b: number;
+        let aPlusN: number;
+        let bPlusN: number;
+
+        if (isLowMap.get(edge.start) || isLowMap.get(edge.end)) {
+          a = originalToNewVertex.get(edge.start);
+          b = originalToNewVertex.get(edge.end);
+          aPlusN = aPlusNArray[2];
+          bPlusN = bPlusNArray[2];
+          isLowMap.set(edge.start, false);
+          isLowMap.set(edge.end, false);  
+        } else {
+          a = edge.start;
+          b = edge.end;
+          aPlusN = aPlusNArray[1];
+          bPlusN = bPlusNArray[1];
+          isLowMap.set(edge.start, true);
+          isLowMap.set(edge.end, true);  
         }
+        newTriangles.push({index: a, face: this.numberOfFaces});
+        newTriangles.push({index: b, face: this.numberOfFaces});
+        newTriangles.push({index: bPlusN, face: this.numberOfFaces});
+        newTriangles.push({index: bPlusN, face: this.numberOfFaces});
+        newTriangles.push({index: aPlusN, face: this.numberOfFaces});
+        newTriangles.push({index: a, face: this.numberOfFaces});
+        this.numberOfFaces++;
+      }
+
+      for (let i: number = 0; i < newTriangles.length; i++) {
+        this.uniqueVertices[vertexToUniqueVertexMap.get(newTriangles[i].index)].vertexToData.get(newTriangles[i].index).indices.push(this.numberOfIndices);
+        this.uniqueVertices[vertexToUniqueVertexMap.get(newTriangles[i].index)].vertexToData.get(newTriangles[i].index).face = newTriangles[i].face;
+        if (this.numberOfIndices % 3 !== 2) {
+          this.uniqueVertices[vertexToUniqueVertexMap.get(newTriangles[i].index)].vertexToData.get(newTriangles[i].index).edges.push(newTriangles[i + 1].index);
+        } else {
+          this.uniqueVertices[vertexToUniqueVertexMap.get(newTriangles[i].index)].vertexToData.get(newTriangles[i].index).edges.push(newTriangles[i - 2].index);
+        }
+        this.numberOfIndices++;
       }
     }
 
+    private isEdgeDuplicate(edge1: {start: number, end: number}, edge2: {start: number, end: number}): boolean {
+      return (this.vertexToUniqueVertexMap.get(edge1.start) === this.vertexToUniqueVertexMap.get(edge2.start) && 
+              this.vertexToUniqueVertexMap.get(edge1.end) === this.vertexToUniqueVertexMap.get(edge2.end)) || 
+             (this.vertexToUniqueVertexMap.get(edge1.start) === this.vertexToUniqueVertexMap.get(edge2.end) && 
+              this.vertexToUniqueVertexMap.get(edge1.end) === this.vertexToUniqueVertexMap.get(edge2.start));
+    }
   }
 }

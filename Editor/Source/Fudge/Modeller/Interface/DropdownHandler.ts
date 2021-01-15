@@ -1,6 +1,5 @@
 namespace Fudge {
   export class DropdownHandler {
-
     private controller: Controller;
 
     constructor(_controller: Controller) {
