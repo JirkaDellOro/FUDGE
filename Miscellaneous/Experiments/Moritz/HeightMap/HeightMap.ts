@@ -1,24 +1,25 @@
 namespace HeightMap {
   import f = FudgeCore;
-  import ƒAid = FudgeAid;
+  import fAid = FudgeAid;
   
 
   window.addEventListener("load", init);
 
   let graph: f.Node = new f.Node("Graph");
 
-  let m1: f.Node = new f.Node("M1");
-  let m2: f.Node = new f.Node("M1");
-  let m3: f.Node = new f.Node("M1");
+  let m1: f.Node;
+  let m2: f.Node;
+  let m3: f.Node;
 
-  let testCube = new f.Node("Test");
+  let testCube: f.Node;
 
   let gridMeshFlat: f.MeshHeightMap;
-  let gridFlat: f.Node = new f.Node("Map");
+  let gridFlat: f.Node;
 
   let viewport: f.Viewport;
 
   let controlled: Controlled;
+  let parentControll: f.Node;
   let cntKeyHorizontal: f.Control = new f.Control("Keyboard", 1, f.CONTROL_TYPE.PROPORTIONAL, true);
   let cntKeyVertical: f.Control = new f.Control("Keyboard", 4, f.CONTROL_TYPE.PROPORTIONAL, true);
   cntKeyHorizontal.setDelay(500);
@@ -44,7 +45,7 @@ namespace HeightMap {
 
     // f.RenderManager.setupTransformAndLights(graph);
 
-    ƒAid.addStandardLightComponents(graph);
+    fAid.addStandardLightComponents(graph);
   }
 
   function hndLoop(_event: Event): void {
@@ -62,9 +63,15 @@ namespace HeightMap {
 
     let meshCube = new f.MeshCube("CubeMesh");
 
+    let coord = new fAid.NodeCoordinateSystem("test");
+
+    parentControll = new f.Node("ParentControlled");
+    parentControll.addComponent(new ƒ.ComponentTransform());
+
     controlled = new Controlled("Cube", f.Matrix4x4.IDENTITY(), matRed, new f.MeshCube());
     controlled.mtxLocal.translation = new f.Vector3(0,0.1,0);
     controlled.mtxLocal.scale(new f.Vector3(0.05,0.05,0.05));
+    controlled.getComponent(f.ComponentMesh).pivot.scaleZ(2);
 
     m1 = Scenes.createCompleteMeshNode("M1", matRed, meshCube);
     m2 = Scenes.createCompleteMeshNode("M2", matRed, meshCube);
@@ -81,13 +88,13 @@ namespace HeightMap {
     gridMeshFlat = new f.MeshHeightMap("HeightMap", 4, 4, myHeightMapFunction);
     gridFlat = Scenes.createCompleteMeshNode("Grid", matFlat, gridMeshFlat);
 
-    testCube = Scenes.createCompleteMeshNode("Test", matRed, meshCube);
-    let testMat = new f.Matrix4x4;
-    testMat.translateY(0.5);
-    testMat.rotateX(45);
-    testMat.rotateZ(45);
-    testCube.mtxLocal.set(testMat);
-    testCube.mtxLocal.scale(new f.Vector3(0.1,0.1,0.1));
+    // testCube = Scenes.createCompleteMeshNode("Test", matRed, meshCube);
+    // let testMat = new f.Matrix4x4;
+    // testMat.translateY(0.5);
+    // testMat.rotateX(45);
+    // testMat.rotateZ(45);
+    // testCube.mtxLocal.set(testMat);
+    // testCube.mtxLocal.scale(new f.Vector3(0.1,0.1,0.1));
 
     let s = 0.01;
 
@@ -96,11 +103,12 @@ namespace HeightMap {
     m3.mtxLocal.scale(new f.Vector3(s,s,s));
 
     graph.addChild(gridFlat);
-    graph.addChild(controlled);
+    graph.addChild(parentControll);
+    parentControll.addChild(controlled);
     graph.addChild(m1);
     graph.addChild(m2);
     graph.addChild(m3);
-    graph.addChild(testCube);
+    // graph.addChild(testCube);
 
     viewport.initialize("Viewport", graph, cmpCamera, document.querySelector("canvas"));
     viewport.setFocus(true);
@@ -108,7 +116,7 @@ namespace HeightMap {
     
     viewport.draw();
 
-    console.log(controlled);
+    // console.log(controlled);
   }
   
   function moreVertices(_event: KeyboardEvent): void{
@@ -137,17 +145,30 @@ namespace HeightMap {
   }
 
   function getPositionOnTerrain(terrain: f.MeshHeightMap, object: f.Node, calculateRotation: boolean = false): f.Matrix4x4{
-    let i: number = 0;
-    
-    if ( calculateRotation )
-      i = 4;
-    
-    
-    let nearestFaces: distanceToFaceVertices = findNearestFace(terrain, object);
+        
+    let nearestFace: distanceToFaceVertices = findNearestFace(terrain, object);
 
+    let rotationMatrix = new f.Matrix4x4;
+    rotationMatrix.rotation = object.mtxWorld.rotation;
+
+    let directionX = f.Vector3.TRANSFORMATION(new f.Vector3(1,0,0), rotationMatrix);
+    let directionZ = f.Vector3.TRANSFORMATION(new f.Vector3(0,0,1), rotationMatrix);
+
+    let angleX = f.Vector3.DOT(directionX, nearestFace.faceNormal);
+    let angleZ = f.Vector3.DOT(directionZ, nearestFace.faceNormal);
+
+    angleX = angleX/(directionX.magnitude * nearestFace.faceNormal.magnitude);
+    angleZ = angleZ/(directionZ.magnitude * nearestFace.faceNormal.magnitude);
+
+    angleX = 90 - Math.acos(angleX) * 180 / Math.PI;
+    angleZ = 90 - Math.acos(angleZ) * 180 / Math.PI;
+
+    // console.log("aX :" + angleX + " aZ :" + angleZ)
 
     let matrix = new f.Matrix4x4;
-    matrix.translateY(calculateHeight(nearestFaces, object));
+    matrix.translateY(calculateHeight(nearestFace, object));
+    matrix.rotateX(angleX);
+    matrix.rotateZ(angleZ);
 
     return matrix;
   }
@@ -159,10 +180,8 @@ namespace HeightMap {
     m3.mtxLocal.translation = face.vertexTHREE;
 
     let ray = new f.Ray(new f.Vector3(0,1,0), object.mtxWorld.translation);
-    let v1 = f.Vector3.DIFFERENCE(face.vertexTWO, face.vertexONE);
-    let v2 = f.Vector3.DIFFERENCE(face.vertexTHREE, face.vertexONE);
-
-    let intersection = ray.intersectPlane(face.vertexONE, f.Vector3.CROSS(v1, v2))
+    
+    let intersection = ray.intersectPlane(face.vertexONE, face.faceNormal);
 
     return intersection.y;
   }
@@ -197,7 +216,11 @@ namespace HeightMap {
   }
 
   function hndKeyboardControls(): void {
-    controlled.height = getPositionOnTerrain(gridMeshFlat, controlled).translation.y;
+    let matrix = getPositionOnTerrain(gridMeshFlat, controlled);
+    controlled.height = matrix.translation.y;
+    controlled.rotationX = matrix.rotation.z;
+    controlled.rotationZ = -matrix.rotation.x;
+
     cntKeyVertical.setInput(
       f.Keyboard.mapToValue(1, 0, [f.KEYBOARD_CODE.I])
       + f.Keyboard.mapToValue(-1, 0, [f.KEYBOARD_CODE.K])
@@ -219,6 +242,8 @@ namespace HeightMap {
 
     public distance: number;
 
+    public faceNormal: f.Vector3;
+
     public constructor(vertexONE: f.Vector3, vertexTWO: f.Vector3, vertexTHREE: f.Vector3, object: f.Node){
       this.vertexONE = vertexONE;
       this.vertexTWO = vertexTWO;
@@ -230,6 +255,15 @@ namespace HeightMap {
 
       this.distance = this.distanceONE + this.distanceTWO + this.distanceTHREE; 
 
+      this.calculateFaceNormal();
+
+    }
+
+    public calculateFaceNormal(){
+      let v1 = f.Vector3.DIFFERENCE(this.vertexTWO, this.vertexONE);
+      let v2 = f.Vector3.DIFFERENCE(this.vertexTHREE, this.vertexONE);
+
+      this.faceNormal = f.Vector3.CROSS(v1, v2);
     }
   }
 }
