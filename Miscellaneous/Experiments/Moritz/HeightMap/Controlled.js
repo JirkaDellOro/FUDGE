@@ -3,7 +3,7 @@ var HeightMap;
 (function (HeightMap) {
     var f = FudgeCore;
     var ƒAid = FudgeAid;
-    class Controlled extends ƒAid.Node {
+    class Controlled extends ƒAid.NodeCoordinateSystem {
         constructor() {
             super(...arguments);
             this.axisSpeed = new f.Axis("Speed", 1, 0 /* PROPORTIONAL */);
@@ -18,10 +18,14 @@ var HeightMap;
         update(_timeFrame) {
             let distance = this.axisSpeed.getOutput() * this.maxSpeed * _timeFrame;
             let angle = this.axisRotation.getOutput() * this.maxRotSpeed * _timeFrame;
-            this.mtxLocal.translateZ(distance);
+            this.mtxLocal.translateX(distance);
             this.mtxLocal.translation = new f.Vector3(this.mtxLocal.translation.x, this.height + 0.025, this.mtxLocal.translation.z);
-            this.mtxLocal.rotateY(angle);
-            this.getComponent(f.ComponentMesh).pivot.rotation = new f.Vector3(this.rotationX, 0, this.rotationZ);
+            let test = f.Vector3.SUM(this.lookAt, this.mtxLocal.translation);
+            let matrix = this.mtxLocal;
+            let vecX = f.Vector3.TRANSFORMATION(new f.Vector3(0, 1, 0), matrix);
+            vecX = f.Vector3.SUM(vecX, this.mtxLocal.translation);
+            this.mtxLocal.lookAt(test);
+            this.mtxLocal.rotateZ(angle);
         }
     }
     HeightMap.Controlled = Controlled;

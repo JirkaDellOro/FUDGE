@@ -68,10 +68,13 @@ namespace HeightMap {
     parentControll = new f.Node("ParentControlled");
     parentControll.addComponent(new ƒ.ComponentTransform());
 
-    controlled = new Controlled("Cube", f.Matrix4x4.IDENTITY(), matRed, new f.MeshCube());
+    let test = new fAid.NodeCoordinateSystem("Cube", f.Matrix4x4.IDENTITY());
+    graph.addChild(test);
+
+    controlled = new Controlled("Cube", f.Matrix4x4.IDENTITY() /*, matRed, new f.MeshCube() */);
     controlled.mtxLocal.translation = new f.Vector3(0,0.1,0);
-    controlled.mtxLocal.scale(new f.Vector3(0.05,0.05,0.05));
-    controlled.getComponent(f.ComponentMesh).pivot.scaleZ(2);
+    controlled.mtxLocal.scale(new f.Vector3(0.2,0.2,0.2));
+    // controlled.getComponent(f.ComponentMesh).pivot.scaleZ(2);
 
     m1 = Scenes.createCompleteMeshNode("M1", matRed, meshCube);
     m2 = Scenes.createCompleteMeshNode("M2", matRed, meshCube);
@@ -148,27 +151,30 @@ namespace HeightMap {
         
     let nearestFace: distanceToFaceVertices = findNearestFace(terrain, object);
 
-    let rotationMatrix = new f.Matrix4x4;
-    rotationMatrix.rotation = object.mtxWorld.rotation;
+    // let rotationMatrix = new f.Matrix4x4;
+    // rotationMatrix.rotation = object.mtxWorld.rotation;
 
-    let directionX = f.Vector3.TRANSFORMATION(new f.Vector3(1,0,0), rotationMatrix);
-    let directionZ = f.Vector3.TRANSFORMATION(new f.Vector3(0,0,1), rotationMatrix);
+    // let directionX = f.Vector3.TRANSFORMATION(new f.Vector3(1,0,0), rotationMatrix);
+    // let directionZ = f.Vector3.TRANSFORMATION(new f.Vector3(0,0,1), rotationMatrix);
 
-    let angleX = f.Vector3.DOT(directionX, nearestFace.faceNormal);
-    let angleZ = f.Vector3.DOT(directionZ, nearestFace.faceNormal);
+    // let angleX = f.Vector3.DOT(directionX, nearestFace.faceNormal);
+    // let angleZ = f.Vector3.DOT(directionZ, nearestFace.faceNormal);
 
-    angleX = angleX/(directionX.magnitude * nearestFace.faceNormal.magnitude);
-    angleZ = angleZ/(directionZ.magnitude * nearestFace.faceNormal.magnitude);
+    // angleX = angleX/(directionX.magnitude * nearestFace.faceNormal.magnitude);
+    // angleZ = angleZ/(directionZ.magnitude * nearestFace.faceNormal.magnitude);
 
-    angleX = 90 - Math.acos(angleX) * 180 / Math.PI;
-    angleZ = 90 - Math.acos(angleZ) * 180 / Math.PI;
+    // angleX = 90 - Math.acos(angleX) * 180 / Math.PI;
+    // angleZ = 90 - Math.acos(angleZ) * 180 / Math.PI;
 
     // console.log("aX :" + angleX + " aZ :" + angleZ)
 
     let matrix = new f.Matrix4x4;
     matrix.translateY(calculateHeight(nearestFace, object));
-    matrix.rotateX(angleX);
-    matrix.rotateZ(angleZ);
+    // console.log(nearestFace.faceNormal.toString())
+    // matrix.rotation = f.Vector3.TRANSFORMATION(nearestFace.faceNormal, f.Matrix4x4.ROTATION_X(90));
+    matrix.rotation = nearestFace.faceNormal;
+    // matrix.rotateX(angleX);
+    // matrix.rotateZ(angleZ);
 
     return matrix;
   }
@@ -218,8 +224,7 @@ namespace HeightMap {
   function hndKeyboardControls(): void {
     let matrix = getPositionOnTerrain(gridMeshFlat, controlled);
     controlled.height = matrix.translation.y;
-    controlled.rotationX = matrix.rotation.z;
-    controlled.rotationZ = -matrix.rotation.x;
+    controlled.lookAt = matrix.rotation;
 
     cntKeyVertical.setInput(
       f.Keyboard.mapToValue(1, 0, [f.KEYBOARD_CODE.I])

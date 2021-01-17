@@ -11,9 +11,9 @@ namespace FudgeAid {
       arrowRed.mtxLocal.rotateZ(-90);
       arrowBlue.mtxLocal.rotateX(90);
 
-      this.addChild(arrowRed);
-      this.addChild(arrowGreen);
-      this.addChild(arrowBlue);
+      this.addChild(arrowRed);    // x-Achsis
+      this.addChild(arrowGreen);  // y-Achsis
+      this.addChild(arrowBlue);   // z-Achsis
     }
   }
 }
