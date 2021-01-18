@@ -641,8 +641,10 @@ declare namespace Fudge {
         private extrudeEdge;
         private addNewTriangles;
         private fillVertexMap;
-        private removeInnerEdges;
+        private getInnerEdges;
+        private findEdgesToRemove;
         private removeInteriorEdges;
+        private removeDuplicateEdges;
         private getNewVertices;
         private addIndicesToNewVertices;
         private isEdgeDuplicate;
