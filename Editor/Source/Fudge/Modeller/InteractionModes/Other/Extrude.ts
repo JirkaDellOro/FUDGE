@@ -49,7 +49,7 @@ namespace Fudge {
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
       // maybe change this after all idk looks weird atm
       mesh.updateNormals();
-      this.createNormalArrows();
+      //this.createNormalArrows();
     }
 
     onmove(_event: ƒ.EventPointer): void {

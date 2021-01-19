@@ -669,13 +669,8 @@ declare namespace Fudge {
         rotateBy(matrix: ƒ.Matrix4x4, center: ƒ.Vector3, selection?: number[]): void;
         extrude(selectedIndices: number[]): number[];
         updatePositionOfVertices(selectedIndices: number[], oldVertexPositions: Map<number, ƒ.Vector3>, diffToOldPosition: ƒ.Vector3, offset: ƒ.Vector3): void;
-        private findEdgesNew;
-        private extrude3Vertices;
-        private addIndicesToNewVertices;
-        private getNewVertices;
-        private findEdgesFrom;
         private countNumberOfFaces;
-        private findCorrectFaceWithoutNormals;
+        private findCorrectFace;
         protected updatePositionOfVertex(vertexIndex: number, newPosition: ƒ.Vector3): void;
         protected findOrderOfTrigonFromSelectedVertex(selectedIndices: number[]): Array<number>;
         protected createVertices(): Float32Array;

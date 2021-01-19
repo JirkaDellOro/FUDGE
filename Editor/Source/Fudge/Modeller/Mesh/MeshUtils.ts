@@ -29,38 +29,6 @@ namespace Fudge {
         edges.splice(edgeToRemove, 1);
       }
 
-      // for (let [face, edgesOfFace] of faceToEdgesMap) {
-      //   // edgesOfFace.sort((a, b) => b.index - a.index);
-
-      //   if (edgesOfFace.length !== 1) {
-      //     // for (let i: number = 0; i < edgesOfFace.length; i++) {
-      //     //   edges.splice(edgesOfFace[i].index, 1);
-      //     // }
-      //   }
-      //   if (edgesOfFace.length === 4) {
-      //     for (let edgeData of edgesOfFace) {
-      //       for (let i: number = edges.length - 1; i >= 0; i--) {
-      //         if (this.areEdgesDuplicate(edges[i], edgeData.edge)) {
-      //           edges.splice(i, 1);
-      //         }
-      //       }
-      //     }
-
-      //     let faceVertices: number[] = [];
-      //     let faceEdges: {start: number, end: number}[] = [];
-      //     for (let edgeData of edgesOfFace) {
-      //       faceVertices.push(edgeData.edge.start);
-      //       faceEdges.push(edgeData.edge);
-      //     }
-      //     let data: {
-      //       vertexToUniqueVertex: Map<number, number>;
-      //       reverse: Map<number, number[]>;
-      //       originalToNewVertex: Map<number, number>;
-      //     } = this.getNewVertices(faceVertices);
-      //     this.addIndicesToNewVertices(faceEdges, data);
-      //   } 
-      // }
-
       this.removeDuplicateEdges(edges, faceToEdgesMap);
       // take care of the remaining edges that aren't part of a face
       for (let edge of edges) {
@@ -88,7 +56,7 @@ namespace Fudge {
         for (let endPoint of this.uniqueVertices[uniqueIndex].vertexToData.get(vertexIndex).edges) {
           let isAddable: boolean = false;
           for (let vertex of selection) {
-            if (vertex === this.vertexToUniqueVertexMap.get(endPoint)) //|| vertex === endPoint) 
+            if (vertex === this.vertexToUniqueVertexMap.get(endPoint))
               isAddable = true;
           }
 
@@ -196,38 +164,17 @@ namespace Fudge {
     }
 
     /*
-      worst method i ever wrote, i sincerely apologize
+      removes all the edges from a face
+      the outer edges with the correct direction will remain
     */
     private findEdgesToRemove(faceToEdgesMap: Map<number, {edge: {start: number, end: number}, index: number}[]>, edges: {start: number, end: number}[]): number[] {
       let edgesToRemove: number[] = [];
       for (let [face, edgesOfFace] of faceToEdgesMap) {
         if (edgesOfFace.length === 4) {
-          // for (let edgeOfFace of edgesOfFace) {
-          //   for (let i: number = 0; i < edges.length; i++) {
-          //     if (this.areEdgesDuplicate(edges[i], edgeOfFace.edge) && i !== edgeOfFace.index) {
-          //       edgesToRemove.push(i);
-          //     }
-          //   }
-          // }
-          // for (let [face2, edgesOfFace2] of faceToEdgesMap) {
-          //   if (edgesOfFace2.length === 4 && face !== face2) {
-          //     for (let edgeOfFace of edgesOfFace) {
-          //       for (let edgeOfFace2 of edgesOfFace2) {
-          //         if (this.areEdgesDuplicate(edgeOfFace.edge, edgeOfFace2.edge)) {
-
-          //         }
-          //       }
-          //     }
-          //   }
-          // }
-
           for (let edgeOfFace of edgesOfFace) {
             edgesToRemove.push(edgeOfFace.index);
           }
         }
-        // for (let edgeOfFace of edgesOfFace) {
-        //   edgesToRemove.push(edgeOfFace.index);
-        // }
       }
       edgesToRemove.sort((a, b) => b - a);
       return edgesToRemove;
@@ -254,7 +201,6 @@ namespace Fudge {
       }
     }
 
-    // remove duplicate edges with different indices, we likely don't need this anymore
     private removeDuplicateEdges(edges: {start: number, end: number}[], faceToEdgesMap: Map<number, {edge: {start: number, end: number}, index: number}[]>): void {
       let edgesToRemove: number[] = [];
       let duplicateEdges: Set<number> = new Set();
@@ -281,7 +227,6 @@ namespace Fudge {
               edgesToRemove.push(j);
               duplicateEdges.add(i);
             }
-            // edges.splice(j, 1);
           }
         }
       }
@@ -292,6 +237,10 @@ namespace Fudge {
       }
     }
 
+    /*
+      add the front face at the end incase a full face is selected
+      TODO: check if this really works if multiple faces are selected
+    */
     private addFrontFaces(faceToEdgesMap: Map<number, {edge: {start: number, end: number}, index: number}[]>): void {
       let vertices: number[] = [];
       for (let [face, edgesOfFace] of faceToEdgesMap) {
@@ -314,6 +263,8 @@ namespace Fudge {
       loops over the selection and adds a new vertex for every selected vertex
       which new vertex belongs to which original vertex is then stored in an object and returned for further processing
       faceVertices: key = vertexIndex, value = uniqueVertexIndex
+      this was a quick hack to extrude a face (instead of single edges)
+      we don't need this anymore since we now use the same algorithm for both cases and just alter the front face at the end
     */
    private getNewVertices(selectedVertices: Array<number>): {vertexToUniqueVertex: Map<number, number>, reverse: Map<number, number[]>, originalToNewVertex: Map<number, number>} {       
     let originalLength: number = this.uniqueVertices.length;
