@@ -29,37 +29,38 @@ namespace Fudge {
         edges.splice(edgeToRemove, 1);
       }
 
-      for (let [face, edgesOfFace] of faceToEdgesMap) {
-        // edgesOfFace.sort((a, b) => b.index - a.index);
+      // for (let [face, edgesOfFace] of faceToEdgesMap) {
+      //   // edgesOfFace.sort((a, b) => b.index - a.index);
 
-        if (edgesOfFace.length !== 1) {
-          // for (let i: number = 0; i < edgesOfFace.length; i++) {
-          //   edges.splice(edgesOfFace[i].index, 1);
-          // }
-        }
-        if (edgesOfFace.length === 4) {
-          for (let edgeData of edgesOfFace) {
-            for (let i: number = edges.length - 1; i >= 0; i--) {
-              if (this.isEdgeDuplicate(edges[i], edgeData.edge)) {
-                edges.splice(i, 1);
-              }
-            }
-          }
+      //   if (edgesOfFace.length !== 1) {
+      //     // for (let i: number = 0; i < edgesOfFace.length; i++) {
+      //     //   edges.splice(edgesOfFace[i].index, 1);
+      //     // }
+      //   }
+      //   if (edgesOfFace.length === 4) {
+      //     for (let edgeData of edgesOfFace) {
+      //       for (let i: number = edges.length - 1; i >= 0; i--) {
+      //         if (this.areEdgesDuplicate(edges[i], edgeData.edge)) {
+      //           edges.splice(i, 1);
+      //         }
+      //       }
+      //     }
 
-          let faceVertices: number[] = [];
-          let faceEdges: {start: number, end: number}[] = [];
-          for (let edgeData of edgesOfFace) {
-            faceVertices.push(edgeData.edge.start);
-            faceEdges.push(edgeData.edge);
-          }
-          let data: {
-            vertexToUniqueVertex: Map<number, number>;
-            reverse: Map<number, number[]>;
-            originalToNewVertex: Map<number, number>;
-          } = this.getNewVertices(faceVertices);
-          this.addIndicesToNewVertices(faceEdges, data);
-        } 
-      }
+      //     let faceVertices: number[] = [];
+      //     let faceEdges: {start: number, end: number}[] = [];
+      //     for (let edgeData of edgesOfFace) {
+      //       faceVertices.push(edgeData.edge.start);
+      //       faceEdges.push(edgeData.edge);
+      //     }
+      //     let data: {
+      //       vertexToUniqueVertex: Map<number, number>;
+      //       reverse: Map<number, number[]>;
+      //       originalToNewVertex: Map<number, number>;
+      //     } = this.getNewVertices(faceVertices);
+      //     this.addIndicesToNewVertices(faceEdges, data);
+      //   } 
+      // }
+
       this.removeDuplicateEdges(edges);
       // take care of the remaining edges that aren't part of a face
       for (let edge of edges) {
@@ -72,11 +73,13 @@ namespace Fudge {
         this.extrudeEdge([edge.start, edge.end]);
       }
 
+      this.addFrontFaces(faceToEdgesMap);
+
       this.addNewTriangles();
     }
 
     /*
-      loop over the stored (half-)edges and find the correct ones  
+      loop over the stored (half-)edges and finds the correct ones  
     */
     private findEdgesFromData(selection: number[]): {start: number, end: number}[] {
       let edges: {start: number, end: number}[] = [];
@@ -99,7 +102,6 @@ namespace Fudge {
       return edges;
     }
 
-    // vertexcount is 4 too high at one point Sadge 
     private extrudeEdge(selection: number[]): number[] {
       let newTriangles: Array<number> = [];
       let reverseVertices: Map<number, number> = new Map();
@@ -200,25 +202,25 @@ namespace Fudge {
       let edgesToRemove: number[] = [];
       for (let [face, edgesOfFace] of faceToEdgesMap) {
         if (edgesOfFace.length === 4) {
-          for (let edgeOfFace of edgesOfFace) {
-            for (let i: number = 0; i < edges.length; i++) {
-              if (this.isEdgeDuplicate(edges[i], edgeOfFace.edge) && i !== edgeOfFace.index) {
-                edgesToRemove.push(i);
-              }
-            }
-          }
+          // for (let edgeOfFace of edgesOfFace) {
+          //   for (let i: number = 0; i < edges.length; i++) {
+          //     if (this.areEdgesDuplicate(edges[i], edgeOfFace.edge) && i !== edgeOfFace.index) {
+          //       edgesToRemove.push(i);
+          //     }
+          //   }
+          // }
           // for (let [face2, edgesOfFace2] of faceToEdgesMap) {
-          //   if (edgesOfFace2.length === 2) {
+          //   if (edgesOfFace2.length === 4 && face !== face2) {
           //     for (let edgeOfFace of edgesOfFace) {
-          //       for (let i: number = edgesOfFace2.length - 1; i >= 0; i--) {
-          //         if (this.isEdgeDuplicate(edgesOfFace2[i].edge, edgeOfFace.edge)) {
-          //           edgesToRemove.push(edgesOfFace2[i].index);
-          //           edgesOfFace2.splice(i, 1);
+          //       for (let edgeOfFace2 of edgesOfFace2) {
+          //         if (this.areEdgesDuplicate(edgeOfFace.edge, edgeOfFace2.edge)) {
+
           //         }
           //       }
           //     }
           //   }
           // }
+
           for (let edgeOfFace of edgesOfFace) {
             edgesToRemove.push(edgeOfFace.index);
           }
@@ -258,11 +260,29 @@ namespace Fudge {
         for (let j: number = 0; j < edges.length; j++) {
           if (i === j) 
             continue;
-          if (this.isEdgeDuplicate(edges[i], edges[j])) {
+          if (this.areEdgesDuplicate(edges[i], edges[j])) {
             edges.splice(j, 1);
           }
         }
       }
+    }
+
+    private addFrontFaces(faceToEdgesMap: Map<number, {edge: {start: number, end: number}, index: number}[]>): void {
+      let vertices: number[] = [];
+      for (let [face, edgesOfFace] of faceToEdgesMap) {
+        if (edgesOfFace.length === 4) {
+          for (let edgeOfFace of edgesOfFace) {
+            vertices.push(edgeOfFace.edge.start);
+          }
+        }
+      }
+      let iterator: number = 0;
+      for (let vertex of vertices) {
+        let originalVertexToData: {indices: number[], face?: number, edges?: number[]} = this.uniqueVertices[this.vertexToUniqueVertexMap.get(vertex)].vertexToData.get(vertex);
+        this.uniqueVertices[this.originalVertexToNewUniqueVertexMap.get(this.vertexToUniqueVertexMap.get(vertex))].vertexToData.set(vertex, {indices: originalVertexToData.indices, face: originalVertexToData.face, edges: originalVertexToData.edges});
+        this.uniqueVertices[this.vertexToUniqueVertexMap.get(vertex)].vertexToData.delete(vertex);
+      }
+
     }
 
     /*
@@ -384,7 +404,7 @@ namespace Fudge {
       }
     }
 
-    private isEdgeDuplicate(edge1: {start: number, end: number}, edge2: {start: number, end: number}): boolean {
+    private areEdgesDuplicate(edge1: {start: number, end: number}, edge2: {start: number, end: number}): boolean {
       return (this.vertexToUniqueVertexMap.get(edge1.start) === this.vertexToUniqueVertexMap.get(edge2.start) && 
               this.vertexToUniqueVertexMap.get(edge1.end) === this.vertexToUniqueVertexMap.get(edge2.end)) || 
              (this.vertexToUniqueVertexMap.get(edge1.start) === this.vertexToUniqueVertexMap.get(edge2.end) && 

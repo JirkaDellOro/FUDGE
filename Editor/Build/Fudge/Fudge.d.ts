@@ -645,9 +645,10 @@ declare namespace Fudge {
         private findEdgesToRemove;
         private removeInteriorEdges;
         private removeDuplicateEdges;
+        private addFrontFaces;
         private getNewVertices;
         private addIndicesToNewVertices;
-        private isEdgeDuplicate;
+        private areEdgesDuplicate;
     }
 }
 declare namespace Fudge {
