@@ -61,7 +61,7 @@ namespace Fudge {
       //   } 
       // }
 
-      this.removeDuplicateEdges(edges);
+      this.removeDuplicateEdges(edges, faceToEdgesMap);
       // take care of the remaining edges that aren't part of a face
       for (let edge of edges) {
         edge.start = this.vertexToUniqueVertexMap.get(edge.start);
@@ -88,7 +88,7 @@ namespace Fudge {
         for (let endPoint of this.uniqueVertices[uniqueIndex].vertexToData.get(vertexIndex).edges) {
           let isAddable: boolean = false;
           for (let vertex of selection) {
-            if (vertex === this.vertexToUniqueVertexMap.get(endPoint) || vertex === endPoint) 
+            if (vertex === this.vertexToUniqueVertexMap.get(endPoint)) //|| vertex === endPoint) 
               isAddable = true;
           }
 
@@ -255,15 +255,40 @@ namespace Fudge {
     }
 
     // remove duplicate edges with different indices, we likely don't need this anymore
-    private removeDuplicateEdges(edges: {start: number, end: number}[]): void {
+    private removeDuplicateEdges(edges: {start: number, end: number}[], faceToEdgesMap: Map<number, {edge: {start: number, end: number}, index: number}[]>): void {
+      let edgesToRemove: number[] = [];
+      let duplicateEdges: Set<number> = new Set();
       for (let i: number = 0; i < edges.length; i++) {
         for (let j: number = 0; j < edges.length; j++) {
           if (i === j) 
             continue;
           if (this.areEdgesDuplicate(edges[i], edges[j])) {
-            edges.splice(j, 1);
+            if (duplicateEdges.has(i) || duplicateEdges.has(j))
+              continue;
+
+            let iIsPartOfFace: boolean = false;
+            for (let [face, edgesOfFace] of faceToEdgesMap) {
+              for (let edgeOfFace of edgesOfFace) {
+                if (edgeOfFace.edge === edges[i]) {
+                  iIsPartOfFace = true;
+                }
+              }
+            }
+            if (iIsPartOfFace) {
+              edgesToRemove.push(i);
+              duplicateEdges.add(j);
+            } else {
+              edgesToRemove.push(j);
+              duplicateEdges.add(i);
+            }
+            // edges.splice(j, 1);
           }
         }
+      }
+      edgesToRemove.sort((a, b) => b - a);
+
+      for (let edgeToRemove of edgesToRemove) {
+        edges.splice(edgeToRemove, 1);
       }
     }
 

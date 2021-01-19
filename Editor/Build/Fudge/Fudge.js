@@ -2453,7 +2453,7 @@ var Fudge;
             //     this.addIndicesToNewVertices(faceEdges, data);
             //   } 
             // }
-            this.removeDuplicateEdges(edges);
+            this.removeDuplicateEdges(edges, faceToEdgesMap);
             // take care of the remaining edges that aren't part of a face
             for (let edge of edges) {
                 edge.start = this.vertexToUniqueVertexMap.get(edge.start);
@@ -2475,7 +2475,7 @@ var Fudge;
                 for (let endPoint of this.uniqueVertices[uniqueIndex].vertexToData.get(vertexIndex).edges) {
                     let isAddable = false;
                     for (let vertex of selection) {
-                        if (vertex === this.vertexToUniqueVertexMap.get(endPoint) || vertex === endPoint)
+                        if (vertex === this.vertexToUniqueVertexMap.get(endPoint)) //|| vertex === endPoint) 
                             isAddable = true;
                     }
                     if (isAddable) {
@@ -2627,15 +2627,39 @@ var Fudge;
             }
         }
         // remove duplicate edges with different indices, we likely don't need this anymore
-        removeDuplicateEdges(edges) {
+        removeDuplicateEdges(edges, faceToEdgesMap) {
+            let edgesToRemove = [];
+            let duplicateEdges = new Set();
             for (let i = 0; i < edges.length; i++) {
                 for (let j = 0; j < edges.length; j++) {
                     if (i === j)
                         continue;
                     if (this.areEdgesDuplicate(edges[i], edges[j])) {
-                        edges.splice(j, 1);
+                        if (duplicateEdges.has(i) || duplicateEdges.has(j))
+                            continue;
+                        let iIsPartOfFace = false;
+                        for (let [face, edgesOfFace] of faceToEdgesMap) {
+                            for (let edgeOfFace of edgesOfFace) {
+                                if (edgeOfFace.edge === edges[i]) {
+                                    iIsPartOfFace = true;
+                                }
+                            }
+                        }
+                        if (iIsPartOfFace) {
+                            edgesToRemove.push(i);
+                            duplicateEdges.add(j);
+                        }
+                        else {
+                            edgesToRemove.push(j);
+                            duplicateEdges.add(i);
+                        }
+                        // edges.splice(j, 1);
                     }
                 }
+            }
+            edgesToRemove.sort((a, b) => b - a);
+            for (let edgeToRemove of edgesToRemove) {
+                edges.splice(edgeToRemove, 1);
             }
         }
         addFrontFaces(faceToEdgesMap) {
