@@ -16,12 +16,16 @@ namespace Fudge {
       //@ts-ignore
     }
 
-    onkeydown(_event: ƒ.EventKeyboard): string {
+    onkeydown(_pressedKey: string): string {
       return null;
     }
     
-    onkeyup(_event: ƒ.EventKeyboard): void {
-      //
+    onkeyup(_pressedKey: string): void {
+      //@ts-ignore
+    }
+
+    update(): void {
+      //@ts-ignore
     }
 
     cleanup(): void {

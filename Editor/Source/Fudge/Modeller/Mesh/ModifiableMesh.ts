@@ -173,7 +173,7 @@ namespace Fudge {
     }
 
     public rotateBy(matrix: ƒ.Matrix4x4, center: ƒ.Vector3, selection: number[] = Array.from(Array(this.uniqueVertices.length).keys())): void {
-      // TODO: actually rotate around world coordinates here
+      // TODO: actually rotate around world coordinates here -> done afaik
       for (let vertexIndex of selection) {
         let newVertexPos: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(this.uniqueVertices[vertexIndex].position, center);
         newVertexPos.transform(matrix);
@@ -185,16 +185,16 @@ namespace Fudge {
     }
 
 
-    // double clicking makes normal caclulation impossible right now because old and new vertices are at the same position, maybe add some small increment initially?
-    public extrude(selectedIndices: number[]): number[] {
-      let meshUtils: MeshUtils = new MeshUtils(this.countNumberOfFaces(), this.vertices.length / ModifiableMesh.vertexSize, this._uniqueVertices, this.indices.length, this.vertices);
-      meshUtils.extrude(selectedIndices);
+    // double clicking makes normal calculation impossible right now because old and new vertices are at the same position, maybe add some small increment initially?
+    public extrude(selectedVertices: number[]): number[] {
+      let meshUtils: MeshUtils = new MeshUtils(this.countNumberOfFaces(), this.vertices, this._uniqueVertices, this.indices.length);
+      meshUtils.extrude(selectedVertices);
       this.vertices = this.createVertices();
       this.indices = this.createIndices();
 
       let newSelection: number[] = [];
-      for (let i: number = 0; i < selectedIndices.length; i++) 
-        newSelection.push(this.uniqueVertices.length - selectedIndices.length + i);
+      for (let i: number = 0; i < selectedVertices.length; i++) 
+        newSelection.push(this.uniqueVertices.length - selectedVertices.length + i);
 
       this.createRenderBuffers();
       return newSelection;

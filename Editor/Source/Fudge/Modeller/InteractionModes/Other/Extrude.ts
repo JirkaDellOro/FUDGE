@@ -49,7 +49,7 @@ namespace Fudge {
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
       // maybe change this after all idk looks weird atm
       mesh.updateNormals();
-      //this.createNormalArrows();
+      this.createNormalArrows();
     }
 
     onmove(_event: ƒ.EventPointer): void {
@@ -91,15 +91,18 @@ namespace Fudge {
       // mesh.updatePositionOfVertices(this.selection, this.copyOfSelectedVertices, this.getDistanceFromRayToCenterOfNode(_event, this.distance), this.offset);
     }
 
-    onkeydown(_event: ƒ.EventKeyboard): string {
-      this.axesSelectionHandler.addAxisOf(_event.key);
+    onkeydown(pressedKey: string): string {
+      this.axesSelectionHandler.addAxisOf(pressedKey);
       return null;
     }
     
-    onkeyup(_event: ƒ.EventKeyboard): void {
-      this.axesSelectionHandler.removeAxisOf(_event.key);
+    onkeyup(pressedKey: string): void {
+      this.axesSelectionHandler.removeAxisOf(pressedKey);
     }
 
+    update(): void {
+      //@ts-ignore
+    }
 
     initialize(): void {
       this.axesSelectionHandler = new AxesSelectionHandler();

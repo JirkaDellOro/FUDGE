@@ -28,7 +28,10 @@ namespace Fudge {
         this.setValues(_event);
       }
 
-      return (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
+      let state: string = null;
+      if (this.axesSelectionHandler.wasPicked) 
+        state = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
+      return state;
     }
 
     onmouseup(_event: ƒ.EventPointer): void {
@@ -77,17 +80,22 @@ namespace Fudge {
       mesh.scaleBy(scaleMatrix, this.copyOfSelectedVertices, this.centroid, this.selection);
     }
 
-    onkeydown (_event: ƒ.EventKeyboard): string {
+    onkeydown (_pressedKey: string): string {
       let result: string = null;
-      if (this.axesSelectionHandler.addAxisOf(_event.key)) {
+      if (this.axesSelectionHandler.addAxisOf(_pressedKey)) {
         result = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
       }
       return result;
     }
 
-    onkeyup(_event: ƒ.EventKeyboard): void {
-      this.axesSelectionHandler.removeAxisOf(_event.key);
+    onkeyup(_pressedKey: string): void {
+      this.axesSelectionHandler.removeAxisOf(_pressedKey);
     }
+
+    update(): void {
+      this.axesSelectionHandler.widget.mtxLocal.translation = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection);
+    }
+
 
     cleanup(): void {
       this.viewport.getGraph().removeChild(this.axesSelectionHandler.widget);

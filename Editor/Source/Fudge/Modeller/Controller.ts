@@ -9,6 +9,7 @@ namespace Fudge {
     // could make an array of Array<{someinterface, string}> to support undo for different objects
     // or just think of some smarter  way of doing undo, e.g. storing the reverse functions
     private states: Array<string> = [];
+    private currentState: number = -1;
     // TODO: change those shortcuts
     private controlModesMap: Map<ControlMode, {type: AbstractControlMode, shortcut: string}> = new Map([
       [ControlMode.OBJECT_MODE, {type: new ObjectMode(), shortcut: "p"}],
@@ -51,13 +52,13 @@ namespace Fudge {
 
       if (_event.ctrlKey) 
         return;
-      let state: string = this.interactionMode.onkeydown(_event);
+      let state: string = this.interactionMode.onkeydown(_event.key.toLowerCase());
       if (state != null) 
         this.saveState(state);
     }
 
     public onkeyup(_event: ƒ.EventKeyboard): void {
-      this.interactionMode.onkeyup(_event);
+      this.interactionMode.onkeyup(_event.key.toLowerCase());
     }
 
     public getSelection(): number[] {
@@ -70,12 +71,17 @@ namespace Fudge {
 
     public switchMode(_event: ƒ.EventKeyboard): void {
       if (_event.ctrlKey) {
-        if (_event.key === "z") {
-          this.loadState();
+        let pressedKey: string = _event.key.toLowerCase();
+        if (pressedKey === "z") {
+          if (!_event.shiftKey) {
+            this.loadState();
+          } else {
+            this.loadState(false);
+          }
         }
 
         for (let controlMode of this.controlModesMap.keys()) {
-          if (this.controlModesMap.get(controlMode).shortcut === _event.key) {
+          if (this.controlModesMap.get(controlMode).shortcut === pressedKey) {
             this.setControlMode(controlMode);
             break;
           }
@@ -83,7 +89,7 @@ namespace Fudge {
 
         let selectedMode: InteractionMode;
         for (let interactionMode in this.currentControlMode.modes) {
-          if (this.currentControlMode.modes[interactionMode].shortcut === _event.key) {
+          if (this.currentControlMode.modes[interactionMode].shortcut === pressedKey) {
             selectedMode = <InteractionMode> interactionMode;
           }
         }
@@ -122,19 +128,36 @@ namespace Fudge {
       this.interactionMode.animate();
     }
 
-    private loadState(): void {
-      if (this.states.length <= 0) 
+    private loadState(isUndo: boolean = true): void {
+      if (this.states.length <= 0 || (this.currentState <= 0 && isUndo) || this.currentState < 0) 
         return;
+
+      if (isUndo) {
+        this.currentState--;
+      } else {
+        if (this.currentState < this.states.length - 1) {
+          this.currentState++;
+        } else {
+          return;
+        }
+      }
+      console.log("states length: " + this.states.length);
+      console.log("current state: " + this.currentState);
+  
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
-      mesh.retrieveState(this.states[this.states.length - 1]);
-      this.states.pop();
-      this.interactionMode.updateSelection();
+      mesh.retrieveState(this.states[this.currentState]);
+      this.interactionMode.updateAfterUndo();
     }
 
     private saveState(state: string): void {
+      this.states.splice(this.currentState + 1);
+      console.log("states length: " + this.states.length);
+      console.log("current state: " + this.currentState);
       this.states.push(state);
       if (this.states.length > 20) {
         this.states.shift();
+      } else {
+        this.currentState++;
       }
     }
   }

@@ -13,7 +13,7 @@ namespace Fudge {
       this.setObject((<ƒ.Node>(<ƒ.General>_state).node).getChildrenByName("Default")[0]);
       this.setTitle("Vertices");
 
-      // this.fillContent();
+      this.fillContent();
       ƒ.EventTargetStatic.addEventListener(ModellerEvents.SELECTION_UPDATE, this.hndEvent);
       _container.on("destroy", this.cleanup);
       // this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
@@ -53,11 +53,11 @@ namespace Fudge {
 
     protected cleanup = (): void => {
       while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild));
-      this.dom.remove();
+        this.dom.remove();
     }
 
     private hndEvent = (_event: CustomEvent): void => {
-      // this.fillContent(_event.detail);
+      this.fillContent(_event.detail);
     }
     
   }

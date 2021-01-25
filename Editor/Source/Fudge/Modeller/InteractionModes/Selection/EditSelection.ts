@@ -19,7 +19,6 @@ namespace Fudge {
     constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>) {
       super(viewport, editableNode, selection);
       this.selector = new Selector(this.editableNode, this.viewport.camera.pivot.translation);
-      // this.initialize();
     }
 
     initialize(): void {
@@ -34,18 +33,6 @@ namespace Fudge {
       this.boxStart = new ƒ.Vector2(_event.canvasX, _event.canvasY);
       this.clientPos = new ƒ.Vector2(_event.canvasX, _event.canvasY);
       ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.drawBox);
-
-      // switch (this.selectionMode) {
-      //   case SelectionMode.VERTEX: 
-      //     let ray: ƒ.Ray = this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY));
-      //     this.selectVertices(ray);
-      //     break;
-      //   case SelectionMode.BOX:
-      //     this.boxStart = new ƒ.Vector2(_event.canvasX, _event.canvasY);
-      //     this.clientPos = new ƒ.Vector2(_event.canvasX, _event.canvasY);
-      //     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.drawBox);
-      //     break;
-      // }
       return null;
     }
 
@@ -78,28 +65,28 @@ namespace Fudge {
       this.clientPos = new ƒ.Vector2(_event.canvasX, _event.canvasY);
     }
 
-    onkeydown(_event: ƒ.EventKeyboard): string {
+    onkeydown(pressedKey: string): string {
       let state: string = null;
 
-      switch (_event.key) {
-        case "Delete": 
+      // delete this later or refactor it to somewhere else
+      switch (pressedKey) {
+        case "delete": 
           (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).removeFace(this.selection);
           this.selection = [];
           state = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
           break;
-        // case "l": 
-        //   this.selectionMode = SelectionMode.BOX;
-        //   break;
-        // case "v":
-        //   this.selectionMode = SelectionMode.VERTEX;
-        //   break;
       }
       return state;
     }
 
-    onkeyup(_event: ƒ.EventKeyboard): void {
+    onkeyup(pressedKey: string): void {
       //
     }
+
+    update(): void {
+      //@ts-ignore
+    }
+
 
     private drawBox = () => {
       let crx2d: CanvasRenderingContext2D = this.viewport.getCanvas().getContext("2d");

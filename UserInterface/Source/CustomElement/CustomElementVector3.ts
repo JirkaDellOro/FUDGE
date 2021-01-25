@@ -9,6 +9,7 @@ namespace FudgeUserInterface {
       let count: number = 0;
       for (let dimension of ["x", "y", "z"])
         (<ƒ.Mutator> mutator)[dimension] = steppers[count++].getMutatorValue();
+      
       return mutator;
     }
 

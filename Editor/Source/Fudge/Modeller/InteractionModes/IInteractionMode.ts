@@ -22,8 +22,9 @@ namespace Fudge {
     abstract onmousedown(_event: ƒ.EventPointer): string;
     abstract onmouseup(_event: ƒ.EventPointer): void;
     abstract onmove(_event: ƒ.EventPointer): void;
-    abstract onkeydown(_event: ƒ.EventKeyboard): string;
-    abstract onkeyup(_event: ƒ.EventKeyboard): void;
+    abstract onkeydown(_pressedKey: string): string;
+    abstract onkeyup(_pressedKey: string): void;
+    abstract update(): void;
 
     abstract initialize(): void;
     abstract cleanup(): void;
@@ -33,13 +34,14 @@ namespace Fudge {
       this.drawCircleAtSelection();
     }
 
-    public updateSelection(): void {
+    public updateAfterUndo(): void {
       for (let i: number = 0; i < this.selection.length; i++) {
         if (this.selection[i] >= (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices.length) {
           this.selection.splice(i, 1);
           i--;
         }
       }
+      this.update();
     }
 
     protected getPosRenderFrom(_event: ƒ.EventPointer): ƒ.Vector2 {
@@ -116,6 +118,7 @@ namespace Fudge {
         crx2d.beginPath();
         crx2d.arc(pos.x, pos.y, 3, 0, 2 * Math.PI);
         crx2d.fillStyle = "black";
+
         crx2d.fill();
       }
     }

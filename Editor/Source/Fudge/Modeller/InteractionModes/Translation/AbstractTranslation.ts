@@ -34,7 +34,11 @@ namespace Fudge {
       }
       this.distance = this.getDistanceFromCameraToCenterOfNode();
       this.oldPosition = this.getPointerPosition(_event, this.distance);
-      return (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
+
+      let state: string = null;
+      if (this.axesSelectionHandler.wasPicked || nodeWasPicked) 
+        state = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
+      return state;
     }
 
     onmouseup(_event: ƒ.EventPointer): void {
@@ -82,16 +86,21 @@ namespace Fudge {
       this.oldPosition = newPos;
     }
 
-    onkeydown(_event: ƒ.EventKeyboard): string {
+    onkeydown(_pressedKey: string): string {
       let result: string = null;
-      if (this.axesSelectionHandler.addAxisOf(_event.key)) {
+      if (this.axesSelectionHandler.addAxisOf(_pressedKey)) {
         result = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
       }
       return result;
     }
     
-    onkeyup(_event: ƒ.EventKeyboard): void {
-      this.axesSelectionHandler.removeAxisOf(_event.key);
+    onkeyup(_pressedKey: string): void {
+      this.axesSelectionHandler.removeAxisOf(_pressedKey);
+      this.axesSelectionHandler.widget.mtxLocal.translation = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection);
+    }
+
+
+    update(): void {
       this.axesSelectionHandler.widget.mtxLocal.translation = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection);
     }
 
