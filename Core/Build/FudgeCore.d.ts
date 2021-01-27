@@ -3238,21 +3238,27 @@ declare namespace FudgeCore {
      * x * z represent the amout of faces whiche are created. As a result you get 1 Vertice more in each direction (x and z achsis)
      * For Example: x = 4, z = 4, 16 squares (32 Faces), 25 vertices
      * @authors Simon Storl-Schulke, HFU, 2020*/
-    type heightMapFunction = (x: number, z: number) => number;
+    type HeightMapFunction = (x: number, z: number) => number;
     /**
      * Generates a planar Grid and applies a Heightmap-Function to it.
      * @authors Jirka Dell'Oro-Friedl, Simon Storl-Schulke, HFU, 2020
      */
-    class MeshHeightMap extends Mesh {
+    class MeshTerrain extends Mesh {
         static readonly iSubclass: number;
         resolutionX: number;
         resolutionZ: number;
+        imgScale: number;
         private heightMapFunction;
-        constructor(_name?: string, _resolutionX?: number, _resolutionZ?: number, _heightMapFunction?: heightMapFunction);
+        private image;
+        constructor(_name?: string, source?: HeightMapFunction | TextureImage, _resolutionX?: number, _resolutionZ?: number);
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
         protected createFaceNormals(): Float32Array;
+        protected imageToClampedArray(image: TextureImage): Uint8ClampedArray;
+        getPositionOnTerrain(object: Node): Ray;
+        private calculateHeight;
+        private findNearestFace;
     }
 }
 declare namespace FudgeCore {
@@ -3367,7 +3373,7 @@ declare namespace FudgeCore {
         resolutionX: number;
         resolutionZ: number;
         private heightMapFunction;
-        constructor(_name?: string, _resolutionX?: number, _resolutionZ?: number, _heightMapFunction?: heightMapFunction);
+        constructor(_name?: string, _resolutionX?: number, _resolutionZ?: number, _heightMapFunction?: HeightMapFunction);
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;

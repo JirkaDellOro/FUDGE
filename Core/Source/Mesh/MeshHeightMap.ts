@@ -5,20 +5,22 @@ namespace FudgeCore {
    * x * z represent the amout of faces whiche are created. As a result you get 1 Vertice more in each direction (x and z achsis)
    * For Example: x = 4, z = 4, 16 squares (32 Faces), 25 vertices 
    * @authors Simon Storl-Schulke, HFU, 2020*/
-  export type heightMapFunction = (x: number, z: number) => number;
+  export type HeightMapFunction = (x: number, z: number) => number;
 
   /**
    * Generates a planar Grid and applies a Heightmap-Function to it.
    * @authors Jirka Dell'Oro-Friedl, Simon Storl-Schulke, HFU, 2020
    */
-  export class MeshHeightMap extends Mesh {
-    public static readonly iSubclass: number = Mesh.registerSubclass(MeshHeightMap);
+  export class MeshTerrain extends Mesh {
+    public static readonly iSubclass: number = Mesh.registerSubclass(MeshTerrain);
 
     public resolutionX: number;
     public resolutionZ: number;
-    private heightMapFunction: heightMapFunction;
-
-    public constructor(_name: string = "MeshHeightMap", _resolutionX: number = 16, _resolutionZ: number = 16, _heightMapFunction?: heightMapFunction) {
+    public imgScale: number = 800;
+    private heightMapFunction: HeightMapFunction;
+    private image: TextureImage;
+    
+    public constructor(_name: string = "MeshHeightMap", source?: HeightMapFunction | TextureImage, _resolutionX: number = 16, _resolutionZ: number = 16) {
       super(_name);
       this.resolutionX = _resolutionX;
       this.resolutionZ = _resolutionZ;
@@ -29,28 +31,67 @@ namespace FudgeCore {
         this.resolutionZ = Math.max(1, this.resolutionZ);
       }
 
-      if (_heightMapFunction) this.heightMapFunction = _heightMapFunction;
-      else this.heightMapFunction = function (_x: number, _y: number): number { return 0; };
+      if (! (source instanceof TextureImage)) {
+        this.heightMapFunction = source;
+        this.image = null;
+      }
+      else this.heightMapFunction = null;
+
+      if (source instanceof TextureImage){
+        this.image = source;
+        this.resolutionX = source.image.width - 1;
+        this.resolutionZ = source.image.height - 1;
+      }
+      else this.image = null;
 
       this.create();
     }
+    
+    
 
     protected createVertices(): Float32Array {
       let vertices: Float32Array = new Float32Array((this.resolutionX + 1) * (this.resolutionZ + 1) * 3);
 
-      //Iterate over each cell to generate grid of vertices
-      for (let i: number = 0, z: number = 0; z <= this.resolutionZ; z++) {
-        for (let x: number = 0; x <= this.resolutionX; x++) {
-          // X
-          vertices[i] = x / this.resolutionX - 0.5;
-          // Apply heightmap to y coordinate
-          vertices[i + 1] = this.heightMapFunction(x / this.resolutionX, z / this.resolutionZ);
-          // Z
-          vertices[i + 2] = z / this.resolutionZ - 0.5;
-          i += 3;
+      if(this.heightMapFunction != null){
+        //Iterate over each cell to generate grid of vertices
+        for (let i: number = 0, z: number = 0; z <= this.resolutionZ; z++) {
+          for (let x: number = 0; x <= this.resolutionX; x++) {
+            // X
+            vertices[i] = x / this.resolutionX - 0.5;
+            // Apply heightmap to y coordinate
+            vertices[i + 1] = this.heightMapFunction(x / this.resolutionX, z / this.resolutionZ);
+            // Z
+            vertices[i + 2] = z / this.resolutionZ - 0.5;
+            i += 3;
+          }
         }
+        return vertices;
       }
-      return vertices;
+      else if( this.image != null){
+        let imgArray = this.imageToClampedArray(this.image);
+        // console.log(imgArray);
+        let px = 0;
+
+        for (let i: number = 0, z: number = 0; z <= this.resolutionZ; z++) {
+          for (let x: number = 0; x <= this.resolutionX; x++) {
+            // X
+            vertices[i] = x / this.resolutionX - 0.5;
+            // Apply heightmap to y coordinate
+            vertices[i + 1] = imgArray[px*4] / this.imgScale;
+            // Z
+            vertices[i + 2] = z / this.resolutionZ - 0.5;
+            i += 3;
+            px++;
+          }
+        }
+        // console.log("resx: " + this.resolutionX + " resz: " + this.resolutionZ);
+
+        return vertices;
+
+      }
+      else {
+        throw new Error("No Source for Vertices is given, must be function or image"); 
+      }
     }
 
     protected createIndices(): Uint16Array {
@@ -113,6 +154,106 @@ namespace FudgeCore {
 
     protected createFaceNormals(): Float32Array {
       return this.calculateFaceNormals();
+    }
+
+    protected imageToClampedArray(image: TextureImage): Uint8ClampedArray{
+      let trImport: Uint8ClampedArray;
+    
+      let canvasImage: HTMLCanvasElement = document.createElement("canvas");
+      canvasImage.width = image.image.width;
+      canvasImage.height = image.image.height;
+
+      let crcTransition: CanvasRenderingContext2D = canvasImage.getContext("2d");
+      crcTransition.imageSmoothingEnabled = false;
+      crcTransition.drawImage(image.image, 0, 0);
+
+      trImport = crcTransition.getImageData(0, 0, image.image.width, image.image.height).data;
+
+      return trImport;
+    }
+
+    public getPositionOnTerrain(object: Node): Ray{
+        
+      let nearestFace: distanceToFaceVertices = this.findNearestFace(object);
+      let ray = new Ray;
+  
+      ray.origin = new Vector3(0, this.calculateHeight(nearestFace, object), 0);
+      ray.direction = nearestFace.faceNormal;
+  
+      return ray;
+    }
+  
+    private calculateHeight (face: distanceToFaceVertices, object: Node): number{
+  
+      // m1.mtxLocal.translation = face.vertexONE;
+      // m2.mtxLocal.translation = face.vertexTWO;
+      // m3.mtxLocal.translation = face.vertexTHREE;
+  
+      let ray = new Ray(new Vector3(0,1,0), object.mtxWorld.translation);
+      
+      let intersection = ray.intersectPlane(face.vertexONE, face.faceNormal);
+  
+      return intersection.y;
+    }
+  
+    private findNearestFace(object: Node): distanceToFaceVertices{
+      let vertices = this.vertices;
+      let indices = this.indices;
+  
+      let nearestFaces: Array<distanceToFaceVertices> = new Array;
+  
+      for(let i = 0; i < indices.length; i = i+3){
+        let vertexONE = new Vector3(vertices[indices[i]*3], vertices[indices[i]*3+1],vertices[indices[i]*3+2]);
+        let vertexTWO = new Vector3(vertices[indices[i+1]*3], vertices[indices[i+1]*3+1],vertices[indices[i+1]*3+2]);
+        let vertexTHREE = new Vector3(vertices[indices[i+2]*3], vertices[indices[i+2]*3+1],vertices[indices[i+2]*3+2]);
+        
+        let face = new distanceToFaceVertices(vertexONE, vertexTWO, vertexTHREE, object);
+        
+        nearestFaces.push(face);
+      }
+  
+      nearestFaces.sort((n1,n2) => {
+        return n1.distance - n2.distance;
+      });
+  
+      return nearestFaces[0];
+  
+    }
+  }
+  
+  class distanceToFaceVertices {
+    public vertexONE: Vector3;
+    public vertexTWO: Vector3;
+    public vertexTHREE: Vector3;
+
+    public distanceONE: number;
+    public distanceTWO: number;
+    public distanceTHREE: number;
+
+    public distance: number;
+
+    public faceNormal: Vector3;
+
+    public constructor(vertexONE: Vector3, vertexTWO: Vector3, vertexTHREE: Vector3, object: Node){
+      this.vertexONE = vertexONE;
+      this.vertexTWO = vertexTWO;
+      this.vertexTHREE = vertexTHREE;
+      
+      this.distanceONE = new Vector2(vertexONE.x - object.mtxLocal.translation.x, vertexONE.z - object.mtxWorld.translation.z).magnitude;
+      this.distanceTWO = new Vector2(vertexTWO.x - object.mtxLocal.translation.x, vertexTWO.z - object.mtxWorld.translation.z).magnitude;
+      this.distanceTHREE = new Vector2(vertexTHREE.x - object.mtxLocal.translation.x, vertexTHREE.z - object.mtxWorld.translation.z).magnitude;
+
+      this.distance = this.distanceONE + this.distanceTWO + this.distanceTHREE; 
+
+      this.calculateFaceNormal();
+
+    }
+
+    public calculateFaceNormal(){
+      let v1 = Vector3.DIFFERENCE(this.vertexTWO, this.vertexONE);
+      let v2 = Vector3.DIFFERENCE(this.vertexTHREE, this.vertexONE);
+
+      this.faceNormal = Vector3.CROSS(v1, v2);
     }
   }
 }

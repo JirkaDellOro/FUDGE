@@ -14,9 +14,9 @@ namespace FudgeCore {
 
     public resolutionX: number;
     public resolutionZ: number;
-    private heightMapFunction: heightMapFunction;
+    private heightMapFunction: HeightMapFunction;
 
-    public constructor(_name: string = "MeshHeightMap", _resolutionX: number = 16, _resolutionZ: number = 16, _heightMapFunction?: heightMapFunction) {
+    public constructor(_name: string = "MeshHeightMap", _resolutionX: number = 16, _resolutionZ: number = 16, _heightMapFunction?: HeightMapFunction) {
       super(_name);
       this.resolutionX = _resolutionX;
       this.resolutionZ = _resolutionZ;
