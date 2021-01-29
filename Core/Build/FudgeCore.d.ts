@@ -1497,6 +1497,7 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         private hndAudioReady;
+        private hndAudioEnded;
         private install;
         private createSource;
         private updateConnection;
@@ -2261,7 +2262,10 @@ declare namespace FudgeCore {
         CHILD_REMOVE = "childRemoveFromAudioGraph",
         /** broadcast to a [[Node]] and all its descendants in the graph to update the panners in AudioComponents */
         UPDATE = "updateAudioGraph",
-        READY = "ready"
+        /** fired when the audio file was loaded and is ready for playing */
+        READY = "ready",
+        /** fired when the end of the audio is reached while playing */
+        ENDED = "ended"
     }
 }
 declare namespace FudgeCore {
