@@ -3233,35 +3233,6 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    /** This function type takes x and z as Parameters and returns a number - to be used as a heightmap.
-     * x and z are mapped from 0 to 1 when used to generate a Heightmap Mesh
-     * x * z represent the amout of faces whiche are created. As a result you get 1 Vertice more in each direction (x and z achsis)
-     * For Example: x = 4, z = 4, 16 squares (32 Faces), 25 vertices
-     * @authors Simon Storl-Schulke, HFU, 2020*/
-    type HeightMapFunction = (x: number, z: number) => number;
-    /**
-     * Generates a planar Grid and applies a Heightmap-Function to it.
-     * @authors Jirka Dell'Oro-Friedl, Simon Storl-Schulke, HFU, 2020
-     */
-    class MeshTerrain extends Mesh {
-        static readonly iSubclass: number;
-        resolutionX: number;
-        resolutionZ: number;
-        imgScale: number;
-        private heightMapFunction;
-        private image;
-        constructor(_name?: string, source?: HeightMapFunction | TextureImage, _resolutionX?: number, _resolutionZ?: number);
-        protected createVertices(): Float32Array;
-        protected createIndices(): Uint16Array;
-        protected createTextureUVs(): Float32Array;
-        protected createFaceNormals(): Float32Array;
-        protected imageToClampedArray(image: TextureImage): Uint8ClampedArray;
-        getPositionOnTerrain(object: Node): Ray;
-        private calculateHeight;
-        private findNearestFace;
-    }
-}
-declare namespace FudgeCore {
     /**
      * Generate a simple pyramid with edges at the base of length 1 and a height of 1. The sides consisting of one, the base of two trigons
      * ```plaintext
@@ -3339,6 +3310,36 @@ declare namespace FudgeCore {
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
         protected createFaceNormals(): Float32Array;
+    }
+}
+declare namespace FudgeCore {
+    /** This function type takes x and z as Parameters and returns a number - to be used as a heightmap.
+     * x and z are mapped from 0 to 1 when used to generate a Heightmap Mesh
+     * x * z * 2 represent the amout of faces whiche are created. As a result you get 1 Vertice more in each direction (x and z achsis)
+     * For Example: x = 4, z = 4, 16 squares (32 Faces), 25 vertices
+     * @authors Simon Storl-Schulke, HFU, 2020*/
+    type HeightMapFunction = (x: number, z: number) => number;
+    /**
+     * Generates a planar Grid and applies a Heightmap-Function to it.
+     * @authors Jirka Dell'Oro-Friedl, Simon Storl-Schulke, HFU, 2020
+     */
+    class MeshTerrain extends Mesh {
+        static readonly iSubclass: number;
+        resolutionX: number;
+        resolutionZ: number;
+        imgScale: number;
+        node: Node;
+        private heightMapFunction;
+        private image;
+        constructor(_name?: string, source?: HeightMapFunction | TextureImage, _resolutionX?: number, _resolutionZ?: number);
+        protected createVertices(): Float32Array;
+        protected createIndices(): Uint16Array;
+        protected createTextureUVs(): Float32Array;
+        protected createFaceNormals(): Float32Array;
+        protected imageToClampedArray(image: TextureImage): Uint8ClampedArray;
+        getPositionOnTerrain(object: Node): Ray;
+        private calculateHeight;
+        private findNearestFace;
     }
 }
 declare namespace FudgeCore {

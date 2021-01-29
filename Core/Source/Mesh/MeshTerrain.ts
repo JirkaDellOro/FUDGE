@@ -2,7 +2,7 @@ namespace FudgeCore {
 
   /** This function type takes x and z as Parameters and returns a number - to be used as a heightmap. 
    * x and z are mapped from 0 to 1 when used to generate a Heightmap Mesh
-   * x * z represent the amout of faces whiche are created. As a result you get 1 Vertice more in each direction (x and z achsis)
+   * x * z * 2 represent the amout of faces whiche are created. As a result you get 1 Vertice more in each direction (x and z achsis)
    * For Example: x = 4, z = 4, 16 squares (32 Faces), 25 vertices 
    * @authors Simon Storl-Schulke, HFU, 2020*/
   export type HeightMapFunction = (x: number, z: number) => number;
@@ -17,6 +17,7 @@ namespace FudgeCore {
     public resolutionX: number;
     public resolutionZ: number;
     public imgScale: number = 800;
+    public node: Node;
     private heightMapFunction: HeightMapFunction;
     private image: TextureImage;
     
@@ -173,30 +174,40 @@ namespace FudgeCore {
     }
 
     public getPositionOnTerrain(object: Node): Ray{
-        
-      let nearestFace: distanceToFaceVertices = this.findNearestFace(object);
+      
+      let relPosObject = Vector3.DIFFERENCE(object.mtxWorld.translation, this.node.mtxWorld.translation);
+      
+      relPosObject = Vector3.TRANSFORMATION(relPosObject, this.node.mtxWorldInverse, false);
+
+      let nearestFace: distanceToFaceVertices = this.findNearestFace(relPosObject);
       let ray = new Ray;
+
+      let origin = new Vector3(0, this.calculateHeight(nearestFace, relPosObject), 0);
+      origin = Vector3.TRANSFORMATION(origin, this.node.mtxWorld, false);
+
+      let direction = nearestFace.faceNormal;
+      direction = Vector3.TRANSFORMATION(direction, this.node.mtxWorld, false);
   
-      ray.origin = new Vector3(0, this.calculateHeight(nearestFace, object), 0);
+      ray.origin = origin
       ray.direction = nearestFace.faceNormal;
   
       return ray;
     }
   
-    private calculateHeight (face: distanceToFaceVertices, object: Node): number{
-  
+    private calculateHeight (face: distanceToFaceVertices, relativePosObject: Vector3): number{
+
       // m1.mtxLocal.translation = face.vertexONE;
       // m2.mtxLocal.translation = face.vertexTWO;
       // m3.mtxLocal.translation = face.vertexTHREE;
   
-      let ray = new Ray(new Vector3(0,1,0), object.mtxWorld.translation);
+      let ray = new Ray(new Vector3(0,1,0), relativePosObject);
       
       let intersection = ray.intersectPlane(face.vertexONE, face.faceNormal);
   
       return intersection.y;
     }
   
-    private findNearestFace(object: Node): distanceToFaceVertices{
+    private findNearestFace(relativPosObject: Vector3): distanceToFaceVertices{
       let vertices = this.vertices;
       let indices = this.indices;
   
@@ -207,7 +218,7 @@ namespace FudgeCore {
         let vertexTWO = new Vector3(vertices[indices[i+1]*3], vertices[indices[i+1]*3+1],vertices[indices[i+1]*3+2]);
         let vertexTHREE = new Vector3(vertices[indices[i+2]*3], vertices[indices[i+2]*3+1],vertices[indices[i+2]*3+2]);
         
-        let face = new distanceToFaceVertices(vertexONE, vertexTWO, vertexTHREE, object);
+        let face = new distanceToFaceVertices(vertexONE, vertexTWO, vertexTHREE, relativPosObject);
         
         nearestFaces.push(face);
       }
@@ -234,14 +245,14 @@ namespace FudgeCore {
 
     public faceNormal: Vector3;
 
-    public constructor(vertexONE: Vector3, vertexTWO: Vector3, vertexTHREE: Vector3, object: Node){
+    public constructor(vertexONE: Vector3, vertexTWO: Vector3, vertexTHREE: Vector3, relativPosObject: Vector3){
       this.vertexONE = vertexONE;
       this.vertexTWO = vertexTWO;
       this.vertexTHREE = vertexTHREE;
       
-      this.distanceONE = new Vector2(vertexONE.x - object.mtxLocal.translation.x, vertexONE.z - object.mtxWorld.translation.z).magnitude;
-      this.distanceTWO = new Vector2(vertexTWO.x - object.mtxLocal.translation.x, vertexTWO.z - object.mtxWorld.translation.z).magnitude;
-      this.distanceTHREE = new Vector2(vertexTHREE.x - object.mtxLocal.translation.x, vertexTHREE.z - object.mtxWorld.translation.z).magnitude;
+      this.distanceONE = new Vector2(vertexONE.x - relativPosObject.x, vertexONE.z - relativPosObject.z).magnitude;
+      this.distanceTWO = new Vector2(vertexTWO.x - relativPosObject.x, vertexTWO.z - relativPosObject.z).magnitude;
+      this.distanceTHREE = new Vector2(vertexTHREE.x - relativPosObject.x, vertexTHREE.z - relativPosObject.z).magnitude;
 
       this.distance = this.distanceONE + this.distanceTWO + this.distanceTHREE; 
 

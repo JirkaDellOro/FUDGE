@@ -2,7 +2,7 @@ namespace HeightMap {
   import f = FudgeCore;
   import ƒAid = FudgeAid;
 
-  export class Controlled extends ƒAid.Node {
+  export class Controlled extends ƒAid.NodeCoordinateSystem {
     public readonly axisSpeed: f.Axis = new f.Axis("Speed", 1, f.CONTROL_TYPE.PROPORTIONAL);
     public readonly axisRotation: f.Axis = new f.Axis("Rotation", 1, f.CONTROL_TYPE.PROPORTIONAL);
     public maxSpeed: number = 1; // units per second
@@ -17,22 +17,27 @@ namespace HeightMap {
     }
 
     public update(_timeFrame: number): void {
+      
       let ray = this.meshTerrain.getPositionOnTerrain(this);
-      this.height = ray.origin.y;
-      this.lookAt = ray.direction;
+      this.mtxLocal.translation = ray.origin;
 
       let distance: number = this.axisSpeed.getOutput() * this.maxSpeed * _timeFrame;
       let angle: number = this.axisRotation.getOutput() * this.maxRotSpeed * _timeFrame;
+      
       this.mtxLocal.translateX(distance /*+ 0.005*/);
-      this.mtxLocal.translation = new f.Vector3(this.mtxLocal.translation.x, this.height + 0.025, this.mtxLocal.translation.z);
+      // this.height = ray.origin.y;
+      // this.lookAt = ray.direction;
+      // this.mtxLocal.translation = new f.Vector3(this.mtxLocal.translation.x, this.height, this.mtxLocal.translation.z);
       
-      let direction = f.Vector3.SUM(this.lookAt, this.mtxLocal.translation);
+      // let direction = f.Vector3.SUM(this.lookAt, this.mtxLocal.translation);
+      // let test = f.Vector3.SUM(ray.origin, f.Vector3.X());
       
-      this.mtxLocal.lookAt( direction, this.mtxLocal.getY());
+      // // this.mtxLocal.lookAt( direction);
+      // this.mtxLocal.showTo(  test, direction)
 
-      // console.log(this.mtxLocal.getX().toString());
+      // // console.log(this.mtxLocal.getX().toString());
 
-      this.mtxLocal.rotateZ(angle /*+ 0.2*/);
+      // this.mtxLocal.rotateZ(angle /*+ 0.2*/);
       
 
     }
