@@ -194,7 +194,7 @@ namespace FudgeCore {
     }
 
     private hndAudioEnded: EventListener = (_event: Event) => {
-      Debug.fudge("Audio ended", Reflect.get(_event.target, "url"));
+      // Debug.fudge("Audio ended", Reflect.get(_event.target, "url"));
       this.playing = false;
     }
 
