@@ -20,12 +20,16 @@ var FudgeUserInterface;
                 this.domElement.dispatchEvent(new Event("mutate" /* MUTATE */, { bubbles: true }));
             };
             this.refresh = (_event) => {
-                this.updateUserInterface();
+                if (document.body.contains(this.domElement)) {
+                    this.updateUserInterface();
+                    return;
+                }
+                window.clearInterval(this.idInterval);
             };
             this.domElement = _domElement;
             this.setMutable(_mutable);
             // TODO: examine, if this should register to one common interval, instead of each installing its own.
-            window.setInterval(this.refresh, this.timeUpdate);
+            this.startRefresh();
             this.domElement.addEventListener("input", this.mutateOnInput);
         }
         /**
@@ -119,6 +123,10 @@ var FudgeUserInterface;
             this.mutator = _mutable.getMutatorForUserInterface();
             if (_mutable instanceof ƒ.Mutable)
                 this.mutatorTypes = _mutable.getMutatorAttributeTypes(this.mutator);
+        }
+        startRefresh() {
+            window.clearInterval(this.idInterval);
+            this.idInterval = window.setInterval(this.refresh, this.timeUpdate);
         }
     }
     FudgeUserInterface.Controller = Controller;

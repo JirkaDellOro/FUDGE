@@ -14,6 +14,7 @@ declare namespace FudgeUserInterface {
         protected mutator: ƒ.Mutator;
         /** [[FudgeCore.Mutator]] used to store the data types of the mutator attributes*/
         protected mutatorTypes: ƒ.Mutator;
+        private idInterval;
         constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
         /**
          * Recursive method taking an existing [[ƒ.Mutator]] as a template
@@ -33,6 +34,7 @@ declare namespace FudgeUserInterface {
         getMutator(_mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
         updateUserInterface(): void;
         setMutable(_mutable: ƒ.Mutable): void;
+        startRefresh(): void;
         protected mutateOnInput: (_event: Event) => Promise<void>;
         protected refresh: (_event: Event) => void;
     }
