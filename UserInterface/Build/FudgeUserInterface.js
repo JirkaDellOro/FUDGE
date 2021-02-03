@@ -754,6 +754,7 @@ var FudgeUserInterface;
                         break;
                     case ƒ.KEYBOARD_CODE.ENTER:
                     case ƒ.KEYBOARD_CODE.NUMPAD_ENTER:
+                    case ƒ.KEYBOARD_CODE.ESC:
                         this.activateInnerTabs(false);
                         this.focus();
                         break;
@@ -882,11 +883,19 @@ var FudgeUserInterface;
          * Displays this value by setting the contents of the digits and the exponent
          */
         display() {
-            let [mantissa, exp] = this.toString().split("e");
+            let digits = this.querySelectorAll("fudge-digit");
             let spans = this.querySelectorAll("span");
+            if (!isFinite(this.value)) {
+                for (let pos = 0; pos < digits.length; pos++) {
+                    let digit = digits[5 - pos];
+                    digit.innerHTML = "  ∞   "[5 - pos];
+                    spans[1].textContent = "  ";
+                }
+                return;
+            }
+            let [mantissa, exp] = this.toString().split("e");
             spans[0].textContent = this.value < 0 ? "-" : "+";
             spans[1].textContent = exp;
-            let digits = this.querySelectorAll("fudge-digit");
             mantissa = mantissa.substring(1);
             mantissa = mantissa.replace(".", "");
             for (let pos = 0; pos < digits.length; pos++) {
@@ -907,7 +916,11 @@ var FudgeUserInterface;
             if (_amount == 0)
                 return;
             if (digit == this.querySelector("[name=exp]")) {
-                this.value *= Math.pow(10, _amount);
+                // console.log(this.value);
+                let value = this.value * Math.pow(10, _amount);
+                console.log(value, this.value);
+                if (isFinite(value))
+                    this.value = value;
                 this.display();
                 return;
             }
