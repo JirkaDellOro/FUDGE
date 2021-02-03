@@ -157,25 +157,29 @@ namespace FudgeCore {
       let finalTransform: Matrix4x4;
 
       let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
-      if (cmpMesh) // TODO: careful when using particlesystem, pivot must not change node position
+      if (cmpMesh) { // TODO: careful when using particlesystem, pivot must not change node position
         finalTransform = Matrix4x4.MULTIPLICATION(_node.mtxWorld, cmpMesh.pivot);
+        cmpMesh.mtxWorld = finalTransform.copy;  // not understood, why copy is needed. 
+      }
       else
         finalTransform = _node.mtxWorld; // caution, RenderManager is a reference...
 
-      // multiply camera matrix
-      let projection: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.ViewProjectionMatrix, finalTransform);
-      // TODO: create drawNode method for particle system using _node.mtxWorld instead of finalTransform
-      _drawNode(_node, finalTransform, projection);
-      // RenderParticles.drawParticles();
+      if (cmpMesh && cmpMesh.isActive) {
+        // multiply camera matrix
+        let projection: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.ViewProjectionMatrix, finalTransform);
+        // TODO: create drawNode method for particle system using _node.mtxWorld instead of finalTransform
+        _drawNode(_node, finalTransform, projection);
+        // RenderParticles.drawParticles();
+        Recycler.store(projection);
+      }
 
       for (let name in _node.getChildren()) {
         let childNode: Node = _node.getChildren()[name];
         RenderManager.drawGraphRecursive(childNode, _cmpCamera, _drawNode); //, world);
       }
-      Recycler.store(projection);
+
       if (finalTransform != _node.mtxWorld)
         Recycler.store(finalTransform);
-
     }
 
     /**
@@ -184,6 +188,7 @@ namespace FudgeCore {
     private static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4, _lights: MapLightTypeToLightList, _cmpCamera: ComponentCamera): void {
       try {
         let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
+        if (!cmpMaterial.isActive) return;
         let mesh: Mesh = _node.getComponent(ComponentMesh).mesh;
         // RenderManager.setLightsInShader(shader, _lights);
         RenderManager.draw(mesh, cmpMaterial, _finalTransform, _projection); //, _lights);

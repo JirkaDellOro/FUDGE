@@ -2736,7 +2736,7 @@ var FudgeCore;
          * Asynchronously loads the audio (mp3) from the given url
          */
         async load(_url) {
-            console.log("AudioLoad", _url);
+            FudgeCore.Debug.fudge("AudioLoad", _url);
             this.url = _url;
             this.ready = false;
             this.path = new URL(this.url.toString(), FudgeCore.Project.baseURL);
@@ -3363,9 +3363,13 @@ var FudgeCore;
             this.listened = false;
             //#endregion
             this.hndAudioReady = (_event) => {
-                console.log("Start Audio!");
+                FudgeCore.Debug.fudge("Audio start", Reflect.get(_event.target, "url"));
                 if (this.playing)
                     this.play(true);
+            };
+            this.hndAudioEnded = (_event) => {
+                // Debug.fudge("Audio ended", Reflect.get(_event.target, "url"));
+                this.playing = false;
             };
             /**
              * Automatically connects/disconnects AudioNodes when adding/removing this component to/from a node.
@@ -3468,8 +3472,10 @@ var FudgeCore;
                     this.createSource(this.audio, this.source.loop);
                     this.source.start(0, 0);
                 }
-                else
+                else {
                     this.audio.addEventListener("ready" /* READY */, this.hndAudioReady);
+                }
+                this.source.addEventListener("ended" /* ENDED */, this.hndAudioEnded);
             }
             else
                 this.source.stop();
@@ -4012,6 +4018,7 @@ var FudgeCore;
         constructor(_mesh = null) {
             super();
             this.pivot = FudgeCore.Matrix4x4.IDENTITY();
+            this.mtxWorld = FudgeCore.Matrix4x4.IDENTITY();
             this.mesh = null;
             this.mesh = _mesh;
         }
@@ -6997,6 +7004,14 @@ var FudgeCore;
             return -1;
         }
         /**
+         * Returns a randomly selected element of the given array
+         */
+        getElement(_array) {
+            if (_array.length > 0)
+                return _array[this.getIndex(_array)];
+            return null;
+        }
+        /**
          * Removes a randomly selected element from the given array and returns it
          */
         splice(_array) {
@@ -7022,6 +7037,18 @@ var FudgeCore;
         getPropertySymbol(_object) {
             let keys = Object.getOwnPropertySymbols(_object);
             return keys[this.getIndex(keys)];
+        }
+        /**
+         * Returns a random three-dimensional vector in the limits of the box defined by the vectors given as [_corner0, _corner1[
+         */
+        getVector3(_corner0, _corner1) {
+            return new FudgeCore.Vector3(this.getRange(_corner0.x, _corner1.x), this.getRange(_corner0.y, _corner1.y), this.getRange(_corner0.z, _corner1.z));
+        }
+        /**
+         * Returns a random two-dimensional vector in the limits of the rectangle defined by the vectors given as [_corner0, _corner1[
+         */
+        getVector2(_corner0, _corner1) {
+            return new FudgeCore.Vector2(this.getRange(_corner0.x, _corner1.x), this.getRange(_corner0.y, _corner1.y));
         }
     }
     Random.default = new Random();
@@ -11871,20 +11898,24 @@ var FudgeCore;
                 return;
             let finalTransform;
             let cmpMesh = _node.getComponent(FudgeCore.ComponentMesh);
-            if (cmpMesh) // TODO: careful when using particlesystem, pivot must not change node position
+            if (cmpMesh) { // TODO: careful when using particlesystem, pivot must not change node position
                 finalTransform = FudgeCore.Matrix4x4.MULTIPLICATION(_node.mtxWorld, cmpMesh.pivot);
+                cmpMesh.mtxWorld = finalTransform.copy; // not understood, why copy is needed. 
+            }
             else
                 finalTransform = _node.mtxWorld; // caution, RenderManager is a reference...
-            // multiply camera matrix
-            let projection = FudgeCore.Matrix4x4.MULTIPLICATION(_cmpCamera.ViewProjectionMatrix, finalTransform);
-            // TODO: create drawNode method for particle system using _node.mtxWorld instead of finalTransform
-            _drawNode(_node, finalTransform, projection);
-            // RenderParticles.drawParticles();
+            if (cmpMesh && cmpMesh.isActive) {
+                // multiply camera matrix
+                let projection = FudgeCore.Matrix4x4.MULTIPLICATION(_cmpCamera.ViewProjectionMatrix, finalTransform);
+                // TODO: create drawNode method for particle system using _node.mtxWorld instead of finalTransform
+                _drawNode(_node, finalTransform, projection);
+                // RenderParticles.drawParticles();
+                FudgeCore.Recycler.store(projection);
+            }
             for (let name in _node.getChildren()) {
                 let childNode = _node.getChildren()[name];
                 RenderManager.drawGraphRecursive(childNode, _cmpCamera, _drawNode); //, world);
             }
-            FudgeCore.Recycler.store(projection);
             if (finalTransform != _node.mtxWorld)
                 FudgeCore.Recycler.store(finalTransform);
         }
@@ -11894,6 +11925,8 @@ var FudgeCore;
         static drawNode(_node, _finalTransform, _projection, _lights, _cmpCamera) {
             try {
                 let cmpMaterial = _node.getComponent(FudgeCore.ComponentMaterial);
+                if (!cmpMaterial.isActive)
+                    return;
                 let mesh = _node.getComponent(FudgeCore.ComponentMesh).mesh;
                 // RenderManager.setLightsInShader(shader, _lights);
                 RenderManager.draw(mesh, cmpMaterial, _finalTransform, _projection); //, _lights);

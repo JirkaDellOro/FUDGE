@@ -1497,6 +1497,7 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         private hndAudioReady;
+        private hndAudioEnded;
         private install;
         private createSource;
         private updateConnection;
@@ -1709,6 +1710,7 @@ declare namespace FudgeCore {
     class ComponentMesh extends Component {
         static readonly iSubclass: number;
         pivot: Matrix4x4;
+        mtxWorld: Matrix4x4;
         mesh: Mesh;
         constructor(_mesh?: Mesh);
         serialize(): Serialization;
@@ -2261,7 +2263,10 @@ declare namespace FudgeCore {
         CHILD_REMOVE = "childRemoveFromAudioGraph",
         /** broadcast to a [[Node]] and all its descendants in the graph to update the panners in AudioComponents */
         UPDATE = "updateAudioGraph",
-        READY = "ready"
+        /** fired when the audio file was loaded and is ready for playing */
+        READY = "ready",
+        /** fired when the end of the audio is reached while playing */
+        ENDED = "ended"
     }
 }
 declare namespace FudgeCore {
@@ -2988,6 +2993,10 @@ declare namespace FudgeCore {
          */
         getIndex<T>(_array: Array<T>): number;
         /**
+         * Returns a randomly selected element of the given array
+         */
+        getElement<T>(_array: Array<T>): T;
+        /**
          * Removes a randomly selected element from the given array and returns it
          */
         splice<T>(_array: Array<T>): T;
@@ -3003,6 +3012,14 @@ declare namespace FudgeCore {
          * Returns a randomly selected symbol from the given object, if symbols are used as keys
          */
         getPropertySymbol(_object: Object): symbol;
+        /**
+         * Returns a random three-dimensional vector in the limits of the box defined by the vectors given as [_corner0, _corner1[
+         */
+        getVector3(_corner0: Vector3, _corner1: Vector3): Vector3;
+        /**
+         * Returns a random two-dimensional vector in the limits of the rectangle defined by the vectors given as [_corner0, _corner1[
+         */
+        getVector2(_corner0: Vector2, _corner1: Vector2): Vector2;
     }
     /**
      * Standard [[Random]]-instance using Math.random().
