@@ -23,6 +23,8 @@ namespace HeightMap {
   cntKeyHorizontal.setDelay(500);
   cntKeyVertical.setDelay(500);
 
+  export let arrowRed: ƒ.Node;
+
 
   function init(_event: Event): void {
 
@@ -68,6 +70,7 @@ namespace HeightMap {
     controlled = new Controlled("Cube", f.Matrix4x4.IDENTITY() /*, matRed, new f.MeshCube() */);
     controlled.mtxLocal.translation = new f.Vector3(0.1,0.1,0.1);
     controlled.mtxLocal.scale(new f.Vector3(0.2,0.2,0.2));
+    // controlled.setUpAxis();
     //controlled.getComponent(f.ComponentMesh).pivot.scaleZ(2);
 
     // m1 = Scenes.createCompleteMeshNode("M1", matRed, meshCube);
@@ -101,6 +104,10 @@ namespace HeightMap {
     // m2.mtxLocal.scale(new f.Vector3(s,s,s));
     // m3.mtxLocal.scale(new f.Vector3(s,s,s));
 
+    arrowRed = Scenes.createCompleteMeshNode("Arrow", matRed, meshCube);
+    arrowRed.getComponent(f.ComponentMesh).pivot.translateZ(0.5);
+    arrowRed.mtxLocal.scale(new f.Vector3(0.01,0.01,0.2))
+
 
     let test: f.Node = new fAid.NodeCoordinateSystem; 
 
@@ -110,6 +117,7 @@ namespace HeightMap {
     // graph.addChild(m2);
     // graph.addChild(m3);
     graph.addChild(test);
+    gridFlat.addChild(arrowRed);
 
     viewport.initialize("Viewport", graph, cmpCamera, document.querySelector("canvas"));
     viewport.setFocus(true);

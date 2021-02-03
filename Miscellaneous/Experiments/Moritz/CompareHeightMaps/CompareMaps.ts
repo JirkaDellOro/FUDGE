@@ -7,7 +7,7 @@ namespace CompareHeightMaps {
 
   let graph: f.Node = new f.Node("Graph");
 
-  let oldGridMeshFlat: f.OldMeshHeightMap;
+  let oldGridMeshFlat: f.MeshHeightMap;
   let gridMeshFlat: f.MeshTerrain;
 
   let oldGridFlat: f.Node = new f.Node("OldMap");
@@ -39,7 +39,7 @@ namespace CompareHeightMaps {
     
 
     gridMeshFlat = new f.MeshTerrain("HeightMap", myHeightMapFunction, 4, 4);
-    oldGridMeshFlat = new f.OldMeshHeightMap("HeightMap", 4, 4, myHeightMapFunction);
+    oldGridMeshFlat = new f.MeshHeightMap("HeightMap", 4, 4, myHeightMapFunction);
 
     gridFlat = Scenes.createCompleteMeshNode("Grid", matTex, gridMeshFlat);
     oldGridFlat = Scenes.createCompleteMeshNode("oldGrid", matTex, oldGridMeshFlat);

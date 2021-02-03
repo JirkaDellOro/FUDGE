@@ -182,7 +182,7 @@ namespace FudgeCore {
       let nearestFace: distanceToFaceVertices = this.findNearestFace(relPosObject);
       let ray = new Ray;
 
-      let origin = new Vector3(0, this.calculateHeight(nearestFace, relPosObject), 0);
+      let origin = new Vector3( object.mtxWorld.translation.x, this.calculateHeight(nearestFace, relPosObject), object.mtxWorld.translation.z);
       origin = Vector3.TRANSFORMATION(origin, this.node.mtxWorld, false);
 
       let direction = nearestFace.faceNormal;

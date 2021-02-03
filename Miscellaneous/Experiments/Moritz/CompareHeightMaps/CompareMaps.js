@@ -27,7 +27,7 @@ var CompareHeightMaps;
             return Math.sin(x * y * Math.PI * 2) * 0.2;
         };
         gridMeshFlat = new f.MeshTerrain("HeightMap", myHeightMapFunction, 4, 4);
-        oldGridMeshFlat = new f.OldMeshHeightMap("HeightMap", 4, 4, myHeightMapFunction);
+        oldGridMeshFlat = new f.MeshHeightMap("HeightMap", 4, 4, myHeightMapFunction);
         gridFlat = Scenes.createCompleteMeshNode("Grid", matTex, gridMeshFlat);
         oldGridFlat = Scenes.createCompleteMeshNode("oldGrid", matTex, oldGridMeshFlat);
         let SecondgridFlat = Scenes.createCompleteMeshNode("Grid", matFlat, gridMeshFlat);

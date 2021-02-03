@@ -9,8 +9,8 @@ namespace FudgeCore {
    * Generates a planar Grid and applies a Heightmap-Function to it.
    * @authors Jirka Dell'Oro-Friedl, Simon Storl-Schulke, HFU, 2020
    */
-  export class OldMeshHeightMap extends Mesh {
-    public static readonly iSubclass: number = Mesh.registerSubclass(OldMeshHeightMap);
+  export class MeshHeightMap extends Mesh {
+    public static readonly iSubclass: number = Mesh.registerSubclass(MeshHeightMap);
 
     public resolutionX: number;
     public resolutionZ: number;

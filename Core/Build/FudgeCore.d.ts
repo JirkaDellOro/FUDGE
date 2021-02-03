@@ -3369,7 +3369,7 @@ declare namespace FudgeCore {
      * Generates a planar Grid and applies a Heightmap-Function to it.
      * @authors Jirka Dell'Oro-Friedl, Simon Storl-Schulke, HFU, 2020
      */
-    class OldMeshHeightMap extends Mesh {
+    class MeshHeightMap extends Mesh {
         static readonly iSubclass: number;
         resolutionX: number;
         resolutionZ: number;
