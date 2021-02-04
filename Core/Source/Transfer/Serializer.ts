@@ -19,13 +19,11 @@ namespace FudgeCore {
    * A [[Serialization]] object can be created from a [[Serializable]] object and a JSON-String may be created from that.  
    * Vice versa, a JSON-String can be parsed to a [[Serialization]] which can be deserialized to a [[Serializable]] object.
    * ```plaintext
-   *  [Serializable] → (serialize) → [Serialization] → (stringify)  
-   *                                                        ↓
-   *                                                    [String]
-   *                                                        ↓
-   *  [Serializable] ← (deserialize) ← [Serialization] ← (parse)
+   *  [Serializable] → (serialize) → [Serialization] → (stringify) → [String] → (save or send)
+   *                                        ↓                            ↓                  ↓         
+   *                [Serializable] ← (deserialize) ← [Serialization] ← (parse) ← (load) ← [Medium]
    * ```      
-   * While the internal serialize/deserialize methods of the objects care of the selection of information needed to recreate the object and its structure,  
+   * While the internal serialize/deserialize method1s of the objects care of the selection of information needed to recreate the object and its structure,  
    * the [[Serializer]] keeps track of the namespaces and classes in order to recreate [[Serializable]] objects. The general structure of a [[Serialization]] is as follows  
    * ```plaintext
    * {
