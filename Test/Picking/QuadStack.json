@@ -6,7 +6,7 @@
       "children": [
         {
           "ƒ.GraphInstance": {
-            "name": "QuadRed",
+            "name": "red",
             "components": {
               "ComponentMesh": [
                 {
@@ -14,7 +14,7 @@
                     "idMesh": "MeshQuad|2021-02-03T16:24:39.626Z|03395",
                     "pivot": {
                       "translation": "[0, -0.6000000238418579, 1]",
-                      "rotation": "[0, 0, 0]",
+                      "rotation": "[0, 45, 0]",
                       "scaling": "[1, 1, 1]"
                     },
                     "Component": {
@@ -47,7 +47,7 @@
         },
         {
           "ƒ.GraphInstance": {
-            "name": "QuadGreen",
+            "name": "green",
             "components": {
               "ComponentMesh": [
                 {
@@ -55,7 +55,7 @@
                     "idMesh": "MeshQuad|2021-02-03T16:24:39.626Z|03395",
                     "pivot": {
                       "translation": "[0.6000000238418579, 0, 0]",
-                      "rotation": "[0, 0, 0]",
+                      "rotation": "[0, 45, 0]",
                       "scaling": "[1, 1, 1]"
                     },
                     "Component": {
@@ -88,7 +88,7 @@
         },
         {
           "ƒ.GraphInstance": {
-            "name": "QuadBlue",
+            "name": "blue",
             "components": {
               "ComponentMesh": [
                 {
@@ -96,7 +96,7 @@
                     "idMesh": "MeshQuad|2021-02-03T16:24:39.626Z|03395",
                     "pivot": {
                       "translation": "[0, 0.6000000238418579, -1]",
-                      "rotation": "[0, 0, 0]",
+                      "rotation": "[0, 45, 0]",
                       "scaling": "[1, 1, 1]"
                     },
                     "Component": {
@@ -129,7 +129,7 @@
         },
         {
           "ƒ.GraphInstance": {
-            "name": "QuadYellow",
+            "name": "yellow",
             "components": {
               "ComponentMesh": [
                 {
@@ -137,7 +137,7 @@
                     "idMesh": "MeshQuad|2021-02-03T16:24:39.626Z|03395",
                     "pivot": {
                       "translation": "[-0.6000000238418579, 0, -2]",
-                      "rotation": "[0, 0, 0]",
+                      "rotation": "[0, 45, 0]",
                       "scaling": "[1, 1, 1]"
                     },
                     "Component": {

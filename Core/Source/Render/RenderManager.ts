@@ -62,8 +62,8 @@ namespace FudgeCore {
         RenderManager.crc3.readPixels(0, 0, _rect.width, _rect.height, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, data);
         let pixel: number = _pos.x + _rect.width * _pos.y;
 
-        // let zBuffer: number = data[4 * pixel + 1] + data[4 * pixel + 2] / 256;
-        let zBuffer: number = data[4 * pixel + 0];
+        let zBuffer: number = data[4 * pixel + 1] + data[4 * pixel + 2] / 256;
+        // let zBuffer: number = data[4 * pixel + 0];
         let hit: RayHit = new RayHit(pickBuffer.node, 0, zBuffer);
 
         hits.push(hit);

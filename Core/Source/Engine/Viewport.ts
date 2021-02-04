@@ -228,6 +228,7 @@ namespace FudgeCore {
     public pointSourceToRender(_source: Vector2): Vector2 {
       let projectionRectangle: Rectangle = this.camera.getProjectionRectangle();
       let point: Vector2 = this.frameSourceToRender.getPoint(_source, projectionRectangle);
+      // console.log(projectionRectangle.toString());
       return point;
     }
 
