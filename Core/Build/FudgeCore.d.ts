@@ -4884,7 +4884,7 @@ declare namespace FudgeCore {
          */
         private static drawNodeForRayCast;
         /**
-         * Creates a texture buffer to be uses as pick-buffer
+         * Creates a texture buffer to be used as pick-buffer
          */
         private static getRayCastTexture;
         /**

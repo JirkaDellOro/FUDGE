@@ -1,7 +1,6 @@
 var Picking;
 (function (Picking) {
     var ƒ = FudgeCore;
-    var ƒUi = FudgeUserInterface;
     var ƒAid = FudgeAid;
     window.addEventListener("load", start);
     let cmpCamera;
@@ -22,8 +21,8 @@ var Picking;
     let uiController;
     async function start(_event) {
         ƒ.Debug.fudge("Start Picking");
-        let domHud = document.querySelector("div#ui");
-        uiController = new ƒUi.Controller(data, domHud);
+        // let domHud: HTMLDivElement = document.querySelector("div#ui");
+        // uiController = new ƒUi.Controller(data, domHud);
         await FudgeCore.Project.loadResourcesFromHTML();
         let canvas = document.querySelector("canvas");
         canvas.addEventListener("mousemove", setCursorPosition);
@@ -42,9 +41,9 @@ var Picking;
         viewport.draw();
         viewport.createPickBuffers();
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
-        ƒ.Loop.start();
+        ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 30);
         // canvas.addEventListener("mousemove", update);
-        window.addEventListener("resize", viewport.createPickBuffers.bind(viewport));
+        // window.addEventListener("resize", viewport.createPickBuffers.bind(viewport));
         function update(_event) {
             viewport.draw();
             pickNodeAt(mouse);
@@ -53,29 +52,18 @@ var Picking;
     function pickNodeAt(_pos) {
         let mouseUp = new ƒ.Vector2(_pos.x, viewport.getClientRectangle().height - _pos.y);
         let posRender = viewport.pointClientToRender(mouseUp);
-        // let ray: ƒ.Ray =  viewport.getRayFromClient(mouse);
-        let posProjection = viewport.pointClientToProjection(mouse);
-        // viewport.getRayFromClient()
-        let direction = new ƒ.Vector3(-posProjection.x, posProjection.y, 1); // understand the negation of x
-        // direction.normalize();
-        // let ray: ƒ.Ray = new ƒ.Ray();
-        let mtxProjection = Reflect.get(cmpCamera, "transform");
-        let rayClip = ƒ.Vector3.TRANSFORMATION(direction, mtxProjection);
-        // console.log(rayClip.toString());
         let hits = viewport.pickNodeAt(posRender);
         for (let hit of hits) {
-            data[hit.node.name] = hit.zBuffer / 128 - 1;
+            data[hit.node.name] = hit.zBuffer / 128 - 1 || -1;
         }
-        rayClip.z = hits[0].zBuffer / 128 - 1;
+        viewport.pointClipToClient;
+        let posClip = new ƒ.Vector3(2 * mouse.x / viewport.getClientRectangle().width - 1, 1 - 2 * mouse.y / viewport.getClientRectangle().height, hits[0].zBuffer / 128 - 1);
         let mtxViewProjectionInverse = ƒ.Matrix4x4.INVERSION(cmpCamera.ViewProjectionMatrix);
         let m = mtxViewProjectionInverse.get();
-        let rayWorld = ƒ.Vector3.TRANSFORMATION(rayClip, mtxViewProjectionInverse, true);
-        let w = m[3] * rayClip.x + m[7] * rayClip.y + m[11] * rayClip.z + m[15];
+        let rayWorld = ƒ.Vector3.TRANSFORMATION(posClip, mtxViewProjectionInverse, true);
+        let w = m[3] * posClip.x + m[7] * posClip.y + m[11] * posClip.z + m[15];
         rayWorld.scale(1 / w);
-        // console.log(hits[0].node.name, rayWorld.toString());
         cursor.mtxLocal.translation = rayWorld;
-        // console.log(data.red);
-        // console.groupEnd();
     }
     function setCursorPosition(_event) {
         mouse = new ƒ.Vector2(_event.clientX, _event.clientY);
