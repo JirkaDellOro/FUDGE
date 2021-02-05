@@ -2155,9 +2155,14 @@ declare namespace FudgeCore {
          */
         showSceneGraph(): void;
         /**
-         * Draw this viewport
+         * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the [[Node]]s and [[ComponentMesh]]es
          */
-        draw(): void;
+        calculateTransforms(): void;
+        /**
+         * Draw this viewport displaying its branch. By default, the transforms in the branch are recalculated first.
+         * Pass `false` if calculation was already done for this frame
+         */
+        draw(_calculateTransforms?: boolean): void;
         /**
         * Draw this viewport for RayCast
         */
@@ -4866,7 +4871,7 @@ declare namespace FudgeCore {
          * Recursively iterates over the graph starting with the node given, recalculates all world transforms,
          * collects all lights and feeds all shaders used in the graph with these lights
          */
-        static setupTransformAndLights(_node: Node, _world?: Matrix4x4, _lights?: MapLightTypeToLightList, _shadersUsed?: (typeof Shader)[]): void;
+        static setupTransformAndLights(_node: Node, _mtxWorld?: Matrix4x4, _lights?: MapLightTypeToLightList, _shadersUsed?: (typeof Shader)[]): void;
         /**
          * The main rendering function to be called from [[Viewport]].
          * Draws the graph starting with the given [[Node]] using the camera given [[ComponentCamera]].

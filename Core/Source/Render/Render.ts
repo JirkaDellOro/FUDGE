@@ -64,20 +64,23 @@ namespace FudgeCore {
      * Recursively iterates over the graph starting with the node given, recalculates all world transforms, 
      * collects all lights and feeds all shaders used in the graph with these lights
      */
-    public static setupTransformAndLights(_node: Node, _world: Matrix4x4 = Matrix4x4.IDENTITY(), _lights: MapLightTypeToLightList = new Map(), _shadersUsed: (typeof Shader)[] = null): void {
+    public static setupTransformAndLights(_node: Node, _mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY(), _lights: MapLightTypeToLightList = new Map(), _shadersUsed: (typeof Shader)[] = null): void {
       Render.timestampUpdate = performance.now();
       let firstLevel: boolean = (_shadersUsed == null);
       if (firstLevel)
         _shadersUsed = [];
 
-      let world: Matrix4x4 = _world;
+      let mtxWorld: Matrix4x4 = _mtxWorld;
 
-      let cmpTransform: ComponentTransform = _node.cmpTransform;
-      if (cmpTransform)
-        world = Matrix4x4.MULTIPLICATION(_world, cmpTransform.local);
+      if (_node.cmpTransform)
+        mtxWorld = Matrix4x4.MULTIPLICATION(_mtxWorld, _node.cmpTransform.local);
 
-      _node.mtxWorld.set(world); // overwrite readonly mtxWorld of node
+      _node.mtxWorld.set(mtxWorld); // overwrite readonly mtxWorld of node
       _node.timestampUpdate = Render.timestampUpdate;
+
+      let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
+      if (cmpMesh)  // TODO: careful when using particlesystem, pivot must not change node position
+        cmpMesh.mtxWorld = Matrix4x4.MULTIPLICATION(_node.mtxWorld, cmpMesh.pivot);
 
       let cmpLights: ComponentLight[] = _node.getComponents(ComponentLight);
       for (let cmpLight of cmpLights) {
@@ -98,7 +101,7 @@ namespace FudgeCore {
       }
 
       for (let child of _node.getChildren()) {
-        Render.setupTransformAndLights(child, world, _lights, _shadersUsed);
+        Render.setupTransformAndLights(child, mtxWorld, _lights, _shadersUsed);
       }
 
       if (firstLevel)
@@ -113,18 +116,12 @@ namespace FudgeCore {
      * Draws the graph starting with the given [[Node]] using the camera given [[ComponentCamera]].
      */
     public static drawGraph(_node: Node, _cmpCamera: ComponentCamera, _drawNode: Function = Render.drawNode): void {
-      let matrix: Matrix4x4 = Matrix4x4.IDENTITY();
-      if (_node.getParent())
-        matrix = _node.getParent().mtxWorld;
-
       let mtxWorldToView: Matrix4x4 = _cmpCamera.mtxWorldToView;
 
       // TODO: Move physics rendering to RenderPhysics extension of RenderManager
       if (Physics.world && Physics.world.mainCam != _cmpCamera)
         Physics.world.mainCam = _cmpCamera; //DebugDraw needs to know the main camera beforehand, _cmpCamera is the viewport camera. | Marko Fehrenbach, HFU 2020
       Render.setupPhysicalTransform(_node);
-
-      Render.setupTransformAndLights(_node, matrix);
 
       //if (Physics.settings && Physics.settings.debugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY) //Give users the possibility to only show physics displayed | Marko Fehrenbach, HFU 2020
       Render.drawGraphRecursive(_node, mtxWorldToView, _drawNode);
@@ -142,21 +139,18 @@ namespace FudgeCore {
       if (!_node.isActive)
         return;
 
-      let mtxMeshToWorld: Matrix4x4;
-
       let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
-      if (cmpMesh) { // TODO: careful when using particlesystem, pivot must not change node position
-        mtxMeshToWorld = Matrix4x4.MULTIPLICATION(_node.mtxWorld, cmpMesh.pivot);
-        cmpMesh.mtxWorld = mtxMeshToWorld.copy; 
-      }
-      else
-        mtxMeshToWorld = _node.mtxWorld; 
+      // if (cmpMesh) { // TODO: careful when using particlesystem, pivot must not change node position
+      //   mtxMeshToWorld = Matrix4x4.MULTIPLICATION(_node.mtxWorld, cmpMesh.pivot);
+      //   cmpMesh.mtxWorld = mtxMeshToWorld.copy;
+      // }
+      // else
+      //   mtxMeshToWorld = _node.mtxWorld;
 
       if (cmpMesh && cmpMesh.isActive) {
-        // multiply camera matrix
-        let mtxMeshToView: Matrix4x4 = Matrix4x4.MULTIPLICATION(_mtxWorldToView, mtxMeshToWorld);
+        let mtxMeshToView: Matrix4x4 = Matrix4x4.MULTIPLICATION(_mtxWorldToView, cmpMesh.mtxWorld);
         // TODO: create drawNode method for particle system using _node.mtxWorld instead of finalTransform
-        _drawNode(_node, mtxMeshToWorld, mtxMeshToView);
+        _drawNode(_node, _node.mtxWorld, mtxMeshToView);
         // RenderParticles.drawParticles();
         Recycler.store(mtxMeshToView);
       }
@@ -165,9 +159,6 @@ namespace FudgeCore {
         let childNode: Node = _node.getChildren()[name];
         Render.drawGraphRecursive(childNode, _mtxWorldToView, _drawNode); //, world);
       }
-
-      if (mtxMeshToWorld != _node.mtxWorld)
-        Recycler.store(mtxMeshToWorld);
     }
 
     /**

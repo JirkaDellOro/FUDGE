@@ -114,9 +114,19 @@ namespace FudgeCore {
 
     // #region Drawing
     /**
-     * Draw this viewport
+     * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the [[Node]]s and [[ComponentMesh]]es 
      */
-    public draw(): void {
+    public calculateTransforms(): void {
+      let matrix: Matrix4x4 = Matrix4x4.IDENTITY();
+      if (this.graph.getParent())
+        matrix = this.graph.getParent().mtxWorld;
+      Render.setupTransformAndLights(this.graph, matrix);
+    }
+    /**
+     * Draw this viewport displaying its branch. By default, the transforms in the branch are recalculated first.
+     * Pass `false` if calculation was already done for this frame 
+     */
+    public draw(_calculateTransforms: boolean = true): void {
       Render.resetFrameBuffer();
       if (!this.camera.isActive)
         return;
@@ -125,6 +135,8 @@ namespace FudgeCore {
       if (this.adjustingCamera)
         this.adjustCamera();
 
+      if (_calculateTransforms)
+        this.calculateTransforms();
       Render.clear(this.camera.backgroundColor);
       Render.drawGraph(this.graph, this.camera);
 
