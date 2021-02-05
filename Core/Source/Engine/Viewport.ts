@@ -171,9 +171,9 @@ namespace FudgeCore {
       this.rectSource = this.frameDestinationToSource.getRect(this.rectDestination);
       // having an offset source does make sense only when multiple viewports display parts of the same rendering. For now: shift it to 0,0
       this.rectSource.x = this.rectSource.y = 0;
-      // still, a partial image of the rendering may be retrieved by moving and resizing the render viewport
+      // still, a partial image of the rendering may be retrieved by moving and resizing the render viewport. For now, it's always adjusted to the current viewport
       let rectRender: Rectangle = this.frameSourceToRender.getRect(this.rectSource);
-      Render.setViewportRectangle(rectRender);
+      Render.setRenderRectangle(rectRender);
       // no more transformation after this for now, offscreen canvas and render-viewport have the same size
       Render.setCanvasSize(rectRender.width, rectRender.height);
     }
@@ -181,7 +181,7 @@ namespace FudgeCore {
      * Adjust the camera parameters to fit the rendering into the render vieport
      */
     public adjustCamera(): void {
-      let rect: Rectangle = Render.getViewportRectangle();
+      let rect: Rectangle = Render.getRenderRectangle();
       this.camera.projectCentral(
         rect.width / rect.height, this.camera.getFieldOfView(), this.camera.getDirection(), this.camera.getNear(), this.camera.getFar());
     }
@@ -207,7 +207,7 @@ namespace FudgeCore {
     }
 
     public pointWorldToClient(_position: Vector3): Vector2 {
-      let projection: Vector3 = this.camera.project(_position);
+      let projection: Vector3 = this.camera.pointWorldToClip(_position);
       let posClient: Vector2 = this.pointClipToClient(projection.toVector2());
       return posClient;
     }
@@ -243,8 +243,8 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns a point in normed view-rectangle matching the given point on the client rectangle
-     * The view-rectangle matches the client size in the hypothetical distance of 1 to the camera, its origin in the center and y-axis pointing up
+     * Returns a point on a projection surface in the hypothetical distance of 1 to the camera  
+     * matching the given point on the client rectangle
      * TODO: examine, if this should be a camera-method. Current implementation is for central-projection
      */
     public pointClientToProjection(_client: Vector2): Vector2 {
@@ -273,7 +273,7 @@ namespace FudgeCore {
       // result.x *= (_normed.x + 1) * rectClient.width;
       // result.y *= (1 - _normed.y) * rectClient.height;
       // result.add(rectClient.position);
-      //TODO: check if rectDestination can be safely (and more perfomant) be used instead getClientRectangle
+      //TODO: check if rectDestination can safely (and more perfomant) be used instead getClientRectangle
       let pointClient: Vector2 = Render.rectClip.pointToRect(_normed, this.rectDestination);
       return pointClient;
     }

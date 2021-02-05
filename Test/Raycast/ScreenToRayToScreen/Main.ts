@@ -79,12 +79,12 @@ namespace ScreenToRayToScreen {
     console.groupEnd();
 
     let rayEnd: ƒ.Vector3 = ƒ.Vector3.SUM(ray.origin, ray.direction);
-    let projection: ƒ.Vector3 = camera.component.project(rayEnd);
+    let posClip: ƒ.Vector3 = camera.component.pointWorldToClip(rayEnd);
     // let screen: ƒ.Vector2 = ƒ.Render.rectClip.pointToRect(projection.toVector2(), viewport.getCanvasRectangle());
-    let screen: ƒ.Vector2 = viewport.pointClipToClient(projection.toVector2());
+    let screen: ƒ.Vector2 = viewport.pointClipToClient(posClip.toVector2());
     console.group("end");
     ƒ.Debug.log("End", rayEnd.toString());
-    ƒ.Debug.log("Projected", projection.toString());
+    ƒ.Debug.log("Projected", posClip.toString());
     ƒ.Debug.log("Screen", screen.toString());
 
     console.groupEnd();
@@ -141,15 +141,15 @@ namespace ScreenToRayToScreen {
 
   function drawLabels(): void {
     let mtxCube: ƒ.Matrix4x4 = root.getChildrenByName("Cube")[0].mtxWorld;
-    let projection: ƒ.Vector3 = camera.component.project(mtxCube.translation);
-    let posCanvas: ƒ.Vector2 = viewport.pointClipToCanvas(projection.toVector2());
-    let posClient: ƒ.Vector2 = viewport.pointClipToClient(projection.toVector2());
+    let posClip: ƒ.Vector3 = camera.component.pointWorldToClip(mtxCube.translation);
+    let posCanvas: ƒ.Vector2 = viewport.pointClipToCanvas(posClip.toVector2());
+    let posClient: ƒ.Vector2 = viewport.pointClipToClient(posClip.toVector2());
     let posScreen: ƒ.Vector2 = viewport.pointClientToScreen(posClient);
 
     ƒ.Debug.group("Cube");
     ƒ.Debug.clear();
     ƒ.Debug.info("End", mtxCube.translation.toString());
-    ƒ.Debug.log("Projected", projection.toString());
+    ƒ.Debug.log("Projected", posClip.toString());
     ƒ.Debug.warn("Canvas", posCanvas.toString());
     ƒ.Debug.error("Client", posClient.toString());
     ƒ.Debug.log("Screen", posScreen.toString());

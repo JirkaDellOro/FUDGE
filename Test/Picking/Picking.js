@@ -57,7 +57,7 @@ var Picking;
             data[hit.node.name] = hit.zBuffer / 128 - 1 || -1;
         }
         let posClip = new ƒ.Vector3(2 * mouse.x / viewport.getClientRectangle().width - 1, 1 - 2 * mouse.y / viewport.getClientRectangle().height, hits[0].zBuffer / 128 - 1);
-        let mtxViewProjectionInverse = ƒ.Matrix4x4.INVERSION(cmpCamera.ViewProjectionMatrix);
+        let mtxViewProjectionInverse = ƒ.Matrix4x4.INVERSION(cmpCamera.mtxWorldToView);
         let m = mtxViewProjectionInverse.get();
         let rayWorld = ƒ.Vector3.TRANSFORMATION(posClip, mtxViewProjectionInverse, true);
         let w = m[3] * posClip.x + m[7] * posClip.y + m[11] * posClip.z + m[15];

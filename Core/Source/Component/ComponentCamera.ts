@@ -23,7 +23,7 @@ namespace FudgeCore {
     public backgroundColor: Color = new Color(0, 0, 0, 1); // The color of the background the camera will render.
     //private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
     private projection: PROJECTION = PROJECTION.CENTRAL;
-    private transform: Matrix4x4 = new Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
+    private mtxProjection: Matrix4x4 = new Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
     private fieldOfView: number = 45; // The camera's sensorangle.
     private aspectRatio: number = 1.0;
     private direction: FIELD_OF_VIEW = FIELD_OF_VIEW.DIAGONAL;
@@ -36,7 +36,7 @@ namespace FudgeCore {
      * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
      * @returns the world-projection-matrix
      */
-    public get ViewProjectionMatrix(): Matrix4x4 {
+    public get mtxWorldToView(): Matrix4x4 {
       //TODO: optimize, no need to recalculate if neither mtxWorld nor pivot have changed
       let mtxCamera: Matrix4x4 = this.pivot;
       try {
@@ -44,9 +44,9 @@ namespace FudgeCore {
       } catch (_error) {
         // no container node or no world transformation found -> continue with pivot only
       }
-      let mtxWorldProjection: Matrix4x4 = Matrix4x4.INVERSION(mtxCamera);
-      mtxWorldProjection = Matrix4x4.MULTIPLICATION(this.transform, mtxWorldProjection);
-      return mtxWorldProjection;
+      let mtxResult: Matrix4x4 = Matrix4x4.INVERSION(mtxCamera);
+      mtxResult = Matrix4x4.MULTIPLICATION(this.mtxProjection, mtxResult);
+      return mtxResult;
     }
 
     public getProjection(): PROJECTION {
@@ -89,7 +89,7 @@ namespace FudgeCore {
       this.projection = PROJECTION.CENTRAL;
       this.near = _near;
       this.far = _far;
-      this.transform = Matrix4x4.PROJECTION_CENTRAL(_aspect, this.fieldOfView, _near, _far, this.direction); // TODO: remove magic numbers
+      this.mtxProjection = Matrix4x4.PROJECTION_CENTRAL(_aspect, this.fieldOfView, _near, _far, this.direction); // TODO: remove magic numbers
     }
     /**
      * Set the camera to orthographic projection. The origin is in the top left corner of the canvas.
@@ -100,11 +100,11 @@ namespace FudgeCore {
      */
     public projectOrthographic(_left: number = 0, _right: number = Render.getCanvas().clientWidth, _bottom: number = Render.getCanvas().clientHeight, _top: number = 0): void {
       this.projection = PROJECTION.ORTHOGRAPHIC;
-      this.transform = Matrix4x4.PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
+      this.mtxProjection = Matrix4x4.PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
     }
 
     /**
-     * Return the calculated normed dimension of the projection surface, that is in the hypothetical distance of 1 to the camera
+     * Return the calculated dimension of a projection surface in the hypothetical distance of 1 to the camera
      */
     public getProjectionRectangle(): Rectangle {
       let tanFov: number = Math.tan(Math.PI * this.fieldOfView / 360); // Half of the angle, to calculate dimension from the center -> right angle
@@ -128,10 +128,10 @@ namespace FudgeCore {
       return Rectangle.GET(0, 0, tanHorizontal * 2, tanVertical * 2);
     }
 
-    public project(_pointInWorldSpace: Vector3): Vector3 {
+    public pointWorldToClip(_pointInWorldSpace: Vector3): Vector3 {
       let result: Vector3;
-      result = Vector3.TRANSFORMATION(_pointInWorldSpace, this.ViewProjectionMatrix);
-      let m: Float32Array = this.ViewProjectionMatrix.get();
+      result = Vector3.TRANSFORMATION(_pointInWorldSpace, this.mtxWorldToView);
+      let m: Float32Array = this.mtxWorldToView.get();
       let w: number = m[3] * _pointInWorldSpace.x + m[7] * _pointInWorldSpace.y + m[11] * _pointInWorldSpace.z + m[15];
       result.scale(1 / w);
       return result;

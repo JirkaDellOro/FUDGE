@@ -78,7 +78,7 @@ var RenderRendering;
                 ƒ.Render.setCanvasSize(rect.width, rect.height);
                 break;
             case "RenderViewport":
-                ƒ.Render.setViewportRectangle(rect);
+                ƒ.Render.setRenderRectangle(rect);
                 break;
             case "ViewportSource":
                 viewPort.rectSource = rect;
@@ -106,7 +106,7 @@ var RenderRendering;
     }
     function update() {
         uiRectangles["RenderCanvas"].set(ƒ.Render.getCanvasRect());
-        uiRectangles["RenderViewport"].set(ƒ.Render.getViewportRectangle());
+        uiRectangles["RenderViewport"].set(ƒ.Render.getRenderRectangle());
         uiRectangles["ViewportSource"].set(viewPort.rectSource);
         uiRectangles["ViewportDestination"].set(viewPort.rectDestination);
         uiRectangles["DomCanvas"].set(new ƒ.Rectangle(0, 0, canvas.width, canvas.height));

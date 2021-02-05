@@ -152,7 +152,7 @@ namespace FudgeCore {
 
       if (cmpMesh && cmpMesh.isActive) {
         // multiply camera matrix
-        let projection: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.ViewProjectionMatrix, finalTransform);
+        let projection: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, finalTransform);
         // TODO: create drawNode method for particle system using _node.mtxWorld instead of finalTransform
         _drawNode(_node, finalTransform, projection);
         // RenderParticles.drawParticles();
@@ -222,8 +222,8 @@ namespace FudgeCore {
      */
     private static getRayCastTexture(): WebGLTexture {
       // create to render to
-      const targetTextureWidth: number = Render.getViewportRectangle().width;
-      const targetTextureHeight: number = Render.getViewportRectangle().height;
+      const targetTextureWidth: number = Render.getRenderRectangle().width;
+      const targetTextureHeight: number = Render.getRenderRectangle().height;
       const targetTexture: WebGLTexture = Render.crc3.createTexture();
       Render.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, targetTexture);
 

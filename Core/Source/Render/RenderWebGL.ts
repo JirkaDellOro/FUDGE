@@ -25,7 +25,7 @@ namespace FudgeCore {
    */
   export abstract class RenderWebGL {
     protected static crc3: WebGL2RenderingContext = RenderWebGL.initialize();
-    private static rectViewport: Rectangle = RenderWebGL.getCanvasRect();
+    private static rectRender: Rectangle = RenderWebGL.getCanvasRect();
 
 
     /** 
@@ -73,7 +73,7 @@ namespace FudgeCore {
       crc3.blendEquation(WebGL2RenderingContext.FUNC_ADD);
       RenderWebGL.setBlendMode(BLEND.TRANSPARENT);
       // RenderOperator.crc3.pixelStorei(WebGL2RenderingContext.UNPACK_FLIP_Y_WEBGL, true);
-      RenderWebGL.rectViewport = RenderWebGL.getCanvasRect();
+      RenderWebGL.rectRender = RenderWebGL.getCanvasRect();
       return crc3;
     }
 
@@ -111,8 +111,8 @@ namespace FudgeCore {
      * Set the area on the offscreen-canvas to render the camera image to.
      * @param _rect
      */
-    public static setViewportRectangle(_rect: Rectangle): void {
-      Object.assign(RenderWebGL.rectViewport, _rect);
+    public static setRenderRectangle(_rect: Rectangle): void {
+      Object.assign(RenderWebGL.rectRender, _rect);
       RenderWebGL.crc3.viewport(_rect.x, _rect.y, _rect.width, _rect.height);
     }
 
@@ -134,8 +134,8 @@ namespace FudgeCore {
     /**
      * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
      */
-    public static getViewportRectangle(): Rectangle {
-      return RenderWebGL.rectViewport;
+    public static getRenderRectangle(): Rectangle {
+      return RenderWebGL.rectRender;
     }
 
     public static setDepthTest(_test: boolean): void {

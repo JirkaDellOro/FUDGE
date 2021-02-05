@@ -666,7 +666,7 @@ declare namespace FudgeCore {
      */
     abstract class RenderWebGL {
         protected static crc3: WebGL2RenderingContext;
-        private static rectViewport;
+        private static rectRender;
         /**
          * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
          * @param _attributeLocation  The location of the attribute on the shader, to which they data will be passed.
@@ -703,7 +703,7 @@ declare namespace FudgeCore {
          * Set the area on the offscreen-canvas to render the camera image to.
          * @param _rect
          */
-        static setViewportRectangle(_rect: Rectangle): void;
+        static setRenderRectangle(_rect: Rectangle): void;
         /**
          * Clear the offscreen renderbuffer with the given [[Color]]
          */
@@ -715,7 +715,7 @@ declare namespace FudgeCore {
         /**
          * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
          */
-        static getViewportRectangle(): Rectangle;
+        static getRenderRectangle(): Rectangle;
         static setDepthTest(_test: boolean): void;
         static setBlendMode(_mode: BLEND): void;
         /**
@@ -1562,7 +1562,7 @@ declare namespace FudgeCore {
         pivot: Matrix4x4;
         backgroundColor: Color;
         private projection;
-        private transform;
+        private mtxProjection;
         private fieldOfView;
         private aspectRatio;
         private direction;
@@ -1573,7 +1573,7 @@ declare namespace FudgeCore {
          * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
          * @returns the world-projection-matrix
          */
-        get ViewProjectionMatrix(): Matrix4x4;
+        get mtxWorldToView(): Matrix4x4;
         getProjection(): PROJECTION;
         getBackgroundEnabled(): boolean;
         getAspect(): number;
@@ -1597,10 +1597,10 @@ declare namespace FudgeCore {
          */
         projectOrthographic(_left?: number, _right?: number, _bottom?: number, _top?: number): void;
         /**
-         * Return the calculated normed dimension of the projection surface, that is in the hypothetical distance of 1 to the camera
+         * Return the calculated dimension of a projection surface in the hypothetical distance of 1 to the camera
          */
         getProjectionRectangle(): Rectangle;
-        project(_pointInWorldSpace: Vector3): Vector3;
+        pointWorldToClip(_pointInWorldSpace: Vector3): Vector3;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
@@ -2189,8 +2189,8 @@ declare namespace FudgeCore {
          */
         pointClientToRender(_client: Vector2): Vector2;
         /**
-         * Returns a point in normed view-rectangle matching the given point on the client rectangle
-         * The view-rectangle matches the client size in the hypothetical distance of 1 to the camera, its origin in the center and y-axis pointing up
+         * Returns a point on a projection surface in the hypothetical distance of 1 to the camera
+         * matching the given point on the client rectangle
          * TODO: examine, if this should be a camera-method. Current implementation is for central-projection
          */
         pointClientToProjection(_client: Vector2): Vector2;

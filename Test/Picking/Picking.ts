@@ -78,7 +78,7 @@ namespace Picking {
       hits[0].zBuffer / 128 - 1
     );
 
-    let mtxViewProjectionInverse: ƒ.Matrix4x4 = ƒ.Matrix4x4.INVERSION(cmpCamera.ViewProjectionMatrix);
+    let mtxViewProjectionInverse: ƒ.Matrix4x4 = ƒ.Matrix4x4.INVERSION(cmpCamera.mtxWorldToView);
     let m: Float32Array = mtxViewProjectionInverse.get();
     let rayWorld: ƒ.Vector3 = ƒ.Vector3.TRANSFORMATION(posClip, mtxViewProjectionInverse, true);
     let w: number = m[3] * posClip.x + m[7] * posClip.y + m[11] * posClip.z + m[15];
