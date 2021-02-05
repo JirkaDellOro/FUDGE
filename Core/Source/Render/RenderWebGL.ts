@@ -164,11 +164,11 @@ namespace FudgeCore {
     /**
      * Draw a mesh buffer using the given infos and the complete projection matrix
      */
-    protected static draw(_mesh: Mesh, cmpMaterial: ComponentMaterial, _final: Matrix4x4, _projection: Matrix4x4): void {
+    protected static draw(_mesh: Mesh, cmpMaterial: ComponentMaterial, _mtxMeshToWorld: Matrix4x4, _mtxWorldToView: Matrix4x4): void {
       let shader: typeof Shader = cmpMaterial.material.getShader();
       let coat: Coat = cmpMaterial.material.getCoat();
       shader.useProgram();
-      _mesh.useRenderBuffers(shader, _final, _projection);
+      _mesh.useRenderBuffers(shader, _mtxMeshToWorld, _mtxWorldToView);
       coat.useRenderData(shader, cmpMaterial);
       RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, _mesh.renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
     }

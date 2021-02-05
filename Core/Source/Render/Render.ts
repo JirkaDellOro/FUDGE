@@ -117,6 +117,8 @@ namespace FudgeCore {
       if (_node.getParent())
         matrix = _node.getParent().mtxWorld;
 
+      let mtxWorldToView: Matrix4x4 = _cmpCamera.mtxWorldToView;
+
       // TODO: Move physics rendering to RenderPhysics extension of RenderManager
       if (Physics.world && Physics.world.mainCam != _cmpCamera)
         Physics.world.mainCam = _cmpCamera; //DebugDraw needs to know the main camera beforehand, _cmpCamera is the viewport camera. | Marko Fehrenbach, HFU 2020
@@ -125,7 +127,7 @@ namespace FudgeCore {
       Render.setupTransformAndLights(_node, matrix);
 
       //if (Physics.settings && Physics.settings.debugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY) //Give users the possibility to only show physics displayed | Marko Fehrenbach, HFU 2020
-      Render.drawGraphRecursive(_node, _cmpCamera, _drawNode);
+      Render.drawGraphRecursive(_node, mtxWorldToView, _drawNode);
 
       if (Physics.settings && Physics.settings.debugDraw == true) {
         Physics.world.debugDraw.end();
@@ -135,49 +137,49 @@ namespace FudgeCore {
     /**
      * Recursivly iterates over the graph and renders each node and all successors with the given render function
      */
-    private static drawGraphRecursive(_node: Node, _cmpCamera: ComponentCamera, _drawNode: Function = Render.drawNode): void {
+    private static drawGraphRecursive(_node: Node, _mtxWorldToView: Matrix4x4, _drawNode: Function = Render.drawNode): void {
       // TODO: see if third parameter _world?: Matrix4x4 would be usefull
       if (!_node.isActive)
         return;
 
-      let finalTransform: Matrix4x4;
+      let mtxMeshToWorld: Matrix4x4;
 
       let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
       if (cmpMesh) { // TODO: careful when using particlesystem, pivot must not change node position
-        finalTransform = Matrix4x4.MULTIPLICATION(_node.mtxWorld, cmpMesh.pivot);
-        cmpMesh.mtxWorld = finalTransform.copy;  // not understood, why copy is needed. 
+        mtxMeshToWorld = Matrix4x4.MULTIPLICATION(_node.mtxWorld, cmpMesh.pivot);
+        cmpMesh.mtxWorld = mtxMeshToWorld.copy; 
       }
       else
-        finalTransform = _node.mtxWorld; // caution, RenderManager is a reference...
+        mtxMeshToWorld = _node.mtxWorld; 
 
       if (cmpMesh && cmpMesh.isActive) {
         // multiply camera matrix
-        let projection: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, finalTransform);
+        let mtxMeshToView: Matrix4x4 = Matrix4x4.MULTIPLICATION(_mtxWorldToView, mtxMeshToWorld);
         // TODO: create drawNode method for particle system using _node.mtxWorld instead of finalTransform
-        _drawNode(_node, finalTransform, projection);
+        _drawNode(_node, mtxMeshToWorld, mtxMeshToView);
         // RenderParticles.drawParticles();
-        Recycler.store(projection);
+        Recycler.store(mtxMeshToView);
       }
 
       for (let name in _node.getChildren()) {
         let childNode: Node = _node.getChildren()[name];
-        Render.drawGraphRecursive(childNode, _cmpCamera, _drawNode); //, world);
+        Render.drawGraphRecursive(childNode, _mtxWorldToView, _drawNode); //, world);
       }
 
-      if (finalTransform != _node.mtxWorld)
-        Recycler.store(finalTransform);
+      if (mtxMeshToWorld != _node.mtxWorld)
+        Recycler.store(mtxMeshToWorld);
     }
 
     /**
      * The standard render function for drawing a single node
      */
-    private static drawNode(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4, _lights: MapLightTypeToLightList, _cmpCamera: ComponentCamera): void {
+    private static drawNode(_node: Node, _mtxMeshToWorld: Matrix4x4, _mtxWorldToView: Matrix4x4, _lights: MapLightTypeToLightList, _cmpCamera: ComponentCamera): void {
       try {
         let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
         if (!cmpMaterial.isActive) return;
         let mesh: Mesh = _node.getComponent(ComponentMesh).mesh;
         // RenderManager.setLightsInShader(shader, _lights);
-        Render.draw(mesh, cmpMaterial, _finalTransform, _projection); //, _lights);
+        Render.draw(mesh, cmpMaterial, _mtxMeshToWorld, _mtxWorldToView); //, _lights);
       } catch (_error) {
         // Debug.error(_error);
       }
@@ -192,7 +194,7 @@ namespace FudgeCore {
     /**
      * The render function for drawing buffers for picking. Renders each node on a dedicated buffer with id and depth values instead of colors
      */
-    private static drawNodeForRayCast(_node: Node, _finalTransform: Matrix4x4, _projection: Matrix4x4, _lights: MapLightTypeToLightList): void { // create Texture to render to, int-rgba
+    private static drawNodeForRayCast(_node: Node, _mtxMeshToWorld: Matrix4x4, _mtxWorldToView: Matrix4x4, _lights: MapLightTypeToLightList): void { // create Texture to render to, int-rgba
       // TODO: look into SSBOs!
       let target: WebGLTexture = Render.getRayCastTexture();
 
@@ -208,7 +210,7 @@ namespace FudgeCore {
         ShaderRayCast.useProgram();
         let pickBuffer: PickBuffer = { node: _node, texture: target, frameBuffer: framebuffer };
         Render.pickBuffers.push(pickBuffer);
-        mesh.useRenderBuffers(ShaderRayCast, _finalTransform, _projection, Render.pickBuffers.length);
+        mesh.useRenderBuffers(ShaderRayCast, _mtxMeshToWorld, _mtxWorldToView, Render.pickBuffers.length);
 
         RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, mesh.renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
       } catch (_error) {

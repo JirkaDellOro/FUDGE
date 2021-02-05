@@ -721,7 +721,7 @@ declare namespace FudgeCore {
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
-        protected static draw(_mesh: Mesh, cmpMaterial: ComponentMaterial, _final: Matrix4x4, _projection: Matrix4x4): void;
+        protected static draw(_mesh: Mesh, cmpMaterial: ComponentMaterial, _mtxMeshToWorld: Matrix4x4, _mtxWorldToView: Matrix4x4): void;
     }
 }
 declare namespace FudgeCore {
