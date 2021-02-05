@@ -1,7 +1,7 @@
 namespace PerformanceLeak {
 
   export import ƒ = FudgeCore;
-  ƒ.RenderManager.initialize(true, false);
+  ƒ.Render.initialize(true, false);
 
   window.addEventListener("load", test);
 

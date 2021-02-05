@@ -1,7 +1,7 @@
 namespace ScreenToRayToScreen {
   import ƒ = FudgeCore;
   import ƒAid = FudgeAid;
-  ƒ.RenderManager.initialize(true);
+  ƒ.Render.initialize(true);
 
   window.addEventListener("load", init);
 
@@ -80,7 +80,7 @@ namespace ScreenToRayToScreen {
 
     let rayEnd: ƒ.Vector3 = ƒ.Vector3.SUM(ray.origin, ray.direction);
     let projection: ƒ.Vector3 = camera.component.project(rayEnd);
-    // let screen: ƒ.Vector2 = ƒ.RenderManager.rectClip.pointToRect(projection.toVector2(), viewport.getCanvasRectangle());
+    // let screen: ƒ.Vector2 = ƒ.Render.rectClip.pointToRect(projection.toVector2(), viewport.getCanvasRectangle());
     let screen: ƒ.Vector2 = viewport.pointClipToClient(projection.toVector2());
     console.group("end");
     ƒ.Debug.log("End", rayEnd.toString());

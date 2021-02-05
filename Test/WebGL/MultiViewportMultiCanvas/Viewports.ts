@@ -1,4 +1,4 @@
-namespace RenderManagerRendering {
+namespace RenderRendering {
   import ƒ = FudgeCore;
   
 

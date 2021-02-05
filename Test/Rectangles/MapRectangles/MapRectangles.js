@@ -1,5 +1,5 @@
-var RenderManagerRendering;
-(function (RenderManagerRendering) {
+var RenderRendering;
+(function (RenderRendering) {
     var ƒ = FudgeCore;
     let map = new ƒ.FramingComplex();
     let uiResult;
@@ -46,5 +46,5 @@ var RenderManagerRendering;
         }
         uiMap.set({ Result: map.getRect(frame) });
     }
-})(RenderManagerRendering || (RenderManagerRendering = {}));
+})(RenderRendering || (RenderRendering = {}));
 //# sourceMappingURL=MapRectangles.js.map

@@ -1,7 +1,7 @@
 var TextureTest;
 (function (TextureTest) {
     var ƒ = FudgeCore;
-    ƒ.RenderManager.initialize(true, true);
+    ƒ.Render.initialize(true, true);
     window.addEventListener("load", init);
     function init(_event) {
         let img = document.querySelector("img");

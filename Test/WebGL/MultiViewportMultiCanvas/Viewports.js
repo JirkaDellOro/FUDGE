@@ -1,5 +1,5 @@
-var RenderManagerRendering;
-(function (RenderManagerRendering) {
+var RenderRendering;
+(function (RenderRendering) {
     var ƒ = FudgeCore;
     window.addEventListener("load", init);
     function init() {
@@ -28,5 +28,5 @@ var RenderManagerRendering;
             }
         }
     }
-})(RenderManagerRendering || (RenderManagerRendering = {}));
+})(RenderRendering || (RenderRendering = {}));
 //# sourceMappingURL=Viewports.js.map

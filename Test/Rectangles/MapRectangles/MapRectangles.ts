@@ -1,4 +1,4 @@
-namespace RenderManagerRendering {
+namespace RenderRendering {
     import ƒ = FudgeCore;
     let map: ƒ.FramingComplex = new ƒ.FramingComplex();
     let uiResult: UI.Rectangle;

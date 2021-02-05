@@ -5,7 +5,7 @@ namespace FudgeCore {
     }
 
     protected static injectTextureImage(this: Texture): void {
-      let crc3: WebGL2RenderingContext = RenderOperator.getRenderingContext();
+      let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       if (this.renderData) {
         // buffers exist
         crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
@@ -14,7 +14,7 @@ namespace FudgeCore {
       else {
         this.renderData = {};
         // TODO: check if all WebGL-Creations are asserted
-        const texture: WebGLTexture = RenderManager.assert<WebGLTexture>(crc3.createTexture());
+        const texture: WebGLTexture = Render.assert<WebGLTexture>(crc3.createTexture());
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, texture);
 
         try {

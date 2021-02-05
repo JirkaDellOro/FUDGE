@@ -1,6 +1,6 @@
 namespace MeshTest {
   import ƒ = FudgeCore;
-  ƒ.RenderManager.initialize(true, true);
+  ƒ.Render.initialize(true, true);
   import ƒAid = FudgeAid;
 
   window.addEventListener("load", init);

@@ -56,7 +56,6 @@ var Picking;
         for (let hit of hits) {
             data[hit.node.name] = hit.zBuffer / 128 - 1 || -1;
         }
-        viewport.pointClipToClient;
         let posClip = new ƒ.Vector3(2 * mouse.x / viewport.getClientRectangle().width - 1, 1 - 2 * mouse.y / viewport.getClientRectangle().height, hits[0].zBuffer / 128 - 1);
         let mtxViewProjectionInverse = ƒ.Matrix4x4.INVERSION(cmpCamera.ViewProjectionMatrix);
         let m = mtxViewProjectionInverse.get();

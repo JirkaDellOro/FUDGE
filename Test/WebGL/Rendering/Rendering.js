@@ -1,5 +1,5 @@
-var RenderManagerRendering;
-(function (RenderManagerRendering) {
+var RenderRendering;
+(function (RenderRendering) {
     var ƒ = FudgeCore;
     window.addEventListener("DOMContentLoaded", init);
     function init() {
@@ -16,10 +16,10 @@ var RenderManagerRendering;
         //viewPort.prepare();
         viewPort.draw();
         let table = {
-            crc3: { width: ƒ.RenderManager.getCanvas().width, height: ƒ.RenderManager.getCanvas().height },
+            crc3: { width: ƒ.Render.getCanvas().width, height: ƒ.Render.getCanvas().height },
             crc2: { width: viewPort.getContext().canvas.width, height: viewPort.getContext().canvas.height }
         };
         console.table(table, ["width", "height"]);
     }
-})(RenderManagerRendering || (RenderManagerRendering = {}));
+})(RenderRendering || (RenderRendering = {}));
 //# sourceMappingURL=Rendering.js.map

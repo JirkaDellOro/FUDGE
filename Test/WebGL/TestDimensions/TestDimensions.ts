@@ -1,4 +1,4 @@
-namespace RenderManagerRendering {
+namespace RenderRendering {
   import ƒ = FudgeCore;
   
 
@@ -91,10 +91,10 @@ namespace RenderManagerRendering {
     let rect: ƒ.Rectangle = <ƒ.Rectangle>_uiRectangle.get();
     switch (_uiRectangle.name) {
       case "RenderCanvas":
-        ƒ.RenderManager.setCanvasSize(rect.width, rect.height);
+        ƒ.Render.setCanvasSize(rect.width, rect.height);
         break;
       case "RenderViewport":
-        ƒ.RenderManager.setViewportRectangle(rect);
+        ƒ.Render.setViewportRectangle(rect);
         break;
       case "ViewportSource":
         viewPort.rectSource = rect;
@@ -123,8 +123,8 @@ namespace RenderManagerRendering {
   }
 
   function update(): void {
-    uiRectangles["RenderCanvas"].set(ƒ.RenderManager.getCanvasRect());
-    uiRectangles["RenderViewport"].set(ƒ.RenderManager.getViewportRectangle());
+    uiRectangles["RenderCanvas"].set(ƒ.Render.getCanvasRect());
+    uiRectangles["RenderViewport"].set(ƒ.Render.getViewportRectangle());
     uiRectangles["ViewportSource"].set(viewPort.rectSource);
     uiRectangles["ViewportDestination"].set(viewPort.rectDestination);
     uiRectangles["DomCanvas"].set(new ƒ.Rectangle(0, 0, canvas.width, canvas.height));

@@ -72,8 +72,6 @@ namespace Picking {
       data[hit.node.name] = hit.zBuffer / 128 - 1 || -1;
     }
 
-    viewport.pointClipToClient
-
     let posClip: ƒ.Vector3 = new ƒ.Vector3(
       2 * mouse.x / viewport.getClientRectangle().width - 1,
       1 - 2 * mouse.y / viewport.getClientRectangle().height,

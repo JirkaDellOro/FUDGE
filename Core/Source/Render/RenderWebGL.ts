@@ -23,9 +23,9 @@ namespace FudgeCore {
    * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
    * Methods and attributes of this class should not be called directly, only through [[RenderManager]]
    */
-  export abstract class RenderOperator {
-    protected static crc3: WebGL2RenderingContext = RenderOperator.initialize();
-    private static rectViewport: Rectangle = RenderOperator.getCanvasRect();
+  export abstract class RenderWebGL {
+    protected static crc3: WebGL2RenderingContext = RenderWebGL.initialize();
+    private static rectViewport: Rectangle = RenderWebGL.getCanvasRect();
 
 
     /** 
@@ -34,7 +34,7 @@ namespace FudgeCore {
      * @param _bufferSpecification  Interface passing datapullspecifications to the buffer.
      */
     public static setAttributeStructure(_attributeLocation: number, _bufferSpecification: BufferSpecification): void {
-      RenderOperator.crc3.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
+      RenderWebGL.crc3.vertexAttribPointer(_attributeLocation, _bufferSpecification.size, _bufferSpecification.dataType, _bufferSpecification.normalize, _bufferSpecification.stride, _bufferSpecification.offset);
     }
 
     /**
@@ -44,7 +44,7 @@ namespace FudgeCore {
     */
     public static assert<T>(_value: T | null, _message: string = ""): T {
       if (_value === null)
-        throw new Error(`Assertion failed. ${_message}, WebGL-Error: ${RenderOperator.crc3 ? RenderOperator.crc3.getError() : ""}`);
+        throw new Error(`Assertion failed. ${_message}, WebGL-Error: ${RenderWebGL.crc3 ? RenderWebGL.crc3.getError() : ""}`);
       return _value;
     }
 
@@ -61,19 +61,19 @@ namespace FudgeCore {
       Debug.fudge("Initialize RenderManager", contextAttributes);
       let canvas: HTMLCanvasElement = document.createElement("canvas");
       let crc3: WebGL2RenderingContext;
-      crc3 = RenderOperator.assert<WebGL2RenderingContext>(
+      crc3 = RenderWebGL.assert<WebGL2RenderingContext>(
         canvas.getContext("webgl2", contextAttributes),
         "WebGL-context couldn't be created"
       );
-      RenderOperator.crc3 = crc3;
+      RenderWebGL.crc3 = crc3;
       // Enable backface- and zBuffer-culling.
       crc3.enable(WebGL2RenderingContext.CULL_FACE);
       crc3.enable(WebGL2RenderingContext.DEPTH_TEST);
       crc3.enable(WebGL2RenderingContext.BLEND);
       crc3.blendEquation(WebGL2RenderingContext.FUNC_ADD);
-      RenderOperator.setBlendMode(BLEND.TRANSPARENT);
+      RenderWebGL.setBlendMode(BLEND.TRANSPARENT);
       // RenderOperator.crc3.pixelStorei(WebGL2RenderingContext.UNPACK_FLIP_Y_WEBGL, true);
-      RenderOperator.rectViewport = RenderOperator.getCanvasRect();
+      RenderWebGL.rectViewport = RenderWebGL.getCanvasRect();
       return crc3;
     }
 
@@ -81,21 +81,21 @@ namespace FudgeCore {
      * Return a reference to the offscreen-canvas
      */
     public static getCanvas(): HTMLCanvasElement {
-      return <HTMLCanvasElement>RenderOperator.crc3.canvas; // TODO: enable OffscreenCanvas
+      return <HTMLCanvasElement>RenderWebGL.crc3.canvas; // TODO: enable OffscreenCanvas
     }
 
     /**
      * Return a reference to the rendering context
      */
     public static getRenderingContext(): WebGL2RenderingContext {
-      return RenderOperator.crc3;
+      return RenderWebGL.crc3;
     }
 
     /**
      * Return a rectangle describing the size of the offscreen-canvas. x,y are 0 at all times.
      */
     public static getCanvasRect(): Rectangle {
-      let canvas: HTMLCanvasElement = <HTMLCanvasElement>RenderOperator.crc3.canvas;
+      let canvas: HTMLCanvasElement = <HTMLCanvasElement>RenderWebGL.crc3.canvas;
       return Rectangle.GET(0, 0, canvas.width, canvas.height);
     }
 
@@ -103,8 +103,8 @@ namespace FudgeCore {
      * Set the size of the offscreen-canvas.
      */
     public static setCanvasSize(_width: number, _height: number): void {
-      RenderOperator.crc3.canvas.width = _width;
-      RenderOperator.crc3.canvas.height = _height;
+      RenderWebGL.crc3.canvas.width = _width;
+      RenderWebGL.crc3.canvas.height = _height;
     }
 
     /**
@@ -112,34 +112,49 @@ namespace FudgeCore {
      * @param _rect
      */
     public static setViewportRectangle(_rect: Rectangle): void {
-      Object.assign(RenderOperator.rectViewport, _rect);
-      RenderOperator.crc3.viewport(_rect.x, _rect.y, _rect.width, _rect.height);
+      Object.assign(RenderWebGL.rectViewport, _rect);
+      RenderWebGL.crc3.viewport(_rect.x, _rect.y, _rect.width, _rect.height);
+    }
+
+    /**
+     * Clear the offscreen renderbuffer with the given [[Color]]
+     */
+    public static clear(_color: Color = null): void {
+      RenderWebGL.crc3.clearColor(_color.r, _color.g, _color.b, _color.a);
+      RenderWebGL.crc3.clear(WebGL2RenderingContext.COLOR_BUFFER_BIT | WebGL2RenderingContext.DEPTH_BUFFER_BIT);
+    }
+
+    /**
+     * Reset the offscreen framebuffer to the original RenderingContext
+     */
+    public static resetFrameBuffer(_color: Color = null): void {
+      RenderWebGL.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, null);
     }
 
     /**
      * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
      */
     public static getViewportRectangle(): Rectangle {
-      return RenderOperator.rectViewport;
+      return RenderWebGL.rectViewport;
     }
 
     public static setDepthTest(_test: boolean): void {
       if (_test)
-        RenderOperator.crc3.enable(WebGL2RenderingContext.DEPTH_TEST);
+        RenderWebGL.crc3.enable(WebGL2RenderingContext.DEPTH_TEST);
       else
-        RenderOperator.crc3.disable(WebGL2RenderingContext.DEPTH_TEST);
+        RenderWebGL.crc3.disable(WebGL2RenderingContext.DEPTH_TEST);
     }
 
     public static setBlendMode(_mode: BLEND): void {
       switch (_mode) {
         case BLEND.OPAQUE:
-          RenderOperator.crc3.blendFunc(WebGL2RenderingContext.ONE, WebGL2RenderingContext.ZERO);
+          RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.ONE, WebGL2RenderingContext.ZERO);
           break;
         case BLEND.TRANSPARENT:
-          RenderOperator.crc3.blendFunc(WebGL2RenderingContext.SRC_ALPHA, WebGL2RenderingContext.ONE_MINUS_SRC_ALPHA);
+          RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.SRC_ALPHA, WebGL2RenderingContext.ONE_MINUS_SRC_ALPHA);
           break;
         case BLEND.PARTICLE:
-          RenderOperator.crc3.blendFunc(WebGL2RenderingContext.SRC_ALPHA, WebGL2RenderingContext.DST_ALPHA);
+          RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.SRC_ALPHA, WebGL2RenderingContext.DST_ALPHA);
           break;
         default:
           break;
@@ -155,7 +170,7 @@ namespace FudgeCore {
       shader.useProgram();
       _mesh.useRenderBuffers(shader, _final, _projection);
       coat.useRenderData(shader, cmpMaterial);
-      RenderOperator.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, _mesh.renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
+      RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, _mesh.renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
     }
 
     /**

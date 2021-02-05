@@ -1,7 +1,7 @@
 var PerformanceLeak;
 (function (PerformanceLeak) {
     PerformanceLeak.ƒ = FudgeCore;
-    PerformanceLeak.ƒ.RenderManager.initialize(true, false);
+    PerformanceLeak.ƒ.Render.initialize(true, false);
     window.addEventListener("load", test);
     let game;
     let viewport;

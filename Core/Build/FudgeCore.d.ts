@@ -664,7 +664,7 @@ declare namespace FudgeCore {
      * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
      * Methods and attributes of this class should not be called directly, only through [[RenderManager]]
      */
-    abstract class RenderOperator {
+    abstract class RenderWebGL {
         protected static crc3: WebGL2RenderingContext;
         private static rectViewport;
         /**
@@ -704,6 +704,14 @@ declare namespace FudgeCore {
          * @param _rect
          */
         static setViewportRectangle(_rect: Rectangle): void;
+        /**
+         * Clear the offscreen renderbuffer with the given [[Color]]
+         */
+        static clear(_color?: Color): void;
+        /**
+         * Reset the offscreen framebuffer to the original RenderingContext
+         */
+        static resetFrameBuffer(_color?: Color): void;
         /**
          * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
          */
@@ -4480,7 +4488,7 @@ declare namespace FudgeCore {
         compileShader(shader: WebGLShader, source: string): void;
     }
     /** Internal Class used to draw debugInformations about the physics simulation onto the renderContext. No user interaction needed. @author Marko Fehrenbach, HFU 2020 //Based on OimoPhysics Haxe DebugDrawDemo */
-    class PhysicsDebugDraw extends RenderOperator {
+    class PhysicsDebugDraw extends RenderWebGL {
         oimoDebugDraw: OIMO.DebugDraw;
         style: OIMO.DebugDrawStyle;
         gl: WebGL2RenderingContext;
@@ -4512,17 +4520,17 @@ declare namespace FudgeCore {
         /** Creating the render buffers for later use. Defining the attributes used in shaders.
          * Needs to create empty buffers to already have them ready to draw later on, linking is only possible with existing buffers. No performance loss because empty buffers are not drawn.*/
         initializeBuffers(): void;
-        /** Fill an array with empty values */
-        private initFloatArray;
-        /** Overriding the existing functions from OimoPhysics.DebugDraw without actually inherit from the class, to avoid compiler problems.
-         * Overriding them to receive debugInformations in the format the physic engine provides them but handling the rendering in the fudge context. */
-        private initializeOverride;
         /** Before OimoPhysics.world is filling the debug. Make sure the buffers are reset. Also receiving the debugMode from settings and updating the current projection for the vertexShader. */
         begin(): void;
         /** After OimoPhysics.world filled the debug. Rendering calls. Setting this program to be used by the Fudge rendering context. And draw each updated buffer and resetting them. */
         end(): void;
         /** Drawing the ray into the debugDraw Call. By using the overwritten line rendering functions and drawing a point (pointSize defined in the shader) at the end of the ray. */
         debugRay(_origin: Vector3, _end: Vector3, _color: Color): void;
+        /** Fill an array with empty values */
+        private initFloatArray;
+        /** Overriding the existing functions from OimoPhysics.DebugDraw without actually inherit from the class, to avoid compiler problems.
+         * Overriding them to receive debugInformations in the format the physic engine provides them but handling the rendering in the fudge context. */
+        private initializeOverride;
         /** The source code (string) of the in physicsDebug used very simple vertexShader.
          *  Handling the projection (which includes, view/world[is always identity in this case]/projection in Fudge). Increasing the size of single points drawn.
          *  And transfer position color to the fragmentShader. */
@@ -4838,20 +4846,13 @@ declare namespace FudgeCore {
         frameBuffer: WebGLFramebuffer;
     }
     /**
-     * The main interface to the render engine, here WebGL, which is used mainly in the superclass [[RenderOperator]]
+     * The main interface to the render engine, here WebGL, which is used mainly in the superclass [[RenderWebGL]]
+     * TODO: move all WebGL-specifica to RenderWebGL
      */
-    abstract class RenderManager extends RenderOperator {
+    abstract class Render extends RenderWebGL {
         static rectClip: Rectangle;
         private static timestampUpdate;
         private static pickBuffers;
-        /**
-         * Clear the offscreen renderbuffer with the given [[Color]]
-         */
-        static clear(_color?: Color): void;
-        /**
-         * Reset the offscreen framebuffer to the original RenderingContext
-         */
-        static resetFrameBuffer(_color?: Color): void;
         /**
          * Draws the graph for RayCasting starting with the given [[Node]] using the camera given [[ComponentCamera]].
          */
@@ -4899,7 +4900,7 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    abstract class RenderParticles extends RenderManager {
+    abstract class RenderParticles extends Render {
         static drawParticles(): void;
     }
 }

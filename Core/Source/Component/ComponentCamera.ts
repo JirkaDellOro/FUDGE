@@ -98,7 +98,7 @@ namespace FudgeCore {
      * @param _bottom The positionvalue of the projectionspace's bottom border.(Default = canvas.clientHeight)
      * @param _top The positionvalue of the projectionspace's top border.(Default = 0)
      */
-    public projectOrthographic(_left: number = 0, _right: number = RenderManager.getCanvas().clientWidth, _bottom: number = RenderManager.getCanvas().clientHeight, _top: number = 0): void {
+    public projectOrthographic(_left: number = 0, _right: number = Render.getCanvas().clientWidth, _bottom: number = Render.getCanvas().clientHeight, _top: number = 0): void {
       this.projection = PROJECTION.ORTHOGRAPHIC;
       this.transform = Matrix4x4.PROJECTION_ORTHOGRAPHIC(_left, _right, _bottom, _top, 400, -400); // TODO: examine magic numbers!
     }

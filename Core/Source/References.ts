@@ -3,6 +3,6 @@
 /// <reference path="Event/Event.ts"/>
 /// <reference path="Transfer/Mutable.ts"/>  
 /// <reference path="Transfer/Serializer.ts"/> 
-/// <reference path="Render/RenderOperator.ts"/>
+/// <reference path="Render/RenderWebGL.ts"/>
 /// <reference path="Render/RenderInjectorTexture.ts"/>
 /// <reference path="Graph/Node.ts"/>

@@ -59,7 +59,7 @@ var ElectronFileIo;
     }
     ElectronFileIo.open = open;
     function createScene() {
-        // initialize RenderManager and transmit content
+        // initialize Render and transmit content
         // create asset
         graph = Scenes.createAxisCross();
         // initialize viewport

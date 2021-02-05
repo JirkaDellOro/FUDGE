@@ -2,7 +2,7 @@ var ScreenToRayToScreen;
 (function (ScreenToRayToScreen) {
     var ƒ = FudgeCore;
     var ƒAid = FudgeAid;
-    ƒ.RenderManager.initialize(true);
+    ƒ.Render.initialize(true);
     window.addEventListener("load", init);
     ScreenToRayToScreen.root = new ƒ.Node("Root");
     let viewport;
@@ -61,7 +61,7 @@ var ScreenToRayToScreen;
         console.groupEnd();
         let rayEnd = ƒ.Vector3.SUM(ray.origin, ray.direction);
         let projection = ScreenToRayToScreen.camera.component.project(rayEnd);
-        // let screen: ƒ.Vector2 = ƒ.RenderManager.rectClip.pointToRect(projection.toVector2(), viewport.getCanvasRectangle());
+        // let screen: ƒ.Vector2 = ƒ.Render.rectClip.pointToRect(projection.toVector2(), viewport.getCanvasRectangle());
         let screen = viewport.pointClipToClient(projection.toVector2());
         console.group("end");
         ƒ.Debug.log("End", rayEnd.toString());

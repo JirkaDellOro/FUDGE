@@ -50,7 +50,7 @@ namespace FudgeCore {
       this.canvas = _canvas;
       this.crc2 = _canvas.getContext("2d");
 
-      this.rectSource = RenderManager.getCanvasRect();
+      this.rectSource = Render.getCanvasRect();
       this.rectDestination = this.getClientRectangle();
 
       this.setGraph(_graph);
@@ -117,7 +117,7 @@ namespace FudgeCore {
      * Draw this viewport
      */
     public draw(): void {
-      RenderManager.resetFrameBuffer();
+      Render.resetFrameBuffer();
       if (!this.camera.isActive)
         return;
       if (this.adjustingFrames)
@@ -125,12 +125,12 @@ namespace FudgeCore {
       if (this.adjustingCamera)
         this.adjustCamera();
 
-      RenderManager.clear(this.camera.backgroundColor);
-      RenderManager.drawGraph(this.graph, this.camera);
+      Render.clear(this.camera.backgroundColor);
+      Render.drawGraph(this.graph, this.camera);
 
       this.crc2.imageSmoothingEnabled = false;
       this.crc2.drawImage(
-        RenderManager.getCanvas(),
+        Render.getCanvas(),
         this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height,
         this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height
       );
@@ -144,13 +144,13 @@ namespace FudgeCore {
         this.adjustFrames();
       if (this.adjustingCamera)
         this.adjustCamera();
-      this.pickBuffers = RenderManager.drawGraphForRayCast(this.graph, this.camera);
+      this.pickBuffers = Render.drawGraphForRayCast(this.graph, this.camera);
     }
 
 
     public pickNodeAt(_pos: Vector2): RayHit[] {
       // this.createPickBuffers();
-      let hits: RayHit[] = RenderManager.pickNodeAt(_pos, this.pickBuffers, this.rectSource);
+      let hits: RayHit[] = Render.pickNodeAt(_pos, this.pickBuffers, this.rectSource);
       hits.sort((a: RayHit, b: RayHit) => (b.zBuffer > 0) ? (a.zBuffer > 0) ? a.zBuffer - b.zBuffer : 1 : -1);
       return hits;
     }
@@ -173,15 +173,15 @@ namespace FudgeCore {
       this.rectSource.x = this.rectSource.y = 0;
       // still, a partial image of the rendering may be retrieved by moving and resizing the render viewport
       let rectRender: Rectangle = this.frameSourceToRender.getRect(this.rectSource);
-      RenderManager.setViewportRectangle(rectRender);
+      Render.setViewportRectangle(rectRender);
       // no more transformation after this for now, offscreen canvas and render-viewport have the same size
-      RenderManager.setCanvasSize(rectRender.width, rectRender.height);
+      Render.setCanvasSize(rectRender.width, rectRender.height);
     }
     /**
      * Adjust the camera parameters to fit the rendering into the render vieport
      */
     public adjustCamera(): void {
-      let rect: Rectangle = RenderManager.getViewportRectangle();
+      let rect: Rectangle = Render.getViewportRectangle();
       this.camera.projectCentral(
         rect.width / rect.height, this.camera.getFieldOfView(), this.camera.getDirection(), this.camera.getNear(), this.camera.getFar());
     }
@@ -274,7 +274,7 @@ namespace FudgeCore {
       // result.y *= (1 - _normed.y) * rectClient.height;
       // result.add(rectClient.position);
       //TODO: check if rectDestination can be safely (and more perfomant) be used instead getClientRectangle
-      let pointClient: Vector2 = RenderManager.rectClip.pointToRect(_normed, this.rectDestination);
+      let pointClient: Vector2 = Render.rectClip.pointToRect(_normed, this.rectDestination);
       return pointClient;
     }
     /**
@@ -282,7 +282,7 @@ namespace FudgeCore {
      * which stretches from -1 to 1 in both dimensions, y pointing up
      */
     public pointClipToCanvas(_normed: Vector2): Vector2 {
-      let pointCanvas: Vector2 = RenderManager.rectClip.pointToRect(_normed, this.getCanvasRectangle());
+      let pointCanvas: Vector2 = Render.rectClip.pointToRect(_normed, this.getCanvasRectangle());
       return pointCanvas;
     }
 

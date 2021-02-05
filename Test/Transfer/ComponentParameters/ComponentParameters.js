@@ -3,7 +3,7 @@ var ComponentParameters;
 ///<reference path="../../../Core/Build/FudgeCore.d.ts"/>
 (function (ComponentParameters) {
     var ƒ = FudgeCore;
-    ƒ.RenderManager.initialize(true, true);
+    ƒ.Render.initialize(true, true);
     window.addEventListener("DOMContentLoaded", init);
     function init() {
         let img = document.querySelector("img");

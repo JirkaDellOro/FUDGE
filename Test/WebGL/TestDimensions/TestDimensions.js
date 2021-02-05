@@ -1,5 +1,5 @@
-var RenderManagerRendering;
-(function (RenderManagerRendering) {
+var RenderRendering;
+(function (RenderRendering) {
     var ƒ = FudgeCore;
     window.addEventListener("load", init);
     let uiRectangles = {};
@@ -75,10 +75,10 @@ var RenderManagerRendering;
         let rect = _uiRectangle.get();
         switch (_uiRectangle.name) {
             case "RenderCanvas":
-                ƒ.RenderManager.setCanvasSize(rect.width, rect.height);
+                ƒ.Render.setCanvasSize(rect.width, rect.height);
                 break;
             case "RenderViewport":
-                ƒ.RenderManager.setViewportRectangle(rect);
+                ƒ.Render.setViewportRectangle(rect);
                 break;
             case "ViewportSource":
                 viewPort.rectSource = rect;
@@ -105,8 +105,8 @@ var RenderManagerRendering;
         cmpCamera.projectCentral(params.aspect, params.fieldOfView);
     }
     function update() {
-        uiRectangles["RenderCanvas"].set(ƒ.RenderManager.getCanvasRect());
-        uiRectangles["RenderViewport"].set(ƒ.RenderManager.getViewportRectangle());
+        uiRectangles["RenderCanvas"].set(ƒ.Render.getCanvasRect());
+        uiRectangles["RenderViewport"].set(ƒ.Render.getViewportRectangle());
         uiRectangles["ViewportSource"].set(viewPort.rectSource);
         uiRectangles["ViewportDestination"].set(viewPort.rectDestination);
         uiRectangles["DomCanvas"].set(new ƒ.Rectangle(0, 0, canvas.width, canvas.height));
@@ -114,5 +114,5 @@ var RenderManagerRendering;
         uiRectangles["CSSRectangle"].set(new ƒ.Rectangle(client.left, client.top, client.width, client.height));
         uiCamera.set({ aspect: cmpCamera.getAspect(), fieldOfView: cmpCamera.getFieldOfView() });
     }
-})(RenderManagerRendering || (RenderManagerRendering = {}));
+})(RenderRendering || (RenderRendering = {}));
 //# sourceMappingURL=TestDimensions.js.map

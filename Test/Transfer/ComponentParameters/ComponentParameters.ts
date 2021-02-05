@@ -1,7 +1,7 @@
 ///<reference path="../../../Core/Build/FudgeCore.d.ts"/>
 namespace ComponentParameters {
   import ƒ = FudgeCore;
-  ƒ.RenderManager.initialize(true, true);
+  ƒ.Render.initialize(true, true);
 
   window.addEventListener("DOMContentLoaded", init);
 

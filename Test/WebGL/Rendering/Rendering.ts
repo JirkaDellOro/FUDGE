@@ -1,4 +1,4 @@
-namespace RenderManagerRendering {
+namespace RenderRendering {
   import ƒ = FudgeCore;
   
 
@@ -21,7 +21,7 @@ namespace RenderManagerRendering {
     viewPort.draw();
 
     let table: {} = {
-      crc3: { width: ƒ.RenderManager.getCanvas().width, height: ƒ.RenderManager.getCanvas().height },
+      crc3: { width: ƒ.Render.getCanvas().width, height: ƒ.Render.getCanvas().height },
       crc2: { width: viewPort.getContext().canvas.width, height: viewPort.getContext().canvas.height }
     };
     console.table(table, ["width", "height"]);
