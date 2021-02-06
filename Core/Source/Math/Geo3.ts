@@ -2,7 +2,7 @@ namespace FudgeCore {
   /**
    * Representation of a vector3 as geographic coordinates as seen on a globe
    * ```plaintext
-   * ←|→ Longitude (Angle to the z-Axis) 
+   * ←|→ Longitude (Angle to the z-axis) 
    *  ↕- Latitude (Angle to the equator)
    *  -→ Magnitude (Distance from the center)  
    * ```
@@ -32,5 +32,4 @@ namespace FudgeCore {
       return `longitude: ${this.longitude.toPrecision(5)}, latitude: ${this.latitude.toPrecision(5)}, magnitude: ${this.magnitude.toPrecision(5)}`;
     }
   }
-
 }

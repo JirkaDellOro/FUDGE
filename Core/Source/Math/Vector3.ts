@@ -173,7 +173,7 @@ namespace FudgeCore {
     /**
      * Creates a cartesian vector from geographic coordinates
      */
-    public static GEO3(_longitude: number = 0, _latitude: number = 0, _magnitude: number = 1): Vector3 {
+    public static GEO(_longitude: number = 0, _latitude: number = 0, _magnitude: number = 1): Vector3 {
       let vector: Vector3 = Recycler.get(Vector3);
       let geo: Geo3 = Recycler.get(Geo3);
       geo.set(_longitude, _latitude, _magnitude);
@@ -242,7 +242,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Adjust the cartesian values of this vector to represent the given a geographic coordinates
+     * Adjust the cartesian values of this vector to represent the given as geographic coordinates
      */
     public set geo(_geo: Geo3) {
       this.set(0, 0, _geo.magnitude);

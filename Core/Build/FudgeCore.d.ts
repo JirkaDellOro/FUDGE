@@ -497,6 +497,10 @@ declare namespace FudgeCore {
          * @returns A Vector that is orthogonal to and has the same magnitude as the given Vector.
          */
         static ORTHOGONAL(_vector: Vector2, _clockwise?: boolean): Vector2;
+        /**
+         * Creates a cartesian vector from polar coordinates
+         */
+        static GEO(_angle?: number, _magnitude?: number): Vector2;
         get x(): number;
         get y(): number;
         set x(_x: number);
@@ -513,6 +517,14 @@ declare namespace FudgeCore {
          * @returns A deep copy of the vector.
          */
         get copy(): Vector2;
+        /**
+         * Returns a polar representation of this vector
+         */
+        get geo(): Geo2;
+        /**
+         * Adjust the cartesian values of this vector to represent the given as polar coordinates
+         */
+        set geo(_geo: Geo2);
         /**
          * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
          * TODO: examine, if tolerance as criterium for the difference is appropriate with very large coordinate values or if _tolerance should be multiplied by coordinate value
@@ -2633,9 +2645,31 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
+     * Representation of a vector2 as polar coordinates
+     * ```plaintext
+     *  ↕- angle (Angle to the x-axis)
+     *  -→ Magnitude (Distance from the center)
+     * ```
+     */
+    class Geo2 {
+        magnitude: number;
+        angle: number;
+        constructor(_angle?: number, _magnitude?: number);
+        /**
+         * Set the properties of this instance at once
+         */
+        set(_angle?: number, _magnitude?: number): void;
+        /**
+         * Returns a pretty string representation
+         */
+        toString(): string;
+    }
+}
+declare namespace FudgeCore {
+    /**
      * Representation of a vector3 as geographic coordinates as seen on a globe
      * ```plaintext
-     * ←|→ Longitude (Angle to the z-Axis)
+     * ←|→ Longitude (Angle to the z-axis)
      *  ↕- Latitude (Angle to the equator)
      *  -→ Magnitude (Distance from the center)
      * ```
@@ -3140,7 +3174,7 @@ declare namespace FudgeCore {
         /**
          * Creates a cartesian vector from geographic coordinates
          */
-        static GEO3(_longitude?: number, _latitude?: number, _magnitude?: number): Vector3;
+        static GEO(_longitude?: number, _latitude?: number, _magnitude?: number): Vector3;
         get x(): number;
         get y(): number;
         get z(): number;
@@ -3164,7 +3198,7 @@ declare namespace FudgeCore {
          */
         get geo(): Geo3;
         /**
-         * Adjust the cartesian values of this vector to represent the given a geographic coordinates
+         * Adjust the cartesian values of this vector to represent the given as geographic coordinates
          */
         set geo(_geo: Geo3);
         /**

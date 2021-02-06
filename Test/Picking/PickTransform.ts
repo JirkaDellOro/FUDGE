@@ -13,6 +13,9 @@ namespace PickTransform {
   let cube: ƒ.Node;
   let cubeTransformed: ƒ.Node;
 
+  let test: ƒ.Vector2 = ƒ.Vector2.GEO(-30, 2);
+  console.log(test.geo.toString());
+
   // class Data extends ƒ.Mutable {
   //   public red: number = 100;
   //   public green: number = 100;
@@ -84,8 +87,6 @@ namespace PickTransform {
       let p0: ƒ.Vector2 = viewport.pointClientToProjection(viewport.pointWorldToClient(cube.mtxLocal.translation));
       let r: ƒ.Vector2 = ƒ.Vector2.DIFFERENCE(p0, p);
       let p0T: ƒ.Vector2 = ƒ.Vector2.SUM(pT, r);
-      // console.log(p0T.toString());
-
 
       let v: ƒ.Vector3 = ƒ.Vector3.NORMALIZATION(p.toVector3(1));
       let v0: ƒ.Vector3 = ƒ.Vector3.NORMALIZATION(p0.toVector3(1));
@@ -95,36 +96,17 @@ namespace PickTransform {
       let mtxTargetToCamera: ƒ.Matrix4x4 = ƒ.Matrix4x4.RELATIVE(cube.mtxLocal, viewport.camera.pivot);
       let vL: ƒ.Vector3 = mtxTargetToCamera.translation;
 
-      // console.log(vL.toString());
-      // let vL: ƒ.Vector3 = ƒ.Vector3.TRANSFORMATION(cube.mtxLocal.translation, ƒ.Matrix4x4.INVERSION(viewport.camera.pivot));
       let l: number = vL.magnitude;
-
       let lT: number = l * ƒ.Vector3.DIFFERENCE(v, v0).magnitude / ƒ.Vector3.DIFFERENCE(vT, v0T).magnitude;
-
       let vLT: ƒ.Vector3 = ƒ.Vector3.SCALE(v0T, lT);
       vLT.x = -vLT.x;
-      // let pos: ƒ.Vector3 = ƒ.Vector3.TRANSFORMATION(vLT, viewport.camera.pivot);
+
       mtxTargetToCamera.translation = vLT;
-      // let angle: number = 90 * Math.acos(ƒ.Vector3.DOT(v, vT));
-      // angle = vLT.geo.latitude;
-      // console.log(angle);
       mtxTargetToCamera.rotateY(vLT.geo.longitude);
       mtxTargetToCamera.rotateX(vLT.geo.latitude);
       mtxTargetToCamera.multiply(viewport.camera.pivot, true);
-      // mtxTargetToCamera.rotateX(angle);
+
       cubeTransformed.mtxLocal.set(mtxTargetToCamera);
-
-      // cubeTransformed.mtxLocal.translation = pos;
-
-      // let vL: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(cube.mtxLocal.translation, viewport.camera.pivot.translation);
-
-      // let rayP0: ƒ.Ray = viewport.getRayFromClient(p0);
-      // let rayP0: ƒ.Ray = new ƒ.Ray(ƒ.Vector3.NORMALIZATION(vL), viewport.camera.pivot.translation, 1);
-      // console.log(rayP0.toString());
-
-      // console.log(p0T.toString());
-
-      // let vP: ƒ.Vector3 = 
     }
 
     function cursorDraw(): void {
