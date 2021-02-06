@@ -31,7 +31,7 @@ namespace ScreenToRay {
     canvasRay = document.querySelector("canvas#ray");
     cameraRay = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
     let cmpCameraRay: ƒ.ComponentCamera = cameraRay;
-    cmpCameraRay.projectCentral(1, 45);
+    cmpCameraRay.projectCentral(1, 10);
     viewportRay.initialize("ray", graph, cmpCameraRay, canvasRay);
     viewportRay.adjustingFrames = true;
 
@@ -99,18 +99,18 @@ namespace ScreenToRay {
   }
 
   function adjustRayCamera(): void {
-    ƒ.Debug.group("Ray");
+    // ƒ.Debug.group("Ray");
 
     let ray: ƒ.Ray = computeRay();
-    ƒ.Debug.log(ray.direction.toString());
+    // ƒ.Debug.log(ray.direction.toString());
 
     ray.direction.transform(cmpCamera.pivot);
-    ƒ.Debug.log(ray.direction.toString());
+    // ƒ.Debug.log(ray.direction.toString());
 
-    ƒ.Debug.groupEnd();
+    // ƒ.Debug.groupEnd();
 
     cameraRay.pivot.lookAt(ray.direction);
-    cameraRay.projectCentral(1, 10);
+    cameraRay.projectCentral(1, 0.001);
     viewportRay.draw();
 
     let crcRay: CanvasRenderingContext2D = canvasRay.getContext("2d");

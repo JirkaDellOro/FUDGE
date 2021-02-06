@@ -25,7 +25,7 @@ var ScreenToRay;
         canvasRay = document.querySelector("canvas#ray");
         cameraRay = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
         let cmpCameraRay = cameraRay;
-        cmpCameraRay.projectCentral(1, 45);
+        cmpCameraRay.projectCentral(1, 10);
         viewportRay.initialize("ray", graph, cmpCameraRay, canvasRay);
         viewportRay.adjustingFrames = true;
         menu = document.getElementsByTagName("div")[0];
@@ -79,14 +79,14 @@ var ScreenToRay;
             output.innerHTML += hit.node.name + ":" + hit.zBuffer + "<br/>";
     }
     function adjustRayCamera() {
-        ƒ.Debug.group("Ray");
+        // ƒ.Debug.group("Ray");
         let ray = computeRay();
-        ƒ.Debug.log(ray.direction.toString());
+        // ƒ.Debug.log(ray.direction.toString());
         ray.direction.transform(cmpCamera.pivot);
-        ƒ.Debug.log(ray.direction.toString());
-        ƒ.Debug.groupEnd();
+        // ƒ.Debug.log(ray.direction.toString());
+        // ƒ.Debug.groupEnd();
         cameraRay.pivot.lookAt(ray.direction);
-        cameraRay.projectCentral(1, 10);
+        cameraRay.projectCentral(1, 0.001);
         viewportRay.draw();
         let crcRay = canvasRay.getContext("2d");
         crcRay.translate(crcRay.canvas.width / 2, crcRay.canvas.height / 2);

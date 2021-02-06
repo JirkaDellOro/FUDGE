@@ -37,13 +37,13 @@ namespace PickTransform {
     // graph.appendChild(cursor);
     cube = new ƒAid.Node(
       "Cube",
-      ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(0.18)),
+      ƒ.Matrix4x4.ROTATION_Y(30),
       new ƒ.Material("Cube", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("green"))),
       new ƒ.MeshCube("Cube")
     );
     cubeTransformed = new ƒAid.Node(
       "CubeTransformed",
-      ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(0.2)),
+      ƒ.Matrix4x4.IDENTITY(),
       new ƒ.Material("Cube", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("red"))),
       new ƒ.MeshCube("Cube")
     );
@@ -53,7 +53,7 @@ namespace PickTransform {
     // setup the viewport
     cmpCamera = new ƒ.ComponentCamera();
     // Reflect.set(cmpCamera, "fieldOfView", 170);
-    cmpCamera.pivot.translateZ(2.1);
+    cmpCamera.pivot.translateZ(12);
     cmpCamera.pivot.rotateY(180);
     viewport = new ƒ.Viewport();
     viewport.initialize("Viewport", graph, cmpCamera, canvas);
@@ -108,8 +108,8 @@ namespace PickTransform {
       // let angle: number = 90 * Math.acos(ƒ.Vector3.DOT(v, vT));
       // angle = vLT.geo.latitude;
       // console.log(angle);
-      mtxTargetToCamera.rotateX(vLT.geo.latitude);
       mtxTargetToCamera.rotateY(vLT.geo.longitude);
+      mtxTargetToCamera.rotateX(vLT.geo.latitude);
       mtxTargetToCamera.multiply(viewport.camera.pivot, true);
       // mtxTargetToCamera.rotateX(angle);
       cubeTransformed.mtxLocal.set(mtxTargetToCamera);
