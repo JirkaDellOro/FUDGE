@@ -5112,6 +5112,9 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    let textureDefault: string;
+}
+declare namespace FudgeCore {
     /**
      * Determines the mode a loop runs in
      */
