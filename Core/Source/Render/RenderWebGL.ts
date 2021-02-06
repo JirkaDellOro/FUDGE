@@ -58,7 +58,7 @@ namespace FudgeCore {
         antialias: (_antialias != undefined) ? _antialias : fudgeConfig.antialias || false,
         premultipliedAlpha: false
       };
-      Debug.fudge("Initialize RenderManager", contextAttributes);
+      Debug.fudge("Initialize RenderWebGL", contextAttributes);
       let canvas: HTMLCanvasElement = document.createElement("canvas");
       let crc3: WebGL2RenderingContext;
       crc3 = RenderWebGL.assert<WebGL2RenderingContext>(

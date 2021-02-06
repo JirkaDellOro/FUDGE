@@ -28,7 +28,9 @@ namespace FudgeCore {
                     out vec4 frag;
                     
                     void main() {
-                       frag = u_color;
+                      // if (gl_FragCoord.x < 700.0)
+                      frag = u_color;
+                     //    frag = vec4(1.0,1.0,1.0,1.0);
                     }`;
     }
   }

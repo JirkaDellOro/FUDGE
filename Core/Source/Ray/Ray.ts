@@ -35,5 +35,9 @@ namespace FudgeCore {
       let distance: Vector3 = Vector3.DIFFERENCE(_target, raySection);
       return distance;
     }
+
+    public toString(): string {
+      return `origin: ${this.origin.toString()}, direction: ${this.direction.toString()}, length: ${this.length.toPrecision(5)}`;
+    }
   }
 }

@@ -4830,6 +4830,7 @@ declare namespace FudgeCore {
          * All values and calculations must be relative to the same coordinate system, preferably the world.
          */
         getDistance(_target: Vector3): Vector3;
+        toString(): string;
     }
 }
 declare namespace FudgeCore {
