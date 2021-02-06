@@ -2633,6 +2633,30 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
+     * Representation of a vector3 as geographic coordinates as seen on a globe
+     * ```plaintext
+     * ←|→ Longitude (Angle to the z-Axis)
+     *  ↕- Latitude (Angle to the equator)
+     *  -→ Magnitude (Distance from the center)
+     * ```
+     */
+    class Geo3 {
+        magnitude: number;
+        latitude: number;
+        longitude: number;
+        constructor(_longitude?: number, _latitude?: number, _magnitude?: number);
+        /**
+         * Set the properties of this instance at once
+         */
+        set(_longitude?: number, _latitude?: number, _magnitude?: number): void;
+        /**
+         * Returns a pretty string representation
+         */
+        toString(): string;
+    }
+}
+declare namespace FudgeCore {
+    /**
      * Simple class for 3x3 matrix operations
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
@@ -3039,16 +3063,6 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Representation of a vector3 as geographic coordinates
-     */
-    class Geo3 {
-        magnitude: number;
-        latitude: number;
-        longitude: number;
-        constructor(longitude?: number, latitude?: number, _magnitude?: number);
-        toString(): string;
-    }
-    /**
      * Stores and manipulates a threedimensional vector comprised of the components x, y and z
      * ```plaintext
      *            +y
@@ -3123,6 +3137,10 @@ declare namespace FudgeCore {
          * Divides the dividend by the divisor component by component and returns the result
          */
         static RATIO(_dividend: Vector3, _divisor: Vector3): Vector3;
+        /**
+         * Creates a cartesian vector from geographic coordinates
+         */
+        static GEO3(_longitude?: number, _latitude?: number, _magnitude?: number): Vector3;
         get x(): number;
         get y(): number;
         get z(): number;

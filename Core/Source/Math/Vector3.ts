@@ -1,23 +1,5 @@
 namespace FudgeCore {
   /**
-   * Representation of a vector3 as geographic coordinates
-   */
-  export class Geo3 {
-    public magnitude: number = 0;
-    public latitude: number = 0;
-    public longitude: number = 0;
-
-    constructor(longitude: number = 0, latitude: number = 0, _magnitude: number = 1) {
-      this.magnitude = _magnitude;
-      this.latitude = latitude;
-      this.longitude = longitude;
-    }
-    public toString(): string {
-      return `longitude: ${this.longitude.toPrecision(5)}, latitude: ${this.latitude.toPrecision(5)}, magnitude: ${this.magnitude.toPrecision(5)}`;
-    }
-  }
-
-  /**
    * Stores and manipulates a threedimensional vector comprised of the components x, y and z
    * ```plaintext
    *            +y
@@ -188,6 +170,18 @@ namespace FudgeCore {
       return vector;
     }
 
+    /**
+     * Creates a cartesian vector from geographic coordinates
+     */
+    public static GEO3(_longitude: number = 0, _latitude: number = 0, _magnitude: number = 1): Vector3 {
+      let vector: Vector3 = Recycler.get(Vector3);
+      let geo: Geo3 = Recycler.get(Geo3);
+      geo.set(_longitude, _latitude, _magnitude);
+      vector.geo = geo;
+      Recycler.store(geo);
+      return vector;
+    }
+
     // TODO: implement equals-functions
     get x(): number {
       return this.data[0];
@@ -236,7 +230,7 @@ namespace FudgeCore {
      * Returns a geographic representation of this vector
      */
     public get geo(): Geo3 {
-      let geo: Geo3 = new Geo3();
+      let geo: Geo3 = Recycler.get(Geo3);
       geo.magnitude = this.magnitude;
 
       if (geo.magnitude === 0)
@@ -251,15 +245,9 @@ namespace FudgeCore {
      * Adjust the cartesian values of this vector to represent the given a geographic coordinates
      */
     public set geo(_geo: Geo3) {
-      // let radianLong: number = Math.PI * _geo.longitude / 180;
-      // this.y = Math.sin(Math.PI * _geo.latitude / 180);
-      // this.x = Math.sin(radianLong);
-      // this.z = Math.cos(radianLong);
-      // this.normalize(_geo.magnitude);
-      let result: Vector3 = new Vector3(0, 0, _geo.magnitude);
-      result.transform(Matrix4x4.ROTATION_X(-_geo.latitude));
-      result.transform(Matrix4x4.ROTATION_Y(_geo.longitude));
-      this.set(result.x, result.y, result.z);
+      this.set(0, 0, _geo.magnitude);
+      this.transform(Matrix4x4.ROTATION_X(-_geo.latitude));
+      this.transform(Matrix4x4.ROTATION_Y(_geo.longitude));
     }
 
     /**
