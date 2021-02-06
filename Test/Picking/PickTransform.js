@@ -28,10 +28,10 @@ var PickTransform;
         // pick the graph to show
         let graph = new ƒ.Node("Graph");
         // graph.appendChild(cursor);
-        cube = new ƒAid.Node("Cube", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(0.2)), new ƒ.Material("Cube", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("green"))), new ƒ.MeshCube("Cube"));
+        cube = new ƒAid.Node("Cube", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(0.18)), new ƒ.Material("Cube", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("green"))), new ƒ.MeshCube("Cube"));
         cubeTransformed = new ƒAid.Node("CubeTransformed", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(0.2)), new ƒ.Material("Cube", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("red"))), new ƒ.MeshCube("Cube"));
-        graph.appendChild(cube);
         graph.appendChild(cubeTransformed);
+        graph.appendChild(cube);
         // setup the viewport
         cmpCamera = new ƒ.ComponentCamera();
         // Reflect.set(cmpCamera, "fieldOfView", 170);
@@ -55,21 +55,37 @@ var PickTransform;
             cursorDraw();
         }
         function calculate() {
+            // console.log(mouse.toString(), viewport.pointClientToRender(mouse).toString());
             // TODO: work in projection-space, not client...
             let p = viewport.pointClientToProjection(mouse);
             let pT = viewport.pointClientToProjection(new ƒ.Vector2(cursor.x, cursor.y));
             let p0 = viewport.pointClientToProjection(viewport.pointWorldToClient(cube.mtxLocal.translation));
             let r = ƒ.Vector2.DIFFERENCE(p0, p);
             let p0T = ƒ.Vector2.SUM(pT, r);
+            // console.log(p0T.toString());
             let v = ƒ.Vector3.NORMALIZATION(p.toVector3(1));
             let v0 = ƒ.Vector3.NORMALIZATION(p0.toVector3(1));
             let vT = ƒ.Vector3.NORMALIZATION(pT.toVector3(1));
             let v0T = ƒ.Vector3.NORMALIZATION(p0T.toVector3(1));
-            let vL = ƒ.Vector3.TRANSFORMATION(cube.mtxLocal.translation, ƒ.Matrix4x4.INVERSION(viewport.camera.pivot));
+            let mtxTargetToCamera = ƒ.Matrix4x4.RELATIVE(cube.mtxLocal, viewport.camera.pivot);
+            let vL = mtxTargetToCamera.translation;
+            // console.log(vL.toString());
+            // let vL: ƒ.Vector3 = ƒ.Vector3.TRANSFORMATION(cube.mtxLocal.translation, ƒ.Matrix4x4.INVERSION(viewport.camera.pivot));
             let l = vL.magnitude;
-            let vLT = ƒ.Vector3.SCALE(v0T, l);
-            let pos = ƒ.Vector3.TRANSFORMATION(vLT, viewport.camera.pivot);
-            cubeTransformed.mtxLocal.translation = pos;
+            let lT = l * ƒ.Vector3.DIFFERENCE(v, v0).magnitude / ƒ.Vector3.DIFFERENCE(vT, v0T).magnitude;
+            let vLT = ƒ.Vector3.SCALE(v0T, lT);
+            vLT.x = -vLT.x;
+            // let pos: ƒ.Vector3 = ƒ.Vector3.TRANSFORMATION(vLT, viewport.camera.pivot);
+            mtxTargetToCamera.translation = vLT;
+            // let angle: number = 90 * Math.acos(ƒ.Vector3.DOT(v, vT));
+            // angle = vLT.geo.latitude;
+            // console.log(angle);
+            mtxTargetToCamera.rotateX(vLT.geo.latitude);
+            mtxTargetToCamera.rotateY(vLT.geo.longitude);
+            mtxTargetToCamera.multiply(viewport.camera.pivot, true);
+            // mtxTargetToCamera.rotateX(angle);
+            cubeTransformed.mtxLocal.set(mtxTargetToCamera);
+            // cubeTransformed.mtxLocal.translation = pos;
             // let vL: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(cube.mtxLocal.translation, viewport.camera.pivot.translation);
             // let rayP0: ƒ.Ray = viewport.getRayFromClient(p0);
             // let rayP0: ƒ.Ray = new ƒ.Ray(ƒ.Vector3.NORMALIZATION(vL), viewport.camera.pivot.translation, 1);

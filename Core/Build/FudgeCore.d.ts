@@ -3039,6 +3039,16 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
+     * Representation of a vector3 as geographic coordinates
+     */
+    class Geo3 {
+        magnitude: number;
+        latitude: number;
+        longitude: number;
+        constructor(longitude?: number, latitude?: number, _magnitude?: number);
+        toString(): string;
+    }
+    /**
      * Stores and manipulates a threedimensional vector comprised of the components x, y and z
      * ```plaintext
      *            +y
@@ -3131,6 +3141,14 @@ declare namespace FudgeCore {
          * Returns a copy of this vector
          */
         get copy(): Vector3;
+        /**
+         * Returns a geographic representation of this vector
+         */
+        get geo(): Geo3;
+        /**
+         * Adjust the cartesian values of this vector to represent the given a geographic coordinates
+         */
+        set geo(_geo: Geo3);
         /**
          * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
          * TODO: examine, if tolerance as criterium for the difference is appropriate with very large coordinate values or if _tolerance should be multiplied by coordinate value
