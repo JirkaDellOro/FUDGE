@@ -16,7 +16,9 @@ var TextureTest;
         graph.addChild(cube);
         graph.addChild(pyramid);
         let viewport = new ƒ.Viewport();
-        let cmpCamera = Scenes.createCamera(new ƒ.Vector3(0, 2, 3), new ƒ.Vector3(0, 0, 0));
+        let cmpCamera = new ƒ.ComponentCamera();
+        cmpCamera.pivot.translation = new ƒ.Vector3(0, 2, 3);
+        cmpCamera.pivot.lookAt(new ƒ.Vector3(0, 0, 0));
         viewport.initialize("Viewport", graph, cmpCamera, document.querySelector("canvas"));
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, function () {
             let speed = 0.5;

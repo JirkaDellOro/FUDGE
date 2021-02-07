@@ -20,7 +20,9 @@ namespace TextureTest {
     graph.addChild(pyramid);
 
     let viewport: ƒ.Viewport = new ƒ.Viewport();
-    let cmpCamera: ƒ.ComponentCamera = Scenes.createCamera(new ƒ.Vector3(0, 2, 3), new ƒ.Vector3(0, 0, 0));
+    let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
+    cmpCamera.pivot.translation = new ƒ.Vector3(0, 2, 3);
+    cmpCamera.pivot.lookAt(new ƒ.Vector3(0, 0, 0));
     viewport.initialize("Viewport", graph, cmpCamera, document.querySelector("canvas"));
 
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, function (): void {
