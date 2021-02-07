@@ -5067,6 +5067,11 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    enum MIPMAP {
+        CRISP = 0,
+        MEDIUM = 1,
+        BLURRY = 2
+    }
     /**
      * Baseclass for different kinds of textures.
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -5074,6 +5079,7 @@ declare namespace FudgeCore {
     abstract class Texture extends Mutable implements SerializableResource {
         name: string;
         idResource: string;
+        mipmap: MIPMAP;
         protected renderData: {
             [key: string]: unknown;
         };
@@ -5105,7 +5111,7 @@ declare namespace FudgeCore {
      */
     class TextureBase64 extends Texture {
         image: HTMLImageElement;
-        constructor(_name: string, _base64: string);
+        constructor(_name: string, _base64: string, _mipmap?: MIPMAP);
         get texImageSource(): TexImageSource;
     }
     /**

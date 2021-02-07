@@ -1,4 +1,7 @@
 namespace FudgeCore {
+  export enum MIPMAP {
+    CRISP, MEDIUM, BLURRY
+  }
   /**
    * Baseclass for different kinds of textures. 
    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -7,6 +10,7 @@ namespace FudgeCore {
   export abstract class Texture extends Mutable implements SerializableResource {
     public name: string;
     public idResource: string = undefined;
+    public mipmap: MIPMAP = MIPMAP.CRISP;
     protected renderData: { [key: string]: unknown };
 
     constructor(_name: string = "Texture") {
@@ -107,9 +111,10 @@ namespace FudgeCore {
   export class TextureBase64 extends Texture {
     public image: HTMLImageElement = new Image();
 
-    constructor (_name: string, _base64: string) {
+    constructor (_name: string, _base64: string, _mipmap: MIPMAP = MIPMAP.CRISP) {
       super(_name);
       this.image.src = _base64;
+      this.mipmap = _mipmap;
     }
     public get texImageSource(): TexImageSource {
       return this.image;
