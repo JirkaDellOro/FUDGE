@@ -4,7 +4,7 @@ namespace FudgeCore {
       RenderInjector.inject(_constructor, RenderInjectorTexture);
     }
 
-    protected static injectTextureImage(this: Texture): void {
+    protected static injectTexture(this: Texture): void {
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       if (this.renderData) {
         // buffers exist
@@ -18,10 +18,10 @@ namespace FudgeCore {
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, texture);
 
         try {
-          crc3.texImage2D(crc3.TEXTURE_2D, 0, crc3.RGBA, crc3.RGBA, crc3.UNSIGNED_BYTE, (<TextureImage>this).image);
+          crc3.texImage2D(crc3.TEXTURE_2D, 0, crc3.RGBA, crc3.RGBA, crc3.UNSIGNED_BYTE, this.texImageSource);
           crc3.texImage2D(
             WebGL2RenderingContext.TEXTURE_2D, 0, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE,
-            (<TextureImage>this).image
+            this.texImageSource
           );
         } catch (_error) {
           Debug.error(_error);

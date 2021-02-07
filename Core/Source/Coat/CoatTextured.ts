@@ -6,16 +6,15 @@ namespace FudgeCore {
   export class CoatTextured extends CoatColored {
     // TODO: see if color should be generalized
     // public color: Color = new Color(1, 1, 1, 1);
-    public texture: TextureImage = null;
+    public texture: Texture = null;
 
-    constructor(_color?: Color, _texture?: TextureImage) {
+    constructor(_color?: Color, _texture?: Texture) {
       super(_color);
-      if (_texture)
-        this.texture = _texture;
+      this.texture = _texture || TextureDefault.texture;
     }
 
     //#region Transfer
-    //TODO: examine using super in serialization is works with decorators... should.
+    //TODO: examine if using super in serialization works with decorators... should.
     public serialize(): Serialization {
       let serialization: Serialization = super.serialize();
       delete serialization.texture;
@@ -24,7 +23,7 @@ namespace FudgeCore {
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       super.deserialize(_serialization);
-      this.texture = <TextureImage> await Project.getResource(_serialization.idTexture);
+      this.texture = <Texture>await Project.getResource(_serialization.idTexture);
       return this;
     }
     //#endregion

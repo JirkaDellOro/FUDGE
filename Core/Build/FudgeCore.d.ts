@@ -739,7 +739,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     class RenderInjectorTexture extends RenderInjector {
         static decorate(_constructor: Function): void;
-        protected static injectTextureImage(this: Texture): void;
+        protected static injectTexture(this: Texture): void;
     }
 }
 declare namespace FudgeCore {
@@ -1295,8 +1295,8 @@ declare namespace FudgeCore {
      * A [[Coat]] providing a texture and additional data for texturing
      */
     class CoatTextured extends CoatColored {
-        texture: TextureImage;
-        constructor(_color?: Color, _texture?: TextureImage);
+        texture: Texture;
+        constructor(_color?: Color, _texture?: Texture);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }
@@ -5071,22 +5071,27 @@ declare namespace FudgeCore {
      * Baseclass for different kinds of textures.
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    abstract class Texture extends Mutable {
+    abstract class Texture extends Mutable implements SerializableResource {
         name: string;
+        idResource: string;
         protected renderData: {
             [key: string]: unknown;
         };
+        constructor(_name?: string);
+        abstract get texImageSource(): TexImageSource;
         useRenderData(): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
     }
     /**
      * Texture created from an existing image
      */
-    class TextureImage extends Texture implements SerializableResource {
+    class TextureImage extends Texture {
         image: HTMLImageElement;
         url: RequestInfo;
-        idResource: string;
         constructor(_url?: RequestInfo);
+        get texImageSource(): TexImageSource;
         /**
          * Asynchronously loads the image from the given url
          */
@@ -5098,21 +5103,35 @@ declare namespace FudgeCore {
     /**
      * Texture created from a canvas
      */
+    class TextureBase64 extends Texture {
+        image: HTMLImageElement;
+        constructor(_name: string, _base64: string);
+        get texImageSource(): TexImageSource;
+    }
+    /**
+     * Texture created from a canvas
+     */
     class TextureCanvas extends Texture {
+        get texImageSource(): TexImageSource;
     }
     /**
      * Texture created from a FUDGE-Sketch
      */
     class TextureSketch extends TextureCanvas {
+        get texImageSource(): TexImageSource;
     }
     /**
      * Texture created from an HTML-page
      */
     class TextureHTML extends TextureCanvas {
+        get texImageSource(): TexImageSource;
     }
 }
 declare namespace FudgeCore {
-    let textureDefault: string;
+    class TextureDefault extends TextureBase64 {
+        static texture: TextureBase64;
+        private static get;
+    }
 }
 declare namespace FudgeCore {
     /**
