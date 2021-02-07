@@ -1,5 +1,6 @@
 namespace ScreenToRay {
   import ƒ = FudgeCore;
+  import ƒAid = FudgeAid;
   
   window.addEventListener("load", init);
 
@@ -19,20 +20,22 @@ namespace ScreenToRay {
 
   function init(): void {
     // create asset
-    let graph: ƒ.Node = Scenes.createAxisCross();
-    graph.addComponent(new ƒ.ComponentTransform());
+    let graph: ƒ.Node = new ƒAid.NodeCoordinateSystem("CoSys", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(100)));
+    // graph.addComponent(new ƒ.ComponentTransform());
 
     // initialize viewports
     canvas = document.querySelector("canvas#viewport");
-    cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
+    cmpCamera = new ƒ.ComponentCamera();
+    cmpCamera.pivot.translation = new ƒ.Vector3(1, 2, 3);
+    cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
     viewport.initialize(canvas.id, graph, cmpCamera, canvas);
     canvas.addEventListener("mousemove", setCursorPosition);
 
     canvasRay = document.querySelector("canvas#ray");
-    cameraRay = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
-    let cmpCameraRay: ƒ.ComponentCamera = cameraRay;
-    cmpCameraRay.projectCentral(1, 10);
-    viewportRay.initialize("ray", graph, cmpCameraRay, canvasRay);
+    cameraRay = new ƒ.ComponentCamera();
+    cameraRay.pivot.translation = new ƒ.Vector3(1, 2, 3);
+    cameraRay.projectCentral(1, 10);
+    viewportRay.initialize("ray", graph, cameraRay, canvasRay);
     viewportRay.adjustingFrames = true;
 
     menu = document.getElementsByTagName("div")[0];

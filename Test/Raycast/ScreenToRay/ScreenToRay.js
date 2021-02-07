@@ -1,6 +1,7 @@
 var ScreenToRay;
 (function (ScreenToRay) {
     var ƒ = FudgeCore;
+    var ƒAid = FudgeAid;
     window.addEventListener("load", init);
     let uiMaps = {};
     let uiClient;
@@ -15,18 +16,20 @@ var ScreenToRay;
     let canvasRay;
     function init() {
         // create asset
-        let graph = Scenes.createAxisCross();
-        graph.addComponent(new ƒ.ComponentTransform());
+        let graph = new ƒAid.NodeCoordinateSystem("CoSys", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(100)));
+        // graph.addComponent(new ƒ.ComponentTransform());
         // initialize viewports
         canvas = document.querySelector("canvas#viewport");
-        cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
+        cmpCamera = new ƒ.ComponentCamera();
+        cmpCamera.pivot.translation = new ƒ.Vector3(1, 2, 3);
+        cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
         viewport.initialize(canvas.id, graph, cmpCamera, canvas);
         canvas.addEventListener("mousemove", setCursorPosition);
         canvasRay = document.querySelector("canvas#ray");
-        cameraRay = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
-        let cmpCameraRay = cameraRay;
-        cmpCameraRay.projectCentral(1, 10);
-        viewportRay.initialize("ray", graph, cmpCameraRay, canvasRay);
+        cameraRay = new ƒ.ComponentCamera();
+        cameraRay.pivot.translation = new ƒ.Vector3(1, 2, 3);
+        cameraRay.projectCentral(1, 10);
+        viewportRay.initialize("ray", graph, cameraRay, canvasRay);
         viewportRay.adjustingFrames = true;
         menu = document.getElementsByTagName("div")[0];
         menu.innerHTML = "Test automatic rectangle transformation. Adjust CSS-Frame and framings";
