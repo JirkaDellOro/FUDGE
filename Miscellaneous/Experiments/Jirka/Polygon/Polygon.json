@@ -1,44 +1,45 @@
 {
-  "MeshPolygon|2021-02-08T08:11:20.883Z|59457": {
+  "MeshPolygon|2021-02-08T14:58:15.037Z|31562": {
     "ƒ.MeshPolygon": {
-      "idResource": "MeshPolygon|2021-02-08T08:11:20.883Z|59457",
-      "name": "MeshPolygonXX",
+      "idResource": "MeshPolygon|2021-02-08T14:58:15.037Z|31562",
+      "name": "MeshPolygon",
       "type": "MeshPolygon",
+      "construction": {
+        "ƒ.Vector2": [
+          "[-1, -1]",
+          "[1, -1]",
+          "[0, 1]"
+        ]
+      },
       "test2": "[1, 2]",
       "test3": "[1, 2, 3]",
-      "construction": [
-        "[-1, -1]",
-        "[1, -1]",
-        "[2, 1]",
-        "[-2, 2]"
-      ],
       "autofit": true
     }
   },
-  "Material|2021-02-08T08:11:27.716Z|57769": {
+  "Material|2021-02-08T14:58:19.425Z|10977": {
     "ƒ.Material": {
       "name": "NewMaterial",
-      "idResource": "Material|2021-02-08T08:11:27.716Z|57769",
-      "shader": "ShaderUniColor",
+      "idResource": "Material|2021-02-08T14:58:19.425Z|10977",
+      "shader": "ShaderTexture",
       "coat": {
-        "ƒ.CoatColored": {
+        "ƒ.CoatTextured": {
           "name": "Coat",
           "color": "[1, 1, 1, 1]"
         }
       }
     }
   },
-  "Graph|2021-02-08T08:11:38.877Z|10415": {
+  "Graph|2021-02-08T14:58:10.028Z|29727": {
     "ƒ.Graph": {
       "name": "NewGraph",
       "components": {
         "ComponentMesh": [
           {
             "ƒ.ComponentMesh": {
-              "idMesh": "MeshPolygon|2021-02-08T08:11:20.883Z|59457",
+              "idMesh": "MeshPolygon|2021-02-08T14:58:15.037Z|31562",
               "pivot": {
                 "translation": "[0, 0, 0]",
-                "rotation": "[0, 0, 0]",
+                "rotation": "[0, 69, 0]",
                 "scaling": "[1, 1, 1]"
               },
               "Component": {
@@ -60,13 +61,13 @@
               "Component": {
                 "active": true
               },
-              "idMaterial": "Material|2021-02-08T08:11:27.716Z|57769"
+              "idMaterial": "Material|2021-02-08T14:58:19.425Z|10977"
             }
           }
         ]
       },
       "children": [],
-      "idResource": "Graph|2021-02-08T08:11:38.877Z|10415",
+      "idResource": "Graph|2021-02-08T14:58:10.028Z|29727",
       "type": "Graph"
     }
   }

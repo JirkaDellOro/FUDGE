@@ -309,13 +309,13 @@ declare namespace FudgeCore {
          * including attached components, children, superclass-objects all information needed for reconstruction
          * @param _object An object to serialize, implementing the [[Serializable]] interface
          */
-        static serializeArray(_objects: Serializable[]): Serialization[];
+        static serializeArray<T extends Serializable>(_type: new () => T, _objects: Serializable[]): Serialization;
         /**
          * Returns an Array of FUDGE-objects reconstructed from the information in the array of [[Serialization]]s given,
          * including attached components, children, superclass-objects
          * @param _serializations
          */
-        static deserializeArray<T extends Serializable>(_type: new () => T, _serializations: Serialization[]): Promise<T[]>;
+        static deserializeArray(_serialization: Serialization): Promise<Serializable[]>;
         static prettify(_json: string): string;
         /**
          * Returns a formatted, human readable JSON-String, representing the given [[Serializaion]] that may have been created by [[Serializer]].serialize
@@ -332,7 +332,7 @@ declare namespace FudgeCore {
          * @param _path
          */
         static reconstruct(_path: string): Serializable;
-        static getConstructor<T extends Serializable>(_type: string, _namespace?: Object): new () => T;
+        static getConstructor<T extends Serializable>(_path: string): new () => T;
         /**
          * Returns the full path to the class of the object, if found in the registered namespaces
          * @param _object

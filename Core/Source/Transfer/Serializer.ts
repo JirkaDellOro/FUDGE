@@ -114,11 +114,18 @@ namespace FudgeCore {
      * including attached components, children, superclass-objects all information needed for reconstruction
      * @param _object An object to serialize, implementing the [[Serializable]] interface
      */
-    public static serializeArray(_objects: Serializable[]): Serialization[] {
+    public static serializeArray<T extends Serializable>(_type: new () => T, _objects: Serializable[]): Serialization {
       let serializations: Serialization[] = [];
+      let path: string = this.getFullPath(new _type());
+      if (!path)
+        throw new Error(`Namespace of serializable object of type ${_type.name} not found. Maybe the namespace hasn't been registered or the class not exported?`);
+      
       for (let object of _objects)
-        serializations.push(Serializer.serialize(object));
-      return serializations;
+        serializations.push(object.serialize());
+
+      let serialization: Serialization = {};
+      serialization[path] = serializations;
+      return serialization;
     }
 
     /**
@@ -126,14 +133,28 @@ namespace FudgeCore {
      * including attached components, children, superclass-objects
      * @param _serializations 
      */
-    public static async deserializeArray<T extends Serializable>(_type: new () => T, _serializations: Serialization[]): Promise<T[]> {
-      let reconstruct: T[] = [];
-      for (let serialization of _serializations) {
-        let object: T = new _type();
-        object.deserialize(serialization);
-        reconstruct.push(object);
+    public static async deserializeArray(_serialization: Serialization): Promise<Serializable[]> {
+      let serializables: Serializable[] = [];
+      let construct: new () => Serializable;
+      let serializations: Serialization[] = [];
+      try {
+        // loop constructed solely to access type-property. Only one expected!
+        for (let path in _serialization) {
+          construct = Serializer.getConstructor(path);
+          serializations = _serialization[path];
+          break;
+        }
+      } catch (_error) {
+        throw new Error("Deserialization failed: " + _error);
       }
-      return reconstruct;
+
+      for (let serialization of serializations) {
+        let serializable: Serializable = new construct();
+        serializable.deserialize(serialization);
+        serializables.push(serializable);
+      }
+
+      return serializables;
     }
 
     //TODO: implement prettifier to make JSON-Stringification of serializations more readable, e.g. placing x, y and z in one line
@@ -163,18 +184,18 @@ namespace FudgeCore {
      * @param _path 
      */
     public static reconstruct(_path: string): Serializable {
-      let typeName: string = _path.substr(_path.lastIndexOf(".") + 1);
-      let namespace: Object = Serializer.getNamespace(_path);
-      if (!namespace)
-        throw new Error(`Namespace of serializable object of type ${typeName} not found. Maybe the namespace hasn't been registered?`);
-      // let reconstruction: Serializable = new (<General>namespace)[typeName];
-      let constructor: new () => Serializable = Serializer.getConstructor(typeName, namespace);
+      let constructor: new () => Serializable = Serializer.getConstructor(_path);
       let reconstruction: Serializable = new constructor();
       return reconstruction;
     }
 
-    public static getConstructor<T extends Serializable>(_type: string, _namespace: Object = FudgeCore): new () => T {
-      return (<General>_namespace)[_type];
+    // public static getConstructor<T extends Serializable>(_type: string, _namespace: Object = FudgeCore): new () => T {
+    public static getConstructor<T extends Serializable>(_path: string): new () => T {
+      let typeName: string = _path.substr(_path.lastIndexOf(".") + 1);
+      let namespace: Object = Serializer.getNamespace(_path);
+      if (!namespace)
+        throw new Error(`Constructor of serializable object of type ${_path} not found. Maybe the namespace hasn't been registered?`);
+      return (<General>namespace)[typeName];
     }
 
     /**
@@ -198,7 +219,7 @@ namespace FudgeCore {
      */
     private static getNamespace(_path: string): Object {
       let namespaceName: string = _path.substr(0, _path.lastIndexOf("."));
-      return Serializer.namespaces[namespaceName];
+      return Serializer.namespaces[namespaceName] || FudgeCore;
     }
 
     /**

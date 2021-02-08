@@ -54,7 +54,7 @@ namespace FudgeCore {
       return result;
     }
 
-    public create(_construction?: Vector2[], _autofit: boolean = true): void {
+    public create(_construction: Vector2[] = [], _autofit: boolean = true): void {
       if (_construction.length < 3) {
         Debug.warn("At least 3 vertices needed to construct MeshPolygon, default trigon used");
         this.create(MeshPolygon.verticesDefault, true);
@@ -97,16 +97,16 @@ namespace FudgeCore {
     //#region Transfer
     public serialize(): Serialization {
       let serialization: Serialization = super.serialize();
-      serialization.construction = Serializer.serializeArray(this.construction);
-      serialization.test2 = Serializer.serialize(this.test2);
-      serialization.test3 = Serializer.serialize(this.test3);
+      serialization.construction = Serializer.serializeArray(Vector2, this.construction);
+      serialization.test2 = this.test2.serialize();
+      serialization.test3 = this.test3.serialize();
       serialization.autofit = this.autofit;
       return serialization;
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       super.deserialize(_serialization);
       // let vectorArray: VectorArray = <VectorArray>await (new VectorArray()).deserialize(_serialization.construction);
-      let vectors: Vector2[] = await Serializer.deserializeArray(Vector2, _serialization.construction);
+      let vectors: Vector2[] = <Vector2[]>await Serializer.deserializeArray(_serialization.construction);
       this.test2 = await (new Vector2()).deserialize(_serialization.test2);
       this.test3 = await (new Vector3()).deserialize(_serialization.test3);
       this.create(vectors, _serialization.autofit);
@@ -128,7 +128,7 @@ namespace FudgeCore {
     // }
 
     protected reduceMutator(_mutator: Mutator): void {
-      console.log(_mutator);
+      // console.log(_mutator);
       // delete _mutator.construction;
     }
     //#endregion

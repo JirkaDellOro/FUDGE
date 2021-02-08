@@ -23,7 +23,8 @@ namespace FudgeCore {
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       super.deserialize(_serialization);
-      this.texture = <Texture>await Project.getResource(_serialization.idTexture);
+      if (_serialization.idTexture)
+        this.texture = <Texture>await Project.getResource(_serialization.idTexture);
       return this;
     }
     //#endregion
