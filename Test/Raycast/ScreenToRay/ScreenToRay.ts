@@ -1,7 +1,7 @@
 namespace ScreenToRay {
   import ƒ = FudgeCore;
   import ƒAid = FudgeAid;
-  
+
   window.addEventListener("load", init);
 
   let uiMaps: { [name: string]: { ui: UI.FieldSet, framing: ƒ.Framing } } = {};
@@ -15,8 +15,10 @@ namespace ScreenToRay {
 
   let mouse: ƒ.Vector2 = new ƒ.Vector2();
   let viewportRay: ƒ.Viewport = new ƒ.Viewport();
+  let viewportPick: ƒ.Viewport = new ƒ.Viewport();
   let cameraRay: ƒ.ComponentCamera;
   let canvasRay: HTMLCanvasElement;
+  let canvasPick: HTMLCanvasElement;
 
   function init(): void {
     // create asset
@@ -37,6 +39,10 @@ namespace ScreenToRay {
     cameraRay.projectCentral(1, 10);
     viewportRay.initialize("ray", graph, cameraRay, canvasRay);
     viewportRay.adjustingFrames = true;
+
+    canvasPick = document.querySelector("canvas#pick");
+    viewportPick.initialize("pick", graph, cameraRay, canvasPick);
+    viewportPick.adjustingFrames = true;
 
     menu = document.getElementsByTagName("div")[0];
     menu.innerHTML = "Test automatic rectangle transformation. Adjust CSS-Frame and framings";
@@ -78,23 +84,26 @@ namespace ScreenToRay {
       update();
       viewport.draw();
       adjustRayCamera();
+      pick();
       pickNodeAt(mouse);
       // let color: ƒ.Color = getPixelColor(mouse);           
     }
   }
 
-  function getPixelColor(_pos: ƒ.Vector2): ƒ.Color {
-    let color: ƒ.Color = new ƒ.Color(1, 1, 1, 1);
-    let crc2: CanvasRenderingContext2D = canvas.getContext("2d");
-    color.setArrayBytesRGBA(crc2.getImageData(_pos.x, _pos.y, 1, 1).data);
-    return color;
+  function pick(): void {
+    let picks: ƒ.Pick[] = viewportPick.pick();
+    
+    let output: HTMLOutputElement = document.querySelector("output#o2");
+    output.innerHTML = "";
+    for (let pick of picks)
+      output.innerHTML += pick.node.name + ":" + pick.zBuffer + "<br/>";
   }
 
   function pickNodeAt(_pos: ƒ.Vector2): void {
     let posRender: ƒ.Vector2 = viewport.pointClientToRender(
       new ƒ.Vector2(_pos.x, viewport.getClientRectangle().height - _pos.y)
     );
-    let output: HTMLOutputElement = document.querySelector("output");
+    let output: HTMLOutputElement = document.querySelector("output#o1");
     output.innerHTML = "";
     let hits: ƒ.RayHit[] = viewport.pickNodeAt(posRender);
     for (let hit of hits)

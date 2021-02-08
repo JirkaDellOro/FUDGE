@@ -2187,6 +2187,7 @@ declare namespace FudgeCore {
          * Pass `false` if calculation was already done for this frame
          */
         draw(_calculateTransforms?: boolean): void;
+        pick(): Pick[];
         /**
         * Draw this viewport for RayCast
         */
@@ -4974,8 +4975,14 @@ declare namespace FudgeCore {
      */
     interface PickBuffer {
         node: Node;
-        texture: WebGLTexture;
         frameBuffer: WebGLFramebuffer;
+    }
+    /**
+     * Information on each node from picking
+     */
+    interface Pick {
+        node: Node;
+        zBuffer: number;
     }
     /**
      * The main interface to the render engine, here WebGL, which is used mainly in the superclass [[RenderWebGL]]
@@ -4983,12 +4990,24 @@ declare namespace FudgeCore {
      */
     abstract class Render extends RenderWebGL {
         static rectClip: Rectangle;
+        static pickTexture: WebGLTexture;
+        static pickBuffer: Uint8Array;
         private static timestampUpdate;
         private static pickBuffers;
+        private static picks;
+        private static pickSize;
+        /**
+         * Creates a texture buffer to be used as pick-buffer
+         */
+        static createPickTexture(_width: number, _height: number): WebGLTexture;
         /**
          * Draws the graph for RayCasting starting with the given [[Node]] using the camera given [[ComponentCamera]].
          */
         static drawGraphForRayCast(_node: Node, _cmpCamera: ComponentCamera): PickBuffer[];
+        /**
+         * Draws the graph for picking starting with the given [[Node]] using the camera with extrem narrow focus [[ComponentCamera]].
+         */
+        static drawGraphForPicking(_node: Node, _cmpCamera: ComponentCamera): Pick[];
         /**
          * Browses through the buffers (previously created with [[drawGraphForRayCast]]) of the size given
          * and returns an unsorted list of the values at the given position, representing node-ids and depth information as [[RayHit]]s
@@ -5013,13 +5032,15 @@ declare namespace FudgeCore {
          */
         private static drawNode;
         /**
+        * The render function for picking.
+        * A cameraprojection with extremely narrow focus is used, so each pixel of the buffer would hold the same information from the node,
+        * but the fragemnt shader renders only 1 pixel for each node into the render buffer, 1st node to 1st pixel, 2nd node to second pixel etc.
+        */
+        private static drawNodeForPicking;
+        /**
          * The render function for drawing buffers for picking. Renders each node on a dedicated buffer with id and depth values instead of colors
          */
         private static drawNodeForRayCast;
-        /**
-         * Creates a texture buffer to be used as pick-buffer
-         */
-        private static getRayCastTexture;
         /**
          * Set light data in shaders
          */

@@ -6,8 +6,15 @@ namespace FudgeCore {
    */
   export interface PickBuffer {
     node: Node;
-    texture: WebGLTexture;
+    // texture: WebGLTexture;
     frameBuffer: WebGLFramebuffer;
+  }
+  /**
+   * Information on each node from picking
+   */
+  export interface Pick {
+    node: Node;
+    zBuffer: number;
   }
 
   /**
@@ -16,10 +23,42 @@ namespace FudgeCore {
    */
   export abstract class Render extends RenderWebGL {
     public static rectClip: Rectangle = new Rectangle(-1, 1, 2, -2);
+    public static pickTexture: WebGLTexture;
+    public static pickBuffer: Uint8Array;
     private static timestampUpdate: number;
     private static pickBuffers: PickBuffer[];
+    private static picks: Pick[];
+    private static pickSize: Vector2;
 
     //#region RayCast & Picking
+    /**
+     * Creates a texture buffer to be used as pick-buffer
+     */
+    public static createPickTexture(_width: number, _height: number): WebGLTexture {
+      Render.pickSize = new Vector2(_width, _height);
+      // create to render to
+      const targetTextureWidth: number = _width;
+      const targetTextureHeight: number = _height;
+      const targetTexture: WebGLTexture = Render.crc3.createTexture();
+      Render.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, targetTexture);
+
+      {
+        const internalFormat: number = WebGL2RenderingContext.RGBA8;
+        const format: number = WebGL2RenderingContext.RGBA;
+        const type: number = WebGL2RenderingContext.UNSIGNED_BYTE;
+        Render.pickBuffer = new Uint8Array(_width * _height * 4);
+        Render.crc3.texImage2D(
+          WebGL2RenderingContext.TEXTURE_2D, 0, internalFormat, targetTextureWidth, targetTextureHeight, 0, format, type, Render.pickBuffer
+        );
+
+        // set the filtering so we don't need mips
+        Render.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.LINEAR);
+        Render.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_S, WebGL2RenderingContext.CLAMP_TO_EDGE);
+        Render.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_T, WebGL2RenderingContext.CLAMP_TO_EDGE);
+      }
+
+      return targetTexture;
+    }
     /**
      * Draws the graph for RayCasting starting with the given [[Node]] using the camera given [[ComponentCamera]].
      */
@@ -32,6 +71,37 @@ namespace FudgeCore {
 
       Render.resetFrameBuffer();
       return Render.pickBuffers;
+    }
+    /**
+     * Draws the graph for picking starting with the given [[Node]] using the camera with extrem narrow focus [[ComponentCamera]].
+     */
+    public static drawGraphForPicking(_node: Node, _cmpCamera: ComponentCamera): Pick[] { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
+      Render.picks = [];
+      //TODO: examine, why switching blendFunction is necessary 
+      RenderWebGL.crc3.blendFunc(1, 0);
+      const framebuffer: WebGLFramebuffer = Render.crc3.createFramebuffer();
+      // render to our targetTexture by binding the framebuffer
+      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, framebuffer);
+      // attach the texture as the first color attachment
+      const attachmentPoint: number = WebGL2RenderingContext.COLOR_ATTACHMENT0;
+      Render.crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, attachmentPoint, WebGL2RenderingContext.TEXTURE_2D, Render.pickTexture, 0);
+
+      // draw nodes
+      Render.drawGraph(_node, _cmpCamera, Render.drawNodeForPicking);
+
+      RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.DST_ALPHA, WebGL2RenderingContext.ONE_MINUS_DST_ALPHA);
+
+      let data: Uint8Array = new Uint8Array(Render.pickSize.x * Render.pickSize.y * 4);
+      Render.crc3.readPixels(0, 0, Render.pickSize.x, Render.pickSize.x, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, data);
+
+      for (let i: number = 0; i < Render.picks.length; i++) {
+        // console.log(data[0], data[1], data[2], data[3]);
+        let zBuffer: number = data[4 * i + 1] + data[4 * i + 2] / 256;
+        Render.picks[i].zBuffer = zBuffer;
+      }
+
+      Render.resetFrameBuffer();
+      return Render.picks;
     }
 
     /**
@@ -183,11 +253,30 @@ namespace FudgeCore {
 
     //#region Picking
     /**
+    * The render function for picking. 
+    * A cameraprojection with extremely narrow focus is used, so each pixel of the buffer would hold the same information from the node,  
+    * but the fragemnt shader renders only 1 pixel for each node into the render buffer, 1st node to 1st pixel, 2nd node to second pixel etc.
+    */
+    private static drawNodeForPicking(_node: Node, _mtxMeshToWorld: Matrix4x4, _mtxWorldToView: Matrix4x4, _lights: MapLightTypeToLightList): void { // create Texture to render to, int-rgba
+      try {
+        let mesh: Mesh = _node.getComponent(ComponentMesh).mesh;
+        ShaderRayCast.useProgram();
+        let pick: Pick = { node: _node, zBuffer: Infinity };
+        Render.picks.push(pick);
+        mesh.useRenderBuffers(ShaderRayCast, _mtxMeshToWorld, _mtxWorldToView, Render.picks.length);
+
+        RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, mesh.renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
+      } catch (_error) {
+        //
+      }
+    }
+
+    /**
      * The render function for drawing buffers for picking. Renders each node on a dedicated buffer with id and depth values instead of colors
      */
     private static drawNodeForRayCast(_node: Node, _mtxMeshToWorld: Matrix4x4, _mtxWorldToView: Matrix4x4, _lights: MapLightTypeToLightList): void { // create Texture to render to, int-rgba
       // TODO: look into SSBOs!
-      let target: WebGLTexture = Render.getRayCastTexture();
+      let target: WebGLTexture = Render.createPickTexture(Render.getRenderRectangle().width, Render.getRenderRectangle().height);
 
       const framebuffer: WebGLFramebuffer = Render.crc3.createFramebuffer();
       // render to our targetTexture by binding the framebuffer
@@ -199,7 +288,7 @@ namespace FudgeCore {
       try {
         let mesh: Mesh = _node.getComponent(ComponentMesh).mesh;
         ShaderRayCast.useProgram();
-        let pickBuffer: PickBuffer = { node: _node, texture: target, frameBuffer: framebuffer };
+        let pickBuffer: PickBuffer = { node: _node, frameBuffer: framebuffer };
         Render.pickBuffers.push(pickBuffer);
         mesh.useRenderBuffers(ShaderRayCast, _mtxMeshToWorld, _mtxWorldToView, Render.pickBuffers.length);
 
@@ -207,34 +296,6 @@ namespace FudgeCore {
       } catch (_error) {
         //
       }
-      // make texture available to onscreen-display
-    }
-
-    /**
-     * Creates a texture buffer to be used as pick-buffer
-     */
-    private static getRayCastTexture(): WebGLTexture {
-      // create to render to
-      const targetTextureWidth: number = Render.getRenderRectangle().width;
-      const targetTextureHeight: number = Render.getRenderRectangle().height;
-      const targetTexture: WebGLTexture = Render.crc3.createTexture();
-      Render.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, targetTexture);
-
-      {
-        const internalFormat: number = WebGL2RenderingContext.RGBA8;
-        const format: number = WebGL2RenderingContext.RGBA;
-        const type: number = WebGL2RenderingContext.UNSIGNED_BYTE;
-        Render.crc3.texImage2D(
-          WebGL2RenderingContext.TEXTURE_2D, 0, internalFormat, targetTextureWidth, targetTextureHeight, 0, format, type, null
-        );
-
-        // set the filtering so we don't need mips
-        Render.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_MIN_FILTER, WebGL2RenderingContext.LINEAR);
-        Render.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_S, WebGL2RenderingContext.CLAMP_TO_EDGE);
-        Render.crc3.texParameteri(WebGL2RenderingContext.TEXTURE_2D, WebGL2RenderingContext.TEXTURE_WRAP_T, WebGL2RenderingContext.CLAMP_TO_EDGE);
-      }
-
-      return targetTexture;
     }
     //#endregion
 

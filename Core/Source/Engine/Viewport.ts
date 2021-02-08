@@ -148,6 +148,23 @@ namespace FudgeCore {
       );
     }
 
+
+    public pick(): Pick[] {
+      if (this.adjustingFrames)
+        this.adjustFrames();
+      if (this.adjustingCamera)
+        this.adjustCamera();
+      Render.pickTexture = Render.createPickTexture(this.rectSource.width, this.rectSource.height);
+      return Render.drawGraphForPicking(this.graph, this.camera);
+      
+      // this.crc2.imageSmoothingEnabled = false;
+      // this.crc2.drawImage(
+      //   Render.getCanvas(),
+      //   this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height,
+      //   this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height
+      // );
+    }
+
     /**
     * Draw this viewport for RayCast
     */

@@ -12,8 +12,10 @@ var ScreenToRay;
     let uiCamera;
     let mouse = new ƒ.Vector2();
     let viewportRay = new ƒ.Viewport();
+    let viewportPick = new ƒ.Viewport();
     let cameraRay;
     let canvasRay;
+    let canvasPick;
     function init() {
         // create asset
         let graph = new ƒAid.NodeCoordinateSystem("CoSys", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(100)));
@@ -31,6 +33,9 @@ var ScreenToRay;
         cameraRay.projectCentral(1, 10);
         viewportRay.initialize("ray", graph, cameraRay, canvasRay);
         viewportRay.adjustingFrames = true;
+        canvasPick = document.querySelector("canvas#pick");
+        viewportPick.initialize("pick", graph, cameraRay, canvasPick);
+        viewportPick.adjustingFrames = true;
         menu = document.getElementsByTagName("div")[0];
         menu.innerHTML = "Test automatic rectangle transformation. Adjust CSS-Frame and framings";
         uiCamera = new UI.Camera();
@@ -63,19 +68,21 @@ var ScreenToRay;
             update();
             viewport.draw();
             adjustRayCamera();
+            pick();
             pickNodeAt(mouse);
             // let color: ƒ.Color = getPixelColor(mouse);           
         }
     }
-    function getPixelColor(_pos) {
-        let color = new ƒ.Color(1, 1, 1, 1);
-        let crc2 = canvas.getContext("2d");
-        color.setArrayBytesRGBA(crc2.getImageData(_pos.x, _pos.y, 1, 1).data);
-        return color;
+    function pick() {
+        let picks = viewportPick.pick();
+        let output = document.querySelector("output#o2");
+        output.innerHTML = "";
+        for (let pick of picks)
+            output.innerHTML += pick.node.name + ":" + pick.zBuffer + "<br/>";
     }
     function pickNodeAt(_pos) {
         let posRender = viewport.pointClientToRender(new ƒ.Vector2(_pos.x, viewport.getClientRectangle().height - _pos.y));
-        let output = document.querySelector("output");
+        let output = document.querySelector("output#o1");
         output.innerHTML = "";
         let hits = viewport.pickNodeAt(posRender);
         for (let hit of hits)
