@@ -3353,6 +3353,46 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
+     * Generate a flat polygon
+     * ```plaintext
+     *             0
+     *           1╱|╲  4 ...
+     *            ╲|_╲╱
+     *            2   3
+     * ```
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2021
+     */
+    class MeshPolygon extends Mesh {
+        static readonly iSubclass: number;
+        protected static verticesDefault: Vector2[];
+        protected construction: Vector2[];
+        protected autofit: boolean;
+        constructor(_name?: string, _vertices?: Vector2[], _autofit?: boolean);
+        static autofit(_vertices: Vector2[]): Vector2[];
+        create(_construction?: Vector2[], _autofit?: boolean): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+        protected createVertices(): Float32Array;
+        protected createTextureUVs(): Float32Array;
+        protected createIndices(): Uint16Array;
+        protected createFaceNormals(): Float32Array;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Generate a simple cube with edges of length 1, each face consisting of two trigons
+     * ```plaintext
+     *            4____7
+     *           0/__3/|
+     *            ||5_||6
+     *           1|/_2|/
+     * ```
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+}
+declare namespace FudgeCore {
+    /**
      * Generate a simple pyramid with edges at the base of length 1 and a height of 1. The sides consisting of one, the base of two trigons
      * ```plaintext
      *               4
