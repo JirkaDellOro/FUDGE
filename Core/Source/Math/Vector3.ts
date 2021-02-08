@@ -384,7 +384,7 @@ namespace FudgeCore {
       return serialization;
     }
 
-    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+    public async deserialize(_serialization: Serialization): Promise<Vector3> {
       if (typeof (_serialization) == "string") {
         [this.x, this.y, this.z] = JSON.parse(<string><unknown>_serialization);
       }

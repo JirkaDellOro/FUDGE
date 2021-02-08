@@ -304,6 +304,18 @@ declare namespace FudgeCore {
          * @param _serialization
          */
         static deserialize(_serialization: Serialization): Promise<Serializable>;
+        /**
+         * Returns an Array of javascript object representing the serializable FUDGE-objects given in the array,
+         * including attached components, children, superclass-objects all information needed for reconstruction
+         * @param _object An object to serialize, implementing the [[Serializable]] interface
+         */
+        static serializeArray(_objects: Serializable[]): Serialization[];
+        /**
+         * Returns an Array of FUDGE-objects reconstructed from the information in the array of [[Serialization]]s given,
+         * including attached components, children, superclass-objects
+         * @param _serializations
+         */
+        static deserializeArray<T extends Serializable>(_type: new () => T, _serializations: Serialization[]): Promise<T[]>;
         static prettify(_json: string): string;
         /**
          * Returns a formatted, human readable JSON-String, representing the given [[Serializaion]] that may have been created by [[Serializer]].serialize
@@ -567,7 +579,7 @@ declare namespace FudgeCore {
         toVector3(_z?: number): Vector3;
         toString(): string;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
+        deserialize(_serialization: Serialization): Promise<Vector2>;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
     }
@@ -3264,7 +3276,7 @@ declare namespace FudgeCore {
          */
         map(_function: (value: number, index: number, array: Float32Array) => number): Vector3;
         serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
+        deserialize(_serialization: Serialization): Promise<Vector3>;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
     }
@@ -3365,6 +3377,8 @@ declare namespace FudgeCore {
     class MeshPolygon extends Mesh {
         static readonly iSubclass: number;
         protected static verticesDefault: Vector2[];
+        test2: Vector2;
+        test3: Vector3;
         protected construction: Vector2[];
         protected autofit: boolean;
         constructor(_name?: string, _vertices?: Vector2[], _autofit?: boolean);
@@ -3373,6 +3387,7 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;
+        protected reduceMutator(_mutator: Mutator): void;
         protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;
         protected createIndices(): Uint16Array;

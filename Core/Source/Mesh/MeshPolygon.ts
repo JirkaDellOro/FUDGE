@@ -16,14 +16,19 @@ namespace FudgeCore {
       new Vector2(1, -1),
       new Vector2(0, 1)
     ];
-    protected construction: Vector2[];
+    public test2: Vector2 = new Vector2(1, 2);
+    public test3: Vector3 = new Vector3(1, 2, 3);
+    // protected construction: VectorArray = new VectorArray();
+    protected construction: Vector2[] = [];
     protected autofit: boolean;
 
     public constructor(_name: string = "MeshPolygon", _vertices: Vector2[] = MeshPolygon.verticesDefault, _autofit: boolean = true) {
       super(_name);
-      this.construction = _vertices.map(_vertex => _vertex.copy);
       this.autofit = _autofit;
+      this.construction = _vertices.map(_vertex => _vertex.copy);
       this.create(this.construction, _autofit);
+      // this.construction.entries = _vertices.map(_vertex => _vertex.copy);
+      // this.create(this.construction.entries as Vector2[], _autofit);
     }
 
     public static autofit(_vertices: Vector2[]): Vector2[] {
@@ -92,18 +97,19 @@ namespace FudgeCore {
     //#region Transfer
     public serialize(): Serialization {
       let serialization: Serialization = super.serialize();
-      serialization.construction = this.construction.map(_vertex => _vertex.serialize());
+      serialization.construction = Serializer.serializeArray(this.construction);
+      serialization.test2 = Serializer.serialize(this.test2);
+      serialization.test3 = Serializer.serialize(this.test3);
       serialization.autofit = this.autofit;
       return serialization;
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       super.deserialize(_serialization);
-      let construction: Vector2[] = _serialization.construction.map(
-        (_entry: Serialization) => {
-          let parse: number[] = JSON.parse(<string><unknown>_entry);
-          return new Vector2(parse[0], parse[1]);
-        });
-      this.create(construction, _serialization.autofit);
+      // let vectorArray: VectorArray = <VectorArray>await (new VectorArray()).deserialize(_serialization.construction);
+      let vectors: Vector2[] = await Serializer.deserializeArray(Vector2, _serialization.construction);
+      this.test2 = await (new Vector2()).deserialize(_serialization.test2);
+      this.test3 = await (new Vector3()).deserialize(_serialization.test3);
+      this.create(vectors, _serialization.autofit);
       return this;
     }
 
@@ -112,6 +118,18 @@ namespace FudgeCore {
       // let sectors: number = Math.round(_mutator.sectors);
       // let stacks: number = Math.round(_mutator.stacks);
       this.create(_mutator.construction, _mutator.autofit);
+    }
+
+    // public getMutator(): Mutator {
+    //   let mutator: Mutator = {};//super.getMutator(true);
+    //   // mutator.construction = this.construction;
+    //   mutator.test = this.test.getMutator();
+    //   return mutator;
+    // }
+
+    protected reduceMutator(_mutator: Mutator): void {
+      console.log(_mutator);
+      // delete _mutator.construction;
     }
     //#endregion
 

@@ -4,8 +4,7 @@
       "idResource": "MeshPolygon|2021-02-08T08:11:20.883Z|59457",
       "name": "MeshPolygonXX",
       "type": "MeshPolygon",
-      "test2": "[1, 2]",
-      "test3": "[1, 2, 3]",
+      "test": "[1, 2]",
       "construction": [
         "[-1, -1]",
         "[1, -1]",

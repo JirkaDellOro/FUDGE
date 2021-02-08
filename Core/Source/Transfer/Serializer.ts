@@ -109,6 +109,33 @@ namespace FudgeCore {
       return null;
     }
 
+    /**
+     * Returns an Array of javascript object representing the serializable FUDGE-objects given in the array,
+     * including attached components, children, superclass-objects all information needed for reconstruction
+     * @param _object An object to serialize, implementing the [[Serializable]] interface
+     */
+    public static serializeArray(_objects: Serializable[]): Serialization[] {
+      let serializations: Serialization[] = [];
+      for (let object of _objects)
+        serializations.push(Serializer.serialize(object));
+      return serializations;
+    }
+
+    /**
+     * Returns an Array of FUDGE-objects reconstructed from the information in the array of [[Serialization]]s given,
+     * including attached components, children, superclass-objects
+     * @param _serializations 
+     */
+    public static async deserializeArray<T extends Serializable>(_type: new () => T, _serializations: Serialization[]): Promise<T[]> {
+      let reconstruct: T[] = [];
+      for (let serialization of _serializations) {
+        let object: T = new _type();
+        object.deserialize(serialization);
+        reconstruct.push(object);
+      }
+      return reconstruct;
+    }
+
     //TODO: implement prettifier to make JSON-Stringification of serializations more readable, e.g. placing x, y and z in one line
     public static prettify(_json: string): string { return _json; }
 

@@ -1,0 +1,27 @@
+{
+  "MeshPolygon|2021-02-08T13:01:27.758Z|54142": {
+    "ƒ.MeshPolygon": {
+      "idResource": "MeshPolygon|2021-02-08T13:01:27.758Z|54142",
+      "name": "MeshPolygon",
+      "type": "MeshPolygon",
+      "construction": [
+        {
+          "ƒ.Vector2": "[-1, -1]"
+        },
+        {
+          "ƒ.Vector2": "[1, -1]"
+        },
+        {
+          "ƒ.Vector2": "[0, 1]"
+        }
+      ],
+      "test2": {
+        "ƒ.Vector2": "[2, -7.970000267028809]"
+      },
+      "test3": {
+        "ƒ.Vector3": "[1.0049999952316284, 2, 3]"
+      },
+      "autofit": true
+    }
+  }
+}
