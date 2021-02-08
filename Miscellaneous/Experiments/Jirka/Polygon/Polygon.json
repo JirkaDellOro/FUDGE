@@ -7,13 +7,15 @@
       "construction": {
         "ƒ.Vector2": [
           "[-1, -1]",
-          "[1, -1]",
-          "[0, 1]"
+          "[0.5, -1]",
+          "[1, 2]",
+          "[-5, 1]"
         ]
       },
       "test2": "[1, 2]",
       "test3": "[1, 2, 3]",
-      "autofit": true
+      "fitMesh": false,
+      "fitTexture": false
     }
   },
   "Material|2021-02-08T14:58:19.425Z|10977": {
@@ -39,7 +41,7 @@
               "idMesh": "MeshPolygon|2021-02-08T14:58:15.037Z|31562",
               "pivot": {
                 "translation": "[0, 0, 0]",
-                "rotation": "[0, 69, 0]",
+                "rotation": "[0, 0, 0]",
                 "scaling": "[1, 1, 1]"
               },
               "Component": {

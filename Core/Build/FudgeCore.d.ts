@@ -3380,10 +3380,11 @@ declare namespace FudgeCore {
         test2: Vector2;
         test3: Vector3;
         protected construction: Vector2[];
-        protected autofit: boolean;
-        constructor(_name?: string, _vertices?: Vector2[], _autofit?: boolean);
-        static autofit(_vertices: Vector2[]): Vector2[];
-        create(_construction?: Vector2[], _autofit?: boolean): void;
+        protected fitMesh: boolean;
+        protected fitTexture: boolean;
+        constructor(_name?: string, _vertices?: Vector2[], _fitMesh?: boolean, _fitTexture?: boolean);
+        static fitMesh(_vertices: Vector2[]): Vector2[];
+        create(_construction?: Vector2[], _fitMesh?: boolean, _fitTexture?: boolean): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;

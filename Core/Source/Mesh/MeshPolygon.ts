@@ -20,18 +20,18 @@ namespace FudgeCore {
     public test3: Vector3 = new Vector3(1, 2, 3);
     // protected construction: VectorArray = new VectorArray();
     protected construction: Vector2[] = [];
-    protected autofit: boolean;
+    protected fitMesh: boolean;
+    protected fitTexture: boolean;
 
-    public constructor(_name: string = "MeshPolygon", _vertices: Vector2[] = MeshPolygon.verticesDefault, _autofit: boolean = true) {
+    public constructor(_name: string = "MeshPolygon", _vertices: Vector2[] = MeshPolygon.verticesDefault, _fitMesh: boolean = true, _fitTexture: boolean = true) {
       super(_name);
-      this.autofit = _autofit;
       this.construction = _vertices.map(_vertex => _vertex.copy);
-      this.create(this.construction, _autofit);
+      this.create(this.construction, _fitMesh, _fitTexture);
       // this.construction.entries = _vertices.map(_vertex => _vertex.copy);
       // this.create(this.construction.entries as Vector2[], _autofit);
     }
 
-    public static autofit(_vertices: Vector2[]): Vector2[] {
+    public static fitMesh(_vertices: Vector2[]): Vector2[] {
       let result: Vector2[] = [];
       let min: Vector2 = Vector2.ZERO();
       let max: Vector2 = Vector2.ZERO();
@@ -54,20 +54,22 @@ namespace FudgeCore {
       return result;
     }
 
-    public create(_construction: Vector2[] = [], _autofit: boolean = true): void {
+    public create(_construction: Vector2[] = [], _fitMesh: boolean = true, _fitTexture: boolean = true): void {
+      this.fitMesh = _fitMesh;
+      this.fitTexture = _fitTexture;
+
       if (_construction.length < 3) {
         Debug.warn("At least 3 vertices needed to construct MeshPolygon, default trigon used");
         this.create(MeshPolygon.verticesDefault, true);
         return;
       }
 
-      if (_autofit)
-        _construction = MeshPolygon.autofit(_construction);
+      let construction: Vector2[] = this.fitMesh ? MeshPolygon.fitMesh(_construction) : _construction;
 
       let min: Vector2 = Vector2.ZERO();
       let max: Vector2 = Vector2.ZERO();
       let vertices: number[] = [];
-      for (let vertex of _construction) {
+      for (let vertex of construction) {
         vertices.push(vertex.x);
         vertices.push(vertex.y);
         vertices.push(0);
@@ -77,15 +79,21 @@ namespace FudgeCore {
         min.y = Math.min(min.y, vertex.y);
         max.y = Math.max(max.y, vertex.y);
       }
-      let center: Vector2 = new Vector2((min.x + max.x) / 2, (min.y + max.y) / 2);
       let size: Vector2 = new Vector2(max.x - min.x, max.y - min.y);
 
       let textureUVs: number[] = [];
-      for (let vertex of _construction) {
-        let textureUV: Vector2 = Vector2.SUM(vertex, center);
-        textureUVs.push(textureUV.x / size.x);
-        textureUVs.push(textureUV.y / size.y);
+      if (this.fitTexture) {
+        for (let vertex of construction) {
+          let textureUV: Vector2 = Vector2.SUM(vertex, min);
+          textureUV.y *= -1;
+          textureUVs.push(textureUV.x / size.x);
+          textureUVs.push(textureUV.y / size.y);
+        }
+      } else {
+        textureUVs = _construction.map(_vertex => [_vertex.x, -_vertex.y]).flat();
       }
+
+      console.log(textureUVs);
 
       this.vertices = new Float32Array(vertices);
       this.textureUVs = new Float32Array(textureUVs);
@@ -100,7 +108,8 @@ namespace FudgeCore {
       serialization.construction = Serializer.serializeArray(Vector2, this.construction);
       serialization.test2 = this.test2.serialize();
       serialization.test3 = this.test3.serialize();
-      serialization.autofit = this.autofit;
+      serialization.fitMesh = this.fitMesh;
+      serialization.fitTexture = this.fitTexture;
       return serialization;
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
@@ -109,7 +118,7 @@ namespace FudgeCore {
       let vectors: Vector2[] = <Vector2[]>await Serializer.deserializeArray(_serialization.construction);
       this.test2 = await (new Vector2()).deserialize(_serialization.test2);
       this.test3 = await (new Vector3()).deserialize(_serialization.test3);
-      this.create(vectors, _serialization.autofit);
+      this.create(vectors, _serialization.fitMesh, _serialization.fitTexture);
       return this;
     }
 
