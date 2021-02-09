@@ -18,10 +18,15 @@ namespace HeightMap {
   export let viewport: f.Viewport;
 
   let controlled: Controlled;
+  let tyreFL: f.Node;
+  let tyreFR: f.Node;
+  let tyreBL: f.Node;
+  let tyreBR: f.Node;
+
   let cntKeyHorizontal: f.Control = new f.Control("Keyboard", 1, f.CONTROL_TYPE.PROPORTIONAL, true);
   let cntKeyVertical: f.Control = new f.Control("Keyboard", 4, f.CONTROL_TYPE.PROPORTIONAL, true);
-  cntKeyHorizontal.setDelay(500);
-  cntKeyVertical.setDelay(500);
+  // cntKeyHorizontal.setDelay(500);
+  // cntKeyVertical.setDelay(500);
 
   export let arrowRed: ƒ.Node;
 
@@ -64,13 +69,46 @@ namespace HeightMap {
     let matTex: ƒ.Material = new ƒ.Material("Textured", ƒ.ShaderTexture, coatTextured);
     let matFlat: f.Material = new f.Material("White", f.ShaderFlat, new f.CoatColored(f.Color.CSS("WHITE")));
     let matRed: f.Material = new f.Material("Red", f.ShaderFlat, new f.CoatColored(f.Color.CSS("RED")));
+    let matGrey: f.Material = new f.Material("Red", f.ShaderFlat, new f.CoatColored(f.Color.CSS("GREY")));
 
     let meshCube = new f.MeshCube("CubeMesh");
+    let meshSphere = new f.MeshSphere("Tyre", 10, 10);
 
-    controlled = new Controlled("Cube", f.Matrix4x4.IDENTITY() /*, matRed, new f.MeshCube() */);
-    controlled.mtxLocal.translation = new f.Vector3(0.1,0.1,0.1);
-    controlled.mtxLocal.scale(new f.Vector3(0.2,0.2,0.2));
-    // controlled.setUpAxis();
+    controlled = new Controlled("Cube", f.Matrix4x4.IDENTITY() , matRed, new f.MeshCube() );
+    controlled.mtxLocal.translation = new f.Vector3( 0.3, 0, 0.3 );
+    controlled.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.1,0.05,0.025));
+    controlled.getComponent(f.ComponentMesh).pivot.translate(new f.Vector3(0.5, 0, 0.5));
+
+    tyreFL = Scenes.createCompleteMeshNode("Tyre FL", matGrey, meshSphere);
+    tyreFL.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.5, 0.5, 0.15));
+
+    tyreFR = Scenes.createCompleteMeshNode("Tyre FR", matGrey, meshSphere);
+    tyreFR.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.5, 0.5, 0.15));
+
+    tyreBR = Scenes.createCompleteMeshNode("Tyre BR", matGrey, meshSphere);
+    tyreBR.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.5, 0.5, 0.15));
+
+    tyreBL = Scenes.createCompleteMeshNode("Tyre FL", matGrey, meshSphere);
+    tyreBL.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.5, 0.5, 0.15));
+
+    tyreFL.mtxLocal.rotateX(90);
+    tyreFL.mtxLocal.scale(f.Vector3.ONE(0.1));
+    tyreFL.mtxLocal.translate(new f.Vector3(0.9, 0, -0.3));
+
+    tyreFR.mtxLocal.rotateX(90);
+    tyreFR.mtxLocal.scale(f.Vector3.ONE(0.1));
+    tyreFR.mtxLocal.translate(new f.Vector3(0.9, 0, 0.3));
+
+    tyreBR.mtxLocal.rotateX(90);
+    tyreBR.mtxLocal.scale(f.Vector3.ONE(0.1));
+    tyreBR.mtxLocal.translate(new f.Vector3(0.1, 0, 0.3));
+
+    tyreBL.mtxLocal.rotateX(90);
+    tyreBL.mtxLocal.scale(f.Vector3.ONE(0.1));
+    tyreBL.mtxLocal.translate(new f.Vector3(0.1, 0, -0.3));
+
+
+    controlled.setUpAxis();
     //controlled.getComponent(f.ComponentMesh).pivot.scaleZ(2);
 
     // m1 = Scenes.createCompleteMeshNode("M1", matRed, meshCube);
@@ -109,15 +147,19 @@ namespace HeightMap {
     arrowRed.mtxLocal.scale(new f.Vector3(0.01,0.01,0.2))
 
 
-    let test: f.Node = new fAid.NodeCoordinateSystem; 
+    // let test: f.Node = new fAid.NodeCoordinateSystem; 
 
     graph.addChild(gridFlat);
     graph.addChild(controlled);
     // graph.addChild(m1);
     // graph.addChild(m2);
     // graph.addChild(m3);
-    graph.addChild(test);
+    // graph.addChild(test);
     gridFlat.addChild(arrowRed);
+    controlled.addChild(tyreFL);
+    controlled.addChild(tyreFR);
+    controlled.addChild(tyreBR);
+    controlled.addChild(tyreBL);
 
     viewport.initialize("Viewport", graph, cmpCamera, document.querySelector("canvas"));
     viewport.setFocus(true);

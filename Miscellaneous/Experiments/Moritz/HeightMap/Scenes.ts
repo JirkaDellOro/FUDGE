@@ -153,13 +153,18 @@ namespace Scenes {
         function rotate(_event: ƒ.EventKeyboard): void {
             let mtxCamera: ƒ.Matrix4x4 = _viewport.camera.pivot;
             let vctCamera: ƒ.Vector3 = ƒ.Vector3.ZERO();
+            let zoom: number;
             vctCamera.y = (0.1 *
                 (_event.code == ƒ.KEYBOARD_CODE.ARROW_UP || _event.code == ƒ.KEYBOARD_CODE.W ? 1 :
                     _event.code == ƒ.KEYBOARD_CODE.ARROW_DOWN || _event.code == ƒ.KEYBOARD_CODE.S ? -1 :
                         0));
-            vctCamera.x = (0.025 *
+            vctCamera.x = (0.1 *
                 (_event.code == ƒ.KEYBOARD_CODE.ARROW_LEFT || _event.code == ƒ.KEYBOARD_CODE.A ? 1 :
                     _event.code == ƒ.KEYBOARD_CODE.ARROW_RIGHT || _event.code == ƒ.KEYBOARD_CODE.D ? -1 :
+                        0));
+            vctCamera.z = (0.1 *
+                (_event.code == ƒ.KEYBOARD_CODE.NUMPAD_ADD ? 1 :
+                    _event.code == ƒ.KEYBOARD_CODE.NUMPAD_SUBTRACT ? -1 :
                         0));
 
             mtxCamera.translate(vctCamera);
