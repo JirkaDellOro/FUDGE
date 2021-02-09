@@ -24,6 +24,8 @@ namespace ScreenToRay {
     // create asset
     let graph: ƒ.Node = new ƒAid.NodeCoordinateSystem("CoSys", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(100)));
     // graph.addComponent(new ƒ.ComponentTransform());
+    graph.getChildrenByName("ArrowBlue")[0].mtxLocal.rotateZ(45, true);
+    graph.getChildrenByName("ArrowBlue")[0].getChildrenByName("ArrowBlueShaft")[0].getComponent(ƒ.ComponentMaterial).clrPrimary = ƒ.Color.CSS("white", 0.5);
 
     // initialize viewports
     canvas = document.querySelector("canvas#viewport");
@@ -92,11 +94,11 @@ namespace ScreenToRay {
 
   function pick(): void {
     let picks: ƒ.Pick[] = viewportPick.pick();
-    
+
     let output: HTMLOutputElement = document.querySelector("output#o2");
     output.innerHTML = "";
     for (let pick of picks)
-      output.innerHTML += pick.node.name + ":" + pick.zBuffer + "<br/>";
+      output.innerHTML += pick.node.name + ":" + pick.zBuffer.toFixed(2) + " | " + pick.alpha + "<br/>";
   }
 
   function pickNodeAt(_pos: ƒ.Vector2): void {
@@ -107,7 +109,7 @@ namespace ScreenToRay {
     output.innerHTML = "";
     let hits: ƒ.RayHit[] = viewport.pickNodeAt(posRender);
     for (let hit of hits)
-      output.innerHTML += hit.node.name + ":" + hit.zBuffer + "<br/>";
+      output.innerHTML += hit.node.name + ":" + hit.zBuffer.toFixed(2) + "<br/>";
   }
 
   function adjustRayCamera(): void {

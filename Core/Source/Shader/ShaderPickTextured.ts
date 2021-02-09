@@ -3,15 +3,21 @@ namespace FudgeCore {
    * Renders for Raycasting
    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
    */
-  export abstract class ShaderPick extends Shader {
+  export abstract class ShaderPickTextured extends Shader {
+
     public static getVertexShaderSource(): string {
       return `#version 300 es
-        in vec3 a_position;       
-        uniform mat4 u_projection;
+         in vec3 a_position;       
+         in vec2 a_textureUVs;
+         uniform mat4 u_projection;
+         uniform mat3 u_pivot;
         
-        void main() {   
-            gl_Position = u_projection * vec4(a_position, 1.0);
-        }`;
+         out vec2 v_textureUVs;
+         
+         void main() {   
+             gl_Position = u_projection * vec4(a_position, 1.0);
+             v_textureUVs = vec2(u_pivot * vec3(a_textureUVs, 1.0)).xy;
+         }`;
     }
     public static getFragmentShaderSource(): string {
       return `#version 300 es
@@ -19,21 +25,23 @@ namespace FudgeCore {
         precision highp int;
         
         uniform int u_id;
+        in vec2 v_textureUVs;
         uniform vec4 u_color;
+        uniform sampler2D u_texture;
+        
         out vec4 frag;
         
         void main() {
            float id = float(u_id); 
-
-           // TODO: vertical dimension!
            if (gl_FragCoord.x < id || gl_FragCoord.x >= id + 1.0)
              discard;
+             
            float upperbyte = trunc(gl_FragCoord.z * 256.0) / 256.0;
            float lowerbyte = fract(gl_FragCoord.z * 256.0);
-
-           float luminance = (float(u_color.r) + float(u_color.g) + float(u_color.b))/3.0;
-                        
-           frag = vec4(upperbyte, lowerbyte, luminance, u_color.a);
+           
+           vec4 color = u_color * texture(u_texture, v_textureUVs);;
+             
+           frag = vec4(upperbyte, lowerbyte, u_color.a, 1.0);
         }`;
     }
   }

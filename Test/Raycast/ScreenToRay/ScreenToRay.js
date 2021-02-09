@@ -20,6 +20,8 @@ var ScreenToRay;
         // create asset
         let graph = new ƒAid.NodeCoordinateSystem("CoSys", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(100)));
         // graph.addComponent(new ƒ.ComponentTransform());
+        graph.getChildrenByName("ArrowBlue")[0].mtxLocal.rotateZ(45, true);
+        graph.getChildrenByName("ArrowBlue")[0].getChildrenByName("ArrowBlueShaft")[0].getComponent(ƒ.ComponentMaterial).clrPrimary = ƒ.Color.CSS("white", 0.5);
         // initialize viewports
         canvas = document.querySelector("canvas#viewport");
         cmpCamera = new ƒ.ComponentCamera();
@@ -78,7 +80,7 @@ var ScreenToRay;
         let output = document.querySelector("output#o2");
         output.innerHTML = "";
         for (let pick of picks)
-            output.innerHTML += pick.node.name + ":" + pick.zBuffer + "<br/>";
+            output.innerHTML += pick.node.name + ":" + pick.zBuffer.toFixed(2) + " | " + pick.alpha + "<br/>";
     }
     function pickNodeAt(_pos) {
         let posRender = viewport.pointClientToRender(new ƒ.Vector2(_pos.x, viewport.getClientRectangle().height - _pos.y));
@@ -86,7 +88,7 @@ var ScreenToRay;
         output.innerHTML = "";
         let hits = viewport.pickNodeAt(posRender);
         for (let hit of hits)
-            output.innerHTML += hit.node.name + ":" + hit.zBuffer + "<br/>";
+            output.innerHTML += hit.node.name + ":" + hit.zBuffer.toFixed(2) + "<br/>";
     }
     function adjustRayCamera() {
         // ƒ.Debug.group("Ray");

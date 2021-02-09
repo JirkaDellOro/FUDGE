@@ -4983,6 +4983,7 @@ declare namespace FudgeCore {
     interface Pick {
         node: Node;
         zBuffer: number;
+        alpha: number;
     }
     /**
      * The main interface to the render engine, here WebGL, which is used mainly in the superclass [[RenderWebGL]]
@@ -5115,6 +5116,16 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     abstract class ShaderPick extends Shader {
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Renders for Raycasting
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    abstract class ShaderPickTextured extends Shader {
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
     }
