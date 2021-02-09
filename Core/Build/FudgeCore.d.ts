@@ -5114,6 +5114,16 @@ declare namespace FudgeCore {
      * Renders for Raycasting
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
+    abstract class ShaderPick extends Shader {
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Renders for Raycasting
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
     abstract class ShaderRayCast extends Shader {
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;

@@ -65,9 +65,11 @@ namespace FudgeCore {
     public static drawGraphForRayCast(_node: Node, _cmpCamera: ComponentCamera): PickBuffer[] { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
       Render.pickBuffers = [];
       //TODO: examine, why switching blendFunction is necessary 
-      RenderWebGL.crc3.blendFunc(1, 0);
+      // RenderWebGL.crc3.blendFunc(1, 0);
+      Render.setBlendMode(BLEND.OPAQUE);
       Render.drawGraph(_node, _cmpCamera, Render.drawNodeForRayCast);
-      RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.DST_ALPHA, WebGL2RenderingContext.ONE_MINUS_DST_ALPHA);
+      // RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.DST_ALPHA, WebGL2RenderingContext.ONE_MINUS_DST_ALPHA);
+      Render.setBlendMode(BLEND.TRANSPARENT);
 
       Render.resetFrameBuffer();
       return Render.pickBuffers;
@@ -78,7 +80,9 @@ namespace FudgeCore {
     public static drawGraphForPicking(_node: Node, _cmpCamera: ComponentCamera): Pick[] { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
       Render.picks = [];
       //TODO: examine, why switching blendFunction is necessary 
-      RenderWebGL.crc3.blendFunc(1, 0);
+      // RenderWebGL.crc3.blendFunc(1, 0);
+      Render.setBlendMode(BLEND.OPAQUE);
+      // Render.setDepthTest(false);
       const framebuffer: WebGLFramebuffer = Render.crc3.createFramebuffer();
       // render to our targetTexture by binding the framebuffer
       Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, framebuffer);
@@ -89,7 +93,8 @@ namespace FudgeCore {
       // draw nodes
       Render.drawGraph(_node, _cmpCamera, Render.drawNodeForPicking);
 
-      RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.DST_ALPHA, WebGL2RenderingContext.ONE_MINUS_DST_ALPHA);
+      // RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.DST_ALPHA, WebGL2RenderingContext.ONE_MINUS_DST_ALPHA);
+      Render.setBlendMode(BLEND.TRANSPARENT);
 
       let data: Uint8Array = new Uint8Array(Render.pickSize.x * Render.pickSize.y * 4);
       Render.crc3.readPixels(0, 0, Render.pickSize.x, Render.pickSize.x, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, data);
@@ -260,11 +265,10 @@ namespace FudgeCore {
     private static drawNodeForPicking(_node: Node, _mtxMeshToWorld: Matrix4x4, _mtxWorldToView: Matrix4x4, _lights: MapLightTypeToLightList): void { // create Texture to render to, int-rgba
       try {
         let mesh: Mesh = _node.getComponent(ComponentMesh).mesh;
-        ShaderRayCast.useProgram();
+        ShaderPick.useProgram();
+        mesh.useRenderBuffers(ShaderPick, _mtxMeshToWorld, _mtxWorldToView, Render.picks.length);
         let pick: Pick = { node: _node, zBuffer: Infinity };
         Render.picks.push(pick);
-        mesh.useRenderBuffers(ShaderRayCast, _mtxMeshToWorld, _mtxWorldToView, Render.picks.length);
-
         RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, mesh.renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
       } catch (_error) {
         //
