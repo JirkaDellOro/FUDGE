@@ -767,6 +767,7 @@ declare namespace FudgeCore {
         name: string;
         readonly mtxWorld: Matrix4x4;
         timestampUpdate: number;
+        nNodesInBranch: number;
         private parent;
         private children;
         private components;
@@ -4970,6 +4971,16 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    class RayPick extends Ray {
+        private cmpCamera;
+        private cmpCameraPick;
+        constructor(_cmpCamera: ComponentCamera);
+        set camera(_cmpCamera: ComponentCamera);
+        get camera(): ComponentCamera;
+        pick(_branch: Node, _posProjection: Vector2): Pick[];
+    }
+}
+declare namespace FudgeCore {
     type MapLightTypeToLightList = Map<TypeOfLight, ComponentLight[]>;
     /**
      * Rendered texture for each node for picking
@@ -5020,7 +5031,7 @@ declare namespace FudgeCore {
          * Recursively iterates over the graph starting with the node given, recalculates all world transforms,
          * collects all lights and feeds all shaders used in the graph with these lights
          */
-        static setupTransformAndLights(_node: Node, _mtxWorld?: Matrix4x4, _lights?: MapLightTypeToLightList, _shadersUsed?: (typeof Shader)[]): void;
+        static setupTransformAndLights(_node: Node, _mtxWorld?: Matrix4x4, _lights?: MapLightTypeToLightList, _shadersUsed?: (typeof Shader)[]): number;
         /**
          * The main rendering function to be called from [[Viewport]].
          * Draws the graph starting with the given [[Node]] using the camera given [[ComponentCamera]].

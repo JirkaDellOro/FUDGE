@@ -100,7 +100,7 @@ namespace FudgeCore {
       for (let i: number = 0; i < Render.picks.length; i++) {
         let zBuffer: number = data[4 * i + 0] + data[4 * i + 1] / 256;
         if (zBuffer == 0) // filter 
-          continue; 
+          continue;
         let picked: Pick = Render.picks[i];
         picked.zBuffer = zBuffer / 128 - 1;
         picked.luminance = data[4 * i + 2] / 255;
@@ -109,7 +109,8 @@ namespace FudgeCore {
       }
 
       Render.resetFrameBuffer();
-      return picks;
+      // return picks; <- optimization
+      return Render.picks;
     }
 
     /**
@@ -128,10 +129,10 @@ namespace FudgeCore {
 
         let zBuffer: number = data[4 * pixel + 1] + data[4 * pixel + 2] / 256;
         zBuffer = zBuffer / 128 - 1;
-        if (zBuffer > -1) {
-          let hit: RayHit = new RayHit(pickBuffer.node, 0, zBuffer);
-          hits.push(hit);
-        }
+        // if (zBuffer > -1) {
+        let hit: RayHit = new RayHit(pickBuffer.node, 0, zBuffer);
+        hits.push(hit);
+        // }
       }
 
       return hits;
@@ -143,13 +144,14 @@ namespace FudgeCore {
      * Recursively iterates over the graph starting with the node given, recalculates all world transforms, 
      * collects all lights and feeds all shaders used in the graph with these lights
      */
-    public static setupTransformAndLights(_node: Node, _mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY(), _lights: MapLightTypeToLightList = new Map(), _shadersUsed: (typeof Shader)[] = null): void {
+    public static setupTransformAndLights(_node: Node, _mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY(), _lights: MapLightTypeToLightList = new Map(), _shadersUsed: (typeof Shader)[] = null): number {
       Render.timestampUpdate = performance.now();
       let firstLevel: boolean = (_shadersUsed == null);
       if (firstLevel)
         _shadersUsed = [];
 
       let mtxWorld: Matrix4x4 = _mtxWorld;
+      _node.nNodesInBranch = 1;
 
       if (_node.cmpTransform)
         mtxWorld = Matrix4x4.MULTIPLICATION(_mtxWorld, _node.cmpTransform.local);
@@ -180,12 +182,14 @@ namespace FudgeCore {
       }
 
       for (let child of _node.getChildren()) {
-        Render.setupTransformAndLights(child, mtxWorld, _lights, _shadersUsed);
+        _node.nNodesInBranch += Render.setupTransformAndLights(child, mtxWorld, _lights, _shadersUsed);
       }
 
       if (firstLevel)
         for (let shader of _shadersUsed)
           Render.setLightsInShader(shader, _lights);
+
+      return _node.nNodesInBranch;
     }
     //#endregion
 

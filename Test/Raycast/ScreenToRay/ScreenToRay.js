@@ -16,7 +16,7 @@ var ScreenToRay;
     let cameraRay;
     let canvasRay;
     let canvasPick;
-    let cursor = new ƒAid.Node("Cursor", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(10)), new ƒ.Material("Cursor", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("darkgray"))), new ƒ.MeshSphere("Cursor", 5, 5));
+    let cursor = new ƒAid.Node("Cursor", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(2)), new ƒ.Material("Cursor", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("darkgray"))), new ƒ.MeshSphere("Cursor", 5, 5));
     function init() {
         // create asset
         let graph = new ƒAid.NodeCoordinateSystem("CoSys", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(100)));
@@ -78,7 +78,11 @@ var ScreenToRay;
         }
     }
     function pick() {
-        let picks = viewportPick.pick();
+        // let picks: ƒ.Pick[] = viewportPick.pick();
+        let rayPick = new ƒ.RayPick(viewport.camera);
+        let posProjection = viewport.pointClientToProjection(mouse);
+        let picks = rayPick.pick(viewport.getGraph(), posProjection);
+        // let ray: ƒ.Ray = new ƒ.Ray(new ƒ.Vector3(-posProjection.x, posProjection.y, 1));
         let output = document.querySelector("output#o2");
         output.innerHTML = "";
         for (let pick of picks) {
@@ -97,7 +101,8 @@ var ScreenToRay;
             output.innerHTML += hit.node.name + ":" + hit.zBuffer.toFixed(2) + "<br/>";
             output.innerHTML += world.toString() + "<br/>";
         }
-        cursor.mtxLocal.translation = viewport.calculateWorldFromZBuffer(mouse, hits[0].zBuffer);
+        if (hits.length)
+            cursor.mtxLocal.translation = viewport.calculateWorldFromZBuffer(mouse, hits[0].zBuffer);
     }
     function adjustRayCamera() {
         // ƒ.Debug.group("Ray");
@@ -135,7 +140,7 @@ var ScreenToRay;
         let rectProjection = cmpCamera.getProjectionRectangle();
         setUiPoint("Projection", posProjection);
         let ray = new ƒ.Ray(new ƒ.Vector3(-posProjection.x, posProjection.y, 1));
-        // ray = viewport.getRayFromScreenPoint(posMouse);
+        // let ray: ƒ.Ray = viewport.getRayFromClient(posMouse);
         return ray;
     }
     function setCursorPosition(_event) {

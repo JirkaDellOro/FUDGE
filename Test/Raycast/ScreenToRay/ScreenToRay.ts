@@ -22,7 +22,7 @@ namespace ScreenToRay {
 
   let cursor: ƒAid.Node = new ƒAid.Node(
     "Cursor",
-    ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(10)),
+    ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(2)),
     new ƒ.Material("Cursor", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("darkgray"))),
     new ƒ.MeshSphere("Cursor", 5, 5)
   );
@@ -102,7 +102,11 @@ namespace ScreenToRay {
   }
 
   function pick(): void {
-    let picks: ƒ.Pick[] = viewportPick.pick();
+    // let picks: ƒ.Pick[] = viewportPick.pick();
+    let rayPick: ƒ.RayPick = new ƒ.RayPick(viewport.camera);
+    let posProjection: ƒ.Vector2 = viewport.pointClientToProjection(mouse);
+    let picks: ƒ.Pick[] = rayPick.pick(viewport.getGraph(), posProjection);
+    // let ray: ƒ.Ray = new ƒ.Ray(new ƒ.Vector3(-posProjection.x, posProjection.y, 1));
 
     let output: HTMLOutputElement = document.querySelector("output#o2");
     output.innerHTML = "";
@@ -126,7 +130,8 @@ namespace ScreenToRay {
       output.innerHTML += world.toString() + "<br/>";
     }
 
-    cursor.mtxLocal.translation = viewport.calculateWorldFromZBuffer(mouse, hits[0].zBuffer);
+    if (hits.length)
+      cursor.mtxLocal.translation = viewport.calculateWorldFromZBuffer(mouse, hits[0].zBuffer);
   }
 
   function adjustRayCamera(): void {
@@ -176,7 +181,7 @@ namespace ScreenToRay {
 
     let ray: ƒ.Ray = new ƒ.Ray(new ƒ.Vector3(-posProjection.x, posProjection.y, 1));
 
-    // ray = viewport.getRayFromScreenPoint(posMouse);
+    // let ray: ƒ.Ray = viewport.getRayFromClient(posMouse);
     return ray;
   }
 

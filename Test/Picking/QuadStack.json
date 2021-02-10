@@ -54,7 +54,7 @@
                   "ƒ.ComponentMesh": {
                     "idMesh": "MeshQuad|2021-02-03T16:24:39.626Z|03395",
                     "pivot": {
-                      "translation": "[0.6000000238418579, 0, 0.3]",
+                      "translation": "[0.6000000238418579, 0, 0]",
                       "rotation": "[0, 45, 0]",
                       "scaling": "[1, 1, 1]"
                     },

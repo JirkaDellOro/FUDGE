@@ -55,11 +55,15 @@ namespace Picking {
     // FudgeAid.Viewport.expandCameraToInteractiveOrbit(viewport);
     viewport.draw();
 
+    let canvasPick: HTMLCanvasElement = document.createElement("canvas");
+    canvasPick.width = 10;
+    canvasPick.height = 10;
     cameraPick = new ƒ.ComponentCamera();
     cameraPick.pivot.set(cmpCamera.pivot);
     cameraPick.projectCentral(1, 10);
-    viewportPick.initialize("pick", graph, cameraPick, canvas);
-    viewportPick.adjustingFrames = true;
+    viewportPick.initialize("pick", graph, cameraPick, canvasPick);
+    viewportPick.adjustingFrames = false;
+    // viewportPick.adjustingCamera = false;
 
     viewport.createPickBuffers();
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
@@ -69,18 +73,30 @@ namespace Picking {
 
     function update(_event: Event): void {
       viewport.draw();
-      pickNodeAt(mouse);
+      // pickNodeAt(mouse);
+      pick();
     }
   }
 
   function pick(): void {
-    let ray: ƒ.Ray = viewport.getRayFromClient(mouse);
+    let posProjection: ƒ.Vector2 = viewport.pointClientToProjection(mouse);
+    let ray: ƒ.Ray = new ƒ.Ray(new ƒ.Vector3(posProjection.x, posProjection.y, 1));
+    // let ray: ƒ.Ray = viewport.getRayFromClient(mouse);
     cameraPick.pivot.lookAt(ray.direction);
     cameraPick.projectCentral(1, 0.001);
 
     let picks: ƒ.Pick[] = viewportPick.pick();
+    // cursor.getComponent(ƒ.ComponentMaterial).activate(false);
     picks.sort((a: ƒ.Pick, b: ƒ.Pick) => (b.zBuffer > 0) ? (a.zBuffer > 0) ? a.zBuffer - b.zBuffer : 1 : -1);
-
+    for (let hit of picks) {
+      data[hit.node.name] = hit.zBuffer;
+    }
+    if (picks.length) {
+      let pick: ƒ.Pick = picks[0];
+      if (pick.node.name == "Cursor")
+        pick = pick[1];
+      cursor.mtxLocal.translation = viewport.calculateWorldFromZBuffer(mouse, pick.zBuffer);
+    }
   }
 
   function pickNodeAt(_pos: ƒ.Vector2): void {

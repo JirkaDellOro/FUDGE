@@ -45,11 +45,15 @@ var Picking;
         viewport.initialize("Viewport", graph, cmpCamera, canvas);
         // FudgeAid.Viewport.expandCameraToInteractiveOrbit(viewport);
         viewport.draw();
+        let canvasPick = document.createElement("canvas");
+        canvasPick.width = 10;
+        canvasPick.height = 10;
         cameraPick = new ƒ.ComponentCamera();
         cameraPick.pivot.set(cmpCamera.pivot);
         cameraPick.projectCentral(1, 10);
-        viewportPick.initialize("pick", graph, cameraPick, canvas);
-        viewportPick.adjustingFrames = true;
+        viewportPick.initialize("pick", graph, cameraPick, canvasPick);
+        viewportPick.adjustingFrames = false;
+        // viewportPick.adjustingCamera = false;
         viewport.createPickBuffers();
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 30);
@@ -57,15 +61,28 @@ var Picking;
         // window.addEventListener("resize", viewport.createPickBuffers.bind(viewport));
         function update(_event) {
             viewport.draw();
-            pickNodeAt(mouse);
+            // pickNodeAt(mouse);
+            pick();
         }
     }
     function pick() {
-        let ray = viewport.getRayFromClient(mouse);
+        let posProjection = viewport.pointClientToProjection(mouse);
+        let ray = new ƒ.Ray(new ƒ.Vector3(posProjection.x, posProjection.y, 1));
+        // let ray: ƒ.Ray = viewport.getRayFromClient(mouse);
         cameraPick.pivot.lookAt(ray.direction);
         cameraPick.projectCentral(1, 0.001);
         let picks = viewportPick.pick();
+        // cursor.getComponent(ƒ.ComponentMaterial).activate(false);
         picks.sort((a, b) => (b.zBuffer > 0) ? (a.zBuffer > 0) ? a.zBuffer - b.zBuffer : 1 : -1);
+        for (let hit of picks) {
+            data[hit.node.name] = hit.zBuffer;
+        }
+        if (picks.length) {
+            let pick = picks[0];
+            if (pick.node.name == "Cursor")
+                pick = pick[1];
+            cursor.mtxLocal.translation = viewport.calculateWorldFromZBuffer(mouse, pick.zBuffer);
+        }
     }
     function pickNodeAt(_pos) {
         let mouseUp = new ƒ.Vector2(_pos.x, viewport.getClientRectangle().height - _pos.y);
