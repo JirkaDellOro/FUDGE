@@ -2193,6 +2193,7 @@ declare namespace FudgeCore {
         */
         createPickBuffers(): void;
         pickNodeAt(_pos: Vector2): RayHit[];
+        calculateWorldFromZBuffer(_pos: Vector2, _z: number): Vector3;
         /**
          * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas
          */

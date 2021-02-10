@@ -20,12 +20,21 @@ namespace ScreenToRay {
   let canvasRay: HTMLCanvasElement;
   let canvasPick: HTMLCanvasElement;
 
+  let cursor: ƒAid.Node = new ƒAid.Node(
+    "Cursor",
+    ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(10)),
+    new ƒ.Material("Cursor", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("darkgray"))),
+    new ƒ.MeshSphere("Cursor", 5, 5)
+  );
+
   function init(): void {
     // create asset
     let graph: ƒ.Node = new ƒAid.NodeCoordinateSystem("CoSys", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(100)));
     // graph.addComponent(new ƒ.ComponentTransform());
     graph.getChildrenByName("ArrowBlue")[0].mtxLocal.rotateZ(45, true);
     graph.getChildrenByName("ArrowBlue")[0].getChildrenByName("ArrowBlueShaft")[0].getComponent(ƒ.ComponentMaterial).clrPrimary.a = 0.5; // = ƒ.Color.CSS("white", 0.9);
+
+    graph.appendChild(cursor);
 
     // initialize viewports
     canvas = document.querySelector("canvas#viewport");
@@ -97,8 +106,11 @@ namespace ScreenToRay {
 
     let output: HTMLOutputElement = document.querySelector("output#o2");
     output.innerHTML = "";
-    for (let pick of picks)
+    for (let pick of picks) {
+      let world: ƒ.Vector3 = viewportPick.calculateWorldFromZBuffer(ƒ.Vector2.ZERO(), pick.zBuffer);
       output.innerHTML += pick.node.name + ":" + pick.zBuffer.toFixed(2) + " | " + pick.luminance.toFixed(2) + " | " + pick.alpha.toFixed(2) + "<br/>";
+      output.innerHTML += world.toString() + "<br/>";
+    }
   }
 
   function pickNodeAt(_pos: ƒ.Vector2): void {
@@ -108,8 +120,13 @@ namespace ScreenToRay {
     let output: HTMLOutputElement = document.querySelector("output#o1");
     output.innerHTML = "";
     let hits: ƒ.RayHit[] = viewport.pickNodeAt(posRender);
-    for (let hit of hits)
+    for (let hit of hits) {
+      let world: ƒ.Vector3 = viewport.calculateWorldFromZBuffer(_pos, hit.zBuffer);
       output.innerHTML += hit.node.name + ":" + hit.zBuffer.toFixed(2) + "<br/>";
+      output.innerHTML += world.toString() + "<br/>";
+    }
+
+    cursor.mtxLocal.translation = viewport.calculateWorldFromZBuffer(mouse, hits[0].zBuffer);
   }
 
   function adjustRayCamera(): void {

@@ -155,14 +155,10 @@ namespace FudgeCore {
       if (this.adjustingCamera)
         this.adjustCamera();
       Render.pickTexture = Render.createPickTexture(this.rectSource.width, this.rectSource.height);
-      return Render.drawGraphForPicking(this.graph, this.camera);
-      
-      // this.crc2.imageSmoothingEnabled = false;
-      // this.crc2.drawImage(
-      //   Render.getCanvas(),
-      //   this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height,
-      //   this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height
-      // );
+      let picks: Pick[] =  Render.drawGraphForPicking(this.graph, this.camera);
+
+      return picks;
+      // cursor.mtxLocal.translation = rayWorld;
     }
 
     /**
@@ -182,6 +178,22 @@ namespace FudgeCore {
       let hits: RayHit[] = Render.pickNodeAt(_pos, this.pickBuffers, this.rectSource);
       // hits.sort((a: RayHit, b: RayHit) => (b.zBuffer > 0) ? (a.zBuffer > 0) ? a.zBuffer - b.zBuffer : 1 : -1);
       return hits;
+    }
+
+    public calculateWorldFromZBuffer(_pos: Vector2, _z: number): Vector3 {
+      let posClip: Vector3 = new Vector3(
+        2 * _pos.x / this.getClientRectangle().width - 1,
+        1 - 2 * _pos.y / this.getClientRectangle().height,
+        _z
+      );
+
+      let mtxViewProjectionInverse: Matrix4x4 = Matrix4x4.INVERSION(this.camera.mtxWorldToView);
+      let m: Float32Array = mtxViewProjectionInverse.get();
+      let rayWorld: Vector3 = Vector3.TRANSFORMATION(posClip, mtxViewProjectionInverse, true);
+      let w: number = m[3] * posClip.x + m[7] * posClip.y + m[11] * posClip.z + m[15];
+      rayWorld.scale(1 / w);
+
+      return rayWorld;
     }
 
     /**

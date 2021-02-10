@@ -3,10 +3,13 @@ var Picking;
 ///<reference path="../../UserInterface/Build/FudgeUserInterface.d.ts"/>
 (function (Picking) {
     var ƒ = FudgeCore;
+    var ƒUi = FudgeUserInterface;
     var ƒAid = FudgeAid;
     window.addEventListener("load", start);
     let cmpCamera;
     let viewport;
+    let viewportPick = new ƒ.Viewport();
+    let cameraPick;
     let mouse = new ƒ.Vector2();
     let cursor = new ƒAid.Node("Cursor", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(0.05)), new ƒ.Material("Cursor", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("darkgray"))), new ƒ.MeshSphere("Cursor", 5, 5));
     class Data extends ƒ.Mutable {
@@ -16,6 +19,7 @@ var Picking;
             this.green = 100;
             this.blue = 100;
             this.yellow = 100;
+            this.cursor = 100;
         }
         reduceMutator(_mutator) { }
     }
@@ -23,8 +27,8 @@ var Picking;
     let uiController;
     async function start(_event) {
         ƒ.Debug.fudge("Start Picking");
-        // let domHud: HTMLDivElement = document.querySelector("div#ui");
-        // uiController = new ƒUi.Controller(data, domHud);
+        let domHud = document.querySelector("div#ui");
+        uiController = new ƒUi.Controller(data, domHud);
         await FudgeCore.Project.loadResourcesFromHTML();
         let canvas = document.querySelector("canvas");
         canvas.addEventListener("mousemove", setCursorPosition);
@@ -41,6 +45,11 @@ var Picking;
         viewport.initialize("Viewport", graph, cmpCamera, canvas);
         // FudgeAid.Viewport.expandCameraToInteractiveOrbit(viewport);
         viewport.draw();
+        cameraPick = new ƒ.ComponentCamera();
+        cameraPick.pivot.set(cmpCamera.pivot);
+        cameraPick.projectCentral(1, 10);
+        viewportPick.initialize("pick", graph, cameraPick, canvas);
+        viewportPick.adjustingFrames = true;
         viewport.createPickBuffers();
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 30);
@@ -51,21 +60,24 @@ var Picking;
             pickNodeAt(mouse);
         }
     }
+    function pick() {
+        let ray = viewport.getRayFromClient(mouse);
+        cameraPick.pivot.lookAt(ray.direction);
+        cameraPick.projectCentral(1, 0.001);
+        let picks = viewportPick.pick();
+        picks.sort((a, b) => (b.zBuffer > 0) ? (a.zBuffer > 0) ? a.zBuffer - b.zBuffer : 1 : -1);
+    }
     function pickNodeAt(_pos) {
         let mouseUp = new ƒ.Vector2(_pos.x, viewport.getClientRectangle().height - _pos.y);
         let posRender = viewport.pointClientToRender(mouseUp);
+        // cursor.mtxLocal.translation = ƒ.Vector3.ONE(100);
         let hits = viewport.pickNodeAt(posRender);
-        hits.sort((a, b) => (b.zBuffer > 0) ? (a.zBuffer > 0) ? a.zBuffer - b.zBuffer : 1 : -1);
+        hits.sort((a, b) => a.zBuffer < b.zBuffer ? -1 : 1);
         for (let hit of hits) {
-            data[hit.node.name] = hit.zBuffer / 128 - 1 || -1;
+            data[hit.node.name] = hit.zBuffer;
         }
-        let posClip = new ƒ.Vector3(2 * mouse.x / viewport.getClientRectangle().width - 1, 1 - 2 * mouse.y / viewport.getClientRectangle().height, hits[0].zBuffer / 128 - 1);
-        let mtxViewProjectionInverse = ƒ.Matrix4x4.INVERSION(cmpCamera.mtxWorldToView);
-        let m = mtxViewProjectionInverse.get();
-        let rayWorld = ƒ.Vector3.TRANSFORMATION(posClip, mtxViewProjectionInverse, true);
-        let w = m[3] * posClip.x + m[7] * posClip.y + m[11] * posClip.z + m[15];
-        rayWorld.scale(1 / w);
-        cursor.mtxLocal.translation = rayWorld;
+        if (hits.length)
+            cursor.mtxLocal.translation = viewport.calculateWorldFromZBuffer(mouse, hits[0].zBuffer);
     }
     function setCursorPosition(_event) {
         mouse = new ƒ.Vector2(_event.clientX, _event.clientY);

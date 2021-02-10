@@ -96,15 +96,20 @@ namespace FudgeCore {
       let data: Uint8Array = new Uint8Array(Render.pickSize.x * Render.pickSize.y * 4);
       Render.crc3.readPixels(0, 0, Render.pickSize.x, Render.pickSize.x, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, data);
 
+      let picks: Pick[] = [];
       for (let i: number = 0; i < Render.picks.length; i++) {
         let zBuffer: number = data[4 * i + 0] + data[4 * i + 1] / 256;
-        Render.picks[i].zBuffer = zBuffer;
-        Render.picks[i].luminance = data[4 * i + 2] / 255;
-        Render.picks[i].alpha = data[4 * i + 3] / 255;
+        if (zBuffer == 0) // filter 
+          continue; 
+        let picked: Pick = Render.picks[i];
+        picked.zBuffer = zBuffer / 128 - 1;
+        picked.luminance = data[4 * i + 2] / 255;
+        picked.alpha = data[4 * i + 3] / 255;
+        picks.push(picked);
       }
 
       Render.resetFrameBuffer();
-      return Render.picks;
+      return picks;
     }
 
     /**
@@ -122,10 +127,11 @@ namespace FudgeCore {
         let pixel: number = _pos.x + _rect.width * _pos.y;
 
         let zBuffer: number = data[4 * pixel + 1] + data[4 * pixel + 2] / 256;
-        // let zBuffer: number = data[4 * pixel + 0];
-        let hit: RayHit = new RayHit(pickBuffer.node, 0, zBuffer);
-
-        hits.push(hit);
+        zBuffer = zBuffer / 128 - 1;
+        if (zBuffer > -1) {
+          let hit: RayHit = new RayHit(pickBuffer.node, 0, zBuffer);
+          hits.push(hit);
+        }
       }
 
       return hits;

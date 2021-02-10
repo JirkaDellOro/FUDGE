@@ -7,6 +7,8 @@ namespace Picking {
   window.addEventListener("load", start);
   let cmpCamera: ƒ.ComponentCamera;
   let viewport: ƒ.Viewport;
+  let viewportPick: ƒ.Viewport = new ƒ.Viewport();
+  let cameraPick: ƒ.ComponentCamera;
 
   let mouse: ƒ.Vector2 = new ƒ.Vector2();
 
@@ -22,6 +24,7 @@ namespace Picking {
     public green: number = 100;
     public blue: number = 100;
     public yellow: number = 100;
+    public cursor: number = 100;
     protected reduceMutator(_mutator: ƒ.Mutator): void {/* */ }
   }
   let data: Data = new Data();
@@ -30,8 +33,8 @@ namespace Picking {
   async function start(_event: Event): Promise<void> {
     ƒ.Debug.fudge("Start Picking");
 
-    // let domHud: HTMLDivElement = document.querySelector("div#ui");
-    // uiController = new ƒUi.Controller(data, domHud);
+    let domHud: HTMLDivElement = document.querySelector("div#ui");
+    uiController = new ƒUi.Controller(data, domHud);
 
     await FudgeCore.Project.loadResourcesFromHTML();
     let canvas: HTMLCanvasElement = document.querySelector("canvas");
@@ -52,6 +55,12 @@ namespace Picking {
     // FudgeAid.Viewport.expandCameraToInteractiveOrbit(viewport);
     viewport.draw();
 
+    cameraPick = new ƒ.ComponentCamera();
+    cameraPick.pivot.set(cmpCamera.pivot);
+    cameraPick.projectCentral(1, 10);
+    viewportPick.initialize("pick", graph, cameraPick, canvas);
+    viewportPick.adjustingFrames = true;
+
     viewport.createPickBuffers();
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
     ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 30);
@@ -64,28 +73,28 @@ namespace Picking {
     }
   }
 
+  function pick(): void {
+    let ray: ƒ.Ray = viewport.getRayFromClient(mouse);
+    cameraPick.pivot.lookAt(ray.direction);
+    cameraPick.projectCentral(1, 0.001);
+
+    let picks: ƒ.Pick[] = viewportPick.pick();
+    picks.sort((a: ƒ.Pick, b: ƒ.Pick) => (b.zBuffer > 0) ? (a.zBuffer > 0) ? a.zBuffer - b.zBuffer : 1 : -1);
+
+  }
+
   function pickNodeAt(_pos: ƒ.Vector2): void {
     let mouseUp: ƒ.Vector2 = new ƒ.Vector2(_pos.x, viewport.getClientRectangle().height - _pos.y);
     let posRender: ƒ.Vector2 = viewport.pointClientToRender(mouseUp);
+    // cursor.mtxLocal.translation = ƒ.Vector3.ONE(100);
 
     let hits: ƒ.RayHit[] = viewport.pickNodeAt(posRender);
-    hits.sort((a: ƒ.RayHit, b: ƒ.RayHit) => (b.zBuffer > 0) ? (a.zBuffer > 0) ? a.zBuffer - b.zBuffer : 1 : -1);
+    hits.sort((a: ƒ.RayHit, b: ƒ.RayHit) => a.zBuffer < b.zBuffer ? -1 : 1);
     for (let hit of hits) {
-      data[hit.node.name] = hit.zBuffer / 128 - 1 || -1;
+      data[hit.node.name] = hit.zBuffer;
     }
-
-    let posClip: ƒ.Vector3 = new ƒ.Vector3(
-      2 * mouse.x / viewport.getClientRectangle().width - 1,
-      1 - 2 * mouse.y / viewport.getClientRectangle().height,
-      hits[0].zBuffer / 128 - 1
-    );
-
-    let mtxViewProjectionInverse: ƒ.Matrix4x4 = ƒ.Matrix4x4.INVERSION(cmpCamera.mtxWorldToView);
-    let m: Float32Array = mtxViewProjectionInverse.get();
-    let rayWorld: ƒ.Vector3 = ƒ.Vector3.TRANSFORMATION(posClip, mtxViewProjectionInverse, true);
-    let w: number = m[3] * posClip.x + m[7] * posClip.y + m[11] * posClip.z + m[15];
-    rayWorld.scale(1 / w);
-    cursor.mtxLocal.translation = rayWorld;
+    if (hits.length)
+      cursor.mtxLocal.translation = viewport.calculateWorldFromZBuffer(mouse, hits[0].zBuffer);
   }
 
 
