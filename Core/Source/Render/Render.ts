@@ -15,6 +15,7 @@ namespace FudgeCore {
   export interface Pick {
     node: Node;
     zBuffer: number;
+    luminance: number;
     alpha: number;
   }
 
@@ -87,15 +88,19 @@ namespace FudgeCore {
       Render.crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, attachmentPoint, WebGL2RenderingContext.TEXTURE_2D, Render.pickTexture, 0);
 
       // draw nodes
+      Render.setBlendMode(BLEND.OPAQUE);
       Render.drawGraph(_node, _cmpCamera, Render.drawNodeForPicking);
+      Render.setBlendMode(BLEND.TRANSPARENT);
 
+      // evaluate texture by reading pixels and extract, convert and store the information about each mesh hit
       let data: Uint8Array = new Uint8Array(Render.pickSize.x * Render.pickSize.y * 4);
       Render.crc3.readPixels(0, 0, Render.pickSize.x, Render.pickSize.x, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, data);
 
       for (let i: number = 0; i < Render.picks.length; i++) {
         let zBuffer: number = data[4 * i + 0] + data[4 * i + 1] / 256;
         Render.picks[i].zBuffer = zBuffer;
-        Render.picks[i].alpha = data[4 * i + 2] / 255;
+        Render.picks[i].luminance = data[4 * i + 2] / 255;
+        Render.picks[i].alpha = data[4 * i + 3] / 255;
       }
 
       Render.resetFrameBuffer();
@@ -257,10 +262,10 @@ namespace FudgeCore {
     */
     private static drawNodeForPicking(_node: Node, _mtxMeshToWorld: Matrix4x4, _mtxWorldToView: Matrix4x4, _lights: MapLightTypeToLightList): void { // create Texture to render to, int-rgba
       try {
-        let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial)
+        let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
         let coat: Coat = cmpMaterial.material.getCoat();
 
-        if (_node.getComponent(ComponentMaterial).material.getCoat() instanceof CoatTextured) {
+        if (coat instanceof CoatTextured) {
           ShaderPickTextured.useProgram();
           coat.useRenderData(ShaderPickTextured, cmpMaterial);
         }
@@ -274,7 +279,7 @@ namespace FudgeCore {
         mesh.useRenderBuffers(ShaderPick, _mtxMeshToWorld, _mtxWorldToView, Render.picks.length);
         RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, mesh.renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
 
-        let pick: Pick = { node: _node, zBuffer: Infinity, alpha: 1.0 };
+        let pick: Pick = { node: _node, zBuffer: Infinity, luminance: 1.0, alpha: 1.0 };
         Render.picks.push(pick);
       } catch (_error) {
         //

@@ -1,4 +1,6 @@
+///<reference path="../../UserInterface/Build/FudgeUserInterface.d.ts"/>
 var Picking;
+///<reference path="../../UserInterface/Build/FudgeUserInterface.d.ts"/>
 (function (Picking) {
     var ƒ = FudgeCore;
     var ƒAid = FudgeAid;
@@ -53,6 +55,7 @@ var Picking;
         let mouseUp = new ƒ.Vector2(_pos.x, viewport.getClientRectangle().height - _pos.y);
         let posRender = viewport.pointClientToRender(mouseUp);
         let hits = viewport.pickNodeAt(posRender);
+        hits.sort((a, b) => (b.zBuffer > 0) ? (a.zBuffer > 0) ? a.zBuffer - b.zBuffer : 1 : -1);
         for (let hit of hits) {
             data[hit.node.name] = hit.zBuffer / 128 - 1 || -1;
         }

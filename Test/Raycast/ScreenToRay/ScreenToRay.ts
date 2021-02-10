@@ -25,7 +25,7 @@ namespace ScreenToRay {
     let graph: ƒ.Node = new ƒAid.NodeCoordinateSystem("CoSys", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(100)));
     // graph.addComponent(new ƒ.ComponentTransform());
     graph.getChildrenByName("ArrowBlue")[0].mtxLocal.rotateZ(45, true);
-    graph.getChildrenByName("ArrowBlue")[0].getChildrenByName("ArrowBlueShaft")[0].getComponent(ƒ.ComponentMaterial).clrPrimary = ƒ.Color.CSS("white", 0.5);
+    graph.getChildrenByName("ArrowBlue")[0].getChildrenByName("ArrowBlueShaft")[0].getComponent(ƒ.ComponentMaterial).clrPrimary.a = 0.5; // = ƒ.Color.CSS("white", 0.9);
 
     // initialize viewports
     canvas = document.querySelector("canvas#viewport");
@@ -98,7 +98,7 @@ namespace ScreenToRay {
     let output: HTMLOutputElement = document.querySelector("output#o2");
     output.innerHTML = "";
     for (let pick of picks)
-      output.innerHTML += pick.node.name + ":" + pick.zBuffer.toFixed(2) + " | " + pick.alpha + "<br/>";
+      output.innerHTML += pick.node.name + ":" + pick.zBuffer.toFixed(2) + " | " + pick.luminance.toFixed(2) + " | " + pick.alpha.toFixed(2) + "<br/>";
   }
 
   function pickNodeAt(_pos: ƒ.Vector2): void {

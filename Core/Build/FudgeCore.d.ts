@@ -4983,6 +4983,7 @@ declare namespace FudgeCore {
     interface Pick {
         node: Node;
         zBuffer: number;
+        luminance: number;
         alpha: number;
     }
     /**

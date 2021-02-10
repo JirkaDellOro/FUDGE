@@ -1,3 +1,4 @@
+///<reference path="../../UserInterface/Build/FudgeUserInterface.d.ts"/>
 namespace Picking {
   import ƒ = FudgeCore;
   import ƒUi = FudgeUserInterface;
@@ -68,6 +69,7 @@ namespace Picking {
     let posRender: ƒ.Vector2 = viewport.pointClientToRender(mouseUp);
 
     let hits: ƒ.RayHit[] = viewport.pickNodeAt(posRender);
+    hits.sort((a: ƒ.RayHit, b: ƒ.RayHit) => (b.zBuffer > 0) ? (a.zBuffer > 0) ? a.zBuffer - b.zBuffer : 1 : -1);
     for (let hit of hits) {
       data[hit.node.name] = hit.zBuffer / 128 - 1 || -1;
     }
