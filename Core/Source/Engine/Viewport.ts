@@ -149,16 +149,14 @@ namespace FudgeCore {
     }
 
 
-    public pick(): Pick[] {
-      if (this.adjustingFrames)
-        this.adjustFrames();
-      if (this.adjustingCamera)
-        this.adjustCamera();
-      Render.pickTexture = Render.createPickTexture(this.rectSource.width, this.rectSource.height);
-      let picks: Pick[] =  Render.drawGraphForPicking(this.graph, this.camera);
+    public pick(): Pick[] {      
+      let size: number = Math.ceil(Math.sqrt(this.graph.nNodesInBranch));
+      let rect: Rectangle = new Rectangle(0, 0, size, size);
+
+      Render.pickTexture = Render.createPickTexture(rect.width, rect.height);
+      let picks: Pick[] = Render.drawGraphForPicking(this.graph, this.camera);
 
       return picks;
-      // cursor.mtxLocal.translation = rayWorld;
     }
 
     /**

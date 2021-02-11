@@ -53,7 +53,6 @@ namespace ScreenToRay {
 
     canvasPick = document.querySelector("canvas#pick");
     viewportPick.initialize("pick", graph, cameraRay, canvasPick);
-    viewportPick.adjustingFrames = true;
 
     menu = document.getElementsByTagName("div")[0];
     menu.innerHTML = "Test automatic rectangle transformation. Adjust CSS-Frame and framings";
@@ -102,11 +101,9 @@ namespace ScreenToRay {
   }
 
   function pick(): void {
-    // let picks: ƒ.Pick[] = viewportPick.pick();
-    let rayPick: ƒ.RayPick = new ƒ.RayPick(viewport.camera);
+    let rayPick: ƒ.RayPick = new ƒ.RayPick(cmpCamera);
     let posProjection: ƒ.Vector2 = viewport.pointClientToProjection(mouse);
     let picks: ƒ.Pick[] = rayPick.pick(viewport.getGraph(), posProjection);
-    // let ray: ƒ.Ray = new ƒ.Ray(new ƒ.Vector3(-posProjection.x, posProjection.y, 1));
 
     let output: HTMLOutputElement = document.querySelector("output#o2");
     output.innerHTML = "";
@@ -135,15 +132,10 @@ namespace ScreenToRay {
   }
 
   function adjustRayCamera(): void {
-    // ƒ.Debug.group("Ray");
-
     let ray: ƒ.Ray = computeRay();
-    // ƒ.Debug.log(ray.direction.toString());
 
     ray.direction.transform(cmpCamera.pivot);
-    // ƒ.Debug.log(ray.direction.toString());
-
-    // ƒ.Debug.groupEnd();
+    // console.log("Compute", ray.toString());
 
     cameraRay.pivot.lookAt(ray.direction);
     cameraRay.projectCentral(1, 0.001);

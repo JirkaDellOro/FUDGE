@@ -39,7 +39,6 @@ var ScreenToRay;
         viewportRay.adjustingFrames = true;
         canvasPick = document.querySelector("canvas#pick");
         viewportPick.initialize("pick", graph, cameraRay, canvasPick);
-        viewportPick.adjustingFrames = true;
         menu = document.getElementsByTagName("div")[0];
         menu.innerHTML = "Test automatic rectangle transformation. Adjust CSS-Frame and framings";
         uiCamera = new UI.Camera();
@@ -78,11 +77,9 @@ var ScreenToRay;
         }
     }
     function pick() {
-        // let picks: ƒ.Pick[] = viewportPick.pick();
-        let rayPick = new ƒ.RayPick(viewport.camera);
+        let rayPick = new ƒ.RayPick(cmpCamera);
         let posProjection = viewport.pointClientToProjection(mouse);
         let picks = rayPick.pick(viewport.getGraph(), posProjection);
-        // let ray: ƒ.Ray = new ƒ.Ray(new ƒ.Vector3(-posProjection.x, posProjection.y, 1));
         let output = document.querySelector("output#o2");
         output.innerHTML = "";
         for (let pick of picks) {
@@ -105,12 +102,9 @@ var ScreenToRay;
             cursor.mtxLocal.translation = viewport.calculateWorldFromZBuffer(mouse, hits[0].zBuffer);
     }
     function adjustRayCamera() {
-        // ƒ.Debug.group("Ray");
         let ray = computeRay();
-        // ƒ.Debug.log(ray.direction.toString());
         ray.direction.transform(cmpCamera.pivot);
-        // ƒ.Debug.log(ray.direction.toString());
-        // ƒ.Debug.groupEnd();
+        // console.log("Compute", ray.toString());
         cameraRay.pivot.lookAt(ray.direction);
         cameraRay.projectCentral(1, 0.001);
         viewportRay.draw();

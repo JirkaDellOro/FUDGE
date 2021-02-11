@@ -17,12 +17,13 @@ namespace FudgeCore {
     }
 
     public pick(_branch: Node, _posProjection: Vector2): Pick[] {
-      this.direction = new Vector3(-_posProjection.x, _posProjection.y);
-      this.direction.transform(this.camera.pivot);
+      this.direction = new Vector3(-_posProjection.x, _posProjection.y, 1);
+      this.direction.transform(this.cmpCamera.pivot);
 
+      this.cmpCameraPick.pivot.translation = this.cmpCamera.pivot.translation;
       this.cmpCameraPick.pivot.lookAt(this.direction);
       this.cmpCameraPick.projectCentral(1, 0.001, FIELD_OF_VIEW.DIAGONAL); //, this.camera.getNear(), this.camera.getFar());
-      // viewportRay.draw();
+      // console.log("PickCamera", this.cmpCameraPick.pivot.translation.toString(), this.cmpCameraPick.pivot.getZ().toString());
 
       let size: number = Math.ceil(Math.sqrt(_branch.nNodesInBranch));
       size = 100; // hack since dimension not yet respected in shader
