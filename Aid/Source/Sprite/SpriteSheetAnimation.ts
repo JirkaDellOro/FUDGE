@@ -17,11 +17,12 @@ namespace FudgeAid {
   export function createSpriteSheet(_name: string, _image: HTMLImageElement): ƒ.CoatTextured {
     let coat: ƒ.CoatTextured = new ƒ.CoatTextured();
     coat.name = _name;
-    coat.texture = new ƒ.TextureImage();
-    coat.texture.image = _image;
+    let texture: ƒ.TextureImage = new ƒ.TextureImage();
+    texture.image = _image;
+    coat.texture = texture;
     return coat;
   }
-  
+
   /**
    * Holds SpriteSheetAnimations in an associative hierarchical array
    */
@@ -47,48 +48,51 @@ namespace FudgeAid {
      * Stores a series of frames in this [[Sprite]], calculating the matrices to use in the components of a [[NodeSprite]]
      */
     public generate(_rects: ƒ.Rectangle[], _resolutionQuad: number, _origin: ƒ.ORIGIN2D): void {
-      let img: HTMLImageElement = this.spritesheet.texture.image;
+      let img: TexImageSource = this.spritesheet.texture.texImageSource;
       this.frames = [];
       let framing: ƒ.FramingScaled = new ƒ.FramingScaled();
       framing.setScale(1 / img.width, 1 / img.height);
-      
+
       let count: number = 0;
       for (let rect of _rects) {
         let frame: SpriteFrame = this.createFrame(this.name + `${count}`, framing, rect, _resolutionQuad, _origin);
         frame.timeScale = 1;
         this.frames.push(frame);
-        
+
         count++;
       }
     }
-    
+
     /**
-     * Add sprite frames using a grid on the spritesheet defined by a rectangle to start with, the number of frames,
-     * the size of the borders of the grid and more
+     * Add sprite frames using a grid on the spritesheet defined by a rectangle to start with, the number of frames, 
+     * the resolution which determines the size of the sprites mesh based on the number of pixels of the texture frame,
+     * the offset from one cell of the grid to the next in the sequence and, in case the sequence spans over more than one row or column,
+     * the offset to move the start rectangle when the margin of the texture is reached and wrapping occurs.
      */
-    public generateByGrid(_startRect: ƒ.Rectangle, _frames: number, _borderSize: ƒ.Vector2, _resolutionQuad: number, _origin: ƒ.ORIGIN2D): void {
-      let img: HTMLImageElement = this.spritesheet.texture.image;
+    public generateByGrid(_startRect: ƒ.Rectangle, _frames: number, _resolutionQuad: number, _origin: ƒ.ORIGIN2D, _offsetNext: ƒ.Vector2, _offsetWrap: ƒ.Vector2 = ƒ.Vector2.ZERO()): void {
+      let img: TexImageSource = this.spritesheet.texture.texImageSource;
+      let rectImage: ƒ.Rectangle = new ƒ.Rectangle(0, 0, img.width, img.height);
       let rect: ƒ.Rectangle = _startRect.copy;
       let rects: ƒ.Rectangle[] = [];
       while (_frames--) {
         rects.push(rect.copy);
-        rect.position.x += _startRect.size.x + _borderSize.x;
-        
-        if (rect.right < img.width)
-        continue;
-        
-        _startRect.position.y += _startRect.size.y + _borderSize.y;
+        rect.position.add(_offsetNext);
+
+        if (rectImage.covers(rect))
+          continue;
+
+        _startRect.position.add(_offsetWrap);
         rect = _startRect.copy;
-        if (rect.bottom > img.height)
-        break;
+        if (!rectImage.covers(rect))
+          break;
       }
-      
+
       rects.forEach((_rect: ƒ.Rectangle) => ƒ.Debug.log(_rect.toString()));
       this.generate(rects, _resolutionQuad, _origin);
     }
-    
+
     private createFrame(_name: string, _framing: ƒ.FramingScaled, _rect: ƒ.Rectangle, _resolutionQuad: number, _origin: ƒ.ORIGIN2D): SpriteFrame {
-      let img: HTMLImageElement = this.spritesheet.texture.image;
+      let img: TexImageSource = this.spritesheet.texture.texImageSource;
       let rectTexture: ƒ.Rectangle = new ƒ.Rectangle(0, 0, img.width, img.height);
       let frame: SpriteFrame = new SpriteFrame();
 

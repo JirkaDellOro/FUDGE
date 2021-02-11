@@ -2,7 +2,7 @@ var MouseToRay;
 (function (MouseToRay) {
     var ƒ = FudgeCore;
     var ƒAid = FudgeAid;
-    ƒ.RenderManager.initialize(true);
+    ƒ.Render.initialize(true);
     window.addEventListener("load", init);
     MouseToRay.root = new ƒ.Node("Root");
     let viewport;

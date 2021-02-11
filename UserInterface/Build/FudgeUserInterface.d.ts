@@ -14,6 +14,7 @@ declare namespace FudgeUserInterface {
         protected mutator: ƒ.Mutator;
         /** [[FudgeCore.Mutator]] used to store the data types of the mutator attributes*/
         protected mutatorTypes: ƒ.Mutator;
+        private idInterval;
         constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
         /**
          * Recursive method taking an existing [[ƒ.Mutator]] as a template
@@ -33,6 +34,7 @@ declare namespace FudgeUserInterface {
         getMutator(_mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
         updateUserInterface(): void;
         setMutable(_mutable: ƒ.Mutable): void;
+        startRefresh(): void;
         protected mutateOnInput: (_event: Event) => Promise<void>;
         protected refresh: (_event: Event) => void;
     }
@@ -185,6 +187,7 @@ declare namespace FudgeUserInterface {
     }
 }
 declare namespace FudgeUserInterface {
+    import ƒ = FudgeCore;
     /**
      * Creates a CustomElement from an HTML-Template-Tag
      */
@@ -197,6 +200,11 @@ declare namespace FudgeUserInterface {
          */
         static register(_tagName: string): void;
         /**
+         * Get the value of this element in a format compatible with [[FudgeCore.Mutator]]
+         */
+        getMutatorValue(): ƒ.Mutator;
+        setMutatorValue(_mutator: ƒ.Mutator): void;
+        /**
          * When connected the first time, the element gets constructed as a deep clone of the template.
          */
         protected connectedCallback(): void;
@@ -205,7 +213,7 @@ declare namespace FudgeUserInterface {
 declare namespace FudgeUserInterface {
     import ƒ = FudgeCore;
     class CustomElementMatrix3x3 extends CustomElementTemplate {
-        getMutatorValue(): Object;
+        getMutatorValue(): ƒ.Mutator;
         setMutatorValue(_mutator: ƒ.Mutator): void;
         protected connectedCallback(): void;
     }

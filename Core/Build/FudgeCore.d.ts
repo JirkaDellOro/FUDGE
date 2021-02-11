@@ -263,13 +263,11 @@ declare namespace FudgeCore {
      * A [[Serialization]] object can be created from a [[Serializable]] object and a JSON-String may be created from that.
      * Vice versa, a JSON-String can be parsed to a [[Serialization]] which can be deserialized to a [[Serializable]] object.
      * ```plaintext
-     *  [Serializable] → (serialize) → [Serialization] → (stringify)
-     *                                                        ↓
-     *                                                    [String]
-     *                                                        ↓
-     *  [Serializable] ← (deserialize) ← [Serialization] ← (parse)
+     *  [Serializable] → (serialize) → [Serialization] → (stringify) → [String] → (save or send)
+     *                                        ↓                            ↓                  ↓
+     *                [Serializable] ← (deserialize) ← [Serialization] ← (parse) ← (load) ← [Medium]
      * ```
-     * While the internal serialize/deserialize methods of the objects care of the selection of information needed to recreate the object and its structure,
+     * While the internal serialize/deserialize method1s of the objects care of the selection of information needed to recreate the object and its structure,
      * the [[Serializer]] keeps track of the namespaces and classes in order to recreate [[Serializable]] objects. The general structure of a [[Serialization]] is as follows
      * ```plaintext
      * {
@@ -306,6 +304,18 @@ declare namespace FudgeCore {
          * @param _serialization
          */
         static deserialize(_serialization: Serialization): Promise<Serializable>;
+        /**
+         * Returns an Array of javascript object representing the serializable FUDGE-objects given in the array,
+         * including attached components, children, superclass-objects all information needed for reconstruction
+         * @param _object An object to serialize, implementing the [[Serializable]] interface
+         */
+        static serializeArray<T extends Serializable>(_type: new () => T, _objects: Serializable[]): Serialization;
+        /**
+         * Returns an Array of FUDGE-objects reconstructed from the information in the array of [[Serialization]]s given,
+         * including attached components, children, superclass-objects
+         * @param _serializations
+         */
+        static deserializeArray(_serialization: Serialization): Promise<Serializable[]>;
         static prettify(_json: string): string;
         /**
          * Returns a formatted, human readable JSON-String, representing the given [[Serializaion]] that may have been created by [[Serializer]].serialize
@@ -322,7 +332,7 @@ declare namespace FudgeCore {
          * @param _path
          */
         static reconstruct(_path: string): Serializable;
-        static getConstructor<T extends Serializable>(_type: string, _namespace?: Object): new () => T;
+        static getConstructor<T extends Serializable>(_path: string): new () => T;
         /**
          * Returns the full path to the class of the object, if found in the registered namespaces
          * @param _object
@@ -499,6 +509,10 @@ declare namespace FudgeCore {
          * @returns A Vector that is orthogonal to and has the same magnitude as the given Vector.
          */
         static ORTHOGONAL(_vector: Vector2, _clockwise?: boolean): Vector2;
+        /**
+         * Creates a cartesian vector from polar coordinates
+         */
+        static GEO(_angle?: number, _magnitude?: number): Vector2;
         get x(): number;
         get y(): number;
         set x(_x: number);
@@ -515,6 +529,14 @@ declare namespace FudgeCore {
          * @returns A deep copy of the vector.
          */
         get copy(): Vector2;
+        /**
+         * Returns a polar representation of this vector
+         */
+        get geo(): Geo2;
+        /**
+         * Adjust the cartesian values of this vector to represent the given as polar coordinates
+         */
+        set geo(_geo: Geo2);
         /**
          * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
          * TODO: examine, if tolerance as criterium for the difference is appropriate with very large coordinate values or if _tolerance should be multiplied by coordinate value
@@ -556,6 +578,8 @@ declare namespace FudgeCore {
          */
         toVector3(_z?: number): Vector3;
         toString(): string;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Vector2>;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
     }
@@ -587,11 +611,6 @@ declare namespace FudgeCore {
          * Returns a new rectangle created with the given parameters
          */
         static GET(_x?: number, _y?: number, _width?: number, _height?: number, _origin?: ORIGIN2D): Rectangle;
-        /**
-         * Sets the position and size of the rectangle according to the given parameters
-         */
-        setPositionAndSize(_x?: number, _y?: number, _width?: number, _height?: number, _origin?: ORIGIN2D): void;
-        pointToRect(_point: Vector2, _target: Rectangle): Vector2;
         get x(): number;
         get y(): number;
         get width(): number;
@@ -622,6 +641,11 @@ declare namespace FudgeCore {
         set bottom(_value: number);
         get copy(): Rectangle;
         /**
+         * Sets the position and size of the rectangle according to the given parameters
+         */
+        setPositionAndSize(_x?: number, _y?: number, _width?: number, _height?: number, _origin?: ORIGIN2D): void;
+        pointToRect(_point: Vector2, _target: Rectangle): Vector2;
+        /**
          * Returns true if the given point is inside of this rectangle or on the border
          * @param _point
          */
@@ -635,6 +659,10 @@ declare namespace FudgeCore {
          * Returns the rectangle created by the intersection of this and the given rectangle or null, if they don't collide
          */
         getIntersection(_rect: Rectangle): Rectangle;
+        /**
+     * Returns the rectangle created by the intersection of this and the given rectangle or null, if they don't collide
+     */
+        covers(_rect: Rectangle): boolean;
         /**
          * Creates a string representation of this rectangle
          */
@@ -660,9 +688,9 @@ declare namespace FudgeCore {
      * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
      * Methods and attributes of this class should not be called directly, only through [[RenderManager]]
      */
-    abstract class RenderOperator {
+    abstract class RenderWebGL {
         protected static crc3: WebGL2RenderingContext;
-        private static rectViewport;
+        private static rectRender;
         /**
          * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
          * @param _attributeLocation  The location of the attribute on the shader, to which they data will be passed.
@@ -699,24 +727,32 @@ declare namespace FudgeCore {
          * Set the area on the offscreen-canvas to render the camera image to.
          * @param _rect
          */
-        static setViewportRectangle(_rect: Rectangle): void;
+        static setRenderRectangle(_rect: Rectangle): void;
+        /**
+         * Clear the offscreen renderbuffer with the given [[Color]]
+         */
+        static clear(_color?: Color): void;
+        /**
+         * Reset the offscreen framebuffer to the original RenderingContext
+         */
+        static resetFrameBuffer(_color?: Color): void;
         /**
          * Retrieve the area on the offscreen-canvas the camera image gets rendered to.
          */
-        static getViewportRectangle(): Rectangle;
+        static getRenderRectangle(): Rectangle;
         static setDepthTest(_test: boolean): void;
         static setBackfaceCulling(_enable: boolean): void;
         static setBlendMode(_mode: BLEND): void;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
-        protected static draw(_mesh: Mesh, cmpMaterial: ComponentMaterial, _final: Matrix4x4, _projection: Matrix4x4): void;
+        protected static draw(_mesh: Mesh, cmpMaterial: ComponentMaterial, _mtxMeshToWorld: Matrix4x4, _mtxWorldToView: Matrix4x4): void;
     }
 }
 declare namespace FudgeCore {
     class RenderInjectorTexture extends RenderInjector {
         static decorate(_constructor: Function): void;
-        protected static injectTextureImage(this: Texture): void;
+        protected static injectTexture(this: Texture): void;
     }
 }
 declare namespace FudgeCore {
@@ -1272,8 +1308,8 @@ declare namespace FudgeCore {
      * A [[Coat]] providing a texture and additional data for texturing
      */
     class CoatTextured extends CoatColored {
-        texture: TextureImage;
-        constructor(_color?: Color, _texture?: TextureImage);
+        texture: Texture;
+        constructor(_color?: Color, _texture?: Texture);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }
@@ -1492,6 +1528,7 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         private hndAudioReady;
+        private hndAudioEnded;
         private install;
         private createSource;
         private updateConnection;
@@ -1550,7 +1587,7 @@ declare namespace FudgeCore {
         pivot: Matrix4x4;
         backgroundColor: Color;
         private projection;
-        private transform;
+        private mtxProjection;
         private fieldOfView;
         private aspectRatio;
         private direction;
@@ -1561,7 +1598,7 @@ declare namespace FudgeCore {
          * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
          * @returns the world-projection-matrix
          */
-        get ViewProjectionMatrix(): Matrix4x4;
+        get mtxWorldToView(): Matrix4x4;
         getProjection(): PROJECTION;
         getBackgroundEnabled(): boolean;
         getAspect(): number;
@@ -1585,10 +1622,10 @@ declare namespace FudgeCore {
          */
         projectOrthographic(_left?: number, _right?: number, _bottom?: number, _top?: number): void;
         /**
-         * Return the calculated normed dimension of the projection surface, that is in the hypothetical distance of 1 to the camera
+         * Return the calculated dimension of a projection surface in the hypothetical distance of 1 to the camera
          */
         getProjectionRectangle(): Rectangle;
-        project(_pointInWorldSpace: Vector3): Vector3;
+        pointWorldToClip(_pointInWorldSpace: Vector3): Vector3;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
@@ -1704,6 +1741,7 @@ declare namespace FudgeCore {
     class ComponentMesh extends Component {
         static readonly iSubclass: number;
         pivot: Matrix4x4;
+        mtxWorld: Matrix4x4;
         mesh: Mesh;
         constructor(_mesh?: Mesh);
         serialize(): Serialization;
@@ -2142,14 +2180,21 @@ declare namespace FudgeCore {
          */
         showSceneGraph(): void;
         /**
-         * Draw this viewport
+         * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the [[Node]]s and [[ComponentMesh]]es
          */
-        draw(): void;
+        calculateTransforms(): void;
+        /**
+         * Draw this viewport displaying its branch. By default, the transforms in the branch are recalculated first.
+         * Pass `false` if calculation was already done for this frame
+         */
+        draw(_calculateTransforms?: boolean): void;
+        pick(): Pick[];
         /**
         * Draw this viewport for RayCast
         */
         createPickBuffers(): void;
         pickNodeAt(_pos: Vector2): RayHit[];
+        calculateWorldFromZBuffer(_pos: Vector2, _z: number): Vector3;
         /**
          * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas
          */
@@ -2176,8 +2221,8 @@ declare namespace FudgeCore {
          */
         pointClientToRender(_client: Vector2): Vector2;
         /**
-         * Returns a point in normed view-rectangle matching the given point on the client rectangle
-         * The view-rectangle matches the client size in the hypothetical distance of 1 to the camera, its origin in the center and y-axis pointing up
+         * Returns a point on a projection surface in the hypothetical distance of 1 to the camera
+         * matching the given point on the client rectangle
          * TODO: examine, if this should be a camera-method. Current implementation is for central-projection
          */
         pointClientToProjection(_client: Vector2): Vector2;
@@ -2256,7 +2301,10 @@ declare namespace FudgeCore {
         CHILD_REMOVE = "childRemoveFromAudioGraph",
         /** broadcast to a [[Node]] and all its descendants in the graph to update the panners in AudioComponents */
         UPDATE = "updateAudioGraph",
-        READY = "ready"
+        /** fired when the audio file was loaded and is ready for playing */
+        READY = "ready",
+        /** fired when the end of the audio is reached while playing */
+        ENDED = "ended"
     }
 }
 declare namespace FudgeCore {
@@ -2491,6 +2539,7 @@ declare namespace FudgeCore {
         arguments: Object[];
         firstCall: boolean;
         lastCall: boolean;
+        count: number;
         constructor(_timer: Timer, ..._arguments: Object[]);
     }
 }
@@ -2611,6 +2660,52 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
+     * Representation of a vector2 as polar coordinates
+     * ```plaintext
+     *  ↕- angle (Angle to the x-axis)
+     *  -→ Magnitude (Distance from the center)
+     * ```
+     */
+    class Geo2 {
+        magnitude: number;
+        angle: number;
+        constructor(_angle?: number, _magnitude?: number);
+        /**
+         * Set the properties of this instance at once
+         */
+        set(_angle?: number, _magnitude?: number): void;
+        /**
+         * Returns a pretty string representation
+         */
+        toString(): string;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Representation of a vector3 as geographic coordinates as seen on a globe
+     * ```plaintext
+     * ←|→ Longitude (Angle to the z-axis)
+     *  ↕- Latitude (Angle to the equator)
+     *  -→ Magnitude (Distance from the center)
+     * ```
+     */
+    class Geo3 {
+        magnitude: number;
+        latitude: number;
+        longitude: number;
+        constructor(_longitude?: number, _latitude?: number, _magnitude?: number);
+        /**
+         * Set the properties of this instance at once
+         */
+        set(_longitude?: number, _latitude?: number, _magnitude?: number): void;
+        /**
+         * Returns a pretty string representation
+         */
+        toString(): string;
+    }
+}
+declare namespace FudgeCore {
+    /**
      * Simple class for 3x3 matrix operations
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
@@ -2634,7 +2729,7 @@ declare namespace FudgeCore {
          * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
          */
         static SCALING(_scalar: Vector2): Matrix3x3;
-        static MULTIPLICATION(_a: Matrix3x3, _b: Matrix3x3): Matrix3x3;
+        static MULTIPLICATION(_left: Matrix3x3, _right: Matrix3x3): Matrix3x3;
         /**
          * - get: a copy of the calculated translation vector
          * - set: effect the matrix ignoring its rotation and scaling
@@ -2729,33 +2824,15 @@ declare namespace FudgeCore {
         private vectors;
         constructor();
         /**
-         * - get: a copy of the calculated translation vector
-         * - set: effect the matrix ignoring its rotation and scaling
-         */
-        get translation(): Vector3;
-        set translation(_translation: Vector3);
-        /**
-         * - get: a copy of the calculated rotation vector
-         * - set: effect the matrix
-         */
-        get rotation(): Vector3;
-        set rotation(_rotation: Vector3);
-        /**
-         * - get: a copy of the calculated scale vector
-         * - set: effect the matrix
-         */
-        get scaling(): Vector3;
-        set scaling(_scaling: Vector3);
-        /**
          * Retrieve a new identity matrix
          */
         static IDENTITY(): Matrix4x4;
         /**
          * Computes and returns the product of two passed matrices.
-         * @param _a The matrix to multiply.
-         * @param _b The matrix to multiply by.
+         * @param _left The matrix to multiply.
+         * @param _right The matrix to multiply by.
          */
-        static MULTIPLICATION(_a: Matrix4x4, _b: Matrix4x4): Matrix4x4;
+        static MULTIPLICATION(_left: Matrix4x4, _right: Matrix4x4): Matrix4x4;
         /**
          * Computes and returns the inverse of a passed matrix.
          * @param _matrix The matrix to compute the inverse of.
@@ -2818,6 +2895,28 @@ declare namespace FudgeCore {
          * @param _far The positionvalue of the projectionspace's far border
          */
         static PROJECTION_ORTHOGRAPHIC(_left: number, _right: number, _bottom: number, _top: number, _near?: number, _far?: number): Matrix4x4;
+        /**
+         * - get: a copy of the calculated translation vector
+         * - set: effect the matrix ignoring its rotation and scaling
+         */
+        get translation(): Vector3;
+        set translation(_translation: Vector3);
+        /**
+         * - get: a copy of the calculated rotation vector
+         * - set: effect the matrix
+         */
+        get rotation(): Vector3;
+        set rotation(_rotation: Vector3);
+        /**
+         * - get: a copy of the calculated scale vector
+         * - set: effect the matrix
+         */
+        get scaling(): Vector3;
+        set scaling(_scaling: Vector3);
+        /**
+         * Return a copy of this
+         */
+        get copy(): Matrix4x4;
         /**
          * Rotate this matrix by given vector in the order Z, Y, X. Right hand rotation is used, thumb points in axis direction, fingers curling indicate rotation
          * The rotation is appended to already applied transforms, thus multiplied from the right. Set _fromLeft to true to switch and put it in front.
@@ -2923,10 +3022,6 @@ declare namespace FudgeCore {
          * Swaps the two cardinal axis and reverses the third, effectively rotating the transform 180 degrees around one and 90 degrees around a second axis
          */
         swapYZ(): void;
-        /**
-         * Return a copy of this
-         */
-        get copy(): Matrix4x4;
         getTranslationTo(_target: Matrix4x4): Vector3;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
@@ -2982,6 +3077,10 @@ declare namespace FudgeCore {
          */
         getIndex<T>(_array: Array<T>): number;
         /**
+         * Returns a randomly selected element of the given array
+         */
+        getElement<T>(_array: Array<T>): T;
+        /**
          * Removes a randomly selected element from the given array and returns it
          */
         splice<T>(_array: Array<T>): T;
@@ -2997,6 +3096,14 @@ declare namespace FudgeCore {
          * Returns a randomly selected symbol from the given object, if symbols are used as keys
          */
         getPropertySymbol(_object: Object): symbol;
+        /**
+         * Returns a random three-dimensional vector in the limits of the box defined by the vectors given as [_corner0, _corner1[
+         */
+        getVector3(_corner0: Vector3, _corner1: Vector3): Vector3;
+        /**
+         * Returns a random two-dimensional vector in the limits of the rectangle defined by the vectors given as [_corner0, _corner1[
+         */
+        getVector2(_corner0: Vector2, _corner1: Vector2): Vector2;
     }
     /**
      * Standard [[Random]]-instance using Math.random().
@@ -3079,6 +3186,10 @@ declare namespace FudgeCore {
          * Divides the dividend by the divisor component by component and returns the result
          */
         static RATIO(_dividend: Vector3, _divisor: Vector3): Vector3;
+        /**
+         * Creates a cartesian vector from geographic coordinates
+         */
+        static GEO(_longitude?: number, _latitude?: number, _magnitude?: number): Vector3;
         get x(): number;
         get y(): number;
         get z(): number;
@@ -3097,6 +3208,14 @@ declare namespace FudgeCore {
          * Returns a copy of this vector
          */
         get copy(): Vector3;
+        /**
+         * Returns a geographic representation of this vector
+         */
+        get geo(): Geo3;
+        /**
+         * Adjust the cartesian values of this vector to represent the given as geographic coordinates
+         */
+        set geo(_geo: Geo3);
         /**
          * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
          * TODO: examine, if tolerance as criterium for the difference is appropriate with very large coordinate values or if _tolerance should be multiplied by coordinate value
@@ -3159,6 +3278,8 @@ declare namespace FudgeCore {
          * Uses the standard array.map functionality to perform the given function on all components of this vector
          */
         map(_function: (value: number, index: number, array: Float32Array) => number): Vector3;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Vector3>;
         getMutator(): Mutator;
         protected reduceMutator(_mutator: Mutator): void;
     }
@@ -3272,6 +3393,50 @@ declare namespace FudgeCore {
         protected createTextureUVs(): Float32Array;
         protected createFaceNormals(): Float32Array;
     }
+}
+declare namespace FudgeCore {
+    /**
+     * Generate a flat polygon
+     * ```plaintext
+     *             0
+     *           1╱|╲  4 ...
+     *            ╲|_╲╱
+     *            2   3
+     * ```
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2021
+     */
+    class MeshPolygon extends Mesh {
+        static readonly iSubclass: number;
+        protected static verticesDefault: Vector2[];
+        test2: Vector2;
+        test3: Vector3;
+        protected construction: Vector2[];
+        protected fitMesh: boolean;
+        protected fitTexture: boolean;
+        constructor(_name?: string, _vertices?: Vector2[], _fitMesh?: boolean, _fitTexture?: boolean);
+        static fitMesh(_vertices: Vector2[]): Vector2[];
+        create(_construction?: Vector2[], _fitMesh?: boolean, _fitTexture?: boolean): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+        protected reduceMutator(_mutator: Mutator): void;
+        protected createVertices(): Float32Array;
+        protected createTextureUVs(): Float32Array;
+        protected createIndices(): Uint16Array;
+        protected createFaceNormals(): Float32Array;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Generate a simple cube with edges of length 1, each face consisting of two trigons
+     * ```plaintext
+     *            4____7
+     *           0/__3/|
+     *            ||5_||6
+     *           1|/_2|/
+     * ```
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
 }
 declare namespace FudgeCore {
     /**
@@ -3457,6 +3622,31 @@ declare namespace FudgeCore {
        */
     class ComponentJointCylindrical extends ComponentJoint {
         static readonly iSubclass: number;
+        private jointSpringDampingRatio;
+        private jointSpringFrequency;
+        private jointRotationSpringDampingRatio;
+        private jointRotationSpringFrequency;
+        private jointMotorLimitUpper;
+        private jointMotorLimitLower;
+        private jointMotorForce;
+        private jointMotorSpeed;
+        private jointRotationMotorLimitUpper;
+        private jointRotationMotorLimitLower;
+        private jointRotationMotorTorque;
+        private jointRotationMotorSpeed;
+        private jointBreakForce;
+        private jointBreakTorque;
+        private config;
+        private rotationalMotor;
+        private translationMotor;
+        private springDamper;
+        private rotationSpringDamper;
+        private jointAnchor;
+        private jointAxis;
+        private jointInternalCollision;
+        private oimoJoint;
+        /** Creating a cylindrical joint between two ComponentRigidbodies moving on one axis and rotating around another bound on a local anchorpoint. */
+        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
          * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
          *  When changed after initialization the joint needs to be reconnected.
@@ -3543,31 +3733,6 @@ declare namespace FudgeCore {
          */
         get internalCollision(): boolean;
         set internalCollision(_value: boolean);
-        private jointSpringDampingRatio;
-        private jointSpringFrequency;
-        private jointRotationSpringDampingRatio;
-        private jointRotationSpringFrequency;
-        private jointMotorLimitUpper;
-        private jointMotorLimitLower;
-        private jointMotorForce;
-        private jointMotorSpeed;
-        private jointRotationMotorLimitUpper;
-        private jointRotationMotorLimitLower;
-        private jointRotationMotorTorque;
-        private jointRotationMotorSpeed;
-        private jointBreakForce;
-        private jointBreakTorque;
-        private config;
-        private rotationalMotor;
-        private translationMotor;
-        private springDamper;
-        private rotationSpringDamper;
-        private jointAnchor;
-        private jointAxis;
-        private jointInternalCollision;
-        private oimoJoint;
-        /** Creating a cylindrical joint between two ComponentRigidbodies moving on one axis and rotating around another bound on a local anchorpoint. */
-        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
          * Initializing and connecting the two rigidbodies with the configured joint properties
          * is automatically called by the physics system. No user interaction needed.
@@ -3583,12 +3748,12 @@ declare namespace FudgeCore {
          * Only to be used when functionality that is not added within Fudge is needed.
         */
         getOimoJoint(): OIMO.Joint;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        protected dirtyStatus(): void;
         private constructJoint;
         private superAdd;
         private superRemove;
-        protected dirtyStatus(): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 }
 declare namespace FudgeCore {
@@ -3609,6 +3774,23 @@ declare namespace FudgeCore {
        */
     class ComponentJointPrismatic extends ComponentJoint {
         static readonly iSubclass: number;
+        private jointSpringDampingRatio;
+        private jointSpringFrequency;
+        private jointMotorLimitUpper;
+        private jointMotorLimitLower;
+        private jointMotorForce;
+        private jointMotorSpeed;
+        private jointBreakForce;
+        private jointBreakTorque;
+        private config;
+        private translationalMotor;
+        private springDamper;
+        private jointAnchor;
+        private jointAxis;
+        private jointInternalCollision;
+        private oimoJoint;
+        /** Creating a prismatic joint between two ComponentRigidbodies only moving on one axis bound on a local anchorpoint. */
+        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
          * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
          *  When changed after initialization the joint needs to be reconnected.
@@ -3665,23 +3847,6 @@ declare namespace FudgeCore {
          */
         get internalCollision(): boolean;
         set internalCollision(_value: boolean);
-        private jointSpringDampingRatio;
-        private jointSpringFrequency;
-        private jointMotorLimitUpper;
-        private jointMotorLimitLower;
-        private jointMotorForce;
-        private jointMotorSpeed;
-        private jointBreakForce;
-        private jointBreakTorque;
-        private config;
-        private translationalMotor;
-        private springDamper;
-        private jointAnchor;
-        private jointAxis;
-        private jointInternalCollision;
-        private oimoJoint;
-        /** Creating a prismatic joint between two ComponentRigidbodies only moving on one axis bound on a local anchorpoint. */
-        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
          * Initializing and connecting the two rigidbodies with the configured joint properties
          * is automatically called by the physics system. No user interaction needed.
@@ -3697,16 +3862,16 @@ declare namespace FudgeCore {
          * Only to be used when functionality that is not added within Fudge is needed.
         */
         getOimoJoint(): OIMO.Joint;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
+        protected dirtyStatus(): void;
         /** Actual creation of a joint in the OimoPhysics system */
         private constructJoint;
         /** Adding this joint to the world through the general function of the base class ComponentJoint. Happening when the joint is connecting.  */
         private superAdd;
         /** Removing this joint to the world through the general function of the base class ComponentJoint. Happening when this component is removed from the Node. */
         private superRemove;
-        /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
-        protected dirtyStatus(): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 }
 declare namespace FudgeCore {
@@ -3734,6 +3899,28 @@ declare namespace FudgeCore {
         */
     class ComponentJointRagdoll extends ComponentJoint {
         static readonly iSubclass: number;
+        private jointTwistSpringDampingRatio;
+        private jointTwistSpringFrequency;
+        private jointSwingSpringDampingRatio;
+        private jointSwingSpringFrequency;
+        private jointTwistMotorLimitUpper;
+        private jointTwistMotorLimitLower;
+        private jointTwistMotorTorque;
+        private jointTwistMotorSpeed;
+        private jointBreakForce;
+        private jointBreakTorque;
+        private config;
+        private jointTwistMotor;
+        private jointTwistSpringDamper;
+        private jointSwingSpringDamper;
+        private jointAnchor;
+        private jointFirstAxis;
+        private jointSecondAxis;
+        private jointInternalCollision;
+        private jointMaxAngle1;
+        private jointMaxAngle2;
+        private oimoJoint;
+        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _firstAxis?: Vector3, _secondAxis?: Vector3, _localAnchor?: Vector3);
         /**
          * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
          *  When changed after initialization the joint needs to be reconnected.
@@ -3816,28 +4003,6 @@ declare namespace FudgeCore {
          */
         get internalCollision(): boolean;
         set internalCollision(_value: boolean);
-        private jointTwistSpringDampingRatio;
-        private jointTwistSpringFrequency;
-        private jointSwingSpringDampingRatio;
-        private jointSwingSpringFrequency;
-        private jointTwistMotorLimitUpper;
-        private jointTwistMotorLimitLower;
-        private jointTwistMotorTorque;
-        private jointTwistMotorSpeed;
-        private jointBreakForce;
-        private jointBreakTorque;
-        private config;
-        private jointTwistMotor;
-        private jointTwistSpringDamper;
-        private jointSwingSpringDamper;
-        private jointAnchor;
-        private jointFirstAxis;
-        private jointSecondAxis;
-        private jointInternalCollision;
-        private jointMaxAngle1;
-        private jointMaxAngle2;
-        private oimoJoint;
-        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _firstAxis?: Vector3, _secondAxis?: Vector3, _localAnchor?: Vector3);
         /**
          * Initializing and connecting the two rigidbodies with the configured joint properties
          * is automatically called by the physics system. No user interaction needed.
@@ -3853,12 +4018,12 @@ declare namespace FudgeCore {
          * Only to be used when functionality that is not added within Fudge is needed.
         */
         getOimoJoint(): OIMO.Joint;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        protected dirtyStatus(): void;
         private constructJoint;
         private superAdd;
         private superRemove;
-        protected dirtyStatus(): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 }
 declare namespace FudgeCore {
@@ -3881,6 +4046,22 @@ declare namespace FudgeCore {
        */
     class ComponentJointRevolute extends ComponentJoint {
         static readonly iSubclass: number;
+        private jointSpringDampingRatio;
+        private jointSpringFrequency;
+        private jointMotorLimitUpper;
+        private jointMotorLimitLower;
+        private jointmotorTorque;
+        private jointMotorSpeed;
+        private jointBreakForce;
+        private jointBreakTorque;
+        private config;
+        private rotationalMotor;
+        private springDamper;
+        private jointAnchor;
+        private jointAxis;
+        private jointInternalCollision;
+        private oimoJoint;
+        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
          * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
          *  When changed after initialization the joint needs to be reconnected.
@@ -3937,22 +4118,6 @@ declare namespace FudgeCore {
          */
         get internalCollision(): boolean;
         set internalCollision(_value: boolean);
-        private jointSpringDampingRatio;
-        private jointSpringFrequency;
-        private jointMotorLimitUpper;
-        private jointMotorLimitLower;
-        private jointmotorTorque;
-        private jointMotorSpeed;
-        private jointBreakForce;
-        private jointBreakTorque;
-        private config;
-        private rotationalMotor;
-        private springDamper;
-        private jointAnchor;
-        private jointAxis;
-        private jointInternalCollision;
-        private oimoJoint;
-        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
          * Initializing and connecting the two rigidbodies with the configured joint properties
          * is automatically called by the physics system. No user interaction needed.
@@ -3968,12 +4133,12 @@ declare namespace FudgeCore {
          * Only to be used when functionality that is not added within Fudge is needed.
         */
         getOimoJoint(): OIMO.Joint;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        protected dirtyStatus(): void;
         private constructJoint;
         private superAdd;
         private superRemove;
-        protected dirtyStatus(): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 }
 declare namespace FudgeCore {
@@ -3996,6 +4161,16 @@ declare namespace FudgeCore {
        */
     class ComponentJointSpherical extends ComponentJoint {
         static readonly iSubclass: number;
+        private jointSpringDampingRatio;
+        private jointSpringFrequency;
+        private jointBreakForce;
+        private jointBreakTorque;
+        private config;
+        private springDamper;
+        private jointAnchor;
+        private jointInternalCollision;
+        private oimoJoint;
+        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _localAnchor?: Vector3);
         /**
     
         /**
@@ -4028,16 +4203,6 @@ declare namespace FudgeCore {
          */
         get internalCollision(): boolean;
         set internalCollision(_value: boolean);
-        private jointSpringDampingRatio;
-        private jointSpringFrequency;
-        private jointBreakForce;
-        private jointBreakTorque;
-        private config;
-        private springDamper;
-        private jointAnchor;
-        private jointInternalCollision;
-        private oimoJoint;
-        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _localAnchor?: Vector3);
         /**
          * Initializing and connecting the two rigidbodies with the configured joint properties
          * is automatically called by the physics system. No user interaction needed.
@@ -4053,12 +4218,12 @@ declare namespace FudgeCore {
          * Only to be used when functionality that is not added within Fudge is needed.
         */
         getOimoJoint(): OIMO.Joint;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        protected dirtyStatus(): void;
         private constructJoint;
         private superAdd;
         private superRemove;
-        protected dirtyStatus(): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 }
 declare namespace FudgeCore {
@@ -4083,6 +4248,31 @@ declare namespace FudgeCore {
        */
     class ComponentJointUniversal extends ComponentJoint {
         static readonly iSubclass: number;
+        private jointFirstSpringDampingRatio;
+        private jointFirstSpringFrequency;
+        private jointSecondSpringDampingRatio;
+        private jointSecondSpringFrequency;
+        private jointFirstMotorLimitUpper;
+        private jointFirstMotorLimitLower;
+        private jointFirstMotorTorque;
+        private jointFirstMotorSpeed;
+        private jointSecondMotorLimitUpper;
+        private jointSecondMotorLimitLower;
+        private jointSecondMotorTorque;
+        private jointSecondMotorSpeed;
+        private jointBreakForce;
+        private jointBreakTorque;
+        private config;
+        private firstAxisMotor;
+        private secondAxisMotor;
+        private firstAxisSpringDamper;
+        private secondAxisSpringDamper;
+        private jointAnchor;
+        private jointFirstAxis;
+        private jointSecondAxis;
+        private jointInternalCollision;
+        private oimoJoint;
+        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _firstAxis?: Vector3, _secondAxis?: Vector3, _localAnchor?: Vector3);
         /**
          * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
          *  When changed after initialization the joint needs to be reconnected.
@@ -4175,31 +4365,6 @@ declare namespace FudgeCore {
          */
         get internalCollision(): boolean;
         set internalCollision(_value: boolean);
-        private jointFirstSpringDampingRatio;
-        private jointFirstSpringFrequency;
-        private jointSecondSpringDampingRatio;
-        private jointSecondSpringFrequency;
-        private jointFirstMotorLimitUpper;
-        private jointFirstMotorLimitLower;
-        private jointFirstMotorTorque;
-        private jointFirstMotorSpeed;
-        private jointSecondMotorLimitUpper;
-        private jointSecondMotorLimitLower;
-        private jointSecondMotorTorque;
-        private jointSecondMotorSpeed;
-        private jointBreakForce;
-        private jointBreakTorque;
-        private config;
-        private firstAxisMotor;
-        private secondAxisMotor;
-        private firstAxisSpringDamper;
-        private secondAxisSpringDamper;
-        private jointAnchor;
-        private jointFirstAxis;
-        private jointSecondAxis;
-        private jointInternalCollision;
-        private oimoJoint;
-        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _firstAxis?: Vector3, _secondAxis?: Vector3, _localAnchor?: Vector3);
         /**
          * Initializing and connecting the two rigidbodies with the configured joint properties
          * is automatically called by the physics system. No user interaction needed.
@@ -4215,12 +4380,12 @@ declare namespace FudgeCore {
          * Only to be used when functionality that is not added within Fudge is needed.
         */
         getOimoJoint(): OIMO.Joint;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        protected dirtyStatus(): void;
         private constructJoint;
         private superAdd;
         private superRemove;
-        protected dirtyStatus(): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 }
 declare namespace FudgeCore {
@@ -4237,6 +4402,31 @@ declare namespace FudgeCore {
         pivot: Matrix4x4;
         /** Vertices that build a convex mesh (form that is in itself closed). Needs to set in the construction of the rb if none of the standard colliders is used. */
         convexMesh: Float32Array;
+        /** Collisions with rigidbodies happening to this body, can be used to build a custom onCollisionStay functionality. */
+        collisions: ComponentRigidbody[];
+        /** Triggers that are currently triggering this body */
+        triggers: ComponentRigidbody[];
+        /** Bodies that trigger this "trigger", only happening if this body is a trigger */
+        bodiesInTrigger: ComponentRigidbody[];
+        /** ID to reference this specific ComponentRigidbody */
+        id: number;
+        private rigidbody;
+        private massData;
+        private collider;
+        private colliderInfo;
+        private rigidbodyInfo;
+        private rbType;
+        private colType;
+        private colGroup;
+        private colMask;
+        private bodyRestitution;
+        private bodyFriction;
+        private linDamping;
+        private angDamping;
+        private rotationalInfluenceFactor;
+        private gravityInfluenceFactor;
+        /** Creating a new rigidbody with a weight in kg, a physics type (default = dynamic), a collider type what physical form has the collider, to what group does it belong, is there a transform Matrix that should be used, and is the collider defined as a group of points that represent a convex mesh. */
+        constructor(_mass?: number, _type?: PHYSICS_TYPE, _colliderType?: COLLIDER_TYPE, _group?: PHYSICS_GROUP, _transform?: Matrix4x4, _convexMesh?: Float32Array);
         /** The type of interaction between the physical world and the transform hierarchy world. DYNAMIC means the body ignores hierarchy and moves by physics. KINEMATIC it's
          * reacting to a [[Node]] that is using physics but can still be controlled by animation or transform. And STATIC means its immovable.
          */
@@ -4288,31 +4478,6 @@ declare namespace FudgeCore {
        * Set the restitution of the rigidbody, which is the factor of bounciness of this rigidbody on surfaces
        */
         set restitution(_restitution: number);
-        /** Collisions with rigidbodies happening to this body, can be used to build a custom onCollisionStay functionality. */
-        collisions: ComponentRigidbody[];
-        /** Triggers that are currently triggering this body */
-        triggers: ComponentRigidbody[];
-        /** Bodies that trigger this "trigger", only happening if this body is a trigger */
-        bodiesInTrigger: ComponentRigidbody[];
-        /** ID to reference this specific ComponentRigidbody */
-        id: number;
-        private rigidbody;
-        private massData;
-        private collider;
-        private colliderInfo;
-        private rigidbodyInfo;
-        private rbType;
-        private colType;
-        private colGroup;
-        private colMask;
-        private bodyRestitution;
-        private bodyFriction;
-        private linDamping;
-        private angDamping;
-        private rotationalInfluenceFactor;
-        private gravityInfluenceFactor;
-        /** Creating a new rigidbody with a weight in kg, a physics type (default = dynamic), a collider type what physical form has the collider, to what group does it belong, is there a transform Matrix that should be used, and is the collider defined as a group of points that represent a convex mesh. */
-        constructor(_mass?: number, _type?: PHYSICS_TYPE, _colliderType?: COLLIDER_TYPE, _group?: PHYSICS_GROUP, _transform?: Matrix4x4, _convexMesh?: Float32Array);
         /**
         * Returns the rigidbody in the form the physics engine is using it, should not be used unless a functionality
         * is not provided through the FUDGE Integration.
@@ -4400,6 +4565,8 @@ declare namespace FudgeCore {
          * returning info about the hit. Provides the same functionality and information a regular raycast does but the ray is only testing against this specific body.
          */
         raycastThisBody(_origin: Vector3, _direction: Vector3, _length: number): RayHitInfo;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         /** Creates the actual OimoPhysics Rigidbody out of informations the Fudge Component has. */
         private createRigidbody;
         /** Creates a collider a shape that represents the object in the physical world.  */
@@ -4420,8 +4587,6 @@ declare namespace FudgeCore {
          * Events in case a body is in a trigger, so not only the body registers a triggerEvent but also the trigger itself.
          */
         private checkBodiesInTrigger;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 }
 declare namespace FudgeCore {
@@ -4495,7 +4660,7 @@ declare namespace FudgeCore {
         compileShader(shader: WebGLShader, source: string): void;
     }
     /** Internal Class used to draw debugInformations about the physics simulation onto the renderContext. No user interaction needed. @author Marko Fehrenbach, HFU 2020 //Based on OimoPhysics Haxe DebugDrawDemo */
-    class PhysicsDebugDraw extends RenderOperator {
+    class PhysicsDebugDraw extends RenderWebGL {
         oimoDebugDraw: OIMO.DebugDraw;
         style: OIMO.DebugDrawStyle;
         gl: WebGL2RenderingContext;
@@ -4527,17 +4692,17 @@ declare namespace FudgeCore {
         /** Creating the render buffers for later use. Defining the attributes used in shaders.
          * Needs to create empty buffers to already have them ready to draw later on, linking is only possible with existing buffers. No performance loss because empty buffers are not drawn.*/
         initializeBuffers(): void;
-        /** Fill an array with empty values */
-        private initFloatArray;
-        /** Overriding the existing functions from OimoPhysics.DebugDraw without actually inherit from the class, to avoid compiler problems.
-         * Overriding them to receive debugInformations in the format the physic engine provides them but handling the rendering in the fudge context. */
-        private initializeOverride;
         /** Before OimoPhysics.world is filling the debug. Make sure the buffers are reset. Also receiving the debugMode from settings and updating the current projection for the vertexShader. */
         begin(): void;
         /** After OimoPhysics.world filled the debug. Rendering calls. Setting this program to be used by the Fudge rendering context. And draw each updated buffer and resetting them. */
         end(): void;
         /** Drawing the ray into the debugDraw Call. By using the overwritten line rendering functions and drawing a point (pointSize defined in the shader) at the end of the ray. */
         debugRay(_origin: Vector3, _end: Vector3, _color: Color): void;
+        /** Fill an array with empty values */
+        private initFloatArray;
+        /** Overriding the existing functions from OimoPhysics.DebugDraw without actually inherit from the class, to avoid compiler problems.
+         * Overriding them to receive debugInformations in the format the physic engine provides them but handling the rendering in the fudge context. */
+        private initializeOverride;
         /** The source code (string) of the in physicsDebug used very simple vertexShader.
          *  Handling the projection (which includes, view/world[is always identity in this case]/projection in Fudge). Increasing the size of single points drawn.
          *  And transfer position color to the fragmentShader. */
@@ -4637,6 +4802,7 @@ declare namespace FudgeCore {
         /** Whether the debug informations of the physics should be displayed or not (default = false) */
         debugDraw: boolean;
         private physicsDebugMode;
+        constructor(_defGroup: number, _defMask: number);
         get debugMode(): PHYSICS_DEBUGMODE;
         set debugMode(_value: PHYSICS_DEBUGMODE);
         /** Change if rigidbodies are able to sleep (don't be considered in physical calculations) when their movement is below a threshold. Deactivation is decreasing performance for minor advantage in precision. */
@@ -4668,7 +4834,6 @@ declare namespace FudgeCore {
         /** The group that this rigidbody belongs to. Default is the DEFAULT Group which means its just a normal Rigidbody not a trigger nor anything special. */
         get defaultCollisionGroup(): number;
         set defaultCollisionGroup(_value: number);
-        constructor(_defGroup: number, _defMask: number);
     }
 }
 declare namespace FudgeCore {
@@ -4832,6 +4997,7 @@ declare namespace FudgeCore {
          * All values and calculations must be relative to the same coordinate system, preferably the world.
          */
         getDistance(_target: Vector3): Vector3;
+        toString(): string;
     }
 }
 declare namespace FudgeCore {
@@ -4849,33 +5015,51 @@ declare namespace FudgeCore {
      */
     interface PickBuffer {
         node: Node;
-        texture: WebGLTexture;
         frameBuffer: WebGLFramebuffer;
     }
     /**
-     * The main interface to the render engine, here WebGL, which is used mainly in the superclass [[RenderOperator]]
+     * Information on each node from picking
      */
-    abstract class RenderManager extends RenderOperator {
+    interface Pick {
+        node: Node;
+        zBuffer: number;
+        luminance: number;
+        alpha: number;
+    }
+    /**
+     * The main interface to the render engine, here WebGL, which is used mainly in the superclass [[RenderWebGL]]
+     * TODO: move all WebGL-specifica to RenderWebGL
+     */
+    abstract class Render extends RenderWebGL {
         static rectClip: Rectangle;
+        static pickTexture: WebGLTexture;
+        static pickBuffer: Uint8Array;
         private static timestampUpdate;
         private static pickBuffers;
+        private static picks;
+        private static pickSize;
         /**
-         * Clear the offscreen renderbuffer with the given [[Color]]
+         * Creates a texture buffer to be used as pick-buffer
          */
-        static clear(_color?: Color): void;
-        /**
-         * Reset the offscreen framebuffer to the original RenderingContext
-         */
-        static resetFrameBuffer(_color?: Color): void;
+        static createPickTexture(_width: number, _height: number): WebGLTexture;
         /**
          * Draws the graph for RayCasting starting with the given [[Node]] using the camera given [[ComponentCamera]].
          */
         static drawGraphForRayCast(_node: Node, _cmpCamera: ComponentCamera): PickBuffer[];
         /**
+         * Draws the graph for picking starting with the given [[Node]] using the camera with extrem narrow focus [[ComponentCamera]].
+         */
+        static drawGraphForPicking(_node: Node, _cmpCamera: ComponentCamera): Pick[];
+        /**
          * Browses through the buffers (previously created with [[drawGraphForRayCast]]) of the size given
          * and returns an unsorted list of the values at the given position, representing node-ids and depth information as [[RayHit]]s
          */
         static pickNodeAt(_pos: Vector2, _pickBuffers: PickBuffer[], _rect: Rectangle): RayHit[];
+        /**
+         * Recursively iterates over the graph starting with the node given, recalculates all world transforms,
+         * collects all lights and feeds all shaders used in the graph with these lights
+         */
+        static setupTransformAndLights(_node: Node, _mtxWorld?: Matrix4x4, _lights?: MapLightTypeToLightList, _shadersUsed?: (typeof Shader)[]): void;
         /**
          * The main rendering function to be called from [[Viewport]].
          * Draws the graph starting with the given [[Node]] using the camera given [[ComponentCamera]].
@@ -4890,18 +5074,15 @@ declare namespace FudgeCore {
          */
         private static drawNode;
         /**
+        * The render function for picking.
+        * A cameraprojection with extremely narrow focus is used, so each pixel of the buffer would hold the same information from the node,
+        * but the fragemnt shader renders only 1 pixel for each node into the render buffer, 1st node to 1st pixel, 2nd node to second pixel etc.
+        */
+        private static drawNodeForPicking;
+        /**
          * The render function for drawing buffers for picking. Renders each node on a dedicated buffer with id and depth values instead of colors
          */
         private static drawNodeForRayCast;
-        /**
-         * Creates a texture buffer to be uses as pick-buffer
-         */
-        private static getRayCastTexture;
-        /**
-         * Recursively iterates over the graph starting with the node given, recalculates all world transforms,
-         * collects all lights and feeds all shaders used in the graph with these lights
-         */
-        static setupTransformAndLights(_node: Node, _world?: Matrix4x4, _lights?: MapLightTypeToLightList, _shadersUsed?: (typeof Shader)[]): void;
         /**
          * Set light data in shaders
          */
@@ -4914,7 +5095,7 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    abstract class RenderParticles extends RenderManager {
+    abstract class RenderParticles extends Render {
         static drawParticles(): void;
     }
 }
@@ -4975,6 +5156,26 @@ declare namespace FudgeCore {
      * Renders for Raycasting
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
+    abstract class ShaderPick extends Shader {
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Renders for Raycasting
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    abstract class ShaderPickTextured extends Shader {
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Renders for Raycasting
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
     abstract class ShaderRayCast extends Shader {
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
@@ -5005,26 +5206,37 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    enum MIPMAP {
+        CRISP = 0,
+        MEDIUM = 1,
+        BLURRY = 2
+    }
     /**
      * Baseclass for different kinds of textures.
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    abstract class Texture extends Mutable {
+    abstract class Texture extends Mutable implements SerializableResource {
         name: string;
+        idResource: string;
+        mipmap: MIPMAP;
         protected renderData: {
             [key: string]: unknown;
         };
+        constructor(_name?: string);
+        abstract get texImageSource(): TexImageSource;
         useRenderData(): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
     }
     /**
      * Texture created from an existing image
      */
-    class TextureImage extends Texture implements SerializableResource {
+    class TextureImage extends Texture {
         image: HTMLImageElement;
         url: RequestInfo;
-        idResource: string;
         constructor(_url?: RequestInfo);
+        get texImageSource(): TexImageSource;
         /**
          * Asynchronously loads the image from the given url
          */
@@ -5036,17 +5248,34 @@ declare namespace FudgeCore {
     /**
      * Texture created from a canvas
      */
+    class TextureBase64 extends Texture {
+        image: HTMLImageElement;
+        constructor(_name: string, _base64: string, _mipmap?: MIPMAP);
+        get texImageSource(): TexImageSource;
+    }
+    /**
+     * Texture created from a canvas
+     */
     class TextureCanvas extends Texture {
+        get texImageSource(): TexImageSource;
     }
     /**
      * Texture created from a FUDGE-Sketch
      */
     class TextureSketch extends TextureCanvas {
+        get texImageSource(): TexImageSource;
     }
     /**
      * Texture created from an HTML-page
      */
     class TextureHTML extends TextureCanvas {
+        get texImageSource(): TexImageSource;
+    }
+}
+declare namespace FudgeCore {
+    class TextureDefault extends TextureBase64 {
+        static texture: TextureBase64;
+        private static get;
     }
 }
 declare namespace FudgeCore {
@@ -5281,8 +5510,8 @@ declare namespace FudgeCore {
      */
     class FileIoBrowserLocal extends EventTargetStatic {
         private static selector;
-        static load(): void;
-        static save(_toSave: MapFilenameToContent): void;
+        static load(_multiple?: boolean): Promise<MapFilenameToContent>;
+        static save(_toSave: MapFilenameToContent, _type?: string): Promise<MapFilenameToContent>;
         static handleFileSelect(_event: Event): Promise<void>;
         static loadFiles(_fileList: FileList, _loaded: MapFilenameToContent): Promise<void>;
     }

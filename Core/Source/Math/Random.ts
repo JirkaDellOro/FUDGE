@@ -72,6 +72,15 @@ namespace FudgeCore {
     }
 
     /**
+     * Returns a randomly selected element of the given array
+     */
+    public getElement<T>(_array: Array<T>): T {
+      if (_array.length > 0)
+        return _array[this.getIndex(_array)];
+      return null;
+    }
+
+    /**
      * Removes a randomly selected element from the given array and returns it
      */
     public splice<T>(_array: Array<T>): T {
@@ -100,6 +109,20 @@ namespace FudgeCore {
     public getPropertySymbol(_object: Object): symbol {
       let keys: symbol[] = Object.getOwnPropertySymbols(_object);
       return keys[this.getIndex(keys)];
+    }
+
+    /**
+     * Returns a random three-dimensional vector in the limits of the box defined by the vectors given as [_corner0, _corner1[
+     */
+    public getVector3(_corner0: Vector3, _corner1: Vector3): Vector3 {
+      return new Vector3(this.getRange(_corner0.x, _corner1.x), this.getRange(_corner0.y, _corner1.y), this.getRange(_corner0.z, _corner1.z));
+    }
+
+    /**
+     * Returns a random two-dimensional vector in the limits of the rectangle defined by the vectors given as [_corner0, _corner1[
+     */
+    public getVector2(_corner0: Vector2, _corner1: Vector2): Vector2 {
+      return new Vector2(this.getRange(_corner0.x, _corner1.x), this.getRange(_corner0.y, _corner1.y));
     }
   }
 

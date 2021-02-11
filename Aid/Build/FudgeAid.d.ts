@@ -204,9 +204,11 @@ declare namespace FudgeAid {
         generate(_rects: ƒ.Rectangle[], _resolutionQuad: number, _origin: ƒ.ORIGIN2D): void;
         /**
          * Add sprite frames using a grid on the spritesheet defined by a rectangle to start with, the number of frames,
-         * the size of the borders of the grid and more
+         * the resolution which determines the size of the sprites mesh based on the number of pixels of the texture frame,
+         * the offset from one cell of the grid to the next in the sequence and, in case the sequence spans over more than one row or column,
+         * the offset to move the start rectangle when the margin of the texture is reached and wrapping occurs.
          */
-        generateByGrid(_startRect: ƒ.Rectangle, _frames: number, _borderSize: ƒ.Vector2, _resolutionQuad: number, _origin: ƒ.ORIGIN2D): void;
+        generateByGrid(_startRect: ƒ.Rectangle, _frames: number, _resolutionQuad: number, _origin: ƒ.ORIGIN2D, _offsetNext: ƒ.Vector2, _offsetWrap?: ƒ.Vector2): void;
         private createFrame;
     }
 }
@@ -215,7 +217,7 @@ declare namespace FudgeAid {
     class ComponentStateMachine<State> extends ƒ.ComponentScript implements StateMachine<State> {
         stateCurrent: State;
         stateNext: State;
-        stateMachine: StateMachineInstructions<State>;
+        instructions: StateMachineInstructions<State>;
         transit(_next: State): void;
         act(): void;
     }
@@ -241,7 +243,7 @@ declare namespace FudgeAid {
     export class StateMachine<State> {
         stateCurrent: State;
         stateNext: State;
-        stateMachine: StateMachineInstructions<State>;
+        instructions: StateMachineInstructions<State>;
         transit(_next: State): void;
         act(): void;
     }

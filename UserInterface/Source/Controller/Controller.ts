@@ -17,11 +17,13 @@ namespace FudgeUserInterface {
     /** [[FudgeCore.Mutator]] used to store the data types of the mutator attributes*/
     protected mutatorTypes: ƒ.Mutator = null;
 
+    private idInterval: number;
+
     constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement) {
       this.domElement = _domElement;
       this.setMutable(_mutable);
       // TODO: examine, if this should register to one common interval, instead of each installing its own.
-      window.setInterval(this.refresh, this.timeUpdate);
+      this.startRefresh();
       this.domElement.addEventListener("input", this.mutateOnInput);
     }
 
@@ -63,6 +65,8 @@ namespace FudgeUserInterface {
 
         if (element instanceof CustomElement)
           mutator[key] = (<CustomElement>element).getMutatorValue();
+        else if (element instanceof HTMLInputElement)
+          mutator[key] = element.value;
         else if (mutatorTypes[key] instanceof Object)
           // TODO: setting a value of the dom element doesn't make sense... examine what this line was supposed to do. Assumably enums
           mutator[key] = (<HTMLSelectElement>element).value;
@@ -127,6 +131,11 @@ namespace FudgeUserInterface {
         this.mutatorTypes = _mutable.getMutatorAttributeTypes(this.mutator);
     }
 
+    public startRefresh(): void {
+      window.clearInterval(this.idInterval);
+      this.idInterval = window.setInterval(this.refresh, this.timeUpdate);
+    }
+
     protected mutateOnInput = async (_event: Event) => {
       this.mutator = this.getMutator();
       await this.mutable.mutate(this.mutator);
@@ -136,7 +145,12 @@ namespace FudgeUserInterface {
     }
 
     protected refresh = (_event: Event) => {
-      this.updateUserInterface();
+      if (document.body.contains(this.domElement)) {
+        this.updateUserInterface();
+        return;
+      }
+      
+      window.clearInterval(this.idInterval);
     }
   }
 }

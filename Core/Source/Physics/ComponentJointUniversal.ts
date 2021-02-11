@@ -21,6 +21,52 @@ namespace FudgeCore {
   export class ComponentJointUniversal extends ComponentJoint {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointUniversal);
 
+    private jointFirstSpringDampingRatio: number = 0;
+    private jointFirstSpringFrequency: number = 0;
+
+    private jointSecondSpringDampingRatio: number = 0;
+    private jointSecondSpringFrequency: number = 0;
+
+    private jointFirstMotorLimitUpper: number = 360;
+    private jointFirstMotorLimitLower: number = 0;
+    private jointFirstMotorTorque: number = 0;
+    private jointFirstMotorSpeed: number = 0;
+
+    private jointSecondMotorLimitUpper: number = 360;
+    private jointSecondMotorLimitLower: number = 0;
+    private jointSecondMotorTorque: number = 0;
+    private jointSecondMotorSpeed: number = 0;
+
+    private jointBreakForce: number = 0;
+    private jointBreakTorque: number = 0;
+
+    private config: OIMO.UniversalJointConfig = new OIMO.UniversalJointConfig();
+    private firstAxisMotor: OIMO.RotationalLimitMotor;
+    private secondAxisMotor: OIMO.RotationalLimitMotor;
+    private firstAxisSpringDamper: OIMO.SpringDamper;
+    private secondAxisSpringDamper: OIMO.SpringDamper;
+    private jointAnchor: OIMO.Vec3;
+    private jointFirstAxis: OIMO.Vec3;
+    private jointSecondAxis: OIMO.Vec3;
+
+    private jointInternalCollision: boolean;
+
+    private oimoJoint: OIMO.UniversalJoint;
+
+
+    constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null, _firstAxis: Vector3 = new Vector3(1, 0, 0), _secondAxis: Vector3 = new Vector3(0, 0, 1), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
+      super(_attachedRigidbody, _connectedRigidbody);
+      this.jointFirstAxis = new OIMO.Vec3(_firstAxis.x, _firstAxis.y, _firstAxis.z);
+      this.jointSecondAxis = new OIMO.Vec3(_secondAxis.x, _secondAxis.y, _secondAxis.z);
+      this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
+
+      /*Tell the physics that there is a new joint and on the physics start the actual joint is first created. Values can be set but the
+        actual constraint ain't existent until the game starts
+      */
+      this.addEventListener(EVENT.COMPONENT_ADD, this.dirtyStatus);
+      this.addEventListener(EVENT.COMPONENT_REMOVE, this.superRemove);
+    }
+
     //#region Get/Set transfor of fudge properties to the physics engine
     /**
      * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
@@ -219,52 +265,6 @@ namespace FudgeCore {
     }
     //#endregion
 
-    private jointFirstSpringDampingRatio: number = 0;
-    private jointFirstSpringFrequency: number = 0;
-
-    private jointSecondSpringDampingRatio: number = 0;
-    private jointSecondSpringFrequency: number = 0;
-
-    private jointFirstMotorLimitUpper: number = 360;
-    private jointFirstMotorLimitLower: number = 0;
-    private jointFirstMotorTorque: number = 0;
-    private jointFirstMotorSpeed: number = 0;
-
-    private jointSecondMotorLimitUpper: number = 360;
-    private jointSecondMotorLimitLower: number = 0;
-    private jointSecondMotorTorque: number = 0;
-    private jointSecondMotorSpeed: number = 0;
-
-    private jointBreakForce: number = 0;
-    private jointBreakTorque: number = 0;
-
-    private config: OIMO.UniversalJointConfig = new OIMO.UniversalJointConfig();
-    private firstAxisMotor: OIMO.RotationalLimitMotor;
-    private secondAxisMotor: OIMO.RotationalLimitMotor;
-    private firstAxisSpringDamper: OIMO.SpringDamper;
-    private secondAxisSpringDamper: OIMO.SpringDamper;
-    private jointAnchor: OIMO.Vec3;
-    private jointFirstAxis: OIMO.Vec3;
-    private jointSecondAxis: OIMO.Vec3;
-
-    private jointInternalCollision: boolean;
-
-    private oimoJoint: OIMO.UniversalJoint;
-
-
-    constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null, _firstAxis: Vector3 = new Vector3(1, 0, 0), _secondAxis: Vector3 = new Vector3(0, 0, 1), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
-      super(_attachedRigidbody, _connectedRigidbody);
-      this.jointFirstAxis = new OIMO.Vec3(_firstAxis.x, _firstAxis.y, _firstAxis.z);
-      this.jointSecondAxis = new OIMO.Vec3(_secondAxis.x, _secondAxis.y, _secondAxis.z);
-      this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
-
-      /*Tell the physics that there is a new joint and on the physics start the actual joint is first created. Values can be set but the
-        actual constraint ain't existent until the game starts
-      */
-      this.addEventListener(EVENT.COMPONENT_ADD, this.dirtyStatus);
-      this.addEventListener(EVENT.COMPONENT_REMOVE, this.superRemove);
-    }
-
     /**
      * Initializing and connecting the two rigidbodies with the configured joint properties
      * is automatically called by the physics system. No user interaction needed.
@@ -295,45 +295,7 @@ namespace FudgeCore {
     public getOimoJoint(): OIMO.Joint {
       return this.oimoJoint;
     }
-
-    private constructJoint(): void {
-      this.firstAxisSpringDamper = new OIMO.SpringDamper().setSpring(this.jointFirstSpringFrequency, this.jointFirstSpringDampingRatio);
-      this.secondAxisSpringDamper = new OIMO.SpringDamper().setSpring(this.jointSecondSpringFrequency, this.jointSecondSpringDampingRatio);
-
-      this.firstAxisMotor = new OIMO.RotationalLimitMotor().setLimits(this.jointFirstMotorLimitLower, this.jointFirstMotorLimitUpper);
-      this.firstAxisMotor.setMotor(this.jointFirstMotorSpeed, this.jointFirstMotorTorque);
-      this.secondAxisMotor = new OIMO.RotationalLimitMotor().setLimits(this.jointFirstMotorLimitLower, this.jointFirstMotorLimitUpper);
-      this.secondAxisMotor.setMotor(this.jointFirstMotorSpeed, this.jointFirstMotorTorque);
-
-      this.config = new OIMO.UniversalJointConfig();
-      let attachedRBPos: Vector3 = this.attachedRigidbody.getContainer().mtxWorld.translation;
-      let worldAnchor: OIMO.Vec3 = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
-      this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, this.jointFirstAxis, this.jointSecondAxis);
-      this.config.limitMotor1 = this.firstAxisMotor;
-      this.config.limitMotor2 = this.secondAxisMotor;
-      this.config.springDamper1 = this.firstAxisSpringDamper;
-      this.config.springDamper2 = this.secondAxisSpringDamper;
-
-      var j: OIMO.UniversalJoint = new OIMO.UniversalJoint(this.config);
-      j.setBreakForce(this.breakForce);
-      j.setBreakTorque(this.breakTorque);
-      j.setAllowCollision(this.jointInternalCollision);
-
-      this.oimoJoint = j;
-    }
-
-    private superAdd(): void {
-      this.addConstraintToWorld(this);
-    }
-
-    private superRemove(): void {
-      this.removeConstraintFromWorld(this);
-    }
-
-    protected dirtyStatus(): void {
-      Physics.world.changeJointStatus(this);
-    }
-
+    
     //#region Saving/Loading
     public serialize(): Serialization {
       let serialization: Serialization = {
@@ -390,5 +352,43 @@ namespace FudgeCore {
     }
     //#endregion
 
+
+    protected dirtyStatus(): void {
+      Physics.world.changeJointStatus(this);
+    }
+
+    private constructJoint(): void {
+      this.firstAxisSpringDamper = new OIMO.SpringDamper().setSpring(this.jointFirstSpringFrequency, this.jointFirstSpringDampingRatio);
+      this.secondAxisSpringDamper = new OIMO.SpringDamper().setSpring(this.jointSecondSpringFrequency, this.jointSecondSpringDampingRatio);
+
+      this.firstAxisMotor = new OIMO.RotationalLimitMotor().setLimits(this.jointFirstMotorLimitLower, this.jointFirstMotorLimitUpper);
+      this.firstAxisMotor.setMotor(this.jointFirstMotorSpeed, this.jointFirstMotorTorque);
+      this.secondAxisMotor = new OIMO.RotationalLimitMotor().setLimits(this.jointFirstMotorLimitLower, this.jointFirstMotorLimitUpper);
+      this.secondAxisMotor.setMotor(this.jointFirstMotorSpeed, this.jointFirstMotorTorque);
+
+      this.config = new OIMO.UniversalJointConfig();
+      let attachedRBPos: Vector3 = this.attachedRigidbody.getContainer().mtxWorld.translation;
+      let worldAnchor: OIMO.Vec3 = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
+      this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, this.jointFirstAxis, this.jointSecondAxis);
+      this.config.limitMotor1 = this.firstAxisMotor;
+      this.config.limitMotor2 = this.secondAxisMotor;
+      this.config.springDamper1 = this.firstAxisSpringDamper;
+      this.config.springDamper2 = this.secondAxisSpringDamper;
+
+      var j: OIMO.UniversalJoint = new OIMO.UniversalJoint(this.config);
+      j.setBreakForce(this.breakForce);
+      j.setBreakTorque(this.breakTorque);
+      j.setAllowCollision(this.jointInternalCollision);
+
+      this.oimoJoint = j;
+    }
+
+    private superAdd(): void {
+      this.addConstraintToWorld(this);
+    }
+
+    private superRemove(): void {
+      this.removeConstraintFromWorld(this);
+    }
   }
 }

@@ -8,8 +8,8 @@ namespace FudgeAid {
     constructor(_name: string, _color: ƒ.Color) {
       super(_name, ƒ.Matrix4x4.IDENTITY());
 
-      let shaft: Node = new Node("Shaft", ƒ.Matrix4x4.IDENTITY(), <ƒ.Material>NodeArrow.internalResources.get("Material"), <ƒ.Mesh>NodeArrow.internalResources.get("Shaft"));
-      let head: Node = new Node("Head", ƒ.Matrix4x4.IDENTITY(), <ƒ.Material>NodeArrow.internalResources.get("Material"), <ƒ.Mesh>NodeArrow.internalResources.get("Head"));
+      let shaft: Node = new Node(_name + "Shaft", ƒ.Matrix4x4.IDENTITY(), <ƒ.Material>NodeArrow.internalResources.get("Material"), <ƒ.Mesh>NodeArrow.internalResources.get("Shaft"));
+      let head: Node = new Node(_name + "Head", ƒ.Matrix4x4.IDENTITY(), <ƒ.Material>NodeArrow.internalResources.get("Material"), <ƒ.Mesh>NodeArrow.internalResources.get("Head"));
       shaft.mtxLocal.scale(new ƒ.Vector3(0.01, 1, 0.01));
       head.mtxLocal.translateY(0.5);
       head.mtxLocal.scale(new ƒ.Vector3(0.05, 0.1, 0.05));

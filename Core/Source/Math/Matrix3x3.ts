@@ -97,25 +97,25 @@ namespace FudgeCore {
     //#endregion
 
 
-    public static MULTIPLICATION(_a: Matrix3x3, _b: Matrix3x3): Matrix3x3 {
-      let a00: number = _a.data[0 * 3 + 0];
-      let a01: number = _a.data[0 * 3 + 1];
-      let a02: number = _a.data[0 * 3 + 2];
-      let a10: number = _a.data[1 * 3 + 0];
-      let a11: number = _a.data[1 * 3 + 1];
-      let a12: number = _a.data[1 * 3 + 2];
-      let a20: number = _a.data[2 * 3 + 0];
-      let a21: number = _a.data[2 * 3 + 1];
-      let a22: number = _a.data[2 * 3 + 2];
-      let b00: number = _b.data[0 * 3 + 0];
-      let b01: number = _b.data[0 * 3 + 1];
-      let b02: number = _b.data[0 * 3 + 2];
-      let b10: number = _b.data[1 * 3 + 0];
-      let b11: number = _b.data[1 * 3 + 1];
-      let b12: number = _b.data[1 * 3 + 2];
-      let b20: number = _b.data[2 * 3 + 0];
-      let b21: number = _b.data[2 * 3 + 1];
-      let b22: number = _b.data[2 * 3 + 2];
+    public static MULTIPLICATION(_left: Matrix3x3, _right: Matrix3x3): Matrix3x3 {
+      let a00: number = _left.data[0 * 3 + 0];
+      let a01: number = _left.data[0 * 3 + 1];
+      let a02: number = _left.data[0 * 3 + 2];
+      let a10: number = _left.data[1 * 3 + 0];
+      let a11: number = _left.data[1 * 3 + 1];
+      let a12: number = _left.data[1 * 3 + 2];
+      let a20: number = _left.data[2 * 3 + 0];
+      let a21: number = _left.data[2 * 3 + 1];
+      let a22: number = _left.data[2 * 3 + 2];
+      let b00: number = _right.data[0 * 3 + 0];
+      let b01: number = _right.data[0 * 3 + 1];
+      let b02: number = _right.data[0 * 3 + 2];
+      let b10: number = _right.data[1 * 3 + 0];
+      let b11: number = _right.data[1 * 3 + 1];
+      let b12: number = _right.data[1 * 3 + 2];
+      let b20: number = _right.data[2 * 3 + 0];
+      let b21: number = _right.data[2 * 3 + 1];
+      let b22: number = _right.data[2 * 3 + 2];
       let matrix: Matrix3x3 = new Matrix3x3;
       matrix.data.set([
         b00 * a00 + b01 * a10 + b02 * a20,
@@ -317,12 +317,21 @@ namespace FudgeCore {
     }
 
     public serialize(): Serialization {
-      // TODO: save translation, rotation and scale as vectors for readability and manipulation
-      let serialization: Serialization = this.getMutator();
+      // this.getMutator();
+      let serialization: Serialization = {
+        translation: this.translation.serialize(),
+        rotation: this.rotation,
+        scaling: this.scaling.serialize()
+      };
       return serialization;
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.mutate(_serialization);
+      let mutator: Mutator = {
+        translation: await this.translation.deserialize(_serialization.translation),
+        rotation: _serialization.rotation,
+        scaling: await this.scaling.deserialize(_serialization.scaling)
+      };
+      this.mutate(mutator);
       return this;
     }
 

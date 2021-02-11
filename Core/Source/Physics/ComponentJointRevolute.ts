@@ -19,6 +19,40 @@ namespace FudgeCore {
   export class ComponentJointRevolute extends ComponentJoint {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointRevolute);
 
+    private jointSpringDampingRatio: number = 0;
+    private jointSpringFrequency: number = 0;
+
+    private jointMotorLimitUpper: number = 360;
+    private jointMotorLimitLower: number = 0;
+    private jointmotorTorque: number = 0;
+    private jointMotorSpeed: number = 0;
+
+    private jointBreakForce: number = 0;
+    private jointBreakTorque: number = 0;
+
+    private config: OIMO.RevoluteJointConfig = new OIMO.RevoluteJointConfig();
+    private rotationalMotor: OIMO.RotationalLimitMotor;
+    private springDamper: OIMO.SpringDamper;
+    private jointAnchor: OIMO.Vec3;
+    private jointAxis: OIMO.Vec3;
+
+    private jointInternalCollision: boolean;
+
+    private oimoJoint: OIMO.RevoluteJoint;
+
+
+    constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null, _axis: Vector3 = new Vector3(0, 1, 0), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
+      super(_attachedRigidbody, _connectedRigidbody);
+      this.jointAxis = new OIMO.Vec3(_axis.x, _axis.y, _axis.z);
+      this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
+
+      /*Tell the physics that there is a new joint and on the physics start the actual joint is first created. Values can be set but the
+       actual constraint ain't existent until the game starts
+     */
+      this.addEventListener(EVENT.COMPONENT_ADD, this.dirtyStatus);
+      this.addEventListener(EVENT.COMPONENT_REMOVE, this.superRemove);
+    }
+    
     //#region Get/Set transfor of fudge properties to the physics engine
     /**
      * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
@@ -142,40 +176,6 @@ namespace FudgeCore {
     }
     //#endregion
 
-    private jointSpringDampingRatio: number = 0;
-    private jointSpringFrequency: number = 0;
-
-    private jointMotorLimitUpper: number = 360;
-    private jointMotorLimitLower: number = 0;
-    private jointmotorTorque: number = 0;
-    private jointMotorSpeed: number = 0;
-
-    private jointBreakForce: number = 0;
-    private jointBreakTorque: number = 0;
-
-    private config: OIMO.RevoluteJointConfig = new OIMO.RevoluteJointConfig();
-    private rotationalMotor: OIMO.RotationalLimitMotor;
-    private springDamper: OIMO.SpringDamper;
-    private jointAnchor: OIMO.Vec3;
-    private jointAxis: OIMO.Vec3;
-
-    private jointInternalCollision: boolean;
-
-    private oimoJoint: OIMO.RevoluteJoint;
-
-
-    constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null, _axis: Vector3 = new Vector3(0, 1, 0), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
-      super(_attachedRigidbody, _connectedRigidbody);
-      this.jointAxis = new OIMO.Vec3(_axis.x, _axis.y, _axis.z);
-      this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
-
-      /*Tell the physics that there is a new joint and on the physics start the actual joint is first created. Values can be set but the
-       actual constraint ain't existent until the game starts
-     */
-      this.addEventListener(EVENT.COMPONENT_ADD, this.dirtyStatus);
-      this.addEventListener(EVENT.COMPONENT_REMOVE, this.superRemove);
-    }
-
     /**
      * Initializing and connecting the two rigidbodies with the configured joint properties
      * is automatically called by the physics system. No user interaction needed.
@@ -205,35 +205,6 @@ namespace FudgeCore {
     */
     public getOimoJoint(): OIMO.Joint {
       return this.oimoJoint;
-    }
-
-    private constructJoint(): void {
-      this.springDamper = new OIMO.SpringDamper().setSpring(this.jointSpringFrequency, this.jointSpringDampingRatio);
-      this.rotationalMotor = new OIMO.RotationalLimitMotor().setLimits(this.jointMotorLimitLower, this.jointMotorLimitUpper);
-      this.rotationalMotor.setMotor(this.jointMotorSpeed, this.jointmotorTorque);
-      this.config = new OIMO.RevoluteJointConfig();
-      let attachedRBPos: Vector3 = this.attachedRigidbody.getContainer().mtxWorld.translation;
-      let worldAnchor: OIMO.Vec3 = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
-      this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, this.jointAxis);
-      this.config.springDamper = this.springDamper;
-      this.config.limitMotor = this.rotationalMotor;
-      var j: OIMO.RevoluteJoint = new OIMO.RevoluteJoint(this.config);
-      j.setBreakForce(this.breakForce);
-      j.setBreakTorque(this.breakTorque);
-      j.setAllowCollision(this.jointInternalCollision);
-      this.oimoJoint = j;
-    }
-
-    private superAdd(): void {
-      this.addConstraintToWorld(this);
-    }
-
-    private superRemove(): void {
-      this.removeConstraintFromWorld(this);
-    }
-
-    protected dirtyStatus(): void {
-      Physics.world.changeJointStatus(this);
     }
 
     //#region Saving/Loading
@@ -277,6 +248,36 @@ namespace FudgeCore {
       return this;
     }
     //#endregion
+
+    protected dirtyStatus(): void {
+      Physics.world.changeJointStatus(this);
+    }
+
+    private constructJoint(): void {
+      this.springDamper = new OIMO.SpringDamper().setSpring(this.jointSpringFrequency, this.jointSpringDampingRatio);
+      this.rotationalMotor = new OIMO.RotationalLimitMotor().setLimits(this.jointMotorLimitLower, this.jointMotorLimitUpper);
+      this.rotationalMotor.setMotor(this.jointMotorSpeed, this.jointmotorTorque);
+      this.config = new OIMO.RevoluteJointConfig();
+      let attachedRBPos: Vector3 = this.attachedRigidbody.getContainer().mtxWorld.translation;
+      let worldAnchor: OIMO.Vec3 = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
+      this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, this.jointAxis);
+      this.config.springDamper = this.springDamper;
+      this.config.limitMotor = this.rotationalMotor;
+      var j: OIMO.RevoluteJoint = new OIMO.RevoluteJoint(this.config);
+      j.setBreakForce(this.breakForce);
+      j.setBreakTorque(this.breakTorque);
+      j.setAllowCollision(this.jointInternalCollision);
+      this.oimoJoint = j;
+    }
+
+    private superAdd(): void {
+      this.addConstraintToWorld(this);
+    }
+
+    private superRemove(): void {
+      this.removeConstraintFromWorld(this);
+    }
+
 
   }
 }

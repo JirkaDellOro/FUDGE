@@ -1,28 +1,45 @@
 namespace FudgeCore {
+  export enum MIPMAP {
+    CRISP, MEDIUM, BLURRY
+  }
   /**
    * Baseclass for different kinds of textures. 
    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
    */
-  export abstract class Texture extends Mutable {
-    public name: string = "Texture";
+  @RenderInjectorTexture.decorate
+  export abstract class Texture extends Mutable implements SerializableResource {
+    public name: string;
+    public idResource: string = undefined;
+    public mipmap: MIPMAP = MIPMAP.CRISP;
     protected renderData: { [key: string]: unknown };
 
+    constructor(_name: string = "Texture") {
+      super();
+      this.name = _name;
+    }
+
+    public abstract get texImageSource(): TexImageSource;
     public useRenderData(): void {/* injected by RenderInjector*/ }
 
+    //#region Transfer
+    public serialize(): Serialization {
+      return {};
+    }
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      return this;
+    }
+
     protected reduceMutator(_mutator: Mutator): void {
-      // delete _mutator.idResource; 
+      delete _mutator.idResource; 
     }
   }
 
   /**
    * Texture created from an existing image
    */
-  @RenderInjectorTexture.decorate
-  export class TextureImage extends Texture implements SerializableResource {
+  export class TextureImage extends Texture {
     public image: HTMLImageElement = null;
     public url: RequestInfo;
-    public idResource: string = undefined;
-
 
     constructor(_url?: RequestInfo) {
       super();
@@ -32,6 +49,10 @@ namespace FudgeCore {
       }
 
       Project.register(this);
+    }
+
+    public get texImageSource(): TexImageSource {
+      return this.image;
     }
 
     /**
@@ -87,16 +108,40 @@ namespace FudgeCore {
   /**
    * Texture created from a canvas
    */
+  export class TextureBase64 extends Texture {
+    public image: HTMLImageElement = new Image();
+
+    constructor (_name: string, _base64: string, _mipmap: MIPMAP = MIPMAP.CRISP) {
+      super(_name);
+      this.image.src = _base64;
+      this.mipmap = _mipmap;
+    }
+    public get texImageSource(): TexImageSource {
+      return this.image;
+    }
+  }
+  /**
+   * Texture created from a canvas
+   */
   export class TextureCanvas extends Texture {
+    public get texImageSource(): TexImageSource {
+      return null;
+    }
   }
   /**
    * Texture created from a FUDGE-Sketch
    */
   export class TextureSketch extends TextureCanvas {
+    public get texImageSource(): TexImageSource {
+      return null;
+    }
   }
   /**
    * Texture created from an HTML-page
    */
   export class TextureHTML extends TextureCanvas {
+    public get texImageSource(): TexImageSource {
+      return null;
+    }
   }
 }

@@ -169,7 +169,19 @@ namespace FudgeCore {
       vector.data = new Float32Array([_dividend.x / _divisor.x, _dividend.y / _divisor.y, _dividend.z / _divisor.z]);
       return vector;
     }
-    
+
+    /**
+     * Creates a cartesian vector from geographic coordinates
+     */
+    public static GEO(_longitude: number = 0, _latitude: number = 0, _magnitude: number = 1): Vector3 {
+      let vector: Vector3 = Recycler.get(Vector3);
+      let geo: Geo3 = Recycler.get(Geo3);
+      geo.set(_longitude, _latitude, _magnitude);
+      vector.geo = geo;
+      Recycler.store(geo);
+      return vector;
+    }
+
     // TODO: implement equals-functions
     get x(): number {
       return this.data[0];
@@ -212,6 +224,30 @@ namespace FudgeCore {
       let copy: Vector3 = Recycler.get(Vector3);
       copy.data.set(this.data);
       return copy;
+    }
+
+    /**
+     * Returns a geographic representation of this vector
+     */
+    public get geo(): Geo3 {
+      let geo: Geo3 = Recycler.get(Geo3);
+      geo.magnitude = this.magnitude;
+
+      if (geo.magnitude === 0)
+        return geo;
+
+      geo.longitude = 180 * Math.atan2(this.x / geo.magnitude, this.z / geo.magnitude) / Math.PI;
+      geo.latitude = 180 * Math.asin(this.y / geo.magnitude) / Math.PI;
+      return geo;
+    }
+
+    /**
+     * Adjust the cartesian values of this vector to represent the given as geographic coordinates
+     */
+    public set geo(_geo: Geo3) {
+      this.set(0, 0, _geo.magnitude);
+      this.transform(Matrix4x4.ROTATION_X(-_geo.latitude));
+      this.transform(Matrix4x4.ROTATION_Y(_geo.longitude));
     }
 
     /**
@@ -340,6 +376,23 @@ namespace FudgeCore {
       return copy;
     }
 
+    //#region Transfer
+    public serialize(): Serialization {
+      let serialization: Serialization = this.getMutator();
+      // serialization.toJSON = () => { return `{ "r": ${this.r}, "g": ${this.g}, "b": ${this.b}, "a": ${this.a}}`; };
+      serialization.toJSON = () => { return `[${this.x}, ${this.y}, ${this.z}]`; };
+      return serialization;
+    }
+
+    public async deserialize(_serialization: Serialization): Promise<Vector3> {
+      if (typeof (_serialization) == "string") {
+        [this.x, this.y, this.z] = JSON.parse(<string><unknown>_serialization);
+      }
+      else
+        this.mutate(_serialization);
+      return this;
+    }
+
     public getMutator(): Mutator {
       let mutator: Mutator = {
         x: this.data[0], y: this.data[1], z: this.data[2]
@@ -347,5 +400,6 @@ namespace FudgeCore {
       return mutator;
     }
     protected reduceMutator(_mutator: Mutator): void {/** */ }
+    //#endregion Transfer
   }
 }

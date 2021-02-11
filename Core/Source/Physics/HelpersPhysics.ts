@@ -110,8 +110,12 @@ namespace FudgeCore {
 
     /** Whether the debug informations of the physics should be displayed or not (default = false) */
     public debugDraw: boolean = false;
-
     private physicsDebugMode: PHYSICS_DEBUGMODE = PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
+
+    constructor(_defGroup: number, _defMask: number) {
+      this.defaultCollisionGroup = _defGroup;
+      this.defaultCollisionMask = _defMask;
+    }
 
     get debugMode(): PHYSICS_DEBUGMODE {
       return this.physicsDebugMode;
@@ -191,11 +195,6 @@ namespace FudgeCore {
     }
     set defaultCollisionGroup(_value: number) {
       OIMO.Setting.defaultCollisionGroup = _value;
-    }
-
-    constructor(_defGroup: number, _defMask: number) {
-      this.defaultCollisionGroup = _defGroup;
-      this.defaultCollisionMask = _defMask;
     }
   }
 }

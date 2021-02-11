@@ -50,7 +50,7 @@ namespace FudgeCore {
       this.canvas = _canvas;
       this.crc2 = _canvas.getContext("2d");
 
-      this.rectSource = RenderManager.getCanvasRect();
+      this.rectSource = Render.getCanvasRect();
       this.rectDestination = this.getClientRectangle();
 
       this.setGraph(_graph);
@@ -114,10 +114,20 @@ namespace FudgeCore {
 
     // #region Drawing
     /**
-     * Draw this viewport
+     * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the [[Node]]s and [[ComponentMesh]]es 
      */
-    public draw(): void {
-      RenderManager.resetFrameBuffer();
+    public calculateTransforms(): void {
+      let matrix: Matrix4x4 = Matrix4x4.IDENTITY();
+      if (this.graph.getParent())
+        matrix = this.graph.getParent().mtxWorld;
+      Render.setupTransformAndLights(this.graph, matrix);
+    }
+    /**
+     * Draw this viewport displaying its branch. By default, the transforms in the branch are recalculated first.
+     * Pass `false` if calculation was already done for this frame 
+     */
+    public draw(_calculateTransforms: boolean = true): void {
+      Render.resetFrameBuffer();
       if (!this.camera.isActive)
         return;
       if (this.adjustingFrames)
@@ -125,15 +135,30 @@ namespace FudgeCore {
       if (this.adjustingCamera)
         this.adjustCamera();
 
-      RenderManager.clear(this.camera.backgroundColor);
-      RenderManager.drawGraph(this.graph, this.camera);
+      if (_calculateTransforms)
+        this.calculateTransforms();
+      Render.clear(this.camera.backgroundColor);
+      Render.drawGraph(this.graph, this.camera);
 
       this.crc2.imageSmoothingEnabled = false;
       this.crc2.drawImage(
-        RenderManager.getCanvas(),
+        Render.getCanvas(),
         this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height,
         this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height
       );
+    }
+
+
+    public pick(): Pick[] {
+      if (this.adjustingFrames)
+        this.adjustFrames();
+      if (this.adjustingCamera)
+        this.adjustCamera();
+      Render.pickTexture = Render.createPickTexture(this.rectSource.width, this.rectSource.height);
+      let picks: Pick[] =  Render.drawGraphForPicking(this.graph, this.camera);
+
+      return picks;
+      // cursor.mtxLocal.translation = rayWorld;
     }
 
     /**
@@ -144,15 +169,31 @@ namespace FudgeCore {
         this.adjustFrames();
       if (this.adjustingCamera)
         this.adjustCamera();
-      this.pickBuffers = RenderManager.drawGraphForRayCast(this.graph, this.camera);
+      this.pickBuffers = Render.drawGraphForRayCast(this.graph, this.camera);
     }
 
 
     public pickNodeAt(_pos: Vector2): RayHit[] {
       // this.createPickBuffers();
-      let hits: RayHit[] = RenderManager.pickNodeAt(_pos, this.pickBuffers, this.rectSource);
-      hits.sort((a: RayHit, b: RayHit) => (b.zBuffer > 0) ? (a.zBuffer > 0) ? a.zBuffer - b.zBuffer : 1 : -1);
+      let hits: RayHit[] = Render.pickNodeAt(_pos, this.pickBuffers, this.rectSource);
+      // hits.sort((a: RayHit, b: RayHit) => (b.zBuffer > 0) ? (a.zBuffer > 0) ? a.zBuffer - b.zBuffer : 1 : -1);
       return hits;
+    }
+
+    public calculateWorldFromZBuffer(_pos: Vector2, _z: number): Vector3 {
+      let posClip: Vector3 = new Vector3(
+        2 * _pos.x / this.getClientRectangle().width - 1,
+        1 - 2 * _pos.y / this.getClientRectangle().height,
+        _z
+      );
+
+      let mtxViewProjectionInverse: Matrix4x4 = Matrix4x4.INVERSION(this.camera.mtxWorldToView);
+      let m: Float32Array = mtxViewProjectionInverse.get();
+      let rayWorld: Vector3 = Vector3.TRANSFORMATION(posClip, mtxViewProjectionInverse, true);
+      let w: number = m[3] * posClip.x + m[7] * posClip.y + m[11] * posClip.z + m[15];
+      rayWorld.scale(1 / w);
+
+      return rayWorld;
     }
 
     /**
@@ -171,17 +212,17 @@ namespace FudgeCore {
       this.rectSource = this.frameDestinationToSource.getRect(this.rectDestination);
       // having an offset source does make sense only when multiple viewports display parts of the same rendering. For now: shift it to 0,0
       this.rectSource.x = this.rectSource.y = 0;
-      // still, a partial image of the rendering may be retrieved by moving and resizing the render viewport
+      // still, a partial image of the rendering may be retrieved by moving and resizing the render viewport. For now, it's always adjusted to the current viewport
       let rectRender: Rectangle = this.frameSourceToRender.getRect(this.rectSource);
-      RenderManager.setViewportRectangle(rectRender);
+      Render.setRenderRectangle(rectRender);
       // no more transformation after this for now, offscreen canvas and render-viewport have the same size
-      RenderManager.setCanvasSize(rectRender.width, rectRender.height);
+      Render.setCanvasSize(rectRender.width, rectRender.height);
     }
     /**
      * Adjust the camera parameters to fit the rendering into the render vieport
      */
     public adjustCamera(): void {
-      let rect: Rectangle = RenderManager.getViewportRectangle();
+      let rect: Rectangle = Render.getRenderRectangle();
       this.camera.projectCentral(
         rect.width / rect.height, this.camera.getFieldOfView(), this.camera.getDirection(), this.camera.getNear(), this.camera.getFar());
     }
@@ -207,7 +248,7 @@ namespace FudgeCore {
     }
 
     public pointWorldToClient(_position: Vector3): Vector2 {
-      let projection: Vector3 = this.camera.project(_position);
+      let projection: Vector3 = this.camera.pointWorldToClip(_position);
       let posClient: Vector2 = this.pointClipToClient(projection.toVector2());
       return posClient;
     }
@@ -228,6 +269,7 @@ namespace FudgeCore {
     public pointSourceToRender(_source: Vector2): Vector2 {
       let projectionRectangle: Rectangle = this.camera.getProjectionRectangle();
       let point: Vector2 = this.frameSourceToRender.getPoint(_source, projectionRectangle);
+      // console.log(projectionRectangle.toString());
       return point;
     }
 
@@ -242,8 +284,8 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns a point in normed view-rectangle matching the given point on the client rectangle
-     * The view-rectangle matches the client size in the hypothetical distance of 1 to the camera, its origin in the center and y-axis pointing up
+     * Returns a point on a projection surface in the hypothetical distance of 1 to the camera  
+     * matching the given point on the client rectangle
      * TODO: examine, if this should be a camera-method. Current implementation is for central-projection
      */
     public pointClientToProjection(_client: Vector2): Vector2 {
@@ -272,8 +314,8 @@ namespace FudgeCore {
       // result.x *= (_normed.x + 1) * rectClient.width;
       // result.y *= (1 - _normed.y) * rectClient.height;
       // result.add(rectClient.position);
-      //TODO: check if rectDestination can be safely (and more perfomant) be used instead getClientRectangle
-      let pointClient: Vector2 = RenderManager.rectClip.pointToRect(_normed, this.rectDestination);
+      //TODO: check if rectDestination can safely (and more perfomant) be used instead getClientRectangle
+      let pointClient: Vector2 = Render.rectClip.pointToRect(_normed, this.rectDestination);
       return pointClient;
     }
     /**
@@ -281,7 +323,7 @@ namespace FudgeCore {
      * which stretches from -1 to 1 in both dimensions, y pointing up
      */
     public pointClipToCanvas(_normed: Vector2): Vector2 {
-      let pointCanvas: Vector2 = RenderManager.rectClip.pointToRect(_normed, this.getCanvasRectangle());
+      let pointCanvas: Vector2 = Render.rectClip.pointToRect(_normed, this.getCanvasRectangle());
       return pointCanvas;
     }
 

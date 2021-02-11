@@ -33,7 +33,7 @@ namespace FudgeCore {
 
     constructor(_color?: Color) {
       super();
-      this.color = _color || new Color(0.5, 0.5, 0.5, 1);
+      this.color = _color || new Color();
     }
 
     //#region Transfer
@@ -56,13 +56,13 @@ namespace FudgeCore {
   @RenderInjectorCoat.decorate
   export class CoatMatCap extends Coat {
     public texture: TextureImage = null;
-    public color: Color = new Color(0.5, 0.5, 0.5, 1);
+    public color: Color = new Color();
     public shadeSmooth: number;
 
     constructor(_texture?: TextureImage, _color?: Color, _shadeSmooth?: number) {
       super();
       this.texture = _texture || new TextureImage();
-      this.color = _color || new Color(0.5, 0.5, 0.5, 1);
+      this.color = _color || new Color();
       this.shadeSmooth = _shadeSmooth || 0;
     }
   }

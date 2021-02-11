@@ -4,7 +4,7 @@ namespace FudgeUserInterface {
 
   export class CustomElementMatrix3x3 extends CustomElementTemplate {
 
-    public getMutatorValue(): Object {
+    public getMutatorValue(): ƒ.Mutator {
       let steppers: NodeListOf<CustomElementStepper> = this.querySelectorAll("fudge-stepper");
       let mutator: ƒ.Mutator = { translation: {}, scaling: {}, rotation: 0 };
       let count: number = 0;

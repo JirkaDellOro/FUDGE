@@ -28,7 +28,7 @@ namespace FudgeCore {
    * rigidbodies.
    */
     public static initializePhysics(): Physics {
-      if (typeof OIMO !== 'undefined' && this.world == null) { //Check if OIMO Namespace was loaded, else do not use any physics. Check is needed to ensure FUDGE can be used without Physics
+      if (typeof OIMO !== "undefined" && this.world == null) { //Check if OIMO Namespace was loaded, else do not use any physics. Check is needed to ensure FUDGE can be used without Physics
         this.world = new Physics();
         this.settings = new PhysicsSettings(PHYSICS_GROUP.DEFAULT, (PHYSICS_GROUP.DEFAULT | PHYSICS_GROUP.GROUP_1 | PHYSICS_GROUP.GROUP_2 | PHYSICS_GROUP.GROUP_3 | PHYSICS_GROUP.GROUP_4));
         this.world.createWorld(); //create the actual oimoPhysics World
@@ -89,7 +89,7 @@ namespace FudgeCore {
   * Starts the physical world by checking that each body has the correct values from the Scene Tree
   */
     public static start(_sceneTree: Node): void {
-      RenderManager.setupTransformAndLights(_sceneTree);
+      Render.setupTransformAndLights(_sceneTree);
       this.world.updateWorldFromWorldMatrix();
     }
 

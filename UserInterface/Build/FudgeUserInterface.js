@@ -20,12 +20,16 @@ var FudgeUserInterface;
                 this.domElement.dispatchEvent(new Event("mutate" /* MUTATE */, { bubbles: true }));
             };
             this.refresh = (_event) => {
-                this.updateUserInterface();
+                if (document.body.contains(this.domElement)) {
+                    this.updateUserInterface();
+                    return;
+                }
+                window.clearInterval(this.idInterval);
             };
             this.domElement = _domElement;
             this.setMutable(_mutable);
             // TODO: examine, if this should register to one common interval, instead of each installing its own.
-            window.setInterval(this.refresh, this.timeUpdate);
+            this.startRefresh();
             this.domElement.addEventListener("input", this.mutateOnInput);
         }
         /**
@@ -61,6 +65,8 @@ var FudgeUserInterface;
                     return mutator;
                 if (element instanceof FudgeUserInterface.CustomElement)
                     mutator[key] = element.getMutatorValue();
+                else if (element instanceof HTMLInputElement)
+                    mutator[key] = element.value;
                 else if (mutatorTypes[key] instanceof Object)
                     // TODO: setting a value of the dom element doesn't make sense... examine what this line was supposed to do. Assumably enums
                     mutator[key] = element.value;
@@ -117,6 +123,10 @@ var FudgeUserInterface;
             this.mutator = _mutable.getMutatorForUserInterface();
             if (_mutable instanceof ƒ.Mutable)
                 this.mutatorTypes = _mutable.getMutatorAttributeTypes(this.mutator);
+        }
+        startRefresh() {
+            window.clearInterval(this.idInterval);
+            this.idInterval = window.setInterval(this.refresh, this.timeUpdate);
         }
     }
     FudgeUserInterface.Controller = Controller;
@@ -530,6 +540,30 @@ var FudgeUserInterface;
             }
         }
         /**
+         * Get the value of this element in a format compatible with [[FudgeCore.Mutator]]
+         */
+        getMutatorValue() {
+            let mutator = {};
+            let elements = this.querySelectorAll("[key");
+            for (let element of elements) {
+                let key = element.getAttribute("key");
+                if (element instanceof FudgeUserInterface.CustomElement)
+                    mutator[key] = element.getMutatorValue();
+                else
+                    mutator[key] = element.value;
+            }
+            return mutator;
+        }
+        setMutatorValue(_mutator) {
+            for (let key in _mutator) {
+                let element = this.querySelector(`[key=${key}]`);
+                if (element instanceof FudgeUserInterface.CustomElement)
+                    element.setMutatorValue(_mutator[key]);
+                else
+                    element.value = _mutator[key];
+            }
+        }
+        /**
          * When connected the first time, the element gets constructed as a deep clone of the template.
          */
         connectedCallback() {
@@ -545,6 +579,9 @@ var FudgeUserInterface;
             for (let child of content.childNodes) {
                 this.appendChild(child.cloneNode(true));
             }
+            let label = this.querySelector("label");
+            if (label)
+                label.textContent = this.getAttribute("label");
         }
     }
     CustomElementTemplate.fragment = new Map();
@@ -752,6 +789,7 @@ var FudgeUserInterface;
                         break;
                     case ƒ.KEYBOARD_CODE.ENTER:
                     case ƒ.KEYBOARD_CODE.NUMPAD_ENTER:
+                    case ƒ.KEYBOARD_CODE.ESC:
                         this.activateInnerTabs(false);
                         this.focus();
                         break;
@@ -880,11 +918,19 @@ var FudgeUserInterface;
          * Displays this value by setting the contents of the digits and the exponent
          */
         display() {
-            let [mantissa, exp] = this.toString().split("e");
+            let digits = this.querySelectorAll("fudge-digit");
             let spans = this.querySelectorAll("span");
+            if (!isFinite(this.value)) {
+                for (let pos = 0; pos < digits.length; pos++) {
+                    let digit = digits[5 - pos];
+                    digit.innerHTML = "  ∞   "[5 - pos];
+                    spans[1].textContent = "  ";
+                }
+                return;
+            }
+            let [mantissa, exp] = this.toString().split("e");
             spans[0].textContent = this.value < 0 ? "-" : "+";
             spans[1].textContent = exp;
-            let digits = this.querySelectorAll("fudge-digit");
             mantissa = mantissa.substring(1);
             mantissa = mantissa.replace(".", "");
             for (let pos = 0; pos < digits.length; pos++) {
@@ -905,7 +951,11 @@ var FudgeUserInterface;
             if (_amount == 0)
                 return;
             if (digit == this.querySelector("[name=exp]")) {
-                this.value *= Math.pow(10, _amount);
+                // console.log(this.value);
+                let value = this.value * Math.pow(10, _amount);
+                console.log(value, this.value);
+                if (isFinite(value))
+                    this.value = value;
                 this.display();
                 return;
             }

@@ -1,6 +1,7 @@
 namespace ScreenToRay {
   import ƒ = FudgeCore;
-  
+  import ƒAid = FudgeAid;
+
   window.addEventListener("load", init);
 
   let uiMaps: { [name: string]: { ui: UI.FieldSet, framing: ƒ.Framing } } = {};
@@ -14,26 +15,45 @@ namespace ScreenToRay {
 
   let mouse: ƒ.Vector2 = new ƒ.Vector2();
   let viewportRay: ƒ.Viewport = new ƒ.Viewport();
+  let viewportPick: ƒ.Viewport = new ƒ.Viewport();
   let cameraRay: ƒ.ComponentCamera;
   let canvasRay: HTMLCanvasElement;
+  let canvasPick: HTMLCanvasElement;
+
+  let cursor: ƒAid.Node = new ƒAid.Node(
+    "Cursor",
+    ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(10)),
+    new ƒ.Material("Cursor", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("darkgray"))),
+    new ƒ.MeshSphere("Cursor", 5, 5)
+  );
 
   function init(): void {
     // create asset
-    let graph: ƒ.Node = Scenes.createAxisCross();
-    graph.addComponent(new ƒ.ComponentTransform());
+    let graph: ƒ.Node = new ƒAid.NodeCoordinateSystem("CoSys", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(100)));
+    // graph.addComponent(new ƒ.ComponentTransform());
+    graph.getChildrenByName("ArrowBlue")[0].mtxLocal.rotateZ(45, true);
+    graph.getChildrenByName("ArrowBlue")[0].getChildrenByName("ArrowBlueShaft")[0].getComponent(ƒ.ComponentMaterial).clrPrimary.a = 0.5; // = ƒ.Color.CSS("white", 0.9);
+
+    graph.appendChild(cursor);
 
     // initialize viewports
     canvas = document.querySelector("canvas#viewport");
-    cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
+    cmpCamera = new ƒ.ComponentCamera();
+    cmpCamera.pivot.translation = new ƒ.Vector3(1, 2, 3);
+    cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
     viewport.initialize(canvas.id, graph, cmpCamera, canvas);
     canvas.addEventListener("mousemove", setCursorPosition);
 
     canvasRay = document.querySelector("canvas#ray");
-    cameraRay = Scenes.createCamera(new ƒ.Vector3(1, 2, 3));
-    let cmpCameraRay: ƒ.ComponentCamera = cameraRay;
-    cmpCameraRay.projectCentral(1, 45);
-    viewportRay.initialize("ray", graph, cmpCameraRay, canvasRay);
+    cameraRay = new ƒ.ComponentCamera();
+    cameraRay.pivot.translation = new ƒ.Vector3(1, 2, 3);
+    cameraRay.projectCentral(1, 10);
+    viewportRay.initialize("ray", graph, cameraRay, canvasRay);
     viewportRay.adjustingFrames = true;
+
+    canvasPick = document.querySelector("canvas#pick");
+    viewportPick.initialize("pick", graph, cameraRay, canvasPick);
+    viewportPick.adjustingFrames = true;
 
     menu = document.getElementsByTagName("div")[0];
     menu.innerHTML = "Test automatic rectangle transformation. Adjust CSS-Frame and framings";
@@ -75,42 +95,53 @@ namespace ScreenToRay {
       update();
       viewport.draw();
       adjustRayCamera();
+      pick();
       pickNodeAt(mouse);
       // let color: ƒ.Color = getPixelColor(mouse);           
     }
   }
 
-  function getPixelColor(_pos: ƒ.Vector2): ƒ.Color {
-    let color: ƒ.Color = new ƒ.Color(1, 1, 1, 1);
-    let crc2: CanvasRenderingContext2D = canvas.getContext("2d");
-    color.setArrayBytesRGBA(crc2.getImageData(_pos.x, _pos.y, 1, 1).data);
-    return color;
+  function pick(): void {
+    let picks: ƒ.Pick[] = viewportPick.pick();
+
+    let output: HTMLOutputElement = document.querySelector("output#o2");
+    output.innerHTML = "";
+    for (let pick of picks) {
+      let world: ƒ.Vector3 = viewportPick.calculateWorldFromZBuffer(ƒ.Vector2.ZERO(), pick.zBuffer);
+      output.innerHTML += pick.node.name + ":" + pick.zBuffer.toFixed(2) + " | " + pick.luminance.toFixed(2) + " | " + pick.alpha.toFixed(2) + "<br/>";
+      output.innerHTML += world.toString() + "<br/>";
+    }
   }
 
   function pickNodeAt(_pos: ƒ.Vector2): void {
     let posRender: ƒ.Vector2 = viewport.pointClientToRender(
       new ƒ.Vector2(_pos.x, viewport.getClientRectangle().height - _pos.y)
     );
-    let output: HTMLOutputElement = document.querySelector("output");
+    let output: HTMLOutputElement = document.querySelector("output#o1");
     output.innerHTML = "";
     let hits: ƒ.RayHit[] = viewport.pickNodeAt(posRender);
-    for (let hit of hits)
-      output.innerHTML += hit.node.name + ":" + hit.zBuffer + "<br/>";
+    for (let hit of hits) {
+      let world: ƒ.Vector3 = viewport.calculateWorldFromZBuffer(_pos, hit.zBuffer);
+      output.innerHTML += hit.node.name + ":" + hit.zBuffer.toFixed(2) + "<br/>";
+      output.innerHTML += world.toString() + "<br/>";
+    }
+
+    cursor.mtxLocal.translation = viewport.calculateWorldFromZBuffer(mouse, hits[0].zBuffer);
   }
 
   function adjustRayCamera(): void {
-    ƒ.Debug.group("Ray");
+    // ƒ.Debug.group("Ray");
 
     let ray: ƒ.Ray = computeRay();
-    ƒ.Debug.log(ray.direction.toString());
+    // ƒ.Debug.log(ray.direction.toString());
 
     ray.direction.transform(cmpCamera.pivot);
-    ƒ.Debug.log(ray.direction.toString());
+    // ƒ.Debug.log(ray.direction.toString());
 
-    ƒ.Debug.groupEnd();
+    // ƒ.Debug.groupEnd();
 
     cameraRay.pivot.lookAt(ray.direction);
-    cameraRay.projectCentral(1, 10);
+    cameraRay.projectCentral(1, 0.001);
     viewportRay.draw();
 
     let crcRay: CanvasRenderingContext2D = canvasRay.getContext("2d");

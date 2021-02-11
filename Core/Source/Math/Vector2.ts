@@ -156,6 +156,18 @@ namespace FudgeCore {
       if (_clockwise) return new Vector2(_vector.y, -_vector.x);
       else return new Vector2(-_vector.y, _vector.x);
     }
+    
+    /**
+     * Creates a cartesian vector from polar coordinates
+     */
+    public static GEO(_angle: number = 0, _magnitude: number = 1): Vector2 {
+      let vector: Vector2 = Recycler.get(Vector2);
+      let geo: Geo2 = Recycler.get(Geo2);
+      geo.set(_angle, _magnitude);
+      vector.geo = geo;
+      Recycler.store(geo);
+      return vector;
+    }
 
     get x(): number {
       return this.data[0];
@@ -190,6 +202,28 @@ namespace FudgeCore {
      */
     public get copy(): Vector2 {
       return new Vector2(this.x, this.y);
+    }
+
+    /**
+     * Returns a polar representation of this vector
+     */
+    public get geo(): Geo2 {
+      let geo: Geo2 = Recycler.get(Geo2);
+      geo.magnitude = this.magnitude;
+
+      if (geo.magnitude === 0)
+        return geo;
+
+      geo.angle = 180 * Math.atan2(this.y / geo.magnitude, this.x / geo.magnitude) / Math.PI;
+      return geo;
+    }
+
+    /**
+     * Adjust the cartesian values of this vector to represent the given as polar coordinates
+     */
+    public set geo(_geo: Geo2) {
+      this.set(_geo.magnitude, 0);
+      this.transform(Matrix3x3.ROTATION(_geo.angle));
     }
 
     /**
@@ -266,6 +300,23 @@ namespace FudgeCore {
       return result;
     }
 
+    //#region Transfer
+    public serialize(): Serialization {
+      let serialization: Serialization = this.getMutator();
+      // serialization.toJSON = () => { return `{ "r": ${this.r}, "g": ${this.g}, "b": ${this.b}, "a": ${this.a}}`; };
+      serialization.toJSON = () => { return `[${this.x}, ${this.y}]`; };
+      return serialization;
+    }
+
+    public async deserialize(_serialization: Serialization): Promise<Vector2> {
+      if (typeof (_serialization) == "string") {
+        [this.x, this.y] = JSON.parse(<string><unknown>_serialization);
+      }
+      else
+        this.mutate(_serialization);
+      return this;
+    }
+
     public getMutator(): Mutator {
       let mutator: Mutator = {
         x: this.data[0], y: this.data[1]
@@ -273,5 +324,6 @@ namespace FudgeCore {
       return mutator;
     }
     protected reduceMutator(_mutator: Mutator): void {/** */ }
+    //#endregion
   }
 }

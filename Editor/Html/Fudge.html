@@ -26,7 +26,26 @@
 
 <body>
   <template>
-    <custom-vector3 style="background-color: rgba(129, 129, 129, 0.561);">
+    
+    <custom-vector2 style="text-align: center;">
+      <span style="text-align: left">
+        <label>label</label>
+      </span>
+      <fudge-stepper key="x" label="x"></fudge-stepper>
+      <fudge-stepper key="y" label="y"></fudge-stepper>
+    </custom-vector2>
+  </template>
+  <script>
+    FudgeUserInterface.CustomElementTemplate.register("custom-vector2");
+    FudgeUserInterface.CustomElement.register("custom-vector2", class CustomVector2 extends FudgeUserInterface.CustomElementTemplate { });
+    FudgeUserInterface.CustomElement.map("Vector2", "custom-vector2");
+  </script>
+
+  <template>
+    <custom-vector3 style="background-color: rgba(129, 129, 129, 0.561); text-align: center;"></custom-vector3>
+      <span style="text-align: left">
+        <label>label</label>
+      </span>
       <fudge-stepper key="x" label="x"></fudge-stepper>
       <fudge-stepper key="y" label="y"></fudge-stepper>
       <fudge-stepper key="z" label="z"></fudge-stepper>
