@@ -223,13 +223,6 @@ namespace FudgeCore {
         return;
 
       let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
-      // if (cmpMesh) { // TODO: careful when using particlesystem, pivot must not change node position
-      //   mtxMeshToWorld = Matrix4x4.MULTIPLICATION(_node.mtxWorld, cmpMesh.pivot);
-      //   cmpMesh.mtxWorld = mtxMeshToWorld.copy;
-      // }
-      // else
-      //   mtxMeshToWorld = _node.mtxWorld;
-
       if (cmpMesh && cmpMesh.isActive) {
         let mtxMeshToView: Matrix4x4 = Matrix4x4.MULTIPLICATION(_mtxWorldToView, cmpMesh.mtxWorld);
         // TODO: create drawNode method for particle system using _node.mtxWorld instead of finalTransform
@@ -274,18 +267,16 @@ namespace FudgeCore {
       try {
         let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
         let coat: Coat = cmpMaterial.material.getCoat();
+        let shader: typeof Shader = coat instanceof CoatTextured ? ShaderPickTextured : ShaderPick;
 
-        if (coat instanceof CoatTextured) {
-          ShaderPickTextured.useProgram();
-          coat.useRenderData(ShaderPickTextured, cmpMaterial);
-        }
-        else {
-          ShaderPick.useProgram();
-          coat.useRenderData(ShaderPick, cmpMaterial);
-        }
+        shader.useProgram();
+        coat.useRenderData(shader, cmpMaterial);
 
+        let sizeUniformLocation: WebGLUniformLocation = shader.uniforms["u_size"];
+        RenderWebGL.getRenderingContext().uniform2fv(sizeUniformLocation, Render.pickSize.get());
 
         let mesh: Mesh = _node.getComponent(ComponentMesh).mesh;
+        // console.log(Render.picks.length);
         mesh.useRenderBuffers(ShaderPick, _mtxMeshToWorld, _mtxWorldToView, Render.picks.length);
         RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, mesh.renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
 

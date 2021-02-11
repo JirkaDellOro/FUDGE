@@ -66,14 +66,12 @@ var ScreenToRay;
         viewport.createPickBuffers();
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, animate);
         ƒ.Loop.start();
-        // animate(null);
         function animate(_event) {
             update();
             viewport.draw();
             adjustRayCamera();
             pick();
             pickNodeAt(mouse);
-            // let color: ƒ.Color = getPixelColor(mouse);           
         }
     }
     function pick() {

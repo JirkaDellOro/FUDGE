@@ -26,7 +26,6 @@ namespace FudgeCore {
       // console.log("PickCamera", this.cmpCameraPick.pivot.translation.toString(), this.cmpCameraPick.pivot.getZ().toString());
 
       let size: number = Math.ceil(Math.sqrt(_branch.nNodesInBranch));
-      size = 100; // hack since dimension not yet respected in shader
       Render.pickTexture = Render.createPickTexture(size, size);
       let picks: Pick[] = Render.drawGraphForPicking(_branch, this.cmpCameraPick);
 

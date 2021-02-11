@@ -70,7 +70,6 @@ namespace FudgeCore {
       crc3.enable(WebGL2RenderingContext.CULL_FACE);
       crc3.enable(WebGL2RenderingContext.DEPTH_TEST);
       crc3.enable(WebGL2RenderingContext.BLEND);
-      crc3.enable(WebGL2RenderingContext.TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
       crc3.blendEquation(WebGL2RenderingContext.FUNC_ADD);
       RenderWebGL.setBlendMode(BLEND.TRANSPARENT);
       // RenderOperator.crc3.pixelStorei(WebGL2RenderingContext.UNPACK_FLIP_Y_WEBGL, true);

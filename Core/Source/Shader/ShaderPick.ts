@@ -19,14 +19,15 @@ namespace FudgeCore {
         precision highp int;
         
         uniform int u_id;
+        uniform vec2 u_size;
         uniform vec4 u_color;
         out vec4 frag;
         
         void main() {
            float id = float(u_id); 
+           float pixel = trunc(gl_FragCoord.x) + u_size.x * trunc(gl_FragCoord.y);
 
-           // TODO: vertical dimension!
-           if (gl_FragCoord.x < id || gl_FragCoord.x >= id + 1.0)
+           if (pixel != id)
              discard;
            float upperbyte = trunc(gl_FragCoord.z * 256.0) / 256.0;
            float lowerbyte = fract(gl_FragCoord.z * 256.0);

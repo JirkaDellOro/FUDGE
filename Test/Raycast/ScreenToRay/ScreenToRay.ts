@@ -84,19 +84,16 @@ namespace ScreenToRay {
       logMutatorInfo(name, uiMaps[name].framing);
     }
 
-
     viewport.createPickBuffers();
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, animate);
     ƒ.Loop.start();
-    // animate(null);
 
     function animate(_event: Event): void {
       update();
       viewport.draw();
       adjustRayCamera();
       pick();
-      pickNodeAt(mouse);
-      // let color: ƒ.Color = getPixelColor(mouse);           
+      pickNodeAt(mouse);     
     }
   }
 
