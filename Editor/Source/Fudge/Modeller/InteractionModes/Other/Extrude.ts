@@ -17,7 +17,7 @@ namespace Fudge {
       this.selector = new Selector(this.editableNode, this.viewport.camera.pivot.translation);
     }
 
-    onmousedown(_event: ƒ.EventPointer): string {
+    onmousedown(_event: ƒ.EventPointer): void {
       if (this.selector.selectVertices(this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY)), this.selection)) {
         this.vertexSelected = true;
         return null;
@@ -30,15 +30,14 @@ namespace Fudge {
       this.oldPosition = this.getPointerPosition(_event, this.distance);
       if (this.getDistanceFromRayToCenterOfNode(_event, this.distance).magnitude > 1)
         return;
-      let state: string = mesh.getState();
+      //let state: string = mesh.getState();
       this.selection = mesh.extrude(this.selection);
       let event: CustomEvent = new CustomEvent(ƒui.EVENT.CHANGE, { bubbles: true, detail: this.selection });
       ƒ.EventTargetStatic.dispatchEvent(event);
       this.isExtruded = true;
-      return state;
     }
 
-    onmouseup(_event: ƒ.EventPointer): void {
+    onmouseup(_event: ƒ.EventPointer): string {
       if (this.vertexSelected) {
         this.vertexSelected = false;
         return;
@@ -49,7 +48,8 @@ namespace Fudge {
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
       // maybe change this after all idk looks weird atm
       mesh.updateNormals();
-      this.createNormalArrows();
+      //this.createNormalArrows();
+      return mesh.getState();
     }
 
     onmove(_event: ƒ.EventPointer): void {
@@ -91,13 +91,13 @@ namespace Fudge {
       // mesh.updatePositionOfVertices(this.selection, this.copyOfSelectedVertices, this.getDistanceFromRayToCenterOfNode(_event, this.distance), this.offset);
     }
 
-    onkeydown(pressedKey: string): string {
+    onkeydown(pressedKey: string): void {
       this.axesSelectionHandler.addAxisOf(pressedKey);
-      return null;
     }
     
-    onkeyup(pressedKey: string): void {
+    onkeyup(pressedKey: string): string {
       this.axesSelectionHandler.removeAxisOf(pressedKey);
+      return null;
     }
 
     update(): void {

@@ -25,7 +25,7 @@ namespace Fudge {
       //
     }
 
-    onmousedown(_event: ƒ.EventPointer): string {
+    onmousedown(_event: ƒ.EventPointer): void {
       if (this.selector.selectVertices(this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY)), this.selection)) {
         this.vertexSelected = true;
         return;
@@ -33,10 +33,9 @@ namespace Fudge {
       this.boxStart = new ƒ.Vector2(_event.canvasX, _event.canvasY);
       this.clientPos = new ƒ.Vector2(_event.canvasX, _event.canvasY);
       ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.drawBox);
-      return null;
     }
 
-    onmouseup(_event: ƒ.EventPointer): void {
+    onmouseup(_event: ƒ.EventPointer): string {
       if (this.vertexSelected) {
         this.vertexSelected = false;
         return;
@@ -56,6 +55,7 @@ namespace Fudge {
       ƒ.EventTargetStatic.dispatchEvent(event);
 
       ƒ.Loop.removeEventListener(ƒ.EVENT.LOOP_FRAME, this.drawBox);
+      return null;
     }
 
     onmove(_event: ƒ.EventPointer): void {
@@ -65,7 +65,21 @@ namespace Fudge {
       this.clientPos = new ƒ.Vector2(_event.canvasX, _event.canvasY);
     }
 
-    onkeydown(pressedKey: string): string {
+    onkeydown(pressedKey: string): void {
+      // let state: string = null;
+
+      // // delete this later or refactor it to somewhere else
+      // switch (pressedKey) {
+      //   case "delete": 
+      //     (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).removeFace(this.selection);
+      //     this.selection = [];
+      //     state = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
+      //     break;
+      // }
+      // return state;
+    }
+
+    onkeyup(pressedKey: string): string {
       let state: string = null;
 
       // delete this later or refactor it to somewhere else
@@ -77,10 +91,6 @@ namespace Fudge {
           break;
       }
       return state;
-    }
-
-    onkeyup(pressedKey: string): void {
-      //
     }
 
     update(): void {

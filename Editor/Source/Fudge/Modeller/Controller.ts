@@ -33,13 +33,17 @@ namespace Fudge {
     }
 
     public onmouseup(_event: ƒ.EventPointer): void {
-      this.interactionMode.onmouseup(_event);
+      let state: string = this.interactionMode.onmouseup(_event);
+      if (state != null) 
+        this.saveState(state);
+
     }
 
     public onmousedown(_event: ƒ.EventPointer): void {
-      let state: string = this.interactionMode.onmousedown(_event);
-      if (state != null) 
-        this.saveState(state);
+      this.interactionMode.onmousedown(_event);
+      // let state: string = this.interactionMode.onmousedown(_event);
+      // if (state != null) 
+      //   this.saveState(state);
     }
 
     public onmove(_event: ƒ.EventPointer): void {
@@ -52,13 +56,20 @@ namespace Fudge {
 
       if (_event.ctrlKey) 
         return;
-      let state: string = this.interactionMode.onkeydown(_event.key.toLowerCase());
-      if (state != null) 
-        this.saveState(state);
+
+      this.interactionMode.onkeydown(_event.key.toLowerCase());
+      // let state: string = this.interactionMode.onkeydown(_event.key.toLowerCase());
+      // if (state != null) 
+      //   this.saveState(state);
     }
 
     public onkeyup(_event: ƒ.EventKeyboard): void {
-      this.interactionMode.onkeyup(_event.key.toLowerCase());
+      if (_event.ctrlKey) 
+        return;
+      let state: string = this.interactionMode.onkeyup(_event.key.toLowerCase());
+      if (state != null) 
+        this.saveState(state);
+
     }
 
     public getSelection(): number[] {
@@ -129,6 +140,12 @@ namespace Fudge {
     }
 
     private loadState(isUndo: boolean = true): void {
+      // if (this.states.length <= 0) 
+      //   return;
+      // let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+      // mesh.retrieveState(this.states[this.states.length - 1]);
+      // this.states.pop();
+      // this.interactionMode.updateAfterUndo();
       if (this.states.length <= 0 || (this.currentState <= 0 && isUndo) || this.currentState < 0) 
         return;
 
@@ -150,6 +167,10 @@ namespace Fudge {
     }
 
     private saveState(state: string): void {
+      // this.states.push(state);
+      // if (this.states.length > 20) {
+      //   this.states.shift();
+      // }
       this.states.splice(this.currentState + 1);
       console.log("states length: " + this.states.length);
       console.log("current state: " + this.currentState);

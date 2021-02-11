@@ -19,7 +19,7 @@ namespace Fudge {
       this.axesSelectionHandler = new AxesSelectionHandler(widget);
     }
 
-    onmousedown(_event: ƒ.EventPointer): string {
+    onmousedown(_event: ƒ.EventPointer): void {
       let posRender: ƒ.Vector2 = this.getPosRenderFrom(_event);
       this.viewport.createPickBuffers();
       this.axesSelectionHandler.pickWidget(this.viewport.pickNodeAt(posRender));
@@ -27,15 +27,19 @@ namespace Fudge {
       if (this.axesSelectionHandler.wasPicked || this.axesSelectionHandler.isAxisSelectedViaKeyboard()) {
         this.setValues(_event);
       }
+      // let state: string = null;
+      // if (this.axesSelectionHandler.wasPicked) 
+      //   state = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
+      // return state;
+    }
 
+    onmouseup(_event: ƒ.EventPointer): string {
       let state: string = null;
       if (this.axesSelectionHandler.wasPicked) 
         state = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
-      return state;
-    }
 
-    onmouseup(_event: ƒ.EventPointer): void {
       this.axesSelectionHandler.releaseComponent();
+      return state;
     }
 
     onmove(_event: ƒ.EventPointer): void {
@@ -80,16 +84,23 @@ namespace Fudge {
       mesh.scaleBy(scaleMatrix, this.copyOfSelectedVertices, this.centroid, this.selection);
     }
 
-    onkeydown (_pressedKey: string): string {
-      let result: string = null;
-      if (this.axesSelectionHandler.addAxisOf(_pressedKey)) {
-        result = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
-      }
-      return result;
+    onkeydown (_pressedKey: string): void {
+      this.axesSelectionHandler.addAxisOf(_pressedKey);
+      // let result: string = null;
+      // if (this.axesSelectionHandler.addAxisOf(_pressedKey)) {
+      //   result = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
+      // }
+      // return result;
     }
 
-    onkeyup(_pressedKey: string): void {
+    onkeyup(_pressedKey: string): string {
+      let state: string = null;
+      if (this.axesSelectionHandler.isValidSelection()) {
+        state = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
+      }
       this.axesSelectionHandler.removeAxisOf(_pressedKey);
+      return state;
+
     }
 
     update(): void {

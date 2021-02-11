@@ -18,22 +18,27 @@ namespace Fudge {
       this.axesSelectionHandler = new AxesSelectionHandler(widget);
     }
 
-    onmousedown(_event: ƒ.EventPointer): string {
+    onmousedown(_event: ƒ.EventPointer): void {
       this.viewport.createPickBuffers();
       let posRender: ƒ.Vector2 = this.getPosRenderFrom(_event);
       this.previousMousePos = new ƒ.Vector2(_event.clientX, _event.clientY);
       this.axesSelectionHandler.pickWidget(this.viewport.pickNodeAt(posRender));
       let state: string = null;
-      if (this.axesSelectionHandler.wasPicked) 
-        state = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
-      return state;
+      // if (this.axesSelectionHandler.wasPicked) 
+      //   state = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
+      // return state;
     }
 
-    onmouseup(_event: ƒ.EventPointer): void {
+    onmouseup(_event: ƒ.EventPointer): string {
+      let state: string = null;
+      if (this.axesSelectionHandler.wasPicked) 
+        state = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
+
       this.axesSelectionHandler.releaseComponent();
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
       mesh.updateNormals();
       // this.createNormalArrows();
+      return state;
     }
 
     onmove(_event: ƒ.EventPointer): void {
@@ -45,40 +50,40 @@ namespace Fudge {
         return;
       }
 
-      let rotationMatrix: ƒ.Matrix4x4 = this.getRotationVector(_event);
+      let rotationMatrix: ƒ.Matrix4x4 = this.getRotationMatrix(_event);
       let mesh: ModifiableMesh = <ModifiableMesh>this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
       mesh.rotateBy(rotationMatrix, this.axesSelectionHandler.widget.mtxLocal.translation, this.selection);
     }
 
-    onkeydown(_pressedKey: string): string {
-      let result: string = null;
-      if (this.axesSelectionHandler.addAxisOf(_pressedKey)) {
-        result = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
-      }
-      return result;
+    onkeydown(_pressedKey: string): void {
+      this.axesSelectionHandler.addAxisOf(_pressedKey)
+      // let result: string = null;
+      // if (this.axesSelectionHandler.addAxisOf(_pressedKey)) {
+      //   result = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
+      // }
     }
 
-    onkeyup(_pressedKey: string): void {
+    onkeyup(_pressedKey: string): string {
+      let state: string = null;
+      if (this.axesSelectionHandler.isValidSelection()) 
+        state = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
+
       this.axesSelectionHandler.removeAxisOf(_pressedKey);
       (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).updateNormals();
+      return state;
     }
 
     update(): void {
       this.axesSelectionHandler.widget.mtxLocal.translation = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection);
     }
 
-
     cleanup(): void {
       this.viewport.getGraph().removeChild(this.axesSelectionHandler.widget);
     }
 
-    private getRotationVector(_event: ƒ.EventPointer): ƒ.Matrix4x4 {
+    private getRotationMatrix(_event: ƒ.EventPointer): ƒ.Matrix4x4 {
       let mousePos: ƒ.Vector2 = new ƒ.Vector2(_event.clientX, _event.clientY);
       let meshCenterClient: ƒ.Vector2 = this.viewport.pointWorldToClient(this.axesSelectionHandler.widget.mtxLocal.translation);
-      //let intersection: ƒ.Vector3 = this.getIntersection(renderPos);
-      //let cameraNorm: ƒ.Vector3 = ƒ.Vector3.NORMALIZATION(this.viewport.camera.pivot.translation);
-      // let angle: number = this.getAngle(this.getOrthogonalVector(intersection, cameraNorm), this.getOrthogonalVector(this.previousIntersection, cameraNorm));
-      // angle = angle * (180 / Math.PI);
       let newClientPosition: ƒ.Vector2 = new ƒ.Vector2(mousePos.x - meshCenterClient.x, mousePos.y - meshCenterClient.y);
       let oldClientPosition: ƒ.Vector2 = new ƒ.Vector2(this.previousMousePos.x - meshCenterClient.x, this.previousMousePos.y - meshCenterClient.y);
       let angle: number = this.getAngle(newClientPosition, oldClientPosition);

@@ -13,17 +13,15 @@ namespace Fudge {
       this.viewport = viewport;
       this.editableNode = editableNode;
       this.selection = selection;
-
-      // ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
-      // ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
     }
 
     /* returns its state in json or null, if nothing was altered */
-    abstract onmousedown(_event: ƒ.EventPointer): string;
-    abstract onmouseup(_event: ƒ.EventPointer): void;
+    abstract onmousedown(_event: ƒ.EventPointer): void;
+    abstract onmouseup(_event: ƒ.EventPointer): string;
     abstract onmove(_event: ƒ.EventPointer): void;
-    abstract onkeydown(_pressedKey: string): string;
-    abstract onkeyup(_pressedKey: string): void;
+    // save states at the end
+    abstract onkeydown(_pressedKey: string): void;
+    abstract onkeyup(_pressedKey: string): string;
     abstract update(): void;
 
     abstract initialize(): void;

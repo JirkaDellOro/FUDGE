@@ -18,7 +18,7 @@ namespace Fudge {
       this.axesSelectionHandler = new AxesSelectionHandler(widget);
     }
 
-    onmousedown(_event: ƒ.EventPointer): string {
+    onmousedown(_event: ƒ.EventPointer): void {
       this.viewport.createPickBuffers();
       let posRender: ƒ.Vector2 = this.getPosRenderFrom(_event);
       let nodeWasPicked: boolean = false;
@@ -35,19 +35,24 @@ namespace Fudge {
       this.distance = this.getDistanceFromCameraToCenterOfNode();
       this.oldPosition = this.getPointerPosition(_event, this.distance);
 
-      let state: string = null;
-      if (this.axesSelectionHandler.wasPicked || nodeWasPicked) 
-        state = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
-      return state;
+      // let state: string = null;
+      // if (this.axesSelectionHandler.wasPicked || nodeWasPicked) 
+      //   state = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
+      // return state;
     }
 
-    onmouseup(_event: ƒ.EventPointer): void {
+    onmouseup(_event: ƒ.EventPointer): string {
+      let state: string = null;
+      if (this.axesSelectionHandler.wasPicked || this.dragging) 
+        state = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
+
       this.dragging = false;
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
       this.axesSelectionHandler.releaseComponent();
       mesh.updateNormals();
       this.axesSelectionHandler.widget.mtxLocal.translation = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection);
       // this.createNormalArrows();
+      return state;
     }
 
     onmove(_event: ƒ.EventPointer): void {
@@ -86,17 +91,23 @@ namespace Fudge {
       this.oldPosition = newPos;
     }
 
-    onkeydown(_pressedKey: string): string {
-      let result: string = null;
-      if (this.axesSelectionHandler.addAxisOf(_pressedKey)) {
-        result = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
-      }
-      return result;
+    onkeydown(_pressedKey: string): void {
+      this.axesSelectionHandler.addAxisOf(_pressedKey);
+      // let result: string = null;
+      // if (this.axesSelectionHandler.addAxisOf(_pressedKey)) {
+      //   result = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
+      // }
+      // return result;
     }
     
-    onkeyup(_pressedKey: string): void {
+    onkeyup(_pressedKey: string): string {
+      let state: string = null;
+      if (this.axesSelectionHandler.isValidSelection()) 
+        state = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
+
       this.axesSelectionHandler.removeAxisOf(_pressedKey);
       this.axesSelectionHandler.widget.mtxLocal.translation = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection);
+      return state;
     }
 
 

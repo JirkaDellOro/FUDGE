@@ -6,21 +6,23 @@ namespace Fudge {
       //@ts-ignore
     }
 
-    onmousedown(_event: ƒ.EventPointer): string {
-      return null;
+    onmousedown(_event: ƒ.EventPointer): void {
+
     }
-    onmouseup(_event: ƒ.EventPointer): void {
+    onmouseup(_event: ƒ.EventPointer): string {
+      return null;
       //@ts-ignore
     }
     onmove(_event: ƒ.EventPointer): void {
       //@ts-ignore
     }
 
-    onkeydown(_pressedKey: string): string {
-      return null;
+    onkeydown(_pressedKey: string): void {
+
     }
     
-    onkeyup(_pressedKey: string): void {
+    onkeyup(_pressedKey: string): string {
+      return null;
       //@ts-ignore
     }
 

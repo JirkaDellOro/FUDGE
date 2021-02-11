@@ -4,9 +4,9 @@ namespace Fudge {
     viewport: ƒ.Viewport;
     editableNode: ƒ.Node;
 
-    abstract onmousedown(_event: ƒ.EventPointer): string;
-    abstract onmouseup(_event: ƒ.EventPointer): void;
-    abstract onmove(_event: ƒ.EventPointer): void;
+    // abstract onmousedown(_event: ƒ.EventPointer): void;
+    // abstract onmouseup(_event: ƒ.EventPointer): string;
+    // abstract onmove(_event: ƒ.EventPointer): void;
     cleanup(): void {
       //
     }
