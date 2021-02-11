@@ -3349,7 +3349,7 @@ declare namespace FudgeCore {
     class MeshCustom extends Mesh {
         static readonly iSubclass: number;
         constructor(_name?: string);
-        asyncLoad(_url: RequestInfo): Promise<void>;
+        load(_url: RequestInfo): Promise<void>;
         protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;
         protected createIndices(): Uint16Array;
@@ -3515,15 +3515,6 @@ declare namespace FudgeCore {
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
-        protected createFaceNormals(): Float32Array;
-    }
-}
-declare namespace FudgeCore {
-    class MeshTest extends Mesh {
-        constructor(_name?: string);
-        protected createVertices(): Float32Array;
-        protected createTextureUVs(): Float32Array;
-        protected createIndices(): Uint16Array;
         protected createFaceNormals(): Float32Array;
     }
 }

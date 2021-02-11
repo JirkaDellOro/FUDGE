@@ -18,7 +18,7 @@ namespace Fudge {
 
       ƒaid.addStandardLightComponents(this.graph, new ƒ.Color(0.5, 0.5, 0.5));
 
-      ƒ.RenderOperator.setBackfaceCulling(false);
+      ƒ.RenderWebGL.setBackfaceCulling(false);
       this.node = this.graph.getChildrenByName("Default")[0];
       this.controller = new Controller(this.viewport, this.node);
       // tslint:disable-next-line: no-unused-expression
