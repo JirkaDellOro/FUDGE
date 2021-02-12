@@ -2,11 +2,11 @@ namespace Fudge {
   export class ObjectMode extends AbstractControlMode {
     public type: ControlMode = ControlMode.OBJECT_MODE; 
 
-    public modes: {[mode in InteractionMode]?: {type: typeof IInteractionMode, shortcut: string}} = 
+    public modes: {[mode in InteractionModes]?: {type: typeof InteractionMode, shortcut: string}} = 
     {
-      [InteractionMode.ROTATE]: {type: ObjectRotation, shortcut: "r"},
-      [InteractionMode.TRANSLATE]: {type: ObjectTranslation, shortcut: "t"},
-      [InteractionMode.SCALE]: {type: ObjectScalation, shortcut: "c"}
+      [InteractionModes.ROTATE]: {type: ObjectRotation, shortcut: "r"},
+      [InteractionModes.TRANSLATE]: {type: ObjectTranslation, shortcut: "t"},
+      [InteractionModes.SCALE]: {type: ObjectScalation, shortcut: "c"}
     };
   }
 } 

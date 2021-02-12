@@ -149,6 +149,28 @@ namespace Fudge {
       this.createRenderBuffers();
     }
 
+    public invertNormals(selection: number[]): void {
+      if (selection.length !== 4) 
+        return;
+      let faceToVertexMap: Map<number, number[]> = new Map();
+      let vertexToUniqueVertexMap: Map<number, number> = new Map();
+      for (let selectedVertex of selection) {
+        for (let [vertex, data] of this.uniqueVertices[selectedVertex].vertexToData) {
+          faceToVertexMap.get(data.face).push(vertex);
+        }
+      }
+
+      // fix this tomorrow
+      for (let [face, vertices] of faceToVertexMap) {
+        if (vertices.length === 4) {
+
+        }
+      }
+
+      this.normalsFace = this.createFaceNormals();
+      this.createRenderBuffers();
+    }
+
     public scaleBy(matrix: ƒ.Matrix4x4, oldVertices: Map<number, ƒ.Vector3>, centroid: ƒ.Vector3, selection: number[] = Array.from(Array(this.uniqueVertices.length).keys())): void {
       // let centroid: ƒ.Vector3 = this.getCentroid(selection);
       for (let vertexIndex of selection) {

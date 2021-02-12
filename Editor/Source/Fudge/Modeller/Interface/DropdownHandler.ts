@@ -43,6 +43,10 @@ namespace Fudge {
         button.innerHTML = name;
         button.classList.add("content-button");
         button.addEventListener("click", this.setControlMode.bind(null, name));
+        let accelerator: HTMLDivElement = document.createElement("div");
+        accelerator.classList.add("accelerator");
+        accelerator.innerHTML = "Shift + " + value.shortcut;
+        button.appendChild(accelerator);        
         dropdown.appendChild(button);
       }
 
@@ -59,12 +63,16 @@ namespace Fudge {
         button.classList.add("content-button");
         button.innerHTML = mode;
         button.addEventListener("click", this.setInteractionMode.bind(null, mode));
+        let accelerator: HTMLDivElement = document.createElement("div");
+        accelerator.classList.add("accelerator");
+        accelerator.innerHTML = "Shift + " + this.controller.controlMode.modes[mode].shortcut;
+        button.appendChild(accelerator);        
         dropdown.appendChild(button);
       }
       dropdown.classList.toggle("show");
     }
 
-    private setInteractionMode = (_name: InteractionMode, _event: Event): void => {
+    private setInteractionMode = (_name: InteractionModes, _event: Event): void => {
       this.controller.setInteractionMode(_name);
       // this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
       this.updateButtontext();

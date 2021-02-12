@@ -1,5 +1,6 @@
+/// <reference path="../InteractionMode.ts" />
 namespace Fudge {
-  export abstract class AbstractRotation extends IInteractionMode {
+  export abstract class AbstractRotation extends InteractionMode {
     public readonly type: InteractionModes = InteractionModes.ROTATE;
     viewport: ƒ.Viewport;
     selection: Array<number>;
@@ -73,12 +74,16 @@ namespace Fudge {
       return state;
     }
 
-    getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {
-      return [];
+    contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
+      switch (Number(_item.id)) {
+        case ModellerMenu.DISPLAY_NORMALS:
+          this.toggleNormals();          
+          break;
+      }
     }
 
-    contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
-      console.log(_item);
+    getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {  
+      return [MenuItemsCreator.getNormalDisplayItem(_callback, InteractionMode.normalsAreDisplayed)];
     }
 
     update(): void {

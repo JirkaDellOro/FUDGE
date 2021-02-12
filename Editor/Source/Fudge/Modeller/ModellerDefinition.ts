@@ -4,7 +4,7 @@ namespace Fudge {
     EDIT_MODE = "Edit-Mode"
   }
 
-  export enum InteractionMode {
+  export enum InteractionModes {
     SELECT = "Box-Select",
     TRANSLATE = "Translate",
     ROTATE = "Rotate",
@@ -25,7 +25,8 @@ namespace Fudge {
   }
 
   export enum ModellerMenu {
-    DISPLAY_NORMALS
+    DISPLAY_NORMALS,
+    INVERT_NORMALS
   }
 
 }

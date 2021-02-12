@@ -5,7 +5,5 @@ namespace Fudge {
       this.selection = Array.from(Array((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices.length).keys());
       this.selector = new Selector(this.editableNode, this.viewport.camera.pivot.translation);
     }
-
-
   }
 }

@@ -1388,13 +1388,14 @@ var Fudge;
             ]);
             this.contextMenuCallback = (_item, _window, _event) => {
                 this.interactionMode.contextMenuCallback(_item, _window, _event);
+                this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
             };
             this.viewport = _viewport;
             this.currentControlMode = this.controlModesMap.get(Fudge.ControlMode.OBJECT_MODE).type;
             this.editableNode = _editableNode;
             this.dom = _dom;
             this.saveState(this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getState());
-            this.setInteractionMode(Fudge.InteractionMode.IDLE);
+            this.setInteractionMode(Fudge.InteractionModes.IDLE);
             //_dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
         }
         get controlMode() {
@@ -1441,8 +1442,8 @@ var Fudge;
             return this.interactionMode.type;
         }
         switchMode(_event) {
+            let pressedKey = _event.key.toLowerCase();
             if (_event.ctrlKey) {
-                let pressedKey = _event.key.toLowerCase();
                 if (pressedKey === "z") {
                     if (!_event.shiftKey) {
                         this.loadState();
@@ -1451,6 +1452,8 @@ var Fudge;
                         this.loadState(false);
                     }
                 }
+            }
+            if (_event.shiftKey) {
                 for (let controlMode of this.controlModesMap.keys()) {
                     if (this.controlModesMap.get(controlMode).shortcut === pressedKey) {
                         this.setControlMode(controlMode);
@@ -1554,15 +1557,15 @@ var Fudge;
         ControlMode["OBJECT_MODE"] = "Object-Mode";
         ControlMode["EDIT_MODE"] = "Edit-Mode";
     })(ControlMode = Fudge.ControlMode || (Fudge.ControlMode = {}));
-    let InteractionMode;
-    (function (InteractionMode) {
-        InteractionMode["SELECT"] = "Box-Select";
-        InteractionMode["TRANSLATE"] = "Translate";
-        InteractionMode["ROTATE"] = "Rotate";
-        InteractionMode["SCALE"] = "Scale";
-        InteractionMode["EXTRUDE"] = "Extrude";
-        InteractionMode["IDLE"] = "Idle";
-    })(InteractionMode = Fudge.InteractionMode || (Fudge.InteractionMode = {}));
+    let InteractionModes;
+    (function (InteractionModes) {
+        InteractionModes["SELECT"] = "Box-Select";
+        InteractionModes["TRANSLATE"] = "Translate";
+        InteractionModes["ROTATE"] = "Rotate";
+        InteractionModes["SCALE"] = "Scale";
+        InteractionModes["EXTRUDE"] = "Extrude";
+        InteractionModes["IDLE"] = "Idle";
+    })(InteractionModes = Fudge.InteractionModes || (Fudge.InteractionModes = {}));
     let Axis;
     (function (Axis) {
         Axis["X"] = "X";
@@ -1577,6 +1580,7 @@ var Fudge;
     let ModellerMenu;
     (function (ModellerMenu) {
         ModellerMenu[ModellerMenu["DISPLAY_NORMALS"] = 0] = "DISPLAY_NORMALS";
+        ModellerMenu[ModellerMenu["INVERT_NORMALS"] = 1] = "INVERT_NORMALS";
     })(ModellerMenu = Fudge.ModellerMenu || (Fudge.ModellerMenu = {}));
 })(Fudge || (Fudge = {}));
 var Fudge;
@@ -1592,11 +1596,11 @@ var Fudge;
             super(...arguments);
             this.type = Fudge.ControlMode.EDIT_MODE;
             this.modes = {
-                [Fudge.InteractionMode.SELECT]: { type: Fudge.EditSelection, shortcut: "s" },
-                [Fudge.InteractionMode.ROTATE]: { type: Fudge.EditRotation, shortcut: "r" },
-                [Fudge.InteractionMode.TRANSLATE]: { type: Fudge.EditTranslation, shortcut: "t" },
-                [Fudge.InteractionMode.EXTRUDE]: { type: Fudge.Extrude, shortcut: "e" },
-                [Fudge.InteractionMode.SCALE]: { type: Fudge.EditScalation, shortcut: "c" }
+                [Fudge.InteractionModes.SELECT]: { type: Fudge.EditSelection, shortcut: "s" },
+                [Fudge.InteractionModes.ROTATE]: { type: Fudge.EditRotation, shortcut: "r" },
+                [Fudge.InteractionModes.TRANSLATE]: { type: Fudge.EditTranslation, shortcut: "t" },
+                [Fudge.InteractionModes.EXTRUDE]: { type: Fudge.Extrude, shortcut: "e" },
+                [Fudge.InteractionModes.SCALE]: { type: Fudge.EditScalation, shortcut: "c" }
             };
         }
     }
@@ -1609,9 +1613,9 @@ var Fudge;
             super(...arguments);
             this.type = Fudge.ControlMode.OBJECT_MODE;
             this.modes = {
-                [Fudge.InteractionMode.ROTATE]: { type: Fudge.ObjectRotation, shortcut: "r" },
-                [Fudge.InteractionMode.TRANSLATE]: { type: Fudge.ObjectTranslation, shortcut: "t" },
-                [Fudge.InteractionMode.SCALE]: { type: Fudge.ObjectScalation, shortcut: "c" }
+                [Fudge.InteractionModes.ROTATE]: { type: Fudge.ObjectRotation, shortcut: "r" },
+                [Fudge.InteractionModes.TRANSLATE]: { type: Fudge.ObjectTranslation, shortcut: "t" },
+                [Fudge.InteractionModes.SCALE]: { type: Fudge.ObjectScalation, shortcut: "c" }
             };
         }
     }
@@ -1619,9 +1623,8 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    var ƒ = FudgeCore;
     var ƒAid = FudgeAid;
-    class IInteractionMode {
+    class InteractionMode {
         constructor(viewport, editableNode, selection = []) {
             this.animate = () => {
                 this.drawCircleAtVertex();
@@ -1676,13 +1679,21 @@ var Fudge;
                 }
                 this.viewport.getGraph().addChild(normalArrow);
             }
-            IInteractionMode.normalsAreDisplayed = true;
+            InteractionMode.normalsAreDisplayed = true;
         }
         removeNormalArrows() {
             for (let node of this.viewport.getGraph().getChildrenByName("normal")) {
                 this.viewport.getGraph().removeChild(node);
             }
-            IInteractionMode.normalsAreDisplayed = false;
+            InteractionMode.normalsAreDisplayed = false;
+        }
+        toggleNormals() {
+            if (!InteractionMode.normalsAreDisplayed) {
+                this.createNormalArrows();
+            }
+            else {
+                this.removeNormalArrows();
+            }
         }
         copyVertices() {
             let vertices = this.editableNode.getComponent(ƒ.ComponentMesh).mesh.uniqueVertices;
@@ -1699,9 +1710,6 @@ var Fudge;
         getDistanceFromRayToCenterOfNode(_event, distance) {
             return ƒ.Vector3.DIFFERENCE(this.getPointerPosition(_event, distance), this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid(this.selection));
         }
-        // protected getDistanceFromCameraToCenterOfNode(): number {
-        //   return ƒ.Vector3.DIFFERENCE((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection), this.viewport.camera.pivot.translation).magnitude;
-        // }
         getDistanceFromCameraToCenterOfNode() {
             return ƒ.Vector3.DIFFERENCE(this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid(this.selection), this.viewport.camera.getContainer().mtxWorld.translation).magnitude;
         }
@@ -1726,21 +1734,17 @@ var Fudge;
             }
         }
     }
-    IInteractionMode.normalsAreDisplayed = false;
-    Fudge.IInteractionMode = IInteractionMode;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    class InteractionMode {
-    }
+    InteractionMode.normalsAreDisplayed = false;
     Fudge.InteractionMode = InteractionMode;
 })(Fudge || (Fudge = {}));
+/// <reference path="../InteractionMode.ts" />
 var Fudge;
+/// <reference path="../InteractionMode.ts" />
 (function (Fudge) {
-    class Extrude extends Fudge.IInteractionMode {
+    class Extrude extends Fudge.InteractionMode {
         constructor(viewport, editableNode, selection) {
             super(viewport, editableNode, selection);
-            this.type = InteractionModes.EXTRUDE;
+            this.type = Fudge.InteractionModes.EXTRUDE;
             this.isExtruded = false;
             this.vertexSelected = false;
             // TODO: check if pivot is still correct or if we need to use the container
@@ -1817,10 +1821,14 @@ var Fudge;
             return null;
         }
         getContextMenuItems(_callback) {
-            return [];
+            return [Fudge.MenuItemsCreator.getNormalDisplayItem(_callback, Fudge.InteractionMode.normalsAreDisplayed)];
         }
         contextMenuCallback(_item, _window, _event) {
-            console.log(_item);
+            switch (Number(_item.id)) {
+                case Fudge.ModellerMenu.DISPLAY_NORMALS:
+                    this.toggleNormals();
+                    break;
+            }
         }
         update() {
             //@ts-ignore
@@ -1837,12 +1845,14 @@ var Fudge;
     }
     Fudge.Extrude = Extrude;
 })(Fudge || (Fudge = {}));
+/// <reference path="../InteractionMode.ts" />
 var Fudge;
+/// <reference path="../InteractionMode.ts" />
 (function (Fudge) {
-    class IdleMode extends Fudge.IInteractionMode {
+    class IdleMode extends Fudge.InteractionMode {
         constructor() {
             super(...arguments);
-            this.type = InteractionModes.IDLE;
+            this.type = Fudge.InteractionModes.IDLE;
         }
         initialize() {
             //@ts-ignore
@@ -1866,7 +1876,7 @@ var Fudge;
             return [];
         }
         contextMenuCallback(_item, _window, _event) {
-            console.log(_item);
+            //@ts-ignore
         }
         update() {
             //@ts-ignore
@@ -1877,12 +1887,14 @@ var Fudge;
     }
     Fudge.IdleMode = IdleMode;
 })(Fudge || (Fudge = {}));
+/// <reference path="../InteractionMode.ts" />
 var Fudge;
+/// <reference path="../InteractionMode.ts" />
 (function (Fudge) {
-    class AbstractRotation extends Fudge.IInteractionMode {
+    class AbstractRotation extends Fudge.InteractionMode {
         constructor() {
             super(...arguments);
-            this.type = InteractionModes.ROTATE;
+            this.type = Fudge.InteractionModes.ROTATE;
         }
         initialize() {
             let widget = new Fudge.RotationWidget();
@@ -1939,11 +1951,15 @@ var Fudge;
             this.editableNode.getComponent(ƒ.ComponentMesh).mesh.updateNormals();
             return state;
         }
-        getContextMenuItems(_callback) {
-            return [];
-        }
         contextMenuCallback(_item, _window, _event) {
-            console.log(_item);
+            switch (Number(_item.id)) {
+                case Fudge.ModellerMenu.DISPLAY_NORMALS:
+                    this.toggleNormals();
+                    break;
+            }
+        }
+        getContextMenuItems(_callback) {
+            return [Fudge.MenuItemsCreator.getNormalDisplayItem(_callback, Fudge.InteractionMode.normalsAreDisplayed)];
         }
         update() {
             this.axesSelectionHandler.widget.mtxLocal.translation = this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid(this.selection);
@@ -2046,13 +2062,15 @@ var Fudge;
     }
     Fudge.ObjectRotation = ObjectRotation;
 })(Fudge || (Fudge = {}));
+/// <reference path="../InteractionMode.ts" />
 var Fudge;
+/// <reference path="../InteractionMode.ts" />
 (function (Fudge) {
-    class AbstractScalation extends Fudge.IInteractionMode {
+    class AbstractScalation extends Fudge.InteractionMode {
         constructor() {
             super(...arguments);
             //protected widget: ƒ.Node;
-            this.type = InteractionModes.SCALE;
+            this.type = Fudge.InteractionModes.SCALE;
         }
         initialize() {
             let widget = new Fudge.ScalationWidget();
@@ -2134,10 +2152,14 @@ var Fudge;
             return state;
         }
         getContextMenuItems(_callback) {
-            return [];
+            return [Fudge.MenuItemsCreator.getNormalDisplayItem(_callback, Fudge.InteractionMode.normalsAreDisplayed)];
         }
         contextMenuCallback(_item, _window, _event) {
-            console.log(_item);
+            switch (Number(_item.id)) {
+                case Fudge.ModellerMenu.DISPLAY_NORMALS:
+                    this.toggleNormals();
+                    break;
+            }
         }
         update() {
             this.axesSelectionHandler.widget.mtxLocal.translation = this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid(this.selection);
@@ -2198,12 +2220,14 @@ var Fudge;
     }
     Fudge.ObjectScalation = ObjectScalation;
 })(Fudge || (Fudge = {}));
+/// <reference path="../InteractionMode.ts" />
 var Fudge;
+/// <reference path="../InteractionMode.ts" />
 (function (Fudge) {
-    class AbstractSelection extends Fudge.IInteractionMode {
+    class AbstractSelection extends Fudge.InteractionMode {
         constructor() {
             super(...arguments);
-            this.type = InteractionModes.SELECT;
+            this.type = Fudge.InteractionModes.SELECT;
         }
         // abstract onmousedown(_event: ƒ.EventPointer): void;
         // abstract onmouseup(_event: ƒ.EventPointer): string;
@@ -2309,10 +2333,10 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    class AbstractTranslation extends Fudge.IInteractionMode {
+    class AbstractTranslation extends Fudge.InteractionMode {
         constructor() {
             super(...arguments);
-            this.type = InteractionModes.TRANSLATE;
+            this.type = Fudge.InteractionModes.TRANSLATE;
             this.dragging = false;
             // protected copyVerticesAndCalculateDistance(_event: ƒ.EventPointer): void {
             //   this.distance = this.getDistanceFromCameraToCenterOfNode();
@@ -2415,31 +2439,14 @@ var Fudge;
             return state;
         }
         getContextMenuItems(_callback) {
-            let item;
-            item = new Fudge.remote.MenuItem({
-                label: "display normals",
-                id: String(Fudge.ModellerMenu.DISPLAY_NORMALS),
-                click: _callback
-            });
-            let item2;
-            item2 = new Fudge.remote.MenuItem({
-                label: "test",
-                click: _callback
-            });
-            return [Fudge.MenuItemsCreator.getNormalDisplayItem(_callback), item2];
+            return [Fudge.MenuItemsCreator.getNormalDisplayItem(_callback, Fudge.InteractionMode.normalsAreDisplayed)];
         }
         contextMenuCallback(_item, _window, _event) {
             switch (Number(_item.id)) {
                 case Fudge.ModellerMenu.DISPLAY_NORMALS:
-                    if (!Fudge.IInteractionMode.normalsAreDisplayed) {
-                        this.createNormalArrows();
-                    }
-                    else {
-                        this.removeNormalArrows();
-                    }
+                    this.toggleNormals();
                     break;
             }
-            console.log(_item);
         }
         update() {
             this.axesSelectionHandler.widget.mtxLocal.translation = this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid(this.selection);
@@ -2478,6 +2485,22 @@ var Fudge;
             }
             return super.onmouseup(_event);
         }
+        getContextMenuItems(_callback) {
+            let item2;
+            item2 = new Fudge.remote.MenuItem({
+                label: "test",
+                click: _callback
+            });
+            return [...super.getContextMenuItems(_callback), Fudge.MenuItemsCreator.getInvertNormalsItem(_callback)];
+        }
+        contextMenuCallback(_item, _window, _event) {
+            switch (Number(_item.id)) {
+                case Fudge.ModellerMenu.INVERT_NORMALS:
+                    this.editableNode.getComponent(ƒ.ComponentMesh).mesh.invertNormals(this.selection);
+                    break;
+            }
+            super.contextMenuCallback(_item, _window, _event);
+        }
     }
     Fudge.EditTranslation = EditTranslation;
 })(Fudge || (Fudge = {}));
@@ -2506,6 +2529,10 @@ var Fudge;
                     button.innerHTML = name;
                     button.classList.add("content-button");
                     button.addEventListener("click", this.setControlMode.bind(null, name));
+                    let accelerator = document.createElement("div");
+                    accelerator.classList.add("accelerator");
+                    accelerator.innerHTML = "Shift + " + value.shortcut;
+                    button.appendChild(accelerator);
                     dropdown.appendChild(button);
                 }
                 dropdown.classList.toggle("show");
@@ -2520,6 +2547,10 @@ var Fudge;
                     button.classList.add("content-button");
                     button.innerHTML = mode;
                     button.addEventListener("click", this.setInteractionMode.bind(null, mode));
+                    let accelerator = document.createElement("div");
+                    accelerator.classList.add("accelerator");
+                    accelerator.innerHTML = "Shift + " + this.controller.controlMode.modes[mode].shortcut;
+                    button.appendChild(accelerator);
                     dropdown.appendChild(button);
                 }
                 dropdown.classList.toggle("show");
@@ -3076,6 +3107,24 @@ var Fudge;
             this.normalsFace = this.createFaceNormals();
             this.createRenderBuffers();
         }
+        invertNormals(selection) {
+            if (selection.length !== 4)
+                return;
+            let faceToVertexMap = new Map();
+            let vertexToUniqueVertexMap = new Map();
+            for (let selectedVertex of selection) {
+                for (let [vertex, data] of this.uniqueVertices[selectedVertex].vertexToData) {
+                    faceToVertexMap.get(data.face).push(vertex);
+                }
+            }
+            // fix this tomorrow
+            for (let [face, vertices] of faceToVertexMap) {
+                if (vertices.length === 4) {
+                }
+            }
+            this.normalsFace = this.createFaceNormals();
+            this.createRenderBuffers();
+        }
         scaleBy(matrix, oldVertices, centroid, selection = Array.from(Array(this.uniqueVertices.length).keys())) {
             // let centroid: ƒ.Vector3 = this.getCentroid(selection);
             for (let vertexIndex of selection) {
@@ -3509,11 +3558,19 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     class MenuItemsCreator {
-        static getNormalDisplayItem(_callback) {
-            let item;
-            item = new Fudge.remote.MenuItem({
-                label: "display normals",
+        static getNormalDisplayItem(_callback, normalsAreDisplayed) {
+            let stateAsString = !normalsAreDisplayed ? "display" : "hide";
+            let item = new Fudge.remote.MenuItem({
+                label: stateAsString + " normals",
                 id: String(Fudge.ModellerMenu.DISPLAY_NORMALS),
+                click: _callback
+            });
+            return item;
+        }
+        static getInvertNormalsItem(_callback) {
+            let item = new Fudge.remote.MenuItem({
+                label: "invert normals",
+                id: String(Fudge.ModellerMenu.INVERT_NORMALS),
                 click: _callback
             });
             return item;

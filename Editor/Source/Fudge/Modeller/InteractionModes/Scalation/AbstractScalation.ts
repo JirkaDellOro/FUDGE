@@ -1,6 +1,6 @@
+/// <reference path="../InteractionMode.ts" />
 namespace Fudge {
-
-  export class AbstractScalation extends IInteractionMode {
+  export class AbstractScalation extends InteractionMode {
     //protected widget: ƒ.Node;
     public readonly type: InteractionModes = InteractionModes.SCALE;
     protected oldPosition: ƒ.Vector3;
@@ -102,12 +102,16 @@ namespace Fudge {
       return state;
     }
 
-    getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {
-      return [];
+    getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {  
+      return [MenuItemsCreator.getNormalDisplayItem(_callback, InteractionMode.normalsAreDisplayed)];
     }
 
     contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
-      console.log(_item);
+      switch (Number(_item.id)) {
+        case ModellerMenu.DISPLAY_NORMALS:
+          this.toggleNormals();          
+          break;
+      }
     }
 
 

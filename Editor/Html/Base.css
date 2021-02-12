@@ -237,7 +237,7 @@ dialog>div#content {
   border: none;
   cursor: pointer;
   margin-bottom: 0px;
-  min-width: 100px;
+  min-width: 130px;
 }
 
 .box {
@@ -264,6 +264,7 @@ dialog>div#content {
   position: absolute;
   background-color: rgb(227, 227, 227);
   /* min-width: 160px; */
+  min-width: 130px;
   overflow: auto;
   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
   z-index: 1;
@@ -276,19 +277,30 @@ dialog>div#content {
   text-decoration: none;
   display: block;
 } */
-
 .content-button {
   background-color: rgb(45, 45, 45);
-  color: white;
-  padding: 6px 10px;
+  color: white; 
   font-size: 11px;
+  width: 100%;
   border: none;
   cursor: pointer;
-  width: 100%;
-}
+  text-align: left;
+  padding: 6px 10px;
+  display: inline;
+} 
 
 /* Change color of dropdown links on hover */
 .content-button:hover {background-color: rgb(45, 45, 45)}
 
 /* Show the dropdown menu (use JS to add this class to the .dropdown-content container when the user clicks on the dropdown button) */
 .show {display:block;}
+
+.accelerator {
+  position: relative;
+  font-size: 11px;
+  display: inline;
+  border: none;
+  text-align: right;
+  float: right;
+  color: gray; 
+}

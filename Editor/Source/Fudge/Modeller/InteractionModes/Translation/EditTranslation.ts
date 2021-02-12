@@ -32,5 +32,25 @@ namespace Fudge {
 
       return super.onmouseup(_event);
     }
+
+    getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {
+      let item2: Electron.MenuItem;  
+      item2 = new remote.MenuItem({
+        label: "test",
+        click: _callback
+      });
+
+      return [...super.getContextMenuItems(_callback), MenuItemsCreator.getInvertNormalsItem(_callback)];
+    }
+
+    contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
+      switch (Number(_item.id)) {
+        case ModellerMenu.INVERT_NORMALS:
+          (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).invertNormals(this.selection);          
+          break;
+      }
+      super.contextMenuCallback(_item, _window, _event);
+    }
+
   }
 }

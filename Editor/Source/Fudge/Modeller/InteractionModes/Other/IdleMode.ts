@@ -1,5 +1,6 @@
+/// <reference path="../InteractionMode.ts" />
 namespace Fudge {
-  export class IdleMode extends IInteractionMode {
+  export class IdleMode extends InteractionMode {
     public readonly type: InteractionModes = InteractionModes.IDLE;
 
     initialize(): void {
@@ -31,7 +32,7 @@ namespace Fudge {
     }
 
     contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
-      console.log(_item);
+      //@ts-ignore
     }
 
     update(): void {

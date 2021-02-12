@@ -350,10 +350,10 @@ declare namespace Fudge {
         onkeydown(_event: ƒ.EventKeyboard): void;
         onkeyup(_event: ƒ.EventKeyboard): void;
         getSelection(): number[];
-        getInteractionModeType(): InteractionMode;
+        getInteractionModeType(): InteractionModes;
         switchMode(_event: ƒ.EventKeyboard): void;
         setControlMode(mode: ControlMode): void;
-        setInteractionMode(mode: InteractionMode): void;
+        setInteractionMode(mode: InteractionModes): void;
         drawSelection(): void;
         getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
         contextMenuCallback: (_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event) => void;
@@ -366,7 +366,7 @@ declare namespace Fudge {
         OBJECT_MODE = "Object-Mode",
         EDIT_MODE = "Edit-Mode"
     }
-    enum InteractionMode {
+    enum InteractionModes {
         SELECT = "Box-Select",
         TRANSLATE = "Translate",
         ROTATE = "Rotate",
@@ -384,7 +384,8 @@ declare namespace Fudge {
         SELECTION_UPDATE = "selectionupdate"
     }
     enum ModellerMenu {
-        DISPLAY_NORMALS = 0
+        DISPLAY_NORMALS = 0,
+        INVERT_NORMALS = 1
     }
 }
 declare namespace Fudge {
@@ -392,8 +393,8 @@ declare namespace Fudge {
         type: ControlMode;
         formerMode: IInteractionMode;
         modes: {
-            [mode in InteractionMode]?: {
-                type: typeof IInteractionMode;
+            [mode in InteractionModes]?: {
+                type: typeof InteractionMode;
                 shortcut: string;
             };
         };
@@ -403,8 +404,8 @@ declare namespace Fudge {
     class EditMode extends AbstractControlMode {
         type: ControlMode;
         modes: {
-            [mode in InteractionMode]?: {
-                type: typeof IInteractionMode;
+            [mode in InteractionModes]?: {
+                type: typeof InteractionMode;
                 shortcut: string;
             };
         };
@@ -414,8 +415,8 @@ declare namespace Fudge {
     class ObjectMode extends AbstractControlMode {
         type: ControlMode;
         modes: {
-            [mode in InteractionMode]?: {
-                type: typeof IInteractionMode;
+            [mode in InteractionModes]?: {
+                type: typeof InteractionMode;
                 shortcut: string;
             };
         };
@@ -423,9 +424,29 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
-    abstract class IInteractionMode {
+    interface IInteractionMode {
+        readonly type: InteractionModes;
+        selection: Array<number>;
+        viewport: ƒ.Viewport;
+        editableNode: ƒ.Node;
+        onmousedown(_event: ƒ.EventPointer): void;
+        onmouseup(_event: ƒ.EventPointer): string;
+        onmove(_event: ƒ.EventPointer): void;
+        onkeydown(_pressedKey: string): void;
+        onkeyup(_pressedKey: string): string;
+        update(): void;
+        getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
+        contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        initialize(): void;
+        cleanup(): void;
+        animate(): void;
+        updateAfterUndo(): void;
+    }
+}
+declare namespace Fudge {
+    abstract class InteractionMode implements IInteractionMode {
         protected static normalsAreDisplayed: boolean;
-        readonly type: InteractionMode;
+        readonly type: InteractionModes;
         selection: Array<number>;
         viewport: ƒ.Viewport;
         editableNode: ƒ.Node;
@@ -446,6 +467,7 @@ declare namespace Fudge {
         protected getPosRenderFrom(_event: ƒ.EventPointer): ƒ.Vector2;
         protected createNormalArrows(): void;
         protected removeNormalArrows(): void;
+        protected toggleNormals(): void;
         protected copyVertices(): Map<number, ƒ.Vector3>;
         protected getPointerPosition(_event: ƒ.EventPointer, distance: number): ƒ.Vector3;
         protected getDistanceFromRayToCenterOfNode(_event: ƒ.EventPointer, distance: number): ƒ.Vector3;
@@ -455,12 +477,8 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    abstract class InteractionMode implements IInteractionMode {
-    }
-}
-declare namespace Fudge {
-    class Extrude extends IInteractionMode {
-        readonly type: InteractionMode;
+    class Extrude extends InteractionMode {
+        readonly type: InteractionModes;
         selection: Array<number>;
         viewport: ƒ.Viewport;
         editableNode: ƒ.Node;
@@ -483,8 +501,8 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    class IdleMode extends IInteractionMode {
-        readonly type: InteractionMode;
+    class IdleMode extends InteractionMode {
+        readonly type: InteractionModes;
         initialize(): void;
         onmousedown(_event: ƒ.EventPointer): void;
         onmouseup(_event: ƒ.EventPointer): string;
@@ -498,8 +516,8 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    abstract class AbstractRotation extends IInteractionMode {
-        readonly type: InteractionMode;
+    abstract class AbstractRotation extends InteractionMode {
+        readonly type: InteractionModes;
         viewport: ƒ.Viewport;
         selection: Array<number>;
         editableNode: ƒ.Node;
@@ -511,8 +529,8 @@ declare namespace Fudge {
         onmove(_event: ƒ.EventPointer): void;
         onkeydown(_pressedKey: string): void;
         onkeyup(_pressedKey: string): string;
-        getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
         contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
         update(): void;
         cleanup(): void;
         private getRotationMatrix;
@@ -538,8 +556,8 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    class AbstractScalation extends IInteractionMode {
-        readonly type: InteractionMode;
+    class AbstractScalation extends InteractionMode {
+        readonly type: InteractionModes;
         protected oldPosition: ƒ.Vector3;
         protected distanceToCenterOfNode: number;
         protected distanceRayToCenter: ƒ.Vector3;
@@ -574,8 +592,8 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    abstract class AbstractSelection extends IInteractionMode {
-        readonly type: InteractionMode;
+    abstract class AbstractSelection extends InteractionMode {
+        readonly type: InteractionModes;
         viewport: ƒ.Viewport;
         editableNode: ƒ.Node;
         getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
@@ -603,8 +621,8 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    abstract class AbstractTranslation extends IInteractionMode {
-        readonly type: InteractionMode;
+    abstract class AbstractTranslation extends InteractionMode {
+        readonly type: InteractionModes;
         viewport: ƒ.Viewport;
         selection: Array<number>;
         editableNode: ƒ.Node;
@@ -631,6 +649,8 @@ declare namespace Fudge {
         onmousedown(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
         onmouseup(_event: ƒ.EventPointer): string;
+        getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
+        contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
     }
 }
 declare namespace Fudge {
@@ -693,6 +713,7 @@ declare namespace Fudge {
         getCentroid(selection?: number[]): ƒ.Vector3;
         removeFace(selection: number[]): void;
         updateNormals(): void;
+        invertNormals(selection: number[]): void;
         scaleBy(matrix: ƒ.Matrix4x4, oldVertices: Map<number, ƒ.Vector3>, centroid: ƒ.Vector3, selection?: number[]): void;
         translateVertices(difference: ƒ.Vector3, selection: number[]): void;
         rotateBy(matrix: ƒ.Matrix4x4, center: ƒ.Vector3, selection?: number[]): void;
@@ -747,7 +768,8 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     class MenuItemsCreator {
-        static getNormalDisplayItem(_callback: ContextMenuCallback): Electron.MenuItem;
+        static getNormalDisplayItem(_callback: ContextMenuCallback, normalsAreDisplayed: boolean): Electron.MenuItem;
+        static getInvertNormalsItem(_callback: ContextMenuCallback): Electron.MenuItem;
     }
 }
 declare namespace Fudge {

@@ -1,6 +1,7 @@
+/// <reference path="../InteractionMode.ts" />
 namespace Fudge {
   import ƒui = FudgeUserInterface;
-  export class Extrude extends IInteractionMode {
+  export class Extrude extends InteractionMode {
     public readonly type: InteractionModes = InteractionModes.EXTRUDE;
     selection: Array<number>;
     viewport: ƒ.Viewport;
@@ -100,12 +101,16 @@ namespace Fudge {
       return null;
     }
 
-    getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {
-      return [];
+    getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {  
+      return [MenuItemsCreator.getNormalDisplayItem(_callback, InteractionMode.normalsAreDisplayed)];
     }
 
     contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
-      console.log(_item);
+      switch (Number(_item.id)) {
+        case ModellerMenu.DISPLAY_NORMALS:
+          this.toggleNormals();          
+          break;
+      }
     }
 
     update(): void {

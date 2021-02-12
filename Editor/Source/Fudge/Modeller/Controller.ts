@@ -24,7 +24,7 @@ namespace Fudge {
       this.editableNode = _editableNode;
       this.dom = _dom;
       this.saveState((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState());
-      this.setInteractionMode(InteractionMode.IDLE);
+      this.setInteractionMode(InteractionModes.IDLE);
       //_dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
     }
 
@@ -79,13 +79,13 @@ namespace Fudge {
       return this.interactionMode.selection;
     }
     
-    public getInteractionModeType(): InteractionMode {
+    public getInteractionModeType(): InteractionModes {
       return this.interactionMode.type;
     }
 
     public switchMode(_event: ƒ.EventKeyboard): void {
+      let pressedKey: string = _event.key.toLowerCase();
       if (_event.ctrlKey) {
-        let pressedKey: string = _event.key.toLowerCase();
         if (pressedKey === "z") {
           if (!_event.shiftKey) {
             this.loadState();
@@ -94,17 +94,19 @@ namespace Fudge {
           }
         }
 
+      }
+
+      if (_event.shiftKey) {
         for (let controlMode of this.controlModesMap.keys()) {
           if (this.controlModesMap.get(controlMode).shortcut === pressedKey) {
             this.setControlMode(controlMode);
             break;
           }
         }
-
-        let selectedMode: InteractionMode;
+        let selectedMode: InteractionModes;
         for (let interactionMode in this.currentControlMode.modes) {
           if (this.currentControlMode.modes[interactionMode].shortcut === pressedKey) {
-            selectedMode = <InteractionMode> interactionMode;
+            selectedMode = <InteractionModes> interactionMode;
           }
         }
         if (selectedMode)
@@ -126,7 +128,7 @@ namespace Fudge {
     }
 
     // maybe add type attributes to the interaction modes to alter behaviour based on those attributes
-    public setInteractionMode(mode: InteractionMode): void {
+    public setInteractionMode(mode: InteractionModes): void {
       this.interactionMode?.cleanup();
       let type: any = this.currentControlMode.modes[mode]?.type || IdleMode;
       let selection: Array<number> = this.interactionMode?.selection;        
@@ -155,6 +157,7 @@ namespace Fudge {
 
     public contextMenuCallback = (_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void => {
       this.interactionMode.contextMenuCallback(_item, _window, _event);
+      this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
     }
 
     private loadState(isUndo: boolean = true): void {
