@@ -2,7 +2,7 @@ namespace Fudge {
 
   export class AbstractScalation extends IInteractionMode {
     //protected widget: ƒ.Node;
-    public readonly type: InteractionMode = InteractionMode.SCALE;
+    public readonly type: InteractionModes = InteractionModes.SCALE;
     protected oldPosition: ƒ.Vector3;
     protected distanceToCenterOfNode: number;
     protected distanceRayToCenter: ƒ.Vector3;
@@ -100,8 +100,16 @@ namespace Fudge {
       }
       this.axesSelectionHandler.removeAxisOf(_pressedKey);
       return state;
-
     }
+
+    getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {
+      return [];
+    }
+
+    contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
+      console.log(_item);
+    }
+
 
     update(): void {
       this.axesSelectionHandler.widget.mtxLocal.translation = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection);

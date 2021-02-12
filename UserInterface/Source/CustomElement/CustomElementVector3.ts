@@ -3,7 +3,7 @@ namespace FudgeUserInterface {
   import ƒ = FudgeCore;
 
   export class CustomElementVector3 extends CustomElementTemplate {
-    public getMutatorValue(): Object {
+    public getMutatorValue(): ƒ.Mutator {
       let steppers: NodeListOf<CustomElementStepper> = this.querySelectorAll("fudge-stepper");
       let mutator: ƒ.Mutator = {};
       let count: number = 0;

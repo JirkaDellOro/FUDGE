@@ -53,8 +53,8 @@
   </template>
   <script>
     FudgeUserInterface.CustomElementTemplate.register("custom-vector3");
-    FudgeUserInterface.CustomElement.register("custom-vector3", FudgeUserInterface.CustomElementVector3);
-    FudgeUserInterface.CustomElement.map("Vector3", "custom-vector3");
+    FudgeUserInterface.CustomElement.register("custom-vector3", class CustomVector3 extends FudgeUserInterface.CustomElementTemplate { }); // FudgeUserInterface.CustomElementVector3);
+    //FudgeUserInterface.CustomElement.map("Vector3", "custom-vector3");
   </script>
 
   <template>

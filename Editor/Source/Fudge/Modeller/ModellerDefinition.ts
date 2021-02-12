@@ -24,4 +24,8 @@ namespace Fudge {
     SELECTION_UPDATE = "selectionupdate"
   }
 
+  export enum ModellerMenu {
+    DISPLAY_NORMALS
+  }
+
 }

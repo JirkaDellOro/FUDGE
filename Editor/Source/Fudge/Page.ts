@@ -172,7 +172,7 @@ namespace Fudge {
         let node: ƒ.Node = new ƒ.Node("graph");
         //let defaultNode: ƒ.Node = new ƒaid.Node("Default", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderFlat, new ƒ.CoatColored()), new ModifiableMesh());
       
-        let defaultNode: ƒ.Node = new ƒaid.Node("Default", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderFlat, new ƒ.CoatColored()), new ModifiableMesh());
+        let defaultNode: ƒ.Node = new ƒaid.Node("Default", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderFlat, new ƒ.CoatColored(new ƒ.Color(0.5, 0.5, 0.5))), new ModifiableMesh());
         modellerNode = defaultNode;
         node.addChild(defaultNode);  
         this.currentPanel = PANEL.MODELLER;

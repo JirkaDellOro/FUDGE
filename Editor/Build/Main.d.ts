@@ -6,11 +6,9 @@ declare namespace Fudge {
         DELETE_NODE = 3,
         EDIT = 4,
         CREATE = 5,
-        CONTROL_MODE = 6,
-        INTERACTION_MODE = 7,
-        CREATE_MESH = 8,
-        CREATE_MATERIAL = 9,
-        CREATE_GRAPH = 10
+        CREATE_MESH = 6,
+        CREATE_MATERIAL = 7,
+        CREATE_GRAPH = 8
     }
     enum MENU {
         QUIT = "quit",

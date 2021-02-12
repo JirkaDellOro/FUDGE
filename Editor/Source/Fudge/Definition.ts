@@ -11,8 +11,6 @@ namespace Fudge {
     DELETE_NODE,
     EDIT,
     CREATE,
-    CONTROL_MODE,
-    INTERACTION_MODE,
     CREATE_MESH,
     CREATE_MATERIAL,
     CREATE_GRAPH

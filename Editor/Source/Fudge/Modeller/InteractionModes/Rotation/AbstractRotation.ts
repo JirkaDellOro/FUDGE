@@ -1,6 +1,6 @@
 namespace Fudge {
   export abstract class AbstractRotation extends IInteractionMode {
-    public readonly type: InteractionMode = InteractionMode.ROTATE;
+    public readonly type: InteractionModes = InteractionModes.ROTATE;
     viewport: ƒ.Viewport;
     selection: Array<number>;
     editableNode: ƒ.Node;
@@ -71,6 +71,14 @@ namespace Fudge {
       this.axesSelectionHandler.removeAxisOf(_pressedKey);
       (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).updateNormals();
       return state;
+    }
+
+    getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {
+      return [];
+    }
+
+    contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
+      console.log(_item);
     }
 
     update(): void {

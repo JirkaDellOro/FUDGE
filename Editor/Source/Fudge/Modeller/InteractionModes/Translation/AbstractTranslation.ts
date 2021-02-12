@@ -1,6 +1,6 @@
 namespace Fudge {
   export abstract class AbstractTranslation extends IInteractionMode {
-    public readonly type: InteractionMode = InteractionMode.TRANSLATE;
+    public readonly type: InteractionModes = InteractionModes.TRANSLATE;
     viewport: ƒ.Viewport;
     selection: Array<number>;
     editableNode: ƒ.Node;
@@ -110,6 +110,34 @@ namespace Fudge {
       return state;
     }
 
+    getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {  
+      let item: Electron.MenuItem;  
+      item = new remote.MenuItem({
+        label: "display normals",
+        id: String(ModellerMenu.DISPLAY_NORMALS),
+        click: _callback
+      });
+      let item2: Electron.MenuItem;  
+      item2 = new remote.MenuItem({
+        label: "test",
+        click: _callback
+      });
+
+      return [MenuItemsCreator.getNormalDisplayItem(_callback), item2];
+    }
+
+    contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
+      switch (Number(_item.id)) {
+        case ModellerMenu.DISPLAY_NORMALS:
+          if (!IInteractionMode.normalsAreDisplayed) {
+            this.createNormalArrows();
+          } else {
+            this.removeNormalArrows();
+          }
+          break;
+      }
+      console.log(_item);
+    }
 
     update(): void {
       this.axesSelectionHandler.widget.mtxLocal.translation = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection);

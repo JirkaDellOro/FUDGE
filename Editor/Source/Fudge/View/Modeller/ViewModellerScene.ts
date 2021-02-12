@@ -20,14 +20,12 @@ namespace Fudge {
 
       ƒ.RenderWebGL.setBackfaceCulling(false);
       this.node = this.graph.getChildrenByName("Default")[0];
-      this.controller = new Controller(this.viewport, this.node);
-      // tslint:disable-next-line: no-unused-expression
+      this.controller = new Controller(this.viewport, this.node, this.dom);
       //new CameraControl(this.viewport);
-
       this.dom.addEventListener(ModellerEvents.HEADER_APPEND, this.changeHeader);
-
       this.dom.append(this.canvas);
-      this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
+      this.contextMenu = this.getContextMenu(this.controller.contextMenuCallback.bind(this));
+      this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.updateContextMenu);
       this.addEventListeners();
     }
 
@@ -66,9 +64,6 @@ namespace Fudge {
       //cmpCamera.pivot.rotateX(90);
 
       this.canvas = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
-      // let container: HTMLDivElement = document.createElement("div");
-      // container.style.borderWidth = "0px";
-      // container.append(this.canvas);
       document.body.appendChild(this.canvas);
 
       this.viewport = new ƒ.Viewport();
@@ -77,74 +72,91 @@ namespace Fudge {
       ƒaid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false, -0.15, 0.005, 0.003);
     } 
 
-    protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
+    protected getContextMenu = (_callback: ContextMenuCallback): Electron.Menu => {
       const menu: Electron.Menu = new remote.Menu();
-      let item: Electron.MenuItem;
-
-      let submenu: Electron.Menu = new remote.Menu();
-      // submenu.append(new remote.MenuItem({label: "Object"}));
-
-      // item = new remote.MenuItem({
-      //   label: "Control Mode",
-      //   submenu: ContextMenu.getSubclassMenu<typeof AbstractControlMode>(CONTEXTMENU.CONTROL_MODE, AbstractControlMode.subclasses, _callback)
-      // });
-
-      if (!this.controller) {
-        return menu;
+      let items: Electron.MenuItem[] = this.controller.getContextMenuItems(_callback);
+      for (let item of items) {
+        menu.append(item);
       }
-
-      for (let mode of this.controller.controlModes.keys()) {
-        let subitem: Electron.MenuItem = new remote.MenuItem(
-          { label: mode, id: String(CONTEXTMENU.CONTROL_MODE), click: _callback, accelerator: process.platform == "darwin" ? "Command+" + this.controller.controlModes.get(mode).shortcut : "ctrl+" + this.controller.controlModes.get(mode).shortcut}
-        );
-        //@ts-ignore
-        subitem.overrideProperty("controlMode", mode);
-        submenu.append(subitem);
-      }
-      item = new remote.MenuItem({
-        label: "Control Mode",
-        submenu: submenu
-      });
-      menu.append(item);
-
-      submenu = new remote.Menu();
-
-      // TODO: fix tight coupling here, only retrieve the shortcut from the controller
-      for (let mode in this.controller.controlMode.modes) {
-        let subitem: Electron.MenuItem = new remote.MenuItem(
-          { label: mode, id: String(CONTEXTMENU.INTERACTION_MODE), click: _callback, accelerator: process.platform == "darwin" ? "Command+" + this.controller.controlMode.modes[mode].shortcut : "ctrl+" + this.controller.controlMode.modes[mode].shortcut  }
-        );
-        //@ts-ignore
-        subitem.overrideProperty("interactionMode", mode);
-        submenu.append(subitem);
-      }
-      item = new remote.MenuItem({
-        label: "Interaction Mode",
-        submenu: submenu
-      });
-      
-      menu.append(item);
       return menu;
     }
 
-    protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void { 
-      switch (Number(_item.id)) {
-        case CONTEXTMENU.CONTROL_MODE: 
-          // BUG: Sometimes _item does not contain a controlMode property, find out why and fix
-          let controlModeNew: ControlMode = _item["controlMode"];
-          // //@ts-ignore
-          this.controller.setControlMode(controlModeNew);
+    // protected contextMenuCallback = (_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void => {
+    //   this.controller.contextMenuCallback(_item, _window, _event); 
+    // }
 
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
-          this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
-          break;
-        case CONTEXTMENU.INTERACTION_MODE:
-          let mode: InteractionMode = _item["interactionMode"];
-          this.controller.setInteractionMode(mode);
-          this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
-          break;
-      }
+    protected updateContextMenu = (): void => {
+      this.contextMenu = this.getContextMenu(this.controller.contextMenuCallback.bind(this));
     }
+
+    // protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
+    //   const menu: Electron.Menu = new remote.Menu();
+    //   let item: Electron.MenuItem;
+
+    //   let submenu: Electron.Menu = new remote.Menu();
+    //   // submenu.append(new remote.MenuItem({label: "Object"}));
+
+    // // item = new remote.MenuItem({
+    // //   label: "Control Mode",
+    // //   submenu: ContextMenu.getSubclassMenu<typeof AbstractControlMode>(CONTEXTMENU.CONTROL_MODE, AbstractControlMode.subclasses, _callback)
+    // // });
+
+    //   if (!this.controller) {
+    //     return menu;
+    //   }
+
+    //   for (let mode of this.controller.controlModes.keys()) {
+    //     let subitem: Electron.MenuItem = new remote.MenuItem(
+    //       { label: mode, id: String(CONTEXTMENU.CONTROL_MODE), click: _callback, accelerator: process.platform == "darwin" ? "Command+" + this.controller.controlModes.get(mode).shortcut : "ctrl+" + this.controller.controlModes.get(mode).shortcut}
+    //     );
+    //     //@ts-ignore
+    //     subitem.overrideProperty("controlMode", mode);
+    //     submenu.append(subitem);
+    //   }
+    //   item = new remote.MenuItem({
+    //     label: "Control Mode",
+    //     submenu: submenu
+    //   });
+    //   menu.append(item);
+
+    //   submenu = new remote.Menu();
+
+    //   // TODO: fix tight coupling here, only retrieve the shortcut from the controller
+    //   for (let mode in this.controller.controlMode.modes) {
+    //     let subitem: Electron.MenuItem = new remote.MenuItem(
+    //       { label: mode, id: String(CONTEXTMENU.INTERACTION_MODE), click: _callback, accelerator: process.platform == "darwin" ? "Command+" + this.controller.controlMode.modes[mode].shortcut : "ctrl+" + this.controller.controlMode.modes[mode].shortcut  }
+    //     );
+    //     //@ts-ignore
+    //     subitem.overrideProperty("interactionMode", mode);
+    //     submenu.append(subitem);
+    //   }
+    //   item = new remote.MenuItem({
+    //     label: "Interaction Mode",
+    //     submenu: submenu
+    //   });
+      
+    //   menu.append(item);
+    //   return menu;
+    // }
+
+    // protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void { 
+    //   switch (Number(_item.id)) {
+    //     case CONTEXTMENU.CONTROL_MODE: 
+    //       // BUG: Sometimes _item does not contain a controlMode property, find out why and fix
+    //       let controlModeNew: ControlMode = _item["controlMode"];
+    //       // //@ts-ignore
+    //       this.controller.setControlMode(controlModeNew);
+
+    //       this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+    //       this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
+    //       break;
+    //     case CONTEXTMENU.INTERACTION_MODE:
+    //       let mode: InteractionMode = _item["interactionMode"];
+    //       this.controller.setInteractionMode(mode);
+    //       this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+    //       break;
+    //   }
+    // }
 
     private animate = (_e: Event) => {
       this.viewport.setGraph(this.graph);

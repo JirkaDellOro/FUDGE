@@ -33,11 +33,9 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["DELETE_NODE"] = 3] = "DELETE_NODE";
         CONTEXTMENU[CONTEXTMENU["EDIT"] = 4] = "EDIT";
         CONTEXTMENU[CONTEXTMENU["CREATE"] = 5] = "CREATE";
-        CONTEXTMENU[CONTEXTMENU["CONTROL_MODE"] = 6] = "CONTROL_MODE";
-        CONTEXTMENU[CONTEXTMENU["INTERACTION_MODE"] = 7] = "INTERACTION_MODE";
-        CONTEXTMENU[CONTEXTMENU["CREATE_MESH"] = 8] = "CREATE_MESH";
-        CONTEXTMENU[CONTEXTMENU["CREATE_MATERIAL"] = 9] = "CREATE_MATERIAL";
-        CONTEXTMENU[CONTEXTMENU["CREATE_GRAPH"] = 10] = "CREATE_GRAPH";
+        CONTEXTMENU[CONTEXTMENU["CREATE_MESH"] = 6] = "CREATE_MESH";
+        CONTEXTMENU[CONTEXTMENU["CREATE_MATERIAL"] = 7] = "CREATE_MATERIAL";
+        CONTEXTMENU[CONTEXTMENU["CREATE_GRAPH"] = 8] = "CREATE_GRAPH";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -593,7 +591,7 @@ var Fudge;
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_MODELLER_OPEN, (_event, _args) => {
                 let node = new ƒ.Node("graph");
                 //let defaultNode: ƒ.Node = new ƒaid.Node("Default", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderFlat, new ƒ.CoatColored()), new ModifiableMesh());
-                let defaultNode = new ƒaid.Node("Default", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderFlat, new ƒ.CoatColored()), new Fudge.ModifiableMesh());
+                let defaultNode = new ƒaid.Node("Default", new ƒ.Matrix4x4(), new ƒ.Material("mtr", ƒ.ShaderFlat, new ƒ.CoatColored(new ƒ.Color(0.5, 0.5, 0.5))), new Fudge.ModifiableMesh());
                 modellerNode = defaultNode;
                 node.addChild(defaultNode);
                 this.currentPanel = Fudge.PANEL.MODELLER;
@@ -1274,10 +1272,10 @@ var Fudge;
         constructor(_mutable, _domElement) {
             super(_mutable, _domElement);
             this.handleInput = (_event) => {
-                this.mutateOnInput(_event);
+                //this.mutateOnInput(_event);
                 this.node.getComponent(ƒ.ComponentMesh).mesh.updateMesh();
             };
-            this.domElement.addEventListener("input", this.handleInput); // this should be obsolete
+            this.domElement.addEventListener("input", this.handleInput);
         }
     }
     Fudge.ControllerVertices = ControllerVertices;
@@ -1378,7 +1376,7 @@ var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
     class Controller {
-        constructor(viewport, editableNode) {
+        constructor(_viewport, _editableNode, _dom) {
             // could make an array of Array<{someinterface, string}> to support undo for different objects
             // or just think of some smarter  way of doing undo, e.g. storing the reverse functions
             this.states = [];
@@ -1388,11 +1386,16 @@ var Fudge;
                 [Fudge.ControlMode.OBJECT_MODE, { type: new Fudge.ObjectMode(), shortcut: "p" }],
                 [Fudge.ControlMode.EDIT_MODE, { type: new Fudge.EditMode(), shortcut: "d" }]
             ]);
-            this.viewport = viewport;
+            this.contextMenuCallback = (_item, _window, _event) => {
+                this.interactionMode.contextMenuCallback(_item, _window, _event);
+            };
+            this.viewport = _viewport;
             this.currentControlMode = this.controlModesMap.get(Fudge.ControlMode.OBJECT_MODE).type;
-            this.editableNode = editableNode;
+            this.editableNode = _editableNode;
+            this.dom = _dom;
             this.saveState(this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getState());
             this.setInteractionMode(Fudge.InteractionMode.IDLE);
+            //_dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
         }
         get controlMode() {
             return this.currentControlMode;
@@ -1473,6 +1476,7 @@ var Fudge;
             this.interactionMode?.cleanup();
             this.interactionMode = this.currentControlMode.formerMode || new Fudge.IdleMode(this.viewport, this.editableNode);
             this.interactionMode.initialize();
+            this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
             console.log("Current Mode: " + this.interactionMode.type);
         }
         // maybe add type attributes to the interaction modes to alter behaviour based on those attributes
@@ -1484,10 +1488,19 @@ var Fudge;
             if (selection && this.controlMode.type === Fudge.ControlMode.EDIT_MODE)
                 this.interactionMode.selection = selection;
             this.interactionMode.initialize();
+            this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
             console.log("Current Mode: " + this.interactionMode.type);
         }
         drawSelection() {
             this.interactionMode.animate();
+        }
+        getContextMenuItems(_callback) {
+            // const menu: Electron.Menu = new remote.Menu();
+            // for (let item of this.interactionMode.getContextMenuItems(this.interactionMode.connectedCallback.bind(this))) {
+            //   menu.append(item);
+            // }
+            // this.contextMenu = menu;
+            return this.interactionMode.getContextMenuItems(_callback);
         }
         loadState(isUndo = true) {
             // if (this.states.length <= 0) 
@@ -1561,6 +1574,10 @@ var Fudge;
         ModellerEvents["HEADER_APPEND"] = "headerappend";
         ModellerEvents["SELECTION_UPDATE"] = "selectionupdate";
     })(ModellerEvents = Fudge.ModellerEvents || (Fudge.ModellerEvents = {}));
+    let ModellerMenu;
+    (function (ModellerMenu) {
+        ModellerMenu[ModellerMenu["DISPLAY_NORMALS"] = 0] = "DISPLAY_NORMALS";
+    })(ModellerMenu = Fudge.ModellerMenu || (Fudge.ModellerMenu = {}));
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -1628,9 +1645,7 @@ var Fudge;
             return this.viewport.pointClientToRender(new ƒ.Vector2(mousePos.x, this.viewport.getCanvasRectangle().height - mousePos.y));
         }
         createNormalArrows() {
-            for (let node of this.viewport.getGraph().getChildrenByName("normal")) {
-                this.viewport.getGraph().removeChild(node);
-            }
+            this.removeNormalArrows();
             let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
             for (let i = 0; i < mesh.vertices.length; i += 3) {
                 let vertex = new ƒ.Vector3(mesh.vertices[i], mesh.vertices[i + 1], mesh.vertices[i + 2]);
@@ -1661,6 +1676,13 @@ var Fudge;
                 }
                 this.viewport.getGraph().addChild(normalArrow);
             }
+            IInteractionMode.normalsAreDisplayed = true;
+        }
+        removeNormalArrows() {
+            for (let node of this.viewport.getGraph().getChildrenByName("normal")) {
+                this.viewport.getGraph().removeChild(node);
+            }
+            IInteractionMode.normalsAreDisplayed = false;
         }
         copyVertices() {
             let vertices = this.editableNode.getComponent(ƒ.ComponentMesh).mesh.uniqueVertices;
@@ -1704,48 +1726,21 @@ var Fudge;
             }
         }
     }
+    IInteractionMode.normalsAreDisplayed = false;
     Fudge.IInteractionMode = IInteractionMode;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    class IdleMode extends Fudge.IInteractionMode {
-        constructor() {
-            super(...arguments);
-            this.type = Fudge.InteractionMode.IDLE;
-        }
-        initialize() {
-            //@ts-ignore
-        }
-        onmousedown(_event) {
-        }
-        onmouseup(_event) {
-            return null;
-            //@ts-ignore
-        }
-        onmove(_event) {
-            //@ts-ignore
-        }
-        onkeydown(_pressedKey) {
-        }
-        onkeyup(_pressedKey) {
-            return null;
-            //@ts-ignore
-        }
-        update() {
-            //@ts-ignore
-        }
-        cleanup() {
-            //@ts-ignore
-        }
+    class InteractionMode {
     }
-    Fudge.IdleMode = IdleMode;
+    Fudge.InteractionMode = InteractionMode;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
     class Extrude extends Fudge.IInteractionMode {
         constructor(viewport, editableNode, selection) {
             super(viewport, editableNode, selection);
-            this.type = Fudge.InteractionMode.EXTRUDE;
+            this.type = InteractionModes.EXTRUDE;
             this.isExtruded = false;
             this.vertexSelected = false;
             // TODO: check if pivot is still correct or if we need to use the container
@@ -1821,6 +1816,12 @@ var Fudge;
             this.axesSelectionHandler.removeAxisOf(pressedKey);
             return null;
         }
+        getContextMenuItems(_callback) {
+            return [];
+        }
+        contextMenuCallback(_item, _window, _event) {
+            console.log(_item);
+        }
         update() {
             //@ts-ignore
         }
@@ -1838,10 +1839,50 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    class IdleMode extends Fudge.IInteractionMode {
+        constructor() {
+            super(...arguments);
+            this.type = InteractionModes.IDLE;
+        }
+        initialize() {
+            //@ts-ignore
+        }
+        onmousedown(_event) {
+        }
+        onmouseup(_event) {
+            return null;
+            //@ts-ignore
+        }
+        onmove(_event) {
+            //@ts-ignore
+        }
+        onkeydown(_pressedKey) {
+        }
+        onkeyup(_pressedKey) {
+            return null;
+            //@ts-ignore
+        }
+        getContextMenuItems(_callback) {
+            return [];
+        }
+        contextMenuCallback(_item, _window, _event) {
+            console.log(_item);
+        }
+        update() {
+            //@ts-ignore
+        }
+        cleanup() {
+            //@ts-ignore
+        }
+    }
+    Fudge.IdleMode = IdleMode;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
     class AbstractRotation extends Fudge.IInteractionMode {
         constructor() {
             super(...arguments);
-            this.type = Fudge.InteractionMode.ROTATE;
+            this.type = InteractionModes.ROTATE;
         }
         initialize() {
             let widget = new Fudge.RotationWidget();
@@ -1897,6 +1938,12 @@ var Fudge;
             this.axesSelectionHandler.removeAxisOf(_pressedKey);
             this.editableNode.getComponent(ƒ.ComponentMesh).mesh.updateNormals();
             return state;
+        }
+        getContextMenuItems(_callback) {
+            return [];
+        }
+        contextMenuCallback(_item, _window, _event) {
+            console.log(_item);
         }
         update() {
             this.axesSelectionHandler.widget.mtxLocal.translation = this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid(this.selection);
@@ -2005,7 +2052,7 @@ var Fudge;
         constructor() {
             super(...arguments);
             //protected widget: ƒ.Node;
-            this.type = Fudge.InteractionMode.SCALE;
+            this.type = InteractionModes.SCALE;
         }
         initialize() {
             let widget = new Fudge.ScalationWidget();
@@ -2086,6 +2133,12 @@ var Fudge;
             this.axesSelectionHandler.removeAxisOf(_pressedKey);
             return state;
         }
+        getContextMenuItems(_callback) {
+            return [];
+        }
+        contextMenuCallback(_item, _window, _event) {
+            console.log(_item);
+        }
         update() {
             this.axesSelectionHandler.widget.mtxLocal.translation = this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid(this.selection);
         }
@@ -2150,11 +2203,17 @@ var Fudge;
     class AbstractSelection extends Fudge.IInteractionMode {
         constructor() {
             super(...arguments);
-            this.type = Fudge.InteractionMode.SELECT;
+            this.type = InteractionModes.SELECT;
         }
         // abstract onmousedown(_event: ƒ.EventPointer): void;
         // abstract onmouseup(_event: ƒ.EventPointer): string;
         // abstract onmove(_event: ƒ.EventPointer): void;
+        getContextMenuItems(_callback) {
+            return [];
+        }
+        contextMenuCallback(_item, _window, _event) {
+            console.log(_item);
+        }
         cleanup() {
             //
         }
@@ -2253,7 +2312,7 @@ var Fudge;
     class AbstractTranslation extends Fudge.IInteractionMode {
         constructor() {
             super(...arguments);
-            this.type = Fudge.InteractionMode.TRANSLATE;
+            this.type = InteractionModes.TRANSLATE;
             this.dragging = false;
             // protected copyVerticesAndCalculateDistance(_event: ƒ.EventPointer): void {
             //   this.distance = this.getDistanceFromCameraToCenterOfNode();
@@ -2354,6 +2413,33 @@ var Fudge;
             this.axesSelectionHandler.removeAxisOf(_pressedKey);
             this.axesSelectionHandler.widget.mtxLocal.translation = this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid(this.selection);
             return state;
+        }
+        getContextMenuItems(_callback) {
+            let item;
+            item = new Fudge.remote.MenuItem({
+                label: "display normals",
+                id: String(Fudge.ModellerMenu.DISPLAY_NORMALS),
+                click: _callback
+            });
+            let item2;
+            item2 = new Fudge.remote.MenuItem({
+                label: "test",
+                click: _callback
+            });
+            return [Fudge.MenuItemsCreator.getNormalDisplayItem(_callback), item2];
+        }
+        contextMenuCallback(_item, _window, _event) {
+            switch (Number(_item.id)) {
+                case Fudge.ModellerMenu.DISPLAY_NORMALS:
+                    if (!Fudge.IInteractionMode.normalsAreDisplayed) {
+                        this.createNormalArrows();
+                    }
+                    else {
+                        this.removeNormalArrows();
+                    }
+                    break;
+            }
+            console.log(_item);
         }
         update() {
             this.axesSelectionHandler.widget.mtxLocal.translation = this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid(this.selection);
@@ -3419,6 +3505,21 @@ var Fudge;
         }
     }
     Fudge.AxesSelectionHandler = AxesSelectionHandler;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    class MenuItemsCreator {
+        static getNormalDisplayItem(_callback) {
+            let item;
+            item = new Fudge.remote.MenuItem({
+                label: "display normals",
+                id: String(Fudge.ModellerMenu.DISPLAY_NORMALS),
+                click: _callback
+            });
+            return item;
+        }
+    }
+    Fudge.MenuItemsCreator = MenuItemsCreator;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -4855,6 +4956,79 @@ var Fudge;
     class ViewModellerScene extends Fudge.View {
         constructor(_container, _state) {
             super(_container, _state);
+            this.getContextMenu = (_callback) => {
+                const menu = new Fudge.remote.Menu();
+                let items = this.controller.getContextMenuItems(_callback);
+                for (let item of items) {
+                    menu.append(item);
+                }
+                return menu;
+            };
+            // protected contextMenuCallback = (_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void => {
+            //   this.controller.contextMenuCallback(_item, _window, _event); 
+            // }
+            this.updateContextMenu = () => {
+                this.contextMenu = this.getContextMenu(this.controller.contextMenuCallback.bind(this));
+            };
+            // protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
+            //   const menu: Electron.Menu = new remote.Menu();
+            //   let item: Electron.MenuItem;
+            //   let submenu: Electron.Menu = new remote.Menu();
+            //   // submenu.append(new remote.MenuItem({label: "Object"}));
+            // // item = new remote.MenuItem({
+            // //   label: "Control Mode",
+            // //   submenu: ContextMenu.getSubclassMenu<typeof AbstractControlMode>(CONTEXTMENU.CONTROL_MODE, AbstractControlMode.subclasses, _callback)
+            // // });
+            //   if (!this.controller) {
+            //     return menu;
+            //   }
+            //   for (let mode of this.controller.controlModes.keys()) {
+            //     let subitem: Electron.MenuItem = new remote.MenuItem(
+            //       { label: mode, id: String(CONTEXTMENU.CONTROL_MODE), click: _callback, accelerator: process.platform == "darwin" ? "Command+" + this.controller.controlModes.get(mode).shortcut : "ctrl+" + this.controller.controlModes.get(mode).shortcut}
+            //     );
+            //     //@ts-ignore
+            //     subitem.overrideProperty("controlMode", mode);
+            //     submenu.append(subitem);
+            //   }
+            //   item = new remote.MenuItem({
+            //     label: "Control Mode",
+            //     submenu: submenu
+            //   });
+            //   menu.append(item);
+            //   submenu = new remote.Menu();
+            //   // TODO: fix tight coupling here, only retrieve the shortcut from the controller
+            //   for (let mode in this.controller.controlMode.modes) {
+            //     let subitem: Electron.MenuItem = new remote.MenuItem(
+            //       { label: mode, id: String(CONTEXTMENU.INTERACTION_MODE), click: _callback, accelerator: process.platform == "darwin" ? "Command+" + this.controller.controlMode.modes[mode].shortcut : "ctrl+" + this.controller.controlMode.modes[mode].shortcut  }
+            //     );
+            //     //@ts-ignore
+            //     subitem.overrideProperty("interactionMode", mode);
+            //     submenu.append(subitem);
+            //   }
+            //   item = new remote.MenuItem({
+            //     label: "Interaction Mode",
+            //     submenu: submenu
+            //   });
+            //   menu.append(item);
+            //   return menu;
+            // }
+            // protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void { 
+            //   switch (Number(_item.id)) {
+            //     case CONTEXTMENU.CONTROL_MODE: 
+            //       // BUG: Sometimes _item does not contain a controlMode property, find out why and fix
+            //       let controlModeNew: ControlMode = _item["controlMode"];
+            //       // //@ts-ignore
+            //       this.controller.setControlMode(controlModeNew);
+            //       this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+            //       this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
+            //       break;
+            //     case CONTEXTMENU.INTERACTION_MODE:
+            //       let mode: InteractionMode = _item["interactionMode"];
+            //       this.controller.setInteractionMode(mode);
+            //       this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+            //       break;
+            //   }
+            // }
             this.animate = (_e) => {
                 this.viewport.setGraph(this.graph);
                 if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
@@ -4894,12 +5068,12 @@ var Fudge;
             ƒaid.addStandardLightComponents(this.graph, new ƒ.Color(0.5, 0.5, 0.5));
             ƒ.RenderWebGL.setBackfaceCulling(false);
             this.node = this.graph.getChildrenByName("Default")[0];
-            this.controller = new Fudge.Controller(this.viewport, this.node);
-            // tslint:disable-next-line: no-unused-expression
+            this.controller = new Fudge.Controller(this.viewport, this.node, this.dom);
             //new CameraControl(this.viewport);
             this.dom.addEventListener(Fudge.ModellerEvents.HEADER_APPEND, this.changeHeader);
             this.dom.append(this.canvas);
-            this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
+            this.contextMenu = this.getContextMenu(this.controller.contextMenuCallback.bind(this));
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.updateContextMenu);
             this.addEventListeners();
         }
         addEventListeners() {
@@ -4928,69 +5102,11 @@ var Fudge;
             new ƒaid.CameraOrbit(cmpCamera);
             //cmpCamera.pivot.rotateX(90);
             this.canvas = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
-            // let container: HTMLDivElement = document.createElement("div");
-            // container.style.borderWidth = "0px";
-            // container.append(this.canvas);
             document.body.appendChild(this.canvas);
             this.viewport = new ƒ.Viewport();
             this.viewport.initialize("Viewport", this.graph, cmpCamera, this.canvas);
             this.viewport.draw();
             ƒaid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false, -0.15, 0.005, 0.003);
-        }
-        getContextMenu(_callback) {
-            const menu = new Fudge.remote.Menu();
-            let item;
-            let submenu = new Fudge.remote.Menu();
-            // submenu.append(new remote.MenuItem({label: "Object"}));
-            // item = new remote.MenuItem({
-            //   label: "Control Mode",
-            //   submenu: ContextMenu.getSubclassMenu<typeof AbstractControlMode>(CONTEXTMENU.CONTROL_MODE, AbstractControlMode.subclasses, _callback)
-            // });
-            if (!this.controller) {
-                return menu;
-            }
-            for (let mode of this.controller.controlModes.keys()) {
-                let subitem = new Fudge.remote.MenuItem({ label: mode, id: String(Fudge.CONTEXTMENU.CONTROL_MODE), click: _callback, accelerator: process.platform == "darwin" ? "Command+" + this.controller.controlModes.get(mode).shortcut : "ctrl+" + this.controller.controlModes.get(mode).shortcut });
-                //@ts-ignore
-                subitem.overrideProperty("controlMode", mode);
-                submenu.append(subitem);
-            }
-            item = new Fudge.remote.MenuItem({
-                label: "Control Mode",
-                submenu: submenu
-            });
-            menu.append(item);
-            submenu = new Fudge.remote.Menu();
-            // TODO: fix tight coupling here, only retrieve the shortcut from the controller
-            for (let mode in this.controller.controlMode.modes) {
-                let subitem = new Fudge.remote.MenuItem({ label: mode, id: String(Fudge.CONTEXTMENU.INTERACTION_MODE), click: _callback, accelerator: process.platform == "darwin" ? "Command+" + this.controller.controlMode.modes[mode].shortcut : "ctrl+" + this.controller.controlMode.modes[mode].shortcut });
-                //@ts-ignore
-                subitem.overrideProperty("interactionMode", mode);
-                submenu.append(subitem);
-            }
-            item = new Fudge.remote.MenuItem({
-                label: "Interaction Mode",
-                submenu: submenu
-            });
-            menu.append(item);
-            return menu;
-        }
-        contextMenuCallback(_item, _window, _event) {
-            switch (Number(_item.id)) {
-                case Fudge.CONTEXTMENU.CONTROL_MODE:
-                    // BUG: Sometimes _item does not contain a controlMode property, find out why and fix
-                    let controlModeNew = _item["controlMode"];
-                    // //@ts-ignore
-                    this.controller.setControlMode(controlModeNew);
-                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
-                    this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
-                    break;
-                case Fudge.CONTEXTMENU.INTERACTION_MODE:
-                    let mode = _item["interactionMode"];
-                    this.controller.setInteractionMode(mode);
-                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
-                    break;
-            }
         }
         cleanup() {
             ƒ.Loop.removeEventListener("loopFrame" /* LOOP_FRAME */, this.animate);

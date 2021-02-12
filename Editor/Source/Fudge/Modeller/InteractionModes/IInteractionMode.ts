@@ -3,7 +3,8 @@ namespace Fudge {
   import ƒAid = FudgeAid;
 
   export abstract class IInteractionMode {
-    public readonly type: InteractionMode;
+    protected static normalsAreDisplayed: boolean = false;
+    public readonly type: InteractionModes;
     selection: Array<number>;
     viewport: ƒ.Viewport;
     editableNode: ƒ.Node;
@@ -23,6 +24,9 @@ namespace Fudge {
     abstract onkeydown(_pressedKey: string): void;
     abstract onkeyup(_pressedKey: string): string;
     abstract update(): void;
+    // fix this tomorrow
+    abstract getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
+    abstract contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void; 
 
     abstract initialize(): void;
     abstract cleanup(): void;
@@ -48,9 +52,7 @@ namespace Fudge {
     }
 
     protected createNormalArrows(): void {
-      for (let node of this.viewport.getGraph().getChildrenByName("normal")) {
-        this.viewport.getGraph().removeChild(node);
-      }
+      this.removeNormalArrows();
       let mesh: ƒ.Mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
       for (let i: number = 0; i < mesh.vertices.length; i += 3) {
         let vertex: ƒ.Vector3 = new ƒ.Vector3(mesh.vertices[i], mesh.vertices[i + 1], mesh.vertices[i + 2]);
@@ -81,7 +83,17 @@ namespace Fudge {
         }
         this.viewport.getGraph().addChild(normalArrow);
       }
+      IInteractionMode.normalsAreDisplayed = true;
     }
+
+    protected removeNormalArrows(): void {
+      for (let node of this.viewport.getGraph().getChildrenByName("normal")) {
+        this.viewport.getGraph().removeChild(node);
+      }
+      IInteractionMode.normalsAreDisplayed = false;
+
+    }
+
     
     protected copyVertices(): Map<number, ƒ.Vector3> {
       let vertices: UniqueVertex[] = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices;

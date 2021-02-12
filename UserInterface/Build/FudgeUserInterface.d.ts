@@ -323,7 +323,7 @@ declare namespace FudgeUserInterface {
 declare namespace FudgeUserInterface {
     import ƒ = FudgeCore;
     class CustomElementVector3 extends CustomElementTemplate {
-        getMutatorValue(): Object;
+        getMutatorValue(): ƒ.Mutator;
         setMutatorValue(_mutator: ƒ.Mutator): void;
         protected connectedCallback(): void;
     }

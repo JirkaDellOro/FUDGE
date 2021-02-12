@@ -1,5 +1,6 @@
 namespace Fudge {
   import ƒ = FudgeCore;
+  import ƒui = FudgeUserInterface;
   
   export class Controller {
     private interactionMode: IInteractionMode;
@@ -10,18 +11,21 @@ namespace Fudge {
     // or just think of some smarter  way of doing undo, e.g. storing the reverse functions
     private states: Array<string> = [];
     private currentState: number = -1;
+    private dom: HTMLElement;
     // TODO: change those shortcuts
     private controlModesMap: Map<ControlMode, {type: AbstractControlMode, shortcut: string}> = new Map([
       [ControlMode.OBJECT_MODE, {type: new ObjectMode(), shortcut: "p"}],
       [ControlMode.EDIT_MODE, {type: new EditMode(), shortcut: "d"}]
     ]); 
 
-    constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node) {
-      this.viewport = viewport;
+    constructor(_viewport: ƒ.Viewport, _editableNode: ƒ.Node, _dom: HTMLElement) {
+      this.viewport = _viewport;
       this.currentControlMode = this.controlModesMap.get(ControlMode.OBJECT_MODE).type;
-      this.editableNode = editableNode;
+      this.editableNode = _editableNode;
+      this.dom = _dom;
       this.saveState((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState());
       this.setInteractionMode(InteractionMode.IDLE);
+      //_dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
     }
 
     public get controlMode(): AbstractControlMode {
@@ -36,7 +40,6 @@ namespace Fudge {
       let state: string = this.interactionMode.onmouseup(_event);
       if (state != null) 
         this.saveState(state);
-
     }
 
     public onmousedown(_event: ƒ.EventPointer): void {
@@ -117,7 +120,8 @@ namespace Fudge {
       console.log(mode);
       this.interactionMode?.cleanup();
       this.interactionMode = this.currentControlMode.formerMode || new IdleMode(this.viewport, this.editableNode);
-      this.interactionMode.initialize();
+      this.interactionMode.initialize(); 
+      this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));     
       console.log("Current Mode: " + this.interactionMode.type);
     }
 
@@ -132,11 +136,25 @@ namespace Fudge {
         this.interactionMode.selection = selection;
       
       this.interactionMode.initialize();
+      this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
       console.log("Current Mode: " + this.interactionMode.type);
     }
 
     public drawSelection(): void {
       this.interactionMode.animate();
+    }
+
+    public getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {
+      // const menu: Electron.Menu = new remote.Menu();
+      // for (let item of this.interactionMode.getContextMenuItems(this.interactionMode.connectedCallback.bind(this))) {
+      //   menu.append(item);
+      // }
+      // this.contextMenu = menu;
+      return this.interactionMode.getContextMenuItems(_callback);
+    }
+
+    public contextMenuCallback = (_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void => {
+      this.interactionMode.contextMenuCallback(_item, _window, _event);
     }
 
     private loadState(isUndo: boolean = true): void {

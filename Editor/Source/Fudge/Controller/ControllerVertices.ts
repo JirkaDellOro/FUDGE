@@ -6,17 +6,15 @@ namespace Fudge {
   import ƒ = FudgeCore;
   import ƒui = FudgeUserInterface;
 
-
   export class ControllerVertices extends ƒui.Controller {
-
     public node: ƒ.Node;
     public constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement) {
       super(_mutable, _domElement);
-      this.domElement.addEventListener("input", this.handleInput); // this should be obsolete
+      this.domElement.addEventListener("input", this.handleInput);
     }
 
     private handleInput = (_event: Event) => {
-      this.mutateOnInput(_event);
+      //this.mutateOnInput(_event);
       (<ModifiableMesh> this.node.getComponent(ƒ.ComponentMesh).mesh).updateMesh();
     }
 
