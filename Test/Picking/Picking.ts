@@ -85,17 +85,17 @@ namespace Picking {
     cameraPick.pivot.lookAt(ray.direction);
     cameraPick.projectCentral(1, 0.001);
 
-    let picks: ƒ.Pick[] = viewportPick.pick();
-    // cursor.getComponent(ƒ.ComponentMaterial).activate(false);
-    picks.sort((a: ƒ.Pick, b: ƒ.Pick) => (b.zBuffer > 0) ? (a.zBuffer > 0) ? a.zBuffer - b.zBuffer : 1 : -1);
+    cursor.getComponent(ƒ.ComponentMesh).activate(false);
+    // let picks: ƒ.Pick[] = viewportPick.pick();
+    let picks: ƒ.Pick[] = ƒ.Picker.pickViewport(viewport, mouse);
+    cursor.getComponent(ƒ.ComponentMesh).activate(true);
+    picks.sort((a: ƒ.Pick, b: ƒ.Pick) => a.zBuffer > b.zBuffer ? 1 : -1);
     for (let hit of picks) {
       data[hit.node.name] = hit.zBuffer;
     }
     if (picks.length) {
       let pick: ƒ.Pick = picks[0];
-      if (pick.node.name == "Cursor")
-        pick = pick[1];
-      cursor.mtxLocal.translation = viewport.calculateWorldFromZBuffer(mouse, pick.zBuffer);
+      cursor.mtxLocal.translation = pick.world;
     }
   }
 

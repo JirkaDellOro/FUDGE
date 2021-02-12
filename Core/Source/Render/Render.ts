@@ -14,9 +14,10 @@ namespace FudgeCore {
    */
   export interface Pick {
     node: Node;
-    zBuffer: number;
-    luminance: number;
-    alpha: number;
+    zBuffer?: number;
+    luminance?: number;
+    alpha?: number;
+    world?: Vector3;
   }
 
   /**
@@ -39,8 +40,6 @@ namespace FudgeCore {
     public static createPickTexture(_width: number, _height: number): WebGLTexture {
       Render.pickSize = new Vector2(_width, _height);
       // create to render to
-      const targetTextureWidth: number = _width;
-      const targetTextureHeight: number = _height;
       const targetTexture: WebGLTexture = Render.crc3.createTexture();
       Render.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, targetTexture);
 
@@ -50,7 +49,7 @@ namespace FudgeCore {
         const type: number = WebGL2RenderingContext.UNSIGNED_BYTE;
         Render.pickBuffer = new Uint8Array(_width * _height * 4);
         Render.crc3.texImage2D(
-          WebGL2RenderingContext.TEXTURE_2D, 0, internalFormat, targetTextureWidth, targetTextureHeight, 0, format, type, Render.pickBuffer
+          WebGL2RenderingContext.TEXTURE_2D, 0, internalFormat, _width, _height, 0, format, type, Render.pickBuffer
         );
 
         // set the filtering so we don't need mips
@@ -105,12 +104,13 @@ namespace FudgeCore {
         picked.zBuffer = zBuffer / 128 - 1;
         picked.luminance = data[4 * i + 2] / 255;
         picked.alpha = data[4 * i + 3] / 255;
+        picked.world = _cmpCamera.pointClipToWorld(Vector3.Z(picked.zBuffer));
+
         picks.push(picked);
       }
 
       Render.resetFrameBuffer();
-      // return picks; <- optimization
-      return Render.picks;
+      return picks;
     }
 
     /**
@@ -122,17 +122,16 @@ namespace FudgeCore {
 
       for (let pickBuffer of _pickBuffers) {
         Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, pickBuffer.frameBuffer);
-        // TODO: instead of reading all data and afterwards pick the pixel, read only the pixel!
         let data: Uint8Array = new Uint8Array(_rect.width * _rect.height * 4);
         Render.crc3.readPixels(0, 0, _rect.width, _rect.height, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, data);
         let pixel: number = _pos.x + _rect.width * _pos.y;
 
         let zBuffer: number = data[4 * pixel + 1] + data[4 * pixel + 2] / 256;
         zBuffer = zBuffer / 128 - 1;
-        // if (zBuffer > -1) {
-        let hit: RayHit = new RayHit(pickBuffer.node, 0, zBuffer);
-        hits.push(hit);
-        // }
+        if (zBuffer > -1) {
+          let hit: RayHit = new RayHit(pickBuffer.node, 0, zBuffer);
+          hits.push(hit);
+        }
       }
 
       return hits;
@@ -266,6 +265,11 @@ namespace FudgeCore {
     private static drawNodeForPicking(_node: Node, _mtxMeshToWorld: Matrix4x4, _mtxWorldToView: Matrix4x4, _lights: MapLightTypeToLightList): void { // create Texture to render to, int-rgba
       try {
         let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
+        let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
+
+        if (!cmpMesh.isActive || !cmpMaterial.isActive)
+          return;
+
         let coat: Coat = cmpMaterial.material.getCoat();
         let shader: typeof Shader = coat instanceof CoatTextured ? ShaderPickTextured : ShaderPick;
 
@@ -275,12 +279,11 @@ namespace FudgeCore {
         let sizeUniformLocation: WebGLUniformLocation = shader.uniforms["u_size"];
         RenderWebGL.getRenderingContext().uniform2fv(sizeUniformLocation, Render.pickSize.get());
 
-        let mesh: Mesh = _node.getComponent(ComponentMesh).mesh;
-        // console.log(Render.picks.length);
+        let mesh: Mesh = cmpMesh.mesh;
         mesh.useRenderBuffers(ShaderPick, _mtxMeshToWorld, _mtxWorldToView, Render.picks.length);
         RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, mesh.renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
 
-        let pick: Pick = { node: _node, zBuffer: Infinity, luminance: 1.0, alpha: 1.0 };
+        let pick: Pick = { node: _node };
         Render.picks.push(pick);
       } catch (_error) {
         //
@@ -303,6 +306,8 @@ namespace FudgeCore {
 
       try {
         let mesh: Mesh = _node.getComponent(ComponentMesh).mesh;
+        if (!_node.getComponent(ComponentMesh).isActive || !_node.getComponent(ComponentMaterial).isActive)
+          return;
         ShaderRayCast.useProgram();
         let pickBuffer: PickBuffer = { node: _node, frameBuffer: framebuffer };
         Render.pickBuffers.push(pickBuffer);

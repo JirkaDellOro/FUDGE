@@ -33,8 +33,8 @@ namespace FudgeCore {
     // TODO: examine, if background should be an attribute of Camera or Viewport
 
     /**
-     * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
-     * @returns the world-projection-matrix
+     * Returns the multiplikation of the worldtransformation of the camera container, the pivot of this camera and the inversion of the projection matrix
+     * yielding the worldspace to viewspace matrix
      */
     public get mtxWorldToView(): Matrix4x4 {
       //TODO: optimize, no need to recalculate if neither mtxWorld nor pivot have changed
@@ -130,11 +130,32 @@ namespace FudgeCore {
 
     public pointWorldToClip(_pointInWorldSpace: Vector3): Vector3 {
       let result: Vector3;
-      result = Vector3.TRANSFORMATION(_pointInWorldSpace, this.mtxWorldToView);
       let m: Float32Array = this.mtxWorldToView.get();
       let w: number = m[3] * _pointInWorldSpace.x + m[7] * _pointInWorldSpace.y + m[11] * _pointInWorldSpace.z + m[15];
+
+      result = Vector3.TRANSFORMATION(_pointInWorldSpace, this.mtxWorldToView);
       result.scale(1 / w);
       return result;
+    }
+
+    public pointClipToWorld(_pointInClipSpace: Vector3): Vector3 {
+      // let result: Vector3 = _pointInClipSpace.copy;
+      // let m: Float32Array = this.mtxWorldToView.get();
+      // let w: number = m[3] * result.x + m[7] * result.y + m[11] * result.z + m[15];
+
+      // let mtxViewToWorld: Matrix4x4 = Matrix4x4.INVERSION(this.mtxWorldToView);
+      // result.scale(w);
+      // result = Vector3.TRANSFORMATION(result, mtxViewToWorld);
+
+      // return result;
+      
+      let mtxViewProjectionInverse: Matrix4x4 = Matrix4x4.INVERSION(this.mtxWorldToView);
+      let m: Float32Array = mtxViewProjectionInverse.get();
+      let rayWorld: Vector3 = Vector3.TRANSFORMATION(_pointInClipSpace, mtxViewProjectionInverse, true);
+      let w: number = m[3] * _pointInClipSpace.x + m[7] * _pointInClipSpace.y + m[11] * _pointInClipSpace.z + m[15];
+      rayWorld.scale(1 / w);
+
+      return rayWorld;
     }
 
     //#region Transfer

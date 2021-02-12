@@ -174,7 +174,6 @@ namespace FudgeCore {
     public pickNodeAt(_pos: Vector2): RayHit[] {
       // this.createPickBuffers();
       let hits: RayHit[] = Render.pickNodeAt(_pos, this.pickBuffers, this.rectSource);
-      // hits.sort((a: RayHit, b: RayHit) => (b.zBuffer > 0) ? (a.zBuffer > 0) ? a.zBuffer - b.zBuffer : 1 : -1);
       return hits;
     }
 

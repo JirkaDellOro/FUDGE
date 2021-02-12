@@ -1595,8 +1595,8 @@ declare namespace FudgeCore {
         private far;
         private backgroundEnabled;
         /**
-         * Returns the multiplikation of the worldtransformation of the camera container with the projection matrix
-         * @returns the world-projection-matrix
+         * Returns the multiplikation of the worldtransformation of the camera container, the pivot of this camera and the inversion of the projection matrix
+         * yielding the worldspace to viewspace matrix
          */
         get mtxWorldToView(): Matrix4x4;
         getProjection(): PROJECTION;
@@ -1626,6 +1626,7 @@ declare namespace FudgeCore {
          */
         getProjectionRectangle(): Rectangle;
         pointWorldToClip(_pointInWorldSpace: Vector3): Vector3;
+        pointClipToWorld(_pointInClipSpace: Vector3): Vector3;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
@@ -4992,9 +4993,10 @@ declare namespace FudgeCore {
      */
     interface Pick {
         node: Node;
-        zBuffer: number;
-        luminance: number;
-        alpha: number;
+        zBuffer?: number;
+        luminance?: number;
+        alpha?: number;
+        world?: Vector3;
     }
     /**
      * The main interface to the render engine, here WebGL, which is used mainly in the superclass [[RenderWebGL]]
