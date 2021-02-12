@@ -2174,7 +2174,7 @@ declare namespace FudgeCore {
          * Set the graph to be drawn in the viewport.
          */
         setGraph(_graph: Node): void;
-        getGraph(): Node;
+        getBranch(): Node;
         /**
          * Logs this viewports scenegraph to the console.
          */
@@ -4943,6 +4943,13 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    class Picker {
+        static pickRay(_branch: Node, _ray: Ray, _min: number, _max: number): Pick[];
+        static pickCamera(_branch: Node, _cmpCamera: ComponentCamera, _posProjection: Vector2): Pick[];
+        static pickViewport(_viewport: Viewport, _posClient: Vector2): Pick[];
+    }
+}
+declare namespace FudgeCore {
     class Ray {
         origin: Vector3;
         direction: Vector3;
@@ -4959,6 +4966,7 @@ declare namespace FudgeCore {
          * All values and calculations must be relative to the same coordinate system, preferably the world.
          */
         getDistance(_target: Vector3): Vector3;
+        transform(_mtxTransform: Matrix4x4): void;
         toString(): string;
     }
 }
@@ -4968,16 +4976,6 @@ declare namespace FudgeCore {
         face: number;
         zBuffer: number;
         constructor(_node?: Node, _face?: number, _zBuffer?: number);
-    }
-}
-declare namespace FudgeCore {
-    class RayPick extends Ray {
-        private cmpCamera;
-        private cmpCameraPick;
-        constructor(_cmpCamera: ComponentCamera);
-        set camera(_cmpCamera: ComponentCamera);
-        get camera(): ComponentCamera;
-        pick(_branch: Node, _posProjection: Vector2): Pick[];
     }
 }
 declare namespace FudgeCore {

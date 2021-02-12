@@ -97,7 +97,7 @@ namespace FudgeCore {
       }
     }
 
-    public getGraph(): Node {
+    public getBranch(): Node {
       return this.graph;
     }
 

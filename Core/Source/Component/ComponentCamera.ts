@@ -69,10 +69,10 @@ namespace FudgeCore {
       return this.direction;
     }
 
-    public getNear(): number  {
+    public getNear(): number {
       return this.near;
     }
-    public getFar(): number  {
+    public getFar(): number {
       return this.far;
     }
 

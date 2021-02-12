@@ -36,6 +36,11 @@ namespace FudgeCore {
       return distance;
     }
 
+    public transform(_mtxTransform: Matrix4x4): void {
+      this.direction.transform(_mtxTransform);
+      this.origin.transform(_mtxTransform);
+    }
+
     public toString(): string {
       return `origin: ${this.origin.toString()}, direction: ${this.direction.toString()}, length: ${this.length.toPrecision(5)}`;
     }

@@ -98,9 +98,11 @@ namespace ScreenToRay {
   }
 
   function pick(): void {
-    let rayPick: ƒ.RayPick = new ƒ.RayPick(cmpCamera);
     let posProjection: ƒ.Vector2 = viewport.pointClientToProjection(mouse);
-    let picks: ƒ.Pick[] = rayPick.pick(viewport.getGraph(), posProjection);
+    // let rayPick: ƒ.RayPick = new ƒ.RayPick(cmpCamera);
+    // let picks: ƒ.Pick[] = rayPick.pick(viewport.getGraph(), posProjection);
+    // let picks: ƒ.Pick[] = ƒ.Picker.pickCamera(viewport.getBranch(), viewport.camera, posProjection);
+    let picks: ƒ.Pick[] = ƒ.Picker.pickViewport(viewport, mouse);
 
     let output: HTMLOutputElement = document.querySelector("output#o2");
     output.innerHTML = "";

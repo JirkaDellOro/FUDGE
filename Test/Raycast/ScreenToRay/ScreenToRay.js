@@ -75,9 +75,11 @@ var ScreenToRay;
         }
     }
     function pick() {
-        let rayPick = new ƒ.RayPick(cmpCamera);
         let posProjection = viewport.pointClientToProjection(mouse);
-        let picks = rayPick.pick(viewport.getGraph(), posProjection);
+        // let rayPick: ƒ.RayPick = new ƒ.RayPick(cmpCamera);
+        // let picks: ƒ.Pick[] = rayPick.pick(viewport.getGraph(), posProjection);
+        // let picks: ƒ.Pick[] = ƒ.Picker.pickCamera(viewport.getBranch(), viewport.camera, posProjection);
+        let picks = ƒ.Picker.pickViewport(viewport, mouse);
         let output = document.querySelector("output#o2");
         output.innerHTML = "";
         for (let pick of picks) {
