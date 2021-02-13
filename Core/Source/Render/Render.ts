@@ -2,17 +2,6 @@ namespace FudgeCore {
   export type MapLightTypeToLightList = Map<TypeOfLight, ComponentLight[]>;
 
   /**
-   * Information on each node from picking
-   */
-  export interface Pick {
-    node: Node;
-    zBuffer?: number;
-    luminance?: number;
-    alpha?: number;
-    world?: Vector3;
-  }
-
-  /**
    * The main interface to the render engine, here WebGL, which is used mainly in the superclass [[RenderWebGL]]
    * TODO: move all WebGL-specifica to RenderWebGL
    */
@@ -21,7 +10,7 @@ namespace FudgeCore {
     public static pickTexture: WebGLTexture;
     public static pickBuffer: Uint8Array;
     private static timestampUpdate: number;
-    private static picks: Pick[];
+    private static ƒpicked: Pick[];
     private static pickSize: Vector2;
 
     //#region Picking
@@ -51,9 +40,9 @@ namespace FudgeCore {
 
       return targetTexture;
     }
-    
+
     public static drawGraphForPicking(_node: Node, _cmpCamera: ComponentCamera): Pick[] { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
-      Render.picks = [];
+      Render.ƒpicked = [];
       // bind framebuffer and texture
       const framebuffer: WebGLFramebuffer = Render.crc3.createFramebuffer();
       Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, framebuffer);
@@ -69,22 +58,23 @@ namespace FudgeCore {
       let data: Uint8Array = new Uint8Array(Render.pickSize.x * Render.pickSize.y * 4);
       Render.crc3.readPixels(0, 0, Render.pickSize.x, Render.pickSize.x, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, data);
 
-      let picks: Pick[] = [];
-      for (let i: number = 0; i < Render.picks.length; i++) {
+      let mtxViewToWorld: Matrix4x4 = Matrix4x4.INVERSION(_cmpCamera.mtxWorldToView);
+      let picked: Pick[] = [];
+      for (let i: number = 0; i < Render.ƒpicked.length; i++) {
         let zBuffer: number = data[4 * i + 0] + data[4 * i + 1] / 256;
         if (zBuffer == 0) // filter 
           continue;
-        let picked: Pick = Render.picks[i];
-        picked.zBuffer = zBuffer / 128 - 1;
-        picked.luminance = data[4 * i + 2] / 255;
-        picked.alpha = data[4 * i + 3] / 255;
-        picked.world = _cmpCamera.pointClipToWorld(Vector3.Z(picked.zBuffer));
+        let pick: Pick = Render.ƒpicked[i];
+        pick.zBuffer = zBuffer / 128 - 1;
+        pick.luminance = data[4 * i + 2] / 255;
+        pick.alpha = data[4 * i + 3] / 255;
+        Reflect.set(pick, "ƒmtxViewToWorld", mtxViewToWorld);
 
-        picks.push(picked);
+        picked.push(pick);
       }
 
       Render.resetFrameBuffer();
-      return picks;
+      return picked;
     }
 
     //#endregion
@@ -231,11 +221,11 @@ namespace FudgeCore {
         RenderWebGL.getRenderingContext().uniform2fv(sizeUniformLocation, Render.pickSize.get());
 
         let mesh: Mesh = cmpMesh.mesh;
-        mesh.useRenderBuffers(ShaderPick, _mtxMeshToWorld, _mtxWorldToView, Render.picks.length);
+        mesh.useRenderBuffers(ShaderPick, _mtxMeshToWorld, _mtxWorldToView, Render.ƒpicked.length);
         RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, mesh.renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
 
-        let pick: Pick = { node: _node };
-        Render.picks.push(pick);
+        let pick: Pick = new Pick(_node);
+        Render.ƒpicked.push(pick);
       } catch (_error) {
         //
       }

@@ -78,12 +78,12 @@ var ScreenToRay;
         let output = document.querySelector("output");
         output.innerHTML = "";
         for (let pick of picks) {
-            let world = pick.world;
+            let world = pick.position;
             output.innerHTML += pick.node.name + ":" + pick.zBuffer.toFixed(2) + " | " + pick.luminance.toFixed(2) + " | " + pick.alpha.toFixed(2) + "<br/>";
             output.innerHTML += world.toString() + "<br/>";
         }
         if (picks.length) {
-            cursor.mtxLocal.translation = picks[0].world;
+            cursor.mtxLocal.translation = picks[0].position;
         }
     }
     function adjustRayCamera() {

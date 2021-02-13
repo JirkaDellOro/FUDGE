@@ -95,7 +95,7 @@ namespace Picking {
     }
     if (picks.length) {
       let pick: ƒ.Pick = picks[0];
-      cursor.mtxLocal.translation = pick.world;
+      cursor.mtxLocal.translation = pick.position;
     }
   }
 

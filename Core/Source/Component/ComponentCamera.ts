@@ -138,20 +138,10 @@ namespace FudgeCore {
       return result;
     }
 
-    public pointClipToWorld(_pointInClipSpace: Vector3): Vector3 {
-      // let result: Vector3 = _pointInClipSpace.copy;
-      // let m: Float32Array = this.mtxWorldToView.get();
-      // let w: number = m[3] * result.x + m[7] * result.y + m[11] * result.z + m[15];
-
-      // let mtxViewToWorld: Matrix4x4 = Matrix4x4.INVERSION(this.mtxWorldToView);
-      // result.scale(w);
-      // result = Vector3.TRANSFORMATION(result, mtxViewToWorld);
-
-      // return result;
-      
-      let mtxViewProjectionInverse: Matrix4x4 = Matrix4x4.INVERSION(this.mtxWorldToView);
-      let m: Float32Array = mtxViewProjectionInverse.get();
-      let rayWorld: Vector3 = Vector3.TRANSFORMATION(_pointInClipSpace, mtxViewProjectionInverse, true);
+    public pointClipToWorld(_pointInClipSpace: Vector3): Vector3 {      
+      let mtxViewToWorld: Matrix4x4 = Matrix4x4.INVERSION(this.mtxWorldToView);
+      let m: Float32Array = mtxViewToWorld.get();
+      let rayWorld: Vector3 = Vector3.TRANSFORMATION(_pointInClipSpace, mtxViewToWorld, true);
       let w: number = m[3] * _pointInClipSpace.x + m[7] * _pointInClipSpace.y + m[11] * _pointInClipSpace.z + m[15];
       rayWorld.scale(1 / w);
 

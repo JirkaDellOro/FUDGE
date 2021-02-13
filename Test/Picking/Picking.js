@@ -81,7 +81,7 @@ var Picking;
         }
         if (picks.length) {
             let pick = picks[0];
-            cursor.mtxLocal.translation = pick.world;
+            cursor.mtxLocal.translation = pick.position;
         }
     }
     function setCursorPosition(_event) {

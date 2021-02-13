@@ -4937,6 +4937,18 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    class Pick {
+        node: Node;
+        zBuffer: number;
+        luminance: number;
+        alpha: number;
+        private ƒmtxViewToWorld;
+        private ƒposition;
+        constructor(_node: Node);
+        get position(): Vector3;
+    }
+}
+declare namespace FudgeCore {
     class Picker {
         static pickRay(_branch: Node, _ray: Ray, _min: number, _max: number): Pick[];
         static pickCamera(_branch: Node, _cmpCamera: ComponentCamera, _posProjection: Vector2): Pick[];
@@ -4965,25 +4977,7 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    class RayHit {
-        node: Node;
-        face: number;
-        zBuffer: number;
-        constructor(_node?: Node, _face?: number, _zBuffer?: number);
-    }
-}
-declare namespace FudgeCore {
     type MapLightTypeToLightList = Map<TypeOfLight, ComponentLight[]>;
-    /**
-     * Information on each node from picking
-     */
-    interface Pick {
-        node: Node;
-        zBuffer?: number;
-        luminance?: number;
-        alpha?: number;
-        world?: Vector3;
-    }
     /**
      * The main interface to the render engine, here WebGL, which is used mainly in the superclass [[RenderWebGL]]
      * TODO: move all WebGL-specifica to RenderWebGL
@@ -4993,7 +4987,7 @@ declare namespace FudgeCore {
         static pickTexture: WebGLTexture;
         static pickBuffer: Uint8Array;
         private static timestampUpdate;
-        private static picks;
+        private static ƒpicked;
         private static pickSize;
         /**
          * Creates a texture buffer to be used as pick-buffer

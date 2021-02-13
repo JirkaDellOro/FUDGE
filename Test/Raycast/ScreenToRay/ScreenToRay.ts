@@ -97,17 +97,17 @@ namespace ScreenToRay {
     let picks: ƒ.Pick[] = ƒ.Picker.pickViewport(viewport, mouse);
     cursor.getComponent(ƒ.ComponentMesh).activate(true);
 
-    picks.sort((a: ƒ.RayHit, b: ƒ.RayHit) => a.zBuffer < b.zBuffer ? -1 : 1);
+    picks.sort((a: ƒ.Pick, b: ƒ.Pick) => a.zBuffer < b.zBuffer ? -1 : 1);
 
     let output: HTMLOutputElement = document.querySelector("output");
     output.innerHTML = "";
     for (let pick of picks) {
-      let world: ƒ.Vector3 = pick.world;
+      let world: ƒ.Vector3 = pick.position;
       output.innerHTML += pick.node.name + ":" + pick.zBuffer.toFixed(2) + " | " + pick.luminance.toFixed(2) + " | " + pick.alpha.toFixed(2) + "<br/>";
       output.innerHTML += world.toString() + "<br/>";
     }
     if (picks.length) {
-      cursor.mtxLocal.translation = picks[0].world;
+      cursor.mtxLocal.translation = picks[0].position;
     }
   }
 
