@@ -4938,14 +4938,19 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     class Pick {
+        #private;
         node: Node;
         zBuffer: number;
         luminance: number;
         alpha: number;
-        private ƒmtxViewToWorld;
-        private ƒposition;
         constructor(_node: Node);
-        get position(): Vector3;
+        get posWorld(): Vector3;
+        get posMesh(): Vector3;
+        get normal(): Vector3;
+        /**
+         * Called solely by the renderer to enable calculation of the world coordinates of this [[Pick]]
+         */
+        set mtxViewToWorld(_mtxViewToWorld: Matrix4x4);
     }
 }
 declare namespace FudgeCore {

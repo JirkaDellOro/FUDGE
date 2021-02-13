@@ -33,8 +33,18 @@ namespace ScreenToRay {
     cosys.getChildrenByName("ArrowBlue")[0].mtxLocal.rotateZ(45, true);
     cosys.getChildrenByName("ArrowBlue")[0].getChildrenByName("ArrowBlueShaft")[0].getComponent(ƒ.ComponentMaterial).clrPrimary.a = 0.5; // = ƒ.Color.CSS("white", 0.9);
 
-    root.appendChild(cosys);
+    // root.appendChild(cosys);
     root.appendChild(cursor);
+
+    let object: ƒAid.Node = new ƒAid.Node(
+      "Object",
+      ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(2)),
+      new ƒ.Material("Object", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("red"))),
+      // new ƒ.MeshCube("Object")
+      new ƒ.MeshSphere("Object", 15, 15)
+    );
+
+    root.appendChild(object);
 
     // initialize viewports
     canvas = document.querySelector("canvas#viewport");
@@ -102,12 +112,14 @@ namespace ScreenToRay {
     let output: HTMLOutputElement = document.querySelector("output");
     output.innerHTML = "";
     for (let pick of picks) {
-      let world: ƒ.Vector3 = pick.position;
-      output.innerHTML += pick.node.name + ":" + pick.zBuffer.toFixed(2) + " | " + pick.luminance.toFixed(2) + " | " + pick.alpha.toFixed(2) + "<br/>";
-      output.innerHTML += world.toString() + "<br/>";
+      output.innerHTML += "Name: " + pick.node.name + ", z: " + pick.zBuffer.toFixed(2) + "<br/>";
+      output.innerHTML += "luminance: " + pick.luminance.toFixed(2) + ", alpha: " + pick.alpha.toFixed(2) + "<br/>";
+      output.innerHTML += "posWorld: " + pick.posWorld.toString() + "<br/>";
+      output.innerHTML += "posMesh: " + pick.posMesh.toString() + "<br/>";
+      output.innerHTML += "normal: " + pick.normal.toString() + "<br/>";
     }
     if (picks.length) {
-      cursor.mtxLocal.translation = picks[0].position;
+      cursor.mtxLocal.translation = picks[0].posWorld;
     }
   }
 

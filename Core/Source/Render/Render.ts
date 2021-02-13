@@ -68,7 +68,7 @@ namespace FudgeCore {
         pick.zBuffer = zBuffer / 128 - 1;
         pick.luminance = data[4 * i + 2] / 255;
         pick.alpha = data[4 * i + 3] / 255;
-        Reflect.set(pick, "ƒmtxViewToWorld", mtxViewToWorld);
+        pick.mtxViewToWorld = mtxViewToWorld;
 
         picked.push(pick);
       }

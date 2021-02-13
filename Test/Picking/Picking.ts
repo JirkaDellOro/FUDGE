@@ -95,7 +95,8 @@ namespace Picking {
     }
     if (picks.length) {
       let pick: ƒ.Pick = picks[0];
-      cursor.mtxLocal.translation = pick.position;
+      cursor.mtxLocal.translation = pick.posWorld;
+      // console.log(pick.normal.toString());
     }
   }
 
