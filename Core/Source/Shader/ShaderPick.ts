@@ -32,7 +32,7 @@ namespace FudgeCore {
            float upperbyte = trunc(gl_FragCoord.z * 256.0) / 256.0;
            float lowerbyte = fract(gl_FragCoord.z * 256.0);
 
-           float luminance = (u_color.r + u_color.g + u_color.b) / 3.0;
+           float luminance = 0.299 * u_color.r + 0.587 * u_color.g + 0.114 * u_color.b;
                         
            frag = vec4(upperbyte, lowerbyte, luminance, u_color.a);
         }`;
