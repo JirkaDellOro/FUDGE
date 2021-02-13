@@ -26,7 +26,8 @@ namespace Fudge {
 
   export enum ModellerMenu {
     DISPLAY_NORMALS,
-    INVERT_NORMALS
+    INVERT_FACE,
+    TOGGLE_BACKFACE_CULLING
   }
 
 }

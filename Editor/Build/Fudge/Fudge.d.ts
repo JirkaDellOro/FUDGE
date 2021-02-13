@@ -385,7 +385,8 @@ declare namespace Fudge {
     }
     enum ModellerMenu {
         DISPLAY_NORMALS = 0,
-        INVERT_NORMALS = 1
+        INVERT_FACE = 1,
+        TOGGLE_BACKFACE_CULLING = 2
     }
 }
 declare namespace Fudge {
@@ -547,6 +548,8 @@ declare namespace Fudge {
         onmousedown(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
         onmouseup(_event: ƒ.EventPointer): string;
+        getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
+        contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
     }
 }
 declare namespace Fudge {
@@ -584,6 +587,8 @@ declare namespace Fudge {
         onmousedown(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
         onmouseup(_event: ƒ.EventPointer): string;
+        getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
+        contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
     }
 }
 declare namespace Fudge {
@@ -596,8 +601,6 @@ declare namespace Fudge {
         readonly type: InteractionModes;
         viewport: ƒ.Viewport;
         editableNode: ƒ.Node;
-        getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
-        contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         cleanup(): void;
     }
 }
@@ -617,6 +620,8 @@ declare namespace Fudge {
         onkeydown(pressedKey: string): void;
         onkeyup(pressedKey: string): string;
         update(): void;
+        getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
+        contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         private drawBox;
     }
 }
@@ -713,7 +718,7 @@ declare namespace Fudge {
         getCentroid(selection?: number[]): ƒ.Vector3;
         removeFace(selection: number[]): void;
         updateNormals(): void;
-        invertNormals(selection: number[]): void;
+        invertFace(selection: number[]): void;
         scaleBy(matrix: ƒ.Matrix4x4, oldVertices: Map<number, ƒ.Vector3>, centroid: ƒ.Vector3, selection?: number[]): void;
         translateVertices(difference: ƒ.Vector3, selection: number[]): void;
         rotateBy(matrix: ƒ.Matrix4x4, center: ƒ.Vector3, selection?: number[]): void;
@@ -769,7 +774,8 @@ declare namespace Fudge {
 declare namespace Fudge {
     class MenuItemsCreator {
         static getNormalDisplayItem(_callback: ContextMenuCallback, normalsAreDisplayed: boolean): Electron.MenuItem;
-        static getInvertNormalsItem(_callback: ContextMenuCallback): Electron.MenuItem;
+        static getInvertFaceItem(_callback: ContextMenuCallback): Electron.MenuItem;
+        static getBackfaceCullItem(_callback: ContextMenuCallback): Electron.MenuItem;
     }
 }
 declare namespace Fudge {
@@ -1055,6 +1061,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     import ƒ = FudgeCore;
     class ViewModellerScene extends View {
+        static isBackfaceCullingEnabled: boolean;
         viewport: ƒ.Viewport;
         canvas: HTMLCanvasElement;
         graph: ƒ.Node;
@@ -1064,8 +1071,10 @@ declare namespace Fudge {
         constructor(_container: GoldenLayout.Container, _state: Object);
         addEventListeners(): void;
         createUserInterface(): void;
+        toggleBackfaceCulling(): void;
         protected getContextMenu: (_callback: ContextMenuCallback) => Electron.Menu;
         protected updateContextMenu: () => void;
+        protected contextMenuCallback: (_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event) => void;
         private animate;
         private onmove;
         private onmouseup;

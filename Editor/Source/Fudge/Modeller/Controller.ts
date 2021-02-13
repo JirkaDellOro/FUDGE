@@ -157,7 +157,6 @@ namespace Fudge {
 
     public contextMenuCallback = (_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void => {
       this.interactionMode.contextMenuCallback(_item, _window, _event);
-      this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
     }
 
     private loadState(isUndo: boolean = true): void {

@@ -149,24 +149,59 @@ namespace Fudge {
       this.createRenderBuffers();
     }
 
-    public invertNormals(selection: number[]): void {
+    public invertFace(selection: number[]): void {
       if (selection.length !== 4) 
         return;
       let faceToVertexMap: Map<number, number[]> = new Map();
       let vertexToUniqueVertexMap: Map<number, number> = new Map();
       for (let selectedVertex of selection) {
         for (let [vertex, data] of this.uniqueVertices[selectedVertex].vertexToData) {
-          faceToVertexMap.get(data.face).push(vertex);
+          vertexToUniqueVertexMap.set(vertex, selectedVertex);
+          if (faceToVertexMap.has(data.face)) {
+            faceToVertexMap.get(data.face).push(vertex);
+          } else {
+            faceToVertexMap.set(data.face, [vertex]);
+          }
         }
       }
 
-      // fix this tomorrow
+      let indexToVertexMap: Map<number, number> = new Map();
       for (let [face, vertices] of faceToVertexMap) {
         if (vertices.length === 4) {
+          for (let vertex of vertices) {
+            let indices: number[] = this.uniqueVertices[vertexToUniqueVertexMap.get(vertex)].vertexToData.get(vertex).indices;
+            for (let i: number = 0; i < indices.length; i++) {
+              switch (indices[i] % 3) {
+                case 0: 
+                  indices[i] = indices[i] + 2;
+                  break;
+                case 2: 
+                  indices[i] = indices[i] - 2;
+                  break;
+              }
+              indexToVertexMap.set(indices[i], vertex);
+            }
+          }
+
+          for (let vertex of vertices) {
+            let indices: number[] = this.uniqueVertices[vertexToUniqueVertexMap.get(vertex)].vertexToData.get(vertex).indices;
+            let edges: number[] = this.uniqueVertices[vertexToUniqueVertexMap.get(vertex)].vertexToData.get(vertex).edges = [];
+            for (let i: number = 0; i < indices.length; i++) {
+              switch (indices[i] % 3) {
+                case 0: 
+                case 1: 
+                  edges.push(indexToVertexMap.get(indices[i] + 1));
+                  break;
+                case 2: 
+                  edges.push(indexToVertexMap.get(indices[i] - 2));
+                  break;
+              }
+            }
+          }
 
         }
       }
-
+      this.indices = this.createIndices();
       this.normalsFace = this.createFaceNormals();
       this.createRenderBuffers();
     }

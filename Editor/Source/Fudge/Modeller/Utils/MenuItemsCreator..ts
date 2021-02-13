@@ -10,14 +10,22 @@ namespace Fudge {
       return item;
     }
 
-    public static getInvertNormalsItem(_callback: ContextMenuCallback): Electron.MenuItem {
+    public static getInvertFaceItem(_callback: ContextMenuCallback): Electron.MenuItem {
       let item: Electron.MenuItem = new remote.MenuItem({
-        label: "invert normals",
-        id: String(ModellerMenu.INVERT_NORMALS),
+        label: "invert face",
+        id: String(ModellerMenu.INVERT_FACE),
         click: _callback
       });
       return item;
     }
 
+    public static getBackfaceCullItem(_callback: ContextMenuCallback): Electron.MenuItem {
+      let backfaceCullItem: Electron.MenuItem = new remote.MenuItem({
+        label: ViewModellerScene.isBackfaceCullingEnabled ? "disable backface-culling" : "enable backface-culling",
+        id: String(ModellerMenu.TOGGLE_BACKFACE_CULLING),
+        click: _callback
+      });
+      return backfaceCullItem;
+    }
   }
 }

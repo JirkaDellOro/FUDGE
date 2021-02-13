@@ -97,6 +97,22 @@ namespace Fudge {
       //@ts-ignore
     }
 
+    getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {
+      return [
+        MenuItemsCreator.getNormalDisplayItem(_callback, InteractionMode.normalsAreDisplayed), 
+        MenuItemsCreator.getInvertFaceItem(_callback)];
+    }
+
+    contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
+      switch (Number(_item.id)) {
+        case ModellerMenu.DISPLAY_NORMALS:
+          this.toggleNormals();          
+          break;
+        case ModellerMenu.INVERT_FACE:
+          (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).invertFace(this.selection);          
+          break;
+      }
+    }
 
     private drawBox = () => {
       let crx2d: CanvasRenderingContext2D = this.viewport.getCanvas().getContext("2d");

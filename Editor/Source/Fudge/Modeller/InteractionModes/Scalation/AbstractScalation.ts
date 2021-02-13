@@ -114,7 +114,6 @@ namespace Fudge {
       }
     }
 
-
     update(): void {
       this.axesSelectionHandler.widget.mtxLocal.translation = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection);
     }

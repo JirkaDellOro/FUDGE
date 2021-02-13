@@ -1388,7 +1388,6 @@ var Fudge;
             ]);
             this.contextMenuCallback = (_item, _window, _event) => {
                 this.interactionMode.contextMenuCallback(_item, _window, _event);
-                this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
             };
             this.viewport = _viewport;
             this.currentControlMode = this.controlModesMap.get(Fudge.ControlMode.OBJECT_MODE).type;
@@ -1580,7 +1579,8 @@ var Fudge;
     let ModellerMenu;
     (function (ModellerMenu) {
         ModellerMenu[ModellerMenu["DISPLAY_NORMALS"] = 0] = "DISPLAY_NORMALS";
-        ModellerMenu[ModellerMenu["INVERT_NORMALS"] = 1] = "INVERT_NORMALS";
+        ModellerMenu[ModellerMenu["INVERT_FACE"] = 1] = "INVERT_FACE";
+        ModellerMenu[ModellerMenu["TOGGLE_BACKFACE_CULLING"] = 2] = "TOGGLE_BACKFACE_CULLING";
     })(ModellerMenu = Fudge.ModellerMenu || (Fudge.ModellerMenu = {}));
 })(Fudge || (Fudge = {}));
 var Fudge;
@@ -1821,12 +1821,18 @@ var Fudge;
             return null;
         }
         getContextMenuItems(_callback) {
-            return [Fudge.MenuItemsCreator.getNormalDisplayItem(_callback, Fudge.InteractionMode.normalsAreDisplayed)];
+            return [
+                Fudge.MenuItemsCreator.getNormalDisplayItem(_callback, Fudge.InteractionMode.normalsAreDisplayed),
+                Fudge.MenuItemsCreator.getInvertFaceItem(_callback)
+            ];
         }
         contextMenuCallback(_item, _window, _event) {
             switch (Number(_item.id)) {
                 case Fudge.ModellerMenu.DISPLAY_NORMALS:
                     this.toggleNormals();
+                    break;
+                case Fudge.ModellerMenu.INVERT_FACE:
+                    this.editableNode.getComponent(ƒ.ComponentMesh).mesh.invertFace(this.selection);
                     break;
             }
         }
@@ -2048,6 +2054,17 @@ var Fudge;
             }
             return super.onmouseup(_event);
         }
+        getContextMenuItems(_callback) {
+            return [...super.getContextMenuItems(_callback), Fudge.MenuItemsCreator.getInvertFaceItem(_callback)];
+        }
+        contextMenuCallback(_item, _window, _event) {
+            switch (Number(_item.id)) {
+                case Fudge.ModellerMenu.INVERT_FACE:
+                    this.editableNode.getComponent(ƒ.ComponentMesh).mesh.invertFace(this.selection);
+                    break;
+            }
+            super.contextMenuCallback(_item, _window, _event);
+        }
     }
     Fudge.EditRotation = EditRotation;
 })(Fudge || (Fudge = {}));
@@ -2206,6 +2223,17 @@ var Fudge;
             }
             return super.onmouseup(_event);
         }
+        getContextMenuItems(_callback) {
+            return [...super.getContextMenuItems(_callback), Fudge.MenuItemsCreator.getInvertFaceItem(_callback)];
+        }
+        contextMenuCallback(_item, _window, _event) {
+            switch (Number(_item.id)) {
+                case Fudge.ModellerMenu.INVERT_FACE:
+                    this.editableNode.getComponent(ƒ.ComponentMesh).mesh.invertFace(this.selection);
+                    break;
+            }
+            super.contextMenuCallback(_item, _window, _event);
+        }
     }
     Fudge.EditScalation = EditScalation;
 })(Fudge || (Fudge = {}));
@@ -2232,12 +2260,6 @@ var Fudge;
         // abstract onmousedown(_event: ƒ.EventPointer): void;
         // abstract onmouseup(_event: ƒ.EventPointer): string;
         // abstract onmove(_event: ƒ.EventPointer): void;
-        getContextMenuItems(_callback) {
-            return [];
-        }
-        contextMenuCallback(_item, _window, _event) {
-            console.log(_item);
-        }
         cleanup() {
             //
         }
@@ -2327,6 +2349,22 @@ var Fudge;
         }
         update() {
             //@ts-ignore
+        }
+        getContextMenuItems(_callback) {
+            return [
+                Fudge.MenuItemsCreator.getNormalDisplayItem(_callback, Fudge.InteractionMode.normalsAreDisplayed),
+                Fudge.MenuItemsCreator.getInvertFaceItem(_callback)
+            ];
+        }
+        contextMenuCallback(_item, _window, _event) {
+            switch (Number(_item.id)) {
+                case Fudge.ModellerMenu.DISPLAY_NORMALS:
+                    this.toggleNormals();
+                    break;
+                case Fudge.ModellerMenu.INVERT_FACE:
+                    this.editableNode.getComponent(ƒ.ComponentMesh).mesh.invertFace(this.selection);
+                    break;
+            }
         }
     }
     Fudge.EditSelection = EditSelection;
@@ -2486,17 +2524,12 @@ var Fudge;
             return super.onmouseup(_event);
         }
         getContextMenuItems(_callback) {
-            let item2;
-            item2 = new Fudge.remote.MenuItem({
-                label: "test",
-                click: _callback
-            });
-            return [...super.getContextMenuItems(_callback), Fudge.MenuItemsCreator.getInvertNormalsItem(_callback)];
+            return [...super.getContextMenuItems(_callback), Fudge.MenuItemsCreator.getInvertFaceItem(_callback)];
         }
         contextMenuCallback(_item, _window, _event) {
             switch (Number(_item.id)) {
-                case Fudge.ModellerMenu.INVERT_NORMALS:
-                    this.editableNode.getComponent(ƒ.ComponentMesh).mesh.invertNormals(this.selection);
+                case Fudge.ModellerMenu.INVERT_FACE:
+                    this.editableNode.getComponent(ƒ.ComponentMesh).mesh.invertFace(this.selection);
                     break;
             }
             super.contextMenuCallback(_item, _window, _event);
@@ -3107,21 +3140,57 @@ var Fudge;
             this.normalsFace = this.createFaceNormals();
             this.createRenderBuffers();
         }
-        invertNormals(selection) {
+        invertFace(selection) {
             if (selection.length !== 4)
                 return;
             let faceToVertexMap = new Map();
             let vertexToUniqueVertexMap = new Map();
             for (let selectedVertex of selection) {
                 for (let [vertex, data] of this.uniqueVertices[selectedVertex].vertexToData) {
-                    faceToVertexMap.get(data.face).push(vertex);
+                    vertexToUniqueVertexMap.set(vertex, selectedVertex);
+                    if (faceToVertexMap.has(data.face)) {
+                        faceToVertexMap.get(data.face).push(vertex);
+                    }
+                    else {
+                        faceToVertexMap.set(data.face, [vertex]);
+                    }
                 }
             }
-            // fix this tomorrow
+            let indexToVertexMap = new Map();
             for (let [face, vertices] of faceToVertexMap) {
                 if (vertices.length === 4) {
+                    for (let vertex of vertices) {
+                        let indices = this.uniqueVertices[vertexToUniqueVertexMap.get(vertex)].vertexToData.get(vertex).indices;
+                        for (let i = 0; i < indices.length; i++) {
+                            switch (indices[i] % 3) {
+                                case 0:
+                                    indices[i] = indices[i] + 2;
+                                    break;
+                                case 2:
+                                    indices[i] = indices[i] - 2;
+                                    break;
+                            }
+                            indexToVertexMap.set(indices[i], vertex);
+                        }
+                    }
+                    for (let vertex of vertices) {
+                        let indices = this.uniqueVertices[vertexToUniqueVertexMap.get(vertex)].vertexToData.get(vertex).indices;
+                        let edges = this.uniqueVertices[vertexToUniqueVertexMap.get(vertex)].vertexToData.get(vertex).edges = [];
+                        for (let i = 0; i < indices.length; i++) {
+                            switch (indices[i] % 3) {
+                                case 0:
+                                case 1:
+                                    edges.push(indexToVertexMap.get(indices[i] + 1));
+                                    break;
+                                case 2:
+                                    edges.push(indexToVertexMap.get(indices[i] - 2));
+                                    break;
+                            }
+                        }
+                    }
                 }
             }
+            this.indices = this.createIndices();
             this.normalsFace = this.createFaceNormals();
             this.createRenderBuffers();
         }
@@ -3567,13 +3636,21 @@ var Fudge;
             });
             return item;
         }
-        static getInvertNormalsItem(_callback) {
+        static getInvertFaceItem(_callback) {
             let item = new Fudge.remote.MenuItem({
-                label: "invert normals",
-                id: String(Fudge.ModellerMenu.INVERT_NORMALS),
+                label: "invert face",
+                id: String(Fudge.ModellerMenu.INVERT_FACE),
                 click: _callback
             });
             return item;
+        }
+        static getBackfaceCullItem(_callback) {
+            let backfaceCullItem = new Fudge.remote.MenuItem({
+                label: Fudge.ViewModellerScene.isBackfaceCullingEnabled ? "disable backface-culling" : "enable backface-culling",
+                id: String(Fudge.ModellerMenu.TOGGLE_BACKFACE_CULLING),
+                click: _callback
+            });
+            return backfaceCullItem;
         }
     }
     Fudge.MenuItemsCreator = MenuItemsCreator;
@@ -5019,13 +5096,22 @@ var Fudge;
                 for (let item of items) {
                     menu.append(item);
                 }
+                menu.append(Fudge.MenuItemsCreator.getBackfaceCullItem(_callback));
                 return menu;
             };
             // protected contextMenuCallback = (_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void => {
             //   this.controller.contextMenuCallback(_item, _window, _event); 
             // }
             this.updateContextMenu = () => {
-                this.contextMenu = this.getContextMenu(this.controller.contextMenuCallback.bind(this));
+                this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
+            };
+            this.contextMenuCallback = (_item, _window, _event) => {
+                switch (Number(_item.id)) {
+                    case Fudge.ModellerMenu.TOGGLE_BACKFACE_CULLING:
+                        this.toggleBackfaceCulling();
+                }
+                this.controller.contextMenuCallback(_item, _window, _event);
+                this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
             };
             // protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
             //   const menu: Electron.Menu = new remote.Menu();
@@ -5123,13 +5209,13 @@ var Fudge;
             this.graph = _state["node"];
             this.createUserInterface();
             ƒaid.addStandardLightComponents(this.graph, new ƒ.Color(0.5, 0.5, 0.5));
-            ƒ.RenderWebGL.setBackfaceCulling(false);
+            ƒ.RenderWebGL.setBackfaceCulling(ViewModellerScene.isBackfaceCullingEnabled);
             this.node = this.graph.getChildrenByName("Default")[0];
             this.controller = new Fudge.Controller(this.viewport, this.node, this.dom);
             //new CameraControl(this.viewport);
             this.dom.addEventListener(Fudge.ModellerEvents.HEADER_APPEND, this.changeHeader);
             this.dom.append(this.canvas);
-            this.contextMenu = this.getContextMenu(this.controller.contextMenuCallback.bind(this));
+            this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.updateContextMenu);
             this.addEventListeners();
         }
@@ -5165,10 +5251,15 @@ var Fudge;
             this.viewport.draw();
             ƒaid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false, -0.15, 0.005, 0.003);
         }
+        toggleBackfaceCulling() {
+            ViewModellerScene.isBackfaceCullingEnabled = !ViewModellerScene.isBackfaceCullingEnabled;
+            ƒ.RenderWebGL.setBackfaceCulling(ViewModellerScene.isBackfaceCullingEnabled);
+        }
         cleanup() {
             ƒ.Loop.removeEventListener("loopFrame" /* LOOP_FRAME */, this.animate);
         }
     }
+    ViewModellerScene.isBackfaceCullingEnabled = false;
     Fudge.ViewModellerScene = ViewModellerScene;
 })(Fudge || (Fudge = {}));
 var Fudge;

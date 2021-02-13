@@ -102,7 +102,9 @@ namespace Fudge {
     }
 
     getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {  
-      return [MenuItemsCreator.getNormalDisplayItem(_callback, InteractionMode.normalsAreDisplayed)];
+      return [
+        MenuItemsCreator.getNormalDisplayItem(_callback, InteractionMode.normalsAreDisplayed), 
+        MenuItemsCreator.getInvertFaceItem(_callback)];
     }
 
     contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
@@ -110,6 +112,11 @@ namespace Fudge {
         case ModellerMenu.DISPLAY_NORMALS:
           this.toggleNormals();          
           break;
+        case ModellerMenu.INVERT_FACE: 
+          (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).invertFace(this.selection);          
+          break;
+
+
       }
     }
 
