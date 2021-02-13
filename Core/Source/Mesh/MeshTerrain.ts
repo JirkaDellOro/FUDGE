@@ -173,23 +173,27 @@ namespace FudgeCore {
       return trImport;
     }
 
-    public getPositionOnTerrain(object: Node): Ray{
+    public getPositionOnTerrain(position: Vector3, mtxWorld?: Matrix4x4): Ray{
       
-      let relPosObject = Vector3.DIFFERENCE(object.mtxWorld.translation, this.node.mtxWorld.translation);
+      let relPosObject: Vector3 = position;
       
-      relPosObject = Vector3.TRANSFORMATION(relPosObject, this.node.mtxWorldInverse, false);
+      if (mtxWorld){
+        relPosObject = Vector3.TRANSFORMATION(position, Matrix4x4.INVERSION(mtxWorld), true);
+      }
 
       let nearestFace: distanceToFaceVertices = this.findNearestFace(relPosObject);
       let ray = new Ray;
 
-      let origin = new Vector3( object.mtxWorld.translation.x, this.calculateHeight(nearestFace, relPosObject), object.mtxWorld.translation.z);
-      origin = Vector3.TRANSFORMATION(origin, this.node.mtxWorld, false);
-
+      let origin = new Vector3( relPosObject.x, this.calculateHeight(nearestFace, relPosObject), relPosObject.z);
       let direction = nearestFace.faceNormal;
-      direction = Vector3.TRANSFORMATION(direction, this.node.mtxWorld, false);
+
+      if(mtxWorld){
+        origin = Vector3.TRANSFORMATION(origin, mtxWorld, true);
+        direction = Vector3.TRANSFORMATION(direction, mtxWorld, false);
+      }
   
       ray.origin = origin
-      ray.direction = nearestFace.faceNormal;
+      ray.direction = direction;
   
       return ray;
     }
@@ -200,25 +204,25 @@ namespace FudgeCore {
       // m2.mtxLocal.translation = face.vertexTWO;
       // m3.mtxLocal.translation = face.vertexTHREE;
   
-      let ray = new Ray(new Vector3(0,1,0), relativePosObject);
+      let ray: Ray = new Ray(new Vector3(0,1,0), relativePosObject);
       
-      let intersection = ray.intersectPlane(face.vertexONE, face.faceNormal);
+      let intersection: Vector3 = ray.intersectPlane(face.vertexONE, face.faceNormal);
   
       return intersection.y;
     }
   
     private findNearestFace(relativPosObject: Vector3): distanceToFaceVertices{
-      let vertices = this.vertices;
-      let indices = this.indices;
+      let vertices: Float32Array = this.vertices;
+      let indices: Uint16Array = this.indices;
   
       let nearestFaces: Array<distanceToFaceVertices> = new Array;
   
       for(let i = 0; i < indices.length; i = i+3){
-        let vertexONE = new Vector3(vertices[indices[i]*3], vertices[indices[i]*3+1],vertices[indices[i]*3+2]);
-        let vertexTWO = new Vector3(vertices[indices[i+1]*3], vertices[indices[i+1]*3+1],vertices[indices[i+1]*3+2]);
-        let vertexTHREE = new Vector3(vertices[indices[i+2]*3], vertices[indices[i+2]*3+1],vertices[indices[i+2]*3+2]);
+        let vertexONE: Vector3 = new Vector3(vertices[indices[i]*3], vertices[indices[i]*3+1],vertices[indices[i]*3+2]);
+        let vertexTWO: Vector3 = new Vector3(vertices[indices[i+1]*3], vertices[indices[i+1]*3+1],vertices[indices[i+1]*3+2]);
+        let vertexTHREE: Vector3 = new Vector3(vertices[indices[i+2]*3], vertices[indices[i+2]*3+1],vertices[indices[i+2]*3+2]);
         
-        let face = new distanceToFaceVertices(vertexONE, vertexTWO, vertexTHREE, relativPosObject);
+        let face: distanceToFaceVertices = new distanceToFaceVertices(vertexONE, vertexTWO, vertexTHREE, relativPosObject);
         
         nearestFaces.push(face);
       }
@@ -261,8 +265,8 @@ namespace FudgeCore {
     }
 
     public calculateFaceNormal(){
-      let v1 = Vector3.DIFFERENCE(this.vertexTWO, this.vertexONE);
-      let v2 = Vector3.DIFFERENCE(this.vertexTHREE, this.vertexONE);
+      let v1: Vector3 = Vector3.DIFFERENCE(this.vertexTWO, this.vertexONE);
+      let v2: Vector3 = Vector3.DIFFERENCE(this.vertexTHREE, this.vertexONE);
 
       this.faceNormal = Vector3.CROSS(v1, v2);
     }

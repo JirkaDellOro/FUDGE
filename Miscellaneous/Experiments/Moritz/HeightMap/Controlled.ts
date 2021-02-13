@@ -9,6 +9,7 @@ namespace HeightMap {
     public maxRotSpeed: number = 180; // degrees per second
     public height: number = 0;
     public lookAt: f.Vector3 = f.Vector3.X(1);
+    public terrain: f.Node;
     public meshTerrain: f.MeshTerrain;
 
     private groundClearance: number = 0.0225;
@@ -19,39 +20,38 @@ namespace HeightMap {
     }
 
     public update(_timeFrame: number): void {
-      // let oldUp = this.mtxLocal.getY();
-      // let oldNormal = this.mtxLocal.getZ();
-      // oldNormal.normalize();
-      // let newUp = oldUp;
-
-      let ray = this.meshTerrain.getPositionOnTerrain(this);
-      this.mtxLocal.translation = new f.Vector3(ray.origin.x, ray.origin.y + this.groundClearance, ray.origin.z);
-      
-
-      let gradient: f.Vector3 = getGradient(ray.direction);
-      arrowRed.mtxLocal.translation = ray.origin;
-      arrowRed.mtxLocal.lookAt(f.Vector3.SUM(gradient, ray.origin));
-
       let distance: number = this.axisSpeed.getOutput() * this.maxSpeed * _timeFrame;
       let angle: number = this.axisRotation.getOutput() * this.maxRotSpeed * _timeFrame;
 
-      ray.direction.normalize();
+      let ray = this.meshTerrain.getPositionOnTerrain(this.mtxWorld.translation, this.terrain.mtxWorld);
 
-      // if (! oldNormal.equals(ray.direction, 0.001) ){
-      //   // console.log(oldNormal.toString() + ray.direction.toString())
-      //   newUp = calculateNewUp(oldNormal, ray.direction, oldUp);
-      // }
+      // let tyreFL: f.Node = this.getChildrenByName("Tyre FL")[0];
 
-      this.mtxLocal.translateX(distance /*+ 0.005*/);
-      this.mtxLocal.lookAt(f.Vector3.SUM(this.mtxLocal.translation, ray.direction) /*, newUp */);
+      // let posFL: f.Ray = this.meshTerrain.getPositionOnTerrain(tyreFL);
+      // console.log("pos: " + posFL.origin.toString() + " Tyre world: " + tyreFL.mtxWorld.translation.toString());
 
-      console.log(this.axisSpeed.getOutput());
+      // let posFLLocal = f.Vector3.TRANSFORMATION(tyreFL.mtxWorld.translation, tyreFL.mtxWorld);
+
+      // console.log("Tyre Local: " + tyreFL.mtxLocal.translation + " pos Local: " + posFLLocal.toString());
+
+      this.mtxLocal.translation = new f.Vector3(ray.origin.x, ray.origin.y + this.groundClearance, ray.origin.z);
+
+      this.mtxLocal.translateX(distance);
+      this.mtxLocal.lookAt(f.Vector3.SUM(this.mtxLocal.translation, ray.direction));
+
+      this.getChildrenByName("Tyre FL")[0].mtxLocal.rotation = new f.Vector3(90, 0, this.axisRotation.getOutput() * 15);
+      this.getChildrenByName("Tyre FR")[0].mtxLocal.rotation = new f.Vector3(90, 0, this.axisRotation.getOutput() * 15);
+      
       this.mtxLocal.rotateZ(angle * distance * 200);
-
-      // this.mtxLocal.translateZ(distance /*+ 0.005*/);
-      // this.mtxLocal.lookAt(f.Vector3.SUM(this.mtxLocal.translation, this.mtxLocal.getZ()), ray.direction, true);
-      // this.mtxLocal.rotateY(angle /*+ 0.2*/);
+      // showGradient(ray);
     }
+  }
+
+  function showGradient(ray: f.Ray): void{
+    let gradient: f.Vector3 = getGradient(ray.direction);
+
+    arrowRed.mtxLocal.translation = ray.origin;
+    arrowRed.mtxLocal.lookAt(f.Vector3.SUM(gradient, ray.origin));
   }
 
   function getGradient(faceNormal: f.Vector3): f.Vector3{
@@ -61,11 +61,5 @@ namespace HeightMap {
     let gradient: f.Vector3 = f.Vector3.CROSS(faceNormal, yCuttingPlane)
 
     return f.Vector3.NORMALIZATION(gradient); 
-  }
-
-  function calculateNewUp(oldNormal: f.Vector3, newNormal: f.Vector3, oldUp: f.Vector3): f.Vector3{
-    let oldDirection = f.Vector3.CROSS(oldNormal, oldUp);
-    let newUp = f.Vector3.CROSS(oldDirection, newNormal)
-    return newUp;
   }
 }

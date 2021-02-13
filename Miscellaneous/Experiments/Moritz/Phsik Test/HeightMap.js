@@ -1,6 +1,6 @@
 "use strict";
-var HeightMap;
-(function (HeightMap) {
+var PhysikTest;
+(function (PhysikTest) {
     var f = FudgeCore;
     var fAid = FudgeAid;
     window.addEventListener("load", init);
@@ -11,15 +11,20 @@ var HeightMap;
     let gridMeshFlat;
     let gridFlat;
     let img;
+    let bodies = new Array(); // Array of all physical objects in the scene to have a quick reference
     let controlled;
     let tyreFL;
     let tyreFR;
     let tyreBL;
     let tyreBR;
+    let frontSuspensionRight;
+    let frontSuspensionLeft;
+    let backSuspensionRight;
+    let backSuspensionLeft;
     let cntKeyHorizontal = new f.Control("Keyboard", 1, 0 /* PROPORTIONAL */, true);
     let cntKeyVertical = new f.Control("Keyboard", 4, 0 /* PROPORTIONAL */, true);
-    async function init(_event) {
-        await setupScene();
+    function init(_event) {
+        setupScene();
         setupControls();
         // controlled.height = getHeightOnTerrain(gridMeshFlat, controlled);
         // console.log(gridMeshFlat.indices);
@@ -27,7 +32,6 @@ var HeightMap;
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, hndLoop);
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 120);
         // f.RenderManager.setupTransformAndLights(graph);
-        // console.log(gridMeshFlat.getPositionOnTerrain(new f.Vector3(0, 0, 0)).origin.toString());
         fAid.addStandardLightComponents(graph);
     }
     function hndLoop(_event) {
@@ -35,9 +39,12 @@ var HeightMap;
         // controlled.mtxLocal.translation = new f.Vector3(controlled.mtxLocal.translation.x, height, controlled.mtxLocal.translation.z);
         let timeFrame = f.Loop.timeFrameGame / 1000;
         controlled.update(timeFrame);
-        HeightMap.viewport.draw();
+        PhysikTest.viewport.draw();
     }
     async function setupScene() {
+        // f.Physics.world.setSolverIterations(1000);
+        // f.Physics.settings.defaultRestitution = 0.15;
+        // f.Physics.settings.defaultFriction = 0.95;
         let coatTextured = new ƒ.CoatTextured();
         let tex = new f.TextureImage();
         tex.load("../Textures/grass.jpg");
@@ -48,19 +55,24 @@ var HeightMap;
         let matGrey = new f.Material("Red", f.ShaderFlat, new f.CoatColored(f.Color.CSS("GREY")));
         let meshCube = new f.MeshCube("CubeMesh");
         let meshSphere = new f.MeshSphere("Tyre", 10, 10);
-        controlled = new HeightMap.Controlled("Cube", f.Matrix4x4.IDENTITY(), matRed, new f.MeshCube());
-        controlled.mtxLocal.translation = new f.Vector3(0.3, 0, -0.3);
-        controlled.mtxLocal.rotateZ(1);
+        controlled = new PhysikTest.Controlled("Cube", f.Matrix4x4.IDENTITY(), matRed, new f.MeshCube());
+        let cmpRigidbody = new f.ComponentRigidbody(500, f.PHYSICS_TYPE.DYNAMIC, f.COLLIDER_TYPE.CUBE, f.PHYSICS_GROUP.DEFAULT, null, null);
+        controlled.addComponent(cmpRigidbody);
+        controlled.mtxLocal.translation = new f.Vector3(0.3, 0, 0.3);
         controlled.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.1, 0.05, 0.025));
         controlled.getComponent(f.ComponentMesh).pivot.translate(new f.Vector3(0.5, 0, 0.5));
-        tyreFL = Scenes.createCompleteMeshNode("Tyre FL", matGrey, meshSphere);
+        tyreFL = createCompleteNode("Tyre FL", matGrey, meshSphere, 20, f.PHYSICS_TYPE.DYNAMIC);
         tyreFL.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.5, 0.5, 0.15));
-        tyreFR = Scenes.createCompleteMeshNode("Tyre FR", matGrey, meshSphere);
+        bodies.push(tyreFL);
+        tyreFR = createCompleteNode("Tyre FR", matGrey, meshSphere, 20, f.PHYSICS_TYPE.DYNAMIC);
         tyreFR.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.5, 0.5, 0.15));
-        tyreBR = Scenes.createCompleteMeshNode("Tyre BR", matGrey, meshSphere);
+        bodies.push(tyreFR);
+        tyreBR = createCompleteNode("Tyre BR", matGrey, meshSphere, 20, f.PHYSICS_TYPE.DYNAMIC);
         tyreBR.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.5, 0.5, 0.15));
-        tyreBL = Scenes.createCompleteMeshNode("Tyre BL", matGrey, meshSphere);
+        bodies.push(tyreBR);
+        tyreBL = createCompleteNode("Tyre FL", matGrey, meshSphere, 20, f.PHYSICS_TYPE.DYNAMIC);
         tyreBL.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.5, 0.5, 0.15));
+        bodies.push(tyreBL);
         tyreFL.mtxLocal.rotateX(90);
         tyreFL.mtxLocal.scale(f.Vector3.ONE(0.1));
         tyreFL.mtxLocal.translate(new f.Vector3(0.9, 0, -0.3));
@@ -81,8 +93,8 @@ var HeightMap;
         const myHeightMapFunction = function (x, y) {
             return Math.sin(x * y * Math.PI * 2) * 0.2;
         };
-        HeightMap.viewport = new f.Viewport();
-        HeightMap.viewport.addEventListener("\u0192keydown" /* DOWN */, moreVertices);
+        PhysikTest.viewport = new f.Viewport();
+        PhysikTest.viewport.addEventListener("\u0192keydown" /* DOWN */, moreVertices);
         let cmpCamera = Scenes.createCamera(new f.Vector3(0, 2, 1), new f.Vector3(0, 0, 0));
         img = new ƒ.TextureImage();
         await img.load("test2.png");
@@ -93,14 +105,13 @@ var HeightMap;
         // gridFlat.mtxLocal.scale(f.Vector3.ONE(1.5));
         // gridFlat.mtxLocal.rotateY(45);
         controlled.meshTerrain = gridMeshFlat;
-        controlled.terrain = gridFlat;
         // let s = 0.01;
         // m1.mtxLocal.scale(new f.Vector3(s,s,s));
         // m2.mtxLocal.scale(new f.Vector3(s,s,s));
         // m3.mtxLocal.scale(new f.Vector3(s,s,s));
-        HeightMap.arrowRed = Scenes.createCompleteMeshNode("Arrow", matRed, meshCube);
-        HeightMap.arrowRed.getComponent(f.ComponentMesh).pivot.translateZ(0.5);
-        HeightMap.arrowRed.mtxLocal.scale(new f.Vector3(0.01, 0.01, 0.2));
+        PhysikTest.arrowRed = Scenes.createCompleteMeshNode("Arrow", matRed, meshCube);
+        PhysikTest.arrowRed.getComponent(f.ComponentMesh).pivot.translateZ(0.5);
+        PhysikTest.arrowRed.mtxLocal.scale(new f.Vector3(0.01, 0.01, 0.2));
         // let test: f.Node = new fAid.NodeCoordinateSystem; 
         graph.addChild(gridFlat);
         graph.addChild(controlled);
@@ -108,15 +119,53 @@ var HeightMap;
         // graph.addChild(m2);
         // graph.addChild(m3);
         // graph.addChild(test);
-        // gridFlat.addChild(arrowRed);
+        gridFlat.addChild(PhysikTest.arrowRed);
         controlled.addChild(tyreFL);
         controlled.addChild(tyreFR);
         controlled.addChild(tyreBR);
         controlled.addChild(tyreBL);
-        HeightMap.viewport.initialize("Viewport", graph, cmpCamera, document.querySelector("canvas"));
-        HeightMap.viewport.setFocus(true);
-        Scenes.dollyViewportCamera(HeightMap.viewport);
-        HeightMap.viewport.draw();
+        frontSuspensionRight = new f.ComponentJointCylindrical(controlled.getComponent(f.ComponentRigidbody), tyreFR.getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(0.50, -1, -0.75));
+        controlled.addComponent(frontSuspensionRight);
+        frontSuspensionRight.springDamping = 100;
+        frontSuspensionRight.springFrequency = 2;
+        frontSuspensionRight.translationMotorLimitUpper = 0;
+        frontSuspensionRight.translationMotorLimitLower = 0;
+        frontSuspensionRight.rotationalMotorLimitUpper = 0;
+        frontSuspensionRight.rotationalMotorLimitLower = 0;
+        frontSuspensionRight.internalCollision = true;
+        frontSuspensionLeft = new f.ComponentJointCylindrical(controlled.getComponent(f.ComponentRigidbody), tyreFL.getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(-0.50, -1, -0.75));
+        controlled.addComponent(frontSuspensionLeft);
+        frontSuspensionLeft.springDamping = 100;
+        frontSuspensionLeft.springFrequency = 2;
+        frontSuspensionLeft.translationMotorLimitUpper = 0;
+        frontSuspensionLeft.translationMotorLimitLower = 0;
+        frontSuspensionLeft.rotationalMotorLimitUpper = 0;
+        frontSuspensionLeft.rotationalMotorLimitLower = 0;
+        frontSuspensionLeft.internalCollision = true;
+        backSuspensionLeft = new f.ComponentJointCylindrical(controlled.getComponent(f.ComponentRigidbody), tyreBL.getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(-0.50, -1, 0.75));
+        controlled.addComponent(backSuspensionLeft);
+        backSuspensionLeft.springDamping = 100;
+        backSuspensionLeft.springFrequency = 2;
+        backSuspensionLeft.translationMotorLimitUpper = 0;
+        backSuspensionLeft.translationMotorLimitLower = 0;
+        backSuspensionLeft.rotationalMotorLimitUpper = 0;
+        backSuspensionLeft.rotationalMotorLimitLower = 0;
+        backSuspensionLeft.internalCollision = true;
+        backSuspensionRight = new f.ComponentJointCylindrical(controlled.getComponent(f.ComponentRigidbody), tyreBR.getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(0.50, -1, 0.75));
+        controlled.addComponent(backSuspensionRight);
+        backSuspensionRight.springDamping = 100;
+        backSuspensionRight.springFrequency = 2;
+        backSuspensionRight.translationMotorLimitUpper = 0;
+        backSuspensionRight.translationMotorLimitLower = 0;
+        backSuspensionRight.rotationalMotorLimitUpper = 0;
+        backSuspensionRight.rotationalMotorLimitLower = 0;
+        backSuspensionRight.internalCollision = true;
+        f.Physics.start(graph);
+        f.Physics.settings.debugDraw = true;
+        PhysikTest.viewport.initialize("Viewport", graph, cmpCamera, document.querySelector("canvas"));
+        PhysikTest.viewport.setFocus(true);
+        Scenes.dollyViewportCamera(PhysikTest.viewport);
+        PhysikTest.viewport.draw();
     }
     function moreVertices(_event) {
         if (_event.code == f.KEYBOARD_CODE.M) {
@@ -200,4 +249,16 @@ var HeightMap;
     //     this.faceNormal = f.Vector3.CROSS(v1, v2);
     //   }
     // }
-})(HeightMap || (HeightMap = {}));
+    function createCompleteNode(_name, _material, _mesh, _mass, _physicsType, _group = f.PHYSICS_GROUP.DEFAULT, _colType = f.COLLIDER_TYPE.CUBE, _convexMesh = null) {
+        let node = new f.Node(_name);
+        let cmpMesh = new f.ComponentMesh(_mesh);
+        let cmpMaterial = new f.ComponentMaterial(_material);
+        let cmpTransform = new f.ComponentTransform();
+        let cmpRigidbody = new f.ComponentRigidbody(_mass, _physicsType, _colType, _group, null, _convexMesh); //add a Float32 Array of points to the rb constructor to create a convex collider
+        node.addComponent(cmpMesh);
+        node.addComponent(cmpMaterial);
+        node.addComponent(cmpTransform);
+        node.addComponent(cmpRigidbody);
+        return node;
+    }
+})(PhysikTest || (PhysikTest = {}));

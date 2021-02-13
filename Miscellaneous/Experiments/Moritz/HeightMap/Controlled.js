@@ -19,42 +19,34 @@ var HeightMap;
             this.axisRotation.setDelay(1000);
         }
         update(_timeFrame) {
-            // let oldUp = this.mtxLocal.getY();
-            // let oldNormal = this.mtxLocal.getZ();
-            // oldNormal.normalize();
-            // let newUp = oldUp;
-            let ray = this.meshTerrain.getPositionOnTerrain(this);
-            this.mtxLocal.translation = new f.Vector3(ray.origin.x, ray.origin.y + this.groundClearance, ray.origin.z);
-            let gradient = getGradient(ray.direction);
-            HeightMap.arrowRed.mtxLocal.translation = ray.origin;
-            HeightMap.arrowRed.mtxLocal.lookAt(f.Vector3.SUM(gradient, ray.origin));
             let distance = this.axisSpeed.getOutput() * this.maxSpeed * _timeFrame;
             let angle = this.axisRotation.getOutput() * this.maxRotSpeed * _timeFrame;
-            ray.direction.normalize();
-            // if (! oldNormal.equals(ray.direction, 0.001) ){
-            //   // console.log(oldNormal.toString() + ray.direction.toString())
-            //   newUp = calculateNewUp(oldNormal, ray.direction, oldUp);
-            // }
-            this.mtxLocal.translateX(distance /*+ 0.005*/);
-            this.mtxLocal.lookAt(f.Vector3.SUM(this.mtxLocal.translation, ray.direction) /*, newUp */);
-            console.log(this.axisSpeed.getOutput());
+            let ray = this.meshTerrain.getPositionOnTerrain(this.mtxWorld.translation, this.terrain.mtxWorld);
+            // let tyreFL: f.Node = this.getChildrenByName("Tyre FL")[0];
+            // let posFL: f.Ray = this.meshTerrain.getPositionOnTerrain(tyreFL);
+            // console.log("pos: " + posFL.origin.toString() + " Tyre world: " + tyreFL.mtxWorld.translation.toString());
+            // let posFLLocal = f.Vector3.TRANSFORMATION(tyreFL.mtxWorld.translation, tyreFL.mtxWorld);
+            // console.log("Tyre Local: " + tyreFL.mtxLocal.translation + " pos Local: " + posFLLocal.toString());
+            this.mtxLocal.translation = new f.Vector3(ray.origin.x, ray.origin.y + this.groundClearance, ray.origin.z);
+            this.mtxLocal.translateX(distance);
+            this.mtxLocal.lookAt(f.Vector3.SUM(this.mtxLocal.translation, ray.direction));
+            this.getChildrenByName("Tyre FL")[0].mtxLocal.rotation = new f.Vector3(90, 0, this.axisRotation.getOutput() * 15);
+            this.getChildrenByName("Tyre FR")[0].mtxLocal.rotation = new f.Vector3(90, 0, this.axisRotation.getOutput() * 15);
             this.mtxLocal.rotateZ(angle * distance * 200);
-            // this.mtxLocal.translateZ(distance /*+ 0.005*/);
-            // this.mtxLocal.lookAt(f.Vector3.SUM(this.mtxLocal.translation, this.mtxLocal.getZ()), ray.direction, true);
-            // this.mtxLocal.rotateY(angle /*+ 0.2*/);
+            // showGradient(ray);
         }
     }
     HeightMap.Controlled = Controlled;
+    function showGradient(ray) {
+        let gradient = getGradient(ray.direction);
+        HeightMap.arrowRed.mtxLocal.translation = ray.origin;
+        HeightMap.arrowRed.mtxLocal.lookAt(f.Vector3.SUM(gradient, ray.origin));
+    }
     function getGradient(faceNormal) {
         if (faceNormal.x == 0 && faceNormal.z == 0)
             return f.Vector3.Y(1);
         let yCuttingPlane = f.Vector3.CROSS(faceNormal, f.Vector3.Y(1));
         let gradient = f.Vector3.CROSS(faceNormal, yCuttingPlane);
         return f.Vector3.NORMALIZATION(gradient);
-    }
-    function calculateNewUp(oldNormal, newNormal, oldUp) {
-        let oldDirection = f.Vector3.CROSS(oldNormal, oldUp);
-        let newUp = f.Vector3.CROSS(oldDirection, newNormal);
-        return newUp;
     }
 })(HeightMap || (HeightMap = {}));

@@ -46,7 +46,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
     f.Physics.world.setSolverIterations(1000);
     f.Physics.settings.defaultRestitution = 0.15;
     f.Physics.settings.defaultFriction = 0.95;
-    // f.Physics.settings.defaultConstraintSolverType = 1; //Use most accurate joint solving, slower but needed for complex things like cars
+    //f.Physics.settings.defaultConstraintSolverType = 1; //Use most accurate joint solving, slower but needed for complex things like cars
     //Experiment with defaultConstraintSolverType and defaultCorrectionAlgorithm
 
     //PHYSICS 
