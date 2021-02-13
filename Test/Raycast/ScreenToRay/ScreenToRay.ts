@@ -15,10 +15,8 @@ namespace ScreenToRay {
 
   let mouse: ƒ.Vector2 = new ƒ.Vector2();
   let viewportRay: ƒ.Viewport = new ƒ.Viewport();
-  let viewportPick: ƒ.Viewport = new ƒ.Viewport();
   let cameraRay: ƒ.ComponentCamera;
   let canvasRay: HTMLCanvasElement;
-  let canvasPick: HTMLCanvasElement;
 
   let cursor: ƒAid.Node = new ƒAid.Node(
     "Cursor",
@@ -53,9 +51,6 @@ namespace ScreenToRay {
     viewportRay.initialize("ray", root, cameraRay, canvasRay);
     viewportRay.adjustingFrames = true;
 
-    canvasPick = document.querySelector("canvas#pick");
-    viewportPick.initialize("pick", root, cameraRay, canvasPick);
-
     menu = document.getElementsByTagName("div")[0];
     menu.innerHTML = "Test automatic rectangle transformation. Adjust CSS-Frame and framings";
     uiCamera = new UI.Camera();
@@ -86,7 +81,6 @@ namespace ScreenToRay {
       logMutatorInfo(name, uiMaps[name].framing);
     }
 
-    viewport.createPickBuffers();
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, animate);
     ƒ.Loop.start();
 
@@ -94,26 +88,20 @@ namespace ScreenToRay {
       update();
       viewport.draw();
       adjustRayCamera();
-      pickNodeAt(mouse);
       pick();
     }
   }
 
   function pick(): void {
-    // let posProjection: ƒ.Vector2 = viewport.pointClientToProjection(mouse);
-    // let rayPick: ƒ.RayPick = new ƒ.RayPick(cmpCamera);
-    // let picks: ƒ.Pick[] = rayPick.pick(viewport.getGraph(), posProjection);
-    // let picks: ƒ.Pick[] = ƒ.Picker.pickCamera(viewport.getBranch(), viewport.camera, posProjection);
     cursor.getComponent(ƒ.ComponentMesh).activate(false);
     let picks: ƒ.Pick[] = ƒ.Picker.pickViewport(viewport, mouse);
     cursor.getComponent(ƒ.ComponentMesh).activate(true);
 
     picks.sort((a: ƒ.RayHit, b: ƒ.RayHit) => a.zBuffer < b.zBuffer ? -1 : 1);
 
-    let output: HTMLOutputElement = document.querySelector("output#o2");
+    let output: HTMLOutputElement = document.querySelector("output");
     output.innerHTML = "";
     for (let pick of picks) {
-      // let world: ƒ.Vector3 = viewportPick.calculateWorldFromZBuffer(ƒ.Vector2.ZERO(), pick.zBuffer);
       let world: ƒ.Vector3 = pick.world;
       output.innerHTML += pick.node.name + ":" + pick.zBuffer.toFixed(2) + " | " + pick.luminance.toFixed(2) + " | " + pick.alpha.toFixed(2) + "<br/>";
       output.innerHTML += world.toString() + "<br/>";
@@ -123,21 +111,6 @@ namespace ScreenToRay {
     }
   }
 
-  function pickNodeAt(_pos: ƒ.Vector2): void {
-    let posRender: ƒ.Vector2 = viewport.pointClientToRender(
-      new ƒ.Vector2(_pos.x, viewport.getClientRectangle().height - _pos.y)
-    );
-    let output: HTMLOutputElement = document.querySelector("output#o1");
-    output.innerHTML = "";
-
-    let hits: ƒ.RayHit[] = viewport.pickNodeAt(posRender);
-    hits.sort((a: ƒ.RayHit, b: ƒ.RayHit) => a.zBuffer < b.zBuffer ? -1 : 1);
-    for (let hit of hits) {
-      let world: ƒ.Vector3 = viewport.calculateWorldFromZBuffer(_pos, hit.zBuffer);
-      output.innerHTML += hit.node.name + ":" + hit.zBuffer.toFixed(2) + "<br/>";
-      output.innerHTML += world.toString() + "<br/>";
-    }
-  }
 
   function adjustRayCamera(): void {
     let ray: ƒ.Ray = computeRay();
@@ -302,9 +275,5 @@ namespace ScreenToRay {
     uiClient.set(ƒ.Rectangle.GET(clientRect.left, clientRect.top, clientRect.width, clientRect.height));
 
     uiCamera.set({ aspect: cmpCamera.getAspect(), fieldOfView: cmpCamera.getFieldOfView() });
-
-    cursor.getComponent(ƒ.ComponentMesh).activate(false);
-    viewport.createPickBuffers();
-    cursor.getComponent(ƒ.ComponentMesh).activate(true);
   }
 }

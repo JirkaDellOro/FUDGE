@@ -2146,7 +2146,6 @@ declare namespace FudgeCore {
         private graph;
         private crc2;
         private canvas;
-        private pickBuffers;
         /**
          * Returns true if this viewport currently has focus and thus receives keyboard events
          */
@@ -2190,12 +2189,6 @@ declare namespace FudgeCore {
          */
         draw(_calculateTransforms?: boolean): void;
         pick(): Pick[];
-        /**
-        * Draw this viewport for RayCast
-        */
-        createPickBuffers(): void;
-        pickNodeAt(_pos: Vector2): RayHit[];
-        calculateWorldFromZBuffer(_pos: Vector2, _z: number): Vector3;
         /**
          * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas
          */
@@ -4982,13 +4975,6 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     type MapLightTypeToLightList = Map<TypeOfLight, ComponentLight[]>;
     /**
-     * Rendered texture for each node for picking
-     */
-    interface PickBuffer {
-        node: Node;
-        frameBuffer: WebGLFramebuffer;
-    }
-    /**
      * Information on each node from picking
      */
     interface Pick {
@@ -5007,26 +4993,13 @@ declare namespace FudgeCore {
         static pickTexture: WebGLTexture;
         static pickBuffer: Uint8Array;
         private static timestampUpdate;
-        private static pickBuffers;
         private static picks;
         private static pickSize;
         /**
          * Creates a texture buffer to be used as pick-buffer
          */
         static createPickTexture(_width: number, _height: number): WebGLTexture;
-        /**
-         * Draws the graph for RayCasting starting with the given [[Node]] using the camera given [[ComponentCamera]].
-         */
-        static drawGraphForRayCast(_node: Node, _cmpCamera: ComponentCamera): PickBuffer[];
-        /**
-         * Draws the graph for picking starting with the given [[Node]] using the camera with extrem narrow focus [[ComponentCamera]].
-         */
         static drawGraphForPicking(_node: Node, _cmpCamera: ComponentCamera): Pick[];
-        /**
-         * Browses through the buffers (previously created with [[drawGraphForRayCast]]) of the size given
-         * and returns an unsorted list of the values at the given position, representing node-ids and depth information as [[RayHit]]s
-         */
-        static pickNodeAt(_pos: Vector2, _pickBuffers: PickBuffer[], _rect: Rectangle): RayHit[];
         /**
          * Recursively iterates over the graph starting with the node given, recalculates all world transforms,
          * collects all lights and feeds all shaders used in the graph with these lights
@@ -5051,10 +5024,6 @@ declare namespace FudgeCore {
         * but the fragemnt shader renders only 1 pixel for each node into the render buffer, 1st node to 1st pixel, 2nd node to second pixel etc.
         */
         private static drawNodeForPicking;
-        /**
-         * The render function for drawing buffers for picking. Renders each node on a dedicated buffer with id and depth values instead of colors
-         */
-        private static drawNodeForRayCast;
         /**
          * Set light data in shaders
          */

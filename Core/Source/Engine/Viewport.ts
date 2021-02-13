@@ -30,7 +30,6 @@ namespace FudgeCore {
     private graph: Node = null; // The first node in the graph that will be rendered.
     private crc2: CanvasRenderingContext2D = null;
     private canvas: HTMLCanvasElement = null;
-    private pickBuffers: PickBuffer[] = [];
     //#endregion
 
     // #region Events (passing from canvas to viewport and from there into graph)
@@ -159,39 +158,21 @@ namespace FudgeCore {
       return picks;
     }
 
-    /**
-    * Draw this viewport for RayCast
-    */
-    public createPickBuffers(): void {
-      if (this.adjustingFrames)
-        this.adjustFrames();
-      if (this.adjustingCamera)
-        this.adjustCamera();
-      this.pickBuffers = Render.drawGraphForRayCast(this.graph, this.camera);
-    }
+    // public calculateWorldFromZBuffer(_pos: Vector2, _z: number): Vector3 {
+    //   let posClip: Vector3 = new Vector3(
+    //     2 * _pos.x / this.getClientRectangle().width - 1,
+    //     1 - 2 * _pos.y / this.getClientRectangle().height,
+    //     _z
+    //   );
 
+    //   let mtxViewProjectionInverse: Matrix4x4 = Matrix4x4.INVERSION(this.camera.mtxWorldToView);
+    //   let m: Float32Array = mtxViewProjectionInverse.get();
+    //   let rayWorld: Vector3 = Vector3.TRANSFORMATION(posClip, mtxViewProjectionInverse, true);
+    //   let w: number = m[3] * posClip.x + m[7] * posClip.y + m[11] * posClip.z + m[15];
+    //   rayWorld.scale(1 / w);
 
-    public pickNodeAt(_pos: Vector2): RayHit[] {
-      // this.createPickBuffers();
-      let hits: RayHit[] = Render.pickNodeAt(_pos, this.pickBuffers, this.rectSource);
-      return hits;
-    }
-
-    public calculateWorldFromZBuffer(_pos: Vector2, _z: number): Vector3 {
-      let posClip: Vector3 = new Vector3(
-        2 * _pos.x / this.getClientRectangle().width - 1,
-        1 - 2 * _pos.y / this.getClientRectangle().height,
-        _z
-      );
-
-      let mtxViewProjectionInverse: Matrix4x4 = Matrix4x4.INVERSION(this.camera.mtxWorldToView);
-      let m: Float32Array = mtxViewProjectionInverse.get();
-      let rayWorld: Vector3 = Vector3.TRANSFORMATION(posClip, mtxViewProjectionInverse, true);
-      let w: number = m[3] * posClip.x + m[7] * posClip.y + m[11] * posClip.z + m[15];
-      rayWorld.scale(1 / w);
-
-      return rayWorld;
-    }
+    //   return rayWorld;
+    // }
 
     /**
      * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas

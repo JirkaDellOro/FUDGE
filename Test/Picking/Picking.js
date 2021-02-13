@@ -37,10 +37,12 @@ var Picking;
         graph.appendChild(cursor);
         // setup the viewport
         cmpCamera = new ƒ.ComponentCamera();
-        Reflect.set(cmpCamera, "far", 4.3);
+        Reflect.set(cmpCamera, "far", 7.3);
         // Reflect.set(cmpCamera, "fieldOfView", 170);
+        cmpCamera.pivot.translateX(0.3);
         cmpCamera.pivot.translateZ(2.1);
-        cmpCamera.pivot.rotateY(180);
+        // cmpCamera.pivot.translateY(-2.1);
+        cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
         viewport = new ƒ.Viewport();
         viewport.initialize("Viewport", graph, cmpCamera, canvas);
         // FudgeAid.Viewport.expandCameraToInteractiveOrbit(viewport);
@@ -54,14 +56,12 @@ var Picking;
         viewportPick.initialize("pick", graph, cameraPick, canvasPick);
         viewportPick.adjustingFrames = false;
         // viewportPick.adjustingCamera = false;
-        viewport.createPickBuffers();
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 30);
         // canvas.addEventListener("mousemove", update);
         // window.addEventListener("resize", viewport.createPickBuffers.bind(viewport));
         function update(_event) {
             viewport.draw();
-            // pickNodeAt(mouse);
             pick();
         }
     }
@@ -83,18 +83,6 @@ var Picking;
             let pick = picks[0];
             cursor.mtxLocal.translation = pick.world;
         }
-    }
-    function pickNodeAt(_pos) {
-        let mouseUp = new ƒ.Vector2(_pos.x, viewport.getClientRectangle().height - _pos.y);
-        let posRender = viewport.pointClientToRender(mouseUp);
-        // cursor.mtxLocal.translation = ƒ.Vector3.ONE(100);
-        let hits = viewport.pickNodeAt(posRender);
-        hits.sort((a, b) => a.zBuffer < b.zBuffer ? -1 : 1);
-        for (let hit of hits) {
-            data[hit.node.name] = hit.zBuffer;
-        }
-        if (hits.length)
-            cursor.mtxLocal.translation = viewport.calculateWorldFromZBuffer(mouse, hits[0].zBuffer);
     }
     function setCursorPosition(_event) {
         mouse = new ƒ.Vector2(_event.clientX, _event.clientY);

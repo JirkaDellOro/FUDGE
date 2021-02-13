@@ -46,10 +46,12 @@ namespace Picking {
 
     // setup the viewport
     cmpCamera = new ƒ.ComponentCamera();
-    Reflect.set(cmpCamera, "far", 4.3);
+    Reflect.set(cmpCamera, "far", 7.3);
     // Reflect.set(cmpCamera, "fieldOfView", 170);
+    cmpCamera.pivot.translateX(0.3);
     cmpCamera.pivot.translateZ(2.1);
-    cmpCamera.pivot.rotateY(180);
+    // cmpCamera.pivot.translateY(-2.1);
+    cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
     viewport = new ƒ.Viewport();
     viewport.initialize("Viewport", graph, cmpCamera, canvas);
     // FudgeAid.Viewport.expandCameraToInteractiveOrbit(viewport);
@@ -65,7 +67,6 @@ namespace Picking {
     viewportPick.adjustingFrames = false;
     // viewportPick.adjustingCamera = false;
 
-    viewport.createPickBuffers();
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
     ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 30);
     // canvas.addEventListener("mousemove", update);
@@ -73,7 +74,6 @@ namespace Picking {
 
     function update(_event: Event): void {
       viewport.draw();
-      // pickNodeAt(mouse);
       pick();
     }
   }
@@ -98,21 +98,6 @@ namespace Picking {
       cursor.mtxLocal.translation = pick.world;
     }
   }
-
-  function pickNodeAt(_pos: ƒ.Vector2): void {
-    let mouseUp: ƒ.Vector2 = new ƒ.Vector2(_pos.x, viewport.getClientRectangle().height - _pos.y);
-    let posRender: ƒ.Vector2 = viewport.pointClientToRender(mouseUp);
-    // cursor.mtxLocal.translation = ƒ.Vector3.ONE(100);
-
-    let hits: ƒ.RayHit[] = viewport.pickNodeAt(posRender);
-    hits.sort((a: ƒ.RayHit, b: ƒ.RayHit) => a.zBuffer < b.zBuffer ? -1 : 1);
-    for (let hit of hits) {
-      data[hit.node.name] = hit.zBuffer;
-    }
-    if (hits.length)
-      cursor.mtxLocal.translation = viewport.calculateWorldFromZBuffer(mouse, hits[0].zBuffer);
-  }
-
 
   function setCursorPosition(_event: MouseEvent): void {
     mouse = new ƒ.Vector2(_event.clientX, _event.clientY);

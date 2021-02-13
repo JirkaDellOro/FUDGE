@@ -2,14 +2,6 @@ namespace FudgeCore {
   export type MapLightTypeToLightList = Map<TypeOfLight, ComponentLight[]>;
 
   /**
-   * Rendered texture for each node for picking
-   */
-  export interface PickBuffer {
-    node: Node;
-    // texture: WebGLTexture;
-    frameBuffer: WebGLFramebuffer;
-  }
-  /**
    * Information on each node from picking
    */
   export interface Pick {
@@ -29,11 +21,10 @@ namespace FudgeCore {
     public static pickTexture: WebGLTexture;
     public static pickBuffer: Uint8Array;
     private static timestampUpdate: number;
-    private static pickBuffers: PickBuffer[];
     private static picks: Pick[];
     private static pickSize: Vector2;
 
-    //#region RayCast & Picking
+    //#region Picking
     /**
      * Creates a texture buffer to be used as pick-buffer
      */
@@ -60,24 +51,7 @@ namespace FudgeCore {
 
       return targetTexture;
     }
-    /**
-     * Draws the graph for RayCasting starting with the given [[Node]] using the camera given [[ComponentCamera]].
-     */
-    public static drawGraphForRayCast(_node: Node, _cmpCamera: ComponentCamera): PickBuffer[] { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
-      Render.pickBuffers = [];
-      //TODO: examine, why switching blendFunction is necessary 
-      // RenderWebGL.crc3.blendFunc(1, 0);
-      Render.setBlendMode(BLEND.OPAQUE);
-      Render.drawGraph(_node, _cmpCamera, Render.drawNodeForRayCast);
-      // RenderWebGL.crc3.blendFunc(WebGL2RenderingContext.DST_ALPHA, WebGL2RenderingContext.ONE_MINUS_DST_ALPHA);
-      Render.setBlendMode(BLEND.TRANSPARENT);
-
-      Render.resetFrameBuffer();
-      return Render.pickBuffers;
-    }
-    /**
-     * Draws the graph for picking starting with the given [[Node]] using the camera with extrem narrow focus [[ComponentCamera]].
-     */
+    
     public static drawGraphForPicking(_node: Node, _cmpCamera: ComponentCamera): Pick[] { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
       Render.picks = [];
       // bind framebuffer and texture
@@ -113,29 +87,6 @@ namespace FudgeCore {
       return picks;
     }
 
-    /**
-     * Browses through the buffers (previously created with [[drawGraphForRayCast]]) of the size given
-     * and returns an unsorted list of the values at the given position, representing node-ids and depth information as [[RayHit]]s
-     */
-    public static pickNodeAt(_pos: Vector2, _pickBuffers: PickBuffer[], _rect: Rectangle): RayHit[] {
-      let hits: RayHit[] = [];
-
-      for (let pickBuffer of _pickBuffers) {
-        Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, pickBuffer.frameBuffer);
-        let data: Uint8Array = new Uint8Array(_rect.width * _rect.height * 4);
-        Render.crc3.readPixels(0, 0, _rect.width, _rect.height, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, data);
-        let pixel: number = _pos.x + _rect.width * _pos.y;
-
-        let zBuffer: number = data[4 * pixel + 1] + data[4 * pixel + 2] / 256;
-        zBuffer = zBuffer / 128 - 1;
-        if (zBuffer > -1) {
-          let hit: RayHit = new RayHit(pickBuffer.node, 0, zBuffer);
-          hits.push(hit);
-        }
-      }
-
-      return hits;
-    }
     //#endregion
 
     //#region Transformation & Lights
@@ -290,34 +241,6 @@ namespace FudgeCore {
       }
     }
 
-    /**
-     * The render function for drawing buffers for picking. Renders each node on a dedicated buffer with id and depth values instead of colors
-     */
-    private static drawNodeForRayCast(_node: Node, _mtxMeshToWorld: Matrix4x4, _mtxWorldToView: Matrix4x4, _lights: MapLightTypeToLightList): void { // create Texture to render to, int-rgba
-      // TODO: look into SSBOs!
-      let target: WebGLTexture = Render.createPickTexture(Render.getRenderRectangle().width, Render.getRenderRectangle().height);
-
-      const framebuffer: WebGLFramebuffer = Render.crc3.createFramebuffer();
-      // render to our targetTexture by binding the framebuffer
-      Render.crc3.bindFramebuffer(WebGL2RenderingContext.FRAMEBUFFER, framebuffer);
-      // attach the texture as the first color attachment
-      const attachmentPoint: number = WebGL2RenderingContext.COLOR_ATTACHMENT0;
-      Render.crc3.framebufferTexture2D(WebGL2RenderingContext.FRAMEBUFFER, attachmentPoint, WebGL2RenderingContext.TEXTURE_2D, target, 0);
-
-      try {
-        let mesh: Mesh = _node.getComponent(ComponentMesh).mesh;
-        if (!_node.getComponent(ComponentMesh).isActive || !_node.getComponent(ComponentMaterial).isActive)
-          return;
-        ShaderRayCast.useProgram();
-        let pickBuffer: PickBuffer = { node: _node, frameBuffer: framebuffer };
-        Render.pickBuffers.push(pickBuffer);
-        mesh.useRenderBuffers(ShaderRayCast, _mtxMeshToWorld, _mtxWorldToView, Render.pickBuffers.length);
-
-        RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, mesh.renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
-      } catch (_error) {
-        //
-      }
-    }
     //#endregion
 
     //#region Lights
