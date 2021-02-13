@@ -14,12 +14,15 @@ namespace FudgeCore {
 
     public static pickCamera(_branch: Node, _cmpCamera: ComponentCamera, _posProjection: Vector2): Pick[] {
       let ray: Ray = new Ray(new Vector3(-_posProjection.x, _posProjection.y, 1));
+      let length: number = ray.direction.magnitude;
+      
       let mtxCamera: Matrix4x4 = _cmpCamera.pivot;
       if (_cmpCamera.getContainer())
         mtxCamera = Matrix4x4.MULTIPLICATION(_cmpCamera.getContainer().mtxWorld, _cmpCamera.pivot);
       ray.transform(mtxCamera);
 
-      let picks: Pick[] = Picker.pickRay(_branch, ray, _cmpCamera.getNear(), _cmpCamera.getFar());
+
+      let picks: Pick[] = Picker.pickRay(_branch, ray, length * _cmpCamera.getNear(), length * _cmpCamera.getFar());
       return picks;
     }
 
