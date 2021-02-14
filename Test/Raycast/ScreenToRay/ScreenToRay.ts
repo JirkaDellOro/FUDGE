@@ -31,10 +31,10 @@ namespace ScreenToRay {
     let object: ƒAid.Node = new ƒAid.Node(
       "Object",
       ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(2)),
-      new ƒ.Material("Object", ƒ.ShaderTexture, new ƒ.CoatTextured(ƒ.Color.CSS("white"))),
-      // new ƒ.Material("Object", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("red"))),
-      // new ƒ.MeshCube("Object")
-      new ƒ.MeshSphere("Object", 15, 15)
+      // new ƒ.Material("Object", ƒ.ShaderTexture, new ƒ.CoatTextured(ƒ.Color.CSS("white"))),
+      new ƒ.Material("Object", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("red"))),
+      new ƒ.MeshCube("Object")
+      // new ƒ.MeshSphere("Object", 15, 15)
     );
 
     root.appendChild(object);

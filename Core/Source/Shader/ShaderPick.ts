@@ -21,7 +21,7 @@ namespace FudgeCore {
         uniform int u_id;
         uniform vec2 u_size;
         uniform vec4 u_color;
-        out vec4 frag;
+        out ivec4 frag;
         
         void main() {
            float id = float(u_id); 
@@ -29,12 +29,10 @@ namespace FudgeCore {
 
            if (pixel != id)
              discard;
-           float upperbyte = trunc(gl_FragCoord.z * 256.0) / 256.0;
-           float lowerbyte = fract(gl_FragCoord.z * 256.0);
 
-           float luminance = 0.299 * u_color.r + 0.587 * u_color.g + 0.114 * u_color.b;
+           uint icolor = uint(u_color.r * 255.0) << 24 | uint(u_color.g * 255.0) << 16 | uint(u_color.b * 255.0) << 8 | uint(u_color.a * 255.0);
                         
-           frag = vec4(upperbyte, lowerbyte, luminance, u_color.a);
+           frag = ivec4(floatBitsToInt(gl_FragCoord.z), icolor, 0, 0);
         }`;
     }
   }

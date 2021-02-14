@@ -40,7 +40,6 @@ namespace FudgeCore {
              discard;
            
            vec4 color = u_color * texture(u_texture, v_textureUVs);
-           float luminance = 0.299 * color.r + 0.587 * color.g + 0.114 * color.b;
            uint icolor = uint(color.r * 255.0) << 24 | uint(color.g * 255.0) << 16 | uint(color.b * 255.0) << 8 | uint(color.a * 255.0);
           
           frag = ivec4(floatBitsToInt(gl_FragCoord.z), icolor, floatBitsToInt(v_textureUVs.x), floatBitsToInt(v_textureUVs.y));
