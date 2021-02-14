@@ -5186,6 +5186,8 @@ declare namespace FudgeCore {
      * Texture created from a canvas
      */
     class TextureCanvas extends Texture {
+        crc2: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
+        constructor(_name: string, _crc2: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D);
         get texImageSource(): TexImageSource;
     }
     /**

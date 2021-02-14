@@ -11,6 +11,7 @@ var ScreenToRay;
     let cmpCamera;
     let uiCamera;
     let mouse = new ƒ.Vector2();
+    let mouseButton;
     let viewportRay = new ƒ.Viewport();
     let cameraRay;
     let canvasRay;
@@ -23,8 +24,9 @@ var ScreenToRay;
         cosys.getChildrenByName("ArrowBlue")[0].getChildrenByName("ArrowBlueShaft")[0].getComponent(ƒ.ComponentMaterial).clrPrimary.a = 0.5; // = ƒ.Color.CSS("white", 0.9);
         let object = new ƒAid.Node("Object", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(2)), new ƒ.Material("Object", ƒ.ShaderTexture, new ƒ.CoatTextured(ƒ.Color.CSS("white"))), 
         // new ƒ.Material("Object", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("red"))),
-        // new ƒ.MeshCube("Object")
-        new ƒ.MeshSphere("Object", 15, 15));
+        new ƒ.MeshCube("Object")
+        // new ƒ.MeshSphere("Object", 15, 15)
+        );
         root.appendChild(object);
         root.appendChild(cursor);
         // initialize viewports
@@ -91,11 +93,26 @@ var ScreenToRay;
             output.innerHTML += "textureUV: " + pick.textureUV.toString() + "<br/>";
             output.innerHTML += "normal: " + pick.normal.toString() + "<br/>";
         }
-        if (picks.length) {
-            cursor.mtxLocal.translation = picks[0].posWorld;
-            cursor.color = picks[0].color;
-            cursor.mtxLocal.lookAt(ƒ.Vector3.SUM(picks[0].posWorld, picks[0].normal), ƒ.Vector3.SUM(ƒ.Vector3.ONE(), picks[0].normal));
-        }
+        if (!picks.length)
+            return;
+        let pick = picks[0];
+        cursor.mtxLocal.translation = pick.posWorld;
+        cursor.color = pick.color;
+        cursor.mtxLocal.lookAt(ƒ.Vector3.SUM(pick.posWorld, pick.normal), ƒ.Vector3.SUM(ƒ.Vector3.ONE(), pick.normal));
+        if (!mouseButton)
+            return;
+        let material = pick.node.getComponent(ƒ.ComponentMaterial).material;
+        let coat = material.getCoat();
+        let img = coat.texture.texImageSource;
+        let canvas = new OffscreenCanvas(img.width, img.height);
+        let crc2 = canvas.getContext("2d");
+        crc2.drawImage(img, 0, 0);
+        crc2.fillStyle = "red";
+        crc2.fillRect(pick.textureUV.x * img.width - 5, pick.textureUV.y * img.width - 5, 10, 10);
+        // crc2.fillRect(0, 0, 300, 200);
+        // crc2.canvas.transferToImageBitmap()
+        let txtCanvas = new ƒ.TextureCanvas("Test", crc2);
+        material.setCoat(new ƒ.CoatTextured(ƒ.Color.CSS("white"), txtCanvas));
     }
     function adjustRayCamera() {
         let ray = computeRay();
@@ -131,6 +148,7 @@ var ScreenToRay;
     }
     function setCursorPosition(_event) {
         mouse = new ƒ.Vector2(_event.clientX, _event.clientY);
+        mouseButton = _event.buttons;
     }
     function hndKeydown(_event) {
         let object = viewport.getBranch().getChildrenByName("Object")[0];

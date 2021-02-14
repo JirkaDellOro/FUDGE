@@ -124,8 +124,14 @@ namespace FudgeCore {
    * Texture created from a canvas
    */
   export class TextureCanvas extends Texture {
+    public crc2: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
+
+    constructor (_name: string, _crc2: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D) {
+      super(_name);
+      this.crc2 = _crc2;
+    }
     public get texImageSource(): TexImageSource {
-      return null;
+      return this.crc2.canvas;
     }
   }
   /**
