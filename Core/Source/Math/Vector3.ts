@@ -22,7 +22,7 @@ namespace FudgeCore {
      */
     public static X(_scale: number = 1): Vector3 {
       const vector: Vector3 = Recycler.get(Vector3);
-      vector.data.set([_scale, 0, 0]);
+      vector.set(_scale, 0, 0);
       return vector;
     }
 
@@ -31,7 +31,7 @@ namespace FudgeCore {
      */
     public static Y(_scale: number = 1): Vector3 {
       const vector: Vector3 = Recycler.get(Vector3);
-      vector.data.set([0, _scale, 0]);
+      vector.set(0, _scale, 0);
       return vector;
     }
 
@@ -49,7 +49,7 @@ namespace FudgeCore {
      */
     public static ZERO(): Vector3 {
       const vector: Vector3 = Recycler.get(Vector3);
-      vector.data.set([0, 0, 0]);
+      vector.set(0, 0, 0);
       return vector;
     }
 
@@ -58,7 +58,7 @@ namespace FudgeCore {
      */
     public static ONE(_scale: number = 1): Vector3 {
       const vector: Vector3 = Recycler.get(Vector3);
-      vector.data.set([_scale, _scale, _scale]);
+      vector.set(_scale, _scale, _scale);
       return vector;
     }
 
@@ -92,7 +92,7 @@ namespace FudgeCore {
           throw (new RangeError("Impossible normalization"));
         vector = Vector3.ZERO();
         let factor: number = _length / _vector.magnitude;
-        vector.data = new Float32Array([_vector.x * factor, _vector.y * factor, _vector.z * factor]);
+        vector.set(_vector.x * factor, _vector.y * factor, _vector.z * factor);
       } catch (_error) {
         Debug.warn(_error);
       }
@@ -105,7 +105,7 @@ namespace FudgeCore {
     public static SUM(..._vectors: Vector3[]): Vector3 {
       let result: Vector3 = Recycler.get(Vector3);
       for (let vector of _vectors)
-        result.data = new Float32Array([result.x + vector.x, result.y + vector.y, result.z + vector.z]);
+        result.set(result.x + vector.x, result.y + vector.y, result.z + vector.z);
       return result;
     }
 
@@ -114,7 +114,7 @@ namespace FudgeCore {
      */
     public static DIFFERENCE(_minuend: Vector3, _subtrahend: Vector3): Vector3 {
       let vector: Vector3 = Recycler.get(Vector3);
-      vector.data = new Float32Array([_minuend.x - _subtrahend.x, _minuend.y - _subtrahend.y, _minuend.z - _subtrahend.z]);
+      vector.set(_minuend.x - _subtrahend.x, _minuend.y - _subtrahend.y, _minuend.z - _subtrahend.z);
       return vector;
     }
 
@@ -123,7 +123,7 @@ namespace FudgeCore {
      */
     public static SCALE(_vector: Vector3, _scaling: number): Vector3 {
       let scaled: Vector3 = Recycler.get(Vector3);
-      scaled.data = new Float32Array([_vector.x * _scaling, _vector.y * _scaling, _vector.z * _scaling]);
+      scaled.set(_vector.x * _scaling, _vector.y * _scaling, _vector.z * _scaling);
       return scaled;
     }
 
@@ -132,10 +132,11 @@ namespace FudgeCore {
      */
     public static CROSS(_a: Vector3, _b: Vector3): Vector3 {
       let vector: Vector3 = Recycler.get(Vector3);
-      vector.data = new Float32Array([
+      vector.set(
         _a.y * _b.z - _a.z * _b.y,
         _a.z * _b.x - _a.x * _b.z,
-        _a.x * _b.y - _a.y * _b.x]);
+        _a.x * _b.y - _a.y * _b.x
+      );
       return vector;
     }
     /**
@@ -166,7 +167,7 @@ namespace FudgeCore {
      */
     public static RATIO(_dividend: Vector3, _divisor: Vector3): Vector3 {
       let vector: Vector3 = Recycler.get(Vector3);
-      vector.data = new Float32Array([_dividend.x / _divisor.x, _dividend.y / _divisor.y, _dividend.z / _divisor.z]);
+      vector.set(_dividend.x / _divisor.x, _dividend.y / _divisor.y, _dividend.z / _divisor.z);
       return vector;
     }
 
@@ -219,6 +220,7 @@ namespace FudgeCore {
 
     /**
      * Returns a copy of this vector
+     * TODO: rename this clone and create a new method copy, which copies the values from a vector given 
      */
     public get copy(): Vector3 {
       let copy: Vector3 = Recycler.get(Vector3);
@@ -317,7 +319,9 @@ namespace FudgeCore {
      * Defines the components of this vector with the given numbers
      */
     public set(_x: number = 0, _y: number = 0, _z: number = 0): void {
-      this.data = new Float32Array([_x, _y, _z]);
+      this.data[0] = _x;
+      this.data[1] = _y;
+      this.data[2] = _z;
     }
 
     /**

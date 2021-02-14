@@ -465,30 +465,19 @@ declare namespace FudgeCore {
          */
         static NORMALIZATION(_vector: Vector2, _length?: number): Vector2;
         /**
-         * Scales a given vector by a given scale without changing the original vector
-         * @param _vector The vector to scale.
-         * @param _scale The scale to scale with.
-         * @returns A new vector representing the scaled version of the given vector
+         * Returns a new vector representing the given vector scaled by the given scaling factor
          */
         static SCALE(_vector: Vector2, _scale: number): Vector2;
         /**
-         * Sums up multiple vectors.
-         * @param _vectors A series of vectors to sum up
-         * @returns A new vector representing the sum of the given vectors
+         * Returns the resulting vector attained by addition of all given vectors.
          */
         static SUM(..._vectors: Vector2[]): Vector2;
         /**
-         * Subtracts two vectors.
-         * @param _a The vector to subtract from.
-         * @param _b The vector to subtract.
-         * @returns A new vector representing the difference of the given vectors
+         * Returns the result of the subtraction of two vectors.
          */
-        static DIFFERENCE(_a: Vector2, _b: Vector2): Vector2;
+        static DIFFERENCE(_minuend: Vector2, _subtrahend: Vector2): Vector2;
         /**
          * Computes the dotproduct of 2 vectors.
-         * @param _a The vector to multiply.
-         * @param _b The vector to multiply by.
-         * @returns A new vector representing the dotproduct of the given vectors
          */
         static DOT(_a: Vector2, _b: Vector2): number;
         /**
@@ -498,7 +487,7 @@ declare namespace FudgeCore {
          * @param _b Vector to compute the cross product with
          * @returns A number representing result of the cross product.
          */
-        static CROSSPRODUCT(_a: Vector2, _b: Vector2): number;
+        static CROSS(_a: Vector2, _b: Vector2): number;
         /**
          * Calculates the orthogonal vector to the given vector. Rotates counterclockwise by default.
          * ```plaintext
@@ -527,6 +516,7 @@ declare namespace FudgeCore {
         get magnitudeSquared(): number;
         /**
          * @returns A deep copy of the vector.
+         * TODO: rename this clone and create a new method copy, which copies the values from a vector given
          */
         get copy(): Vector2;
         /**
@@ -553,19 +543,15 @@ declare namespace FudgeCore {
          */
         subtract(_subtrahend: Vector2): void;
         /**
-         * Scales the Vector by the _scale.
-         * @param _scale The scale to multiply the vector with.
+         * Scales the Vector by the given _scalar.
          */
-        scale(_scale: number): void;
+        scale(_scalar: number): void;
         /**
-         * Normalizes the vector.
-         * @param _length A modificator to get a different length of normalized vector.
+         * Normalizes this to the given length, 1 by default
          */
         normalize(_length?: number): void;
         /**
-         * Sets the Vector to the given parameters. Ommitted parameters default to 0.
-         * @param _x new x to set
-         * @param _y new y to set
+         * Defines the components of this vector with the given numbers
          */
         set(_x?: number, _y?: number): void;
         /**
@@ -3202,6 +3188,7 @@ declare namespace FudgeCore {
         get magnitudeSquared(): number;
         /**
          * Returns a copy of this vector
+         * TODO: rename this clone and create a new method copy, which copies the values from a vector given
          */
         get copy(): Vector3;
         /**
