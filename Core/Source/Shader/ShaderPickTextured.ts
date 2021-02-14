@@ -38,20 +38,12 @@ namespace FudgeCore {
 
            if (pixel != id)
              discard;
-           float upperbyte = trunc(gl_FragCoord.z * 256.0) / 256.0;
-           float lowerbyte = fract(gl_FragCoord.z * 256.0);
            
            vec4 color = u_color * texture(u_texture, v_textureUVs);
            float luminance = 0.299 * color.r + 0.587 * color.g + 0.114 * color.b;
-           int icolor = int(color.r * 255.0) << 24 + int(color.g * 255.0) << 16 + int(color.b * 255.0) << 8 + int(color.a * 255.0);
-
-           float floatToInt = 0.5 * 4294967296.0;
-          //  gl_FragCoord.z
-          //  
-          //  frag = vec4(upperbyte, lowerbyte, luminance, color.a);
-          //  frag = ivec4(trunc(floatToInt * gl_FragCoord.z), icolor, trunc(floatToInt * u_texture.x), trunc(floatToInt * u_texture.y));
-          //  frag = ivec4(trunc(floatToInt * gl_FragCoord.z), 0, 0, 0);
-           frag = ivec4(floatToInt * gl_FragCoord.z, icolor, floatToInt * v_textureUVs.x, floatToInt * v_textureUVs.y);
+           uint icolor = uint(color.r * 255.0) << 24 | uint(color.g * 255.0) << 16 | uint(color.b * 255.0) << 8 | uint(color.a * 255.0);
+          
+          frag = ivec4(floatBitsToInt(gl_FragCoord.z), icolor, floatBitsToInt(v_textureUVs.x), floatBitsToInt(v_textureUVs.y));
         }`;
     }
   }

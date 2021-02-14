@@ -61,6 +61,7 @@ namespace FudgeCore {
       let mtxViewToWorld: Matrix4x4 = Matrix4x4.INVERSION(_cmpCamera.mtxWorldToView);
       let picked: Pick[] = [];
       for (let i: number = 0; i < Render.ƒpicked.length; i++) {
+
         // console.log(
         //   (data[4 * i + 0] / (4294967296 / 2)).toFixed(5), (data[4 * i + 1] / (4294967296 / 2)).toFixed(5),
         //   (data[4 * i + 2] / (4294967296 / 2)).toFixed(5), (data[4 * i + 3] / (4294967296 / 2)).toFixed(5)
@@ -69,10 +70,10 @@ namespace FudgeCore {
         if (zBuffer == 0) // filter 
           continue;
         let pick: Pick = Render.ƒpicked[i];
-        // pick.zBuffer = zBuffer / 128 - 1;
-        pick.zBuffer = (data[4 * i + 0] / (4294967296 / 2)) * 2 - 1;
-        pick.luminance = data[4 * i + 2] / 255;
-        pick.alpha = data[4 * i + 3] / 255;
+        pick.zBuffer = convertInt32toFloat32(data, 4 * i + 0) * 2 - 1;
+        pick.color = convertInt32toColor(data, 4 * i + 1);
+        pick.textureUV = Recycler.get(Vector2);
+        pick.textureUV.set(convertInt32toFloat32(data, 4 * i + 2), convertInt32toFloat32(data, 4 * i + 3))
         pick.mtxViewToWorld = mtxViewToWorld;
 
         picked.push(pick);
@@ -80,6 +81,21 @@ namespace FudgeCore {
 
       Render.resetFrameBuffer();
       return picked;
+
+      function convertInt32toFloat32(_int32Array: Int32Array, _index: number): number {
+        let buffer: ArrayBuffer = new ArrayBuffer(4);
+        let view: DataView = new DataView(buffer);
+        view.setInt32(0, _int32Array[_index]);
+        return view.getFloat32(0);
+      }
+
+      function convertInt32toColor(_int32Array: Int32Array, _index: number): Color {
+        let buffer: ArrayBuffer = new ArrayBuffer(4);
+        let view: DataView = new DataView(buffer);
+        view.setInt32(0, _int32Array[_index]);
+        let color: Color = Color.CSS(`rgb(${view.getUint8(0)}, ${view.getUint8(1)}, ${view.getUint8(2)})`, view.getUint8(3) / 255);
+        return color;
+      }
     }
 
     //#endregion

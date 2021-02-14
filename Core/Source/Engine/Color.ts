@@ -91,6 +91,17 @@ namespace FudgeCore {
       this.setArrayBytesRGBA(bytes);
     }
 
+    public copy(_color: Color): void {
+      this.r = _color.r; 
+      this.g = _color.g; 
+      this.b = _color.b; 
+      this.a = _color.a; 
+    }
+    
+    public toString(): string {
+      return `(r: ${this.r.toFixed(3)}, g: ${this.g.toFixed(3)}, b: ${this.b.toFixed(3)}, a: ${this.a.toFixed(3)})`;
+    }
+
     //#region Transfer
     public serialize(): Serialization {
       let serialization: Serialization = this.getMutator(true);

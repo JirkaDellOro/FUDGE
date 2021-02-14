@@ -1,10 +1,9 @@
 namespace FudgeCore {
   export class Pick {
-    // public face: number;
     public node: Node;
     public zBuffer: number;
-    public luminance: number;
-    public alpha: number;
+    public color: Color;
+    public textureUV: Vector2;
     #mtxViewToWorld: Matrix4x4;
     #posWorld: Vector3;
     #posMesh: Vector3;
@@ -29,7 +28,6 @@ namespace FudgeCore {
     public get posMesh(): Vector3 {
       if (this.#posMesh)
         return this.#posMesh;
-      // console.log(this.node.getComponent(ComponentMesh).mtxWorld.toString());
       let mtxWorldToMesh: Matrix4x4 = Matrix4x4.INVERSION(this.node.getComponent(ComponentMesh).mtxWorld);
       let posMesh: Vector3 = Vector3.TRANSFORMATION(this.posWorld, mtxWorldToMesh);
       this.#posMesh = posMesh;
@@ -50,7 +48,6 @@ namespace FudgeCore {
         vertex.set(x, y, z);
         [x, y, z] = mesh.normalsFace.subarray(iVertex * 3, (iVertex + 1) * 3);
         normal.set(x, y, z);
-        // console.log(i, iVertex, normal.toString());
 
         let difference: Vector3 = Vector3.DIFFERENCE(this.posMesh, vertex);
         let distance: number = Math.abs(Vector3.DOT(normal, difference));
@@ -61,6 +58,7 @@ namespace FudgeCore {
       }
 
       result.transform(cmpMesh.mtxWorld, false);
+      result.normalize();
       return result;
     }
 

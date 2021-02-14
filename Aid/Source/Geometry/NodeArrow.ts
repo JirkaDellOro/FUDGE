@@ -35,7 +35,7 @@ namespace FudgeAid {
 
     public set color(_color: ƒ.Color) {
       for (let child of this.getChildren()) {
-        child.getComponent(ƒ.ComponentMaterial).clrPrimary = _color;
+        child.getComponent(ƒ.ComponentMaterial).clrPrimary.copy(_color);
       }
     }
   }

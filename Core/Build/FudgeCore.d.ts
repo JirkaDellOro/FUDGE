@@ -1998,6 +1998,8 @@ declare namespace FudgeCore {
         getCSS(): string;
         getHex(): string;
         setHex(_hex: string): void;
+        copy(_color: Color): void;
+        toString(): string;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
@@ -4941,8 +4943,8 @@ declare namespace FudgeCore {
         #private;
         node: Node;
         zBuffer: number;
-        luminance: number;
-        alpha: number;
+        color: Color;
+        textureUV: Vector2;
         constructor(_node: Node);
         get posWorld(): Vector3;
         get posMesh(): Vector3;

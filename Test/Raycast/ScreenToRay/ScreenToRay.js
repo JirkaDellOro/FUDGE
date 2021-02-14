@@ -21,13 +21,12 @@ var ScreenToRay;
         let cosys = new ƒAid.NodeCoordinateSystem("CoSys", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(100)));
         cosys.getChildrenByName("ArrowBlue")[0].mtxLocal.rotateZ(45, true);
         cosys.getChildrenByName("ArrowBlue")[0].getChildrenByName("ArrowBlueShaft")[0].getComponent(ƒ.ComponentMaterial).clrPrimary.a = 0.5; // = ƒ.Color.CSS("white", 0.9);
-        root.appendChild(cursor);
         let object = new ƒAid.Node("Object", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(2)), new ƒ.Material("Object", ƒ.ShaderTexture, new ƒ.CoatTextured(ƒ.Color.CSS("white"))), 
         // new ƒ.Material("Object", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("red"))),
-        new ƒ.MeshCube("Object")
-        // new ƒ.MeshSphere("Object", 15, 15)
-        );
+        // new ƒ.MeshCube("Object")
+        new ƒ.MeshSphere("Object", 15, 15));
         root.appendChild(object);
+        root.appendChild(cursor);
         // initialize viewports
         canvas = document.querySelector("canvas#viewport");
         cmpCamera = new ƒ.ComponentCamera();
@@ -85,14 +84,16 @@ var ScreenToRay;
         output.innerHTML = "";
         for (let pick of picks) {
             output.innerHTML += "Name: " + pick.node.name + ", z: " + pick.zBuffer.toFixed(2) + "<br/>";
-            output.innerHTML += "luminance: " + pick.luminance.toFixed(2) + ", alpha: " + pick.alpha.toFixed(2) + "<br/>";
+            // output.innerHTML += "luminance: " + pick.luminance.toFixed(2) + ", alpha: " + pick.alpha.toFixed(2) + "<br/>";
+            output.innerHTML += "color: " + pick.color.toString() + "<br/>";
             output.innerHTML += "posWorld: " + pick.posWorld.toString() + "<br/>";
             output.innerHTML += "posMesh: " + pick.posMesh.toString() + "<br/>";
+            output.innerHTML += "textureUV: " + pick.textureUV.toString() + "<br/>";
             output.innerHTML += "normal: " + pick.normal.toString() + "<br/>";
         }
         if (picks.length) {
             cursor.mtxLocal.translation = picks[0].posWorld;
-            cursor.color = ƒ.Color.CSS(`HSLA(0, 0%, ${picks[0].luminance * 100}%, ${picks[0].alpha}`);
+            cursor.color = picks[0].color;
             cursor.mtxLocal.lookAt(ƒ.Vector3.SUM(picks[0].posWorld, picks[0].normal), ƒ.Vector3.SUM(ƒ.Vector3.ONE(), picks[0].normal));
         }
     }
