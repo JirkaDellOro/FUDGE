@@ -28,6 +28,8 @@ var HeightMap;
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 120);
         // f.RenderManager.setupTransformAndLights(graph);
         // console.log(gridMeshFlat.getPositionOnTerrain(new f.Vector3(0, 0, 0)).origin.toString());
+        console.log(tyreFL.mtxWorld.toString());
+        console.log(f.Vector3.TRANSFORMATION(tyreFL.mtxWorld.translation, tyreFL.mtxWorldInverse).toString());
         fAid.addStandardLightComponents(graph);
     }
     function hndLoop(_event) {

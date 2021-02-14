@@ -25,13 +25,23 @@ namespace HeightMap {
 
       let ray = this.meshTerrain.getPositionOnTerrain(this.mtxWorld.translation, this.terrain.mtxWorld);
 
-      // let tyreFL: f.Node = this.getChildrenByName("Tyre FL")[0];
+      let tyreFL: f.Node = this.getChildrenByName("Tyre FL")[0];
 
-      // let posFL: f.Ray = this.meshTerrain.getPositionOnTerrain(tyreFL);
+      let posFL: f.Ray = this.meshTerrain.getPositionOnTerrain(tyreFL.mtxWorld.translation, this.terrain.mtxWorld);
+
+      // console.log("mtxWorld: " + tyreFL.mtxWorld.translation.toString())
+      // console.log("posTerrain: " + posFL.origin.toString())
+      
+      let posFLLocal = f.Vector3.TRANSFORMATION(posFL.origin, this.mtxWorldInverse);
+
+      console.log("mtxLocal: " + tyreFL.mtxLocal.translation.toString())
+      console.log("posTerrain: " + posFLLocal.toString())
+
+      tyreFL.mtxLocal.translation = new f.Vector3(tyreFL.mtxLocal.translation.x, tyreFL.mtxLocal.translation.y, posFLLocal.z);
+      
+      
+      
       // console.log("pos: " + posFL.origin.toString() + " Tyre world: " + tyreFL.mtxWorld.translation.toString());
-
-      // let posFLLocal = f.Vector3.TRANSFORMATION(tyreFL.mtxWorld.translation, tyreFL.mtxWorld);
-
       // console.log("Tyre Local: " + tyreFL.mtxLocal.translation + " pos Local: " + posFLLocal.toString());
 
       this.mtxLocal.translation = new f.Vector3(ray.origin.x, ray.origin.y + this.groundClearance, ray.origin.z);
