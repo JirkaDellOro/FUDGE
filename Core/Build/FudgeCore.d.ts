@@ -4990,7 +4990,7 @@ declare namespace FudgeCore {
     abstract class Render extends RenderWebGL {
         static rectClip: Rectangle;
         static pickTexture: WebGLTexture;
-        static pickBuffer: Uint8Array;
+        static pickBuffer: Int32Array;
         private static timestampUpdate;
         private static ƒpicked;
         private static pickSize;

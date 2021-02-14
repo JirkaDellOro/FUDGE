@@ -8,7 +8,7 @@ namespace FudgeCore {
   export abstract class Render extends RenderWebGL {
     public static rectClip: Rectangle = new Rectangle(-1, 1, 2, -2);
     public static pickTexture: WebGLTexture;
-    public static pickBuffer: Uint8Array;
+    public static pickBuffer: Int32Array;
     private static timestampUpdate: number;
     private static ƒpicked: Pick[];
     private static pickSize: Vector2;
@@ -24,10 +24,10 @@ namespace FudgeCore {
       Render.crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, targetTexture);
 
       {
-        const internalFormat: number = WebGL2RenderingContext.RGBA8;
-        const format: number = WebGL2RenderingContext.RGBA;
-        const type: number = WebGL2RenderingContext.UNSIGNED_BYTE;
-        Render.pickBuffer = new Uint8Array(_width * _height * 4);
+        const internalFormat: number = WebGL2RenderingContext.RGBA32I;
+        const format: number = WebGL2RenderingContext.RGBA_INTEGER;
+        const type: number = WebGL2RenderingContext.INT;
+        Render.pickBuffer = new Int32Array(_width * _height * 4);
         Render.crc3.texImage2D(
           WebGL2RenderingContext.TEXTURE_2D, 0, internalFormat, _width, _height, 0, format, type, Render.pickBuffer
         );
@@ -55,17 +55,22 @@ namespace FudgeCore {
       Render.setBlendMode(BLEND.TRANSPARENT);
 
       // evaluate texture by reading pixels and extract, convert and store the information about each mesh hit
-      let data: Uint8Array = new Uint8Array(Render.pickSize.x * Render.pickSize.y * 4);
-      Render.crc3.readPixels(0, 0, Render.pickSize.x, Render.pickSize.x, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, data);
+      let data: Int32Array = new Int32Array(Render.pickSize.x * Render.pickSize.y * 4);
+      Render.crc3.readPixels(0, 0, Render.pickSize.x, Render.pickSize.x, WebGL2RenderingContext.RGBA_INTEGER, WebGL2RenderingContext.INT, data);
 
       let mtxViewToWorld: Matrix4x4 = Matrix4x4.INVERSION(_cmpCamera.mtxWorldToView);
       let picked: Pick[] = [];
       for (let i: number = 0; i < Render.ƒpicked.length; i++) {
+        // console.log(
+        //   (data[4 * i + 0] / (4294967296 / 2)).toFixed(5), (data[4 * i + 1] / (4294967296 / 2)).toFixed(5),
+        //   (data[4 * i + 2] / (4294967296 / 2)).toFixed(5), (data[4 * i + 3] / (4294967296 / 2)).toFixed(5)
+        // );
         let zBuffer: number = data[4 * i + 0] + data[4 * i + 1] / 256;
         if (zBuffer == 0) // filter 
           continue;
         let pick: Pick = Render.ƒpicked[i];
-        pick.zBuffer = zBuffer / 128 - 1;
+        // pick.zBuffer = zBuffer / 128 - 1;
+        pick.zBuffer = (data[4 * i + 0] / (4294967296 / 2)) * 2 - 1;
         pick.luminance = data[4 * i + 2] / 255;
         pick.alpha = data[4 * i + 3] / 255;
         pick.mtxViewToWorld = mtxViewToWorld;
