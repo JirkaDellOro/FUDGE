@@ -171,10 +171,8 @@ namespace FudgeCore {
         Recycler.store(mtxMeshToView);
       }
 
-      for (let name in _node.getChildren()) {
-        let childNode: Node = _node.getChildren()[name];
+      for (let childNode of _node.getChildren())
         Render.drawGraphRecursive(childNode, _mtxWorldToView, _drawNode); //, world);
-      }
     }
 
     /**
@@ -221,7 +219,7 @@ namespace FudgeCore {
         RenderWebGL.getRenderingContext().uniform2fv(sizeUniformLocation, Render.pickSize.get());
 
         let mesh: Mesh = cmpMesh.mesh;
-        mesh.useRenderBuffers(ShaderPick, _mtxMeshToWorld, _mtxWorldToView, Render.ƒpicked.length);
+        mesh.useRenderBuffers(shader, _mtxMeshToWorld, _mtxWorldToView, Render.ƒpicked.length);
         RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, mesh.renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
 
         let pick: Pick = new Pick(_node);

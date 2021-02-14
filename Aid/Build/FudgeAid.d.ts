@@ -123,6 +123,7 @@ declare namespace FudgeAid {
         private static internalResources;
         constructor(_name: string, _color: ƒ.Color);
         private static createInternalResources;
+        set color(_color: ƒ.Color);
     }
 }
 declare namespace FudgeAid {

@@ -60,7 +60,7 @@ namespace FudgeCore {
         }
       }
 
-      // result.transform(cmpMesh.mtxWorld, false);
+      result.transform(cmpMesh.mtxWorld, false);
       return result;
     }
 

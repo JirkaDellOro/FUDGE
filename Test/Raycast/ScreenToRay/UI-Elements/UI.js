@@ -96,9 +96,11 @@ var UI;
     class Camera extends FieldSet {
         constructor(_name = "Camera") {
             super(_name);
-            this.values = { aspect: 0, fieldOfView: 0 };
+            this.values = { aspect: 0, fieldOfView: 0, near: 0, far: 0 };
             this.appendChild(new Stepper("fieldOfView", { min: 5, max: 100, step: 5, value: 45 }));
             this.appendChild(new Stepper("aspect", { min: 0.1, max: 10, step: 0.1, value: 1 }));
+            this.appendChild(new Stepper("near", { min: 0.01, max: 10, step: 0.01, value: 1 }));
+            this.appendChild(new Stepper("far", { min: 1, max: 1000, step: 0.5, value: 10 }));
         }
     }
     UI.Camera = Camera;

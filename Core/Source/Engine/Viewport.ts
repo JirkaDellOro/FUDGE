@@ -27,7 +27,7 @@ namespace FudgeCore {
     public adjustingCamera: boolean = true;
 
 
-    private graph: Node = null; // The first node in the graph that will be rendered.
+    private branch: Node = null; // The first node in the graph that will be rendered with all its descendants.
     private crc2: CanvasRenderingContext2D = null;
     private canvas: HTMLCanvasElement = null;
     //#endregion
@@ -85,19 +85,19 @@ namespace FudgeCore {
      * Set the graph to be drawn in the viewport.
      */
     public setGraph(_graph: Node): void {
-      if (this.graph) {
-        this.graph.removeEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
-        this.graph.removeEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
+      if (this.branch) {
+        this.branch.removeEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
+        this.branch.removeEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
       }
-      this.graph = _graph;
-      if (this.graph) {
-        this.graph.addEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
-        this.graph.addEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
+      this.branch = _graph;
+      if (this.branch) {
+        this.branch.addEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
+        this.branch.addEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
       }
     }
 
     public getBranch(): Node {
-      return this.graph;
+      return this.branch;
     }
 
     /**
@@ -107,8 +107,8 @@ namespace FudgeCore {
       // TODO: move to debug-class
       let output: string = "SceneGraph for this viewport:";
       output += "\n \n";
-      output += this.graph.name;
-      Debug.log(output + "   => ROOTNODE" + this.graph.toHierarchyString());
+      output += this.branch.name;
+      Debug.log(output + "   => ROOTNODE" + this.branch.toHierarchyString());
     }
 
     // #region Drawing
@@ -117,9 +117,9 @@ namespace FudgeCore {
      */
     public calculateTransforms(): void {
       let matrix: Matrix4x4 = Matrix4x4.IDENTITY();
-      if (this.graph.getParent())
-        matrix = this.graph.getParent().mtxWorld;
-      Render.setupTransformAndLights(this.graph, matrix);
+      if (this.branch.getParent())
+        matrix = this.branch.getParent().mtxWorld;
+      Render.setupTransformAndLights(this.branch, matrix);
     }
     /**
      * Draw this viewport displaying its branch. By default, the transforms in the branch are recalculated first.
@@ -137,7 +137,7 @@ namespace FudgeCore {
       if (_calculateTransforms)
         this.calculateTransforms();
       Render.clear(this.camera.backgroundColor);
-      Render.drawGraph(this.graph, this.camera);
+      Render.drawGraph(this.branch, this.camera);
 
       this.crc2.imageSmoothingEnabled = false;
       this.crc2.drawImage(
@@ -149,11 +149,11 @@ namespace FudgeCore {
 
 
     public pick(): Pick[] {      
-      let size: number = Math.ceil(Math.sqrt(this.graph.nNodesInBranch));
+      let size: number = Math.ceil(Math.sqrt(this.branch.nNodesInBranch));
       let rect: Rectangle = new Rectangle(0, 0, size, size);
 
       Render.pickTexture = Render.createPickTexture(rect.width, rect.height);
-      let picks: Pick[] = Render.drawGraphForPicking(this.graph, this.camera);
+      let picks: Pick[] = Render.drawGraphForPicking(this.branch, this.camera);
 
       return picks;
     }

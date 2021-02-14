@@ -18,30 +18,24 @@ namespace ScreenToRay {
   let cameraRay: ƒ.ComponentCamera;
   let canvasRay: HTMLCanvasElement;
 
-  let cursor: ƒAid.Node = new ƒAid.Node(
-    "Cursor",
-    ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(0.1)),
-    new ƒ.Material("Cursor", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("darkgray"))),
-    new ƒ.MeshSphere("Cursor", 5, 5)
-  );
+  let cursor: ƒAid.NodeArrow = new ƒAid.NodeArrow("Cursor", ƒ.Color.CSS("white"));
 
   function init(): void {
     // create asset
     let root: ƒ.Node = new ƒ.Node("Root");
     let cosys: ƒAid.Node = new ƒAid.NodeCoordinateSystem("CoSys", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(100)));
-    // graph.addComponent(new ƒ.ComponentTransform());
     cosys.getChildrenByName("ArrowBlue")[0].mtxLocal.rotateZ(45, true);
     cosys.getChildrenByName("ArrowBlue")[0].getChildrenByName("ArrowBlueShaft")[0].getComponent(ƒ.ComponentMaterial).clrPrimary.a = 0.5; // = ƒ.Color.CSS("white", 0.9);
 
-    // root.appendChild(cosys);
     root.appendChild(cursor);
 
     let object: ƒAid.Node = new ƒAid.Node(
       "Object",
       ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(2)),
-      new ƒ.Material("Object", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("red"))),
-      // new ƒ.MeshCube("Object")
-      new ƒ.MeshSphere("Object", 15, 15)
+      new ƒ.Material("Object", ƒ.ShaderTexture, new ƒ.CoatTextured(ƒ.Color.CSS("white"))),
+      // new ƒ.Material("Object", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("red"))),
+      new ƒ.MeshCube("Object")
+      // new ƒ.MeshSphere("Object", 15, 15)
     );
 
     root.appendChild(object);
@@ -49,6 +43,7 @@ namespace ScreenToRay {
     // initialize viewports
     canvas = document.querySelector("canvas#viewport");
     cmpCamera = new ƒ.ComponentCamera();
+    cmpCamera.projectCentral(1, 45, ƒ.FIELD_OF_VIEW.DIAGONAL, 2, 5);
     cmpCamera.pivot.translation = new ƒ.Vector3(1, 2, 3);
     cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
     viewport.initialize(canvas.id, root, cmpCamera, canvas);
@@ -57,7 +52,7 @@ namespace ScreenToRay {
     canvasRay = document.querySelector("canvas#ray");
     cameraRay = new ƒ.ComponentCamera();
     cameraRay.pivot.translation = new ƒ.Vector3(1, 2, 3);
-    cameraRay.projectCentral(1, 10);
+    // cameraRay.projectCentral(1, 10);
     viewportRay.initialize("ray", root, cameraRay, canvasRay);
     viewportRay.adjustingFrames = true;
 
@@ -91,6 +86,8 @@ namespace ScreenToRay {
       logMutatorInfo(name, uiMaps[name].framing);
     }
 
+    document.addEventListener("keydown", hndKeydown);
+
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, animate);
     ƒ.Loop.start();
 
@@ -103,9 +100,9 @@ namespace ScreenToRay {
   }
 
   function pick(): void {
-    cursor.getComponent(ƒ.ComponentMesh).activate(false);
+    cursor.activate(false);
     let picks: ƒ.Pick[] = ƒ.Picker.pickViewport(viewport, mouse);
-    cursor.getComponent(ƒ.ComponentMesh).activate(true);
+    cursor.activate(true);
 
     picks.sort((a: ƒ.Pick, b: ƒ.Pick) => a.zBuffer < b.zBuffer ? -1 : 1);
 
@@ -120,6 +117,8 @@ namespace ScreenToRay {
     }
     if (picks.length) {
       cursor.mtxLocal.translation = picks[0].posWorld;
+      cursor.color = ƒ.Color.CSS(`HSLA(0, 0%, ${picks[0].luminance * 100}%, ${picks[0].alpha}`);
+      cursor.mtxLocal.lookAt(ƒ.Vector3.SUM(picks[0].posWorld, picks[0].normal), ƒ.Vector3.SUM(ƒ.Vector3.ONE(), picks[0].normal));
     }
   }
 
@@ -128,7 +127,6 @@ namespace ScreenToRay {
     let ray: ƒ.Ray = computeRay();
 
     ray.direction.transform(cmpCamera.pivot);
-    // console.log("Compute", ray.toString());
 
     cameraRay.pivot.lookAt(ray.direction);
     cameraRay.projectCentral(1, 5);
@@ -141,8 +139,6 @@ namespace ScreenToRay {
   }
 
   function computeRay(): ƒ.Ray {
-    // let posMouse: ƒ.Vector2 = ƒ.Vector2.DIFFERENCE(mouse, new ƒ.Vector2(rect.width / 2, rect.height / 2));
-    // posMouse.y *= -1;
     let posMouse: ƒ.Vector2 = mouse.copy;
     setUiPoint("Client", posMouse);
 
@@ -166,12 +162,17 @@ namespace ScreenToRay {
 
     let ray: ƒ.Ray = new ƒ.Ray(new ƒ.Vector3(-posProjection.x, posProjection.y, 1));
 
-    // let ray: ƒ.Ray = viewport.getRayFromClient(posMouse);
     return ray;
   }
 
   function setCursorPosition(_event: MouseEvent): void {
     mouse = new ƒ.Vector2(_event.clientX, _event.clientY);
+  }
+
+  function hndKeydown(_event: KeyboardEvent): void {
+    let object: ƒ.Node = viewport.getBranch().getChildrenByName("Object")[0];
+    object.mtxLocal.rotateY(5 * (_event.code == ƒ.KEYBOARD_CODE.A ? -1 : _event.code == ƒ.KEYBOARD_CODE.D ? 1 : 0));
+    object.mtxLocal.rotateX(5 * (_event.code == ƒ.KEYBOARD_CODE.W ? -1 : _event.code == ƒ.KEYBOARD_CODE.S ? 1 : 0));
   }
 
   function setUiPoint(_name: string, _point: ƒ.Vector2): void {
@@ -247,7 +248,7 @@ namespace ScreenToRay {
 
   function setCamera(): void {
     let params: UI.ParamsCamera = uiCamera.get();
-    cmpCamera.projectCentral(params.aspect, params.fieldOfView); //, ƒ.FIELD_OF_VIEW.HORIZONTAL);
+    cmpCamera.projectCentral(params.aspect, params.fieldOfView, ƒ.FIELD_OF_VIEW.DIAGONAL, params.near, params.far); //);
   }
 
   function setClient(_uiRectangle: UI.Rectangle): void {
@@ -286,6 +287,6 @@ namespace ScreenToRay {
     let clientRect: ClientRect = canvas.getBoundingClientRect();
     uiClient.set(ƒ.Rectangle.GET(clientRect.left, clientRect.top, clientRect.width, clientRect.height));
 
-    uiCamera.set({ aspect: cmpCamera.getAspect(), fieldOfView: cmpCamera.getFieldOfView() });
+    uiCamera.set({ aspect: cmpCamera.getAspect(), fieldOfView: cmpCamera.getFieldOfView(), near: cmpCamera.getNear(), far: cmpCamera.getFar() });
   }
 }

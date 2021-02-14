@@ -2143,7 +2143,7 @@ declare namespace FudgeCore {
         frameSourceToRender: FramingScaled;
         adjustingFrames: boolean;
         adjustingCamera: boolean;
-        private graph;
+        private branch;
         private crc2;
         private canvas;
         /**

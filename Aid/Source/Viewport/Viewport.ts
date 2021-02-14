@@ -31,13 +31,13 @@ namespace FudgeAid {
       camera.axisTranslateZ.addControl(cntMouseWheel);
       camera.axisTranslateZ.setFactor(_speedCameraDistance);
 
-      _viewport.getGraph().addChild(camera);
+      _viewport.getBranch().addChild(camera);
 
       let focus: ƒ.Node;
       if (_showFocus) {
         focus = new NodeCoordinateSystem("Focus");
         focus.addComponent(new ƒ.ComponentTransform());
-        _viewport.getGraph().addChild(focus);
+        _viewport.getBranch().addChild(focus);
       }
 
       return camera;
