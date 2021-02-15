@@ -131,7 +131,7 @@ namespace FudgeCore {
       this.crc2 = _crc2;
     }
     public get texImageSource(): TexImageSource {
-      return this.crc2.canvas;
+      return <OffscreenCanvas>this.crc2.canvas;
     }
   }
   /**
