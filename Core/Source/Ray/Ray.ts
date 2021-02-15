@@ -1,7 +1,13 @@
 namespace FudgeCore {
+  /**
+   * Defined by an origin and a direction of type [[Vector3]], rays are used to calculate picking an intersections
+   * 
+   * @authors Jirka Dell'Oro-Friedl, HFU, 2021
+   */
   export class Ray {
     public origin: Vector3;
     public direction: Vector3;
+    /** TODO: support length */
     public length: number;
 
     constructor(_direction: Vector3 = Vector3.Z(-1), _origin: Vector3 = Vector3.ZERO(), _length: number = 1) {
@@ -36,11 +42,17 @@ namespace FudgeCore {
       return distance;
     }
 
+    /**
+     * Transform the ray by the given matrix
+     */
     public transform(_mtxTransform: Matrix4x4): void {
       this.direction.transform(_mtxTransform);
       this.origin.transform(_mtxTransform);
     }
 
+    /**
+     * Returns a readable string representation of this ray
+     */
     public toString(): string {
       return `origin: ${this.origin.toString()}, direction: ${this.direction.toString()}, length: ${this.length.toPrecision(5)}`;
     }

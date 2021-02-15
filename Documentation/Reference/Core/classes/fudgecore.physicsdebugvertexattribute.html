@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>RayHit | Fudge Core</title>
+	<title>PhysicsDebugVertexAttribute | Fudge Core</title>
 	<meta name="description" content="Documentation for Fudge Core">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -59,21 +59,28 @@
 					<a href="../modules/fudgecore.html">FudgeCore</a>
 				</li>
 				<li>
-					<a href="fudgecore.rayhit.html">RayHit</a>
+					<a href="fudgecore.physicsdebugvertexattribute.html">PhysicsDebugVertexAttribute</a>
 				</li>
 			</ul>
-			<h1>Class RayHit</h1>
+			<h1>Class PhysicsDebugVertexAttribute</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>Internal class for managing data about webGL Attributes</p>
+					</div>
+				</div>
+			</section>
 			<section class="tsd-panel tsd-hierarchy">
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">RayHit</span>
+						<span class="target">PhysicsDebugVertexAttribute</span>
 					</li>
 				</ul>
 			</section>
@@ -84,15 +91,14 @@
 						<section class="tsd-index-section ">
 							<h3>Constructors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="fudgecore.rayhit.html#constructor" class="tsd-kind-icon">constructor</a></li>
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="fudgecore.physicsdebugvertexattribute.html#constructor" class="tsd-kind-icon">constructor</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.rayhit.html#face" class="tsd-kind-icon">face</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.rayhit.html#node" class="tsd-kind-icon">node</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.rayhit.html#zbuffer" class="tsd-kind-icon">z<wbr>Buffer</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.physicsdebugvertexattribute.html#float32count" class="tsd-kind-icon">float32<wbr>Count</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.physicsdebugvertexattribute.html#name" class="tsd-kind-icon">name</a></li>
 							</ul>
 						</section>
 					</div>
@@ -104,28 +110,25 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Ray<wbr>Hit<span class="tsd-signature-symbol">(</span>_node<span class="tsd-signature-symbol">?: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a>, _face<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _zBuffer<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.rayhit.html" class="tsd-signature-type">RayHit</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Physics<wbr>Debug<wbr>Vertex<wbr>Attribute<span class="tsd-signature-symbol">(</span>_float32Count<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.physicsdebugvertexattribute.html" class="tsd-signature-type">PhysicsDebugVertexAttribute</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Ray/RayHit.ts#L5">Documents/HFU/FUDGE/Core/Source/Ray/RayHit.ts:5</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L111">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:111</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _node: <a href="fudgecore.node.html" class="tsd-signature-type">Node</a><span class="tsd-signature-symbol"> = null</span></h5>
+									<h5>_float32Count: <span class="tsd-signature-type">number</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _face: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></h5>
-								</li>
-								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _zBuffer: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></h5>
+									<h5>_name: <span class="tsd-signature-type">string</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.rayhit.html" class="tsd-signature-type">RayHit</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.physicsdebugvertexattribute.html" class="tsd-signature-type">PhysicsDebugVertexAttribute</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -133,32 +136,22 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
-					<a name="face" class="tsd-anchor"></a>
-					<h3>face</h3>
-					<div class="tsd-signature tsd-kind-icon">face<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<a name="float32count" class="tsd-anchor"></a>
+					<h3>float32<wbr>Count</h3>
+					<div class="tsd-signature tsd-kind-icon">float32<wbr>Count<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Ray/RayHit.ts#L4">Documents/HFU/FUDGE/Core/Source/Ray/RayHit.ts:4</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L110">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:110</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
-					<a name="node" class="tsd-anchor"></a>
-					<h3>node</h3>
-					<div class="tsd-signature tsd-kind-icon">node<span class="tsd-signature-symbol">:</span> <a href="fudgecore.node.html" class="tsd-signature-type">Node</a></div>
+					<a name="name" class="tsd-anchor"></a>
+					<h3>name</h3>
+					<div class="tsd-signature tsd-kind-icon">name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Ray/RayHit.ts#L3">Documents/HFU/FUDGE/Core/Source/Ray/RayHit.ts:3</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
-					<a name="zbuffer" class="tsd-anchor"></a>
-					<h3>z<wbr>Buffer</h3>
-					<div class="tsd-signature tsd-kind-icon">z<wbr>Buffer<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Ray/RayHit.ts#L5">Documents/HFU/FUDGE/Core/Source/Ray/RayHit.ts:5</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L111">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:111</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -180,19 +173,16 @@
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-class tsd-parent-kind-namespace">
-						<a href="fudgecore.rayhit.html" class="tsd-kind-icon">Ray<wbr>Hit</a>
+						<a href="fudgecore.physicsdebugvertexattribute.html" class="tsd-kind-icon">Physics<wbr>Debug<wbr>Vertex<wbr>Attribute</a>
 						<ul>
 							<li class=" tsd-kind-constructor tsd-parent-kind-class">
-								<a href="fudgecore.rayhit.html#constructor" class="tsd-kind-icon">constructor</a>
+								<a href="fudgecore.physicsdebugvertexattribute.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="fudgecore.rayhit.html#face" class="tsd-kind-icon">face</a>
+								<a href="fudgecore.physicsdebugvertexattribute.html#float32count" class="tsd-kind-icon">float32<wbr>Count</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="fudgecore.rayhit.html#node" class="tsd-kind-icon">node</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="fudgecore.rayhit.html#zbuffer" class="tsd-kind-icon">z<wbr>Buffer</a>
+								<a href="fudgecore.physicsdebugvertexattribute.html#name" class="tsd-kind-icon">name</a>
 							</li>
 						</ul>
 					</li>

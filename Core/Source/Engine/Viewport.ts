@@ -1,6 +1,6 @@
 namespace FudgeCore {
   /**
-   * Controls the rendering of a graph, using the given [[ComponentCamera]],
+   * Controls the rendering of a branch, using the given [[ComponentCamera]],
    * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
    * through a series of [[Framing]] objects. The stages involved are in order of rendering
    * [[RenderManager]].viewport -> [[Viewport]].source -> [[Viewport]].destination -> DOM-Canvas -> Client(CSS)
@@ -10,7 +10,7 @@ namespace FudgeCore {
     private static focus: Viewport;
 
     public name: string = "Viewport"; // The name to call this viewport by.
-    public camera: ComponentCamera = null; // The camera representing the view parameters to render the graph.
+    public camera: ComponentCamera = null; // The camera representing the view parameters to render the branch.
 
     public rectSource: Rectangle;
     public rectDestination: Rectangle;
@@ -27,12 +27,12 @@ namespace FudgeCore {
     public adjustingCamera: boolean = true;
 
 
-    private branch: Node = null; // The first node in the graph that will be rendered with all its descendants.
-    private crc2: CanvasRenderingContext2D = null;
-    private canvas: HTMLCanvasElement = null;
+    #branch: Node = null; // The to render with all its descendants.
+    #crc2: CanvasRenderingContext2D = null;
+    #canvas: HTMLCanvasElement = null;
     //#endregion
 
-    // #region Events (passing from canvas to viewport and from there into graph)
+    // #region Events (passing from canvas to viewport and from there into branch)
     /**
      * Returns true if this viewport currently has focus and thus receives keyboard events
      */
@@ -41,36 +41,36 @@ namespace FudgeCore {
     }
 
     /**
-     * Connects the viewport to the given canvas to render the given graph to using the given camera-component, and names the viewport as given.
+     * Connects the viewport to the given canvas to render the given branch to using the given camera-component, and names the viewport as given.
      */
-    public initialize(_name: string, _graph: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void {
+    public initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void {
       this.name = _name;
       this.camera = _camera;
-      this.canvas = _canvas;
-      this.crc2 = _canvas.getContext("2d");
+      this.#canvas = _canvas;
+      this.#crc2 = _canvas.getContext("2d");
 
       this.rectSource = Render.getCanvasRect();
       this.rectDestination = this.getClientRectangle();
 
-      this.setGraph(_graph);
+      this.setBranch(_branch);
     }
     /**
      * Retrieve the destination canvas
      */
     public getCanvas(): HTMLCanvasElement {
-      return this.canvas;
+      return this.#canvas;
     }
     /**
      * Retrieve the 2D-context attached to the destination canvas
      */
     public getContext(): CanvasRenderingContext2D {
-      return this.crc2;
+      return this.#crc2;
     }
     /**
      * Retrieve the size of the destination canvas as a rectangle, x and y are always 0 
      */
     public getCanvasRectangle(): Rectangle {
-      return Rectangle.GET(0, 0, this.canvas.width, this.canvas.height);
+      return Rectangle.GET(0, 0, this.#canvas.width, this.#canvas.height);
     }
     /**
      * Retrieve the client rectangle the canvas is displayed and fit in, x and y are always 0 
@@ -78,26 +78,29 @@ namespace FudgeCore {
     public getClientRectangle(): Rectangle {
       // FUDGE doesn't care about where the client rect is, only about the size matters.
       // return Rectangle.GET(this.canvas.offsetLeft, this.canvas.offsetTop, this.canvas.clientWidth, this.canvas.clientHeight);
-      return Rectangle.GET(0, 0, this.canvas.clientWidth, this.canvas.clientHeight);
+      return Rectangle.GET(0, 0, this.#canvas.clientWidth, this.#canvas.clientHeight);
     }
 
     /**
-     * Set the graph to be drawn in the viewport.
+     * Set the branch to be drawn in the viewport.
      */
-    public setGraph(_graph: Node): void {
-      if (this.branch) {
-        this.branch.removeEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
-        this.branch.removeEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
+    public setBranch(_branch: Node): void {
+      if (this.#branch) {
+        this.#branch.removeEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
+        this.#branch.removeEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
       }
-      this.branch = _graph;
-      if (this.branch) {
-        this.branch.addEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
-        this.branch.addEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
+      this.#branch = _branch;
+      if (this.#branch) {
+        this.#branch.addEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
+        this.#branch.addEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
       }
     }
 
+    /**
+     * Retrieve the branch this viewport renders
+     */
     public getBranch(): Node {
-      return this.branch;
+      return this.#branch;
     }
 
     /**
@@ -107,8 +110,8 @@ namespace FudgeCore {
       // TODO: move to debug-class
       let output: string = "SceneGraph for this viewport:";
       output += "\n \n";
-      output += this.branch.name;
-      Debug.log(output + "   => ROOTNODE" + this.branch.toHierarchyString());
+      output += this.#branch.name;
+      Debug.log(output + "   => ROOTNODE" + this.#branch.toHierarchyString());
     }
 
     // #region Drawing
@@ -117,10 +120,11 @@ namespace FudgeCore {
      */
     public calculateTransforms(): void {
       let matrix: Matrix4x4 = Matrix4x4.IDENTITY();
-      if (this.branch.getParent())
-        matrix = this.branch.getParent().mtxWorld;
-      Render.setupTransformAndLights(this.branch, matrix);
+      if (this.#branch.getParent())
+        matrix = this.#branch.getParent().mtxWorld;
+      Render.setupTransformAndLights(this.#branch, matrix);
     }
+
     /**
      * Draw this viewport displaying its branch. By default, the transforms in the branch are recalculated first.
      * Pass `false` if calculation was already done for this frame 
@@ -137,42 +141,15 @@ namespace FudgeCore {
       if (_calculateTransforms)
         this.calculateTransforms();
       Render.clear(this.camera.backgroundColor);
-      Render.drawGraph(this.branch, this.camera);
+      Render.drawBranch(this.#branch, this.camera);
 
-      this.crc2.imageSmoothingEnabled = false;
-      this.crc2.drawImage(
+      this.#crc2.imageSmoothingEnabled = false;
+      this.#crc2.drawImage(
         Render.getCanvas(),
         this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height,
         this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height
       );
     }
-
-
-    public pick(): Pick[] {      
-      let size: number = Math.ceil(Math.sqrt(this.branch.nNodesInBranch));
-      let rect: Rectangle = new Rectangle(0, 0, size, size);
-
-      Render.pickTexture = Render.createPickTexture(rect.width, rect.height);
-      let picks: Pick[] = Render.drawGraphForPicking(this.branch, this.camera);
-
-      return picks;
-    }
-
-    // public calculateWorldFromZBuffer(_pos: Vector2, _z: number): Vector3 {
-    //   let posClip: Vector3 = new Vector3(
-    //     2 * _pos.x / this.getClientRectangle().width - 1,
-    //     1 - 2 * _pos.y / this.getClientRectangle().height,
-    //     _z
-    //   );
-
-    //   let mtxViewProjectionInverse: Matrix4x4 = Matrix4x4.INVERSION(this.camera.mtxWorldToView);
-    //   let m: Float32Array = mtxViewProjectionInverse.get();
-    //   let rayWorld: Vector3 = Vector3.TRANSFORMATION(posClip, mtxViewProjectionInverse, true);
-    //   let w: number = m[3] * posClip.x + m[7] * posClip.y + m[11] * posClip.z + m[15];
-    //   rayWorld.scale(1 / w);
-
-    //   return rayWorld;
-    // }
 
     /**
      * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas
@@ -182,8 +159,8 @@ namespace FudgeCore {
       let rectClient: Rectangle = this.getClientRectangle();
       // adjust the canvas size according to the given framing applied to client
       let rectCanvas: Rectangle = this.frameClientToCanvas.getRect(rectClient);
-      this.canvas.width = rectCanvas.width;
-      this.canvas.height = rectCanvas.height;
+      this.#canvas.width = rectCanvas.width;
+      this.#canvas.height = rectCanvas.height;
       // adjust the destination area on the target-canvas to render to by applying the framing to canvas
       this.rectDestination = this.frameCanvasToDestination.getRect(rectCanvas);
       // adjust the area on the source-canvas to render from by applying the framing to destination area
@@ -225,6 +202,9 @@ namespace FudgeCore {
       return ray;
     }
 
+    /**
+     * Returns a point on the client rectangle matching the projection of the given point in world space
+     */
     public pointWorldToClient(_position: Vector3): Vector2 {
       let projection: Vector3 = this.camera.pointWorldToClip(_position);
       let posClient: Vector2 = this.pointClipToClient(projection.toVector2());
@@ -241,6 +221,7 @@ namespace FudgeCore {
       //TODO: when Source, Render and RenderViewport deviate, continue transformation 
       return result;
     }
+
     /**
      * Returns a point on the render-rectangle matching the given point on the source rectangle
      */
@@ -296,6 +277,7 @@ namespace FudgeCore {
       let pointClient: Vector2 = Render.rectClip.pointToRect(_normed, this.rectDestination);
       return pointClient;
     }
+
     /**
      * Returns a point in the client rectangle matching the given point in normed clipspace rectangle, 
      * which stretches from -1 to 1 in both dimensions, y pointing up
@@ -305,15 +287,18 @@ namespace FudgeCore {
       return pointCanvas;
     }
 
+    /**
+     * Returns a point in the browser page matching the given point of the viewport
+     */
     public pointClientToScreen(_client: Vector2): Vector2 {
-      let screen: Vector2 = new Vector2(this.canvas.offsetLeft + _client.x, this.canvas.offsetTop + _client.y);
+      let screen: Vector2 = new Vector2(this.#canvas.offsetLeft + _client.x, this.#canvas.offsetTop + _client.y);
       return screen;
     }
+
     /**
      * Switch the viewports focus on or off. Only one viewport in one FUDGE instance can have the focus, thus receiving keyboard events. 
      * So a viewport currently having the focus will lose it, when another one receives it. The viewports fire [[Event]]s accordingly.
      * // TODO: examine, if this can be achieved by regular DOM-Focus and tabindex=0
-     * @param _on 
      */
     public setFocus(_on: boolean): void {
       if (_on) {
@@ -332,40 +317,37 @@ namespace FudgeCore {
         Viewport.focus = null;
       }
     }
+
     /**
      * De- / Activates the given pointer event to be propagated into the viewport as FUDGE-Event 
-     * @param _type 
-     * @param _on 
      */
     public activatePointerEvent(_type: EVENT_POINTER, _on: boolean): void {
-      this.activateEvent(this.canvas, _type, this.hndPointerEvent, _on);
+      this.activateEvent(this.#canvas, _type, this.hndPointerEvent, _on);
     }
+
     /**
      * De- / Activates the given keyboard event to be propagated into the viewport as FUDGE-Event
-     * @param _type 
-     * @param _on 
      */
     public activateKeyboardEvent(_type: EVENT_KEYBOARD, _on: boolean): void {
-      this.activateEvent(this.canvas.ownerDocument, _type, this.hndKeyboardEvent, _on);
+      this.activateEvent(this.#canvas.ownerDocument, _type, this.hndKeyboardEvent, _on);
     }
+
     /**
      * De- / Activates the given drag-drop event to be propagated into the viewport as FUDGE-Event
-     * @param _type 
-     * @param _on 
      */
     public activateDragDropEvent(_type: EVENT_DRAGDROP, _on: boolean): void {
       if (_type == EVENT_DRAGDROP.START)
-        this.canvas.draggable = _on;
-      this.activateEvent(this.canvas, _type, this.hndDragDropEvent, _on);
+        this.#canvas.draggable = _on;
+      this.activateEvent(this.#canvas, _type, this.hndDragDropEvent, _on);
     }
+
     /**
      * De- / Activates the wheel event to be propagated into the viewport as FUDGE-Event
-     * @param _type 
-     * @param _on 
      */
     public activateWheelEvent(_type: EVENT_WHEEL, _on: boolean): void {
-      this.activateEvent(this.canvas, _type, this.hndWheelEvent, _on);
+      this.activateEvent(this.#canvas, _type, this.hndWheelEvent, _on);
     }
+
     /**
      * Handle drag-drop events and dispatch to viewport as FUDGE-Event
      */
@@ -388,14 +370,15 @@ namespace FudgeCore {
       this.addCanvasPosition(event);
       this.dispatchEvent(event);
     }
+
     /**
      * Add position of the pointer mapped to canvas-coordinates as canvasX, canvasY to the event
-     * @param event
      */
     private addCanvasPosition(event: EventPointer | EventDragDrop): void {
-      event.canvasX = this.canvas.width * event.pointerX / event.clientRect.width;
-      event.canvasY = this.canvas.height * event.pointerY / event.clientRect.height;
+      event.canvasX = this.#canvas.width * event.pointerX / event.clientRect.width;
+      event.canvasY = this.#canvas.height * event.pointerY / event.clientRect.height;
     }
+
     /**
      * Handle pointer events and dispatch to viewport as FUDGE-Event
      */
@@ -404,6 +387,7 @@ namespace FudgeCore {
       this.addCanvasPosition(event);
       this.dispatchEvent(event);
     }
+
     /**
      * Handle keyboard events and dispatch to viewport as FUDGE-Event, if the viewport has the focus
      */
@@ -413,6 +397,7 @@ namespace FudgeCore {
       let event: EventKeyboard = new EventKeyboard("ƒ" + _event.type, <EventKeyboard>_event);
       this.dispatchEvent(event);
     }
+
     /**
      * Handle wheel event and dispatch to viewport as FUDGE-Event
      */

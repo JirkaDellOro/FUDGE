@@ -2113,13 +2113,14 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Controls the rendering of a graph, using the given [[ComponentCamera]],
+     * Controls the rendering of a branch, using the given [[ComponentCamera]],
      * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
      * through a series of [[Framing]] objects. The stages involved are in order of rendering
      * [[RenderManager]].viewport -> [[Viewport]].source -> [[Viewport]].destination -> DOM-Canvas -> Client(CSS)
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Viewport extends EventTargetƒ {
+        #private;
         private static focus;
         name: string;
         camera: ComponentCamera;
@@ -2131,17 +2132,14 @@ declare namespace FudgeCore {
         frameSourceToRender: FramingScaled;
         adjustingFrames: boolean;
         adjustingCamera: boolean;
-        private branch;
-        private crc2;
-        private canvas;
         /**
          * Returns true if this viewport currently has focus and thus receives keyboard events
          */
         get hasFocus(): boolean;
         /**
-         * Connects the viewport to the given canvas to render the given graph to using the given camera-component, and names the viewport as given.
+         * Connects the viewport to the given canvas to render the given branch to using the given camera-component, and names the viewport as given.
          */
-        initialize(_name: string, _graph: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void;
+        initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void;
         /**
          * Retrieve the destination canvas
          */
@@ -2159,9 +2157,12 @@ declare namespace FudgeCore {
          */
         getClientRectangle(): Rectangle;
         /**
-         * Set the graph to be drawn in the viewport.
+         * Set the branch to be drawn in the viewport.
          */
-        setGraph(_graph: Node): void;
+        setBranch(_branch: Node): void;
+        /**
+         * Retrieve the branch this viewport renders
+         */
         getBranch(): Node;
         /**
          * Logs this viewports scenegraph to the console.
@@ -2176,7 +2177,6 @@ declare namespace FudgeCore {
          * Pass `false` if calculation was already done for this frame
          */
         draw(_calculateTransforms?: boolean): void;
-        pick(): Pick[];
         /**
          * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas
          */
@@ -2189,6 +2189,9 @@ declare namespace FudgeCore {
          * Returns a [[Ray]] in world coordinates from this camera through the point given in client space
          */
         getRayFromClient(_point: Vector2): Ray;
+        /**
+         * Returns a point on the client rectangle matching the projection of the given point in world space
+         */
         pointWorldToClient(_position: Vector3): Vector2;
         /**
          * Returns a point on the source-rectangle matching the given point on the client rectangle
@@ -2218,36 +2221,30 @@ declare namespace FudgeCore {
          * which stretches from -1 to 1 in both dimensions, y pointing up
          */
         pointClipToCanvas(_normed: Vector2): Vector2;
+        /**
+         * Returns a point in the browser page matching the given point of the viewport
+         */
         pointClientToScreen(_client: Vector2): Vector2;
         /**
          * Switch the viewports focus on or off. Only one viewport in one FUDGE instance can have the focus, thus receiving keyboard events.
          * So a viewport currently having the focus will lose it, when another one receives it. The viewports fire [[Event]]s accordingly.
          * // TODO: examine, if this can be achieved by regular DOM-Focus and tabindex=0
-         * @param _on
          */
         setFocus(_on: boolean): void;
         /**
          * De- / Activates the given pointer event to be propagated into the viewport as FUDGE-Event
-         * @param _type
-         * @param _on
          */
         activatePointerEvent(_type: EVENT_POINTER, _on: boolean): void;
         /**
          * De- / Activates the given keyboard event to be propagated into the viewport as FUDGE-Event
-         * @param _type
-         * @param _on
          */
         activateKeyboardEvent(_type: EVENT_KEYBOARD, _on: boolean): void;
         /**
          * De- / Activates the given drag-drop event to be propagated into the viewport as FUDGE-Event
-         * @param _type
-         * @param _on
          */
         activateDragDropEvent(_type: EVENT_DRAGDROP, _on: boolean): void;
         /**
          * De- / Activates the wheel event to be propagated into the viewport as FUDGE-Event
-         * @param _type
-         * @param _on
          */
         activateWheelEvent(_type: EVENT_WHEEL, _on: boolean): void;
         /**
@@ -2256,7 +2253,6 @@ declare namespace FudgeCore {
         private hndDragDropEvent;
         /**
          * Add position of the pointer mapped to canvas-coordinates as canvasX, canvasY to the event
-         * @param event
          */
         private addCanvasPosition;
         /**
@@ -4926,6 +4922,11 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Stores information provided by [[Render]]-picking e.g. using [[Picker]] and provides methods for further calculation of positions and normals etc.
+     *
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2021
+     */
     class Pick {
         #private;
         node: Node;
@@ -4933,8 +4934,17 @@ declare namespace FudgeCore {
         color: Color;
         textureUV: Vector2;
         constructor(_node: Node);
+        /**
+         * Accessor to calculate and store world position of intersection of [[Ray]] and [[Mesh]] only when used.
+         */
         get posWorld(): Vector3;
+        /**
+         * Accessor to calculate and store position in mesh-space of intersection of [[Ray]] and [[Mesh]] only when used.
+         */
         get posMesh(): Vector3;
+        /**
+         * Accessor to calculate and store the face normal in world-space at the point of intersection of [[Ray]] and [[Mesh]] only when used.
+         */
         get normal(): Vector3;
         /**
          * Called solely by the renderer to enable calculation of the world coordinates of this [[Pick]]
@@ -4943,16 +4953,39 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Provides static methods for picking using [[Render]]
+     *
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2021
+     */
     class Picker {
+        /**
+         * Takes a ray plus min and max values for the near and far planes to construct the picker-camera,
+         * then renders the pick-texture and returns a [[Pick]]-array with information about the hits of the ray.
+         */
         static pickRay(_branch: Node, _ray: Ray, _min: number, _max: number): Pick[];
+        /**
+         * Takes a camera and a point on its virtual normed projection plane (distance 1) to construct the picker-camera,
+         * then renders the pick-texture and returns a [[Pick]]-array with information about the hits of the ray.
+         */
         static pickCamera(_branch: Node, _cmpCamera: ComponentCamera, _posProjection: Vector2): Pick[];
+        /**
+         * Takes the camera of the given viewport and a point the client surface to construct the picker-camera,
+         * then renders the pick-texture and returns a [[Pick]]-array with information about the hits of the ray.
+         */
         static pickViewport(_viewport: Viewport, _posClient: Vector2): Pick[];
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Defined by an origin and a direction of type [[Vector3]], rays are used to calculate picking an intersections
+     *
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2021
+     */
     class Ray {
         origin: Vector3;
         direction: Vector3;
+        /** TODO: support length */
         length: number;
         constructor(_direction?: Vector3, _origin?: Vector3, _length?: number);
         /**
@@ -4966,7 +4999,13 @@ declare namespace FudgeCore {
          * All values and calculations must be relative to the same coordinate system, preferably the world.
          */
         getDistance(_target: Vector3): Vector3;
+        /**
+         * Transform the ray by the given matrix
+         */
         transform(_mtxTransform: Matrix4x4): void;
+        /**
+         * Returns a readable string representation of this ray
+         */
         toString(): string;
     }
 }
@@ -4987,27 +5026,31 @@ declare namespace FudgeCore {
          * Creates a texture buffer to be used as pick-buffer
          */
         static createPickTexture(_width: number, _height: number): WebGLTexture;
-        static drawGraphForPicking(_node: Node, _cmpCamera: ComponentCamera): Pick[];
         /**
-         * Recursively iterates over the graph starting with the node given, recalculates all world transforms,
+         * Used with a [[Picker]]-camera, this method renders one pixel with picking information
+         * for each node in the line of sight and return that as an unsorted [[Pick]]-array
+         */
+        static drawBranchForPicking(_branch: Node, _cmpCamera: ComponentCamera): Pick[];
+        /**
+         * Recursively iterates over the branch starting with the node given, recalculates all world transforms,
          * collects all lights and feeds all shaders used in the graph with these lights
          */
-        static setupTransformAndLights(_node: Node, _mtxWorld?: Matrix4x4, _lights?: MapLightTypeToLightList, _shadersUsed?: (typeof Shader)[]): number;
+        static setupTransformAndLights(_branch: Node, _mtxWorld?: Matrix4x4, _lights?: MapLightTypeToLightList, _shadersUsed?: (typeof Shader)[]): number;
         /**
          * The main rendering function to be called from [[Viewport]].
-         * Draws the graph starting with the given [[Node]] using the camera given [[ComponentCamera]].
+         * Draws the branch starting with the given [[Node]] using the camera given [[ComponentCamera]].
          */
-        static drawGraph(_node: Node, _cmpCamera: ComponentCamera, _drawNode?: Function): void;
+        static drawBranch(_branch: Node, _cmpCamera: ComponentCamera, _drawNode?: Function): void;
         /**
          * Recursivly iterates over the graph and renders each node and all successors with the given render function
          */
-        private static drawGraphRecursive;
+        private static drawBranchRecursive;
         /**
          * The standard render function for drawing a single node
          */
         private static drawNode;
         /**
-        * The render function for picking.
+        * The render function for picking a single node.
         * A cameraprojection with extremely narrow focus is used, so each pixel of the buffer would hold the same information from the node,
         * but the fragemnt shader renders only 1 pixel for each node into the render buffer, 1st node to 1st pixel, 2nd node to second pixel etc.
         */
@@ -5096,16 +5139,6 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     abstract class ShaderPickTextured extends Shader {
-        static getVertexShaderSource(): string;
-        static getFragmentShaderSource(): string;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * Renders for Raycasting
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    abstract class ShaderRayCast extends Shader {
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
     }

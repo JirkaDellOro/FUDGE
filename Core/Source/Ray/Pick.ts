@@ -1,4 +1,9 @@
 namespace FudgeCore {
+  /**
+   * Stores information provided by [[Render]]-picking e.g. using [[Picker]] and provides methods for further calculation of positions and normals etc.
+   * 
+   * @authors Jirka Dell'Oro-Friedl, HFU, 2021
+   */
   export class Pick {
     public node: Node;
     public zBuffer: number;
@@ -12,6 +17,9 @@ namespace FudgeCore {
       this.node = _node;
     }
 
+    /**
+     * Accessor to calculate and store world position of intersection of [[Ray]] and [[Mesh]] only when used.
+     */
     public get posWorld(): Vector3 {
       if (this.#posWorld)
         return this.#posWorld;
@@ -25,6 +33,9 @@ namespace FudgeCore {
       return result;
     }
 
+    /**
+     * Accessor to calculate and store position in mesh-space of intersection of [[Ray]] and [[Mesh]] only when used.
+     */
     public get posMesh(): Vector3 {
       if (this.#posMesh)
         return this.#posMesh;
@@ -34,6 +45,9 @@ namespace FudgeCore {
       return posMesh;
     }
 
+    /**
+     * Accessor to calculate and store the face normal in world-space at the point of intersection of [[Ray]] and [[Mesh]] only when used.
+     */
     public get normal(): Vector3 {
       let cmpMesh: ComponentMesh = this.node.getComponent(ComponentMesh);
       let mesh: Mesh = cmpMesh.mesh;
