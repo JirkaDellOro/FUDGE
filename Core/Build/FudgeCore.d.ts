@@ -658,6 +658,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     let fudgeConfig: General;
+    type RenderTexture = WebGLTexture;
     enum BLEND {
         OPAQUE = 0,
         TRANSPARENT = 1,
@@ -676,7 +677,13 @@ declare namespace FudgeCore {
      */
     abstract class RenderWebGL {
         protected static crc3: WebGL2RenderingContext;
+        protected static ƒpicked: Pick[];
         private static rectRender;
+        private static sizePick;
+        /**
+         * Initializes offscreen-canvas, renderingcontext and hardware viewport. Call once before creating any resources like meshes or shaders
+         */
+        static initialize(_antialias?: boolean, _alpha?: boolean): WebGL2RenderingContext;
         /**
          * Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.
          * @param _attributeLocation  The location of the attribute on the shader, to which they data will be passed.
@@ -689,10 +696,6 @@ declare namespace FudgeCore {
         * @param _message  optional, additional message for the exception
         */
         static assert<T>(_value: T | null, _message?: string): T;
-        /**
-         * Initializes offscreen-canvas, renderingcontext and hardware viewport. Call once before creating any resources like meshes or shaders
-         */
-        static initialize(_antialias?: boolean, _alpha?: boolean): WebGL2RenderingContext;
         /**
          * Return a reference to the offscreen-canvas
          */
@@ -728,6 +731,21 @@ declare namespace FudgeCore {
         static getRenderRectangle(): Rectangle;
         static setDepthTest(_test: boolean): void;
         static setBlendMode(_mode: BLEND): void;
+        /**
+         * Creates a texture buffer to be used as pick-buffer
+         */
+        protected static createPickTexture(_size: number): RenderTexture;
+        protected static getPicks(_size: number, _cmpCamera: ComponentCamera): Pick[];
+        /**
+        * The render function for picking a single node.
+        * A cameraprojection with extremely narrow focus is used, so each pixel of the buffer would hold the same information from the node,
+        * but the fragment shader renders only 1 pixel for each node into the render buffer, 1st node to 1st pixel, 2nd node to second pixel etc.
+        */
+        protected static pick(_node: Node, _mtxMeshToWorld: Matrix4x4, _mtxWorldToView: Matrix4x4, _lights: MapLightTypeToLightList): void;
+        /**
+         * Set light data in shaders
+         */
+        protected static setLightsInShader(_shader: typeof Shader, _lights: MapLightTypeToLightList): void;
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
@@ -5012,20 +5030,12 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     type MapLightTypeToLightList = Map<TypeOfLight, ComponentLight[]>;
     /**
-     * The main interface to the render engine, here WebGL, which is used mainly in the superclass [[RenderWebGL]]
-     * TODO: move all WebGL-specifica to RenderWebGL
+     * The main interface to the render engine, here WebGL (see superclass [[RenderWebGL]] and the RenderInjectors
      */
     abstract class Render extends RenderWebGL {
         static rectClip: Rectangle;
-        static pickTexture: WebGLTexture;
         static pickBuffer: Int32Array;
         private static timestampUpdate;
-        private static ƒpicked;
-        private static pickSize;
-        /**
-         * Creates a texture buffer to be used as pick-buffer
-         */
-        static createPickTexture(_width: number, _height: number): WebGLTexture;
         /**
          * Used with a [[Picker]]-camera, this method renders one pixel with picking information
          * for each node in the line of sight and return that as an unsorted [[Pick]]-array
@@ -5049,16 +5059,6 @@ declare namespace FudgeCore {
          * The standard render function for drawing a single node
          */
         private static drawNode;
-        /**
-        * The render function for picking a single node.
-        * A cameraprojection with extremely narrow focus is used, so each pixel of the buffer would hold the same information from the node,
-        * but the fragemnt shader renders only 1 pixel for each node into the render buffer, 1st node to 1st pixel, 2nd node to second pixel etc.
-        */
-        private static drawNodeForPicking;
-        /**
-         * Set light data in shaders
-         */
-        private static setLightsInShader;
         /**
         * Physics Part -> Take all nodes with cmpRigidbody, and overwrite their local position/rotation with the one coming from
         * the rb component, which is the new "local" WORLD position.

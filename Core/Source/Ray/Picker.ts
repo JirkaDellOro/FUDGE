@@ -15,8 +15,6 @@ namespace FudgeCore {
       cmpCameraPick.pivot.lookAt(_ray.direction);
       cmpCameraPick.projectCentral(1, 0.001, FIELD_OF_VIEW.DIAGONAL, _min, _max);
 
-      let size: number = Math.ceil(Math.sqrt(_branch.nNodesInBranch));
-      Render.pickTexture = Render.createPickTexture(size, size);
       let picks: Pick[] = Render.drawBranchForPicking(_branch, cmpCameraPick);
       return picks;
     }
