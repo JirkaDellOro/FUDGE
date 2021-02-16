@@ -24,11 +24,14 @@ var ScreenToRay;
         cosys.getChildrenByName("ArrowBlue")[0].getChildrenByName("ArrowBlueShaft")[0].getComponent(ƒ.ComponentMaterial).clrPrimary.a = 0.5; // = ƒ.Color.CSS("white", 0.9);
         let object = new ƒAid.Node("Object", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(2)), new ƒ.Material("Object", ƒ.ShaderTexture, new ƒ.CoatTextured(ƒ.Color.CSS("white"))), 
         // new ƒ.Material("Object", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("red"))),
-        new ƒ.MeshPolygon("Object")
+        // new ƒ.MeshPolygon("Object")
+        new ƒ.MeshTorus("Object")
         // new ƒ.MeshSphere("Object", 15, 15)
         );
         root.appendChild(object);
         root.appendChild(cursor);
+        console.log(object.getComponent(ƒ.ComponentMesh).mesh.boundingBox);
+        console.log(object.getComponent(ƒ.ComponentMesh).mesh.radius);
         // initialize viewports
         canvas = document.querySelector("canvas#viewport");
         cmpCamera = new ƒ.ComponentCamera();

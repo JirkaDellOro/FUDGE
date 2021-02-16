@@ -90,7 +90,7 @@ namespace FudgeCore {
         textureUVs = _construction.map(_vertex => [_vertex.x, -_vertex.y]).flat();
       }
 
-      console.log(textureUVs);
+      // console.log(textureUVs);
 
       this.ƒvertices = new Float32Array(vertices);
       this.ƒtextureUVs = new Float32Array(textureUVs);

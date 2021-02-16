@@ -1,4 +1,9 @@
 namespace FudgeCore {
+  interface BoundingBox {
+    min: Vector3;
+    max: Vector3;
+  }
+
   /**
    * Abstract base class for all meshes. 
    * Meshes provide indexed vertices, the order of indices to create trigons and normals, and texture coordinates
@@ -24,6 +29,9 @@ namespace FudgeCore {
     protected ƒtextureUVs: Float32Array;
     protected ƒnormalsFace: Float32Array;
     protected ƒnormals: Float32Array;
+    protected ƒbox: BoundingBox;
+    protected ƒradius: number;
+
 
     public constructor(_name: string = "Mesh") {
       super();
@@ -66,13 +74,19 @@ namespace FudgeCore {
 
       return this.ƒtextureUVs;
     }
-    public get normals(): Float32Array {
-      if (this.ƒnormals == null)
-        this.ƒnormals = this.createNormals();
+    public get boundingBox(): BoundingBox {
+      if (this.ƒbox == null)
+        this.ƒbox = this.createBoundingBox();
 
-      return this.ƒnormals;
+      return this.ƒbox;
     }
-    
+    public get radius(): number {
+      if (this.ƒradius == null)
+        this.ƒradius = this.createRadius();
+
+      return this.ƒradius;
+    }
+
 
     public useRenderBuffers(_shader: typeof Shader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void {/* injected by RenderInjector*/ }
     public createRenderBuffers(): void {/* injected by RenderInjector*/ }
@@ -86,11 +100,13 @@ namespace FudgeCore {
     }
 
     public clear(): void {
-      this.ƒvertices = null;
-      this.ƒindices = null;
-      this.ƒtextureUVs = null;
-      this.ƒnormalsFace = null;
-      this.ƒnormals = null;
+      this.ƒvertices = undefined;
+      this.ƒindices = undefined;
+      this.ƒtextureUVs = undefined;
+      this.ƒnormalsFace = undefined;
+      this.ƒnormals = undefined;
+      this.ƒbox = undefined;
+      this.ƒradius = undefined;
 
       this.renderBuffers = null;
     }
@@ -129,7 +145,10 @@ namespace FudgeCore {
     }
 
 
-    // public abstract create(): void;
+    protected createVertices(): Float32Array { return null; }
+    protected createTextureUVs(): Float32Array { return null; }
+    protected createIndices(): Uint16Array { return null; }
+    protected createNormals(): Float32Array { return null; }
 
     protected createFaceNormals(): Float32Array {
       let normals: number[] = [];
@@ -152,10 +171,26 @@ namespace FudgeCore {
       return new Float32Array(normals);
     }
 
-    protected createVertices(): Float32Array { return null; }
-    protected createTextureUVs(): Float32Array { return null; }
-    protected createIndices(): Uint16Array { return null; }
-    protected createNormals(): Float32Array { return null; }
+    protected createRadius(): number {
+      let radius: number = 0;
+      for (let vertex: number = 0; vertex < this.vertices.length; vertex += 3) {
+        radius = Math.max(Math.hypot(this.vertices[vertex], this.vertices[vertex + 1], this.vertices[vertex + 2]));
+      }
+      return radius;
+    }
+
+    protected createBoundingBox(): BoundingBox {
+      let box: BoundingBox = { min: Vector3.ONE(Infinity - 1), max: Vector3.ONE(-Infinity + 1) };
+      for (let vertex: number = 0; vertex < this.vertices.length; vertex += 3) {
+        box.min.x = Math.min(this.vertices[vertex], box.min.x);
+        box.max.x = Math.max(this.vertices[vertex], box.max.x);
+        box.min.y = Math.min(this.vertices[vertex + 1], box.min.y);
+        box.max.y = Math.max(this.vertices[vertex + 1], box.max.y);
+        box.min.z = Math.min(this.vertices[vertex + 2], box.min.z);
+        box.max.z = Math.max(this.vertices[vertex + 2], box.max.z);
+      }
+      return box;
+    }
 
 
     protected reduceMutator(_mutator: Mutator): void {

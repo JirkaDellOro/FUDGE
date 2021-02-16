@@ -3282,13 +3282,17 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    interface BoundingBox {
+        min: Vector3;
+        max: Vector3;
+    }
     /**
      * Abstract base class for all meshes.
      * Meshes provide indexed vertices, the order of indices to create trigons and normals, and texture coordinates
      *
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    abstract class Mesh extends Mutable implements SerializableResource {
+    export abstract class Mesh extends Mutable implements SerializableResource {
         /** refers back to this class from any subclass e.g. in order to find compatible other resources*/
         static readonly baseClass: typeof Mesh;
         /** list of all the subclasses derived from this class, if they registered properly*/
@@ -3301,6 +3305,8 @@ declare namespace FudgeCore {
         protected ƒtextureUVs: Float32Array;
         protected ƒnormalsFace: Float32Array;
         protected ƒnormals: Float32Array;
+        protected ƒbox: BoundingBox;
+        protected ƒradius: number;
         constructor(_name?: string);
         static getBufferSpecification(): BufferSpecification;
         protected static registerSubclass(_subClass: typeof Mesh): number;
@@ -3309,7 +3315,8 @@ declare namespace FudgeCore {
         get indices(): Uint16Array;
         get normalsFace(): Float32Array;
         get textureUVs(): Float32Array;
-        get normals(): Float32Array;
+        get boundingBox(): BoundingBox;
+        get radius(): number;
         useRenderBuffers(_shader: typeof Shader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void;
         createRenderBuffers(): void;
         deleteRenderBuffers(_shader: typeof Shader): void;
@@ -3320,13 +3327,16 @@ declare namespace FudgeCore {
         deserialize(_serialization: Serialization): Promise<Serializable>;
         /**Flip the Normals of a Mesh to render opposite side of each polygon*/
         flipNormals(): void;
-        protected createFaceNormals(): Float32Array;
         protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createNormals(): Float32Array;
+        protected createFaceNormals(): Float32Array;
+        protected createRadius(): number;
+        protected createBoundingBox(): BoundingBox;
         protected reduceMutator(_mutator: Mutator): void;
     }
+    export {};
 }
 declare namespace FudgeCore {
     /**
