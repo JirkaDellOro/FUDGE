@@ -21,9 +21,6 @@ namespace FudgeCore {
     }
 
     protected static createRenderBuffers(this: Mesh): void {
-      // console.log("createRenderBuffers", this);
-      // return;
-
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       let vertices: WebGLBuffer = RenderWebGL.assert<WebGLBuffer>(crc3.createBuffer());
       crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, vertices);
@@ -53,8 +50,8 @@ namespace FudgeCore {
     }
 
     protected static useRenderBuffers(this: Mesh, _shader: typeof Shader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void {
-      // console.log("useRenderBuffers", this);
-      // return;
+      if (!this.renderBuffers)
+        this.createRenderBuffers();
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
 
       let aPosition: number = _shader.attributes["a_position"];

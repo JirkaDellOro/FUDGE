@@ -16,9 +16,6 @@ namespace FudgeCore {
       new Vector2(1, -1),
       new Vector2(0, 1)
     ];
-    public test2: Vector2 = new Vector2(1, 2);
-    public test3: Vector3 = new Vector3(1, 2, 3);
-    // protected construction: VectorArray = new VectorArray();
     protected construction: Vector2[] = [];
     protected fitMesh: boolean;
     protected fitTexture: boolean;
@@ -95,19 +92,17 @@ namespace FudgeCore {
 
       console.log(textureUVs);
 
-      this.vertices = new Float32Array(vertices);
-      this.textureUVs = new Float32Array(textureUVs);
-      this.indices = this.createIndices();
-      this.normalsFace = this.createFaceNormals();
-      this.createRenderBuffers();
+      this.ƒvertices = new Float32Array(vertices);
+      this.ƒtextureUVs = new Float32Array(textureUVs);
+      this.ƒindices = this.createIndices();
+      this.ƒnormalsFace = this.createFaceNormals();
+      // this.createRenderBuffers();
     }
 
     //#region Transfer
     public serialize(): Serialization {
       let serialization: Serialization = super.serialize();
       serialization.construction = Serializer.serializeArray(Vector2, this.construction);
-      serialization.test2 = this.test2.serialize();
-      serialization.test3 = this.test3.serialize();
       serialization.fitMesh = this.fitMesh;
       serialization.fitTexture = this.fitTexture;
       return serialization;
@@ -116,8 +111,6 @@ namespace FudgeCore {
       super.deserialize(_serialization);
       // let vectorArray: VectorArray = <VectorArray>await (new VectorArray()).deserialize(_serialization.construction);
       let vectors: Vector2[] = <Vector2[]>await Serializer.deserializeArray(_serialization.construction);
-      this.test2 = await (new Vector2()).deserialize(_serialization.test2);
-      this.test3 = await (new Vector3()).deserialize(_serialization.test3);
       this.create(vectors, _serialization.fitMesh, _serialization.fitTexture);
       return this;
     }
@@ -142,23 +135,11 @@ namespace FudgeCore {
     }
     //#endregion
 
-    protected createVertices(): Float32Array {
-      return this.vertices;
-    }
-    protected createTextureUVs(): Float32Array {
-      return this.textureUVs;
-    }
     protected createIndices(): Uint16Array {
       let indices: Array<number> = [];
       for (let i: number = 2; i < this.vertices.length / 3; i++)
         indices.push(0, i - 1, i);
       return new Uint16Array(indices);
-    }
-    protected createFaceNormals(): Float32Array {
-      let normals: number[] = [];
-      for (let i: number = 2; i < this.vertices.length / 3; i++)
-        normals.push(0, 0, 1);
-      return new Float32Array(normals);
     }
   }
 }

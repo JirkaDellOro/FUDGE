@@ -34,7 +34,7 @@ namespace ScreenToRay {
       ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(2)),
       new ƒ.Material("Object", ƒ.ShaderTexture, new ƒ.CoatTextured(ƒ.Color.CSS("white"))),
       // new ƒ.Material("Object", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("red"))),
-      new ƒ.MeshCube("Object")
+      new ƒ.MeshPolygon("Object")
       // new ƒ.MeshSphere("Object", 15, 15)
     );
 

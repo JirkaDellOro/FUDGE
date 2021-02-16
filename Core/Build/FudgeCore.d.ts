@@ -3293,32 +3293,38 @@ declare namespace FudgeCore {
         static readonly baseClass: typeof Mesh;
         /** list of all the subclasses derived from this class, if they registered properly*/
         static readonly subclasses: typeof Mesh[];
-        vertices: Float32Array;
-        indices: Uint16Array;
-        textureUVs: Float32Array;
-        normalsFace: Float32Array;
         idResource: string;
         name: string;
         renderBuffers: RenderBuffers;
+        protected ƒvertices: Float32Array;
+        protected ƒindices: Uint16Array;
+        protected ƒtextureUVs: Float32Array;
+        protected ƒnormalsFace: Float32Array;
+        protected ƒnormals: Float32Array;
         constructor(_name?: string);
         static getBufferSpecification(): BufferSpecification;
         protected static registerSubclass(_subClass: typeof Mesh): number;
         get type(): string;
+        get vertices(): Float32Array;
+        get indices(): Uint16Array;
+        get normalsFace(): Float32Array;
+        get textureUVs(): Float32Array;
+        get normals(): Float32Array;
         useRenderBuffers(_shader: typeof Shader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void;
         createRenderBuffers(): void;
         deleteRenderBuffers(_shader: typeof Shader): void;
         getVertexCount(): number;
         getIndexCount(): number;
-        create(): void;
+        clear(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         /**Flip the Normals of a Mesh to render opposite side of each polygon*/
         flipNormals(): void;
-        protected calculateFaceNormals(): Float32Array;
-        protected abstract createVertices(): Float32Array;
-        protected abstract createTextureUVs(): Float32Array;
-        protected abstract createIndices(): Uint16Array;
-        protected abstract createFaceNormals(): Float32Array;
+        protected createFaceNormals(): Float32Array;
+        protected createVertices(): Float32Array;
+        protected createTextureUVs(): Float32Array;
+        protected createIndices(): Uint16Array;
+        protected createNormals(): Float32Array;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -3360,7 +3366,6 @@ declare namespace FudgeCore {
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
-        protected createFaceNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {
@@ -3377,8 +3382,6 @@ declare namespace FudgeCore {
     class MeshPolygon extends Mesh {
         static readonly iSubclass: number;
         protected static verticesDefault: Vector2[];
-        test2: Vector2;
-        test3: Vector3;
         protected construction: Vector2[];
         protected fitMesh: boolean;
         protected fitTexture: boolean;
@@ -3389,10 +3392,7 @@ declare namespace FudgeCore {
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;
         protected reduceMutator(_mutator: Mutator): void;
-        protected createVertices(): Float32Array;
-        protected createTextureUVs(): Float32Array;
         protected createIndices(): Uint16Array;
-        protected createFaceNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {
@@ -3424,7 +3424,6 @@ declare namespace FudgeCore {
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
-        protected createFaceNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {
@@ -3454,7 +3453,7 @@ declare namespace FudgeCore {
      */
     class MeshSphere extends Mesh {
         static readonly iSubclass: number;
-        normals: Float32Array;
+        protected ƒnormals: Float32Array;
         private sectors;
         private stacks;
         constructor(_name?: string, _sectors?: number, _stacks?: number);
@@ -3463,9 +3462,6 @@ declare namespace FudgeCore {
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;
         protected createIndices(): Uint16Array;
-        protected createVertices(): Float32Array;
-        protected createTextureUVs(): Float32Array;
-        protected createFaceNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {
@@ -3494,16 +3490,12 @@ declare namespace FudgeCore {
      */
     class MeshTorus extends Mesh {
         static readonly iSubclass: number;
-        normals: Float32Array;
         private thickness;
         private majorSegments;
         private minorSegments;
         constructor(_name?: string, _thickness?: number, _majorSegments?: number, _minorSegments?: number);
         create(): void;
         protected createIndices(): Uint16Array;
-        protected createVertices(): Float32Array;
-        protected createTextureUVs(): Float32Array;
-        protected createFaceNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {

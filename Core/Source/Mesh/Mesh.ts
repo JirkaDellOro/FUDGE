@@ -12,20 +12,23 @@ namespace FudgeCore {
     /** list of all the subclasses derived from this class, if they registered properly*/
     public static readonly subclasses: typeof Mesh[] = [];
 
-    // TODO: check if these arrays must be cached like this or if calling the methods is better.
-    public vertices: Float32Array;
-    public indices: Uint16Array;
-    public textureUVs: Float32Array;
-    public normalsFace: Float32Array;
 
     public idResource: string = undefined;
     public name: string = "Mesh";
 
     public renderBuffers: RenderBuffers; /* defined by RenderInjector*/
 
+    // TODO: check if these arrays must be cached like this or if calling the methods is better.
+    protected ƒvertices: Float32Array;
+    protected ƒindices: Uint16Array;
+    protected ƒtextureUVs: Float32Array;
+    protected ƒnormalsFace: Float32Array;
+    protected ƒnormals: Float32Array;
+
     public constructor(_name: string = "Mesh") {
       super();
       this.name = _name;
+      this.clear();
       Project.register(this);
     }
 
@@ -36,8 +39,40 @@ namespace FudgeCore {
     protected static registerSubclass(_subClass: typeof Mesh): number { return Mesh.subclasses.push(_subClass) - 1; }
 
     public get type(): string {
-      return this.constructor.name; 
+      return this.constructor.name;
     }
+
+    public get vertices(): Float32Array {
+      if (this.ƒvertices == null)
+        this.ƒvertices = this.createVertices();
+
+      return this.ƒvertices;
+    }
+    public get indices(): Uint16Array {
+      if (this.ƒindices == null)
+        this.ƒindices = this.createIndices();
+
+      return this.ƒindices;
+    }
+    public get normalsFace(): Float32Array {
+      if (this.ƒnormalsFace == null)
+        this.ƒnormalsFace = this.createFaceNormals();
+
+      return this.ƒnormalsFace;
+    }
+    public get textureUVs(): Float32Array {
+      if (this.ƒtextureUVs == null)
+        this.ƒtextureUVs = this.createTextureUVs();
+
+      return this.ƒtextureUVs;
+    }
+    public get normals(): Float32Array {
+      if (this.ƒnormals == null)
+        this.ƒnormals = this.createNormals();
+
+      return this.ƒnormals;
+    }
+    
 
     public useRenderBuffers(_shader: typeof Shader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void {/* injected by RenderInjector*/ }
     public createRenderBuffers(): void {/* injected by RenderInjector*/ }
@@ -50,12 +85,14 @@ namespace FudgeCore {
       return this.indices.length;
     }
 
-    public create(): void {
-      this.vertices = this.createVertices();
-      this.indices = this.createIndices();
-      this.textureUVs = this.createTextureUVs();
-      this.normalsFace = this.createFaceNormals();
-      this.createRenderBuffers();
+    public clear(): void {
+      this.ƒvertices = null;
+      this.ƒindices = null;
+      this.ƒtextureUVs = null;
+      this.ƒnormalsFace = null;
+      this.ƒnormals = null;
+
+      this.renderBuffers = null;
     }
 
     // Serialize/Deserialize for all meshes that calculate without parameters
@@ -83,7 +120,7 @@ namespace FudgeCore {
       }
 
       //flip indices direction
-      for (let i: number = 0; i < this.indices.length - 2; i += 3 ) {
+      for (let i: number = 0; i < this.indices.length - 2; i += 3) {
         let i0: number = this.indices[i];
         this.indices[i] = this.indices[i + 1];
         this.indices[i + 1] = i0;
@@ -91,9 +128,10 @@ namespace FudgeCore {
       this.createRenderBuffers();
     }
 
+
     // public abstract create(): void;
 
-    protected calculateFaceNormals(): Float32Array {
+    protected createFaceNormals(): Float32Array {
       let normals: number[] = [];
       let vertices: Vector3[] = [];
 
@@ -114,12 +152,13 @@ namespace FudgeCore {
       return new Float32Array(normals);
     }
 
-    protected abstract createVertices(): Float32Array;
-    protected abstract createTextureUVs(): Float32Array;
-    protected abstract createIndices(): Uint16Array;
-    protected abstract createFaceNormals(): Float32Array;
+    protected createVertices(): Float32Array { return null; }
+    protected createTextureUVs(): Float32Array { return null; }
+    protected createIndices(): Uint16Array { return null; }
+    protected createNormals(): Float32Array { return null; }
 
-    protected reduceMutator(_mutator: Mutator): void { 
+
+    protected reduceMutator(_mutator: Mutator): void {
       // delete _mutator.idResource; 
     }
   }

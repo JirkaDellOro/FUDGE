@@ -5,7 +5,6 @@ namespace FudgeCore {
    */
   export class MeshTorus extends Mesh {
     public static readonly iSubclass: number = Mesh.registerSubclass(MeshTorus);
-    public normals: Float32Array;
     private thickness: number = 0.25;
     private majorSegments: number = 32;
     private minorSegments: number = 12;
@@ -62,11 +61,10 @@ namespace FudgeCore {
       // scale down
       vertices = vertices.map(_value => _value / 2);
 
-      this.textureUVs = new Float32Array(textureUVs);
-      this.normals = new Float32Array(normals);
-      this.vertices = new Float32Array(vertices);
-      this.normalsFace = this.createFaceNormals();
-      this.indices = this.createIndices();
+      this.ƒtextureUVs = new Float32Array(textureUVs);
+      this.ƒnormals = new Float32Array(normals);
+      this.ƒvertices = new Float32Array(vertices);
+      this.ƒindices = this.createIndices();
       this.createRenderBuffers();
     }
 
@@ -85,19 +83,6 @@ namespace FudgeCore {
       }
       let indices: Uint16Array = new Uint16Array(inds);
       return indices;
-    }
-
-    protected createVertices(): Float32Array {
-      return this.vertices;
-    }
-
-    protected createTextureUVs(): Float32Array {
-      return this.textureUVs;
-    }
-
-    //TODO: we also need REAL face normals
-    protected createFaceNormals(): Float32Array {
-      return this.normals;
     }
   }
 }
