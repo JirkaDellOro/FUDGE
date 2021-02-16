@@ -117,7 +117,7 @@ namespace Fudge {
           this.viewport.draw();
           break;
         case "Graph":
-          this.viewport.setGraph(<ƒ.Graph>this.resource);
+          this.viewport.setBranch(<ƒ.Graph>this.resource);
           this.dom.appendChild(this.viewport.getCanvas());
           this.viewport.draw();
           break;
@@ -137,7 +137,7 @@ namespace Fudge {
     private createStandardGraph(): ƒ.Node {
       let graph: ƒ.Node = new ƒ.Node("PreviewScene");
       ƒaid.addStandardLightComponents(graph);
-      this.viewport.setGraph(graph);
+      this.viewport.setBranch(graph);
       this.dom.appendChild(this.viewport.getCanvas());
       return graph;
     }

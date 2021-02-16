@@ -2283,7 +2283,7 @@ var Fudge;
             if (!_node)
                 return;
             this.graph = _node;
-            this.viewport.setGraph(this.graph);
+            this.viewport.setBranch(this.graph);
             this.redraw();
         }
         hndDragOver(_event, _viewSource) {
@@ -2433,7 +2433,7 @@ var Fudge;
                     this.viewport.draw();
                     break;
                 case "Graph":
-                    this.viewport.setGraph(this.resource);
+                    this.viewport.setBranch(this.resource);
                     this.dom.appendChild(this.viewport.getCanvas());
                     this.viewport.draw();
                     break;
@@ -2452,7 +2452,7 @@ var Fudge;
         createStandardGraph() {
             let graph = new ƒ.Node("PreviewScene");
             ƒaid.addStandardLightComponents(graph);
-            this.viewport.setGraph(graph);
+            this.viewport.setBranch(graph);
             this.dom.appendChild(this.viewport.getCanvas());
             return graph;
         }

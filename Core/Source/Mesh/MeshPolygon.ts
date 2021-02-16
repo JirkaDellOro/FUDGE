@@ -28,7 +28,7 @@ namespace FudgeCore {
       // this.create(this.construction.entries as Vector2[], _autofit);
     }
 
-    public static fitMesh(_vertices: Vector2[]): Vector2[] {
+    private static fitMesh(_vertices: Vector2[]): Vector2[] {
       let result: Vector2[] = [];
       let min: Vector2 = Vector2.ZERO();
       let max: Vector2 = Vector2.ZERO();
@@ -52,6 +52,8 @@ namespace FudgeCore {
     }
 
     public create(_construction: Vector2[] = [], _fitMesh: boolean = true, _fitTexture: boolean = true): void {
+      this.clear();
+
       this.fitMesh = _fitMesh;
       this.fitTexture = _fitTexture;
 
@@ -130,7 +132,7 @@ namespace FudgeCore {
     // }
 
     protected reduceMutator(_mutator: Mutator): void {
-      // console.log(_mutator);
+      super.reduceMutator(_mutator);
       // delete _mutator.construction;
     }
     //#endregion

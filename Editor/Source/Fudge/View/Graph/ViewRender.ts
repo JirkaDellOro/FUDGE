@@ -53,7 +53,7 @@ namespace Fudge {
       if (!_node)
         return;
       this.graph = _node;
-      this.viewport.setGraph(this.graph);
+      this.viewport.setBranch(this.graph);
       this.redraw();
     }
 

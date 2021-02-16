@@ -11,7 +11,10 @@ namespace FudgeCore {
 
     public constructor(_name: string = "MeshTorus", _thickness: number = 0.25, _majorSegments: number = 32, _minorSegments: number = 12) {
       super(_name);
+      this.create(_thickness, _majorSegments, _minorSegments);
+    }
 
+    public create(_thickness: number = 0.25, _majorSegments: number = 32, _minorSegments: number = 12): void {
       //Clamp resolution to prevent performance issues
       this.majorSegments = Math.min(_majorSegments, 128);
       this.minorSegments = Math.min(_minorSegments, 128);
@@ -22,10 +25,8 @@ namespace FudgeCore {
         this.minorSegments = Math.max(3, _minorSegments);
       }
 
-      this.create();
-    }
+      this.clear();
 
-    public create(): void {
       let vertices: Array<number> = [];
       let normals: number[] = [];
       let textureUVs: number[] = [];
@@ -66,6 +67,15 @@ namespace FudgeCore {
       this.ƒvertices = new Float32Array(vertices);
       this.ƒindices = this.createIndices();
       this.createRenderBuffers();
+    }
+
+
+    public async mutate(_mutator: Mutator): Promise<void> {
+      super.mutate(_mutator);
+      let thickness: number = Math.round(_mutator.thickness);
+      let majorSegments: number = Math.round(_mutator.majorSegments);
+      let minorSegments: number = Math.round(_mutator.minorSegments);
+      this.create(thickness, majorSegments, minorSegments);
     }
 
     protected createIndices(): Uint16Array {

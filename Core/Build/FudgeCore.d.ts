@@ -3396,7 +3396,7 @@ declare namespace FudgeCore {
         protected fitMesh: boolean;
         protected fitTexture: boolean;
         constructor(_name?: string, _vertices?: Vector2[], _fitMesh?: boolean, _fitTexture?: boolean);
-        static fitMesh(_vertices: Vector2[]): Vector2[];
+        private static fitMesh;
         create(_construction?: Vector2[], _fitMesh?: boolean, _fitTexture?: boolean): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
@@ -3504,7 +3504,8 @@ declare namespace FudgeCore {
         private majorSegments;
         private minorSegments;
         constructor(_name?: string, _thickness?: number, _majorSegments?: number, _minorSegments?: number);
-        create(): void;
+        create(_thickness?: number, _majorSegments?: number, _minorSegments?: number): void;
+        mutate(_mutator: Mutator): Promise<void>;
         protected createIndices(): Uint16Array;
     }
 }

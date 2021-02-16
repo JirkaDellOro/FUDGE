@@ -194,7 +194,13 @@ namespace FudgeCore {
 
 
     protected reduceMutator(_mutator: Mutator): void {
-      // delete _mutator.idResource; 
+      delete _mutator.ƒbox; 
+      delete _mutator.ƒradius; 
+      delete _mutator.ƒvertices; 
+      delete _mutator.ƒindices; 
+      delete _mutator.ƒnormals; 
+      delete _mutator.ƒnormalsFace; 
+      delete _mutator.ƒtextureUVs; 
     }
   }
 }
