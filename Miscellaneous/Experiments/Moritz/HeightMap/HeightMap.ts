@@ -4,7 +4,7 @@ namespace HeightMap {
   
   window.addEventListener("load", init);
 
-  let graph: f.Node = new f.Node("Graph");
+  export let graph: f.Node = new f.Node("Graph");
 
   // let m1: f.Node;
   // let m2: f.Node;
@@ -22,6 +22,8 @@ namespace HeightMap {
   let tyreFR: f.Node;
   let tyreBL: f.Node;
   let tyreBR: f.Node;
+  let frontAxis: f.Node;
+  let rearAxis: f.Node;
 
   let cntKeyHorizontal: f.Control = new f.Control("Keyboard", 1, f.CONTROL_TYPE.PROPORTIONAL, true);
   let cntKeyVertical: f.Control = new f.Control("Keyboard", 4, f.CONTROL_TYPE.PROPORTIONAL, true);
@@ -29,7 +31,6 @@ namespace HeightMap {
   // cntKeyVertical.setDelay(500);
 
   export let arrowRed: ƒ.Node;
-
 
   async function init(_event: Event): Promise<void> {
 
@@ -42,14 +43,11 @@ namespace HeightMap {
     // console.log(gridMeshFlat.vertices);
 
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, hndLoop);
-    ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 120);
+    ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 30);
 
     // f.RenderManager.setupTransformAndLights(graph);
 
     // console.log(gridMeshFlat.getPositionOnTerrain(new f.Vector3(0, 0, 0)).origin.toString());
-
-    console.log(tyreFL.mtxWorld.toString())
-    console.log(f.Vector3.TRANSFORMATION(tyreFL.mtxWorld.translation, tyreFL.mtxWorldInverse).toString())
 
     fAid.addStandardLightComponents(graph);
   }
@@ -79,39 +77,56 @@ namespace HeightMap {
     let meshCube = new f.MeshCube("CubeMesh");
     let meshSphere = new f.MeshSphere("Tyre", 10, 10);
 
-    controlled = new Controlled("Cube", f.Matrix4x4.IDENTITY() , matRed, new f.MeshCube() );
-    controlled.mtxLocal.translation = new f.Vector3( 0.3, 0, -0.3 );
+    controlled = new Controlled("Cube", f.Matrix4x4.IDENTITY()/*, matRed, meshCube*/);
+    controlled.mtxLocal.translation = new f.Vector3( 0.3, 0, 0.3 );
     controlled.mtxLocal.rotateZ(1);
-    controlled.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.1,0.05,0.025));
-    controlled.getComponent(f.ComponentMesh).pivot.translate(new f.Vector3(0.5, 0, 0.5));
+
+    // controlled.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.1,0.05,0.025));
+    // controlled.getComponent(f.ComponentMesh).pivot.translate(new f.Vector3(0.5, 0, 0.5));
+
+    frontAxis = Scenes.createCompleteMeshNode("Front Axis", matRed, meshCube);
+    frontAxis.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.1, 0.8, 0.1));
+    frontAxis.mtxLocal.translate(new f.Vector3(0.1, 0, 0));
+    frontAxis.mtxLocal.scale(f.Vector3.ONE(0.1));
+
+    rearAxis = Scenes.createCompleteMeshNode("Rear Axis", matGrey, meshCube);
+    rearAxis.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.1, 0.8, 0.1));
+    rearAxis.mtxLocal.scale(f.Vector3.ONE(0.1));
+
 
     tyreFL = Scenes.createCompleteMeshNode("Tyre FL", matGrey, meshSphere);
-    tyreFL.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.5, 0.5, 0.15));
+    tyreFL.getComponent(f.ComponentMesh).pivot.translateZ(0.5);
+    tyreFL.getComponent(f.ComponentMesh).pivot.rotateX(-90);
+    tyreFL.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(1, 1, 0.3));
 
     tyreFR = Scenes.createCompleteMeshNode("Tyre FR", matGrey, meshSphere);
-    tyreFR.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.5, 0.5, 0.15));
+    tyreFR.getComponent(f.ComponentMesh).pivot.translateZ(0.5);
+    tyreFR.getComponent(f.ComponentMesh).pivot.rotateX(-90);
+    tyreFR.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(1, 1, 0.3));
+
 
     tyreBR = Scenes.createCompleteMeshNode("Tyre BR", matGrey, meshSphere);
-    tyreBR.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.5, 0.5, 0.15));
+    tyreBR.getComponent(f.ComponentMesh).pivot.translateZ(0.5);
+    tyreBR.getComponent(f.ComponentMesh).pivot.rotateX(-90);
+    tyreBR.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(1, 1, 0.3));
 
     tyreBL = Scenes.createCompleteMeshNode("Tyre BL", matGrey, meshSphere);
-    tyreBL.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.5, 0.5, 0.15));
+    tyreBL.getComponent(f.ComponentMesh).pivot.translateZ(0.5);
+    tyreBL.getComponent(f.ComponentMesh).pivot.rotateX(-90);
+    tyreBL.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(1, 1, 0.3));
 
-    tyreFL.mtxLocal.rotateX(90);
-    tyreFL.mtxLocal.scale(f.Vector3.ONE(0.1));
-    tyreFL.mtxLocal.translate(new f.Vector3(0.9, 0, -0.3));
+    
+    tyreFL.mtxLocal.scale(f.Vector3.ONE(0.5));
+    tyreFL.mtxLocal.translate(new f.Vector3(0, 0.6, -0.5));
 
-    tyreFR.mtxLocal.rotateX(90);
-    tyreFR.mtxLocal.scale(f.Vector3.ONE(0.1));
-    tyreFR.mtxLocal.translate(new f.Vector3(0.9, 0, 0.3));
+    tyreFR.mtxLocal.scale(f.Vector3.ONE(0.5));
+    tyreFR.mtxLocal.translate(new f.Vector3(0, -0.6, -0.5));
 
-    tyreBR.mtxLocal.rotateX(90);
-    tyreBR.mtxLocal.scale(f.Vector3.ONE(0.1));
-    tyreBR.mtxLocal.translate(new f.Vector3(0.1, 0, 0.3));
+    tyreBR.mtxLocal.scale(f.Vector3.ONE(0.5));
+    tyreBR.mtxLocal.translate(new f.Vector3(0, -0.6, -0.5));
 
-    tyreBL.mtxLocal.rotateX(90);
-    tyreBL.mtxLocal.scale(f.Vector3.ONE(0.1));
-    tyreBL.mtxLocal.translate(new f.Vector3(0.1, 0, -0.3));
+    tyreBL.mtxLocal.scale(f.Vector3.ONE(0.5));
+    tyreBL.mtxLocal.translate(new f.Vector3(0, 0.6, -0.5));
 
 
     controlled.setUpAxis();
@@ -130,7 +145,7 @@ namespace HeightMap {
     let cmpCamera: f.ComponentCamera = Scenes.createCamera(new f.Vector3(0, 2, 1), new f.Vector3(0, 0, 0));
 
     img = new ƒ.TextureImage();
-    await img.load("test2.png");
+    await img.load("TestMap.png");
 
     gridMeshFlat = new f.MeshTerrain("HeightMap", img);
     gridFlat = Scenes.createCompleteMeshNode("Grid", matFlat, gridMeshFlat);
@@ -151,22 +166,38 @@ namespace HeightMap {
 
     arrowRed = Scenes.createCompleteMeshNode("Arrow", matRed, meshCube);
     arrowRed.getComponent(f.ComponentMesh).pivot.translateZ(0.5);
-    arrowRed.mtxLocal.scale(new f.Vector3(0.01,0.01,0.2))
+    arrowRed.mtxLocal.scale(new f.Vector3(0.1,0.1,2))
 
+    // arrowFront = Scenes.createCompleteMeshNode("Arrow", matRed, meshCube);
+    // arrowFront.getComponent(f.ComponentMesh).pivot.translateZ(0.5);
+    // arrowFront.mtxLocal.scale(new f.Vector3(0.1,0.1,1))
 
-    // let test: f.Node = new fAid.NodeCoordinateSystem; 
+    let test: f.Node = new fAid.NodeCoordinateSystem; 
+    let test2: f.Node = new fAid.NodeCoordinateSystem("Test2", f.Matrix4x4.IDENTITY()); 
+    test2.mtxLocal.scale(f.Vector3.ONE(3));
+    let test3: f.Node = new fAid.NodeCoordinateSystem("Test2", f.Matrix4x4.IDENTITY()); 
+    test3.mtxLocal.scale(f.Vector3.ONE(2));
 
     graph.addChild(gridFlat);
     graph.addChild(controlled);
+    controlled.addChild(frontAxis);
+    controlled.addChild(rearAxis);
+
+    frontAxis.addChild(test3)
+    // tyreFL.addChild(test2);
+    // tyreFR.addChild(test3);
+    graph.addChild(test);
+    
+    rearAxis.addChild(arrowRed);
+
+    frontAxis.addChild(tyreFL);
+    frontAxis.addChild(tyreFR);
+    rearAxis.addChild(tyreBR);
+    rearAxis.addChild(tyreBL);
+    
     // graph.addChild(m1);
     // graph.addChild(m2);
     // graph.addChild(m3);
-    // graph.addChild(test);
-    // gridFlat.addChild(arrowRed);
-    controlled.addChild(tyreFL);
-    controlled.addChild(tyreFR);
-    controlled.addChild(tyreBR);
-    controlled.addChild(tyreBL);
 
     viewport.initialize("Viewport", graph, cmpCamera, document.querySelector("canvas"));
     viewport.setFocus(true);
