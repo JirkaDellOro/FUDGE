@@ -17,6 +17,7 @@ namespace FudgeCore {
       this.data = new Float32Array([_x, _y, _z]);
     }
 
+    //#region Static
     /**
      * Creates and returns a vector with the given length pointing in x-direction
      */
@@ -182,7 +183,9 @@ namespace FudgeCore {
       Recycler.store(geo);
       return vector;
     }
+    //#endregion
 
+    //#region Accessors
     // TODO: implement equals-functions
     get x(): number {
       return this.data[0];
@@ -251,6 +254,7 @@ namespace FudgeCore {
       this.transform(Matrix4x4.ROTATION_X(-_geo.latitude));
       this.transform(Matrix4x4.ROTATION_Y(_geo.longitude));
     }
+    //#endregion
 
     /**
      * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
@@ -361,6 +365,23 @@ namespace FudgeCore {
     public shuffle(): void {
       let a: number[] = Array.from(this.data);
       this.set(Random.default.splice(a), Random.default.splice(a), a[0]);
+    }
+
+    /**
+     * For each dimension, moves the component to the minimum of this and the given vector
+     */
+    public min(_compare: Vector3): void {
+      this.x = Math.min(this.x, _compare.x);
+      this.y = Math.min(this.y, _compare.y);
+      this.z = Math.min(this.z, _compare.z);
+    }
+    /**
+     * For each dimension, moves the component to the maximum of this and the given vector
+     */
+    public max(_compare: Vector3): void {
+      this.x = Math.max(this.x, _compare.x);
+      this.y = Math.max(this.y, _compare.y);
+      this.z = Math.max(this.z, _compare.z);
     }
 
     /**

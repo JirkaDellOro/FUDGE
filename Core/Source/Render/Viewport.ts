@@ -122,7 +122,7 @@ namespace FudgeCore {
       let matrix: Matrix4x4 = Matrix4x4.IDENTITY();
       if (this.#branch.getParent())
         matrix = this.#branch.getParent().mtxWorld;
-      Render.setupTransformAndLights(this.#branch, matrix);
+      Render.prepare(this.#branch, matrix);
     }
 
     /**
@@ -141,7 +141,8 @@ namespace FudgeCore {
       if (_calculateTransforms)
         this.calculateTransforms();
       Render.clear(this.camera.backgroundColor);
-      Render.drawBranch(this.#branch, this.camera);
+      // Render.drawBranch(this.#branch, this.camera);
+      Render.drawList(this.camera);
 
       this.#crc2.imageSmoothingEnabled = false;
       this.#crc2.drawImage(

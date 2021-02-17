@@ -14,6 +14,15 @@ namespace FudgeCore {
       this.mesh = _mesh;
     }
 
+    public get boundingBox(): Box {
+      let box: Box = Recycler.get(Box);
+      box.set(
+        Vector3.TRANSFORMATION(this.mesh.boundingBox.min, this.mtxWorld, true),
+        Vector3.TRANSFORMATION(this.mesh.boundingBox.max, this.mtxWorld, true)
+      );
+      return box;
+    }
+
     //#region Transfer
     public serialize(): Serialization {
       let serialization: Serialization;
@@ -32,9 +41,9 @@ namespace FudgeCore {
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       let mesh: Mesh;
       if (_serialization.idMesh)
-        mesh = <Mesh> await Project.getResource(_serialization.idMesh);
+        mesh = <Mesh>await Project.getResource(_serialization.idMesh);
       else
-        mesh = <Mesh> await Serializer.deserialize(_serialization.mesh);
+        mesh = <Mesh>await Serializer.deserialize(_serialization.mesh);
       this.mesh = mesh;
 
       this.pivot.deserialize(_serialization.pivot);

@@ -1,9 +1,4 @@
 namespace FudgeCore {
-  interface BoundingBox {
-    min: Vector3;
-    max: Vector3;
-  }
-
   /**
    * Abstract base class for all meshes. 
    * Meshes provide indexed vertices, the order of indices to create trigons and normals, and texture coordinates
@@ -29,7 +24,8 @@ namespace FudgeCore {
     protected ƒtextureUVs: Float32Array;
     protected ƒnormalsFace: Float32Array;
     protected ƒnormals: Float32Array;
-    protected ƒbox: BoundingBox;
+    protected ƒbox: Box;
+    // TODO: explore mathematics for easy transformations of radius 
     protected ƒradius: number;
 
 
@@ -74,7 +70,7 @@ namespace FudgeCore {
 
       return this.ƒtextureUVs;
     }
-    public get boundingBox(): BoundingBox {
+    public get boundingBox(): Box {
       if (this.ƒbox == null)
         this.ƒbox = this.createBoundingBox();
 
@@ -179,8 +175,9 @@ namespace FudgeCore {
       return radius;
     }
 
-    protected createBoundingBox(): BoundingBox {
-      let box: BoundingBox = { min: Vector3.ONE(Infinity - 1), max: Vector3.ONE(-Infinity + 1) };
+    protected createBoundingBox(): Box {
+      let box: Box = Recycler.get(Box);
+      box.set();
       for (let vertex: number = 0; vertex < this.vertices.length; vertex += 3) {
         box.min.x = Math.min(this.vertices[vertex], box.min.x);
         box.max.x = Math.max(this.vertices[vertex], box.max.x);

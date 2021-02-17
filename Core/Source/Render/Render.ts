@@ -8,6 +8,7 @@ namespace FudgeCore {
     public static rectClip: Rectangle = new Rectangle(-1, 1, 2, -2);
     public static pickBuffer: Int32Array;
     private static timestampUpdate: number;
+    private static nodesSimple: RecycableArray<Node> = new RecycableArray();
 
     //#region Picking
     /**
@@ -33,16 +34,22 @@ namespace FudgeCore {
 
     //#endregion
 
-    //#region Transformation & Lights
+    //#region Prepare
     /**
      * Recursively iterates over the branch starting with the node given, recalculates all world transforms, 
-     * collects all lights and feeds all shaders used in the graph with these lights
+     * collects all lights and feeds all shaders used in the graph with these lights. Sorts nodes for different
+     * render passes.
      */
-    public static setupTransformAndLights(_branch: Node, _mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY(), _lights: MapLightTypeToLightList = new Map(), _shadersUsed: (typeof Shader)[] = null): number {
-      Render.timestampUpdate = performance.now();
+    public static prepare(_branch: Node, _mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY(), _lights: MapLightTypeToLightList = new Map(), _shadersUsed: (typeof Shader)[] = null): void {
       let firstLevel: boolean = (_shadersUsed == null);
-      if (firstLevel)
+      if (firstLevel) {
         _shadersUsed = [];
+        Render.timestampUpdate = performance.now();
+        Render.nodesSimple.reset();
+      }
+
+      if (!_branch.isActive)
+        return; // don't add branch to render list if not active
 
       let mtxWorld: Matrix4x4 = _mtxWorld;
       _branch.nNodesInBranch = 1;
@@ -53,12 +60,10 @@ namespace FudgeCore {
       _branch.mtxWorld.set(mtxWorld); // overwrite readonly mtxWorld of the current node
       _branch.timestampUpdate = Render.timestampUpdate;
 
-      let cmpMesh: ComponentMesh = _branch.getComponent(ComponentMesh);
-      if (cmpMesh)  // TODO: careful when using particlesystem, pivot must not change node position
-        cmpMesh.mtxWorld = Matrix4x4.MULTIPLICATION(_branch.mtxWorld, cmpMesh.pivot);
-
       let cmpLights: ComponentLight[] = _branch.getComponents(ComponentLight);
       for (let cmpLight of cmpLights) {
+        if (!cmpLight.isActive)
+          continue;
         let type: TypeOfLight = cmpLight.light.getType();
         let lightsOfType: ComponentLight[] = _lights.get(type);
         if (!lightsOfType) {
@@ -68,22 +73,26 @@ namespace FudgeCore {
         lightsOfType.push(cmpLight);
       }
 
+      let cmpMesh: ComponentMesh = _branch.getComponent(ComponentMesh);
       let cmpMaterial: ComponentMaterial = _branch.getComponent(ComponentMaterial);
-      if (cmpMaterial) {
+      if (cmpMesh && cmpMesh.isActive && cmpMaterial && cmpMaterial.isActive) {
+        // TODO: careful when using particlesystem, pivot must not change node position
+        cmpMesh.mtxWorld = Matrix4x4.MULTIPLICATION(_branch.mtxWorld, cmpMesh.pivot);
         let shader: typeof Shader = cmpMaterial.material.getShader();
         if (_shadersUsed.indexOf(shader) < 0)
           _shadersUsed.push(shader);
+
+        Render.nodesSimple.push(_branch); // add this node to render list
       }
 
       for (let child of _branch.getChildren()) {
-        _branch.nNodesInBranch += Render.setupTransformAndLights(child, mtxWorld, _lights, _shadersUsed);
+        Render.prepare(child, mtxWorld, _lights, _shadersUsed);
+        _branch.nNodesInBranch += child.nNodesInBranch;
       }
 
       if (firstLevel)
         for (let shader of _shadersUsed)
           Render.setLightsInShader(shader, _lights);
-
-      return _branch.nNodesInBranch;
     }
     //#endregion
 
@@ -105,6 +114,18 @@ namespace FudgeCore {
 
       if (Physics.settings && Physics.settings.debugDraw == true) {
         Physics.world.debugDraw.end();
+      }
+    }
+
+    public static drawList(_cmpCamera: ComponentCamera, _drawNode: Function = Render.drawNode): void {
+      // TODO: check physics
+
+      for (let node of this.nodesSimple) {
+        let cmpMesh: ComponentMesh = node.getComponent(ComponentMesh);
+        let mtxMeshToView: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, cmpMesh.mtxWorld);
+        let cmpMaterial: ComponentMaterial = node.getComponent(ComponentMaterial);
+        Render.draw(cmpMesh.mesh, cmpMaterial, node.mtxWorld, mtxMeshToView); 
+        Recycler.store(mtxMeshToView);
       }
     }
 

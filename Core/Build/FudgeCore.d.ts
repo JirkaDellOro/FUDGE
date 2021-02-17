@@ -352,6 +352,26 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Wraps a regular Javascript Array and offers very limited functionality geared solely towards avoiding garbage colletion.
+     */
+    class RecycableArray<T> {
+        #private;
+        get length(): number;
+        /**
+         * Sets the virtual length of the array to zero but keeps the entries beyond.
+         */
+        reset(): void;
+        push(_entry: T): number;
+        pop(): T;
+        /**
+         * Recycles the object following the last in the array and increases the array length
+         * It must be assured, that none of the objects in the array is still in any use of any kind!
+         */
+        [Symbol.iterator](): IterableIterator<T>;
+    }
+}
+declare namespace FudgeCore {
     class RenderInjector {
         static inject(_constructor: Function, _injector: typeof RenderInjector): void;
     }
@@ -559,6 +579,14 @@ declare namespace FudgeCore {
          */
         get(): Float32Array;
         transform(_matrix: Matrix3x3, _includeTranslation?: boolean): void;
+        /**
+         * For each dimension, moves the component to the minimum of this and the given vector
+         */
+        min(_compare: Vector3): void;
+        /**
+         * For each dimension, moves the component to the maximum of this and the given vector
+         */
+        max(_compare: Vector3): void;
         /**
          * Adds a z-component of the given magnitude (default=0) to the vector and returns a new Vector3
          */
@@ -1274,52 +1302,6 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Holds data to feed into a [[Shader]] to describe the surface of [[Mesh]].
-     * [[Material]]s reference [[Coat]] and [[Shader]].
-     * The method useRenderData will be injected by [[RenderInjector]] at runtime, extending the functionality of this class to deal with the renderer.
-     */
-    class Coat extends Mutable implements Serializable {
-        name: string;
-        protected renderData: {
-            [key: string]: unknown;
-        };
-        useRenderData(_shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
-        protected reduceMutator(): void;
-    }
-    /**
-     * The simplest [[Coat]] providing just a color
-     */
-    class CoatColored extends Coat {
-        color: Color;
-        constructor(_color?: Color);
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
-    }
-    /**
-     * A [[Coat]] to be used by the MatCap Shader providing a texture, a tint color (0.5 grey is neutral). Set shadeSmooth to 1 for smooth shading.
-     */
-    class CoatMatCap extends Coat {
-        texture: TextureImage;
-        color: Color;
-        shadeSmooth: number;
-        constructor(_texture?: TextureImage, _color?: Color, _shadeSmooth?: number);
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * A [[Coat]] providing a texture and additional data for texturing
-     */
-    class CoatTextured extends CoatColored {
-        texture: Texture;
-        constructor(_color?: Color, _texture?: Texture);
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
-    }
-}
-declare namespace FudgeCore {
-    /**
      * Superclass for all [[Component]]s that can be attached to [[Node]]s.
      * @authors Jirka Dell'Oro-Friedl, HFU, 2020 | Jascha Karagöl, HFU, 2019
      * @link https://github.com/JirkaDellOro/FUDGE/wiki/Component
@@ -1749,6 +1731,7 @@ declare namespace FudgeCore {
         mtxWorld: Matrix4x4;
         mesh: Mesh;
         constructor(_mesh?: Mesh);
+        get boundingBox(): Box;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorForUserInterface(): MutatorForUserInterface;
@@ -1976,317 +1959,6 @@ declare namespace FudgeCore {
         static createDelegate(_headline: string): Function;
         private static getIndentation;
         private static print;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * Defines a color as values in the range of 0 to 1 for the four channels red, green, blue and alpha (for opacity)
-     */
-    class Color extends Mutable implements Serializable {
-        private static crc2;
-        r: number;
-        g: number;
-        b: number;
-        a: number;
-        constructor(_r?: number, _g?: number, _b?: number, _a?: number);
-        static getHexFromCSSKeyword(_keyword: string): string;
-        static CSS(_keyword: string, _alpha?: number): Color;
-        static MULTIPLY(_color1: Color, _color2: Color): Color;
-        setNormRGBA(_r: number, _g: number, _b: number, _a: number): void;
-        setBytesRGBA(_r: number, _g: number, _b: number, _a: number): void;
-        getArray(): Float32Array;
-        setArrayNormRGBA(_color: Float32Array): void;
-        setArrayBytesRGBA(_color: Uint8ClampedArray): void;
-        getArrayBytesRGBA(): Uint8ClampedArray;
-        add(_color: Color): void;
-        getCSS(): string;
-        getHex(): string;
-        setHex(_hex: string): void;
-        copy(_color: Color): void;
-        toString(): string;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
-        protected reduceMutator(_mutator: Mutator): void;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * Baseclass for materials. Combines a [[Shader]] with a compatible [[Coat]]
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    class Material extends Mutable implements SerializableResource {
-        /** The name to call the Material by. */
-        name: string;
-        idResource: string;
-        private shaderType;
-        private coat;
-        constructor(_name: string, _shader?: typeof Shader, _coat?: Coat);
-        /**
-         * Creates a new [[Coat]] instance that is valid for the [[Shader]] referenced by this material
-         */
-        createCoatMatchingShader(): Coat;
-        /**
-         * Makes this material reference the given [[Coat]] if it is compatible with the referenced [[Shader]]
-         * @param _coat
-         */
-        setCoat(_coat: Coat): void;
-        /**
-         * Returns the currently referenced [[Coat]] instance
-         */
-        getCoat(): Coat;
-        /**
-         * Changes the materials reference to the given [[Shader]], creates and references a new [[Coat]] instance
-         * and mutates the new coat to preserve matching properties.
-         * @param _shaderType
-         */
-        setShader(_shaderType: typeof Shader): void;
-        /**
-         * Returns the [[Shader]] referenced by this material
-         */
-        getShader(): typeof Shader;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
-        protected reduceMutator(_mutator: Mutator): void;
-    }
-}
-declare namespace FudgeCore {
-    enum MODE {
-        EDITOR = 0,
-        RUNTIME = 1
-    }
-    interface SerializableResource extends Serializable {
-        name: string;
-        type: string;
-        idResource: string;
-    }
-    interface Resources {
-        [idResource: string]: SerializableResource;
-    }
-    interface SerializationOfResources {
-        [idResource: string]: Serialization;
-    }
-    interface ScriptNamespaces {
-        [name: string]: Object;
-    }
-    interface ComponentScripts {
-        [namespace: string]: ComponentScript[];
-    }
-    /**
-     * Static class handling the resources used with the current FUDGE-instance.
-     * Keeps a list of the resources and generates ids to retrieve them.
-     * Resources are objects referenced multiple times but supposed to be stored only once
-     */
-    abstract class Project {
-        static resources: Resources;
-        static serialization: SerializationOfResources;
-        static scriptNamespaces: ScriptNamespaces;
-        static baseURL: URL;
-        static mode: MODE;
-        /**
-         * Registers the resource and generates an id for it by default.
-         * If the resource already has an id, thus having been registered, its deleted from the list and registered anew.
-         * It's possible to pass an id, but should not be done except by the Serializer.
-         */
-        static register(_resource: SerializableResource, _idResource?: string): void;
-        static deregister(_resource: SerializableResource): void;
-        static clear(): void;
-        static getResourcesOfType<T>(_type: new (_args: General) => T): Resources;
-        /**
-         * Generate a user readable and unique id using the type of the resource, the date and random numbers
-         * @param _resource
-         */
-        static generateId(_resource: SerializableResource): string;
-        /**
-         * Tests, if an object is a [[SerializableResource]]
-         * @param _object The object to examine
-         */
-        static isResource(_object: Serializable): boolean;
-        /**
-         * Retrieves the resource stored with the given id
-         */
-        static getResource(_idResource: string): Promise<SerializableResource>;
-        /**
-         * Creates and registers a resource from a [[Node]], copying the complete graph starting with it
-         * @param _node A node to create the resource from
-         * @param _replaceWithInstance if true (default), the node used as origin is replaced by a [[GraphInstance]] of the [[Graph]] created
-         */
-        static registerAsGraph(_node: Node, _replaceWithInstance?: boolean): Promise<Graph>;
-        static createGraphInstance(_graph: Graph): Promise<GraphInstance>;
-        static registerScriptNamespace(_namespace: Object): void;
-        static getComponentScripts(): ComponentScripts;
-        static loadScript(_url: RequestInfo): Promise<void>;
-        static loadResources(_url: RequestInfo): Promise<Resources>;
-        static loadResourcesFromHTML(): Promise<void>;
-        /**
-         * Serialize all resources
-         */
-        static serialize(): SerializationOfResources;
-        /**
-         * Create resources from a serialization, deleting all resources previously registered
-         * @param _serialization
-         */
-        static deserialize(_serialization: SerializationOfResources): Promise<Resources>;
-        private static deserializeResource;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * Controls the rendering of a branch, using the given [[ComponentCamera]],
-     * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
-     * through a series of [[Framing]] objects. The stages involved are in order of rendering
-     * [[RenderManager]].viewport -> [[Viewport]].source -> [[Viewport]].destination -> DOM-Canvas -> Client(CSS)
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    class Viewport extends EventTargetƒ {
-        #private;
-        private static focus;
-        name: string;
-        camera: ComponentCamera;
-        rectSource: Rectangle;
-        rectDestination: Rectangle;
-        frameClientToCanvas: FramingScaled;
-        frameCanvasToDestination: FramingComplex;
-        frameDestinationToSource: FramingScaled;
-        frameSourceToRender: FramingScaled;
-        adjustingFrames: boolean;
-        adjustingCamera: boolean;
-        /**
-         * Returns true if this viewport currently has focus and thus receives keyboard events
-         */
-        get hasFocus(): boolean;
-        /**
-         * Connects the viewport to the given canvas to render the given branch to using the given camera-component, and names the viewport as given.
-         */
-        initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void;
-        /**
-         * Retrieve the destination canvas
-         */
-        getCanvas(): HTMLCanvasElement;
-        /**
-         * Retrieve the 2D-context attached to the destination canvas
-         */
-        getContext(): CanvasRenderingContext2D;
-        /**
-         * Retrieve the size of the destination canvas as a rectangle, x and y are always 0
-         */
-        getCanvasRectangle(): Rectangle;
-        /**
-         * Retrieve the client rectangle the canvas is displayed and fit in, x and y are always 0
-         */
-        getClientRectangle(): Rectangle;
-        /**
-         * Set the branch to be drawn in the viewport.
-         */
-        setBranch(_branch: Node): void;
-        /**
-         * Retrieve the branch this viewport renders
-         */
-        getBranch(): Node;
-        /**
-         * Logs this viewports scenegraph to the console.
-         */
-        showSceneGraph(): void;
-        /**
-         * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the [[Node]]s and [[ComponentMesh]]es
-         */
-        calculateTransforms(): void;
-        /**
-         * Draw this viewport displaying its branch. By default, the transforms in the branch are recalculated first.
-         * Pass `false` if calculation was already done for this frame
-         */
-        draw(_calculateTransforms?: boolean): void;
-        /**
-         * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas
-         */
-        adjustFrames(): void;
-        /**
-         * Adjust the camera parameters to fit the rendering into the render vieport
-         */
-        adjustCamera(): void;
-        /**
-         * Returns a [[Ray]] in world coordinates from this camera through the point given in client space
-         */
-        getRayFromClient(_point: Vector2): Ray;
-        /**
-         * Returns a point on the client rectangle matching the projection of the given point in world space
-         */
-        pointWorldToClient(_position: Vector3): Vector2;
-        /**
-         * Returns a point on the source-rectangle matching the given point on the client rectangle
-         */
-        pointClientToSource(_client: Vector2): Vector2;
-        /**
-         * Returns a point on the render-rectangle matching the given point on the source rectangle
-         */
-        pointSourceToRender(_source: Vector2): Vector2;
-        /**
-         * Returns a point on the render-rectangle matching the given point on the client rectangle
-         */
-        pointClientToRender(_client: Vector2): Vector2;
-        /**
-         * Returns a point on a projection surface in the hypothetical distance of 1 to the camera
-         * matching the given point on the client rectangle
-         * TODO: examine, if this should be a camera-method. Current implementation is for central-projection
-         */
-        pointClientToProjection(_client: Vector2): Vector2;
-        /**
-         * Returns a point in the client rectangle matching the given point in normed clipspace rectangle,
-         * which stretches from -1 to 1 in both dimensions, y pointing up
-         */
-        pointClipToClient(_normed: Vector2): Vector2;
-        /**
-         * Returns a point in the client rectangle matching the given point in normed clipspace rectangle,
-         * which stretches from -1 to 1 in both dimensions, y pointing up
-         */
-        pointClipToCanvas(_normed: Vector2): Vector2;
-        /**
-         * Returns a point in the browser page matching the given point of the viewport
-         */
-        pointClientToScreen(_client: Vector2): Vector2;
-        /**
-         * Switch the viewports focus on or off. Only one viewport in one FUDGE instance can have the focus, thus receiving keyboard events.
-         * So a viewport currently having the focus will lose it, when another one receives it. The viewports fire [[Event]]s accordingly.
-         * // TODO: examine, if this can be achieved by regular DOM-Focus and tabindex=0
-         */
-        setFocus(_on: boolean): void;
-        /**
-         * De- / Activates the given pointer event to be propagated into the viewport as FUDGE-Event
-         */
-        activatePointerEvent(_type: EVENT_POINTER, _on: boolean): void;
-        /**
-         * De- / Activates the given keyboard event to be propagated into the viewport as FUDGE-Event
-         */
-        activateKeyboardEvent(_type: EVENT_KEYBOARD, _on: boolean): void;
-        /**
-         * De- / Activates the given drag-drop event to be propagated into the viewport as FUDGE-Event
-         */
-        activateDragDropEvent(_type: EVENT_DRAGDROP, _on: boolean): void;
-        /**
-         * De- / Activates the wheel event to be propagated into the viewport as FUDGE-Event
-         */
-        activateWheelEvent(_type: EVENT_WHEEL, _on: boolean): void;
-        /**
-         * Handle drag-drop events and dispatch to viewport as FUDGE-Event
-         */
-        private hndDragDropEvent;
-        /**
-         * Add position of the pointer mapped to canvas-coordinates as canvasX, canvasY to the event
-         */
-        private addCanvasPosition;
-        /**
-         * Handle pointer events and dispatch to viewport as FUDGE-Event
-         */
-        private hndPointerEvent;
-        /**
-         * Handle keyboard events and dispatch to viewport as FUDGE-Event, if the viewport has the focus
-         */
-        private hndKeyboardEvent;
-        /**
-         * Handle wheel event and dispatch to viewport as FUDGE-Event
-         */
-        private hndWheelEvent;
-        private activateEvent;
-        private hndComponentEvent;
     }
 }
 declare namespace FudgeCore {
@@ -2581,6 +2253,123 @@ declare namespace FudgeCore {
          * Set this node to be a recreation of the [[Graph]] given
          */
         set(_graph: Graph): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Holds data to feed into a [[Shader]] to describe the surface of [[Mesh]].
+     * [[Material]]s reference [[Coat]] and [[Shader]].
+     * The method useRenderData will be injected by [[RenderInjector]] at runtime, extending the functionality of this class to deal with the renderer.
+     */
+    class Coat extends Mutable implements Serializable {
+        name: string;
+        protected renderData: {
+            [key: string]: unknown;
+        };
+        useRenderData(_shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        protected reduceMutator(): void;
+    }
+    /**
+     * The simplest [[Coat]] providing just a color
+     */
+    class CoatColored extends Coat {
+        color: Color;
+        constructor(_color?: Color);
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+    }
+    /**
+     * A [[Coat]] to be used by the MatCap Shader providing a texture, a tint color (0.5 grey is neutral). Set shadeSmooth to 1 for smooth shading.
+     */
+    class CoatMatCap extends Coat {
+        texture: TextureImage;
+        color: Color;
+        shadeSmooth: number;
+        constructor(_texture?: TextureImage, _color?: Color, _shadeSmooth?: number);
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * A [[Coat]] providing a texture and additional data for texturing
+     */
+    class CoatTextured extends CoatColored {
+        texture: Texture;
+        constructor(_color?: Color, _texture?: Texture);
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Defines a color as values in the range of 0 to 1 for the four channels red, green, blue and alpha (for opacity)
+     */
+    class Color extends Mutable implements Serializable {
+        private static crc2;
+        r: number;
+        g: number;
+        b: number;
+        a: number;
+        constructor(_r?: number, _g?: number, _b?: number, _a?: number);
+        static getHexFromCSSKeyword(_keyword: string): string;
+        static CSS(_keyword: string, _alpha?: number): Color;
+        static MULTIPLY(_color1: Color, _color2: Color): Color;
+        setNormRGBA(_r: number, _g: number, _b: number, _a: number): void;
+        setBytesRGBA(_r: number, _g: number, _b: number, _a: number): void;
+        getArray(): Float32Array;
+        setArrayNormRGBA(_color: Float32Array): void;
+        setArrayBytesRGBA(_color: Uint8ClampedArray): void;
+        getArrayBytesRGBA(): Uint8ClampedArray;
+        add(_color: Color): void;
+        getCSS(): string;
+        getHex(): string;
+        setHex(_hex: string): void;
+        copy(_color: Color): void;
+        toString(): string;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        protected reduceMutator(_mutator: Mutator): void;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Baseclass for materials. Combines a [[Shader]] with a compatible [[Coat]]
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class Material extends Mutable implements SerializableResource {
+        /** The name to call the Material by. */
+        name: string;
+        idResource: string;
+        private shaderType;
+        private coat;
+        constructor(_name: string, _shader?: typeof Shader, _coat?: Coat);
+        /**
+         * Creates a new [[Coat]] instance that is valid for the [[Shader]] referenced by this material
+         */
+        createCoatMatchingShader(): Coat;
+        /**
+         * Makes this material reference the given [[Coat]] if it is compatible with the referenced [[Shader]]
+         * @param _coat
+         */
+        setCoat(_coat: Coat): void;
+        /**
+         * Returns the currently referenced [[Coat]] instance
+         */
+        getCoat(): Coat;
+        /**
+         * Changes the materials reference to the given [[Shader]], creates and references a new [[Coat]] instance
+         * and mutates the new coat to preserve matching properties.
+         * @param _shaderType
+         */
+        setShader(_shaderType: typeof Shader): void;
+        /**
+         * Returns the [[Shader]] referenced by this material
+         */
+        getShader(): typeof Shader;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace FudgeCore {
@@ -3268,6 +3057,14 @@ declare namespace FudgeCore {
          */
         shuffle(): void;
         /**
+         * For each dimension, moves the component to the minimum of this and the given vector
+         */
+        min(_compare: Vector3): void;
+        /**
+         * For each dimension, moves the component to the maximum of this and the given vector
+         */
+        max(_compare: Vector3): void;
+        /**
          * Returns a formatted string representation of this vector
          */
         toString(): string;
@@ -3282,17 +3079,13 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    interface BoundingBox {
-        min: Vector3;
-        max: Vector3;
-    }
     /**
      * Abstract base class for all meshes.
      * Meshes provide indexed vertices, the order of indices to create trigons and normals, and texture coordinates
      *
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    export abstract class Mesh extends Mutable implements SerializableResource {
+    abstract class Mesh extends Mutable implements SerializableResource {
         /** refers back to this class from any subclass e.g. in order to find compatible other resources*/
         static readonly baseClass: typeof Mesh;
         /** list of all the subclasses derived from this class, if they registered properly*/
@@ -3305,7 +3098,7 @@ declare namespace FudgeCore {
         protected ƒtextureUVs: Float32Array;
         protected ƒnormalsFace: Float32Array;
         protected ƒnormals: Float32Array;
-        protected ƒbox: BoundingBox;
+        protected ƒbox: Box;
         protected ƒradius: number;
         constructor(_name?: string);
         static getBufferSpecification(): BufferSpecification;
@@ -3315,7 +3108,7 @@ declare namespace FudgeCore {
         get indices(): Uint16Array;
         get normalsFace(): Float32Array;
         get textureUVs(): Float32Array;
-        get boundingBox(): BoundingBox;
+        get boundingBox(): Box;
         get radius(): number;
         useRenderBuffers(_shader: typeof Shader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void;
         createRenderBuffers(): void;
@@ -3333,10 +3126,9 @@ declare namespace FudgeCore {
         protected createNormals(): Float32Array;
         protected createFaceNormals(): Float32Array;
         protected createRadius(): number;
-        protected createBoundingBox(): BoundingBox;
+        protected createBoundingBox(): Box;
         protected reduceMutator(_mutator: Mutator): void;
     }
-    export {};
 }
 declare namespace FudgeCore {
     /**
@@ -4944,6 +4736,25 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
+     * Defines a threedimensional box by two corner-points, one with minimal values and one with maximum values
+     */
+    class Box {
+        min: Vector3;
+        max: Vector3;
+        constructor(_min?: Vector3, _max?: Vector3);
+        /**
+         * Define the corners of this box, standard values are Infinity for min, and -Infinity for max,
+         * creating an impossible inverted box that can not contain any points
+         */
+        set(_min?: Vector3, _max?: Vector3): void;
+        /**
+         * Expand the box if necessary to include the given point
+         */
+        expand(_include: Vector3): void;
+    }
+}
+declare namespace FudgeCore {
+    /**
      * Stores information provided by [[Render]]-picking e.g. using [[Picker]] and provides methods for further calculation of positions and normals etc.
      *
      * @authors Jirka Dell'Oro-Friedl, HFU, 2021
@@ -5039,6 +4850,7 @@ declare namespace FudgeCore {
         static rectClip: Rectangle;
         static pickBuffer: Int32Array;
         private static timestampUpdate;
+        private static nodesSimple;
         /**
          * Used with a [[Picker]]-camera, this method renders one pixel with picking information
          * for each node in the line of sight and return that as an unsorted [[Pick]]-array
@@ -5046,14 +4858,16 @@ declare namespace FudgeCore {
         static drawBranchForPicking(_branch: Node, _cmpCamera: ComponentCamera): Pick[];
         /**
          * Recursively iterates over the branch starting with the node given, recalculates all world transforms,
-         * collects all lights and feeds all shaders used in the graph with these lights
+         * collects all lights and feeds all shaders used in the graph with these lights. Sorts nodes for different
+         * render passes.
          */
-        static setupTransformAndLights(_branch: Node, _mtxWorld?: Matrix4x4, _lights?: MapLightTypeToLightList, _shadersUsed?: (typeof Shader)[]): number;
+        static prepare(_branch: Node, _mtxWorld?: Matrix4x4, _lights?: MapLightTypeToLightList, _shadersUsed?: (typeof Shader)[]): void;
         /**
          * The main rendering function to be called from [[Viewport]].
          * Draws the branch starting with the given [[Node]] using the camera given [[ComponentCamera]].
          */
         static drawBranch(_branch: Node, _cmpCamera: ComponentCamera, _drawNode?: Function): void;
+        static drawList(_cmpCamera: ComponentCamera, _drawNode?: Function): void;
         /**
          * Recursivly iterates over the graph and renders each node and all successors with the given render function
          */
@@ -5072,6 +4886,262 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     abstract class RenderParticles extends Render {
         static drawParticles(): void;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Controls the rendering of a branch, using the given [[ComponentCamera]],
+     * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
+     * through a series of [[Framing]] objects. The stages involved are in order of rendering
+     * [[RenderManager]].viewport -> [[Viewport]].source -> [[Viewport]].destination -> DOM-Canvas -> Client(CSS)
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    class Viewport extends EventTargetƒ {
+        #private;
+        private static focus;
+        name: string;
+        camera: ComponentCamera;
+        rectSource: Rectangle;
+        rectDestination: Rectangle;
+        frameClientToCanvas: FramingScaled;
+        frameCanvasToDestination: FramingComplex;
+        frameDestinationToSource: FramingScaled;
+        frameSourceToRender: FramingScaled;
+        adjustingFrames: boolean;
+        adjustingCamera: boolean;
+        /**
+         * Returns true if this viewport currently has focus and thus receives keyboard events
+         */
+        get hasFocus(): boolean;
+        /**
+         * Connects the viewport to the given canvas to render the given branch to using the given camera-component, and names the viewport as given.
+         */
+        initialize(_name: string, _branch: Node, _camera: ComponentCamera, _canvas: HTMLCanvasElement): void;
+        /**
+         * Retrieve the destination canvas
+         */
+        getCanvas(): HTMLCanvasElement;
+        /**
+         * Retrieve the 2D-context attached to the destination canvas
+         */
+        getContext(): CanvasRenderingContext2D;
+        /**
+         * Retrieve the size of the destination canvas as a rectangle, x and y are always 0
+         */
+        getCanvasRectangle(): Rectangle;
+        /**
+         * Retrieve the client rectangle the canvas is displayed and fit in, x and y are always 0
+         */
+        getClientRectangle(): Rectangle;
+        /**
+         * Set the branch to be drawn in the viewport.
+         */
+        setBranch(_branch: Node): void;
+        /**
+         * Retrieve the branch this viewport renders
+         */
+        getBranch(): Node;
+        /**
+         * Logs this viewports scenegraph to the console.
+         */
+        showSceneGraph(): void;
+        /**
+         * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the [[Node]]s and [[ComponentMesh]]es
+         */
+        calculateTransforms(): void;
+        /**
+         * Draw this viewport displaying its branch. By default, the transforms in the branch are recalculated first.
+         * Pass `false` if calculation was already done for this frame
+         */
+        draw(_calculateTransforms?: boolean): void;
+        /**
+         * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas
+         */
+        adjustFrames(): void;
+        /**
+         * Adjust the camera parameters to fit the rendering into the render vieport
+         */
+        adjustCamera(): void;
+        /**
+         * Returns a [[Ray]] in world coordinates from this camera through the point given in client space
+         */
+        getRayFromClient(_point: Vector2): Ray;
+        /**
+         * Returns a point on the client rectangle matching the projection of the given point in world space
+         */
+        pointWorldToClient(_position: Vector3): Vector2;
+        /**
+         * Returns a point on the source-rectangle matching the given point on the client rectangle
+         */
+        pointClientToSource(_client: Vector2): Vector2;
+        /**
+         * Returns a point on the render-rectangle matching the given point on the source rectangle
+         */
+        pointSourceToRender(_source: Vector2): Vector2;
+        /**
+         * Returns a point on the render-rectangle matching the given point on the client rectangle
+         */
+        pointClientToRender(_client: Vector2): Vector2;
+        /**
+         * Returns a point on a projection surface in the hypothetical distance of 1 to the camera
+         * matching the given point on the client rectangle
+         * TODO: examine, if this should be a camera-method. Current implementation is for central-projection
+         */
+        pointClientToProjection(_client: Vector2): Vector2;
+        /**
+         * Returns a point in the client rectangle matching the given point in normed clipspace rectangle,
+         * which stretches from -1 to 1 in both dimensions, y pointing up
+         */
+        pointClipToClient(_normed: Vector2): Vector2;
+        /**
+         * Returns a point in the client rectangle matching the given point in normed clipspace rectangle,
+         * which stretches from -1 to 1 in both dimensions, y pointing up
+         */
+        pointClipToCanvas(_normed: Vector2): Vector2;
+        /**
+         * Returns a point in the browser page matching the given point of the viewport
+         */
+        pointClientToScreen(_client: Vector2): Vector2;
+        /**
+         * Switch the viewports focus on or off. Only one viewport in one FUDGE instance can have the focus, thus receiving keyboard events.
+         * So a viewport currently having the focus will lose it, when another one receives it. The viewports fire [[Event]]s accordingly.
+         * // TODO: examine, if this can be achieved by regular DOM-Focus and tabindex=0
+         */
+        setFocus(_on: boolean): void;
+        /**
+         * De- / Activates the given pointer event to be propagated into the viewport as FUDGE-Event
+         */
+        activatePointerEvent(_type: EVENT_POINTER, _on: boolean): void;
+        /**
+         * De- / Activates the given keyboard event to be propagated into the viewport as FUDGE-Event
+         */
+        activateKeyboardEvent(_type: EVENT_KEYBOARD, _on: boolean): void;
+        /**
+         * De- / Activates the given drag-drop event to be propagated into the viewport as FUDGE-Event
+         */
+        activateDragDropEvent(_type: EVENT_DRAGDROP, _on: boolean): void;
+        /**
+         * De- / Activates the wheel event to be propagated into the viewport as FUDGE-Event
+         */
+        activateWheelEvent(_type: EVENT_WHEEL, _on: boolean): void;
+        /**
+         * Handle drag-drop events and dispatch to viewport as FUDGE-Event
+         */
+        private hndDragDropEvent;
+        /**
+         * Add position of the pointer mapped to canvas-coordinates as canvasX, canvasY to the event
+         */
+        private addCanvasPosition;
+        /**
+         * Handle pointer events and dispatch to viewport as FUDGE-Event
+         */
+        private hndPointerEvent;
+        /**
+         * Handle keyboard events and dispatch to viewport as FUDGE-Event, if the viewport has the focus
+         */
+        private hndKeyboardEvent;
+        /**
+         * Handle wheel event and dispatch to viewport as FUDGE-Event
+         */
+        private hndWheelEvent;
+        private activateEvent;
+        private hndComponentEvent;
+    }
+}
+declare namespace FudgeCore {
+    interface MapFilenameToContent {
+        [filename: string]: string;
+    }
+    /**
+     * Handles file transfer from a Fudge-Browserapp to the local filesystem without a local server.
+     * Saves to the download-path given by the browser, loads from the player's choice.
+     */
+    class FileIoBrowserLocal extends EventTargetStatic {
+        private static selector;
+        static load(_multiple?: boolean): Promise<MapFilenameToContent>;
+        static save(_toSave: MapFilenameToContent, _type?: string): Promise<MapFilenameToContent>;
+        static handleFileSelect(_event: Event): Promise<void>;
+        static loadFiles(_fileList: FileList, _loaded: MapFilenameToContent): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
+    enum MODE {
+        EDITOR = 0,
+        RUNTIME = 1
+    }
+    interface SerializableResource extends Serializable {
+        name: string;
+        type: string;
+        idResource: string;
+    }
+    interface Resources {
+        [idResource: string]: SerializableResource;
+    }
+    interface SerializationOfResources {
+        [idResource: string]: Serialization;
+    }
+    interface ScriptNamespaces {
+        [name: string]: Object;
+    }
+    interface ComponentScripts {
+        [namespace: string]: ComponentScript[];
+    }
+    /**
+     * Static class handling the resources used with the current FUDGE-instance.
+     * Keeps a list of the resources and generates ids to retrieve them.
+     * Resources are objects referenced multiple times but supposed to be stored only once
+     */
+    abstract class Project {
+        static resources: Resources;
+        static serialization: SerializationOfResources;
+        static scriptNamespaces: ScriptNamespaces;
+        static baseURL: URL;
+        static mode: MODE;
+        /**
+         * Registers the resource and generates an id for it by default.
+         * If the resource already has an id, thus having been registered, its deleted from the list and registered anew.
+         * It's possible to pass an id, but should not be done except by the Serializer.
+         */
+        static register(_resource: SerializableResource, _idResource?: string): void;
+        static deregister(_resource: SerializableResource): void;
+        static clear(): void;
+        static getResourcesOfType<T>(_type: new (_args: General) => T): Resources;
+        /**
+         * Generate a user readable and unique id using the type of the resource, the date and random numbers
+         * @param _resource
+         */
+        static generateId(_resource: SerializableResource): string;
+        /**
+         * Tests, if an object is a [[SerializableResource]]
+         * @param _object The object to examine
+         */
+        static isResource(_object: Serializable): boolean;
+        /**
+         * Retrieves the resource stored with the given id
+         */
+        static getResource(_idResource: string): Promise<SerializableResource>;
+        /**
+         * Creates and registers a resource from a [[Node]], copying the complete graph starting with it
+         * @param _node A node to create the resource from
+         * @param _replaceWithInstance if true (default), the node used as origin is replaced by a [[GraphInstance]] of the [[Graph]] created
+         */
+        static registerAsGraph(_node: Node, _replaceWithInstance?: boolean): Promise<Graph>;
+        static createGraphInstance(_graph: Graph): Promise<GraphInstance>;
+        static registerScriptNamespace(_namespace: Object): void;
+        static getComponentScripts(): ComponentScripts;
+        static loadScript(_url: RequestInfo): Promise<void>;
+        static loadResources(_url: RequestInfo): Promise<Resources>;
+        static loadResourcesFromHTML(): Promise<void>;
+        /**
+         * Serialize all resources
+         */
+        static serialize(): SerializationOfResources;
+        /**
+         * Create resources from a serialization, deleting all resources previously registered
+         * @param _serialization
+         */
+        static deserialize(_serialization: SerializationOfResources): Promise<Resources>;
+        private static deserializeResource;
     }
 }
 declare namespace FudgeCore {
@@ -5465,21 +5535,5 @@ declare namespace FudgeCore {
          * Clears the timer, removing it from the interval-timers handled by window
          */
         clear(): void;
-    }
-}
-declare namespace FudgeCore {
-    interface MapFilenameToContent {
-        [filename: string]: string;
-    }
-    /**
-     * Handles file transfer from a Fudge-Browserapp to the local filesystem without a local server.
-     * Saves to the download-path given by the browser, loads from the player's choice.
-     */
-    class FileIoBrowserLocal extends EventTargetStatic {
-        private static selector;
-        static load(_multiple?: boolean): Promise<MapFilenameToContent>;
-        static save(_toSave: MapFilenameToContent, _type?: string): Promise<MapFilenameToContent>;
-        static handleFileSelect(_event: Event): Promise<void>;
-        static loadFiles(_fileList: FileList, _loaded: MapFilenameToContent): Promise<void>;
     }
 }

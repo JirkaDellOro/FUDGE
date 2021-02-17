@@ -15,6 +15,7 @@ namespace FudgeCore {
       this.data = new Float32Array([_x, _y]);
     }
 
+    //#region Static
     /** 
      * A shorthand for writing `new Vector2(0, 0)`.
      * @returns A new vector with the values (0, 0)
@@ -166,7 +167,9 @@ namespace FudgeCore {
       Recycler.store(geo);
       return vector;
     }
+    //#endregion
 
+    //#region Accessors
     get x(): number {
       return this.data[0];
     }
@@ -226,6 +229,7 @@ namespace FudgeCore {
       this.set(_geo.magnitude, 0);
       this.transform(Matrix3x3.ROTATION(_geo.angle));
     }
+    //#endregion
 
     /**
      * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
@@ -286,6 +290,21 @@ namespace FudgeCore {
       this.data = Vector2.TRANSFORMATION(this, _matrix, _includeTranslation).data;
     }
 
+    /**
+     * For each dimension, moves the component to the minimum of this and the given vector
+     */
+    public min(_compare: Vector3): void {
+      this.x = Math.min(this.x, _compare.x);
+      this.y = Math.min(this.y, _compare.y);
+    }
+    /**
+     * For each dimension, moves the component to the maximum of this and the given vector
+     */
+    public max(_compare: Vector3): void {
+      this.x = Math.max(this.x, _compare.x);
+      this.y = Math.max(this.y, _compare.y);
+    }
+    
     /**
      * Adds a z-component of the given magnitude (default=0) to the vector and returns a new Vector3
      */
