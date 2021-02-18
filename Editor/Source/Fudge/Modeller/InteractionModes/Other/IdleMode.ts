@@ -8,7 +8,7 @@ namespace Fudge {
     }
 
     onmousedown(_event: ƒ.EventPointer): void {
-
+      //@ts-ignore
     }
     onmouseup(_event: ƒ.EventPointer): string {
       return null;
@@ -19,12 +19,11 @@ namespace Fudge {
     }
 
     onkeydown(_pressedKey: string): void {
-
+      //@ts-ignore
     }
     
     onkeyup(_pressedKey: string): string {
       return null;
-      //@ts-ignore
     }
 
     getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {

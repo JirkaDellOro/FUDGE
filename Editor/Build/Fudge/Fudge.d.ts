@@ -472,7 +472,7 @@ declare namespace Fudge {
         protected copyVertices(): Map<number, ƒ.Vector3>;
         protected getPointerPosition(_event: ƒ.EventPointer, distance: number): ƒ.Vector3;
         protected getDistanceFromRayToCenterOfNode(_event: ƒ.EventPointer, distance: number): ƒ.Vector3;
-        protected getDistanceFromCameraToCenterOfNode(): number;
+        protected getDistanceFromCameraToCentroid(): number;
         private drawCircleAtVertex;
         private drawCircleAtSelection;
     }
@@ -562,8 +562,8 @@ declare namespace Fudge {
     class AbstractScalation extends InteractionMode {
         readonly type: InteractionModes;
         protected oldPosition: ƒ.Vector3;
-        protected distanceToCenterOfNode: number;
-        protected distanceRayToCenter: ƒ.Vector3;
+        protected distanceCameraToCentroid: number;
+        protected distancePointerToCentroid: ƒ.Vector3;
         protected copyOfSelectedVertices: Map<number, ƒ.Vector3>;
         protected axesSelectionHandler: AxesSelectionHandler;
         private centroid;
@@ -608,7 +608,6 @@ declare namespace Fudge {
     import ƒ = FudgeCore;
     class EditSelection extends AbstractSelection {
         selection: Array<number>;
-        private selectionMode;
         private boxStart;
         private clientPos;
         private vertexSelected;
@@ -660,7 +659,7 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     class ObjectTranslation extends AbstractTranslation {
-        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>);
+        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
     }
 }
 declare namespace Fudge {
@@ -719,6 +718,7 @@ declare namespace Fudge {
         removeFace(selection: number[]): void;
         updateNormals(): void;
         invertFace(selection: number[]): void;
+        newScaleBy(matrix: ƒ.Matrix4x4, oldVertices: Map<number, ƒ.Vector3>, selection?: number[]): void;
         scaleBy(matrix: ƒ.Matrix4x4, oldVertices: Map<number, ƒ.Vector3>, centroid: ƒ.Vector3, selection?: number[]): void;
         translateVertices(difference: ƒ.Vector3, selection: number[]): void;
         rotateBy(matrix: ƒ.Matrix4x4, center: ƒ.Vector3, selection?: number[]): void;

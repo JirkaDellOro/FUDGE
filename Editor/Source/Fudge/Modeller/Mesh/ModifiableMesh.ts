@@ -206,6 +206,17 @@ namespace Fudge {
       this.createRenderBuffers();
     }
 
+    public newScaleBy(matrix: ƒ.Matrix4x4, oldVertices: Map<number, ƒ.Vector3>, selection: number[] = Array.from(Array(this.uniqueVertices.length).keys())): void {
+      for (let vertexIndex of selection) {
+        let currentVertex: ƒ.Vector3 = oldVertices.get(vertexIndex);
+        let newVertex: ƒ.Vector3 = new ƒ.Vector3(currentVertex.x , currentVertex.y, currentVertex.z);
+        newVertex.transform(matrix);
+        this._uniqueVertices[vertexIndex].position = newVertex;
+      }
+      this.vertices = this.createVertices();
+      this.createRenderBuffers();
+    }
+
     public scaleBy(matrix: ƒ.Matrix4x4, oldVertices: Map<number, ƒ.Vector3>, centroid: ƒ.Vector3, selection: number[] = Array.from(Array(this.uniqueVertices.length).keys())): void {
       // let centroid: ƒ.Vector3 = this.getCentroid(selection);
       for (let vertexIndex of selection) {

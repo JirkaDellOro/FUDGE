@@ -1,16 +1,7 @@
 namespace Fudge {
   import ƒ = FudgeCore;
-  import ƒui = FudgeUserInterface;
-
-
-  enum SelectionMode {
-    VERTEX,
-    BOX
-  }
-
   export class EditSelection extends AbstractSelection {
-    selection: Array<number> = [];
-    private selectionMode: SelectionMode = SelectionMode.BOX;
+    public selection: Array<number> = [];
     private boxStart: ƒ.Vector2;
     private clientPos: ƒ.Vector2;
     private vertexSelected: boolean = false;
@@ -59,16 +50,13 @@ namespace Fudge {
     }
 
     onmove(_event: ƒ.EventPointer): void {
-      if (this.selectionMode !== SelectionMode.BOX) 
-        return;
-
       this.clientPos = new ƒ.Vector2(_event.canvasX, _event.canvasY);
     }
 
     onkeydown(pressedKey: string): void {
       // let state: string = null;
 
-      // // delete this later or refactor it to somewhere else
+      // delete this later or refactor it to somewhere else
       // switch (pressedKey) {
       //   case "delete": 
       //     (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).removeFace(this.selection);

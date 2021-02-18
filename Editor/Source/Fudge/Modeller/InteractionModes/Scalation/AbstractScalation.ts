@@ -1,11 +1,10 @@
 /// <reference path="../InteractionMode.ts" />
 namespace Fudge {
   export class AbstractScalation extends InteractionMode {
-    //protected widget: ƒ.Node;
     public readonly type: InteractionModes = InteractionModes.SCALE;
     protected oldPosition: ƒ.Vector3;
-    protected distanceToCenterOfNode: number;
-    protected distanceRayToCenter: ƒ.Vector3;
+    protected distanceCameraToCentroid: number;
+    protected distancePointerToCentroid: ƒ.Vector3;
     protected copyOfSelectedVertices: Map<number, ƒ.Vector3>;
     protected axesSelectionHandler: AxesSelectionHandler;
     private centroid: ƒ.Vector3;
@@ -27,10 +26,6 @@ namespace Fudge {
       if (this.axesSelectionHandler.wasPicked || this.axesSelectionHandler.isAxisSelectedViaKeyboard()) {
         this.setValues(_event);
       }
-      // let state: string = null;
-      // if (this.axesSelectionHandler.wasPicked) 
-      //   state = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
-      // return state;
     }
 
     onmouseup(_event: ƒ.EventPointer): string {
@@ -55,42 +50,42 @@ namespace Fudge {
       if (selectedAxes.length <= 0) 
         return;
       
-      let currentPosition: ƒ.Vector3 = this.getPointerPosition(_event, this.distanceToCenterOfNode);
-      let diff: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(currentPosition, this.oldPosition);
+      let currentPosition: ƒ.Vector3 = this.getPointerPosition(_event, this.distanceCameraToCentroid);
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
 
       let scaleMatrix: ƒ.Matrix4x4;
       // let abs: number = ƒ.Vector3.DIFFERENCE(diff, this.distanceRayToCenter);
 
       // TODO: Fix offset and this should be correct
-      let abs: number = ƒ.Vector3.DIFFERENCE(currentPosition, this.centroid).magnitude;
 
+      let abs: number = ƒ.Vector3.DIFFERENCE(currentPosition, this.centroid).magnitude;
+      let scale: number = currentPosition.magnitude / this.oldPosition.magnitude;
+      let testscale: number = ƒ.Vector3.DIFFERENCE(currentPosition, this.centroid).magnitude / this.distancePointerToCentroid.magnitude;
       // let abs: number = ƒ.Vector3.DOT(newPosition, this.distanceRayToCenter);
       let scaleVector: ƒ.Vector3 = ƒ.Vector3.ONE();
       for (let pickedAxis of selectedAxes) {
         switch (pickedAxis) {
           case Axis.X:
-            scaleVector.x = abs;
+            //scaleVector.x = abs;
+            scaleVector.x = testscale;
             break;
           case Axis.Y:
-            scaleVector.y = abs;
+            //scaleVector.y = abs;
+            scaleVector.y = testscale;
             break;
           case Axis.Z:
-            scaleVector.z = abs;
+            //scaleVector.z = abs;
+            scaleVector.z = testscale;
             break;
         }
       }
       scaleMatrix = ƒ.Matrix4x4.SCALING(scaleVector);
-      mesh.scaleBy(scaleMatrix, this.copyOfSelectedVertices, this.centroid, this.selection);
+      mesh.newScaleBy(scaleMatrix, this.copyOfSelectedVertices, this.selection);
+      //mesh.scaleBy(scaleMatrix, this.copyOfSelectedVertices, this.centroid, this.selection);
     }
 
     onkeydown (_pressedKey: string): void {
       this.axesSelectionHandler.addAxisOf(_pressedKey);
-      // let result: string = null;
-      // if (this.axesSelectionHandler.addAxisOf(_pressedKey)) {
-      //   result = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
-      // }
-      // return result;
     }
 
     onkeyup(_pressedKey: string): string {
@@ -124,10 +119,10 @@ namespace Fudge {
     }
 
     private setValues(_event: ƒ.EventPointer): void {
-      this.distanceToCenterOfNode = this.getDistanceFromCameraToCenterOfNode();
-      this.oldPosition = this.getPointerPosition(_event, this.distanceToCenterOfNode);
+      this.distanceCameraToCentroid = this.getDistanceFromCameraToCentroid();
+      this.oldPosition = this.getPointerPosition(_event, this.distanceCameraToCentroid);
       this.centroid = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection);
-      this.distanceRayToCenter = ƒ.Vector3.DIFFERENCE(this.oldPosition, this.centroid);
+      this.distancePointerToCentroid = ƒ.Vector3.DIFFERENCE(this.oldPosition, this.centroid);
       this.copyOfSelectedVertices = this.copyVertices();
     }
   }

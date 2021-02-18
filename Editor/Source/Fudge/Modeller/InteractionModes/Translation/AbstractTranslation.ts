@@ -1,9 +1,9 @@
 namespace Fudge {
   export abstract class AbstractTranslation extends InteractionMode {
     public readonly type: InteractionModes = InteractionModes.TRANSLATE;
-    viewport: ƒ.Viewport;
-    selection: Array<number>;
-    editableNode: ƒ.Node;
+    public viewport: ƒ.Viewport;
+    public selection: Array<number>;
+    public editableNode: ƒ.Node;
     protected dragging: boolean = false;
     protected distance: number;
     protected oldPosition: ƒ.Vector3;
@@ -32,7 +32,7 @@ namespace Fudge {
       if (nodeWasPicked && !this.axesSelectionHandler.wasPicked) {
         this.dragging = true;
       }
-      this.distance = this.getDistanceFromCameraToCenterOfNode();
+      this.distance = this.getDistanceFromCameraToCentroid();
       this.oldPosition = this.getPointerPosition(_event, this.distance);
 
       // let state: string = null;
@@ -58,7 +58,7 @@ namespace Fudge {
     onmove(_event: ƒ.EventPointer): void {
       if (!this.axesSelectionHandler.isValidSelection() && !this.dragging) {
         if (this.axesSelectionHandler.isAxisSelectedViaKeyboard()) {
-          this.distance = this.getDistanceFromCameraToCenterOfNode();
+          this.distance = this.getDistanceFromCameraToCentroid();
           this.oldPosition = this.getPointerPosition(_event, this.distance);
           this.axesSelectionHandler.isSelectedViaKeyboard = true;
         }

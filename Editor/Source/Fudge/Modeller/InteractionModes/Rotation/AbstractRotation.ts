@@ -2,9 +2,9 @@
 namespace Fudge {
   export abstract class AbstractRotation extends InteractionMode {
     public readonly type: InteractionModes = InteractionModes.ROTATE;
-    viewport: ƒ.Viewport;
-    selection: Array<number>;
-    editableNode: ƒ.Node;
+    public viewport: ƒ.Viewport;
+    public selection: Array<number>;
+    public editableNode: ƒ.Node;
 
     protected axesSelectionHandler: AxesSelectionHandler;
     private previousMousePos: ƒ.Vector2;
@@ -38,7 +38,6 @@ namespace Fudge {
       this.axesSelectionHandler.releaseComponent();
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
       mesh.updateNormals();
-      // this.createNormalArrows();
       return state;
     }
 
@@ -147,6 +146,5 @@ namespace Fudge {
       let ray: ƒ.Ray = this.viewport.getRayFromClient(posRender);
       return ray.intersectPlane(new ƒ.Vector3(0, 0, 0), this.viewport.camera.pivot.translation);
     }
-
   }
 }

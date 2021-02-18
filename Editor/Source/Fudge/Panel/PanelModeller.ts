@@ -1,14 +1,11 @@
 namespace Fudge {
-  import ƒ = FudgeCore;
-  import ƒui = FudgeUserInterface;
-
   export class PanelModeller extends Panel {
 
     constructor(_container: GoldenLayout.Container, _state: Object) {
       super(_container, _state);
 
       this.goldenLayout.registerComponent(VIEW.MODELLER, ViewModellerScene);
-      this.goldenLayout.registerComponent(VIEW.HIERARCHY, ViewHierarchy);
+      //this.goldenLayout.registerComponent(VIEW.HIERARCHY, ViewHierarchy);
       this.goldenLayout.registerComponent(VIEW.PROPERTIES, ViewObjectProperties);
       let stack;
       // this.goldenLayout.on("stackCreated", this.addHeaderControl);

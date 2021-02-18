@@ -50,6 +50,5 @@ namespace Fudge {
       }
       return vertexWasPicked;
     }
-
   }
 }

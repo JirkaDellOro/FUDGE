@@ -3,9 +3,9 @@ namespace Fudge {
   export abstract class InteractionMode implements IInteractionMode {
     protected static normalsAreDisplayed: boolean = false;    
     public readonly type: InteractionModes;
-    selection: Array<number>;
-    viewport: ƒ.Viewport;
-    editableNode: ƒ.Node;
+    public selection: Array<number>;
+    public viewport: ƒ.Viewport;
+    public editableNode: ƒ.Node;
     protected selector: Selector;
 
     constructor (viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number> = []) {
@@ -116,7 +116,7 @@ namespace Fudge {
       return ƒ.Vector3.DIFFERENCE(this.getPointerPosition(_event, distance), (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection));
     }
     
-    protected getDistanceFromCameraToCenterOfNode(): number {
+    protected getDistanceFromCameraToCentroid(): number {
       return ƒ.Vector3.DIFFERENCE((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection), this.viewport.camera.getContainer().mtxWorld.translation).magnitude;
     }
 

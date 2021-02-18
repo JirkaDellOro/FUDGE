@@ -14,8 +14,8 @@ namespace Fudge {
     private dom: HTMLElement;
     // TODO: change those shortcuts
     private controlModesMap: Map<ControlMode, {type: AbstractControlMode, shortcut: string}> = new Map([
-      [ControlMode.OBJECT_MODE, {type: new ObjectMode(), shortcut: "p"}],
-      [ControlMode.EDIT_MODE, {type: new EditMode(), shortcut: "d"}]
+      [ControlMode.OBJECT_MODE, {type: new ObjectMode(), shortcut: "o"}],
+      [ControlMode.EDIT_MODE, {type: new EditMode(), shortcut: "e"}]
     ]); 
 
     constructor(_viewport: ƒ.Viewport, _editableNode: ƒ.Node, _dom: HTMLElement) {
@@ -25,7 +25,6 @@ namespace Fudge {
       this.dom = _dom;
       this.saveState((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState());
       this.setInteractionMode(InteractionModes.IDLE);
-      //_dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
     }
 
     public get controlMode(): AbstractControlMode {
@@ -44,9 +43,6 @@ namespace Fudge {
 
     public onmousedown(_event: ƒ.EventPointer): void {
       this.interactionMode.onmousedown(_event);
-      // let state: string = this.interactionMode.onmousedown(_event);
-      // if (state != null) 
-      //   this.saveState(state);
     }
 
     public onmove(_event: ƒ.EventPointer): void {
@@ -54,16 +50,10 @@ namespace Fudge {
     }
 
     public onkeydown(_event: ƒ.EventKeyboard): void {
-      // let eTarget: EventTarget = new EventTarget();
-      // eTarget.dispatchEvent(event);
-
       if (_event.ctrlKey) 
         return;
 
       this.interactionMode.onkeydown(_event.key.toLowerCase());
-      // let state: string = this.interactionMode.onkeydown(_event.key.toLowerCase());
-      // if (state != null) 
-      //   this.saveState(state);
     }
 
     public onkeyup(_event: ƒ.EventKeyboard): void {
@@ -72,7 +62,6 @@ namespace Fudge {
       let state: string = this.interactionMode.onkeyup(_event.key.toLowerCase());
       if (state != null) 
         this.saveState(state);
-
     }
 
     public getSelection(): number[] {
@@ -123,6 +112,7 @@ namespace Fudge {
       this.interactionMode?.cleanup();
       this.interactionMode = this.currentControlMode.formerMode || new IdleMode(this.viewport, this.editableNode);
       this.interactionMode.initialize(); 
+      ƒ.EventTargetStatic.dispatchEvent(new CustomEvent(ModellerEvents.SELECTION_UPDATE, { bubbles: true, detail: this.interactionMode.selection }));
       this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));     
       console.log("Current Mode: " + this.interactionMode.type);
     }
@@ -138,6 +128,7 @@ namespace Fudge {
         this.interactionMode.selection = selection;
       
       this.interactionMode.initialize();
+      ƒ.EventTargetStatic.dispatchEvent(new CustomEvent(ModellerEvents.SELECTION_UPDATE, { bubbles: true, detail: this.interactionMode.selection }));
       this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
       console.log("Current Mode: " + this.interactionMode.type);
     }
@@ -147,11 +138,6 @@ namespace Fudge {
     }
 
     public getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {
-      // const menu: Electron.Menu = new remote.Menu();
-      // for (let item of this.interactionMode.getContextMenuItems(this.interactionMode.connectedCallback.bind(this))) {
-      //   menu.append(item);
-      // }
-      // this.contextMenu = menu;
       return this.interactionMode.getContextMenuItems(_callback);
     }
 
@@ -160,12 +146,6 @@ namespace Fudge {
     }
 
     private loadState(isUndo: boolean = true): void {
-      // if (this.states.length <= 0) 
-      //   return;
-      // let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
-      // mesh.retrieveState(this.states[this.states.length - 1]);
-      // this.states.pop();
-      // this.interactionMode.updateAfterUndo();
       if (this.states.length <= 0 || (this.currentState <= 0 && isUndo) || this.currentState < 0) 
         return;
 
@@ -178,22 +158,13 @@ namespace Fudge {
           return;
         }
       }
-      console.log("states length: " + this.states.length);
-      console.log("current state: " + this.currentState);
-  
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
       mesh.retrieveState(this.states[this.currentState]);
       this.interactionMode.updateAfterUndo();
     }
 
     private saveState(state: string): void {
-      // this.states.push(state);
-      // if (this.states.length > 20) {
-      //   this.states.shift();
-      // }
       this.states.splice(this.currentState + 1);
-      console.log("states length: " + this.states.length);
-      console.log("current state: " + this.currentState);
       this.states.push(state);
       if (this.states.length > 20) {
         this.states.shift();

@@ -3,9 +3,9 @@ namespace Fudge {
   import ƒui = FudgeUserInterface;
   export class Extrude extends InteractionMode {
     public readonly type: InteractionModes = InteractionModes.EXTRUDE;
-    selection: Array<number>;
-    viewport: ƒ.Viewport;
-    editableNode: ƒ.Node;
+    public selection: Array<number>;
+    public viewport: ƒ.Viewport;
+    public editableNode: ƒ.Node;
     private isExtruded: boolean = false;
     private distance: number;
     private oldPosition: ƒ.Vector3;
@@ -27,7 +27,7 @@ namespace Fudge {
       if (!this.selection)
         return;
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
-      this.distance = this.getDistanceFromCameraToCenterOfNode();
+      this.distance = this.getDistanceFromCameraToCentroid();
       this.oldPosition = this.getPointerPosition(_event, this.distance);
       if (this.getDistanceFromRayToCenterOfNode(_event, this.distance).magnitude > 1)
         return;
