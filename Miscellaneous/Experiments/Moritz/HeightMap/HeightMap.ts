@@ -25,12 +25,18 @@ namespace HeightMap {
   let frontAxis: f.Node;
   let rearAxis: f.Node;
 
+  let FL: f.Node;
+  let FR: f.Node;
+  let BL: f.Node;
+  let BR: f.Node;
+
   let cntKeyHorizontal: f.Control = new f.Control("Keyboard", 1, f.CONTROL_TYPE.PROPORTIONAL, true);
   let cntKeyVertical: f.Control = new f.Control("Keyboard", 4, f.CONTROL_TYPE.PROPORTIONAL, true);
   // cntKeyHorizontal.setDelay(500);
   // cntKeyVertical.setDelay(500);
 
   export let arrowRed: ƒ.Node;
+  export let arrowRed2: f.Node;
 
   async function init(_event: Event): Promise<void> {
 
@@ -81,6 +87,8 @@ namespace HeightMap {
     controlled.mtxLocal.translation = new f.Vector3( 0.3, 0, 0.3 );
     controlled.mtxLocal.rotateZ(1);
 
+    controlled.mtxLocal.lookAt(f.Vector3.SUM(controlled.mtxLocal.translation, f.Vector3.Y(1)));
+
     // controlled.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.1,0.05,0.025));
     // controlled.getComponent(f.ComponentMesh).pivot.translate(new f.Vector3(0.5, 0, 0.5));
 
@@ -128,6 +136,14 @@ namespace HeightMap {
     tyreBL.mtxLocal.scale(f.Vector3.ONE(0.5));
     tyreBL.mtxLocal.translate(new f.Vector3(0, 0.6, -0.5));
 
+    FL = new f.Node("FL");
+    FL.addComponent(new f.ComponentTransform());
+    FR = new f.Node("FR");
+    FR.addComponent(new f.ComponentTransform());
+    BR = new f.Node("BR");
+    BR.addComponent(new f.ComponentTransform());
+    BL = new f.Node("BL");
+    BL.addComponent(new f.ComponentTransform());
 
     controlled.setUpAxis();
     //controlled.getComponent(f.ComponentMesh).pivot.scaleZ(2);
@@ -168,13 +184,17 @@ namespace HeightMap {
     arrowRed.getComponent(f.ComponentMesh).pivot.translateZ(0.5);
     arrowRed.mtxLocal.scale(new f.Vector3(0.1,0.1,2))
 
+    arrowRed2 = Scenes.createCompleteMeshNode("Arrow", matRed, meshCube);
+    arrowRed2.getComponent(f.ComponentMesh).pivot.translateZ(0.5);
+    arrowRed2.mtxLocal.scale(new f.Vector3(0.1,0.1,2))
+
     // arrowFront = Scenes.createCompleteMeshNode("Arrow", matRed, meshCube);
     // arrowFront.getComponent(f.ComponentMesh).pivot.translateZ(0.5);
     // arrowFront.mtxLocal.scale(new f.Vector3(0.1,0.1,1))
 
     let test: f.Node = new fAid.NodeCoordinateSystem; 
     let test2: f.Node = new fAid.NodeCoordinateSystem("Test2", f.Matrix4x4.IDENTITY()); 
-    test2.mtxLocal.scale(f.Vector3.ONE(3));
+    test2.mtxLocal.scale(f.Vector3.ONE(0.5));
     let test3: f.Node = new fAid.NodeCoordinateSystem("Test2", f.Matrix4x4.IDENTITY()); 
     test3.mtxLocal.scale(f.Vector3.ONE(2));
 
@@ -183,17 +203,23 @@ namespace HeightMap {
     controlled.addChild(frontAxis);
     controlled.addChild(rearAxis);
 
-    frontAxis.addChild(test3)
+    // controlled.addChild(test2)
+    rearAxis.addChild(test3)
     // tyreFL.addChild(test2);
     // tyreFR.addChild(test3);
     graph.addChild(test);
     
-    rearAxis.addChild(arrowRed);
+    // rearAxis.addChild(arrowRed);
 
     frontAxis.addChild(tyreFL);
     frontAxis.addChild(tyreFR);
     rearAxis.addChild(tyreBR);
     rearAxis.addChild(tyreBL);
+
+    controlled.addChild(FL);
+    controlled.addChild(FR);
+    controlled.addChild(BR);
+    controlled.addChild(BL);
     
     // graph.addChild(m1);
     // graph.addChild(m2);
@@ -203,6 +229,13 @@ namespace HeightMap {
     viewport.setFocus(true);
     Scenes.dollyViewportCamera(viewport);
     
+    viewport.draw();
+
+    FL.mtxLocal.translation = f.Vector3.TRANSFORMATION(tyreFL.mtxWorld.translation, controlled.mtxWorldInverse);
+    FR.mtxLocal.translation = f.Vector3.TRANSFORMATION(tyreFR.mtxWorld.translation, controlled.mtxWorldInverse);
+    BR.mtxLocal.translation = f.Vector3.TRANSFORMATION(tyreBR.mtxWorld.translation, controlled.mtxWorldInverse);
+    BL.mtxLocal.translation = f.Vector3.TRANSFORMATION(tyreBL.mtxWorld.translation, controlled.mtxWorldInverse);
+
     viewport.draw();
   }
   
