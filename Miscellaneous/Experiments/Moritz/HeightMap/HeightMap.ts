@@ -182,7 +182,7 @@ namespace HeightMap {
 
     arrowRed = Scenes.createCompleteMeshNode("Arrow", matRed, meshCube);
     arrowRed.getComponent(f.ComponentMesh).pivot.translateZ(0.5);
-    arrowRed.mtxLocal.scale(new f.Vector3(0.1,0.1,2))
+    arrowRed.mtxLocal.scale(new f.Vector3(0.01,0.01,0.2))
 
     arrowRed2 = Scenes.createCompleteMeshNode("Arrow", matRed, meshCube);
     arrowRed2.getComponent(f.ComponentMesh).pivot.translateZ(0.5);
@@ -194,7 +194,7 @@ namespace HeightMap {
 
     let test: f.Node = new fAid.NodeCoordinateSystem; 
     let test2: f.Node = new fAid.NodeCoordinateSystem("Test2", f.Matrix4x4.IDENTITY()); 
-    test2.mtxLocal.scale(f.Vector3.ONE(0.5));
+    test2.mtxLocal.scale(f.Vector3.ONE(2));
     let test3: f.Node = new fAid.NodeCoordinateSystem("Test2", f.Matrix4x4.IDENTITY()); 
     test3.mtxLocal.scale(f.Vector3.ONE(2));
 
@@ -205,11 +205,12 @@ namespace HeightMap {
 
     // controlled.addChild(test2)
     rearAxis.addChild(test3)
+    frontAxis.addChild(test2)
     // tyreFL.addChild(test2);
     // tyreFR.addChild(test3);
     graph.addChild(test);
     
-    // rearAxis.addChild(arrowRed);
+    controlled.addChild(arrowRed);
 
     frontAxis.addChild(tyreFL);
     frontAxis.addChild(tyreFR);
