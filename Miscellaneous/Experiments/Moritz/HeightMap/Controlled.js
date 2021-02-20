@@ -23,8 +23,8 @@ var HeightMap;
             this.mtxLocal.rotateZ(angle * distance * 50);
             let frontAxis = this.getChildrenByName("Front Axis")[0];
             let rearAxis = this.getChildrenByName("Rear Axis")[0];
-            // let tyreFL: f.Node = frontAxis.getChildrenByName("Tyre FL")[0];
-            // let tyreFR: f.Node = frontAxis.getChildrenByName("Tyre FR")[0];
+            let steeringFL = frontAxis.getChildrenByName("Tyre FL")[0];
+            let steeringFR = frontAxis.getChildrenByName("Tyre FR")[0];
             // let tyreBR: f.Node = rearAxis.getChildrenByName("Tyre BR")[0];
             // let tyreBL: f.Node = rearAxis.getChildrenByName("Tyre BL")[0];
             let tyreFL = this.getChildrenByName("FL")[0];
@@ -59,8 +59,8 @@ var HeightMap;
             // }
             // frontAxis.mtxLocal.translation = new f.Vector3(frontAxis.mtxLocal.translation.x, frontAxis.mtxLocal.translation.y, (posFL.origin.y + posFR.origin.y)/2 + this.groundClearance);
             // rearAxis.mtxLocal.translation = new f.Vector3(rearAxis.mtxLocal.translation.x, rearAxis.mtxLocal.translation.y, (posBL.origin.y + posBR.origin.y)/2 + this.groundClearance);
-            tyreFL.mtxLocal.rotation = new f.Vector3(0, 0, this.axisRotation.getOutput() * 15);
-            tyreFR.mtxLocal.rotation = new f.Vector3(0, 0, this.axisRotation.getOutput() * 15);
+            steeringFL.mtxLocal.rotation = new f.Vector3(0, 0, this.axisRotation.getOutput() * 15);
+            steeringFR.mtxLocal.rotation = new f.Vector3(0, 0, this.axisRotation.getOutput() * 15);
             // showGradient(ray);
         }
     }
