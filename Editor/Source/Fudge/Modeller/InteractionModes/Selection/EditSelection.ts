@@ -54,16 +54,16 @@ namespace Fudge {
     }
 
     onkeydown(pressedKey: string): void {
-      // let state: string = null;
+      let state: string = null;
 
       // delete this later or refactor it to somewhere else
-      // switch (pressedKey) {
-      //   case "delete": 
-      //     (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).removeFace(this.selection);
-      //     this.selection = [];
-      //     state = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
-      //     break;
-      // }
+      switch (pressedKey) {
+        case "delete": 
+          (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).removeFace(this.selection);
+          this.selection = [];
+          state = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
+          break;
+      }
       // return state;
     }
 

@@ -19,7 +19,7 @@ namespace Fudge {
       this.vertices = _vertices;
     }
 
-    public extrude(selection: number[]): void {
+    public extrude(selection: number[]): number[] {
       this.fillVertexMap(selection);
       let edges: {start: number, end: number}[] = this.findEdgesFromData(selection);
       let faceToEdgesMap: Map<number, {edge: {start: number, end: number}, index: number}[]> = this.getInnerEdges(edges);
@@ -31,13 +31,16 @@ namespace Fudge {
 
       this.removeDuplicateEdges(edges, faceToEdgesMap);
 
+      let result: number[] = [];
       // extrude all the edges
       for (let edge of edges) {
         this.extrudeEdge([edge.start, edge.end]);
+        result.push(edge.start);
       }
 
       this.addFrontFaces(faceToEdgesMap);
       this.addNewTriangles();
+      return result;
     }
 
     /*

@@ -34,11 +34,6 @@ namespace Fudge {
       }
       this.distance = this.getDistanceFromCameraToCentroid();
       this.oldPosition = this.getPointerPosition(_event, this.distance);
-
-      // let state: string = null;
-      // if (this.axesSelectionHandler.wasPicked || nodeWasPicked) 
-      //   state = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
-      // return state;
     }
 
     onmouseup(_event: ƒ.EventPointer): string {
@@ -51,7 +46,6 @@ namespace Fudge {
       this.axesSelectionHandler.releaseComponent();
       mesh.updateNormals();
       this.axesSelectionHandler.widget.mtxLocal.translation = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection);
-      // this.createNormalArrows();
       return state;
     }
 
@@ -93,11 +87,6 @@ namespace Fudge {
 
     onkeydown(_pressedKey: string): void {
       this.axesSelectionHandler.addAxisOf(_pressedKey);
-      // let result: string = null;
-      // if (this.axesSelectionHandler.addAxisOf(_pressedKey)) {
-      //   result = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
-      // }
-      // return result;
     }
     
     onkeyup(_pressedKey: string): string {
@@ -129,16 +118,5 @@ namespace Fudge {
     cleanup(): void {
       this.viewport.getGraph().removeChild(this.axesSelectionHandler.widget);
     }
-
-    // protected copyVerticesAndCalculateDistance(_event: ƒ.EventPointer): void {
-    //   this.distance = this.getDistanceFromCameraToCenterOfNode();
-    //   let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
-    //   let vertices: UniqueVertex[] = mesh.uniqueVertices;
-    //   this.copyOfSelectedVertices = new Map();
-    //   for (let vertexIndex of this.selection) {
-    //     this.copyOfSelectedVertices.set(vertexIndex, new ƒ.Vector3(vertices[vertexIndex].position.x, vertices[vertexIndex].position.y, vertices[vertexIndex].position.z));
-    //   }
-    // }
-
   }
 }

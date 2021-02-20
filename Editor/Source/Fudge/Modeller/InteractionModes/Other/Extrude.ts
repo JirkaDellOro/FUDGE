@@ -11,6 +11,7 @@ namespace Fudge {
     private oldPosition: ƒ.Vector3;
     private axesSelectionHandler: AxesSelectionHandler;
     private vertexSelected: boolean = false;
+    private orientation: ƒ.Vector3;
 
     constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>) {
       super(viewport, editableNode, selection);
@@ -31,8 +32,13 @@ namespace Fudge {
       this.oldPosition = this.getPointerPosition(_event, this.distance);
       if (this.getDistanceFromRayToCenterOfNode(_event, this.distance).magnitude > 1)
         return;
-      //let state: string = mesh.getState();
-      this.selection = mesh.extrude(this.selection);
+      this.orientation = mesh.extrude(this.selection);
+
+      let newSelection: number[] = [];
+      for (let i: number = 0; i < this.selection.length; i++) 
+        newSelection.push(mesh.uniqueVertices.length - this.selection.length + i);
+      this.selection = newSelection;
+
       let event: CustomEvent = new CustomEvent(ƒui.EVENT.CHANGE, { bubbles: true, detail: this.selection });
       ƒ.EventTargetStatic.dispatchEvent(event);
       this.isExtruded = true;
@@ -47,49 +53,46 @@ namespace Fudge {
         return;
       this.isExtruded = false;
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
-      // maybe change this after all idk looks weird atm
       mesh.updateNormals();
-      //this.createNormalArrows();
       return mesh.getState();
     }
 
     onmove(_event: ƒ.EventPointer): void {
-      if (this.vertexSelected)
-        return;
-
-      if (!this.isExtruded)  
+      if (this.vertexSelected || !this.isExtruded)
         return;
 
       let newPos: ƒ.Vector3 = this.getPointerPosition(_event, this.distance);
       let diff: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(newPos, this.oldPosition);
 
-      let translationVector: ƒ.Vector3 = new ƒ.Vector3(0, 0, 0);
+      let translationVector: ƒ.Vector3 = new ƒ.Vector3(this.orientation.x, this.orientation.y, this.orientation.z);
       let selectedAxes: Axis[] = this.axesSelectionHandler.getSelectedAxes();
+      //let translationVector: ƒ.Vector3 = new ƒ.Vector3(0, 0, 0);
 
-      // dunno if we should keep this because atm normal calculation does not work if wrong axes are selected
-      for (let axis of selectedAxes) {
-        switch (axis) {
-          case Axis.X:
-            translationVector.x = diff.x;
-            break;
-          case Axis.Y:
-            translationVector.y = diff.y;
-            break;
-          case Axis.Z:
-            translationVector.z = diff.z;
-            break;
-        }
-      }
-      if (selectedAxes.length === 0)
+      let distance: number = ƒ.Vector3.DOT(diff, this.orientation) > 0 ? diff.magnitude : diff.magnitude * -1;
+      translationVector.scale(distance);
+      // diff.x *= Math.abs(this.orientation.x);
+      // diff.y *= Math.abs(this.orientation.y);
+      // diff.z *= Math.abs(this.orientation.z);
+      // for (let axis of selectedAxes) {
+      //   switch (axis) {
+      //     case Axis.X:
+      //       translationVector.x = diff.x;
+      //       break;
+      //     case Axis.Y:
+      //       translationVector.y = diff.y;
+      //       break;
+      //     case Axis.Z:
+      //       translationVector.z = diff.z;
+      //       break;
+      //   }
+      // }
+      // if (selectedAxes.length === 0)
+      //   translationVector = diff;
+      if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.SHIFT_LEFT, ƒ.KEYBOARD_CODE.SHIFT_RIGHT])) 
         translationVector = diff;
-
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
-
-
       mesh.translateVertices(translationVector, this.selection);
       this.oldPosition = newPos;
-      // let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
-      // mesh.updatePositionOfVertices(this.selection, this.copyOfSelectedVertices, this.getDistanceFromRayToCenterOfNode(_event, this.distance), this.offset);
     }
 
     onkeydown(pressedKey: string): void {

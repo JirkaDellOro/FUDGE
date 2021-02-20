@@ -53,35 +53,31 @@ namespace Fudge {
       let currentPosition: ƒ.Vector3 = this.getPointerPosition(_event, this.distanceCameraToCentroid);
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
 
-      let scaleMatrix: ƒ.Matrix4x4;
+      //let scaleMatrix: ƒ.Matrix4x4;
       // let abs: number = ƒ.Vector3.DIFFERENCE(diff, this.distanceRayToCenter);
 
       // TODO: Fix offset and this should be correct
 
-      let abs: number = ƒ.Vector3.DIFFERENCE(currentPosition, this.centroid).magnitude;
-      let scale: number = currentPosition.magnitude / this.oldPosition.magnitude;
-      let testscale: number = ƒ.Vector3.DIFFERENCE(currentPosition, this.centroid).magnitude / this.distancePointerToCentroid.magnitude;
+      // let abs: number = ƒ.Vector3.DIFFERENCE(currentPosition, this.centroid).magnitude;
+      // let scale: number = currentPosition.magnitude / this.oldPosition.magnitude;
+      let scalar: number = ƒ.Vector3.DIFFERENCE(currentPosition, this.centroid).magnitude / this.distancePointerToCentroid.magnitude;
       // let abs: number = ƒ.Vector3.DOT(newPosition, this.distanceRayToCenter);
       let scaleVector: ƒ.Vector3 = ƒ.Vector3.ONE();
       for (let pickedAxis of selectedAxes) {
         switch (pickedAxis) {
           case Axis.X:
-            //scaleVector.x = abs;
-            scaleVector.x = testscale;
+            scaleVector.x = scalar;
             break;
           case Axis.Y:
-            //scaleVector.y = abs;
-            scaleVector.y = testscale;
+            scaleVector.y = scalar;
             break;
           case Axis.Z:
-            //scaleVector.z = abs;
-            scaleVector.z = testscale;
+            scaleVector.z = scalar;
             break;
         }
       }
-      scaleMatrix = ƒ.Matrix4x4.SCALING(scaleVector);
-      mesh.newScaleBy(scaleMatrix, this.copyOfSelectedVertices, this.selection);
-      //mesh.scaleBy(scaleMatrix, this.copyOfSelectedVertices, this.centroid, this.selection);
+      let scaleMatrix: ƒ.Matrix4x4 = ƒ.Matrix4x4.SCALING(scaleVector);
+      mesh.scaleBy(scaleMatrix, this.copyOfSelectedVertices, this.selection);
     }
 
     onkeydown (_pressedKey: string): void {

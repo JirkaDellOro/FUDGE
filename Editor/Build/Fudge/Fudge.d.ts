@@ -488,6 +488,7 @@ declare namespace Fudge {
         private oldPosition;
         private axesSelectionHandler;
         private vertexSelected;
+        private orientation;
         constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>);
         onmousedown(_event: ƒ.EventPointer): void;
         onmouseup(_event: ƒ.EventPointer): string;
@@ -689,7 +690,7 @@ declare namespace Fudge {
         private vertices;
         private originalVertexToNewUniqueVertexMap;
         constructor(_numberOfFaces: number, _vertices: Float32Array, _uniqueVertices: UniqueVertex[], _numberOfIndices: number);
-        extrude(selection: number[]): void;
+        extrude(selection: number[]): number[];
         private findEdgesFromData;
         private extrudeEdge;
         private addNewTriangles;
@@ -706,8 +707,8 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     class ModifiableMesh extends ƒ.Mesh {
+        #private;
         static readonly vertexSize: number;
-        private _uniqueVertices;
         constructor();
         get uniqueVertices(): UniqueVertex[];
         getState(): string;
@@ -718,12 +719,12 @@ declare namespace Fudge {
         removeFace(selection: number[]): void;
         updateNormals(): void;
         invertFace(selection: number[]): void;
-        newScaleBy(matrix: ƒ.Matrix4x4, oldVertices: Map<number, ƒ.Vector3>, selection?: number[]): void;
-        scaleBy(matrix: ƒ.Matrix4x4, oldVertices: Map<number, ƒ.Vector3>, centroid: ƒ.Vector3, selection?: number[]): void;
+        scaleBy(scaleMatrix: ƒ.Matrix4x4, oldVertices: Map<number, ƒ.Vector3>, selection?: number[]): void;
         translateVertices(difference: ƒ.Vector3, selection: number[]): void;
         rotateBy(matrix: ƒ.Matrix4x4, center: ƒ.Vector3, selection?: number[]): void;
-        extrude(selectedVertices: number[]): number[];
+        extrude(selectedVertices: number[]): ƒ.Vector3;
         updatePositionOfVertices(selectedIndices: number[], oldVertexPositions: Map<number, ƒ.Vector3>, diffToOldPosition: ƒ.Vector3, offset: ƒ.Vector3): void;
+        private rearrangeIndicesAfterRemove;
         private countNumberOfFaces;
         private findCorrectFace;
         protected updatePositionOfVertex(vertexIndex: number, newPosition: ƒ.Vector3): void;
