@@ -18,6 +18,7 @@ namespace HeightMap {
   export let viewport: f.Viewport;
 
   let controlled: Controlled;
+  let chassis: f.Node;
   let tyreFL: f.Node;
   let tyreFR: f.Node;
   let tyreBL: f.Node;
@@ -42,11 +43,6 @@ namespace HeightMap {
 
     await setupScene();
     setupControls();
-
-    // controlled.height = getHeightOnTerrain(gridMeshFlat, controlled);
-
-    // console.log(gridMeshFlat.indices);
-    // console.log(gridMeshFlat.vertices);
 
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, hndLoop);
     ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 30);
@@ -85,9 +81,13 @@ namespace HeightMap {
 
     controlled = new Controlled("Cube", f.Matrix4x4.IDENTITY()/*, matRed, meshCube*/);
     controlled.mtxLocal.translation = new f.Vector3( 0.3, 0, 0.3 );
-    controlled.mtxLocal.rotateZ(1);
+    controlled.mtxLocal.lookAt(f.Vector3.SUM(controlled.mtxLocal.translation, f.Vector3.Y(1)), f.Vector3.X(1));
 
-    controlled.mtxLocal.lookAt(f.Vector3.SUM(controlled.mtxLocal.translation, f.Vector3.Y(1)));
+    chassis = Scenes.createCompleteMeshNode("Chassis", matRed, meshCube);
+    chassis.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(1, 0.5, 0.3));
+    chassis.getComponent(f.ComponentMesh).pivot.translateX(0.5)
+    chassis.mtxLocal.scale(f.Vector3.ONE(0.1));
+    chassis.mtxLocal.translateZ(0.2)
 
     // controlled.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.1,0.05,0.025));
     // controlled.getComponent(f.ComponentMesh).pivot.translate(new f.Vector3(0.5, 0, 0.5));
@@ -161,7 +161,7 @@ namespace HeightMap {
     let cmpCamera: f.ComponentCamera = Scenes.createCamera(new f.Vector3(0, 2, 1), new f.Vector3(0, 0, 0));
 
     img = new ƒ.TextureImage();
-    await img.load("TestMap.png");
+    await img.load("test2.png");
 
     gridMeshFlat = new f.MeshTerrain("HeightMap", img);
     gridFlat = Scenes.createCompleteMeshNode("Grid", matFlat, gridMeshFlat);
@@ -202,6 +202,7 @@ namespace HeightMap {
     graph.addChild(controlled);
     controlled.addChild(frontAxis);
     controlled.addChild(rearAxis);
+    controlled.addChild(chassis);
 
     // controlled.addChild(test2)
     rearAxis.addChild(test3)
@@ -210,7 +211,7 @@ namespace HeightMap {
     // tyreFR.addChild(test3);
     graph.addChild(test);
     
-    controlled.addChild(arrowRed);
+    // controlled.addChild(arrowRed);
 
     frontAxis.addChild(tyreFL);
     frontAxis.addChild(tyreFR);

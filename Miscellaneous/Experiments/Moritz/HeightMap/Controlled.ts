@@ -13,8 +13,8 @@ namespace HeightMap {
     private groundClearance: number = 0.025;
 
     public setUpAxis(): void {
-      this.axisSpeed.setDelay(1000);
-      this.axisRotation.setDelay(1000);
+      this.axisSpeed.setDelay(2000);
+      this.axisRotation.setDelay(300);
     }
 
     public update(_timeFrame: number): void {
@@ -49,8 +49,8 @@ namespace HeightMap {
       vecFrontAxis = f.Vector3.SCALE(vecFrontAxis, 0.5);
       vecRearAxis = f.Vector3.SCALE(vecRearAxis, 0.5);
 
-      let posFrontAxis = new f.Vector3(frontAxis.mtxWorld.translation.x, (posFL.origin.y + posFR.origin.y)/2 + this.groundClearance, frontAxis.mtxWorld.translation.z);
-      let posRearAxis = new f.Vector3(rearAxis.mtxWorld.translation.x, (posBL.origin.y + posBR.origin.y)/2 + this.groundClearance, rearAxis.mtxWorld.translation.z);
+      let posFrontAxis: f.Vector3 = new f.Vector3(frontAxis.mtxWorld.translation.x, (posFL.origin.y + posFR.origin.y)/2 + this.groundClearance, frontAxis.mtxWorld.translation.z);
+      let posRearAxis: f.Vector3 = new f.Vector3(rearAxis.mtxWorld.translation.x, (posBL.origin.y + posBR.origin.y)/2 + this.groundClearance, rearAxis.mtxWorld.translation.z);
 
       let vecMidAxis = f.Vector3.DIFFERENCE(posFrontAxis, posRearAxis);
 
@@ -59,7 +59,7 @@ namespace HeightMap {
 
       let chassisNormal: f.Vector3 = f.Vector3.SUM(f.Vector3.NORMALIZATION(frontNormal), f.Vector3.NORMALIZATION(backNormal));
 
-      f.RenderManager.setupTransformAndLights;
+      console.log((posBL.origin.y + posBR.origin.y)/2 + this.groundClearance);
       this.mtxLocal.translation = new f.Vector3(this.mtxLocal.translation.x, distance + (posBL.origin.y + posBR.origin.y)/2 + this.groundClearance, this.mtxLocal.translation.z);
 
       // if(!backNormal.equals(f.Vector3.ZERO()) && !backNormal.equals(f.Vector3.ZERO())){
@@ -69,10 +69,10 @@ namespace HeightMap {
         
         // chassisNormal.transform(this.mtxWorldInverse, false)
 
-        this.mtxLocal.lookAt(f.Vector3.SUM(chassisNormal, this.mtxLocal.translation));
+        this.mtxLocal.lookAt(f.Vector3.SUM(chassisNormal, this.mtxLocal.translation), );
         // arrowRed.mtxLocal.lookAt(f.Vector3.SUM(chassisNormal, this.mtxLocal.translation));
-        frontAxis.mtxLocal.lookAt(f.Vector3.SUM(frontNormal, frontAxis.mtxLocal.translation))
-        rearAxis.mtxLocal.lookAt(f.Vector3.SUM(backNormal, rearAxis.mtxLocal.translation))
+        frontAxis.mtxLocal.lookAt(f.Vector3.SUM(frontNormal, frontAxis.mtxLocal.translation), new f.Vector3(0,1,0));
+        rearAxis.mtxLocal.lookAt(f.Vector3.SUM(backNormal, rearAxis.mtxLocal.translation), new f.Vector3(0,1,0));
         
         // this.mtxLocal.rotateY(chRot * 0.1);
         

@@ -13,8 +13,8 @@ var HeightMap;
             this.groundClearance = 0.025;
         }
         setUpAxis() {
-            this.axisSpeed.setDelay(1000);
-            this.axisRotation.setDelay(1000);
+            this.axisSpeed.setDelay(2000);
+            this.axisRotation.setDelay(300);
         }
         update(_timeFrame) {
             let distance = this.axisSpeed.getOutput() * this.maxSpeed * _timeFrame;
@@ -45,7 +45,7 @@ var HeightMap;
             let frontNormal = f.Vector3.CROSS(vecMidAxis, vecFrontAxis);
             let backNormal = f.Vector3.CROSS(vecMidAxis, vecRearAxis);
             let chassisNormal = f.Vector3.SUM(f.Vector3.NORMALIZATION(frontNormal), f.Vector3.NORMALIZATION(backNormal));
-            f.RenderManager.setupTransformAndLights;
+            console.log((posBL.origin.y + posBR.origin.y) / 2 + this.groundClearance);
             this.mtxLocal.translation = new f.Vector3(this.mtxLocal.translation.x, distance + (posBL.origin.y + posBR.origin.y) / 2 + this.groundClearance, this.mtxLocal.translation.z);
             // if(!backNormal.equals(f.Vector3.ZERO()) && !backNormal.equals(f.Vector3.ZERO())){
             frontNormal.transform(this.mtxWorldInverse, false);
@@ -53,8 +53,8 @@ var HeightMap;
             // chassisNormal.transform(this.mtxWorldInverse, false)
             this.mtxLocal.lookAt(f.Vector3.SUM(chassisNormal, this.mtxLocal.translation));
             // arrowRed.mtxLocal.lookAt(f.Vector3.SUM(chassisNormal, this.mtxLocal.translation));
-            frontAxis.mtxLocal.lookAt(f.Vector3.SUM(frontNormal, frontAxis.mtxLocal.translation));
-            rearAxis.mtxLocal.lookAt(f.Vector3.SUM(backNormal, rearAxis.mtxLocal.translation));
+            frontAxis.mtxLocal.lookAt(f.Vector3.SUM(frontNormal, frontAxis.mtxLocal.translation), new f.Vector3(0, 1, 0));
+            rearAxis.mtxLocal.lookAt(f.Vector3.SUM(backNormal, rearAxis.mtxLocal.translation), new f.Vector3(0, 1, 0));
             // this.mtxLocal.rotateY(chRot * 0.1);
             // }
             // frontAxis.mtxLocal.translation = new f.Vector3(frontAxis.mtxLocal.translation.x, frontAxis.mtxLocal.translation.y, (posFL.origin.y + posFR.origin.y)/2 + this.groundClearance);
