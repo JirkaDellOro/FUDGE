@@ -42,7 +42,7 @@ namespace Fudge {
         }
       }
 
-      let event: CustomEvent = new CustomEvent(ModellerEvents.SELECTION_UPDATE, { bubbles: true, detail: this.selection });
+      let event: CustomEvent = new CustomEvent(MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: this.selection });
       ƒ.EventTargetStatic.dispatchEvent(event);
 
       ƒ.Loop.removeEventListener(ƒ.EVENT.LOOP_FRAME, this.drawBox);
@@ -93,10 +93,10 @@ namespace Fudge {
 
     contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
       switch (Number(_item.id)) {
-        case ModellerMenu.DISPLAY_NORMALS:
+        case MODELLER_MENU.DISPLAY_NORMALS:
           this.toggleNormals();          
           break;
-        case ModellerMenu.INVERT_FACE:
+        case MODELLER_MENU.INVERT_FACE:
           (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).invertFace(this.selection);          
           break;
       }

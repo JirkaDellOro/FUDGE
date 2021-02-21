@@ -1,7 +1,7 @@
 /// <reference path="../InteractionMode.ts" />
 namespace Fudge {
   export abstract class AbstractRotation extends InteractionMode {
-    public readonly type: InteractionModes = InteractionModes.ROTATE;
+    public readonly type: INTERACTION_MODE = INTERACTION_MODE.ROTATE;
     public viewport: ƒ.Viewport;
     public selection: Array<number>;
     public editableNode: ƒ.Node;
@@ -24,10 +24,6 @@ namespace Fudge {
       let posRender: ƒ.Vector2 = this.getPosRenderFrom(_event);
       this.previousMousePos = new ƒ.Vector2(_event.clientX, _event.clientY);
       this.axesSelectionHandler.pickWidget(this.viewport.pickNodeAt(posRender));
-      let state: string = null;
-      // if (this.axesSelectionHandler.wasPicked) 
-      //   state = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
-      // return state;
     }
 
     onmouseup(_event: ƒ.EventPointer): string {
@@ -75,7 +71,7 @@ namespace Fudge {
 
     contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
       switch (Number(_item.id)) {
-        case ModellerMenu.DISPLAY_NORMALS:
+        case MODELLER_MENU.DISPLAY_NORMALS:
           this.toggleNormals();          
           break;
       }
@@ -100,7 +96,7 @@ namespace Fudge {
       let oldClientPosition: ƒ.Vector2 = new ƒ.Vector2(this.previousMousePos.x - meshCenterClient.x, this.previousMousePos.y - meshCenterClient.y);
       let angle: number = this.getAngle(newClientPosition, oldClientPosition);
       angle = angle * (180 / Math.PI);
-      let selectedAxes: Axis[] = this.axesSelectionHandler.getSelectedAxes();
+      let selectedAxes: AXIS[] = this.axesSelectionHandler.getSelectedAxes();
       let rotationMatrix: ƒ.Matrix4x4;
       /*
         TODO: check if we can make this work with multiple axis, but seems very hard to predict and utilize
@@ -108,13 +104,13 @@ namespace Fudge {
         at the moment the last selected axis is used, maybe find a better solution here too
       */
       switch (selectedAxes[selectedAxes.length - 1]) {
-        case Axis.X:
+        case AXIS.X:
           rotationMatrix = ƒ.Matrix4x4.ROTATION_X(angle);
           break;
-        case Axis.Y:
+        case AXIS.Y:
           rotationMatrix = ƒ.Matrix4x4.ROTATION_Y(angle);
           break;
-        case Axis.Z:
+        case AXIS.Z:
           rotationMatrix = ƒ.Matrix4x4.ROTATION_Z(angle);
           break;
       }

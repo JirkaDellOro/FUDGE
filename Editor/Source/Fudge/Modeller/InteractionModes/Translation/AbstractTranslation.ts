@@ -1,6 +1,6 @@
 namespace Fudge {
   export abstract class AbstractTranslation extends InteractionMode {
-    public readonly type: InteractionModes = InteractionModes.TRANSLATE;
+    public readonly type: INTERACTION_MODE = INTERACTION_MODE.TRANSLATE;
     public viewport: ƒ.Viewport;
     public selection: Array<number>;
     public editableNode: ƒ.Node;
@@ -61,18 +61,18 @@ namespace Fudge {
       let newPos: ƒ.Vector3 = this.getPointerPosition(_event, this.distance);
       let diff: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(newPos, this.oldPosition);
       let translationVector: ƒ.Vector3 = new ƒ.Vector3(0, 0, 0);
-      let selectedAxes: Axis[] = this.axesSelectionHandler.getSelectedAxes();
+      let selectedAxes: AXIS[] = this.axesSelectionHandler.getSelectedAxes();
 
       if (!this.dragging) {
         for (let axis of selectedAxes) {
           switch (axis) {
-            case Axis.X:
+            case AXIS.X:
               translationVector.x = diff.x;
               break;
-            case Axis.Y:
+            case AXIS.Y:
               translationVector.y = diff.y;
               break;
-            case Axis.Z:
+            case AXIS.Z:
               translationVector.z = diff.z;
               break;
           }
@@ -105,7 +105,7 @@ namespace Fudge {
 
     contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
       switch (Number(_item.id)) {
-        case ModellerMenu.DISPLAY_NORMALS:
+        case MODELLER_MENU.DISPLAY_NORMALS:
           this.toggleNormals();          
           break;
       }

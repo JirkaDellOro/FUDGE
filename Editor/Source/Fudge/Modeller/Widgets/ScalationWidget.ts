@@ -1,7 +1,7 @@
 namespace Fudge {
   import ƒ = FudgeCore;
   export class ScalationWidget extends IWidget {
-    protected componentToAxisMap: Map<ƒ.Node, Axis> = new Map();
+    protected componentToAxisMap: Map<ƒ.Node, AXIS> = new Map();
 
     constructor (_name: string = "ScalationWidget", _transform: ƒ.Matrix4x4 = new ƒ.Matrix4x4()) {
       super(_name); 
@@ -9,9 +9,9 @@ namespace Fudge {
       let yScaleWidget: WidgetPillar = new WidgetPillar("Y_Scalation", new ƒ.Color(0, 1, 0));
       let zScaleWidget: WidgetPillar = new WidgetPillar("Z_Scalation", new ƒ.Color(0, 0, 1));
 
-      this.componentToAxisMap.set(xScaleWidget, Axis.X);
-      this.componentToAxisMap.set(yScaleWidget, Axis.Y);
-      this.componentToAxisMap.set(zScaleWidget, Axis.Z);
+      this.componentToAxisMap.set(xScaleWidget, AXIS.X);
+      this.componentToAxisMap.set(yScaleWidget, AXIS.Y);
+      this.componentToAxisMap.set(zScaleWidget, AXIS.Z);
 
       xScaleWidget.mtxLocal.rotateZ(-90);
       zScaleWidget.mtxLocal.rotateX(90);
@@ -22,10 +22,10 @@ namespace Fudge {
       this.fillColorDict();
     }
 
-    public isHitWidgetComponent(_hits: ƒ.RayHit[]): {axis: Axis, additionalNodes: ƒ.Node[]} {
+    public isHitWidgetComponent(_hits: ƒ.RayHit[]): {axis: AXIS, additionalNodes: ƒ.Node[]} {
       let additionalNodes: ƒ.Node[] = [];
       let lowestZBuffer: number = Number.MAX_VALUE;
-      let pickedAxis: Axis;
+      let pickedAxis: AXIS;
       let wasPicked: boolean = false;
       for (let hit of _hits) {
         if (hit.zBuffer == 0)

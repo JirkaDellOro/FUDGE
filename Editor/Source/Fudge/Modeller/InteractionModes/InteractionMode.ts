@@ -2,7 +2,7 @@ namespace Fudge {
   import ƒAid = FudgeAid;
   export abstract class InteractionMode implements IInteractionMode {
     protected static normalsAreDisplayed: boolean = false;    
-    public readonly type: InteractionModes;
+    public readonly type: INTERACTION_MODE;
     public selection: Array<number>;
     public viewport: ƒ.Viewport;
     public editableNode: ƒ.Node;

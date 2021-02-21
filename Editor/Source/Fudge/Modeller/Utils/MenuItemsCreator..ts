@@ -5,7 +5,7 @@ namespace Fudge {
         label: "toggle normals",
         type: "checkbox",
         checked: normalsAreDisplayed,
-        id: String(ModellerMenu.DISPLAY_NORMALS),
+        id: String(MODELLER_MENU.DISPLAY_NORMALS),
         click: _callback
       });
       return item;
@@ -14,7 +14,7 @@ namespace Fudge {
     public static getInvertFaceItem(_callback: ContextMenuCallback): Electron.MenuItem {
       let item: Electron.MenuItem = new remote.MenuItem({
         label: "invert face",
-        id: String(ModellerMenu.INVERT_FACE),
+        id: String(MODELLER_MENU.INVERT_FACE),
         click: _callback
       });
       return item;
@@ -25,7 +25,7 @@ namespace Fudge {
         type: "checkbox",
         checked: ViewModellerScene.isBackfaceCullingEnabled,
         label: "toggle backface culling",
-        id: String(ModellerMenu.TOGGLE_BACKFACE_CULLING),
+        id: String(MODELLER_MENU.TOGGLE_BACKFACE_CULLING),
         click: _callback
       });
       return item;

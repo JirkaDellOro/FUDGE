@@ -2,8 +2,8 @@ namespace Fudge {
   export class AxesSelectionHandler {
     public isSelectedViaKeyboard: boolean = false;
     private _widget: IWidget;
-    private selectedAxes: Axis[] = [];
-    private pickedAxis: Axis;
+    private selectedAxes: AXIS[] = [];
+    private pickedAxis: AXIS;
     private axisIsPicked: boolean = false;
 
 
@@ -28,7 +28,7 @@ namespace Fudge {
     }
 
     public pickWidget(_hits: ƒ.RayHit[]): ƒ.Node[] {
-      let result: {axis: Axis, additionalNodes: ƒ.Node[]} = this._widget.isHitWidgetComponent(_hits);
+      let result: {axis: AXIS, additionalNodes: ƒ.Node[]} = this._widget.isHitWidgetComponent(_hits);
       this.pickedAxis = result.axis;
       if (this.pickedAxis)
         this.axisIsPicked = true;
@@ -39,8 +39,8 @@ namespace Fudge {
       return this.axisIsPicked || this.isSelectedViaKeyboard;
     }
     
-    public getSelectedAxes(): Axis[] {
-      let selectedAxes: Axis[] = this.selectedAxes.slice();
+    public getSelectedAxes(): AXIS[] {
+      let selectedAxes: AXIS[] = this.selectedAxes.slice();
       if (!this.selectedAxes.includes(this.pickedAxis) && this.axisIsPicked) {
         selectedAxes.push(this.pickedAxis);
       }
@@ -49,7 +49,7 @@ namespace Fudge {
 
     public addAxisOf(_key: string): boolean {
       let isNewSelection: boolean = false;
-      let selectedAxis: Axis = this.getSelectedAxisBy(_key);
+      let selectedAxis: AXIS = this.getSelectedAxisBy(_key);
       if (!this.selectedAxes.includes(selectedAxis) && selectedAxis) {
         this.selectedAxes.push(selectedAxis);
         if (this._widget) 
@@ -60,7 +60,7 @@ namespace Fudge {
     }
 
     public removeAxisOf(_key: string): void {
-      let selectedAxis: Axis = this.getSelectedAxisBy(_key);
+      let selectedAxis: AXIS = this.getSelectedAxisBy(_key);
       if (!selectedAxis) 
         return;
       let index: number = this.selectedAxes.indexOf(selectedAxis);
@@ -77,17 +77,17 @@ namespace Fudge {
       return this.selectedAxes.length > 0;
     }
 
-    private getSelectedAxisBy(_key: string): Axis {
-      let selectedAxis: Axis;
+    private getSelectedAxisBy(_key: string): AXIS {
+      let selectedAxis: AXIS;
       switch (_key) {
         case "x": 
-          selectedAxis = Axis.X;
+          selectedAxis = AXIS.X;
           break;
         case "y": 
-          selectedAxis = Axis.Y;
+          selectedAxis = AXIS.Y;
           break;
         case "z":
-          selectedAxis = Axis.Z;
+          selectedAxis = AXIS.Z;
           break;
       }
       return selectedAxis;

@@ -14,7 +14,7 @@ namespace Fudge {
       this.setTitle("Vertices");
 
       this.fillContent();
-      ƒ.EventTargetStatic.addEventListener(ModellerEvents.SELECTION_UPDATE, this.hndEvent);
+      ƒ.EventTargetStatic.addEventListener(MODELLER_EVENTS.SELECTION_UPDATE, this.hndEvent);
       _container.on("destroy", this.cleanup);
       // this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       // this.parentPanel.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setSelectedNode);

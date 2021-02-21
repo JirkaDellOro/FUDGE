@@ -23,7 +23,7 @@ namespace Fudge {
       this.node = this.graph.getChildrenByName("Default")[0];
       this.controller = new Controller(this.viewport, this.node, this.dom);
       //new CameraControl(this.viewport);
-      this.dom.addEventListener(ModellerEvents.HEADER_APPEND, this.changeHeader);
+      this.dom.addEventListener(MODELLER_EVENTS.HEADER_APPEND, this.changeHeader);
       this.dom.append(this.canvas);
       this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.updateContextMenu);
@@ -98,7 +98,7 @@ namespace Fudge {
 
     protected contextMenuCallback = (_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void => {
       switch (Number(_item.id)) {
-        case ModellerMenu.TOGGLE_BACKFACE_CULLING: 
+        case MODELLER_MENU.TOGGLE_BACKFACE_CULLING: 
           this.toggleBackfaceCulling();
       }
       this.controller.contextMenuCallback(_item, _window, _event);

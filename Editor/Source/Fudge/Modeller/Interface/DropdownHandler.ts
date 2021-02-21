@@ -72,13 +72,13 @@ namespace Fudge {
       dropdown.classList.toggle("show");
     }
 
-    private setInteractionMode = (_name: InteractionModes, _event: Event): void => {
+    private setInteractionMode = (_name: INTERACTION_MODE, _event: Event): void => {
       this.controller.setInteractionMode(_name);
       // this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
       this.updateButtontext();
     }
 
-    private setControlMode = (_name: ControlMode, _event: Event): void => {
+    private setControlMode = (_name: CONTROL_MODE, _event: Event): void => {
       this.controller.setControlMode(_name);
       // this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
       this.updateButtontext();

@@ -1383,18 +1383,18 @@ var Fudge;
             this.currentState = -1;
             // TODO: change those shortcuts
             this.controlModesMap = new Map([
-                [Fudge.ControlMode.OBJECT_MODE, { type: new Fudge.ObjectMode(), shortcut: "o" }],
-                [Fudge.ControlMode.EDIT_MODE, { type: new Fudge.EditMode(), shortcut: "e" }]
+                [Fudge.CONTROL_MODE.OBJECT_MODE, { type: new Fudge.ObjectMode(), shortcut: "o" }],
+                [Fudge.CONTROL_MODE.EDIT_MODE, { type: new Fudge.EditMode(), shortcut: "e" }]
             ]);
             this.contextMenuCallback = (_item, _window, _event) => {
                 this.interactionMode.contextMenuCallback(_item, _window, _event);
             };
             this.viewport = _viewport;
-            this.currentControlMode = this.controlModesMap.get(Fudge.ControlMode.OBJECT_MODE).type;
+            this.currentControlMode = this.controlModesMap.get(Fudge.CONTROL_MODE.OBJECT_MODE).type;
             this.editableNode = _editableNode;
             this.dom = _dom;
             this.saveState(this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getState());
-            this.setInteractionMode(Fudge.InteractionModes.IDLE);
+            this.setInteractionMode(Fudge.INTERACTION_MODE.IDLE);
         }
         get controlMode() {
             return this.currentControlMode;
@@ -1469,7 +1469,7 @@ var Fudge;
             this.interactionMode?.cleanup();
             this.interactionMode = this.currentControlMode.formerMode || new Fudge.IdleMode(this.viewport, this.editableNode);
             this.interactionMode.initialize();
-            ƒ.EventTargetStatic.dispatchEvent(new CustomEvent(Fudge.ModellerEvents.SELECTION_UPDATE, { bubbles: true, detail: this.interactionMode.selection }));
+            ƒ.EventTargetStatic.dispatchEvent(new CustomEvent(Fudge.MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: this.interactionMode.selection }));
             this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
             console.log("Current Mode: " + this.interactionMode.type);
         }
@@ -1479,10 +1479,10 @@ var Fudge;
             let type = this.currentControlMode.modes[mode]?.type || Fudge.IdleMode;
             let selection = this.interactionMode?.selection;
             this.interactionMode = new type(this.viewport, this.editableNode, selection);
-            if (selection && this.controlMode.type === Fudge.ControlMode.EDIT_MODE)
+            if (selection && this.controlMode.type === Fudge.CONTROL_MODE.EDIT_MODE)
                 this.interactionMode.selection = selection;
             this.interactionMode.initialize();
-            ƒ.EventTargetStatic.dispatchEvent(new CustomEvent(Fudge.ModellerEvents.SELECTION_UPDATE, { bubbles: true, detail: this.interactionMode.selection }));
+            ƒ.EventTargetStatic.dispatchEvent(new CustomEvent(Fudge.MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: this.interactionMode.selection }));
             this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
             console.log("Current Mode: " + this.interactionMode.type);
         }
@@ -1525,37 +1525,37 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    let ControlMode;
-    (function (ControlMode) {
-        ControlMode["OBJECT_MODE"] = "Object-Mode";
-        ControlMode["EDIT_MODE"] = "Edit-Mode";
-    })(ControlMode = Fudge.ControlMode || (Fudge.ControlMode = {}));
-    let InteractionModes;
-    (function (InteractionModes) {
-        InteractionModes["SELECT"] = "Box-Select";
-        InteractionModes["TRANSLATE"] = "Translate";
-        InteractionModes["ROTATE"] = "Rotate";
-        InteractionModes["SCALE"] = "Scale";
-        InteractionModes["EXTRUDE"] = "Extrude";
-        InteractionModes["IDLE"] = "Idle";
-    })(InteractionModes = Fudge.InteractionModes || (Fudge.InteractionModes = {}));
-    let Axis;
-    (function (Axis) {
-        Axis["X"] = "X";
-        Axis["Y"] = "Y";
-        Axis["Z"] = "Z";
-    })(Axis = Fudge.Axis || (Fudge.Axis = {}));
-    let ModellerEvents;
-    (function (ModellerEvents) {
-        ModellerEvents["HEADER_APPEND"] = "headerappend";
-        ModellerEvents["SELECTION_UPDATE"] = "selectionupdate";
-    })(ModellerEvents = Fudge.ModellerEvents || (Fudge.ModellerEvents = {}));
-    let ModellerMenu;
-    (function (ModellerMenu) {
-        ModellerMenu[ModellerMenu["DISPLAY_NORMALS"] = 0] = "DISPLAY_NORMALS";
-        ModellerMenu[ModellerMenu["INVERT_FACE"] = 1] = "INVERT_FACE";
-        ModellerMenu[ModellerMenu["TOGGLE_BACKFACE_CULLING"] = 2] = "TOGGLE_BACKFACE_CULLING";
-    })(ModellerMenu = Fudge.ModellerMenu || (Fudge.ModellerMenu = {}));
+    let CONTROL_MODE;
+    (function (CONTROL_MODE) {
+        CONTROL_MODE["OBJECT_MODE"] = "Object-Mode";
+        CONTROL_MODE["EDIT_MODE"] = "Edit-Mode";
+    })(CONTROL_MODE = Fudge.CONTROL_MODE || (Fudge.CONTROL_MODE = {}));
+    let INTERACTION_MODE;
+    (function (INTERACTION_MODE) {
+        INTERACTION_MODE["SELECT"] = "Box-Select";
+        INTERACTION_MODE["TRANSLATE"] = "Translate";
+        INTERACTION_MODE["ROTATE"] = "Rotate";
+        INTERACTION_MODE["SCALE"] = "Scale";
+        INTERACTION_MODE["EXTRUDE"] = "Extrude";
+        INTERACTION_MODE["IDLE"] = "Idle";
+    })(INTERACTION_MODE = Fudge.INTERACTION_MODE || (Fudge.INTERACTION_MODE = {}));
+    let AXIS;
+    (function (AXIS) {
+        AXIS["X"] = "X";
+        AXIS["Y"] = "Y";
+        AXIS["Z"] = "Z";
+    })(AXIS = Fudge.AXIS || (Fudge.AXIS = {}));
+    let MODELLER_EVENTS;
+    (function (MODELLER_EVENTS) {
+        MODELLER_EVENTS["HEADER_APPEND"] = "headerappend";
+        MODELLER_EVENTS["SELECTION_UPDATE"] = "selectionupdate";
+    })(MODELLER_EVENTS = Fudge.MODELLER_EVENTS || (Fudge.MODELLER_EVENTS = {}));
+    let MODELLER_MENU;
+    (function (MODELLER_MENU) {
+        MODELLER_MENU[MODELLER_MENU["DISPLAY_NORMALS"] = 0] = "DISPLAY_NORMALS";
+        MODELLER_MENU[MODELLER_MENU["INVERT_FACE"] = 1] = "INVERT_FACE";
+        MODELLER_MENU[MODELLER_MENU["TOGGLE_BACKFACE_CULLING"] = 2] = "TOGGLE_BACKFACE_CULLING";
+    })(MODELLER_MENU = Fudge.MODELLER_MENU || (Fudge.MODELLER_MENU = {}));
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -1568,13 +1568,13 @@ var Fudge;
     class EditMode extends Fudge.AbstractControlMode {
         constructor() {
             super(...arguments);
-            this.type = Fudge.ControlMode.EDIT_MODE;
+            this.type = Fudge.CONTROL_MODE.EDIT_MODE;
             this.modes = {
-                [Fudge.InteractionModes.SELECT]: { type: Fudge.EditSelection, shortcut: "s" },
-                [Fudge.InteractionModes.ROTATE]: { type: Fudge.EditRotation, shortcut: "r" },
-                [Fudge.InteractionModes.TRANSLATE]: { type: Fudge.EditTranslation, shortcut: "t" },
-                [Fudge.InteractionModes.EXTRUDE]: { type: Fudge.Extrude, shortcut: "e" },
-                [Fudge.InteractionModes.SCALE]: { type: Fudge.EditScalation, shortcut: "c" }
+                [Fudge.INTERACTION_MODE.SELECT]: { type: Fudge.EditSelection, shortcut: "s" },
+                [Fudge.INTERACTION_MODE.ROTATE]: { type: Fudge.EditRotation, shortcut: "r" },
+                [Fudge.INTERACTION_MODE.TRANSLATE]: { type: Fudge.EditTranslation, shortcut: "t" },
+                [Fudge.INTERACTION_MODE.EXTRUDE]: { type: Fudge.Extrude, shortcut: "e" },
+                [Fudge.INTERACTION_MODE.SCALE]: { type: Fudge.EditScalation, shortcut: "c" }
             };
         }
     }
@@ -1585,11 +1585,11 @@ var Fudge;
     class ObjectMode extends Fudge.AbstractControlMode {
         constructor() {
             super(...arguments);
-            this.type = Fudge.ControlMode.OBJECT_MODE;
+            this.type = Fudge.CONTROL_MODE.OBJECT_MODE;
             this.modes = {
-                [Fudge.InteractionModes.ROTATE]: { type: Fudge.ObjectRotation, shortcut: "r" },
-                [Fudge.InteractionModes.TRANSLATE]: { type: Fudge.ObjectTranslation, shortcut: "t" },
-                [Fudge.InteractionModes.SCALE]: { type: Fudge.ObjectScalation, shortcut: "c" }
+                [Fudge.INTERACTION_MODE.ROTATE]: { type: Fudge.ObjectRotation, shortcut: "r" },
+                [Fudge.INTERACTION_MODE.TRANSLATE]: { type: Fudge.ObjectTranslation, shortcut: "t" },
+                [Fudge.INTERACTION_MODE.SCALE]: { type: Fudge.ObjectScalation, shortcut: "c" }
             };
         }
     }
@@ -1718,7 +1718,7 @@ var Fudge;
     class Extrude extends Fudge.InteractionMode {
         constructor(viewport, editableNode, selection) {
             super(viewport, editableNode, selection);
-            this.type = Fudge.InteractionModes.EXTRUDE;
+            this.type = Fudge.INTERACTION_MODE.EXTRUDE;
             this.isExtruded = false;
             this.vertexSelected = false;
             // TODO: check if pivot is still correct or if we need to use the container
@@ -1806,10 +1806,10 @@ var Fudge;
         }
         contextMenuCallback(_item, _window, _event) {
             switch (Number(_item.id)) {
-                case Fudge.ModellerMenu.DISPLAY_NORMALS:
+                case Fudge.MODELLER_MENU.DISPLAY_NORMALS:
                     this.toggleNormals();
                     break;
-                case Fudge.ModellerMenu.INVERT_FACE:
+                case Fudge.MODELLER_MENU.INVERT_FACE:
                     this.editableNode.getComponent(ƒ.ComponentMesh).mesh.invertFace(this.selection);
                     break;
             }
@@ -1819,7 +1819,6 @@ var Fudge;
         }
         initialize() {
             this.axesSelectionHandler = new Fudge.AxesSelectionHandler();
-            //this.createNormalArrows();
         }
         cleanup() {
             for (let node of this.viewport.getGraph().getChildrenByName("normal")) {
@@ -1836,7 +1835,7 @@ var Fudge;
     class IdleMode extends Fudge.InteractionMode {
         constructor() {
             super(...arguments);
-            this.type = Fudge.InteractionModes.IDLE;
+            this.type = Fudge.INTERACTION_MODE.IDLE;
         }
         initialize() {
             //@ts-ignore
@@ -1879,7 +1878,7 @@ var Fudge;
     class AbstractRotation extends Fudge.InteractionMode {
         constructor() {
             super(...arguments);
-            this.type = Fudge.InteractionModes.ROTATE;
+            this.type = Fudge.INTERACTION_MODE.ROTATE;
         }
         initialize() {
             let widget = new Fudge.RotationWidget();
@@ -1894,10 +1893,6 @@ var Fudge;
             let posRender = this.getPosRenderFrom(_event);
             this.previousMousePos = new ƒ.Vector2(_event.clientX, _event.clientY);
             this.axesSelectionHandler.pickWidget(this.viewport.pickNodeAt(posRender));
-            let state = null;
-            // if (this.axesSelectionHandler.wasPicked) 
-            //   state = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
-            // return state;
         }
         onmouseup(_event) {
             let state = null;
@@ -1937,7 +1932,7 @@ var Fudge;
         }
         contextMenuCallback(_item, _window, _event) {
             switch (Number(_item.id)) {
-                case Fudge.ModellerMenu.DISPLAY_NORMALS:
+                case Fudge.MODELLER_MENU.DISPLAY_NORMALS:
                     this.toggleNormals();
                     break;
             }
@@ -1966,13 +1961,13 @@ var Fudge;
               at the moment the last selected axis is used, maybe find a better solution here too
             */
             switch (selectedAxes[selectedAxes.length - 1]) {
-                case Fudge.Axis.X:
+                case Fudge.AXIS.X:
                     rotationMatrix = ƒ.Matrix4x4.ROTATION_X(angle);
                     break;
-                case Fudge.Axis.Y:
+                case Fudge.AXIS.Y:
                     rotationMatrix = ƒ.Matrix4x4.ROTATION_Y(angle);
                     break;
-                case Fudge.Axis.Z:
+                case Fudge.AXIS.Z:
                     rotationMatrix = ƒ.Matrix4x4.ROTATION_Z(angle);
                     break;
             }
@@ -2037,7 +2032,7 @@ var Fudge;
         }
         contextMenuCallback(_item, _window, _event) {
             switch (Number(_item.id)) {
-                case Fudge.ModellerMenu.INVERT_FACE:
+                case Fudge.MODELLER_MENU.INVERT_FACE:
                     this.editableNode.getComponent(ƒ.ComponentMesh).mesh.invertFace(this.selection);
                     break;
             }
@@ -2064,7 +2059,7 @@ var Fudge;
     class AbstractScalation extends Fudge.InteractionMode {
         constructor() {
             super(...arguments);
-            this.type = Fudge.InteractionModes.SCALE;
+            this.type = Fudge.INTERACTION_MODE.SCALE;
         }
         initialize() {
             let widget = new Fudge.ScalationWidget();
@@ -2104,7 +2099,6 @@ var Fudge;
             let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
             //let scaleMatrix: ƒ.Matrix4x4;
             // let abs: number = ƒ.Vector3.DIFFERENCE(diff, this.distanceRayToCenter);
-            // TODO: Fix offset and this should be correct
             // let abs: number = ƒ.Vector3.DIFFERENCE(currentPosition, this.centroid).magnitude;
             // let scale: number = currentPosition.magnitude / this.oldPosition.magnitude;
             let scalar = ƒ.Vector3.DIFFERENCE(currentPosition, this.centroid).magnitude / this.distancePointerToCentroid.magnitude;
@@ -2112,13 +2106,13 @@ var Fudge;
             let scaleVector = ƒ.Vector3.ONE();
             for (let pickedAxis of selectedAxes) {
                 switch (pickedAxis) {
-                    case Fudge.Axis.X:
+                    case Fudge.AXIS.X:
                         scaleVector.x = scalar;
                         break;
-                    case Fudge.Axis.Y:
+                    case Fudge.AXIS.Y:
                         scaleVector.y = scalar;
                         break;
-                    case Fudge.Axis.Z:
+                    case Fudge.AXIS.Z:
                         scaleVector.z = scalar;
                         break;
                 }
@@ -2142,7 +2136,7 @@ var Fudge;
         }
         contextMenuCallback(_item, _window, _event) {
             switch (Number(_item.id)) {
-                case Fudge.ModellerMenu.DISPLAY_NORMALS:
+                case Fudge.MODELLER_MENU.DISPLAY_NORMALS:
                     this.toggleNormals();
                     break;
             }
@@ -2197,7 +2191,7 @@ var Fudge;
         }
         contextMenuCallback(_item, _window, _event) {
             switch (Number(_item.id)) {
-                case Fudge.ModellerMenu.INVERT_FACE:
+                case Fudge.MODELLER_MENU.INVERT_FACE:
                     this.editableNode.getComponent(ƒ.ComponentMesh).mesh.invertFace(this.selection);
                     break;
             }
@@ -2224,7 +2218,7 @@ var Fudge;
     class AbstractSelection extends Fudge.InteractionMode {
         constructor() {
             super(...arguments);
-            this.type = Fudge.InteractionModes.SELECT;
+            this.type = Fudge.INTERACTION_MODE.SELECT;
         }
         cleanup() {
             //
@@ -2273,7 +2267,7 @@ var Fudge;
                     this.selection.push(i);
                 }
             }
-            let event = new CustomEvent(Fudge.ModellerEvents.SELECTION_UPDATE, { bubbles: true, detail: this.selection });
+            let event = new CustomEvent(Fudge.MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: this.selection });
             ƒ.EventTargetStatic.dispatchEvent(event);
             ƒ.Loop.removeEventListener("loopFrame" /* LOOP_FRAME */, this.drawBox);
             return null;
@@ -2316,10 +2310,10 @@ var Fudge;
         }
         contextMenuCallback(_item, _window, _event) {
             switch (Number(_item.id)) {
-                case Fudge.ModellerMenu.DISPLAY_NORMALS:
+                case Fudge.MODELLER_MENU.DISPLAY_NORMALS:
                     this.toggleNormals();
                     break;
-                case Fudge.ModellerMenu.INVERT_FACE:
+                case Fudge.MODELLER_MENU.INVERT_FACE:
                     this.editableNode.getComponent(ƒ.ComponentMesh).mesh.invertFace(this.selection);
                     break;
             }
@@ -2332,7 +2326,7 @@ var Fudge;
     class AbstractTranslation extends Fudge.InteractionMode {
         constructor() {
             super(...arguments);
-            this.type = Fudge.InteractionModes.TRANSLATE;
+            this.type = Fudge.INTERACTION_MODE.TRANSLATE;
             this.dragging = false;
         }
         initialize() {
@@ -2385,13 +2379,13 @@ var Fudge;
             if (!this.dragging) {
                 for (let axis of selectedAxes) {
                     switch (axis) {
-                        case Fudge.Axis.X:
+                        case Fudge.AXIS.X:
                             translationVector.x = diff.x;
                             break;
-                        case Fudge.Axis.Y:
+                        case Fudge.AXIS.Y:
                             translationVector.y = diff.y;
                             break;
-                        case Fudge.Axis.Z:
+                        case Fudge.AXIS.Z:
                             translationVector.z = diff.z;
                             break;
                     }
@@ -2420,7 +2414,7 @@ var Fudge;
         }
         contextMenuCallback(_item, _window, _event) {
             switch (Number(_item.id)) {
-                case Fudge.ModellerMenu.DISPLAY_NORMALS:
+                case Fudge.MODELLER_MENU.DISPLAY_NORMALS:
                     this.toggleNormals();
                     break;
             }
@@ -2467,7 +2461,7 @@ var Fudge;
         }
         contextMenuCallback(_item, _window, _event) {
             switch (Number(_item.id)) {
-                case Fudge.ModellerMenu.INVERT_FACE:
+                case Fudge.MODELLER_MENU.INVERT_FACE:
                     this.editableNode.getComponent(ƒ.ComponentMesh).mesh.invertFace(this.selection);
                     break;
             }
@@ -3496,13 +3490,13 @@ var Fudge;
             let selectedAxis;
             switch (_key) {
                 case "x":
-                    selectedAxis = Fudge.Axis.X;
+                    selectedAxis = Fudge.AXIS.X;
                     break;
                 case "y":
-                    selectedAxis = Fudge.Axis.Y;
+                    selectedAxis = Fudge.AXIS.Y;
                     break;
                 case "z":
-                    selectedAxis = Fudge.Axis.Z;
+                    selectedAxis = Fudge.AXIS.Z;
                     break;
             }
             return selectedAxis;
@@ -3518,7 +3512,7 @@ var Fudge;
                 label: "toggle normals",
                 type: "checkbox",
                 checked: normalsAreDisplayed,
-                id: String(Fudge.ModellerMenu.DISPLAY_NORMALS),
+                id: String(Fudge.MODELLER_MENU.DISPLAY_NORMALS),
                 click: _callback
             });
             return item;
@@ -3526,7 +3520,7 @@ var Fudge;
         static getInvertFaceItem(_callback) {
             let item = new Fudge.remote.MenuItem({
                 label: "invert face",
-                id: String(Fudge.ModellerMenu.INVERT_FACE),
+                id: String(Fudge.MODELLER_MENU.INVERT_FACE),
                 click: _callback
             });
             return item;
@@ -3536,7 +3530,7 @@ var Fudge;
                 type: "checkbox",
                 checked: Fudge.ViewModellerScene.isBackfaceCullingEnabled,
                 label: "toggle backface culling",
-                id: String(Fudge.ModellerMenu.TOGGLE_BACKFACE_CULLING),
+                id: String(Fudge.MODELLER_MENU.TOGGLE_BACKFACE_CULLING),
                 click: _callback
             });
             return item;
@@ -3584,7 +3578,7 @@ var Fudge;
                     selection.splice(0, selection.length);
                 }
                 selection.push(nearestVertexIndex);
-                let event = new CustomEvent(Fudge.ModellerEvents.SELECTION_UPDATE, { bubbles: true, detail: selection });
+                let event = new CustomEvent(Fudge.MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: selection });
                 ƒ.EventTargetStatic.dispatchEvent(event);
             }
             return vertexWasPicked;
@@ -3632,9 +3626,9 @@ var Fudge;
             let yRotWidget = new Fudge.WidgetCircle("Y_Rotation", new ƒ.Color(0, 1, 0), new ƒ.Matrix4x4());
             let xRotWidget = new Fudge.WidgetCircle("X_Rotation", new ƒ.Color(1, 0, 0), ƒ.Matrix4x4.ROTATION_Z(90));
             let zRotWidget = new Fudge.WidgetCircle("Z_Rotation", new ƒ.Color(0, 0, 1), ƒ.Matrix4x4.ROTATION_X(90));
-            this.componentToAxisMap.set(xRotWidget, Fudge.Axis.X);
-            this.componentToAxisMap.set(yRotWidget, Fudge.Axis.Y);
-            this.componentToAxisMap.set(zRotWidget, Fudge.Axis.Z);
+            this.componentToAxisMap.set(xRotWidget, Fudge.AXIS.X);
+            this.componentToAxisMap.set(yRotWidget, Fudge.AXIS.Y);
+            this.componentToAxisMap.set(zRotWidget, Fudge.AXIS.Z);
             this.addChild(yRotWidget);
             this.addChild(xRotWidget);
             this.addChild(zRotWidget);
@@ -3689,9 +3683,9 @@ var Fudge;
             let xScaleWidget = new Fudge.WidgetPillar("X_Scalation", new ƒ.Color(1, 0, 0));
             let yScaleWidget = new Fudge.WidgetPillar("Y_Scalation", new ƒ.Color(0, 1, 0));
             let zScaleWidget = new Fudge.WidgetPillar("Z_Scalation", new ƒ.Color(0, 0, 1));
-            this.componentToAxisMap.set(xScaleWidget, Fudge.Axis.X);
-            this.componentToAxisMap.set(yScaleWidget, Fudge.Axis.Y);
-            this.componentToAxisMap.set(zScaleWidget, Fudge.Axis.Z);
+            this.componentToAxisMap.set(xScaleWidget, Fudge.AXIS.X);
+            this.componentToAxisMap.set(yScaleWidget, Fudge.AXIS.Y);
+            this.componentToAxisMap.set(zScaleWidget, Fudge.AXIS.Z);
             xScaleWidget.mtxLocal.rotateZ(-90);
             zScaleWidget.mtxLocal.rotateX(90);
             this.addChild(yScaleWidget);
@@ -3753,9 +3747,9 @@ var Fudge;
             let arrowRed = new ƒAid.NodeArrow("ArrowRed", new ƒ.Color(1, 0, 0, 1));
             let arrowGreen = new ƒAid.NodeArrow("ArrowGreen", new ƒ.Color(0, 1, 0, 1));
             let arrowBlue = new ƒAid.NodeArrow("ArrowBlue", new ƒ.Color(0, 0, 1, 1));
-            this.componentToAxisMap.set(arrowRed, Fudge.Axis.X);
-            this.componentToAxisMap.set(arrowGreen, Fudge.Axis.Y);
-            this.componentToAxisMap.set(arrowBlue, Fudge.Axis.Z);
+            this.componentToAxisMap.set(arrowRed, Fudge.AXIS.X);
+            this.componentToAxisMap.set(arrowGreen, Fudge.AXIS.Y);
+            this.componentToAxisMap.set(arrowBlue, Fudge.AXIS.Z);
             arrowRed.mtxLocal.rotateZ(-90);
             arrowBlue.mtxLocal.rotateX(90);
             this.addChild(arrowRed);
@@ -3963,7 +3957,7 @@ var Fudge;
                     { type: "component", componentName: Fudge.VIEW.PROPERTIES, componentState: _state, title: "Properties" }
                 ]
             });
-            let event = new CustomEvent(Fudge.ModellerEvents.HEADER_APPEND, { bubbles: false, detail: stack });
+            let event = new CustomEvent(Fudge.MODELLER_EVENTS.HEADER_APPEND, { bubbles: false, detail: stack });
             this.broadcastEvent(event);
         }
         cleanup() {
@@ -4996,7 +4990,7 @@ var Fudge;
             };
             this.contextMenuCallback = (_item, _window, _event) => {
                 switch (Number(_item.id)) {
-                    case Fudge.ModellerMenu.TOGGLE_BACKFACE_CULLING:
+                    case Fudge.MODELLER_MENU.TOGGLE_BACKFACE_CULLING:
                         this.toggleBackfaceCulling();
                 }
                 this.controller.contextMenuCallback(_item, _window, _event);
@@ -5102,7 +5096,7 @@ var Fudge;
             this.node = this.graph.getChildrenByName("Default")[0];
             this.controller = new Fudge.Controller(this.viewport, this.node, this.dom);
             //new CameraControl(this.viewport);
-            this.dom.addEventListener(Fudge.ModellerEvents.HEADER_APPEND, this.changeHeader);
+            this.dom.addEventListener(Fudge.MODELLER_EVENTS.HEADER_APPEND, this.changeHeader);
             this.dom.append(this.canvas);
             this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.updateContextMenu);
@@ -5172,7 +5166,7 @@ var Fudge;
             this.setObject(_state.node.getChildrenByName("Default")[0]);
             this.setTitle("Vertices");
             this.fillContent();
-            ƒ.EventTargetStatic.addEventListener(Fudge.ModellerEvents.SELECTION_UPDATE, this.hndEvent);
+            ƒ.EventTargetStatic.addEventListener(Fudge.MODELLER_EVENTS.SELECTION_UPDATE, this.hndEvent);
             _container.on("destroy", this.cleanup);
             // this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
             // this.parentPanel.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setSelectedNode);

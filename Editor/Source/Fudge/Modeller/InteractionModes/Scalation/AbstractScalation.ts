@@ -1,7 +1,7 @@
 /// <reference path="../InteractionMode.ts" />
 namespace Fudge {
   export class AbstractScalation extends InteractionMode {
-    public readonly type: InteractionModes = InteractionModes.SCALE;
+    public readonly type: INTERACTION_MODE = INTERACTION_MODE.SCALE;
     protected oldPosition: ƒ.Vector3;
     protected distanceCameraToCentroid: number;
     protected distancePointerToCentroid: ƒ.Vector3;
@@ -46,7 +46,7 @@ namespace Fudge {
         return;
       }
       
-      let selectedAxes: Axis[] = this.axesSelectionHandler.getSelectedAxes();
+      let selectedAxes: AXIS[] = this.axesSelectionHandler.getSelectedAxes();
       if (selectedAxes.length <= 0) 
         return;
       
@@ -55,9 +55,6 @@ namespace Fudge {
 
       //let scaleMatrix: ƒ.Matrix4x4;
       // let abs: number = ƒ.Vector3.DIFFERENCE(diff, this.distanceRayToCenter);
-
-      // TODO: Fix offset and this should be correct
-
       // let abs: number = ƒ.Vector3.DIFFERENCE(currentPosition, this.centroid).magnitude;
       // let scale: number = currentPosition.magnitude / this.oldPosition.magnitude;
       let scalar: number = ƒ.Vector3.DIFFERENCE(currentPosition, this.centroid).magnitude / this.distancePointerToCentroid.magnitude;
@@ -65,13 +62,13 @@ namespace Fudge {
       let scaleVector: ƒ.Vector3 = ƒ.Vector3.ONE();
       for (let pickedAxis of selectedAxes) {
         switch (pickedAxis) {
-          case Axis.X:
+          case AXIS.X:
             scaleVector.x = scalar;
             break;
-          case Axis.Y:
+          case AXIS.Y:
             scaleVector.y = scalar;
             break;
-          case Axis.Z:
+          case AXIS.Z:
             scaleVector.z = scalar;
             break;
         }
@@ -99,7 +96,7 @@ namespace Fudge {
 
     contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
       switch (Number(_item.id)) {
-        case ModellerMenu.DISPLAY_NORMALS:
+        case MODELLER_MENU.DISPLAY_NORMALS:
           this.toggleNormals();          
           break;
       }

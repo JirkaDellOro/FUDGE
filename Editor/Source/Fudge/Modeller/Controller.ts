@@ -13,25 +13,25 @@ namespace Fudge {
     private currentState: number = -1;
     private dom: HTMLElement;
     // TODO: change those shortcuts
-    private controlModesMap: Map<ControlMode, {type: AbstractControlMode, shortcut: string}> = new Map([
-      [ControlMode.OBJECT_MODE, {type: new ObjectMode(), shortcut: "o"}],
-      [ControlMode.EDIT_MODE, {type: new EditMode(), shortcut: "e"}]
+    private controlModesMap: Map<CONTROL_MODE, {type: AbstractControlMode, shortcut: string}> = new Map([
+      [CONTROL_MODE.OBJECT_MODE, {type: new ObjectMode(), shortcut: "o"}],
+      [CONTROL_MODE.EDIT_MODE, {type: new EditMode(), shortcut: "e"}]
     ]); 
 
     constructor(_viewport: ƒ.Viewport, _editableNode: ƒ.Node, _dom: HTMLElement) {
       this.viewport = _viewport;
-      this.currentControlMode = this.controlModesMap.get(ControlMode.OBJECT_MODE).type;
+      this.currentControlMode = this.controlModesMap.get(CONTROL_MODE.OBJECT_MODE).type;
       this.editableNode = _editableNode;
       this.dom = _dom;
       this.saveState((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState());
-      this.setInteractionMode(InteractionModes.IDLE);
+      this.setInteractionMode(INTERACTION_MODE.IDLE);
     }
 
     public get controlMode(): AbstractControlMode {
       return this.currentControlMode;
     }
 
-    public get controlModes(): Map<ControlMode, {type: AbstractControlMode, shortcut: string}> {
+    public get controlModes(): Map<CONTROL_MODE, {type: AbstractControlMode, shortcut: string}> {
       return this.controlModesMap;
     }
 
@@ -68,7 +68,7 @@ namespace Fudge {
       return this.interactionMode.selection;
     }
     
-    public getInteractionModeType(): InteractionModes {
+    public getInteractionModeType(): INTERACTION_MODE {
       return this.interactionMode.type;
     }
 
@@ -92,10 +92,10 @@ namespace Fudge {
             break;
           }
         }
-        let selectedMode: InteractionModes;
+        let selectedMode: INTERACTION_MODE;
         for (let interactionMode in this.currentControlMode.modes) {
           if (this.currentControlMode.modes[interactionMode].shortcut === pressedKey) {
-            selectedMode = <InteractionModes> interactionMode;
+            selectedMode = <INTERACTION_MODE> interactionMode;
           }
         }
         if (selectedMode)
@@ -103,7 +103,7 @@ namespace Fudge {
       }
     }
     
-    public setControlMode(mode: ControlMode): void {
+    public setControlMode(mode: CONTROL_MODE): void {
       if (!mode)
         return;
       this.currentControlMode.formerMode = this.interactionMode;
@@ -112,23 +112,23 @@ namespace Fudge {
       this.interactionMode?.cleanup();
       this.interactionMode = this.currentControlMode.formerMode || new IdleMode(this.viewport, this.editableNode);
       this.interactionMode.initialize(); 
-      ƒ.EventTargetStatic.dispatchEvent(new CustomEvent(ModellerEvents.SELECTION_UPDATE, { bubbles: true, detail: this.interactionMode.selection }));
+      ƒ.EventTargetStatic.dispatchEvent(new CustomEvent(MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: this.interactionMode.selection }));
       this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));     
       console.log("Current Mode: " + this.interactionMode.type);
     }
 
     // maybe add type attributes to the interaction modes to alter behaviour based on those attributes
-    public setInteractionMode(mode: InteractionModes): void {
+    public setInteractionMode(mode: INTERACTION_MODE): void {
       this.interactionMode?.cleanup();
       let type: any = this.currentControlMode.modes[mode]?.type || IdleMode;
       let selection: Array<number> = this.interactionMode?.selection;        
       this.interactionMode = new type(this.viewport, this.editableNode, selection);
 
-      if (selection && this.controlMode.type === ControlMode.EDIT_MODE)
+      if (selection && this.controlMode.type === CONTROL_MODE.EDIT_MODE)
         this.interactionMode.selection = selection;
       
       this.interactionMode.initialize();
-      ƒ.EventTargetStatic.dispatchEvent(new CustomEvent(ModellerEvents.SELECTION_UPDATE, { bubbles: true, detail: this.interactionMode.selection }));
+      ƒ.EventTargetStatic.dispatchEvent(new CustomEvent(MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: this.interactionMode.selection }));
       this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
       console.log("Current Mode: " + this.interactionMode.type);
     }

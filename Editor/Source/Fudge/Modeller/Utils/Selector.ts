@@ -45,7 +45,7 @@ namespace Fudge {
         }
         selection.push(nearestVertexIndex);
 
-        let event: CustomEvent = new CustomEvent(ModellerEvents.SELECTION_UPDATE, { bubbles: true, detail: selection });
+        let event: CustomEvent = new CustomEvent(MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: selection });
         ƒ.EventTargetStatic.dispatchEvent(event);
       }
       return vertexWasPicked;

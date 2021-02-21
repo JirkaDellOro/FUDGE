@@ -2,7 +2,7 @@
 namespace Fudge {
   import ƒui = FudgeUserInterface;
   export class Extrude extends InteractionMode {
-    public readonly type: InteractionModes = InteractionModes.EXTRUDE;
+    public readonly type: INTERACTION_MODE = INTERACTION_MODE.EXTRUDE;
     public selection: Array<number>;
     public viewport: ƒ.Viewport;
     public editableNode: ƒ.Node;
@@ -65,7 +65,7 @@ namespace Fudge {
       let diff: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(newPos, this.oldPosition);
 
       let translationVector: ƒ.Vector3 = new ƒ.Vector3(this.orientation.x, this.orientation.y, this.orientation.z);
-      let selectedAxes: Axis[] = this.axesSelectionHandler.getSelectedAxes();
+      let selectedAxes: AXIS[] = this.axesSelectionHandler.getSelectedAxes();
       //let translationVector: ƒ.Vector3 = new ƒ.Vector3(0, 0, 0);
 
       let distance: number = ƒ.Vector3.DOT(diff, this.orientation) > 0 ? diff.magnitude : diff.magnitude * -1;
@@ -112,10 +112,10 @@ namespace Fudge {
 
     contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
       switch (Number(_item.id)) {
-        case ModellerMenu.DISPLAY_NORMALS:
+        case MODELLER_MENU.DISPLAY_NORMALS:
           this.toggleNormals();          
           break;
-        case ModellerMenu.INVERT_FACE: 
+        case MODELLER_MENU.INVERT_FACE: 
           (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).invertFace(this.selection);          
           break;
 
@@ -129,7 +129,6 @@ namespace Fudge {
 
     initialize(): void {
       this.axesSelectionHandler = new AxesSelectionHandler();
-      //this.createNormalArrows();
     }
     
     cleanup(): void {

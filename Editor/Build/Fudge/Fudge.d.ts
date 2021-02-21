@@ -340,7 +340,7 @@ declare namespace Fudge {
         private controlModesMap;
         constructor(_viewport: ƒ.Viewport, _editableNode: ƒ.Node, _dom: HTMLElement);
         get controlMode(): AbstractControlMode;
-        get controlModes(): Map<ControlMode, {
+        get controlModes(): Map<CONTROL_MODE, {
             type: AbstractControlMode;
             shortcut: string;
         }>;
@@ -350,10 +350,10 @@ declare namespace Fudge {
         onkeydown(_event: ƒ.EventKeyboard): void;
         onkeyup(_event: ƒ.EventKeyboard): void;
         getSelection(): number[];
-        getInteractionModeType(): InteractionModes;
+        getInteractionModeType(): INTERACTION_MODE;
         switchMode(_event: ƒ.EventKeyboard): void;
-        setControlMode(mode: ControlMode): void;
-        setInteractionMode(mode: InteractionModes): void;
+        setControlMode(mode: CONTROL_MODE): void;
+        setInteractionMode(mode: INTERACTION_MODE): void;
         drawSelection(): void;
         getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
         contextMenuCallback: (_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event) => void;
@@ -362,11 +362,11 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    enum ControlMode {
+    enum CONTROL_MODE {
         OBJECT_MODE = "Object-Mode",
         EDIT_MODE = "Edit-Mode"
     }
-    enum InteractionModes {
+    enum INTERACTION_MODE {
         SELECT = "Box-Select",
         TRANSLATE = "Translate",
         ROTATE = "Rotate",
@@ -374,16 +374,16 @@ declare namespace Fudge {
         EXTRUDE = "Extrude",
         IDLE = "Idle"
     }
-    enum Axis {
+    enum AXIS {
         X = "X",
         Y = "Y",
         Z = "Z"
     }
-    enum ModellerEvents {
+    enum MODELLER_EVENTS {
         HEADER_APPEND = "headerappend",
         SELECTION_UPDATE = "selectionupdate"
     }
-    enum ModellerMenu {
+    enum MODELLER_MENU {
         DISPLAY_NORMALS = 0,
         INVERT_FACE = 1,
         TOGGLE_BACKFACE_CULLING = 2
@@ -391,10 +391,10 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     abstract class AbstractControlMode {
-        type: ControlMode;
+        type: CONTROL_MODE;
         formerMode: IInteractionMode;
         modes: {
-            [mode in InteractionModes]?: {
+            [mode in INTERACTION_MODE]?: {
                 type: typeof InteractionMode;
                 shortcut: string;
             };
@@ -403,9 +403,9 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     class EditMode extends AbstractControlMode {
-        type: ControlMode;
+        type: CONTROL_MODE;
         modes: {
-            [mode in InteractionModes]?: {
+            [mode in INTERACTION_MODE]?: {
                 type: typeof InteractionMode;
                 shortcut: string;
             };
@@ -414,9 +414,9 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     class ObjectMode extends AbstractControlMode {
-        type: ControlMode;
+        type: CONTROL_MODE;
         modes: {
-            [mode in InteractionModes]?: {
+            [mode in INTERACTION_MODE]?: {
                 type: typeof InteractionMode;
                 shortcut: string;
             };
@@ -426,7 +426,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     import ƒ = FudgeCore;
     interface IInteractionMode {
-        readonly type: InteractionModes;
+        readonly type: INTERACTION_MODE;
         selection: Array<number>;
         viewport: ƒ.Viewport;
         editableNode: ƒ.Node;
@@ -447,7 +447,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     abstract class InteractionMode implements IInteractionMode {
         protected static normalsAreDisplayed: boolean;
-        readonly type: InteractionModes;
+        readonly type: INTERACTION_MODE;
         selection: Array<number>;
         viewport: ƒ.Viewport;
         editableNode: ƒ.Node;
@@ -479,7 +479,7 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     class Extrude extends InteractionMode {
-        readonly type: InteractionModes;
+        readonly type: INTERACTION_MODE;
         selection: Array<number>;
         viewport: ƒ.Viewport;
         editableNode: ƒ.Node;
@@ -504,7 +504,7 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     class IdleMode extends InteractionMode {
-        readonly type: InteractionModes;
+        readonly type: INTERACTION_MODE;
         initialize(): void;
         onmousedown(_event: ƒ.EventPointer): void;
         onmouseup(_event: ƒ.EventPointer): string;
@@ -519,7 +519,7 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     abstract class AbstractRotation extends InteractionMode {
-        readonly type: InteractionModes;
+        readonly type: INTERACTION_MODE;
         viewport: ƒ.Viewport;
         selection: Array<number>;
         editableNode: ƒ.Node;
@@ -561,7 +561,7 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     class AbstractScalation extends InteractionMode {
-        readonly type: InteractionModes;
+        readonly type: INTERACTION_MODE;
         protected oldPosition: ƒ.Vector3;
         protected distanceCameraToCentroid: number;
         protected distancePointerToCentroid: ƒ.Vector3;
@@ -599,7 +599,7 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     abstract class AbstractSelection extends InteractionMode {
-        readonly type: InteractionModes;
+        readonly type: INTERACTION_MODE;
         viewport: ƒ.Viewport;
         editableNode: ƒ.Node;
         cleanup(): void;
@@ -627,7 +627,7 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     abstract class AbstractTranslation extends InteractionMode {
-        readonly type: InteractionModes;
+        readonly type: INTERACTION_MODE;
         viewport: ƒ.Viewport;
         selection: Array<number>;
         editableNode: ƒ.Node;
@@ -765,7 +765,7 @@ declare namespace Fudge {
         releaseComponent(): void;
         pickWidget(_hits: ƒ.RayHit[]): ƒ.Node[];
         isValidSelection(): boolean;
-        getSelectedAxes(): Axis[];
+        getSelectedAxes(): AXIS[];
         addAxisOf(_key: string): boolean;
         removeAxisOf(_key: string): void;
         isAxisSelectedViaKeyboard(): boolean;
@@ -790,28 +790,28 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     abstract class IWidget extends ƒ.Node {
-        protected abstract componentToAxisMap: Map<ƒ.Node, Axis>;
+        protected abstract componentToAxisMap: Map<ƒ.Node, AXIS>;
         protected componentToOriginalColorMap: Map<ƒ.Node, ƒ.Color>;
         protected pickedComponent: ƒ.Node;
-        getAxisFromWidgetComponent(_component: ƒ.Node): Axis;
+        getAxisFromWidgetComponent(_component: ƒ.Node): AXIS;
         abstract isHitWidgetComponent(_hits: ƒ.RayHit[]): {
-            axis: Axis;
+            axis: AXIS;
             additionalNodes: ƒ.Node[];
         };
         releaseComponent(pickedComponent?: ƒ.Node): void;
-        getComponentFromAxis(_axis: Axis): ƒ.Node;
-        updateWidget(_axis: Axis): void;
+        getComponentFromAxis(_axis: AXIS): ƒ.Node;
+        updateWidget(_axis: AXIS): void;
         abstract changeColorOfComponent(component: ƒ.Node): void;
-        removeUnselectedAxis(_axis: Axis): void;
+        removeUnselectedAxis(_axis: AXIS): void;
     }
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
     class RotationWidget extends IWidget {
-        protected componentToAxisMap: Map<ƒ.Node, Axis>;
+        protected componentToAxisMap: Map<ƒ.Node, AXIS>;
         constructor(_name?: string, _transform?: ƒ.Matrix4x4);
         isHitWidgetComponent(_hits: ƒ.RayHit[]): {
-            axis: Axis;
+            axis: AXIS;
             additionalNodes: ƒ.Node[];
         };
         changeColorOfComponent(component: ƒ.Node): void;
@@ -821,10 +821,10 @@ declare namespace Fudge {
 declare namespace Fudge {
     import ƒ = FudgeCore;
     class ScalationWidget extends IWidget {
-        protected componentToAxisMap: Map<ƒ.Node, Axis>;
+        protected componentToAxisMap: Map<ƒ.Node, AXIS>;
         constructor(_name?: string, _transform?: ƒ.Matrix4x4);
         isHitWidgetComponent(_hits: ƒ.RayHit[]): {
-            axis: Axis;
+            axis: AXIS;
             additionalNodes: ƒ.Node[];
         };
         changeColorOfComponent(component: ƒ.Node): void;
@@ -834,10 +834,10 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     class TranslationWidget extends IWidget {
-        protected componentToAxisMap: Map<ƒ.Node, Axis>;
+        protected componentToAxisMap: Map<ƒ.Node, AXIS>;
         constructor(_name?: string, _transform?: ƒ.Matrix4x4);
         isHitWidgetComponent(_hits: ƒ.RayHit[]): {
-            axis: Axis;
+            axis: AXIS;
             additionalNodes: ƒ.Node[];
         };
         releaseComponent(pickedComponent?: ƒ.Node): void;

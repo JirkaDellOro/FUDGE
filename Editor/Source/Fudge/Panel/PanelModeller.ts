@@ -29,7 +29,7 @@ namespace Fudge {
       ]
       });
 
-      let event: CustomEvent = new CustomEvent(ModellerEvents.HEADER_APPEND, { bubbles: false, detail: stack });
+      let event: CustomEvent = new CustomEvent(MODELLER_EVENTS.HEADER_APPEND, { bubbles: false, detail: stack });
       this.broadcastEvent(event);
     }
 

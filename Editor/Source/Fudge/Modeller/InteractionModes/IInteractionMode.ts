@@ -1,7 +1,7 @@
 namespace Fudge {
   import ƒ = FudgeCore;
   export interface IInteractionMode {
-    readonly type: InteractionModes;
+    readonly type: INTERACTION_MODE;
     selection: Array<number>;
     viewport: ƒ.Viewport;
     editableNode: ƒ.Node;

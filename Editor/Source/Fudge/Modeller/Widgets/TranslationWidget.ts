@@ -1,7 +1,7 @@
 namespace Fudge {
   import ƒAid = FudgeAid;
   export class TranslationWidget extends IWidget {
-    protected componentToAxisMap: Map<ƒ.Node, Axis> = new Map();
+    protected componentToAxisMap: Map<ƒ.Node, AXIS> = new Map();
 
     constructor(_name: string = "TranslationWidget", _transform?: ƒ.Matrix4x4) {
       super(_name);
@@ -9,9 +9,9 @@ namespace Fudge {
       let arrowGreen: ƒ.Node = new ƒAid.NodeArrow("ArrowGreen", new ƒ.Color(0, 1, 0, 1));
       let arrowBlue: ƒ.Node = new ƒAid.NodeArrow("ArrowBlue", new ƒ.Color(0, 0, 1, 1));
 
-      this.componentToAxisMap.set(arrowRed, Axis.X);
-      this.componentToAxisMap.set(arrowGreen, Axis.Y);
-      this.componentToAxisMap.set(arrowBlue, Axis.Z);
+      this.componentToAxisMap.set(arrowRed, AXIS.X);
+      this.componentToAxisMap.set(arrowGreen, AXIS.Y);
+      this.componentToAxisMap.set(arrowBlue, AXIS.Z);
 
       arrowRed.mtxLocal.rotateZ(-90);
       arrowBlue.mtxLocal.rotateX(90);
@@ -22,10 +22,10 @@ namespace Fudge {
       this.fillColorDict();
     }
 
-    public isHitWidgetComponent(_hits: ƒ.RayHit[]): {axis: Axis, additionalNodes: ƒ.Node[]} {
+    public isHitWidgetComponent(_hits: ƒ.RayHit[]): {axis: AXIS, additionalNodes: ƒ.Node[]} {
       let additionalNodes: ƒ.Node[] = [];
       let lowestZBuffer: number = Number.MAX_VALUE;
-      let pickedAxis: Axis;
+      let pickedAxis: AXIS;
       let wasPicked: boolean = false;
       for (let hit of _hits) {
         if (hit.zBuffer == 0)
