@@ -1,8 +1,16 @@
 "use strict";
-/// <reference path="ClassB.ts"/>;
 var ModuleTest;
 (function (ModuleTest) {
-    //import * as ClassB from "ClassB";
+    class ClassB {
+        static sayHello() {
+            console.log("Hello from ClassB");
+        }
+    }
+    ModuleTest.ClassB = ClassB;
+})(ModuleTest || (ModuleTest = {}));
+///<reference path="ClassB.ts"/>
+var ModuleTest;
+(function (ModuleTest) {
     class ClassA extends ModuleTest.ClassB {
         constructor() {
             super(...arguments);
@@ -19,4 +27,4 @@ var ModuleTest;
     ModuleTest.ClassA = ClassA;
     ClassA.sayHello();
 })(ModuleTest || (ModuleTest = {}));
-//# sourceMappingURL=ClassA.js.map
+//# sourceMappingURL=Module.js.map
