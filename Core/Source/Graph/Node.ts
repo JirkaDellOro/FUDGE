@@ -13,6 +13,7 @@ namespace FudgeCore {
     public readonly mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY();
     public timestampUpdate: number = 0;
     public nNodesInBranch: number = 0;
+    public radius: number = 0;
 
     private parent: Node | null = null; // The parent of this node.
     private children: Node[] = []; // array of child nodes appended to this node.
@@ -72,8 +73,8 @@ namespace FudgeCore {
     /**
      * Generator yielding the node and all decendants in the graph below for iteration
      */
-    public get graph(): IterableIterator<Node> {
-      return this.getGraphGenerator();
+    public get iterator(): IterableIterator<Node> {
+      return this.getIteratorGenerator();
     }
 
     public activate(_on: boolean): void {
@@ -506,10 +507,10 @@ namespace FudgeCore {
     }
     // #endregion
 
-    private * getGraphGenerator(): IterableIterator<Node> {
+    private * getIteratorGenerator(): IterableIterator<Node> {
       yield this;
       for (let child of this.children)
-        yield* child.graph;
+        yield* child.iterator;
     }
   }
 }

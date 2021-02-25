@@ -14,14 +14,21 @@ namespace FudgeCore {
       this.mesh = _mesh;
     }
 
-    public get boundingBox(): Box {
-      let box: Box = Recycler.get(Box);
-      box.set(
-        Vector3.TRANSFORMATION(this.mesh.boundingBox.min, this.mtxWorld, true),
-        Vector3.TRANSFORMATION(this.mesh.boundingBox.max, this.mtxWorld, true)
-      );
-      return box;
+    public get radius(): number {
+      let scaling: Vector3 = this.mtxWorld.scaling;
+      let scale: number = Math.max(Math.abs(scaling.x), Math.abs(scaling.y), Math.abs(scaling.z));
+      return this.mesh.radius * scale;
     }
+
+    // TODO: remove or think if the transformed bounding box is of value or can be made to be
+    // public get boundingBox(): Box {
+    //   let box: Box = Recycler.get(Box);
+    //   box.set(
+    //     Vector3.TRANSFORMATION(this.mesh.boundingBox.min, this.mtxWorld, true),
+    //     Vector3.TRANSFORMATION(this.mesh.boundingBox.max, this.mtxWorld, true)
+    //   );
+    //   return box;
+    // }
 
     //#region Transfer
     public serialize(): Serialization {

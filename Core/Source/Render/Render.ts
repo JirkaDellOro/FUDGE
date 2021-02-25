@@ -53,6 +53,7 @@ namespace FudgeCore {
 
       let mtxWorld: Matrix4x4 = _mtxWorld;
       _branch.nNodesInBranch = 1;
+      _branch.radius = 0;
 
       if (_branch.cmpTransform)
         mtxWorld = Matrix4x4.MULTIPLICATION(_mtxWorld, _branch.cmpTransform.local);
@@ -82,12 +83,18 @@ namespace FudgeCore {
         if (_shadersUsed.indexOf(shader) < 0)
           _shadersUsed.push(shader);
 
+        _branch.radius = cmpMesh.radius;
         Render.nodesSimple.push(_branch); // add this node to render list
       }
 
       for (let child of _branch.getChildren()) {
         Render.prepare(child, mtxWorld, _lights, _shadersUsed);
+
         _branch.nNodesInBranch += child.nNodesInBranch;
+        _branch.radius = Math.max(
+          _branch.radius, 
+          Vector3.DIFFERENCE(child.mtxWorld.translation, _branch.mtxWorld.translation).magnitude + child.radius
+        );
       }
 
       if (firstLevel)

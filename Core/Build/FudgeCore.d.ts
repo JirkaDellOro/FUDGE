@@ -800,6 +800,7 @@ declare namespace FudgeCore {
         readonly mtxWorld: Matrix4x4;
         timestampUpdate: number;
         nNodesInBranch: number;
+        radius: number;
         private parent;
         private children;
         private components;
@@ -831,7 +832,7 @@ declare namespace FudgeCore {
         /**
          * Generator yielding the node and all decendants in the graph below for iteration
          */
-        get graph(): IterableIterator<Node>;
+        get iterator(): IterableIterator<Node>;
         activate(_on: boolean): void;
         /**
          * Returns a reference to this nodes parent node
@@ -950,7 +951,7 @@ declare namespace FudgeCore {
          */
         broadcastEvent(_event: Event): void;
         private broadcastEventRecursive;
-        private getGraphGenerator;
+        private getIteratorGenerator;
     }
 }
 declare namespace FudgeCore {
@@ -1731,7 +1732,7 @@ declare namespace FudgeCore {
         mtxWorld: Matrix4x4;
         mesh: Mesh;
         constructor(_mesh?: Mesh);
-        get boundingBox(): Box;
+        get radius(): number;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorForUserInterface(): MutatorForUserInterface;
