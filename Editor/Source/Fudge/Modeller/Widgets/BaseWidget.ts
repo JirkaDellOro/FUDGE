@@ -1,5 +1,5 @@
 namespace Fudge {
-  export abstract class IWidget extends ƒ.Node {
+  export abstract class BaseWidget extends ƒ.Node {
     protected abstract componentToAxisMap: Map<ƒ.Node, AXIS>;
     protected componentToOriginalColorMap: Map<ƒ.Node, ƒ.Color> = new Map();
     protected pickedComponent: ƒ.Node;

@@ -339,9 +339,9 @@ declare namespace Fudge {
         private dom;
         private controlModesMap;
         constructor(_viewport: ƒ.Viewport, _editableNode: ƒ.Node, _dom: HTMLElement);
-        get controlMode(): AbstractControlMode;
+        get controlMode(): IControlMode;
         get controlModes(): Map<CONTROL_MODE, {
-            type: AbstractControlMode;
+            type: IControlMode;
             shortcut: string;
         }>;
         onmouseup(_event: ƒ.EventPointer): void;
@@ -390,7 +390,7 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    abstract class AbstractControlMode {
+    interface IControlMode {
         type: CONTROL_MODE;
         formerMode: IInteractionMode;
         modes: {
@@ -402,7 +402,8 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    class EditMode extends AbstractControlMode {
+    class EditMode implements IControlMode {
+        formerMode: IInteractionMode;
         type: CONTROL_MODE;
         modes: {
             [mode in INTERACTION_MODE]?: {
@@ -413,7 +414,8 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    class ObjectMode extends AbstractControlMode {
+    class ObjectMode implements IControlMode {
+        formerMode: IInteractionMode;
         type: CONTROL_MODE;
         modes: {
             [mode in INTERACTION_MODE]?: {
@@ -759,7 +761,7 @@ declare namespace Fudge {
         private selectedAxes;
         private pickedAxis;
         private axisIsPicked;
-        constructor(widget?: IWidget);
+        constructor(widget?: BaseWidget);
         get widget(): ƒ.Node;
         get wasPicked(): boolean;
         releaseComponent(): void;
@@ -789,7 +791,7 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    abstract class IWidget extends ƒ.Node {
+    abstract class BaseWidget extends ƒ.Node {
         protected abstract componentToAxisMap: Map<ƒ.Node, AXIS>;
         protected componentToOriginalColorMap: Map<ƒ.Node, ƒ.Color>;
         protected pickedComponent: ƒ.Node;
@@ -807,7 +809,7 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
-    class RotationWidget extends IWidget {
+    class RotationWidget extends BaseWidget {
         protected componentToAxisMap: Map<ƒ.Node, AXIS>;
         constructor(_name?: string, _transform?: ƒ.Matrix4x4);
         isHitWidgetComponent(_hits: ƒ.RayHit[]): {
@@ -820,7 +822,7 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
-    class ScalationWidget extends IWidget {
+    class ScalationWidget extends BaseWidget {
         protected componentToAxisMap: Map<ƒ.Node, AXIS>;
         constructor(_name?: string, _transform?: ƒ.Matrix4x4);
         isHitWidgetComponent(_hits: ƒ.RayHit[]): {
@@ -833,7 +835,7 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    class TranslationWidget extends IWidget {
+    class TranslationWidget extends BaseWidget {
         protected componentToAxisMap: Map<ƒ.Node, AXIS>;
         constructor(_name?: string, _transform?: ƒ.Matrix4x4);
         isHitWidgetComponent(_hits: ƒ.RayHit[]): {

@@ -1,6 +1,6 @@
 namespace Fudge {
   import ƒ = FudgeCore;
-  export class RotationWidget extends IWidget {
+  export class RotationWidget extends BaseWidget {
     protected componentToAxisMap: Map<ƒ.Node, AXIS> = new Map();
     
     constructor (_name: string = "RotationWidget", _transform?: ƒ.Matrix4x4) {

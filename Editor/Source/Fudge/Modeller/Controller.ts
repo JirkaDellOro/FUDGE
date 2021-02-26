@@ -4,7 +4,7 @@ namespace Fudge {
   
   export class Controller {
     private interactionMode: IInteractionMode;
-    private currentControlMode: AbstractControlMode;
+    private currentControlMode: IControlMode;
     private viewport: ƒ.Viewport;
     private editableNode: ƒ.Node;
     // could make an array of Array<{someinterface, string}> to support undo for different objects
@@ -13,7 +13,7 @@ namespace Fudge {
     private currentState: number = -1;
     private dom: HTMLElement;
     // TODO: change those shortcuts
-    private controlModesMap: Map<CONTROL_MODE, {type: AbstractControlMode, shortcut: string}> = new Map([
+    private controlModesMap: Map<CONTROL_MODE, {type: IControlMode, shortcut: string}> = new Map([
       [CONTROL_MODE.OBJECT_MODE, {type: new ObjectMode(), shortcut: "o"}],
       [CONTROL_MODE.EDIT_MODE, {type: new EditMode(), shortcut: "e"}]
     ]); 
@@ -27,11 +27,11 @@ namespace Fudge {
       this.setInteractionMode(INTERACTION_MODE.IDLE);
     }
 
-    public get controlMode(): AbstractControlMode {
+    public get controlMode(): IControlMode {
       return this.currentControlMode;
     }
 
-    public get controlModes(): Map<CONTROL_MODE, {type: AbstractControlMode, shortcut: string}> {
+    public get controlModes(): Map<CONTROL_MODE, {type: IControlMode, shortcut: string}> {
       return this.controlModesMap;
     }
 

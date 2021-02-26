@@ -10,7 +10,7 @@ namespace Fudge {
     protected axesSelectionHandler: AxesSelectionHandler;
 
     initialize(): void {
-      let widget: IWidget = new TranslationWidget();
+      let widget: TranslationWidget = new TranslationWidget();
       let mtx: ƒ.Matrix4x4 = new ƒ.Matrix4x4();
       mtx.translation = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection);
       widget.addComponent(new ƒ.ComponentTransform(mtx));

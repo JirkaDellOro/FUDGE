@@ -1,6 +1,6 @@
 namespace Fudge {
   import ƒ = FudgeCore;
-  export class ScalationWidget extends IWidget {
+  export class ScalationWidget extends BaseWidget {
     protected componentToAxisMap: Map<ƒ.Node, AXIS> = new Map();
 
     constructor (_name: string = "ScalationWidget", _transform: ƒ.Matrix4x4 = new ƒ.Matrix4x4()) {

@@ -1559,15 +1559,8 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    class AbstractControlMode {
-    }
-    Fudge.AbstractControlMode = AbstractControlMode;
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
-    class EditMode extends Fudge.AbstractControlMode {
+    class EditMode {
         constructor() {
-            super(...arguments);
             this.type = Fudge.CONTROL_MODE.EDIT_MODE;
             this.modes = {
                 [Fudge.INTERACTION_MODE.SELECT]: { type: Fudge.EditSelection, shortcut: "s" },
@@ -1582,9 +1575,8 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    class ObjectMode extends Fudge.AbstractControlMode {
+    class ObjectMode {
         constructor() {
-            super(...arguments);
             this.type = Fudge.CONTROL_MODE.OBJECT_MODE;
             this.modes = {
                 [Fudge.INTERACTION_MODE.ROTATE]: { type: Fudge.ObjectRotation, shortcut: "r" },
@@ -3588,7 +3580,7 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    class IWidget extends ƒ.Node {
+    class BaseWidget extends ƒ.Node {
         constructor() {
             super(...arguments);
             this.componentToOriginalColorMap = new Map();
@@ -3614,12 +3606,12 @@ var Fudge;
             this.releaseComponent(component);
         }
     }
-    Fudge.IWidget = IWidget;
+    Fudge.BaseWidget = BaseWidget;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
-    class RotationWidget extends Fudge.IWidget {
+    class RotationWidget extends Fudge.BaseWidget {
         constructor(_name = "RotationWidget", _transform) {
             super(_name);
             this.componentToAxisMap = new Map();
@@ -3676,7 +3668,7 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
-    class ScalationWidget extends Fudge.IWidget {
+    class ScalationWidget extends Fudge.BaseWidget {
         constructor(_name = "ScalationWidget", _transform = new ƒ.Matrix4x4()) {
             super(_name);
             this.componentToAxisMap = new Map();
@@ -3740,7 +3732,7 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     var ƒAid = FudgeAid;
-    class TranslationWidget extends Fudge.IWidget {
+    class TranslationWidget extends Fudge.BaseWidget {
         constructor(_name = "TranslationWidget", _transform) {
             super(_name);
             this.componentToAxisMap = new Map();

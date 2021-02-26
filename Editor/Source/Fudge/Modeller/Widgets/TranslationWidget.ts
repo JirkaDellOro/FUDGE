@@ -1,6 +1,6 @@
 namespace Fudge {
   import ƒAid = FudgeAid;
-  export class TranslationWidget extends IWidget {
+  export class TranslationWidget extends BaseWidget {
     protected componentToAxisMap: Map<ƒ.Node, AXIS> = new Map();
 
     constructor(_name: string = "TranslationWidget", _transform?: ƒ.Matrix4x4) {

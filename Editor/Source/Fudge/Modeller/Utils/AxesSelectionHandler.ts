@@ -1,14 +1,14 @@
 namespace Fudge {
   export class AxesSelectionHandler {
     public isSelectedViaKeyboard: boolean = false;
-    private _widget: IWidget;
+    private _widget: BaseWidget;
     private selectedAxes: AXIS[] = [];
     private pickedAxis: AXIS;
     private axisIsPicked: boolean = false;
 
 
     // TODO: check if we could define the event listeners here, so that the whole process of using the selection handler is fully automatic
-    constructor(widget: IWidget = null) {
+    constructor(widget: BaseWidget = null) {
       this._widget = widget;
     }
 

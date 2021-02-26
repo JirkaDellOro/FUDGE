@@ -1,5 +1,6 @@
 namespace Fudge {
-  export class EditMode extends AbstractControlMode {
+  export class EditMode implements IControlMode {
+    public formerMode: IInteractionMode;
     public type: CONTROL_MODE = CONTROL_MODE.EDIT_MODE; 
     public modes: {[mode in INTERACTION_MODE]?: {type: typeof InteractionMode, shortcut: string}} = 
     {
