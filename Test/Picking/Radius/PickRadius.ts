@@ -12,10 +12,6 @@ namespace PickRadius {
     let material: ƒ.Material = new ƒ.Material("Transparent", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("white", 0.5)));
 
     for (let child of zoo.getChildren()) {
-      if (child.nChildren)
-        continue;
-
-      ƒ.Debug.fudge(child.radius);
       let sphere: ƒ.Node = new ƒAid.Node(
         "BoundingSphere", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(2)), material, meshShpere
       );
@@ -32,7 +28,21 @@ namespace PickRadius {
     sphere.mtxLocal.scale(ƒ.Vector3.ONE(zoo.radius));
     root.appendChild(sphere);
 
-
     ƒ.Debug.branch(root);
+
+    viewport.getCanvas().addEventListener("mousemove", pickWorldSpace);
+
+    function pickWorldSpace(_event: MouseEvent): void {
+      let ray: ƒ.Ray = viewport.getRayFromClient(new ƒ.Vector2(_event.clientX, _event.clientY));
+      ƒ.Debug.group("Pick3D");
+      for (let node of zoo.iterator) {
+        let cmpMesh: ƒ.ComponentMesh = node.getComponent(ƒ.ComponentMesh);
+        let position: ƒ.Vector3 = cmpMesh ? cmpMesh.mtxWorld.translation : node.mtxWorld.translation;
+        if (ray.getDistance(position).magnitude < node.radius) {
+          ƒ.Debug.fudge(node.name);
+        }
+      }
+      ƒ.Debug.groupEnd();
+    }
   }
 }
