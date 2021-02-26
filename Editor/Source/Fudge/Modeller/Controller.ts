@@ -7,7 +7,7 @@ namespace Fudge {
     private viewport: ƒ.Viewport;
     private editableNode: ƒ.Node;
     // could make an array of Array<{someinterface, string}> to support undo for different objects
-    // or just think of some smarter  way of doing undo, e.g. storing the reverse functions
+    // or just think of some smarter way of doing undo, e.g. storing the reverse functions
     private states: Array<string> = [];
     private currentState: number = -1;
     private dom: HTMLElement;
@@ -115,7 +115,6 @@ namespace Fudge {
       console.log("Current Mode: " + this.interactionMode.type);
     }
 
-    // maybe add type attributes to the interaction modes to alter behaviour based on those attributes
     public setInteractionMode(mode: INTERACTION_MODE): void {
       this.interactionMode?.cleanup();
       let type: any = this.currentControlMode.modes[mode]?.type || IdleMode;

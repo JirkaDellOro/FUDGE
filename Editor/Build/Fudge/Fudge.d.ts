@@ -313,22 +313,6 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
-    class CameraControl {
-        viewport: ƒ.Viewport;
-        currentRotation: ƒ.Vector3;
-        target: ƒ.Vector3;
-        selectedNodes: ƒ.Node[];
-        constructor(viewport: ƒ.Viewport);
-        private onclick;
-        private handleMove;
-        private zoom;
-        private rotateCamera;
-        private moveCamera;
-        private multiplyMatrixes;
-    }
-}
-declare namespace Fudge {
-    import ƒ = FudgeCore;
     class Controller {
         private interactionMode;
         private currentControlMode;
@@ -390,9 +374,9 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    interface IControlMode {
-        type: CONTROL_MODE;
+    class EditMode implements IControlMode {
         formerMode: IInteractionMode;
+        type: CONTROL_MODE;
         modes: {
             [mode in INTERACTION_MODE]?: {
                 type: typeof InteractionMode;
@@ -402,9 +386,9 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    class EditMode implements IControlMode {
-        formerMode: IInteractionMode;
+    interface IControlMode {
         type: CONTROL_MODE;
+        formerMode: IInteractionMode;
         modes: {
             [mode in INTERACTION_MODE]?: {
                 type: typeof InteractionMode;
@@ -539,8 +523,6 @@ declare namespace Fudge {
         cleanup(): void;
         private getRotationMatrix;
         private getAngle;
-        private getOrthogonalVector;
-        private getIntersection;
     }
 }
 declare namespace Fudge {
@@ -666,21 +648,7 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    class DropdownHandler {
-        private controller;
-        constructor(_controller: Controller);
-        getControlDropdown(): HTMLDivElement;
-        getInteractionDropdown(): HTMLDivElement;
-        private openDropdownControl;
-        private openDropdownInteraction;
-        private setInteractionMode;
-        private setControlMode;
-        private updateButtontext;
-        private closeMenu;
-    }
-}
-declare namespace Fudge {
-    class MeshUtils {
+    class MeshExtrude {
         private numberOfFaces;
         private vertexCount;
         private uniqueVertices;
@@ -702,8 +670,6 @@ declare namespace Fudge {
         private removeInteriorEdges;
         private removeDuplicateEdges;
         private addFrontFaces;
-        private getNewVertices;
-        private addIndicesToNewVertices;
         private areEdgesDuplicate;
     }
 }
@@ -772,6 +738,20 @@ declare namespace Fudge {
         removeAxisOf(_key: string): void;
         isAxisSelectedViaKeyboard(): boolean;
         private getSelectedAxisBy;
+    }
+}
+declare namespace Fudge {
+    class DropdownHandler {
+        private controller;
+        constructor(_controller: Controller);
+        getControlDropdown(): HTMLDivElement;
+        getInteractionDropdown(): HTMLDivElement;
+        private openDropdownControl;
+        private openDropdownInteraction;
+        private setInteractionMode;
+        private setControlMode;
+        private updateButtontext;
+        private closeMenu;
     }
 }
 declare namespace Fudge {

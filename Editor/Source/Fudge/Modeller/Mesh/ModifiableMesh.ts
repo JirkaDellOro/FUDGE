@@ -201,19 +201,7 @@ namespace Fudge {
       this.vertices = this.createVertices();
       this.createRenderBuffers();
     }
-
-    // public scaleBy(matrix: ƒ.Matrix4x4, oldVertices: Map<number, ƒ.Vector3>, centroid: ƒ.Vector3, selection: number[] = Array.from(Array(this.uniqueVertices.length).keys())): void {
-    //   for (let vertexIndex of selection) {
-    //     let currentVertex: ƒ.Vector3 = oldVertices.get(vertexIndex);
-    //     let newVertex: ƒ.Vector3 = new ƒ.Vector3(currentVertex.x - centroid.x, currentVertex.y - centroid.y, currentVertex.z - centroid.z);
-    //     newVertex.transform(matrix);
-    //     newVertex.add(centroid);
-    //     this.#uniqueVertices[vertexIndex].position = newVertex;
-    //   }
-    //   this.vertices = this.createVertices();
-    //   this.createRenderBuffers();
-    // }
-
+    
     public translateVertices(difference: ƒ.Vector3, selection: number[]): void {
       for (let vertexIndex of selection) {
         this.#uniqueVertices[vertexIndex].position.add(difference);
@@ -230,7 +218,6 @@ namespace Fudge {
         this.uniqueVertices[vertexIndex].position = ƒ.Vector3.SUM(newVertexPos, center);
       }
       this.vertices = this.createVertices();
-      // this.updateNormals(this.findOrderOfTrigonFromSelectedVertex(selection));
       this.createRenderBuffers();
     }
 
@@ -239,7 +226,7 @@ namespace Fudge {
     public extrude(selectedVertices: number[]): ƒ.Vector3 {
       if (selectedVertices.length < 2)
         return;
-      let meshUtils: MeshUtils = new MeshUtils(this.countNumberOfFaces(), this.vertices, this.#uniqueVertices, this.indices.length);
+      let meshUtils: MeshExtrude = new MeshExtrude(this.countNumberOfFaces(), this.vertices, this.#uniqueVertices, this.indices.length);
       let oldVertices: number[] = meshUtils.extrude(selectedVertices);
       let finalNormal: ƒ.Vector3 = new ƒ.Vector3();
       for (let i: number = 0; i < oldVertices.length; i++) {
@@ -266,9 +253,6 @@ namespace Fudge {
         let currentVertex: ƒ.Vector3 = oldVertexPositions.get(selection);
         this.updatePositionOfVertex(selection, new ƒ.Vector3(currentVertex.x + diffToOldPosition.x - offset.x, currentVertex.y + diffToOldPosition.y - offset.y, currentVertex.z + diffToOldPosition.z - offset.z));
       }
-
-      // let trigons: Array<number> = this.findOrderOfTrigonFromSelectedVertex(selectedIndices);
-      // this.updateNormals(trigons);
       this.createRenderBuffers();
     }
 

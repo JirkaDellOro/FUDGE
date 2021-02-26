@@ -17,11 +17,9 @@ namespace Fudge {
     abstract onmousedown(_event: ƒ.EventPointer): void;
     abstract onmouseup(_event: ƒ.EventPointer): string;
     abstract onmove(_event: ƒ.EventPointer): void;
-    // save states at the end
     abstract onkeydown(_pressedKey: string): void;
     abstract onkeyup(_pressedKey: string): string;
     abstract update(): void;
-    // fix this tomorrow
     abstract getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
     abstract contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void; 
 

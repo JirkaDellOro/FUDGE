@@ -53,10 +53,6 @@ namespace Fudge {
 
     onkeydown(_pressedKey: string): void {
       this.axesSelectionHandler.addAxisOf(_pressedKey)
-      // let result: string = null;
-      // if (this.axesSelectionHandler.addAxisOf(_pressedKey)) {
-      //   result = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
-      // }
     }
 
     onkeyup(_pressedKey: string): string {
@@ -120,27 +116,6 @@ namespace Fudge {
 
     private getAngle(first: ƒ.Vector2, second: ƒ.Vector2): number {
       return Math.atan2(first.x, first.y) - Math.atan2(second.x, second.y);
-    }
-
-    /*
-      those functions are not used anymore since angle calculation is now done in client space, could get removed later 
-    */
-    private getOrthogonalVector(posAtIntersection: ƒ.Vector3, cameraTranslationNorm: ƒ.Vector3): ƒ.Vector2 {
-      return new ƒ.Vector2(
-        + posAtIntersection.y + posAtIntersection.z * cameraTranslationNorm.y,
-        + posAtIntersection.z * Math.abs(cameraTranslationNorm.x)
-        - posAtIntersection.x * Math.abs(cameraTranslationNorm.z)
-        + posAtIntersection.x * cameraTranslationNorm.y);
-      // swapped signs, should work too
-      // - posAtIntersection.y - posAtIntersection.z * cameraTranslationNorm.y, 
-      // - posAtIntersection.z * Math.abs(cameraTranslationNorm.x)
-      // - posAtIntersection.x * Math.abs(cameraTranslationNorm.z) 
-      // + posAtIntersection.x * cameraTranslationNorm.y);
-    }
-
-    private getIntersection(posRender: ƒ.Vector2): ƒ.Vector3 {
-      let ray: ƒ.Ray = this.viewport.getRayFromClient(posRender);
-      return ray.intersectPlane(new ƒ.Vector3(0, 0, 0), this.viewport.camera.pivot.translation);
     }
   }
 }

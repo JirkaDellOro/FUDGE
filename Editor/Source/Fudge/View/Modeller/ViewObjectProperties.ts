@@ -16,9 +16,6 @@ namespace Fudge {
       this.fillContent();
       ƒ.EventTargetStatic.addEventListener(MODELLER_EVENTS.SELECTION_UPDATE, this.hndEvent);
       _container.on("destroy", this.cleanup);
-      // this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
-      // this.parentPanel.addEventListener(ƒui.EVENT_USERINTERFACE.SELECT, this.setSelectedNode);
-      // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
     }
 
 
@@ -45,12 +42,7 @@ namespace Fudge {
         this.dom.append(uiComponent.domElement);
       }
     }
-
-    // protected update = () => {
-
-    // }
-
-
+    
     protected cleanup = (): void => {
       while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild));
         this.dom.remove();
