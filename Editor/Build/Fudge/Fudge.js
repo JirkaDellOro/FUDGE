@@ -1381,7 +1381,6 @@ var Fudge;
             // or just think of some smarter  way of doing undo, e.g. storing the reverse functions
             this.states = [];
             this.currentState = -1;
-            // TODO: change those shortcuts
             this.controlModesMap = new Map([
                 [Fudge.CONTROL_MODE.OBJECT_MODE, { type: new Fudge.ObjectMode(), shortcut: "o" }],
                 [Fudge.CONTROL_MODE.EDIT_MODE, { type: new Fudge.EditMode(), shortcut: "e" }]
@@ -4974,9 +4973,6 @@ var Fudge;
                 menu.append(Fudge.MenuItemsCreator.getBackfaceCullItem(_callback));
                 return menu;
             };
-            // protected contextMenuCallback = (_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void => {
-            //   this.controller.contextMenuCallback(_item, _window, _event); 
-            // }
             this.updateContextMenu = () => {
                 this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
             };
@@ -4988,65 +4984,6 @@ var Fudge;
                 this.controller.contextMenuCallback(_item, _window, _event);
                 this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
             };
-            // protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
-            //   const menu: Electron.Menu = new remote.Menu();
-            //   let item: Electron.MenuItem;
-            //   let submenu: Electron.Menu = new remote.Menu();
-            //   // submenu.append(new remote.MenuItem({label: "Object"}));
-            // // item = new remote.MenuItem({
-            // //   label: "Control Mode",
-            // //   submenu: ContextMenu.getSubclassMenu<typeof AbstractControlMode>(CONTEXTMENU.CONTROL_MODE, AbstractControlMode.subclasses, _callback)
-            // // });
-            //   if (!this.controller) {
-            //     return menu;
-            //   }
-            //   for (let mode of this.controller.controlModes.keys()) {
-            //     let subitem: Electron.MenuItem = new remote.MenuItem(
-            //       { label: mode, id: String(CONTEXTMENU.CONTROL_MODE), click: _callback, accelerator: process.platform == "darwin" ? "Command+" + this.controller.controlModes.get(mode).shortcut : "ctrl+" + this.controller.controlModes.get(mode).shortcut}
-            //     );
-            //     //@ts-ignore
-            //     subitem.overrideProperty("controlMode", mode);
-            //     submenu.append(subitem);
-            //   }
-            //   item = new remote.MenuItem({
-            //     label: "Control Mode",
-            //     submenu: submenu
-            //   });
-            //   menu.append(item);
-            //   submenu = new remote.Menu();
-            //   // TODO: fix tight coupling here, only retrieve the shortcut from the controller
-            //   for (let mode in this.controller.controlMode.modes) {
-            //     let subitem: Electron.MenuItem = new remote.MenuItem(
-            //       { label: mode, id: String(CONTEXTMENU.INTERACTION_MODE), click: _callback, accelerator: process.platform == "darwin" ? "Command+" + this.controller.controlMode.modes[mode].shortcut : "ctrl+" + this.controller.controlMode.modes[mode].shortcut  }
-            //     );
-            //     //@ts-ignore
-            //     subitem.overrideProperty("interactionMode", mode);
-            //     submenu.append(subitem);
-            //   }
-            //   item = new remote.MenuItem({
-            //     label: "Interaction Mode",
-            //     submenu: submenu
-            //   });
-            //   menu.append(item);
-            //   return menu;
-            // }
-            // protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void { 
-            //   switch (Number(_item.id)) {
-            //     case CONTEXTMENU.CONTROL_MODE: 
-            //       // BUG: Sometimes _item does not contain a controlMode property, find out why and fix
-            //       let controlModeNew: ControlMode = _item["controlMode"];
-            //       // //@ts-ignore
-            //       this.controller.setControlMode(controlModeNew);
-            //       this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
-            //       this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
-            //       break;
-            //     case CONTEXTMENU.INTERACTION_MODE:
-            //       let mode: InteractionMode = _item["interactionMode"];
-            //       this.controller.setInteractionMode(mode);
-            //       this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
-            //       break;
-            //   }
-            // }
             this.animate = (_e) => {
                 this.viewport.setGraph(this.graph);
                 if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
@@ -5087,7 +5024,6 @@ var Fudge;
             ƒ.RenderWebGL.setBackfaceCulling(ViewModellerScene.isBackfaceCullingEnabled);
             this.node = this.graph.getChildrenByName("Default")[0];
             this.controller = new Fudge.Controller(this.viewport, this.node, this.dom);
-            //new CameraControl(this.viewport);
             this.dom.addEventListener(Fudge.MODELLER_EVENTS.HEADER_APPEND, this.changeHeader);
             this.dom.append(this.canvas);
             this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
@@ -5114,17 +5050,15 @@ var Fudge;
         }
         createUserInterface() {
             let cmpCamera = new ƒ.ComponentCamera();
-            // cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
-            // cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
-            // cmpCamera.projectCentral(1, 45);
-            new ƒaid.CameraOrbit(cmpCamera);
-            //cmpCamera.pivot.rotateX(90);
             this.canvas = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
             document.body.appendChild(this.canvas);
             this.viewport = new ƒ.Viewport();
             this.viewport.initialize("Viewport", this.graph, cmpCamera, this.canvas);
             this.viewport.draw();
-            ƒaid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false, -0.15, 0.005, 0.003);
+            let orbitCamera = ƒaid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false, -0.15, 0.005, 0.003);
+            orbitCamera.rotateX(-30);
+            orbitCamera.rotateY(45);
+            orbitCamera.distance = 5;
         }
         toggleBackfaceCulling() {
             ViewModellerScene.isBackfaceCullingEnabled = !ViewModellerScene.isBackfaceCullingEnabled;

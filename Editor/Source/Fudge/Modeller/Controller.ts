@@ -1,6 +1,5 @@
 namespace Fudge {
   import ƒ = FudgeCore;
-  import ƒui = FudgeUserInterface;
   
   export class Controller {
     private interactionMode: IInteractionMode;
@@ -12,7 +11,6 @@ namespace Fudge {
     private states: Array<string> = [];
     private currentState: number = -1;
     private dom: HTMLElement;
-    // TODO: change those shortcuts
     private controlModesMap: Map<CONTROL_MODE, {type: IControlMode, shortcut: string}> = new Map([
       [CONTROL_MODE.OBJECT_MODE, {type: new ObjectMode(), shortcut: "o"}],
       [CONTROL_MODE.EDIT_MODE, {type: new EditMode(), shortcut: "e"}]
