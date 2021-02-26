@@ -91,10 +91,10 @@ namespace FudgeCore {
         Render.prepare(child, mtxWorld, _lights, _shadersUsed);
 
         _branch.nNodesInBranch += child.nNodesInBranch;
-        _branch.radius = Math.max(
-          _branch.radius, 
-          Vector3.DIFFERENCE(child.mtxWorld.translation, _branch.mtxWorld.translation).magnitude + child.radius
-        );
+        let cmpMeshChild: ComponentMesh = child.getComponent(ComponentMesh);
+        let position: Vector3 = cmpMeshChild ? cmpMeshChild.mtxWorld.translation : child.mtxWorld.translation;
+
+        _branch.radius = Math.max(_branch.radius, Vector3.DIFFERENCE(position, _branch.mtxWorld.translation).magnitude + child.radius);
       }
 
       if (firstLevel)
@@ -131,7 +131,7 @@ namespace FudgeCore {
         let cmpMesh: ComponentMesh = node.getComponent(ComponentMesh);
         let mtxMeshToView: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, cmpMesh.mtxWorld);
         let cmpMaterial: ComponentMaterial = node.getComponent(ComponentMaterial);
-        Render.draw(cmpMesh.mesh, cmpMaterial, node.mtxWorld, mtxMeshToView); 
+        Render.draw(cmpMesh.mesh, cmpMaterial, node.mtxWorld, mtxMeshToView);
         Recycler.store(mtxMeshToView);
       }
     }
