@@ -13,7 +13,7 @@ namespace Fudge {
       this.setObject((<ƒ.Node>(<ƒ.General>_state).node).getChildrenByName("Default")[0]);
       this.setTitle("Vertices");
 
-      this.fillContent();
+      this.fillContent(((<ModifiableMesh> this.currentNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices));
       ƒ.EventTargetStatic.addEventListener(MODELLER_EVENTS.SELECTION_UPDATE, this.hndEvent);
       _container.on("destroy", this.cleanup);
     }
@@ -26,7 +26,7 @@ namespace Fudge {
       this.currentNode = _object;
     }
 
-    private fillContent(selection: number[] = Array.from(Array((<ModifiableMesh> this.currentNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices.length).keys())): void {
+    private fillContent(_vertices: UniqueVertex[], selection: number[] = Array.from(Array(_vertices.length).keys())): void {
       while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild));
 
       // let fieldset: ƒui.ExpandableFieldSet = ƒui.Generator.createFieldSetFromMutable((<ModifiableMesh> this.currentNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices[0], "0");
@@ -35,8 +35,8 @@ namespace Fudge {
       // TODO see if we can make this work without a new fieldset for every vertex
       let mesh: ModifiableMesh = (<ModifiableMesh> this.currentNode.getComponent(ƒ.ComponentMesh).mesh);
       for (let selectedVertex of selection) {
-        let fieldset: ƒui.ExpandableFieldSet = ƒui.Generator.createFieldSetFromMutable(mesh.uniqueVertices[selectedVertex], selectedVertex.toString());
-        let uiComponent: ControllerVertices = new ControllerVertices(mesh.uniqueVertices[selectedVertex], fieldset);
+        let fieldset: ƒui.ExpandableFieldSet = ƒui.Generator.createFieldSetFromMutable(_vertices[selectedVertex], selectedVertex.toString());
+        let uiComponent: ControllerVertices = new ControllerVertices(_vertices[selectedVertex], fieldset);
         uiComponent.node = this.currentNode;
   
         this.dom.append(uiComponent.domElement);
@@ -49,7 +49,7 @@ namespace Fudge {
     }
 
     private hndEvent = (_event: CustomEvent): void => {
-      this.fillContent(_event.detail);
+      this.fillContent(_event.detail.vertices, _event.detail.selection);
     }
     
   }

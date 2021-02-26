@@ -42,25 +42,31 @@ namespace Fudge {
       }
 
       let event: CustomEvent = new CustomEvent(MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: this.selection });
-      ƒ.EventTargetStatic.dispatchEvent(event);
+      ƒ.EventTargetStatic.dispatchEvent(
+        new CustomEvent(MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: {
+          selection: this.selection, vertices: (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices}
+        })
+      );
 
       ƒ.Loop.removeEventListener(ƒ.EVENT.LOOP_FRAME, this.drawBox);
       return null;
     }
 
+
+
     onmove(_event: ƒ.EventPointer): void {
       this.clientPos = new ƒ.Vector2(_event.canvasX, _event.canvasY);
     }
 
-    onkeydown(pressedKey: string): void {
+    onkeydown(_pressedKey: string): void {
       //
     }
 
-    onkeyup(pressedKey: string): string {
+    onkeyup(_pressedKey: string): string {
       let state: string = null;
 
       // delete this later or refactor it to somewhere else
-      switch (pressedKey) {
+      switch (_pressedKey) {
         case "delete": 
           (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).removeFace(this.selection);
           this.selection = [];

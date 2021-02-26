@@ -1376,7 +1376,7 @@ var Fudge;
             this.interactionMode?.cleanup();
             this.interactionMode = this.currentControlMode.formerMode || new Fudge.IdleMode(this.viewport, this.editableNode);
             this.interactionMode.initialize();
-            ƒ.EventTargetStatic.dispatchEvent(new CustomEvent(Fudge.MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: this.interactionMode.selection }));
+            ƒ.EventTargetStatic.dispatchEvent(new CustomEvent(Fudge.MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: { selection: this.interactionMode.selection, vertices: this.editableNode.getComponent(ƒ.ComponentMesh).mesh.uniqueVertices } }));
             this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
             console.log("Current Mode: " + this.interactionMode.type);
         }
@@ -1388,7 +1388,7 @@ var Fudge;
             if (selection && this.controlMode.type === Fudge.CONTROL_MODE.EDIT_MODE)
                 this.interactionMode.selection = selection;
             this.interactionMode.initialize();
-            ƒ.EventTargetStatic.dispatchEvent(new CustomEvent(Fudge.MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: this.interactionMode.selection }));
+            ƒ.EventTargetStatic.dispatchEvent(new CustomEvent(Fudge.MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: { selection: this.interactionMode.selection, vertices: this.editableNode.getComponent(ƒ.ComponentMesh).mesh.uniqueVertices } }));
             this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
             console.log("Current Mode: " + this.interactionMode.type);
         }
@@ -1582,8 +1582,8 @@ var Fudge;
         getDistanceFromRayToCenterOfNode(_event, distance) {
             return ƒ.Vector3.DIFFERENCE(this.getPointerPosition(_event, distance), this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid(this.selection));
         }
-        getDistanceFromCameraToCentroid() {
-            return ƒ.Vector3.DIFFERENCE(this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid(this.selection), this.viewport.camera.getContainer().mtxWorld.translation).magnitude;
+        getDistanceFromCameraToCentroid(_centroid) {
+            return ƒ.Vector3.DIFFERENCE(_centroid, this.viewport.camera.getContainer().mtxWorld.translation).magnitude;
         }
         drawCircleAtVertex() {
             let crx2d = this.viewport.getCanvas().getContext("2d");
@@ -1619,28 +1619,54 @@ var Fudge;
             this.type = Fudge.INTERACTION_MODE.EXTRUDE;
             this.isExtruded = false;
             this.vertexSelected = false;
+            this.loopIsRunning = false;
+            this.drawSelectionCircle = () => {
+                this.clientCentroid = this.viewport.pointWorldToClient((this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid(this.selection)));
+                let crx2d = this.viewport.getCanvas().getContext("2d");
+                crx2d.strokeStyle = `rgb(255, 255, 125)`;
+                crx2d.beginPath();
+                crx2d.arc(this.clientCentroid.x, this.clientCentroid.y, Extrude.selectionRadius, 0, 2 * Math.PI);
+                crx2d.stroke();
+            };
             // TODO: check if pivot is still correct or if we need to use the container
             this.selector = new Fudge.Selector(this.editableNode, this.viewport.camera.pivot.translation);
         }
         onmousedown(_event) {
-            if (this.selector.selectVertices(this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY)), this.selection)) {
-                this.vertexSelected = true;
-                return null;
+            let willBeExtruded = false;
+            if (this.loopIsRunning) {
+                if (ƒ.Vector2.DIFFERENCE(new ƒ.Vector2(_event.canvasX, _event.canvasY), this.clientCentroid).magnitude < Extrude.selectionRadius) {
+                    willBeExtruded = true;
+                }
+            }
+            if (!willBeExtruded) {
+                if (this.selector.selectVertices(this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY)), this.selection)) {
+                    if (this.selection.length >= 2) {
+                        if (!this.loopIsRunning)
+                            this.startLoop();
+                    }
+                    else {
+                        ƒ.Loop.removeEventListener("loopFrame" /* LOOP_FRAME */, this.drawSelectionCircle);
+                        this.loopIsRunning = false;
+                    }
+                    this.vertexSelected = true;
+                }
+                return;
             }
             if (!this.selection)
                 return;
             let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
-            this.distance = this.getDistanceFromCameraToCentroid();
-            this.oldPosition = this.getPointerPosition(_event, this.distance);
-            if (this.getDistanceFromRayToCenterOfNode(_event, this.distance).magnitude > 1)
-                return;
+            let centroid = mesh.getCentroid(this.selection);
+            this.clientCentroid = this.viewport.pointWorldToClient(centroid);
+            this.distanceCameraToCentroid = this.getDistanceFromCameraToCentroid(centroid);
+            this.oldPosition = this.getPointerPosition(_event, this.distanceCameraToCentroid);
             this.orientation = mesh.extrude(this.selection);
+            if (!this.orientation)
+                return;
             let newSelection = [];
             for (let i = 0; i < this.selection.length; i++)
                 newSelection.push(mesh.uniqueVertices.length - this.selection.length + i);
             this.selection = newSelection;
-            let event = new CustomEvent("change" /* CHANGE */, { bubbles: true, detail: this.selection });
-            ƒ.EventTargetStatic.dispatchEvent(event);
+            ƒ.EventTargetStatic.dispatchEvent(new CustomEvent("change" /* CHANGE */, { bubbles: true, detail: this.selection }));
             this.isExtruded = true;
         }
         onmouseup(_event) {
@@ -1658,7 +1684,7 @@ var Fudge;
         onmove(_event) {
             if (this.vertexSelected || !this.isExtruded)
                 return;
-            let newPos = this.getPointerPosition(_event, this.distance);
+            let newPos = this.getPointerPosition(_event, this.distanceCameraToCentroid);
             let diff = ƒ.Vector3.DIFFERENCE(newPos, this.oldPosition);
             let translationVector = new ƒ.Vector3(this.orientation.x, this.orientation.y, this.orientation.z);
             let selectedAxes = this.axesSelectionHandler.getSelectedAxes();
@@ -1683,7 +1709,7 @@ var Fudge;
             // }
             // if (selectedAxes.length === 0)
             //   translationVector = diff;
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.SHIFT_LEFT, ƒ.KEYBOARD_CODE.SHIFT_RIGHT]))
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.SHIFT_LEFT, ƒ.KEYBOARD_CODE.SHIFT_RIGHT]) || this.selection.length < 4)
                 translationVector = diff;
             let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
             mesh.translateVertices(translationVector, this.selection);
@@ -1716,14 +1742,20 @@ var Fudge;
             //@ts-ignore
         }
         initialize() {
+            if (this.selection.length >= 2) {
+                this.startLoop();
+            }
             this.axesSelectionHandler = new Fudge.AxesSelectionHandler();
         }
         cleanup() {
-            for (let node of this.viewport.getGraph().getChildrenByName("normal")) {
-                this.viewport.getGraph().removeChild(node);
-            }
+            ƒ.Loop.removeEventListener("loopFrame" /* LOOP_FRAME */, this.drawSelectionCircle);
+        }
+        startLoop() {
+            ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, this.drawSelectionCircle);
+            this.loopIsRunning = true;
         }
     }
+    Extrude.selectionRadius = 40;
     Fudge.Extrude = Extrude;
 })(Fudge || (Fudge = {}));
 /// <reference path="../InteractionMode.ts" />
@@ -1973,23 +2005,18 @@ var Fudge;
                 return;
             let currentPosition = this.getPointerPosition(_event, this.distanceCameraToCentroid);
             let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
-            //let scaleMatrix: ƒ.Matrix4x4;
-            // let abs: number = ƒ.Vector3.DIFFERENCE(diff, this.distanceRayToCenter);
-            // let abs: number = ƒ.Vector3.DIFFERENCE(currentPosition, this.centroid).magnitude;
-            // let scale: number = currentPosition.magnitude / this.oldPosition.magnitude;
-            let scalar = ƒ.Vector3.DIFFERENCE(currentPosition, this.centroid).magnitude / this.distancePointerToCentroid.magnitude;
-            // let abs: number = ƒ.Vector3.DOT(newPosition, this.distanceRayToCenter);
+            let scaleFactor = ƒ.Vector3.DIFFERENCE(currentPosition, this.centroid).magnitude / this.distancePointerToCentroid.magnitude;
             let scaleVector = ƒ.Vector3.ONE();
             for (let pickedAxis of selectedAxes) {
                 switch (pickedAxis) {
                     case Fudge.AXIS.X:
-                        scaleVector.x = scalar;
+                        scaleVector.x = scaleFactor;
                         break;
                     case Fudge.AXIS.Y:
-                        scaleVector.y = scalar;
+                        scaleVector.y = scaleFactor;
                         break;
                     case Fudge.AXIS.Z:
-                        scaleVector.z = scalar;
+                        scaleVector.z = scaleFactor;
                         break;
                 }
             }
@@ -2024,7 +2051,7 @@ var Fudge;
             this.viewport.getGraph().removeChild(this.axesSelectionHandler.widget);
         }
         setValues(_event) {
-            this.distanceCameraToCentroid = this.getDistanceFromCameraToCentroid();
+            this.distanceCameraToCentroid = this.getDistanceFromCameraToCentroid(this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid(this.selection));
             this.oldPosition = this.getPointerPosition(_event, this.distanceCameraToCentroid);
             this.centroid = this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid(this.selection);
             this.distancePointerToCentroid = ƒ.Vector3.DIFFERENCE(this.oldPosition, this.centroid);
@@ -2143,20 +2170,24 @@ var Fudge;
                 }
             }
             let event = new CustomEvent(Fudge.MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: this.selection });
-            ƒ.EventTargetStatic.dispatchEvent(event);
+            ƒ.EventTargetStatic.dispatchEvent(new CustomEvent(Fudge.MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: {
+                    selection: this.selection,
+                    vertices: this.editableNode.getComponent(ƒ.ComponentMesh).mesh.uniqueVertices
+                }
+            }));
             ƒ.Loop.removeEventListener("loopFrame" /* LOOP_FRAME */, this.drawBox);
             return null;
         }
         onmove(_event) {
             this.clientPos = new ƒ.Vector2(_event.canvasX, _event.canvasY);
         }
-        onkeydown(pressedKey) {
+        onkeydown(_pressedKey) {
             //
         }
-        onkeyup(pressedKey) {
+        onkeyup(_pressedKey) {
             let state = null;
             // delete this later or refactor it to somewhere else
-            switch (pressedKey) {
+            switch (_pressedKey) {
                 case "delete":
                     this.editableNode.getComponent(ƒ.ComponentMesh).mesh.removeFace(this.selection);
                     this.selection = [];
@@ -2215,8 +2246,8 @@ var Fudge;
             if (nodeWasPicked && !this.axesSelectionHandler.wasPicked) {
                 this.dragging = true;
             }
-            this.distance = this.getDistanceFromCameraToCentroid();
-            this.oldPosition = this.getPointerPosition(_event, this.distance);
+            this.distanceCameraToCentroid = this.getDistanceFromCameraToCentroid(this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid(this.selection));
+            this.oldPosition = this.getPointerPosition(_event, this.distanceCameraToCentroid);
         }
         onmouseup(_event) {
             let state = null;
@@ -2232,13 +2263,13 @@ var Fudge;
         onmove(_event) {
             if (!this.axesSelectionHandler.isValidSelection() && !this.dragging) {
                 if (this.axesSelectionHandler.isAxisSelectedViaKeyboard()) {
-                    this.distance = this.getDistanceFromCameraToCentroid();
-                    this.oldPosition = this.getPointerPosition(_event, this.distance);
+                    this.distanceCameraToCentroid = this.getDistanceFromCameraToCentroid(this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid(this.selection));
+                    this.oldPosition = this.getPointerPosition(_event, this.distanceCameraToCentroid);
                     this.axesSelectionHandler.isSelectedViaKeyboard = true;
                 }
                 return;
             }
-            let newPos = this.getPointerPosition(_event, this.distance);
+            let newPos = this.getPointerPosition(_event, this.distanceCameraToCentroid);
             let diff = ƒ.Vector3.DIFFERENCE(newPos, this.oldPosition);
             let translationVector = new ƒ.Vector3(0, 0, 0);
             let selectedAxes = this.axesSelectionHandler.getSelectedAxes();
@@ -2528,9 +2559,6 @@ var Fudge;
                 }
             }
         }
-        /*
-          i and j are found randomly for single faces, maybe add some functionality to make the user swap normals
-        */
         removeDuplicateEdges(edges, faceToEdgesMap) {
             let edgesToRemove = [];
             let duplicateEdges = new Set();
@@ -2550,21 +2578,20 @@ var Fudge;
                             }
                         }
                         // maybe change this to:
-                        // edgesToRemove.push(j);
-                        // duplicateEdges.add(i);
-                        // if (iIsPartOfFace) {
-                        //   let oldStart: number = edges[i].start;
-                        //   edges[i].start = edges[i].end;
-                        //   edges[i].end = oldStart;
-                        // } 
+                        edgesToRemove.push(j);
+                        duplicateEdges.add(i);
                         if (iIsPartOfFace) {
-                            edgesToRemove.push(i);
-                            duplicateEdges.add(j);
+                            let oldStart = edges[i].start;
+                            edges[i].start = edges[i].end;
+                            edges[i].end = oldStart;
                         }
-                        else {
-                            edgesToRemove.push(j);
-                            duplicateEdges.add(i);
-                        }
+                        // if (iIsPartOfFace) {
+                        //   edgesToRemove.push(i);
+                        //   duplicateEdges.add(j);
+                        // } else {
+                        //   edgesToRemove.push(j);
+                        //   duplicateEdges.add(i);
+                        // }
                     }
                 }
             }
@@ -2813,6 +2840,8 @@ var Fudge;
                 return;
             let meshUtils = new Fudge.MeshExtrude(this.countNumberOfFaces(), this.vertices, this.#uniqueVertices, this.indices.length);
             let oldVertices = meshUtils.extrude(selectedVertices);
+            if (oldVertices.length === 0)
+                return;
             let finalNormal = new ƒ.Vector3();
             for (let i = 0; i < oldVertices.length; i++) {
                 let subnormal = new ƒ.Vector3(this.normalsFace[oldVertices[i] * 3], this.normalsFace[oldVertices[i] * 3 + 1], this.normalsFace[oldVertices[i] * 3 + 2]);
@@ -2821,9 +2850,9 @@ var Fudge;
             finalNormal.normalize();
             this.vertices = this.createVertices();
             this.indices = this.createIndices();
-            let newSelection = [];
-            for (let i = 0; i < selectedVertices.length; i++)
-                newSelection.push(this.uniqueVertices.length - selectedVertices.length + i);
+            // let newSelection: number[] = [];
+            // for (let i: number = 0; i < selectedVertices.length; i++)
+            //   newSelection.push(this.uniqueVertices.length - selectedVertices.length + i);
             this.createRenderBuffers();
             return finalNormal;
         }
@@ -3317,8 +3346,14 @@ var Fudge;
                 if (!ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.CTRL_RIGHT, ƒ.KEYBOARD_CODE.CTRL_LEFT])) {
                     selection.splice(0, selection.length);
                 }
-                selection.push(nearestVertexIndex);
-                let event = new CustomEvent(Fudge.MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: selection });
+                let vertexAlreadySelected = false;
+                for (let selectedIndex of selection) {
+                    if (selectedIndex === nearestVertexIndex)
+                        vertexAlreadySelected = true;
+                }
+                if (!vertexAlreadySelected)
+                    selection.push(nearestVertexIndex);
+                let event = new CustomEvent(Fudge.MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: { selection: selection, vertices: mesh.uniqueVertices } });
                 ƒ.EventTargetStatic.dispatchEvent(event);
             }
             return vertexWasPicked;
@@ -4757,6 +4792,24 @@ var Fudge;
             };
             this.onkeydown = (_event) => {
                 this.controller.onkeydown(_event);
+                switch (_event.key) {
+                    case "1":
+                        this.orbitCamera.rotationX = 0;
+                        this.orbitCamera.rotationY = 0;
+                        break;
+                    case "3":
+                        this.orbitCamera.rotationX = 0;
+                        this.orbitCamera.rotationY = 90;
+                        break;
+                    case "7":
+                        this.orbitCamera.rotationX = -90;
+                        this.orbitCamera.rotationY = 0;
+                        break;
+                    case "9":
+                        this.orbitCamera.rotationX = 90;
+                        this.orbitCamera.rotationY = 0;
+                        break;
+                }
             };
             this.onkeyup = (_event) => {
                 this.controller.onkeyup(_event);
@@ -4804,10 +4857,10 @@ var Fudge;
             this.viewport = new ƒ.Viewport();
             this.viewport.initialize("Viewport", this.graph, cmpCamera, this.canvas);
             this.viewport.draw();
-            let orbitCamera = ƒaid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false, -0.15, 0.005, 0.003);
-            orbitCamera.rotateX(-30);
-            orbitCamera.rotateY(45);
-            orbitCamera.distance = 5;
+            this.orbitCamera = ƒaid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false, -0.15, 0.005, 0.003);
+            this.orbitCamera.rotateX(-30);
+            this.orbitCamera.rotateY(45);
+            this.orbitCamera.distance = 5;
         }
         toggleBackfaceCulling() {
             ViewModellerScene.isBackfaceCullingEnabled = !ViewModellerScene.isBackfaceCullingEnabled;
@@ -4833,12 +4886,12 @@ var Fudge;
                 this.dom.remove();
             };
             this.hndEvent = (_event) => {
-                this.fillContent(_event.detail);
+                this.fillContent(_event.detail.vertices, _event.detail.selection);
             };
             // this.contextMenu = this.getContextMenu(this.contextMenuCallback);
             this.setObject(_state.node.getChildrenByName("Default")[0]);
             this.setTitle("Vertices");
-            this.fillContent();
+            this.fillContent((this.currentNode.getComponent(ƒ.ComponentMesh).mesh.uniqueVertices));
             ƒ.EventTargetStatic.addEventListener(Fudge.MODELLER_EVENTS.SELECTION_UPDATE, this.hndEvent);
             _container.on("destroy", this.cleanup);
         }
@@ -4847,7 +4900,7 @@ var Fudge;
                 return;
             this.currentNode = _object;
         }
-        fillContent(selection = Array.from(Array(this.currentNode.getComponent(ƒ.ComponentMesh).mesh.uniqueVertices.length).keys())) {
+        fillContent(_vertices, selection = Array.from(Array(_vertices.length).keys())) {
             while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
                 ;
             // let fieldset: ƒui.ExpandableFieldSet = ƒui.Generator.createFieldSetFromMutable((<ModifiableMesh> this.currentNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices[0], "0");
@@ -4855,8 +4908,8 @@ var Fudge;
             // TODO see if we can make this work without a new fieldset for every vertex
             let mesh = this.currentNode.getComponent(ƒ.ComponentMesh).mesh;
             for (let selectedVertex of selection) {
-                let fieldset = ƒui.Generator.createFieldSetFromMutable(mesh.uniqueVertices[selectedVertex], selectedVertex.toString());
-                let uiComponent = new Fudge.ControllerVertices(mesh.uniqueVertices[selectedVertex], fieldset);
+                let fieldset = ƒui.Generator.createFieldSetFromMutable(_vertices[selectedVertex], selectedVertex.toString());
+                let uiComponent = new Fudge.ControllerVertices(_vertices[selectedVertex], fieldset);
                 uiComponent.node = this.currentNode;
                 this.dom.append(uiComponent.domElement);
             }

@@ -5,7 +5,7 @@ namespace Fudge {
     public selection: Array<number>;
     public editableNode: ƒ.Node;
     protected dragging: boolean = false;
-    protected distance: number;
+    protected distanceCameraToCentroid: number;
     protected oldPosition: ƒ.Vector3;
     protected axesSelectionHandler: AxesSelectionHandler;
 
@@ -32,8 +32,8 @@ namespace Fudge {
       if (nodeWasPicked && !this.axesSelectionHandler.wasPicked) {
         this.dragging = true;
       }
-      this.distance = this.getDistanceFromCameraToCentroid();
-      this.oldPosition = this.getPointerPosition(_event, this.distance);
+      this.distanceCameraToCentroid = this.getDistanceFromCameraToCentroid((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection));
+      this.oldPosition = this.getPointerPosition(_event, this.distanceCameraToCentroid);
     }
 
     onmouseup(_event: ƒ.EventPointer): string {
@@ -52,13 +52,13 @@ namespace Fudge {
     onmove(_event: ƒ.EventPointer): void {
       if (!this.axesSelectionHandler.isValidSelection() && !this.dragging) {
         if (this.axesSelectionHandler.isAxisSelectedViaKeyboard()) {
-          this.distance = this.getDistanceFromCameraToCentroid();
-          this.oldPosition = this.getPointerPosition(_event, this.distance);
+          this.distanceCameraToCentroid = this.getDistanceFromCameraToCentroid((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection));
+          this.oldPosition = this.getPointerPosition(_event, this.distanceCameraToCentroid);
           this.axesSelectionHandler.isSelectedViaKeyboard = true;
         }
         return;
       }
-      let newPos: ƒ.Vector3 = this.getPointerPosition(_event, this.distance);
+      let newPos: ƒ.Vector3 = this.getPointerPosition(_event, this.distanceCameraToCentroid);
       let diff: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(newPos, this.oldPosition);
       let translationVector: ƒ.Vector3 = new ƒ.Vector3(0, 0, 0);
       let selectedAxes: AXIS[] = this.axesSelectionHandler.getSelectedAxes();

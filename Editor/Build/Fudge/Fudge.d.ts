@@ -458,23 +458,26 @@ declare namespace Fudge {
         protected copyVertices(): Map<number, ƒ.Vector3>;
         protected getPointerPosition(_event: ƒ.EventPointer, distance: number): ƒ.Vector3;
         protected getDistanceFromRayToCenterOfNode(_event: ƒ.EventPointer, distance: number): ƒ.Vector3;
-        protected getDistanceFromCameraToCentroid(): number;
+        protected getDistanceFromCameraToCentroid(_centroid: ƒ.Vector3): number;
         private drawCircleAtVertex;
         private drawCircleAtSelection;
     }
 }
 declare namespace Fudge {
     class Extrude extends InteractionMode {
+        private static selectionRadius;
         readonly type: INTERACTION_MODE;
         selection: Array<number>;
         viewport: ƒ.Viewport;
         editableNode: ƒ.Node;
         private isExtruded;
-        private distance;
+        private distanceCameraToCentroid;
         private oldPosition;
         private axesSelectionHandler;
         private vertexSelected;
         private orientation;
+        private clientCentroid;
+        private loopIsRunning;
         constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>);
         onmousedown(_event: ƒ.EventPointer): void;
         onmouseup(_event: ƒ.EventPointer): string;
@@ -486,6 +489,8 @@ declare namespace Fudge {
         update(): void;
         initialize(): void;
         cleanup(): void;
+        private startLoop;
+        private drawSelectionCircle;
     }
 }
 declare namespace Fudge {
@@ -601,8 +606,8 @@ declare namespace Fudge {
         onmousedown(_event: ƒ.EventPointer): void;
         onmouseup(_event: ƒ.EventPointer): string;
         onmove(_event: ƒ.EventPointer): void;
-        onkeydown(pressedKey: string): void;
-        onkeyup(pressedKey: string): string;
+        onkeydown(_pressedKey: string): void;
+        onkeyup(_pressedKey: string): string;
         update(): void;
         getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
         contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
@@ -616,7 +621,7 @@ declare namespace Fudge {
         selection: Array<number>;
         editableNode: ƒ.Node;
         protected dragging: boolean;
-        protected distance: number;
+        protected distanceCameraToCentroid: number;
         protected oldPosition: ƒ.Vector3;
         protected axesSelectionHandler: AxesSelectionHandler;
         initialize(): void;
@@ -1051,6 +1056,7 @@ declare namespace Fudge {
         controller: Controller;
         node: ƒ.Node;
         content: HTMLDivElement;
+        private orbitCamera;
         constructor(_container: GoldenLayout.Container, _state: Object);
         addEventListeners(): void;
         createUserInterface(): void;

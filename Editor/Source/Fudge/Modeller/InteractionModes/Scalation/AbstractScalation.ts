@@ -53,23 +53,18 @@ namespace Fudge {
       let currentPosition: ƒ.Vector3 = this.getPointerPosition(_event, this.distanceCameraToCentroid);
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
 
-      //let scaleMatrix: ƒ.Matrix4x4;
-      // let abs: number = ƒ.Vector3.DIFFERENCE(diff, this.distanceRayToCenter);
-      // let abs: number = ƒ.Vector3.DIFFERENCE(currentPosition, this.centroid).magnitude;
-      // let scale: number = currentPosition.magnitude / this.oldPosition.magnitude;
-      let scalar: number = ƒ.Vector3.DIFFERENCE(currentPosition, this.centroid).magnitude / this.distancePointerToCentroid.magnitude;
-      // let abs: number = ƒ.Vector3.DOT(newPosition, this.distanceRayToCenter);
+      let scaleFactor: number = ƒ.Vector3.DIFFERENCE(currentPosition, this.centroid).magnitude / this.distancePointerToCentroid.magnitude;
       let scaleVector: ƒ.Vector3 = ƒ.Vector3.ONE();
       for (let pickedAxis of selectedAxes) {
         switch (pickedAxis) {
           case AXIS.X:
-            scaleVector.x = scalar;
+            scaleVector.x = scaleFactor;
             break;
           case AXIS.Y:
-            scaleVector.y = scalar;
+            scaleVector.y = scaleFactor;
             break;
           case AXIS.Z:
-            scaleVector.z = scalar;
+            scaleVector.z = scaleFactor;
             break;
         }
       }
@@ -112,7 +107,7 @@ namespace Fudge {
     }
 
     private setValues(_event: ƒ.EventPointer): void {
-      this.distanceCameraToCentroid = this.getDistanceFromCameraToCentroid();
+      this.distanceCameraToCentroid = this.getDistanceFromCameraToCentroid((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection));
       this.oldPosition = this.getPointerPosition(_event, this.distanceCameraToCentroid);
       this.centroid = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection);
       this.distancePointerToCentroid = ƒ.Vector3.DIFFERENCE(this.oldPosition, this.centroid);

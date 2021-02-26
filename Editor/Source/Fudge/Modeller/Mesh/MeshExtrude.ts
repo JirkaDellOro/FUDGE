@@ -205,9 +205,6 @@ namespace Fudge {
       }
     }
 
-    /*
-      i and j are found randomly for single faces, maybe add some functionality to make the user swap normals
-    */
     private removeDuplicateEdges(edges: {start: number, end: number}[], faceToEdgesMap: Map<number, {edge: {start: number, end: number}, index: number}[]>): void {
       let edgesToRemove: number[] = [];
       let duplicateEdges: Set<number> = new Set();
@@ -228,22 +225,22 @@ namespace Fudge {
               }
             }
             // maybe change this to:
-            // edgesToRemove.push(j);
-            // duplicateEdges.add(i);
-
-            // if (iIsPartOfFace) {
-            //   let oldStart: number = edges[i].start;
-            //   edges[i].start = edges[i].end;
-            //   edges[i].end = oldStart;
-            // } 
+            edgesToRemove.push(j);
+            duplicateEdges.add(i);
 
             if (iIsPartOfFace) {
-              edgesToRemove.push(i);
-              duplicateEdges.add(j);
-            } else {
-              edgesToRemove.push(j);
-              duplicateEdges.add(i);
-            }
+              let oldStart: number = edges[i].start;
+              edges[i].start = edges[i].end;
+              edges[i].end = oldStart;
+            } 
+
+            // if (iIsPartOfFace) {
+            //   edgesToRemove.push(i);
+            //   duplicateEdges.add(j);
+            // } else {
+            //   edgesToRemove.push(j);
+            //   duplicateEdges.add(i);
+            // }
           }
         }
       }

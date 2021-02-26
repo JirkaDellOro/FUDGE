@@ -43,9 +43,15 @@ namespace Fudge {
         if (!ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.CTRL_RIGHT, ƒ.KEYBOARD_CODE.CTRL_LEFT])) {
           selection.splice(0, selection.length);
         }
-        selection.push(nearestVertexIndex);
+        let vertexAlreadySelected: boolean = false;
+        for (let selectedIndex of selection) {
+          if (selectedIndex === nearestVertexIndex) 
+            vertexAlreadySelected = true;
+        }
+        if (!vertexAlreadySelected)
+          selection.push(nearestVertexIndex);
 
-        let event: CustomEvent = new CustomEvent(MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: selection });
+        let event: CustomEvent = new CustomEvent(MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: {selection: selection, vertices: mesh.uniqueVertices }});
         ƒ.EventTargetStatic.dispatchEvent(event);
       }
       return vertexWasPicked;

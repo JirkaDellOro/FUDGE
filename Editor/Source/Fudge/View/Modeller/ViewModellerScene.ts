@@ -11,6 +11,7 @@ namespace Fudge {
     controller: Controller;
     node: ƒ.Node;
     content: HTMLDivElement;
+    private orbitCamera: ƒaid.CameraOrbit;
 
     constructor(_container: GoldenLayout.Container, _state: Object) {
       super(_container, _state);
@@ -63,10 +64,10 @@ namespace Fudge {
       this.viewport = new ƒ.Viewport();
       this.viewport.initialize("Viewport", this.graph, cmpCamera, this.canvas);
       this.viewport.draw();
-      let orbitCamera: ƒaid.CameraOrbit =  ƒaid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false, -0.15, 0.005, 0.003);
-      orbitCamera.rotateX(-30);
-      orbitCamera.rotateY(45);
-      orbitCamera.distance = 5;
+      this.orbitCamera =  ƒaid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false, -0.15, 0.005, 0.003);
+      this.orbitCamera.rotateX(-30);
+      this.orbitCamera.rotateY(45);
+      this.orbitCamera.distance = 5;
     } 
 
     public toggleBackfaceCulling(): void {
@@ -126,6 +127,25 @@ namespace Fudge {
 
     private onkeydown = (_event: ƒ.EventKeyboard): void => {
       this.controller.onkeydown(_event);
+
+      switch(_event.key) {
+        case "1":
+          this.orbitCamera.rotationX = 0;
+          this.orbitCamera.rotationY = 0;
+          break;
+        case "3":
+          this.orbitCamera.rotationX = 0;
+          this.orbitCamera.rotationY = 90;
+          break;
+        case "7":
+          this.orbitCamera.rotationX = -90;
+          this.orbitCamera.rotationY = 0;
+          break;
+        case "9":
+          this.orbitCamera.rotationX = 90;
+          this.orbitCamera.rotationY = 0;
+          break;
+      }
     }
 
     private onkeyup = (_event: ƒ.EventKeyboard): void => {

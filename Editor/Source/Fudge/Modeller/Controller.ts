@@ -110,7 +110,7 @@ namespace Fudge {
       this.interactionMode?.cleanup();
       this.interactionMode = this.currentControlMode.formerMode || new IdleMode(this.viewport, this.editableNode);
       this.interactionMode.initialize(); 
-      ƒ.EventTargetStatic.dispatchEvent(new CustomEvent(MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: this.interactionMode.selection }));
+      ƒ.EventTargetStatic.dispatchEvent(new CustomEvent(MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: {selection: this.interactionMode.selection, vertices: (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices  }}));
       this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));     
       console.log("Current Mode: " + this.interactionMode.type);
     }
@@ -125,7 +125,7 @@ namespace Fudge {
         this.interactionMode.selection = selection;
       
       this.interactionMode.initialize();
-      ƒ.EventTargetStatic.dispatchEvent(new CustomEvent(MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: this.interactionMode.selection }));
+      ƒ.EventTargetStatic.dispatchEvent(new CustomEvent(MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: {selection: this.interactionMode.selection, vertices: (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices  }}));
       this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
       console.log("Current Mode: " + this.interactionMode.type);
     }
@@ -159,7 +159,7 @@ namespace Fudge {
       mesh.retrieveState(this.states[this.currentState]);
       this.interactionMode.updateAfterUndo();
     }
-
+    
     private saveState(state: string): void {
       this.states.splice(this.currentState + 1);
       this.states.push(state);

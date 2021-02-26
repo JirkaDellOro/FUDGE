@@ -114,8 +114,8 @@ namespace Fudge {
       return ƒ.Vector3.DIFFERENCE(this.getPointerPosition(_event, distance), (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection));
     }
     
-    protected getDistanceFromCameraToCentroid(): number {
-      return ƒ.Vector3.DIFFERENCE((<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection), this.viewport.camera.getContainer().mtxWorld.translation).magnitude;
+    protected getDistanceFromCameraToCentroid(_centroid: ƒ.Vector3): number {
+      return ƒ.Vector3.DIFFERENCE(_centroid, this.viewport.camera.getContainer().mtxWorld.translation).magnitude;
     }
 
     private drawCircleAtVertex(): void {

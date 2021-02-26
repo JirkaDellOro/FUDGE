@@ -228,6 +228,9 @@ namespace Fudge {
         return;
       let meshUtils: MeshExtrude = new MeshExtrude(this.countNumberOfFaces(), this.vertices, this.#uniqueVertices, this.indices.length);
       let oldVertices: number[] = meshUtils.extrude(selectedVertices);
+      if (oldVertices.length === 0)
+        return;
+      
       let finalNormal: ƒ.Vector3 = new ƒ.Vector3();
       for (let i: number = 0; i < oldVertices.length; i++) {
         let subnormal: ƒ.Vector3 = new ƒ.Vector3(this.normalsFace[oldVertices[i] * 3], this.normalsFace[oldVertices[i] * 3 + 1], this.normalsFace[oldVertices[i] * 3 + 2]);
@@ -237,9 +240,9 @@ namespace Fudge {
       this.vertices = this.createVertices();
       this.indices = this.createIndices();
 
-      let newSelection: number[] = [];
-      for (let i: number = 0; i < selectedVertices.length; i++)
-        newSelection.push(this.uniqueVertices.length - selectedVertices.length + i);
+      // let newSelection: number[] = [];
+      // for (let i: number = 0; i < selectedVertices.length; i++)
+      //   newSelection.push(this.uniqueVertices.length - selectedVertices.length + i);
 
       this.createRenderBuffers();
       return finalNormal;
