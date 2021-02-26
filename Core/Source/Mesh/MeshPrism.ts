@@ -7,7 +7,7 @@ namespace FudgeCore {
    *            ||5_||6
    *           1|/_2|/ 
    * ```
-   * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+   * @authors Jirka Dell'Oro-Friedl, HFU, 2021
    */
   // export class MeshPrism extends Mesh {
   //   public static readonly iSubclass: number = Mesh.registerSubclass(MeshCube);

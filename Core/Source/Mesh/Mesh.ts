@@ -170,7 +170,7 @@ namespace FudgeCore {
     protected createRadius(): number {
       let radius: number = 0;
       for (let vertex: number = 0; vertex < this.vertices.length; vertex += 3) {
-        radius = Math.max(Math.hypot(this.vertices[vertex], this.vertices[vertex + 1], this.vertices[vertex + 2]));
+        radius = Math.max(radius, Math.hypot(this.vertices[vertex], this.vertices[vertex + 1], this.vertices[vertex + 2]));
       }
       return radius;
     }

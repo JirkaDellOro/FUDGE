@@ -202,6 +202,7 @@ namespace Fudge {
 
           // draw viewport once for immediate feedback
           viewport.draw();
+          canvas.dispatchEvent(new CustomEvent("interactiveViewportStarted", {bubbles: true, detail: viewport}));
         }
       }).toString();
 

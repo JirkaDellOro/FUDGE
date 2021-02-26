@@ -99,6 +99,10 @@ declare namespace FudgeCore {
          */
         static groupEnd(): void;
         /**
+         * Log a branch of the node hierarchy
+         */
+        static branch(_branch: Node): void;
+        /**
          * Lookup all delegates registered to the filter and call them using the given arguments
          */
         private static delegate;
@@ -3207,7 +3211,7 @@ declare namespace FudgeCore {
      *            ||5_||6
      *           1|/_2|/
      * ```
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2021
      */
 }
 declare namespace FudgeCore {

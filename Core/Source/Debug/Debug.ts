@@ -89,6 +89,21 @@ namespace FudgeCore {
       Debug.delegate(DEBUG_FILTER.GROUPEND, null, null);
     }
     /**
+     * Log a branch of the node hierarchy
+     */
+    public static branch(_branch: Node): void {
+      if (_branch.nChildren > 0)
+        Debug.group(_branch.name);
+      else
+        Debug.fudge(_branch.name);
+
+      for (let child of _branch.getChildren()) Debug.branch(child);
+
+      if (_branch.nChildren > 0)
+        Debug.groupEnd();
+    }
+
+    /**
      * Lookup all delegates registered to the filter and call them using the given arguments
      */
     private static delegate(_filter: DEBUG_FILTER, _message: unknown, _args: unknown[]): void {

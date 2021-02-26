@@ -1,6 +1,6 @@
 namespace PickTransform {
   import ƒ = FudgeCore;
-  import ƒUi = FudgeUserInterface;
+  // import ƒUi = FudgeUserInterface;
   import ƒAid = FudgeAid;
 
   window.addEventListener("load", start);

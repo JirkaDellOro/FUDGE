@@ -1,4 +1,4 @@
-///<reference path="../../UserInterface/Build/FudgeUserInterface.d.ts"/>
+///<reference path="../../../UserInterface/Build/FudgeUserInterface.d.ts"/>
 namespace Picking {
   import ƒ = FudgeCore;
   import ƒUi = FudgeUserInterface;

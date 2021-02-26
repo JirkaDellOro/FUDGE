@@ -1,6 +1,7 @@
 var PickTransform;
 (function (PickTransform) {
     var ƒ = FudgeCore;
+    // import ƒUi = FudgeUserInterface;
     var ƒAid = FudgeAid;
     window.addEventListener("load", start);
     let cmpCamera;
