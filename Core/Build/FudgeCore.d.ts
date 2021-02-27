@@ -782,7 +782,7 @@ declare namespace FudgeCore {
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
-        protected static draw(_cmpMesh: ComponentMesh, cmpMaterial: ComponentMaterial, _mtxMeshToWorld: Matrix4x4, _mtxWorldToView: Matrix4x4): void;
+        protected static drawMesh(_cmpMesh: ComponentMesh, cmpMaterial: ComponentMaterial, _mtxMeshToWorld: Matrix4x4, _mtxWorldToView: Matrix4x4): void;
     }
 }
 declare namespace FudgeCore {
@@ -4870,9 +4870,9 @@ declare namespace FudgeCore {
          * for each node in the line of sight and return that as an unsorted [[Pick]]-array
          */
         static pickBranch(_branch: Node, _cmpCamera: ComponentCamera): Pick[];
-        static drawList(_cmpCamera: ComponentCamera): void;
-        static drawListAlpha(_cmpCamera: ComponentCamera): void;
-        private static drawListInternal;
+        static draw(_cmpCamera: ComponentCamera): void;
+        private static drawListAlpha;
+        private static drawList;
         /**
         * Physics Part -> Take all nodes with cmpRigidbody, and overwrite their local position/rotation with the one coming from
         * the rb component, which is the new "local" WORLD position.
@@ -4943,14 +4943,14 @@ declare namespace FudgeCore {
          */
         showSceneGraph(): void;
         /**
-         * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the [[Node]]s and [[ComponentMesh]]es
-         */
-        calculateTransforms(): void;
-        /**
          * Draw this viewport displaying its branch. By default, the transforms in the branch are recalculated first.
          * Pass `false` if calculation was already done for this frame
          */
         draw(_calculateTransforms?: boolean): void;
+        /**
+         * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the [[Node]]s and [[ComponentMesh]]es
+         */
+        calculateTransforms(): void;
         /**
          * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas
          */

@@ -111,7 +111,7 @@ namespace FudgeCore {
       }
 
       Render.setBlendMode(BLEND.TRANSPARENT);
-      
+
       let picks: Pick[] = Render.getPicks(size, _cmpCamera);
       Render.resetFrameBuffer();
       return picks;
@@ -119,35 +119,37 @@ namespace FudgeCore {
     //#endregion
 
     //#region Drawing
-    public static drawList(_cmpCamera: ComponentCamera): void {
+    public static draw(_cmpCamera: ComponentCamera): void {
       // TODO: Move physics rendering to RenderPhysics extension of RenderManager
       if (Physics.world && Physics.world.mainCam != _cmpCamera)
         Physics.world.mainCam = _cmpCamera; //DebugDraw needs to know the main camera beforehand, _cmpCamera is the viewport camera. | Marko Fehrenbach, HFU 2020
 
       // TODO: check physics
-      Render.drawListInternal(_cmpCamera, this.nodesSimple);
+      Render.drawList(_cmpCamera, this.nodesSimple);
+      Render.drawListAlpha(_cmpCamera);
 
       if (Physics.settings && Physics.settings.debugDraw == true) {
         Physics.world.debugDraw.end();
       }
     }
-    public static drawListAlpha(_cmpCamera: ComponentCamera): void {
+
+    private static drawListAlpha(_cmpCamera: ComponentCamera): void {
       function sort(_a: Node, _b: Node): number {
-        // TODO: optimize to reduce calculations. Store clipspace translations in one pass and sort in another
-        let aDistance: number = _cmpCamera.pointWorldToClip(_a.getComponent(ComponentMesh).mtxWorld.translation).z;
-        let bDistance: number = _cmpCamera.pointWorldToClip(_b.getComponent(ComponentMesh).mtxWorld.translation).z;
-        return (aDistance < bDistance) ? 1 : -1;
+        return (Reflect.get(_a, "zCamera") < Reflect.get(_b, "zCamera")) ? 1 : -1;
       }
+      for (let node of Render.nodesAlpha)
+        Reflect.set(node, "zCamera", _cmpCamera.pointWorldToClip(node.getComponent(ComponentMesh).mtxWorld.translation).z);
+
       let sorted: Node[] = Render.nodesAlpha.getSorted(sort);
-      Render.drawListInternal(_cmpCamera, sorted);
+      Render.drawList(_cmpCamera, sorted);
     }
 
-    private static drawListInternal(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>): void {
+    private static drawList(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>): void {
       for (let node of _list) {
         let cmpMesh: ComponentMesh = node.getComponent(ComponentMesh);
         let mtxMeshToView: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, cmpMesh.mtxWorld);
         let cmpMaterial: ComponentMaterial = node.getComponent(ComponentMaterial);
-        Render.draw(cmpMesh, cmpMaterial, node.mtxWorld, mtxMeshToView);
+        Render.drawMesh(cmpMesh, cmpMaterial, node.mtxWorld, mtxMeshToView);
         Recycler.store(mtxMeshToView);
       }
     }

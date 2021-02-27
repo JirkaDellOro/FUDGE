@@ -116,16 +116,6 @@ namespace FudgeCore {
 
     // #region Drawing
     /**
-     * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the [[Node]]s and [[ComponentMesh]]es 
-     */
-    public calculateTransforms(): void {
-      let matrix: Matrix4x4 = Matrix4x4.IDENTITY();
-      if (this.#branch.getParent())
-        matrix = this.#branch.getParent().mtxWorld;
-      Render.prepare(this.#branch, matrix);
-    }
-
-    /**
      * Draw this viewport displaying its branch. By default, the transforms in the branch are recalculated first.
      * Pass `false` if calculation was already done for this frame 
      */
@@ -141,9 +131,7 @@ namespace FudgeCore {
       if (_calculateTransforms)
         this.calculateTransforms();
       Render.clear(this.camera.backgroundColor);
-      // Render.drawBranch(this.#branch, this.camera);
-      Render.drawList(this.camera);
-      Render.drawListAlpha(this.camera);
+      Render.draw(this.camera);
 
       this.#crc2.imageSmoothingEnabled = false;
       this.#crc2.drawImage(
@@ -152,6 +140,17 @@ namespace FudgeCore {
         this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height
       );
     }
+
+    /**
+     * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the [[Node]]s and [[ComponentMesh]]es 
+     */
+    public calculateTransforms(): void {
+      let matrix: Matrix4x4 = Matrix4x4.IDENTITY();
+      if (this.#branch.getParent())
+        matrix = this.#branch.getParent().mtxWorld;
+      Render.prepare(this.#branch, matrix);
+    }
+
 
     /**
      * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas

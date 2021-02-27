@@ -312,7 +312,7 @@ namespace FudgeCore {
     /**
      * Draw a mesh buffer using the given infos and the complete projection matrix
      */
-    protected static draw(_cmpMesh: ComponentMesh, cmpMaterial: ComponentMaterial, _mtxMeshToWorld: Matrix4x4, _mtxWorldToView: Matrix4x4): void {
+    protected static drawMesh(_cmpMesh: ComponentMesh, cmpMaterial: ComponentMaterial, _mtxMeshToWorld: Matrix4x4, _mtxWorldToView: Matrix4x4): void {
       let shader: typeof Shader = cmpMaterial.material.getShader();
       let coat: Coat = cmpMaterial.material.getCoat();
       shader.useProgram();
