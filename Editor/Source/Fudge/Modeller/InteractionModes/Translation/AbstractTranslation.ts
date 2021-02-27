@@ -45,7 +45,7 @@ namespace Fudge {
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
       this.axesSelectionHandler.releaseComponent();
       mesh.updateNormals();
-      this.axesSelectionHandler.widget.mtxLocal.translation = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection);
+      this.axesSelectionHandler.widget.mtxLocal.translation = mesh.getCentroid(this.selection);
       return state;
     }
 
@@ -91,6 +91,8 @@ namespace Fudge {
     
     onkeyup(_pressedKey: string): string {
       let state: string = null;
+      let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+      mesh.updateNormals();
       if (this.axesSelectionHandler.isValidSelection()) 
         state = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
 

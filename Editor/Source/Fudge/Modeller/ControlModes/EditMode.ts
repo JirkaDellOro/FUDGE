@@ -7,7 +7,7 @@ namespace Fudge {
       [INTERACTION_MODE.SELECT]: {type: EditSelection, shortcut: "s"}, 
       [INTERACTION_MODE.ROTATE]: {type: EditRotation, shortcut: "r"},
       [INTERACTION_MODE.TRANSLATE]: {type: EditTranslation, shortcut: "t"},
-      [INTERACTION_MODE.EXTRUDE]: {type: Extrude, shortcut: "e"},
+      [INTERACTION_MODE.EXTRUDE]: {type: Extrude, shortcut: "x"},
       [INTERACTION_MODE.SCALE]: {type: EditScalation, shortcut: "c"}
     };
   }

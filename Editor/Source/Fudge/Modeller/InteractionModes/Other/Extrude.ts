@@ -54,9 +54,8 @@ namespace Fudge {
       this.distanceCameraToCentroid = this.getDistanceFromCameraToCentroid(centroid);
       this.oldPosition = this.getPointerPosition(_event, this.distanceCameraToCentroid);
       this.orientation = mesh.extrude(this.selection);
-      if (!this.orientation) 
-        return;
-
+      // if (!this.orientation) 
+      //   return;
 
       let newSelection: number[] = [];
       for (let i: number = 0; i < this.selection.length; i++) 
@@ -86,13 +85,13 @@ namespace Fudge {
 
       let newPos: ƒ.Vector3 = this.getPointerPosition(_event, this.distanceCameraToCentroid);
       let diff: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(newPos, this.oldPosition);
-
-      let translationVector: ƒ.Vector3 = new ƒ.Vector3(this.orientation.x, this.orientation.y, this.orientation.z);
-      let selectedAxes: AXIS[] = this.axesSelectionHandler.getSelectedAxes();
-      //let translationVector: ƒ.Vector3 = new ƒ.Vector3(0, 0, 0);
-
-      let distance: number = ƒ.Vector3.DOT(diff, this.orientation) > 0 ? diff.magnitude : diff.magnitude * -1;
-      translationVector.scale(distance);
+      let translationVector: ƒ.Vector3 = diff;
+      if (this.orientation && !ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.SHIFT_LEFT, ƒ.KEYBOARD_CODE.SHIFT_RIGHT])) {
+        translationVector = new ƒ.Vector3(this.orientation.x, this.orientation.y, this.orientation.z);
+        let distance: number = ƒ.Vector3.DOT(diff, this.orientation) > 0 ? diff.magnitude : diff.magnitude * -1;
+        translationVector.scale(distance);  
+      }
+      // let selectedAxes: AXIS[] = this.axesSelectionHandler.getSelectedAxes();
       // diff.x *= Math.abs(this.orientation.x);
       // diff.y *= Math.abs(this.orientation.y);
       // diff.z *= Math.abs(this.orientation.z);
@@ -111,8 +110,9 @@ namespace Fudge {
       // }
       // if (selectedAxes.length === 0)
       //   translationVector = diff;
-      if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.SHIFT_LEFT, ƒ.KEYBOARD_CODE.SHIFT_RIGHT]) || this.selection.length < 4) 
-        translationVector = diff;
+
+      // if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.SHIFT_LEFT, ƒ.KEYBOARD_CODE.SHIFT_RIGHT]) || this.selection.length < 4) 
+      //   translationVector = diff;
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
       mesh.translateVertices(translationVector, this.selection);
       this.oldPosition = newPos;
@@ -126,23 +126,6 @@ namespace Fudge {
       this.axesSelectionHandler.removeAxisOf(pressedKey);
       return null;
     }
-
-    // getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {  
-    //   return [
-    //     MenuItemsCreator.getNormalDisplayItem(_callback, InteractionMode.normalsAreDisplayed), 
-    //     MenuItemsCreator.getInvertFaceItem(_callback)];
-    // }
-
-    // contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
-    //   switch (Number(_item.id)) {
-    //     case MODELLER_MENU.DISPLAY_NORMALS:
-    //       this.toggleNormals();          
-    //       break;
-    //     case MODELLER_MENU.INVERT_FACE: 
-    //       (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).invertFace(this.selection);          
-    //       break;
-    //   }
-    // }
 
     update(): void {
       //@ts-ignore

@@ -114,6 +114,7 @@ var Fudge;
     (function (MODELLER_EVENTS) {
         MODELLER_EVENTS["HEADER_APPEND"] = "headerappend";
         MODELLER_EVENTS["SELECTION_UPDATE"] = "selectionupdate";
+        MODELLER_EVENTS["HEADER_UPDATE"] = "headerupdate";
     })(MODELLER_EVENTS = Fudge.MODELLER_EVENTS || (Fudge.MODELLER_EVENTS = {}));
     let MODELLER_MENU;
     (function (MODELLER_MENU) {
@@ -1420,6 +1421,7 @@ var Fudge;
             this.interactionMode = this.currentControlMode.formerMode || new Fudge.IdleMode(this.viewport, this.editableNode);
             this.interactionMode.initialize();
             ƒ.EventTargetStatic.dispatchEvent(new CustomEvent(Fudge.MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: { selection: this.interactionMode.selection, vertices: this.editableNode.getComponent(ƒ.ComponentMesh).mesh.uniqueVertices } }));
+            ƒ.EventTargetStatic.dispatchEvent(new CustomEvent(Fudge.MODELLER_EVENTS.HEADER_UPDATE, { bubbles: true }));
             this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
             console.log("Current Mode: " + this.interactionMode.type);
         }
@@ -1432,6 +1434,7 @@ var Fudge;
                 this.interactionMode.selection = selection;
             this.interactionMode.initialize();
             ƒ.EventTargetStatic.dispatchEvent(new CustomEvent(Fudge.MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: { selection: this.interactionMode.selection, vertices: this.editableNode.getComponent(ƒ.ComponentMesh).mesh.uniqueVertices } }));
+            ƒ.EventTargetStatic.dispatchEvent(new CustomEvent(Fudge.MODELLER_EVENTS.HEADER_UPDATE, { bubbles: true }));
             this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
             console.log("Current Mode: " + this.interactionMode.type);
         }
@@ -1481,7 +1484,7 @@ var Fudge;
                 [Fudge.INTERACTION_MODE.SELECT]: { type: Fudge.EditSelection, shortcut: "s" },
                 [Fudge.INTERACTION_MODE.ROTATE]: { type: Fudge.EditRotation, shortcut: "r" },
                 [Fudge.INTERACTION_MODE.TRANSLATE]: { type: Fudge.EditTranslation, shortcut: "t" },
-                [Fudge.INTERACTION_MODE.EXTRUDE]: { type: Fudge.Extrude, shortcut: "e" },
+                [Fudge.INTERACTION_MODE.EXTRUDE]: { type: Fudge.Extrude, shortcut: "x" },
                 [Fudge.INTERACTION_MODE.SCALE]: { type: Fudge.EditScalation, shortcut: "c" }
             };
         }
@@ -1702,8 +1705,8 @@ var Fudge;
             this.distanceCameraToCentroid = this.getDistanceFromCameraToCentroid(centroid);
             this.oldPosition = this.getPointerPosition(_event, this.distanceCameraToCentroid);
             this.orientation = mesh.extrude(this.selection);
-            if (!this.orientation)
-                return;
+            // if (!this.orientation) 
+            //   return;
             let newSelection = [];
             for (let i = 0; i < this.selection.length; i++)
                 newSelection.push(mesh.uniqueVertices.length - this.selection.length + i);
@@ -1728,11 +1731,13 @@ var Fudge;
                 return;
             let newPos = this.getPointerPosition(_event, this.distanceCameraToCentroid);
             let diff = ƒ.Vector3.DIFFERENCE(newPos, this.oldPosition);
-            let translationVector = new ƒ.Vector3(this.orientation.x, this.orientation.y, this.orientation.z);
-            let selectedAxes = this.axesSelectionHandler.getSelectedAxes();
-            //let translationVector: ƒ.Vector3 = new ƒ.Vector3(0, 0, 0);
-            let distance = ƒ.Vector3.DOT(diff, this.orientation) > 0 ? diff.magnitude : diff.magnitude * -1;
-            translationVector.scale(distance);
+            let translationVector = diff;
+            if (this.orientation && !ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.SHIFT_LEFT, ƒ.KEYBOARD_CODE.SHIFT_RIGHT])) {
+                translationVector = new ƒ.Vector3(this.orientation.x, this.orientation.y, this.orientation.z);
+                let distance = ƒ.Vector3.DOT(diff, this.orientation) > 0 ? diff.magnitude : diff.magnitude * -1;
+                translationVector.scale(distance);
+            }
+            // let selectedAxes: AXIS[] = this.axesSelectionHandler.getSelectedAxes();
             // diff.x *= Math.abs(this.orientation.x);
             // diff.y *= Math.abs(this.orientation.y);
             // diff.z *= Math.abs(this.orientation.z);
@@ -1751,8 +1756,8 @@ var Fudge;
             // }
             // if (selectedAxes.length === 0)
             //   translationVector = diff;
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.SHIFT_LEFT, ƒ.KEYBOARD_CODE.SHIFT_RIGHT]) || this.selection.length < 4)
-                translationVector = diff;
+            // if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.SHIFT_LEFT, ƒ.KEYBOARD_CODE.SHIFT_RIGHT]) || this.selection.length < 4) 
+            //   translationVector = diff;
             let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
             mesh.translateVertices(translationVector, this.selection);
             this.oldPosition = newPos;
@@ -1764,21 +1769,6 @@ var Fudge;
             this.axesSelectionHandler.removeAxisOf(pressedKey);
             return null;
         }
-        // getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {  
-        //   return [
-        //     MenuItemsCreator.getNormalDisplayItem(_callback, InteractionMode.normalsAreDisplayed), 
-        //     MenuItemsCreator.getInvertFaceItem(_callback)];
-        // }
-        // contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
-        //   switch (Number(_item.id)) {
-        //     case MODELLER_MENU.DISPLAY_NORMALS:
-        //       this.toggleNormals();          
-        //       break;
-        //     case MODELLER_MENU.INVERT_FACE: 
-        //       (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).invertFace(this.selection);          
-        //       break;
-        //   }
-        // }
         update() {
             //@ts-ignore
         }
@@ -2281,7 +2271,7 @@ var Fudge;
             let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
             this.axesSelectionHandler.releaseComponent();
             mesh.updateNormals();
-            this.axesSelectionHandler.widget.mtxLocal.translation = this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid(this.selection);
+            this.axesSelectionHandler.widget.mtxLocal.translation = mesh.getCentroid(this.selection);
             return state;
         }
         onmove(_event) {
@@ -2324,6 +2314,8 @@ var Fudge;
         }
         onkeyup(_pressedKey) {
             let state = null;
+            let mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+            mesh.updateNormals();
             if (this.axesSelectionHandler.isValidSelection())
                 state = this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getState();
             this.axesSelectionHandler.removeAxisOf(_pressedKey);
@@ -2405,7 +2397,6 @@ var Fudge;
             this.vertexCount = _vertices.length / Fudge.ModifiableMesh.vertexSize;
             this.uniqueVertices = _uniqueVertices;
             this.numberOfIndices = _numberOfIndices;
-            this.vertices = _vertices;
         }
         extrude(selection) {
             this.fillVertexMap(selection);
@@ -2422,9 +2413,12 @@ var Fudge;
                 this.extrudeEdge([edge.start, edge.end]);
                 result.push(edge.start);
             }
-            this.addFrontFaces(faceToEdgesMap);
+            let newVertices = this.addFrontFaces(faceToEdgesMap);
             this.addNewTriangles();
-            return result;
+            if (newVertices.length > 0) {
+                return result;
+            }
+            return null;
         }
         /*
           loop over the stored (half-)edges and finds the correct ones
@@ -2543,7 +2537,6 @@ var Fudge;
                                 edgesToRemove.push(i);
                             }
                         }
-                        // test this
                         let oldStart = edges[edgeOfFace.index].start;
                         edges[edgeOfFace.index].start = edges[edgeOfFace.index].end;
                         edges[edgeOfFace.index].end = oldStart;
@@ -2592,7 +2585,6 @@ var Fudge;
                                 }
                             }
                         }
-                        // maybe change this to:
                         edgesToRemove.push(j);
                         duplicateEdges.add(i);
                         if (iIsPartOfFace) {
@@ -2633,6 +2625,7 @@ var Fudge;
                 this.uniqueVertices[this.originalVertexToNewUniqueVertexMap.get(this.vertexToUniqueVertexMap.get(vertex))].vertexToData.set(vertex, { indices: originalVertexToData.indices, face: originalVertexToData.face, edges: originalVertexToData.edges });
                 this.uniqueVertices[this.vertexToUniqueVertexMap.get(vertex)].vertexToData.delete(vertex);
             }
+            return vertices;
         }
         areEdgesDuplicate(edge1, edge2) {
             return (this.vertexToUniqueVertexMap.get(edge1.start) === this.vertexToUniqueVertexMap.get(edge2.start) &&
@@ -2760,7 +2753,7 @@ var Fudge;
             }
             this.vertices = this.createVertices();
             this.indices = this.createIndices();
-            this.normalsFace = this.calculateFaceNormals();
+            this.normalsFace = this.createFaceNormals();
             this.createRenderBuffers();
         }
         updateNormals() {
@@ -2855,14 +2848,15 @@ var Fudge;
                 return;
             let meshUtils = new Fudge.MeshExtrude(this.countNumberOfFaces(), this.vertices, this.#uniqueVertices, this.indices.length);
             let oldVertices = meshUtils.extrude(selectedVertices);
-            if (oldVertices.length === 0)
-                return;
-            let finalNormal = new ƒ.Vector3();
-            for (let i = 0; i < oldVertices.length; i++) {
-                let subnormal = new ƒ.Vector3(this.normalsFace[oldVertices[i] * 3], this.normalsFace[oldVertices[i] * 3 + 1], this.normalsFace[oldVertices[i] * 3 + 2]);
-                finalNormal.add(subnormal);
+            let finalNormal = null;
+            if (oldVertices) {
+                finalNormal = new ƒ.Vector3();
+                for (let i = 0; i < oldVertices.length; i++) {
+                    let subnormal = new ƒ.Vector3(this.normalsFace[oldVertices[i] * 3], this.normalsFace[oldVertices[i] * 3 + 1], this.normalsFace[oldVertices[i] * 3 + 2]);
+                    finalNormal.add(subnormal);
+                }
+                finalNormal.normalize();
             }
-            finalNormal.normalize();
             this.vertices = this.createVertices();
             this.indices = this.createIndices();
             this.createRenderBuffers();
@@ -3233,11 +3227,17 @@ var Fudge;
             };
             this.setInteractionMode = (_name, _event) => {
                 this.controller.setInteractionMode(_name);
-                this.updateButtontext();
             };
             this.setControlMode = (_name, _event) => {
                 this.controller.setControlMode(_name);
-                this.updateButtontext();
+            };
+            this.updateButtontext = () => {
+                let controlButton = document.querySelector("#control-button");
+                if (controlButton)
+                    controlButton.innerHTML = this.controller.controlMode.type;
+                let interactionButton = document.querySelector("#interaction-button");
+                if (interactionButton)
+                    interactionButton.innerHTML = this.controller.getInteractionModeType();
             };
             this.closeMenu = (_event) => {
                 if (!_event.target.matches(".dropbtn")) {
@@ -3254,6 +3254,7 @@ var Fudge;
             let container = document.createElement("div");
             container.style.borderWidth = "0px";
             window.addEventListener("click", this.closeMenu);
+            ƒ.EventTargetStatic.addEventListener(Fudge.MODELLER_EVENTS.HEADER_UPDATE, this.updateButtontext);
         }
         getControlDropdown() {
             let template = document.querySelector("#dropdown-template");
@@ -3274,12 +3275,6 @@ var Fudge;
             buttonInteraction.id = "interaction-button";
             buttonInteraction.innerHTML = this.controller.getInteractionModeType();
             return dropdownInteraction;
-        }
-        updateButtontext() {
-            let controlButton = document.querySelector("#control-button");
-            controlButton.innerHTML = this.controller.controlMode.type;
-            let interactionButton = document.querySelector("#interaction-button");
-            interactionButton.innerHTML = this.controller.getInteractionModeType();
         }
     }
     Fudge.DropdownHandler = DropdownHandler;

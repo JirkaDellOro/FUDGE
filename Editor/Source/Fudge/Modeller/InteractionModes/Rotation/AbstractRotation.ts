@@ -52,7 +52,7 @@ namespace Fudge {
     }
 
     onkeydown(_pressedKey: string): void {
-      this.axesSelectionHandler.addAxisOf(_pressedKey)
+      this.axesSelectionHandler.addAxisOf(_pressedKey);
     }
 
     onkeyup(_pressedKey: string): string {

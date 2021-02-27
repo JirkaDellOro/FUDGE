@@ -79,7 +79,8 @@ declare namespace Fudge {
     }
     enum MODELLER_EVENTS {
         HEADER_APPEND = "headerappend",
-        SELECTION_UPDATE = "selectionupdate"
+        SELECTION_UPDATE = "selectionupdate",
+        HEADER_UPDATE = "headerupdate"
     }
     enum MODELLER_MENU {
         DISPLAY_NORMALS = 0,
@@ -660,7 +661,6 @@ declare namespace Fudge {
         private newVertexToOriginalVertexMap;
         private originalVertexToNewVertexMap;
         private vertexToUniqueVertexMap;
-        private vertices;
         private originalVertexToNewUniqueVertexMap;
         constructor(_numberOfFaces: number, _vertices: Float32Array, _uniqueVertices: UniqueVertex[], _numberOfIndices: number);
         extrude(selection: number[]): number[];

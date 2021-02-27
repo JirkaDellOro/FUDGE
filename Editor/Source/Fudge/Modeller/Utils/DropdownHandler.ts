@@ -8,6 +8,7 @@ namespace Fudge {
       container.style.borderWidth = "0px";
 
       window.addEventListener("click", this.closeMenu);
+      ƒ.EventTargetStatic.addEventListener(MODELLER_EVENTS.HEADER_UPDATE, this.updateButtontext);
     }
 
     public getControlDropdown(): HTMLDivElement {
@@ -74,19 +75,19 @@ namespace Fudge {
 
     private setInteractionMode = (_name: INTERACTION_MODE, _event: Event): void => {
       this.controller.setInteractionMode(_name);
-      this.updateButtontext();
     }
 
     private setControlMode = (_name: CONTROL_MODE, _event: Event): void => {
       this.controller.setControlMode(_name);
-      this.updateButtontext();
     }
 
-    private updateButtontext(): void {
+    private updateButtontext = (): void => {
       let controlButton: HTMLDivElement = document.querySelector("#control-button");
-      controlButton.innerHTML = this.controller.controlMode.type;
+      if (controlButton)
+        controlButton.innerHTML = this.controller.controlMode.type;
       let interactionButton: HTMLDivElement = document.querySelector("#interaction-button");
-      interactionButton.innerHTML = this.controller.getInteractionModeType();
+      if (interactionButton)
+        interactionButton.innerHTML = this.controller.getInteractionModeType();
     }
 
     private closeMenu = (_event: ƒ.EventPointer): void => {

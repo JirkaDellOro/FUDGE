@@ -4,7 +4,7 @@ namespace Fudge {
     public static getMenuItems(types: MODELLER_MENU[], _callback: ContextMenuCallback): Electron.MenuItem[] {
       let items: Electron.MenuItem[] = [];
       for (let type of types) {
-        switch(type) {
+        switch (type) {
           case MODELLER_MENU.DISPLAY_NORMALS:
             items.push(MenuItemsCreator.getNormalDisplayItem(_callback));
             break;

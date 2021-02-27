@@ -97,7 +97,8 @@ namespace Fudge {
 
   export enum MODELLER_EVENTS {
     HEADER_APPEND = "headerappend",
-    SELECTION_UPDATE = "selectionupdate"
+    SELECTION_UPDATE = "selectionupdate",
+    HEADER_UPDATE = "headerupdate"
   }
 
   export enum MODELLER_MENU {

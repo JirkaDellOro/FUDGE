@@ -21,9 +21,6 @@ namespace Fudge {
     abstract onkeydown(_pressedKey: string): void;
     abstract onkeyup(_pressedKey: string): string;
     abstract update(): void;
-    //abstract getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
-    // abstract contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void; 
-
     abstract initialize(): void;
     abstract cleanup(): void;
 

@@ -157,7 +157,7 @@ namespace Fudge {
     private onkeydown = (_event: ƒ.EventKeyboard): void => {
       this.controller.onkeydown(_event);
 
-      switch(_event.key) {
+      switch (_event.key) {
         case "1":
           this.orbitCamera.rotationX = 0;
           this.orbitCamera.rotationY = 0;
