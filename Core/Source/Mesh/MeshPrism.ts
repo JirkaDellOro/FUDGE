@@ -5,7 +5,7 @@ namespace FudgeCore {
    *             _______ 
    * Polygon  → ╱ ╲_____╲ ← Polygon
    *            ╲_╱_____╱
-   *            Z-Length 1
+   *            Z-Length = 1
    * ```
    * @authors Jirka Dell'Oro-Friedl, HFU, 2021
    */
@@ -38,6 +38,7 @@ namespace FudgeCore {
 
 
     private extrude(): void {
+      let lengthsPolygon: number[] = this.calculatePolygonLengths();
       let lengthVertexArrayPolygon: number = this.vertices.length;
       let nVerticesPolygon: number = lengthVertexArrayPolygon / 3;
       let nVerticesPrism: number = 4 * nVerticesPolygon + 2; // second polygon + wrapper + closing points
@@ -101,7 +102,8 @@ namespace FudgeCore {
       textureUVs.set(this.textureUVs, 0);
       textureUVs.set(this.textureUVs, nTextureUVs);
 
-      let increment: number = 1 / nVerticesPolygon;
+      let sumLengths: number = lengthsPolygon.reduce((_sum, _value) => _sum + _value);
+      let increment: number = 1 / sumLengths;
       index = nTextureUVs * 2;
       let v: number = 0;
       for (let vertex: number = 0; vertex <= nVerticesPolygon; vertex++) {
@@ -111,10 +113,26 @@ namespace FudgeCore {
         textureUVs[index] = 0;
         textureUVs[index + nVerticesPolygon * 2 + 2] = 1;
         index++;
-        v += increment;
+        v += increment * lengthsPolygon[vertex  ];
       }
 
       this.ƒtextureUVs = textureUVs;
+    }
+
+    private calculatePolygonLengths(): number[] {
+      let result: number[] = [];
+      let first: Vector3;
+      let prev: Vector3;
+      for (let i: number = 0; i < this.vertices.length; i += 3) {
+        let current: Vector3 = new Vector3(this.vertices[i], this.vertices[i + 1], this.vertices[i + 2]);
+        if (prev)
+          result.push(Vector3.DIFFERENCE(current, prev).magnitude);
+        else
+          first = current;
+        prev = current;
+      }
+      result.push(Vector3.DIFFERENCE(first, prev).magnitude);
+      return result;
     }
   }
 }

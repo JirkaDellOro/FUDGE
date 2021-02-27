@@ -3211,7 +3211,7 @@ declare namespace FudgeCore {
      *             _______
      * Polygon  → ╱ ╲_____╲ ← Polygon
      *            ╲_╱_____╱
-     *            Z-Length 1
+     *            Z-Length = 1
      * ```
      * @authors Jirka Dell'Oro-Friedl, HFU, 2021
      */
@@ -3222,6 +3222,7 @@ declare namespace FudgeCore {
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
         private extrude;
+        private calculatePolygonLengths;
     }
 }
 declare namespace FudgeCore {
