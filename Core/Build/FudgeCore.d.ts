@@ -3206,15 +3206,23 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Generate a simple cube with edges of length 1, each face consisting of two trigons
+     * Generates a prism which is a simple extrusion of a polygon
      * ```plaintext
-     *            4____7
-     *           0/__3/|
-     *            ||5_||6
-     *           1|/_2|/
+     *             _______
+     * Polygon  → ╱ ╲_____╲ ← Polygon
+     *            ╲_╱_____╱
+     *            Z-Length 1
      * ```
      * @authors Jirka Dell'Oro-Friedl, HFU, 2021
      */
+    class MeshPrism extends MeshPolygon {
+        static readonly iSubclass: number;
+        constructor(_name?: string, _vertices?: Vector2[], _fitMesh?: boolean, _fitTexture?: boolean);
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        protected reduceMutator(_mutator: Mutator): void;
+        private extrude;
+    }
 }
 declare namespace FudgeCore {
     /**

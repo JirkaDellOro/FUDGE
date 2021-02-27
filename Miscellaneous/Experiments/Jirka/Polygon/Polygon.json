@@ -1,6 +1,6 @@
 {
   "MeshPolygon|2021-02-08T14:58:15.037Z|31562": {
-    "ƒ.MeshPolygon": {
+    "ƒ.MeshPrism": {
       "idResource": "MeshPolygon|2021-02-08T14:58:15.037Z|31562",
       "name": "MeshPolygon",
       "type": "MeshPolygon",
@@ -14,7 +14,7 @@
       },
       "test2": "[1, 2]",
       "test3": "[1, 2, 3]",
-      "fitMesh": false,
+      "fitMesh": true,
       "fitTexture": false
     }
   },

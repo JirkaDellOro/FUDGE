@@ -97,7 +97,7 @@ namespace FudgeCore {
       this.ƒvertices = new Float32Array(vertices);
       this.ƒtextureUVs = new Float32Array(textureUVs);
       this.ƒindices = this.createIndices();
-      this.ƒnormalsFace = this.createFaceNormals();
+      // this.ƒnormalsFace = this.createFaceNormals();
       // this.createRenderBuffers();
     }
 
@@ -119,21 +119,11 @@ namespace FudgeCore {
 
     public async mutate(_mutator: Mutator): Promise<void> {
       super.mutate(_mutator);
-      // let sectors: number = Math.round(_mutator.sectors);
-      // let stacks: number = Math.round(_mutator.stacks);
       this.create(_mutator.construction, _mutator.autofit);
     }
 
-    // public getMutator(): Mutator {
-    //   let mutator: Mutator = {};//super.getMutator(true);
-    //   // mutator.construction = this.construction;
-    //   mutator.test = this.test.getMutator();
-    //   return mutator;
-    // }
-
     protected reduceMutator(_mutator: Mutator): void {
       super.reduceMutator(_mutator);
-      // delete _mutator.construction;
     }
     //#endregion
 
