@@ -9,6 +9,7 @@ namespace FudgeCore {
     public static pickBuffer: Int32Array;
     private static timestampUpdate: number;
     private static nodesSimple: RecycableArray<Node> = new RecycableArray();
+    private static nodesAlpha: RecycableArray<Node> = new RecycableArray();
 
     //#region Picking
     /**
@@ -46,6 +47,7 @@ namespace FudgeCore {
         _shadersUsed = [];
         Render.timestampUpdate = performance.now();
         Render.nodesSimple.reset();
+        Render.nodesAlpha.reset();
       }
 
       if (!_branch.isActive)
@@ -84,7 +86,10 @@ namespace FudgeCore {
           _shadersUsed.push(shader);
 
         _branch.radius = cmpMesh.radius;
-        Render.nodesSimple.push(_branch); // add this node to render list
+        if (cmpMaterial.sortForAlpha)
+          Render.nodesAlpha.push(_branch); // add this node to render list
+        else
+          Render.nodesSimple.push(_branch); // add this node to render list
       }
 
       for (let child of _branch.getChildren()) {
@@ -124,10 +129,22 @@ namespace FudgeCore {
       }
     }
 
-    public static drawList(_cmpCamera: ComponentCamera, _drawNode: Function = Render.drawNode): void {
+    public static drawList(_cmpCamera: ComponentCamera): void {
       // TODO: check physics
+      Render.drawListInternal(_cmpCamera, this.nodesSimple);
+    }
+    public static drawListAlpha(_cmpCamera: ComponentCamera): void {
+      function sort(_a: Node, _b: Node): number {
+        let aDistance: number = _cmpCamera.pointWorldToClip(_a.getComponent(ComponentMesh).mtxWorld.translation).z;
+        let bDistance: number = _cmpCamera.pointWorldToClip(_b.getComponent(ComponentMesh).mtxWorld.translation).z;
+        return (aDistance < bDistance) ? 1 : -1;
+      }
+      let sorted: Node[] = Render.nodesAlpha.getSorted(sort)
+      Render.drawListInternal(_cmpCamera, sorted);
+    }
 
-      for (let node of this.nodesSimple) {
+    private static drawListInternal(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>): void {
+      for (let node of _list) {
         let cmpMesh: ComponentMesh = node.getComponent(ComponentMesh);
         let mtxMeshToView: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, cmpMesh.mtxWorld);
         let cmpMaterial: ComponentMaterial = node.getComponent(ComponentMaterial);
@@ -136,6 +153,7 @@ namespace FudgeCore {
       }
     }
 
+    // TODO: remove drawBranchRecursive and drawNode after picking is been done by list!
     /**
      * Recursivly iterates over the graph and renders each node and all successors with the given render function
      */

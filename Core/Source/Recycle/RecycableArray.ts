@@ -47,9 +47,15 @@ namespace FudgeCore {
     //   return this.#array[this.#length++];
     // }
 
-    *[Symbol.iterator](): IterableIterator<T> {
+    public *[Symbol.iterator](): IterableIterator<T> {
       for (let i: number = 0; i < this.#length; i++)
         yield this.#array[i];
+    }
+
+    public getSorted(_sort: (a: T, b: T) => number): T[] {
+      let sorted: T[] = this.#array.slice(0, this.#length);
+      sorted.sort(_sort);
+      return sorted;
     }
   }
 }

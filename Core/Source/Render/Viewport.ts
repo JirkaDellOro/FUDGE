@@ -143,6 +143,7 @@ namespace FudgeCore {
       Render.clear(this.camera.backgroundColor);
       // Render.drawBranch(this.#branch, this.camera);
       Render.drawList(this.camera);
+      Render.drawListAlpha(this.camera);
 
       this.#crc2.imageSmoothingEnabled = false;
       this.#crc2.drawImage(

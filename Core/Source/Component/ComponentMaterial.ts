@@ -9,6 +9,8 @@ namespace FudgeCore {
     public clrPrimary: Color = Color.CSS("white");
     public clrSecondary: Color = Color.CSS("white");
     public pivot: Matrix3x3 = Matrix3x3.IDENTITY();
+    //** support sorting of objects with transparency when rendering, render objects in the back first */
+    public sortForAlpha: boolean = false;
     // public mutatorCoat: MutatorForComponent;
 
     public constructor(_material: Material = null) {

@@ -373,6 +373,7 @@ declare namespace FudgeCore {
          * It must be assured, that none of the objects in the array is still in any use of any kind!
          */
         [Symbol.iterator](): IterableIterator<T>;
+        getSorted(_sort: (a: T, b: T) => number): T[];
     }
 }
 declare namespace FudgeCore {
@@ -1720,6 +1721,7 @@ declare namespace FudgeCore {
         clrPrimary: Color;
         clrSecondary: Color;
         pivot: Matrix3x3;
+        sortForAlpha: boolean;
         constructor(_material?: Material);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
@@ -4856,6 +4858,7 @@ declare namespace FudgeCore {
         static pickBuffer: Int32Array;
         private static timestampUpdate;
         private static nodesSimple;
+        private static nodesAlpha;
         /**
          * Used with a [[Picker]]-camera, this method renders one pixel with picking information
          * for each node in the line of sight and return that as an unsorted [[Pick]]-array
@@ -4872,7 +4875,9 @@ declare namespace FudgeCore {
          * Draws the branch starting with the given [[Node]] using the camera given [[ComponentCamera]].
          */
         static drawBranch(_branch: Node, _cmpCamera: ComponentCamera, _drawNode?: Function): void;
-        static drawList(_cmpCamera: ComponentCamera, _drawNode?: Function): void;
+        static drawList(_cmpCamera: ComponentCamera): void;
+        static drawListAlpha(_cmpCamera: ComponentCamera): void;
+        private static drawListInternal;
         /**
          * Recursivly iterates over the graph and renders each node and all successors with the given render function
          */

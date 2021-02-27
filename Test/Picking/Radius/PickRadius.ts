@@ -7,6 +7,9 @@ namespace PickRadius {
     let viewport: ƒ.Viewport = _event.detail;
     let root: ƒ.Node = viewport.getBranch();
     let zoo: ƒ.Node = root.getChildrenByName("Zoo")[0];
+    let radii: ƒ.Node = new ƒ.Node("Radii");
+    root.replaceChild(zoo, radii);
+    root.appendChild(zoo);
 
     let meshShpere: ƒ.MeshSphere = new ƒ.MeshSphere("BoundingSphere", 40, 40);
     let material: ƒ.Material = new ƒ.Material("Transparent", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("white", 0.5)));
@@ -19,14 +22,16 @@ namespace PickRadius {
 
       let cmpMesh: ƒ.ComponentMesh = child.getComponent(ƒ.ComponentMesh);
       sphere.mtxLocal.translation = cmpMesh.mtxWorld.translation;
-      root.appendChild(sphere);
+      sphere.getComponent(ƒ.ComponentMaterial).sortForAlpha = true;
+      radii.appendChild(sphere);
     }
 
     let sphere: ƒ.Node = new ƒAid.Node(
       "BoundingSphere", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(2)), material, meshShpere
     );
     sphere.mtxLocal.scale(ƒ.Vector3.ONE(zoo.radius));
-    root.appendChild(sphere);
+    sphere.getComponent(ƒ.ComponentMaterial).sortForAlpha = true;
+    // radii.appendChild(sphere);
 
     ƒ.Debug.branch(root);
 
