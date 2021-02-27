@@ -774,7 +774,7 @@ declare namespace FudgeCore {
         * A cameraprojection with extremely narrow focus is used, so each pixel of the buffer would hold the same information from the node,
         * but the fragment shader renders only 1 pixel for each node into the render buffer, 1st node to 1st pixel, 2nd node to second pixel etc.
         */
-        protected static pick(_node: Node, _mtxMeshToWorld: Matrix4x4, _mtxWorldToView: Matrix4x4, _lights: MapLightTypeToLightList): void;
+        protected static pick(_node: Node, _mtxMeshToWorld: Matrix4x4, _mtxWorldToView: Matrix4x4): void;
         /**
          * Set light data in shaders
          */
@@ -782,7 +782,7 @@ declare namespace FudgeCore {
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
-        protected static draw(_mesh: Mesh, cmpMaterial: ComponentMaterial, _mtxMeshToWorld: Matrix4x4, _mtxWorldToView: Matrix4x4): void;
+        protected static draw(_cmpMesh: ComponentMesh, cmpMaterial: ComponentMaterial, _mtxMeshToWorld: Matrix4x4, _mtxWorldToView: Matrix4x4): void;
     }
 }
 declare namespace FudgeCore {
@@ -836,8 +836,9 @@ declare namespace FudgeCore {
         get nChildren(): number;
         /**
          * Generator yielding the node and all decendants in the graph below for iteration
+         * Inactive nodes and their descendants can be filtered
          */
-        get iterator(): IterableIterator<Node>;
+        getIterator(_active?: boolean): IterableIterator<Node>;
         activate(_on: boolean): void;
         /**
          * Returns a reference to this nodes parent node
@@ -956,7 +957,6 @@ declare namespace FudgeCore {
          */
         broadcastEvent(_event: Event): void;
         private broadcastEventRecursive;
-        private getIteratorGenerator;
     }
 }
 declare namespace FudgeCore {
@@ -1713,7 +1713,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Attaches a [[Material]] to the node
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019 - 2021
      */
     class ComponentMaterial extends Component {
         static readonly iSubclass: number;
@@ -4860,32 +4860,19 @@ declare namespace FudgeCore {
         private static nodesSimple;
         private static nodesAlpha;
         /**
-         * Used with a [[Picker]]-camera, this method renders one pixel with picking information
-         * for each node in the line of sight and return that as an unsorted [[Pick]]-array
-         */
-        static drawBranchForPicking(_branch: Node, _cmpCamera: ComponentCamera): Pick[];
-        /**
          * Recursively iterates over the branch starting with the node given, recalculates all world transforms,
          * collects all lights and feeds all shaders used in the graph with these lights. Sorts nodes for different
          * render passes.
          */
         static prepare(_branch: Node, _mtxWorld?: Matrix4x4, _lights?: MapLightTypeToLightList, _shadersUsed?: (typeof Shader)[]): void;
         /**
-         * The main rendering function to be called from [[Viewport]].
-         * Draws the branch starting with the given [[Node]] using the camera given [[ComponentCamera]].
+         * Used with a [[Picker]]-camera, this method renders one pixel with picking information
+         * for each node in the line of sight and return that as an unsorted [[Pick]]-array
          */
-        static drawBranch(_branch: Node, _cmpCamera: ComponentCamera, _drawNode?: Function): void;
+        static pickBranch(_branch: Node, _cmpCamera: ComponentCamera): Pick[];
         static drawList(_cmpCamera: ComponentCamera): void;
         static drawListAlpha(_cmpCamera: ComponentCamera): void;
         private static drawListInternal;
-        /**
-         * Recursivly iterates over the graph and renders each node and all successors with the given render function
-         */
-        private static drawBranchRecursive;
-        /**
-         * The standard render function for drawing a single node
-         */
-        private static drawNode;
         /**
         * Physics Part -> Take all nodes with cmpRigidbody, and overwrite their local position/rotation with the one coming from
         * the rb component, which is the new "local" WORLD position.

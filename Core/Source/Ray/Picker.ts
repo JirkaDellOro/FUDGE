@@ -15,7 +15,7 @@ namespace FudgeCore {
       cmpCameraPick.pivot.lookAt(_ray.direction);
       cmpCameraPick.projectCentral(1, 0.001, FIELD_OF_VIEW.DIAGONAL, _min, _max);
 
-      let picks: Pick[] = Render.drawBranchForPicking(_branch, cmpCameraPick);
+      let picks: Pick[] = Render.pickBranch(_branch, cmpCameraPick);
       return picks;
     }
 

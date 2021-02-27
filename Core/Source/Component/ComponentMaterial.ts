@@ -1,7 +1,7 @@
 namespace FudgeCore {
   /**
    * Attaches a [[Material]] to the node
-   * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+   * @authors Jirka Dell'Oro-Friedl, HFU, 2019 - 2021
    */
   export class ComponentMaterial extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentMaterial);

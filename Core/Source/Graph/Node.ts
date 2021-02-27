@@ -72,9 +72,14 @@ namespace FudgeCore {
 
     /**
      * Generator yielding the node and all decendants in the graph below for iteration
+     * Inactive nodes and their descendants can be filtered
      */
-    public get iterator(): IterableIterator<Node> {
-      return this.getIteratorGenerator();
+    public * getIterator(_active: boolean = false): IterableIterator<Node> {
+      if (!_active || this.isActive) {
+        yield this;
+        for (let child of this.children)
+          yield* child.getIterator(_active);
+      }
     }
 
     public activate(_on: boolean): void {
@@ -178,7 +183,7 @@ namespace FudgeCore {
       this.children.splice(found, 1);
       _child.parent = null;
     }
-    
+
     /**
      * Removes all references in the list of children
      */
@@ -506,11 +511,5 @@ namespace FudgeCore {
       }
     }
     // #endregion
-
-    private * getIteratorGenerator(): IterableIterator<Node> {
-      yield this;
-      for (let child of this.children)
-        yield* child.iterator;
-    }
   }
 }
