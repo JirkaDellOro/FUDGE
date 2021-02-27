@@ -64,13 +64,13 @@ namespace FudgeCore {
       // double vertices for wrapping
       vertices.set(vertices.slice(0, lengthVertexArrayPolygon * 2), lengthVertexArrayPolygon * 2);
       // copy first and last vertex to close wrapper
-      vertices.set(vertices.slice(lengthVertexArrayPolygon * 4 - 3, lengthVertexArrayPolygon * 4), lengthVertexArrayPolygon * 4);
-      vertices.set(vertices.slice(0, 3), lengthVertexArrayPolygon * 4 + 3);
+      vertices.set(vertices.slice(lengthVertexArrayPolygon, lengthVertexArrayPolygon + 3), lengthVertexArrayPrism - 6);
+      vertices.set(vertices.slice(0, 3), lengthVertexArrayPrism - 3);
 
       this.ƒvertices = vertices;
 
       // copy to new index array
-      let indices: Uint16Array = new Uint16Array(nIndicesPrism); 
+      let indices: Uint16Array = new Uint16Array(nIndicesPrism);
       indices.set(this.indices, 0);
 
       // copy indices for second polygon and reverse sequence
@@ -80,19 +80,19 @@ namespace FudgeCore {
         indices[nIndicesPolygon + i + 2] = this.indices[i + 1] + nVerticesPolygon;
       }
 
-      // // create indizes for wrapper
-      // let index: number = nIndicesPolygon * 2;
-      // for (let i: number = 0; i < nVerticesPolygon; i++) {
-      //   let vertex: number = i + 2 * nVerticesPolygon;
-      //   indices[index++] = vertex;
-      //   indices[index++] = vertex + nVerticesPolygon;
-      //   indices[index++] = vertex + nVerticesPolygon + 1;
-      //   indices[index++] = vertex;
-      //   indices[index++] = vertex + nVerticesPolygon + 1;
-      //   indices[index++] = vertex + 1;
-      // }
-      // // close wrapper
-      // indices[indices.length - 1] = (vertices.length - 1) / 3;
+      // create indizes for wrapper
+      let index: number = nIndicesPolygon * 2;
+      for (let i: number = 0; i < nVerticesPolygon; i++) {
+        let vertex: number = i + 2 * nVerticesPolygon;
+        indices[index++] = vertex;
+        indices[index++] = vertex + nVerticesPolygon;
+        indices[index++] = vertex + nVerticesPolygon + 1;
+        indices[index++] = vertex;
+        indices[index++] = vertex + nVerticesPolygon + 1;
+        indices[index++] = vertex + 1;
+      }
+      // close wrapper
+      indices[indices.length - 1] = (vertices.length - 1) / 3;
 
       this.ƒindices = indices;
 
