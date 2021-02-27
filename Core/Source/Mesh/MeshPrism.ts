@@ -61,15 +61,18 @@ namespace FudgeCore {
       // copy to new vertex array
       vertices.set(this.vertices, lengthVertexArrayPolygon);
 
-      // double vertices for wrapping
-      vertices.set(vertices.slice(0, lengthVertexArrayPolygon * 2), lengthVertexArrayPolygon * 2);
-      // copy first and last vertex to close wrapper
-      vertices.set(vertices.slice(lengthVertexArrayPolygon, lengthVertexArrayPolygon + 3), lengthVertexArrayPrism - 6);
-      vertices.set(vertices.slice(0, 3), lengthVertexArrayPrism - 3);
+      // duplicate vertices of first polygon for wrapping
+      vertices.set(vertices.slice(0, lengthVertexArrayPolygon), lengthVertexArrayPolygon * 2);
+      // duplicate first vertex of first polygon again to close wrapper
+      vertices.set(vertices.slice(0, 3), lengthVertexArrayPolygon * 3);
+      // duplicate vertices of second polygon for wrapping
+      vertices.set(vertices.slice(lengthVertexArrayPolygon, lengthVertexArrayPolygon * 2), lengthVertexArrayPolygon * 3 + 3);
+      // duplicate first vertex of second polygon again to close wrapper
+      vertices.set(vertices.slice(lengthVertexArrayPolygon, lengthVertexArrayPolygon + 3), lengthVertexArrayPrism - 3);
 
       this.ƒvertices = vertices;
 
-      // copy to new index array
+      // copy indices to new index array
       let indices: Uint16Array = new Uint16Array(nIndicesPrism);
       indices.set(this.indices, 0);
 
@@ -85,29 +88,33 @@ namespace FudgeCore {
       for (let i: number = 0; i < nVerticesPolygon; i++) {
         let vertex: number = i + 2 * nVerticesPolygon;
         indices[index++] = vertex;
-        indices[index++] = vertex + nVerticesPolygon;
         indices[index++] = vertex + nVerticesPolygon + 1;
+        indices[index++] = vertex + nVerticesPolygon + 2;
         indices[index++] = vertex;
-        indices[index++] = vertex + nVerticesPolygon + 1;
+        indices[index++] = vertex + nVerticesPolygon + 2;
         indices[index++] = vertex + 1;
       }
-      // close wrapper
-      indices[indices.length - 1] = (vertices.length - 1) / 3;
-
       this.ƒindices = indices;
 
       let nTextureUVs: number = this.textureUVs.length;
-      let textureUVs: Float32Array = new Float32Array(nTextureUVs * 2);
+      let textureUVs: Float32Array = new Float32Array(nVerticesPrism * 2);
       textureUVs.set(this.textureUVs, 0);
       textureUVs.set(this.textureUVs, nTextureUVs);
+
+      let increment: number = 1 / nVerticesPolygon;
+      index = nTextureUVs * 2;
+      let v: number = 0;
+      for (let vertex: number = 0; vertex <= nVerticesPolygon; vertex++) {
+        textureUVs[index] = v;
+        textureUVs[index + nVerticesPolygon * 2 + 2] = v;
+        index++;
+        textureUVs[index] = 0;
+        textureUVs[index + nVerticesPolygon * 2 + 2] = 1;
+        index++;
+        v += increment;
+      }
+
       this.ƒtextureUVs = textureUVs;
     }
-
-    // protected createIndices(): Uint16Array {
-    //   let indices: Array<number> = [];
-    //   for (let i: number = 2; i < this.vertices.length / 3; i++)
-    //     indices.push(0, i - 1, i);
-    //   return new Uint16Array(indices);
-    // }
   }
 }

@@ -15,7 +15,7 @@
       "test2": "[1, 2]",
       "test3": "[1, 2, 3]",
       "fitMesh": true,
-      "fitTexture": false
+      "fitTexture": true
     }
   },
   "Material|2021-02-08T14:58:19.425Z|10977": {
