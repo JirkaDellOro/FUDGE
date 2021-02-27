@@ -18,8 +18,9 @@ namespace Fudge {
 
     constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>) {
       super(viewport, editableNode, selection);
-      // TODO: check if pivot is still correct or if we need to use the container
       this.selector = new Selector(this.editableNode, this.viewport.camera.pivot.translation);
+      this.availableMenuitems.set(MODELLER_MENU.INVERT_FACE, this.invertFace.bind(this));
+      this.availableMenuitems.set(MODELLER_MENU.REMOVE_FACE, this.removeFace.bind(this));
     }
 
     onmousedown(_event: ƒ.EventPointer): void {
@@ -126,22 +127,22 @@ namespace Fudge {
       return null;
     }
 
-    getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {  
-      return [
-        MenuItemsCreator.getNormalDisplayItem(_callback, InteractionMode.normalsAreDisplayed), 
-        MenuItemsCreator.getInvertFaceItem(_callback)];
-    }
+    // getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {  
+    //   return [
+    //     MenuItemsCreator.getNormalDisplayItem(_callback, InteractionMode.normalsAreDisplayed), 
+    //     MenuItemsCreator.getInvertFaceItem(_callback)];
+    // }
 
-    contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
-      switch (Number(_item.id)) {
-        case MODELLER_MENU.DISPLAY_NORMALS:
-          this.toggleNormals();          
-          break;
-        case MODELLER_MENU.INVERT_FACE: 
-          (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).invertFace(this.selection);          
-          break;
-      }
-    }
+    // contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
+    //   switch (Number(_item.id)) {
+    //     case MODELLER_MENU.DISPLAY_NORMALS:
+    //       this.toggleNormals();          
+    //       break;
+    //     case MODELLER_MENU.INVERT_FACE: 
+    //       (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).invertFace(this.selection);          
+    //       break;
+    //   }
+    // }
 
     update(): void {
       //@ts-ignore

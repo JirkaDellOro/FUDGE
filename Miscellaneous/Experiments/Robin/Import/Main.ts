@@ -1,7 +1,7 @@
 ///<reference types="../../../../Core/Build/FudgeCore.js"/>
+import ƒ = FudgeCore;
 
 namespace Importer_Tests {
-  import ƒ = FudgeCore;
   export let viewport: ƒ.Viewport;
   window.addEventListener("load", load);
 
@@ -10,20 +10,17 @@ namespace Importer_Tests {
     let graph: ƒ.Node = new ƒ.Node("Graph");
   
     let mesh: ƒ.MeshCustom = new ƒ.MeshCustom();
-    await mesh.asyncLoad("mesh.json");
+    await mesh.load("mesh.json");
     let cube: ƒ.MeshCube = new ƒ.MeshCube();
 
     //await new Promise(r => setTimeout(r, 2000));
 
     let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
 
-    // cmpCamera.pivot.translate(new ƒ.Vector3(-3, -2, -1));
-    // cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
-    // cmpCamera.projectCentral(1, 45);
-    cmpCamera.pivot.translateZ(20); 
-    cmpCamera.pivot.rotateY(180);
-
-    let mtr: ƒ.Material = new ƒ.Material("Material", ƒ.ShaderUniColor, new ƒ.CoatColored());
+    cmpCamera.pivot.translate(new ƒ.Vector3(10, 6, 3));
+    cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
+    cmpCamera.projectCentral(1, 45);
+    let mtr: ƒ.Material = new ƒ.Material("Material", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("green")));
     let mtrCmp: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(mtr);
 
     let compMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh(mesh);

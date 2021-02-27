@@ -60,6 +60,40 @@ declare namespace Fudge {
         OBJECT_PROPERTIES = "ViewObjectProperties",
         SCRIPT = "ViewScript"
     }
+    enum CONTROL_MODE {
+        OBJECT_MODE = "Object-Mode",
+        EDIT_MODE = "Edit-Mode"
+    }
+    enum INTERACTION_MODE {
+        SELECT = "Box-Select",
+        TRANSLATE = "Translate",
+        ROTATE = "Rotate",
+        SCALE = "Scale",
+        EXTRUDE = "Extrude",
+        IDLE = "Idle"
+    }
+    enum AXIS {
+        X = "X",
+        Y = "Y",
+        Z = "Z"
+    }
+    enum MODELLER_EVENTS {
+        HEADER_APPEND = "headerappend",
+        SELECTION_UPDATE = "selectionupdate"
+    }
+    enum MODELLER_MENU {
+        DISPLAY_NORMALS = 0,
+        INVERT_FACE = 1,
+        REMOVE_FACE = 2,
+        TOGGLE_BACKFACE_CULLING = 3
+    }
+    enum ELECTRON_KEYS {
+        CTRL = "CommandOrControl",
+        SHIFT = "Shift",
+        ALT = "Alt",
+        ALTGR = "AltGr",
+        SUPER = "Super"
+    }
 }
 declare namespace Fudge {
     export enum MIME {
@@ -335,6 +369,7 @@ declare namespace Fudge {
         onkeyup(_event: ƒ.EventKeyboard): void;
         getSelection(): number[];
         getInteractionModeType(): INTERACTION_MODE;
+        executeAccelerator(_event: ƒ.EventKeyboard): boolean;
         switchMode(_event: ƒ.EventKeyboard): void;
         setControlMode(mode: CONTROL_MODE): void;
         setInteractionMode(mode: INTERACTION_MODE): void;
@@ -346,32 +381,6 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    enum CONTROL_MODE {
-        OBJECT_MODE = "Object-Mode",
-        EDIT_MODE = "Edit-Mode"
-    }
-    enum INTERACTION_MODE {
-        SELECT = "Box-Select",
-        TRANSLATE = "Translate",
-        ROTATE = "Rotate",
-        SCALE = "Scale",
-        EXTRUDE = "Extrude",
-        IDLE = "Idle"
-    }
-    enum AXIS {
-        X = "X",
-        Y = "Y",
-        Z = "Z"
-    }
-    enum MODELLER_EVENTS {
-        HEADER_APPEND = "headerappend",
-        SELECTION_UPDATE = "selectionupdate"
-    }
-    enum MODELLER_MENU {
-        DISPLAY_NORMALS = 0,
-        INVERT_FACE = 1,
-        TOGGLE_BACKFACE_CULLING = 2
-    }
 }
 declare namespace Fudge {
     class EditMode implements IControlMode {
@@ -421,6 +430,7 @@ declare namespace Fudge {
         onmove(_event: ƒ.EventPointer): void;
         onkeydown(_pressedKey: string): void;
         onkeyup(_pressedKey: string): string;
+        executeAccelerator(_event: ƒ.EventKeyboard): boolean;
         update(): void;
         getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
         contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
@@ -432,12 +442,13 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     abstract class InteractionMode implements IInteractionMode {
-        protected static normalsAreDisplayed: boolean;
+        static normalsAreDisplayed: boolean;
         readonly type: INTERACTION_MODE;
         selection: Array<number>;
         viewport: ƒ.Viewport;
         editableNode: ƒ.Node;
         protected selector: Selector;
+        protected availableMenuitems: Map<MODELLER_MENU, Function>;
         constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection?: Array<number>);
         abstract onmousedown(_event: ƒ.EventPointer): void;
         abstract onmouseup(_event: ƒ.EventPointer): string;
@@ -445,12 +456,13 @@ declare namespace Fudge {
         abstract onkeydown(_pressedKey: string): void;
         abstract onkeyup(_pressedKey: string): string;
         abstract update(): void;
-        abstract getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
-        abstract contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         abstract initialize(): void;
         abstract cleanup(): void;
         animate: () => void;
         updateAfterUndo(): void;
+        executeAccelerator(_event: ƒ.EventKeyboard): boolean;
+        getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
+        contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         protected getPosRenderFrom(_event: ƒ.EventPointer): ƒ.Vector2;
         protected createNormalArrows(): void;
         protected removeNormalArrows(): void;
@@ -459,6 +471,8 @@ declare namespace Fudge {
         protected getPointerPosition(_event: ƒ.EventPointer, distance: number): ƒ.Vector3;
         protected getDistanceFromRayToCenterOfNode(_event: ƒ.EventPointer, distance: number): ƒ.Vector3;
         protected getDistanceFromCameraToCentroid(_centroid: ƒ.Vector3): number;
+        protected invertFace(): void;
+        protected removeFace(): void;
         private drawCircleAtVertex;
         private drawCircleAtSelection;
     }
@@ -484,8 +498,6 @@ declare namespace Fudge {
         onmove(_event: ƒ.EventPointer): void;
         onkeydown(pressedKey: string): void;
         onkeyup(pressedKey: string): string;
-        getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
-        contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         update(): void;
         initialize(): void;
         cleanup(): void;
@@ -522,8 +534,6 @@ declare namespace Fudge {
         onmove(_event: ƒ.EventPointer): void;
         onkeydown(_pressedKey: string): void;
         onkeyup(_pressedKey: string): string;
-        contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
-        getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
         update(): void;
         cleanup(): void;
         private getRotationMatrix;
@@ -538,8 +548,6 @@ declare namespace Fudge {
         onmousedown(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
         onmouseup(_event: ƒ.EventPointer): string;
-        getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
-        contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
     }
 }
 declare namespace Fudge {
@@ -563,8 +571,6 @@ declare namespace Fudge {
         onmove(_event: ƒ.EventPointer): void;
         onkeydown(_pressedKey: string): void;
         onkeyup(_pressedKey: string): string;
-        getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
-        contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         update(): void;
         cleanup(): void;
         private setValues;
@@ -577,8 +583,6 @@ declare namespace Fudge {
         onmousedown(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
         onmouseup(_event: ƒ.EventPointer): string;
-        getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
-        contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
     }
 }
 declare namespace Fudge {
@@ -609,8 +613,6 @@ declare namespace Fudge {
         onkeydown(_pressedKey: string): void;
         onkeyup(_pressedKey: string): string;
         update(): void;
-        getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
-        contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         private drawBox;
     }
 }
@@ -630,8 +632,6 @@ declare namespace Fudge {
         onmove(_event: ƒ.EventPointer): void;
         onkeydown(_pressedKey: string): void;
         onkeyup(_pressedKey: string): string;
-        getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
-        contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         update(): void;
         cleanup(): void;
     }
@@ -643,8 +643,6 @@ declare namespace Fudge {
         onmousedown(_event: ƒ.EventPointer): void;
         onmove(_event: ƒ.EventPointer): void;
         onmouseup(_event: ƒ.EventPointer): string;
-        getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
-        contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
     }
 }
 declare namespace Fudge {
@@ -761,9 +759,12 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     class MenuItemsCreator {
-        static getNormalDisplayItem(_callback: ContextMenuCallback, normalsAreDisplayed: boolean): Electron.MenuItem;
-        static getInvertFaceItem(_callback: ContextMenuCallback): Electron.MenuItem;
-        static getBackfaceCullItem(_callback: ContextMenuCallback): Electron.MenuItem;
+        static getMenuItems(types: MODELLER_MENU[], _callback: ContextMenuCallback): Electron.MenuItem[];
+        private static getNormalDisplayItem;
+        private static getInvertFaceItem;
+        private static getBackfaceCullItem;
+        private static getRemoveFaceItem;
+        private static getAccelerator;
     }
 }
 declare namespace Fudge {
@@ -1050,17 +1051,19 @@ declare namespace Fudge {
     import ƒ = FudgeCore;
     class ViewModellerScene extends View {
         static isBackfaceCullingEnabled: boolean;
+        static menuitemToShortcutsMap: Map<MODELLER_MENU, Set<string>>;
         viewport: ƒ.Viewport;
         canvas: HTMLCanvasElement;
         graph: ƒ.Node;
         controller: Controller;
         node: ƒ.Node;
         content: HTMLDivElement;
+        protected availableMenuitems: Map<MODELLER_MENU, Function>;
         private orbitCamera;
         constructor(_container: GoldenLayout.Container, _state: Object);
+        static toggleBackfaceCulling(): void;
         addEventListeners(): void;
         createUserInterface(): void;
-        toggleBackfaceCulling(): void;
         protected getContextMenu: (_callback: ContextMenuCallback) => Electron.Menu;
         protected updateContextMenu: () => void;
         protected contextMenuCallback: (_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event) => void;

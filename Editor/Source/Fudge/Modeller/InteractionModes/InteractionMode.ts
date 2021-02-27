@@ -1,12 +1,13 @@
 namespace Fudge {
   import ƒAid = FudgeAid;
   export abstract class InteractionMode implements IInteractionMode {
-    protected static normalsAreDisplayed: boolean = false;    
+    public static normalsAreDisplayed: boolean = false;    
     public readonly type: INTERACTION_MODE;
     public selection: Array<number>;
     public viewport: ƒ.Viewport;
     public editableNode: ƒ.Node;
     protected selector: Selector;
+    protected availableMenuitems: Map<MODELLER_MENU, Function> = new Map([[MODELLER_MENU.DISPLAY_NORMALS, this.toggleNormals.bind(this)]]);
 
     constructor (viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number> = []) {
       this.viewport = viewport;
@@ -20,8 +21,8 @@ namespace Fudge {
     abstract onkeydown(_pressedKey: string): void;
     abstract onkeyup(_pressedKey: string): string;
     abstract update(): void;
-    abstract getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
-    abstract contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void; 
+    //abstract getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
+    // abstract contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void; 
 
     abstract initialize(): void;
     abstract cleanup(): void;
@@ -39,6 +40,36 @@ namespace Fudge {
         }
       }
       this.update();
+    }
+
+    public executeAccelerator(_event: ƒ.EventKeyboard): boolean {
+      let wasExecuted: boolean = false;
+      let pressedKey: string = _event.key.toLowerCase();
+      for (let [menuitem, shortcuts] of ViewModellerScene.menuitemToShortcutsMap) {
+        let selected: boolean = true; 
+        if (shortcuts.has(ELECTRON_KEYS.CTRL) && !_event.ctrlKey)
+          selected = false;
+
+        if (shortcuts.has(ELECTRON_KEYS.SHIFT) && !_event.shiftKey)
+          selected = false;
+
+        if (selected === true && shortcuts.has(pressedKey)) {
+          if (this.availableMenuitems.has(menuitem)) {
+            this.availableMenuitems.get(menuitem)();
+            wasExecuted = true;
+          }
+        }
+      }
+      return wasExecuted;
+    }
+
+    public getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {
+      return MenuItemsCreator.getMenuItems(Array.from(this.availableMenuitems.keys()), _callback);
+    }
+
+    public contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
+      if (this.availableMenuitems.has(Number(_item.id))) 
+        this.availableMenuitems.get(Number(_item.id))();
     }
 
     protected getPosRenderFrom(_event: ƒ.EventPointer): ƒ.Vector2 {
@@ -118,6 +149,13 @@ namespace Fudge {
       return ƒ.Vector3.DIFFERENCE(_centroid, this.viewport.camera.getContainer().mtxWorld.translation).magnitude;
     }
 
+    protected invertFace(): void {
+      (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).invertFace(this.selection);
+    }
+
+    protected removeFace(): void {
+      (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).removeFace(this.selection);
+    }
     private drawCircleAtVertex(): void {
       let crx2d: CanvasRenderingContext2D = this.viewport.getCanvas().getContext("2d");
       for (let vertex of (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices) {

@@ -66,9 +66,8 @@ namespace Fudge {
       console.log(result);
     }
 
-    // TODO: use proper typing here
     public export(): string {
-      let serialization: Object = {
+      let serialization: {vertices: number[], indices: number[], normals: number[], textureCoordinates: number[]} = {
         vertices: Array.from(this.vertices),
         indices: Array.from(this.indices),
         normals: Array.from(this.normalsFace),
@@ -136,6 +135,7 @@ namespace Fudge {
     }
 
     public invertFace(selection: number[]): void {
+      console.log("invert face called");
       if (selection.length !== 4)
         return;
       let faceToVertexMap: Map<number, number[]> = new Map();
@@ -239,10 +239,6 @@ namespace Fudge {
       finalNormal.normalize()
       this.vertices = this.createVertices();
       this.indices = this.createIndices();
-
-      // let newSelection: number[] = [];
-      // for (let i: number = 0; i < selectedVertices.length; i++)
-      //   newSelection.push(this.uniqueVertices.length - selectedVertices.length + i);
 
       this.createRenderBuffers();
       return finalNormal;
@@ -368,7 +364,6 @@ namespace Fudge {
                 trigons.push(this.indices[indexInIndicesArray - 2], this.indices[indexInIndicesArray - 1], this.indices[indexInIndicesArray]);
                 break;
             }
-            // trigons.push(trigon);  
           }
         }
       }

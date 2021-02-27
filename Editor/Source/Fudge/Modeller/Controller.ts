@@ -70,6 +70,10 @@ namespace Fudge {
       return this.interactionMode.type;
     }
 
+    public executeAccelerator(_event: ƒ.EventKeyboard): boolean {
+      return this.interactionMode.executeAccelerator(_event);
+    }
+
     public switchMode(_event: ƒ.EventKeyboard): void {
       let pressedKey: string = _event.key.toLowerCase();
       if (_event.ctrlKey) {
@@ -80,7 +84,6 @@ namespace Fudge {
             this.loadState(false);
           }
         }
-
       }
 
       if (_event.shiftKey) {

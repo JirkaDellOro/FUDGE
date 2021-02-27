@@ -65,17 +65,17 @@ namespace Fudge {
       return state;
     }
 
-    contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
-      switch (Number(_item.id)) {
-        case MODELLER_MENU.DISPLAY_NORMALS:
-          this.toggleNormals();          
-          break;
-      }
-    }
+    // contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
+    //   switch (Number(_item.id)) {
+    //     case MODELLER_MENU.DISPLAY_NORMALS:
+    //       this.toggleNormals();          
+    //       break;
+    //   }
+    // }
 
-    getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {  
-      return [MenuItemsCreator.getNormalDisplayItem(_callback, InteractionMode.normalsAreDisplayed)];
-    }
+    // getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {  
+    //   return [MenuItemsCreator.getNormalDisplayItem(_callback, InteractionMode.normalsAreDisplayed)];
+    // }
 
     update(): void {
       this.axesSelectionHandler.widget.mtxLocal.translation = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection);

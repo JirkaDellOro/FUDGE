@@ -5,12 +5,18 @@ namespace Fudge {
 
   export class ViewModellerScene extends View {
     public static isBackfaceCullingEnabled: boolean = false;
-    viewport: ƒ.Viewport;
-    canvas: HTMLCanvasElement;
-    graph: ƒ.Node;
-    controller: Controller;
-    node: ƒ.Node;
-    content: HTMLDivElement;
+    public static menuitemToShortcutsMap: Map<MODELLER_MENU, Set<string>> = new Map([
+      [MODELLER_MENU.TOGGLE_BACKFACE_CULLING, new Set([ELECTRON_KEYS.CTRL, ELECTRON_KEYS.SHIFT, "b"])], 
+      [MODELLER_MENU.DISPLAY_NORMALS, new Set([ELECTRON_KEYS.CTRL, ELECTRON_KEYS.SHIFT, "n"])], 
+      [MODELLER_MENU.INVERT_FACE, new Set([ELECTRON_KEYS.CTRL, ELECTRON_KEYS.SHIFT, "i"])],
+      [MODELLER_MENU.REMOVE_FACE, new Set(["delete"])]]);
+    public viewport: ƒ.Viewport;
+    public canvas: HTMLCanvasElement;
+    public graph: ƒ.Node;
+    public controller: Controller;
+    public node: ƒ.Node;
+    public content: HTMLDivElement;
+    protected availableMenuitems: Map<MODELLER_MENU, Function> = new Map([[MODELLER_MENU.TOGGLE_BACKFACE_CULLING, ViewModellerScene.toggleBackfaceCulling]]);
     private orbitCamera: ƒaid.CameraOrbit;
 
     constructor(_container: GoldenLayout.Container, _state: Object) {
@@ -30,7 +36,13 @@ namespace Fudge {
       this.addEventListeners();
     }
 
-    addEventListeners(): void {
+    public static toggleBackfaceCulling(): void {
+      ViewModellerScene.isBackfaceCullingEnabled = !ViewModellerScene.isBackfaceCullingEnabled;
+      ƒ.RenderWebGL.setBackfaceCulling(ViewModellerScene.isBackfaceCullingEnabled);
+    }
+
+
+    public addEventListeners(): void {
       this.viewport.addEventListener(ƒ.EVENT_POINTER.MOVE, this.onmove);
       this.viewport.activatePointerEvent(ƒ.EVENT_POINTER.MOVE, true);
 
@@ -56,7 +68,7 @@ namespace Fudge {
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
     }
 
-    createUserInterface(): void {
+    public createUserInterface(): void {
       let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
       this.canvas = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
       document.body.appendChild(this.canvas);
@@ -70,18 +82,14 @@ namespace Fudge {
       this.orbitCamera.distance = 5;
     } 
 
-    public toggleBackfaceCulling(): void {
-      ViewModellerScene.isBackfaceCullingEnabled = !ViewModellerScene.isBackfaceCullingEnabled;
-      ƒ.RenderWebGL.setBackfaceCulling(ViewModellerScene.isBackfaceCullingEnabled);
-    }
 
     protected getContextMenu = (_callback: ContextMenuCallback): Electron.Menu => {
       const menu: Electron.Menu = new remote.Menu();
       let items: Electron.MenuItem[] = this.controller.getContextMenuItems(_callback);
+      items.push(...MenuItemsCreator.getMenuItems([MODELLER_MENU.TOGGLE_BACKFACE_CULLING], _callback));
       for (let item of items) {
         menu.append(item);
       }
-      menu.append(MenuItemsCreator.getBackfaceCullItem(_callback));
       return menu;
     }
 
@@ -92,7 +100,7 @@ namespace Fudge {
     protected contextMenuCallback = (_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void => {
       switch (Number(_item.id)) {
         case MODELLER_MENU.TOGGLE_BACKFACE_CULLING: 
-          this.toggleBackfaceCulling();
+          ViewModellerScene.toggleBackfaceCulling();
       }
       this.controller.contextMenuCallback(_item, _window, _event);
       this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
@@ -123,6 +131,27 @@ namespace Fudge {
 
     private handleKeyboard = (_event: ƒ.EventKeyboard): void => {
       this.controller.switchMode(_event);
+
+      let acceleratorWasExecuted: boolean = this.controller.executeAccelerator(_event);
+      let wasExecuted: boolean = false;
+      let pressedKey: string = _event.key.toLowerCase();
+      for (let [menuitem, shortcuts] of ViewModellerScene.menuitemToShortcutsMap) {
+        let selected: boolean = true; 
+        if (shortcuts.has(ELECTRON_KEYS.CTRL) && !_event.ctrlKey)
+          selected = false;
+
+        if (shortcuts.has(ELECTRON_KEYS.SHIFT) && !_event.shiftKey)
+          selected = false;
+
+        if (selected === true && shortcuts.has(pressedKey)) {
+          if (this.availableMenuitems.has(menuitem)) {
+            this.availableMenuitems.get(menuitem)();
+            wasExecuted = true;
+          }
+        }
+      }
+      if (acceleratorWasExecuted || wasExecuted) 
+        this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
     }
 
     private onkeydown = (_event: ƒ.EventKeyboard): void => {

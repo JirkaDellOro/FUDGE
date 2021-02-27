@@ -11,6 +11,7 @@ namespace Fudge {
     onmove(_event: ƒ.EventPointer): void;
     onkeydown(_pressedKey: string): void;
     onkeyup(_pressedKey: string): string;
+    executeAccelerator(_event: ƒ.EventKeyboard): boolean;
     update(): void;
     getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
     contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void; 

@@ -90,6 +90,46 @@ var Fudge;
         // SKETCH = ViewSketch,
         // MESH = ViewMesh,
     })(VIEW = Fudge.VIEW || (Fudge.VIEW = {}));
+    let CONTROL_MODE;
+    (function (CONTROL_MODE) {
+        CONTROL_MODE["OBJECT_MODE"] = "Object-Mode";
+        CONTROL_MODE["EDIT_MODE"] = "Edit-Mode";
+    })(CONTROL_MODE = Fudge.CONTROL_MODE || (Fudge.CONTROL_MODE = {}));
+    let INTERACTION_MODE;
+    (function (INTERACTION_MODE) {
+        INTERACTION_MODE["SELECT"] = "Box-Select";
+        INTERACTION_MODE["TRANSLATE"] = "Translate";
+        INTERACTION_MODE["ROTATE"] = "Rotate";
+        INTERACTION_MODE["SCALE"] = "Scale";
+        INTERACTION_MODE["EXTRUDE"] = "Extrude";
+        INTERACTION_MODE["IDLE"] = "Idle";
+    })(INTERACTION_MODE = Fudge.INTERACTION_MODE || (Fudge.INTERACTION_MODE = {}));
+    let AXIS;
+    (function (AXIS) {
+        AXIS["X"] = "X";
+        AXIS["Y"] = "Y";
+        AXIS["Z"] = "Z";
+    })(AXIS = Fudge.AXIS || (Fudge.AXIS = {}));
+    let MODELLER_EVENTS;
+    (function (MODELLER_EVENTS) {
+        MODELLER_EVENTS["HEADER_APPEND"] = "headerappend";
+        MODELLER_EVENTS["SELECTION_UPDATE"] = "selectionupdate";
+    })(MODELLER_EVENTS = Fudge.MODELLER_EVENTS || (Fudge.MODELLER_EVENTS = {}));
+    let MODELLER_MENU;
+    (function (MODELLER_MENU) {
+        MODELLER_MENU[MODELLER_MENU["DISPLAY_NORMALS"] = 0] = "DISPLAY_NORMALS";
+        MODELLER_MENU[MODELLER_MENU["INVERT_FACE"] = 1] = "INVERT_FACE";
+        MODELLER_MENU[MODELLER_MENU["REMOVE_FACE"] = 2] = "REMOVE_FACE";
+        MODELLER_MENU[MODELLER_MENU["TOGGLE_BACKFACE_CULLING"] = 3] = "TOGGLE_BACKFACE_CULLING";
+    })(MODELLER_MENU = Fudge.MODELLER_MENU || (Fudge.MODELLER_MENU = {}));
+    let ELECTRON_KEYS;
+    (function (ELECTRON_KEYS) {
+        ELECTRON_KEYS["CTRL"] = "CommandOrControl";
+        ELECTRON_KEYS["SHIFT"] = "Shift";
+        ELECTRON_KEYS["ALT"] = "Alt";
+        ELECTRON_KEYS["ALTGR"] = "AltGr";
+        ELECTRON_KEYS["SUPER"] = "Super";
+    })(ELECTRON_KEYS = Fudge.ELECTRON_KEYS || (Fudge.ELECTRON_KEYS = {}));
 })(Fudge || (Fudge = {}));
 // /<reference types="../../../node_modules/@types/node/fs"/>
 var Fudge;
@@ -1338,6 +1378,9 @@ var Fudge;
         getInteractionModeType() {
             return this.interactionMode.type;
         }
+        executeAccelerator(_event) {
+            return this.interactionMode.executeAccelerator(_event);
+        }
         switchMode(_event) {
             let pressedKey = _event.key.toLowerCase();
             if (_event.ctrlKey) {
@@ -1431,40 +1474,6 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
-    let CONTROL_MODE;
-    (function (CONTROL_MODE) {
-        CONTROL_MODE["OBJECT_MODE"] = "Object-Mode";
-        CONTROL_MODE["EDIT_MODE"] = "Edit-Mode";
-    })(CONTROL_MODE = Fudge.CONTROL_MODE || (Fudge.CONTROL_MODE = {}));
-    let INTERACTION_MODE;
-    (function (INTERACTION_MODE) {
-        INTERACTION_MODE["SELECT"] = "Box-Select";
-        INTERACTION_MODE["TRANSLATE"] = "Translate";
-        INTERACTION_MODE["ROTATE"] = "Rotate";
-        INTERACTION_MODE["SCALE"] = "Scale";
-        INTERACTION_MODE["EXTRUDE"] = "Extrude";
-        INTERACTION_MODE["IDLE"] = "Idle";
-    })(INTERACTION_MODE = Fudge.INTERACTION_MODE || (Fudge.INTERACTION_MODE = {}));
-    let AXIS;
-    (function (AXIS) {
-        AXIS["X"] = "X";
-        AXIS["Y"] = "Y";
-        AXIS["Z"] = "Z";
-    })(AXIS = Fudge.AXIS || (Fudge.AXIS = {}));
-    let MODELLER_EVENTS;
-    (function (MODELLER_EVENTS) {
-        MODELLER_EVENTS["HEADER_APPEND"] = "headerappend";
-        MODELLER_EVENTS["SELECTION_UPDATE"] = "selectionupdate";
-    })(MODELLER_EVENTS = Fudge.MODELLER_EVENTS || (Fudge.MODELLER_EVENTS = {}));
-    let MODELLER_MENU;
-    (function (MODELLER_MENU) {
-        MODELLER_MENU[MODELLER_MENU["DISPLAY_NORMALS"] = 0] = "DISPLAY_NORMALS";
-        MODELLER_MENU[MODELLER_MENU["INVERT_FACE"] = 1] = "INVERT_FACE";
-        MODELLER_MENU[MODELLER_MENU["TOGGLE_BACKFACE_CULLING"] = 2] = "TOGGLE_BACKFACE_CULLING";
-    })(MODELLER_MENU = Fudge.MODELLER_MENU || (Fudge.MODELLER_MENU = {}));
-})(Fudge || (Fudge = {}));
-var Fudge;
-(function (Fudge) {
     class EditMode {
         constructor() {
             this.type = Fudge.CONTROL_MODE.EDIT_MODE;
@@ -1498,6 +1507,7 @@ var Fudge;
     var ƒAid = FudgeAid;
     class InteractionMode {
         constructor(viewport, editableNode, selection = []) {
+            this.availableMenuitems = new Map([[Fudge.MODELLER_MENU.DISPLAY_NORMALS, this.toggleNormals.bind(this)]]);
             this.animate = () => {
                 this.drawCircleAtVertex();
                 this.drawCircleAtSelection();
@@ -1514,6 +1524,31 @@ var Fudge;
                 }
             }
             this.update();
+        }
+        executeAccelerator(_event) {
+            let wasExecuted = false;
+            let pressedKey = _event.key.toLowerCase();
+            for (let [menuitem, shortcuts] of Fudge.ViewModellerScene.menuitemToShortcutsMap) {
+                let selected = true;
+                if (shortcuts.has(Fudge.ELECTRON_KEYS.CTRL) && !_event.ctrlKey)
+                    selected = false;
+                if (shortcuts.has(Fudge.ELECTRON_KEYS.SHIFT) && !_event.shiftKey)
+                    selected = false;
+                if (selected === true && shortcuts.has(pressedKey)) {
+                    if (this.availableMenuitems.has(menuitem)) {
+                        this.availableMenuitems.get(menuitem)();
+                        wasExecuted = true;
+                    }
+                }
+            }
+            return wasExecuted;
+        }
+        getContextMenuItems(_callback) {
+            return Fudge.MenuItemsCreator.getMenuItems(Array.from(this.availableMenuitems.keys()), _callback);
+        }
+        contextMenuCallback(_item, _window, _event) {
+            if (this.availableMenuitems.has(Number(_item.id)))
+                this.availableMenuitems.get(Number(_item.id))();
         }
         getPosRenderFrom(_event) {
             let mousePos = new ƒ.Vector2(_event.canvasX, _event.canvasY);
@@ -1585,6 +1620,12 @@ var Fudge;
         getDistanceFromCameraToCentroid(_centroid) {
             return ƒ.Vector3.DIFFERENCE(_centroid, this.viewport.camera.getContainer().mtxWorld.translation).magnitude;
         }
+        invertFace() {
+            this.editableNode.getComponent(ƒ.ComponentMesh).mesh.invertFace(this.selection);
+        }
+        removeFace() {
+            this.editableNode.getComponent(ƒ.ComponentMesh).mesh.removeFace(this.selection);
+        }
         drawCircleAtVertex() {
             let crx2d = this.viewport.getCanvas().getContext("2d");
             for (let vertex of this.editableNode.getComponent(ƒ.ComponentMesh).mesh.uniqueVertices) {
@@ -1628,8 +1669,9 @@ var Fudge;
                 crx2d.arc(this.clientCentroid.x, this.clientCentroid.y, Extrude.selectionRadius, 0, 2 * Math.PI);
                 crx2d.stroke();
             };
-            // TODO: check if pivot is still correct or if we need to use the container
             this.selector = new Fudge.Selector(this.editableNode, this.viewport.camera.pivot.translation);
+            this.availableMenuitems.set(Fudge.MODELLER_MENU.INVERT_FACE, this.invertFace.bind(this));
+            this.availableMenuitems.set(Fudge.MODELLER_MENU.REMOVE_FACE, this.removeFace.bind(this));
         }
         onmousedown(_event) {
             let willBeExtruded = false;
@@ -1722,22 +1764,21 @@ var Fudge;
             this.axesSelectionHandler.removeAxisOf(pressedKey);
             return null;
         }
-        getContextMenuItems(_callback) {
-            return [
-                Fudge.MenuItemsCreator.getNormalDisplayItem(_callback, Fudge.InteractionMode.normalsAreDisplayed),
-                Fudge.MenuItemsCreator.getInvertFaceItem(_callback)
-            ];
-        }
-        contextMenuCallback(_item, _window, _event) {
-            switch (Number(_item.id)) {
-                case Fudge.MODELLER_MENU.DISPLAY_NORMALS:
-                    this.toggleNormals();
-                    break;
-                case Fudge.MODELLER_MENU.INVERT_FACE:
-                    this.editableNode.getComponent(ƒ.ComponentMesh).mesh.invertFace(this.selection);
-                    break;
-            }
-        }
+        // getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {  
+        //   return [
+        //     MenuItemsCreator.getNormalDisplayItem(_callback, InteractionMode.normalsAreDisplayed), 
+        //     MenuItemsCreator.getInvertFaceItem(_callback)];
+        // }
+        // contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
+        //   switch (Number(_item.id)) {
+        //     case MODELLER_MENU.DISPLAY_NORMALS:
+        //       this.toggleNormals();          
+        //       break;
+        //     case MODELLER_MENU.INVERT_FACE: 
+        //       (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).invertFace(this.selection);          
+        //       break;
+        //   }
+        // }
         update() {
             //@ts-ignore
         }
@@ -1856,16 +1897,16 @@ var Fudge;
             this.editableNode.getComponent(ƒ.ComponentMesh).mesh.updateNormals();
             return state;
         }
-        contextMenuCallback(_item, _window, _event) {
-            switch (Number(_item.id)) {
-                case Fudge.MODELLER_MENU.DISPLAY_NORMALS:
-                    this.toggleNormals();
-                    break;
-            }
-        }
-        getContextMenuItems(_callback) {
-            return [Fudge.MenuItemsCreator.getNormalDisplayItem(_callback, Fudge.InteractionMode.normalsAreDisplayed)];
-        }
+        // contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
+        //   switch (Number(_item.id)) {
+        //     case MODELLER_MENU.DISPLAY_NORMALS:
+        //       this.toggleNormals();          
+        //       break;
+        //   }
+        // }
+        // getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {  
+        //   return [MenuItemsCreator.getNormalDisplayItem(_callback, InteractionMode.normalsAreDisplayed)];
+        // }
         update() {
             this.axesSelectionHandler.widget.mtxLocal.translation = this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid(this.selection);
         }
@@ -1914,6 +1955,8 @@ var Fudge;
             super(viewport, editableNode, selection);
             this.vertexSelected = false;
             this.selector = new Fudge.Selector(this.editableNode, this.viewport.camera.pivot.translation);
+            this.availableMenuitems.set(Fudge.MODELLER_MENU.INVERT_FACE, this.invertFace.bind(this));
+            this.availableMenuitems.set(Fudge.MODELLER_MENU.REMOVE_FACE, this.removeFace.bind(this));
         }
         onmousedown(_event) {
             if (this.selector.selectVertices(this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY)), this.selection)) {
@@ -1934,17 +1977,6 @@ var Fudge;
                 return null;
             }
             return super.onmouseup(_event);
-        }
-        getContextMenuItems(_callback) {
-            return [...super.getContextMenuItems(_callback), Fudge.MenuItemsCreator.getInvertFaceItem(_callback)];
-        }
-        contextMenuCallback(_item, _window, _event) {
-            switch (Number(_item.id)) {
-                case Fudge.MODELLER_MENU.INVERT_FACE:
-                    this.editableNode.getComponent(ƒ.ComponentMesh).mesh.invertFace(this.selection);
-                    break;
-            }
-            super.contextMenuCallback(_item, _window, _event);
         }
     }
     Fudge.EditRotation = EditRotation;
@@ -2034,16 +2066,16 @@ var Fudge;
             this.axesSelectionHandler.removeAxisOf(_pressedKey);
             return state;
         }
-        getContextMenuItems(_callback) {
-            return [Fudge.MenuItemsCreator.getNormalDisplayItem(_callback, Fudge.InteractionMode.normalsAreDisplayed)];
-        }
-        contextMenuCallback(_item, _window, _event) {
-            switch (Number(_item.id)) {
-                case Fudge.MODELLER_MENU.DISPLAY_NORMALS:
-                    this.toggleNormals();
-                    break;
-            }
-        }
+        // getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {  
+        //   return [MenuItemsCreator.getNormalDisplayItem(_callback, InteractionMode.normalsAreDisplayed)];
+        // }
+        // contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
+        //   switch (Number(_item.id)) {
+        //     case MODELLER_MENU.DISPLAY_NORMALS:
+        //       this.toggleNormals();          
+        //       break;
+        //   }
+        // }
         update() {
             this.axesSelectionHandler.widget.mtxLocal.translation = this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid(this.selection);
         }
@@ -2067,6 +2099,8 @@ var Fudge;
             super(viewport, editableNode, selection);
             this.vertexSelected = false;
             this.selector = new Fudge.Selector(this.editableNode, this.viewport.camera.pivot.translation);
+            this.availableMenuitems.set(Fudge.MODELLER_MENU.INVERT_FACE, this.invertFace.bind(this));
+            this.availableMenuitems.set(Fudge.MODELLER_MENU.REMOVE_FACE, this.removeFace.bind(this));
         }
         onmousedown(_event) {
             if (this.selector.selectVertices(this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY)), this.selection)) {
@@ -2087,17 +2121,6 @@ var Fudge;
                 return;
             }
             return super.onmouseup(_event);
-        }
-        getContextMenuItems(_callback) {
-            return [...super.getContextMenuItems(_callback), Fudge.MenuItemsCreator.getInvertFaceItem(_callback)];
-        }
-        contextMenuCallback(_item, _window, _event) {
-            switch (Number(_item.id)) {
-                case Fudge.MODELLER_MENU.INVERT_FACE:
-                    this.editableNode.getComponent(ƒ.ComponentMesh).mesh.invertFace(this.selection);
-                    break;
-            }
-            super.contextMenuCallback(_item, _window, _event);
         }
     }
     Fudge.EditScalation = EditScalation;
@@ -2136,12 +2159,29 @@ var Fudge;
             super(viewport, editableNode, selection);
             this.selection = [];
             this.vertexSelected = false;
+            // getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {
+            //   return [
+            //     MenuItemsCreator.getNormalDisplayItem(_callback, InteractionMode.normalsAreDisplayed), 
+            //     MenuItemsCreator.getInvertFaceItem(_callback)];
+            // }
+            // contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
+            //   switch (Number(_item.id)) {
+            //     case MODELLER_MENU.DISPLAY_NORMALS:
+            //       this.toggleNormals();          
+            //       break;
+            //     case MODELLER_MENU.INVERT_FACE:
+            //       (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).invertFace(this.selection);          
+            //       break;
+            //   }
+            // }
             this.drawBox = () => {
                 let crx2d = this.viewport.getCanvas().getContext("2d");
                 crx2d.strokeStyle = `rgb(220, 220, 220)`;
                 crx2d.strokeRect(this.boxStart.x, this.boxStart.y, this.clientPos.x - this.boxStart.x, this.clientPos.y - this.boxStart.y);
             };
             this.selector = new Fudge.Selector(this.editableNode, this.viewport.camera.pivot.translation);
+            this.availableMenuitems.set(Fudge.MODELLER_MENU.INVERT_FACE, this.invertFace.bind(this));
+            this.availableMenuitems.set(Fudge.MODELLER_MENU.REMOVE_FACE, this.removeFace.bind(this));
         }
         initialize() {
             //
@@ -2198,22 +2238,6 @@ var Fudge;
         }
         update() {
             //@ts-ignore
-        }
-        getContextMenuItems(_callback) {
-            return [
-                Fudge.MenuItemsCreator.getNormalDisplayItem(_callback, Fudge.InteractionMode.normalsAreDisplayed),
-                Fudge.MenuItemsCreator.getInvertFaceItem(_callback)
-            ];
-        }
-        contextMenuCallback(_item, _window, _event) {
-            switch (Number(_item.id)) {
-                case Fudge.MODELLER_MENU.DISPLAY_NORMALS:
-                    this.toggleNormals();
-                    break;
-                case Fudge.MODELLER_MENU.INVERT_FACE:
-                    this.editableNode.getComponent(ƒ.ComponentMesh).mesh.invertFace(this.selection);
-                    break;
-            }
         }
     }
     Fudge.EditSelection = EditSelection;
@@ -2306,16 +2330,16 @@ var Fudge;
             this.axesSelectionHandler.widget.mtxLocal.translation = this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid(this.selection);
             return state;
         }
-        getContextMenuItems(_callback) {
-            return [Fudge.MenuItemsCreator.getNormalDisplayItem(_callback, Fudge.InteractionMode.normalsAreDisplayed)];
-        }
-        contextMenuCallback(_item, _window, _event) {
-            switch (Number(_item.id)) {
-                case Fudge.MODELLER_MENU.DISPLAY_NORMALS:
-                    this.toggleNormals();
-                    break;
-            }
-        }
+        // getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {  
+        //   return [MenuItemsCreator.getNormalDisplayItem(_callback, InteractionMode.normalsAreDisplayed)];
+        // }
+        // contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
+        //   switch (Number(_item.id)) {
+        //     case MODELLER_MENU.DISPLAY_NORMALS:
+        //       this.toggleNormals();          
+        //       break;
+        //   }
+        // }
         update() {
             this.axesSelectionHandler.widget.mtxLocal.translation = this.editableNode.getComponent(ƒ.ComponentMesh).mesh.getCentroid(this.selection);
         }
@@ -2332,6 +2356,8 @@ var Fudge;
             super(viewport, editableNode);
             this.vertexSelected = false;
             this.selector = new Fudge.Selector(this.editableNode, this.viewport.camera.pivot.translation);
+            this.availableMenuitems.set(Fudge.MODELLER_MENU.INVERT_FACE, this.invertFace.bind(this));
+            this.availableMenuitems.set(Fudge.MODELLER_MENU.REMOVE_FACE, this.removeFace.bind(this));
         }
         onmousedown(_event) {
             if (this.selector.selectVertices(this.viewport.getRayFromClient(new ƒ.Vector2(_event.canvasX, _event.canvasY)), this.selection)) {
@@ -2352,17 +2378,6 @@ var Fudge;
                 return;
             }
             return super.onmouseup(_event);
-        }
-        getContextMenuItems(_callback) {
-            return [...super.getContextMenuItems(_callback), Fudge.MenuItemsCreator.getInvertFaceItem(_callback)];
-        }
-        contextMenuCallback(_item, _window, _event) {
-            switch (Number(_item.id)) {
-                case Fudge.MODELLER_MENU.INVERT_FACE:
-                    this.editableNode.getComponent(ƒ.ComponentMesh).mesh.invertFace(this.selection);
-                    break;
-            }
-            super.contextMenuCallback(_item, _window, _event);
         }
     }
     Fudge.EditTranslation = EditTranslation;
@@ -2689,7 +2704,6 @@ var Fudge;
             this.create();
             console.log(result);
         }
-        // TODO: use proper typing here
         export() {
             let serialization = {
                 vertices: Array.from(this.vertices),
@@ -2754,6 +2768,7 @@ var Fudge;
             this.createRenderBuffers();
         }
         invertFace(selection) {
+            console.log("invert face called");
             if (selection.length !== 4)
                 return;
             let faceToVertexMap = new Map();
@@ -2850,9 +2865,6 @@ var Fudge;
             finalNormal.normalize();
             this.vertices = this.createVertices();
             this.indices = this.createIndices();
-            // let newSelection: number[] = [];
-            // for (let i: number = 0; i < selectedVertices.length; i++)
-            //   newSelection.push(this.uniqueVertices.length - selectedVertices.length + i);
             this.createRenderBuffers();
             return finalNormal;
         }
@@ -2965,7 +2977,6 @@ var Fudge;
                                 trigons.push(this.indices[indexInIndicesArray - 2], this.indices[indexInIndicesArray - 1], this.indices[indexInIndicesArray]);
                                 break;
                         }
-                        // trigons.push(trigon);  
                     }
                 }
             }
@@ -3276,33 +3287,79 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     class MenuItemsCreator {
-        static getNormalDisplayItem(_callback, normalsAreDisplayed) {
+        static getMenuItems(types, _callback) {
+            let items = [];
+            for (let type of types) {
+                switch (type) {
+                    case Fudge.MODELLER_MENU.DISPLAY_NORMALS:
+                        items.push(MenuItemsCreator.getNormalDisplayItem(_callback));
+                        break;
+                    case Fudge.MODELLER_MENU.TOGGLE_BACKFACE_CULLING:
+                        items.push(MenuItemsCreator.getBackfaceCullItem(_callback));
+                        break;
+                    case Fudge.MODELLER_MENU.INVERT_FACE:
+                        items.push(MenuItemsCreator.getInvertFaceItem(_callback));
+                        break;
+                    case Fudge.MODELLER_MENU.REMOVE_FACE:
+                        items.push(MenuItemsCreator.getRemoveFaceItem(_callback));
+                }
+            }
+            return items;
+        }
+        static getNormalDisplayItem(_callback) {
+            let type = Fudge.MODELLER_MENU.DISPLAY_NORMALS;
             let item = new Fudge.remote.MenuItem({
                 label: "toggle normals",
                 type: "checkbox",
-                checked: normalsAreDisplayed,
-                id: String(Fudge.MODELLER_MENU.DISPLAY_NORMALS),
-                click: _callback
+                checked: Fudge.InteractionMode.normalsAreDisplayed,
+                id: String(type),
+                click: _callback,
+                accelerator: MenuItemsCreator.getAccelerator(type)
             });
             return item;
         }
         static getInvertFaceItem(_callback) {
+            let type = Fudge.MODELLER_MENU.INVERT_FACE;
             let item = new Fudge.remote.MenuItem({
                 label: "invert face",
                 id: String(Fudge.MODELLER_MENU.INVERT_FACE),
-                click: _callback
+                click: _callback,
+                accelerator: MenuItemsCreator.getAccelerator(type)
             });
             return item;
         }
         static getBackfaceCullItem(_callback) {
+            let type = Fudge.MODELLER_MENU.TOGGLE_BACKFACE_CULLING;
             let item = new Fudge.remote.MenuItem({
                 type: "checkbox",
                 checked: Fudge.ViewModellerScene.isBackfaceCullingEnabled,
                 label: "toggle backface culling",
                 id: String(Fudge.MODELLER_MENU.TOGGLE_BACKFACE_CULLING),
-                click: _callback
+                click: _callback,
+                accelerator: MenuItemsCreator.getAccelerator(type)
             });
             return item;
+        }
+        static getRemoveFaceItem(_callback) {
+            let type = Fudge.MODELLER_MENU.REMOVE_FACE;
+            let item = new Fudge.remote.MenuItem({
+                label: "remove face",
+                id: String(Fudge.MODELLER_MENU.REMOVE_FACE),
+                click: _callback,
+                accelerator: MenuItemsCreator.getAccelerator(type)
+            });
+            return item;
+        }
+        static getAccelerator(type) {
+            let result = "";
+            let iterator = 0;
+            for (let key of Fudge.ViewModellerScene.menuitemToShortcutsMap.get(type)) {
+                iterator++;
+                result += key;
+                if (iterator < Fudge.ViewModellerScene.menuitemToShortcutsMap.get(type).size)
+                    result += "+";
+            }
+            return result;
         }
     }
     Fudge.MenuItemsCreator = MenuItemsCreator;
@@ -4748,13 +4805,14 @@ var Fudge;
     class ViewModellerScene extends Fudge.View {
         constructor(_container, _state) {
             super(_container, _state);
+            this.availableMenuitems = new Map([[Fudge.MODELLER_MENU.TOGGLE_BACKFACE_CULLING, ViewModellerScene.toggleBackfaceCulling]]);
             this.getContextMenu = (_callback) => {
                 const menu = new Fudge.remote.Menu();
                 let items = this.controller.getContextMenuItems(_callback);
+                items.push(...Fudge.MenuItemsCreator.getMenuItems([Fudge.MODELLER_MENU.TOGGLE_BACKFACE_CULLING], _callback));
                 for (let item of items) {
                     menu.append(item);
                 }
-                menu.append(Fudge.MenuItemsCreator.getBackfaceCullItem(_callback));
                 return menu;
             };
             this.updateContextMenu = () => {
@@ -4763,7 +4821,7 @@ var Fudge;
             this.contextMenuCallback = (_item, _window, _event) => {
                 switch (Number(_item.id)) {
                     case Fudge.MODELLER_MENU.TOGGLE_BACKFACE_CULLING:
-                        this.toggleBackfaceCulling();
+                        ViewModellerScene.toggleBackfaceCulling();
                 }
                 this.controller.contextMenuCallback(_item, _window, _event);
                 this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
@@ -4789,6 +4847,24 @@ var Fudge;
             };
             this.handleKeyboard = (_event) => {
                 this.controller.switchMode(_event);
+                let acceleratorWasExecuted = this.controller.executeAccelerator(_event);
+                let wasExecuted = false;
+                let pressedKey = _event.key.toLowerCase();
+                for (let [menuitem, shortcuts] of ViewModellerScene.menuitemToShortcutsMap) {
+                    let selected = true;
+                    if (shortcuts.has(Fudge.ELECTRON_KEYS.CTRL) && !_event.ctrlKey)
+                        selected = false;
+                    if (shortcuts.has(Fudge.ELECTRON_KEYS.SHIFT) && !_event.shiftKey)
+                        selected = false;
+                    if (selected === true && shortcuts.has(pressedKey)) {
+                        if (this.availableMenuitems.has(menuitem)) {
+                            this.availableMenuitems.get(menuitem)();
+                            wasExecuted = true;
+                        }
+                    }
+                }
+                if (acceleratorWasExecuted || wasExecuted)
+                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
             };
             this.onkeydown = (_event) => {
                 this.controller.onkeydown(_event);
@@ -4832,6 +4908,10 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.updateContextMenu);
             this.addEventListeners();
         }
+        static toggleBackfaceCulling() {
+            ViewModellerScene.isBackfaceCullingEnabled = !ViewModellerScene.isBackfaceCullingEnabled;
+            ƒ.RenderWebGL.setBackfaceCulling(ViewModellerScene.isBackfaceCullingEnabled);
+        }
         addEventListeners() {
             this.viewport.addEventListener("\u0192pointermove" /* MOVE */, this.onmove);
             this.viewport.activatePointerEvent("\u0192pointermove" /* MOVE */, true);
@@ -4862,15 +4942,17 @@ var Fudge;
             this.orbitCamera.rotateY(45);
             this.orbitCamera.distance = 5;
         }
-        toggleBackfaceCulling() {
-            ViewModellerScene.isBackfaceCullingEnabled = !ViewModellerScene.isBackfaceCullingEnabled;
-            ƒ.RenderWebGL.setBackfaceCulling(ViewModellerScene.isBackfaceCullingEnabled);
-        }
         cleanup() {
             ƒ.Loop.removeEventListener("loopFrame" /* LOOP_FRAME */, this.animate);
         }
     }
     ViewModellerScene.isBackfaceCullingEnabled = false;
+    ViewModellerScene.menuitemToShortcutsMap = new Map([
+        [Fudge.MODELLER_MENU.TOGGLE_BACKFACE_CULLING, new Set([Fudge.ELECTRON_KEYS.CTRL, Fudge.ELECTRON_KEYS.SHIFT, "b"])],
+        [Fudge.MODELLER_MENU.DISPLAY_NORMALS, new Set([Fudge.ELECTRON_KEYS.CTRL, Fudge.ELECTRON_KEYS.SHIFT, "n"])],
+        [Fudge.MODELLER_MENU.INVERT_FACE, new Set([Fudge.ELECTRON_KEYS.CTRL, Fudge.ELECTRON_KEYS.SHIFT, "i"])],
+        [Fudge.MODELLER_MENU.REMOVE_FACE, new Set(["delete"])]
+    ]);
     Fudge.ViewModellerScene = ViewModellerScene;
 })(Fudge || (Fudge = {}));
 var Fudge;

@@ -66,6 +66,37 @@ var Fudge;
         // SKETCH = ViewSketch,
         // MESH = ViewMesh,
     })(VIEW = Fudge.VIEW || (Fudge.VIEW = {}));
+    let CONTROL_MODE;
+    (function (CONTROL_MODE) {
+        CONTROL_MODE["OBJECT_MODE"] = "Object-Mode";
+        CONTROL_MODE["EDIT_MODE"] = "Edit-Mode";
+    })(CONTROL_MODE = Fudge.CONTROL_MODE || (Fudge.CONTROL_MODE = {}));
+    let INTERACTION_MODE;
+    (function (INTERACTION_MODE) {
+        INTERACTION_MODE["SELECT"] = "Box-Select";
+        INTERACTION_MODE["TRANSLATE"] = "Translate";
+        INTERACTION_MODE["ROTATE"] = "Rotate";
+        INTERACTION_MODE["SCALE"] = "Scale";
+        INTERACTION_MODE["EXTRUDE"] = "Extrude";
+        INTERACTION_MODE["IDLE"] = "Idle";
+    })(INTERACTION_MODE = Fudge.INTERACTION_MODE || (Fudge.INTERACTION_MODE = {}));
+    let AXIS;
+    (function (AXIS) {
+        AXIS["X"] = "X";
+        AXIS["Y"] = "Y";
+        AXIS["Z"] = "Z";
+    })(AXIS = Fudge.AXIS || (Fudge.AXIS = {}));
+    let MODELLER_EVENTS;
+    (function (MODELLER_EVENTS) {
+        MODELLER_EVENTS["HEADER_APPEND"] = "headerappend";
+        MODELLER_EVENTS["SELECTION_UPDATE"] = "selectionupdate";
+    })(MODELLER_EVENTS = Fudge.MODELLER_EVENTS || (Fudge.MODELLER_EVENTS = {}));
+    let MODELLER_MENU;
+    (function (MODELLER_MENU) {
+        MODELLER_MENU[MODELLER_MENU["DISPLAY_NORMALS"] = 0] = "DISPLAY_NORMALS";
+        MODELLER_MENU[MODELLER_MENU["INVERT_FACE"] = 1] = "INVERT_FACE";
+        MODELLER_MENU[MODELLER_MENU["TOGGLE_BACKFACE_CULLING"] = 2] = "TOGGLE_BACKFACE_CULLING";
+    })(MODELLER_MENU = Fudge.MODELLER_MENU || (Fudge.MODELLER_MENU = {}));
 })(Fudge || (Fudge = {}));
 ///<reference types="../../node_modules/electron"/>
 /**

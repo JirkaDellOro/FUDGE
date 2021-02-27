@@ -47,6 +47,32 @@ declare namespace Fudge {
         OBJECT_PROPERTIES = "ViewObjectProperties",
         SCRIPT = "ViewScript"
     }
+    enum CONTROL_MODE {
+        OBJECT_MODE = "Object-Mode",
+        EDIT_MODE = "Edit-Mode"
+    }
+    enum INTERACTION_MODE {
+        SELECT = "Box-Select",
+        TRANSLATE = "Translate",
+        ROTATE = "Rotate",
+        SCALE = "Scale",
+        EXTRUDE = "Extrude",
+        IDLE = "Idle"
+    }
+    enum AXIS {
+        X = "X",
+        Y = "Y",
+        Z = "Z"
+    }
+    enum MODELLER_EVENTS {
+        HEADER_APPEND = "headerappend",
+        SELECTION_UPDATE = "selectionupdate"
+    }
+    enum MODELLER_MENU {
+        DISPLAY_NORMALS = 0,
+        INVERT_FACE = 1,
+        TOGGLE_BACKFACE_CULLING = 2
+    }
 }
 /**
  * Main electron application running node. Starts the browser window to contain Fudge and sets up the main menu.
