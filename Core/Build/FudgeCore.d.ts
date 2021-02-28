@@ -3158,26 +3158,6 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    /** This function type takes x and z as Parameters and returns a number - to be used as a heightmap.
-     * x and z are mapped from 0 to 1 when used to generate a Heightmap Mesh
-     * @authors Simon Storl-Schulke, HFU, 2020*/
-    type heightMapFunction = (x: number, z: number) => number;
-    /**
-     * Generates a planar Grid and applies a Heightmap-Function to it.
-     * @authors Jirka Dell'Oro-Friedl, Simon Storl-Schulke, HFU, 2020
-     */
-    class MeshHeightMap extends Mesh {
-        static readonly iSubclass: number;
-        private resolutionX;
-        private resolutionZ;
-        private heightMapFunction;
-        constructor(_name?: string, _resolutionX?: number, _resolutionZ?: number, _heightMapFunction?: heightMapFunction);
-        protected createVertices(): Float32Array;
-        protected createIndices(): Uint16Array;
-        protected createTextureUVs(): Float32Array;
-    }
-}
-declare namespace FudgeCore {
     /**
      * Generate a flat polygon
      * ```plaintext
@@ -3202,6 +3182,48 @@ declare namespace FudgeCore {
         mutate(_mutator: Mutator): Promise<void>;
         protected reduceMutator(_mutator: Mutator): void;
         protected createIndices(): Uint16Array;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Generates an extrusion of a polygon by a series of transformations
+     * ```plaintext
+     *                      ____
+     * Polygon         ____╱╲   ╲
+     * Transform 0  → ╱ ╲__╲_╲___╲ ← Transform 2
+     *                ╲_╱__╱ ╱   ╱
+     *     Transform 1  →  ╲╱___╱
+     * ```
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2021
+     */
+    class MeshExtrusion extends MeshPolygon {
+        static readonly iSubclass: number;
+        protected static transformsDefault: Matrix4x4[];
+        constructor(_name?: string, _vertices?: Vector2[], _transforms?: Matrix4x4[], _fitMesh?: boolean, _fitTexture?: boolean);
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        protected reduceMutator(_mutator: Mutator): void;
+        private extrude;
+    }
+}
+declare namespace FudgeCore {
+    /** This function type takes x and z as Parameters and returns a number - to be used as a heightmap.
+     * x and z are mapped from 0 to 1 when used to generate a Heightmap Mesh
+     * @authors Simon Storl-Schulke, HFU, 2020*/
+    type heightMapFunction = (x: number, z: number) => number;
+    /**
+     * Generates a planar Grid and applies a Heightmap-Function to it.
+     * @authors Jirka Dell'Oro-Friedl, Simon Storl-Schulke, HFU, 2020
+     */
+    class MeshHeightMap extends Mesh {
+        static readonly iSubclass: number;
+        private resolutionX;
+        private resolutionZ;
+        private heightMapFunction;
+        constructor(_name?: string, _resolutionX?: number, _resolutionZ?: number, _heightMapFunction?: heightMapFunction);
+        protected createVertices(): Float32Array;
+        protected createIndices(): Uint16Array;
+        protected createTextureUVs(): Float32Array;
     }
 }
 declare namespace FudgeCore {
