@@ -243,7 +243,7 @@ var Fudge;
     Fudge.saveProject = saveProject;
     async function saveMesh(jsonString) {
         let filename = Fudge.remote.dialog.showOpenDialogSync(null, {
-            properties: ["openDirectory", "createDirectory"], title: "Select a folder to save the project to", buttonLabel: "Save Project"
+            properties: ["openDirectory", "createDirectory"], title: "Select a folder to save the project to", buttonLabel: "Save Mesh"
         });
         if (!filename)
             return;
@@ -4942,7 +4942,7 @@ var Fudge;
             this.viewport = new ƒ.Viewport();
             this.viewport.initialize("Viewport", this.graph, cmpCamera, this.canvas);
             this.viewport.draw();
-            this.orbitCamera = ƒaid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false, -0.15, 0.005, 0.003);
+            this.orbitCamera = ƒaid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false, -0.15, -0.005, 0.003);
             this.orbitCamera.rotateX(-30);
             this.orbitCamera.rotateY(45);
             this.orbitCamera.distance = 5;

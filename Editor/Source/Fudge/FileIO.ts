@@ -34,7 +34,7 @@ namespace Fudge {
 
   export async function saveMesh(jsonString: string): Promise<void> {
     let filename: string | string[] = remote.dialog.showOpenDialogSync(null, {
-      properties: ["openDirectory", "createDirectory"], title: "Select a folder to save the project to", buttonLabel: "Save Project"
+      properties: ["openDirectory", "createDirectory"], title: "Select a folder to save the project to", buttonLabel: "Save Mesh"
     });
     if (!filename)
       return;
