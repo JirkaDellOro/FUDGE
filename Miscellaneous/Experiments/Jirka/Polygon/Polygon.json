@@ -1,5 +1,5 @@
 {
-  "MeshPolygon|2021-02-08T14:58:15.037Z|31562": {
+  "Mesh|2021-02-08T14:58:15.037Z|31562": {
     "ƒ.MeshPrism": {
       "idResource": "Mesh|2021-02-08T14:58:15.037Z|31562",
       "name": "Poly/Extrusion/Prism",
@@ -57,7 +57,7 @@
         "ComponentMesh": [
           {
             "ƒ.ComponentMesh": {
-              "idMesh": "MeshPolygon|2021-02-08T14:58:15.037Z|31562",
+              "idMesh": "Mesh|2021-02-08T14:58:15.037Z|31562",
               "pivot": {
                 "translation": "[0, 0, 0]",
                 "rotation": "[0, 0, 0]",
