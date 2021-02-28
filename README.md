@@ -13,7 +13,7 @@ To get started with FUDGE, please browse through the [Wiki](https://github.com/J
 ## Core
 Contains the core functionality of FUDGE needed to create games. For many games it's sufficient to work only with this module.
 ## UserInterface
-Comtains the classes for easy and even automatic creation of graphical interfaces using the mutator concept (see Wiki). This module is heavily used in the editor and can be used and extended for games.
+Contains the classes for easy and even automatic creation of graphical interfaces using the mutator concept (see Wiki). This module is heavily used in the editor and can be used and extended for games.
 ## Network
 Contains components for gaming over networks. This module is not fully evaluated yet.
 ## Aid
