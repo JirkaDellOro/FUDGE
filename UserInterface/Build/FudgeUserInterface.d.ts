@@ -187,6 +187,7 @@ declare namespace FudgeUserInterface {
     }
 }
 declare namespace FudgeUserInterface {
+    import ƒ = FudgeCore;
     /**
      * Creates a CustomElement from an HTML-Template-Tag
      */
@@ -199,6 +200,11 @@ declare namespace FudgeUserInterface {
          */
         static register(_tagName: string): void;
         /**
+         * Get the value of this element in a format compatible with [[FudgeCore.Mutator]]
+         */
+        getMutatorValue(): ƒ.Mutator;
+        setMutatorValue(_mutator: ƒ.Mutator): void;
+        /**
          * When connected the first time, the element gets constructed as a deep clone of the template.
          */
         protected connectedCallback(): void;
@@ -207,7 +213,7 @@ declare namespace FudgeUserInterface {
 declare namespace FudgeUserInterface {
     import ƒ = FudgeCore;
     class CustomElementMatrix3x3 extends CustomElementTemplate {
-        getMutatorValue(): Object;
+        getMutatorValue(): ƒ.Mutator;
         setMutatorValue(_mutator: ƒ.Mutator): void;
         protected connectedCallback(): void;
     }

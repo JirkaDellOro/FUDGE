@@ -2,6 +2,8 @@
 - Open the console (F12 or Ctrl+Shift+I), since many test also or solely show output to the console!
 - Testing online on jirkadelloro.github.io/FUDGE only tests the master branch. Test other branches locally using a local server.
 - Use of markdown viewer is recommended when testing locally to use this README.md
+- Here is only a selection of test that are already enhanced with explanation and user guidelines
+- Find more tests in the folder "Miscellaneous"
 
 ## Audio
 - [Audio Graph Insertion](Audio/GraphInsertion/Test.html)  
@@ -11,6 +13,7 @@ Test the handling of the WebAudio context to mix the audiosignals of selected br
 - [SpatialSound](Audio/SpatialSound/Test.html)  
 Complex test for spatial stereo audio. Orbit the camera around the world origin, move an audio source and adjust the panner cones.
 
+<!-- 
 ## Events
 - [EventPassing](Events/EventPassing/Test.html)   
 In der Konsole sollten mehrere Events angezeigt werden und der Fokus soll nach dem Anklicken eines Viewports mit den Pfeiltasten steuerbar sein.
@@ -83,3 +86,4 @@ Hier sollen zwei Tori zu sehen sein - einer mit Flat Shading und der andere mit 
 
 - [HeightMap](Mesh/HeightMap/Test.html)  
 Hier sollen zwei durch eine Sinusfunktion (anhand von X und Z Koordinaten des Grids) generierte Gridmeshes angezeigt werden. Eine mit Flat Shading und eines mit einer Erde-Textur.
+-->

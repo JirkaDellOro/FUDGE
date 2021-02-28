@@ -15,8 +15,10 @@ namespace FudgeCore {
     public resolutionX: number;
     public resolutionZ: number;
     private heightMapFunction: HeightMapFunction;
+    private image: TextureImage;
+    public imgScale: number = 800;
 
-    public constructor(_name: string = "MeshHeightMap", _resolutionX: number = 16, _resolutionZ: number = 16, _heightMapFunction?: HeightMapFunction) {
+    public constructor(_name: string = "MeshHeightMap", source?: HeightMapFunction | TextureImage, _resolutionX: number = 16, _resolutionZ: number = 16) {
       super(_name);
       this.resolutionX = _resolutionX;
       this.resolutionZ = _resolutionZ;
@@ -27,28 +29,67 @@ namespace FudgeCore {
         this.resolutionZ = Math.max(1, this.resolutionZ);
       }
 
-      if (_heightMapFunction) this.heightMapFunction = _heightMapFunction;
-      else this.heightMapFunction = function (_x: number, _y: number): number { return 0; };
+      if (!(source instanceof TextureImage)) {
+        this.heightMapFunction = source;
+        this.image = null;
+      }
+      else this.heightMapFunction = null;
+
+      if (source instanceof TextureImage) {
+        this.image = source;
+        this.resolutionX = source.image.width - 1;
+        this.resolutionZ = source.image.height - 1;
+      }
+      else this.image = null;
 
       this.create();
     }
 
+
+
     protected createVertices(): Float32Array {
       let vertices: Float32Array = new Float32Array((this.resolutionX + 1) * (this.resolutionZ + 1) * 3);
 
-      //Iterate over each cell to generate grid of vertices
-      for (let i: number = 0, z: number = 0; z <= this.resolutionZ; z++) {
-        for (let x: number = 0; x <= this.resolutionX; x++) {
-          // X
-          vertices[i] = x / this.resolutionX - 0.5;
-          // Apply heightmap to y coordinate
-          vertices[i + 1] = this.heightMapFunction(x / this.resolutionX, z / this.resolutionZ);
-          // Z
-          vertices[i + 2] = z / this.resolutionZ - 0.5;
-          i += 3;
+      if (this.heightMapFunction != null) {
+        //Iterate over each cell to generate grid of vertices
+        for (let i: number = 0, z: number = 0; z <= this.resolutionZ; z++) {
+          for (let x: number = 0; x <= this.resolutionX; x++) {
+            // X
+            vertices[i] = x / this.resolutionX - 0.5;
+            // Apply heightmap to y coordinate
+            vertices[i + 1] = this.heightMapFunction(x / this.resolutionX, z / this.resolutionZ);
+            // Z
+            vertices[i + 2] = z / this.resolutionZ - 0.5;
+            i += 3;
+          }
         }
+        return vertices;
       }
-      return vertices;
+      else if (this.image != null) {
+        let imgArray = this.imageToClampedArray(this.image);
+        // console.log(imgArray);
+        let px = 0;
+
+        for (let i: number = 0, z: number = 0; z <= this.resolutionZ; z++) {
+          for (let x: number = 0; x <= this.resolutionX; x++) {
+            // X
+            vertices[i] = x / this.resolutionX - 0.5;
+            // Apply heightmap to y coordinate
+            vertices[i + 1] = imgArray[px * 4] / this.imgScale;
+            // Z
+            vertices[i + 2] = z / this.resolutionZ - 0.5;
+            i += 3;
+            px++;
+          }
+        }
+        // console.log("resx: " + this.resolutionX + " resz: " + this.resolutionZ);
+
+        return vertices;
+
+      }
+      else {
+        throw new Error("No Source for Vertices is given, must be function or image");
+      }
     }
 
     protected createIndices(): Uint16Array {
@@ -91,6 +132,22 @@ namespace FudgeCore {
 
     protected createFaceNormals(): Float32Array {
       return this.calculateFaceNormals();
+    }
+
+    protected imageToClampedArray(image: TextureImage): Uint8ClampedArray {
+      let trImport: Uint8ClampedArray;
+
+      let canvasImage: HTMLCanvasElement = document.createElement("canvas");
+      canvasImage.width = image.image.width;
+      canvasImage.height = image.image.height;
+
+      let crcTransition: CanvasRenderingContext2D = canvasImage.getContext("2d");
+      crcTransition.imageSmoothingEnabled = false;
+      crcTransition.drawImage(image.image, 0, 0);
+
+      trImport = crcTransition.getImageData(0, 0, image.image.width, image.image.height).data;
+
+      return trImport;
     }
   }
 }

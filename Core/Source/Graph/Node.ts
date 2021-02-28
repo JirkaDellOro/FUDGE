@@ -12,6 +12,7 @@ namespace FudgeCore {
     public name: string; // The name to call this node by.
     public readonly mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY();
     public timestampUpdate: number = 0;
+    public nNodesInBranch: number = 0;
 
     private parent: Node | null = null; // The parent of this node.
     private children: Node[] = []; // array of child nodes appended to this node.

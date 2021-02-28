@@ -540,6 +540,30 @@ var FudgeUserInterface;
             }
         }
         /**
+         * Get the value of this element in a format compatible with [[FudgeCore.Mutator]]
+         */
+        getMutatorValue() {
+            let mutator = {};
+            let elements = this.querySelectorAll("[key");
+            for (let element of elements) {
+                let key = element.getAttribute("key");
+                if (element instanceof FudgeUserInterface.CustomElement)
+                    mutator[key] = element.getMutatorValue();
+                else
+                    mutator[key] = element.value;
+            }
+            return mutator;
+        }
+        setMutatorValue(_mutator) {
+            for (let key in _mutator) {
+                let element = this.querySelector(`[key=${key}]`);
+                if (element instanceof FudgeUserInterface.CustomElement)
+                    element.setMutatorValue(_mutator[key]);
+                else
+                    element.value = _mutator[key];
+            }
+        }
+        /**
          * When connected the first time, the element gets constructed as a deep clone of the template.
          */
         connectedCallback() {
@@ -555,6 +579,9 @@ var FudgeUserInterface;
             for (let child of content.childNodes) {
                 this.appendChild(child.cloneNode(true));
             }
+            let label = this.querySelector("label");
+            if (label)
+                label.textContent = this.getAttribute("label");
         }
     }
     CustomElementTemplate.fragment = new Map();

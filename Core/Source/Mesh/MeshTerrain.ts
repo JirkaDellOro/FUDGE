@@ -7,6 +7,11 @@ namespace FudgeCore {
    * @authors Simon Storl-Schulke, HFU, 2020*/
   export type HeightMapFunction = (x: number, z: number) => number;
 
+  export class PositionOnTerrain {
+    position: Vector3;
+    normal: Vector3;
+  }
+
   /**
    * Generates a planar Grid and applies a Heightmap-Function to it.
    * @authors Jirka Dell'Oro-Friedl, Simon Storl-Schulke, HFU, 2020
@@ -16,11 +21,11 @@ namespace FudgeCore {
 
     public resolutionX: number;
     public resolutionZ: number;
-    public imgScale: number = 800;
+    public imgScale: number = 255;
     public node: Node;
     private heightMapFunction: HeightMapFunction;
     private image: TextureImage;
-    
+
     public constructor(_name: string = "MeshHeightMap", source?: HeightMapFunction | TextureImage, _resolutionX: number = 16, _resolutionZ: number = 16) {
       super(_name);
       this.resolutionX = _resolutionX;
@@ -32,13 +37,13 @@ namespace FudgeCore {
         this.resolutionZ = Math.max(1, this.resolutionZ);
       }
 
-      if (! (source instanceof TextureImage)) {
+      if (!(source instanceof TextureImage)) {
         this.heightMapFunction = source;
         this.image = null;
       }
       else this.heightMapFunction = null;
 
-      if (source instanceof TextureImage){
+      if (source instanceof TextureImage) {
         this.image = source;
         this.resolutionX = source.image.width - 1;
         this.resolutionZ = source.image.height - 1;
@@ -47,13 +52,13 @@ namespace FudgeCore {
 
       this.create();
     }
-    
-    
+
+
 
     protected createVertices(): Float32Array {
       let vertices: Float32Array = new Float32Array((this.resolutionX + 1) * (this.resolutionZ + 1) * 3);
 
-      if(this.heightMapFunction != null){
+      if (this.heightMapFunction != null) {
         //Iterate over each cell to generate grid of vertices
         for (let i: number = 0, z: number = 0; z <= this.resolutionZ; z++) {
           for (let x: number = 0; x <= this.resolutionX; x++) {
@@ -68,9 +73,9 @@ namespace FudgeCore {
         }
         return vertices;
       }
-      else if( this.image != null){
+      else if (this.image != null) {
         let imgArray = this.imageToClampedArray(this.image);
-        // console.log(imgArray);
+        console.log(imgArray);
         let px = 0;
 
         for (let i: number = 0, z: number = 0; z <= this.resolutionZ; z++) {
@@ -78,20 +83,19 @@ namespace FudgeCore {
             // X
             vertices[i] = x / this.resolutionX - 0.5;
             // Apply heightmap to y coordinate
-            vertices[i + 1] = imgArray[px*4] / this.imgScale;
+            vertices[i + 1] = imgArray[px * 4] / this.imgScale;
             // Z
             vertices[i + 2] = z / this.resolutionZ - 0.5;
             i += 3;
             px++;
           }
         }
-        // console.log("resx: " + this.resolutionX + " resz: " + this.resolutionZ);
 
         return vertices;
 
       }
       else {
-        throw new Error("No Source for Vertices is given, must be function or image"); 
+        throw new Error("No Source for Vertices is given, must be function or image");
       }
     }
 
@@ -106,7 +110,7 @@ namespace FudgeCore {
       for (let z: number = 0; z < this.resolutionZ; z++) {
         for (let x: number = 0; x < this.resolutionX; x++) {
 
-          if (!switchOrientation){
+          if (!switchOrientation) {
             // First triangle of each uneven grid-cell
             indices[tris + 0] = vert + 0;
             indices[tris + 1] = vert + this.resolutionX + 1;
@@ -133,7 +137,7 @@ namespace FudgeCore {
           vert++;
           tris += 6;
         }
-        if(this.resolutionX % 2 == 0)
+        if (this.resolutionX % 2 == 0)
           switchOrientation = !switchOrientation;
         vert++;
       }
@@ -157,86 +161,91 @@ namespace FudgeCore {
       return this.calculateFaceNormals();
     }
 
-    protected imageToClampedArray(image: TextureImage): Uint8ClampedArray{
+    protected imageToClampedArray(image: TextureImage): Uint8ClampedArray {
       let trImport: Uint8ClampedArray;
-    
+
       let canvasImage: HTMLCanvasElement = document.createElement("canvas");
       canvasImage.width = image.image.width;
       canvasImage.height = image.image.height;
 
-      let crcTransition: CanvasRenderingContext2D = canvasImage.getContext("2d");
-      crcTransition.imageSmoothingEnabled = false;
-      crcTransition.drawImage(image.image, 0, 0);
+      let crcHeightMap: CanvasRenderingContext2D = canvasImage.getContext("2d");
+      crcHeightMap.imageSmoothingEnabled = false;
+      crcHeightMap.drawImage(image.image, 0, 0);
 
-      trImport = crcTransition.getImageData(0, 0, image.image.width, image.image.height).data;
+      trImport = crcHeightMap.getImageData(0, 0, image.image.width, image.image.height).data;
 
       return trImport;
     }
 
-    public getPositionOnTerrain(position: Vector3, mtxWorld?: Matrix4x4): Ray{
-      
+    public getPositionOnTerrain(position: Vector3, mtxWorld?: Matrix4x4): PositionOnTerrain {
+
       let relPosObject: Vector3 = position;
-      
-      if (mtxWorld){
+
+      if (mtxWorld) {
         relPosObject = Vector3.TRANSFORMATION(position, Matrix4x4.INVERSION(mtxWorld), true);
       }
 
-      let nearestFace: distanceToFaceVertices = this.findNearestFace(relPosObject);
-      let ray = new Ray;
+      let nearestFace: DistanceToFaceVertices = this.findNearestFace(relPosObject);
+      let posOnTerrain: PositionOnTerrain = new PositionOnTerrain;
 
-      let origin = new Vector3( relPosObject.x, this.calculateHeight(nearestFace, relPosObject), relPosObject.z);
+      let origin = new Vector3(relPosObject.x, this.calculateHeight(nearestFace, relPosObject), relPosObject.z);
       let direction = nearestFace.faceNormal;
 
-      if(mtxWorld){
+      if (mtxWorld) {
         origin = Vector3.TRANSFORMATION(origin, mtxWorld, true);
         direction = Vector3.TRANSFORMATION(direction, mtxWorld, false);
       }
-  
-      ray.origin = origin
-      ray.direction = direction;
-  
-      return ray;
-    }
-  
-    private calculateHeight (face: distanceToFaceVertices, relativePosObject: Vector3): number{
 
-      // m1.mtxLocal.translation = face.vertexONE;
-      // m2.mtxLocal.translation = face.vertexTWO;
-      // m3.mtxLocal.translation = face.vertexTHREE;
-  
-      let ray: Ray = new Ray(new Vector3(0,1,0), relativePosObject);
-      
+      posOnTerrain.position = origin
+      posOnTerrain.normal = direction;
+
+      return posOnTerrain;
+    }
+
+    private calculateHeight(face: DistanceToFaceVertices, relativePosObject: Vector3): number {
+
+      let ray: Ray = new Ray(new Vector3(0, 1, 0), relativePosObject);
       let intersection: Vector3 = ray.intersectPlane(face.vertexONE, face.faceNormal);
-  
+
       return intersection.y;
     }
-  
-    private findNearestFace(relativPosObject: Vector3): distanceToFaceVertices{
+
+    private findNearestFace(relativPosObject: Vector3): DistanceToFaceVertices {
       let vertices: Float32Array = this.vertices;
       let indices: Uint16Array = this.indices;
-  
-      let nearestFaces: Array<distanceToFaceVertices> = new Array;
-  
-      for(let i = 0; i < indices.length; i = i+3){
-        let vertexONE: Vector3 = new Vector3(vertices[indices[i]*3], vertices[indices[i]*3+1],vertices[indices[i]*3+2]);
-        let vertexTWO: Vector3 = new Vector3(vertices[indices[i+1]*3], vertices[indices[i+1]*3+1],vertices[indices[i+1]*3+2]);
-        let vertexTHREE: Vector3 = new Vector3(vertices[indices[i+2]*3], vertices[indices[i+2]*3+1],vertices[indices[i+2]*3+2]);
-        
-        let face: distanceToFaceVertices = new distanceToFaceVertices(vertexONE, vertexTWO, vertexTHREE, relativPosObject);
-        
-        nearestFaces.push(face);
-      }
-  
-      nearestFaces.sort((n1,n2) => {
-        return n1.distance - n2.distance;
-      });
-  
-      return nearestFaces[0];
-  
+
+      let row = Math.floor((relativPosObject.z + 0.5) * this.resolutionZ);
+      let column = Math.floor((relativPosObject.x + 0.5) * this.resolutionX);
+
+      if (row >= this.resolutionZ) row = this.resolutionZ - 1;
+      if (row < 0) row = 0;
+      if (column >= this.resolutionX) column = this.resolutionZ - 1;
+      if (column < 0) column = 0;
+
+      let field = ((row * this.resolutionX) + column) * 6;
+
+      let vertexONE1: Vector3 = new Vector3(vertices[indices[field] * 3], vertices[indices[field] * 3 + 1], vertices[indices[field] * 3 + 2]);
+      let vertexTWO1: Vector3 = new Vector3(vertices[indices[field + 1] * 3], vertices[indices[field + 1] * 3 + 1], vertices[indices[field + 1] * 3 + 2]);
+      let vertexTHREE1: Vector3 = new Vector3(vertices[indices[field + 2] * 3], vertices[indices[field + 2] * 3 + 1], vertices[indices[field + 2] * 3 + 2]);
+
+      let face1: DistanceToFaceVertices = new DistanceToFaceVertices(vertexONE1, vertexTWO1, vertexTHREE1, relativPosObject);
+
+      field = field + 3;
+
+      let vertexONE2: Vector3 = new Vector3(vertices[indices[field] * 3], vertices[indices[field] * 3 + 1], vertices[indices[field] * 3 + 2]);
+      let vertexTWO2: Vector3 = new Vector3(vertices[indices[field + 1] * 3], vertices[indices[field + 1] * 3 + 1], vertices[indices[field + 1] * 3 + 2]);
+      let vertexTHREE2: Vector3 = new Vector3(vertices[indices[field + 2] * 3], vertices[indices[field + 2] * 3 + 1], vertices[indices[field + 2] * 3 + 2]);
+
+      let face2: DistanceToFaceVertices = new DistanceToFaceVertices(vertexONE2, vertexTWO2, vertexTHREE2, relativPosObject);
+
+      if (face1.distance < face2.distance)
+        return face1;
+      else return face2;
+
     }
   }
-  
-  class distanceToFaceVertices {
+
+  class DistanceToFaceVertices {
     public vertexONE: Vector3;
     public vertexTWO: Vector3;
     public vertexTHREE: Vector3;
@@ -249,22 +258,22 @@ namespace FudgeCore {
 
     public faceNormal: Vector3;
 
-    public constructor(vertexONE: Vector3, vertexTWO: Vector3, vertexTHREE: Vector3, relativPosObject: Vector3){
+    public constructor(vertexONE: Vector3, vertexTWO: Vector3, vertexTHREE: Vector3, relativPosObject: Vector3) {
       this.vertexONE = vertexONE;
       this.vertexTWO = vertexTWO;
       this.vertexTHREE = vertexTHREE;
-      
+
       this.distanceONE = new Vector2(vertexONE.x - relativPosObject.x, vertexONE.z - relativPosObject.z).magnitude;
       this.distanceTWO = new Vector2(vertexTWO.x - relativPosObject.x, vertexTWO.z - relativPosObject.z).magnitude;
       this.distanceTHREE = new Vector2(vertexTHREE.x - relativPosObject.x, vertexTHREE.z - relativPosObject.z).magnitude;
 
-      this.distance = this.distanceONE + this.distanceTWO + this.distanceTHREE; 
+      this.distance = this.distanceONE + this.distanceTWO + this.distanceTHREE;
 
       this.calculateFaceNormal();
 
     }
 
-    public calculateFaceNormal(){
+    public calculateFaceNormal() {
       let v1: Vector3 = Vector3.DIFFERENCE(this.vertexTWO, this.vertexONE);
       let v2: Vector3 = Vector3.DIFFERENCE(this.vertexTHREE, this.vertexONE);
 

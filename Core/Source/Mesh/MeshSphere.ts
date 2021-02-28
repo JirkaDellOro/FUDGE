@@ -106,6 +106,7 @@ namespace FudgeCore {
       let stacks: number = Math.round(_mutator.stacks);
       this.create(sectors, stacks);
     }
+    //#endregion
 
     protected createIndices(): Uint16Array {
       let inds: Array<number> = [];

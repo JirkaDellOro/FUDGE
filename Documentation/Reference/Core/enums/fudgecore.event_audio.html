@@ -78,6 +78,7 @@
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudgecore.event_audio.html#child_append" class="tsd-kind-icon">CHILD_<wbr>APPEND</a></li>
 								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudgecore.event_audio.html#child_remove" class="tsd-kind-icon">CHILD_<wbr>REMOVE</a></li>
+								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudgecore.event_audio.html#ended" class="tsd-kind-icon">ENDED</a></li>
 								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudgecore.event_audio.html#ready" class="tsd-kind-icon">READY</a></li>
 								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="fudgecore.event_audio.html#update" class="tsd-kind-icon">UPDATE</a></li>
 							</ul>
@@ -93,7 +94,7 @@
 					<div class="tsd-signature tsd-kind-icon">CHILD_<wbr>APPEND<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;childAppendToAudioGraph&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Event/EventAudio.ts#L4">Documents/HFU/FUDGE/Core/Source/Event/EventAudio.ts:4</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Event/EventAudio.ts#L4">Documents/HFU/FUDGE/Core/Source/Event/EventAudio.ts:4</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -108,7 +109,7 @@
 					<div class="tsd-signature tsd-kind-icon">CHILD_<wbr>REMOVE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;childRemoveFromAudioGraph&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Event/EventAudio.ts#L6">Documents/HFU/FUDGE/Core/Source/Event/EventAudio.ts:6</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Event/EventAudio.ts#L6">Documents/HFU/FUDGE/Core/Source/Event/EventAudio.ts:6</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -118,14 +119,34 @@
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
+					<a name="ended" class="tsd-anchor"></a>
+					<h3>ENDED</h3>
+					<div class="tsd-signature tsd-kind-icon">ENDED<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;ended&quot;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Event/EventAudio.ts#L12">Documents/HFU/FUDGE/Core/Source/Event/EventAudio.ts:12</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>fired when the end of the audio is reached while playing</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
 					<a name="ready" class="tsd-anchor"></a>
 					<h3>READY</h3>
 					<div class="tsd-signature tsd-kind-icon">READY<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;ready&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Event/EventAudio.ts#L9">Documents/HFU/FUDGE/Core/Source/Event/EventAudio.ts:9</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Event/EventAudio.ts#L10">Documents/HFU/FUDGE/Core/Source/Event/EventAudio.ts:10</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>fired when the audio file was loaded and is ready for playing</p>
+						</div>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
 					<a name="update" class="tsd-anchor"></a>
@@ -133,7 +154,7 @@
 					<div class="tsd-signature tsd-kind-icon">UPDATE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;updateAudioGraph&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Event/EventAudio.ts#L8">Documents/HFU/FUDGE/Core/Source/Event/EventAudio.ts:8</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Event/EventAudio.ts#L8">Documents/HFU/FUDGE/Core/Source/Event/EventAudio.ts:8</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -167,6 +188,9 @@
 							</li>
 							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
 								<a href="fudgecore.event_audio.html#child_remove" class="tsd-kind-icon">CHILD_<wbr>REMOVE</a>
+							</li>
+							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
+								<a href="fudgecore.event_audio.html#ended" class="tsd-kind-icon">ENDED</a>
 							</li>
 							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
 								<a href="fudgecore.event_audio.html#ready" class="tsd-kind-icon">READY</a>

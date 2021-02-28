@@ -173,15 +173,18 @@ namespace Fudge {
         async function startInteractiveViewport(): Promise<void> {
           // load resources referenced in the link-tag
           await FudgeCore.Project.loadResourcesFromHTML();
+          FudgeCore.Debug.log("Project:", FudgeCore.Project.resources);
 
           // pick the graph to show
           let graph: ƒ.Graph = <ƒ.Graph>FudgeCore.Project.resources[_graphId];
+          FudgeCore.Debug.log("Graph:", graph);
 
           // setup the viewport
           let cmpCamera: ƒ.ComponentCamera = new FudgeCore.ComponentCamera();
           let canvas: HTMLCanvasElement = document.querySelector("canvas");
           let viewport: ƒ.Viewport = new FudgeCore.Viewport();
           viewport.initialize("InteractiveViewport", graph, cmpCamera, canvas);
+          FudgeCore.Debug.log("Viewport:", viewport);
 
           // hide the cursor when interacting, also suppressing right-click menu
           canvas.addEventListener("mousedown", canvas.requestPointerLock);
@@ -195,6 +198,7 @@ namespace Fudge {
           cmpCamera.getContainer().addComponent(cmpListener);
           FudgeCore.AudioManager.default.listenWith(cmpListener);
           FudgeCore.AudioManager.default.listenTo(graph);
+          FudgeCore.Debug.log("Audio:", FudgeCore.AudioManager.default);
 
           // draw viewport once for immediate feedback
           viewport.draw();

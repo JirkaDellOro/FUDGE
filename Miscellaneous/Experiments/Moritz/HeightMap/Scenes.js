@@ -130,12 +130,12 @@ var Scenes;
             let vctCamera = ƒ.Vector3.ZERO();
             let zoom;
             vctCamera.y = (0.1 *
-                (_event.code == ƒ.KEYBOARD_CODE.ARROW_UP || _event.code == ƒ.KEYBOARD_CODE.W ? 1 :
-                    _event.code == ƒ.KEYBOARD_CODE.ARROW_DOWN || _event.code == ƒ.KEYBOARD_CODE.S ? -1 :
+                (_event.code == ƒ.KEYBOARD_CODE.ARROW_UP ? 1 :
+                    _event.code == ƒ.KEYBOARD_CODE.ARROW_DOWN ? -1 :
                         0));
             vctCamera.x = (0.1 *
-                (_event.code == ƒ.KEYBOARD_CODE.ARROW_LEFT || _event.code == ƒ.KEYBOARD_CODE.A ? 1 :
-                    _event.code == ƒ.KEYBOARD_CODE.ARROW_RIGHT || _event.code == ƒ.KEYBOARD_CODE.D ? -1 :
+                (_event.code == ƒ.KEYBOARD_CODE.ARROW_LEFT ? 1 :
+                    _event.code == ƒ.KEYBOARD_CODE.ARROW_RIGHT ? -1 :
                         0));
             vctCamera.z = (0.1 *
                 (_event.code == ƒ.KEYBOARD_CODE.NUMPAD_ADD ? 1 :
