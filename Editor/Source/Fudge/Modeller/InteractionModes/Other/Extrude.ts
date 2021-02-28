@@ -10,7 +10,6 @@ namespace Fudge {
     private isExtruded: boolean = false;
     private distanceCameraToCentroid: number;
     private oldPosition: ƒ.Vector3;
-    private axesSelectionHandler: AxesSelectionHandler;
     private vertexSelected: boolean = false;
     private orientation: ƒ.Vector3;
     private clientCentroid: ƒ.Vector2;
@@ -25,6 +24,8 @@ namespace Fudge {
 
     onmousedown(_event: ƒ.EventPointer): void {
       let willBeExtruded: boolean = false;
+      // start drawing of the interaction circle
+      // also restrict the vertex selection if inside the circle was clicked
       if (this.loopIsRunning) {
         if (ƒ.Vector2.DIFFERENCE(new ƒ.Vector2(_event.canvasX, _event.canvasY), this.clientCentroid).magnitude < Extrude.selectionRadius) {
           willBeExtruded = true;
@@ -41,7 +42,6 @@ namespace Fudge {
           }
           this.vertexSelected = true;
         }
-
         return;
       }
 
@@ -54,8 +54,6 @@ namespace Fudge {
       this.distanceCameraToCentroid = this.getDistanceFromCameraToCentroid(centroid);
       this.oldPosition = this.getPointerPosition(_event, this.distanceCameraToCentroid);
       this.orientation = mesh.extrude(this.selection);
-      // if (!this.orientation) 
-      //   return;
 
       let newSelection: number[] = [];
       for (let i: number = 0; i < this.selection.length; i++) 
@@ -86,44 +84,23 @@ namespace Fudge {
       let newPos: ƒ.Vector3 = this.getPointerPosition(_event, this.distanceCameraToCentroid);
       let diff: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(newPos, this.oldPosition);
       let translationVector: ƒ.Vector3 = diff;
+      // extrude in the direction of the old normal if a full face was extruded
+      // otherwise, do freeform drag n drop
       if (this.orientation && !ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.SHIFT_LEFT, ƒ.KEYBOARD_CODE.SHIFT_RIGHT])) {
         translationVector = new ƒ.Vector3(this.orientation.x, this.orientation.y, this.orientation.z);
         let distance: number = ƒ.Vector3.DOT(diff, this.orientation) > 0 ? diff.magnitude : diff.magnitude * -1;
         translationVector.scale(distance);  
       }
-      // let selectedAxes: AXIS[] = this.axesSelectionHandler.getSelectedAxes();
-      // diff.x *= Math.abs(this.orientation.x);
-      // diff.y *= Math.abs(this.orientation.y);
-      // diff.z *= Math.abs(this.orientation.z);
-      // for (let axis of selectedAxes) {
-      //   switch (axis) {
-      //     case Axis.X:
-      //       translationVector.x = diff.x;
-      //       break;
-      //     case Axis.Y:
-      //       translationVector.y = diff.y;
-      //       break;
-      //     case Axis.Z:
-      //       translationVector.z = diff.z;
-      //       break;
-      //   }
-      // }
-      // if (selectedAxes.length === 0)
-      //   translationVector = diff;
-
-      // if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.SHIFT_LEFT, ƒ.KEYBOARD_CODE.SHIFT_RIGHT]) || this.selection.length < 4) 
-      //   translationVector = diff;
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
       mesh.translateVertices(translationVector, this.selection);
       this.oldPosition = newPos;
     }
 
     onkeydown(pressedKey: string): void {
-      this.axesSelectionHandler.addAxisOf(pressedKey);
+      //@ts-ignore
     }
     
     onkeyup(pressedKey: string): string {
-      this.axesSelectionHandler.removeAxisOf(pressedKey);
       return null;
     }
 
@@ -135,7 +112,6 @@ namespace Fudge {
       if (this.selection.length >= 2) {
         this.startLoop();
       }
-      this.axesSelectionHandler = new AxesSelectionHandler();
     }
     
     cleanup(): void {

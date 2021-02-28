@@ -1,4 +1,8 @@
 namespace Fudge {
+  /* 
+    uses html templates to create dropdown menus to change the current mode
+    updates after an HEADER_UPDATE event was called
+  */
   export class DropdownHandler {
     private controller: Controller;
 

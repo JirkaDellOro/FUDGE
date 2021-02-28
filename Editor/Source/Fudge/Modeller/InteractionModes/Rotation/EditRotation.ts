@@ -35,19 +35,5 @@ namespace Fudge {
 
       return super.onmouseup(_event);
     }
-
-    // getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {
-    //   return [...super.getContextMenuItems(_callback), MenuItemsCreator.getInvertFaceItem(_callback)];
-    // }
-
-    // contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
-    //   switch (Number(_item.id)) {
-    //     case MODELLER_MENU.INVERT_FACE:
-    //       (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).invertFace(this.selection);          
-    //       break;
-    //   }
-    //   super.contextMenuCallback(_item, _window, _event);
-    // }
-
   }
 }

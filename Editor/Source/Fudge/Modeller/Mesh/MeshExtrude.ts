@@ -68,6 +68,9 @@ namespace Fudge {
       return edges;
     }
 
+    /* 
+      extrude one edge defined by the vertices in selection
+    */
     private extrudeEdge(selection: number[]): number[] {
       let newTriangles: Array<number> = [];
       let reverseVertices: Map<number, number> = new Map();
@@ -120,7 +123,10 @@ namespace Fudge {
         this.numberOfIndices++;
       }
     }
-
+    /* 
+      fill a map with the relationship of real vertex to position in the uniqueVertex array 
+      in order access that information in constant time 
+    */
     private fillVertexMap(selection: number[]): void {
       for (let selectedVertex of selection) {
         for (let [vertexIndex, data] of this.uniqueVertices[selectedVertex].vertexToData) {
@@ -129,6 +135,9 @@ namespace Fudge {
       }
     }
 
+    /*
+      find out the which edge belongs to which face and return that information
+    */
     private getInnerEdges(edges: {start: number, end: number}[]): Map<number, {edge: {start: number, end: number}, index: number}[]> {
       let faceToEdgesMap: Map<number, {edge: {start: number, end: number}, index: number}[]> = new Map();
       for (let i: number = 0; i < edges.length; i++) {
@@ -205,6 +214,9 @@ namespace Fudge {
       }
     }
 
+    /*
+      remove duplice edges, i.e. two boundary edges belonging to different faces
+    */
     private removeDuplicateEdges(edges: {start: number, end: number}[], faceToEdgesMap: Map<number, {edge: {start: number, end: number}, index: number}[]>): void {
       let edgesToRemove: number[] = [];
       let duplicateEdges: Set<number> = new Set();
@@ -232,14 +244,6 @@ namespace Fudge {
               edges[i].start = edges[i].end;
               edges[i].end = oldStart;
             } 
-
-            // if (iIsPartOfFace) {
-            //   edgesToRemove.push(i);
-            //   duplicateEdges.add(j);
-            // } else {
-            //   edgesToRemove.push(j);
-            //   duplicateEdges.add(i);
-            // }
           }
         }
       }
@@ -252,7 +256,6 @@ namespace Fudge {
 
     /*
       add the front face at the end incase a full face is selected
-      TODO: check if this really works if multiple faces are selected
     */
     private addFrontFaces(faceToEdgesMap: Map<number, {edge: {start: number, end: number}, index: number}[]>): number[] {
       let vertices: number[] = [];
@@ -271,6 +274,10 @@ namespace Fudge {
       return vertices;
     }
 
+
+    /* 
+      check if two edges conntect the same vertices 
+    */
     private areEdgesDuplicate(edge1: {start: number, end: number}, edge2: {start: number, end: number}): boolean {
       return (this.vertexToUniqueVertexMap.get(edge1.start) === this.vertexToUniqueVertexMap.get(edge2.start) && 
               this.vertexToUniqueVertexMap.get(edge1.end) === this.vertexToUniqueVertexMap.get(edge2.end)) || 

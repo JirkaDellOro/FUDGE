@@ -17,7 +17,6 @@ namespace Fudge {
       this.addChild(xRotWidget);
       this.addChild(zRotWidget);
       this.fillColorDict();
-
     }
 
     public isHitWidgetComponent(_hits: ƒ.RayHit[]): {axis: AXIS, additionalNodes: ƒ.Node[]} {

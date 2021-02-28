@@ -29,6 +29,10 @@ namespace Fudge {
       return this.#uniqueVertices;
     }
 
+
+    /* 
+      get the current state of the mesh for reload
+    */
     public getState(): string {
       let serializable: Array<Object> = [];
       for (let vertex of this.#uniqueVertices) {
@@ -49,6 +53,9 @@ namespace Fudge {
       return JSON.stringify(serializable);
     }
 
+    /* 
+      reload the old state
+    */
     public retrieveState(state: string): void {
       let json: Array<any> = JSON.parse(state);
       let result: Array<UniqueVertex> = [];
@@ -65,7 +72,9 @@ namespace Fudge {
       this.create();
       console.log(result);
     }
-
+    /*
+      export the mesh in json to use it in different fudge applications 
+    */
     public export(): string {
       let serialization: {vertices: number[], indices: number[], normals: number[], textureCoordinates: number[]} = {
         vertices: Array.from(this.vertices),
@@ -82,6 +91,9 @@ namespace Fudge {
       this.createRenderBuffers();
     }
 
+    /* 
+      find the centroid of the selected mesh
+    */
     public getCentroid(selection: number[] = Array.from(Array(this.uniqueVertices.length).keys())): ƒ.Vector3 {
       let sum: ƒ.Vector3 = new ƒ.Vector3();
       let numberOfVertices: number = 0;
@@ -211,7 +223,6 @@ namespace Fudge {
     }
 
     public rotateBy(matrix: ƒ.Matrix4x4, center: ƒ.Vector3, selection: number[] = Array.from(Array(this.uniqueVertices.length).keys())): void {
-      // TODO: actually rotate around world coordinates here -> done afaik
       for (let vertexIndex of selection) {
         let newVertexPos: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(this.uniqueVertices[vertexIndex].position, center);
         newVertexPos.transform(matrix);

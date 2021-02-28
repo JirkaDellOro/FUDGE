@@ -50,9 +50,9 @@ namespace Fudge {
       if (selectedAxes.length <= 0) 
         return;
       
+      // return the difference between the new and the old mouseposition
+      // scale the according axis with this factor
       let currentPosition: ƒ.Vector3 = this.getPointerPosition(_event, this.distanceCameraToCentroid);
-      let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
-
       let scaleFactor: number = ƒ.Vector3.DIFFERENCE(currentPosition, this.centroid).magnitude / this.distancePointerToCentroid.magnitude;
       let scaleVector: ƒ.Vector3 = ƒ.Vector3.ONE();
       for (let pickedAxis of selectedAxes) {
@@ -69,6 +69,7 @@ namespace Fudge {
         }
       }
       let scaleMatrix: ƒ.Matrix4x4 = ƒ.Matrix4x4.SCALING(scaleVector);
+      let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
       mesh.scaleBy(scaleMatrix, this.copyOfSelectedVertices, this.selection);
     }
 
@@ -84,18 +85,6 @@ namespace Fudge {
       this.axesSelectionHandler.removeAxisOf(_pressedKey);
       return state;
     }
-
-    // getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {  
-    //   return [MenuItemsCreator.getNormalDisplayItem(_callback, InteractionMode.normalsAreDisplayed)];
-    // }
-
-    // contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
-    //   switch (Number(_item.id)) {
-    //     case MODELLER_MENU.DISPLAY_NORMALS:
-    //       this.toggleNormals();          
-    //       break;
-    //   }
-    // }
 
     update(): void {
       this.axesSelectionHandler.widget.mtxLocal.translation = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection);

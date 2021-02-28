@@ -1,5 +1,8 @@
 /// <reference path="../InteractionMode.ts" />
 namespace Fudge {
+  /*
+    idle class with no functionality incase now other mode is selected  
+  */
   export class IdleMode extends InteractionMode {
     public readonly type: INTERACTION_MODE = INTERACTION_MODE.IDLE;
 

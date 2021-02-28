@@ -7,6 +7,15 @@ namespace Fudge {
     public viewport: ƒ.Viewport;
     public editableNode: ƒ.Node;
     protected selector: Selector;
+    /* 
+      map with menu items 
+      the value function is executed, when the according the menu item selected, either by click or accelerator
+      incase someone wants to add a menu item: 
+      1. add one entry with MODELLER_MENU, shortcut in ViewModellerScene.menuitemToShortcutsMap
+      2. add one entry to this map in the desired interaction mode
+      3. add one function in MenuItemsCreator, which creates an item for the MODELLER_MENU value
+      rest should be automatic
+    */
     protected availableMenuitems: Map<MODELLER_MENU, Function> = new Map([[MODELLER_MENU.DISPLAY_NORMALS, this.toggleNormals.bind(this)]]);
 
     constructor (viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number> = []) {
@@ -39,6 +48,9 @@ namespace Fudge {
       this.update();
     }
 
+    /* 
+      check if the pressed keycombo is the same as one that is defined in the available availableMenuitems map 
+    */
     public executeAccelerator(_event: ƒ.EventKeyboard): boolean {
       let wasExecuted: boolean = false;
       let pressedKey: string = _event.key.toLowerCase();
@@ -60,10 +72,16 @@ namespace Fudge {
       return wasExecuted;
     }
 
+    /* 
+      create the context menu items according the entries in the availableMenuitems map
+    */
     public getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {
       return MenuItemsCreator.getMenuItems(Array.from(this.availableMenuitems.keys()), _callback);
     }
 
+    /* 
+      check if the selected item is the same as one that is defined in the availableMenuitems map
+    */
     public contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
       if (this.availableMenuitems.has(Number(_item.id))) 
         this.availableMenuitems.get(Number(_item.id))();
@@ -74,6 +92,9 @@ namespace Fudge {
       return this.viewport.pointClientToRender(new ƒ.Vector2(mousePos.x, this.viewport.getCanvasRectangle().height - mousePos.y));
     }
 
+    /* 
+      draw the normals as fudge arrows  
+    */
     protected createNormalArrows(): void {
       this.removeNormalArrows();
       let mesh: ƒ.Mesh = this.editableNode.getComponent(ƒ.ComponentMesh).mesh;

@@ -5,6 +5,14 @@ namespace Fudge {
 
   export class ViewModellerScene extends View {
     public static isBackfaceCullingEnabled: boolean = false;
+    /* 
+      maps MODELLER_MENU to the accelerator key
+      incase someone wants to add a menu item: 
+      1. add one entry with MODELLER_MENU, shortcut in to this map
+      2. add one entry with MODELLER_MENU, function to the availableModes map in the desired interaction mode
+      3. add one function here, which creates an item for the MODELLER_MENU value
+      rest should be automatic
+    */
     public static menuitemToShortcutsMap: Map<MODELLER_MENU, Set<string>> = new Map([
       [MODELLER_MENU.TOGGLE_BACKFACE_CULLING, new Set([ELECTRON_KEYS.CTRL, ELECTRON_KEYS.SHIFT, "b"])], 
       [MODELLER_MENU.DISPLAY_NORMALS, new Set([ELECTRON_KEYS.CTRL, ELECTRON_KEYS.SHIFT, "n"])], 
@@ -16,6 +24,7 @@ namespace Fudge {
     public controller: Controller;
     public node: ƒ.Node;
     public content: HTMLDivElement;
+    // menu items can also be added here, if they should be available everywhere
     protected availableMenuitems: Map<MODELLER_MENU, Function> = new Map([[MODELLER_MENU.TOGGLE_BACKFACE_CULLING, ViewModellerScene.toggleBackfaceCulling]]);
     private orbitCamera: ƒaid.CameraOrbit;
 
@@ -25,7 +34,6 @@ namespace Fudge {
       this.createUserInterface();
 
       ƒaid.addStandardLightComponents(this.graph, new ƒ.Color(0.5, 0.5, 0.5));
-
       ƒ.RenderWebGL.setBackfaceCulling(ViewModellerScene.isBackfaceCullingEnabled);
       this.node = this.graph.getChildrenByName("Default")[0];
       this.controller = new Controller(this.viewport, this.node, this.dom);
@@ -82,7 +90,9 @@ namespace Fudge {
       this.orbitCamera.distance = 5;
     } 
 
-
+    /* 
+      append all the menu items from the interaction modes
+    */
     protected getContextMenu = (_callback: ContextMenuCallback): Electron.Menu => {
       const menu: Electron.Menu = new remote.Menu();
       let items: Electron.MenuItem[] = this.controller.getContextMenuItems(_callback);

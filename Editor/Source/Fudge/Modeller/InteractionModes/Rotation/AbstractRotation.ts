@@ -65,18 +65,6 @@ namespace Fudge {
       return state;
     }
 
-    // contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
-    //   switch (Number(_item.id)) {
-    //     case MODELLER_MENU.DISPLAY_NORMALS:
-    //       this.toggleNormals();          
-    //       break;
-    //   }
-    // }
-
-    // getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {  
-    //   return [MenuItemsCreator.getNormalDisplayItem(_callback, InteractionMode.normalsAreDisplayed)];
-    // }
-
     update(): void {
       this.axesSelectionHandler.widget.mtxLocal.translation = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection);
     }
@@ -84,7 +72,10 @@ namespace Fudge {
     cleanup(): void {
       this.viewport.getGraph().removeChild(this.axesSelectionHandler.widget);
     }
-
+    /* 
+      calculate the angle between the old and the new mouseposition in clientspace in relation to the centroid
+      rotate around that angle
+    */
     private getRotationMatrix(_event: ƒ.EventPointer): ƒ.Matrix4x4 {
       let mousePos: ƒ.Vector2 = new ƒ.Vector2(_event.clientX, _event.clientY);
       let meshCenterClient: ƒ.Vector2 = this.viewport.pointWorldToClient(this.axesSelectionHandler.widget.mtxLocal.translation);

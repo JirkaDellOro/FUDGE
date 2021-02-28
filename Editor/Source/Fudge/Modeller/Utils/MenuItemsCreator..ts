@@ -1,4 +1,13 @@
 namespace Fudge {
+  /* 
+    creates electron menu items according to the inserted types
+
+    incase someone wants to add a menu item: 
+    1. add one entry with MODELLER_MENU, shortcut in ViewModellerScene.menuitemToShortcutsMap
+    2. add one entry with MODELLER_MENU, function to the availableModes map in the desired interaction mode
+    3. add one function here, which creates an item for the MODELLER_MENU value
+    rest should be automatic
+  */
   export class MenuItemsCreator {
 
     public static getMenuItems(types: MODELLER_MENU[], _callback: ContextMenuCallback): Electron.MenuItem[] {

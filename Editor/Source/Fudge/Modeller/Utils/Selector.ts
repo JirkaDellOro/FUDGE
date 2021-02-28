@@ -1,6 +1,9 @@
 namespace Fudge {
   import ƒ = FudgeCore;
 
+  /*
+    selects vertices based on mouse clicks
+  */
   export class Selector {
     private node: ƒ.Node;
     private cameraPivot: ƒ.Vector3;

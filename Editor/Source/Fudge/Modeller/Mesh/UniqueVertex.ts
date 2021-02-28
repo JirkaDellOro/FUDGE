@@ -1,4 +1,8 @@
 namespace Fudge {
+  /* 
+    combines multiple vertices at the same position into one,
+    so that they can be manipulated together
+  */
   export class UniqueVertex extends ƒ.Mutable {
     public position: ƒ.Vector3;
     // key is the index of the vertex in the vertices array, value is the position of the key in the indices

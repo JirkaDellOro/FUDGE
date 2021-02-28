@@ -43,7 +43,6 @@ namespace Fudge {
         }
       }
 
-      let event: CustomEvent = new CustomEvent(MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: this.selection });
       ƒ.EventTargetStatic.dispatchEvent(
         new CustomEvent(MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: {
           selection: this.selection, vertices: (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices}
@@ -59,20 +58,11 @@ namespace Fudge {
     }
 
     onkeydown(_pressedKey: string): void {
-      //
+      //@ts-ignore
     }
 
     onkeyup(_pressedKey: string): string {
       let state: string = null;
-
-      // delete this later or refactor it to somewhere else
-      switch (_pressedKey) {
-        case "delete": 
-          (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).removeFace(this.selection);
-          this.selection = [];
-          state = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
-          break;
-      }
       return state;
     }
 
@@ -80,23 +70,7 @@ namespace Fudge {
       //@ts-ignore
     }
 
-    // getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[] {
-    //   return [
-    //     MenuItemsCreator.getNormalDisplayItem(_callback, InteractionMode.normalsAreDisplayed), 
-    //     MenuItemsCreator.getInvertFaceItem(_callback)];
-    // }
-
-    // contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
-    //   switch (Number(_item.id)) {
-    //     case MODELLER_MENU.DISPLAY_NORMALS:
-    //       this.toggleNormals();          
-    //       break;
-    //     case MODELLER_MENU.INVERT_FACE:
-    //       (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).invertFace(this.selection);          
-    //       break;
-    //   }
-    // }
-
+    /* draw the current boundary box */
     private drawBox = () => {
       let crx2d: CanvasRenderingContext2D = this.viewport.getCanvas().getContext("2d");
       crx2d.strokeStyle = `rgb(220, 220, 220)`;

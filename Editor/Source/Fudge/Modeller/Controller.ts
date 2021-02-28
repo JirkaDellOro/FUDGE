@@ -86,7 +86,6 @@ namespace Fudge {
         }
       }
 
-
       if (_event.shiftKey) {
         for (let controlMode of this.controlModesMap.keys()) {
           if (this.controlModesMap.get(controlMode).shortcut === pressedKey) {
@@ -110,14 +109,12 @@ namespace Fudge {
         return;
       this.currentControlMode.formerMode = this.interactionMode;
       this.currentControlMode = this.controlModesMap.get(mode).type;
-      console.log(mode);
       this.interactionMode?.cleanup();
       this.interactionMode = this.currentControlMode.formerMode || new IdleMode(this.viewport, this.editableNode);
       this.interactionMode.initialize(); 
       ƒ.EventTargetStatic.dispatchEvent(new CustomEvent(MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: {selection: this.interactionMode.selection, vertices: (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices  }}));
       ƒ.EventTargetStatic.dispatchEvent(new CustomEvent(MODELLER_EVENTS.HEADER_UPDATE, { bubbles: true}));
       this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));     
-      console.log("Current Mode: " + this.interactionMode.type);
     }
 
     public setInteractionMode(mode: INTERACTION_MODE): void {
@@ -133,7 +130,6 @@ namespace Fudge {
       ƒ.EventTargetStatic.dispatchEvent(new CustomEvent(MODELLER_EVENTS.SELECTION_UPDATE, { bubbles: true, detail: {selection: this.interactionMode.selection, vertices: (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices  }}));
       ƒ.EventTargetStatic.dispatchEvent(new CustomEvent(MODELLER_EVENTS.HEADER_UPDATE, { bubbles: true}));
       this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
-      console.log("Current Mode: " + this.interactionMode.type);
     }
 
     public drawSelection(): void {

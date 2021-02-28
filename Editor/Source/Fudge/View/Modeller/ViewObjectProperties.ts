@@ -29,11 +29,7 @@ namespace Fudge {
     private fillContent(_vertices: UniqueVertex[], selection: number[] = Array.from(Array(_vertices.length).keys())): void {
       while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild));
 
-      // let fieldset: ƒui.ExpandableFieldSet = ƒui.Generator.createFieldSetFromMutable((<ModifiableMesh> this.currentNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices[0], "0");
-      // let uiComponent: ControllerComponent = new ControllerComponent((<ModifiableMesh> this.currentNode.getComponent(ƒ.ComponentMesh).mesh).uniqueVertices[0], fieldset);
-
       // TODO see if we can make this work without a new fieldset for every vertex
-      let mesh: ModifiableMesh = (<ModifiableMesh> this.currentNode.getComponent(ƒ.ComponentMesh).mesh);
       for (let selectedVertex of selection) {
         let fieldset: ƒui.ExpandableFieldSet = ƒui.Generator.createFieldSetFromMutable(_vertices[selectedVertex], selectedVertex.toString());
         let uiComponent: ControllerVertices = new ControllerVertices(_vertices[selectedVertex], fieldset);
