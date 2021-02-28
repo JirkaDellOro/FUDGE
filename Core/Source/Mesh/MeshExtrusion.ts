@@ -17,6 +17,7 @@ namespace FudgeCore {
       Matrix4x4.TRANSLATION(Vector3.Z(0.5)),
       Matrix4x4.TRANSLATION(Vector3.Z(-0.5))
     ];
+    #transforms: Matrix4x4[] = [];
 
     public constructor(_name: string = "MeshExtrusion", _vertices: Vector2[] = MeshPolygon.verticesDefault, _transforms: Matrix4x4[] = MeshExtrusion.transformsDefault, _fitMesh: boolean = true, _fitTexture: boolean = true) {
       super(_name, _vertices, _fitMesh, _fitTexture);
@@ -33,7 +34,10 @@ namespace FudgeCore {
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       await super.deserialize(_serialization);
-      this.extrude(MeshExtrusion.transformsDefault);
+      // console.log(_serialization.transforms);
+      let transforms: Matrix4x4[] = <Matrix4x4[]>await Serializer.deserializeArray(_serialization.transforms);
+      // console.log(transforms[0].toString(), transforms[1].toString());
+      this.extrude(transforms);
       return this;
     }
 
@@ -43,7 +47,8 @@ namespace FudgeCore {
     //#endregion
 
 
-    private extrude(_transforms: Matrix4x4[]): void {
+    private extrude(_transforms: Matrix4x4[] = MeshExtrusion.transformsDefault): void {
+      this.#transforms = _transforms;
       let polygon: Vector3[] = [];
       for (let i: number = 0; i < this.vertices.length; i += 3)
         polygon.push(new Vector3(this.vertices[i], this.vertices[i + 1], this.vertices[i + 2]));
@@ -60,14 +65,14 @@ namespace FudgeCore {
       let nIndicesExtrusion: number = nFacesExtrusion * 3;
 
       let vertices: Float32Array = new Float32Array(lengthVertexArrayExtrusion);
-
+      
       // create base by transformation of polygon with first transform
       let base: Vector3[] = polygon.map((_v: Vector3) => Vector3.TRANSFORMATION(_v, _transforms[0], true));
       vertices.set(base.map((_v: Vector3) => [_v.x, _v.y, _v.z]).flat());
       // create lid by transformation of polygon with last transform
       let lid: Vector3[] = polygon.map((_v: Vector3) => Vector3.TRANSFORMATION(_v, _transforms[nTransforms - 1], true));
       vertices.set(lid.map((_v: Vector3) => [_v.x, _v.y, _v.z]).flat(), lengthVertexArrayPolygon);
-
+      
       // duplicate first vertex of polygon to the end to create a texturable wrapping
       polygon.push(polygon[0].copy);
       let index: number = lengthVertexArrayPolygon * 2;
@@ -76,7 +81,7 @@ namespace FudgeCore {
         vertices.set(wrap.map((_v: Vector3) => [_v.x, _v.y, _v.z]).flat(), index);
         index += polygon.length * 3;
       }
-
+      
       this.ƒvertices = vertices;
 
       // copy indices to new index array

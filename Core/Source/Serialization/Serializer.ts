@@ -150,7 +150,7 @@ namespace FudgeCore {
 
       for (let serialization of serializations) {
         let serializable: Serializable = new construct();
-        serializable.deserialize(serialization);
+        await serializable.deserialize(serialization);
         serializables.push(serializable);
       }
 

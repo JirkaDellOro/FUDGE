@@ -3197,6 +3197,7 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2021
      */
     class MeshExtrusion extends MeshPolygon {
+        #private;
         static readonly iSubclass: number;
         protected static transformsDefault: Matrix4x4[];
         constructor(_name?: string, _vertices?: Vector2[], _transforms?: Matrix4x4[], _fitMesh?: boolean, _fitTexture?: boolean);
