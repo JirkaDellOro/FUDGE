@@ -1,7 +1,7 @@
 <img src="https://jirkadelloro.github.io/FUDGE/Miscellaneous/Logo/FudgeLogoText.png" onload="document.querySelector('h1').style.visibility='hidden'"/>
 
 <a href="https://beaumo.github.io/Thesis/Miscellaneous/Experiments/Moritz/Race/Test.html">Race</a>
-<a href="https://beaumo.github.io/Thesis/Miscellaneous/Experiments/Moritz/SuspensionTest/Test.html">Race</a>
+<a href="https://beaumo.github.io/Thesis/Miscellaneous/Experiments/Moritz/SuspensionTest/Test.html">SuspensionTest</a>
 
 
 # Welcome!
