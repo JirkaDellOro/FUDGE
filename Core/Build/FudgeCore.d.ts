@@ -3197,9 +3197,9 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2021
      */
     class MeshExtrusion extends MeshPolygon {
-        #private;
         static readonly iSubclass: number;
         protected static transformsDefault: Matrix4x4[];
+        private ƒtransforms;
         constructor(_name?: string, _vertices?: Vector2[], _transforms?: Matrix4x4[], _fitMesh?: boolean, _fitTexture?: boolean);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
@@ -3238,14 +3238,12 @@ declare namespace FudgeCore {
      * ```
      * @authors Jirka Dell'Oro-Friedl, HFU, 2021
      */
-    class MeshPrism extends MeshPolygon {
+    class MeshPrism extends MeshExtrusion {
         static readonly iSubclass: number;
         constructor(_name?: string, _vertices?: Vector2[], _fitMesh?: boolean, _fitTexture?: boolean);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
-        private extrude;
-        private calculatePolygonLengths;
     }
 }
 declare namespace FudgeCore {

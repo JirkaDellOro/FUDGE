@@ -1,9 +1,9 @@
 {
   "MeshPolygon|2021-02-08T14:58:15.037Z|31562": {
-    "ƒ.MeshExtrusion": {
-      "idResource": "MeshPolygon|2021-02-08T14:58:15.037Z|31562",
-      "name": "MeshPolygon",
-      "type": "MeshPolygon",
+    "ƒ.MeshPrism": {
+      "idResource": "Mesh|2021-02-08T14:58:15.037Z|31562",
+      "name": "Poly/Extrusion/Prism",
+      "type": "MeshExtrusion",
       "construction": {
         "ƒ.Vector2": [
           "[-1, -1]",
