@@ -14,7 +14,7 @@ namespace FudgeCore {
 
   /**
    * Generates a planar Grid and applies a Heightmap-Function to it.
-   * @authors Jirka Dell'Oro-Friedl, Simon Storl-Schulke, HFU, 2020
+   * @authors Jirka Dell'Oro-Friedl, Simon Storl-Schulke, Moritz Beaugrand HFU, 2020
    */
   export class MeshTerrain extends Mesh {
     public static readonly iSubclass: number = Mesh.registerSubclass(MeshTerrain);
@@ -26,6 +26,13 @@ namespace FudgeCore {
     private heightMapFunction: HeightMapFunction;
     private image: TextureImage;
 
+    /**
+     * HeightMapFunction or PNG 
+     * @param _name 
+     * @param source 
+     * @param _resolutionX 
+     * @param _resolutionZ 
+     */
     public constructor(_name: string = "MeshHeightMap", source?: HeightMapFunction | TextureImage, _resolutionX: number = 16, _resolutionZ: number = 16) {
       super(_name);
       this.resolutionX = _resolutionX;
