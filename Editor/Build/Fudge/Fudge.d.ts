@@ -382,8 +382,6 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-}
-declare namespace Fudge {
     class EditMode implements IControlMode {
         formerMode: IInteractionMode;
         type: CONTROL_MODE;
@@ -488,7 +486,6 @@ declare namespace Fudge {
         private isExtruded;
         private distanceCameraToCentroid;
         private oldPosition;
-        private axesSelectionHandler;
         private vertexSelected;
         private orientation;
         private clientCentroid;
@@ -509,6 +506,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     class IdleMode extends InteractionMode {
         readonly type: INTERACTION_MODE;
+        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
         initialize(): void;
         onmousedown(_event: ƒ.EventPointer): void;
         onmouseup(_event: ƒ.EventPointer): string;
@@ -738,7 +736,7 @@ declare namespace Fudge {
         isValidSelection(): boolean;
         getSelectedAxes(): AXIS[];
         addAxisOf(_key: string): boolean;
-        removeAxisOf(_key: string): void;
+        removeAxisOf(_key: string, removeAll?: boolean): void;
         isAxisSelectedViaKeyboard(): boolean;
         private getSelectedAxisBy;
     }

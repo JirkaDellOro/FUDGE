@@ -70,6 +70,7 @@ namespace Fudge {
       }
       let scaleMatrix: ƒ.Matrix4x4 = ƒ.Matrix4x4.SCALING(scaleVector);
       let mesh: ModifiableMesh = <ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh;
+      scaleMatrix.translation = new ƒ.Vector3(this.centroid.x * (1 - scaleVector.x), this.centroid.y * (1 - scaleVector.y), this.centroid.z * (1 - scaleVector.z));
       mesh.scaleBy(scaleMatrix, this.copyOfSelectedVertices, this.selection);
     }
 
@@ -82,7 +83,7 @@ namespace Fudge {
       if (this.axesSelectionHandler.isValidSelection()) {
         state = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getState();
       }
-      this.axesSelectionHandler.removeAxisOf(_pressedKey);
+      this.axesSelectionHandler.removeAxisOf(_pressedKey, true);
       return state;
     }
 

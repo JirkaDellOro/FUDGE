@@ -90,13 +90,23 @@ var Fudge;
     (function (MODELLER_EVENTS) {
         MODELLER_EVENTS["HEADER_APPEND"] = "headerappend";
         MODELLER_EVENTS["SELECTION_UPDATE"] = "selectionupdate";
+        MODELLER_EVENTS["HEADER_UPDATE"] = "headerupdate";
     })(MODELLER_EVENTS = Fudge.MODELLER_EVENTS || (Fudge.MODELLER_EVENTS = {}));
     let MODELLER_MENU;
     (function (MODELLER_MENU) {
         MODELLER_MENU[MODELLER_MENU["DISPLAY_NORMALS"] = 0] = "DISPLAY_NORMALS";
         MODELLER_MENU[MODELLER_MENU["INVERT_FACE"] = 1] = "INVERT_FACE";
-        MODELLER_MENU[MODELLER_MENU["TOGGLE_BACKFACE_CULLING"] = 2] = "TOGGLE_BACKFACE_CULLING";
+        MODELLER_MENU[MODELLER_MENU["REMOVE_FACE"] = 2] = "REMOVE_FACE";
+        MODELLER_MENU[MODELLER_MENU["TOGGLE_BACKFACE_CULLING"] = 3] = "TOGGLE_BACKFACE_CULLING";
     })(MODELLER_MENU = Fudge.MODELLER_MENU || (Fudge.MODELLER_MENU = {}));
+    let ELECTRON_KEYS;
+    (function (ELECTRON_KEYS) {
+        ELECTRON_KEYS["CTRL"] = "CommandOrControl";
+        ELECTRON_KEYS["SHIFT"] = "Shift";
+        ELECTRON_KEYS["ALT"] = "Alt";
+        ELECTRON_KEYS["ALTGR"] = "AltGr";
+        ELECTRON_KEYS["SUPER"] = "Super";
+    })(ELECTRON_KEYS = Fudge.ELECTRON_KEYS || (Fudge.ELECTRON_KEYS = {}));
 })(Fudge || (Fudge = {}));
 ///<reference types="../../node_modules/electron"/>
 /**

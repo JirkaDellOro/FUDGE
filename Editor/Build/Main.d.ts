@@ -66,12 +66,21 @@ declare namespace Fudge {
     }
     enum MODELLER_EVENTS {
         HEADER_APPEND = "headerappend",
-        SELECTION_UPDATE = "selectionupdate"
+        SELECTION_UPDATE = "selectionupdate",
+        HEADER_UPDATE = "headerupdate"
     }
     enum MODELLER_MENU {
         DISPLAY_NORMALS = 0,
         INVERT_FACE = 1,
-        TOGGLE_BACKFACE_CULLING = 2
+        REMOVE_FACE = 2,
+        TOGGLE_BACKFACE_CULLING = 3
+    }
+    enum ELECTRON_KEYS {
+        CTRL = "CommandOrControl",
+        SHIFT = "Shift",
+        ALT = "Alt",
+        ALTGR = "AltGr",
+        SUPER = "Super"
     }
 }
 /**

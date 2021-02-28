@@ -61,18 +61,29 @@ namespace Fudge {
       return isNewSelection;
     }
 
-    public removeAxisOf(_key: string): void {
+    public removeAxisOf(_key: string, removeAll: boolean = false): void {
       let selectedAxis: AXIS = this.getSelectedAxisBy(_key);
       if (!selectedAxis) 
         return;
-      let index: number = this.selectedAxes.indexOf(selectedAxis);
-      if (index != -1) {
-        if (this._widget) 
-          this._widget.removeUnselectedAxis(this.selectedAxes[index]);
-        this.selectedAxes.splice(index, 1);
-        if (!this.isAxisSelectedViaKeyboard()) 
-          this.isSelectedViaKeyboard = false;
+      let indicesOfAxes: number[] = [];
+      if (!removeAll) {
+        let index: number = this.selectedAxes.indexOf(selectedAxis);
+        indicesOfAxes.push(index);
+      } else {
+        indicesOfAxes = Array.from(Array(this.selectedAxes.length).keys());
       }
+
+      for (let index of indicesOfAxes) {
+        if (index != -1) {
+          if (this._widget) 
+            this._widget.removeUnselectedAxis(this.selectedAxes[index]);
+        }  
+      }
+
+      this.selectedAxes.splice(indicesOfAxes.sort((a, b) => a - b)[0], indicesOfAxes.length);
+      if (!this.isAxisSelectedViaKeyboard()) 
+        this.isSelectedViaKeyboard = false;
+
     }
 
     public isAxisSelectedViaKeyboard(): boolean {
