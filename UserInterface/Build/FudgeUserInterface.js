@@ -38,7 +38,7 @@ var FudgeUserInterface;
          */
         static updateMutator(_domElement, _mutator) {
             for (let key in _mutator) {
-                let element = _domElement.querySelector(`[key=${key}]`);
+                let element = _domElement.querySelector(`[key=${"ƒ" + key}]`);
                 if (element == null)
                     continue;
                 if (element instanceof FudgeUserInterface.CustomElement)
@@ -60,7 +60,7 @@ var FudgeUserInterface;
             // TODO: Mutator type now only used for enums. Examine if there is another way
             let mutatorTypes = _types || _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
-                let element = _domElement.querySelector(`[key=${key}]`);
+                let element = _domElement.querySelector(`[key=${"ƒ" + key}]`);
                 if (element == null)
                     return mutator;
                 if (element instanceof FudgeUserInterface.CustomElement)
@@ -91,7 +91,7 @@ var FudgeUserInterface;
             if (_mutable instanceof ƒ.Mutable)
                 mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
-                let element = _domElement.querySelector(`[key=${key}]`);
+                let element = _domElement.querySelector(`[key=${"ƒ" + key}]`);
                 if (!element)
                     continue;
                 let value = mutator[key];
@@ -102,7 +102,7 @@ var FudgeUserInterface;
                 else {
                     // let fieldset: HTMLFieldSetElement = <HTMLFieldSetElement><HTMLElement>element;
                     let subMutable = Reflect.get(_mutable, key);
-                    if (subMutable instanceof ƒ.Mutable)
+                    if (subMutable instanceof ƒ.MutableArray || subMutable instanceof ƒ.Mutable)
                         this.updateUserInterface(subMutable, element, mutator[key]);
                     else
                         //element.setMutatorValue(value);
@@ -162,7 +162,8 @@ var FudgeUserInterface;
          */
         static createInterfaceFromMutable(_mutable, _mutator) {
             let mutator = _mutator || _mutable.getMutatorForUserInterface();
-            let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
+            let mutatorTypes = _mutable instanceof ƒ.MutableArray ?
+                ƒ.MutableArray.getMutatorAttributeTypes(mutator, _mutable) : _mutable.getMutatorAttributeTypes(mutator);
             let div = document.createElement("div");
             for (let key in mutatorTypes) {
                 let type = mutatorTypes[key];
@@ -171,7 +172,7 @@ var FudgeUserInterface;
                 if (!element) {
                     let subMutable;
                     subMutable = Reflect.get(_mutable, key);
-                    if (subMutable instanceof ƒ.Mutable)
+                    if ((subMutable instanceof ƒ.MutableArray) || (subMutable instanceof ƒ.Mutable))
                         element = Generator.createFieldSetFromMutable(subMutable, key, mutator[key]);
                     else //Idea: Display an enumerated select here
                         element = new FudgeUserInterface.CustomElementTextInput({ key: key, label: key, value: type ? type.toString() : "?" });
@@ -215,7 +216,7 @@ var FudgeUserInterface;
                     // Generator.createDropdown(_key, _type, _value.toString(), element);
                     let elementType = FudgeUserInterface.CustomElement.get("Object");
                     // @ts-ignore: instantiate abstract class
-                    element = new elementType({ key: _key, label: _key, value: _value.toString() }, _type);
+                    element = new elementType({ key: "ƒ" + _key, label: _key, value: _value.toString() }, _type);
                     // (<CustomElement>element).setMutatorValue(_value);
                 }
                 else {
@@ -226,7 +227,7 @@ var FudgeUserInterface;
                     if (!elementType)
                         return element;
                     // @ts-ignore: instantiate abstract class
-                    element = new elementType({ key: _key, label: _key, value: _value.toString() });
+                    element = new elementType({ key: "ƒ" + _key, label: _key, value: _value.toString() });
                 }
             }
             catch (_error) {
@@ -259,7 +260,7 @@ var FudgeUserInterface;
             let cntFoldFieldset = new FudgeUserInterface.ExpandableFieldSet(_key);
             //TODO: unique ids
             // cntFoldFieldset.id = _legend;
-            cntFoldFieldset.setAttribute("key", _key);
+            cntFoldFieldset.setAttribute("key", "ƒ" + _key);
             cntFoldFieldset.setAttribute("type", _type);
             return cntFoldFieldset;
         }
@@ -373,7 +374,7 @@ var FudgeUserInterface;
          * Sets the content of the input element
          */
         setMutatorValue(_value) {
-            console.log(_value);
+            // console.log(_value);
         }
     }
     // @ts-ignore

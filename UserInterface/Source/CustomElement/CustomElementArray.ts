@@ -37,7 +37,7 @@ namespace FudgeUserInterface {
      * Sets the content of the input element
      */
     public setMutatorValue(_value: Object): void {
-      console.log(_value);
+      // console.log(_value);
     }
   }
 }

@@ -33,7 +33,7 @@ namespace FudgeUserInterface {
      */
     public static updateMutator(_domElement: HTMLElement, _mutator: ƒ.Mutator): ƒ.Mutator {
       for (let key in _mutator) {
-        let element: HTMLInputElement = <HTMLInputElement>_domElement.querySelector(`[key=${key}]`);
+        let element: HTMLInputElement = <HTMLInputElement>_domElement.querySelector(`[key=${"ƒ" + key}]`);
         if (element == null)
           continue;
 
@@ -59,7 +59,7 @@ namespace FudgeUserInterface {
       let mutatorTypes: ƒ.MutatorAttributeTypes = _types || _mutable.getMutatorAttributeTypes(mutator);
 
       for (let key in mutator) {
-        let element: HTMLElement = _domElement.querySelector(`[key=${key}]`);
+        let element: HTMLElement = _domElement.querySelector(`[key=${"ƒ" + key}]`);
         if (element == null)
           return mutator;
 
@@ -92,7 +92,7 @@ namespace FudgeUserInterface {
       if (_mutable instanceof ƒ.Mutable)
         mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
       for (let key in mutator) {
-        let element: CustomElement = <CustomElement>_domElement.querySelector(`[key=${key}]`);
+        let element: CustomElement = <CustomElement>_domElement.querySelector(`[key=${"ƒ" + key}]`);
         if (!element)
           continue;
 
@@ -105,7 +105,7 @@ namespace FudgeUserInterface {
         else {
           // let fieldset: HTMLFieldSetElement = <HTMLFieldSetElement><HTMLElement>element;
           let subMutable: ƒ.Mutable = Reflect.get(_mutable, key);
-          if (subMutable instanceof ƒ.Mutable)
+          if (subMutable instanceof ƒ.MutableArray || subMutable instanceof ƒ.Mutable)
             this.updateUserInterface(subMutable, element, mutator[key]);
           else
             //element.setMutatorValue(value);

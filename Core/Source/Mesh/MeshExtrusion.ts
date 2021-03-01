@@ -43,6 +43,13 @@ namespace FudgeCore {
       return this;
     }
 
+    public getMutatorForUserInterface(): MutatorForUserInterface {
+      let mutator: MutatorForUserInterface = <MutatorForUserInterface>super.getMutator(true);
+      // mutator.shape = this.shape.map((_value: Vector2) => _value.getMutatorForUserInterface);
+      // mutator.shape = this.shape;
+      return mutator;
+    }
+
     protected reduceMutator(_mutator: Mutator): void {
       super.reduceMutator(_mutator);
     }

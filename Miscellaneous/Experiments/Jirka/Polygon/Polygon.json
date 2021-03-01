@@ -4,7 +4,7 @@
       "idResource": "Mesh|2021-02-08T14:58:15.037Z|31562",
       "name": "Poly/Extrusion/Prism",
       "type": "MeshExtrusion",
-      "construction": {
+      "shape": {
         "ƒ.Vector2": [
           "[-1, -1]",
           "[0.5, -1]",
@@ -20,8 +20,8 @@
             "scaling": "[1, 1, 1]"
           },
           {
-            "translation": "[0, 0, -0.6]",
-            "rotation": "[0, 30, 0]",
+            "translation": "[0, 0, -0]",
+            "rotation": "[0, 0, 0]",
             "scaling": "[1, 1, 1]"
           },
           {

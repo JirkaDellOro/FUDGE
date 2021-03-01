@@ -233,7 +233,6 @@ declare namespace FudgeCore {
         /**
          * Returns an associative array with the same attributes as the given mutator, but with the corresponding types as string-values
          * Does not recurse into objects!
-         * @param _mutator
          */
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         /**
@@ -1320,8 +1319,8 @@ declare namespace FudgeCore {
         /** list of all the subclasses derived from this class, if they registered properly*/
         static readonly subclasses: typeof Component[];
         protected singleton: boolean;
-        private container;
         protected active: boolean;
+        private container;
         protected static registerSubclass(_subclass: typeof Component): number;
         get isActive(): boolean;
         /**
@@ -3171,12 +3170,12 @@ declare namespace FudgeCore {
     class MeshPolygon extends Mesh {
         static readonly iSubclass: number;
         protected static verticesDefault: Vector2[];
-        protected construction: Vector2[];
+        protected shape: MutableArray<Vector2>;
         protected fitMesh: boolean;
         protected fitTexture: boolean;
-        constructor(_name?: string, _vertices?: Vector2[], _fitMesh?: boolean, _fitTexture?: boolean);
+        constructor(_name?: string, _shape?: Vector2[], _fitMesh?: boolean, _fitTexture?: boolean);
         private static fitMesh;
-        create(_construction?: Vector2[], _fitMesh?: boolean, _fitTexture?: boolean): void;
+        create(_shape?: Vector2[], _fitMesh?: boolean, _fitTexture?: boolean): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;
@@ -3203,6 +3202,7 @@ declare namespace FudgeCore {
         constructor(_name?: string, _vertices?: Vector2[], _transforms?: Matrix4x4[], _fitMesh?: boolean, _fitTexture?: boolean);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        getMutatorForUserInterface(): MutatorForUserInterface;
         protected reduceMutator(_mutator: Mutator): void;
         private extrude;
     }
@@ -5089,6 +5089,15 @@ declare namespace FudgeCore {
         static save(_toSave: MapFilenameToContent, _type?: string): Promise<MapFilenameToContent>;
         static handleFileSelect(_event: Event): Promise<void>;
         static loadFiles(_fileList: FileList, _loaded: MapFilenameToContent): Promise<void>;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Array for [[Mutable]]s. When used as a property of a [[Mutable]], the [[Mutator]]s of the entries are included as array in the [[Mutator]]
+     * @author Jirka Dell'Oro-Friedl, HFU, 2021
+     */
+    class MutableArray<T extends Mutable> extends Array<T> {
+        static getMutatorAttributeTypes<T extends Mutable>(_mutator: Mutator, _mutable: MutableArray<T>): MutatorAttributeTypes;
     }
 }
 declare namespace FudgeCore {

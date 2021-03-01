@@ -16,17 +16,13 @@ namespace FudgeCore {
       new Vector2(1, -1),
       new Vector2(0, 1)
     ];
-    protected construction: Vector2[] = [];
+    protected shape: MutableArray<Vector2> = new MutableArray<Vector2>();
     protected fitMesh: boolean;
     protected fitTexture: boolean;
 
-    public constructor(_name: string = "MeshPolygon", _vertices: Vector2[] = MeshPolygon.verticesDefault, _fitMesh: boolean = true, _fitTexture: boolean = true) {
+    public constructor(_name: string = "MeshPolygon", _shape: Vector2[] = MeshPolygon.verticesDefault, _fitMesh: boolean = true, _fitTexture: boolean = true) {
       super(_name);
-      this.construction = _vertices.map(_vertex => _vertex.copy);
-      this.create(this.construction, _fitMesh, _fitTexture);
-      // this.construction.entries = _vertices.map(_vertex => _vertex.copy);
-      // this.create(this.construction.entries as Vector2[], _autofit);
-    }
+      this.create(_shape, _fitMesh, _fitTexture);    }
 
     private static fitMesh(_vertices: Vector2[]): Vector2[] {
       let result: Vector2[] = [];
@@ -51,24 +47,25 @@ namespace FudgeCore {
       return result;
     }
 
-    public create(_construction: Vector2[] = [], _fitMesh: boolean = true, _fitTexture: boolean = true): void {
+    public create(_shape: Vector2[] = [], _fitMesh: boolean = true, _fitTexture: boolean = true): void {
+      this.shape = MutableArray.from(_shape.map(_vertex => _vertex.copy));
       this.clear();
 
       this.fitMesh = _fitMesh;
       this.fitTexture = _fitTexture;
 
-      if (_construction.length < 3) {
+      if (_shape.length < 3) {
         Debug.warn("At least 3 vertices needed to construct MeshPolygon, default trigon used");
         this.create(MeshPolygon.verticesDefault, true);
         return;
       }
 
-      let construction: Vector2[] = this.fitMesh ? MeshPolygon.fitMesh(_construction) : _construction;
+      let shape: Vector2[] = this.fitMesh ? MeshPolygon.fitMesh(_shape) : _shape;
 
       let min: Vector2 = Vector2.ZERO();
       let max: Vector2 = Vector2.ZERO();
       let vertices: number[] = [];
-      for (let vertex of construction) {
+      for (let vertex of shape) {
         vertices.push(vertex.x);
         vertices.push(vertex.y);
         vertices.push(0);
@@ -82,14 +79,14 @@ namespace FudgeCore {
 
       let textureUVs: number[] = [];
       if (this.fitTexture) {
-        for (let vertex of construction) {
+        for (let vertex of shape) {
           let textureUV: Vector2 = Vector2.SUM(vertex, min);
           textureUV.y *= -1;
           textureUVs.push(textureUV.x / size.x);
           textureUVs.push(textureUV.y / size.y);
         }
       } else {
-        textureUVs = _construction.map(_vertex => [_vertex.x, -_vertex.y]).flat();
+        textureUVs = _shape.map(_vertex => [_vertex.x, -_vertex.y]).flat();
       }
 
       // console.log(textureUVs);
@@ -104,22 +101,21 @@ namespace FudgeCore {
     //#region Transfer
     public serialize(): Serialization {
       let serialization: Serialization = super.serialize();
-      serialization.construction = Serializer.serializeArray(Vector2, this.construction);
+      serialization.shape = Serializer.serializeArray(Vector2, this.shape);
       serialization.fitMesh = this.fitMesh;
       serialization.fitTexture = this.fitTexture;
       return serialization;
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       super.deserialize(_serialization);
-      // let vectorArray: VectorArray = <VectorArray>await (new VectorArray()).deserialize(_serialization.construction);
-      let vectors: Vector2[] = <Vector2[]>await Serializer.deserializeArray(_serialization.construction);
+      let vectors: Vector2[] = <Vector2[]>await Serializer.deserializeArray(_serialization.shape);
       this.create(vectors, _serialization.fitMesh, _serialization.fitTexture);
       return this;
     }
 
     public async mutate(_mutator: Mutator): Promise<void> {
       super.mutate(_mutator);
-      this.create(_mutator.construction, _mutator.autofit);
+      this.create(_mutator.shape, _mutator.autofit);
     }
 
     protected reduceMutator(_mutator: Mutator): void {

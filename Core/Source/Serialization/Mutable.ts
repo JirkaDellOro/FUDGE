@@ -35,7 +35,7 @@ namespace FudgeCore {
     }
     return mutator;
   }
-  
+
   /**
    * Base class for all types being mutable using [[Mutator]]-objects, thus providing and using interfaces created at runtime.  
    * Mutables provide a [[Mutator]] that is build by collecting all object-properties that are either of a primitive type or again Mutable.
@@ -75,7 +75,7 @@ namespace FudgeCore {
         let value: Object = this[attribute];
         if (value instanceof Function)
           continue;
-        if (value instanceof Object && !(value instanceof Mutable) && !(value.hasOwnProperty("idResource")))
+        if (value instanceof Object && !(value instanceof Mutable) && !(value instanceof MutableArray) && !(value.hasOwnProperty("idResource")))
           continue;
         mutator[attribute] = this[attribute];
       }
@@ -86,11 +86,13 @@ namespace FudgeCore {
       // delete unwanted attributes
       this.reduceMutator(mutator);
 
-      // replace references to mutable objects with references to copies
+      // replace references to mutable objects with references to mutators
       for (let attribute in mutator) {
         let value: Object = mutator[attribute];
         if (value instanceof Mutable)
           mutator[attribute] = value.getMutator();
+        if (value instanceof MutableArray)
+          mutator[attribute] = value.map((_value) => _value.getMutator());
       }
 
       return mutator;
@@ -120,7 +122,6 @@ namespace FudgeCore {
     /**
      * Returns an associative array with the same attributes as the given mutator, but with the corresponding types as string-values
      * Does not recurse into objects!
-     * @param _mutator 
      */
     public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {
       let types: MutatorAttributeTypes = {};

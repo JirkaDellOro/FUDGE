@@ -31,7 +31,8 @@ namespace FudgeUserInterface {
      */
     public static createInterfaceFromMutable(_mutable: ƒ.Mutable, _mutator?: ƒ.Mutator): HTMLDivElement {
       let mutator: ƒ.Mutator = _mutator || _mutable.getMutatorForUserInterface();
-      let mutatorTypes: ƒ.MutatorAttributeTypes = _mutable.getMutatorAttributeTypes(mutator);
+      let mutatorTypes: ƒ.MutatorAttributeTypes = _mutable instanceof ƒ.MutableArray ?
+        ƒ.MutableArray.getMutatorAttributeTypes(mutator, _mutable) : _mutable.getMutatorAttributeTypes(mutator);
       let div: HTMLDivElement = document.createElement("div");
 
       for (let key in mutatorTypes) {
@@ -41,7 +42,7 @@ namespace FudgeUserInterface {
         if (!element) {
           let subMutable: ƒ.Mutable;
           subMutable = Reflect.get(_mutable, key);
-          if (subMutable instanceof ƒ.Mutable)
+          if ((subMutable instanceof ƒ.MutableArray) || (subMutable instanceof ƒ.Mutable))
             element = Generator.createFieldSetFromMutable(subMutable, key, <ƒ.Mutator>mutator[key]);
           else //Idea: Display an enumerated select here
             element = new CustomElementTextInput({ key: key, label: key, value: type ? type.toString() : "?" });
@@ -66,7 +67,7 @@ namespace FudgeUserInterface {
           let fieldset: ExpandableFieldSet = Generator.createExpendableFieldset(key, "Hallo");
           fieldset.content.appendChild(Generator.createInterfaceFromMutator(value));
           div.appendChild(fieldset);
-        } 
+        }
         else
           div.appendChild(this.createMutatorElement(key, (<Object>value).constructor.name, value));
         div.appendChild(document.createElement("br"));
@@ -88,7 +89,7 @@ namespace FudgeUserInterface {
 
           let elementType: typeof CustomElement = CustomElement.get("Object");
           // @ts-ignore: instantiate abstract class
-          element = new elementType({ key: _key, label: _key, value: _value.toString() }, _type);
+          element = new elementType({ key: "ƒ" + _key, label: _key, value: _value.toString() }, _type);
           // (<CustomElement>element).setMutatorValue(_value);
         }
         else {
@@ -99,7 +100,7 @@ namespace FudgeUserInterface {
           if (!elementType)
             return element;
           // @ts-ignore: instantiate abstract class
-          element = new elementType({ key: _key, label: _key, value: _value.toString() });
+          element = new elementType({ key: "ƒ" + _key, label: _key, value: _value.toString() });
         }
       } catch (_error) {
         ƒ.Debug.fudge(_error);
@@ -133,7 +134,7 @@ namespace FudgeUserInterface {
       let cntFoldFieldset: ExpandableFieldSet = new ExpandableFieldSet(_key);
       //TODO: unique ids
       // cntFoldFieldset.id = _legend;
-      cntFoldFieldset.setAttribute("key", _key);
+      cntFoldFieldset.setAttribute("key", "ƒ" + _key);
       cntFoldFieldset.setAttribute("type", _type);
       return cntFoldFieldset;
     }
