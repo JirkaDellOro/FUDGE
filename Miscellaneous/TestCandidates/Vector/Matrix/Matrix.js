@@ -17,7 +17,7 @@ var MatrixTest;
         cmpCamera.pivot.translate(new ƒ.Vector3(1, 2, 2));
         cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
         viewport.initialize("Viewport", root, cmpCamera, document.querySelector("canvas"));
-        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, animate);
+        ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, animate);
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 5);
     }
     function animate() {

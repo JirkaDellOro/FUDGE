@@ -9,7 +9,7 @@ var Graph;
             };
             this.hndRemoveComponent = (_event) => {
                 this.getContainer().removeEventListener("startSatellite", this.start);
-                ƒ.Loop.removeEventListener("loopFrame" /* LOOP_FRAME */, this.update);
+                ƒ.Loop.removeEventListener(ƒ.EVENT.LOOP_FRAME, this.update);
             };
             this.start = (_event) => {
                 this.mtxLocal = this.getContainer().mtxLocal;
@@ -17,7 +17,7 @@ var Graph;
                 this.mtxPivot.translateZ(-0.5);
                 this.mtxPivot.scale(ƒ.Vector3.ONE(0.2));
                 this.mtxLocal.rotateY(Math.random() * 360);
-                ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, this.update);
+                ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.update);
             };
             this.update = (_event) => {
                 // tpo: test performance optimization
@@ -27,8 +27,8 @@ var Graph;
                 this.mtxLocal.rotateY(1);
                 this.mtxPivot.rotateX(5);
             };
-            this.addEventListener("componentAdd" /* COMPONENT_ADD */, this.hndAddComponent);
-            this.addEventListener("componentRemove" /* COMPONENT_REMOVE */, this.hndRemoveComponent);
+            this.addEventListener(ƒ.EVENT.COMPONENT_ADD, this.hndAddComponent);
+            this.addEventListener(ƒ.EVENT.COMPONENT_REMOVE, this.hndRemoveComponent);
         }
     }
     // tpo: test performance optimization

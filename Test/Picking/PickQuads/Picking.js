@@ -1,6 +1,6 @@
-///<reference path="../../../UserInterface/Build/FudgeUserInterface.d.ts"/>
+///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
 var Picking;
-///<reference path="../../../UserInterface/Build/FudgeUserInterface.d.ts"/>
+///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
 (function (Picking) {
     var ƒ = FudgeCore;
     var ƒUi = FudgeUserInterface;

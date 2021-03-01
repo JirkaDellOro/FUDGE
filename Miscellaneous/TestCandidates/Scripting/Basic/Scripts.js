@@ -9,10 +9,10 @@ var Scripts;
             this.hndMutation = (_event) => {
                 console.log("Mutation", this);
             };
-            this.addEventListener("componentAdd" /* COMPONENT_ADD */, this.hndComponentAdd);
+            this.addEventListener(ƒ.EVENT.COMPONENT_ADD, this.hndComponentAdd);
             this.hndLoopFrame = this.hndLoopFrame.bind(this); // when using conventional function
-            ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, this.hndLoopFrame); // when using arrow-function
-            this.addEventListener("mutate" /* MUTATE */, this.hndMutation);
+            ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.hndLoopFrame); // when using arrow-function
+            this.addEventListener(ƒ.EVENT.MUTATE, this.hndMutation);
         }
         async mutate(_mutator) {
             super.mutate(_mutator);
@@ -21,8 +21,8 @@ var Scripts;
             console.log("Component event", _event);
             console.log("Container", this.getContainer());
             console.log("Target is this?", _event.target == this, this.name);
-            this.getContainer().addEventListener("componentAdd" /* COMPONENT_ADD */, this.hndNodeEvent);
-            this.getContainer().addEventListener("childRemove" /* CHILD_REMOVE */, this.hndNodeEvent);
+            this.getContainer().addEventListener(ƒ.EVENT.COMPONENT_ADD, this.hndNodeEvent);
+            this.getContainer().addEventListener(ƒ.EVENT.CHILD_REMOVE, this.hndNodeEvent);
         }
         hndNodeEvent(_event) {
             console.log("Node event", _event);

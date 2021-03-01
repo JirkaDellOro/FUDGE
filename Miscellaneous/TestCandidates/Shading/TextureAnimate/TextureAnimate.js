@@ -28,7 +28,7 @@ var TextureAnimate;
         viewport.initialize("Viewport", root, cmpCamera, document.querySelector("canvas"));
         viewport.draw();
         ƒ.Loop.start();
-        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, (_event) => {
+        ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, (_event) => {
             for (let node of root.getChildren()) {
                 let cmpMaterial = node.getComponent(ƒ.ComponentMaterial);
                 cmpMaterial.pivot.rotate(0.1);

@@ -15,8 +15,8 @@ var ScriptSerialization;
                     return;
                 this.getContainer().mtxLocal.translate(this.startPosition);
             };
-            this.addEventListener("componentAdd" /* COMPONENT_ADD */, this.hndAddComponent);
-            this.addEventListener("mutate" /* MUTATE */, this.hndMutation);
+            this.addEventListener(ƒ.EVENT.COMPONENT_ADD, this.hndAddComponent);
+            this.addEventListener(ƒ.EVENT.MUTATE, this.hndMutation);
         }
         reduceMutator(_mutator) {
             // delete properties that should not be mutated
