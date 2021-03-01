@@ -1,6 +1,6 @@
 {
   "Mesh|2021-02-08T14:58:15.037Z|31562": {
-    "ƒ.MeshPrism": {
+    "ƒ.MeshExtrusion": {
       "idResource": "Mesh|2021-02-08T14:58:15.037Z|31562",
       "name": "Poly/Extrusion/Prism",
       "type": "MeshExtrusion",
