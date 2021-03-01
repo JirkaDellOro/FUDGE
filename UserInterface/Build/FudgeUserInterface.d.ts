@@ -56,7 +56,7 @@ declare namespace FudgeUserInterface {
         /**
          * Create a div-Elements containing the interface for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
          */
-        static createInterfaceFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): HTMLDivElement;
+        static createInterfaceFromMutable(_mutable: ƒ.Mutable, _mutator?: ƒ.Mutator): HTMLDivElement;
         /**
          * Create a div-Element containing the interface for the [[FudgeCore.Mutator]]
          * Does not support nested mutators!
@@ -121,6 +121,27 @@ declare namespace FudgeUserInterface {
         abstract getMutatorValue(): Object;
         /**
          * Set the value of this element using a format compatible with [[FudgeCore.Mutator]]
+         */
+        setMutatorValue(_value: Object): void;
+    }
+}
+declare namespace FudgeUserInterface {
+    /**
+     * A standard text input field with a label to it.
+     */
+    class CustomElementArray extends CustomElement {
+        private static customElement;
+        constructor(_attributes: CustomElementAttributes);
+        /**
+         * Creates the content of the element when connected the first time
+         */
+        connectedCallback(): void;
+        /**
+         * Retrieves the content of the input element
+         */
+        getMutatorValue(): string;
+        /**
+         * Sets the content of the input element
          */
         setMutatorValue(_value: Object): void;
     }
@@ -400,23 +421,23 @@ declare namespace FudgeUserInterface {
 }
 declare namespace FudgeUserInterface {
     /**
-     * Subclass this to create a broker between your data and a [[Tree]] to display and manipulate it.
-     * The [[Tree]] doesn't know how your data is structured and how to handle it, the controller implements the methods needed
+     * Subclass this to create a broker between your data and a [[Table]] to display and manipulate it.
+     * The [[Table]] doesn't know how your data is structured and how to handle it, the controller implements the methods needed
      */
     abstract class TableController<T> {
-        /** Stores references to selected objects. Override with a reference in outer scope, if selection should also operate outside of tree */
+        /** Stores references to selected objects. Override with a reference in outer scope, if selection should also operate outside of table */
         selection: T[];
-        /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
+        /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of table */
         dragDrop: {
             sources: T[];
             target: T;
         };
-        /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
+        /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of table */
         copyPaste: {
             sources: T[];
             target: T;
         };
-        /** Retrieve a string to create a label for the tree item representing the object  */
+        /** Retrieve a string to create a label for the table item representing the object  */
         abstract getLabel(_object: T): string;
         /** Return false to disallow renaming the item/object, or processes the proposed new label */
         abstract rename(_object: T, _new: string): boolean;

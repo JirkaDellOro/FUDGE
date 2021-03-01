@@ -154,13 +154,13 @@ var FudgeUserInterface;
         static createFieldSetFromMutable(_mutable, _name, _mutator) {
             let name = _name || _mutable.constructor.name;
             let fieldset = Generator.createExpendableFieldset(name, _mutable.type);
-            fieldset.content.appendChild(Generator.createInterfaceFromMutable(_mutable, _name, _mutator));
+            fieldset.content.appendChild(Generator.createInterfaceFromMutable(_mutable, _mutator));
             return fieldset;
         }
         /**
          * Create a div-Elements containing the interface for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
          */
-        static createInterfaceFromMutable(_mutable, _name, _mutator) {
+        static createInterfaceFromMutable(_mutable, _mutator) {
             let mutator = _mutator || _mutable.getMutatorForUserInterface();
             let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
             let div = document.createElement("div");
@@ -339,6 +339,46 @@ var FudgeUserInterface;
     CustomElement.mapObjectToCustomElement = new Map();
     CustomElement.idCounter = 0;
     FudgeUserInterface.CustomElement = CustomElement;
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
+    /**
+     * A standard text input field with a label to it.
+     */
+    class CustomElementArray extends FudgeUserInterface.CustomElement {
+        constructor(_attributes) {
+            super(_attributes);
+        }
+        /**
+         * Creates the content of the element when connected the first time
+         */
+        connectedCallback() {
+            if (this.initialized)
+                return;
+            this.initialized = true;
+            this.appendLabel();
+            let list = document.createElement("ol");
+            list.id = FudgeUserInterface.CustomElement.nextId;
+            // list.value = this.getAttribute("value");
+            this.appendChild(list);
+        }
+        /**
+         * Retrieves the content of the input element
+         */
+        getMutatorValue() {
+            return "";
+            // return this.querySelector("input").value;
+        }
+        /**
+         * Sets the content of the input element
+         */
+        setMutatorValue(_value) {
+            console.log(_value);
+        }
+    }
+    // @ts-ignore
+    CustomElementArray.customElement = FudgeUserInterface.CustomElement.register("fudge-array", CustomElementArray, Array);
+    FudgeUserInterface.CustomElementArray = CustomElementArray;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
@@ -1713,16 +1753,16 @@ var FudgeUserInterface;
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
     /**
-     * Subclass this to create a broker between your data and a [[Tree]] to display and manipulate it.
-     * The [[Tree]] doesn't know how your data is structured and how to handle it, the controller implements the methods needed
+     * Subclass this to create a broker between your data and a [[Table]] to display and manipulate it.
+     * The [[Table]] doesn't know how your data is structured and how to handle it, the controller implements the methods needed
      */
     class TableController {
         constructor() {
-            /** Stores references to selected objects. Override with a reference in outer scope, if selection should also operate outside of tree */
+            /** Stores references to selected objects. Override with a reference in outer scope, if selection should also operate outside of table */
             this.selection = [];
-            /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
+            /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of table */
             this.dragDrop = { sources: [], target: null };
-            /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
+            /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of table */
             this.copyPaste = { sources: [], target: null };
         }
     }
