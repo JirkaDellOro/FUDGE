@@ -82,7 +82,8 @@
               "Component": {
                 "active": true
               },
-              "idMaterial": "Material|2021-02-08T14:58:19.425Z|10977"
+              "idMaterial": "Material|2021-02-08T14:58:19.425Z|10977",
+              "sortForAlpha": true
             }
           }
         ]

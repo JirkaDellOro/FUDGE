@@ -22,6 +22,7 @@ namespace FudgeCore {
     //#region Transfer
     public serialize(): Serialization {
       let serialization: Serialization = {
+        sortForAlphathis: this.sortForAlpha,
         clrPrimary: this.clrPrimary.serialize(),
         clrSecondary: this.clrSecondary.serialize(),
         pivot: this.pivot.serialize(),
@@ -45,6 +46,7 @@ namespace FudgeCore {
       this.material = material;
       this.clrPrimary.deserialize(_serialization.clrPrimary);
       this.clrSecondary.deserialize(_serialization.clrSecondary);
+      this.sortForAlpha = _serialization.sortForAlpha;
       this.pivot.deserialize(_serialization.pivot);
       super.deserialize(_serialization[super.constructor.name]);
       return this;
