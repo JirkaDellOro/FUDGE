@@ -3203,6 +3203,7 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorForUserInterface(): MutatorForUserInterface;
+        mutate(_mutator: Mutator): Promise<void>;
         protected reduceMutator(_mutator: Mutator): void;
         private extrude;
     }
@@ -5098,6 +5099,7 @@ declare namespace FudgeCore {
      */
     class MutableArray<T extends Mutable> extends Array<T> {
         static getMutatorAttributeTypes<T extends Mutable>(_mutator: Mutator, _mutable: MutableArray<T>): MutatorAttributeTypes;
+        static mutate<T extends Mutable>(_mutable: MutableArray<T>, _mutator: Mutator): Promise<void>;
     }
 }
 declare namespace FudgeCore {

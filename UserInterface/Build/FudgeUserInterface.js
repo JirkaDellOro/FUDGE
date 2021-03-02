@@ -60,7 +60,7 @@ var FudgeUserInterface;
             // TODO: Mutator type now only used for enums. Examine if there is another way
             let mutatorTypes = _types || _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
-                let element = _domElement.querySelector(`[key=${"ƒ" + key}]`);
+                let element = _domElement.querySelector(`[key=${"ƒ" + key}]`) || _domElement.querySelector(`[key=${key}]`);
                 if (element == null)
                     return mutator;
                 if (element instanceof FudgeUserInterface.CustomElement)
@@ -77,6 +77,9 @@ var FudgeUserInterface;
                     // let subTypes: ƒ.Mutator = subMutable.getMutatorAttributeTypes(subMutator);
                     if (subMutable instanceof ƒ.Mutable)
                         mutator[key] = this.getMutator(subMutable, element, subMutator); //, subTypes);
+                    if (subMutable instanceof ƒ.MutableArray)
+                        for (let subkey in subMutator)
+                            subMutator[subkey] = this.getMutator(subMutable[parseInt(subkey)], element.querySelector(`[key=${"ƒ" + subkey}]`)); //, subTypes);
                 }
             }
             return mutator;

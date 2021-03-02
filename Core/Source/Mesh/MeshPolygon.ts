@@ -115,7 +115,8 @@ namespace FudgeCore {
 
     public async mutate(_mutator: Mutator): Promise<void> {
       super.mutate(_mutator);
-      this.create(_mutator.shape, _mutator.autofit);
+      this.shape.forEach((_value: Vector2) => console.log(_value.toString()));
+      this.create(this.shape, this.fitMesh, this.fitTexture);
     }
 
     protected reduceMutator(_mutator: Mutator): void {

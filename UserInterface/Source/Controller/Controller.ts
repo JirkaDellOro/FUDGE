@@ -59,7 +59,7 @@ namespace FudgeUserInterface {
       let mutatorTypes: ƒ.MutatorAttributeTypes = _types || _mutable.getMutatorAttributeTypes(mutator);
 
       for (let key in mutator) {
-        let element: HTMLElement = _domElement.querySelector(`[key=${"ƒ" + key}]`);
+        let element: HTMLElement = _domElement.querySelector(`[key=${"ƒ" + key}]`) || _domElement.querySelector(`[key=${key}]`);
         if (element == null)
           return mutator;
 
@@ -77,6 +77,9 @@ namespace FudgeUserInterface {
           // let subTypes: ƒ.Mutator = subMutable.getMutatorAttributeTypes(subMutator);
           if (subMutable instanceof ƒ.Mutable)
             mutator[key] = this.getMutator(subMutable, element, subMutator); //, subTypes);
+          if (subMutable instanceof ƒ.MutableArray)
+            for (let subkey in subMutator)
+              subMutator[subkey] = this.getMutator(subMutable[parseInt(subkey)], element.querySelector(`[key=${"ƒ" + subkey}]`)); //, subTypes);
         }
       }
       return mutator;
@@ -149,7 +152,7 @@ namespace FudgeUserInterface {
         this.updateUserInterface();
         return;
       }
-      
+
       window.clearInterval(this.idInterval);
     }
   }

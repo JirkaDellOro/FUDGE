@@ -164,6 +164,11 @@ namespace FudgeCore {
         let value: Mutator = <Mutator>_mutator[attribute];
         if (mutant instanceof Mutable)
           await mutant.mutate(value);
+        if (mutant instanceof MutableArray) {
+          await MutableArray.mutate(mutant, value);
+          //@ts-ignore
+          this[attribute] = mutant; //.forEach((_value: Object) => console.log(_value.toString()));
+        }
         else
           Reflect.set(this, attribute, value);
       }
