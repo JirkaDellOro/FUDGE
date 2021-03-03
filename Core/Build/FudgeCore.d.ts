@@ -3198,11 +3198,10 @@ declare namespace FudgeCore {
     class MeshExtrusion extends MeshPolygon {
         static readonly iSubclass: number;
         protected static transformsDefault: Matrix4x4[];
-        private ƒtransforms;
+        private transforms;
         constructor(_name?: string, _vertices?: Vector2[], _transforms?: Matrix4x4[], _fitMesh?: boolean, _fitTexture?: boolean);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
-        getMutatorForUserInterface(): MutatorForUserInterface;
         mutate(_mutator: Mutator): Promise<void>;
         protected reduceMutator(_mutator: Mutator): void;
         private extrude;

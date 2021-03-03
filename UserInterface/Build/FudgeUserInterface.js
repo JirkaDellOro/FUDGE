@@ -77,9 +77,10 @@ var FudgeUserInterface;
                     // let subTypes: ƒ.Mutator = subMutable.getMutatorAttributeTypes(subMutator);
                     if (subMutable instanceof ƒ.Mutable)
                         mutator[key] = this.getMutator(subMutable, element, subMutator); //, subTypes);
-                    if (subMutable instanceof ƒ.MutableArray)
-                        for (let subkey in subMutator)
-                            subMutator[subkey] = this.getMutator(subMutable[parseInt(subkey)], element.querySelector(`[key=${"ƒ" + subkey}]`)); //, subTypes);
+                    if (subMutable instanceof ƒ.MutableArray) {
+                        let subTypes = ƒ.MutableArray.getMutatorAttributeTypes(subMutator, subMutable);
+                        mutator[key] = this.getMutator(subMutable, element, subMutator, subTypes);
+                    }
                 }
             }
             return mutator;
