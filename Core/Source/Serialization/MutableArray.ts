@@ -15,8 +15,6 @@ namespace FudgeCore {
     public static async mutate<T extends Mutable>(_mutable: MutableArray<T>, _mutator: Mutator): Promise<void> {
       for (let entry in _mutable)
         await _mutable[entry].mutate(_mutator[entry]);
-
-      _mutable.forEach((_value: T) => console.log(_value.toString()));
     }
   }
 }

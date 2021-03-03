@@ -166,8 +166,6 @@ namespace FudgeCore {
           await mutant.mutate(value);
         if (mutant instanceof MutableArray) {
           await MutableArray.mutate(mutant, value);
-          //@ts-ignore
-          this[attribute] = mutant; //.forEach((_value: Object) => console.log(_value.toString()));
         }
         else
           Reflect.set(this, attribute, value);

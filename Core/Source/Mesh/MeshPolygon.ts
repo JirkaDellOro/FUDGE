@@ -22,7 +22,8 @@ namespace FudgeCore {
 
     public constructor(_name: string = "MeshPolygon", _shape: Vector2[] = MeshPolygon.verticesDefault, _fitMesh: boolean = true, _fitTexture: boolean = true) {
       super(_name);
-      this.create(_shape, _fitMesh, _fitTexture);    }
+      this.create(_shape, _fitMesh, _fitTexture);
+    }
 
     private static fitMesh(_vertices: Vector2[]): Vector2[] {
       let result: Vector2[] = [];
@@ -114,9 +115,9 @@ namespace FudgeCore {
     }
 
     public async mutate(_mutator: Mutator): Promise<void> {
-      super.mutate(_mutator);
-      this.shape.forEach((_value: Vector2) => console.log(_value.toString()));
-      this.create(this.shape, this.fitMesh, this.fitTexture);
+      await super.mutate(_mutator);
+      this.create(this.shape, _mutator.fitMesh, _mutator.fitTexture);
+      this.dispatchEvent(new Event(EVENT.MUTATE));
     }
 
     protected reduceMutator(_mutator: Mutator): void {

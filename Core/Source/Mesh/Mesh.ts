@@ -198,6 +198,7 @@ namespace FudgeCore {
       delete _mutator.ƒnormals; 
       delete _mutator.ƒnormalsFace; 
       delete _mutator.ƒtextureUVs; 
+      delete _mutator.renderBuffers; 
     }
   }
 }
