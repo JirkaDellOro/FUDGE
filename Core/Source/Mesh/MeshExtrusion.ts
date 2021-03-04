@@ -56,7 +56,7 @@ namespace FudgeCore {
 
 
     private extrude(_transforms: Matrix4x4[] = MeshExtrusion.transformsDefault): void {
-      this.transforms = MutableArray.from(_transforms);
+      this.transforms = <MutableArray<Matrix4x4>>MutableArray.from(<MutableArray<Matrix4x4>>_transforms);
 
       // save original polygon
       let polygon: Vector3[] = [];

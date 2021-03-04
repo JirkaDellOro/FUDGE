@@ -74,13 +74,8 @@ var FudgeUserInterface;
                     let subMutator = Reflect.get(mutator, key);
                     let subMutable;
                     subMutable = Reflect.get(_mutable, key);
-                    // let subTypes: ƒ.Mutator = subMutable.getMutatorAttributeTypes(subMutator);
-                    if (subMutable instanceof ƒ.Mutable)
+                    if (subMutable instanceof ƒ.MutableArray || subMutable instanceof ƒ.Mutable)
                         mutator[key] = this.getMutator(subMutable, element, subMutator); //, subTypes);
-                    if (subMutable instanceof ƒ.MutableArray) {
-                        let subTypes = ƒ.MutableArray.getMutatorAttributeTypes(subMutator, subMutable);
-                        mutator[key] = this.getMutator(subMutable, element, subMutator, subTypes);
-                    }
                 }
             }
             return mutator;
@@ -166,8 +161,7 @@ var FudgeUserInterface;
          */
         static createInterfaceFromMutable(_mutable, _mutator) {
             let mutator = _mutator || _mutable.getMutatorForUserInterface();
-            let mutatorTypes = _mutable instanceof ƒ.MutableArray ?
-                ƒ.MutableArray.getMutatorAttributeTypes(mutator, _mutable) : _mutable.getMutatorAttributeTypes(mutator);
+            let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
             let div = document.createElement("div");
             for (let key in mutatorTypes) {
                 let type = mutatorTypes[key];
@@ -362,10 +356,8 @@ var FudgeUserInterface;
                 return;
             this.initialized = true;
             this.appendLabel();
-            let list = document.createElement("ol");
-            list.id = FudgeUserInterface.CustomElement.nextId;
-            // list.value = this.getAttribute("value");
-            this.appendChild(list);
+            let fieldset = FudgeUserInterface.Generator.createExpendableFieldset(this.getAttribute("label"), "Array");
+            this.appendChild(fieldset);
         }
         /**
          * Retrieves the content of the input element
@@ -382,7 +374,7 @@ var FudgeUserInterface;
         }
     }
     // @ts-ignore
-    CustomElementArray.customElement = FudgeUserInterface.CustomElement.register("fudge-array", CustomElementArray, Array);
+    CustomElementArray.customElement = FudgeUserInterface.CustomElement.register("fudge-array", CustomElementArray, /* ƒ.Mutable */ Array);
     FudgeUserInterface.CustomElementArray = CustomElementArray;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
@@ -512,13 +504,6 @@ var FudgeUserInterface;
             super();
             this.initialized = false;
         }
-        connectedCallback() {
-            if (this.initialized)
-                return;
-            this.initialized = true;
-            this.value = 0;
-            this.tabIndex = -1;
-        }
         set value(_value) {
             _value = Math.trunc(_value);
             if (_value > 9 || _value < 0)
@@ -527,6 +512,13 @@ var FudgeUserInterface;
         }
         get value() {
             return parseInt(this.textContent);
+        }
+        connectedCallback() {
+            if (this.initialized)
+                return;
+            this.initialized = true;
+            this.value = 0;
+            this.tabIndex = -1;
         }
         add(_addend) {
             _addend = Math.trunc(_addend);

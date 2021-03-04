@@ -162,11 +162,8 @@ namespace FudgeCore {
           continue;
         let mutant: Object = Reflect.get(this, attribute);
         let value: Mutator = <Mutator>_mutator[attribute];
-        if (mutant instanceof Mutable)
+        if (mutant instanceof MutableArray || mutant instanceof Mutable)
           await mutant.mutate(value);
-        if (mutant instanceof MutableArray) {
-          await MutableArray.mutate(mutant, value);
-        }
         else
           Reflect.set(this, attribute, value);
       }

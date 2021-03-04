@@ -49,7 +49,7 @@ namespace FudgeCore {
     }
 
     public create(_shape: Vector2[] = [], _fitMesh: boolean = true, _fitTexture: boolean = true): void {
-      this.shape = MutableArray.from(_shape.map(_vertex => _vertex.copy));
+      this.shape = <MutableArray<Vector2>>MutableArray.from(_shape.map(_vertex => _vertex.copy));
       this.clear();
 
       this.fitMesh = _fitMesh;

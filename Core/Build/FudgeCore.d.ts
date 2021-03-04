@@ -5097,8 +5097,8 @@ declare namespace FudgeCore {
      * @author Jirka Dell'Oro-Friedl, HFU, 2021
      */
     class MutableArray<T extends Mutable> extends Array<T> {
-        static getMutatorAttributeTypes<T extends Mutable>(_mutator: Mutator, _mutable: MutableArray<T>): MutatorAttributeTypes;
-        static mutate<T extends Mutable>(_mutable: MutableArray<T>, _mutator: Mutator): Promise<void>;
+        getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
+        mutate(_mutator: Mutator): Promise<void>;
     }
 }
 declare namespace FudgeCore {

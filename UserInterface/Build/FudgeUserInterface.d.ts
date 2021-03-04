@@ -126,6 +126,7 @@ declare namespace FudgeUserInterface {
     }
 }
 declare namespace FudgeUserInterface {
+    import ƒ = FudgeCore;
     /**
      * A standard text input field with a label to it.
      */
@@ -143,7 +144,7 @@ declare namespace FudgeUserInterface {
         /**
          * Sets the content of the input element
          */
-        setMutatorValue(_value: Object): void;
+        setMutatorValue(_value: ƒ.MutableArray<ƒ.Mutable>): void;
     }
 }
 declare namespace FudgeUserInterface {
@@ -201,9 +202,9 @@ declare namespace FudgeUserInterface {
         private static customElement;
         protected initialized: boolean;
         constructor();
-        connectedCallback(): void;
         set value(_value: number);
         get value(): number;
+        connectedCallback(): void;
         add(_addend: number): void;
     }
 }

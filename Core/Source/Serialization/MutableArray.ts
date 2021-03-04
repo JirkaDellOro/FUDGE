@@ -5,16 +5,16 @@ namespace FudgeCore {
    */
   // mainly for type-checking
   export class MutableArray<T extends Mutable> extends Array<T> {
-    public static getMutatorAttributeTypes<T extends Mutable>(_mutator: Mutator, _mutable: MutableArray<T>): MutatorAttributeTypes {
+    public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {
       let types: MutatorAttributeTypes = {};
-      for (let entry in _mutable)
-        types[/* "#" +  */entry] = _mutable[entry].constructor.name;
+      for (let entry in this)
+        types[entry] = this[entry].constructor.name;
 
       return types;
     }
-    public static async mutate<T extends Mutable>(_mutable: MutableArray<T>, _mutator: Mutator): Promise<void> {
-      for (let entry in _mutable)
-        await _mutable[entry].mutate(_mutator[entry]);
+    public async mutate(_mutator: Mutator): Promise<void> {
+      for (let entry in this)
+        await this[entry].mutate(_mutator[entry]);
     }
   }
 }

@@ -1,10 +1,11 @@
 namespace FudgeUserInterface {
+  import ƒ = FudgeCore;
   /**
    * A standard text input field with a label to it.
    */
   export class CustomElementArray extends CustomElement {
     // @ts-ignore
-    private static customElement: void = CustomElement.register("fudge-array", CustomElementArray, Array);
+    private static customElement: void = CustomElement.register("fudge-array", CustomElementArray, /* ƒ.Mutable */Array);
 
     constructor(_attributes: CustomElementAttributes) {
       super(_attributes);
@@ -20,11 +21,10 @@ namespace FudgeUserInterface {
 
       this.appendLabel();
       
-      let list: HTMLOListElement = document.createElement("ol");
-      list.id = CustomElement.nextId;
-      // list.value = this.getAttribute("value");
-      this.appendChild(list);
+      let fieldset: ExpandableFieldSet = Generator.createExpendableFieldset(this.getAttribute("label"), "Array");
+      this.appendChild(fieldset);
     }
+
 
     /**
      * Retrieves the content of the input element
@@ -36,8 +36,12 @@ namespace FudgeUserInterface {
     /**
      * Sets the content of the input element
      */
-    public setMutatorValue(_value: Object): void {
+    public setMutatorValue(_value: ƒ.MutableArray<ƒ.Mutable>): void {
       // console.log(_value);
     }
+
+    // private createList(): void {
+    //   //
+    // }
   }
 }

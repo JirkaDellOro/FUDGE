@@ -74,13 +74,8 @@ namespace FudgeUserInterface {
           let subMutator: ƒ.Mutator = Reflect.get(mutator, key);
           let subMutable: ƒ.Mutable;
           subMutable = Reflect.get(_mutable, key);
-          // let subTypes: ƒ.Mutator = subMutable.getMutatorAttributeTypes(subMutator);
-          if (subMutable instanceof ƒ.Mutable)
+          if (subMutable instanceof ƒ.MutableArray || subMutable instanceof ƒ.Mutable)
             mutator[key] = this.getMutator(subMutable, element, subMutator); //, subTypes);
-          if (subMutable instanceof ƒ.MutableArray) {
-            let subTypes: ƒ.MutatorAttributeTypes = ƒ.MutableArray.getMutatorAttributeTypes(subMutator, subMutable);
-            mutator[key] = this.getMutator(subMutable, element, subMutator, subTypes);
-          }
         }
       }
       return mutator;
