@@ -29,7 +29,7 @@ namespace FudgeUserInterface {
     /**
      * Create a div-Elements containing the interface for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
      */
-    public static createInterfaceFromMutable(_mutable: ƒ.Mutable, _mutator?: ƒ.Mutator): HTMLDivElement {
+    public static createInterfaceFromMutable(_mutable: ƒ.Mutable | ƒ.MutableArray<ƒ.Mutable>, _mutator?: ƒ.Mutator): HTMLDivElement {
       let mutator: ƒ.Mutator = _mutator || _mutable.getMutatorForUserInterface();
       let mutatorTypes: ƒ.MutatorAttributeTypes = _mutable.getMutatorAttributeTypes(mutator);
       let div: HTMLDivElement = document.createElement("div");

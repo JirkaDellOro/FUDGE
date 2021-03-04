@@ -12,6 +12,12 @@ namespace FudgeCore {
 
       return types;
     }
+    public getMutator(): Mutator {
+      return this.map((_value) => _value.getMutator());
+    }
+    public getMutatorForUserInterface(): Mutator {
+      return this.getMutator();
+    }
     public async mutate(_mutator: Mutator): Promise<void> {
       for (let entry in this)
         await this[entry].mutate(_mutator[entry]);

@@ -5098,6 +5098,8 @@ declare namespace FudgeCore {
      */
     class MutableArray<T extends Mutable> extends Array<T> {
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
+        getMutator(): Mutator;
+        getMutatorForUserInterface(): Mutator;
         mutate(_mutator: Mutator): Promise<void>;
     }
 }

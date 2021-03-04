@@ -40,11 +40,25 @@
   <script src="../../../../Core/Build/FudgeCore.js"></script>
   <script src="../../../../UserInterface/Build/FudgeUserInterface.js"></script>
   <script src="Data.js"></script>
-  <script src="ListControl.js" defer></script>
+  <script src="List.js" defer></script>
   <script src="Main.js" defer></script>
 </head>
 
 <body>
+  <template>
+    <custom-vector2 style="text-align: right; display: inline-grid; grid-template-columns: 2em 8em 8em;">
+      <span>
+        <label>label</label>
+      </span>
+      <fudge-stepper key="x" label="x"></fudge-stepper>
+      <fudge-stepper key="y" label="y"></fudge-stepper>
+    </custom-vector2>
+  </template>
+  <script>
+    FudgeUserInterface.CustomElementTemplate.register("custom-vector2");
+    FudgeUserInterface.CustomElement.register("custom-vector2", class CustomVector2 extends FudgeUserInterface.CustomElementTemplate { });
+    FudgeUserInterface.CustomElement.map("Vector2", "custom-vector2");
+  </script>
 </body>
 
 </html>
