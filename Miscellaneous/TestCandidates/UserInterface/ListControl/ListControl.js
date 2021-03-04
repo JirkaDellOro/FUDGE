@@ -1,7 +1,7 @@
 var ListControl;
 (function (ListControl) {
     var ƒui = FudgeUserInterface;
-    class ListControlData extends ƒui.TableController {
+    class ListController extends ƒui.Controller {
         static getHead() {
             let head = [];
             head.push({ label: "Name", key: "name", sortable: true, editable: true });
@@ -23,7 +23,7 @@ var ListControl;
             _data.sort(compare);
         }
     }
-    ListControlData.head = ListControlData.getHead();
-    ListControl.ListControlData = ListControlData;
+    ListController.head = ListControlData.getHead();
+    ListControl.ListController = ListController;
 })(ListControl || (ListControl = {}));
 //# sourceMappingURL=ListControl.js.map

@@ -38,7 +38,7 @@ var FudgeUserInterface;
          */
         static updateMutator(_domElement, _mutator) {
             for (let key in _mutator) {
-                let element = _domElement.querySelector(`[key=${"ƒ" + key}]`);
+                let element = Controller.findChildElementByKey(_domElement, key);
                 if (element == null)
                     continue;
                 if (element instanceof FudgeUserInterface.CustomElement)
@@ -60,7 +60,7 @@ var FudgeUserInterface;
             // TODO: Mutator type now only used for enums. Examine if there is another way
             let mutatorTypes = _types || _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
-                let element = _domElement.querySelector(`[key=${"ƒ" + key}]`) || _domElement.querySelector(`[key=${key}]`);
+                let element = Controller.findChildElementByKey(_domElement, key);
                 if (element == null)
                     return mutator;
                 if (element instanceof FudgeUserInterface.CustomElement)
@@ -90,7 +90,7 @@ var FudgeUserInterface;
             if (_mutable instanceof ƒ.Mutable)
                 mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
-                let element = _domElement.querySelector(`[key=${"ƒ" + key}]`);
+                let element = Controller.findChildElementByKey(_domElement, key);
                 if (!element)
                     continue;
                 let value = mutator[key];
@@ -108,6 +108,16 @@ var FudgeUserInterface;
                         Reflect.set(element, "value", value);
                 }
             }
+        }
+        static findChildElementByKey(_domElement, key) {
+            let result;
+            try {
+                result = _domElement.querySelector(`[key = ${key}]`);
+            }
+            catch (_error) {
+                result = _domElement.querySelector(`[key = ${"ƒ" + key}]`);
+            }
+            return result;
         }
         getMutator(_mutator, _types) {
             // TODO: should get Mutator for UI or work with this.mutator (examine)
@@ -214,8 +224,12 @@ var FudgeUserInterface;
                     // Generator.createDropdown(_key, _type, _value.toString(), element);
                     let elementType = FudgeUserInterface.CustomElement.get("Object");
                     // @ts-ignore: instantiate abstract class
-                    element = new elementType({ key: "ƒ" + _key, label: _key, value: _value.toString() }, _type);
+                    element = new elementType({ key: _key, label: _key, value: _value.toString() }, _type);
                     // (<CustomElement>element).setMutatorValue(_value);
+                }
+                else if (_value instanceof ƒ.MutableArray) {
+                    console.log("MutableArray");
+                    // insert Array-Controller!
                 }
                 else {
                     // TODO: remove switch and use registered custom elements instead
@@ -225,7 +239,7 @@ var FudgeUserInterface;
                     if (!elementType)
                         return element;
                     // @ts-ignore: instantiate abstract class
-                    element = new elementType({ key: "ƒ" + _key, label: _key, value: _value.toString() });
+                    element = new elementType({ key: _key, label: _key, value: _value.toString() });
                 }
             }
             catch (_error) {
@@ -258,7 +272,7 @@ var FudgeUserInterface;
             let cntFoldFieldset = new FudgeUserInterface.ExpandableFieldSet(_key);
             //TODO: unique ids
             // cntFoldFieldset.id = _legend;
-            cntFoldFieldset.setAttribute("key", "ƒ" + _key);
+            cntFoldFieldset.setAttribute("key", _key);
             cntFoldFieldset.setAttribute("type", _type);
             return cntFoldFieldset;
         }
@@ -277,8 +291,12 @@ var FudgeUserInterface;
             super();
             this.initialized = false;
             if (_attributes)
-                for (let name in _attributes)
+                for (let name in _attributes) {
                     this.setAttribute(name, _attributes[name]);
+                    if (name == "key" && !isNaN(Number(_attributes[name])))
+                        // if key is a number, as with arrays, prefix with "ƒ", since numbers are not allowed as attributes for querySelector
+                        this.setAttribute(name, "ƒ" + _attributes[name]);
+                }
         }
         /**
          * Retrieve an id to use for children of this element, needed e.g. for standard interaction with the label
@@ -341,6 +359,7 @@ var FudgeUserInterface;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
+    var ƒ = FudgeCore;
     /**
      * A standard text input field with a label to it.
      */
@@ -374,7 +393,7 @@ var FudgeUserInterface;
         }
     }
     // @ts-ignore
-    CustomElementArray.customElement = FudgeUserInterface.CustomElement.register("fudge-array", CustomElementArray, /* ƒ.Mutable */ Array);
+    CustomElementArray.customElement = FudgeUserInterface.CustomElement.register("fudge-array", CustomElementArray, ƒ.MutableArray);
     FudgeUserInterface.CustomElementArray = CustomElementArray;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;

@@ -31,6 +31,7 @@ declare namespace FudgeUserInterface {
          * If an additional [[ƒ.Mutator]] is passed, its values are used instead of those of the [[ƒ.Mutable]].
          */
         static updateUserInterface(_mutable: ƒ.Mutable, _domElement: HTMLElement, _mutator?: ƒ.Mutator): void;
+        static findChildElementByKey(_domElement: HTMLElement, key: string): HTMLElement;
         getMutator(_mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
         updateUserInterface(): void;
         setMutable(_mutable: ƒ.Mutable): void;

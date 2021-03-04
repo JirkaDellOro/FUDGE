@@ -88,8 +88,12 @@ namespace FudgeUserInterface {
 
           let elementType: typeof CustomElement = CustomElement.get("Object");
           // @ts-ignore: instantiate abstract class
-          element = new elementType({ key: "ƒ" + _key, label: _key, value: _value.toString() }, _type);
+          element = new elementType({ key: _key, label: _key, value: _value.toString() }, _type);
           // (<CustomElement>element).setMutatorValue(_value);
+        }
+        else if (_value instanceof ƒ.MutableArray) {
+          console.log("MutableArray");
+          // insert Array-Controller!
         }
         else {
           // TODO: remove switch and use registered custom elements instead
@@ -99,7 +103,7 @@ namespace FudgeUserInterface {
           if (!elementType)
             return element;
           // @ts-ignore: instantiate abstract class
-          element = new elementType({ key: "ƒ" + _key, label: _key, value: _value.toString() });
+          element = new elementType({ key: _key, label: _key, value: _value.toString() });
         }
       } catch (_error) {
         ƒ.Debug.fudge(_error);
@@ -133,7 +137,7 @@ namespace FudgeUserInterface {
       let cntFoldFieldset: ExpandableFieldSet = new ExpandableFieldSet(_key);
       //TODO: unique ids
       // cntFoldFieldset.id = _legend;
-      cntFoldFieldset.setAttribute("key", "ƒ" + _key);
+      cntFoldFieldset.setAttribute("key", _key);
       cntFoldFieldset.setAttribute("type", _type);
       return cntFoldFieldset;
     }

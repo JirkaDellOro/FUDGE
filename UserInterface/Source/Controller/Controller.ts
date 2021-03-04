@@ -33,7 +33,7 @@ namespace FudgeUserInterface {
      */
     public static updateMutator(_domElement: HTMLElement, _mutator: ƒ.Mutator): ƒ.Mutator {
       for (let key in _mutator) {
-        let element: HTMLInputElement = <HTMLInputElement>_domElement.querySelector(`[key=${"ƒ" + key}]`);
+        let element: HTMLInputElement = <HTMLInputElement>Controller.findChildElementByKey(_domElement, key);
         if (element == null)
           continue;
 
@@ -59,7 +59,7 @@ namespace FudgeUserInterface {
       let mutatorTypes: ƒ.MutatorAttributeTypes = _types || _mutable.getMutatorAttributeTypes(mutator);
 
       for (let key in mutator) {
-        let element: HTMLElement = _domElement.querySelector(`[key=${"ƒ" + key}]`) || _domElement.querySelector(`[key=${key}]`);
+        let element: HTMLElement = Controller.findChildElementByKey(_domElement, key);
         if (element == null)
           return mutator;
 
@@ -91,7 +91,7 @@ namespace FudgeUserInterface {
       if (_mutable instanceof ƒ.Mutable)
         mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
       for (let key in mutator) {
-        let element: CustomElement = <CustomElement>_domElement.querySelector(`[key=${"ƒ" + key}]`);
+        let element: CustomElement = <CustomElement>Controller.findChildElementByKey(_domElement, key);
         if (!element)
           continue;
 
@@ -111,6 +111,16 @@ namespace FudgeUserInterface {
             Reflect.set(element, "value", value);
         }
       }
+    }
+
+    public static findChildElementByKey(_domElement: HTMLElement, key: string): HTMLElement {
+      let result: HTMLElement;
+      try {
+        result = _domElement.querySelector(`[key = ${key}]`);
+      } catch (_error) {
+        result = _domElement.querySelector(`[key = ${"ƒ" + key}]`);
+      }
+      return result;
     }
 
     public getMutator(_mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator {

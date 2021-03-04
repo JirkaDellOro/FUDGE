@@ -1,7 +1,7 @@
 namespace ListControl {
   import ƒui = FudgeUserInterface;
 
-  export class ListControlData extends ƒui.TableController<ƒ.Mutable> {
+  export class ListController extends ƒui.Controller {
     private static head: ƒui.TABLE[] = ListControlData.getHead();
 
     private static getHead(): ƒui.TABLE[] {

@@ -5,7 +5,7 @@ namespace FudgeUserInterface {
    */
   export class CustomElementArray extends CustomElement {
     // @ts-ignore
-    private static customElement: void = CustomElement.register("fudge-array", CustomElementArray, /* ƒ.Mutable */Array);
+    private static customElement: void = CustomElement.register("fudge-array", CustomElementArray, ƒ.MutableArray);
 
     constructor(_attributes: CustomElementAttributes) {
       super(_attributes);
