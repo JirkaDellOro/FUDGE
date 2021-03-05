@@ -59,7 +59,7 @@ namespace SuspensionTest {
 
       let chassisNormal: f.Vector3 = f.Vector3.SUM(f.Vector3.NORMALIZATION(frontNormal), f.Vector3.NORMALIZATION(backNormal));
 
-      console.log((posBL.position.y + posBR.position.y)/2 + this.groundClearance);
+      // console.log((posBL.position.y + posBR.position.y)/2 + this.groundClearance);
       this.mtxLocal.translation = new f.Vector3(this.mtxLocal.translation.x, (posBL.position.y + posBR.position.y)/2 + this.groundClearance, this.mtxLocal.translation.z);
 
       // if(!backNormal.equals(f.Vector3.ZERO()) && !backNormal.equals(f.Vector3.ZERO())){
