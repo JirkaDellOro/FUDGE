@@ -224,3 +224,8 @@ dialog {
 dialog>div#content {
   background-color: var(--color-background-content);
 }
+
+/* standard fudge elements */
+fudge-boolean, fudge-color, fudge-textinput {
+  display: block;
+}

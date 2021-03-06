@@ -49,7 +49,7 @@ namespace FudgeUserInterface {
           // _parent.appendChild(fieldset);
         }
         div.appendChild(element);
-        div.appendChild(document.createElement("br"));
+        // div.appendChild(document.createElement("br"));
       }
       return div;
     }
@@ -69,7 +69,7 @@ namespace FudgeUserInterface {
         }
         else
           div.appendChild(this.createMutatorElement(key, (<Object>value).constructor.name, value));
-        div.appendChild(document.createElement("br"));
+        // div.appendChild(document.createElement("br"));
       }
       return div;
     }

@@ -17,6 +17,7 @@ namespace FudgeCore {
       new Vector2(0, 1)
     ];
     protected shape: MutableArray<Vector2> = new MutableArray<Vector2>();
+    // protected shape: MutableArray<Vector2> = new MutableArray(Vector2);
     protected fitMesh: boolean;
     protected fitTexture: boolean;
 

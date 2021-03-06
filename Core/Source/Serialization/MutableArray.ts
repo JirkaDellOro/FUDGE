@@ -1,10 +1,21 @@
 namespace FudgeCore {
   /**
-   * Array for [[Mutable]]s. When used as a property of a [[Mutable]], the [[Mutator]]s of the entries are included as array in the [[Mutator]]
+   * Mutable array of [[Mutable]]s. The [[Mutator]]s of the entries are included as array in the [[Mutator]]
    * @author Jirka Dell'Oro-Friedl, HFU, 2021
    */
-  // mainly for type-checking
   export class MutableArray<T extends Mutable> extends Array<T> {
+    public rearrange(_sequence: number[]): void {
+      let length: number = this.length;
+      for (let index of _sequence) {
+        let original: T = this[index];
+        // TODO: optimize, copy only double entries
+        //@ts-ignore
+        let copy: T = new original.constructor();
+        copy.mutate(original.getMutator());
+        this.push(copy);
+      }
+      this.splice(0, length);
+    }
     public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {
       let types: MutatorAttributeTypes = {};
       for (let entry in this)

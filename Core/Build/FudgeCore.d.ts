@@ -5093,10 +5093,11 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Array for [[Mutable]]s. When used as a property of a [[Mutable]], the [[Mutator]]s of the entries are included as array in the [[Mutator]]
+     * Mutable array of [[Mutable]]s. The [[Mutator]]s of the entries are included as array in the [[Mutator]]
      * @author Jirka Dell'Oro-Friedl, HFU, 2021
      */
     class MutableArray<T extends Mutable> extends Array<T> {
+        rearrange(_sequence: number[]): void;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         getMutator(): Mutator;
         getMutatorForUserInterface(): Mutator;
