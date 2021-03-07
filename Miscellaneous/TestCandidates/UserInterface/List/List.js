@@ -2,9 +2,9 @@ var ListControl;
 (function (ListControl) {
     var ƒ = FudgeCore;
     var ƒUi = FudgeUserInterface;
-    class List extends HTMLDivElement {
-        constructor(_array) {
-            super();
+    class ExpendableList extends ƒUi.ExpandableFieldSet {
+        constructor(_legend, _array) {
+            super(_legend);
             this.mutateOnInput = async (_event) => {
                 let mutator = this.getMutator();
                 // console.log(mutator);
@@ -79,11 +79,12 @@ var ListControl;
         }
         setContent(_array) {
             this.mutable = _array;
-            this.innerHTML = "";
-            let div = ƒUi.Generator.createInterfaceFromMutable(this.mutable);
-            this.appendChild(div);
+            // this.content.innerHTML = "";
+            this.removeChild(this.content);
+            this.content = ƒUi.Generator.createInterfaceFromMutable(this.mutable);
+            this.appendChild(this.content);
             console.log(this);
-            for (let child of div.children) {
+            for (let child of this.content.children) {
                 child.draggable = true;
                 child.addEventListener("dragstart", this.hndDragStart);
                 child.addEventListener("drop", this.hndDrop);
@@ -97,7 +98,7 @@ var ListControl;
         }
         rearrangeMutable(_focus = undefined) {
             let sequence = [];
-            for (let child of this.children[0].children) {
+            for (let child of this.content.children) {
                 sequence.push(parseInt(child.getAttribute("label")));
             }
             console.log(sequence);
@@ -109,11 +110,11 @@ var ListControl;
         setFocus(_focus = undefined) {
             if (_focus == undefined)
                 return;
-            _focus = Math.min(_focus, this.children[0].children.length - 1);
-            this.children[0].children[_focus].focus();
+            _focus = Math.min(_focus, this.content.children.length - 1);
+            this.content.children[_focus].focus();
         }
     }
-    ListControl.List = List;
-    customElements.define("list-array", List, { extends: "div" });
+    ListControl.ExpendableList = ExpendableList;
+    customElements.define("list-array", ExpendableList, { extends: "fieldset" });
 })(ListControl || (ListControl = {}));
 //# sourceMappingURL=List.js.map

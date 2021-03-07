@@ -1,6 +1,7 @@
 namespace FudgeUserInterface {
   import ƒ = FudgeCore;
 
+  // Consider HTMLDetailsElement since it provides open-close functionality from the shelf
   export class ExpandableFieldSet extends HTMLFieldSetElement {
     public content: HTMLDivElement;
     private expander: HTMLInputElement;

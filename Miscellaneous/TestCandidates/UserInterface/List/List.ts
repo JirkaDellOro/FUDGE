@@ -2,22 +2,23 @@ namespace ListControl {
   import ƒ = FudgeCore;
   import ƒUi = FudgeUserInterface;
 
-  export class List extends HTMLDivElement {
+  export class ExpendableList extends ƒUi.ExpandableFieldSet {
     public mutable: ƒ.MutableArray<ƒ.Mutable>;
 
-    constructor(_array: ƒ.MutableArray<ƒ.Mutable>) {
-      super();
+    constructor(_legend: string, _array: ƒ.MutableArray<ƒ.Mutable>) {
+      super(_legend);
       this.setContent(_array);
       this.addEventListener("input", this.mutateOnInput);
     }
 
     public setContent(_array: ƒ.MutableArray<ƒ.Mutable>): void {
       this.mutable = _array;
-      this.innerHTML = "";
-      let div: HTMLElement = ƒUi.Generator.createInterfaceFromMutable(this.mutable);
-      this.appendChild(div);
+      // this.content.innerHTML = "";
+      this.removeChild(this.content);
+      this.content = ƒUi.Generator.createInterfaceFromMutable(this.mutable);
+      this.appendChild(this.content);
       console.log(this);
-      for (let child of div.children as HTMLCollectionOf<HTMLElement>) {
+      for (let child of this.content.children as HTMLCollectionOf<HTMLElement>) {
         child.draggable = true;
         child.addEventListener("dragstart", this.hndDragStart);
         child.addEventListener("drop", this.hndDrop);
@@ -43,7 +44,7 @@ namespace ListControl {
 
     private rearrangeMutable(_focus: number = undefined): void {
       let sequence: number[] = [];
-      for (let child of this.children[0].children) {
+      for (let child of this.content.children) {
         sequence.push(parseInt(child.getAttribute("label")));
       }
       console.log(sequence);
@@ -56,8 +57,8 @@ namespace ListControl {
     private setFocus(_focus: number = undefined): void {
       if (_focus == undefined)
         return;
-      _focus = Math.min(_focus, this.children[0].children.length - 1);
-      (<HTMLElement>this.children[0].children[_focus]).focus();
+      _focus = Math.min(_focus, this.content.children.length - 1);
+      (<HTMLElement>this.content.children[_focus]).focus();
     }
 
     private hndDragStart = (_event: DragEvent): void => {
@@ -130,5 +131,5 @@ namespace ListControl {
     }
   }
 
-  customElements.define("list-array", List, { extends: "div" });
+  customElements.define("list-array", ExpendableList, { extends: "fieldset" });
 } 

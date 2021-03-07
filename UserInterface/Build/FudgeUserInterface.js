@@ -1304,6 +1304,7 @@ var FudgeUserInterface;
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
     var ƒ = FudgeCore;
+    // Consider HTMLDetailsElement since it provides open-close functionality from the shelf
     class ExpandableFieldSet extends HTMLFieldSetElement {
         constructor(_legend = "") {
             super();
