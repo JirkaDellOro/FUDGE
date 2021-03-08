@@ -1,10 +1,4 @@
 namespace FudgeUserInterface {
-  // export const enum EVENT_USERINTERFACE {
-  //   SELECT = "select",
-  //   UPDATE = "update",
-  //   DROPMENUCLICK = "dropMenuClick",
-  //   DROPMENUCOLLAPSE = "dropMenuCollapse",
-  // }
   export const enum EVENT {
     CLICK = "click",
     DOUBLE_CLICK = "dblclick",

@@ -1,27 +1,17 @@
 namespace FudgeUserInterface {
   import ƒ = FudgeCore;
 
-  // Consider HTMLDetailsElement since it provides open-close functionality from the shelf
-  export class ExpandableFieldSet extends HTMLFieldSetElement {
+  export class Details extends HTMLDetailsElement {
     public content: HTMLDivElement;
-    private expander: HTMLInputElement;
 
     public constructor(_legend: string = "") {
       super();
-      let cntLegend: HTMLLegendElement = document.createElement("legend");
-
-      this.expander = document.createElement("input");
-      this.expander.type = "checkbox";
-      this.expander.checked = true;
-      this.expander.tabIndex = -1;
-      let lblTitle: HTMLSpanElement = document.createElement("span");
+      this.open = true;
+      let lblTitle: HTMLElement = document.createElement("summary");
       lblTitle.textContent = _legend;
-      this.appendChild(this.expander);
-      cntLegend.appendChild(lblTitle);
+      this.appendChild(lblTitle);
 
       this.content = document.createElement("div");
-
-      this.appendChild(cntLegend);
       this.appendChild(this.content);
 
       this.tabIndex = 0;
@@ -29,16 +19,18 @@ namespace FudgeUserInterface {
       this.addEventListener(EVENT.FOCUS_NEXT, this.hndFocus);
       this.addEventListener(EVENT.FOCUS_PREVIOUS, this.hndFocus);
       this.addEventListener(EVENT.FOCUS_SET, this.hndFocus);
-      this.expander.addEventListener("input", this.hndToggle);
+      // this.expander.addEventListener("input", this.hndToggle);
       // this.expander.addEventListener("change", this.hndToggle);
     }
 
     public get isExpanded(): boolean {
-      return this.expander.checked;
+      // return this.expander.checked;
+      return this.open;
     }
 
     public expand(_expand: boolean): void {
-      this.expander.checked = _expand;
+      // this.expander.checked = _expand;
+      this.open = _expand;
       this.hndToggle(null);
     }
 
@@ -60,12 +52,12 @@ namespace FudgeUserInterface {
         case EVENT.FOCUS_PREVIOUS:
           let previous: HTMLElement = <HTMLElement>this.previousElementSibling;
           if (previous && previous.tabIndex > -1) {
-            let fieldsets: NodeListOf<HTMLFieldSetElement> = previous.querySelectorAll("fieldset");
-            let i: number = fieldsets.length;
+            let sets: NodeListOf<HTMLDetailsElement> = previous.querySelectorAll("details");
+            let i: number = sets.length;
             if (i)
-              do { // focus the last visible fieldset
-                fieldsets[--i].focus();
-              } while (!fieldsets[i].offsetParent);
+              do { // focus the last visible set
+                sets[--i].focus();
+              } while (!sets[i].offsetParent);
             else
               previous.focus();
 
@@ -95,7 +87,7 @@ namespace FudgeUserInterface {
         case ƒ.KEYBOARD_CODE.ARROW_DOWN:
           let next: HTMLElement = this;
           if (this.isExpanded)
-            next = this.querySelector("fieldset");
+            next = this.querySelector("details");
           else
             do {
               next = <HTMLElement>next.nextElementSibling;
@@ -116,10 +108,10 @@ namespace FudgeUserInterface {
           let previous: HTMLElement = this;
           do {
             previous = <HTMLElement>previous.previousElementSibling;
-          } while (previous && !(previous instanceof ExpandableFieldSet));
+          } while (previous && !(previous instanceof Details));
 
           if (previous)
-            if ((<ExpandableFieldSet>previous).isExpanded)
+            if ((<Details>previous).isExpanded)
               this.dispatchEvent(new KeyboardEvent(EVENT.FOCUS_PREVIOUS, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
             else
               previous.focus();
@@ -130,5 +122,5 @@ namespace FudgeUserInterface {
     }
   }
 
-  customElements.define("ui-fold-fieldset", ExpandableFieldSet, { extends: "fieldset" });
+  customElements.define("ui-set", Details, { extends: "details" });
 }

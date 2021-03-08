@@ -99,7 +99,6 @@ var FudgeUserInterface;
                 else if (mutatorTypes[key] instanceof Object)
                     element.setMutatorValue(value);
                 else {
-                    // let fieldset: HTMLFieldSetElement = <HTMLFieldSetElement><HTMLElement>element;
                     let subMutable = Reflect.get(_mutable, key);
                     if (subMutable instanceof ƒ.MutableArray || subMutable instanceof ƒ.Mutable)
                         this.updateUserInterface(subMutable, element, mutator[key]);
@@ -150,21 +149,21 @@ var FudgeUserInterface;
      */
     class Generator {
         /**
-         * Creates a [[Controller]] from a [[FudgeCore.Mutable]] using a CustomFieldSet
+         * Creates a [[Controller]] from a [[FudgeCore.Mutable]] with an expandable or mutable set
          */
         static createController(_mutable, _name) {
-            let controller = new FudgeUserInterface.Controller(_mutable, Generator.createFieldSetFromMutable(_mutable, _name));
+            let controller = new FudgeUserInterface.Controller(_mutable, Generator.createSetFromMutable(_mutable, _name));
             controller.updateUserInterface();
             return controller;
         }
         /**
-         * Create a extendable fieldset for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+         * Create a extendable or mutable set for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
          */
-        static createFieldSetFromMutable(_mutable, _name, _mutator) {
+        static createSetFromMutable(_mutable, _name, _mutator) {
             let name = _name || _mutable.constructor.name;
-            let fieldset = Generator.createExpendableFieldset(name, _mutable.type);
-            fieldset.content.appendChild(Generator.createInterfaceFromMutable(_mutable, _mutator));
-            return fieldset;
+            let set = Generator.createSet(name, _mutable.type);
+            set.content.appendChild(Generator.createInterfaceFromMutable(_mutable, _mutator));
+            return set;
         }
         /**
          * Create a div-Elements containing the interface for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
@@ -181,11 +180,9 @@ var FudgeUserInterface;
                     let subMutable;
                     subMutable = Reflect.get(_mutable, key);
                     if ((subMutable instanceof ƒ.MutableArray) || (subMutable instanceof ƒ.Mutable))
-                        element = Generator.createFieldSetFromMutable(subMutable, key, mutator[key]);
+                        element = Generator.createSetFromMutable(subMutable, key, mutator[key]);
                     else //Idea: Display an enumerated select here
                         element = new FudgeUserInterface.CustomElementTextInput({ key: key, label: key, value: type ? type.toString() : "?" });
-                    // let fieldset: FoldableFieldSet = Generator.createFieldsetFromMutable(subMutable, key, <ƒ.Mutator>_mutator[key]);
-                    // _parent.appendChild(fieldset);
                 }
                 div.appendChild(element);
                 // div.appendChild(document.createElement("br"));
@@ -201,9 +198,9 @@ var FudgeUserInterface;
             for (let key in _mutator) {
                 let value = Reflect.get(_mutator, key);
                 if (value instanceof Object) {
-                    let fieldset = Generator.createExpendableFieldset(key, "Hallo");
-                    fieldset.content.appendChild(Generator.createInterfaceFromMutator(value));
-                    div.appendChild(fieldset);
+                    let set = Generator.createSet(key, "Set");
+                    set.content.appendChild(Generator.createInterfaceFromMutator(value));
+                    div.appendChild(set);
                 }
                 else
                     div.appendChild(this.createMutatorElement(key, value.constructor.name, value));
@@ -267,14 +264,11 @@ var FudgeUserInterface;
             _parent.appendChild(dropdown);
             return dropdown;
         }
-        // TODO: implement CustomFieldSet and replace this
-        static createExpendableFieldset(_key, _type) {
-            let cntFoldFieldset = new FudgeUserInterface.ExpandableFieldSet(_key);
-            //TODO: unique ids
-            // cntFoldFieldset.id = _legend;
-            cntFoldFieldset.setAttribute("key", _key);
-            cntFoldFieldset.setAttribute("type", _type);
-            return cntFoldFieldset;
+        static createSet(_key, _type) {
+            let set = new FudgeUserInterface.Details(_key);
+            set.setAttribute("key", _key);
+            set.setAttribute("type", _type);
+            return set;
         }
     }
     FudgeUserInterface.Generator = Generator;
@@ -356,45 +350,6 @@ var FudgeUserInterface;
     CustomElement.mapObjectToCustomElement = new Map();
     CustomElement.idCounter = 0;
     FudgeUserInterface.CustomElement = CustomElement;
-})(FudgeUserInterface || (FudgeUserInterface = {}));
-var FudgeUserInterface;
-(function (FudgeUserInterface) {
-    var ƒ = FudgeCore;
-    /**
-     * A standard text input field with a label to it.
-     */
-    class CustomElementArray extends FudgeUserInterface.CustomElement {
-        constructor(_attributes) {
-            super(_attributes);
-        }
-        /**
-         * Creates the content of the element when connected the first time
-         */
-        connectedCallback() {
-            if (this.initialized)
-                return;
-            this.initialized = true;
-            this.appendLabel();
-            let fieldset = FudgeUserInterface.Generator.createExpendableFieldset(this.getAttribute("label"), "Array");
-            this.appendChild(fieldset);
-        }
-        /**
-         * Retrieves the content of the input element
-         */
-        getMutatorValue() {
-            return "";
-            // return this.querySelector("input").value;
-        }
-        /**
-         * Sets the content of the input element
-         */
-        setMutatorValue(_value) {
-            // console.log(_value);
-        }
-    }
-    // @ts-ignore
-    CustomElementArray.customElement = FudgeUserInterface.CustomElement.register("fudge-array", CustomElementArray, ƒ.MutableArray);
-    FudgeUserInterface.CustomElementArray = CustomElementArray;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
@@ -1087,6 +1042,118 @@ var FudgeUserInterface;
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
     var ƒ = FudgeCore;
+    class Details extends HTMLDetailsElement {
+        constructor(_legend = "") {
+            super();
+            this.hndToggle = (_event) => {
+                if (_event)
+                    _event.stopPropagation();
+                this.dispatchEvent(new Event(this.isExpanded ? "expand" /* EXPAND */ : "collapse" /* COLLAPSE */, { bubbles: true }));
+            };
+            this.hndFocus = (_event) => {
+                switch (_event.type) {
+                    case "focusNext" /* FOCUS_NEXT */:
+                        let next = this.nextElementSibling;
+                        if (next && next.tabIndex > -1) {
+                            next.focus();
+                            _event.stopPropagation();
+                        }
+                        break;
+                    case "focusPrevious" /* FOCUS_PREVIOUS */:
+                        let previous = this.previousElementSibling;
+                        if (previous && previous.tabIndex > -1) {
+                            let sets = previous.querySelectorAll("details");
+                            let i = sets.length;
+                            if (i)
+                                do { // focus the last visible set
+                                    sets[--i].focus();
+                                } while (!sets[i].offsetParent);
+                            else
+                                previous.focus();
+                            _event.stopPropagation();
+                        }
+                        break;
+                    case "focusSet" /* FOCUS_SET */:
+                        if (_event.target != this) {
+                            this.focus();
+                            _event.stopPropagation();
+                        }
+                        break;
+                }
+            };
+            this.hndKey = (_event) => {
+                _event.stopPropagation();
+                // let target: HTMLElement = <HTMLElement>_event.target;
+                switch (_event.code) {
+                    case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
+                        if (!this.isExpanded) {
+                            this.expand(true);
+                            return;
+                        }
+                    case ƒ.KEYBOARD_CODE.ARROW_DOWN:
+                        let next = this;
+                        if (this.isExpanded)
+                            next = this.querySelector("details");
+                        else
+                            do {
+                                next = next.nextElementSibling;
+                            } while (next && next.tabIndex > -1);
+                        if (next)
+                            next.focus();
+                        // next.dispatchEvent(new KeyboardEvent(EVENT_TREE.FOCUS_NEXT, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                        else
+                            this.dispatchEvent(new KeyboardEvent("focusNext" /* FOCUS_NEXT */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                        break;
+                    case ƒ.KEYBOARD_CODE.ARROW_LEFT:
+                        if (this.isExpanded) {
+                            this.expand(false);
+                            return;
+                        }
+                    case ƒ.KEYBOARD_CODE.ARROW_UP:
+                        let previous = this;
+                        do {
+                            previous = previous.previousElementSibling;
+                        } while (previous && !(previous instanceof Details));
+                        if (previous)
+                            if (previous.isExpanded)
+                                this.dispatchEvent(new KeyboardEvent("focusPrevious" /* FOCUS_PREVIOUS */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                            else
+                                previous.focus();
+                        else
+                            this.parentElement.dispatchEvent(new KeyboardEvent("focusSet" /* FOCUS_SET */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                        break;
+                }
+            };
+            this.open = true;
+            let lblTitle = document.createElement("summary");
+            lblTitle.textContent = _legend;
+            this.appendChild(lblTitle);
+            this.content = document.createElement("div");
+            this.appendChild(this.content);
+            this.tabIndex = 0;
+            this.addEventListener("keydown" /* KEY_DOWN */, this.hndKey);
+            this.addEventListener("focusNext" /* FOCUS_NEXT */, this.hndFocus);
+            this.addEventListener("focusPrevious" /* FOCUS_PREVIOUS */, this.hndFocus);
+            this.addEventListener("focusSet" /* FOCUS_SET */, this.hndFocus);
+            // this.expander.addEventListener("input", this.hndToggle);
+            // this.expander.addEventListener("change", this.hndToggle);
+        }
+        get isExpanded() {
+            // return this.expander.checked;
+            return this.open;
+        }
+        expand(_expand) {
+            // this.expander.checked = _expand;
+            this.open = _expand;
+            this.hndToggle(null);
+        }
+    }
+    FudgeUserInterface.Details = Details;
+    customElements.define("ui-set", Details, { extends: "details" });
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
+    var ƒ = FudgeCore;
     /**
      * Static class to display a modal or non-modal dialog with an interface for the given mutator.
      */
@@ -1136,397 +1203,6 @@ var FudgeUserInterface;
     }
     FudgeUserInterface.Dialog = Dialog;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
-// namespace FudgeUserInterface {
-//     /**
-//      * <select><option>Hallo</option></select>
-//      */
-//     import ƒ = FudgeCore;
-//     export class ToggleButton extends HTMLButtonElement {
-//         private toggleState: boolean;
-//         public constructor(style: string) {
-//             super();
-//             this.type = "button";
-//             this.toggleState = true;
-//             this.classList.add(style);
-//             this.classList.add("ToggleOn");
-//             this.addEventListener("click", this.switchToggleState);
-//         }
-//         public setToggleState(toggleState: boolean): void {
-//             this.toggleState = toggleState;
-//             if (this.toggleState == true) {
-//                 this.classList.add("ToggleOn");
-//                 this.classList.remove("ToggleOff");
-//             }
-//             else {
-//                 this.classList.remove("ToggleOn");
-//                 this.classList.add("ToggleOff");
-//             }
-//         }
-//         public getToggleState(): boolean {
-//             return this.toggleState;
-//         }
-//         public toggle(): void {
-//             this.setToggleState(!this.toggleState);
-//         }
-//         private switchToggleState = (_event: MouseEvent): void => {
-//             this.setToggleState(!this.toggleState);
-//         }
-//     }
-//     export class Stepper extends HTMLInputElement {
-//         public constructor(_label: string, params: { min?: number, max?: number, step?: number, value?: number } = {}) {
-//             super();
-//             this.name = _label;
-//             this.type = "number";
-//             this.value = params.value.toString();
-//             this.id = _label;
-//             this.step = String(params.step) || "1";
-//         }
-//     }
-//     export class FoldableFieldSet extends HTMLFieldSetElement {
-//         public constructor(_legend: string) {
-//             super();
-//             let cntLegend: HTMLLegendElement = document.createElement("legend");
-//             cntLegend.classList.add("unfoldable");
-//             let btnFoldButton: HTMLButtonElement = new ToggleButton("FoldButton");
-//             btnFoldButton.addEventListener("click", this.toggleFoldElement);
-//             // btnfoldButton.classList.add("unfoldable");
-//             let lblTitle: HTMLSpanElement = document.createElement("span");
-//             lblTitle.textContent = _legend;
-//             // lblTitle.classList.add("unfoldable");
-//             cntLegend.appendChild(btnFoldButton);
-//             cntLegend.appendChild(lblTitle);
-//             this.appendChild(cntLegend);
-//         }
-//         private toggleFoldElement = (_event: MouseEvent): void => {
-//             _event.preventDefault();
-//             if (_event.target != _event.currentTarget) return;
-//             //Get the fieldset the button belongs to
-//             let children: HTMLCollection = this.children;
-//             //fold or unfold all children that aren't unfoldable
-//             for (let child of children) {
-//                 if (!child.classList.contains("unfoldable")) {
-//                     child.classList.toggle("folded");
-//                 }
-//             }
-//         }
-//     }
-//     class MenuButton extends HTMLDivElement {
-//         name: string;
-//         private signature: string;
-//         public constructor(_name: string, textcontent: string, parentSignature: string) {
-//             super();
-//             this.name = _name;
-//             this.signature = parentSignature + "." + _name;
-//             let button: HTMLButtonElement = document.createElement("button");
-//             button.textContent = textcontent;
-//             this.append(button);
-//             button.addEventListener("click", this.resolveClick);
-//         }
-//         private resolveClick = (_event: MouseEvent): void => {
-//             let event: CustomEvent = new CustomEvent(EVENT_USERINTERFACE.DROPMENUCLICK, { detail: this.signature, bubbles: true });
-//             this.dispatchEvent(event);
-//         }
-//     }
-//     class MenuContent extends HTMLDivElement {
-//         public constructor(_submenu?: boolean) {
-//             super();
-//             if (_submenu) {
-//                 this.classList.add("submenu-content");
-//             }
-//             else {
-//                 this.classList.add("dropdown-content");
-//             }
-//         }
-//     }
-//     export class DropMenu extends HTMLDivElement {
-//         name: string;
-//         private content: MenuContent;
-//         private signature: string;
-//         public constructor(_name: string, _contentList: ƒ.Mutator, params: { _parentSignature?: string, _text?: string }) {
-//             super();
-//             let button: HTMLButtonElement = document.createElement("button");
-//             button.name = _name;
-//             if (params._text) {
-//                 button.textContent = params._text;
-//             }
-//             else {
-//                 button.textContent = _name;
-//             }
-//             button.addEventListener("click", this.toggleFoldContent);
-//             window.addEventListener("click", this.collapseMenu);
-//             let isSubmenu: boolean = (params._parentSignature != null);
-//             if (params._parentSignature) {
-//                 this.signature = params._parentSignature + "." + _name;
-//             }
-//             else {
-//                 this.signature = _name;
-//             }
-//             this.append(button);
-//             this.content = new MenuContent(isSubmenu);
-//             if (params._parentSignature) {
-//                 this.classList.add("submenu");
-//             }
-//             else {
-//                 this.classList.add("dropdown");
-//             }
-//             this.content.classList.toggle("folded");
-//             this.name = _name;
-//             for (let key in _contentList) {
-//                 if (typeof _contentList[key] == "object") {
-//                     let subMenu: DropMenu = new DropMenu(key, <ƒ.Mutator>_contentList[key], { _parentSignature: this.signature });
-//                     this.content.append(subMenu);
-//                 }
-//                 else if (typeof _contentList[key] == "string") {
-//                     let contentEntry: MenuButton = new MenuButton(key, <string>_contentList[key], this.signature);
-//                     this.content.append(contentEntry);
-//                 }
-//             }
-//             this.append(this.content);
-//         }
-//         private toggleFoldContent = (_event: MouseEvent): void => {
-//             this.content.classList.toggle("folded");
-//         }
-//         private collapseMenu = (_event: MouseEvent): void => {
-//             if (!(this.contains(<HTMLElement>_event.target))) {
-//                 if (!this.content.classList.contains("folded")) {
-//                     this.toggleFoldContent(_event);
-//                 }
-//             }
-//         }
-//     }
-//     customElements.define("ui-stepper", Stepper, { extends: "input" });
-//     customElements.define("ui-toggle-button", ToggleButton, { extends: "button" });
-//     customElements.define("ui-fold-fieldset", FoldableFieldSet, { extends: "fieldset" });
-//     customElements.define("ui-dropdown", DropMenu, { extends: "div" });
-//     customElements.define("ui-dropdown-button", MenuButton, { extends: "div" });
-//     customElements.define("ui-dropdown-content", MenuContent, { extends: "div" });
-// }
-var FudgeUserInterface;
-(function (FudgeUserInterface) {
-    var ƒ = FudgeCore;
-    // Consider HTMLDetailsElement since it provides open-close functionality from the shelf
-    class ExpandableFieldSet extends HTMLFieldSetElement {
-        constructor(_legend = "") {
-            super();
-            this.hndToggle = (_event) => {
-                if (_event)
-                    _event.stopPropagation();
-                this.dispatchEvent(new Event(this.isExpanded ? "expand" /* EXPAND */ : "collapse" /* COLLAPSE */, { bubbles: true }));
-            };
-            this.hndFocus = (_event) => {
-                switch (_event.type) {
-                    case "focusNext" /* FOCUS_NEXT */:
-                        let next = this.nextElementSibling;
-                        if (next && next.tabIndex > -1) {
-                            next.focus();
-                            _event.stopPropagation();
-                        }
-                        break;
-                    case "focusPrevious" /* FOCUS_PREVIOUS */:
-                        let previous = this.previousElementSibling;
-                        if (previous && previous.tabIndex > -1) {
-                            let fieldsets = previous.querySelectorAll("fieldset");
-                            let i = fieldsets.length;
-                            if (i)
-                                do { // focus the last visible fieldset
-                                    fieldsets[--i].focus();
-                                } while (!fieldsets[i].offsetParent);
-                            else
-                                previous.focus();
-                            _event.stopPropagation();
-                        }
-                        break;
-                    case "focusSet" /* FOCUS_SET */:
-                        if (_event.target != this) {
-                            this.focus();
-                            _event.stopPropagation();
-                        }
-                        break;
-                }
-            };
-            this.hndKey = (_event) => {
-                _event.stopPropagation();
-                // let target: HTMLElement = <HTMLElement>_event.target;
-                switch (_event.code) {
-                    case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
-                        if (!this.isExpanded) {
-                            this.expand(true);
-                            return;
-                        }
-                    case ƒ.KEYBOARD_CODE.ARROW_DOWN:
-                        let next = this;
-                        if (this.isExpanded)
-                            next = this.querySelector("fieldset");
-                        else
-                            do {
-                                next = next.nextElementSibling;
-                            } while (next && next.tabIndex > -1);
-                        if (next)
-                            next.focus();
-                        // next.dispatchEvent(new KeyboardEvent(EVENT_TREE.FOCUS_NEXT, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
-                        else
-                            this.dispatchEvent(new KeyboardEvent("focusNext" /* FOCUS_NEXT */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
-                        break;
-                    case ƒ.KEYBOARD_CODE.ARROW_LEFT:
-                        if (this.isExpanded) {
-                            this.expand(false);
-                            return;
-                        }
-                    case ƒ.KEYBOARD_CODE.ARROW_UP:
-                        let previous = this;
-                        do {
-                            previous = previous.previousElementSibling;
-                        } while (previous && !(previous instanceof ExpandableFieldSet));
-                        if (previous)
-                            if (previous.isExpanded)
-                                this.dispatchEvent(new KeyboardEvent("focusPrevious" /* FOCUS_PREVIOUS */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
-                            else
-                                previous.focus();
-                        else
-                            this.parentElement.dispatchEvent(new KeyboardEvent("focusSet" /* FOCUS_SET */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
-                        break;
-                }
-            };
-            let cntLegend = document.createElement("legend");
-            this.expander = document.createElement("input");
-            this.expander.type = "checkbox";
-            this.expander.checked = true;
-            this.expander.tabIndex = -1;
-            let lblTitle = document.createElement("span");
-            lblTitle.textContent = _legend;
-            this.appendChild(this.expander);
-            cntLegend.appendChild(lblTitle);
-            this.content = document.createElement("div");
-            this.appendChild(cntLegend);
-            this.appendChild(this.content);
-            this.tabIndex = 0;
-            this.addEventListener("keydown" /* KEY_DOWN */, this.hndKey);
-            this.addEventListener("focusNext" /* FOCUS_NEXT */, this.hndFocus);
-            this.addEventListener("focusPrevious" /* FOCUS_PREVIOUS */, this.hndFocus);
-            this.addEventListener("focusSet" /* FOCUS_SET */, this.hndFocus);
-            this.expander.addEventListener("input", this.hndToggle);
-            // this.expander.addEventListener("change", this.hndToggle);
-        }
-        get isExpanded() {
-            return this.expander.checked;
-        }
-        expand(_expand) {
-            this.expander.checked = _expand;
-            this.hndToggle(null);
-        }
-    }
-    FudgeUserInterface.ExpandableFieldSet = ExpandableFieldSet;
-    customElements.define("ui-fold-fieldset", ExpandableFieldSet, { extends: "fieldset" });
-})(FudgeUserInterface || (FudgeUserInterface = {}));
-// namespace FudgeUserInterface {
-//     import ƒ = FudgeCore;
-//     // export abstract class ListController {
-//     //     abstract listRoot: HTMLElement;
-//     //     protected abstract toggleCollapse(_event: MouseEvent): void;
-//     // }
-//     abstract class CollapsableList extends HTMLUListElement {
-//         header: HTMLLIElement;
-//         content: HTMLElement;
-//         constructor() {
-//             super();
-//             this.header = document.createElement("li");
-//             this.content = document.createElement("ul");
-//             this.appendChild(this.header);
-//             this.appendChild(this.content);
-//         }
-//         public collapse(element: HTMLElement): void {
-//             (<CollapsableList>element).content.classList.toggle("folded");
-//         }
-//     }
-//     export class CollapsableNodeList extends CollapsableList {
-//         node: ƒ.Node;
-//         constructor(_node: ƒ.Node, _name: string, _unfolded: boolean = false) {
-//             super();
-//             this.node = _node;
-//             let buttonState: string;
-//             if (this.node.getChildren().length != 0)
-//                 buttonState = "FoldButton";
-//             else
-//                 buttonState = "invisible";
-//             let btnToggle: HTMLButtonElement = new ToggleButton(buttonState);
-//             (<ToggleButton>btnToggle).setToggleState(_unfolded);
-//             btnToggle.addEventListener("click", this.collapseEvent);
-//             this.header.appendChild(btnToggle);
-//             let lblName: HTMLSpanElement = document.createElement("span");
-//             lblName.textContent = _name;
-//             lblName.addEventListener("click", this.selectNode);
-//             this.header.appendChild(lblName);
-//         }
-//         public selectNode = (_event: MouseEvent): void => {
-//             let event: Event = new CustomEvent(EVENT_USERINTERFACE.SELECT, { bubbles: true, detail: this.node });
-//             this.dispatchEvent(event);
-//         }
-//         public collapseEvent = (_event: MouseEvent): void => {
-//             let event: Event = new CustomEvent(EVENT_USERINTERFACE.COLLAPSE, { bubbles: true, detail: this });
-//             this.dispatchEvent(event);
-//         }
-//     }
-//     export class CollapsableAnimationList extends CollapsableList {
-//         mutator: ƒ.Mutator;
-//         name: string;
-//         index: ƒ.Mutator;
-//         constructor(_mutator: ƒ.Mutator, _name: string, _unfolded: boolean = false) {
-//             super();
-//             this.mutator = _mutator;
-//             this.name = _name;
-//             this.index = {};
-//             let btnToggle: HTMLButtonElement = new ToggleButton("FoldButton");
-//             (<ToggleButton>btnToggle).setToggleState(_unfolded);
-//             btnToggle.addEventListener("click", this.collapseEvent);
-//             this.header.appendChild(btnToggle);
-//             let lblName: HTMLSpanElement = document.createElement("span");
-//             lblName.textContent = _name;
-//             this.header.appendChild(lblName);
-//             this.buildContent(_mutator);
-//             this.content.addEventListener("input", this.updateMutator);
-//         }
-//         public collapseEvent = (_event: MouseEvent): void => {
-//             let event: Event = new CustomEvent(EVENT_USERINTERFACE.COLLAPSE, { bubbles: true, detail: this });
-//             this.dispatchEvent(event);
-//         }
-//         public buildContent(_mutator: ƒ.Mutator): void {
-//             for (let key in _mutator) {
-//                 if (typeof _mutator[key] == "object") {
-//                     let newList: CollapsableAnimationList = new CollapsableAnimationList(<ƒ.Mutator>_mutator[key], key);
-//                     this.content.append(newList);
-//                     this.index[key] = newList.getElementIndex();
-//                 }
-//                 else {
-//                     let listEntry: HTMLLIElement = document.createElement("li");
-//                     Generator.createLabelElement(key, listEntry);
-//                     let inputEntry: HTMLSpanElement = Generator.createStepperElement(key, listEntry, { _value: (<number>_mutator[key]) });
-//                     this.content.append(listEntry);
-//                     this.index[key] = inputEntry;
-//                 }
-//             }
-//         }
-//         public getMutator(): ƒ.Mutator {
-//             return this.mutator;
-//         }
-//         public setMutator(_mutator: ƒ.Mutator): void {
-//             this.collapse(this.content);
-//             this.mutator = _mutator;
-//             this.buildContent(_mutator);
-//         }
-//         public getElementIndex(): ƒ.Mutator {
-//             return this.index;
-//         }
-//         private updateMutator = (_event: Event): void => {
-//             let target: HTMLInputElement = <HTMLInputElement>_event.target;
-//             this.mutator[target.id] = parseFloat(target.value);
-//             _event.cancelBubble = true;
-//             let event: Event = new CustomEvent(EVENT_USERINTERFACE.UPDATE, { bubbles: true, detail: this.mutator });
-//             this.dispatchEvent(event);
-//         }
-//     }
-//     customElements.define("ui-node-list", CollapsableNodeList, { extends: "ul" });
-//     customElements.define("ui-animation-list", CollapsableAnimationList, { extends: "ul" });
-// }
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
     class MultiLevelMenuManager {

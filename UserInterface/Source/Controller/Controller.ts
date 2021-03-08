@@ -102,7 +102,6 @@ namespace FudgeUserInterface {
         else if (mutatorTypes[key] instanceof Object)
           element.setMutatorValue(value);
         else {
-          // let fieldset: HTMLFieldSetElement = <HTMLFieldSetElement><HTMLElement>element;
           let subMutable: ƒ.Mutable = Reflect.get(_mutable, key);
           if (subMutable instanceof ƒ.MutableArray || subMutable instanceof ƒ.Mutable)
             this.updateUserInterface(subMutable, element, mutator[key]);

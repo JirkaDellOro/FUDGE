@@ -2072,7 +2072,7 @@ var Fudge;
                     this.setTitle(this.node.name);
                     let nodeComponents = this.node.getAllComponents();
                     for (let nodeComponent of nodeComponents) {
-                        let fieldset = ƒui.Generator.createFieldSetFromMutable(nodeComponent);
+                        let fieldset = ƒui.Generator.createSetFromMutable(nodeComponent);
                         let uiComponent = new Fudge.ControllerComponent(nodeComponent, fieldset);
                         fieldset.expand(this.expanded[nodeComponent.type]);
                         this.dom.append(uiComponent.domElement);
@@ -2565,7 +2565,7 @@ var Fudge;
             if (this.resource) {
                 this.setTitle(this.resource.name);
                 if (this.resource instanceof ƒ.Mutable) {
-                    let fieldset = ƒui.Generator.createFieldSetFromMutable(this.resource);
+                    let fieldset = ƒui.Generator.createSetFromMutable(this.resource);
                     let uiMutable = new Fudge.ControllerComponent(this.resource, fieldset);
                     content = uiMutable.domElement;
                 }

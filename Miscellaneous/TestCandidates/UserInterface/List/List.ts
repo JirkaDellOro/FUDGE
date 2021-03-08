@@ -2,7 +2,7 @@ namespace ListControl {
   import ƒ = FudgeCore;
   import ƒUi = FudgeUserInterface;
 
-  export class ExpendableList extends ƒUi.ExpandableFieldSet {
+  export class List extends ƒUi.Details {
     public mutable: ƒ.MutableArray<ƒ.Mutable>;
 
     constructor(_legend: string, _array: ƒ.MutableArray<ƒ.Mutable>) {
@@ -11,7 +11,7 @@ namespace ListControl {
       this.addEventListener("input", this.mutateOnInput);
     }
 
-    public setContent(_array: ƒ.MutableArray<ƒ.Mutable>): void {
+    public setContent(_array: ƒ.MutableArray<ƒ.Mutable>): void { 
       this.mutable = _array;
       // this.content.innerHTML = "";
       this.removeChild(this.content);
@@ -131,5 +131,5 @@ namespace ListControl {
     }
   }
 
-  customElements.define("list-array", ExpendableList, { extends: "fieldset" });
+  customElements.define("list-array", List, { extends: "details" });
 } 

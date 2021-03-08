@@ -47,13 +47,13 @@ declare namespace FudgeUserInterface {
      */
     class Generator {
         /**
-         * Creates a [[Controller]] from a [[FudgeCore.Mutable]] using a CustomFieldSet
+         * Creates a [[Controller]] from a [[FudgeCore.Mutable]] with an expandable or mutable set
          */
         static createController(_mutable: ƒ.Mutable, _name?: string): Controller;
         /**
-         * Create a extendable fieldset for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+         * Create a extendable or mutable set for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
          */
-        static createFieldSetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): ExpandableFieldSet;
+        static createSetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): Details;
         /**
          * Create a div-Elements containing the interface for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
          */
@@ -71,7 +71,7 @@ declare namespace FudgeUserInterface {
          * TODO: refactor for enums
          */
         static createDropdown(_name: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement;
-        static createExpendableFieldset(_key: string, _type: string): ExpandableFieldSet;
+        static createSet(_key: string, _type: string): Details;
     }
 }
 declare namespace FudgeUserInterface {
@@ -124,28 +124,6 @@ declare namespace FudgeUserInterface {
          * Set the value of this element using a format compatible with [[FudgeCore.Mutator]]
          */
         setMutatorValue(_value: Object): void;
-    }
-}
-declare namespace FudgeUserInterface {
-    import ƒ = FudgeCore;
-    /**
-     * A standard text input field with a label to it.
-     */
-    class CustomElementArray extends CustomElement {
-        private static customElement;
-        constructor(_attributes: CustomElementAttributes);
-        /**
-         * Creates the content of the element when connected the first time
-         */
-        connectedCallback(): void;
-        /**
-         * Retrieves the content of the input element
-         */
-        getMutatorValue(): string;
-        /**
-         * Sets the content of the input element
-         */
-        setMutatorValue(_value: ƒ.MutableArray<ƒ.Mutable>): void;
     }
 }
 declare namespace FudgeUserInterface {
@@ -344,6 +322,17 @@ declare namespace FudgeUserInterface {
     }
 }
 declare namespace FudgeUserInterface {
+    class Details extends HTMLDetailsElement {
+        content: HTMLDivElement;
+        constructor(_legend?: string);
+        get isExpanded(): boolean;
+        expand(_expand: boolean): void;
+        private hndToggle;
+        private hndFocus;
+        private hndKey;
+    }
+}
+declare namespace FudgeUserInterface {
     import ƒ = FudgeCore;
     /**
      * Static class to display a modal or non-modal dialog with an interface for the given mutator.
@@ -358,20 +347,6 @@ declare namespace FudgeUserInterface {
     }
 }
 declare namespace FudgeUserInterface {
-    class ExpandableFieldSet extends HTMLFieldSetElement {
-        content: HTMLDivElement;
-        private expander;
-        constructor(_legend?: string);
-        get isExpanded(): boolean;
-        expand(_expand: boolean): void;
-        private hndToggle;
-        private hndFocus;
-        private hndKey;
-    }
-}
-declare namespace FudgeUserInterface {
-}
-declare namespace FudgeUserInterface {
     /**
      * <select><option>Hallo</option></select>
      */
@@ -379,8 +354,6 @@ declare namespace FudgeUserInterface {
     class MultiLevelMenuManager {
         static buildFromSignature(_signature: string, _mutator?: ƒ.Mutator): ƒ.Mutator;
     }
-}
-declare namespace FudgeUserInterface {
 }
 declare namespace FudgeUserInterface {
     interface TABLE {

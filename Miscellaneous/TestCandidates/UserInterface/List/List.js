@@ -2,7 +2,7 @@ var ListControl;
 (function (ListControl) {
     var ƒ = FudgeCore;
     var ƒUi = FudgeUserInterface;
-    class ExpendableList extends ƒUi.ExpandableFieldSet {
+    class List extends ƒUi.Details {
         constructor(_legend, _array) {
             super(_legend);
             this.mutateOnInput = async (_event) => {
@@ -114,7 +114,7 @@ var ListControl;
             this.content.children[_focus].focus();
         }
     }
-    ListControl.ExpendableList = ExpendableList;
-    customElements.define("list-array", ExpendableList, { extends: "fieldset" });
+    ListControl.List = List;
+    customElements.define("list-array", List, { extends: "details" });
 })(ListControl || (ListControl = {}));
 //# sourceMappingURL=List.js.map
