@@ -1163,6 +1163,7 @@ var FudgeUserInterface;
                 // _event.preventDefault; 
                 let keyDrag = _event.currentTarget.getAttribute("key");
                 _event.dataTransfer.setData("index", keyDrag);
+                console.log(keyDrag);
             };
             this.hndDragOver = (_event) => {
                 _event.preventDefault();
@@ -1178,12 +1179,12 @@ var FudgeUserInterface;
                 let drag = this.querySelector(`[key=${keyDrag}]`);
                 let insertion = keyDrag > keyDrop ? "beforebegin" : "afterend";
                 if (_event.ctrlKey)
-                    drag = drag.cloneNode(true);
-                if (_event.shiftKey) {
+                    drag = drag.cloneNode(false);
+                if (_event.shiftKey)
                     drag.parentNode.removeChild(drag);
-                }
                 else
                     drop.insertAdjacentElement(insertion, drag);
+                this.rearrangeMutable();
             };
             this.hndkey = (_event) => {
                 let item = _event.currentTarget;
@@ -1204,9 +1205,8 @@ var FudgeUserInterface;
                             break;
                         }
                         _event.shiftKey ? item = item.cloneNode(true) : sibling = item.previousSibling;
-                        if (!sibling)
-                            break;
-                        sibling.insertAdjacentElement("beforebegin", item);
+                        if (sibling)
+                            sibling.insertAdjacentElement("beforebegin", item);
                         this.rearrangeMutable(--focus);
                         break;
                     case ƒ.KEYBOARD_CODE.ARROW_DOWN:
@@ -1215,9 +1215,8 @@ var FudgeUserInterface;
                             break;
                         }
                         _event.shiftKey ? item = item.cloneNode(true) : sibling = item.nextSibling;
-                        if (!sibling)
-                            break;
-                        sibling.insertAdjacentElement("afterend", item);
+                        if (sibling)
+                            sibling.insertAdjacentElement("afterend", item);
                         this.rearrangeMutable(++focus);
                         break;
                     default:
@@ -1233,12 +1232,10 @@ var FudgeUserInterface;
         }
         setContent(_array) {
             this.mutable = _array;
-            // this.content.innerHTML = "";
             this.removeChild(this.content);
             this.content = FudgeUserInterface.Generator.createInterfaceFromMutable(this.mutable);
             this.appendChild(this.content);
             for (let child of this.content.children) {
-                console.log(child.children);
                 child.draggable = true;
                 child.addEventListener("dragstart", this.hndDragStart);
                 child.addEventListener("drop", this.hndDrop);
@@ -1260,11 +1257,12 @@ var FudgeUserInterface;
             this.setContent(this.mutable);
             FudgeUserInterface.Controller.updateUserInterface(this.mutable, this);
             this.setFocus(_focus);
+            this.dispatchEvent(new Event("input", { bubbles: true }));
         }
         setFocus(_focus = undefined) {
             if (_focus == undefined)
                 return;
-            _focus = Math.min(_focus, this.content.children.length - 1);
+            _focus = Math.max(0, Math.min(_focus, this.content.children.length - 1));
             this.content.children[_focus].focus();
         }
     }

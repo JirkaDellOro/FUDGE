@@ -12,12 +12,10 @@ namespace FudgeUserInterface {
 
     public setContent(_array: ƒ.MutableArray<ƒ.Mutable>): void {
       this.mutable = _array;
-      // this.content.innerHTML = "";
       this.removeChild(this.content);
       this.content = Generator.createInterfaceFromMutable(this.mutable);
       this.appendChild(this.content);
       for (let child of this.content.children as HTMLCollectionOf<HTMLElement>) {
-        console.log(child.children);
         child.draggable = true;
         child.addEventListener("dragstart", this.hndDragStart);
         child.addEventListener("drop", this.hndDrop);
@@ -48,15 +46,17 @@ namespace FudgeUserInterface {
       }
       console.log(sequence);
       this.mutable.rearrange(sequence);
+
       this.setContent(this.mutable);
       Controller.updateUserInterface(this.mutable, this);
       this.setFocus(_focus);
+      this.dispatchEvent(new Event("input", { bubbles: true }));
     }
 
     private setFocus(_focus: number = undefined): void {
       if (_focus == undefined)
         return;
-      _focus = Math.min(_focus, this.content.children.length - 1);
+      _focus = Math.max(0, Math.min(_focus, this.content.children.length - 1));
       (<HTMLElement>this.content.children[_focus]).focus();
     }
 
@@ -64,6 +64,7 @@ namespace FudgeUserInterface {
       // _event.preventDefault; 
       let keyDrag: string = (<HTMLElement>_event.currentTarget).getAttribute("key");
       _event.dataTransfer.setData("index", keyDrag);
+      console.log(keyDrag);
     }
 
     private hndDragOver = (_event: DragEvent): void => {
@@ -82,11 +83,13 @@ namespace FudgeUserInterface {
 
       let insertion: InsertPosition = keyDrag > keyDrop ? "beforebegin" : "afterend";
       if (_event.ctrlKey)
-        drag = <HTMLElement>drag.cloneNode(true);
-      if (_event.shiftKey) {
+        drag = <HTMLElement>drag.cloneNode(false);
+      if (_event.shiftKey)
         drag.parentNode.removeChild(drag);
-      } else
+      else
         drop.insertAdjacentElement(insertion, drag);
+
+      this.rearrangeMutable();
     }
 
     private hndkey = (_event: KeyboardEvent): void => {
@@ -111,9 +114,8 @@ namespace FudgeUserInterface {
             break;
           }
           _event.shiftKey ? item = <HTMLElement>item.cloneNode(true) : sibling = <HTMLElement>item.previousSibling;
-          if (!sibling)
-            break;
-          sibling.insertAdjacentElement("beforebegin", item);
+          if (sibling)
+            sibling.insertAdjacentElement("beforebegin", item);
           this.rearrangeMutable(--focus);
           break;
         case ƒ.KEYBOARD_CODE.ARROW_DOWN:
@@ -122,9 +124,8 @@ namespace FudgeUserInterface {
             break;
           }
           _event.shiftKey ? item = <HTMLElement>item.cloneNode(true) : sibling = <HTMLElement>item.nextSibling;
-          if (!sibling)
-            break;
-          sibling.insertAdjacentElement("afterend", item);
+          if (sibling)
+            sibling.insertAdjacentElement("afterend", item);
           this.rearrangeMutable(++focus);
           break;
         default:
