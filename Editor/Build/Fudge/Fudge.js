@@ -1091,8 +1091,8 @@ var Fudge;
             let chain = _script["__proto__"];
             this.superClass = chain.name;
             do {
-                this.isComponent ||= (chain.name == "Component");
-                this.isComponentScript ||= (chain.name == "ComponentScript");
+                this.isComponent = this.isComponent || (chain.name == "Component");
+                this.isComponentScript = this.isComponentScript || (chain.name == "ComponentScript");
                 chain = chain["__proto__"];
             } while (chain);
         }
@@ -2072,7 +2072,7 @@ var Fudge;
                     this.setTitle(this.node.name);
                     let nodeComponents = this.node.getAllComponents();
                     for (let nodeComponent of nodeComponents) {
-                        let fieldset = ƒui.Generator.createSetFromMutable(nodeComponent);
+                        let fieldset = ƒui.Generator.createDetailsFromMutable(nodeComponent);
                         let uiComponent = new Fudge.ControllerComponent(nodeComponent, fieldset);
                         fieldset.expand(this.expanded[nodeComponent.type]);
                         this.dom.append(uiComponent.domElement);
@@ -2565,7 +2565,7 @@ var Fudge;
             if (this.resource) {
                 this.setTitle(this.resource.name);
                 if (this.resource instanceof ƒ.Mutable) {
-                    let fieldset = ƒui.Generator.createSetFromMutable(this.resource);
+                    let fieldset = ƒui.Generator.createDetailsFromMutable(this.resource);
                     let uiMutable = new Fudge.ControllerComponent(this.resource, fieldset);
                     content = uiMutable.domElement;
                 }
