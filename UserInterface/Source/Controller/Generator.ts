@@ -23,8 +23,7 @@ namespace FudgeUserInterface {
       let name: string = _name || _mutable.constructor.name;
 
       if (_mutable instanceof ƒ.MutableArray) {
-        let details: DetailsArray = new DetailsArray(_name, _mutable);
-        // Controller.updateUserInterface(details.mutable, details);
+        let details: DetailsArray = new DetailsArray(name, _mutable);
         return details;
       }
 

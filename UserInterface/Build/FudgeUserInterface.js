@@ -162,8 +162,7 @@ var FudgeUserInterface;
         static createDetailsFromMutable(_mutable, _name, _mutator) {
             let name = _name || _mutable.constructor.name;
             if (_mutable instanceof ƒ.MutableArray) {
-                let details = new FudgeUserInterface.DetailsArray(_name, _mutable);
-                // Controller.updateUserInterface(details.mutable, details);
+                let details = new FudgeUserInterface.DetailsArray(name, _mutable);
                 return details;
             }
             let details = Generator.createDetails(name, _mutable.type);
@@ -561,6 +560,8 @@ var FudgeUserInterface;
         setMutatorValue(_mutator) {
             for (let key in _mutator) {
                 let element = this.querySelector(`[key=${key}]`);
+                if (!element)
+                    console.log(`Couldn't find ${key} in`, this);
                 if (element instanceof FudgeUserInterface.CustomElement)
                     element.setMutatorValue(_mutator[key]);
                 else
@@ -1117,6 +1118,7 @@ var FudgeUserInterface;
                         break;
                 }
             };
+            this.setAttribute("key", _legend);
             this.open = true;
             let lblTitle = document.createElement("summary");
             lblTitle.textContent = _legend;
@@ -1235,8 +1237,8 @@ var FudgeUserInterface;
             this.removeChild(this.content);
             this.content = FudgeUserInterface.Generator.createInterfaceFromMutable(this.mutable);
             this.appendChild(this.content);
-            console.log(this);
             for (let child of this.content.children) {
+                console.log(child.children);
                 child.draggable = true;
                 child.addEventListener("dragstart", this.hndDragStart);
                 child.addEventListener("drop", this.hndDrop);

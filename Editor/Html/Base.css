@@ -179,6 +179,7 @@ details details {
   /* border: none; */
   padding-left: 1em;
 }
+
 /* Dialog */
 
 dialog {
@@ -200,4 +201,38 @@ dialog>div#content {
 
 fudge-boolean, fudge-color, fudge-textinput {
   display: block;
+}
+
+/* custom elements */
+
+custom-vector2 {
+  text-align: right;
+  display: grid;
+  grid-template-columns: 2em 8em 8em;
+}
+
+custom-vector3 {
+  text-align: right;
+  display: grid;
+  grid-template-columns: 2em 8em 8em 8em;
+}
+
+custom-matrix4x4 {
+  text-align: center;
+  display: grid;
+  column-gap: 1em;
+  grid-template-columns: min-content min-content min-content min-content;
+  grid-template-rows: min-content min-content min-content min-content;
+}
+
+custom-matrix3x3 {
+  text-align: center;
+  display: grid;
+  column-gap: 1em;
+  grid-template-columns: min-content min-content min-content;
+  grid-template-rows: min-content min-content min-content min-content
+}
+
+custom-matrix4x4 span.rowVector, custom-matrix3x3 span.rowVector {
+  text-align: right
 }

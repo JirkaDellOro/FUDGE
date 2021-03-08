@@ -16,8 +16,8 @@ namespace FudgeUserInterface {
       this.removeChild(this.content);
       this.content = Generator.createInterfaceFromMutable(this.mutable);
       this.appendChild(this.content);
-      console.log(this);
       for (let child of this.content.children as HTMLCollectionOf<HTMLElement>) {
+        console.log(child.children);
         child.draggable = true;
         child.addEventListener("dragstart", this.hndDragStart);
         child.addEventListener("drop", this.hndDrop);

@@ -43,6 +43,8 @@ namespace FudgeUserInterface {
     public setMutatorValue(_mutator: ƒ.Mutator): void {
       for (let key in _mutator) {
         let element: HTMLInputElement = this.querySelector(`[key=${key}]`);
+        if (!element)
+          console.log(`Couldn't find ${key} in`, this);
         if (element instanceof CustomElement)
           element.setMutatorValue(_mutator[key]);
         else

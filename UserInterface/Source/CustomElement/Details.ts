@@ -6,6 +6,7 @@ namespace FudgeUserInterface {
 
     public constructor(_legend: string = "") {
       super();
+      this.setAttribute("key", _legend);
       this.open = true;
       let lblTitle: HTMLElement = document.createElement("summary");
       lblTitle.textContent = _legend;
