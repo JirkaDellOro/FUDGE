@@ -347,6 +347,22 @@ declare namespace FudgeUserInterface {
     }
 }
 declare namespace FudgeUserInterface {
+    import ƒ = FudgeCore;
+    class List extends Details {
+        mutable: ƒ.MutableArray<ƒ.Mutable>;
+        constructor(_legend: string, _array: ƒ.MutableArray<ƒ.Mutable>);
+        setContent(_array: ƒ.MutableArray<ƒ.Mutable>): void;
+        getMutator(): ƒ.Mutator;
+        protected mutateOnInput: (_event: Event) => Promise<void>;
+        private rearrangeMutable;
+        private setFocus;
+        private hndDragStart;
+        private hndDragOver;
+        private hndDrop;
+        private hndkey;
+    }
+}
+declare namespace FudgeUserInterface {
     /**
      * <select><option>Hallo</option></select>
      */

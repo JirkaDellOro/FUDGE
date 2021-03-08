@@ -1,8 +1,7 @@
-namespace ListControl {
+namespace FudgeUserInterface {
   import ƒ = FudgeCore;
-  import ƒUi = FudgeUserInterface;
 
-  export class List extends ƒUi.Details {
+  export class List extends Details {
     public mutable: ƒ.MutableArray<ƒ.Mutable>;
 
     constructor(_legend: string, _array: ƒ.MutableArray<ƒ.Mutable>) {
@@ -15,7 +14,7 @@ namespace ListControl {
       this.mutable = _array;
       // this.content.innerHTML = "";
       this.removeChild(this.content);
-      this.content = ƒUi.Generator.createInterfaceFromMutable(this.mutable);
+      this.content = Generator.createInterfaceFromMutable(this.mutable);
       this.appendChild(this.content);
       console.log(this);
       for (let child of this.content.children as HTMLCollectionOf<HTMLElement>) {
@@ -30,7 +29,7 @@ namespace ListControl {
 
 
     public getMutator(): ƒ.Mutator {
-      return ƒUi.Controller.getMutator(this.mutable, this);
+      return Controller.getMutator(this.mutable, this);
     }
 
     protected mutateOnInput = async (_event: Event) => {
@@ -50,7 +49,7 @@ namespace ListControl {
       console.log(sequence);
       this.mutable.rearrange(sequence);
       this.setContent(this.mutable);
-      ƒUi.Controller.updateUserInterface(this.mutable, this);
+      Controller.updateUserInterface(this.mutable, this);
       this.setFocus(_focus);
     }
 
@@ -79,7 +78,7 @@ namespace ListControl {
       let drop: HTMLElement = <HTMLElement>_event.currentTarget;
       let keyDrop: string = drop.getAttribute("key");
       let keyDrag: string = _event.dataTransfer.getData("index");
-      let drag: HTMLElement = this.querySelector(`[key=${keyDrag}]`)
+      let drag: HTMLElement = this.querySelector(`[key=${keyDrag}]`);
 
       let insertion: InsertPosition = keyDrag > keyDrop ? "beforebegin" : "afterend";
       if (_event.ctrlKey)
@@ -131,5 +130,5 @@ namespace ListControl {
     }
   }
 
-  customElements.define("list-array", List, { extends: "details" });
+  customElements.define("ui-list", List, { extends: "details" });
 } 

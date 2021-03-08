@@ -122,5 +122,5 @@ namespace FudgeUserInterface {
     }
   }
 
-  customElements.define("ui-set", Details, { extends: "details" });
+  customElements.define("ui-details", Details, { extends: "details" });
 }
