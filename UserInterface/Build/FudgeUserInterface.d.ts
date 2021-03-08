@@ -47,13 +47,13 @@ declare namespace FudgeUserInterface {
      */
     class Generator {
         /**
-         * Creates a [[Controller]] from a [[FudgeCore.Mutable]] with an expandable or mutable set
+         * Creates a [[Controller]] from a [[FudgeCore.Mutable]] with expandable details or a list
          */
         static createController(_mutable: ƒ.Mutable, _name?: string): Controller;
         /**
-         * Create a extendable or mutable set for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+         * Create extendable details for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
          */
-        static createSetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): Details;
+        static createDetailsFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): Details;
         /**
          * Create a div-Elements containing the interface for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
          */
@@ -71,7 +71,7 @@ declare namespace FudgeUserInterface {
          * TODO: refactor for enums
          */
         static createDropdown(_name: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement;
-        static createSet(_key: string, _type: string): Details;
+        static createDetails(_key: string, _type: string): Details;
     }
 }
 declare namespace FudgeUserInterface {
@@ -334,21 +334,7 @@ declare namespace FudgeUserInterface {
 }
 declare namespace FudgeUserInterface {
     import ƒ = FudgeCore;
-    /**
-     * Static class to display a modal or non-modal dialog with an interface for the given mutator.
-     */
-    class Dialog {
-        static dom: HTMLDialogElement;
-        /**
-         * Prompt the dialog to the user with the given headline, call to action and labels for the cancel- and ok-button
-         * Use `await` on call, to continue after the user has pressed one of the buttons.
-         */
-        static prompt(_data: ƒ.Mutable | ƒ.Mutator | Object, _modal?: boolean, _head?: string, _callToAction?: string, _ok?: string, _cancel?: string): Promise<boolean>;
-    }
-}
-declare namespace FudgeUserInterface {
-    import ƒ = FudgeCore;
-    class List extends Details {
+    class DetailsArray extends Details {
         mutable: ƒ.MutableArray<ƒ.Mutable>;
         constructor(_legend: string, _array: ƒ.MutableArray<ƒ.Mutable>);
         setContent(_array: ƒ.MutableArray<ƒ.Mutable>): void;
@@ -360,6 +346,20 @@ declare namespace FudgeUserInterface {
         private hndDragOver;
         private hndDrop;
         private hndkey;
+    }
+}
+declare namespace FudgeUserInterface {
+    import ƒ = FudgeCore;
+    /**
+     * Static class to display a modal or non-modal dialog with an interface for the given mutator.
+     */
+    class Dialog {
+        static dom: HTMLDialogElement;
+        /**
+         * Prompt the dialog to the user with the given headline, call to action and labels for the cancel- and ok-button
+         * Use `await` on call, to continue after the user has pressed one of the buttons.
+         */
+        static prompt(_data: ƒ.Mutable | ƒ.Mutator | Object, _modal?: boolean, _head?: string, _callToAction?: string, _ok?: string, _cancel?: string): Promise<boolean>;
     }
 }
 declare namespace FudgeUserInterface {

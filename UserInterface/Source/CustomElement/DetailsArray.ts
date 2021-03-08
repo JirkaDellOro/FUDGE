@@ -1,7 +1,7 @@
 namespace FudgeUserInterface {
   import ƒ = FudgeCore;
 
-  export class List extends Details {
+  export class DetailsArray extends Details {
     public mutable: ƒ.MutableArray<ƒ.Mutable>;
 
     constructor(_legend: string, _array: ƒ.MutableArray<ƒ.Mutable>) {
@@ -10,7 +10,7 @@ namespace FudgeUserInterface {
       this.addEventListener("input", this.mutateOnInput);
     }
 
-    public setContent(_array: ƒ.MutableArray<ƒ.Mutable>): void { 
+    public setContent(_array: ƒ.MutableArray<ƒ.Mutable>): void {
       this.mutable = _array;
       // this.content.innerHTML = "";
       this.removeChild(this.content);
@@ -98,6 +98,7 @@ namespace FudgeUserInterface {
 
       let focus: number = parseInt(item.getAttribute("label"));
       let sibling: HTMLElement = item;
+      let passEvent: boolean = false;
 
       switch (_event.code) {
         case ƒ.KEYBOARD_CODE.DELETE:
@@ -126,9 +127,16 @@ namespace FudgeUserInterface {
           sibling.insertAdjacentElement("afterend", item);
           this.rearrangeMutable(++focus);
           break;
+        default:
+          passEvent = true;
+      }
+
+      if (!passEvent) {
+        _event.stopPropagation();
+        // this.mutateOnInput(null);
       }
     }
   }
 
-  customElements.define("ui-list", List, { extends: "details" });
-} 
+  customElements.define("ui-list", DetailsArray, { extends: "details" });
+}

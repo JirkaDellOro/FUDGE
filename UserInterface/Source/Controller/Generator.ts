@@ -8,22 +8,29 @@ namespace FudgeUserInterface {
    */
   export class Generator {
     /**
-     * Creates a [[Controller]] from a [[FudgeCore.Mutable]] with an expandable or mutable set
+     * Creates a [[Controller]] from a [[FudgeCore.Mutable]] with expandable details or a list
      */
     public static createController(_mutable: ƒ.Mutable, _name?: string): Controller {
-      let controller: Controller = new Controller(_mutable, Generator.createSetFromMutable(_mutable, _name));
+      let controller: Controller = new Controller(_mutable, Generator.createDetailsFromMutable(_mutable, _name));
       controller.updateUserInterface();
       return controller;
     }
 
     /**
-     * Create a extendable or mutable set for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+     * Create extendable details for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
      */
-    public static createSetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): Details {
+    public static createDetailsFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): Details {
       let name: string = _name || _mutable.constructor.name;
-      let set: Details = Generator.createSet(name, _mutable.type);
-      set.content.appendChild(Generator.createInterfaceFromMutable(_mutable, _mutator));
-      return set;
+
+      if (_mutable instanceof ƒ.MutableArray) {
+        let details: DetailsArray = new DetailsArray(_name, _mutable);
+        // Controller.updateUserInterface(details.mutable, details);
+        return details;
+      }
+
+      let details: Details = Generator.createDetails(name, _mutable.type);
+      details.content.appendChild(Generator.createInterfaceFromMutable(_mutable, _mutator));
+      return details;
     }
 
     /**
@@ -42,12 +49,11 @@ namespace FudgeUserInterface {
           let subMutable: ƒ.Mutable;
           subMutable = Reflect.get(_mutable, key);
           if ((subMutable instanceof ƒ.MutableArray) || (subMutable instanceof ƒ.Mutable))
-            element = Generator.createSetFromMutable(subMutable, key, <ƒ.Mutator>mutator[key]);
+            element = Generator.createDetailsFromMutable(subMutable, key, <ƒ.Mutator>mutator[key]);
           else //Idea: Display an enumerated select here
             element = new CustomElementTextInput({ key: key, label: key, value: type ? type.toString() : "?" });
         }
         div.appendChild(element);
-        // div.appendChild(document.createElement("br"));
       }
       return div;
     }
@@ -61,13 +67,12 @@ namespace FudgeUserInterface {
       for (let key in _mutator) {
         let value: Object = Reflect.get(_mutator, key);
         if (value instanceof Object) {
-          let set: Details = Generator.createSet(key, "Set");
-          set.content.appendChild(Generator.createInterfaceFromMutator(value));
-          div.appendChild(set);
+          let details: Details = Generator.createDetails(key, "Details");
+          details.content.appendChild(Generator.createInterfaceFromMutator(value));
+          div.appendChild(details);
         }
         else
           div.appendChild(this.createMutatorElement(key, (<Object>value).constructor.name, value));
-        // div.appendChild(document.createElement("br"));
       }
       return div;
     }
@@ -79,25 +84,16 @@ namespace FudgeUserInterface {
       let element: HTMLElement;
       try {
         if (_type instanceof Object) {
-          //TODO: refactor for enums and get rid of the two old generator functions
-          // element = document.createElement("span");
-          // Generator.createLabelElement(_key, element);
-          // Generator.createDropdown(_key, _type, _value.toString(), element);
-
           let elementType: typeof CustomElement = CustomElement.get("Object");
           // @ts-ignore: instantiate abstract class
           element = new elementType({ key: _key, label: _key, value: _value.toString() }, _type);
-          // (<CustomElement>element).setMutatorValue(_value);
         }
         else if (_value instanceof ƒ.MutableArray) {
           console.log("MutableArray");
           // insert Array-Controller!
         }
         else {
-          // TODO: remove switch and use registered custom elements instead
-          // let elementType: typeof CustomElement = CustomElement.get(<ObjectConstructor>_value.constructor);
           let elementType: typeof CustomElement = CustomElement.get(_type);
-          // console.log("CustomElement", _type, elementType);
           if (!elementType)
             return element;
           // @ts-ignore: instantiate abstract class
@@ -114,8 +110,6 @@ namespace FudgeUserInterface {
      */
     public static createDropdown(_name: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement {
       let dropdown: HTMLSelectElement = document.createElement("select");
-      // TODO: unique ids
-      // dropdown.id = _name;
       dropdown.name = _name;
       for (let value in _content) {
         let entry: HTMLOptionElement = document.createElement("option");
@@ -130,11 +124,11 @@ namespace FudgeUserInterface {
       return dropdown;
     }
 
-    public static createSet(_key: string, _type: string): Details {
-      let set: Details = new Details(_key);
-      set.setAttribute("key", _key);
-      set.setAttribute("type", _type);
-      return set;
+    public static createDetails(_key: string, _type: string): Details {
+      let details: Details = new Details(_key);
+      details.setAttribute("key", _key);
+      details.setAttribute("type", _type);
+      return details;
     }
   }
 }

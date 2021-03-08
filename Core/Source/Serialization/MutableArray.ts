@@ -32,6 +32,8 @@ namespace FudgeCore {
     public async mutate(_mutator: Mutator): Promise<void> {
       for (let entry in this)
         await this[entry].mutate(_mutator[entry]);
+
+      // this.dispatchEvent(new Event(EVENT.MUTATE));
     }
   }
 }

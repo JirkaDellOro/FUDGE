@@ -149,21 +149,26 @@ var FudgeUserInterface;
      */
     class Generator {
         /**
-         * Creates a [[Controller]] from a [[FudgeCore.Mutable]] with an expandable or mutable set
+         * Creates a [[Controller]] from a [[FudgeCore.Mutable]] with expandable details or a list
          */
         static createController(_mutable, _name) {
-            let controller = new FudgeUserInterface.Controller(_mutable, Generator.createSetFromMutable(_mutable, _name));
+            let controller = new FudgeUserInterface.Controller(_mutable, Generator.createDetailsFromMutable(_mutable, _name));
             controller.updateUserInterface();
             return controller;
         }
         /**
-         * Create a extendable or mutable set for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+         * Create extendable details for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
          */
-        static createSetFromMutable(_mutable, _name, _mutator) {
+        static createDetailsFromMutable(_mutable, _name, _mutator) {
             let name = _name || _mutable.constructor.name;
-            let set = Generator.createSet(name, _mutable.type);
-            set.content.appendChild(Generator.createInterfaceFromMutable(_mutable, _mutator));
-            return set;
+            if (_mutable instanceof ƒ.MutableArray) {
+                let details = new FudgeUserInterface.DetailsArray(_name, _mutable);
+                // Controller.updateUserInterface(details.mutable, details);
+                return details;
+            }
+            let details = Generator.createDetails(name, _mutable.type);
+            details.content.appendChild(Generator.createInterfaceFromMutable(_mutable, _mutator));
+            return details;
         }
         /**
          * Create a div-Elements containing the interface for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
@@ -180,12 +185,11 @@ var FudgeUserInterface;
                     let subMutable;
                     subMutable = Reflect.get(_mutable, key);
                     if ((subMutable instanceof ƒ.MutableArray) || (subMutable instanceof ƒ.Mutable))
-                        element = Generator.createSetFromMutable(subMutable, key, mutator[key]);
+                        element = Generator.createDetailsFromMutable(subMutable, key, mutator[key]);
                     else //Idea: Display an enumerated select here
                         element = new FudgeUserInterface.CustomElementTextInput({ key: key, label: key, value: type ? type.toString() : "?" });
                 }
                 div.appendChild(element);
-                // div.appendChild(document.createElement("br"));
             }
             return div;
         }
@@ -198,13 +202,12 @@ var FudgeUserInterface;
             for (let key in _mutator) {
                 let value = Reflect.get(_mutator, key);
                 if (value instanceof Object) {
-                    let set = Generator.createSet(key, "Set");
-                    set.content.appendChild(Generator.createInterfaceFromMutator(value));
-                    div.appendChild(set);
+                    let details = Generator.createDetails(key, "Details");
+                    details.content.appendChild(Generator.createInterfaceFromMutator(value));
+                    div.appendChild(details);
                 }
                 else
                     div.appendChild(this.createMutatorElement(key, value.constructor.name, value));
-                // div.appendChild(document.createElement("br"));
             }
             return div;
         }
@@ -215,24 +218,16 @@ var FudgeUserInterface;
             let element;
             try {
                 if (_type instanceof Object) {
-                    //TODO: refactor for enums and get rid of the two old generator functions
-                    // element = document.createElement("span");
-                    // Generator.createLabelElement(_key, element);
-                    // Generator.createDropdown(_key, _type, _value.toString(), element);
                     let elementType = FudgeUserInterface.CustomElement.get("Object");
                     // @ts-ignore: instantiate abstract class
                     element = new elementType({ key: _key, label: _key, value: _value.toString() }, _type);
-                    // (<CustomElement>element).setMutatorValue(_value);
                 }
                 else if (_value instanceof ƒ.MutableArray) {
                     console.log("MutableArray");
                     // insert Array-Controller!
                 }
                 else {
-                    // TODO: remove switch and use registered custom elements instead
-                    // let elementType: typeof CustomElement = CustomElement.get(<ObjectConstructor>_value.constructor);
                     let elementType = FudgeUserInterface.CustomElement.get(_type);
-                    // console.log("CustomElement", _type, elementType);
                     if (!elementType)
                         return element;
                     // @ts-ignore: instantiate abstract class
@@ -249,8 +244,6 @@ var FudgeUserInterface;
          */
         static createDropdown(_name, _content, _value, _parent, _cssClass) {
             let dropdown = document.createElement("select");
-            // TODO: unique ids
-            // dropdown.id = _name;
             dropdown.name = _name;
             for (let value in _content) {
                 let entry = document.createElement("option");
@@ -264,11 +257,11 @@ var FudgeUserInterface;
             _parent.appendChild(dropdown);
             return dropdown;
         }
-        static createSet(_key, _type) {
-            let set = new FudgeUserInterface.Details(_key);
-            set.setAttribute("key", _key);
-            set.setAttribute("type", _type);
-            return set;
+        static createDetails(_key, _type) {
+            let details = new FudgeUserInterface.Details(_key);
+            details.setAttribute("key", _key);
+            details.setAttribute("type", _type);
+            return details;
         }
     }
     FudgeUserInterface.Generator = Generator;
@@ -1154,6 +1147,131 @@ var FudgeUserInterface;
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
     var ƒ = FudgeCore;
+    class DetailsArray extends FudgeUserInterface.Details {
+        constructor(_legend, _array) {
+            super(_legend);
+            this.mutateOnInput = async (_event) => {
+                let mutator = this.getMutator();
+                // console.log(mutator);
+                await this.mutable.mutate(mutator);
+                _event.stopPropagation();
+                this.dispatchEvent(new Event("mutate" /* MUTATE */, { bubbles: true }));
+            };
+            this.hndDragStart = (_event) => {
+                // _event.preventDefault; 
+                let keyDrag = _event.currentTarget.getAttribute("key");
+                _event.dataTransfer.setData("index", keyDrag);
+            };
+            this.hndDragOver = (_event) => {
+                _event.preventDefault();
+                if (_event.ctrlKey)
+                    _event.dataTransfer.dropEffect = "copy";
+                if (_event.shiftKey)
+                    _event.dataTransfer.dropEffect = "link";
+            };
+            this.hndDrop = (_event) => {
+                let drop = _event.currentTarget;
+                let keyDrop = drop.getAttribute("key");
+                let keyDrag = _event.dataTransfer.getData("index");
+                let drag = this.querySelector(`[key=${keyDrag}]`);
+                let insertion = keyDrag > keyDrop ? "beforebegin" : "afterend";
+                if (_event.ctrlKey)
+                    drag = drag.cloneNode(true);
+                if (_event.shiftKey) {
+                    drag.parentNode.removeChild(drag);
+                }
+                else
+                    drop.insertAdjacentElement(insertion, drag);
+            };
+            this.hndkey = (_event) => {
+                let item = _event.currentTarget;
+                // only work on items of list, not their children
+                if (_event.target != item)
+                    return;
+                let focus = parseInt(item.getAttribute("label"));
+                let sibling = item;
+                let passEvent = false;
+                switch (_event.code) {
+                    case ƒ.KEYBOARD_CODE.DELETE:
+                        item.parentNode.removeChild(item);
+                        this.rearrangeMutable(focus);
+                        break;
+                    case ƒ.KEYBOARD_CODE.ARROW_UP:
+                        if (!_event.altKey) {
+                            this.setFocus(--focus);
+                            break;
+                        }
+                        _event.shiftKey ? item = item.cloneNode(true) : sibling = item.previousSibling;
+                        if (!sibling)
+                            break;
+                        sibling.insertAdjacentElement("beforebegin", item);
+                        this.rearrangeMutable(--focus);
+                        break;
+                    case ƒ.KEYBOARD_CODE.ARROW_DOWN:
+                        if (!_event.altKey) {
+                            this.setFocus(++focus);
+                            break;
+                        }
+                        _event.shiftKey ? item = item.cloneNode(true) : sibling = item.nextSibling;
+                        if (!sibling)
+                            break;
+                        sibling.insertAdjacentElement("afterend", item);
+                        this.rearrangeMutable(++focus);
+                        break;
+                    default:
+                        passEvent = true;
+                }
+                if (!passEvent) {
+                    _event.stopPropagation();
+                    // this.mutateOnInput(null);
+                }
+            };
+            this.setContent(_array);
+            this.addEventListener("input", this.mutateOnInput);
+        }
+        setContent(_array) {
+            this.mutable = _array;
+            // this.content.innerHTML = "";
+            this.removeChild(this.content);
+            this.content = FudgeUserInterface.Generator.createInterfaceFromMutable(this.mutable);
+            this.appendChild(this.content);
+            console.log(this);
+            for (let child of this.content.children) {
+                child.draggable = true;
+                child.addEventListener("dragstart", this.hndDragStart);
+                child.addEventListener("drop", this.hndDrop);
+                child.addEventListener("dragover", this.hndDragOver);
+                child.addEventListener("keydown", this.hndkey, true);
+                child.tabIndex = 0;
+            }
+        }
+        getMutator() {
+            return FudgeUserInterface.Controller.getMutator(this.mutable, this);
+        }
+        rearrangeMutable(_focus = undefined) {
+            let sequence = [];
+            for (let child of this.content.children) {
+                sequence.push(parseInt(child.getAttribute("label")));
+            }
+            console.log(sequence);
+            this.mutable.rearrange(sequence);
+            this.setContent(this.mutable);
+            FudgeUserInterface.Controller.updateUserInterface(this.mutable, this);
+            this.setFocus(_focus);
+        }
+        setFocus(_focus = undefined) {
+            if (_focus == undefined)
+                return;
+            _focus = Math.min(_focus, this.content.children.length - 1);
+            this.content.children[_focus].focus();
+        }
+    }
+    FudgeUserInterface.DetailsArray = DetailsArray;
+    customElements.define("ui-list", DetailsArray, { extends: "details" });
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
+    var ƒ = FudgeCore;
     /**
      * Static class to display a modal or non-modal dialog with an interface for the given mutator.
      */
@@ -1202,124 +1320,6 @@ var FudgeUserInterface;
         }
     }
     FudgeUserInterface.Dialog = Dialog;
-})(FudgeUserInterface || (FudgeUserInterface = {}));
-var FudgeUserInterface;
-(function (FudgeUserInterface) {
-    var ƒ = FudgeCore;
-    class List extends FudgeUserInterface.Details {
-        constructor(_legend, _array) {
-            super(_legend);
-            this.mutateOnInput = async (_event) => {
-                let mutator = this.getMutator();
-                // console.log(mutator);
-                await this.mutable.mutate(mutator);
-                _event.stopPropagation();
-                this.dispatchEvent(new Event("mutate" /* MUTATE */, { bubbles: true }));
-            };
-            this.hndDragStart = (_event) => {
-                // _event.preventDefault; 
-                let keyDrag = _event.currentTarget.getAttribute("key");
-                _event.dataTransfer.setData("index", keyDrag);
-            };
-            this.hndDragOver = (_event) => {
-                _event.preventDefault();
-                if (_event.ctrlKey)
-                    _event.dataTransfer.dropEffect = "copy";
-                if (_event.shiftKey)
-                    _event.dataTransfer.dropEffect = "link";
-            };
-            this.hndDrop = (_event) => {
-                let drop = _event.currentTarget;
-                let keyDrop = drop.getAttribute("key");
-                let keyDrag = _event.dataTransfer.getData("index");
-                let drag = this.querySelector(`[key=${keyDrag}]`);
-                let insertion = keyDrag > keyDrop ? "beforebegin" : "afterend";
-                if (_event.ctrlKey)
-                    drag = drag.cloneNode(true);
-                if (_event.shiftKey) {
-                    drag.parentNode.removeChild(drag);
-                }
-                else
-                    drop.insertAdjacentElement(insertion, drag);
-            };
-            this.hndkey = (_event) => {
-                let item = _event.currentTarget;
-                // only work on items of list, not their children
-                if (_event.target != item)
-                    return;
-                let focus = parseInt(item.getAttribute("label"));
-                let sibling = item;
-                switch (_event.code) {
-                    case ƒ.KEYBOARD_CODE.DELETE:
-                        item.parentNode.removeChild(item);
-                        this.rearrangeMutable(focus);
-                        break;
-                    case ƒ.KEYBOARD_CODE.ARROW_UP:
-                        if (!_event.altKey) {
-                            this.setFocus(--focus);
-                            break;
-                        }
-                        _event.shiftKey ? item = item.cloneNode(true) : sibling = item.previousSibling;
-                        if (!sibling)
-                            break;
-                        sibling.insertAdjacentElement("beforebegin", item);
-                        this.rearrangeMutable(--focus);
-                        break;
-                    case ƒ.KEYBOARD_CODE.ARROW_DOWN:
-                        if (!_event.altKey) {
-                            this.setFocus(++focus);
-                            break;
-                        }
-                        _event.shiftKey ? item = item.cloneNode(true) : sibling = item.nextSibling;
-                        if (!sibling)
-                            break;
-                        sibling.insertAdjacentElement("afterend", item);
-                        this.rearrangeMutable(++focus);
-                        break;
-                }
-            };
-            this.setContent(_array);
-            this.addEventListener("input", this.mutateOnInput);
-        }
-        setContent(_array) {
-            this.mutable = _array;
-            // this.content.innerHTML = "";
-            this.removeChild(this.content);
-            this.content = FudgeUserInterface.Generator.createInterfaceFromMutable(this.mutable);
-            this.appendChild(this.content);
-            console.log(this);
-            for (let child of this.content.children) {
-                child.draggable = true;
-                child.addEventListener("dragstart", this.hndDragStart);
-                child.addEventListener("drop", this.hndDrop);
-                child.addEventListener("dragover", this.hndDragOver);
-                child.addEventListener("keydown", this.hndkey, true);
-                child.tabIndex = 0;
-            }
-        }
-        getMutator() {
-            return FudgeUserInterface.Controller.getMutator(this.mutable, this);
-        }
-        rearrangeMutable(_focus = undefined) {
-            let sequence = [];
-            for (let child of this.content.children) {
-                sequence.push(parseInt(child.getAttribute("label")));
-            }
-            console.log(sequence);
-            this.mutable.rearrange(sequence);
-            this.setContent(this.mutable);
-            FudgeUserInterface.Controller.updateUserInterface(this.mutable, this);
-            this.setFocus(_focus);
-        }
-        setFocus(_focus = undefined) {
-            if (_focus == undefined)
-                return;
-            _focus = Math.min(_focus, this.content.children.length - 1);
-            this.content.children[_focus].focus();
-        }
-    }
-    FudgeUserInterface.List = List;
-    customElements.define("ui-list", List, { extends: "details" });
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
