@@ -2,42 +2,46 @@ namespace FudgeUserInterface {
   import ƒ = FudgeCore;
 
   export class DetailsArray extends Details {
-    public mutable: ƒ.MutableArray<ƒ.Mutable>;
+    // public mutable: ƒ.MutableArray<ƒ.Mutable>;
 
-    constructor(_legend: string, _array: ƒ.MutableArray<ƒ.Mutable>) {
+    constructor(_legend: string) {
       super(_legend);
-      this.setContent(_array);
-      this.addEventListener("input", this.mutateOnInput);
     }
 
-    public setContent(_array: ƒ.MutableArray<ƒ.Mutable>): void {
-      this.mutable = _array;
-      this.removeChild(this.content);
-      this.content = Generator.createInterfaceFromMutable(this.mutable);
-      this.appendChild(this.content);
+    public setContent(_content: HTMLDivElement): void {
+      super.setContent(_content);
+      // this.mutable = _array;
+      // this.removeChild(this.content);
+      // this.content = Generator.createInterfaceFromMutable(this.mutable);
+      // this.appendChild(this.content);
       for (let child of this.content.children as HTMLCollectionOf<HTMLElement>) {
         child.draggable = true;
-        child.addEventListener("dragstart", this.hndDragStart);
-        child.addEventListener("drop", this.hndDrop);
-        child.addEventListener("dragover", this.hndDragOver);
-        child.addEventListener("keydown", this.hndkey, true);
+        child.addEventListener(EVENT.DRAG_START, this.hndDragStart);
+        child.addEventListener(EVENT.DROP, this.hndDrop);
+        child.addEventListener(EVENT.DRAG_OVER, this.hndDragOver);
+        child.addEventListener(EVENT.KEY_DOWN, this.hndkey, true);
         child.tabIndex = 0;
       }
     }
 
 
     public getMutator(): ƒ.Mutator {
-      return Controller.getMutator(this.mutable, this);
+      let mutator: ƒ.Mutator[] = [];
+
+      for (let child of this.content.children as HTMLCollectionOf<CustomElement>) {
+        mutator.push(child.getMutatorValue());
+      }
+      return mutator;
     }
 
-    protected mutateOnInput = async (_event: Event) => {
-      let mutator: ƒ.Mutator = this.getMutator();
-      // console.log(mutator);
-      await this.mutable.mutate(mutator);
-      _event.stopPropagation();
+    // protected mutateOnInput = async (_event: Event) => {
+    //   let mutator: ƒ.Mutator = this.getMutator();
+    //   console.log(mutator);
+    //   await this.mutable.mutate(mutator);
+    //   _event.stopPropagation();
 
-      this.dispatchEvent(new Event(ƒ.EVENT.MUTATE, { bubbles: true }));
-    }
+    //   this.dispatchEvent(new Event(ƒ.EVENT.MUTATE, { bubbles: true }));
+    // }
 
     private rearrangeMutable(_focus: number = undefined): void {
       let sequence: number[] = [];
@@ -45,12 +49,13 @@ namespace FudgeUserInterface {
         sequence.push(parseInt(child.getAttribute("label")));
       }
       console.log(sequence);
-      this.mutable.rearrange(sequence);
+      // this.mutable.rearrange(sequence);
 
-      this.setContent(this.mutable);
-      Controller.updateUserInterface(this.mutable, this);
+      // this.setContent(this.mutable);
+      // Controller.updateUserInterface(this.mutable, this);
       this.setFocus(_focus);
-      this.dispatchEvent(new Event("input", { bubbles: true }));
+      this.dispatchEvent(new CustomEvent(EVENT.REARRANGE_ARRAY, { bubbles: true, detail: { key: this.getAttribute("key"), sequence: sequence }}));
+      this.dispatchEvent(new Event(EVENT.INPUT, { bubbles: true }));
     }
 
     private setFocus(_focus: number = undefined): void {
@@ -113,7 +118,7 @@ namespace FudgeUserInterface {
             this.setFocus(--focus);
             break;
           }
-          _event.shiftKey ? item = <HTMLElement>item.cloneNode(true) : sibling = <HTMLElement>item.previousSibling;
+          _event.shiftKey ? item = <HTMLElement>item.cloneNode(false) : sibling = <HTMLElement>item.previousSibling;
           if (sibling)
             sibling.insertAdjacentElement("beforebegin", item);
           this.rearrangeMutable(--focus);
@@ -123,7 +128,7 @@ namespace FudgeUserInterface {
             this.setFocus(++focus);
             break;
           }
-          _event.shiftKey ? item = <HTMLElement>item.cloneNode(true) : sibling = <HTMLElement>item.nextSibling;
+          _event.shiftKey ? item = <HTMLElement>item.cloneNode(false) : sibling = <HTMLElement>item.nextSibling;
           if (sibling)
             sibling.insertAdjacentElement("afterend", item);
           this.rearrangeMutable(++focus);

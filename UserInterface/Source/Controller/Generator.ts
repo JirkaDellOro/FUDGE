@@ -19,16 +19,17 @@ namespace FudgeUserInterface {
     /**
      * Create extendable details for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
      */
-    public static createDetailsFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): Details {
+    public static createDetailsFromMutable(_mutable: ƒ.Mutable | ƒ.MutableArray<ƒ.Mutable>, _name?: string, _mutator?: ƒ.Mutator): Details | DetailsArray {
       let name: string = _name || _mutable.constructor.name;
 
-      if (_mutable instanceof ƒ.MutableArray) {
-        let details: DetailsArray = new DetailsArray(name, _mutable);
-        return details;
-      }
+      let details: Details | DetailsArray;
+      if (_mutable instanceof ƒ.MutableArray)
+        details = new DetailsArray(name);
+      else if (_mutable instanceof ƒ.Mutable)
+        details = new Details(name);
+      else return null;
 
-      let details: Details = Generator.createDetails(name, _mutable.type);
-      details.content.appendChild(Generator.createInterfaceFromMutable(_mutable, _mutator));
+      details.setContent(Generator.createInterfaceFromMutable(_mutable, _mutator));
       return details;
     }
 
@@ -47,9 +48,9 @@ namespace FudgeUserInterface {
         if (!element) {
           let subMutable: ƒ.Mutable;
           subMutable = Reflect.get(_mutable, key);
-          if ((subMutable instanceof ƒ.MutableArray) || (subMutable instanceof ƒ.Mutable))
-            element = Generator.createDetailsFromMutable(subMutable, key, <ƒ.Mutator>mutator[key]);
-          else //Idea: Display an enumerated select here
+          element = Generator.createDetailsFromMutable(subMutable, key, <ƒ.Mutator>mutator[key]);
+          if (!element)
+            //Idea: Display an enumerated select here
             element = new CustomElementTextInput({ key: key, label: key, value: type ? type.toString() : "?" });
         }
         div.appendChild(element);
@@ -66,7 +67,8 @@ namespace FudgeUserInterface {
       for (let key in _mutator) {
         let value: Object = Reflect.get(_mutator, key);
         if (value instanceof Object) {
-          let details: Details = Generator.createDetails(key, "Details");
+          // let details: Details = Generator.createDetails(key, "Details");
+          let details: Details = new Details(key);
           details.content.appendChild(Generator.createInterfaceFromMutator(value));
           div.appendChild(details);
         }
@@ -123,12 +125,17 @@ namespace FudgeUserInterface {
       return dropdown;
     }
 
-    public static createDetails(_key: string, _type: string): Details {
-      let details: Details = new Details(_key);
-      details.setAttribute("key", _key);
-      details.setAttribute("type", _type);
-      return details;
-    }
+    // public static createDetails(_key: string, _type: string): Details {
+    //   let details: Details = new Details(_key);
+    //   // details.setAttribute("type", _type);
+    //   return details;
+    // }
+    // public static createDetailsArray(_key: string, _type: string): Details {
+    //   let details: Details = new DetailsArray(_key);
+    //   details.setAttribute("key", _key);
+    //   details.setAttribute("type", _type);
+    //   return details;
+    // }
   }
 }
 

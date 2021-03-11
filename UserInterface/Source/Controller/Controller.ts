@@ -24,7 +24,8 @@ namespace FudgeUserInterface {
       this.setMutable(_mutable);
       // TODO: examine, if this should register to one common interval, instead of each installing its own.
       this.startRefresh();
-      this.domElement.addEventListener("input", this.mutateOnInput);
+      this.domElement.addEventListener(EVENT.INPUT, this.mutateOnInput);
+      this.domElement.addEventListener(EVENT.REARRANGE_ARRAY, this.rearrangeArray);
     }
 
     /**
@@ -145,6 +146,30 @@ namespace FudgeUserInterface {
     }
 
     protected mutateOnInput = async (_event: Event) => {
+      this.mutator = this.getMutator();
+      await this.mutable.mutate(this.mutator);
+      _event.stopPropagation();
+
+      this.domElement.dispatchEvent(new Event(EVENT.MUTATE, { bubbles: true }));
+    }
+
+    protected rearrangeArray = async (_event: Event) => {
+      let sequence: number[] = (<CustomEvent>_event).detail.sequence;
+      let path: string[] = [];
+      let element: HTMLElement = <HTMLElement>_event.target;
+      while (element != this.domElement) {
+        if (element.getAttribute("key"))
+          path.push(element.getAttribute("key"));
+        element = element.parentElement;
+      }
+      // console.log(path);
+      let mutable: ƒ.Mutable = this.mutable;
+      for (let key of path)
+        mutable = Reflect.get(mutable, key);
+
+      (<ƒ.MutableArray<ƒ.Mutable>><unknown>mutable).rearrange(sequence);
+      // this.setContent(this.mutable);
+      Controller.updateUserInterface(mutable, <HTMLElement>_event.target);
       this.mutator = this.getMutator();
       await this.mutable.mutate(this.mutator);
       _event.stopPropagation();

@@ -8,9 +8,9 @@ namespace FudgeUserInterface {
       super();
       this.setAttribute("key", _legend);
       this.open = true;
-      let lblTitle: HTMLElement = document.createElement("summary");
-      lblTitle.textContent = _legend;
-      this.appendChild(lblTitle);
+      let lblSummary: HTMLElement = document.createElement("summary");
+      lblSummary.textContent = _legend;
+      this.appendChild(lblSummary);
 
       this.content = document.createElement("div");
       this.appendChild(this.content);
@@ -20,13 +20,17 @@ namespace FudgeUserInterface {
       this.addEventListener(EVENT.FOCUS_NEXT, this.hndFocus);
       this.addEventListener(EVENT.FOCUS_PREVIOUS, this.hndFocus);
       this.addEventListener(EVENT.FOCUS_SET, this.hndFocus);
-      // this.expander.addEventListener("input", this.hndToggle);
-      // this.expander.addEventListener("change", this.hndToggle);
     }
+
 
     public get isExpanded(): boolean {
       // return this.expander.checked;
       return this.open;
+    }
+
+    public setContent(_content: HTMLDivElement): void {
+      this.replaceChild(_content, this.content);
+      this.content = _content;
     }
 
     public expand(_expand: boolean): void {

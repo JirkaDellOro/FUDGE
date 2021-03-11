@@ -105,9 +105,9 @@ namespace Fudge {
 
           let nodeComponents: ƒ.Component[] = this.node.getAllComponents();
           for (let nodeComponent of nodeComponents) {
-            let fieldset: ƒui.Details = ƒui.Generator.createDetailsFromMutable(nodeComponent);
-            let uiComponent: ControllerComponent = new ControllerComponent(nodeComponent, fieldset);
-            fieldset.expand(this.expanded[nodeComponent.type]);
+            let details: ƒui.Details = ƒui.Generator.createDetailsFromMutable(nodeComponent);
+            let uiComponent: ControllerComponent = new ControllerComponent(nodeComponent, details);
+            details.expand(this.expanded[nodeComponent.type]);
             this.dom.append(uiComponent.domElement);
           }
         }

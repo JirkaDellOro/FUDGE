@@ -7,11 +7,13 @@ namespace FudgeUserInterface {
     DRAG_OVER = "dragover",
     DROP = "drop",
     POINTER_UP = "pointerup",
+    WHEEL = "wheel",
     FOCUS_NEXT = "focusNext",
     FOCUS_PREVIOUS = "focusPrevious",
     FOCUS_IN = "focusin",
     FOCUS_OUT = "focusout",
     FOCUS_SET = "focusSet",
+    BLUR = "blur",
     CHANGE = "change",
     DELETE = "delete",
     RENAME = "rename",
@@ -25,6 +27,8 @@ namespace FudgeUserInterface {
     MUTATE = "mutate",
     REMOVE_CHILD = "removeChild",
     COLLAPSE = "collapse",
-    EXPAND = "expand"
+    EXPAND = "expand",
+    INPUT = "input",
+    REARRANGE_ARRAY = "rearrangeArray"
   }
 }

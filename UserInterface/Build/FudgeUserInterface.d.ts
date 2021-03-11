@@ -37,6 +37,7 @@ declare namespace FudgeUserInterface {
         setMutable(_mutable: ƒ.Mutable): void;
         startRefresh(): void;
         protected mutateOnInput: (_event: Event) => Promise<void>;
+        protected rearrangeArray: (_event: Event) => Promise<void>;
         protected refresh: (_event: Event) => void;
     }
 }
@@ -53,7 +54,7 @@ declare namespace FudgeUserInterface {
         /**
          * Create extendable details for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
          */
-        static createDetailsFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): Details;
+        static createDetailsFromMutable(_mutable: ƒ.Mutable | ƒ.MutableArray<ƒ.Mutable>, _name?: string, _mutator?: ƒ.Mutator): Details | DetailsArray;
         /**
          * Create a div-Elements containing the interface for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
          */
@@ -71,7 +72,6 @@ declare namespace FudgeUserInterface {
          * TODO: refactor for enums
          */
         static createDropdown(_name: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement;
-        static createDetails(_key: string, _type: string): Details;
     }
 }
 declare namespace FudgeUserInterface {
@@ -326,6 +326,7 @@ declare namespace FudgeUserInterface {
         content: HTMLDivElement;
         constructor(_legend?: string);
         get isExpanded(): boolean;
+        setContent(_content: HTMLDivElement): void;
         expand(_expand: boolean): void;
         private hndToggle;
         private hndFocus;
@@ -335,11 +336,9 @@ declare namespace FudgeUserInterface {
 declare namespace FudgeUserInterface {
     import ƒ = FudgeCore;
     class DetailsArray extends Details {
-        mutable: ƒ.MutableArray<ƒ.Mutable>;
-        constructor(_legend: string, _array: ƒ.MutableArray<ƒ.Mutable>);
-        setContent(_array: ƒ.MutableArray<ƒ.Mutable>): void;
+        constructor(_legend: string);
+        setContent(_content: HTMLDivElement): void;
         getMutator(): ƒ.Mutator;
-        protected mutateOnInput: (_event: Event) => Promise<void>;
         private rearrangeMutable;
         private setFocus;
         private hndDragStart;
@@ -687,11 +686,13 @@ declare namespace FudgeUserInterface {
         DRAG_OVER = "dragover",
         DROP = "drop",
         POINTER_UP = "pointerup",
+        WHEEL = "wheel",
         FOCUS_NEXT = "focusNext",
         FOCUS_PREVIOUS = "focusPrevious",
         FOCUS_IN = "focusin",
         FOCUS_OUT = "focusout",
         FOCUS_SET = "focusSet",
+        BLUR = "blur",
         CHANGE = "change",
         DELETE = "delete",
         RENAME = "rename",
@@ -705,6 +706,8 @@ declare namespace FudgeUserInterface {
         MUTATE = "mutate",
         REMOVE_CHILD = "removeChild",
         COLLAPSE = "collapse",
-        EXPAND = "expand"
+        EXPAND = "expand",
+        INPUT = "input",
+        REARRANGE_ARRAY = "rearrangeArray"
     }
 }
