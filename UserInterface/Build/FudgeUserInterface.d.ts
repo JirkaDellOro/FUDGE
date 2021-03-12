@@ -327,7 +327,7 @@ declare namespace FudgeUserInterface {
 declare namespace FudgeUserInterface {
     class Details extends HTMLDetailsElement {
         content: HTMLDivElement;
-        constructor(_legend?: string);
+        constructor(_legend: string, _type: string);
         get isExpanded(): boolean;
         setContent(_content: HTMLDivElement): void;
         expand(_expand: boolean): void;

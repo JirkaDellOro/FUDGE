@@ -2,10 +2,9 @@ namespace FudgeUserInterface {
   import ƒ = FudgeCore;
 
   export class DetailsArray extends Details {
-    // public mutable: ƒ.MutableArray<ƒ.Mutable>;
 
     constructor(_legend: string) {
-      super(_legend);
+      super(_legend, "Array");
     }
 
     public setContent(_content: HTMLDivElement): void {

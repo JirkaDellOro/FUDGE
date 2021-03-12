@@ -186,7 +186,7 @@ var FudgeUserInterface;
             if (_mutable instanceof ƒ.MutableArray)
                 details = new FudgeUserInterface.DetailsArray(name);
             else if (_mutable instanceof ƒ.Mutable)
-                details = new FudgeUserInterface.Details(name);
+                details = new FudgeUserInterface.Details(name, _mutable.type);
             else
                 return null;
             details.setContent(Generator.createInterfaceFromMutable(_mutable, _mutator));
@@ -225,7 +225,7 @@ var FudgeUserInterface;
                 let value = Reflect.get(_mutator, key);
                 if (value instanceof Object) {
                     // let details: Details = Generator.createDetails(key, "Details");
-                    let details = new FudgeUserInterface.Details(key);
+                    let details = new FudgeUserInterface.Details(key, "Details");
                     details.content.appendChild(Generator.createInterfaceFromMutator(value));
                     div.appendChild(details);
                 }
@@ -1071,7 +1071,7 @@ var FudgeUserInterface;
 (function (FudgeUserInterface) {
     var ƒ = FudgeCore;
     class Details extends HTMLDetailsElement {
-        constructor(_legend = "") {
+        constructor(_legend = "", _type) {
             super();
             this.hndToggle = (_event) => {
                 if (_event)
@@ -1153,6 +1153,7 @@ var FudgeUserInterface;
                 }
             };
             this.setAttribute("key", _legend);
+            this.setAttribute("type", _type);
             this.open = true;
             let lblSummary = document.createElement("summary");
             lblSummary.textContent = _legend;
@@ -1186,9 +1187,8 @@ var FudgeUserInterface;
 (function (FudgeUserInterface) {
     var ƒ = FudgeCore;
     class DetailsArray extends FudgeUserInterface.Details {
-        // public mutable: ƒ.MutableArray<ƒ.Mutable>;
         constructor(_legend) {
-            super(_legend);
+            super(_legend, "Array");
             this.hndDragStart = (_event) => {
                 // _event.preventDefault; 
                 let keyDrag = _event.currentTarget.getAttribute("key");

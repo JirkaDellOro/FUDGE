@@ -21,15 +21,6 @@
       "idResource": "MeshExtrusion|2021-03-12T08:34:59.462Z|59324",
       "name": "MeshExtrusion",
       "type": "MeshExtrusion",
-      "shape": {
-        "ƒ.Vector2": [
-          "[-1, -1]",
-          "[1, -1]",
-          "[0, 1]"
-        ]
-      },
-      "fitMesh": true,
-      "fitTexture": true,
       "transforms": {
         "ƒ.Matrix4x4": [
           {
@@ -48,6 +39,17 @@
             "scaling": "[1, 1, 1]"
           }
         ]
+      },
+      "MeshPolygon": {
+        "shape": {
+          "ƒ.Vector2": [
+            "[-1, -1]",
+            "[1, -1]",
+            "[0, 1]"
+          ]
+        },
+        "fitMesh": true,
+        "fitTexture": true
       }
     }
   },
@@ -60,19 +62,6 @@
         "ƒ.CoatTextured": {
           "name": "Coat",
           "color": "[1, 1, 1, 1]"
-        }
-      }
-    }
-  },
-  "Material|2021-03-12T08:21:45.681Z|49886": {
-    "ƒ.Material": {
-      "name": "mtrFlat",
-      "idResource": "Material|2021-03-12T08:21:45.681Z|49886",
-      "shader": "ShaderFlat",
-      "coat": {
-        "ƒ.CoatColored": {
-          "name": "Coat",
-          "color": "[1, 0, 0, 1]"
         }
       }
     }
@@ -196,6 +185,19 @@
       ],
       "idResource": "Graph|2021-03-12T08:01:20.043Z|34632",
       "type": "Graph"
+    }
+  },
+  "Material|2021-03-12T08:21:45.681Z|49886": {
+    "ƒ.Material": {
+      "name": "mtrFlat",
+      "idResource": "Material|2021-03-12T08:21:45.681Z|49886",
+      "shader": "ShaderFlat",
+      "coat": {
+        "ƒ.CoatColored": {
+          "name": "Coat",
+          "color": "[1, 0, 0, 1]"
+        }
+      }
     }
   }
 }

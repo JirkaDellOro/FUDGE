@@ -28,10 +28,8 @@ namespace FudgeCore {
 
     //#region Transfer
     public serialize(): Serialization {
-      let serialization: Serialization = {
-        transforms: Serializer.serializeArray(Matrix4x4, this.transforms),
-        [super.constructor.name]: super.serialize()
-      };
+      let serialization: Serialization = super.serialize();
+      serialization.transforms = Serializer.serializeArray(Matrix4x4, this.transforms);
       return serialization;
     }
 

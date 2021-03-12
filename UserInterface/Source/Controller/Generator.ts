@@ -26,7 +26,7 @@ namespace FudgeUserInterface {
       if (_mutable instanceof ƒ.MutableArray)
         details = new DetailsArray(name);
       else if (_mutable instanceof ƒ.Mutable)
-        details = new Details(name);
+        details = new Details(name, _mutable.type);
       else return null;
 
       details.setContent(Generator.createInterfaceFromMutable(_mutable, _mutator));
@@ -68,7 +68,7 @@ namespace FudgeUserInterface {
         let value: Object = Reflect.get(_mutator, key);
         if (value instanceof Object) {
           // let details: Details = Generator.createDetails(key, "Details");
-          let details: Details = new Details(key);
+          let details: Details = new Details(key, "Details");
           details.content.appendChild(Generator.createInterfaceFromMutator(value));
           div.appendChild(details);
         }

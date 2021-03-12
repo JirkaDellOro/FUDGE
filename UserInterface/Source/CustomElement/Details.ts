@@ -4,9 +4,10 @@ namespace FudgeUserInterface {
   export class Details extends HTMLDetailsElement {
     public content: HTMLDivElement;
 
-    public constructor(_legend: string = "") {
+    public constructor(_legend: string = "", _type: string) {
       super();
       this.setAttribute("key", _legend);
+      this.setAttribute("type", _type);
       this.open = true;
       let lblSummary: HTMLElement = document.createElement("summary");
       lblSummary.textContent = _legend;
