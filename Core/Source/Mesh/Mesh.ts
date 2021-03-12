@@ -44,7 +44,7 @@ namespace FudgeCore {
 
     protected static getTrigonsFromQuad(_quad: number[]): number[] {
       // TODO: add parameters for other diagonal and reversion of rotation
-      let indices: number[] = [_quad[0], _quad[1], _quad[2], _quad[0], _quad[2], _quad[3]];
+      let indices: number[] = [_quad[0], _quad[1], _quad[2], _quad[3], _quad[0], _quad[2]];
       return indices;
     }
 

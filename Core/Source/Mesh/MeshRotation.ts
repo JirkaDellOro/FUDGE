@@ -62,12 +62,11 @@ namespace FudgeCore {
       // let nFacesPolygon: number = nVerticesPolygon - 2;
       // let nIndicesPolygon: number = nFacesPolygon * 3;
 
-      // generate vertices as strips along the polygon
       let vertices: Vector3[] = [];
-      for (let sector: number = 0; sector < this.sectors; sector++) {
+      for (let sector: number = 0; sector <= this.sectors; sector++) {
         vertices.push(...polygon.map((_vector: Vector3) => _vector.copy));
         polygon.forEach((_vector: Vector3) => _vector.transform(mtxRotate));
-        vertices.push(...polygon.map((_vector: Vector3) => _vector.copy));
+        // vertices.push(...polygon.map((_vector: Vector3) => _vector.copy));
       }
 
       // copy indices to new index array
@@ -75,7 +74,7 @@ namespace FudgeCore {
 
       for (let sector: number = 0; sector < this.sectors; sector++) {
         for (let quad: number = 0; quad < nVerticesPolygon - 1; quad++) {
-          let start: number = sector * nVerticesPolygon * 2 + quad;
+          let start: number = sector * nVerticesPolygon + quad;
           let quadIndices: number[] = [start + 1, start + 1 + nVerticesPolygon, start + nVerticesPolygon, start];
           indices.push(...Mesh.getTrigonsFromQuad(quadIndices));
         }
@@ -85,13 +84,11 @@ namespace FudgeCore {
 
       let textureUVs: number[] = [];
       for (let sector: number = 0; sector < this.sectors; sector++) {
-        for (let side: number = 0; side < 2; side++)
-          for (let i: number = 0; i < nVerticesPolygon; i++) {
-            let u: number = (sector + side) / this.sectors;
-            let v: number = i * 1 / (nVerticesPolygon - 1);
-            textureUVs.push(u, v);
-          }
-
+        for (let i: number = 0; i < nVerticesPolygon; i++) {
+          let u: number = sector / this.sectors;
+          let v: number = i * 1 / (nVerticesPolygon - 1);
+          textureUVs.push(u, v);
+        }
       }
 
       this.ƒvertices = new Float32Array(vertices.map((_v: Vector3) => [_v.x, _v.y, _v.z]).flat());
