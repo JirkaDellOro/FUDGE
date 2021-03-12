@@ -5102,6 +5102,10 @@ declare namespace FudgeCore {
         getMutator(): Mutator;
         getMutatorForUserInterface(): Mutator;
         mutate(_mutator: Mutator): Promise<void>;
+        /**
+         * Updates the values of the given mutator according to the current state of the instance
+         */
+        updateMutator(_mutator: Mutator): void;
     }
 }
 declare namespace FudgeCore {

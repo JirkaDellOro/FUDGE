@@ -147,7 +147,7 @@ namespace FudgeCore {
       for (let attribute in _mutator) {
         let value: Object = _mutator[attribute];
         if (value instanceof Mutable)
-          value = value.getMutator();
+          _mutator[attribute] = value.getMutator();
         else
           _mutator[attribute] = (<General>this)[attribute];
       }

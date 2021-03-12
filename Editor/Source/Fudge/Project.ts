@@ -120,7 +120,8 @@ namespace Fudge {
       }
 
       let result: string = (new XMLSerializer()).serializeToString(html);
-      result = result.replaceAll("><", ">\n<");
+      result = result.replace(/></g, ">\n<");
+      // result = result.replaceAll("><", ">\n<");
       return result;
     }
 

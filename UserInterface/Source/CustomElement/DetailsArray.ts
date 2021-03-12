@@ -10,20 +10,10 @@ namespace FudgeUserInterface {
 
     public setContent(_content: HTMLDivElement): void {
       super.setContent(_content);
-      // this.mutable = _array;
-      // this.removeChild(this.content);
-      // this.content = Generator.createInterfaceFromMutable(this.mutable);
-      // this.appendChild(this.content);
       for (let child of this.content.children as HTMLCollectionOf<HTMLElement>) {
-        child.draggable = true;
-        child.addEventListener(EVENT.DRAG_START, this.hndDragStart);
-        child.addEventListener(EVENT.DROP, this.hndDrop);
-        child.addEventListener(EVENT.DRAG_OVER, this.hndDragOver);
-        child.addEventListener(EVENT.KEY_DOWN, this.hndkey, true);
-        child.tabIndex = 0;
+        this.addEventListeners(child);
       }
     }
-
 
     public getMutator(): ƒ.Mutator {
       let mutator: ƒ.Mutator[] = [];
@@ -34,27 +24,32 @@ namespace FudgeUserInterface {
       return mutator;
     }
 
-    // protected mutateOnInput = async (_event: Event) => {
-    //   let mutator: ƒ.Mutator = this.getMutator();
-    //   console.log(mutator);
-    //   await this.mutable.mutate(mutator);
-    //   _event.stopPropagation();
+    private addEventListeners(_child: HTMLElement): void {
+      _child.draggable = true;
+      _child.addEventListener(EVENT.DRAG_START, this.hndDragStart);
+      _child.addEventListener(EVENT.DROP, this.hndDrop);
+      _child.addEventListener(EVENT.DRAG_OVER, this.hndDragOver);
+      _child.addEventListener(EVENT.KEY_DOWN, this.hndkey, true);
+      _child.tabIndex = 0;
+    }
 
-    //   this.dispatchEvent(new Event(ƒ.EVENT.MUTATE, { bubbles: true }));
-    // }
-
-    private rearrangeMutable(_focus: number = undefined): void {
+    private rearrange(_focus: number = undefined): void {
       let sequence: number[] = [];
       for (let child of this.content.children) {
         sequence.push(parseInt(child.getAttribute("label")));
       }
-      console.log(sequence);
-      // this.mutable.rearrange(sequence);
-
-      // this.setContent(this.mutable);
-      // Controller.updateUserInterface(this.mutable, this);
       this.setFocus(_focus);
-      this.dispatchEvent(new CustomEvent(EVENT.REARRANGE_ARRAY, { bubbles: true, detail: { key: this.getAttribute("key"), sequence: sequence }}));
+      this.dispatchEvent(new CustomEvent(EVENT.REARRANGE_ARRAY, { bubbles: true, detail: { key: this.getAttribute("key"), sequence: sequence } }));
+
+      let count: number = 0;
+      for (let child of this.content.children as HTMLCollectionOf<CustomElement>) {
+        child.setAttribute("label", count.toString());
+        child.setAttribute("key", "ƒ" + count);
+        child.setLabel(count.toString());
+        console.log(child.tabIndex);
+        count++;
+      }
+
       this.dispatchEvent(new Event(EVENT.INPUT, { bubbles: true }));
     }
 
@@ -86,15 +81,17 @@ namespace FudgeUserInterface {
       let keyDrag: string = _event.dataTransfer.getData("index");
       let drag: HTMLElement = this.querySelector(`[key=${keyDrag}]`);
 
-      let insertion: InsertPosition = keyDrag > keyDrop ? "beforebegin" : "afterend";
+      let position: InsertPosition = keyDrag > keyDrop ? "beforebegin" : "afterend";
       if (_event.ctrlKey)
-        drag = <HTMLElement>drag.cloneNode(false);
+        drag = <HTMLElement>drag.cloneNode(true);
       if (_event.shiftKey)
         drag.parentNode.removeChild(drag);
       else
-        drop.insertAdjacentElement(insertion, drag);
+        drop.insertAdjacentElement(position, drag);
 
-      this.rearrangeMutable();
+      this.rearrange();
+      this.addEventListeners(drag);
+      drag.focus();
     }
 
     private hndkey = (_event: KeyboardEvent): void => {
@@ -106,32 +103,41 @@ namespace FudgeUserInterface {
 
       let focus: number = parseInt(item.getAttribute("label"));
       let sibling: HTMLElement = item;
+      let insert: HTMLElement = item;
       let passEvent: boolean = false;
 
       switch (_event.code) {
         case ƒ.KEYBOARD_CODE.DELETE:
           item.parentNode.removeChild(item);
-          this.rearrangeMutable(focus);
+          this.rearrange(focus);
           break;
         case ƒ.KEYBOARD_CODE.ARROW_UP:
           if (!_event.altKey) {
             this.setFocus(--focus);
             break;
           }
-          _event.shiftKey ? item = <HTMLElement>item.cloneNode(false) : sibling = <HTMLElement>item.previousSibling;
+          if (_event.shiftKey) {
+            insert = <HTMLElement>item.cloneNode(true);
+            this.addEventListeners(insert);
+          } else
+            sibling = <HTMLElement>item.previousSibling;
           if (sibling)
-            sibling.insertAdjacentElement("beforebegin", item);
-          this.rearrangeMutable(--focus);
+            sibling.insertAdjacentElement("beforebegin", insert);
+          this.rearrange(--focus);
           break;
         case ƒ.KEYBOARD_CODE.ARROW_DOWN:
           if (!_event.altKey) {
             this.setFocus(++focus);
             break;
           }
-          _event.shiftKey ? item = <HTMLElement>item.cloneNode(false) : sibling = <HTMLElement>item.nextSibling;
+          if (_event.shiftKey) {
+            insert = <HTMLElement>item.cloneNode(true);
+            this.addEventListeners(insert);
+          } else
+            sibling = <HTMLElement>item.nextSibling;
           if (sibling)
-            sibling.insertAdjacentElement("afterend", item);
-          this.rearrangeMutable(++focus);
+            sibling.insertAdjacentElement("afterend", insert);
+          this.rearrange(++focus);
           break;
         default:
           passEvent = true;
@@ -139,7 +145,6 @@ namespace FudgeUserInterface {
 
       if (!passEvent) {
         _event.stopPropagation();
-        // this.mutateOnInput(null);
       }
     }
   }

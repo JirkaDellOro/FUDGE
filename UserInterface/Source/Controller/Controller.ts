@@ -11,7 +11,7 @@ namespace FudgeUserInterface {
     public domElement: HTMLElement;
     protected timeUpdate: number = 190;
     /** Refererence to the [[FudgeCore.Mutable]] this ui refers to */
-    protected mutable: ƒ.Mutable;
+    protected mutable: ƒ.Mutable | ƒ.MutableArray<ƒ.Mutable>;
     /** [[FudgeCore.Mutator]] used to convey data to and from the mutable*/
     protected mutator: ƒ.Mutator;
     /** [[FudgeCore.Mutator]] used to store the data types of the mutator attributes*/
@@ -19,7 +19,7 @@ namespace FudgeUserInterface {
 
     private idInterval: number;
 
-    constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement) {
+    constructor(_mutable: ƒ.Mutable | ƒ.MutableArray<ƒ.Mutable>, _domElement: HTMLElement) {
       this.domElement = _domElement;
       this.setMutable(_mutable);
       // TODO: examine, if this should register to one common interval, instead of each installing its own.
@@ -133,7 +133,7 @@ namespace FudgeUserInterface {
       Controller.updateUserInterface(this.mutable, this.domElement);
     }
 
-    public setMutable(_mutable: ƒ.Mutable): void {
+    public setMutable(_mutable: ƒ.Mutable | ƒ.MutableArray<ƒ.Mutable>): void {
       this.mutable = _mutable;
       this.mutator = _mutable.getMutatorForUserInterface();
       if (_mutable instanceof ƒ.Mutable)
@@ -156,25 +156,24 @@ namespace FudgeUserInterface {
     protected rearrangeArray = async (_event: Event) => {
       let sequence: number[] = (<CustomEvent>_event).detail.sequence;
       let path: string[] = [];
-      let element: HTMLElement = <HTMLElement>_event.target;
-      while (element != this.domElement) {
-        if (element.getAttribute("key"))
-          path.push(element.getAttribute("key"));
-        element = element.parentElement;
+      let details: DetailsArray = <DetailsArray>_event.target;
+      let mutable: ƒ.Mutable | ƒ.MutableArray<ƒ.Mutable>;
+
+      { // find the MutableArray connected to this DetailsArray
+        let element: HTMLElement = details;
+        while (element != this.domElement) {
+          if (element.getAttribute("key"))
+            path.push(element.getAttribute("key"));
+          element = element.parentElement;
+        }
+        // console.log(path);
+        mutable = this.mutable;
+        for (let key of path)
+          mutable = Reflect.get(mutable, key);
       }
-      // console.log(path);
-      let mutable: ƒ.Mutable = this.mutable;
-      for (let key of path)
-        mutable = Reflect.get(mutable, key);
 
+      // rearrange that mutable
       (<ƒ.MutableArray<ƒ.Mutable>><unknown>mutable).rearrange(sequence);
-      // this.setContent(this.mutable);
-      Controller.updateUserInterface(mutable, <HTMLElement>_event.target);
-      this.mutator = this.getMutator();
-      await this.mutable.mutate(this.mutator);
-      _event.stopPropagation();
-
-      this.domElement.dispatchEvent(new Event(EVENT.MUTATE, { bubbles: true }));
     }
 
     protected refresh = (_event: Event) => {

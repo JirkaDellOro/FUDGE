@@ -88,6 +88,12 @@ namespace FudgeUserInterface {
       return label;
     }
 
+    public setLabel(_label: string): void {
+      let label: HTMLLabelElement = this.querySelector("label");
+      if (label)
+        label.textContent = _label;
+    }
+
     /**
      * Get the value of this element in a format compatible with [[FudgeCore.Mutator]]
      */
@@ -98,6 +104,18 @@ namespace FudgeUserInterface {
      */
     public setMutatorValue(_value: Object): void {
       Reflect.set(this, "value", _value);
+    }
+
+    /** Workaround reconnection of clone */
+    public cloneNode(_deep: boolean): Node {
+      let label: string = this.getAttribute("label");
+      //@ts-ignore
+      let clone: CustomElement = new this.constructor(label ? { label: label } : null);
+      document.body.appendChild(clone);
+      clone.setMutatorValue(this.getMutatorValue());
+      for (let attribute of this.attributes)
+        clone.setAttribute(attribute.name, attribute.value);
+      return clone;
     }
   }
 }

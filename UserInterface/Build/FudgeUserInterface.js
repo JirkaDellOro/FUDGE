@@ -22,23 +22,22 @@ var FudgeUserInterface;
             this.rearrangeArray = async (_event) => {
                 let sequence = _event.detail.sequence;
                 let path = [];
-                let element = _event.target;
-                while (element != this.domElement) {
-                    if (element.getAttribute("key"))
-                        path.push(element.getAttribute("key"));
-                    element = element.parentElement;
+                let details = _event.target;
+                let mutable;
+                { // find the MutableArray connected to this DetailsArray
+                    let element = details;
+                    while (element != this.domElement) {
+                        if (element.getAttribute("key"))
+                            path.push(element.getAttribute("key"));
+                        element = element.parentElement;
+                    }
+                    // console.log(path);
+                    mutable = this.mutable;
+                    for (let key of path)
+                        mutable = Reflect.get(mutable, key);
                 }
-                // console.log(path);
-                let mutable = this.mutable;
-                for (let key of path)
-                    mutable = Reflect.get(mutable, key);
+                // rearrange that mutable
                 mutable.rearrange(sequence);
-                // this.setContent(this.mutable);
-                Controller.updateUserInterface(mutable, _event.target);
-                this.mutator = this.getMutator();
-                await this.mutable.mutate(this.mutator);
-                _event.stopPropagation();
-                this.domElement.dispatchEvent(new Event("mutate" /* MUTATE */, { bubbles: true }));
             };
             this.refresh = (_event) => {
                 if (document.body.contains(this.domElement)) {
@@ -351,11 +350,27 @@ var FudgeUserInterface;
             this.appendChild(label);
             return label;
         }
+        setLabel(_label) {
+            let label = this.querySelector("label");
+            if (label)
+                label.textContent = _label;
+        }
         /**
          * Set the value of this element using a format compatible with [[FudgeCore.Mutator]]
          */
         setMutatorValue(_value) {
             Reflect.set(this, "value", _value);
+        }
+        /** Workaround reconnection of clone */
+        cloneNode(_deep) {
+            let label = this.getAttribute("label");
+            //@ts-ignore
+            let clone = new this.constructor(label ? { label: label } : null);
+            document.body.appendChild(clone);
+            clone.setMutatorValue(this.getMutatorValue());
+            for (let attribute of this.attributes)
+                clone.setAttribute(attribute.name, attribute.value);
+            return clone;
         }
     }
     CustomElement.mapObjectToCustomElement = new Map();
@@ -1192,14 +1207,16 @@ var FudgeUserInterface;
                 let keyDrop = drop.getAttribute("key");
                 let keyDrag = _event.dataTransfer.getData("index");
                 let drag = this.querySelector(`[key=${keyDrag}]`);
-                let insertion = keyDrag > keyDrop ? "beforebegin" : "afterend";
+                let position = keyDrag > keyDrop ? "beforebegin" : "afterend";
                 if (_event.ctrlKey)
-                    drag = drag.cloneNode(false);
+                    drag = drag.cloneNode(true);
                 if (_event.shiftKey)
                     drag.parentNode.removeChild(drag);
                 else
-                    drop.insertAdjacentElement(insertion, drag);
-                this.rearrangeMutable();
+                    drop.insertAdjacentElement(position, drag);
+                this.rearrange();
+                this.addEventListeners(drag);
+                drag.focus();
             };
             this.hndkey = (_event) => {
                 let item = _event.currentTarget;
@@ -1208,54 +1225,55 @@ var FudgeUserInterface;
                     return;
                 let focus = parseInt(item.getAttribute("label"));
                 let sibling = item;
+                let insert = item;
                 let passEvent = false;
                 switch (_event.code) {
                     case ƒ.KEYBOARD_CODE.DELETE:
                         item.parentNode.removeChild(item);
-                        this.rearrangeMutable(focus);
+                        this.rearrange(focus);
                         break;
                     case ƒ.KEYBOARD_CODE.ARROW_UP:
                         if (!_event.altKey) {
                             this.setFocus(--focus);
                             break;
                         }
-                        _event.shiftKey ? item = item.cloneNode(false) : sibling = item.previousSibling;
+                        if (_event.shiftKey) {
+                            insert = item.cloneNode(true);
+                            this.addEventListeners(insert);
+                        }
+                        else
+                            sibling = item.previousSibling;
                         if (sibling)
-                            sibling.insertAdjacentElement("beforebegin", item);
-                        this.rearrangeMutable(--focus);
+                            sibling.insertAdjacentElement("beforebegin", insert);
+                        this.rearrange(--focus);
                         break;
                     case ƒ.KEYBOARD_CODE.ARROW_DOWN:
                         if (!_event.altKey) {
                             this.setFocus(++focus);
                             break;
                         }
-                        _event.shiftKey ? item = item.cloneNode(false) : sibling = item.nextSibling;
+                        if (_event.shiftKey) {
+                            insert = item.cloneNode(true);
+                            this.addEventListeners(insert);
+                        }
+                        else
+                            sibling = item.nextSibling;
                         if (sibling)
-                            sibling.insertAdjacentElement("afterend", item);
-                        this.rearrangeMutable(++focus);
+                            sibling.insertAdjacentElement("afterend", insert);
+                        this.rearrange(++focus);
                         break;
                     default:
                         passEvent = true;
                 }
                 if (!passEvent) {
                     _event.stopPropagation();
-                    // this.mutateOnInput(null);
                 }
             };
         }
         setContent(_content) {
             super.setContent(_content);
-            // this.mutable = _array;
-            // this.removeChild(this.content);
-            // this.content = Generator.createInterfaceFromMutable(this.mutable);
-            // this.appendChild(this.content);
             for (let child of this.content.children) {
-                child.draggable = true;
-                child.addEventListener("dragstart" /* DRAG_START */, this.hndDragStart);
-                child.addEventListener("drop" /* DROP */, this.hndDrop);
-                child.addEventListener("dragover" /* DRAG_OVER */, this.hndDragOver);
-                child.addEventListener("keydown" /* KEY_DOWN */, this.hndkey, true);
-                child.tabIndex = 0;
+                this.addEventListeners(child);
             }
         }
         getMutator() {
@@ -1265,24 +1283,29 @@ var FudgeUserInterface;
             }
             return mutator;
         }
-        // protected mutateOnInput = async (_event: Event) => {
-        //   let mutator: ƒ.Mutator = this.getMutator();
-        //   console.log(mutator);
-        //   await this.mutable.mutate(mutator);
-        //   _event.stopPropagation();
-        //   this.dispatchEvent(new Event(ƒ.EVENT.MUTATE, { bubbles: true }));
-        // }
-        rearrangeMutable(_focus = undefined) {
+        addEventListeners(_child) {
+            _child.draggable = true;
+            _child.addEventListener("dragstart" /* DRAG_START */, this.hndDragStart);
+            _child.addEventListener("drop" /* DROP */, this.hndDrop);
+            _child.addEventListener("dragover" /* DRAG_OVER */, this.hndDragOver);
+            _child.addEventListener("keydown" /* KEY_DOWN */, this.hndkey, true);
+            _child.tabIndex = 0;
+        }
+        rearrange(_focus = undefined) {
             let sequence = [];
             for (let child of this.content.children) {
                 sequence.push(parseInt(child.getAttribute("label")));
             }
-            console.log(sequence);
-            // this.mutable.rearrange(sequence);
-            // this.setContent(this.mutable);
-            // Controller.updateUserInterface(this.mutable, this);
             this.setFocus(_focus);
             this.dispatchEvent(new CustomEvent("rearrangeArray" /* REARRANGE_ARRAY */, { bubbles: true, detail: { key: this.getAttribute("key"), sequence: sequence } }));
+            let count = 0;
+            for (let child of this.content.children) {
+                child.setAttribute("label", count.toString());
+                child.setAttribute("key", "ƒ" + count);
+                child.setLabel(count.toString());
+                console.log(child.tabIndex);
+                count++;
+            }
             this.dispatchEvent(new Event("input" /* INPUT */, { bubbles: true }));
         }
         setFocus(_focus = undefined) {

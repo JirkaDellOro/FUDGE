@@ -9,13 +9,13 @@ declare namespace FudgeUserInterface {
         domElement: HTMLElement;
         protected timeUpdate: number;
         /** Refererence to the [[FudgeCore.Mutable]] this ui refers to */
-        protected mutable: ƒ.Mutable;
+        protected mutable: ƒ.Mutable | ƒ.MutableArray<ƒ.Mutable>;
         /** [[FudgeCore.Mutator]] used to convey data to and from the mutable*/
         protected mutator: ƒ.Mutator;
         /** [[FudgeCore.Mutator]] used to store the data types of the mutator attributes*/
         protected mutatorTypes: ƒ.Mutator;
         private idInterval;
-        constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
+        constructor(_mutable: ƒ.Mutable | ƒ.MutableArray<ƒ.Mutable>, _domElement: HTMLElement);
         /**
          * Recursive method taking an existing [[ƒ.Mutator]] as a template
          * and updating its values with those found in the given UI-domElement.
@@ -34,7 +34,7 @@ declare namespace FudgeUserInterface {
         static findChildElementByKey(_domElement: HTMLElement, key: string): HTMLElement;
         getMutator(_mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
         updateUserInterface(): void;
-        setMutable(_mutable: ƒ.Mutable): void;
+        setMutable(_mutable: ƒ.Mutable | ƒ.MutableArray<ƒ.Mutable>): void;
         startRefresh(): void;
         protected mutateOnInput: (_event: Event) => Promise<void>;
         protected rearrangeArray: (_event: Event) => Promise<void>;
@@ -116,6 +116,7 @@ declare namespace FudgeUserInterface {
          * Add a label-element as child to this element
          */
         appendLabel(): HTMLLabelElement;
+        setLabel(_label: string): void;
         /**
          * Get the value of this element in a format compatible with [[FudgeCore.Mutator]]
          */
@@ -124,6 +125,8 @@ declare namespace FudgeUserInterface {
          * Set the value of this element using a format compatible with [[FudgeCore.Mutator]]
          */
         setMutatorValue(_value: Object): void;
+        /** Workaround reconnection of clone */
+        cloneNode(_deep: boolean): Node;
     }
 }
 declare namespace FudgeUserInterface {
@@ -339,7 +342,8 @@ declare namespace FudgeUserInterface {
         constructor(_legend: string);
         setContent(_content: HTMLDivElement): void;
         getMutator(): ƒ.Mutator;
-        private rearrangeMutable;
+        private addEventListeners;
+        private rearrange;
         private setFocus;
         private hndDragStart;
         private hndDragOver;

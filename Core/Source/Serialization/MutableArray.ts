@@ -33,5 +33,20 @@ namespace FudgeCore {
       for (let entry in this)
         await this[entry].mutate(_mutator[entry]);
     }
+
+    /**
+     * Updates the values of the given mutator according to the current state of the instance
+     */
+    public updateMutator(_mutator: Mutator): void {
+      for (let entry in this) {
+        let mutatorValue: Object = _mutator[entry];
+        if (!mutatorValue)
+          continue;
+        if (this[entry] instanceof Mutable)
+          _mutator[entry] = this[entry].getMutator();
+        else
+          _mutator[entry] = this[entry];
+      }
+    }
   }
 }
