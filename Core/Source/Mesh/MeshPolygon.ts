@@ -49,6 +49,10 @@ namespace FudgeCore {
       return result;
     }
 
+    protected get minVertices(): number {
+      return 3;
+    }
+
     public create(_shape: Vector2[] = [], _fitMesh: boolean = true, _fitTexture: boolean = true): void {
       this.shape = <MutableArray<Vector2>>MutableArray.from(_shape.map(_vertex => _vertex.copy));
       this.clear();
@@ -56,8 +60,8 @@ namespace FudgeCore {
       this.fitMesh = _fitMesh;
       this.fitTexture = _fitTexture;
 
-      if (_shape.length < 3) {
-        Debug.warn("At least 3 vertices needed to construct MeshPolygon, default trigon used");
+      if (_shape.length < this.minVertices) {
+        Debug.warn(`At least ${this.minVertices} vertices needed to construct MeshPolygon, default trigon used`);
         this.create(MeshPolygon.verticesDefault, true);
         return;
       }
@@ -132,5 +136,6 @@ namespace FudgeCore {
         indices.push(0, i - 1, i);
       return new Uint16Array(indices);
     }
+    
   }
 }

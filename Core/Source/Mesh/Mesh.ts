@@ -42,6 +42,23 @@ namespace FudgeCore {
 
     protected static registerSubclass(_subClass: typeof Mesh): number { return Mesh.subclasses.push(_subClass) - 1; }
 
+    protected static getTrigonsFromQuad(_quad: number[]): number[] {
+      // TODO: add parameters for other diagonal and reversion of rotation
+      let indices: number[] = [_quad[0], _quad[1], _quad[2], _quad[0], _quad[2], _quad[3]];
+      return indices;
+    }
+
+    protected static deleteInvalidIndices(_indices: number[], _vertices: Vector3[]): void {
+      //delete "non"-faces with two identical vectors
+      for (let i: number = _indices.length - 3; i >= 0; i -= 3) {
+        let v0: Vector3 = _vertices[_indices[i]];
+        let v1: Vector3 = _vertices[_indices[i + 1]];
+        let v2: Vector3 = _vertices[_indices[i + 2]];
+        if (v0.equals(v1) || v2.equals(v1) || v0.equals(v2))
+          _indices.splice(i, 3);
+      }
+    }
+
     public get type(): string {
       return this.constructor.name;
     }
@@ -154,12 +171,12 @@ namespace FudgeCore {
         vertices.push(new Vector3(this.vertices[v], this.vertices[v + 1], this.vertices[v + 2]));
 
       for (let i: number = 0; i < this.indices.length; i += 3) {
-        let vertex: number[] = [this.indices[i], this.indices[i + 1], this.indices[i + 2]];
+        let trigon: number[] = [this.indices[i], this.indices[i + 1], this.indices[i + 2]];
 
-        let v0: Vector3 = Vector3.DIFFERENCE(vertices[vertex[0]], vertices[vertex[1]]);
-        let v1: Vector3 = Vector3.DIFFERENCE(vertices[vertex[0]], vertices[vertex[2]]);
+        let v0: Vector3 = Vector3.DIFFERENCE(vertices[trigon[0]], vertices[trigon[1]]);
+        let v1: Vector3 = Vector3.DIFFERENCE(vertices[trigon[0]], vertices[trigon[2]]);
         let normal: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(v0, v1));
-        let index: number = vertex[2] * 3;
+        let index: number = trigon[2] * 3;
         normals[index] = normal.x;
         normals[index + 1] = normal.y;
         normals[index + 2] = normal.z;
@@ -191,14 +208,14 @@ namespace FudgeCore {
 
 
     protected reduceMutator(_mutator: Mutator): void {
-      delete _mutator.ƒbox; 
-      delete _mutator.ƒradius; 
-      delete _mutator.ƒvertices; 
-      delete _mutator.ƒindices; 
-      delete _mutator.ƒnormals; 
-      delete _mutator.ƒnormalsFace; 
-      delete _mutator.ƒtextureUVs; 
-      delete _mutator.renderBuffers; 
+      delete _mutator.ƒbox;
+      delete _mutator.ƒradius;
+      delete _mutator.ƒvertices;
+      delete _mutator.ƒindices;
+      delete _mutator.ƒnormals;
+      delete _mutator.ƒnormalsFace;
+      delete _mutator.ƒtextureUVs;
+      delete _mutator.renderBuffers;
     }
   }
 }

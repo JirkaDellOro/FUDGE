@@ -3109,6 +3109,8 @@ declare namespace FudgeCore {
         constructor(_name?: string);
         static getBufferSpecification(): BufferSpecification;
         protected static registerSubclass(_subClass: typeof Mesh): number;
+        protected static getTrigonsFromQuad(_quad: number[]): number[];
+        protected static deleteInvalidIndices(_indices: number[], _vertices: Vector3[]): void;
         get type(): string;
         get vertices(): Float32Array;
         get indices(): Uint16Array;
@@ -3175,6 +3177,7 @@ declare namespace FudgeCore {
         protected fitTexture: boolean;
         constructor(_name?: string, _shape?: Vector2[], _fitMesh?: boolean, _fitTexture?: boolean);
         private static fitMesh;
+        protected get minVertices(): number;
         create(_shape?: Vector2[], _fitMesh?: boolean, _fitTexture?: boolean): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
@@ -3282,6 +3285,26 @@ declare namespace FudgeCore {
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
         protected createFaceNormals(): Float32Array;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Generates a rotation of a polygon around the y-axis
+     * ```plaintext
+     * ```
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2021
+     */
+    class MeshRotation extends MeshPolygon {
+        static readonly iSubclass: number;
+        protected static verticesDefault: Vector2[];
+        private sectors;
+        constructor(_name?: string, _vertices?: Vector2[], _sectors?: number, _fitMesh?: boolean, _fitTexture?: boolean);
+        protected get minVertices(): number;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+        protected reduceMutator(_mutator: Mutator): void;
+        private rotate;
     }
 }
 declare namespace FudgeCore {

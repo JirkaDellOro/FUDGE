@@ -1,4 +1,3 @@
-
 ///<reference path="../View/View.ts"/>
 ///<reference path="../View/Project/ViewExternal.ts"/>
 ///<reference path="../View/Project/ViewInternal.ts"/>

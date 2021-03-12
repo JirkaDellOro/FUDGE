@@ -23,7 +23,7 @@ namespace FudgeCore {
     public constructor(_name: string = "MeshExtrusion", _vertices: Vector2[] = MeshPolygon.verticesDefault, _transforms: Matrix4x4[] = MeshExtrusion.transformsDefault, _fitMesh: boolean = true, _fitTexture: boolean = true) {
       super(_name, _vertices, _fitMesh, _fitTexture);
       this.extrude(_transforms);
-      console.log("Mutator", this.getMutator());
+      // console.log("Mutator", this.getMutator());
     }
 
     //#region Transfer
@@ -98,23 +98,11 @@ namespace FudgeCore {
       // create indizes for wrapper
       for (let t: number = 0; t < nTransforms - 1; t++)
         for (let i: number = 0; i < nVerticesPolygon; i++) {
-          let vertex: number = i + (2 + t) * nVerticesPolygon + t;
-          indices.push(vertex);
-          indices.push(vertex + nVerticesPolygon + 1);
-          indices.push(vertex + nVerticesPolygon + 2);
-          indices.push(vertex);
-          indices.push(vertex + nVerticesPolygon + 2);
-          indices.push(vertex + 1);
+          let index: number = i + (2 + t) * nVerticesPolygon + t;
+          indices.push(...Mesh.getTrigonsFromQuad([index, index + nVerticesPolygon + 1, index + nVerticesPolygon + 2, index + 1]));
         }
 
-      //delete "non"-faces with two identical vectors
-      for (let i: number = indices.length - 3; i >= 0; i -= 3) {
-        let v0: Vector3 = vertices[indices[i]];
-        let v1: Vector3 = vertices[indices[i + 1]];
-        let v2: Vector3 = vertices[indices[i + 2]];
-        if (v0.equals(v1) || v2.equals(v1) || v0.equals(v2))
-          indices.splice(i, 3);
-      }
+      Mesh.deleteInvalidIndices(indices, vertices);
 
 
       let nTextureUVs: number = this.textureUVs.length;
@@ -123,6 +111,7 @@ namespace FudgeCore {
       textureUVs.push(...this.textureUVs);
 
       // TODO: wrap texture nicer respecting the distances between vertices, see lengths polygon etc.
+      // first step: use fitTexture only for stretching, otherwise use vertext positions for texturing
       // let sumLengths: number = lengthsPolygon.reduce((_sum, _value) => _sum + _value);
       let index: number = nTextureUVs * 2;
       let incV: number = 1 / nVerticesPolygon;
