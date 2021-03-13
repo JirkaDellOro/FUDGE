@@ -1,7 +1,7 @@
 namespace Fudge {
   import ƒ = FudgeCore;
-  import ƒui = FudgeUserInterface;
-  import ƒaid = FudgeAid;
+  import ƒUi = FudgeUserInterface;
+  import ƒAid = FudgeAid;
 
   /**
    * View the rendering of a graph in a viewport with an independent camera
@@ -18,24 +18,25 @@ namespace Fudge {
       this.createUserInterface();
 
       _container.on("resize", this.redraw);
-      this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
+      this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
-      this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
+      this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
     }
 
     createUserInterface(): void {
       let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
-      cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
-      cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
+      // cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
+      // cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
       cmpCamera.projectCentral(1, 45);
-      this.canvas = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
+      this.canvas = ƒAid.Canvas.create(true, ƒAid.IMAGE_RENDERING.PIXELATED);
       let container: HTMLDivElement = document.createElement("div");
       container.style.borderWidth = "0px";
       document.body.appendChild(this.canvas);
 
       this.viewport = new ƒ.Viewport();
       this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
+      FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
       this.viewport.draw();
 
       this.dom.append(this.canvas);
@@ -46,7 +47,7 @@ namespace Fudge {
       //Focus cameracontrols on new viewport
       // let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });
 
-      this.canvas.addEventListener("click", this.activeViewport);
+      this.canvas.addEventListener(ƒUi.EVENT.CLICK, this.activeViewport);
     }
 
     public setGraph(_node: ƒ.Node): void {
@@ -85,11 +86,12 @@ namespace Fudge {
         case EVENT_EDITOR.SET_GRAPH:
           this.setGraph(_event.detail);
           break;
-        case ƒui.EVENT.MUTATE:
+        case ƒUi.EVENT.MUTATE:
         case EVENT_EDITOR.UPDATE:
           this.redraw();
       }
     }
+
 
     // private animate = (_e: Event) => {
     //   this.viewport.setGraph(this.graph);

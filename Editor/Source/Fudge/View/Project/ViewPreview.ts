@@ -1,7 +1,7 @@
 namespace Fudge {
   import ƒ = FudgeCore;
-  import ƒui = FudgeUserInterface;
-  import ƒaid = FudgeAid;
+  import ƒUi = FudgeUserInterface;
+  import ƒAid = FudgeAid;
 
   /**
    * Preview a resource
@@ -18,18 +18,19 @@ namespace Fudge {
 
       // create viewport for 3D-resources
       let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
-      cmpCamera.pivot.translate(new ƒ.Vector3(1, 2, 1));
-      cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
+      // cmpCamera.pivot.translate(new ƒ.Vector3(1, 2, 1));
+      // cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
       cmpCamera.projectCentral(1, 45);
-      let canvas: HTMLCanvasElement = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
+      let canvas: HTMLCanvasElement = ƒAid.Canvas.create(true, ƒAid.IMAGE_RENDERING.PIXELATED);
       this.viewport = new ƒ.Viewport();
       this.viewport.initialize("Preview", null, cmpCamera, canvas);
+      ƒAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
 
       this.fillContent();
 
       _container.on("resize", this.redraw);
-      this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
-      this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
+      this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
+      this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent, true);
       // this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
       // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
@@ -136,7 +137,7 @@ namespace Fudge {
 
     private createStandardGraph(): ƒ.Node {
       let graph: ƒ.Node = new ƒ.Node("PreviewScene");
-      ƒaid.addStandardLightComponents(graph);
+      ƒAid.addStandardLightComponents(graph);
       this.viewport.setBranch(graph);
       this.dom.appendChild(this.viewport.getCanvas());
       return graph;
@@ -181,8 +182,8 @@ namespace Fudge {
     private hndEvent = (_event: CustomEvent): void => {
       // console.log(_event.type);
       switch (_event.type) {
-        case ƒui.EVENT.CHANGE:
-        case ƒui.EVENT.MUTATE:
+        case ƒUi.EVENT.CHANGE:
+        case ƒUi.EVENT.MUTATE:
         case EVENT_EDITOR.UPDATE:
           if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture || this.resource instanceof ƒ.Material)
             this.fillContent();

@@ -713,6 +713,7 @@ declare namespace FudgeUserInterface {
         EXPAND = "expand",
         INPUT = "input",
         REARRANGE_ARRAY = "rearrangeArray",
-        TOGGLE = "toggle"
+        TOGGLE = "toggle",
+        POINTER_MOVE = "pointermove"
     }
 }

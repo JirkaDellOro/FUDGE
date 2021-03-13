@@ -17,14 +17,13 @@ namespace FudgeAid {
       camera = new CameraOrbitMovingFocus(_viewport.camera, 5, 85, 0.01, 1000);
       _viewport.camera.projectCentral(_viewport.camera.getAspect(), _viewport.camera.getFieldOfView(), _viewport.camera.getDirection(), 0.01, 1000);
 
-      // set up axis to control
+      // yset up axis to control
       camera.axisRotateX.addControl(cntMouseVertical);
       camera.axisRotateX.setFactor(_speedCameraRotation);
 
       camera.axisRotateY.addControl(cntMouseHorizontal);
       camera.axisRotateY.setFactor(_speedCameraRotation);
-
-      _viewport.getBranch().addChild(camera);
+      // _viewport.getBranch().addChild(camera);
 
       let focus: ƒ.Node;
       if (_showFocus) {
@@ -33,7 +32,10 @@ namespace FudgeAid {
         _viewport.getBranch().addChild(focus);
       }
 
+      redraw();
       return camera;
+
+
 
       function hndPointerMove(_event: ƒ.EventPointer): void {
         if (!_event.buttons)
@@ -43,35 +45,40 @@ namespace FudgeAid {
 
         cntMouseHorizontal.setInput(_event.movementX);
         cntMouseVertical.setInput(_event.movementY);
-        focus.mtxLocal.translation = camera.mtxLocal.translation;
-        _viewport.draw();
+        ƒ.Render.prepare(camera);
 
         if (_event.altKey || _event.buttons == 4) {
           let offset: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(posCamera, camera.nodeCamera.mtxWorld.translation);
           camera.mtxLocal.translate(offset, false);
-          focus.mtxLocal.translation = camera.mtxLocal.translation;
-          _viewport.draw();
         }
+
+        redraw();
       }
 
       function hndPointerDown(_event: ƒ.EventPointer): void {
-        console.log("pointerdown", _event.clientX, _event.clientY);
         let picks: ƒ.Pick[] = ƒ.Picker.pickViewport(_viewport, new ƒ.Vector2(_event.clientX, _event.clientY));
+        console.log(picks);
         if (picks.length == 0)
           return;
         picks.sort((_a: ƒ.Pick, _b: ƒ.Pick) => _a.zBuffer < _b.zBuffer ? -1 : 1);
 
+
         let posCamera: ƒ.Vector3 = camera.nodeCamera.mtxWorld.translation;
         camera.mtxLocal.translation = picks[0].posWorld;
-        focus.mtxLocal.translation = camera.mtxLocal.translation;
         ƒ.Render.prepare(camera);
         camera.positionCamera(posCamera);
-        _viewport.draw();
+        redraw();
       }
 
       function hndWheelMove(_event: WheelEvent): void {
         camera.distance *= 1 + (_event.deltaY * _speedCameraDistance);
-        focus.mtxLocal.translation = camera.mtxLocal.translation;
+        redraw();
+      }
+
+      function redraw(): void {
+        if (focus)
+          focus.mtxLocal.translation = camera.mtxLocal.translation;
+        ƒ.Render.prepare(camera);
         _viewport.draw();
       }
     }

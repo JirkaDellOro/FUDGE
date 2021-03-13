@@ -120,6 +120,8 @@ namespace FudgeCore {
      * Pass `false` if calculation was already done for this frame 
      */
     public draw(_calculateTransforms: boolean = true): void {
+      if (!this.#branch)
+        return;
       Render.resetFrameBuffer();
       if (!this.camera.isActive)
         return;

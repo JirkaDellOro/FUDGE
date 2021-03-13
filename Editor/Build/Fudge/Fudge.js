@@ -2219,7 +2219,7 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
-    var ƒaid = FudgeAid;
+    var ƒAid = FudgeAid;
     /**
      * View the rendering of a graph in a viewport with an independent camera
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
@@ -2264,22 +2264,23 @@ var Fudge;
         }
         createUserInterface() {
             let cmpCamera = new ƒ.ComponentCamera();
-            cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
-            cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
+            // cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
+            // cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
             cmpCamera.projectCentral(1, 45);
-            this.canvas = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
+            this.canvas = ƒAid.Canvas.create(true, ƒAid.IMAGE_RENDERING.PIXELATED);
             let container = document.createElement("div");
             container.style.borderWidth = "0px";
             document.body.appendChild(this.canvas);
             this.viewport = new ƒ.Viewport();
             this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
+            FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
             this.viewport.draw();
             this.dom.append(this.canvas);
             // ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
             // ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
             //Focus cameracontrols on new viewport
             // let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });
-            this.canvas.addEventListener("click", this.activeViewport);
+            this.canvas.addEventListener("click" /* CLICK */, this.activeViewport);
         }
         setGraph(_node) {
             if (!_node)
@@ -2312,7 +2313,7 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
-    var ƒaid = FudgeAid;
+    var ƒAid = FudgeAid;
     /**
      * Preview a resource
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
@@ -2349,12 +2350,13 @@ var Fudge;
             };
             // create viewport for 3D-resources
             let cmpCamera = new ƒ.ComponentCamera();
-            cmpCamera.pivot.translate(new ƒ.Vector3(1, 2, 1));
-            cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
+            // cmpCamera.pivot.translate(new ƒ.Vector3(1, 2, 1));
+            // cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
             cmpCamera.projectCentral(1, 45);
-            let canvas = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
+            let canvas = ƒAid.Canvas.create(true, ƒAid.IMAGE_RENDERING.PIXELATED);
             this.viewport = new ƒ.Viewport();
             this.viewport.initialize("Preview", null, cmpCamera, canvas);
+            ƒAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
             this.fillContent();
             _container.on("resize", this.redraw);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
@@ -2453,7 +2455,7 @@ var Fudge;
         }
         createStandardGraph() {
             let graph = new ƒ.Node("PreviewScene");
-            ƒaid.addStandardLightComponents(graph);
+            ƒAid.addStandardLightComponents(graph);
             this.viewport.setBranch(graph);
             this.dom.appendChild(this.viewport.getCanvas());
             return graph;
