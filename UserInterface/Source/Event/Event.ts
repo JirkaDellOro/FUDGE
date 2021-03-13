@@ -29,6 +29,7 @@ namespace FudgeUserInterface {
     COLLAPSE = "collapse",
     EXPAND = "expand",
     INPUT = "input",
-    REARRANGE_ARRAY = "rearrangeArray"
+    REARRANGE_ARRAY = "rearrangeArray",
+    TOGGLE = "toggle"
   }
 }

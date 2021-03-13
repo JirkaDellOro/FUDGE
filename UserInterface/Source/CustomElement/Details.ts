@@ -21,6 +21,7 @@ namespace FudgeUserInterface {
       this.addEventListener(EVENT.FOCUS_NEXT, this.hndFocus);
       this.addEventListener(EVENT.FOCUS_PREVIOUS, this.hndFocus);
       this.addEventListener(EVENT.FOCUS_SET, this.hndFocus);
+      this.addEventListener(EVENT.TOGGLE, this.hndToggle)
     }
 
 

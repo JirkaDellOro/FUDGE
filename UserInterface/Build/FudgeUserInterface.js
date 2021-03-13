@@ -1165,6 +1165,7 @@ var FudgeUserInterface;
             this.addEventListener("focusNext" /* FOCUS_NEXT */, this.hndFocus);
             this.addEventListener("focusPrevious" /* FOCUS_PREVIOUS */, this.hndFocus);
             this.addEventListener("focusSet" /* FOCUS_SET */, this.hndFocus);
+            this.addEventListener("toggle" /* TOGGLE */, this.hndToggle);
         }
         get isExpanded() {
             // return this.expander.checked;
