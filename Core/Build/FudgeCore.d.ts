@@ -2690,8 +2690,8 @@ declare namespace FudgeCore {
          * - get: a copy of the calculated translation vector
          * - set: effect the matrix ignoring its rotation and scaling
          */
-        get translation(): Vector3;
         set translation(_translation: Vector3);
+        get translation(): Vector3;
         /**
          * - get: a copy of the calculated rotation vector
          * - set: effect the matrix
@@ -3001,13 +3001,11 @@ declare namespace FudgeCore {
          */
         get copy(): Vector3;
         /**
-         * Returns a geographic representation of this vector
-         */
-        get geo(): Geo3;
-        /**
-         * Adjust the cartesian values of this vector to represent the given as geographic coordinates
+         * - get: returns a geographic representation of this vector
+         * - set: adjust the cartesian values of this vector to represent the given as geographic coordinates
          */
         set geo(_geo: Geo3);
+        get geo(): Geo3;
         /**
          * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
          * TODO: examine, if tolerance as criterium for the difference is appropriate with very large coordinate values or if _tolerance should be multiplied by coordinate value
@@ -4857,17 +4855,17 @@ declare namespace FudgeCore {
     class Picker {
         /**
          * Takes a ray plus min and max values for the near and far planes to construct the picker-camera,
-         * then renders the pick-texture and returns a [[Pick]]-array with information about the hits of the ray.
+         * then renders the pick-texture and returns an unsorted [[Pick]]-array with information about the hits of the ray.
          */
         static pickRay(_branch: Node, _ray: Ray, _min: number, _max: number): Pick[];
         /**
          * Takes a camera and a point on its virtual normed projection plane (distance 1) to construct the picker-camera,
-         * then renders the pick-texture and returns a [[Pick]]-array with information about the hits of the ray.
+         * then renders the pick-texture and returns an unsorted [[Pick]]-array with information about the hits of the ray.
          */
         static pickCamera(_branch: Node, _cmpCamera: ComponentCamera, _posProjection: Vector2): Pick[];
         /**
          * Takes the camera of the given viewport and a point the client surface to construct the picker-camera,
-         * then renders the pick-texture and returns a [[Pick]]-array with information about the hits of the ray.
+         * then renders the pick-texture and returns an unsorted [[Pick]]-array with information about the hits of the ray.
          */
         static pickViewport(_viewport: Viewport, _posClient: Vector2): Pick[];
     }

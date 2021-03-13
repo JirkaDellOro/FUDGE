@@ -7,7 +7,7 @@ namespace FudgeCore {
   export class Picker {
     /**
      * Takes a ray plus min and max values for the near and far planes to construct the picker-camera,
-     * then renders the pick-texture and returns a [[Pick]]-array with information about the hits of the ray.
+     * then renders the pick-texture and returns an unsorted [[Pick]]-array with information about the hits of the ray.
      */
     public static pickRay(_branch: Node, _ray: Ray, _min: number, _max: number): Pick[] {
       let cmpCameraPick: ComponentCamera = new ComponentCamera();
@@ -21,7 +21,7 @@ namespace FudgeCore {
 
     /**
      * Takes a camera and a point on its virtual normed projection plane (distance 1) to construct the picker-camera,
-     * then renders the pick-texture and returns a [[Pick]]-array with information about the hits of the ray.
+     * then renders the pick-texture and returns an unsorted [[Pick]]-array with information about the hits of the ray.
      */
     public static pickCamera(_branch: Node, _cmpCamera: ComponentCamera, _posProjection: Vector2): Pick[] {
       let ray: Ray = new Ray(new Vector3(-_posProjection.x, _posProjection.y, 1));
@@ -39,7 +39,7 @@ namespace FudgeCore {
 
     /**
      * Takes the camera of the given viewport and a point the client surface to construct the picker-camera,
-     * then renders the pick-texture and returns a [[Pick]]-array with information about the hits of the ray.
+     * then renders the pick-texture and returns an unsorted [[Pick]]-array with information about the hits of the ray.
      */
     public static pickViewport(_viewport: Viewport, _posClient: Vector2): Pick[] {
       let posProjection: Vector2 = _viewport.pointClientToProjection(_posClient);

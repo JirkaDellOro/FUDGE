@@ -415,18 +415,18 @@ namespace FudgeCore {
      * - get: a copy of the calculated translation vector   
      * - set: effect the matrix ignoring its rotation and scaling
      */
+    public set translation(_translation: Vector3) {
+      this.data.set(_translation.get(), 12);
+      // no full cache reset required
+      this.vectors.translation = _translation.copy;
+      this.mutator = null;
+    }
     public get translation(): Vector3 {
       if (!this.vectors.translation) {
         this.vectors.translation = Recycler.get(Vector3);
         this.vectors.translation.set(this.data[12], this.data[13], this.data[14]);
       }
       return this.vectors.translation.copy;
-    }
-    public set translation(_translation: Vector3) {
-      this.data.set(_translation.get(), 12);
-      // no full cache reset required
-      this.vectors.translation = _translation.copy;
-      this.mutator = null;
     }
 
     /** 

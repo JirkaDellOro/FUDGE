@@ -232,8 +232,14 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns a geographic representation of this vector
+     * - get: returns a geographic representation of this vector  
+     * - set: adjust the cartesian values of this vector to represent the given as geographic coordinates
      */
+    public set geo(_geo: Geo3) {
+      this.set(0, 0, _geo.magnitude);
+      this.transform(Matrix4x4.ROTATION_X(-_geo.latitude));
+      this.transform(Matrix4x4.ROTATION_Y(_geo.longitude));
+    }
     public get geo(): Geo3 {
       let geo: Geo3 = Recycler.get(Geo3);
       geo.magnitude = this.magnitude;
@@ -244,15 +250,6 @@ namespace FudgeCore {
       geo.longitude = 180 * Math.atan2(this.x / geo.magnitude, this.z / geo.magnitude) / Math.PI;
       geo.latitude = 180 * Math.asin(this.y / geo.magnitude) / Math.PI;
       return geo;
-    }
-
-    /**
-     * Adjust the cartesian values of this vector to represent the given as geographic coordinates
-     */
-    public set geo(_geo: Geo3) {
-      this.set(0, 0, _geo.magnitude);
-      this.transform(Matrix4x4.ROTATION_X(-_geo.latitude));
-      this.transform(Matrix4x4.ROTATION_Y(_geo.longitude));
     }
     //#endregion
 

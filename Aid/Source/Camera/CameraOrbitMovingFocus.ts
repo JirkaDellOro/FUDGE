@@ -6,7 +6,7 @@ namespace FudgeAid {
     public readonly axisTranslateY: ƒ.Axis = new ƒ.Axis("TranslateY", 1, ƒ.CONTROL_TYPE.PROPORTIONAL, true);
     public readonly axisTranslateZ: ƒ.Axis = new ƒ.Axis("TranslateZ", 1, ƒ.CONTROL_TYPE.PROPORTIONAL, true);
 
-    public constructor(_cmpCamera: ƒ.ComponentCamera, _distanceStart: number = 2, _maxRotX: number = 75, _minDistance: number = 1, _maxDistance: number = 10) {
+    public constructor(_cmpCamera: ƒ.ComponentCamera, _distanceStart: number = 5, _maxRotX: number = 85, _minDistance: number = 0, _maxDistance: number = Infinity) {
       super(_cmpCamera, _distanceStart, _maxRotX, _minDistance, _maxDistance);
       this.name = "CameraOrbitMovingFocus";
 
