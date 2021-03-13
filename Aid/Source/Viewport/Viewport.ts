@@ -11,7 +11,6 @@ namespace FudgeAid {
 
       let cntMouseHorizontal: ƒ.Control = new ƒ.Control("MouseHorizontal");
       let cntMouseVertical: ƒ.Control = new ƒ.Control("MouseVertical");
-      let cntMouseWheel: ƒ.Control = new ƒ.Control("MouseWheel");
 
       // camera setup
       let camera: CameraOrbitMovingFocus;
@@ -24,15 +23,6 @@ namespace FudgeAid {
 
       camera.axisRotateY.addControl(cntMouseHorizontal);
       camera.axisRotateY.setFactor(_speedCameraRotation);
-
-      camera.axisTranslateX.addControl(cntMouseHorizontal);
-      camera.axisTranslateX.setFactor(_speedCameraTranslation);
-
-      camera.axisTranslateY.addControl(cntMouseVertical);
-      camera.axisTranslateY.setFactor(_speedCameraTranslation);
-
-      camera.axisTranslateZ.addControl(cntMouseWheel);
-      camera.axisTranslateZ.setFactor(_speedCameraDistance);
 
       _viewport.getBranch().addChild(camera);
 
@@ -49,19 +39,15 @@ namespace FudgeAid {
         if (!_event.buttons)
           return;
 
-        activateAxis(_event);
         let posCamera: ƒ.Vector3 = camera.nodeCamera.mtxWorld.translation.copy;
 
         cntMouseHorizontal.setInput(_event.movementX);
-        cntMouseVertical.setInput((_event.shiftKey ? -1 : 1) * _event.movementY);
-
-
+        cntMouseVertical.setInput(_event.movementY);
         focus.mtxLocal.translation = camera.mtxLocal.translation;
         _viewport.draw();
 
-        if (_event.altKey && !_event.shiftKey) {
+        if (_event.altKey || _event.buttons == 4) {
           let offset: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(posCamera, camera.nodeCamera.mtxWorld.translation);
-          // console.log(posCamera.toString(), camera.node.mtxWorld.translation.toString());
           camera.mtxLocal.translate(offset, false);
           focus.mtxLocal.translation = camera.mtxLocal.translation;
           _viewport.draw();
@@ -84,25 +70,9 @@ namespace FudgeAid {
       }
 
       function hndWheelMove(_event: WheelEvent): void {
-        activateAxis(_event);
-
-        if (_event.shiftKey) {
-          cntMouseWheel.setInput(_event.deltaY);
-        }
-        else
-          camera.distance *= 1 + (_event.deltaY * _speedCameraDistance);
-
+        camera.distance *= 1 + (_event.deltaY * _speedCameraDistance);
         focus.mtxLocal.translation = camera.mtxLocal.translation;
         _viewport.draw();
-      }
-
-      function activateAxis(_event: PointerEvent | WheelEvent): void {
-        camera.axisTranslateX.active = _event.shiftKey;
-        camera.axisTranslateY.active = _event.shiftKey;
-        camera.axisTranslateZ.active = _event.shiftKey;
-
-        camera.axisRotateX.active = !_event.shiftKey;
-        camera.axisRotateY.active = !_event.shiftKey;
       }
     }
   }
