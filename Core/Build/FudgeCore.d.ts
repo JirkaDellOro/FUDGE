@@ -3109,7 +3109,11 @@ declare namespace FudgeCore {
         constructor(_name?: string);
         static getBufferSpecification(): BufferSpecification;
         protected static registerSubclass(_subClass: typeof Mesh): number;
-        protected static getTrigonsFromQuad(_quad: number[]): number[];
+        /**
+         * Takes an array of four indices for a quad and returns an array of six indices for two trigons cutting that quad.
+         * If the quad is planar (default), the trigons end on the same index, allowing a single normal for both faces on the referenced vertex
+         */
+        protected static getTrigonsFromQuad(_quad: number[], _even?: boolean): number[];
         protected static deleteInvalidIndices(_indices: number[], _vertices: Vector3[]): void;
         get type(): string;
         get vertices(): Float32Array;

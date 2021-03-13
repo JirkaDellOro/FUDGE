@@ -42,9 +42,17 @@ namespace FudgeCore {
 
     protected static registerSubclass(_subClass: typeof Mesh): number { return Mesh.subclasses.push(_subClass) - 1; }
 
-    protected static getTrigonsFromQuad(_quad: number[]): number[] {
+    /**
+     * Takes an array of four indices for a quad and returns an array of six indices for two trigons cutting that quad.
+     * If the quad is planar (default), the trigons end on the same index, allowing a single normal for both faces on the referenced vertex 
+     */
+    protected static getTrigonsFromQuad(_quad: number[], _even: boolean = true): number[] {
       // TODO: add parameters for other diagonal and reversion of rotation
-      let indices: number[] = [_quad[0], _quad[1], _quad[2], _quad[3], _quad[0], _quad[2]];
+      let indices: number[];
+      if (_even)
+        indices = [_quad[0], _quad[1], _quad[2], _quad[3], _quad[0], _quad[2]];
+      else
+        indices = [_quad[0], _quad[1], _quad[2], _quad[0], _quad[2], _quad[3]];
       return indices;
     }
 

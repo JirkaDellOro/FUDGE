@@ -78,9 +78,13 @@ namespace FudgeCore {
 
       // duplicate first vertex of polygon to the end to create a texturable wrapping
       polygon.push(polygon[0].copy);
-      for (let transform of _transforms) {
-        let wrap: Vector3[] = polygon.map((_v: Vector3) => Vector3.TRANSFORMATION(_v, transform, true));
+      let wrap: Vector3[];
+      for (let i: number = 0; i < nTransforms; i++) {
+        let transform: Matrix4x4 = _transforms[i];
+        wrap = polygon.map((_v: Vector3) => Vector3.TRANSFORMATION(_v, transform, true));
         vertices.push(...wrap);
+        if (i > 0 && i < nTransforms - 1)
+          vertices.push(...wrap.map((_vector: Vector3) => _vector.copy));
       }
 
 
@@ -98,8 +102,11 @@ namespace FudgeCore {
       // create indizes for wrapper
       for (let t: number = 0; t < nTransforms - 1; t++)
         for (let i: number = 0; i < nVerticesPolygon; i++) {
-          let index: number = i + (2 + t) * nVerticesPolygon + t;
-          indices.push(...Mesh.getTrigonsFromQuad([index, index + nVerticesPolygon + 1, index + nVerticesPolygon + 2, index + 1]));
+          // let index: number = i + (2 + t) * nVerticesPolygon + t;
+          let index: number = i + 2 * nVerticesPolygon + 2 * t * (nVerticesPolygon + 1);
+          if (i == 0)
+            console.log("Start", index, t);
+          indices.push(...Mesh.getTrigonsFromQuad([index, index + nVerticesPolygon + 1, index + nVerticesPolygon + 2, index + 1], false));
         }
 
       Mesh.deleteInvalidIndices(indices, vertices);
