@@ -8,7 +8,7 @@ namespace FudgeCore {
     public material: Material;
     public clrPrimary: Color = Color.CSS("white");
     public clrSecondary: Color = Color.CSS("white");
-    public pivot: Matrix3x3 = Matrix3x3.IDENTITY();
+    public mtxPivot: Matrix3x3 = Matrix3x3.IDENTITY();
     //** support sorting of objects with transparency when rendering, render objects in the back first */
     public sortForAlpha: boolean = false;
     // public mutatorCoat: MutatorForComponent;
@@ -25,7 +25,7 @@ namespace FudgeCore {
         sortForAlphathis: this.sortForAlpha,
         clrPrimary: this.clrPrimary.serialize(),
         clrSecondary: this.clrSecondary.serialize(),
-        pivot: this.pivot.serialize(),
+        pivot: this.mtxPivot.serialize(),
         [super.constructor.name]: super.serialize()
       };
       /* at this point of time, serialization as resource and as inline object is possible. TODO: check if inline becomes obsolete */
@@ -47,7 +47,7 @@ namespace FudgeCore {
       this.clrPrimary.deserialize(_serialization.clrPrimary);
       this.clrSecondary.deserialize(_serialization.clrSecondary);
       this.sortForAlpha = _serialization.sortForAlpha;
-      this.pivot.deserialize(_serialization.pivot);
+      this.mtxPivot.deserialize(_serialization.pivot);
       super.deserialize(_serialization[super.constructor.name]);
       return this;
     }

@@ -480,7 +480,7 @@ declare namespace FudgeCore {
          * @returns A new vector with the values (_scale, 0)
          */
         static X(_scale?: number): Vector2;
-        static TRANSFORMATION(_vector: Vector2, _matrix: Matrix3x3, _includeTranslation?: boolean): Vector2;
+        static TRANSFORMATION(_vector: Vector2, _mtxTransform: Matrix3x3, _includeTranslation?: boolean): Vector2;
         /**
          * Normalizes a given vector to the given length without editing the original vector.
          * @param _vector the vector to normalize
@@ -582,7 +582,7 @@ declare namespace FudgeCore {
          * @returns An array of the data of the vector
          */
         get(): Float32Array;
-        transform(_matrix: Matrix3x3, _includeTranslation?: boolean): void;
+        transform(_mtxTransform: Matrix3x3, _includeTranslation?: boolean): void;
         /**
          * For each dimension, moves the component to the minimum of this and the given vector
          */
@@ -1719,7 +1719,7 @@ declare namespace FudgeCore {
         material: Material;
         clrPrimary: Color;
         clrSecondary: Color;
-        pivot: Matrix3x3;
+        mtxPivot: Matrix3x3;
         sortForAlpha: boolean;
         constructor(_material?: Material);
         serialize(): Serialization;
@@ -2520,7 +2520,7 @@ declare namespace FudgeCore {
          * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
          */
         static SCALING(_scalar: Vector2): Matrix3x3;
-        static MULTIPLICATION(_left: Matrix3x3, _right: Matrix3x3): Matrix3x3;
+        static MULTIPLICATION(_mtxLeft: Matrix3x3, _mtxRight: Matrix3x3): Matrix3x3;
         /**
          * - get: a copy of the calculated translation vector
          * - set: effect the matrix ignoring its rotation and scaling
@@ -2574,7 +2574,7 @@ declare namespace FudgeCore {
         /**
          * Multiply this matrix with the given matrix
          */
-        multiply(_matrix: Matrix3x3): void;
+        multiply(_mtxRight: Matrix3x3): void;
         /**
          * Calculates and returns the euler-angles representing the current rotation of this matrix
          */
@@ -2582,7 +2582,7 @@ declare namespace FudgeCore {
         /**
          * Sets the elements of this matrix to the values of the given matrix
          */
-        set(_to: Matrix3x3): void;
+        set(_mtxTo: Matrix3x3): void;
         toString(): string;
         /**
          * Return the elements of this matrix as a Float32Array

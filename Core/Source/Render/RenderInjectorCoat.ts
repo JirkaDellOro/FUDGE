@@ -23,7 +23,7 @@ namespace FudgeCore {
       // crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.renderData["texture0"]);
       (<CoatTextured>this).texture.useRenderData();
       crc3.uniform1i(_shader.uniforms["u_texture"], 0);
-      crc3.uniformMatrix3fv(_shader.uniforms["u_pivot"], false, _cmpMaterial.pivot.get());
+      crc3.uniformMatrix3fv(_shader.uniforms["u_pivot"], false, _cmpMaterial.mtxPivot.get());
       // }
       // else {
       //   this.renderData = {};
