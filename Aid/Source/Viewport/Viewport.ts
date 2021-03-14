@@ -56,12 +56,11 @@ namespace FudgeAid {
       }
 
       function hndPointerDown(_event: ƒ.EventPointer): void {
-        let picks: ƒ.Pick[] = ƒ.Picker.pickViewport(_viewport, new ƒ.Vector2(_event.clientX, _event.clientY));
-        console.log(picks);
+        let pos: ƒ.Vector2 = new ƒ.Vector2(_event.canvasX, _event.canvasY);
+        let picks: ƒ.Pick[] = ƒ.Picker.pickViewport(_viewport, pos);
         if (picks.length == 0)
           return;
         picks.sort((_a: ƒ.Pick, _b: ƒ.Pick) => _a.zBuffer < _b.zBuffer ? -1 : 1);
-
 
         let posCamera: ƒ.Vector3 = camera.nodeCamera.mtxWorld.translation;
         camera.mtxLocal.translation = picks[0].posWorld;

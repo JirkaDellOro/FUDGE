@@ -2336,6 +2336,7 @@ var Fudge;
                             this.resource = _event.detail.data.script;
                         else
                             this.resource = _event.detail.data;
+                        this.resetCamera();
                         this.fillContent();
                         break;
                 }
@@ -2356,7 +2357,7 @@ var Fudge;
             let canvas = ƒAid.Canvas.create(true, ƒAid.IMAGE_RENDERING.PIXELATED);
             this.viewport = new ƒ.Viewport();
             this.viewport.initialize("Preview", null, cmpCamera, canvas);
-            ƒAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
+            this.cmrOrbit = ƒAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
             this.fillContent();
             _container.on("resize", this.redraw);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
@@ -2428,18 +2429,18 @@ var Fudge;
                     graph = this.createStandardGraph();
                     graph.addComponent(new ƒ.ComponentMesh(this.resource));
                     graph.addComponent(new ƒ.ComponentMaterial(ViewPreview.mtrStandard));
-                    this.viewport.draw();
+                    this.redraw();
                     break;
                 case "Material":
                     graph = this.createStandardGraph();
                     graph.addComponent(new ƒ.ComponentMesh(ViewPreview.meshStandard));
                     graph.addComponent(new ƒ.ComponentMaterial(this.resource));
-                    this.viewport.draw();
+                    this.redraw();
                     break;
                 case "Graph":
                     this.viewport.setBranch(this.resource);
                     this.dom.appendChild(this.viewport.getCanvas());
-                    this.viewport.draw();
+                    this.redraw();
                     break;
                 case "TextureImage":
                     let img = this.resource.image;
@@ -2493,6 +2494,12 @@ var Fudge;
             code = code.replaceAll("    ", " ");
             pre.textContent = code;
             return pre;
+        }
+        resetCamera() {
+            this.cmrOrbit.rotationX = -30;
+            this.cmrOrbit.rotationY = 30;
+            this.cmrOrbit.distance = 3;
+            ƒ.Render.prepare(this.cmrOrbit);
         }
     }
     ViewPreview.mtrStandard = ViewPreview.createStandardMaterial();

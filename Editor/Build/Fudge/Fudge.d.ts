@@ -501,6 +501,7 @@ declare namespace Fudge {
         private static meshStandard;
         private resource;
         private viewport;
+        private cmrOrbit;
         constructor(_container: GoldenLayout.Container, _state: Object);
         private static createStandardMaterial;
         private static createStandardMesh;
@@ -512,6 +513,7 @@ declare namespace Fudge {
         private createAudioPreview;
         private createScriptPreview;
         private hndEvent;
+        private resetCamera;
         private redraw;
     }
 }
