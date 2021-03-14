@@ -871,7 +871,7 @@ var FudgeUserInterface;
             input.type = "number";
             input.style.position = "absolute";
             input.style.display = "none";
-            input.addEventListener("input" /* INPUT */, (_event) => { event.stopPropagation(); });
+            input.addEventListener("input" /* INPUT */, (_event) => { _event.stopPropagation(); });
             this.appendChild(input);
             let sign = document.createElement("span");
             sign.textContent = "+";
@@ -984,7 +984,7 @@ var FudgeUserInterface;
         }
         changeDigitFocussed(_amount) {
             let digit = document.activeElement;
-            if (!this.contains(digit))
+            if (digit == this || !this.contains(digit))
                 return;
             _amount = Math.round(_amount);
             if (_amount == 0)
