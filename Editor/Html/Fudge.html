@@ -26,9 +26,8 @@
 
 <body>
   <template>
-    
-    <custom-vector2 style="text-align: center;">
-      <span style="text-align: left">
+    <custom-vector2>
+      <span>
         <label>label</label>
       </span>
       <fudge-stepper key="x" label="x"></fudge-stepper>
@@ -42,8 +41,8 @@
   </script>
 
   <template>
-    <custom-vector3 style="background-color: rgba(129, 129, 129, 0.561); text-align: center;"></custom-vector3>
-      <span style="text-align: left">
+    <custom-vector3>
+      <span>
         <label>label</label>
       </span>
       <fudge-stepper key="x" label="x"></fudge-stepper>
@@ -58,25 +57,22 @@
   </script>
 
   <template>
-    <custom-matrix4x4 style="text-align: center; display: grid; column-gap: 1em;
-        grid-template-columns: min-content min-content min-content min-content; 
-        grid-template-rows: min-content min-content min-content min-content;">
-      <span style="text-align: left">
-        <!-- <input type="checkbox" checked="true" /> -->
+    <custom-matrix4x4>
+      <span>
         <label>label</label>
       </span>
       <span>x</span>
       <span>y</span>
       <span>z</span>
-      <span style="text-align: right;">translation</span>
+      <span class="rowVector">translation</span>
       <fudge-stepper key="tx"></fudge-stepper>
       <fudge-stepper key="ty"></fudge-stepper>
       <fudge-stepper key="tz"></fudge-stepper>
-      <span style="text-align: right;">rotation</span>
+      <span class="rowVector">rotation</span>
       <fudge-stepper key="rx"></fudge-stepper>
       <fudge-stepper key="ry"></fudge-stepper>
       <fudge-stepper key="rz"></fudge-stepper>
-      <span style="text-align: right;">scaling</span>
+      <span class="rowVector">scaling</span>
       <fudge-stepper key="sx"></fudge-stepper>
       <fudge-stepper key="sy"></fudge-stepper>
       <fudge-stepper key="sz"></fudge-stepper>
@@ -89,24 +85,21 @@
   </script>
 
   <template>
-    <custom-matrix3x3 style="text-align: center; display: grid; column-gap: 1em;
-        grid-template-columns: min-content min-content min-content; 
-        grid-template-rows: min-content min-content min-content min-content;">
-      <span style="text-align: left">
-        <!-- <input type="checkbox" checked="true" /> -->
+    <custom-matrix3x3>
+      <span>
         <label>label</label>
       </span>
       <span>x</span>
       <span>y</span>
-      <span style="text-align: right;">translation</span>
+      <span class="rowVector">translation</span>
       <fudge-stepper key="tx"></fudge-stepper>
       <fudge-stepper key="ty"></fudge-stepper>
-      <span style="text-align: right;">scaling</span>
+      <span class="rowVector">scaling</span>
       <fudge-stepper key="sx"></fudge-stepper>
       <fudge-stepper key="sy"></fudge-stepper>
-      <span style="text-align: right;">rotation</span>
+      <span class="rowVector">rotation</span>
       <fudge-stepper key="r"></fudge-stepper>
-      </custom-matrix4x4>
+    </custom-matrix3x3>
   </template>
   <script>
     FudgeUserInterface.CustomElementTemplate.register("custom-matrix3x3");

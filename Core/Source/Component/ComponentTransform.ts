@@ -10,11 +10,11 @@ namespace FudgeCore {
    */
   export class ComponentTransform extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentTransform);
-    public local: Matrix4x4;
+    public mtxLocal: Matrix4x4;
 
-    public constructor(_matrix: Matrix4x4 = Matrix4x4.IDENTITY()) {
+    public constructor(_mtxInit: Matrix4x4 = Matrix4x4.IDENTITY()) {
       super();
-      this.local = _matrix;
+      this.mtxLocal = _mtxInit;
     }
 
     //#region Transformations respecting the hierarchy
@@ -26,13 +26,13 @@ namespace FudgeCore {
     public lookAt(_targetWorld: Vector3, _up?: Vector3): void {
       let container: Node = this.getContainer();
       if (!container && !container.getParent())
-        return this.local.lookAt(_targetWorld, _up);
+        return this.mtxLocal.lookAt(_targetWorld, _up);
 
       // component is attached to a child node -> transform respecting the hierarchy
       let mtxWorld: Matrix4x4 = container.mtxWorld.copy;
       mtxWorld.lookAt(_targetWorld, _up, true);
-      let local: Matrix4x4 = Matrix4x4.RELATIVE(mtxWorld, null, container.getParent().mtxWorldInverse);
-      this.local = local;
+      let mtxLocal: Matrix4x4 = Matrix4x4.RELATIVE(mtxWorld, null, container.getParent().mtxWorldInverse);
+      this.mtxLocal = mtxLocal;
     }
 
     /**
@@ -42,13 +42,13 @@ namespace FudgeCore {
     public showTo(_targetWorld: Vector3, _up?: Vector3): void {
       let container: Node = this.getContainer();
       if (!container && !container.getParent())
-        return this.local.showTo(_targetWorld, _up);
+        return this.mtxLocal.showTo(_targetWorld, _up);
 
       // component is attached to a child node -> transform respecting the hierarchy
       let mtxWorld: Matrix4x4 = container.mtxWorld.copy;
       mtxWorld.showTo(_targetWorld, _up, true);
-      let local: Matrix4x4 = Matrix4x4.RELATIVE(mtxWorld, null, container.getParent().mtxWorldInverse);
-      this.local = local;
+      let mtxLocal: Matrix4x4 = Matrix4x4.RELATIVE(mtxWorld, null, container.getParent().mtxWorldInverse);
+      this.mtxLocal = mtxLocal;
     }
 
     /**
@@ -56,7 +56,7 @@ namespace FudgeCore {
      * Use rebase before appending the container of this component to another node while preserving its transformation in the world.
      */
     public rebase(_node: Node = null): void {
-      let mtxResult: Matrix4x4 = this.local;
+      let mtxResult: Matrix4x4 = this.mtxLocal;
       let container: Node = this.getContainer();
       if (container)
         mtxResult = container.mtxWorld;
@@ -64,26 +64,26 @@ namespace FudgeCore {
       if (_node)
         mtxResult = Matrix4x4.RELATIVE(mtxResult, null, _node.mtxWorldInverse);
 
-      this.local = mtxResult;
+      this.mtxLocal = mtxResult;
     }
 
     /**
      * Applies the given transformation relative to the selected base (SELF, PARENT, WORLD) or a particular other node (NODE)
      */
-    public transform(_transform: Matrix4x4, _base: BASE = BASE.SELF, _node: Node = null): void {
+    public transform(_mtxTransform: Matrix4x4, _base: BASE = BASE.SELF, _node: Node = null): void {
       switch (_base) {
         case BASE.SELF:
-          this.local.multiply(_transform);
+          this.mtxLocal.multiply(_mtxTransform);
           break;
         case BASE.PARENT:
-          this.local.multiply(_transform, true);
+          this.mtxLocal.multiply(_mtxTransform, true);
           break;
         case BASE.NODE:
           if (!_node)
             throw new Error("BASE.NODE requires a node given as base");
         case BASE.WORLD:
           this.rebase(_node);
-          this.local.multiply(_transform, true);
+          this.mtxLocal.multiply(_mtxTransform, true);
 
           let container: Node = this.getContainer();
           if (container) {
@@ -106,14 +106,14 @@ namespace FudgeCore {
     //#region Transfer
     public serialize(): Serialization {
       let serialization: Serialization = {
-        local: this.local.serialize(),
+        local: this.mtxLocal.serialize(),
         [super.constructor.name]: super.serialize()
       };
       return serialization;
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       super.deserialize(_serialization[super.constructor.name]);
-      this.local.deserialize(_serialization.local);
+      this.mtxLocal.deserialize(_serialization.local);
       return this;
     }
 

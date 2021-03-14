@@ -31,7 +31,7 @@ namespace FudgeUserInterface {
       input.type = "number";
       input.style.position = "absolute";
       input.style.display = "none";
-      input.addEventListener("input", (_event: Event): void => { event.stopPropagation(); });
+      input.addEventListener(EVENT.INPUT, (_event: Event): void => { _event.stopPropagation(); });
       this.appendChild(input);
 
 
@@ -54,11 +54,11 @@ namespace FudgeUserInterface {
       this.appendChild(exp);
 
 
-      // input.addEventListener("change", this.hndInput);
-      input.addEventListener("blur", this.hndInput);
-      this.addEventListener("blur", this.hndFocus);
-      this.addEventListener("keydown", this.hndKey);
-      this.addEventListener("wheel", this.hndWheel);
+      // input.addEventListener(EVENT.CHANGE, this.hndInput);
+      input.addEventListener(EVENT.BLUR, this.hndInput);
+      this.addEventListener(EVENT.BLUR, this.hndFocus);
+      this.addEventListener(EVENT.KEY_DOWN, this.hndKey);
+      this.addEventListener(EVENT.WHEEL, this.hndWheel);
     }
 
     /**
@@ -197,7 +197,7 @@ namespace FudgeUserInterface {
           this.display();
           this.openInput(false);
           this.focus();
-          this.dispatchEvent(new Event("input", { bubbles: true }));
+          this.dispatchEvent(new Event(EVENT.INPUT, { bubbles: true }));
         }
         return;
       }
@@ -210,14 +210,14 @@ namespace FudgeUserInterface {
         if (next)
           next.focus();
 
-        this.dispatchEvent(new Event("input", { bubbles: true }));
+        this.dispatchEvent(new Event(EVENT.INPUT, { bubbles: true }));
         return;
       }
 
       if (_event.key == "-" || _event.key == "+") {
         this.value = (_event.key == "-" ? -1 : 1) * Math.abs(this.value);
         this.display();
-        this.dispatchEvent(new Event("input", { bubbles: true }));
+        this.dispatchEvent(new Event(EVENT.INPUT, { bubbles: true }));
         return;
       }
 
@@ -227,11 +227,11 @@ namespace FudgeUserInterface {
       switch (_event.code) {
         case ƒ.KEYBOARD_CODE.ARROW_DOWN:
           this.changeDigitFocussed(-1);
-          this.dispatchEvent(new Event("input", { bubbles: true }));
+          this.dispatchEvent(new Event(EVENT.INPUT, { bubbles: true }));
           break;
         case ƒ.KEYBOARD_CODE.ARROW_UP:
           this.changeDigitFocussed(+1);
-          this.dispatchEvent(new Event("input", { bubbles: true }));
+          this.dispatchEvent(new Event(EVENT.INPUT, { bubbles: true }));
           break;
         case ƒ.KEYBOARD_CODE.ARROW_LEFT:
           (<HTMLElement>active.previousElementSibling).focus();
@@ -261,7 +261,7 @@ namespace FudgeUserInterface {
       _event.preventDefault();
       let change: number = _event.deltaY < 0 ? +1 : -1;
       this.changeDigitFocussed(change);
-      this.dispatchEvent(new Event("input", { bubbles: true }));
+      this.dispatchEvent(new Event(EVENT.INPUT, { bubbles: true }));
     }
 
     private hndInput = (_event: Event): void => {
@@ -277,7 +277,7 @@ namespace FudgeUserInterface {
 
     private changeDigitFocussed(_amount: number): void {
       let digit: Element = document.activeElement;
-      if (!this.contains(digit))
+      if (digit == this || !this.contains(digit))
         return;
 
       _amount = Math.round(_amount);
@@ -289,7 +289,7 @@ namespace FudgeUserInterface {
         let value: number = this.value * Math.pow(10, _amount);
         console.log(value, this.value);
         if (isFinite(value))
-          this.value = value;
+          this.value = value; 
         this.display();
         return;
       }

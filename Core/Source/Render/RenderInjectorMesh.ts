@@ -21,9 +21,6 @@ namespace FudgeCore {
     }
 
     protected static createRenderBuffers(this: Mesh): void {
-      // console.log("createRenderBuffers", this);
-      // return;
-
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       let vertices: WebGLBuffer = RenderWebGL.assert<WebGLBuffer>(crc3.createBuffer());
       crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, vertices);
@@ -52,9 +49,9 @@ namespace FudgeCore {
       this.renderBuffers = renderBuffers;
     }
 
-    protected static useRenderBuffers(this: Mesh, _shader: typeof Shader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void {
-      // console.log("useRenderBuffers", this);
-      // return;
+    protected static useRenderBuffers(this: Mesh, _shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): void {
+      if (!this.renderBuffers)
+        this.createRenderBuffers();
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
 
       let aPosition: number = _shader.attributes["a_position"];
@@ -65,12 +62,12 @@ namespace FudgeCore {
       crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.renderBuffers.indices);
 
       let uProjection: WebGLUniformLocation = _shader.uniforms["u_projection"];
-      crc3.uniformMatrix4fv(uProjection, false, _projection.get());
+      crc3.uniformMatrix4fv(uProjection, false, _mtxProjection.get());
 
       // feed in face normals if shader accepts u_world. 
       let uWorld: WebGLUniformLocation = _shader.uniforms["u_world"];
       if (uWorld) {
-        crc3.uniformMatrix4fv(uWorld, false, _world.get());
+        crc3.uniformMatrix4fv(uWorld, false, _mtxWorld.get());
       }
 
       let aNormal: number = _shader.attributes["a_normal"];

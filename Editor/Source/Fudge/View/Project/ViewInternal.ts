@@ -53,7 +53,7 @@ namespace Fudge {
       });
       menu.append(item);
 
-      item = new remote.MenuItem({ label: "Create Graph", id: String(CONTEXTMENU.CREATE_GRAPH), click: _callback, accelerator: process.platform == "darwin" ? "G" : "G" });
+      item = new remote.MenuItem({ label: "Create Graph", id: String(CONTEXTMENU.CREATE_GRAPH), click: _callback, accelerator: "G" });
       menu.append(item);
 
       // ContextMenu.appendCopyPaste(menu);

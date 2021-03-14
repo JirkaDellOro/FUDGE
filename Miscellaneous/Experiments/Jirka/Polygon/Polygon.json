@@ -1,10 +1,10 @@
 {
-  "MeshPolygon|2021-02-08T14:58:15.037Z|31562": {
-    "ƒ.MeshPolygon": {
-      "idResource": "MeshPolygon|2021-02-08T14:58:15.037Z|31562",
-      "name": "MeshPolygon",
-      "type": "MeshPolygon",
-      "construction": {
+  "Mesh|2021-02-08T14:58:15.037Z|31562": {
+    "ƒ.MeshExtrusion": {
+      "idResource": "Mesh|2021-02-08T14:58:15.037Z|31562",
+      "name": "Poly/Extrusion/Prism",
+      "type": "MeshExtrusion",
+      "shape": {
         "ƒ.Vector2": [
           "[-1, -1]",
           "[0.5, -1]",
@@ -12,10 +12,29 @@
           "[-5, 1]"
         ]
       },
+      "transforms": {
+        "ƒ.Matrix4x4": [
+          {
+            "translation": "[0, 0, 0.6]",
+            "rotation": "[0, 0, 0]",
+            "scaling": "[1, 1, 1]"
+          },
+          {
+            "translation": "[0, 0, -0]",
+            "rotation": "[0, 0, 0]",
+            "scaling": "[1, 1, 1]"
+          },
+          {
+            "translation": "[0, 0.3, -1]",
+            "rotation": "[0, 0, -30]",
+            "scaling": "[0.5, 0.5, 0.5]"
+          }
+        ]
+      },
       "test2": "[1, 2]",
       "test3": "[1, 2, 3]",
-      "fitMesh": false,
-      "fitTexture": false
+      "fitMesh": true,
+      "fitTexture": true
     }
   },
   "Material|2021-02-08T14:58:19.425Z|10977": {
@@ -38,7 +57,7 @@
         "ComponentMesh": [
           {
             "ƒ.ComponentMesh": {
-              "idMesh": "MeshPolygon|2021-02-08T14:58:15.037Z|31562",
+              "idMesh": "Mesh|2021-02-08T14:58:15.037Z|31562",
               "pivot": {
                 "translation": "[0, 0, 0]",
                 "rotation": "[0, 0, 0]",
@@ -63,7 +82,8 @@
               "Component": {
                 "active": true
               },
-              "idMaterial": "Material|2021-02-08T14:58:19.425Z|10977"
+              "idMaterial": "Material|2021-02-08T14:58:19.425Z|10977",
+              "sortForAlpha": true
             }
           }
         ]

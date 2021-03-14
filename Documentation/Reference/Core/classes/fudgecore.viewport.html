@@ -72,10 +72,10 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>Controls the rendering of a graph, using the given <a href="fudgecore.componentcamera.html">ComponentCamera</a>,
+						<p>Controls the rendering of a branch, using the given <a href="fudgecore.componentcamera.html">ComponentCamera</a>,
 							and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
 							through a series of <a href="fudgecore.framing.html">Framing</a> objects. The stages involved are in order of rendering
-						<a href="fudgecore.rendermanager.html">RenderManager</a>.viewport -&gt; <a href="fudgecore.viewport.html">Viewport</a>.source -&gt; <a href="fudgecore.viewport.html">Viewport</a>.destination -&gt; DOM-Canvas -&gt; Client(CSS)</p>
+						[[RenderManager]].viewport -&gt; <a href="fudgecore.viewport.html">Viewport</a>.source -&gt; <a href="fudgecore.viewport.html">Viewport</a>.destination -&gt; DOM-Canvas -&gt; Client(CSS)</p>
 					</div>
 					<dl class="tsd-comment-tags">
 						<dt>authors</dt>
@@ -132,17 +132,16 @@
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="fudgecore.viewport.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.viewport.html#adjustcamera" class="tsd-kind-icon">adjust<wbr>Camera</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.viewport.html#adjustframes" class="tsd-kind-icon">adjust<wbr>Frames</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.viewport.html#createpickbuffers" class="tsd-kind-icon">create<wbr>Pick<wbr>Buffers</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.viewport.html#calculatetransforms" class="tsd-kind-icon">calculate<wbr>Transforms</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="fudgecore.viewport.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.viewport.html#draw" class="tsd-kind-icon">draw</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.viewport.html#getbranch" class="tsd-kind-icon">get<wbr>Branch</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.viewport.html#getcanvas" class="tsd-kind-icon">get<wbr>Canvas</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.viewport.html#getcanvasrectangle" class="tsd-kind-icon">get<wbr>Canvas<wbr>Rectangle</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.viewport.html#getclientrectangle" class="tsd-kind-icon">get<wbr>Client<wbr>Rectangle</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.viewport.html#getcontext" class="tsd-kind-icon">get<wbr>Context</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.viewport.html#getgraph" class="tsd-kind-icon">get<wbr>Graph</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.viewport.html#getrayfromclient" class="tsd-kind-icon">get<wbr>Ray<wbr>From<wbr>Client</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.viewport.html#initialize" class="tsd-kind-icon">initialize</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.viewport.html#picknodeat" class="tsd-kind-icon">pick<wbr>Node<wbr>At</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.viewport.html#pointclienttoprojection" class="tsd-kind-icon">point<wbr>Client<wbr>ToProjection</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.viewport.html#pointclienttorender" class="tsd-kind-icon">point<wbr>Client<wbr>ToRender</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.viewport.html#pointclienttoscreen" class="tsd-kind-icon">point<wbr>Client<wbr>ToScreen</a></li>
@@ -152,8 +151,8 @@
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.viewport.html#pointsourcetorender" class="tsd-kind-icon">point<wbr>Source<wbr>ToRender</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.viewport.html#pointworldtoclient" class="tsd-kind-icon">point<wbr>World<wbr>ToClient</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="fudgecore.viewport.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.viewport.html#setbranch" class="tsd-kind-icon">set<wbr>Branch</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.viewport.html#setfocus" class="tsd-kind-icon">set<wbr>Focus</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.viewport.html#setgraph" class="tsd-kind-icon">set<wbr>Graph</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.viewport.html#showscenegraph" class="tsd-kind-icon">show<wbr>Scene<wbr>Graph</a></li>
 							</ul>
 						</section>
@@ -168,7 +167,7 @@
 					<div class="tsd-signature tsd-kind-icon">adjusting<wbr>Camera<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = true</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L27">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:27</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L27">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:27</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -178,7 +177,7 @@
 					<div class="tsd-signature tsd-kind-icon">adjusting<wbr>Frames<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = true</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L26">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:26</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L26">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:26</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -188,7 +187,7 @@
 					<div class="tsd-signature tsd-kind-icon">camera<span class="tsd-signature-symbol">:</span> <a href="fudgecore.componentcamera.html" class="tsd-signature-type">ComponentCamera</a><span class="tsd-signature-symbol"> = null</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L13">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:13</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L13">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:13</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -198,7 +197,7 @@
 					<div class="tsd-signature tsd-kind-icon">frame<wbr>Canvas<wbr>ToDestination<span class="tsd-signature-symbol">:</span> <a href="fudgecore.framingcomplex.html" class="tsd-signature-type">FramingComplex</a><span class="tsd-signature-symbol"> = new FramingComplex()</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L22">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:22</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L22">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:22</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -208,7 +207,7 @@
 					<div class="tsd-signature tsd-kind-icon">frame<wbr>Client<wbr>ToCanvas<span class="tsd-signature-symbol">:</span> <a href="fudgecore.framingscaled.html" class="tsd-signature-type">FramingScaled</a><span class="tsd-signature-symbol"> = new FramingScaled()</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L21">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:21</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L21">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:21</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -218,7 +217,7 @@
 					<div class="tsd-signature tsd-kind-icon">frame<wbr>Destination<wbr>ToSource<span class="tsd-signature-symbol">:</span> <a href="fudgecore.framingscaled.html" class="tsd-signature-type">FramingScaled</a><span class="tsd-signature-symbol"> = new FramingScaled()</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L23">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:23</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L23">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:23</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -228,7 +227,7 @@
 					<div class="tsd-signature tsd-kind-icon">frame<wbr>Source<wbr>ToRender<span class="tsd-signature-symbol">:</span> <a href="fudgecore.framingscaled.html" class="tsd-signature-type">FramingScaled</a><span class="tsd-signature-symbol"> = new FramingScaled()</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L24">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:24</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L24">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:24</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -238,7 +237,7 @@
 					<div class="tsd-signature tsd-kind-icon">name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;Viewport&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L12">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:12</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L12">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:12</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -248,7 +247,7 @@
 					<div class="tsd-signature tsd-kind-icon">rect<wbr>Destination<span class="tsd-signature-symbol">:</span> <a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L16">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:16</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L16">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:16</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -258,7 +257,7 @@
 					<div class="tsd-signature tsd-kind-icon">rect<wbr>Source<span class="tsd-signature-symbol">:</span> <a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L15">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:15</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L15">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:15</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -275,7 +274,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L40">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:40</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L39">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:39</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -300,7 +299,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L336">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:336</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L338">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:338</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -315,8 +314,6 @@
 								</li>
 								<li>
 									<h5>_on: <span class="tsd-signature-type">boolean</span></h5>
-									<div class="tsd-comment tsd-typography">
-									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -333,7 +330,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L328">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:328</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L331">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:331</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -348,8 +345,6 @@
 								</li>
 								<li>
 									<h5>_on: <span class="tsd-signature-type">boolean</span></h5>
-									<div class="tsd-comment tsd-typography">
-									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -366,7 +361,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L320">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:320</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L324">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:324</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -381,8 +376,6 @@
 								</li>
 								<li>
 									<h5>_on: <span class="tsd-signature-type">boolean</span></h5>
-									<div class="tsd-comment tsd-typography">
-									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -399,7 +392,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L346">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:346</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L347">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:347</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -414,8 +407,6 @@
 								</li>
 								<li>
 									<h5>_on: <span class="tsd-signature-type">boolean</span></h5>
-									<div class="tsd-comment tsd-typography">
-									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -434,7 +425,7 @@
 								<p>Inherited from <a href="fudgecore.eventtarget_.html">EventTargetƒ</a>.<a href="fudgecore.eventtarget_.html#addeventlistener">addEventListener</a></p>
 								<p>Overrides <a href="fudgecore.control.html">Control</a>.<a href="fudgecore.control.html#addeventlistener">addEventListener</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Event/Event.ts#L56">Documents/HFU/FUDGE/Core/Source/Event/Event.ts:56</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Event/Event.ts#L57">Documents/HFU/FUDGE/Core/Source/Event/Event.ts:57</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -463,7 +454,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L183">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:183</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L179">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:179</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -485,7 +476,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L161">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:161</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L157">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:157</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -498,21 +489,21 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="createpickbuffers" class="tsd-anchor"></a>
-					<h3>create<wbr>Pick<wbr>Buffers</h3>
+					<a name="calculatetransforms" class="tsd-anchor"></a>
+					<h3>calculate<wbr>Transforms</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">create<wbr>Pick<wbr>Buffers<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">calculate<wbr>Transforms<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L142">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:142</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L121">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:121</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Draw this viewport for RayCast</p>
+									<p>Calculate the cascade of transforms in this branch and store the results as mtxWorld in the <a href="fudgecore.node.html">Node</a>s and <a href="fudgecore.componentmesh.html">ComponentMesh</a>es</p>
 								</div>
 							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -531,7 +522,7 @@
 								<p>Inherited from <a href="fudgecore.eventtarget_.html">EventTargetƒ</a>.<a href="fudgecore.eventtarget_.html#dispatchevent">dispatchEvent</a></p>
 								<p>Overrides <a href="fudgecore.audiomanager.html">AudioManager</a>.<a href="fudgecore.audiomanager.html#dispatchevent">dispatchEvent</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Event/Event.ts#L63">Documents/HFU/FUDGE/Core/Source/Event/Event.ts:63</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Event/Event.ts#L64">Documents/HFU/FUDGE/Core/Source/Event/Event.ts:64</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -548,21 +539,50 @@
 					<a name="draw" class="tsd-anchor"></a>
 					<h3>draw</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">draw<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">draw<span class="tsd-signature-symbol">(</span>_calculateTransforms<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L119">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:119</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L132">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:132</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Draw this viewport</p>
+									<p>Draw this viewport displaying its branch. By default, the transforms in the branch are recalculated first.
+									Pass <code>false</code> if calculation was already done for this frame</p>
 								</div>
 							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _calculateTransforms: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = true</span></h5>
+								</li>
+							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="getbranch" class="tsd-anchor"></a>
+					<h3>get<wbr>Branch</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Branch<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L102">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:102</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Retrieve the branch this viewport renders</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.node.html" class="tsd-signature-type">Node</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -576,7 +596,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L61">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:61</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L60">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:60</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -598,7 +618,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L73">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:73</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L72">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:72</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -620,7 +640,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L79">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:79</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L78">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:78</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -642,7 +662,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L67">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:67</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L66">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:66</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -651,23 +671,6 @@
 								</div>
 							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">CanvasRenderingContext2D</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="getgraph" class="tsd-anchor"></a>
-					<h3>get<wbr>Graph</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Graph<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L100">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:100</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.node.html" class="tsd-signature-type">Node</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -681,7 +684,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L194">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:194</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L190">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:190</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -703,18 +706,18 @@
 					<a name="initialize" class="tsd-anchor"></a>
 					<h3>initialize</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">initialize<span class="tsd-signature-symbol">(</span>_name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, _graph<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a>, _camera<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentcamera.html" class="tsd-signature-type">ComponentCamera</a>, _canvas<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">HTMLCanvasElement</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">initialize<span class="tsd-signature-symbol">(</span>_name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, _branch<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a>, _camera<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentcamera.html" class="tsd-signature-type">ComponentCamera</a>, _canvas<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">HTMLCanvasElement</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L47">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:47</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L46">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:46</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Connects the viewport to the given canvas to render the given graph to using the given camera-component, and names the viewport as given.</p>
+									<p>Connects the viewport to the given canvas to render the given branch to using the given camera-component, and names the viewport as given.</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -723,7 +726,7 @@
 									<h5>_name: <span class="tsd-signature-type">string</span></h5>
 								</li>
 								<li>
-									<h5>_graph: <a href="fudgecore.node.html" class="tsd-signature-type">Node</a></h5>
+									<h5>_branch: <a href="fudgecore.node.html" class="tsd-signature-type">Node</a></h5>
 								</li>
 								<li>
 									<h5>_camera: <a href="fudgecore.componentcamera.html" class="tsd-signature-type">ComponentCamera</a></h5>
@@ -737,29 +740,6 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="picknodeat" class="tsd-anchor"></a>
-					<h3>pick<wbr>Node<wbr>At</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">pick<wbr>Node<wbr>At<span class="tsd-signature-symbol">(</span>_pos<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.rayhit.html" class="tsd-signature-type">RayHit</a><span class="tsd-signature-symbol">[]</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L151">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:151</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>_pos: <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.rayhit.html" class="tsd-signature-type">RayHit</a><span class="tsd-signature-symbol">[]</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
 					<a name="pointclienttoprojection" class="tsd-anchor"></a>
 					<h3>point<wbr>Client<wbr>ToProjection</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -769,13 +749,13 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L249">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:249</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L250">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:250</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Returns a point in normed view-rectangle matching the given point on the client rectangle
-										The view-rectangle matches the client size in the hypothetical distance of 1 to the camera, its origin in the center and y-axis pointing up
+									<p>Returns a point on a projection surface in the hypothetical distance of 1 to the camera
+										matching the given point on the client rectangle
 									TODO: examine, if this should be a camera-method. Current implementation is for central-projection</p>
 								</div>
 							</div>
@@ -799,7 +779,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L237">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:237</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L238">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:238</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -827,9 +807,14 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L288">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:288</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L293">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:293</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns a point in the browser page matching the given point of the viewport</p>
+								</div>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
@@ -850,7 +835,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L218">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:218</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L217">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:217</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -878,7 +863,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L283">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:283</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L285">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:285</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -907,7 +892,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L269">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:269</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L270">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:270</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -936,7 +921,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L228">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:228</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L228">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:228</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -964,9 +949,14 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L209">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:209</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L208">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:208</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns a point on the client rectangle matching the projection of the given point in world space</p>
+								</div>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
@@ -989,7 +979,7 @@
 								<p>Inherited from <a href="fudgecore.eventtarget_.html">EventTargetƒ</a>.<a href="fudgecore.eventtarget_.html#removeeventlistener">removeEventListener</a></p>
 								<p>Overrides <a href="fudgecore.control.html">Control</a>.<a href="fudgecore.control.html#removeeventlistener">removeEventListener</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Event/Event.ts#L59">Documents/HFU/FUDGE/Core/Source/Event/Event.ts:59</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Event/Event.ts#L60">Documents/HFU/FUDGE/Core/Source/Event/Event.ts:60</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1009,6 +999,34 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="setbranch" class="tsd-anchor"></a>
+					<h3>set<wbr>Branch</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Branch<span class="tsd-signature-symbol">(</span>_branch<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L87">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:87</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Set the branch to be drawn in the viewport.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_branch: <a href="fudgecore.node.html" class="tsd-signature-type">Node</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
 					<a name="setfocus" class="tsd-anchor"></a>
 					<h3>set<wbr>Focus</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -1018,13 +1036,13 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L298">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:298</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L303">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:303</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
 									<p>Switch the viewports focus on or off. Only one viewport in one FUDGE instance can have the focus, thus receiving keyboard events.
-										So a viewport currently having the focus will lose it, when another one receives it. The viewports fire [[Event]]s accordingly.
+										So a viewport currently having the focus will lose it, when another one receives it. The viewports fire <a href="fudgecore.eventphysics.html#event">Event</a>s accordingly.
 									// TODO: examine, if this can be achieved by regular DOM-Focus and tabindex=0</p>
 								</div>
 							</div>
@@ -1032,36 +1050,6 @@
 							<ul class="tsd-parameters">
 								<li>
 									<h5>_on: <span class="tsd-signature-type">boolean</span></h5>
-									<div class="tsd-comment tsd-typography">
-									</div>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="setgraph" class="tsd-anchor"></a>
-					<h3>set<wbr>Graph</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">set<wbr>Graph<span class="tsd-signature-symbol">(</span>_graph<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L88">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:88</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Set the graph to be drawn in the viewport.</p>
-								</div>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>_graph: <a href="fudgecore.node.html" class="tsd-signature-type">Node</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -1078,7 +1066,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Engine/Viewport.ts#L107">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:107</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Engine/Viewport.ts#L109">Documents/HFU/FUDGE/Core/Source/Engine/Viewport.ts:109</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1165,13 +1153,16 @@
 								<a href="fudgecore.viewport.html#adjustframes" class="tsd-kind-icon">adjust<wbr>Frames</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgecore.viewport.html#createpickbuffers" class="tsd-kind-icon">create<wbr>Pick<wbr>Buffers</a>
+								<a href="fudgecore.viewport.html#calculatetransforms" class="tsd-kind-icon">calculate<wbr>Transforms</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
 								<a href="fudgecore.viewport.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudgecore.viewport.html#draw" class="tsd-kind-icon">draw</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.viewport.html#getbranch" class="tsd-kind-icon">get<wbr>Branch</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudgecore.viewport.html#getcanvas" class="tsd-kind-icon">get<wbr>Canvas</a>
@@ -1186,16 +1177,10 @@
 								<a href="fudgecore.viewport.html#getcontext" class="tsd-kind-icon">get<wbr>Context</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgecore.viewport.html#getgraph" class="tsd-kind-icon">get<wbr>Graph</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudgecore.viewport.html#getrayfromclient" class="tsd-kind-icon">get<wbr>Ray<wbr>From<wbr>Client</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudgecore.viewport.html#initialize" class="tsd-kind-icon">initialize</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgecore.viewport.html#picknodeat" class="tsd-kind-icon">pick<wbr>Node<wbr>At</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudgecore.viewport.html#pointclienttoprojection" class="tsd-kind-icon">point<wbr>Client<wbr>ToProjection</a>
@@ -1225,10 +1210,10 @@
 								<a href="fudgecore.viewport.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgecore.viewport.html#setfocus" class="tsd-kind-icon">set<wbr>Focus</a>
+								<a href="fudgecore.viewport.html#setbranch" class="tsd-kind-icon">set<wbr>Branch</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgecore.viewport.html#setgraph" class="tsd-kind-icon">set<wbr>Graph</a>
+								<a href="fudgecore.viewport.html#setfocus" class="tsd-kind-icon">set<wbr>Focus</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudgecore.viewport.html#showscenegraph" class="tsd-kind-icon">show<wbr>Scene<wbr>Graph</a>

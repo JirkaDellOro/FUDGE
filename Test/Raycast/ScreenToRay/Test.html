@@ -27,6 +27,8 @@
 
     canvas#viewport {
       display: block;
+      width: 600px;
+      height: 600px;
     }
 
     input[type=number] {
@@ -44,22 +46,16 @@
 
     output {
       display: inline-block;
-      width: 250px;
-    }
-    span {
-      display: block;
+      width: 300px;
+      vertical-align: top;
     }
   </style>
 </head>
 
 <body>
   <canvas id="viewport"></canvas>
-  <span>
-    <output id="o1"></output>
-    <output id="o2"></output>
-  </span>
   <canvas id="ray"></canvas>
-  <canvas id="pick"></canvas>
+  <output></output>
   <div name="menu">
   </div>
 </body>

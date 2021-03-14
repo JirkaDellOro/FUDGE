@@ -1,11 +1,10 @@
-
 ///<reference path="../View/View.ts"/>
 ///<reference path="../View/Project/ViewExternal.ts"/>
 ///<reference path="../View/Project/ViewInternal.ts"/>
 
 namespace Fudge {
   import ƒ = FudgeCore;
-  import ƒui = FudgeUserInterface;
+  import ƒUi = FudgeUserInterface;
 
   interface DragDropFilter {
     onKeyAttribute?: string;
@@ -25,13 +24,19 @@ namespace Fudge {
     TextureOnMaterial: { fromViews: [ViewInternal], onType: ƒ.Material, ofType: ƒ.Texture, dropEffect: "link" }
   };
 
-  export class ControllerComponent extends ƒui.Controller {
+  export class ControllerComponent extends ƒUi.Controller {
     public constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement) {
       super(_mutable, _domElement);
-      this.domElement.addEventListener("input", this.mutateOnInput); // this should be obsolete
-      this.domElement.addEventListener(ƒui.EVENT.DRAG_OVER, this.hndDragOver);
-      this.domElement.addEventListener(ƒui.EVENT.DROP, this.hndDrop);
-      // this.domElement.addEventListener(ƒui.EVENT.UPDATE, this.hndUpdate);
+      this.domElement.addEventListener(ƒUi.EVENT.INPUT, this.mutateOnInput); // this should be obsolete
+      this.domElement.addEventListener(ƒUi.EVENT.DRAG_OVER, this.hndDragOver);
+      this.domElement.addEventListener(ƒUi.EVENT.DROP, this.hndDrop);
+      this.domElement.addEventListener(ƒUi.EVENT.KEY_DOWN, this.hndKey);
+    }
+
+    private hndKey = (_event: KeyboardEvent): void => {
+      _event.stopPropagation();
+      if (_event.code == ƒ.KEYBOARD_CODE.DELETE)
+        this.domElement.dispatchEvent(new CustomEvent(ƒUi.EVENT.DELETE, { bubbles: true, detail: this }));
     }
 
     private hndDragOver = (_event: DragEvent): void => {

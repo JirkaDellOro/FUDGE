@@ -9,13 +9,13 @@ declare namespace FudgeUserInterface {
         domElement: HTMLElement;
         protected timeUpdate: number;
         /** Refererence to the [[FudgeCore.Mutable]] this ui refers to */
-        protected mutable: ƒ.Mutable;
+        protected mutable: ƒ.Mutable | ƒ.MutableArray<ƒ.Mutable>;
         /** [[FudgeCore.Mutator]] used to convey data to and from the mutable*/
         protected mutator: ƒ.Mutator;
         /** [[FudgeCore.Mutator]] used to store the data types of the mutator attributes*/
         protected mutatorTypes: ƒ.Mutator;
         private idInterval;
-        constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
+        constructor(_mutable: ƒ.Mutable | ƒ.MutableArray<ƒ.Mutable>, _domElement: HTMLElement);
         /**
          * Recursive method taking an existing [[ƒ.Mutator]] as a template
          * and updating its values with those found in the given UI-domElement.
@@ -25,17 +25,19 @@ declare namespace FudgeUserInterface {
          * Recursive method taking the a [[ƒ.Mutable]] as a template to create a [[ƒ.Mutator]] or update the given [[ƒ.Mutator]]
          * with the values in the given UI-domElement
          */
-        static getMutator(_mutable: ƒ.Mutable, _domElement: HTMLElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
+        static getMutator(_mutable: ƒ.Mutable | ƒ.MutableArray<ƒ.Mutable>, _domElement: HTMLElement, _mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
         /**
          * Recursive method taking the [[ƒ.Mutator]] of a [[ƒ.Mutable]] and updating the UI-domElement accordingly.
          * If an additional [[ƒ.Mutator]] is passed, its values are used instead of those of the [[ƒ.Mutable]].
          */
-        static updateUserInterface(_mutable: ƒ.Mutable, _domElement: HTMLElement, _mutator?: ƒ.Mutator): void;
+        static updateUserInterface(_mutable: ƒ.Mutable | ƒ.MutableArray<ƒ.Mutable>, _domElement: HTMLElement, _mutator?: ƒ.Mutator): void;
+        static findChildElementByKey(_domElement: HTMLElement, key: string): HTMLElement;
         getMutator(_mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
         updateUserInterface(): void;
-        setMutable(_mutable: ƒ.Mutable): void;
+        setMutable(_mutable: ƒ.Mutable | ƒ.MutableArray<ƒ.Mutable>): void;
         startRefresh(): void;
         protected mutateOnInput: (_event: Event) => Promise<void>;
+        protected rearrangeArray: (_event: Event) => Promise<void>;
         protected refresh: (_event: Event) => void;
     }
 }
@@ -46,17 +48,17 @@ declare namespace FudgeUserInterface {
      */
     class Generator {
         /**
-         * Creates a [[Controller]] from a [[FudgeCore.Mutable]] using a CustomFieldSet
+         * Creates a [[Controller]] from a [[FudgeCore.Mutable]] with expandable details or a list
          */
         static createController(_mutable: ƒ.Mutable, _name?: string): Controller;
         /**
-         * Create a extendable fieldset for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+         * Create extendable details for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
          */
-        static createFieldSetFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): ExpandableFieldSet;
+        static createDetailsFromMutable(_mutable: ƒ.Mutable | ƒ.MutableArray<ƒ.Mutable>, _name?: string, _mutator?: ƒ.Mutator): Details | DetailsArray;
         /**
          * Create a div-Elements containing the interface for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
          */
-        static createInterfaceFromMutable(_mutable: ƒ.Mutable, _name?: string, _mutator?: ƒ.Mutator): HTMLDivElement;
+        static createInterfaceFromMutable(_mutable: ƒ.Mutable | ƒ.MutableArray<ƒ.Mutable>, _mutator?: ƒ.Mutator): HTMLDivElement;
         /**
          * Create a div-Element containing the interface for the [[FudgeCore.Mutator]]
          * Does not support nested mutators!
@@ -70,7 +72,6 @@ declare namespace FudgeUserInterface {
          * TODO: refactor for enums
          */
         static createDropdown(_name: string, _content: Object, _value: string, _parent: HTMLElement, _cssClass?: string): HTMLSelectElement;
-        static createExpendableFieldset(_key: string, _type: string): ExpandableFieldSet;
     }
 }
 declare namespace FudgeUserInterface {
@@ -115,6 +116,7 @@ declare namespace FudgeUserInterface {
          * Add a label-element as child to this element
          */
         appendLabel(): HTMLLabelElement;
+        setLabel(_label: string): void;
         /**
          * Get the value of this element in a format compatible with [[FudgeCore.Mutator]]
          */
@@ -123,6 +125,8 @@ declare namespace FudgeUserInterface {
          * Set the value of this element using a format compatible with [[FudgeCore.Mutator]]
          */
         setMutatorValue(_value: Object): void;
+        /** Workaround reconnection of clone */
+        cloneNode(_deep: boolean): Node;
     }
 }
 declare namespace FudgeUserInterface {
@@ -180,9 +184,9 @@ declare namespace FudgeUserInterface {
         private static customElement;
         protected initialized: boolean;
         constructor();
-        connectedCallback(): void;
         set value(_value: number);
         get value(): number;
+        connectedCallback(): void;
         add(_addend: number): void;
     }
 }
@@ -321,6 +325,33 @@ declare namespace FudgeUserInterface {
     }
 }
 declare namespace FudgeUserInterface {
+    class Details extends HTMLDetailsElement {
+        content: HTMLDivElement;
+        constructor(_legend: string, _type: string);
+        get isExpanded(): boolean;
+        setContent(_content: HTMLDivElement): void;
+        expand(_expand: boolean): void;
+        private hndToggle;
+        private hndFocus;
+        private hndKey;
+    }
+}
+declare namespace FudgeUserInterface {
+    import ƒ = FudgeCore;
+    class DetailsArray extends Details {
+        constructor(_legend: string);
+        setContent(_content: HTMLDivElement): void;
+        getMutator(): ƒ.Mutator;
+        private addEventListeners;
+        private rearrange;
+        private setFocus;
+        private hndDragStart;
+        private hndDragOver;
+        private hndDrop;
+        private hndkey;
+    }
+}
+declare namespace FudgeUserInterface {
     import ƒ = FudgeCore;
     class CustomElementVector3 extends CustomElementTemplate {
         getMutatorValue(): ƒ.Mutator;
@@ -343,20 +374,6 @@ declare namespace FudgeUserInterface {
     }
 }
 declare namespace FudgeUserInterface {
-    class ExpandableFieldSet extends HTMLFieldSetElement {
-        content: HTMLDivElement;
-        private expander;
-        constructor(_legend?: string);
-        get isExpanded(): boolean;
-        expand(_expand: boolean): void;
-        private hndToggle;
-        private hndFocus;
-        private hndKey;
-    }
-}
-declare namespace FudgeUserInterface {
-}
-declare namespace FudgeUserInterface {
     /**
      * <select><option>Hallo</option></select>
      */
@@ -364,8 +381,6 @@ declare namespace FudgeUserInterface {
     class MultiLevelMenuManager {
         static buildFromSignature(_signature: string, _mutator?: ƒ.Mutator): ƒ.Mutator;
     }
-}
-declare namespace FudgeUserInterface {
 }
 declare namespace FudgeUserInterface {
     interface TABLE {
@@ -408,23 +423,23 @@ declare namespace FudgeUserInterface {
 }
 declare namespace FudgeUserInterface {
     /**
-     * Subclass this to create a broker between your data and a [[Tree]] to display and manipulate it.
-     * The [[Tree]] doesn't know how your data is structured and how to handle it, the controller implements the methods needed
+     * Subclass this to create a broker between your data and a [[Table]] to display and manipulate it.
+     * The [[Table]] doesn't know how your data is structured and how to handle it, the controller implements the methods needed
      */
     abstract class TableController<T> {
-        /** Stores references to selected objects. Override with a reference in outer scope, if selection should also operate outside of tree */
+        /** Stores references to selected objects. Override with a reference in outer scope, if selection should also operate outside of table */
         selection: T[];
-        /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
+        /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of table */
         dragDrop: {
             sources: T[];
             target: T;
         };
-        /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
+        /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of table */
         copyPaste: {
             sources: T[];
             target: T;
         };
-        /** Retrieve a string to create a label for the tree item representing the object  */
+        /** Retrieve a string to create a label for the table item representing the object  */
         abstract getLabel(_object: T): string;
         /** Return false to disallow renaming the item/object, or processes the proposed new label */
         abstract rename(_object: T, _new: string): boolean;
@@ -683,11 +698,13 @@ declare namespace FudgeUserInterface {
         DRAG_OVER = "dragover",
         DROP = "drop",
         POINTER_UP = "pointerup",
+        WHEEL = "wheel",
         FOCUS_NEXT = "focusNext",
         FOCUS_PREVIOUS = "focusPrevious",
         FOCUS_IN = "focusin",
         FOCUS_OUT = "focusout",
         FOCUS_SET = "focusSet",
+        BLUR = "blur",
         CHANGE = "change",
         DELETE = "delete",
         RENAME = "rename",
@@ -701,6 +718,10 @@ declare namespace FudgeUserInterface {
         MUTATE = "mutate",
         REMOVE_CHILD = "removeChild",
         COLLAPSE = "collapse",
-        EXPAND = "expand"
+        EXPAND = "expand",
+        INPUT = "input",
+        REARRANGE_ARRAY = "rearrangeArray",
+        TOGGLE = "toggle",
+        POINTER_MOVE = "pointermove"
     }
 }

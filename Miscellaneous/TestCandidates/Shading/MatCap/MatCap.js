@@ -26,7 +26,7 @@ var MatCapTest;
         let cmpCamera = Scenes.createCamera(new ƒ.Vector3(1, 1, 5), new ƒ.Vector3(0, 0, 0));
         viewport.initialize("Viewport", graph, cmpCamera, document.querySelector("canvas"));
         viewport.draw();
-        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, handleFrame);
+        ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, handleFrame);
         ƒ.Loop.start(ƒ.LOOP_MODE["TIME_GAME"], 30, true);
         function handleFrame(_event) {
             sphere.mtxLocal.rotateX(1);

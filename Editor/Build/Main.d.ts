@@ -3,12 +3,11 @@ declare namespace Fudge {
         ADD_NODE = 0,
         ADD_COMPONENT = 1,
         ADD_COMPONENT_SCRIPT = 2,
-        DELETE_NODE = 3,
-        EDIT = 4,
-        CREATE = 5,
-        CREATE_MESH = 6,
-        CREATE_MATERIAL = 7,
-        CREATE_GRAPH = 8
+        EDIT = 3,
+        CREATE_MESH = 4,
+        CREATE_MATERIAL = 5,
+        CREATE_GRAPH = 6,
+        REMOVE_COMPONENT = 7
     }
     enum MENU {
         QUIT = "quit",

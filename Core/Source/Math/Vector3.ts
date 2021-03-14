@@ -17,12 +17,13 @@ namespace FudgeCore {
       this.data = new Float32Array([_x, _y, _z]);
     }
 
+    //#region Static
     /**
      * Creates and returns a vector with the given length pointing in x-direction
      */
     public static X(_scale: number = 1): Vector3 {
       const vector: Vector3 = Recycler.get(Vector3);
-      vector.data.set([_scale, 0, 0]);
+      vector.set(_scale, 0, 0);
       return vector;
     }
 
@@ -31,7 +32,7 @@ namespace FudgeCore {
      */
     public static Y(_scale: number = 1): Vector3 {
       const vector: Vector3 = Recycler.get(Vector3);
-      vector.data.set([0, _scale, 0]);
+      vector.set(0, _scale, 0);
       return vector;
     }
 
@@ -49,7 +50,7 @@ namespace FudgeCore {
      */
     public static ZERO(): Vector3 {
       const vector: Vector3 = Recycler.get(Vector3);
-      vector.data.set([0, 0, 0]);
+      vector.set(0, 0, 0);
       return vector;
     }
 
@@ -58,16 +59,16 @@ namespace FudgeCore {
      */
     public static ONE(_scale: number = 1): Vector3 {
       const vector: Vector3 = Recycler.get(Vector3);
-      vector.data.set([_scale, _scale, _scale]);
+      vector.set(_scale, _scale, _scale);
       return vector;
     }
 
     /**
      * Creates and returns a vector through transformation of the given vector by the given matrix
      */
-    public static TRANSFORMATION(_vector: Vector3, _matrix: Matrix4x4, _includeTranslation: boolean = true): Vector3 {
+    public static TRANSFORMATION(_vector: Vector3, _mtxTransform: Matrix4x4, _includeTranslation: boolean = true): Vector3 {
       let result: Vector3 = Recycler.get(Vector3);
-      let m: Float32Array = _matrix.get();
+      let m: Float32Array = _mtxTransform.get();
       let [x, y, z] = _vector.get();
 
       result.x = m[0] * x + m[4] * y + m[8] * z;
@@ -75,7 +76,7 @@ namespace FudgeCore {
       result.z = m[2] * x + m[6] * y + m[10] * z;
 
       if (_includeTranslation) {
-        result.add(_matrix.translation);
+        result.add(_mtxTransform.translation);
       }
 
       return result;
@@ -92,7 +93,7 @@ namespace FudgeCore {
           throw (new RangeError("Impossible normalization"));
         vector = Vector3.ZERO();
         let factor: number = _length / _vector.magnitude;
-        vector.data = new Float32Array([_vector.x * factor, _vector.y * factor, _vector.z * factor]);
+        vector.set(_vector.x * factor, _vector.y * factor, _vector.z * factor);
       } catch (_error) {
         Debug.warn(_error);
       }
@@ -105,7 +106,7 @@ namespace FudgeCore {
     public static SUM(..._vectors: Vector3[]): Vector3 {
       let result: Vector3 = Recycler.get(Vector3);
       for (let vector of _vectors)
-        result.data = new Float32Array([result.x + vector.x, result.y + vector.y, result.z + vector.z]);
+        result.set(result.x + vector.x, result.y + vector.y, result.z + vector.z);
       return result;
     }
 
@@ -114,7 +115,7 @@ namespace FudgeCore {
      */
     public static DIFFERENCE(_minuend: Vector3, _subtrahend: Vector3): Vector3 {
       let vector: Vector3 = Recycler.get(Vector3);
-      vector.data = new Float32Array([_minuend.x - _subtrahend.x, _minuend.y - _subtrahend.y, _minuend.z - _subtrahend.z]);
+      vector.set(_minuend.x - _subtrahend.x, _minuend.y - _subtrahend.y, _minuend.z - _subtrahend.z);
       return vector;
     }
 
@@ -123,7 +124,7 @@ namespace FudgeCore {
      */
     public static SCALE(_vector: Vector3, _scaling: number): Vector3 {
       let scaled: Vector3 = Recycler.get(Vector3);
-      scaled.data = new Float32Array([_vector.x * _scaling, _vector.y * _scaling, _vector.z * _scaling]);
+      scaled.set(_vector.x * _scaling, _vector.y * _scaling, _vector.z * _scaling);
       return scaled;
     }
 
@@ -132,10 +133,11 @@ namespace FudgeCore {
      */
     public static CROSS(_a: Vector3, _b: Vector3): Vector3 {
       let vector: Vector3 = Recycler.get(Vector3);
-      vector.data = new Float32Array([
+      vector.set(
         _a.y * _b.z - _a.z * _b.y,
         _a.z * _b.x - _a.x * _b.z,
-        _a.x * _b.y - _a.y * _b.x]);
+        _a.x * _b.y - _a.y * _b.x
+      );
       return vector;
     }
     /**
@@ -166,7 +168,7 @@ namespace FudgeCore {
      */
     public static RATIO(_dividend: Vector3, _divisor: Vector3): Vector3 {
       let vector: Vector3 = Recycler.get(Vector3);
-      vector.data = new Float32Array([_dividend.x / _divisor.x, _dividend.y / _divisor.y, _dividend.z / _divisor.z]);
+      vector.set(_dividend.x / _divisor.x, _dividend.y / _divisor.y, _dividend.z / _divisor.z);
       return vector;
     }
 
@@ -181,7 +183,9 @@ namespace FudgeCore {
       Recycler.store(geo);
       return vector;
     }
+    //#endregion
 
+    //#region Accessors
     // TODO: implement equals-functions
     get x(): number {
       return this.data[0];
@@ -219,6 +223,7 @@ namespace FudgeCore {
 
     /**
      * Returns a copy of this vector
+     * TODO: rename this clone and create a new method copy, which copies the values from a vector given 
      */
     public get copy(): Vector3 {
       let copy: Vector3 = Recycler.get(Vector3);
@@ -227,8 +232,14 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns a geographic representation of this vector
+     * - get: returns a geographic representation of this vector  
+     * - set: adjust the cartesian values of this vector to represent the given as geographic coordinates
      */
+    public set geo(_geo: Geo3) {
+      this.set(0, 0, _geo.magnitude);
+      this.transform(Matrix4x4.ROTATION_X(-_geo.latitude));
+      this.transform(Matrix4x4.ROTATION_Y(_geo.longitude));
+    }
     public get geo(): Geo3 {
       let geo: Geo3 = Recycler.get(Geo3);
       geo.magnitude = this.magnitude;
@@ -240,15 +251,7 @@ namespace FudgeCore {
       geo.latitude = 180 * Math.asin(this.y / geo.magnitude) / Math.PI;
       return geo;
     }
-
-    /**
-     * Adjust the cartesian values of this vector to represent the given as geographic coordinates
-     */
-    public set geo(_geo: Geo3) {
-      this.set(0, 0, _geo.magnitude);
-      this.transform(Matrix4x4.ROTATION_X(-_geo.latitude));
-      this.transform(Matrix4x4.ROTATION_Y(_geo.longitude));
-    }
+    //#endregion
 
     /**
      * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
@@ -317,7 +320,9 @@ namespace FudgeCore {
      * Defines the components of this vector with the given numbers
      */
     public set(_x: number = 0, _y: number = 0, _z: number = 0): void {
-      this.data = new Float32Array([_x, _y, _z]);
+      this.data[0] = _x;
+      this.data[1] = _y;
+      this.data[2] = _z;
     }
 
     /**
@@ -331,8 +336,8 @@ namespace FudgeCore {
      * Transforms this vector by the given matrix, including or exluding the translation.
      * Including is the default, excluding will only rotate and scale this vector.
      */
-    public transform(_matrix: Matrix4x4, _includeTranslation: boolean = true): void {
-      this.data = Vector3.TRANSFORMATION(this, _matrix, _includeTranslation).data;
+    public transform(_mtxTransform: Matrix4x4, _includeTranslation: boolean = true): void {
+      this.data = Vector3.TRANSFORMATION(this, _mtxTransform, _includeTranslation).data;
     }
 
     /**
@@ -357,6 +362,23 @@ namespace FudgeCore {
     public shuffle(): void {
       let a: number[] = Array.from(this.data);
       this.set(Random.default.splice(a), Random.default.splice(a), a[0]);
+    }
+
+    /**
+     * For each dimension, moves the component to the minimum of this and the given vector
+     */
+    public min(_compare: Vector3): void {
+      this.x = Math.min(this.x, _compare.x);
+      this.y = Math.min(this.y, _compare.y);
+      this.z = Math.min(this.z, _compare.z);
+    }
+    /**
+     * For each dimension, moves the component to the maximum of this and the given vector
+     */
+    public max(_compare: Vector3): void {
+      this.x = Math.max(this.x, _compare.x);
+      this.y = Math.max(this.y, _compare.y);
+      this.z = Math.max(this.z, _compare.z);
     }
 
     /**

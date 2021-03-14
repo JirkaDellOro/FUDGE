@@ -1,0 +1,1048 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>PhysicsDebugDraw | Fudge Core</title>
+	<meta name="description" content="Documentation for Fudge Core">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="../assets/js/search.json" data-base="..">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="../index.html" class="title">Fudge Core</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+							<input type="checkbox" id="tsd-filter-only-exported" />
+							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="../index.html">Globals</a>
+				</li>
+				<li>
+					<a href="../modules/fudgecore.html">FudgeCore</a>
+				</li>
+				<li>
+					<a href="fudgecore.physicsdebugdraw.html">PhysicsDebugDraw</a>
+				</li>
+			</ul>
+			<h1>Class PhysicsDebugDraw</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>Internal Class used to draw debugInformations about the physics simulation onto the renderContext. No user interaction needed. @author Marko Fehrenbach, HFU 2020 //Based on OimoPhysics Haxe DebugDrawDemo</p>
+					</div>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<a href="fudgecore.renderwebgl.html" class="tsd-signature-type">RenderWebGL</a>
+						<ul class="tsd-hierarchy">
+							<li>
+								<span class="target">PhysicsDebugDraw</span>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel-group tsd-index-group">
+				<h2>Index</h2>
+				<section class="tsd-panel tsd-index-panel">
+					<div class="tsd-index-content">
+						<section class="tsd-index-section ">
+							<h3>Constructors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="fudgecore.physicsdebugdraw.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Properties</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.physicsdebugdraw.html#gl" class="tsd-kind-icon">gl</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.physicsdebugdraw.html#linebuffersize" class="tsd-kind-icon">line<wbr>Buffer<wbr>Size</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.physicsdebugdraw.html#linedata" class="tsd-kind-icon">line<wbr>Data</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.physicsdebugdraw.html#lineibo" class="tsd-kind-icon">lineIBO</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.physicsdebugdraw.html#linevbo" class="tsd-kind-icon">lineVBO</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.physicsdebugdraw.html#numlinedata" class="tsd-kind-icon">num<wbr>Line<wbr>Data</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.physicsdebugdraw.html#numpointdata" class="tsd-kind-icon">num<wbr>Point<wbr>Data</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.physicsdebugdraw.html#numtridata" class="tsd-kind-icon">num<wbr>Tri<wbr>Data</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.physicsdebugdraw.html#oimodebugdraw" class="tsd-kind-icon">oimo<wbr>Debug<wbr>Draw</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.physicsdebugdraw.html#pointbuffersize" class="tsd-kind-icon">point<wbr>Buffer<wbr>Size</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.physicsdebugdraw.html#pointdata" class="tsd-kind-icon">point<wbr>Data</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.physicsdebugdraw.html#pointibo" class="tsd-kind-icon">pointIBO</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.physicsdebugdraw.html#pointvbo" class="tsd-kind-icon">pointVBO</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.physicsdebugdraw.html#program" class="tsd-kind-icon">program</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.physicsdebugdraw.html#shader" class="tsd-kind-icon">shader</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.physicsdebugdraw.html#style" class="tsd-kind-icon">style</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.physicsdebugdraw.html#tribuffersize" class="tsd-kind-icon">tri<wbr>Buffer<wbr>Size</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.physicsdebugdraw.html#tridata" class="tsd-kind-icon">tri<wbr>Data</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.physicsdebugdraw.html#triibo" class="tsd-kind-icon">triIBO</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.physicsdebugdraw.html#trivbo" class="tsd-kind-icon">triVBO</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Methods</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.physicsdebugdraw.html#begin" class="tsd-kind-icon">begin</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.physicsdebugdraw.html#debugray" class="tsd-kind-icon">debug<wbr>Ray</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.physicsdebugdraw.html#end" class="tsd-kind-icon">end</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.physicsdebugdraw.html#getdebugmodefromsettings" class="tsd-kind-icon">get<wbr>Debug<wbr>Mode<wbr>From<wbr>Settings</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.physicsdebugdraw.html#initializebuffers" class="tsd-kind-icon">initialize<wbr>Buffers</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-inherited tsd-is-static"><a href="fudgecore.physicsdebugdraw.html#assert" class="tsd-kind-icon">assert</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.physicsdebugdraw.html#clear" class="tsd-kind-icon">clear</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.physicsdebugdraw.html#getcanvas" class="tsd-kind-icon">get<wbr>Canvas</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.physicsdebugdraw.html#getcanvasrect" class="tsd-kind-icon">get<wbr>Canvas<wbr>Rect</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.physicsdebugdraw.html#getrenderrectangle" class="tsd-kind-icon">get<wbr>Render<wbr>Rectangle</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.physicsdebugdraw.html#getrenderingcontext" class="tsd-kind-icon">get<wbr>Rendering<wbr>Context</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.physicsdebugdraw.html#initialize" class="tsd-kind-icon">initialize</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.physicsdebugdraw.html#resetframebuffer" class="tsd-kind-icon">reset<wbr>Frame<wbr>Buffer</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.physicsdebugdraw.html#setattributestructure" class="tsd-kind-icon">set<wbr>Attribute<wbr>Structure</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.physicsdebugdraw.html#setblendmode" class="tsd-kind-icon">set<wbr>Blend<wbr>Mode</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.physicsdebugdraw.html#setcanvassize" class="tsd-kind-icon">set<wbr>Canvas<wbr>Size</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.physicsdebugdraw.html#setdepthtest" class="tsd-kind-icon">set<wbr>Depth<wbr>Test</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.physicsdebugdraw.html#setrenderrectangle" class="tsd-kind-icon">set<wbr>Render<wbr>Rectangle</a></li>
+							</ul>
+						</section>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Constructors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
+					<a name="constructor" class="tsd-anchor"></a>
+					<h3>constructor</h3>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Physics<wbr>Debug<wbr>Draw<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.physicsdebugdraw.html" class="tsd-signature-type">PhysicsDebugDraw</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L219">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:219</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Creating the debug for physics in Fudge. Tell it to draw only wireframe objects, since Fudge is handling rendering of the objects besides physics.
+									Override OimoPhysics Functions with own rendering. Initialize buffers and connect them with the context for later use.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.physicsdebugdraw.html" class="tsd-signature-type">PhysicsDebugDraw</a></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="gl" class="tsd-anchor"></a>
+					<h3>gl</h3>
+					<div class="tsd-signature tsd-kind-icon">gl<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">WebGL2RenderingContext</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L194">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:194</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="linebuffersize" class="tsd-anchor"></a>
+					<h3>line<wbr>Buffer<wbr>Size</h3>
+					<div class="tsd-signature tsd-kind-icon">line<wbr>Buffer<wbr>Size<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L213">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:213</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="linedata" class="tsd-anchor"></a>
+					<h3>line<wbr>Data</h3>
+					<div class="tsd-signature tsd-kind-icon">line<wbr>Data<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Float32Array</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L214">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:214</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="lineibo" class="tsd-anchor"></a>
+					<h3>lineIBO</h3>
+					<div class="tsd-signature tsd-kind-icon">lineIBO<span class="tsd-signature-symbol">:</span> <a href="fudgecore.physicsdebugindexbuffer.html" class="tsd-signature-type">PhysicsDebugIndexBuffer</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L204">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:204</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="linevbo" class="tsd-anchor"></a>
+					<h3>lineVBO</h3>
+					<div class="tsd-signature tsd-kind-icon">lineVBO<span class="tsd-signature-symbol">:</span> <a href="fudgecore.physicsdebugvertexbuffer.html" class="tsd-signature-type">PhysicsDebugVertexBuffer</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L203">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:203</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="numlinedata" class="tsd-anchor"></a>
+					<h3>num<wbr>Line<wbr>Data</h3>
+					<div class="tsd-signature tsd-kind-icon">num<wbr>Line<wbr>Data<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L215">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:215</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="numpointdata" class="tsd-anchor"></a>
+					<h3>num<wbr>Point<wbr>Data</h3>
+					<div class="tsd-signature tsd-kind-icon">num<wbr>Point<wbr>Data<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L211">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:211</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="numtridata" class="tsd-anchor"></a>
+					<h3>num<wbr>Tri<wbr>Data</h3>
+					<div class="tsd-signature tsd-kind-icon">num<wbr>Tri<wbr>Data<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L219">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:219</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="oimodebugdraw" class="tsd-anchor"></a>
+					<h3>oimo<wbr>Debug<wbr>Draw</h3>
+					<div class="tsd-signature tsd-kind-icon">oimo<wbr>Debug<wbr>Draw<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">DebugDraw</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L192">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:192</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="pointbuffersize" class="tsd-anchor"></a>
+					<h3>point<wbr>Buffer<wbr>Size</h3>
+					<div class="tsd-signature tsd-kind-icon">point<wbr>Buffer<wbr>Size<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L209">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:209</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="pointdata" class="tsd-anchor"></a>
+					<h3>point<wbr>Data</h3>
+					<div class="tsd-signature tsd-kind-icon">point<wbr>Data<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Float32Array</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L210">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:210</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="pointibo" class="tsd-anchor"></a>
+					<h3>pointIBO</h3>
+					<div class="tsd-signature tsd-kind-icon">pointIBO<span class="tsd-signature-symbol">:</span> <a href="fudgecore.physicsdebugindexbuffer.html" class="tsd-signature-type">PhysicsDebugIndexBuffer</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L201">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:201</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="pointvbo" class="tsd-anchor"></a>
+					<h3>pointVBO</h3>
+					<div class="tsd-signature tsd-kind-icon">pointVBO<span class="tsd-signature-symbol">:</span> <a href="fudgecore.physicsdebugvertexbuffer.html" class="tsd-signature-type">PhysicsDebugVertexBuffer</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L200">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:200</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="program" class="tsd-anchor"></a>
+					<h3>program</h3>
+					<div class="tsd-signature tsd-kind-icon">program<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">WebGLProgram</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L196">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:196</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="shader" class="tsd-anchor"></a>
+					<h3>shader</h3>
+					<div class="tsd-signature tsd-kind-icon">shader<span class="tsd-signature-symbol">:</span> <a href="fudgecore.physicsdebugshader.html" class="tsd-signature-type">PhysicsDebugShader</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L197">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:197</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="style" class="tsd-anchor"></a>
+					<h3>style</h3>
+					<div class="tsd-signature tsd-kind-icon">style<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">DebugDrawStyle</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L193">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:193</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="tribuffersize" class="tsd-anchor"></a>
+					<h3>tri<wbr>Buffer<wbr>Size</h3>
+					<div class="tsd-signature tsd-kind-icon">tri<wbr>Buffer<wbr>Size<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L217">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:217</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="tridata" class="tsd-anchor"></a>
+					<h3>tri<wbr>Data</h3>
+					<div class="tsd-signature tsd-kind-icon">tri<wbr>Data<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Float32Array</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L218">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:218</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="triibo" class="tsd-anchor"></a>
+					<h3>triIBO</h3>
+					<div class="tsd-signature tsd-kind-icon">triIBO<span class="tsd-signature-symbol">:</span> <a href="fudgecore.physicsdebugindexbuffer.html" class="tsd-signature-type">PhysicsDebugIndexBuffer</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L207">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:207</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="trivbo" class="tsd-anchor"></a>
+					<h3>triVBO</h3>
+					<div class="tsd-signature tsd-kind-icon">triVBO<span class="tsd-signature-symbol">:</span> <a href="fudgecore.physicsdebugvertexbuffer.html" class="tsd-signature-type">PhysicsDebugVertexBuffer</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L206">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:206</a></li>
+						</ul>
+					</aside>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="begin" class="tsd-anchor"></a>
+					<h3>begin</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">begin<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L397">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:397</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Before OimoPhysics.world is filling the debug. Make sure the buffers are reset. Also receiving the debugMode from settings and updating the current projection for the vertexShader.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="debugray" class="tsd-anchor"></a>
+					<h3>debug<wbr>Ray</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">debug<wbr>Ray<span class="tsd-signature-symbol">(</span>_origin<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a>, _end<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a>, _color<span class="tsd-signature-symbol">: </span><a href="fudgecore.color.html" class="tsd-signature-type">Color</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L435">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:435</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Drawing the ray into the debugDraw Call. By using the overwritten line rendering functions and drawing a point (pointSize defined in the shader) at the end of the ray.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_origin: <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h5>
+								</li>
+								<li>
+									<h5>_end: <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h5>
+								</li>
+								<li>
+									<h5>_color: <a href="fudgecore.color.html" class="tsd-signature-type">Color</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="end" class="tsd-anchor"></a>
+					<h3>end</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">end<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L409">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:409</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>After OimoPhysics.world filled the debug. Rendering calls. Setting this program to be used by the Fudge rendering context. And draw each updated buffer and resetting them.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="getdebugmodefromsettings" class="tsd-anchor"></a>
+					<h3>get<wbr>Debug<wbr>Mode<wbr>From<wbr>Settings</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Debug<wbr>Mode<wbr>From<wbr>Settings<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L241">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:241</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Receive the current DebugMode from the physics settings and set the OimoPhysics.DebugDraw booleans to show only certain informations.
+										Needed since some debug informations exclude others, and can&#39;t be drawn at the same time, by OimoPhysics. And for users it provides more readability
+									to debug only what they need and is commonly debugged.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="initializebuffers" class="tsd-anchor"></a>
+					<h3>initialize<wbr>Buffers</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">initialize<wbr>Buffers<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/DebugPhysicsDraw.ts#L274">Documents/HFU/FUDGE/Core/Source/Physics/DebugPhysicsDraw.ts:274</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Creating the render buffers for later use. Defining the attributes used in shaders.
+									Needs to create empty buffers to already have them ready to draw later on, linking is only possible with existing buffers. No performance loss because empty buffers are not drawn.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-inherited tsd-is-static">
+					<a name="assert" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> assert</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-inherited tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">assert&lt;T&gt;<span class="tsd-signature-symbol">(</span>_value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span>, _message<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.renderwebgl.html">RenderWebGL</a>.<a href="fudgecore.renderwebgl.html#assert">assert</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L45">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:45</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Checks the first parameter and throws an exception with the WebGL-errorcode if the value is null</p>
+								</div>
+							</div>
+							<h4 class="tsd-type-parameters-title">Type parameters</h4>
+							<ul class="tsd-type-parameters">
+								<li>
+									<h4>T</h4>
+								</li>
+							</ul>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_value: <span class="tsd-signature-type">T</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>value to check against null</p>
+									</div>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _message: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;&quot;</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>optional, additional message for the exception</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">T</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+					<a name="clear" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> clear</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">clear<span class="tsd-signature-symbol">(</span>_color<span class="tsd-signature-symbol">?: </span><a href="fudgecore.color.html" class="tsd-signature-type">Color</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.renderwebgl.html">RenderWebGL</a>.<a href="fudgecore.renderwebgl.html#clear">clear</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L122">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:122</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Clear the offscreen renderbuffer with the given <a href="fudgecore.color.html">Color</a></p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _color: <a href="fudgecore.color.html" class="tsd-signature-type">Color</a><span class="tsd-signature-symbol"> = null</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+					<a name="getcanvas" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> get<wbr>Canvas</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Canvas<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">HTMLCanvasElement</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.renderwebgl.html">RenderWebGL</a>.<a href="fudgecore.renderwebgl.html#getcanvas">getCanvas</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L83">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:83</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Return a reference to the offscreen-canvas</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">HTMLCanvasElement</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+					<a name="getcanvasrect" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> get<wbr>Canvas<wbr>Rect</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Canvas<wbr>Rect<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.renderwebgl.html">RenderWebGL</a>.<a href="fudgecore.renderwebgl.html#getcanvasrect">getCanvasRect</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L97">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:97</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Return a rectangle describing the size of the offscreen-canvas. x,y are 0 at all times.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+					<a name="getrenderrectangle" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> get<wbr>Render<wbr>Rectangle</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Render<wbr>Rectangle<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.renderwebgl.html">RenderWebGL</a>.<a href="fudgecore.renderwebgl.html#getrenderrectangle">getRenderRectangle</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L137">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:137</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Retrieve the area on the offscreen-canvas the camera image gets rendered to.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+					<a name="getrenderingcontext" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> get<wbr>Rendering<wbr>Context</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Rendering<wbr>Context<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">WebGL2RenderingContext</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.renderwebgl.html">RenderWebGL</a>.<a href="fudgecore.renderwebgl.html#getrenderingcontext">getRenderingContext</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L90">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:90</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Return a reference to the rendering context</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">WebGL2RenderingContext</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+					<a name="initialize" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> initialize</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">initialize<span class="tsd-signature-symbol">(</span>_antialias<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span>, _alpha<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">WebGL2RenderingContext</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.renderwebgl.html">RenderWebGL</a>.<a href="fudgecore.renderwebgl.html#initialize">initialize</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L54">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:54</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Initializes offscreen-canvas, renderingcontext and hardware viewport. Call once before creating any resources like meshes or shaders</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> _antialias: <span class="tsd-signature-type">boolean</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> _alpha: <span class="tsd-signature-type">boolean</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">WebGL2RenderingContext</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+					<a name="resetframebuffer" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> reset<wbr>Frame<wbr>Buffer</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">reset<wbr>Frame<wbr>Buffer<span class="tsd-signature-symbol">(</span>_color<span class="tsd-signature-symbol">?: </span><a href="fudgecore.color.html" class="tsd-signature-type">Color</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.renderwebgl.html">RenderWebGL</a>.<a href="fudgecore.renderwebgl.html#resetframebuffer">resetFrameBuffer</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L130">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:130</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Reset the offscreen framebuffer to the original RenderingContext</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _color: <a href="fudgecore.color.html" class="tsd-signature-type">Color</a><span class="tsd-signature-symbol"> = null</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+					<a name="setattributestructure" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> set<wbr>Attribute<wbr>Structure</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Attribute<wbr>Structure<span class="tsd-signature-symbol">(</span>_attributeLocation<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _bufferSpecification<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.bufferspecification.html" class="tsd-signature-type">BufferSpecification</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.renderwebgl.html">RenderWebGL</a>.<a href="fudgecore.renderwebgl.html#setattributestructure">setAttributeStructure</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L36">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:36</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Wrapper function to utilize the bufferSpecification interface when passing data to the shader via a buffer.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_attributeLocation: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The location of the attribute on the shader, to which they data will be passed.</p>
+									</div>
+								</li>
+								<li>
+									<h5>_bufferSpecification: <a href="../interfaces/fudgecore.bufferspecification.html" class="tsd-signature-type">BufferSpecification</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Interface passing datapullspecifications to the buffer.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+					<a name="setblendmode" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> set<wbr>Blend<wbr>Mode</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Blend<wbr>Mode<span class="tsd-signature-symbol">(</span>_mode<span class="tsd-signature-symbol">: </span><a href="../enums/fudgecore.blend.html" class="tsd-signature-type">BLEND</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.renderwebgl.html">RenderWebGL</a>.<a href="fudgecore.renderwebgl.html#setblendmode">setBlendMode</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L148">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:148</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_mode: <a href="../enums/fudgecore.blend.html" class="tsd-signature-type">BLEND</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+					<a name="setcanvassize" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> set<wbr>Canvas<wbr>Size</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Canvas<wbr>Size<span class="tsd-signature-symbol">(</span>_width<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _height<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.renderwebgl.html">RenderWebGL</a>.<a href="fudgecore.renderwebgl.html#setcanvassize">setCanvasSize</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L105">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:105</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Set the size of the offscreen-canvas.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_width: <span class="tsd-signature-type">number</span></h5>
+								</li>
+								<li>
+									<h5>_height: <span class="tsd-signature-type">number</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+					<a name="setdepthtest" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> set<wbr>Depth<wbr>Test</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Depth<wbr>Test<span class="tsd-signature-symbol">(</span>_test<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.renderwebgl.html">RenderWebGL</a>.<a href="fudgecore.renderwebgl.html#setdepthtest">setDepthTest</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L141">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:141</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_test: <span class="tsd-signature-type">boolean</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+					<a name="setrenderrectangle" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> set<wbr>Render<wbr>Rectangle</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Render<wbr>Rectangle<span class="tsd-signature-symbol">(</span>_rect<span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.renderwebgl.html">RenderWebGL</a>.<a href="fudgecore.renderwebgl.html#setrenderrectangle">setRenderRectangle</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L114">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:114</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Set the area on the offscreen-canvas to render the camera image to.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_rect: <a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></h5>
+									<div class="tsd-comment tsd-typography">
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="../index.html"><em>Globals</em></a>
+					</li>
+					<li class="current tsd-kind-namespace">
+						<a href="../modules/fudgecore.html">Fudge<wbr>Core</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-class tsd-parent-kind-namespace">
+						<a href="fudgecore.physicsdebugdraw.html" class="tsd-kind-icon">Physics<wbr>Debug<wbr>Draw</a>
+						<ul>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class">
+								<a href="fudgecore.physicsdebugdraw.html#constructor" class="tsd-kind-icon">constructor</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.physicsdebugdraw.html#gl" class="tsd-kind-icon">gl</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.physicsdebugdraw.html#linebuffersize" class="tsd-kind-icon">line<wbr>Buffer<wbr>Size</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.physicsdebugdraw.html#linedata" class="tsd-kind-icon">line<wbr>Data</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.physicsdebugdraw.html#lineibo" class="tsd-kind-icon">lineIBO</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.physicsdebugdraw.html#linevbo" class="tsd-kind-icon">lineVBO</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.physicsdebugdraw.html#numlinedata" class="tsd-kind-icon">num<wbr>Line<wbr>Data</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.physicsdebugdraw.html#numpointdata" class="tsd-kind-icon">num<wbr>Point<wbr>Data</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.physicsdebugdraw.html#numtridata" class="tsd-kind-icon">num<wbr>Tri<wbr>Data</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.physicsdebugdraw.html#oimodebugdraw" class="tsd-kind-icon">oimo<wbr>Debug<wbr>Draw</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.physicsdebugdraw.html#pointbuffersize" class="tsd-kind-icon">point<wbr>Buffer<wbr>Size</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.physicsdebugdraw.html#pointdata" class="tsd-kind-icon">point<wbr>Data</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.physicsdebugdraw.html#pointibo" class="tsd-kind-icon">pointIBO</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.physicsdebugdraw.html#pointvbo" class="tsd-kind-icon">pointVBO</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.physicsdebugdraw.html#program" class="tsd-kind-icon">program</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.physicsdebugdraw.html#shader" class="tsd-kind-icon">shader</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.physicsdebugdraw.html#style" class="tsd-kind-icon">style</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.physicsdebugdraw.html#tribuffersize" class="tsd-kind-icon">tri<wbr>Buffer<wbr>Size</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.physicsdebugdraw.html#tridata" class="tsd-kind-icon">tri<wbr>Data</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.physicsdebugdraw.html#triibo" class="tsd-kind-icon">triIBO</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.physicsdebugdraw.html#trivbo" class="tsd-kind-icon">triVBO</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.physicsdebugdraw.html#begin" class="tsd-kind-icon">begin</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.physicsdebugdraw.html#debugray" class="tsd-kind-icon">debug<wbr>Ray</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.physicsdebugdraw.html#end" class="tsd-kind-icon">end</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.physicsdebugdraw.html#getdebugmodefromsettings" class="tsd-kind-icon">get<wbr>Debug<wbr>Mode<wbr>From<wbr>Settings</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.physicsdebugdraw.html#initializebuffers" class="tsd-kind-icon">initialize<wbr>Buffers</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-inherited tsd-is-static">
+								<a href="fudgecore.physicsdebugdraw.html#assert" class="tsd-kind-icon">assert</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+								<a href="fudgecore.physicsdebugdraw.html#clear" class="tsd-kind-icon">clear</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+								<a href="fudgecore.physicsdebugdraw.html#getcanvas" class="tsd-kind-icon">get<wbr>Canvas</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+								<a href="fudgecore.physicsdebugdraw.html#getcanvasrect" class="tsd-kind-icon">get<wbr>Canvas<wbr>Rect</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+								<a href="fudgecore.physicsdebugdraw.html#getrenderrectangle" class="tsd-kind-icon">get<wbr>Render<wbr>Rectangle</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+								<a href="fudgecore.physicsdebugdraw.html#getrenderingcontext" class="tsd-kind-icon">get<wbr>Rendering<wbr>Context</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+								<a href="fudgecore.physicsdebugdraw.html#initialize" class="tsd-kind-icon">initialize</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+								<a href="fudgecore.physicsdebugdraw.html#resetframebuffer" class="tsd-kind-icon">reset<wbr>Frame<wbr>Buffer</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+								<a href="fudgecore.physicsdebugdraw.html#setattributestructure" class="tsd-kind-icon">set<wbr>Attribute<wbr>Structure</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+								<a href="fudgecore.physicsdebugdraw.html#setblendmode" class="tsd-kind-icon">set<wbr>Blend<wbr>Mode</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+								<a href="fudgecore.physicsdebugdraw.html#setcanvassize" class="tsd-kind-icon">set<wbr>Canvas<wbr>Size</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+								<a href="fudgecore.physicsdebugdraw.html#setdepthtest" class="tsd-kind-icon">set<wbr>Depth<wbr>Test</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+								<a href="fudgecore.physicsdebugdraw.html#setrenderrectangle" class="tsd-kind-icon">set<wbr>Render<wbr>Rectangle</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+				<ul class="after-current">
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="../assets/js/main.js"></script>
+</body>
+</html>

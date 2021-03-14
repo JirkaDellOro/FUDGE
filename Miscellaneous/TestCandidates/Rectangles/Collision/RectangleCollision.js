@@ -12,8 +12,8 @@ var RectangleCollision;
         rect0.position.y = canvas.height / 2 - rect0.size.y / 2;
         let viewport = new ƒ.Viewport();
         viewport.initialize("Viewport", null, null, canvas);
-        viewport.addEventListener("\u0192pointermove" /* MOVE */, update);
-        viewport.activatePointerEvent("\u0192pointermove" /* MOVE */, true);
+        viewport.addEventListener(ƒ.EVENT_POINTER.MOVE, update);
+        viewport.activatePointerEvent(ƒ.EVENT_POINTER.MOVE, true);
         function update(_event) {
             crc2.clearRect(0, 0, canvas.width, canvas.height);
             let pointer = new ƒ.Vector2(_event.pointerX, _event.pointerY);

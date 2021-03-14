@@ -65,8 +65,8 @@ declare namespace FudgeAid {
         private minDistance;
         private maxDistance;
         constructor(_cmpCamera: ƒ.ComponentCamera, _distanceStart?: number, _maxRotX?: number, _minDistance?: number, _maxDistance?: number);
-        get component(): ƒ.ComponentCamera;
-        get node(): ƒ.Node;
+        get cmpCamera(): ƒ.ComponentCamera;
+        get nodeCamera(): ƒ.Node;
         set distance(_distance: number);
         get distance(): number;
         set rotationY(_angle: number);
@@ -75,6 +75,7 @@ declare namespace FudgeAid {
         get rotationX(): number;
         rotateY(_delta: number): void;
         rotateX(_delta: number): void;
+        positionCamera(_posWorld: ƒ.Vector3): void;
         hndAxisOutput: EventListener;
     }
 }
@@ -122,6 +123,7 @@ declare namespace FudgeAid {
         private static internalResources;
         constructor(_name: string, _color: ƒ.Color);
         private static createInternalResources;
+        set color(_color: ƒ.Color);
     }
 }
 declare namespace FudgeAid {

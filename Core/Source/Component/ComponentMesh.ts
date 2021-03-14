@@ -5,7 +5,7 @@ namespace FudgeCore {
    */
   export class ComponentMesh extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentMesh);
-    public pivot: Matrix4x4 = Matrix4x4.IDENTITY();
+    public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
     public mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY();
     public mesh: Mesh = null;
 
@@ -13,6 +13,22 @@ namespace FudgeCore {
       super();
       this.mesh = _mesh;
     }
+
+    public get radius(): number {
+      let scaling: Vector3 = this.mtxWorld.scaling;
+      let scale: number = Math.max(Math.abs(scaling.x), Math.abs(scaling.y), Math.abs(scaling.z));
+      return this.mesh.radius * scale;
+    }
+
+    // TODO: remove or think if the transformed bounding box is of value or can be made to be
+    // public get boundingBox(): Box {
+    //   let box: Box = Recycler.get(Box);
+    //   box.set(
+    //     Vector3.TRANSFORMATION(this.mesh.boundingBox.min, this.mtxWorld, true),
+    //     Vector3.TRANSFORMATION(this.mesh.boundingBox.max, this.mtxWorld, true)
+    //   );
+    //   return box;
+    // }
 
     //#region Transfer
     public serialize(): Serialization {
@@ -24,7 +40,7 @@ namespace FudgeCore {
       else
         serialization = { mesh: Serializer.serialize(this.mesh) };
 
-      serialization.pivot = this.pivot.serialize();
+      serialization.pivot = this.mtxPivot.serialize();
       serialization[super.constructor.name] = super.serialize();
       return serialization;
     }
@@ -32,12 +48,12 @@ namespace FudgeCore {
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       let mesh: Mesh;
       if (_serialization.idMesh)
-        mesh = <Mesh> await Project.getResource(_serialization.idMesh);
+        mesh = <Mesh>await Project.getResource(_serialization.idMesh);
       else
-        mesh = <Mesh> await Serializer.deserialize(_serialization.mesh);
+        mesh = <Mesh>await Serializer.deserialize(_serialization.mesh);
       this.mesh = mesh;
 
-      this.pivot.deserialize(_serialization.pivot);
+      this.mtxPivot.deserialize(_serialization.pivot);
       super.deserialize(_serialization[super.constructor.name]);
       return this;
     }

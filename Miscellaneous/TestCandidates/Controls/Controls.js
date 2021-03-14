@@ -2,9 +2,9 @@ var Controls;
 (function (Controls) {
     var ƒ = FudgeCore;
     window.addEventListener("DOMContentLoaded", init);
-    let controlProportional = new ƒ.Control("Proportional", 1, 0 /* PROPORTIONAL */);
-    let controlIntegral = new ƒ.Control("Integral", 0.1, 1 /* INTEGRAL */);
-    let controlDifferential = new ƒ.Control("Differential", 2, 2 /* DIFFERENTIAL */);
+    let controlProportional = new ƒ.Control("Proportional", 1, ƒ.CONTROL_TYPE.PROPORTIONAL);
+    let controlIntegral = new ƒ.Control("Integral", 0.1, ƒ.CONTROL_TYPE.INTEGRAL);
+    let controlDifferential = new ƒ.Control("Differential", 2, ƒ.CONTROL_TYPE.DIFFERENTIAL);
     let input;
     let output;
     let mode;
@@ -42,9 +42,9 @@ var Controls;
         let differential = createFieldset("Differential", true, number, slider);
         addDelayStepper(differential);
         output.appendChild(differential);
-        controlProportional.addEventListener("output" /* OUTPUT */, function (_event) { hndControlOutput(_event, proportional); });
-        controlIntegral.addEventListener("output" /* OUTPUT */, function (_event) { hndControlOutput(_event, integral); });
-        controlDifferential.addEventListener("output" /* OUTPUT */, function (_event) { hndControlOutput(_event, differential); });
+        controlProportional.addEventListener(ƒ.EVENT_CONTROL.OUTPUT, function (_event) { hndControlOutput(_event, proportional); });
+        controlIntegral.addEventListener(ƒ.EVENT_CONTROL.OUTPUT, function (_event) { hndControlOutput(_event, integral); });
+        controlDifferential.addEventListener(ƒ.EVENT_CONTROL.OUTPUT, function (_event) { hndControlOutput(_event, differential); });
         proportional.addEventListener("input", function (_event) { hndControlParameters(_event, controlProportional); });
         integral.addEventListener("input", function (_event) { hndControlParameters(_event, controlIntegral); });
         differential.addEventListener("input", function (_event) { hndControlParameters(_event, controlDifferential); });
@@ -150,9 +150,9 @@ var Controls;
     }
     function update() {
         updateMeter(document);
-        controlProportional.dispatchEvent(new Event("output" /* OUTPUT */));
-        controlDifferential.dispatchEvent(new Event("output" /* OUTPUT */));
-        controlIntegral.dispatchEvent(new Event("output" /* OUTPUT */));
+        controlProportional.dispatchEvent(new Event(ƒ.EVENT_CONTROL.OUTPUT));
+        controlDifferential.dispatchEvent(new Event(ƒ.EVENT_CONTROL.OUTPUT));
+        controlIntegral.dispatchEvent(new Event(ƒ.EVENT_CONTROL.OUTPUT));
         let target = document.querySelector("input#Passive");
         if (target.checked)
             window.setTimeout(update, 10);

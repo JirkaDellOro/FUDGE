@@ -1,0 +1,304 @@
+{
+  "MeshPolygon|2021-03-12T07:49:49.428Z|54806": {
+    "ƒ.MeshPolygon": {
+      "idResource": "MeshPolygon|2021-03-12T07:49:49.428Z|54806",
+      "name": "MeshPolygon",
+      "type": "MeshPolygon",
+      "shape": {
+        "ƒ.Vector2": [
+          "[-1, -1]",
+          "[-1, -2.5]",
+          "[1, -1]",
+          "[0, 1]"
+        ]
+      },
+      "fitTexture": false
+    }
+  },
+  "MeshExtrusion|2021-03-12T08:34:59.462Z|59324": {
+    "ƒ.MeshExtrusion": {
+      "idResource": "MeshExtrusion|2021-03-12T08:34:59.462Z|59324",
+      "name": "MeshExtrusion",
+      "type": "MeshExtrusion",
+      "shape": {
+        "ƒ.Vector2": [
+          "[-1, -1]",
+          "[1, -1]",
+          "[1, 1]",
+          "[-1, 1]"
+        ]
+      },
+      "fitTexture": true,
+      "transforms": {
+        "ƒ.Matrix4x4": [
+          {
+            "translation": "[0, 0, 2.000000238418579]",
+            "rotation": "[-20, 0, 0]",
+            "scaling": "[1, 1, 1]"
+          },
+          {
+            "translation": "[0, 0, 0]",
+            "rotation": "[0, 0, 24]",
+            "scaling": "[1, 1, 1]"
+          },
+          {
+            "translation": "[0, 0, -2.000000238418579]",
+            "rotation": "[0, -19, 0]",
+            "scaling": "[1, 1, 1]"
+          }
+        ]
+      }
+    }
+  },
+  "Material|2021-03-12T08:01:39.005Z|42220": {
+    "ƒ.Material": {
+      "name": "mtrTextured",
+      "idResource": "Material|2021-03-12T08:01:39.005Z|42220",
+      "shader": "ShaderTexture",
+      "coat": {
+        "ƒ.CoatTextured": {
+          "name": "Coat",
+          "color": "[1, 1, 1, 1]"
+        }
+      }
+    }
+  },
+  "Material|2021-03-12T08:21:45.681Z|49886": {
+    "ƒ.Material": {
+      "name": "mtrFlat",
+      "idResource": "Material|2021-03-12T08:21:45.681Z|49886",
+      "shader": "ShaderFlat",
+      "coat": {
+        "ƒ.CoatColored": {
+          "name": "Coat",
+          "color": "[1, 1, 1, 1]"
+        }
+      }
+    }
+  },
+  "MeshRotation|2021-03-12T18:45:49.874Z|80226": {
+    "ƒ.MeshRotation": {
+      "idResource": "MeshRotation|2021-03-12T18:45:49.874Z|80226",
+      "name": "MeshRotation",
+      "type": "MeshRotation",
+      "shape": {
+        "ƒ.Vector2": [
+          "[0, 0.75]",
+          "[0.30000001192092896, 0.699999988079071]",
+          "[0.4000000059604645, 0.6000000238418579]",
+          "[0.5, 0.5]",
+          "[0.5, -0.5]",
+          "[0.10000000149011612, -0.699999988079071]"
+        ]
+      },
+      "fitTexture": true,
+      "sectors": 13
+    }
+  },
+  "Graph|2021-03-12T08:01:20.043Z|34632": {
+    "ƒ.Graph": {
+      "name": "Bodies",
+      "components": {
+        "ComponentLight": [
+          {
+            "ƒ.ComponentLight": {
+              "pivot": {
+                "translation": "[0, 0, 0]",
+                "rotation": "[60, 0, 0]",
+                "scaling": "[1, 1, 1]"
+              },
+              "light": {
+                "ƒ.LightDirectional": {
+                  "color": "[0, 1, 0, 1]"
+                }
+              }
+            }
+          },
+          {
+            "ƒ.ComponentLight": {
+              "pivot": {
+                "translation": "[0, 0, 0]",
+                "rotation": "[0, 0, 0]",
+                "scaling": "[1, 1, 1]"
+              },
+              "light": {
+                "ƒ.LightAmbient": {
+                  "color": "[0.2549019607843137, 0.24313725490196078, 0.24313725490196078, 1]"
+                }
+              }
+            }
+          },
+          {
+            "ƒ.ComponentLight": {
+              "pivot": {
+                "translation": "[0, 0, 0]",
+                "rotation": "[-60, 0, 0]",
+                "scaling": "[1, 1, 1]"
+              },
+              "light": {
+                "ƒ.LightDirectional": {
+                  "color": "[1, 0, 0, 1]"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "children": [
+        {
+          "ƒ.Node": {
+            "name": "Extrusion",
+            "components": {
+              "ComponentMesh": [
+                {
+                  "ƒ.ComponentMesh": {
+                    "idMesh": "MeshExtrusion|2021-03-12T08:34:59.462Z|59324",
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentMaterial": [
+                {
+                  "ƒ.ComponentMaterial": {
+                    "sortForAlpha": false,
+                    "clrPrimary": "[1, 1, 1, 1]",
+                    "clrSecondary": "[1, 1, 1, 1]",
+                    "pivot": {
+                      "translation": "[0, 0]",
+                      "rotation": 0,
+                      "scaling": "[1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    },
+                    "idMaterial": "Material|2021-03-12T08:21:45.681Z|49886"
+                  }
+                }
+              ],
+              "ComponentTransform": [
+                {
+                  "ƒ.ComponentTransform": {
+                    "local": {
+                      "translation": "[-2, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[0.49999991059303284, 0.49999991059303284, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ]
+            },
+            "children": []
+          }
+        },
+        {
+          "ƒ.Node": {
+            "name": "Polygon",
+            "components": {
+              "ComponentMesh": [
+                {
+                  "ƒ.ComponentMesh": {
+                    "idMesh": "MeshPolygon|2021-03-12T07:49:49.428Z|54806",
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentMaterial": [
+                {
+                  "ƒ.ComponentMaterial": {
+                    "sortForAlpha": false,
+                    "clrPrimary": "[1, 1, 1, 1]",
+                    "clrSecondary": "[1, 1, 1, 1]",
+                    "pivot": {
+                      "translation": "[8.420001029968262, -0.30000001192092896]",
+                      "rotation": 0,
+                      "scaling": "[3.1000001430511475, 4.399999618530273]"
+                    },
+                    "Component": {
+                      "active": true
+                    },
+                    "idMaterial": "Material|2021-03-12T08:01:39.005Z|42220"
+                  }
+                }
+              ],
+              "ComponentTransform": [
+                {
+                  "ƒ.ComponentTransform": {
+                    "local": {
+                      "translation": "[0, 2.5, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ]
+            },
+            "children": []
+          }
+        },
+        {
+          "ƒ.Node": {
+            "name": "Cylinder",
+            "components": {
+              "ComponentMesh": [
+                {
+                  "ƒ.ComponentMesh": {
+                    "idMesh": "MeshRotation|2021-03-12T18:45:49.874Z|80226",
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentMaterial": [
+                {
+                  "ƒ.ComponentMaterial": {
+                    "sortForAlpha": false,
+                    "clrPrimary": "[1, 1, 1, 1]",
+                    "clrSecondary": "[1, 1, 1, 1]",
+                    "pivot": {
+                      "translation": "[0, 0]",
+                      "rotation": 0,
+                      "scaling": "[1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    },
+                    "idMaterial": "Material|2021-03-12T08:21:45.681Z|49886"
+                  }
+                }
+              ]
+            },
+            "children": []
+          }
+        }
+      ],
+      "idResource": "Graph|2021-03-12T08:01:20.043Z|34632",
+      "type": "Graph"
+    }
+  }
+}

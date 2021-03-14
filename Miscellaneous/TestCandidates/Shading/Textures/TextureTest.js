@@ -20,7 +20,7 @@ var TextureTest;
         cmpCamera.pivot.translation = new ƒ.Vector3(0, 2, 3);
         cmpCamera.pivot.lookAt(new ƒ.Vector3(0, 0, 0));
         viewport.initialize("Viewport", graph, cmpCamera, document.querySelector("canvas"));
-        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, function () {
+        ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, function () {
             let speed = 0.5;
             pyramid.mtxLocal.rotateX(speed);
             cube.mtxLocal.rotateY(speed);

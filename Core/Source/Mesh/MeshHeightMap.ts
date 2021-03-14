@@ -30,7 +30,7 @@ namespace FudgeCore {
       if (_heightMapFunction) this.heightMapFunction = _heightMapFunction;
       else this.heightMapFunction = function (_x: number, _y: number): number { return 0; };
 
-      this.create();
+      // this.create();
     }
 
     protected createVertices(): Float32Array {
@@ -87,10 +87,6 @@ namespace FudgeCore {
         }
       }
       return textureUVs;
-    }
-
-    protected createFaceNormals(): Float32Array {
-      return this.calculateFaceNormals();
     }
   }
 }

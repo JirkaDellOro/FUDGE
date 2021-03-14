@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
-        "target": "es6",
+      "target": "ESNext",
+      "module": "none",
         "sourceMap": true,
         "strictFunctionTypes": true,
         "alwaysStrict": true,

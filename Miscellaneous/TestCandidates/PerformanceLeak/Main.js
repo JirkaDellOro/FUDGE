@@ -22,7 +22,7 @@ var PerformanceLeak;
         viewport.initialize("Viewport", game, cmpCamera, canvas);
         viewport.draw();
         game.broadcastEvent(new CustomEvent("registerHitBox"));
-        PerformanceLeak.ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
+        PerformanceLeak.ƒ.Loop.addEventListener(PerformanceLeak.ƒ.EVENT.LOOP_FRAME, update);
         PerformanceLeak.ƒ.Loop.start(PerformanceLeak.ƒ.LOOP_MODE.TIME_GAME, 60);
         function update(_event) {
             elapsedTime += PerformanceLeak.ƒ.Loop.timeFrameGame;

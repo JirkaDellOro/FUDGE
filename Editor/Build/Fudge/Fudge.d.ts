@@ -1,4 +1,5 @@
 /// <reference types="../../../node_modules/electron/electron" />
+/// <reference types="../../core/build/fudgecore" />
 /// <reference types="../../../aid/build/fudgeaid" />
 /// <reference types="golden-layout" />
 /// <reference types="../../../userinterface/build/fudgeuserinterface" />
@@ -16,12 +17,11 @@ declare namespace Fudge {
         ADD_NODE = 0,
         ADD_COMPONENT = 1,
         ADD_COMPONENT_SCRIPT = 2,
-        DELETE_NODE = 3,
-        EDIT = 4,
-        CREATE = 5,
-        CREATE_MESH = 6,
-        CREATE_MATERIAL = 7,
-        CREATE_GRAPH = 8
+        EDIT = 3,
+        CREATE_MESH = 4,
+        CREATE_MATERIAL = 5,
+        CREATE_GRAPH = 6,
+        REMOVE_COMPONENT = 7
     }
     enum MENU {
         QUIT = "quit",
@@ -31,8 +31,7 @@ declare namespace Fudge {
         PANEL_GRAPH_OPEN = "panelGraphOpen",
         PANEL_ANIMATION_OPEN = "panelAnimationOpen",
         PANEL_PROJECT_OPEN = "panelProjectOpen",
-        FULLSCREEN = "fullscreen",
-        PANEL_MODELLER_OPEN = "panelModellerOpen"
+        FULLSCREEN = "fullscreen"
     }
     enum EVENT_EDITOR {
         SET_GRAPH = "setGraph",
@@ -43,8 +42,7 @@ declare namespace Fudge {
     }
     enum PANEL {
         GRAPH = "PanelGraph",
-        PROJECT = "PanelProject",
-        MODELLER = "PanelModeller"
+        PROJECT = "PanelProject"
     }
     enum VIEW {
         HIERARCHY = "ViewHierarchy",
@@ -56,44 +54,7 @@ declare namespace Fudge {
         EXTERNAL = "ViewExternal",
         PROPERTIES = "ViewProperties",
         PREVIEW = "ViewPreview",
-        MODELLER = "ViewModeller",
-        OBJECT_PROPERTIES = "ViewObjectProperties",
         SCRIPT = "ViewScript"
-    }
-    enum CONTROL_MODE {
-        OBJECT_MODE = "Object-Mode",
-        EDIT_MODE = "Edit-Mode"
-    }
-    enum INTERACTION_MODE {
-        SELECT = "Box-Select",
-        TRANSLATE = "Translate",
-        ROTATE = "Rotate",
-        SCALE = "Scale",
-        EXTRUDE = "Extrude",
-        IDLE = "Idle"
-    }
-    enum AXIS {
-        X = "X",
-        Y = "Y",
-        Z = "Z"
-    }
-    enum MODELLER_EVENTS {
-        HEADER_APPEND = "headerappend",
-        SELECTION_UPDATE = "selectionupdate",
-        HEADER_UPDATE = "headerupdate"
-    }
-    enum MODELLER_MENU {
-        DISPLAY_NORMALS = 0,
-        INVERT_FACE = 1,
-        REMOVE_FACE = 2,
-        TOGGLE_BACKFACE_CULLING = 3
-    }
-    enum ELECTRON_KEYS {
-        CTRL = "CommandOrControl",
-        SHIFT = "Shift",
-        ALT = "Alt",
-        ALTGR = "AltGr",
-        SUPER = "Super"
     }
 }
 declare namespace Fudge {
@@ -125,7 +86,6 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     function saveProject(): Promise<void>;
-    function saveMesh(jsonString: string): Promise<void>;
     function promptLoadProject(): Promise<URL>;
     function loadProject(_url: URL): Promise<void>;
 }
@@ -177,7 +137,6 @@ declare namespace Fudge {
         private static idCounter;
         private static goldenLayout;
         private static panels;
-        private static currentPanel;
         static start(): Promise<void>;
         static setupGoldenLayout(): void;
         static add(_panel: typeof Panel, _title: string, _state?: Object): void;
@@ -268,9 +227,10 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
-    import ƒui = FudgeUserInterface;
-    class ControllerComponent extends ƒui.Controller {
+    import ƒUi = FudgeUserInterface;
+    class ControllerComponent extends ƒUi.Controller {
         constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
+        private hndKey;
         private hndDragOver;
         private hndDrop;
         private filterDragDrop;
@@ -338,512 +298,6 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    import ƒ = FudgeCore;
-    import ƒui = FudgeUserInterface;
-    class ControllerVertices extends ƒui.Controller {
-        node: ƒ.Node;
-        constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
-        private handleInput;
-    }
-}
-declare namespace Fudge {
-    import ƒ = FudgeCore;
-    class Controller {
-        private interactionMode;
-        private currentControlMode;
-        private viewport;
-        private editableNode;
-        private states;
-        private currentState;
-        private dom;
-        private controlModesMap;
-        constructor(_viewport: ƒ.Viewport, _editableNode: ƒ.Node, _dom: HTMLElement);
-        get controlMode(): IControlMode;
-        get controlModes(): Map<CONTROL_MODE, {
-            type: IControlMode;
-            shortcut: string;
-        }>;
-        onmouseup(_event: ƒ.EventPointer): void;
-        onmousedown(_event: ƒ.EventPointer): void;
-        onmove(_event: ƒ.EventPointer): void;
-        onkeydown(_event: ƒ.EventKeyboard): void;
-        onkeyup(_event: ƒ.EventKeyboard): void;
-        getSelection(): number[];
-        getInteractionModeType(): INTERACTION_MODE;
-        executeAccelerator(_event: ƒ.EventKeyboard): boolean;
-        switchMode(_event: ƒ.EventKeyboard): void;
-        setControlMode(mode: CONTROL_MODE): void;
-        setInteractionMode(mode: INTERACTION_MODE): void;
-        drawSelection(): void;
-        getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
-        contextMenuCallback: (_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event) => void;
-        private loadState;
-        private saveState;
-    }
-}
-declare namespace Fudge {
-    class EditMode implements IControlMode {
-        formerMode: IInteractionMode;
-        type: CONTROL_MODE;
-        modes: {
-            [mode in INTERACTION_MODE]?: {
-                type: typeof InteractionMode;
-                shortcut: string;
-            };
-        };
-    }
-}
-declare namespace Fudge {
-    interface IControlMode {
-        type: CONTROL_MODE;
-        formerMode: IInteractionMode;
-        modes: {
-            [mode in INTERACTION_MODE]?: {
-                type: typeof InteractionMode;
-                shortcut: string;
-            };
-        };
-    }
-}
-declare namespace Fudge {
-    class ObjectMode implements IControlMode {
-        formerMode: IInteractionMode;
-        type: CONTROL_MODE;
-        modes: {
-            [mode in INTERACTION_MODE]?: {
-                type: typeof InteractionMode;
-                shortcut: string;
-            };
-        };
-    }
-}
-declare namespace Fudge {
-    import ƒ = FudgeCore;
-    interface IInteractionMode {
-        readonly type: INTERACTION_MODE;
-        selection: Array<number>;
-        viewport: ƒ.Viewport;
-        editableNode: ƒ.Node;
-        onmousedown(_event: ƒ.EventPointer): void;
-        onmouseup(_event: ƒ.EventPointer): string;
-        onmove(_event: ƒ.EventPointer): void;
-        onkeydown(_pressedKey: string): void;
-        onkeyup(_pressedKey: string): string;
-        executeAccelerator(_event: ƒ.EventKeyboard): boolean;
-        update(): void;
-        getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
-        contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
-        initialize(): void;
-        cleanup(): void;
-        animate(): void;
-        updateAfterUndo(): void;
-    }
-}
-declare namespace Fudge {
-    abstract class InteractionMode implements IInteractionMode {
-        static normalsAreDisplayed: boolean;
-        readonly type: INTERACTION_MODE;
-        selection: Array<number>;
-        viewport: ƒ.Viewport;
-        editableNode: ƒ.Node;
-        protected selector: Selector;
-        protected availableMenuitems: Map<MODELLER_MENU, Function>;
-        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection?: Array<number>);
-        abstract onmousedown(_event: ƒ.EventPointer): void;
-        abstract onmouseup(_event: ƒ.EventPointer): string;
-        abstract onmove(_event: ƒ.EventPointer): void;
-        abstract onkeydown(_pressedKey: string): void;
-        abstract onkeyup(_pressedKey: string): string;
-        abstract update(): void;
-        abstract initialize(): void;
-        abstract cleanup(): void;
-        animate: () => void;
-        updateAfterUndo(): void;
-        executeAccelerator(_event: ƒ.EventKeyboard): boolean;
-        getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
-        contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
-        protected getPosRenderFrom(_event: ƒ.EventPointer): ƒ.Vector2;
-        protected createNormalArrows(): void;
-        protected removeNormalArrows(): void;
-        protected toggleNormals(): void;
-        protected copyVertices(): Map<number, ƒ.Vector3>;
-        protected getPointerPosition(_event: ƒ.EventPointer, distance: number): ƒ.Vector3;
-        protected getDistanceFromRayToCenterOfNode(_event: ƒ.EventPointer, distance: number): ƒ.Vector3;
-        protected getDistanceFromCameraToCentroid(_centroid: ƒ.Vector3): number;
-        protected invertFace(): void;
-        protected removeFace(): void;
-        private drawCircleAtVertex;
-        private drawCircleAtSelection;
-    }
-}
-declare namespace Fudge {
-    class Extrude extends InteractionMode {
-        private static selectionRadius;
-        readonly type: INTERACTION_MODE;
-        selection: Array<number>;
-        viewport: ƒ.Viewport;
-        editableNode: ƒ.Node;
-        private isExtruded;
-        private distanceCameraToCentroid;
-        private oldPosition;
-        private vertexSelected;
-        private orientation;
-        private clientCentroid;
-        private loopIsRunning;
-        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>);
-        onmousedown(_event: ƒ.EventPointer): void;
-        onmouseup(_event: ƒ.EventPointer): string;
-        onmove(_event: ƒ.EventPointer): void;
-        onkeydown(pressedKey: string): void;
-        onkeyup(pressedKey: string): string;
-        update(): void;
-        initialize(): void;
-        cleanup(): void;
-        private startLoop;
-        private drawSelectionCircle;
-    }
-}
-declare namespace Fudge {
-    class IdleMode extends InteractionMode {
-        readonly type: INTERACTION_MODE;
-        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
-        initialize(): void;
-        onmousedown(_event: ƒ.EventPointer): void;
-        onmouseup(_event: ƒ.EventPointer): string;
-        onmove(_event: ƒ.EventPointer): void;
-        onkeydown(_pressedKey: string): void;
-        onkeyup(_pressedKey: string): string;
-        getContextMenuItems(_callback: ContextMenuCallback): Electron.MenuItem[];
-        contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
-        update(): void;
-        cleanup(): void;
-    }
-}
-declare namespace Fudge {
-    abstract class AbstractRotation extends InteractionMode {
-        readonly type: INTERACTION_MODE;
-        viewport: ƒ.Viewport;
-        selection: Array<number>;
-        editableNode: ƒ.Node;
-        protected axesSelectionHandler: AxesSelectionHandler;
-        private previousMousePos;
-        initialize(): void;
-        onmousedown(_event: ƒ.EventPointer): void;
-        onmouseup(_event: ƒ.EventPointer): string;
-        onmove(_event: ƒ.EventPointer): void;
-        onkeydown(_pressedKey: string): void;
-        onkeyup(_pressedKey: string): string;
-        update(): void;
-        cleanup(): void;
-        private getRotationMatrix;
-        private getAngle;
-    }
-}
-declare namespace Fudge {
-    import ƒ = FudgeCore;
-    class EditRotation extends AbstractRotation {
-        private vertexSelected;
-        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>);
-        onmousedown(_event: ƒ.EventPointer): void;
-        onmove(_event: ƒ.EventPointer): void;
-        onmouseup(_event: ƒ.EventPointer): string;
-    }
-}
-declare namespace Fudge {
-    import ƒ = FudgeCore;
-    class ObjectRotation extends AbstractRotation {
-        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>);
-    }
-}
-declare namespace Fudge {
-    class AbstractScalation extends InteractionMode {
-        readonly type: INTERACTION_MODE;
-        protected oldPosition: ƒ.Vector3;
-        protected distanceCameraToCentroid: number;
-        protected distancePointerToCentroid: ƒ.Vector3;
-        protected copyOfSelectedVertices: Map<number, ƒ.Vector3>;
-        protected axesSelectionHandler: AxesSelectionHandler;
-        private centroid;
-        initialize(): void;
-        onmousedown(_event: ƒ.EventPointer): void;
-        onmouseup(_event: ƒ.EventPointer): string;
-        onmove(_event: ƒ.EventPointer): void;
-        onkeydown(_pressedKey: string): void;
-        onkeyup(_pressedKey: string): string;
-        update(): void;
-        cleanup(): void;
-        private setValues;
-    }
-}
-declare namespace Fudge {
-    class EditScalation extends AbstractScalation {
-        private vertexSelected;
-        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>);
-        onmousedown(_event: ƒ.EventPointer): void;
-        onmove(_event: ƒ.EventPointer): void;
-        onmouseup(_event: ƒ.EventPointer): string;
-    }
-}
-declare namespace Fudge {
-    class ObjectScalation extends AbstractScalation {
-        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>);
-    }
-}
-declare namespace Fudge {
-    abstract class AbstractSelection extends InteractionMode {
-        readonly type: INTERACTION_MODE;
-        viewport: ƒ.Viewport;
-        editableNode: ƒ.Node;
-        cleanup(): void;
-    }
-}
-declare namespace Fudge {
-    import ƒ = FudgeCore;
-    class EditSelection extends AbstractSelection {
-        selection: Array<number>;
-        private boxStart;
-        private clientPos;
-        private vertexSelected;
-        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>);
-        initialize(): void;
-        onmousedown(_event: ƒ.EventPointer): void;
-        onmouseup(_event: ƒ.EventPointer): string;
-        onmove(_event: ƒ.EventPointer): void;
-        onkeydown(_pressedKey: string): void;
-        onkeyup(_pressedKey: string): string;
-        update(): void;
-        private drawBox;
-    }
-}
-declare namespace Fudge {
-    abstract class AbstractTranslation extends InteractionMode {
-        readonly type: INTERACTION_MODE;
-        viewport: ƒ.Viewport;
-        selection: Array<number>;
-        editableNode: ƒ.Node;
-        protected dragging: boolean;
-        protected distanceCameraToCentroid: number;
-        protected oldPosition: ƒ.Vector3;
-        protected axesSelectionHandler: AxesSelectionHandler;
-        initialize(): void;
-        onmousedown(_event: ƒ.EventPointer): void;
-        onmouseup(_event: ƒ.EventPointer): string;
-        onmove(_event: ƒ.EventPointer): void;
-        onkeydown(_pressedKey: string): void;
-        onkeyup(_pressedKey: string): string;
-        update(): void;
-        cleanup(): void;
-    }
-}
-declare namespace Fudge {
-    class EditTranslation extends AbstractTranslation {
-        private vertexSelected;
-        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>);
-        onmousedown(_event: ƒ.EventPointer): void;
-        onmove(_event: ƒ.EventPointer): void;
-        onmouseup(_event: ƒ.EventPointer): string;
-    }
-}
-declare namespace Fudge {
-    class ObjectTranslation extends AbstractTranslation {
-        constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node);
-    }
-}
-declare namespace Fudge {
-    class MeshExtrude {
-        private numberOfFaces;
-        private vertexCount;
-        private uniqueVertices;
-        private newTriangles;
-        private numberOfIndices;
-        private newVertexToOriginalVertexMap;
-        private originalVertexToNewVertexMap;
-        private vertexToUniqueVertexMap;
-        private originalVertexToNewUniqueVertexMap;
-        constructor(_numberOfFaces: number, _vertices: Float32Array, _uniqueVertices: UniqueVertex[], _numberOfIndices: number);
-        extrude(selection: number[]): number[];
-        private findEdgesFromData;
-        private extrudeEdge;
-        private addNewTriangles;
-        private fillVertexMap;
-        private getInnerEdges;
-        private findEdgesToRemove;
-        private removeInteriorEdges;
-        private removeDuplicateEdges;
-        private addFrontFaces;
-        private areEdgesDuplicate;
-    }
-}
-declare namespace Fudge {
-    class ModifiableMesh extends ƒ.Mesh {
-        #private;
-        static readonly vertexSize: number;
-        constructor();
-        get uniqueVertices(): UniqueVertex[];
-        getState(): string;
-        retrieveState(state: string): void;
-        export(): string;
-        updateMesh(): void;
-        getCentroid(selection?: number[]): ƒ.Vector3;
-        removeFace(selection: number[]): void;
-        updateNormals(): void;
-        invertFace(selection: number[]): void;
-        scaleBy(scaleMatrix: ƒ.Matrix4x4, oldVertices: Map<number, ƒ.Vector3>, selection?: number[]): void;
-        translateVertices(difference: ƒ.Vector3, selection: number[]): void;
-        rotateBy(matrix: ƒ.Matrix4x4, center: ƒ.Vector3, selection?: number[]): void;
-        extrude(selectedVertices: number[]): ƒ.Vector3;
-        updatePositionOfVertices(selectedIndices: number[], oldVertexPositions: Map<number, ƒ.Vector3>, diffToOldPosition: ƒ.Vector3, offset: ƒ.Vector3): void;
-        private rearrangeIndicesAfterRemove;
-        private countNumberOfFaces;
-        private findCorrectFace;
-        protected updatePositionOfVertex(vertexIndex: number, newPosition: ƒ.Vector3): void;
-        protected findOrderOfTrigonFromSelectedVertex(selectedIndices: number[]): Array<number>;
-        protected createVertices(): Float32Array;
-        protected createTextureUVs(): Float32Array;
-        protected createIndices(): Uint16Array;
-        protected createFaceNormals(trigons?: Array<number>): Float32Array;
-        private calculateNormals;
-    }
-}
-declare namespace Fudge {
-    class UniqueVertex extends ƒ.Mutable {
-        position: ƒ.Vector3;
-        vertexToData: Map<number, {
-            indices: number[];
-            face?: number;
-            edges?: number[];
-        }>;
-        constructor(_position: ƒ.Vector3, _vertexToData: Map<number, {
-            indices: number[];
-            face?: number;
-            edges?: number[];
-        }>);
-        protected reduceMutator(_mutator: ƒ.Mutator): void;
-    }
-}
-declare namespace Fudge {
-    class AxesSelectionHandler {
-        isSelectedViaKeyboard: boolean;
-        private _widget;
-        private selectedAxes;
-        private pickedAxis;
-        private axisIsPicked;
-        constructor(widget?: BaseWidget);
-        get widget(): ƒ.Node;
-        get wasPicked(): boolean;
-        releaseComponent(): void;
-        pickWidget(_hits: ƒ.RayHit[]): ƒ.Node[];
-        isValidSelection(): boolean;
-        getSelectedAxes(): AXIS[];
-        addAxisOf(_key: string): boolean;
-        removeAxisOf(_key: string, removeAll?: boolean): void;
-        isAxisSelectedViaKeyboard(): boolean;
-        private getSelectedAxisBy;
-    }
-}
-declare namespace Fudge {
-    class DropdownHandler {
-        private controller;
-        constructor(_controller: Controller);
-        getControlDropdown(): HTMLDivElement;
-        getInteractionDropdown(): HTMLDivElement;
-        private openDropdownControl;
-        private openDropdownInteraction;
-        private setInteractionMode;
-        private setControlMode;
-        private updateButtontext;
-        private closeMenu;
-    }
-}
-declare namespace Fudge {
-    class MenuItemsCreator {
-        static getMenuItems(types: MODELLER_MENU[], _callback: ContextMenuCallback): Electron.MenuItem[];
-        private static getNormalDisplayItem;
-        private static getInvertFaceItem;
-        private static getBackfaceCullItem;
-        private static getRemoveFaceItem;
-        private static getAccelerator;
-    }
-}
-declare namespace Fudge {
-    import ƒ = FudgeCore;
-    class Selector {
-        private node;
-        private cameraPivot;
-        constructor(_node: ƒ.Node, _cameraPivot: ƒ.Vector3);
-        selectVertices(_ray: ƒ.Ray, selection: number[]): boolean;
-    }
-}
-declare namespace Fudge {
-    abstract class BaseWidget extends ƒ.Node {
-        protected abstract componentToAxisMap: Map<ƒ.Node, AXIS>;
-        protected componentToOriginalColorMap: Map<ƒ.Node, ƒ.Color>;
-        protected pickedComponent: ƒ.Node;
-        getAxisFromWidgetComponent(_component: ƒ.Node): AXIS;
-        abstract isHitWidgetComponent(_hits: ƒ.RayHit[]): {
-            axis: AXIS;
-            additionalNodes: ƒ.Node[];
-        };
-        releaseComponent(pickedComponent?: ƒ.Node): void;
-        getComponentFromAxis(_axis: AXIS): ƒ.Node;
-        updateWidget(_axis: AXIS): void;
-        abstract changeColorOfComponent(component: ƒ.Node): void;
-        removeUnselectedAxis(_axis: AXIS): void;
-    }
-}
-declare namespace Fudge {
-    import ƒ = FudgeCore;
-    class RotationWidget extends BaseWidget {
-        protected componentToAxisMap: Map<ƒ.Node, AXIS>;
-        constructor(_name?: string, _transform?: ƒ.Matrix4x4);
-        isHitWidgetComponent(_hits: ƒ.RayHit[]): {
-            axis: AXIS;
-            additionalNodes: ƒ.Node[];
-        };
-        changeColorOfComponent(component: ƒ.Node): void;
-        private fillColorDict;
-    }
-}
-declare namespace Fudge {
-    import ƒ = FudgeCore;
-    class ScalationWidget extends BaseWidget {
-        protected componentToAxisMap: Map<ƒ.Node, AXIS>;
-        constructor(_name?: string, _transform?: ƒ.Matrix4x4);
-        isHitWidgetComponent(_hits: ƒ.RayHit[]): {
-            axis: AXIS;
-            additionalNodes: ƒ.Node[];
-        };
-        changeColorOfComponent(component: ƒ.Node): void;
-        releaseComponent(pickedComponent?: ƒ.Node): void;
-        private fillColorDict;
-    }
-}
-declare namespace Fudge {
-    class TranslationWidget extends BaseWidget {
-        protected componentToAxisMap: Map<ƒ.Node, AXIS>;
-        constructor(_name?: string, _transform?: ƒ.Matrix4x4);
-        isHitWidgetComponent(_hits: ƒ.RayHit[]): {
-            axis: AXIS;
-            additionalNodes: ƒ.Node[];
-        };
-        releaseComponent(pickedComponent?: ƒ.Node): void;
-        changeColorOfComponent(component: ƒ.Node): void;
-        private fillColorDict;
-    }
-}
-declare namespace Fudge {
-    import ƒ = FudgeCore;
-    class WidgetCircle extends ƒ.Node {
-        constructor(_name: string, _color: ƒ.Color, _transform: ƒ.Matrix4x4);
-    }
-}
-declare namespace Fudge {
-    import ƒAid = FudgeAid;
-    class WidgetPillar extends ƒAid.Node {
-        constructor(_name: string, _color: ƒ.Color);
-    }
-}
-declare namespace Fudge {
     /**
      * Base class for all [[Panel]]s aggregating [[View]]s
      * Subclasses are presets for common panels. A user might add or delete [[View]]s at runtime
@@ -871,12 +325,6 @@ declare namespace Fudge {
         getNode(): ƒ.Node;
         private hndEvent;
         private hndFocusNode;
-    }
-}
-declare namespace Fudge {
-    class PanelModeller extends Panel {
-        constructor(_container: GoldenLayout.Container, _state: Object);
-        protected cleanup(): void;
     }
 }
 declare namespace Fudge {
@@ -1046,48 +494,6 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
-    import ƒ = FudgeCore;
-    class ViewModellerScene extends View {
-        static isBackfaceCullingEnabled: boolean;
-        static menuitemToShortcutsMap: Map<MODELLER_MENU, Set<string>>;
-        viewport: ƒ.Viewport;
-        canvas: HTMLCanvasElement;
-        graph: ƒ.Node;
-        controller: Controller;
-        node: ƒ.Node;
-        content: HTMLDivElement;
-        protected availableMenuitems: Map<MODELLER_MENU, Function>;
-        private orbitCamera;
-        constructor(_container: GoldenLayout.Container, _state: Object);
-        static toggleBackfaceCulling(): void;
-        addEventListeners(): void;
-        createUserInterface(): void;
-        protected getContextMenu: (_callback: ContextMenuCallback) => Electron.Menu;
-        protected updateContextMenu: () => void;
-        protected contextMenuCallback: (_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event) => void;
-        private animate;
-        private onmove;
-        private onmouseup;
-        private onmousedown;
-        private handleKeyboard;
-        private onkeydown;
-        private onkeyup;
-        private changeHeader;
-        protected cleanup(): void;
-    }
-}
-declare namespace Fudge {
-    import ƒ = FudgeCore;
-    class ViewObjectProperties extends View {
-        private currentNode;
-        constructor(_container: GoldenLayout.Container, _state: Object);
-        protected setObject(_object: ƒ.Node): void;
-        private fillContent;
-        protected cleanup: () => void;
-        private hndEvent;
-    }
-}
-declare namespace Fudge {
     /**
      * Preview a resource
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
@@ -1097,6 +503,7 @@ declare namespace Fudge {
         private static meshStandard;
         private resource;
         private viewport;
+        private cmrOrbit;
         constructor(_container: GoldenLayout.Container, _state: Object);
         private static createStandardMaterial;
         private static createStandardMesh;
@@ -1108,6 +515,7 @@ declare namespace Fudge {
         private createAudioPreview;
         private createScriptPreview;
         private hndEvent;
+        private resetCamera;
         private redraw;
     }
 }

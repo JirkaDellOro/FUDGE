@@ -14,7 +14,7 @@ namespace FudgeCore {
    
     public constructor(_name: string = "MeshCube") {
       super(_name);
-      this.create();
+      // this.create();
     }
 
 

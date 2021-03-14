@@ -112,6 +112,7 @@
 							<h3>Accessors</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="fudgecore.vector3.html#copy" class="tsd-kind-icon">copy</a></li>
+								<li class="tsd-kind-accessor tsd-parent-kind-class"><a href="fudgecore.vector3.html#geo" class="tsd-kind-icon">geo</a></li>
 								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="fudgecore.vector3.html#magnitude" class="tsd-kind-icon">magnitude</a></li>
 								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="fudgecore.vector3.html#magnitudesquared" class="tsd-kind-icon">magnitude<wbr>Squared</a></li>
 								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.vector3.html#type" class="tsd-kind-icon">type</a></li>
@@ -125,6 +126,7 @@
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.vector3.html#add" class="tsd-kind-icon">add</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="fudgecore.vector3.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.vector3.html#deserialize" class="tsd-kind-icon">deserialize</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="fudgecore.vector3.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.vector3.html#equals" class="tsd-kind-icon">equals</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.vector3.html#get" class="tsd-kind-icon">get</a></li>
@@ -140,6 +142,7 @@
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.vector3.html#reflect" class="tsd-kind-icon">reflect</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="fudgecore.vector3.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.vector3.html#scale" class="tsd-kind-icon">scale</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.vector3.html#serialize" class="tsd-kind-icon">serialize</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.vector3.html#set" class="tsd-kind-icon">set</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.vector3.html#shuffle" class="tsd-kind-icon">shuffle</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.vector3.html#subtract" class="tsd-kind-icon">subtract</a></li>
@@ -150,6 +153,7 @@
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.vector3.html#cross" class="tsd-kind-icon">CROSS</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.vector3.html#difference" class="tsd-kind-icon">DIFFERENCE</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.vector3.html#dot" class="tsd-kind-icon">DOT</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.vector3.html#geo-1" class="tsd-kind-icon">GEO</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.vector3.html#normalization" class="tsd-kind-icon">NORMALIZATION</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.vector3.html#one" class="tsd-kind-icon">ONE</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.vector3.html#ratio" class="tsd-kind-icon">RATIO</a></li>
@@ -178,7 +182,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L13">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:13</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L13">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:13</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -210,15 +214,58 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L211">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:211</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L225">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:225</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Returns a copy of this vector</p>
+									<p>Returns a copy of this vector
+									TODO: rename this clone and create a new method copy, which copies the values from a vector given</p>
 								</div>
 							</div>
 							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-accessor tsd-parent-kind-class">
+					<a name="geo" class="tsd-anchor"></a>
+					<h3>geo</h3>
+					<ul class="tsd-signatures tsd-kind-accessor tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> geo<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.geo3.html" class="tsd-signature-type">Geo3</a></li>
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">set</span> geo<span class="tsd-signature-symbol">(</span>_geo<span class="tsd-signature-symbol">: </span><a href="fudgecore.geo3.html" class="tsd-signature-type">Geo3</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L234">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:234</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns a geographic representation of this vector</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.geo3.html" class="tsd-signature-type">Geo3</a></h4>
+						</li>
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L249">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:249</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Adjust the cartesian values of this vector to represent the given as geographic coordinates</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_geo: <a href="fudgecore.geo3.html" class="tsd-signature-type">Geo3</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -232,7 +279,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L197">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:197</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L210">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:210</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -254,7 +301,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L204">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:204</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L217">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:217</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -277,7 +324,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#type">type</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Transfer/Mutable.ts#L62">Documents/HFU/FUDGE/Core/Source/Transfer/Mutable.ts:62</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Mutable.ts#L62">Documents/HFU/FUDGE/Core/Source/Transfer/Mutable.ts:62</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -301,7 +348,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L174">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:174</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L187">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:187</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
@@ -309,7 +356,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L184">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:184</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L197">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:197</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -333,7 +380,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L177">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:177</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L190">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:190</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
@@ -341,7 +388,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L187">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:187</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L200">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:200</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -365,7 +412,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L180">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:180</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L193">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:193</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
@@ -373,7 +420,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L190">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:190</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L203">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:203</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -399,7 +446,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L255">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:255</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L293">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:293</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -429,7 +476,7 @@
 								<p>Inherited from <a href="fudgecore.eventtarget_.html">EventTargetƒ</a>.<a href="fudgecore.eventtarget_.html#addeventlistener">addEventListener</a></p>
 								<p>Overrides <a href="fudgecore.control.html">Control</a>.<a href="fudgecore.control.html#addeventlistener">addEventListener</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Event/Event.ts#L56">Documents/HFU/FUDGE/Core/Source/Event/Event.ts:56</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Event/Event.ts#L57">Documents/HFU/FUDGE/Core/Source/Event/Event.ts:57</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -448,6 +495,29 @@
 						</li>
 					</ul>
 				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="deserialize" class="tsd-anchor"></a>
+					<h3>deserialize</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">deserialize<span class="tsd-signature-symbol">(</span>_serialization<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.serialization.html" class="tsd-signature-type">Serialization</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L391">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:391</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_serialization: <a href="../interfaces/fudgecore.serialization.html" class="tsd-signature-type">Serialization</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
 					<a name="dispatchevent" class="tsd-anchor"></a>
 					<h3>dispatch<wbr>Event</h3>
@@ -460,7 +530,7 @@
 								<p>Inherited from <a href="fudgecore.eventtarget_.html">EventTargetƒ</a>.<a href="fudgecore.eventtarget_.html#dispatchevent">dispatchEvent</a></p>
 								<p>Overrides <a href="fudgecore.audiomanager.html">AudioManager</a>.<a href="fudgecore.audiomanager.html#dispatchevent">dispatchEvent</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Event/Event.ts#L63">Documents/HFU/FUDGE/Core/Source/Event/Event.ts:63</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Event/Event.ts#L64">Documents/HFU/FUDGE/Core/Source/Event/Event.ts:64</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -483,7 +553,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L221">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:221</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L259">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:259</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -515,7 +585,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L290">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:290</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L330">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:330</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -538,7 +608,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutator">getMutator</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L343">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:343</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L400">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:400</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a></h4>
@@ -556,7 +626,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutatorattributetypes">getMutatorAttributeTypes</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Transfer/Mutable.ts#L125">Documents/HFU/FUDGE/Core/Source/Transfer/Mutable.ts:125</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Mutable.ts#L125">Documents/HFU/FUDGE/Core/Source/Transfer/Mutable.ts:125</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -588,7 +658,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutatorforanimation">getMutatorForAnimation</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Transfer/Mutable.ts#L103">Documents/HFU/FUDGE/Core/Source/Transfer/Mutable.ts:103</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Mutable.ts#L103">Documents/HFU/FUDGE/Core/Source/Transfer/Mutable.ts:103</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -612,7 +682,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutatorforuserinterface">getMutatorForUserInterface</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Transfer/Mutable.ts#L110">Documents/HFU/FUDGE/Core/Source/Transfer/Mutable.ts:110</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Mutable.ts#L110">Documents/HFU/FUDGE/Core/Source/Transfer/Mutable.ts:110</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -635,7 +705,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L231">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:231</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L269">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:269</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -666,7 +736,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L247">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:247</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L285">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:285</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -697,7 +767,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L337">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:337</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L377">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:377</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -750,7 +820,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#mutate">mutate</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Transfer/Mutable.ts#L158">Documents/HFU/FUDGE/Core/Source/Transfer/Mutable.ts:158</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Mutable.ts#L158">Documents/HFU/FUDGE/Core/Source/Transfer/Mutable.ts:158</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -780,7 +850,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L276">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:276</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L314">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:314</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -808,7 +878,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L312">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:312</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L352">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:352</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -838,7 +908,7 @@
 								<p>Inherited from <a href="fudgecore.eventtarget_.html">EventTargetƒ</a>.<a href="fudgecore.eventtarget_.html#removeeventlistener">removeEventListener</a></p>
 								<p>Overrides <a href="fudgecore.control.html">Control</a>.<a href="fudgecore.control.html#removeeventlistener">removeEventListener</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Event/Event.ts#L59">Documents/HFU/FUDGE/Core/Source/Event/Event.ts:59</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Event/Event.ts#L60">Documents/HFU/FUDGE/Core/Source/Event/Event.ts:60</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -867,7 +937,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L269">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:269</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L307">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:307</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -886,6 +956,23 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="serialize" class="tsd-anchor"></a>
+					<h3>serialize</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">serialize<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.serialization.html" class="tsd-signature-type">Serialization</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L384">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:384</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.serialization.html" class="tsd-signature-type">Serialization</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
 					<a name="set" class="tsd-anchor"></a>
 					<h3>set</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -895,7 +982,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L283">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:283</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L321">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:321</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -929,7 +1016,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L321">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:321</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L361">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:361</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -951,7 +1038,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L262">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:262</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L300">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:300</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -979,7 +1066,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L329">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:329</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L369">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:369</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1001,7 +1088,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L305">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:305</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L345">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:345</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1023,7 +1110,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L298">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:298</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L338">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:338</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1056,7 +1143,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#updatemutator">updateMutator</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Transfer/Mutable.ts#L145">Documents/HFU/FUDGE/Core/Source/Transfer/Mutable.ts:145</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Mutable.ts#L145">Documents/HFU/FUDGE/Core/Source/Transfer/Mutable.ts:145</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1086,7 +1173,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L133">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:133</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L133">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:133</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1117,7 +1204,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L115">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:115</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L115">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:115</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1148,7 +1235,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L144">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:144</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L145">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:145</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1170,6 +1257,40 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="geo-1" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> GEO</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">GEO<span class="tsd-signature-symbol">(</span>_longitude<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _latitude<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _magnitude<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L177">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:177</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Creates a cartesian vector from geographic coordinates</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _longitude: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _latitude: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _magnitude: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 1</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
 					<a name="normalization" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> NORMALIZATION</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
@@ -1179,7 +1300,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L87">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:87</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L87">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:87</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1210,7 +1331,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L59">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:59</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L59">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:59</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1238,7 +1359,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L167">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:167</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L168">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:168</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1269,7 +1390,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L158">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:158</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L159">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:159</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1303,7 +1424,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L124">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:124</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L124">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:124</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1334,7 +1455,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L105">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:105</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L105">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:105</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1362,7 +1483,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L68">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:68</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L68">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:68</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1396,7 +1517,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L23">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:23</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L23">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:23</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1424,7 +1545,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L32">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:32</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L32">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:32</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1452,7 +1573,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L41">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:41</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L41">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:41</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1480,7 +1601,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/Core/Source/Math/Vector3.ts#L50">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:50</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Vector3.ts#L50">Documents/HFU/FUDGE/Core/Source/Math/Vector3.ts:50</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1518,6 +1639,9 @@
 							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
 								<a href="fudgecore.vector3.html#copy" class="tsd-kind-icon">copy</a>
 							</li>
+							<li class=" tsd-kind-accessor tsd-parent-kind-class">
+								<a href="fudgecore.vector3.html#geo" class="tsd-kind-icon">geo</a>
+							</li>
 							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
 								<a href="fudgecore.vector3.html#magnitude" class="tsd-kind-icon">magnitude</a>
 							</li>
@@ -1541,6 +1665,9 @@
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
 								<a href="fudgecore.vector3.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.vector3.html#deserialize" class="tsd-kind-icon">deserialize</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
 								<a href="fudgecore.vector3.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a>
@@ -1588,6 +1715,9 @@
 								<a href="fudgecore.vector3.html#scale" class="tsd-kind-icon">scale</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.vector3.html#serialize" class="tsd-kind-icon">serialize</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudgecore.vector3.html#set" class="tsd-kind-icon">set</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
@@ -1616,6 +1746,9 @@
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
 								<a href="fudgecore.vector3.html#dot" class="tsd-kind-icon">DOT</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="fudgecore.vector3.html#geo-1" class="tsd-kind-icon">GEO</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
 								<a href="fudgecore.vector3.html#normalization" class="tsd-kind-icon">NORMALIZATION</a>

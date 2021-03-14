@@ -1,7 +1,7 @@
 namespace Fudge {
   import ƒ = FudgeCore;
-  import ƒui = FudgeUserInterface;
-  import ƒaid = FudgeAid;
+  import ƒUi = FudgeUserInterface;
+  import ƒAid = FudgeAid;
 
   /**
    * Preview a resource
@@ -12,24 +12,26 @@ namespace Fudge {
     private static meshStandard: ƒ.Mesh = ViewPreview.createStandardMesh();
     private resource: ƒ.SerializableResource | DirectoryEntry | Function;
     private viewport: ƒ.Viewport;
+    private cmrOrbit: ƒAid.CameraOrbit;
 
     constructor(_container: GoldenLayout.Container, _state: Object) {
       super(_container, _state);
 
       // create viewport for 3D-resources
       let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
-      cmpCamera.pivot.translate(new ƒ.Vector3(2, 4, 2));
-      cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
+      // cmpCamera.pivot.translate(new ƒ.Vector3(1, 2, 1));
+      // cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
       cmpCamera.projectCentral(1, 45);
-      let canvas: HTMLCanvasElement = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
+      let canvas: HTMLCanvasElement = ƒAid.Canvas.create(true, ƒAid.IMAGE_RENDERING.PIXELATED);
       this.viewport = new ƒ.Viewport();
       this.viewport.initialize("Preview", null, cmpCamera, canvas);
+      this.cmrOrbit = ƒAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
 
       this.fillContent();
 
       _container.on("resize", this.redraw);
-      this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
-      this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
+      this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
+      this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent, true);
       // this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
       // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
@@ -108,18 +110,18 @@ namespace Fudge {
           graph = this.createStandardGraph();
           graph.addComponent(new ƒ.ComponentMesh(<ƒ.Mesh>this.resource));
           graph.addComponent(new ƒ.ComponentMaterial(ViewPreview.mtrStandard));
-          this.viewport.draw();
+          this.redraw();
           break;
         case "Material":
           graph = this.createStandardGraph();
           graph.addComponent(new ƒ.ComponentMesh(ViewPreview.meshStandard));
           graph.addComponent(new ƒ.ComponentMaterial(<ƒ.Material>this.resource));
-          this.viewport.draw();
+          this.redraw();
           break;
         case "Graph":
-          this.viewport.setGraph(<ƒ.Graph>this.resource);
+          this.viewport.setBranch(<ƒ.Graph>this.resource);
           this.dom.appendChild(this.viewport.getCanvas());
-          this.viewport.draw();
+          this.redraw();
           break;
         case "TextureImage":
           let img: HTMLImageElement = (<ƒ.TextureImage>this.resource).image;
@@ -136,8 +138,8 @@ namespace Fudge {
 
     private createStandardGraph(): ƒ.Node {
       let graph: ƒ.Node = new ƒ.Node("PreviewScene");
-      ƒaid.addStandardLightComponents(graph);
-      this.viewport.setGraph(graph);
+      ƒAid.addStandardLightComponents(graph);
+      this.viewport.setBranch(graph);
       this.dom.appendChild(this.viewport.getCanvas());
       return graph;
     }
@@ -181,8 +183,8 @@ namespace Fudge {
     private hndEvent = (_event: CustomEvent): void => {
       // console.log(_event.type);
       switch (_event.type) {
-        case ƒui.EVENT.CHANGE:
-        case ƒui.EVENT.MUTATE:
+        case ƒUi.EVENT.CHANGE:
+        case ƒUi.EVENT.MUTATE:
         case EVENT_EDITOR.UPDATE:
           if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture || this.resource instanceof ƒ.Material)
             this.fillContent();
@@ -193,9 +195,17 @@ namespace Fudge {
             this.resource = _event.detail.data.script;
           else
             this.resource = _event.detail.data;
+          this.resetCamera();
           this.fillContent();
           break;
       }
+    }
+
+    private resetCamera(): void {
+      this.cmrOrbit.rotationX = -30;
+      this.cmrOrbit.rotationY = 30;
+      this.cmrOrbit.distance = 3;
+      ƒ.Render.prepare(this.cmrOrbit);
     }
 
     private redraw = () => {

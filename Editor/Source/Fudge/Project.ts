@@ -120,7 +120,8 @@ namespace Fudge {
       }
 
       let result: string = (new XMLSerializer()).serializeToString(html);
-      result = result.replaceAll("><", ">\n<");
+      result = result.replace(/></g, ">\n<");
+      // result = result.replaceAll("><", ">\n<");
       return result;
     }
 
@@ -202,6 +203,7 @@ namespace Fudge {
 
           // draw viewport once for immediate feedback
           viewport.draw();
+          canvas.dispatchEvent(new CustomEvent("interactiveViewportStarted", {bubbles: true, detail: viewport}));
         }
       }).toString();
 

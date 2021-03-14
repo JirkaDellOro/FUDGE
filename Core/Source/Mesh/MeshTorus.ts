@@ -5,15 +5,12 @@ namespace FudgeCore {
    */
   export class MeshTorus extends Mesh {
     public static readonly iSubclass: number = Mesh.registerSubclass(MeshTorus);
-    public normals: Float32Array;
     private thickness: number = 0.25;
     private majorSegments: number = 32;
     private minorSegments: number = 12;
 
     public constructor(_name: string = "MeshTorus", _thickness: number = 0.25, _majorSegments: number = 32, _minorSegments: number = 12) {
       super(_name);
-
-
       this.create(_thickness, _majorSegments, _minorSegments);
     }
 
@@ -28,7 +25,9 @@ namespace FudgeCore {
         this.majorSegments = Math.max(3, _majorSegments);
         this.minorSegments = Math.max(3, _minorSegments);
       }
-      
+
+      this.clear();
+
       let vertices: Array<number> = [];
       let normals: number[] = [];
       let textureUVs: number[] = [];
@@ -64,23 +63,21 @@ namespace FudgeCore {
       // scale down
       vertices = vertices.map(_value => _value / 2);
 
-      this.textureUVs = new Float32Array(textureUVs);
-      this.normals = new Float32Array(normals);
-      this.vertices = new Float32Array(vertices);
-      this.normalsFace = this.createFaceNormals();
-      this.indices = this.createIndices();
+      this.ƒtextureUVs = new Float32Array(textureUVs);
+      this.ƒnormals = new Float32Array(normals);
+      this.ƒvertices = new Float32Array(vertices);
+      this.ƒindices = this.createIndices();
       this.createRenderBuffers();
     }
 
 
     public async mutate(_mutator: Mutator): Promise<void> {
       super.mutate(_mutator);
-      let thickness: number = _mutator.thickness;
+      let thickness: number = Math.round(_mutator.thickness);
       let majorSegments: number = Math.round(_mutator.majorSegments);
       let minorSegments: number = Math.round(_mutator.minorSegments);
       this.create(thickness, majorSegments, minorSegments);
     }
-
 
     protected createIndices(): Uint16Array {
       let inds: Array<number> = [];
@@ -97,19 +94,6 @@ namespace FudgeCore {
       }
       let indices: Uint16Array = new Uint16Array(inds);
       return indices;
-    }
-
-    protected createVertices(): Float32Array {
-      return this.vertices;
-    }
-
-    protected createTextureUVs(): Float32Array {
-      return this.textureUVs;
-    }
-
-    //TODO: we also need REAL face normals
-    protected createFaceNormals(): Float32Array {
-      return this.normals;
     }
   }
 }

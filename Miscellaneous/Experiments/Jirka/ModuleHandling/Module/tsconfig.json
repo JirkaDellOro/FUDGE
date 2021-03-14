@@ -1,12 +1,11 @@
 {
     "compilerOptions": {
-        "target": "es6",
+        "target": "ESNext",
+        "module": "ESNext",
         "sourceMap": true,
         "strictFunctionTypes": true,
         "alwaysStrict": true,
-        //"diagnostics": true,
         "strict": true,
-        //"outFile": "Test.js"
     },
     "exclude": [
         "node_modules"

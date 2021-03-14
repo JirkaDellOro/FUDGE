@@ -14,7 +14,7 @@ namespace FudgeCore {
 
     public constructor(_name: string = "MeshPyramid") {
       super(_name);
-      this.create();
+      // this.create();
     }
 
 
@@ -58,10 +58,6 @@ namespace FudgeCore {
                 /*5*/ 0, 0, /*6*/ 1, 0,  /*7*/ 1, 1, /*8*/ 0, 1
       ]);
       return textureUVs;
-    }
-
-    protected createFaceNormals(): Float32Array {
-      return new Float32Array(this.calculateFaceNormals());
     }
   }
 }

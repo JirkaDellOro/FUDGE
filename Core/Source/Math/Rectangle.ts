@@ -1,4 +1,4 @@
-///<reference path="../Engine/Recycler.ts"/>
+///<reference path="../Recycle/Recycler.ts"/>
 ///<reference path="Vector2.ts"/>
 
 namespace FudgeCore {

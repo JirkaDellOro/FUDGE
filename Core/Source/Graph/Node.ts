@@ -12,6 +12,11 @@ namespace FudgeCore {
     public name: string; // The name to call this node by.
     public readonly mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY();
     public timestampUpdate: number = 0;
+    public nNodesInBranch: number = 0;
+    public radius: number = 0;
+
+    #mtxWorldInverseUpdated: number;
+    #mtxWorldInverse: Matrix4x4;
 
     private parent: Node | null = null; // The parent of this node.
     private children: Node[] = []; // array of child nodes appended to this node.
@@ -22,8 +27,6 @@ namespace FudgeCore {
     private captures: MapEventTypeToListener = {};
     private active: boolean = true;
 
-    private worldInverseUpdated: number;
-    private worldInverse: Matrix4x4;
 
     /**
      * Creates a new node with a name and initializes all attributes
@@ -50,15 +53,15 @@ namespace FudgeCore {
      * Fails if no [[ComponentTransform]] is attached
      */
     public get mtxLocal(): Matrix4x4 {
-      return this.cmpTransform.local;
+      return this.cmpTransform.mtxLocal;
     }
 
     public get mtxWorldInverse(): Matrix4x4 {
-      if (this.worldInverseUpdated != this.timestampUpdate)
-        this.worldInverse = Matrix4x4.INVERSION(this.mtxWorld);
+      if (this.#mtxWorldInverseUpdated != this.timestampUpdate)
+        this.#mtxWorldInverse = Matrix4x4.INVERSION(this.mtxWorld);
 
-      this.worldInverseUpdated = this.timestampUpdate;
-      return this.worldInverse;
+      this.#mtxWorldInverseUpdated = this.timestampUpdate;
+      return this.#mtxWorldInverse;
     }
 
     /**
@@ -70,9 +73,14 @@ namespace FudgeCore {
 
     /**
      * Generator yielding the node and all decendants in the graph below for iteration
+     * Inactive nodes and their descendants can be filtered
      */
-    public get graph(): IterableIterator<Node> {
-      return this.getGraphGenerator();
+    public * getIterator(_active: boolean = false): IterableIterator<Node> {
+      if (!_active || this.isActive) {
+        yield this;
+        for (let child of this.children)
+          yield* child.getIterator(_active);
+      }
     }
 
     public activate(_on: boolean): void {
@@ -176,7 +184,7 @@ namespace FudgeCore {
       this.children.splice(found, 1);
       _child.parent = null;
     }
-    
+
     /**
      * Removes all references in the list of children
      */
@@ -504,11 +512,5 @@ namespace FudgeCore {
       }
     }
     // #endregion
-
-    private * getGraphGenerator(): IterableIterator<Node> {
-      yield this;
-      for (let child of this.children)
-        yield* child.graph;
-    }
   }
 }

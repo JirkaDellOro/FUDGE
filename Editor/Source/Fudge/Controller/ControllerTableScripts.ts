@@ -16,8 +16,8 @@ namespace Fudge {
       let chain: Function = _script["__proto__"];
       this.superClass = chain.name;
       do {
-        this.isComponent ||= (chain.name == "Component");
-        this.isComponentScript ||= (chain.name == "ComponentScript");
+        this.isComponent = this.isComponent || (chain.name == "Component");
+        this.isComponentScript = this.isComponentScript || (chain.name == "ComponentScript");
         chain = chain["__proto__"];
       } while (chain);
     }

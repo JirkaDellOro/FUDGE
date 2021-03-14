@@ -1,5 +1,5 @@
 namespace TableControl {
-  import ƒ = FudgeCore;
+  // import ƒ = FudgeCore;
   import ƒui = FudgeUserInterface;
 
 

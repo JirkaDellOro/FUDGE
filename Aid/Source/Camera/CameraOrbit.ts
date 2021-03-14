@@ -38,11 +38,11 @@ namespace FudgeAid {
       this.axisDistance.addEventListener(ƒ.EVENT_CONTROL.OUTPUT, this.hndAxisOutput);
     }
 
-    public get component(): ƒ.ComponentCamera {
+    public get cmpCamera(): ƒ.ComponentCamera {
       return this.translator.getComponent(ƒ.ComponentCamera);
     }
 
-    public get node(): ƒ.Node {
+    public get nodeCamera(): ƒ.Node {
       return this.translator;
     }
 
@@ -78,6 +78,15 @@ namespace FudgeAid {
 
     public rotateX(_delta: number): void {
       this.rotationX = this.rotatorX.mtxLocal.rotation.x + _delta;
+    }
+
+    // set position of camera component relative to the center of orbit
+    public positionCamera(_posWorld: ƒ.Vector3): void {
+      let difference: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(_posWorld, this.mtxWorld.translation);
+      let geo: ƒ.Geo3 = difference.geo;
+      this.rotationY = geo.longitude;
+      this.rotationX = -geo.latitude;
+      this.distance = geo.magnitude;
     }
 
     public hndAxisOutput: EventListener = (_event: Event): void => {

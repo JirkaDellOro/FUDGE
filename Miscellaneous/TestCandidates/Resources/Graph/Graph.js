@@ -36,7 +36,7 @@ var Graph;
         console.groupCollapsed("NodeInstance");
         console.log(ƒ.Serializer.stringify(srlInstance));
         console.groupEnd();
-        ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
+        ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
         // debugger;
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 10);
         function update(_event) {

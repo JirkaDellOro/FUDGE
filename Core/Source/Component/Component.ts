@@ -15,8 +15,8 @@ namespace FudgeCore {
     public static readonly subclasses: typeof Component[] = [];
 
     protected singleton: boolean = true;
-    private container: Node | null = null;
     protected active: boolean = true;
+    private container: Node | null = null;
 
     protected static registerSubclass(_subclass: typeof Component): number { return Component.subclasses.push(_subclass) - 1; }
 
@@ -78,6 +78,7 @@ namespace FudgeCore {
     protected reduceMutator(_mutator: Mutator): void {
       delete _mutator.singleton;
       delete _mutator.container;
+      delete _mutator.mtxWorld;
     }
     //#endregion
   }

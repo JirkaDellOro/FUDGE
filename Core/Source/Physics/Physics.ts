@@ -89,7 +89,7 @@ namespace FudgeCore {
   * Starts the physical world by checking that each body has the correct values from the Scene Tree
   */
     public static start(_sceneTree: Node): void {
-      Render.setupTransformAndLights(_sceneTree);
+      Render.prepare(_sceneTree);
       this.world.updateWorldFromWorldMatrix();
     }
 
