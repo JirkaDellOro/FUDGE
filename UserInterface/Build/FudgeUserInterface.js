@@ -1113,9 +1113,6 @@ var FudgeUserInterface;
                 _event.stopPropagation();
                 // let target: HTMLElement = <HTMLElement>_event.target;
                 switch (_event.code) {
-                    case ƒ.KEYBOARD_CODE.DELETE:
-                        this.dispatchEvent(new KeyboardEvent("delete" /* DELETE */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
-                        break;
                     case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
                         if (!this.isExpanded) {
                             this.expand(true);
@@ -1416,12 +1413,13 @@ var FudgeUserInterface;
             //   // _event.stopPropagation();
             //   // this.addChildren(this.controller.dragDrop.sources, this.controller.dragDrop.target);
             // }
-            // private hndDelete = (_event: Event): void => {
-            //   // let target: TreeItem<T> = <TreeItem<T>>_event.target;
-            //   // _event.stopPropagation();
-            //   // let remove: T[] = this.controller.delete([target.data]);
-            //   // this.delete(remove);
-            // }
+            this.hndDelete = (_event) => {
+                let target = _event.target;
+                _event.stopPropagation();
+                let remove = this.controller.delete([target.data]);
+                console.log(remove);
+                // this.delete(remove);
+            };
             this.hndEscape = (_event) => {
                 this.clearSelection();
             };
@@ -1478,10 +1476,10 @@ var FudgeUserInterface;
             this.addEventListener("focusNext" /* FOCUS_NEXT */, this.hndFocus);
             this.addEventListener("focusPrevious" /* FOCUS_PREVIOUS */, this.hndFocus);
             this.addEventListener("escape" /* ESCAPE */, this.hndEscape);
+            this.addEventListener("delete" /* DELETE */, this.hndDelete);
             // this.addEventListener(EVENT_TABLE.CHANGE, this.hndSort);
             // this.addEventListener(EVENT_TREE.RENAME, this.hndRename);
             // this.addEventListener(EVENT_TREE.DROP, this.hndDrop);
-            // this.addEventListener(EVENT_TREE.DELETE, this.hndDelete);
             // this.addEventListener(EVENT_TREE.COPY, this.hndCopyPaste);
             // this.addEventListener(EVENT_TREE.PASTE, this.hndCopyPaste);
             // this.addEventListener(EVENT_TREE.CUT, this.hndCopyPaste);
@@ -2066,7 +2064,7 @@ var FudgeUserInterface;
         }
         hndDrop(_event) {
             // _event.stopPropagation();
-            console.log(_event.dataTransfer);
+            // console.log(_event.dataTransfer);
             this.addChildren(this.controller.dragDrop.sources, this.controller.dragDrop.target);
         }
         addChildren(_children, _target) {

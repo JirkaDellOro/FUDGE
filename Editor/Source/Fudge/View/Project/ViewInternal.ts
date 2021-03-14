@@ -19,6 +19,7 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
+      this.dom.addEventListener(ƒui.EVENT.DELETE, this.hndEvent);
     }
 
     public listResources(): void {

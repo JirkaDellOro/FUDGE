@@ -245,8 +245,8 @@ declare namespace Fudge {
         getHead(): ƒui.TABLE[];
         getLabel(_object: ƒ.SerializableResource): string;
         rename(_object: ƒ.SerializableResource, _new: string): boolean;
-        delete(_focussed: ƒ.SerializableResource[]): ƒ.SerializableResource[];
         copy(_originals: ƒ.SerializableResource[]): Promise<ƒ.SerializableResource[]>;
+        delete(_focussed: ƒ.SerializableResource[]): ƒ.SerializableResource[];
         sort(_data: ƒ.SerializableResource[], _key: string, _direction: number): void;
     }
 }
@@ -287,7 +287,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     import ƒ = FudgeCore;
     import ƒUi = FudgeUserInterface;
-    class ControllerTreeNode extends ƒUi.TreeController<ƒ.Node> {
+    class ControllerTreeHierarchy extends ƒUi.TreeController<ƒ.Node> {
         getLabel(_node: ƒ.Node): string;
         rename(_node: ƒ.Node, _new: string): boolean;
         hasChildren(_node: ƒ.Node): boolean;

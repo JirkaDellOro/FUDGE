@@ -804,6 +804,7 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
+            this.dom.addEventListener("delete" /* DELETE */, this.hndEvent);
         }
         listResources() {
             while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
@@ -1073,8 +1074,10 @@ var Fudge;
         }
         getLabel(_object) { return ""; }
         rename(_object, _new) { return false; }
-        delete(_focussed) { return null; }
         copy(_originals) { return null; }
+        delete(_focussed) {
+            return null;
+        }
         sort(_data, _key, _direction) {
             function compare(_a, _b) {
                 return _direction * (_a[_key] == _b[_key] ? 0 : (_a[_key] > _b[_key] ? 1 : -1));
@@ -1176,7 +1179,7 @@ var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒUi = FudgeUserInterface;
-    class ControllerTreeNode extends ƒUi.TreeController {
+    class ControllerTreeHierarchy extends ƒUi.TreeController {
         getLabel(_node) {
             return _node.name;
         }
@@ -1223,7 +1226,7 @@ var Fudge;
             return copies;
         }
     }
-    Fudge.ControllerTreeNode = ControllerTreeNode;
+    Fudge.ControllerTreeHierarchy = ControllerTreeHierarchy;
 })(Fudge || (Fudge = {}));
 ///<reference path="../View/View.ts"/>
 var Fudge;
@@ -2115,7 +2118,7 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
-    var ƒui = FudgeUserInterface;
+    var ƒUi = FudgeUserInterface;
     /**
      * View the hierarchy of a graph as tree-control
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
@@ -2126,7 +2129,13 @@ var Fudge;
             //#endregion
             //#region EventHandlers
             this.hndEvent = (_event) => {
-                this.setGraph(_event.detail);
+                switch (_event.type) {
+                    case "delete" /* DELETE */:
+                        this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                        break;
+                    default:
+                        this.setGraph(_event.detail);
+                }
             };
             // this.contextMenu = this.getContextMenu(this.contextMenuCallback);
             this.setGraph(_state.node);
@@ -2140,10 +2149,11 @@ var Fudge;
                 this.dom.removeChild(this.tree);
             this.graph = _graph;
             // this.selectedNode = null;
-            this.tree = new ƒui.Tree(new Fudge.ControllerTreeNode(), this.graph);
+            this.tree = new ƒUi.Tree(new Fudge.ControllerTreeHierarchy(), this.graph);
             // this.listController.listRoot.addEventListener(ƒui.EVENT.SELECT, this.passEventToPanel);
             //TODO: examine if tree should fire common UI-EVENT for selection instead
             // this.tree.addEventListener(ƒui.EVENT.SELECT, this.passEventToPanel);
+            this.tree.addEventListener("delete" /* DELETE */, this.hndEvent);
             this.tree.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.append(this.tree);
         }
@@ -2245,6 +2255,7 @@ var Fudge;
                         this.setGraph(_event.detail);
                         break;
                     case "mutate" /* MUTATE */:
+                    case "delete" /* DELETE */:
                     case Fudge.EVENT_EDITOR.UPDATE:
                         this.redraw();
                 }
@@ -2272,6 +2283,7 @@ var Fudge;
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
+            this.dom.addEventListener("delete" /* DELETE */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
         }
         createUserInterface() {

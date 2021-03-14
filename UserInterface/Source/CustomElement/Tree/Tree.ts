@@ -114,7 +114,7 @@ namespace FudgeUserInterface {
 
     private hndDrop(_event: DragEvent): void {
       // _event.stopPropagation();
-      console.log(_event.dataTransfer);
+      // console.log(_event.dataTransfer);
       this.addChildren(this.controller.dragDrop.sources, this.controller.dragDrop.target);
     }
 

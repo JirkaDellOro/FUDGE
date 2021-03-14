@@ -2,7 +2,7 @@ namespace Fudge {
   import ƒ = FudgeCore;
   import ƒUi = FudgeUserInterface;
 
-  export class ControllerTreeNode extends ƒUi.TreeController<ƒ.Node> {
+  export class ControllerTreeHierarchy extends ƒUi.TreeController<ƒ.Node> {
     public getLabel(_node: ƒ.Node): string {
       return _node.name;
     }

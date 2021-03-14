@@ -31,10 +31,10 @@ namespace FudgeUserInterface {
       this.addEventListener(EVENT.FOCUS_NEXT, <EventListener>this.hndFocus);
       this.addEventListener(EVENT.FOCUS_PREVIOUS, <EventListener>this.hndFocus);
       this.addEventListener(EVENT.ESCAPE, this.hndEscape);
+      this.addEventListener(EVENT.DELETE, this.hndDelete);
       // this.addEventListener(EVENT_TABLE.CHANGE, this.hndSort);
       // this.addEventListener(EVENT_TREE.RENAME, this.hndRename);
       // this.addEventListener(EVENT_TREE.DROP, this.hndDrop);
-      // this.addEventListener(EVENT_TREE.DELETE, this.hndDelete);
       // this.addEventListener(EVENT_TREE.COPY, this.hndCopyPaste);
       // this.addEventListener(EVENT_TREE.PASTE, this.hndCopyPaste);
       // this.addEventListener(EVENT_TREE.CUT, this.hndCopyPaste);
@@ -190,13 +190,13 @@ namespace FudgeUserInterface {
     //   // this.addChildren(this.controller.dragDrop.sources, this.controller.dragDrop.target);
     // }
 
-    // private hndDelete = (_event: Event): void => {
-    //   // let target: TreeItem<T> = <TreeItem<T>>_event.target;
-    //   // _event.stopPropagation();
-    //   // let remove: T[] = this.controller.delete([target.data]);
-
-    //   // this.delete(remove);
-    // }
+    private hndDelete = (_event: Event): void => {
+      let target: TableItem<T> = <TableItem<T>>_event.target;
+      _event.stopPropagation();
+      let remove: T[] = this.controller.delete([target.data]);
+      console.log(remove);
+      // this.delete(remove);
+    }
 
     private hndEscape = (_event: Event): void => {
       this.clearSelection();
