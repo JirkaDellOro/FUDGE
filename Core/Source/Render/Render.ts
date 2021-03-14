@@ -38,7 +38,7 @@ namespace FudgeCore {
       _branch.radius = 0;
 
       if (_branch.cmpTransform)
-        mtxWorld = Matrix4x4.MULTIPLICATION(_mtxWorld, _branch.cmpTransform.local);
+        mtxWorld = Matrix4x4.MULTIPLICATION(_mtxWorld, _branch.cmpTransform.mtxLocal);
 
       _branch.mtxWorld.set(mtxWorld); // overwrite readonly mtxWorld of the current node
       _branch.timestampUpdate = Render.timestampUpdate;
@@ -60,7 +60,7 @@ namespace FudgeCore {
       let cmpMaterial: ComponentMaterial = _branch.getComponent(ComponentMaterial);
       if (cmpMesh && cmpMesh.isActive && cmpMaterial && cmpMaterial.isActive) {
         // TODO: careful when using particlesystem, pivot must not change node position
-        cmpMesh.mtxWorld = Matrix4x4.MULTIPLICATION(_branch.mtxWorld, cmpMesh.pivot);
+        cmpMesh.mtxWorld = Matrix4x4.MULTIPLICATION(_branch.mtxWorld, cmpMesh.mtxPivot);
         let shader: typeof Shader = cmpMaterial.material.getShader();
         if (_shadersUsed.indexOf(shader) < 0)
           _shadersUsed.push(shader);

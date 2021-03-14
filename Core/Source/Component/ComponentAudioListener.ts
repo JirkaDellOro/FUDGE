@@ -6,15 +6,15 @@ namespace FudgeCore {
    */
   export class ComponentAudioListener extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentAudioListener);
-    public pivot: Matrix4x4 = Matrix4x4.IDENTITY();
+    public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
 
     /**
      * Updates the position and orientation of the given AudioListener
      */
     public update(_listener: AudioListener): void {
-      let mtxResult: Matrix4x4 = this.pivot;
+      let mtxResult: Matrix4x4 = this.mtxPivot;
       if (this.getContainer())
-        mtxResult = Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.pivot);
+        mtxResult = Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.mtxPivot);
 
       // Debug.log(mtxResult.toString());
       let position: Vector3 = mtxResult.translation;

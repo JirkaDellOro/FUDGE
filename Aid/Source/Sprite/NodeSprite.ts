@@ -41,7 +41,7 @@ namespace FudgeAid {
      */
     public showFrame(_index: number): void {
       let spriteFrame: SpriteFrame = this.animation.frames[_index];
-      this.cmpMesh.pivot = spriteFrame.mtxPivot;
+      this.cmpMesh.mtxPivot = spriteFrame.mtxPivot;
       this.cmpMaterial.pivot = spriteFrame.mtxTexture;
       this.cmpMaterial.material.setCoat(this.animation.spritesheet);
       this.frameCurrent = _index;

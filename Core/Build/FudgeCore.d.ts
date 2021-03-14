@@ -407,7 +407,7 @@ declare namespace FudgeCore {
     class RenderInjectorMesh {
         static decorate(_constructor: Function): void;
         protected static createRenderBuffers(this: Mesh): void;
-        protected static useRenderBuffers(this: Mesh, _shader: typeof Shader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void;
+        protected static useRenderBuffers(this: Mesh, _shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): void;
         protected static deleteRenderBuffers(_renderBuffers: RenderBuffers): void;
     }
 }
@@ -811,8 +811,8 @@ declare namespace FudgeCore {
         private listeners;
         private captures;
         private active;
-        private worldInverseUpdated;
-        private worldInverse;
+        private ƒmtxWorldInverseUpdated;
+        private ƒmtxWorldInverse;
         /**
          * Creates a new node with a name and initializes all attributes
          * @param _name The name by which the node can be called.
@@ -1462,7 +1462,7 @@ declare namespace FudgeCore {
     class ComponentAudio extends Component {
         static readonly iSubclass: number;
         /** places and directs the panner relative to the world transform of the [[Node]]  */
-        pivot: Matrix4x4;
+        mtxPivot: Matrix4x4;
         protected singleton: boolean;
         private audio;
         private gain;
@@ -1546,7 +1546,7 @@ declare namespace FudgeCore {
      */
     class ComponentAudioListener extends Component {
         static readonly iSubclass: number;
-        pivot: Matrix4x4;
+        mtxPivot: Matrix4x4;
         /**
          * Updates the position and orientation of the given AudioListener
          */
@@ -1575,8 +1575,8 @@ declare namespace FudgeCore {
      */
     class ComponentCamera extends Component {
         static readonly iSubclass: number;
-        pivot: Matrix4x4;
-        backgroundColor: Color;
+        mtxPivot: Matrix4x4;
+        clrBackground: Color;
         private projection;
         private mtxProjection;
         private fieldOfView;
@@ -1698,7 +1698,7 @@ declare namespace FudgeCore {
     }
     class ComponentLight extends Component {
         static readonly iSubclass: number;
-        pivot: Matrix4x4;
+        mtxPivot: Matrix4x4;
         light: Light;
         constructor(_light?: Light);
         setType<T extends Light>(_class: new () => T): void;
@@ -1733,7 +1733,7 @@ declare namespace FudgeCore {
      */
     class ComponentMesh extends Component {
         static readonly iSubclass: number;
-        pivot: Matrix4x4;
+        mtxPivot: Matrix4x4;
         mtxWorld: Matrix4x4;
         mesh: Mesh;
         constructor(_mesh?: Mesh);
@@ -1769,8 +1769,8 @@ declare namespace FudgeCore {
      */
     class ComponentTransform extends Component {
         static readonly iSubclass: number;
-        local: Matrix4x4;
-        constructor(_matrix?: Matrix4x4);
+        mtxLocal: Matrix4x4;
+        constructor(_mtxInit?: Matrix4x4);
         /**
          * Adjusts the rotation to point the z-axis directly at the given target point in world space and tilts it to accord with the given up vector,
          * respectively calculating yaw and pitch. If no up vector is given, the previous up-vector is used.
@@ -1789,7 +1789,7 @@ declare namespace FudgeCore {
         /**
          * Applies the given transformation relative to the selected base (SELF, PARENT, WORLD) or a particular other node (NODE)
          */
-        transform(_transform: Matrix4x4, _base?: BASE, _node?: Node): void;
+        transform(_mtxTransform: Matrix4x4, _base?: BASE, _node?: Node): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
@@ -2620,15 +2620,15 @@ declare namespace FudgeCore {
         static IDENTITY(): Matrix4x4;
         /**
          * Computes and returns the product of two passed matrices.
-         * @param _left The matrix to multiply.
-         * @param _right The matrix to multiply by.
+         * @param _mtxLeft The matrix to multiply.
+         * @param _mtxRight The matrix to multiply by.
          */
-        static MULTIPLICATION(_left: Matrix4x4, _right: Matrix4x4): Matrix4x4;
+        static MULTIPLICATION(_mtxLeft: Matrix4x4, _mtxRight: Matrix4x4): Matrix4x4;
         /**
          * Computes and returns the inverse of a passed matrix.
-         * @param _matrix The matrix to compute the inverse of.
+         * @param _mtx The matrix to compute the inverse of.
          */
-        static INVERSION(_matrix: Matrix4x4): Matrix4x4;
+        static INVERSION(_mtx: Matrix4x4): Matrix4x4;
         /**
          * Computes and returns a matrix with the given translation, its z-axis pointing directly at the given target,
          * and a minimal angle between its y-axis and the given up-Vector, respetively calculating yaw and pitch.
@@ -2650,7 +2650,6 @@ declare namespace FudgeCore {
         static ROTATION_X(_angleInDegrees: number): Matrix4x4;
         /**
          * Returns a matrix that rotates coordinates on the y-axis when multiplied by.
-         * @param _angleInDegrees The value of the rotation.
          */
         static ROTATION_Y(_angleInDegrees: number): Matrix4x4;
         /**
@@ -2666,7 +2665,7 @@ declare namespace FudgeCore {
          * Returns a representation of the given matrix relative to the given base.
          * If known, pass the inverse of the base to avoid unneccesary calculation
          */
-        static RELATIVE(_matrix: Matrix4x4, _base: Matrix4x4, _inverse?: Matrix4x4): Matrix4x4;
+        static RELATIVE(_mtx: Matrix4x4, _mtxBase: Matrix4x4, _mtxInverse?: Matrix4x4): Matrix4x4;
         /**
          * Computes and returns a matrix that applies perspective to an object, if its transform is multiplied by it.
          * @param _aspect The aspect ratio between width and height of projectionspace.(Default = canvas.clientWidth / canvas.ClientHeight)
@@ -2783,7 +2782,7 @@ declare namespace FudgeCore {
         /**
          * Sets the elements of this matrix to the values of the given matrix
          */
-        set(_to: Matrix4x4): void;
+        set(_mtxTo: Matrix4x4): void;
         toString(): string;
         /**
          * Return the elements of this matrix as a Float32Array
@@ -2813,7 +2812,7 @@ declare namespace FudgeCore {
          * Swaps the two cardinal axis and reverses the third, effectively rotating the transform 180 degrees around one and 90 degrees around a second axis
          */
         swapYZ(): void;
-        getTranslationTo(_target: Matrix4x4): Vector3;
+        getTranslationTo(_mtxTarget: Matrix4x4): Vector3;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutator(): Mutator;
@@ -2938,7 +2937,7 @@ declare namespace FudgeCore {
         /**
          * Creates and returns a vector through transformation of the given vector by the given matrix
          */
-        static TRANSFORMATION(_vector: Vector3, _matrix: Matrix4x4, _includeTranslation?: boolean): Vector3;
+        static TRANSFORMATION(_vector: Vector3, _mtxTransform: Matrix4x4, _includeTranslation?: boolean): Vector3;
         /**
          * Creates and returns a vector which is a copy of the given vector scaled to the given length
          */
@@ -3047,7 +3046,7 @@ declare namespace FudgeCore {
          * Transforms this vector by the given matrix, including or exluding the translation.
          * Including is the default, excluding will only rotate and scale this vector.
          */
-        transform(_matrix: Matrix4x4, _includeTranslation?: boolean): void;
+        transform(_mtxTransform: Matrix4x4, _includeTranslation?: boolean): void;
         /**
          * Drops the z-component and returns a Vector2 consisting of the x- and y-components
          */
@@ -3120,7 +3119,7 @@ declare namespace FudgeCore {
         get textureUVs(): Float32Array;
         get boundingBox(): Box;
         get radius(): number;
-        useRenderBuffers(_shader: typeof Shader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void;
+        useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): void;
         createRenderBuffers(): void;
         deleteRenderBuffers(_shader: typeof Shader): void;
         getVertexCount(): number;
@@ -3202,9 +3201,9 @@ declare namespace FudgeCore {
      */
     class MeshExtrusion extends MeshPolygon {
         static readonly iSubclass: number;
-        protected static transformsDefault: Matrix4x4[];
-        private transforms;
-        constructor(_name?: string, _vertices?: Vector2[], _transforms?: Matrix4x4[], _fitMesh?: boolean, _fitTexture?: boolean);
+        protected static mtxDefaults: Matrix4x4[];
+        private mtxTransforms;
+        constructor(_name?: string, _vertices?: Vector2[], _mtxTransforms?: Matrix4x4[], _fitMesh?: boolean, _fitTexture?: boolean);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;

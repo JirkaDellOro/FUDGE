@@ -132,7 +132,7 @@ namespace FudgeCore {
 
       if (_calculateTransforms)
         this.calculateTransforms();
-      Render.clear(this.camera.backgroundColor);
+      Render.clear(this.camera.clrBackground);
       Render.draw(this.camera);
 
       this.#crc2.imageSmoothingEnabled = false;
@@ -147,10 +147,10 @@ namespace FudgeCore {
      * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the [[Node]]s and [[ComponentMesh]]es 
      */
     public calculateTransforms(): void {
-      let matrix: Matrix4x4 = Matrix4x4.IDENTITY();
+      let mtxRoot: Matrix4x4 = Matrix4x4.IDENTITY();
       if (this.#branch.getParent())
-        matrix = this.#branch.getParent().mtxWorld;
-      Render.prepare(this.#branch, matrix);
+        mtxRoot = this.#branch.getParent().mtxWorld;
+      Render.prepare(this.#branch, mtxRoot);
     }
 
 
@@ -195,8 +195,8 @@ namespace FudgeCore {
       let ray: Ray = new Ray(new Vector3(-posProjection.x, posProjection.y, 1));
 
       // ray.direction.scale(camera.distance);
-      ray.origin.transform(this.camera.pivot);
-      ray.direction.transform(this.camera.pivot, false);
+      ray.origin.transform(this.camera.mtxPivot);
+      ray.direction.transform(this.camera.mtxPivot, false);
       let cameraNode: Node = this.camera.getContainer();
       if (cameraNode) {
         ray.origin.transform(cameraNode.mtxWorld);

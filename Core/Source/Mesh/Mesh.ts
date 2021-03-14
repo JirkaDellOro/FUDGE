@@ -109,7 +109,7 @@ namespace FudgeCore {
     }
 
 
-    public useRenderBuffers(_shader: typeof Shader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void {/* injected by RenderInjector*/ }
+    public useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): void {/* injected by RenderInjector*/ }
     public createRenderBuffers(): void {/* injected by RenderInjector*/ }
     public deleteRenderBuffers(_shader: typeof Shader): void {/* injected by RenderInjector*/ }
 

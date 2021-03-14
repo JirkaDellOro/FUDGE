@@ -24,8 +24,8 @@ namespace FudgeCore {
     private captures: MapEventTypeToListener = {};
     private active: boolean = true;
 
-    private worldInverseUpdated: number;
-    private worldInverse: Matrix4x4;
+    private ƒmtxWorldInverseUpdated: number;
+    private ƒmtxWorldInverse: Matrix4x4;
 
     /**
      * Creates a new node with a name and initializes all attributes
@@ -52,15 +52,15 @@ namespace FudgeCore {
      * Fails if no [[ComponentTransform]] is attached
      */
     public get mtxLocal(): Matrix4x4 {
-      return this.cmpTransform.local;
+      return this.cmpTransform.mtxLocal;
     }
 
     public get mtxWorldInverse(): Matrix4x4 {
-      if (this.worldInverseUpdated != this.timestampUpdate)
-        this.worldInverse = Matrix4x4.INVERSION(this.mtxWorld);
+      if (this.ƒmtxWorldInverseUpdated != this.timestampUpdate)
+        this.ƒmtxWorldInverse = Matrix4x4.INVERSION(this.mtxWorld);
 
-      this.worldInverseUpdated = this.timestampUpdate;
-      return this.worldInverse;
+      this.ƒmtxWorldInverseUpdated = this.timestampUpdate;
+      return this.ƒmtxWorldInverse;
     }
 
     /**

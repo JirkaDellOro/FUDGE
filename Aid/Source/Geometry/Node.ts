@@ -20,7 +20,7 @@ namespace FudgeAid {
 
     public get pivot(): ƒ.Matrix4x4 {
       let cmpMesh: ƒ.ComponentMesh = this.getComponent(ƒ.ComponentMesh);
-      return cmpMesh ? cmpMesh.pivot : null;
+      return cmpMesh ? cmpMesh.mtxPivot : null;
     }
 
     public async deserialize(_serialization: ƒ.Serialization): Promise<ƒ.Serializable> {

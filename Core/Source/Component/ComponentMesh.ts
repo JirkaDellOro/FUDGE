@@ -5,7 +5,7 @@ namespace FudgeCore {
    */
   export class ComponentMesh extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentMesh);
-    public pivot: Matrix4x4 = Matrix4x4.IDENTITY();
+    public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
     public mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY();
     public mesh: Mesh = null;
 
@@ -40,7 +40,7 @@ namespace FudgeCore {
       else
         serialization = { mesh: Serializer.serialize(this.mesh) };
 
-      serialization.pivot = this.pivot.serialize();
+      serialization.pivot = this.mtxPivot.serialize();
       serialization[super.constructor.name] = super.serialize();
       return serialization;
     }
@@ -53,7 +53,7 @@ namespace FudgeCore {
         mesh = <Mesh>await Serializer.deserialize(_serialization.mesh);
       this.mesh = mesh;
 
-      this.pivot.deserialize(_serialization.pivot);
+      this.mtxPivot.deserialize(_serialization.pivot);
       super.deserialize(_serialization[super.constructor.name]);
       return this;
     }

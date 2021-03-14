@@ -30,7 +30,7 @@ namespace FudgeCore {
   export class ComponentAudio extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentAudio);
     /** places and directs the panner relative to the world transform of the [[Node]]  */
-    public pivot: Matrix4x4 = Matrix4x4.IDENTITY();
+    public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
 
     protected singleton: boolean = false;
 
@@ -267,9 +267,9 @@ namespace FudgeCore {
      * Updates the panner node, its position and direction, using the worldmatrix of the container and the pivot of this component. 
      */
     private update = (_event: Event): void => {
-      let mtxResult: Matrix4x4 = this.pivot;
+      let mtxResult: Matrix4x4 = this.mtxPivot;
       if (this.getContainer())
-        mtxResult = Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.pivot);
+        mtxResult = Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.mtxPivot);
 
       // Debug.log(mtxResult.toString());
       let position: Vector3 = mtxResult.translation;

@@ -17,7 +17,7 @@ namespace Fudge {
     private id: number;
 
     constructor(_container: GoldenLayout.Container, _state: Object) {
-      this.dom = document.createElement("div");
+      this.dom = document.createElement("div"); 
       this.dom.style.height = "100%";
       this.dom.style.overflow = "auto";
       this.dom.setAttribute("view", this.constructor.name);

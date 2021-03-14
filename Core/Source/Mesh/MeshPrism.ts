@@ -14,7 +14,7 @@ namespace FudgeCore {
     public static readonly iSubclass: number = Mesh.registerSubclass(MeshPrism);
 
     public constructor(_name: string = "MeshPrism", _vertices: Vector2[] = MeshPolygon.verticesDefault, _fitMesh: boolean = true, _fitTexture: boolean = true) {
-      super(_name, _vertices, MeshExtrusion.transformsDefault, _fitMesh, _fitTexture);
+      super(_name, _vertices, MeshExtrusion.mtxDefaults, _fitMesh, _fitTexture);
     }
 
     //#region Transfer

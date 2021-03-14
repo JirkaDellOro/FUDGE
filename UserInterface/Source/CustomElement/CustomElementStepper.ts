@@ -289,7 +289,7 @@ namespace FudgeUserInterface {
         let value: number = this.value * Math.pow(10, _amount);
         console.log(value, this.value);
         if (isFinite(value))
-          this.value = value;
+          this.value = value; 
         this.display();
         return;
       }
