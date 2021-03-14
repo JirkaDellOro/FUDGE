@@ -85,12 +85,12 @@
       "type": "MeshRotation",
       "shape": {
         "ƒ.Vector2": [
-          "[0.0, 0.75]",
-          "[0.3, 0.7]",
-          "[0.4, 0.6]",
+          "[0, 0.75]",
+          "[0.30000001192092896, 0.699999988079071]",
+          "[0.4000000059604645, 0.6000000238418579]",
           "[0.5, 0.5]",
           "[0.5, -0.5]",
-          "[0.1, -0.7]"
+          "[0.10000000149011612, -0.699999988079071]"
         ]
       },
       "fitMesh": false,
@@ -112,7 +112,7 @@
               },
               "light": {
                 "ƒ.LightDirectional": {
-                  "color": "[0.0, 1.0, 0.0, 1]"
+                  "color": "[0, 1, 0, 1]"
                 }
               }
             }
@@ -170,6 +170,7 @@
               "ComponentMaterial": [
                 {
                   "ƒ.ComponentMaterial": {
+                    "sortForAlpha": false,
                     "clrPrimary": "[1, 1, 1, 1]",
                     "clrSecondary": "[1, 1, 1, 1]",
                     "pivot": {
@@ -224,12 +225,13 @@
               "ComponentMaterial": [
                 {
                   "ƒ.ComponentMaterial": {
+                    "sortForAlpha": false,
                     "clrPrimary": "[1, 1, 1, 1]",
                     "clrSecondary": "[1, 1, 1, 1]",
                     "pivot": {
-                      "translation": "[0, 0]",
+                      "translation": "[8.420001029968262, -0.30000001192092896]",
                       "rotation": 0,
-                      "scaling": "[1, 1]"
+                      "scaling": "[3.1000001430511475, 4.399999618530273]"
                     },
                     "Component": {
                       "active": true
@@ -278,6 +280,7 @@
               "ComponentMaterial": [
                 {
                   "ƒ.ComponentMaterial": {
+                    "sortForAlpha": false,
                     "clrPrimary": "[1, 1, 1, 1]",
                     "clrSecondary": "[1, 1, 1, 1]",
                     "pivot": {

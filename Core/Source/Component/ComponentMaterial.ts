@@ -22,7 +22,7 @@ namespace FudgeCore {
     //#region Transfer
     public serialize(): Serialization {
       let serialization: Serialization = {
-        sortForAlphathis: this.sortForAlpha,
+        sortForAlpha: this.sortForAlpha,
         clrPrimary: this.clrPrimary.serialize(),
         clrSecondary: this.clrSecondary.serialize(),
         pivot: this.mtxPivot.serialize(),
