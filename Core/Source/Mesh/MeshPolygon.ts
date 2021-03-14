@@ -1,6 +1,7 @@
 namespace FudgeCore {
   /**
-   * Generate a flat polygon
+   * Generate a flat polygon. All trigons share vertex 0, so careful design is required to create concave polygons. 
+   * Vertex 0 is also associated with the face normal.
    * ```plaintext
    *             0 
    *           1╱|╲  4 ...
@@ -17,47 +18,43 @@ namespace FudgeCore {
       new Vector2(0, 1)
     ];
     protected shape: MutableArray<Vector2> = new MutableArray<Vector2>();
-    // protected shape: MutableArray<Vector2> = new MutableArray(Vector2);
-    protected fitMesh: boolean;
     protected fitTexture: boolean;
 
-    public constructor(_name: string = "MeshPolygon", _shape: Vector2[] = MeshPolygon.verticesDefault, _fitMesh: boolean = true, _fitTexture: boolean = true) {
+    public constructor(_name: string = "MeshPolygon", _shape: Vector2[] = MeshPolygon.verticesDefault, _fitTexture: boolean = true) {
       super(_name);
-      this.create(_shape, _fitMesh, _fitTexture);
+      this.create(_shape, _fitTexture);
     }
 
-    private static fitMesh(_vertices: Vector2[]): Vector2[] {
-      let result: Vector2[] = [];
-      let min: Vector2 = Vector2.ZERO();
-      let max: Vector2 = Vector2.ZERO();
-      for (let vertex of _vertices) {
-        min.x = Math.min(min.x, vertex.x);
-        max.x = Math.max(max.x, vertex.x);
-        min.y = Math.min(min.y, vertex.y);
-        max.y = Math.max(max.y, vertex.y);
-      }
-      let center: Vector2 = new Vector2((min.x + max.x) / 2, (min.y + max.y) / 2);
-      let size: Vector2 = new Vector2(max.x - min.x, max.y - min.y);
+    // private static fitMesh(_vertices: Vector2[]): Vector2[] {
+    //   let result: Vector2[] = [];
+    //   let min: Vector2 = Vector2.ZERO();
+    //   let max: Vector2 = Vector2.ZERO();
+    //   for (let vertex of _vertices) {
+    //     min.x = Math.min(min.x, vertex.x);
+    //     max.x = Math.max(max.x, vertex.x);
+    //     min.y = Math.min(min.y, vertex.y);
+    //     max.y = Math.max(max.y, vertex.y);
+    //   }
+    //   let center: Vector2 = new Vector2((min.x + max.x) / 2, (min.y + max.y) / 2);
+    //   let size: Vector2 = new Vector2(max.x - min.x, max.y - min.y);
 
-      for (let vertex of _vertices) {
-        let adjusted: Vector2 = Vector2.DIFFERENCE(vertex, center);
-        adjusted.x /= size.x;
-        adjusted.y /= size.y;
-        result.push(adjusted);
-      }
+    //   for (let vertex of _vertices) {
+    //     let adjusted: Vector2 = Vector2.DIFFERENCE(vertex, center);
+    //     adjusted.x /= size.x;
+    //     adjusted.y /= size.y;
+    //     result.push(adjusted);
+    //   }
 
-      return result;
-    }
+    //   return result;
+    // }
 
     protected get minVertices(): number {
       return 3;
     }
 
-    public create(_shape: Vector2[] = [], _fitMesh: boolean = true, _fitTexture: boolean = true): void {
+    public create(_shape: Vector2[] = [], _fitTexture: boolean = true): void {
       this.shape = <MutableArray<Vector2>>MutableArray.from(_shape.map(_vertex => _vertex.copy));
       this.clear();
-
-      this.fitMesh = _fitMesh;
       this.fitTexture = _fitTexture;
 
       if (_shape.length < this.minVertices) {
@@ -66,7 +63,7 @@ namespace FudgeCore {
         return;
       }
 
-      let shape: Vector2[] = this.fitMesh ? MeshPolygon.fitMesh(_shape) : _shape;
+      let shape: Vector2[] = _shape;
 
       let min: Vector2 = Vector2.ZERO();
       let max: Vector2 = Vector2.ZERO();
@@ -108,20 +105,19 @@ namespace FudgeCore {
     public serialize(): Serialization {
       let serialization: Serialization = super.serialize();
       serialization.shape = Serializer.serializeArray(Vector2, this.shape);
-      serialization.fitMesh = this.fitMesh;
       serialization.fitTexture = this.fitTexture;
       return serialization;
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       super.deserialize(_serialization);
       let vectors: Vector2[] = <Vector2[]>await Serializer.deserializeArray(_serialization.shape);
-      this.create(vectors, _serialization.fitMesh, _serialization.fitTexture);
+      this.create(vectors, _serialization.fitTexture);
       return this;
     }
 
     public async mutate(_mutator: Mutator): Promise<void> {
       await super.mutate(_mutator);
-      this.create(this.shape, _mutator.fitMesh, _mutator.fitTexture);
+      this.create(this.shape, _mutator.fitTexture);
       this.dispatchEvent(new Event(EVENT.MUTATE));
     }
 
@@ -136,6 +132,6 @@ namespace FudgeCore {
         indices.push(0, i - 1, i);
       return new Uint16Array(indices);
     }
-    
+
   }
 }

@@ -3161,7 +3161,8 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Generate a flat polygon
+     * Generate a flat polygon. All trigons share vertex 0, so careful design is required to create concave polygons.
+     * Vertex 0 is also associated with the face normal.
      * ```plaintext
      *             0
      *           1╱|╲  4 ...
@@ -3174,12 +3175,10 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         protected static verticesDefault: Vector2[];
         protected shape: MutableArray<Vector2>;
-        protected fitMesh: boolean;
         protected fitTexture: boolean;
-        constructor(_name?: string, _shape?: Vector2[], _fitMesh?: boolean, _fitTexture?: boolean);
-        private static fitMesh;
+        constructor(_name?: string, _shape?: Vector2[], _fitTexture?: boolean);
         protected get minVertices(): number;
-        create(_shape?: Vector2[], _fitMesh?: boolean, _fitTexture?: boolean): void;
+        create(_shape?: Vector2[], _fitTexture?: boolean): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;
@@ -3203,7 +3202,7 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         protected static mtxDefaults: Matrix4x4[];
         private mtxTransforms;
-        constructor(_name?: string, _vertices?: Vector2[], _mtxTransforms?: Matrix4x4[], _fitMesh?: boolean, _fitTexture?: boolean);
+        constructor(_name?: string, _vertices?: Vector2[], _mtxTransforms?: Matrix4x4[], _fitTexture?: boolean);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;
@@ -3229,25 +3228,6 @@ declare namespace FudgeCore {
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * Generates a prism which is a simple extrusion of a polygon
-     * ```plaintext
-     *             _______
-     * Polygon  → ╱ ╲_____╲ ← Polygon
-     *            ╲_╱_____╱
-     *            Z-Length = 1
-     * ```
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2021
-     */
-    class MeshPrism extends MeshExtrusion {
-        static readonly iSubclass: number;
-        constructor(_name?: string, _vertices?: Vector2[], _fitMesh?: boolean, _fitTexture?: boolean);
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
-        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace FudgeCore {
@@ -3299,7 +3279,7 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         protected static verticesDefault: Vector2[];
         private sectors;
-        constructor(_name?: string, _vertices?: Vector2[], _sectors?: number, _fitMesh?: boolean, _fitTexture?: boolean);
+        constructor(_name?: string, _vertices?: Vector2[], _sectors?: number, _fitTexture?: boolean);
         protected get minVertices(): number;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;

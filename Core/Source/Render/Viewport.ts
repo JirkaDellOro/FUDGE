@@ -107,7 +107,6 @@ namespace FudgeCore {
      * Logs this viewports scenegraph to the console.
      */
     public showSceneGraph(): void {
-      // TODO: move to debug-class
       let output: string = "SceneGraph for this viewport:";
       output += "\n \n";
       output += this.#branch.name;

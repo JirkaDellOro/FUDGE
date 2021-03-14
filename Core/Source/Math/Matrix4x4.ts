@@ -524,7 +524,7 @@ namespace FudgeCore {
       difference.normalize();
       let cos: number = Vector3.DOT(Vector3.NORMALIZATION(this.getZ()), difference);
       let sin: number = Vector3.DOT(Vector3.NORMALIZATION(this.getX()), difference);
-      console.log(sin, cos);
+      // console.log(sin, cos);
       let mtxRotation: Matrix4x4 = Recycler.borrow(Matrix4x4);
       mtxRotation.data.set([
         cos, 0, -sin, 0,
@@ -536,7 +536,7 @@ namespace FudgeCore {
 
       cos = Vector3.DOT(Vector3.NORMALIZATION(this.getZ()), difference);
       sin = -Vector3.DOT(Vector3.NORMALIZATION(this.getY()), difference);
-      console.log(sin, cos);
+      // console.log(sin, cos);
       mtxRotation.data.set([
         1, 0, 0, 0,
         0, cos, sin, 0,

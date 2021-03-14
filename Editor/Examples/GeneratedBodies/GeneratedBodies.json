@@ -12,7 +12,6 @@
           "[0, 1]"
         ]
       },
-      "fitMesh": false,
       "fitTexture": false
     }
   },
@@ -29,7 +28,6 @@
           "[-1, 1]"
         ]
       },
-      "fitMesh": true,
       "fitTexture": true,
       "transforms": {
         "ƒ.Matrix4x4": [
@@ -93,7 +91,6 @@
           "[0.10000000149011612, -0.699999988079071]"
         ]
       },
-      "fitMesh": false,
       "fitTexture": true,
       "sectors": 13
     }

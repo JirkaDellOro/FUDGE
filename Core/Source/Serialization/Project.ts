@@ -181,7 +181,7 @@ namespace FudgeCore {
       // script.addEventListener("load", handleLoadedScript)
       let head: HTMLHeadElement = document.head;
       head.appendChild(script);
-      console.log("Loading: ", _url);
+      Debug.log("Loading: ", _url);
 
       return new Promise((resolve, reject) => {
         script.addEventListener("load", () => resolve());

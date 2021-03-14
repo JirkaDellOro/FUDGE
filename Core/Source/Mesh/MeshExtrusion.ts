@@ -20,8 +20,8 @@ namespace FudgeCore {
     private mtxTransforms: MutableArray<Matrix4x4> = new MutableArray<Matrix4x4>();
     // private transforms: MutableArray<Matrix4x4> = new MutableArray(Matrix4x4);
 
-    public constructor(_name: string = "MeshExtrusion", _vertices: Vector2[] = MeshPolygon.verticesDefault, _mtxTransforms: Matrix4x4[] = MeshExtrusion.mtxDefaults, _fitMesh: boolean = true, _fitTexture: boolean = true) {
-      super(_name, _vertices, _fitMesh, _fitTexture);
+    public constructor(_name: string = "MeshExtrusion", _vertices: Vector2[] = MeshPolygon.verticesDefault, _mtxTransforms: Matrix4x4[] = MeshExtrusion.mtxDefaults, _fitTexture: boolean = true) {
+      super(_name, _vertices, _fitTexture);
       this.extrude(_mtxTransforms);
       // console.log("Mutator", this.getMutator());
     }
@@ -104,8 +104,6 @@ namespace FudgeCore {
         for (let i: number = 0; i < nVerticesPolygon; i++) {
           // let index: number = i + (2 + t) * nVerticesPolygon + t;
           let index: number = i + 2 * nVerticesPolygon + 2 * t * (nVerticesPolygon + 1);
-          if (i == 0)
-            console.log("Start", index, t);
           indices.push(...Mesh.getTrigonsFromQuad([index, index + nVerticesPolygon + 1, index + nVerticesPolygon + 2, index + 1], false));
         }
 
