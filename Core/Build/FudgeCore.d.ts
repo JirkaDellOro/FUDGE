@@ -4974,6 +4974,7 @@ declare namespace FudgeCore {
         getBranch(): Node;
         /**
          * Logs this viewports scenegraph to the console.
+         * TODO: remove this method, since it's implemented in Debug
          */
         showSceneGraph(): void;
         /**

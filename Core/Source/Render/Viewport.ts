@@ -105,12 +105,10 @@ namespace FudgeCore {
 
     /**
      * Logs this viewports scenegraph to the console.
+     * TODO: remove this method, since it's implemented in Debug
      */
     public showSceneGraph(): void {
-      let output: string = "SceneGraph for this viewport:";
-      output += "\n \n";
-      output += this.#branch.name;
-      Debug.log(output + "   => ROOTNODE" + this.#branch.toHierarchyString());
+      Debug.branch(this.#branch);
     }
 
     // #region Drawing
