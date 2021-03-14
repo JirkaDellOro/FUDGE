@@ -31,7 +31,9 @@ namespace Fudge {
 
       // TODO see if we can make this work without a new fieldset for every vertex
       for (let selectedVertex of selection) {
-        let fieldset: ƒui.ExpandableFieldSet = ƒui.Generator.createFieldSetFromMutable(_vertices[selectedVertex], selectedVertex.toString());
+        // TODO check if this really works
+        let fieldset: ƒui.Details = ƒui.Generator.createDetailsFromMutable(_vertices[selectedVertex], selectedVertex.toString());
+//        let fieldset: ƒui.ExpandableFieldSet = ƒui.Generator.createFieldSetFromMutable(_vertices[selectedVertex], selectedVertex.toString());
         let uiComponent: ControllerVertices = new ControllerVertices(_vertices[selectedVertex], fieldset);
         uiComponent.node = this.currentNode;
   

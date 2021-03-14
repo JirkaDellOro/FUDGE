@@ -125,14 +125,14 @@ namespace Fudge {
             normalArrow.mtxLocal.rotateX(90);
           }
         }
-        this.viewport.getGraph().addChild(normalArrow);
+        this.viewport.getBranch().addChild(normalArrow);
       }
       InteractionMode.normalsAreDisplayed = true;
     }
 
     protected removeNormalArrows(): void {
-      for (let node of this.viewport.getGraph().getChildrenByName("normal")) {
-        this.viewport.getGraph().removeChild(node);
+      for (let node of this.viewport.getBranch().getChildrenByName("normal")) {
+        this.viewport.getBranch().removeChild(node);
       }
       InteractionMode.normalsAreDisplayed = false;
     }

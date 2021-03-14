@@ -8,7 +8,7 @@ namespace Fudge {
       return this.componentToAxisMap.get(_component);
     }
 
-    public abstract isHitWidgetComponent(_hits: ƒ.RayHit[]): {axis: AXIS, additionalNodes: ƒ.Node[]};
+    public abstract isHitWidgetComponent(_hits: ƒ.Pick[]): {axis: AXIS, additionalNodes: ƒ.Node[]};
 
     public releaseComponent(pickedComponent: ƒ.Node = this.pickedComponent): void {
       pickedComponent.getComponent(ƒ.ComponentMaterial).clrPrimary = this.componentToOriginalColorMap.get(pickedComponent);

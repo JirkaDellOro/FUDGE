@@ -44,12 +44,18 @@ namespace FudgeAid {
         let posCamera: ƒ.Vector3 = camera.nodeCamera.mtxWorld.translation.copy;
 
         cntMouseHorizontal.setInput(_event.movementX);
-        cntMouseVertical.setInput(_event.movementY);
-        ƒ.Render.prepare(camera);
+        cntMouseVertical.setInput((_event.shiftKey ? -1 : 1) * _event.movementY);
 
-        if (_event.altKey || _event.buttons == 4) {
+        if (_showFocus)
+          focus.mtxLocal.translation = camera.mtxLocal.translation;
+        //_viewport.draw();
+        
+        if (_event.altKey && !_event.shiftKey) {
           let offset: ƒ.Vector3 = ƒ.Vector3.DIFFERENCE(posCamera, camera.nodeCamera.mtxWorld.translation);
+          // console.log(posCamera.toString(), camera.node.mtxWorld.translation.toString());
           camera.mtxLocal.translate(offset, false);
+          focus.mtxLocal.translation = camera.mtxLocal.translation;
+          //_viewport.draw();
         }
 
         redraw();
@@ -62,11 +68,9 @@ namespace FudgeAid {
           return;
         picks.sort((_a: ƒ.Pick, _b: ƒ.Pick) => _a.zBuffer < _b.zBuffer ? -1 : 1);
 
-        let posCamera: ƒ.Vector3 = camera.nodeCamera.mtxWorld.translation;
-        camera.mtxLocal.translation = picks[0].posWorld;
-        ƒ.Render.prepare(camera);
-        camera.positionCamera(posCamera);
-        redraw();
+        if (_showFocus)
+          focus.mtxLocal.translation = camera.mtxLocal.translation;
+        //_viewport.draw();
       }
 
       function hndWheelMove(_event: WheelEvent): void {

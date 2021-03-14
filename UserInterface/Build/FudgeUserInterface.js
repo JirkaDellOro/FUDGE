@@ -1140,9 +1140,6 @@ var FudgeUserInterface;
                 _event.stopPropagation();
                 // let target: HTMLElement = <HTMLElement>_event.target;
                 switch (_event.code) {
-                    case ƒ.KEYBOARD_CODE.DELETE:
-                        this.dispatchEvent(new KeyboardEvent("delete" /* DELETE */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
-                        break;
                     case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
                         if (!this.isExpanded) {
                             this.expand(true);

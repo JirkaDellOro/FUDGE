@@ -4,7 +4,7 @@ namespace Fudge {
     private vertexSelected: boolean = false;
     constructor(viewport: ƒ.Viewport, editableNode: ƒ.Node, selection: Array<number>) {
       super(viewport, editableNode);
-      this.selector = new Selector(this.editableNode, this.viewport.camera.pivot.translation);
+      this.selector = new Selector(this.editableNode, this.viewport.camera.mtxPivot.translation);
       this.availableMenuitems.set(MODELLER_MENU.INVERT_FACE, this.invertFace.bind(this));
       this.availableMenuitems.set(MODELLER_MENU.REMOVE_FACE, this.removeFace.bind(this));
     }

@@ -14,14 +14,13 @@ namespace Fudge {
       let mtx: ƒ.Matrix4x4 = new ƒ.Matrix4x4();
       mtx.translation = mtx.translation = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection);
       widget.addComponent(new ƒ.ComponentTransform(mtx));
-      this.viewport.getGraph().addChild(widget);
+      this.viewport.getBranch().addChild(widget);
       this.axesSelectionHandler = new AxesSelectionHandler(widget);
     }
 
     onmousedown(_event: ƒ.EventPointer): void {
-      let posRender: ƒ.Vector2 = this.getPosRenderFrom(_event);
-      this.viewport.createPickBuffers();
-      this.axesSelectionHandler.pickWidget(this.viewport.pickNodeAt(posRender));
+      //let posRender: ƒ.Vector2 = this.getPosRenderFrom(_event);
+      this.axesSelectionHandler.pickWidget(ƒ.Picker.pickViewport(this.viewport, new ƒ.Vector2(_event.canvasX, _event.canvasY)));
 
       if (this.axesSelectionHandler.wasPicked || this.axesSelectionHandler.isAxisSelectedViaKeyboard()) {
         this.setValues(_event);
@@ -93,7 +92,7 @@ namespace Fudge {
 
 
     cleanup(): void {
-      this.viewport.getGraph().removeChild(this.axesSelectionHandler.widget);
+      this.viewport.getBranch().removeChild(this.axesSelectionHandler.widget);
     }
 
     private setValues(_event: ƒ.EventPointer): void {

@@ -8,7 +8,7 @@ namespace Fudge {
     /* 
       maps MODELLER_MENU to the accelerator key
       incase someone wants to add a menu item: 
-      1. add one entry with MODELLER_MENU, shortcut in to this map
+      1. add one entry with MODELLER_MENU, shortcut to this map
       2. add one entry with MODELLER_MENU, function to the availableModes map in the desired interaction mode
       3. add one function here, which creates an item for the MODELLER_MENU value
       rest should be automatic
@@ -84,10 +84,16 @@ namespace Fudge {
       this.viewport = new ƒ.Viewport();
       this.viewport.initialize("Viewport", this.graph, cmpCamera, this.canvas);
       this.viewport.draw();
-      this.orbitCamera =  ƒaid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false, -0.15, -0.005, 0.003);
-      this.orbitCamera.rotateX(-30);
-      this.orbitCamera.rotateY(45);
+      this.orbitCamera = ƒaid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false, -0.15, -0.005, 0.003);
+      // this.orbitCamera.rotateX(-30);
+      // this.orbitCamera.rotateY(45);
+      // this.orbitCamera.distance = 5;
+
+      this.orbitCamera.rotationX = -30;
+      this.orbitCamera.rotationY = 45;
       this.orbitCamera.distance = 5;
+      ƒ.Render.prepare(this.orbitCamera);
+
     } 
 
     /* 
@@ -117,7 +123,8 @@ namespace Fudge {
     }
 
     private animate = (_e: Event) => {
-      this.viewport.setGraph(this.graph);
+      this.viewport.setBranch(this.graph);
+      //this.viewport.setGraph(this.graph);
       if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
         this.viewport.draw();
       this.controller.drawSelection();
@@ -167,6 +174,7 @@ namespace Fudge {
     private onkeydown = (_event: ƒ.EventKeyboard): void => {
       this.controller.onkeydown(_event);
 
+      let isRotated: boolean = true;
       switch (_event.key) {
         case "1":
           this.orbitCamera.rotationX = 0;
@@ -184,7 +192,11 @@ namespace Fudge {
           this.orbitCamera.rotationX = 90;
           this.orbitCamera.rotationY = 0;
           break;
+        default: 
+          isRotated = false;
       }
+      if (isRotated)
+        ƒ.Render.prepare(this.orbitCamera);
     }
 
     private onkeyup = (_event: ƒ.EventKeyboard): void => {

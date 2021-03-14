@@ -19,7 +19,7 @@ namespace Fudge {
       this.fillColorDict();
     }
 
-    public isHitWidgetComponent(_hits: ƒ.RayHit[]): {axis: AXIS, additionalNodes: ƒ.Node[]} {
+    public isHitWidgetComponent(_hits: ƒ.Pick[]): {axis: AXIS, additionalNodes: ƒ.Node[]} {
       let additionalNodes: ƒ.Node[] = [];
       let lowestZBuffer: number = Number.MAX_VALUE;
       let wasPicked: boolean = false;

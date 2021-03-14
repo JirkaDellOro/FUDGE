@@ -9,10 +9,10 @@ namespace FudgeCore {
       let path: URL = new URL(_url.toString(), Project.baseURL);
       const response: Response = await window.fetch(path.toString());
       const json = await response.json();
-      this.vertices = new Float32Array(json.vertices);
-      this.indices = new Uint16Array(json.indices);
-      this.textureUVs = new Float32Array(json.textureCoordinates);
-      this.normalsFace = new Float32Array(json.normals);
+      this.ƒvertices = new Float32Array(json.vertices);
+      this.ƒindices = new Uint16Array(json.indices);
+      this.ƒtextureUVs = new Float32Array(json.textureCoordinates);
+      this.ƒnormalsFace = new Float32Array(json.normals);
       this.createRenderBuffers();
     }
 

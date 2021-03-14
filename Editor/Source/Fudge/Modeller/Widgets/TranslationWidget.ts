@@ -13,8 +13,8 @@ namespace Fudge {
       this.componentToAxisMap.set(arrowGreen, AXIS.Y);
       this.componentToAxisMap.set(arrowBlue, AXIS.Z);
 
-      arrowRed.mtxLocal.rotateZ(-90);
-      arrowBlue.mtxLocal.rotateX(90);
+      arrowRed.mtxLocal.rotateY(90);
+      arrowGreen.mtxLocal.rotateX(-90);
 
       this.addChild(arrowRed);
       this.addChild(arrowGreen);
@@ -22,7 +22,7 @@ namespace Fudge {
       this.fillColorDict();
     }
 
-    public isHitWidgetComponent(_hits: ƒ.RayHit[]): {axis: AXIS, additionalNodes: ƒ.Node[]} {
+    public isHitWidgetComponent(_hits: ƒ.Pick[]): {axis: AXIS, additionalNodes: ƒ.Node[]} {
       let additionalNodes: ƒ.Node[] = [];
       let lowestZBuffer: number = Number.MAX_VALUE;
       let pickedAxis: AXIS;

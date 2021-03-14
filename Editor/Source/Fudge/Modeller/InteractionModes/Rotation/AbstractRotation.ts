@@ -15,15 +15,13 @@ namespace Fudge {
       let mtx: ƒ.Matrix4x4 = new ƒ.Matrix4x4();
       mtx.translation = (<ModifiableMesh> this.editableNode.getComponent(ƒ.ComponentMesh).mesh).getCentroid(this.selection);
       widget.addComponent(new ƒ.ComponentTransform(mtx));
-      this.viewport.getGraph().addChild(widget);
+      this.viewport.getBranch().addChild(widget);
       this.axesSelectionHandler = new AxesSelectionHandler(widget);
     }
 
     onmousedown(_event: ƒ.EventPointer): void {
-      this.viewport.createPickBuffers();
-      let posRender: ƒ.Vector2 = this.getPosRenderFrom(_event);
       this.previousMousePos = new ƒ.Vector2(_event.clientX, _event.clientY);
-      this.axesSelectionHandler.pickWidget(this.viewport.pickNodeAt(posRender));
+      this.axesSelectionHandler.pickWidget(ƒ.Picker.pickViewport(this.viewport, new ƒ.Vector2(_event.canvasX, _event.canvasY)));
     }
 
     onmouseup(_event: ƒ.EventPointer): string {
@@ -70,7 +68,7 @@ namespace Fudge {
     }
 
     cleanup(): void {
-      this.viewport.getGraph().removeChild(this.axesSelectionHandler.widget);
+      this.viewport.getBranch().removeChild(this.axesSelectionHandler.widget);
     }
     /* 
       calculate the angle between the old and the new mouseposition in clientspace in relation to the centroid

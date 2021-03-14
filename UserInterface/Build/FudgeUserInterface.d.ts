@@ -325,6 +325,14 @@ declare namespace FudgeUserInterface {
     }
 }
 declare namespace FudgeUserInterface {
+    import ƒ = FudgeCore;
+    class CustomElementVector3 extends CustomElementTemplate {
+        getMutatorValue(): ƒ.Mutator;
+        setMutatorValue(_mutator: ƒ.Mutator): void;
+        protected connectedCallback(): void;
+    }
+}
+declare namespace FudgeUserInterface {
     class Details extends HTMLDetailsElement {
         content: HTMLDivElement;
         constructor(_legend: string, _type: string);
@@ -349,14 +357,6 @@ declare namespace FudgeUserInterface {
         private hndDragOver;
         private hndDrop;
         private hndkey;
-    }
-}
-declare namespace FudgeUserInterface {
-    import ƒ = FudgeCore;
-    class CustomElementVector3 extends CustomElementTemplate {
-        getMutatorValue(): ƒ.Mutator;
-        setMutatorValue(_mutator: ƒ.Mutator): void;
-        protected connectedCallback(): void;
     }
 }
 declare namespace FudgeUserInterface {

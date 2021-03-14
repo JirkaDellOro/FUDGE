@@ -29,7 +29,7 @@ namespace Fudge {
       }
     }
 
-    public pickWidget(_hits: ƒ.RayHit[]): ƒ.Node[] {
+    public pickWidget(_hits: ƒ.Pick[]): ƒ.Node[] {
       let result: {axis: AXIS, additionalNodes: ƒ.Node[]} = this._widget.isHitWidgetComponent(_hits);
       this.pickedAxis = result.axis;
       if (this.pickedAxis)

@@ -69,11 +69,11 @@ namespace FudgeCore {
           texCoords.push(t);
         }
       }       
-      this.vertices = new Float32Array(vertices);
+      this.ƒvertices = new Float32Array(vertices);
       this.normals = new Float32Array(normals);
-      this.textureUVs = new Float32Array(texCoords);
-      this.normalsFace = this.normals;
-      this.indices = this.createIndices();
+      this.ƒtextureUVs = new Float32Array(texCoords);
+      this.ƒnormalsFace = this.normals;
+      this.ƒindices = this.createIndices();
       this.createRenderBuffers();
     }
 
