@@ -246,7 +246,7 @@ namespace FudgeCore {
       try {
         let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
         let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
-        
+
         let coat: Coat = cmpMaterial.material.getCoat();
         let shader: typeof Shader = coat instanceof CoatTextured ? ShaderPickTextured : ShaderPick;
 
@@ -279,6 +279,7 @@ namespace FudgeCore {
       // Ambient
       let ambient: WebGLUniformLocation = uni["u_ambient.color"];
       if (ambient) {
+        RenderWebGL.crc3.uniform4fv(ambient, [0, 0, 0, 0]);
         let cmpLights: ComponentLight[] = _lights.get(LightAmbient);
         if (cmpLights) {
           // TODO: add up ambient lights to a single color
@@ -292,6 +293,7 @@ namespace FudgeCore {
       // Directional
       let nDirectional: WebGLUniformLocation = uni["u_nLightsDirectional"];
       if (nDirectional) {
+        RenderWebGL.crc3.uniform1ui(nDirectional, 0);
         let cmpLights: ComponentLight[] = _lights.get(LightDirectional);
         if (cmpLights) {
           let n: number = cmpLights.length;
