@@ -1,7 +1,7 @@
 namespace FudgeCore {
   /**
    * Attaches a [[Material]] to the node
-   * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+   * @authors Jirka Dell'Oro-Friedl, HFU, 2019 - 2021
    */
   export class ComponentMaterial extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentMaterial);
@@ -9,6 +9,8 @@ namespace FudgeCore {
     public clrPrimary: Color = Color.CSS("white");
     public clrSecondary: Color = Color.CSS("white");
     public pivot: Matrix3x3 = Matrix3x3.IDENTITY();
+    //** support sorting of objects with transparency when rendering, render objects in the back first */
+    public sortForAlpha: boolean = false;
     // public mutatorCoat: MutatorForComponent;
 
     public constructor(_material: Material = null) {
@@ -20,6 +22,7 @@ namespace FudgeCore {
     //#region Transfer
     public serialize(): Serialization {
       let serialization: Serialization = {
+        sortForAlphathis: this.sortForAlpha,
         clrPrimary: this.clrPrimary.serialize(),
         clrSecondary: this.clrSecondary.serialize(),
         pivot: this.pivot.serialize(),
@@ -43,6 +46,7 @@ namespace FudgeCore {
       this.material = material;
       this.clrPrimary.deserialize(_serialization.clrPrimary);
       this.clrSecondary.deserialize(_serialization.clrSecondary);
+      this.sortForAlpha = _serialization.sortForAlpha;
       this.pivot.deserialize(_serialization.pivot);
       super.deserialize(_serialization[super.constructor.name]);
       return this;

@@ -1,7 +1,7 @@
 namespace MouseToRay {
   import ƒ = FudgeCore;
   import ƒAid = FudgeAid;
-  ƒ.RenderManager.initialize(true);
+  ƒ.Render.initialize(true);
 
   window.addEventListener("load", init);
 

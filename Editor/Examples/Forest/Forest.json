@@ -56,21 +56,9 @@
           {
             "ƒ.ComponentLight": {
               "pivot": {
-                "translation": {
-                  "x": 0,
-                  "y": 0,
-                  "z": 0
-                },
-                "rotation": {
-                  "x": 0,
-                  "y": 0,
-                  "z": 0
-                },
-                "scaling": {
-                  "x": 1,
-                  "y": 1,
-                  "z": 1
-                }
+                "translation": "[0, 0, 0]",
+                "rotation": "[0, 0, 0]",
+                "scaling": "[1, 1, 1]"
               },
               "light": {
                 "ƒ.LightAmbient": {
@@ -82,21 +70,9 @@
           {
             "ƒ.ComponentLight": {
               "pivot": {
-                "translation": {
-                  "x": 0,
-                  "y": 0,
-                  "z": 0
-                },
-                "rotation": {
-                  "x": 46,
-                  "y": 16,
-                  "z": 0
-                },
-                "scaling": {
-                  "x": 1,
-                  "y": 1,
-                  "z": 1
-                }
+                "translation": "[0, 0, 0]",
+                "rotation": "[46, 16, 0]",
+                "scaling": "[1, 1, 1]"
               },
               "light": {
                 "ƒ.LightDirectional": {
@@ -118,15 +94,9 @@
                     "clrPrimary": "[1, 1, 1, 1]",
                     "clrSecondary": "[1, 1, 1, 1]",
                     "pivot": {
-                      "translation": {
-                        "x": 0,
-                        "y": 0
-                      },
+                      "translation": "[0, 0]",
                       "rotation": 0,
-                      "scaling": {
-                        "x": 1,
-                        "y": 1
-                      }
+                      "scaling": "[1, 1]"
                     },
                     "Component": {
                       "active": true
@@ -140,21 +110,9 @@
                   "ƒ.ComponentMesh": {
                     "idMesh": "MeshQuad|2020-11-03T14:12:08.998Z|43579",
                     "pivot": {
-                      "translation": {
-                        "x": 0,
-                        "y": 0,
-                        "z": 0
-                      },
-                      "rotation": {
-                        "x": 0,
-                        "y": 0,
-                        "z": 0
-                      },
-                      "scaling": {
-                        "x": 1,
-                        "y": 1,
-                        "z": 1
-                      }
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
                     },
                     "Component": {
                       "active": true
@@ -166,21 +124,9 @@
                 {
                   "ƒ.ComponentTransform": {
                     "local": {
-                      "translation": {
-                        "x": 0,
-                        "y": 0,
-                        "z": 0
-                      },
-                      "rotation": {
-                        "x": -90,
-                        "y": 0,
-                        "z": 0
-                      },
-                      "scaling": {
-                        "x": 9,
-                        "y": 9,
-                        "z": 1
-                      }
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[-90, 0, 0]",
+                      "scaling": "[9, 9, 1]"
                     },
                     "Component": {
                       "active": true
@@ -206,21 +152,9 @@
                         "ƒ.ComponentMesh": {
                           "idMesh": "MeshSphere|2020-11-03T14:20:01.094Z|85510",
                           "pivot": {
-                            "translation": {
-                              "x": 0,
-                              "y": 1.4999998807907104,
-                              "z": 0
-                            },
-                            "rotation": {
-                              "x": 0,
-                              "y": 0,
-                              "z": 0
-                            },
-                            "scaling": {
-                              "x": 1,
-                              "y": 1,
-                              "z": 1
-                            }
+                            "translation": "[0, 1.4999998807907104, 0]",
+                            "rotation": "[0, 0, 0]",
+                            "scaling": "[1, 1, 1]"
                           },
                           "Component": {
                             "active": true
@@ -234,15 +168,9 @@
                           "clrPrimary": "[0.35294117647058826, 0.7843137254901961, 0.19607843137254902, 1]",
                           "clrSecondary": "[1, 1, 1, 1]",
                           "pivot": {
-                            "translation": {
-                              "x": 0,
-                              "y": 0
-                            },
+                            "translation": "[0, 0]",
                             "rotation": 0,
-                            "scaling": {
-                              "x": 1,
-                              "y": 1
-                            }
+                            "scaling": "[1, 1]"
                           },
                           "Component": {
                             "active": true
@@ -264,21 +192,9 @@
                         "ƒ.ComponentMesh": {
                           "idMesh": "MeshPyramid|2020-11-03T14:16:46.689Z|55994",
                           "pivot": {
-                            "translation": {
-                              "x": 0,
-                              "y": 0,
-                              "z": 0
-                            },
-                            "rotation": {
-                              "x": 0,
-                              "y": 0,
-                              "z": 0
-                            },
-                            "scaling": {
-                              "x": 0.19999995827674866,
-                              "y": 2,
-                              "z": 0.19999998807907104
-                            }
+                            "translation": "[0, 0, 0]",
+                            "rotation": "[0, 0, 0]",
+                            "scaling": "[0.19999995827674866, 2, 0.19999998807907104]"
                           },
                           "Component": {
                             "active": true
@@ -292,15 +208,9 @@
                           "clrPrimary": "[0.3215686274509804, 0.1803921568627451, 0.11764705882352941, 1]",
                           "clrSecondary": "[1, 1, 1, 1]",
                           "pivot": {
-                            "translation": {
-                              "x": 0,
-                              "y": 0
-                            },
+                            "translation": "[0, 0]",
                             "rotation": 0,
-                            "scaling": {
-                              "x": 1,
-                              "y": 1
-                            }
+                            "scaling": "[1, 1]"
                           },
                           "Component": {
                             "active": true
@@ -326,21 +236,9 @@
                 {
                   "ƒ.ComponentTransform": {
                     "local": {
-                      "translation": {
-                        "x": 1,
-                        "y": 0,
-                        "z": 1
-                      },
-                      "rotation": {
-                        "x": 0,
-                        "y": 0,
-                        "z": 0
-                      },
-                      "scaling": {
-                        "x": 1,
-                        "y": 1,
-                        "z": 1
-                      }
+                      "translation": "[1, 0, 1]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
                     },
                     "Component": {
                       "active": true
@@ -359,21 +257,9 @@
                         "ƒ.ComponentMesh": {
                           "idMesh": "MeshSphere|2020-11-03T14:20:01.094Z|85510",
                           "pivot": {
-                            "translation": {
-                              "x": 0,
-                              "y": 1.4999998807907104,
-                              "z": 0
-                            },
-                            "rotation": {
-                              "x": 0,
-                              "y": 0,
-                              "z": 0
-                            },
-                            "scaling": {
-                              "x": 1,
-                              "y": 1,
-                              "z": 1
-                            }
+                            "translation": "[0, 1.4999998807907104, 0]",
+                            "rotation": "[0, 0, 0]",
+                            "scaling": "[1, 1, 1]"
                           },
                           "Component": {
                             "active": true
@@ -387,15 +273,9 @@
                           "clrPrimary": "[0.35294117647058826, 0.7843137254901961, 0.19607843137254902, 1]",
                           "clrSecondary": "[1, 1, 1, 1]",
                           "pivot": {
-                            "translation": {
-                              "x": 0,
-                              "y": 0
-                            },
+                            "translation": "[0, 0]",
                             "rotation": 0,
-                            "scaling": {
-                              "x": 1,
-                              "y": 1
-                            }
+                            "scaling": "[1, 1]"
                           },
                           "Component": {
                             "active": true
@@ -417,21 +297,9 @@
                         "ƒ.ComponentMesh": {
                           "idMesh": "MeshPyramid|2020-11-03T14:16:46.689Z|55994",
                           "pivot": {
-                            "translation": {
-                              "x": 0,
-                              "y": 0,
-                              "z": 0
-                            },
-                            "rotation": {
-                              "x": 0,
-                              "y": 0,
-                              "z": 0
-                            },
-                            "scaling": {
-                              "x": 0.19999995827674866,
-                              "y": 2,
-                              "z": 0.19999998807907104
-                            }
+                            "translation": "[0, 0, 0]",
+                            "rotation": "[0, 0, 0]",
+                            "scaling": "[0.19999995827674866, 2, 0.19999998807907104]"
                           },
                           "Component": {
                             "active": true
@@ -445,15 +313,9 @@
                           "clrPrimary": "[0.3215686274509804, 0.1803921568627451, 0.11764705882352941, 1]",
                           "clrSecondary": "[1, 1, 1, 1]",
                           "pivot": {
-                            "translation": {
-                              "x": 0,
-                              "y": 0
-                            },
+                            "translation": "[0, 0]",
                             "rotation": 0,
-                            "scaling": {
-                              "x": 1,
-                              "y": 1
-                            }
+                            "scaling": "[1, 1]"
                           },
                           "Component": {
                             "active": true
@@ -490,21 +352,9 @@
                   "ƒ.ComponentMesh": {
                     "idMesh": "MeshSphere|2020-11-03T14:20:01.094Z|85510",
                     "pivot": {
-                      "translation": {
-                        "x": 0,
-                        "y": 1.4999998807907104,
-                        "z": 0
-                      },
-                      "rotation": {
-                        "x": 0,
-                        "y": 0,
-                        "z": 0
-                      },
-                      "scaling": {
-                        "x": 1,
-                        "y": 1,
-                        "z": 1
-                      }
+                      "translation": "[0, 1.4999998807907104, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
                     },
                     "Component": {
                       "active": true
@@ -518,15 +368,9 @@
                     "clrPrimary": "[0.35294117647058826, 0.7843137254901961, 0.19607843137254902, 1]",
                     "clrSecondary": "[1, 1, 1, 1]",
                     "pivot": {
-                      "translation": {
-                        "x": 0,
-                        "y": 0
-                      },
+                      "translation": "[0, 0]",
                       "rotation": 0,
-                      "scaling": {
-                        "x": 1,
-                        "y": 1
-                      }
+                      "scaling": "[1, 1]"
                     },
                     "Component": {
                       "active": true
@@ -548,21 +392,9 @@
                   "ƒ.ComponentMesh": {
                     "idMesh": "MeshPyramid|2020-11-03T14:16:46.689Z|55994",
                     "pivot": {
-                      "translation": {
-                        "x": 0,
-                        "y": 0,
-                        "z": 0
-                      },
-                      "rotation": {
-                        "x": 0,
-                        "y": 0,
-                        "z": 0
-                      },
-                      "scaling": {
-                        "x": 0.19999995827674866,
-                        "y": 2,
-                        "z": 0.19999998807907104
-                      }
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[0.19999995827674866, 2, 0.19999998807907104]"
                     },
                     "Component": {
                       "active": true
@@ -576,15 +408,9 @@
                     "clrPrimary": "[0.3215686274509804, 0.1803921568627451, 0.11764705882352941, 1]",
                     "clrSecondary": "[1, 1, 1, 1]",
                     "pivot": {
-                      "translation": {
-                        "x": 0,
-                        "y": 0
-                      },
+                      "translation": "[0, 0]",
                       "rotation": 0,
-                      "scaling": {
-                        "x": 1,
-                        "y": 1
-                      }
+                      "scaling": "[1, 1]"
                     },
                     "Component": {
                       "active": true

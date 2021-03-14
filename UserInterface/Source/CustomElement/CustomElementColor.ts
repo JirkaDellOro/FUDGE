@@ -13,7 +13,7 @@ namespace FudgeUserInterface {
       if (!_attributes.label)
         this.setAttribute("label", _attributes.key);
 
-      this.addEventListener("keydown", this.hndKey);
+      this.addEventListener(EVENT.KEY_DOWN, this.hndKey);
     }
 
     /**
@@ -38,7 +38,7 @@ namespace FudgeUserInterface {
       slider.max = "1";
       slider.step = "0.01";
       this.appendChild(slider);
-      slider.addEventListener("wheel", this.hndWheel);
+      slider.addEventListener(EVENT.WHEEL, this.hndWheel);
     }
 
     /**
@@ -73,7 +73,7 @@ namespace FudgeUserInterface {
       // console.log(_event.deltaY / 1000);
       let currentValue: number = Number(slider.value);
       slider.value = String(currentValue - _event.deltaY / 1000);
-      slider.dispatchEvent(new Event("input", { bubbles: true }));
+      slider.dispatchEvent(new Event(EVENT.INPUT, { bubbles: true }));
     }
   }
 }

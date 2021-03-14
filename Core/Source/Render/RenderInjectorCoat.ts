@@ -7,17 +7,17 @@ namespace FudgeCore {
     protected static injectCoatColored(this: Coat, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void {
       let colorUniformLocation: WebGLUniformLocation = _shader.uniforms["u_color"];
       let color: Color = Color.MULTIPLY((<CoatColored>this).color, _cmpMaterial.clrPrimary);
-      RenderOperator.getRenderingContext().uniform4fv(colorUniformLocation, color.getArray());
+      RenderWebGL.getRenderingContext().uniform4fv(colorUniformLocation, color.getArray());
     }
 
     protected static injectCoatTextured(this: Coat, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void {
-      let crc3: WebGL2RenderingContext = RenderOperator.getRenderingContext();
+      let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       // if (this.renderData) {
       // buffers exist
       // TODO: find a way to use inheritance through decorator, thus calling methods injected in superclass
       let colorUniformLocation: WebGLUniformLocation = _shader.uniforms["u_color"];
       let color: Color = Color.MULTIPLY((<CoatTextured>this).color, _cmpMaterial.clrPrimary);
-      RenderOperator.getRenderingContext().uniform4fv(colorUniformLocation, color.getArray());
+      RenderWebGL.getRenderingContext().uniform4fv(colorUniformLocation, color.getArray());
 
       // crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
       // crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.renderData["texture0"]);
@@ -33,7 +33,7 @@ namespace FudgeCore {
     }
 
     protected static injectCoatMatCap(this: Coat, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void {
-      let crc3: WebGL2RenderingContext = RenderOperator.getRenderingContext();
+      let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
 
       let colorUniformLocation: WebGLUniformLocation = _shader.uniforms["u_tint_color"];
       let { r, g, b, a } = (<CoatMatCap>this).color;
@@ -53,7 +53,7 @@ namespace FudgeCore {
       else {
         this.renderData = {};
         // TODO: check if all WebGL-Creations are asserted
-        const texture: WebGLTexture = RenderManager.assert<WebGLTexture>(crc3.createTexture());
+        const texture: WebGLTexture = Render.assert<WebGLTexture>(crc3.createTexture());
         crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, texture);
 
         try {

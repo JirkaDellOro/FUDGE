@@ -1,4 +1,4 @@
-///<reference path="../Engine/Recycler.ts"/>
+///<reference path="../Recycle/Recycler.ts"/>
 ///<reference path="Vector2.ts"/>
 
 namespace FudgeCore {
@@ -37,32 +37,6 @@ namespace FudgeCore {
       let rect: Rectangle = Recycler.get(Rectangle);
       rect.setPositionAndSize(_x, _y, _width, _height);
       return rect;
-    }
-
-    /**
-     * Sets the position and size of the rectangle according to the given parameters
-     */
-    public setPositionAndSize(_x: number = 0, _y: number = 0, _width: number = 1, _height: number = 1, _origin: ORIGIN2D = ORIGIN2D.TOPLEFT): void {
-      this.size.set(_width, _height);
-      switch (_origin & 0x03) {
-        case 0x00: this.position.x = _x; break;
-        case 0x01: this.position.x = _x - _width / 2; break;
-        case 0x02: this.position.x = _x - _width; break;
-      }
-      switch (_origin & 0x30) {
-        case 0x00: this.position.y = _y; break;
-        case 0x10: this.position.y = _y - _height / 2; break;
-        case 0x20: this.position.y = _y - _height; break;
-      }
-    }
-
-    public pointToRect(_point: Vector2, _target: Rectangle): Vector2 {
-      let result: Vector2 = _point.copy;
-      result.subtract(this.position);
-      result.x *= _target.width / this.width;
-      result.y *= _target.height / this.height;
-      result.add(_target.position);
-      return result;
     }
 
     get x(): number {
@@ -137,9 +111,35 @@ namespace FudgeCore {
     set bottom(_value: number) {
       this.size.y = this.position.y + _value;
     }
-
+    
     public get copy(): Rectangle {
       return Rectangle.GET(this.x, this.y, this.width, this.height);
+    }
+
+    /**
+     * Sets the position and size of the rectangle according to the given parameters
+     */
+    public setPositionAndSize(_x: number = 0, _y: number = 0, _width: number = 1, _height: number = 1, _origin: ORIGIN2D = ORIGIN2D.TOPLEFT): void {
+      this.size.set(_width, _height);
+      switch (_origin & 0x03) {
+        case 0x00: this.position.x = _x; break;
+        case 0x01: this.position.x = _x - _width / 2; break;
+        case 0x02: this.position.x = _x - _width; break;
+      }
+      switch (_origin & 0x30) {
+        case 0x00: this.position.y = _y; break;
+        case 0x10: this.position.y = _y - _height / 2; break;
+        case 0x20: this.position.y = _y - _height; break;
+      }
+    }
+
+    public pointToRect(_point: Vector2, _target: Rectangle): Vector2 {
+      let result: Vector2 = _point.copy;
+      result.subtract(this.position);
+      result.x *= _target.width / this.width;
+      result.y *= _target.height / this.height;
+      result.add(_target.position);
+      return result;
     }
 
     /**
@@ -176,6 +176,17 @@ namespace FudgeCore {
       intersection.height = Math.min(this.bottom, _rect.bottom) - intersection.y;
 
       return intersection;
+    }
+
+    /**
+ * Returns the rectangle created by the intersection of this and the given rectangle or null, if they don't collide
+ */
+    public covers(_rect: Rectangle): boolean {
+      if (this.left > _rect.left) return false;
+      if (this.right < _rect.right) return false;
+      if (this.top > _rect.top) return false;
+      if (this.bottom < _rect.bottom) return false;
+      return true;
     }
 
     /**

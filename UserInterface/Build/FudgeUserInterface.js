@@ -19,14 +19,39 @@ var FudgeUserInterface;
                 _event.stopPropagation();
                 this.domElement.dispatchEvent(new Event("mutate" /* MUTATE */, { bubbles: true }));
             };
+            this.rearrangeArray = async (_event) => {
+                let sequence = _event.detail.sequence;
+                let path = [];
+                let details = _event.target;
+                let mutable;
+                { // find the MutableArray connected to this DetailsArray
+                    let element = details;
+                    while (element != this.domElement) {
+                        if (element.getAttribute("key"))
+                            path.push(element.getAttribute("key"));
+                        element = element.parentElement;
+                    }
+                    // console.log(path);
+                    mutable = this.mutable;
+                    for (let key of path)
+                        mutable = Reflect.get(mutable, key);
+                }
+                // rearrange that mutable
+                mutable.rearrange(sequence);
+            };
             this.refresh = (_event) => {
-                this.updateUserInterface();
+                if (document.body.contains(this.domElement)) {
+                    this.updateUserInterface();
+                    return;
+                }
+                window.clearInterval(this.idInterval);
             };
             this.domElement = _domElement;
             this.setMutable(_mutable);
             // TODO: examine, if this should register to one common interval, instead of each installing its own.
-            window.setInterval(this.refresh, this.timeUpdate);
-            this.domElement.addEventListener("input", this.mutateOnInput);
+            this.startRefresh();
+            this.domElement.addEventListener("input" /* INPUT */, this.mutateOnInput);
+            this.domElement.addEventListener("rearrangeArray" /* REARRANGE_ARRAY */, this.rearrangeArray);
         }
         /**
          * Recursive method taking an existing [[ƒ.Mutator]] as a template
@@ -34,7 +59,7 @@ var FudgeUserInterface;
          */
         static updateMutator(_domElement, _mutator) {
             for (let key in _mutator) {
-                let element = _domElement.querySelector(`[key=${key}]`);
+                let element = Controller.findChildElementByKey(_domElement, key);
                 if (element == null)
                     continue;
                 if (element instanceof FudgeUserInterface.CustomElement)
@@ -56,11 +81,13 @@ var FudgeUserInterface;
             // TODO: Mutator type now only used for enums. Examine if there is another way
             let mutatorTypes = _types || _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
-                let element = _domElement.querySelector(`[key=${key}]`);
+                let element = Controller.findChildElementByKey(_domElement, key);
                 if (element == null)
                     return mutator;
                 if (element instanceof FudgeUserInterface.CustomElement)
                     mutator[key] = element.getMutatorValue();
+                else if (element instanceof HTMLInputElement)
+                    mutator[key] = element.value;
                 else if (mutatorTypes[key] instanceof Object)
                     // TODO: setting a value of the dom element doesn't make sense... examine what this line was supposed to do. Assumably enums
                     mutator[key] = element.value;
@@ -68,8 +95,7 @@ var FudgeUserInterface;
                     let subMutator = Reflect.get(mutator, key);
                     let subMutable;
                     subMutable = Reflect.get(_mutable, key);
-                    // let subTypes: ƒ.Mutator = subMutable.getMutatorAttributeTypes(subMutator);
-                    if (subMutable instanceof ƒ.Mutable)
+                    if (subMutable instanceof ƒ.MutableArray || subMutable instanceof ƒ.Mutable)
                         mutator[key] = this.getMutator(subMutable, element, subMutator); //, subTypes);
                 }
             }
@@ -85,7 +111,7 @@ var FudgeUserInterface;
             if (_mutable instanceof ƒ.Mutable)
                 mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
             for (let key in mutator) {
-                let element = _domElement.querySelector(`[key=${key}]`);
+                let element = Controller.findChildElementByKey(_domElement, key);
                 if (!element)
                     continue;
                 let value = mutator[key];
@@ -94,15 +120,24 @@ var FudgeUserInterface;
                 else if (mutatorTypes[key] instanceof Object)
                     element.setMutatorValue(value);
                 else {
-                    // let fieldset: HTMLFieldSetElement = <HTMLFieldSetElement><HTMLElement>element;
                     let subMutable = Reflect.get(_mutable, key);
-                    if (subMutable instanceof ƒ.Mutable)
+                    if (subMutable instanceof ƒ.MutableArray || subMutable instanceof ƒ.Mutable)
                         this.updateUserInterface(subMutable, element, mutator[key]);
                     else
                         //element.setMutatorValue(value);
                         Reflect.set(element, "value", value);
                 }
             }
+        }
+        static findChildElementByKey(_domElement, key) {
+            let result;
+            try {
+                result = _domElement.querySelector(`[key = ${key}]`);
+            }
+            catch (_error) {
+                result = _domElement.querySelector(`[key = ${"ƒ" + key}]`);
+            }
+            return result;
         }
         getMutator(_mutator, _types) {
             // TODO: should get Mutator for UI or work with this.mutator (examine)
@@ -118,6 +153,10 @@ var FudgeUserInterface;
             if (_mutable instanceof ƒ.Mutable)
                 this.mutatorTypes = _mutable.getMutatorAttributeTypes(this.mutator);
         }
+        startRefresh() {
+            window.clearInterval(this.idInterval);
+            this.idInterval = window.setInterval(this.refresh, this.timeUpdate);
+        }
     }
     FudgeUserInterface.Controller = Controller;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
@@ -131,26 +170,32 @@ var FudgeUserInterface;
      */
     class Generator {
         /**
-         * Creates a [[Controller]] from a [[FudgeCore.Mutable]] using a CustomFieldSet
+         * Creates a [[Controller]] from a [[FudgeCore.Mutable]] with expandable details or a list
          */
         static createController(_mutable, _name) {
-            let controller = new FudgeUserInterface.Controller(_mutable, Generator.createFieldSetFromMutable(_mutable, _name));
+            let controller = new FudgeUserInterface.Controller(_mutable, Generator.createDetailsFromMutable(_mutable, _name));
             controller.updateUserInterface();
             return controller;
         }
         /**
-         * Create a extendable fieldset for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
+         * Create extendable details for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
          */
-        static createFieldSetFromMutable(_mutable, _name, _mutator) {
+        static createDetailsFromMutable(_mutable, _name, _mutator) {
             let name = _name || _mutable.constructor.name;
-            let fieldset = Generator.createExpendableFieldset(name, _mutable.type);
-            fieldset.content.appendChild(Generator.createInterfaceFromMutable(_mutable, _name, _mutator));
-            return fieldset;
+            let details;
+            if (_mutable instanceof ƒ.MutableArray)
+                details = new FudgeUserInterface.DetailsArray(name);
+            else if (_mutable instanceof ƒ.Mutable)
+                details = new FudgeUserInterface.Details(name, _mutable.type);
+            else
+                return null;
+            details.setContent(Generator.createInterfaceFromMutable(_mutable, _mutator));
+            return details;
         }
         /**
          * Create a div-Elements containing the interface for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]
          */
-        static createInterfaceFromMutable(_mutable, _name, _mutator) {
+        static createInterfaceFromMutable(_mutable, _mutator) {
             let mutator = _mutator || _mutable.getMutatorForUserInterface();
             let mutatorTypes = _mutable.getMutatorAttributeTypes(mutator);
             let div = document.createElement("div");
@@ -161,15 +206,12 @@ var FudgeUserInterface;
                 if (!element) {
                     let subMutable;
                     subMutable = Reflect.get(_mutable, key);
-                    if (subMutable instanceof ƒ.Mutable)
-                        element = Generator.createFieldSetFromMutable(subMutable, key, mutator[key]);
-                    else //Idea: Display an enumerated select here
+                    element = Generator.createDetailsFromMutable(subMutable, key, mutator[key]);
+                    if (!element)
+                        //Idea: Display an enumerated select here
                         element = new FudgeUserInterface.CustomElementTextInput({ key: key, label: key, value: type ? type.toString() : "?" });
-                    // let fieldset: FoldableFieldSet = Generator.createFieldsetFromMutable(subMutable, key, <ƒ.Mutator>_mutator[key]);
-                    // _parent.appendChild(fieldset);
                 }
                 div.appendChild(element);
-                div.appendChild(document.createElement("br"));
             }
             return div;
         }
@@ -182,13 +224,13 @@ var FudgeUserInterface;
             for (let key in _mutator) {
                 let value = Reflect.get(_mutator, key);
                 if (value instanceof Object) {
-                    let fieldset = Generator.createExpendableFieldset(key, "Hallo");
-                    fieldset.content.appendChild(Generator.createInterfaceFromMutator(value));
-                    div.appendChild(fieldset);
+                    // let details: Details = Generator.createDetails(key, "Details");
+                    let details = new FudgeUserInterface.Details(key, "Details");
+                    details.content.appendChild(Generator.createInterfaceFromMutator(value));
+                    div.appendChild(details);
                 }
                 else
                     div.appendChild(this.createMutatorElement(key, value.constructor.name, value));
-                div.appendChild(document.createElement("br"));
             }
             return div;
         }
@@ -199,20 +241,16 @@ var FudgeUserInterface;
             let element;
             try {
                 if (_type instanceof Object) {
-                    //TODO: refactor for enums and get rid of the two old generator functions
-                    // element = document.createElement("span");
-                    // Generator.createLabelElement(_key, element);
-                    // Generator.createDropdown(_key, _type, _value.toString(), element);
                     let elementType = FudgeUserInterface.CustomElement.get("Object");
                     // @ts-ignore: instantiate abstract class
                     element = new elementType({ key: _key, label: _key, value: _value.toString() }, _type);
-                    // (<CustomElement>element).setMutatorValue(_value);
+                }
+                else if (_value instanceof ƒ.MutableArray) {
+                    console.log("MutableArray");
+                    // insert Array-Controller!
                 }
                 else {
-                    // TODO: remove switch and use registered custom elements instead
-                    // let elementType: typeof CustomElement = CustomElement.get(<ObjectConstructor>_value.constructor);
                     let elementType = FudgeUserInterface.CustomElement.get(_type);
-                    // console.log("CustomElement", _type, elementType);
                     if (!elementType)
                         return element;
                     // @ts-ignore: instantiate abstract class
@@ -229,8 +267,6 @@ var FudgeUserInterface;
          */
         static createDropdown(_name, _content, _value, _parent, _cssClass) {
             let dropdown = document.createElement("select");
-            // TODO: unique ids
-            // dropdown.id = _name;
             dropdown.name = _name;
             for (let value in _content) {
                 let entry = document.createElement("option");
@@ -243,15 +279,6 @@ var FudgeUserInterface;
             }
             _parent.appendChild(dropdown);
             return dropdown;
-        }
-        // TODO: implement CustomFieldSet and replace this
-        static createExpendableFieldset(_key, _type) {
-            let cntFoldFieldset = new FudgeUserInterface.ExpandableFieldSet(_key);
-            //TODO: unique ids
-            // cntFoldFieldset.id = _legend;
-            cntFoldFieldset.setAttribute("key", _key);
-            cntFoldFieldset.setAttribute("type", _type);
-            return cntFoldFieldset;
         }
     }
     FudgeUserInterface.Generator = Generator;
@@ -268,8 +295,12 @@ var FudgeUserInterface;
             super();
             this.initialized = false;
             if (_attributes)
-                for (let name in _attributes)
+                for (let name in _attributes) {
                     this.setAttribute(name, _attributes[name]);
+                    if (name == "key" && !isNaN(Number(_attributes[name])))
+                        // if key is a number, as with arrays, prefix with "ƒ", since numbers are not allowed as attributes for querySelector
+                        this.setAttribute(name, "ƒ" + _attributes[name]);
+                }
         }
         /**
          * Retrieve an id to use for children of this element, needed e.g. for standard interaction with the label
@@ -319,11 +350,27 @@ var FudgeUserInterface;
             this.appendChild(label);
             return label;
         }
+        setLabel(_label) {
+            let label = this.querySelector("label");
+            if (label)
+                label.textContent = _label;
+        }
         /**
          * Set the value of this element using a format compatible with [[FudgeCore.Mutator]]
          */
         setMutatorValue(_value) {
             Reflect.set(this, "value", _value);
+        }
+        /** Workaround reconnection of clone */
+        cloneNode(_deep) {
+            let label = this.getAttribute("label");
+            //@ts-ignore
+            let clone = new this.constructor(label ? { label: label } : null);
+            document.body.appendChild(clone);
+            clone.setMutatorValue(this.getMutatorValue());
+            for (let attribute of this.attributes)
+                clone.setAttribute(attribute.name, attribute.value);
+            return clone;
         }
     }
     CustomElement.mapObjectToCustomElement = new Map();
@@ -386,7 +433,7 @@ var FudgeUserInterface;
             this.color = new ƒ.Color();
             if (!_attributes.label)
                 this.setAttribute("label", _attributes.key);
-            this.addEventListener("keydown", this.hndKey);
+            this.addEventListener("keydown" /* KEY_DOWN */, this.hndKey);
         }
         /**
          * Creates the content of the element when connected the first time
@@ -406,7 +453,7 @@ var FudgeUserInterface;
             slider.max = "1";
             slider.step = "0.01";
             this.appendChild(slider);
-            slider.addEventListener("wheel", this.hndWheel);
+            slider.addEventListener("wheel" /* WHEEL */, this.hndWheel);
         }
         /**
          * Retrieves the values of picker and slider as ƒ.Mutator
@@ -439,7 +486,7 @@ var FudgeUserInterface;
             // console.log(_event.deltaY / 1000);
             let currentValue = Number(slider.value);
             slider.value = String(currentValue - _event.deltaY / 1000);
-            slider.dispatchEvent(new Event("input", { bubbles: true }));
+            slider.dispatchEvent(new Event("input" /* INPUT */, { bubbles: true }));
         }
     }
     // @ts-ignore
@@ -457,13 +504,6 @@ var FudgeUserInterface;
             super();
             this.initialized = false;
         }
-        connectedCallback() {
-            if (this.initialized)
-                return;
-            this.initialized = true;
-            this.value = 0;
-            this.tabIndex = -1;
-        }
         set value(_value) {
             _value = Math.trunc(_value);
             if (_value > 9 || _value < 0)
@@ -472,6 +512,13 @@ var FudgeUserInterface;
         }
         get value() {
             return parseInt(this.textContent);
+        }
+        connectedCallback() {
+            if (this.initialized)
+                return;
+            this.initialized = true;
+            this.value = 0;
+            this.tabIndex = -1;
         }
         add(_addend) {
             _addend = Math.trunc(_addend);
@@ -530,6 +577,32 @@ var FudgeUserInterface;
             }
         }
         /**
+         * Get the value of this element in a format compatible with [[FudgeCore.Mutator]]
+         */
+        getMutatorValue() {
+            let mutator = {};
+            let elements = this.querySelectorAll("[key");
+            for (let element of elements) {
+                let key = element.getAttribute("key");
+                if (element instanceof FudgeUserInterface.CustomElement)
+                    mutator[key] = element.getMutatorValue();
+                else
+                    mutator[key] = element.value;
+            }
+            return mutator;
+        }
+        setMutatorValue(_mutator) {
+            for (let key in _mutator) {
+                let element = this.querySelector(`[key=${key}]`);
+                if (!element)
+                    console.log(`Couldn't find ${key} in`, this);
+                if (element instanceof FudgeUserInterface.CustomElement)
+                    element.setMutatorValue(_mutator[key]);
+                else
+                    element.value = _mutator[key];
+            }
+        }
+        /**
          * When connected the first time, the element gets constructed as a deep clone of the template.
          */
         connectedCallback() {
@@ -545,6 +618,9 @@ var FudgeUserInterface;
             for (let child of content.childNodes) {
                 this.appendChild(child.cloneNode(true));
             }
+            let label = this.querySelector("label");
+            if (label)
+                label.textContent = this.getAttribute("label");
         }
     }
     CustomElementTemplate.fragment = new Map();
@@ -712,7 +788,7 @@ var FudgeUserInterface;
                         this.display();
                         this.openInput(false);
                         this.focus();
-                        this.dispatchEvent(new Event("input", { bubbles: true }));
+                        this.dispatchEvent(new Event("input" /* INPUT */, { bubbles: true }));
                     }
                     return;
                 }
@@ -722,13 +798,13 @@ var FudgeUserInterface;
                     let next = active.nextElementSibling;
                     if (next)
                         next.focus();
-                    this.dispatchEvent(new Event("input", { bubbles: true }));
+                    this.dispatchEvent(new Event("input" /* INPUT */, { bubbles: true }));
                     return;
                 }
                 if (_event.key == "-" || _event.key == "+") {
                     this.value = (_event.key == "-" ? -1 : 1) * Math.abs(this.value);
                     this.display();
-                    this.dispatchEvent(new Event("input", { bubbles: true }));
+                    this.dispatchEvent(new Event("input" /* INPUT */, { bubbles: true }));
                     return;
                 }
                 if (_event.code != ƒ.KEYBOARD_CODE.TABULATOR)
@@ -736,11 +812,11 @@ var FudgeUserInterface;
                 switch (_event.code) {
                     case ƒ.KEYBOARD_CODE.ARROW_DOWN:
                         this.changeDigitFocussed(-1);
-                        this.dispatchEvent(new Event("input", { bubbles: true }));
+                        this.dispatchEvent(new Event("input" /* INPUT */, { bubbles: true }));
                         break;
                     case ƒ.KEYBOARD_CODE.ARROW_UP:
                         this.changeDigitFocussed(+1);
-                        this.dispatchEvent(new Event("input", { bubbles: true }));
+                        this.dispatchEvent(new Event("input" /* INPUT */, { bubbles: true }));
                         break;
                     case ƒ.KEYBOARD_CODE.ARROW_LEFT:
                         active.previousElementSibling.focus();
@@ -752,6 +828,7 @@ var FudgeUserInterface;
                         break;
                     case ƒ.KEYBOARD_CODE.ENTER:
                     case ƒ.KEYBOARD_CODE.NUMPAD_ENTER:
+                    case ƒ.KEYBOARD_CODE.ESC:
                         this.activateInnerTabs(false);
                         this.focus();
                         break;
@@ -768,7 +845,7 @@ var FudgeUserInterface;
                 _event.preventDefault();
                 let change = _event.deltaY < 0 ? +1 : -1;
                 this.changeDigitFocussed(change);
-                this.dispatchEvent(new Event("input", { bubbles: true }));
+                this.dispatchEvent(new Event("input" /* INPUT */, { bubbles: true }));
             };
             this.hndInput = (_event) => {
                 this.openInput(false);
@@ -794,7 +871,7 @@ var FudgeUserInterface;
             input.type = "number";
             input.style.position = "absolute";
             input.style.display = "none";
-            input.addEventListener("input", (_event) => { event.stopPropagation(); });
+            input.addEventListener("input" /* INPUT */, (_event) => { event.stopPropagation(); });
             this.appendChild(input);
             let sign = document.createElement("span");
             sign.textContent = "+";
@@ -812,11 +889,11 @@ var FudgeUserInterface;
             exp.tabIndex = -1;
             exp.setAttribute("name", "exp");
             this.appendChild(exp);
-            // input.addEventListener("change", this.hndInput);
-            input.addEventListener("blur", this.hndInput);
-            this.addEventListener("blur", this.hndFocus);
-            this.addEventListener("keydown", this.hndKey);
-            this.addEventListener("wheel", this.hndWheel);
+            // input.addEventListener(EVENT.CHANGE, this.hndInput);
+            input.addEventListener("blur" /* BLUR */, this.hndInput);
+            this.addEventListener("blur" /* BLUR */, this.hndFocus);
+            this.addEventListener("keydown" /* KEY_DOWN */, this.hndKey);
+            this.addEventListener("wheel" /* WHEEL */, this.hndWheel);
         }
         /**
          * De-/Activates tabbing for the inner digits
@@ -880,11 +957,19 @@ var FudgeUserInterface;
          * Displays this value by setting the contents of the digits and the exponent
          */
         display() {
-            let [mantissa, exp] = this.toString().split("e");
+            let digits = this.querySelectorAll("fudge-digit");
             let spans = this.querySelectorAll("span");
+            if (!isFinite(this.value)) {
+                for (let pos = 0; pos < digits.length; pos++) {
+                    let digit = digits[5 - pos];
+                    digit.innerHTML = "  ∞   "[5 - pos];
+                    spans[1].textContent = "  ";
+                }
+                return;
+            }
+            let [mantissa, exp] = this.toString().split("e");
             spans[0].textContent = this.value < 0 ? "-" : "+";
             spans[1].textContent = exp;
-            let digits = this.querySelectorAll("fudge-digit");
             mantissa = mantissa.substring(1);
             mantissa = mantissa.replace(".", "");
             for (let pos = 0; pos < digits.length; pos++) {
@@ -905,7 +990,11 @@ var FudgeUserInterface;
             if (_amount == 0)
                 return;
             if (digit == this.querySelector("[name=exp]")) {
-                this.value *= Math.pow(10, _amount);
+                // console.log(this.value);
+                let value = this.value * Math.pow(10, _amount);
+                console.log(value, this.value);
+                if (isFinite(value))
+                    this.value = value;
                 this.display();
                 return;
             }
@@ -981,6 +1070,258 @@ var FudgeUserInterface;
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
     var ƒ = FudgeCore;
+    class Details extends HTMLDetailsElement {
+        constructor(_legend = "", _type) {
+            super();
+            this.hndToggle = (_event) => {
+                if (_event)
+                    _event.stopPropagation();
+                this.dispatchEvent(new Event(this.isExpanded ? "expand" /* EXPAND */ : "collapse" /* COLLAPSE */, { bubbles: true }));
+            };
+            this.hndFocus = (_event) => {
+                switch (_event.type) {
+                    case "focusNext" /* FOCUS_NEXT */:
+                        let next = this.nextElementSibling;
+                        if (next && next.tabIndex > -1) {
+                            next.focus();
+                            _event.stopPropagation();
+                        }
+                        break;
+                    case "focusPrevious" /* FOCUS_PREVIOUS */:
+                        let previous = this.previousElementSibling;
+                        if (previous && previous.tabIndex > -1) {
+                            let sets = previous.querySelectorAll("details");
+                            let i = sets.length;
+                            if (i)
+                                do { // focus the last visible set
+                                    sets[--i].focus();
+                                } while (!sets[i].offsetParent);
+                            else
+                                previous.focus();
+                            _event.stopPropagation();
+                        }
+                        break;
+                    case "focusSet" /* FOCUS_SET */:
+                        if (_event.target != this) {
+                            this.focus();
+                            _event.stopPropagation();
+                        }
+                        break;
+                }
+            };
+            this.hndKey = (_event) => {
+                _event.stopPropagation();
+                // let target: HTMLElement = <HTMLElement>_event.target;
+                switch (_event.code) {
+                    case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
+                        if (!this.isExpanded) {
+                            this.expand(true);
+                            return;
+                        }
+                    case ƒ.KEYBOARD_CODE.ARROW_DOWN:
+                        let next = this;
+                        if (this.isExpanded)
+                            next = this.querySelector("details");
+                        else
+                            do {
+                                next = next.nextElementSibling;
+                            } while (next && next.tabIndex > -1);
+                        if (next)
+                            next.focus();
+                        // next.dispatchEvent(new KeyboardEvent(EVENT_TREE.FOCUS_NEXT, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                        else
+                            this.dispatchEvent(new KeyboardEvent("focusNext" /* FOCUS_NEXT */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                        break;
+                    case ƒ.KEYBOARD_CODE.ARROW_LEFT:
+                        if (this.isExpanded) {
+                            this.expand(false);
+                            return;
+                        }
+                    case ƒ.KEYBOARD_CODE.ARROW_UP:
+                        let previous = this;
+                        do {
+                            previous = previous.previousElementSibling;
+                        } while (previous && !(previous instanceof Details));
+                        if (previous)
+                            if (previous.isExpanded)
+                                this.dispatchEvent(new KeyboardEvent("focusPrevious" /* FOCUS_PREVIOUS */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                            else
+                                previous.focus();
+                        else
+                            this.parentElement.dispatchEvent(new KeyboardEvent("focusSet" /* FOCUS_SET */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                        break;
+                }
+            };
+            this.setAttribute("key", _legend);
+            this.setAttribute("type", _type);
+            this.open = true;
+            let lblSummary = document.createElement("summary");
+            lblSummary.textContent = _legend;
+            this.appendChild(lblSummary);
+            this.content = document.createElement("div");
+            this.appendChild(this.content);
+            this.tabIndex = 0;
+            this.addEventListener("keydown" /* KEY_DOWN */, this.hndKey);
+            this.addEventListener("focusNext" /* FOCUS_NEXT */, this.hndFocus);
+            this.addEventListener("focusPrevious" /* FOCUS_PREVIOUS */, this.hndFocus);
+            this.addEventListener("focusSet" /* FOCUS_SET */, this.hndFocus);
+            this.addEventListener("toggle" /* TOGGLE */, this.hndToggle);
+        }
+        get isExpanded() {
+            // return this.expander.checked;
+            return this.open;
+        }
+        setContent(_content) {
+            this.replaceChild(_content, this.content);
+            this.content = _content;
+        }
+        expand(_expand) {
+            // this.expander.checked = _expand;
+            this.open = _expand;
+            this.hndToggle(null);
+        }
+    }
+    FudgeUserInterface.Details = Details;
+    customElements.define("ui-details", Details, { extends: "details" });
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
+    var ƒ = FudgeCore;
+    class DetailsArray extends FudgeUserInterface.Details {
+        constructor(_legend) {
+            super(_legend, "Array");
+            this.hndDragStart = (_event) => {
+                // _event.preventDefault; 
+                let keyDrag = _event.currentTarget.getAttribute("key");
+                _event.dataTransfer.setData("index", keyDrag);
+                console.log(keyDrag);
+            };
+            this.hndDragOver = (_event) => {
+                _event.preventDefault();
+                if (_event.ctrlKey)
+                    _event.dataTransfer.dropEffect = "copy";
+                if (_event.shiftKey)
+                    _event.dataTransfer.dropEffect = "link";
+            };
+            this.hndDrop = (_event) => {
+                let drop = _event.currentTarget;
+                let keyDrop = drop.getAttribute("key");
+                let keyDrag = _event.dataTransfer.getData("index");
+                let drag = this.querySelector(`[key=${keyDrag}]`);
+                let position = keyDrag > keyDrop ? "beforebegin" : "afterend";
+                if (_event.ctrlKey)
+                    drag = drag.cloneNode(true);
+                if (_event.shiftKey)
+                    drag.parentNode.removeChild(drag);
+                else
+                    drop.insertAdjacentElement(position, drag);
+                this.rearrange();
+                this.addEventListeners(drag);
+                drag.focus();
+            };
+            this.hndkey = (_event) => {
+                let item = _event.currentTarget;
+                // only work on items of list, not their children
+                if (_event.target != item)
+                    return;
+                let focus = parseInt(item.getAttribute("label"));
+                let sibling = item;
+                let insert = item;
+                let passEvent = false;
+                switch (_event.code) {
+                    case ƒ.KEYBOARD_CODE.DELETE:
+                        item.parentNode.removeChild(item);
+                        this.rearrange(focus);
+                        break;
+                    case ƒ.KEYBOARD_CODE.ARROW_UP:
+                        if (!_event.altKey) {
+                            this.setFocus(--focus);
+                            break;
+                        }
+                        if (_event.shiftKey) {
+                            insert = item.cloneNode(true);
+                            this.addEventListeners(insert);
+                        }
+                        else
+                            sibling = item.previousSibling;
+                        if (sibling)
+                            sibling.insertAdjacentElement("beforebegin", insert);
+                        this.rearrange(--focus);
+                        break;
+                    case ƒ.KEYBOARD_CODE.ARROW_DOWN:
+                        if (!_event.altKey) {
+                            this.setFocus(++focus);
+                            break;
+                        }
+                        if (_event.shiftKey) {
+                            insert = item.cloneNode(true);
+                            this.addEventListeners(insert);
+                        }
+                        else
+                            sibling = item.nextSibling;
+                        if (sibling)
+                            sibling.insertAdjacentElement("afterend", insert);
+                        this.rearrange(++focus);
+                        break;
+                    default:
+                        passEvent = true;
+                }
+                if (!passEvent) {
+                    _event.stopPropagation();
+                }
+            };
+        }
+        setContent(_content) {
+            super.setContent(_content);
+            for (let child of this.content.children) {
+                this.addEventListeners(child);
+            }
+        }
+        getMutator() {
+            let mutator = [];
+            for (let child of this.content.children) {
+                mutator.push(child.getMutatorValue());
+            }
+            return mutator;
+        }
+        addEventListeners(_child) {
+            _child.draggable = true;
+            _child.addEventListener("dragstart" /* DRAG_START */, this.hndDragStart);
+            _child.addEventListener("drop" /* DROP */, this.hndDrop);
+            _child.addEventListener("dragover" /* DRAG_OVER */, this.hndDragOver);
+            _child.addEventListener("keydown" /* KEY_DOWN */, this.hndkey, true);
+            _child.tabIndex = 0;
+        }
+        rearrange(_focus = undefined) {
+            let sequence = [];
+            for (let child of this.content.children) {
+                sequence.push(parseInt(child.getAttribute("label")));
+            }
+            this.setFocus(_focus);
+            this.dispatchEvent(new CustomEvent("rearrangeArray" /* REARRANGE_ARRAY */, { bubbles: true, detail: { key: this.getAttribute("key"), sequence: sequence } }));
+            let count = 0;
+            for (let child of this.content.children) {
+                child.setAttribute("label", count.toString());
+                child.setAttribute("key", "ƒ" + count);
+                child.setLabel(count.toString());
+                console.log(child.tabIndex);
+                count++;
+            }
+            this.dispatchEvent(new Event("input" /* INPUT */, { bubbles: true }));
+        }
+        setFocus(_focus = undefined) {
+            if (_focus == undefined)
+                return;
+            _focus = Math.max(0, Math.min(_focus, this.content.children.length - 1));
+            this.content.children[_focus].focus();
+        }
+    }
+    FudgeUserInterface.DetailsArray = DetailsArray;
+    customElements.define("ui-list", DetailsArray, { extends: "details" });
+})(FudgeUserInterface || (FudgeUserInterface = {}));
+var FudgeUserInterface;
+(function (FudgeUserInterface) {
+    var ƒ = FudgeCore;
     /**
      * Static class to display a modal or non-modal dialog with an interface for the given mutator.
      */
@@ -1023,403 +1364,13 @@ var FudgeUserInterface;
                     document.body.removeChild(Dialog.dom);
                     _resolve(_event.target == btnOk);
                 };
-                btnCancel.addEventListener("click", hndButton);
-                btnOk.addEventListener("click", hndButton);
+                btnCancel.addEventListener("click" /* CLICK */, hndButton);
+                btnOk.addEventListener("click" /* CLICK */, hndButton);
             });
         }
     }
     FudgeUserInterface.Dialog = Dialog;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
-// namespace FudgeUserInterface {
-//     /**
-//      * <select><option>Hallo</option></select>
-//      */
-//     import ƒ = FudgeCore;
-//     export class ToggleButton extends HTMLButtonElement {
-//         private toggleState: boolean;
-//         public constructor(style: string) {
-//             super();
-//             this.type = "button";
-//             this.toggleState = true;
-//             this.classList.add(style);
-//             this.classList.add("ToggleOn");
-//             this.addEventListener("click", this.switchToggleState);
-//         }
-//         public setToggleState(toggleState: boolean): void {
-//             this.toggleState = toggleState;
-//             if (this.toggleState == true) {
-//                 this.classList.add("ToggleOn");
-//                 this.classList.remove("ToggleOff");
-//             }
-//             else {
-//                 this.classList.remove("ToggleOn");
-//                 this.classList.add("ToggleOff");
-//             }
-//         }
-//         public getToggleState(): boolean {
-//             return this.toggleState;
-//         }
-//         public toggle(): void {
-//             this.setToggleState(!this.toggleState);
-//         }
-//         private switchToggleState = (_event: MouseEvent): void => {
-//             this.setToggleState(!this.toggleState);
-//         }
-//     }
-//     export class Stepper extends HTMLInputElement {
-//         public constructor(_label: string, params: { min?: number, max?: number, step?: number, value?: number } = {}) {
-//             super();
-//             this.name = _label;
-//             this.type = "number";
-//             this.value = params.value.toString();
-//             this.id = _label;
-//             this.step = String(params.step) || "1";
-//         }
-//     }
-//     export class FoldableFieldSet extends HTMLFieldSetElement {
-//         public constructor(_legend: string) {
-//             super();
-//             let cntLegend: HTMLLegendElement = document.createElement("legend");
-//             cntLegend.classList.add("unfoldable");
-//             let btnFoldButton: HTMLButtonElement = new ToggleButton("FoldButton");
-//             btnFoldButton.addEventListener("click", this.toggleFoldElement);
-//             // btnfoldButton.classList.add("unfoldable");
-//             let lblTitle: HTMLSpanElement = document.createElement("span");
-//             lblTitle.textContent = _legend;
-//             // lblTitle.classList.add("unfoldable");
-//             cntLegend.appendChild(btnFoldButton);
-//             cntLegend.appendChild(lblTitle);
-//             this.appendChild(cntLegend);
-//         }
-//         private toggleFoldElement = (_event: MouseEvent): void => {
-//             _event.preventDefault();
-//             if (_event.target != _event.currentTarget) return;
-//             //Get the fieldset the button belongs to
-//             let children: HTMLCollection = this.children;
-//             //fold or unfold all children that aren't unfoldable
-//             for (let child of children) {
-//                 if (!child.classList.contains("unfoldable")) {
-//                     child.classList.toggle("folded");
-//                 }
-//             }
-//         }
-//     }
-//     class MenuButton extends HTMLDivElement {
-//         name: string;
-//         private signature: string;
-//         public constructor(_name: string, textcontent: string, parentSignature: string) {
-//             super();
-//             this.name = _name;
-//             this.signature = parentSignature + "." + _name;
-//             let button: HTMLButtonElement = document.createElement("button");
-//             button.textContent = textcontent;
-//             this.append(button);
-//             button.addEventListener("click", this.resolveClick);
-//         }
-//         private resolveClick = (_event: MouseEvent): void => {
-//             let event: CustomEvent = new CustomEvent(EVENT_USERINTERFACE.DROPMENUCLICK, { detail: this.signature, bubbles: true });
-//             this.dispatchEvent(event);
-//         }
-//     }
-//     class MenuContent extends HTMLDivElement {
-//         public constructor(_submenu?: boolean) {
-//             super();
-//             if (_submenu) {
-//                 this.classList.add("submenu-content");
-//             }
-//             else {
-//                 this.classList.add("dropdown-content");
-//             }
-//         }
-//     }
-//     export class DropMenu extends HTMLDivElement {
-//         name: string;
-//         private content: MenuContent;
-//         private signature: string;
-//         public constructor(_name: string, _contentList: ƒ.Mutator, params: { _parentSignature?: string, _text?: string }) {
-//             super();
-//             let button: HTMLButtonElement = document.createElement("button");
-//             button.name = _name;
-//             if (params._text) {
-//                 button.textContent = params._text;
-//             }
-//             else {
-//                 button.textContent = _name;
-//             }
-//             button.addEventListener("click", this.toggleFoldContent);
-//             window.addEventListener("click", this.collapseMenu);
-//             let isSubmenu: boolean = (params._parentSignature != null);
-//             if (params._parentSignature) {
-//                 this.signature = params._parentSignature + "." + _name;
-//             }
-//             else {
-//                 this.signature = _name;
-//             }
-//             this.append(button);
-//             this.content = new MenuContent(isSubmenu);
-//             if (params._parentSignature) {
-//                 this.classList.add("submenu");
-//             }
-//             else {
-//                 this.classList.add("dropdown");
-//             }
-//             this.content.classList.toggle("folded");
-//             this.name = _name;
-//             for (let key in _contentList) {
-//                 if (typeof _contentList[key] == "object") {
-//                     let subMenu: DropMenu = new DropMenu(key, <ƒ.Mutator>_contentList[key], { _parentSignature: this.signature });
-//                     this.content.append(subMenu);
-//                 }
-//                 else if (typeof _contentList[key] == "string") {
-//                     let contentEntry: MenuButton = new MenuButton(key, <string>_contentList[key], this.signature);
-//                     this.content.append(contentEntry);
-//                 }
-//             }
-//             this.append(this.content);
-//         }
-//         private toggleFoldContent = (_event: MouseEvent): void => {
-//             this.content.classList.toggle("folded");
-//         }
-//         private collapseMenu = (_event: MouseEvent): void => {
-//             if (!(this.contains(<HTMLElement>_event.target))) {
-//                 if (!this.content.classList.contains("folded")) {
-//                     this.toggleFoldContent(_event);
-//                 }
-//             }
-//         }
-//     }
-//     customElements.define("ui-stepper", Stepper, { extends: "input" });
-//     customElements.define("ui-toggle-button", ToggleButton, { extends: "button" });
-//     customElements.define("ui-fold-fieldset", FoldableFieldSet, { extends: "fieldset" });
-//     customElements.define("ui-dropdown", DropMenu, { extends: "div" });
-//     customElements.define("ui-dropdown-button", MenuButton, { extends: "div" });
-//     customElements.define("ui-dropdown-content", MenuContent, { extends: "div" });
-// }
-var FudgeUserInterface;
-(function (FudgeUserInterface) {
-    var ƒ = FudgeCore;
-    class ExpandableFieldSet extends HTMLFieldSetElement {
-        constructor(_legend = "") {
-            super();
-            this.hndToggle = (_event) => {
-                if (_event)
-                    _event.stopPropagation();
-                this.dispatchEvent(new Event(this.isExpanded ? "expand" /* EXPAND */ : "collapse" /* COLLAPSE */, { bubbles: true }));
-            };
-            this.hndFocus = (_event) => {
-                switch (_event.type) {
-                    case "focusNext" /* FOCUS_NEXT */:
-                        let next = this.nextElementSibling;
-                        if (next && next.tabIndex > -1) {
-                            next.focus();
-                            _event.stopPropagation();
-                        }
-                        break;
-                    case "focusPrevious" /* FOCUS_PREVIOUS */:
-                        let previous = this.previousElementSibling;
-                        if (previous && previous.tabIndex > -1) {
-                            let fieldsets = previous.querySelectorAll("fieldset");
-                            let i = fieldsets.length;
-                            if (i)
-                                do { // focus the last visible fieldset
-                                    fieldsets[--i].focus();
-                                } while (!fieldsets[i].offsetParent);
-                            else
-                                previous.focus();
-                            _event.stopPropagation();
-                        }
-                        break;
-                    case "focusSet" /* FOCUS_SET */:
-                        if (_event.target != this) {
-                            this.focus();
-                            _event.stopPropagation();
-                        }
-                        break;
-                }
-            };
-            this.hndKey = (_event) => {
-                _event.stopPropagation();
-                // let target: HTMLElement = <HTMLElement>_event.target;
-                switch (_event.code) {
-                    case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
-                        if (!this.isExpanded) {
-                            this.expand(true);
-                            return;
-                        }
-                    case ƒ.KEYBOARD_CODE.ARROW_DOWN:
-                        let next = this;
-                        if (this.isExpanded)
-                            next = this.querySelector("fieldset");
-                        else
-                            do {
-                                next = next.nextElementSibling;
-                            } while (next && next.tabIndex > -1);
-                        if (next)
-                            next.focus();
-                        // next.dispatchEvent(new KeyboardEvent(EVENT_TREE.FOCUS_NEXT, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
-                        else
-                            this.dispatchEvent(new KeyboardEvent("focusNext" /* FOCUS_NEXT */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
-                        break;
-                    case ƒ.KEYBOARD_CODE.ARROW_LEFT:
-                        if (this.isExpanded) {
-                            this.expand(false);
-                            return;
-                        }
-                    case ƒ.KEYBOARD_CODE.ARROW_UP:
-                        let previous = this;
-                        do {
-                            previous = previous.previousElementSibling;
-                        } while (previous && !(previous instanceof ExpandableFieldSet));
-                        if (previous)
-                            if (previous.isExpanded)
-                                this.dispatchEvent(new KeyboardEvent("focusPrevious" /* FOCUS_PREVIOUS */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
-                            else
-                                previous.focus();
-                        else
-                            this.parentElement.dispatchEvent(new KeyboardEvent("focusSet" /* FOCUS_SET */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
-                        break;
-                }
-            };
-            let cntLegend = document.createElement("legend");
-            this.expander = document.createElement("input");
-            this.expander.type = "checkbox";
-            this.expander.checked = true;
-            this.expander.tabIndex = -1;
-            let lblTitle = document.createElement("span");
-            lblTitle.textContent = _legend;
-            this.appendChild(this.expander);
-            cntLegend.appendChild(lblTitle);
-            this.content = document.createElement("div");
-            this.appendChild(cntLegend);
-            this.appendChild(this.content);
-            this.tabIndex = 0;
-            this.addEventListener("keydown" /* KEY_DOWN */, this.hndKey);
-            this.addEventListener("focusNext" /* FOCUS_NEXT */, this.hndFocus);
-            this.addEventListener("focusPrevious" /* FOCUS_PREVIOUS */, this.hndFocus);
-            this.addEventListener("focusSet" /* FOCUS_SET */, this.hndFocus);
-            this.expander.addEventListener("input", this.hndToggle);
-            // this.expander.addEventListener("change", this.hndToggle);
-        }
-        get isExpanded() {
-            return this.expander.checked;
-        }
-        expand(_expand) {
-            this.expander.checked = _expand;
-            this.hndToggle(null);
-        }
-    }
-    FudgeUserInterface.ExpandableFieldSet = ExpandableFieldSet;
-    customElements.define("ui-fold-fieldset", ExpandableFieldSet, { extends: "fieldset" });
-})(FudgeUserInterface || (FudgeUserInterface = {}));
-// namespace FudgeUserInterface {
-//     import ƒ = FudgeCore;
-//     // export abstract class ListController {
-//     //     abstract listRoot: HTMLElement;
-//     //     protected abstract toggleCollapse(_event: MouseEvent): void;
-//     // }
-//     abstract class CollapsableList extends HTMLUListElement {
-//         header: HTMLLIElement;
-//         content: HTMLElement;
-//         constructor() {
-//             super();
-//             this.header = document.createElement("li");
-//             this.content = document.createElement("ul");
-//             this.appendChild(this.header);
-//             this.appendChild(this.content);
-//         }
-//         public collapse(element: HTMLElement): void {
-//             (<CollapsableList>element).content.classList.toggle("folded");
-//         }
-//     }
-//     export class CollapsableNodeList extends CollapsableList {
-//         node: ƒ.Node;
-//         constructor(_node: ƒ.Node, _name: string, _unfolded: boolean = false) {
-//             super();
-//             this.node = _node;
-//             let buttonState: string;
-//             if (this.node.getChildren().length != 0)
-//                 buttonState = "FoldButton";
-//             else
-//                 buttonState = "invisible";
-//             let btnToggle: HTMLButtonElement = new ToggleButton(buttonState);
-//             (<ToggleButton>btnToggle).setToggleState(_unfolded);
-//             btnToggle.addEventListener("click", this.collapseEvent);
-//             this.header.appendChild(btnToggle);
-//             let lblName: HTMLSpanElement = document.createElement("span");
-//             lblName.textContent = _name;
-//             lblName.addEventListener("click", this.selectNode);
-//             this.header.appendChild(lblName);
-//         }
-//         public selectNode = (_event: MouseEvent): void => {
-//             let event: Event = new CustomEvent(EVENT_USERINTERFACE.SELECT, { bubbles: true, detail: this.node });
-//             this.dispatchEvent(event);
-//         }
-//         public collapseEvent = (_event: MouseEvent): void => {
-//             let event: Event = new CustomEvent(EVENT_USERINTERFACE.COLLAPSE, { bubbles: true, detail: this });
-//             this.dispatchEvent(event);
-//         }
-//     }
-//     export class CollapsableAnimationList extends CollapsableList {
-//         mutator: ƒ.Mutator;
-//         name: string;
-//         index: ƒ.Mutator;
-//         constructor(_mutator: ƒ.Mutator, _name: string, _unfolded: boolean = false) {
-//             super();
-//             this.mutator = _mutator;
-//             this.name = _name;
-//             this.index = {};
-//             let btnToggle: HTMLButtonElement = new ToggleButton("FoldButton");
-//             (<ToggleButton>btnToggle).setToggleState(_unfolded);
-//             btnToggle.addEventListener("click", this.collapseEvent);
-//             this.header.appendChild(btnToggle);
-//             let lblName: HTMLSpanElement = document.createElement("span");
-//             lblName.textContent = _name;
-//             this.header.appendChild(lblName);
-//             this.buildContent(_mutator);
-//             this.content.addEventListener("input", this.updateMutator);
-//         }
-//         public collapseEvent = (_event: MouseEvent): void => {
-//             let event: Event = new CustomEvent(EVENT_USERINTERFACE.COLLAPSE, { bubbles: true, detail: this });
-//             this.dispatchEvent(event);
-//         }
-//         public buildContent(_mutator: ƒ.Mutator): void {
-//             for (let key in _mutator) {
-//                 if (typeof _mutator[key] == "object") {
-//                     let newList: CollapsableAnimationList = new CollapsableAnimationList(<ƒ.Mutator>_mutator[key], key);
-//                     this.content.append(newList);
-//                     this.index[key] = newList.getElementIndex();
-//                 }
-//                 else {
-//                     let listEntry: HTMLLIElement = document.createElement("li");
-//                     Generator.createLabelElement(key, listEntry);
-//                     let inputEntry: HTMLSpanElement = Generator.createStepperElement(key, listEntry, { _value: (<number>_mutator[key]) });
-//                     this.content.append(listEntry);
-//                     this.index[key] = inputEntry;
-//                 }
-//             }
-//         }
-//         public getMutator(): ƒ.Mutator {
-//             return this.mutator;
-//         }
-//         public setMutator(_mutator: ƒ.Mutator): void {
-//             this.collapse(this.content);
-//             this.mutator = _mutator;
-//             this.buildContent(_mutator);
-//         }
-//         public getElementIndex(): ƒ.Mutator {
-//             return this.index;
-//         }
-//         private updateMutator = (_event: Event): void => {
-//             let target: HTMLInputElement = <HTMLInputElement>_event.target;
-//             this.mutator[target.id] = parseFloat(target.value);
-//             _event.cancelBubble = true;
-//             let event: Event = new CustomEvent(EVENT_USERINTERFACE.UPDATE, { bubbles: true, detail: this.mutator });
-//             this.dispatchEvent(event);
-//         }
-//     }
-//     customElements.define("ui-node-list", CollapsableNodeList, { extends: "ul" });
-//     customElements.define("ui-animation-list", CollapsableAnimationList, { extends: "ul" });
-// }
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
     class MultiLevelMenuManager {
@@ -1663,16 +1614,16 @@ var FudgeUserInterface;
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
     /**
-     * Subclass this to create a broker between your data and a [[Tree]] to display and manipulate it.
-     * The [[Tree]] doesn't know how your data is structured and how to handle it, the controller implements the methods needed
+     * Subclass this to create a broker between your data and a [[Table]] to display and manipulate it.
+     * The [[Table]] doesn't know how your data is structured and how to handle it, the controller implements the methods needed
      */
     class TableController {
         constructor() {
-            /** Stores references to selected objects. Override with a reference in outer scope, if selection should also operate outside of tree */
+            /** Stores references to selected objects. Override with a reference in outer scope, if selection should also operate outside of table */
             this.selection = [];
-            /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
+            /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of table */
             this.dragDrop = { sources: [], target: null };
-            /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
+            /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of table */
             this.copyPaste = { sources: [], target: null };
         }
     }

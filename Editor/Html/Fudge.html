@@ -15,6 +15,7 @@
   <script>window.$ = window.jQuery = require("jquery.min.js");</script>
   <script>window.GoldenLayout = require("goldenlayout.js");</script>
   <!-- Fudge -->
+  <script type="text/javascript" src="../../Physics/OimoPhysics.js"></script>
   <script type="text/javascript" src="../../Core/Build/FudgeCore.js"></script>
   <script type="text/javascript" src="../../Aid/Build/FudgeAid.js"></script>
   <script type="text/javascript" src="../../UserInterface/Build/FudgeUserInterface.js"></script>
@@ -25,10 +26,28 @@
 
 <body>
   <template>
-    <custom-vector3 style="background-color: antiquewhite;">
+    <custom-vector2>
+      <span>
+        <label>label</label>
+      </span>
       <fudge-stepper key="x" label="x"></fudge-stepper>
-      <fudge-stepper key="y" label="x"></fudge-stepper>
-      <fudge-stepper key="z" label="x"></fudge-stepper>
+      <fudge-stepper key="y" label="y"></fudge-stepper>
+    </custom-vector2>
+  </template>
+  <script>
+    FudgeUserInterface.CustomElementTemplate.register("custom-vector2");
+    FudgeUserInterface.CustomElement.register("custom-vector2", class CustomVector2 extends FudgeUserInterface.CustomElementTemplate { });
+    FudgeUserInterface.CustomElement.map("Vector2", "custom-vector2");
+  </script>
+
+  <template>
+    <custom-vector3>
+      <span>
+        <label>label</label>
+      </span>
+      <fudge-stepper key="x" label="x"></fudge-stepper>
+      <fudge-stepper key="y" label="y"></fudge-stepper>
+      <fudge-stepper key="z" label="z"></fudge-stepper>
     </custom-vector3>
   </template>
   <script>
@@ -38,25 +57,22 @@
   </script>
 
   <template>
-    <custom-matrix4x4 style="text-align: center; display: grid; column-gap: 1em;
-        grid-template-columns: min-content min-content min-content min-content; 
-        grid-template-rows: min-content min-content min-content min-content;">
-      <span style="text-align: left">
-        <!-- <input type="checkbox" checked="true" /> -->
+    <custom-matrix4x4>
+      <span>
         <label>label</label>
       </span>
       <span>x</span>
       <span>y</span>
       <span>z</span>
-      <span style="text-align: right;">translation</span>
+      <span class="rowVector">translation</span>
       <fudge-stepper key="tx"></fudge-stepper>
       <fudge-stepper key="ty"></fudge-stepper>
       <fudge-stepper key="tz"></fudge-stepper>
-      <span style="text-align: right;">rotation</span>
+      <span class="rowVector">rotation</span>
       <fudge-stepper key="rx"></fudge-stepper>
       <fudge-stepper key="ry"></fudge-stepper>
       <fudge-stepper key="rz"></fudge-stepper>
-      <span style="text-align: right;">scaling</span>
+      <span class="rowVector">scaling</span>
       <fudge-stepper key="sx"></fudge-stepper>
       <fudge-stepper key="sy"></fudge-stepper>
       <fudge-stepper key="sz"></fudge-stepper>
@@ -69,24 +85,21 @@
   </script>
 
   <template>
-    <custom-matrix3x3 style="text-align: center; display: grid; column-gap: 1em;
-        grid-template-columns: min-content min-content min-content; 
-        grid-template-rows: min-content min-content min-content min-content;">
-      <span style="text-align: left">
-        <!-- <input type="checkbox" checked="true" /> -->
+    <custom-matrix3x3>
+      <span>
         <label>label</label>
       </span>
       <span>x</span>
       <span>y</span>
-      <span style="text-align: right;">translation</span>
+      <span class="rowVector">translation</span>
       <fudge-stepper key="tx"></fudge-stepper>
       <fudge-stepper key="ty"></fudge-stepper>
-      <span style="text-align: right;">scaling</span>
+      <span class="rowVector">scaling</span>
       <fudge-stepper key="sx"></fudge-stepper>
       <fudge-stepper key="sy"></fudge-stepper>
-      <span style="text-align: right;">rotation</span>
+      <span class="rowVector">rotation</span>
       <fudge-stepper key="r"></fudge-stepper>
-      </custom-matrix4x4>
+    </custom-matrix3x3>
   </template>
   <script>
     FudgeUserInterface.CustomElementTemplate.register("custom-matrix3x3");

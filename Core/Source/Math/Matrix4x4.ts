@@ -37,58 +37,6 @@ namespace FudgeCore {
       this.resetCache();
     }
 
-    /** 
-     * - get: a copy of the calculated translation vector   
-     * - set: effect the matrix ignoring its rotation and scaling
-     */
-    public get translation(): Vector3 {
-      if (!this.vectors.translation) {
-        this.vectors.translation = Recycler.get(Vector3);
-        this.vectors.translation.set(this.data[12], this.data[13], this.data[14]);
-      }
-      return this.vectors.translation.copy;
-    }
-    public set translation(_translation: Vector3) {
-      this.data.set(_translation.get(), 12);
-      // no full cache reset required
-      this.vectors.translation = _translation.copy;
-      this.mutator = null;
-    }
-
-    /** 
-     * - get: a copy of the calculated rotation vector   
-     * - set: effect the matrix
-     */
-    public get rotation(): Vector3 {
-      if (!this.vectors.rotation)
-        this.vectors.rotation = this.getEulerAngles();
-      return this.vectors.rotation.copy;
-    }
-    public set rotation(_rotation: Vector3) {
-      this.mutate({ "rotation": _rotation });
-      this.resetCache();
-    }
-
-    /** 
-     * - get: a copy of the calculated scale vector   
-     * - set: effect the matrix
-     */
-    public get scaling(): Vector3 {
-      if (!this.vectors.scaling) {
-        this.vectors.scaling = Recycler.get(Vector3);
-        this.vectors.scaling.set(
-          Math.hypot(this.data[0], this.data[1], this.data[2]),
-          Math.hypot(this.data[4], this.data[5], this.data[6]),
-          Math.hypot(this.data[8], this.data[9], this.data[10])
-        );
-      }
-      return this.vectors.scaling.copy;
-    }
-    public set scaling(_scaling: Vector3) {
-      this.mutate({ "scaling": _scaling });
-      this.resetCache();
-    }
-
     //#region STATICS
     /**
      * Retrieve a new identity matrix
@@ -107,12 +55,12 @@ namespace FudgeCore {
 
     /**
      * Computes and returns the product of two passed matrices.
-     * @param _a The matrix to multiply.
-     * @param _b The matrix to multiply by.
+     * @param _left The matrix to multiply.
+     * @param _right The matrix to multiply by.
      */
-    public static MULTIPLICATION(_a: Matrix4x4, _b: Matrix4x4): Matrix4x4 {
-      let a: Float32Array = _a.data;
-      let b: Float32Array = _b.data;
+    public static MULTIPLICATION(_left: Matrix4x4, _right: Matrix4x4): Matrix4x4 {
+      let a: Float32Array = _left.data;
+      let b: Float32Array = _right.data;
       // let matrix: Matrix4x4 = new Matrix4x4();
       const matrix: Matrix4x4 = Recycler.get(Matrix4x4);
       let a00: number = a[0 * 4 + 0];
@@ -462,6 +410,69 @@ namespace FudgeCore {
     }
     //#endregion
 
+    //#region  Accessors
+    /** 
+     * - get: a copy of the calculated translation vector   
+     * - set: effect the matrix ignoring its rotation and scaling
+     */
+    public set translation(_translation: Vector3) {
+      this.data.set(_translation.get(), 12);
+      // no full cache reset required
+      this.vectors.translation = _translation.copy;
+      this.mutator = null;
+    }
+    public get translation(): Vector3 {
+      if (!this.vectors.translation) {
+        this.vectors.translation = Recycler.get(Vector3);
+        this.vectors.translation.set(this.data[12], this.data[13], this.data[14]);
+      }
+      return this.vectors.translation.copy;
+    }
+
+    /** 
+     * - get: a copy of the calculated rotation vector   
+     * - set: effect the matrix
+     */
+    public get rotation(): Vector3 {
+      if (!this.vectors.rotation)
+        this.vectors.rotation = this.getEulerAngles();
+      return this.vectors.rotation.copy;
+    }
+    public set rotation(_rotation: Vector3) {
+      this.mutate({ "rotation": _rotation });
+      this.resetCache();
+    }
+
+    /** 
+     * - get: a copy of the calculated scale vector   
+     * - set: effect the matrix
+     */
+    public get scaling(): Vector3 {
+      if (!this.vectors.scaling) {
+        this.vectors.scaling = Recycler.get(Vector3);
+        this.vectors.scaling.set(
+          Math.hypot(this.data[0], this.data[1], this.data[2]),
+          Math.hypot(this.data[4], this.data[5], this.data[6]),
+          Math.hypot(this.data[8], this.data[9], this.data[10])
+        );
+      }
+      return this.vectors.scaling.copy;
+    }
+    public set scaling(_scaling: Vector3) {
+      this.mutate({ "scaling": _scaling });
+      this.resetCache();
+    }
+
+    /**
+     * Return a copy of this
+     */
+    public get copy(): Matrix4x4 {
+      let copy: Matrix4x4 = new Matrix4x4();
+      copy.set(this);
+      return copy;
+    }
+    //#endregion
+
     //#region Rotation
     /**
      * Rotate this matrix by given vector in the order Z, Y, X. Right hand rotation is used, thumb points in axis direction, fingers curling indicate rotation
@@ -786,15 +797,6 @@ namespace FudgeCore {
       this.data.set([-this.data[0], -this.data[1], -this.data[2]], 0); // reverse x-axis
     }
 
-    /**
-     * Return a copy of this
-     */
-    public get copy(): Matrix4x4 {
-      let copy: Matrix4x4 = new Matrix4x4();
-      copy.set(this);
-      return copy;
-    }
-
     public getTranslationTo(_target: Matrix4x4): Vector3 {
       let difference: Vector3 = Recycler.get(Vector3);
       difference.set(_target.data[12] - this.data[12], _target.data[13] - this.data[13], _target.data[14] - this.data[14]);
@@ -802,12 +804,21 @@ namespace FudgeCore {
     }
 
     public serialize(): Serialization {
-      // TODO: save translation, rotation and scale as vectors for readability and manipulation
-      let serialization: Serialization = this.getMutator();
+      // this.getMutator();
+      let serialization: Serialization = {
+        translation: this.translation.serialize(),
+        rotation: this.rotation.serialize(),
+        scaling: this.scaling.serialize()
+      };
       return serialization;
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.mutate(_serialization);
+      let mutator: Mutator = {
+        translation: await this.translation.deserialize(_serialization.translation),
+        rotation: await this.rotation.deserialize(_serialization.rotation),
+        scaling: await this.scaling.deserialize(_serialization.scaling)
+      };
+      this.mutate(mutator);
       return this;
     }
 

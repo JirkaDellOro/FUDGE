@@ -139,8 +139,8 @@ table.sortable td>input:read-only {
   cursor: default;
 }
 
-
 /* Text input */
+
 ul.tree .selected>input {
   color: var(--color-highlight);
   font-weight: bold;
@@ -153,13 +153,6 @@ input {
   color: var(--color-text);
   border: none;
 }
-
-/* 
-input:focus, li:focus, li:focus>input[type="text"] {
-  border: none;
-  outline: 1px solid var(--color-dragdrop-outline);
-  text-decoration: underline;
-} */
 
 *:focus {
   outline: 1px outset var(--color-focus);
@@ -180,36 +173,15 @@ label {
   /* text-shadow: 1px 1px var(--color-background-main) ; */
 }
 
-/* Fieldset */
+/* set (details) */
 
-fieldset {
-  border: none;
+details details {
+  /* border: none; */
   padding-left: 1em;
 }
 
-fieldset>legend {
-  /* left: -1em; */
-  position: relative;
-}
-
-fieldset>input[type=checkbox] {
-  height: 0px;
-  top: -1.1em;
-  left: -1em;
-  float: left;
-  position: relative;
-  color: var(--color-text);
-}
-
-fieldset>input[type=checkbox]:checked::before {
-  content: "▼";
-}
-
-fieldset>input[type=checkbox]::before {
-  content: "►";
-}
-
 /* Dialog */
+
 dialog {
   background-color: var(--color-background-main);
   border: none;
@@ -223,4 +195,44 @@ dialog {
 
 dialog>div#content {
   background-color: var(--color-background-content);
+}
+
+/* standard fudge elements */
+
+fudge-boolean, fudge-color, fudge-textinput {
+  display: block;
+}
+
+/* custom elements */
+
+custom-vector2 {
+  text-align: right;
+  display: grid;
+  grid-template-columns: 2em 8em 8em;
+}
+
+custom-vector3 {
+  text-align: right;
+  display: grid;
+  grid-template-columns: 2em 8em 8em 8em;
+}
+
+custom-matrix4x4 {
+  text-align: center;
+  display: grid;
+  column-gap: 1em;
+  grid-template-columns: min-content min-content min-content min-content;
+  grid-template-rows: min-content min-content min-content min-content;
+}
+
+custom-matrix3x3 {
+  text-align: center;
+  display: grid;
+  column-gap: 1em;
+  grid-template-columns: min-content min-content min-content;
+  grid-template-rows: min-content min-content min-content min-content
+}
+
+custom-matrix4x4 span.rowVector, custom-matrix3x3 span.rowVector {
+  text-align: right
 }

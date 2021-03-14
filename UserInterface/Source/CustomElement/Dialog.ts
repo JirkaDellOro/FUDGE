@@ -47,8 +47,8 @@ namespace FudgeUserInterface {
           document.body.removeChild(Dialog.dom);
           _resolve(_event.target == btnOk);
         };
-        btnCancel.addEventListener("click", hndButton);
-        btnOk.addEventListener("click", hndButton);
+        btnCancel.addEventListener(EVENT.CLICK, hndButton);
+        btnOk.addEventListener(EVENT.CLICK, hndButton);
       });
     }
   }

@@ -28,7 +28,7 @@ namespace FudgeCore {
      * Asynchronously loads the audio (mp3) from the given url
      */
     public async load(_url: RequestInfo): Promise<void> {
-      console.log("AudioLoad", _url);
+      Debug.fudge("AudioLoad", _url);
       this.url = _url;
       this.ready = false;
       this.path = new URL(this.url.toString(), Project.baseURL);

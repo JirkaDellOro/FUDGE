@@ -52,6 +52,7 @@ namespace FudgeCore {
         if (!this.active)
           return;
           
+        this.event.count = this.count;
         this.event.lastCall = (this.count == 1);
         _handler(this.event);
         this.event.firstCall = false;

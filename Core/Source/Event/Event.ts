@@ -42,7 +42,7 @@ namespace FudgeCore {
     }
 
 
-    export type Eventƒ = EventPointer | EventDragDrop | EventWheel | EventKeyboard | Event;
+    export type Eventƒ = EventPointer | EventDragDrop | EventWheel | EventKeyboard | Event | EventPhysics;
 
     export type EventListenerƒ =
         ((_event: EventPointer) => void) |
@@ -50,6 +50,7 @@ namespace FudgeCore {
         ((_event: EventWheel) => void) |
         ((_event: EventKeyboard) => void) |
         ((_event: Eventƒ) => void) |
+        ((_event: EventPhysics) => void) |
         EventListenerObject;
 
     export class EventTargetƒ extends EventTarget {

@@ -105,9 +105,9 @@ namespace Fudge {
 
           let nodeComponents: ƒ.Component[] = this.node.getAllComponents();
           for (let nodeComponent of nodeComponents) {
-            let fieldset: ƒui.ExpandableFieldSet = ƒui.Generator.createFieldSetFromMutable(nodeComponent);
-            let uiComponent: ControllerComponent = new ControllerComponent(nodeComponent, fieldset);
-            fieldset.expand(this.expanded[nodeComponent.type]);
+            let details: ƒui.Details = ƒui.Generator.createDetailsFromMutable(nodeComponent);
+            let uiComponent: ControllerComponent = new ControllerComponent(nodeComponent, details);
+            details.expand(this.expanded[nodeComponent.type]);
             this.dom.append(uiComponent.domElement);
           }
         }
@@ -129,7 +129,7 @@ namespace Fudge {
           break;
         case ƒui.EVENT.EXPAND:
         case ƒui.EVENT.COLLAPSE:
-          this.expanded[(<ƒui.ExpandableFieldSet>_event.target).getAttribute("type")] = (_event.type == ƒui.EVENT.EXPAND);
+          this.expanded[(<ƒui.Details>_event.target).getAttribute("type")] = (_event.type == ƒui.EVENT.EXPAND);
         default:
           break;
       }

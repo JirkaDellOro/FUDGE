@@ -15,13 +15,13 @@ namespace FudgeCore {
     public static useProgram(this: typeof Shader): void {
       if (!this.program)
         this.createProgram();
-      let crc3: WebGL2RenderingContext = RenderOperator.getRenderingContext();
+      let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       crc3.useProgram(this.program);
       crc3.enableVertexAttribArray(this.attributes["a_position"]);
     }
 
     public static deleteProgram(this: typeof Shader): void {
-      let crc3: WebGL2RenderingContext = RenderOperator.getRenderingContext();
+      let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       if (this.program) {
         crc3.deleteProgram(this.program);
         delete this.attributes;
@@ -31,13 +31,13 @@ namespace FudgeCore {
 
     protected static createProgram(this: typeof Shader): void {
       Debug.fudge("Create shader program", this.name);
-      let crc3: WebGL2RenderingContext = RenderOperator.getRenderingContext();
+      let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       let program: WebGLProgram = crc3.createProgram();
       try {
-        crc3.attachShader(program, RenderOperator.assert<WebGLShader>(compileShader(this.getVertexShaderSource(), WebGL2RenderingContext.VERTEX_SHADER)));
-        crc3.attachShader(program, RenderOperator.assert<WebGLShader>(compileShader(this.getFragmentShaderSource(), WebGL2RenderingContext.FRAGMENT_SHADER)));
+        crc3.attachShader(program, RenderWebGL.assert<WebGLShader>(compileShader(this.getVertexShaderSource(), WebGL2RenderingContext.VERTEX_SHADER)));
+        crc3.attachShader(program, RenderWebGL.assert<WebGLShader>(compileShader(this.getFragmentShaderSource(), WebGL2RenderingContext.FRAGMENT_SHADER)));
         crc3.linkProgram(program);
-        let error: string = RenderOperator.assert<string>(crc3.getProgramInfoLog(program));
+        let error: string = RenderWebGL.assert<string>(crc3.getProgramInfoLog(program));
         if (error !== "") {
           throw new Error("Error linking Shader: " + error);
         }
@@ -56,7 +56,7 @@ namespace FudgeCore {
         let webGLShader: WebGLShader = crc3.createShader(_shaderType);
         crc3.shaderSource(webGLShader, _shaderCode);
         crc3.compileShader(webGLShader);
-        let error: string = RenderOperator.assert<string>(crc3.getShaderInfoLog(webGLShader));
+        let error: string = RenderWebGL.assert<string>(crc3.getShaderInfoLog(webGLShader));
         if (error !== "") {
           throw new Error("Error compiling shader: " + error);
         }
@@ -71,7 +71,7 @@ namespace FudgeCore {
         let detectedAttributes: { [name: string]: number } = {};
         let attributeCount: number = crc3.getProgramParameter(program, WebGL2RenderingContext.ACTIVE_ATTRIBUTES);
         for (let i: number = 0; i < attributeCount; i++) {
-          let attributeInfo: WebGLActiveInfo = RenderOperator.assert<WebGLActiveInfo>(crc3.getActiveAttrib(program, i));
+          let attributeInfo: WebGLActiveInfo = RenderWebGL.assert<WebGLActiveInfo>(crc3.getActiveAttrib(program, i));
           if (!attributeInfo) {
             break;
           }
@@ -83,11 +83,11 @@ namespace FudgeCore {
         let detectedUniforms: { [name: string]: WebGLUniformLocation } = {};
         let uniformCount: number = crc3.getProgramParameter(program, WebGL2RenderingContext.ACTIVE_UNIFORMS);
         for (let i: number = 0; i < uniformCount; i++) {
-          let info: WebGLActiveInfo = RenderOperator.assert<WebGLActiveInfo>(crc3.getActiveUniform(program, i));
+          let info: WebGLActiveInfo = RenderWebGL.assert<WebGLActiveInfo>(crc3.getActiveUniform(program, i));
           if (!info) {
             break;
           }
-          detectedUniforms[info.name] = RenderOperator.assert<WebGLUniformLocation>(crc3.getUniformLocation(program, info.name));
+          detectedUniforms[info.name] = RenderWebGL.assert<WebGLUniformLocation>(crc3.getUniformLocation(program, info.name));
         }
         return detectedUniforms;
       }

@@ -21,14 +21,14 @@ namespace FudgeAid {
   export class StateMachine<State> {
     public stateCurrent: State;
     public stateNext: State;
-    public stateMachine: StateMachineInstructions<State>;
+    public instructions: StateMachineInstructions<State>;
 
     public transit(_next: State): void {
-      this.stateMachine.transit(this.stateCurrent, _next, this);
+      this.instructions.transit(this.stateCurrent, _next, this);
     }
 
     public act(): void {
-      this.stateMachine.act(this.stateCurrent, this);
+      this.instructions.act(this.stateCurrent, this);
     }
   }
 
@@ -69,7 +69,7 @@ namespace FudgeAid {
         let transition: StateMachineMethod<State> = active.transitions.get(_next);
         transition(_machine);
       } catch (_error) {
-        console.info(_error.message);
+        // console.info(_error.message);
         this.transitDefault(_machine);
       } finally {
         _machine.stateCurrent = _next;
@@ -83,7 +83,7 @@ namespace FudgeAid {
         let active: StateMachineMapStateToMethods<State> = this.get(_current);
         active.action(_machine);
       } catch (_error) {
-        console.info(_error.message);
+        // console.info(_error.message);
         this.actDefault(_machine);
       }
     }

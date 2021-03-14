@@ -347,7 +347,8 @@ var Fudge;
                 return element;
             }
             let result = (new XMLSerializer()).serializeToString(html);
-            result = result.replaceAll("><", ">\n<");
+            result = result.replace(/></g, ">\n<");
+            // result = result.replaceAll("><", ">\n<");
             return result;
         }
         getGraphs() {
@@ -393,13 +394,16 @@ var Fudge;
                 async function startInteractiveViewport() {
                     // load resources referenced in the link-tag
                     await FudgeCore.Project.loadResourcesFromHTML();
+                    FudgeCore.Debug.log("Project:", FudgeCore.Project.resources);
                     // pick the graph to show
                     let graph = FudgeCore.Project.resources[_graphId];
+                    FudgeCore.Debug.log("Graph:", graph);
                     // setup the viewport
                     let cmpCamera = new FudgeCore.ComponentCamera();
                     let canvas = document.querySelector("canvas");
                     let viewport = new FudgeCore.Viewport();
                     viewport.initialize("InteractiveViewport", graph, cmpCamera, canvas);
+                    FudgeCore.Debug.log("Viewport:", viewport);
                     // hide the cursor when interacting, also suppressing right-click menu
                     canvas.addEventListener("mousedown", canvas.requestPointerLock);
                     canvas.addEventListener("mouseup", function () { document.exitPointerLock(); });
@@ -410,8 +414,10 @@ var Fudge;
                     cmpCamera.getContainer().addComponent(cmpListener);
                     FudgeCore.AudioManager.default.listenWith(cmpListener);
                     FudgeCore.AudioManager.default.listenTo(graph);
+                    FudgeCore.Debug.log("Audio:", FudgeCore.AudioManager.default);
                     // draw viewport once for immediate feedback
                     viewport.draw();
+                    canvas.dispatchEvent(new CustomEvent("interactiveViewportStarted", { bubbles: true, detail: viewport }));
                 }
             }).toString();
             code = "(" + code + `)("${_graphId}");\n`;
@@ -1086,8 +1092,8 @@ var Fudge;
             let chain = _script["__proto__"];
             this.superClass = chain.name;
             do {
-                this.isComponent ||= (chain.name == "Component");
-                this.isComponentScript ||= (chain.name == "ComponentScript");
+                this.isComponent = this.isComponent || (chain.name == "Component");
+                this.isComponentScript = this.isComponentScript || (chain.name == "ComponentScript");
                 chain = chain["__proto__"];
             } while (chain);
         }
@@ -2067,9 +2073,9 @@ var Fudge;
                     this.setTitle(this.node.name);
                     let nodeComponents = this.node.getAllComponents();
                     for (let nodeComponent of nodeComponents) {
-                        let fieldset = ƒui.Generator.createFieldSetFromMutable(nodeComponent);
-                        let uiComponent = new Fudge.ControllerComponent(nodeComponent, fieldset);
-                        fieldset.expand(this.expanded[nodeComponent.type]);
+                        let details = ƒui.Generator.createDetailsFromMutable(nodeComponent);
+                        let uiComponent = new Fudge.ControllerComponent(nodeComponent, details);
+                        details.expand(this.expanded[nodeComponent.type]);
                         this.dom.append(uiComponent.domElement);
                     }
                 }
@@ -2213,7 +2219,7 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
-    var ƒaid = FudgeAid;
+    var ƒAid = FudgeAid;
     /**
      * View the rendering of a graph in a viewport with an independent camera
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
@@ -2258,28 +2264,29 @@ var Fudge;
         }
         createUserInterface() {
             let cmpCamera = new ƒ.ComponentCamera();
-            cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
-            cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
+            // cmpCamera.pivot.translate(new ƒ.Vector3(3, 2, 1));
+            // cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
             cmpCamera.projectCentral(1, 45);
-            this.canvas = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
+            this.canvas = ƒAid.Canvas.create(true, ƒAid.IMAGE_RENDERING.PIXELATED);
             let container = document.createElement("div");
             container.style.borderWidth = "0px";
             document.body.appendChild(this.canvas);
             this.viewport = new ƒ.Viewport();
             this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
+            FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
             this.viewport.draw();
             this.dom.append(this.canvas);
             // ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
             // ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
             //Focus cameracontrols on new viewport
             // let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });
-            this.canvas.addEventListener("click", this.activeViewport);
+            this.canvas.addEventListener("click" /* CLICK */, this.activeViewport);
         }
         setGraph(_node) {
             if (!_node)
                 return;
             this.graph = _node;
-            this.viewport.setGraph(this.graph);
+            this.viewport.setBranch(this.graph);
             this.redraw();
         }
         hndDragOver(_event, _viewSource) {
@@ -2306,7 +2313,7 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
-    var ƒaid = FudgeAid;
+    var ƒAid = FudgeAid;
     /**
      * Preview a resource
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
@@ -2329,6 +2336,7 @@ var Fudge;
                             this.resource = _event.detail.data.script;
                         else
                             this.resource = _event.detail.data;
+                        this.resetCamera();
                         this.fillContent();
                         break;
                 }
@@ -2343,12 +2351,13 @@ var Fudge;
             };
             // create viewport for 3D-resources
             let cmpCamera = new ƒ.ComponentCamera();
-            cmpCamera.pivot.translate(new ƒ.Vector3(1, 2, 1));
-            cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
+            // cmpCamera.pivot.translate(new ƒ.Vector3(1, 2, 1));
+            // cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
             cmpCamera.projectCentral(1, 45);
-            let canvas = ƒaid.Canvas.create(true, ƒaid.IMAGE_RENDERING.PIXELATED);
+            let canvas = ƒAid.Canvas.create(true, ƒAid.IMAGE_RENDERING.PIXELATED);
             this.viewport = new ƒ.Viewport();
             this.viewport.initialize("Preview", null, cmpCamera, canvas);
+            this.cmrOrbit = ƒAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
             this.fillContent();
             _container.on("resize", this.redraw);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
@@ -2420,18 +2429,18 @@ var Fudge;
                     graph = this.createStandardGraph();
                     graph.addComponent(new ƒ.ComponentMesh(this.resource));
                     graph.addComponent(new ƒ.ComponentMaterial(ViewPreview.mtrStandard));
-                    this.viewport.draw();
+                    this.redraw();
                     break;
                 case "Material":
                     graph = this.createStandardGraph();
                     graph.addComponent(new ƒ.ComponentMesh(ViewPreview.meshStandard));
                     graph.addComponent(new ƒ.ComponentMaterial(this.resource));
-                    this.viewport.draw();
+                    this.redraw();
                     break;
                 case "Graph":
-                    this.viewport.setGraph(this.resource);
+                    this.viewport.setBranch(this.resource);
                     this.dom.appendChild(this.viewport.getCanvas());
-                    this.viewport.draw();
+                    this.redraw();
                     break;
                 case "TextureImage":
                     let img = this.resource.image;
@@ -2447,8 +2456,8 @@ var Fudge;
         }
         createStandardGraph() {
             let graph = new ƒ.Node("PreviewScene");
-            ƒaid.addStandardLightComponents(graph);
-            this.viewport.setGraph(graph);
+            ƒAid.addStandardLightComponents(graph);
+            this.viewport.setBranch(graph);
             this.dom.appendChild(this.viewport.getCanvas());
             return graph;
         }
@@ -2485,6 +2494,12 @@ var Fudge;
             code = code.replaceAll("    ", " ");
             pre.textContent = code;
             return pre;
+        }
+        resetCamera() {
+            this.cmrOrbit.rotationX = -30;
+            this.cmrOrbit.rotationY = 30;
+            this.cmrOrbit.distance = 3;
+            ƒ.Render.prepare(this.cmrOrbit);
         }
     }
     ViewPreview.mtrStandard = ViewPreview.createStandardMaterial();
@@ -2560,7 +2575,7 @@ var Fudge;
             if (this.resource) {
                 this.setTitle(this.resource.name);
                 if (this.resource instanceof ƒ.Mutable) {
-                    let fieldset = ƒui.Generator.createFieldSetFromMutable(this.resource);
+                    let fieldset = ƒui.Generator.createDetailsFromMutable(this.resource);
                     let uiMutable = new Fudge.ControllerComponent(this.resource, fieldset);
                     content = uiMutable.domElement;
                 }

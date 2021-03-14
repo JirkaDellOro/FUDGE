@@ -9,6 +9,7 @@ namespace FudgeCore {
         public arguments: Object[];
         public firstCall: boolean = true;
         public lastCall: boolean = false;
+        public count: number;
 
         constructor(_timer: Timer, ..._arguments: Object[]) {
             this.target = _timer;

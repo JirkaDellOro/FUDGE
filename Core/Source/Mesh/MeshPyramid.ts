@@ -14,7 +14,7 @@ namespace FudgeCore {
 
     public constructor(_name: string = "MeshPyramid") {
       super(_name);
-      this.create();
+      // this.create();
     }
 
 
@@ -52,16 +52,12 @@ namespace FudgeCore {
     protected createTextureUVs(): Float32Array {
       let textureUVs: Float32Array = new Float32Array([
                 // front
-                /*0*/ 0, 1, /*1*/ 0.5, 1,  /*2*/ 1, 1, /*3*/ 0.5, 1,
+                /*0*/ 0, 1, /*1*/ 1, 1,  /*2*/ 1, 0, /*3*/ 0, 0,
                 // back
-                /*4*/ 0.5, 0,
+                /*4*/ 0.5, 0.5,
                 /*5*/ 0, 0, /*6*/ 1, 0,  /*7*/ 1, 1, /*8*/ 0, 1
       ]);
       return textureUVs;
-    }
-
-    protected createFaceNormals(): Float32Array {
-      return new Float32Array(this.calculateFaceNormals());
     }
   }
 }

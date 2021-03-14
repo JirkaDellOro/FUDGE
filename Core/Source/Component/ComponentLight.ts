@@ -14,7 +14,7 @@ namespace FudgeCore {
     DIRECTIONAL = "LightDirectional",
     POINT = "LightPoint",
     SPOT = "LightSpot"
-  };
+  }
 
   export class ComponentLight extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentLight);

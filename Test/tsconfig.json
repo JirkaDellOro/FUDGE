@@ -59,7 +59,6 @@
     "Transfer/Project/Code/Build/**"
   ],
   "types": [
-    "../Core/Build/FudgeCore",
     "../UserInterface/Build/FudgeUserInterface",
   ]
 }

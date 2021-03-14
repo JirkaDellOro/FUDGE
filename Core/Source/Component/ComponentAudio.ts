@@ -111,8 +111,10 @@ namespace FudgeCore {
           this.createSource(this.audio, this.source.loop);
           this.source.start(0, 0);
         }
-        else
+        else {
           this.audio.addEventListener(EVENT_AUDIO.READY, this.hndAudioReady);
+        }
+        this.source.addEventListener(EVENT_AUDIO.ENDED, this.hndAudioEnded);
       }
       else
         this.source.stop();
@@ -176,7 +178,7 @@ namespace FudgeCore {
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       super.deserialize(_serialization);
-      let audio: Audio = <Audio> await Project.getResource(_serialization.idResource);
+      let audio: Audio = <Audio>await Project.getResource(_serialization.idResource);
       this.createSource(audio, _serialization.loop);
       this.volume = _serialization.volume;
       this.play(_serialization.playing);
@@ -186,9 +188,14 @@ namespace FudgeCore {
 
 
     private hndAudioReady: EventListener = (_event: Event) => {
-      console.log("Start Audio!");
+      Debug.fudge("Audio start", Reflect.get(_event.target, "url"));
       if (this.playing)
         this.play(true);
+    }
+
+    private hndAudioEnded: EventListener = (_event: Event) => {
+      // Debug.fudge("Audio ended", Reflect.get(_event.target, "url"));
+      this.playing = false;
     }
 
     private install(_audioManager: AudioManager = AudioManager.default): void {
