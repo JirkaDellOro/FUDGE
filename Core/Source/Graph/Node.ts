@@ -15,6 +15,9 @@ namespace FudgeCore {
     public nNodesInBranch: number = 0;
     public radius: number = 0;
 
+    #mtxWorldInverseUpdated: number;
+    #mtxWorldInverse: Matrix4x4;
+
     private parent: Node | null = null; // The parent of this node.
     private children: Node[] = []; // array of child nodes appended to this node.
     private components: MapClassToComponents = {};
@@ -24,8 +27,6 @@ namespace FudgeCore {
     private captures: MapEventTypeToListener = {};
     private active: boolean = true;
 
-    private ƒmtxWorldInverseUpdated: number;
-    private ƒmtxWorldInverse: Matrix4x4;
 
     /**
      * Creates a new node with a name and initializes all attributes
@@ -56,11 +57,11 @@ namespace FudgeCore {
     }
 
     public get mtxWorldInverse(): Matrix4x4 {
-      if (this.ƒmtxWorldInverseUpdated != this.timestampUpdate)
-        this.ƒmtxWorldInverse = Matrix4x4.INVERSION(this.mtxWorld);
+      if (this.#mtxWorldInverseUpdated != this.timestampUpdate)
+        this.#mtxWorldInverse = Matrix4x4.INVERSION(this.mtxWorld);
 
-      this.ƒmtxWorldInverseUpdated = this.timestampUpdate;
-      return this.ƒmtxWorldInverse;
+      this.#mtxWorldInverseUpdated = this.timestampUpdate;
+      return this.#mtxWorldInverse;
     }
 
     /**

@@ -1,6 +1,6 @@
 namespace Fudge {
   import ƒ = FudgeCore;
-  import ƒui = FudgeUserInterface;
+  import ƒUi = FudgeUserInterface;
 
   enum Menu {
     COMPONENTMENU = "Add Components"
@@ -28,10 +28,11 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
-      this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
-      this.dom.addEventListener(ƒui.EVENT.EXPAND, this.hndEvent);
-      this.dom.addEventListener(ƒui.EVENT.COLLAPSE, this.hndEvent);
-      this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
+      // this.dom.addEventListener(ƒUi.EVENT.RENAME, this.hndEvent);
+      this.dom.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
+      this.dom.addEventListener(ƒUi.EVENT.EXPAND, this.hndEvent);
+      this.dom.addEventListener(ƒUi.EVENT.COLLAPSE, this.hndEvent);
+      this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
     }
 
     //#region  ContextMenu
@@ -44,7 +45,7 @@ namespace Fudge {
       });
       menu.append(item);
 
-      ContextMenu.appendCopyPaste(menu);
+      // ContextMenu.appendCopyPaste(menu);
       return menu;
     }
 
@@ -60,7 +61,7 @@ namespace Fudge {
           ƒ.Debug.info(cmpNew.type, cmpNew);
 
           this.node.addComponent(cmpNew);
-          this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.SELECT, { bubbles: true, detail: { data: this.node } }));
+          this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.SELECT, { bubbles: true, detail: { data: this.node } }));
           break;
       }
     }
@@ -105,7 +106,7 @@ namespace Fudge {
 
           let nodeComponents: ƒ.Component[] = this.node.getAllComponents();
           for (let nodeComponent of nodeComponents) {
-            let details: ƒui.Details = ƒui.Generator.createDetailsFromMutable(nodeComponent);
+            let details: ƒUi.Details = ƒUi.Generator.createDetailsFromMutable(nodeComponent);
             let uiComponent: ControllerComponent = new ControllerComponent(nodeComponent, details);
             details.expand(this.expanded[nodeComponent.type]);
             this.dom.append(uiComponent.domElement);
@@ -127,9 +128,14 @@ namespace Fudge {
         case EVENT_EDITOR.UPDATE:
           this.fillContent();
           break;
-        case ƒui.EVENT.EXPAND:
-        case ƒui.EVENT.COLLAPSE:
-          this.expanded[(<ƒui.Details>_event.target).getAttribute("type")] = (_event.type == ƒui.EVENT.EXPAND);
+        case ƒUi.EVENT.DELETE:
+          let component: ƒ.Component = _event.detail.mutable;
+          this.node.removeComponent(component);
+          this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+          break;
+        case ƒUi.EVENT.EXPAND:
+        case ƒUi.EVENT.COLLAPSE:
+          this.expanded[(<ƒUi.Details>_event.target).getAttribute("type")] = (_event.type == ƒUi.EVENT.EXPAND);
         default:
           break;
       }

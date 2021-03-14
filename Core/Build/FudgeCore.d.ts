@@ -800,6 +800,7 @@ declare namespace FudgeCore {
      * @link https://github.com/JirkaDellOro/FUDGE/wiki/Graph
      */
     class Node extends EventTargetƒ implements Serializable {
+        #private;
         name: string;
         readonly mtxWorld: Matrix4x4;
         timestampUpdate: number;
@@ -811,8 +812,6 @@ declare namespace FudgeCore {
         private listeners;
         private captures;
         private active;
-        private ƒmtxWorldInverseUpdated;
-        private ƒmtxWorldInverse;
         /**
          * Creates a new node with a name and initializes all attributes
          * @param _name The name by which the node can be called.

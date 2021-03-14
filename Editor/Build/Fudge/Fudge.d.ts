@@ -20,7 +20,8 @@ declare namespace Fudge {
         EDIT = 3,
         CREATE_MESH = 4,
         CREATE_MATERIAL = 5,
-        CREATE_GRAPH = 6
+        CREATE_GRAPH = 6,
+        REMOVE_COMPONENT = 7
     }
     enum MENU {
         QUIT = "quit",
@@ -226,9 +227,10 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
-    import ƒui = FudgeUserInterface;
-    class ControllerComponent extends ƒui.Controller {
+    import ƒUi = FudgeUserInterface;
+    class ControllerComponent extends ƒUi.Controller {
         constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
+        private hndKey;
         private hndDragOver;
         private hndDrop;
         private filterDragDrop;

@@ -34,6 +34,7 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["CREATE_MESH"] = 4] = "CREATE_MESH";
         CONTEXTMENU[CONTEXTMENU["CREATE_MATERIAL"] = 5] = "CREATE_MATERIAL";
         CONTEXTMENU[CONTEXTMENU["CREATE_GRAPH"] = 6] = "CREATE_GRAPH";
+        CONTEXTMENU[CONTEXTMENU["REMOVE_COMPONENT"] = 7] = "REMOVE_COMPONENT";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -830,7 +831,7 @@ var Fudge;
                 submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE_MATERIAL, ƒ.Shader.subclasses, _callback)
             });
             menu.append(item);
-            item = new Fudge.remote.MenuItem({ label: "Create Graph", id: String(Fudge.CONTEXTMENU.CREATE_GRAPH), click: _callback, accelerator: process.platform == "darwin" ? "G" : "G" });
+            item = new Fudge.remote.MenuItem({ label: "Create Graph", id: String(Fudge.CONTEXTMENU.CREATE_GRAPH), click: _callback, accelerator: "G" });
             menu.append(item);
             // ContextMenu.appendCopyPaste(menu);
             return menu;
@@ -922,7 +923,7 @@ var Fudge;
 ///<reference path="../View/Project/ViewInternal.ts"/>
 (function (Fudge) {
     var ƒ = FudgeCore;
-    var ƒui = FudgeUserInterface;
+    var ƒUi = FudgeUserInterface;
     let filter = {
         UrlOnTexture: { fromViews: [Fudge.ViewExternal], onKeyAttribute: "url", onTypeAttribute: "TextureImage", ofType: Fudge.DirectoryEntry, dropEffect: "link" },
         UrlOnAudio: { fromViews: [Fudge.ViewExternal], onKeyAttribute: "url", onTypeAttribute: "Audio", ofType: Fudge.DirectoryEntry, dropEffect: "link" },
@@ -931,9 +932,14 @@ var Fudge;
         MeshOnMeshLabel: { fromViews: [Fudge.ViewInternal], onKeyAttribute: "mesh", ofType: ƒ.Mesh, dropEffect: "link" },
         TextureOnMaterial: { fromViews: [Fudge.ViewInternal], onType: ƒ.Material, ofType: ƒ.Texture, dropEffect: "link" }
     };
-    class ControllerComponent extends ƒui.Controller {
+    class ControllerComponent extends ƒUi.Controller {
         constructor(_mutable, _domElement) {
             super(_mutable, _domElement);
+            this.hndKey = (_event) => {
+                _event.stopPropagation();
+                if (_event.code == ƒ.KEYBOARD_CODE.DELETE)
+                    this.domElement.dispatchEvent(new CustomEvent("delete" /* DELETE */, { bubbles: true, detail: this }));
+            };
             this.hndDragOver = (_event) => {
                 // url on texture
                 if (this.filterDragDrop(_event, filter.UrlOnTexture, checkMimeType(Fudge.MIME.IMAGE)))
@@ -1008,10 +1014,10 @@ var Fudge;
                 if (this.filterDragDrop(_event, filter.TextureOnMaterial, setTexture))
                     return;
             };
-            this.domElement.addEventListener("input", this.mutateOnInput); // this should be obsolete
+            this.domElement.addEventListener("input" /* INPUT */, this.mutateOnInput); // this should be obsolete
             this.domElement.addEventListener("dragover" /* DRAG_OVER */, this.hndDragOver);
             this.domElement.addEventListener("drop" /* DROP */, this.hndDrop);
-            // this.domElement.addEventListener(ƒui.EVENT.UPDATE, this.hndUpdate);
+            this.domElement.addEventListener("keydown" /* KEY_DOWN */, this.hndKey);
         }
         filterDragDrop(_event, _filter, _callback = () => true) {
             let target = _event.target;
@@ -1967,7 +1973,7 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
-    var ƒui = FudgeUserInterface;
+    var ƒUi = FudgeUserInterface;
     let Menu;
     (function (Menu) {
         Menu["COMPONENTMENU"] = "Add Components";
@@ -1995,6 +2001,11 @@ var Fudge;
                     case Fudge.EVENT_EDITOR.UPDATE:
                         this.fillContent();
                         break;
+                    case "delete" /* DELETE */:
+                        let component = _event.detail.mutable;
+                        this.node.removeComponent(component);
+                        this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                        break;
                     case "expand" /* EXPAND */:
                     case "collapse" /* COLLAPSE */:
                         this.expanded[_event.target.getAttribute("type")] = (_event.type == "expand" /* EXPAND */);
@@ -2006,7 +2017,8 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
-            this.dom.addEventListener("rename" /* RENAME */, this.hndEvent);
+            // this.dom.addEventListener(ƒUi.EVENT.RENAME, this.hndEvent);
+            this.dom.addEventListener("delete" /* DELETE */, this.hndEvent);
             this.dom.addEventListener("expand" /* EXPAND */, this.hndEvent);
             this.dom.addEventListener("collapse" /* COLLAPSE */, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
@@ -2020,7 +2032,7 @@ var Fudge;
                 submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.ADD_COMPONENT, ƒ.Component.subclasses, _callback)
             });
             menu.append(item);
-            Fudge.ContextMenu.appendCopyPaste(menu);
+            // ContextMenu.appendCopyPaste(menu);
             return menu;
         }
         contextMenuCallback(_item, _window, _event) {
@@ -2073,7 +2085,7 @@ var Fudge;
                     this.setTitle(this.node.name);
                     let nodeComponents = this.node.getAllComponents();
                     for (let nodeComponent of nodeComponents) {
-                        let details = ƒui.Generator.createDetailsFromMutable(nodeComponent);
+                        let details = ƒUi.Generator.createDetailsFromMutable(nodeComponent);
                         let uiComponent = new Fudge.ControllerComponent(nodeComponent, details);
                         details.expand(this.expanded[nodeComponent.type]);
                         this.dom.append(uiComponent.domElement);
