@@ -1312,11 +1312,11 @@ var Fudge;
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndFocusNode);
             this.dom.addEventListener("rename" /* RENAME */, this.broadcastEvent);
         }
-        setGraph(_node) {
-            this.node = _node;
+        setGraph(_graph) {
+            this.graph = _graph;
         }
         getNode() {
-            return this.node;
+            return this.graph;
         }
     }
     Fudge.PanelGraph = PanelGraph;
@@ -2089,9 +2089,9 @@ var Fudge;
                     let nodeComponents = this.node.getAllComponents();
                     for (let nodeComponent of nodeComponents) {
                         let details = ƒUi.Generator.createDetailsFromMutable(nodeComponent);
-                        let uiComponent = new Fudge.ControllerComponent(nodeComponent, details);
+                        let controller = new Fudge.ControllerComponent(nodeComponent, details);
                         details.expand(this.expanded[nodeComponent.type]);
-                        this.dom.append(uiComponent.domElement);
+                        this.dom.append(controller.domElement);
                     }
                 }
             }

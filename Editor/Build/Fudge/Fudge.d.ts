@@ -319,9 +319,9 @@ declare namespace Fudge {
     * @authors Monika Galkewitsch, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
     */
     class PanelGraph extends Panel {
-        private node;
+        private graph;
         constructor(_container: GoldenLayout.Container, _state: Object);
-        setGraph(_node: ƒ.Node): void;
+        setGraph(_graph: ƒ.Node): void;
         getNode(): ƒ.Node;
         private hndEvent;
         private hndFocusNode;

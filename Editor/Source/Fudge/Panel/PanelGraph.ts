@@ -7,7 +7,7 @@ namespace Fudge {
   * @authors Monika Galkewitsch, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
   */
   export class PanelGraph extends Panel {
-    private node: ƒ.Node;
+    private graph: ƒ.Node;
 
     constructor(_container: GoldenLayout.Container, _state: Object) {
       super(_container, _state);
@@ -37,12 +37,12 @@ namespace Fudge {
       this.dom.addEventListener(ƒui.EVENT.RENAME, this.broadcastEvent);
     }
 
-    public setGraph(_node: ƒ.Node): void {
-      this.node = _node;
+    public setGraph(_graph: ƒ.Node): void {
+      this.graph = _graph;
     }
 
     public getNode(): ƒ.Node {
-      return this.node;
+      return this.graph;
     }
 
     private hndEvent = (_event: CustomEvent): void => {

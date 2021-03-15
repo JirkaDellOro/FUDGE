@@ -129,5 +129,6 @@ namespace FudgeUserInterface {
     }
   }
 
+  // TODO: use CustomElement.register?
   customElements.define("ui-details", Details, { extends: "details" });
 }

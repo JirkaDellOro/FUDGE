@@ -92,9 +92,8 @@
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgeuserinterface.generator.html#createcontroller" class="tsd-kind-icon">create<wbr>Controller</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgeuserinterface.generator.html#createdetailsfrommutable" class="tsd-kind-icon">create<wbr>Details<wbr>From<wbr>Mutable</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgeuserinterface.generator.html#createdropdown" class="tsd-kind-icon">create<wbr>Dropdown</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgeuserinterface.generator.html#createexpendablefieldset" class="tsd-kind-icon">create<wbr>Expendable<wbr>Fieldset</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgeuserinterface.generator.html#createfieldsetfrommutable" class="tsd-kind-icon">create<wbr>Field<wbr>Set<wbr>From<wbr>Mutable</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgeuserinterface.generator.html#createinterfacefrommutable" class="tsd-kind-icon">create<wbr>Interface<wbr>From<wbr>Mutable</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgeuserinterface.generator.html#createinterfacefrommutator" class="tsd-kind-icon">create<wbr>Interface<wbr>From<wbr>Mutator</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgeuserinterface.generator.html#createmutatorelement" class="tsd-kind-icon">create<wbr>Mutator<wbr>Element</a></li>
@@ -115,12 +114,12 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/Controller/Generator.ts#L13">Documents/HFU/FUDGE/UserInterface/Source/Controller/Generator.ts:13</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/f8bc6cef/UserInterface/Source/Controller/Generator.ts#L13">Documents/HFU/FUDGE/UserInterface/Source/Controller/Generator.ts:13</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Creates a <a href="fudgeuserinterface.controller.html">Controller</a> from a [[FudgeCore.Mutable]] using a CustomFieldSet</p>
+									<p>Creates a <a href="fudgeuserinterface.controller.html">Controller</a> from a [[FudgeCore.Mutable]] with expandable details or a list</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -137,6 +136,40 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="createdetailsfrommutable" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> create<wbr>Details<wbr>From<wbr>Mutable</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">create<wbr>Details<wbr>From<wbr>Mutable<span class="tsd-signature-symbol">(</span>_mutable<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ƒ.Mutable</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">ƒ.MutableArray</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ƒ.Mutable</span><span class="tsd-signature-symbol">&gt;</span>, _name<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span>, _mutator<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">ƒ.Mutator</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgeuserinterface.details.html" class="tsd-signature-type">Details</a><span class="tsd-signature-symbol"> | </span><a href="fudgeuserinterface.detailsarray.html" class="tsd-signature-type">DetailsArray</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/f8bc6cef/UserInterface/Source/Controller/Generator.ts#L22">Documents/HFU/FUDGE/UserInterface/Source/Controller/Generator.ts:22</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Create extendable details for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_mutable: <span class="tsd-signature-type">ƒ.Mutable</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">ƒ.MutableArray</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ƒ.Mutable</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> _name: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> _mutator: <span class="tsd-signature-type">ƒ.Mutator</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="fudgeuserinterface.details.html" class="tsd-signature-type">Details</a><span class="tsd-signature-symbol"> | </span><a href="fudgeuserinterface.detailsarray.html" class="tsd-signature-type">DetailsArray</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
 					<a name="createdropdown" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> create<wbr>Dropdown</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
@@ -146,7 +179,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/Controller/Generator.ts#L113">Documents/HFU/FUDGE/UserInterface/Source/Controller/Generator.ts:113</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/f8bc6cef/UserInterface/Source/Controller/Generator.ts#L112">Documents/HFU/FUDGE/UserInterface/Source/Controller/Generator.ts:112</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -177,76 +210,16 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
-					<a name="createexpendablefieldset" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagStatic">Static</span> create<wbr>Expendable<wbr>Fieldset</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">create<wbr>Expendable<wbr>Fieldset<span class="tsd-signature-symbol">(</span>_key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, _type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgeuserinterface.expandablefieldset.html" class="tsd-signature-type">ExpandableFieldSet</a></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/Controller/Generator.ts#L132">Documents/HFU/FUDGE/UserInterface/Source/Controller/Generator.ts:132</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>_key: <span class="tsd-signature-type">string</span></h5>
-								</li>
-								<li>
-									<h5>_type: <span class="tsd-signature-type">string</span></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudgeuserinterface.expandablefieldset.html" class="tsd-signature-type">ExpandableFieldSet</a></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
-					<a name="createfieldsetfrommutable" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagStatic">Static</span> create<wbr>Field<wbr>Set<wbr>From<wbr>Mutable</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">create<wbr>Field<wbr>Set<wbr>From<wbr>Mutable<span class="tsd-signature-symbol">(</span>_mutable<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ƒ.Mutable</span>, _name<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span>, _mutator<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">ƒ.Mutator</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgeuserinterface.expandablefieldset.html" class="tsd-signature-type">ExpandableFieldSet</a></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/Controller/Generator.ts#L22">Documents/HFU/FUDGE/UserInterface/Source/Controller/Generator.ts:22</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Create a extendable fieldset for the [[FudgeCore.Mutator]] or the [[FudgeCore.Mutable]]</p>
-								</div>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>_mutable: <span class="tsd-signature-type">ƒ.Mutable</span></h5>
-								</li>
-								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> _name: <span class="tsd-signature-type">string</span></h5>
-								</li>
-								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> _mutator: <span class="tsd-signature-type">ƒ.Mutator</span></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudgeuserinterface.expandablefieldset.html" class="tsd-signature-type">ExpandableFieldSet</a></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
 					<a name="createinterfacefrommutable" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> create<wbr>Interface<wbr>From<wbr>Mutable</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">create<wbr>Interface<wbr>From<wbr>Mutable<span class="tsd-signature-symbol">(</span>_mutable<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ƒ.Mutable</span>, _name<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span>, _mutator<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">ƒ.Mutator</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">HTMLDivElement</span></li>
+						<li class="tsd-signature tsd-kind-icon">create<wbr>Interface<wbr>From<wbr>Mutable<span class="tsd-signature-symbol">(</span>_mutable<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ƒ.Mutable</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">ƒ.MutableArray</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ƒ.Mutable</span><span class="tsd-signature-symbol">&gt;</span>, _mutator<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">ƒ.Mutator</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">HTMLDivElement</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/Controller/Generator.ts#L32">Documents/HFU/FUDGE/UserInterface/Source/Controller/Generator.ts:32</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/f8bc6cef/UserInterface/Source/Controller/Generator.ts#L39">Documents/HFU/FUDGE/UserInterface/Source/Controller/Generator.ts:39</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -257,10 +230,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_mutable: <span class="tsd-signature-type">ƒ.Mutable</span></h5>
-								</li>
-								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> _name: <span class="tsd-signature-type">string</span></h5>
+									<h5>_mutable: <span class="tsd-signature-type">ƒ.Mutable</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">ƒ.MutableArray</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ƒ.Mutable</span><span class="tsd-signature-symbol">&gt;</span></h5>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagOptional">Optional</span> _mutator: <span class="tsd-signature-type">ƒ.Mutator</span></h5>
@@ -280,7 +250,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/Controller/Generator.ts#L61">Documents/HFU/FUDGE/UserInterface/Source/Controller/Generator.ts:61</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/f8bc6cef/UserInterface/Source/Controller/Generator.ts#L65">Documents/HFU/FUDGE/UserInterface/Source/Controller/Generator.ts:65</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -309,7 +279,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/Controller/Generator.ts#L80">Documents/HFU/FUDGE/UserInterface/Source/Controller/Generator.ts:80</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/f8bc6cef/UserInterface/Source/Controller/Generator.ts#L84">Documents/HFU/FUDGE/UserInterface/Source/Controller/Generator.ts:84</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -388,10 +358,13 @@
 						<a href="fudgeuserinterface.customelementtextinput.html" class="tsd-kind-icon">Custom<wbr>Element<wbr>Text<wbr>Input</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-namespace">
-						<a href="fudgeuserinterface.dialog.html" class="tsd-kind-icon">Dialog</a>
+						<a href="fudgeuserinterface.details.html" class="tsd-kind-icon">Details</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-namespace">
-						<a href="fudgeuserinterface.expandablefieldset.html" class="tsd-kind-icon">Expandable<wbr>Field<wbr>Set</a>
+						<a href="fudgeuserinterface.detailsarray.html" class="tsd-kind-icon">Details<wbr>Array</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-namespace">
+						<a href="fudgeuserinterface.dialog.html" class="tsd-kind-icon">Dialog</a>
 					</li>
 				</ul>
 				<ul class="current">
@@ -402,13 +375,10 @@
 								<a href="fudgeuserinterface.generator.html#createcontroller" class="tsd-kind-icon">create<wbr>Controller</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="fudgeuserinterface.generator.html#createdetailsfrommutable" class="tsd-kind-icon">create<wbr>Details<wbr>From<wbr>Mutable</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
 								<a href="fudgeuserinterface.generator.html#createdropdown" class="tsd-kind-icon">create<wbr>Dropdown</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
-								<a href="fudgeuserinterface.generator.html#createexpendablefieldset" class="tsd-kind-icon">create<wbr>Expendable<wbr>Fieldset</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
-								<a href="fudgeuserinterface.generator.html#createfieldsetfrommutable" class="tsd-kind-icon">create<wbr>Field<wbr>Set<wbr>From<wbr>Mutable</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
 								<a href="fudgeuserinterface.generator.html#createinterfacefrommutable" class="tsd-kind-icon">create<wbr>Interface<wbr>From<wbr>Mutable</a>
