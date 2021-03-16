@@ -56,8 +56,8 @@ namespace PickTransform {
     // setup the viewport
     cmpCamera = new ƒ.ComponentCamera();
     // Reflect.set(cmpCamera, "fieldOfView", 170);
-    cmpCamera.pivot.translateZ(12);
-    cmpCamera.pivot.rotateY(180);
+    cmpCamera.mtxPivot.translateZ(12);
+    cmpCamera.mtxPivot.rotateY(180);
     viewport = new ƒ.Viewport();
     viewport.initialize("Viewport", graph, cmpCamera, canvas);
     // FudgeAid.Viewport.expandCameraToInteractiveOrbit(viewport);
@@ -93,7 +93,7 @@ namespace PickTransform {
       let vT: ƒ.Vector3 = ƒ.Vector3.NORMALIZATION(pT.toVector3(1));
       let v0T: ƒ.Vector3 = ƒ.Vector3.NORMALIZATION(p0T.toVector3(1));
 
-      let mtxTargetToCamera: ƒ.Matrix4x4 = ƒ.Matrix4x4.RELATIVE(cube.mtxLocal, viewport.camera.pivot);
+      let mtxTargetToCamera: ƒ.Matrix4x4 = ƒ.Matrix4x4.RELATIVE(cube.mtxLocal, viewport.camera.mtxPivot);
       let vL: ƒ.Vector3 = mtxTargetToCamera.translation;
 
       let l: number = vL.magnitude;
@@ -104,7 +104,7 @@ namespace PickTransform {
       mtxTargetToCamera.translation = vLT;
       mtxTargetToCamera.rotateY(vLT.geo.longitude);
       mtxTargetToCamera.rotateX(vLT.geo.latitude);
-      mtxTargetToCamera.multiply(viewport.camera.pivot, true);
+      mtxTargetToCamera.multiply(viewport.camera.mtxPivot, true);
 
       cubeTransformed.mtxLocal.set(mtxTargetToCamera);
     }
