@@ -18,7 +18,7 @@ namespace FudgeAid {
       return "ƒAidNode_" + Node.count++;
     }
 
-    public get pivot(): ƒ.Matrix4x4 {
+    public get mtxMeshPivot(): ƒ.Matrix4x4 {
       let cmpMesh: ƒ.ComponentMesh = this.getComponent(ƒ.ComponentMesh);
       return cmpMesh ? cmpMesh.mtxPivot : null;
     }
