@@ -99,13 +99,13 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
 
     //Standard Fudge Scene Initialization - Creating a directional light, a camera and initialize the viewport
     let cmpLight: f.ComponentLight = new f.ComponentLight(new f.LightDirectional(f.Color.CSS("WHITE")));
-    cmpLight.pivot.lookAt(new f.Vector3(0.5, -1, -0.8)); //Set light direction
+    cmpLight.mtxPivot.lookAt(new f.Vector3(0.5, -1, -0.8)); //Set light direction
     hierarchy.addComponent(cmpLight);
 
     let cmpCamera: f.ComponentCamera = new f.ComponentCamera();
-    cmpCamera.backgroundColor = f.Color.CSS("GREY");
-    cmpCamera.pivot.translate(new f.Vector3(2, 3.5, 17)); //Move camera far back so the whole scene is visible
-    cmpCamera.pivot.lookAt(f.Vector3.ZERO()); //Set the camera matrix so that it looks at the center of the scene
+    cmpCamera.clrBackground = f.Color.CSS("GREY");
+    cmpCamera.mtxPivot.translate(new f.Vector3(2, 3.5, 17)); //Move camera far back so the whole scene is visible
+    cmpCamera.mtxPivot.lookAt(f.Vector3.ZERO()); //Set the camera matrix so that it looks at the center of the scene
 
     viewPort = new f.Viewport(); //Creating a viewport that is rendered onto the html canvas element
     viewPort.initialize("Viewport", hierarchy, cmpCamera, app); //initialize the viewport with the root node, camera and canvas
@@ -117,7 +117,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
 
     //Important start the game loop after starting physics, so physics can use the current transform before it's first iteration
     f.Loop.addEventListener(f.EVENT.LOOP_FRAME, update); //Tell the game loop to call the update function on each frame
-    f.Loop.start(); //Stard the game loop
+    f.Loop.start(); //Start the game loop
   }
 
   //Function to animate/update the Fudge scene, commonly known as gameloop
@@ -142,10 +142,9 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
         - Static:    Immovable, but interacting with other bodies, mostly used for things like obstacles, walls that are fixed
         - Dynamic:   Standard physical object, interacting with everything in a defined physical way,
                      Physical objects only listen to the physics engine, changing the transform will be overwritten by the physics integration.
-        - Kinematic: Is able to interact with physical objects, but is controlley by transform/animation. Downside is it can not be moved by physics.
+        - Kinematic: Is able to interact with physical objects, but is controlled by transform/animation. Downside is it can not be moved by physics.
                      So colliding is only possible with dynamic objects it will move through static objects because kinematic objects try to push
                      everything but won't be pushed themselves, so if an object does not move away the kinematic will "glitch" through it. 
-                     This problem will be tackled in a later tutorial.
     */
     let cmpRigidbody: f.ComponentRigidbody = new f.ComponentRigidbody(_mass, _physicsType, _colType, _group);
     // Hint --> To convert a normal Fudge Node to a physics node just add a ComponentRigidbody defined by a mass, physics interaction type and collider type.
@@ -205,6 +204,20 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
       bodies[2].getComponent(f.ComponentRigidbody).applyImpulseAtPoint(new f.Vector3(0, 15, 0)); //15 kg Impulse about the same effect
     }
     // Hint --> Impulses are much stronger because of their instantaneous nature they do not use force to slowly push something it's a direct hit, so keep that value low
+
+
+    //You can influence the time in which the physics are calculated either in update when you change the default of 60 fps in f.Physics.world.simulate(timeDelta)
+    //or by changing the whole timescale of your Fudge App.
+    if (_event.code == f.KEYBOARD_CODE.I) {
+      f.Time.game.setScale(2);
+    }
+    if (_event.code == f.KEYBOARD_CODE.K) {
+      f.Time.game.setScale(1);
+    }
+    if (_event.code == f.KEYBOARD_CODE.M) {
+      f.Time.game.setScale(0.5);
+    }
+
   }
 
 }

@@ -20,7 +20,6 @@ namespace FudgeCore {
      * render passes.
      */
     public static prepare(_branch: Node, _mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY(), _lights: MapLightTypeToLightList = new Map(), _shadersUsed: (typeof Shader)[] = null): void {
-      Render.setupPhysicalTransform(_branch);
 
       let firstLevel: boolean = (_shadersUsed == null);
       if (firstLevel) {
@@ -85,6 +84,10 @@ namespace FudgeCore {
       if (firstLevel)
         for (let shader of _shadersUsed)
           Render.setLightsInShader(shader, _lights);
+
+
+      //Calculate Physics based on all previous calculations    
+      Render.setupPhysicalTransform(_branch);
     }
     //#endregion
 
@@ -125,8 +128,10 @@ namespace FudgeCore {
         Physics.world.mainCam = _cmpCamera; //DebugDraw needs to know the main camera beforehand, _cmpCamera is the viewport camera. | Marko Fehrenbach, HFU 2020
 
       // TODO: check physics
-      Render.drawList(_cmpCamera, this.nodesSimple);
-      Render.drawListAlpha(_cmpCamera);
+      if (Physics.settings != null && Physics.settings.debugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY) { //Give users the possibility to only show physics displayed | Marko Fehrenbach, HFU 2020
+        Render.drawList(_cmpCamera, this.nodesSimple);
+        Render.drawListAlpha(_cmpCamera);
+      }
 
       if (Physics.settings && Physics.settings.debugDraw == true) {
         Physics.world.debugDraw.end();

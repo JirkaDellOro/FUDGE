@@ -25,15 +25,18 @@ namespace FudgeCore {
     public binomalImpulse: number;
     /** The point where the collision/triggering initially happened. The collision point exists only on COLLISION_ENTER / TRIGGER_ENTER. */
     public collisionPoint: Vector3;
+    /** The normal vector of the collision. Only existing on COLLISION_ENTER */
+    public collisionNormal: Vector3;
 
     /** Creates a new event customized for physics. Holding informations about impulses. Collision point and the body that is colliding */
-    constructor(_type: EVENT_PHYSICS, _hitRigidbody: ComponentRigidbody, _normalImpulse: number, _tangentImpulse: number, _binormalImpulse: number, _collisionPoint: Vector3 = null) {
+    constructor(_type: EVENT_PHYSICS, _hitRigidbody: ComponentRigidbody, _normalImpulse: number, _tangentImpulse: number, _binormalImpulse: number, _collisionPoint: Vector3 = null, _collisionNormal: Vector3 = null) {
       super(_type);
       this.cmpRigidbody = _hitRigidbody;
       this.normalImpulse = _normalImpulse;
       this.tangentImpulse = _tangentImpulse;
       this.binomalImpulse = _binormalImpulse;
       this.collisionPoint = _collisionPoint;
+      this.collisionNormal = _collisionNormal;
     }
   }
 
@@ -110,12 +113,8 @@ namespace FudgeCore {
 
     /** Whether the debug informations of the physics should be displayed or not (default = false) */
     public debugDraw: boolean = false;
-    private physicsDebugMode: PHYSICS_DEBUGMODE = PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
 
-    constructor(_defGroup: number, _defMask: number) {
-      this.defaultCollisionGroup = _defGroup;
-      this.defaultCollisionMask = _defMask;
-    }
+    private physicsDebugMode: PHYSICS_DEBUGMODE = PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
 
     get debugMode(): PHYSICS_DEBUGMODE {
       return this.physicsDebugMode;
@@ -190,11 +189,33 @@ namespace FudgeCore {
     }
 
     /** The group that this rigidbody belongs to. Default is the DEFAULT Group which means its just a normal Rigidbody not a trigger nor anything special. */
-    get defaultCollisionGroup(): number {
-      return OIMO.Setting.defaultCollisionGroup;
+    get defaultCollisionGroup(): PHYSICS_GROUP {
+      return <PHYSICS_GROUP>OIMO.Setting.defaultCollisionGroup;
     }
-    set defaultCollisionGroup(_value: number) {
+    set defaultCollisionGroup(_value: PHYSICS_GROUP) {
       OIMO.Setting.defaultCollisionGroup = _value;
+    }
+
+    /** Change the type of joint solver algorithm. Default Iterative == 0, is faster but less stable. Direct == 1, slow but more stable, recommended for complex joint work. Change this setting only at the start of your game. */
+    get defaultConstraintSolverType(): number {
+      return OIMO.Setting.defaultJointConstraintSolverType;
+    }
+    set defaultConstraintSolverType(_value: number) {
+      OIMO.Setting.defaultJointConstraintSolverType = _value;
+    }
+
+    /** The correction algorithm used to correct physics calculations. Change this only at the beginning of your game. Each has different approaches, so if you have problems test another
+     *  Default 0 = Baumgarte (fast but less correct induces some energy errors), 1 = Split-Impulse (fast and no engery errors, but more inaccurate for joints), 2 = Non-linear Gauss Seidel (slowest but most accurate)*/
+    get defaultCorrectionAlgorithm(): number {
+      return OIMO.Setting.defaultJointPositionCorrectionAlgorithm;
+    }
+    set defaultCorrectionAlgorithm(_value: number) {
+      OIMO.Setting.defaultJointPositionCorrectionAlgorithm = _value;
+    }
+
+    constructor(_defGroup: number, _defMask: number) {
+      this.defaultCollisionGroup = _defGroup;
+      this.defaultCollisionMask = _defMask;
     }
   }
 }

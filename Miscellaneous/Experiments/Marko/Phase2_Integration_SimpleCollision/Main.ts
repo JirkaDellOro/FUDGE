@@ -35,31 +35,31 @@ namespace FudgePhysics_Communication {
 
     ground = createCompleteMeshNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.GROUP_1);
     let cmpGroundMesh: f.ComponentTransform = ground.getComponent(f.ComponentTransform);
-    cmpGroundMesh.local.scale(new f.Vector3(10, 0.3, 10));
+    cmpGroundMesh.mtxLocal.scale(new f.Vector3(10, 0.3, 10));
 
-    cmpGroundMesh.local.translate(new f.Vector3(0, -1.5, 0));
+    cmpGroundMesh.mtxLocal.translate(new f.Vector3(0, -1.5, 0));
     hierarchy.appendChild(ground);
 
     bodies[0] = createCompleteMeshNode("Cube_1", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.GROUP_2);
     let cmpCubeTransform: f.ComponentTransform = bodies[0].getComponent(f.ComponentTransform);
     hierarchy.appendChild(bodies[0]);
-    cmpCubeTransform.local.translate(new f.Vector3(0, 7, 0));
+    cmpCubeTransform.mtxLocal.translate(new f.Vector3(0, 7, 0));
 
     bodies[1] = createCompleteMeshNode("Cube_2", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 1, 0, 1))), new f.MeshCube(), 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.GROUP_1);
     let cmpCubeTransform2: f.ComponentTransform = bodies[1].getComponent(f.ComponentTransform);
     bodies[0].appendChild(bodies[1]);
     bodies[1].removeComponent(bodies[1].getComponent(f.ComponentRigidbody));
-    cmpCubeTransform2.local.translate(new f.Vector3(0, 1, 0));
+    cmpCubeTransform2.mtxLocal.translate(new f.Vector3(0, 1, 0));
 
     bodies[2] = createCompleteMeshNode("Cube_3", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.PHYSICS_TYPE.DYNAMIC);
     let cmpCubeTransform3: f.ComponentTransform = bodies[2].getComponent(f.ComponentTransform);
     hierarchy.appendChild(bodies[2]);
-    cmpCubeTransform3.local.translate(new f.Vector3(0.5, 3, 0.5));
+    cmpCubeTransform3.mtxLocal.translate(new f.Vector3(0.5, 3, 0.5));
 
     bodies[3] = createCompleteMeshNode("Cube_3", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0, 1, 1))), new f.MeshCube(), 1, f.PHYSICS_TYPE.KINEMATIC);
     moveableTransform = bodies[3].getComponent(f.ComponentTransform);
     hierarchy.appendChild(bodies[3]);
-    moveableTransform.local.translate(new f.Vector3(-4, 1, 0));
+    moveableTransform.mtxLocal.translate(new f.Vector3(-4, 1, 0));
 
     bodies[4] = createCompleteMeshNode("Pyramid", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0, 1, 1))), new f.MeshPyramid, 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.GROUP_1, f.COLLIDER_TYPE.PYRAMID);
     hierarchy.appendChild(bodies[4]);
@@ -135,13 +135,13 @@ namespace FudgePhysics_Communication {
 
     //Rest initialization
     let cmpLight: f.ComponentLight = new f.ComponentLight(new f.LightDirectional(f.Color.CSS("WHITE")));
-    cmpLight.pivot.lookAt(new f.Vector3(0.5, -1, -0.8));
+    cmpLight.mtxPivot.lookAt(new f.Vector3(0.5, -1, -0.8));
     hierarchy.addComponent(cmpLight);
 
     let cmpCamera: f.ComponentCamera = new f.ComponentCamera();
-    cmpCamera.backgroundColor = f.Color.CSS("GREY");
-    cmpCamera.pivot.translate(new f.Vector3(2, 2, 10));
-    cmpCamera.pivot.lookAt(f.Vector3.ZERO());
+    cmpCamera.clrBackground = f.Color.CSS("GREY");
+    cmpCamera.mtxPivot.translate(new f.Vector3(2, 2, 10));
+    cmpCamera.mtxPivot.lookAt(f.Vector3.ZERO());
 
 
     viewPort = new f.Viewport();
@@ -217,9 +217,9 @@ namespace FudgePhysics_Communication {
     if (_event.code == f.KEYBOARD_CODE.E) {
       height -= 1 * stepWidth;
     }
-    let pos: f.Vector3 = moveableTransform.local.translation;
+    let pos: f.Vector3 = moveableTransform.mtxLocal.translation;
     pos.add(new f.Vector3(horizontal, height, vertical));
-    moveableTransform.local.translation = pos;
+    moveableTransform.mtxLocal.translation = pos;
   }
 
 }

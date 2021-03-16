@@ -10,10 +10,10 @@ namespace FudgeCore {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentRigidbody);
 
     /** The pivot of the physics itself. Default the pivot is identical to the transform. It's used like an offset. */
-    public pivot: Matrix4x4 = Matrix4x4.IDENTITY();
+    public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
 
     /** Vertices that build a convex mesh (form that is in itself closed). Needs to set in the construction of the rb if none of the standard colliders is used. */
-    public convexMesh: Float32Array;
+    public convexMesh: Float32Array = null;
 
     /** Collisions with rigidbodies happening to this body, can be used to build a custom onCollisionStay functionality. */
     public collisions: ComponentRigidbody[] = new Array();
@@ -43,7 +43,7 @@ namespace FudgeCore {
     private gravityInfluenceFactor: number = 1;
 
     /** Creating a new rigidbody with a weight in kg, a physics type (default = dynamic), a collider type what physical form has the collider, to what group does it belong, is there a transform Matrix that should be used, and is the collider defined as a group of points that represent a convex mesh. */
-    constructor(_mass: number = 1, _type: PHYSICS_TYPE = PHYSICS_TYPE.DYNAMIC, _colliderType: COLLIDER_TYPE = COLLIDER_TYPE.CUBE, _group: PHYSICS_GROUP = Physics.settings.defaultCollisionGroup, _transform: Matrix4x4 = null, _convexMesh: Float32Array = null) {
+    constructor(_mass: number = 1, _type: PHYSICS_TYPE = PHYSICS_TYPE.DYNAMIC, _colliderType: COLLIDER_TYPE = COLLIDER_TYPE.CUBE, _group: PHYSICS_GROUP = Physics.settings.defaultCollisionGroup, _mtxTransform: Matrix4x4 = null, _convexMesh: Float32Array = null) {
       super();
       //Setting up all incoming values to be internal values
       this.convexMesh = _convexMesh;
@@ -55,7 +55,7 @@ namespace FudgeCore {
       this.bodyFriction = Physics.settings.defaultFriction;
       this.colMask = Physics.settings.defaultCollisionMask;
       //Create the actual rigidbody in the OimoPhysics Space
-      this.createRigidbody(_mass, _type, this.colliderType, _transform, this.collisionGroup);
+      this.createRigidbody(_mass, _type, this.colliderType, _mtxTransform, this.collisionGroup);
       this.id = Physics.world.distributeBodyID();
       //Handling adding/removing the component
       this.addEventListener(EVENT.COMPONENT_ADD, this.addRigidbodyToWorld);
@@ -86,6 +86,7 @@ namespace FudgeCore {
           break;
       }
       this.rigidbody.setType(oimoType);
+      this.rigidbody.setMassData(this.massData); //have to reset mass after changing the type, since Oimo is handling mass internally wrong when switching types
     }
 
     /** The shape that represents the [[Node]] in the physical world. Default is a Cube. */
@@ -133,8 +134,9 @@ namespace FudgeCore {
   */
     set mass(_value: number) {
       this.massData.mass = _value;
-      if (this.rigidbody != null)
-        this.rigidbody.setMassData(this.massData);
+      if (this.getContainer() != null)
+        if (this.rigidbody != null)
+          this.rigidbody.setMassData(this.massData);
     }
 
     /** Air reistance, when moving. A Body does slow down even on a surface without friction. */
@@ -213,6 +215,19 @@ namespace FudgeCore {
       return this.rigidbody;
     }
 
+    /** Rotating the rigidbody therefore changing it's rotation over time directly in physics. This way physics is changing instead of transform. 
+ *  But you are able to incremental changing it instead of a direct rotation.  Although it's always prefered to use forces in physics.
+*/
+    public rotateBody(_rotationChange: Vector3): void {
+      this.rigidbody.rotateXyz(new OIMO.Vec3(_rotationChange.x * Math.PI / 180, _rotationChange.y * Math.PI / 180, _rotationChange.z * Math.PI / 180));
+    }
+
+    /** Translating the rigidbody therefore changing it's place over time directly in physics. This way physics is changing instead of transform. 
+     *  But you are able to incremental changing it instead of a direct position. Although it's always prefered to use forces in physics. */
+    public translateBody(_translationChange: Vector3): void {
+      this.rigidbody.translate(new OIMO.Vec3(_translationChange.x, _translationChange.y, _translationChange.z));
+    }
+
     /**
    * Checking for Collision with other Colliders and dispatches a custom event with information about the collider.
    * Automatically called in the RenderManager, no interaction needed.
@@ -237,11 +252,12 @@ namespace FudgeCore {
         if (objHit2 == null || list.getContact().isTouching() == false)
           return;
         let points: OIMO.ManifoldPoint[] = collisionManifold.getPoints(); //All points in the collision where the two bodies are touching, used to calculate the full impact
+        let normal: OIMO.Vec3 = collisionManifold.getNormal();
         normalImpulse = 0;
         binormalImpulse = 0;
         tangentImpulse = 0;
         if (objHit.getOimoRigidbody() != this.getOimoRigidbody() && this.collisions.indexOf(objHit) == -1) { //Fire, if the hit object is not the Body itself but another and it's not already fired.
-          let colPos: OIMO.Vec3 = points[0].getPosition2(); //THE point of collision is the first touching point (EXTENSION: could be the center of all touching points combined)
+          let colPos: OIMO.Vec3 = this.collisionCenterPoint(points, collisionManifold.getNumPoints()); //THE point of collision is the first touching point (EXTENSION: could be the center of all touching points combined)
           colPoint = new Vector3(colPos.x, colPos.y, colPos.z);
           points.forEach((value: OIMO.ManifoldPoint): void => { //The impact of the collision involving all touching points
             normalImpulse += value.getNormalImpulse();
@@ -249,11 +265,11 @@ namespace FudgeCore {
             tangentImpulse += value.getTangentImpulse();
           });
           this.collisions.push(objHit); //Tell the object that the event for this object does not need to be fired again
-          event = new EventPhysics(EVENT_PHYSICS.COLLISION_ENTER, objHit, normalImpulse, tangentImpulse, binormalImpulse, colPoint); //Building the actual event, with what object did collide and informations about it
+          event = new EventPhysics(EVENT_PHYSICS.COLLISION_ENTER, objHit, normalImpulse, tangentImpulse, binormalImpulse, colPoint, new Vector3(normal.x, normal.y, normal.z)); //Building the actual event, with what object did collide and informations about it
           this.dispatchEvent(event); //Sending the given event
         }
         if (objHit2 != this && this.collisions.indexOf(objHit2) == -1) { //Same as the above but for the case the SECOND hit object is not the body itself
-          let colPos: OIMO.Vec3 = points[0].getPosition2();
+          let colPos: OIMO.Vec3 = this.collisionCenterPoint(points, collisionManifold.getNumPoints());
           colPoint = new Vector3(colPos.x, colPos.y, colPos.z);
           points.forEach((value: OIMO.ManifoldPoint): void => {
             normalImpulse += value.getNormalImpulse();
@@ -262,7 +278,7 @@ namespace FudgeCore {
           });
 
           this.collisions.push(objHit2);
-          event = new EventPhysics(EVENT_PHYSICS.COLLISION_ENTER, objHit2, normalImpulse, tangentImpulse, binormalImpulse, colPoint);
+          event = new EventPhysics(EVENT_PHYSICS.COLLISION_ENTER, objHit2, normalImpulse, tangentImpulse, binormalImpulse, colPoint, new Vector3(normal.x, normal.y, normal.z));
           this.dispatchEvent(event);
         }
         list = list.getNext(); //Start the same routine with the next collision in the list
@@ -309,7 +325,7 @@ namespace FudgeCore {
       this.triggers.forEach((value: ComponentRigidbody) => { //Every Collider in the list is checked if the collision is still happening
         let isTriggering: boolean = this.collidesWith(this.getOimoRigidbody(), value.getOimoRigidbody());
         if (isTriggering == false) {
-          let index: number = this.collisions.indexOf(value);
+          let index: number = this.triggers.indexOf(value);
           this.triggers.splice(index);
           event = new EventPhysics(EVENT_PHYSICS.TRIGGER_EXIT, value, 0, 0, 0);
           this.dispatchEvent(event);
@@ -324,15 +340,15 @@ namespace FudgeCore {
    * Checks that the Rigidbody is positioned correctly and recreates the Collider with new scale/position/rotation
    */
     public updateFromWorld(): void {
-      let worldTransform: Matrix4x4 = super.getContainer().mtxWorld; //super.getContainer() != null ? super.getContainer().mtxWorld : Matrix4x4.IDENTITY(); //The the world information about where to position/scale/rotate
+      let worldTransform: Matrix4x4 = super.getContainer().mtxWorld;//super.getContainer() != null ? super.getContainer().mtxWorld : Matrix4x4.IDENTITY(); //The the world information about where to position/scale/rotate
       let position: Vector3 = worldTransform.translation; //Adding the offsets from the pivot
-      position.add(this.pivot.translation);
+      position.add(this.mtxPivot.translation);
       let rotation: Vector3 = worldTransform.getEulerAngles();
-      rotation.add(this.pivot.rotation);
+      rotation.add(this.mtxPivot.rotation);
       let scaling: Vector3 = worldTransform.scaling;
-      scaling.x *= this.pivot.scaling.x;
-      scaling.y *= this.pivot.scaling.y;
-      scaling.z *= this.pivot.scaling.z;
+      scaling.x *= this.mtxPivot.scaling.x;
+      scaling.y *= this.mtxPivot.scaling.y;
+      scaling.z *= this.mtxPivot.scaling.z;
       this.createCollider(new OIMO.Vec3(scaling.x / 2, scaling.y / 2, scaling.z / 2), this.colliderType); //recreate the collider
       this.collider = new OIMO.Shape(this.colliderInfo);
       let oldCollider: OIMO.Shape = this.rigidbody.getShapeList();
@@ -369,7 +385,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Get the current ROTATION of the [[Node]] in the physical space
+     * Get the current ROTATION of the [[Node]] in the physical space. Note this range from -pi to pi, so -90 to 90.
      */
     public getRotation(): Vector3 {
       let orientation: OIMO.Quat = this.rigidbody.getOrientation();
@@ -382,9 +398,48 @@ namespace FudgeCore {
      * Sets the current ROTATION of the [[Node]] in the physical space, in degree.
      */
     public setRotation(_value: Vector3): void {
-      this.rigidbody.setRotation(new OIMO.Mat3().fromEulerXyz(new OIMO.Vec3(_value.x * Math.PI / 180, _value.y * Math.PI / 180, _value.z * Math.PI / 180)));
+      // this.rigidbody.setRotationXyz(new OIMO.Vec3(_value.x * Math.PI / 180, _value.y * Math.PI / 180, _value.z * Math.PI / 180));
+      let rotInQuat: OIMO.Quat = new OIMO.Quat();
+      rotInQuat.fromMat3(new OIMO.Mat3().fromEulerXyz(new OIMO.Vec3(_value.x * Math.PI / 180, _value.y * Math.PI / 180, _value.z * Math.PI / 180)));
+      rotInQuat.normalize();
+      this.rigidbody.setOrientation(rotInQuat);
     }
 
+
+    /** Get the current SCALING in the physical space. */
+    public getScaling(): Vector3 {
+      let scaling: Vector3 = this.getContainer().mtxWorld.scaling.copy;
+      scaling.x *= this.mtxPivot.scaling.x;
+      scaling.y *= this.mtxPivot.scaling.y;
+      scaling.z *= this.mtxPivot.scaling.z;
+      return scaling;
+    }
+
+    /** Sets the current SCALING of the [[Node]] in the physical space. Also applying this scaling to the node itself. */
+    public setScaling(_value: Vector3): void {
+      let scaling: Vector3 = _value.copy;
+      scaling.x *= this.mtxPivot.scaling.x;
+      scaling.y *= this.mtxPivot.scaling.y;
+      scaling.z *= this.mtxPivot.scaling.z;
+      this.createCollider(new OIMO.Vec3(scaling.x / 2, scaling.y / 2, scaling.z / 2), this.colliderType); //recreate the collider
+      this.collider = new OIMO.Shape(this.colliderInfo);
+      let oldCollider: OIMO.Shape = this.rigidbody.getShapeList();
+      this.rigidbody.addShape(this.collider); //add new collider, before removing the old, so the rb is never active with 0 colliders
+      this.rigidbody.removeShape(oldCollider); //remove the old collider
+      this.collider.userData = this; //reset the extra information so that this collider knows to which Fudge Component it's connected
+      this.collider.setCollisionGroup(this.collisionGroup);
+      if (this.collisionGroup == PHYSICS_GROUP.TRIGGER) //Trigger not collidering with anythign so their mask is only colliding with trigger
+        this.collider.setCollisionMask(PHYSICS_GROUP.TRIGGER);
+      else
+        this.collider.setCollisionMask(this.colMask);
+      if (this.rigidbody.getShapeList() != null) { //reset the informations about physics handling, has to be done because the shape is new
+        this.rigidbody.getShapeList().setRestitution(this.bodyRestitution);
+        this.rigidbody.getShapeList().setFriction(this.bodyFriction);
+      }
+      let mutator: Mutator = {};
+      mutator["scaling"] = _value;
+      this.getContainer().mtxLocal.mutate(mutator);
+    }
     //#region Velocity and Forces
 
     /**
@@ -404,11 +459,28 @@ namespace FudgeCore {
       this.rigidbody.setLinearVelocity(velocity);
     }
 
+    /**
+* Get the current ANGULAR - VELOCITY of the [[Node]]
+*/
+    public getAngularVelocity(): Vector3 {
+      let velocity: OIMO.Vec3 = this.rigidbody.getAngularVelocity();
+      return new Vector3(velocity.x, velocity.y, velocity.z);
+    }
+
 
     /**
-     * Applies a continous FORCE at the center of the RIGIDBODY in the three dimensions. Considering the rigidbody's MASS.
-     * The force is measured in newton, 1kg needs about 10 Newton to fight against gravity.
-     */
+   * Sets the current ANGULAR - VELOCITY of the [[Node]]
+   */
+    public setAngularVelocity(_value: Vector3): void {
+      let velocity: OIMO.Vec3 = new OIMO.Vec3(_value.x, _value.y, _value.z);
+      this.rigidbody.setAngularVelocity(velocity);
+    }
+
+
+    /**
+    * Applies a continous FORCE at the center of the RIGIDBODY in the three dimensions. Considering the rigidbody's MASS.
+    * The force is measured in newton, 1kg needs about 10 Newton to fight against gravity.
+    */
     public applyForce(_force: Vector3): void {
       this.rigidbody.applyForceToCenter(new OIMO.Vec3(_force.x, _force.y, _force.z));
     }
@@ -487,10 +559,10 @@ namespace FudgeCore {
       let hitInfo: RayHitInfo = new RayHitInfo();
       let geometry: OIMO.Geometry = this.rigidbody.getShapeList().getGeometry();
       let transform: OIMO.Transform = this.rigidbody.getTransform();
-      let scaledDirection: Vector3 = _direction;
-      scaledDirection.scale(length);
-      let endpoint: Vector3 = Vector3.SUM(scaledDirection, _origin);
-      let oimoRay: OIMO.RayCastHit;
+      let scaledDirection: Vector3 = _direction.copy;
+      scaledDirection.scale(_length);
+      let endpoint: Vector3 = Vector3.SUM(scaledDirection, _origin.copy);
+      let oimoRay: OIMO.RayCastHit = new OIMO.RayCastHit();
       let hit: boolean = geometry.rayCast(new OIMO.Vec3(_origin.x, _origin.y, _origin.z), new OIMO.Vec3(endpoint.x, endpoint.y, endpoint.z), transform, oimoRay); //the actual OimoPhysics Raycast
       if (hit) {  //If hit return a bunch of informations about the hit
         hitInfo.hit = true;
@@ -517,7 +589,7 @@ namespace FudgeCore {
     //#region Saving/Loading - Some properties might be missing, e.g. convexMesh (Float32Array)
     public serialize(): Serialization {
       let serialization: Serialization = {
-        pivot: this.pivot.serialize(),
+        pivot: this.mtxPivot.serialize(),
         id: this.id,
         physicsType: this.rbType,
         mass: this.massData.mass,
@@ -535,7 +607,7 @@ namespace FudgeCore {
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.pivot.deserialize(_serialization.pivot);
+      this.mtxPivot.deserialize(_serialization.pivot);
       this.id = _serialization.id;
       this.physicsType = _serialization.physicsType;
       this.mass = _serialization.mass != null ? _serialization.mass : 1;
@@ -553,7 +625,7 @@ namespace FudgeCore {
     //#endregion
 
     /** Creates the actual OimoPhysics Rigidbody out of informations the Fudge Component has. */
-    private createRigidbody(_mass: number, _type: PHYSICS_TYPE, _colliderType: COLLIDER_TYPE, _transform: Matrix4x4, _collisionGroup: PHYSICS_GROUP = PHYSICS_GROUP.DEFAULT): void {
+    private createRigidbody(_mass: number, _type: PHYSICS_TYPE, _colliderType: COLLIDER_TYPE, _mtxTransform: Matrix4x4, _collisionGroup: PHYSICS_GROUP = PHYSICS_GROUP.DEFAULT): void {
       let oimoType: number; //Need the conversion from simple enum to number because if enum is defined as Oimo.RigidyBodyType you have to include Oimo to use FUDGE at all
       switch (_type) {
         case PHYSICS_TYPE.DYNAMIC:
@@ -569,11 +641,11 @@ namespace FudgeCore {
           oimoType = OIMO.RigidBodyType.DYNAMIC;
           break;
       }
-      let tmpTransform: Matrix4x4 = _transform == null ? super.getContainer() != null ? super.getContainer().mtxWorld : Matrix4x4.IDENTITY() : _transform; //Get transform informations from the world, since physics does not care about hierarchy
+      let tmpTransform: Matrix4x4 = _mtxTransform == null ? super.getContainer() != null ? super.getContainer().mtxWorld : Matrix4x4.IDENTITY() : _mtxTransform; //Get transform informations from the world, since physics does not care about hierarchy
       //Convert informations from Fudge to OimoPhysics and creating a collider with it, while also adding a pivot to derivate from the transform informations if needed
-      let scale: OIMO.Vec3 = new OIMO.Vec3((tmpTransform.scaling.x * this.pivot.scaling.x) / 2, (tmpTransform.scaling.y * this.pivot.scaling.y) / 2, (tmpTransform.scaling.z * this.pivot.scaling.z) / 2);
-      let position: OIMO.Vec3 = new OIMO.Vec3(tmpTransform.translation.x + this.pivot.translation.x, tmpTransform.translation.y + this.pivot.translation.y, tmpTransform.translation.z + this.pivot.translation.z);
-      let rotation: OIMO.Vec3 = new OIMO.Vec3(tmpTransform.rotation.x + this.pivot.rotation.x, tmpTransform.rotation.y + this.pivot.rotation.y, tmpTransform.rotation.z + this.pivot.rotation.z);
+      let scale: OIMO.Vec3 = new OIMO.Vec3((tmpTransform.scaling.x * this.mtxPivot.scaling.x) / 2, (tmpTransform.scaling.y * this.mtxPivot.scaling.y) / 2, (tmpTransform.scaling.z * this.mtxPivot.scaling.z) / 2);
+      let position: OIMO.Vec3 = new OIMO.Vec3(tmpTransform.translation.x + this.mtxPivot.translation.x, tmpTransform.translation.y + this.mtxPivot.translation.y, tmpTransform.translation.z + this.mtxPivot.translation.z);
+      let rotation: OIMO.Vec3 = new OIMO.Vec3(tmpTransform.rotation.x + this.mtxPivot.rotation.x, tmpTransform.rotation.y + this.mtxPivot.rotation.y, tmpTransform.rotation.z + this.mtxPivot.rotation.z);
       this.createCollider(scale, _colliderType);
       //Setting informations about mass, position/rotation and physical reaction type
       this.massData.mass = _mass; //_type != PHYSICS_TYPE.STATIC ? _mass : 0; //If a object is static it acts as if it has no mass
@@ -658,6 +730,9 @@ namespace FudgeCore {
 
     /** Removing this ComponentRigidbody from the Physiscs.world taking the informations from the oimoPhysics system */
     private removeRigidbodyFromWorld(): void {
+      if (this.colGroup == PHYSICS_GROUP.TRIGGER) { //Delete check for this trigger from world if this component is removed
+        Physics.world.unregisterTrigger(this);
+      }
       Physics.world.removeRigidbody(this);
     }
 
@@ -700,13 +775,55 @@ namespace FudgeCore {
       this.bodiesInTrigger.forEach((value: ComponentRigidbody) => { //Every Collider in the list is checked if the collision is still happening
         let isTriggering: boolean = this.collidesWith(this.getOimoRigidbody(), value.getOimoRigidbody());
         if (isTriggering == false) {
-          let index: number = this.collisions.indexOf(value);
+          let index: number = this.bodiesInTrigger.indexOf(value);
           this.bodiesInTrigger.splice(index);
-          event = new EventPhysics(EVENT_PHYSICS.TRIGGER_ENTER, value, 0, 0, 0);
+          event = new EventPhysics(EVENT_PHYSICS.TRIGGER_EXIT, value, 0, 0, 0);
           this.dispatchEvent(event);
         }
       });
     }
+
+    //Calculating the center of a collision as a singular point - in case there is more than one point - by getting the geometrical center of all colliding points
+    private collisionCenterPoint(_colPoints: OIMO.ManifoldPoint[], _numPoints: number): OIMO.Vec3 {
+      let center: OIMO.Vec3;
+      let totalPoints = 0;
+      let totalX = 0;
+      let totalY = 0;
+      let totalZ = 0;
+      _colPoints.forEach((value: OIMO.ManifoldPoint): void => {
+        if (totalPoints < _numPoints) {
+          totalPoints++;
+          totalX += value.getPosition2().x;
+          totalY += value.getPosition2().y;
+          totalZ += value.getPosition2().z;
+        }
+      });
+      center = new OIMO.Vec3(totalX / _numPoints, totalY / _numPoints, totalZ / _numPoints);
+      return center;
+    }
     //#endregion
+
+    /** Change properties thorugh a associative array */
+    public async mutate(_mutator: Mutator): Promise<void> {
+      if (_mutator["friction"])
+        this.friction = <number>_mutator["friction"];
+      if (_mutator["restitution"])
+        this.restitution = <number>_mutator["restituion"];
+      if (_mutator["mass"])
+        this.mass = <number>_mutator["mass"];
+      if (_mutator["linearDamping"])
+        this.linearDamping = <number>_mutator["linearDamping"];
+      if (_mutator["angularDamping"])
+        this.angularDamping = <number>_mutator["angularDamping"];
+      if (_mutator["gravityScale"])
+        this.gravityScale = <number>_mutator["gravityScale"];
+
+      this.dispatchEvent(new Event(EVENT.MUTATE));
+    }
+
+    public reduceMutator(_mutator: Mutator): void {
+      delete _mutator.convexMesh; //Convex Mesh can't be shown in the editor because float32Array is not a viable mutator
+      delete _mutator.colMask;
+    }
   }
 }

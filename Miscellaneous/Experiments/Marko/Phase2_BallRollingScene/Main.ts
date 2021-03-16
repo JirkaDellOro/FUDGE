@@ -28,15 +28,15 @@ namespace FudgePhysics_Communication {
     document.addEventListener("keydown", hndKeyDown);
     let ground: f.Node = createCompleteMeshNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), "Cube", 0, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.GROUP_1);
     let cmpGroundMesh: f.ComponentTransform = ground.getComponent(f.ComponentTransform);
-    cmpGroundMesh.local.scale(new f.Vector3(10, 0.3, 10));
+    cmpGroundMesh.mtxLocal.scale(new f.Vector3(10, 0.3, 10));
 
-    cmpGroundMesh.local.translate(new f.Vector3(0, -1.5, 0));
+    cmpGroundMesh.mtxLocal.translate(new f.Vector3(0, -1.5, 0));
     hierarchy.appendChild(ground);
 
     bodies[0] = createCompleteMeshNode("Ball", new f.Material("Ball", f.ShaderFlat, new f.CoatColored(new f.Color(0.5, 0.5, 0.5, 1))), "Sphere", 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.GROUP_2);
     let cmpCubeTransform: f.ComponentTransform = bodies[0].getComponent(f.ComponentTransform);
     hierarchy.appendChild(bodies[0]);
-    cmpCubeTransform.local.translate(new f.Vector3(7, 4, 0));
+    cmpCubeTransform.mtxLocal.translate(new f.Vector3(7, 4, 0));
     ballRB = bodies[0].getComponent(f.ComponentRigidbody);
     ballRB.linearDamping = 0.1;
     ballRB.angularDamping = 0.1;
@@ -67,13 +67,13 @@ namespace FudgePhysics_Communication {
     bodies[3].getComponent(f.ComponentRigidbody).addEventListener(f.EVENT_PHYSICS.TRIGGER_ENTER, resetBall);
 
     let cmpLight: f.ComponentLight = new f.ComponentLight(new f.LightDirectional(f.Color.CSS("WHITE")));
-    cmpLight.pivot.lookAt(new f.Vector3(0.5, -1, -0.8));
+    cmpLight.mtxPivot.lookAt(new f.Vector3(0.5, -1, -0.8));
     hierarchy.addComponent(cmpLight);
 
     let cmpCamera: f.ComponentCamera = new f.ComponentCamera();
-    cmpCamera.backgroundColor = f.Color.CSS("GREY");
-    cmpCamera.pivot.translate(new f.Vector3(2, 4, 25));
-    cmpCamera.pivot.lookAt(f.Vector3.ZERO());
+    cmpCamera.clrBackground = f.Color.CSS("GREY");
+    cmpCamera.mtxPivot.translate(new f.Vector3(2, 4, 25));
+    cmpCamera.mtxPivot.lookAt(f.Vector3.ZERO());
 
 
     viewPort = new f.Viewport();
@@ -115,11 +115,11 @@ namespace FudgePhysics_Communication {
     let mesh: f.Mesh;
     let meshType: f.COLLIDER_TYPE;
     if (_mesh == "Cube") {
-      mesh = new f.MeshCube;
+      mesh = new f.MeshCube();
       meshType = f.COLLIDER_TYPE.CUBE;
     }
     if (_mesh == "Sphere") {
-      mesh = new f.MeshSphere;
+      mesh = new f.MeshSphere(undefined, 8, 8);
       meshType = f.COLLIDER_TYPE.SPHERE;
     }
 

@@ -46,11 +46,11 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
     bodies[1].mtxLocal.scale(new f.Vector3(14, 0.3, 7));
     bodies[1].mtxLocal.rotateX(90, true);
     hierarchy.appendChild(bodies[1]);
-    bodies[1] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC);
-    bodies[1].mtxLocal.translate(new f.Vector3(3.5, 7, 0));
-    bodies[1].mtxLocal.scale(new f.Vector3(7, 0.3, 14));
-    bodies[1].mtxLocal.rotateZ(90, true);
-    hierarchy.appendChild(bodies[1]);
+    bodies[2] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC);
+    bodies[2].mtxLocal.translate(new f.Vector3(3.5, 7, 0));
+    bodies[2].mtxLocal.scale(new f.Vector3(7, 0.3, 14));
+    bodies[2].mtxLocal.rotateZ(90, true);
+    hierarchy.appendChild(bodies[2]);
 
 
     //Creating some dynamic bodies to play with
@@ -65,13 +65,13 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
 
     //Standard Fudge Scene Initialization - Creating a directional light, a camera and initialize the viewport
     let cmpLight: f.ComponentLight = new f.ComponentLight(new f.LightDirectional(f.Color.CSS("WHITE")));
-    cmpLight.pivot.lookAt(new f.Vector3(-0.5, -1, -0.8)); //Set light direction
+    cmpLight.mtxPivot.lookAt(new f.Vector3(-0.5, -1, -0.8)); //Set light direction
     hierarchy.addComponent(cmpLight);
 
     cmpCamera = new f.ComponentCamera();
-    cmpCamera.backgroundColor = f.Color.CSS("GREY");
-    cmpCamera.pivot.translate(new f.Vector3(2, 3.5, 17)); //Move camera far back so the whole scene is visible
-    cmpCamera.pivot.lookAt(f.Vector3.ZERO()); //Set the camera matrix so that it looks at the center of the scene
+    cmpCamera.clrBackground = f.Color.CSS("GREY");
+    cmpCamera.mtxPivot.translate(new f.Vector3(2, 3.5, 17)); //Move camera far back so the whole scene is visible
+    cmpCamera.mtxPivot.lookAt(f.Vector3.ZERO()); //Set the camera matrix so that it looks at the center of the scene
 
     viewPort = new f.Viewport(); //Creating a viewport that is rendered onto the html canvas element
     viewPort.initialize("Viewport", hierarchy, cmpCamera, app); //initialize the viewport with the root node, camera and canvas
@@ -113,14 +113,14 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
   }
 
   //What happens when the left mouse button is pressed
-  function hndMouseDown(_event: f.EventPointer) {
+  function hndMouseDown(_event: f.EventPointer): void {
 
     let mouse: f.Vector2 = new f.Vector2(_event.pointerX, _event.pointerY); //Get the mouse position in the html window/client space
     let posProjection: f.Vector2 = viewPort.pointClientToProjection(mouse); //Convert the mouse position to the projection (ingame space)
 
     let ray: f.Ray = new f.Ray(new f.Vector3(-posProjection.x, posProjection.y, 1)); //Create a Fudge Mathematical ray. That starts a little in front of the camera
-    ray.origin.transform(cmpCamera.pivot); //Re-position the ray start to be at the camera position but offset by the mouse input
-    ray.direction.transform(cmpCamera.pivot, false); //Create the raycast direction by turning it the way the camera is facing
+    ray.origin.transform(cmpCamera.mtxPivot); //Re-position the ray start to be at the camera position but offset by the mouse input
+    ray.direction.transform(cmpCamera.mtxPivot, false); //Create the raycast direction by turning it the way the camera is facing
 
     //PHYSICS - Ray
     //Calculate a mathematical line from a point to a point in a direction of a length, and return the nearest physical object and infos about the ray.
@@ -160,7 +160,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
   }
 
   //What happens when the left mouse button is released
-  function hndMouseUp(_event: f.EventPointer) {
+  function hndMouseUp(_event: f.EventPointer): void {
     if (pickedBody != null) { //We unpick the body and therefore give it it's normal material back
       pickedBody.getContainer().getComponent(f.ComponentMaterial).material = standardMaterial;
       pickedBody = null;

@@ -17,7 +17,7 @@ namespace FudgeCore {
     // private textureUVs: Array<number> = [];
     // public textureUVs: Float32Array;
 
-    public constructor(_name: string = "MeshSphere", _sectors: number = 3, _stacks: number = 2) {
+    public constructor(_name: string = "MeshSphere", _sectors: number = 8, _stacks: number = 8) {
       super(_name);
 
       this.create(_sectors, _stacks);

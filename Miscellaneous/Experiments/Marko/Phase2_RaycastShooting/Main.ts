@@ -56,9 +56,9 @@ namespace FudgePhysics_Communication {
     bodies[3] = createCompleteMeshNode("Player", new f.Material("Player", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0, 1, 1))), new f.MeshCube(), 1, f.PHYSICS_TYPE.KINEMATIC);
     moveableTransform = bodies[3].getComponent(f.ComponentTransform);
     hierarchy.appendChild(bodies[3]);
-    moveableTransform.local.scale(new f.Vector3(1, 2, 1));
-    moveableTransform.local.rotateY(180);
-    moveableTransform.local.translate(new f.Vector3(0, 0.5, 0));
+    moveableTransform.mtxLocal.scale(new f.Vector3(1, 2, 1));
+    moveableTransform.mtxLocal.rotateY(180);
+    moveableTransform.mtxLocal.translate(new f.Vector3(0, 0.5, 0));
 
     bodies[4] = createCompleteMeshNode("PlayerGun", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0, 1, 1))), new f.MeshCube, 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.GROUP_1);
     bodies[4].removeComponent(bodies[4].getComponent(f.ComponentRigidbody));
@@ -67,13 +67,13 @@ namespace FudgePhysics_Communication {
     bodies[3].appendChild(bodies[4]);
 
     let cmpLight: f.ComponentLight = new f.ComponentLight(new f.LightDirectional(f.Color.CSS("WHITE")));
-    cmpLight.pivot.lookAt(new f.Vector3(0.5, -1, -0.8));
+    cmpLight.mtxPivot.lookAt(new f.Vector3(0.5, -1, -0.8));
     hierarchy.addComponent(cmpLight);
 
     let cmpCamera: f.ComponentCamera = new f.ComponentCamera();
-    cmpCamera.backgroundColor = f.Color.CSS("GREY");
-    cmpCamera.pivot.translate(new f.Vector3(-2, 1, -9.5));
-    cmpCamera.pivot.scale(new f.Vector3(1, 0.5, 1));
+    cmpCamera.clrBackground = f.Color.CSS("GREY");
+    cmpCamera.mtxPivot.translate(new f.Vector3(-2, 1, -9.5));
+    cmpCamera.mtxPivot.scale(new f.Vector3(1, 0.5, 1));
     bodies[3].addComponent(cmpCamera);
 
 
@@ -144,11 +144,11 @@ namespace FudgePhysics_Communication {
       vertical -= 1 * stepWidth;
     }
     let pos: f.Vector3 = new f.Vector3(horizontal, 0, vertical);
-    moveableTransform.local.translate(pos, true);
+    moveableTransform.mtxLocal.translate(pos, true);
   }
 
   function hndPointerMove(_event: f.EventPointer): void {
-    moveableTransform.local.rotateY(_event.movementX * speedCameraRotation);
+    moveableTransform.mtxLocal.rotateY(_event.movementX * speedCameraRotation);
   }
 
   function continousRaycast(): void {//_event: f.EventPointer): void {

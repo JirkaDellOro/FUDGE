@@ -4193,7 +4193,7 @@ declare namespace FudgeCore {
     class ComponentRigidbody extends Component {
         static readonly iSubclass: number;
         /** The pivot of the physics itself. Default the pivot is identical to the transform. It's used like an offset. */
-        pivot: Matrix4x4;
+        mtxPivot: Matrix4x4;
         /** Vertices that build a convex mesh (form that is in itself closed). Needs to set in the construction of the rb if none of the standard colliders is used. */
         convexMesh: Float32Array;
         /** Collisions with rigidbodies happening to this body, can be used to build a custom onCollisionStay functionality. */
@@ -4220,7 +4220,7 @@ declare namespace FudgeCore {
         private rotationalInfluenceFactor;
         private gravityInfluenceFactor;
         /** Creating a new rigidbody with a weight in kg, a physics type (default = dynamic), a collider type what physical form has the collider, to what group does it belong, is there a transform Matrix that should be used, and is the collider defined as a group of points that represent a convex mesh. */
-        constructor(_mass?: number, _type?: PHYSICS_TYPE, _colliderType?: COLLIDER_TYPE, _group?: PHYSICS_GROUP, _transform?: Matrix4x4, _convexMesh?: Float32Array);
+        constructor(_mass?: number, _type?: PHYSICS_TYPE, _colliderType?: COLLIDER_TYPE, _group?: PHYSICS_GROUP, _mtxTransform?: Matrix4x4, _convexMesh?: Float32Array);
         /** The type of interaction between the physical world and the transform hierarchy world. DYNAMIC means the body ignores hierarchy and moves by physics. KINEMATIC it's
          * reacting to a [[Node]] that is using physics but can still be controlled by animation or transform. And STATIC means its immovable.
          */
@@ -4277,6 +4277,13 @@ declare namespace FudgeCore {
         * is not provided through the FUDGE Integration.
         */
         getOimoRigidbody(): OIMO.RigidBody;
+        /** Rotating the rigidbody therefore changing it's rotation over time directly in physics. This way physics is changing instead of transform.
+     *  But you are able to incremental changing it instead of a direct rotation.  Although it's always prefered to use forces in physics.
+    */
+        rotateBody(_rotationChange: Vector3): void;
+        /** Translating the rigidbody therefore changing it's place over time directly in physics. This way physics is changing instead of transform.
+         *  But you are able to incremental changing it instead of a direct position. Although it's always prefered to use forces in physics. */
+        translateBody(_translationChange: Vector3): void;
         /**
        * Checking for Collision with other Colliders and dispatches a custom event with information about the collider.
        * Automatically called in the RenderManager, no interaction needed.
@@ -4300,13 +4307,17 @@ declare namespace FudgeCore {
       */
         setPosition(_value: Vector3): void;
         /**
-         * Get the current ROTATION of the [[Node]] in the physical space
+         * Get the current ROTATION of the [[Node]] in the physical space. Note this range from -pi to pi, so -90 to 90.
          */
         getRotation(): Vector3;
         /**
          * Sets the current ROTATION of the [[Node]] in the physical space, in degree.
          */
         setRotation(_value: Vector3): void;
+        /** Get the current SCALING in the physical space. */
+        getScaling(): Vector3;
+        /** Sets the current SCALING of the [[Node]] in the physical space. Also applying this scaling to the node itself. */
+        setScaling(_value: Vector3): void;
         /**
         * Get the current VELOCITY of the [[Node]]
         */
@@ -4316,9 +4327,17 @@ declare namespace FudgeCore {
          */
         setVelocity(_value: Vector3): void;
         /**
-         * Applies a continous FORCE at the center of the RIGIDBODY in the three dimensions. Considering the rigidbody's MASS.
-         * The force is measured in newton, 1kg needs about 10 Newton to fight against gravity.
-         */
+    * Get the current ANGULAR - VELOCITY of the [[Node]]
+    */
+        getAngularVelocity(): Vector3;
+        /**
+       * Sets the current ANGULAR - VELOCITY of the [[Node]]
+       */
+        setAngularVelocity(_value: Vector3): void;
+        /**
+        * Applies a continous FORCE at the center of the RIGIDBODY in the three dimensions. Considering the rigidbody's MASS.
+        * The force is measured in newton, 1kg needs about 10 Newton to fight against gravity.
+        */
         applyForce(_force: Vector3): void;
         /**
         * Applies a continous FORCE at a specific point in the world to the RIGIDBODY in the three dimensions. Considering the rigidbody's MASS
@@ -4381,6 +4400,10 @@ declare namespace FudgeCore {
          * Events in case a body is in a trigger, so not only the body registers a triggerEvent but also the trigger itself.
          */
         private checkBodiesInTrigger;
+        private collisionCenterPoint;
+        /** Change properties thorugh a associative array */
+        mutate(_mutator: Mutator): Promise<void>;
+        reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace FudgeCore {
@@ -4398,10 +4421,6 @@ declare namespace FudgeCore {
         constructor(_renderingContext: WebGL2RenderingContext);
         /** Fill the bound buffer with data. Used at buffer initialization */
         setData(array: Array<number>): void;
-        /** Update the data in the buffer */
-        updateData(array: Array<number>): void;
-        /** Update the buffer with the specific type of Float32Array */
-        updateDataFloat32Array(array: Float32Array): void;
         /** Set Shader Attributes informations by getting their position in the shader, setting the offset, stride and size. For later use in the binding process */
         setAttribs(attribs: Array<PhysicsDebugVertexAttribute>): void;
         /** Get the position of the attribute in the shader */
@@ -4418,10 +4437,6 @@ declare namespace FudgeCore {
         constructor(_renderingContext: WebGL2RenderingContext);
         /** Fill the bound buffer with data amount. Used at buffer initialization */
         setData(array: Array<number>): void;
-        /** Update the actual data in the buffer */
-        updateData(array: Array<number>): void;
-        /** Update the buffer with the specific type of Int16Array */
-        updateDataInt16Array(array: Int16Array): void;
         /** The actual DrawCall for physicsDebugDraw Buffers. This is where the information from the debug is actually drawn. */
         draw(_mode?: number, _count?: number): void;
     }
@@ -4466,14 +4481,14 @@ declare namespace FudgeCore {
         lineIBO: PhysicsDebugIndexBuffer;
         triVBO: PhysicsDebugVertexBuffer;
         triIBO: PhysicsDebugIndexBuffer;
-        pointBufferSize: number;
-        pointData: Float32Array;
+        pointData: Array<number>;
+        pointIboData: Array<number>;
         numPointData: number;
-        lineBufferSize: number;
-        lineData: Float32Array;
+        lineData: Array<number>;
+        lineIboData: Array<number>;
         numLineData: number;
-        triBufferSize: number;
-        triData: Float32Array;
+        triData: Array<number>;
+        triIboData: Array<number>;
         numTriData: number;
         /** Creating the debug for physics in Fudge. Tell it to draw only wireframe objects, since Fudge is handling rendering of the objects besides physics.
          * Override OimoPhysics Functions with own rendering. Initialize buffers and connect them with the context for later use. */
@@ -4483,20 +4498,18 @@ declare namespace FudgeCore {
          * to debug only what they need and is commonly debugged.
          */
         getDebugModeFromSettings(): void;
-        /** Creating the render buffers for later use. Defining the attributes used in shaders.
-         * Needs to create empty buffers to already have them ready to draw later on, linking is only possible with existing buffers. No performance loss because empty buffers are not drawn.*/
+        /** Creating the empty render buffers. Defining the attributes used in shaders.
+         * Needs to create empty buffers to already have them ready to draw later on, linking is only possible with existing buffers. */
         initializeBuffers(): void;
+        /** Overriding the existing functions from OimoPhysics.DebugDraw without actually inherit from the class, to avoid compiler problems.
+         * Overriding them to receive debugInformations in the format the physic engine provides them but handling the rendering in the fudge context. */
+        private initializeOverride;
         /** Before OimoPhysics.world is filling the debug. Make sure the buffers are reset. Also receiving the debugMode from settings and updating the current projection for the vertexShader. */
         begin(): void;
         /** After OimoPhysics.world filled the debug. Rendering calls. Setting this program to be used by the Fudge rendering context. And draw each updated buffer and resetting them. */
         end(): void;
         /** Drawing the ray into the debugDraw Call. By using the overwritten line rendering functions and drawing a point (pointSize defined in the shader) at the end of the ray. */
         debugRay(_origin: Vector3, _end: Vector3, _color: Color): void;
-        /** Fill an array with empty values */
-        private initFloatArray;
-        /** Overriding the existing functions from OimoPhysics.DebugDraw without actually inherit from the class, to avoid compiler problems.
-         * Overriding them to receive debugInformations in the format the physic engine provides them but handling the rendering in the fudge context. */
-        private initializeOverride;
         /** The source code (string) of the in physicsDebug used very simple vertexShader.
          *  Handling the projection (which includes, view/world[is always identity in this case]/projection in Fudge). Increasing the size of single points drawn.
          *  And transfer position color to the fragmentShader. */
@@ -4531,8 +4544,10 @@ declare namespace FudgeCore {
         binomalImpulse: number;
         /** The point where the collision/triggering initially happened. The collision point exists only on COLLISION_ENTER / TRIGGER_ENTER. */
         collisionPoint: Vector3;
+        /** The normal vector of the collision. Only existing on COLLISION_ENTER */
+        collisionNormal: Vector3;
         /** Creates a new event customized for physics. Holding informations about impulses. Collision point and the body that is colliding */
-        constructor(_type: EVENT_PHYSICS, _hitRigidbody: ComponentRigidbody, _normalImpulse: number, _tangentImpulse: number, _binormalImpulse: number, _collisionPoint?: Vector3);
+        constructor(_type: EVENT_PHYSICS, _hitRigidbody: ComponentRigidbody, _normalImpulse: number, _tangentImpulse: number, _binormalImpulse: number, _collisionPoint?: Vector3, _collisionNormal?: Vector3);
     }
     /**
   * Groups to place a node in, not every group should collide with every group. Use a Mask in to exclude collisions
@@ -4596,7 +4611,6 @@ declare namespace FudgeCore {
         /** Whether the debug informations of the physics should be displayed or not (default = false) */
         debugDraw: boolean;
         private physicsDebugMode;
-        constructor(_defGroup: number, _defMask: number);
         get debugMode(): PHYSICS_DEBUGMODE;
         set debugMode(_value: PHYSICS_DEBUGMODE);
         /** Change if rigidbodies are able to sleep (don't be considered in physical calculations) when their movement is below a threshold. Deactivation is decreasing performance for minor advantage in precision. */
@@ -4626,8 +4640,16 @@ declare namespace FudgeCore {
         get defaultCollisionMask(): number;
         set defaultCollisionMask(_value: number);
         /** The group that this rigidbody belongs to. Default is the DEFAULT Group which means its just a normal Rigidbody not a trigger nor anything special. */
-        get defaultCollisionGroup(): number;
-        set defaultCollisionGroup(_value: number);
+        get defaultCollisionGroup(): PHYSICS_GROUP;
+        set defaultCollisionGroup(_value: PHYSICS_GROUP);
+        /** Change the type of joint solver algorithm. Default Iterative == 0, is faster but less stable. Direct == 1, slow but more stable, recommended for complex joint work. Change this setting only at the start of your game. */
+        get defaultConstraintSolverType(): number;
+        set defaultConstraintSolverType(_value: number);
+        /** The correction algorithm used to correct physics calculations. Change this only at the beginning of your game. Each has different approaches, so if you have problems test another
+         *  Default 0 = Baumgarte (fast but less correct induces some energy errors), 1 = Split-Impulse (fast and no engery errors, but more inaccurate for joints), 2 = Non-linear Gauss Seidel (slowest but most accurate)*/
+        get defaultCorrectionAlgorithm(): number;
+        set defaultCorrectionAlgorithm(_value: number);
+        constructor(_defGroup: number, _defMask: number);
     }
 }
 declare namespace FudgeCore {
@@ -4704,6 +4726,8 @@ declare namespace FudgeCore {
         * Removing a OIMO Joint/Constraint to the OIMO World, happens automatically when removeing a FUDGE Joint Component
         */
         removeJoint(_cmpJoint: ComponentJoint): void;
+        /** Returns the actual used world of the OIMO physics engine. No user interaction needed.*/
+        getOimoWorld(): OIMO.World;
         /**
       * Simulates the physical world. _deltaTime is the amount of time between physical steps, default is 60 frames per second ~17ms
       */
