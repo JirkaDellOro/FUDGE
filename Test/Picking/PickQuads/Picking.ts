@@ -48,10 +48,10 @@ namespace Picking {
     cmpCamera = new ƒ.ComponentCamera();
     Reflect.set(cmpCamera, "far", 7.3);
     // Reflect.set(cmpCamera, "fieldOfView", 170);
-    cmpCamera.pivot.translateX(0.3);
-    cmpCamera.pivot.translateZ(2.1);
+    cmpCamera.mtxPivot.translateX(0.3);
+    cmpCamera.mtxPivot.translateZ(2.1);
     // cmpCamera.pivot.translateY(-2.1);
-    cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
+    cmpCamera.mtxPivot.lookAt(ƒ.Vector3.ZERO());
     viewport = new ƒ.Viewport();
     viewport.initialize("Viewport", graph, cmpCamera, canvas);
     // FudgeAid.Viewport.expandCameraToInteractiveOrbit(viewport);
@@ -61,7 +61,7 @@ namespace Picking {
     canvasPick.width = 10;
     canvasPick.height = 10;
     cameraPick = new ƒ.ComponentCamera();
-    cameraPick.pivot.set(cmpCamera.pivot);
+    cameraPick.mtxPivot.set(cmpCamera.mtxPivot);
     cameraPick.projectCentral(1, 10);
     viewportPick.initialize("pick", graph, cameraPick, canvasPick);
     viewportPick.adjustingFrames = false;
@@ -82,7 +82,7 @@ namespace Picking {
     let posProjection: ƒ.Vector2 = viewport.pointClientToProjection(mouse);
     let ray: ƒ.Ray = new ƒ.Ray(new ƒ.Vector3(posProjection.x, posProjection.y, 1));
     // let ray: ƒ.Ray = viewport.getRayFromClient(mouse);
-    cameraPick.pivot.lookAt(ray.direction);
+    cameraPick.mtxPivot.lookAt(ray.direction);
     cameraPick.projectCentral(1, 0.001);
 
     cursor.getComponent(ƒ.ComponentMesh).activate(false);
