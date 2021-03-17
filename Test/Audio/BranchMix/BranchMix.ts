@@ -19,15 +19,15 @@ namespace AudioGraph {
       nodes.push(new ƒ.Node("Node" + i));
 
     let cmpAudio: ƒ.ComponentAudio = new ƒ.ComponentAudio(audioHypno, true, true);
-    cmpAudio.pivot.translateX(2);
+    cmpAudio.mtxPivot.translateX(2);
     nodes[0].addComponent(cmpAudio);
     
     cmpAudio = new ƒ.ComponentAudio(audioTrancy, true, true);
-    cmpAudio.pivot.translateX(-2);
+    cmpAudio.mtxPivot.translateX(-2);
     nodes[1].addComponent(cmpAudio);
     
     cmpAudio = new ƒ.ComponentAudio(audioMario, true, true);
-    cmpAudio.pivot.translateX(0);
+    cmpAudio.mtxPivot.translateX(0);
     nodes[2].addComponent(cmpAudio);
 
     nodeControlled = nodes[0];

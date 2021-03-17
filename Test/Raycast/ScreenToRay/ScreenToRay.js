@@ -36,13 +36,13 @@ var ScreenToRay;
         canvas = document.querySelector("canvas#viewport");
         cmpCamera = new ƒ.ComponentCamera();
         cmpCamera.projectCentral(1, 45, ƒ.FIELD_OF_VIEW.DIAGONAL, 2, 5);
-        cmpCamera.pivot.translation = new ƒ.Vector3(1, 2, 3);
-        cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
+        cmpCamera.mtxPivot.translation = new ƒ.Vector3(1, 2, 3);
+        cmpCamera.mtxPivot.lookAt(ƒ.Vector3.ZERO());
         viewport.initialize(canvas.id, root, cmpCamera, canvas);
         canvas.addEventListener("mousemove", setCursorPosition);
         canvasRay = document.querySelector("canvas#ray");
         cameraRay = new ƒ.ComponentCamera();
-        cameraRay.pivot.translation = new ƒ.Vector3(1, 2, 3);
+        cameraRay.mtxPivot.translation = new ƒ.Vector3(1, 2, 3);
         // cameraRay.projectCentral(1, 10);
         viewportRay.initialize("ray", root, cameraRay, canvasRay);
         viewportRay.adjustingFrames = true;
@@ -126,8 +126,8 @@ var ScreenToRay;
     }
     function adjustRayCamera() {
         let ray = computeRay();
-        ray.direction.transform(cmpCamera.pivot);
-        cameraRay.pivot.lookAt(ray.direction);
+        ray.direction.transform(cmpCamera.mtxPivot);
+        cameraRay.mtxPivot.lookAt(ray.direction);
         cameraRay.projectCentral(1, 5);
         viewportRay.draw();
         let crcRay = canvasRay.getContext("2d");

@@ -61,7 +61,7 @@ var AudioSpace;
         // camera setup
         const cmpCamera = new ƒ.ComponentCamera();
         camera = new ƒAid.CameraOrbit(cmpCamera, 3, 80, 0.1, 20);
-        camera.node.addComponent(new ƒ.ComponentAudioListener());
+        camera.nodeCamera.addComponent(new ƒ.ComponentAudioListener());
         camera.axisRotateX.addControl(cntMouseY);
         camera.axisRotateY.addControl(cntMouseX);
         // scene setup
@@ -73,7 +73,7 @@ var AudioSpace;
         const canvas = document.querySelector("canvas");
         viewport.initialize("Viewport", graph, cmpCamera, canvas);
         ƒ.AudioManager.default.listenTo(graph);
-        ƒ.AudioManager.default.listenWith(camera.node.getComponent(ƒ.ComponentAudioListener));
+        ƒ.AudioManager.default.listenWith(camera.nodeCamera.getComponent(ƒ.ComponentAudioListener));
         // setup event handling
         viewport.setFocus(true);
         viewport.activatePointerEvent("\u0192pointermove" /* MOVE */, true);

@@ -204,7 +204,7 @@ namespace FudgeCore {
 
     public static async loadResourcesFromHTML(): Promise<void> {
       const head: HTMLHeadElement = document.head;
-      let links: NodeListOf<HTMLLinkElement> = head.querySelectorAll("link[type=resources");
+      let links: NodeListOf<HTMLLinkElement> = head.querySelectorAll("link[type=resources]");
       for (let link of links) {
         let url: RequestInfo = link.getAttribute("src");
         await Project.loadResources(url);
