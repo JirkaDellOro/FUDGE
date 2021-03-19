@@ -1,4 +1,4 @@
-/// <reference path="../../core/build/fudgecore.d.ts" />
+/// <reference path="../../Core/Build/FudgeCore.d.ts" />
 /// <reference types="../../core/build/fudgecore" />
 import ƒ = FudgeCore;
 import ƒAid = FudgeAid;
@@ -114,7 +114,7 @@ declare namespace FudgeAid {
         private static count;
         constructor(_name?: string, _transform?: ƒ.Matrix4x4, _material?: ƒ.Material, _mesh?: ƒ.Mesh);
         private static getNextName;
-        get pivot(): ƒ.Matrix4x4;
+        get mtxMeshPivot(): ƒ.Matrix4x4;
         deserialize(_serialization: ƒ.Serialization): Promise<ƒ.Serializable>;
     }
 }

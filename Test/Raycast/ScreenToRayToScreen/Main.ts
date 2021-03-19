@@ -34,7 +34,7 @@ namespace ScreenToRayToScreen {
 
     // setup viewport
     viewport = new ƒ.Viewport();
-    viewport.initialize("Viewport", root, camera.component, canvas);
+    viewport.initialize("Viewport", root, camera.cmpCamera, canvas);
     ƒ.Debug.log("Viewport", viewport);
 
     // setup event handling
@@ -69,17 +69,17 @@ namespace ScreenToRayToScreen {
     console.groupEnd();
 
     ray.direction.scale(camera.distance);
-    ray.origin.transform(camera.component.pivot);
-    ray.origin.transform(camera.component.getContainer().mtxWorld);
-    ray.direction.transform(camera.component.pivot, false);
-    ray.direction.transform(camera.component.getContainer().mtxWorld, false);
+    ray.origin.transform(camera.cmpCamera.mtxPivot);
+    ray.origin.transform(camera.cmpCamera.getContainer().mtxWorld);
+    ray.direction.transform(camera.cmpCamera.mtxPivot, false);
+    ray.direction.transform(camera.cmpCamera.getContainer().mtxWorld, false);
     console.group("transformed");
     ƒ.Debug.log("origin", ray.origin.toString());
     ƒ.Debug.log("direction", ray.direction.toString());
     console.groupEnd();
 
     let rayEnd: ƒ.Vector3 = ƒ.Vector3.SUM(ray.origin, ray.direction);
-    let posClip: ƒ.Vector3 = camera.component.pointWorldToClip(rayEnd);
+    let posClip: ƒ.Vector3 = camera.cmpCamera.pointWorldToClip(rayEnd);
     // let screen: ƒ.Vector2 = ƒ.Render.rectClip.pointToRect(projection.toVector2(), viewport.getCanvasRectangle());
     let screen: ƒ.Vector2 = viewport.pointClipToClient(posClip.toVector2());
     console.group("end");
@@ -106,14 +106,14 @@ namespace ScreenToRayToScreen {
 
     // set lights
     let cmpLight: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(ƒ.Color.CSS("WHITE")));
-    cmpLight.pivot.lookAt(new ƒ.Vector3(-1, -3, -2));
+    cmpLight.mtxPivot.lookAt(new ƒ.Vector3(-1, -3, -2));
     root.addComponent(cmpLight);
     let cmpLightAmbient: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightAmbient(ƒ.Color.CSS("grey")));
     root.addComponent(cmpLightAmbient);
 
     // setup orbiting camera
     let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
-    cmpCamera.backgroundColor = ƒ.Color.CSS("white");
+    cmpCamera.clrBackground = ƒ.Color.CSS("white");
     camera = new ƒAid.CameraOrbit(cmpCamera, 5, 75, 3, 20);
     root.addChild(camera);
     // camera.node.addComponent(cmpLight);
@@ -141,7 +141,7 @@ namespace ScreenToRayToScreen {
 
   function drawLabels(): void {
     let mtxCube: ƒ.Matrix4x4 = root.getChildrenByName("Cube")[0].mtxWorld;
-    let posClip: ƒ.Vector3 = camera.component.pointWorldToClip(mtxCube.translation);
+    let posClip: ƒ.Vector3 = camera.cmpCamera.pointWorldToClip(mtxCube.translation);
     let posCanvas: ƒ.Vector2 = viewport.pointClipToCanvas(posClip.toVector2());
     let posClient: ƒ.Vector2 = viewport.pointClipToClient(posClip.toVector2());
     let posScreen: ƒ.Vector2 = viewport.pointClientToScreen(posClient);

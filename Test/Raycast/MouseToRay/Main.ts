@@ -17,8 +17,8 @@ namespace MouseToRay {
     createScene();
 
     let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
-    cmpCamera.pivot.translate(ƒ.Vector3.ONE(5));
-    cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
+    cmpCamera.mtxPivot.translate(ƒ.Vector3.ONE(5));
+    cmpCamera.mtxPivot.lookAt(ƒ.Vector3.ZERO());
     viewport = new ƒ.Viewport();
     viewport.initialize("Viewport", root, cmpCamera, canvas);
     ƒ.Debug.log("Viewport", viewport);
