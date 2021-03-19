@@ -83,7 +83,7 @@ namespace FudgeCore {
 
 
       let textureUVs: number[] = [];
-      for (let sector: number = 0; sector < this.sectors; sector++) {
+      for (let sector: number = 0; sector <= this.sectors; sector++) {
         for (let i: number = 0; i < nVerticesPolygon; i++) {
           let u: number = sector / this.sectors;
           let v: number = i * 1 / (nVerticesPolygon - 1);

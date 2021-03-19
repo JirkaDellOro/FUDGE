@@ -38,10 +38,10 @@ namespace AudioSpace {
     const mtrGrey: ƒ.Material = new ƒ.Material("White", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("slategrey")));
     const inner: ƒAid.Node = new ƒAid.Node("Inner", ƒ.Matrix4x4.IDENTITY(), mtrWhite, new ƒ.MeshPyramid());
     const outer: ƒAid.Node = new ƒAid.Node("Outer", ƒ.Matrix4x4.IDENTITY(), mtrGrey, new ƒ.MeshPyramid());
-    const mtxMesh: ƒ.Matrix4x4 = inner.pivot;
+    const mtxMesh: ƒ.Matrix4x4 = inner.mtxMeshPivot;
     mtxMesh.rotateX(-90);
     mtxMesh.translateZ(1, false);
-    outer.pivot.set(inner.pivot);
+    outer.mtxMeshPivot.set(inner.mtxMeshPivot);
     const speaker: ƒAid.Node = new ƒAid.Node("Speaker", ƒ.Matrix4x4.IDENTITY());
     speaker.addChild(inner);
     speaker.addChild(outer);

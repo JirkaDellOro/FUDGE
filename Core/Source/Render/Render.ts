@@ -128,11 +128,10 @@ namespace FudgeCore {
         Physics.world.mainCam = _cmpCamera; //DebugDraw needs to know the main camera beforehand, _cmpCamera is the viewport camera. | Marko Fehrenbach, HFU 2020
 
       // TODO: check physics
-      if (Physics.settings != null && Physics.settings.debugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY) { //Give users the possibility to only show physics displayed | Marko Fehrenbach, HFU 2020
-        Render.drawList(_cmpCamera, this.nodesSimple);
-        Render.drawListAlpha(_cmpCamera);
-      }
-
+      //if (Physics.settings != null && Physics.settings.debugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY) {
+      Render.drawList(_cmpCamera, this.nodesSimple);
+      Render.drawListAlpha(_cmpCamera);
+      //}
       if (Physics.settings && Physics.settings.debugDraw == true) {
         Physics.world.debugDraw.end();
       }

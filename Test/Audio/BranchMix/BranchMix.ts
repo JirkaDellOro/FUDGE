@@ -57,7 +57,7 @@ namespace AudioGraph {
       nodeControlled = nodes[_event.keyCode - 48];
     switch (_event.code) {
       case ƒ.KEYBOARD_CODE.A:
-        if (cmpAudio){
+        if (cmpAudio) {
           cmpAudio.activate(!cmpAudio.isActive);
           // cmpAudio.play(cmpAudio.isActive);
         }
