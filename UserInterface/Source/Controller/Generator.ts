@@ -89,6 +89,7 @@ namespace FudgeUserInterface {
           // @ts-ignore: instantiate abstract class
           element = new elementType({ key: _key, label: _key, value: _value.toString() }, _type);
         }
+        // TODO: delete?
         else if (_value instanceof ƒ.MutableArray) {
           console.log("MutableArray");
           // insert Array-Controller!
