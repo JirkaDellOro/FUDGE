@@ -1,5 +1,15 @@
 namespace FudgeAid {
   export class Viewport {
+    public static create(_branch: ƒ.Node): ƒ.Viewport {
+      let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
+      cmpCamera.mtxPivot.translate(ƒ.Vector3.Z(4));
+      cmpCamera.mtxPivot.rotateY(180);
+
+      let viewport: ƒ.Viewport = new ƒ.Viewport();
+      viewport.initialize("ƒAid-Viewport", _branch, cmpCamera, Canvas.create());
+      return viewport;
+    }
+
     public static expandCameraToInteractiveOrbit(_viewport: ƒ.Viewport, _showFocus: boolean = true, _speedCameraRotation: number = 1, _speedCameraTranslation: number = 0.01, _speedCameraDistance: number = 0.001): CameraOrbit {
       _viewport.setFocus(true);
       _viewport.activatePointerEvent(ƒ.EVENT_POINTER.DOWN, true);
