@@ -5,46 +5,41 @@ namespace AnimationTest {
   window.addEventListener("DOMContentLoaded", init);
 
   let node: ƒ.Node;
-  let cmpMesh: ƒ.ComponentMesh;
   let animation: ƒ.Animation;
+  let viewport: ƒ.Viewport;
 
   let startTime: number = Date.now();
 
   function init(): void {
-    Scenes.createMiniScene();
-    Scenes.createViewport();
-    Scenes.viewport.draw();
-
-    node = Scenes.node;
-    cmpMesh = node.getComponent(ƒ.ComponentMesh);
+    node = new ƒAid.Node("Test", ƒ.Matrix4x4.IDENTITY(), new ƒ.Material("Uni", ƒ.ShaderUniColor, new ƒ.CoatColored()), new ƒ.MeshCube("Cube"));
+    viewport = ƒAid.Viewport.create(node);
+    viewport.draw();
     initAnim();
-
   }
 
   function initAnim(): void {
-    // let nS: ƒ.Serialization = node.serialize();
-    // console.log(cmpMesh.getMutator());
-    // console.log(ƒ.Serializer.stringify(nS));
-
     let animseq: ƒ.AnimationSequence = new ƒ.AnimationSequence();
     animseq.addKey(new ƒ.AnimationKey(0, 0));
-    animseq.addKey(new ƒ.AnimationKey(5000, 45));
+    animseq.addKey(new ƒ.AnimationKey(2000, 45));
+    animseq.
 
     let animStructure: ƒ.AnimationStructure = {
       components: {
         ComponentTransform: [
           {
             "ƒ.ComponentTransform": {
-              rotation: {
-                x: animseq,
-                y: animseq
+              mtxLocal: {
+                rotation: {
+                  x: animseq,
+                  y: animseq
+                }
               }
             }
           }
         ]
       }
     };
-    animation = new ƒ.Animation("testAnimation", animStructure);
+    animation = new ƒ.Animation("testAnimation", animStructure, 10);
 
     console.log(animation);
     // animation.animationStructure["components"]["ComponentMesh"][0]["ƒ.ComponentMesh"]["pivot"]["rotation"]["y"] = animseq;
@@ -69,13 +64,11 @@ namespace AnimationTest {
     // console.log(mutator["components"]["ComponentMesh"][0]["ƒ.ComponentMesh"]);
     // node.getComponent(ƒ.ComponentMesh).mutate(<ƒ.Mutator>(mutator["components"]["ComponentMesh"][0]["ƒ.ComponentMesh"]));
     node.applyAnimation(mutator);
-
-    Scenes.viewport.draw();
+    // console.log(mutator);
+    viewport.draw();
   }
 
   function hndlEv(_e: Event): void {
     console.log("event!");
   }
-
-
 }

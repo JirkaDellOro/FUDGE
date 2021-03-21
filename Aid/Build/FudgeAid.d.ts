@@ -276,6 +276,7 @@ declare namespace FudgeAid {
 }
 declare namespace FudgeAid {
     class Viewport {
+        static create(_branch: ƒ.Node): ƒ.Viewport;
         static expandCameraToInteractiveOrbit(_viewport: ƒ.Viewport, _showFocus?: boolean, _speedCameraRotation?: number, _speedCameraTranslation?: number, _speedCameraDistance?: number): CameraOrbit;
     }
 }

@@ -4,9 +4,12 @@ namespace FudgeAid {
       let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
       cmpCamera.mtxPivot.translate(ƒ.Vector3.Z(4));
       cmpCamera.mtxPivot.rotateY(180);
+      
+      let canvas: HTMLCanvasElement = Canvas.create();
+      document.body.appendChild(canvas);
 
       let viewport: ƒ.Viewport = new ƒ.Viewport();
-      viewport.initialize("ƒAid-Viewport", _branch, cmpCamera, Canvas.create());
+      viewport.initialize("ƒAid-Viewport", _branch, cmpCamera, canvas);
       return viewport;
     }
 
