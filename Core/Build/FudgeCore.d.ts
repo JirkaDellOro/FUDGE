@@ -981,10 +981,34 @@ declare namespace FudgeCore {
         [name: string]: number;
     }
     /**
+     * Holds different playmodes the animation uses to play back its animation.
+     * @author Lukas Scheuerle, HFU, 2019
+     */
+    enum ANIMATION_PLAYMODE {
+        /**Plays animation in a loop: it restarts once it hit the end.*/
+        LOOP = 0,
+        /**Plays animation once and stops at the last key/frame*/
+        PLAYONCE = 1,
+        /**Plays animation once and stops on the first key/frame */
+        PLAYONCESTOPAFTER = 2,
+        /**Plays animation like LOOP, but backwards.*/
+        REVERSELOOP = 3,
+        /**Causes the animation not to play at all. Useful for jumping to various positions in the animation without proceeding in the animation.*/
+        STOP = 4
+    }
+    enum ANIMATION_PLAYBACK {
+        /**Calculates the state of the animation at the exact position of time. Ignores FPS value of animation.*/
+        TIMEBASED_CONTINOUS = 0,
+        /**Limits the calculation of the state of the animation to the FPS value of the animation. Skips frames if needed.*/
+        TIMEBASED_RASTERED_TO_FPS = 1,
+        /**Uses the FPS value of the animation to advance once per frame, no matter the speed of the frames. Doesn't skip any frames.*/
+        FRAMEBASED = 2
+    }
+    /**
      * Animation Class to hold all required Objects that are part of an Animation.
      * Also holds functions to play said Animation.
      * Can be added to a Node and played through [[ComponentAnimator]].
-     * @author Lukas Scheuerle, HFU, 2019
+     * @author Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021
      */
     class Animation extends Mutable implements SerializableResource {
         idResource: string;
@@ -1033,6 +1057,16 @@ declare namespace FudgeCore {
          * (Re-)Calculate the total time of the Animation. Calculation-heavy, use only if actually needed.
          */
         calculateTotalTime(): void;
+        /**
+         * Returns the time to use for animation sampling when applying a playmode
+         */
+        getModalTime(_time: number, _playmode: ANIMATION_PLAYMODE, _timeStop?: number): number;
+        /**
+         * Calculates and returns the direction the animation should currently be playing in.
+         * @param _time the time at which to calculate the direction
+         * @returns 1 if forward, 0 if stop, -1 if backwards
+         */
+        calculateDirection(_time: number, _playmode: ANIMATION_PLAYMODE): number;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutator(): Mutator;
@@ -1344,30 +1378,6 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Holds different playmodes the animation uses to play back its animation.
-     * @author Lukas Scheuerle, HFU, 2019
-     */
-    enum ANIMATION_PLAYMODE {
-        /**Plays animation in a loop: it restarts once it hit the end.*/
-        LOOP = 0,
-        /**Plays animation once and stops at the last key/frame*/
-        PLAYONCE = 1,
-        /**Plays animation once and stops on the first key/frame */
-        PLAYONCESTOPAFTER = 2,
-        /**Plays animation like LOOP, but backwards.*/
-        REVERSELOOP = 3,
-        /**Causes the animation not to play at all. Useful for jumping to various positions in the animation without proceeding in the animation.*/
-        STOP = 4
-    }
-    enum ANIMATION_PLAYBACK {
-        /**Calculates the state of the animation at the exact position of time. Ignores FPS value of animation.*/
-        TIMEBASED_CONTINOUS = 0,
-        /**Limits the calculation of the state of the animation to the FPS value of the animation. Skips frames if needed.*/
-        TIMEBASED_RASTERED_TO_FPS = 1,
-        /**Uses the FPS value of the animation to advance once per frame, no matter the speed of the frames. Doesn't skip any frames.*/
-        FRAMEBASED = 2
-    }
-    /**
      * Holds a reference to an [[Animation]] and controls it. Controls playback and playmode as well as speed.
      * @authors Lukas Scheuerle, HFU, 2019
      */
@@ -1382,9 +1392,9 @@ declare namespace FudgeCore {
         private lastTime;
         constructor(_animation?: Animation, _playmode?: ANIMATION_PLAYMODE, _playback?: ANIMATION_PLAYBACK);
         set speed(_s: number);
+        activate(_on: boolean): void;
         /**
          * Jumps to a certain time in the animation to play from there.
-         * @param _time The time to jump to
          */
         jumpTo(_time: number): void;
         /**
@@ -1416,13 +1426,6 @@ declare namespace FudgeCore {
          * @param _time the time to apply the playmodes to
          * @returns the recalculated time
          */
-        private applyPlaymodes;
-        /**
-         * Calculates and returns the direction the animation should currently be playing in.
-         * @param _time the time at which to calculate the direction
-         * @returns 1 if forward, 0 if stop, -1 if backwards
-         */
-        private calculateDirection;
         /**
          * Updates the scale of the animation if the user changes it or if the global game timer changed its scale.
          */

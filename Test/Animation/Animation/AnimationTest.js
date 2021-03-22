@@ -18,8 +18,6 @@ var AnimationTest;
         let animseq = new ƒ.AnimationSequence();
         animseq.addKey(new ƒ.AnimationKey(0, 0));
         animseq.addKey(new ƒ.AnimationKey(2000, 45));
-        animseq.
-        ;
         let animStructure = {
             components: {
                 ComponentTransform: [

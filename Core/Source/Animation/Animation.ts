@@ -42,10 +42,38 @@ namespace FudgeCore {
   }
 
   /**
+   * Holds different playmodes the animation uses to play back its animation.
+   * @author Lukas Scheuerle, HFU, 2019
+   */
+  export enum ANIMATION_PLAYMODE {
+    /**Plays animation in a loop: it restarts once it hit the end.*/
+    LOOP,
+    /**Plays animation once and stops at the last key/frame*/
+    PLAYONCE,
+    /**Plays animation once and stops on the first key/frame */
+    PLAYONCESTOPAFTER,
+    /**Plays animation like LOOP, but backwards.*/
+    REVERSELOOP,
+    /**Causes the animation not to play at all. Useful for jumping to various positions in the animation without proceeding in the animation.*/
+    STOP
+    //TODO: add an INHERIT and a PINGPONG mode
+  }
+
+  export enum ANIMATION_PLAYBACK {
+    //TODO: add an in-depth description of what happens to the animation (and events) depending on the Playback. Use Graphs to explain.
+    /**Calculates the state of the animation at the exact position of time. Ignores FPS value of animation.*/
+    TIMEBASED_CONTINOUS,
+    /**Limits the calculation of the state of the animation to the FPS value of the animation. Skips frames if needed.*/
+    TIMEBASED_RASTERED_TO_FPS,
+    /**Uses the FPS value of the animation to advance once per frame, no matter the speed of the frames. Doesn't skip any frames.*/
+    FRAMEBASED
+  }
+
+  /**
    * Animation Class to hold all required Objects that are part of an Animation.
    * Also holds functions to play said Animation.
    * Can be added to a Node and played through [[ComponentAnimator]].
-   * @author Lukas Scheuerle, HFU, 2019
+   * @author Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021
    */
   export class Animation extends Mutable implements SerializableResource {
     idResource: string;
@@ -85,7 +113,7 @@ namespace FudgeCore {
       this.eventsProcessed.clear();
       this.animationStructuresProcessed.clear();
     }
-    
+
     /**
      * Generates a new "Mutator" with the information to apply to the [[Node]] the [[ComponentAnimator]] is attached to with [[Node.applyAnimation()]].
      * @param _time The time at which the animation currently is at
@@ -150,7 +178,7 @@ namespace FudgeCore {
       this.events[_name] = _time;
       this.eventsProcessed.clear();
     }
-    
+
     /**
      * Removes the event with the given name from the list of events.
      * @param _name name of the event to remove.
@@ -169,8 +197,53 @@ namespace FudgeCore {
       this.traverseStructureForTime(this.animationStructure);
     }
 
+    /**
+     * Returns the time to use for animation sampling when applying a playmode
+     */
+    public getModalTime(_time: number, _playmode: ANIMATION_PLAYMODE, _timeStop: number = _time): number {
+      switch (_playmode) {
+        case ANIMATION_PLAYMODE.STOP:
+          // return this.localTime.getOffset();
+          return _timeStop;
+        case ANIMATION_PLAYMODE.PLAYONCE:
+          if (_time >= this.totalTime)
+            return this.totalTime - 0.01;     //TODO: this might cause some issues
+        case ANIMATION_PLAYMODE.PLAYONCESTOPAFTER:
+          if (_time >= this.totalTime)
+            // TODO: return _timeStop instead?
+            return this.totalTime + 0.01;     //TODO: this might cause some issues
+      }
+      return _time;
+    }
+    
+    /**
+     * Calculates and returns the direction the animation should currently be playing in.
+     * @param _time the time at which to calculate the direction
+     * @returns 1 if forward, 0 if stop, -1 if backwards
+     */
+     public calculateDirection(_time: number, _playmode: ANIMATION_PLAYMODE): number {
+      switch (_playmode) {
+        case ANIMATION_PLAYMODE.STOP:
+          return 0;
+        // case ANIMATION_PLAYMODE.PINGPONG:
+        //   if (Math.floor(_time / this.animation.totalTime) % 2 == 0)
+        //     return 1;
+        //   else
+        //     return -1;
+        case ANIMATION_PLAYMODE.REVERSELOOP:
+          return -1;
+        case ANIMATION_PLAYMODE.PLAYONCE:
+        case ANIMATION_PLAYMODE.PLAYONCESTOPAFTER:
+          if (_time >= this.totalTime) {
+            return 0;
+          }
+        default:
+          return 1;
+      }
+    }
+
     //#region transfer
-    serialize(): Serialization {
+    public serialize(): Serialization {
       let s: Serialization = {
         idResource: this.idResource,
         name: this.name,
@@ -188,6 +261,7 @@ namespace FudgeCore {
       s.animationStructure = this.traverseStructureForSerialisation(this.animationStructure);
       return s;
     }
+
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.idResource = _serialization.idResource;
       this.name = _serialization.name;
@@ -429,7 +503,7 @@ namespace FudgeCore {
       }
       return ae;
     }
-    
+
     /**
      * Creates a rastered [[AnimationEventTrigger]] object based on the given one.  
      * @param _events the event object to calculate the new one out of
@@ -443,7 +517,7 @@ namespace FudgeCore {
       }
       return ae;
     }
-    
+
     /**
      * Checks which events lay between two given times and returns the names of the ones that do.
      * @param _eventTriggers The event object to check the events inside of

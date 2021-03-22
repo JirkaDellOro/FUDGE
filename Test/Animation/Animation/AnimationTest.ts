@@ -21,7 +21,6 @@ namespace AnimationTest {
     let animseq: ƒ.AnimationSequence = new ƒ.AnimationSequence();
     animseq.addKey(new ƒ.AnimationKey(0, 0));
     animseq.addKey(new ƒ.AnimationKey(2000, 45));
-    animseq.
 
     let animStructure: ƒ.AnimationStructure = {
       components: {
@@ -66,6 +65,7 @@ namespace AnimationTest {
     node.applyAnimation(mutator);
     // console.log(mutator);
     viewport.draw();
+    
   }
 
   function hndlEv(_e: Event): void {
