@@ -1686,10 +1686,6 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Attaches a [[Light]] to the node
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    /**
      * Defines identifiers for the various types of light this component can provide.
      */
     enum LIGHT_TYPE {
@@ -1698,6 +1694,10 @@ declare namespace FudgeCore {
         POINT = "LightPoint",
         SPOT = "LightSpot"
     }
+    /**
+      * Attaches a [[Light]] to the node
+      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+      */
     class ComponentLight extends Component {
         static readonly iSubclass: number;
         mtxPivot: Matrix4x4;
