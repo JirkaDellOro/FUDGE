@@ -2,7 +2,9 @@ namespace FudgeCore {
     export const enum EVENT_TIMER {
         CALL = "ƒlapse"
     }
-
+    /**
+     * An event that represents a call from a Timer
+     * */
     export class EventTimer {
         public type: EVENT_TIMER = EVENT_TIMER.CALL;
         public target: Timer;

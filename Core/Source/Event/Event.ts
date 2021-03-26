@@ -52,7 +52,9 @@ namespace FudgeCore {
         ((_event: Eventƒ) => void) |
         ((_event: EventPhysics) => void) |
         EventListenerObject;
-
+        /**
+         *  a subclass of EventTarget and Baseclass for different kinds of Events.
+         * */
     export class EventTargetƒ extends EventTarget {
         addEventListener(_type: string, _handler: EventListenerƒ, _options?: boolean | AddEventListenerOptions): void {
             super.addEventListener(_type, <EventListenerOrEventListenerObject>_handler, _options);

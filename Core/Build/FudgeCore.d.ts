@@ -155,6 +155,9 @@ declare namespace FudgeCore {
     }
     type Eventƒ = EventPointer | EventDragDrop | EventWheel | EventKeyboard | Event | EventPhysics;
     type EventListenerƒ = ((_event: EventPointer) => void) | ((_event: EventDragDrop) => void) | ((_event: EventWheel) => void) | ((_event: EventKeyboard) => void) | ((_event: Eventƒ) => void) | ((_event: EventPhysics) => void) | EventListenerObject;
+    /**
+     *  a subclass of EventTarget and Baseclass for different kinds of Events.
+     * */
     class EventTargetƒ extends EventTarget {
         addEventListener(_type: string, _handler: EventListenerƒ, _options?: boolean | AddEventListenerOptions): void;
         removeEventListener(_type: string, _handler: EventListenerƒ, _options?: boolean | AddEventListenerOptions): void;
@@ -1991,6 +1994,9 @@ declare namespace FudgeCore {
         END = "\u0192dragend",
         OVER = "\u0192dragover"
     }
+    /**
+     * a subclass of DragEvent .A event that represents a drag and drop interaction
+     */
     class EventDragDrop extends DragEvent {
         pointerX: number;
         pointerY: number;
@@ -2001,6 +2007,10 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * a subclass of KeyboardEvent. EventKeyboard objects describe a user interaction with the keyboard
+     * each event describes a single interaction between the user and a key (or combination of a key with modifier keys) on the keyboard.
+     */
     class EventKeyboard extends KeyboardEvent {
         constructor(type: string, _event: EventKeyboard);
     }
@@ -2196,6 +2206,9 @@ declare namespace FudgeCore {
         GOTCAPTURE = "\u0192gotpointercapture",
         LOSTCAPTURE = "\u0192lostpointercapture"
     }
+    /**
+     * a subclass of PointerEvent. The state of a DOM event produced by a pointer such as the geometry of the contact point
+     * */
     class EventPointer extends PointerEvent {
         pointerX: number;
         pointerY: number;
@@ -2209,6 +2222,9 @@ declare namespace FudgeCore {
     const enum EVENT_TIMER {
         CALL = "\u0192lapse"
     }
+    /**
+     * An event that represents a call from a Timer
+     * */
     class EventTimer {
         type: EVENT_TIMER;
         target: Timer;
@@ -2223,6 +2239,9 @@ declare namespace FudgeCore {
     const enum EVENT_WHEEL {
         WHEEL = "\u0192wheel"
     }
+    /**
+     * A supclass of WheelEvent. Events that occur due to the user moving a mouse wheel or similar input device.
+     * */
     class EventWheel extends WheelEvent {
         constructor(type: string, _event: EventWheel);
     }

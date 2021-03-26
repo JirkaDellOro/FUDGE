@@ -1,4 +1,5 @@
 namespace FudgeCore {
+   //gives WebGL Buffer the data from the [[Shader]]
   export class RenderInjectorShader {
     public static decorate(_constructor: Function): void {
       Object.defineProperty(_constructor, "useProgram", {
