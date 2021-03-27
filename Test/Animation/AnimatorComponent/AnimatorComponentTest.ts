@@ -67,15 +67,16 @@ namespace AnimatorComponentTest {
 
     // override component with reconstruction for testing. Deactivate to test original
     // cmpAnimation = cmpAnimationReconstructed;
-    node.addComponent(cmpAnimation);
-    cmpAnimation.jumpTo(animation.labels["test"]);
     cmpAnimation.addEventListener("eventStart", hndlEv);
     cmpAnimation.addEventListener("eventAfterStart", hndlEv);
     cmpAnimation.addEventListener("eventMiddle", hndlEv);
     cmpAnimation.addEventListener("eventBeforeEnd", hndlEv);
     cmpAnimation.addEventListener("eventEnd", hndlEv);
-
+    
     cmpAnimation.playmode = ƒ.ANIMATION_PLAYMODE.REVERSELOOP;
+    node.addComponent(cmpAnimation);
+    cmpAnimation.jumpTo(animation.labels["test"]);
+    cmpAnimation.activate(true);
 
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, frame);
     ƒ.Loop.start();

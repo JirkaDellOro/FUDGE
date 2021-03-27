@@ -35,7 +35,7 @@ namespace FudgeCore {
       this.addEventListener(EVENT.COMPONENT_ADD, () => (
         this.getContainer().addEventListener(EVENT.CHILD_REMOVE, () => this.activate(false)))
       );
-      this.activate(true);
+      // this.activate(true);
     }
 
     set speed(_s: number) {
@@ -45,6 +45,7 @@ namespace FudgeCore {
 
     public activate(_on: boolean): void {
       super.activate(_on);
+      console.log("cmpAnimator activate", _on);
       if (_on)
         Loop.addEventListener(EVENT.LOOP_FRAME, <EventListener><unknown>this.updateAnimationLoop);
       else
