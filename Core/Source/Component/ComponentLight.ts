@@ -1,10 +1,6 @@
 ///<reference path="../Light/Light.ts"/>
 namespace FudgeCore {
-  /**
-   * Attaches a [[Light]] to the node
-   * @authors Jirka Dell'Oro-Friedl, HFU, 2019
-   */
-
+ 
   /**
    * Defines identifiers for the various types of light this component can provide.  
    */
@@ -15,7 +11,10 @@ namespace FudgeCore {
     POINT = "LightPoint",
     SPOT = "LightSpot"
   }
-
+ /**
+   * Attaches a [[Light]] to the node
+   * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+   */
   export class ComponentLight extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentLight);
     // private static constructors: { [type: string]: General } = { [LIGHT_TYPE.AMBIENT]: LightAmbient, [LIGHT_TYPE.DIRECTIONAL]: LightDirectional, [LIGHT_TYPE.POINT]: LightPoint, [LIGHT_TYPE.SPOT]: LightSpot };
