@@ -3173,7 +3173,6 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     class MeshCylinder extends Mesh {
         static readonly iSubclass: number;
-        normals: Float32Array;
         private sectors;
         constructor(_name?: string, _sectors?: number);
         create(_sectors?: number): void;

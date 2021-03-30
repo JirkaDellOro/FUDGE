@@ -1,7 +1,6 @@
 namespace FudgeCore {
   export class MeshCylinder extends Mesh {
     public static readonly iSubclass: number = Mesh.registerSubclass(MeshCylinder);
-    public normals: Float32Array;
 
     private sectors: number;
     public constructor(_name: string = "MeshCylinder", _sectors: number = 8) {
@@ -70,9 +69,8 @@ namespace FudgeCore {
         }
       }       
       this.ƒvertices = new Float32Array(vertices);
-      this.normals = new Float32Array(normals);
       this.ƒtextureUVs = new Float32Array(texCoords);
-      this.ƒnormalsFace = this.normals;
+      this.ƒnormalsFace = new Float32Array(normals);
       this.ƒindices = this.createIndices();
       this.createRenderBuffers();
     }
@@ -104,19 +102,24 @@ namespace FudgeCore {
       return unitVertices;
     }
 
+    // tslint:disable-next-line: member-ordering
     public async mutate(_mutator: Mutator): Promise<void> {
       super.mutate(_mutator);
       let sectors: number = Math.round(_mutator.sectors);
       this.create(sectors);
     }
 
+    // tslint:disable-next-line: member-ordering
     protected createVertices(): Float32Array {
       return this.vertices;
     }
+
+    // tslint:disable-next-line: member-ordering
     protected createTextureUVs(): Float32Array {
       return this.textureUVs;
     }
 
+    // tslint:disable-next-line: member-ordering
     protected createIndices(): Uint16Array {
       let baseCenterIndex: number = 0;
       let topCenterIndex: number = baseCenterIndex + this.sectors + 1; // include center vertex
@@ -167,15 +170,15 @@ namespace FudgeCore {
         indices.push(k1 + 1);
         indices.push(k2);
 
-        // side indices: bottom right -> rop left -> bottom left
+        // side indices: bottom right -> top left -> bottom left
         if (i != this.sectors - 1) {
-          indices.push(k2);
           indices.push(k1 + 1);
           indices.push(k2 + 1);
+          indices.push(k2);
         } else {
-          indices.push(k1);
           indices.push(k);
           indices.push(k1 + 1);
+          indices.push(k1);
         }
       }
 
@@ -184,7 +187,7 @@ namespace FudgeCore {
 
     //TODO: we also need REAL face normals
     protected createFaceNormals(): Float32Array {
-      return this.normals;
+      return this.ƒnormalsFace;
     }
   }
 }
