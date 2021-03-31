@@ -1,9 +1,8 @@
 {
-    "mode": "file",
+    "entryPoints": "",
     "out": "../../Documentation/Reference/UserInterface/",
     "name": "Fudge User Interface",
     "readme": "none",
     "excludePrivate": "true",
-    "excludeProtected": "true",
-    "ignoreCompilerErrors": "true"
+    "excludeProtected": "true"
 }
