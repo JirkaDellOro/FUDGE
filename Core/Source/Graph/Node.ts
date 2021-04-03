@@ -441,7 +441,6 @@ namespace FudgeCore {
      * Dispatches a synthetic event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
      * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase, 
      * than the matching handler of the target node in the target phase, and back out of the hierarchy in the bubbling phase, invoking appropriate handlers of the anvestors
-     * @param _event The event to dispatch
      */
     public dispatchEvent(_event: Event): boolean {
       let ancestors: Node[] = [];
@@ -457,9 +456,7 @@ namespace FudgeCore {
       for (let i: number = ancestors.length - 1; i >= 0; i--) {
         let ancestor: Node = ancestors[i];
         Object.defineProperty(_event, "currentTarget", { writable: true, value: ancestor });
-        let captures: EventListener[] = ancestor.captures[_event.type] || [];
-        for (let handler of captures)
-          handler(_event);
+        this.callListeners(ancestor.captures[_event.type], _event);
       }
 
       if (!_event.bubbles)
@@ -468,20 +465,25 @@ namespace FudgeCore {
       // target phase
       Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.AT_TARGET });
       Object.defineProperty(_event, "currentTarget", { writable: true, value: this });
-      let listeners: EventListener[] = this.listeners[_event.type] || [];
-      for (let handler of listeners)
-        handler(_event);
+      this.callListeners(this.listeners[_event.type], _event);
 
       // bubble phase
       Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.BUBBLING_PHASE });
       for (let i: number = 0; i < ancestors.length; i++) {
         let ancestor: Node = ancestors[i];
         Object.defineProperty(_event, "currentTarget", { writable: true, value: ancestor });
-        let listeners: Function[] = ancestor.listeners[_event.type] || [];
-        for (let handler of listeners)
-          handler(_event);
+        this.callListeners(ancestor.listeners[_event.type], _event);
       }
       return true; //TODO: return a meaningful value, see documentation of dispatch event
+    }
+    /**
+     * Dispatches a synthetic event to target without travelling through the graph hierarchy neither during capture nor bubbling phase
+     */
+    public dispatchEventToTargetOnly(_event: Event): boolean {
+      Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.AT_TARGET });
+      Object.defineProperty(_event, "currentTarget", { writable: true, value: this });
+      this.callListeners(this.listeners[_event.type], _event);
+      return true;
     }
     /**
      * Broadcasts a synthetic event to this node and from there to all nodes deeper in the hierarchy,
@@ -510,6 +512,12 @@ namespace FudgeCore {
       for (let child of this.children) {
         child.broadcastEventRecursive(_event);
       }
+    }
+
+    private callListeners(_listeners: EventListener[], _event: Event): void {
+      if (_listeners?.length > 0)
+        for (let handler of _listeners)
+          handler(_event);
     }
     // #endregion
   }
