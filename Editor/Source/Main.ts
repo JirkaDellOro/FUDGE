@@ -56,7 +56,8 @@ namespace Main {
       // fullscreen: true,
       webPreferences: {        // preload: path.join(__dirname, "preload.js"),
         nodeIntegration: true,
-        enableRemoteModule: true
+        enableRemoteModule: true,
+        contextIsolation: false
       }
     });
 
