@@ -57,14 +57,15 @@ var AnimatorComponentTest;
         // #endregion
         // override component with reconstruction for testing. Deactivate to test original
         // cmpAnimation = cmpAnimationReconstructed;
-        node.addComponent(cmpAnimation);
-        cmpAnimation.jumpTo(animation.labels["test"]);
         cmpAnimation.addEventListener("eventStart", hndlEv);
         cmpAnimation.addEventListener("eventAfterStart", hndlEv);
         cmpAnimation.addEventListener("eventMiddle", hndlEv);
         cmpAnimation.addEventListener("eventBeforeEnd", hndlEv);
         cmpAnimation.addEventListener("eventEnd", hndlEv);
         cmpAnimation.playmode = ƒ.ANIMATION_PLAYMODE.REVERSELOOP;
+        node.addComponent(cmpAnimation);
+        cmpAnimation.jumpTo(animation.labels["test"]);
+        cmpAnimation.activate(true);
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, frame);
         ƒ.Loop.start();
         // let timer: ƒ.Timer = new ƒ.Timer(ƒ.Time.game, 2000, 1, () => node.removeComponent(cmpAnimation));

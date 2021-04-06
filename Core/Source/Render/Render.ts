@@ -36,6 +36,8 @@ namespace FudgeCore {
       _branch.nNodesInBranch = 1;
       _branch.radius = 0;
 
+      _branch.dispatchEventToTargetOnly(new Event(EVENT.RENDER_PREPARE));
+
       if (_branch.cmpTransform && _branch.cmpTransform.isActive)
         mtxWorld = Matrix4x4.MULTIPLICATION(_mtxWorld, _branch.cmpTransform.mtxLocal);
 

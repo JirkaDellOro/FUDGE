@@ -120,7 +120,8 @@ var Main;
             // fullscreen: true,
             webPreferences: {
                 nodeIntegration: true,
-                enableRemoteModule: true
+                enableRemoteModule: true,
+                contextIsolation: false
             }
         });
         window.webContents.openDevTools();

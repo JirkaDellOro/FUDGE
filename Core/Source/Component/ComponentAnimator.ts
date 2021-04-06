@@ -32,10 +32,10 @@ namespace FudgeCore {
 
       Time.game.addEventListener(EVENT.TIME_SCALED, this.updateScale.bind(this));
       this.addEventListener(EVENT.COMPONENT_REMOVE, () => this.activate(false));
-      this.addEventListener(EVENT.COMPONENT_ADD, () => (
-        this.getContainer().addEventListener(EVENT.CHILD_REMOVE, () => this.activate(false)))
-      );
-      this.activate(true);
+      this.addEventListener(EVENT.COMPONENT_ADD, () => {
+        this.getContainer().addEventListener(EVENT.CHILD_REMOVE, () => this.activate(false));
+        this.activate(true);
+      });
     }
 
     set speed(_s: number) {
@@ -45,10 +45,13 @@ namespace FudgeCore {
 
     public activate(_on: boolean): void {
       super.activate(_on);
+      if (!this.getContainer())
+        return;
+
       if (_on)
-        Loop.addEventListener(EVENT.LOOP_FRAME, <EventListener><unknown>this.updateAnimationLoop);
+        this.getContainer().addEventListener(EVENT.RENDER_PREPARE, this.updateAnimationLoop);
       else
-        Loop.removeEventListener(EVENT.LOOP_FRAME, <EventListener><unknown>this.updateAnimationLoop);
+        this.getContainer().removeEventListener(EVENT.RENDER_PREPARE, this.updateAnimationLoop);
     }
 
     /**
@@ -112,7 +115,7 @@ namespace FudgeCore {
      * Uses the built-in time unless a different time is specified.
      * May also be called from updateAnimation().
      */
-    private updateAnimationLoop = (_e: Event, _time: number): [Mutator, number] => {
+    private updateAnimationLoop = (_e: Event, _time?: number): [Mutator, number] => {
       if (this.animation.totalTime == 0)
         return [null, 0];
       let time: number = _time || this.localTime.get();
@@ -145,7 +148,7 @@ namespace FudgeCore {
       }
     }
 
-    /**
+    /**   MOVED TO ANIMATION, TODO: delete
      * Calculates the actual time to use, using the current playmodes.
      * @param _time the time to apply the playmodes to
      * @returns the recalculated time
