@@ -20,13 +20,13 @@ namespace FudgeCore {
      * render passes.
      */
     public static prepare(_branch: Node, _mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY(), _lights: MapLightTypeToLightList = new Map(), _shadersUsed: (typeof Shader)[] = null): void {
-
       let firstLevel: boolean = (_shadersUsed == null);
       if (firstLevel) {
         _shadersUsed = [];
         Render.timestampUpdate = performance.now();
         Render.nodesSimple.reset();
         Render.nodesAlpha.reset();
+        Render.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START));
       }
 
       if (!_branch.isActive)
@@ -83,10 +83,11 @@ namespace FudgeCore {
         _branch.radius = Math.max(_branch.radius, Vector3.DIFFERENCE(position, _branch.mtxWorld.translation).magnitude + child.radius);
       }
 
-      if (firstLevel)
+      if (firstLevel) {
+        Render.dispatchEvent(new Event(EVENT.RENDER_PREPARE_END));
         for (let shader of _shadersUsed)
           Render.setLightsInShader(shader, _lights);
-
+      }
 
       //Calculate Physics based on all previous calculations    
       Render.setupPhysicalTransform(_branch);

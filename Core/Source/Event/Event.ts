@@ -41,7 +41,9 @@ namespace FudgeCore {
     /** dispatched to [[FileIo]] when a list of files has been saved */
     FILE_SAVED = "fileSaved",
     /** dispatched to [[Node]] when recalculating transforms for render */
-    RENDER_PREPARE = "renderPrepare"
+    RENDER_PREPARE = "renderPrepare",
+    RENDER_PREPARE_START = "renderPrepareStart",
+    RENDER_PREPARE_END = "renderPrepareEnd"
   }
 
 

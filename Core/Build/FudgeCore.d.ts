@@ -153,7 +153,9 @@ declare namespace FudgeCore {
         /** dispatched to [[FileIo]] when a list of files has been saved */
         FILE_SAVED = "fileSaved",
         /** dispatched to [[Node]] when recalculating transforms for render */
-        RENDER_PREPARE = "renderPrepare"
+        RENDER_PREPARE = "renderPrepare",
+        RENDER_PREPARE_START = "renderPrepareStart",
+        RENDER_PREPARE_END = "renderPrepareEnd"
     }
     type Eventƒ = EventPointer | EventDragDrop | EventWheel | EventKeyboard | Event | EventPhysics;
     type EventListenerƒ = ((_event: EventPointer) => void) | ((_event: EventDragDrop) => void) | ((_event: EventWheel) => void) | ((_event: EventKeyboard) => void) | ((_event: Eventƒ) => void) | ((_event: EventPhysics) => void) | EventListenerObject;
@@ -709,7 +711,7 @@ declare namespace FudgeCore {
      * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
      * Methods and attributes of this class should not be called directly, only through [[RenderManager]]
      */
-    abstract class RenderWebGL {
+    abstract class RenderWebGL extends EventTargetStatic {
         protected static crc3: WebGL2RenderingContext;
         protected static ƒpicked: Pick[];
         private static rectRender;
