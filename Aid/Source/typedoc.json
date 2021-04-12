@@ -4,6 +4,6 @@
     "name": "Fudge Aid",
     "readme": "none",
     "excludePrivate": "true",
-    "excludeProtected": "true"
-   
+    "excludeProtected": "true",
+    "exclude": "References.ts"
 }

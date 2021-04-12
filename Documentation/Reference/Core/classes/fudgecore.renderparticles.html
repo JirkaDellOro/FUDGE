@@ -7,6 +7,7 @@
 	<meta name="description" content="Documentation for Fudge Core">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
+	<script async src="../assets/js/search.js" id="search-script"></script>
 </head>
 <body>
 <header>
@@ -40,8 +41,6 @@
 							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
 							<input type="checkbox" id="tsd-filter-externals" checked />
 							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
-							<input type="checkbox" id="tsd-filter-only-exported" />
-							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
 						</div>
 					</div>
 					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
@@ -53,7 +52,7 @@
 		<div class="container">
 			<ul class="tsd-breadcrumb">
 				<li>
-					<a href="../index.html">Globals</a>
+					<a href="../index.html">Fudge Core</a>
 				</li>
 				<li>
 					<a href="../modules/fudgecore.html">FudgeCore</a>
@@ -73,7 +72,7 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<a href="fudgecore.render.html" class="tsd-signature-type">Render</a>
+						<a href="fudgecore.render.html" class="tsd-signature-type" data-tsd-kind="Class">Render</a>
 						<ul class="tsd-hierarchy">
 							<li>
 								<span class="target">RenderParticles</span>
@@ -87,10 +86,15 @@
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section tsd-is-inherited">
+							<h3>Constructors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.renderparticles.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section tsd-is-inherited">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#pickbuffer" class="tsd-kind-icon">pick<wbr>Buffer</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#picktexture" class="tsd-kind-icon">pick<wbr>Texture</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#rectclip" class="tsd-kind-icon">rect<wbr>Clip</a></li>
 							</ul>
 						</section>
@@ -99,25 +103,42 @@
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#assert" class="tsd-kind-icon">assert</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#clear" class="tsd-kind-icon">clear</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#createpicktexture" class="tsd-kind-icon">create<wbr>Pick<wbr>Texture</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#drawbranch" class="tsd-kind-icon">draw<wbr>Branch</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#drawbranchforpicking" class="tsd-kind-icon">draw<wbr>Branch<wbr>For<wbr>Picking</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#draw" class="tsd-kind-icon">draw</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.renderparticles.html#drawparticles" class="tsd-kind-icon">draw<wbr>Particles</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#getcanvas" class="tsd-kind-icon">get<wbr>Canvas</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#getcanvasrect" class="tsd-kind-icon">get<wbr>Canvas<wbr>Rect</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#getrenderrectangle" class="tsd-kind-icon">get<wbr>Render<wbr>Rectangle</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#getrenderingcontext" class="tsd-kind-icon">get<wbr>Rendering<wbr>Context</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#initialize" class="tsd-kind-icon">initialize</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#pickbranch" class="tsd-kind-icon">pick<wbr>Branch</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#prepare" class="tsd-kind-icon">prepare</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#resetframebuffer" class="tsd-kind-icon">reset<wbr>Frame<wbr>Buffer</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#setattributestructure" class="tsd-kind-icon">set<wbr>Attribute<wbr>Structure</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#setblendmode" class="tsd-kind-icon">set<wbr>Blend<wbr>Mode</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#setcanvassize" class="tsd-kind-icon">set<wbr>Canvas<wbr>Size</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#setdepthtest" class="tsd-kind-icon">set<wbr>Depth<wbr>Test</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#setrenderrectangle" class="tsd-kind-icon">set<wbr>Render<wbr>Rectangle</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.renderparticles.html#setuptransformandlights" class="tsd-kind-icon">setup<wbr>Transform<wbr>And<wbr>Lights</a></li>
 							</ul>
 						</section>
 					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group tsd-is-inherited">
+				<h2>Constructors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited">
+					<a name="constructor" class="tsd-anchor"></a>
+					<h3>constructor</h3>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Render<wbr>Particles<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.renderparticles.html" class="tsd-signature-type" data-tsd-kind="Class">RenderParticles</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.render.html">Render</a>.<a href="fudgecore.render.html#constructor">constructor</a></p>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.renderparticles.html" class="tsd-signature-type" data-tsd-kind="Class">RenderParticles</a></h4>
+						</li>
+					</ul>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group tsd-is-inherited">
@@ -129,29 +150,18 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.render.html">Render</a>.<a href="fudgecore.render.html#pickbuffer">pickBuffer</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/Render.ts#L11">Documents/HFU/FUDGE/Core/Source/Render/Render.ts:11</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-					<a name="picktexture" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagStatic">Static</span> pick<wbr>Texture</h3>
-					<div class="tsd-signature tsd-kind-icon">pick<wbr>Texture<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">WebGLTexture</span></div>
-					<aside class="tsd-sources">
-						<p>Inherited from <a href="fudgecore.render.html">Render</a>.<a href="fudgecore.render.html#picktexture">pickTexture</a></p>
-						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/Render.ts#L10">Documents/HFU/FUDGE/Core/Source/Render/Render.ts:10</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/Render.ts#L9">Render/Render.ts:9</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static">
 					<a name="rectclip" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> rect<wbr>Clip</h3>
-					<div class="tsd-signature tsd-kind-icon">rect<wbr>Clip<span class="tsd-signature-symbol">:</span> <a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a><span class="tsd-signature-symbol"> = new Rectangle(-1, 1, 2, -2)</span></div>
+					<div class="tsd-signature tsd-kind-icon">rect<wbr>Clip<span class="tsd-signature-symbol">:</span> <a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a><span class="tsd-signature-symbol"> = ...</span></div>
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.render.html">Render</a>.<a href="fudgecore.render.html#rectclip">rectClip</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/Render.ts#L9">Documents/HFU/FUDGE/Core/Source/Render/Render.ts:9</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/Render.ts#L8">Render/Render.ts:8</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -162,14 +172,14 @@
 					<a name="assert" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> assert</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-inherited tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">assert&lt;T&gt;<span class="tsd-signature-symbol">(</span>_value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span>, _message<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span></li>
+						<li class="tsd-signature tsd-kind-icon">assert&lt;T&gt;<span class="tsd-signature-symbol">(</span>_value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span>, _message<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.renderwebgl.html">RenderWebGL</a>.<a href="fudgecore.renderwebgl.html#assert">assert</a></p>
+								<p>Inherited from <a href="fudgecore.render.html">Render</a>.<a href="fudgecore.render.html#assert">assert</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L45">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:45</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/RenderWebGL.ts#L77">Render/RenderWebGL.ts:77</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -186,13 +196,13 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_value: <span class="tsd-signature-type">T</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
+									<h5>_value: <span class="tsd-signature-type">T</span></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>value to check against null</p>
 									</div>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _message: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;&quot;</span></h5>
+									<h5>_message: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;&quot;</span></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>optional, additional message for the exception</p>
 									</div>
@@ -206,14 +216,14 @@
 					<a name="clear" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> clear</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">clear<span class="tsd-signature-symbol">(</span>_color<span class="tsd-signature-symbol">?: </span><a href="fudgecore.color.html" class="tsd-signature-type">Color</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">clear<span class="tsd-signature-symbol">(</span>_color<span class="tsd-signature-symbol">?: </span><a href="fudgecore.color.html" class="tsd-signature-type" data-tsd-kind="Class">Color</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.renderwebgl.html">RenderWebGL</a>.<a href="fudgecore.renderwebgl.html#clear">clear</a></p>
+								<p>Inherited from <a href="fudgecore.render.html">Render</a>.<a href="fudgecore.render.html#clear">clear</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L122">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:122</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/RenderWebGL.ts#L125">Render/RenderWebGL.ts:125</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -224,7 +234,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _color: <a href="fudgecore.color.html" class="tsd-signature-type">Color</a><span class="tsd-signature-symbol"> = null</span></h5>
+									<h5>_color: <a href="fudgecore.color.html" class="tsd-signature-type" data-tsd-kind="Class">Color</a><span class="tsd-signature-symbol"> = null</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -232,103 +242,26 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-					<a name="createpicktexture" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagStatic">Static</span> create<wbr>Pick<wbr>Texture</h3>
+					<a name="draw" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> draw</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">create<wbr>Pick<wbr>Texture<span class="tsd-signature-symbol">(</span>_width<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _height<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">WebGLTexture</span></li>
+						<li class="tsd-signature tsd-kind-icon">draw<span class="tsd-signature-symbol">(</span>_cmpCamera<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentcamera.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentCamera</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.render.html">Render</a>.<a href="fudgecore.render.html#createpicktexture">createPickTexture</a></p>
+								<p>Inherited from <a href="fudgecore.render.html">Render</a>.<a href="fudgecore.render.html#draw">draw</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/Render.ts#L20">Documents/HFU/FUDGE/Core/Source/Render/Render.ts:20</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/Render.ts#L127">Render/Render.ts:127</a></li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Creates a texture buffer to be used as pick-buffer</p>
-								</div>
-							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_width: <span class="tsd-signature-type">number</span></h5>
-								</li>
-								<li>
-									<h5>_height: <span class="tsd-signature-type">number</span></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">WebGLTexture</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-					<a name="drawbranch" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagStatic">Static</span> draw<wbr>Branch</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">draw<wbr>Branch<span class="tsd-signature-symbol">(</span>_branch<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a>, _cmpCamera<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentcamera.html" class="tsd-signature-type">ComponentCamera</a>, _drawNode<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Function</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.render.html">Render</a>.<a href="fudgecore.render.html#drawbranch">drawBranch</a></p>
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/Render.ts#L161">Documents/HFU/FUDGE/Core/Source/Render/Render.ts:161</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>The main rendering function to be called from <a href="fudgecore.viewport.html">Viewport</a>.
-									Draws the branch starting with the given <a href="fudgecore.node.html">Node</a> using the camera given <a href="fudgecore.componentcamera.html">ComponentCamera</a>.</p>
-								</div>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>_branch: <a href="fudgecore.node.html" class="tsd-signature-type">Node</a></h5>
-								</li>
-								<li>
-									<h5>_cmpCamera: <a href="fudgecore.componentcamera.html" class="tsd-signature-type">ComponentCamera</a></h5>
-								</li>
-								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _drawNode: <span class="tsd-signature-type">Function</span><span class="tsd-signature-symbol"> = Render.drawNode</span></h5>
+									<h5>_cmpCamera: <a href="fudgecore.componentcamera.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentCamera</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-					<a name="drawbranchforpicking" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagStatic">Static</span> draw<wbr>Branch<wbr>For<wbr>Picking</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">draw<wbr>Branch<wbr>For<wbr>Picking<span class="tsd-signature-symbol">(</span>_branch<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a>, _cmpCamera<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentcamera.html" class="tsd-signature-type">ComponentCamera</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.pick.html" class="tsd-signature-type">Pick</a><span class="tsd-signature-symbol">[]</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.render.html">Render</a>.<a href="fudgecore.render.html#drawbranchforpicking">drawBranchForPicking</a></p>
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/Render.ts#L48">Documents/HFU/FUDGE/Core/Source/Render/Render.ts:48</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Used with a <a href="fudgecore.picker.html">Picker</a>-camera, this method renders one pixel with picking information
-									for each node in the line of sight and return that as an unsorted <a href="fudgecore.pick.html">Pick</a>-array</p>
-								</div>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>_branch: <a href="fudgecore.node.html" class="tsd-signature-type">Node</a></h5>
-								</li>
-								<li>
-									<h5>_cmpCamera: <a href="fudgecore.componentcamera.html" class="tsd-signature-type">ComponentCamera</a></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.pick.html" class="tsd-signature-type">Pick</a><span class="tsd-signature-symbol">[]</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -342,7 +275,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderParticles.ts#L3">Documents/HFU/FUDGE/Core/Source/Render/RenderParticles.ts:3</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/RenderParticles.ts#L3">Render/RenderParticles.ts:3</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -358,9 +291,9 @@
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.renderwebgl.html">RenderWebGL</a>.<a href="fudgecore.renderwebgl.html#getcanvas">getCanvas</a></p>
+								<p>Inherited from <a href="fudgecore.render.html">Render</a>.<a href="fudgecore.render.html#getcanvas">getCanvas</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L83">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:83</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/RenderWebGL.ts#L86">Render/RenderWebGL.ts:86</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -376,14 +309,14 @@
 					<a name="getcanvasrect" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> get<wbr>Canvas<wbr>Rect</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Canvas<wbr>Rect<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Canvas<wbr>Rect<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.renderwebgl.html">RenderWebGL</a>.<a href="fudgecore.renderwebgl.html#getcanvasrect">getCanvasRect</a></p>
+								<p>Inherited from <a href="fudgecore.render.html">Render</a>.<a href="fudgecore.render.html#getcanvasrect">getCanvasRect</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L97">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:97</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/RenderWebGL.ts#L100">Render/RenderWebGL.ts:100</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -391,7 +324,7 @@
 									<p>Return a rectangle describing the size of the offscreen-canvas. x,y are 0 at all times.</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -399,14 +332,14 @@
 					<a name="getrenderrectangle" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> get<wbr>Render<wbr>Rectangle</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Render<wbr>Rectangle<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Render<wbr>Rectangle<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.renderwebgl.html">RenderWebGL</a>.<a href="fudgecore.renderwebgl.html#getrenderrectangle">getRenderRectangle</a></p>
+								<p>Inherited from <a href="fudgecore.render.html">Render</a>.<a href="fudgecore.render.html#getrenderrectangle">getRenderRectangle</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L137">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:137</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/RenderWebGL.ts#L140">Render/RenderWebGL.ts:140</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -414,7 +347,7 @@
 									<p>Retrieve the area on the offscreen-canvas the camera image gets rendered to.</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -427,9 +360,9 @@
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.renderwebgl.html">RenderWebGL</a>.<a href="fudgecore.renderwebgl.html#getrenderingcontext">getRenderingContext</a></p>
+								<p>Inherited from <a href="fudgecore.render.html">Render</a>.<a href="fudgecore.render.html#getrenderingcontext">getRenderingContext</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L90">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:90</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/RenderWebGL.ts#L93">Render/RenderWebGL.ts:93</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -450,9 +383,9 @@
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.renderwebgl.html">RenderWebGL</a>.<a href="fudgecore.renderwebgl.html#initialize">initialize</a></p>
+								<p>Inherited from <a href="fudgecore.render.html">Render</a>.<a href="fudgecore.render.html#initialize">initialize</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L54">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:54</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/RenderWebGL.ts#L37">Render/RenderWebGL.ts:37</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -474,17 +407,90 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-					<a name="resetframebuffer" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagStatic">Static</span> reset<wbr>Frame<wbr>Buffer</h3>
+					<a name="pickbranch" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> pick<wbr>Branch</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">reset<wbr>Frame<wbr>Buffer<span class="tsd-signature-symbol">(</span>_color<span class="tsd-signature-symbol">?: </span><a href="fudgecore.color.html" class="tsd-signature-type">Color</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">pick<wbr>Branch<span class="tsd-signature-symbol">(</span>_branch<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type" data-tsd-kind="Class">Node</a>, _cmpCamera<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentcamera.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentCamera</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.pick.html" class="tsd-signature-type" data-tsd-kind="Class">Pick</a><span class="tsd-signature-symbol">[]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.renderwebgl.html">RenderWebGL</a>.<a href="fudgecore.renderwebgl.html#resetframebuffer">resetFrameBuffer</a></p>
+								<p>Inherited from <a href="fudgecore.render.html">Render</a>.<a href="fudgecore.render.html#pickbranch">pickBranch</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L130">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:130</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/Render.ts#L101">Render/Render.ts:101</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Used with a <a href="fudgecore.picker.html">Picker</a>-camera, this method renders one pixel with picking information
+									for each node in the line of sight and return that as an unsorted <a href="fudgecore.pick.html">Pick</a>-array</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_branch: <a href="fudgecore.node.html" class="tsd-signature-type" data-tsd-kind="Class">Node</a></h5>
+								</li>
+								<li>
+									<h5>_cmpCamera: <a href="fudgecore.componentcamera.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentCamera</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.pick.html" class="tsd-signature-type" data-tsd-kind="Class">Pick</a><span class="tsd-signature-symbol">[]</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+					<a name="prepare" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> prepare</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">prepare<span class="tsd-signature-symbol">(</span>_branch<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type" data-tsd-kind="Class">Node</a>, _mtxWorld<span class="tsd-signature-symbol">?: </span><a href="fudgecore.matrix4x4.html" class="tsd-signature-type" data-tsd-kind="Class">Matrix4x4</a>, _lights<span class="tsd-signature-symbol">?: </span><a href="../modules/fudgecore.html#maplighttypetolightlist" class="tsd-signature-type" data-tsd-kind="Type alias">MapLightTypeToLightList</a>, _shadersUsed<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-symbol">typeof </span><a href="fudgecore.shader.html" class="tsd-signature-type" data-tsd-kind="Class">Shader</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.render.html">Render</a>.<a href="fudgecore.render.html#prepare">prepare</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/Render.ts#L22">Render/Render.ts:22</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Recursively iterates over the branch starting with the node given, recalculates all world transforms,
+										collects all lights and feeds all shaders used in the graph with these lights. Sorts nodes for different
+									render passes.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_branch: <a href="fudgecore.node.html" class="tsd-signature-type" data-tsd-kind="Class">Node</a></h5>
+								</li>
+								<li>
+									<h5>_mtxWorld: <a href="fudgecore.matrix4x4.html" class="tsd-signature-type" data-tsd-kind="Class">Matrix4x4</a><span class="tsd-signature-symbol"> = ...</span></h5>
+								</li>
+								<li>
+									<h5>_lights: <a href="../modules/fudgecore.html#maplighttypetolightlist" class="tsd-signature-type" data-tsd-kind="Type alias">MapLightTypeToLightList</a><span class="tsd-signature-symbol"> = ...</span></h5>
+								</li>
+								<li>
+									<h5>_shadersUsed: <span class="tsd-signature-symbol">typeof </span><a href="fudgecore.shader.html" class="tsd-signature-type" data-tsd-kind="Class">Shader</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = null</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+					<a name="resetframebuffer" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> reset<wbr>Frame<wbr>Buffer</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">reset<wbr>Frame<wbr>Buffer<span class="tsd-signature-symbol">(</span>_color<span class="tsd-signature-symbol">?: </span><a href="fudgecore.color.html" class="tsd-signature-type" data-tsd-kind="Class">Color</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="fudgecore.render.html">Render</a>.<a href="fudgecore.render.html#resetframebuffer">resetFrameBuffer</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/RenderWebGL.ts#L133">Render/RenderWebGL.ts:133</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -495,7 +501,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _color: <a href="fudgecore.color.html" class="tsd-signature-type">Color</a><span class="tsd-signature-symbol"> = null</span></h5>
+									<h5>_color: <a href="fudgecore.color.html" class="tsd-signature-type" data-tsd-kind="Class">Color</a><span class="tsd-signature-symbol"> = null</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -506,14 +512,14 @@
 					<a name="setattributestructure" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> set<wbr>Attribute<wbr>Structure</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">set<wbr>Attribute<wbr>Structure<span class="tsd-signature-symbol">(</span>_attributeLocation<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _bufferSpecification<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.bufferspecification.html" class="tsd-signature-type">BufferSpecification</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Attribute<wbr>Structure<span class="tsd-signature-symbol">(</span>_attributeLocation<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _bufferSpecification<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.bufferspecification.html" class="tsd-signature-type" data-tsd-kind="Interface">BufferSpecification</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.renderwebgl.html">RenderWebGL</a>.<a href="fudgecore.renderwebgl.html#setattributestructure">setAttributeStructure</a></p>
+								<p>Inherited from <a href="fudgecore.render.html">Render</a>.<a href="fudgecore.render.html#setattributestructure">setAttributeStructure</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L36">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:36</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/RenderWebGL.ts#L68">Render/RenderWebGL.ts:68</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -530,7 +536,7 @@
 									</div>
 								</li>
 								<li>
-									<h5>_bufferSpecification: <a href="../interfaces/fudgecore.bufferspecification.html" class="tsd-signature-type">BufferSpecification</a></h5>
+									<h5>_bufferSpecification: <a href="../interfaces/fudgecore.bufferspecification.html" class="tsd-signature-type" data-tsd-kind="Interface">BufferSpecification</a></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>Interface passing datapullspecifications to the buffer.</p>
 									</div>
@@ -544,20 +550,20 @@
 					<a name="setblendmode" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> set<wbr>Blend<wbr>Mode</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">set<wbr>Blend<wbr>Mode<span class="tsd-signature-symbol">(</span>_mode<span class="tsd-signature-symbol">: </span><a href="../enums/fudgecore.blend.html" class="tsd-signature-type">BLEND</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Blend<wbr>Mode<span class="tsd-signature-symbol">(</span>_mode<span class="tsd-signature-symbol">: </span><a href="../enums/fudgecore.blend.html" class="tsd-signature-type" data-tsd-kind="Enumeration">BLEND</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.renderwebgl.html">RenderWebGL</a>.<a href="fudgecore.renderwebgl.html#setblendmode">setBlendMode</a></p>
+								<p>Inherited from <a href="fudgecore.render.html">Render</a>.<a href="fudgecore.render.html#setblendmode">setBlendMode</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L148">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:148</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/RenderWebGL.ts#L151">Render/RenderWebGL.ts:151</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_mode: <a href="../enums/fudgecore.blend.html" class="tsd-signature-type">BLEND</a></h5>
+									<h5>_mode: <a href="../enums/fudgecore.blend.html" class="tsd-signature-type" data-tsd-kind="Enumeration">BLEND</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -573,9 +579,9 @@
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.renderwebgl.html">RenderWebGL</a>.<a href="fudgecore.renderwebgl.html#setcanvassize">setCanvasSize</a></p>
+								<p>Inherited from <a href="fudgecore.render.html">Render</a>.<a href="fudgecore.render.html#setcanvassize">setCanvasSize</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L105">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:105</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/RenderWebGL.ts#L108">Render/RenderWebGL.ts:108</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -605,9 +611,9 @@
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.renderwebgl.html">RenderWebGL</a>.<a href="fudgecore.renderwebgl.html#setdepthtest">setDepthTest</a></p>
+								<p>Inherited from <a href="fudgecore.render.html">Render</a>.<a href="fudgecore.render.html#setdepthtest">setDepthTest</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L141">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:141</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/RenderWebGL.ts#L144">Render/RenderWebGL.ts:144</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -624,14 +630,14 @@
 					<a name="setrenderrectangle" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> set<wbr>Render<wbr>Rectangle</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">set<wbr>Render<wbr>Rectangle<span class="tsd-signature-symbol">(</span>_rect<span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Render<wbr>Rectangle<span class="tsd-signature-symbol">(</span>_rect<span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.renderwebgl.html">RenderWebGL</a>.<a href="fudgecore.renderwebgl.html#setrenderrectangle">setRenderRectangle</a></p>
+								<p>Inherited from <a href="fudgecore.render.html">Render</a>.<a href="fudgecore.render.html#setrenderrectangle">setRenderRectangle</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L114">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:114</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/RenderWebGL.ts#L117">Render/RenderWebGL.ts:117</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -642,7 +648,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_rect: <a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></h5>
+									<h5>_rect: <a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a></h5>
 									<div class="tsd-comment tsd-typography">
 									</div>
 								</li>
@@ -651,52 +657,13 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-					<a name="setuptransformandlights" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagStatic">Static</span> setup<wbr>Transform<wbr>And<wbr>Lights</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">setup<wbr>Transform<wbr>And<wbr>Lights<span class="tsd-signature-symbol">(</span>_branch<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a>, _mtxWorld<span class="tsd-signature-symbol">?: </span><a href="fudgecore.matrix4x4.html" class="tsd-signature-type">Matrix4x4</a>, _lights<span class="tsd-signature-symbol">?: </span><a href="../modules/fudgecore.html#maplighttypetolightlist" class="tsd-signature-type">MapLightTypeToLightList</a>, _shadersUsed<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-symbol">typeof </span><a href="fudgecore.shader.html" class="tsd-signature-type">Shader</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.render.html">Render</a>.<a href="fudgecore.render.html#setuptransformandlights">setupTransformAndLights</a></p>
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/Render.ts#L107">Documents/HFU/FUDGE/Core/Source/Render/Render.ts:107</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Recursively iterates over the branch starting with the node given, recalculates all world transforms,
-									collects all lights and feeds all shaders used in the graph with these lights</p>
-								</div>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>_branch: <a href="fudgecore.node.html" class="tsd-signature-type">Node</a></h5>
-								</li>
-								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _mtxWorld: <a href="fudgecore.matrix4x4.html" class="tsd-signature-type">Matrix4x4</a><span class="tsd-signature-symbol"> = Matrix4x4.IDENTITY()</span></h5>
-								</li>
-								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _lights: <a href="../modules/fudgecore.html#maplighttypetolightlist" class="tsd-signature-type">MapLightTypeToLightList</a><span class="tsd-signature-symbol"> = new Map()</span></h5>
-								</li>
-								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _shadersUsed: <span class="tsd-signature-symbol">typeof </span><a href="fudgecore.shader.html" class="tsd-signature-type">Shader</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = null</span></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
-						</li>
-					</ul>
-				</section>
 			</section>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 			<nav class="tsd-navigation primary">
 				<ul>
-					<li class="globals  ">
-						<a href="../index.html"><em>Globals</em></a>
+					<li class=" ">
+						<a href="../index.html">Exports</a>
 					</li>
 					<li class="current tsd-kind-namespace">
 						<a href="../modules/fudgecore.html">Fudge<wbr>Core</a>
@@ -710,11 +677,11 @@
 					<li class="current tsd-kind-class tsd-parent-kind-namespace">
 						<a href="fudgecore.renderparticles.html" class="tsd-kind-icon">Render<wbr>Particles</a>
 						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-								<a href="fudgecore.renderparticles.html#pickbuffer" class="tsd-kind-icon">pick<wbr>Buffer</a>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited">
+								<a href="fudgecore.renderparticles.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-								<a href="fudgecore.renderparticles.html#picktexture" class="tsd-kind-icon">pick<wbr>Texture</a>
+								<a href="fudgecore.renderparticles.html#pickbuffer" class="tsd-kind-icon">pick<wbr>Buffer</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static">
 								<a href="fudgecore.renderparticles.html#rectclip" class="tsd-kind-icon">rect<wbr>Clip</a>
@@ -726,13 +693,7 @@
 								<a href="fudgecore.renderparticles.html#clear" class="tsd-kind-icon">clear</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-								<a href="fudgecore.renderparticles.html#createpicktexture" class="tsd-kind-icon">create<wbr>Pick<wbr>Texture</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-								<a href="fudgecore.renderparticles.html#drawbranch" class="tsd-kind-icon">draw<wbr>Branch</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-								<a href="fudgecore.renderparticles.html#drawbranchforpicking" class="tsd-kind-icon">draw<wbr>Branch<wbr>For<wbr>Picking</a>
+								<a href="fudgecore.renderparticles.html#draw" class="tsd-kind-icon">draw</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
 								<a href="fudgecore.renderparticles.html#drawparticles" class="tsd-kind-icon">draw<wbr>Particles</a>
@@ -753,6 +714,12 @@
 								<a href="fudgecore.renderparticles.html#initialize" class="tsd-kind-icon">initialize</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+								<a href="fudgecore.renderparticles.html#pickbranch" class="tsd-kind-icon">pick<wbr>Branch</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
+								<a href="fudgecore.renderparticles.html#prepare" class="tsd-kind-icon">prepare</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
 								<a href="fudgecore.renderparticles.html#resetframebuffer" class="tsd-kind-icon">reset<wbr>Frame<wbr>Buffer</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
@@ -770,9 +737,6 @@
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
 								<a href="fudgecore.renderparticles.html#setrenderrectangle" class="tsd-kind-icon">set<wbr>Render<wbr>Rectangle</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-								<a href="fudgecore.renderparticles.html#setuptransformandlights" class="tsd-kind-icon">setup<wbr>Transform<wbr>And<wbr>Lights</a>
-							</li>
 						</ul>
 					</li>
 				</ul>
@@ -786,6 +750,9 @@
 	<div class="container">
 		<h2>Legend</h2>
 		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
+			</ul>
 			<ul class="tsd-legend">
 				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
 			</ul>

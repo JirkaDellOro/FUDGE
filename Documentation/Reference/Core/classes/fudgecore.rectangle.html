@@ -7,6 +7,7 @@
 	<meta name="description" content="Documentation for Fudge Core">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
+	<script async src="../assets/js/search.js" id="search-script"></script>
 </head>
 <body>
 <header>
@@ -40,8 +41,6 @@
 							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
 							<input type="checkbox" id="tsd-filter-externals" checked />
 							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
-							<input type="checkbox" id="tsd-filter-only-exported" />
-							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
 						</div>
 					</div>
 					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
@@ -53,7 +52,7 @@
 		<div class="container">
 			<ul class="tsd-breadcrumb">
 				<li>
-					<a href="../index.html">Globals</a>
+					<a href="../index.html">Fudge Core</a>
 				</li>
 				<li>
 					<a href="../modules/fudgecore.html">FudgeCore</a>
@@ -85,7 +84,7 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<a href="fudgecore.mutable.html" class="tsd-signature-type">Mutable</a>
+						<a href="fudgecore.mutable.html" class="tsd-signature-type" data-tsd-kind="Class">Mutable</a>
 						<ul class="tsd-hierarchy">
 							<li>
 								<span class="target">Rectangle</span>
@@ -101,7 +100,7 @@
 						<section class="tsd-index-section ">
 							<h3>Constructors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="fudgecore.rectangle.html#constructor" class="tsd-kind-icon">constructor</a></li>
+								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite"><a href="fudgecore.rectangle.html#constructor" class="tsd-kind-icon">constructor</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
@@ -129,10 +128,10 @@
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="fudgecore.rectangle.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.rectangle.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.rectangle.html#collides" class="tsd-kind-icon">collides</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.rectangle.html#covers" class="tsd-kind-icon">covers</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="fudgecore.rectangle.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.rectangle.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.rectangle.html#getintersection" class="tsd-kind-icon">get<wbr>Intersection</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.rectangle.html#getmutator" class="tsd-kind-icon">get<wbr>Mutator</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.rectangle.html#getmutatorattributetypes" class="tsd-kind-icon">get<wbr>Mutator<wbr>Attribute<wbr>Types</a></li>
@@ -141,7 +140,7 @@
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.rectangle.html#isinside" class="tsd-kind-icon">is<wbr>Inside</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.rectangle.html#mutate" class="tsd-kind-icon">mutate</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.rectangle.html#pointtorect" class="tsd-kind-icon">point<wbr>ToRect</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="fudgecore.rectangle.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.rectangle.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.rectangle.html#setpositionandsize" class="tsd-kind-icon">set<wbr>Position<wbr>And<wbr>Size</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.rectangle.html#tostring" class="tsd-kind-icon">to<wbr>String</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.rectangle.html#updatemutator" class="tsd-kind-icon">update<wbr>Mutator</a></li>
@@ -153,38 +152,39 @@
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Constructors</h2>
-				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
-					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Rectangle<span class="tsd-signature-symbol">(</span>_x<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _y<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _width<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _height<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _origin<span class="tsd-signature-symbol">?: </span><a href="../enums/fudgecore.origin2d.html" class="tsd-signature-type">ORIGIN2D</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></li>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Rectangle<span class="tsd-signature-symbol">(</span>_x<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _y<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _width<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _height<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _origin<span class="tsd-signature-symbol">?: </span><a href="../enums/fudgecore.origin2d.html" class="tsd-signature-type" data-tsd-kind="Enumeration">ORIGIN2D</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
+								<p>Overrides <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#constructor">constructor</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L26">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:26</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L26">Math/Rectangle.ts:26</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _x: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></h5>
+									<h5>_x: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _y: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></h5>
+									<h5>_y: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _width: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 1</span></h5>
+									<h5>_width: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 1</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _height: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 1</span></h5>
+									<h5>_height: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 1</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _origin: <a href="../enums/fudgecore.origin2d.html" class="tsd-signature-type">ORIGIN2D</a><span class="tsd-signature-symbol"> = ORIGIN2D.TOPLEFT</span></h5>
+									<h5>_origin: <a href="../enums/fudgecore.origin2d.html" class="tsd-signature-type" data-tsd-kind="Enumeration">ORIGIN2D</a><span class="tsd-signature-symbol"> = ...</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -194,20 +194,20 @@
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 					<a name="position" class="tsd-anchor"></a>
 					<h3>position</h3>
-					<div class="tsd-signature tsd-kind-icon">position<span class="tsd-signature-symbol">:</span> <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a><span class="tsd-signature-symbol"> = Recycler.get(Vector2)</span></div>
+					<div class="tsd-signature tsd-kind-icon">position<span class="tsd-signature-symbol">:</span> <a href="fudgecore.vector2.html" class="tsd-signature-type" data-tsd-kind="Class">Vector2</a><span class="tsd-signature-symbol"> = ...</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L25">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:25</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L25">Math/Rectangle.ts:25</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 					<a name="size" class="tsd-anchor"></a>
 					<h3>size</h3>
-					<div class="tsd-signature tsd-kind-icon">size<span class="tsd-signature-symbol">:</span> <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a><span class="tsd-signature-symbol"> = Recycler.get(Vector2)</span></div>
+					<div class="tsd-signature tsd-kind-icon">size<span class="tsd-signature-symbol">:</span> <a href="fudgecore.vector2.html" class="tsd-signature-type" data-tsd-kind="Class">Vector2</a><span class="tsd-signature-symbol"> = ...</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L26">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:26</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L26">Math/Rectangle.ts:26</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -225,7 +225,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L82">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:82</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L82">Math/Rectangle.ts:82</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -238,7 +238,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L111">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:111</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L111">Math/Rectangle.ts:111</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -260,16 +260,16 @@
 					<a name="copy" class="tsd-anchor"></a>
 					<h3>copy</h3>
 					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> copy<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></li>
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> copy<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L115">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:115</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L115">Math/Rectangle.ts:115</a></li>
 								</ul>
 							</aside>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -284,7 +284,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L51">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:51</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L51">Math/Rectangle.ts:51</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
@@ -292,7 +292,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L97">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:97</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L97">Math/Rectangle.ts:97</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -316,7 +316,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L58">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:58</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L58">Math/Rectangle.ts:58</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -329,7 +329,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L100">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:100</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L100">Math/Rectangle.ts:100</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -358,7 +358,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L74">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:74</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L74">Math/Rectangle.ts:74</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -371,7 +371,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L108">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:108</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L108">Math/Rectangle.ts:108</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -400,7 +400,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L66">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:66</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L66">Math/Rectangle.ts:66</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -413,7 +413,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L104">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:104</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L104">Math/Rectangle.ts:104</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -440,9 +440,8 @@
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#type">type</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Mutable.ts#L62">Documents/HFU/FUDGE/Core/Source/Transfer/Mutable.ts:62</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Serialization/Mutable.ts#L62">Serialization/Mutable.ts:62</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -466,7 +465,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L48">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:48</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L48">Math/Rectangle.ts:48</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
@@ -474,7 +473,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L94">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:94</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L94">Math/Rectangle.ts:94</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -498,7 +497,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L42">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:42</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L42">Math/Rectangle.ts:42</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
@@ -506,7 +505,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L88">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:88</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L88">Math/Rectangle.ts:88</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -530,7 +529,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L45">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:45</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L45">Math/Rectangle.ts:45</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
@@ -538,7 +537,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L91">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:91</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L91">Math/Rectangle.ts:91</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -554,19 +553,18 @@
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 					<a name="addeventlistener" class="tsd-anchor"></a>
 					<h3>add<wbr>Event<wbr>Listener</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">add<wbr>Event<wbr>Listener<span class="tsd-signature-symbol">(</span>_type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, _handler<span class="tsd-signature-symbol">: </span><a href="../modules/fudgecore.html#eventlistener_" class="tsd-signature-type">EventListenerƒ</a>, _options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">AddEventListenerOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">add<wbr>Event<wbr>Listener<span class="tsd-signature-symbol">(</span>_type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, _handler<span class="tsd-signature-symbol">: </span><a href="../modules/fudgecore.html#eventlistener_" class="tsd-signature-type" data-tsd-kind="Type alias">EventListenerƒ</a>, _options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">AddEventListenerOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.eventtarget_.html">EventTargetƒ</a>.<a href="fudgecore.eventtarget_.html#addeventlistener">addEventListener</a></p>
-								<p>Overrides <a href="fudgecore.control.html">Control</a>.<a href="fudgecore.control.html#addeventlistener">addEventListener</a></p>
+								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#addeventlistener">addEventListener</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Event/Event.ts#L57">Documents/HFU/FUDGE/Core/Source/Event/Event.ts:57</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Event/Event.ts#L60">Event/Event.ts:60</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -575,7 +573,7 @@
 									<h5>_type: <span class="tsd-signature-type">string</span></h5>
 								</li>
 								<li>
-									<h5>_handler: <a href="../modules/fudgecore.html#eventlistener_" class="tsd-signature-type">EventListenerƒ</a></h5>
+									<h5>_handler: <a href="../modules/fudgecore.html#eventlistener_" class="tsd-signature-type" data-tsd-kind="Type alias">EventListenerƒ</a></h5>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagOptional">Optional</span> _options: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">AddEventListenerOptions</span></h5>
@@ -589,13 +587,13 @@
 					<a name="collides" class="tsd-anchor"></a>
 					<h3>collides</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">collides<span class="tsd-signature-symbol">(</span>_rect<span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+						<li class="tsd-signature tsd-kind-icon">collides<span class="tsd-signature-symbol">(</span>_rect<span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L157">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:157</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L157">Math/Rectangle.ts:157</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -606,7 +604,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_rect: <a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></h5>
+									<h5>_rect: <a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a></h5>
 									<div class="tsd-comment tsd-typography">
 									</div>
 								</li>
@@ -619,13 +617,13 @@
 					<a name="covers" class="tsd-anchor"></a>
 					<h3>covers</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">covers<span class="tsd-signature-symbol">(</span>_rect<span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+						<li class="tsd-signature tsd-kind-icon">covers<span class="tsd-signature-symbol">(</span>_rect<span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L184">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:184</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L184">Math/Rectangle.ts:184</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -636,32 +634,31 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_rect: <a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></h5>
+									<h5>_rect: <a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 					<a name="dispatchevent" class="tsd-anchor"></a>
 					<h3>dispatch<wbr>Event</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">dispatch<wbr>Event<span class="tsd-signature-symbol">(</span>_event<span class="tsd-signature-symbol">: </span><a href="../modules/fudgecore.html#event_" class="tsd-signature-type">Eventƒ</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">dispatch<wbr>Event<span class="tsd-signature-symbol">(</span>_event<span class="tsd-signature-symbol">: </span><a href="../modules/fudgecore.html#event_" class="tsd-signature-type" data-tsd-kind="Type alias">Eventƒ</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.eventtarget_.html">EventTargetƒ</a>.<a href="fudgecore.eventtarget_.html#dispatchevent">dispatchEvent</a></p>
-								<p>Overrides <a href="fudgecore.audiomanager.html">AudioManager</a>.<a href="fudgecore.audiomanager.html#dispatchevent">dispatchEvent</a></p>
+								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#dispatchevent">dispatchEvent</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Event/Event.ts#L64">Documents/HFU/FUDGE/Core/Source/Event/Event.ts:64</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Event/Event.ts#L67">Event/Event.ts:67</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_event: <a href="../modules/fudgecore.html#event_" class="tsd-signature-type">Eventƒ</a></h5>
+									<h5>_event: <a href="../modules/fudgecore.html#event_" class="tsd-signature-type" data-tsd-kind="Type alias">Eventƒ</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
@@ -672,13 +669,13 @@
 					<a name="getintersection" class="tsd-anchor"></a>
 					<h3>get<wbr>Intersection</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Intersection<span class="tsd-signature-symbol">(</span>_rect<span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Intersection<span class="tsd-signature-symbol">(</span>_rect<span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L168">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:168</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L168">Math/Rectangle.ts:168</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -689,10 +686,10 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_rect: <a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></h5>
+									<h5>_rect: <a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -700,14 +697,14 @@
 					<a name="getmutator" class="tsd-anchor"></a>
 					<h3>get<wbr>Mutator</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Mutator<span class="tsd-signature-symbol">(</span>_extendable<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Mutator<span class="tsd-signature-symbol">(</span>_extendable<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type" data-tsd-kind="Interface">Mutator</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutator">getMutator</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Mutable.ts#L70">Documents/HFU/FUDGE/Core/Source/Transfer/Mutable.ts:70</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Serialization/Mutable.ts#L70">Serialization/Mutable.ts:70</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -720,10 +717,10 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _extendable: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></h5>
+									<h5>_extendable: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type" data-tsd-kind="Interface">Mutator</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -731,14 +728,14 @@
 					<a name="getmutatorattributetypes" class="tsd-anchor"></a>
 					<h3>get<wbr>Mutator<wbr>Attribute<wbr>Types</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Mutator<wbr>Attribute<wbr>Types<span class="tsd-signature-symbol">(</span>_mutator<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutatorattributetypes.html" class="tsd-signature-type">MutatorAttributeTypes</a></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Mutator<wbr>Attribute<wbr>Types<span class="tsd-signature-symbol">(</span>_mutator<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type" data-tsd-kind="Interface">Mutator</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutatorattributetypes.html" class="tsd-signature-type" data-tsd-kind="Interface">MutatorAttributeTypes</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutatorattributetypes">getMutatorAttributeTypes</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Mutable.ts#L125">Documents/HFU/FUDGE/Core/Source/Transfer/Mutable.ts:125</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Serialization/Mutable.ts#L126">Serialization/Mutable.ts:126</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -750,12 +747,10 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_mutator: <a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a></h5>
-									<div class="tsd-comment tsd-typography">
-									</div>
+									<h5>_mutator: <a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type" data-tsd-kind="Interface">Mutator</a></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutatorattributetypes.html" class="tsd-signature-type">MutatorAttributeTypes</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutatorattributetypes.html" class="tsd-signature-type" data-tsd-kind="Interface">MutatorAttributeTypes</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -763,14 +758,14 @@
 					<a name="getmutatorforanimation" class="tsd-anchor"></a>
 					<h3>get<wbr>Mutator<wbr>For<wbr>Animation</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>Animation<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutatorforanimation.html" class="tsd-signature-type">MutatorForAnimation</a></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>Animation<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutatorforanimation.html" class="tsd-signature-type" data-tsd-kind="Interface">MutatorForAnimation</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutatorforanimation">getMutatorForAnimation</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Mutable.ts#L103">Documents/HFU/FUDGE/Core/Source/Transfer/Mutable.ts:103</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Serialization/Mutable.ts#L105">Serialization/Mutable.ts:105</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -779,7 +774,7 @@
 									Basic functionality is identical to <a href="fudgecore.rectangle.html#getmutator">getMutator</a>, returned mutator should then be reduced by the subclassed instance</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutatorforanimation.html" class="tsd-signature-type">MutatorForAnimation</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutatorforanimation.html" class="tsd-signature-type" data-tsd-kind="Interface">MutatorForAnimation</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -787,14 +782,14 @@
 					<a name="getmutatorforuserinterface" class="tsd-anchor"></a>
 					<h3>get<wbr>Mutator<wbr>For<wbr>User<wbr>Interface</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>User<wbr>Interface<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutatorforuserinterface.html" class="tsd-signature-type">MutatorForUserInterface</a></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>User<wbr>Interface<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutatorforuserinterface.html" class="tsd-signature-type" data-tsd-kind="Interface">MutatorForUserInterface</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutatorforuserinterface">getMutatorForUserInterface</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Mutable.ts#L110">Documents/HFU/FUDGE/Core/Source/Transfer/Mutable.ts:110</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Serialization/Mutable.ts#L112">Serialization/Mutable.ts:112</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -803,7 +798,7 @@
 									Basic functionality is identical to <a href="fudgecore.rectangle.html#getmutator">getMutator</a>, returned mutator should then be reduced by the subclassed instance</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutatorforuserinterface.html" class="tsd-signature-type">MutatorForUserInterface</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutatorforuserinterface.html" class="tsd-signature-type" data-tsd-kind="Interface">MutatorForUserInterface</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -811,13 +806,13 @@
 					<a name="isinside" class="tsd-anchor"></a>
 					<h3>is<wbr>Inside</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">is<wbr>Inside<span class="tsd-signature-symbol">(</span>_point<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+						<li class="tsd-signature tsd-kind-icon">is<wbr>Inside<span class="tsd-signature-symbol">(</span>_point<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type" data-tsd-kind="Class">Vector2</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L149">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:149</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L149">Math/Rectangle.ts:149</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -828,7 +823,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_point: <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h5>
+									<h5>_point: <a href="fudgecore.vector2.html" class="tsd-signature-type" data-tsd-kind="Class">Vector2</a></h5>
 									<div class="tsd-comment tsd-typography">
 									</div>
 								</li>
@@ -841,14 +836,14 @@
 					<a name="mutate" class="tsd-anchor"></a>
 					<h3>mutate</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">mutate<span class="tsd-signature-symbol">(</span>_mutator<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">mutate<span class="tsd-signature-symbol">(</span>_mutator<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type" data-tsd-kind="Interface">Mutator</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#mutate">mutate</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Mutable.ts#L158">Documents/HFU/FUDGE/Core/Source/Transfer/Mutable.ts:158</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Serialization/Mutable.ts#L159">Serialization/Mutable.ts:159</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -859,7 +854,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_mutator: <a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a></h5>
+									<h5>_mutator: <a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type" data-tsd-kind="Interface">Mutator</a></h5>
 									<div class="tsd-comment tsd-typography">
 									</div>
 								</li>
@@ -872,41 +867,40 @@
 					<a name="pointtorect" class="tsd-anchor"></a>
 					<h3>point<wbr>ToRect</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">point<wbr>ToRect<span class="tsd-signature-symbol">(</span>_point<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a>, _target<span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></li>
+						<li class="tsd-signature tsd-kind-icon">point<wbr>ToRect<span class="tsd-signature-symbol">(</span>_point<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type" data-tsd-kind="Class">Vector2</a>, _target<span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type" data-tsd-kind="Class">Vector2</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L136">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:136</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L136">Math/Rectangle.ts:136</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_point: <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h5>
+									<h5>_point: <a href="fudgecore.vector2.html" class="tsd-signature-type" data-tsd-kind="Class">Vector2</a></h5>
 								</li>
 								<li>
-									<h5>_target: <a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></h5>
+									<h5>_target: <a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector2.html" class="tsd-signature-type" data-tsd-kind="Class">Vector2</a></h4>
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 					<a name="removeeventlistener" class="tsd-anchor"></a>
 					<h3>remove<wbr>Event<wbr>Listener</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">remove<wbr>Event<wbr>Listener<span class="tsd-signature-symbol">(</span>_type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, _handler<span class="tsd-signature-symbol">: </span><a href="../modules/fudgecore.html#eventlistener_" class="tsd-signature-type">EventListenerƒ</a>, _options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">AddEventListenerOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">remove<wbr>Event<wbr>Listener<span class="tsd-signature-symbol">(</span>_type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, _handler<span class="tsd-signature-symbol">: </span><a href="../modules/fudgecore.html#eventlistener_" class="tsd-signature-type" data-tsd-kind="Type alias">EventListenerƒ</a>, _options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">AddEventListenerOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.eventtarget_.html">EventTargetƒ</a>.<a href="fudgecore.eventtarget_.html#removeeventlistener">removeEventListener</a></p>
-								<p>Overrides <a href="fudgecore.control.html">Control</a>.<a href="fudgecore.control.html#removeeventlistener">removeEventListener</a></p>
+								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#removeeventlistener">removeEventListener</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Event/Event.ts#L60">Documents/HFU/FUDGE/Core/Source/Event/Event.ts:60</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Event/Event.ts#L63">Event/Event.ts:63</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -915,7 +909,7 @@
 									<h5>_type: <span class="tsd-signature-type">string</span></h5>
 								</li>
 								<li>
-									<h5>_handler: <a href="../modules/fudgecore.html#eventlistener_" class="tsd-signature-type">EventListenerƒ</a></h5>
+									<h5>_handler: <a href="../modules/fudgecore.html#eventlistener_" class="tsd-signature-type" data-tsd-kind="Type alias">EventListenerƒ</a></h5>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagOptional">Optional</span> _options: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">AddEventListenerOptions</span></h5>
@@ -929,13 +923,13 @@
 					<a name="setpositionandsize" class="tsd-anchor"></a>
 					<h3>set<wbr>Position<wbr>And<wbr>Size</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">set<wbr>Position<wbr>And<wbr>Size<span class="tsd-signature-symbol">(</span>_x<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _y<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _width<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _height<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _origin<span class="tsd-signature-symbol">?: </span><a href="../enums/fudgecore.origin2d.html" class="tsd-signature-type">ORIGIN2D</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Position<wbr>And<wbr>Size<span class="tsd-signature-symbol">(</span>_x<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _y<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _width<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _height<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _origin<span class="tsd-signature-symbol">?: </span><a href="../enums/fudgecore.origin2d.html" class="tsd-signature-type" data-tsd-kind="Enumeration">ORIGIN2D</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L122">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:122</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L122">Math/Rectangle.ts:122</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -946,19 +940,19 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _x: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></h5>
+									<h5>_x: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _y: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></h5>
+									<h5>_y: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _width: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 1</span></h5>
+									<h5>_width: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 1</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _height: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 1</span></h5>
+									<h5>_height: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 1</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _origin: <a href="../enums/fudgecore.origin2d.html" class="tsd-signature-type">ORIGIN2D</a><span class="tsd-signature-symbol"> = ORIGIN2D.TOPLEFT</span></h5>
+									<h5>_origin: <a href="../enums/fudgecore.origin2d.html" class="tsd-signature-type" data-tsd-kind="Enumeration">ORIGIN2D</a><span class="tsd-signature-symbol"> = ...</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -975,7 +969,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L195">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:195</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L195">Math/Rectangle.ts:195</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -991,14 +985,14 @@
 					<a name="updatemutator" class="tsd-anchor"></a>
 					<h3>update<wbr>Mutator</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">update<wbr>Mutator<span class="tsd-signature-symbol">(</span>_mutator<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">update<wbr>Mutator<span class="tsd-signature-symbol">(</span>_mutator<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type" data-tsd-kind="Interface">Mutator</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#updatemutator">updateMutator</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Mutable.ts#L145">Documents/HFU/FUDGE/Core/Source/Transfer/Mutable.ts:145</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Serialization/Mutable.ts#L146">Serialization/Mutable.ts:146</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1009,7 +1003,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_mutator: <a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a></h5>
+									<h5>_mutator: <a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type" data-tsd-kind="Interface">Mutator</a></h5>
 									<div class="tsd-comment tsd-typography">
 									</div>
 								</li>
@@ -1022,13 +1016,13 @@
 					<a name="get" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> GET</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">GET<span class="tsd-signature-symbol">(</span>_x<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _y<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _width<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _height<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _origin<span class="tsd-signature-symbol">?: </span><a href="../enums/fudgecore.origin2d.html" class="tsd-signature-type">ORIGIN2D</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></li>
+						<li class="tsd-signature tsd-kind-icon">GET<span class="tsd-signature-symbol">(</span>_x<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _y<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _width<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _height<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _origin<span class="tsd-signature-symbol">?: </span><a href="../enums/fudgecore.origin2d.html" class="tsd-signature-type" data-tsd-kind="Enumeration">ORIGIN2D</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Math/Rectangle.ts#L36">Documents/HFU/FUDGE/Core/Source/Math/Rectangle.ts:36</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Math/Rectangle.ts#L36">Math/Rectangle.ts:36</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1039,22 +1033,22 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _x: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></h5>
+									<h5>_x: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _y: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></h5>
+									<h5>_y: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _width: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 1</span></h5>
+									<h5>_width: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 1</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _height: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 1</span></h5>
+									<h5>_height: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 1</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _origin: <a href="../enums/fudgecore.origin2d.html" class="tsd-signature-type">ORIGIN2D</a><span class="tsd-signature-symbol"> = ORIGIN2D.TOPLEFT</span></h5>
+									<h5>_origin: <a href="../enums/fudgecore.origin2d.html" class="tsd-signature-type" data-tsd-kind="Enumeration">ORIGIN2D</a><span class="tsd-signature-symbol"> = ...</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -1063,8 +1057,8 @@
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 			<nav class="tsd-navigation primary">
 				<ul>
-					<li class="globals  ">
-						<a href="../index.html"><em>Globals</em></a>
+					<li class=" ">
+						<a href="../index.html">Exports</a>
 					</li>
 					<li class="current tsd-kind-namespace">
 						<a href="../modules/fudgecore.html">Fudge<wbr>Core</a>
@@ -1078,7 +1072,7 @@
 					<li class="current tsd-kind-class tsd-parent-kind-namespace">
 						<a href="fudgecore.rectangle.html" class="tsd-kind-icon">Rectangle</a>
 						<ul>
-							<li class=" tsd-kind-constructor tsd-parent-kind-class">
+							<li class=" tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
 								<a href="fudgecore.rectangle.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
@@ -1117,7 +1111,7 @@
 							<li class=" tsd-kind-accessor tsd-parent-kind-class">
 								<a href="fudgecore.rectangle.html#y" class="tsd-kind-icon">y</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgecore.rectangle.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
@@ -1126,7 +1120,7 @@
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudgecore.rectangle.html#covers" class="tsd-kind-icon">covers</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgecore.rectangle.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
@@ -1153,7 +1147,7 @@
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudgecore.rectangle.html#pointtorect" class="tsd-kind-icon">point<wbr>ToRect</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgecore.rectangle.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">

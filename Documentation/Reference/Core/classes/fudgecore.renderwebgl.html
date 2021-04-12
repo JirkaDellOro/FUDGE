@@ -7,6 +7,7 @@
 	<meta name="description" content="Documentation for Fudge Core">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
+	<script async src="../assets/js/search.js" id="search-script"></script>
 </head>
 <body>
 <header>
@@ -40,8 +41,6 @@
 							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
 							<input type="checkbox" id="tsd-filter-externals" checked />
 							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
-							<input type="checkbox" id="tsd-filter-only-exported" />
-							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
 						</div>
 					</div>
 					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
@@ -53,7 +52,7 @@
 		<div class="container">
 			<ul class="tsd-breadcrumb">
 				<li>
-					<a href="../index.html">Globals</a>
+					<a href="../index.html">Fudge Core</a>
 				</li>
 				<li>
 					<a href="../modules/fudgecore.html">FudgeCore</a>
@@ -84,10 +83,10 @@
 						<span class="target">RenderWebGL</span>
 						<ul class="tsd-hierarchy">
 							<li>
-								<a href="fudgecore.physicsdebugdraw.html" class="tsd-signature-type">PhysicsDebugDraw</a>
+								<a href="fudgecore.physicsdebugdraw.html" class="tsd-signature-type" data-tsd-kind="Class">PhysicsDebugDraw</a>
 							</li>
 							<li>
-								<a href="fudgecore.render.html" class="tsd-signature-type">Render</a>
+								<a href="fudgecore.render.html" class="tsd-signature-type" data-tsd-kind="Class">Render</a>
 							</li>
 						</ul>
 					</li>
@@ -97,6 +96,12 @@
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
+						<section class="tsd-index-section ">
+							<h3>Constructors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="fudgecore.renderwebgl.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
@@ -119,18 +124,35 @@
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Constructors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
+					<a name="constructor" class="tsd-anchor"></a>
+					<h3>constructor</h3>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Render<wbr>WebGL<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.renderwebgl.html" class="tsd-signature-type" data-tsd-kind="Class">RenderWebGL</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+							</aside>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.renderwebgl.html" class="tsd-signature-type" data-tsd-kind="Class">RenderWebGL</a></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-static">
 					<a name="assert" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> assert</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">assert&lt;T&gt;<span class="tsd-signature-symbol">(</span>_value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span>, _message<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span></li>
+						<li class="tsd-signature tsd-kind-icon">assert&lt;T&gt;<span class="tsd-signature-symbol">(</span>_value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span>, _message<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L45">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:45</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/RenderWebGL.ts#L77">Render/RenderWebGL.ts:77</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -147,13 +169,13 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_value: <span class="tsd-signature-type">T</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
+									<h5>_value: <span class="tsd-signature-type">T</span></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>value to check against null</p>
 									</div>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _message: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;&quot;</span></h5>
+									<h5>_message: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;&quot;</span></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>optional, additional message for the exception</p>
 									</div>
@@ -167,13 +189,13 @@
 					<a name="clear" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> clear</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">clear<span class="tsd-signature-symbol">(</span>_color<span class="tsd-signature-symbol">?: </span><a href="fudgecore.color.html" class="tsd-signature-type">Color</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">clear<span class="tsd-signature-symbol">(</span>_color<span class="tsd-signature-symbol">?: </span><a href="fudgecore.color.html" class="tsd-signature-type" data-tsd-kind="Class">Color</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L122">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:122</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/RenderWebGL.ts#L125">Render/RenderWebGL.ts:125</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -184,7 +206,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _color: <a href="fudgecore.color.html" class="tsd-signature-type">Color</a><span class="tsd-signature-symbol"> = null</span></h5>
+									<h5>_color: <a href="fudgecore.color.html" class="tsd-signature-type" data-tsd-kind="Class">Color</a><span class="tsd-signature-symbol"> = null</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -201,7 +223,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L83">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:83</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/RenderWebGL.ts#L86">Render/RenderWebGL.ts:86</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -217,13 +239,13 @@
 					<a name="getcanvasrect" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> get<wbr>Canvas<wbr>Rect</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Canvas<wbr>Rect<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Canvas<wbr>Rect<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L97">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:97</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/RenderWebGL.ts#L100">Render/RenderWebGL.ts:100</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -231,7 +253,7 @@
 									<p>Return a rectangle describing the size of the offscreen-canvas. x,y are 0 at all times.</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -239,13 +261,13 @@
 					<a name="getrenderrectangle" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> get<wbr>Render<wbr>Rectangle</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Render<wbr>Rectangle<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Render<wbr>Rectangle<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L137">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:137</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/RenderWebGL.ts#L140">Render/RenderWebGL.ts:140</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -253,7 +275,7 @@
 									<p>Retrieve the area on the offscreen-canvas the camera image gets rendered to.</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -267,7 +289,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L90">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:90</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/RenderWebGL.ts#L93">Render/RenderWebGL.ts:93</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -289,7 +311,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L54">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:54</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/RenderWebGL.ts#L37">Render/RenderWebGL.ts:37</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -314,13 +336,13 @@
 					<a name="resetframebuffer" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> reset<wbr>Frame<wbr>Buffer</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">reset<wbr>Frame<wbr>Buffer<span class="tsd-signature-symbol">(</span>_color<span class="tsd-signature-symbol">?: </span><a href="fudgecore.color.html" class="tsd-signature-type">Color</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">reset<wbr>Frame<wbr>Buffer<span class="tsd-signature-symbol">(</span>_color<span class="tsd-signature-symbol">?: </span><a href="fudgecore.color.html" class="tsd-signature-type" data-tsd-kind="Class">Color</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L130">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:130</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/RenderWebGL.ts#L133">Render/RenderWebGL.ts:133</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -331,7 +353,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _color: <a href="fudgecore.color.html" class="tsd-signature-type">Color</a><span class="tsd-signature-symbol"> = null</span></h5>
+									<h5>_color: <a href="fudgecore.color.html" class="tsd-signature-type" data-tsd-kind="Class">Color</a><span class="tsd-signature-symbol"> = null</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -342,13 +364,13 @@
 					<a name="setattributestructure" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> set<wbr>Attribute<wbr>Structure</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">set<wbr>Attribute<wbr>Structure<span class="tsd-signature-symbol">(</span>_attributeLocation<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _bufferSpecification<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.bufferspecification.html" class="tsd-signature-type">BufferSpecification</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Attribute<wbr>Structure<span class="tsd-signature-symbol">(</span>_attributeLocation<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _bufferSpecification<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.bufferspecification.html" class="tsd-signature-type" data-tsd-kind="Interface">BufferSpecification</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L36">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:36</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/RenderWebGL.ts#L68">Render/RenderWebGL.ts:68</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -365,7 +387,7 @@
 									</div>
 								</li>
 								<li>
-									<h5>_bufferSpecification: <a href="../interfaces/fudgecore.bufferspecification.html" class="tsd-signature-type">BufferSpecification</a></h5>
+									<h5>_bufferSpecification: <a href="../interfaces/fudgecore.bufferspecification.html" class="tsd-signature-type" data-tsd-kind="Interface">BufferSpecification</a></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>Interface passing datapullspecifications to the buffer.</p>
 									</div>
@@ -379,19 +401,19 @@
 					<a name="setblendmode" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> set<wbr>Blend<wbr>Mode</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">set<wbr>Blend<wbr>Mode<span class="tsd-signature-symbol">(</span>_mode<span class="tsd-signature-symbol">: </span><a href="../enums/fudgecore.blend.html" class="tsd-signature-type">BLEND</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Blend<wbr>Mode<span class="tsd-signature-symbol">(</span>_mode<span class="tsd-signature-symbol">: </span><a href="../enums/fudgecore.blend.html" class="tsd-signature-type" data-tsd-kind="Enumeration">BLEND</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L148">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:148</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/RenderWebGL.ts#L151">Render/RenderWebGL.ts:151</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_mode: <a href="../enums/fudgecore.blend.html" class="tsd-signature-type">BLEND</a></h5>
+									<h5>_mode: <a href="../enums/fudgecore.blend.html" class="tsd-signature-type" data-tsd-kind="Enumeration">BLEND</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -408,7 +430,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L105">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:105</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/RenderWebGL.ts#L108">Render/RenderWebGL.ts:108</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -439,7 +461,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L141">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:141</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/RenderWebGL.ts#L144">Render/RenderWebGL.ts:144</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -456,13 +478,13 @@
 					<a name="setrenderrectangle" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> set<wbr>Render<wbr>Rectangle</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">set<wbr>Render<wbr>Rectangle<span class="tsd-signature-symbol">(</span>_rect<span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Render<wbr>Rectangle<span class="tsd-signature-symbol">(</span>_rect<span class="tsd-signature-symbol">: </span><a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Render/RenderWebGL.ts#L114">Documents/HFU/FUDGE/Core/Source/Render/RenderWebGL.ts:114</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Render/RenderWebGL.ts#L117">Render/RenderWebGL.ts:117</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -473,7 +495,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_rect: <a href="fudgecore.rectangle.html" class="tsd-signature-type">Rectangle</a></h5>
+									<h5>_rect: <a href="fudgecore.rectangle.html" class="tsd-signature-type" data-tsd-kind="Class">Rectangle</a></h5>
 									<div class="tsd-comment tsd-typography">
 									</div>
 								</li>
@@ -487,8 +509,8 @@
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 			<nav class="tsd-navigation primary">
 				<ul>
-					<li class="globals  ">
-						<a href="../index.html"><em>Globals</em></a>
+					<li class=" ">
+						<a href="../index.html">Exports</a>
 					</li>
 					<li class="current tsd-kind-namespace">
 						<a href="../modules/fudgecore.html">Fudge<wbr>Core</a>
@@ -502,6 +524,9 @@
 					<li class="current tsd-kind-class tsd-parent-kind-namespace">
 						<a href="fudgecore.renderwebgl.html" class="tsd-kind-icon">Render<wbr>WebGL</a>
 						<ul>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class">
+								<a href="fudgecore.renderwebgl.html#constructor" class="tsd-kind-icon">constructor</a>
+							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter tsd-is-static">
 								<a href="fudgecore.renderwebgl.html#assert" class="tsd-kind-icon">assert</a>
 							</li>
@@ -554,6 +579,9 @@
 	<div class="container">
 		<h2>Legend</h2>
 		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+			</ul>
 			<ul class="tsd-legend">
 				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
 			</ul>

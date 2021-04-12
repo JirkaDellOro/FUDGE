@@ -7,6 +7,7 @@
 	<meta name="description" content="Documentation for Fudge Core">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
+	<script async src="../assets/js/search.js" id="search-script"></script>
 </head>
 <body>
 <header>
@@ -40,8 +41,6 @@
 							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
 							<input type="checkbox" id="tsd-filter-externals" checked />
 							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
-							<input type="checkbox" id="tsd-filter-only-exported" />
-							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
 						</div>
 					</div>
 					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
@@ -53,7 +52,7 @@
 		<div class="container">
 			<ul class="tsd-breadcrumb">
 				<li>
-					<a href="../index.html">Globals</a>
+					<a href="../index.html">Fudge Core</a>
 				</li>
 				<li>
 					<a href="../modules/fudgecore.html">FudgeCore</a>
@@ -94,6 +93,12 @@
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
+							<h3>Constructors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="fudgecore.picker.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.picker.html#pickcamera" class="tsd-kind-icon">pick<wbr>Camera</a></li>
@@ -105,39 +110,56 @@
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Constructors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
+					<a name="constructor" class="tsd-anchor"></a>
+					<h3>constructor</h3>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Picker<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.picker.html" class="tsd-signature-type" data-tsd-kind="Class">Picker</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+							</aside>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.picker.html" class="tsd-signature-type" data-tsd-kind="Class">Picker</a></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
 					<a name="pickcamera" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> pick<wbr>Camera</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">pick<wbr>Camera<span class="tsd-signature-symbol">(</span>_branch<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a>, _cmpCamera<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentcamera.html" class="tsd-signature-type">ComponentCamera</a>, _posProjection<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.pick.html" class="tsd-signature-type">Pick</a><span class="tsd-signature-symbol">[]</span></li>
+						<li class="tsd-signature tsd-kind-icon">pick<wbr>Camera<span class="tsd-signature-symbol">(</span>_branch<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type" data-tsd-kind="Class">Node</a>, _cmpCamera<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentcamera.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentCamera</a>, _posProjection<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type" data-tsd-kind="Class">Vector2</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.pick.html" class="tsd-signature-type" data-tsd-kind="Class">Pick</a><span class="tsd-signature-symbol">[]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Ray/Picker.ts#L28">Documents/HFU/FUDGE/Core/Source/Ray/Picker.ts:28</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Ray/Picker.ts#L26">Ray/Picker.ts:26</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
 									<p>Takes a camera and a point on its virtual normed projection plane (distance 1) to construct the picker-camera,
-									then renders the pick-texture and returns a <a href="fudgecore.pick.html">Pick</a>-array with information about the hits of the ray.</p>
+									then renders the pick-texture and returns an unsorted <a href="fudgecore.pick.html">Pick</a>-array with information about the hits of the ray.</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_branch: <a href="fudgecore.node.html" class="tsd-signature-type">Node</a></h5>
+									<h5>_branch: <a href="fudgecore.node.html" class="tsd-signature-type" data-tsd-kind="Class">Node</a></h5>
 								</li>
 								<li>
-									<h5>_cmpCamera: <a href="fudgecore.componentcamera.html" class="tsd-signature-type">ComponentCamera</a></h5>
+									<h5>_cmpCamera: <a href="fudgecore.componentcamera.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentCamera</a></h5>
 								</li>
 								<li>
-									<h5>_posProjection: <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h5>
+									<h5>_posProjection: <a href="fudgecore.vector2.html" class="tsd-signature-type" data-tsd-kind="Class">Vector2</a></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.pick.html" class="tsd-signature-type">Pick</a><span class="tsd-signature-symbol">[]</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.pick.html" class="tsd-signature-type" data-tsd-kind="Class">Pick</a><span class="tsd-signature-symbol">[]</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -145,28 +167,28 @@
 					<a name="pickray" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> pick<wbr>Ray</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">pick<wbr>Ray<span class="tsd-signature-symbol">(</span>_branch<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a>, _ray<span class="tsd-signature-symbol">: </span><a href="fudgecore.ray.html" class="tsd-signature-type">Ray</a>, _min<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _max<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.pick.html" class="tsd-signature-type">Pick</a><span class="tsd-signature-symbol">[]</span></li>
+						<li class="tsd-signature tsd-kind-icon">pick<wbr>Ray<span class="tsd-signature-symbol">(</span>_branch<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type" data-tsd-kind="Class">Node</a>, _ray<span class="tsd-signature-symbol">: </span><a href="fudgecore.ray.html" class="tsd-signature-type" data-tsd-kind="Class">Ray</a>, _min<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _max<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.pick.html" class="tsd-signature-type" data-tsd-kind="Class">Pick</a><span class="tsd-signature-symbol">[]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Ray/Picker.ts#L12">Documents/HFU/FUDGE/Core/Source/Ray/Picker.ts:12</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Ray/Picker.ts#L12">Ray/Picker.ts:12</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
 									<p>Takes a ray plus min and max values for the near and far planes to construct the picker-camera,
-									then renders the pick-texture and returns a <a href="fudgecore.pick.html">Pick</a>-array with information about the hits of the ray.</p>
+									then renders the pick-texture and returns an unsorted <a href="fudgecore.pick.html">Pick</a>-array with information about the hits of the ray.</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_branch: <a href="fudgecore.node.html" class="tsd-signature-type">Node</a></h5>
+									<h5>_branch: <a href="fudgecore.node.html" class="tsd-signature-type" data-tsd-kind="Class">Node</a></h5>
 								</li>
 								<li>
-									<h5>_ray: <a href="fudgecore.ray.html" class="tsd-signature-type">Ray</a></h5>
+									<h5>_ray: <a href="fudgecore.ray.html" class="tsd-signature-type" data-tsd-kind="Class">Ray</a></h5>
 								</li>
 								<li>
 									<h5>_min: <span class="tsd-signature-type">number</span></h5>
@@ -175,7 +197,7 @@
 									<h5>_max: <span class="tsd-signature-type">number</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.pick.html" class="tsd-signature-type">Pick</a><span class="tsd-signature-symbol">[]</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.pick.html" class="tsd-signature-type" data-tsd-kind="Class">Pick</a><span class="tsd-signature-symbol">[]</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -183,31 +205,31 @@
 					<a name="pickviewport" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> pick<wbr>Viewport</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">pick<wbr>Viewport<span class="tsd-signature-symbol">(</span>_viewport<span class="tsd-signature-symbol">: </span><a href="fudgecore.viewport.html" class="tsd-signature-type">Viewport</a>, _posClient<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.pick.html" class="tsd-signature-type">Pick</a><span class="tsd-signature-symbol">[]</span></li>
+						<li class="tsd-signature tsd-kind-icon">pick<wbr>Viewport<span class="tsd-signature-symbol">(</span>_viewport<span class="tsd-signature-symbol">: </span><a href="fudgecore.viewport.html" class="tsd-signature-type" data-tsd-kind="Class">Viewport</a>, _posClient<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector2.html" class="tsd-signature-type" data-tsd-kind="Class">Vector2</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.pick.html" class="tsd-signature-type" data-tsd-kind="Class">Pick</a><span class="tsd-signature-symbol">[]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Ray/Picker.ts#L46">Documents/HFU/FUDGE/Core/Source/Ray/Picker.ts:46</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Ray/Picker.ts#L44">Ray/Picker.ts:44</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
 									<p>Takes the camera of the given viewport and a point the client surface to construct the picker-camera,
-									then renders the pick-texture and returns a <a href="fudgecore.pick.html">Pick</a>-array with information about the hits of the ray.</p>
+									then renders the pick-texture and returns an unsorted <a href="fudgecore.pick.html">Pick</a>-array with information about the hits of the ray.</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_viewport: <a href="fudgecore.viewport.html" class="tsd-signature-type">Viewport</a></h5>
+									<h5>_viewport: <a href="fudgecore.viewport.html" class="tsd-signature-type" data-tsd-kind="Class">Viewport</a></h5>
 								</li>
 								<li>
-									<h5>_posClient: <a href="fudgecore.vector2.html" class="tsd-signature-type">Vector2</a></h5>
+									<h5>_posClient: <a href="fudgecore.vector2.html" class="tsd-signature-type" data-tsd-kind="Class">Vector2</a></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.pick.html" class="tsd-signature-type">Pick</a><span class="tsd-signature-symbol">[]</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.pick.html" class="tsd-signature-type" data-tsd-kind="Class">Pick</a><span class="tsd-signature-symbol">[]</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -216,8 +238,8 @@
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 			<nav class="tsd-navigation primary">
 				<ul>
-					<li class="globals  ">
-						<a href="../index.html"><em>Globals</em></a>
+					<li class=" ">
+						<a href="../index.html">Exports</a>
 					</li>
 					<li class="current tsd-kind-namespace">
 						<a href="../modules/fudgecore.html">Fudge<wbr>Core</a>
@@ -231,6 +253,9 @@
 					<li class="current tsd-kind-class tsd-parent-kind-namespace">
 						<a href="fudgecore.picker.html" class="tsd-kind-icon">Picker</a>
 						<ul>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class">
+								<a href="fudgecore.picker.html#constructor" class="tsd-kind-icon">constructor</a>
+							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
 								<a href="fudgecore.picker.html#pickcamera" class="tsd-kind-icon">pick<wbr>Camera</a>
 							</li>
@@ -253,6 +278,9 @@
 	<div class="container">
 		<h2>Legend</h2>
 		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+			</ul>
 			<ul class="tsd-legend">
 				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
 			</ul>

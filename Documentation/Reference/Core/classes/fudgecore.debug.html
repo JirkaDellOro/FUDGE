@@ -7,6 +7,7 @@
 	<meta name="description" content="Documentation for Fudge Core">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
+	<script async src="../assets/js/search.js" id="search-script"></script>
 </head>
 <body>
 <header>
@@ -40,8 +41,6 @@
 							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
 							<input type="checkbox" id="tsd-filter-externals" checked />
 							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
-							<input type="checkbox" id="tsd-filter-only-exported" />
-							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
 						</div>
 					</div>
 					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
@@ -53,7 +52,7 @@
 		<div class="container">
 			<ul class="tsd-breadcrumb">
 				<li>
-					<a href="../index.html">Globals</a>
+					<a href="../index.html">Fudge Core</a>
 				</li>
 				<li>
 					<a href="../modules/fudgecore.html">FudgeCore</a>
@@ -91,8 +90,15 @@
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
+							<h3>Constructors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="fudgecore.debug.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.debug.html#branch" class="tsd-kind-icon">branch</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.debug.html#clear" class="tsd-kind-icon">clear</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.debug.html#error" class="tsd-kind-icon">error</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.debug.html#fudge" class="tsd-kind-icon">fudge</a></li>
@@ -109,7 +115,52 @@
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Constructors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
+					<a name="constructor" class="tsd-anchor"></a>
+					<h3>constructor</h3>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Debug<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.debug.html" class="tsd-signature-type" data-tsd-kind="Class">Debug</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+							</aside>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.debug.html" class="tsd-signature-type" data-tsd-kind="Class">Debug</a></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="branch" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> branch</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">branch<span class="tsd-signature-symbol">(</span>_branch<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type" data-tsd-kind="Class">Node</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Debug/Debug.ts#L94">Debug/Debug.ts:94</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Log a branch of the node hierarchy</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_branch: <a href="fudgecore.node.html" class="tsd-signature-type" data-tsd-kind="Class">Node</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
 					<a name="clear" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> clear</h3>
@@ -120,7 +171,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Debug/Debug.ts#L70">Documents/HFU/FUDGE/Core/Source/Debug/Debug.ts:70</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Debug/Debug.ts#L70">Debug/Debug.ts:70</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -142,7 +193,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Debug/Debug.ts#L58">Documents/HFU/FUDGE/Core/Source/Debug/Debug.ts:58</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Debug/Debug.ts#L58">Debug/Debug.ts:58</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -173,7 +224,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Debug/Debug.ts#L64">Documents/HFU/FUDGE/Core/Source/Debug/Debug.ts:64</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Debug/Debug.ts#L64">Debug/Debug.ts:64</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -204,7 +255,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Debug/Debug.ts#L76">Documents/HFU/FUDGE/Core/Source/Debug/Debug.ts:76</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Debug/Debug.ts#L76">Debug/Debug.ts:76</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -232,7 +283,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Debug/Debug.ts#L82">Documents/HFU/FUDGE/Core/Source/Debug/Debug.ts:82</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Debug/Debug.ts#L82">Debug/Debug.ts:82</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -260,7 +311,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Debug/Debug.ts#L88">Documents/HFU/FUDGE/Core/Source/Debug/Debug.ts:88</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Debug/Debug.ts#L88">Debug/Debug.ts:88</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -282,7 +333,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Debug/Debug.ts#L40">Documents/HFU/FUDGE/Core/Source/Debug/Debug.ts:40</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Debug/Debug.ts#L40">Debug/Debug.ts:40</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -313,7 +364,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Debug/Debug.ts#L46">Documents/HFU/FUDGE/Core/Source/Debug/Debug.ts:46</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Debug/Debug.ts#L46">Debug/Debug.ts:46</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -338,13 +389,13 @@
 					<a name="setfilter" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> set<wbr>Filter</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">set<wbr>Filter<span class="tsd-signature-symbol">(</span>_target<span class="tsd-signature-symbol">: </span><a href="fudgecore.debugtarget.html" class="tsd-signature-type">DebugTarget</a>, _filter<span class="tsd-signature-symbol">: </span><a href="../enums/fudgecore.debug_filter.html" class="tsd-signature-type">DEBUG_FILTER</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Filter<span class="tsd-signature-symbol">(</span>_target<span class="tsd-signature-symbol">: </span><a href="fudgecore.debugtarget.html" class="tsd-signature-type" data-tsd-kind="Class">DebugTarget</a>, _filter<span class="tsd-signature-symbol">: </span><a href="../enums/fudgecore.debug_filter.html" class="tsd-signature-type" data-tsd-kind="Enumeration">DEBUG_FILTER</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Debug/Debug.ts#L21">Documents/HFU/FUDGE/Core/Source/Debug/Debug.ts:21</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Debug/Debug.ts#L21">Debug/Debug.ts:21</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -355,10 +406,10 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_target: <a href="fudgecore.debugtarget.html" class="tsd-signature-type">DebugTarget</a></h5>
+									<h5>_target: <a href="fudgecore.debugtarget.html" class="tsd-signature-type" data-tsd-kind="Class">DebugTarget</a></h5>
 								</li>
 								<li>
-									<h5>_filter: <a href="../enums/fudgecore.debug_filter.html" class="tsd-signature-type">DEBUG_FILTER</a></h5>
+									<h5>_filter: <a href="../enums/fudgecore.debug_filter.html" class="tsd-signature-type" data-tsd-kind="Enumeration">DEBUG_FILTER</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -375,7 +426,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Debug/Debug.ts#L52">Documents/HFU/FUDGE/Core/Source/Debug/Debug.ts:52</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/8df580da/Core/Source/Debug/Debug.ts#L52">Debug/Debug.ts:52</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -401,8 +452,8 @@
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 			<nav class="tsd-navigation primary">
 				<ul>
-					<li class="globals  ">
-						<a href="../index.html"><em>Globals</em></a>
+					<li class=" ">
+						<a href="../index.html">Exports</a>
 					</li>
 					<li class="current tsd-kind-namespace">
 						<a href="../modules/fudgecore.html">Fudge<wbr>Core</a>
@@ -416,6 +467,12 @@
 					<li class="current tsd-kind-class tsd-parent-kind-namespace">
 						<a href="fudgecore.debug.html" class="tsd-kind-icon">Debug</a>
 						<ul>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class">
+								<a href="fudgecore.debug.html#constructor" class="tsd-kind-icon">constructor</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="fudgecore.debug.html#branch" class="tsd-kind-icon">branch</a>
+							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
 								<a href="fudgecore.debug.html#clear" class="tsd-kind-icon">clear</a>
 							</li>
@@ -459,6 +516,9 @@
 	<div class="container">
 		<h2>Legend</h2>
 		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+			</ul>
 			<ul class="tsd-legend">
 				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
 			</ul>
