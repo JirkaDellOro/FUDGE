@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Geo3 | Fudge Core</title>
+	<title>Box | Fudge Core</title>
 	<meta name="description" content="Documentation for Fudge Core">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -59,10 +59,10 @@
 					<a href="../modules/fudgecore.html">FudgeCore</a>
 				</li>
 				<li>
-					<a href="fudgecore.geo3.html">Geo3</a>
+					<a href="fudgecore.box.html">Box</a>
 				</li>
 			</ul>
-			<h1>Class Geo3</h1>
+			<h1>Class Box</h1>
 		</div>
 	</div>
 </header>
@@ -72,11 +72,7 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>Representation of a vector3 as geographic coordinates as seen on a globe</p>
-						<pre><code class="language-plaintext">←|→ Longitude (Angle to the z-axis)
- ↕- Latitude (Angle to the equator)
- -→ Magnitude (Distance from the center)
-</code></pre>
+						<p>Defines a threedimensional box by two corner-points, one with minimal values and one with maximum values</p>
 					</div>
 				</div>
 			</section>
@@ -84,7 +80,7 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">Geo3</span>
+						<span class="target">Box</span>
 					</li>
 				</ul>
 			</section>
@@ -95,22 +91,21 @@
 						<section class="tsd-index-section ">
 							<h3>Constructors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="fudgecore.geo3.html#constructor" class="tsd-kind-icon">constructor</a></li>
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="fudgecore.box.html#constructor" class="tsd-kind-icon">constructor</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.geo3.html#latitude" class="tsd-kind-icon">latitude</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.geo3.html#longitude" class="tsd-kind-icon">longitude</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.geo3.html#magnitude" class="tsd-kind-icon">magnitude</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.box.html#max" class="tsd-kind-icon">max</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.box.html#min" class="tsd-kind-icon">min</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.geo3.html#set" class="tsd-kind-icon">set</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.geo3.html#tostring" class="tsd-kind-icon">to<wbr>String</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.box.html#expand" class="tsd-kind-icon">expand</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.box.html#set" class="tsd-kind-icon">set</a></li>
 							</ul>
 						</section>
 					</div>
@@ -122,28 +117,25 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Geo3<span class="tsd-signature-symbol">(</span>_longitude<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _latitude<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _magnitude<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.geo3.html" class="tsd-signature-type">Geo3</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Box<span class="tsd-signature-symbol">(</span>_min<span class="tsd-signature-symbol">?: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a>, _max<span class="tsd-signature-symbol">?: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.box.html" class="tsd-signature-type">Box</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Math/Geo3.ts#L13">Documents/HFU/FUDGE/Core/Source/Math/Geo3.ts:13</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Ray/Box.ts#L7">Documents/HFU/FUDGE/Core/Source/Ray/Box.ts:7</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _longitude: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></h5>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _min: <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol"> = Vector3.ONE(Infinity)</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _latitude: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></h5>
-								</li>
-								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _magnitude: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 1</span></h5>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _max: <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol"> = Vector3.ONE(-Infinity)</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.geo3.html" class="tsd-signature-type">Geo3</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.box.html" class="tsd-signature-type">Box</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -151,32 +143,22 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
-					<a name="latitude" class="tsd-anchor"></a>
-					<h3>latitude</h3>
-					<div class="tsd-signature tsd-kind-icon">latitude<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></div>
+					<a name="max" class="tsd-anchor"></a>
+					<h3>max</h3>
+					<div class="tsd-signature tsd-kind-icon">max<span class="tsd-signature-symbol">:</span> <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Math/Geo3.ts#L12">Documents/HFU/FUDGE/Core/Source/Math/Geo3.ts:12</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Ray/Box.ts#L7">Documents/HFU/FUDGE/Core/Source/Ray/Box.ts:7</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
-					<a name="longitude" class="tsd-anchor"></a>
-					<h3>longitude</h3>
-					<div class="tsd-signature tsd-kind-icon">longitude<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></div>
+					<a name="min" class="tsd-anchor"></a>
+					<h3>min</h3>
+					<div class="tsd-signature tsd-kind-icon">min<span class="tsd-signature-symbol">:</span> <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Math/Geo3.ts#L13">Documents/HFU/FUDGE/Core/Source/Math/Geo3.ts:13</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
-					<a name="magnitude" class="tsd-anchor"></a>
-					<h3>magnitude</h3>
-					<div class="tsd-signature tsd-kind-icon">magnitude<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Math/Geo3.ts#L11">Documents/HFU/FUDGE/Core/Source/Math/Geo3.ts:11</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Ray/Box.ts#L6">Documents/HFU/FUDGE/Core/Source/Ray/Box.ts:6</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -184,33 +166,27 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="set" class="tsd-anchor"></a>
-					<h3>set</h3>
+					<a name="expand" class="tsd-anchor"></a>
+					<h3>expand</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">set<span class="tsd-signature-symbol">(</span>_longitude<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _latitude<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _magnitude<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">expand<span class="tsd-signature-symbol">(</span>_include<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Math/Geo3.ts#L22">Documents/HFU/FUDGE/Core/Source/Math/Geo3.ts:22</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Ray/Box.ts#L25">Documents/HFU/FUDGE/Core/Source/Ray/Box.ts:25</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Set the properties of this instance at once</p>
+									<p>Expand the box if necessary to include the given point</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _longitude: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></h5>
-								</li>
-								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _latitude: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></h5>
-								</li>
-								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _magnitude: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 1</span></h5>
+									<h5>_include: <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -218,24 +194,34 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="tostring" class="tsd-anchor"></a>
-					<h3>to<wbr>String</h3>
+					<a name="set" class="tsd-anchor"></a>
+					<h3>set</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">to<wbr>String<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+						<li class="tsd-signature tsd-kind-icon">set<span class="tsd-signature-symbol">(</span>_min<span class="tsd-signature-symbol">?: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a>, _max<span class="tsd-signature-symbol">?: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Math/Geo3.ts#L31">Documents/HFU/FUDGE/Core/Source/Math/Geo3.ts:31</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Ray/Box.ts#L17">Documents/HFU/FUDGE/Core/Source/Ray/Box.ts:17</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Returns a pretty string representation</p>
+									<p>Define the corners of this box, standard values are Infinity for min, and -Infinity for max,
+									creating an impossible inverted box that can not contain any points</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _min: <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol"> = Vector3.ONE(Infinity)</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _max: <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol"> = Vector3.ONE(-Infinity)</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -257,25 +243,22 @@
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-class tsd-parent-kind-namespace">
-						<a href="fudgecore.geo3.html" class="tsd-kind-icon">Geo3</a>
+						<a href="fudgecore.box.html" class="tsd-kind-icon">Box</a>
 						<ul>
 							<li class=" tsd-kind-constructor tsd-parent-kind-class">
-								<a href="fudgecore.geo3.html#constructor" class="tsd-kind-icon">constructor</a>
+								<a href="fudgecore.box.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="fudgecore.geo3.html#latitude" class="tsd-kind-icon">latitude</a>
+								<a href="fudgecore.box.html#max" class="tsd-kind-icon">max</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="fudgecore.geo3.html#longitude" class="tsd-kind-icon">longitude</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="fudgecore.geo3.html#magnitude" class="tsd-kind-icon">magnitude</a>
+								<a href="fudgecore.box.html#min" class="tsd-kind-icon">min</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgecore.geo3.html#set" class="tsd-kind-icon">set</a>
+								<a href="fudgecore.box.html#expand" class="tsd-kind-icon">expand</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="fudgecore.geo3.html#tostring" class="tsd-kind-icon">to<wbr>String</a>
+								<a href="fudgecore.box.html#set" class="tsd-kind-icon">set</a>
 							</li>
 						</ul>
 					</li>

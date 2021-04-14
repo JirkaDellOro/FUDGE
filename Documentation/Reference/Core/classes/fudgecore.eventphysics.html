@@ -104,6 +104,7 @@
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.eventphysics.html#cancelbubble" class="tsd-kind-icon">cancel<wbr>Bubble</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.eventphysics.html#cancelable" class="tsd-kind-icon">cancelable</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.eventphysics.html#cmprigidbody" class="tsd-kind-icon">cmp<wbr>Rigidbody</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.eventphysics.html#collisionnormal" class="tsd-kind-icon">collision<wbr>Normal</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.eventphysics.html#collisionpoint" class="tsd-kind-icon">collision<wbr>Point</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.eventphysics.html#composed" class="tsd-kind-icon">composed</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.eventphysics.html#currenttarget" class="tsd-kind-icon">current<wbr>Target</a></li>
@@ -139,13 +140,13 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Event<wbr>Physics<span class="tsd-signature-symbol">(</span>_type<span class="tsd-signature-symbol">: </span><a href="../enums/fudgecore.event_physics.html" class="tsd-signature-type">EVENT_PHYSICS</a>, _hitRigidbody<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a>, _normalImpulse<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _tangentImpulse<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _binormalImpulse<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _collisionPoint<span class="tsd-signature-symbol">?: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.eventphysics.html" class="tsd-signature-type">EventPhysics</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Event<wbr>Physics<span class="tsd-signature-symbol">(</span>_type<span class="tsd-signature-symbol">: </span><a href="../enums/fudgecore.event_physics.html" class="tsd-signature-type">EVENT_PHYSICS</a>, _hitRigidbody<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a>, _normalImpulse<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _tangentImpulse<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _binormalImpulse<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, _collisionPoint<span class="tsd-signature-symbol">?: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a>, _collisionNormal<span class="tsd-signature-symbol">?: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.eventphysics.html" class="tsd-signature-type">EventPhysics</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/HelpersPhysics.ts#L27">Documents/HFU/FUDGE/Core/Source/Physics/HelpersPhysics.ts:27</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Physics/HelpersPhysics.ts#L29">Documents/HFU/FUDGE/Core/Source/Physics/HelpersPhysics.ts:29</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -173,6 +174,9 @@
 								<li>
 									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _collisionPoint: <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol"> = null</span></h5>
 								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _collisionNormal: <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol"> = null</span></h5>
+								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="fudgecore.eventphysics.html" class="tsd-signature-type">EventPhysics</a></h4>
 						</li>
@@ -188,7 +192,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.eventdragdrop.html">EventDragDrop</a>.<a href="fudgecore.eventdragdrop.html#at_target">AT_TARGET</a></p>
 						<ul>
-							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5347</li>
+							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5328</li>
 						</ul>
 					</aside>
 				</section>
@@ -199,7 +203,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.eventdragdrop.html">EventDragDrop</a>.<a href="fudgecore.eventdragdrop.html#bubbling_phase">BUBBLING_PHASE</a></p>
 						<ul>
-							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5348</li>
+							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5329</li>
 						</ul>
 					</aside>
 				</section>
@@ -210,7 +214,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.eventdragdrop.html">EventDragDrop</a>.<a href="fudgecore.eventdragdrop.html#capturing_phase">CAPTURING_PHASE</a></p>
 						<ul>
-							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5349</li>
+							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5330</li>
 						</ul>
 					</aside>
 				</section>
@@ -221,7 +225,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.eventdragdrop.html">EventDragDrop</a>.<a href="fudgecore.eventdragdrop.html#none">NONE</a></p>
 						<ul>
-							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5350</li>
+							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5331</li>
 						</ul>
 					</aside>
 				</section>
@@ -231,7 +235,7 @@
 					<div class="tsd-signature tsd-kind-icon">binomal<wbr>Impulse<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/HelpersPhysics.ts#L25">Documents/HFU/FUDGE/Core/Source/Physics/HelpersPhysics.ts:25</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Physics/HelpersPhysics.ts#L25">Documents/HFU/FUDGE/Core/Source/Physics/HelpersPhysics.ts:25</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -242,7 +246,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.eventdragdrop.html">EventDragDrop</a>.<a href="fudgecore.eventdragdrop.html#bubbles">bubbles</a></p>
 						<ul>
-							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5289</li>
+							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5270</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -258,7 +262,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.eventdragdrop.html">EventDragDrop</a>.<a href="fudgecore.eventdragdrop.html#cancelbubble">cancelBubble</a></p>
 						<ul>
-							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5290</li>
+							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5271</li>
 						</ul>
 					</aside>
 				</section>
@@ -269,7 +273,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.eventdragdrop.html">EventDragDrop</a>.<a href="fudgecore.eventdragdrop.html#cancelable">cancelable</a></p>
 						<ul>
-							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5294</li>
+							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5275</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -284,7 +288,7 @@
 					<div class="tsd-signature tsd-kind-icon">cmp<wbr>Rigidbody<span class="tsd-signature-symbol">:</span> <a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/HelpersPhysics.ts#L17">Documents/HFU/FUDGE/Core/Source/Physics/HelpersPhysics.ts:17</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Physics/HelpersPhysics.ts#L17">Documents/HFU/FUDGE/Core/Source/Physics/HelpersPhysics.ts:17</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -294,12 +298,27 @@
 					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="collisionnormal" class="tsd-anchor"></a>
+					<h3>collision<wbr>Normal</h3>
+					<div class="tsd-signature tsd-kind-icon">collision<wbr>Normal<span class="tsd-signature-symbol">:</span> <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Physics/HelpersPhysics.ts#L29">Documents/HFU/FUDGE/Core/Source/Physics/HelpersPhysics.ts:29</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The normal vector of the collision. Only existing on COLLISION_ENTER</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 					<a name="collisionpoint" class="tsd-anchor"></a>
 					<h3>collision<wbr>Point</h3>
 					<div class="tsd-signature tsd-kind-icon">collision<wbr>Point<span class="tsd-signature-symbol">:</span> <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/HelpersPhysics.ts#L27">Documents/HFU/FUDGE/Core/Source/Physics/HelpersPhysics.ts:27</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Physics/HelpersPhysics.ts#L27">Documents/HFU/FUDGE/Core/Source/Physics/HelpersPhysics.ts:27</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -315,7 +334,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.eventdragdrop.html">EventDragDrop</a>.<a href="fudgecore.eventdragdrop.html#composed">composed</a></p>
 						<ul>
-							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5298</li>
+							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5279</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -331,7 +350,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.eventdragdrop.html">EventDragDrop</a>.<a href="fudgecore.eventdragdrop.html#currenttarget">currentTarget</a></p>
 						<ul>
-							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5302</li>
+							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5283</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -347,7 +366,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.eventdragdrop.html">EventDragDrop</a>.<a href="fudgecore.eventdragdrop.html#defaultprevented">defaultPrevented</a></p>
 						<ul>
-							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5306</li>
+							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5287</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -363,7 +382,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.eventdragdrop.html">EventDragDrop</a>.<a href="fudgecore.eventdragdrop.html#eventphase">eventPhase</a></p>
 						<ul>
-							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5310</li>
+							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5291</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -379,7 +398,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.eventdragdrop.html">EventDragDrop</a>.<a href="fudgecore.eventdragdrop.html#istrusted">isTrusted</a></p>
 						<ul>
-							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5314</li>
+							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5295</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -394,7 +413,7 @@
 					<div class="tsd-signature tsd-kind-icon">normal<wbr>Impulse<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/HelpersPhysics.ts#L23">Documents/HFU/FUDGE/Core/Source/Physics/HelpersPhysics.ts:23</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Physics/HelpersPhysics.ts#L23">Documents/HFU/FUDGE/Core/Source/Physics/HelpersPhysics.ts:23</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -412,7 +431,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.eventdragdrop.html">EventDragDrop</a>.<a href="fudgecore.eventdragdrop.html#returnvalue">returnValue</a></p>
 						<ul>
-							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5315</li>
+							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5296</li>
 						</ul>
 					</aside>
 				</section>
@@ -423,7 +442,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.eventdragdrop.html">EventDragDrop</a>.<a href="fudgecore.eventdragdrop.html#srcelement">srcElement</a></p>
 						<ul>
-							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5317</li>
+							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5298</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -439,7 +458,7 @@
 					<div class="tsd-signature tsd-kind-icon">tangent<wbr>Impulse<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/HelpersPhysics.ts#L24">Documents/HFU/FUDGE/Core/Source/Physics/HelpersPhysics.ts:24</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Physics/HelpersPhysics.ts#L24">Documents/HFU/FUDGE/Core/Source/Physics/HelpersPhysics.ts:24</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -450,7 +469,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.eventdragdrop.html">EventDragDrop</a>.<a href="fudgecore.eventdragdrop.html#target">target</a></p>
 						<ul>
-							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5321</li>
+							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5302</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -466,7 +485,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.eventdragdrop.html">EventDragDrop</a>.<a href="fudgecore.eventdragdrop.html#timestamp">timeStamp</a></p>
 						<ul>
-							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5325</li>
+							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5306</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -482,7 +501,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.eventdragdrop.html">EventDragDrop</a>.<a href="fudgecore.eventdragdrop.html#type">type</a></p>
 						<ul>
-							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5329</li>
+							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5310</li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -497,7 +516,7 @@
 					<div class="tsd-signature tsd-kind-icon">Event<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>constructor<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span>AT_TARGET<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>BUBBLING_PHASE<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>CAPTURING_PHASE<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>NONE<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>prototype<span class="tsd-signature-symbol">: </span><a href="fudgecore.eventphysics.html#event" class="tsd-signature-type">Event</a><span class="tsd-signature-symbol"> }</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5353</li>
+							<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5334</li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -512,7 +531,7 @@
 									<li class="tsd-description">
 										<aside class="tsd-sources">
 											<ul>
-												<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5354</li>
+												<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5335</li>
 											</ul>
 										</aside>
 										<h4 class="tsd-parameters-title">Parameters</h4>
@@ -560,7 +579,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.eventdragdrop.html">EventDragDrop</a>.<a href="fudgecore.eventdragdrop.html#composedpath">composedPath</a></p>
 								<ul>
-									<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5333</li>
+									<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5314</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -583,7 +602,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.eventdragdrop.html">EventDragDrop</a>.<a href="fudgecore.eventdragdrop.html#initevent">initEvent</a></p>
 								<ul>
-									<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5334</li>
+									<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5315</li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -613,7 +632,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.eventdragdrop.html">EventDragDrop</a>.<a href="fudgecore.eventdragdrop.html#preventdefault">preventDefault</a></p>
 								<ul>
-									<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5338</li>
+									<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5319</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -636,7 +655,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.eventdragdrop.html">EventDragDrop</a>.<a href="fudgecore.eventdragdrop.html#stopimmediatepropagation">stopImmediatePropagation</a></p>
 								<ul>
-									<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5342</li>
+									<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5323</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -659,7 +678,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.eventdragdrop.html">EventDragDrop</a>.<a href="fudgecore.eventdragdrop.html#stoppropagation">stopPropagation</a></p>
 								<ul>
-									<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5346</li>
+									<li>Defined in AppData/Roaming/npm/node_modules/typescript/lib/lib.dom.d.ts:5327</li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -720,6 +739,9 @@
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="fudgecore.eventphysics.html#cmprigidbody" class="tsd-kind-icon">cmp<wbr>Rigidbody</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.eventphysics.html#collisionnormal" class="tsd-kind-icon">collision<wbr>Normal</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="fudgecore.eventphysics.html#collisionpoint" class="tsd-kind-icon">collision<wbr>Point</a>

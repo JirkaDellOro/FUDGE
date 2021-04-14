@@ -77,7 +77,8 @@
 						Vice versa, a JSON-String can be parsed to a <a href="../interfaces/fudgecore.serialization.html">Serialization</a> which can be deserialized to a <a href="../interfaces/fudgecore.serializable.html">Serializable</a> object.</p>
 						<pre><code class="language-plaintext"> [Serializable] → (serialize) → [Serialization] → (stringify) → [String] → (save or send)
                                        ↓                            ↓                  ↓
-               [Serializable] ← (deserialize) ← [Serialization] ← (parse) ← (load) ← [Medium]</code></pre>
+               [Serializable] ← (deserialize) ← [Serialization] ← (parse) ← (load) ← [Medium]
+</code></pre>
 						<p>While the internal serialize/deserialize method1s of the objects care of the selection of information needed to recreate the object and its structure,
 						the <a href="fudgecore.serializer.html">Serializer</a> keeps track of the namespaces and classes in order to recreate <a href="../interfaces/fudgecore.serializable.html">Serializable</a> objects. The general structure of a <a href="../interfaces/fudgecore.serialization.html">Serialization</a> is as follows</p>
 						<pre><code class="language-plaintext">{
@@ -88,7 +89,8 @@
          ...,
          constructorNameOfSuperclass: SerializationOfSuperClass
      }
-}</code></pre>
+}
+</code></pre>
 						<p>Since the instance of the superclass is created automatically when an object is created,
 							the SerializationOfSuperClass omits the the namespaceName.className key and consists only of its value.
 						The constructorNameOfSuperclass is given instead as a property name in the serialization of the subclass.</p>
@@ -137,7 +139,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Serializer.ts#L96">Documents/HFU/FUDGE/Core/Source/Transfer/Serializer.ts:96</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Serialization/Serializer.ts#L96">Documents/HFU/FUDGE/Core/Source/Serialization/Serializer.ts:96</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -168,7 +170,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Serializer.ts#L136">Documents/HFU/FUDGE/Core/Source/Transfer/Serializer.ts:136</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Serialization/Serializer.ts#L136">Documents/HFU/FUDGE/Core/Source/Serialization/Serializer.ts:136</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -197,7 +199,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Serializer.ts#L193">Documents/HFU/FUDGE/Core/Source/Transfer/Serializer.ts:193</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Serialization/Serializer.ts#L193">Documents/HFU/FUDGE/Core/Source/Serialization/Serializer.ts:193</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -228,7 +230,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Serializer.ts#L178">Documents/HFU/FUDGE/Core/Source/Transfer/Serializer.ts:178</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Serialization/Serializer.ts#L178">Documents/HFU/FUDGE/Core/Source/Serialization/Serializer.ts:178</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -258,7 +260,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Serializer.ts#L161">Documents/HFU/FUDGE/Core/Source/Transfer/Serializer.ts:161</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Serialization/Serializer.ts#L161">Documents/HFU/FUDGE/Core/Source/Serialization/Serializer.ts:161</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -281,7 +283,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Serializer.ts#L186">Documents/HFU/FUDGE/Core/Source/Transfer/Serializer.ts:186</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Serialization/Serializer.ts#L186">Documents/HFU/FUDGE/Core/Source/Serialization/Serializer.ts:186</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -311,7 +313,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Serializer.ts#L51">Documents/HFU/FUDGE/Core/Source/Transfer/Serializer.ts:51</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Serialization/Serializer.ts#L51">Documents/HFU/FUDGE/Core/Source/Serialization/Serializer.ts:51</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -341,7 +343,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Serializer.ts#L79">Documents/HFU/FUDGE/Core/Source/Transfer/Serializer.ts:79</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Serialization/Serializer.ts#L79">Documents/HFU/FUDGE/Core/Source/Serialization/Serializer.ts:79</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -373,7 +375,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Serializer.ts#L117">Documents/HFU/FUDGE/Core/Source/Transfer/Serializer.ts:117</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Serialization/Serializer.ts#L117">Documents/HFU/FUDGE/Core/Source/Serialization/Serializer.ts:117</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -413,7 +415,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Serializer.ts#L167">Documents/HFU/FUDGE/Core/Source/Transfer/Serializer.ts:167</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/97e92e99/Core/Source/Serialization/Serializer.ts#L167">Documents/HFU/FUDGE/Core/Source/Serialization/Serializer.ts:167</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
