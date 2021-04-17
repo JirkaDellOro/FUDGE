@@ -27,5 +27,8 @@
     "typedoc-plugin-merge-modules": "^2.0.0",
     "websocket": "^1.0.32",
     "ws": "^7.1.2"
+  },
+  "devDependencies": {
+    "typedoc-plugin-merge-modules": "^2.0.0"
   }
 }
