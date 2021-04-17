@@ -10,7 +10,7 @@ namespace PhysikTest {
   // let m2: f.Node;
   // let m3: f.Node;
 
-  let gridMeshFlat: f.MeshTerrain;
+  let meshTerrain: f.MeshTerrain;
   let gridFlat: f.Node;
 
   let img: f.TextureImage;
@@ -89,23 +89,23 @@ namespace PhysikTest {
     let cmpRigidbody: f.ComponentRigidbody = new f.ComponentRigidbody(500, f.PHYSICS_TYPE.DYNAMIC, f.COLLIDER_TYPE.CUBE, f.PHYSICS_GROUP.DEFAULT, null, null);
     controlled.addComponent(cmpRigidbody);
     controlled.mtxLocal.translation = new f.Vector3( 0.3, 0, 0.3 );
-    controlled.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.1,0.05,0.025));
-    controlled.getComponent(f.ComponentMesh).pivot.translate(new f.Vector3(0.5, 0, 0.5));
+    controlled.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(0.1,0.05,0.025));
+    controlled.getComponent(f.ComponentMesh).mtxPivot.translate(new f.Vector3(0.5, 0, 0.5));
 
     tyreFL = createCompleteNode("Tyre FL", matGrey, meshSphere, 20, f.PHYSICS_TYPE.DYNAMIC);
-    tyreFL.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.5, 0.5, 0.15));
+    tyreFL.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(0.5, 0.5, 0.15));
     bodies.push(tyreFL);
 
     tyreFR = createCompleteNode("Tyre FR", matGrey, meshSphere, 20, f.PHYSICS_TYPE.DYNAMIC);
-    tyreFR.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.5, 0.5, 0.15));
+    tyreFR.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(0.5, 0.5, 0.15));
     bodies.push(tyreFR);
 
     tyreBR = createCompleteNode("Tyre BR", matGrey, meshSphere, 20, f.PHYSICS_TYPE.DYNAMIC);
-    tyreBR.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.5, 0.5, 0.15));
+    tyreBR.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(0.5, 0.5, 0.15));
     bodies.push(tyreBR);
 
     tyreBL = createCompleteNode("Tyre FL", matGrey, meshSphere, 20, f.PHYSICS_TYPE.DYNAMIC);
-    tyreBL.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.5, 0.5, 0.15));
+    tyreBL.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(0.5, 0.5, 0.15));
     bodies.push(tyreBL);
 
     tyreFL.mtxLocal.rotateX(90);
@@ -126,7 +126,7 @@ namespace PhysikTest {
 
 
     controlled.setUpAxis();
-    //controlled.getComponent(f.ComponentMesh).pivot.scaleZ(2);
+    //controlled.getComponent(f.ComponentMesh).mtxPivot.scaleZ(2);
 
     // m1 = Scenes.createCompleteMeshNode("M1", matRed, meshCube);
     // m2 = Scenes.createCompleteMeshNode("M2", matRed, meshCube);
@@ -143,15 +143,15 @@ namespace PhysikTest {
     img = new ƒ.TextureImage();
     await img.load("test2.png");
 
-    gridMeshFlat = new f.MeshTerrain("HeightMap", img);
-    gridFlat = Scenes.createCompleteMeshNode("Grid", matFlat, gridMeshFlat);
-    gridMeshFlat.node = gridFlat;
+    meshTerrain = new f.MeshTerrain("HeightMap", img);
+    gridFlat = Scenes.createCompleteMeshNode("Grid", matFlat, meshTerrain);
+    meshTerrain.node = gridFlat;
 
     // gridFlat.mtxLocal.translateX(0.5);
     // gridFlat.mtxLocal.scale(f.Vector3.ONE(1.5));
     // gridFlat.mtxLocal.rotateY(45);
 
-    controlled.meshTerrain = gridMeshFlat;
+    controlled.meshTerrain = meshTerrain;
 
     // let s = 0.01;
 
@@ -160,7 +160,7 @@ namespace PhysikTest {
     // m3.mtxLocal.scale(new f.Vector3(s,s,s));
 
     arrowRed = Scenes.createCompleteMeshNode("Arrow", matRed, meshCube);
-    arrowRed.getComponent(f.ComponentMesh).pivot.translateZ(0.5);
+    arrowRed.getComponent(f.ComponentMesh).mtxPivot.translateZ(0.5);
     arrowRed.mtxLocal.scale(new f.Vector3(0.01,0.01,0.2))
 
 
@@ -232,24 +232,24 @@ namespace PhysikTest {
   function moreVertices(_event: KeyboardEvent): void{
     if(_event.code == f.KEYBOARD_CODE.M){
       
-      gridMeshFlat.resolutionX = gridMeshFlat.resolutionX + 1;
-      gridMeshFlat.resolutionZ = gridMeshFlat.resolutionZ + 1;
+      meshTerrain.resolutionX = meshTerrain.resolutionX + 1;
+      meshTerrain.resolutionZ = meshTerrain.resolutionZ + 1;
       
-      gridMeshFlat.create();
-      gridMeshFlat.createRenderBuffers();
+      meshTerrain.clear();
+      meshTerrain.createRenderBuffers();
 
-      console.log(gridMeshFlat.resolutionX);
+      console.log(meshTerrain.resolutionX);
     }
 
     if(_event.code == f.KEYBOARD_CODE.N){
       
-      gridMeshFlat.resolutionX = gridMeshFlat.resolutionX - 1;
-      gridMeshFlat.resolutionZ = gridMeshFlat.resolutionZ - 1;
+      meshTerrain.resolutionX = meshTerrain.resolutionX - 1;
+      meshTerrain.resolutionZ = meshTerrain.resolutionZ - 1;
       
-      gridMeshFlat.create();
-      gridMeshFlat.createRenderBuffers();
+      meshTerrain.clear();
+      meshTerrain.createRenderBuffers();
 
-      console.log(gridMeshFlat.resolutionX);
+      console.log(meshTerrain.resolutionX);
     }
 
   }

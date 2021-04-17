@@ -41,7 +41,7 @@ namespace ControlableCube {
             this.addComponent(new f.ComponentTransform());
             this.addComponent(this.cmpCube);
             this.addComponent(new f.ComponentMaterial(this.material));
-            this.cmpCube.pivot.scale(new f.Vector3(0.1,0.1,0.1));
+            this.cmpCube.mtxPivot.scale(new f.Vector3(0.1,0.1,0.1));
         }
     }
 }

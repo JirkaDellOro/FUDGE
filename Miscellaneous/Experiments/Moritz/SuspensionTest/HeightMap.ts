@@ -70,41 +70,41 @@ namespace SuspensionTest {
     controlled.mtxLocal.lookAt(f.Vector3.SUM(controlled.mtxLocal.translation, f.Vector3.Y(1)), f.Vector3.X(1));
 
     chassis = Scenes.createCompleteMeshNode("Chassis", matRed, meshCube);
-    chassis.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(1, 0.5, 0.3));
-    chassis.getComponent(f.ComponentMesh).pivot.translateX(0.5)
+    chassis.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(1, 0.5, 0.3));
+    chassis.getComponent(f.ComponentMesh).mtxPivot.translateX(0.5)
     chassis.mtxLocal.scale(f.Vector3.ONE(0.1));
     chassis.mtxLocal.translateZ(0.2)
 
     frontAxis = Scenes.createCompleteMeshNode("Front Axis", matRed, meshCube);
-    frontAxis.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.1, 0.8, 0.1));
+    frontAxis.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(0.1, 0.8, 0.1));
     frontAxis.mtxLocal.translate(new f.Vector3(0.1, 0, 0));
     frontAxis.mtxLocal.scale(f.Vector3.ONE(0.1));
 
     rearAxis = Scenes.createCompleteMeshNode("Rear Axis", matGrey, meshCube);
-    rearAxis.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.1, 0.8, 0.1));
+    rearAxis.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(0.1, 0.8, 0.1));
     rearAxis.mtxLocal.scale(f.Vector3.ONE(0.1));
 
 
     tyreFL = Scenes.createCompleteMeshNode("Tyre FL", matGrey, meshSphere);
-    tyreFL.getComponent(f.ComponentMesh).pivot.translateZ(0.5);
-    tyreFL.getComponent(f.ComponentMesh).pivot.rotateX(-90);
-    tyreFL.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(1, 1, 0.3));
+    tyreFL.getComponent(f.ComponentMesh).mtxPivot.translateZ(0.5);
+    tyreFL.getComponent(f.ComponentMesh).mtxPivot.rotateX(-90);
+    tyreFL.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(1, 1, 0.3));
 
     tyreFR = Scenes.createCompleteMeshNode("Tyre FR", matGrey, meshSphere);
-    tyreFR.getComponent(f.ComponentMesh).pivot.translateZ(0.5);
-    tyreFR.getComponent(f.ComponentMesh).pivot.rotateX(-90);
-    tyreFR.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(1, 1, 0.3));
+    tyreFR.getComponent(f.ComponentMesh).mtxPivot.translateZ(0.5);
+    tyreFR.getComponent(f.ComponentMesh).mtxPivot.rotateX(-90);
+    tyreFR.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(1, 1, 0.3));
 
 
     tyreBR = Scenes.createCompleteMeshNode("Tyre BR", matGrey, meshSphere);
-    tyreBR.getComponent(f.ComponentMesh).pivot.translateZ(0.5);
-    tyreBR.getComponent(f.ComponentMesh).pivot.rotateX(-90);
-    tyreBR.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(1, 1, 0.3));
+    tyreBR.getComponent(f.ComponentMesh).mtxPivot.translateZ(0.5);
+    tyreBR.getComponent(f.ComponentMesh).mtxPivot.rotateX(-90);
+    tyreBR.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(1, 1, 0.3));
 
     tyreBL = Scenes.createCompleteMeshNode("Tyre BL", matGrey, meshSphere);
-    tyreBL.getComponent(f.ComponentMesh).pivot.translateZ(0.5);
-    tyreBL.getComponent(f.ComponentMesh).pivot.rotateX(-90);
-    tyreBL.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(1, 1, 0.3));
+    tyreBL.getComponent(f.ComponentMesh).mtxPivot.translateZ(0.5);
+    tyreBL.getComponent(f.ComponentMesh).mtxPivot.rotateX(-90);
+    tyreBL.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(1, 1, 0.3));
 
     
     tyreFL.mtxLocal.scale(f.Vector3.ONE(0.5));
@@ -150,11 +150,11 @@ namespace SuspensionTest {
     controlled.terrain = gridFlat;
 
     arrowRed = Scenes.createCompleteMeshNode("Arrow", matRed, meshCube);
-    arrowRed.getComponent(f.ComponentMesh).pivot.translateZ(0.5);
+    arrowRed.getComponent(f.ComponentMesh).mtxPivot.translateZ(0.5);
     arrowRed.mtxLocal.scale(new f.Vector3(0.01,0.01,0.2))
 
     arrowRed2 = Scenes.createCompleteMeshNode("Arrow", matRed, meshCube);
-    arrowRed2.getComponent(f.ComponentMesh).pivot.translateZ(0.5);
+    arrowRed2.getComponent(f.ComponentMesh).mtxPivot.translateZ(0.5);
     arrowRed2.mtxLocal.scale(new f.Vector3(0.1,0.1,2))
 
 
@@ -205,7 +205,7 @@ namespace SuspensionTest {
       gridMeshFlat.resolutionX = gridMeshFlat.resolutionX + 1;
       gridMeshFlat.resolutionZ = gridMeshFlat.resolutionZ + 1;
       
-      gridMeshFlat.create();
+      gridMeshFlat.clear();
       gridMeshFlat.createRenderBuffers();
 
       console.log(gridMeshFlat.resolutionX);
@@ -216,7 +216,7 @@ namespace SuspensionTest {
       gridMeshFlat.resolutionX = gridMeshFlat.resolutionX - 1;
       gridMeshFlat.resolutionZ = gridMeshFlat.resolutionZ - 1;
       
-      gridMeshFlat.create();
+      gridMeshFlat.clear();
       gridMeshFlat.createRenderBuffers();
 
       console.log(gridMeshFlat.resolutionX);

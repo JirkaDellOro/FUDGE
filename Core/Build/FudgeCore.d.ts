@@ -3363,12 +3363,11 @@ declare namespace FudgeCore {
          * @param _resolutionZ
          */
         constructor(_name?: string, source?: HeightMapFunction | TextureImage, _resolutionX?: number, _resolutionZ?: number);
+        getPositionOnTerrain(position: Vector3, mtxWorld?: Matrix4x4): PositionOnTerrain;
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
-        protected createFaceNormals(): Float32Array;
         protected imageToClampedArray(image: TextureImage): Uint8ClampedArray;
-        getPositionOnTerrain(position: Vector3, mtxWorld?: Matrix4x4): PositionOnTerrain;
         private calculateHeight;
         private findNearestFace;
     }

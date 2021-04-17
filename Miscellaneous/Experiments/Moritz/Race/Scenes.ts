@@ -29,7 +29,7 @@ namespace Scenes {
         // cubeBlue.cmpTransform.scaleZ(2);
         // using mesh pivot on blue node, just for testing...
         let cmpMesh: ƒ.ComponentMesh = cubeBlue.getComponent(ƒ.ComponentMesh);
-        cmpMesh.pivot.scaleZ(2);
+        cmpMesh.mtxPivot.scaleZ(2);
         cubeBlue.removeComponent(cubeBlue.cmpTransform);
 
         // create graph
@@ -95,7 +95,7 @@ namespace Scenes {
 
         node = createCompleteMeshNode("Node", new ƒ.Material("Red", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(1, 0, 0, 1))), new ƒ.MeshCube());
         let cmpTransform: ƒ.ComponentTransform = node.cmpTransform;
-        cmpTransform.local.scaleX(2);
+        cmpTransform.mtxLocal.scaleX(2);
 
         cmpCamera = createCamera();
 
@@ -117,8 +117,8 @@ namespace Scenes {
     export function createCamera(_translation: ƒ.Vector3 = new ƒ.Vector3(1, 1, 10), _lookAt: ƒ.Vector3 = new ƒ.Vector3()): ƒ.ComponentCamera {
         let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
         cmpCamera.projectCentral(1, 45, ƒ.FIELD_OF_VIEW.DIAGONAL);
-        cmpCamera.pivot.translate(_translation);
-        cmpCamera.pivot.lookAt(_lookAt);
+        cmpCamera.mtxPivot.translate(_translation);
+        cmpCamera.mtxPivot.lookAt(_lookAt);
         return cmpCamera;
         // camera.addComponent(cmpCamera);
         // camera.addComponent(cmpTransform);
@@ -151,7 +151,7 @@ namespace Scenes {
         _viewport.addEventListener(ƒ.EVENT_KEYBOARD.DOWN, rotate);
 
         function rotate(_event: ƒ.EventKeyboard): void {
-            let mtxCamera: ƒ.Matrix4x4 = _viewport.camera.pivot;
+            let mtxCamera: ƒ.Matrix4x4 = _viewport.camera.mtxPivot;
             let vctCamera: ƒ.Vector3 = ƒ.Vector3.ZERO();
             let zoom: number;
             vctCamera.y = (0.1 *

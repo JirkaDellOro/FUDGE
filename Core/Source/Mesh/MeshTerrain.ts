@@ -57,10 +57,35 @@ namespace FudgeCore {
       }
       else this.image = null;
 
-      this.create();
+      this.ƒnormalsFace = this.createFaceNormals();
+      this.ƒindices = this.createIndices();
     }
 
 
+    public getPositionOnTerrain(position: Vector3, mtxWorld?: Matrix4x4): PositionOnTerrain {
+
+      let relPosObject: Vector3 = position;
+
+      if (mtxWorld) {
+        relPosObject = Vector3.TRANSFORMATION(position, Matrix4x4.INVERSION(mtxWorld), true);
+      }
+
+      let nearestFace: DistanceToFaceVertices = this.findNearestFace(relPosObject);
+      let posOnTerrain: PositionOnTerrain = new PositionOnTerrain;
+
+      let origin: Vector3 = new Vector3(relPosObject.x, this.calculateHeight(nearestFace, relPosObject), relPosObject.z);
+      let direction: Vector3 = nearestFace.faceNormal;
+
+      if (mtxWorld) {
+        origin = Vector3.TRANSFORMATION(origin, mtxWorld, true);
+        direction = Vector3.TRANSFORMATION(direction, mtxWorld, false);
+      }
+
+      posOnTerrain.position = origin;
+      posOnTerrain.normal = direction;
+
+      return posOnTerrain;
+    }
 
     protected createVertices(): Float32Array {
       let vertices: Float32Array = new Float32Array((this.resolutionX + 1) * (this.resolutionZ + 1) * 3);
@@ -81,9 +106,9 @@ namespace FudgeCore {
         return vertices;
       }
       else if (this.image != null) {
-        let imgArray = this.imageToClampedArray(this.image);
+        let imgArray: Uint8ClampedArray = this.imageToClampedArray(this.image);
         console.log(imgArray);
-        let px = 0;
+        let px: number = 0;
 
         for (let i: number = 0, z: number = 0; z <= this.resolutionZ; z++) {
           for (let x: number = 0; x <= this.resolutionX; x++) {
@@ -110,7 +135,7 @@ namespace FudgeCore {
       let vert: number = 0;
       let tris: number = 0;
 
-      let indices = new Uint16Array(this.resolutionX * this.resolutionZ * 6);
+      let indices: Uint16Array = new Uint16Array(this.resolutionX * this.resolutionZ * 6);
 
       let switchOrientation: Boolean = false;
 
@@ -164,10 +189,6 @@ namespace FudgeCore {
       return textureUVs;
     }
 
-    protected createFaceNormals(): Float32Array {
-      return this.calculateFaceNormals();
-    }
-
     protected imageToClampedArray(image: TextureImage): Uint8ClampedArray {
       let trImport: Uint8ClampedArray;
 
@@ -184,31 +205,6 @@ namespace FudgeCore {
       return trImport;
     }
 
-    public getPositionOnTerrain(position: Vector3, mtxWorld?: Matrix4x4): PositionOnTerrain {
-
-      let relPosObject: Vector3 = position;
-
-      if (mtxWorld) {
-        relPosObject = Vector3.TRANSFORMATION(position, Matrix4x4.INVERSION(mtxWorld), true);
-      }
-
-      let nearestFace: DistanceToFaceVertices = this.findNearestFace(relPosObject);
-      let posOnTerrain: PositionOnTerrain = new PositionOnTerrain;
-
-      let origin = new Vector3(relPosObject.x, this.calculateHeight(nearestFace, relPosObject), relPosObject.z);
-      let direction = nearestFace.faceNormal;
-
-      if (mtxWorld) {
-        origin = Vector3.TRANSFORMATION(origin, mtxWorld, true);
-        direction = Vector3.TRANSFORMATION(direction, mtxWorld, false);
-      }
-
-      posOnTerrain.position = origin
-      posOnTerrain.normal = direction;
-
-      return posOnTerrain;
-    }
-
     private calculateHeight(face: DistanceToFaceVertices, relativePosObject: Vector3): number {
 
       let ray: Ray = new Ray(new Vector3(0, 1, 0), relativePosObject);
@@ -221,15 +217,15 @@ namespace FudgeCore {
       let vertices: Float32Array = this.vertices;
       let indices: Uint16Array = this.indices;
 
-      let row = Math.floor((relativPosObject.z + 0.5) * this.resolutionZ);
-      let column = Math.floor((relativPosObject.x + 0.5) * this.resolutionX);
+      let row: number = Math.floor((relativPosObject.z + 0.5) * this.resolutionZ);
+      let column: number = Math.floor((relativPosObject.x + 0.5) * this.resolutionX);
 
       if (row >= this.resolutionZ) row = this.resolutionZ - 1;
       if (row < 0) row = 0;
       if (column >= this.resolutionX) column = this.resolutionZ - 1;
       if (column < 0) column = 0;
 
-      let field = ((row * this.resolutionX) + column) * 6;
+      let field: number = ((row * this.resolutionX) + column) * 6;
 
       let vertexONE1: Vector3 = new Vector3(vertices[indices[field] * 3], vertices[indices[field] * 3 + 1], vertices[indices[field] * 3 + 2]);
       let vertexTWO1: Vector3 = new Vector3(vertices[indices[field + 1] * 3], vertices[indices[field + 1] * 3 + 1], vertices[indices[field + 1] * 3 + 2]);
@@ -280,7 +276,7 @@ namespace FudgeCore {
 
     }
 
-    public calculateFaceNormal() {
+    private calculateFaceNormal(): void {
       let v1: Vector3 = Vector3.DIFFERENCE(this.vertexTWO, this.vertexONE);
       let v2: Vector3 = Vector3.DIFFERENCE(this.vertexTHREE, this.vertexONE);
 

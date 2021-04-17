@@ -21,7 +21,7 @@ var Scenes;
         // cubeBlue.cmpTransform.scaleZ(2);
         // using mesh pivot on blue node, just for testing...
         let cmpMesh = cubeBlue.getComponent(ƒ.ComponentMesh);
-        cmpMesh.pivot.scaleZ(2);
+        cmpMesh.mtxPivot.scaleZ(2);
         cubeBlue.removeComponent(cubeBlue.cmpTransform);
         // create graph
         let graph = new ƒ.Node("AxisCross");
@@ -74,7 +74,7 @@ var Scenes;
     function createMiniScene() {
         Scenes.node = createCompleteMeshNode("Node", new ƒ.Material("Red", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(1, 0, 0, 1))), new ƒ.MeshCube());
         let cmpTransform = Scenes.node.cmpTransform;
-        cmpTransform.local.scaleX(2);
+        cmpTransform.mtxLocal.scaleX(2);
         Scenes.cmpCamera = createCamera();
         let child = new ƒ.Node("Child");
         Scenes.node.addChild(child);
@@ -94,8 +94,8 @@ var Scenes;
     function createCamera(_translation = new ƒ.Vector3(1, 1, 10), _lookAt = new ƒ.Vector3()) {
         let cmpCamera = new ƒ.ComponentCamera();
         cmpCamera.projectCentral(1, 45, ƒ.FIELD_OF_VIEW.DIAGONAL);
-        cmpCamera.pivot.translate(_translation);
-        cmpCamera.pivot.lookAt(_lookAt);
+        cmpCamera.mtxPivot.translate(_translation);
+        cmpCamera.mtxPivot.lookAt(_lookAt);
         return cmpCamera;
         // camera.addComponent(cmpCamera);
         // camera.addComponent(cmpTransform);
@@ -126,7 +126,7 @@ var Scenes;
         _viewport.activateKeyboardEvent("\u0192keydown" /* DOWN */, true);
         _viewport.addEventListener("\u0192keydown" /* DOWN */, rotate);
         function rotate(_event) {
-            let mtxCamera = _viewport.camera.pivot;
+            let mtxCamera = _viewport.camera.mtxPivot;
             let vctCamera = ƒ.Vector3.ZERO();
             let zoom;
             vctCamera.y = (0.1 *

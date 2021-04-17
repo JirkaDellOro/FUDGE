@@ -59,7 +59,7 @@ namespace ControlableCube {
     let mtrCube: f.Material = new f.Material("mtrCube", f.ShaderUniColor, new f.CoatColored(f.Color.CSS("white")));
     controlled = new Controlled("Cube", f.Matrix4x4.IDENTITY(), mtrCube, new f.MeshCube());
     // controlled.setUpAxis();
-    controlled.getComponent(f.ComponentMesh).pivot.translateY(0.5);
+    controlled.getComponent(f.ComponentMesh).mtxPivot.translateY(0.5);
     root.addChild(controlled);
 
     let txtFloor: ƒ.TextureImage = new ƒ.TextureImage("../Textures/DEM1_5.png");
@@ -72,16 +72,16 @@ namespace ControlableCube {
     root.addChild(plane);
 
     let cmpCamera: f.ComponentCamera = new f.ComponentCamera();
-    // cmpCamera.pivot.translate(new ƒ.Vector3(0, 20, 30));
-    // cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
+    // cmpCamera.mtxPivot.translate(new ƒ.Vector3(0, 20, 30));
+    // cmpCamera.mtxPivot.lookAt(ƒ.Vector3.ZERO());
 
     cameraAnker.addComponent(new f.ComponentTransform);
     cameraAnker.mtxLocal.rotateY(180);
     
-    cmpCamera.pivot.translate(new f.Vector3(0, 30, 30));
-    cmpCamera.pivot.rotateY(0);
-    cmpCamera.pivot.rotateX(-30);
-    cmpCamera.pivot.lookAt(ƒ.Vector3.ZERO());
+    cmpCamera.mtxPivot.translate(new f.Vector3(0, 30, 30));
+    cmpCamera.mtxPivot.rotateY(0);
+    cmpCamera.mtxPivot.rotateX(-30);
+    cmpCamera.mtxPivot.lookAt(ƒ.Vector3.ZERO());
 
     cameraAnker.addComponent(cmpCamera);
     controlled.addChild(cameraAnker);

@@ -137,36 +137,36 @@ namespace HeightMap {
     controlled.mtxLocal.lookAt(f.Vector3.SUM(controlled.mtxLocal.translation, f.Vector3.Y(1)), new f.Vector3(0, 0, 1));
 
     chassis = Scenes.createCompleteMeshNode("Chassis", matRed, meshCube);
-    chassis.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(1, 0.5, 0.3));
-    chassis.getComponent(f.ComponentMesh).pivot.translateX(0.5)
+    chassis.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(1, 0.5, 0.3));
+    chassis.getComponent(f.ComponentMesh).mtxPivot.translateX(0.5)
     chassis.mtxLocal.scale(f.Vector3.ONE(0.1));
     chassis.mtxLocal.translateZ(0.2)
 
     frontAxis = Scenes.createCompleteMeshNode("Front Axis", matRed, meshCube);
-    frontAxis.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.1, 0.8, 0.1));
+    frontAxis.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(0.1, 0.8, 0.1));
     frontAxis.mtxLocal.translate(new f.Vector3(0.1, 0, 0));
     frontAxis.mtxLocal.scale(f.Vector3.ONE(0.1));
 
     rearAxis = Scenes.createCompleteMeshNode("Rear Axis", matGrey, meshCube);
-    rearAxis.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(0.1, 0.8, 0.1));
+    rearAxis.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(0.1, 0.8, 0.1));
     rearAxis.mtxLocal.scale(f.Vector3.ONE(0.1));
 
 
     tyreRotationFL = Scenes.createCompleteMeshNode("Tyre Rotation FL", matGrey, meshSphere);
-    tyreRotationFL.getComponent(f.ComponentMesh).pivot.rotateX(-90);
-    tyreRotationFL.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(1, 1, 0.3));
+    tyreRotationFL.getComponent(f.ComponentMesh).mtxPivot.rotateX(-90);
+    tyreRotationFL.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(1, 1, 0.3));
 
     tyreRotationFR = Scenes.createCompleteMeshNode("Tyre Rotation FR", matGrey, meshSphere);
-    tyreRotationFR.getComponent(f.ComponentMesh).pivot.rotateX(-90);
-    tyreRotationFR.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(1, 1, 0.3));
+    tyreRotationFR.getComponent(f.ComponentMesh).mtxPivot.rotateX(-90);
+    tyreRotationFR.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(1, 1, 0.3));
 
     tyreRotationBR = Scenes.createCompleteMeshNode("Tyre Rotation BR", matGrey, meshSphere);
-    tyreRotationBR.getComponent(f.ComponentMesh).pivot.rotateX(-90);
-    tyreRotationBR.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(1, 1, 0.3));
+    tyreRotationBR.getComponent(f.ComponentMesh).mtxPivot.rotateX(-90);
+    tyreRotationBR.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(1, 1, 0.3));
 
     tyreRotationBL = Scenes.createCompleteMeshNode("Tyre Rotation BL", matGrey, meshSphere);
-    tyreRotationBL.getComponent(f.ComponentMesh).pivot.rotateX(-90);
-    tyreRotationBL.getComponent(f.ComponentMesh).pivot.scale(new f.Vector3(1, 1, 0.3));
+    tyreRotationBL.getComponent(f.ComponentMesh).mtxPivot.rotateX(-90);
+    tyreRotationBL.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(1, 1, 0.3));
 
 
     tyreFL = new f.Node("Tyre FL");
