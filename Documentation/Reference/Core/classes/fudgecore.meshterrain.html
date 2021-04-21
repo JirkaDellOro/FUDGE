@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>MeshHeightMap | Fudge Core</title>
+	<title>MeshTerrain | Fudge Core</title>
 	<meta name="description" content="Documentation for Fudge Core">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -58,10 +58,10 @@
 					<a href="../modules/fudgecore.html">FudgeCore</a>
 				</li>
 				<li>
-					<a href="fudgecore.meshheightmap.html">MeshHeightMap</a>
+					<a href="fudgecore.meshterrain.html">MeshTerrain</a>
 				</li>
 			</ul>
-			<h1>Class MeshHeightMap</h1>
+			<h1>Class MeshTerrain</h1>
 		</div>
 	</div>
 </header>
@@ -75,7 +75,7 @@
 					</div>
 					<dl class="tsd-comment-tags">
 						<dt>authors</dt>
-						<dd><p>Jirka Dell&#39;Oro-Friedl, Simon Storl-Schulke, HFU, 2020</p>
+						<dd><p>Jirka Dell&#39;Oro-Friedl, Simon Storl-Schulke, Moritz Beaugrand HFU, 2020</p>
 						</dd>
 					</dl>
 				</div>
@@ -87,7 +87,7 @@
 						<a href="fudgecore.mesh.html" class="tsd-signature-type" data-tsd-kind="Class">Mesh</a>
 						<ul class="tsd-hierarchy">
 							<li>
-								<span class="target">MeshHeightMap</span>
+								<span class="target">MeshTerrain</span>
 							</li>
 						</ul>
 					</li>
@@ -100,54 +100,59 @@
 						<section class="tsd-index-section ">
 							<h3>Constructors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite"><a href="fudgecore.meshheightmap.html#constructor" class="tsd-kind-icon">constructor</a></li>
+								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite"><a href="fudgecore.meshterrain.html#constructor" class="tsd-kind-icon">constructor</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#idresource" class="tsd-kind-icon">id<wbr>Resource</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#name" class="tsd-kind-icon">name</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#renderbuffers" class="tsd-kind-icon">render<wbr>Buffers</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.meshheightmap.html#baseclass" class="tsd-kind-icon">base<wbr>Class</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><a href="fudgecore.meshheightmap.html#isubclass" class="tsd-kind-icon">i<wbr>Subclass</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.meshheightmap.html#subclasses" class="tsd-kind-icon">subclasses</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#idresource" class="tsd-kind-icon">id<wbr>Resource</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.meshterrain.html#imgscale" class="tsd-kind-icon">img<wbr>Scale</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#name" class="tsd-kind-icon">name</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.meshterrain.html#node" class="tsd-kind-icon">node</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#renderbuffers" class="tsd-kind-icon">render<wbr>Buffers</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.meshterrain.html#resolutionx" class="tsd-kind-icon">resolutionX</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.meshterrain.html#resolutionz" class="tsd-kind-icon">resolutionZ</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.meshterrain.html#baseclass" class="tsd-kind-icon">base<wbr>Class</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><a href="fudgecore.meshterrain.html#isubclass" class="tsd-kind-icon">i<wbr>Subclass</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.meshterrain.html#subclasses" class="tsd-kind-icon">subclasses</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Accessors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#boundingbox" class="tsd-kind-icon">bounding<wbr>Box</a></li>
-								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#indices" class="tsd-kind-icon">indices</a></li>
-								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#normalsface" class="tsd-kind-icon">normals<wbr>Face</a></li>
-								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#radius" class="tsd-kind-icon">radius</a></li>
-								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#textureuvs" class="tsd-kind-icon">textureUVs</a></li>
-								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#type" class="tsd-kind-icon">type</a></li>
-								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#vertices" class="tsd-kind-icon">vertices</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#boundingbox" class="tsd-kind-icon">bounding<wbr>Box</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#indices" class="tsd-kind-icon">indices</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#normalsface" class="tsd-kind-icon">normals<wbr>Face</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#radius" class="tsd-kind-icon">radius</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#textureuvs" class="tsd-kind-icon">textureUVs</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#type" class="tsd-kind-icon">type</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#vertices" class="tsd-kind-icon">vertices</a></li>
 							</ul>
 						</section>
-						<section class="tsd-index-section tsd-is-inherited">
+						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#clear" class="tsd-kind-icon">clear</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#createrenderbuffers" class="tsd-kind-icon">create<wbr>Render<wbr>Buffers</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#deleterenderbuffers" class="tsd-kind-icon">delete<wbr>Render<wbr>Buffers</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#deserialize" class="tsd-kind-icon">deserialize</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#flipnormals" class="tsd-kind-icon">flip<wbr>Normals</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#getindexcount" class="tsd-kind-icon">get<wbr>Index<wbr>Count</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#getmutator" class="tsd-kind-icon">get<wbr>Mutator</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#getmutatorattributetypes" class="tsd-kind-icon">get<wbr>Mutator<wbr>Attribute<wbr>Types</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#getmutatorforanimation" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>Animation</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#getmutatorforuserinterface" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>User<wbr>Interface</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#getvertexcount" class="tsd-kind-icon">get<wbr>Vertex<wbr>Count</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#mutate" class="tsd-kind-icon">mutate</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#serialize" class="tsd-kind-icon">serialize</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#updatemutator" class="tsd-kind-icon">update<wbr>Mutator</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshheightmap.html#userenderbuffers" class="tsd-kind-icon">use<wbr>Render<wbr>Buffers</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.meshheightmap.html#getbufferspecification" class="tsd-kind-icon">get<wbr>Buffer<wbr>Specification</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#clear" class="tsd-kind-icon">clear</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#createrenderbuffers" class="tsd-kind-icon">create<wbr>Render<wbr>Buffers</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#deleterenderbuffers" class="tsd-kind-icon">delete<wbr>Render<wbr>Buffers</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#deserialize" class="tsd-kind-icon">deserialize</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#flipnormals" class="tsd-kind-icon">flip<wbr>Normals</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#getindexcount" class="tsd-kind-icon">get<wbr>Index<wbr>Count</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#getmutator" class="tsd-kind-icon">get<wbr>Mutator</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#getmutatorattributetypes" class="tsd-kind-icon">get<wbr>Mutator<wbr>Attribute<wbr>Types</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#getmutatorforanimation" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>Animation</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#getmutatorforuserinterface" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>User<wbr>Interface</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.meshterrain.html#getpositiononterrain" class="tsd-kind-icon">get<wbr>Position<wbr>OnTerrain</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#getvertexcount" class="tsd-kind-icon">get<wbr>Vertex<wbr>Count</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#mutate" class="tsd-kind-icon">mutate</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#serialize" class="tsd-kind-icon">serialize</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#updatemutator" class="tsd-kind-icon">update<wbr>Mutator</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.meshterrain.html#userenderbuffers" class="tsd-kind-icon">use<wbr>Render<wbr>Buffers</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static"><a href="fudgecore.meshterrain.html#getbufferspecification" class="tsd-kind-icon">get<wbr>Buffer<wbr>Specification</a></li>
 							</ul>
 						</section>
 					</div>
@@ -159,32 +164,39 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Mesh<wbr>Height<wbr>Map<span class="tsd-signature-symbol">(</span>_name<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span>, _resolutionX<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _resolutionZ<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _heightMapFunction<span class="tsd-signature-symbol">?: </span><a href="../modules/fudgecore.html#heightmapfunction" class="tsd-signature-type" data-tsd-kind="Type alias">heightMapFunction</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.meshheightmap.html" class="tsd-signature-type" data-tsd-kind="Class">MeshHeightMap</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Mesh<wbr>Terrain<span class="tsd-signature-symbol">(</span>_name<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span>, source<span class="tsd-signature-symbol">?: </span><a href="fudgecore.textureimage.html" class="tsd-signature-type" data-tsd-kind="Class">TextureImage</a><span class="tsd-signature-symbol"> | </span><a href="../modules/fudgecore.html#heightmapfunction" class="tsd-signature-type" data-tsd-kind="Type alias">HeightMapFunction</a>, _resolutionX<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _resolutionZ<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.meshterrain.html" class="tsd-signature-type" data-tsd-kind="Class">MeshTerrain</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Overrides <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#constructor">constructor</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Mesh/MeshHeightMap.ts#L17">Mesh/MeshHeightMap.ts:17</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/MeshTerrain.ts#L27">Documents/HFU/FUDGE/Core/Source/Mesh/MeshTerrain.ts:27</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>HeightMapFunction or PNG</p>
+								</div>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>_name: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;MeshHeightMap&quot;</span></h5>
 								</li>
 								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> source: <a href="fudgecore.textureimage.html" class="tsd-signature-type" data-tsd-kind="Class">TextureImage</a><span class="tsd-signature-symbol"> | </span><a href="../modules/fudgecore.html#heightmapfunction" class="tsd-signature-type" data-tsd-kind="Type alias">HeightMapFunction</a></h5>
+								</li>
+								<li>
 									<h5>_resolutionX: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 16</span></h5>
 								</li>
 								<li>
 									<h5>_resolutionZ: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 16</span></h5>
-								</li>
-								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> _heightMapFunction: <a href="../modules/fudgecore.html#heightmapfunction" class="tsd-signature-type" data-tsd-kind="Type alias">heightMapFunction</a></h5>
+									<div class="tsd-comment tsd-typography">
+									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.meshheightmap.html" class="tsd-signature-type" data-tsd-kind="Class">MeshHeightMap</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.meshterrain.html" class="tsd-signature-type" data-tsd-kind="Class">MeshTerrain</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -198,7 +210,17 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#idresource">idResource</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Mesh/Mesh.ts#L16">Mesh/Mesh.ts:16</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/Mesh.ts#L16">Documents/HFU/FUDGE/Core/Source/Mesh/Mesh.ts:16</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="imgscale" class="tsd-anchor"></a>
+					<h3>img<wbr>Scale</h3>
+					<div class="tsd-signature tsd-kind-icon">img<wbr>Scale<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 255</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/MeshTerrain.ts#L24">Documents/HFU/FUDGE/Core/Source/Mesh/MeshTerrain.ts:24</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -209,7 +231,17 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#name">name</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Mesh/Mesh.ts#L17">Mesh/Mesh.ts:17</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/Mesh.ts#L17">Documents/HFU/FUDGE/Core/Source/Mesh/Mesh.ts:17</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="node" class="tsd-anchor"></a>
+					<h3>node</h3>
+					<div class="tsd-signature tsd-kind-icon">node<span class="tsd-signature-symbol">:</span> <a href="fudgecore.node.html" class="tsd-signature-type" data-tsd-kind="Class">Node</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/MeshTerrain.ts#L25">Documents/HFU/FUDGE/Core/Source/Mesh/MeshTerrain.ts:25</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -220,7 +252,27 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#renderbuffers">renderBuffers</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Mesh/Mesh.ts#L19">Mesh/Mesh.ts:19</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/Mesh.ts#L19">Documents/HFU/FUDGE/Core/Source/Mesh/Mesh.ts:19</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="resolutionx" class="tsd-anchor"></a>
+					<h3>resolutionX</h3>
+					<div class="tsd-signature tsd-kind-icon">resolutionX<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/MeshTerrain.ts#L22">Documents/HFU/FUDGE/Core/Source/Mesh/MeshTerrain.ts:22</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="resolutionz" class="tsd-anchor"></a>
+					<h3>resolutionZ</h3>
+					<div class="tsd-signature tsd-kind-icon">resolutionZ<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/MeshTerrain.ts#L23">Documents/HFU/FUDGE/Core/Source/Mesh/MeshTerrain.ts:23</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -231,7 +283,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#baseclass">baseClass</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Mesh/Mesh.ts#L11">Mesh/Mesh.ts:11</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/Mesh.ts#L11">Documents/HFU/FUDGE/Core/Source/Mesh/Mesh.ts:11</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -246,7 +298,7 @@
 					<div class="tsd-signature tsd-kind-icon">i<wbr>Subclass<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = ...</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Mesh/MeshHeightMap.ts#L13">Mesh/MeshHeightMap.ts:13</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/MeshTerrain.ts#L20">Documents/HFU/FUDGE/Core/Source/Mesh/MeshTerrain.ts:20</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -257,7 +309,7 @@
 					<aside class="tsd-sources">
 						<p>Inherited from <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#subclasses">subclasses</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Mesh/Mesh.ts#L13">Mesh/Mesh.ts:13</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/Mesh.ts#L13">Documents/HFU/FUDGE/Core/Source/Mesh/Mesh.ts:13</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -279,7 +331,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Mesh/Mesh.ts#L98">Mesh/Mesh.ts:98</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/Mesh.ts#L98">Documents/HFU/FUDGE/Core/Source/Mesh/Mesh.ts:98</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <a href="fudgecore.box.html" class="tsd-signature-type" data-tsd-kind="Class">Box</a></h4>
@@ -296,7 +348,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Mesh/Mesh.ts#L80">Mesh/Mesh.ts:80</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/Mesh.ts#L80">Documents/HFU/FUDGE/Core/Source/Mesh/Mesh.ts:80</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Uint16Array</span></h4>
@@ -313,7 +365,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Mesh/Mesh.ts#L86">Mesh/Mesh.ts:86</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/Mesh.ts#L86">Documents/HFU/FUDGE/Core/Source/Mesh/Mesh.ts:86</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Float32Array</span></h4>
@@ -330,7 +382,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Mesh/Mesh.ts#L104">Mesh/Mesh.ts:104</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/Mesh.ts#L104">Documents/HFU/FUDGE/Core/Source/Mesh/Mesh.ts:104</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
@@ -347,7 +399,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Mesh/Mesh.ts#L92">Mesh/Mesh.ts:92</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/Mesh.ts#L92">Documents/HFU/FUDGE/Core/Source/Mesh/Mesh.ts:92</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Float32Array</span></h4>
@@ -364,7 +416,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Mesh/Mesh.ts#L70">Mesh/Mesh.ts:70</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/Mesh.ts#L70">Documents/HFU/FUDGE/Core/Source/Mesh/Mesh.ts:70</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -387,7 +439,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Mesh/Mesh.ts#L74">Mesh/Mesh.ts:74</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/Mesh.ts#L74">Documents/HFU/FUDGE/Core/Source/Mesh/Mesh.ts:74</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Float32Array</span></h4>
@@ -395,7 +447,7 @@
 					</ul>
 				</section>
 			</section>
-			<section class="tsd-panel-group tsd-member-group tsd-is-inherited">
+			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 					<a name="addeventlistener" class="tsd-anchor"></a>
@@ -408,7 +460,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#addeventlistener">addEventListener</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Event/Event.ts#L62">Event/Event.ts:62</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Event/Event.ts#L62">Documents/HFU/FUDGE/Core/Source/Event/Event.ts:62</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -438,7 +490,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#clear">clear</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Mesh/Mesh.ts#L123">Mesh/Mesh.ts:123</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/Mesh.ts#L123">Documents/HFU/FUDGE/Core/Source/Mesh/Mesh.ts:123</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -456,7 +508,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#createrenderbuffers">createRenderBuffers</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Mesh/Mesh.ts#L113">Mesh/Mesh.ts:113</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/Mesh.ts#L113">Documents/HFU/FUDGE/Core/Source/Mesh/Mesh.ts:113</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -474,7 +526,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#deleterenderbuffers">deleteRenderBuffers</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Mesh/Mesh.ts#L114">Mesh/Mesh.ts:114</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/Mesh.ts#L114">Documents/HFU/FUDGE/Core/Source/Mesh/Mesh.ts:114</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -498,7 +550,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#deserialize">deserialize</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Mesh/Mesh.ts#L144">Mesh/Mesh.ts:144</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/Mesh.ts#L144">Documents/HFU/FUDGE/Core/Source/Mesh/Mesh.ts:144</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -522,7 +574,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#dispatchevent">dispatchEvent</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Event/Event.ts#L69">Event/Event.ts:69</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Event/Event.ts#L69">Documents/HFU/FUDGE/Core/Source/Event/Event.ts:69</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -546,7 +598,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#flipnormals">flipNormals</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Mesh/Mesh.ts#L152">Mesh/Mesh.ts:152</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/Mesh.ts#L152">Documents/HFU/FUDGE/Core/Source/Mesh/Mesh.ts:152</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -569,7 +621,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#getindexcount">getIndexCount</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Mesh/Mesh.ts#L119">Mesh/Mesh.ts:119</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/Mesh.ts#L119">Documents/HFU/FUDGE/Core/Source/Mesh/Mesh.ts:119</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
@@ -587,7 +639,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#getmutator">getMutator</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Serialization/Mutable.ts#L70">Serialization/Mutable.ts:70</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Serialization/Mutable.ts#L70">Documents/HFU/FUDGE/Core/Source/Serialization/Mutable.ts:70</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -618,7 +670,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#getmutatorattributetypes">getMutatorAttributeTypes</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Serialization/Mutable.ts#L126">Serialization/Mutable.ts:126</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Serialization/Mutable.ts#L126">Documents/HFU/FUDGE/Core/Source/Serialization/Mutable.ts:126</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -648,13 +700,13 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#getmutatorforanimation">getMutatorForAnimation</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Serialization/Mutable.ts#L105">Serialization/Mutable.ts:105</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Serialization/Mutable.ts#L105">Documents/HFU/FUDGE/Core/Source/Serialization/Mutable.ts:105</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
 									<p>Collect the attributes of the instance and their values applicable for animation.
-									Basic functionality is identical to <a href="fudgecore.meshheightmap.html#getmutator">getMutator</a>, returned mutator should then be reduced by the subclassed instance</p>
+									Basic functionality is identical to <a href="fudgecore.meshterrain.html#getmutator">getMutator</a>, returned mutator should then be reduced by the subclassed instance</p>
 								</div>
 							</div>
 							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutatorforanimation.html" class="tsd-signature-type" data-tsd-kind="Interface">MutatorForAnimation</a></h4>
@@ -672,16 +724,42 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#getmutatorforuserinterface">getMutatorForUserInterface</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Serialization/Mutable.ts#L112">Serialization/Mutable.ts:112</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Serialization/Mutable.ts#L112">Documents/HFU/FUDGE/Core/Source/Serialization/Mutable.ts:112</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
 									<p>Collect the attributes of the instance and their values applicable for the user interface.
-									Basic functionality is identical to <a href="fudgecore.meshheightmap.html#getmutator">getMutator</a>, returned mutator should then be reduced by the subclassed instance</p>
+									Basic functionality is identical to <a href="fudgecore.meshterrain.html#getmutator">getMutator</a>, returned mutator should then be reduced by the subclassed instance</p>
 								</div>
 							</div>
 							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutatorforuserinterface.html" class="tsd-signature-type" data-tsd-kind="Interface">MutatorForUserInterface</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="getpositiononterrain" class="tsd-anchor"></a>
+					<h3>get<wbr>Position<wbr>OnTerrain</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Position<wbr>OnTerrain<span class="tsd-signature-symbol">(</span>position<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type" data-tsd-kind="Class">Vector3</a>, mtxWorld<span class="tsd-signature-symbol">?: </span><a href="fudgecore.matrix4x4.html" class="tsd-signature-type" data-tsd-kind="Class">Matrix4x4</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.positiononterrain.html" class="tsd-signature-type" data-tsd-kind="Class">PositionOnTerrain</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/MeshTerrain.ts#L65">Documents/HFU/FUDGE/Core/Source/Mesh/MeshTerrain.ts:65</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>position: <a href="fudgecore.vector3.html" class="tsd-signature-type" data-tsd-kind="Class">Vector3</a></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> mtxWorld: <a href="fudgecore.matrix4x4.html" class="tsd-signature-type" data-tsd-kind="Class">Matrix4x4</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.positiononterrain.html" class="tsd-signature-type" data-tsd-kind="Class">PositionOnTerrain</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -696,7 +774,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#getvertexcount">getVertexCount</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Mesh/Mesh.ts#L116">Mesh/Mesh.ts:116</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/Mesh.ts#L116">Documents/HFU/FUDGE/Core/Source/Mesh/Mesh.ts:116</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
@@ -714,7 +792,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#mutate">mutate</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Serialization/Mutable.ts#L159">Serialization/Mutable.ts:159</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Serialization/Mutable.ts#L159">Documents/HFU/FUDGE/Core/Source/Serialization/Mutable.ts:159</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -745,7 +823,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#removeeventlistener">removeEventListener</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Event/Event.ts#L65">Event/Event.ts:65</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Event/Event.ts#L65">Documents/HFU/FUDGE/Core/Source/Event/Event.ts:65</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -775,7 +853,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#serialize">serialize</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Mesh/Mesh.ts#L136">Mesh/Mesh.ts:136</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/Mesh.ts#L136">Documents/HFU/FUDGE/Core/Source/Mesh/Mesh.ts:136</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.serialization.html" class="tsd-signature-type" data-tsd-kind="Interface">Serialization</a></h4>
@@ -793,7 +871,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#updatemutator">updateMutator</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Serialization/Mutable.ts#L146">Serialization/Mutable.ts:146</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Serialization/Mutable.ts#L146">Documents/HFU/FUDGE/Core/Source/Serialization/Mutable.ts:146</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -824,7 +902,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#userenderbuffers">useRenderBuffers</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Mesh/Mesh.ts#L112">Mesh/Mesh.ts:112</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/Mesh.ts#L112">Documents/HFU/FUDGE/Core/Source/Mesh/Mesh.ts:112</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -857,7 +935,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.mesh.html">Mesh</a>.<a href="fudgecore.mesh.html#getbufferspecification">getBufferSpecification</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/Core/Source/Mesh/Mesh.ts#L39">Mesh/Mesh.ts:39</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/27689d78/Core/Source/Mesh/Mesh.ts#L39">Documents/HFU/FUDGE/Core/Source/Mesh/Mesh.ts:39</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.bufferspecification.html" class="tsd-signature-type" data-tsd-kind="Interface">BufferSpecification</a></h4>
@@ -882,106 +960,121 @@
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-class tsd-parent-kind-namespace">
-						<a href="fudgecore.meshheightmap.html" class="tsd-kind-icon">Mesh<wbr>Height<wbr>Map</a>
+						<a href="fudgecore.meshterrain.html" class="tsd-kind-icon">Mesh<wbr>Terrain</a>
 						<ul>
 							<li class=" tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
-								<a href="fudgecore.meshheightmap.html#constructor" class="tsd-kind-icon">constructor</a>
+								<a href="fudgecore.meshterrain.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#idresource" class="tsd-kind-icon">id<wbr>Resource</a>
+								<a href="fudgecore.meshterrain.html#idresource" class="tsd-kind-icon">id<wbr>Resource</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.meshterrain.html#imgscale" class="tsd-kind-icon">img<wbr>Scale</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#name" class="tsd-kind-icon">name</a>
+								<a href="fudgecore.meshterrain.html#name" class="tsd-kind-icon">name</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.meshterrain.html#node" class="tsd-kind-icon">node</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#renderbuffers" class="tsd-kind-icon">render<wbr>Buffers</a>
+								<a href="fudgecore.meshterrain.html#renderbuffers" class="tsd-kind-icon">render<wbr>Buffers</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.meshterrain.html#resolutionx" class="tsd-kind-icon">resolutionX</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgecore.meshterrain.html#resolutionz" class="tsd-kind-icon">resolutionZ</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-								<a href="fudgecore.meshheightmap.html#baseclass" class="tsd-kind-icon">base<wbr>Class</a>
+								<a href="fudgecore.meshterrain.html#baseclass" class="tsd-kind-icon">base<wbr>Class</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-static">
-								<a href="fudgecore.meshheightmap.html#isubclass" class="tsd-kind-icon">i<wbr>Subclass</a>
+								<a href="fudgecore.meshterrain.html#isubclass" class="tsd-kind-icon">i<wbr>Subclass</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-								<a href="fudgecore.meshheightmap.html#subclasses" class="tsd-kind-icon">subclasses</a>
+								<a href="fudgecore.meshterrain.html#subclasses" class="tsd-kind-icon">subclasses</a>
 							</li>
 							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#boundingbox" class="tsd-kind-icon">bounding<wbr>Box</a>
+								<a href="fudgecore.meshterrain.html#boundingbox" class="tsd-kind-icon">bounding<wbr>Box</a>
 							</li>
 							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#indices" class="tsd-kind-icon">indices</a>
+								<a href="fudgecore.meshterrain.html#indices" class="tsd-kind-icon">indices</a>
 							</li>
 							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#normalsface" class="tsd-kind-icon">normals<wbr>Face</a>
+								<a href="fudgecore.meshterrain.html#normalsface" class="tsd-kind-icon">normals<wbr>Face</a>
 							</li>
 							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#radius" class="tsd-kind-icon">radius</a>
+								<a href="fudgecore.meshterrain.html#radius" class="tsd-kind-icon">radius</a>
 							</li>
 							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#textureuvs" class="tsd-kind-icon">textureUVs</a>
+								<a href="fudgecore.meshterrain.html#textureuvs" class="tsd-kind-icon">textureUVs</a>
 							</li>
 							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#type" class="tsd-kind-icon">type</a>
+								<a href="fudgecore.meshterrain.html#type" class="tsd-kind-icon">type</a>
 							</li>
 							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#vertices" class="tsd-kind-icon">vertices</a>
+								<a href="fudgecore.meshterrain.html#vertices" class="tsd-kind-icon">vertices</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a>
+								<a href="fudgecore.meshterrain.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#clear" class="tsd-kind-icon">clear</a>
+								<a href="fudgecore.meshterrain.html#clear" class="tsd-kind-icon">clear</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#createrenderbuffers" class="tsd-kind-icon">create<wbr>Render<wbr>Buffers</a>
+								<a href="fudgecore.meshterrain.html#createrenderbuffers" class="tsd-kind-icon">create<wbr>Render<wbr>Buffers</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#deleterenderbuffers" class="tsd-kind-icon">delete<wbr>Render<wbr>Buffers</a>
+								<a href="fudgecore.meshterrain.html#deleterenderbuffers" class="tsd-kind-icon">delete<wbr>Render<wbr>Buffers</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#deserialize" class="tsd-kind-icon">deserialize</a>
+								<a href="fudgecore.meshterrain.html#deserialize" class="tsd-kind-icon">deserialize</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a>
+								<a href="fudgecore.meshterrain.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#flipnormals" class="tsd-kind-icon">flip<wbr>Normals</a>
+								<a href="fudgecore.meshterrain.html#flipnormals" class="tsd-kind-icon">flip<wbr>Normals</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#getindexcount" class="tsd-kind-icon">get<wbr>Index<wbr>Count</a>
+								<a href="fudgecore.meshterrain.html#getindexcount" class="tsd-kind-icon">get<wbr>Index<wbr>Count</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#getmutator" class="tsd-kind-icon">get<wbr>Mutator</a>
+								<a href="fudgecore.meshterrain.html#getmutator" class="tsd-kind-icon">get<wbr>Mutator</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#getmutatorattributetypes" class="tsd-kind-icon">get<wbr>Mutator<wbr>Attribute<wbr>Types</a>
+								<a href="fudgecore.meshterrain.html#getmutatorattributetypes" class="tsd-kind-icon">get<wbr>Mutator<wbr>Attribute<wbr>Types</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#getmutatorforanimation" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>Animation</a>
+								<a href="fudgecore.meshterrain.html#getmutatorforanimation" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>Animation</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#getmutatorforuserinterface" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>User<wbr>Interface</a>
+								<a href="fudgecore.meshterrain.html#getmutatorforuserinterface" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>User<wbr>Interface</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.meshterrain.html#getpositiononterrain" class="tsd-kind-icon">get<wbr>Position<wbr>OnTerrain</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#getvertexcount" class="tsd-kind-icon">get<wbr>Vertex<wbr>Count</a>
+								<a href="fudgecore.meshterrain.html#getvertexcount" class="tsd-kind-icon">get<wbr>Vertex<wbr>Count</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#mutate" class="tsd-kind-icon">mutate</a>
+								<a href="fudgecore.meshterrain.html#mutate" class="tsd-kind-icon">mutate</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a>
+								<a href="fudgecore.meshterrain.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#serialize" class="tsd-kind-icon">serialize</a>
+								<a href="fudgecore.meshterrain.html#serialize" class="tsd-kind-icon">serialize</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#updatemutator" class="tsd-kind-icon">update<wbr>Mutator</a>
+								<a href="fudgecore.meshterrain.html#updatemutator" class="tsd-kind-icon">update<wbr>Mutator</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="fudgecore.meshheightmap.html#userenderbuffers" class="tsd-kind-icon">use<wbr>Render<wbr>Buffers</a>
+								<a href="fudgecore.meshterrain.html#userenderbuffers" class="tsd-kind-icon">use<wbr>Render<wbr>Buffers</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-static">
-								<a href="fudgecore.meshheightmap.html#getbufferspecification" class="tsd-kind-icon">get<wbr>Buffer<wbr>Specification</a>
+								<a href="fudgecore.meshterrain.html#getbufferspecification" class="tsd-kind-icon">get<wbr>Buffer<wbr>Specification</a>
 							</li>
 						</ul>
 					</li>
@@ -997,11 +1090,13 @@
 		<h2>Legend</h2>
 		<div class="tsd-legend-group">
 			<ul class="tsd-legend">
-				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
-				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
 			</ul>
 			<ul class="tsd-legend">
-				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
 			</ul>
 			<ul class="tsd-legend">
 				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
