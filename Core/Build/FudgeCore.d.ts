@@ -3237,6 +3237,30 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**Simple Wavefront OBJ import. Takes a wavefront obj string. To Load from a file url, use the
+     * Load Method.
+     * Currently only works with triangulated Meshes
+     * (activate 'Geomentry -> Triangulate Faces' in the Blender obj exporter) */
+    class MeshObj extends Mesh {
+        protected verts: number[];
+        protected uvs: number[];
+        protected inds: number[];
+        protected facenormals: number[];
+        constructor(objString: string);
+        /** Loads an obj file from the given source url and a returns a complete Node from it.
+        * Multiple Objects are treated as a single Mesh. If no material is given, uses a default flat white material. */
+        static Load(src: string, name?: string, material?: Material): Node;
+        /** Creates three Vertices from each face. ALthough inefficient, this has to be done for now - see Issue 244 */
+        protected splitVertices(): void;
+        /** Splits up the obj string into separate string arrays for each datatype */
+        protected parseObj(data: string): void;
+        protected createVertices(): Float32Array;
+        protected createTextureUVs(): Float32Array;
+        protected createIndices(): Uint16Array;
+        protected createFaceNormals(): Float32Array;
+    }
+}
+declare namespace FudgeCore {
     /**
      * Generate a simple pyramid with edges at the base of length 1 and a height of 1. The sides consisting of one, the base of two trigons
      * ```plaintext
