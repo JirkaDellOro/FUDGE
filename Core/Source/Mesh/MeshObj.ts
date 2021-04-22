@@ -1,9 +1,10 @@
 namespace FudgeCore {
 
     /**Simple Wavefront OBJ import. Takes a wavefront obj string. To Load from a file url, use the
-     * Load Method.
-     * Currently only works with triangulated Meshes
-     * (activate 'Geomentry -> Triangulate Faces' in the Blender obj exporter) */
+     * static LOAD Method. Currently only works with triangulated Meshes
+     * (activate 'Geomentry -> Triangulate Faces' in the Blenders obj exporter)
+     * @todo UVs, Load Materials, Support Quads
+     * @authors Simon Storl-Schulke 2021 */
     export class MeshObj extends Mesh {
         
         protected verts: number[] = [];
@@ -19,7 +20,7 @@ namespace FudgeCore {
 
         /** Loads an obj file from the given source url and a returns a complete Node from it. 
         * Multiple Objects are treated as a single Mesh. If no material is given, uses a default flat white material. */
-        public static Load(
+        public static LOAD(
             src: string,
             name: string = "ObjNode",
             material: Material = new Material("MaterialRed", ShaderFlat, new CoatColored(new Color(0.8, 0.8, 0.8, 1)))
@@ -47,7 +48,7 @@ namespace FudgeCore {
         }
 
 
-        /** Creates three Vertices from each face. ALthough inefficient, this has to be done for now - see Issue 244 */
+        /** Creates three Vertices from each face. Although inefficient, this has to be done for now - see Issue 244 */
         protected splitVertices(): void {
 
             let vertsNew: number[] = [];
@@ -77,12 +78,21 @@ namespace FudgeCore {
                     this.verts[this.inds[i + 2] * 3 + 2]
                 );
 
-                // Calculate Normal by three given points
+                // Calculate Normal by three face vertices
                 let normal: Vector3 = Vector3.CROSS(Vector3.DIFFERENCE(v2, v1), Vector3.DIFFERENCE(v3, v1));
                 normal.normalize();
 
-                faceNormalsNew.push(normal.x, normal.y, normal.z, normal.x, normal.y, normal.z, normal.x, normal.y, normal.z);
-                vertsNew.push(v1.x, v1.y, v1.z, v2.x, v2.y, v2.z, v3.x, v3.y, v3.z);
+                // Use same Normal for all three face verices
+                faceNormalsNew.push(
+                    normal.x, normal.y, normal.z,
+                    normal.x, normal.y, normal.z,
+                    normal.x, normal.y, normal.z);
+                
+                vertsNew.push(
+                    v1.x, v1.y, v1.z,
+                    v2.x, v2.y, v2.z,
+                    v3.x, v3.y, v3.z);
+                
                 indicesNew.push(i, i + 1, i + 2);
             }
 
@@ -92,18 +102,16 @@ namespace FudgeCore {
             this.facenormals = faceNormalsNew;
         }
 
-        /** Splits up the obj string into separate string arrays for each datatype */
+        /** Splits up the obj string into separate arrays for each datatype */
         protected parseObj(data: string): void {
             const lines: string[] = data.split("\n");
 
             for (let line of lines) {
                 line = line.trim();
 
-                //ignore comments and empty lines
                 if (!line || line.startsWith("#"))
                     continue;
 
-                //split line into parts
                 const parts: string[] = line.split(" ");
                 parts.shift();
 
@@ -131,6 +139,7 @@ namespace FudgeCore {
         }
 
         protected createTextureUVs(): Float32Array {
+            //TODO: not working yet
             return new Float32Array(this.uvs);
         }
 

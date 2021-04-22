@@ -3238,9 +3238,11 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**Simple Wavefront OBJ import. Takes a wavefront obj string. To Load from a file url, use the
-     * Load Method.
+     * static LOAD Method.
      * Currently only works with triangulated Meshes
-     * (activate 'Geomentry -> Triangulate Faces' in the Blender obj exporter) */
+     * (activate 'Geomentry -> Triangulate Faces' in the Blenders obj exporter)
+     * @todo UVs, Load Materials, Support Quads
+     * @authors Simon Storl-Schulke 2021 */
     class MeshObj extends Mesh {
         protected verts: number[];
         protected uvs: number[];
@@ -3249,7 +3251,7 @@ declare namespace FudgeCore {
         constructor(objString: string);
         /** Loads an obj file from the given source url and a returns a complete Node from it.
         * Multiple Objects are treated as a single Mesh. If no material is given, uses a default flat white material. */
-        static Load(src: string, name?: string, material?: Material): Node;
+        static LOAD(src: string, name?: string, material?: Material): Node;
         /** Creates three Vertices from each face. ALthough inefficient, this has to be done for now - see Issue 244 */
         protected splitVertices(): void;
         /** Splits up the obj string into separate string arrays for each datatype */
