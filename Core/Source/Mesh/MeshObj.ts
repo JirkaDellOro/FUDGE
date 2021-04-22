@@ -2,7 +2,7 @@ namespace FudgeCore {
 
     /**Simple Wavefront OBJ import. Takes a wavefront obj string. To Load from a file url, use the
      * static LOAD Method. Currently only works with triangulated Meshes
-     * (activate 'Geomentry -> Triangulate Faces' in the Blenders obj exporter)
+     * (activate 'Geomentry → Triangulate Faces' in Blenders obj exporter)
      * @todo UVs, Load Materials, Support Quads
      * @authors Simon Storl-Schulke 2021 */
     export class MeshObj extends Mesh {
@@ -59,7 +59,7 @@ namespace FudgeCore {
             // For each face
             for (let i = 0; i < this.inds.length; i += 3) {
 
-                // Get it's 3 vertices
+                // Get its 3 vertices
                 let v1: Vector3 = new Vector3(
                     this.verts[this.inds[i + 0] * 3 + 0],
                     this.verts[this.inds[i + 0] * 3 + 1],
