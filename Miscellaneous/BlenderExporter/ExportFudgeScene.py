@@ -77,15 +77,16 @@ def serialize_camera(cam: bpy.types.Camera) -> dict:
     }
 
 
-def export_scene(context, filepath, human_readable):
+def export_scene(context, filepath, human_readable, selected_only):
     
     scenedata = {
         "objects": [],
         "objectdata": []
     }
 
+    objectlist = bpy.context.selected_objects if selected_only else bpy.context.scene.objects
  
-    for c_obj in bpy.context.scene.objects:
+    for c_obj in objectlist:
 
         objectdata: dict = {}
 
@@ -179,7 +180,7 @@ class IO_OT_export_fudge_scene(bpy.types.Operator, ExportHelper):
     )
 
     def execute(self, context):
-        return export_scene(context, self.filepath, self.human_readable)
+        return export_scene(context, self.filepath, self.human_readable, self.selected_only)
 
 
 def menu_func_export(self, context):
