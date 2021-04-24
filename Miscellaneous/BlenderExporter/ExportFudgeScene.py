@@ -49,6 +49,7 @@ def serialize_mesh(mesh: bpy.types.Mesh) -> dict:
 
 
     meshdata = {
+        "name": mesh.name,
         "vertices": vertices,
         "indices": indices,
         # "facenormals": normals_face
@@ -60,6 +61,7 @@ def serialize_mesh(mesh: bpy.types.Mesh) -> dict:
 
 def serialize_light(light: bpy.types.Light) -> dict:
     return {
+        "name": light.name,
         "type": light.type, # possible Types are POINT, SUN, SPOT, AREA
         "energy": light.energy, 
         "color": [light.color.r, light.color.g, light.color.b]
@@ -68,6 +70,7 @@ def serialize_light(light: bpy.types.Light) -> dict:
 
 def serialize_camera(cam: bpy.types.Camera) -> dict:
     return {
+        "name": cam.name,
         "fov_vertical": cam.angle_y,
         "fov_horizontal": cam.angle_x,
         "fov_diagonal": cam.angle
@@ -77,23 +80,42 @@ def serialize_camera(cam: bpy.types.Camera) -> dict:
 def export_scene(context, filepath, human_readable):
     
     scenedata = {
-        "objects": []
+        "objects": [],
+        "objectdata": []
     }
+
+    names_meshes = []
+    names_lights = []
+    names_cameras = []
 
     for c_obj in bpy.context.scene.objects:
 
         objectdata: dict = {}
-        
-        if c_obj.type == "MESH":
+
+        objecttype = c_obj.type
+        objectdata_name = c_obj.data.name if c_obj.data is not None else ""
+
+        if objecttype == "MESH" and objectdata_name not in names_meshes:
             objectdata = serialize_mesh(c_obj.data)
-        elif c_obj.type == "LIGHT":
+            names_meshes.append(c_obj.data.name)
+
+        elif objecttype == "LIGHT" and objectdata_name not in names_lights:
             objectdata = serialize_light(c_obj.data)
-        elif c_obj.type == "CAMERA":
+            names_lights.append(c_obj.data.name)
+
+        elif objecttype == "CAMERA" and objectdata_name not in names_cameras:
             objectdata = serialize_camera(c_obj.data)
-        else:
-            continue # skip over unsopported object types
-        
+            names_cameras.append(c_obj.data.name)
+
+        # treat all unsupported objecttypes as empty
+        if objecttype not in {"MESH", "LIGHT", "CAMERA"}:
+            objectdata_name = ""
+            objecttype = "EMPTY"
+
         m = c_obj.matrix_local
+
+        if objectdata:
+            scenedata["objectdata"].append(objectdata)
 
         matrix = [
             [m[0][0], m[0][1], m[0][2], m[0][3]],
@@ -105,9 +127,9 @@ def export_scene(context, filepath, human_readable):
 
         obj = {
             "name": c_obj.name,
-            "type": c_obj.type,
+            "type": objecttype,
             "matrix": matrix,
-            "data": objectdata
+            "data": objectdata_name
         }
 
         scenedata["objects"].append(obj)
