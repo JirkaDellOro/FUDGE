@@ -6,7 +6,7 @@ namespace FudgeCore {
         public constructor(
             protected _vertices: Float32Array,
             protected _textureUVs: Float32Array,
-            protected _indices: Float32Array,
+            protected _indices: Uint16Array,
             protected _faceNormals: Float32Array
         ) { super(); }
 
@@ -19,11 +19,11 @@ namespace FudgeCore {
         }
 
         protected createIndices(): Uint16Array {
-            return new Uint16Array(this._indices);
+            return this._indices;
         }
 
         protected createFaceNormals(): Float32Array {
-            return new Float32Array(this._faceNormals);
+            return this._faceNormals;
         }
     }
 }
