@@ -3,27 +3,34 @@ namespace FudgeCore {
     /** Allows to create custom meshes from given Data */
     export class MeshFromData extends Mesh {
 
-        public constructor(
-            protected _vertices: Float32Array,
-            protected _textureUVs: Float32Array,
-            protected _indices: Uint16Array,
-            protected _faceNormals: Float32Array
-        ) { super(); }
+        protected _vertices: Float32Array,
+            protected vertices: Float32Array;
+            protected textureUVs: Float32Array;
+            protected indices: Uint16Array;
+            protected faceNormals: Float32Array;
+        
+        public constructor(_vertices: Float32Array, _textureUVs: Float32Array, _indices: Uint16Array, _faceNormals: Float32Array) {
+            super();
+            this.vertices = _vertices;
+            this.textureUVs = _textureUVs;
+            this.indices = _indices;
+            this.faceNormals = _faceNormals
+        }
 
         protected createVertices(): Float32Array {
-            return this._vertices;
+            return this.vertices;
         }
 
         protected createTextureUVs(): Float32Array {
-            return this._textureUVs;
+            return this.textureUVs;
         }
 
         protected createIndices(): Uint16Array {
-            return this._indices;
+            return this.indices;
         }
 
         protected createFaceNormals(): Float32Array {
-            return this._faceNormals;
+            return this.faceNormals;
         }
     }
 }
