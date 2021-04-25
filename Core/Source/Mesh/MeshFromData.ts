@@ -2,8 +2,6 @@ namespace FudgeCore {
 
     /** Allows to create custom meshes from given Data */
     export class MeshFromData extends Mesh {
-
-        protected _vertices: Float32Array,
             protected vertices: Float32Array;
             protected textureUVs: Float32Array;
             protected indices: Uint16Array;
