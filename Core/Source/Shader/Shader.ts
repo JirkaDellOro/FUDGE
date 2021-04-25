@@ -13,6 +13,9 @@ namespace FudgeCore {
     /** list of all the subclasses derived from this class, if they registered properly*/
     public static readonly subclasses: typeof Shader[] = [];
 
+    public static vertexShaderSource: string;
+    public static fragmentShaderSource: string;
+
     public static program: WebGLProgram;
     public static attributes: { [name: string]: number };
     public static uniforms: { [name: string]: WebGLUniformLocation };
@@ -25,7 +28,6 @@ namespace FudgeCore {
     public static deleteProgram(this: typeof Shader): void {/* injected by decorator */ }
     public static useProgram(this: typeof Shader): void {/* injected by decorator */ }
     public static createProgram(this: typeof Shader): void {/* injected by decorator */ } 
-    
     
     protected static registerSubclass(_subclass: typeof Shader): number { return Shader.subclasses.push(_subclass) - 1; }
   }

@@ -2308,7 +2308,8 @@ declare namespace FudgeCore {
      */
     class CoatColored extends Coat {
         color: Color;
-        constructor(_color?: Color);
+        shininess: number;
+        constructor(_color?: Color, _shininess?: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }
@@ -2651,6 +2652,11 @@ declare namespace FudgeCore {
          */
         static MULTIPLICATION(_mtxLeft: Matrix4x4, _mtxRight: Matrix4x4): Matrix4x4;
         /**
+         * Computes and returns the transpose of a passed matrix.
+         * @param _mtx The matrix to compute the inverse of.
+         */
+        static TRANSPOSE(_mtx: Matrix4x4): Matrix4x4;
+        /**
          * Computes and returns the inverse of a passed matrix.
          * @param _mtx The matrix to compute the inverse of.
          */
@@ -2738,6 +2744,8 @@ declare namespace FudgeCore {
          * The rotation is appended to already applied transforms, thus multiplied from the right. Set _fromLeft to true to switch and put it in front.
          */
         rotate(_by: Vector3, _fromLeft?: boolean): void;
+        transpose(): Matrix4x4;
+        inverse(): Matrix4x4;
         /**
          * Adds a rotation around the x-axis to this matrix
          */
@@ -3126,6 +3134,7 @@ declare namespace FudgeCore {
         protected ƒindices: Uint16Array;
         protected ƒtextureUVs: Float32Array;
         protected ƒnormalsFace: Float32Array;
+        protected ƒnormalsVertice: Float32Array;
         protected ƒnormals: Float32Array;
         protected ƒbox: Box;
         protected ƒradius: number;
@@ -3142,6 +3151,7 @@ declare namespace FudgeCore {
         get vertices(): Float32Array;
         get indices(): Uint16Array;
         get normalsFace(): Float32Array;
+        get normalsVertice(): Float32Array;
         get textureUVs(): Float32Array;
         get boundingBox(): Box;
         get radius(): number;
@@ -3151,6 +3161,7 @@ declare namespace FudgeCore {
         getVertexCount(): number;
         getIndexCount(): number;
         clear(): void;
+        create(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         /**Flip the Normals of a Mesh to render opposite side of each polygon*/
@@ -3160,6 +3171,7 @@ declare namespace FudgeCore {
         protected createIndices(): Uint16Array;
         protected createNormals(): Float32Array;
         protected createFaceNormals(): Float32Array;
+        protected createVerticeNormals(): Float32Array;
         protected createRadius(): number;
         protected createBoundingBox(): Box;
         protected reduceMutator(_mutator: Mutator): void;
@@ -3237,10 +3249,23 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /** Allows to create custom meshes from given Data */
+    class MeshFromData extends Mesh {
+        protected verticesToSet: Float32Array;
+        protected textureUVsToSet: Float32Array;
+        protected indicesToSet: Uint16Array;
+        protected faceNormalsToSet: Float32Array;
+        constructor(_vertices: Float32Array, _textureUVs: Float32Array, _indices: Uint16Array, _faceNormals: Float32Array);
+        protected createVertices(): Float32Array;
+        protected createTextureUVs(): Float32Array;
+        protected createIndices(): Uint16Array;
+        protected createFaceNormals(): Float32Array;
+    }
+}
+declare namespace FudgeCore {
     /**Simple Wavefront OBJ import. Takes a wavefront obj string. To Load from a file url, use the
-     * static LOAD Method.
-     * Currently only works with triangulated Meshes
-     * (activate 'Geomentry -> Triangulate Faces' in the Blenders obj exporter)
+     * static LOAD Method. Currently only works with triangulated Meshes
+     * (activate 'Geomentry → Triangulate Faces' in Blenders obj exporter)
      * @todo UVs, Load Materials, Support Quads
      * @authors Simon Storl-Schulke 2021 */
     class MeshObj extends Mesh {
@@ -3252,9 +3277,9 @@ declare namespace FudgeCore {
         /** Loads an obj file from the given source url and a returns a complete Node from it.
         * Multiple Objects are treated as a single Mesh. If no material is given, uses a default flat white material. */
         static LOAD(src: string, name?: string, material?: Material): Node;
-        /** Creates three Vertices from each face. ALthough inefficient, this has to be done for now - see Issue 244 */
+        /** Creates three Vertices from each face. Although inefficient, this has to be done for now - see Issue 244 */
         protected splitVertices(): void;
-        /** Splits up the obj string into separate string arrays for each datatype */
+        /** Splits up the obj string into separate arrays for each datatype */
         protected parseObj(data: string): void;
         protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;
@@ -5299,6 +5324,8 @@ declare namespace FudgeCore {
         static readonly baseClass: typeof Shader;
         /** list of all the subclasses derived from this class, if they registered properly*/
         static readonly subclasses: typeof Shader[];
+        static vertexShaderSource: string;
+        static fragmentShaderSource: string;
         static program: WebGLProgram;
         static attributes: {
             [name: string]: number;
@@ -5317,72 +5344,103 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    /**
-     * Single color shading
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
+    class ShaderModular extends Shader {
+        vertexShaderSource: string;
+        fragmentShaderSource: string;
+        constructor(_vertexShaderSource: string, _fragmentShaderSource: string);
+        getVertexShaderSource(): string;
+        getFragmentShaderSource(): string;
+        getCoat(): typeof Coat;
+    }
+}
+declare namespace FudgeCore {
     abstract class ShaderFlat extends Shader {
         static readonly iSubclass: number;
-        static getCoat(): typeof Coat;
+        static vertexShaderSource: string;
+        static fragmentShaderSource: string;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
+        static getCoat(): typeof Coat;
     }
 }
 declare namespace FudgeCore {
-    /**
-     * Matcap (Material Capture) shading. The texture provided by the coat is used as a matcap material.
-     * Implementation based on https://www.clicktorelease.com/blog/creating-spherical-environment-mapping-shader/
-     * @authors Simon Storl-Schulke, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
+    abstract class ShaderGouraud extends Shader {
+        static readonly iSubclass: number;
+        static vertexShaderSource: string;
+        static fragmentShaderSource: string;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+        static getCoat(): typeof Coat;
+    }
+}
+declare namespace FudgeCore {
     abstract class ShaderMatCap extends Shader {
         static readonly iSubclass: number;
+        static vertexShaderSource: string;
+        static fragmentShaderSource: string;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
         static getCoat(): typeof Coat;
-        static getVertexShaderSource(): string;
-        static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {
-    /**
-     * Renders for Raycasting
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
-     */
+    abstract class ShaderPhong extends Shader {
+        static readonly iSubclass: number;
+        static vertexShaderSource: string;
+        static fragmentShaderSource: string;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+        static getCoat(): typeof Coat;
+    }
+}
+declare namespace FudgeCore {
     abstract class ShaderPick extends Shader {
+        static readonly iSubclass: number;
+        static vertexShaderSource: string;
+        static fragmentShaderSource: string;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
+        static getCoat(): typeof Coat;
     }
 }
 declare namespace FudgeCore {
-    /**
-     * Renders for Raycasting
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
-     */
     abstract class ShaderPickTextured extends Shader {
+        static readonly iSubclass: number;
+        static vertexShaderSource: string;
+        static fragmentShaderSource: string;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
+        static getCoat(): typeof Coat;
     }
 }
 declare namespace FudgeCore {
-    /**
-     * Textured shading
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
+    abstract class ShaderSmooth extends Shader {
+        static readonly iSubclass: number;
+        static vertexShaderSource: string;
+        static fragmentShaderSource: string;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+        static getCoat(): typeof Coat;
+    }
+}
+declare namespace FudgeCore {
     abstract class ShaderTexture extends Shader {
         static readonly iSubclass: number;
-        static getCoat(): typeof Coat;
+        static vertexShaderSource: string;
+        static fragmentShaderSource: string;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
+        static getCoat(): typeof Coat;
     }
 }
 declare namespace FudgeCore {
-    /**
-     * Single color shading
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
     abstract class ShaderUniColor extends Shader {
         static readonly iSubclass: number;
-        static getCoat(): typeof Coat;
+        static vertexShaderSource: string;
+        static fragmentShaderSource: string;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
+        static getCoat(): typeof Coat;
     }
 }
 declare namespace FudgeCore {

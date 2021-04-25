@@ -30,10 +30,11 @@ namespace FudgeCore {
   @RenderInjectorCoat.decorate
   export class CoatColored extends Coat {
     public color: Color;
-
-    constructor(_color?: Color) {
+    public shininess: number;
+    constructor(_color?: Color, _shininess?: number) {
       super();
       this.color = _color || new Color();
+      this.shininess = _shininess || 0;
     }
 
     //#region Transfer

@@ -23,6 +23,7 @@ namespace FudgeCore {
     protected ƒindices: Uint16Array;
     protected ƒtextureUVs: Float32Array;
     protected ƒnormalsFace: Float32Array;
+    protected ƒnormalsVertex: Float32Array;
     protected ƒnormals: Float32Array;
     protected ƒbox: Box;
     // TODO: explore mathematics for easy transformations of radius 
@@ -89,6 +90,12 @@ namespace FudgeCore {
 
       return this.ƒnormalsFace;
     }
+    public get normalsVertex(): Float32Array {
+      if (this.ƒnormalsVertex == null)
+        this.ƒnormalsVertex = this.createVertexNormals();
+
+      return this.ƒnormalsVertex;
+    }
     public get textureUVs(): Float32Array {
       if (this.ƒtextureUVs == null)
         this.ƒtextureUVs = this.createTextureUVs();
@@ -130,6 +137,15 @@ namespace FudgeCore {
       this.ƒradius = undefined;
 
       this.renderBuffers = null;
+    }
+
+    public create(): void {
+      this.ƒvertices = this.createVertices();
+      this.ƒindices = this.createIndices();
+      this.ƒtextureUVs = this.createTextureUVs();
+      this.ƒnormalsFace = this.createFaceNormals();
+      this.ƒnormalsVertex = this.createVertexNormals();
+      this.createRenderBuffers();
     }
 
     // Serialize/Deserialize for all meshes that calculate without parameters
@@ -190,6 +206,10 @@ namespace FudgeCore {
         normals[index + 2] = normal.z;
       }
       return new Float32Array(normals);
+    }
+
+    protected createVertexNormals(): Float32Array {
+      return this.ƒnormalsVertex;
     }
 
     protected createRadius(): number {

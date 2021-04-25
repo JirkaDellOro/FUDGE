@@ -3,10 +3,10 @@
     "version": "0.0.0",
     "description": "Short and easy to understand samples demonstrating WebGL 2 features.",
     "license": "MIT",
-    "contributors": {
-        "name": "Trung Le, Shuai Shao (Shrek), and Contributors",
-        "url": "https://github.com/WebGLSamples/WebGL2Samples/graphs/contributors"
-    },
+    "contributors": [
+        {"name": "Trung Le, Shuai Shao (Shrek), and Contributors",
+        "url": "https://github.com/WebGLSamples/WebGL2Samples/graphs/contributors"}
+    ],
     "keywords": [
         "WebGL"
     ],

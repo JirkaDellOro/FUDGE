@@ -70,6 +70,12 @@ namespace FudgeCore {
         crc3.uniformMatrix4fv(uWorld, false, _mtxWorld.get());
       }
 
+      let uNormal: WebGLUniformLocation = _shader.uniforms["u_normal"];
+      if (uNormal) {
+        let normalMatrix: Matrix4x4 = _mtxWorld.inverse().transpose();
+        crc3.uniformMatrix4fv(uNormal, false, normalMatrix.get());
+      }
+
       let aNormal: number = _shader.attributes["a_normal"];
       if (aNormal) {
         crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderBuffers.normalsFace);
