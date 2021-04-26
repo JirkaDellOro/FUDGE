@@ -132,6 +132,7 @@ namespace FudgeCore {
       this.ƒindices = undefined;
       this.ƒtextureUVs = undefined;
       this.ƒnormalsFace = undefined;
+      this.ƒnormalsVertex = undefined;
       this.ƒnormals = undefined;
       this.ƒbox = undefined;
       this.ƒradius = undefined;
@@ -209,7 +210,36 @@ namespace FudgeCore {
     }
 
     protected createVertexNormals(): Float32Array {
-      return this.ƒnormalsVertex;
+      let normals: Vector3[] = [];
+      let vertices: Vector3[] = [];
+
+      for (let v: number = 0; v < this.vertices.length; v += 3) {
+        normals.push(new Vector3(0, 0, 0));
+        vertices.push(new Vector3(this.vertices[v], this.vertices[v + 1], this.vertices[v + 2]));
+      }
+
+      for (let i: number = 0; i < this.indices.length; i += 3) {
+        let trigon: number[] = [this.indices[i], this.indices[i + 1], this.indices[i + 2]];
+
+        //TODO: access the already calculated face normals instead of calculating them again
+        let v0: Vector3 = Vector3.DIFFERENCE(vertices[trigon[0]], vertices[trigon[1]]);
+        let v1: Vector3 = Vector3.DIFFERENCE(vertices[trigon[0]], vertices[trigon[2]]);
+        let normalFace: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(v0, v1));
+
+        normals[trigon[0]] = Vector3.SUM(normals[trigon[0]], normalFace);
+        normals[trigon[1]] = Vector3.SUM(normals[trigon[1]], normalFace);
+        normals[trigon[2]] = Vector3.SUM(normals[trigon[2]], normalFace);
+      }
+
+      let vertexNormals: number[] = [];
+      for (let j: number = 0; j < normals.length; j++) {
+        if (normals[j].magnitude != 0) {
+          Vector3.NORMALIZATION(normals[j]);
+        }
+        vertexNormals.push(normals[j].x, normals[j].y, normals[j].z);
+      }
+
+      return new Float32Array(vertexNormals);
     }
 
     protected createRadius(): number {
