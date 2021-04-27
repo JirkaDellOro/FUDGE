@@ -156,7 +156,7 @@ namespace FudgeCore {
         let cmpMesh: ComponentMesh = node.getComponent(ComponentMesh);
         let mtxMeshToView: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, cmpMesh.mtxWorld);
         let cmpMaterial: ComponentMaterial = node.getComponent(ComponentMaterial);
-        Render.drawMesh(cmpMesh, cmpMaterial, node.mtxWorld, mtxMeshToView);
+        Render.drawMesh(cmpMesh, cmpMaterial, cmpMesh.mtxWorld, mtxMeshToView);
         Recycler.store(mtxMeshToView);
       }
     }
