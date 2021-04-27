@@ -211,34 +211,23 @@ namespace FudgeCore {
 
     protected createVertexNormals(): Float32Array {
       let normals: Vector3[] = [];
-      let vertices: Vector3[] = [];
-
-      for (let v: number = 0; v < this.vertices.length; v += 3) {
-        normals.push(new Vector3(0, 0, 0));
-        vertices.push(new Vector3(this.vertices[v], this.vertices[v + 1], this.vertices[v + 2]));
-      }
+      for (let v: number = 0; v < this.vertices.length; v += 3) 
+        normals.push(Vector3.ZERO());
 
       for (let i: number = 0; i < this.indices.length; i += 3) {
         let trigon: number[] = [this.indices[i], this.indices[i + 1], this.indices[i + 2]];
+        let index: number = trigon[2] * 3;
+        let normalFace: Vector3 = new Vector3(this.ƒnormalsFace[index], this.ƒnormalsFace[index + 1], this.ƒnormalsFace[index + 2]);
 
-        //TODO: access the already calculated face normals instead of calculating them again
-        let v0: Vector3 = Vector3.DIFFERENCE(vertices[trigon[0]], vertices[trigon[1]]);
-        let v1: Vector3 = Vector3.DIFFERENCE(vertices[trigon[0]], vertices[trigon[2]]);
-        let normalFace: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(v0, v1));
-
-        normals[trigon[0]] = Vector3.SUM(normals[trigon[0]], normalFace);
-        normals[trigon[1]] = Vector3.SUM(normals[trigon[1]], normalFace);
-        normals[trigon[2]] = Vector3.SUM(normals[trigon[2]], normalFace);
+        for (let t: number = 0; t < trigon.length; t++)
+          normals[trigon[t]] = Vector3.SUM(normals[trigon[t]], normalFace);
       }
-
       let vertexNormals: number[] = [];
-      for (let j: number = 0; j < normals.length; j++) {
-        if (normals[j].magnitude != 0) {
-          Vector3.NORMALIZATION(normals[j]);
-        }
-        vertexNormals.push(normals[j].x, normals[j].y, normals[j].z);
+      for (let n: number = 0; n < normals.length; n++) {
+        if (normals[n].magnitude != 0) 
+          normals[n] = Vector3.NORMALIZATION(normals[n]);
+        vertexNormals.push(normals[n].x, normals[n].y, normals[n].z);
       }
-
       return new Float32Array(vertexNormals);
     }
 

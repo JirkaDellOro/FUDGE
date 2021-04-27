@@ -15,7 +15,7 @@ struct LightDirectional {
 const uint MAX_LIGHTS_DIRECTIONAL = 10u;
 
 in vec3 a_position;
-in vec3 a_normalFace;
+in vec3 a_normalVertex;
 uniform mat4 u_world;
 uniform mat4 u_projection;
 uniform float u_shininess;
@@ -35,9 +35,9 @@ vec3 calculateReflection(vec3 light_dir, vec3 view_dir, vec3 normal, float shini
 
 void main() {
     gl_Position = u_projection * u_world * vec4(a_position, 1.0);
-    vec4 v_position4 = u_world * vec4(a_normalFace, 1.0);
+    vec4 v_position4 = u_world * vec4(a_normalVertex, 1.0);
     vec3 v_position = vec3(v_position4) / v_position4.w;
-    vec3 N = vec3(a_normalFace);
+    vec3 N = vec3(a_normalVertex);
 
     v_color = u_ambient.color;
     for(uint i = 0u; i < u_nLightsDirectional; i++) {
