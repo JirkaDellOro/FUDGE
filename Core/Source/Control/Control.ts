@@ -155,7 +155,9 @@ namespace FudgeCore {
       }
       return output;
     }
-
+    /**
+     * calculates the output considering the time of the delay
+     */
     private getValueDelayed(): number {
       if (this.timeValueDelay > 0) {
         let timeElapsedSinceInput: number = this.time.get() - this.timeOutputTargetSet;
@@ -164,7 +166,7 @@ namespace FudgeCore {
       }
       return this.outputTarget;
     }
-
+    
     private dispatchOutput = (_eventOrValue: EventTimer | number): void => {
       if (!this.active)
         return;
