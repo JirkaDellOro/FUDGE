@@ -58,7 +58,7 @@ uniform float u_shininess;
 out vec4 frag;
 
 vec3 calculateReflection(vec3 light_dir, vec3 view_dir, vec3 normal, float shininess) {
-    vec3 color = vec3(1.0);
+    vec3 color = vec3(1);
     vec3 R = reflect(-light_dir, normal);
     float spec_dot = max(dot(R, view_dir), 0.0);
     color += pow(spec_dot, shininess);
@@ -82,9 +82,6 @@ void main() {
     frag.a = 1.0;
 }       `;
     
-    public static getVertexShaderSource(): string { return this.vertexShaderSource; }
-    public static getFragmentShaderSource(): string { return this.fragmentShaderSource; }
-
     public static getCoat(): typeof Coat { return CoatColored; }
   }
 }

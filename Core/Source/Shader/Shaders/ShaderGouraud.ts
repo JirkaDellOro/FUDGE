@@ -32,7 +32,7 @@ uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
 out vec4 v_color;
 
 vec3 calculateReflection(vec3 light_dir, vec3 view_dir, vec3 normal, float shininess) {
-    vec3 color = vec3(1.0);
+    vec3 color = vec3(1);
     vec3 R = reflect(-light_dir, normal);
     float spec_dot = max(dot(R, view_dir), 0.0);
     color += pow(spec_dot, shininess);
@@ -67,8 +67,8 @@ void main() {
 * @authors Luis Keck, HFU, 2021
 */
 precision highp float;
-
 uniform vec4 u_color;
+
 in vec4 v_color;
 out vec4 frag;
 
@@ -77,9 +77,6 @@ void main()
 	frag = u_color * v_color;
 }`;
     
-    public static getVertexShaderSource(): string { return this.vertexShaderSource; }
-    public static getFragmentShaderSource(): string { return this.fragmentShaderSource; }
-
     public static getCoat(): typeof Coat { return CoatColored; }
   }
 }

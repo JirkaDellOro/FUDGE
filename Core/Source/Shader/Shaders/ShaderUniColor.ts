@@ -33,9 +33,6 @@ void main() {
   //    frag = vec4(1.0,1.0,1.0,1.0);
 }`;
     
-    public static getVertexShaderSource(): string { return this.vertexShaderSource; }
-    public static getFragmentShaderSource(): string { return this.fragmentShaderSource; }
-
     public static getCoat(): typeof Coat { return CoatColored; }
   }
 }

@@ -42,9 +42,6 @@ void main() {
     frag = ivec4(floatBitsToInt(gl_FragCoord.z), icolor, 0, 0);
 }`;
     
-    public static getVertexShaderSource(): string { return this.vertexShaderSource; }
-    public static getFragmentShaderSource(): string { return this.fragmentShaderSource; }
-
     public static getCoat(): typeof Coat { return CoatColored; }
   }
 }

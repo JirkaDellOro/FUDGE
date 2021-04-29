@@ -22,8 +22,8 @@ namespace FudgeCore {
 
     /** The type of coat that can be used with this shader to create a material */
     public static getCoat(): typeof Coat { return null; }
-    public static getVertexShaderSource(): string { return null; }
-    public static getFragmentShaderSource(): string { return null; }
+    public static getVertexShaderSource(): string { return this.vertexShaderSource; }
+    public static getFragmentShaderSource(): string { return this.fragmentShaderSource; }
 
     public static deleteProgram(this: typeof Shader): void {/* injected by decorator */ }
     public static useProgram(this: typeof Shader): void {/* injected by decorator */ }
