@@ -339,8 +339,9 @@ namespace FudgeCore {
     /**
    * Checks that the Rigidbody is positioned correctly and recreates the Collider with new scale/position/rotation
    */
-    public updateFromWorld(): void {
-      let worldTransform: Matrix4x4 = super.getContainer().mtxWorld;//super.getContainer() != null ? super.getContainer().mtxWorld : Matrix4x4.IDENTITY(); //The the world information about where to position/scale/rotate
+    public updateFromWorld(_toMesh: boolean = false): void {
+      let cmpMesh: ComponentMesh = this.getContainer().getComponent(ComponentMesh);
+      let worldTransform: Matrix4x4 = (_toMesh && cmpMesh) ? cmpMesh.mtxWorld : this.getContainer().mtxWorld; //super.getContainer() != null ? super.getContainer().mtxWorld : Matrix4x4.IDENTITY(); //The the world information about where to position/scale/rotate
       let position: Vector3 = worldTransform.translation; //Adding the offsets from the pivot
       position.add(this.mtxPivot.translation);
       let rotation: Vector3 = worldTransform.getEulerAngles();
@@ -356,7 +357,7 @@ namespace FudgeCore {
       this.rigidbody.removeShape(oldCollider); //remove the old collider
       this.collider.userData = this; //reset the extra information so that this collider knows to which Fudge Component it's connected
       this.collider.setCollisionGroup(this.collisionGroup);
-      if (this.collisionGroup == PHYSICS_GROUP.TRIGGER) //Trigger not collidering with anythign so their mask is only colliding with trigger
+      if (this.collisionGroup == PHYSICS_GROUP.TRIGGER) //Trigger not collidering with anything so their mask is only colliding with trigger
         this.collider.setCollisionMask(PHYSICS_GROUP.TRIGGER);
       else
         this.collider.setCollisionMask(this.colMask);
@@ -622,6 +623,29 @@ namespace FudgeCore {
       super.deserialize(_serialization[super.constructor.name]);
       return this;
     }
+
+    /** Change properties by an associative array */
+    public async mutate(_mutator: Mutator): Promise<void> {
+      if (_mutator["friction"])
+        this.friction = <number>_mutator["friction"];
+      if (_mutator["restitution"])
+        this.restitution = <number>_mutator["restituion"];
+      if (_mutator["mass"])
+        this.mass = <number>_mutator["mass"];
+      if (_mutator["linearDamping"])
+        this.linearDamping = <number>_mutator["linearDamping"];
+      if (_mutator["angularDamping"])
+        this.angularDamping = <number>_mutator["angularDamping"];
+      if (_mutator["gravityScale"])
+        this.gravityScale = <number>_mutator["gravityScale"];
+
+      this.dispatchEvent(new Event(EVENT.MUTATE));
+    }
+
+    public reduceMutator(_mutator: Mutator): void {
+      delete _mutator.convexMesh; //Convex Mesh can't be shown in the editor because float32Array is not a viable mutator
+      delete _mutator.colMask;
+    }
     //#endregion
 
     /** Creates the actual OimoPhysics Rigidbody out of informations the Fudge Component has. */
@@ -786,10 +810,10 @@ namespace FudgeCore {
     //Calculating the center of a collision as a singular point - in case there is more than one point - by getting the geometrical center of all colliding points
     private collisionCenterPoint(_colPoints: OIMO.ManifoldPoint[], _numPoints: number): OIMO.Vec3 {
       let center: OIMO.Vec3;
-      let totalPoints = 0;
-      let totalX = 0;
-      let totalY = 0;
-      let totalZ = 0;
+      let totalPoints: number = 0;
+      let totalX: number = 0;
+      let totalY: number = 0;
+      let totalZ: number = 0;
       _colPoints.forEach((value: OIMO.ManifoldPoint): void => {
         if (totalPoints < _numPoints) {
           totalPoints++;
@@ -802,28 +826,5 @@ namespace FudgeCore {
       return center;
     }
     //#endregion
-
-    /** Change properties thorugh a associative array */
-    public async mutate(_mutator: Mutator): Promise<void> {
-      if (_mutator["friction"])
-        this.friction = <number>_mutator["friction"];
-      if (_mutator["restitution"])
-        this.restitution = <number>_mutator["restituion"];
-      if (_mutator["mass"])
-        this.mass = <number>_mutator["mass"];
-      if (_mutator["linearDamping"])
-        this.linearDamping = <number>_mutator["linearDamping"];
-      if (_mutator["angularDamping"])
-        this.angularDamping = <number>_mutator["angularDamping"];
-      if (_mutator["gravityScale"])
-        this.gravityScale = <number>_mutator["gravityScale"];
-
-      this.dispatchEvent(new Event(EVENT.MUTATE));
-    }
-
-    public reduceMutator(_mutator: Mutator): void {
-      delete _mutator.convexMesh; //Convex Mesh can't be shown in the editor because float32Array is not a viable mutator
-      delete _mutator.colMask;
-    }
   }
 }

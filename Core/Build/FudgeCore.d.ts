@@ -4383,7 +4383,7 @@ declare namespace FudgeCore {
         /**
        * Checks that the Rigidbody is positioned correctly and recreates the Collider with new scale/position/rotation
        */
-        updateFromWorld(): void;
+        updateFromWorld(_toMesh?: boolean): void;
         /**
        * Get the current POSITION of the [[Node]] in the physical space
        */
@@ -4466,6 +4466,9 @@ declare namespace FudgeCore {
         raycastThisBody(_origin: Vector3, _direction: Vector3, _length: number): RayHitInfo;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        /** Change properties by an associative array */
+        mutate(_mutator: Mutator): Promise<void>;
+        reduceMutator(_mutator: Mutator): void;
         /** Creates the actual OimoPhysics Rigidbody out of informations the Fudge Component has. */
         private createRigidbody;
         /** Creates a collider a shape that represents the object in the physical world.  */
@@ -4487,9 +4490,6 @@ declare namespace FudgeCore {
          */
         private checkBodiesInTrigger;
         private collisionCenterPoint;
-        /** Change properties thorugh a associative array */
-        mutate(_mutator: Mutator): Promise<void>;
-        reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace FudgeCore {
@@ -4740,9 +4740,9 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-    * Main Physics Class to hold information about the physical representation of the scene
-    * @author Marko Fehrenbach, HFU 2020
-    */
+      * Main Physics Class to hold information about the physical representation of the scene
+      * @author Marko Fehrenbach, HFU 2020
+      */
     class Physics {
         /** The PHYSICAL WORLD that gives every [[Node]] with a ComponentRigidbody a physical representation and moves them accordingly to the laws of the physical world. */
         static world: Physics;
@@ -4757,22 +4757,22 @@ declare namespace FudgeCore {
         private triggerBodyList;
         private jointList;
         /**
-       * Creating a physical world to represent the [[Node]] Scene Tree. Call once before using any physics functions or
-       * rigidbodies.
-       */
+         * Creating a physical world to represent the [[Node]] Scene Tree. Call once before using any physics functions or
+         * rigidbodies.
+         */
         static initializePhysics(): Physics;
         /**
-      * Cast a RAY into the physical world from a origin point in a certain direction. Receiving informations about the hit object and the
-      * hit point. Do not specify a _group to raycast the whole world, else only bodies within the specific group can be hit.
-      */
+        * Cast a RAY into the physical world from a origin point in a certain direction. Receiving informations about the hit object and the
+        * hit point. Do not specify a _group to raycast the whole world, else only bodies within the specific group can be hit.
+        */
         static raycast(_origin: Vector3, _direction: Vector3, _length?: number, _group?: PHYSICS_GROUP): RayHitInfo;
         /**
-      * Starts the physical world by checking that each body has the correct values from the Scene Tree
-      */
-        static start(_sceneTree: Node): void;
+          * Adjusts the transforms of the [[ComponentRigidbody]]s in the given branch to match their nodes or meshes
+          */
+        static adjustTransforms(_branch: Node, _toMesh?: boolean): void;
         /** Internal function to calculate the endpoint of mathematical ray. By adding the multiplied direction to the origin.
-         * Used because OimoPhysics defines ray by start/end. But GameEngines commonly use origin/direction.
-         */
+           * Used because OimoPhysics defines ray by start/end. But GameEngines commonly use origin/direction.
+           */
         private static getRayEndPoint;
         /** Internal function to get the distance in which a ray hit by subtracting points from each other and get the square root of the squared product of each component. */
         private static getRayDistance;
@@ -4781,42 +4781,42 @@ declare namespace FudgeCore {
         /** Returns all the ComponentRigidbodies that are in the specific group of triggers. */
         getTriggerList(): ComponentRigidbody[];
         /**
-      * Getting the solver iterations of the physics engine. Higher iteration numbers increase accuracy but decrease performance
-      */
+        * Getting the solver iterations of the physics engine. Higher iteration numbers increase accuracy but decrease performance
+        */
         getSolverIterations(): number;
         /**
-      * Setting the solver iterations of the physics engine. Higher iteration numbers increase accuracy but decrease performance
-      */
+        * Setting the solver iterations of the physics engine. Higher iteration numbers increase accuracy but decrease performance
+        */
         setSolverIterations(_value: number): void;
         /**
-      * Get the applied gravitational force to physical objects. Default earth gravity = 9.81 m/s
-      */
+        * Get the applied gravitational force to physical objects. Default earth gravity = 9.81 m/s
+        */
         getGravity(): Vector3;
         /**
-      * Set the applied gravitational force to physical objects. Default earth gravity = 9.81 m/s
-      */
+        * Set the applied gravitational force to physical objects. Default earth gravity = 9.81 m/s
+        */
         setGravity(_value: Vector3): void;
         /**
-      * Adding a new OIMO Rigidbody to the OIMO World, happens automatically when adding a FUDGE Rigidbody Component
-      */
+        * Adding a new OIMO Rigidbody to the OIMO World, happens automatically when adding a FUDGE Rigidbody Component
+        */
         addRigidbody(_cmpRB: ComponentRigidbody): void;
         /**
-      * Removing a OIMO Rigidbody to the OIMO World, happens automatically when removing a FUDGE Rigidbody Component
-      */
+        * Removing a OIMO Rigidbody to the OIMO World, happens automatically when removing a FUDGE Rigidbody Component
+        */
         removeRigidbody(_cmpRB: ComponentRigidbody): void;
         /**
-    * Adding a new OIMO Joint/Constraint to the OIMO World, happens automatically when adding a FUDGE Joint Component
-    */
+        * Adding a new OIMO Joint/Constraint to the OIMO World, happens automatically when adding a FUDGE Joint Component
+        */
         addJoint(_cmpJoint: ComponentJoint): void;
         /**
-        * Removing a OIMO Joint/Constraint to the OIMO World, happens automatically when removeing a FUDGE Joint Component
-        */
+          * Removing a OIMO Joint/Constraint to the OIMO World, happens automatically when removeing a FUDGE Joint Component
+          */
         removeJoint(_cmpJoint: ComponentJoint): void;
         /** Returns the actual used world of the OIMO physics engine. No user interaction needed.*/
         getOimoWorld(): OIMO.World;
         /**
-      * Simulates the physical world. _deltaTime is the amount of time between physical steps, default is 60 frames per second ~17ms
-      */
+        * Simulates the physical world. _deltaTime is the amount of time between physical steps, default is 60 frames per second ~17ms
+        */
         simulate(_deltaTime?: number): void;
         /** Make the given ComponentRigidbody known to the world as a body that is not colliding, but only triggering events. Used internally no interaction needed. */
         registerTrigger(_rigidbody: ComponentRigidbody): void;
@@ -4827,15 +4827,15 @@ declare namespace FudgeCore {
          */
         connectJoints(): void;
         /**
-      * Called internally to inform the physics system that a joint has a change of core properties like ComponentRigidbody and needs to
-      * be recreated.
-      */
+        * Called internally to inform the physics system that a joint has a change of core properties like ComponentRigidbody and needs to
+        * be recreated.
+        */
         changeJointStatus(_cmpJoint: ComponentJoint): void;
         /** Giving a ComponentRigidbody a specific identification number so it can be referenced in the loading process. And removed rb's can receive a new id. */
         distributeBodyID(): number;
         /** Returns the ComponentRigidbody with the given id. Used internally to reconnect joints on loading in the editor. */
         getBodyByID(_id: number): ComponentRigidbody;
-        /** Updates all to the Physics.world known Rigidbodies with their respective world positions/rotations/scalings */
+        /** Updates all [[Rigidbodies]] known to the Physics.world to match their containers or meshes transformations */
         private updateWorldFromWorldMatrix;
         /** Create a oimoPhysics world. Called once at the beginning if none is existend yet. */
         private createWorld;

@@ -3,9 +3,9 @@
 namespace FudgeCore {
 
   /**
-  * Main Physics Class to hold information about the physical representation of the scene
-  * @author Marko Fehrenbach, HFU 2020
-  */
+    * Main Physics Class to hold information about the physical representation of the scene
+    * @author Marko Fehrenbach, HFU 2020
+    */
   export class Physics {
 
     /** The PHYSICAL WORLD that gives every [[Node]] with a ComponentRigidbody a physical representation and moves them accordingly to the laws of the physical world. */
@@ -24,9 +24,9 @@ namespace FudgeCore {
     private jointList: ComponentJoint[] = new Array();
 
     /**
-   * Creating a physical world to represent the [[Node]] Scene Tree. Call once before using any physics functions or
-   * rigidbodies.
-   */
+     * Creating a physical world to represent the [[Node]] Scene Tree. Call once before using any physics functions or
+     * rigidbodies.
+     */
     public static initializePhysics(): Physics {
       if (typeof OIMO !== "undefined" && this.world == null) { //Check if OIMO Namespace was loaded, else do not use any physics. Check is needed to ensure FUDGE can be used without Physics
         this.world = new Physics();
@@ -39,9 +39,9 @@ namespace FudgeCore {
     }
 
     /**
-  * Cast a RAY into the physical world from a origin point in a certain direction. Receiving informations about the hit object and the
-  * hit point. Do not specify a _group to raycast the whole world, else only bodies within the specific group can be hit.
-  */
+    * Cast a RAY into the physical world from a origin point in a certain direction. Receiving informations about the hit object and the
+    * hit point. Do not specify a _group to raycast the whole world, else only bodies within the specific group can be hit.
+    */
     public static raycast(_origin: Vector3, _direction: Vector3, _length: number = 1, _group: PHYSICS_GROUP = PHYSICS_GROUP.DEFAULT): RayHitInfo {
       let hitInfo: RayHitInfo = new RayHitInfo();
       let ray: OIMO.RayCastClosest = new OIMO.RayCastClosest();
@@ -86,16 +86,16 @@ namespace FudgeCore {
 
 
     /**
-  * Starts the physical world by checking that each body has the correct values from the Scene Tree
-  */
-    public static start(_sceneTree: Node): void {
-      Render.prepare(_sceneTree);
-      this.world.updateWorldFromWorldMatrix();
+      * Adjusts the transforms of the [[ComponentRigidbody]]s in the given branch to match their nodes or meshes
+      */
+    public static adjustTransforms(_branch: Node, _toMesh: boolean = false): void {
+      Render.prepare(_branch);
+      this.world.updateWorldFromWorldMatrix(_toMesh);
     }
 
     /** Internal function to calculate the endpoint of mathematical ray. By adding the multiplied direction to the origin. 
-     * Used because OimoPhysics defines ray by start/end. But GameEngines commonly use origin/direction.
-     */
+       * Used because OimoPhysics defines ray by start/end. But GameEngines commonly use origin/direction.
+       */
     private static getRayEndPoint(start: OIMO.Vec3, direction: Vector3, length: number): OIMO.Vec3 {
       let origin: Vector3 = new Vector3(start.x, start.y, start.z);
       let scaledDirection: Vector3 = direction;
@@ -123,47 +123,47 @@ namespace FudgeCore {
     }
 
     /**
-  * Getting the solver iterations of the physics engine. Higher iteration numbers increase accuracy but decrease performance
-  */
+    * Getting the solver iterations of the physics engine. Higher iteration numbers increase accuracy but decrease performance
+    */
     public getSolverIterations(): number {
       return Physics.world.oimoWorld.getNumPositionIterations();
     }
 
     /**
-  * Setting the solver iterations of the physics engine. Higher iteration numbers increase accuracy but decrease performance
-  */
+    * Setting the solver iterations of the physics engine. Higher iteration numbers increase accuracy but decrease performance
+    */
     public setSolverIterations(_value: number): void {
       Physics.world.oimoWorld.setNumPositionIterations(_value);
       Physics.world.oimoWorld.setNumVelocityIterations(_value);
     }
 
     /**
-  * Get the applied gravitational force to physical objects. Default earth gravity = 9.81 m/s
-  */
+    * Get the applied gravitational force to physical objects. Default earth gravity = 9.81 m/s
+    */
     public getGravity(): Vector3 {
       let tmpVec: OIMO.Vec3 = Physics.world.oimoWorld.getGravity();
       return new Vector3(tmpVec.x, tmpVec.y, tmpVec.z);
     }
 
     /**
-  * Set the applied gravitational force to physical objects. Default earth gravity = 9.81 m/s
-  */
+    * Set the applied gravitational force to physical objects. Default earth gravity = 9.81 m/s
+    */
     public setGravity(_value: Vector3): void {
       let tmpVec: OIMO.Vec3 = new OIMO.Vec3(_value.x, _value.y, _value.z);
       Physics.world.oimoWorld.setGravity(tmpVec);
     }
 
     /**
-  * Adding a new OIMO Rigidbody to the OIMO World, happens automatically when adding a FUDGE Rigidbody Component
-  */
+    * Adding a new OIMO Rigidbody to the OIMO World, happens automatically when adding a FUDGE Rigidbody Component
+    */
     public addRigidbody(_cmpRB: ComponentRigidbody): void {
       this.bodyList.push(_cmpRB);
       Physics.world.oimoWorld.addRigidBody(_cmpRB.getOimoRigidbody());
     }
 
     /**
-  * Removing a OIMO Rigidbody to the OIMO World, happens automatically when removing a FUDGE Rigidbody Component
-  */
+    * Removing a OIMO Rigidbody to the OIMO World, happens automatically when removing a FUDGE Rigidbody Component
+    */
     public removeRigidbody(_cmpRB: ComponentRigidbody): void {
       let id: number = this.bodyList.indexOf(_cmpRB);
       this.bodyList.splice(id, 1);
@@ -171,15 +171,15 @@ namespace FudgeCore {
     }
 
     /**
-* Adding a new OIMO Joint/Constraint to the OIMO World, happens automatically when adding a FUDGE Joint Component
-*/
+    * Adding a new OIMO Joint/Constraint to the OIMO World, happens automatically when adding a FUDGE Joint Component
+    */
     public addJoint(_cmpJoint: ComponentJoint): void {
       Physics.world.oimoWorld.addJoint(_cmpJoint.getOimoJoint());
     }
 
     /**
-    * Removing a OIMO Joint/Constraint to the OIMO World, happens automatically when removeing a FUDGE Joint Component
-    */
+      * Removing a OIMO Joint/Constraint to the OIMO World, happens automatically when removeing a FUDGE Joint Component
+      */
     public removeJoint(_cmpJoint: ComponentJoint): void {
       Physics.world.oimoWorld.removeJoint(_cmpJoint.getOimoJoint());
     }
@@ -190,8 +190,8 @@ namespace FudgeCore {
     }
 
     /**
-  * Simulates the physical world. _deltaTime is the amount of time between physical steps, default is 60 frames per second ~17ms
-  */
+    * Simulates the physical world. _deltaTime is the amount of time between physical steps, default is 60 frames per second ~17ms
+    */
     public simulate(_deltaTime: number = 1 / 60): void {
       if (this.jointList.length > 0)
         this.connectJoints(); //Connect joints if anything has happened between the last call to any of the two paired rigidbodies
@@ -232,9 +232,9 @@ namespace FudgeCore {
     }
 
     /**
-  * Called internally to inform the physics system that a joint has a change of core properties like ComponentRigidbody and needs to
-  * be recreated.
-  */
+    * Called internally to inform the physics system that a joint has a change of core properties like ComponentRigidbody and needs to
+    * be recreated.
+    */
     public changeJointStatus(_cmpJoint: ComponentJoint): void {
       this.jointList.push(_cmpJoint);
     }
@@ -268,11 +268,10 @@ namespace FudgeCore {
       return body;
     }
 
-    /** Updates all to the Physics.world known Rigidbodies with their respective world positions/rotations/scalings */
-    private updateWorldFromWorldMatrix(): void {
-      this.bodyList.forEach(function (value: ComponentRigidbody): void {
-        value.updateFromWorld();
-      });
+    /** Updates all [[Rigidbodies]] known to the Physics.world to match their containers or meshes transformations */
+    private updateWorldFromWorldMatrix(_toMesh: boolean = false): void {
+      for (let body of this.bodyList)
+        body.updateFromWorld(_toMesh);
     }
 
     /** Create a oimoPhysics world. Called once at the beginning if none is existend yet. */
@@ -284,16 +283,14 @@ namespace FudgeCore {
         this.bodyList = null;
         this.jointList = null;
         this.triggerBodyList = null;
-        for (let i = 0; i < jointsWorld; i++) {
+        for (let i: number = 0; i < jointsWorld; i++) {
           Physics.world.oimoWorld.removeJoint(Physics.world.oimoWorld.getJointList());
         }
-        for (let i = 0; i < bodiesWorld; i++) {
+        for (let i: number = 0; i < bodiesWorld; i++) {
           Physics.world.oimoWorld.removeRigidBody(Physics.world.oimoWorld.getRigidBodyList());
         }
       }
       Physics.world.oimoWorld = new OIMO.World();
     }
-
   }
-
 }
