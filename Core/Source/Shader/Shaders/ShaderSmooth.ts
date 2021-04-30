@@ -58,7 +58,5 @@ out vec4 frag;
 void main() {
     frag = u_color * v_color;
 }`;
-    
-    public static getCoat(): typeof Coat { return CoatColored; }
   }
 }

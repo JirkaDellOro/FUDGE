@@ -8,7 +8,5 @@ namespace FudgeCore {
     
     public static fragmentShaderSource: string = 
     `$`;
-    
-    public static getCoat(): typeof Coat { return CoatColored; }
   }
 }

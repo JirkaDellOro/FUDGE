@@ -30,7 +30,7 @@ namespace FudgeCore {
             let nodeObj: Node = new Node(name);
             nodeObj.addComponent(new ComponentTransform());
 
-            xmlhttp.onreadystatechange = async function () {
+            xmlhttp.onreadystatechange = async function(): Promise<void> {
 
                 if (this.readyState == 4 && this.status == 200) {
                     fileContent = this.responseText;
@@ -57,7 +57,7 @@ namespace FudgeCore {
             let faceNormalsNew: number[] = [];
 
             // For each face
-            for (let i = 0; i < this.inds.length; i += 3) {
+            for (let i: number = 0; i < this.inds.length; i += 3) {
 
                 // Get its 3 vertices
                 let v1: Vector3 = new Vector3(
@@ -135,7 +135,7 @@ namespace FudgeCore {
 
 
         protected createVertices(): Float32Array {
-            return new Float32Array(this.verts);;
+            return new Float32Array(this.verts);
         }
 
         protected createTextureUVs(): Float32Array {

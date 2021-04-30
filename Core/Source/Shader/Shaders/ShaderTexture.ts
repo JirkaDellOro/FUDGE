@@ -42,7 +42,5 @@ void main() {
     if (frag.a < 0.01)
       discard;
 }`;
-    
-    public static getCoat(): typeof Coat { return CoatColored; }
   }
 }

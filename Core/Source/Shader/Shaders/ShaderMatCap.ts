@@ -50,7 +50,5 @@ void main() {
       frag = u_tint_color * texture(u_texture, texcoords_flat) * 2.0;
     }
 }`;
-    
-    public static getCoat(): typeof Coat { return CoatColored; }
   }
 }

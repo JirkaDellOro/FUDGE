@@ -21,7 +21,7 @@ namespace FudgeCore {
     public static uniforms: { [name: string]: WebGLUniformLocation };
 
     /** The type of coat that can be used with this shader to create a material */
-    public static getCoat(): typeof Coat { return null; }
+    public static getCoat(): typeof Coat { return CoatColored; }
     public static getVertexShaderSource(): string { return this.vertexShaderSource; }
     public static getFragmentShaderSource(): string { return this.fragmentShaderSource; }
 

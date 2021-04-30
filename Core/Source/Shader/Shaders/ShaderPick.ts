@@ -41,7 +41,5 @@ void main() {
                 
     frag = ivec4(floatBitsToInt(gl_FragCoord.z), icolor, 0, 0);
 }`;
-    
-    public static getCoat(): typeof Coat { return CoatColored; }
   }
 }

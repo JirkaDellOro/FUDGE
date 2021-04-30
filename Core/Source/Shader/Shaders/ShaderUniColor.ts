@@ -32,7 +32,5 @@ void main() {
   frag = u_color;
   //    frag = vec4(1.0,1.0,1.0,1.0);
 }`;
-    
-    public static getCoat(): typeof Coat { return CoatColored; }
   }
 }

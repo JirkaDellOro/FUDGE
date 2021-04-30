@@ -50,7 +50,5 @@ void main() {
   
   frag = ivec4(floatBitsToInt(gl_FragCoord.z), icolor, floatBitsToInt(v_textureUVs.x), floatBitsToInt(v_textureUVs.y));
 }`;
-    
-    public static getCoat(): typeof Coat { return CoatColored; }
   }
 }
