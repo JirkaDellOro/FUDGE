@@ -78,7 +78,8 @@ namespace FudgeCore {
 
       let uNormal: WebGLUniformLocation = _shader.uniforms["u_normal"];
       if (uNormal) {
-        let normalMatrix: Matrix4x4 = _mtxWorld.inverse().transpose();
+        let normalMatrix: Matrix4x4 = Matrix4x4.TRANSPOSE(Matrix4x4.INVERSION(_mtxWorld));
+        // let normalMatrix: Matrix4x4 = _mtxWorld.inverse().transpose();
         crc3.uniformMatrix4fv(uNormal, false, normalMatrix.get());
       }
 

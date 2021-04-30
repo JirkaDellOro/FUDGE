@@ -4,7 +4,7 @@ var Test;
     var fudge = FudgeCore;
     window.addEventListener("load", hndLoad);
     let sphereColor = fudge.Color.CSS("GREEN");
-    let sphereSize = 25;
+    let sphereSize = 20;
     let ambIntensity = 0.2;
     let dirIntensity = 0.7;
     let shininess = 200;
@@ -18,8 +18,10 @@ var Test;
         Test.viewport0 = new fudge.Viewport();
         Test.viewport1 = new fudge.Viewport();
         Test.viewport2 = new fudge.Viewport();
+
         //FLAT
         // fudge.ShaderModular.addVertexShaderModule([
+        //     fudge.SHADER_MODULE.HEAD_VERT,
         //     fudge.SHADER_MODULE.LIGHTS, 
         //     fudge.SHADER_MODULE.MATRIX_WORLD,
         //     fudge.SHADER_MODULE.MATRIX_PROJECTION,
@@ -28,13 +30,16 @@ var Test;
         //     fudge.SHADER_MODULE.FLAT_VERT_MAIN
         // ]);
         // fudge.ShaderModular.addFragmentShaderModule([
+        //     fudge.SHADER_MODULE.HEAD_FRAG,
         //     fudge.SHADER_MODULE.COLOR_U, 
         //     fudge.SHADER_MODULE.COLOR_IN_FLAT, 
         //     fudge.SHADER_MODULE.FRAG_OUT, 
         //     fudge.SHADER_MODULE.FLAT_FRAG_MAIN
         // ]);
+
         //GOURAUD
         // fudge.ShaderModular.addVertexShaderModule([
+        //     fudge.SHADER_MODULE.HEAD_VERT,
         //     fudge.SHADER_MODULE.LIGHTS, 
         //     fudge.SHADER_MODULE.MATRIX_WORLD, 
         //     fudge.SHADER_MODULE.COLOR_OUT,
@@ -45,30 +50,35 @@ var Test;
         //     fudge.SHADER_MODULE.GOURAUD_VERT_MAIN
         // ]);
         // fudge.ShaderModular.addFragmentShaderModule([
+        //      fudge.SHADER_MODULE.HEAD_FRAG,
         //     fudge.SHADER_MODULE.COLOR_U, 
         //     fudge.SHADER_MODULE.COLOR_IN, 
         //     fudge.SHADER_MODULE.FRAG_OUT, 
         //     fudge.SHADER_MODULE.GOURAUD_FRAG_MAIN
         // ]);
+
         //PHONG
-        // fudge.ShaderModular.addVertexShaderModule([
-        //     fudge.SHADER_MODULE.MATRIX_WORLD,
-        //     fudge.SHADER_MODULE.MATRIX_PROJECTION, 
-        //     fudge.SHADER_MODULE.MATRIX_NORMAL,
-        //     fudge.SHADER_MODULE.NORMAL_VERTEX, 
-        //     fudge.SHADER_MODULE.PHONG_VERT_MAIN
-        // ]);
-        // fudge.ShaderModular.addFragmentShaderModule([
-        //     fudge.SHADER_MODULE.LIGHTS, 
-        //     fudge.SHADER_MODULE.COLOR_U, 
-        //     fudge.SHADER_MODULE.SHININESS,
-        //     fudge.SHADER_MODULE.REFLECTION, 
-        //     fudge.SHADER_MODULE.FRAG_OUT, 
-        //     fudge.SHADER_MODULE.PHONG_FRAG_MAIN
-        // ]);
+        fudge.ShaderModular.addVertexShaderModule([
+            fudge.SHADER_MODULE.HEAD_VERT,
+            fudge.SHADER_MODULE.MATRIX_WORLD,
+            fudge.SHADER_MODULE.MATRIX_PROJECTION, 
+            fudge.SHADER_MODULE.MATRIX_NORMAL,
+            fudge.SHADER_MODULE.NORMAL_VERTEX, 
+            fudge.SHADER_MODULE.PHONG_VERT_MAIN
+        ]);
+        fudge.ShaderModular.addFragmentShaderModule([
+            fudge.SHADER_MODULE.HEAD_FRAG,
+            fudge.SHADER_MODULE.LIGHTS, 
+            fudge.SHADER_MODULE.COLOR_U, 
+            fudge.SHADER_MODULE.SHININESS,
+            fudge.SHADER_MODULE.REFLECTION, 
+            fudge.SHADER_MODULE.FRAG_OUT, 
+            fudge.SHADER_MODULE.PHONG_FRAG_MAIN
+        ]);
+        
         let sphere0 = new SphereWithLights("Sphere0", sphereColor, Test.ShaderCustom);
         let sphere1 = new SphereWithLights("Sphere1", sphereColor, shaders[1]);
-        let sphere2 = new SphereWithLights("Sphere2", sphereColor, shaders[2]);
+        let sphere2 = new SphereWithLights("Sphere2", sphereColor, fudge.ShaderModular);
         let cmpCamera = new fudge.ComponentCamera();
         cmpCamera.mtxPivot.translateZ(-2);
         Test.viewport0.initialize("Viewport", sphere0, cmpCamera, canvas0);

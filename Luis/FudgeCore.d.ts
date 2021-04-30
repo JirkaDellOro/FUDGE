@@ -5345,16 +5345,6 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    abstract class ShaderModular extends Shader {
-        static readonly iSubclass: number;
-        static vertexShaderSource: string;
-        static fragmentShaderSource: string;
-        static addVertexShaderModule(_modules: string[]): void;
-        static addFragmentShaderModule(_modules: string[]): void;
-        static clearVertexShaderSource(): void;
-        static clearFragmentShaderSource(): void;
-        static clearShaderSources(): void;
-    }
     enum SHADER_MODULE {
         HEAD_VERT = "#version 300 es\n        precision highp float;\n        in vec3 a_position;\n        ",
         HEAD_FRAG = "#version 300 es\n        precision highp float;\n        ",
@@ -5377,6 +5367,16 @@ declare namespace FudgeCore {
         GOURAUD_VERT_MAIN = "void main() {\n            gl_Position = u_projection * vec4(a_position, 1.0);\n            vec4 v_position4 = u_world * vec4(a_normalVertex, 1.0);\n            vec3 v_position = vec3(v_position4) / v_position4.w;\n            vec3 N = normalize(vec3(u_normal * vec4(a_normalVertex, 0.0)));\n        \n            v_color = u_ambient.color;\n            for(uint i = 0u; i < u_nLightsDirectional; i++) {\n                vec3 light_dir = normalize(-u_directional[i].direction);\n                vec3 view_dir = normalize(v_position);\n                \n                float illuminance = dot(light_dir, N);\n                if(illuminance > 0.0) {\n                    vec3 reflection = calculateReflection(light_dir, view_dir, N, u_shininess);\n                    v_color += vec4(reflection, 1.0) * illuminance * u_directional[i].color;\n                }\n            }\n            v_color.a = 1.0;\n        }",
         PHONG_VERT_MAIN = "out vec3 f_normal;\n        out vec3 v_position;\n        void main() {\n            f_normal = vec3(u_normal * vec4(a_normalVertex, 0.0));\n            vec4 v_position4 = u_world * vec4(a_position, 1.0);\n            v_position = vec3(v_position4) / v_position4.w;\n            gl_Position = u_projection * vec4(a_position, 1.0);\n          }",
         PHONG_FRAG_MAIN = "in vec3 f_normal;\n        in vec3 v_position;\n        void main() {\n            frag = u_ambient.color;\n            for(uint i = 0u; i < u_nLightsDirectional; i++) {\n                vec3 light_dir = normalize(-u_directional[i].direction);\n                vec3 view_dir = normalize(v_position);\n                vec3 N = normalize(f_normal);\n        \n                float illuminance = dot(light_dir, N);\n                if(illuminance > 0.0) {\n                    vec3 reflection = calculateReflection(light_dir, view_dir, N, u_shininess);\n                    frag += vec4(reflection, 1.0) * illuminance * u_directional[i].color;\n                }\n            }\n            frag *= u_color;\n            frag.a = 1.0;\n        }"
+    }
+    abstract class ShaderModular extends Shader {
+        static readonly iSubclass: number;
+        static vertexShaderSource: string;
+        static fragmentShaderSource: string;
+        static addVertexShaderModule(_modules: string[]): void;
+        static addFragmentShaderModule(_modules: string[]): void;
+        static clearVertexShaderSource(): void;
+        static clearFragmentShaderSource(): void;
+        static clearShaderSources(): void;
     }
 }
 declare namespace FudgeCore {

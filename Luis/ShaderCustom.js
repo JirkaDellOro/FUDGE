@@ -11,7 +11,6 @@ var Test;
     var fudge = FudgeCore;
     let ShaderCustom = ShaderCustom_1 = class ShaderCustom extends fudge.Shader {
     };
-    ShaderCustom.iSubclass = fudge.Shader.registerSubclass(ShaderCustom_1);
     ShaderCustom.vertexShaderSource = fudge.SHADER_MODULE.HEAD_VERT
         + fudge.SHADER_MODULE.LIGHTS
         + fudge.SHADER_MODULE.MATRIX_WORLD
