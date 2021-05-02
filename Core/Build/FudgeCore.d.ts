@@ -2625,6 +2625,14 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
+     * Represents the matrix as translation, rotation and scaling vector, being calculated from the matrix
+     */
+    interface VectorRepresentation {
+        translation: Vector3;
+        rotation: Vector3;
+        scaling: Vector3;
+    }
+    /**
      * Stores a 4x4 transformation matrix and provides operations for it.
      * ```plaintext
      * [ 0, 1, 2, 3 ] ← row vector x
@@ -2635,7 +2643,7 @@ declare namespace FudgeCore {
      * ```
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Matrix4x4 extends Mutable implements Serializable {
+    export class Matrix4x4 extends Mutable implements Serializable {
         private data;
         private mutator;
         private vectors;
@@ -2644,6 +2652,10 @@ declare namespace FudgeCore {
          * Retrieve a new identity matrix
          */
         static IDENTITY(): Matrix4x4;
+        /**
+         * Constructs a new matrix according to the translation, rotation and scaling vectors given
+         */
+        static CONSTRUCTION(_vectors: VectorRepresentation): Matrix4x4;
         /**
          * Computes and returns the product of two passed matrices.
          * @param _mtxLeft The matrix to multiply.
@@ -2847,6 +2859,7 @@ declare namespace FudgeCore {
         protected reduceMutator(_mutator: Mutator): void;
         private resetCache;
     }
+    export {};
 }
 declare namespace FudgeCore {
     /**
