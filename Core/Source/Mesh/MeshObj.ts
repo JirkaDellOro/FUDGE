@@ -47,7 +47,6 @@ namespace FudgeCore {
             return nodeObj;
         }
 
-
         /** Creates three Vertices from each face. Although inefficient, this has to be done for now - see Issue 244 */
         protected splitVertices(): void {
 
