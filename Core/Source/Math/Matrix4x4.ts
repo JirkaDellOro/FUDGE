@@ -52,6 +52,16 @@ namespace FudgeCore {
       return mtxResult;
     }
 
+
+    /**
+     * Constructs a new matrix according to the translation, rotation and scaling vectors given
+     */
+    public static CONSTRUCTION(_vectors: VectorRepresentation): Matrix4x4 {
+      let result: Matrix4x4 = Matrix4x4.IDENTITY();
+      result.mutate(_vectors);
+      return result;
+    }
+
     /**
      * Computes and returns the product of two passed matrices.
      * @param _mtxLeft The matrix to multiply.
