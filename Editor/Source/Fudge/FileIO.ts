@@ -39,8 +39,7 @@ namespace Fudge {
     });
     if (!filenames)
       return null;
-
-    return new URL(filenames[0]);
+    return new URL("file://" + filenames[0]);
   }
 
   export async function loadProject(_url: URL): Promise<void> {

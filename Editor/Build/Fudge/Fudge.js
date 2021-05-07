@@ -201,7 +201,7 @@ var Fudge;
         });
         if (!filenames)
             return null;
-        return new URL(filenames[0]);
+        return new URL("file://" + filenames[0]);
     }
     Fudge.promptLoadProject = promptLoadProject;
     async function loadProject(_url) {
@@ -761,7 +761,9 @@ var Fudge;
             while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
                 ;
             let path = new URL(".", ƒ.Project.baseURL).pathname;
-            path = path.substr(1); // strip leading slash
+            if (navigator.platform == "Win32" || navigator.platform == "Win64") {
+                path = path.substr(1); // strip leading slash
+            }
             let root = Fudge.DirectoryEntry.createRoot(path);
             this.tree = new ƒui.Tree(new Fudge.ControllerTreeDirectory(), root);
             this.dom.appendChild(this.tree);
