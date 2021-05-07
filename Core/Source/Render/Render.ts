@@ -7,9 +7,10 @@ namespace FudgeCore {
   export abstract class Render extends RenderWebGL {
     public static rectClip: Rectangle = new Rectangle(-1, 1, 2, -2);
     public static pickBuffer: Int32Array;
-    private static timestampUpdate: number;
+    public static nodesPhysics: RecycableArray<Node> = new RecycableArray();
     private static nodesSimple: RecycableArray<Node> = new RecycableArray();
     private static nodesAlpha: RecycableArray<Node> = new RecycableArray();
+    private static timestampUpdate: number;
 
     // TODO: research if picking should be optimized using radius picking to filter
 
@@ -26,23 +27,29 @@ namespace FudgeCore {
         Render.timestampUpdate = performance.now();
         Render.nodesSimple.reset();
         Render.nodesAlpha.reset();
+        Render.nodesPhysics.reset();
         Render.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START));
       }
 
       if (!_branch.isActive)
         return; // don't add branch to render list if not active
 
-      let mtxWorld: Matrix4x4 = _mtxWorld;
       _branch.nNodesInBranch = 1;
       _branch.radius = 0;
-
+      
       _branch.dispatchEventToTargetOnly(new Event(EVENT.RENDER_PREPARE));
+      _branch.timestampUpdate = Render.timestampUpdate;
 
       if (_branch.cmpTransform && _branch.cmpTransform.isActive)
-        mtxWorld = Matrix4x4.MULTIPLICATION(_mtxWorld, _branch.cmpTransform.mtxLocal);
+        _branch.mtxWorld.set(Matrix4x4.MULTIPLICATION(_mtxWorld, _branch.cmpTransform.mtxLocal));
+      else
+        _branch.mtxWorld.set(_mtxWorld); // overwrite readonly mtxWorld of the current node
 
-      _branch.mtxWorld.set(mtxWorld); // overwrite readonly mtxWorld of the current node
-      _branch.timestampUpdate = Render.timestampUpdate;
+      let cmpRigidbody: ComponentRigidbody = _branch.getComponent(ComponentRigidbody);
+      if (cmpRigidbody && cmpRigidbody.isActive) { //TODO: support de-/activation throughout
+        Render.nodesPhysics.push(_branch); // add this node to physics list
+        this.transformByPhysics(_branch, cmpRigidbody);
+      }
 
       let cmpLights: ComponentLight[] = _branch.getComponents(ComponentLight);
       for (let cmpLight of cmpLights) {
@@ -74,7 +81,7 @@ namespace FudgeCore {
       }
 
       for (let child of _branch.getChildren()) {
-        Render.prepare(child, mtxWorld, _lights, _shadersUsed);
+        Render.prepare(child, _branch.mtxWorld, _lights, _shadersUsed);
 
         _branch.nNodesInBranch += child.nNodesInBranch;
         let cmpMeshChild: ComponentMesh = child.getComponent(ComponentMesh);
@@ -90,7 +97,7 @@ namespace FudgeCore {
       }
 
       //Calculate Physics based on all previous calculations    
-      Render.setupPhysicalTransform(_branch);
+      // Render.setupPhysicalTransform(_branch);
     }
     //#endregion
 
@@ -190,6 +197,34 @@ namespace FudgeCore {
         }
       }
     }
-    //#endregion
+
+    private static transformByPhysics(_node: Node, _cmpRigidbody: ComponentRigidbody): void {
+      if (!Physics.world?.getBodyList().length)
+        return;
+
+      if (!_node.mtxLocal) {
+        throw (new Error("ComponentRigidbody requires ComponentTransform at the same Node"));
+      }
+
+      let mutator: Mutator = {};
+      _cmpRigidbody.checkCollisionEvents();
+      _cmpRigidbody.checkTriggerEvents();
+
+      if (_cmpRigidbody.physicsType == PHYSICS_TYPE.KINEMATIC) { //Case of Kinematic Rigidbody
+        _cmpRigidbody.setPosition(_node.mtxWorld.translation);
+        _cmpRigidbody.setRotation(_node.mtxWorld.rotation);
+        return;
+      }
+
+      //Override any position/rotation, Physical Objects do not know hierachy unless it's established through physics
+      mutator["rotation"] = _cmpRigidbody.getRotation();
+      mutator["translation"] = _cmpRigidbody.getPosition();
+      _node.mtxLocal.mutate(mutator);
+      // _node.mtxWorld.mutate(mutator);
+      // TODO: exmine nodes without parents and partial branches drawn without parent
+      // _node.mtxLocal.set(Matrix4x4.RELATIVE(_node.mtxWorld, _node.getParent().mtxWorld, _node.getParent().mtxWorldInverse));
+    }
   }
+  //#endregion
+}
 }

@@ -4849,7 +4849,6 @@ declare namespace FudgeCore {
         /** Returns the ComponentRigidbody with the given id. Used internally to reconnect joints on loading in the editor. */
         getBodyByID(_id: number): ComponentRigidbody;
         /** Updates all [[Rigidbodies]] known to the Physics.world to match their containers or meshes transformations */
-        private updateWorldFromWorldMatrix;
         /** Create a oimoPhysics world. Called once at the beginning if none is existend yet. */
         private createWorld;
     }
@@ -5012,9 +5011,10 @@ declare namespace FudgeCore {
     abstract class Render extends RenderWebGL {
         static rectClip: Rectangle;
         static pickBuffer: Int32Array;
-        private static timestampUpdate;
+        static nodesPhysics: RecycableArray<Node>;
         private static nodesSimple;
         private static nodesAlpha;
+        private static timestampUpdate;
         /**
          * Recursively iterates over the branch starting with the node given, recalculates all world transforms,
          * collects all lights and feeds all shaders used in the graph with these lights. Sorts nodes for different
@@ -5034,6 +5034,7 @@ declare namespace FudgeCore {
         * the rb component, which is the new "local" WORLD position.
         */
         private static setupPhysicalTransform;
+        private static transformByPhysics;
     }
 }
 declare namespace FudgeCore {
