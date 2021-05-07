@@ -1,4 +1,5 @@
 #version 300 es
+
 /**
 * Gouraud shading
 * Implementation based on https://www.gsn-lib.org/docs/nodes/ShaderPluginNode.php

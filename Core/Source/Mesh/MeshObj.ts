@@ -132,7 +132,6 @@ namespace FudgeCore {
             }
         }
 
-
         protected createVertices(): Float32Array {
             return new Float32Array(this.verts);
         }

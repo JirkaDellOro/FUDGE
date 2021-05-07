@@ -23,7 +23,7 @@ namespace FudgeCore {
     protected ƒindices: Uint16Array;
     protected ƒtextureUVs: Float32Array;
     protected ƒnormalsFace: Float32Array;
-    protected ƒunNormalsFace: Float32Array;
+    protected ƒunNormalsFace: Float32Array; // name should probably be changed
     protected ƒnormalsVertex: Float32Array;
     protected ƒnormals: Float32Array;
     protected ƒbox: Box;
