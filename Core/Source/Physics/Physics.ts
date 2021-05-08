@@ -89,7 +89,7 @@ namespace FudgeCore {
       * Adjusts the transforms of the [[ComponentRigidbody]]s in the given branch to match their nodes or meshes
       */
     public static adjustTransforms(_branch: Node, _toMesh: boolean = false): void {
-      Render.prepare(_branch);
+      Render.prepare(_branch, {ignorePhysics: true});
       for (let node of Render.nodesPhysics)
         node.getComponent(ComponentRigidbody).updateFromWorld(_toMesh);
       // this.world.updateWorldFromWorldMatrix(_toMesh);

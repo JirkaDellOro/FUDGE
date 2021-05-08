@@ -1,6 +1,10 @@
 namespace FudgeCore {
   export type MapLightTypeToLightList = Map<TypeOfLight, ComponentLight[]>;
 
+  export interface RenderPrepareOptions {
+    ignorePhysics?: boolean;
+  }
+
   /**
    * The main interface to the render engine, here WebGL (see superclass [[RenderWebGL]] and the RenderInjectors
    */
@@ -20,7 +24,7 @@ namespace FudgeCore {
      * collects all lights and feeds all shaders used in the graph with these lights. Sorts nodes for different
      * render passes.
      */
-    public static prepare(_branch: Node, _mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY(), _lights: MapLightTypeToLightList = new Map(), _shadersUsed: (typeof Shader)[] = null): void {
+    public static prepare(_branch: Node, _options: RenderPrepareOptions = {}, _mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY(), _lights: MapLightTypeToLightList = new Map(), _shadersUsed: (typeof Shader)[] = null): void {
       let firstLevel: boolean = (_shadersUsed == null);
       if (firstLevel) {
         _shadersUsed = [];
@@ -36,7 +40,7 @@ namespace FudgeCore {
 
       _branch.nNodesInBranch = 1;
       _branch.radius = 0;
-      
+
       _branch.dispatchEventToTargetOnly(new Event(EVENT.RENDER_PREPARE));
       _branch.timestampUpdate = Render.timestampUpdate;
 
@@ -45,11 +49,14 @@ namespace FudgeCore {
       else
         _branch.mtxWorld.set(_mtxWorld); // overwrite readonly mtxWorld of the current node
 
+
       let cmpRigidbody: ComponentRigidbody = _branch.getComponent(ComponentRigidbody);
       if (cmpRigidbody && cmpRigidbody.isActive) { //TODO: support de-/activation throughout
         Render.nodesPhysics.push(_branch); // add this node to physics list
-        this.transformByPhysics(_branch, cmpRigidbody);
+        if (!_options?.ignorePhysics)
+          this.transformByPhysics(_branch, cmpRigidbody);
       }
+
 
       let cmpLights: ComponentLight[] = _branch.getComponents(ComponentLight);
       for (let cmpLight of cmpLights) {
@@ -81,7 +88,7 @@ namespace FudgeCore {
       }
 
       for (let child of _branch.getChildren()) {
-        Render.prepare(child, _branch.mtxWorld, _lights, _shadersUsed);
+        Render.prepare(child, _options, _branch.mtxWorld, _lights, _shadersUsed);
 
         _branch.nNodesInBranch += child.nNodesInBranch;
         let cmpMeshChild: ComponentMesh = child.getComponent(ComponentMesh);
@@ -173,30 +180,30 @@ namespace FudgeCore {
     * Physics Part -> Take all nodes with cmpRigidbody, and overwrite their local position/rotation with the one coming from 
     * the rb component, which is the new "local" WORLD position.
     */
-    private static setupPhysicalTransform(_branch: Node): void {
-      if (Physics.world != null && Physics.world.getBodyList().length >= 1) {
-        let mutator: Mutator = {};
-        for (let name in _branch.getChildren()) {
-          let childNode: Node = _branch.getChildren()[name];
-          Render.setupPhysicalTransform(childNode);
-          let cmpRigidbody: ComponentRigidbody = childNode.getComponent(ComponentRigidbody);
-          if (childNode.getComponent(ComponentTransform) != null && cmpRigidbody != null) {
-            cmpRigidbody.checkCollisionEvents();
-            cmpRigidbody.checkTriggerEvents();
-            if (cmpRigidbody.physicsType != PHYSICS_TYPE.KINEMATIC) { //Case of Dynamic/Static Rigidbody
-              //Override any position/rotation, Physical Objects do not know hierachy unless it's established through physics
-              mutator["rotation"] = cmpRigidbody.getRotation();
-              mutator["translation"] = cmpRigidbody.getPosition();
-              childNode.mtxLocal.mutate(mutator);
-            }
-            if (cmpRigidbody.physicsType == PHYSICS_TYPE.KINEMATIC) { //Case of Kinematic Rigidbody
-              cmpRigidbody.setPosition(childNode.mtxWorld.translation);
-              cmpRigidbody.setRotation(childNode.mtxWorld.rotation);
-            }
-          }
-        }
-      }
-    }
+    // private static setupPhysicalTransform(_branch: Node): void {
+    //   if (Physics.world != null && Physics.world.getBodyList().length >= 1) {
+    //     let mutator: Mutator = {};
+    //     for (let name in _branch.getChildren()) {
+    //       let childNode: Node = _branch.getChildren()[name];
+    //       Render.setupPhysicalTransform(childNode);
+    //       let cmpRigidbody: ComponentRigidbody = childNode.getComponent(ComponentRigidbody);
+    //       if (childNode.getComponent(ComponentTransform) != null && cmpRigidbody != null) {
+    //         cmpRigidbody.checkCollisionEvents();
+    //         cmpRigidbody.checkTriggerEvents();
+    //         if (cmpRigidbody.physicsType != PHYSICS_TYPE.KINEMATIC) { //Case of Dynamic/Static Rigidbody
+    //           //Override any position/rotation, Physical Objects do not know hierachy unless it's established through physics
+    //           mutator["rotation"] = cmpRigidbody.getRotation();
+    //           mutator["translation"] = cmpRigidbody.getPosition();
+    //           childNode.mtxLocal.mutate(mutator);
+    //         }
+    //         if (cmpRigidbody.physicsType == PHYSICS_TYPE.KINEMATIC) { //Case of Kinematic Rigidbody
+    //           cmpRigidbody.setPosition(childNode.mtxWorld.translation);
+    //           cmpRigidbody.setRotation(childNode.mtxWorld.rotation);
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
 
     private static transformByPhysics(_node: Node, _cmpRigidbody: ComponentRigidbody): void {
       if (!Physics.world?.getBodyList().length)
@@ -206,7 +213,6 @@ namespace FudgeCore {
         throw (new Error("ComponentRigidbody requires ComponentTransform at the same Node"));
       }
 
-      let mutator: Mutator = {};
       _cmpRigidbody.checkCollisionEvents();
       _cmpRigidbody.checkTriggerEvents();
 
@@ -216,15 +222,14 @@ namespace FudgeCore {
         return;
       }
 
-      //Override any position/rotation, Physical Objects do not know hierachy unless it's established through physics
+      //Override any position/rotation, disregard hierachy not established by joints
+      let mutator: Mutator = {};
       mutator["rotation"] = _cmpRigidbody.getRotation();
       mutator["translation"] = _cmpRigidbody.getPosition();
-      _node.mtxLocal.mutate(mutator);
-      // _node.mtxWorld.mutate(mutator);
-      // TODO: exmine nodes without parents and partial branches drawn without parent
-      // _node.mtxLocal.set(Matrix4x4.RELATIVE(_node.mtxWorld, _node.getParent().mtxWorld, _node.getParent().mtxWorldInverse));
+      _node.mtxWorld.mutate(mutator);
+      // Attention, node needs parent... but would using physics without make sense ?
+      _node.mtxLocal.set(Matrix4x4.RELATIVE(_node.mtxWorld, _node.getParent().mtxWorld));
     }
   }
   //#endregion
-}
 }

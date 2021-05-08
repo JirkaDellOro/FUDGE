@@ -5005,6 +5005,9 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     type MapLightTypeToLightList = Map<TypeOfLight, ComponentLight[]>;
+    interface RenderPrepareOptions {
+        ignorePhysics?: boolean;
+    }
     /**
      * The main interface to the render engine, here WebGL (see superclass [[RenderWebGL]] and the RenderInjectors
      */
@@ -5020,7 +5023,7 @@ declare namespace FudgeCore {
          * collects all lights and feeds all shaders used in the graph with these lights. Sorts nodes for different
          * render passes.
          */
-        static prepare(_branch: Node, _mtxWorld?: Matrix4x4, _lights?: MapLightTypeToLightList, _shadersUsed?: (typeof Shader)[]): void;
+        static prepare(_branch: Node, _options?: RenderPrepareOptions, _mtxWorld?: Matrix4x4, _lights?: MapLightTypeToLightList, _shadersUsed?: (typeof Shader)[]): void;
         /**
          * Used with a [[Picker]]-camera, this method renders one pixel with picking information
          * for each node in the line of sight and return that as an unsorted [[Pick]]-array
@@ -5033,7 +5036,6 @@ declare namespace FudgeCore {
         * Physics Part -> Take all nodes with cmpRigidbody, and overwrite their local position/rotation with the one coming from
         * the rb component, which is the new "local" WORLD position.
         */
-        private static setupPhysicalTransform;
         private static transformByPhysics;
     }
 }
