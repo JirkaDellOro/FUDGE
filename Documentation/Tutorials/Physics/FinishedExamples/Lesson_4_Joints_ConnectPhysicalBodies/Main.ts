@@ -1,8 +1,7 @@
-///<reference types="../../../../Core/Build/FudgeCore.js"/>
-import f = FudgeCore;
 //Reference Fudge, getting code completion ready and creating a shortcut f to write FudgeCode more comfortably
 
-namespace Turorials_FUDGEPhysics_Lesson1 {
+namespace Tutorials_FUDGEPhysics_Lesson1 {
+  import f = FudgeCore;
 
   /*GOAL: Learning how to connect physical bodies with each other and what types of connections can be used to create different
           physical phenomena. And lastly how they can be influenced. In this tutorial not all joints are explained it's a means to get started,
@@ -156,7 +155,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
     viewPort.initialize("Viewport", hierarchy, cmpCamera, app); //initialize the viewport with the root node, camera and canvas
 
     //PHYSICS - Start using physics by telling the physics the scene root object. Physics will recalculate every transform and initialize
-    f.Physics.start(hierarchy);
+    f.Physics.adjustTransforms(hierarchy);
 
     //Important start the game loop after starting physics, so physics can use the current transform before it's first iteration
     f.Loop.addEventListener(f.EVENT.LOOP_FRAME, update); //Tell the game loop to call the update function on each frame
