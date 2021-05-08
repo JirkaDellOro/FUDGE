@@ -1,8 +1,8 @@
 /**
-   * Updates the TypeScript files of all shaders to apply changes in the GLSL files 
-   * (currently uses the files in folder 'ShaderSources/Vertex/' to determine the existing shaders)
-   * @authors Luis Keck, HFU, 2021
-   */
+ * Updates the TypeScript files of all shaders to apply changes in the GLSL files 
+ * (currently uses the files in folder 'ShaderSources/Vertex/' to determine the existing shaders)
+ * @authors Luis Keck, HFU, 2021
+ */
 var fs = require("fs");
 
 var files = fs.readdirSync("ShaderSources/Vertex/");//writeShader() is called once for every file in this folder
