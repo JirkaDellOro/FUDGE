@@ -5349,26 +5349,26 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     enum SHADER_MODULE {
-        HEAD_VERT = "#version 300 es\nprecision highp float;\nin vec3 a_position;\n",
-        HEAD_FRAG = "#version 300 es\nprecision highp float;\n",
-        NORMAL_FACE = "in vec3 a_normalFace;\n",
-        NORMAL_VERTEX = "in vec3 a_normalVertex;\n",
-        MATRIX_WORLD = "uniform mat4 u_world;\n",
-        MATRIX_PROJECTION = "uniform mat4 u_projection;\n",
-        MATRIX_NORMAL = "uniform mat4 u_normal;\n",
-        COLOR_OUT = "out vec4 v_color;\n",
-        COLOR_OUT_FLAT = "flat out vec4 v_color;\n",
-        COLOR_IN = "in vec4 v_color;\n",
-        COLOR_IN_FLAT = "flat in vec4 v_color;\n",
-        COLOR_U = "uniform vec4 u_color;\n",
-        SHININESS = "uniform float u_shininess;\n",
-        FRAG_OUT = "out vec4 frag;\n",
-        LIGHTS = "struct LightAmbient {\n    vec4 color;\n};\nstruct LightDirectional {\n    vec4 color;\n    vec3 direction;\n};\nconst uint MAX_LIGHTS_DIRECTIONAL = 10u;\nuniform LightAmbient u_ambient;\nuniform uint u_nLightsDirectional;\nuniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];\n",
-        REFLECTIOM = "vec3 calculateReflection(vec3 light_dir, vec3 view_dir, vec3 normal, float shininess) {\n    vec3 color = vec3(1);\n    vec3 R = reflect(-light_dir, normal);\n    float spec_dot = max(dot(R, view_dir), 0.0);\n    color += pow(spec_dot, shininess);\n    return color;\n}\n",
-        FLAT_MAIN_VERT = "void main() {\n    gl_Position = u_projection * vec4(a_position, 1.0);\n    vec3 normal = normalize(mat3(u_world) * a_normalFace);\n    v_color = u_ambient.color;\n    for(uint i = 0u; i < u_nLightsDirectional; i++) {\n        float illumination = -dot(normal, u_directional[i].direction);\n        if(illumination > 0.0f)\n            v_color += illumination * u_directional[i].color;\n    }\n    v_color.a = 1.0;\n}\n",
-        BASIC_MAIN_FRAG = "void main() {\n    frag = u_color * v_color;\n}\n",
-        GOURAUD_MAIN_VERT = "void main() {\n    gl_Position = u_projection * vec4(a_position, 1.0);\n    vec4 v_position4 = u_world * vec4(a_normalVertex, 1.0);\n    vec3 v_position = vec3(v_position4) / v_position4.w;\n    vec3 N = normalize(vec3(u_normal * vec4(a_normalVertex, 0.0)));\n    v_color = u_ambient.color;\n    for(uint i = 0u; i < u_nLightsDirectional; i++) {\n        vec3 light_dir = normalize(-u_directional[i].direction);\n        vec3 view_dir = normalize(v_position);\n        float illuminance = dot(light_dir, N);\n        if(illuminance > 0.0) {\n            vec3 reflection = calculateReflection(light_dir, view_dir, N, u_shininess);\n            v_color += vec4(reflection, 1.0) * illuminance * u_directional[i].color;\n        }\n    }\n    v_color.a = 1.0;\n}\n",
-        PHONG_MAIN_VERT = "out vec3 f_normal;\nout vec3 v_position;\nvoid main() {\n    f_normal = vec3(u_normal * vec4(a_normalVertex, 0.0));\n    vec4 v_position4 = u_world * vec4(a_position, 1.0);\n    v_position = vec3(v_position4) / v_position4.w;\n    gl_Position = u_projection * vec4(a_position, 1.0);\n}\n",
+        HEAD_VERT = "#version 300 es\nprecision highp float;\nin vec3 a_position;",
+        HEAD_FRAG = "#version 300 es\nprecision highp float;",
+        NORMAL_FACE = "in vec3 a_normalFace;",
+        NORMAL_VERTEX = "in vec3 a_normalVertex;",
+        MATRIX_WORLD = "uniform mat4 u_world;",
+        MATRIX_PROJECTION = "uniform mat4 u_projection;",
+        MATRIX_NORMAL = "uniform mat4 u_normal;",
+        COLOR_OUT = "out vec4 v_color;",
+        COLOR_OUT_FLAT = "flat out vec4 v_color;",
+        COLOR_IN = "in vec4 v_color;",
+        COLOR_IN_FLAT = "flat in vec4 v_color;",
+        COLOR_U = "uniform vec4 u_color;",
+        SHININESS = "uniform float u_shininess;",
+        FRAG_OUT = "out vec4 frag;",
+        LIGHTS = "struct LightAmbient {\n    vec4 color;\n};\nstruct LightDirectional {\n    vec4 color;\n    vec3 direction;\n};\nconst uint MAX_LIGHTS_DIRECTIONAL = 10u;\nuniform LightAmbient u_ambient;\nuniform uint u_nLightsDirectional;\nuniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];",
+        REFLECTIOM = "vec3 calculateReflection(vec3 light_dir, vec3 view_dir, vec3 normal, float shininess) {\n    vec3 color = vec3(1);\n    vec3 R = reflect(-light_dir, normal);\n    float spec_dot = max(dot(R, view_dir), 0.0);\n    color += pow(spec_dot, shininess);\n    return color;\n}",
+        FLAT_MAIN_VERT = "void main() {\n    gl_Position = u_projection * vec4(a_position, 1.0);\n    vec3 normal = normalize(mat3(u_world) * a_normalFace);\n    v_color = u_ambient.color;\n    for(uint i = 0u; i < u_nLightsDirectional; i++) {\n        float illumination = -dot(normal, u_directional[i].direction);\n        if(illumination > 0.0f)\n            v_color += illumination * u_directional[i].color;\n    }\n    v_color.a = 1.0;\n}",
+        BASIC_MAIN_FRAG = "void main() {\n    frag = u_color * v_color;\n}",
+        GOURAUD_MAIN_VERT = "void main() {\n    gl_Position = u_projection * vec4(a_position, 1.0);\n    vec4 v_position4 = u_world * vec4(a_normalVertex, 1.0);\n    vec3 v_position = vec3(v_position4) / v_position4.w;\n    vec3 N = normalize(vec3(u_normal * vec4(a_normalVertex, 0.0)));\n    v_color = u_ambient.color;\n    for(uint i = 0u; i < u_nLightsDirectional; i++) {\n        vec3 light_dir = normalize(-u_directional[i].direction);\n        vec3 view_dir = normalize(v_position);\n        float illuminance = dot(light_dir, N);\n        if(illuminance > 0.0) {\n            vec3 reflection = calculateReflection(light_dir, view_dir, N, u_shininess);\n            v_color += vec4(reflection, 1.0) * illuminance * u_directional[i].color;\n        }\n    }\n    v_color.a = 1.0;\n}",
+        PHONG_MAIN_VERT = "out vec3 f_normal;\nout vec3 v_position;\nvoid main() {\n    f_normal = vec3(u_normal * vec4(a_normalVertex, 0.0));\n    vec4 v_position4 = u_world * vec4(a_position, 1.0);\n    v_position = vec3(v_position4) / v_position4.w;\n    gl_Position = u_projection * vec4(a_position, 1.0);\n}",
         PHONG_MAIN_FRAG = "void main() {\n    frag = u_ambient.color;\n    for(uint i = 0u; i < u_nLightsDirectional; i++) {\n        vec3 light_dir = normalize(-u_directional[i].direction);\n        vec3 view_dir = normalize(v_position);\n        vec3 N = normalize(f_normal);\n        float illuminance = dot(light_dir, N);\n        if(illuminance > 0.0) {\n            vec3 reflection = calculateReflection(light_dir, view_dir, N, u_shininess);\n            frag += vec4(reflection, 1.0) * illuminance * u_directional[i].color;\n        }\n    }\n    frag *= u_color;\n    frag.a = 1.0;\n}"
     }
 }
@@ -5416,6 +5416,13 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     abstract class ShaderSmooth extends Shader {
+        static readonly iSubclass: number;
+        static vertexShaderSource: string;
+        static fragmentShaderSource: string;
+    }
+}
+declare namespace FudgeCore {
+    abstract class ShaderTest extends Shader {
         static readonly iSubclass: number;
         static vertexShaderSource: string;
         static fragmentShaderSource: string;
