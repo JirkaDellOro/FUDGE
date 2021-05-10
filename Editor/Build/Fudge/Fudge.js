@@ -176,7 +176,7 @@ var Fudge;
         });
         if (!filename)
             return;
-        filename = filename[0] + "/a.b";
+        filename = "file://" + filename[0] + "/a.b";
         console.log(filename);
         if (Fudge.project.files.index.overwrite) {
             let html = Fudge.project.getProjectHTML();

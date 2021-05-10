@@ -46,7 +46,8 @@ namespace Main {
     console.log("createFudge");
     fudge = addWindow("../Html/Fudge.html");
     const menu: Electron.Menu = Menu.buildFromTemplate(getMenuFudge());
-    fudge.setMenu(menu);
+    Menu.setApplicationMenu(menu);
+    //fudge.setMenu(menu); // do not work with mac
   }
 
   function addWindow(_url: string, width: number = defaultWidth, height: number = defaultHeight): Electron.BrowserWindow {

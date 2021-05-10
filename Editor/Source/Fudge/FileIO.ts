@@ -11,7 +11,7 @@ namespace Fudge {
     if (!filename)
       return;
 
-    filename = filename[0] + "/a.b";
+    filename = "file://" + filename[0] + "/a.b";
     console.log(filename);
 
     if (project.files.index.overwrite) {
