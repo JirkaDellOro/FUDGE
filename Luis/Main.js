@@ -3,26 +3,33 @@ var Test;
 (function (Test) {
     var fudge = FudgeCore;
     window.addEventListener("load", hndLoad);
+
     let color = fudge.Color.CSS("GREEN");
-    let sphereSize = 15;
+    let sphereSize = 20;
     let ambIntensity = 0.3;
     let dirIntensity = 0.6;
     let shininess = 128;
     let dirRotation = new fudge.Vector3(20, 20, 0);
+
     let shaders = [fudge.ShaderFlat, fudge.ShaderGouraud, fudge.ShaderPhong];
+
     function hndLoad(_event) {
         const canvas0 = document.getElementById("c0");
         const canvas1 = document.getElementById("c1");
         const canvas2 = document.getElementById("c2");
         fudge.Render.initialize();
+
         Test.viewport0 = new fudge.Viewport();
         Test.viewport1 = new fudge.Viewport();
         Test.viewport2 = new fudge.Viewport();
-        let object0 = new ObjectWithLights("Object0", color, fudge.ShaderTest);
+
+        let object0 = new ObjectWithLights("Object0", color, shaders[0]);
         let object1 = new ObjectWithLights("Object1", color, shaders[1]);
         let object2 = new ObjectWithLights("Object2", color, shaders[2]);
+
         let cmpCamera = new fudge.ComponentCamera();
         cmpCamera.mtxPivot.translateZ(-2);
+
         Test.viewport0.initialize("Viewport", object0, cmpCamera, canvas0);
         Test.viewport0.draw();
         Test.viewport1.initialize("Viewport", object1, cmpCamera, canvas1);
@@ -37,18 +44,20 @@ var Test;
             this.appendChild(this.object);
             let mtr = new fudge.Material("mtr" + _color.toString(), _shader, new fudge.CoatColored(_color, shininess));
             let cmpMaterial = new fudge.ComponentMaterial(mtr);
+
             this.object.addComponent(new fudge.ComponentMesh(new fudge.MeshSphere(sphereSize.toString(), sphereSize, sphereSize)));
             // this.object.addComponent(new fudge.ComponentMesh(new fudge.MeshObj(Test.Object.obj)));
+
             this.object.addComponent(cmpMaterial);
             this.object.addComponent(new fudge.ComponentTransform());
-            this.object.cmpTransform.mtxLocal.rotateY(180);
-            // this.object.cmpTransform.mtxLocal.rotateX(-45);
+            
             let cmpLight = new fudge.ComponentLight(new fudge.LightDirectional(new fudge.Color(dirIntensity, dirIntensity, dirIntensity, 1)));
             let light = new fudge.Node("Light");
             light.addComponent(cmpLight);
             light.addComponent(new fudge.ComponentTransform());
             light.cmpTransform.mtxLocal.rotate(dirRotation);
             this.appendChild(light);
+
             let cmpLightAmb = new fudge.ComponentLight(new fudge.LightAmbient(new fudge.Color(ambIntensity, ambIntensity, ambIntensity, 1)));
             let lightAmb = new fudge.Node("LightAmb");
             lightAmb.addComponent(cmpLightAmb);

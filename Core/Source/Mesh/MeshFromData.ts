@@ -12,7 +12,7 @@ namespace FudgeCore {
             this.verticesToSet = _vertices;
             this.textureUVsToSet = _textureUVs;
             this.indicesToSet = _indices;
-            this.faceNormalsToSet = _faceNormals
+            this.faceNormalsToSet = _faceNormals;
         }
 
         protected createVertices(): Float32Array {

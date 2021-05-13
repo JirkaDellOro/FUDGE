@@ -15,8 +15,8 @@ fs.readFile("ShaderSources/ShaderModules.glsl", function (err, data) {
             else
                 withBreaks += noBreak[a];
         }
-        
-        if(i != src.length - 2)
+
+        if (i < src.length - 2)
             modules.push(src[i] + " = `" + withBreaks + "`,");
         else
             modules.push(src[i] + " = `" + withBreaks + "`");

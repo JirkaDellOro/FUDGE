@@ -1,3 +1,4 @@
+//Flat shader built from shader modules
 namespace FudgeCore {
 
     @RenderInjectorShader.decorate

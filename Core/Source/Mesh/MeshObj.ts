@@ -11,11 +11,13 @@ namespace FudgeCore {
         protected uvs: number[] = [];
         protected inds: number[] = [];
         protected facenormals: number[] = [];
+        protected faceunnormals: number[] = [];
 
         public constructor(objString: string) {
             super();
             this.parseObj(objString);
             this.splitVertices();
+            this.createVertexNormals();
         }
 
         /** Loads an obj file from the given source url and a returns a complete Node from it. 
@@ -47,6 +49,26 @@ namespace FudgeCore {
             return nodeObj;
         }
 
+        public static LOAD_MESH(src: string): Mesh {
+
+            let xmlhttp: XMLHttpRequest = new XMLHttpRequest();
+            let fileContent: string = "";
+            let mesh: Mesh;
+
+            xmlhttp.onreadystatechange = async function(): Promise<void> {
+
+                if (this.readyState == 4 && this.status == 200) {
+                    fileContent = this.responseText;
+                    mesh = new MeshObj(fileContent);
+                }
+            };
+
+            xmlhttp.open("GET", src, true);
+            xmlhttp.send();
+
+            return mesh;
+        }
+
         /** Creates three Vertices from each face. Although inefficient, this has to be done for now - see Issue 244 */
         protected splitVertices(): void {
 
@@ -54,6 +76,7 @@ namespace FudgeCore {
             //let uvsNew: number[] = [];
             let indicesNew: number[] = [];
             let faceNormalsNew: number[] = [];
+            let faceUnNormalsNew: number[] = [];
 
             // For each face
             for (let i: number = 0; i < this.inds.length; i += 3) {
@@ -79,6 +102,12 @@ namespace FudgeCore {
 
                 // Calculate Normal by three face vertices
                 let normal: Vector3 = Vector3.CROSS(Vector3.DIFFERENCE(v2, v1), Vector3.DIFFERENCE(v3, v1));
+                
+                faceUnNormalsNew.push(
+                    normal.x, normal.y, normal.z,
+                    normal.x, normal.y, normal.z,
+                    normal.x, normal.y, normal.z);
+                
                 normal.normalize();
 
                 // Use same Normal for all three face verices
@@ -99,6 +128,7 @@ namespace FudgeCore {
             // this.uvs = uvsNew;
             this.inds = indicesNew;
             this.facenormals = faceNormalsNew;
+            this.faceunnormals = faceUnNormalsNew;
         }
 
         /** Splits up the obj string into separate arrays for each datatype */
@@ -145,6 +175,9 @@ namespace FudgeCore {
             return new Uint16Array(this.inds);
         }
 
+        protected createFaceUnNormals(): Float32Array {
+            return new Float32Array(this.faceunnormals);
+        }
         protected createFaceNormals(): Float32Array {
             return new Float32Array(this.facenormals);
         }

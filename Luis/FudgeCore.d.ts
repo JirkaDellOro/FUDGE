@@ -3277,10 +3277,12 @@ declare namespace FudgeCore {
         protected uvs: number[];
         protected inds: number[];
         protected facenormals: number[];
+        protected faceunnormals: number[];
         constructor(objString: string);
         /** Loads an obj file from the given source url and a returns a complete Node from it.
         * Multiple Objects are treated as a single Mesh. If no material is given, uses a default flat white material. */
         static LOAD(src: string, name?: string, material?: Material): Node;
+        static LOAD_MESH(src: string): Mesh;
         /** Creates three Vertices from each face. Although inefficient, this has to be done for now - see Issue 244 */
         protected splitVertices(): void;
         /** Splits up the obj string into separate arrays for each datatype */
@@ -3288,6 +3290,7 @@ declare namespace FudgeCore {
         protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;
         protected createIndices(): Uint16Array;
+        protected createFaceUnNormals(): Float32Array;
         protected createFaceNormals(): Float32Array;
     }
 }
@@ -5350,7 +5353,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     enum SHADER_MODULE {
         HEAD_VERT = "#version 300 es\nprecision highp float;\nin vec3 a_position;",
-        HEAD_FRAG = "#version 300 es\nprecision highp float;",
+        HEAD_FRAG = "#version 300 es\nprecision highp float;\n",
         NORMAL_FACE = "in vec3 a_normalFace;",
         NORMAL_VERTEX = "in vec3 a_normalVertex;",
         MATRIX_WORLD = "uniform mat4 u_world;",
