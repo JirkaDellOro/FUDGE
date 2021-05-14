@@ -2,7 +2,6 @@
 struct LightAmbient {
     vec4 color;
 };
-
 struct LightDirectional {
     vec4 color;
     vec3 direction;

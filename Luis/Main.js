@@ -6,8 +6,8 @@ var Test;
 
     let color = fudge.Color.CSS("GREEN");
     let sphereSize = 20;
-    let ambIntensity = 0.3;
-    let dirIntensity = 0.6;
+    let ambIntensity = 0.4;
+    let dirIntensity = 0.8;
     let shininess = 128;
     let dirRotation = new fudge.Vector3(20, 20, 0);
 
@@ -45,8 +45,8 @@ var Test;
             let mtr = new fudge.Material("mtr" + _color.toString(), _shader, new fudge.CoatColored(_color, shininess));
             let cmpMaterial = new fudge.ComponentMaterial(mtr);
 
-            this.object.addComponent(new fudge.ComponentMesh(new fudge.MeshSphere(sphereSize.toString(), sphereSize, sphereSize)));
-            // this.object.addComponent(new fudge.ComponentMesh(new fudge.MeshObj(Test.Object.obj)));
+            // this.object.addComponent(new fudge.ComponentMesh(new fudge.MeshSphere(sphereSize.toString(), sphereSize, sphereSize)));
+            this.object.addComponent(new fudge.ComponentMesh(new fudge.MeshObj(Test.Object.obj)));
 
             this.object.addComponent(cmpMaterial);
             this.object.addComponent(new fudge.ComponentTransform());
