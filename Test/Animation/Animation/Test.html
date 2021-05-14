@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Animation</title>
+    <link rel="stylesheet" href="../../TestInstructions.css">
+    <script src="../../dialog-polyfill.min.js"></script>
+    <script src="../../TestInstructions.js"></script>
     <script type="text/javascript" src="../../../Core/Build/FudgeCore.js"></script>
     <script type="text/javascript" src="../../../Aid/Build/FudgeAid.js"></script>
     <script type="text/javascript" src="AnimationTest.js"></script>
@@ -25,5 +28,33 @@
 </head>
 
 <body>
-
+    <script>
+        TestInstructions.display({
+          Name: "Animation",
+          Test: [
+            "An Animation changes the properties of objects with AnimationKeys",
+            "An AnimationKey defines one value at a time",
+            "An AnimeStructure defines which properties should be influenced by the AnimationKeys"
+          ],
+          Setup: [
+            "1 loop to update the viewport and the animation",
+            "1 Animation with 2 AnimationsKeys",
+            "1 an AnimationStructure which defines an animation for a rotation of the x and y axes"
+          ],
+          Act: [
+            //"start and stop the animation",
+            "watch an animation"
+          ],
+          Observe: [
+            "Console to see the Animation object"
+          ],
+          /* Control: [
+            //"Enter: start or stop the animation"
+            //"no controls"
+          ], */
+          Expect: [
+           "The cube rotates to the selected angle and switch back to the origin"
+          ]
+        });
+      </script>
 </body>

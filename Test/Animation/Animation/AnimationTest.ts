@@ -7,13 +7,14 @@ namespace AnimationTest {
   let node: ƒ.Node;
   let animation: ƒ.Animation;
   let viewport: ƒ.Viewport;
-
+  //let animationPlays: boolean;
   let startTime: number = Date.now();
 
   function init(): void {
     node = new ƒAid.Node("Test", ƒ.Matrix4x4.IDENTITY(), new ƒ.Material("Uni", ƒ.ShaderUniColor, new ƒ.CoatColored()), new ƒ.MeshCube("Cube"));
     viewport = ƒAid.Viewport.create(node);
     viewport.draw();
+    //window.addEventListener("keydown", handleKeydown);
     initAnim();
   }
 
@@ -65,10 +66,18 @@ namespace AnimationTest {
     node.applyAnimation(mutator);
     // console.log(mutator);
     viewport.draw();
-    
+
   }
 
   function hndlEv(_e: Event): void {
     console.log("event!");
   }
+
+  /* function handleKeydown(_event: KeyboardEvent): void {
+    if (_event.code === ƒ.KEYBOARD_CODE.ENTER) {
+      startTime =  Date.now() - startTime;
+      animationPlays ? ƒ.Loop.start() : ƒ.Loop.stop();
+      animationPlays = animationPlays ? false : true;
+    }
+  } */
 }

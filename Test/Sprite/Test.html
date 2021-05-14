@@ -1,17 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../TestInstructions.css">
+    <script src="../dialog-polyfill.min.js"></script>
+    <script src="../TestInstructions.js"></script>
     <script src="../../../Core/Build/FudgeCore.js"></script>
     <script src="../../../Aid/Build/FudgeAid.js"></script>
-    <script src="spriteObject.js"></script>
-    <script src="SpritesMain.js"></script>
-   
-    <title>Sprite|Test</title>
+    <script src="Sprites.js"></script>
+
 </head>
+
 <body>
-    <canvas width="800" height="600"></canvas>
+    <style>
+        dialog {
+            top: 0px;
+        }
+    </style>
+    <canvas width="400" height="300"></canvas>
+    <script>
+        TestInstructions.display({
+            Name: "Sprite",
+            Test: [
+                "An animation generated from a sprite sheet.",
+            ],
+            Setup: [
+                "1 SpriteSheetAnimation and 1 NodeSprite from FUDGE Aid",
+                "an asynchronous method to load the sprite sheet",
+                "a sprite sheet animation for cutting the individual sprites of the animation"
+            ],
+            Act: [
+                "watch an animation"
+            ],
+            Observe: [
+                "Console to see the properties of the generated sprites"
+            ],
+            /* Control: [
+              //"Enter: start or stop the animation"
+              //"no controls"
+            ], */
+            Expect: [
+                "A ball bouncing off a surface",
+                "6 pictures that are switched through one after the other and that do not appear completely fluid"
+            ]
+        });
+    </script>
 </body>
+
 </html>

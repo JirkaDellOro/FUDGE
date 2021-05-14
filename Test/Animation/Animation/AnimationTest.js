@@ -7,11 +7,13 @@ var AnimationTest;
     let node;
     let animation;
     let viewport;
+    //let animationPlays: boolean;
     let startTime = Date.now();
     function init() {
         node = new ƒAid.Node("Test", ƒ.Matrix4x4.IDENTITY(), new ƒ.Material("Uni", ƒ.ShaderUniColor, new ƒ.CoatColored()), new ƒ.MeshCube("Cube"));
         viewport = ƒAid.Viewport.create(node);
         viewport.draw();
+        //window.addEventListener("keydown", handleKeydown);
         initAnim();
     }
     function initAnim() {
@@ -62,5 +64,12 @@ var AnimationTest;
     function hndlEv(_e) {
         console.log("event!");
     }
+    /* function handleKeydown(_event: KeyboardEvent): void {
+      if (_event.code === ƒ.KEYBOARD_CODE.ENTER) {
+        startTime =  Date.now() - startTime;
+        animationPlays ? ƒ.Loop.start() : ƒ.Loop.stop();
+        animationPlays = animationPlays ? false : true;
+      }
+    } */
 })(AnimationTest || (AnimationTest = {}));
 //# sourceMappingURL=AnimationTest.js.map
