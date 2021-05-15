@@ -4567,7 +4567,9 @@ declare namespace FudgeCore {
         /** Compile a shader out of a string and validate it. */
         compileShader(shader: WebGLShader, source: string): void;
     }
-    /** Internal Class used to draw debugInformations about the physics simulation onto the renderContext. No user interaction needed. @author Marko Fehrenbach, HFU 2020 //Based on OimoPhysics Haxe DebugDrawDemo */
+    /** Internal Class used to draw debugInformations about the physics simulation onto the renderContext. No user interaction needed.
+     * @author Marko Fehrenbach, HFU 2020 //Based on OimoPhysics Haxe DebugDrawDemo
+     */
     class PhysicsDebugDraw extends RenderWebGL {
         oimoDebugDraw: OIMO.DebugDraw;
         style: OIMO.DebugDrawStyle;
@@ -4831,6 +4833,7 @@ declare namespace FudgeCore {
         * Simulates the physical world. _deltaTime is the amount of time between physical steps, default is 60 frames per second ~17ms
         */
         simulate(_deltaTime?: number): void;
+        draw(_cmpCamera: ComponentCamera): void;
         /** Make the given ComponentRigidbody known to the world as a body that is not colliding, but only triggering events. Used internally no interaction needed. */
         registerTrigger(_rigidbody: ComponentRigidbody): void;
         /** Remove the given ComponentRigidbody the world as viable triggeringBody. Used internally no interaction needed. */
@@ -5032,10 +5035,6 @@ declare namespace FudgeCore {
         static draw(_cmpCamera: ComponentCamera): void;
         private static drawListAlpha;
         private static drawList;
-        /**
-        * Physics Part -> Take all nodes with cmpRigidbody, and overwrite their local position/rotation with the one coming from
-        * the rb component, which is the new "local" WORLD position.
-        */
         private static transformByPhysics;
     }
 }

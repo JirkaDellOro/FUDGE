@@ -163,7 +163,9 @@ namespace FudgeCore {
     }
   }
 
-  /** Internal Class used to draw debugInformations about the physics simulation onto the renderContext. No user interaction needed. @author Marko Fehrenbach, HFU 2020 //Based on OimoPhysics Haxe DebugDrawDemo */
+  /** Internal Class used to draw debugInformations about the physics simulation onto the renderContext. No user interaction needed. 
+   * @author Marko Fehrenbach, HFU 2020 //Based on OimoPhysics Haxe DebugDrawDemo 
+   */
   export class PhysicsDebugDraw extends RenderWebGL {
     public oimoDebugDraw: OIMO.DebugDraw; //the original physics engine debugDraw class receiving calls from the oimoPhysics.World, and providing informations in form of points/lines/triangles what the physics world looks like
     public style: OIMO.DebugDrawStyle; //colors of the debug informations, unchanged in Fudge integration, basically coloring things like sleeping/active rb's differently, joints white and such. No need to have users change anything.
