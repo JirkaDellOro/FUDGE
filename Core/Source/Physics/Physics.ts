@@ -204,10 +204,11 @@ namespace FudgeCore {
     }
 
     public draw(_cmpCamera: ComponentCamera): void {
+      Physics.world.debugDraw.getDebugModeFromSettings();
       Physics.world.mainCam = _cmpCamera;
-      Physics.world.debugDraw.begin();  //Updates info about the current projection, resetting the points/lines/triangles that need to be drawn from debug
       Physics.world.oimoWorld.debugDraw(); //Filling the physics world debug informations into the debug rendering handler
-      Physics.world.debugDraw.end();
+      Physics.world.debugDraw.drawBuffers();
+      Physics.world.debugDraw.clearBuffers();  //Updates info about the current projection, resetting the points/lines/triangles that need to be drawn from debug
     }
 
     /** Make the given ComponentRigidbody known to the world as a body that is not colliding, but only triggering events. Used internally no interaction needed. */

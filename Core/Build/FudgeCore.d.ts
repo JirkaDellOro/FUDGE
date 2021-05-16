@@ -4603,9 +4603,9 @@ declare namespace FudgeCore {
          * Needs to create empty buffers to already have them ready to draw later on, linking is only possible with existing buffers. */
         initializeBuffers(): void;
         /** Before OimoPhysics.world is filling the debug. Make sure the buffers are reset. Also receiving the debugMode from settings and updating the current projection for the vertexShader. */
-        begin(): void;
+        clearBuffers(): void;
         /** After OimoPhysics.world filled the debug. Rendering calls. Setting this program to be used by the Fudge rendering context. And draw each updated buffer and resetting them. */
-        end(): void;
+        drawBuffers(): void;
         /** Drawing the ray into the debugDraw Call. By using the overwritten line rendering functions and drawing a point (pointSize defined in the shader) at the end of the ray. */
         debugRay(_origin: Vector3, _end: Vector3, _color: Color): void;
         /** Overriding the existing functions from OimoPhysics.DebugDraw without actually inherit from the class, to avoid compiler problems.
