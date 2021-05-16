@@ -117,7 +117,9 @@ namespace FudgeCore {
         this.source.addEventListener(EVENT_AUDIO.ENDED, this.hndAudioEnded);
       }
       else
-        this.source.stop();
+        try {
+          this.source.stop();
+        } catch (_error: unknown) { /* catch exception when source hasn't been started... */ }
       this.playing = _on;
     }
 

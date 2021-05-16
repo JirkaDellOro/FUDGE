@@ -1,6 +1,6 @@
 namespace FudgeCore {
   export interface MapEventTypeToListener {
-    [eventType: string]: EventListener[];
+    [eventType: string]: EventListenerƒ[];
   }
 
   /**
@@ -47,7 +47,7 @@ namespace FudgeCore {
   }
 
 
-  export type Eventƒ = EventPointer | EventDragDrop | EventWheel | EventKeyboard | Event | EventPhysics;
+  // export type Eventƒ = EventPointer | EventDragDrop | EventWheel | EventKeyboard | Event | EventPhysics;
 
   export type EventListenerƒ =
     ((_event: EventPointer) => void) |
@@ -56,7 +56,11 @@ namespace FudgeCore {
     ((_event: EventKeyboard) => void) |
     ((_event: Eventƒ) => void) |
     ((_event: EventPhysics) => void) |
-    EventListenerObject;
+    ((_event: CustomEvent) => void) |
+    EventListenerOrEventListenerObject;
+
+  export type Eventƒ = EventPointer | EventDragDrop | EventWheel | EventKeyboard | Event | EventPhysics | CustomEvent;
+  // export type EventListenerƒ = ((_event: Eventƒ) => void) | EventListener | EventListenerObject;
 
   export class EventTargetƒ extends EventTarget {
     addEventListener(_type: string, _handler: EventListenerƒ, _options?: boolean | AddEventListenerOptions): void {

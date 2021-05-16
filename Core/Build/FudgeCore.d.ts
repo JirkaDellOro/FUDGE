@@ -114,7 +114,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     interface MapEventTypeToListener {
-        [eventType: string]: EventListener[];
+        [eventType: string]: EventListenerƒ[];
     }
     /**
      * Types of events specific to Fudge, in addition to the standard DOM/Browser-Types and custom strings
@@ -157,8 +157,8 @@ declare namespace FudgeCore {
         RENDER_PREPARE_START = "renderPrepareStart",
         RENDER_PREPARE_END = "renderPrepareEnd"
     }
-    type Eventƒ = EventPointer | EventDragDrop | EventWheel | EventKeyboard | Event | EventPhysics;
-    type EventListenerƒ = ((_event: EventPointer) => void) | ((_event: EventDragDrop) => void) | ((_event: EventWheel) => void) | ((_event: EventKeyboard) => void) | ((_event: Eventƒ) => void) | ((_event: EventPhysics) => void) | EventListenerObject;
+    type EventListenerƒ = ((_event: EventPointer) => void) | ((_event: EventDragDrop) => void) | ((_event: EventWheel) => void) | ((_event: EventKeyboard) => void) | ((_event: Eventƒ) => void) | ((_event: EventPhysics) => void) | ((_event: CustomEvent) => void) | EventListenerOrEventListenerObject;
+    type Eventƒ = EventPointer | EventDragDrop | EventWheel | EventKeyboard | Event | EventPhysics | CustomEvent;
     class EventTargetƒ extends EventTarget {
         addEventListener(_type: string, _handler: EventListenerƒ, _options?: boolean | AddEventListenerOptions): void;
         removeEventListener(_type: string, _handler: EventListenerƒ, _options?: boolean | AddEventListenerOptions): void;
@@ -937,14 +937,14 @@ declare namespace FudgeCore {
          * @param _handler The function to call when the event reaches this node
          * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
          */
-        addEventListener(_type: EVENT | string, _handler: EventListener, _capture?: boolean): void;
+        addEventListener(_type: EVENT | string, _handler: EventListenerƒ, _capture?: boolean): void;
         /**
          * Removes an event listener from the node. The signatur must match the one used with addEventListener
          * @param _type The type of the event, should be an enumerated value of NODE_EVENT, can be any string
          * @param _handler The function to call when the event reaches this node
          * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
          */
-        removeEventListener(_type: EVENT | string, _handler: EventListener, _capture?: boolean): void;
+        removeEventListener(_type: EVENT | string, _handler: EventListenerƒ, _capture?: boolean): void;
         /**
          * Dispatches a synthetic event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
          * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase,
