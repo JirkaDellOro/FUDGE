@@ -178,8 +178,9 @@ namespace FudgeCore {
       _cmpRigidbody.checkTriggerEvents();
 
       if (_cmpRigidbody.physicsType == PHYSICS_TYPE.KINEMATIC) { //Case of Kinematic Rigidbody
-        _cmpRigidbody.setPosition(_node.mtxWorld.translation);
-        _cmpRigidbody.setRotation(_node.mtxWorld.rotation);
+        let mtxPivotWorld: Matrix4x4 = Matrix4x4.MULTIPLICATION(_node.mtxWorld, _cmpRigidbody.mtxPivot);
+        _cmpRigidbody.setPosition(mtxPivotWorld.translation);
+        _cmpRigidbody.setRotation(mtxPivotWorld.rotation);
         return;
       }
 
