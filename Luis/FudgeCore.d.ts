@@ -3292,6 +3292,7 @@ declare namespace FudgeCore {
         protected createIndices(): Uint16Array;
         protected createFaceUnNormals(): Float32Array;
         protected createFaceNormals(): Float32Array;
+        protected createVertexNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {
@@ -5353,7 +5354,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     enum SHADER_MODULE {
         HEAD_VERT = "#version 300 es\nprecision highp float;\nin vec3 a_position;",
-        HEAD_FRAG = "#version 300 es\nprecision highp float;\n",
+        HEAD_FRAG = "#version 300 es\nprecision highp float;",
         NORMAL_FACE = "in vec3 a_normalFace;",
         NORMAL_VERTEX = "in vec3 a_normalVertex;",
         MATRIX_WORLD = "uniform mat4 u_world;",

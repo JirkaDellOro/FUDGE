@@ -17,7 +17,6 @@ namespace FudgeCore {
             super();
             this.parseObj(objString);
             this.splitVertices();
-            this.createVertexNormals();
         }
 
         /** Loads an obj file from the given source url and a returns a complete Node from it. 
@@ -71,7 +70,6 @@ namespace FudgeCore {
 
         /** Creates three Vertices from each face. Although inefficient, this has to be done for now - see Issue 244 */
         protected splitVertices(): void {
-
             let vertsNew: number[] = [];
             //let uvsNew: number[] = [];
             let indicesNew: number[] = [];
@@ -180,6 +178,29 @@ namespace FudgeCore {
         }
         protected createFaceNormals(): Float32Array {
             return new Float32Array(this.facenormals);
+        }
+
+        protected createVertexNormals(): Float32Array {
+            
+            let vertexNormals: number[] = [];
+            for (let i: number = 0; i < this.vertices.length; i += 3) {
+                let vertex: Vector3 = new Vector3(this.vertices[i], this.vertices[i + 1], this.vertices[i + 2]);
+                let sameVerts: number[] = [];
+
+                for (let j: number = 0; j < this.vertices.length; j += 3) {
+                    if (this.vertices[j] == vertex.x && this.vertices[j + 1] == vertex.y && this.vertices[j + 2] == vertex.z) 
+                        sameVerts.push(j);  
+                }
+
+                let sum: Vector3 = Vector3.ZERO();
+                for (let z: number = 0; z < sameVerts.length; z++) 
+                    sum = Vector3.SUM(sum, new Vector3(this.faceunnormals[sameVerts[z] + 0], 
+                                                       this.faceunnormals[sameVerts[z] + 1], 
+                                                       this.faceunnormals[sameVerts[z] + 2]));
+                
+                vertexNormals.push(sum.x / sameVerts.length, sum.y / sameVerts.length, sum.z / sameVerts.length);
+            }
+            return new Float32Array(vertexNormals);
         }
     }
 }
