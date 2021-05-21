@@ -6,7 +6,7 @@ var Test;
 
     let color = fudge.Color.CSS("GREEN");
     let sphereSize = 20;
-    let ambIntensity = 0.2;
+    let ambIntensity = 0.4;
     let dirIntensity = 0.8;
     let shininess = 128;
     let dirRotation = new fudge.Vector3(20, 20, 0);
@@ -50,6 +50,7 @@ var Test;
 
             this.object.addComponent(cmpMaterial);
             this.object.addComponent(new fudge.ComponentTransform());
+            this.object.cmpTransform.mtxLocal.rotateY(0);
             
             let cmpLight = new fudge.ComponentLight(new fudge.LightDirectional(new fudge.Color(dirIntensity, dirIntensity, dirIntensity, 1)));
             let light = new fudge.Node("Light");

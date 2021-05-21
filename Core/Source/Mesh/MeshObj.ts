@@ -180,8 +180,8 @@ namespace FudgeCore {
             return new Float32Array(this.facenormals);
         }
 
-        protected createVertexNormals(): Float32Array {
-            
+        //Luis Keck: calculates vertex normals for smooth shading
+        protected createVertexNormals(): Float32Array {     
             let vertexNormals: number[] = [];
             for (let i: number = 0; i < this.vertices.length; i += 3) {
                 let vertex: Vector3 = new Vector3(this.vertices[i], this.vertices[i + 1], this.vertices[i + 2]);
@@ -198,7 +198,10 @@ namespace FudgeCore {
                                                        this.faceunnormals[sameVerts[z] + 1], 
                                                        this.faceunnormals[sameVerts[z] + 2]));
                 
-                vertexNormals.push(sum.x / sameVerts.length, sum.y / sameVerts.length, sum.z / sameVerts.length);
+                if (sum.magnitude != 0)
+                    sum = Vector3.NORMALIZATION(sum);
+                    
+                vertexNormals.push(sum.x, sum.y, sum.z);
             }
             return new Float32Array(vertexNormals);
         }
