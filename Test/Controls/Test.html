@@ -52,6 +52,43 @@
 </head>
 
 <body>
+  <script>
+    // look what makes passive and active
+    TestInstructions.display({
+      Name: "Controls",
+      Test: [
+        "The controller processes the received input to a selected output : PROPORTIONAL, INTEGRAL, DIFFERENTIAL"
+      ],
+      Setup: [
+        "3 controllers with different types",
+        "3 different input possibilities: keyboard, input field absolute and relative",
+        "Number input fields for different settings: Factor, Delay"
+      ],
+      Act: [
+        "Change between passive and active mode",
+        "Control one imput with A / D or by moving the respective slider"
+      ],
+      Observe: [
+        "see the incoming input signals",
+        "look at the outputs to see how the controller processes the inputs"
+      ],
+      Control: [
+        "<strong>Keys: </strong>  A: gives a negative input value equal to the factor | D: gives a positive input value equal to the factor",
+        "<strong>Slider: </strong>  increase and decrease the input ",
+        "<strong>Checkboxes: </strong>  choose active or passive mode",
+        "<strong>numberfeald: </strong>  Enter a delay for the outputs and the scaling factor"
+      ],
+      Expect: [
+        "The probotional controller outputs the amount of input received multiplied by its factor",
+        "The integral controller adds the received input multiplied by a factor to the current value",
+        "The differential controller gives an impulse in the amount of the received input multiplied by its factor"
+      ]
+    });
+  </script>
+  <fieldset>
+    <legend>Instructions</legend>
+    <script>document.write(TestInstructions.get("Control").innerHTML);</script>
+  </fieldset>
   <fieldset id="Mode">
     <legend>Mode</legend>
     <meter id="Update"></meter>
@@ -74,38 +111,5 @@
     <textarea cols="80" rows="10"></textarea>
   </fieldset>
 
-  <script>
-    // look what makes passive and active
-    TestInstructions.display({
-      Name: "Controls",
-      Test: [ 
-        "The controller processes the received input to a selected output : PROPORTIONAL, INTEGRAL, DIFFERENTIAL"
-      ],
-      Setup: [
-        "3 controllers with different types",
-        "3 different input possibilities: keyboard, input field absolute and relative",
-        "Number input fields for different settings: Factor, Delay"
-      ],
-      Act: [ 
-        "Change between passive and active mode",
-        "Control one imput with A / D or by moving the respective slider"
-      ],
-      Observe: [
-        "see the incoming input signals",
-        "look at the outputs to see how the controller processes the inputs"
-      ],
-      Controls: [
-        "A: gives a negative input value equal to the factor",
-        "D: gives a positive input value equal to the factor",
-        "Slider: increase and decrease the input",
-        "Checkboxes: choose active or passive mode",
-        "numberfeald: Enter a delay for the outputs and the scaling factor"
-      ],
-      Expect: [
-      "The probotional controller outputs the amount of input received multiplied by its factor",
-      "The integral controller adds the received input multiplied by a factor to the current value",
-      "The differential controller gives an impulse in the amount of the received input multiplied by its factor"
-      ]
-    });
-  </script>
+
 </body>

@@ -15,25 +15,21 @@
 </head>
 
 <body>
-    <style>
-        dialog {
-            top: 0px;
-        }
-    </style>
-    <canvas width="400" height="300"></canvas>
+
+
     <script>
         TestInstructions.display({
             Name: "Sprite",
             Test: [
-                "An animation generated from a sprite sheet.",
+                "An animation generated from a sprite sheet."
             ],
             Setup: [
                 "1 SpriteSheetAnimation and 1 NodeSprite from FUDGE Aid",
-                "an asynchronous method to load the sprite sheet",
+                "An asynchronous method to load the sprite sheet",
                 "a sprite sheet animation for cutting the individual sprites of the animation"
             ],
             Act: [
-                "watch an animation"
+                "Watch an animation"
             ],
             Observe: [
                 "Console to see the properties of the generated sprites"
@@ -43,11 +39,12 @@
               //"no controls"
             ], */
             Expect: [
-                "A ball bouncing off a surface",
+                "Watch an animation of a ball bouncing off the ground",
                 "6 pictures that are switched through one after the other and that do not appear completely fluid"
             ]
         });
     </script>
+    <canvas width="400" height="300"></canvas>
 </body>
 
 </html>
