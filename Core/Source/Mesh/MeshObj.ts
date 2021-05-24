@@ -180,24 +180,29 @@ namespace FudgeCore {
             return new Float32Array(this.facenormals);
         }
 
-        //Luis Keck: calculates vertex normals for smooth shading
+        /*Luis Keck: Calculates vertex normals for smooth shading.
+        New function needed because faces do not share vertices currently */
         protected createVertexNormals(): Float32Array {     
             let vertexNormals: number[] = [];
+
+            //goes through all vertices
             for (let i: number = 0; i < this.vertices.length; i += 3) {
                 let vertex: Vector3 = new Vector3(this.vertices[i], this.vertices[i + 1], this.vertices[i + 2]);
-                let sameVerts: number[] = [];
+                let samePosVerts: number[] = [];
 
+                //finds vertices that share position with the vertex of current iteration
                 for (let j: number = 0; j < this.vertices.length; j += 3) {
                     if (this.vertices[j] == vertex.x && this.vertices[j + 1] == vertex.y && this.vertices[j + 2] == vertex.z) 
-                        sameVerts.push(j);  
+                        samePosVerts.push(j);  
                 }
 
                 let sum: Vector3 = Vector3.ZERO();
-                for (let z: number = 0; z < sameVerts.length; z++) 
-                    sum = Vector3.SUM(sum, new Vector3(this.faceunnormals[sameVerts[z] + 0], 
-                                                       this.faceunnormals[sameVerts[z] + 1], 
-                                                       this.faceunnormals[sameVerts[z] + 2]));
-                
+                //adds the face normals of all faces that would share these vertices
+                for (let z: number = 0; z < samePosVerts.length; z++) 
+                    sum = Vector3.SUM(sum, new Vector3(this.faceunnormals[samePosVerts[z] + 0], 
+                                                       this.faceunnormals[samePosVerts[z] + 1], 
+                                                       this.faceunnormals[samePosVerts[z] + 2]));
+                                                       
                 if (sum.magnitude != 0)
                     sum = Vector3.NORMALIZATION(sum);
                     

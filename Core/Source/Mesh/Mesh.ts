@@ -220,12 +220,10 @@ namespace FudgeCore {
 
     protected createFaceNormals(): Float32Array {
       let normals: number[] = [];
+      let faceUnNormals: Float32Array = this.unNormalsFace;
 
-      if (this.ƒunNormalsFace == null)
-        this.ƒunNormalsFace = this.createFaceUnNormals();
-
-      for (let n: number = 0; n < this.ƒunNormalsFace.length; n += 3) {
-        let normal: Vector3 = new Vector3(this.ƒunNormalsFace[n], this.ƒunNormalsFace[n + 1], this.ƒunNormalsFace[n + 2]);
+      for (let n: number = 0; n < faceUnNormals.length; n += 3) {
+        let normal: Vector3 = new Vector3(faceUnNormals[n], faceUnNormals[n + 1], faceUnNormals[n + 2]);
         normal = Vector3.NORMALIZATION(normal);
         normals.push(normal.x, normal.y, normal.z);
       }
@@ -234,8 +232,7 @@ namespace FudgeCore {
 
     protected createVertexNormals(): Float32Array {
       let normals: Vector3[] = [];
-      if (this.ƒunNormalsFace == null)
-        this.ƒunNormalsFace = this.createFaceUnNormals();
+      let faceUnNormals: Float32Array = this.unNormalsFace;
         
       for (let v: number = 0; v < this.vertices.length; v += 3) 
         normals.push(Vector3.ZERO());
@@ -243,7 +240,7 @@ namespace FudgeCore {
       for (let i: number = 0; i < this.indices.length; i += 3) {
         let trigon: number[] = [this.indices[i], this.indices[i + 1], this.indices[i + 2]];
         let index: number = trigon[2] * 3;
-        let normalFace: Vector3 = new Vector3(this.ƒunNormalsFace[index], this.ƒunNormalsFace[index + 1], this.ƒunNormalsFace[index + 2]);
+        let normalFace: Vector3 = new Vector3(faceUnNormals[index], faceUnNormals[index + 1], faceUnNormals[index + 2]);
 
         for (let t: number = 0; t < trigon.length; t++)
           normals[trigon[t]] = Vector3.SUM(normals[trigon[t]], normalFace);

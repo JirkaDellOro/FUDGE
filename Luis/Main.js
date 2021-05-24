@@ -6,7 +6,7 @@ var Test;
 
     let color = fudge.Color.CSS("GREEN");
     let sphereSize = 20;
-    let ambIntensity = 0.4;
+    let ambIntensity = 0.3;
     let dirIntensity = 0.8;
     let shininess = 128;
     let dirRotation = new fudge.Vector3(20, 20, 0);
