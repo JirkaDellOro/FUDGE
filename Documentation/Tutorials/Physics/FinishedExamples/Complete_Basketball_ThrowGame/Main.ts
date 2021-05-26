@@ -1,8 +1,7 @@
-///<reference types="../../../../Core/Build/FudgeCore.js"/>
-import f = FudgeCore;
 //Reference Fudge, getting code completion ready and creating a shortcut f to write FudgeCode more comfortably
 
-namespace Turorials_FUDGEPhysics_Lesson1 {
+namespace Tutorials_FUDGEPhysics_Lesson1 {
+  import f = FudgeCore;
 
   //GOAL: Learning to use the physical raycast to interact with objects. Different method than the standard Fudge Depth Texture Raycast
 
@@ -116,7 +115,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
     //Physics Events
 
     //PHYSICS - Start using physics by telling the physics the scene root object. Physics will recalculate every transform and initialize
-    f.Physics.start(hierarchy);
+    f.Physics.adjustTransforms(hierarchy);
 
     //f.Physics.settings.debugDraw = true; //Seeing the physical scene in debug mode - Lesson Debugging
 

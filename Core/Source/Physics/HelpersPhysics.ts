@@ -116,6 +116,11 @@ namespace FudgeCore {
 
     private physicsDebugMode: PHYSICS_DEBUGMODE = PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
 
+    constructor(_defGroup: number, _defMask: number) {
+      this.defaultCollisionGroup = _defGroup;
+      this.defaultCollisionMask = _defMask;
+    }
+
     get debugMode(): PHYSICS_DEBUGMODE {
       return this.physicsDebugMode;
     }
@@ -211,11 +216,6 @@ namespace FudgeCore {
     }
     set defaultCorrectionAlgorithm(_value: number) {
       OIMO.Setting.defaultJointPositionCorrectionAlgorithm = _value;
-    }
-
-    constructor(_defGroup: number, _defMask: number) {
-      this.defaultCollisionGroup = _defGroup;
-      this.defaultCollisionMask = _defMask;
     }
   }
 }

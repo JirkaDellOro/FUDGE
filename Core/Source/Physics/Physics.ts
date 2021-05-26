@@ -89,8 +89,12 @@ namespace FudgeCore {
       * Adjusts the transforms of the [[ComponentRigidbody]]s in the given branch to match their nodes or meshes
       */
     public static adjustTransforms(_branch: Node, _toMesh: boolean = false): void {
-      Render.prepare(_branch);
-      this.world.updateWorldFromWorldMatrix(_toMesh);
+      Render.prepare(_branch, {ignorePhysics: true});
+      for (let node of Render.nodesPhysics)
+        node.getComponent(ComponentRigidbody).updateFromWorld(_toMesh);
+      // this.world.updateWorldFromWorldMatrix(_toMesh);
+      // for (let body of this.world.bodyList)
+      //   body.updateFromWorld(_toMesh);
     }
 
     /** Internal function to calculate the endpoint of mathematical ray. By adding the multiplied direction to the origin. 
@@ -269,10 +273,10 @@ namespace FudgeCore {
     }
 
     /** Updates all [[Rigidbodies]] known to the Physics.world to match their containers or meshes transformations */
-    private updateWorldFromWorldMatrix(_toMesh: boolean = false): void {
-      for (let body of this.bodyList)
-        body.updateFromWorld(_toMesh);
-    }
+    // private updateWorldFromWorldMatrix(_toMesh: boolean = false): void {
+    //   for (let body of this.bodyList)
+    //     body.updateFromWorld(_toMesh);
+    // }
 
     /** Create a oimoPhysics world. Called once at the beginning if none is existend yet. */
     private createWorld(): void {

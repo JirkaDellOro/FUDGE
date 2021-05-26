@@ -147,7 +147,7 @@ namespace FudgeCore {
       let mtxRoot: Matrix4x4 = Matrix4x4.IDENTITY();
       if (this.#branch.getParent())
         mtxRoot = this.#branch.getParent().mtxWorld;
-      Render.prepare(this.#branch, mtxRoot);
+      Render.prepare(this.#branch, null, mtxRoot);
     }
 
 

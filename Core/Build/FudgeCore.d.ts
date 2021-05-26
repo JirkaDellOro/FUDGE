@@ -114,7 +114,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     interface MapEventTypeToListener {
-        [eventType: string]: EventListener[];
+        [eventType: string]: EventListenerƒ[];
     }
     /**
      * Types of events specific to Fudge, in addition to the standard DOM/Browser-Types and custom strings
@@ -157,8 +157,8 @@ declare namespace FudgeCore {
         RENDER_PREPARE_START = "renderPrepareStart",
         RENDER_PREPARE_END = "renderPrepareEnd"
     }
-    type Eventƒ = EventPointer | EventDragDrop | EventWheel | EventKeyboard | Event | EventPhysics;
-    type EventListenerƒ = ((_event: EventPointer) => void) | ((_event: EventDragDrop) => void) | ((_event: EventWheel) => void) | ((_event: EventKeyboard) => void) | ((_event: Eventƒ) => void) | ((_event: EventPhysics) => void) | EventListenerObject;
+    type EventListenerƒ = ((_event: EventPointer) => void) | ((_event: EventDragDrop) => void) | ((_event: EventWheel) => void) | ((_event: EventKeyboard) => void) | ((_event: Eventƒ) => void) | ((_event: EventPhysics) => void) | ((_event: CustomEvent) => void) | EventListenerOrEventListenerObject;
+    type Eventƒ = EventPointer | EventDragDrop | EventWheel | EventKeyboard | Event | EventPhysics | CustomEvent;
     class EventTargetƒ extends EventTarget {
         addEventListener(_type: string, _handler: EventListenerƒ, _options?: boolean | AddEventListenerOptions): void;
         removeEventListener(_type: string, _handler: EventListenerƒ, _options?: boolean | AddEventListenerOptions): void;
@@ -937,14 +937,14 @@ declare namespace FudgeCore {
          * @param _handler The function to call when the event reaches this node
          * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
          */
-        addEventListener(_type: EVENT | string, _handler: EventListener, _capture?: boolean): void;
+        addEventListener(_type: EVENT | string, _handler: EventListenerƒ, _capture?: boolean): void;
         /**
          * Removes an event listener from the node. The signatur must match the one used with addEventListener
          * @param _type The type of the event, should be an enumerated value of NODE_EVENT, can be any string
          * @param _handler The function to call when the event reaches this node
          * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
          */
-        removeEventListener(_type: EVENT | string, _handler: EventListener, _capture?: boolean): void;
+        removeEventListener(_type: EVENT | string, _handler: EventListenerƒ, _capture?: boolean): void;
         /**
          * Dispatches a synthetic event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
          * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase,
@@ -4600,15 +4600,15 @@ declare namespace FudgeCore {
         /** Creating the empty render buffers. Defining the attributes used in shaders.
          * Needs to create empty buffers to already have them ready to draw later on, linking is only possible with existing buffers. */
         initializeBuffers(): void;
-        /** Overriding the existing functions from OimoPhysics.DebugDraw without actually inherit from the class, to avoid compiler problems.
-         * Overriding them to receive debugInformations in the format the physic engine provides them but handling the rendering in the fudge context. */
-        private initializeOverride;
         /** Before OimoPhysics.world is filling the debug. Make sure the buffers are reset. Also receiving the debugMode from settings and updating the current projection for the vertexShader. */
         begin(): void;
         /** After OimoPhysics.world filled the debug. Rendering calls. Setting this program to be used by the Fudge rendering context. And draw each updated buffer and resetting them. */
         end(): void;
         /** Drawing the ray into the debugDraw Call. By using the overwritten line rendering functions and drawing a point (pointSize defined in the shader) at the end of the ray. */
         debugRay(_origin: Vector3, _end: Vector3, _color: Color): void;
+        /** Overriding the existing functions from OimoPhysics.DebugDraw without actually inherit from the class, to avoid compiler problems.
+         * Overriding them to receive debugInformations in the format the physic engine provides them but handling the rendering in the fudge context. */
+        private initializeOverride;
         /** The source code (string) of the in physicsDebug used very simple vertexShader.
          *  Handling the projection (which includes, view/world[is always identity in this case]/projection in Fudge). Increasing the size of single points drawn.
          *  And transfer position color to the fragmentShader. */
@@ -4710,6 +4710,7 @@ declare namespace FudgeCore {
         /** Whether the debug informations of the physics should be displayed or not (default = false) */
         debugDraw: boolean;
         private physicsDebugMode;
+        constructor(_defGroup: number, _defMask: number);
         get debugMode(): PHYSICS_DEBUGMODE;
         set debugMode(_value: PHYSICS_DEBUGMODE);
         /** Change if rigidbodies are able to sleep (don't be considered in physical calculations) when their movement is below a threshold. Deactivation is decreasing performance for minor advantage in precision. */
@@ -4748,7 +4749,6 @@ declare namespace FudgeCore {
          *  Default 0 = Baumgarte (fast but less correct induces some energy errors), 1 = Split-Impulse (fast and no engery errors, but more inaccurate for joints), 2 = Non-linear Gauss Seidel (slowest but most accurate)*/
         get defaultCorrectionAlgorithm(): number;
         set defaultCorrectionAlgorithm(_value: number);
-        constructor(_defGroup: number, _defMask: number);
     }
 }
 declare namespace FudgeCore {
@@ -4849,7 +4849,6 @@ declare namespace FudgeCore {
         /** Returns the ComponentRigidbody with the given id. Used internally to reconnect joints on loading in the editor. */
         getBodyByID(_id: number): ComponentRigidbody;
         /** Updates all [[Rigidbodies]] known to the Physics.world to match their containers or meshes transformations */
-        private updateWorldFromWorldMatrix;
         /** Create a oimoPhysics world. Called once at the beginning if none is existend yet. */
         private createWorld;
     }
@@ -5006,21 +5005,25 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     type MapLightTypeToLightList = Map<TypeOfLight, ComponentLight[]>;
+    interface RenderPrepareOptions {
+        ignorePhysics?: boolean;
+    }
     /**
      * The main interface to the render engine, here WebGL (see superclass [[RenderWebGL]] and the RenderInjectors
      */
     abstract class Render extends RenderWebGL {
         static rectClip: Rectangle;
         static pickBuffer: Int32Array;
-        private static timestampUpdate;
+        static nodesPhysics: RecycableArray<Node>;
         private static nodesSimple;
         private static nodesAlpha;
+        private static timestampUpdate;
         /**
          * Recursively iterates over the branch starting with the node given, recalculates all world transforms,
          * collects all lights and feeds all shaders used in the graph with these lights. Sorts nodes for different
          * render passes.
          */
-        static prepare(_branch: Node, _mtxWorld?: Matrix4x4, _lights?: MapLightTypeToLightList, _shadersUsed?: (typeof Shader)[]): void;
+        static prepare(_branch: Node, _options?: RenderPrepareOptions, _mtxWorld?: Matrix4x4, _lights?: MapLightTypeToLightList, _shadersUsed?: (typeof Shader)[]): void;
         /**
          * Used with a [[Picker]]-camera, this method renders one pixel with picking information
          * for each node in the line of sight and return that as an unsorted [[Pick]]-array
@@ -5033,7 +5036,7 @@ declare namespace FudgeCore {
         * Physics Part -> Take all nodes with cmpRigidbody, and overwrite their local position/rotation with the one coming from
         * the rb component, which is the new "local" WORLD position.
         */
-        private static setupPhysicalTransform;
+        private static transformByPhysics;
     }
 }
 declare namespace FudgeCore {
