@@ -13,53 +13,78 @@ namespace Test_sprites {
 
   async function hndLoad(_event: Event): Promise<void> {
 
-    await createAssets();
-    const canvas: HTMLCanvasElement = document.querySelector("canvas");
+    // setup sprites
+    await loadSprites();
+
+
+    // setup scene
+    root = new ƒ.Node("root");
 
     spriteNode = new ƒAid.NodeSprite("Sprite");
-    root = new ƒ.Node("root");
-    let node: ƒ.Node = new ƒ.Node("TestNode");
     spriteNode.addComponent(new ƒ.ComponentTransform(new ƒ.Matrix4x4()));
-    node.addComponent(new ƒ.ComponentTransform(ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.ZERO())));
-    root.addChild(spriteNode);
-
     spriteNode.setAnimation(<ƒAid.SpriteSheetAnimation>animations["bounce"]);
     spriteNode.setFrameDirection(1);
-    spriteNode.mtxLocal.translateY(-0.8);
-    spriteNode.framerate = 5;
+    spriteNode.mtxLocal.translateY(-1);
+    spriteNode.framerate = parseInt((<HTMLInputElement>document.querySelector("[name=fps]")).value);
 
+    root.addChild(spriteNode);
+
+    // camera setup
     let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
-    cmpCamera.mtxPivot.translateZ(4);
+    cmpCamera.mtxPivot.translateZ(5);
     cmpCamera.mtxPivot.rotateY(180);
-    
+
+    // setup viewport
+    const canvas: HTMLCanvasElement = document.querySelector("canvas");
+
     viewport = new ƒ.Viewport();
     viewport.initialize("Viewport", root, cmpCamera, canvas);
     viewport.camera.clrBackground = ƒ.Color.CSS("White");
     viewport.draw();
 
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, hndLoop);
-    ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 60);
+    ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 10);
+
+
+
+    document.forms[0].addEventListener("change", handleChange);
+
   }
+
   function hndLoop(_event: Event): void {
+    let avg: HTMLInputElement = document.querySelector("[name=currentframe]");
+    avg.value = spriteNode.getCurrentFrame + ""; //ToDo: see if I can get the current frame differently
+
     viewport.draw();
   }
 
 
-  async function createAssets(): Promise<void> {
-    let txtAvatar: ƒ.TextureImage = new ƒ.TextureImage();
-    await txtAvatar.load("Assets/Ball.png");
-    let coatSprite: ƒ.CoatTextured = new ƒ.CoatTextured(clrWhite, txtAvatar);
-    generateSprites(coatSprite);
+  async function loadSprites(): Promise<void> {
+
+    let imgSpriteSheet: ƒ.TextureImage = new ƒ.TextureImage();
+    await imgSpriteSheet.load("Assets/bounceball.png");
+
+    let spriteSheet: ƒ.CoatTextured = new ƒ.CoatTextured(clrWhite, imgSpriteSheet);
+    generateSprites(spriteSheet);
   }
 
   function generateSprites(_spritesheet: ƒ.CoatTextured): void {
+
     animations = {};
     this.animations = {};
     let name: string = "bounce";
     let sprite: ƒAid.SpriteSheetAnimation = new ƒAid.SpriteSheetAnimation(name, _spritesheet);
-    sprite.generateByGrid(ƒ.Rectangle.GET(1, 0, 17, 42), 7, 22, ƒ.ORIGIN2D.BOTTOMCENTER, ƒ.Vector2.X(20));
+    sprite.generateByGrid(ƒ.Rectangle.GET(1, 0, 17, 60), 8, 22, ƒ.ORIGIN2D.BOTTOMCENTER, ƒ.Vector2.X(20));
     animations[name] = sprite;
   }
+
+  function handleChange(_event: Event): void {
+    let value: number = parseInt((<HTMLInputElement>_event.target).value);
+    spriteNode.framerate = value;
+    console.log("framerate set to: " + value);
+
+  }
+ 
 
 }
 

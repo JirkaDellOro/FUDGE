@@ -20,6 +20,36 @@
         input:read-only {
             background-color: lightgrey;
         }
+
+        input[type=range],
+        textarea {
+            width: 100%;
+        }
+
+        input[type=range]:enabled {
+            box-shadow: 0px 0px 1px #cccccc;
+        }
+
+        strong {
+            display: inline-block;
+           
+        }
+
+        fieldset {
+            border: 0px #dddddd solid;
+        }
+
+        fieldset#loop {
+            background-color: azure;
+        }
+
+        fieldset#time {
+            background-color: beige;
+        }
+
+        dialog {
+            top: 0px;
+        }
     </style>
     <script type="text/javascript" src="../../Core/Build/FudgeCore.js"></script>
     <script src="TimeLoop.js"></script>
@@ -52,7 +82,7 @@
                 "See in the console when a lapse has started"
             ],
             Control: [
-                "<strong>input fields</strong>Set fps for game time and realtime | Set scaling for gametime | Set time to trigger the lapse event",
+                "<strong>input fields</strong> Set fps for game time and realtime | Set scaling for gametime | Set time to trigger the lapse event",
                 "<strong>button</strong> trigger in event after the set time"
             ],
             Expect: [

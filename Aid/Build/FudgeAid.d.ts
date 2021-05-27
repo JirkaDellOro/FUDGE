@@ -156,6 +156,10 @@ declare namespace FudgeAid {
         private timer;
         constructor(_name: string);
         private static createInternalResource;
+        /**
+         * @returns the number of the current frame
+         */
+        get getCurrentFrame(): number;
         setAnimation(_animation: SpriteSheetAnimation): void;
         /**
          * Show a specific frame of the sequence
