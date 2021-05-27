@@ -233,8 +233,8 @@ namespace FudgeCore {
     protected createVertexNormals(): Float32Array {
       let normals: Vector3[] = [];
       let faceUnNormals: Float32Array = this.unNormalsFace;
-        
-      for (let v: number = 0; v < this.vertices.length; v += 3) 
+
+      for (let v: number = 0; v < this.vertices.length; v += 3)
         normals.push(Vector3.ZERO());
 
       for (let i: number = 0; i < this.indices.length; i += 3) {
@@ -247,7 +247,7 @@ namespace FudgeCore {
       }
       let vertexNormals: number[] = [];
       for (let n: number = 0; n < normals.length; n++) {
-        if (normals[n].magnitude != 0) 
+        if (normals[n].magnitude != 0)
           normals[n] = Vector3.NORMALIZATION(normals[n]);
         vertexNormals.push(normals[n].x, normals[n].y, normals[n].z);
       }
