@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Animation</title>
+  <link rel="stylesheet" href="../../TestInstructions.css">
+  <script src="../../dialog-polyfill.min.js"></script>
+  <script src="../../TestInstructions.js"></script>
+  <script type="text/javascript" src="../../../Core/Build/FudgeCore.js"></script>
+  <script type="text/javascript" src="../../../Aid/Build/FudgeAid.js"></script>
+  <script type="text/javascript" src="AnimationTest.js"></script>
+
+  <style type="text/css">
+    html,
+    body {
+      padding: 0;
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    canvas {
+      width: 100vw;
+      height: 100vh;
+    }
+
+    form {
+      margin: 5px;
+    }
+
+    button {
+      margin: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <script>
+    TestInstructions.display({
+      Name: "Animation",
+      Test: [
+        "An Animation changes the properties of objects with AnimationKeys",
+        "An AnimationKey defines one value at a time",
+        "An AnimeStructure defines which properties should be influenced by the AnimationKeys"
+      ],
+      Setup: [
+        "1 animation component that controls the animation",
+        "1 Animation with 2 AnimationsKeys",
+        "1 an AnimationStructure which defines an animation for a rotation of the x and y axes"
+      ],
+      Act: [
+        "Verender animation keys on for the time and its rotation around the x and y value",
+        "choose the animation mode",
+        "determine the type of playback playback",
+        "determine with how many frames the animation is played",
+        "watch an animation"
+      ],
+      Observe: [
+        "Console to see the Animation object"
+      ],
+      Control: [
+        "<strong>Number-Stepper</strong> chose time and value of the rotation | give the Fps for TIMEBASED_RASTERED_TO_FPS and FRAMEBASED playback",
+        "<strong>Dropdown</strong> select the playback type | select the mode of animation"
+      ],
+      Expect: [
+        "key 1 indicates the time at which the animation starts and the starting angle",
+        "key 2 specifies the end angle and the time of the end of the animation",
+        "<strong>playmodes</strong>  <br> - LOOP it restarts once it hit the end </br> - PLAYONCE plays animation once and stops at the last key/frame </br> - PLAYONCESTOPAFTER plays animation once and stops on the first key/frame <br> - REVERSELOOP plays animation like LOOP, but backwards <br> - STOP causes the animation not to play at all",
+        "Note: Stop does not work as expected",
+        "<strong>playback</strong>  <br> - TIMEBASED_CONTINOUS a loop of the animation lasts as long as the specified value of the second key <br> - TIMEBASED_RASTERED_TO_FPS the animation depends on the specified fps, the animation is updated per frame <br> - FRAMEBASED Uses the FPS value of the animation to advance once per frame"
+      ]
+    });
+  </script>
+
+  <form>
+    <fieldset id="animationkey">
+
+      <legend>Keys</legend>
+      <input type="number" name="keytime1" min="0" max="30000" step="100" value="0"> Time Key 1
+      <input type="number" name="value1" min="0" max="360" step="5" value="0"> Key 1 Value<br>
+      <input type="number" name="keytime2" min="0" max="30000" step="100" value="2000"> Time Key 2
+      <input type="number" name="value2" min="0" max="360" step="5" value="45"> Key 2 Value <br>
+    </fieldset>
+
+    <fieldset id="animation">
+
+      <legend>Animation</legend>
+
+      <input type="number" name="fps" min="1" max="60" step="1" value="30"> fps <br>
+
+      <select name="mode" value="LOOP">
+        <option value="LOOP">LOOP</option>
+        <option value="PLAYONCE">PLAYONCE</option>
+        <option value="PLAYONCESTOPAFTER">PLAYONCESTOPAFTER</option>
+        <option value="REVERSELOOP">REVERSELOOP</option>
+        <option value="PLAYONCESTOPAFTER">STOP</option>
+      </select> playmode</br>
+
+      <select name="back" value="TIMEBASED_CONTINOUS">
+        <option value="TIMEBASED_CONTINOUS">TIMEBASED_CONTINOUS</option>
+        <option value="TIMEBASED_RASTERED_TO_FPS">TIMEBASED_RASTERED_TO_FPS</option>
+        <option value="FRAMEBASED">FRAMEBASED</option>
+      </select> playback</br>
+    </fieldset>
+  </form>
+
+  <button id="start"> start animation </button>
+
+
+</body>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="../TestInstructions.css">
+  <script src="../dialog-polyfill.min.js"></script>
+  <script src="../TestInstructions.js"></script>
+
+  <link rel="stylesheet" href="TestDebug.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="../../../Core/Build/FudgeCore.js"></script>
+  <script type="text/javascript" src="TestDebug.js"></script>
+  <title>Fudge Debug-Klasse</title>
+</head>
+
+<body>
+  <script>
+    TestInstructions.display({
+      Name: "Debug",
+      Test: [
+        "Creates custom debug messages that can be viewed on various targets",
+      ],
+      Setup: [
+        "8 Filters determine the type of message",
+        "1 DebugConsole, 1 DebugTextArea, 1 DebugAlert which determine where the message is displayed",
+        "1 HTML form element as a table with which one defines the display type and message"
+      ],
+      Act: [
+        "Select the type of report and the place of publication",
+        "Click on the headings to select the whole row / column"
+      ],
+      Observe: [
+        "See the debug message as an alert",
+        "See the debug message in the console",
+        "See the debug message in the TextArea"
+      ],
+      Control: [
+        "<strong>check-Boxes</strong> Select the type of display you want"
+      ],
+      Expect: [
+        "How debug report depends on the selected display location and selected filter",
+        "Verbose must be switched on for fudge messages to be displayed on the console",
+        "The various messages presented a custom symbol </br> info: ✓ | log: ✎ | Warning: ⚠ | Error: ❌ | FUDGE: 🎲"
+      ]
+    });
+  </script>
+  <fieldset>
+    <legend>Message</legend>
+    <p id="Message"></p>
+  </fieldset>
+
+  <fieldset>
+    <legend>Output and Filters</legend>
+    <form>
+    </form>
+  </fieldset>
+
+  <fieldset>
+    <legend>DebugTextArea</legend>
+    <textarea cols="120" rows="10"></textarea>
+  </fieldset>
+</body>
+
+</html>
