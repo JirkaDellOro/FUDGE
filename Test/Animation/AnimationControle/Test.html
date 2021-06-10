@@ -72,7 +72,7 @@
         - PLAYONCESTOPAFTER plays animation once and stops on the first key/frame <br> \
         - REVERSELOOP plays animation like LOOP, but backwards <br>\
         - STOP causes the animation not to play at all",
-        "Note: Stop does not work as expected",
+        /* Note: Stop does not work as expected */
         "<strong>playback</strong>  <br> - TIMEBASED_CONTINOUS a loop of the animation lasts as long as the specified value of the second key <br> \
         - TIMEBASED_RASTERED_TO_FPS the animation depends on the specified fps, the animation is updated per frame <br> \
         - FRAMEBASED Uses the FPS value of the animation to advance once per frame"
@@ -82,12 +82,11 @@
 
   <form>
     <fieldset id="animationkey">
-
       <legend>Keys</legend>
       <input type="number" name="keytime1" min="0" max="30000" step="100" value="0"> Time Key 1
-      <input type="number" name="value1" min="0" max="360" step="5" value="0"> Key 1 Value<br>
+      <input type="number" name="value1" min="0" max="360" step="5" value="0"> rotation x,y-axis Key 1<br>
       <input type="number" name="keytime2" min="0" max="30000" step="100" value="2000"> Time Key 2
-      <input type="number" name="value2" min="0" max="360" step="5" value="45"> Key 2 Value <br>
+      <input type="number" name="value2" min="0" max="360" step="5" value="45"> rotation x,y-axis Key 2 <br>
     </fieldset>
 
     <fieldset id="animation">

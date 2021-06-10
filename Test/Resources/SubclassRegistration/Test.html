@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+
+<head>
+    <link rel="stylesheet" href="../../TestInstructions.css">
+    <script src="../../dialog-polyfill.min.js"></script>
+    <script src="../../TestInstructions.js"></script>
+    <meta charset="UTF-8">
+    <title>Subclass Registration</title>
+    <script type="text/javascript" src="../../../Core/Build/FudgeCore.js"></script>
+    <script type="text/javascript" src="SubclassRegistration.js"></script>
+</head>
+
+<body>
+    <script>
+        TestInstructions.display({
+            Name: "SubclassRegistration",
+            Test: [
+                "see if all components, meshes and shader subclasses are all properly rgestriert"
+            ],
+            Setup: [
+                "ƒ.Mesh.subclasses",
+                "ƒ.Component.subclasses",
+                "ƒ.Shader.subclasses"
+            ],
+            /*  Act: [
+                ""
+            ], */
+            Observe: [
+                
+                "Console to see all registered subclasses"
+            ],
+            /* Control: [
+                
+            ], */
+            Expect: [
+                "All subclasses of Mesh, Component and Shader are shown in the console log",
+
+                "<strong>Mesh</strong></br> \
+                MeshCube </br> \
+                MeshPolygon </br> \
+                MeshExtrusion </br> \
+                MeshPyramid </br> \
+                MeshQuad </br> \
+                MeshRotation </br> \
+                MeshSphere </br> \
+                MeshSprite </br> \
+                MeshTerrain </br> \
+                MeshTorus",
+
+                "<strong>Component</strong> </br> \
+                ComponentAudio  </br> \
+                ComponentAudioListener </br> \
+                ComponentCamera </br> \
+                ComponentLight </br> \
+                ComponentMaterial </br> \
+                ComponentMesh </br> \
+                ComponentScript </br> \
+                ComponentTransform </br> \
+                ComponentJoint </br> \
+                ComponentJointCylindrical </br> \
+                ComponentJointPrismatic </br> \
+                ComponentJointRagdoll </br> \
+                ComponentJointRevolute </br> \
+                ComponentJointSpherical </br> \
+                ComponentJointUniversal </br> \
+                ComponentRigidbody",
+
+                "<strong>Shader</strong> </br> \
+                ShaderFlat </br > \
+                ShaderMatCap </br > \
+                ShaderTexture </br > \
+                ShaderUniColor"
+
+            ]
+
+        });
+    </script>
+</body>
