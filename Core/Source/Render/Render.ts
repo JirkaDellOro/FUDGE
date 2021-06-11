@@ -140,18 +140,8 @@ namespace FudgeCore {
 
     //#region Drawing
     public static draw(_cmpCamera: ComponentCamera): void {
-      // TODO: Move physics rendering to RenderPhysics extension of RenderManager
-      if (Physics.world && Physics.world.mainCam != _cmpCamera)
-        Physics.world.mainCam = _cmpCamera; //DebugDraw needs to know the main camera beforehand, _cmpCamera is the viewport camera. | Marko Fehrenbach, HFU 2020
-
-      // TODO: check physics
-      if (!Physics.settings || Physics.settings.debugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY) { //Give users the possibility to only show physics displayed | Marko Fehrenbach, HFU 2020
-        Render.drawList(_cmpCamera, this.nodesSimple);
-        Render.drawListAlpha(_cmpCamera);
-      }
-      if (Physics.settings && Physics.settings.debugDraw == true) {
-        Physics.world.debugDraw.end();
-      }
+      Render.drawList(_cmpCamera, this.nodesSimple);
+      Render.drawListAlpha(_cmpCamera);
     }
 
     private static drawListAlpha(_cmpCamera: ComponentCamera): void {
@@ -176,35 +166,6 @@ namespace FudgeCore {
     }
 
     //#region Physics
-    /**
-    * Physics Part -> Take all nodes with cmpRigidbody, and overwrite their local position/rotation with the one coming from 
-    * the rb component, which is the new "local" WORLD position.
-    */
-    // private static setupPhysicalTransform(_branch: Node): void {
-    //   if (Physics.world != null && Physics.world.getBodyList().length >= 1) {
-    //     let mutator: Mutator = {};
-    //     for (let name in _branch.getChildren()) {
-    //       let childNode: Node = _branch.getChildren()[name];
-    //       Render.setupPhysicalTransform(childNode);
-    //       let cmpRigidbody: ComponentRigidbody = childNode.getComponent(ComponentRigidbody);
-    //       if (childNode.getComponent(ComponentTransform) != null && cmpRigidbody != null) {
-    //         cmpRigidbody.checkCollisionEvents();
-    //         cmpRigidbody.checkTriggerEvents();
-    //         if (cmpRigidbody.physicsType != PHYSICS_TYPE.KINEMATIC) { //Case of Dynamic/Static Rigidbody
-    //           //Override any position/rotation, Physical Objects do not know hierachy unless it's established through physics
-    //           mutator["rotation"] = cmpRigidbody.getRotation();
-    //           mutator["translation"] = cmpRigidbody.getPosition();
-    //           childNode.mtxLocal.mutate(mutator);
-    //         }
-    //         if (cmpRigidbody.physicsType == PHYSICS_TYPE.KINEMATIC) { //Case of Kinematic Rigidbody
-    //           cmpRigidbody.setPosition(childNode.mtxWorld.translation);
-    //           cmpRigidbody.setRotation(childNode.mtxWorld.rotation);
-    //         }
-    //       }
-    //     }
-    //   }
-    // }
-
     private static transformByPhysics(_node: Node, _cmpRigidbody: ComponentRigidbody): void {
       if (!Physics.world?.getBodyList().length)
         return;
@@ -217,8 +178,9 @@ namespace FudgeCore {
       _cmpRigidbody.checkTriggerEvents();
 
       if (_cmpRigidbody.physicsType == PHYSICS_TYPE.KINEMATIC) { //Case of Kinematic Rigidbody
-        _cmpRigidbody.setPosition(_node.mtxWorld.translation);
-        _cmpRigidbody.setRotation(_node.mtxWorld.rotation);
+        let mtxPivotWorld: Matrix4x4 = Matrix4x4.MULTIPLICATION(_node.mtxWorld, _cmpRigidbody.mtxPivot);
+        _cmpRigidbody.setPosition(mtxPivotWorld.translation);
+        _cmpRigidbody.setRotation(mtxPivotWorld.rotation);
         return;
       }
 

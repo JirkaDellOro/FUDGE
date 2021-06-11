@@ -163,7 +163,9 @@ namespace FudgeCore {
     }
   }
 
-  /** Internal Class used to draw debugInformations about the physics simulation onto the renderContext. No user interaction needed. @author Marko Fehrenbach, HFU 2020 //Based on OimoPhysics Haxe DebugDrawDemo */
+  /** Internal Class used to draw debugInformations about the physics simulation onto the renderContext. No user interaction needed. 
+   * @author Marko Fehrenbach, HFU 2020 //Based on OimoPhysics Haxe DebugDrawDemo 
+   */
   export class PhysicsDebugDraw extends RenderWebGL {
     public oimoDebugDraw: OIMO.DebugDraw; //the original physics engine debugDraw class receiving calls from the oimoPhysics.World, and providing informations in form of points/lines/triangles what the physics world looks like
     public style: OIMO.DebugDrawStyle; //colors of the debug informations, unchanged in Fudge integration, basically coloring things like sleeping/active rb's differently, joints white and such. No need to have users change anything.
@@ -267,11 +269,12 @@ namespace FudgeCore {
       this.triIBO = new PhysicsDebugIndexBuffer(this.gl);
       this.triVBO.setAttribs(attribs);
       this.triVBO.loadAttribIndices(this.shader);
+
+      this.clearBuffers();
     }
 
     /** Before OimoPhysics.world is filling the debug. Make sure the buffers are reset. Also receiving the debugMode from settings and updating the current projection for the vertexShader. */
-    public begin(): void {
-      this.getDebugModeFromSettings();
+    public clearBuffers(): void {
       this.gl.lineWidth(2.0); //Does not affect anything because lineWidth is currently only supported by Microsoft Edge and Fudge is optimized for Chrome
 
       this.pointData = []; //Resetting the data to be filled again
@@ -284,7 +287,7 @@ namespace FudgeCore {
     }
 
     /** After OimoPhysics.world filled the debug. Rendering calls. Setting this program to be used by the Fudge rendering context. And draw each updated buffer and resetting them. */
-    public end(): void {
+    public drawBuffers(): void {
       this.shader.use();
       let projection: Float32Array = Physics.world.mainCam.mtxWorldToView.get();
       this.gl.uniformMatrix4fv(this.shader.getUniformLocation("u_projection"), false, projection);

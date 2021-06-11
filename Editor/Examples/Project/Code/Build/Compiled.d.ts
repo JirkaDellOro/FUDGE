@@ -22,9 +22,9 @@ declare namespace Script2 {
 declare namespace Script {
     import ƒ = FudgeCore;
     class TimerMessage extends ƒ.ComponentScript {
+        #private;
         prefix: string;
-        count: number;
-        private timer;
+        test: boolean;
         constructor();
         hndTimer: (_event: ƒ.EventTimer) => void;
         hndAddComponent: (_event: Event) => void;

@@ -89,7 +89,7 @@ namespace FudgeCore {
       * Adjusts the transforms of the [[ComponentRigidbody]]s in the given branch to match their nodes or meshes
       */
     public static adjustTransforms(_branch: Node, _toMesh: boolean = false): void {
-      Render.prepare(_branch, {ignorePhysics: true});
+      Render.prepare(_branch, { ignorePhysics: true });
       for (let node of Render.nodesPhysics)
         node.getComponent(ComponentRigidbody).updateFromWorld(_toMesh);
       // this.world.updateWorldFromWorldMatrix(_toMesh);
@@ -201,10 +201,14 @@ namespace FudgeCore {
         this.connectJoints(); //Connect joints if anything has happened between the last call to any of the two paired rigidbodies
       if (Time.game.getScale() != 0) //If time is stopped do not simulate to avoid misbehaviour
         Physics.world.oimoWorld.step(_deltaTime * Time.game.getScale());  //Update the simulation by the given deltaTime and the Fudge internal TimeScale
-      if (Physics.world.mainCam != null && Physics.settings.debugDraw == true) { //Get Cam from viewport instead of setting it for physics
-        Physics.world.debugDraw.begin();  //Updates info about the current projection, resetting the points/lines/triangles that need to be drawn from debug
-        Physics.world.oimoWorld.debugDraw(); //Filling the physics world debug informations into the debug rendering handler
-      }
+    }
+
+    public draw(_cmpCamera: ComponentCamera): void {
+      Physics.world.debugDraw.getDebugModeFromSettings();
+      Physics.world.mainCam = _cmpCamera;
+      Physics.world.oimoWorld.debugDraw(); //Filling the physics world debug informations into the debug rendering handler
+      Physics.world.debugDraw.drawBuffers();
+      Physics.world.debugDraw.clearBuffers();  //Updates info about the current projection, resetting the points/lines/triangles that need to be drawn from debug
     }
 
     /** Make the given ComponentRigidbody known to the world as a body that is not colliding, but only triggering events. Used internally no interaction needed. */
