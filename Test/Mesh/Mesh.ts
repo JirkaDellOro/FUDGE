@@ -27,7 +27,7 @@ namespace Mesh {
     const rotator: ƒAid.Node = new ƒAid.Node("Rotator", ƒ.Matrix4x4.IDENTITY());
     const translator: ƒAid.Node = new ƒAid.Node("Translator", ƒ.Matrix4x4.IDENTITY());
 
-    const nodes: ƒAid.Node = new ƒAid.Node("Speaker", ƒ.Matrix4x4.IDENTITY());
+    const nodes: ƒAid.Node = new ƒAid.Node("nodes", ƒ.Matrix4x4.IDENTITY());
     rotator.addChild(nodes);
     translator.addChild(rotator);
 

@@ -15,7 +15,7 @@ var Mesh;
     async function init(_event) {
         const rotator = new ƒAid.Node("Rotator", ƒ.Matrix4x4.IDENTITY());
         const translator = new ƒAid.Node("Translator", ƒ.Matrix4x4.IDENTITY());
-        const nodes = new ƒAid.Node("Speaker", ƒ.Matrix4x4.IDENTITY());
+        const nodes = new ƒAid.Node("nodes", ƒ.Matrix4x4.IDENTITY());
         rotator.addChild(nodes);
         translator.addChild(rotator);
         mtxRotatorX = nodes.mtxLocal;
