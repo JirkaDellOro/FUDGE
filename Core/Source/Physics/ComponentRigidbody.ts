@@ -399,17 +399,14 @@ namespace FudgeCore {
      * Sets the current ROTATION of the [[Node]] in the physical space, in degree.
      */
     public setRotation(_value: Vector3): void {
-      // this.rigidbody.setRotationXyz(new OIMO.Vec3(_value.x * Math.PI / 180, _value.y * Math.PI / 180, _value.z * Math.PI / 180));
-      let rotInQuat: OIMO.Quat = new OIMO.Quat();
-      // rotInQuat.fromMat3(new OIMO.Mat3().fromEulerXyz(new OIMO.Vec3(_value.x * Math.PI / 180, _value.y * Math.PI / 180, _value.z * Math.PI / 180)));
-      let rot: OIMO.Mat3 = new OIMO.Mat3();
-      //.fromEulerXyz(0, _value.y * Math.PI / 180, 0);
-      rot.appendRotationEq(_value.z * Math.PI / 180, 0, 0, 1);
-      rot.appendRotationEq(_value.y * Math.PI / 180, 0, 1, 0);
-      rot.appendRotationEq(_value.x * Math.PI / 180, 1, 0, 0); 
-      rotInQuat.fromMat3(rot);
-      rotInQuat.normalize();
-      this.rigidbody.setOrientation(rotInQuat);
+      let quat: OIMO.Quat = new OIMO.Quat();
+      let mtxRot: Matrix4x4 = Matrix4x4.IDENTITY();
+      mtxRot.rotate(new Vector3(_value.x, _value.y, _value.z));
+      let array: Float32Array = mtxRot.get();
+      let rot: OIMO.Mat3 = new OIMO.Mat3(array[0], array[4], array[8], array[1], array[5], array[9], array[2], array[6], array[10]);
+      quat.fromMat3(rot);
+      // quat.normalize();
+      this.rigidbody.setOrientation(quat);
     }
 
 

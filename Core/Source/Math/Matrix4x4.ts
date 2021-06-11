@@ -22,6 +22,7 @@ namespace FudgeCore {
    */
 
   export class Matrix4x4 extends Mutable implements Serializable {
+    private static deg2rad: number = Math.PI / 180;
     private data: Float32Array = new Float32Array(16); // The data of the matrix.
     private mutator: Mutator = null; // prepared for optimization, keep mutator to reduce redundant calculation and for comparison. Set to null when data changes!
     private vectors: VectorRepresentation; // vector representation of this matrix
@@ -270,11 +271,10 @@ namespace FudgeCore {
 
     /**
      * Returns a matrix that rotates coordinates on the x-axis when multiplied by.
-     * @param _angleInDegrees The value of the rotation.
      */
     public static ROTATION_X(_angleInDegrees: number): Matrix4x4 {
       const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
-      let angleInRadians: number = _angleInDegrees * Math.PI / 180;
+      let angleInRadians: number = _angleInDegrees * Matrix4x4.deg2rad;
       let sin: number = Math.sin(angleInRadians);
       let cos: number = Math.cos(angleInRadians);
       mtxResult.data.set([
@@ -291,7 +291,7 @@ namespace FudgeCore {
      */
     public static ROTATION_Y(_angleInDegrees: number): Matrix4x4 {
       let mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
-      let angleInRadians: number = _angleInDegrees * Math.PI / 180;
+      let angleInRadians: number = _angleInDegrees * Matrix4x4.deg2rad;
       let sin: number = Math.sin(angleInRadians);
       let cos: number = Math.cos(angleInRadians);
       mtxResult.data.set([
@@ -305,11 +305,10 @@ namespace FudgeCore {
 
     /**
      * Returns a matrix that rotates coordinates on the z-axis when multiplied by.
-     * @param _angleInDegrees The value of the rotation.
      */
     public static ROTATION_Z(_angleInDegrees: number): Matrix4x4 {
       const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
-      let angleInRadians: number = _angleInDegrees * Math.PI / 180;
+      let angleInRadians: number = _angleInDegrees * Matrix4x4.deg2rad;
       let sin: number = Math.sin(angleInRadians);
       let cos: number = Math.cos(angleInRadians);
       mtxResult.data.set([
@@ -321,6 +320,28 @@ namespace FudgeCore {
       return mtxResult;
     }
 
+    /**
+     * Returns a matrix that rotates coordinates when multiplied by, using the angles given.
+     * Rotation occurs around the axis in the order Z-Y-X .
+     */
+    public static ROTATION(_eulerAnglesInDegrees: Vector3): Matrix4x4 {
+      const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
+      let anglesInRadians: Vector3 = Vector3.SCALE(_eulerAnglesInDegrees, Matrix4x4.deg2rad);
+      let sinX: number = Math.sin(anglesInRadians.x);
+      let cosX: number = Math.cos(anglesInRadians.x);
+      let sinY: number = Math.sin(anglesInRadians.y);
+      let cosY: number = Math.cos(anglesInRadians.y);
+      let sinZ: number = Math.sin(anglesInRadians.z);
+      let cosZ: number = Math.cos(anglesInRadians.z);
+      mtxResult.data.set([
+        /**/                 cosZ * cosY, /**/                 sinZ * cosY, /**/       -sinY, 0,
+        cosZ * sinY * sinX - sinZ * cosX, sinZ * sinY * sinX + cosZ * cosX, /**/ cosY * sinX, 0,
+        cosZ * sinY * cosX + sinZ * sinX, sinZ * sinY * cosX - cosZ * sinX, /**/ cosY * cosX, 0,
+        0, 0, 0, 1
+      ]);
+      return mtxResult;
+    }
+    
     /**
      * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
      */
@@ -357,7 +378,7 @@ namespace FudgeCore {
      */
     public static PROJECTION_CENTRAL(_aspect: number, _fieldOfViewInDegrees: number, _near: number, _far: number, _direction: FIELD_OF_VIEW): Matrix4x4 {
       //TODO: camera looks down negative z-direction, should be positive
-      let fieldOfViewInRadians: number = _fieldOfViewInDegrees * Math.PI / 180;
+      let fieldOfViewInRadians: number = _fieldOfViewInDegrees * Matrix4x4.deg2rad;
       let f: number = Math.tan(0.5 * (Math.PI - fieldOfViewInRadians));
       let rangeInv: number = 1.0 / (_near - _far);
       const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
@@ -477,9 +498,12 @@ namespace FudgeCore {
      * The rotation is appended to already applied transforms, thus multiplied from the right. Set _fromLeft to true to switch and put it in front.
      */
     public rotate(_by: Vector3, _fromLeft: boolean = false): void {
-      this.rotateZ(_by.z, _fromLeft);
-      this.rotateY(_by.y, _fromLeft);
-      this.rotateX(_by.x, _fromLeft);
+      // this.rotateZ(_by.z, _fromLeft);
+      // this.rotateY(_by.y, _fromLeft);
+      // this.rotateX(_by.x, _fromLeft);
+      let mtxRotation: Matrix4x4 = Matrix4x4.ROTATION(_by);
+      this.multiply(mtxRotation, _fromLeft);
+      Recycler.store(mtxRotation);
     }
 
     /**
@@ -873,9 +897,10 @@ namespace FudgeCore {
       if (vectors.translation)
         mtxResult.translate(vectors.translation);
       if (vectors.rotation) {
-        mtxResult.rotateZ(vectors.rotation.z);
-        mtxResult.rotateY(vectors.rotation.y);
-        mtxResult.rotateX(vectors.rotation.x);
+        // mtxResult.rotateZ(vectors.rotation.z);
+        // mtxResult.rotateY(vectors.rotation.y);
+        // mtxResult.rotateX(vectors.rotation.x);
+        mtxResult.rotate(vectors.rotation);
       }
       if (vectors.scaling)
         mtxResult.scale(vectors.scaling);
