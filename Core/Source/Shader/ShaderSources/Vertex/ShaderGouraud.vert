@@ -1,5 +1,6 @@
 #version 300 es
 #define GLSLIFY 1
+#define GLSLIFY 1
 /**
 * Gouraud shading
 * Implementation based on https://www.gsn-lib.org/docs/nodes/ShaderPluginNode.php
@@ -23,7 +24,7 @@ vec3 calculateReflection(vec3 light_dir, vec3 view_dir, vec3 normal, float shini
     float spec_dot = max(dot(R, view_dir), 0.0);
     color += pow(spec_dot, shininess);
     return color;
-} 
+}
 
 in vec3 a_position;
 in vec3 a_normalVertex;

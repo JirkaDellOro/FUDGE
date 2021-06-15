@@ -28,9 +28,7 @@ uniform vec4 u_color;
 out vec4 frag;
 
 void main() {
-  // if (gl_FragCoord.x < 200.0)
   frag = u_color;
-  //    frag = vec4(1.0,1.0,1.0,1.0);
 }`;
   }
 }

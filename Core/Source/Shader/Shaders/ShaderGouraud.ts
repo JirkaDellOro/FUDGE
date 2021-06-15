@@ -28,7 +28,7 @@ vec3 calculateReflection(vec3 light_dir, vec3 view_dir, vec3 normal, float shini
     float spec_dot = max(dot(R, view_dir), 0.0);
     color += pow(spec_dot, shininess);
     return color;
-} 
+}
 
 in vec3 a_position;
 in vec3 a_normalVertex;
@@ -66,6 +66,7 @@ void main() {
 * @authors Luis Keck, HFU, 2021
 */
 precision highp float;
+
 uniform vec4 u_color;
 
 in vec4 v_color;

@@ -20,7 +20,7 @@ struct LightDirectional {
 const uint MAX_LIGHTS_DIRECTIONAL = 10u;
 
 in vec3 a_position;
-in vec3 a_normalFace;
+in vec3 a_normalVertex;
 uniform mat4 u_world;
 uniform mat4 u_projection;
 
@@ -31,7 +31,7 @@ out vec4 v_color;
 
 void main() {
     gl_Position = u_projection * vec4(a_position, 1.0);
-    vec3 normal = normalize(mat3(u_world) * a_normalFace);
+    vec3 normal = normalize(mat3(u_world) * a_normalVertex);
 
     v_color = u_ambient.color;
     for(uint i = 0u; i < u_nLightsDirectional; i++) {

@@ -11,7 +11,7 @@ for (var i = 0; i < files.length; i++) {
 }
 
 function writeShader(ShaderName) {
-    
+
     //get the TypeScript code
     fs.readFile("ShaderCodeTemplate.txt", function (err, data) {
         if (err) {
