@@ -11,7 +11,7 @@ namespace FudgeCore {
         protected uvs: number[] = [];
         protected inds: number[] = [];
         protected facenormals: number[] = [];
-        protected faceunnormals: number[] = [];
+        protected facecrossproducts: number[] = [];
 
         public constructor(objString: string) {
             super();
@@ -74,7 +74,7 @@ namespace FudgeCore {
             //let uvsNew: number[] = [];
             let indicesNew: number[] = [];
             let faceNormalsNew: number[] = [];
-            let faceUnNormalsNew: number[] = [];
+            let faceCrossProductsNew: number[] = [];
 
             // For each face
             for (let i: number = 0; i < this.inds.length; i += 3) {
@@ -101,7 +101,7 @@ namespace FudgeCore {
                 // Calculate Normal by three face vertices
                 let normal: Vector3 = Vector3.CROSS(Vector3.DIFFERENCE(v2, v1), Vector3.DIFFERENCE(v3, v1));
                 
-                faceUnNormalsNew.push(
+                faceCrossProductsNew.push(
                     normal.x, normal.y, normal.z,
                     normal.x, normal.y, normal.z,
                     normal.x, normal.y, normal.z);
@@ -126,7 +126,7 @@ namespace FudgeCore {
             // this.uvs = uvsNew;
             this.inds = indicesNew;
             this.facenormals = faceNormalsNew;
-            this.faceunnormals = faceUnNormalsNew;
+            this.facecrossproducts = faceCrossProductsNew;
         }
 
         /** Splits up the obj string into separate arrays for each datatype */
@@ -173,8 +173,8 @@ namespace FudgeCore {
             return new Uint16Array(this.inds);
         }
 
-        protected createFaceUnNormals(): Float32Array {
-            return new Float32Array(this.faceunnormals);
+        protected calculateFaceCrossProducts(): Float32Array {
+            return new Float32Array(this.faceCrossProducts);
         }
         protected createFaceNormals(): Float32Array {
             return new Float32Array(this.facenormals);
@@ -199,9 +199,9 @@ namespace FudgeCore {
                 let sum: Vector3 = Vector3.ZERO();
                 //adds the face normals of all faces that would share these vertices
                 for (let z: number = 0; z < samePosVerts.length; z++) 
-                    sum = Vector3.SUM(sum, new Vector3(this.faceunnormals[samePosVerts[z] + 0], 
-                                                       this.faceunnormals[samePosVerts[z] + 1], 
-                                                       this.faceunnormals[samePosVerts[z] + 2]));
+                    sum = Vector3.SUM(sum, new Vector3(this.faceCrossProducts[samePosVerts[z] + 0], 
+                                                       this.faceCrossProducts[samePosVerts[z] + 1], 
+                                                       this.faceCrossProducts[samePosVerts[z] + 2]));
                                                        
                 if (sum.magnitude != 0)
                     sum = Vector3.NORMALIZATION(sum);

@@ -23,9 +23,8 @@ namespace FudgeCore {
     protected ƒindices: Uint16Array;
     protected ƒtextureUVs: Float32Array;
     protected ƒnormalsFace: Float32Array;
-    protected ƒunNormalsFace: Float32Array; // name should probably be changed
+    protected ƒfaceCrossProducts: Float32Array; 
     protected ƒnormalsVertex: Float32Array;
-    protected ƒnormals: Float32Array;
     protected ƒbox: Box;
     // TODO: explore mathematics for easy transformations of radius 
     protected ƒradius: number;
@@ -91,11 +90,11 @@ namespace FudgeCore {
 
       return this.ƒnormalsFace;
     }
-    public get unNormalsFace(): Float32Array {
-      if (this.ƒunNormalsFace == null)
-        this.ƒunNormalsFace = this.createFaceUnNormals();
+    public get faceCrossProducts(): Float32Array {
+      if (this.ƒfaceCrossProducts == null)
+        this.ƒfaceCrossProducts = this.calculateFaceCrossProducts();
 
-      return this.ƒunNormalsFace;
+      return this.ƒfaceCrossProducts;
     }
     public get normalsVertex(): Float32Array {
       if (this.ƒnormalsVertex == null)
@@ -139,9 +138,8 @@ namespace FudgeCore {
       this.ƒindices = undefined;
       this.ƒtextureUVs = undefined;
       this.ƒnormalsFace = undefined;
-      this.ƒunNormalsFace = undefined;
+      this.ƒfaceCrossProducts = undefined;
       this.ƒnormalsVertex = undefined;
-      this.ƒnormals = undefined;
       this.ƒbox = undefined;
       this.ƒradius = undefined;
 
@@ -152,7 +150,7 @@ namespace FudgeCore {
       this.ƒvertices = this.createVertices();
       this.ƒindices = this.createIndices();
       this.ƒtextureUVs = this.createTextureUVs();
-      this.ƒunNormalsFace = this.createFaceUnNormals();
+      this.ƒfaceCrossProducts = this.calculateFaceCrossProducts();
       this.ƒnormalsFace = this.createFaceNormals();
       this.ƒnormalsVertex = this.createVertexNormals();
       this.createRenderBuffers();
@@ -197,8 +195,8 @@ namespace FudgeCore {
     protected createIndices(): Uint16Array { return null; }
     protected createNormals(): Float32Array { return null; }
 
-    protected createFaceUnNormals(): Float32Array {
-      let normals: number[] = [];
+    protected calculateFaceCrossProducts(): Float32Array {
+      let crossProducts: number[] = [];
       let vertices: Vector3[] = [];
 
       for (let v: number = 0; v < this.vertices.length; v += 3)
@@ -209,21 +207,21 @@ namespace FudgeCore {
 
         let v0: Vector3 = Vector3.DIFFERENCE(vertices[trigon[0]], vertices[trigon[1]]);
         let v1: Vector3 = Vector3.DIFFERENCE(vertices[trigon[0]], vertices[trigon[2]]);
-        let normal: Vector3 = Vector3.CROSS(v0, v1);
+        let crossProduct: Vector3 = Vector3.CROSS(v0, v1);
         let index: number = trigon[2] * 3;
-        normals[index] = normal.x;
-        normals[index + 1] = normal.y;
-        normals[index + 2] = normal.z;
+        crossProducts[index] = crossProduct.x;
+        crossProducts[index + 1] = crossProduct.y;
+        crossProducts[index + 2] = crossProduct.z;
       }
-      return new Float32Array(normals);
+      return new Float32Array(crossProducts);
     }
 
     protected createFaceNormals(): Float32Array {
       let normals: number[] = [];
-      let faceUnNormals: Float32Array = this.unNormalsFace;
+      let faceCrossProducts: Float32Array = this.faceCrossProducts;
 
-      for (let n: number = 0; n < faceUnNormals.length; n += 3) {
-        let normal: Vector3 = new Vector3(faceUnNormals[n], faceUnNormals[n + 1], faceUnNormals[n + 2]);
+      for (let n: number = 0; n < faceCrossProducts.length; n += 3) {
+        let normal: Vector3 = new Vector3(faceCrossProducts[n], faceCrossProducts[n + 1], faceCrossProducts[n + 2]);
         normal = Vector3.NORMALIZATION(normal);
         normals.push(normal.x, normal.y, normal.z);
       }
@@ -232,7 +230,7 @@ namespace FudgeCore {
 
     protected createVertexNormals(): Float32Array {
       let normals: Vector3[] = [];
-      let faceUnNormals: Float32Array = this.unNormalsFace;
+      let faceCrossProducts: Float32Array = this.faceCrossProducts;
 
       for (let v: number = 0; v < this.vertices.length; v += 3)
         normals.push(Vector3.ZERO());
@@ -240,7 +238,7 @@ namespace FudgeCore {
       for (let i: number = 0; i < this.indices.length; i += 3) {
         let trigon: number[] = [this.indices[i], this.indices[i + 1], this.indices[i + 2]];
         let index: number = trigon[2] * 3;
-        let normalFace: Vector3 = new Vector3(faceUnNormals[index], faceUnNormals[index + 1], faceUnNormals[index + 2]);
+        let normalFace: Vector3 = new Vector3(faceCrossProducts[index], faceCrossProducts[index + 1], faceCrossProducts[index + 2]);
 
         for (let t: number = 0; t < trigon.length; t++)
           normals[trigon[t]] = Vector3.SUM(normals[trigon[t]], normalFace);
@@ -282,9 +280,9 @@ namespace FudgeCore {
       delete _mutator.ƒradius;
       delete _mutator.ƒvertices;
       delete _mutator.ƒindices;
-      delete _mutator.ƒnormals;
+      delete _mutator.ƒnormalsVertex;
       delete _mutator.ƒnormalsFace;
-      delete _mutator.ƒunNormalsFace;
+      delete _mutator.ƒfaceCrossProducts;
       delete _mutator.ƒtextureUVs;
       delete _mutator.renderBuffers;
     }
