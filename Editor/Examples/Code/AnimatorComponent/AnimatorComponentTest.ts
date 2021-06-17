@@ -19,8 +19,8 @@ namespace AnimatorComponentTest {
     node.addChild(child);
 
     let camera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
-    camera.pivot.translate(new ƒ.Vector3(1, 1, 10));
-    camera.pivot.lookAt(ƒ.Vector3.ZERO());
+    camera.mtxPivot.translate(new ƒ.Vector3(1, 1, 10));
+    camera.mtxPivot.lookAt(ƒ.Vector3.ZERO());
 
     let canvas: HTMLCanvasElement = ƒAid.Canvas.create();
     document.body.appendChild(canvas);

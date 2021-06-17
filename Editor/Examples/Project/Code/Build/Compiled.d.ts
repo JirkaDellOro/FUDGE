@@ -24,7 +24,7 @@ declare namespace Script {
     class TimerMessage extends ƒ.ComponentScript {
         #private;
         prefix: string;
-        test: boolean;
+        count: number;
         constructor();
         hndTimer: (_event: ƒ.EventTimer) => void;
         hndAddComponent: (_event: Event) => void;

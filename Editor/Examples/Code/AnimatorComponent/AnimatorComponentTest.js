@@ -1,16 +1,25 @@
-///<reference types="../../../../Core/Build/FudgeCore"/>
+///<reference path="../../../../Aid/Build/FudgeAid.d.ts"/>
 var AnimatorComponentTest;
-///<reference types="../../../../Core/Build/FudgeCore"/>
+///<reference path="../../../../Aid/Build/FudgeAid.d.ts"/>
 (function (AnimatorComponentTest) {
     var ƒ = FudgeCore;
+    var ƒAid = FudgeAid;
     window.addEventListener("DOMContentLoaded", init);
     let node;
+    let viewport = new ƒ.Viewport();
     let startTime = Date.now();
     function init() {
-        Scenes.createMiniScene();
-        Scenes.createViewport();
-        Scenes.viewPort.draw();
-        node = Scenes.node;
+        let child = new ƒAid.Node("Test", ƒ.Matrix4x4.IDENTITY(), new ƒ.Material("Red", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("red"))), new ƒ.MeshCube());
+        child.mtxLocal.scaleX(2);
+        node.addChild(child);
+        let camera = new ƒ.ComponentCamera();
+        camera.mtxPivot.translate(new ƒ.Vector3(1, 1, 10));
+        camera.mtxPivot.lookAt(ƒ.Vector3.ZERO());
+        let canvas = ƒAid.Canvas.create();
+        document.body.appendChild(canvas);
+        viewport.initialize("TestViewport", node, camera, canvas);
+        viewport.showSceneGraph();
+        viewport.draw();
         initAnim();
     }
     function initAnim() {
@@ -65,8 +74,7 @@ var AnimatorComponentTest;
         ƒ.Loop.start();
     }
     function frame() {
-        ƒ.RenderManager.update();
-        Scenes.viewPort.draw();
+        viewport.draw();
     }
     function hndlEv(_e) {
         console.log(_e.type /*, (<ƒ.ComponentAnimator>_e.target).getContainer().name*/);
