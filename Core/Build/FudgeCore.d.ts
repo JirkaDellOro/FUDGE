@@ -3135,9 +3135,8 @@ declare namespace FudgeCore {
         protected ƒindices: Uint16Array;
         protected ƒtextureUVs: Float32Array;
         protected ƒnormalsFace: Float32Array;
-        protected ƒunNormalsFace: Float32Array;
+        protected ƒfaceCrossProducts: Float32Array;
         protected ƒnormalsVertex: Float32Array;
-        protected ƒnormals: Float32Array;
         protected ƒbox: Box;
         protected ƒradius: number;
         constructor(_name?: string);
@@ -3153,7 +3152,7 @@ declare namespace FudgeCore {
         get vertices(): Float32Array;
         get indices(): Uint16Array;
         get normalsFace(): Float32Array;
-        get unNormalsFace(): Float32Array;
+        get faceCrossProducts(): Float32Array;
         get normalsVertex(): Float32Array;
         get textureUVs(): Float32Array;
         get boundingBox(): Box;
@@ -3173,7 +3172,7 @@ declare namespace FudgeCore {
         protected createTextureUVs(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createNormals(): Float32Array;
-        protected createFaceUnNormals(): Float32Array;
+        protected calculateFaceCrossProducts(): Float32Array;
         protected createFaceNormals(): Float32Array;
         protected createVertexNormals(): Float32Array;
         protected createRadius(): number;
@@ -3277,7 +3276,7 @@ declare namespace FudgeCore {
         protected uvs: number[];
         protected inds: number[];
         protected facenormals: number[];
-        protected faceunnormals: number[];
+        protected facecrossproducts: number[];
         constructor(objString: string);
         /** Loads an obj file from the given source url and a returns a complete Node from it.
         * Multiple Objects are treated as a single Mesh. If no material is given, uses a default flat white material. */
@@ -3290,7 +3289,7 @@ declare namespace FudgeCore {
         protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;
         protected createIndices(): Uint16Array;
-        protected createFaceUnNormals(): Float32Array;
+        protected calculateFaceCrossProducts(): Float32Array;
         protected createFaceNormals(): Float32Array;
         protected createVertexNormals(): Float32Array;
     }
