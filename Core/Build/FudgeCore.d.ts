@@ -2527,6 +2527,7 @@ declare namespace FudgeCore {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class Matrix3x3 extends Mutable implements Serializable {
+        private static deg2rad;
         private data;
         private mutator;
         private vectors;
@@ -2644,6 +2645,7 @@ declare namespace FudgeCore {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class Matrix4x4 extends Mutable implements Serializable {
+        private static deg2rad;
         private data;
         private mutator;
         private vectors;
@@ -2683,7 +2685,6 @@ declare namespace FudgeCore {
         static TRANSLATION(_translate: Vector3): Matrix4x4;
         /**
          * Returns a matrix that rotates coordinates on the x-axis when multiplied by.
-         * @param _angleInDegrees The value of the rotation.
          */
         static ROTATION_X(_angleInDegrees: number): Matrix4x4;
         /**
@@ -2692,9 +2693,13 @@ declare namespace FudgeCore {
         static ROTATION_Y(_angleInDegrees: number): Matrix4x4;
         /**
          * Returns a matrix that rotates coordinates on the z-axis when multiplied by.
-         * @param _angleInDegrees The value of the rotation.
          */
         static ROTATION_Z(_angleInDegrees: number): Matrix4x4;
+        /**
+         * Returns a matrix that rotates coordinates when multiplied by, using the angles given.
+         * Rotation occurs around the axis in the order Z-Y-X .
+         */
+        static ROTATION(_eulerAnglesInDegrees: Vector3): Matrix4x4;
         /**
          * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
          */
