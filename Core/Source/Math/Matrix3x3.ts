@@ -1,7 +1,7 @@
 namespace FudgeCore {
 
   /**
-   * Represents the matrix as translation, rotation and scaling vector, being calculated from the matrix
+   * Represents the matrix as translation, rotation and scaling {@link Vector2}, being calculated from the matrix
    */
   interface VectorRepresentation {
     translation: Vector2;
@@ -52,7 +52,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given vector.
+     * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given {@link Vector2}.
      */
     public static TRANSLATION(_translate: Vector2): Matrix3x3 {
       const mtxResult: Matrix3x3 = Recycler.get(Matrix3x3);
@@ -82,7 +82,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
+     * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given {@link Vector2}
      */
     public static SCALING(_scalar: Vector2): Matrix3x3 {
       const mtxResult: Matrix3x3 = Recycler.get(Matrix3x3);
@@ -131,7 +131,7 @@ namespace FudgeCore {
     }
 
     /** 
-     * - get: a copy of the calculated translation vector   
+     * - get: a copy of the calculated translation {@link Vector2}   
      * - set: effect the matrix ignoring its rotation and scaling
      */
     public get translation(): Vector2 {
@@ -147,7 +147,7 @@ namespace FudgeCore {
     }
 
     /** 
-     * - get: a copy of the calculated rotation vector   
+     * - get: a copy of the calculated rotation {@link Vector2}   
      * - set: effect the matrix
      */
     public get rotation(): number {
@@ -161,7 +161,7 @@ namespace FudgeCore {
     }
 
     /** 
-     * - get: a copy of the calculated scale vector   
+     * - get: a copy of the calculated scale {@link Vector2}   
      * - set: effect the matrix
      */
     public get scaling(): Vector2 {
@@ -188,7 +188,7 @@ namespace FudgeCore {
 
     //#region Translation
     /**
-     * Add a translation by the given vector to this matrix 
+     * Add a translation by the given {@link Vector2} to this matrix 
      */
     public translate(_by: Vector2): void {
       const mtxResult: Matrix3x3 = Matrix3x3.MULTIPLICATION(this, Matrix3x3.TRANSLATION(_by));
@@ -217,7 +217,7 @@ namespace FudgeCore {
 
     //#region Scaling
     /**
-     * Add a scaling by the given vector to this matrix 
+     * Add a scaling by the given {@link Vector2} to this matrix 
      */
     public scale(_by: Vector2): void {
       const mtxResult: Matrix3x3 = Matrix3x3.MULTIPLICATION(this, Matrix3x3.SCALING(_by));

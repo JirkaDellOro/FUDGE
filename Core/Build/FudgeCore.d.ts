@@ -2535,7 +2535,7 @@ declare namespace FudgeCore {
         static PROJECTION(_width: number, _height: number): Matrix3x3;
         static IDENTITY(): Matrix3x3;
         /**
-         * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given vector.
+         * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given {@link Vector2}.
          */
         static TRANSLATION(_translate: Vector2): Matrix3x3;
         /**
@@ -2544,24 +2544,24 @@ declare namespace FudgeCore {
          */
         static ROTATION(_angleInDegrees: number): Matrix3x3;
         /**
-         * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
+         * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given {@link Vector2}
          */
         static SCALING(_scalar: Vector2): Matrix3x3;
         static MULTIPLICATION(_mtxLeft: Matrix3x3, _mtxRight: Matrix3x3): Matrix3x3;
         /**
-         * - get: a copy of the calculated translation vector
+         * - get: a copy of the calculated translation {@link Vector2}
          * - set: effect the matrix ignoring its rotation and scaling
          */
         get translation(): Vector2;
         set translation(_translation: Vector2);
         /**
-         * - get: a copy of the calculated rotation vector
+         * - get: a copy of the calculated rotation {@link Vector2}
          * - set: effect the matrix
          */
         get rotation(): number;
         set rotation(_rotation: number);
         /**
-         * - get: a copy of the calculated scale vector
+         * - get: a copy of the calculated scale {@link Vector2}
          * - set: effect the matrix
          */
         get scaling(): Vector2;
@@ -2571,7 +2571,7 @@ declare namespace FudgeCore {
          */
         get copy(): Matrix3x3;
         /**
-         * Add a translation by the given vector to this matrix
+         * Add a translation by the given {@link Vector2} to this matrix
          */
         translate(_by: Vector2): void;
         /**
@@ -2583,7 +2583,7 @@ declare namespace FudgeCore {
          */
         translateY(_y: number): void;
         /**
-         * Add a scaling by the given vector to this matrix
+         * Add a scaling by the given {@link Vector2} to this matrix
          */
         scale(_by: Vector2): void;
         /**
@@ -2626,7 +2626,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Represents the matrix as translation, rotation and scaling vector, being calculated from the matrix
+     * Represents the matrix as translation, rotation and scaling {@link Vector3}, being calculated from the matrix
      */
     interface VectorRepresentation {
         translation: Vector3;
@@ -2655,7 +2655,7 @@ declare namespace FudgeCore {
          */
         static IDENTITY(): Matrix4x4;
         /**
-         * Constructs a new matrix according to the translation, rotation and scaling vectors given
+         * Constructs a new matrix according to the translation, rotation and scaling {@link Vector3}s given
          */
         static CONSTRUCTION(_vectors: VectorRepresentation): Matrix4x4;
         /**
@@ -2671,16 +2671,16 @@ declare namespace FudgeCore {
         static INVERSION(_mtx: Matrix4x4): Matrix4x4;
         /**
          * Computes and returns a matrix with the given translation, its z-axis pointing directly at the given target,
-         * and a minimal angle between its y-axis and the given up-Vector, respetively calculating yaw and pitch.
+         * and a minimal angle between its y-axis and the given up-{@link Vector3}, respetively calculating yaw and pitch.
          */
         static LOOK_AT(_translation: Vector3, _target: Vector3, _up?: Vector3): Matrix4x4;
         /**
-         * Computes and returns a matrix with the given translation, its y-axis matching the given up-vector
+         * Computes and returns a matrix with the given translation, its y-axis matching the given up-{@link Vector3}
          * and its z-axis facing towards the given target at a minimal angle, respetively calculating yaw only.
          */
         static SHOW_TO(_translation: Vector3, _target: Vector3, _up?: Vector3): Matrix4x4;
         /**
-         * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given vector.
+         * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given {@link Vector3}.
          */
         static TRANSLATION(_translate: Vector3): Matrix4x4;
         /**
@@ -2701,7 +2701,7 @@ declare namespace FudgeCore {
          */
         static ROTATION(_eulerAnglesInDegrees: Vector3): Matrix4x4;
         /**
-         * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
+         * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given {@link Vector3}
          */
         static SCALING(_scalar: Vector3): Matrix4x4;
         /**
@@ -2729,19 +2729,19 @@ declare namespace FudgeCore {
          */
         static PROJECTION_ORTHOGRAPHIC(_left: number, _right: number, _bottom: number, _top: number, _near?: number, _far?: number): Matrix4x4;
         /**
-         * - get: a copy of the calculated translation vector
+         * - get: a copy of the calculated translation {@link Vector3}
          * - set: effect the matrix ignoring its rotation and scaling
          */
         set translation(_translation: Vector3);
         get translation(): Vector3;
         /**
-         * - get: a copy of the calculated rotation vector
+         * - get: a copy of the calculated rotation {@link Vector3}
          * - set: effect the matrix
          */
         get rotation(): Vector3;
         set rotation(_rotation: Vector3);
         /**
-         * - get: a copy of the calculated scale vector
+         * - get: a copy of the calculated scale {@link Vector3}
          * - set: effect the matrix
          */
         get scaling(): Vector3;
@@ -2751,7 +2751,7 @@ declare namespace FudgeCore {
          */
         get copy(): Matrix4x4;
         /**
-         * Rotate this matrix by given vector in the order Z, Y, X. Right hand rotation is used, thumb points in axis direction, fingers curling indicate rotation
+         * Rotate this matrix by given {@link Vector3} in the order Z, Y, X. Right hand rotation is used, thumb points in axis direction, fingers curling indicate rotation
          * The rotation is appended to already applied transforms, thus multiplied from the right. Set _fromLeft to true to switch and put it in front.
          */
         rotate(_by: Vector3, _fromLeft?: boolean): void;
@@ -2768,20 +2768,23 @@ declare namespace FudgeCore {
          */
         rotateZ(_angleInDegrees: number, _fromLeft?: boolean): void;
         /**
-         * Adjusts the rotation of this matrix to point the z-axis directly at the given target and tilts it to accord with the given up vector,
-         * respectively calculating yaw and pitch. If no up vector is given, the previous up-vector is used.
+         * Adjusts the rotation of this matrix to point the z-axis directly at the given target and tilts it to accord with the given up-{@link Vector3},
+         * respectively calculating yaw and pitch. If no up-{@link Vector3} is given, the previous up-{@link Vector3} is used.
          * When _preserveScaling is false, a rotated identity matrix is the result.
          */
         lookAt(_target: Vector3, _up?: Vector3, _preserveScaling?: boolean): void;
+        /**
+         * Same as {@link Matrix4x4.lookAt}, but optimized and needs testing
+         */
         lookAtRotate(_target: Vector3, _up?: Vector3, _preserveScaling?: boolean): void;
         /**
-         * Adjusts the rotation of this matrix to match its y-axis with the given up-vector and facing its z-axis toward the given target at minimal angle,
-         * respectively calculating yaw only. If no up vector is given, the previous up-vector is used.
+         * Adjusts the rotation of this matrix to match its y-axis with the given up-{@link Vector3} and facing its z-axis toward the given target at minimal angle,
+         * respectively calculating yaw only. If no up-{@link Vector3} is given, the previous up-{@link Vector3} is used.
          * When _preserveScaling is false, a rotated identity matrix is the result.
          */
         showTo(_target: Vector3, _up?: Vector3, _preserveScaling?: boolean): void;
         /**
-         * Add a translation by the given vector to this matrix.
+         * Add a translation by the given {@link Vector3} to this matrix.
          * If _local is true, translation occurs according to the current rotation and scaling of this matrix,
          * according to the parent otherwise.
          */
@@ -2799,7 +2802,7 @@ declare namespace FudgeCore {
          */
         translateZ(_z: number, _local?: boolean): void;
         /**
-         * Add a scaling by the given vector to this matrix
+         * Add a scaling by the given {@link Vector3} to this matrix
          */
         scale(_by: Vector3): void;
         /**
@@ -2855,6 +2858,9 @@ declare namespace FudgeCore {
          * Swaps the two cardinal axis and reverses the third, effectively rotating the transform 180 degrees around one and 90 degrees around a second axis
          */
         swapYZ(): void;
+        /**
+         * Returns the tranlation from this matrix to the target matrix
+         */
         getTranslationTo(_mtxTarget: Matrix4x4): Vector3;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
