@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "target": "ESNext",
-        "module": "none",
+        "module": "ESNext",
         "sourceMap": true,
         "strictFunctionTypes": true,
         "alwaysStrict": true,
@@ -9,9 +9,6 @@
         // "composite": true,
         "declaration": true,
         "strict": true,
-        "outFile": "../Build/Module.js"
-    },
-    "exclude": [
-        "node_modules"
-    ]
+        // "outFile": "../Build/Module.js"
+    }
 }

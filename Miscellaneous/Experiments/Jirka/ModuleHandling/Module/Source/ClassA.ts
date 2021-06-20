@@ -1,15 +1,15 @@
-///<reference path="ClassB.ts"/>
+// /<reference types="./ClassB"/>
+import { ClassB } from "./ClassB.js";
 
-module ModuleTest {
-  export class ClassA extends ClassB {
-    private x: number = 10;
-    static sayHello(): void {
-      console.log("Hello from ClassA");
-      ClassA.test(new ClassB());
-    }
+export class ClassA extends ClassB {
+  private x: number = 10;
+  static sayHello(): void {
+    console.log("Hello from ClassA");
+    ClassA.test(new ClassB());
+  }
 
-    static test(_b: ClassB): void {
-      console.log(_b);
-    }
+  static test(_b: ClassB): void {
+    console.log(_b);
   }
 }
+

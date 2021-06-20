@@ -1,7 +1,6 @@
-"use strict";
-import {ClassA, ClassB} from "./Build/Module.js";
-
-console.log();
+// import {ClassA, ClassB} from "./Build/Module.js";
+import { ClassA } from "./Source/ClassA.js";
+import { ClassB } from "./Source/ClassB.js";
 console.log(ClassA);
 console.log(ClassB);
 //# sourceMappingURL=Import.js.map

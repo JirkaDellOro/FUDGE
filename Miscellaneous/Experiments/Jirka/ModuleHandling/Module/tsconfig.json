@@ -8,6 +8,6 @@
         "strict": true,
     },
     "exclude": [
-        "node_modules"
+        "Build"
     ]
 }
