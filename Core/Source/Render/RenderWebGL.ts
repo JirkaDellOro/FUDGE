@@ -23,7 +23,7 @@ namespace FudgeCore {
 
   /**
    * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
-   * Methods and attributes of this class should not be called directly, only through {@link RenderManager]]
+   * Methods and attributes of this class should not be called directly, only through {@link Render}
    */
   export abstract class RenderWebGL extends EventTargetStatic {
     protected static crc3: WebGL2RenderingContext = RenderWebGL.initialize();
@@ -120,7 +120,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Clear the offscreen renderbuffer with the given {@link Color]]
+     * Clear the offscreen renderbuffer with the given {@link Color}
      */
     public static clear(_color: Color = null): void {
       RenderWebGL.crc3.clearColor(_color.r, _color.g, _color.b, _color.a);

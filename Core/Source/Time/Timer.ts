@@ -1,13 +1,13 @@
 namespace FudgeCore {
   /**
-   * Defines the signature of handler functions for {@link TimerEventƒ}s, very similar to usual event handler
+   * Defines the signature of handler functions for {@link EventTimer}s, very similar to usual event handler
    */
   export type TimerHandler = (_event: EventTimer) => void;
 
   /**
-   * A {@link Timer]]-instance internally uses window.setInterval to call a given handler with a given frequency a given number of times,
-   * passing an {@link TimerEventƒ]]-instance with additional information and given arguments. 
-   * The frequency scales with the {@link Time]]-instance the {@link Timer]]-instance is attached to.
+   * A {@link Timer}-instance internally uses window.setInterval to call a given handler with a given frequency a given number of times,
+   * passing an {@link EventTimer}-instance with additional information and given arguments. 
+   * The frequency scales with the {@link Time}-instance the {@link Timer}-instance is attached to.
    * 
    * @author Jirka Dell'Oro-Friedl, HFU, 2019
    */
@@ -83,7 +83,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Attaches a copy of this at its current state to the same {@link Time]]-instance. Used internally when rescaling {@link Time]]
+     * Attaches a copy of this at its current state to the same {@link Time}-instance. Used internally when rescaling {@link Time}
      */
     public installCopy(): Timer {
       return new Timer(this.time, this.elapse, this.count, this.handler, this.event.arguments);

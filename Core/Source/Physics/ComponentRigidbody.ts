@@ -124,7 +124,7 @@ namespace FudgeCore {
     }
 
     /**
-   * Returns the physical weight of the {@link Node]]
+   * Returns the physical weight of the {@link Node}
    */
     get mass(): number {
       return this.rigidbody.getMass();
@@ -306,7 +306,7 @@ namespace FudgeCore {
 
     /**
       * Checking for Collision with Triggers with a overlapping test, dispatching a custom event with information about the trigger,
-      * or triggered {@link Nod}. Automatically called in the RenderManager, no interaction needed.
+      * or triggered {@link Node}. Automatically called in the RenderManager, no interaction needed.
       */
     public checkTriggerEvents(): void {
       let possibleTriggers: ComponentRigidbody[] = Physics.world.getTriggerList(); //Get the array from the world that contains every trigger existing and check it with this body
@@ -447,7 +447,7 @@ namespace FudgeCore {
     //#region Velocity and Forces
 
     /**
-    * Get the current VELOCITY of the {@link Node]]
+    * Get the current VELOCITY of the {@link Node}
     */
     public getVelocity(): Vector3 {
       let velocity: OIMO.Vec3 = this.rigidbody.getLinearVelocity();
@@ -456,7 +456,7 @@ namespace FudgeCore {
 
 
     /**
-     * Sets the current VELOCITY of the {@link Node]]
+     * Sets the current VELOCITY of the {@link Node}
      */
     public setVelocity(_value: Vector3): void {
       let velocity: OIMO.Vec3 = new OIMO.Vec3(_value.x, _value.y, _value.z);
@@ -464,7 +464,7 @@ namespace FudgeCore {
     }
 
     /**
-* Get the current ANGULAR - VELOCITY of the {@link Node]]
+* Get the current ANGULAR - VELOCITY of the {@link Node}
 */
     public getAngularVelocity(): Vector3 {
       let velocity: OIMO.Vec3 = this.rigidbody.getAngularVelocity();
@@ -473,7 +473,7 @@ namespace FudgeCore {
 
 
     /**
-   * Sets the current ANGULAR - VELOCITY of the {@link Node]]
+   * Sets the current ANGULAR - VELOCITY of the {@link Node}
    */
     public setAngularVelocity(_value: Vector3): void {
       let velocity: OIMO.Vec3 = new OIMO.Vec3(_value.x, _value.y, _value.z);

@@ -1,6 +1,6 @@
 namespace FudgeCore {
   /**
-   * Stores information provided by {@link Render]]-picking e.g. using {@link Picker} and provides methods for further calculation of positions and normals etc.
+   * Stores information provided by {@link Render}-picking e.g. using {@link Picker} and provides methods for further calculation of positions and normals etc.
    * 
    * @authors Jirka Dell'Oro-Friedl, HFU, 2021
    */
@@ -77,7 +77,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Called solely by the renderer to enable calculation of the world coordinates of this {@link Pick]]
+     * Called solely by the renderer to enable calculation of the world coordinates of this {@link Pick}
      */
     public set mtxViewToWorld(_mtxViewToWorld: Matrix4x4) {
       this.#mtxViewToWorld = _mtxViewToWorld;

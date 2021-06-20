@@ -1,6 +1,6 @@
 namespace FudgeCore {
   /**
-   * A sequence of {@link AnimationKey}s that is mapped to an attribute of a {@link Node} or its {@link Component}s inside the {@link Animatio}.
+   * A sequence of {@link AnimationKey}s that is mapped to an attribute of a {@link Node} or its {@link Component}s inside the {@link Animation}.
    * Provides functions to modify said keys
    * @author Lukas Scheuerle, HFU, 2019
    */

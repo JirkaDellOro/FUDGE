@@ -72,7 +72,7 @@ namespace FudgeCore {
   /**
    * Animation Class to hold all required Objects that are part of an Animation.
    * Also holds functions to play said Animation.
-   * Can be added to a Node and played through {@link ComponentAnimato}.
+   * Can be added to a Node and played through {@link ComponentAnimator}.
    * @author Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021
    */
   export class Animation extends Mutable implements SerializableResource {

@@ -127,7 +127,7 @@ namespace FudgeCore {
   }
 
   /**
-   * Standard {@link Random]]-instance using Math.random().
+   * Standard {@link Random}-instance using Math.random().
    */
   export const random: Random = new Random();
 }

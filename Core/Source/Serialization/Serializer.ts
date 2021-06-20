@@ -45,7 +45,7 @@ namespace FudgeCore {
     private static namespaces: NamespaceRegister = { "ƒ": FudgeCore };
 
     /**
-     * Registers a namespace to the {@link Serializer]], to enable automatic instantiation of classes defined within
+     * Registers a namespace to the {@link Serializer}, to enable automatic instantiation of classes defined within
      * @param _namespace 
      */
     public static registerNamespace(_namespace: Object): string {
@@ -161,7 +161,7 @@ namespace FudgeCore {
     public static prettify(_json: string): string { return _json; }
 
     /**
-     * Returns a formatted, human readable JSON-String, representing the given {@link Serializaion} that may have been created by {@link Serialize}.serialize
+     * Returns a formatted, human readable JSON-String, representing the given {@link Serialization} that may have been created by {@link Serializer}.serialize
      * @param _serialization
      */
     public static stringify(_serialization: Serialization): string {
@@ -172,7 +172,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns a {@link Serialization} created from the given JSON-String. Result may be passed to {@link Serialize}.deserialize
+     * Returns a {@link Serialization} created from the given JSON-String. Result may be passed to {@link Serializer.deserialize}
      * @param _json 
      */
     public static parse(_json: string): Serialization {

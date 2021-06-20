@@ -4,12 +4,12 @@
 namespace FudgeCore {
   /**
    * The Debug-Class offers functions known from the console-object and additions, 
-   * routing the information to various {@link DebugTargets} that can be easily defined by the developers and registerd by users
+   * routing the information to various {@link DebugTarget}s that can be easily defined by the developers and registerd by users
    * Override functions in subclasses of {@link DebugTarget} and register them as their delegates
    */
   export class Debug {
     /**
-     * For each set filter, this associative array keeps references to the registered delegate functions of the chosen {@link DebugTargets]]
+     * For each set filter, this associative array keeps references to the registered delegate functions of the chosen {@link DebugTarget}s
      */
     private static delegates: { [filter: number]: MapDebugTargetToDelegate } = Debug.setupConsole();
 

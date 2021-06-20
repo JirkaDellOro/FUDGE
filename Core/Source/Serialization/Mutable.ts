@@ -37,7 +37,7 @@ namespace FudgeCore {
   }
 
   /**
-   * Base class for all types being mutable using {@link Mutator]]-objects, thus providing and using interfaces created at runtime.  
+   * Base class for all types being mutable using {@link Mutator}-objects, thus providing and using interfaces created at runtime.  
    * Mutables provide a {@link Mutator} that is build by collecting all object-properties that are either of a primitive type or again Mutable.
    * Subclasses can either reduce the standard {@link Mutator} built by this base class by deleting properties or implement an individual getMutator-method.
    * The provided properties of the {@link Mutator} must match public properties or getters/setters of the object.
@@ -100,21 +100,21 @@ namespace FudgeCore {
 
     /**
      * Collect the attributes of the instance and their values applicable for animation.
-     * Basic functionality is identical to {@link getMutator]], returned mutator should then be reduced by the subclassed instance
+     * Basic functionality is identical to {@link getMutator}, returned mutator should then be reduced by the subclassed instance
      */
     public getMutatorForAnimation(): MutatorForAnimation {
       return <MutatorForAnimation>this.getMutator();
     }
     /**
      * Collect the attributes of the instance and their values applicable for the user interface.
-     * Basic functionality is identical to {@link getMutator]], returned mutator should then be reduced by the subclassed instance
+     * Basic functionality is identical to {@link getMutator}, returned mutator should then be reduced by the subclassed instance
      */
     public getMutatorForUserInterface(): MutatorForUserInterface {
       return <MutatorForUserInterface>this.getMutator();
     }
     /**
      * Collect the attributes of the instance and their values applicable for indiviualization by the component.
-     * Basic functionality is identical to {@link getMutator]], returned mutator should then be reduced by the subclassed instance
+     * Basic functionality is identical to {@link getMutator}, returned mutator should then be reduced by the subclassed instance
      */
     // public getMutatorForComponent(): MutatorForComponent {
     //     return <MutatorForComponent>this.getMutator();

@@ -1,6 +1,6 @@
 namespace FudgeCore {
   /**
-   * Baseclass for materials. Combines a {@link Shader} with a compatible {@link Coat]]
+   * Baseclass for materials. Combines a {@link Shader} with a compatible {@link Coat}
    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
    */
   export class Material extends Mutable implements SerializableResource {
@@ -32,7 +32,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Makes this material reference the given {@link Coat} if it is compatible with the referenced {@link Shader]]
+     * Makes this material reference the given {@link Coat} if it is compatible with the referenced {@link Shader}
      * @param _coat 
      */
     public setCoat(_coat: Coat): void {
@@ -52,7 +52,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Changes the materials reference to the given {@link Shader]], creates and references a new {@link Coat} instance  
+     * Changes the materials reference to the given {@link Shader}, creates and references a new {@link Coat} instance  
      * and mutates the new coat to preserve matching properties.
      * @param _shaderType 
      */

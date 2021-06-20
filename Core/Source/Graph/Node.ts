@@ -42,7 +42,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Shortcut to retrieve this nodes {@link ComponentTransform]]
+     * Shortcut to retrieve this nodes {@link ComponentTransform}
      */
     public get cmpTransform(): ComponentTransform {
       return <ComponentTransform>this.getComponents(ComponentTransform)[0];
@@ -133,7 +133,7 @@ namespace FudgeCore {
 
     /**
      * Simply calls {@link addChild}. This reference is here solely because appendChild is the equivalent method in DOM.
-     * See and preferably use {@link addChild]]
+     * See and preferably use {@link addChild}
      */
     // tslint:disable-next-line: member-ordering
     public readonly appendChild: (_child: Node) => void = this.addChild;
@@ -240,7 +240,7 @@ namespace FudgeCore {
 
     /**
      * Applies a Mutator from {@link Animation} to all its components and transfers it to its children.
-     * @param _mutator The mutator generated from an {@link Animation]]
+     * @param _mutator The mutator generated from an {@link Animation}
      */
     public applyAnimation(_mutator: Mutator): void {
       if (_mutator.components) {

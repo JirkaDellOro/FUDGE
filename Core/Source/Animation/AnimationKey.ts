@@ -5,7 +5,7 @@ namespace FudgeCore {
   /**
    * Holds information about set points in time, their accompanying values as well as their slopes. 
    * Also holds a reference to the {@link AnimationFunction}s that come in and out of the sides. The {@link AnimationFunction}s are handled by the {@link AnimationSequence}s.
-   * Saved inside an {@link AnimationSequenc}.
+   * Saved inside an {@link AnimationSequence}.
    * @author Lukas Scheuerle, HFU, 2019
    */
   export class AnimationKey extends Mutable implements Serializable {

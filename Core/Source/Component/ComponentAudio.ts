@@ -15,7 +15,7 @@ namespace FudgeCore {
   }
 
   /**
-   * Builds a minimal audio graph (by default in {@link AudioManage}.default) and synchronizes it with the containing {@link Node]]
+   * Builds a minimal audio graph (by default in {@link AudioManager}.default) and synchronizes it with the containing {@link Node}
    * ```plaintext
    * ┌ AudioManager(.default) ────────────────────────┐
    * │ ┌ ComponentAudio ───────────────────┐          │
@@ -124,7 +124,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Inserts AudioNodes between the panner and the local gain of this {@link ComponentAudio]]
+     * Inserts AudioNodes between the panner and the local gain of this {@link ComponentAudio}
      * _input and _output may be the same AudioNode, if there is only one to insert,
      * or may have multiple AudioNode between them to create an effect-graph.\
      * Note that {@link ComponentAudio} does not keep track of inserted AudioNodes!

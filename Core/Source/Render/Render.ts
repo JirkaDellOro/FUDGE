@@ -110,8 +110,8 @@ namespace FudgeCore {
 
     //#region Picking
     /**
-     * Used with a {@link Picker]]-camera, this method renders one pixel with picking information 
-     * for each node in the line of sight and return that as an unsorted {@link Pick]]-array
+     * Used with a {@link Picker}-camera, this method renders one pixel with picking information 
+     * for each node in the line of sight and return that as an unsorted {@link Pick}-array
      */
     public static pickBranch(_branch: Node, _cmpCamera: ComponentCamera): Pick[] { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
       Render.ƒpicked = [];

@@ -1,6 +1,6 @@
 namespace FudgeCore {
   /**
-   * An instance of a {@link Grap}.  
+   * An instance of a {@link Graph}.  
    * This node keeps a reference to its resource an can thus optimize serialization
    * @author Jirka Dell'Oro-Friedl, HFU, 2019
    * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource

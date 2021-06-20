@@ -8,7 +8,7 @@ namespace FudgeCore {
    */
 
   export const enum EVENT {
-    /** dispatched to targets registered at {@link Loop]], when requested animation frame starts */
+    /** dispatched to targets registered at {@link Loop}, when requested animation frame starts */
     LOOP_FRAME = "loopFrame",
     /** dispatched to a {@link Component} when its being added to a {@link Node} */
     COMPONENT_ADD = "componentAdd",
@@ -36,9 +36,9 @@ namespace FudgeCore {
     GRAPH_INSTANTIATED = "graphInstantiated",
     /** dispatched to {@link Time} when it's scaling changed  */
     TIME_SCALED = "timeScaled",
-    /** dispatched to {@link FileIo} when a list of files has been loaded  */
+    /** dispatched to {@link FileIoBrowserLocal} when a list of files has been loaded  */
     FILE_LOADED = "fileLoaded",
-    /** dispatched to {@link FileIo} when a list of files has been saved */
+    /** dispatched to {@link FileIoBrowserLocal} when a list of files has been saved */
     FILE_SAVED = "fileSaved",
     /** dispatched to {@link Node} when recalculating transforms for render */
     RENDER_PREPARE = "renderPrepare",
