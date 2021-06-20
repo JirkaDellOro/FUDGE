@@ -1,6 +1,6 @@
 namespace FudgeCore {
   /**
-   * A node managed by [[Project]] that functions as a template for [[GraphInstance]]s 
+   * A node managed by {@link Project} that functions as a template for {@link GraphInstance}s 
    * @author Jirka Dell'Oro-Friedl, HFU, 2019
    * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource
    */

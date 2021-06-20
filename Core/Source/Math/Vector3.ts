@@ -348,7 +348,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Reflects this vector at a given normal. See [[REFLECTION]]
+     * Reflects this vector at a given normal. See {@link REFLECTION]]
      */
     public reflect(_normal: Vector3): void {
       const reflected: Vector3 = Vector3.REFLECTION(this, _normal);

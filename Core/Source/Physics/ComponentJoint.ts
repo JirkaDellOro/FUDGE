@@ -1,8 +1,8 @@
 namespace FudgeCore {
   /**
-     * Acts as the physical representation of a connection between two [[Node]]'s.
+     * Acts as the physical representation of a connection between two {@link Node}'s.
      * The type of conncetion is defined by the subclasses like prismatic joint, cylinder joint etc.
-     * A Rigidbody on the [[Node]] that this component is added to is needed. Setting the connectedRigidbody and
+     * A Rigidbody on the {@link Node} that this component is added to is needed. Setting the connectedRigidbody and
      * initializing the connection creates a physical connection between them. This differs from a connection through hierarchy
      * in the node structure of fudge. Joints can have different DOF's (Degrees Of Freedom), 1 Axis that can either twist or swing is a degree of freedom.
      * A joint typically consists of a motor that limits movement/rotation or is activly trying to move to a limit. And a spring which defines the rigidity.

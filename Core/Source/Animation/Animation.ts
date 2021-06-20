@@ -3,7 +3,7 @@
 namespace FudgeCore {
   /**
    * Holds information about the AnimationStructure that the Animation uses to map the Sequences to the Attributes.
-   * Built out of a [[Node]]'s serialsation, it swaps the values with [[AnimationSequence]]s.
+   * Built out of a {@link Node}'s serialsation, it swaps the values with {@link AnimationSequence}s.
    */
   export interface AnimationStructure {
     [attribute: string]: Serialization | AnimationSequence;
@@ -72,7 +72,7 @@ namespace FudgeCore {
   /**
    * Animation Class to hold all required Objects that are part of an Animation.
    * Also holds functions to play said Animation.
-   * Can be added to a Node and played through [[ComponentAnimator]].
+   * Can be added to a Node and played through {@link ComponentAnimato}.
    * @author Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021
    */
   export class Animation extends Mutable implements SerializableResource {
@@ -115,7 +115,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Generates a new "Mutator" with the information to apply to the [[Node]] the [[ComponentAnimator]] is attached to with [[Node.applyAnimation()]].
+     * Generates a new "Mutator" with the information to apply to the {@link Node} the {@link ComponentAnimator} is attached to with {@link Node.applyAnimation}.
      * @param _time The time at which the animation currently is at
      * @param _direction The direction in which the animation is supposed to be playing back. >0 == forward, 0 == stop, <0 == backwards
      * @param _playback The playbackmode the animation is supposed to be calculated with.
@@ -141,7 +141,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns a list of the names of the events the [[ComponentAnimator]] needs to fire between _min and _max. 
+     * Returns a list of the names of the events the {@link ComponentAnimator} needs to fire between _min and _max. 
      * @param _min The minimum time (inclusive) to check between
      * @param _max The maximum time (exclusive) to check between
      * @param _playback The playback mode to check in. Has an effect on when the Events are fired. 
@@ -384,9 +384,9 @@ namespace FudgeCore {
     }
 
     /**
-     * Ensures the existance of the requested [[AnimationStrcuture]] and returns it.
+     * Ensures the existance of the requested {@link AnimationStrcuture} and returns it.
      * @param _type the type of the structure to get
-     * @returns the requested [[AnimationStructure]]
+     * @returns the requested {@link AnimationStructure]]
      */
     private getProcessedAnimationStructure(_type: ANIMATION_STRUCTURE_TYPE): AnimationStructure {
       if (!this.animationStructuresProcessed.has(_type)) {
@@ -414,9 +414,9 @@ namespace FudgeCore {
     }
 
     /**
-     * Ensures the existance of the requested [[AnimationEventTrigger]] and returns it.
+     * Ensures the existance of the requested {@link AnimationEventTrigger} and returns it.
      * @param _type The type of AnimationEventTrigger to get
-     * @returns the requested [[AnimationEventTrigger]]
+     * @returns the requested {@link AnimationEventTrigger]]
      */
     private getProcessedEventTrigger(_type: ANIMATION_STRUCTURE_TYPE): AnimationEventTrigger {
       if (!this.eventsProcessed.has(_type)) {
@@ -477,7 +477,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Creates a rastered [[AnimationSequence]] out of a given sequence.
+     * Creates a rastered {@link AnimationSequence} out of a given sequence.
      * @param _sequence The sequence to calculate the new sequence out of
      * @returns the rastered sequence.
      */
@@ -492,7 +492,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Creates a new reversed [[AnimationEventTrigger]] object based on the given one.  
+     * Creates a new reversed {@link AnimationEventTrigger} object based on the given one.  
      * @param _events the event object to calculate the new one out of
      * @returns the reversed event object
      */
@@ -505,7 +505,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Creates a rastered [[AnimationEventTrigger]] object based on the given one.  
+     * Creates a rastered {@link AnimationEventTrigger} object based on the given one.  
      * @param _events the event object to calculate the new one out of
      * @returns the rastered event object
      */

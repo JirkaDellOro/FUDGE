@@ -49,7 +49,7 @@ namespace FudgeCore {
     /**
 
     /**
-     * The exact position where the two [[Node]]s are connected. When changed after initialization the joint needs to be reconnected.
+     * The exact position where the two {@link Node}s are connected. When changed after initialization the joint needs to be reconnected.
      */
     get anchor(): Vector3 {
       return new Vector3(this.jointAnchor.x, this.jointAnchor.y, this.jointAnchor.z);

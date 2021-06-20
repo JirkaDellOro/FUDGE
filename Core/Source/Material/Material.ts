@@ -1,6 +1,6 @@
 namespace FudgeCore {
   /**
-   * Baseclass for materials. Combines a [[Shader]] with a compatible [[Coat]]
+   * Baseclass for materials. Combines a {@link Shader} with a compatible {@link Coat]]
    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
    */
   export class Material extends Mutable implements SerializableResource {
@@ -24,7 +24,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Creates a new [[Coat]] instance that is valid for the [[Shader]] referenced by this material
+     * Creates a new {@link Coat} instance that is valid for the {@link Shader} referenced by this material
      */
     public createCoatMatchingShader(): Coat {
       let coat: Coat = new (this.shaderType.getCoat())();
@@ -32,7 +32,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Makes this material reference the given [[Coat]] if it is compatible with the referenced [[Shader]]
+     * Makes this material reference the given {@link Coat} if it is compatible with the referenced {@link Shader]]
      * @param _coat 
      */
     public setCoat(_coat: Coat): void {
@@ -45,14 +45,14 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns the currently referenced [[Coat]] instance
+     * Returns the currently referenced {@link Coat} instance
      */
     public getCoat(): Coat {
       return this.coat;
     }
 
     /**
-     * Changes the materials reference to the given [[Shader]], creates and references a new [[Coat]] instance  
+     * Changes the materials reference to the given {@link Shader]], creates and references a new {@link Coat} instance  
      * and mutates the new coat to preserve matching properties.
      * @param _shaderType 
      */
@@ -64,7 +64,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns the [[Shader]] referenced by this material
+     * Returns the {@link Shader} referenced by this material
      */
     public getShader(): typeof Shader {
       return this.shaderType;

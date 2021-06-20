@@ -15,16 +15,16 @@ namespace FudgeCore {
   }
 
   /**
-   * Handles the external serialization and deserialization of [[Serializable]] objects. The internal process is handled by the objects themselves.  
-   * A [[Serialization]] object can be created from a [[Serializable]] object and a JSON-String may be created from that.  
-   * Vice versa, a JSON-String can be parsed to a [[Serialization]] which can be deserialized to a [[Serializable]] object.
+   * Handles the external serialization and deserialization of {@link Serializable} objects. The internal process is handled by the objects themselves.  
+   * A {@link Serialization} object can be created from a {@link Serializable} object and a JSON-String may be created from that.  
+   * Vice versa, a JSON-String can be parsed to a {@link Serialization} which can be deserialized to a {@link Serializable} object.
    * ```plaintext
    *  [Serializable] → (serialize) → [Serialization] → (stringify) → [String] → (save or send)
    *                                        ↓                            ↓                  ↓         
    *                [Serializable] ← (deserialize) ← [Serialization] ← (parse) ← (load) ← [Medium]
    * ```      
    * While the internal serialize/deserialize method1s of the objects care of the selection of information needed to recreate the object and its structure,  
-   * the [[Serializer]] keeps track of the namespaces and classes in order to recreate [[Serializable]] objects. The general structure of a [[Serialization]] is as follows  
+   * the {@link Serializer} keeps track of the namespaces and classes in order to recreate {@link Serializable} objects. The general structure of a {@link Serialization} is as follows  
    * ```plaintext
    * {
    *      namespaceName.className: {
@@ -45,7 +45,7 @@ namespace FudgeCore {
     private static namespaces: NamespaceRegister = { "ƒ": FudgeCore };
 
     /**
-     * Registers a namespace to the [[Serializer]], to enable automatic instantiation of classes defined within
+     * Registers a namespace to the {@link Serializer]], to enable automatic instantiation of classes defined within
      * @param _namespace 
      */
     public static registerNamespace(_namespace: Object): string {
@@ -74,7 +74,7 @@ namespace FudgeCore {
     /**
      * Returns a javascript object representing the serializable FUDGE-object given,
      * including attached components, children, superclass-objects all information needed for reconstruction
-     * @param _object An object to serialize, implementing the [[Serializable]] interface
+     * @param _object An object to serialize, implementing the {@link Serializable} interface
      */
     public static serialize(_object: Serializable): Serialization {
       let serialization: Serialization = {};
@@ -89,7 +89,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns a FUDGE-object reconstructed from the information in the [[Serialization]] given,
+     * Returns a FUDGE-object reconstructed from the information in the {@link Serialization} given,
      * including attached components, children, superclass-objects
      * @param _serialization 
      */
@@ -112,7 +112,7 @@ namespace FudgeCore {
     /**
      * Returns an Array of javascript object representing the serializable FUDGE-objects given in the array,
      * including attached components, children, superclass-objects all information needed for reconstruction
-     * @param _object An object to serialize, implementing the [[Serializable]] interface
+     * @param _object An object to serialize, implementing the {@link Serializable} interface
      */
     public static serializeArray<T extends Serializable>(_type: new () => T, _objects: Serializable[]): Serialization {
       let serializations: Serialization[] = [];
@@ -129,7 +129,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns an Array of FUDGE-objects reconstructed from the information in the array of [[Serialization]]s given,
+     * Returns an Array of FUDGE-objects reconstructed from the information in the array of {@link Serialization}s given,
      * including attached components, children, superclass-objects
      * @param _serializations 
      */
@@ -161,7 +161,7 @@ namespace FudgeCore {
     public static prettify(_json: string): string { return _json; }
 
     /**
-     * Returns a formatted, human readable JSON-String, representing the given [[Serializaion]] that may have been created by [[Serializer]].serialize
+     * Returns a formatted, human readable JSON-String, representing the given {@link Serializaion} that may have been created by {@link Serialize}.serialize
      * @param _serialization
      */
     public static stringify(_serialization: Serialization): string {
@@ -172,7 +172,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns a [[Serialization]] created from the given JSON-String. Result may be passed to [[Serializer]].deserialize
+     * Returns a {@link Serialization} created from the given JSON-String. Result may be passed to {@link Serialize}.deserialize
      * @param _json 
      */
     public static parse(_json: string): Serialization {

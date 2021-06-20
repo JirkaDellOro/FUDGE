@@ -6,7 +6,7 @@ namespace FudgeCore {
     textureUVs: WebGLBuffer;
     normalsFace: WebGLBuffer;
   }
- //gives WebGL Buffer the data from the [[Mesh]]
+ //gives WebGL Buffer the data from the {@link Mesh]]
   export class RenderInjectorMesh {
     public static decorate(_constructor: Function): void {
       Object.defineProperty(_constructor.prototype, "useRenderBuffers", {

@@ -4,7 +4,7 @@
 namespace FudgeCore {
 
   /**
-   * Holds a reference to an [[Animation]] and controls it. Controls playback and playmode as well as speed.
+   * Holds a reference to an {@link Animation} and controls it. Controls playback and playmode as well as speed.
    * @authors Lukas Scheuerle, HFU, 2019
    */
   export class ComponentAnimator extends Component {

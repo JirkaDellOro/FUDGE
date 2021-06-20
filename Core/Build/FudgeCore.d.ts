@@ -50,12 +50,12 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * The Debug-Class offers functions known from the console-object and additions,
-     * routing the information to various [[DebugTargets]] that can be easily defined by the developers and registerd by users
-     * Override functions in subclasses of [[DebugTarget]] and register them as their delegates
+     * routing the information to various {@link DebugTargets} that can be easily defined by the developers and registerd by users
+     * Override functions in subclasses of {@link DebugTarget} and register them as their delegates
      */
     class Debug {
         /**
-         * For each set filter, this associative array keeps references to the registered delegate functions of the chosen [[DebugTargets]]
+         * For each set filter, this associative array keeps references to the registered delegate functions of the chosen {@link DebugTargets]]
          */
         private static delegates;
         /**
@@ -120,39 +120,39 @@ declare namespace FudgeCore {
      * Types of events specific to Fudge, in addition to the standard DOM/Browser-Types and custom strings
      */
     const enum EVENT {
-        /** dispatched to targets registered at [[Loop]], when requested animation frame starts */
+        /** dispatched to targets registered at {@link Loop]], when requested animation frame starts */
         LOOP_FRAME = "loopFrame",
-        /** dispatched to a [[Component]] when its being added to a [[Node]] */
+        /** dispatched to a {@link Component} when its being added to a {@link Node} */
         COMPONENT_ADD = "componentAdd",
-        /** dispatched to a [[Component]] when its being removed from a [[Node]] */
+        /** dispatched to a {@link Component} when its being removed from a {@link Node} */
         COMPONENT_REMOVE = "componentRemove",
-        /** dispatched to a [[Component]] when its being activated */
+        /** dispatched to a {@link Component} when its being activated */
         COMPONENT_ACTIVATE = "componentActivate",
-        /** dispatched to a [[Component]] when its being deactivated */
+        /** dispatched to a {@link Component} when its being deactivated */
         COMPONENT_DEACTIVATE = "componentDeactivate",
-        /** dispatched to a child [[Node]] and its ancestors after it was appended to a parent */
+        /** dispatched to a child {@link Node} and its ancestors after it was appended to a parent */
         CHILD_APPEND = "childAppend",
-        /** dispatched to a child [[Node]] and its ancestors just before its being removed from its parent */
+        /** dispatched to a child {@link Node} and its ancestors just before its being removed from its parent */
         CHILD_REMOVE = "childRemove",
-        /** dispatched to a [[Mutable]] when its being mutated */
+        /** dispatched to a {@link Mutable} when its being mutated */
         MUTATE = "mutate",
-        /** dispatched to [[Viewport]] when it gets the focus to receive keyboard input */
+        /** dispatched to {@link Viewport} when it gets the focus to receive keyboard input */
         FOCUS_IN = "focusin",
-        /** dispatched to [[Viewport]] when it loses the focus to receive keyboard input */
+        /** dispatched to {@link Viewport} when it loses the focus to receive keyboard input */
         FOCUS_OUT = "focusout",
-        /** dispatched to [[Node]] when it's done serializing */
+        /** dispatched to {@link Node} when it's done serializing */
         NODE_SERIALIZED = "nodeSerialized",
-        /** dispatched to [[Node]] when it's done deserializing, so all components, children and attributes are available */
+        /** dispatched to {@link Node} when it's done deserializing, so all components, children and attributes are available */
         NODE_DESERIALIZED = "nodeDeserialized",
-        /** dispatched to [[GraphInstance]] when it's content is set according to a serialization of a [[Graph]]  */
+        /** dispatched to {@link GraphInstance} when it's content is set according to a serialization of a {@link Graph}  */
         GRAPH_INSTANTIATED = "graphInstantiated",
-        /** dispatched to [[Time]] when it's scaling changed  */
+        /** dispatched to {@link Time} when it's scaling changed  */
         TIME_SCALED = "timeScaled",
-        /** dispatched to [[FileIo]] when a list of files has been loaded  */
+        /** dispatched to {@link FileIo} when a list of files has been loaded  */
         FILE_LOADED = "fileLoaded",
-        /** dispatched to [[FileIo]] when a list of files has been saved */
+        /** dispatched to {@link FileIo} when a list of files has been saved */
         FILE_SAVED = "fileSaved",
-        /** dispatched to [[Node]] when recalculating transforms for render */
+        /** dispatched to {@link Node} when recalculating transforms for render */
         RENDER_PREPARE = "renderPrepare",
         RENDER_PREPARE_START = "renderPrepareStart",
         RENDER_PREPARE_END = "renderPrepareEnd"
@@ -199,15 +199,15 @@ declare namespace FudgeCore {
      */
     function getMutatorOfArbitrary(_object: Object): Mutator;
     /**
-     * Base class for all types being mutable using [[Mutator]]-objects, thus providing and using interfaces created at runtime.
-     * Mutables provide a [[Mutator]] that is build by collecting all object-properties that are either of a primitive type or again Mutable.
-     * Subclasses can either reduce the standard [[Mutator]] built by this base class by deleting properties or implement an individual getMutator-method.
-     * The provided properties of the [[Mutator]] must match public properties or getters/setters of the object.
+     * Base class for all types being mutable using {@link Mutator]]-objects, thus providing and using interfaces created at runtime.
+     * Mutables provide a {@link Mutator} that is build by collecting all object-properties that are either of a primitive type or again Mutable.
+     * Subclasses can either reduce the standard {@link Mutator} built by this base class by deleting properties or implement an individual getMutator-method.
+     * The provided properties of the {@link Mutator} must match public properties or getters/setters of the object.
      * Otherwise, they will be ignored if not handled by an override of the mutate-method in the subclass and throw errors in an automatically generated user-interface for the object.
      */
     abstract class Mutable extends EventTargetƒ {
         /**
-         * Decorator allows to attach [[Mutable]] functionality to existing classes.
+         * Decorator allows to attach {@link Mutable} functionality to existing classes.
          */
         /**
          * Retrieves the type of this mutable subclass as the name of the runtime class
@@ -217,22 +217,22 @@ declare namespace FudgeCore {
         /**
          * Collect applicable attributes of the instance and copies of their values in a Mutator-object.
          * By default, a mutator cannot extended, since extensions are not available in the object the mutator belongs to.
-         * A mutator may be reduced by the descendants of [[Mutable]] to contain only the properties needed.
+         * A mutator may be reduced by the descendants of {@link Mutable} to contain only the properties needed.
          */
         getMutator(_extendable?: boolean): Mutator;
         /**
          * Collect the attributes of the instance and their values applicable for animation.
-         * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
+         * Basic functionality is identical to {@link getMutator]], returned mutator should then be reduced by the subclassed instance
          */
         getMutatorForAnimation(): MutatorForAnimation;
         /**
          * Collect the attributes of the instance and their values applicable for the user interface.
-         * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
+         * Basic functionality is identical to {@link getMutator]], returned mutator should then be reduced by the subclassed instance
          */
         getMutatorForUserInterface(): MutatorForUserInterface;
         /**
          * Collect the attributes of the instance and their values applicable for indiviualization by the component.
-         * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
+         * Basic functionality is identical to {@link getMutator]], returned mutator should then be reduced by the subclassed instance
          */
         /**
          * Returns an associative array with the same attributes as the given mutator, but with the corresponding types as string-values
@@ -266,16 +266,16 @@ declare namespace FudgeCore {
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }
     /**
-     * Handles the external serialization and deserialization of [[Serializable]] objects. The internal process is handled by the objects themselves.
-     * A [[Serialization]] object can be created from a [[Serializable]] object and a JSON-String may be created from that.
-     * Vice versa, a JSON-String can be parsed to a [[Serialization]] which can be deserialized to a [[Serializable]] object.
+     * Handles the external serialization and deserialization of {@link Serializable} objects. The internal process is handled by the objects themselves.
+     * A {@link Serialization} object can be created from a {@link Serializable} object and a JSON-String may be created from that.
+     * Vice versa, a JSON-String can be parsed to a {@link Serialization} which can be deserialized to a {@link Serializable} object.
      * ```plaintext
      *  [Serializable] → (serialize) → [Serialization] → (stringify) → [String] → (save or send)
      *                                        ↓                            ↓                  ↓
      *                [Serializable] ← (deserialize) ← [Serialization] ← (parse) ← (load) ← [Medium]
      * ```
      * While the internal serialize/deserialize method1s of the objects care of the selection of information needed to recreate the object and its structure,
-     * the [[Serializer]] keeps track of the namespaces and classes in order to recreate [[Serializable]] objects. The general structure of a [[Serialization]] is as follows
+     * the {@link Serializer} keeps track of the namespaces and classes in order to recreate {@link Serializable} objects. The general structure of a {@link Serialization} is as follows
      * ```plaintext
      * {
      *      namespaceName.className: {
@@ -295,18 +295,18 @@ declare namespace FudgeCore {
         /** In order for the Serializer to create class instances, it needs access to the appropriate namespaces */
         private static namespaces;
         /**
-         * Registers a namespace to the [[Serializer]], to enable automatic instantiation of classes defined within
+         * Registers a namespace to the {@link Serializer]], to enable automatic instantiation of classes defined within
          * @param _namespace
          */
         static registerNamespace(_namespace: Object): string;
         /**
          * Returns a javascript object representing the serializable FUDGE-object given,
          * including attached components, children, superclass-objects all information needed for reconstruction
-         * @param _object An object to serialize, implementing the [[Serializable]] interface
+         * @param _object An object to serialize, implementing the {@link Serializable} interface
          */
         static serialize(_object: Serializable): Serialization;
         /**
-         * Returns a FUDGE-object reconstructed from the information in the [[Serialization]] given,
+         * Returns a FUDGE-object reconstructed from the information in the {@link Serialization} given,
          * including attached components, children, superclass-objects
          * @param _serialization
          */
@@ -314,23 +314,23 @@ declare namespace FudgeCore {
         /**
          * Returns an Array of javascript object representing the serializable FUDGE-objects given in the array,
          * including attached components, children, superclass-objects all information needed for reconstruction
-         * @param _object An object to serialize, implementing the [[Serializable]] interface
+         * @param _object An object to serialize, implementing the {@link Serializable} interface
          */
         static serializeArray<T extends Serializable>(_type: new () => T, _objects: Serializable[]): Serialization;
         /**
-         * Returns an Array of FUDGE-objects reconstructed from the information in the array of [[Serialization]]s given,
+         * Returns an Array of FUDGE-objects reconstructed from the information in the array of {@link Serialization}s given,
          * including attached components, children, superclass-objects
          * @param _serializations
          */
         static deserializeArray(_serialization: Serialization): Promise<Serializable[]>;
         static prettify(_json: string): string;
         /**
-         * Returns a formatted, human readable JSON-String, representing the given [[Serializaion]] that may have been created by [[Serializer]].serialize
+         * Returns a formatted, human readable JSON-String, representing the given {@link Serializaion} that may have been created by {@link Serialize}.serialize
          * @param _serialization
          */
         static stringify(_serialization: Serialization): string;
         /**
-         * Returns a [[Serialization]] created from the given JSON-String. Result may be passed to [[Serializer]].deserialize
+         * Returns a {@link Serialization} created from the given JSON-String. Result may be passed to {@link Serialize}.deserialize
          * @param _json
          */
         static parse(_json: string): Serialization;
@@ -418,7 +418,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Keeps a depot of objects that have been marked for reuse, sorted by type.
-     * Using [[Recycler]] reduces load on the carbage collector and thus supports smooth performance
+     * Using {@link Recycler} reduces load on the carbage collector and thus supports smooth performance
      */
     abstract class Recycler {
         private static depot;
@@ -709,7 +709,7 @@ declare namespace FudgeCore {
     }
     /**
      * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
-     * Methods and attributes of this class should not be called directly, only through [[RenderManager]]
+     * Methods and attributes of this class should not be called directly, only through {@link RenderManager]]
      */
     abstract class RenderWebGL extends EventTargetStatic {
         protected static crc3: WebGL2RenderingContext;
@@ -754,7 +754,7 @@ declare namespace FudgeCore {
          */
         static setRenderRectangle(_rect: Rectangle): void;
         /**
-         * Clear the offscreen renderbuffer with the given [[Color]]
+         * Clear the offscreen renderbuffer with the given {@link Color]]
          */
         static clear(_color?: Color): void;
         /**
@@ -823,12 +823,12 @@ declare namespace FudgeCore {
         constructor(_name: string);
         get isActive(): boolean;
         /**
-         * Shortcut to retrieve this nodes [[ComponentTransform]]
+         * Shortcut to retrieve this nodes {@link ComponentTransform]]
          */
         get cmpTransform(): ComponentTransform;
         /**
-         * Shortcut to retrieve the local [[Matrix4x4]] attached to this nodes [[ComponentTransform]]
-         * Fails if no [[ComponentTransform]] is attached
+         * Shortcut to retrieve the local {@link Matrix4x4} attached to this nodes {@link ComponentTransform}
+         * Fails if no {@link ComponentTransform} is attached
          */
         get mtxLocal(): Matrix4x4;
         get mtxWorldInverse(): Matrix4x4;
@@ -863,8 +863,8 @@ declare namespace FudgeCore {
          */
         getChildrenByName(_name: string): Node[];
         /**
-         * Simply calls [[addChild]]. This reference is here solely because appendChild is the equivalent method in DOM.
-         * See and preferably use [[addChild]]
+         * Simply calls {@link addChild}. This reference is here solely because appendChild is the equivalent method in DOM.
+         * See and preferably use {@link addChild]]
          */
         readonly appendChild: (_child: Node) => void;
         /**
@@ -895,8 +895,8 @@ declare namespace FudgeCore {
         isUpdated(_timestampUpdate: number): boolean;
         isDescendantOf(_ancestor: Node): boolean;
         /**
-         * Applies a Mutator from [[Animation]] to all its components and transfers it to its children.
-         * @param _mutator The mutator generated from an [[Animation]]
+         * Applies a Mutator from {@link Animation} to all its components and transfers it to its children.
+         * @param _mutator The mutator generated from an {@link Animation]]
          */
         applyAnimation(_mutator: Mutator): void;
         /**
@@ -968,7 +968,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Holds information about the AnimationStructure that the Animation uses to map the Sequences to the Attributes.
-     * Built out of a [[Node]]'s serialsation, it swaps the values with [[AnimationSequence]]s.
+     * Built out of a {@link Node}'s serialsation, it swaps the values with {@link AnimationSequence}s.
      */
     interface AnimationStructure {
         [attribute: string]: Serialization | AnimationSequence;
@@ -1015,7 +1015,7 @@ declare namespace FudgeCore {
     /**
      * Animation Class to hold all required Objects that are part of an Animation.
      * Also holds functions to play said Animation.
-     * Can be added to a Node and played through [[ComponentAnimator]].
+     * Can be added to a Node and played through {@link ComponentAnimato}.
      * @author Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021
      */
     class Animation extends Mutable implements SerializableResource {
@@ -1034,7 +1034,7 @@ declare namespace FudgeCore {
         get fps(): number;
         set fps(_fps: number);
         /**
-         * Generates a new "Mutator" with the information to apply to the [[Node]] the [[ComponentAnimator]] is attached to with [[Node.applyAnimation()]].
+         * Generates a new "Mutator" with the information to apply to the {@link Node} the {@link ComponentAnimator} is attached to with {@link Node.applyAnimation}.
          * @param _time The time at which the animation currently is at
          * @param _direction The direction in which the animation is supposed to be playing back. >0 == forward, 0 == stop, <0 == backwards
          * @param _playback The playbackmode the animation is supposed to be calculated with.
@@ -1042,7 +1042,7 @@ declare namespace FudgeCore {
          */
         getMutated(_time: number, _direction: number, _playback: ANIMATION_PLAYBACK): Mutator;
         /**
-         * Returns a list of the names of the events the [[ComponentAnimator]] needs to fire between _min and _max.
+         * Returns a list of the names of the events the {@link ComponentAnimator} needs to fire between _min and _max.
          * @param _min The minimum time (inclusive) to check between
          * @param _max The maximum time (exclusive) to check between
          * @param _playback The playback mode to check in. Has an effect on when the Events are fired.
@@ -1111,15 +1111,15 @@ declare namespace FudgeCore {
          */
         private traverseStructureForTime;
         /**
-         * Ensures the existance of the requested [[AnimationStrcuture]] and returns it.
+         * Ensures the existance of the requested {@link AnimationStrcuture} and returns it.
          * @param _type the type of the structure to get
-         * @returns the requested [[AnimationStructure]]
+         * @returns the requested {@link AnimationStructure]]
          */
         private getProcessedAnimationStructure;
         /**
-         * Ensures the existance of the requested [[AnimationEventTrigger]] and returns it.
+         * Ensures the existance of the requested {@link AnimationEventTrigger} and returns it.
          * @param _type The type of AnimationEventTrigger to get
-         * @returns the requested [[AnimationEventTrigger]]
+         * @returns the requested {@link AnimationEventTrigger]]
          */
         private getProcessedEventTrigger;
         /**
@@ -1136,19 +1136,19 @@ declare namespace FudgeCore {
          */
         private calculateReverseSequence;
         /**
-         * Creates a rastered [[AnimationSequence]] out of a given sequence.
+         * Creates a rastered {@link AnimationSequence} out of a given sequence.
          * @param _sequence The sequence to calculate the new sequence out of
          * @returns the rastered sequence.
          */
         private calculateRasteredSequence;
         /**
-         * Creates a new reversed [[AnimationEventTrigger]] object based on the given one.
+         * Creates a new reversed {@link AnimationEventTrigger} object based on the given one.
          * @param _events the event object to calculate the new one out of
          * @returns the reversed event object
          */
         private calculateReverseEventTriggers;
         /**
-         * Creates a rastered [[AnimationEventTrigger]] object based on the given one.
+         * Creates a rastered {@link AnimationEventTrigger} object based on the given one.
          * @param _events the event object to calculate the new one out of
          * @returns the rastered event object
          */
@@ -1165,7 +1165,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Calculates the values between [[AnimationKey]]s.
+     * Calculates the values between {@link AnimationKey}s.
      * Represented internally by a cubic function (`f(x) = ax³ + bx² + cx + d`).
      * Only needs to be recalculated when the keys change, so at runtime it should only be calculated once.
      * @author Lukas Scheuerle, HFU, 2019
@@ -1197,8 +1197,8 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Holds information about set points in time, their accompanying values as well as their slopes.
-     * Also holds a reference to the [[AnimationFunction]]s that come in and out of the sides. The [[AnimationFunction]]s are handled by the [[AnimationSequence]]s.
-     * Saved inside an [[AnimationSequence]].
+     * Also holds a reference to the {@link AnimationFunction}s that come in and out of the sides. The {@link AnimationFunction}s are handled by the {@link AnimationSequence}s.
+     * Saved inside an {@link AnimationSequenc}.
      * @author Lukas Scheuerle, HFU, 2019
      */
     class AnimationKey extends Mutable implements Serializable {
@@ -1238,7 +1238,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * A sequence of [[AnimationKey]]s that is mapped to an attribute of a [[Node]] or its [[Component]]s inside the [[Animation]].
+     * A sequence of {@link AnimationKey}s that is mapped to an attribute of a {@link Node} or its {@link Component}s inside the {@link Animatio}.
      * Provides functions to modify said keys
      * @author Lukas Scheuerle, HFU, 2019
      */
@@ -1284,7 +1284,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Extension of AudioBuffer with a load method that creates a buffer in the [[AudioManager]].default to be used with [[ComponentAudio]]
+     * Extension of AudioBuffer with a load method that creates a buffer in the {@link AudioManage}.default to be used with {@link ComponentAudio]]
      * @authors Thomas Dorner, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class Audio extends Mutable implements SerializableResource {
@@ -1329,7 +1329,7 @@ declare namespace FudgeCore {
          */
         get volume(): number;
         /**
-         * Determines FUDGE-graph to listen to. Each [[ComponentAudio]] in the graph will connect to this contexts master gain, all others disconnect.
+         * Determines FUDGE-graph to listen to. Each {@link ComponentAudio} in the graph will connect to this contexts master gain, all others disconnect.
          */
         listenTo: (_graph: Node | null) => void;
         /**
@@ -1337,7 +1337,7 @@ declare namespace FudgeCore {
          */
         getGraphListeningTo: () => Node;
         /**
-         * Set the [[ComponentAudioListener]] that serves the spatial location and orientation for this contexts listener
+         * Set the {@link ComponentAudioListener} that serves the spatial location and orientation for this contexts listener
          */
         listenWith: (_cmpListener: ComponentAudioListener | null) => void;
         /**
@@ -1348,7 +1348,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Superclass for all [[Component]]s that can be attached to [[Node]]s.
+     * Superclass for all {@link Component}s that can be attached to {@link Node}s.
      * @authors Jirka Dell'Oro-Friedl, HFU, 2020 | Jascha Karagöl, HFU, 2019
      * @link https://github.com/JirkaDellOro/FUDGE/wiki/Component
      */
@@ -1386,7 +1386,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Holds a reference to an [[Animation]] and controls it. Controls playback and playmode as well as speed.
+     * Holds a reference to an {@link Animation} and controls it. Controls playback and playmode as well as speed.
      * @authors Lukas Scheuerle, HFU, 2019
      */
     class ComponentAnimator extends Component {
@@ -1457,7 +1457,7 @@ declare namespace FudgeCore {
         GAIN = 2
     }
     /**
-     * Builds a minimal audio graph (by default in [[AudioManager]].default) and synchronizes it with the containing [[Node]]
+     * Builds a minimal audio graph (by default in {@link AudioManage}.default) and synchronizes it with the containing {@link Node]]
      * ```plaintext
      * ┌ AudioManager(.default) ────────────────────────┐
      * │ ┌ ComponentAudio ───────────────────┐          │
@@ -1471,7 +1471,7 @@ declare namespace FudgeCore {
      */
     class ComponentAudio extends Component {
         static readonly iSubclass: number;
-        /** places and directs the panner relative to the world transform of the [[Node]]  */
+        /** places and directs the panner relative to the world transform of the {@link Node}  */
         mtxPivot: Matrix4x4;
         protected singleton: boolean;
         private audio;
@@ -1502,10 +1502,10 @@ declare namespace FudgeCore {
          */
         play(_on: boolean): void;
         /**
-         * Inserts AudioNodes between the panner and the local gain of this [[ComponentAudio]]
+         * Inserts AudioNodes between the panner and the local gain of this {@link ComponentAudio]]
          * _input and _output may be the same AudioNode, if there is only one to insert,
          * or may have multiple AudioNode between them to create an effect-graph.\
-         * Note that [[ComponentAudio]] does not keep track of inserted AudioNodes!
+         * Note that {@link ComponentAudio} does not keep track of inserted AudioNodes!
          * ```plaintext
          * ┌ AudioManager(.default) ──────────────────────────────────────────────────────┐
          * │ ┌ ComponentAudio ─────────────────────────────────────────────────┐          │
@@ -1523,7 +1523,7 @@ declare namespace FudgeCore {
         activate(_on: boolean): void;
         /**
          * Connects this components gain-node to the gain node of the AudioManager this component runs on.
-         * Only call this method if the component is not attached to a [[Node]] but needs to be heard.
+         * Only call this method if the component is not attached to a {@link Node} but needs to be heard.
          */
         connect(_on: boolean): void;
         serialize(): Serialization;
@@ -1551,7 +1551,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Serves to set the spatial location and orientation of AudioListeners relative to the
-     * world transform of the [[Node]] it is attached to.
+     * world transform of the {@link Node} it is attached to.
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentAudioListener extends Component {
@@ -1703,7 +1703,7 @@ declare namespace FudgeCore {
         SPOT = "LightSpot"
     }
     /**
-      * Attaches a [[Light]] to the node
+      * Attaches a {@link Light} to the node
       * @authors Jirka Dell'Oro-Friedl, HFU, 2019
       */
     class ComponentLight extends Component {
@@ -1721,7 +1721,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Attaches a [[Material]] to the node
+     * Attaches a {@link Material} to the node
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019 - 2021
      */
     class ComponentMaterial extends Component {
@@ -1738,7 +1738,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Attaches a [[Mesh]] to the node
+     * Attaches a {@link Mesh} to the node
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentMesh extends Component {
@@ -1774,7 +1774,7 @@ declare namespace FudgeCore {
         NODE = 3
     }
     /**
-     * Attaches a transform-[[Matrix4x4]] to the node, moving, scaling and rotating it in space relative to its parent.
+     * Attaches a transform-[[Matrix4x4} to the node, moving, scaling and rotating it in space relative to its parent.
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentTransform extends Component {
@@ -1846,11 +1846,11 @@ declare namespace FudgeCore {
         protected idTimer: number;
         constructor(_name: string, _factor?: number, _type?: CONTROL_TYPE, _active?: boolean);
         /**
-         * Set the time-object to be used when calculating the output in [[CONTROL_TYPE.INTEGRAL]]
+         * Set the time-object to be used when calculating the output in {@link CONTROL_TYPE.INTEGRAL]]
          */
         setTimebase(_time: Time): void;
         /**
-         * Feed an input value into this control and fire the events [[EVENT_CONTROL.INPUT]] and [[EVENT_CONTROL.OUTPUT]]
+         * Feed an input value into this control and fire the events {@link EVENT_CONTROL.INPUT} and {@link EVENT_CONTROL.OUTPUT]]
          */
         setInput(_input: number): void;
         pulse(_input: number): void;
@@ -1864,7 +1864,7 @@ declare namespace FudgeCore {
          */
         setRateDispatchOutput(_rateDispatchOutput?: number): void;
         /**
-         * Set the factor to multiply the input value given with [[setInput]] with
+         * Set the factor to multiply the input value given with {@link setInput} with
          */
         setFactor(_factor: number): void;
         /**
@@ -1882,8 +1882,8 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Handles multiple controls as inputs and creates an output from that.
-     * As a subclass of [[Control]], axis calculates the ouput summing up the inputs and processing the result using its own settings.
-     * Dispatches [[EVENT_CONTROL.OUTPUT]] and [[EVENT_CONTROL.INPUT]] when one of the controls dispatches them.
+     * As a subclass of {@link Control]], axis calculates the ouput summing up the inputs and processing the result using its own settings.
+     * Dispatches {@link EVENT_CONTROL.OUTPUT} and {@link EVENT_CONTROL.INPUT} when one of the controls dispatches them.
      * ```plaintext
      *           ┌───────────────────────────────────────────┐
      *           │ ┌───────┐                                 │
@@ -1979,11 +1979,11 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     const enum EVENT_AUDIO {
-        /** broadcast to a [[Node]] and all its descendants in the graph after it was appended to a parent */
+        /** broadcast to a {@link Node} and all its descendants in the graph after it was appended to a parent */
         CHILD_APPEND = "childAppendToAudioGraph",
-        /** broadcast to a [[Node]] and all its descendants in the graph just before its being removed from its parent */
+        /** broadcast to a {@link Node} and all its descendants in the graph just before its being removed from its parent */
         CHILD_REMOVE = "childRemoveFromAudioGraph",
-        /** broadcast to a [[Node]] and all its descendants in the graph to update the panners in AudioComponents */
+        /** broadcast to a {@link Node} and all its descendants in the graph to update the panners in AudioComponents */
         UPDATE = "updateAudioGraph",
         /** fired when the audio file was loaded and is ready for playing */
         READY = "ready",
@@ -2253,7 +2253,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * A node managed by [[Project]] that functions as a template for [[GraphInstance]]s
+     * A node managed by {@link Project} that functions as a template for {@link GraphInstance}s
      * @author Jirka Dell'Oro-Friedl, HFU, 2019
      * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource
      */
@@ -2266,7 +2266,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * An instance of a [[Graph]].
+     * An instance of a {@link Grap}.
      * This node keeps a reference to its resource an can thus optimize serialization
      * @author Jirka Dell'Oro-Friedl, HFU, 2019
      * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource
@@ -2276,22 +2276,22 @@ declare namespace FudgeCore {
         private idSource;
         constructor(_graph?: Graph);
         /**
-         * Recreate this node from the [[Graph]] referenced
+         * Recreate this node from the {@link Graph} referenced
          */
         reset(): Promise<void>;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         /**
-         * Set this node to be a recreation of the [[Graph]] given
+         * Set this node to be a recreation of the {@link Graph} given
          */
         set(_graph: Graph): Promise<void>;
     }
 }
 declare namespace FudgeCore {
     /**
-     * Holds data to feed into a [[Shader]] to describe the surface of [[Mesh]].
-     * [[Material]]s reference [[Coat]] and [[Shader]].
-     * The method useRenderData will be injected by [[RenderInjector]] at runtime, extending the functionality of this class to deal with the renderer.
+     * Holds data to feed into a {@link Shader} to describe the surface of {@link Mes}.
+     * {@link Material}s reference {@link Coat} and {@link Shade}.
+     * The method useRenderData will be injected by {@link RenderInjector} at runtime, extending the functionality of this class to deal with the renderer.
      */
     class Coat extends Mutable implements Serializable {
         name: string;
@@ -2304,7 +2304,7 @@ declare namespace FudgeCore {
         protected reduceMutator(): void;
     }
     /**
-     * The simplest [[Coat]] providing just a color
+     * The simplest {@link Coat} providing just a color
      */
     class CoatColored extends Coat {
         color: Color;
@@ -2313,7 +2313,7 @@ declare namespace FudgeCore {
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }
     /**
-     * A [[Coat]] to be used by the MatCap Shader providing a texture, a tint color (0.5 grey is neutral). Set shadeSmooth to 1 for smooth shading.
+     * A {@link Coat} to be used by the MatCap Shader providing a texture, a tint color (0.5 grey is neutral). Set shadeSmooth to 1 for smooth shading.
      */
     class CoatMatCap extends Coat {
         texture: TextureImage;
@@ -2324,7 +2324,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * A [[Coat]] providing a texture and additional data for texturing
+     * A {@link Coat} providing a texture and additional data for texturing
      */
     class CoatTextured extends CoatColored {
         texture: Texture;
@@ -2366,7 +2366,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Baseclass for materials. Combines a [[Shader]] with a compatible [[Coat]]
+     * Baseclass for materials. Combines a {@link Shader} with a compatible {@link Coat]]
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Material extends Mutable implements SerializableResource {
@@ -2377,26 +2377,26 @@ declare namespace FudgeCore {
         private coat;
         constructor(_name: string, _shader?: typeof Shader, _coat?: Coat);
         /**
-         * Creates a new [[Coat]] instance that is valid for the [[Shader]] referenced by this material
+         * Creates a new {@link Coat} instance that is valid for the {@link Shader} referenced by this material
          */
         createCoatMatchingShader(): Coat;
         /**
-         * Makes this material reference the given [[Coat]] if it is compatible with the referenced [[Shader]]
+         * Makes this material reference the given {@link Coat} if it is compatible with the referenced {@link Shader]]
          * @param _coat
          */
         setCoat(_coat: Coat): void;
         /**
-         * Returns the currently referenced [[Coat]] instance
+         * Returns the currently referenced {@link Coat} instance
          */
         getCoat(): Coat;
         /**
-         * Changes the materials reference to the given [[Shader]], creates and references a new [[Coat]] instance
+         * Changes the materials reference to the given {@link Shader]], creates and references a new {@link Coat} instance
          * and mutates the new coat to preserve matching properties.
          * @param _shaderType
          */
         setShader(_shaderType: typeof Shader): void;
         /**
-         * Returns the [[Shader]] referenced by this material
+         * Returns the {@link Shader} referenced by this material
          */
         getShader(): typeof Shader;
         serialize(): Serialization;
@@ -2877,7 +2877,7 @@ declare namespace FudgeCore {
         static default: Random;
         private generate;
         /**
-         * Create an instance of [[Random]]. If desired, creates a PRNG with it and feeds the given seed.
+         * Create an instance of {@link Random}. If desired, creates a PRNG with it and feeds the given seed.
          * @param _ownGenerator Default is false
          * @param _seed Default is Math.random()
          */
@@ -2940,7 +2940,7 @@ declare namespace FudgeCore {
         getVector2(_corner0: Vector2, _corner1: Vector2): Vector2;
     }
     /**
-     * Standard [[Random]]-instance using Math.random().
+     * Standard {@link Random]]-instance using Math.random().
      */
     const random: Random;
 }
@@ -3096,7 +3096,7 @@ declare namespace FudgeCore {
          */
         toVector2(): Vector2;
         /**
-         * Reflects this vector at a given normal. See [[REFLECTION]]
+         * Reflects this vector at a given normal. See {@link REFLECTION]]
          */
         reflect(_normal: Vector3): void;
         /**
@@ -3447,9 +3447,9 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-       * Acts as the physical representation of a connection between two [[Node]]'s.
+       * Acts as the physical representation of a connection between two {@link Node}'s.
        * The type of conncetion is defined by the subclasses like prismatic joint, cylinder joint etc.
-       * A Rigidbody on the [[Node]] that this component is added to is needed. Setting the connectedRigidbody and
+       * A Rigidbody on the {@link Node} that this component is added to is needed. Setting the connectedRigidbody and
        * initializing the connection creates a physical connection between them. This differs from a connection through hierarchy
        * in the node structure of fudge. Joints can have different DOF's (Degrees Of Freedom), 1 Axis that can either twist or swing is a degree of freedom.
        * A joint typically consists of a motor that limits movement/rotation or is activly trying to move to a limit. And a spring which defines the rigidity.
@@ -3546,13 +3546,13 @@ declare namespace FudgeCore {
         /** Creating a cylindrical joint between two ComponentRigidbodies moving on one axis and rotating around another bound on a local anchorpoint. */
         constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
-         * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
+         * The axis connecting the the two {@link Node}s e.g. Vector3(0,1,0) to have a upward connection.
          *  When changed after initialization the joint needs to be reconnected.
          */
         get axis(): Vector3;
         set axis(_value: Vector3);
         /**
-         * The exact position where the two [[Node]]s are connected. When changed after initialization the joint needs to be reconnected.
+         * The exact position where the two {@link Node}s are connected. When changed after initialization the joint needs to be reconnected.
          */
         get anchor(): Vector3;
         set anchor(_value: Vector3);
@@ -3690,13 +3690,13 @@ declare namespace FudgeCore {
         /** Creating a prismatic joint between two ComponentRigidbodies only moving on one axis bound on a local anchorpoint. */
         constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
-         * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
+         * The axis connecting the the two {@link Node}s e.g. Vector3(0,1,0) to have a upward connection.
          *  When changed after initialization the joint needs to be reconnected.
          */
         get axis(): Vector3;
         set axis(_value: Vector3);
         /**
-         * The exact position where the two [[Node]]s are connected. When changed after initialization the joint needs to be reconnected.
+         * The exact position where the two {@link Node}s are connected. When changed after initialization the joint needs to be reconnected.
          */
         get anchor(): Vector3;
         set anchor(_value: Vector3);
@@ -3820,19 +3820,19 @@ declare namespace FudgeCore {
         private oimoJoint;
         constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _firstAxis?: Vector3, _secondAxis?: Vector3, _localAnchor?: Vector3);
         /**
-         * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
+         * The axis connecting the the two {@link Node}s e.g. Vector3(0,1,0) to have a upward connection.
          *  When changed after initialization the joint needs to be reconnected.
          */
         get firstAxis(): Vector3;
         set firstAxis(_value: Vector3);
         /**
-        * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
+        * The axis connecting the the two {@link Node}s e.g. Vector3(0,1,0) to have a upward connection.
         *  When changed after initialization the joint needs to be reconnected.
         */
         get secondAxis(): Vector3;
         set secondAxis(_value: Vector3);
         /**
-         * The exact position where the two [[Node]]s are connected. When changed after initialization the joint needs to be reconnected.
+         * The exact position where the two {@link Node}s are connected. When changed after initialization the joint needs to be reconnected.
          */
         get anchor(): Vector3;
         set anchor(_value: Vector3);
@@ -3961,13 +3961,13 @@ declare namespace FudgeCore {
         private oimoJoint;
         constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
-         * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
+         * The axis connecting the the two {@link Node}s e.g. Vector3(0,1,0) to have a upward connection.
          *  When changed after initialization the joint needs to be reconnected.
          */
         get axis(): Vector3;
         set axis(_value: Vector3);
         /**
-         * The exact position where the two [[Node]]s are connected. When changed after initialization the joint needs to be reconnected.
+         * The exact position where the two {@link Node}s are connected. When changed after initialization the joint needs to be reconnected.
          */
         get anchor(): Vector3;
         set anchor(_value: Vector3);
@@ -4072,7 +4072,7 @@ declare namespace FudgeCore {
         /**
     
         /**
-         * The exact position where the two [[Node]]s are connected. When changed after initialization the joint needs to be reconnected.
+         * The exact position where the two {@link Node}s are connected. When changed after initialization the joint needs to be reconnected.
          */
         get anchor(): Vector3;
         set anchor(_value: Vector3);
@@ -4172,19 +4172,19 @@ declare namespace FudgeCore {
         private oimoJoint;
         constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _firstAxis?: Vector3, _secondAxis?: Vector3, _localAnchor?: Vector3);
         /**
-         * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
+         * The axis connecting the the two {@link Node}s e.g. Vector3(0,1,0) to have a upward connection.
          *  When changed after initialization the joint needs to be reconnected.
          */
         get firstAxis(): Vector3;
         set firstAxis(_value: Vector3);
         /**
-        * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
+        * The axis connecting the the two {@link Node}s e.g. Vector3(0,1,0) to have a upward connection.
         *  When changed after initialization the joint needs to be reconnected.
         */
         get secondAxis(): Vector3;
         set secondAxis(_value: Vector3);
         /**
-         * The exact position where the two [[Node]]s are connected. When changed after initialization the joint needs to be reconnected.
+         * The exact position where the two {@link Node}s are connected. When changed after initialization the joint needs to be reconnected.
          */
         get anchor(): Vector3;
         set anchor(_value: Vector3);
@@ -4288,7 +4288,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-       * Acts as the physical representation of the [[Node]] it's attached to.
+       * Acts as the physical representation of the {@link Node} it's attached to.
        * It's the connection between the Fudge Rendered world and the Physics world.
        * For the physics to correctly get the transformations rotations need to be applied with from left = true.
        * Or rotations need to happen before scaling.
@@ -4326,14 +4326,14 @@ declare namespace FudgeCore {
         /** Creating a new rigidbody with a weight in kg, a physics type (default = dynamic), a collider type what physical form has the collider, to what group does it belong, is there a transform Matrix that should be used, and is the collider defined as a group of points that represent a convex mesh. */
         constructor(_mass?: number, _type?: PHYSICS_TYPE, _colliderType?: COLLIDER_TYPE, _group?: PHYSICS_GROUP, _mtxTransform?: Matrix4x4, _convexMesh?: Float32Array);
         /** The type of interaction between the physical world and the transform hierarchy world. DYNAMIC means the body ignores hierarchy and moves by physics. KINEMATIC it's
-         * reacting to a [[Node]] that is using physics but can still be controlled by animation or transform. And STATIC means its immovable.
+         * reacting to a {@link Node} that is using physics but can still be controlled by animation or transform. And STATIC means its immovable.
          */
         get physicsType(): PHYSICS_TYPE;
         set physicsType(_value: PHYSICS_TYPE);
-        /** The shape that represents the [[Node]] in the physical world. Default is a Cube. */
+        /** The shape that represents the {@link Node} in the physical world. Default is a Cube. */
         get colliderType(): COLLIDER_TYPE;
         set colliderType(_value: COLLIDER_TYPE);
-        /** The physics group this [[Node]] belongs to it's the default group normally which means it physically collides with every group besides trigger. */
+        /** The physics group this {@link Node} belongs to it's the default group normally which means it physically collides with every group besides trigger. */
         get collisionGroup(): PHYSICS_GROUP;
         set collisionGroup(_value: PHYSICS_GROUP);
         /** The groups this object collides with. Groups must be writen in form of
@@ -4341,11 +4341,11 @@ declare namespace FudgeCore {
         get collisionMask(): number;
         set collisionMask(_value: number);
         /**
-       * Returns the physical weight of the [[Node]]
+       * Returns the physical weight of the {@link Node]]
        */
         get mass(): number;
         /**
-      * Setting the physical weight of the [[Node]] in kg
+      * Setting the physical weight of the {@link Node} in kg
       */
         set mass(_value: number);
         /** Air reistance, when moving. A Body does slow down even on a surface without friction. */
@@ -4395,7 +4395,7 @@ declare namespace FudgeCore {
         checkCollisionEvents(): void;
         /**
           * Checking for Collision with Triggers with a overlapping test, dispatching a custom event with information about the trigger,
-          * or triggered [[Node]]. Automatically called in the RenderManager, no interaction needed.
+          * or triggered {@link Nod}. Automatically called in the RenderManager, no interaction needed.
           */
         checkTriggerEvents(): void;
         /**
@@ -4403,39 +4403,39 @@ declare namespace FudgeCore {
        */
         updateFromWorld(_toMesh?: boolean): void;
         /**
-       * Get the current POSITION of the [[Node]] in the physical space
+       * Get the current POSITION of the {@link Node} in the physical space
        */
         getPosition(): Vector3;
         /**
-      * Sets the current POSITION of the [[Node]] in the physical space
+      * Sets the current POSITION of the {@link Node} in the physical space
       */
         setPosition(_value: Vector3): void;
         /**
-         * Get the current ROTATION of the [[Node]] in the physical space. Note this range from -pi to pi, so -90 to 90.
+         * Get the current ROTATION of the {@link Node} in the physical space. Note this range from -pi to pi, so -90 to 90.
          */
         getRotation(): Vector3;
         /**
-         * Sets the current ROTATION of the [[Node]] in the physical space, in degree.
+         * Sets the current ROTATION of the {@link Node} in the physical space, in degree.
          */
         setRotation(_value: Vector3): void;
         /** Get the current SCALING in the physical space. */
         getScaling(): Vector3;
-        /** Sets the current SCALING of the [[Node]] in the physical space. Also applying this scaling to the node itself. */
+        /** Sets the current SCALING of the {@link Node} in the physical space. Also applying this scaling to the node itself. */
         setScaling(_value: Vector3): void;
         /**
-        * Get the current VELOCITY of the [[Node]]
+        * Get the current VELOCITY of the {@link Node]]
         */
         getVelocity(): Vector3;
         /**
-         * Sets the current VELOCITY of the [[Node]]
+         * Sets the current VELOCITY of the {@link Node]]
          */
         setVelocity(_value: Vector3): void;
         /**
-    * Get the current ANGULAR - VELOCITY of the [[Node]]
+    * Get the current ANGULAR - VELOCITY of the {@link Node]]
     */
         getAngularVelocity(): Vector3;
         /**
-       * Sets the current ANGULAR - VELOCITY of the [[Node]]
+       * Sets the current ANGULAR - VELOCITY of the {@link Node]]
        */
         setAngularVelocity(_value: Vector3): void;
         /**
@@ -4626,13 +4626,13 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     const enum EVENT_PHYSICS {
-        /** broadcast to a [[Node]] and all [[Nodes]] in the branch it's the root of */
+        /** broadcast to a {@link Node} and all {@link Nodes} in the branch it's the root of */
         TRIGGER_ENTER = "TriggerEnteredCollision",
-        /** broadcast to a [[Node]] and all [[Nodes]] in the branch it's the root of */
+        /** broadcast to a {@link Node} and all {@link Nodes} in the branch it's the root of */
         TRIGGER_EXIT = "TriggerLeftCollision",
-        /** broadcast to a [[Node]] and all [[Nodes]] in the branch it's the root of */
+        /** broadcast to a {@link Node} and all {@link Nodes} in the branch it's the root of */
         COLLISION_ENTER = "ColliderEnteredCollision",
-        /** broadcast to a [[Node]] and all [[Nodes]] in the branch it's the root of */
+        /** broadcast to a {@link Node} and all {@link Nodes} in the branch it's the root of */
         COLLISION_EXIT = "ColliderLeftCollision"
     }
     class EventPhysics extends Event {
@@ -4764,7 +4764,7 @@ declare namespace FudgeCore {
       * @author Marko Fehrenbach, HFU 2020
       */
     class Physics {
-        /** The PHYSICAL WORLD that gives every [[Node]] with a ComponentRigidbody a physical representation and moves them accordingly to the laws of the physical world. */
+        /** The PHYSICAL WORLD that gives every {@link Node} with a ComponentRigidbody a physical representation and moves them accordingly to the laws of the physical world. */
         static world: Physics;
         /** The SETTINGS that apply to the physical world. Ranging from things like sleeping, collisionShapeThickness and others */
         static settings: PhysicsSettings;
@@ -4777,7 +4777,7 @@ declare namespace FudgeCore {
         private triggerBodyList;
         private jointList;
         /**
-         * Creating a physical world to represent the [[Node]] Scene Tree. Call once before using any physics functions or
+         * Creating a physical world to represent the {@link Node} Scene Tree. Call once before using any physics functions or
          * rigidbodies.
          */
         static initializePhysics(): Physics;
@@ -4787,7 +4787,7 @@ declare namespace FudgeCore {
         */
         static raycast(_origin: Vector3, _direction: Vector3, _length?: number, _group?: PHYSICS_GROUP): RayHitInfo;
         /**
-          * Adjusts the transforms of the [[ComponentRigidbody]]s in the given branch to match their nodes or meshes
+          * Adjusts the transforms of the {@link ComponentRigidbody}s in the given branch to match their nodes or meshes
           */
         static adjustTransforms(_branch: Node, _toMesh?: boolean): void;
         /** Internal function to calculate the endpoint of mathematical ray. By adding the multiplied direction to the origin.
@@ -4856,7 +4856,7 @@ declare namespace FudgeCore {
         distributeBodyID(): number;
         /** Returns the ComponentRigidbody with the given id. Used internally to reconnect joints on loading in the editor. */
         getBodyByID(_id: number): ComponentRigidbody;
-        /** Updates all [[Rigidbodies]] known to the Physics.world to match their containers or meshes transformations */
+        /** Updates all {@link Rigidbodies} known to the Physics.world to match their containers or meshes transformations */
         /** Create a oimoPhysics world. Called once at the beginning if none is existend yet. */
         private createWorld;
     }
@@ -4925,7 +4925,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Stores information provided by [[Render]]-picking e.g. using [[Picker]] and provides methods for further calculation of positions and normals etc.
+     * Stores information provided by {@link Render]]-picking e.g. using {@link Picker} and provides methods for further calculation of positions and normals etc.
      *
      * @authors Jirka Dell'Oro-Friedl, HFU, 2021
      */
@@ -4937,50 +4937,50 @@ declare namespace FudgeCore {
         textureUV: Vector2;
         constructor(_node: Node);
         /**
-         * Accessor to calculate and store world position of intersection of [[Ray]] and [[Mesh]] only when used.
+         * Accessor to calculate and store world position of intersection of {@link Ray} and {@link Mesh} only when used.
          */
         get posWorld(): Vector3;
         /**
-         * Accessor to calculate and store position in mesh-space of intersection of [[Ray]] and [[Mesh]] only when used.
+         * Accessor to calculate and store position in mesh-space of intersection of {@link Ray} and {@link Mesh} only when used.
          */
         get posMesh(): Vector3;
         /**
-         * Accessor to calculate and store the face normal in world-space at the point of intersection of [[Ray]] and [[Mesh]] only when used.
+         * Accessor to calculate and store the face normal in world-space at the point of intersection of {@link Ray} and {@link Mesh} only when used.
          */
         get normal(): Vector3;
         /**
-         * Called solely by the renderer to enable calculation of the world coordinates of this [[Pick]]
+         * Called solely by the renderer to enable calculation of the world coordinates of this {@link Pick]]
          */
         set mtxViewToWorld(_mtxViewToWorld: Matrix4x4);
     }
 }
 declare namespace FudgeCore {
     /**
-     * Provides static methods for picking using [[Render]]
+     * Provides static methods for picking using {@link Render]]
      *
      * @authors Jirka Dell'Oro-Friedl, HFU, 2021
      */
     class Picker {
         /**
          * Takes a ray plus min and max values for the near and far planes to construct the picker-camera,
-         * then renders the pick-texture and returns an unsorted [[Pick]]-array with information about the hits of the ray.
+         * then renders the pick-texture and returns an unsorted {@link Pick]]-array with information about the hits of the ray.
          */
         static pickRay(_branch: Node, _ray: Ray, _min: number, _max: number): Pick[];
         /**
          * Takes a camera and a point on its virtual normed projection plane (distance 1) to construct the picker-camera,
-         * then renders the pick-texture and returns an unsorted [[Pick]]-array with information about the hits of the ray.
+         * then renders the pick-texture and returns an unsorted {@link Pick]]-array with information about the hits of the ray.
          */
         static pickCamera(_branch: Node, _cmpCamera: ComponentCamera, _posProjection: Vector2): Pick[];
         /**
          * Takes the camera of the given viewport and a point the client surface to construct the picker-camera,
-         * then renders the pick-texture and returns an unsorted [[Pick]]-array with information about the hits of the ray.
+         * then renders the pick-texture and returns an unsorted {@link Pick]]-array with information about the hits of the ray.
          */
         static pickViewport(_viewport: Viewport, _posClient: Vector2): Pick[];
     }
 }
 declare namespace FudgeCore {
     /**
-     * Defined by an origin and a direction of type [[Vector3]], rays are used to calculate picking an intersections
+     * Defined by an origin and a direction of type {@link Vector3]], rays are used to calculate picking an intersections
      *
      * @authors Jirka Dell'Oro-Friedl, HFU, 2021
      */
@@ -5017,7 +5017,7 @@ declare namespace FudgeCore {
         ignorePhysics?: boolean;
     }
     /**
-     * The main interface to the render engine, here WebGL (see superclass [[RenderWebGL]] and the RenderInjectors
+     * The main interface to the render engine, here WebGL (see superclass {@link RenderWebGL} and the RenderInjectors
      */
     abstract class Render extends RenderWebGL {
         static rectClip: Rectangle;
@@ -5033,8 +5033,8 @@ declare namespace FudgeCore {
          */
         static prepare(_branch: Node, _options?: RenderPrepareOptions, _mtxWorld?: Matrix4x4, _lights?: MapLightTypeToLightList, _shadersUsed?: (typeof Shader)[]): void;
         /**
-         * Used with a [[Picker]]-camera, this method renders one pixel with picking information
-         * for each node in the line of sight and return that as an unsorted [[Pick]]-array
+         * Used with a {@link Picker]]-camera, this method renders one pixel with picking information
+         * for each node in the line of sight and return that as an unsorted {@link Pick]]-array
          */
         static pickBranch(_branch: Node, _cmpCamera: ComponentCamera): Pick[];
         static draw(_cmpCamera: ComponentCamera): void;
@@ -5050,10 +5050,10 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Controls the rendering of a branch, using the given [[ComponentCamera]],
+     * Controls the rendering of a branch, using the given {@link ComponentCamera]],
      * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
-     * through a series of [[Framing]] objects. The stages involved are in order of rendering
-     * [[RenderManager]].viewport -> [[Viewport]].source -> [[Viewport]].destination -> DOM-Canvas -> Client(CSS)
+     * through a series of {@link Framing} objects. The stages involved are in order of rendering
+     * {@link RenderManage}.viewport -> {@link Viewpor}.source -> {@link Viewpor}.destination -> DOM-Canvas -> Client(CSS)
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Viewport extends EventTargetƒ {
@@ -5112,7 +5112,7 @@ declare namespace FudgeCore {
          */
         draw(_calculateTransforms?: boolean): void;
         /**
-         * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the [[Node]]s and [[ComponentMesh]]es
+         * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the {@link Node}s and {@link ComponentMesh]]es
          */
         calculateTransforms(): void;
         /**
@@ -5124,7 +5124,7 @@ declare namespace FudgeCore {
          */
         adjustCamera(): void;
         /**
-         * Returns a [[Ray]] in world coordinates from this camera through the point given in client space
+         * Returns a {@link Ray} in world coordinates from this camera through the point given in client space
          */
         getRayFromClient(_point: Vector2): Ray;
         /**
@@ -5165,7 +5165,7 @@ declare namespace FudgeCore {
         pointClientToScreen(_client: Vector2): Vector2;
         /**
          * Switch the viewports focus on or off. Only one viewport in one FUDGE instance can have the focus, thus receiving keyboard events.
-         * So a viewport currently having the focus will lose it, when another one receives it. The viewports fire [[Event]]s accordingly.
+         * So a viewport currently having the focus will lose it, when another one receives it. The viewports fire {@link Event}s accordingly.
          * // TODO: examine, if this can be achieved by regular DOM-Focus and tabindex=0
          */
         setFocus(_on: boolean): void;
@@ -5227,7 +5227,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Mutable array of [[Mutable]]s. The [[Mutator]]s of the entries are included as array in the [[Mutator]]
+     * Mutable array of {@link Mutable}s. The {@link Mutator}s of the entries are included as array in the {@link Mutator]]
      * @author Jirka Dell'Oro-Friedl, HFU, 2021
      */
     class MutableArray<T extends Mutable> extends Array<T> {
@@ -5290,7 +5290,7 @@ declare namespace FudgeCore {
          */
         static generateId(_resource: SerializableResource): string;
         /**
-         * Tests, if an object is a [[SerializableResource]]
+         * Tests, if an object is a {@link SerializableResource]]
          * @param _object The object to examine
          */
         static isResource(_object: Serializable): boolean;
@@ -5299,9 +5299,9 @@ declare namespace FudgeCore {
          */
         static getResource(_idResource: string): Promise<SerializableResource>;
         /**
-         * Creates and registers a resource from a [[Node]], copying the complete graph starting with it
+         * Creates and registers a resource from a {@link Node]], copying the complete graph starting with it
          * @param _node A node to create the resource from
-         * @param _replaceWithInstance if true (default), the node used as origin is replaced by a [[GraphInstance]] of the [[Graph]] created
+         * @param _replaceWithInstance if true (default), the node used as origin is replaced by a {@link GraphInstance} of the {@link Graph} created
          */
         static registerAsGraph(_node: Node, _replaceWithInstance?: boolean): Promise<Graph>;
         static createGraphInstance(_graph: Graph): Promise<GraphInstance>;
@@ -5500,14 +5500,14 @@ declare namespace FudgeCore {
     enum LOOP_MODE {
         /** Loop cycles controlled by window.requestAnimationFrame */
         FRAME_REQUEST = "frameRequest",
-        /** Loop cycles with the given framerate in [[Time]].game */
+        /** Loop cycles with the given framerate in {@link Tim}.game */
         TIME_GAME = "timeGame",
-        /** Loop cycles with the given framerate in realtime, independent of [[Time]].game */
+        /** Loop cycles with the given framerate in realtime, independent of {@link Tim}.game */
         TIME_REAL = "timeReal"
     }
     /**
      * Core loop of a Fudge application. Initializes automatically and must be started explicitly.
-     * It then fires [[EVENT]].LOOP\_FRAME to all added listeners at each frame
+     * It then fires {@link EVEN}.LOOP\_FRAME to all added listeners at each frame
      *
      * @author Jirka Dell'Oro-Friedl, HFU, 2019
      */
@@ -5581,7 +5581,7 @@ declare namespace FudgeCore {
     }
     /**
      * Instances of this class generate a timestamp that correlates with the time elapsed since the start of the program but allows for resetting and scaling.
-     * Supports [[Timer]]s similar to window.setInterval but with respect to the scaled time.
+     * Supports {@link Timer}s similar to window.setInterval but with respect to the scaled time.
      * All time values are given in milliseconds
      *
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -5636,11 +5636,11 @@ declare namespace FudgeCore {
          */
         delay(_lapse: number): Promise<void>;
         /**
-         * Stops and deletes all [[Timer]]s attached. Should be called before this Time-object leaves scope
+         * Stops and deletes all {@link Timer}s attached. Should be called before this Time-object leaves scope
          */
         clearAllTimers(): void;
         /**
-         * Deletes [[Timer]] found using the internal id of the connected interval-object
+         * Deletes {@link Timer} found using the internal id of the connected interval-object
          * @param _id
          */
         deleteTimerByItsInternalId(_id: number): void;
@@ -5653,7 +5653,7 @@ declare namespace FudgeCore {
          */
         setTimer(_lapse: number, _count: number, _handler: TimerHandler, ..._arguments: Object[]): number;
         /**
-         * This method is called internally by [[Time]] and [[Timer]] and must not be called otherwise
+         * This method is called internally by {@link Time} and {@link Timer} and must not be called otherwise
          */
         addTimer(_timer: Timer): number;
         /**
@@ -5669,24 +5669,24 @@ declare namespace FudgeCore {
          */
         getTimers(): Timers;
         /**
-         * Returns true if there are [[Timers]] installed to this
+         * Returns true if there are {@link Timers} installed to this
          */
         hasTimers(): boolean;
         /**
-         * Recreates [[Timer]]s when scaling changes
+         * Recreates {@link Timer}s when scaling changes
          */
         private rescaleAllTimers;
     }
 }
 declare namespace FudgeCore {
     /**
-     * Defines the signature of handler functions for [[TimerEventƒ]]s, very similar to usual event handler
+     * Defines the signature of handler functions for {@link TimerEventƒ}s, very similar to usual event handler
      */
     type TimerHandler = (_event: EventTimer) => void;
     /**
-     * A [[Timer]]-instance internally uses window.setInterval to call a given handler with a given frequency a given number of times,
-     * passing an [[TimerEventƒ]]-instance with additional information and given arguments.
-     * The frequency scales with the [[Time]]-instance the [[Timer]]-instance is attached to.
+     * A {@link Timer]]-instance internally uses window.setInterval to call a given handler with a given frequency a given number of times,
+     * passing an {@link TimerEventƒ]]-instance with additional information and given arguments.
+     * The frequency scales with the {@link Time]]-instance the {@link Timer]]-instance is attached to.
      *
      * @author Jirka Dell'Oro-Friedl, HFU, 2019
      */
@@ -5700,11 +5700,11 @@ declare namespace FudgeCore {
         private timeoutReal;
         private idWindow;
         /**
-         * Creates a [[Timer]] instance.
-         * @param _time The [[Time]] instance, the timer attaches to
+         * Creates a {@link Timer} instance.
+         * @param _time The {@link Time} instance, the timer attaches to
          * @param _elapse The time in milliseconds to elapse, to the next call of _handler, measured in _time
          * @param _count The desired number of calls to _handler, Timer deinstalls automatically after last call. Passing 0 invokes infinite calls
-         * @param _handler The [[TimerHandler]] instance to call
+         * @param _handler The {@link TimerHandler} instance to call
          * @param _arguments Additional arguments to pass to _handler
          *
          * TODO: for proper handling and deletion, use Time.setTimer instead of instantiating timers yourself.
@@ -5719,7 +5719,7 @@ declare namespace FudgeCore {
          */
         get lapse(): number;
         /**
-         * Attaches a copy of this at its current state to the same [[Time]]-instance. Used internally when rescaling [[Time]]
+         * Attaches a copy of this at its current state to the same {@link Time]]-instance. Used internally when rescaling {@link Time]]
          */
         installCopy(): Timer;
         /**

@@ -1,6 +1,6 @@
 namespace FudgeCore {
   /**
-   * Defined by an origin and a direction of type [[Vector3]], rays are used to calculate picking an intersections
+   * Defined by an origin and a direction of type {@link Vector3]], rays are used to calculate picking an intersections
    * 
    * @authors Jirka Dell'Oro-Friedl, HFU, 2021
    */

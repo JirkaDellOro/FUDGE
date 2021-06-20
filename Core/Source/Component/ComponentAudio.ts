@@ -15,7 +15,7 @@ namespace FudgeCore {
   }
 
   /**
-   * Builds a minimal audio graph (by default in [[AudioManager]].default) and synchronizes it with the containing [[Node]]
+   * Builds a minimal audio graph (by default in {@link AudioManage}.default) and synchronizes it with the containing {@link Node]]
    * ```plaintext
    * ┌ AudioManager(.default) ────────────────────────┐
    * │ ┌ ComponentAudio ───────────────────┐          │
@@ -29,7 +29,7 @@ namespace FudgeCore {
    */
   export class ComponentAudio extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentAudio);
-    /** places and directs the panner relative to the world transform of the [[Node]]  */
+    /** places and directs the panner relative to the world transform of the {@link Node}  */
     public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
 
     protected singleton: boolean = false;
@@ -124,10 +124,10 @@ namespace FudgeCore {
     }
 
     /**
-     * Inserts AudioNodes between the panner and the local gain of this [[ComponentAudio]]
+     * Inserts AudioNodes between the panner and the local gain of this {@link ComponentAudio]]
      * _input and _output may be the same AudioNode, if there is only one to insert,
      * or may have multiple AudioNode between them to create an effect-graph.\
-     * Note that [[ComponentAudio]] does not keep track of inserted AudioNodes!
+     * Note that {@link ComponentAudio} does not keep track of inserted AudioNodes!
      * ```plaintext
      * ┌ AudioManager(.default) ──────────────────────────────────────────────────────┐
      * │ ┌ ComponentAudio ─────────────────────────────────────────────────┐          │
@@ -158,7 +158,7 @@ namespace FudgeCore {
 
     /**
      * Connects this components gain-node to the gain node of the AudioManager this component runs on.
-     * Only call this method if the component is not attached to a [[Node]] but needs to be heard.
+     * Only call this method if the component is not attached to a {@link Node} but needs to be heard.
      */
     public connect(_on: boolean): void {
       if (_on)

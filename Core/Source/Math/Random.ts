@@ -10,7 +10,7 @@ namespace FudgeCore {
     private generate: Function = Math.random;
 
     /**
-     * Create an instance of [[Random]]. If desired, creates a PRNG with it and feeds the given seed.
+     * Create an instance of {@link Random}. If desired, creates a PRNG with it and feeds the given seed.
      * @param _ownGenerator Default is false
      * @param _seed Default is Math.random()
      */
@@ -127,7 +127,7 @@ namespace FudgeCore {
   }
 
   /**
-   * Standard [[Random]]-instance using Math.random().
+   * Standard {@link Random]]-instance using Math.random().
    */
   export const random: Random = new Random();
 }

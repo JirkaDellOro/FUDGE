@@ -1,7 +1,7 @@
 namespace FudgeCore {
   /**
    * Serves to set the spatial location and orientation of AudioListeners relative to the
-   * world transform of the [[Node]] it is attached to.
+   * world transform of the {@link Node} it is attached to.
    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
    */
   export class ComponentAudioListener extends Component {
