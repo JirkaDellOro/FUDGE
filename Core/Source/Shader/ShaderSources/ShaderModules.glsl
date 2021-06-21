@@ -5,9 +5,7 @@ in vec3 a_position;//
 
 HEAD_FRAG//
 #version 300 es
-precision highp float;
-#define GLSLIFY 1
-//
+precision highp float;//
 
 NORMAL_FACE//
 in vec3 a_normalFace;//

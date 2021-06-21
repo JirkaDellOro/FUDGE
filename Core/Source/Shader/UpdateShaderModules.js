@@ -1,5 +1,4 @@
 var fs = require("fs");
-
 fs.readFile("ShaderSources/ShaderModules.glsl", function (err, data) {
     if (err) {
         return console.error(err);

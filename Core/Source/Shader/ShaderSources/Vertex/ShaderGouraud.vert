@@ -1,6 +1,4 @@
 #version 300 es
-#define GLSLIFY 1
-#define GLSLIFY 1
 /**
 * Gouraud shading
 * Implementation based on https://www.gsn-lib.org/docs/nodes/ShaderPluginNode.php

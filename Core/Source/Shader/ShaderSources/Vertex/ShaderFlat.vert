@@ -1,4 +1,5 @@
 #version 300 es
+#define GLSLIFY 1
 
 /**
 * Flat color shading

@@ -1,4 +1,5 @@
 #version 300 es
+#define GLSLIFY 1
 /**
 * Single color shading
 * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
