@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "sourceMap": true,
+    "types": [
+      "./Build/Library"
+    ]
+  },
+  "exclude": [
+    "Source",
+    "Build"
+  ]
+}
