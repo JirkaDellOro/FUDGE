@@ -26,8 +26,8 @@ See example [PureNamespace](PureNamespace)
     ...
   }
   ```
-- Insert a simple script-tag with the path to file as `src` attribute in the HTML-File.
-- Loading the HTML-File into the browser causes the namespace-object to appear as a property in the scope of globalThis, the window respectively. It is considered 'cluttering', but makes things easy. This is what the first lines of output of `console.log(window)` look like:
+- Insert a simple script-tag with the path to file as `src` attribute in the HTML-file.
+- Loading the HTML-file into the browser causes the namespace-object to appear as a property in the scope of globalThis, the window respectively. It is considered 'cluttering', but makes things easy. This is what the first lines of output of `console.log(window)` look like:
 ```plaintext
 - Window {window: Window, self: Window, document:  …}
   - Library:
@@ -68,5 +68,17 @@ See example [ModuleFromNamespace](ModuleFromNamespace)
   ```
 - This, however, will deter the use of namespaces ...
 
-### Workaround
-- 
+### Workaround  
+- Between the two script-tags, insert a third one which loads another small module that creates a reference to the previously loaded module in the global scope, thus recreating the clutter. This module just looks like this:
+  ```javascript
+  import { Library } from "./Build/Library.js";
+  globalThis.Library = Library;
+  ```
+- Since module loading happens asynchronously, the consumption must not happen before the module is fully loaded and referenced. A `load` handler is used in the script to wait for the HTML to be fully loaded and parsed, and the attribute `defer` delays execution of the script in the first place. At this point of time, it appears that both mechanisms are necessary.
+- In the HTML-file, the script-tags now look like this:
+  ```html
+    <script type="module" src="./Build/Library.js"></script>
+    <script type="module" src="Importer.js"></script>
+    <script src="Test.js" defer></script>
+  ```
+- For testing, I added a file `Test2.ts` that compiles together with `Test.ts` to `Test.js`.
