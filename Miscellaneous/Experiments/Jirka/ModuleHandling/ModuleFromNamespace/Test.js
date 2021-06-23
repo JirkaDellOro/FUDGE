@@ -2,7 +2,6 @@ var Test;
 (function (Test) {
     window.addEventListener("load", init);
     var lib = Library;
-    // init(null);
     function init(_event) {
         console.group("Library");
         console.log(lib);

@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "sourceMap": true,
+    // "outFile": "./Test.js",
+    "types": [
+      "./Build/Library"
+    ]
+  },
+  "include": [
+    "Test.ts",
+    "Test2.ts"
+  ],
+  "exclude": [
+    "Source",
+    "Build"
+  ]
+}
