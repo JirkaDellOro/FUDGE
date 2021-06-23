@@ -1,6 +1,10 @@
 "use strict";
 var Library;
 (function (Library) {
+    globalThis.Library = Library;
+})(Library || (Library = {}));
+var Library;
+(function (Library) {
     console.group("Loading Library");
     let ENUM;
     (function (ENUM) {
@@ -45,6 +49,4 @@ var Library;
     sub.sayHello();
     console.groupEnd();
 })(Library || (Library = {}));
-
-globalThis.Library = Library;
 //# sourceMappingURL=Library.js.map

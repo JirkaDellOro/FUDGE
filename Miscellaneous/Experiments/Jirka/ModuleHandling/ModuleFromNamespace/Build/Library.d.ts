@@ -1,4 +1,6 @@
 declare namespace Library {
+}
+declare namespace Library {
     enum ENUM {
         INTERFACE = "Interface",
         SUPERCLASS = "SuperClass",

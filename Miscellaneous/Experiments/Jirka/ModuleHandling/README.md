@@ -47,11 +47,9 @@ See example [PureNamespace](PureNamespace)
   ```
 - In order to get type checking at design time, make sure to reference the d.ts-file either in the configuration file using `types` or as triple-slash directive in the code.  
 
-
-## Create and use a module with namespaces 
-See example [ModuleFromNamespace](ModuleFromNamespace)  
-
-- In the compiled javascript file of the library, simply insert one `export` in front of the declaration of the namespace-object
+## Pure module
+To make this library an ES-module in a single file, without using extra bundlers, the following needs to be done:  
+- In the compiled javascript file of the library, simply insert one `export ` in front of the declaration of the namespace-object
   ```javascript
   "use strict";
   var Library;
@@ -60,35 +58,15 @@ See example [ModuleFromNamespace](ModuleFromNamespace)
   "use strict";
   export var Library;
   ```
-- That alone makes the object a module which loads differently.
-- In the HTML-file add `type="module"` to the script-tag.
-- This is when things diverge. The module will load fine, but not into the global scope. It's managed by the module loader now. The consuming script won't have access to it, unless it imports the module itself using a statement like
+- That alone makes the object a module which loads differently. The browser console shows `SyntaxError: Unexpected token 'export'`
+- So delete the script tag loading the library in the HTML-file. You could add the attribute `type="module"` which would make the module load properly, but the consuming script won't have access to it anyway, since it's managed by the module loader now. 
+- Instead, write the following as first line in Test.ts, to load the library there:
   ```typescript
   import {Library} from "./Build/Library.js";
   ```
-- This, however, will deter the use of namespaces. Also, in order to get type support, the .d.ts-file of the module needs to show all the export statements.
-
-### Workaround  
-- At the end of the compiled library-file, insert the following
-  ```javascript
-  globalThis.Library = Library;
-  ```
-- This recreates the clutter by adding a reference to the library in the global scope.
-- Since module loading happens asynchronously, the consumption must not happen before the module is fully loaded and referenced. A `load` handler is used in the script to wait for the HTML to be fully loaded and parsed, and the attribute `defer` delays execution of the script in the first place. At this point of time, it appears that both mechanisms are necessary.
-- In the HTML-file, the script-tags now look like this:
-  ```html
-    <script type="module" src="./Build/Library.js"></script>
-    <script src="Test.js" defer></script>
-  ```
-- For testing, I added a file `Test2.ts` that compiles together with `Test.ts` to `Test.js`.
-
-## Pure module
-Third party modules usually come in a different form in order to be imported by the module loader. From what I have so far, I'd like to dive deeper into that format. In order to import the module from the file, the d.ts-file needs to be adjusted.
-- Write `import {Library} from "./Build/Library";` as first line in Test.ts. 
-- TypeScript tells that Library is not a module any more.
-- Write `export` in front of every namespace declaration, class, interface etc. in the d.ts-file
-- Now TypeScript excepts Library as a module, but Test is now a module also, due to the use of the import {...}
-- Thus, at design time, namespaces is ignored and types will not automatically cross file borders
+- TypeScript tells that Library is not a module. To fix this and to get type support, the .d.ts-file of the module needs to show all the export statements. So write `export` in front of every namespace declaration, class, interface etc. in the d.ts-file.
+- Now TypeScript accepts Library as a module, but Test is now a module also, due to the use of the import {...}. So now use the `type="module"`attribute to load Test in the HTML-File.
+- The consuming script now being a module, deters the use of namespaces. TypeScript tells that the namespace is declared but never used and won't find declarations in other files, though appearently in the same namespace. 
 - At runtime, `define` is required, since Test has been compiled with `system`
 - So switch to `ESNext` in the configuration, which requires disabling compilation into one outfile
 - In the sourcecode, strip away the namespaces and add the import to Test2.ts as well
@@ -96,3 +74,22 @@ Third party modules usually come in a different form in order to be imported by 
 - Test on the other hand, doesn't know the TestClass from Test2, so it needs to import it from Test2 using `import {TestClass} from "./Test2.js"`
 - At runtime, the browser complains that it can't use the import statement outside of a module. In the HTML-file, change the type-attribute of the script-tag loading Test to `module` and dismiss defer.
 - So now it should be running. I lost the namespaces and now have to explicitly import everything in every file that is used there.
+
+## Create and use a module with namespaces 
+See example [ModuleFromNamespace](ModuleFromNamespace)  
+- In the HTML-file add `type="module"` to the script-tag.
+- The module will load fine now, but not into the global scope. 
+
+### Workaround  
+- Add the following line in your namespace to recreate the 'clutter' by adding a reference to the library in the global scope
+  ```typescript
+  globalThis.Library = Library;
+  ```
+- In the example the line was added in the separate file "Clutter.ts". 
+- Since module loading happens asynchronously, the consumption must not happen before the module is fully loaded and referenced. A `load` handler is used in the script to wait for the HTML to be fully loaded and parsed, and the attribute `defer` delays execution of the script in the first place. At this point of time, it appears that both mechanisms are necessary.
+- In the HTML-file, the script-tags now look like this:
+  ```html
+    <script type="module" src="./Build/Library.js"></script>
+    <script src="Test.js" defer></script>
+  ```
+- For testing, I added a file `Test2.ts` that compiles together with `Test.ts` to `Test.js`.
