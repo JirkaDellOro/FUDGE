@@ -8,8 +8,5 @@
     "strict": true,
     "outFile": "./../Build/Library.js",
     "declaration": true
-  },
-  "exclude": [
-    "node_modules"
-  ]
+  }
 }
