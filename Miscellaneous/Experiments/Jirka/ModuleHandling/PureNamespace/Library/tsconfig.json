@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "system",
+    "sourceMap": true,
+    "strictFunctionTypes": true,
+    "alwaysStrict": true,
+    "strict": true,
+    "outFile": "./../Build/Library.js",
+    "declaration": true
+  }
+}

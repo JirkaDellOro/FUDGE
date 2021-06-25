@@ -1,6 +1,6 @@
 namespace FudgeCore {
   /**
-   * An instance of a [[Graph]].  
+   * An instance of a {@link Graph}.  
    * This node keeps a reference to its resource an can thus optimize serialization
    * @author Jirka Dell'Oro-Friedl, HFU, 2019
    * @link https://github.com/JirkaDellOro/FUDGE/wiki/Resource
@@ -19,7 +19,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Recreate this node from the [[Graph]] referenced
+     * Recreate this node from the {@link Graph} referenced
      */
     public async reset(): Promise<void> {
       let resource: Graph = <Graph>await Project.getResource(this.idSource);
@@ -40,7 +40,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Set this node to be a recreation of the [[Graph]] given
+     * Set this node to be a recreation of the {@link Graph} given
      */
     public async set(_graph: Graph): Promise<void> {
       // TODO: examine, if the serialization should be stored in the Graph for optimization

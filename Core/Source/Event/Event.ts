@@ -8,39 +8,39 @@ namespace FudgeCore {
    */
 
   export const enum EVENT {
-    /** dispatched to targets registered at [[Loop]], when requested animation frame starts */
+    /** dispatched to targets registered at {@link Loop}, when requested animation frame starts */
     LOOP_FRAME = "loopFrame",
-    /** dispatched to a [[Component]] when its being added to a [[Node]] */
+    /** dispatched to a {@link Component} when its being added to a {@link Node} */
     COMPONENT_ADD = "componentAdd",
-    /** dispatched to a [[Component]] when its being removed from a [[Node]] */
+    /** dispatched to a {@link Component} when its being removed from a {@link Node} */
     COMPONENT_REMOVE = "componentRemove",
-    /** dispatched to a [[Component]] when its being activated */
+    /** dispatched to a {@link Component} when its being activated */
     COMPONENT_ACTIVATE = "componentActivate",
-    /** dispatched to a [[Component]] when its being deactivated */
+    /** dispatched to a {@link Component} when its being deactivated */
     COMPONENT_DEACTIVATE = "componentDeactivate",
-    /** dispatched to a child [[Node]] and its ancestors after it was appended to a parent */
+    /** dispatched to a child {@link Node} and its ancestors after it was appended to a parent */
     CHILD_APPEND = "childAppend",
-    /** dispatched to a child [[Node]] and its ancestors just before its being removed from its parent */
+    /** dispatched to a child {@link Node} and its ancestors just before its being removed from its parent */
     CHILD_REMOVE = "childRemove",
-    /** dispatched to a [[Mutable]] when its being mutated */
+    /** dispatched to a {@link Mutable} when its being mutated */
     MUTATE = "mutate",
-    /** dispatched to [[Viewport]] when it gets the focus to receive keyboard input */
+    /** dispatched to {@link Viewport} when it gets the focus to receive keyboard input */
     FOCUS_IN = "focusin",
-    /** dispatched to [[Viewport]] when it loses the focus to receive keyboard input */
+    /** dispatched to {@link Viewport} when it loses the focus to receive keyboard input */
     FOCUS_OUT = "focusout",
-    /** dispatched to [[Node]] when it's done serializing */
+    /** dispatched to {@link Node} when it's done serializing */
     NODE_SERIALIZED = "nodeSerialized",
-    /** dispatched to [[Node]] when it's done deserializing, so all components, children and attributes are available */
+    /** dispatched to {@link Node} when it's done deserializing, so all components, children and attributes are available */
     NODE_DESERIALIZED = "nodeDeserialized",
-    /** dispatched to [[GraphInstance]] when it's content is set according to a serialization of a [[Graph]]  */
+    /** dispatched to {@link GraphInstance} when it's content is set according to a serialization of a {@link Graph}  */
     GRAPH_INSTANTIATED = "graphInstantiated",
-    /** dispatched to [[Time]] when it's scaling changed  */
+    /** dispatched to {@link Time} when it's scaling changed  */
     TIME_SCALED = "timeScaled",
-    /** dispatched to [[FileIo]] when a list of files has been loaded  */
+    /** dispatched to {@link FileIoBrowserLocal} when a list of files has been loaded  */
     FILE_LOADED = "fileLoaded",
-    /** dispatched to [[FileIo]] when a list of files has been saved */
+    /** dispatched to {@link FileIoBrowserLocal} when a list of files has been saved */
     FILE_SAVED = "fileSaved",
-    /** dispatched to [[Node]] when recalculating transforms for render */
+    /** dispatched to {@link Node} when recalculating transforms for render */
     RENDER_PREPARE = "renderPrepare",
     RENDER_PREPARE_START = "renderPrepareStart",
     RENDER_PREPARE_END = "renderPrepareEnd"

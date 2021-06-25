@@ -18,7 +18,7 @@ namespace FudgeCore {
 
   /**
    * Instances of this class generate a timestamp that correlates with the time elapsed since the start of the program but allows for resetting and scaling.  
-   * Supports [[Timer]]s similar to window.setInterval but with respect to the scaled time.
+   * Supports {@link Timer}s similar to window.setInterval but with respect to the scaled time.
    * All time values are given in milliseconds
    * 
    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -142,7 +142,7 @@ namespace FudgeCore {
 
     // TODO: examine if web-workers would enhance performance here!
     /**
-     * Stops and deletes all [[Timer]]s attached. Should be called before this Time-object leaves scope
+     * Stops and deletes all {@link Timer}s attached. Should be called before this Time-object leaves scope
      */
     public clearAllTimers(): void {
       for (let id in this.timers) {
@@ -151,7 +151,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Deletes [[Timer]] found using the internal id of the connected interval-object
+     * Deletes {@link Timer} found using the internal id of the connected interval-object
      * @param _id 
      */
     public deleteTimerByItsInternalId(_id: number): void {
@@ -180,7 +180,7 @@ namespace FudgeCore {
     }
 
     /**
-     * This method is called internally by [[Time]] and [[Timer]] and must not be called otherwise
+     * This method is called internally by {@link Time} and {@link Timer} and must not be called otherwise
      */
     public addTimer(_timer: Timer): number {
       this.timers[++this.idTimerAddedLast] = _timer;
@@ -214,14 +214,14 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns true if there are [[Timers]] installed to this
+     * Returns true if there are {@link Timers} installed to this
      */
     public hasTimers(): boolean {
       return (Object.keys(this.timers).length > 0);
     }
 
     /**
-     * Recreates [[Timer]]s when scaling changes
+     * Recreates {@link Timer}s when scaling changes
      */
     private rescaleAllTimers(): void {
       for (let id in this.timers) {

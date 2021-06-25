@@ -1,5 +1,5 @@
 namespace FudgeCore {
-  //Baseclass for [[RenderInjectorCoat]] and [[RenderInjectorTexture]]
+  //Baseclass for {@link RenderInjectorCoat} and {@link RenderInjectorTexture]]
   export class RenderInjector {
 
     public static inject(_constructor: Function, _injector: typeof RenderInjector): void {

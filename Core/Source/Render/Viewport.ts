@@ -1,9 +1,9 @@
 namespace FudgeCore {
   /**
-   * Controls the rendering of a branch, using the given [[ComponentCamera]],
+   * Controls the rendering of a branch, using the given {@link ComponentCamera},
    * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
-   * through a series of [[Framing]] objects. The stages involved are in order of rendering
-   * [[RenderManager]].viewport -> [[Viewport]].source -> [[Viewport]].destination -> DOM-Canvas -> Client(CSS)
+   * through a series of {@link Framing} objects. The stages involved are in order of rendering
+   * {@link Render}.viewport -> {@link Viewport}.source -> {@link Viewport}.destination -> DOM-Canvas -> Client(CSS)
    * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
    */
   export class Viewport extends EventTargetƒ {
@@ -147,7 +147,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the [[Node]]s and [[ComponentMesh]]es 
+     * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the {@link Node}s and {@link ComponentMesh}es 
      */
     public calculateTransforms(): void {
       let mtxRoot: Matrix4x4 = Matrix4x4.IDENTITY();
@@ -191,7 +191,7 @@ namespace FudgeCore {
 
     //#region Points
     /**
-     * Returns a [[Ray]] in world coordinates from this camera through the point given in client space
+     * Returns a {@link Ray} in world coordinates from this camera through the point given in client space
      */
     public getRayFromClient(_point: Vector2): Ray {
       let posProjection: Vector2 = this.pointClientToProjection(_point);
@@ -303,7 +303,7 @@ namespace FudgeCore {
 
     /**
      * Switch the viewports focus on or off. Only one viewport in one FUDGE instance can have the focus, thus receiving keyboard events. 
-     * So a viewport currently having the focus will lose it, when another one receives it. The viewports fire [[Event]]s accordingly.
+     * So a viewport currently having the focus will lose it, when another one receives it. The viewports fire {@link Eventƒ}s accordingly.
      * // TODO: examine, if this can be achieved by regular DOM-Focus and tabindex=0
      */
     public setFocus(_on: boolean): void {

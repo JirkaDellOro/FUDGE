@@ -2,7 +2,7 @@
 // / <reference path="../Transfer/Mutable.ts"/>
 namespace FudgeCore {
   /** 
-   * Superclass for all [[Component]]s that can be attached to [[Node]]s.
+   * Superclass for all {@link Component}s that can be attached to {@link Node}s.
    * @authors Jirka Dell'Oro-Friedl, HFU, 2020 | Jascha Karagöl, HFU, 2019  
    * @link https://github.com/JirkaDellOro/FUDGE/wiki/Component
    */

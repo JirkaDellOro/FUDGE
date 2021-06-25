@@ -1,6 +1,6 @@
 namespace FudgeCore {
   /**
-   * Attaches a [[Material]] to the node
+   * Attaches a {@link Material} to the node
    * @authors Jirka Dell'Oro-Friedl, HFU, 2019 - 2021
    */
   export class ComponentMaterial extends Component {

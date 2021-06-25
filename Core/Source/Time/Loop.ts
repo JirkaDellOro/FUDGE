@@ -7,15 +7,15 @@ namespace FudgeCore {
   export enum LOOP_MODE {
     /** Loop cycles controlled by window.requestAnimationFrame */
     FRAME_REQUEST = "frameRequest",
-    /** Loop cycles with the given framerate in [[Time]].game */
+    /** Loop cycles with the given framerate in {@link Time.game} */
     TIME_GAME = "timeGame",
-    /** Loop cycles with the given framerate in realtime, independent of [[Time]].game */
+    /** Loop cycles with the given framerate in realtime, independent of {@link Time.game} */
     TIME_REAL = "timeReal"
   }
 
   /**
    * Core loop of a Fudge application. Initializes automatically and must be started explicitly.
-   * It then fires [[EVENT]].LOOP\_FRAME to all added listeners at each frame
+   * It then fires {@link EVENT.LOOP_FRAME} to all added listeners at each frame
    * 
    * @author Jirka Dell'Oro-Friedl, HFU, 2019
    */

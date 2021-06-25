@@ -8,7 +8,7 @@ namespace FudgeCore {
     */
   export class Physics {
 
-    /** The PHYSICAL WORLD that gives every [[Node]] with a ComponentRigidbody a physical representation and moves them accordingly to the laws of the physical world. */
+    /** The PHYSICAL WORLD that gives every {@link Node} with a ComponentRigidbody a physical representation and moves them accordingly to the laws of the physical world. */
     public static world: Physics = Physics.initializePhysics();
     /** The SETTINGS that apply to the physical world. Ranging from things like sleeping, collisionShapeThickness and others */
     public static settings: PhysicsSettings;
@@ -24,7 +24,7 @@ namespace FudgeCore {
     private jointList: ComponentJoint[] = new Array();
 
     /**
-     * Creating a physical world to represent the [[Node]] Scene Tree. Call once before using any physics functions or
+     * Creating a physical world to represent the {@link Node} Scene Tree. Call once before using any physics functions or
      * rigidbodies.
      */
     public static initializePhysics(): Physics {
@@ -86,7 +86,7 @@ namespace FudgeCore {
 
 
     /**
-      * Adjusts the transforms of the [[ComponentRigidbody]]s in the given branch to match their nodes or meshes
+      * Adjusts the transforms of the {@link ComponentRigidbody}s in the given branch to match their nodes or meshes
       */
     public static adjustTransforms(_branch: Node, _toMesh: boolean = false): void {
       Render.prepare(_branch, { ignorePhysics: true });
@@ -276,7 +276,7 @@ namespace FudgeCore {
       return body;
     }
 
-    /** Updates all [[Rigidbodies]] known to the Physics.world to match their containers or meshes transformations */
+    /** Updates all {@link Rigidbodies} known to the Physics.world to match their containers or meshes transformations */
     // private updateWorldFromWorldMatrix(_toMesh: boolean = false): void {
     //   for (let body of this.bodyList)
     //     body.updateFromWorld(_toMesh);

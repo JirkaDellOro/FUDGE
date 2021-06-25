@@ -1,6 +1,6 @@
 namespace FudgeCore {
   /**
-   * Attaches a [[Mesh]] to the node
+   * Attaches a {@link Mesh} to the node
    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
    */
   export class ComponentMesh extends Component {

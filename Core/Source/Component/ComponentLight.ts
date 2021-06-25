@@ -12,7 +12,7 @@ namespace FudgeCore {
     SPOT = "LightSpot"
   }
  /**
-   * Attaches a [[Light]] to the node
+   * Attaches a {@link Light} to the node
    * @authors Jirka Dell'Oro-Friedl, HFU, 2019
    */
   export class ComponentLight extends Component {

@@ -6,7 +6,7 @@ namespace FudgeCore {
   }
 
   /**
-   * The main interface to the render engine, here WebGL (see superclass [[RenderWebGL]] and the RenderInjectors
+   * The main interface to the render engine, here WebGL (see superclass {@link RenderWebGL} and the RenderInjectors
    */
   export abstract class Render extends RenderWebGL {
     public static rectClip: Rectangle = new Rectangle(-1, 1, 2, -2);
@@ -110,8 +110,8 @@ namespace FudgeCore {
 
     //#region Picking
     /**
-     * Used with a [[Picker]]-camera, this method renders one pixel with picking information 
-     * for each node in the line of sight and return that as an unsorted [[Pick]]-array
+     * Used with a {@link Picker}-camera, this method renders one pixel with picking information 
+     * for each node in the line of sight and return that as an unsorted {@link Pick}-array
      */
     public static pickBranch(_branch: Node, _cmpCamera: ComponentCamera): Pick[] { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
       Render.ƒpicked = [];

@@ -42,15 +42,15 @@ namespace FudgeCore {
     }
 
     /**
-     * Shortcut to retrieve this nodes [[ComponentTransform]]
+     * Shortcut to retrieve this nodes {@link ComponentTransform}
      */
     public get cmpTransform(): ComponentTransform {
       return <ComponentTransform>this.getComponents(ComponentTransform)[0];
     }
 
     /**
-     * Shortcut to retrieve the local [[Matrix4x4]] attached to this nodes [[ComponentTransform]]  
-     * Fails if no [[ComponentTransform]] is attached
+     * Shortcut to retrieve the local {@link Matrix4x4} attached to this nodes {@link ComponentTransform}  
+     * Fails if no {@link ComponentTransform} is attached
      */
     public get mtxLocal(): Matrix4x4 {
       return this.cmpTransform.mtxLocal;
@@ -132,8 +132,8 @@ namespace FudgeCore {
     }
 
     /**
-     * Simply calls [[addChild]]. This reference is here solely because appendChild is the equivalent method in DOM.
-     * See and preferably use [[addChild]]
+     * Simply calls {@link addChild}. This reference is here solely because appendChild is the equivalent method in DOM.
+     * See and preferably use {@link addChild}
      */
     // tslint:disable-next-line: member-ordering
     public readonly appendChild: (_child: Node) => void = this.addChild;
@@ -239,8 +239,8 @@ namespace FudgeCore {
     }
 
     /**
-     * Applies a Mutator from [[Animation]] to all its components and transfers it to its children.
-     * @param _mutator The mutator generated from an [[Animation]]
+     * Applies a Mutator from {@link Animation} to all its components and transfers it to its children.
+     * @param _mutator The mutator generated from an {@link Animation}
      */
     public applyAnimation(_mutator: Mutator): void {
       if (_mutator.components) {

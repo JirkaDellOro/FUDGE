@@ -1,6 +1,6 @@
 namespace FudgeCore {
   /**
-     * Acts as the physical representation of the [[Node]] it's attached to.
+     * Acts as the physical representation of the {@link Node} it's attached to.
      * It's the connection between the Fudge Rendered world and the Physics world.
      * For the physics to correctly get the transformations rotations need to be applied with from left = true.
      * Or rotations need to happen before scaling.
@@ -63,7 +63,7 @@ namespace FudgeCore {
     }
 
     /** The type of interaction between the physical world and the transform hierarchy world. DYNAMIC means the body ignores hierarchy and moves by physics. KINEMATIC it's
-     * reacting to a [[Node]] that is using physics but can still be controlled by animation or transform. And STATIC means its immovable.
+     * reacting to a {@link Node} that is using physics but can still be controlled by animation or transform. And STATIC means its immovable.
      */
     get physicsType(): PHYSICS_TYPE {
       return this.rbType;
@@ -89,7 +89,7 @@ namespace FudgeCore {
       this.rigidbody.setMassData(this.massData); //have to reset mass after changing the type, since Oimo is handling mass internally wrong when switching types
     }
 
-    /** The shape that represents the [[Node]] in the physical world. Default is a Cube. */
+    /** The shape that represents the {@link Node} in the physical world. Default is a Cube. */
     get colliderType(): COLLIDER_TYPE {
       return this.colType;
     }
@@ -99,7 +99,7 @@ namespace FudgeCore {
       this.colType = _value;
     }
 
-    /** The physics group this [[Node]] belongs to it's the default group normally which means it physically collides with every group besides trigger. */
+    /** The physics group this {@link Node} belongs to it's the default group normally which means it physically collides with every group besides trigger. */
     get collisionGroup(): PHYSICS_GROUP {
       return this.colGroup;
     }
@@ -124,13 +124,13 @@ namespace FudgeCore {
     }
 
     /**
-   * Returns the physical weight of the [[Node]]
+   * Returns the physical weight of the {@link Node}
    */
     get mass(): number {
       return this.rigidbody.getMass();
     }
     /**
-  * Setting the physical weight of the [[Node]] in kg
+  * Setting the physical weight of the {@link Node} in kg
   */
     set mass(_value: number) {
       this.massData.mass = _value;
@@ -306,7 +306,7 @@ namespace FudgeCore {
 
     /**
       * Checking for Collision with Triggers with a overlapping test, dispatching a custom event with information about the trigger,
-      * or triggered [[Node]]. Automatically called in the RenderManager, no interaction needed.
+      * or triggered {@link Node}. Automatically called in the RenderManager, no interaction needed.
       */
     public checkTriggerEvents(): void {
       let possibleTriggers: ComponentRigidbody[] = Physics.world.getTriggerList(); //Get the array from the world that contains every trigger existing and check it with this body
@@ -371,7 +371,7 @@ namespace FudgeCore {
     }
 
     /**
-   * Get the current POSITION of the [[Node]] in the physical space
+   * Get the current POSITION of the {@link Node} in the physical space
    */
     public getPosition(): Vector3 {
       let tmpPos: OIMO.Vec3 = this.rigidbody.getPosition();
@@ -379,14 +379,14 @@ namespace FudgeCore {
     }
 
     /**
-  * Sets the current POSITION of the [[Node]] in the physical space
+  * Sets the current POSITION of the {@link Node} in the physical space
   */
     public setPosition(_value: Vector3): void {
       this.rigidbody.setPosition(new OIMO.Vec3(_value.x, _value.y, _value.z));
     }
 
     /**
-     * Get the current ROTATION of the [[Node]] in the physical space. Note this range from -pi to pi, so -90 to 90.
+     * Get the current ROTATION of the {@link Node} in the physical space. Note this range from -pi to pi, so -90 to 90.
      */
     public getRotation(): Vector3 {
       let orientation: OIMO.Quat = this.rigidbody.getOrientation();
@@ -396,7 +396,7 @@ namespace FudgeCore {
 
 
     /**
-     * Sets the current ROTATION of the [[Node]] in the physical space, in degree.
+     * Sets the current ROTATION of the {@link Node} in the physical space, in degree.
      */
     public setRotation(_value: Vector3): void {
       let quat: OIMO.Quat = new OIMO.Quat();
@@ -419,7 +419,7 @@ namespace FudgeCore {
       return scaling;
     }
 
-    /** Sets the current SCALING of the [[Node]] in the physical space. Also applying this scaling to the node itself. */
+    /** Sets the current SCALING of the {@link Node} in the physical space. Also applying this scaling to the node itself. */
     public setScaling(_value: Vector3): void {
       let scaling: Vector3 = _value.copy;
       scaling.x *= this.mtxPivot.scaling.x;
@@ -447,7 +447,7 @@ namespace FudgeCore {
     //#region Velocity and Forces
 
     /**
-    * Get the current VELOCITY of the [[Node]]
+    * Get the current VELOCITY of the {@link Node}
     */
     public getVelocity(): Vector3 {
       let velocity: OIMO.Vec3 = this.rigidbody.getLinearVelocity();
@@ -456,7 +456,7 @@ namespace FudgeCore {
 
 
     /**
-     * Sets the current VELOCITY of the [[Node]]
+     * Sets the current VELOCITY of the {@link Node}
      */
     public setVelocity(_value: Vector3): void {
       let velocity: OIMO.Vec3 = new OIMO.Vec3(_value.x, _value.y, _value.z);
@@ -464,7 +464,7 @@ namespace FudgeCore {
     }
 
     /**
-* Get the current ANGULAR - VELOCITY of the [[Node]]
+* Get the current ANGULAR - VELOCITY of the {@link Node}
 */
     public getAngularVelocity(): Vector3 {
       let velocity: OIMO.Vec3 = this.rigidbody.getAngularVelocity();
@@ -473,7 +473,7 @@ namespace FudgeCore {
 
 
     /**
-   * Sets the current ANGULAR - VELOCITY of the [[Node]]
+   * Sets the current ANGULAR - VELOCITY of the {@link Node}
    */
     public setAngularVelocity(_value: Vector3): void {
       let velocity: OIMO.Vec3 = new OIMO.Vec3(_value.x, _value.y, _value.z);

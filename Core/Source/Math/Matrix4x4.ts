@@ -1,7 +1,7 @@
 namespace FudgeCore {
 
   /**
-   * Represents the matrix as translation, rotation and scaling vector, being calculated from the matrix
+   * Represents the matrix as translation, rotation and scaling {@link Vector3}, being calculated from the matrix
    */
   interface VectorRepresentation {
     translation: Vector3;
@@ -55,7 +55,7 @@ namespace FudgeCore {
 
 
     /**
-     * Constructs a new matrix according to the translation, rotation and scaling vectors given
+     * Constructs a new matrix according to the translation, rotation and scaling {@link Vector3}s given
      */
     public static CONSTRUCTION(_vectors: VectorRepresentation): Matrix4x4 {
       let result: Matrix4x4 = Matrix4x4.IDENTITY();
@@ -210,7 +210,7 @@ namespace FudgeCore {
 
     /**
      * Computes and returns a matrix with the given translation, its z-axis pointing directly at the given target,
-     * and a minimal angle between its y-axis and the given up-Vector, respetively calculating yaw and pitch.
+     * and a minimal angle between its y-axis and the given up-{@link Vector3}, respetively calculating yaw and pitch.
      */
     public static LOOK_AT(_translation: Vector3, _target: Vector3, _up: Vector3 = Vector3.Y()): Matrix4x4 {
       const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
@@ -232,7 +232,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Computes and returns a matrix with the given translation, its y-axis matching the given up-vector
+     * Computes and returns a matrix with the given translation, its y-axis matching the given up-{@link Vector3}
      * and its z-axis facing towards the given target at a minimal angle, respetively calculating yaw only.
      */
     public static SHOW_TO(_translation: Vector3, _target: Vector3, _up: Vector3 = Vector3.Y()): Matrix4x4 {
@@ -256,7 +256,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given vector.
+     * Returns a matrix that translates coordinates along the x-, y- and z-axis according to the given {@link Vector3}.
      */
     public static TRANSLATION(_translate: Vector3): Matrix4x4 {
       const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
@@ -343,7 +343,7 @@ namespace FudgeCore {
     }
     
     /**
-     * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given vector
+     * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given {@link Vector3}
      */
     public static SCALING(_scalar: Vector3): Matrix4x4 {
       const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
@@ -431,7 +431,7 @@ namespace FudgeCore {
 
     //#region  Accessors
     /** 
-     * - get: a copy of the calculated translation vector   
+     * - get: a copy of the calculated translation {@link Vector3}   
      * - set: effect the matrix ignoring its rotation and scaling
      */
     public set translation(_translation: Vector3) {
@@ -449,7 +449,7 @@ namespace FudgeCore {
     }
 
     /** 
-     * - get: a copy of the calculated rotation vector   
+     * - get: a copy of the calculated rotation {@link Vector3}   
      * - set: effect the matrix
      */
     public get rotation(): Vector3 {
@@ -463,7 +463,7 @@ namespace FudgeCore {
     }
 
     /** 
-     * - get: a copy of the calculated scale vector   
+     * - get: a copy of the calculated scale {@link Vector3}   
      * - set: effect the matrix
      */
     public get scaling(): Vector3 {
@@ -494,7 +494,7 @@ namespace FudgeCore {
 
     //#region Rotation
     /**
-     * Rotate this matrix by given vector in the order Z, Y, X. Right hand rotation is used, thumb points in axis direction, fingers curling indicate rotation
+     * Rotate this matrix by given {@link Vector3} in the order Z, Y, X. Right hand rotation is used, thumb points in axis direction, fingers curling indicate rotation
      * The rotation is appended to already applied transforms, thus multiplied from the right. Set _fromLeft to true to switch and put it in front.
      */
     public rotate(_by: Vector3, _fromLeft: boolean = false): void {
@@ -534,8 +534,8 @@ namespace FudgeCore {
     }
 
     /**
-     * Adjusts the rotation of this matrix to point the z-axis directly at the given target and tilts it to accord with the given up vector,
-     * respectively calculating yaw and pitch. If no up vector is given, the previous up-vector is used. 
+     * Adjusts the rotation of this matrix to point the z-axis directly at the given target and tilts it to accord with the given up-{@link Vector3},
+     * respectively calculating yaw and pitch. If no up-{@link Vector3} is given, the previous up-{@link Vector3} is used. 
      * When _preserveScaling is false, a rotated identity matrix is the result. 
      */
     public lookAt(_target: Vector3, _up?: Vector3, _preserveScaling: boolean = true): void {
@@ -548,6 +548,9 @@ namespace FudgeCore {
       this.set(mtxResult);
       Recycler.store(mtxResult);
     }
+    /**
+     * Same as {@link Matrix4x4.lookAt}, but optimized and needs testing
+     */
     // TODO: testing lookat that really just rotates the matrix rather than creating a new one
     public lookAtRotate(_target: Vector3, _up?: Vector3, _preserveScaling: boolean = true): void {
       if (!_up)
@@ -582,8 +585,8 @@ namespace FudgeCore {
     }
 
     /**
-     * Adjusts the rotation of this matrix to match its y-axis with the given up-vector and facing its z-axis toward the given target at minimal angle,
-     * respectively calculating yaw only. If no up vector is given, the previous up-vector is used. 
+     * Adjusts the rotation of this matrix to match its y-axis with the given up-{@link Vector3} and facing its z-axis toward the given target at minimal angle,
+     * respectively calculating yaw only. If no up-{@link Vector3} is given, the previous up-{@link Vector3} is used. 
      * When _preserveScaling is false, a rotated identity matrix is the result. 
      */
     public showTo(_target: Vector3, _up?: Vector3, _preserveScaling: boolean = true): void {
@@ -600,7 +603,7 @@ namespace FudgeCore {
 
     //#region Translation
     /**
-     * Add a translation by the given vector to this matrix.
+     * Add a translation by the given {@link Vector3} to this matrix.
      * If _local is true, translation occurs according to the current rotation and scaling of this matrix,
      * according to the parent otherwise. 
      */
@@ -653,7 +656,7 @@ namespace FudgeCore {
 
     //#region Scaling
     /**
-     * Add a scaling by the given vector to this matrix 
+     * Add a scaling by the given {@link Vector3} to this matrix 
      */
     public scale(_by: Vector3): void {
       const mtxResult: Matrix4x4 = Matrix4x4.MULTIPLICATION(this, Matrix4x4.SCALING(_by));
@@ -819,6 +822,9 @@ namespace FudgeCore {
       this.data.set([-this.data[0], -this.data[1], -this.data[2]], 0); // reverse x-axis
     }
 
+    /**
+     * Returns the tranlation from this matrix to the target matrix
+     */
     public getTranslationTo(_mtxTarget: Matrix4x4): Vector3 {
       let difference: Vector3 = Recycler.get(Vector3);
       difference.set(_mtxTarget.data[12] - this.data[12], _mtxTarget.data[13] - this.data[13], _mtxTarget.data[14] - this.data[14]);
