@@ -5,6 +5,7 @@ namespace FudgeCore {
 
     public static vertexShaderSource: string = 
     `#version 300 es
+#define GLSLIFY 1
 /**
 * Smooth color shading
 * @authors Luis Keck, HFU, 2021

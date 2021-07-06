@@ -5,6 +5,8 @@
 * @authors Luis Keck, HFU, 2021
 */
 precision highp float;
+#define GLSLIFY 1
+#define GLSLIFY 1
 
 struct LightAmbient {
     vec4 color;

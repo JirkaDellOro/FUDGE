@@ -1,0 +1,12 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "process",
+			"label": "write shaders - ShaderWriter.cmd",
+			"group": "build",
+			"command": "ShaderWriter.cmd",
+			"problemMatcher": []
+		}
+	]
+}

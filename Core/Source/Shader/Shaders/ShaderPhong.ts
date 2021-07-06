@@ -38,6 +38,8 @@ void main() {
 */
 precision highp float;
 
+
+
 struct LightAmbient {
     vec4 color;
 };
