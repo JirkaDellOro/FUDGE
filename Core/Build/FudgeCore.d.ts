@@ -2828,7 +2828,7 @@ declare namespace FudgeCore {
         /**
          * Sets the elements of this matrix to the values of the given matrix
          */
-        set(_mtxTo: Matrix4x4): void;
+        set(_mtxTo: Matrix4x4 | Float32Array): void;
         toString(): string;
         /**
          * Return the elements of this matrix as a Float32Array

@@ -341,7 +341,7 @@ namespace FudgeCore {
       ]);
       return mtxResult;
     }
-    
+
     /**
      * Returns a matrix that scales coordinates along the x-, y- and z-axis according to the given {@link Vector3}
      */
@@ -752,9 +752,11 @@ namespace FudgeCore {
     /**
      * Sets the elements of this matrix to the values of the given matrix
      */
-    public set(_mtxTo: Matrix4x4): void {
-      // this.data = _to.get();
-      this.data.set(_mtxTo.data);
+    public set(_mtxTo: Matrix4x4 | Float32Array): void {
+      if (_mtxTo instanceof Float32Array)
+        this.data.set(_mtxTo);
+      else
+        this.data.set(_mtxTo.data);
       this.resetCache();
     }
 
