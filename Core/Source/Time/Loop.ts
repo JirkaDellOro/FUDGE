@@ -57,10 +57,10 @@ namespace FudgeCore {
     public static get frames(): number { return Loop.ƒFrames; }
 
     /**
-     * Starts the loop with the given mode and fps
-     * @param _mode 
-     * @param _fps Is only applicable in TIME-modes
-     * @param _syncWithAnimationFrame Experimental and only applicable in TIME-modes. Should defer the loop-cycle until the next possible animation frame.
+     * Starts the loop with the given mode and fps.  
+     * The default for _mode is FRAME_REQUEST, see {@link LOOP_MODE}, hooking the loop to the browser's animation frame.
+     * Is only applicable in TIME-modes.
+     * _syncWithAnimationFrame is experimental and only applicable in TIME-modes, deferring the loop-cycle until the next possible animation frame.
      */
     public static start(_mode: LOOP_MODE = LOOP_MODE.FRAME_REQUEST, _fps: number = 60, _syncWithAnimationFrame: boolean = false): void {
       Loop.stop();
