@@ -4294,6 +4294,68 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
+       * A physical connection between two bodies with no movement.
+       * Best way to simulate convex objects like a char seat connected to chair legs.
+       * The actual anchor point does not matter that much, only in very specific edge cases.
+       * Because welding means they simply do not disconnect. (unless you add Breakability)
+       * @author Marko Fehrenbach, HFU 2020
+       */
+    class ComponentJointWelding extends ComponentJoint {
+        static readonly iSubclass: number;
+        /**
+          * If the two connected RigidBodies collide with eath other. (Default = false)
+          * On a welding joint the connected bodies should not be colliding with each other,
+          * for best results
+         */
+        get internalCollision(): boolean;
+        set internalCollision(_value: boolean);
+        /**
+ * The amount of force needed to break the JOINT, in Newton. 0 equals unbreakable (default)
+*/
+        get breakForce(): number;
+        set breakForce(_value: number);
+        /**
+           * The amount of force needed to break the JOINT, while rotating, in Newton. 0 equals unbreakable (default)
+          */
+        get breakTorque(): number;
+        set breakTorque(_value: number);
+        /**
+         * The exact position where the two {@link Node}s are connected. When changed after initialization the joint needs to be reconnected.
+         */
+        get anchor(): Vector3;
+        set anchor(_value: Vector3);
+        private jointAnchor;
+        private jointInternalCollision;
+        private jointBreakForce;
+        private jointBreakTorque;
+        private config;
+        private oimoJoint;
+        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _localAnchor?: Vector3);
+        /**
+         * Initializing and connecting the two rigidbodies with the configured joint properties
+         * is automatically called by the physics system. No user interaction needed.
+         */
+        connect(): void;
+        /**
+         * Disconnecting the two rigidbodies and removing them from the physics system,
+         * is automatically called by the physics system. No user interaction needed.
+         */
+        disconnect(): void;
+        /**
+         * Returns the original Joint used by the physics engine. Used internally no user interaction needed.
+         * Only to be used when functionality that is not added within Fudge is needed.
+        */
+        getOimoJoint(): OIMO.Joint;
+        protected dirtyStatus(): void;
+        private constructJoint;
+        private superAdd;
+        private superRemove;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+    }
+}
+declare namespace FudgeCore {
+    /**
        * Acts as the physical representation of the {@link Node} it's attached to.
        * It's the connection between the Fudge Rendered world and the Physics world.
        * For the physics to correctly get the transformations rotations need to be applied with from left = true.
@@ -4309,9 +4371,7 @@ declare namespace FudgeCore {
         /** Collisions with rigidbodies happening to this body, can be used to build a custom onCollisionStay functionality. */
         collisions: ComponentRigidbody[];
         /** Triggers that are currently triggering this body */
-        triggers: ComponentRigidbody[];
-        /** Bodies that trigger this "trigger", only happening if this body is a trigger */
-        bodiesInTrigger: ComponentRigidbody[];
+        triggerings: ComponentRigidbody[];
         /** ID to reference this specific ComponentRigidbody */
         id: number;
         private rigidbody;
@@ -4329,6 +4389,8 @@ declare namespace FudgeCore {
         private angDamping;
         private rotationalInfluenceFactor;
         private gravityInfluenceFactor;
+        private bodyIsTrigger;
+        private callbacks;
         /** Creating a new rigidbody with a weight in kg, a physics type (default = dynamic), a collider type what physical form has the collider, to what group does it belong, is there a transform Matrix that should be used, and is the collider defined as a group of points that represent a convex mesh. */
         constructor(_mass?: number, _type?: PHYSICS_TYPE, _colliderType?: COLLIDER_TYPE, _group?: PHYSICS_GROUP, _mtxTransform?: Matrix4x4, _convexMesh?: Float32Array);
         /** The type of interaction between the physical world and the transform hierarchy world. DYNAMIC means the body ignores hierarchy and moves by physics. KINEMATIC it's
@@ -4346,6 +4408,9 @@ declare namespace FudgeCore {
          *  e.g. collisionMask = PHYSICS_GROUP.DEFAULT | PHYSICS_GROUP.GROUP_1 and so on to collide with multiple groups. */
         get collisionMask(): number;
         set collisionMask(_value: number);
+        /** Marking the Body as a trigger therefore not influencing the collision system but only sending triggerEvents */
+        get isTrigger(): boolean;
+        set isTrigger(_value: boolean);
         /**
        * Returns the physical weight of the {@link Node}
        */
@@ -4399,11 +4464,6 @@ declare namespace FudgeCore {
        * Automatically called in the RenderManager, no interaction needed.
        */
         checkCollisionEvents(): void;
-        /**
-          * Checking for Collision with Triggers with a overlapping test, dispatching a custom event with information about the trigger,
-          * or triggered {@link Node}. Automatically called in the RenderManager, no interaction needed.
-          */
-        checkTriggerEvents(): void;
         /**
        * Checks that the Rigidbody is positioned correctly and recreates the Collider with new scale/position/rotation
        */
@@ -4505,15 +4565,19 @@ declare namespace FudgeCore {
         private addRigidbodyToWorld;
         /** Removing this ComponentRigidbody from the Physiscs.world taking the informations from the oimoPhysics system */
         private removeRigidbodyFromWorld;
-        /** Check if two OimoPhysics Shapes collide with each other. By overlapping their approximations */
-        private collidesWith;
-        /** Find the approximated entry point of a trigger event. To give the event a approximated information where to put something in the world when a triggerEvent has happened */
-        private getTriggerEnterPoint;
-        /**
-         * Events in case a body is in a trigger, so not only the body registers a triggerEvent but also the trigger itself.
-         */
-        private checkBodiesInTrigger;
         private collisionCenterPoint;
+        /**
+        * Trigger EnteringEvent Callback, automatically called by OIMO Physics within their calculations.
+        * Since the event does not know which body is the trigger iniator, the event can be listened to
+        * on either the trigger or the triggered. (This is only possible with the Fudge OIMO Fork!)
+        */
+        private triggerEnter;
+        /**
+        * Trigger LeavingEvent Callback, automatically called by OIMO Physics within their calculations.
+        * Since the event does not know which body is the trigger iniator, the event can be listened to
+        * on either the trigger or the triggered. (This is only possible with the Fudge OIMO Fork!)
+        */
+        private triggerExit;
     }
 }
 declare namespace FudgeCore {
@@ -4666,11 +4730,11 @@ declare namespace FudgeCore {
   */
     enum PHYSICS_GROUP {
         DEFAULT = 1,
-        TRIGGER = 60000,
         GROUP_1 = 2,
         GROUP_2 = 4,
         GROUP_3 = 8,
-        GROUP_4 = 16
+        GROUP_4 = 16,
+        GROUP_5 = 32
     }
     /**
     * Different types of physical interaction, DYNAMIC is fully influenced by physics and only physics, STATIC means immovable,
@@ -4780,7 +4844,6 @@ declare namespace FudgeCore {
         mainCam: ComponentCamera;
         private oimoWorld;
         private bodyList;
-        private triggerBodyList;
         private jointList;
         /**
          * Creating a physical world to represent the {@link Node} Scene Tree. Call once before using any physics functions or
@@ -4804,8 +4867,6 @@ declare namespace FudgeCore {
         private static getRayDistance;
         /** Returns all the ComponentRigidbodies that are known to the physical space. */
         getBodyList(): ComponentRigidbody[];
-        /** Returns all the ComponentRigidbodies that are in the specific group of triggers. */
-        getTriggerList(): ComponentRigidbody[];
         /**
         * Getting the solver iterations of the physics engine. Higher iteration numbers increase accuracy but decrease performance
         */
@@ -4841,14 +4902,11 @@ declare namespace FudgeCore {
         /** Returns the actual used world of the OIMO physics engine. No user interaction needed.*/
         getOimoWorld(): OIMO.World;
         /**
-        * Simulates the physical world. _deltaTime is the amount of time between physical steps, default is 60 frames per second ~17ms
+        * Simulates the physical world. _deltaTime is the amount of time between physical steps, default is 60 frames per second ~17ms.
+        * A frame timing can't be smaller than 1/30 of a second, or else it will be set to 30 frames, to have more consistent frame calculations.
         */
         simulate(_deltaTime?: number): void;
         draw(_cmpCamera: ComponentCamera): void;
-        /** Make the given ComponentRigidbody known to the world as a body that is not colliding, but only triggering events. Used internally no interaction needed. */
-        registerTrigger(_rigidbody: ComponentRigidbody): void;
-        /** Remove the given ComponentRigidbody the world as viable triggeringBody. Used internally no interaction needed. */
-        unregisterTrigger(_rigidbody: ComponentRigidbody): void;
         /** Connect all joints that are not connected yet. Used internally no user interaction needed. This functionality is called and needed to make sure joints connect/disconnect
          * if any of the two paired ComponentRigidbodies change.
          */

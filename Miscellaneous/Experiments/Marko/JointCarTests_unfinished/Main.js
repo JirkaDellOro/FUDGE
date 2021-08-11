@@ -53,17 +53,17 @@ var Turorials_FUDGEPhysics_Lesson1;
         //#endregion PHYSICS
         //Standard Fudge Scene Initialization - Creating a directional light, a camera and initialize the viewport
         let cmpLight = new f.ComponentLight(new f.LightDirectional(f.Color.CSS("WHITE")));
-        cmpLight.pivot.lookAt(new f.Vector3(0.5, -1, -0.8)); //Set light direction
+        cmpLight.mtxPivot.lookAt(new f.Vector3(0.5, -1, -0.8)); //Set light direction
         hierarchy.addComponent(cmpLight);
         let cmpCamera = new f.ComponentCamera();
-        cmpCamera.backgroundColor = f.Color.CSS("GREY");
-        cmpCamera.pivot.translate(new f.Vector3(17, 4, 17)); //Move camera far back so the whole scene is visible
-        cmpCamera.pivot.lookAt(f.Vector3.ZERO()); //Set the camera matrix so that it looks at the center of the scene
+        cmpCamera.clrBackground = f.Color.CSS("GREY");
+        cmpCamera.mtxPivot.translate(new f.Vector3(17, 4, 17)); //Move camera far back so the whole scene is visible
+        cmpCamera.mtxPivot.lookAt(f.Vector3.ZERO()); //Set the camera matrix so that it looks at the center of the scene
         viewPort = new f.Viewport(); //Creating a viewport that is rendered onto the html canvas element
         viewPort.initialize("Viewport", hierarchy, cmpCamera, app); //initialize the viewport with the root node, camera and canvas
         document.addEventListener("keypress", hndKey); //Adding a listener for keypress handling
         //PHYSICS - Start using physics by telling the physics the scene root object. Physics will recalculate every transform and initialize
-        f.Physics.start(hierarchy);
+        f.Physics.adjustTransforms(hierarchy);
         f.Physics.settings.debugDraw = true;
         //Important start the game loop after starting physics, so physics can use the current transform before it's first iteration
         f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update); //Tell the game loop to call the update function on each frame
