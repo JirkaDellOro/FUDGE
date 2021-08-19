@@ -1,8 +1,8 @@
 /// <reference types="../../../node_modules/electron/electron" />
 /// <reference types="../../core/build/fudgecore" />
+/// <reference types="../../goldenlayoutbundle/bundle/umd/golden-layout" />
 /// <reference types="../../../aid/build/fudgeaid" />
 /// <reference types="../../../userinterface/build/fudgeuserinterface" />
-/// <reference types="../../goldenlayoutbundle/bundle/umd/golden-layout" />
 declare namespace Fudge {
     type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
     class ContextMenu {
@@ -140,7 +140,7 @@ declare namespace Fudge {
         private static panels;
         static start(): Promise<void>;
         static setupGoldenLayout(): void;
-        static add_old(_panel: typeof Panel, _title: string, _state?: Object): void;
+        static add_(_panel: typeof Panel, _title: string, _state?: JsonValue): void;
         static find(_type: typeof Panel): Panel[];
         private static generateID;
         private static setupPageListeners;
@@ -179,7 +179,7 @@ declare namespace Fudge {
         protected contextMenu: Electron.Menu;
         private container;
         private id;
-        constructor(_container: GoldenLayout.Container, _state: Object);
+        constructor(_container: ComponentContainer, _state: JsonValue);
         static getViewSource(_event: DragEvent): View;
         private static registerViewForDragDrop;
         setTitle(_title: string): void;
@@ -199,7 +199,7 @@ declare namespace Fudge {
      */
     class ViewExternal extends View {
         private tree;
-        constructor(_container: GoldenLayout.Container, _state: Object);
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         setProject(): void;
         getSelection(): DirectoryEntry[];
         getDragDropSources(): DirectoryEntry[];
@@ -215,7 +215,7 @@ declare namespace Fudge {
      */
     class ViewInternal extends View {
         private table;
-        constructor(_container: GoldenLayout.Container, _state: Object);
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         listResources(): void;
         getSelection(): ƒ.SerializableResource[];
         getDragDropSources(): ƒ.SerializableResource[];
@@ -307,7 +307,7 @@ declare namespace Fudge {
     abstract class Panel extends View {
         protected goldenLayout: GoldenLayout;
         private views;
-        constructor(_container: GoldenLayout.Container, _state: Object);
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         /** Send custom copies of the given event to the views */
         broadcastEvent: (_event: Event) => void;
         private addViewComponent;
@@ -321,7 +321,7 @@ declare namespace Fudge {
     */
     class PanelGraph extends Panel {
         private graph;
-        constructor(_container: GoldenLayout.Container, _state: Object);
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         setGraph(_graph: ƒ.Node): void;
         getNode(): ƒ.Node;
         private hndEvent;
@@ -334,7 +334,7 @@ declare namespace Fudge {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class PanelProject extends Panel {
-        constructor(_container: GoldenLayout.Container, _state: Object);
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         private hndEvent;
     }
 }
@@ -443,7 +443,7 @@ declare namespace Fudge {
     class ViewComponents extends View {
         private node;
         private expanded;
-        constructor(_container: GoldenLayout.Container, _state: Object);
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
@@ -463,7 +463,7 @@ declare namespace Fudge {
     class ViewHierarchy extends View {
         private graph;
         private tree;
-        constructor(_container: GoldenLayout.Container, _state: Object);
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         setGraph(_graph: ƒ.Node): void;
         getSelection(): ƒ.Node[];
         getDragDropSources(): ƒ.Node[];
@@ -484,7 +484,7 @@ declare namespace Fudge {
         viewport: ƒ.Viewport;
         canvas: HTMLCanvasElement;
         graph: ƒ.Node;
-        constructor(_container: GoldenLayout.Container, _state: Object);
+        constructor(_container: ComponentContainer, _state: JsonValue);
         createUserInterface(): void;
         setGraph(_node: ƒ.Node): void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
@@ -505,7 +505,7 @@ declare namespace Fudge {
         private resource;
         private viewport;
         private cmrOrbit;
-        constructor(_container: GoldenLayout.Container, _state: Object);
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         private static createStandardMaterial;
         private static createStandardMesh;
         private fillContent;
@@ -527,7 +527,7 @@ declare namespace Fudge {
      */
     class ViewProperties extends View {
         private resource;
-        constructor(_container: GoldenLayout.Container, _state: Object);
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         private fillContent;
         private hndEvent;
@@ -540,7 +540,7 @@ declare namespace Fudge {
      */
     class ViewScript extends View {
         private table;
-        constructor(_container: GoldenLayout.Container, _state: Object);
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         listScripts(): void;
         getSelection(): ScriptInfo[];
         getDragDropSources(): ScriptInfo[];

@@ -21,7 +21,7 @@ namespace Fudge {
     private node: ƒ.Node;
     private expanded: { [type: string]: boolean } = { ComponentTransform: true };
 
-    constructor(_container: GoldenLayout.Container, _state: Object) {
+    constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
       this.fillContent();
 

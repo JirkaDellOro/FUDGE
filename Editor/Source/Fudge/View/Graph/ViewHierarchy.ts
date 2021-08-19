@@ -11,7 +11,7 @@ namespace Fudge {
     // private selectedNode: ƒ.Node;
     private tree: ƒUi.Tree<ƒ.Node>;
 
-    constructor(_container: GoldenLayout.Container, _state: Object) {
+    constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
       // this.contextMenu = this.getContextMenu(this.contextMenuCallback);
 

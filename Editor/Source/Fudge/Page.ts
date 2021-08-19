@@ -42,7 +42,9 @@ namespace Fudge {
     }
 
     public static setupGoldenLayout(): void {
-      let config: LayoutConfig = {
+      
+      //old root config 
+      let config_old: any = {
         settings: { showPopoutIcon: false },
         content: [{
           id: "root", type: "row", isClosable: false,
@@ -51,30 +53,84 @@ namespace Fudge {
           ]
         }]
       };
+
+      let config: LayoutConfig = {
+        root: {
+          type: "row",
+          isClosable: true,
+          content: [ 
+          {
+              type: "component",
+              componentType: PANEL.GRAPH,
+              content: []
+          },
+
+          {
+            type: "component",
+            componentType: PANEL.PROJECT,
+            content: []
+        },
+          ],
+        }
+      }
+
+
       
+
       //this.goldenLayout = new GoldenLayout();   //This might be a problem because it can't use a specific place to put it.
-      this.goldenLayout = new this.goldenLayoutModule.GoldenLayout();
+      this.goldenLayout = new this.goldenLayoutModule.GoldenLayout(); // GoldenLayout 2 as UMD-Module
+      
       console.log(this.goldenLayout);
 
-      this.goldenLayout.registerComponent("Welcome", welcome);
-      this.goldenLayout.registerComponent(PANEL.GRAPH, PanelGraph);
-      this.goldenLayout.registerComponent(PANEL.PROJECT, PanelProject);
-      this.goldenLayout.init();
+      
+      // Old registerComponent methods
+      // this.goldenLayout.registerComponent("Welcome", welcome);
+      // this.goldenLayout.registerComponent(PANEL.GRAPH, PanelGraph);
+      // this.goldenLayout.registerComponent(PANEL.PROJECT, PanelProject);
+      // this.goldenLayout.init();
+
+      this.goldenLayout.registerComponentConstructor(PANEL.PROJECT, PanelProject);
+      this.goldenLayout.registerComponentConstructor(PANEL.GRAPH, PanelGraph);
+      
+      //this.goldenLayout.registerComponentConstructor(PANEL.PROJECT, PanelProject);
+
+      
+      this.goldenLayout.loadLayout(config);
     }
 
-    public static add(_panel: typeof Panel, _title: string, _state?: Object): void {
-      let config: GoldenLayout.ItemConfig = {
-        type: "stack",
-        content: [{
-          type: "component", componentName: _panel.name, componentState: _state,
-          title: _title, id: this.generateID(_panel.name)
-        }]
-      };
+    // public static add_old(_panel: typeof Panel, _title: string, _state?: Object): void {
+    //   let config: GoldenLayout.ItemConfig = {
+    //     type: "stack",
+    //     content: [{
+    //       type: "component", componentName: _panel.name, componentState: _state,
+    //       title: _title, id: this.generateID(_panel.name)
+    //     }]
+    //   };
 
-      let inner: GoldenLayout.ContentItem = this.goldenLayout.root.contentItems[0];
-      let item: GoldenLayout.ContentItem = Page.goldenLayout.createContentItem(config);
-      inner.addChild(item);
-      this.panels.push(item.getComponentsByName(_panel.name)[0]);
+    //   let inner: GoldenLayout.ContentItem = this.goldenLayout.root.contentItems[0];
+    //   let item: GoldenLayout.ContentItem = Page.goldenLayout.createContentItem(config);
+    //   inner.addChild(item);
+    //   this.panels.push(item.getComponentsByName(_panel.name)[0]);
+    // }
+
+    // remove _ to use
+    public static add_(_panel: typeof Panel, _title: string, _state?: JsonValue): void {
+      // TODO: Füllen RowOrColumnItemConfig
+      const panelConfig: RowOrColumnItemConfig = {
+        type: "column",
+        content: [
+          {
+            type: "component",
+            componentType: _panel.name,
+            componentState: _state,
+            title: _title,
+            id: this.generateID(_panel.name),
+          }
+        ]
+      }
+      //let panel = this.goldenLayout.rootItem.layoutManager.findFirstComponentItemById()
+      this.goldenLayout.rootItem.layoutManager.addItemAtLocation(panelConfig, [{typeId: LayoutManager.LocationSelector.TypeId.Root}]);
+      //this.panels.push(panel)
     }
 
     public static find(_type: typeof Panel): Panel[] {
@@ -159,7 +215,7 @@ namespace Fudge {
     }
   }
 
-  function welcome(container: GoldenLayout.Container, state: Object): void {
-    container.getElement().html("<div>Welcome</div>");
-  }
+  // function welcome(container: GoldenLayout.Container, state: Object): void {
+  //   container.getElement().html("<div>Welcome</div>");
+  // }
 }

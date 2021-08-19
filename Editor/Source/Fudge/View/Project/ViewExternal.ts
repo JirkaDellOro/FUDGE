@@ -9,7 +9,7 @@ namespace Fudge {
   export class ViewExternal extends View {
     private tree: ƒui.Tree<DirectoryEntry>;
 
-    constructor(_container: GoldenLayout.Container, _state: Object) {
+    constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
 
       this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);

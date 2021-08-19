@@ -12,7 +12,7 @@ namespace Fudge {
     canvas: HTMLCanvasElement;
     graph: ƒ.Node;
 
-    constructor(_container: GoldenLayout.Container, _state: Object) {
+    constructor(_container: ComponentContainer, _state: JsonValue) {
       super(_container, _state);
       this.graph = <ƒ.Node><unknown>_state["node"];
       this.createUserInterface();
