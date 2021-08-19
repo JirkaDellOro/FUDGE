@@ -1,8 +1,8 @@
 /// <reference types="../../../node_modules/electron/electron" />
 /// <reference types="../../core/build/fudgecore" />
 /// <reference types="../../../aid/build/fudgeaid" />
-/// <reference types="golden-layout" />
 /// <reference types="../../../userinterface/build/fudgeuserinterface" />
+/// <reference types="../../goldenlayoutbundle/bundle/umd/golden-layout" />
 declare namespace Fudge {
     type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
     class ContextMenu {
@@ -135,11 +135,12 @@ declare namespace Fudge {
      */
     class Page {
         private static idCounter;
+        static goldenLayoutModule: any;
         private static goldenLayout;
         private static panels;
         static start(): Promise<void>;
         static setupGoldenLayout(): void;
-        static add(_panel: typeof Panel, _title: string, _state?: Object): void;
+        static add_old(_panel: typeof Panel, _title: string, _state?: Object): void;
         static find(_type: typeof Panel): Panel[];
         private static generateID;
         private static setupPageListeners;

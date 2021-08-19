@@ -18,9 +18,11 @@
   },
   "types": [
     "electron", 
-    "golden-layout",
-    "JQuery",
+    //"golden-layout",
+    //"JQuery",
     "node",
     "node/fs"
   ],
+
+ "exclude": ["../../GoldenLayoutBundle"]
 }

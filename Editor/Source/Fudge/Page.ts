@@ -1,6 +1,7 @@
 ///<reference types="../../../node_modules/electron/Electron"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
 ///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
+/// <reference types="../../GoldenLayoutBundle/bundle/umd/golden-layout" />
 ///<reference path="Project.ts"/>
 
 namespace Fudge {
@@ -19,11 +20,13 @@ namespace Fudge {
    */
   export class Page {
     private static idCounter: number = 0;
+    public static goldenLayoutModule = (globalThis as any).goldenLayout;
     private static goldenLayout: GoldenLayout;
     private static panels: Panel[] = [];
 
     public static async start(): Promise<void> {
       // TODO: At this point of time, the project is just a single node. A project is much more complex...
+      console.log(Page.goldenLayoutModule); // kann weg
       let node: ƒ.Node = null;
 
       Page.setupGoldenLayout();
@@ -39,7 +42,7 @@ namespace Fudge {
     }
 
     public static setupGoldenLayout(): void {
-      let config: GoldenLayout.Config = {
+      let config: LayoutConfig = {
         settings: { showPopoutIcon: false },
         content: [{
           id: "root", type: "row", isClosable: false,
@@ -48,7 +51,10 @@ namespace Fudge {
           ]
         }]
       };
-      this.goldenLayout = new GoldenLayout(config);   //This might be a problem because it can't use a specific place to put it.
+      
+      //this.goldenLayout = new GoldenLayout();   //This might be a problem because it can't use a specific place to put it.
+      this.goldenLayout = new this.goldenLayoutModule.GoldenLayout();
+      console.log(this.goldenLayout);
 
       this.goldenLayout.registerComponent("Welcome", welcome);
       this.goldenLayout.registerComponent(PANEL.GRAPH, PanelGraph);
