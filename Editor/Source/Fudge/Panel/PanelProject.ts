@@ -93,7 +93,7 @@ namespace Fudge {
       console.log(this.dom)
 
       // MUSS wieder benutzt werden. Hier gibt es einen Fehler, wenn dieses Event benutzt wird. Dom not defined
-      this.broadcastEvent(new Event(EVENT_EDITOR.SET_PROJECT));
+      //this.broadcastEvent(new Event(EVENT_EDITOR.SET_PROJECT));
     }
 
     private hndEvent = (_event: CustomEvent): void => {

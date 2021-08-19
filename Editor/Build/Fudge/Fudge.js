@@ -1551,7 +1551,7 @@ var Fudge;
             // this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
             console.log(this.dom);
             // MUSS wieder benutzt werden. Hier gibt es einen Fehler, wenn dieses Event benutzt wird. Dom not defined
-            this.broadcastEvent(new Event(Fudge.EVENT_EDITOR.SET_PROJECT));
+            //this.broadcastEvent(new Event(EVENT_EDITOR.SET_PROJECT));
         }
         hndEvent = (_event) => {
             // if (_event.type == EVENT_EDITOR.SET_PROJECT)
