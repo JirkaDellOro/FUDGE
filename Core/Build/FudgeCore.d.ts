@@ -851,6 +851,10 @@ declare namespace FudgeCore {
          */
         getAncestor(): Node | null;
         /**
+         * Traces the hierarchy upwards to the first ancestor and returns the path through the graph to this node
+         */
+        getPath(): Node[];
+        /**
          * Returns child at the given index in the list of children
          */
         getChild(_index: number): Node;

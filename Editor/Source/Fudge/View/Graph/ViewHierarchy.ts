@@ -19,17 +19,18 @@ namespace Fudge {
 
       // this.parentPanel.addEventListener(ƒui.EVENT.SELECT, this.setSelectedNode);
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
     }
-    
+
     public setGraph(_graph: ƒ.Node): void {
       if (!_graph)
-      return;
+        return;
       if (this.tree)
-      this.dom.removeChild(this.tree);
-      
+        this.dom.removeChild(this.tree);
+
       this.graph = _graph;
       // this.selectedNode = null;
-      
+
       this.tree = new ƒUi.Tree<ƒ.Node>(new ControllerTreeHierarchy(), this.graph);
       // this.listController.listRoot.addEventListener(ƒui.EVENT.SELECT, this.passEventToPanel);
       //TODO: examine if tree should fire common UI-EVENT for selection instead
@@ -45,6 +46,14 @@ namespace Fudge {
 
     public getDragDropSources(): ƒ.Node[] {
       return this.tree.controller.dragDrop.sources;
+    }
+    
+    public focusNode(_node: ƒ.Node): void {
+      let path: ƒ.Node[] = _node.getPath();
+      path = path.splice(path.indexOf(this.graph));
+      console.log(path);
+      this.tree.show(path);
+      this.tree.displaySelection([_node]);
     }
 
     protected hndDragOver(_event: DragEvent, _viewSource: View): void {
@@ -142,6 +151,9 @@ namespace Fudge {
       switch (_event.type) {
         case ƒUi.EVENT.DELETE:
           this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+          break;
+        case EVENT_EDITOR.FOCUS_NODE:
+          this.focusNode(_event.detail);
           break;
         default:
           this.setGraph(_event.detail);

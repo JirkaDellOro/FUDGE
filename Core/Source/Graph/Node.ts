@@ -107,6 +107,17 @@ namespace FudgeCore {
       return ancestor;
     }
 
+    /**
+     * Traces the hierarchy upwards to the first ancestor and returns the path through the graph to this node
+     */
+    public getPath(): Node[] {
+      let ancestor: Node = this;
+      let path: Node[] = [this];
+      while (ancestor.getParent())
+        path.unshift(ancestor = ancestor.getParent());
+      return path;
+    }
+
 
     /**
      * Returns child at the given index in the list of children

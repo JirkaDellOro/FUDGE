@@ -4,7 +4,7 @@ namespace FudgeAid {
       let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
       cmpCamera.mtxPivot.translate(ƒ.Vector3.Z(4));
       cmpCamera.mtxPivot.rotateY(180);
-      
+
       let canvas: HTMLCanvasElement = Canvas.create();
       document.body.appendChild(canvas);
 
@@ -80,6 +80,8 @@ namespace FudgeAid {
         ƒ.Render.prepare(camera);
         camera.positionCamera(posCamera);
         redraw();
+
+        _viewport.getCanvas().dispatchEvent(new CustomEvent("pick", { detail: picks[0], bubbles: true }));
       }
 
       function hndWheelMove(_event: WheelEvent): void {

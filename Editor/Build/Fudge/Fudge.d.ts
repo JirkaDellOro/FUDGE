@@ -466,6 +466,7 @@ declare namespace Fudge {
         setGraph(_graph: ƒ.Node): void;
         getSelection(): ƒ.Node[];
         getDragDropSources(): ƒ.Node[];
+        focusNode(_node: ƒ.Node): void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): Promise<void>;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
@@ -489,6 +490,7 @@ declare namespace Fudge {
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): void;
         private hndEvent;
+        private hndPick;
         private activeViewport;
         private redraw;
     }

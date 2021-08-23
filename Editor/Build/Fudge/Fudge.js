@@ -2133,6 +2133,9 @@ var Fudge;
                     case "delete" /* DELETE */:
                         this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
                         break;
+                    case Fudge.EVENT_EDITOR.FOCUS_NODE:
+                        this.focusNode(_event.detail);
+                        break;
                     default:
                         this.setGraph(_event.detail);
                 }
@@ -2141,6 +2144,7 @@ var Fudge;
             this.setGraph(_state.node);
             // this.parentPanel.addEventListener(ƒui.EVENT.SELECT, this.setSelectedNode);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
         }
         setGraph(_graph) {
             if (!_graph)
@@ -2162,6 +2166,13 @@ var Fudge;
         }
         getDragDropSources() {
             return this.tree.controller.dragDrop.sources;
+        }
+        focusNode(_node) {
+            let path = _node.getPath();
+            path = path.splice(path.indexOf(this.graph));
+            console.log(path);
+            this.tree.show(path);
+            this.tree.displaySelection([_node]);
         }
         hndDragOver(_event, _viewSource) {
             if (_viewSource == this) {
@@ -2260,6 +2271,11 @@ var Fudge;
                         this.redraw();
                 }
             };
+            this.hndPick = (_event) => {
+                let picked = _event.detail.node;
+                // this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.FOCUS_NODE, { bubbles: true, detail: picked }));
+                this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { bubbles: true, detail: { data: picked } }));
+            };
             // private animate = (_e: Event) => {
             //   this.viewport.setGraph(this.graph);
             //   if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
@@ -2305,6 +2321,7 @@ var Fudge;
             //Focus cameracontrols on new viewport
             // let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });
             this.canvas.addEventListener("click" /* CLICK */, this.activeViewport);
+            this.canvas.addEventListener("pick", this.hndPick);
         }
         setGraph(_node) {
             if (!_node)
