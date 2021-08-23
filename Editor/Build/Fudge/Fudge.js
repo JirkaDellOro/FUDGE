@@ -175,10 +175,27 @@ var Fudge;
         });
         if (!filename)
             return;
-        let base = new URL(filename[0]);
+        let base = new URL(new URL(filename[0]).toString() + "/");
+        console.log("Path", base.toString());
         Fudge.project = new Fudge.Project(base);
         await saveProject();
-        await loadProject(new URL(Fudge.project.files.index.filename, Fudge.project.base + "/"));
+        let ƒPath = new URL("../../", location.href);
+        console.log(ƒPath);
+        // fs.mkdirSync(new URL("Fudge", base));
+        fs.mkdirSync(new URL("Fudge/Core", base), { recursive: true });
+        fs.mkdirSync(new URL("Fudge/Aid", base), { recursive: true });
+        let copies = {
+            "Core/Build/FudgeCore.js": "Fudge/Core/FudgeCore.js",
+            "Core/Build/FudgeCore.d.ts": "Fudge/Core/FudgeCore.d.ts",
+            "Aid/Build/FudgeAid.js": "Fudge/Aid/FudgeAid.js",
+            "Aid/Build/FudgeAid.d.ts": "Fudge/Aid/FudgeAid.d.ts",
+        };
+        for (let copy in copies) {
+            let src = new URL(copy, ƒPath);
+            let dest = new URL(copies[copy], base);
+            fs.copyFileSync(src, dest);
+        }
+        await loadProject(new URL(Fudge.project.files.index.filename, Fudge.project.base));
     }
     Fudge.newProject = newProject;
     async function saveProject() {
@@ -187,9 +204,7 @@ var Fudge;
         if (!await Fudge.project.openDialog())
             return;
         let base = Fudge.project.base;
-        let projectName = base.toString().split("/").pop();
-        base = new URL("base", base + "/");
-        console.log(base);
+        let projectName = base.toString().split("/").slice(-2, -1)[0];
         if (Fudge.project.files.index.overwrite) {
             let html = Fudge.project.getProjectHTML(projectName);
             let htmlFileName = new URL(Fudge.project.files.index.filename, base);
@@ -201,7 +216,6 @@ var Fudge;
         }
         if (Fudge.project.files.internal.overwrite) {
             let jsonFileName = new URL(Fudge.project.files.internal.filename, base);
-            console.log(jsonFileName);
             fs.writeFileSync(jsonFileName, Fudge.project.getProjectJSON());
         }
     }
@@ -308,7 +322,6 @@ var Fudge;
             let promise = ƒui.Dialog.prompt(Fudge.project, false, "Review project settings", "Adjust settings and press OK", "OK", "Cancel");
             ƒui.Dialog.dom.addEventListener("change" /* CHANGE */, this.hndChange);
             if (await promise) {
-                console.log("OK");
                 let mutator = ƒui.Controller.getMutator(this, ƒui.Dialog.dom, this.getMutator());
                 this.mutate(mutator);
                 return true;
@@ -333,7 +346,7 @@ var Fudge;
             html.head.appendChild(createTag("meta", { charset: "utf-8" }));
             html.head.appendChild(html.createComment("Load FUDGE. Initially, these files were copied from your local FUDGE installation. You may want to refer to online versions or create symlinks to keep up to date."));
             html.head.appendChild(createTag("script", { type: "text/javascript", src: "Fudge/Core/FudgeCore.js" }));
-            html.head.appendChild(createTag("script", { type: "text/javascript", src: "Fudge/Aid/Build/FudgeAid.js" }));
+            html.head.appendChild(createTag("script", { type: "text/javascript", src: "Fudge/Aid/FudgeAid.js" }));
             html.head.appendChild(html.createComment("Link stylesheet and internal resources"));
             html.head.appendChild(createTag("link", { rel: "stylesheet", href: this.files.style.filename }));
             html.head.appendChild(createTag("link", { type: "resources", src: this.files.internal.filename }));
@@ -570,7 +583,6 @@ var Fudge;
                 if (!url)
                     return;
                 await Fudge.loadProject(url);
-                ;
                 Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
                 Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
                 Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });

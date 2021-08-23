@@ -144,7 +144,7 @@ namespace Fudge {
         let url: URL = await promptLoadProject();
         if (!url)
           return;
-        await loadProject(url);;
+        await loadProject(url);
         ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
         ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
         ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });

@@ -47,7 +47,6 @@ namespace Fudge {
 
       ƒui.Dialog.dom.addEventListener(ƒui.EVENT.CHANGE, this.hndChange);
       if (await promise) {
-        console.log("OK");
         let mutator: ƒ.Mutator = ƒui.Controller.getMutator(this, ƒui.Dialog.dom, this.getMutator());
         this.mutate(mutator);
         return true;
@@ -87,7 +86,7 @@ namespace Fudge {
 
       html.head.appendChild(html.createComment("Load FUDGE. Initially, these files were copied from your local FUDGE installation. You may want to refer to online versions or create symlinks to keep up to date."));
       html.head.appendChild(createTag("script", { type: "text/javascript", src: "Fudge/Core/FudgeCore.js" }));
-      html.head.appendChild(createTag("script", { type: "text/javascript", src: "Fudge/Aid/Build/FudgeAid.js" }));
+      html.head.appendChild(createTag("script", { type: "text/javascript", src: "Fudge/Aid/FudgeAid.js" }));
 
       html.head.appendChild(html.createComment("Link stylesheet and internal resources"));
       html.head.appendChild(createTag("link", { rel: "stylesheet", href: this.files.style.filename }));

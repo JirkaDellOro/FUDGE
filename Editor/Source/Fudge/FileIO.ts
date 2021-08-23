@@ -10,11 +10,36 @@ namespace Fudge {
     if (!filename)
       return;
 
-    let base: URL = new URL(filename[0]);
+    let base: URL = new URL(new URL(filename[0]).toString() + "/");
+    console.log("Path", base.toString());
+
     project = new Project(base);
 
     await saveProject();
-    await loadProject(new URL(project.files.index.filename, project.base + "/"));
+
+    let ƒPath: URL = new URL("../../", location.href);
+    console.log(ƒPath);
+
+    // fs.mkdirSync(new URL("Fudge", base));
+    fs.mkdirSync(new URL("Fudge/Core", base), {recursive: true});
+    fs.mkdirSync(new URL("Fudge/Aid", base), {recursive: true});
+
+    let copies: { [src: string]: string } = {
+      "Core/Build/FudgeCore.js": "Fudge/Core/FudgeCore.js",
+      "Core/Build/FudgeCore.d.ts": "Fudge/Core/FudgeCore.d.ts",
+      "Aid/Build/FudgeAid.js": "Fudge/Aid/FudgeAid.js",
+      "Aid/Build/FudgeAid.d.ts": "Fudge/Aid/FudgeAid.d.ts",
+    };
+
+    for (let copy in copies) {
+     let src: URL = new URL(copy, ƒPath);
+     let dest: URL = new URL(copies[copy], base);
+     fs.copyFileSync(src, dest);
+    }
+    
+
+
+    await loadProject(new URL(project.files.index.filename, project.base));
   }
 
   export async function saveProject(): Promise<void> {
@@ -25,9 +50,7 @@ namespace Fudge {
       return;
 
     let base: URL = project.base;
-    let projectName: string = base.toString().split("/").pop();
-    base = new URL("base", base + "/");
-    console.log(base);
+    let projectName: string = base.toString().split("/").slice(-2, -1)[0];
 
     if (project.files.index.overwrite) {
       let html: string = project.getProjectHTML(projectName);
@@ -42,7 +65,6 @@ namespace Fudge {
 
     if (project.files.internal.overwrite) {
       let jsonFileName: URL = new URL(project.files.internal.filename, base);
-      console.log(jsonFileName);
       fs.writeFileSync(jsonFileName, project.getProjectJSON());
     }
   }
