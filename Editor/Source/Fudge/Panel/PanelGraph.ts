@@ -60,9 +60,8 @@ namespace Fudge {
 
       this.goldenLayout.addItemAtLocation(renderConfig, [{typeId: LayoutManager.LocationSelector.TypeId.Root}]);
       this.goldenLayout.addItemAtLocation(hierachyAndComponents, [{typeId: LayoutManager.LocationSelector.TypeId.Root}]);
-      // Kann weg
-      console.log(this.goldenLayout.getRegisteredComponentTypeNames())
-      //inner.layoutManager.addItemAtLocation(hierachyAndComponents, [{typeId: LayoutManager.LocationSelector.TypeId.FirstColumn}]);
+     
+      // addchild replaced with addItemAtLocation
       // inner.addChild({
       //   type: "column", content: [{
       //     type: "component", componentName: VIEW.RENDER, componentState: _state, title: "Render"

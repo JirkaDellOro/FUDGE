@@ -463,7 +463,6 @@ var Fudge;
         static panels = [];
         static async start() {
             // TODO: At this point of time, the project is just a single node. A project is much more complex...
-            console.log(Page.goldenLayoutModule); // kann weg
             let node = null;
             Page.setupGoldenLayout();
             ƒ.Project.mode = ƒ.MODE.EDITOR;
@@ -506,7 +505,6 @@ var Fudge;
             };
             //this.goldenLayout = new GoldenLayout();   //This might be a problem because it can't use a specific place to put it.
             this.goldenLayout = new this.goldenLayoutModule.GoldenLayout(); // GoldenLayout 2 as UMD-Module
-            console.log(this.goldenLayout);
             // Old registerComponent methods
             // this.goldenLayout.registerComponent("Welcome", welcome);
             // this.goldenLayout.registerComponent(PANEL.GRAPH, PanelGraph);
@@ -1320,13 +1318,10 @@ var Fudge;
         //public dom; // muss vielleicht weg
         constructor(_container, _state) {
             super(_container, _state);
-            //this.dom = document.createElement("div"); // muss vielleicht wieder weg
-            //this.dom.style.height = "100%"; // muss vielleicht wieder weg
             this.dom.style.width = "100%";
             this.dom.style.overflow = "visible";
-            this.dom.removeAttribute("view"); // wieder hinzufügen
+            this.dom.removeAttribute("view");
             this.dom.setAttribute("panel", this.constructor.name);
-            //_container.element.appendChild(this.dom); // muss vielleicht wieder weg
             let oldconfig = {
                 settings: { showPopoutIcon: false },
                 content: [{
@@ -1337,35 +1332,13 @@ var Fudge;
                 root: {
                     type: "row",
                     isClosable: true,
-                    content: [
-                    // {
-                    //   type: "component",
-                    //   componentType: "anfang",
-                    //   content: []
-                    // }
-                    ]
+                    content: []
                 }
             };
             this.goldenLayout = new Fudge.Page.goldenLayoutModule.GoldenLayout(this.dom);
-            console.log("kann weg wenn es funktioniert");
-            console.log(this.goldenLayout);
             this.goldenLayout.on("stateChanged", () => this.goldenLayout.updateRootSize());
-            //this.goldenLayout.on("componentCreated", this.addViewComponent);                // Vorerst auskomentiert zu testzwecken
+            //this.goldenLayout.on("componentCreated", this.addViewComponent);                // old eventname
             this.goldenLayout.on("itemCreated", this.addViewComponent);
-            // this.goldenLayout.on("itemCreated", () => {
-            //   console.log("itemcreated Test");
-            // })
-            // this.goldenLayout.registerComponentFactoryFunction("anfang", (container, state) => {
-            //   let newDiv = document.createElement("div")
-            //   console.log(newDiv);
-            //   newDiv.style.height = "100%";
-            //   newDiv.style.width = "100%";
-            //   newDiv.style.color = "white";
-            //   newDiv.innerHTML = "<h2> This is a first component test usw. </h2>";
-            //   newDiv.innerHTML += "<form> <label for='vname'>Vorname: <input id='vname' name='vname'></label>";
-            //   newDiv.innerHTML += "<label for='zname'>Zuname: <input id='zname' name='zname'></label>"
-            //   container.element.appendChild(newDiv);
-            // })
             this.goldenLayout.loadLayout(config);
         }
         /** Send custom copies of the given event to the views */
@@ -1378,6 +1351,7 @@ var Fudge;
         };
         addViewComponent = (_event) => {
             //this.views.push(<View>(<ƒ.General>_component).instance); original
+            // adjustmens for GoldenLayout 2
             let target = _event.target;
             if (target instanceof Fudge.Page.goldenLayoutModule.ComponentItem) {
                 this.views.push(target.component);
@@ -1436,9 +1410,7 @@ var Fudge;
             };
             this.goldenLayout.addItemAtLocation(renderConfig, [{ typeId: 7 /* Root */ }]);
             this.goldenLayout.addItemAtLocation(hierachyAndComponents, [{ typeId: 7 /* Root */ }]);
-            // Kann weg
-            console.log(this.goldenLayout.getRegisteredComponentTypeNames());
-            //inner.layoutManager.addItemAtLocation(hierachyAndComponents, [{typeId: LayoutManager.LocationSelector.TypeId.FirstColumn}]);
+            // addchild replaced with addItemAtLocation
             // inner.addChild({
             //   type: "column", content: [{
             //     type: "component", componentName: VIEW.RENDER, componentState: _state, title: "Render"
@@ -1557,8 +1529,8 @@ var Fudge;
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             // this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
-            console.log(this.dom);
-            // MUSS wieder benutzt werden. Hier gibt es einen Fehler, wenn dieses Event benutzt wird. Dom not defined
+            //console.log(this.dom)
+            // DOM note definded 
             this.broadcastEvent(new Event(Fudge.EVENT_EDITOR.SET_PROJECT));
         }
         hndEvent = (_event) => {

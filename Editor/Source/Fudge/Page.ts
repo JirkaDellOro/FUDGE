@@ -26,7 +26,6 @@ namespace Fudge {
 
     public static async start(): Promise<void> {
       // TODO: At this point of time, the project is just a single node. A project is much more complex...
-      console.log(Page.goldenLayoutModule); // kann weg
       let node: ƒ.Node = null;
 
       Page.setupGoldenLayout();
@@ -79,10 +78,7 @@ namespace Fudge {
 
       //this.goldenLayout = new GoldenLayout();   //This might be a problem because it can't use a specific place to put it.
       this.goldenLayout = new this.goldenLayoutModule.GoldenLayout(); // GoldenLayout 2 as UMD-Module
-
-      console.log(this.goldenLayout);
-
-
+      
       // Old registerComponent methods
       // this.goldenLayout.registerComponent("Welcome", welcome);
       // this.goldenLayout.registerComponent(PANEL.GRAPH, PanelGraph);

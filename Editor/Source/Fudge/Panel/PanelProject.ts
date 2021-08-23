@@ -90,9 +90,9 @@ namespace Fudge {
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
       // this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
 
-      console.log(this.dom)
+      //console.log(this.dom)
       
-      // MUSS wieder benutzt werden. Hier gibt es einen Fehler, wenn dieses Event benutzt wird. Dom not defined
+      // DOM note definded 
       this.broadcastEvent(new Event(EVENT_EDITOR.SET_PROJECT));
     }
 
