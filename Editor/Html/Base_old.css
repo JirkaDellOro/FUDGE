@@ -22,31 +22,30 @@
 }
 
 .lm_splitter:hover {
-  /* background: var(--color-background-content); */
-  background: darkgrey;
+  background: var(--color-background-content);
 }
 
-/* .lm_splitter.lm_dragging {
+.lm_splitter.lm_dragging {
   background: var(--color-background-main);
-} */
+}
 
-/* .lm_selected .lm_header {
+.lm_selected .lm_header {
   background-color: var(--color-background-content);
-} */
+}
 
-/* .lm_tab:hover, .lm_tab .lm_active, .lm_dragProxy .lm_tab {
+.lm_tab:hover, .lm_tab .lm_active, .lm_dragProxy .lm_tab {
   background-color: var(--color-background-content);
-} */
+}
 
-/* .lm_header {
+.lm_header {
   background-color: var(--color-background-main);
-} */
+}
 
 /* Controls */
 
-/* .lm_header .lm_controls .lm_tabdropdown:before {
+.lm_header .lm_controls .lm_tabdropdown:before {
   color: var(--color-text);
-} */
+}
 
 /* Drag & Drop */
 
