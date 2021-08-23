@@ -1,32 +1,47 @@
 namespace Fudge {
   const fs: ƒ.General = require("fs");
 
-  export async function saveProject(): Promise<void> {
-    if (!await project.openDialog())
-      return;
+  export async function newProject(): Promise<void> {
 
     let filename: string | string[] = remote.dialog.showOpenDialogSync(null, {
-      properties: ["openDirectory", "createDirectory"], title: "Select a folder to save the project to", buttonLabel: "Save Project"
+      properties: ["openDirectory", "createDirectory"], title: "Select/Create a folder to save the project to. The foldername becomes the name of your project", buttonLabel: "Save Project"
     });
+
     if (!filename)
       return;
 
-    filename = filename[0] + "/a.b";
-    console.log(filename);
+    let base: URL = new URL(filename[0]);
+    project = new Project(base);
+
+    await saveProject();
+    await loadProject(new URL(project.files.index.filename, project.base + "/"));
+  }
+
+  export async function saveProject(): Promise<void> {
+    if (!project)
+      return;
+
+    if (!await project.openDialog())
+      return;
+
+    let base: URL = project.base;
+    let projectName: string = base.toString().split("/").pop();
+    base = new URL("base", base + "/");
+    console.log(base);
 
     if (project.files.index.overwrite) {
-      let html: string = project.getProjectHTML();
-      let htmlFileName: URL = new URL(project.files.index.filename, filename);
+      let html: string = project.getProjectHTML(projectName);
+      let htmlFileName: URL = new URL(project.files.index.filename, base);
       fs.writeFileSync(htmlFileName, html);
     }
 
     if (project.files.style.overwrite) {
-      let cssFileName: URL = new URL(project.files.style.filename, filename);
+      let cssFileName: URL = new URL(project.files.style.filename, base);
       fs.writeFileSync(cssFileName, project.getProjectCSS());
     }
 
     if (project.files.internal.overwrite) {
-      let jsonFileName: URL = new URL(project.files.internal.filename, filename);
+      let jsonFileName: URL = new URL(project.files.internal.filename, base);
       console.log(jsonFileName);
       fs.writeFileSync(jsonFileName, project.getProjectJSON());
     }
@@ -55,14 +70,15 @@ namespace Fudge {
     console.log(head);
 
     ƒ.Project.clear();
+    project = new Project(_url);
 
-    project.title = head.querySelector("title").textContent;
-    
+    // project.title = head.querySelector("title").textContent;
+
     project.files.index.filename = _url.toString().split("/").pop();
     project.files.index.overwrite = false;
 
     let css: HTMLLinkElement = head.querySelector("link[rel=stylesheet]");
-    project.files.style.filename = css.getAttribute("href");  
+    project.files.style.filename = css.getAttribute("href");
     project.files.style.overwrite = false;
 
     //TODO: should old scripts be removed from memory first? How?
@@ -74,7 +90,7 @@ namespace Fudge {
         await ƒ.Project.loadScript(new URL(url, _url).toString());
         console.log("ComponentScripts", ƒ.Project.getComponentScripts());
         console.log("Script Namespaces", ƒ.Project.scriptNamespaces);
-        
+
         project.files.script.filename = url;
         Reflect.set(project.files.script, "include", true);
       }
@@ -89,7 +105,7 @@ namespace Fudge {
       ƒ.Debug.groupCollapsed("Deserialized");
       ƒ.Debug.info(reconstruction);
       ƒ.Debug.groupEnd();
-      
+
       project.files.internal.filename = resourceFile;
       project.files.internal.overwrite = true;
     }

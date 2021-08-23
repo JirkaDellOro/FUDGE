@@ -11,6 +11,7 @@ declare namespace Fudge {
     }
     enum MENU {
         QUIT = "quit",
+        PROJECT_NEW = "projectNew",
         PROJECT_SAVE = "projectSave",
         PROJECT_LOAD = "projectLoad",
         DEVTOOLS_OPEN = "devtoolsOpen",

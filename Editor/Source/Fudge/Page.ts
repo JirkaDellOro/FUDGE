@@ -11,7 +11,7 @@ namespace Fudge {
   export const ipcRenderer: Electron.IpcRenderer = require("electron").ipcRenderer;
   export const remote: Electron.Remote = require("electron").remote;
 
-  export let project: Project = new Project();
+  export let project: Project; // = new Project();
 
   /**
    * The uppermost container for all panels controlling data flow between. 
@@ -33,9 +33,12 @@ namespace Fudge {
       Page.setupPageListeners();
 
       // for testing:
-      ipcRenderer.emit(MENU.PANEL_PROJECT_OPEN);
-      ipcRenderer.emit(MENU.PANEL_GRAPH_OPEN);
+      // ipcRenderer.emit(MENU.PANEL_PROJECT_OPEN);
+      // ipcRenderer.emit(MENU.PANEL_GRAPH_OPEN);
       // ipcRenderer.emit(MENU.PROJECT_LOAD);
+      ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: false });
+      ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: false });
+      ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: false });
     }
 
     public static setupGoldenLayout(): void {
@@ -124,15 +127,27 @@ namespace Fudge {
 
     //#region Main-Events from Electron
     private static setupMainListeners(): void {
+      ipcRenderer.on(MENU.PROJECT_NEW, async (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
+        ƒ.Project.clear();
+        await newProject();
+        ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
+        ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
+        ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
+        Page.broadcastEvent(new CustomEvent(EVENT_EDITOR.SET_PROJECT));
+      });
+
       ipcRenderer.on(MENU.PROJECT_SAVE, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
         saveProject();
       });
 
       ipcRenderer.on(MENU.PROJECT_LOAD, async (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
         let url: URL = await promptLoadProject();
-        if (url)
-          await loadProject(url);
-        // Page.broadcastEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, { detail: node }));
+        if (!url)
+          return;
+        await loadProject(url);;
+        ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
+        ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
+        ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
         Page.broadcastEvent(new CustomEvent(EVENT_EDITOR.SET_PROJECT));
       });
 

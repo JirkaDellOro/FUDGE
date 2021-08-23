@@ -25,6 +25,7 @@ declare namespace Fudge {
     }
     enum MENU {
         QUIT = "quit",
+        PROJECT_NEW = "projectNew",
         PROJECT_SAVE = "projectSave",
         PROJECT_LOAD = "projectLoad",
         DEVTOOLS_OPEN = "devtoolsOpen",
@@ -85,6 +86,7 @@ declare namespace Fudge {
     export {};
 }
 declare namespace Fudge {
+    function newProject(): Promise<void>;
     function saveProject(): Promise<void>;
     function promptLoadProject(): Promise<URL>;
     function loadProject(_url: URL): Promise<void>;
@@ -107,20 +109,19 @@ declare namespace Fudge {
     }
     export class Project extends ƒ.Mutable {
         files: Files;
-        title: string;
+        base: URL;
         private includePhysics;
         private includeAutoViewScript;
         private graphToStartWith;
-        constructor();
+        constructor(_base: URL);
         openDialog(): Promise<boolean>;
         hndChange: (_event: Event) => void;
         getProjectJSON(): string;
         getProjectCSS(): string;
-        getProjectHTML(): string;
+        getProjectHTML(_title: string): string;
         getGraphs(): Object;
         getMutatorAttributeTypes(_mutator: ƒ.Mutator): ƒ.MutatorAttributeTypes;
         protected reduceMutator(_mutator: ƒ.Mutator): void;
-        private updateFilenames;
         private getAutoViewScript;
     }
     export {};
