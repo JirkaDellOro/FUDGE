@@ -140,7 +140,7 @@ declare namespace Fudge {
         private static panels;
         static start(): Promise<void>;
         static setupGoldenLayout(): void;
-        static add_(_panel: typeof Panel, _title: string, _state?: JsonValue): void;
+        static add(_panel: typeof Panel, _title: string, _state?: JsonValue): void;
         static find(_type: typeof Panel): Panel[];
         private static generateID;
         private static setupPageListeners;

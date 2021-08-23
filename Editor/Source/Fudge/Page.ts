@@ -42,7 +42,7 @@ namespace Fudge {
     }
 
     public static setupGoldenLayout(): void {
-      
+
       //old root config 
       let config_old: any = {
         settings: { showPopoutIcon: false },
@@ -58,31 +58,31 @@ namespace Fudge {
         root: {
           type: "row",
           isClosable: true,
-          content: [ 
-          {
-              type: "component",
-              componentType: PANEL.GRAPH,
-              content: []
-          },
+          content: [
+            //   {
+            //       type: "component",
+            //       componentType: PANEL.GRAPH,
+            //       content: []
+            //   },
 
-          {
-            type: "component",
-            componentType: PANEL.PROJECT,
-            content: []
-        },
+            //   {
+            //     type: "component",
+            //     componentType: PANEL.PROJECT,
+            //     content: []
+            // },
           ],
         }
       }
 
 
-      
+
 
       //this.goldenLayout = new GoldenLayout();   //This might be a problem because it can't use a specific place to put it.
       this.goldenLayout = new this.goldenLayoutModule.GoldenLayout(); // GoldenLayout 2 as UMD-Module
-      
+
       console.log(this.goldenLayout);
 
-      
+
       // Old registerComponent methods
       // this.goldenLayout.registerComponent("Welcome", welcome);
       // this.goldenLayout.registerComponent(PANEL.GRAPH, PanelGraph);
@@ -91,10 +91,10 @@ namespace Fudge {
 
       this.goldenLayout.registerComponentConstructor(PANEL.PROJECT, PanelProject);
       this.goldenLayout.registerComponentConstructor(PANEL.GRAPH, PanelGraph);
-      
+
       //this.goldenLayout.registerComponentConstructor(PANEL.PROJECT, PanelProject);
 
-      
+
       this.goldenLayout.loadLayout(config);
     }
 
@@ -114,7 +114,7 @@ namespace Fudge {
     // }
 
     // remove _ to use
-    public static add_(_panel: typeof Panel, _title: string, _state?: JsonValue): void {
+    public static add(_panel: typeof Panel, _title: string, _state?: JsonValue): void {
       // TODO: Füllen RowOrColumnItemConfig
       const panelConfig: RowOrColumnItemConfig = {
         type: "column",
@@ -129,7 +129,7 @@ namespace Fudge {
         ]
       }
       //let panel = this.goldenLayout.rootItem.layoutManager.findFirstComponentItemById()
-      this.goldenLayout.rootItem.layoutManager.addItemAtLocation(panelConfig, [{typeId: LayoutManager.LocationSelector.TypeId.Root}]);
+      this.goldenLayout.rootItem.layoutManager.addItemAtLocation(panelConfig, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
       //this.panels.push(panel)
     }
 
@@ -200,7 +200,10 @@ namespace Fudge {
 
       ipcRenderer.on(MENU.PANEL_GRAPH_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
         let node: ƒ.Node = new ƒaid.NodeCoordinateSystem("WorldCooSys");
-        Page.add(PanelGraph, "Graph", Object({ node: node }));
+        // funktioniert nicht
+        Page.add(PanelGraph, "Graph", null);
+        // Alternative
+        //Page.add(PanelGraph, "Graph", "Platzhalter should be node"); 
         Page.broadcastEvent(new CustomEvent(EVENT_EDITOR.UPDATE, { detail: node }));
       });
 

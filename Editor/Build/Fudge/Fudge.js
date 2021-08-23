@@ -491,16 +491,16 @@ var Fudge;
                     type: "row",
                     isClosable: true,
                     content: [
-                        {
-                            type: "component",
-                            componentType: Fudge.PANEL.GRAPH,
-                            content: []
-                        },
-                        {
-                            type: "component",
-                            componentType: Fudge.PANEL.PROJECT,
-                            content: []
-                        },
+                    //   {
+                    //       type: "component",
+                    //       componentType: PANEL.GRAPH,
+                    //       content: []
+                    //   },
+                    //   {
+                    //     type: "component",
+                    //     componentType: PANEL.PROJECT,
+                    //     content: []
+                    // },
                     ],
                 }
             };
@@ -531,7 +531,7 @@ var Fudge;
         //   this.panels.push(item.getComponentsByName(_panel.name)[0]);
         // }
         // remove _ to use
-        static add_(_panel, _title, _state) {
+        static add(_panel, _title, _state) {
             // TODO: Füllen RowOrColumnItemConfig
             const panelConfig = {
                 type: "column",
@@ -609,7 +609,10 @@ var Fudge;
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_GRAPH_OPEN, (_event, _args) => {
                 let node = new ƒaid.NodeCoordinateSystem("WorldCooSys");
-                Page.add(Fudge.PanelGraph, "Graph", Object({ node: node }));
+                // funktioniert nicht
+                Page.add(Fudge.PanelGraph, "Graph", null);
+                // Alternative
+                //Page.add(PanelGraph, "Graph", "Platzhalter should be node"); 
                 Page.broadcastEvent(new CustomEvent(Fudge.EVENT_EDITOR.UPDATE, { detail: node }));
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_PROJECT_OPEN, (_event, _args) => {
@@ -1373,8 +1376,12 @@ var Fudge;
                 view.dom.dispatchEvent(event);
             }
         };
-        addViewComponent = (_component) => {
-            this.views.push(_component.instance);
+        addViewComponent = (_event) => {
+            //this.views.push(<View>(<ƒ.General>_component).instance); original
+            let target = _event.target;
+            if (target instanceof Fudge.Page.goldenLayoutModule.ComponentItem) {
+                this.views.push(target.component);
+            }
         };
     }
     Fudge.Panel = Panel;
@@ -1429,6 +1436,7 @@ var Fudge;
             };
             this.goldenLayout.addItemAtLocation(renderConfig, [{ typeId: 7 /* Root */ }]);
             this.goldenLayout.addItemAtLocation(hierachyAndComponents, [{ typeId: 7 /* Root */ }]);
+            // Kann weg
             console.log(this.goldenLayout.getRegisteredComponentTypeNames());
             //inner.layoutManager.addItemAtLocation(hierachyAndComponents, [{typeId: LayoutManager.LocationSelector.TypeId.FirstColumn}]);
             // inner.addChild({
@@ -1551,7 +1559,7 @@ var Fudge;
             // this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
             console.log(this.dom);
             // MUSS wieder benutzt werden. Hier gibt es einen Fehler, wenn dieses Event benutzt wird. Dom not defined
-            //this.broadcastEvent(new Event(EVENT_EDITOR.SET_PROJECT));
+            this.broadcastEvent(new Event(Fudge.EVENT_EDITOR.SET_PROJECT));
         }
         hndEvent = (_event) => {
             // if (_event.type == EVENT_EDITOR.SET_PROJECT)

@@ -77,15 +77,19 @@ namespace Fudge {
 
     /** Send custom copies of the given event to the views */
     public broadcastEvent = (_event: Event): void => {
-       console.log("views", this.views);
+      console.log("views", this.views);
       for (let view of this.views) {
         let event: CustomEvent = new CustomEvent(_event.type, { bubbles: false, cancelable: true, detail: (<CustomEvent>_event).detail });
         view.dom.dispatchEvent(event);
       }
     }
 
-    private addViewComponent = (_component: Object): void => {
-      this.views.push(<View>(<ƒ.General>_component).instance);
+    private addViewComponent = (_event: EventEmitter.BubblingEvent): void => {
+      //this.views.push(<View>(<ƒ.General>_component).instance); original
+      let target: ComponentItem = _event.target as ComponentItem;
+      if (target instanceof Page.goldenLayoutModule.ComponentItem) {
+        this.views.push(<View>target.component);
+      }
     }
   }
 }
