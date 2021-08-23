@@ -75,10 +75,11 @@ namespace FudgeAid {
           return;
         picks.sort((_a: ƒ.Pick, _b: ƒ.Pick) => _a.zBuffer < _b.zBuffer ? -1 : 1);
 
-        let posCamera: ƒ.Vector3 = camera.nodeCamera.mtxWorld.translation;
+        // let posCamera: ƒ.Vector3 = camera.nodeCamera.mtxWorld.translation;
+        // camera.mtxLocal.translation = picks[0].posWorld;
+        // // ƒ.Render.prepare(camera);
+        // camera.positionCamera(posCamera);
         camera.mtxLocal.translation = picks[0].posWorld;
-        ƒ.Render.prepare(camera);
-        camera.positionCamera(posCamera);
         redraw();
 
         _viewport.getCanvas().dispatchEvent(new CustomEvent("pick", { detail: picks[0], bubbles: true }));

@@ -481,9 +481,10 @@ declare namespace Fudge {
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class ViewRender extends View {
-        viewport: ƒ.Viewport;
-        canvas: HTMLCanvasElement;
-        graph: ƒ.Node;
+        private cameraOrbit;
+        private viewport;
+        private canvas;
+        private graph;
         constructor(_container: GoldenLayout.Container, _state: Object);
         createUserInterface(): void;
         setGraph(_node: ƒ.Node): void;

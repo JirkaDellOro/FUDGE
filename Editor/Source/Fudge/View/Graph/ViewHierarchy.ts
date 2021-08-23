@@ -51,7 +51,6 @@ namespace Fudge {
     public focusNode(_node: ƒ.Node): void {
       let path: ƒ.Node[] = _node.getPath();
       path = path.splice(path.indexOf(this.graph));
-      console.log(path);
       this.tree.show(path);
       this.tree.displaySelection([_node]);
     }

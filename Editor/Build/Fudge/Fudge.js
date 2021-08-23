@@ -2170,7 +2170,6 @@ var Fudge;
         focusNode(_node) {
             let path = _node.getPath();
             path = path.splice(path.indexOf(this.graph));
-            console.log(path);
             this.tree.show(path);
             this.tree.displaySelection([_node]);
         }
@@ -2265,6 +2264,10 @@ var Fudge;
                     case Fudge.EVENT_EDITOR.SET_GRAPH:
                         this.setGraph(_event.detail);
                         break;
+                    case Fudge.EVENT_EDITOR.FOCUS_NODE:
+                        this.cameraOrbit.mtxLocal.translation = _event.detail.mtxWorld.translation;
+                        ƒ.Render.prepare(this.cameraOrbit);
+                    // break;
                     case "mutate" /* MUTATE */:
                     case "delete" /* DELETE */:
                     case Fudge.EVENT_EDITOR.UPDATE:
@@ -2301,6 +2304,7 @@ var Fudge;
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener("delete" /* DELETE */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
         }
         createUserInterface() {
             let cmpCamera = new ƒ.ComponentCamera();
@@ -2313,7 +2317,7 @@ var Fudge;
             document.body.appendChild(this.canvas);
             this.viewport = new ƒ.Viewport();
             this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
-            FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
+            this.cameraOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
             this.viewport.draw();
             this.dom.append(this.canvas);
             // ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);

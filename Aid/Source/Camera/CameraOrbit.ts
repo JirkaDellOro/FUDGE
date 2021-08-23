@@ -90,6 +90,7 @@ namespace FudgeAid {
       this.rotationX = -geo.latitude;
       this.distance = geo.magnitude;
     }
+    
 
     public hndAxisOutput: EventListener = (_event: Event): void => {
       let output: number = (<CustomEvent>_event).detail.output;
