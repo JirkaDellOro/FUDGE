@@ -8,7 +8,7 @@ namespace Fudge {
    * @author Jirka Dell'Oro-Friedl, HFU, 2020
    */
   export class ViewRender extends View {
-    private cameraOrbit: ƒAid.CameraOrbit;
+    private cmrOrbit: ƒAid.CameraOrbit;
     private viewport: ƒ.Viewport;
     private canvas: HTMLCanvasElement;
     private graph: ƒ.Node;
@@ -39,7 +39,7 @@ namespace Fudge {
 
       this.viewport = new ƒ.Viewport();
       this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
-      this.cameraOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
+      this.cmrOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
       this.viewport.draw();
 
       this.dom.append(this.canvas);
@@ -92,8 +92,8 @@ namespace Fudge {
           this.setGraph(_event.detail);
           break;
         case EVENT_EDITOR.FOCUS_NODE:
-          this.cameraOrbit.mtxLocal.translation = _event.detail.mtxWorld.translation;
-          ƒ.Render.prepare(this.cameraOrbit);
+          this.cmrOrbit.mtxLocal.translation = _event.detail.mtxWorld.translation;
+          ƒ.Render.prepare(this.cmrOrbit);
           // break;
         case ƒUi.EVENT.MUTATE:
         case ƒUi.EVENT.DELETE:

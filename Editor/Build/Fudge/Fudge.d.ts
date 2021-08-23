@@ -481,7 +481,7 @@ declare namespace Fudge {
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class ViewRender extends View {
-        private cameraOrbit;
+        private cmrOrbit;
         private viewport;
         private canvas;
         private graph;

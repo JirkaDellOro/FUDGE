@@ -188,28 +188,35 @@ namespace Fudge {
         case EVENT_EDITOR.UPDATE:
           if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture || this.resource instanceof ƒ.Material)
             this.fillContent();
-          this.redraw();
+          // this.redraw();
           break;
         default:
           if (_event.detail.data instanceof ScriptInfo)
             this.resource = _event.detail.data.script;
           else
             this.resource = _event.detail.data;
-          this.resetCamera();
+
           this.fillContent();
           break;
       }
     }
 
     private resetCamera(): void {
+      let branch: ƒ.Node = this.viewport.getBranch();
+      ƒ.Render.prepare(branch);
+      let r: number = branch.radius;
+
+      this.cmrOrbit.mtxLocal.translation = ƒ.Vector3.ZERO();
+      ƒ.Render.prepare(this.cmrOrbit);
       this.cmrOrbit.rotationX = -30;
       this.cmrOrbit.rotationY = 30;
-      this.cmrOrbit.distance = 3;
+      this.cmrOrbit.distance = r * 3;
       ƒ.Render.prepare(this.cmrOrbit);
     }
 
     private redraw = () => {
       try {
+        this.resetCamera();
         this.viewport.draw();
       } catch (_error: unknown) {
         //nop

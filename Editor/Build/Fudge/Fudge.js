@@ -2265,8 +2265,8 @@ var Fudge;
                         this.setGraph(_event.detail);
                         break;
                     case Fudge.EVENT_EDITOR.FOCUS_NODE:
-                        this.cameraOrbit.mtxLocal.translation = _event.detail.mtxWorld.translation;
-                        ƒ.Render.prepare(this.cameraOrbit);
+                        this.cmrOrbit.mtxLocal.translation = _event.detail.mtxWorld.translation;
+                        ƒ.Render.prepare(this.cmrOrbit);
                     // break;
                     case "mutate" /* MUTATE */:
                     case "delete" /* DELETE */:
@@ -2317,7 +2317,7 @@ var Fudge;
             document.body.appendChild(this.canvas);
             this.viewport = new ƒ.Viewport();
             this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
-            this.cameraOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
+            this.cmrOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
             this.viewport.draw();
             this.dom.append(this.canvas);
             // ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
@@ -2374,20 +2374,20 @@ var Fudge;
                     case Fudge.EVENT_EDITOR.UPDATE:
                         if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture || this.resource instanceof ƒ.Material)
                             this.fillContent();
-                        this.redraw();
+                        // this.redraw();
                         break;
                     default:
                         if (_event.detail.data instanceof Fudge.ScriptInfo)
                             this.resource = _event.detail.data.script;
                         else
                             this.resource = _event.detail.data;
-                        this.resetCamera();
                         this.fillContent();
                         break;
                 }
             };
             this.redraw = () => {
                 try {
+                    this.resetCamera();
                     this.viewport.draw();
                 }
                 catch (_error) {
@@ -2541,9 +2541,14 @@ var Fudge;
             return pre;
         }
         resetCamera() {
+            let branch = this.viewport.getBranch();
+            ƒ.Render.prepare(branch);
+            let r = branch.radius;
+            this.cmrOrbit.mtxLocal.translation = ƒ.Vector3.ZERO();
+            ƒ.Render.prepare(this.cmrOrbit);
             this.cmrOrbit.rotationX = -30;
             this.cmrOrbit.rotationY = 30;
-            this.cmrOrbit.distance = 3;
+            this.cmrOrbit.distance = r * 3;
             ƒ.Render.prepare(this.cmrOrbit);
         }
     }
