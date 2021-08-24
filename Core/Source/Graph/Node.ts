@@ -83,6 +83,10 @@ namespace FudgeCore {
       }
     }
 
+    public [Symbol.iterator](): IterableIterator<Node> {
+      return this.getIterator();
+    }
+
     public activate(_on: boolean): void {
       this.active = _on;
       // TODO: check if COMPONENT_ACTIVATE/DEACTIVATE is the correct event to dispatch. Shouldn't it be something like NODE_ACTIVATE/DEACTIVATE?
@@ -332,7 +336,7 @@ namespace FudgeCore {
 
       _component.setContainer(this);
       _component.dispatchEvent(new Event(EVENT.COMPONENT_ADD));
-      this.dispatchEventToTargetOnly(new CustomEvent(EVENT.COMPONENT_ADD, {detail: _component})); // TODO: see if this is be feasable
+      this.dispatchEventToTargetOnly(new CustomEvent(EVENT.COMPONENT_ADD, { detail: _component })); // TODO: see if this is be feasable
     }
     /** 
      * Removes the given component from the node, if it was attached, and sets its parent to null. 
@@ -346,7 +350,7 @@ namespace FudgeCore {
         if (foundAt < 0)
           return;
         _component.dispatchEvent(new Event(EVENT.COMPONENT_REMOVE));
-        this.dispatchEventToTargetOnly(new CustomEvent(EVENT.COMPONENT_REMOVE, {detail: _component})); // TODO: see if this would be feasable
+        this.dispatchEventToTargetOnly(new CustomEvent(EVENT.COMPONENT_REMOVE, { detail: _component })); // TODO: see if this would be feasable
         componentsOfType.splice(foundAt, 1);
         _component.setContainer(null);
       } catch (_error) {
@@ -532,7 +536,7 @@ namespace FudgeCore {
     private callListeners(_listeners: EventListenerƒ[], _event: Event): void {
       if (_listeners?.length > 0)
         for (let handler of _listeners)
-        // @ts-ignore
+          // @ts-ignore
           handler(_event);
     }
     // #endregion
