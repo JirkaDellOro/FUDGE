@@ -18,6 +18,7 @@ namespace Fudge {
 
       this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
+      this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener(ƒui.EVENT.DELETE, this.hndEvent);
     }
@@ -148,6 +149,7 @@ namespace Fudge {
       switch (_event.type) {
         case EVENT_EDITOR.SET_PROJECT:
         case EVENT_EDITOR.UPDATE:
+        case ƒui.EVENT.MUTATE:
           this.listResources();
           break;
         // case ƒui.EVENT.SELECT:

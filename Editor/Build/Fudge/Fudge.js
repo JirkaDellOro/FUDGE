@@ -169,6 +169,7 @@ var Fudge;
 var Fudge;
 (function (Fudge) {
     const fs = require("fs");
+    var ƒui = FudgeUserInterface;
     async function newProject() {
         let filename = Fudge.remote.dialog.showOpenDialogSync(null, {
             properties: ["openDirectory", "createDirectory"], title: "Select/Create a folder to save the project to. The foldername becomes the name of your project", buttonLabel: "Save Project"
@@ -282,12 +283,20 @@ var Fudge;
     Fudge.loadProject = loadProject;
     function watchFolder() {
         let dir = new URL(".", Fudge.project.base);
-        let watcher = fs.watch(dir, { recursive: true, persistent: false }, async (_event, _url) => {
-            console.log(_event, _url);
-            watcher.close();
-            await loadProject(Fudge.project.base);
-            document.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE));
-        });
+        let watcher = fs.watch(dir, { recursive: true }, hndFileChange);
+        async function hndFileChange(_event, _url) {
+            let filename = _url.toString();
+            if (filename == Fudge.project.files.index.filename || filename == Fudge.project.files.internal.filename || filename == Fudge.project.files.script.filename) {
+                watcher.close();
+                let promise = ƒui.Dialog.prompt(null, false, "Important file change", "Reload project?", "Reload", "Cancel");
+                if (await promise) {
+                    await loadProject(Fudge.project.base);
+                }
+                else
+                    watcher = fs.watch(dir, { recursive: true }, hndFileChange);
+                document.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE));
+            }
+        }
     }
 })(Fudge || (Fudge = {}));
 var Fudge;
@@ -854,6 +863,7 @@ var Fudge;
                 switch (_event.type) {
                     case Fudge.EVENT_EDITOR.SET_PROJECT:
                     case Fudge.EVENT_EDITOR.UPDATE:
+                    case "mutate" /* MUTATE */:
                         this.listResources();
                         break;
                     // case ƒui.EVENT.SELECT:
@@ -863,6 +873,7 @@ var Fudge;
             };
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
+            this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.addEventListener("delete" /* DELETE */, this.hndEvent);
         }

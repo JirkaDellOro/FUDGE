@@ -1,5 +1,6 @@
 namespace Fudge {
   const fs: ƒ.General = require("fs");
+  import ƒui = FudgeUserInterface;
 
   export async function newProject(): Promise<void> {
 
@@ -142,14 +143,19 @@ namespace Fudge {
 
   function watchFolder(): void {
     let dir: URL = new URL(".", project.base);
-    let watcher: ƒ.General = fs.watch(
-      dir,
-      { recursive: true, persistent: false },
-      async (_event: string, _url: URL) => {
-        console.log(_event, _url);
+    let watcher: ƒ.General = fs.watch(dir, { recursive: true }, hndFileChange);
+
+    async function hndFileChange(_event: string, _url: URL): Promise<void> {
+      let filename: string = _url.toString();
+      if (filename == project.files.index.filename || filename == project.files.internal.filename || filename == project.files.script.filename) {
         watcher.close();
-        await loadProject(project.base);
+        let promise: Promise<boolean> = ƒui.Dialog.prompt(null, false, "Important file change", "Reload project?", "Reload", "Cancel");
+        if (await promise) {
+          await loadProject(project.base);
+        } else
+          watcher = fs.watch(dir, { recursive: true }, hndFileChange);
         document.dispatchEvent(new Event(EVENT_EDITOR.UPDATE));
-      });
+      }
+    }
   }
 }
