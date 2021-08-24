@@ -188,13 +188,19 @@ var Fudge;
             "Core/Build/FudgeCore.js": "Fudge/Core/FudgeCore.js",
             "Core/Build/FudgeCore.d.ts": "Fudge/Core/FudgeCore.d.ts",
             "Aid/Build/FudgeAid.js": "Fudge/Aid/FudgeAid.js",
-            "Aid/Build/FudgeAid.d.ts": "Fudge/Aid/FudgeAid.d.ts",
+            "Aid/Build/FudgeAid.d.ts": "Fudge/Aid/FudgeAid.d.ts"
         };
         for (let copy in copies) {
             let src = new URL(copy, ƒPath);
             let dest = new URL(copies[copy], base);
             fs.copyFileSync(src, dest);
         }
+        fs.mkdirSync(new URL("Script/Source", base), { recursive: true });
+        fs.mkdirSync(new URL("Script/Build", base), { recursive: true });
+        fs.copyFileSync(new URL("Editor/Source/Template/CustomComponentScript.txt", ƒPath), new URL("Script/Source/CustomComponentScript.ts", base));
+        fs.copyFileSync(new URL("Editor/Source/Template/tsconfig.txt", ƒPath), new URL("Script/Source/tsconfig.json", base));
+        fs.copyFileSync(new URL("Editor/Source/Template/.gitignore.txt", ƒPath), new URL(".gitignore", base));
+        fs.copyFileSync(new URL("Editor/Source/Template/Script.txt", ƒPath), new URL("Script/Build/Script.js", base));
         await loadProject(new URL(Fudge.project.files.index.filename, Fudge.project.base));
     }
     Fudge.newProject = newProject;
@@ -271,8 +277,18 @@ var Fudge;
             Fudge.project.files.internal.filename = resourceFile;
             Fudge.project.files.internal.overwrite = true;
         }
+        watchFolder();
     }
     Fudge.loadProject = loadProject;
+    function watchFolder() {
+        let dir = new URL(".", Fudge.project.base);
+        let watcher = fs.watch(dir, { recursive: true, persistent: false }, async (_event, _url) => {
+            console.log(_event, _url);
+            watcher.close();
+            await loadProject(Fudge.project.base);
+            document.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE));
+        });
+    }
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -289,13 +305,13 @@ var Fudge;
     class Files extends ƒ.Mutable {
         constructor() {
             super();
-            this.index = new FileInfo(true, "Index.html");
-            this.style = new FileInfo(true, "Style.css");
+            this.index = new FileInfo(true, "index.html");
+            this.style = new FileInfo(true, "style.css");
             this.internal = new FileInfo(true, "Internal.json");
-            this.script = new FileInfo(true, "Script.ts");
+            this.script = new FileInfo(true, "Script/Build/Script.js");
             Reflect.deleteProperty(this.script, "overwrite");
             Reflect.set(this.script, "include", false);
-            this.script.filename = "Script.js";
+            this.script.filename = "Script/Build/Script.js";
         }
         reduceMutator(_mutator) { }
     }
@@ -352,7 +368,7 @@ var Fudge;
             html.head.appendChild(createTag("link", { type: "resources", src: this.files.internal.filename }));
             if (Reflect.get(this.files.script, "include")) {
                 html.head.appendChild(html.createComment("Load custom scripts"));
-                html.head.appendChild(createTag("script", { type: "text/javascript", src: "Script/Build/" + this.files.script.filename, editor: "true" }));
+                html.head.appendChild(createTag("script", { type: "text/javascript", src: this.files.script.filename, editor: "true" }));
             }
             if (this.includeAutoViewScript) {
                 html.head.appendChild(html.createComment("Auto-View"));
@@ -425,6 +441,10 @@ var Fudge;
                     // pick the graph to show
                     let graph = FudgeCore.Project.resources[_graphId];
                     FudgeCore.Debug.log("Graph:", graph);
+                    if (!graph) {
+                        alert("Nothing to render. Create a graph with at least a mesh, material and probably some light");
+                        return;
+                    }
                     // setup the viewport
                     let cmpCamera = new FudgeCore.ComponentCamera();
                     let canvas = document.querySelector("canvas");
@@ -795,6 +815,7 @@ var Fudge;
                 this.setProject();
             };
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
         }
         setProject() {
             while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
@@ -1396,7 +1417,7 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
-            // this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             this.broadcastEvent(new Event(Fudge.EVENT_EDITOR.SET_PROJECT));
         }
     }

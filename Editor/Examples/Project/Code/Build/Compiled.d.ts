@@ -23,6 +23,7 @@ declare namespace Script {
     import ƒ = FudgeCore;
     class TimerMessage extends ƒ.ComponentScript {
         #private;
+        static readonly iSubclass: number;
         prefix: string;
         count: number;
         constructor();

@@ -21,23 +21,28 @@ namespace Fudge {
     console.log(ƒPath);
 
     // fs.mkdirSync(new URL("Fudge", base));
-    fs.mkdirSync(new URL("Fudge/Core", base), {recursive: true});
-    fs.mkdirSync(new URL("Fudge/Aid", base), {recursive: true});
+    fs.mkdirSync(new URL("Fudge/Core", base), { recursive: true });
+    fs.mkdirSync(new URL("Fudge/Aid", base), { recursive: true });
 
     let copies: { [src: string]: string } = {
       "Core/Build/FudgeCore.js": "Fudge/Core/FudgeCore.js",
       "Core/Build/FudgeCore.d.ts": "Fudge/Core/FudgeCore.d.ts",
       "Aid/Build/FudgeAid.js": "Fudge/Aid/FudgeAid.js",
-      "Aid/Build/FudgeAid.d.ts": "Fudge/Aid/FudgeAid.d.ts",
+      "Aid/Build/FudgeAid.d.ts": "Fudge/Aid/FudgeAid.d.ts"
     };
 
     for (let copy in copies) {
-     let src: URL = new URL(copy, ƒPath);
-     let dest: URL = new URL(copies[copy], base);
-     fs.copyFileSync(src, dest);
+      let src: URL = new URL(copy, ƒPath);
+      let dest: URL = new URL(copies[copy], base);
+      fs.copyFileSync(src, dest);
     }
-    
 
+    fs.mkdirSync(new URL("Script/Source", base), { recursive: true });
+    fs.mkdirSync(new URL("Script/Build", base), { recursive: true });
+    fs.copyFileSync(new URL("Editor/Source/Template/CustomComponentScript.txt", ƒPath), new URL("Script/Source/CustomComponentScript.ts", base));
+    fs.copyFileSync(new URL("Editor/Source/Template/tsconfig.txt", ƒPath), new URL("Script/Source/tsconfig.json", base));
+    fs.copyFileSync(new URL("Editor/Source/Template/.gitignore.txt", ƒPath), new URL(".gitignore", base));
+    fs.copyFileSync(new URL("Editor/Source/Template/Script.txt", ƒPath), new URL("Script/Build/Script.js", base));
 
     await loadProject(new URL(project.files.index.filename, project.base));
   }
@@ -131,5 +136,20 @@ namespace Fudge {
       project.files.internal.filename = resourceFile;
       project.files.internal.overwrite = true;
     }
+
+    watchFolder();
+  }
+
+  function watchFolder(): void {
+    let dir: URL = new URL(".", project.base);
+    let watcher: ƒ.General = fs.watch(
+      dir,
+      { recursive: true, persistent: false },
+      async (_event: string, _url: URL) => {
+        console.log(_event, _url);
+        watcher.close();
+        await loadProject(project.base);
+        document.dispatchEvent(new Event(EVENT_EDITOR.UPDATE));
+      });
   }
 }

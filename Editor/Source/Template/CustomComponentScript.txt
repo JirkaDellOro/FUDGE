@@ -1,11 +1,9 @@
-// /<reference types="../../../../../Core/Build/FudgeCore"/>
 namespace Script {
   import ƒ = FudgeCore;
-  // ƒ.Serializer.registerNamespace(Script);
   ƒ.Project.registerScriptNamespace(Script);
 
-  export class TimerMessage extends ƒ.ComponentScript {
-    public static readonly iSubclass: number = ƒ.Component.registerSubclass(TimerMessage);
+  export class CustomComponentScript extends ƒ.ComponentScript {
+    public static readonly iSubclass: number = ƒ.Component.registerSubclass(CustomComponentScript);
     public prefix: string = "Script: ";
     public count: number = 0;
     #timer: ƒ.Timer;

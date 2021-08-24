@@ -56,7 +56,6 @@ var Script;
     class TimerMessage extends ƒ.ComponentScript {
         constructor() {
             super();
-            // public static readonly iSubclass: number = ƒ.Component.registerSubclass(TimerMessage);
             this.prefix = "Script: ";
             this.count = 0;
             this.hndTimer = (_event) => {
@@ -77,6 +76,7 @@ var Script;
         }
         #timer;
     }
+    TimerMessage.iSubclass = ƒ.Component.registerSubclass(TimerMessage);
     Script.TimerMessage = TimerMessage;
 })(Script || (Script = {}));
 //# sourceMappingURL=Compiled.js.map

@@ -14,16 +14,16 @@ namespace Fudge {
   }
 
   export class Files extends ƒ.Mutable {
-    public index: FileInfo = new FileInfo(true, "Index.html");
-    public style: FileInfo = new FileInfo(true, "Style.css");
+    public index: FileInfo = new FileInfo(true, "index.html");
+    public style: FileInfo = new FileInfo(true, "style.css");
     public internal: FileInfo = new FileInfo(true, "Internal.json");
-    public script: FileInfo = new FileInfo(true, "Script.ts");
+    public script: FileInfo = new FileInfo(true, "Script/Build/Script.js");
 
     constructor() {
       super();
       Reflect.deleteProperty(this.script, "overwrite");
       Reflect.set(this.script, "include", false);
-      this.script.filename = "Script.js";
+      this.script.filename = "Script/Build/Script.js";
     }
     protected reduceMutator(_mutator: ƒ.Mutator): void {/* */ }
   }
@@ -94,7 +94,7 @@ namespace Fudge {
 
       if (Reflect.get(this.files.script, "include")) {
         html.head.appendChild(html.createComment("Load custom scripts"));
-        html.head.appendChild(createTag("script", { type: "text/javascript", src: "Script/Build/" + this.files.script.filename, editor: "true" }));
+        html.head.appendChild(createTag("script", { type: "text/javascript", src: this.files.script.filename, editor: "true" }));
       }
 
       if (this.includeAutoViewScript) {
@@ -180,6 +180,10 @@ namespace Fudge {
           // pick the graph to show
           let graph: ƒ.Graph = <ƒ.Graph>FudgeCore.Project.resources[_graphId];
           FudgeCore.Debug.log("Graph:", graph);
+          if (!graph) {
+            alert("Nothing to render. Create a graph with at least a mesh, material and probably some light");
+            return;
+          }
 
           // setup the viewport
           let cmpCamera: ƒ.ComponentCamera = new FudgeCore.ComponentCamera();
