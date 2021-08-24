@@ -841,6 +841,7 @@ declare namespace FudgeCore {
          * Inactive nodes and their descendants can be filtered
          */
         getIterator(_active?: boolean): IterableIterator<Node>;
+        [Symbol.iterator](): IterableIterator<Node>;
         activate(_on: boolean): void;
         /**
          * Returns a reference to this nodes parent node

@@ -1,9 +1,13 @@
 namespace Fudge {
   const fs: ƒ.General = require("fs");
   import ƒui = FudgeUserInterface;
+  export let watcher: ƒ.General;
+
+  interface CopyList {
+    [src: string]: string;
+  }
 
   export async function newProject(): Promise<void> {
-
     let filename: string | string[] = remote.dialog.showOpenDialogSync(null, {
       properties: ["openDirectory", "createDirectory"], title: "Select/Create a folder to save the project to. The foldername becomes the name of your project", buttonLabel: "Save Project"
     });
@@ -25,27 +29,34 @@ namespace Fudge {
     fs.mkdirSync(new URL("Fudge/Core", base), { recursive: true });
     fs.mkdirSync(new URL("Fudge/Aid", base), { recursive: true });
 
-    let copies: { [src: string]: string } = {
+    let copyFudge: CopyList = {
       "Core/Build/FudgeCore.js": "Fudge/Core/FudgeCore.js",
       "Core/Build/FudgeCore.d.ts": "Fudge/Core/FudgeCore.d.ts",
       "Aid/Build/FudgeAid.js": "Fudge/Aid/FudgeAid.js",
       "Aid/Build/FudgeAid.d.ts": "Fudge/Aid/FudgeAid.d.ts"
     };
+    copyFiles(copyFudge, ƒPath, base);
 
-    for (let copy in copies) {
-      let src: URL = new URL(copy, ƒPath);
-      let dest: URL = new URL(copies[copy], base);
-      fs.copyFileSync(src, dest);
-    }
-
+    fs.copyFileSync(new URL("Editor/Source/Template/.gitignore.txt", ƒPath), new URL(".gitignore", base));
     fs.mkdirSync(new URL("Script/Source", base), { recursive: true });
     fs.mkdirSync(new URL("Script/Build", base), { recursive: true });
-    fs.copyFileSync(new URL("Editor/Source/Template/CustomComponentScript.txt", ƒPath), new URL("Script/Source/CustomComponentScript.ts", base));
-    fs.copyFileSync(new URL("Editor/Source/Template/tsconfig.txt", ƒPath), new URL("Script/Source/tsconfig.json", base));
-    fs.copyFileSync(new URL("Editor/Source/Template/.gitignore.txt", ƒPath), new URL(".gitignore", base));
-    fs.copyFileSync(new URL("Editor/Source/Template/Script.txt", ƒPath), new URL("Script/Build/Script.js", base));
+    
+    let copyTemplates: CopyList = {
+      "CustomComponentScript.txt": "Source/CustomComponentScript.ts",
+      "tsconfig.txt": "Source/tsconfig.json",
+      "Script.txt": " Build/Script.js"
+    };
+    copyFiles(copyTemplates, new URL("Editor/Source/Template/", ƒPath), new URL("Script/", base));
 
     await loadProject(new URL(project.files.index.filename, project.base));
+  }
+
+  function copyFiles(_list: CopyList, _srcPath: URL, _destPath: URL): void {
+    for (let copy in _list) {
+      let src: URL = new URL(copy, _srcPath);
+      let dest: URL = new URL(_list[copy], _destPath);
+      fs.copyFileSync(src, dest);
+    }
   }
 
   export async function saveProject(): Promise<void> {
@@ -57,6 +68,8 @@ namespace Fudge {
 
     let base: URL = project.base;
     let projectName: string = base.toString().split("/").slice(-2, -1)[0];
+    if (watcher)
+      watcher.close();
 
     if (project.files.index.overwrite) {
       let html: string = project.getProjectHTML(projectName);
@@ -73,6 +86,8 @@ namespace Fudge {
       let jsonFileName: URL = new URL(project.files.internal.filename, base);
       fs.writeFileSync(jsonFileName, project.getProjectJSON());
     }
+
+    watchFolder();
   }
 
   export async function promptLoadProject(): Promise<URL> {
@@ -96,6 +111,8 @@ namespace Fudge {
     const dom: Document = parser.parseFromString(content, "application/xhtml+xml");
     const head: HTMLHeadElement = dom.querySelector("head");
     console.log(head);
+    if (watcher)
+      watcher.close();
 
     ƒ.Project.clear();
     project = new Project(_url);
@@ -103,11 +120,11 @@ namespace Fudge {
     // project.title = head.querySelector("title").textContent;
 
     project.files.index.filename = _url.toString().split("/").pop();
-    project.files.index.overwrite = false;
+    // project.files.index.overwrite = false;
 
     let css: HTMLLinkElement = head.querySelector("link[rel=stylesheet]");
     project.files.style.filename = css.getAttribute("href");
-    project.files.style.overwrite = false;
+    // project.files.style.overwrite = false;
 
     //TODO: should old scripts be removed from memory first? How?
     const scripts: NodeListOf<HTMLScriptElement> = head.querySelectorAll("script");
@@ -143,7 +160,7 @@ namespace Fudge {
 
   function watchFolder(): void {
     let dir: URL = new URL(".", project.base);
-    let watcher: ƒ.General = fs.watch(dir, { recursive: true }, hndFileChange);
+    watcher = fs.watch(dir, { recursive: true }, hndFileChange);
 
     async function hndFileChange(_event: string, _url: URL): Promise<void> {
       let filename: string = _url.toString();

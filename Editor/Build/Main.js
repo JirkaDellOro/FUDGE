@@ -103,7 +103,6 @@ var Main;
             createFudge();
     });
     ipcMain.addListener("enableMenuItem", function (_event, _args) {
-        console.log("Enable", Menu.getApplicationMenu());
         Menu.getApplicationMenu().getMenuItemById(_args["item"]).enabled = _args["on"];
     });
     function send(_window, _message, ..._args) {

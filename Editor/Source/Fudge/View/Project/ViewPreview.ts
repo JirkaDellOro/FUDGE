@@ -188,7 +188,7 @@ namespace Fudge {
         case EVENT_EDITOR.UPDATE:
           if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture || this.resource instanceof ƒ.Material)
             this.fillContent();
-          // this.redraw();
+          this.redraw();
           break;
         default:
           if (_event.detail.data instanceof ScriptInfo)

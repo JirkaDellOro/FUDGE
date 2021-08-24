@@ -185,26 +185,32 @@ var Fudge;
         // fs.mkdirSync(new URL("Fudge", base));
         fs.mkdirSync(new URL("Fudge/Core", base), { recursive: true });
         fs.mkdirSync(new URL("Fudge/Aid", base), { recursive: true });
-        let copies = {
+        let copyFudge = {
             "Core/Build/FudgeCore.js": "Fudge/Core/FudgeCore.js",
             "Core/Build/FudgeCore.d.ts": "Fudge/Core/FudgeCore.d.ts",
             "Aid/Build/FudgeAid.js": "Fudge/Aid/FudgeAid.js",
             "Aid/Build/FudgeAid.d.ts": "Fudge/Aid/FudgeAid.d.ts"
         };
-        for (let copy in copies) {
-            let src = new URL(copy, ƒPath);
-            let dest = new URL(copies[copy], base);
-            fs.copyFileSync(src, dest);
-        }
+        copyFiles(copyFudge, ƒPath, base);
+        fs.copyFileSync(new URL("Editor/Source/Template/.gitignore.txt", ƒPath), new URL(".gitignore", base));
         fs.mkdirSync(new URL("Script/Source", base), { recursive: true });
         fs.mkdirSync(new URL("Script/Build", base), { recursive: true });
-        fs.copyFileSync(new URL("Editor/Source/Template/CustomComponentScript.txt", ƒPath), new URL("Script/Source/CustomComponentScript.ts", base));
-        fs.copyFileSync(new URL("Editor/Source/Template/tsconfig.txt", ƒPath), new URL("Script/Source/tsconfig.json", base));
-        fs.copyFileSync(new URL("Editor/Source/Template/.gitignore.txt", ƒPath), new URL(".gitignore", base));
-        fs.copyFileSync(new URL("Editor/Source/Template/Script.txt", ƒPath), new URL("Script/Build/Script.js", base));
+        let copyTemplates = {
+            "CustomComponentScript.txt": "Source/CustomComponentScript.ts",
+            "tsconfig.txt": "Source/tsconfig.json",
+            "Script.txt": " Build/Script.js"
+        };
+        copyFiles(copyTemplates, new URL("Editor/Source/Template/", ƒPath), new URL("Script/", base));
         await loadProject(new URL(Fudge.project.files.index.filename, Fudge.project.base));
     }
     Fudge.newProject = newProject;
+    function copyFiles(_list, _srcPath, _destPath) {
+        for (let copy in _list) {
+            let src = new URL(copy, _srcPath);
+            let dest = new URL(_list[copy], _destPath);
+            fs.copyFileSync(src, dest);
+        }
+    }
     async function saveProject() {
         if (!Fudge.project)
             return;
@@ -212,6 +218,8 @@ var Fudge;
             return;
         let base = Fudge.project.base;
         let projectName = base.toString().split("/").slice(-2, -1)[0];
+        if (Fudge.watcher)
+            Fudge.watcher.close();
         if (Fudge.project.files.index.overwrite) {
             let html = Fudge.project.getProjectHTML(projectName);
             let htmlFileName = new URL(Fudge.project.files.index.filename, base);
@@ -225,6 +233,7 @@ var Fudge;
             let jsonFileName = new URL(Fudge.project.files.internal.filename, base);
             fs.writeFileSync(jsonFileName, Fudge.project.getProjectJSON());
         }
+        watchFolder();
     }
     Fudge.saveProject = saveProject;
     async function promptLoadProject() {
@@ -246,14 +255,16 @@ var Fudge;
         const dom = parser.parseFromString(content, "application/xhtml+xml");
         const head = dom.querySelector("head");
         console.log(head);
+        if (Fudge.watcher)
+            Fudge.watcher.close();
         ƒ.Project.clear();
         Fudge.project = new Fudge.Project(_url);
         // project.title = head.querySelector("title").textContent;
         Fudge.project.files.index.filename = _url.toString().split("/").pop();
-        Fudge.project.files.index.overwrite = false;
+        // project.files.index.overwrite = false;
         let css = head.querySelector("link[rel=stylesheet]");
         Fudge.project.files.style.filename = css.getAttribute("href");
-        Fudge.project.files.style.overwrite = false;
+        // project.files.style.overwrite = false;
         //TODO: should old scripts be removed from memory first? How?
         const scripts = head.querySelectorAll("script");
         for (let script of scripts) {
@@ -283,17 +294,17 @@ var Fudge;
     Fudge.loadProject = loadProject;
     function watchFolder() {
         let dir = new URL(".", Fudge.project.base);
-        let watcher = fs.watch(dir, { recursive: true }, hndFileChange);
+        Fudge.watcher = fs.watch(dir, { recursive: true }, hndFileChange);
         async function hndFileChange(_event, _url) {
             let filename = _url.toString();
             if (filename == Fudge.project.files.index.filename || filename == Fudge.project.files.internal.filename || filename == Fudge.project.files.script.filename) {
-                watcher.close();
+                Fudge.watcher.close();
                 let promise = ƒui.Dialog.prompt(null, false, "Important file change", "Reload project?", "Reload", "Cancel");
                 if (await promise) {
                     await loadProject(Fudge.project.base);
                 }
                 else
-                    watcher = fs.watch(dir, { recursive: true }, hndFileChange);
+                    Fudge.watcher = fs.watch(dir, { recursive: true }, hndFileChange);
                 document.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE));
             }
         }
@@ -319,7 +330,7 @@ var Fudge;
             this.internal = new FileInfo(true, "Internal.json");
             this.script = new FileInfo(true, "Script/Build/Script.js");
             Reflect.deleteProperty(this.script, "overwrite");
-            Reflect.set(this.script, "include", false);
+            Reflect.set(this.script, "include", true);
             this.script.filename = "Script/Build/Script.js";
         }
         reduceMutator(_mutator) { }
@@ -1344,6 +1355,7 @@ var Fudge;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
+    var ƒ = FudgeCore;
     /**
     * Shows a graph and offers means for manipulation
     * @authors Monika Galkewitsch, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
@@ -1351,9 +1363,15 @@ var Fudge;
     class PanelGraph extends Fudge.Panel {
         constructor(_container, _state) {
             super(_container, _state);
-            this.hndEvent = (_event) => {
-                if (_event.type == Fudge.EVENT_EDITOR.SET_GRAPH)
-                    this.setGraph(_event.detail);
+            this.hndEvent = async (_event) => {
+                switch (_event.type) {
+                    case Fudge.EVENT_EDITOR.SET_GRAPH:
+                        this.setGraph(_event.detail);
+                    case Fudge.EVENT_EDITOR.SET_PROJECT:
+                    case Fudge.EVENT_EDITOR.UPDATE:
+                        let newGraph = await ƒ.Project.getResource(this.graph.idResource);
+                        _event = new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { detail: newGraph });
+                }
                 this.broadcastEvent(_event);
                 // _event.stopPropagation();
             };
@@ -1385,9 +1403,6 @@ var Fudge;
         }
         setGraph(_graph) {
             this.graph = _graph;
-        }
-        getNode() {
-            return this.graph;
         }
     }
     Fudge.PanelGraph = PanelGraph;
@@ -2445,7 +2460,7 @@ var Fudge;
                     case Fudge.EVENT_EDITOR.UPDATE:
                         if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture || this.resource instanceof ƒ.Material)
                             this.fillContent();
-                        // this.redraw();
+                        this.redraw();
                         break;
                     default:
                         if (_event.detail.data instanceof Fudge.ScriptInfo)

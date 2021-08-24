@@ -36,7 +36,6 @@ namespace Main {
   });
 
   ipcMain.addListener("enableMenuItem", function (_event: Electron.Event, _args: Object): void {
-    console.log("Enable", Menu.getApplicationMenu());
     Menu.getApplicationMenu().getMenuItemById(_args["item"]).enabled = _args["on"];
   });
 

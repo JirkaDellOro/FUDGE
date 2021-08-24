@@ -22,7 +22,7 @@ namespace Fudge {
     constructor() {
       super();
       Reflect.deleteProperty(this.script, "overwrite");
-      Reflect.set(this.script, "include", false);
+      Reflect.set(this.script, "include", true);
       this.script.filename = "Script/Build/Script.js";
     }
     protected reduceMutator(_mutator: ƒ.Mutator): void {/* */ }

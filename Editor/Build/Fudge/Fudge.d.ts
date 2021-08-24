@@ -86,6 +86,7 @@ declare namespace Fudge {
     export {};
 }
 declare namespace Fudge {
+    let watcher: ƒ.General;
     function newProject(): Promise<void>;
     function saveProject(): Promise<void>;
     function promptLoadProject(): Promise<URL>;
@@ -322,8 +323,7 @@ declare namespace Fudge {
     class PanelGraph extends Panel {
         private graph;
         constructor(_container: GoldenLayout.Container, _state: Object);
-        setGraph(_graph: ƒ.Node): void;
-        getNode(): ƒ.Node;
+        setGraph(_graph: ƒ.Graph): void;
         private hndEvent;
         private hndFocusNode;
     }
