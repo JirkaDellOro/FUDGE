@@ -63,6 +63,14 @@ namespace FudgeCore {
       return this.gain.gain.value;
     }
 
+    public set loop(_on: boolean) {
+      this.source.loop = _on;
+    }
+
+    public get loop(): boolean {
+      return this.source.loop;
+    }
+
     public get isPlaying(): boolean {
       return this.playing;
     }

@@ -1489,6 +1489,8 @@ declare namespace FudgeCore {
         constructor(_audio?: Audio, _loop?: boolean, _start?: boolean, _audioManager?: AudioManager);
         set volume(_value: number);
         get volume(): number;
+        set loop(_on: boolean);
+        get loop(): boolean;
         get isPlaying(): boolean;
         get isAttached(): boolean;
         get isListened(): boolean;
