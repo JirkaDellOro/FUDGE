@@ -197,6 +197,7 @@ var Fudge;
         fs.mkdirSync(new URL("Script/Build", base), { recursive: true });
         let copyTemplates = {
             "CustomComponentScript.txt": "Source/CustomComponentScript.ts",
+            "Main.txt": "Source/Main.ts",
             "tsconfig.txt": "Source/tsconfig.json",
             "Script.txt": " Build/Script.js"
         };

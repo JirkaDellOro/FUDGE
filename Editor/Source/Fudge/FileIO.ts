@@ -43,6 +43,7 @@ namespace Fudge {
     
     let copyTemplates: CopyList = {
       "CustomComponentScript.txt": "Source/CustomComponentScript.ts",
+      "Main.txt": "Source/Main.ts",
       "tsconfig.txt": "Source/tsconfig.json",
       "Script.txt": " Build/Script.js"
     };
