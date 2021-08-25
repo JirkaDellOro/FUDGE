@@ -216,7 +216,7 @@ declare namespace FudgeCore {
         get type(): string;
         /**
          * Collect applicable attributes of the instance and copies of their values in a Mutator-object.
-         * By default, a mutator cannot extended, since extensions are not available in the object the mutator belongs to.
+         * By default, a mutator cannot be extended, since extensions are not available in the object the mutator belongs to.
          * A mutator may be reduced by the descendants of {@link Mutable} to contain only the properties needed.
          */
         getMutator(_extendable?: boolean): Mutator;
@@ -1535,6 +1535,9 @@ declare namespace FudgeCore {
         connect(_on: boolean): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        getMutator(): Mutator;
+        mutate(_mutator: Mutator): Promise<void>;
+        protected reduceMutator(_mutator: Mutator): void;
         private hndAudioReady;
         private hndAudioEnded;
         private install;

@@ -180,8 +180,8 @@ namespace FudgeCore {
       let serialization: Serialization = super.serialize();
       serialization.idResource = this.audio.idResource;
       serialization.playing = this.playing;
-      serialization.loop = this.source.loop;
-      serialization.volume = this.gain.gain.value;
+      serialization.loop = this.loop;
+      serialization.volume = this.volume;
       // console.log(this.getMutatorOfNode(AUDIO_NODE_TYPE.PANNER));
       // TODO: serialize panner parameters
       return serialization;
@@ -193,6 +193,27 @@ namespace FudgeCore {
       this.volume = _serialization.volume;
       this.play(_serialization.playing);
       return this;
+    }
+
+    public getMutator(): Mutator {
+      let mutator: Mutator = super.getMutator(true);
+      let audio: Mutator = mutator.audio;
+      delete mutator.audio; // just to rearrange in interfaces...
+      mutator.loop = this.loop;
+      mutator.volume = this.volume;
+      mutator.audio = audio; //... so audio comes last
+      return mutator;
+    }
+
+    public async mutate(_mutator: Mutator): Promise<void> {
+      await super.mutate(_mutator);
+      this.volume = _mutator.volume;
+      this.loop = _mutator.loop;
+    }
+
+    protected reduceMutator(_mutator: Mutator): void {
+      super.reduceMutator(_mutator);
+      delete _mutator.listened;
     }
     //#endregion
 

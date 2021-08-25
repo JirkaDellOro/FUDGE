@@ -64,7 +64,7 @@ namespace FudgeCore {
     }
     /**
      * Collect applicable attributes of the instance and copies of their values in a Mutator-object.
-     * By default, a mutator cannot extended, since extensions are not available in the object the mutator belongs to.
+     * By default, a mutator cannot be extended, since extensions are not available in the object the mutator belongs to.
      * A mutator may be reduced by the descendants of {@link Mutable} to contain only the properties needed.
      */
     public getMutator(_extendable: boolean = false): Mutator {

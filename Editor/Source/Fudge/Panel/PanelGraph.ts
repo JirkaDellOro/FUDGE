@@ -47,8 +47,10 @@ namespace Fudge {
           this.setGraph(_event.detail);
         case EVENT_EDITOR.SET_PROJECT:
         case EVENT_EDITOR.UPDATE:
-          let newGraph: ƒ.Graph = <ƒ.Graph>await ƒ.Project.getResource(this.graph.idResource);
-          _event = new CustomEvent(EVENT_EDITOR.SET_GRAPH, { detail: newGraph });
+          if (this.graph) {
+            let newGraph: ƒ.Graph = <ƒ.Graph>await ƒ.Project.getResource(this.graph.idResource);
+            _event = new CustomEvent(EVENT_EDITOR.SET_GRAPH, { detail: newGraph });
+          }
       }
       this.broadcastEvent(_event);
       // _event.stopPropagation();

@@ -61,10 +61,10 @@ namespace FudgeCore {
       if (_mutator.url != this.url.toString())
         this.load(_mutator.url);
       // except url from mutator for further processing
-      delete(_mutator.url);
+      delete (_mutator.url);
       super.mutate(_mutator);
       // reconstruct, for mutator may be kept by caller
-      _mutator.url = url;
+      Reflect.set(_mutator, "url", url);
     }
 
     protected reduceMutator(_mutator: Mutator): void {
