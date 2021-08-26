@@ -1370,9 +1370,11 @@ var Fudge;
                         this.setGraph(_event.detail);
                     case Fudge.EVENT_EDITOR.SET_PROJECT:
                     case Fudge.EVENT_EDITOR.UPDATE:
+                        // TODO: meaningful difference between update and setgraph
                         if (this.graph) {
                             let newGraph = await ƒ.Project.getResource(this.graph.idResource);
-                            _event = new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { detail: newGraph });
+                            if (this.graph != newGraph)
+                                _event = new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { detail: newGraph });
                         }
                 }
                 this.broadcastEvent(_event);

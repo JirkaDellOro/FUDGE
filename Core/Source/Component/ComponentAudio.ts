@@ -89,7 +89,7 @@ namespace FudgeCore {
      * Set the property of the panner to the given value. Use to manipulate range and rolloff etc.
      */
     public setPanner(_property: AUDIO_PANNER, _value: number): void {
-      Object.assign(this.panner, { [_property]: _value });
+      Reflect.set(this.panner, _property, _value);
     }
 
     // TODO: may be used for serialization of AudioNodes
