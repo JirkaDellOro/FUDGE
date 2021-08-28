@@ -10,7 +10,8 @@ namespace TestDebug {
     [ƒ.DEBUG_FILTER.CLEAR, ƒ.Debug.clear],
     [ƒ.DEBUG_FILTER.GROUP, ƒ.Debug.group],
     [ƒ.DEBUG_FILTER.GROUPCOLLAPSED, ƒ.Debug.groupCollapsed],
-    [ƒ.DEBUG_FILTER.GROUPEND, ƒ.Debug.groupEnd]
+    [ƒ.DEBUG_FILTER.GROUPEND, ƒ.Debug.groupEnd],
+    [ƒ.DEBUG_FILTER.SOURCE, ƒ.Debug.source]
   ]);
   let targets: ƒ.DebugTarget[] = [ƒ.DebugConsole, ƒ.DebugTextArea, ƒ.DebugAlert];
 

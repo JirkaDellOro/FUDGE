@@ -104,9 +104,23 @@ namespace FudgeCore {
     }
 
     /**
+     * Displays messages about the source of the debug call
+     */
+    public static source(_message: unknown, ..._args: unknown[]): void {
+      Debug.delegate(DEBUG_FILTER.SOURCE, _message, _args);
+    }
+
+    /**
      * Lookup all delegates registered to the filter and call them using the given arguments
      */
     private static delegate(_filter: DEBUG_FILTER, _message: unknown, _args: unknown[]): void {
+      if (_filter != DEBUG_FILTER.SOURCE) {
+        for (let delegate of Debug.delegates[DEBUG_FILTER.SOURCE].values())
+          if (delegate) {
+            let trace: string[] = new Error("Test").stack.split("\n");
+            delegate(trace[3]);
+          }
+      }
       let delegates: MapDebugTargetToDelegate = Debug.delegates[_filter];
       for (let delegate of delegates.values())
         if (delegate)
@@ -123,7 +137,8 @@ namespace FudgeCore {
       let result: { [filter: number]: MapDebugTargetToDelegate } = {};
       let filters: DEBUG_FILTER[] = [
         DEBUG_FILTER.INFO, DEBUG_FILTER.LOG, DEBUG_FILTER.WARN, DEBUG_FILTER.ERROR, DEBUG_FILTER.FUDGE,
-        DEBUG_FILTER.CLEAR, DEBUG_FILTER.GROUP, DEBUG_FILTER.GROUPCOLLAPSED, DEBUG_FILTER.GROUPEND
+        DEBUG_FILTER.CLEAR, DEBUG_FILTER.GROUP, DEBUG_FILTER.GROUPCOLLAPSED, DEBUG_FILTER.GROUPEND,
+        DEBUG_FILTER.SOURCE
       ];
 
       for (let filter of filters)

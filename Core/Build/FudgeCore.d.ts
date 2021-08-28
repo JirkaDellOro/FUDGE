@@ -23,6 +23,7 @@ declare namespace FudgeCore {
         GROUP = 257,
         GROUPCOLLAPSED = 258,
         GROUPEND = 260,
+        SOURCE = 512,
         MESSAGES = 31,
         FORMAT = 263,
         ALL = 287
@@ -42,9 +43,13 @@ declare namespace FudgeCore {
     class DebugConsole extends DebugTarget {
         static delegates: MapDebugFilterToDelegate;
         /**
-         * Displays critical information about failures, which is emphasized e.g. by color
+         * Should be used to display uncritical state information of FUDGE, only visible in browser's verbose mode
          */
         static fudge(_message: Object, ..._args: Object[]): void;
+        /**
+         * Displays an extra line with information about the source of the debug message
+         */
+        static source(_message: Object, ..._args: Object[]): void;
     }
 }
 declare namespace FudgeCore {
@@ -102,6 +107,10 @@ declare namespace FudgeCore {
          * Log a branch of the node hierarchy
          */
         static branch(_branch: Node): void;
+        /**
+         * Displays messages about the source of the debug call
+         */
+        static source(_message: unknown, ..._args: unknown[]): void;
         /**
          * Lookup all delegates registered to the filter and call them using the given arguments
          */
