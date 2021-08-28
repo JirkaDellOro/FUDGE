@@ -1009,7 +1009,7 @@ declare namespace FudgeCore {
         TIMEBASED_CONTINOUS = 0,
         /**Limits the calculation of the state of the animation to the FPS value of the animation. Skips frames if needed.*/
         TIMEBASED_RASTERED_TO_FPS = 1,
-        /**Uses the FPS value of the animation to advance once per frame, no matter the speed of the frames. Doesn't skip any frames.*/
+        /** Advances the time each frame according to the FPS value of the animation, ignoring the actual duration of the frames. Doesn't skip any frames.*/
         FRAMEBASED = 2
     }
     /**

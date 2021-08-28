@@ -33,20 +33,20 @@
           Name: "Animation",
           Test: [
             "An Animation changes the properties of objects with AnimationKeys",
-            "An AnimationKey defines one value at a time",
-            "An AnimeStructure defines which properties should be influenced by the AnimationKeys"
+            "An AnimationKey defines one specific value for one specific point of time in the animation",
+            "An AnimationStructure defines which properties should be influenced by the AnimationKeys"
           ],
           Setup: [
             "1 loop to update the viewport and the animation",
             "1 Animation with 2 AnimationsKeys",
-            "1 an AnimationStructure which defines an animation for a rotation of the x and y axes"
+            "1 AnimationStructure which defines an animation of the rotation around the x and y axes"
           ],
           Act: [
             //"start and stop the animation",
-            "watch an animation"
+            "watch the animation"
           ],
           Observe: [
-            "Console to see the Animation object"
+            "Watch the cube"
           ],
           /* Control: [
             //"Enter: start or stop the animation"

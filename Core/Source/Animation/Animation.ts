@@ -65,7 +65,7 @@ namespace FudgeCore {
     TIMEBASED_CONTINOUS,
     /**Limits the calculation of the state of the animation to the FPS value of the animation. Skips frames if needed.*/
     TIMEBASED_RASTERED_TO_FPS,
-    /**Uses the FPS value of the animation to advance once per frame, no matter the speed of the frames. Doesn't skip any frames.*/
+    /** Advances the time each frame according to the FPS value of the animation, ignoring the actual duration of the frames. Doesn't skip any frames.*/
     FRAMEBASED
   }
 
@@ -123,20 +123,14 @@ namespace FudgeCore {
      */
     getMutated(_time: number, _direction: number, _playback: ANIMATION_PLAYBACK): Mutator {     //TODO: find a better name for this
       let m: Mutator = {};
-      if (_playback == ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS) {
-        if (_direction >= 0) {
-          m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(ANIMATION_STRUCTURE_TYPE.NORMAL), _time);
-        } else {
-          m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(ANIMATION_STRUCTURE_TYPE.REVERSE), _time);
-        }
-      } else {
-        if (_direction >= 0) {
-          m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(ANIMATION_STRUCTURE_TYPE.RASTERED), _time);
-        } else {
-          m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(ANIMATION_STRUCTURE_TYPE.RASTEREDREVERSE), _time);
-        }
-      }
+      let animationStructure: ANIMATION_STRUCTURE_TYPE;
 
+      if (_playback == ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS)
+        animationStructure = _direction < 0 ? ANIMATION_STRUCTURE_TYPE.REVERSE : ANIMATION_STRUCTURE_TYPE.NORMAL;
+      else
+        animationStructure = _direction < 0 ? ANIMATION_STRUCTURE_TYPE.RASTEREDREVERSE : ANIMATION_STRUCTURE_TYPE.RASTERED;
+
+      m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(animationStructure), _time);
       return m;
     }
 
@@ -215,13 +209,13 @@ namespace FudgeCore {
       }
       return _time;
     }
-    
+
     /**
      * Calculates and returns the direction the animation should currently be playing in.
      * @param _time the time at which to calculate the direction
      * @returns 1 if forward, 0 if stop, -1 if backwards
      */
-     public calculateDirection(_time: number, _playmode: ANIMATION_PLAYMODE): number {
+    public calculateDirection(_time: number, _playmode: ANIMATION_PLAYMODE): number {
       switch (_playmode) {
         case ANIMATION_PLAYMODE.STOP:
           return 0;
