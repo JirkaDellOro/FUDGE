@@ -271,7 +271,7 @@ namespace FudgeCore {
       }
       this.eventsProcessed = new Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger>();
 
-      this.animationStructure = this.traverseStructureForDeserialisation(_serialization.animationStructure);
+      this.animationStructure = await this.traverseStructureForDeserialisation(_serialization.animationStructure);
 
       this.animationStructuresProcessed = new Map<ANIMATION_STRUCTURE_TYPE, AnimationStructure>();
 
@@ -305,14 +305,14 @@ namespace FudgeCore {
      * @param _serialization The serialization to transfer into an AnimationStructure
      * @returns the newly created AnimationStructure.
      */
-    private traverseStructureForDeserialisation(_serialization: Serialization): AnimationStructure {
+    private async traverseStructureForDeserialisation(_serialization: Serialization): Promise<AnimationStructure> {
       let newStructure: AnimationStructure = {};
       for (let n in _serialization) {
         if (_serialization[n].animationSequence) {
           let animSeq: AnimationSequence = new AnimationSequence();
-          newStructure[n] = animSeq.deserialize(_serialization[n]);
+          newStructure[n] = await animSeq.deserialize(_serialization[n]);
         } else {
-          newStructure[n] = this.traverseStructureForDeserialisation(_serialization[n]);
+          newStructure[n] = await this.traverseStructureForDeserialisation(_serialization[n]);
         }
       }
       return newStructure;

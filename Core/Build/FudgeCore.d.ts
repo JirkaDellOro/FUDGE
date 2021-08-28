@@ -3506,7 +3506,7 @@ declare namespace FudgeCore {
         /** Setting both bodies to the bodies that belong to the loaded IDs and reconnecting them */
         protected setBodiesFromLoadedIDs(): void;
         /** Deserialize Base Class Information - Component, since Typescript does not give the ability to call super.super */
-        protected baseDeserialize(_serialization: Serialization): Serializable;
+        protected baseDeserialize(_serialization: Serialization): Promise<Serializable>;
         /** Serialize Base Class Information - Component, since Typescript does not give the ability to call super.super in Child classes of e.g. ComponentJointPrismatic */
         protected baseSerialize(): Serialization;
     }

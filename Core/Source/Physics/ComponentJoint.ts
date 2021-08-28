@@ -92,15 +92,15 @@ namespace FudgeCore {
 
 
     /** Setting both bodies to the bodies that belong to the loaded IDs and reconnecting them */
-    protected setBodiesFromLoadedIDs() {
+    protected setBodiesFromLoadedIDs(): void {
       Debug.log("Set From: " + this.idAttachedRB + " / " + this.idConnectedRB);
       this.attachedRigidbody = Physics.world.getBodyByID(this.idAttachedRB);
       this.connectedRigidbody = Physics.world.getBodyByID(this.idConnectedRB);
     }
 
     /** Deserialize Base Class Information - Component, since Typescript does not give the ability to call super.super */
-    protected baseDeserialize(_serialization: Serialization): Serializable {
-      super.deserialize(_serialization[super.constructor.name]);
+    protected async baseDeserialize(_serialization: Serialization): Promise<Serializable> {
+      await super.deserialize(_serialization[super.constructor.name]);
       return this;
     }
 

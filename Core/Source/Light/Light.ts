@@ -23,7 +23,7 @@ namespace FudgeCore {
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.color.deserialize(_serialization.color);
+      await this.color.deserialize(_serialization.color);
       return this;
     }
 

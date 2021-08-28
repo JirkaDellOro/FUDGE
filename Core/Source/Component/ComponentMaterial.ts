@@ -44,11 +44,11 @@ namespace FudgeCore {
       // else
       //   material = <Material>await Serializer.deserialize(_serialization.material);
       this.material = material;
-      this.clrPrimary.deserialize(_serialization.clrPrimary);
-      this.clrSecondary.deserialize(_serialization.clrSecondary);
+      await this.clrPrimary.deserialize(_serialization.clrPrimary);
+      await this.clrSecondary.deserialize(_serialization.clrSecondary);
       this.sortForAlpha = _serialization.sortForAlpha;
-      this.mtxPivot.deserialize(_serialization.pivot);
-      super.deserialize(_serialization[super.constructor.name]);
+      await this.mtxPivot.deserialize(_serialization.pivot);
+      await super.deserialize(_serialization[super.constructor.name]);
       return this;
     }
 

@@ -109,7 +109,7 @@ namespace FudgeCore {
       return serialization;
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      super.deserialize(_serialization);
+      await super.deserialize(_serialization);
       let vectors: Vector2[] = <Vector2[]>await Serializer.deserializeArray(_serialization.shape);
       this.create(vectors, _serialization.fitTexture);
       return this;

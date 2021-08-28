@@ -611,7 +611,7 @@ namespace FudgeCore {
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.mtxPivot.deserialize(_serialization.pivot);
+      await this.mtxPivot.deserialize(_serialization.pivot);
       this.id = _serialization.id;
       this.physicsType = _serialization.physicsType;
       this.mass = _serialization.mass != null ? _serialization.mass : 1;
@@ -623,7 +623,7 @@ namespace FudgeCore {
       this.gravityScale = _serialization.gravityScale != null ? _serialization.gravityScale : 1;
       this.friction = _serialization.friction != null ? _serialization.friction : this.bodyFriction;
       this.restitution = _serialization.restitution != null ? _serialization.restitution : this.bodyRestitution;
-      super.deserialize(_serialization[super.constructor.name]);
+      await super.deserialize(_serialization[super.constructor.name]);
       return this;
     }
 

@@ -53,8 +53,8 @@ namespace FudgeCore {
         mesh = <Mesh>await Serializer.deserialize(_serialization.mesh);
       this.mesh = mesh;
 
-      this.mtxPivot.deserialize(_serialization.pivot);
-      super.deserialize(_serialization[super.constructor.name]);
+      await this.mtxPivot.deserialize(_serialization.pivot);
+      await super.deserialize(_serialization[super.constructor.name]);
       return this;
     }
 

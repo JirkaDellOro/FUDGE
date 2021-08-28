@@ -97,13 +97,13 @@ namespace FudgeCore {
 
     public async deserialize(_s: Serialization): Promise<Serializable> {
       this.animation = new Animation("");
-      this.animation.deserialize(_s.animation);
+      await this.animation.deserialize(_s.animation);
       this.playback = _s.playback;
       this.playmode = _s.playmode;
       this.speedScale = _s.speedScale;
       this.speedScalesWithGlobalSpeed = _s.speedScalesWithGlobalSpeed;
 
-      super.deserialize(_s[super.constructor.name]);
+      await super.deserialize(_s[super.constructor.name]);
       return this;
     }
     //#endregion
