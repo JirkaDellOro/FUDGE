@@ -38,7 +38,7 @@ namespace FudgeCore {
       });
     }
 
-    set speed(_s: number) {
+    public set speed(_s: number) {
       this.speedScale = _s;
       this.updateScale();
     }
@@ -63,6 +63,15 @@ namespace FudgeCore {
       _time = _time % this.animation.totalTime;
       let mutator: Mutator = this.animation.getMutated(_time, this.animation.calculateDirection(_time, this.playmode), this.playback);
       this.getContainer().applyAnimation(mutator);
+    }
+
+    /**
+     * Jumps to a certain label in the animation if defined
+     */
+    public jumpToLabel(_label: string): void {
+      let time: number = this.animation.labels[_label];
+      if (time)
+        this.jumpTo(time);
     }
 
     /**

@@ -1406,6 +1406,10 @@ declare namespace FudgeCore {
          */
         jumpTo(_time: number): void;
         /**
+         * Jumps to a certain label in the animation if defined
+         */
+        jumpToLabel(_label: string): void;
+        /**
          * Returns the current time of the animation, modulated for animation length.
          */
         getCurrentTime(): number;

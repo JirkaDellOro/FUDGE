@@ -22,7 +22,7 @@
 
     canvas {
       width: 100vw;
-      height: 100vh;
+      height: auto !important;
     }
 
     form {
@@ -40,39 +40,34 @@
     TestInstructions.display({
       Name: "Animation",
       Test: [
-        "An Animation changes the properties of objects with AnimationKeys",
-        "An AnimationKey defines one specific value for one specific point of time in the animation",
-        "An AnimationStructure defines which properties should be influenced by the AnimationKeys"
+        "Animations manipulate properties of a mutable object according to a given input, mostly time, along cubic splines.",
+        "The properties to manipulate are given as AnimationStructure and can be nested, the input and output values as a AnimationSequence of AnimationKeys.",
+        "They are combined as Animation and can be controlled by a ComponentAnimator to manipulate the other components of its container.",
+        "Additionally, event-triggers may be installed with an animation to fire events when the input value passes the trigger input.",
+        "To help navigating within an animation, labels may be defined."
       ],
       Setup: [
-        "1 Loop to update the viewport and the animation",
-        "1 Animation with 2 AnimationsKeys",
-        "1 AnimationStructure which defines an animation of the rotation around the x and y axes"
+        "A cube with a transform- and an animator-component. An AnimationStructure references the x and y axis of the rotation of the transform",
+        "A minimal sequence of two AnimationsKeys with adjustable input and output values, where input refers to time as is standard",
+        "An Animation using the sequence and structure, with one event-trigger and a label, plus a framerate for discrete animation"
       ],
       Act: [
-        "adjust point of time and value of the animation keys, that control rotation around the x and y axis",
-        "select the animation mode",
-        "select the type of playback",
-        "adjust the number of frames defined in the animation per second",
-        "watch an animation"
+        "adjust point of time and value of the animation keys.",
+        "adjust fps, the input-value of the event trigger and the time the label references.",
+        "select the animation mode and the type of playback",
+        "click the button to jump to the label"
       ],
       Observe: [
-        "The cube moves according to the given values, which are the only variables. The gameloop runs constantly in request-mode."
-      ],
-      Control: [
-        "<strong>Number-Stepper</strong> chose time and value of the rotation | give the Fps for TIMEBASED_RASTERED_TO_FPS and FRAMEBASED playback",
-        "<strong>Dropdown</strong> select the playback type | select the mode of animation"
+        "The cube moves according to the given values, which are the only variables. The gameloop runs constantly in request-mode.",
+        "See the console to check if the events are fired when the trigger was passed during the last frame"
       ],
       Expect: [
-        "key 1 indicates the time at which the animation starts and the starting angle",
-        "key 2 specifies the end angle and the time of the end of the animation",
         "<strong>playmodes</strong> <br> \
         - LOOP it restarts once it hit the end </br> \
         - PLAYONCE plays animation once and stops at the last key/frame </br> \
         - PLAYONCESTOPAFTER plays animation once and stops on the first key/frame <br> \
         - REVERSELOOP plays animation like LOOP, but backwards <br>\
         - STOP causes the animation not to play at all",
-        /* Note: Stop does not work as expected */
         "<strong>playback</strong>  <br>\
         - TIMEBASED_CONTINOUS a loop of the animation lasts as long as the specified value of the second key <br> \
         - TIMEBASED_RASTERED_TO_FPS the animation depends on the specified fps, the animation is updated per frame <br> \
@@ -82,19 +77,25 @@
   </script>
 
   <form>
-    <fieldset id="animationkey">
-      <legend>Keys</legend>
-      <input type="number" name="keytime1" min="0" max="30000" step="100" value="0"> Time Key 1
-      <input type="number" name="value1" min="0" max="360" step="5" value="0"> rotation x,y-axis Key 1<br>
-      <input type="number" name="keytime2" min="0" max="30000" step="100" value="2000"> Time Key 2
-      <input type="number" name="value2" min="0" max="360" step="5" value="45"> rotation x,y-axis Key 2 <br>
+    <fieldset id="sequence">
+      <legend>Sequence</legend>
+      Key 0: time <input type="number" name="time0" min="0" step="100" value="0">
+      value <input type="number" name="value0" min="0" max="360" step="5" value="0"><br />
+      Key 1: time <input type="number" name="time1" min="0" step="100" value="2000">
+      value <input type="number" name="value1" min="0" max="360" step="5" value="45"><br />
+    </fieldset>
+    <fieldset id="animation">
+      <legend>Animation</legend>
+      <input type="number" name="fps" min="1" max="60" step="1" value="30"> fps (the number of frames defined per
+      second for animations with discrete steps, e.g. sprite images) <br/>
+      <input type="number" name="event" min="0" step="1" value="1000"> time for an event to fire <br/>
+      <input type="number" name="label" min="0" step="1" value="500"> time at which the label is placed <button type="button" id="jump">Jump</button><br/>
+      <sub>The animation structure is hardcoded in this test and maps the sequence onto the x- and y-rotation of the cubes transform component</sub>
     </fieldset>
 
-    <fieldset id="animation">
+    <fieldset id="component">
+      <legend>ComponentAnimator</legend>
 
-      <legend>Animation</legend>
-
-      <input type="number" name="fps" min="1" max="60" step="1" value="30"> fps (the number of frames defined per seconds, irrelevant in continuous mode) <br>
 
       <select name="mode" value="LOOP">
         <option value="LOOP">LOOP</option>
@@ -111,8 +112,4 @@
       </select> playback</br>
     </fieldset>
   </form>
-
-  <button id="start"> start animation </button>
-
-
 </body>
