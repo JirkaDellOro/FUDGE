@@ -80,7 +80,7 @@ namespace FudgeCore {
     name: string;
     totalTime: number = 0;
     labels: AnimationLabel = {};
-    stepsPerSecond: number = 10;
+    // stepsPerSecond: number = 10;
     animationStructure: AnimationStructure;
     events: AnimationEventTrigger = {};
     private framesPerSecond: number = 60;
@@ -96,6 +96,7 @@ namespace FudgeCore {
       this.animationStructuresProcessed.set(ANIMATION_STRUCTURE_TYPE.NORMAL, _animStructure);
       this.framesPerSecond = _fps;
       this.calculateTotalTime();
+      Project.register(this);
     }
 
     get getLabels(): Enumerator {
@@ -244,7 +245,7 @@ namespace FudgeCore {
         labels: {},
         events: {},
         fps: this.framesPerSecond,
-        sps: this.stepsPerSecond
+        // sps: this.stepsPerSecond
       };
       for (let name in this.labels) {
         s.labels[name] = this.labels[name];
@@ -260,7 +261,7 @@ namespace FudgeCore {
       this.idResource = _serialization.idResource;
       this.name = _serialization.name;
       this.framesPerSecond = _serialization.fps;
-      this.stepsPerSecond = _serialization.sps;
+      // this.stepsPerSecond = _serialization.sps;
       this.labels = {};
       for (let name in _serialization.labels) {
         this.labels[name] = _serialization.labels[name];

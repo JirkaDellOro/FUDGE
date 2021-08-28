@@ -45,15 +45,18 @@ var AnimatorComponentTest;
         cmpAnimator.speed = 2;
         // #region serialisation
         console.group("Serialization");
+        console.log(animation);
+        let serialisation = animation.serialize();
+        console.log(ƒ.Serializer.stringify(serialisation));
         console.log(cmpAnimator);
-        let serialisation = cmpAnimator.serialize();
+        serialisation = cmpAnimator.serialize();
         console.log(ƒ.Serializer.stringify(serialisation));
         console.groupEnd();
         console.group("Reconstruction");
         let cmpAnimatorReconstructed = new ƒ.ComponentAnimator();
         await cmpAnimatorReconstructed.deserialize(serialisation);
-        serialisation = cmpAnimatorReconstructed.serialize();
         console.log(cmpAnimatorReconstructed);
+        serialisation = cmpAnimatorReconstructed.serialize();
         console.log(ƒ.Serializer.stringify(serialisation));
         console.groupEnd();
         // #endregion

@@ -92,27 +92,26 @@ namespace FudgeCore {
 
     //#region transfer
     public serialize(): Serialization {
-      let s: Serialization = super.serialize();
-      s["animation"] = this.animation.serialize();
-      s["playmode"] = this.playmode;
-      s["playback"] = this.playback;
-      s["speedScale"] = this.speedScale;
-      s["speedScalesWithGlobalSpeed"] = this.speedScalesWithGlobalSpeed;
+      let serialization: Serialization = super.serialize();
+      serialization.idAnimation = this.animation.idResource;
+      serialization.playmode = this.playmode;
+      serialization.playback = this.playback;
+      serialization.speedScale = this.speedScale;
+      serialization.speedScalesWithGlobalSpeed = this.speedScalesWithGlobalSpeed;
+      serialization[super.constructor.name] = super.serialize();
 
-      s[super.constructor.name] = super.serialize();
-
-      return s;
+      return serialization;
     }
 
-    public async deserialize(_s: Serialization): Promise<Serializable> {
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.animation = new Animation("");
-      await this.animation.deserialize(_s.animation);
-      this.playback = _s.playback;
-      this.playmode = _s.playmode;
-      this.speedScale = _s.speedScale;
-      this.speedScalesWithGlobalSpeed = _s.speedScalesWithGlobalSpeed;
+      this.animation = <Animation>await Project.getResource(_serialization.idAnimation);
+      this.playback = _serialization.playback;
+      this.playmode = _serialization.playmode;
+      this.speedScale = _serialization.speedScale;
+      this.speedScalesWithGlobalSpeed = _serialization.speedScalesWithGlobalSpeed;
 
-      await super.deserialize(_s[super.constructor.name]);
+      await super.deserialize(_serialization[super.constructor.name]);
       return this;
     }
     //#endregion

@@ -54,15 +54,20 @@ namespace AnimatorComponentTest {
 
     // #region serialisation
     console.group("Serialization");
+    console.log(animation);
+    let serialisation: ƒ.Serialization = animation.serialize();
+    console.log(ƒ.Serializer.stringify(serialisation));
+
     console.log(cmpAnimator);
-    let serialisation: ƒ.Serialization = cmpAnimator.serialize();
+    serialisation = cmpAnimator.serialize();
     console.log(ƒ.Serializer.stringify(serialisation));
     console.groupEnd();
+
     console.group("Reconstruction");
     let cmpAnimatorReconstructed: ƒ.ComponentAnimator = new ƒ.ComponentAnimator();
     await cmpAnimatorReconstructed.deserialize(serialisation);
-    serialisation = cmpAnimatorReconstructed.serialize();
     console.log(cmpAnimatorReconstructed);
+    serialisation = cmpAnimatorReconstructed.serialize();
     console.log(ƒ.Serializer.stringify(serialisation));
     console.groupEnd();
     // #endregion
