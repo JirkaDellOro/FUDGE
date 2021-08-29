@@ -1,41 +1,50 @@
 var Random;
 (function (Random) {
     var ƒ = FudgeCore;
+    class Result {
+    }
     let random = new ƒ.Random();
+    let results = {};
     window.addEventListener("load", hndload);
     function hndload() {
-        ƒ.Debug.log("[0,1[", random.getNorm());
-        ƒ.Debug.log("[-1,1[", random.getRange(-1, 1));
-        ƒ.Debug.log("[-10, 10]", random.getRangeFloored(-10, 10));
-        ƒ.Debug.log("Bool", random.getBoolean());
-        ƒ.Debug.log("Sign", random.getSign());
+        addResult("getNorm [0,1[", random.getNorm());
+        addResult("getRange [-1,1[", random.getRange(-1, 1));
+        addResult("getRangeFloored [-10, 10]", random.getRangeFloored(-10, 10));
+        addResult("getBoolean", random.getBoolean());
+        addResult("getSign", random.getSign());
         let array = ["a", "b", "c"];
         let i = random.getIndex(array);
-        ƒ.Debug.log("Index", i, array[i]);
+        addResult("getIndex", i, array[i]);
         let j = random.getElement(array);
-        ƒ.Debug.log("Element", j, array.indexOf(j));
+        addResult("getElement", j, array.indexOf(j));
         let k = random.splice(array);
-        ƒ.Debug.log("splice", k, array);
+        addResult("splice", k, array.toString());
         let s1 = Symbol("ƒudge1");
         let s2 = Symbol("ƒudge2");
         let object = { x: 10, b: true, s: "ƒudge" };
         object[s1] = "ƒudge1";
         object[s2] = "ƒudge2";
         let property = random.getPropertyName(object);
-        ƒ.Debug.log("Property", property, object[property]);
+        addResult("getPropertyName", property, object[property]);
         let symbol = random.getPropertySymbol(object);
-        ƒ.Debug.log("Property", symbol, object[symbol]);
+        addResult("getPropertySymbol", symbol, object[symbol]);
         let map = new Map();
         map.set(array, "Array");
         map.set(object, "Object");
         let key = random.getKey(map);
-        ƒ.Debug.log("Key", key, map.get(key));
-        let corner0 = ƒ.Vector3.ZERO();
-        let corner1 = new ƒ.Vector3(5, 5, 5);
+        addResult("getKey", key, map.get(key));
+        let corner0 = ƒ.Vector3.ONE(-3);
+        let corner1 = ƒ.Vector3.ONE(5);
         let randomVector2 = random.getVector2(corner0.toVector2(), corner1.toVector2());
-        ƒ.Debug.log("Vector2", randomVector2);
+        addResult("getVector2", randomVector2.toString());
         let randomVector3 = random.getVector3(corner0, corner1);
-        ƒ.Debug.log("Vector3", randomVector3);
+        addResult("getVector3", randomVector3.toString());
+        console.table(results);
+    }
+    function addResult(...args) {
+        let result = new Result();
+        let i = 0;
+        results[args[0]] = { result: args[1], comment: args[2] ? args[2] : null };
     }
 })(Random || (Random = {}));
 //# sourceMappingURL=Random.js.map
