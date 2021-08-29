@@ -13,8 +13,6 @@ namespace FudgeCore {
      */
     private static delegates: { [filter: number]: MapDebugTargetToDelegate } = Debug.setupConsole();
 
-    // TODO: create filter DEBUG_FILTER.FUDGE solely for messages from FUDGE
-
     /**
      * De- / Activate a filter for the given DebugTarget. 
      */
@@ -138,12 +136,14 @@ namespace FudgeCore {
       let result: { [filter: number]: MapDebugTargetToDelegate } = {};
       let filters: DEBUG_FILTER[] = [
         DEBUG_FILTER.INFO, DEBUG_FILTER.LOG, DEBUG_FILTER.WARN, DEBUG_FILTER.ERROR, DEBUG_FILTER.FUDGE,
-        DEBUG_FILTER.CLEAR, DEBUG_FILTER.GROUP, DEBUG_FILTER.GROUPCOLLAPSED, DEBUG_FILTER.GROUPEND
-        // DEBUG_FILTER.SOURCE
+        DEBUG_FILTER.CLEAR, DEBUG_FILTER.GROUP, DEBUG_FILTER.GROUPCOLLAPSED, DEBUG_FILTER.GROUPEND,
+        DEBUG_FILTER.SOURCE
       ];
 
       for (let filter of filters)
         result[filter] = new Map([[DebugConsole, DebugConsole.delegates[filter]]]);
+
+      result[DEBUG_FILTER.SOURCE].delete(DebugConsole);
 
       return result;
     }
