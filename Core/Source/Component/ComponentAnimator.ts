@@ -15,8 +15,8 @@ namespace FudgeCore {
     playback: ANIMATION_PLAYBACK;
     speedScalesWithGlobalSpeed: boolean = true;
 
+    #speedScale: number = 1;
     private localTime: Time;
-    private speedScale: number = 1;
     private lastTime: number = 0;
 
     constructor(_animation: Animation = new Animation(""), _playmode: ANIMATION_PLAYMODE = ANIMATION_PLAYMODE.LOOP, _playback: ANIMATION_PLAYBACK = ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS) {
@@ -38,9 +38,13 @@ namespace FudgeCore {
       });
     }
 
-    public set speed(_s: number) {
-      this.speedScale = _s;
+    public set speed(_speed: number) {
+      this.#speedScale = _speed;
       this.updateScale();
+    }
+
+    public get speed(): number {
+      return this.#speedScale;
     }
 
     public activate(_on: boolean): void {
@@ -96,7 +100,7 @@ namespace FudgeCore {
       serialization.idAnimation = this.animation.idResource;
       serialization.playmode = this.playmode;
       serialization.playback = this.playback;
-      serialization.speedScale = this.speedScale;
+      serialization.speed = this.speed;
       serialization.speedScalesWithGlobalSpeed = this.speedScalesWithGlobalSpeed;
       serialization[super.constructor.name] = super.serialize();
 
@@ -104,14 +108,13 @@ namespace FudgeCore {
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.animation = new Animation("");
+      await super.deserialize(_serialization[super.constructor.name]);
       this.animation = <Animation>await Project.getResource(_serialization.idAnimation);
       this.playback = _serialization.playback;
       this.playmode = _serialization.playmode;
-      this.speedScale = _serialization.speedScale;
+      this.speed = _serialization.speed;
       this.speedScalesWithGlobalSpeed = _serialization.speedScalesWithGlobalSpeed;
 
-      await super.deserialize(_serialization[super.constructor.name]);
       return this;
     }
     //#endregion
@@ -182,7 +185,7 @@ namespace FudgeCore {
      * Updates the scale of the animation if the user changes it or if the global game timer changed its scale.
      */
     private updateScale(): void {
-      let newScale: number = this.speedScale;
+      let newScale: number = this.#speedScale;
       if (this.speedScalesWithGlobalSpeed)
         newScale *= Time.game.getScale();
       this.localTime.setScale(newScale);

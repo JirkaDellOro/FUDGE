@@ -30,30 +30,51 @@
 <body>
   <script>
     TestInstructions.display({
-      Name: "Serialization of the AnimatorComponent",
+      Name: "ComponentAnimator",
       Test: [
-        "An Animation changes the properties of objects with AnimationKeys",
-        "An AnimationKey defines one specific value for one specific point of time in the animation",
-        "An AnimationStructure defines which properties should be influenced by the AnimationKeys"
+        "ComponentAnimator is complex and largely extensible, so this test was created to check the serialization and deserialization.",
+        "It also tests if the Component is attached and detached from the node and deactivated, when the node gets removed from the graph, so that no events and timers leak in memory."
       ],
       Setup: [
-        "an animation component that controls the animation",
-        "1 Animation with 2 AnimationsKeys",
-        "1 an AnimationStructure which defines an animation for a rotation of the x and y axes"
+        "A small animation rotating the cube with 5 seconds of length, a label at 2 seconds and an event triggered at 3 seconds",
+        "A ComponentAnimator with a speed of 2, playmode loop and continous time, reacting to the event if triggered with console output",
+        "A reconstruction of this component created by serialization/deserialization"
       ],
       Act: [
-        "watch an animation"
+        "Switch to use the orginal component or the reconstruction",
+        "Add an additional event listener to make the animation jump to the label when the event is triggered",
+        "Choose to detach the component or remove the whole node after 8 seconds"
       ],
       Observe: [
-        "Console to see the serialized animation"
+        "Compare the animations of the original and the reconstruction",
+        "In the console, see if the serializations match",
+        "Observe the output from the event handler."
       ],
       /* Control: [
         //"no controls"
       ], */
       Expect: [
-        "The cube rotates to the selected angle and switch back to the origin",
-        "after 2 seconds the cube disappears"
+        "Identical behavior of the original and the reconstructed component.",
+        "Serializations should match.",
+        "The output in the console should end when the component was detached or the node removed."
       ]
     });
   </script>
+
+  <form>
+    <fieldset id="use">
+      <legend>Use</legend>
+      <input type="radio" name="use" id="original" value="original" /><label for="original">Original</label>
+      <input type="radio" name="use" id="reconstruction" value="reconstruction" checked /><label
+        for="reconstruction">Reconstruction</label><br/>
+      <input type="checkbox" id="jump" name="jump" /><label for="jump">jump</label>
+    </fieldset>
+    <fieldset id="destroy">
+      <legend>After 8 seconds</legend>
+      <input type="radio" name="destroy" id="nothing" value="nothing" checked /><label for="nothing">keep going</label>
+      <input type="radio" name="destroy" id="detach" value="detach" /><label for="detach">detach component</label>
+      <input type="radio" name="destroy" id="remove" value="remove" /><label for="remove">remove node</label>
+    </fieldset>
+  </form>
+
 </body>

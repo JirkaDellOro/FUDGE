@@ -1398,16 +1398,17 @@ declare namespace FudgeCore {
      * @authors Lukas Scheuerle, HFU, 2019
      */
     class ComponentAnimator extends Component {
+        #private;
         static readonly iSubclass: number;
         animation: Animation;
         playmode: ANIMATION_PLAYMODE;
         playback: ANIMATION_PLAYBACK;
         speedScalesWithGlobalSpeed: boolean;
         private localTime;
-        private speedScale;
         private lastTime;
         constructor(_animation?: Animation, _playmode?: ANIMATION_PLAYMODE, _playback?: ANIMATION_PLAYBACK);
-        set speed(_s: number);
+        set speed(_speed: number);
+        get speed(): number;
         activate(_on: boolean): void;
         /**
          * Jumps to a certain time in the animation to play from there.

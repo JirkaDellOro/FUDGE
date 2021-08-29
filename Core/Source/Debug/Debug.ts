@@ -114,12 +114,13 @@ namespace FudgeCore {
      * Lookup all delegates registered to the filter and call them using the given arguments
      */
     private static delegate(_filter: DEBUG_FILTER, _message: unknown, _args: unknown[]): void {
-      if (_filter != DEBUG_FILTER.SOURCE) {
-        for (let delegate of Debug.delegates[DEBUG_FILTER.SOURCE].values())
-          if (delegate) {
-            let trace: string[] = new Error("Test").stack.split("\n");
-            delegate(trace[3]);
-          }
+      if (_filter == DEBUG_FILTER.LOG || _filter == DEBUG_FILTER.WARN || _filter == DEBUG_FILTER.ERROR) {
+        if (Debug.delegates[DEBUG_FILTER.SOURCE])
+          for (let delegate of Debug.delegates[DEBUG_FILTER.SOURCE].values())
+            if (delegate) {
+              let trace: string[] = new Error("Test").stack.split("\n");
+              delegate(trace[3]);
+            }
       }
       let delegates: MapDebugTargetToDelegate = Debug.delegates[_filter];
       for (let delegate of delegates.values())
