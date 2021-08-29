@@ -13,7 +13,7 @@ namespace Graph {
     let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
     cmpCamera.mtxPivot.translation = new ƒ.Vector3(5, 7, 20);
     cmpCamera.mtxPivot.lookAt(ƒ.Vector3.ZERO());
-    
+
     let canvas: HTMLCanvasElement = document.querySelector("canvas");
 
     document.body.appendChild(canvas);
@@ -23,8 +23,6 @@ namespace Graph {
 
     let center: ƒ.Node = createCenterAndSatellite();
 
-    // Fudge["AnimateSatellite"] = AnimateSatellite;
-    // console.log(AnimateSatellite["namespaceX"]);
     let resource: ƒ.Graph = await ƒ.Project.registerAsGraph(center, false);
 
     let dim: ƒ.Vector3 = new ƒ.Vector3(2, 2, 2);
@@ -36,8 +34,8 @@ namespace Graph {
           graph.addChild(instance);
           instance.mtxLocal.translate(new ƒ.Vector3(2 * x, 2 * y, 2 * z));
           (<ƒ.ComponentMesh>instance.getComponent(ƒ.ComponentMesh)).mtxPivot.scale(ƒ.Vector3.ONE(1));
-          instance.broadcastEvent(new Event("startSatellite"));
         }
+    graph.broadcastEvent(new Event("startSatellite"));
 
     let srlResources: ƒ.SerializationOfResources = ƒ.Project.serialize();
     let srlInstance: ƒ.Serialization = ƒ.Serializer.serialize(new ƒ.GraphInstance(resource));
@@ -62,10 +60,7 @@ namespace Graph {
     let mtrCyan: ƒ.Material = new ƒ.Material("Cyan", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(0, 0.5, 1, 1)));
     let pyramid: ƒ.MeshPyramid = new ƒ.MeshPyramid();
     let cube: ƒ.MeshCube = new ƒ.MeshCube();
-    // ƒ.Project.register(pyramid);
-    // ƒ.Project.register(cube);
-    // ƒ.Project.register(mtrOrange);
-    // ƒ.Project.register(mtrCyan);
+    
     let center: ƒ.Node = new ƒAid.Node("Center", ƒ.Matrix4x4.IDENTITY(), mtrOrange, pyramid);
     center.getComponent(ƒ.ComponentMesh).mtxPivot.scale(ƒ.Vector3.ONE(0.5));
     let satellite: ƒ.Node = new ƒAid.Node("Satellite", ƒ.Matrix4x4.IDENTITY(), mtrCyan, cube);
