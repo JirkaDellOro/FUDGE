@@ -41,7 +41,7 @@ var AnimatorComponentTest;
         animation.labels["test"] = 2000;
         animation.setEvent("event", 3000);
         let cmpAnimator = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE.LOOP, ƒ.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS);
-        cmpAnimator.speed = 2;
+        cmpAnimator.scale = 2;
         // #region serialisation
         console.groupCollapsed("Animation");
         let serialisation = animation.serialize();

@@ -5,7 +5,7 @@ namespace FudgeCore {
 
   /**
    * Holds a reference to an {@link Animation} and controls it. Controls playback and playmode as well as speed.
-   * @authors Lukas Scheuerle, HFU, 2019
+   * @authors Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021
    */
   export class ComponentAnimator extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentAnimator);
@@ -13,11 +13,11 @@ namespace FudgeCore {
     animation: Animation;
     playmode: ANIMATION_PLAYMODE;
     playback: ANIMATION_PLAYBACK;
-    speedScalesWithGlobalSpeed: boolean = true;
+    scaleWithGameTime: boolean = true;
 
-    #speedScale: number = 1;
-    private localTime: Time;
-    private lastTime: number = 0;
+    #scale: number = 1;
+    #timeLocal: Time;
+    #previous: number = 0;
 
     constructor(_animation: Animation = new Animation(""), _playmode: ANIMATION_PLAYMODE = ANIMATION_PLAYMODE.LOOP, _playback: ANIMATION_PLAYBACK = ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS) {
       super();
@@ -25,12 +25,11 @@ namespace FudgeCore {
       this.playmode = _playmode;
       this.playback = _playback;
 
-      this.localTime = new Time();
+      this.#timeLocal = new Time();
 
       //TODO: update animation total time when loading a different animation?
       this.animation.calculateTotalTime();
 
-      Time.game.addEventListener(EVENT.TIME_SCALED, this.updateScale.bind(this));
       this.addEventListener(EVENT.COMPONENT_REMOVE, () => this.activate(false));
       this.addEventListener(EVENT.COMPONENT_ADD, () => {
         this.getContainer().addEventListener(EVENT.CHILD_REMOVE, () => this.activate(false));
@@ -38,13 +37,20 @@ namespace FudgeCore {
       });
     }
 
-    public set speed(_speed: number) {
-      this.#speedScale = _speed;
+    public set scale(_scale: number) {
+      this.#scale = _scale;
       this.updateScale();
     }
 
-    public get speed(): number {
-      return this.#speedScale;
+    public get scale(): number {
+      return this.#scale;
+    }
+
+    /**
+     * Returns the current sample time of the animation
+     */
+     public get time(): number {
+      return this.#timeLocal.get() % this.animation.totalTime;
     }
 
     public activate(_on: boolean): void {
@@ -52,18 +58,22 @@ namespace FudgeCore {
       if (!this.getContainer())
         return;
 
-      if (_on)
+      if (_on) {
+        Time.game.addEventListener(EVENT.TIME_SCALED, this.updateScale);
         this.getContainer().addEventListener(EVENT.RENDER_PREPARE, this.updateAnimationLoop);
-      else
+      }
+      else {
+        Time.game.addEventListener(EVENT.TIME_SCALED, this.updateScale);
         this.getContainer().removeEventListener(EVENT.RENDER_PREPARE, this.updateAnimationLoop);
+      }
     }
 
     /**
      * Jumps to a certain time in the animation to play from there.
      */
     public jumpTo(_time: number): void {
-      this.localTime.set(_time);
-      this.lastTime = _time;
+      this.#timeLocal.set(_time);
+      this.#previous = _time;
       _time = _time % this.animation.totalTime;
       let mutator: Mutator = this.animation.getMutated(_time, this.animation.calculateDirection(_time, this.playmode), this.playback);
       this.getContainer().applyAnimation(mutator);
@@ -76,13 +86,6 @@ namespace FudgeCore {
       let time: number = this.animation.labels[_label];
       if (time)
         this.jumpTo(time);
-    }
-
-    /**
-     * Returns the current time of the animation, modulated for animation length.
-     */
-    public getCurrentTime(): number {
-      return this.localTime.get() % this.animation.totalTime;
     }
 
     /**
@@ -100,8 +103,8 @@ namespace FudgeCore {
       serialization.idAnimation = this.animation.idResource;
       serialization.playmode = this.playmode;
       serialization.playback = this.playback;
-      serialization.speed = this.speed;
-      serialization.speedScalesWithGlobalSpeed = this.speedScalesWithGlobalSpeed;
+      serialization.scale = this.scale;
+      serialization.scaleWithGameTime = this.scaleWithGameTime;
       serialization[super.constructor.name] = super.serialize();
 
       return serialization;
@@ -112,8 +115,8 @@ namespace FudgeCore {
       this.animation = <Animation>await Project.getResource(_serialization.idAnimation);
       this.playback = _serialization.playback;
       this.playmode = _serialization.playmode;
-      this.speed = _serialization.speed;
-      this.speedScalesWithGlobalSpeed = _serialization.speedScalesWithGlobalSpeed;
+      this.scale = _serialization.scale;
+      this.scaleWithGameTime = _serialization.scaleWithGameTime;
 
       return this;
     }
@@ -129,16 +132,16 @@ namespace FudgeCore {
     private updateAnimationLoop = (_e: Event, _time?: number): [Mutator, number] => {
       if (this.animation.totalTime == 0)
         return [null, 0];
-      let time: number = _time || this.localTime.get();
+      let time: number = _time || this.#timeLocal.get();
       if (this.playback == ANIMATION_PLAYBACK.FRAMEBASED) {
-        time = this.lastTime + (1000 / this.animation.fps);
+        time = this.#previous + (1000 / this.animation.fps);
       }
       let direction: number = this.animation.calculateDirection(time, this.playmode);
-      time = this.animation.getModalTime(time, this.playmode, this.localTime.getOffset());
-      this.executeEvents(this.animation.getEventsToFire(this.lastTime, time, this.playback, direction));
+      time = this.animation.getModalTime(time, this.playmode, this.#timeLocal.getOffset());
+      this.executeEvents(this.animation.getEventsToFire(this.#previous, time, this.playback, direction));
 
-      if (this.lastTime != time) {
-        this.lastTime = time;
+      if (this.#previous != time) {
+        this.#previous = time;
         time = time % this.animation.totalTime;
         let mutator: Mutator = this.animation.getMutated(time, direction, this.playback);
         if (this.getContainer()) {
@@ -159,36 +162,14 @@ namespace FudgeCore {
       }
     }
 
-    /**   MOVED TO ANIMATION, TODO: delete
-     * Calculates the actual time to use, using the current playmodes.
-     * @param _time the time to apply the playmodes to
-     * @returns the recalculated time
-     */
-    // private applyPlaymodes(_time: number): number {
-    //   switch (this.playmode) {
-    //     case ANIMATION_PLAYMODE.STOP:
-    //       return this.localTime.getOffset();
-    //     case ANIMATION_PLAYMODE.PLAYONCE:
-    //       if (_time >= this.animation.totalTime)
-    //         return this.animation.totalTime - 0.01;     //TODO: this might cause some issues
-    //       else return _time;
-    //     case ANIMATION_PLAYMODE.PLAYONCESTOPAFTER:
-    //       if (_time >= this.animation.totalTime)
-    //         return this.animation.totalTime + 0.01;     //TODO: this might cause some issues
-    //       else return _time;
-    //     default:
-    //       return _time;
-    //   }
-    // }
-
     /**
      * Updates the scale of the animation if the user changes it or if the global game timer changed its scale.
      */
-    private updateScale(): void {
-      let newScale: number = this.#speedScale;
-      if (this.speedScalesWithGlobalSpeed)
+    private updateScale = (): void => {
+      let newScale: number = this.#scale;
+      if (this.scaleWithGameTime)
         newScale *= Time.game.getScale();
-      this.localTime.setScale(newScale);
+      this.#timeLocal.setScale(newScale);
     }
     //#endregion
   }

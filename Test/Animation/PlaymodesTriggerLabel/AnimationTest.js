@@ -58,9 +58,9 @@ var AnimatorControleTest;
         let playmode = String(formData.get("mode"));
         let playback = String(formData.get("back"));
         let cmpAnimator = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE[playmode], ƒ.ANIMATION_PLAYBACK[playback]);
-        cmpAnimator.speed = 1;
+        cmpAnimator.scale = 1;
         cmpAnimator.addEventListener("event", (_event) => {
-            let time = _event.target.getCurrentTime();
+            let time = _event.target.time;
             console.log(`Event fired at ${time}`, _event);
         });
         if (node.getComponent(ƒ.ComponentAnimator)) {

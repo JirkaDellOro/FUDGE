@@ -72,9 +72,9 @@ namespace AnimatorControleTest {
     let playback: string = String(formData.get("back"));
 
     let cmpAnimator: ƒ.ComponentAnimator = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE[playmode], ƒ.ANIMATION_PLAYBACK[playback]);
-    cmpAnimator.speed = 1;
+    cmpAnimator.scale = 1;
     cmpAnimator.addEventListener("event", (_event: Event) => {
-      let time: number = (<ƒ.ComponentAnimator>_event.target).getCurrentTime();
+      let time: number = (<ƒ.ComponentAnimator>_event.target).time;
       console.log(`Event fired at ${time}`, _event);
     });
 

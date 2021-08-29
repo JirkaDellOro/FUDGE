@@ -1395,7 +1395,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Holds a reference to an {@link Animation} and controls it. Controls playback and playmode as well as speed.
-     * @authors Lukas Scheuerle, HFU, 2019
+     * @authors Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021
      */
     class ComponentAnimator extends Component {
         #private;
@@ -1403,12 +1403,14 @@ declare namespace FudgeCore {
         animation: Animation;
         playmode: ANIMATION_PLAYMODE;
         playback: ANIMATION_PLAYBACK;
-        speedScalesWithGlobalSpeed: boolean;
-        private localTime;
-        private lastTime;
+        scaleWithGameTime: boolean;
         constructor(_animation?: Animation, _playmode?: ANIMATION_PLAYMODE, _playback?: ANIMATION_PLAYBACK);
-        set speed(_speed: number);
-        get speed(): number;
+        set scale(_scale: number);
+        get scale(): number;
+        /**
+         * Returns the current sample time of the animation
+         */
+        get time(): number;
         activate(_on: boolean): void;
         /**
          * Jumps to a certain time in the animation to play from there.
@@ -1418,10 +1420,6 @@ declare namespace FudgeCore {
          * Jumps to a certain label in the animation if defined
          */
         jumpToLabel(_label: string): void;
-        /**
-         * Returns the current time of the animation, modulated for animation length.
-         */
-        getCurrentTime(): number;
         /**
          * Forces an update of the animation from outside. Used in the ViewAnimation. Shouldn't be used during the game.
          * @param _time the (unscaled) time to update the animation with.
@@ -1442,11 +1440,6 @@ declare namespace FudgeCore {
          * @param events a list of names of custom events to fire
          */
         private executeEvents;
-        /**   MOVED TO ANIMATION, TODO: delete
-         * Calculates the actual time to use, using the current playmodes.
-         * @param _time the time to apply the playmodes to
-         * @returns the recalculated time
-         */
         /**
          * Updates the scale of the animation if the user changes it or if the global game timer changed its scale.
          */
