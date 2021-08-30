@@ -16,7 +16,8 @@ namespace FudgeCore {
       [DEBUG_FILTER.CLEAR]: DebugTextArea.clear,
       [DEBUG_FILTER.GROUP]: DebugTextArea.group,
       [DEBUG_FILTER.GROUPCOLLAPSED]: DebugTextArea.group,
-      [DEBUG_FILTER.GROUPEND]: DebugTextArea.groupEnd
+      [DEBUG_FILTER.GROUPEND]: DebugTextArea.groupEnd,
+      [DEBUG_FILTER.SOURCE]: DebugTextArea.createDelegate(DEBUG_SYMBOL[DEBUG_FILTER.SOURCE])
     };
     private static groups: string[] = [];
 

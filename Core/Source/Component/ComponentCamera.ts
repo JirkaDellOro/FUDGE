@@ -170,8 +170,8 @@ namespace FudgeCore {
       this.fieldOfView = _serialization.fieldOfView;
       this.aspectRatio = _serialization.aspect;
       this.direction = _serialization.direction;
-      this.mtxPivot.deserialize(_serialization.pivot);
-      super.deserialize(_serialization[super.constructor.name]);
+      await this.mtxPivot.deserialize(_serialization.pivot);
+      await super.deserialize(_serialization[super.constructor.name]);
       switch (this.projection) {
         case PROJECTION.ORTHOGRAPHIC:
           this.projectOrthographic(); // TODO: serialize and deserialize parameters

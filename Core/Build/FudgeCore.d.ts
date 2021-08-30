@@ -23,6 +23,7 @@ declare namespace FudgeCore {
         GROUP = 257,
         GROUPCOLLAPSED = 258,
         GROUPEND = 260,
+        SOURCE = 512,
         MESSAGES = 31,
         FORMAT = 263,
         ALL = 287
@@ -42,9 +43,13 @@ declare namespace FudgeCore {
     class DebugConsole extends DebugTarget {
         static delegates: MapDebugFilterToDelegate;
         /**
-         * Displays critical information about failures, which is emphasized e.g. by color
+         * Should be used to display uncritical state information of FUDGE, only visible in browser's verbose mode
          */
         static fudge(_message: Object, ..._args: Object[]): void;
+        /**
+         * Displays an extra line with information about the source of the debug message
+         */
+        static source(_message: Object, ..._args: Object[]): void;
     }
 }
 declare namespace FudgeCore {
@@ -102,6 +107,10 @@ declare namespace FudgeCore {
          * Log a branch of the node hierarchy
          */
         static branch(_branch: Node): void;
+        /**
+         * Displays messages about the source of the debug call
+         */
+        static source(_message: unknown, ..._args: unknown[]): void;
         /**
          * Lookup all delegates registered to the filter and call them using the given arguments
          */
@@ -1014,7 +1023,7 @@ declare namespace FudgeCore {
         TIMEBASED_CONTINOUS = 0,
         /**Limits the calculation of the state of the animation to the FPS value of the animation. Skips frames if needed.*/
         TIMEBASED_RASTERED_TO_FPS = 1,
-        /**Uses the FPS value of the animation to advance once per frame, no matter the speed of the frames. Doesn't skip any frames.*/
+        /** Advances the time each frame according to the FPS value of the animation, ignoring the actual duration of the frames. Doesn't skip any frames.*/
         FRAMEBASED = 2
     }
     /**
@@ -1028,7 +1037,6 @@ declare namespace FudgeCore {
         name: string;
         totalTime: number;
         labels: AnimationLabel;
-        stepsPerSecond: number;
         animationStructure: AnimationStructure;
         events: AnimationEventTrigger;
         private framesPerSecond;
@@ -1392,28 +1400,31 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Holds a reference to an {@link Animation} and controls it. Controls playback and playmode as well as speed.
-     * @authors Lukas Scheuerle, HFU, 2019
+     * @authors Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021
      */
     class ComponentAnimator extends Component {
+        #private;
         static readonly iSubclass: number;
         animation: Animation;
         playmode: ANIMATION_PLAYMODE;
         playback: ANIMATION_PLAYBACK;
-        speedScalesWithGlobalSpeed: boolean;
-        private localTime;
-        private speedScale;
-        private lastTime;
+        scaleWithGameTime: boolean;
         constructor(_animation?: Animation, _playmode?: ANIMATION_PLAYMODE, _playback?: ANIMATION_PLAYBACK);
-        set speed(_s: number);
+        set scale(_scale: number);
+        get scale(): number;
+        /**
+         * Returns the current sample time of the animation
+         */
+        get time(): number;
         activate(_on: boolean): void;
         /**
          * Jumps to a certain time in the animation to play from there.
          */
         jumpTo(_time: number): void;
         /**
-         * Returns the current time of the animation, modulated for animation length.
+         * Jumps to a certain label in the animation if defined
          */
-        getCurrentTime(): number;
+        jumpToLabel(_label: string): void;
         /**
          * Forces an update of the animation from outside. Used in the ViewAnimation. Shouldn't be used during the game.
          * @param _time the (unscaled) time to update the animation with.
@@ -1421,7 +1432,7 @@ declare namespace FudgeCore {
          */
         updateAnimation(_time: number): [Mutator, number];
         serialize(): Serialization;
-        deserialize(_s: Serialization): Promise<Serializable>;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         /**
          * Updates the Animation.
          * Gets called every time the Loop fires the LOOP_FRAME Event.
@@ -1434,11 +1445,6 @@ declare namespace FudgeCore {
          * @param events a list of names of custom events to fire
          */
         private executeEvents;
-        /**   MOVED TO ANIMATION, TODO: delete
-         * Calculates the actual time to use, using the current playmodes.
-         * @param _time the time to apply the playmodes to
-         * @returns the recalculated time
-         */
         /**
          * Updates the scale of the animation if the user changes it or if the global game timer changed its scale.
          */
@@ -1885,6 +1891,9 @@ declare namespace FudgeCore {
          * Calculates the output of this control
          */
         protected calculateOutput(): number;
+        /**
+         * calculates the output considering the time of the delay
+         */
         private getValueDelayed;
         private dispatchOutput;
     }
@@ -3513,7 +3522,7 @@ declare namespace FudgeCore {
         /** Setting both bodies to the bodies that belong to the loaded IDs and reconnecting them */
         protected setBodiesFromLoadedIDs(): void;
         /** Deserialize Base Class Information - Component, since Typescript does not give the ability to call super.super */
-        protected baseDeserialize(_serialization: Serialization): Serializable;
+        protected baseDeserialize(_serialization: Serialization): Promise<Serializable>;
         /** Serialize Base Class Information - Component, since Typescript does not give the ability to call super.super in Child classes of e.g. ComponentJointPrismatic */
         protected baseSerialize(): Serialization;
     }
@@ -4300,68 +4309,6 @@ declare namespace FudgeCore {
         private constructJoint;
         private superAdd;
         private superRemove;
-    }
-}
-declare namespace FudgeCore {
-    /**
-       * A physical connection between two bodies with no movement.
-       * Best way to simulate convex objects like a char seat connected to chair legs.
-       * The actual anchor point does not matter that much, only in very specific edge cases.
-       * Because welding means they simply do not disconnect. (unless you add Breakability)
-       * @author Marko Fehrenbach, HFU 2020
-       */
-    class ComponentJointWelding extends ComponentJoint {
-        static readonly iSubclass: number;
-        /**
-          * If the two connected RigidBodies collide with eath other. (Default = false)
-          * On a welding joint the connected bodies should not be colliding with each other,
-          * for best results
-         */
-        get internalCollision(): boolean;
-        set internalCollision(_value: boolean);
-        /**
- * The amount of force needed to break the JOINT, in Newton. 0 equals unbreakable (default)
-*/
-        get breakForce(): number;
-        set breakForce(_value: number);
-        /**
-           * The amount of force needed to break the JOINT, while rotating, in Newton. 0 equals unbreakable (default)
-          */
-        get breakTorque(): number;
-        set breakTorque(_value: number);
-        /**
-         * The exact position where the two {@link Node}s are connected. When changed after initialization the joint needs to be reconnected.
-         */
-        get anchor(): Vector3;
-        set anchor(_value: Vector3);
-        private jointAnchor;
-        private jointInternalCollision;
-        private jointBreakForce;
-        private jointBreakTorque;
-        private config;
-        private oimoJoint;
-        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _localAnchor?: Vector3);
-        /**
-         * Initializing and connecting the two rigidbodies with the configured joint properties
-         * is automatically called by the physics system. No user interaction needed.
-         */
-        connect(): void;
-        /**
-         * Disconnecting the two rigidbodies and removing them from the physics system,
-         * is automatically called by the physics system. No user interaction needed.
-         */
-        disconnect(): void;
-        /**
-         * Returns the original Joint used by the physics engine. Used internally no user interaction needed.
-         * Only to be used when functionality that is not added within Fudge is needed.
-        */
-        getOimoJoint(): OIMO.Joint;
-        protected dirtyStatus(): void;
-        private constructJoint;
-        private superAdd;
-        private superRemove;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 }
 declare namespace FudgeCore {

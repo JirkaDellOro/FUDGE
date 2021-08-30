@@ -96,7 +96,7 @@ namespace FudgeCore {
       return serialization;
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      super.deserialize(_serialization);
+      await super.deserialize(_serialization);
       this.create(_serialization.sectors, _serialization.stacks);
       return this;
     }

@@ -29,6 +29,11 @@ namespace FudgeAid {
       return mesh;
     }
 
+    /**
+     * @returns the number of the current frame
+     */
+    public get getCurrentFrame(): number { return this.frameCurrent; } //ToDo: see if getframeCurrent is problematic
+
     public setAnimation(_animation: SpriteSheetAnimation): void {
       this.animation = _animation;
       if (this.timer)
@@ -62,5 +67,7 @@ namespace FudgeAid {
     public setFrameDirection(_direction: number): void {
       this.direction = Math.floor(_direction);
     }
+
+    
   }
 }

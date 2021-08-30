@@ -176,6 +176,7 @@ var Fudge;
         });
         if (!filename)
             return;
+<<<<<<< HEAD
         let base = new URL(new URL(filename[0]).toString() + "/");
         console.log("Path", base.toString());
         Fudge.project = new Fudge.Project(base);
@@ -221,6 +222,10 @@ var Fudge;
         let projectName = base.toString().split("/").slice(-2, -1)[0];
         if (Fudge.watcher)
             Fudge.watcher.close();
+=======
+        filename = "file://" + filename[0] + "/a.b";
+        console.log(filename);
+>>>>>>> DavidTest
         if (Fudge.project.files.index.overwrite) {
             let html = Fudge.project.getProjectHTML(projectName);
             let htmlFileName = new URL(Fudge.project.files.index.filename, base);
@@ -244,7 +249,7 @@ var Fudge;
         });
         if (!filenames)
             return null;
-        return new URL(filenames[0]);
+        return new URL("file://" + filenames[0]);
     }
     Fudge.promptLoadProject = promptLoadProject;
     async function loadProject(_url) {
@@ -842,7 +847,9 @@ var Fudge;
             while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
                 ;
             let path = new URL(".", ƒ.Project.baseURL).pathname;
-            path = path.substr(1); // strip leading slash
+            if (navigator.platform == "Win32" || navigator.platform == "Win64") {
+                path = path.substr(1); // strip leading slash
+            }
             let root = Fudge.DirectoryEntry.createRoot(path);
             this.tree = new ƒui.Tree(new Fudge.ControllerTreeDirectory(), root);
             this.dom.appendChild(this.tree);

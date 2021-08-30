@@ -227,11 +227,15 @@ namespace FudgeCore {
       for (let id in this.timers) {
         let timer: Timer = this.timers[id];
         timer.clear();
+        delete this.timers[id];
         if (!this.scale)
           // Time has stopped, no need to replace cleared timers
           continue;
 
-        this.timers[id] = timer.installCopy();
+        /* this.timers[id] =  */
+        timer = timer.installCopy(); // the timer is automatically added to this time instance
+        delete this.timers[this.idTimerAddedLast]; // remove the copy again ...
+        this.timers[id] = timer; // ... and place it at the id of the original
       }
     }
   }

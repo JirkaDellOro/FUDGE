@@ -761,7 +761,7 @@ namespace FudgeCore {
         * Since the event does not know which body is the trigger iniator, the event can be listened to
         * on either the trigger or the triggered. (This is only possible with the Fudge OIMO Fork!)
         */
-        private triggerEnter(contact: OIMO.Contact) {
+        private triggerEnter(contact: OIMO.Contact): void {
             let objHit: ComponentRigidbody; //collision consisting of 2 bodies, so Hit1/2
             let objHit2: ComponentRigidbody;
             let event: EventPhysics;  //The event that will be send and the informations added to it
@@ -802,7 +802,7 @@ namespace FudgeCore {
         * Since the event does not know which body is the trigger iniator, the event can be listened to
         * on either the trigger or the triggered. (This is only possible with the Fudge OIMO Fork!)
         */
-        private triggerExit(contact: OIMO.Contact) {
+        private triggerExit(contact: OIMO.Contact): void {
             //REMOVE OLD Triggering Body
             let objHit: ComponentRigidbody; //collision consisting of 2 bodies, so Hit1/2
             let objHit2: ComponentRigidbody;

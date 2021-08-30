@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+
+<head>
+    <link rel="stylesheet" href="../TestInstructions.css">
+    <script src="../dialog-polyfill.min.js"></script>
+    <script src="../TestInstructions.js"></script>
+    <meta charset="UTF-8">
+    <title>Random</title>
+    <script type="text/javascript" src="../../Core/Build/FudgeCore.js"></script>
+    <script type="text/javascript" src="Random.js"></script>
+</head>
+
+<body>
+    <script>
+        TestInstructions.display({
+            Name: "Random",
+            Test: [
+                "The random methods of the Random class are executed and the return value is output in the console",
+            ],
+            Setup: [
+                "1 array [a, b, c]",
+                "1 object with the properties x: 10, b: true, s: fudge and the symbols ƒudge1, ƒudge2"
+
+            ],
+             Act: [
+                 "Reload the page to generate new random outputs",
+ 
+             ], 
+            Observe: [
+                "See the return of the random method in the console",
+            ],
+            /*  Control: [
+                 "<strong>check-Boxes</strong> Select the type of display you want"
+             ], */
+            Expect: [
+                "the following values should be output in the console:<br> \
+                - a number from 0 to 1 <br> \
+                - a number from -1 to 1 <br> \
+                - a number from -10 to 10 without decimal places <br> \
+                - a truth value true or false <br> \
+                - a random sign, 1 or -1 <br> \
+                - a random index of the array. <br> \
+                - a random Element of the array. <br> \
+                - a random element of the array and that element is removed from the array <br> \
+                - a random property of the object with its value  <br> \
+                - a random symbol of the object with its value <br> \
+                - a random key of a map, maps can use arbitrary objects as key <br> \
+                - a random vector2 from the range [-3,-3] to [5,5] <br> \
+                - a random vector3 from the range [-3,-3,-3] to [5,5,5]",
+                "all values change when the page is reloaded"
+
+            ]
+        });
+    </script>
+    look in the console
+</body>

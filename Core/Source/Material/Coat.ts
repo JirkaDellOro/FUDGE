@@ -43,8 +43,8 @@ namespace FudgeCore {
       return serialization;
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      super.deserialize(_serialization);
-      this.color.deserialize(_serialization.color);
+      await super.deserialize(_serialization);
+      await this.color.deserialize(_serialization.color);
       return this;
     }
     //#endregion
