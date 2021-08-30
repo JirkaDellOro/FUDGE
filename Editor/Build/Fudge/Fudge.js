@@ -176,7 +176,6 @@ var Fudge;
         });
         if (!filename)
             return;
-<<<<<<< HEAD
         let base = new URL(new URL(filename[0]).toString() + "/");
         console.log("Path", base.toString());
         Fudge.project = new Fudge.Project(base);
@@ -222,10 +221,6 @@ var Fudge;
         let projectName = base.toString().split("/").slice(-2, -1)[0];
         if (Fudge.watcher)
             Fudge.watcher.close();
-=======
-        filename = "file://" + filename[0] + "/a.b";
-        console.log(filename);
->>>>>>> DavidTest
         if (Fudge.project.files.index.overwrite) {
             let html = Fudge.project.getProjectHTML(projectName);
             let htmlFileName = new URL(Fudge.project.files.index.filename, base);

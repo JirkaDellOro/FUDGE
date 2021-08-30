@@ -51,8 +51,8 @@ var Mesh;
                     mesh = new ƒ.MeshSphere();
                     break;
                 case "MeshTerrain":
-                    //ToDo: MeshTerrain insert
-                    continue;
+                    mesh = new ƒ.MeshTerrain();
+                    break;
                 case "MeshTorus":
                     mesh = new ƒ.MeshTorus();
                     break;

@@ -18,12 +18,13 @@ namespace FudgeCore {
    */
   export class MeshTerrain extends Mesh {
     public static readonly iSubclass: number = Mesh.registerSubclass(MeshTerrain);
+    private static readonly fMinimal: HeightMapFunction = ((_x: number, _z: number) => 0.05 * (Math.cos(_x * 10) + Math.cos(_z * 10) + Math.random()));
 
     public resolutionX: number;
     public resolutionZ: number;
     public imgScale: number = 255;
     public node: Node;
-    private heightMapFunction: HeightMapFunction = ((_x: number, _z: number) => 0); // flat...
+    private heightMapFunction: HeightMapFunction = null;
     private image: TextureImage = null;
 
     /**
@@ -33,7 +34,7 @@ namespace FudgeCore {
      * @param _resolutionX 
      * @param _resolutionZ 
      */
-    public constructor(_name: string = "MeshHeightMap", _source: HeightMapFunction | TextureImage = null, _resolutionX: number = 16, _resolutionZ: number = 16) {
+    public constructor(_name: string = "MeshHeightMap", _source: HeightMapFunction | TextureImage = MeshTerrain.fMinimal, _resolutionX: number = 16, _resolutionZ: number = 16) {
       super(_name);
       this.resolutionX = _resolutionX;
       this.resolutionZ = _resolutionZ;
@@ -49,8 +50,9 @@ namespace FudgeCore {
         this.resolutionX = _source.image.width - 1;
         this.resolutionZ = _source.image.height - 1;
       }
-      else 
+      else {
         this.heightMapFunction = _source;
+      }
 
       this.ƒnormalsFace = this.createFaceNormals();
       this.ƒindices = this.createIndices();
@@ -60,7 +62,7 @@ namespace FudgeCore {
     public getPositionOnTerrain(position: Vector3, mtxWorld?: Matrix4x4): PositionOnTerrain {
       let relPosObject: Vector3 = position;
 
-      if (mtxWorld) 
+      if (mtxWorld)
         relPosObject = Vector3.TRANSFORMATION(position, Matrix4x4.INVERSION(mtxWorld), true);
 
       let nearestFace: DistanceToFaceVertices = this.findNearestFace(relPosObject);
