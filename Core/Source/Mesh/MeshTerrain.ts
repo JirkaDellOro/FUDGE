@@ -23,39 +23,34 @@ namespace FudgeCore {
     public resolutionZ: number;
     public imgScale: number = 255;
     public node: Node;
-    private heightMapFunction: HeightMapFunction;
-    private image: TextureImage;
+    private heightMapFunction: HeightMapFunction = ((_x: number, _z: number) => 0); // flat...
+    private image: TextureImage = null;
 
     /**
      * HeightMapFunction or PNG 
      * @param _name 
-     * @param source 
+     * @param _source 
      * @param _resolutionX 
      * @param _resolutionZ 
      */
-    public constructor(_name: string = "MeshHeightMap", source?: HeightMapFunction | TextureImage, _resolutionX: number = 16, _resolutionZ: number = 16) {
+    public constructor(_name: string = "MeshHeightMap", _source: HeightMapFunction | TextureImage = null, _resolutionX: number = 16, _resolutionZ: number = 16) {
       super(_name);
       this.resolutionX = _resolutionX;
       this.resolutionZ = _resolutionZ;
 
-      if (_resolutionZ || _resolutionX <= 0) {
-        Debug.warn("HeightMap Mesh cannot have resolution values < 1. ");
+      if (_resolutionZ < 1 || _resolutionX < 1) {
+        Debug.warn("HeightMap resolution < 1, corrected to 1");
         this.resolutionX = Math.max(1, this.resolutionX);
         this.resolutionZ = Math.max(1, this.resolutionZ);
       }
 
-      if (!(source instanceof TextureImage)) {
-        this.heightMapFunction = source;
-        this.image = null;
+      if (_source instanceof TextureImage) {
+        this.image = _source;
+        this.resolutionX = _source.image.width - 1;
+        this.resolutionZ = _source.image.height - 1;
       }
-      else this.heightMapFunction = null;
-
-      if (source instanceof TextureImage) {
-        this.image = source;
-        this.resolutionX = source.image.width - 1;
-        this.resolutionZ = source.image.height - 1;
-      }
-      else this.image = null;
+      else 
+        this.heightMapFunction = _source;
 
       this.ƒnormalsFace = this.createFaceNormals();
       this.ƒindices = this.createIndices();
@@ -63,12 +58,10 @@ namespace FudgeCore {
 
 
     public getPositionOnTerrain(position: Vector3, mtxWorld?: Matrix4x4): PositionOnTerrain {
-
       let relPosObject: Vector3 = position;
 
-      if (mtxWorld) {
+      if (mtxWorld) 
         relPosObject = Vector3.TRANSFORMATION(position, Matrix4x4.INVERSION(mtxWorld), true);
-      }
 
       let nearestFace: DistanceToFaceVertices = this.findNearestFace(relPosObject);
       let posOnTerrain: PositionOnTerrain = new PositionOnTerrain;

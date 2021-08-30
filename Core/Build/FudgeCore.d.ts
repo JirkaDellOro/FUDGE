@@ -3440,11 +3440,11 @@ declare namespace FudgeCore {
         /**
          * HeightMapFunction or PNG
          * @param _name
-         * @param source
+         * @param _source
          * @param _resolutionX
          * @param _resolutionZ
          */
-        constructor(_name?: string, source?: HeightMapFunction | TextureImage, _resolutionX?: number, _resolutionZ?: number);
+        constructor(_name?: string, _source?: HeightMapFunction | TextureImage, _resolutionX?: number, _resolutionZ?: number);
         getPositionOnTerrain(position: Vector3, mtxWorld?: Matrix4x4): PositionOnTerrain;
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
@@ -4309,68 +4309,6 @@ declare namespace FudgeCore {
         private constructJoint;
         private superAdd;
         private superRemove;
-    }
-}
-declare namespace FudgeCore {
-    /**
-       * A physical connection between two bodies with no movement.
-       * Best way to simulate convex objects like a char seat connected to chair legs.
-       * The actual anchor point does not matter that much, only in very specific edge cases.
-       * Because welding means they simply do not disconnect. (unless you add Breakability)
-       * @author Marko Fehrenbach, HFU 2020
-       */
-    class ComponentJointWelding extends ComponentJoint {
-        static readonly iSubclass: number;
-        /**
-          * If the two connected RigidBodies collide with eath other. (Default = false)
-          * On a welding joint the connected bodies should not be colliding with each other,
-          * for best results
-         */
-        get internalCollision(): boolean;
-        set internalCollision(_value: boolean);
-        /**
- * The amount of force needed to break the JOINT, in Newton. 0 equals unbreakable (default)
-*/
-        get breakForce(): number;
-        set breakForce(_value: number);
-        /**
-           * The amount of force needed to break the JOINT, while rotating, in Newton. 0 equals unbreakable (default)
-          */
-        get breakTorque(): number;
-        set breakTorque(_value: number);
-        /**
-         * The exact position where the two {@link Node}s are connected. When changed after initialization the joint needs to be reconnected.
-         */
-        get anchor(): Vector3;
-        set anchor(_value: Vector3);
-        private jointAnchor;
-        private jointInternalCollision;
-        private jointBreakForce;
-        private jointBreakTorque;
-        private config;
-        private oimoJoint;
-        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _localAnchor?: Vector3);
-        /**
-         * Initializing and connecting the two rigidbodies with the configured joint properties
-         * is automatically called by the physics system. No user interaction needed.
-         */
-        connect(): void;
-        /**
-         * Disconnecting the two rigidbodies and removing them from the physics system,
-         * is automatically called by the physics system. No user interaction needed.
-         */
-        disconnect(): void;
-        /**
-         * Returns the original Joint used by the physics engine. Used internally no user interaction needed.
-         * Only to be used when functionality that is not added within Fudge is needed.
-        */
-        getOimoJoint(): OIMO.Joint;
-        protected dirtyStatus(): void;
-        private constructJoint;
-        private superAdd;
-        private superRemove;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 }
 declare namespace FudgeCore {

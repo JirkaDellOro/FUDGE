@@ -74,7 +74,7 @@ namespace PhysikTest {
     let coatTextured: ƒ.CoatTextured = new ƒ.CoatTextured();
     let tex = new f.TextureImage();
 
-    tex.load("../Textures/grass.jpg");
+    tex.load("../Textures/DEM1_5.png");
     coatTextured.texture = tex;
 
     let matTex: ƒ.Material = new ƒ.Material("Textured", ƒ.ShaderTexture, coatTextured);
@@ -218,7 +218,7 @@ namespace PhysikTest {
     backSuspensionRight.rotationalMotorLimitLower = 0;
     backSuspensionRight.internalCollision = true;
 
-    f.Physics.start(graph);
+    f.Physics.adjustTransforms(graph);
 
     f.Physics.settings.debugDraw = true;
 
