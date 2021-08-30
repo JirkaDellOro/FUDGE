@@ -3,7 +3,7 @@
 namespace FudgeCore {
   /**
    * Holds information about the AnimationStructure that the Animation uses to map the Sequences to the Attributes.
-   * Built out of a [[Node]]'s serialsation, it swaps the values with [[AnimationSequence]]s.
+   * Built out of a {@link Node}'s serialsation, it swaps the values with {@link AnimationSequence}s.
    */
   export interface AnimationStructure {
     [attribute: string]: Serialization | AnimationSequence;
@@ -42,17 +42,45 @@ namespace FudgeCore {
   }
 
   /**
+   * Holds different playmodes the animation uses to play back its animation.
+   * @author Lukas Scheuerle, HFU, 2019
+   */
+  export enum ANIMATION_PLAYMODE {
+    /**Plays animation in a loop: it restarts once it hit the end.*/
+    LOOP,
+    /**Plays animation once and stops at the last key/frame*/
+    PLAYONCE,
+    /**Plays animation once and stops on the first key/frame */
+    PLAYONCESTOPAFTER,
+    /**Plays animation like LOOP, but backwards.*/
+    REVERSELOOP,
+    /**Causes the animation not to play at all. Useful for jumping to various positions in the animation without proceeding in the animation.*/
+    STOP
+    //TODO: add an INHERIT and a PINGPONG mode
+  }
+
+  export enum ANIMATION_PLAYBACK {
+    //TODO: add an in-depth description of what happens to the animation (and events) depending on the Playback. Use Graphs to explain.
+    /**Calculates the state of the animation at the exact position of time. Ignores FPS value of animation.*/
+    TIMEBASED_CONTINOUS,
+    /**Limits the calculation of the state of the animation to the FPS value of the animation. Skips frames if needed.*/
+    TIMEBASED_RASTERED_TO_FPS,
+    /** Advances the time each frame according to the FPS value of the animation, ignoring the actual duration of the frames. Doesn't skip any frames.*/
+    FRAMEBASED
+  }
+
+  /**
    * Animation Class to hold all required Objects that are part of an Animation.
    * Also holds functions to play said Animation.
-   * Can be added to a Node and played through [[ComponentAnimator]].
-   * @author Lukas Scheuerle, HFU, 2019
+   * Can be added to a Node and played through {@link ComponentAnimator}.
+   * @author Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021
    */
   export class Animation extends Mutable implements SerializableResource {
     idResource: string;
     name: string;
     totalTime: number = 0;
     labels: AnimationLabel = {};
-    stepsPerSecond: number = 10;
+    // stepsPerSecond: number = 10;
     animationStructure: AnimationStructure;
     events: AnimationEventTrigger = {};
     private framesPerSecond: number = 60;
@@ -68,6 +96,7 @@ namespace FudgeCore {
       this.animationStructuresProcessed.set(ANIMATION_STRUCTURE_TYPE.NORMAL, _animStructure);
       this.framesPerSecond = _fps;
       this.calculateTotalTime();
+      Project.register(this);
     }
 
     get getLabels(): Enumerator {
@@ -85,9 +114,9 @@ namespace FudgeCore {
       this.eventsProcessed.clear();
       this.animationStructuresProcessed.clear();
     }
-    
+
     /**
-     * Generates a new "Mutator" with the information to apply to the [[Node]] the [[ComponentAnimator]] is attached to with [[Node.applyAnimation()]].
+     * Generates a new "Mutator" with the information to apply to the {@link Node} the {@link ComponentAnimator} is attached to with {@link Node.applyAnimation}.
      * @param _time The time at which the animation currently is at
      * @param _direction The direction in which the animation is supposed to be playing back. >0 == forward, 0 == stop, <0 == backwards
      * @param _playback The playbackmode the animation is supposed to be calculated with.
@@ -95,25 +124,19 @@ namespace FudgeCore {
      */
     getMutated(_time: number, _direction: number, _playback: ANIMATION_PLAYBACK): Mutator {     //TODO: find a better name for this
       let m: Mutator = {};
-      if (_playback == ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS) {
-        if (_direction >= 0) {
-          m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(ANIMATION_STRUCTURE_TYPE.NORMAL), _time);
-        } else {
-          m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(ANIMATION_STRUCTURE_TYPE.REVERSE), _time);
-        }
-      } else {
-        if (_direction >= 0) {
-          m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(ANIMATION_STRUCTURE_TYPE.RASTERED), _time);
-        } else {
-          m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(ANIMATION_STRUCTURE_TYPE.RASTEREDREVERSE), _time);
-        }
-      }
+      let animationStructure: ANIMATION_STRUCTURE_TYPE;
 
+      if (_playback == ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS)
+        animationStructure = _direction < 0 ? ANIMATION_STRUCTURE_TYPE.REVERSE : ANIMATION_STRUCTURE_TYPE.NORMAL;
+      else
+        animationStructure = _direction < 0 ? ANIMATION_STRUCTURE_TYPE.RASTEREDREVERSE : ANIMATION_STRUCTURE_TYPE.RASTERED;
+
+      m = this.traverseStructureForMutator(this.getProcessedAnimationStructure(animationStructure), _time);
       return m;
     }
 
     /**
-     * Returns a list of the names of the events the [[ComponentAnimator]] needs to fire between _min and _max. 
+     * Returns a list of the names of the events the {@link ComponentAnimator} needs to fire between _min and _max. 
      * @param _min The minimum time (inclusive) to check between
      * @param _max The maximum time (exclusive) to check between
      * @param _playback The playback mode to check in. Has an effect on when the Events are fired. 
@@ -150,7 +173,7 @@ namespace FudgeCore {
       this.events[_name] = _time;
       this.eventsProcessed.clear();
     }
-    
+
     /**
      * Removes the event with the given name from the list of events.
      * @param _name name of the event to remove.
@@ -169,15 +192,60 @@ namespace FudgeCore {
       this.traverseStructureForTime(this.animationStructure);
     }
 
+    /**
+     * Returns the time to use for animation sampling when applying a playmode
+     */
+    public getModalTime(_time: number, _playmode: ANIMATION_PLAYMODE, _timeStop: number = _time): number {
+      switch (_playmode) {
+        case ANIMATION_PLAYMODE.STOP:
+          // return this.localTime.getOffset();
+          return _timeStop;
+        case ANIMATION_PLAYMODE.PLAYONCE:
+          if (_time >= this.totalTime)
+            return this.totalTime - 0.01;     //TODO: this might cause some issues
+        case ANIMATION_PLAYMODE.PLAYONCESTOPAFTER:
+          if (_time >= this.totalTime)
+            // TODO: return _timeStop instead?
+            return this.totalTime + 0.01;     //TODO: this might cause some issues
+      }
+      return _time;
+    }
+
+    /**
+     * Calculates and returns the direction the animation should currently be playing in.
+     * @param _time the time at which to calculate the direction
+     * @returns 1 if forward, 0 if stop, -1 if backwards
+     */
+    public calculateDirection(_time: number, _playmode: ANIMATION_PLAYMODE): number {
+      switch (_playmode) {
+        case ANIMATION_PLAYMODE.STOP:
+          return 0;
+        // case ANIMATION_PLAYMODE.PINGPONG:
+        //   if (Math.floor(_time / this.animation.totalTime) % 2 == 0)
+        //     return 1;
+        //   else
+        //     return -1;
+        case ANIMATION_PLAYMODE.REVERSELOOP:
+          return -1;
+        case ANIMATION_PLAYMODE.PLAYONCE:
+        case ANIMATION_PLAYMODE.PLAYONCESTOPAFTER:
+          if (_time >= this.totalTime) {
+            return 0;
+          }
+        default:
+          return 1;
+      }
+    }
+
     //#region transfer
-    serialize(): Serialization {
+    public serialize(): Serialization {
       let s: Serialization = {
         idResource: this.idResource,
         name: this.name,
         labels: {},
         events: {},
         fps: this.framesPerSecond,
-        sps: this.stepsPerSecond
+        // sps: this.stepsPerSecond
       };
       for (let name in this.labels) {
         s.labels[name] = this.labels[name];
@@ -188,11 +256,12 @@ namespace FudgeCore {
       s.animationStructure = this.traverseStructureForSerialisation(this.animationStructure);
       return s;
     }
+
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.idResource = _serialization.idResource;
       this.name = _serialization.name;
       this.framesPerSecond = _serialization.fps;
-      this.stepsPerSecond = _serialization.sps;
+      // this.stepsPerSecond = _serialization.sps;
       this.labels = {};
       for (let name in _serialization.labels) {
         this.labels[name] = _serialization.labels[name];
@@ -203,7 +272,7 @@ namespace FudgeCore {
       }
       this.eventsProcessed = new Map<ANIMATION_STRUCTURE_TYPE, AnimationEventTrigger>();
 
-      this.animationStructure = this.traverseStructureForDeserialisation(_serialization.animationStructure);
+      this.animationStructure = await this.traverseStructureForDeserialisation(_serialization.animationStructure);
 
       this.animationStructuresProcessed = new Map<ANIMATION_STRUCTURE_TYPE, AnimationStructure>();
 
@@ -237,14 +306,14 @@ namespace FudgeCore {
      * @param _serialization The serialization to transfer into an AnimationStructure
      * @returns the newly created AnimationStructure.
      */
-    private traverseStructureForDeserialisation(_serialization: Serialization): AnimationStructure {
+    private async traverseStructureForDeserialisation(_serialization: Serialization): Promise<AnimationStructure> {
       let newStructure: AnimationStructure = {};
       for (let n in _serialization) {
         if (_serialization[n].animationSequence) {
           let animSeq: AnimationSequence = new AnimationSequence();
-          newStructure[n] = animSeq.deserialize(_serialization[n]);
+          newStructure[n] = await animSeq.deserialize(_serialization[n]);
         } else {
-          newStructure[n] = this.traverseStructureForDeserialisation(_serialization[n]);
+          newStructure[n] = await this.traverseStructureForDeserialisation(_serialization[n]);
         }
       }
       return newStructure;
@@ -310,9 +379,9 @@ namespace FudgeCore {
     }
 
     /**
-     * Ensures the existance of the requested [[AnimationStrcuture]] and returns it.
+     * Ensures the existance of the requested {@link AnimationStrcuture} and returns it.
      * @param _type the type of the structure to get
-     * @returns the requested [[AnimationStructure]]
+     * @returns the requested {@link AnimationStructure]]
      */
     private getProcessedAnimationStructure(_type: ANIMATION_STRUCTURE_TYPE): AnimationStructure {
       if (!this.animationStructuresProcessed.has(_type)) {
@@ -340,9 +409,9 @@ namespace FudgeCore {
     }
 
     /**
-     * Ensures the existance of the requested [[AnimationEventTrigger]] and returns it.
+     * Ensures the existance of the requested {@link AnimationEventTrigger} and returns it.
      * @param _type The type of AnimationEventTrigger to get
-     * @returns the requested [[AnimationEventTrigger]]
+     * @returns the requested {@link AnimationEventTrigger]]
      */
     private getProcessedEventTrigger(_type: ANIMATION_STRUCTURE_TYPE): AnimationEventTrigger {
       if (!this.eventsProcessed.has(_type)) {
@@ -403,7 +472,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Creates a rastered [[AnimationSequence]] out of a given sequence.
+     * Creates a rastered {@link AnimationSequence} out of a given sequence.
      * @param _sequence The sequence to calculate the new sequence out of
      * @returns the rastered sequence.
      */
@@ -418,7 +487,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Creates a new reversed [[AnimationEventTrigger]] object based on the given one.  
+     * Creates a new reversed {@link AnimationEventTrigger} object based on the given one.  
      * @param _events the event object to calculate the new one out of
      * @returns the reversed event object
      */
@@ -429,9 +498,9 @@ namespace FudgeCore {
       }
       return ae;
     }
-    
+
     /**
-     * Creates a rastered [[AnimationEventTrigger]] object based on the given one.  
+     * Creates a rastered {@link AnimationEventTrigger} object based on the given one.  
      * @param _events the event object to calculate the new one out of
      * @returns the rastered event object
      */
@@ -443,7 +512,7 @@ namespace FudgeCore {
       }
       return ae;
     }
-    
+
     /**
      * Checks which events lay between two given times and returns the names of the ones that do.
      * @param _eventTriggers The event object to check the events inside of

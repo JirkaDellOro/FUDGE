@@ -1,6 +1,6 @@
 namespace FudgeCore {
   /**
-   * Stores information provided by [[Render]]-picking e.g. using [[Picker]] and provides methods for further calculation of positions and normals etc.
+   * Stores information provided by {@link Render}-picking e.g. using {@link Picker} and provides methods for further calculation of positions and normals etc.
    * 
    * @authors Jirka Dell'Oro-Friedl, HFU, 2021
    */
@@ -18,7 +18,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Accessor to calculate and store world position of intersection of [[Ray]] and [[Mesh]] only when used.
+     * Accessor to calculate and store world position of intersection of {@link Ray} and {@link Mesh} only when used.
      */
     public get posWorld(): Vector3 {
       if (this.#posWorld)
@@ -34,7 +34,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Accessor to calculate and store position in mesh-space of intersection of [[Ray]] and [[Mesh]] only when used.
+     * Accessor to calculate and store position in mesh-space of intersection of {@link Ray} and {@link Mesh} only when used.
      */
     public get posMesh(): Vector3 {
       if (this.#posMesh)
@@ -46,7 +46,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Accessor to calculate and store the face normal in world-space at the point of intersection of [[Ray]] and [[Mesh]] only when used.
+     * Accessor to calculate and store the face normal in world-space at the point of intersection of {@link Ray} and {@link Mesh} only when used.
      */
     public get normal(): Vector3 {
       let cmpMesh: ComponentMesh = this.node.getComponent(ComponentMesh);
@@ -77,7 +77,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Called solely by the renderer to enable calculation of the world coordinates of this [[Pick]]
+     * Called solely by the renderer to enable calculation of the world coordinates of this {@link Pick}
      */
     public set mtxViewToWorld(_mtxViewToWorld: Matrix4x4) {
       this.#mtxViewToWorld = _mtxViewToWorld;

@@ -92,7 +92,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Tests, if an object is a [[SerializableResource]]
+     * Tests, if an object is a {@link SerializableResource}
      * @param _object The object to examine
      */
     public static isResource(_object: Serializable): boolean {
@@ -116,9 +116,9 @@ namespace FudgeCore {
     }
 
     /**
-     * Creates and registers a resource from a [[Node]], copying the complete graph starting with it
+     * Creates and registers a resource from a {@link Node}, copying the complete graph starting with it
      * @param _node A node to create the resource from
-     * @param _replaceWithInstance if true (default), the node used as origin is replaced by a [[GraphInstance]] of the [[Graph]] created
+     * @param _replaceWithInstance if true (default), the node used as origin is replaced by a {@link GraphInstance} of the {@link Graph} created
      */
     public static async registerAsGraph(_node: Node, _replaceWithInstance: boolean = true): Promise<Graph> {
       let serialization: Serialization = _node.serialize();
@@ -181,7 +181,7 @@ namespace FudgeCore {
       // script.addEventListener("load", handleLoadedScript)
       let head: HTMLHeadElement = document.head;
       head.appendChild(script);
-      console.log("Loading: ", _url);
+      Debug.log("Loading: ", _url);
 
       return new Promise((resolve, reject) => {
         script.addEventListener("load", () => resolve());
@@ -204,7 +204,7 @@ namespace FudgeCore {
 
     public static async loadResourcesFromHTML(): Promise<void> {
       const head: HTMLHeadElement = document.head;
-      let links: NodeListOf<HTMLLinkElement> = head.querySelectorAll("link[type=resources");
+      let links: NodeListOf<HTMLLinkElement> = head.querySelectorAll("link[type=resources]");
       for (let link of links) {
         let url: RequestInfo = link.getAttribute("src");
         await Project.loadResources(url);

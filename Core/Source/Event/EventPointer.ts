@@ -11,7 +11,9 @@ namespace FudgeCore {
         GOTCAPTURE = "ƒgotpointercapture",
         LOSTCAPTURE = "ƒlostpointercapture"
     }
-
+    /**  
+     * a subclass of PointerEvent. The state of a DOM event produced by a pointer such as the geometry of the contact point
+     * */
     export class EventPointer extends PointerEvent {
         public pointerX: number;
         public pointerY: number;

@@ -6,7 +6,9 @@ namespace FudgeCore {
         END = "ƒdragend",
         OVER = "ƒdragover"
     }
-
+    /**
+     * a subclass of DragEvent .A event that represents a drag and drop interaction
+     */
     export class EventDragDrop extends DragEvent {
         public pointerX: number;
         public pointerY: number;

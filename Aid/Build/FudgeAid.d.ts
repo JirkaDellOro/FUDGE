@@ -114,7 +114,7 @@ declare namespace FudgeAid {
         private static count;
         constructor(_name?: string, _transform?: ƒ.Matrix4x4, _material?: ƒ.Material, _mesh?: ƒ.Mesh);
         private static getNextName;
-        get pivot(): ƒ.Matrix4x4;
+        get mtxMeshPivot(): ƒ.Matrix4x4;
         deserialize(_serialization: ƒ.Serialization): Promise<ƒ.Serializable>;
     }
 }
@@ -156,6 +156,10 @@ declare namespace FudgeAid {
         private timer;
         constructor(_name: string);
         private static createInternalResource;
+        /**
+         * @returns the number of the current frame
+         */
+        get getCurrentFrame(): number;
         setAnimation(_animation: SpriteSheetAnimation): void;
         /**
          * Show a specific frame of the sequence
@@ -276,6 +280,7 @@ declare namespace FudgeAid {
 }
 declare namespace FudgeAid {
     class Viewport {
+        static create(_branch: ƒ.Node): ƒ.Viewport;
         static expandCameraToInteractiveOrbit(_viewport: ƒ.Viewport, _showFocus?: boolean, _speedCameraRotation?: number, _speedCameraTranslation?: number, _speedCameraDistance?: number): CameraOrbit;
     }
 }

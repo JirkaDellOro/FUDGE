@@ -7,6 +7,7 @@
 	<meta name="description" content="Documentation for Fudge Core">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
+	<script async src="../assets/js/search.js" id="search-script"></script>
 </head>
 <body>
 <header>
@@ -40,8 +41,6 @@
 							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
 							<input type="checkbox" id="tsd-filter-externals" checked />
 							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
-							<input type="checkbox" id="tsd-filter-only-exported" />
-							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
 						</div>
 					</div>
 					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
@@ -53,7 +52,7 @@
 		<div class="container">
 			<ul class="tsd-breadcrumb">
 				<li>
-					<a href="../index.html">Globals</a>
+					<a href="../index.html">Fudge Core</a>
 				</li>
 				<li>
 					<a href="../modules/fudgecore.html">FudgeCore</a>
@@ -79,8 +78,9 @@
                    ----------  ↑
                    |        |  |
          &lt;---------|        |--------------&gt; connectedRigidbody, sliding on one Axis, 1st Degree of Freedom
-                   |        |  |
-                   ----------  ↓ rotating on one Axis, 2nd Degree of Freedom</code></pre>
+                   |        |  |   
+                   ----------  ↓ rotating on one Axis, 2nd Degree of Freedom   
+</code></pre>
 					<dl class="tsd-comment-tags">
 						<dt>author</dt>
 						<dd><p>Marko Fehrenbach, HFU 2020</p>
@@ -92,19 +92,13 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<a href="fudgecore.componentjoint.html" class="tsd-signature-type">ComponentJoint</a>
+						<a href="fudgecore.componentjoint.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentJoint</a>
 						<ul class="tsd-hierarchy">
 							<li>
 								<span class="target">ComponentJointCylindrical</span>
 							</li>
 						</ul>
 					</li>
-				</ul>
-			</section>
-			<section class="tsd-panel">
-				<h3>Implements</h3>
-				<ul class="tsd-hierarchy">
-					<li><a href="../interfaces/fudgecore.serializable.html" class="tsd-signature-type">Serializable</a></li>
 				</ul>
 			</section>
 			<section class="tsd-panel-group tsd-index-group">
@@ -157,12 +151,12 @@
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentjointcylindrical.html#activate" class="tsd-kind-icon">activate</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="fudgecore.componentjointcylindrical.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentjointcylindrical.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentjointcylindrical.html#checkconnection" class="tsd-kind-icon">check<wbr>Connection</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="fudgecore.componentjointcylindrical.html#connect" class="tsd-kind-icon">connect</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="fudgecore.componentjointcylindrical.html#deserialize" class="tsd-kind-icon">deserialize</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="fudgecore.componentjointcylindrical.html#disconnect" class="tsd-kind-icon">disconnect</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="fudgecore.componentjointcylindrical.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentjointcylindrical.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentjointcylindrical.html#getcontainer" class="tsd-kind-icon">get<wbr>Container</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentjointcylindrical.html#getmutator" class="tsd-kind-icon">get<wbr>Mutator</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentjointcylindrical.html#getmutatorattributetypes" class="tsd-kind-icon">get<wbr>Mutator<wbr>Attribute<wbr>Types</a></li>
@@ -170,7 +164,7 @@
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentjointcylindrical.html#getmutatorforuserinterface" class="tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>User<wbr>Interface</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="fudgecore.componentjointcylindrical.html#getoimojoint" class="tsd-kind-icon">get<wbr>Oimo<wbr>Joint</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentjointcylindrical.html#mutate" class="tsd-kind-icon">mutate</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited"><a href="fudgecore.componentjointcylindrical.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentjointcylindrical.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="fudgecore.componentjointcylindrical.html#serialize" class="tsd-kind-icon">serialize</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentjointcylindrical.html#setcontainer" class="tsd-kind-icon">set<wbr>Container</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="fudgecore.componentjointcylindrical.html#updatemutator" class="tsd-kind-icon">update<wbr>Mutator</a></li>
@@ -185,14 +179,14 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Component<wbr>Joint<wbr>Cylindrical<span class="tsd-signature-symbol">(</span>_attachedRigidbody<span class="tsd-signature-symbol">?: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a>, _connectedRigidbody<span class="tsd-signature-symbol">?: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a>, _axis<span class="tsd-signature-symbol">?: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a>, _localAnchor<span class="tsd-signature-symbol">?: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.componentjointcylindrical.html" class="tsd-signature-type">ComponentJointCylindrical</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Component<wbr>Joint<wbr>Cylindrical<span class="tsd-signature-symbol">(</span>_attachedRigidbody<span class="tsd-signature-symbol">?: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentRigidbody</a>, _connectedRigidbody<span class="tsd-signature-symbol">?: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentRigidbody</a>, _axis<span class="tsd-signature-symbol">?: </span><a href="fudgecore.vector3.html" class="tsd-signature-type" data-tsd-kind="Class">Vector3</a>, _localAnchor<span class="tsd-signature-symbol">?: </span><a href="fudgecore.vector3.html" class="tsd-signature-type" data-tsd-kind="Class">Vector3</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.componentjointcylindrical.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentJointCylindrical</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<p>Overrides <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#constructor">constructor</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L49">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:49</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L49">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:49</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -203,19 +197,19 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _attachedRigidbody: <a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a><span class="tsd-signature-symbol"> = null</span></h5>
+									<h5>_attachedRigidbody: <a href="fudgecore.componentrigidbody.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentRigidbody</a><span class="tsd-signature-symbol"> = null</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _connectedRigidbody: <a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a><span class="tsd-signature-symbol"> = null</span></h5>
+									<h5>_connectedRigidbody: <a href="fudgecore.componentrigidbody.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentRigidbody</a><span class="tsd-signature-symbol"> = null</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _axis: <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol"> = new Vector3(0, 1, 0)</span></h5>
+									<h5>_axis: <a href="fudgecore.vector3.html" class="tsd-signature-type" data-tsd-kind="Class">Vector3</a><span class="tsd-signature-symbol"> = ...</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _localAnchor: <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol"> = new Vector3(0, 0, 0)</span></h5>
+									<h5>_localAnchor: <a href="fudgecore.vector3.html" class="tsd-signature-type" data-tsd-kind="Class">Vector3</a><span class="tsd-signature-symbol"> = ...</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.componentjointcylindrical.html" class="tsd-signature-type">ComponentJointCylindrical</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.componentjointcylindrical.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentJointCylindrical</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -225,11 +219,11 @@
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static">
 					<a name="baseclass" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> <span class="tsd-flag ts-flagReadonly">Readonly</span> base<wbr>Class</h3>
-					<div class="tsd-signature tsd-kind-icon">base<wbr>Class<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">typeof </span><a href="fudgecore.component.html" class="tsd-signature-type">Component</a><span class="tsd-signature-symbol"> = Component</span></div>
+					<div class="tsd-signature tsd-kind-icon">base<wbr>Class<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">typeof </span><a href="fudgecore.component.html" class="tsd-signature-type" data-tsd-kind="Class">Component</a><span class="tsd-signature-symbol"> = ...</span></div>
 					<aside class="tsd-sources">
-						<p>Inherited from <a href="fudgecore.component.html">Component</a>.<a href="fudgecore.component.html#baseclass">baseClass</a></p>
+						<p>Inherited from <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#baseclass">baseClass</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Component/Component.ts#L13">Documents/HFU/FUDGE/Core/Source/Component/Component.ts:13</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Component/Component.ts#L13">Documents/HFU/FUDGE/Core/Source/Component/Component.ts:13</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -241,22 +235,27 @@
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-overwrite tsd-is-static">
 					<a name="isubclass" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> <span class="tsd-flag ts-flagReadonly">Readonly</span> i<wbr>Subclass</h3>
-					<div class="tsd-signature tsd-kind-icon">i<wbr>Subclass<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = Component.registerSubclass(ComponentJointCylindrical)</span></div>
+					<div class="tsd-signature tsd-kind-icon">i<wbr>Subclass<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = ...</span></div>
 					<aside class="tsd-sources">
 						<p>Overrides <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#isubclass">iSubclass</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L18">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:18</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L18">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:18</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>subclasses get a iSubclass number for identification</p>
+						</div>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-static">
 					<a name="subclasses" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> <span class="tsd-flag ts-flagReadonly">Readonly</span> subclasses</h3>
-					<div class="tsd-signature tsd-kind-icon">subclasses<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">typeof </span><a href="fudgecore.component.html" class="tsd-signature-type">Component</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = []</span></div>
+					<div class="tsd-signature tsd-kind-icon">subclasses<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">typeof </span><a href="fudgecore.component.html" class="tsd-signature-type" data-tsd-kind="Class">Component</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = []</span></div>
 					<aside class="tsd-sources">
-						<p>Inherited from <a href="fudgecore.component.html">Component</a>.<a href="fudgecore.component.html#subclasses">subclasses</a></p>
+						<p>Inherited from <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#subclasses">subclasses</a></p>
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Component/Component.ts#L15">Documents/HFU/FUDGE/Core/Source/Component/Component.ts:15</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Component/Component.ts#L15">Documents/HFU/FUDGE/Core/Source/Component/Component.ts:15</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -272,14 +271,14 @@
 					<a name="anchor" class="tsd-anchor"></a>
 					<h3>anchor</h3>
 					<ul class="tsd-signatures tsd-kind-accessor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> anchor<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></li>
-						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">set</span> anchor<span class="tsd-signature-symbol">(</span>_value<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> anchor<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type" data-tsd-kind="Class">Vector3</a></li>
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">set</span> anchor<span class="tsd-signature-symbol">(</span>_value<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type" data-tsd-kind="Class">Vector3</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L81">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:81</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L81">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:81</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -287,12 +286,12 @@
 									<p>The exact position where the two <a href="fudgecore.node.html">Node</a>s are connected. When changed after initialization the joint needs to be reconnected.</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector3.html" class="tsd-signature-type" data-tsd-kind="Class">Vector3</a></h4>
 						</li>
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L84">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:84</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L84">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:84</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -303,7 +302,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_value: <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h5>
+									<h5>_value: <a href="fudgecore.vector3.html" class="tsd-signature-type" data-tsd-kind="Class">Vector3</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -314,15 +313,14 @@
 					<a name="attachedrigidbody" class="tsd-anchor"></a>
 					<h3>attached<wbr>Rigidbody</h3>
 					<ul class="tsd-signatures tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> attachedRigidbody<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a></li>
-						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">set</span> attachedRigidbody<span class="tsd-signature-symbol">(</span>_cmpRB<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> attachedRigidbody<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentRigidbody</a></li>
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">set</span> attachedRigidbody<span class="tsd-signature-symbol">(</span>_cmpRB<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentRigidbody</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#attachedrigidbody">attachedRigidbody</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJoint.ts#L16">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJoint.ts:16</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJoint.ts#L16">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJoint.ts:16</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -330,13 +328,12 @@
 									<p>Get/Set the first ComponentRigidbody of this connection. It should always be the one that this component is attached too in the sceneTree.</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.componentrigidbody.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentRigidbody</a></h4>
 						</li>
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#attachedrigidbody">attachedRigidbody</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJoint.ts#L19">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJoint.ts:19</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJoint.ts#L19">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJoint.ts:19</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -347,7 +344,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_cmpRB: <a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a></h5>
+									<h5>_cmpRB: <a href="fudgecore.componentrigidbody.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentRigidbody</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -358,14 +355,14 @@
 					<a name="axis" class="tsd-anchor"></a>
 					<h3>axis</h3>
 					<ul class="tsd-signatures tsd-kind-accessor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> axis<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></li>
-						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">set</span> axis<span class="tsd-signature-symbol">(</span>_value<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> axis<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type" data-tsd-kind="Class">Vector3</a></li>
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">set</span> axis<span class="tsd-signature-symbol">(</span>_value<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type" data-tsd-kind="Class">Vector3</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L69">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:69</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L69">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:69</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -374,12 +371,12 @@
 									When changed after initialization the joint needs to be reconnected.</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector3.html" class="tsd-signature-type" data-tsd-kind="Class">Vector3</a></h4>
 						</li>
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L72">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:72</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L72">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:72</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -391,7 +388,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_value: <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h5>
+									<h5>_value: <a href="fudgecore.vector3.html" class="tsd-signature-type" data-tsd-kind="Class">Vector3</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -409,7 +406,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L137">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:137</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L137">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:137</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -422,7 +419,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L140">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:140</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L140">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:140</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -451,7 +448,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L148">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:148</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L148">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:148</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -464,7 +461,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L151">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:151</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L151">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:151</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -486,15 +483,14 @@
 					<a name="connectedrigidbody" class="tsd-anchor"></a>
 					<h3>connected<wbr>Rigidbody</h3>
 					<ul class="tsd-signatures tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> connectedRigidbody<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a></li>
-						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">set</span> connectedRigidbody<span class="tsd-signature-symbol">(</span>_cmpRB<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> connectedRigidbody<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentRigidbody</a></li>
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">set</span> connectedRigidbody<span class="tsd-signature-symbol">(</span>_cmpRB<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentRigidbody</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#connectedrigidbody">connectedRigidbody</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJoint.ts#L27">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJoint.ts:27</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJoint.ts#L27">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJoint.ts:27</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -502,13 +498,12 @@
 									<p>Get/Set the second ComponentRigidbody of this connection.</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.componentrigidbody.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentRigidbody</a></h4>
 						</li>
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#connectedrigidbody">connectedRigidbody</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJoint.ts#L30">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJoint.ts:30</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJoint.ts#L30">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJoint.ts:30</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -519,7 +514,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_cmpRB: <a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a></h5>
+									<h5>_cmpRB: <a href="fudgecore.componentrigidbody.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentRigidbody</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -537,7 +532,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L241">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:241</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L241">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:241</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -550,7 +545,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L244">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:244</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L244">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:244</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -577,9 +572,8 @@
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.component.html">Component</a>.<a href="fudgecore.component.html#isactive">isActive</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Component/Component.ts#L23">Documents/HFU/FUDGE/Core/Source/Component/Component.ts:23</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Component/Component.ts#L23">Documents/HFU/FUDGE/Core/Source/Component/Component.ts:23</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
@@ -595,9 +589,8 @@
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.component.html">Component</a>.<a href="fudgecore.component.html#issingleton">isSingleton</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Component/Component.ts#L30">Documents/HFU/FUDGE/Core/Source/Component/Component.ts:30</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Component/Component.ts#L30">Documents/HFU/FUDGE/Core/Source/Component/Component.ts:30</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -620,7 +613,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L115">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:115</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L115">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:115</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -633,7 +626,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L118">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:118</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L118">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:118</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -662,7 +655,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L126">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:126</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L126">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:126</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -675,7 +668,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L129">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:129</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L129">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:129</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -704,7 +697,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L169">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:169</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L169">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:169</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -717,7 +710,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L172">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:172</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L172">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:172</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -746,7 +739,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L159">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:159</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L159">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:159</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -759,7 +752,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L162">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:162</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L162">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:162</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -788,7 +781,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L179">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:179</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L179">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:179</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -801,7 +794,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L182">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:182</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L182">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:182</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -830,7 +823,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L189">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:189</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L189">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:189</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -843,7 +836,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L192">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:192</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L192">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:192</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -871,9 +864,8 @@
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#selfcollision">selfCollision</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJoint.ts#L40">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJoint.ts:40</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJoint.ts#L40">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJoint.ts:40</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -886,9 +878,8 @@
 						</li>
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#selfcollision">selfCollision</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJoint.ts#L43">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJoint.ts:43</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJoint.ts#L43">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJoint.ts:43</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -918,7 +909,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L93">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:93</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L93">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:93</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -931,7 +922,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L96">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:96</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L96">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:96</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -960,7 +951,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L104">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:104</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L104">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:104</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -973,7 +964,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L107">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:107</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L107">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:107</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1002,7 +993,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L230">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:230</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L230">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:230</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1015,7 +1006,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L233">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:233</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L233">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:233</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1044,7 +1035,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L210">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:210</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L210">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:210</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1057,7 +1048,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L213">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:213</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L213">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:213</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1086,7 +1077,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L200">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:200</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L200">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:200</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1099,7 +1090,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L203">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:203</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L203">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:203</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1128,7 +1119,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L220">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:220</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L220">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:220</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1141,7 +1132,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L223">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:223</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L223">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:223</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1168,9 +1159,8 @@
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#type">type</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Mutable.ts#L62">Documents/HFU/FUDGE/Core/Source/Transfer/Mutable.ts:62</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Serialization/Mutable.ts#L62">Documents/HFU/FUDGE/Core/Source/Serialization/Mutable.ts:62</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1195,9 +1185,9 @@
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.component.html">Component</a>.<a href="fudgecore.component.html#activate">activate</a></p>
+								<p>Inherited from <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#activate">activate</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Component/Component.ts#L34">Documents/HFU/FUDGE/Core/Source/Component/Component.ts:34</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Component/Component.ts#L34">Documents/HFU/FUDGE/Core/Source/Component/Component.ts:34</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1210,19 +1200,18 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 					<a name="addeventlistener" class="tsd-anchor"></a>
 					<h3>add<wbr>Event<wbr>Listener</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">add<wbr>Event<wbr>Listener<span class="tsd-signature-symbol">(</span>_type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, _handler<span class="tsd-signature-symbol">: </span><a href="../modules/fudgecore.html#eventlistener_" class="tsd-signature-type">EventListenerƒ</a>, _options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">AddEventListenerOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">add<wbr>Event<wbr>Listener<span class="tsd-signature-symbol">(</span>_type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, _handler<span class="tsd-signature-symbol">: </span><a href="../modules/fudgecore.html#eventlistener_" class="tsd-signature-type" data-tsd-kind="Type alias">EventListenerƒ</a>, _options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">AddEventListenerOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.eventtarget_.html">EventTargetƒ</a>.<a href="fudgecore.eventtarget_.html#addeventlistener">addEventListener</a></p>
-								<p>Overrides <a href="fudgecore.control.html">Control</a>.<a href="fudgecore.control.html#addeventlistener">addEventListener</a></p>
+								<p>Inherited from <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#addeventlistener">addEventListener</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Event/Event.ts#L57">Documents/HFU/FUDGE/Core/Source/Event/Event.ts:57</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Event/Event.ts#L66">Documents/HFU/FUDGE/Core/Source/Event/Event.ts:66</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1231,7 +1220,7 @@
 									<h5>_type: <span class="tsd-signature-type">string</span></h5>
 								</li>
 								<li>
-									<h5>_handler: <a href="../modules/fudgecore.html#eventlistener_" class="tsd-signature-type">EventListenerƒ</a></h5>
+									<h5>_handler: <a href="../modules/fudgecore.html#eventlistener_" class="tsd-signature-type" data-tsd-kind="Type alias">EventListenerƒ</a></h5>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagOptional">Optional</span> _options: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">AddEventListenerOptions</span></h5>
@@ -1252,7 +1241,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#checkconnection">checkConnection</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJoint.ts#L64">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJoint.ts:64</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJoint.ts#L64">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJoint.ts:64</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1275,7 +1264,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#connect">connect</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L254">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:254</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L254">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:254</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1292,24 +1281,23 @@
 					<a name="deserialize" class="tsd-anchor"></a>
 					<h3>deserialize</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
-						<li class="tsd-signature tsd-kind-icon">deserialize<span class="tsd-signature-symbol">(</span>_serialization<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.serialization.html" class="tsd-signature-type">Serialization</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/fudgecore.serializable.html" class="tsd-signature-type">Serializable</a><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">deserialize<span class="tsd-signature-symbol">(</span>_serialization<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.serialization.html" class="tsd-signature-type" data-tsd-kind="Interface">Serialization</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/fudgecore.serializable.html" class="tsd-signature-type" data-tsd-kind="Interface">Serializable</a><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Implementation of <a href="../interfaces/fudgecore.serializable.html">Serializable</a>.<a href="../interfaces/fudgecore.serializable.html#deserialize">deserialize</a></p>
-								<p>Overrides <a href="fudgecore.component.html">Component</a>.<a href="fudgecore.component.html#deserialize">deserialize</a></p>
+								<p>Overrides <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#deserialize">deserialize</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L308">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:308</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L308">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:308</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_serialization: <a href="../interfaces/fudgecore.serialization.html" class="tsd-signature-type">Serialization</a></h5>
+									<h5>_serialization: <a href="../interfaces/fudgecore.serialization.html" class="tsd-signature-type" data-tsd-kind="Interface">Serialization</a></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/fudgecore.serializable.html" class="tsd-signature-type">Serializable</a><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/fudgecore.serializable.html" class="tsd-signature-type" data-tsd-kind="Interface">Serializable</a><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -1324,7 +1312,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#disconnect">disconnect</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L266">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:266</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L266">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:266</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1337,25 +1325,24 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 					<a name="dispatchevent" class="tsd-anchor"></a>
 					<h3>dispatch<wbr>Event</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">dispatch<wbr>Event<span class="tsd-signature-symbol">(</span>_event<span class="tsd-signature-symbol">: </span><a href="../modules/fudgecore.html#event_" class="tsd-signature-type">Eventƒ</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">dispatch<wbr>Event<span class="tsd-signature-symbol">(</span>_event<span class="tsd-signature-symbol">: </span><a href="../modules/fudgecore.html#event_" class="tsd-signature-type" data-tsd-kind="Type alias">Eventƒ</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.eventtarget_.html">EventTargetƒ</a>.<a href="fudgecore.eventtarget_.html#dispatchevent">dispatchEvent</a></p>
-								<p>Overrides <a href="fudgecore.audiomanager.html">AudioManager</a>.<a href="fudgecore.audiomanager.html#dispatchevent">dispatchEvent</a></p>
+								<p>Inherited from <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#dispatchevent">dispatchEvent</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Event/Event.ts#L64">Documents/HFU/FUDGE/Core/Source/Event/Event.ts:64</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Event/Event.ts#L73">Documents/HFU/FUDGE/Core/Source/Event/Event.ts:73</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_event: <a href="../modules/fudgecore.html#event_" class="tsd-signature-type">Eventƒ</a></h5>
+									<h5>_event: <a href="../modules/fudgecore.html#event_" class="tsd-signature-type" data-tsd-kind="Type alias">Eventƒ</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
@@ -1366,14 +1353,14 @@
 					<a name="getcontainer" class="tsd-anchor"></a>
 					<h3>get<wbr>Container</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Container<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Container<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type" data-tsd-kind="Class">Node</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.component.html">Component</a>.<a href="fudgecore.component.html#getcontainer">getContainer</a></p>
+								<p>Inherited from <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#getcontainer">getContainer</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Component/Component.ts#L43">Documents/HFU/FUDGE/Core/Source/Component/Component.ts:43</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Component/Component.ts#L43">Documents/HFU/FUDGE/Core/Source/Component/Component.ts:43</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1381,7 +1368,7 @@
 									<p>Retrieves the node, this component is currently attached to</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.node.html" class="tsd-signature-type">Node</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.node.html" class="tsd-signature-type" data-tsd-kind="Class">Node</a></h4>
 							<p>The container node or null, if the component is not attached to</p>
 						</li>
 					</ul>
@@ -1390,14 +1377,14 @@
 					<a name="getmutator" class="tsd-anchor"></a>
 					<h3>get<wbr>Mutator</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Mutator<span class="tsd-signature-symbol">(</span>_extendable<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Mutator<span class="tsd-signature-symbol">(</span>_extendable<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type" data-tsd-kind="Interface">Mutator</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutator">getMutator</a></p>
+								<p>Inherited from <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#getmutator">getMutator</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Mutable.ts#L70">Documents/HFU/FUDGE/Core/Source/Transfer/Mutable.ts:70</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Serialization/Mutable.ts#L70">Documents/HFU/FUDGE/Core/Source/Serialization/Mutable.ts:70</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1410,10 +1397,10 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _extendable: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></h5>
+									<h5>_extendable: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type" data-tsd-kind="Interface">Mutator</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -1421,14 +1408,14 @@
 					<a name="getmutatorattributetypes" class="tsd-anchor"></a>
 					<h3>get<wbr>Mutator<wbr>Attribute<wbr>Types</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Mutator<wbr>Attribute<wbr>Types<span class="tsd-signature-symbol">(</span>_mutator<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutatorattributetypes.html" class="tsd-signature-type">MutatorAttributeTypes</a></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Mutator<wbr>Attribute<wbr>Types<span class="tsd-signature-symbol">(</span>_mutator<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type" data-tsd-kind="Interface">Mutator</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutatorattributetypes.html" class="tsd-signature-type" data-tsd-kind="Interface">MutatorAttributeTypes</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutatorattributetypes">getMutatorAttributeTypes</a></p>
+								<p>Inherited from <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#getmutatorattributetypes">getMutatorAttributeTypes</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Mutable.ts#L125">Documents/HFU/FUDGE/Core/Source/Transfer/Mutable.ts:125</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Serialization/Mutable.ts#L126">Documents/HFU/FUDGE/Core/Source/Serialization/Mutable.ts:126</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1440,12 +1427,10 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_mutator: <a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a></h5>
-									<div class="tsd-comment tsd-typography">
-									</div>
+									<h5>_mutator: <a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type" data-tsd-kind="Interface">Mutator</a></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutatorattributetypes.html" class="tsd-signature-type">MutatorAttributeTypes</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutatorattributetypes.html" class="tsd-signature-type" data-tsd-kind="Interface">MutatorAttributeTypes</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -1453,14 +1438,14 @@
 					<a name="getmutatorforanimation" class="tsd-anchor"></a>
 					<h3>get<wbr>Mutator<wbr>For<wbr>Animation</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>Animation<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutatorforanimation.html" class="tsd-signature-type">MutatorForAnimation</a></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>Animation<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutatorforanimation.html" class="tsd-signature-type" data-tsd-kind="Interface">MutatorForAnimation</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutatorforanimation">getMutatorForAnimation</a></p>
+								<p>Inherited from <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#getmutatorforanimation">getMutatorForAnimation</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Mutable.ts#L103">Documents/HFU/FUDGE/Core/Source/Transfer/Mutable.ts:103</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Serialization/Mutable.ts#L105">Documents/HFU/FUDGE/Core/Source/Serialization/Mutable.ts:105</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1469,7 +1454,7 @@
 									Basic functionality is identical to <a href="fudgecore.componentjointcylindrical.html#getmutator">getMutator</a>, returned mutator should then be reduced by the subclassed instance</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutatorforanimation.html" class="tsd-signature-type">MutatorForAnimation</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutatorforanimation.html" class="tsd-signature-type" data-tsd-kind="Interface">MutatorForAnimation</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -1477,14 +1462,14 @@
 					<a name="getmutatorforuserinterface" class="tsd-anchor"></a>
 					<h3>get<wbr>Mutator<wbr>For<wbr>User<wbr>Interface</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>User<wbr>Interface<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutatorforuserinterface.html" class="tsd-signature-type">MutatorForUserInterface</a></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Mutator<wbr>For<wbr>User<wbr>Interface<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutatorforuserinterface.html" class="tsd-signature-type" data-tsd-kind="Interface">MutatorForUserInterface</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#getmutatorforuserinterface">getMutatorForUserInterface</a></p>
+								<p>Inherited from <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#getmutatorforuserinterface">getMutatorForUserInterface</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Mutable.ts#L110">Documents/HFU/FUDGE/Core/Source/Transfer/Mutable.ts:110</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Serialization/Mutable.ts#L112">Documents/HFU/FUDGE/Core/Source/Serialization/Mutable.ts:112</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1493,7 +1478,7 @@
 									Basic functionality is identical to <a href="fudgecore.componentjointcylindrical.html#getmutator">getMutator</a>, returned mutator should then be reduced by the subclassed instance</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutatorforuserinterface.html" class="tsd-signature-type">MutatorForUserInterface</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.mutatorforuserinterface.html" class="tsd-signature-type" data-tsd-kind="Interface">MutatorForUserInterface</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -1508,7 +1493,7 @@
 							<aside class="tsd-sources">
 								<p>Overrides <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#getoimojoint">getOimoJoint</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L277">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:277</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L277">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:277</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1525,14 +1510,14 @@
 					<a name="mutate" class="tsd-anchor"></a>
 					<h3>mutate</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">mutate<span class="tsd-signature-symbol">(</span>_mutator<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">mutate<span class="tsd-signature-symbol">(</span>_mutator<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type" data-tsd-kind="Interface">Mutator</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#mutate">mutate</a></p>
+								<p>Inherited from <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#mutate">mutate</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Mutable.ts#L158">Documents/HFU/FUDGE/Core/Source/Transfer/Mutable.ts:158</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Serialization/Mutable.ts#L159">Documents/HFU/FUDGE/Core/Source/Serialization/Mutable.ts:159</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1543,7 +1528,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_mutator: <a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a></h5>
+									<h5>_mutator: <a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type" data-tsd-kind="Interface">Mutator</a></h5>
 									<div class="tsd-comment tsd-typography">
 									</div>
 								</li>
@@ -1552,19 +1537,18 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 					<a name="removeeventlistener" class="tsd-anchor"></a>
 					<h3>remove<wbr>Event<wbr>Listener</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">remove<wbr>Event<wbr>Listener<span class="tsd-signature-symbol">(</span>_type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, _handler<span class="tsd-signature-symbol">: </span><a href="../modules/fudgecore.html#eventlistener_" class="tsd-signature-type">EventListenerƒ</a>, _options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">AddEventListenerOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">remove<wbr>Event<wbr>Listener<span class="tsd-signature-symbol">(</span>_type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, _handler<span class="tsd-signature-symbol">: </span><a href="../modules/fudgecore.html#eventlistener_" class="tsd-signature-type" data-tsd-kind="Type alias">EventListenerƒ</a>, _options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">AddEventListenerOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.eventtarget_.html">EventTargetƒ</a>.<a href="fudgecore.eventtarget_.html#removeeventlistener">removeEventListener</a></p>
-								<p>Overrides <a href="fudgecore.control.html">Control</a>.<a href="fudgecore.control.html#removeeventlistener">removeEventListener</a></p>
+								<p>Inherited from <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#removeeventlistener">removeEventListener</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Event/Event.ts#L60">Documents/HFU/FUDGE/Core/Source/Event/Event.ts:60</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Event/Event.ts#L69">Documents/HFU/FUDGE/Core/Source/Event/Event.ts:69</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1573,7 +1557,7 @@
 									<h5>_type: <span class="tsd-signature-type">string</span></h5>
 								</li>
 								<li>
-									<h5>_handler: <a href="../modules/fudgecore.html#eventlistener_" class="tsd-signature-type">EventListenerƒ</a></h5>
+									<h5>_handler: <a href="../modules/fudgecore.html#eventlistener_" class="tsd-signature-type" data-tsd-kind="Type alias">EventListenerƒ</a></h5>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagOptional">Optional</span> _options: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">AddEventListenerOptions</span></h5>
@@ -1587,18 +1571,17 @@
 					<a name="serialize" class="tsd-anchor"></a>
 					<h3>serialize</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
-						<li class="tsd-signature tsd-kind-icon">serialize<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.serialization.html" class="tsd-signature-type">Serialization</a></li>
+						<li class="tsd-signature tsd-kind-icon">serialize<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.serialization.html" class="tsd-signature-type" data-tsd-kind="Interface">Serialization</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Implementation of <a href="../interfaces/fudgecore.serializable.html">Serializable</a>.<a href="../interfaces/fudgecore.serializable.html#serialize">serialize</a></p>
-								<p>Overrides <a href="fudgecore.component.html">Component</a>.<a href="fudgecore.component.html#serialize">serialize</a></p>
+								<p>Overrides <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#serialize">serialize</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/ComponentJointCylindrical.ts#L282">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:282</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/ComponentJointCylindrical.ts#L282">Documents/HFU/FUDGE/Core/Source/Physics/ComponentJointCylindrical.ts:282</a></li>
 								</ul>
 							</aside>
-							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.serialization.html" class="tsd-signature-type">Serialization</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgecore.serialization.html" class="tsd-signature-type" data-tsd-kind="Interface">Serialization</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -1606,14 +1589,14 @@
 					<a name="setcontainer" class="tsd-anchor"></a>
 					<h3>set<wbr>Container</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">set<wbr>Container<span class="tsd-signature-symbol">(</span>_container<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Container<span class="tsd-signature-symbol">(</span>_container<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type" data-tsd-kind="Class">Node</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.component.html">Component</a>.<a href="fudgecore.component.html#setcontainer">setContainer</a></p>
+								<p>Inherited from <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#setcontainer">setContainer</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Component/Component.ts#L51">Documents/HFU/FUDGE/Core/Source/Component/Component.ts:51</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Component/Component.ts#L51">Documents/HFU/FUDGE/Core/Source/Component/Component.ts:51</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1624,7 +1607,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_container: <a href="fudgecore.node.html" class="tsd-signature-type">Node</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
+									<h5>_container: <a href="fudgecore.node.html" class="tsd-signature-type" data-tsd-kind="Class">Node</a></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>The node to attach this component to</p>
 									</div>
@@ -1638,14 +1621,14 @@
 					<a name="updatemutator" class="tsd-anchor"></a>
 					<h3>update<wbr>Mutator</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">update<wbr>Mutator<span class="tsd-signature-symbol">(</span>_mutator<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">update<wbr>Mutator<span class="tsd-signature-symbol">(</span>_mutator<span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type" data-tsd-kind="Interface">Mutator</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="fudgecore.mutable.html">Mutable</a>.<a href="fudgecore.mutable.html#updatemutator">updateMutator</a></p>
+								<p>Inherited from <a href="fudgecore.componentjoint.html">ComponentJoint</a>.<a href="fudgecore.componentjoint.html#updatemutator">updateMutator</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Transfer/Mutable.ts#L145">Documents/HFU/FUDGE/Core/Source/Transfer/Mutable.ts:145</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Serialization/Mutable.ts#L146">Documents/HFU/FUDGE/Core/Source/Serialization/Mutable.ts:146</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1656,7 +1639,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_mutator: <a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type">Mutator</a></h5>
+									<h5>_mutator: <a href="../interfaces/fudgecore.mutator.html" class="tsd-signature-type" data-tsd-kind="Interface">Mutator</a></h5>
 									<div class="tsd-comment tsd-typography">
 									</div>
 								</li>
@@ -1670,8 +1653,8 @@
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 			<nav class="tsd-navigation primary">
 				<ul>
-					<li class="globals  ">
-						<a href="../index.html"><em>Globals</em></a>
+					<li class=" ">
+						<a href="../index.html">Exports</a>
 					</li>
 					<li class="current tsd-kind-namespace">
 						<a href="../modules/fudgecore.html">Fudge<wbr>Core</a>
@@ -1769,7 +1752,7 @@
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgecore.componentjointcylindrical.html#activate" class="tsd-kind-icon">activate</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgecore.componentjointcylindrical.html#addeventlistener" class="tsd-kind-icon">add<wbr>Event<wbr>Listener</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
@@ -1784,7 +1767,7 @@
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
 								<a href="fudgecore.componentjointcylindrical.html#disconnect" class="tsd-kind-icon">disconnect</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgecore.componentjointcylindrical.html#dispatchevent" class="tsd-kind-icon">dispatch<wbr>Event</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
@@ -1808,7 +1791,7 @@
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgecore.componentjointcylindrical.html#mutate" class="tsd-kind-icon">mutate</a>
 							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite tsd-is-inherited">
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
 								<a href="fudgecore.componentjointcylindrical.html#removeeventlistener" class="tsd-kind-icon">remove<wbr>Event<wbr>Listener</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">

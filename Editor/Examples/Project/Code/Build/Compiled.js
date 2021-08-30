@@ -56,17 +56,16 @@ var Script;
     class TimerMessage extends ƒ.ComponentScript {
         constructor() {
             super();
-            // public static readonly iSubclass: number = ƒ.Component.registerSubclass(TimerMessage);
             this.prefix = "Script: ";
             this.count = 0;
             this.hndTimer = (_event) => {
                 console.log(this.prefix + this.count++);
             };
             this.hndAddComponent = (_event) => {
-                this.timer = new ƒ.Timer(ƒ.Time.game, 1000, 0, this.hndTimer);
+                this.#timer = new ƒ.Timer(ƒ.Time.game, 1000, 0, this.hndTimer);
             };
             this.hndRemoveComponent = (_event) => {
-                this.timer.clear();
+                this.#timer.clear();
                 this.removeEventListener("componentAdd" /* COMPONENT_ADD */, this.hndAddComponent);
                 this.removeEventListener("componentRemove" /* COMPONENT_REMOVE */, this.hndRemoveComponent);
             };
@@ -75,7 +74,9 @@ var Script;
             this.addEventListener("componentAdd" /* COMPONENT_ADD */, this.hndAddComponent);
             this.addEventListener("componentRemove" /* COMPONENT_REMOVE */, this.hndRemoveComponent);
         }
+        #timer;
     }
+    TimerMessage.iSubclass = ƒ.Component.registerSubclass(TimerMessage);
     Script.TimerMessage = TimerMessage;
 })(Script || (Script = {}));
 //# sourceMappingURL=Compiled.js.map

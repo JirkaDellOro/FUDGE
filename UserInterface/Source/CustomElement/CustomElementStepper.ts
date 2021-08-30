@@ -31,7 +31,7 @@ namespace FudgeUserInterface {
       input.type = "number";
       input.style.position = "absolute";
       input.style.display = "none";
-      input.addEventListener(EVENT.INPUT, (_event: Event): void => { event.stopPropagation(); });
+      input.addEventListener(EVENT.INPUT, (_event: Event): void => { _event.stopPropagation(); });
       this.appendChild(input);
 
 
@@ -277,7 +277,7 @@ namespace FudgeUserInterface {
 
     private changeDigitFocussed(_amount: number): void {
       let digit: Element = document.activeElement;
-      if (!this.contains(digit))
+      if (digit == this || !this.contains(digit))
         return;
 
       _amount = Math.round(_amount);
@@ -289,7 +289,7 @@ namespace FudgeUserInterface {
         let value: number = this.value * Math.pow(10, _amount);
         console.log(value, this.value);
         if (isFinite(value))
-          this.value = value;
+          this.value = value; 
         this.display();
         return;
       }

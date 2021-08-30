@@ -26,27 +26,15 @@ namespace FudgeCore {
       // this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null); 
     }
 
-    /** Update the data in the buffer */
-    public updateData(array: Array<number>): void {
-      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffer);
-      this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, new Float32Array(array));
-    }
-
-    /** Update the buffer with the specific type of Float32Array */
-    public updateDataFloat32Array(array: Float32Array): void {
-      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffer);
-      this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, array);
-    }
-
     /** Set Shader Attributes informations by getting their position in the shader, setting the offset, stride and size. For later use in the binding process */
     public setAttribs(attribs: Array<PhysicsDebugVertexAttribute>): void {
       this.attribs = attribs;
       this.offsets = [];
       this.stride = 0;
-      var num: number = attribs.length;
-      for (let i: number = 0; i < num; i++) {
+      let n: number = attribs.length;
+      for (let i: number = 0; i < n; i++) {
         this.offsets.push(this.stride);
-        this.stride += attribs[i].float32Count * Float32Array.BYTES_PER_ELEMENT; // 32bit float Bytes aer a constant of 4
+        this.stride += attribs[i].float32Count * Float32Array.BYTES_PER_ELEMENT; // 32bit float Bytes are a constant of 4
       }
     }
 
@@ -58,9 +46,9 @@ namespace FudgeCore {
     /** Enable a attribute in a shader for this context, */
     public bindAttribs(): void {
       if (this.indices == null) throw "indices are not loaded";
-      var num: number = this.attribs.length;
+      let n: number = this.attribs.length;
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.buffer); //making the buffer of this class the current buffer
-      for (let i: number = 0; i < num; i++) {
+      for (let i: number = 0; i < n; i++) {
         this.gl.enableVertexAttribArray(this.indices[i]); //enable the Attribute
         this.gl.vertexAttribPointer(this.indices[i], this.attribs[i].float32Count, this.gl.FLOAT, false, this.stride, this.offsets[i]); //creates a pointer and structure for this attribute
       }
@@ -84,18 +72,6 @@ namespace FudgeCore {
       this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.buffer);
       this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Int16Array(array), this.gl.DYNAMIC_DRAW);
       this.count = array.length;
-    }
-
-    /** Update the actual data in the buffer */
-    public updateData(array: Array<number>): void {
-      this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.buffer);
-      this.gl.bufferSubData(this.gl.ELEMENT_ARRAY_BUFFER, 0, new Int16Array(array));
-    }
-
-    /** Update the buffer with the specific type of Int16Array */
-    public updateDataInt16Array(array: Int16Array): void {
-      this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.buffer);
-      this.gl.bufferSubData(this.gl.ELEMENT_ARRAY_BUFFER, 0, array);
     }
 
     /** The actual DrawCall for physicsDebugDraw Buffers. This is where the information from the debug is actually drawn. */
@@ -158,14 +134,14 @@ namespace FudgeCore {
     /** Get the location of a uniform in a shader in this program */
     public getUniformLocation(_name: string): WebGLUniformLocation {
       if (this.uniformLocationMap.has(_name)) return this.uniformLocationMap.get(_name);
-      var location: WebGLUniformLocation = this.gl.getUniformLocation(this.program, _name);
+      let location: WebGLUniformLocation = this.gl.getUniformLocation(this.program, _name);
       this.uniformLocationMap.set(_name, location);
       return location;
     }
 
     /** Get all indices for every attribute in the shaders of this program */
     public getAttribIndices(_attribs: Array<PhysicsDebugVertexAttribute>): Array<number> {
-      var indices: Array<number> = [];
+      let indices: Array<number> = [];
       _attribs.forEach(value => {
         indices.push(this.getAttribIndex(value.name));
       });
@@ -187,7 +163,9 @@ namespace FudgeCore {
     }
   }
 
-  /** Internal Class used to draw debugInformations about the physics simulation onto the renderContext. No user interaction needed. @author Marko Fehrenbach, HFU 2020 //Based on OimoPhysics Haxe DebugDrawDemo */
+  /** Internal Class used to draw debugInformations about the physics simulation onto the renderContext. No user interaction needed. 
+   * @author Marko Fehrenbach, HFU 2020 //Based on OimoPhysics Haxe DebugDrawDemo 
+   */
   export class PhysicsDebugDraw extends RenderWebGL {
     public oimoDebugDraw: OIMO.DebugDraw; //the original physics engine debugDraw class receiving calls from the oimoPhysics.World, and providing informations in form of points/lines/triangles what the physics world looks like
     public style: OIMO.DebugDrawStyle; //colors of the debug informations, unchanged in Fudge integration, basically coloring things like sleeping/active rb's differently, joints white and such. No need to have users change anything.
@@ -206,16 +184,16 @@ namespace FudgeCore {
     public triVBO: PhysicsDebugVertexBuffer;
     public triIBO: PhysicsDebugIndexBuffer;
 
-    public pointBufferSize: number;
-    public pointData: Float32Array;
+    public pointData: Array<number>;
+    public pointIboData: Array<number>;
     public numPointData: number;
 
-    public lineBufferSize: number;
-    public lineData: Float32Array;
+    public lineData: Array<number>;
+    public lineIboData: Array<number>;
     public numLineData: number;
 
-    public triBufferSize: number;
-    public triData: Float32Array;
+    public triData: Array<number>;
+    public triIboData: Array<number>;
     public numTriData: number;
 
     /** Creating the debug for physics in Fudge. Tell it to draw only wireframe objects, since Fudge is handling rendering of the objects besides physics. 
@@ -225,12 +203,13 @@ namespace FudgeCore {
 
       this.style = new OIMO.DebugDrawStyle();
       this.oimoDebugDraw = new OIMO.DebugDraw();
-      this.oimoDebugDraw.wireframe = true;
+      this.oimoDebugDraw.wireframe = true; //Triangle Rendering is handled by FUDGE so, only the physics lines/points need to be rendered, although triangle is still implemented
 
       this.gl = RenderWebGL.crc3;
       this.initializeOverride();
       this.shader = new PhysicsDebugShader(this.gl);
       this.shader.compile(this.vertexShaderSource(), this.fragmentShaderSource());
+
       this.initializeBuffers();
     }
 
@@ -269,10 +248,10 @@ namespace FudgeCore {
       this.oimoDebugDraw.drawShapes = elementsToDraw[8];
     }
 
-    /** Creating the render buffers for later use. Defining the attributes used in shaders.
-     * Needs to create empty buffers to already have them ready to draw later on, linking is only possible with existing buffers. No performance loss because empty buffers are not drawn.*/
+    /** Creating the empty render buffers. Defining the attributes used in shaders.
+     * Needs to create empty buffers to already have them ready to draw later on, linking is only possible with existing buffers. */
     public initializeBuffers(): void {
-      var attribs: Array<PhysicsDebugVertexAttribute> = [
+      let attribs: Array<PhysicsDebugVertexAttribute> = [
         new PhysicsDebugVertexAttribute(3, "aPosition"),
         new PhysicsDebugVertexAttribute(3, "aNormal"),
         new PhysicsDebugVertexAttribute(3, "aColor")
@@ -291,140 +270,61 @@ namespace FudgeCore {
       this.triVBO.setAttribs(attribs);
       this.triVBO.loadAttribIndices(this.shader);
 
-      this.pointBufferSize = 4096;
-      this.lineBufferSize = 4096;
-      this.triBufferSize = 4096;
-      this.pointData = new Float32Array(this.pointBufferSize * 9);
-      this.lineData = new Float32Array(this.lineBufferSize * 9 * 2);
-      this.triData = new Float32Array(this.triBufferSize * 9 * 3);
-
-      this.initFloatArray(this.pointData);
-      this.initFloatArray(this.lineData);
-      this.initFloatArray(this.triData);
-
-      var vbo: Array<number> = [];
-      var ibo: Array<number> = [];
-      for (let i: number = 0; i < this.pointBufferSize; i++) {
-        vbo.push(0);
-        vbo.push(0);
-        vbo.push(0); // pos1
-        vbo.push(0);
-        vbo.push(0);
-        vbo.push(0); // nml1
-        vbo.push(0);
-        vbo.push(0);
-        vbo.push(0); // rgb1
-        vbo.push(0);
-        vbo.push(0);
-        vbo.push(0); // pos2
-        vbo.push(0);
-        vbo.push(0);
-        vbo.push(0); // nml2
-        vbo.push(0);
-        vbo.push(0);
-        vbo.push(0); // rgb2
-        ibo.push(i);
-      }
-      this.pointVBO.setData(vbo);
-      this.pointIBO.setData(ibo);
-
-      vbo = [];
-      ibo = [];
-      for (let i: number = 0; i < this.lineBufferSize; i++) {
-        vbo.push(0);
-        vbo.push(0);
-        vbo.push(0); // pos1
-        vbo.push(0);
-        vbo.push(0);
-        vbo.push(0); // nml1
-        vbo.push(0);
-        vbo.push(0);
-        vbo.push(0); // rgb1
-        vbo.push(0);
-        vbo.push(0);
-        vbo.push(0); // pos2
-        vbo.push(0);
-        vbo.push(0);
-        vbo.push(0); // nml2
-        vbo.push(0);
-        vbo.push(0);
-        vbo.push(0); // rgb2
-        ibo.push(i * 2);
-        ibo.push(i * 2 + 1);
-      }
-      this.lineVBO.setData(vbo);
-      this.lineIBO.setData(ibo);
-
-      vbo = [];
-      ibo = [];
-      for (let i: number = 0; i < this.triBufferSize; i++) {
-        vbo.push(0);
-        vbo.push(0);
-        vbo.push(0); // pos1
-        vbo.push(0);
-        vbo.push(0);
-        vbo.push(0); // nml1
-        vbo.push(0);
-        vbo.push(0);
-        vbo.push(0); // rgb1
-        vbo.push(0);
-        vbo.push(0);
-        vbo.push(0); // pos2
-        vbo.push(0);
-        vbo.push(0);
-        vbo.push(0); // nml2
-        vbo.push(0);
-        vbo.push(0);
-        vbo.push(0); // rgb2
-        vbo.push(0);
-        vbo.push(0);
-        vbo.push(0); // pos3
-        vbo.push(0);
-        vbo.push(0);
-        vbo.push(0); // nml3
-        vbo.push(0);
-        vbo.push(0);
-        vbo.push(0); // rgb3
-        ibo.push(i * 3);
-        ibo.push(i * 3 + 1);
-        ibo.push(i * 3 + 2);
-      }
-      this.triVBO.setData(vbo);
-      this.triIBO.setData(ibo);
+      this.clearBuffers();
     }
 
     /** Before OimoPhysics.world is filling the debug. Make sure the buffers are reset. Also receiving the debugMode from settings and updating the current projection for the vertexShader. */
-    public begin(): void {
-      this.getDebugModeFromSettings();
+    public clearBuffers(): void {
       this.gl.lineWidth(2.0); //Does not affect anything because lineWidth is currently only supported by Microsoft Edge and Fudge is optimized for Chrome
-      let projection: Float32Array = Physics.world.mainCam.mtxWorldToView.get();
-      this.gl.uniformMatrix4fv(this.shader.getUniformLocation("u_projection"), false, projection);
 
-      this.numPointData = 0;
+      this.pointData = []; //Resetting the data to be filled again
+      this.lineData = [];
+      this.triData = [];
+
+      this.numPointData = 0; //Resetting the amount of data calls
       this.numLineData = 0;
       this.numTriData = 0;
     }
 
     /** After OimoPhysics.world filled the debug. Rendering calls. Setting this program to be used by the Fudge rendering context. And draw each updated buffer and resetting them. */
-    public end(): void {
+    public drawBuffers(): void {
       this.shader.use();
+      let projection: Float32Array = Physics.world.mainCam.mtxWorldToView.get();
+      this.gl.uniformMatrix4fv(this.shader.getUniformLocation("u_projection"), false, projection);
+
 
       if (this.numPointData > 0) {
-        this.pointVBO.updateDataFloat32Array(this.pointData);
+        this.pointIboData = [];  //Buffer size matching to whats needed
+        for (let i: number = 0; i < this.numPointData; i++) {
+          this.pointIboData.push(i);
+        }
+        this.pointIBO.setData(this.pointIboData); //Set Index buffer to correct size
+        this.pointVBO.setData(this.pointData); //Set Vertex Buffer to current Data
         this.pointVBO.bindAttribs();
-        this.pointIBO.draw(this.gl.POINTS, this.numPointData);
+        this.pointIBO.draw(this.gl.POINTS, this.numPointData); //The actual draw call for each index in ibo
         this.numPointData = 0;
       }
       if (this.numLineData > 0) {
-        this.lineVBO.updateDataFloat32Array(this.lineData);
+        this.lineIboData = [];
+        for (let i: number = 0; i < this.numLineData; i++) {
+          this.lineIboData.push(i * 2);
+          this.lineIboData.push(i * 2 + 1);
+        }
+        this.lineIBO.setData(this.lineIboData);
+        this.lineVBO.setData(this.lineData);
         this.lineVBO.bindAttribs();
         this.lineIBO.draw(this.gl.LINES, this.numLineData * 2);
         this.numLineData = 0;
       }
-
-
       if (this.numTriData > 0) {
-        this.triVBO.updateDataFloat32Array(this.triData);
+        this.triIboData = [];
+        for (let i: number = 0; i < this.numTriData; i++) {
+          this.triIboData.push(i * 3);
+          this.triIboData.push(i * 3 + 1);
+          this.triIboData.push(i * 3 + 2);
+        }
+        this.triIBO.setData(this.triIboData);
+        this.triVBO.setData(this.triData);
         this.triVBO.bindAttribs();
         this.triIBO.draw(this.gl.TRIANGLES, this.numTriData * 3);
         this.numTriData = 0;
@@ -435,106 +335,51 @@ namespace FudgeCore {
     public debugRay(_origin: Vector3, _end: Vector3, _color: Color): void {
       this.oimoDebugDraw.line(new OIMO.Vec3(_origin.x, _origin.y, _origin.z), new OIMO.Vec3(_end.x, _end.y, _end.z), new OIMO.Vec3(_color.r, _color.g, _color.b));
       this.oimoDebugDraw.point(new OIMO.Vec3(_end.x, _end.y, _end.z), new OIMO.Vec3(_color.r, _color.g, _color.b));
-
-    }
-    
-    /** Fill an array with empty values */
-    private initFloatArray(a: Float32Array): void {
-      var num: number = a.length;
-      for (let i: number = 0; i < num; i++) {
-        a[i] = 0;
-      }
     }
 
     /** Overriding the existing functions from OimoPhysics.DebugDraw without actually inherit from the class, to avoid compiler problems. 
      * Overriding them to receive debugInformations in the format the physic engine provides them but handling the rendering in the fudge context. */
     private initializeOverride(): void {
       //Override point/line/triangle functions of OimoPhysics which are used to draw wireframes of objects, lines of raycasts or triangles when the objects are rendered by the physics not FUDGE (unused)
-      OIMO.DebugDraw.prototype.point = function (v: OIMO.Vec3, color: OIMO.Vec3): void {
+
+      OIMO.DebugDraw.prototype.point = function (_v: OIMO.Vec3, _color: OIMO.Vec3): void {
         let debugWrapper: PhysicsDebugDraw = Physics.world.debugDraw; //Get the custom physics debug class to have access to the data.
         if (Physics.world.mainCam != null) { //only act when there is a camera that is rendering
-          let idx: number = debugWrapper.numPointData * 9; //offset from last call
-          let data: Float32Array = debugWrapper.pointData; //get the already written buffer informations
-          data[idx++] = v.x;    //fill in the informations - position, normals, color
-          data[idx++] = v.y;
-          data[idx++] = v.z;
-          data[idx++] = 0;
-          data[idx++] = 0;
-          data[idx++] = 0;
-          data[idx++] = color.x;
-          data[idx++] = color.y;
-          data[idx++] = color.z;
+          let data: Array<Number> = debugWrapper.pointData; //get the already written buffer informations
+          data.push(_v.x, _v.y, _v.z); //Coordinates of the point
+          data.push(0, 0, 0); //Point Normals - Empty since it's not a polygon
+          data.push(_color.x, _color.y, _color.z); //Color of the point
           debugWrapper.numPointData++;
-
-          //when the buffer is fully filled draw and reset - Not needed it's handled through the begin/end functions - removed in line/triangles
-          // if (debugWrapper.numPointData == debugWrapper.pointBufferSize) {  
-          //   debugWrapper.pointVBO.updateDataFloat32Array(debugWrapper.pointData);
-          //   debugWrapper.pointVBO.bindAttribs();
-          //   debugWrapper.pointIBO.draw(RenderOperator.crc3.POINTS);
-          //   debugWrapper.numPointData = 0;
-          // }
         }
       };
 
-      OIMO.DebugDraw.prototype.line = function (v1: OIMO.Vec3, v2: OIMO.Vec3, color: OIMO.Vec3): void {
+      OIMO.DebugDraw.prototype.line = function (_v1: OIMO.Vec3, _v2: OIMO.Vec3, _color: OIMO.Vec3): void {
         let debugWrapper: PhysicsDebugDraw = Physics.world.debugDraw;
         if (Physics.world.mainCam != null) {
-          let idx: number = debugWrapper.numLineData * 18;
-          let data: Float32Array = debugWrapper.lineData;
-          data[idx++] = v1.x;
-          data[idx++] = v1.y;
-          data[idx++] = v1.z;
-          data[idx++] = 0;
-          data[idx++] = 0;
-          data[idx++] = 0;
-          data[idx++] = color.x;
-          data[idx++] = color.y;
-          data[idx++] = color.z;
-          data[idx++] = v2.x;
-          data[idx++] = v2.y;
-          data[idx++] = v2.z;
-          data[idx++] = 0;
-          data[idx++] = 0;
-          data[idx++] = 0;
-          data[idx++] = color.x;
-          data[idx++] = color.y;
-          data[idx++] = color.z;
+          let data: Array<number> = debugWrapper.lineData;
+          data.push(_v1.x, _v1.y, _v1.z); //Point 1 Coordinates
+          data.push(0, 0, 0); //P1 Normals - Empty since it's not a polygon
+          data.push(_color.x, _color.y, _color.z); //P1 Color
+          data.push(_v2.x, _v2.y, _v2.z); //Point 2 Coordinates
+          data.push(0, 0, 0);
+          data.push(_color.x, _color.y, _color.z);
           debugWrapper.numLineData++;
         }
       };
 
-      OIMO.DebugDraw.prototype.triangle = function (v1: OIMO.Vec3, v2: OIMO.Vec3, v3: OIMO.Vec3, n1: OIMO.Vec3, n2: OIMO.Vec3, n3: OIMO.Vec3, color: OIMO.Vec3): void {
+      OIMO.DebugDraw.prototype.triangle = function (_v1: OIMO.Vec3, _v2: OIMO.Vec3, _v3: OIMO.Vec3, _n1: OIMO.Vec3, _n2: OIMO.Vec3, _n3: OIMO.Vec3, _color: OIMO.Vec3): void {
         let debugWrapper: PhysicsDebugDraw = Physics.world.debugDraw;
         if (Physics.world.mainCam != null) {
-          var idx: number = debugWrapper.numTriData * 27;
-          var data: Float32Array = debugWrapper.triData;
-          data[idx++] = v1.x;
-          data[idx++] = v1.y;
-          data[idx++] = v1.z;
-          data[idx++] = n1.x;
-          data[idx++] = n1.y;
-          data[idx++] = n1.z;
-          data[idx++] = color.x;
-          data[idx++] = color.y;
-          data[idx++] = color.z;
-          data[idx++] = v2.x;
-          data[idx++] = v2.y;
-          data[idx++] = v2.z;
-          data[idx++] = n2.x;
-          data[idx++] = n2.y;
-          data[idx++] = n2.z;
-          data[idx++] = color.x;
-          data[idx++] = color.y;
-          data[idx++] = color.z;
-          data[idx++] = v3.x;
-          data[idx++] = v3.y;
-          data[idx++] = v3.z;
-          data[idx++] = n3.x;
-          data[idx++] = n3.y;
-          data[idx++] = n3.z;
-          data[idx++] = color.x;
-          data[idx++] = color.y;
-          data[idx++] = color.z;
+          let data: Array<number> = debugWrapper.triData;
+          data.push(_v1.x, _v1.y, _v1.z);
+          data.push(_n1.x, _n1.y, _n1.z);
+          data.push(_color.x, _color.y, _color.z);
+          data.push(_v2.x, _v2.y, _v2.z);
+          data.push(_n2.x, _n2.y, _n2.z);
+          data.push(_color.x, _color.y, _color.z);
+          data.push(_v3.x, _v3.y, _v3.z);
+          data.push(_n3.x, _n3.y, _n3.z);
+          data.push(_color.x, _color.y, _color.z);
           debugWrapper.numTriData++;
         }
       };
@@ -561,7 +406,6 @@ namespace FudgeCore {
 				gl_Position = u_projection * vec4(aPosition,1.0);
 				gl_PointSize = 6.0;
 			}`;
-
     }
 
     /** The source code (string) of the in physicsDebug used super simple fragmentShader. Unlit - only colorizing the drawn pixels, normals/position are given to make it expandable */
@@ -579,4 +423,3 @@ namespace FudgeCore {
   }
 
 }
-

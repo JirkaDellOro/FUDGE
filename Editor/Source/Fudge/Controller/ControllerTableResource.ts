@@ -18,8 +18,10 @@ namespace Fudge {
 
     public getLabel(_object: ƒ.SerializableResource): string { return ""; }
     public rename(_object: ƒ.SerializableResource, _new: string): boolean { return false; }
-    public delete(_focussed: ƒ.SerializableResource[]): ƒ.SerializableResource[] { return null; }
     public copy(_originals: ƒ.SerializableResource[]): Promise<ƒ.SerializableResource[]> { return null; }
+    public delete(_focussed: ƒ.SerializableResource[]): ƒ.SerializableResource[] { 
+      return null; 
+    }
 
 
     public sort(_data: ƒ.SerializableResource[], _key: string, _direction: number): void {

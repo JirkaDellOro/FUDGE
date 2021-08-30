@@ -15,6 +15,9 @@ namespace FudgeCore {
     public nNodesInBranch: number = 0;
     public radius: number = 0;
 
+    #mtxWorldInverseUpdated: number;
+    #mtxWorldInverse: Matrix4x4;
+
     private parent: Node | null = null; // The parent of this node.
     private children: Node[] = []; // array of child nodes appended to this node.
     private components: MapClassToComponents = {};
@@ -24,8 +27,6 @@ namespace FudgeCore {
     private captures: MapEventTypeToListener = {};
     private active: boolean = true;
 
-    private worldInverseUpdated: number;
-    private worldInverse: Matrix4x4;
 
     /**
      * Creates a new node with a name and initializes all attributes
@@ -41,26 +42,26 @@ namespace FudgeCore {
     }
 
     /**
-     * Shortcut to retrieve this nodes [[ComponentTransform]]
+     * Shortcut to retrieve this nodes {@link ComponentTransform}
      */
     public get cmpTransform(): ComponentTransform {
       return <ComponentTransform>this.getComponents(ComponentTransform)[0];
     }
 
     /**
-     * Shortcut to retrieve the local [[Matrix4x4]] attached to this nodes [[ComponentTransform]]  
-     * Fails if no [[ComponentTransform]] is attached
+     * Shortcut to retrieve the local {@link Matrix4x4} attached to this nodes {@link ComponentTransform}  
+     * Fails if no {@link ComponentTransform} is attached
      */
     public get mtxLocal(): Matrix4x4 {
-      return this.cmpTransform.local;
+      return this.cmpTransform.mtxLocal;
     }
 
     public get mtxWorldInverse(): Matrix4x4 {
-      if (this.worldInverseUpdated != this.timestampUpdate)
-        this.worldInverse = Matrix4x4.INVERSION(this.mtxWorld);
+      if (this.#mtxWorldInverseUpdated != this.timestampUpdate)
+        this.#mtxWorldInverse = Matrix4x4.INVERSION(this.mtxWorld);
 
-      this.worldInverseUpdated = this.timestampUpdate;
-      return this.worldInverse;
+      this.#mtxWorldInverseUpdated = this.timestampUpdate;
+      return this.#mtxWorldInverse;
     }
 
     /**
@@ -80,6 +81,10 @@ namespace FudgeCore {
         for (let child of this.children)
           yield* child.getIterator(_active);
       }
+    }
+
+    public [Symbol.iterator](): IterableIterator<Node> {
+      return this.getIterator();
     }
 
     public activate(_on: boolean): void {
@@ -104,6 +109,17 @@ namespace FudgeCore {
       while (ancestor.getParent())
         ancestor = ancestor.getParent();
       return ancestor;
+    }
+
+    /**
+     * Traces the hierarchy upwards to the first ancestor and returns the path through the graph to this node
+     */
+    public getPath(): Node[] {
+      let ancestor: Node = this;
+      let path: Node[] = [this];
+      while (ancestor.getParent())
+        path.unshift(ancestor = ancestor.getParent());
+      return path;
     }
 
 
@@ -131,8 +147,8 @@ namespace FudgeCore {
     }
 
     /**
-     * Simply calls [[addChild]]. This reference is here solely because appendChild is the equivalent method in DOM.
-     * See and preferably use [[addChild]]
+     * Simply calls {@link addChild}. This reference is here solely because appendChild is the equivalent method in DOM.
+     * See and preferably use {@link addChild}
      */
     // tslint:disable-next-line: member-ordering
     public readonly appendChild: (_child: Node) => void = this.addChild;
@@ -238,8 +254,8 @@ namespace FudgeCore {
     }
 
     /**
-     * Applies a Mutator from [[Animation]] to all its components and transfers it to its children.
-     * @param _mutator The mutator generated from an [[Animation]]
+     * Applies a Mutator from {@link Animation} to all its components and transfers it to its children.
+     * @param _mutator The mutator generated from an {@link Animation}
      */
     public applyAnimation(_mutator: Mutator): void {
       if (_mutator.components) {
@@ -320,6 +336,7 @@ namespace FudgeCore {
 
       _component.setContainer(this);
       _component.dispatchEvent(new Event(EVENT.COMPONENT_ADD));
+      this.dispatchEventToTargetOnly(new CustomEvent(EVENT.COMPONENT_ADD, { detail: _component })); // TODO: see if this is be feasable
     }
     /** 
      * Removes the given component from the node, if it was attached, and sets its parent to null. 
@@ -333,6 +350,7 @@ namespace FudgeCore {
         if (foundAt < 0)
           return;
         _component.dispatchEvent(new Event(EVENT.COMPONENT_REMOVE));
+        this.dispatchEventToTargetOnly(new CustomEvent(EVENT.COMPONENT_REMOVE, { detail: _component })); // TODO: see if this would be feasable
         componentsOfType.splice(foundAt, 1);
         _component.setContainer(null);
       } catch (_error) {
@@ -417,7 +435,7 @@ namespace FudgeCore {
      * @param _handler The function to call when the event reaches this node
      * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
      */
-    public addEventListener(_type: EVENT | string, _handler: EventListener, _capture: boolean /*| AddEventListenerOptions*/ = false): void {
+    public addEventListener(_type: EVENT | string, _handler: EventListenerƒ, _capture: boolean /*| AddEventListenerOptions*/ = false): void {
       let listListeners: MapEventTypeToListener = _capture ? this.captures : this.listeners;
       if (!listListeners[_type])
         listListeners[_type] = [];
@@ -429,8 +447,8 @@ namespace FudgeCore {
      * @param _handler The function to call when the event reaches this node
      * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
      */
-    public removeEventListener(_type: EVENT | string, _handler: EventListener, _capture: boolean /*| AddEventListenerOptions*/ = false): void {
-      let listenersForType: EventListener[] = _capture ? this.captures[_type] : this.listeners[_type];
+    public removeEventListener(_type: EVENT | string, _handler: EventListenerƒ, _capture: boolean /*| AddEventListenerOptions*/ = false): void {
+      let listenersForType: EventListenerƒ[] = _capture ? this.captures[_type] : this.listeners[_type];
       if (listenersForType)
         for (let i: number = listenersForType.length - 1; i >= 0; i--)
           if (listenersForType[i] == _handler)
@@ -440,7 +458,6 @@ namespace FudgeCore {
      * Dispatches a synthetic event to target. This implementation always returns true (standard: return true only if either event's cancelable attribute value is false or its preventDefault() method was not invoked)
      * The event travels into the hierarchy to this node dispatching the event, invoking matching handlers of the nodes ancestors listening to the capture phase, 
      * than the matching handler of the target node in the target phase, and back out of the hierarchy in the bubbling phase, invoking appropriate handlers of the anvestors
-     * @param _event The event to dispatch
      */
     public dispatchEvent(_event: Event): boolean {
       let ancestors: Node[] = [];
@@ -456,31 +473,35 @@ namespace FudgeCore {
       for (let i: number = ancestors.length - 1; i >= 0; i--) {
         let ancestor: Node = ancestors[i];
         Object.defineProperty(_event, "currentTarget", { writable: true, value: ancestor });
-        let captures: EventListener[] = ancestor.captures[_event.type] || [];
-        for (let handler of captures)
-          handler(_event);
+        this.callListeners(ancestor.captures[_event.type], _event);
       }
-
-      if (!_event.bubbles)
-        return true;
 
       // target phase
       Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.AT_TARGET });
       Object.defineProperty(_event, "currentTarget", { writable: true, value: this });
-      let listeners: EventListener[] = this.listeners[_event.type] || [];
-      for (let handler of listeners)
-        handler(_event);
+      this.callListeners(this.captures[_event.type], _event);
+      this.callListeners(this.listeners[_event.type], _event);
+
+      if (!_event.bubbles)
+        return true;
 
       // bubble phase
       Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.BUBBLING_PHASE });
       for (let i: number = 0; i < ancestors.length; i++) {
         let ancestor: Node = ancestors[i];
         Object.defineProperty(_event, "currentTarget", { writable: true, value: ancestor });
-        let listeners: Function[] = ancestor.listeners[_event.type] || [];
-        for (let handler of listeners)
-          handler(_event);
+        this.callListeners(ancestor.listeners[_event.type], _event);
       }
       return true; //TODO: return a meaningful value, see documentation of dispatch event
+    }
+    /**
+     * Dispatches a synthetic event to target without travelling through the graph hierarchy neither during capture nor bubbling phase
+     */
+    public dispatchEventToTargetOnly(_event: Event): boolean {
+      Object.defineProperty(_event, "eventPhase", { writable: true, value: Event.AT_TARGET });
+      Object.defineProperty(_event, "currentTarget", { writable: true, value: this });
+      this.callListeners(this.listeners[_event.type], _event); // TODO: examine if this should go to the captures instead of the listeners
+      return true;
     }
     /**
      * Broadcasts a synthetic event to this node and from there to all nodes deeper in the hierarchy,
@@ -497,8 +518,9 @@ namespace FudgeCore {
     private broadcastEventRecursive(_event: Event): void {
       // capture phase only
       Object.defineProperty(_event, "currentTarget", { writable: true, value: this });
-      let captures: Function[] = this.captures[_event.type] || [];
+      let captures: EventListenerƒ[] = this.captures[_event.type] || [];
       for (let handler of captures)
+        // @ts-ignore
         handler(_event);
       // appears to be slower, astonishingly...
       // captures.forEach(function (handler: Function): void {
@@ -509,6 +531,13 @@ namespace FudgeCore {
       for (let child of this.children) {
         child.broadcastEventRecursive(_event);
       }
+    }
+
+    private callListeners(_listeners: EventListenerƒ[], _event: Event): void {
+      if (_listeners?.length > 0)
+        for (let handler of _listeners)
+          // @ts-ignore
+          handler(_event);
     }
     // #endregion
   }

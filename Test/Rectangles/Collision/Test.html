@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link rel="stylesheet" href="../../TestInstructions.css">
+  <script src="../../dialog-polyfill.min.js"></script>
+  <script src="../../TestInstructions.js"></script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Rectangle Collision</title>
+  <script src="../../../Core/Build/FudgeCore.js"></script>
+  <script src="RectangleCollision.js"></script>
+</head>
+
+<body>
+  <script> 
+    TestInstructions.display({
+      Name: "RectangleCollision",
+      Test: [
+        "Two rectangles are shown, one rectangle is at the position of the mouse pointer, the other is at a fixed position",
+        "If the rectangles overlap, a collision is recognized and the overlap is displayed"
+      ],
+      Setup: [
+        "2 rectangle",
+      ],
+      Act: [
+        "Move the rectangle"
+      ],
+      Observe: [
+        "collision of the rectangles",
+        "intersection of rectangles"
+      ],
+      Control: [
+        "<strong>Mouse Movement</strong> moves the rectangle"
+      ],
+      Expect: [
+        "When the rectangles intersect, the solid rectangle is colored blue",
+        "The overlap is colored red"
+      ]
+    });
+  </script>
+  <canvas width="800" height="600"></canvas>
+</body>
+
+</html>

@@ -6,7 +6,7 @@ namespace FudgeCore {
     textureUVs: WebGLBuffer;
     normalsFace: WebGLBuffer;
   }
-
+ //gives WebGL Buffer the data from the {@link Mesh]]
   export class RenderInjectorMesh {
     public static decorate(_constructor: Function): void {
       Object.defineProperty(_constructor.prototype, "useRenderBuffers", {
@@ -49,7 +49,7 @@ namespace FudgeCore {
       this.renderBuffers = renderBuffers;
     }
 
-    protected static useRenderBuffers(this: Mesh, _shader: typeof Shader, _world: Matrix4x4, _projection: Matrix4x4, _id?: number): void {
+    protected static useRenderBuffers(this: Mesh, _shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): void {
       if (!this.renderBuffers)
         this.createRenderBuffers();
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
@@ -62,12 +62,12 @@ namespace FudgeCore {
       crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.renderBuffers.indices);
 
       let uProjection: WebGLUniformLocation = _shader.uniforms["u_projection"];
-      crc3.uniformMatrix4fv(uProjection, false, _projection.get());
+      crc3.uniformMatrix4fv(uProjection, false, _mtxProjection.get());
 
       // feed in face normals if shader accepts u_world. 
       let uWorld: WebGLUniformLocation = _shader.uniforms["u_world"];
       if (uWorld) {
-        crc3.uniformMatrix4fv(uWorld, false, _world.get());
+        crc3.uniformMatrix4fv(uWorld, false, _mtxWorld.get());
       }
 
       let aNormal: number = _shader.attributes["a_normal"];

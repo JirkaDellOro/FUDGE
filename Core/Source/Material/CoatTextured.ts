@@ -1,6 +1,6 @@
 namespace FudgeCore {
   /**
-   * A [[Coat]] providing a texture and additional data for texturing
+   * A {@link Coat} providing a texture and additional data for texturing
    */
   @RenderInjectorCoat.decorate
   export class CoatTextured extends CoatColored {
@@ -22,7 +22,7 @@ namespace FudgeCore {
       return serialization;
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      super.deserialize(_serialization);
+      await super.deserialize(_serialization);
       if (_serialization.idTexture)
         this.texture = <Texture>await Project.getResource(_serialization.idTexture);
       return this;

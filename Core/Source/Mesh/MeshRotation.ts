@@ -14,10 +14,10 @@ namespace FudgeCore {
     ];
     private sectors: number;
 
-    public constructor(_name: string = "MeshRotation", _vertices: Vector2[] = MeshRotation.verticesDefault, _sectors: number = 3, _fitMesh: boolean = true, _fitTexture: boolean = true) {
-      super(_name, _vertices, _fitMesh, _fitTexture);
+    public constructor(_name: string = "MeshRotation", _vertices: Vector2[] = MeshRotation.verticesDefault, _sectors: number = 3, _fitTexture: boolean = true) {
+      super(_name, _vertices, _fitTexture);
       this.rotate(_sectors);
-      console.log("Mutator", this.getMutator());
+      // console.log("Mutator", this.getMutator());
     }
 
     protected get minVertices(): number {
@@ -83,7 +83,7 @@ namespace FudgeCore {
 
 
       let textureUVs: number[] = [];
-      for (let sector: number = 0; sector < this.sectors; sector++) {
+      for (let sector: number = 0; sector <= this.sectors; sector++) {
         for (let i: number = 0; i < nVerticesPolygon; i++) {
           let u: number = sector / this.sectors;
           let v: number = i * 1 / (nVerticesPolygon - 1);

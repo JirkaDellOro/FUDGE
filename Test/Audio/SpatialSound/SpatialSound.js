@@ -32,10 +32,10 @@ var AudioSpace;
         const mtrGrey = new ƒ.Material("White", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("slategrey")));
         const inner = new ƒAid.Node("Inner", ƒ.Matrix4x4.IDENTITY(), mtrWhite, new ƒ.MeshPyramid());
         const outer = new ƒAid.Node("Outer", ƒ.Matrix4x4.IDENTITY(), mtrGrey, new ƒ.MeshPyramid());
-        const mtxMesh = inner.pivot;
+        const mtxMesh = inner.mtxMeshPivot;
         mtxMesh.rotateX(-90);
         mtxMesh.translateZ(1, false);
-        outer.pivot.set(inner.pivot);
+        outer.mtxMeshPivot.set(inner.mtxMeshPivot);
         const speaker = new ƒAid.Node("Speaker", ƒ.Matrix4x4.IDENTITY());
         speaker.addChild(inner);
         speaker.addChild(outer);
@@ -61,7 +61,7 @@ var AudioSpace;
         // camera setup
         const cmpCamera = new ƒ.ComponentCamera();
         camera = new ƒAid.CameraOrbit(cmpCamera, 3, 80, 0.1, 20);
-        camera.node.addComponent(new ƒ.ComponentAudioListener());
+        camera.nodeCamera.addComponent(new ƒ.ComponentAudioListener());
         camera.axisRotateX.addControl(cntMouseY);
         camera.axisRotateY.addControl(cntMouseX);
         // scene setup
@@ -73,7 +73,7 @@ var AudioSpace;
         const canvas = document.querySelector("canvas");
         viewport.initialize("Viewport", graph, cmpCamera, canvas);
         ƒ.AudioManager.default.listenTo(graph);
-        ƒ.AudioManager.default.listenWith(camera.node.getComponent(ƒ.ComponentAudioListener));
+        ƒ.AudioManager.default.listenWith(camera.nodeCamera.getComponent(ƒ.ComponentAudioListener));
         // setup event handling
         viewport.setFocus(true);
         viewport.activatePointerEvent("\u0192pointermove" /* MOVE */, true);

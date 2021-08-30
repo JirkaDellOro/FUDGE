@@ -7,6 +7,7 @@
 	<meta name="description" content="Documentation for Fudge User Interface">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
+	<script async src="../assets/js/search.js" id="search-script"></script>
 </head>
 <body>
 <header>
@@ -40,8 +41,6 @@
 							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
 							<input type="checkbox" id="tsd-filter-externals" checked />
 							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
-							<input type="checkbox" id="tsd-filter-only-exported" />
-							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
 						</div>
 					</div>
 					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
@@ -53,7 +52,7 @@
 		<div class="container">
 			<ul class="tsd-breadcrumb">
 				<li>
-					<a href="../index.html">Globals</a>
+					<a href="../index.html">Fudge User Interface</a>
 				</li>
 				<li>
 					<a href="../modules/fudgeuserinterface.html">FudgeUserInterface</a>
@@ -106,7 +105,9 @@
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgeuserinterface.controller.html#getmutator" class="tsd-kind-icon">get<wbr>Mutator</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgeuserinterface.controller.html#setmutable" class="tsd-kind-icon">set<wbr>Mutable</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgeuserinterface.controller.html#startrefresh" class="tsd-kind-icon">start<wbr>Refresh</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgeuserinterface.controller.html#updateuserinterface" class="tsd-kind-icon">update<wbr>User<wbr>Interface</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgeuserinterface.controller.html#findchildelementbykey" class="tsd-kind-icon">find<wbr>Child<wbr>Element<wbr>ByKey</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgeuserinterface.controller.html#getmutator-1" class="tsd-kind-icon">get<wbr>Mutator</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgeuserinterface.controller.html#updatemutator" class="tsd-kind-icon">update<wbr>Mutator</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgeuserinterface.controller.html#updateuserinterface-1" class="tsd-kind-icon">update<wbr>User<wbr>Interface</a></li>
@@ -121,25 +122,25 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Controller<span class="tsd-signature-symbol">(</span>_mutable<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ƒ.Mutable</span>, _domElement<span class="tsd-signature-symbol">: </span><a href="fudgeuserinterface.customelement.html#htmlelement" class="tsd-signature-type">HTMLElement</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgeuserinterface.controller.html" class="tsd-signature-type">Controller</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Controller<span class="tsd-signature-symbol">(</span>_mutable<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Mutable</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">MutableArray</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Mutable</span><span class="tsd-signature-symbol">&gt;</span>, _domElement<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">HTMLElement</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgeuserinterface.controller.html" class="tsd-signature-type" data-tsd-kind="Class">Controller</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/Controller/Controller.ts#L18">Documents/HFU/FUDGE/UserInterface/Source/Controller/Controller.ts:18</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/UserInterface/Source/Controller/Controller.ts#L20">Controller/Controller.ts:20</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_mutable: <span class="tsd-signature-type">ƒ.Mutable</span></h5>
+									<h5>_mutable: <span class="tsd-signature-type">Mutable</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">MutableArray</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Mutable</span><span class="tsd-signature-symbol">&gt;</span></h5>
 								</li>
 								<li>
-									<h5>_domElement: <a href="fudgeuserinterface.customelement.html#htmlelement" class="tsd-signature-type">HTMLElement</a></h5>
+									<h5>_domElement: <span class="tsd-signature-type">HTMLElement</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudgeuserinterface.controller.html" class="tsd-signature-type">Controller</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgeuserinterface.controller.html" class="tsd-signature-type" data-tsd-kind="Class">Controller</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -149,10 +150,10 @@
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 					<a name="domelement" class="tsd-anchor"></a>
 					<h3>dom<wbr>Element</h3>
-					<div class="tsd-signature tsd-kind-icon">dom<wbr>Element<span class="tsd-signature-symbol">:</span> <a href="fudgeuserinterface.customelement.html#htmlelement" class="tsd-signature-type">HTMLElement</a></div>
+					<div class="tsd-signature tsd-kind-icon">dom<wbr>Element<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">HTMLElement</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/Controller/Controller.ts#L11">Documents/HFU/FUDGE/UserInterface/Source/Controller/Controller.ts:11</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/UserInterface/Source/Controller/Controller.ts#L11">Controller/Controller.ts:11</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -163,25 +164,25 @@
 					<a name="getmutator" class="tsd-anchor"></a>
 					<h3>get<wbr>Mutator</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Mutator<span class="tsd-signature-symbol">(</span>_mutator<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">ƒ.Mutator</span>, _types<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">ƒ.Mutator</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ƒ.Mutator</span></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Mutator<span class="tsd-signature-symbol">(</span>_mutator<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Mutator</span>, _types<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Mutator</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Mutator</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/Controller/Controller.ts#L113">Documents/HFU/FUDGE/UserInterface/Source/Controller/Controller.ts:113</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/UserInterface/Source/Controller/Controller.ts#L126">Controller/Controller.ts:126</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> _mutator: <span class="tsd-signature-type">ƒ.Mutator</span></h5>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> _mutator: <span class="tsd-signature-type">Mutator</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> _types: <span class="tsd-signature-type">ƒ.Mutator</span></h5>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> _types: <span class="tsd-signature-type">Mutator</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">ƒ.Mutator</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Mutator</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -189,21 +190,38 @@
 					<a name="setmutable" class="tsd-anchor"></a>
 					<h3>set<wbr>Mutable</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">set<wbr>Mutable<span class="tsd-signature-symbol">(</span>_mutable<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ƒ.Mutable</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Mutable<span class="tsd-signature-symbol">(</span>_mutable<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Mutable</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">MutableArray</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Mutable</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/Controller/Controller.ts#L123">Documents/HFU/FUDGE/UserInterface/Source/Controller/Controller.ts:123</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/UserInterface/Source/Controller/Controller.ts#L136">Controller/Controller.ts:136</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_mutable: <span class="tsd-signature-type">ƒ.Mutable</span></h5>
+									<h5>_mutable: <span class="tsd-signature-type">Mutable</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">MutableArray</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Mutable</span><span class="tsd-signature-symbol">&gt;</span></h5>
 								</li>
 							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="startrefresh" class="tsd-anchor"></a>
+					<h3>start<wbr>Refresh</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">start<wbr>Refresh<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/UserInterface/Source/Controller/Controller.ts#L143">Controller/Controller.ts:143</a></li>
+								</ul>
+							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 						</li>
 					</ul>
@@ -218,7 +236,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/Controller/Controller.ts#L119">Documents/HFU/FUDGE/UserInterface/Source/Controller/Controller.ts:119</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/UserInterface/Source/Controller/Controller.ts#L132">Controller/Controller.ts:132</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -226,16 +244,42 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
-					<a name="getmutator-1" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagStatic">Static</span> get<wbr>Mutator</h3>
+					<a name="findchildelementbykey" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> find<wbr>Child<wbr>Element<wbr>ByKey</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Mutator<span class="tsd-signature-symbol">(</span>_mutable<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ƒ.Mutable</span>, _domElement<span class="tsd-signature-symbol">: </span><a href="fudgeuserinterface.customelement.html#htmlelement" class="tsd-signature-type">HTMLElement</a>, _mutator<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">ƒ.Mutator</span>, _types<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">ƒ.Mutator</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ƒ.Mutator</span></li>
+						<li class="tsd-signature tsd-kind-icon">find<wbr>Child<wbr>Element<wbr>ByKey<span class="tsd-signature-symbol">(</span>_domElement<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">HTMLElement</span>, key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">HTMLElement</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/Controller/Controller.ts#L53">Documents/HFU/FUDGE/UserInterface/Source/Controller/Controller.ts:53</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/UserInterface/Source/Controller/Controller.ts#L116">Controller/Controller.ts:116</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_domElement: <span class="tsd-signature-type">HTMLElement</span></h5>
+								</li>
+								<li>
+									<h5>key: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">HTMLElement</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="getmutator-1" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> get<wbr>Mutator</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Mutator<span class="tsd-signature-symbol">(</span>_mutable<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Mutable</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">MutableArray</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Mutable</span><span class="tsd-signature-symbol">&gt;</span>, _domElement<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">HTMLElement</span>, _mutator<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Mutator</span>, _types<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Mutator</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Mutator</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/UserInterface/Source/Controller/Controller.ts#L56">Controller/Controller.ts:56</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -247,19 +291,19 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_mutable: <span class="tsd-signature-type">ƒ.Mutable</span></h5>
+									<h5>_mutable: <span class="tsd-signature-type">Mutable</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">MutableArray</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Mutable</span><span class="tsd-signature-symbol">&gt;</span></h5>
 								</li>
 								<li>
-									<h5>_domElement: <a href="fudgeuserinterface.customelement.html#htmlelement" class="tsd-signature-type">HTMLElement</a></h5>
+									<h5>_domElement: <span class="tsd-signature-type">HTMLElement</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> _mutator: <span class="tsd-signature-type">ƒ.Mutator</span></h5>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> _mutator: <span class="tsd-signature-type">Mutator</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> _types: <span class="tsd-signature-type">ƒ.Mutator</span></h5>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> _types: <span class="tsd-signature-type">Mutator</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">ƒ.Mutator</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Mutator</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -267,13 +311,13 @@
 					<a name="updatemutator" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> update<wbr>Mutator</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">update<wbr>Mutator<span class="tsd-signature-symbol">(</span>_domElement<span class="tsd-signature-symbol">: </span><a href="fudgeuserinterface.customelement.html#htmlelement" class="tsd-signature-type">HTMLElement</a>, _mutator<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ƒ.Mutator</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ƒ.Mutator</span></li>
+						<li class="tsd-signature tsd-kind-icon">update<wbr>Mutator<span class="tsd-signature-symbol">(</span>_domElement<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">HTMLElement</span>, _mutator<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Mutator</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Mutator</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/Controller/Controller.ts#L32">Documents/HFU/FUDGE/UserInterface/Source/Controller/Controller.ts:32</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/UserInterface/Source/Controller/Controller.ts#L35">Controller/Controller.ts:35</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -285,13 +329,13 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_domElement: <a href="fudgeuserinterface.customelement.html#htmlelement" class="tsd-signature-type">HTMLElement</a></h5>
+									<h5>_domElement: <span class="tsd-signature-type">HTMLElement</span></h5>
 								</li>
 								<li>
-									<h5>_mutator: <span class="tsd-signature-type">ƒ.Mutator</span></h5>
+									<h5>_mutator: <span class="tsd-signature-type">Mutator</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">ƒ.Mutator</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Mutator</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -299,13 +343,13 @@
 					<a name="updateuserinterface-1" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> update<wbr>User<wbr>Interface</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">update<wbr>User<wbr>Interface<span class="tsd-signature-symbol">(</span>_mutable<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ƒ.Mutable</span>, _domElement<span class="tsd-signature-symbol">: </span><a href="fudgeuserinterface.customelement.html#htmlelement" class="tsd-signature-type">HTMLElement</a>, _mutator<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">ƒ.Mutator</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">update<wbr>User<wbr>Interface<span class="tsd-signature-symbol">(</span>_mutable<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Mutable</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">MutableArray</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Mutable</span><span class="tsd-signature-symbol">&gt;</span>, _domElement<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">HTMLElement</span>, _mutator<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Mutator</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/Controller/Controller.ts#L85">Documents/HFU/FUDGE/UserInterface/Source/Controller/Controller.ts:85</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/UserInterface/Source/Controller/Controller.ts#L89">Controller/Controller.ts:89</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -317,13 +361,13 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_mutable: <span class="tsd-signature-type">ƒ.Mutable</span></h5>
+									<h5>_mutable: <span class="tsd-signature-type">Mutable</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">MutableArray</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Mutable</span><span class="tsd-signature-symbol">&gt;</span></h5>
 								</li>
 								<li>
-									<h5>_domElement: <a href="fudgeuserinterface.customelement.html#htmlelement" class="tsd-signature-type">HTMLElement</a></h5>
+									<h5>_domElement: <span class="tsd-signature-type">HTMLElement</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> _mutator: <span class="tsd-signature-type">ƒ.Mutator</span></h5>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> _mutator: <span class="tsd-signature-type">Mutator</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -335,8 +379,8 @@
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 			<nav class="tsd-navigation primary">
 				<ul>
-					<li class="globals  ">
-						<a href="../index.html"><em>Globals</em></a>
+					<li class=" ">
+						<a href="../index.html">Exports</a>
 					</li>
 					<li class="current tsd-kind-namespace">
 						<a href="../modules/fudgeuserinterface.html">Fudge<wbr>User<wbr>Interface</a>
@@ -369,7 +413,13 @@
 								<a href="fudgeuserinterface.controller.html#setmutable" class="tsd-kind-icon">set<wbr>Mutable</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgeuserinterface.controller.html#startrefresh" class="tsd-kind-icon">start<wbr>Refresh</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudgeuserinterface.controller.html#updateuserinterface" class="tsd-kind-icon">update<wbr>User<wbr>Interface</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="fudgeuserinterface.controller.html#findchildelementbykey" class="tsd-kind-icon">find<wbr>Child<wbr>Element<wbr>ByKey</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
 								<a href="fudgeuserinterface.controller.html#getmutator-1" class="tsd-kind-icon">get<wbr>Mutator</a>
@@ -415,10 +465,13 @@
 						<a href="fudgeuserinterface.customelementtextinput.html" class="tsd-kind-icon">Custom<wbr>Element<wbr>Text<wbr>Input</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-namespace">
-						<a href="fudgeuserinterface.dialog.html" class="tsd-kind-icon">Dialog</a>
+						<a href="fudgeuserinterface.details.html" class="tsd-kind-icon">Details</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-namespace">
-						<a href="fudgeuserinterface.expandablefieldset.html" class="tsd-kind-icon">Expandable<wbr>Field<wbr>Set</a>
+						<a href="fudgeuserinterface.detailsarray.html" class="tsd-kind-icon">Details<wbr>Array</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-namespace">
+						<a href="fudgeuserinterface.dialog.html" class="tsd-kind-icon">Dialog</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-namespace">
 						<a href="fudgeuserinterface.generator.html" class="tsd-kind-icon">Generator</a>
@@ -452,9 +505,6 @@
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-namespace">
 						<a href="../interfaces/fudgeuserinterface.table-1.html" class="tsd-kind-icon">TABLE</a>
-					</li>
-					<li class=" tsd-kind-variable tsd-parent-kind-namespace tsd-is-not-exported">
-						<a href="../modules/fudgeuserinterface.html#_" class="tsd-kind-icon">ƒ</a>
 					</li>
 				</ul>
 			</nav>

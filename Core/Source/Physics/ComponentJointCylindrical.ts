@@ -63,7 +63,7 @@ namespace FudgeCore {
     
     //#region Get/Set transfor of fudge properties to the physics engine
     /**
-     * The axis connecting the the two [[Node]]s e.g. Vector3(0,1,0) to have a upward connection.
+     * The axis connecting the the two {@link Node}s e.g. Vector3(0,1,0) to have a upward connection.
      *  When changed after initialization the joint needs to be reconnected.
      */
     get axis(): Vector3 {
@@ -76,7 +76,7 @@ namespace FudgeCore {
     }
 
     /**
-     * The exact position where the two [[Node]]s are connected. When changed after initialization the joint needs to be reconnected.
+     * The exact position where the two {@link Node}s are connected. When changed after initialization the joint needs to be reconnected.
      */
     get anchor(): Vector3 {
       return new Vector3(this.jointAnchor.x, this.jointAnchor.y, this.jointAnchor.z);

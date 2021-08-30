@@ -7,6 +7,7 @@
 	<meta name="description" content="Documentation for Fudge User Interface">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
+	<script async src="../assets/js/search.js" id="search-script"></script>
 </head>
 <body>
 <header>
@@ -40,8 +41,6 @@
 							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
 							<input type="checkbox" id="tsd-filter-externals" checked />
 							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
-							<input type="checkbox" id="tsd-filter-only-exported" />
-							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
 						</div>
 					</div>
 					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
@@ -53,7 +52,7 @@
 		<div class="container">
 			<ul class="tsd-breadcrumb">
 				<li>
-					<a href="../index.html">Globals</a>
+					<a href="../index.html">Fudge User Interface</a>
 				</li>
 				<li>
 					<a href="../modules/fudgeuserinterface.html">FudgeUserInterface</a>
@@ -89,6 +88,12 @@
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
+							<h3>Constructors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="fudgeuserinterface.dialog.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><a href="fudgeuserinterface.dialog.html#dom" class="tsd-kind-icon">dom</a></li>
@@ -104,6 +109,23 @@
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Constructors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
+					<a name="constructor" class="tsd-anchor"></a>
+					<h3>constructor</h3>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Dialog<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgeuserinterface.dialog.html" class="tsd-signature-type" data-tsd-kind="Class">Dialog</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+							</aside>
+							<h4 class="tsd-returns-title">Returns <a href="fudgeuserinterface.dialog.html" class="tsd-signature-type" data-tsd-kind="Class">Dialog</a></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-static">
 					<a name="dom" class="tsd-anchor"></a>
@@ -111,7 +133,7 @@
 					<div class="tsd-signature tsd-kind-icon">dom<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">HTMLDialogElement</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/CustomElement/Dialog.ts#L8">Documents/HFU/FUDGE/UserInterface/Source/CustomElement/Dialog.ts:8</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/UserInterface/Source/CustomElement/Dialog.ts#L8">CustomElement/Dialog.ts:8</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -122,13 +144,13 @@
 					<a name="prompt" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> prompt</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">prompt<span class="tsd-signature-symbol">(</span>_data<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ƒ.Mutable</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">ƒ.Mutator</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Object</span>, _modal<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span>, _head<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span>, _callToAction<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span>, _ok<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span>, _cancel<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">prompt<span class="tsd-signature-symbol">(</span>_data<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Object</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Mutator</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Mutable</span>, _modal<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span>, _head<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span>, _callToAction<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span>, _ok<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span>, _cancel<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/CustomElement/Dialog.ts#L13">Documents/HFU/FUDGE/UserInterface/Source/CustomElement/Dialog.ts:13</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/UserInterface/Source/CustomElement/Dialog.ts#L13">CustomElement/Dialog.ts:13</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -140,22 +162,22 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_data: <span class="tsd-signature-type">ƒ.Mutable</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">ƒ.Mutator</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Object</span></h5>
+									<h5>_data: <span class="tsd-signature-type">Object</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Mutator</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Mutable</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _modal: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = true</span></h5>
+									<h5>_modal: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = true</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _head: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;Headline&quot;</span></h5>
+									<h5>_head: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;Headline&quot;</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _callToAction: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;Instruction&quot;</span></h5>
+									<h5>_callToAction: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;Instruction&quot;</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _ok: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;OK&quot;</span></h5>
+									<h5>_ok: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;OK&quot;</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _cancel: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;Cancel&quot;</span></h5>
+									<h5>_cancel: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;Cancel&quot;</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -167,8 +189,8 @@
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 			<nav class="tsd-navigation primary">
 				<ul>
-					<li class="globals  ">
-						<a href="../index.html"><em>Globals</em></a>
+					<li class=" ">
+						<a href="../index.html">Exports</a>
 					</li>
 					<li class="current tsd-kind-namespace">
 						<a href="../modules/fudgeuserinterface.html">Fudge<wbr>User<wbr>Interface</a>
@@ -216,11 +238,20 @@
 					<li class=" tsd-kind-class tsd-parent-kind-namespace">
 						<a href="fudgeuserinterface.customelementtextinput.html" class="tsd-kind-icon">Custom<wbr>Element<wbr>Text<wbr>Input</a>
 					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-namespace">
+						<a href="fudgeuserinterface.details.html" class="tsd-kind-icon">Details</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-namespace">
+						<a href="fudgeuserinterface.detailsarray.html" class="tsd-kind-icon">Details<wbr>Array</a>
+					</li>
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-class tsd-parent-kind-namespace">
 						<a href="fudgeuserinterface.dialog.html" class="tsd-kind-icon">Dialog</a>
 						<ul>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class">
+								<a href="fudgeuserinterface.dialog.html#constructor" class="tsd-kind-icon">constructor</a>
+							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-static">
 								<a href="fudgeuserinterface.dialog.html#dom" class="tsd-kind-icon">dom</a>
 							</li>
@@ -231,9 +262,6 @@
 					</li>
 				</ul>
 				<ul class="after-current">
-					<li class=" tsd-kind-class tsd-parent-kind-namespace">
-						<a href="fudgeuserinterface.expandablefieldset.html" class="tsd-kind-icon">Expandable<wbr>Field<wbr>Set</a>
-					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-namespace">
 						<a href="fudgeuserinterface.generator.html" class="tsd-kind-icon">Generator</a>
 					</li>
@@ -267,9 +295,6 @@
 					<li class=" tsd-kind-interface tsd-parent-kind-namespace">
 						<a href="../interfaces/fudgeuserinterface.table-1.html" class="tsd-kind-icon">TABLE</a>
 					</li>
-					<li class=" tsd-kind-variable tsd-parent-kind-namespace tsd-is-not-exported">
-						<a href="../modules/fudgeuserinterface.html#_" class="tsd-kind-icon">ƒ</a>
-					</li>
 				</ul>
 			</nav>
 		</div>
@@ -282,6 +307,9 @@
 			<ul class="tsd-legend">
 				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
 				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
 			</ul>
 		</div>
 	</div>

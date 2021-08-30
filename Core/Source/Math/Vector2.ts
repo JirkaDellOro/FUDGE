@@ -58,15 +58,15 @@ namespace FudgeCore {
       return vector;
     }
 
-    public static TRANSFORMATION(_vector: Vector2, _matrix: Matrix3x3, _includeTranslation: boolean = true): Vector2 {
+    public static TRANSFORMATION(_vector: Vector2, _mtxTransform: Matrix3x3, _includeTranslation: boolean = true): Vector2 {
       let result: Vector2 = Recycler.get(Vector2);
-      let m: Float32Array = _matrix.get();
+      let m: Float32Array = _mtxTransform.get();
       let [x, y] = _vector.get();
       result.x = m[0] * x + m[3] * y;
       result.y = m[1] * x + m[4] * y;
 
       if (_includeTranslation) {
-        result.add(_matrix.translation);
+        result.add(_mtxTransform.translation);
       }
 
       return result;
@@ -286,8 +286,8 @@ namespace FudgeCore {
       return new Float32Array(this.data);
     }
 
-    public transform(_matrix: Matrix3x3, _includeTranslation: boolean = true): void {
-      this.data = Vector2.TRANSFORMATION(this, _matrix, _includeTranslation).data;
+    public transform(_mtxTransform: Matrix3x3, _includeTranslation: boolean = true): void {
+      this.data = Vector2.TRANSFORMATION(this, _mtxTransform, _includeTranslation).data;
     }
 
     /**

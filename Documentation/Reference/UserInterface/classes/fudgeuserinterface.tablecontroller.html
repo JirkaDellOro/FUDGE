@@ -7,6 +7,7 @@
 	<meta name="description" content="Documentation for Fudge User Interface">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
+	<script async src="../assets/js/search.js" id="search-script"></script>
 </head>
 <body>
 <header>
@@ -40,8 +41,6 @@
 							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
 							<input type="checkbox" id="tsd-filter-externals" checked />
 							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
-							<input type="checkbox" id="tsd-filter-only-exported" />
-							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
 						</div>
 					</div>
 					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
@@ -53,7 +52,7 @@
 		<div class="container">
 			<ul class="tsd-breadcrumb">
 				<li>
-					<a href="../index.html">Globals</a>
+					<a href="../index.html">Fudge User Interface</a>
 				</li>
 				<li>
 					<a href="../modules/fudgeuserinterface.html">FudgeUserInterface</a>
@@ -72,8 +71,8 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>Subclass this to create a broker between your data and a <a href="fudgeuserinterface.tree.html">Tree</a> to display and manipulate it.
-						The <a href="fudgeuserinterface.tree.html">Tree</a> doesn&#39;t know how your data is structured and how to handle it, the controller implements the methods needed</p>
+						<p>Subclass this to create a broker between your data and a <a href="fudgeuserinterface.table.html">Table</a> to display and manipulate it.
+						The <a href="fudgeuserinterface.table.html">Table</a> doesn&#39;t know how your data is structured and how to handle it, the controller implements the methods needed</p>
 					</div>
 				</div>
 			</section>
@@ -98,8 +97,16 @@
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
+							<h3>Constructors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-has-type-parameter"><a href="fudgeuserinterface.tablecontroller.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgeuserinterface.tablecontroller.html#copypaste" class="tsd-kind-icon">copy<wbr>Paste</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgeuserinterface.tablecontroller.html#dragdrop" class="tsd-kind-icon">drag<wbr>Drop</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgeuserinterface.tablecontroller.html#selection" class="tsd-kind-icon">selection</a></li>
 							</ul>
 						</section>
@@ -114,30 +121,98 @@
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgeuserinterface.tablecontroller.html#sort" class="tsd-kind-icon">sort</a></li>
 							</ul>
 						</section>
-						<section class="tsd-index-section ">
-							<h3>Object literals</h3>
-							<ul class="tsd-index-list">
-								<li class="tsd-kind-object-literal tsd-parent-kind-class"><a href="fudgeuserinterface.tablecontroller.html#copypaste" class="tsd-kind-icon">copy<wbr>Paste</a></li>
-								<li class="tsd-kind-object-literal tsd-parent-kind-class"><a href="fudgeuserinterface.tablecontroller.html#dragdrop" class="tsd-kind-icon">drag<wbr>Drop</a></li>
-							</ul>
-						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Constructors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class tsd-has-type-parameter">
+					<a name="constructor" class="tsd-anchor"></a>
+					<h3>constructor</h3>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class tsd-has-type-parameter">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Table<wbr>Controller&lt;T&gt;<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgeuserinterface.tablecontroller.html" class="tsd-signature-type" data-tsd-kind="Class">TableController</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+							</aside>
+							<h4 class="tsd-type-parameters-title">Type parameters</h4>
+							<ul class="tsd-type-parameters">
+								<li>
+									<h4>T</h4>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="fudgeuserinterface.tablecontroller.html" class="tsd-signature-type" data-tsd-kind="Class">TableController</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="copypaste" class="tsd-anchor"></a>
+					<h3>copy<wbr>Paste</h3>
+					<div class="tsd-signature tsd-kind-icon">copy<wbr>Paste<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>sources<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">; </span>target<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol"> = ...</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/UserInterface/Source/CustomElement/Table/TableController.ts#L12">CustomElement/Table/TableController.ts:12</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&amp;drop should operate outside of table</p>
+						</div>
+					</div>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter">
+								<h5>sources<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">[]</span></h5>
+							</li>
+							<li class="tsd-parameter">
+								<h5>target<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span></h5>
+							</li>
+						</ul>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="dragdrop" class="tsd-anchor"></a>
+					<h3>drag<wbr>Drop</h3>
+					<div class="tsd-signature tsd-kind-icon">drag<wbr>Drop<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>sources<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">; </span>target<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol"> = ...</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/UserInterface/Source/CustomElement/Table/TableController.ts#L10">CustomElement/Table/TableController.ts:10</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&amp;drop should operate outside of table</p>
+						</div>
+					</div>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter">
+								<h5>sources<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">[]</span></h5>
+							</li>
+							<li class="tsd-parameter">
+								<h5>target<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span></h5>
+							</li>
+						</ul>
+					</div>
+				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 					<a name="selection" class="tsd-anchor"></a>
 					<h3>selection</h3>
 					<div class="tsd-signature tsd-kind-icon">selection<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = []</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/CustomElement/Table/TableController.ts#L8">Documents/HFU/FUDGE/UserInterface/Source/CustomElement/Table/TableController.ts:8</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/UserInterface/Source/CustomElement/Table/TableController.ts#L8">CustomElement/Table/TableController.ts:8</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
 						<div class="lead">
-							<p>Stores references to selected objects. Override with a reference in outer scope, if selection should also operate outside of tree</p>
+							<p>Stores references to selected objects. Override with a reference in outer scope, if selection should also operate outside of table</p>
 						</div>
 					</div>
 				</section>
@@ -154,7 +229,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/CustomElement/Table/TableController.ts#L26">Documents/HFU/FUDGE/UserInterface/Source/CustomElement/Table/TableController.ts:26</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/UserInterface/Source/CustomElement/Table/TableController.ts#L26">CustomElement/Table/TableController.ts:26</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -182,7 +257,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/CustomElement/Table/TableController.ts#L20">Documents/HFU/FUDGE/UserInterface/Source/CustomElement/Table/TableController.ts:20</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/UserInterface/Source/CustomElement/Table/TableController.ts#L20">CustomElement/Table/TableController.ts:20</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -199,13 +274,13 @@
 					<a name="gethead" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagAbstract">Abstract</span> get<wbr>Head</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Head<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgeuserinterface.table-1.html" class="tsd-signature-type">TABLE</a><span class="tsd-signature-symbol">[]</span></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Head<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/fudgeuserinterface.table-1.html" class="tsd-signature-type" data-tsd-kind="Interface">TABLE</a><span class="tsd-signature-symbol">[]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/CustomElement/Table/TableController.ts#L31">Documents/HFU/FUDGE/UserInterface/Source/CustomElement/Table/TableController.ts:31</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/UserInterface/Source/CustomElement/Table/TableController.ts#L31">CustomElement/Table/TableController.ts:31</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -213,7 +288,7 @@
 									<p>Return a list of TABLE-objects describing the head-titles and according properties</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgeuserinterface.table-1.html" class="tsd-signature-type">TABLE</a><span class="tsd-signature-symbol">[]</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/fudgeuserinterface.table-1.html" class="tsd-signature-type" data-tsd-kind="Interface">TABLE</a><span class="tsd-signature-symbol">[]</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -227,12 +302,12 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/CustomElement/Table/TableController.ts#L15">Documents/HFU/FUDGE/UserInterface/Source/CustomElement/Table/TableController.ts:15</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/UserInterface/Source/CustomElement/Table/TableController.ts#L15">CustomElement/Table/TableController.ts:15</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Retrieve a string to create a label for the tree item representing the object</p>
+									<p>Retrieve a string to create a label for the table item representing the object</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -255,7 +330,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/CustomElement/Table/TableController.ts#L18">Documents/HFU/FUDGE/UserInterface/Source/CustomElement/Table/TableController.ts:18</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/UserInterface/Source/CustomElement/Table/TableController.ts#L18">CustomElement/Table/TableController.ts:18</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -286,7 +361,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/CustomElement/Table/TableController.ts#L36">Documents/HFU/FUDGE/UserInterface/Source/CustomElement/Table/TableController.ts:36</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/841dbaf2/UserInterface/Source/CustomElement/Table/TableController.ts#L36">CustomElement/Table/TableController.ts:36</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -311,85 +386,12 @@
 					</ul>
 				</section>
 			</section>
-			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Object literals</h2>
-				<section class="tsd-panel tsd-member tsd-kind-object-literal tsd-parent-kind-class">
-					<a name="copypaste" class="tsd-anchor"></a>
-					<h3>copy<wbr>Paste</h3>
-					<div class="tsd-signature tsd-kind-icon">copy<wbr>Paste<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/CustomElement/Table/TableController.ts#L12">Documents/HFU/FUDGE/UserInterface/Source/CustomElement/Table/TableController.ts:12</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&amp;drop should operate outside of tree</p>
-						</div>
-					</div>
-					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
-						<a name="copypaste.sources" class="tsd-anchor"></a>
-						<h3>sources</h3>
-						<div class="tsd-signature tsd-kind-icon">sources<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = []</span></div>
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/CustomElement/Table/TableController.ts#L12">Documents/HFU/FUDGE/UserInterface/Source/CustomElement/Table/TableController.ts:12</a></li>
-							</ul>
-						</aside>
-					</section>
-					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
-						<a name="copypaste.target" class="tsd-anchor"></a>
-						<h3>target</h3>
-						<div class="tsd-signature tsd-kind-icon">target<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> = null</span></div>
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/CustomElement/Table/TableController.ts#L12">Documents/HFU/FUDGE/UserInterface/Source/CustomElement/Table/TableController.ts:12</a></li>
-							</ul>
-						</aside>
-					</section>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-object-literal tsd-parent-kind-class">
-					<a name="dragdrop" class="tsd-anchor"></a>
-					<h3>drag<wbr>Drop</h3>
-					<div class="tsd-signature tsd-kind-icon">drag<wbr>Drop<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">object</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/CustomElement/Table/TableController.ts#L10">Documents/HFU/FUDGE/UserInterface/Source/CustomElement/Table/TableController.ts:10</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
-						<div class="lead">
-							<p>Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&amp;drop should operate outside of tree</p>
-						</div>
-					</div>
-					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
-						<a name="dragdrop.sources-1" class="tsd-anchor"></a>
-						<h3>sources</h3>
-						<div class="tsd-signature tsd-kind-icon">sources<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = []</span></div>
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/CustomElement/Table/TableController.ts#L10">Documents/HFU/FUDGE/UserInterface/Source/CustomElement/Table/TableController.ts:10</a></li>
-							</ul>
-						</aside>
-					</section>
-					<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-object-literal">
-						<a name="dragdrop.target-1" class="tsd-anchor"></a>
-						<h3>target</h3>
-						<div class="tsd-signature tsd-kind-icon">target<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> = null</span></div>
-						<aside class="tsd-sources">
-							<ul>
-								<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/fde0b019/UserInterface/Source/CustomElement/Table/TableController.ts#L10">Documents/HFU/FUDGE/UserInterface/Source/CustomElement/Table/TableController.ts:10</a></li>
-							</ul>
-						</aside>
-					</section>
-				</section>
-			</section>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 			<nav class="tsd-navigation primary">
 				<ul>
-					<li class="globals  ">
-						<a href="../index.html"><em>Globals</em></a>
+					<li class=" ">
+						<a href="../index.html">Exports</a>
 					</li>
 					<li class="current tsd-kind-namespace">
 						<a href="../modules/fudgeuserinterface.html">Fudge<wbr>User<wbr>Interface</a>
@@ -438,10 +440,13 @@
 						<a href="fudgeuserinterface.customelementtextinput.html" class="tsd-kind-icon">Custom<wbr>Element<wbr>Text<wbr>Input</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-namespace">
-						<a href="fudgeuserinterface.dialog.html" class="tsd-kind-icon">Dialog</a>
+						<a href="fudgeuserinterface.details.html" class="tsd-kind-icon">Details</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-namespace">
-						<a href="fudgeuserinterface.expandablefieldset.html" class="tsd-kind-icon">Expandable<wbr>Field<wbr>Set</a>
+						<a href="fudgeuserinterface.detailsarray.html" class="tsd-kind-icon">Details<wbr>Array</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-namespace">
+						<a href="fudgeuserinterface.dialog.html" class="tsd-kind-icon">Dialog</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-namespace">
 						<a href="fudgeuserinterface.generator.html" class="tsd-kind-icon">Generator</a>
@@ -457,6 +462,15 @@
 					<li class="current tsd-kind-class tsd-parent-kind-namespace tsd-has-type-parameter">
 						<a href="fudgeuserinterface.tablecontroller.html" class="tsd-kind-icon">Table<wbr>Controller</a>
 						<ul>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class tsd-has-type-parameter">
+								<a href="fudgeuserinterface.tablecontroller.html#constructor" class="tsd-kind-icon">constructor</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgeuserinterface.tablecontroller.html#copypaste" class="tsd-kind-icon">copy<wbr>Paste</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="fudgeuserinterface.tablecontroller.html#dragdrop" class="tsd-kind-icon">drag<wbr>Drop</a>
+							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="fudgeuserinterface.tablecontroller.html#selection" class="tsd-kind-icon">selection</a>
 							</li>
@@ -477,12 +491,6 @@
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudgeuserinterface.tablecontroller.html#sort" class="tsd-kind-icon">sort</a>
-							</li>
-							<li class=" tsd-kind-object-literal tsd-parent-kind-class">
-								<a href="fudgeuserinterface.tablecontroller.html#copypaste" class="tsd-kind-icon">copy<wbr>Paste</a>
-							</li>
-							<li class=" tsd-kind-object-literal tsd-parent-kind-class">
-								<a href="fudgeuserinterface.tablecontroller.html#dragdrop" class="tsd-kind-icon">drag<wbr>Drop</a>
 							</li>
 						</ul>
 					</li>
@@ -508,9 +516,6 @@
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-namespace">
 						<a href="../interfaces/fudgeuserinterface.table-1.html" class="tsd-kind-icon">TABLE</a>
-					</li>
-					<li class=" tsd-kind-variable tsd-parent-kind-namespace tsd-is-not-exported">
-						<a href="../modules/fudgeuserinterface.html#_" class="tsd-kind-icon">ƒ</a>
 					</li>
 				</ul>
 			</nav>

@@ -1,9 +1,10 @@
 {
-    "mode": "file",
+    "entryPoints": "",
     "out": "../../Documentation/Reference/Aid/",
     "name": "Fudge Aid",
     "readme": "none",
     "excludePrivate": "true",
     "excludeProtected": "true",
-    "ignoreCompilerErrors": "true"
+    "exclude": "References.ts",
+    "plugin": "typedoc-plugin-merge-modules"
 }

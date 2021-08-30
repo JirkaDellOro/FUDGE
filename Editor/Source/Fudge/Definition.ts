@@ -3,6 +3,10 @@ namespace Fudge {
 
 
 
+
+
+
+
   export enum CONTEXTMENU {
     // SKETCH = ViewSketch,
     ADD_NODE,
@@ -11,11 +15,14 @@ namespace Fudge {
     EDIT,
     CREATE_MESH,
     CREATE_MATERIAL,
-    CREATE_GRAPH
+    CREATE_GRAPH,
+    REMOVE_COMPONENT
   }
+
 
   export enum MENU {
     QUIT = "quit",
+    PROJECT_NEW = "projectNew",
     PROJECT_SAVE = "projectSave",
     PROJECT_LOAD = "projectLoad",
     DEVTOOLS_OPEN = "devtoolsOpen",
@@ -23,10 +30,9 @@ namespace Fudge {
     PANEL_ANIMATION_OPEN = "panelAnimationOpen",
     PANEL_PROJECT_OPEN = "panelProjectOpen",
     FULLSCREEN = "fullscreen"
-
     /* obsolete ?
     NODE_DELETE = "nodeDelete",
-    NODE_UPDATE = "nodeUpdate", 
+    NODE_UPDATE = "nodeUpdate",
     */
   }
 

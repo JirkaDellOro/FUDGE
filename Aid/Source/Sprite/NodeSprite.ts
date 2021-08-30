@@ -29,6 +29,11 @@ namespace FudgeAid {
       return mesh;
     }
 
+    /**
+     * @returns the number of the current frame
+     */
+    public get getCurrentFrame(): number { return this.frameCurrent; } //ToDo: see if getframeCurrent is problematic
+
     public setAnimation(_animation: SpriteSheetAnimation): void {
       this.animation = _animation;
       if (this.timer)
@@ -41,8 +46,8 @@ namespace FudgeAid {
      */
     public showFrame(_index: number): void {
       let spriteFrame: SpriteFrame = this.animation.frames[_index];
-      this.cmpMesh.pivot = spriteFrame.mtxPivot;
-      this.cmpMaterial.pivot = spriteFrame.mtxTexture;
+      this.cmpMesh.mtxPivot = spriteFrame.mtxPivot;
+      this.cmpMaterial.mtxPivot = spriteFrame.mtxTexture;
       this.cmpMaterial.material.setCoat(this.animation.spritesheet);
       this.frameCurrent = _index;
       this.timer = ƒ.Time.game.setTimer(spriteFrame.timeScale * 1000 / this.framerate, 1, this.showFrameNext);
@@ -62,5 +67,7 @@ namespace FudgeAid {
     public setFrameDirection(_direction: number): void {
       this.direction = Math.floor(_direction);
     }
+
+    
   }
 }

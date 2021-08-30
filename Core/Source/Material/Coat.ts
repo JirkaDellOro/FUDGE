@@ -1,8 +1,8 @@
 namespace FudgeCore {
   /**
-   * Holds data to feed into a [[Shader]] to describe the surface of [[Mesh]].  
-   * [[Material]]s reference [[Coat]] and [[Shader]].   
-   * The method useRenderData will be injected by [[RenderInjector]] at runtime, extending the functionality of this class to deal with the renderer.
+   * Holds data to feed into a {@link Shader} to describe the surface of {@link Mesh}.  
+   * {@link Material}s reference {@link Coat} and {@link Shader}.   
+   * The method useRenderData will be injected by {@link RenderInjector} at runtime, extending the functionality of this class to deal with the renderer.
    */
   export class Coat extends Mutable implements Serializable {
     public name: string = "Coat";
@@ -25,7 +25,7 @@ namespace FudgeCore {
   }
 
   /**
-   * The simplest [[Coat]] providing just a color
+   * The simplest {@link Coat} providing just a color
    */
   @RenderInjectorCoat.decorate
   export class CoatColored extends Coat {
@@ -43,15 +43,15 @@ namespace FudgeCore {
       return serialization;
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      super.deserialize(_serialization);
-      this.color.deserialize(_serialization.color);
+      await super.deserialize(_serialization);
+      await this.color.deserialize(_serialization.color);
       return this;
     }
     //#endregion
   }
 
   /**
-   * A [[Coat]] to be used by the MatCap Shader providing a texture, a tint color (0.5 grey is neutral). Set shadeSmooth to 1 for smooth shading.
+   * A {@link Coat} to be used by the MatCap Shader providing a texture, a tint color (0.5 grey is neutral). Set shadeSmooth to 1 for smooth shading.
    */
   @RenderInjectorCoat.decorate
   export class CoatMatCap extends Coat {

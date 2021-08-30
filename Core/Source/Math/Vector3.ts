@@ -66,9 +66,9 @@ namespace FudgeCore {
     /**
      * Creates and returns a vector through transformation of the given vector by the given matrix
      */
-    public static TRANSFORMATION(_vector: Vector3, _matrix: Matrix4x4, _includeTranslation: boolean = true): Vector3 {
+    public static TRANSFORMATION(_vector: Vector3, _mtxTransform: Matrix4x4, _includeTranslation: boolean = true): Vector3 {
       let result: Vector3 = Recycler.get(Vector3);
-      let m: Float32Array = _matrix.get();
+      let m: Float32Array = _mtxTransform.get();
       let [x, y, z] = _vector.get();
 
       result.x = m[0] * x + m[4] * y + m[8] * z;
@@ -76,7 +76,7 @@ namespace FudgeCore {
       result.z = m[2] * x + m[6] * y + m[10] * z;
 
       if (_includeTranslation) {
-        result.add(_matrix.translation);
+        result.add(_mtxTransform.translation);
       }
 
       return result;
@@ -336,8 +336,8 @@ namespace FudgeCore {
      * Transforms this vector by the given matrix, including or exluding the translation.
      * Including is the default, excluding will only rotate and scale this vector.
      */
-    public transform(_matrix: Matrix4x4, _includeTranslation: boolean = true): void {
-      this.data = Vector3.TRANSFORMATION(this, _matrix, _includeTranslation).data;
+    public transform(_mtxTransform: Matrix4x4, _includeTranslation: boolean = true): void {
+      this.data = Vector3.TRANSFORMATION(this, _mtxTransform, _includeTranslation).data;
     }
 
     /**
@@ -348,7 +348,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Reflects this vector at a given normal. See [[REFLECTION]]
+     * Reflects this vector at a given normal. See {@link Vector3.REFLECTION}
      */
     public reflect(_normal: Vector3): void {
       const reflected: Vector3 = Vector3.REFLECTION(this, _normal);

@@ -245,6 +245,7 @@ var FudgeUserInterface;
                     // @ts-ignore: instantiate abstract class
                     element = new elementType({ key: _key, label: _key, value: _value.toString() }, _type);
                 }
+                // TODO: delete?
                 else if (_value instanceof ƒ.MutableArray) {
                     console.log("MutableArray");
                     // insert Array-Controller!
@@ -871,7 +872,7 @@ var FudgeUserInterface;
             input.type = "number";
             input.style.position = "absolute";
             input.style.display = "none";
-            input.addEventListener("input" /* INPUT */, (_event) => { event.stopPropagation(); });
+            input.addEventListener("input" /* INPUT */, (_event) => { _event.stopPropagation(); });
             this.appendChild(input);
             let sign = document.createElement("span");
             sign.textContent = "+";
@@ -984,7 +985,7 @@ var FudgeUserInterface;
         }
         changeDigitFocussed(_amount) {
             let digit = document.activeElement;
-            if (!this.contains(digit))
+            if (digit == this || !this.contains(digit))
                 return;
             _amount = Math.round(_amount);
             if (_amount == 0)
@@ -1182,6 +1183,7 @@ var FudgeUserInterface;
         }
     }
     FudgeUserInterface.Details = Details;
+    // TODO: use CustomElement.register?
     customElements.define("ui-details", Details, { extends: "details" });
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
@@ -1413,12 +1415,13 @@ var FudgeUserInterface;
             //   // _event.stopPropagation();
             //   // this.addChildren(this.controller.dragDrop.sources, this.controller.dragDrop.target);
             // }
-            // private hndDelete = (_event: Event): void => {
-            //   // let target: TreeItem<T> = <TreeItem<T>>_event.target;
-            //   // _event.stopPropagation();
-            //   // let remove: T[] = this.controller.delete([target.data]);
-            //   // this.delete(remove);
-            // }
+            this.hndDelete = (_event) => {
+                let target = _event.target;
+                _event.stopPropagation();
+                let remove = this.controller.delete([target.data]);
+                console.log(remove);
+                // this.delete(remove);
+            };
             this.hndEscape = (_event) => {
                 this.clearSelection();
             };
@@ -1475,10 +1478,10 @@ var FudgeUserInterface;
             this.addEventListener("focusNext" /* FOCUS_NEXT */, this.hndFocus);
             this.addEventListener("focusPrevious" /* FOCUS_PREVIOUS */, this.hndFocus);
             this.addEventListener("escape" /* ESCAPE */, this.hndEscape);
+            this.addEventListener("delete" /* DELETE */, this.hndDelete);
             // this.addEventListener(EVENT_TABLE.CHANGE, this.hndSort);
             // this.addEventListener(EVENT_TREE.RENAME, this.hndRename);
             // this.addEventListener(EVENT_TREE.DROP, this.hndDrop);
-            // this.addEventListener(EVENT_TREE.DELETE, this.hndDelete);
             // this.addEventListener(EVENT_TREE.COPY, this.hndCopyPaste);
             // this.addEventListener(EVENT_TREE.PASTE, this.hndCopyPaste);
             // this.addEventListener(EVENT_TREE.CUT, this.hndCopyPaste);
@@ -2063,7 +2066,7 @@ var FudgeUserInterface;
         }
         hndDrop(_event) {
             // _event.stopPropagation();
-            console.log(_event.dataTransfer);
+            // console.log(_event.dataTransfer);
             this.addChildren(this.controller.dragDrop.sources, this.controller.dragDrop.target);
         }
         addChildren(_children, _target) {

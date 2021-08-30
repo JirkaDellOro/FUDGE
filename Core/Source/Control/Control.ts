@@ -51,7 +51,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Set the time-object to be used when calculating the output in [[CONTROL_TYPE.INTEGRAL]]
+     * Set the time-object to be used when calculating the output in {@link CONTROL_TYPE.INTEGRAL}
      */
     public setTimebase(_time: Time): void {
       this.time = _time;
@@ -59,7 +59,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Feed an input value into this control and fire the events [[EVENT_CONTROL.INPUT]] and [[EVENT_CONTROL.OUTPUT]]
+     * Feed an input value into this control and fire the events {@link EVENT_CONTROL.INPUT} and {@link EVENT_CONTROL.OUTPUT}
      */
     public setInput(_input: number): void {
       if (!this.active)
@@ -108,7 +108,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Set the factor to multiply the input value given with [[setInput]] with
+     * Set the factor to multiply the input value given with {@link setInput} with
      */
     public setFactor(_factor: number): void {
       this.factor = _factor;
@@ -155,7 +155,9 @@ namespace FudgeCore {
       }
       return output;
     }
-
+    /**
+     * calculates the output considering the time of the delay
+     */
     private getValueDelayed(): number {
       if (this.timeValueDelay > 0) {
         let timeElapsedSinceInput: number = this.time.get() - this.timeOutputTargetSet;
@@ -164,7 +166,7 @@ namespace FudgeCore {
       }
       return this.outputTarget;
     }
-
+    
     private dispatchOutput = (_eventOrValue: EventTimer | number): void => {
       if (!this.active)
         return;

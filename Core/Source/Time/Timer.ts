@@ -1,13 +1,13 @@
 namespace FudgeCore {
   /**
-   * Defines the signature of handler functions for [[TimerEventƒ]]s, very similar to usual event handler
+   * Defines the signature of handler functions for {@link EventTimer}s, very similar to usual event handler
    */
   export type TimerHandler = (_event: EventTimer) => void;
 
   /**
-   * A [[Timer]]-instance internally uses window.setInterval to call a given handler with a given frequency a given number of times,
-   * passing an [[TimerEventƒ]]-instance with additional information and given arguments. 
-   * The frequency scales with the [[Time]]-instance the [[Timer]]-instance is attached to.
+   * A {@link Timer}-instance internally uses window.setInterval to call a given handler with a given frequency a given number of times,
+   * passing an {@link EventTimer}-instance with additional information and given arguments. 
+   * The frequency scales with the {@link Time}-instance the {@link Timer}-instance is attached to.
    * 
    * @author Jirka Dell'Oro-Friedl, HFU, 2019
    */
@@ -22,11 +22,11 @@ namespace FudgeCore {
     private idWindow: number;
 
     /**
-     * Creates a [[Timer]] instance.
-     * @param _time The [[Time]] instance, the timer attaches to
+     * Creates a {@link Timer} instance.
+     * @param _time The {@link Time} instance, the timer attaches to
      * @param _elapse The time in milliseconds to elapse, to the next call of _handler, measured in _time
      * @param _count The desired number of calls to _handler, Timer deinstalls automatically after last call. Passing 0 invokes infinite calls
-     * @param _handler The [[TimerHandler]] instance to call
+     * @param _handler The {@link TimerHandler} instance to call
      * @param _arguments Additional arguments to pass to _handler
      * 
      * TODO: for proper handling and deletion, use Time.setTimer instead of instantiating timers yourself.
@@ -83,7 +83,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Attaches a copy of this at its current state to the same [[Time]]-instance. Used internally when rescaling [[Time]]
+     * Attaches a copy of this at its current state to the same {@link Time}-instance. Used internally when rescaling {@link Time}
      */
     public installCopy(): Timer {
       return new Timer(this.time, this.elapse, this.count, this.handler, this.event.arguments);

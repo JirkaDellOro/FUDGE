@@ -19,8 +19,8 @@ namespace FudgeCore {
    */
   export class ComponentCamera extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentCamera);
-    public pivot: Matrix4x4 = Matrix4x4.IDENTITY();
-    public backgroundColor: Color = new Color(0, 0, 0, 1); // The color of the background the camera will render.
+    public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
+    public clrBackground: Color = new Color(0, 0, 0, 1); // The color of the background the camera will render.
     //private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
     private projection: PROJECTION = PROJECTION.CENTRAL;
     private mtxProjection: Matrix4x4 = new Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
@@ -38,9 +38,9 @@ namespace FudgeCore {
      */
     public get mtxWorldToView(): Matrix4x4 {
       //TODO: optimize, no need to recalculate if neither mtxWorld nor pivot have changed
-      let mtxCamera: Matrix4x4 = this.pivot;
+      let mtxCamera: Matrix4x4 = this.mtxPivot;
       try {
-        mtxCamera = Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.pivot);
+        mtxCamera = Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.mtxPivot);
       } catch (_error) {
         // no container node or no world transformation found -> continue with pivot only
       }
@@ -151,27 +151,27 @@ namespace FudgeCore {
     //#region Transfer
     public serialize(): Serialization {
       let serialization: Serialization = {
-        backgroundColor: this.backgroundColor,
+        backgroundColor: this.clrBackground,
         backgroundEnabled: this.backgroundEnabled,
         projection: this.projection,
         fieldOfView: this.fieldOfView,
         direction: this.direction,
         aspect: this.aspectRatio,
-        pivot: this.pivot.serialize(),
+        pivot: this.mtxPivot.serialize(),
         [super.constructor.name]: super.serialize()
       };
       return serialization;
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.backgroundColor = _serialization.backgroundColor;
+      this.clrBackground = _serialization.backgroundColor;
       this.backgroundEnabled = _serialization.backgroundEnabled;
       this.projection = _serialization.projection;
       this.fieldOfView = _serialization.fieldOfView;
       this.aspectRatio = _serialization.aspect;
       this.direction = _serialization.direction;
-      this.pivot.deserialize(_serialization.pivot);
-      super.deserialize(_serialization[super.constructor.name]);
+      await this.mtxPivot.deserialize(_serialization.pivot);
+      await super.deserialize(_serialization[super.constructor.name]);
       switch (this.projection) {
         case PROJECTION.ORTHOGRAPHIC:
           this.projectOrthographic(); // TODO: serialize and deserialize parameters

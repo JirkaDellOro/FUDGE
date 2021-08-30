@@ -7,7 +7,7 @@ namespace Fudge {
   * @authors Monika Galkewitsch, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
   */
   export class PanelGraph extends Panel {
-    private node: ƒ.Node;
+    private graph: ƒ.Graph;
 
     constructor(_container: GoldenLayout.Container, _state: Object) {
       super(_container, _state);
@@ -37,22 +37,28 @@ namespace Fudge {
       this.dom.addEventListener(ƒui.EVENT.RENAME, this.broadcastEvent);
     }
 
-    public setGraph(_node: ƒ.Node): void {
-      this.node = _node;
+    public setGraph(_graph: ƒ.Graph): void {
+      this.graph = _graph;
     }
 
-    public getNode(): ƒ.Node {
-      return this.node;
-    }
-
-    private hndEvent = (_event: CustomEvent): void => {
-      if (_event.type == EVENT_EDITOR.SET_GRAPH)
-        this.setGraph(_event.detail);
+    private hndEvent = async (_event: CustomEvent): Promise<void> => {
+      switch (_event.type) {
+        case EVENT_EDITOR.SET_GRAPH:
+          this.setGraph(_event.detail);
+        case EVENT_EDITOR.SET_PROJECT:
+        case EVENT_EDITOR.UPDATE:
+          // TODO: meaningful difference between update and setgraph
+          if (this.graph) {
+            let newGraph: ƒ.Graph = <ƒ.Graph>await ƒ.Project.getResource(this.graph.idResource);
+            if (this.graph != newGraph)
+              _event = new CustomEvent(EVENT_EDITOR.SET_GRAPH, { detail: newGraph });
+          }
+      }
       this.broadcastEvent(_event);
       // _event.stopPropagation();
     }
     private hndFocusNode = (_event: CustomEvent): void => {
-      let event: CustomEvent = new CustomEvent(EVENT_EDITOR.FOCUS_NODE, {bubbles: false, detail: _event.detail.data});
+      let event: CustomEvent = new CustomEvent(EVENT_EDITOR.FOCUS_NODE, { bubbles: false, detail: _event.detail.data });
       this.broadcastEvent(event);
     }
   }

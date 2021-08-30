@@ -6,15 +6,18 @@ FUDGE is a lightweight open-source game engine and editor created for educating 
 # Wiki
 To get started with FUDGE, please browse through the [Wiki](https://github.com/JirkaDellOro/FUDGE/wiki) to learn about the core concepts and the inner workings of FUDGE. Doing so will grant you an intuitive understanding extremely helpful for further working with FUDGE.
 
-# Directory Overview
+# Code Overview
+Find the source code on [Github](https://github.com/JirkaDellOro)  
 ## Core
 Contains the core functionality of FUDGE needed to create games. For many games it's sufficient to work only with this module.
+## Aid
+Contains collections of classes for convenience, bundling and simplifying common procedures.
+## Physics
+Contains an adapted version of the Oimo-Physics-Engine that works with FUDGE  
 ## UserInterface
 Contains the classes for easy and even automatic creation of graphical interfaces using the mutator concept (see Wiki). This module is heavily used in the editor and can be used and extended for games.
 ## Network
 Contains components for gaming over networks. This module is not fully evaluated yet.
-## Aid
-Contains collections of classes for convenience, bundling and simplifying common procedures.
 ## Editor
 The directory of the actual standalone editor to be executed with Electron or packed as executable by an Electron packager
 ## Documentation
@@ -24,18 +27,16 @@ Contains programs to test the functionality of various components of FUDGE separ
 ## Miscellaneous	
 A collection of various other helpful documents and resources
 
-# Reference
+# Documentation
 - [Wiki](https://github.com/JirkaDellOro/FUDGE/wiki)  
 - [Class-Diagramm Core](https://raw.githubusercontent.com/JirkaDellOro/FUDGE/development/Documentation/Design/Core.svg)  
-- [APIs](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference)  
+- [API-References](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference)  
 
 # Call for papers
-- :pencil: Modeller
-- :pencil: Cameratransformation, Axonometry and VR
-- :pencil: Diegetic User-Interface
-- :pencil: Redesign Golden Layout
-- :pencil: Input-Manager
-- Shader
+## ToDo
+- Bones
+- Cameratransformation, Axonometry and VR
+- Diegetic User-Interface
 - Grapheditor/Wiring for Shader and Animation
 - Light and Shadow
 - Primitve 3D-Models and 2D-Shapes 
@@ -44,8 +45,10 @@ A collection of various other helpful documents and resources
 - Undo/Rollback
 - Selection-Sets to store temporary Groups
 - Advanced texturing
-
-# Contributors  
+## In Progress
+- Redesign Golden Layout
+- Input-Manager  
+## Done  
 
 | Name               | Area                              |
 |--------------------|-----------------------------------|
@@ -60,4 +63,5 @@ A collection of various other helpful documents and resources
 | Elke Scherffius    | Tutorials                         |
 | Marko Fehrenbach   | Physics                         |
 | Jonas Plotzky      | Particlesystem                         |
-
+| Robin Schwab      | Modeller                         |
+| Luis Keck      | Shader-System                         |

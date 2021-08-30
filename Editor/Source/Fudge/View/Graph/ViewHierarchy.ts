@@ -1,6 +1,6 @@
 namespace Fudge {
   import ƒ = FudgeCore;
-  import ƒui = FudgeUserInterface;
+  import ƒUi = FudgeUserInterface;
 
   /**
    * View the hierarchy of a graph as tree-control
@@ -9,7 +9,7 @@ namespace Fudge {
   export class ViewHierarchy extends View {
     private graph: ƒ.Node;
     // private selectedNode: ƒ.Node;
-    private tree: ƒui.Tree<ƒ.Node>;
+    private tree: ƒUi.Tree<ƒ.Node>;
 
     constructor(_container: GoldenLayout.Container, _state: Object) {
       super(_container, _state);
@@ -19,6 +19,7 @@ namespace Fudge {
 
       // this.parentPanel.addEventListener(ƒui.EVENT.SELECT, this.setSelectedNode);
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
     }
 
     public setGraph(_graph: ƒ.Node): void {
@@ -30,11 +31,12 @@ namespace Fudge {
       this.graph = _graph;
       // this.selectedNode = null;
 
-      this.tree = new ƒui.Tree<ƒ.Node>(new ControllerTreeNode(), this.graph);
+      this.tree = new ƒUi.Tree<ƒ.Node>(new ControllerTreeHierarchy(), this.graph);
       // this.listController.listRoot.addEventListener(ƒui.EVENT.SELECT, this.passEventToPanel);
       //TODO: examine if tree should fire common UI-EVENT for selection instead
       // this.tree.addEventListener(ƒui.EVENT.SELECT, this.passEventToPanel);
-      this.tree.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
+      this.tree.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
+      this.tree.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.append(this.tree);
     }
 
@@ -44,6 +46,13 @@ namespace Fudge {
 
     public getDragDropSources(): ƒ.Node[] {
       return this.tree.controller.dragDrop.sources;
+    }
+    
+    public focusNode(_node: ƒ.Node): void {
+      let path: ƒ.Node[] = _node.getPath();
+      path = path.splice(path.indexOf(this.graph));
+      this.tree.show(path);
+      this.tree.displaySelection([_node]);
     }
 
     protected hndDragOver(_event: DragEvent, _viewSource: View): void {
@@ -130,7 +139,7 @@ namespace Fudge {
           ƒ.Debug.info(cmpScript.type, cmpScript);
 
           focus.addComponent(cmpScript);
-          this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.SELECT, { bubbles: true, detail: { data: focus } }));
+          this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.SELECT, { bubbles: true, detail: { data: focus } }));
           break;
       }
     }
@@ -138,7 +147,16 @@ namespace Fudge {
 
     //#region EventHandlers
     private hndEvent = (_event: CustomEvent): void => {
-      this.setGraph(_event.detail);
+      switch (_event.type) {
+        case ƒUi.EVENT.DELETE:
+          this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+          break;
+        case EVENT_EDITOR.FOCUS_NODE:
+          this.focusNode(_event.detail);
+          break;
+        default:
+          this.setGraph(_event.detail);
+      }
     }
 
     // private setNode(_node: ƒ.Node): void {

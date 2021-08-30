@@ -20,10 +20,12 @@ declare namespace Fudge {
         EDIT = 3,
         CREATE_MESH = 4,
         CREATE_MATERIAL = 5,
-        CREATE_GRAPH = 6
+        CREATE_GRAPH = 6,
+        REMOVE_COMPONENT = 7
     }
     enum MENU {
         QUIT = "quit",
+        PROJECT_NEW = "projectNew",
         PROJECT_SAVE = "projectSave",
         PROJECT_LOAD = "projectLoad",
         DEVTOOLS_OPEN = "devtoolsOpen",
@@ -84,6 +86,8 @@ declare namespace Fudge {
     export {};
 }
 declare namespace Fudge {
+    let watcher: ƒ.General;
+    function newProject(): Promise<void>;
     function saveProject(): Promise<void>;
     function promptLoadProject(): Promise<URL>;
     function loadProject(_url: URL): Promise<void>;
@@ -106,20 +110,19 @@ declare namespace Fudge {
     }
     export class Project extends ƒ.Mutable {
         files: Files;
-        title: string;
+        base: URL;
         private includePhysics;
         private includeAutoViewScript;
         private graphToStartWith;
-        constructor();
+        constructor(_base: URL);
         openDialog(): Promise<boolean>;
         hndChange: (_event: Event) => void;
         getProjectJSON(): string;
         getProjectCSS(): string;
-        getProjectHTML(): string;
+        getProjectHTML(_title: string): string;
         getGraphs(): Object;
         getMutatorAttributeTypes(_mutator: ƒ.Mutator): ƒ.MutatorAttributeTypes;
         protected reduceMutator(_mutator: ƒ.Mutator): void;
-        private updateFilenames;
         private getAutoViewScript;
     }
     export {};
@@ -226,9 +229,10 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
-    import ƒui = FudgeUserInterface;
-    class ControllerComponent extends ƒui.Controller {
+    import ƒUi = FudgeUserInterface;
+    class ControllerComponent extends ƒUi.Controller {
         constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
+        private hndKey;
         private hndDragOver;
         private hndDrop;
         private filterDragDrop;
@@ -243,8 +247,8 @@ declare namespace Fudge {
         getHead(): ƒui.TABLE[];
         getLabel(_object: ƒ.SerializableResource): string;
         rename(_object: ƒ.SerializableResource, _new: string): boolean;
-        delete(_focussed: ƒ.SerializableResource[]): ƒ.SerializableResource[];
         copy(_originals: ƒ.SerializableResource[]): Promise<ƒ.SerializableResource[]>;
+        delete(_focussed: ƒ.SerializableResource[]): ƒ.SerializableResource[];
         sort(_data: ƒ.SerializableResource[], _key: string, _direction: number): void;
     }
 }
@@ -285,7 +289,7 @@ declare namespace Fudge {
 declare namespace Fudge {
     import ƒ = FudgeCore;
     import ƒUi = FudgeUserInterface;
-    class ControllerTreeNode extends ƒUi.TreeController<ƒ.Node> {
+    class ControllerTreeHierarchy extends ƒUi.TreeController<ƒ.Node> {
         getLabel(_node: ƒ.Node): string;
         rename(_node: ƒ.Node, _new: string): boolean;
         hasChildren(_node: ƒ.Node): boolean;
@@ -317,10 +321,9 @@ declare namespace Fudge {
     * @authors Monika Galkewitsch, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
     */
     class PanelGraph extends Panel {
-        private node;
+        private graph;
         constructor(_container: GoldenLayout.Container, _state: Object);
-        setGraph(_node: ƒ.Node): void;
-        getNode(): ƒ.Node;
+        setGraph(_graph: ƒ.Graph): void;
         private hndEvent;
         private hndFocusNode;
     }
@@ -464,6 +467,7 @@ declare namespace Fudge {
         setGraph(_graph: ƒ.Node): void;
         getSelection(): ƒ.Node[];
         getDragDropSources(): ƒ.Node[];
+        focusNode(_node: ƒ.Node): void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): Promise<void>;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
@@ -478,15 +482,17 @@ declare namespace Fudge {
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class ViewRender extends View {
-        viewport: ƒ.Viewport;
-        canvas: HTMLCanvasElement;
-        graph: ƒ.Node;
+        private cmrOrbit;
+        private viewport;
+        private canvas;
+        private graph;
         constructor(_container: GoldenLayout.Container, _state: Object);
         createUserInterface(): void;
         setGraph(_node: ƒ.Node): void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): void;
         private hndEvent;
+        private hndPick;
         private activeViewport;
         private redraw;
     }

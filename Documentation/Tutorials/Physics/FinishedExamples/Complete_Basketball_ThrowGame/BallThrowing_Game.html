@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="author" content="Marko Fehrenbach, HFU 2020">
+    <meta name="description" content="Learning example of a complete game using physics in FUDGE">
+    <meta name="keywords" content="FUDGE, GameDevelopment, Physics, Typescript">
+    <title>Ball Throwing - Full Game Example</title>
+
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: rgb(42, 42, 42);
+            color: rgb(235, 235, 200);
+        }
+
+        #center-wrapper {
+            text-align: center;
+        }
+
+        h1 {
+            color: rgb(255, 227, 104);
+        }
+
+        canvas {
+            width: 64%;
+            height: 27%;
+        }
+    </style>
+
+<script src="../../../../../Physics/OimoPhysics.js"></script>
+<script src="../../../../../Core/Build/FudgeCore.js"></script>
+
+</head>
+
+<body>
+    <div id="center-wrapper">
+        <h1>Ball - Throwing</h1>
+        <h1 id="pointsCounter">Points: 0 / Speed: 0</h1>
+        <canvas></canvas>
+        <script src="Main.js"></script>
+        <p>> Collect POINTS by shooting GOALS, or hitting any TARGETS</p>
+        <p>> PRESS Mouse DOWN to aim, RELEASE mouse to shoot. Movementlength = Strength, Movementline = Direction</p>
+        <p>> Speed tells you how fast the ball was near the ring</p>
+    </div>
+</body>
+
+</html>

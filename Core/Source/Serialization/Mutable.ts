@@ -37,15 +37,15 @@ namespace FudgeCore {
   }
 
   /**
-   * Base class for all types being mutable using [[Mutator]]-objects, thus providing and using interfaces created at runtime.  
-   * Mutables provide a [[Mutator]] that is build by collecting all object-properties that are either of a primitive type or again Mutable.
-   * Subclasses can either reduce the standard [[Mutator]] built by this base class by deleting properties or implement an individual getMutator-method.
-   * The provided properties of the [[Mutator]] must match public properties or getters/setters of the object.
+   * Base class for all types being mutable using {@link Mutator}-objects, thus providing and using interfaces created at runtime.  
+   * Mutables provide a {@link Mutator} that is build by collecting all object-properties that are either of a primitive type or again Mutable.
+   * Subclasses can either reduce the standard {@link Mutator} built by this base class by deleting properties or implement an individual getMutator-method.
+   * The provided properties of the {@link Mutator} must match public properties or getters/setters of the object.
    * Otherwise, they will be ignored if not handled by an override of the mutate-method in the subclass and throw errors in an automatically generated user-interface for the object.
    */
   export abstract class Mutable extends EventTargetƒ {
     /**
-     * Decorator allows to attach [[Mutable]] functionality to existing classes. 
+     * Decorator allows to attach {@link Mutable} functionality to existing classes. 
      */
     // public static decorate(_constructor: Function): void {
     //   Object.defineProperty(_constructor.prototype, "useRenderData", {
@@ -64,8 +64,8 @@ namespace FudgeCore {
     }
     /**
      * Collect applicable attributes of the instance and copies of their values in a Mutator-object.
-     * By default, a mutator cannot extended, since extensions are not available in the object the mutator belongs to.
-     * A mutator may be reduced by the descendants of [[Mutable]] to contain only the properties needed.
+     * By default, a mutator cannot be extended, since extensions are not available in the object the mutator belongs to.
+     * A mutator may be reduced by the descendants of {@link Mutable} to contain only the properties needed.
      */
     public getMutator(_extendable: boolean = false): Mutator {
       let mutator: Mutator = {};
@@ -100,21 +100,21 @@ namespace FudgeCore {
 
     /**
      * Collect the attributes of the instance and their values applicable for animation.
-     * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
+     * Basic functionality is identical to {@link getMutator}, returned mutator should then be reduced by the subclassed instance
      */
     public getMutatorForAnimation(): MutatorForAnimation {
       return <MutatorForAnimation>this.getMutator();
     }
     /**
      * Collect the attributes of the instance and their values applicable for the user interface.
-     * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
+     * Basic functionality is identical to {@link getMutator}, returned mutator should then be reduced by the subclassed instance
      */
     public getMutatorForUserInterface(): MutatorForUserInterface {
       return <MutatorForUserInterface>this.getMutator();
     }
     /**
      * Collect the attributes of the instance and their values applicable for indiviualization by the component.
-     * Basic functionality is identical to [[getMutator]], returned mutator should then be reduced by the subclassed instance
+     * Basic functionality is identical to {@link getMutator}, returned mutator should then be reduced by the subclassed instance
      */
     // public getMutatorForComponent(): MutatorForComponent {
     //     return <MutatorForComponent>this.getMutator();

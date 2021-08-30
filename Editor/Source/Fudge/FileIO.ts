@@ -1,35 +1,94 @@
 namespace Fudge {
   const fs: ƒ.General = require("fs");
+  import ƒui = FudgeUserInterface;
+  export let watcher: ƒ.General;
 
-  export async function saveProject(): Promise<void> {
-    if (!await project.openDialog())
-      return;
+  interface CopyList {
+    [src: string]: string;
+  }
 
+  export async function newProject(): Promise<void> {
     let filename: string | string[] = remote.dialog.showOpenDialogSync(null, {
-      properties: ["openDirectory", "createDirectory"], title: "Select a folder to save the project to", buttonLabel: "Save Project"
+      properties: ["openDirectory", "createDirectory"], title: "Select/Create a folder to save the project to. The foldername becomes the name of your project", buttonLabel: "Save Project"
     });
+
     if (!filename)
       return;
 
-    filename = filename[0] + "/a.b";
-    console.log(filename);
+    let base: URL = new URL(new URL(filename[0]).toString() + "/");
+    console.log("Path", base.toString());
+
+    project = new Project(base);
+
+    await saveProject();
+
+    let ƒPath: URL = new URL("../../", location.href);
+    console.log(ƒPath);
+
+    // fs.mkdirSync(new URL("Fudge", base));
+    fs.mkdirSync(new URL("Fudge/Core", base), { recursive: true });
+    fs.mkdirSync(new URL("Fudge/Aid", base), { recursive: true });
+
+    let copyFudge: CopyList = {
+      "Core/Build/FudgeCore.js": "Fudge/Core/FudgeCore.js",
+      "Core/Build/FudgeCore.d.ts": "Fudge/Core/FudgeCore.d.ts",
+      "Aid/Build/FudgeAid.js": "Fudge/Aid/FudgeAid.js",
+      "Aid/Build/FudgeAid.d.ts": "Fudge/Aid/FudgeAid.d.ts"
+    };
+    copyFiles(copyFudge, ƒPath, base);
+
+    fs.copyFileSync(new URL("Editor/Source/Template/.gitignore.txt", ƒPath), new URL(".gitignore", base));
+    fs.mkdirSync(new URL("Script/Source", base), { recursive: true });
+    fs.mkdirSync(new URL("Script/Build", base), { recursive: true });
+    
+    let copyTemplates: CopyList = {
+      "CustomComponentScript.txt": "Source/CustomComponentScript.ts",
+      "Main.txt": "Source/Main.ts",
+      "tsconfig.txt": "Source/tsconfig.json",
+      "Script.txt": " Build/Script.js"
+    };
+    copyFiles(copyTemplates, new URL("Editor/Source/Template/", ƒPath), new URL("Script/", base));
+
+    await loadProject(new URL(project.files.index.filename, project.base));
+  }
+
+  function copyFiles(_list: CopyList, _srcPath: URL, _destPath: URL): void {
+    for (let copy in _list) {
+      let src: URL = new URL(copy, _srcPath);
+      let dest: URL = new URL(_list[copy], _destPath);
+      fs.copyFileSync(src, dest);
+    }
+  }
+
+  export async function saveProject(): Promise<void> {
+    if (!project)
+      return;
+
+    if (!await project.openDialog())
+      return;
+
+    let base: URL = project.base;
+    let projectName: string = base.toString().split("/").slice(-2, -1)[0];
+    if (watcher)
+      watcher.close();
 
     if (project.files.index.overwrite) {
-      let html: string = project.getProjectHTML();
-      let htmlFileName: URL = new URL(project.files.index.filename, filename);
+      let html: string = project.getProjectHTML(projectName);
+      let htmlFileName: URL = new URL(project.files.index.filename, base);
       fs.writeFileSync(htmlFileName, html);
     }
 
     if (project.files.style.overwrite) {
-      let cssFileName: URL = new URL(project.files.style.filename, filename);
+      let cssFileName: URL = new URL(project.files.style.filename, base);
       fs.writeFileSync(cssFileName, project.getProjectCSS());
     }
 
     if (project.files.internal.overwrite) {
-      let jsonFileName: URL = new URL(project.files.internal.filename, filename);
-      console.log(jsonFileName);
+      let jsonFileName: URL = new URL(project.files.internal.filename, base);
       fs.writeFileSync(jsonFileName, project.getProjectJSON());
     }
+
+    watchFolder();
   }
 
   export async function promptLoadProject(): Promise<URL> {
@@ -39,8 +98,7 @@ namespace Fudge {
     });
     if (!filenames)
       return null;
-
-    return new URL(filenames[0]);
+    return new URL("file://" + filenames[0]);
   }
 
   export async function loadProject(_url: URL): Promise<void> {
@@ -53,17 +111,20 @@ namespace Fudge {
     const dom: Document = parser.parseFromString(content, "application/xhtml+xml");
     const head: HTMLHeadElement = dom.querySelector("head");
     console.log(head);
+    if (watcher)
+      watcher.close();
 
     ƒ.Project.clear();
+    project = new Project(_url);
 
-    project.title = head.querySelector("title").textContent;
-    
+    // project.title = head.querySelector("title").textContent;
+
     project.files.index.filename = _url.toString().split("/").pop();
-    project.files.index.overwrite = false;
+    // project.files.index.overwrite = false;
 
     let css: HTMLLinkElement = head.querySelector("link[rel=stylesheet]");
-    project.files.style.filename = css.getAttribute("href");  
-    project.files.style.overwrite = false;
+    project.files.style.filename = css.getAttribute("href");
+    // project.files.style.overwrite = false;
 
     //TODO: should old scripts be removed from memory first? How?
     const scripts: NodeListOf<HTMLScriptElement> = head.querySelectorAll("script");
@@ -74,7 +135,7 @@ namespace Fudge {
         await ƒ.Project.loadScript(new URL(url, _url).toString());
         console.log("ComponentScripts", ƒ.Project.getComponentScripts());
         console.log("Script Namespaces", ƒ.Project.scriptNamespaces);
-        
+
         project.files.script.filename = url;
         Reflect.set(project.files.script, "include", true);
       }
@@ -89,9 +150,29 @@ namespace Fudge {
       ƒ.Debug.groupCollapsed("Deserialized");
       ƒ.Debug.info(reconstruction);
       ƒ.Debug.groupEnd();
-      
+
       project.files.internal.filename = resourceFile;
       project.files.internal.overwrite = true;
+    }
+
+    watchFolder();
+  }
+
+  function watchFolder(): void {
+    let dir: URL = new URL(".", project.base);
+    watcher = fs.watch(dir, { recursive: true }, hndFileChange);
+
+    async function hndFileChange(_event: string, _url: URL): Promise<void> {
+      let filename: string = _url.toString();
+      if (filename == project.files.index.filename || filename == project.files.internal.filename || filename == project.files.script.filename) {
+        watcher.close();
+        let promise: Promise<boolean> = ƒui.Dialog.prompt(null, false, "Important file change", "Reload project?", "Reload", "Cancel");
+        if (await promise) {
+          await loadProject(project.base);
+        } else
+          watcher = fs.watch(dir, { recursive: true }, hndFileChange);
+        document.dispatchEvent(new Event(EVENT_EDITOR.UPDATE));
+      }
     }
   }
 }

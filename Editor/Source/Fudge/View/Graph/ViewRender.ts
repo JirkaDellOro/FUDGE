@@ -8,9 +8,10 @@ namespace Fudge {
    * @author Jirka Dell'Oro-Friedl, HFU, 2020
    */
   export class ViewRender extends View {
-    viewport: ƒ.Viewport;
-    canvas: HTMLCanvasElement;
-    graph: ƒ.Node;
+    private cmrOrbit: ƒAid.CameraOrbit;
+    private viewport: ƒ.Viewport;
+    private canvas: HTMLCanvasElement;
+    private graph: ƒ.Node;
 
     constructor(_container: GoldenLayout.Container, _state: Object) {
       super(_container, _state);
@@ -21,7 +22,9 @@ namespace Fudge {
       this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
+      this.dom.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
     }
 
     createUserInterface(): void {
@@ -36,10 +39,11 @@ namespace Fudge {
 
       this.viewport = new ƒ.Viewport();
       this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
-      FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
+      this.cmrOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
       this.viewport.draw();
 
       this.dom.append(this.canvas);
+
 
       // ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
       // ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);
@@ -48,6 +52,7 @@ namespace Fudge {
       // let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });
 
       this.canvas.addEventListener(ƒUi.EVENT.CLICK, this.activeViewport);
+      this.canvas.addEventListener("pick", this.hndPick);
     }
 
     public setGraph(_node: ƒ.Node): void {
@@ -86,12 +91,23 @@ namespace Fudge {
         case EVENT_EDITOR.SET_GRAPH:
           this.setGraph(_event.detail);
           break;
+        case EVENT_EDITOR.FOCUS_NODE:
+          this.cmrOrbit.mtxLocal.translation = _event.detail.mtxWorld.translation;
+          ƒ.Render.prepare(this.cmrOrbit);
+          // break;
         case ƒUi.EVENT.MUTATE:
+        case ƒUi.EVENT.DELETE:
         case EVENT_EDITOR.UPDATE:
           this.redraw();
       }
     }
 
+    private hndPick = (_event: CustomEvent): void => {
+      let picked: ƒ.Node = _event.detail.node;
+
+      // this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.FOCUS_NODE, { bubbles: true, detail: picked }));
+      this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.SELECT, { bubbles: true, detail: { data: picked } }));
+    }
 
     // private animate = (_e: Event) => {
     //   this.viewport.setGraph(this.graph);

@@ -23,9 +23,9 @@ namespace FudgeCore {
 
   /**
    * Base class for RenderManager, handling the connection to the rendering system, in this case WebGL.
-   * Methods and attributes of this class should not be called directly, only through [[RenderManager]]
+   * Methods and attributes of this class should not be called directly, only through {@link Render}
    */
-  export abstract class RenderWebGL {
+  export abstract class RenderWebGL extends EventTargetStatic {
     protected static crc3: WebGL2RenderingContext = RenderWebGL.initialize();
     protected static ƒpicked: Pick[];
     private static rectRender: Rectangle = RenderWebGL.getCanvasRect();
@@ -120,7 +120,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Clear the offscreen renderbuffer with the given [[Color]]
+     * Clear the offscreen renderbuffer with the given {@link Color}
      */
     public static clear(_color: Color = null): void {
       RenderWebGL.crc3.clearColor(_color.r, _color.g, _color.b, _color.a);
@@ -246,7 +246,7 @@ namespace FudgeCore {
       try {
         let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
         let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
-        
+
         let coat: Coat = cmpMaterial.material.getCoat();
         let shader: typeof Shader = coat instanceof CoatTextured ? ShaderPickTextured : ShaderPick;
 
@@ -279,6 +279,7 @@ namespace FudgeCore {
       // Ambient
       let ambient: WebGLUniformLocation = uni["u_ambient.color"];
       if (ambient) {
+        RenderWebGL.crc3.uniform4fv(ambient, [0, 0, 0, 0]);
         let cmpLights: ComponentLight[] = _lights.get(LightAmbient);
         if (cmpLights) {
           // TODO: add up ambient lights to a single color
@@ -292,6 +293,7 @@ namespace FudgeCore {
       // Directional
       let nDirectional: WebGLUniformLocation = uni["u_nLightsDirectional"];
       if (nDirectional) {
+        RenderWebGL.crc3.uniform1ui(nDirectional, 0);
         let cmpLights: ComponentLight[] = _lights.get(LightDirectional);
         if (cmpLights) {
           let n: number = cmpLights.length;
@@ -300,7 +302,7 @@ namespace FudgeCore {
             let cmpLight: ComponentLight = cmpLights[i];
             RenderWebGL.crc3.uniform4fv(uni[`u_directional[${i}].color`], cmpLight.light.color.getArray());
             let direction: Vector3 = Vector3.Z();
-            direction.transform(cmpLight.pivot, false);
+            direction.transform(cmpLight.mtxPivot, false);
             direction.transform(cmpLight.getContainer().mtxWorld);
             RenderWebGL.crc3.uniform3fv(uni[`u_directional[${i}].direction`], direction.get());
           }

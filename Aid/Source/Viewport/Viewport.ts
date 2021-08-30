@@ -1,5 +1,18 @@
 namespace FudgeAid {
   export class Viewport {
+    public static create(_branch: ƒ.Node): ƒ.Viewport {
+      let cmpCamera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
+      cmpCamera.mtxPivot.translate(ƒ.Vector3.Z(4));
+      cmpCamera.mtxPivot.rotateY(180);
+
+      let canvas: HTMLCanvasElement = Canvas.create();
+      document.body.appendChild(canvas);
+
+      let viewport: ƒ.Viewport = new ƒ.Viewport();
+      viewport.initialize("ƒAid-Viewport", _branch, cmpCamera, canvas);
+      return viewport;
+    }
+
     public static expandCameraToInteractiveOrbit(_viewport: ƒ.Viewport, _showFocus: boolean = true, _speedCameraRotation: number = 1, _speedCameraTranslation: number = 0.01, _speedCameraDistance: number = 0.001): CameraOrbit {
       _viewport.setFocus(true);
       _viewport.activatePointerEvent(ƒ.EVENT_POINTER.DOWN, true);
@@ -62,11 +75,14 @@ namespace FudgeAid {
           return;
         picks.sort((_a: ƒ.Pick, _b: ƒ.Pick) => _a.zBuffer < _b.zBuffer ? -1 : 1);
 
-        let posCamera: ƒ.Vector3 = camera.nodeCamera.mtxWorld.translation;
+        // let posCamera: ƒ.Vector3 = camera.nodeCamera.mtxWorld.translation;
+        // camera.mtxLocal.translation = picks[0].posWorld;
+        // // ƒ.Render.prepare(camera);
+        // camera.positionCamera(posCamera);
         camera.mtxLocal.translation = picks[0].posWorld;
-        ƒ.Render.prepare(camera);
-        camera.positionCamera(posCamera);
         redraw();
+
+        _viewport.getCanvas().dispatchEvent(new CustomEvent("pick", { detail: picks[0], bubbles: true }));
       }
 
       function hndWheelMove(_event: WheelEvent): void {

@@ -14,30 +14,32 @@ namespace Fudge {
   }
 
   export class Files extends ƒ.Mutable {
-    public index: FileInfo = new FileInfo(true, "");
-    public style: FileInfo = new FileInfo(true, "");
-    public internal: FileInfo = new FileInfo(true, "");
-    public script: FileInfo = new FileInfo(true, "");
+    public index: FileInfo = new FileInfo(true, "index.html");
+    public style: FileInfo = new FileInfo(true, "style.css");
+    public internal: FileInfo = new FileInfo(true, "Internal.json");
+    public script: FileInfo = new FileInfo(true, "Script/Build/Script.js");
 
     constructor() {
       super();
       Reflect.deleteProperty(this.script, "overwrite");
-      Reflect.set(this.script, "include", false);
-      this.script.filename = "?.js";
+      Reflect.set(this.script, "include", true);
+      this.script.filename = "Script/Build/Script.js";
     }
     protected reduceMutator(_mutator: ƒ.Mutator): void {/* */ }
   }
 
   export class Project extends ƒ.Mutable {
     public files: Files = new Files();
-    public title: string = "NewProject";
+    // public title: string = "NewProject";
+    public base: URL;
     private includePhysics: boolean = false;
     private includeAutoViewScript: boolean = true;
     private graphToStartWith: string = "";
 
-    public constructor() {
+    public constructor(_base: URL) {
       super();
-      this.updateFilenames("NewProject", true, this);
+      // this.updateFilenames("NewProject", true, this);
+      this.base = _base;
     }
 
     public async openDialog(): Promise<boolean> {
@@ -45,7 +47,6 @@ namespace Fudge {
 
       ƒui.Dialog.dom.addEventListener(ƒui.EVENT.CHANGE, this.hndChange);
       if (await promise) {
-        console.log("OK");
         let mutator: ƒ.Mutator = ƒui.Controller.getMutator(this, ƒui.Dialog.dom, this.getMutator());
         this.mutate(mutator);
         return true;
@@ -56,10 +57,10 @@ namespace Fudge {
     public hndChange = (_event: Event): void => {
       let mutator: ƒ.Mutator = ƒui.Controller.getMutator(this, ƒui.Dialog.dom, this.getMutator());
       console.log(mutator, this);
-      if (mutator.title != this.title) {
-        this.updateFilenames(mutator.title, false, mutator);
-        ƒui.Controller.updateUserInterface(this, ƒui.Dialog.dom, mutator);
-      }
+      // if (mutator.title != this.title) {
+      //   this.updateFilenames(mutator.title, false, mutator);
+      //   ƒui.Controller.updateUserInterface(this, ƒui.Dialog.dom, mutator);
+      // }
     }
 
     public getProjectJSON(): string {
@@ -78,14 +79,14 @@ namespace Fudge {
       return content;
     }
 
-    public getProjectHTML(): string {
-      let html: Document = document.implementation.createHTMLDocument(this.title);
+    public getProjectHTML(_title: string): string {
+      let html: Document = document.implementation.createHTMLDocument(_title);
 
       html.head.appendChild(createTag("meta", { charset: "utf-8" }));
 
-      html.head.appendChild(html.createComment("Load FUDGE"));
-      html.head.appendChild(createTag("script", { type: "text/javascript", src: "../../../Core/Build/FudgeCore.js" }));
-      html.head.appendChild(createTag("script", { type: "text/javascript", src: "../../../Aid/Build/FudgeAid.js" }));
+      html.head.appendChild(html.createComment("Load FUDGE. Initially, these files were copied from your local FUDGE installation. You may want to refer to online versions or create symlinks to keep up to date."));
+      html.head.appendChild(createTag("script", { type: "text/javascript", src: "Fudge/Core/FudgeCore.js" }));
+      html.head.appendChild(createTag("script", { type: "text/javascript", src: "Fudge/Aid/FudgeAid.js" }));
 
       html.head.appendChild(html.createComment("Link stylesheet and internal resources"));
       html.head.appendChild(createTag("link", { rel: "stylesheet", href: this.files.style.filename }));
@@ -103,7 +104,7 @@ namespace Fudge {
 
       html.body.appendChild(html.createComment("Dialog shown at startup only"));
       let dialog: HTMLElement = createTag("dialog");
-      dialog.appendChild(createTag("h1", {}, this.title));
+      dialog.appendChild(createTag("h1", {}, _title));
       dialog.appendChild(createTag("p", {}, "click to start"));
       html.body.appendChild(dialog);
 
@@ -144,15 +145,15 @@ namespace Fudge {
 
     protected reduceMutator(_mutator: ƒ.Mutator): void {/* */ }
 
-    private updateFilenames(_title: string, _all: boolean = false, _mutator: ƒ.Mutator): void {
-      let files: { [key: string]: FileInfo } = { html: _mutator.files.index, css: _mutator.files.style, json: _mutator.files.internal };
-      for (let key in files) {
-        let fileInfo: FileInfo = files[key];
-        fileInfo.overwrite = _all || fileInfo.overwrite;
-        if (fileInfo.overwrite)
-          fileInfo.filename = _title + "." + key;
-      }
-    }
+    // private updateFilenames(_title: string, _all: boolean = false, _mutator: ƒ.Mutator): void {
+    //   let files: { [key: string]: FileInfo } = { html: _mutator.files.index, css: _mutator.files.style, json: _mutator.files.internal };
+    //   for (let key in files) {
+    //     let fileInfo: FileInfo = files[key];
+    //     fileInfo.overwrite = _all || fileInfo.overwrite;
+    //     if (fileInfo.overwrite)
+    //       fileInfo.filename = _title + "." + key;
+    //   }
+    // }
 
     private getAutoViewScript(_graphId: string): HTMLScriptElement {
       let code: string;
@@ -179,6 +180,10 @@ namespace Fudge {
           // pick the graph to show
           let graph: ƒ.Graph = <ƒ.Graph>FudgeCore.Project.resources[_graphId];
           FudgeCore.Debug.log("Graph:", graph);
+          if (!graph) {
+            alert("Nothing to render. Create a graph with at least a mesh, material and probably some light");
+            return;
+          }
 
           // setup the viewport
           let cmpCamera: ƒ.ComponentCamera = new FudgeCore.ComponentCamera();
@@ -203,7 +208,7 @@ namespace Fudge {
 
           // draw viewport once for immediate feedback
           viewport.draw();
-          canvas.dispatchEvent(new CustomEvent("interactiveViewportStarted", {bubbles: true, detail: viewport}));
+          canvas.dispatchEvent(new CustomEvent("interactiveViewportStarted", { bubbles: true, detail: viewport }));
         }
       }).toString();
 

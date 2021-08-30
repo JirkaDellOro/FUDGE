@@ -1,0 +1,11 @@
+td {
+  width: 8em;
+  text-align: center;
+}
+
+th[toggle=false] {
+  color: grey;
+}
+th[toggle=true] {
+  color: black;
+}

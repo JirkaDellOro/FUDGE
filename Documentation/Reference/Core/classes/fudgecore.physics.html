@@ -7,6 +7,7 @@
 	<meta name="description" content="Documentation for Fudge Core">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
+	<script async src="../assets/js/search.js" id="search-script"></script>
 </head>
 <body>
 <header>
@@ -40,8 +41,6 @@
 							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
 							<input type="checkbox" id="tsd-filter-externals" checked />
 							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
-							<input type="checkbox" id="tsd-filter-only-exported" />
-							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
 						</div>
 					</div>
 					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
@@ -53,7 +52,7 @@
 		<div class="container">
 			<ul class="tsd-breadcrumb">
 				<li>
-					<a href="../index.html">Globals</a>
+					<a href="../index.html">Fudge Core</a>
 				</li>
 				<li>
 					<a href="../modules/fudgecore.html">FudgeCore</a>
@@ -94,6 +93,12 @@
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
+							<h3>Constructors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="fudgecore.physics.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="fudgecore.physics.html#debugdraw" class="tsd-kind-icon">debug<wbr>Draw</a></li>
@@ -110,9 +115,11 @@
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.physics.html#changejointstatus" class="tsd-kind-icon">change<wbr>Joint<wbr>Status</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.physics.html#connectjoints" class="tsd-kind-icon">connect<wbr>Joints</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.physics.html#distributebodyid" class="tsd-kind-icon">distribute<wbr>BodyID</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.physics.html#draw" class="tsd-kind-icon">draw</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.physics.html#getbodybyid" class="tsd-kind-icon">get<wbr>Body<wbr>ByID</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.physics.html#getbodylist" class="tsd-kind-icon">get<wbr>Body<wbr>List</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.physics.html#getgravity" class="tsd-kind-icon">get<wbr>Gravity</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.physics.html#getoimoworld" class="tsd-kind-icon">get<wbr>Oimo<wbr>World</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.physics.html#getsolveriterations" class="tsd-kind-icon">get<wbr>Solver<wbr>Iterations</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.physics.html#gettriggerlist" class="tsd-kind-icon">get<wbr>Trigger<wbr>List</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.physics.html#registertrigger" class="tsd-kind-icon">register<wbr>Trigger</a></li>
@@ -122,12 +129,29 @@
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.physics.html#setsolveriterations" class="tsd-kind-icon">set<wbr>Solver<wbr>Iterations</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.physics.html#simulate" class="tsd-kind-icon">simulate</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="fudgecore.physics.html#unregistertrigger" class="tsd-kind-icon">unregister<wbr>Trigger</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.physics.html#adjusttransforms" class="tsd-kind-icon">adjust<wbr>Transforms</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.physics.html#initializephysics" class="tsd-kind-icon">initialize<wbr>Physics</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.physics.html#raycast" class="tsd-kind-icon">raycast</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="fudgecore.physics.html#start" class="tsd-kind-icon">start</a></li>
 							</ul>
 						</section>
 					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Constructors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
+					<a name="constructor" class="tsd-anchor"></a>
+					<h3>constructor</h3>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Physics<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.physics.html" class="tsd-signature-type" data-tsd-kind="Class">Physics</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+							</aside>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.physics.html" class="tsd-signature-type" data-tsd-kind="Class">Physics</a></h4>
+						</li>
+					</ul>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
@@ -135,10 +159,10 @@
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 					<a name="debugdraw" class="tsd-anchor"></a>
 					<h3>debug<wbr>Draw</h3>
-					<div class="tsd-signature tsd-kind-icon">debug<wbr>Draw<span class="tsd-signature-symbol">:</span> <a href="fudgecore.physicsdebugdraw.html" class="tsd-signature-type">PhysicsDebugDraw</a></div>
+					<div class="tsd-signature tsd-kind-icon">debug<wbr>Draw<span class="tsd-signature-symbol">:</span> <a href="fudgecore.physicsdebugdraw.html" class="tsd-signature-type" data-tsd-kind="Class">PhysicsDebugDraw</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/Physics.ts#L17">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:17</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/Physics.ts#L17">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:17</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -150,10 +174,10 @@
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 					<a name="maincam" class="tsd-anchor"></a>
 					<h3>main<wbr>Cam</h3>
-					<div class="tsd-signature tsd-kind-icon">main<wbr>Cam<span class="tsd-signature-symbol">:</span> <a href="fudgecore.componentcamera.html" class="tsd-signature-type">ComponentCamera</a></div>
+					<div class="tsd-signature tsd-kind-icon">main<wbr>Cam<span class="tsd-signature-symbol">:</span> <a href="fudgecore.componentcamera.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentCamera</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/Physics.ts#L19">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:19</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/Physics.ts#L19">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:19</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -165,10 +189,10 @@
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-static">
 					<a name="settings" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> settings</h3>
-					<div class="tsd-signature tsd-kind-icon">settings<span class="tsd-signature-symbol">:</span> <a href="fudgecore.physicssettings.html" class="tsd-signature-type">PhysicsSettings</a></div>
+					<div class="tsd-signature tsd-kind-icon">settings<span class="tsd-signature-symbol">:</span> <a href="fudgecore.physicssettings.html" class="tsd-signature-type" data-tsd-kind="Class">PhysicsSettings</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/Physics.ts#L14">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:14</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/Physics.ts#L14">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:14</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -180,10 +204,10 @@
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-static">
 					<a name="world" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> world</h3>
-					<div class="tsd-signature tsd-kind-icon">world<span class="tsd-signature-symbol">:</span> <a href="fudgecore.physics.html" class="tsd-signature-type">Physics</a><span class="tsd-signature-symbol"> = Physics.initializePhysics()</span></div>
+					<div class="tsd-signature tsd-kind-icon">world<span class="tsd-signature-symbol">:</span> <a href="fudgecore.physics.html" class="tsd-signature-type" data-tsd-kind="Class">Physics</a><span class="tsd-signature-symbol"> = ...</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/Physics.ts#L12">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:12</a></li>
+							<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/Physics.ts#L12">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:12</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -199,13 +223,13 @@
 					<a name="addjoint" class="tsd-anchor"></a>
 					<h3>add<wbr>Joint</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">add<wbr>Joint<span class="tsd-signature-symbol">(</span>_cmpJoint<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentjoint.html" class="tsd-signature-type">ComponentJoint</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">add<wbr>Joint<span class="tsd-signature-symbol">(</span>_cmpJoint<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentjoint.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentJoint</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/Physics.ts#L176">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:176</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/Physics.ts#L180">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:180</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -216,7 +240,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_cmpJoint: <a href="fudgecore.componentjoint.html" class="tsd-signature-type">ComponentJoint</a></h5>
+									<h5>_cmpJoint: <a href="fudgecore.componentjoint.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentJoint</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -227,13 +251,13 @@
 					<a name="addrigidbody" class="tsd-anchor"></a>
 					<h3>add<wbr>Rigidbody</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">add<wbr>Rigidbody<span class="tsd-signature-symbol">(</span>_cmpRB<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">add<wbr>Rigidbody<span class="tsd-signature-symbol">(</span>_cmpRB<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentRigidbody</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/Physics.ts#L159">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:159</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/Physics.ts#L163">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:163</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -244,7 +268,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_cmpRB: <a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a></h5>
+									<h5>_cmpRB: <a href="fudgecore.componentrigidbody.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentRigidbody</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -255,13 +279,13 @@
 					<a name="changejointstatus" class="tsd-anchor"></a>
 					<h3>change<wbr>Joint<wbr>Status</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">change<wbr>Joint<wbr>Status<span class="tsd-signature-symbol">(</span>_cmpJoint<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentjoint.html" class="tsd-signature-type">ComponentJoint</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">change<wbr>Joint<wbr>Status<span class="tsd-signature-symbol">(</span>_cmpJoint<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentjoint.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentJoint</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/Physics.ts#L233">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:233</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/Physics.ts#L246">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:246</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -273,7 +297,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_cmpJoint: <a href="fudgecore.componentjoint.html" class="tsd-signature-type">ComponentJoint</a></h5>
+									<h5>_cmpJoint: <a href="fudgecore.componentjoint.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentJoint</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -290,7 +314,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/Physics.ts#L215">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:215</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/Physics.ts#L229">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:229</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -313,7 +337,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/Physics.ts#L238">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:238</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/Physics.ts#L251">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:251</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -326,16 +350,39 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="getbodybyid" class="tsd-anchor"></a>
-					<h3>get<wbr>Body<wbr>ByID</h3>
+					<a name="draw" class="tsd-anchor"></a>
+					<h3>draw</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Body<wbr>ByID<span class="tsd-signature-symbol">(</span>_id<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a></li>
+						<li class="tsd-signature tsd-kind-icon">draw<span class="tsd-signature-symbol">(</span>_cmpCamera<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentcamera.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentCamera</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/Physics.ts#L256">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:256</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/Physics.ts#L206">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:206</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_cmpCamera: <a href="fudgecore.componentcamera.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentCamera</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="getbodybyid" class="tsd-anchor"></a>
+					<h3>get<wbr>Body<wbr>ByID</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Body<wbr>ByID<span class="tsd-signature-symbol">(</span>_id<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentRigidbody</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/Physics.ts#L269">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:269</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -349,7 +396,7 @@
 									<h5>_id: <span class="tsd-signature-type">number</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.componentrigidbody.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentRigidbody</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -357,13 +404,13 @@
 					<a name="getbodylist" class="tsd-anchor"></a>
 					<h3>get<wbr>Body<wbr>List</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Body<wbr>List<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a><span class="tsd-signature-symbol">[]</span></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Body<wbr>List<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentRigidbody</a><span class="tsd-signature-symbol">[]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/Physics.ts#L116">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:116</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/Physics.ts#L120">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:120</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -371,7 +418,7 @@
 									<p>Returns all the ComponentRigidbodies that are known to the physical space.</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a><span class="tsd-signature-symbol">[]</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.componentrigidbody.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentRigidbody</a><span class="tsd-signature-symbol">[]</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -379,13 +426,13 @@
 					<a name="getgravity" class="tsd-anchor"></a>
 					<h3>get<wbr>Gravity</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Gravity<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Gravity<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type" data-tsd-kind="Class">Vector3</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/Physics.ts#L143">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:143</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/Physics.ts#L147">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:147</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -393,7 +440,29 @@
 									<p>Get the applied gravitational force to physical objects. Default earth gravity = 9.81 m/s</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.vector3.html" class="tsd-signature-type" data-tsd-kind="Class">Vector3</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="getoimoworld" class="tsd-anchor"></a>
+					<h3>get<wbr>Oimo<wbr>World</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Oimo<wbr>World<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">World</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/Physics.ts#L192">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:192</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Returns the actual used world of the OIMO physics engine. No user interaction needed.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">World</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -407,7 +476,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/Physics.ts#L128">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:128</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/Physics.ts#L132">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:132</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -423,13 +492,13 @@
 					<a name="gettriggerlist" class="tsd-anchor"></a>
 					<h3>get<wbr>Trigger<wbr>List</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Trigger<wbr>List<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a><span class="tsd-signature-symbol">[]</span></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Trigger<wbr>List<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentRigidbody</a><span class="tsd-signature-symbol">[]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/Physics.ts#L121">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:121</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/Physics.ts#L125">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:125</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -437,7 +506,7 @@
 									<p>Returns all the ComponentRigidbodies that are in the specific group of triggers.</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a><span class="tsd-signature-symbol">[]</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.componentrigidbody.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentRigidbody</a><span class="tsd-signature-symbol">[]</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -445,13 +514,13 @@
 					<a name="registertrigger" class="tsd-anchor"></a>
 					<h3>register<wbr>Trigger</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">register<wbr>Trigger<span class="tsd-signature-symbol">(</span>_rigidbody<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">register<wbr>Trigger<span class="tsd-signature-symbol">(</span>_rigidbody<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentRigidbody</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/Physics.ts#L201">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:201</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/Physics.ts#L215">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:215</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -462,7 +531,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_rigidbody: <a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a></h5>
+									<h5>_rigidbody: <a href="fudgecore.componentrigidbody.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentRigidbody</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -473,13 +542,13 @@
 					<a name="removejoint" class="tsd-anchor"></a>
 					<h3>remove<wbr>Joint</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">remove<wbr>Joint<span class="tsd-signature-symbol">(</span>_cmpJoint<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentjoint.html" class="tsd-signature-type">ComponentJoint</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">remove<wbr>Joint<span class="tsd-signature-symbol">(</span>_cmpJoint<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentjoint.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentJoint</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/Physics.ts#L183">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:183</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/Physics.ts#L187">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:187</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -490,7 +559,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_cmpJoint: <a href="fudgecore.componentjoint.html" class="tsd-signature-type">ComponentJoint</a></h5>
+									<h5>_cmpJoint: <a href="fudgecore.componentjoint.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentJoint</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -501,13 +570,13 @@
 					<a name="removerigidbody" class="tsd-anchor"></a>
 					<h3>remove<wbr>Rigidbody</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">remove<wbr>Rigidbody<span class="tsd-signature-symbol">(</span>_cmpRB<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">remove<wbr>Rigidbody<span class="tsd-signature-symbol">(</span>_cmpRB<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentRigidbody</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/Physics.ts#L167">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:167</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/Physics.ts#L171">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:171</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -518,7 +587,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_cmpRB: <a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a></h5>
+									<h5>_cmpRB: <a href="fudgecore.componentrigidbody.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentRigidbody</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -529,13 +598,13 @@
 					<a name="setgravity" class="tsd-anchor"></a>
 					<h3>set<wbr>Gravity</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">set<wbr>Gravity<span class="tsd-signature-symbol">(</span>_value<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Gravity<span class="tsd-signature-symbol">(</span>_value<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type" data-tsd-kind="Class">Vector3</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/Physics.ts#L151">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:151</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/Physics.ts#L155">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:155</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -546,7 +615,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_value: <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h5>
+									<h5>_value: <a href="fudgecore.vector3.html" class="tsd-signature-type" data-tsd-kind="Class">Vector3</a></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -563,7 +632,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/Physics.ts#L135">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:135</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/Physics.ts#L139">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:139</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -591,7 +660,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/Physics.ts#L190">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:190</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/Physics.ts#L199">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:199</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -602,7 +671,7 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _deltaTime: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 1 / 60</span></h5>
+									<h5>_deltaTime: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = ...</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -613,13 +682,13 @@
 					<a name="unregistertrigger" class="tsd-anchor"></a>
 					<h3>unregister<wbr>Trigger</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">unregister<wbr>Trigger<span class="tsd-signature-symbol">(</span>_rigidbody<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">unregister<wbr>Trigger<span class="tsd-signature-symbol">(</span>_rigidbody<span class="tsd-signature-symbol">: </span><a href="fudgecore.componentrigidbody.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentRigidbody</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/Physics.ts#L207">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:207</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/Physics.ts#L221">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:221</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -630,7 +699,38 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_rigidbody: <a href="fudgecore.componentrigidbody.html" class="tsd-signature-type">ComponentRigidbody</a></h5>
+									<h5>_rigidbody: <a href="fudgecore.componentrigidbody.html" class="tsd-signature-type" data-tsd-kind="Class">ComponentRigidbody</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="adjusttransforms" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> adjust<wbr>Transforms</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">adjust<wbr>Transforms<span class="tsd-signature-symbol">(</span>_branch<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type" data-tsd-kind="Class">Node</a>, _toMesh<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/Physics.ts#L91">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:91</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Adjusts the transforms of the <a href="fudgecore.componentrigidbody.html">ComponentRigidbody</a>s in the given branch to match their nodes or meshes</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_branch: <a href="fudgecore.node.html" class="tsd-signature-type" data-tsd-kind="Class">Node</a></h5>
+								</li>
+								<li>
+									<h5>_toMesh: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -641,13 +741,13 @@
 					<a name="initializephysics" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> initialize<wbr>Physics</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">initialize<wbr>Physics<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.physics.html" class="tsd-signature-type">Physics</a></li>
+						<li class="tsd-signature tsd-kind-icon">initialize<wbr>Physics<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.physics.html" class="tsd-signature-type" data-tsd-kind="Class">Physics</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/Physics.ts#L30">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:30</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/Physics.ts#L30">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:30</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -656,7 +756,7 @@
 									rigidbodies.</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.physics.html" class="tsd-signature-type">Physics</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.physics.html" class="tsd-signature-type" data-tsd-kind="Class">Physics</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -664,13 +764,13 @@
 					<a name="raycast" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagStatic">Static</span> raycast</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">raycast<span class="tsd-signature-symbol">(</span>_origin<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a>, _direction<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a>, _length<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _group<span class="tsd-signature-symbol">?: </span><a href="../enums/fudgecore.physics_group.html" class="tsd-signature-type">PHYSICS_GROUP</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.rayhitinfo.html" class="tsd-signature-type">RayHitInfo</a></li>
+						<li class="tsd-signature tsd-kind-icon">raycast<span class="tsd-signature-symbol">(</span>_origin<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type" data-tsd-kind="Class">Vector3</a>, _direction<span class="tsd-signature-symbol">: </span><a href="fudgecore.vector3.html" class="tsd-signature-type" data-tsd-kind="Class">Vector3</a>, _length<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, _group<span class="tsd-signature-symbol">?: </span><a href="../enums/fudgecore.physics_group.html" class="tsd-signature-type" data-tsd-kind="Enumeration">PHYSICS_GROUP</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="fudgecore.rayhitinfo.html" class="tsd-signature-type" data-tsd-kind="Class">RayHitInfo</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/Physics.ts#L45">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:45</a></li>
+									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/ee5a3b6f/Core/Source/Physics/Physics.ts#L45">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:45</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -682,47 +782,19 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>_origin: <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h5>
+									<h5>_origin: <a href="fudgecore.vector3.html" class="tsd-signature-type" data-tsd-kind="Class">Vector3</a></h5>
 								</li>
 								<li>
-									<h5>_direction: <a href="fudgecore.vector3.html" class="tsd-signature-type">Vector3</a></h5>
+									<h5>_direction: <a href="fudgecore.vector3.html" class="tsd-signature-type" data-tsd-kind="Class">Vector3</a></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _length: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 1</span></h5>
+									<h5>_length: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 1</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> _group: <a href="../enums/fudgecore.physics_group.html" class="tsd-signature-type">PHYSICS_GROUP</a><span class="tsd-signature-symbol"> = PHYSICS_GROUP.DEFAULT</span></h5>
+									<h5>_group: <a href="../enums/fudgecore.physics_group.html" class="tsd-signature-type" data-tsd-kind="Enumeration">PHYSICS_GROUP</a><span class="tsd-signature-symbol"> = ...</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="fudgecore.rayhitinfo.html" class="tsd-signature-type">RayHitInfo</a></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
-					<a name="start" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagStatic">Static</span> start</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
-						<li class="tsd-signature tsd-kind-icon">start<span class="tsd-signature-symbol">(</span>_sceneTree<span class="tsd-signature-symbol">: </span><a href="fudgecore.node.html" class="tsd-signature-type">Node</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/JirkaDellOro/FUDGE/blob/e778a5d5/Core/Source/Physics/Physics.ts#L91">Documents/HFU/FUDGE/Core/Source/Physics/Physics.ts:91</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Starts the physical world by checking that each body has the correct values from the Scene Tree</p>
-								</div>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>_sceneTree: <a href="fudgecore.node.html" class="tsd-signature-type">Node</a></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+							<h4 class="tsd-returns-title">Returns <a href="fudgecore.rayhitinfo.html" class="tsd-signature-type" data-tsd-kind="Class">RayHitInfo</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -731,8 +803,8 @@
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 			<nav class="tsd-navigation primary">
 				<ul>
-					<li class="globals  ">
-						<a href="../index.html"><em>Globals</em></a>
+					<li class=" ">
+						<a href="../index.html">Exports</a>
 					</li>
 					<li class="current tsd-kind-namespace">
 						<a href="../modules/fudgecore.html">Fudge<wbr>Core</a>
@@ -746,6 +818,9 @@
 					<li class="current tsd-kind-class tsd-parent-kind-namespace">
 						<a href="fudgecore.physics.html" class="tsd-kind-icon">Physics</a>
 						<ul>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class">
+								<a href="fudgecore.physics.html#constructor" class="tsd-kind-icon">constructor</a>
+							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="fudgecore.physics.html#debugdraw" class="tsd-kind-icon">debug<wbr>Draw</a>
 							</li>
@@ -774,6 +849,9 @@
 								<a href="fudgecore.physics.html#distributebodyid" class="tsd-kind-icon">distribute<wbr>BodyID</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.physics.html#draw" class="tsd-kind-icon">draw</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudgecore.physics.html#getbodybyid" class="tsd-kind-icon">get<wbr>Body<wbr>ByID</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
@@ -781,6 +859,9 @@
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudgecore.physics.html#getgravity" class="tsd-kind-icon">get<wbr>Gravity</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="fudgecore.physics.html#getoimoworld" class="tsd-kind-icon">get<wbr>Oimo<wbr>World</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="fudgecore.physics.html#getsolveriterations" class="tsd-kind-icon">get<wbr>Solver<wbr>Iterations</a>
@@ -810,13 +891,13 @@
 								<a href="fudgecore.physics.html#unregistertrigger" class="tsd-kind-icon">unregister<wbr>Trigger</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="fudgecore.physics.html#adjusttransforms" class="tsd-kind-icon">adjust<wbr>Transforms</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
 								<a href="fudgecore.physics.html#initializephysics" class="tsd-kind-icon">initialize<wbr>Physics</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
 								<a href="fudgecore.physics.html#raycast" class="tsd-kind-icon">raycast</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
-								<a href="fudgecore.physics.html#start" class="tsd-kind-icon">start</a>
 							</li>
 						</ul>
 					</li>
@@ -832,6 +913,7 @@
 		<h2>Legend</h2>
 		<div class="tsd-legend-group">
 			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
 				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
 				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
 			</ul>

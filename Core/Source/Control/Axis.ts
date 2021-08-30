@@ -2,8 +2,8 @@
 namespace FudgeCore {
   /**
    * Handles multiple controls as inputs and creates an output from that.
-   * As a subclass of [[Control]], axis calculates the ouput summing up the inputs and processing the result using its own settings.  
-   * Dispatches [[EVENT_CONTROL.OUTPUT]] and [[EVENT_CONTROL.INPUT]] when one of the controls dispatches them.
+   * As a subclass of {@link Control}, axis calculates the ouput summing up the inputs and processing the result using its own settings.  
+   * Dispatches {@link EVENT_CONTROL.OUTPUT} and {@link EVENT_CONTROL.INPUT} when one of the controls dispatches them.
    * ```plaintext
    *           ┌───────────────────────────────────────────┐
    *           │ ┌───────┐                                 │

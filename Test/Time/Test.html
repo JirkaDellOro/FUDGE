@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link rel="stylesheet" href="../TestInstructions.css">
+  <script src="../dialog-polyfill.min.js"></script>
+  <script src="../TestInstructions.js"></script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Time and Loop</title>
+  <style>
+    input,
+    select,
+    meter {
+      width: 10em;
+    }
+
+    input:read-only {
+      background-color: lightgrey;
+    }
+
+    input[type=range],
+    textarea {
+      width: 100%;
+    }
+
+    input[type=range]:enabled {
+      box-shadow: 0px 0px 1px #cccccc;
+    }
+
+    strong {
+      display: inline-block;
+
+    }
+
+    fieldset {
+      border: 0px #dddddd solid;
+    }
+
+    fieldset#loop {
+      background-color: azure;
+    }
+
+    fieldset#time {
+      background-color: beige;
+    }
+
+    dialog {
+      top: 0px;
+    }
+  </style>
+  <script type="text/javascript" src="../../Core/Build/FudgeCore.js"></script>
+  <script src="TimeLoop.js"></script>
+</head>
+
+<body>
+  <script>
+    TestInstructions.display({
+      Name: "Time",
+      Test: [
+        "The game time, its scaling and the core loop in different modes.",
+        "Timer events controlled by game time."
+      ],
+      Setup: [
+        "Fieldset to adjust the scaling of the game time, the delay for the event to fire und a button to install the event.",
+        "Fieldset to adjust the parameters for the loop.",
+      ],
+      Act: [
+        "Set a scaling for gametime",
+        "Enter a time after which an event should be fired and install it",
+        "Set the frame rate (not applicable for FRAME_REQUEST, since that is determined by the browser)",
+        "Select the mode of the loop",
+
+      ],
+      Observe: [
+        "The average frame rate, the meter bars, the progress of scaled game time",
+      ],
+      Control: [
+        "<strong>input fields</strong> Set fps for game time and realtime | Set scaling for gametime | Set time to trigger the lapse event",
+        "<strong>button</strong> trigger in event after the set time"
+      ],
+      Expect: [
+        "In the <strong>FRAME REQUEST</strong> mode, the average fps should remain constant",
+        "In the <strong>TIME_REAL</strong> mode, the average fps should be at the same level as the set fps",
+        "In <strong>TIME GAME</strong> mode, the average fps should be at the level of the fps set and multiplied by the scaling",
+        "The event of the lapse should be fired after the specific time [ms] divided by the scaling"
+      ]
+    });
+  </script>
+  
+  <form>
+    <fieldset id="time">
+      <legend>Time.game</legend>
+      <input name="time" disabled></input> Time<br />
+      <input type="number" name="scale" min="-1000" max="1000" step="0.1" value="1"> Scale<br />
+      <input type="number" name="lapse" min="1000" max="100000" step="100" value="1000"> Event lapse 
+      <button type="button" name="start"> Set</button><br />
+      <meter min="0" max="10" value="0" name="event" /> Event<br />
+    </fieldset>
+  </form>
+  <form>
+    <fieldset id="loop">
+      <legend>Loop</legend>
+      <input name="avg" disabled></input> Avg<br />
+      <input type="number" name="fps" min="0" max="1000" value="30"> FPS<br />
+      <select name="mode" value="Real">
+        <option value="FRAME_REQUEST">FRAME_REQUEST</option>
+        <option value="TIME_GAME">TIME_GAME</option>
+        <option value="TIME_REAL">TIME_REAL</option>
+      </select> Mode</br>
+      <meter min="0" max="10" value="0" name="frame" /> Frame<br />
+    </fieldset>
+  </form>
+</body>
+
+</html>

@@ -1,6 +1,6 @@
 namespace FudgeCore {
   /**
-   * Extension of AudioBuffer with a load method that creates a buffer in the [[AudioManager]].default to be used with [[ComponentAudio]]
+   * Extension of AudioBuffer with a load method that creates a buffer in the {@link AudioManager}.default to be used with {@link ComponentAudio}
    * @authors Thomas Dorner, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
    */
   export class Audio extends Mutable implements SerializableResource {
@@ -61,10 +61,10 @@ namespace FudgeCore {
       if (_mutator.url != this.url.toString())
         this.load(_mutator.url);
       // except url from mutator for further processing
-      delete(_mutator.url);
+      delete (_mutator.url);
       super.mutate(_mutator);
       // reconstruct, for mutator may be kept by caller
-      _mutator.url = url;
+      Reflect.set(_mutator, "url", url);
     }
 
     protected reduceMutator(_mutator: Mutator): void {

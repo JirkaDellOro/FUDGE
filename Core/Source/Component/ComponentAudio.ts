@@ -15,7 +15,7 @@ namespace FudgeCore {
   }
 
   /**
-   * Builds a minimal audio graph (by default in [[AudioManager]].default) and synchronizes it with the containing [[Node]]
+   * Builds a minimal audio graph (by default in {@link AudioManager}.default) and synchronizes it with the containing {@link Node}
    * ```plaintext
    * ┌ AudioManager(.default) ────────────────────────┐
    * │ ┌ ComponentAudio ───────────────────┐          │
@@ -29,8 +29,8 @@ namespace FudgeCore {
    */
   export class ComponentAudio extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentAudio);
-    /** places and directs the panner relative to the world transform of the [[Node]]  */
-    public pivot: Matrix4x4 = Matrix4x4.IDENTITY();
+    /** places and directs the panner relative to the world transform of the {@link Node}  */
+    public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
 
     protected singleton: boolean = false;
 
@@ -63,6 +63,14 @@ namespace FudgeCore {
       return this.gain.gain.value;
     }
 
+    public set loop(_on: boolean) {
+      this.source.loop = _on;
+    }
+
+    public get loop(): boolean {
+      return this.source.loop;
+    }
+
     public get isPlaying(): boolean {
       return this.playing;
     }
@@ -81,7 +89,7 @@ namespace FudgeCore {
      * Set the property of the panner to the given value. Use to manipulate range and rolloff etc.
      */
     public setPanner(_property: AUDIO_PANNER, _value: number): void {
-      Object.assign(this.panner, { [_property]: _value });
+      Reflect.set(this.panner, _property, _value);
     }
 
     // TODO: may be used for serialization of AudioNodes
@@ -117,15 +125,17 @@ namespace FudgeCore {
         this.source.addEventListener(EVENT_AUDIO.ENDED, this.hndAudioEnded);
       }
       else
-        this.source.stop();
+        try {
+          this.source.stop();
+        } catch (_error: unknown) { /* catch exception when source hasn't been started... */ }
       this.playing = _on;
     }
 
     /**
-     * Inserts AudioNodes between the panner and the local gain of this [[ComponentAudio]]
+     * Inserts AudioNodes between the panner and the local gain of this {@link ComponentAudio}
      * _input and _output may be the same AudioNode, if there is only one to insert,
      * or may have multiple AudioNode between them to create an effect-graph.\
-     * Note that [[ComponentAudio]] does not keep track of inserted AudioNodes!
+     * Note that {@link ComponentAudio} does not keep track of inserted AudioNodes!
      * ```plaintext
      * ┌ AudioManager(.default) ──────────────────────────────────────────────────────┐
      * │ ┌ ComponentAudio ─────────────────────────────────────────────────┐          │
@@ -156,7 +166,7 @@ namespace FudgeCore {
 
     /**
      * Connects this components gain-node to the gain node of the AudioManager this component runs on.
-     * Only call this method if the component is not attached to a [[Node]] but needs to be heard.
+     * Only call this method if the component is not attached to a {@link Node} but needs to be heard.
      */
     public connect(_on: boolean): void {
       if (_on)
@@ -170,19 +180,40 @@ namespace FudgeCore {
       let serialization: Serialization = super.serialize();
       serialization.idResource = this.audio.idResource;
       serialization.playing = this.playing;
-      serialization.loop = this.source.loop;
-      serialization.volume = this.gain.gain.value;
+      serialization.loop = this.loop;
+      serialization.volume = this.volume;
       // console.log(this.getMutatorOfNode(AUDIO_NODE_TYPE.PANNER));
       // TODO: serialize panner parameters
       return serialization;
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      super.deserialize(_serialization);
+      await super.deserialize(_serialization);
       let audio: Audio = <Audio>await Project.getResource(_serialization.idResource);
       this.createSource(audio, _serialization.loop);
       this.volume = _serialization.volume;
       this.play(_serialization.playing);
       return this;
+    }
+
+    public getMutator(): Mutator {
+      let mutator: Mutator = super.getMutator(true);
+      let audio: Mutator = mutator.audio;
+      delete mutator.audio; // just to rearrange in interfaces...
+      mutator.loop = this.loop;
+      mutator.volume = this.volume;
+      mutator.audio = audio; //... so audio comes last
+      return mutator;
+    }
+
+    public async mutate(_mutator: Mutator): Promise<void> {
+      await super.mutate(_mutator);
+      this.volume = _mutator.volume;
+      this.loop = _mutator.loop;
+    }
+
+    protected reduceMutator(_mutator: Mutator): void {
+      super.reduceMutator(_mutator);
+      delete _mutator.listened;
     }
     //#endregion
 
@@ -267,9 +298,9 @@ namespace FudgeCore {
      * Updates the panner node, its position and direction, using the worldmatrix of the container and the pivot of this component. 
      */
     private update = (_event: Event): void => {
-      let mtxResult: Matrix4x4 = this.pivot;
+      let mtxResult: Matrix4x4 = this.mtxPivot;
       if (this.getContainer())
-        mtxResult = Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.pivot);
+        mtxResult = Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.mtxPivot);
 
       // Debug.log(mtxResult.toString());
       let position: Vector3 = mtxResult.translation;

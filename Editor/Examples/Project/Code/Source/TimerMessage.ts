@@ -5,12 +5,12 @@ namespace Script {
   ƒ.Project.registerScriptNamespace(Script);
 
   export class TimerMessage extends ƒ.ComponentScript {
-    // public static readonly iSubclass: number = ƒ.Component.registerSubclass(TimerMessage);
+    public static readonly iSubclass: number = ƒ.Component.registerSubclass(TimerMessage);
     public prefix: string = "Script: ";
     public count: number = 0;
-    private timer: ƒ.Timer;
+    #timer: ƒ.Timer;
 
-    constructor() { 
+    constructor() {
       super();
       if (ƒ.Project.mode == ƒ.MODE.EDITOR)
         return;
@@ -24,10 +24,10 @@ namespace Script {
     }
 
     public hndAddComponent = (_event: Event) => {
-      this.timer = new ƒ.Timer(ƒ.Time.game, 1000, 0, this.hndTimer);
+      this.#timer = new ƒ.Timer(ƒ.Time.game, 1000, 0, this.hndTimer);
     }
     public hndRemoveComponent = (_event: Event) => {
-      this.timer.clear();
+      this.#timer.clear();
       this.removeEventListener(ƒ.EVENT.COMPONENT_ADD, this.hndAddComponent);
       this.removeEventListener(ƒ.EVENT.COMPONENT_REMOVE, this.hndRemoveComponent);
     }

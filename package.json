@@ -4,7 +4,7 @@
   "description": "Furtwangen University Didactic Game Editor (FUDGE)",
   "main": "index.js",
   "scripts": {
-    "run": "electron Editor/electron",
+    "run": "electron Editor/Electron",
     "build": "electron-packager Editor/Electron FUDGE --icon=Miscellaneous/Logo/Fudge_360.png --overwrite --all"
   },
   "repository": {
@@ -23,8 +23,8 @@
   "dependencies": {
     "@types/node": "^12.7.1",
     "@types/ws": "^6.0.2",
-    "electron": "^12.1.0",
+    "electron": "^12.0.2",
     "websocket": "^1.0.32",
-    "ws": "^7.1.2"
+    "ws": "^7.4.6"
   }
 }

@@ -1,9 +1,9 @@
 namespace FudgeCore {
   /**
-   * Controls the rendering of a branch, using the given [[ComponentCamera]],
+   * Controls the rendering of a branch, using the given {@link ComponentCamera},
    * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
-   * through a series of [[Framing]] objects. The stages involved are in order of rendering
-   * [[RenderManager]].viewport -> [[Viewport]].source -> [[Viewport]].destination -> DOM-Canvas -> Client(CSS)
+   * through a series of {@link Framing} objects. The stages involved are in order of rendering
+   * {@link Render}.viewport -> {@link Viewport}.source -> {@link Viewport}.destination -> DOM-Canvas -> Client(CSS)
    * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
    */
   export class Viewport extends EventTargetƒ {
@@ -105,13 +105,10 @@ namespace FudgeCore {
 
     /**
      * Logs this viewports scenegraph to the console.
+     * TODO: remove this method, since it's implemented in Debug
      */
     public showSceneGraph(): void {
-      // TODO: move to debug-class
-      let output: string = "SceneGraph for this viewport:";
-      output += "\n \n";
-      output += this.#branch.name;
-      Debug.log(output + "   => ROOTNODE" + this.#branch.toHierarchyString());
+      Debug.branch(this.#branch);
     }
 
     // #region Drawing
@@ -132,8 +129,14 @@ namespace FudgeCore {
 
       if (_calculateTransforms)
         this.calculateTransforms();
-      Render.clear(this.camera.backgroundColor);
-      Render.draw(this.camera);
+
+      Render.clear(this.camera.clrBackground);
+
+      if (Physics.settings?.debugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
+        Render.draw(this.camera);
+      if (Physics.settings?.debugDraw) {
+        Physics.world.draw(this.camera);
+      }
 
       this.#crc2.imageSmoothingEnabled = false;
       this.#crc2.drawImage(
@@ -144,13 +147,13 @@ namespace FudgeCore {
     }
 
     /**
-     * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the [[Node]]s and [[ComponentMesh]]es 
+     * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the {@link Node}s and {@link ComponentMesh}es 
      */
     public calculateTransforms(): void {
-      let matrix: Matrix4x4 = Matrix4x4.IDENTITY();
+      let mtxRoot: Matrix4x4 = Matrix4x4.IDENTITY();
       if (this.#branch.getParent())
-        matrix = this.#branch.getParent().mtxWorld;
-      Render.prepare(this.#branch, matrix);
+        mtxRoot = this.#branch.getParent().mtxWorld;
+      Render.prepare(this.#branch, null, mtxRoot);
     }
 
 
@@ -188,15 +191,15 @@ namespace FudgeCore {
 
     //#region Points
     /**
-     * Returns a [[Ray]] in world coordinates from this camera through the point given in client space
+     * Returns a {@link Ray} in world coordinates from this camera through the point given in client space
      */
     public getRayFromClient(_point: Vector2): Ray {
       let posProjection: Vector2 = this.pointClientToProjection(_point);
       let ray: Ray = new Ray(new Vector3(-posProjection.x, posProjection.y, 1));
 
       // ray.direction.scale(camera.distance);
-      ray.origin.transform(this.camera.pivot);
-      ray.direction.transform(this.camera.pivot, false);
+      ray.origin.transform(this.camera.mtxPivot);
+      ray.direction.transform(this.camera.mtxPivot, false);
       let cameraNode: Node = this.camera.getContainer();
       if (cameraNode) {
         ray.origin.transform(cameraNode.mtxWorld);
@@ -300,7 +303,7 @@ namespace FudgeCore {
 
     /**
      * Switch the viewports focus on or off. Only one viewport in one FUDGE instance can have the focus, thus receiving keyboard events. 
-     * So a viewport currently having the focus will lose it, when another one receives it. The viewports fire [[Event]]s accordingly.
+     * So a viewport currently having the focus will lose it, when another one receives it. The viewports fire {@link Eventƒ}s accordingly.
      * // TODO: examine, if this can be achieved by regular DOM-Focus and tabindex=0
      */
     public setFocus(_on: boolean): void {

@@ -35,6 +35,10 @@ namespace Main {
     if (fudge === null) createFudge();
   });
 
+  ipcMain.addListener("enableMenuItem", function (_event: Electron.Event, _args: Object): void {
+    Menu.getApplicationMenu().getMenuItemById(_args["item"]).enabled = _args["on"];
+  });
+
   function send(_window: Electron.BrowserWindow, _message: string, ..._args: unknown[]): void {
     console.log(`Send message ${_message}`);
     _window.webContents.send(_message, _args);
@@ -46,7 +50,8 @@ namespace Main {
     console.log("createFudge");
     fudge = addWindow("../Html/Fudge.html");
     const menu: Electron.Menu = Menu.buildFromTemplate(getMenuFudge());
-    fudge.setMenu(menu);
+    // fudge.setMenu(menu);
+    Menu.setApplicationMenu(menu);
   }
 
   function addWindow(_url: string, width: number = defaultWidth, height: number = defaultHeight): Electron.BrowserWindow {
@@ -56,7 +61,8 @@ namespace Main {
       // fullscreen: true,
       webPreferences: {        // preload: path.join(__dirname, "preload.js"),
         nodeIntegration: true,
-        enableRemoteModule: true
+        enableRemoteModule: true,
+        contextIsolation: false
       }
     });
 
@@ -111,16 +117,17 @@ namespace Main {
     const menu: Electron.MenuItemConstructorOptions[] = [
       {
         label: "Project", submenu: [
-          { label: "Save", id: Fudge.MENU.PROJECT_SAVE, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+S" : "Ctrl+S" },
-          { label: "Open", id: Fudge.MENU.PROJECT_LOAD, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+O" : "Ctrl+O" },
+          { label: "New", id: Fudge.MENU.PROJECT_NEW, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+N" : "Ctrl+N" },
+          { label: "Load", id: Fudge.MENU.PROJECT_LOAD, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+L" : "Ctrl+L" },
+          { label: "Save", id: Fudge.MENU.PROJECT_SAVE, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+S" : "Ctrl+S", enabled: false },
           { label: "Quit", id: Fudge.MENU.QUIT, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+Q" : "Ctrl+Q" }
         ]
       },
       {
         label: "Edit", submenu: [
-          { label: "Project", id: Fudge.MENU.PANEL_PROJECT_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+G" : "Ctrl+P" },
-          { label: "Graph", id: Fudge.MENU.PANEL_GRAPH_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+G" : "Ctrl+G" },
-          { label: "Animation", id: Fudge.MENU.PANEL_ANIMATION_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+I" : "Ctrl+I" }
+          { label: "Project", id: Fudge.MENU.PANEL_PROJECT_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+R" : "Ctrl+R", enabled: false  },
+          { label: "Graph", id: Fudge.MENU.PANEL_GRAPH_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+G" : "Ctrl+G", enabled: false  },
+          { label: "Animation", id: Fudge.MENU.PANEL_ANIMATION_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+I" : "Ctrl+I", enabled: false }
         ]
       },
       {

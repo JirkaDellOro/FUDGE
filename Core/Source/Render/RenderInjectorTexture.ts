@@ -1,4 +1,5 @@
 namespace FudgeCore {
+   //gives WebGL Buffer the data from the {@link Texture]]
   export class RenderInjectorTexture extends RenderInjector {
     public static decorate(_constructor: Function): void {
       RenderInjector.inject(_constructor, RenderInjectorTexture);

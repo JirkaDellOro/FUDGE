@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Mesh</title>
+  <title>Test</title>
+
+  <link rel="stylesheet" href="../TestInstructions.css">
+  <script src="../dialog-polyfill.min.js"></script>
+  <script src="../TestInstructions.js"></script>
+
+  <script type="text/javascript" src="../../Core/Build/FudgeCore.js"></script>
+  <script type="text/javascript" src="../../Aid/Build/FudgeAid.js"></script>
+
+  <script type="text/javascript" src="Mesh.js"></script>
+
+  <style type="text/css">
+    html,
+    body {
+      padding: 0;
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    canvas {
+      width: 100vw;
+      height: 600px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <script>
+    TestInstructions.display({
+      Name: "Mesh",
+      Test: [
+        "Shows all subclasses of mesh that have been properly registered ",
+      ],
+      Setup: [
+        "1 ƒAid.NodeCoordinateSystem symbolizing the worlds origin and coordinate system",
+        "1 ƒ.node is created for each subclass of Mesh",
+        "1 ƒAid.Node called 'nodes' for moving all ƒ.Nodes together",
+        "1 ƒAid.CameraOrbit moving around the worlds center"
+      ],
+      Act: [
+        "Move the camera",
+        "Move the Nodes"
+      ],
+      Observe: [
+        "A list of all subclasses derived from class Mesh that have been properly registered is output in the console",
+        "All meshes are drawn on the canvas and checked for defects",
+        "use the controls to get a close look at the meshes"
+      ],
+      Control: [
+        "<strong>Source</strong> WASDEX: translate | ARROWS: rotate | SPACE: center",
+        "<strong>Camera</strong> HOLD+MOVE MOUSE: orbit | WHEEL: move in/out"
+      ],
+      Expect: [
+        "All meshes have the default texture, for this the default texture is available over transparent surfaces and these are not an error",
+        "You can see a Cube, Polygon, MeshExtrusion, Pyramid, Quad, MeshRotation, Sphere, MeshSprite and a torus",
+        "the quad and polygon are only visible from the front",
+        "the RotationsMash is a three-sided vessel without a lid or base"
+      ]
+    });
+  </script>
+
+  <fieldset>
+    <legend>Instructions</legend>
+    <script>document.write(TestInstructions.get("Control").innerHTML);</script>
+  </fieldset>
+  <canvas></canvas>
+</body>
+
+</html>
