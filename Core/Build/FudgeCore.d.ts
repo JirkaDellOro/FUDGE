@@ -2892,6 +2892,18 @@ declare namespace FudgeCore {
     export {};
 }
 /**
+ * Baseclass for Noise2, Noise3 and Noise4
+ * @authors Jirka Dell'Oro-Friedl, HFU, 2021
+ * This is an adaption of https://www.npmjs.com/package/fast-simplex-noise
+ */
+declare namespace FudgeCore {
+    class Noise {
+        protected perm: Uint8Array;
+        protected permMod12: Uint8Array;
+        constructor(_random?: Function);
+    }
+}
+/**
  * This is an adaption of https://www.npmjs.com/package/fast-simplex-noise
  * done by Jirka Dell'Oro-Friedl, HFU, 2021
  *
@@ -2904,7 +2916,7 @@ declare namespace FudgeCore {
  * attribution is appreciated.
  */
 declare namespace FudgeCore {
-    class Noise2 {
+    class Noise2 extends Noise {
         #private;
         private static offset;
         private static gradient;
@@ -2925,7 +2937,7 @@ declare namespace FudgeCore {
  * attribution is appreciated.
  */
 declare namespace FudgeCore {
-    class Noise3 {
+    class Noise3 extends Noise {
         #private;
         private static offset;
         private static gradient;
@@ -2946,7 +2958,7 @@ declare namespace FudgeCore {
  * attribution is appreciated.
  */
 declare namespace FudgeCore {
-    class Noise4 {
+    class Noise4 extends Noise {
         #private;
         private static offset;
         private static gradient;

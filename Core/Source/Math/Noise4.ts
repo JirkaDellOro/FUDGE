@@ -13,31 +13,13 @@
 
 namespace FudgeCore {
   // TODO: Test
-  export class Noise4 {
+  export class Noise4 extends Noise {
     private static offset: number = (5.0 - Math.sqrt(5.0)) / 20.0;
     private static gradient: number[][] = [[0, 1, 1, 1], [0, 1, 1, -1], [0, 1, -1, 1], [0, 1, -1, -1], [0, -1, 1, 1], [0, -1, 1, -1], [0, -1, -1, 1], [0, -1, -1, -1], [1, 0, 1, 1], [1, 0, 1, -1], [1, 0, -1, 1], [1, 0, -1, -1], [-1, 0, 1, 1], [-1, 0, 1, -1], [-1, 0, -1, 1], [-1, 0, -1, -1], [1, 1, 0, 1], [1, 1, 0, -1], [1, -1, 0, 1], [1, -1, 0, -1], [-1, 1, 0, 1], [-1, 1, 0, -1], [-1, -1, 0, 1], [-1, -1, 0, -1], [1, 1, 1, 0], [1, 1, -1, 0], [1, -1, 1, 0], [1, -1, -1, 0], [-1, 1, 1, 0], [-1, 1, -1, 0], [-1, -1, 1, 0], [-1, -1, -1, 0]];
     #sample: (_x: number, _y: number, _z: number, _w: number) => number = null;
 
     constructor(_random: Function = Math.random) {
-      const p: Uint8Array = new Uint8Array(256);
-      for (let i: number = 0; i < 256; i++)
-        p[i] = i;
-
-      let n: number;
-      let q: number;
-      for (let i: number = 255; i > 0; i--) {
-        n = Math.floor((i + 1) * _random());
-        q = p[i];
-        p[i] = p[n];
-        p[n] = q;
-      }
-
-      const perm: Uint8Array = new Uint8Array(512);
-      const permMod12: Uint8Array = new Uint8Array(512);
-      for (let i: number = 0; i < 512; i++) {
-        perm[i] = p[i & 255];
-        permMod12[i] = perm[i] % 12;
-      }
+      super(_random)
 
       this.#sample = (x: number, y: number, z: number, w: number): number => {
         // Skew the (x,y,z,w) space to determine which cell of 24 simplices we're in
@@ -120,27 +102,27 @@ namespace FudgeCore {
         const kk: number = k & 255;
         const ll: number = l & 255;
         const g0: number[] = Noise4.gradient[
-          perm[ii + perm[jj + perm[kk + perm[ll]]]] %
+          this.perm[ii + this.perm[jj + this.perm[kk + this.perm[ll]]]] %
           32
         ];
         const g1: number[] = Noise4.gradient[
-          perm[
-          ii + i1 + perm[jj + j1 + perm[kk + k1 + perm[ll + l1]]]
+          this.perm[
+          ii + i1 + this.perm[jj + j1 + this.perm[kk + k1 + this.perm[ll + l1]]]
           ] % 32
         ];
         const g2: number[] = Noise4.gradient[
-          perm[
-          ii + i2 + perm[jj + j2 + perm[kk + k2 + perm[ll + l2]]]
+          this.perm[
+          ii + i2 + this.perm[jj + j2 + this.perm[kk + k2 + this.perm[ll + l2]]]
           ] % 32
         ];
         const g3: number[] = Noise4.gradient[
-          perm[
-          ii + i3 + perm[jj + j3 + perm[kk + k3 + perm[ll + l3]]]
+          this.perm[
+          ii + i3 + this.perm[jj + j3 + this.perm[kk + k3 + this.perm[ll + l3]]]
           ] % 32
         ];
         const g4: number[] = Noise4.gradient[
-          perm[
-          ii + 1 + perm[jj + 1 + perm[kk + 1 + perm[ll + 1]]]
+          this.perm[
+          ii + 1 + this.perm[jj + 1 + this.perm[kk + 1 + this.perm[ll + 1]]]
           ] % 32
         ];
 

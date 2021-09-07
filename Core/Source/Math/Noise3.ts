@@ -14,31 +14,14 @@
 namespace FudgeCore {
 
   // TODO: Test
-  export class Noise3 {
+  export class Noise3 extends Noise {
     private static offset: number = 1.0 / 6.0;
     private static gradient: number[][] = [[1, 1, 0], [-1, 1, 0], [1, -1, 0], [-1, -1, 0], [1, 0, 1], [-1, 0, 1], [1, 0, -1], [-1, 0, -1], [0, 1, 1], [0, -1, -1], [0, 1, -1], [0, -1, -1]
     ];
-    #sample: (_x: number, _y: number, _z: number) => number = null;  
+    #sample: (_x: number, _y: number, _z: number) => number = null;
 
     constructor(_random: Function = Math.random) {
-      const p: Uint8Array = new Uint8Array(256);
-      for (let i: number = 0; i < 256; i++) p[i] = i;
-
-      let n: number;
-      let q: number;
-      for (let i: number = 255; i > 0; i--) {
-        n = Math.floor((i + 1) * _random());
-        q = p[i];
-        p[i] = p[n];
-        p[n] = q;
-      }
-
-      const perm: Uint8Array = new Uint8Array(512);
-      const permMod12: Uint8Array = new Uint8Array(512);
-      for (let i: number = 0; i < 512; i++) {
-        perm[i] = p[i & 255];
-        permMod12[i] = perm[i] % 12;
-      }
+      super(_random);
 
       this.#sample = (_x: number, _y: number, _z: number) => {
         // Skew the input space to determine which simplex cell we're in
@@ -97,10 +80,10 @@ namespace FudgeCore {
         const ii: number = i & 255;
         const jj: number = j & 255;
         const kk: number = k & 255;
-        const g0: number[] = Noise3.gradient[permMod12[ii + perm[jj + perm[kk]]]];
-        const g1: number[] = Noise3.gradient[permMod12[ii + i1 + perm[jj + j1 + perm[kk + k1]]]];
-        const g2: number[] = Noise3.gradient[permMod12[ii + i2 + perm[jj + j2 + perm[kk + k2]]]];
-        const g3: number[] = Noise3.gradient[permMod12[ii + 1 + perm[jj + 1 + perm[kk + 1]]]];
+        const g0: number[] = Noise3.gradient[this.permMod12[ii + this.perm[jj + this.perm[kk]]]];
+        const g1: number[] = Noise3.gradient[this.permMod12[ii + i1 + this.perm[jj + j1 + this.perm[kk + k1]]]];
+        const g2: number[] = Noise3.gradient[this.permMod12[ii + i2 + this.perm[jj + j2 + this.perm[kk + k2]]]];
+        const g3: number[] = Noise3.gradient[this.permMod12[ii + 1 + this.perm[jj + 1 + this.perm[kk + 1]]]];
 
         // Calcu:numberate the contribution from the four corners
         const t0: number = 0.5 - x0 * x0 - y0 * y0 - z0 * z0;
