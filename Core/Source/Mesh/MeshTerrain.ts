@@ -18,7 +18,8 @@ namespace FudgeCore {
    */
   export class MeshTerrain extends Mesh {
     public static readonly iSubclass: number = Mesh.registerSubclass(MeshTerrain);
-    private static readonly fMinimal: HeightMapFunction = ((_x: number, _z: number) => 0.05 * (Math.cos(_x * 10) + Math.cos(_z * 10) + Math.random()));
+    // private static readonly fMinimal: HeightMapFunction = ((_x: number, _z: number) => 0.05 * (Math.cos(_x * 10) + Math.cos(_z * 10) + Math.random()));
+    // private static readonly fMinimal: HeightMapFunction = (new Noise2()).sample;
 
     public resolutionX: number;
     public resolutionZ: number;
@@ -34,7 +35,7 @@ namespace FudgeCore {
      * @param _resolutionX 
      * @param _resolutionZ 
      */
-    public constructor(_name: string = "MeshHeightMap", _source: HeightMapFunction | TextureImage = MeshTerrain.fMinimal, _resolutionX: number = 16, _resolutionZ: number = 16) {
+    public constructor(_name: string = "MeshHeightMap", _source: HeightMapFunction | TextureImage = new Noise2().sample, _resolutionX: number = 16, _resolutionZ: number = 16) {
       super(_name);
       this.resolutionX = _resolutionX;
       this.resolutionZ = _resolutionZ;

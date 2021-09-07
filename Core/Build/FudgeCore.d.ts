@@ -2891,6 +2891,27 @@ declare namespace FudgeCore {
     }
     export {};
 }
+/**
+ * This is an adaption of https://www.npmjs.com/package/fast-simplex-noise
+ * done by Jirka Dell'Oro-Friedl, HFU, 2021
+ *
+ * Based on example code by Stefan Gustavson (stegu@itn.liu.se).
+ * Optimisations by Peter Eastman (peastman@drizzle.stanford.edu).
+ * Better rank ordering method by Stefan Gustavson in 2012.
+ *
+ * This code was placed in the public domain by its original author,
+ * Stefan Gustavson. You may use it as you see fit, but
+ * attribution is appreciated.
+ */
+declare namespace FudgeCore {
+    class Noise2 {
+        #private;
+        private static offset;
+        private static gradient;
+        constructor(random?: Function);
+        sample: (_x: number, _y: number) => number;
+    }
+}
 declare namespace FudgeCore {
     /**
      * Class for creating random values, supporting Javascript's Math.random and a deterministig pseudo-random number generator (PRNG)
@@ -3431,7 +3452,6 @@ declare namespace FudgeCore {
      */
     class MeshTerrain extends Mesh {
         static readonly iSubclass: number;
-        private static readonly fMinimal;
         resolutionX: number;
         resolutionZ: number;
         imgScale: number;
