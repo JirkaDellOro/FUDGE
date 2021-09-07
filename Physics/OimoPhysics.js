@@ -16261,7 +16261,7 @@ oimo_dynamics_ContactManager.prototype = {
 		if(r1 == r2) {
 			return false;
 		}
-		if(r1._type != 0 && r2._type != 0) {
+		if(r1._type != 0 && r2._type != 0 && (!s1._rigidBody._isTrigger && !s2._rigidBody._isTrigger)) {
 			return false;
 		}
 		if((s1._collisionGroup & s2._collisionMask) == 0 || (s2._collisionGroup & s1._collisionMask) == 0) {
