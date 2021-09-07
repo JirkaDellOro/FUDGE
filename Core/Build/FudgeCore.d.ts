@@ -2908,8 +2908,50 @@ declare namespace FudgeCore {
         #private;
         private static offset;
         private static gradient;
-        constructor(random?: Function);
+        constructor(_random?: Function);
         sample: (_x: number, _y: number) => number;
+    }
+}
+/**
+ * This is an adaption of https://www.npmjs.com/package/fast-simplex-noise
+ * done by Jirka Dell'Oro-Friedl, HFU, 2021
+ *
+ * Based on example code by Stefan Gustavson (stegu@itn.liu.se).
+ * Optimisations by Peter Eastman (peastman@drizzle.stanford.edu).
+ * Better rank ordering method by Stefan Gustavson in 2012.
+ *
+ * This code was placed in the public domain by its original author,
+ * Stefan Gustavson. You may use it as you see fit, but
+ * attribution is appreciated.
+ */
+declare namespace FudgeCore {
+    class Noise3 {
+        #private;
+        private static offset;
+        private static gradient;
+        constructor(_random?: Function);
+        sample: (_x: number, _y: number, _z: number) => number;
+    }
+}
+/**
+ * This is an adaption of https://www.npmjs.com/package/fast-simplex-noise
+ * done by Jirka Dell'Oro-Friedl, HFU, 2021
+ *
+ * Based on example code by Stefan Gustavson (stegu@itn.liu.se).
+ * Optimisations by Peter Eastman (peastman@drizzle.stanford.edu).
+ * Better rank ordering method by Stefan Gustavson in 2012.
+ *
+ * This code was placed in the public domain by its original author,
+ * Stefan Gustavson. You may use it as you see fit, but
+ * attribution is appreciated.
+ */
+declare namespace FudgeCore {
+    class Noise4 {
+        #private;
+        private static offset;
+        private static gradient;
+        constructor(_random?: Function);
+        sample: (_x: number, _y: number, _z: number, _w: number) => number;
     }
 }
 declare namespace FudgeCore {

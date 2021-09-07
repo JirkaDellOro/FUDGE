@@ -12,13 +12,12 @@
  */
 
 namespace FudgeCore {
-
   export class Noise2 {
     private static offset: number = (3.0 - Math.sqrt(3.0)) / 6.0;
     private static gradient: number[][] = [[1, 1], [-1, 1], [1, -1], [-1, -1], [1, 0], [-1, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [0, 1], [0, -1]];
-    #sample: (x: number, y: number) => number = null;    //TODO: make private using #
+    #sample: (_x: number, _y: number) => number = null;   
 
-    constructor(random: Function = Math.random) {
+    constructor(_random: Function = Math.random) {
       const p: Uint8Array = new Uint8Array(256);
       for (let i: number = 0; i < 256; i++)
         p[i] = i;
@@ -26,7 +25,7 @@ namespace FudgeCore {
       let n: number;
       let q: number;
       for (let i: number = 255; i > 0; i--) {
-        n = Math.floor((i + 1) * random());
+        n = Math.floor((i + 1) * _random());
         q = p[i];
         p[i] = p[n];
         p[n] = q;
@@ -39,16 +38,16 @@ namespace FudgeCore {
         permMod12[i] = perm[i] % 12;
       }
 
-      this.#sample = (x: number, y: number) => {
+      this.#sample = (_x: number, _y: number) => {
         // Skew the input space to determine which simplex cell we're in
-        const s: number = (x + y) * 0.5 * (Math.sqrt(3.0) - 1.0); // Hairy factor for 2D
-        const i: number = Math.floor(x + s);
-        const j: number = Math.floor(y + s);
+        const s: number = (_x + _y) * 0.5 * (Math.sqrt(3.0) - 1.0); // Hairy factor for 2D
+        const i: number = Math.floor(_x + s);
+        const j: number = Math.floor(_y + s);
         const t: number = (i + j) * Noise2.offset;
         const X0: number = i - t; // Unskew the cell origin back to (x,y) space
         const Y0: number = j - t;
-        const x0: number = x - X0; // The x,y distances from the cell origin
-        const y0: number = y - Y0;
+        const x0: number = _x - X0; // The x,y distances from the cell origin
+        const y0: number = _y - Y0;
 
         // Determine which simplex we are in.
         const i1: number = x0 > y0 ? 1 : 0;
