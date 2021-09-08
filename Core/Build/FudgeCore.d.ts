@@ -3456,6 +3456,8 @@ declare namespace FudgeCore {
         constructor(_name?: string, _resolution?: Vector2, _scaleInput?: Vector2, _functionOrSeed?: HeightMapFunction | number);
         create(_resolution?: Vector2, _scaleInput?: Vector2, _functionOrSeed?: HeightMapFunction | number): void;
         getPositionOnTerrain(position: Vector3, mtxWorld?: Matrix4x4): PositionOnTerrain;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;

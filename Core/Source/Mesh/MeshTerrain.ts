@@ -24,19 +24,24 @@ namespace FudgeCore {
     protected seed: number;
     protected heightMapFunction: HeightMapFunction = null;
 
-    public constructor(_name: string = "MeshTerrain", _resolution: Vector2 = Vector2.ONE(10), _scaleInput: Vector2 = Vector2.ONE(), _functionOrSeed?: HeightMapFunction | number) {
+    public constructor(_name: string = "MeshTerrain", _resolution: Vector2 = Vector2.ONE(10), _scaleInput: Vector2 = Vector2.ONE(), _functionOrSeed: HeightMapFunction | number = 0) {
       super(_name);
       this.create(_resolution, _scaleInput, _functionOrSeed);
     }
 
-    public create(_resolution: Vector2 = Vector2.ONE(10), _scaleInput: Vector2 = Vector2.ONE(), _functionOrSeed?: HeightMapFunction | number): void {
+    public create(_resolution: Vector2 = Vector2.ONE(10), _scaleInput: Vector2 = Vector2.ONE(), _functionOrSeed: HeightMapFunction | number = 0): void {
       this.clear();
+      this.seed = undefined;
       this.resolution = _resolution.copy;
-      
+      this.scale = _scaleInput.copy;
+
       if (_functionOrSeed instanceof Function)
         this.heightMapFunction = _functionOrSeed;
-      else if (typeof (_functionOrSeed) == "number")
-        this.heightMapFunction = new Noise2().sample; // TODO call PRNG
+      else if (typeof (_functionOrSeed) == "number") {
+        this.seed = _functionOrSeed;
+        let prng: Random = new Random(this.seed);
+        this.heightMapFunction = new Noise2(() => prng.getNorm()).sample; // TODO call PRNG
+      }
       else
         this.heightMapFunction = new Noise2().sample;
 
@@ -75,10 +80,32 @@ namespace FudgeCore {
       return posOnTerrain;
     }
 
+    //#region Transfer
+    public serialize(): Serialization {
+      let serialization: Serialization = super.serialize();
+      serialization.seed = this.seed;
+      serialization.scale = this.scale.serialize();
+      serialization.resolution = this.resolution.serialize();
+      return serialization;
+    }
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      await super.deserialize(_serialization);
+      await this.resolution.deserialize(_serialization.resolution);
+      await this.scale.deserialize(_serialization.scale);
+      this.seed = _serialization.seed;
+      this.create(this.resolution, this.scale, this.seed);
+      return this;
+    }
+
     public async mutate(_mutator: Mutator): Promise<void> {
       super.mutate(_mutator);
-      this.create(new Vector2(_mutator.resolution.x, _mutator.resolution.y));
+      this.create(
+        new Vector2(_mutator.resolution.x, _mutator.resolution.y),
+        new Vector2(_mutator.scale.x, _mutator.scale.y),
+        _mutator.seed
+      );
     }
+    //#endregion
 
     protected createVertices(): Float32Array {
       let vertices: Float32Array = new Float32Array((this.resolution.x + 1) * (this.resolution.y + 1) * 3);
@@ -89,7 +116,7 @@ namespace FudgeCore {
           let xNorm: number = x / this.resolution.x;
           let zNorm: number = z / this.resolution.y;
           vertices[i] = xNorm - 0.5;
-          vertices[i + 1] = this.heightMapFunction(xNorm, zNorm);
+          vertices[i + 1] = this.heightMapFunction(xNorm * this.scale.x, zNorm * this.scale.y);
           vertices[i + 2] = zNorm - 0.5;
           i += 3;
         }
