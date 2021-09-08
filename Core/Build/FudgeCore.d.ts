@@ -3473,9 +3473,15 @@ declare namespace FudgeCore {
      */
     class MeshRelief extends MeshTerrain {
         static readonly iSubclass: number;
+        private texture;
         constructor(_name?: string, _texture?: TextureImage);
         private static createHeightMapFunction;
         private static textureToClampedArray;
+        setTexture(_texture?: TextureImage): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+        protected reduceMutator(_mutator: Mutator): void;
         protected createVertices(): Float32Array;
     }
 }

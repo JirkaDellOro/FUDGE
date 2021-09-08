@@ -6,9 +6,11 @@ namespace FudgeCore {
    */
   export class MeshRelief extends MeshTerrain {
     public static readonly iSubclass: number = Mesh.registerSubclass(MeshRelief);
+    private texture: TextureImage = null;
 
     public constructor(_name: string = "MeshRelief", _texture: TextureImage = null) {
-      super(_name, _texture ? new Vector2(_texture.image.width, _texture.image.height) : undefined, undefined, MeshRelief.createHeightMapFunction(_texture));
+      super(_name, undefined, undefined, (_x: number, _z: number) => 0);
+      this.setTexture(_texture);
     }
 
     private static createHeightMapFunction(_texture: TextureImage): HeightMapFunction {
@@ -31,6 +33,46 @@ namespace FudgeCore {
 
       return crc.getImageData(0, 0, _texture.image.width, _texture.image.height).data;
     }
+
+    public setTexture(_texture: TextureImage = null): void {
+      if (!_texture)
+        return;
+      this.texture = _texture;
+      super.create(_texture ? new Vector2(_texture.image.width - 1, _texture.image.height - 1) : undefined, undefined, MeshRelief.createHeightMapFunction(_texture));
+    }
+
+    //#region Transfer
+    public serialize(): Serialization {
+      let serialization: Serialization = super.serialize();
+      delete serialization.seed;
+      delete serialization.scale;
+      delete serialization.resolution;
+
+      if (this.texture)
+        serialization.idTexture = this.texture.idResource;
+
+      return serialization;
+    }
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      await super.deserialize(_serialization);
+      if (_serialization.idTexture) {
+        this.texture = <TextureImage>await Project.getResource(_serialization.idTexture);
+        this.setTexture(this.texture);
+      }
+      return this;
+    }
+
+    public async mutate(_mutator: Mutator): Promise<void> {
+      this.setTexture(_mutator.texture);
+    }
+
+    protected reduceMutator(_mutator: Mutator): void {
+      super.reduceMutator(_mutator);
+      delete _mutator.seed;
+      delete _mutator.scale;
+      delete _mutator.resolution;
+    }
+    //#endregion
 
     protected createVertices(): Float32Array {
       let vertices: Float32Array = new Float32Array((this.resolution.x + 1) * (this.resolution.y + 1) * 3);

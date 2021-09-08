@@ -21,7 +21,8 @@ namespace Fudge {
     MaterialOnComponentMaterial: { fromViews: [ViewInternal], onTypeAttribute: "Material", onType: ƒ.ComponentMaterial, ofType: ƒ.Material, dropEffect: "link" },
     MeshOnComponentMesh: { fromViews: [ViewInternal], onType: ƒ.ComponentMesh, ofType: ƒ.Mesh, dropEffect: "link" },
     MeshOnMeshLabel: { fromViews: [ViewInternal], onKeyAttribute: "mesh", ofType: ƒ.Mesh, dropEffect: "link" },
-    TextureOnMaterial: { fromViews: [ViewInternal], onType: ƒ.Material, ofType: ƒ.Texture, dropEffect: "link" }
+    TextureOnMaterial: { fromViews: [ViewInternal], onType: ƒ.Material, ofType: ƒ.Texture, dropEffect: "link" },
+    TextureOnMeshRelief: { fromViews: [ViewInternal], onType: ƒ.MeshRelief, ofType: ƒ.TextureImage, dropEffect: "link" }
   };
 
   export class ControllerComponent extends ƒUi.Controller {
@@ -56,6 +57,8 @@ namespace Fudge {
       if (this.filterDragDrop(_event, filter.MeshOnMeshLabel)) return;
       // Texture on Material
       if (this.filterDragDrop(_event, filter.TextureOnMaterial)) return;
+      // Texture on MeshRelief
+      if (this.filterDragDrop(_event, filter.TextureOnMeshRelief)) return;
 
       function checkMimeType(_mime: MIME): (_sources: Object[]) => boolean {
         return (_sources: Object[]): boolean => {
@@ -90,6 +93,14 @@ namespace Fudge {
         this.domElement.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
         return true;
       };
+      let setHeightMap: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
+        // this.mutable["texture"] = _sources[0];
+        let mutator: ƒ.Mutator = this.mutable.getMutator();
+        mutator.texture = _sources[0];
+        this.mutable.mutate(mutator);
+        this.domElement.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+        return true;
+      };
 
       // texture
       if (this.filterDragDrop(_event, filter.UrlOnTexture, setExternalLink)) return;
@@ -104,6 +115,8 @@ namespace Fudge {
       if (this.filterDragDrop(_event, filter.MeshOnMeshLabel, setMesh)) return;
       // Texture on Material
       if (this.filterDragDrop(_event, filter.TextureOnMaterial, setTexture)) return;
+      // Texture on MeshRelief
+      if (this.filterDragDrop(_event, filter.TextureOnMeshRelief, setHeightMap)) return;
     }
 
 

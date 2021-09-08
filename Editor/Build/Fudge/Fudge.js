@@ -1016,7 +1016,8 @@ var Fudge;
         MaterialOnComponentMaterial: { fromViews: [Fudge.ViewInternal], onTypeAttribute: "Material", onType: ƒ.ComponentMaterial, ofType: ƒ.Material, dropEffect: "link" },
         MeshOnComponentMesh: { fromViews: [Fudge.ViewInternal], onType: ƒ.ComponentMesh, ofType: ƒ.Mesh, dropEffect: "link" },
         MeshOnMeshLabel: { fromViews: [Fudge.ViewInternal], onKeyAttribute: "mesh", ofType: ƒ.Mesh, dropEffect: "link" },
-        TextureOnMaterial: { fromViews: [Fudge.ViewInternal], onType: ƒ.Material, ofType: ƒ.Texture, dropEffect: "link" }
+        TextureOnMaterial: { fromViews: [Fudge.ViewInternal], onType: ƒ.Material, ofType: ƒ.Texture, dropEffect: "link" },
+        TextureOnMeshRelief: { fromViews: [Fudge.ViewInternal], onType: ƒ.MeshRelief, ofType: ƒ.TextureImage, dropEffect: "link" }
     };
     class ControllerComponent extends ƒUi.Controller {
         constructor(_mutable, _domElement) {
@@ -1047,6 +1048,9 @@ var Fudge;
                     return;
                 // Texture on Material
                 if (this.filterDragDrop(_event, filter.TextureOnMaterial))
+                    return;
+                // Texture on MeshRelief
+                if (this.filterDragDrop(_event, filter.TextureOnMeshRelief))
                     return;
                 function checkMimeType(_mime) {
                     return (_sources) => {
@@ -1081,6 +1085,14 @@ var Fudge;
                     this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
                     return true;
                 };
+                let setHeightMap = (_sources) => {
+                    // this.mutable["texture"] = _sources[0];
+                    let mutator = this.mutable.getMutator();
+                    mutator.texture = _sources[0];
+                    this.mutable.mutate(mutator);
+                    this.domElement.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                    return true;
+                };
                 // texture
                 if (this.filterDragDrop(_event, filter.UrlOnTexture, setExternalLink))
                     return;
@@ -1098,6 +1110,9 @@ var Fudge;
                     return;
                 // Texture on Material
                 if (this.filterDragDrop(_event, filter.TextureOnMaterial, setTexture))
+                    return;
+                // Texture on MeshRelief
+                if (this.filterDragDrop(_event, filter.TextureOnMeshRelief, setHeightMap))
                     return;
             };
             this.domElement.addEventListener("input" /* INPUT */, this.mutateOnInput); // this should be obsolete
