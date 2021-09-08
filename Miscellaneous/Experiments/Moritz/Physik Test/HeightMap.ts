@@ -143,9 +143,9 @@ namespace PhysikTest {
     img = new ƒ.TextureImage();
     await img.load("test2.png");
 
-    meshTerrain = new f.MeshTerrain("HeightMap", img);
+    meshTerrain = new f.MeshRelief("HeightMap", img);
     gridFlat = Scenes.createCompleteMeshNode("Grid", matFlat, meshTerrain);
-    meshTerrain.node = gridFlat;
+    // meshTerrain.node = gridFlat;
 
     // gridFlat.mtxLocal.translateX(0.5);
     // gridFlat.mtxLocal.scale(f.Vector3.ONE(1.5));
@@ -230,27 +230,27 @@ namespace PhysikTest {
   }
   
   function moreVertices(_event: KeyboardEvent): void{
-    if(_event.code == f.KEYBOARD_CODE.M){
+    // if(_event.code == f.KEYBOARD_CODE.M){
       
-      meshTerrain.resolutionX = meshTerrain.resolutionX + 1;
-      meshTerrain.resolutionZ = meshTerrain.resolutionZ + 1;
+    //   meshTerrain.sizeX = meshTerrain.sizeX + 1;
+    //   meshTerrain.sizeZ = meshTerrain.sizeZ + 1;
       
-      meshTerrain.clear();
-      meshTerrain.createRenderBuffers();
+    //   meshTerrain.clear();
+    //   meshTerrain.createRenderBuffers();
 
-      console.log(meshTerrain.resolutionX);
-    }
+    //   console.log(meshTerrain.sizeX);
+    // }
 
-    if(_event.code == f.KEYBOARD_CODE.N){
+    // if(_event.code == f.KEYBOARD_CODE.N){
       
-      meshTerrain.resolutionX = meshTerrain.resolutionX - 1;
-      meshTerrain.resolutionZ = meshTerrain.resolutionZ - 1;
+    //   meshTerrain.sizeX = meshTerrain.sizeX - 1;
+    //   meshTerrain.sizeZ = meshTerrain.sizeZ - 1;
       
-      meshTerrain.clear();
-      meshTerrain.createRenderBuffers();
+    //   meshTerrain.clear();
+    //   meshTerrain.createRenderBuffers();
 
-      console.log(meshTerrain.resolutionX);
-    }
+    //   console.log(meshTerrain.sizeX);
+    // }
 
   }
 

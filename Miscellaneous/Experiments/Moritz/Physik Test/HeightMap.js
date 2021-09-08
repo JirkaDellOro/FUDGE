@@ -98,9 +98,9 @@ var PhysikTest;
         let cmpCamera = Scenes.createCamera(new f.Vector3(0, 2, 1), new f.Vector3(0, 0, 0));
         img = new ƒ.TextureImage();
         await img.load("test2.png");
-        meshTerrain = new f.MeshTerrain("HeightMap", img);
+        meshTerrain = new f.MeshRelief("HeightMap", img);
         gridFlat = Scenes.createCompleteMeshNode("Grid", matFlat, meshTerrain);
-        meshTerrain.node = gridFlat;
+        // meshTerrain.node = gridFlat;
         // gridFlat.mtxLocal.translateX(0.5);
         // gridFlat.mtxLocal.scale(f.Vector3.ONE(1.5));
         // gridFlat.mtxLocal.rotateY(45);
@@ -168,20 +168,20 @@ var PhysikTest;
         PhysikTest.viewport.draw();
     }
     function moreVertices(_event) {
-        if (_event.code == f.KEYBOARD_CODE.M) {
-            meshTerrain.resolutionX = meshTerrain.resolutionX + 1;
-            meshTerrain.resolutionZ = meshTerrain.resolutionZ + 1;
-            meshTerrain.clear();
-            meshTerrain.createRenderBuffers();
-            console.log(meshTerrain.resolutionX);
-        }
-        if (_event.code == f.KEYBOARD_CODE.N) {
-            meshTerrain.resolutionX = meshTerrain.resolutionX - 1;
-            meshTerrain.resolutionZ = meshTerrain.resolutionZ - 1;
-            meshTerrain.clear();
-            meshTerrain.createRenderBuffers();
-            console.log(meshTerrain.resolutionX);
-        }
+        // if(_event.code == f.KEYBOARD_CODE.M){
+        //   meshTerrain.sizeX = meshTerrain.sizeX + 1;
+        //   meshTerrain.sizeZ = meshTerrain.sizeZ + 1;
+        //   meshTerrain.clear();
+        //   meshTerrain.createRenderBuffers();
+        //   console.log(meshTerrain.sizeX);
+        // }
+        // if(_event.code == f.KEYBOARD_CODE.N){
+        //   meshTerrain.sizeX = meshTerrain.sizeX - 1;
+        //   meshTerrain.sizeZ = meshTerrain.sizeZ - 1;
+        //   meshTerrain.clear();
+        //   meshTerrain.createRenderBuffers();
+        //   console.log(meshTerrain.sizeX);
+        // }
     }
     // export function getPositionOnTerrain(terrain: f.MeshHeightMap, object: f.Node, calculateRotation: boolean = false): f.Ray{
     //   let nearestFace: distanceToFaceVertices = findNearestFace(terrain, object);

@@ -1,10 +1,11 @@
 namespace FudgeCore {
 
-  /** This function type takes x and z as Parameters and returns a number - to be used as a heightmap. 
-   * x and z are mapped from 0 to 1 when used to generate a Heightmap Mesh
-   * x * z * 2 represent the amout of faces whiche are created. As a result you get 1 Vertice more in each direction (x and z achsis)
-   * For Example: x = 4, z = 4, 16 squares (32 Faces), 25 vertices 
-   * @authors Simon Storl-Schulke, HFU, 2020*/
+  /** 
+   * This function type takes x and z as Parameters and returns a number between -1 and 1 to be used as a heightmap. 
+   * x * z * 2 represent the amout of faces which are created. As a result you get 1 vertex more in each direction (x and z axis)
+   * The y-component of the resulting mesh may be moved to values between 0 and a maximum height.
+   * @authors Simon Storl-Schulke, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
+   */
   export type HeightMapFunction = (x: number, z: number) => number;
 
   export class PositionOnTerrain {
@@ -13,47 +14,38 @@ namespace FudgeCore {
   }
 
   /**
-   * Generates a planar Grid and applies a Heightmap-Function to it.
-   * @authors Jirka Dell'Oro-Friedl, Simon Storl-Schulke, Moritz Beaugrand HFU, 2020
+   * Generates a planar grid and applies a heightmap-function to it.
+   * @authors Jirka Dell'Oro-Friedl, HFU, 2021 | Simon Storl-Schulke, HFU, 2020 | Moritz Beaugrand, HFU, 2021
    */
   export class MeshTerrain extends Mesh {
     public static readonly iSubclass: number = Mesh.registerSubclass(MeshTerrain);
-    // private static readonly fMinimal: HeightMapFunction = ((_x: number, _z: number) => 0.05 * (Math.cos(_x * 10) + Math.cos(_z * 10) + Math.random()));
-    // private static readonly fMinimal: HeightMapFunction = (new Noise2()).sample;
+    protected resolution: Vector2;
+    protected scale: Vector2;
+    protected seed: number;
+    protected heightMapFunction: HeightMapFunction = null;
 
-    public resolutionX: number;
-    public resolutionZ: number;
-    public imgScale: number = 255;
-    public node: Node;
-    private heightMapFunction: HeightMapFunction = null;
-    private image: TextureImage = null;
-
-    /**
-     * HeightMapFunction or PNG 
-     * @param _name 
-     * @param _source 
-     * @param _resolutionX 
-     * @param _resolutionZ 
-     */
-    public constructor(_name: string = "MeshHeightMap", _source: HeightMapFunction | TextureImage = new Noise2().sample, _resolutionX: number = 16, _resolutionZ: number = 16) {
+    public constructor(_name: string = "MeshTerrain", _resolution: Vector2 = Vector2.ONE(10), _scaleInput: Vector2 = Vector2.ONE(), _functionOrSeed?: HeightMapFunction | number) {
       super(_name);
-      this.resolutionX = _resolutionX;
-      this.resolutionZ = _resolutionZ;
+      this.create(_resolution, _scaleInput, _functionOrSeed);
+    }
 
-      if (_resolutionZ < 1 || _resolutionX < 1) {
-        Debug.warn("HeightMap resolution < 1, corrected to 1");
-        this.resolutionX = Math.max(1, this.resolutionX);
-        this.resolutionZ = Math.max(1, this.resolutionZ);
-      }
+    public create(_resolution: Vector2 = Vector2.ONE(10), _scaleInput: Vector2 = Vector2.ONE(), _functionOrSeed?: HeightMapFunction | number): void {
+      this.clear();
+      this.resolution = _resolution.copy;
+      
+      if (_functionOrSeed instanceof Function)
+        this.heightMapFunction = _functionOrSeed;
+      else if (typeof (_functionOrSeed) == "number")
+        this.heightMapFunction = new Noise2().sample; // TODO call PRNG
+      else
+        this.heightMapFunction = new Noise2().sample;
 
-      if (_source instanceof TextureImage) {
-        this.image = _source;
-        this.resolutionX = _source.image.width - 1;
-        this.resolutionZ = _source.image.height - 1;
-      }
-      else {
-        this.heightMapFunction = _source;
-      }
+      // if (_size < 1 || _sizeX < 1) {
+      //   Debug.warn("HeightMap resolution < 1, corrected to 1");
+      //   this.size.x = Math.max(1, this.size.x);
+      //   this.size.y = Math.max(1, this.size.y);
+      // }
+
 
       this.ƒnormalsFace = this.createFaceNormals();
       this.ƒindices = this.createIndices();
@@ -83,81 +75,59 @@ namespace FudgeCore {
       return posOnTerrain;
     }
 
+    public async mutate(_mutator: Mutator): Promise<void> {
+      super.mutate(_mutator);
+      this.create(new Vector2(_mutator.resolution.x, _mutator.resolution.y));
+    }
+
     protected createVertices(): Float32Array {
-      let vertices: Float32Array = new Float32Array((this.resolutionX + 1) * (this.resolutionZ + 1) * 3);
-
-      if (this.heightMapFunction != null) {
-        //Iterate over each cell to generate grid of vertices
-        for (let i: number = 0, z: number = 0; z <= this.resolutionZ; z++) {
-          for (let x: number = 0; x <= this.resolutionX; x++) {
-            // X
-            vertices[i] = x / this.resolutionX - 0.5;
-            // Apply heightmap to y coordinate
-            vertices[i + 1] = this.heightMapFunction(x / this.resolutionX, z / this.resolutionZ);
-            // Z
-            vertices[i + 2] = z / this.resolutionZ - 0.5;
-            i += 3;
-          }
+      let vertices: Float32Array = new Float32Array((this.resolution.x + 1) * (this.resolution.y + 1) * 3);
+      //Iterate over each cell to generate grid of vertices
+      let i: number = 0;
+      for (let z: number = 0; z <= this.resolution.y; z++) {
+        for (let x: number = 0; x <= this.resolution.x; x++) {
+          let xNorm: number = x / this.resolution.x;
+          let zNorm: number = z / this.resolution.y;
+          vertices[i] = xNorm - 0.5;
+          vertices[i + 1] = this.heightMapFunction(xNorm, zNorm);
+          vertices[i + 2] = zNorm - 0.5;
+          i += 3;
         }
-        return vertices;
       }
-      else if (this.image != null) {
-        let imgArray: Uint8ClampedArray = this.imageToClampedArray(this.image);
-        console.log(imgArray);
-        let px: number = 0;
-
-        for (let i: number = 0, z: number = 0; z <= this.resolutionZ; z++) {
-          for (let x: number = 0; x <= this.resolutionX; x++) {
-            // X
-            vertices[i] = x / this.resolutionX - 0.5;
-            // Apply heightmap to y coordinate
-            vertices[i + 1] = imgArray[px * 4] / this.imgScale;
-            // Z
-            vertices[i + 2] = z / this.resolutionZ - 0.5;
-            i += 3;
-            px++;
-          }
-        }
-
-        return vertices;
-
-      }
-      else {
-        throw new Error("No Source for Vertices is given, must be function or image");
-      }
+      return vertices;
     }
 
     protected createIndices(): Uint16Array {
       let vert: number = 0;
       let tris: number = 0;
 
-      let indices: Uint16Array = new Uint16Array(this.resolutionX * this.resolutionZ * 6);
+      let indices: Uint16Array = new Uint16Array(this.resolution.x * this.resolution.y * 6);
 
       let switchOrientation: Boolean = false;
 
-      for (let z: number = 0; z < this.resolutionZ; z++) {
-        for (let x: number = 0; x < this.resolutionX; x++) {
+      for (let z: number = 0; z < this.resolution.y; z++) {
+        for (let x: number = 0; x < this.resolution.x; x++) {
 
           if (!switchOrientation) {
             // First triangle of each uneven grid-cell
             indices[tris + 0] = vert + 0;
-            indices[tris + 1] = vert + this.resolutionX + 1;
+            indices[tris + 1] = vert + this.resolution.x + 1;
             indices[tris + 2] = vert + 1;
 
             // Second triangle of each uneven grid-cell
             indices[tris + 3] = vert + 1;
-            indices[tris + 4] = vert + this.resolutionX + 1;
-            indices[tris + 5] = vert + this.resolutionX + 2;
+            indices[tris + 4] = vert + this.resolution.x + 1;
+            indices[tris + 5] = vert + this.resolution.x + 2;
           }
           else {
             // First triangle of each even grid-cell
             indices[tris + 0] = vert + 0;
-            indices[tris + 1] = vert + this.resolutionX + 1;
-            indices[tris + 2] = vert + this.resolutionX + 2;
+            indices[tris + 1] = vert + this.resolution.x + 1;
+            indices[tris + 2] = vert + this.resolution.x + 2;
 
             // Second triangle of each even grid-cell
             indices[tris + 3] = vert + 0;
-            indices[tris + 4] = vert + this.resolutionX + 2;
+            indices[tris + 4] = vert + this.resolution.x + 2;
             indices[tris + 5] = vert + 1;
           }
 
@@ -165,7 +135,7 @@ namespace FudgeCore {
           vert++;
           tris += 6;
         }
-        if (this.resolutionX % 2 == 0)
+        if (this.resolution.x % 2 == 0)
           switchOrientation = !switchOrientation;
         vert++;
       }
@@ -175,34 +145,17 @@ namespace FudgeCore {
     protected createTextureUVs(): Float32Array {
       let textureUVs: Float32Array = new Float32Array(this.indices.length * 2);
 
-      for (let i: number = 0, z: number = 0; z <= this.resolutionZ; z++) {
-        for (let x: number = 0; x <= this.resolutionX; x++) {
-          textureUVs[i] = x / this.resolutionX;
-          textureUVs[i + 1] = z / this.resolutionZ;
+      for (let i: number = 0, z: number = 0; z <= this.resolution.y; z++) {
+        for (let x: number = 0; x <= this.resolution.x; x++) {
+          textureUVs[i] = x / this.resolution.x;
+          textureUVs[i + 1] = z / this.resolution.y;
           i += 2;
         }
       }
       return textureUVs;
     }
 
-    protected imageToClampedArray(image: TextureImage): Uint8ClampedArray {
-      let trImport: Uint8ClampedArray;
-
-      let canvasImage: HTMLCanvasElement = document.createElement("canvas");
-      canvasImage.width = image.image.width;
-      canvasImage.height = image.image.height;
-
-      let crcHeightMap: CanvasRenderingContext2D = canvasImage.getContext("2d");
-      crcHeightMap.imageSmoothingEnabled = false;
-      crcHeightMap.drawImage(image.image, 0, 0);
-
-      trImport = crcHeightMap.getImageData(0, 0, image.image.width, image.image.height).data;
-
-      return trImport;
-    }
-
     private calculateHeight(face: DistanceToFaceVertices, relativePosObject: Vector3): number {
-
       let ray: Ray = new Ray(new Vector3(0, 1, 0), relativePosObject);
       let intersection: Vector3 = ray.intersectPlane(face.vertexONE, face.faceNormal);
 
@@ -213,15 +166,15 @@ namespace FudgeCore {
       let vertices: Float32Array = this.vertices;
       let indices: Uint16Array = this.indices;
 
-      let row: number = Math.floor((relativPosObject.z + 0.5) * this.resolutionZ);
-      let column: number = Math.floor((relativPosObject.x + 0.5) * this.resolutionX);
+      let row: number = Math.floor((relativPosObject.z + 0.5) * this.resolution.y);
+      let column: number = Math.floor((relativPosObject.x + 0.5) * this.resolution.x);
 
-      if (row >= this.resolutionZ) row = this.resolutionZ - 1;
+      if (row >= this.resolution.y) row = this.resolution.y - 1;
       if (row < 0) row = 0;
-      if (column >= this.resolutionX) column = this.resolutionZ - 1;
+      if (column >= this.resolution.x) column = this.resolution.y - 1;
       if (column < 0) column = 0;
 
-      let field: number = ((row * this.resolutionX) + column) * 6;
+      let field: number = ((row * this.resolution.x) + column) * 6;
 
       let vertexONE1: Vector3 = new Vector3(vertices[indices[field] * 3], vertices[indices[field] * 3 + 1], vertices[indices[field] * 3 + 2]);
       let vertexTWO1: Vector3 = new Vector3(vertices[indices[field + 1] * 3], vertices[indices[field + 1] * 3 + 1], vertices[indices[field + 1] * 3 + 2]);

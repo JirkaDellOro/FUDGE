@@ -53,7 +53,7 @@ var HeightMap;
         if (!chequeredFlag()) {
             let time = Date.now() - startTime;
             let seconds = Math.floor(time / 1000);
-            console.log(seconds + ":" + time % (seconds * 1000));
+            // console.log(seconds + ":" + time % (seconds * 1000));
         }
         if (controlled.mtxWorld.translation.y < 0)
             sunk = true;
@@ -154,13 +154,13 @@ var HeightMap;
         cmpCamera = Scenes.createCamera(new f.Vector3(0, 2, 3.5), new f.Vector3(0, 0, 0));
         heightMap = new ƒ.TextureImage();
         await heightMap.load("../Textures/map.png");
-        gridMeshFlat = new f.MeshTerrain("HeightMap", heightMap);
+        gridMeshFlat = new f.MeshRelief("HeightMap", heightMap);
         gridFlat = Scenes.createCompleteMeshNode("Grid", matTex, gridMeshFlat);
-        gridMeshFlat.node = gridFlat;
+        // gridMeshFlat.node = gridFlat;
         gridFlat.mtxLocal.translateY(-0.1);
         gridFlat.mtxLocal.scale(new f.Vector3(3, 0.7, 3));
         water = Scenes.createCompleteMeshNode("Water", matWater, meshPlane);
-        water.mtxLocal.rotateX(-90);
+        // water.mtxLocal.rotateX(-90);
         water.mtxLocal.scale(new f.Vector3(3, 3, 1));
         finish = Scenes.createCompleteMeshNode("Finish", matFinish, meshPlane);
         finish.mtxLocal.translation = new f.Vector3(-0.69969, 0.25512, 0.70381);

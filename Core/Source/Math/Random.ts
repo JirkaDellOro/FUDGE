@@ -10,21 +10,18 @@ namespace FudgeCore {
     private generate: Function = Math.random;
 
     /**
-     * Create an instance of {@link Random}. If desired, creates a PRNG with it and feeds the given seed.
-     * @param _ownGenerator Default is false
-     * @param _seed Default is Math.random()
+     * Create an instance of {@link Random}. 
+     * If a seed is given, LFIB4 is used as generator, reproducing a series of numbers from that seed.
+     * If a function producing values between 0 and 1 is given, it will be used as generator.
      */
-    constructor(_ownGenerator: boolean = false, _seed: number = Math.random()) {
-      if (_ownGenerator)
-        this.generate = Random.createGenerator(_seed);
-    }
-
-    /**
-     * Creates a dererminstic PRNG with the given seed
-     */
-    public static createGenerator(_seed: number): Function {
-      // TODO: replace with random number generator to generate predictable sequence
-      return Math.random;
+    constructor(_seedOrFunction?: number | Function) {
+      if (_seedOrFunction instanceof Function)
+        this.generate = _seedOrFunction;
+      else if (_seedOrFunction == undefined)
+        this.generate = Math.random;
+      else
+        //@ts-ignore
+        this.generate = new LFIB4(_seedOrFunction);
     }
 
     /**

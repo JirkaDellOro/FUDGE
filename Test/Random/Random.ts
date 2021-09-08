@@ -6,7 +6,9 @@ namespace Random {
     comment: unknown;
   }
 
-  let random: ƒ.Random = new ƒ.Random();
+  let seed: number = parseFloat(location.search.slice(1)) || undefined;
+  console.log("Seed = " + seed);
+  let random: ƒ.Random = new ƒ.Random(seed);
   let results: { [command: string]: Result } = {};
 
   window.addEventListener("load", hndload);

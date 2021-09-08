@@ -7,7 +7,7 @@ namespace FudgeCore {
   export class MeshSphere extends Mesh {
     public static readonly iSubclass: number = Mesh.registerSubclass(MeshSphere);
 
-    protected ƒnormals: Float32Array;
+    // protected ƒnormals: Float32Array;
 
     private sectors: number;
     private stacks: number;
