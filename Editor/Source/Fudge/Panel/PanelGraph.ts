@@ -9,25 +9,52 @@ namespace Fudge {
   export class PanelGraph extends Panel {
     private graph: ƒ.Graph;
 
-    constructor(_container: GoldenLayout.Container, _state: Object) {
+    constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
 
-      this.goldenLayout.registerComponent(VIEW.RENDER, ViewRender);
-      this.goldenLayout.registerComponent(VIEW.COMPONENTS, ViewComponents);
-      this.goldenLayout.registerComponent(VIEW.HIERARCHY, ViewHierarchy);
 
-      let inner: GoldenLayout.ContentItem = this.goldenLayout.root.contentItems[0];
-      inner.addChild({
-        type: "column", content: [{
-          type: "component", componentName: VIEW.RENDER, componentState: _state, title: "Render"
-        }]
-      });
-      inner.addChild({
-        type: "column", content: [
-          { type: "component", componentName: VIEW.HIERARCHY, componentState: _state, title: "Hierarchy" },
-          { type: "component", componentName: VIEW.COMPONENTS, componentState: _state, title: "Components" }
+      this.goldenLayout.registerComponentConstructor(VIEW.RENDER, ViewRender);
+      this.goldenLayout.registerComponentConstructor(VIEW.COMPONENTS, ViewComponents);
+      this.goldenLayout.registerComponentConstructor(VIEW.HIERARCHY, ViewHierarchy);
+
+      let inner: ContentItem = this.goldenLayout.rootItem;
+
+      const renderConfig: RowOrColumnItemConfig = {
+        type: "column",
+        isClosable: true,
+        content: [
+          {
+            type: "component",
+            componentType: VIEW.RENDER,
+            componentState: _state,
+            title: "Render"
+          }
         ]
-      });
+      }
+
+      const hierachyAndComponents: RowOrColumnItemConfig = {
+        type: "column",
+        isClosable: true,
+        content: [
+          {
+            type: "component",
+            componentType: VIEW.HIERARCHY,
+            componentState: _state,
+            title: "Hierachy"
+          },
+          {
+            type: "component",
+            componentType: VIEW.COMPONENTS,
+            componentState: _state,
+            title: "Components"
+          }
+        ]
+      };
+
+
+      this.goldenLayout.addItemAtLocation(renderConfig, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
+      this.goldenLayout.addItemAtLocation(hierachyAndComponents, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
+
 
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);

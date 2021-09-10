@@ -9,40 +9,51 @@ namespace Fudge {
    */
 
   // TODO: class might become a customcomponent for HTML! = this.dom
+
+  // extends view vorrübergehend entfernt
   export abstract class Panel extends View {
     protected goldenLayout: GoldenLayout;
     private views: View[] = [];
+    //public dom; // muss vielleicht weg
 
-    constructor(_container: GoldenLayout.Container, _state: Object) {
+    constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
       this.dom.style.width = "100%";
       this.dom.style.overflow = "visible";
       this.dom.removeAttribute("view");
       this.dom.setAttribute("panel", this.constructor.name);
 
-      let config: GoldenLayout.Config = {
-        settings: { showPopoutIcon: false },
-        content: [{
-          type: "row", content: []
-        }]
+      const config: LayoutConfig = {
+        settings: { showPopoutIcon: false, showMaximiseIcon: false },
+        root: {
+          type: "row",
+          isClosable: false,
+          content: [
+          ]
+        }
       };
-      this.goldenLayout = new GoldenLayout(config, this.dom);
-      this.goldenLayout.on("stateChanged", () => this.goldenLayout.updateSize());
-      this.goldenLayout.on("componentCreated", this.addViewComponent);
-      this.goldenLayout.init();
+
+      this.goldenLayout = new Page.goldenLayoutModule.GoldenLayout(this.dom);
+
+      this.goldenLayout.on("stateChanged", () => this.goldenLayout.updateRootSize());
+      this.goldenLayout.on("itemCreated", this.addViewComponent);
+      this.goldenLayout.loadLayout(config);
     }
 
     /** Send custom copies of the given event to the views */
     public broadcastEvent = (_event: Event): void => {
-      // console.log("views", this.views);
       for (let view of this.views) {
         let event: CustomEvent = new CustomEvent(_event.type, { bubbles: false, cancelable: true, detail: (<CustomEvent>_event).detail });
         view.dom.dispatchEvent(event);
       }
     }
 
-    private addViewComponent = (_component: Object): void => {
-      this.views.push(<View>(<ƒ.General>_component).instance);
+    private addViewComponent = (_event: EventEmitter.BubblingEvent): void => {
+      // adjustmens for GoldenLayout 2
+      let target: ComponentItem = _event.target as ComponentItem;
+      if (target instanceof Page.goldenLayoutModule.ComponentItem) {
+        this.views.push(<View>target.component);
+      }
     }
   }
 }

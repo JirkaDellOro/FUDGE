@@ -1,6 +1,7 @@
 ///<reference types="../../../node_modules/electron/Electron"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
 ///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
+// /<reference types="../../GoldenLayout/golden-layout" />
 ///<reference path="Project.ts"/>
 
 namespace Fudge {
@@ -18,13 +19,14 @@ namespace Fudge {
    * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
    */
   export class Page {
+    public static goldenLayoutModule: ƒ.General = (globalThis as ƒ.General).goldenLayout;  // ƒ.General is synonym for any... hack to get GoldenLayout to work
     private static idCounter: number = 0;
     private static goldenLayout: GoldenLayout;
     private static panels: Panel[] = [];
 
-    public static async start(): Promise<void> {
+    private static async start(): Promise<void> {
       // TODO: At this point of time, the project is just a single node. A project is much more complex...
-      let node: ƒ.Node = null;
+      // let node: ƒ.Node = null;
 
       Page.setupGoldenLayout();
       ƒ.Project.mode = ƒ.MODE.EDITOR;
@@ -41,51 +43,58 @@ namespace Fudge {
       ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: false });
     }
 
-    public static setupGoldenLayout(): void {
-      let config: GoldenLayout.Config = {
-        settings: { showPopoutIcon: false },
-        content: [{
-          id: "root", type: "row", isClosable: false,
-          content: [
-            // { type: "component", componentName: "Welcome", title: "Welcome", componentState: {} }
-          ]
-        }]
-      };
-      this.goldenLayout = new GoldenLayout(config);   //This might be a problem because it can't use a specific place to put it.
+    private static setupGoldenLayout(): void {
+      Page.goldenLayout = new Page.goldenLayoutModule.GoldenLayout(); // GoldenLayout 2 as UMD-Module
+      Page.goldenLayout.on("itemCreated", Page.hndPanelCreated);
 
-      this.goldenLayout.registerComponent("Welcome", welcome);
-      this.goldenLayout.registerComponent(PANEL.GRAPH, PanelGraph);
-      this.goldenLayout.registerComponent(PANEL.PROJECT, PanelProject);
-      this.goldenLayout.init();
+      Page.goldenLayout.registerComponentConstructor(PANEL.PROJECT, PanelProject);
+      Page.goldenLayout.registerComponentConstructor(PANEL.GRAPH, PanelGraph);
+
+      Page.loadLayout();
     }
 
-    public static add(_panel: typeof Panel, _title: string, _state?: Object): void {
-      let config: GoldenLayout.ItemConfig = {
-        type: "stack",
-        content: [{
-          type: "component", componentName: _panel.name, componentState: _state,
-          title: _title, id: this.generateID(_panel.name)
-        }]
+    private static add(_panel: typeof Panel, _title: string, _state?: JsonValue): void {
+      const panelConfig: RowOrColumnItemConfig = {
+        type: "row",
+        content: [
+          {
+            type: "component",
+            componentType: _panel.name,
+            componentState: _state,
+            title: _title,
+            id: Page.generateID(_panel.name)
+          }
+        ]
       };
 
-      let inner: GoldenLayout.ContentItem = this.goldenLayout.root.contentItems[0];
-      let item: GoldenLayout.ContentItem = Page.goldenLayout.createContentItem(config);
-      inner.addChild(item);
-      this.panels.push(item.getComponentsByName(_panel.name)[0]);
+
+      if (!Page.goldenLayout.rootItem)  // workaround because golden Layout loses rootItem...
+        Page.loadLayout();
+
+      Page.goldenLayout.rootItem.layoutManager.addItemAtLocation(panelConfig, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
     }
 
-    public static find(_type: typeof Panel): Panel[] {
+    private static find(_type: typeof Panel): Panel[] {
       let result: Panel[] = [];
-      // for (let panel of Page.panels) {
-      //   if (panel instanceof _type)
-      //     result.push(panel);
-      // }
       result = Page.panels.filter((_panel) => { return _panel instanceof _type; });
       return result;
     }
 
     private static generateID(_name: string): string {
       return _name + Page.idCounter++;
+    }
+
+    private static loadLayout(): void {
+      let config: LayoutConfig = {
+        settings: { showPopoutIcon: false, showMaximiseIcon: true },
+        root: {
+          type: "row",
+          isClosable: true,
+          content: [
+          ]
+        }
+      };
+      Page.goldenLayout.loadLayout(config);
     }
 
     //#region Page-Events from DOM
@@ -109,9 +118,9 @@ namespace Fudge {
       switch (_event.type) {
         case EVENT_EDITOR.DESTROY:
           let view: View = _event.detail;
-          console.log("Page received DESTROY", view);
           if (view instanceof Panel)
             Page.panels.splice(Page.panels.indexOf(view), 1);
+          console.log("Panels", Page.panels);
           break;
         case EVENT_EDITOR.SET_GRAPH:
           let panel: Panel[] = Page.find(PanelGraph);
@@ -124,6 +133,14 @@ namespace Fudge {
       }
     }
     //#endregion
+
+    private static hndPanelCreated = (_event: EventEmitter.BubblingEvent): void => {
+      let target: ComponentItem = _event.target as ComponentItem;
+      if (target instanceof Page.goldenLayoutModule.ComponentItem) {
+        Page.panels.push(<Panel>target.component);
+      }
+      console.log("Panels", Page.panels);
+    }
 
     //#region Main-Events from Electron
     private static setupMainListeners(): void {
@@ -153,7 +170,10 @@ namespace Fudge {
 
       ipcRenderer.on(MENU.PANEL_GRAPH_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
         let node: ƒ.Node = new ƒaid.NodeCoordinateSystem("WorldCooSys");
-        Page.add(PanelGraph, "Graph", Object({ node: node }));
+        // funktioniert nicht
+        Page.add(PanelGraph, "Graph", null);
+        // Alternative
+        //Page.add(PanelGraph, "Graph", "Platzhalter should be node"); 
         Page.broadcastEvent(new CustomEvent(EVENT_EDITOR.UPDATE, { detail: node }));
       });
 
@@ -168,7 +188,7 @@ namespace Fudge {
     }
   }
 
-  function welcome(container: GoldenLayout.Container, state: Object): void {
-    container.getElement().html("<div>Welcome</div>");
-  }
+  // function welcome(container: GoldenLayout.Container, state: Object): void {
+  //   container.getElement().html("<div>Welcome</div>");
+  // }
 }

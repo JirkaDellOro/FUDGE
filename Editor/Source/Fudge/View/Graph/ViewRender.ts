@@ -13,7 +13,7 @@ namespace Fudge {
     private canvas: HTMLCanvasElement;
     private graph: ƒ.Node;
 
-    constructor(_container: GoldenLayout.Container, _state: Object) {
+    constructor(_container: ComponentContainer, _state: JsonValue) {
       super(_container, _state);
       this.graph = <ƒ.Node><unknown>_state["node"];
       this.createUserInterface();
@@ -91,23 +91,23 @@ namespace Fudge {
         case EVENT_EDITOR.SET_GRAPH:
           this.setGraph(_event.detail);
           break;
-        case EVENT_EDITOR.FOCUS_NODE:
-          this.cmrOrbit.mtxLocal.translation = _event.detail.mtxWorld.translation;
-          ƒ.Render.prepare(this.cmrOrbit);
-          // break;
-        case ƒUi.EVENT.MUTATE:
-        case ƒUi.EVENT.DELETE:
-        case EVENT_EDITOR.UPDATE:
-          this.redraw();
+          case EVENT_EDITOR.FOCUS_NODE:
+            this.cmrOrbit.mtxLocal.translation = _event.detail.mtxWorld.translation;
+            ƒ.Render.prepare(this.cmrOrbit);
+            // break;
+          case ƒUi.EVENT.MUTATE:
+          case ƒUi.EVENT.DELETE:
+          case EVENT_EDITOR.UPDATE:
+            this.redraw();
+        }
       }
-    }
-
-    private hndPick = (_event: CustomEvent): void => {
-      let picked: ƒ.Node = _event.detail.node;
-
-      // this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.FOCUS_NODE, { bubbles: true, detail: picked }));
-      this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.SELECT, { bubbles: true, detail: { data: picked } }));
-    }
+  
+      private hndPick = (_event: CustomEvent): void => {
+        let picked: ƒ.Node = _event.detail.node;
+  
+        // this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.FOCUS_NODE, { bubbles: true, detail: picked }));
+        this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.SELECT, { bubbles: true, detail: { data: picked } }));
+      }
 
     // private animate = (_e: Event) => {
     //   this.viewport.setGraph(this.graph);

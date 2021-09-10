@@ -14,7 +14,7 @@ namespace Fudge {
     private viewport: ƒ.Viewport;
     private cmrOrbit: ƒAid.CameraOrbit;
 
-    constructor(_container: GoldenLayout.Container, _state: Object) {
+    constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
 
       // create viewport for 3D-resources

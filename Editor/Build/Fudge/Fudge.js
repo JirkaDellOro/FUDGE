@@ -499,11 +499,13 @@ var Fudge;
 ///<reference types="../../../node_modules/electron/Electron"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
 ///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
+// /<reference types="../../GoldenLayout/golden-layout" />
 ///<reference path="Project.ts"/>
 var Fudge;
 ///<reference types="../../../node_modules/electron/Electron"/>
 ///<reference types="../../../Aid/Build/FudgeAid"/>
 ///<reference types="../../../UserInterface/Build/FudgeUserInterface"/>
+// /<reference types="../../GoldenLayout/golden-layout" />
 ///<reference path="Project.ts"/>
 (function (Fudge) {
     var ƒ = FudgeCore;
@@ -517,7 +519,7 @@ var Fudge;
     class Page {
         static async start() {
             // TODO: At this point of time, the project is just a single node. A project is much more complex...
-            let node = null;
+            // let node: ƒ.Node = null;
             Page.setupGoldenLayout();
             ƒ.Project.mode = ƒ.MODE.EDITOR;
             // TODO: create a new Panel containing a ViewData by default. More Views can be added by the user or by configuration
@@ -532,45 +534,47 @@ var Fudge;
             Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: false });
         }
         static setupGoldenLayout() {
-            let config = {
-                settings: { showPopoutIcon: false },
-                content: [{
-                        id: "root", type: "row", isClosable: false,
-                        content: [
-                        // { type: "component", componentName: "Welcome", title: "Welcome", componentState: {} }
-                        ]
-                    }]
-            };
-            this.goldenLayout = new GoldenLayout(config); //This might be a problem because it can't use a specific place to put it.
-            this.goldenLayout.registerComponent("Welcome", welcome);
-            this.goldenLayout.registerComponent(Fudge.PANEL.GRAPH, Fudge.PanelGraph);
-            this.goldenLayout.registerComponent(Fudge.PANEL.PROJECT, Fudge.PanelProject);
-            this.goldenLayout.init();
+            Page.goldenLayout = new Page.goldenLayoutModule.GoldenLayout(); // GoldenLayout 2 as UMD-Module
+            Page.goldenLayout.on("itemCreated", Page.hndPanelCreated);
+            Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.PROJECT, Fudge.PanelProject);
+            Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.GRAPH, Fudge.PanelGraph);
+            Page.loadLayout();
         }
         static add(_panel, _title, _state) {
-            let config = {
-                type: "stack",
-                content: [{
-                        type: "component", componentName: _panel.name, componentState: _state,
-                        title: _title, id: this.generateID(_panel.name)
-                    }]
+            const panelConfig = {
+                type: "row",
+                content: [
+                    {
+                        type: "component",
+                        componentType: _panel.name,
+                        componentState: _state,
+                        title: _title,
+                        id: Page.generateID(_panel.name)
+                    }
+                ]
             };
-            let inner = this.goldenLayout.root.contentItems[0];
-            let item = Page.goldenLayout.createContentItem(config);
-            inner.addChild(item);
-            this.panels.push(item.getComponentsByName(_panel.name)[0]);
+            if (!Page.goldenLayout.rootItem) // workaround because golden Layout loses rootItem...
+                Page.loadLayout();
+            Page.goldenLayout.rootItem.layoutManager.addItemAtLocation(panelConfig, [{ typeId: 7 /* Root */ }]);
         }
         static find(_type) {
             let result = [];
-            // for (let panel of Page.panels) {
-            //   if (panel instanceof _type)
-            //     result.push(panel);
-            // }
             result = Page.panels.filter((_panel) => { return _panel instanceof _type; });
             return result;
         }
         static generateID(_name) {
             return _name + Page.idCounter++;
+        }
+        static loadLayout() {
+            let config = {
+                settings: { showPopoutIcon: false, showMaximiseIcon: true },
+                root: {
+                    type: "row",
+                    isClosable: true,
+                    content: []
+                }
+            };
+            Page.goldenLayout.loadLayout(config);
         }
         //#region Page-Events from DOM
         static setupPageListeners() {
@@ -591,9 +595,9 @@ var Fudge;
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.DESTROY:
                     let view = _event.detail;
-                    console.log("Page received DESTROY", view);
                     if (view instanceof Fudge.Panel)
                         Page.panels.splice(Page.panels.indexOf(view), 1);
+                    console.log("Panels", Page.panels);
                     break;
                 case Fudge.EVENT_EDITOR.SET_GRAPH:
                     let panel = Page.find(Fudge.PanelGraph);
@@ -605,7 +609,6 @@ var Fudge;
                     break;
             }
         }
-        //#endregion
         //#region Main-Events from Electron
         static setupMainListeners() {
             Fudge.ipcRenderer.on(Fudge.MENU.PROJECT_NEW, async (_event, _args) => {
@@ -631,7 +634,10 @@ var Fudge;
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_GRAPH_OPEN, (_event, _args) => {
                 let node = new ƒaid.NodeCoordinateSystem("WorldCooSys");
-                Page.add(Fudge.PanelGraph, "Graph", Object({ node: node }));
+                // funktioniert nicht
+                Page.add(Fudge.PanelGraph, "Graph", null);
+                // Alternative
+                //Page.add(PanelGraph, "Graph", "Platzhalter should be node"); 
                 Page.broadcastEvent(new CustomEvent(Fudge.EVENT_EDITOR.UPDATE, { detail: node }));
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_PROJECT_OPEN, (_event, _args) => {
@@ -643,12 +649,21 @@ var Fudge;
             });
         }
     }
+    Page.goldenLayoutModule = globalThis.goldenLayout; // ƒ.General is synonym for any... hack to get GoldenLayout to work
     Page.idCounter = 0;
     Page.panels = [];
+    //#endregion
+    Page.hndPanelCreated = (_event) => {
+        let target = _event.target;
+        if (target instanceof Page.goldenLayoutModule.ComponentItem) {
+            Page.panels.push(target.component);
+        }
+        console.log("Panels", Page.panels);
+    };
     Fudge.Page = Page;
-    function welcome(container, state) {
-        container.getElement().html("<div>Welcome</div>");
-    }
+    // function welcome(container: GoldenLayout.Container, state: Object): void {
+    //   container.getElement().html("<div>Welcome</div>");
+    // }
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {
@@ -759,9 +774,10 @@ var Fudge;
             this.dom.style.height = "100%";
             this.dom.style.overflow = "auto";
             this.dom.setAttribute("view", this.constructor.name);
-            _container.getElement().append(this.dom);
+            //_container.getElement().append(this.dom); //old
+            _container.element.appendChild(this.dom);
             this.container = _container;
-            this.container.on("destroy", (_e) => this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.DESTROY, { bubbles: true, detail: _e["instance"] })));
+            this.container.on("destroy", () => this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.DESTROY, { bubbles: true, detail: this })));
             // console.log(this.contextMenuCallback);
             this.contextMenu = this.getContextMenu(this.contextMenuCallback.bind(this));
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEventCommon);
@@ -1338,35 +1354,42 @@ var Fudge;
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     // TODO: class might become a customcomponent for HTML! = this.dom
+    // extends view vorrübergehend entfernt
     class Panel extends Fudge.View {
+        //public dom; // muss vielleicht weg
         constructor(_container, _state) {
             super(_container, _state);
             this.views = [];
             /** Send custom copies of the given event to the views */
             this.broadcastEvent = (_event) => {
-                // console.log("views", this.views);
                 for (let view of this.views) {
                     let event = new CustomEvent(_event.type, { bubbles: false, cancelable: true, detail: _event.detail });
                     view.dom.dispatchEvent(event);
                 }
             };
-            this.addViewComponent = (_component) => {
-                this.views.push(_component.instance);
+            this.addViewComponent = (_event) => {
+                // adjustmens for GoldenLayout 2
+                let target = _event.target;
+                if (target instanceof Fudge.Page.goldenLayoutModule.ComponentItem) {
+                    this.views.push(target.component);
+                }
             };
             this.dom.style.width = "100%";
             this.dom.style.overflow = "visible";
             this.dom.removeAttribute("view");
             this.dom.setAttribute("panel", this.constructor.name);
-            let config = {
-                settings: { showPopoutIcon: false },
-                content: [{
-                        type: "row", content: []
-                    }]
+            const config = {
+                settings: { showPopoutIcon: false, showMaximiseIcon: false },
+                root: {
+                    type: "row",
+                    isClosable: false,
+                    content: []
+                }
             };
-            this.goldenLayout = new GoldenLayout(config, this.dom);
-            this.goldenLayout.on("stateChanged", () => this.goldenLayout.updateSize());
-            this.goldenLayout.on("componentCreated", this.addViewComponent);
-            this.goldenLayout.init();
+            this.goldenLayout = new Fudge.Page.goldenLayoutModule.GoldenLayout(this.dom);
+            this.goldenLayout.on("stateChanged", () => this.goldenLayout.updateRootSize());
+            this.goldenLayout.on("itemCreated", this.addViewComponent);
+            this.goldenLayout.loadLayout(config);
         }
     }
     Fudge.Panel = Panel;
@@ -1401,21 +1424,42 @@ var Fudge;
                 let event = new CustomEvent(Fudge.EVENT_EDITOR.FOCUS_NODE, { bubbles: false, detail: _event.detail.data });
                 this.broadcastEvent(event);
             };
-            this.goldenLayout.registerComponent(Fudge.VIEW.RENDER, Fudge.ViewRender);
-            this.goldenLayout.registerComponent(Fudge.VIEW.COMPONENTS, Fudge.ViewComponents);
-            this.goldenLayout.registerComponent(Fudge.VIEW.HIERARCHY, Fudge.ViewHierarchy);
-            let inner = this.goldenLayout.root.contentItems[0];
-            inner.addChild({
-                type: "column", content: [{
-                        type: "component", componentName: Fudge.VIEW.RENDER, componentState: _state, title: "Render"
-                    }]
-            });
-            inner.addChild({
-                type: "column", content: [
-                    { type: "component", componentName: Fudge.VIEW.HIERARCHY, componentState: _state, title: "Hierarchy" },
-                    { type: "component", componentName: Fudge.VIEW.COMPONENTS, componentState: _state, title: "Components" }
+            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.RENDER, Fudge.ViewRender);
+            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.COMPONENTS, Fudge.ViewComponents);
+            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.HIERARCHY, Fudge.ViewHierarchy);
+            let inner = this.goldenLayout.rootItem;
+            const renderConfig = {
+                type: "column",
+                isClosable: true,
+                content: [
+                    {
+                        type: "component",
+                        componentType: Fudge.VIEW.RENDER,
+                        componentState: _state,
+                        title: "Render"
+                    }
                 ]
-            });
+            };
+            const hierachyAndComponents = {
+                type: "column",
+                isClosable: true,
+                content: [
+                    {
+                        type: "component",
+                        componentType: Fudge.VIEW.HIERARCHY,
+                        componentState: _state,
+                        title: "Hierachy"
+                    },
+                    {
+                        type: "component",
+                        componentType: Fudge.VIEW.COMPONENTS,
+                        componentState: _state,
+                        title: "Components"
+                    }
+                ]
+            };
+            this.goldenLayout.addItemAtLocation(renderConfig, [{ typeId: 7 /* Root */ }]);
+            this.goldenLayout.addItemAtLocation(hierachyAndComponents, [{ typeId: 7 /* Root */ }]);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
@@ -1443,25 +1487,74 @@ var Fudge;
                 //   this.setGraph(_event.detail);
                 this.broadcastEvent(_event);
             };
-            this.goldenLayout.registerComponent(Fudge.VIEW.INTERNAL, Fudge.ViewInternal);
-            this.goldenLayout.registerComponent(Fudge.VIEW.EXTERNAL, Fudge.ViewExternal);
-            this.goldenLayout.registerComponent(Fudge.VIEW.PROPERTIES, Fudge.ViewProperties);
-            this.goldenLayout.registerComponent(Fudge.VIEW.PREVIEW, Fudge.ViewPreview);
-            this.goldenLayout.registerComponent(Fudge.VIEW.SCRIPT, Fudge.ViewScript);
-            let inner = this.goldenLayout.root.contentItems[0];
-            inner.addChild({
-                type: "column", content: [
-                    { type: "component", componentName: Fudge.VIEW.PREVIEW, componentState: _state, title: "Preview" },
-                    { type: "component", componentName: Fudge.VIEW.PROPERTIES, componentState: _state, title: "Properties" }
+            //old registercomponent
+            // this.goldenLayout.registerComponent(VIEW.INTERNAL, ViewInternal);
+            // this.goldenLayout.registerComponent(VIEW.EXTERNAL, ViewExternal);
+            // this.goldenLayout.registerComponent(VIEW.PROPERTIES, ViewProperties);
+            // this.goldenLayout.registerComponent(VIEW.PREVIEW, ViewPreview);
+            // this.goldenLayout.registerComponent(VIEW.SCRIPT, ViewScript);
+            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.INTERNAL, Fudge.ViewInternal);
+            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.EXTERNAL, Fudge.ViewExternal);
+            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.PROPERTIES, Fudge.ViewProperties);
+            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.PREVIEW, Fudge.ViewPreview);
+            this.goldenLayout.registerComponentConstructor(Fudge.VIEW.SCRIPT, Fudge.ViewScript);
+            let inner = this.goldenLayout.rootItem.contentItems[0];
+            const previewAndPropertiesConfig = {
+                type: "column",
+                content: [
+                    {
+                        type: "component",
+                        componentType: Fudge.VIEW.PREVIEW,
+                        componentState: _state,
+                        title: "Preview"
+                    },
+                    {
+                        type: "component",
+                        componentType: Fudge.VIEW.PROPERTIES,
+                        componentState: _state,
+                        title: "Properties"
+                    }
                 ]
-            });
-            inner.addChild({
-                type: "column", content: [
-                    { type: "component", componentName: Fudge.VIEW.INTERNAL, componentState: _state, title: "Internal" },
-                    { type: "component", componentName: Fudge.VIEW.EXTERNAL, componentState: _state, title: "External" },
-                    { type: "component", componentName: Fudge.VIEW.SCRIPT, componentState: _state, title: "Script" }
+            };
+            const internalExternalScriptConfig = {
+                type: "column",
+                content: [
+                    {
+                        type: "component",
+                        componentType: Fudge.VIEW.INTERNAL,
+                        componentState: _state,
+                        title: "Internal"
+                    },
+                    {
+                        type: "component",
+                        componentType: Fudge.VIEW.EXTERNAL,
+                        componentState: _state,
+                        title: "External"
+                    },
+                    {
+                        type: "component",
+                        componentType: Fudge.VIEW.SCRIPT,
+                        componentState: _state,
+                        title: "Script"
+                    }
                 ]
-            });
+            };
+            this.goldenLayout.rootItem.layoutManager.addItemAtLocation(previewAndPropertiesConfig, [{ typeId: 7 /* Root */ }]);
+            this.goldenLayout.rootItem.layoutManager.addItemAtLocation(internalExternalScriptConfig, [{ typeId: 7 /* Root */ }]);
+            //old addchild
+            // inner.addChild({
+            //   type: "column", content: [
+            //     { type: "component", componentName: VIEW.PREVIEW, componentState: _state, title: "Preview" },
+            //     { type: "component", componentName: VIEW.PROPERTIES, componentState: _state, title: "Properties" }
+            //   ]
+            // });
+            // inner.addChild({
+            //   type: "column", content: [
+            //     { type: "component", componentName: VIEW.INTERNAL, componentState: _state, title: "Internal" },
+            //     { type: "component", componentName: VIEW.EXTERNAL, componentState: _state, title: "External" },
+            //     { type: "component", componentName: VIEW.SCRIPT, componentState: _state, title: "Script" }
+            //   ]
+            // });
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
@@ -1644,7 +1737,7 @@ var Fudge;
             spsI.max = "999";
             spsI.step = "1";
             spsI.id = "sps";
-            spsI.value = this.animation.stepsPerSecond.toString();
+            spsI.value = this.animation.fps.toString(); // stepsPerSecond.toString();
             spsI.style.width = "40px";
             _tb.appendChild(spsL);
             _tb.appendChild(spsI);
@@ -1700,7 +1793,7 @@ var Fudge;
                     this.updateDisplay();
                     break;
                 case "back":
-                    this.playbackTime = this.playbackTime -= 1000 / this.animation.stepsPerSecond;
+                    this.playbackTime = this.playbackTime -= 1000 / this.animation.fps; // stepsPerSecond;
                     this.playbackTime = Math.max(this.playbackTime, 0);
                     this.updateDisplay();
                     break;
@@ -1712,7 +1805,7 @@ var Fudge;
                     this.playing = false;
                     break;
                 case "forward":
-                    this.playbackTime = this.playbackTime += 1000 / this.animation.stepsPerSecond;
+                    this.playbackTime = this.playbackTime += 1000 / this.animation.fps; // stepsPerSecond;
                     this.playbackTime = Math.min(this.playbackTime, this.animation.totalTime);
                     this.updateDisplay();
                     break;
@@ -1740,7 +1833,7 @@ var Fudge;
                 case "sps":
                     // console.log("sps changed to", target.value);
                     if (!isNaN(+target.value)) {
-                        this.animation.stepsPerSecond = +target.value;
+                        this.animation.fps /* stepsPerSecond */ = +target.value;
                         this.sheet.redraw(this.playbackTime);
                     }
                     break;
@@ -1760,10 +1853,6 @@ var Fudge;
             this.sheet.redraw(this.playbackTime);
             if (!_m)
                 _m = this.animation.getMutated(this.playbackTime, 0, this.cmpAnimator.playback);
-            // this.attributeList.innerHTML = "";
-            // this.attributeList.appendChild(
-            // this.controller.BuildFromMutator(_m);
-            // this.controller = new FudgeUserInterface.UIAnimationList(_m, this.attributeList); //TODO: remove this hack, because it's horrible!
             this.controller.updateMutator(_m);
         }
         setTime(_time, updateDisplay = true) {
@@ -1838,7 +1927,7 @@ var Fudge;
             //TODO: make this scale nicely/use the animations SPS
             let baseWidth = 1000;
             let pixelPerSecond = Math.floor(baseWidth * this.scale.x);
-            let stepsPerSecond = this.view.animation.stepsPerSecond;
+            let stepsPerSecond = this.view.animation.fps; // was stepsPerSecond TODO: find out why... see masterthesis Lukas Scheuerle;
             let stepsPerDisplayText = 1;
             // [stepsPerSecond, stepsPerDisplayText] = this.calculateDisplay(pixelPerSecond);
             let pixelPerStep = pixelPerSecond / stepsPerSecond;
