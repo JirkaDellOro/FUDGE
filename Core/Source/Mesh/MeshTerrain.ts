@@ -24,12 +24,12 @@ namespace FudgeCore {
     protected seed: number;
     protected heightMapFunction: HeightMapFunction = null;
 
-    public constructor(_name: string = "MeshTerrain", _resolution: Vector2 = Vector2.ONE(10), _scaleInput: Vector2 = Vector2.ONE(), _functionOrSeed: HeightMapFunction | number = 0) {
+    public constructor(_name: string = "MeshTerrain", _resolution: Vector2 = Vector2.ONE(2), _scaleInput: Vector2 = Vector2.ONE(), _functionOrSeed: HeightMapFunction | number = 0) {
       super(_name);
       this.create(_resolution, _scaleInput, _functionOrSeed);
     }
 
-    public create(_resolution: Vector2 = Vector2.ONE(10), _scaleInput: Vector2 = Vector2.ONE(), _functionOrSeed: HeightMapFunction | number = 0): void {
+    public create(_resolution: Vector2 = Vector2.ONE(2), _scaleInput: Vector2 = Vector2.ONE(), _functionOrSeed: HeightMapFunction | number = 0): void {
       this.clear();
       this.seed = undefined;
       this.resolution = _resolution.copy;
@@ -44,16 +44,6 @@ namespace FudgeCore {
       }
       else
         this.heightMapFunction = new Noise2().sample;
-
-      // if (_size < 1 || _sizeX < 1) {
-      //   Debug.warn("HeightMap resolution < 1, corrected to 1");
-      //   this.size.x = Math.max(1, this.size.x);
-      //   this.size.y = Math.max(1, this.size.y);
-      // }
-
-
-      this.ƒnormalsFace = this.createFaceNormals();
-      this.ƒindices = this.createIndices();
     }
 
 
@@ -108,20 +98,26 @@ namespace FudgeCore {
     //#endregion
 
     protected createVertices(): Float32Array {
-      let vertices: Float32Array = new Float32Array((this.resolution.x + 1) * (this.resolution.y + 1) * 3);
+      let vertices: Vector3[] = [];
       //Iterate over each cell to generate grid of vertices
-      let i: number = 0;
+      let row: Vector3[];
       for (let z: number = 0; z <= this.resolution.y; z++) {
+        row = [];
         for (let x: number = 0; x <= this.resolution.x; x++) {
           let xNorm: number = x / this.resolution.x;
           let zNorm: number = z / this.resolution.y;
-          vertices[i] = xNorm - 0.5;
-          vertices[i + 1] = this.heightMapFunction(xNorm * this.scale.x, zNorm * this.scale.y);
-          vertices[i + 2] = zNorm - 0.5;
-          i += 3;
+          row.push(new Vector3(
+            xNorm - 0.5,
+            this.heightMapFunction(xNorm * this.scale.x, zNorm * this.scale.y),
+            zNorm - 0.5
+          ));
         }
+        vertices.push(...row);
+        if (z > 0 && z <= this.resolution.y - 1) // duplicate row to separate vertex- and face-normals
+          vertices.push(...row);
       }
-      return vertices;
+
+      return new Float32Array(vertices.map((_v: Vector3) => [_v.x, _v.y, _v.z]).flat());
     }
 
     protected createIndices(): Uint16Array {
@@ -132,25 +128,25 @@ namespace FudgeCore {
 
       let switchOrientation: Boolean = false;
 
-      for (let z: number = 0; z < this.resolution.y; z++) {
+      for (let z: number = 0; z < 2 * this.resolution.y; z += 2) {
         for (let x: number = 0; x < this.resolution.x; x++) {
 
           if (!switchOrientation) {
-            // First triangle of each uneven grid-cell
-            indices[tris + 0] = vert + 0;
             indices[tris + 1] = vert + this.resolution.x + 1;
             indices[tris + 2] = vert + 1;
+            // First triangle of each uneven grid-cell
+            indices[tris + 0] = vert + 0;
 
             // Second triangle of each uneven grid-cell
-            indices[tris + 3] = vert + 1;
             indices[tris + 4] = vert + this.resolution.x + 1;
             indices[tris + 5] = vert + this.resolution.x + 2;
+            indices[tris + 3] = vert + 1;
           }
           else {
             // First triangle of each even grid-cell
-            indices[tris + 0] = vert + 0;
             indices[tris + 1] = vert + this.resolution.x + 1;
             indices[tris + 2] = vert + this.resolution.x + 2;
+            indices[tris + 0] = vert + 0;
 
             // Second triangle of each even grid-cell
             indices[tris + 3] = vert + 0;
@@ -164,7 +160,7 @@ namespace FudgeCore {
         }
         if (this.resolution.x % 2 == 0)
           switchOrientation = !switchOrientation;
-        vert++;
+        vert += this.resolution.x + 2;
       }
       return indices;
     }

@@ -9,7 +9,7 @@ namespace FudgeCore {
     private texture: TextureImage = null;
 
     public constructor(_name: string = "MeshRelief", _texture: TextureImage = null) {
-      super(_name, undefined, undefined, (_x: number, _z: number) => 0);
+      super(_name, Vector2.ONE(2), undefined, (_x: number, _z: number) => 0);
       this.setTexture(_texture);
     }
 
