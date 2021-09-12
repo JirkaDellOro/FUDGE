@@ -166,16 +166,12 @@ namespace FudgeCore {
     }
 
     protected createTextureUVs(): Float32Array {
-      let textureUVs: Float32Array = new Float32Array(this.indices.length * 2);
+      let textureUVs: Vector2[] = [];
+      for (let i: number = 0; i < this.vertices.length; i += 3)
+        textureUVs.push(new Vector2(this.vertices[i], this.vertices[i + 2]));
 
-      for (let i: number = 0, z: number = 0; z <= this.resolution.y; z++) {
-        for (let x: number = 0; x <= this.resolution.x; x++) {
-          textureUVs[i] = x / this.resolution.x;
-          textureUVs[i + 1] = z / this.resolution.y;
-          i += 2;
-        }
-      }
-      return textureUVs;
+      return new Float32Array(textureUVs.map((_v: Vector2) => [_v.x + 0.5, _v.y + 0.5]).flat());
+
     }
 
     private calculateHeight(face: DistanceToFaceVertices, relativePosObject: Vector3): number {
