@@ -35,7 +35,7 @@ namespace FudgeCore {
         
         void main() {   
             gl_Position = u_projection * vec4(a_position, 1.0);
-            vec3 normal = normalize(mat3(u_world) * a_normal);
+            vec3 normal = normalize(transpose(inverse(mat3(u_world))) * a_normal);
             // vec3 normal = normalize(vec3(u_world * vec4(a_normal, 1.0)));
 
             v_color = u_ambient.color;
