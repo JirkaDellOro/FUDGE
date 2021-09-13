@@ -20,16 +20,13 @@ namespace Main {
   let fudge: Electron.BrowserWindow;
   let defaultWidth: number = 800;
   let defaultHeight: number = 600;
+  let saved: boolean = false;
   //#endregion
 
   // app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
 
   //#region Events 
   app.addListener("ready", createFudge);
-  app.addListener("window-all-closed", function (): void {
-    console.log("Quit");
-    if (process.platform !== "darwin") app.quit();
-  });
   app.addListener("activate", function (): void {
     console.log("Activate");
     if (fudge === null) createFudge();
@@ -38,6 +35,17 @@ namespace Main {
   ipcMain.addListener("enableMenuItem", function (_event: Electron.Event, _args: Object): void {
     Menu.getApplicationMenu().getMenuItemById(_args["item"]).enabled = _args["on"];
   });
+
+  function quit(_event: Electron.Event | { type: string }): void {
+    if (!saved) {
+      console.log("Trying to save state!", _event.type);
+      // _event.preventDefault();
+      send(fudge, Fudge.MENU.QUIT);
+      saved = true;
+      if (process.platform !== "darwin")
+        app.quit();
+    }
+  }
 
   function send(_window: Electron.BrowserWindow, _message: string, ..._args: unknown[]): void {
     console.log(`Send message ${_message}`);
@@ -52,6 +60,7 @@ namespace Main {
     const menu: Electron.Menu = Menu.buildFromTemplate(getMenuFudge());
     // fudge.setMenu(menu);
     Menu.setApplicationMenu(menu);
+    fudge.on("close", quit);
   }
 
   function addWindow(_url: string, width: number = defaultWidth, height: number = defaultHeight): Electron.BrowserWindow {
@@ -85,7 +94,7 @@ namespace Main {
         _window.fullScreen = !_window.isFullScreen();
         break;
       case Fudge.MENU.QUIT:
-        app.quit();
+        quit({ type: "Ctrl+Q" });
         break;
 
       //Physics Debug Menu Options | Marko Fehrenbach, HFU 2020  
@@ -125,8 +134,8 @@ namespace Main {
       },
       {
         label: "Edit", submenu: [
-          { label: "Project", id: Fudge.MENU.PANEL_PROJECT_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+R" : "Ctrl+R", enabled: false  },
-          { label: "Graph", id: Fudge.MENU.PANEL_GRAPH_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+G" : "Ctrl+G", enabled: false  },
+          { label: "Project", id: Fudge.MENU.PANEL_PROJECT_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+R" : "Ctrl+R", enabled: false },
+          { label: "Graph", id: Fudge.MENU.PANEL_GRAPH_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+G" : "Ctrl+G", enabled: false },
           { label: "Animation", id: Fudge.MENU.PANEL_ANIMATION_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+I" : "Ctrl+I", enabled: false }
         ]
       },

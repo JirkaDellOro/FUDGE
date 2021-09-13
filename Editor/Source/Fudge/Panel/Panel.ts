@@ -2,6 +2,10 @@
 namespace Fudge {
   import ƒ = FudgeCore;
 
+  export interface PanelState {
+    [key: string]: string;
+  }
+
   /**
    * Base class for all [[Panel]]s aggregating [[View]]s
    * Subclasses are presets for common panels. A user might add or delete [[View]]s at runtime
@@ -47,6 +51,8 @@ namespace Fudge {
         view.dom.dispatchEvent(event);
       }
     }
+
+    public abstract getState(): PanelState;
 
     private addViewComponent = (_event: EventEmitter.BubblingEvent): void => {
       // adjustmens for GoldenLayout 2

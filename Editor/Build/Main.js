@@ -88,15 +88,11 @@ var Main;
     let fudge;
     let defaultWidth = 800;
     let defaultHeight = 600;
+    let saved = false;
     //#endregion
     // app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
     //#region Events 
     app.addListener("ready", createFudge);
-    app.addListener("window-all-closed", function () {
-        console.log("Quit");
-        if (process.platform !== "darwin")
-            app.quit();
-    });
     app.addListener("activate", function () {
         console.log("Activate");
         if (fudge === null)
@@ -105,6 +101,16 @@ var Main;
     ipcMain.addListener("enableMenuItem", function (_event, _args) {
         Menu.getApplicationMenu().getMenuItemById(_args["item"]).enabled = _args["on"];
     });
+    function quit(_event) {
+        if (!saved) {
+            console.log("Trying to save state!", _event.type);
+            // _event.preventDefault();
+            send(fudge, Fudge.MENU.QUIT);
+            saved = true;
+            if (process.platform !== "darwin")
+                app.quit();
+        }
+    }
     function send(_window, _message, ..._args) {
         console.log(`Send message ${_message}`);
         _window.webContents.send(_message, _args);
@@ -117,6 +123,7 @@ var Main;
         const menu = Menu.buildFromTemplate(getMenuFudge());
         // fudge.setMenu(menu);
         Menu.setApplicationMenu(menu);
+        fudge.on("close", quit);
     }
     function addWindow(_url, width = defaultWidth, height = defaultHeight) {
         let window = new BrowserWindow({
@@ -147,7 +154,7 @@ var Main;
                 _window.fullScreen = !_window.isFullScreen();
                 break;
             case Fudge.MENU.QUIT:
-                app.quit();
+                quit({ type: "Ctrl+Q" });
                 break;
             //Physics Debug Menu Options | Marko Fehrenbach, HFU 2020  
             case MENU.PHYSICS_DEBUG:

@@ -510,7 +510,6 @@ var Fudge;
 ///<reference path="Project.ts"/>
 (function (Fudge) {
     var ƒ = FudgeCore;
-    var ƒaid = FudgeAid;
     Fudge.ipcRenderer = require("electron").ipcRenderer;
     Fudge.remote = require("electron").remote;
     /**
@@ -518,15 +517,15 @@ var Fudge;
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class Page {
+        // called by windows load-listener
         static async start() {
             ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
             ƒ.Physics.settings.debugDraw = true;
             // ƒ.Debug.setFilter(ƒ.DebugConsole, ƒ.DEBUG_FILTER.ALL | ƒ.DEBUG_FILTER.SOURCE);
-            // TODO: At this point of time, the project is just a single node. A project is much more complex...
-            // let node: ƒ.Node = null;
+            console.log("LocalStorage", localStorage);
+            //window.localStorage.clear();
             Page.setupGoldenLayout();
             ƒ.Project.mode = ƒ.MODE.EDITOR;
-            // TODO: create a new Panel containing a ViewData by default. More Views can be added by the user or by configuration
             Page.setupMainListeners();
             Page.setupPageListeners();
             // for testing:
@@ -536,6 +535,14 @@ var Fudge;
             Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: false });
             Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: false });
             Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: false });
+            if (localStorage.project) {
+                console.log("Load project referenced in local storage", localStorage.project);
+                await Page.loadProject(new URL(localStorage.project));
+                let panelInfos = JSON.parse(localStorage.panels);
+                for (let panelInfo of panelInfos) {
+                    Page.add(Fudge[panelInfo.type], panelInfo.state);
+                }
+            }
         }
         static setupGoldenLayout() {
             Page.goldenLayout = new Page.goldenLayoutModule.GoldenLayout(); // GoldenLayout 2 as UMD-Module
@@ -544,7 +551,7 @@ var Fudge;
             Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.GRAPH, Fudge.PanelGraph);
             Page.loadLayout();
         }
-        static add(_panel, _title, _state) {
+        static add(_panel, _state) {
             const panelConfig = {
                 type: "row",
                 content: [
@@ -552,7 +559,7 @@ var Fudge;
                         type: "component",
                         componentType: _panel.name,
                         componentState: _state,
-                        title: _title,
+                        title: "Panel",
                         id: Page.generateID(_panel.name)
                     }
                 ]
@@ -606,12 +613,19 @@ var Fudge;
                 case Fudge.EVENT_EDITOR.SET_GRAPH:
                     let panel = Page.find(Fudge.PanelGraph);
                     if (!panel.length)
-                        Page.add(Fudge.PanelGraph, "Graph", Object({ node: new ƒaid.NodeCoordinateSystem("WorldCooSys") }));
+                        Page.add(Fudge.PanelGraph, null);
                 // break;
                 default:
                     Page.broadcastEvent(_event);
                     break;
             }
+        }
+        static async loadProject(_url) {
+            await Fudge.loadProject(_url);
+            Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
+            Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
+            Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
+            Page.broadcastEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_PROJECT));
         }
         //#region Main-Events from Electron
         static setupMainListeners() {
@@ -630,22 +644,21 @@ var Fudge;
                 let url = await Fudge.promptLoadProject();
                 if (!url)
                     return;
-                await Fudge.loadProject(url);
-                Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
-                Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
-                Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
-                Page.broadcastEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_PROJECT));
+                await Page.loadProject(url);
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_GRAPH_OPEN, (_event, _args) => {
-                let node = new ƒaid.NodeCoordinateSystem("WorldCooSys");
-                // funktioniert nicht
-                Page.add(Fudge.PanelGraph, "Graph", null);
-                // Alternative
-                //Page.add(PanelGraph, "Graph", "Platzhalter should be node"); 
-                Page.broadcastEvent(new CustomEvent(Fudge.EVENT_EDITOR.UPDATE, { detail: node }));
+                Page.add(Fudge.PanelGraph, null);
+                // Page.broadcastEvent(new CustomEvent(EVENT_EDITOR.UPDATE, { detail: node }));
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_PROJECT_OPEN, (_event, _args) => {
-                Page.add(Fudge.PanelProject, "Project", null); //Object.create(null,  {node: { writable: true, value: node }}));
+                Page.add(Fudge.PanelProject, null);
+            });
+            Fudge.ipcRenderer.on(Fudge.MENU.QUIT, (_event, _args) => {
+                localStorage.setItem("project", Fudge.project.base.toString());
+                let panelInfos = [];
+                for (let panel of this.panels)
+                    panelInfos.push({ type: panel.constructor.name, state: panel.getState() });
+                localStorage.setItem("panels", JSON.stringify(panelInfos));
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_ANIMATION_OPEN, (_event, _args) => {
                 //   let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
@@ -662,7 +675,6 @@ var Fudge;
         if (target instanceof Page.goldenLayoutModule.ComponentItem) {
             Page.panels.push(target.component);
         }
-        console.log("Panels", Page.panels);
     };
     Fudge.Page = Page;
     // function welcome(container: GoldenLayout.Container, state: Object): void {
@@ -1434,7 +1446,7 @@ var Fudge;
             this.goldenLayout.registerComponentConstructor(Fudge.VIEW.RENDER, Fudge.ViewRender);
             this.goldenLayout.registerComponentConstructor(Fudge.VIEW.COMPONENTS, Fudge.ViewComponents);
             this.goldenLayout.registerComponentConstructor(Fudge.VIEW.HIERARCHY, Fudge.ViewHierarchy);
-            let inner = this.goldenLayout.rootItem;
+            this.setTitle("Graph");
             const renderConfig = {
                 type: "column",
                 isClosable: true,
@@ -1473,6 +1485,12 @@ var Fudge;
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndFocusNode);
             this.dom.addEventListener("rename" /* RENAME */, this.broadcastEvent);
+            if (_state["graph"])
+                ƒ.Project.getResource(_state["graph"]).then((_graph) => {
+                    this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { detail: _graph }));
+                    // TODO: trace the node saved. The name is not sufficient, path is necessary...
+                    // this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.FOCUS_NODE, { detail: _graph.findChild }));
+                });
         }
         setGraph(_graph) {
             if (_graph) {
@@ -1481,6 +1499,14 @@ var Fudge;
                 return;
             }
             this.setTitle("Graph");
+        }
+        getState() {
+            let state = {};
+            if (this.graph) {
+                state.graph = this.graph.idResource;
+                return state;
+            }
+            // TODO: iterate over views and collect their states for reconstruction 
         }
     }
     Fudge.PanelGraph = PanelGraph;
@@ -1558,6 +1584,10 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
             this.setTitle("Project | " + Fudge.project.name);
             this.broadcastEvent(new Event(Fudge.EVENT_EDITOR.SET_PROJECT));
+        }
+        getState() {
+            // TODO: iterate over views and collect their states for reconstruction 
+            return {};
         }
     }
     Fudge.PanelProject = PanelProject;
@@ -2347,7 +2377,7 @@ var Fudge;
         setGraph(_graph) {
             if (!_graph) {
                 this.graph = undefined;
-                // this.dom.innerHTML = "Edit graph";
+                this.dom.innerHTML = "";
                 return;
             }
             if (this.graph && this.tree)

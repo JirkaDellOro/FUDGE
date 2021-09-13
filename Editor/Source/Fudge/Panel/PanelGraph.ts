@@ -12,12 +12,11 @@ namespace Fudge {
     constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
 
-
       this.goldenLayout.registerComponentConstructor(VIEW.RENDER, ViewRender);
       this.goldenLayout.registerComponentConstructor(VIEW.COMPONENTS, ViewComponents);
       this.goldenLayout.registerComponentConstructor(VIEW.HIERARCHY, ViewHierarchy);
 
-      let inner: ContentItem = this.goldenLayout.rootItem;
+      this.setTitle("Graph");
 
       const renderConfig: RowOrColumnItemConfig = {
         type: "column",
@@ -62,6 +61,13 @@ namespace Fudge {
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndFocusNode);
       this.dom.addEventListener(ƒui.EVENT.RENAME, this.broadcastEvent);
+
+      if (_state["graph"])
+        ƒ.Project.getResource(_state["graph"]).then((_graph: ƒ.Graph) => {
+          this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.SET_GRAPH, { detail: _graph }));
+          // TODO: trace the node saved. The name is not sufficient, path is necessary...
+          // this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.FOCUS_NODE, { detail: _graph.findChild }));
+        });
     }
 
     public setGraph(_graph: ƒ.Graph): void {
@@ -72,6 +78,15 @@ namespace Fudge {
       }
 
       this.setTitle("Graph");
+    }
+
+    public getState(): { [key: string]: string } {
+      let state: PanelState = {};
+      if (this.graph) {
+        state.graph = this.graph.idResource;
+        return state;
+      }
+      // TODO: iterate over views and collect their states for reconstruction 
     }
 
     private hndEvent = async (_event: CustomEvent): Promise<void> => {

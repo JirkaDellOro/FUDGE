@@ -1,12 +1,4 @@
 namespace Fudge {
-
-
-
-
-
-
-
-
   export enum CONTEXTMENU {
     // SKETCH = ViewSketch,
     ADD_NODE,
@@ -18,7 +10,6 @@ namespace Fudge {
     CREATE_GRAPH,
     REMOVE_COMPONENT
   }
-
 
   export enum MENU {
     QUIT = "quit",
@@ -35,7 +26,6 @@ namespace Fudge {
     NODE_UPDATE = "nodeUpdate",
     */
   }
-
 
   export enum EVENT_EDITOR {
     SET_GRAPH = "setGraph",

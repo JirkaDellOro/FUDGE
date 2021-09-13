@@ -14,6 +14,11 @@ namespace Fudge {
 
   export let project: Project; // = new Project();
 
+  export interface PanelInfo {
+    type: string;
+    state: PanelState;
+  }
+
   /**
    * The uppermost container for all panels controlling data flow between. 
    * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
@@ -24,19 +29,20 @@ namespace Fudge {
     private static goldenLayout: GoldenLayout;
     private static panels: Panel[] = [];
 
+    // called by windows load-listener
     private static async start(): Promise<void> {
       ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
       ƒ.Physics.settings.debugDraw = true;
       // ƒ.Debug.setFilter(ƒ.DebugConsole, ƒ.DEBUG_FILTER.ALL | ƒ.DEBUG_FILTER.SOURCE);
-      // TODO: At this point of time, the project is just a single node. A project is much more complex...
-      // let node: ƒ.Node = null;
+
+      console.log("LocalStorage", localStorage);
+      //window.localStorage.clear();
 
       Page.setupGoldenLayout();
       ƒ.Project.mode = ƒ.MODE.EDITOR;
-      // TODO: create a new Panel containing a ViewData by default. More Views can be added by the user or by configuration
+      
       Page.setupMainListeners();
       Page.setupPageListeners();
-
       // for testing:
       // ipcRenderer.emit(MENU.PANEL_PROJECT_OPEN);
       // ipcRenderer.emit(MENU.PANEL_GRAPH_OPEN);
@@ -44,6 +50,16 @@ namespace Fudge {
       ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: false });
       ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: false });
       ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: false });
+
+      if (localStorage.project) {
+        console.log("Load project referenced in local storage", localStorage.project);
+        await Page.loadProject(new URL(localStorage.project));
+
+        let panelInfos: PanelInfo[] = JSON.parse(localStorage.panels);
+        for (let panelInfo of panelInfos) {
+          Page.add(Fudge[panelInfo.type], panelInfo.state);
+        }
+      }
     }
 
     private static setupGoldenLayout(): void {
@@ -56,7 +72,7 @@ namespace Fudge {
       Page.loadLayout();
     }
 
-    private static add(_panel: typeof Panel, _title: string, _state?: JsonValue): void {
+    private static add(_panel: typeof Panel, _state?: JsonValue): void {
       const panelConfig: RowOrColumnItemConfig = {
         type: "row",
         content: [
@@ -64,12 +80,11 @@ namespace Fudge {
             type: "component",
             componentType: _panel.name,
             componentState: _state,
-            title: _title,
+            title: "Panel",
             id: Page.generateID(_panel.name)
           }
         ]
       };
-
 
       if (!Page.goldenLayout.rootItem)  // workaround because golden Layout loses rootItem...
         Page.loadLayout();
@@ -128,7 +143,7 @@ namespace Fudge {
         case EVENT_EDITOR.SET_GRAPH:
           let panel: Panel[] = Page.find(PanelGraph);
           if (!panel.length)
-            Page.add(PanelGraph, "Graph", Object({ node: new ƒaid.NodeCoordinateSystem("WorldCooSys") }));
+            Page.add(PanelGraph, null);
         // break;
         default:
           Page.broadcastEvent(_event);
@@ -142,7 +157,14 @@ namespace Fudge {
       if (target instanceof Page.goldenLayoutModule.ComponentItem) {
         Page.panels.push(<Panel>target.component);
       }
-      console.log("Panels", Page.panels);
+    }
+
+    private static async loadProject(_url: URL): Promise<void> {
+      await loadProject(_url);
+      ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
+      ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
+      ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
+      Page.broadcastEvent(new CustomEvent(EVENT_EDITOR.SET_PROJECT));
     }
 
     //#region Main-Events from Electron
@@ -164,24 +186,24 @@ namespace Fudge {
         let url: URL = await promptLoadProject();
         if (!url)
           return;
-        await loadProject(url);
-        ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
-        ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
-        ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: true });
-        Page.broadcastEvent(new CustomEvent(EVENT_EDITOR.SET_PROJECT));
+        await Page.loadProject(url);
       });
 
       ipcRenderer.on(MENU.PANEL_GRAPH_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-        let node: ƒ.Node = new ƒaid.NodeCoordinateSystem("WorldCooSys");
-        // funktioniert nicht
-        Page.add(PanelGraph, "Graph", null);
-        // Alternative
-        //Page.add(PanelGraph, "Graph", "Platzhalter should be node"); 
-        Page.broadcastEvent(new CustomEvent(EVENT_EDITOR.UPDATE, { detail: node }));
+        Page.add(PanelGraph, null);
+        // Page.broadcastEvent(new CustomEvent(EVENT_EDITOR.UPDATE, { detail: node }));
       });
 
       ipcRenderer.on(MENU.PANEL_PROJECT_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-        Page.add(PanelProject, "Project", null); //Object.create(null,  {node: { writable: true, value: node }}));
+        Page.add(PanelProject, null); 
+      });
+
+      ipcRenderer.on(MENU.QUIT, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
+        localStorage.setItem("project", project.base.toString());
+        let panelInfos: PanelInfo[] = [];
+        for (let panel of this.panels)
+          panelInfos.push({type: panel.constructor.name, state: panel.getState()});
+        localStorage.setItem("panels", JSON.stringify(panelInfos));
       });
 
       ipcRenderer.on(MENU.PANEL_ANIMATION_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {

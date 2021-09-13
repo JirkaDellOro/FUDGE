@@ -133,6 +133,10 @@ declare namespace Fudge {
     const ipcRenderer: Electron.IpcRenderer;
     const remote: Electron.Remote;
     let project: Project;
+    interface PanelInfo {
+        type: string;
+        state: PanelState;
+    }
     /**
      * The uppermost container for all panels controlling data flow between.
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
@@ -153,6 +157,7 @@ declare namespace Fudge {
         private static broadcastEvent;
         private static hndEvent;
         private static hndPanelCreated;
+        private static loadProject;
         private static setupMainListeners;
     }
 }
@@ -305,6 +310,9 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    interface PanelState {
+        [key: string]: string;
+    }
     /**
      * Base class for all [[Panel]]s aggregating [[View]]s
      * Subclasses are presets for common panels. A user might add or delete [[View]]s at runtime
@@ -316,6 +324,7 @@ declare namespace Fudge {
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         /** Send custom copies of the given event to the views */
         broadcastEvent: (_event: Event) => void;
+        abstract getState(): PanelState;
         private addViewComponent;
     }
 }
@@ -329,6 +338,9 @@ declare namespace Fudge {
         private graph;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         setGraph(_graph: ƒ.Graph): void;
+        getState(): {
+            [key: string]: string;
+        };
         private hndEvent;
         private hndFocusNode;
     }
@@ -340,6 +352,9 @@ declare namespace Fudge {
      */
     class PanelProject extends Panel {
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        getState(): {
+            [key: string]: string;
+        };
         private hndEvent;
     }
 }

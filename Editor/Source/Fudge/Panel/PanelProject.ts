@@ -79,6 +79,11 @@ namespace Fudge {
       this.broadcastEvent(new Event(EVENT_EDITOR.SET_PROJECT));
     }
     
+    public getState(): { [key: string]: string } {
+      // TODO: iterate over views and collect their states for reconstruction 
+      return {};
+    }
+
     private hndEvent = (_event: CustomEvent): void => {
       this.setTitle("Project | " + project.name);
       this.broadcastEvent(_event);

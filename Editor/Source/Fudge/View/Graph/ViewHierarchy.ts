@@ -25,7 +25,7 @@ namespace Fudge {
     public setGraph(_graph: ƒ.Node): void {
       if (!_graph) {
         this.graph = undefined;
-        // this.dom.innerHTML = "Edit graph";
+        this.dom.innerHTML = "";
         return;
       }
 
