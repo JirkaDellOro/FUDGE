@@ -30,7 +30,7 @@ namespace Fudge {
             title: "Render"
           }
         ]
-      }
+      };
 
       const hierachyAndComponents: RowOrColumnItemConfig = {
         type: "column",
@@ -65,13 +65,20 @@ namespace Fudge {
     }
 
     public setGraph(_graph: ƒ.Graph): void {
-      this.graph = _graph;
+      if (_graph) {
+        this.setTitle("Graph | " + _graph.name);
+        this.graph = _graph;
+        return;
+      }
+
+      this.setTitle("Graph");
     }
 
     private hndEvent = async (_event: CustomEvent): Promise<void> => {
       switch (_event.type) {
         case EVENT_EDITOR.SET_GRAPH:
           this.setGraph(_event.detail);
+          break;
         case EVENT_EDITOR.SET_PROJECT:
         case EVENT_EDITOR.UPDATE:
           // TODO: meaningful difference between update and setgraph
@@ -82,7 +89,7 @@ namespace Fudge {
           }
       }
       this.broadcastEvent(_event);
-      // _event.stopPropagation();
+      _event.stopPropagation();
     }
     private hndFocusNode = (_event: CustomEvent): void => {
       let event: CustomEvent = new CustomEvent(EVENT_EDITOR.FOCUS_NODE, { bubbles: false, detail: _event.detail.data });

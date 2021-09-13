@@ -23,11 +23,16 @@ namespace Fudge {
     }
 
     public setGraph(_graph: ƒ.Node): void {
-      if (!_graph)
+      if (!_graph) {
+        this.graph = undefined;
+        // this.dom.innerHTML = "Edit graph";
         return;
-      if (this.tree)
+      }
+
+      if (this.graph && this.tree)
         this.dom.removeChild(this.tree);
 
+      this.dom.innerHTML = "";
       this.graph = _graph;
       // this.selectedNode = null;
 
@@ -38,6 +43,8 @@ namespace Fudge {
       this.tree.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
       this.tree.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.append(this.tree);
+      this.dom.title = "Right click to create new node";
+      this.tree.title = "Select node to edit";
     }
 
     public getSelection(): ƒ.Node[] {

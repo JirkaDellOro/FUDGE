@@ -32,6 +32,7 @@ namespace Fudge {
     public files: Files = new Files();
     // public title: string = "NewProject";
     public base: URL;
+    public name: string;
     private includePhysics: boolean = false;
     private includeAutoViewScript: boolean = true;
     private graphToStartWith: string = "";
@@ -40,6 +41,7 @@ namespace Fudge {
       super();
       // this.updateFilenames("NewProject", true, this);
       this.base = _base;
+      this.name = _base.toString().split("/").slice(-2, -1)[0];
     }
 
     public async openDialog(): Promise<boolean> {

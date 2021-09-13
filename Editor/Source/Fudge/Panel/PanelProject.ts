@@ -67,35 +67,20 @@ namespace Fudge {
         ]
       };
 
-      this.goldenLayout.rootItem.layoutManager.addItemAtLocation(previewAndPropertiesConfig, [{typeId: LayoutManager.LocationSelector.TypeId.Root}]);
-      this.goldenLayout.rootItem.layoutManager.addItemAtLocation(internalExternalScriptConfig, [{typeId: LayoutManager.LocationSelector.TypeId.Root}]);
-
-      //old addchild
-      // inner.addChild({
-      //   type: "column", content: [
-      //     { type: "component", componentName: VIEW.PREVIEW, componentState: _state, title: "Preview" },
-      //     { type: "component", componentName: VIEW.PROPERTIES, componentState: _state, title: "Properties" }
-      //   ]
-      // });
-      // inner.addChild({
-      //   type: "column", content: [
-      //     { type: "component", componentName: VIEW.INTERNAL, componentState: _state, title: "Internal" },
-      //     { type: "component", componentName: VIEW.EXTERNAL, componentState: _state, title: "External" },
-      //     { type: "component", componentName: VIEW.SCRIPT, componentState: _state, title: "Script" }
-      //   ]
-      // });
+      this.goldenLayout.rootItem.layoutManager.addItemAtLocation(previewAndPropertiesConfig, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
+      this.goldenLayout.rootItem.layoutManager.addItemAtLocation(internalExternalScriptConfig, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
 
       this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
 
+      this.setTitle("Project | " + project.name);
       this.broadcastEvent(new Event(EVENT_EDITOR.SET_PROJECT));
     }
-
+    
     private hndEvent = (_event: CustomEvent): void => {
-      // if (_event.type == EVENT_EDITOR.SET_PROJECT)
-      //   this.setGraph(_event.detail);
+      this.setTitle("Project | " + project.name);
       this.broadcastEvent(_event);
     }
   }

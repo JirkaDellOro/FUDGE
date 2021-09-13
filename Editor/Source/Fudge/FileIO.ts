@@ -68,12 +68,12 @@ namespace Fudge {
       return;
 
     let base: URL = project.base;
-    let projectName: string = base.toString().split("/").slice(-2, -1)[0];
+    // let projectName: string = base.toString().split("/").slice(-2, -1)[0];
     if (watcher)
       watcher.close();
 
     if (project.files.index.overwrite) {
-      let html: string = project.getProjectHTML(projectName);
+      let html: string = project.getProjectHTML(project.name);
       let htmlFileName: URL = new URL(project.files.index.filename, base);
       fs.writeFileSync(htmlFileName, html);
     }
@@ -117,8 +117,7 @@ namespace Fudge {
     ƒ.Project.clear();
     project = new Project(_url);
 
-    // project.title = head.querySelector("title").textContent;
-
+    project.name = head.querySelector("title").textContent;
     project.files.index.filename = _url.toString().split("/").pop();
     // project.files.index.overwrite = false;
 

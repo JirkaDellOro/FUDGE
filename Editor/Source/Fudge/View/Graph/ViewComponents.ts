@@ -102,7 +102,8 @@ namespace Fudge {
       while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild));
       if (this.node) {
         if (this.node instanceof ƒ.Node) {
-          this.setTitle(this.node.name);
+          this.setTitle("Components | " + this.node.name);
+          this.dom.title = "Drop internal resources or use right click to create new components";
 
           let nodeComponents: ƒ.Component[] = this.node.getAllComponents();
           for (let nodeComponent of nodeComponents) {
@@ -114,6 +115,8 @@ namespace Fudge {
         }
       }
       else {
+        this.setTitle("Components");
+        this.dom.title = "Select node to edit components";
         let cntEmpty: HTMLDivElement = document.createElement("div");
         this.dom.append(cntEmpty);
       }
