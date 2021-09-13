@@ -214,13 +214,13 @@ fudge-boolean, fudge-color, fudge-textinput, fudge-stepper {
 custom-vector2 {
   text-align: right;
   display: grid;
-  grid-template-columns: 2em 8em 8em;
+  grid-template-columns: max-content 8em 8em;
 }
 
 custom-vector3 {
   text-align: right;
   display: grid;
-  grid-template-columns: 2em 8em 8em 8em;
+  grid-template-columns: max-content 8em 8em 8em;
 }
 
 custom-matrix4x4 {
