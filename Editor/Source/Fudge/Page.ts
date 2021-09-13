@@ -25,6 +25,7 @@ namespace Fudge {
     private static panels: Panel[] = [];
 
     private static async start(): Promise<void> {
+      // ƒ.Debug.setFilter(ƒ.DebugConsole, ƒ.DEBUG_FILTER.ALL | ƒ.DEBUG_FILTER.SOURCE);
       // TODO: At this point of time, the project is just a single node. A project is much more complex...
       // let node: ƒ.Node = null;
 

@@ -76,7 +76,7 @@ namespace Main {
   //#region Menus  
   function menuSelect(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.KeyboardEvent): void {
     console.log(`MenuSelect: Item-id=${Fudge.MENU[_item.id]}`);
-    // TODO: simplify switch by usinge enums as messages
+    // TODO: simplify switch using enums as messages
     switch (_item.id) {
       case Fudge.MENU.DEVTOOLS_OPEN:
         _window.webContents.openDevTools();

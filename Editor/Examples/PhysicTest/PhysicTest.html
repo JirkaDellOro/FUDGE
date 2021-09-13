@@ -13,6 +13,9 @@
 <!--Link stylesheet and internal resources-->
 <link rel="stylesheet" href="PhysicTest.css" />
 <link type="resources" src="PhysicTest.json" />
+<!--Load custom scripts-->
+<!-- <script type="text/javascript" src="Script/Build/Script.js" editor="true">
+</script> -->
 <!--Auto-View-->
 <script>(function (_graphId) {
                 window.addEventListener("load", init);
@@ -30,13 +33,20 @@
                 async function startInteractiveViewport() {
                     // load resources referenced in the link-tag
                     await FudgeCore.Project.loadResourcesFromHTML();
+                    FudgeCore.Debug.log("Project:", FudgeCore.Project.resources);
                     // pick the graph to show
                     let graph = FudgeCore.Project.resources[_graphId];
+                    FudgeCore.Debug.log("Graph:", graph);
+                    if (!graph) {
+                        alert("Nothing to render. Create a graph with at least a mesh, material and probably some light");
+                        return;
+                    }
                     // setup the viewport
                     let cmpCamera = new FudgeCore.ComponentCamera();
                     let canvas = document.querySelector("canvas");
                     let viewport = new FudgeCore.Viewport();
                     viewport.initialize("InteractiveViewport", graph, cmpCamera, canvas);
+                    FudgeCore.Debug.log("Viewport:", viewport);
                     // hide the cursor when interacting, also suppressing right-click menu
                     canvas.addEventListener("mousedown", canvas.requestPointerLock);
                     canvas.addEventListener("mouseup", function () { document.exitPointerLock(); });
@@ -47,10 +57,12 @@
                     cmpCamera.getContainer().addComponent(cmpListener);
                     FudgeCore.AudioManager.default.listenWith(cmpListener);
                     FudgeCore.AudioManager.default.listenTo(graph);
+                    FudgeCore.Debug.log("Audio:", FudgeCore.AudioManager.default);
                     // draw viewport once for immediate feedback
                     viewport.draw();
+                    canvas.dispatchEvent(new CustomEvent("interactiveViewportStarted", { bubbles: true, detail: viewport }));
                 }
-            })("");
+            })("Graph|2020-11-11T14:45:27.492Z|55222");
 </script>
 </head>
 <body>

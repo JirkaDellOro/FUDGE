@@ -518,6 +518,7 @@ var Fudge;
      */
     class Page {
         static async start() {
+            // ƒ.Debug.setFilter(ƒ.DebugConsole, ƒ.DEBUG_FILTER.ALL | ƒ.DEBUG_FILTER.SOURCE);
             // TODO: At this point of time, the project is just a single node. A project is much more complex...
             // let node: ƒ.Node = null;
             Page.setupGoldenLayout();
@@ -2516,6 +2517,8 @@ var Fudge;
             this.viewport.initialize("ViewNode_Viewport", this.graph, cmpCamera, this.canvas);
             this.cmrOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
             this.viewport.draw();
+            ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
+            ƒ.Physics.settings.debugDraw = true;
             this.dom.append(this.canvas);
             // ƒ.Loop.start(ƒ.LOOP_MODE.TIME_REAL);
             // ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.animate);

@@ -138,7 +138,7 @@ var Main;
     //#region Menus  
     function menuSelect(_item, _window, _event) {
         console.log(`MenuSelect: Item-id=${Fudge.MENU[_item.id]}`);
-        // TODO: simplify switch by usinge enums as messages
+        // TODO: simplify switch using enums as messages
         switch (_item.id) {
             case Fudge.MENU.DEVTOOLS_OPEN:
                 _window.webContents.openDevTools();

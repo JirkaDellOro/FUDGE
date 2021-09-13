@@ -42,6 +42,9 @@ namespace Fudge {
       this.cmrOrbit = FudgeAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
       this.viewport.draw();
 
+      ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
+      ƒ.Physics.settings.debugDraw = true;
+      
       this.dom.append(this.canvas);
 
 
