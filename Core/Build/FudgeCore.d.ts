@@ -4470,6 +4470,7 @@ declare namespace FudgeCore {
        * @author Marko Fehrenbach, HFU 2020
        */
     class ComponentRigidbody extends Component {
+        #private;
         static readonly iSubclass: number;
         /** The pivot of the physics itself. Default the pivot is identical to the transform. It's used like an offset. */
         mtxPivot: Matrix4x4;
@@ -4479,27 +4480,12 @@ declare namespace FudgeCore {
         collisions: ComponentRigidbody[];
         /** Triggers that are currently triggering this body */
         triggerings: ComponentRigidbody[];
-        /** ID to reference this specific ComponentRigidbody */
-        id: number;
-        private rigidbody;
-        private massData;
-        private collider;
-        private colliderInfo;
-        private rigidbodyInfo;
-        private rbType;
-        private colType;
-        private colGroup;
-        private colMask;
-        private bodyRestitution;
-        private bodyFriction;
-        private linDamping;
-        private angDamping;
-        private rotationalInfluenceFactor;
-        private gravityInfluenceFactor;
-        private bodyIsTrigger;
-        private callbacks;
+        /** The groups this object collides with. Groups must be writen in form of
+         *  e.g. collisionMask = PHYSICS_GROUP.DEFAULT | PHYSICS_GROUP.GROUP_1 and so on to collide with multiple groups. */
+        collisionMask: number;
         /** Creating a new rigidbody with a weight in kg, a physics type (default = dynamic), a collider type what physical form has the collider, to what group does it belong, is there a transform Matrix that should be used, and is the collider defined as a group of points that represent a convex mesh. */
         constructor(_mass?: number, _type?: PHYSICS_TYPE, _colliderType?: COLLIDER_TYPE, _group?: PHYSICS_GROUP, _mtxTransform?: Matrix4x4, _convexMesh?: Float32Array);
+        get id(): number;
         /** The type of interaction between the physical world and the transform hierarchy world. DYNAMIC means the body ignores hierarchy and moves by physics. KINEMATIC it's
          * reacting to a {@link Node} that is using physics but can still be controlled by animation or transform. And STATIC means its immovable.
          */
@@ -4511,10 +4497,6 @@ declare namespace FudgeCore {
         /** The physics group this {@link Node} belongs to it's the default group normally which means it physically collides with every group besides trigger. */
         get collisionGroup(): PHYSICS_GROUP;
         set collisionGroup(_value: PHYSICS_GROUP);
-        /** The groups this object collides with. Groups must be writen in form of
-         *  e.g. collisionMask = PHYSICS_GROUP.DEFAULT | PHYSICS_GROUP.GROUP_1 and so on to collide with multiple groups. */
-        get collisionMask(): number;
-        set collisionMask(_value: number);
         /** Marking the Body as a trigger therefore not influencing the collision system but only sending triggerEvents */
         get isTrigger(): boolean;
         set isTrigger(_value: boolean);
