@@ -74,6 +74,31 @@
                     "idMaterial": "Material|2021-09-15T16:53:06.944Z|28469"
                   }
                 }
+              ],
+              "ComponentRigidbody": [
+                {
+                  "ƒ.ComponentRigidbody": {
+                    "collisionMask": 31,
+                    "friction": 0.2,
+                    "restitution": 0.2,
+                    "mass": 1,
+                    "linearDamping": 0.1,
+                    "angularDamping": 0.1,
+                    "gravityScale": 1,
+                    "bodyType": "STATIC",
+                    "colliderType": "SPHERE",
+                    "isTrigger": false,
+                    "id": 0,
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
               ]
             },
             "children": []

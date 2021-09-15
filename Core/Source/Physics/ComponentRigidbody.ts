@@ -563,9 +563,15 @@ namespace FudgeCore {
     //#region Saving/Loading - Some properties might be missing, e.g. convexMesh (Float32Array)
     public serialize(): Serialization {
       let serialization: Serialization = this.getMutator();
-      serialization.pivot = this.mtxPivot.serialize();
+
+      delete serialization.mtxPivot;
+      delete serialization.active;
+
+      serialization.bodyType = BODY_TYPE[this.#bodyType];
+      serialization.colliderType = COLLIDER_TYPE[this.#colliderType];
+
       serialization.id = this.#id;
-      serialization.trigger = this.isTrigger;
+      serialization.pivot = this.mtxPivot.serialize();
       serialization[super.constructor.name] = super.serialize();
       return serialization;
     }
@@ -573,9 +579,9 @@ namespace FudgeCore {
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.mtxPivot.deserialize(_serialization.pivot);
       this.#id = _serialization.id;
-      this.physicsType = _serialization.physicsType;
-      this.mass = _serialization.mass || 1;
-      this.colliderType = _serialization.colliderType || COLLIDER_TYPE.CUBE;
+      this.#bodyType = <number><unknown>BODY_TYPE[_serialization.bodyType];
+      this.#colliderType = <number><unknown>COLLIDER_TYPE[_serialization.colliderType];
+      this.mass = _serialization.mass || this.mass;
       this.linearDamping = _serialization.linearDamping || this.#dampingLinear;
       this.angularDamping = _serialization.angularDamping || this.#dampingAngular;
       this.collisionGroup = _serialization.collisionGroup || this.#collisionGroup;
@@ -621,6 +627,7 @@ namespace FudgeCore {
       mutator.gravityScale = this.gravityScale;
       mutator.bodyType = this.#bodyType;
       mutator.colliderType = this.#colliderType;
+      mutator.isTrigger = this.#isTrigger;
 
       // Object.preventExtensions(mutator);
       return mutator;
