@@ -29,7 +29,7 @@ namespace FudgeCore {
         public static initializePhysics(): Physics {
             if (typeof OIMO !== "undefined" && this.world == null) { //Check if OIMO Namespace was loaded, else do not use any physics. Check is needed to ensure FUDGE can be used without Physics
                 this.world = new Physics();
-                this.settings = new PhysicsSettings(PHYSICS_GROUP.DEFAULT, (PHYSICS_GROUP.DEFAULT | PHYSICS_GROUP.GROUP_1 | PHYSICS_GROUP.GROUP_2 | PHYSICS_GROUP.GROUP_3 | PHYSICS_GROUP.GROUP_4));
+                this.settings = new PhysicsSettings(COLLISION_GROUP.DEFAULT, (COLLISION_GROUP.DEFAULT | COLLISION_GROUP.GROUP_1 | COLLISION_GROUP.GROUP_2 | COLLISION_GROUP.GROUP_3 | COLLISION_GROUP.GROUP_4));
                 this.world.createWorld(); //create the actual oimoPhysics World
                 this.world.debugDraw = new PhysicsDebugDraw();  //Create a Fudge Physics debugging handling object
                 this.world.oimoWorld.setDebugDraw(this.world.debugDraw.oimoDebugDraw); //Tell OimoPhysics where to debug to and how it will be handled
@@ -41,13 +41,13 @@ namespace FudgeCore {
         * Cast a RAY into the physical world from a origin point in a certain direction. Receiving informations about the hit object and the
         * hit point. Do not specify a _group to raycast the whole world, else only bodies within the specific group can be hit.
         */
-        public static raycast(_origin: Vector3, _direction: Vector3, _length: number = 1, _group: PHYSICS_GROUP = PHYSICS_GROUP.DEFAULT): RayHitInfo {
+        public static raycast(_origin: Vector3, _direction: Vector3, _length: number = 1, _group: COLLISION_GROUP = COLLISION_GROUP.DEFAULT): RayHitInfo {
             let hitInfo: RayHitInfo = new RayHitInfo();
             let ray: OIMO.RayCastClosest = new OIMO.RayCastClosest();
             let begin: OIMO.Vec3 = new OIMO.Vec3(_origin.x, _origin.y, _origin.z);
             let end: OIMO.Vec3 = this.getRayEndPoint(begin, new Vector3(_direction.x, _direction.y, _direction.z), _length);
             ray.clear();
-            if (_group == PHYSICS_GROUP.DEFAULT) { //Case 1: Raycasting the whole world, normal mode
+            if (_group == COLLISION_GROUP.DEFAULT) { //Case 1: Raycasting the whole world, normal mode
                 Physics.world.oimoWorld.rayCast(begin, end, ray);
             } else { //Case2: Raycasting on each body in a specific group
                 let allHits: RayHitInfo[] = new Array();

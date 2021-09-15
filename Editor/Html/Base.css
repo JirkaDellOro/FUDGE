@@ -205,7 +205,7 @@ dialog>div#content {
 
 /* standard fudge elements */
 
-fudge-boolean, fudge-color, fudge-textinput, fudge-stepper {
+fudge-boolean, fudge-color, fudge-textinput, fudge-stepper, fudge-select {
   display: block;
 }
 

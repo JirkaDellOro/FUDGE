@@ -4484,19 +4484,19 @@ declare namespace FudgeCore {
          *  e.g. collisionMask = PHYSICS_GROUP.DEFAULT | PHYSICS_GROUP.GROUP_1 and so on to collide with multiple groups. */
         collisionMask: number;
         /** Creating a new rigidbody with a weight in kg, a physics type (default = dynamic), a collider type what physical form has the collider, to what group does it belong, is there a transform Matrix that should be used, and is the collider defined as a group of points that represent a convex mesh. */
-        constructor(_mass?: number, _type?: PHYSICS_TYPE, _colliderType?: COLLIDER_TYPE, _group?: PHYSICS_GROUP, _mtxTransform?: Matrix4x4, _convexMesh?: Float32Array);
+        constructor(_mass?: number, _type?: BODY_TYPE, _colliderType?: COLLIDER_TYPE, _group?: COLLISION_GROUP, _mtxTransform?: Matrix4x4, _convexMesh?: Float32Array);
         get id(): number;
         /** The type of interaction between the physical world and the transform hierarchy world. DYNAMIC means the body ignores hierarchy and moves by physics. KINEMATIC it's
          * reacting to a {@link Node} that is using physics but can still be controlled by animation or transform. And STATIC means its immovable.
          */
-        get physicsType(): PHYSICS_TYPE;
-        set physicsType(_value: PHYSICS_TYPE);
+        get physicsType(): BODY_TYPE;
+        set physicsType(_value: BODY_TYPE);
         /** The shape that represents the {@link Node} in the physical world. Default is a Cube. */
         get colliderType(): COLLIDER_TYPE;
         set colliderType(_value: COLLIDER_TYPE);
         /** The physics group this {@link Node} belongs to it's the default group normally which means it physically collides with every group besides trigger. */
-        get collisionGroup(): PHYSICS_GROUP;
-        set collisionGroup(_value: PHYSICS_GROUP);
+        get collisionGroup(): COLLISION_GROUP;
+        set collisionGroup(_value: COLLISION_GROUP);
         /** Marking the Body as a trigger therefore not influencing the collision system but only sending triggerEvents */
         get isTrigger(): boolean;
         set isTrigger(_value: boolean);
@@ -4641,6 +4641,8 @@ declare namespace FudgeCore {
         deserialize(_serialization: Serialization): Promise<Serializable>;
         /** Change properties by an associative array */
         mutate(_mutator: Mutator): Promise<void>;
+        getMutator(): Mutator;
+        getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         reduceMutator(_mutator: Mutator): void;
         /** Creates the actual OimoPhysics Rigidbody out of informations the Fudge Component has. */
         private createRigidbody;
@@ -4817,7 +4819,7 @@ declare namespace FudgeCore {
     /**
   * Groups to place a node in, not every group should collide with every group. Use a Mask in to exclude collisions
   */
-    enum PHYSICS_GROUP {
+    enum COLLISION_GROUP {
         DEFAULT = 1,
         GROUP_1 = 2,
         GROUP_2 = 4,
@@ -4829,7 +4831,7 @@ declare namespace FudgeCore {
     * Different types of physical interaction, DYNAMIC is fully influenced by physics and only physics, STATIC means immovable,
     * KINEMATIC is moved through transform and animation instead of physics code.
     */
-    enum PHYSICS_TYPE {
+    enum BODY_TYPE {
         DYNAMIC = 0,
         STATIC = 1,
         KINEMATIC = 2
@@ -4906,8 +4908,8 @@ declare namespace FudgeCore {
         get defaultCollisionMask(): number;
         set defaultCollisionMask(_value: number);
         /** The group that this rigidbody belongs to. Default is the DEFAULT Group which means its just a normal Rigidbody not a trigger nor anything special. */
-        get defaultCollisionGroup(): PHYSICS_GROUP;
-        set defaultCollisionGroup(_value: PHYSICS_GROUP);
+        get defaultCollisionGroup(): COLLISION_GROUP;
+        set defaultCollisionGroup(_value: COLLISION_GROUP);
         /** Change the type of joint solver algorithm. Default Iterative == 0, is faster but less stable. Direct == 1, slow but more stable, recommended for complex joint work. Change this setting only at the start of your game. */
         get defaultConstraintSolverType(): number;
         set defaultConstraintSolverType(_value: number);
@@ -4943,7 +4945,7 @@ declare namespace FudgeCore {
         * Cast a RAY into the physical world from a origin point in a certain direction. Receiving informations about the hit object and the
         * hit point. Do not specify a _group to raycast the whole world, else only bodies within the specific group can be hit.
         */
-        static raycast(_origin: Vector3, _direction: Vector3, _length?: number, _group?: PHYSICS_GROUP): RayHitInfo;
+        static raycast(_origin: Vector3, _direction: Vector3, _length?: number, _group?: COLLISION_GROUP): RayHitInfo;
         /**
           * Adjusts the transforms of the {@link ComponentRigidbody}s in the given branch to match their nodes or meshes
           */

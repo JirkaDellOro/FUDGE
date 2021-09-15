@@ -3,19 +3,14 @@
 <head>
 <title>PhysicTest</title>
 <meta charset="utf-8" />
-<!--Load FUDGE-->
-<script type="text/javascript" src="../../../Core/Build/FudgeCore.js">
+<!--Load FUDGE. Initially, these files were copied from your local FUDGE installation. You may want to refer to online versions or create symlinks to keep up to date.-->
+<script type="text/javascript" src="Fudge/Core/FudgeCore.js">
 </script>
-<script type="text/javascript" src="../../../Aid/Build/FudgeAid.js">
-</script>
-<script type="text/javascript" src="../../../Physics/OimoPhysics.js">
+<script type="text/javascript" src="Fudge/Aid/FudgeAid.js">
 </script>
 <!--Link stylesheet and internal resources-->
-<link rel="stylesheet" href="PhysicTest.css" />
-<link type="resources" src="PhysicTest.json" />
-<!--Load custom scripts-->
-<!-- <script type="text/javascript" src="Script/Build/Script.js" editor="true">
-</script> -->
+<link rel="stylesheet" href="style.css" />
+<link type="resources" src="Internal.json" />
 <!--Auto-View-->
 <script>(function (_graphId) {
                 window.addEventListener("load", init);
@@ -62,7 +57,7 @@
                     viewport.draw();
                     canvas.dispatchEvent(new CustomEvent("interactiveViewportStarted", { bubbles: true, detail: viewport }));
                 }
-            })("Graph|2020-11-11T14:45:27.492Z|55222");
+            })("Graph|2021-09-15T16:53:12.128Z|95389");
 </script>
 </head>
 <body>

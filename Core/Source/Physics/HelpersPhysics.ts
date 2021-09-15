@@ -43,7 +43,7 @@ namespace FudgeCore {
     /**
   * Groups to place a node in, not every group should collide with every group. Use a Mask in to exclude collisions
   */
-    export enum PHYSICS_GROUP { //TODO Give a possiblithy to set which layer collides with which, CollisionMatrix?
+    export enum COLLISION_GROUP { //TODO Give a possiblithy to set which layer collides with which, CollisionMatrix?
         DEFAULT = 1,
         GROUP_1 = 2,
         GROUP_2 = 4,
@@ -56,7 +56,7 @@ namespace FudgeCore {
     * Different types of physical interaction, DYNAMIC is fully influenced by physics and only physics, STATIC means immovable, 
     * KINEMATIC is moved through transform and animation instead of physics code.
     */
-    export enum PHYSICS_TYPE {
+    export enum BODY_TYPE {
         DYNAMIC, // = OIMO.RigidBodyType.DYNAMIC,
         STATIC, // = OIMO.RigidBodyType.STATIC,
         KINEMATIC // = OIMO.RigidBodyType.KINEMATIC
@@ -194,10 +194,10 @@ namespace FudgeCore {
         }
 
         /** The group that this rigidbody belongs to. Default is the DEFAULT Group which means its just a normal Rigidbody not a trigger nor anything special. */
-        get defaultCollisionGroup(): PHYSICS_GROUP {
-            return <PHYSICS_GROUP>OIMO.Setting.defaultCollisionGroup;
+        get defaultCollisionGroup(): COLLISION_GROUP {
+            return <COLLISION_GROUP>OIMO.Setting.defaultCollisionGroup;
         }
-        set defaultCollisionGroup(_value: PHYSICS_GROUP) {
+        set defaultCollisionGroup(_value: COLLISION_GROUP) {
             OIMO.Setting.defaultCollisionGroup = _value;
         }
 
