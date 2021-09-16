@@ -61,7 +61,7 @@
                 {
                   "ƒ.ComponentMaterial": {
                     "sortForAlpha": false,
-                    "clrPrimary": "[1, 1, 1, 0.17]",
+                    "clrPrimary": "[0.23137254901960785, 0.4470588235294118, 0.21568627450980393, 1]",
                     "clrSecondary": "[1, 1, 1, 1]",
                     "pivot": {
                       "translation": "[0, 0]",
@@ -78,15 +78,14 @@
               "ComponentRigidbody": [
                 {
                   "ƒ.ComponentRigidbody": {
-                    "collisionMask": 31,
                     "friction": 0.2,
                     "restitution": 0.2,
                     "mass": 1,
-                    "linearDamping": 0.1,
-                    "angularDamping": 0.1,
-                    "gravityScale": 1,
-                    "bodyType": "STATIC",
-                    "colliderType": "CYLINDER",
+                    "dampTranslation": 0.1,
+                    "dampRotation": 0.1,
+                    "effectGravity": 1,
+                    "typeBody": "DYNAMIC",
+                    "typeCollider": "CUBE",
                     "isTrigger": false,
                     "id": 0,
                     "pivot": {

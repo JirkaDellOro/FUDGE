@@ -28,21 +28,24 @@ namespace FudgeCore {
     #id: number = 0;
 
     //Private informations - Mostly OimoPhysics variables that should not be exposed to the Fudge User and manipulated by them
-    #rigidbody: OIMO.RigidBody;
-    #massData: OIMO.MassData = new OIMO.MassData();
     #collider: OIMO.Shape;
     #colliderInfo: OIMO.ShapeConfig;
+    #collisionGroup: COLLISION_GROUP = COLLISION_GROUP.DEFAULT;
+    #typeCollider: COLLIDER_TYPE = COLLIDER_TYPE.CUBE;
+    
+    #rigidbody: OIMO.RigidBody;
     #rigidbodyInfo: OIMO.RigidBodyConfig = new OIMO.RigidBodyConfig();
     #typeBody: BODY_TYPE = BODY_TYPE.DYNAMIC;
-    #colliderType: COLLIDER_TYPE = COLLIDER_TYPE.CUBE;
-    #collisionGroup: COLLISION_GROUP = COLLISION_GROUP.DEFAULT;
+    
+    #massData: OIMO.MassData = new OIMO.MassData();
     #restitution: number;
     #friction: number;
     #dampingLinear: number = 0.1;
     #dampingAngular: number = 0.1;
-    #influenceRotational: Vector3 = Vector3.ONE();
-    #influenceGravity: number = 1;
+    #effectRotation: Vector3 = Vector3.ONE();
+    #effectGravity: number = 1;
     #isTrigger: boolean = false;
+    
     #callbacks: OIMO.ContactCallback; //Callback Methods when within the oimoSystem a event is happening
 
     /** Creating a new rigidbody with a weight in kg, a physics type (default = dynamic), a collider type what physical form has the collider, to what group does it belong, is there a transform Matrix that should be used, and is the collider defined as a group of points that represent a convex mesh. */
@@ -58,10 +61,10 @@ namespace FudgeCore {
     /** The type of interaction between the physical world and the transform hierarchy world. DYNAMIC means the body ignores hierarchy and moves by physics. KINEMATIC it's
      * reacting to a {@link Node} that is using physics but can still be controlled by animation or transform. And STATIC means its immovable.
      */
-    public get bodyType(): BODY_TYPE {
+    public get typeBody(): BODY_TYPE {
       return this.#typeBody;
     }
-    public set bodyType(_value: BODY_TYPE) {
+    public set typeBody(_value: BODY_TYPE) {
       this.#typeBody = _value;
       let oimoType: number;
       switch (this.#typeBody) {
@@ -83,12 +86,12 @@ namespace FudgeCore {
     }
 
     /** The shape that represents the {@link Node} in the physical world. Default is a Cube. */
-    public get colliderType(): COLLIDER_TYPE {
-      return this.#colliderType;
+    public get typeCollider(): COLLIDER_TYPE {
+      return this.#typeCollider;
     }
-    public set colliderType(_value: COLLIDER_TYPE) {
-      if (_value != this.#colliderType && this.#rigidbody != null) {
-        this.#colliderType = _value;
+    public set typeCollider(_value: COLLIDER_TYPE) {
+      if (_value != this.#typeCollider && this.#rigidbody != null) {
+        this.#typeCollider = _value;
         this.updateFromWorld();
       }
     }
@@ -131,39 +134,39 @@ namespace FudgeCore {
     }
 
     /** Air reistance, when moving. A Body does slow down even on a surface without friction. */
-    public get linearDamping(): number {
+    public get dampTranslation(): number {
       return this.#rigidbody.getLinearDamping();
     }
-    public set linearDamping(_value: number) {
+    public set dampTranslation(_value: number) {
       this.#dampingLinear = _value;
       this.#rigidbody.setLinearDamping(_value);
     }
 
     /** Air resistance, when rotating. */
-    public get angularDamping(): number {
+    public get dampRotation(): number {
       return this.#rigidbody.getAngularDamping();
     }
-    public set angularDamping(_value: number) {
+    public set dampRotation(_value: number) {
       this.#dampingAngular = _value;
       this.#rigidbody.setAngularDamping(_value);
     }
 
     /** The factor this rigidbody reacts rotations that happen in the physical world. 0 to lock rotation this axis. */
-    public get rotationInfluenceFactor(): Vector3 {
-      return this.#influenceRotational;
+    public get effectRotation(): Vector3 {
+      return this.#effectRotation;
     }
-    public set rotationInfluenceFactor(_influence: Vector3) {
-      this.#influenceRotational = _influence;
-      this.#rigidbody.setRotationFactor(new OIMO.Vec3(this.#influenceRotational.x, this.#influenceRotational.y, this.#influenceRotational.z));
+    public set effectRotation(_effect: Vector3) {
+      this.#effectRotation = _effect;
+      this.#rigidbody.setRotationFactor(new OIMO.Vec3(this.#effectRotation.x, this.#effectRotation.y, this.#effectRotation.z));
     }
 
     /** The factor this rigidbody reacts to world gravity. Default = 1 e.g. 1*9.81 m/s. */
-    public get gravityScale(): number {
-      return this.#influenceGravity;
+    public get effectGravity(): number {
+      return this.#effectGravity;
     }
-    public set gravityScale(_influence: number) {
-      this.#influenceGravity = _influence;
-      if (this.#rigidbody != null) this.#rigidbody.setGravityScale(this.#influenceGravity);
+    public set effectGravity(_effect: number) {
+      this.#effectGravity = _effect;
+      if (this.#rigidbody != null) this.#rigidbody.setGravityScale(this.#effectGravity);
     }
 
     /**
@@ -305,7 +308,7 @@ namespace FudgeCore {
       scaling.x *= this.mtxPivot.scaling.x;
       scaling.y *= this.mtxPivot.scaling.y;
       scaling.z *= this.mtxPivot.scaling.z;
-      this.createCollider(new OIMO.Vec3(scaling.x / 2, scaling.y / 2, scaling.z / 2), this.#colliderType); //recreate the collider
+      this.createCollider(new OIMO.Vec3(scaling.x / 2, scaling.y / 2, scaling.z / 2), this.#typeCollider); //recreate the collider
       this.#collider = new OIMO.Shape(this.#colliderInfo);
       let oldCollider: OIMO.Shape = this.#rigidbody.getShapeList();
       this.#rigidbody.addShape(this.#collider); //add new collider, before removing the old, so the rb is never active with 0 colliders
@@ -378,7 +381,7 @@ namespace FudgeCore {
       scaling.x *= this.mtxPivot.scaling.x;
       scaling.y *= this.mtxPivot.scaling.y;
       scaling.z *= this.mtxPivot.scaling.z;
-      this.createCollider(new OIMO.Vec3(scaling.x / 2, scaling.y / 2, scaling.z / 2), this.colliderType); //recreate the collider
+      this.createCollider(new OIMO.Vec3(scaling.x / 2, scaling.y / 2, scaling.z / 2), this.typeCollider); //recreate the collider
       this.#collider = new OIMO.Shape(this.#colliderInfo);
       let oldCollider: OIMO.Shape = this.#rigidbody.getShapeList();
       this.#rigidbody.addShape(this.#collider); //add new collider, before removing the old, so the rb is never active with 0 colliders
@@ -548,8 +551,8 @@ namespace FudgeCore {
       delete serialization.mtxPivot;
       delete serialization.active;
 
-      serialization.bodyType = BODY_TYPE[this.#typeBody];
-      serialization.colliderType = COLLIDER_TYPE[this.#colliderType];
+      serialization.typeBody = BODY_TYPE[this.#typeBody];
+      serialization.typeCollider = COLLIDER_TYPE[this.#typeCollider];
 
       serialization.id = this.#id;
       serialization.pivot = this.mtxPivot.serialize();
@@ -560,20 +563,20 @@ namespace FudgeCore {
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.mtxPivot.deserialize(_serialization.pivot);
       this.#id = _serialization.id;
-      this.#typeBody = <number><unknown>BODY_TYPE[_serialization.bodyType];
-      this.#colliderType = <number><unknown>COLLIDER_TYPE[_serialization.colliderType];
+      this.#typeBody = <number><unknown>BODY_TYPE[_serialization.typeBody];
+      this.#typeCollider = <number><unknown>COLLIDER_TYPE[_serialization.typeCollider];
       this.mass = _serialization.mass || this.mass;
-      this.linearDamping = _serialization.linearDamping || this.linearDamping;
-      this.angularDamping = _serialization.angularDamping || this.angularDamping;
+      this.dampTranslation = _serialization.dampTranslation || this.dampTranslation;
+      this.dampRotation = _serialization.dampRotation || this.dampRotation;
       this.collisionGroup = _serialization.collisionGroup || this.collisionGroup;
-      this.rotationInfluenceFactor = _serialization.rotationInfluence || this.rotationInfluenceFactor;
-      this.gravityScale = _serialization.gravityScale || this.gravityScale;
+      this.effectRotation = _serialization.effectRotation || this.effectRotation;
+      this.effectGravity = _serialization.effectGravity || this.effectGravity;
       this.friction = _serialization.friction || this.friction;
       this.restitution = _serialization.restitution || this.restitution;
       this.isTrigger = _serialization.trigger || this.isTrigger;
       super.deserialize(_serialization[super.constructor.name]);
 
-      this.create(this.mass, this.#typeBody, this.#colliderType, this.collisionGroup, this.mtxPivot, this.convexMesh);
+      this.create(this.mass, this.#typeBody, this.#typeCollider, this.collisionGroup, this.mtxPivot, this.convexMesh);
       return this;
     }
 
@@ -589,12 +592,12 @@ namespace FudgeCore {
       callIfExist("friction", (_value: number) => this.friction = _value);
       callIfExist("restitution", (_value: number) => this.restitution = _value);
       callIfExist("mass", (_value: number) => this.mass = _value);
-      callIfExist("linearDamping", (_value: number) => this.linearDamping = _value);
-      callIfExist("angularDamping", (_value: number) => this.angularDamping = _value);
-      callIfExist("gravityScale", (_value: number) => this.gravityScale = _value);
+      callIfExist("dampTranslation", (_value: number) => this.dampTranslation = _value);
+      callIfExist("dampRotation", (_value: number) => this.dampRotation = _value);
+      callIfExist("effectGravity", (_value: number) => this.effectGravity = _value);
       callIfExist("collisionGroup", (_value: COLLISION_GROUP) => this.collisionGroup = _value);
-      callIfExist("bodyType", (_value: string) => this.bodyType = parseInt(_value));
-      callIfExist("colliderType", (_value: string) => this.colliderType = parseInt(_value));
+      callIfExist("typeBody", (_value: string) => this.typeBody = parseInt(_value));
+      callIfExist("typeCollider", (_value: string) => this.typeCollider = parseInt(_value));
 
       this.dispatchEvent(new Event(EVENT.MUTATE));
     }
@@ -605,11 +608,11 @@ namespace FudgeCore {
       mutator.friction = this.friction;
       mutator.restitution = this.restitution;
       mutator.mass = this.mass;
-      mutator.linearDamping = this.linearDamping;
-      mutator.angularDamping = this.angularDamping;
-      mutator.gravityScale = this.gravityScale;
-      mutator.bodyType = this.#typeBody;
-      mutator.colliderType = this.#colliderType;
+      mutator.dampTranslation = this.dampTranslation;
+      mutator.dampRotation = this.dampRotation;
+      mutator.effectGravity = this.effectGravity;
+      mutator.typeBody = this.#typeBody;
+      mutator.typeCollider = this.#typeCollider;
       mutator.isTrigger = this.#isTrigger;
 
       // Object.preventExtensions(mutator);
@@ -618,17 +621,17 @@ namespace FudgeCore {
 
     public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {
       let types: MutatorAttributeTypes = super.getMutatorAttributeTypes(_mutator);
-      if (types.bodyType)
-        types.bodyType = BODY_TYPE;
-      if (types.colliderType)
-        types.colliderType = COLLIDER_TYPE;
+      if (types.typeBody)
+        types.typeBody = BODY_TYPE;
+      if (types.typeCollider)
+        types.typeCollider = COLLIDER_TYPE;
       return types;
     }
 
     public reduceMutator(_mutator: Mutator): void {
       super.reduceMutator(_mutator);
       delete _mutator.convexMesh; //Convex Mesh can't be shown in the editor because float32Array is not a viable mutator
-      delete _mutator.colMask;
+      delete _mutator.collisionMask;
     }
     //#endregion
 
@@ -638,13 +641,13 @@ namespace FudgeCore {
       this.convexMesh = _convexMesh;
       this.#typeBody = _type;
       this.#collisionGroup = _group;
-      this.#colliderType = _colliderType;
+      this.#typeCollider = _colliderType;
       this.mass = _mass;
       this.#restitution = Physics.settings.defaultRestitution;
       this.#friction = Physics.settings.defaultFriction;
       this.collisionMask = Physics.settings.defaultCollisionMask;
       //Create the actual rigidbody in the OimoPhysics Space
-      this.createRigidbody(_mass, _type, this.#colliderType, _mtxTransform, this.#collisionGroup);
+      this.createRigidbody(_mass, _type, this.#typeCollider, _mtxTransform, this.#collisionGroup);
       this.#id = Physics.world.distributeBodyID();
 
       // Event Callbacks directly from OIMO Physics
@@ -704,16 +707,16 @@ namespace FudgeCore {
       this.#rigidbody.getShapeList().setContactCallback(this.#callbacks);
       this.#rigidbody.setLinearDamping(this.#dampingLinear);
       this.#rigidbody.setAngularDamping(this.#dampingAngular);
-      this.#rigidbody.setGravityScale(this.#influenceGravity);
-      this.#rigidbody.setRotationFactor(new OIMO.Vec3(this.#influenceRotational.x, this.#influenceRotational.y, this.#influenceRotational.z));
+      this.#rigidbody.setGravityScale(this.#effectGravity);
+      this.#rigidbody.setRotationFactor(new OIMO.Vec3(this.#effectRotation.x, this.#effectRotation.y, this.#effectRotation.z));
     }
 
     /** Creates a collider a shape that represents the object in the physical world.  */
     private createCollider(_scale: OIMO.Vec3, _colliderType: COLLIDER_TYPE): void {
       let shapeConf: OIMO.ShapeConfig = new OIMO.ShapeConfig(); //Collider with geometry and infos like friction/restitution and more
       let geometry: OIMO.Geometry;
-      if (this.colliderType != _colliderType) //If the collider type was changed set the internal one new, else don't so there is not infinite set calls
-        this.colliderType = _colliderType;
+      if (this.typeCollider != _colliderType) //If the collider type was changed set the internal one new, else don't so there is not infinite set calls
+        this.typeCollider = _colliderType;
       switch (_colliderType) {  //Create a different OimoPhysics geometry based on the given type. That is only the mathematical shape of the collider
         case COLLIDER_TYPE.CUBE:
           geometry = new OIMO.BoxGeometry(_scale);

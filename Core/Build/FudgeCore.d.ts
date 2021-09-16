@@ -4489,11 +4489,11 @@ declare namespace FudgeCore {
         /** The type of interaction between the physical world and the transform hierarchy world. DYNAMIC means the body ignores hierarchy and moves by physics. KINEMATIC it's
          * reacting to a {@link Node} that is using physics but can still be controlled by animation or transform. And STATIC means its immovable.
          */
-        get bodyType(): BODY_TYPE;
-        set bodyType(_value: BODY_TYPE);
+        get typeBody(): BODY_TYPE;
+        set typeBody(_value: BODY_TYPE);
         /** The shape that represents the {@link Node} in the physical world. Default is a Cube. */
-        get colliderType(): COLLIDER_TYPE;
-        set colliderType(_value: COLLIDER_TYPE);
+        get typeCollider(): COLLIDER_TYPE;
+        set typeCollider(_value: COLLIDER_TYPE);
         /** The physics group this {@link Node} belongs to it's the default group normally which means it physically collides with every group besides trigger. */
         get collisionGroup(): COLLISION_GROUP;
         set collisionGroup(_value: COLLISION_GROUP);
@@ -4509,17 +4509,17 @@ declare namespace FudgeCore {
       */
         set mass(_value: number);
         /** Air reistance, when moving. A Body does slow down even on a surface without friction. */
-        get linearDamping(): number;
-        set linearDamping(_value: number);
+        get dampTranslation(): number;
+        set dampTranslation(_value: number);
         /** Air resistance, when rotating. */
-        get angularDamping(): number;
-        set angularDamping(_value: number);
+        get dampRotation(): number;
+        set dampRotation(_value: number);
         /** The factor this rigidbody reacts rotations that happen in the physical world. 0 to lock rotation this axis. */
-        get rotationInfluenceFactor(): Vector3;
-        set rotationInfluenceFactor(_influence: Vector3);
+        get effectRotation(): Vector3;
+        set effectRotation(_effect: Vector3);
         /** The factor this rigidbody reacts to world gravity. Default = 1 e.g. 1*9.81 m/s. */
-        get gravityScale(): number;
-        set gravityScale(_influence: number);
+        get effectGravity(): number;
+        set effectGravity(_effect: number);
         /**
       * Get the friction of the rigidbody, which is the factor of sliding resistance of this rigidbody on surfaces
       */
@@ -4818,8 +4818,8 @@ declare namespace FudgeCore {
         constructor(_type: EVENT_PHYSICS, _hitRigidbody: ComponentRigidbody, _normalImpulse: number, _tangentImpulse: number, _binormalImpulse: number, _collisionPoint?: Vector3, _collisionNormal?: Vector3);
     }
     /**
-  * Groups to place a node in, not every group should collide with every group. Use a Mask in to exclude collisions
-  */
+    * Groups to place a node in, not every group should collide with every group. Use a Mask in to exclude collisions
+    */
     enum COLLISION_GROUP {
         DEFAULT = 1,
         GROUP_1 = 2,
