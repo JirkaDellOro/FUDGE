@@ -176,7 +176,7 @@ namespace FudgeCore {
 
             _cmpRigidbody.checkCollisionEvents();
 
-            if (_cmpRigidbody.physicsType == BODY_TYPE.KINEMATIC) { //Case of Kinematic Rigidbody
+            if (_cmpRigidbody.bodyType == BODY_TYPE.KINEMATIC) { //Case of Kinematic Rigidbody
                 let mtxPivotWorld: Matrix4x4 = Matrix4x4.MULTIPLICATION(_node.mtxWorld, _cmpRigidbody.mtxPivot);
                 _cmpRigidbody.setPosition(mtxPivotWorld.translation);
                 _cmpRigidbody.setRotation(mtxPivotWorld.rotation);

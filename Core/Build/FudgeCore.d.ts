@@ -4489,8 +4489,8 @@ declare namespace FudgeCore {
         /** The type of interaction between the physical world and the transform hierarchy world. DYNAMIC means the body ignores hierarchy and moves by physics. KINEMATIC it's
          * reacting to a {@link Node} that is using physics but can still be controlled by animation or transform. And STATIC means its immovable.
          */
-        get physicsType(): BODY_TYPE;
-        set physicsType(_value: BODY_TYPE);
+        get bodyType(): BODY_TYPE;
+        set bodyType(_value: BODY_TYPE);
         /** The shape that represents the {@link Node} in the physical world. Default is a Cube. */
         get colliderType(): COLLIDER_TYPE;
         set colliderType(_value: COLLIDER_TYPE);
@@ -4644,6 +4644,7 @@ declare namespace FudgeCore {
         getMutator(): Mutator;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         reduceMutator(_mutator: Mutator): void;
+        private create;
         /** Creates the actual OimoPhysics Rigidbody out of informations the Fudge Component has. */
         private createRigidbody;
         /** Creates a collider a shape that represents the object in the physical world.  */

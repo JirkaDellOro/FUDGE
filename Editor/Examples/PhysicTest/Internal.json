@@ -34,7 +34,7 @@
                     "local": {
                       "translation": "[0, 0, 0]",
                       "rotation": "[0, 0, 0]",
-                      "scaling": "[1, 1, 1]"
+                      "scaling": "[0.9000000953674316, 0.8999999761581421, 0.9000000357627869]"
                     },
                     "Component": {
                       "active": true
@@ -61,7 +61,7 @@
                 {
                   "ƒ.ComponentMaterial": {
                     "sortForAlpha": false,
-                    "clrPrimary": "[1, 1, 1, 0.42]",
+                    "clrPrimary": "[1, 1, 1, 0.17]",
                     "clrSecondary": "[1, 1, 1, 1]",
                     "pivot": {
                       "translation": "[0, 0]",
@@ -86,7 +86,7 @@
                     "angularDamping": 0.1,
                     "gravityScale": 1,
                     "bodyType": "STATIC",
-                    "colliderType": "SPHERE",
+                    "colliderType": "CYLINDER",
                     "isTrigger": false,
                     "id": 0,
                     "pivot": {
