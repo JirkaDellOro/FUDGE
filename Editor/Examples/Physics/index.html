@@ -1,16 +1,26 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>NewProject</title>
+<title>Physics</title>
 <meta charset="utf-8" />
-<!--Load FUDGE-->
-<script type="text/javascript" src="../../../Core/Build/FudgeCore.js">
+<!--Editor settings of this project-->
+<link type="settings" content="{'files':{'index':{'overwrite':true,'filename':'index.html'},'style':{'overwrite':true,'filename':'style.css'},'internal':{'overwrite':true,'filename':'Internal.json'},'script':{'filename':'Script/Build/Script.js','include':true}},'name':'Physics','includePhysics':true,'includeAutoViewScript':true,'graphToStartWith':'Graph|2021-09-16T16:18:45.095Z|30710'}" />
+<!--FUDGE-version of Oimo-Physics. You may want to download a local copy to work offline and be independent from future changes!-->
+<script type="text/javascript" src="https://jirkadelloro.github.io/FUDGE/Physics/OimoPhysics.js">
 </script>
-<script type="text/javascript" src="../../../Aid/Build/FudgeAid.js">
+<!--Load FUDGE. You may want to download local copies to work offline and be independent from future changes! Developers working on FUDGE itself may want to create symlinks-->
+<script type="text/javascript" src="https://jirkadelloro.github.io/FUDGE/Core/Build/FudgeCore.js">
 </script>
+<script type="text/javascript" src="https://jirkadelloro.github.io/FUDGE/Aid/Build/FudgeAid.js">
+</script>
+<!--Render physics-components-->
+<script type="text/javascript">FudgeCore.Physics.settings.debugDraw = true;</script>
 <!--Link stylesheet and internal resources-->
-<link rel="stylesheet" href="NewProject.css" />
-<link type="resources" src="NewProject.json" />
+<link rel="stylesheet" href="style.css" />
+<link type="resources" src="Internal.json" />
+<!--Load custom scripts-->
+<script type="text/javascript" src="Script/Build/Script.js" editor="true">
+</script>
 <!--Auto-View-->
 <script>(function (_graphId) {
                 window.addEventListener("load", init);
@@ -28,16 +38,23 @@
                 async function startInteractiveViewport() {
                     // load resources referenced in the link-tag
                     await FudgeCore.Project.loadResourcesFromHTML();
+                    FudgeCore.Debug.log("Project:", FudgeCore.Project.resources);
                     // pick the graph to show
                     let graph = FudgeCore.Project.resources[_graphId];
+                    FudgeCore.Debug.log("Graph:", graph);
+                    if (!graph) {
+                        alert("Nothing to render. Create a graph with at least a mesh, material and probably some light");
+                        return;
+                    }
                     // setup the viewport
                     let cmpCamera = new FudgeCore.ComponentCamera();
                     let canvas = document.querySelector("canvas");
                     let viewport = new FudgeCore.Viewport();
                     viewport.initialize("InteractiveViewport", graph, cmpCamera, canvas);
+                    FudgeCore.Debug.log("Viewport:", viewport);
                     // hide the cursor when interacting, also suppressing right-click menu
                     canvas.addEventListener("mousedown", canvas.requestPointerLock);
-                    canvas.addEventListener("mouseup", function(){document.exitPointerLock()});
+                    canvas.addEventListener("mouseup", function () { document.exitPointerLock(); });
                     // make the camera interactive (complex method in FudgeAid)
                     FudgeAid.Viewport.expandCameraToInteractiveOrbit(viewport);
                     // setup audio
@@ -45,16 +62,18 @@
                     cmpCamera.getContainer().addComponent(cmpListener);
                     FudgeCore.AudioManager.default.listenWith(cmpListener);
                     FudgeCore.AudioManager.default.listenTo(graph);
+                    FudgeCore.Debug.log("Audio:", FudgeCore.AudioManager.default);
                     // draw viewport once for immediate feedback
                     viewport.draw();
+                    canvas.dispatchEvent(new CustomEvent("interactiveViewportStarted", { bubbles: true, detail: viewport }));
                 }
-            })("Graph|2020-10-30T16:46:07.510Z|21011");
+            })("Graph|2021-09-16T16:18:45.095Z|30710");
 </script>
 </head>
 <body>
 <!--Dialog shown at startup only-->
 <dialog>
-<h1>NewProject</h1>
+<h1>Physics</h1>
 <p>click to start</p>
 </dialog>
 <!--Canvas for FUDGE to render to-->

@@ -39,6 +39,7 @@ namespace Fudge {
 
     fs.copyFileSync(new URL("Editor/Source/Template/.gitignore.txt", ƒPath), new URL(".gitignore", base));
     fs.mkdirSync(new URL("Script/Source", base), { recursive: true });
+    fs.mkdirSync(new URL("Script/Source/@types", base), { recursive: true });
     fs.mkdirSync(new URL("Script/Build", base), { recursive: true });
 
     let copyTemplates: CopyList = {
@@ -48,6 +49,9 @@ namespace Fudge {
       "Script.txt": " Build/Script.js"
     };
     copyFiles(copyTemplates, new URL("Editor/Source/Template/", ƒPath), new URL("Script/", base));
+
+    let definition: Response = await fetch("https://JirkaDellOro.github.io/FUDGE/Core/Build/FudgeCore.d.ts");
+    fs.writeFileSync(new URL("Script/Source/@types/FudgeCore.d.ts", base), await definition.text());
 
     await loadProject(new URL(project.files.index.filename, project.base));
   }
