@@ -40,7 +40,7 @@ namespace Fudge {
     fs.copyFileSync(new URL("Editor/Source/Template/.gitignore.txt", ƒPath), new URL(".gitignore", base));
     fs.mkdirSync(new URL("Script/Source", base), { recursive: true });
     fs.mkdirSync(new URL("Script/Build", base), { recursive: true });
-    
+
     let copyTemplates: CopyList = {
       "CustomComponentScript.txt": "Source/CustomComponentScript.ts",
       "Main.txt": "Source/Main.ts",
@@ -68,7 +68,6 @@ namespace Fudge {
       return;
 
     let base: URL = project.base;
-    // let projectName: string = base.toString().split("/").slice(-2, -1)[0];
     if (watcher)
       watcher.close();
 
@@ -117,13 +116,9 @@ namespace Fudge {
     ƒ.Project.clear();
     project = new Project(_url);
 
-    project.name = head.querySelector("title").textContent;
-    project.files.index.filename = _url.toString().split("/").pop();
-    // project.files.index.overwrite = false;
-
-    let css: HTMLLinkElement = head.querySelector("link[rel=stylesheet]");
-    project.files.style.filename = css.getAttribute("href");
-    // project.files.style.overwrite = false;
+    let settings: string = head.querySelectorAll("link[type=settings]")[0].getAttribute("content");
+    settings = settings.replace(/'/g, "\"");
+    project.mutate(JSON.parse(settings));
 
     //TODO: should old scripts be removed from memory first? How?
     const scripts: NodeListOf<HTMLScriptElement> = head.querySelectorAll("script");
@@ -134,9 +129,6 @@ namespace Fudge {
         await ƒ.Project.loadScript(new URL(url, _url).toString());
         console.log("ComponentScripts", ƒ.Project.getComponentScripts());
         console.log("Script Namespaces", ƒ.Project.scriptNamespaces);
-
-        project.files.script.filename = url;
-        Reflect.set(project.files.script, "include", true);
       }
     }
 
@@ -149,9 +141,6 @@ namespace Fudge {
       ƒ.Debug.groupCollapsed("Deserialized");
       ƒ.Debug.info(reconstruction);
       ƒ.Debug.groupEnd();
-
-      project.files.internal.filename = resourceFile;
-      project.files.internal.overwrite = true;
     }
 
     watchFolder();
@@ -175,3 +164,4 @@ namespace Fudge {
     }
   }
 }
+

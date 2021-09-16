@@ -48,6 +48,7 @@ namespace Fudge {
       let promise: Promise<boolean> = ƒui.Dialog.prompt(project, false, "Review project settings", "Adjust settings and press OK", "OK", "Cancel");
 
       ƒui.Dialog.dom.addEventListener(ƒui.EVENT.CHANGE, this.hndChange);
+
       if (await promise) {
         let mutator: ƒ.Mutator = ƒui.Controller.getMutator(this, ƒui.Dialog.dom, this.getMutator());
         this.mutate(mutator);
@@ -85,19 +86,22 @@ namespace Fudge {
       let html: Document = document.implementation.createHTMLDocument(_title);
 
       html.head.appendChild(createTag("meta", { charset: "utf-8" }));
-
-      html.head.appendChild(createTag("link", {type: "settings",  content: "{includePhysics: true}"}));
+      let settings: string = JSON.stringify(project.getMutator());
+      settings = settings.replace(/"/g, "'");
+      html.head.appendChild(html.createComment("Editor settings of this project"));
+      html.head.appendChild(createTag("link", { type: "settings", content: settings }));
 
       if (this.includePhysics) {
-        html.head.appendChild(html.createComment("Include a local copy of Oimo-Physics. You may want to refer to the online version (https://jirkadelloro.github.io/FUDGE/Physics/OimoPhysics.js) or create a symlink to keep up to date."));
+        html.head.appendChild(html.createComment("FUDGE-version of Oimo-Physics. You may want to download a local copy to work offline and be independent from future changes!"));
         html.head.appendChild(createTag("script", { type: "text/javascript", src: "https://jirkadelloro.github.io/FUDGE/Physics/OimoPhysics.js" }));
       }
 
-      html.head.appendChild(html.createComment("Load FUDGE. Initially, these files were copied from your local FUDGE installation. You may want to refer to online versions (https://jirkadelloro.github.io/FUDGE/Core/Build/FudgeCore.js) or create symlinks to keep up to date."));
+      html.head.appendChild(html.createComment("Load FUDGE. You may want to download local copies to work offline and be independent from future changes! Developers working on FUDGE itself may want to create symlinks"));
       html.head.appendChild(createTag("script", { type: "text/javascript", src: "https://jirkadelloro.github.io/FUDGE/Core/Build/FudgeCore.js" }));
       html.head.appendChild(createTag("script", { type: "text/javascript", src: "https://jirkadelloro.github.io/FUDGE/Aid/Build/FudgeAid.js" }));
 
       if (this.includePhysics) {
+        html.head.appendChild(html.createComment("Render physics-components"));
         html.head.appendChild(createTag(
           "script", { type: "text/javascript" },
           "FudgeCore.Physics.settings.debugDraw = true;"
@@ -159,17 +163,9 @@ namespace Fudge {
       return types;
     }
 
-    protected reduceMutator(_mutator: ƒ.Mutator): void {/* */ }
-
-    // private updateFilenames(_title: string, _all: boolean = false, _mutator: ƒ.Mutator): void {
-    //   let files: { [key: string]: FileInfo } = { html: _mutator.files.index, css: _mutator.files.style, json: _mutator.files.internal };
-    //   for (let key in files) {
-    //     let fileInfo: FileInfo = files[key];
-    //     fileInfo.overwrite = _all || fileInfo.overwrite;
-    //     if (fileInfo.overwrite)
-    //       fileInfo.filename = _title + "." + key;
-    //   }
-    // }
+    protected reduceMutator(_mutator: ƒ.Mutator): void {
+      delete _mutator.base;
+     }
 
     private getAutoViewScript(_graphId: string): HTMLScriptElement {
       let code: string;

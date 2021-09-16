@@ -218,7 +218,6 @@ var Fudge;
         if (!await Fudge.project.openDialog())
             return;
         let base = Fudge.project.base;
-        // let projectName: string = base.toString().split("/").slice(-2, -1)[0];
         if (Fudge.watcher)
             Fudge.watcher.close();
         if (Fudge.project.files.index.overwrite) {
@@ -260,12 +259,9 @@ var Fudge;
             Fudge.watcher.close();
         ƒ.Project.clear();
         Fudge.project = new Fudge.Project(_url);
-        Fudge.project.name = head.querySelector("title").textContent;
-        Fudge.project.files.index.filename = _url.toString().split("/").pop();
-        // project.files.index.overwrite = false;
-        let css = head.querySelector("link[rel=stylesheet]");
-        Fudge.project.files.style.filename = css.getAttribute("href");
-        // project.files.style.overwrite = false;
+        let settings = head.querySelectorAll("link[type=settings]")[0].getAttribute("content");
+        settings = settings.replace(/'/g, "\"");
+        Fudge.project.mutate(JSON.parse(settings));
         //TODO: should old scripts be removed from memory first? How?
         const scripts = head.querySelectorAll("script");
         for (let script of scripts) {
@@ -275,8 +271,6 @@ var Fudge;
                 await ƒ.Project.loadScript(new URL(url, _url).toString());
                 console.log("ComponentScripts", ƒ.Project.getComponentScripts());
                 console.log("Script Namespaces", ƒ.Project.scriptNamespaces);
-                Fudge.project.files.script.filename = url;
-                Reflect.set(Fudge.project.files.script, "include", true);
             }
         }
         const resourceLinks = head.querySelectorAll("link[type=resources]");
@@ -287,8 +281,6 @@ var Fudge;
             ƒ.Debug.groupCollapsed("Deserialized");
             ƒ.Debug.info(reconstruction);
             ƒ.Debug.groupEnd();
-            Fudge.project.files.internal.filename = resourceFile;
-            Fudge.project.files.internal.overwrite = true;
         }
         watchFolder();
     }
@@ -382,15 +374,19 @@ var Fudge;
         getProjectHTML(_title) {
             let html = document.implementation.createHTMLDocument(_title);
             html.head.appendChild(createTag("meta", { charset: "utf-8" }));
-            html.head.appendChild(createTag("link", { type: "settings", content: "{includePhysics: true}" }));
+            let settings = JSON.stringify(Fudge.project.getMutator());
+            settings = settings.replace(/"/g, "'");
+            html.head.appendChild(html.createComment("Editor settings of this project"));
+            html.head.appendChild(createTag("link", { type: "settings", content: settings }));
             if (this.includePhysics) {
-                html.head.appendChild(html.createComment("Include a local copy of Oimo-Physics. You may want to refer to the online version (https://jirkadelloro.github.io/FUDGE/Physics/OimoPhysics.js) or create a symlink to keep up to date."));
+                html.head.appendChild(html.createComment("FUDGE-version of Oimo-Physics. You may want to download a local copy to work offline and be independent from future changes!"));
                 html.head.appendChild(createTag("script", { type: "text/javascript", src: "https://jirkadelloro.github.io/FUDGE/Physics/OimoPhysics.js" }));
             }
-            html.head.appendChild(html.createComment("Load FUDGE. Initially, these files were copied from your local FUDGE installation. You may want to refer to online versions (https://jirkadelloro.github.io/FUDGE/Core/Build/FudgeCore.js) or create symlinks to keep up to date."));
+            html.head.appendChild(html.createComment("Load FUDGE. You may want to download local copies to work offline and be independent from future changes! Developers working on FUDGE itself may want to create symlinks"));
             html.head.appendChild(createTag("script", { type: "text/javascript", src: "https://jirkadelloro.github.io/FUDGE/Core/Build/FudgeCore.js" }));
             html.head.appendChild(createTag("script", { type: "text/javascript", src: "https://jirkadelloro.github.io/FUDGE/Aid/Build/FudgeAid.js" }));
             if (this.includePhysics) {
+                html.head.appendChild(html.createComment("Render physics-components"));
                 html.head.appendChild(createTag("script", { type: "text/javascript" }, "FudgeCore.Physics.settings.debugDraw = true;"));
             }
             html.head.appendChild(html.createComment("Link stylesheet and internal resources"));
@@ -439,16 +435,9 @@ var Fudge;
                 types.graphToStartWith = this.getGraphs();
             return types;
         }
-        reduceMutator(_mutator) { }
-        // private updateFilenames(_title: string, _all: boolean = false, _mutator: ƒ.Mutator): void {
-        //   let files: { [key: string]: FileInfo } = { html: _mutator.files.index, css: _mutator.files.style, json: _mutator.files.internal };
-        //   for (let key in files) {
-        //     let fileInfo: FileInfo = files[key];
-        //     fileInfo.overwrite = _all || fileInfo.overwrite;
-        //     if (fileInfo.overwrite)
-        //       fileInfo.filename = _title + "." + key;
-        //   }
-        // }
+        reduceMutator(_mutator) {
+            delete _mutator.base;
+        }
         getAutoViewScript(_graphId) {
             let code;
             code = (function (_graphId) {
