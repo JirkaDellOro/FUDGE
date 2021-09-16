@@ -561,10 +561,9 @@ namespace FudgeCore {
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      super.deserialize(_serialization[super.constructor.name]);
       this.mtxPivot.deserialize(_serialization.pivot);
       this.#id = _serialization.id;
-      this.#typeBody = <number><unknown>BODY_TYPE[_serialization.typeBody];
-      this.#typeCollider = <number><unknown>COLLIDER_TYPE[_serialization.typeCollider];
       this.mass = _serialization.mass || this.mass;
       this.dampTranslation = _serialization.dampTranslation || this.dampTranslation;
       this.dampRotation = _serialization.dampRotation || this.dampRotation;
@@ -574,8 +573,9 @@ namespace FudgeCore {
       this.friction = _serialization.friction || this.friction;
       this.restitution = _serialization.restitution || this.restitution;
       this.isTrigger = _serialization.trigger || this.isTrigger;
-      super.deserialize(_serialization[super.constructor.name]);
 
+      this.#typeBody = <number><unknown>BODY_TYPE[_serialization.typeBody];
+      this.#typeCollider = <number><unknown>COLLIDER_TYPE[_serialization.typeCollider];
       this.create(this.mass, this.#typeBody, this.#typeCollider, this.collisionGroup, this.mtxPivot, this.convexMesh);
       return this;
     }

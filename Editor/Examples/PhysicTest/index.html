@@ -3,13 +3,16 @@
 <head>
 <title>PhysicTest</title>
 <meta charset="utf-8" />
-<!--Load FUDGE-->
-<script type="text/javascript" src="../../../Physics/OimoPhysics.js">
+<link type="settings" content="{includePhysics: true}" />
+<!--Include a local copy of Oimo-Physics. You may want to refer to the online version (https://jirkadelloro.github.io/FUDGE/Physics/OimoPhysics.js) or create a symlink to keep up to date.-->
+<script type="text/javascript" src="https://jirkadelloro.github.io/FUDGE/Physics/OimoPhysics.js">
 </script>
-<script type="text/javascript" src="../../../Core/Build/FudgeCore.js">
+<!--Load FUDGE. Initially, these files were copied from your local FUDGE installation. You may want to refer to online versions (https://jirkadelloro.github.io/FUDGE/Core/Build/FudgeCore.js) or create symlinks to keep up to date.-->
+<script type="text/javascript" src="https://jirkadelloro.github.io/FUDGE/Core/Build/FudgeCore.js">
 </script>
-<script type="text/javascript" src="../../../Aid/Build/FudgeAid.js">
+<script type="text/javascript" src="https://jirkadelloro.github.io/FUDGE/Aid/Build/FudgeAid.js">
 </script>
+<script type="text/javascript">FudgeCore.Physics.settings.debugDraw = true;</script>
 <!--Link stylesheet and internal resources-->
 <link rel="stylesheet" href="style.css" />
 <link type="resources" src="Internal.json" />

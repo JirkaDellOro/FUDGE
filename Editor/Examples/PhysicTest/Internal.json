@@ -85,7 +85,7 @@
                     "dampRotation": 0.1,
                     "effectGravity": 1,
                     "typeBody": "DYNAMIC",
-                    "typeCollider": "CUBE",
+                    "typeCollider": "CAPSULE",
                     "isTrigger": false,
                     "id": 0,
                     "pivot": {

@@ -182,16 +182,16 @@ var Fudge;
         await saveProject();
         let ƒPath = new URL("../../", location.href);
         console.log(ƒPath);
-        // fs.mkdirSync(new URL("Fudge", base));
-        fs.mkdirSync(new URL("Fudge/Core", base), { recursive: true });
-        fs.mkdirSync(new URL("Fudge/Aid", base), { recursive: true });
-        let copyFudge = {
-            "Core/Build/FudgeCore.js": "Fudge/Core/FudgeCore.js",
-            "Core/Build/FudgeCore.d.ts": "Fudge/Core/FudgeCore.d.ts",
-            "Aid/Build/FudgeAid.js": "Fudge/Aid/FudgeAid.js",
-            "Aid/Build/FudgeAid.d.ts": "Fudge/Aid/FudgeAid.d.ts"
-        };
-        copyFiles(copyFudge, ƒPath, base);
+        // Rather use online links...
+        // fs.mkdirSync(new URL("Fudge/Core", base), { recursive: true });
+        // fs.mkdirSync(new URL("Fudge/Aid", base), { recursive: true });
+        // let copyFudge: CopyList = {
+        //   "Core/Build/FudgeCore.js": "Fudge/Core/FudgeCore.js",
+        //   "Core/Build/FudgeCore.d.ts": "Fudge/Core/FudgeCore.d.ts",
+        //   "Aid/Build/FudgeAid.js": "Fudge/Aid/FudgeAid.js",
+        //   "Aid/Build/FudgeAid.d.ts": "Fudge/Aid/FudgeAid.d.ts"
+        // };
+        // copyFiles(copyFudge, ƒPath, base);
         fs.copyFileSync(new URL("Editor/Source/Template/.gitignore.txt", ƒPath), new URL(".gitignore", base));
         fs.mkdirSync(new URL("Script/Source", base), { recursive: true });
         fs.mkdirSync(new URL("Script/Build", base), { recursive: true });
@@ -382,9 +382,17 @@ var Fudge;
         getProjectHTML(_title) {
             let html = document.implementation.createHTMLDocument(_title);
             html.head.appendChild(createTag("meta", { charset: "utf-8" }));
-            html.head.appendChild(html.createComment("Load FUDGE. Initially, these files were copied from your local FUDGE installation. You may want to refer to online versions or create symlinks to keep up to date."));
-            html.head.appendChild(createTag("script", { type: "text/javascript", src: "Fudge/Core/FudgeCore.js" }));
-            html.head.appendChild(createTag("script", { type: "text/javascript", src: "Fudge/Aid/FudgeAid.js" }));
+            html.head.appendChild(createTag("link", { type: "settings", content: "{includePhysics: true}" }));
+            if (this.includePhysics) {
+                html.head.appendChild(html.createComment("Include a local copy of Oimo-Physics. You may want to refer to the online version (https://jirkadelloro.github.io/FUDGE/Physics/OimoPhysics.js) or create a symlink to keep up to date."));
+                html.head.appendChild(createTag("script", { type: "text/javascript", src: "https://jirkadelloro.github.io/FUDGE/Physics/OimoPhysics.js" }));
+            }
+            html.head.appendChild(html.createComment("Load FUDGE. Initially, these files were copied from your local FUDGE installation. You may want to refer to online versions (https://jirkadelloro.github.io/FUDGE/Core/Build/FudgeCore.js) or create symlinks to keep up to date."));
+            html.head.appendChild(createTag("script", { type: "text/javascript", src: "https://jirkadelloro.github.io/FUDGE/Core/Build/FudgeCore.js" }));
+            html.head.appendChild(createTag("script", { type: "text/javascript", src: "https://jirkadelloro.github.io/FUDGE/Aid/Build/FudgeAid.js" }));
+            if (this.includePhysics) {
+                html.head.appendChild(createTag("script", { type: "text/javascript" }, "FudgeCore.Physics.settings.debugDraw = true;"));
+            }
             html.head.appendChild(html.createComment("Link stylesheet and internal resources"));
             html.head.appendChild(createTag("link", { rel: "stylesheet", href: this.files.style.filename }));
             html.head.appendChild(createTag("link", { type: "resources", src: this.files.internal.filename }));

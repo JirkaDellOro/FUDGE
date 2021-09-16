@@ -25,17 +25,17 @@ namespace Fudge {
     let ƒPath: URL = new URL("../../", location.href);
     console.log(ƒPath);
 
-    // fs.mkdirSync(new URL("Fudge", base));
-    fs.mkdirSync(new URL("Fudge/Core", base), { recursive: true });
-    fs.mkdirSync(new URL("Fudge/Aid", base), { recursive: true });
+    // Rather use online links...
+    // fs.mkdirSync(new URL("Fudge/Core", base), { recursive: true });
+    // fs.mkdirSync(new URL("Fudge/Aid", base), { recursive: true });
 
-    let copyFudge: CopyList = {
-      "Core/Build/FudgeCore.js": "Fudge/Core/FudgeCore.js",
-      "Core/Build/FudgeCore.d.ts": "Fudge/Core/FudgeCore.d.ts",
-      "Aid/Build/FudgeAid.js": "Fudge/Aid/FudgeAid.js",
-      "Aid/Build/FudgeAid.d.ts": "Fudge/Aid/FudgeAid.d.ts"
-    };
-    copyFiles(copyFudge, ƒPath, base);
+    // let copyFudge: CopyList = {
+    //   "Core/Build/FudgeCore.js": "Fudge/Core/FudgeCore.js",
+    //   "Core/Build/FudgeCore.d.ts": "Fudge/Core/FudgeCore.d.ts",
+    //   "Aid/Build/FudgeAid.js": "Fudge/Aid/FudgeAid.js",
+    //   "Aid/Build/FudgeAid.d.ts": "Fudge/Aid/FudgeAid.d.ts"
+    // };
+    // copyFiles(copyFudge, ƒPath, base);
 
     fs.copyFileSync(new URL("Editor/Source/Template/.gitignore.txt", ƒPath), new URL(".gitignore", base));
     fs.mkdirSync(new URL("Script/Source", base), { recursive: true });
