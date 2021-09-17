@@ -827,7 +827,6 @@ declare namespace FudgeCore {
         private active;
         /**
          * Creates a new node with a name and initializes all attributes
-         * @param _name The name by which the node can be called.
          */
         constructor(_name: string);
         get isActive(): boolean;
@@ -888,7 +887,6 @@ declare namespace FudgeCore {
         addChild(_child: Node): void;
         /**
          * Removes the reference to the give node from the list of children
-         * @param _child The node to be removed.
          */
         removeChild(_child: Node): void;
         /**
@@ -897,20 +895,16 @@ declare namespace FudgeCore {
         removeAllChildren(): void;
         /**
          * Returns the position of the node in the list of children or -1 if not found
-         * @param _search The node to be found.
          */
         findChild(_search: Node): number;
         /**
          * Replaces a child node with another, preserving the position in the list of children
-         * @param _replace The node to be replaced
-         * @param _with The node to replace with
          */
         replaceChild(_replace: Node, _with: Node): boolean;
         isUpdated(_timestampUpdate: number): boolean;
         isDescendantOf(_ancestor: Node): boolean;
         /**
          * Applies a Mutator from {@link Animation} to all its components and transfers it to its children.
-         * @param _mutator The mutator generated from an {@link Animation}
          */
         applyAnimation(_mutator: Mutator): void;
         /**
@@ -919,16 +913,14 @@ declare namespace FudgeCore {
         getAllComponents(): Component[];
         /**
          * Returns a clone of the list of components of the given class attached to this node.
-         * @param _class The class of the components to be found.
          */
         getComponents<T extends Component>(_class: new () => T): T[];
         /**
          * Returns the first compontent found of the given class attached this node or null, if list is empty or doesn't exist
-         * @param _class The class of the components to be found.
          */
         getComponent<T extends Component>(_class: new () => T): T;
         /**
-         * Attach the given component to this node. Identical to addComponent
+         * Attach the given component to this node. Identical to {@link addComponent}
          */
         attach(_component: Component): void;
         /**
@@ -936,13 +928,11 @@ declare namespace FudgeCore {
          */
         addComponent(_component: Component): void;
         /**
-         * Detach the given component from this node. Identical to removeComponent
+         * Detach the given component from this node. Identical to {@link removeComponent}
          */
         detach(_component: Component): void;
         /**
          * Removes the given component from the node, if it was attached, and sets its parent to null.
-         * @param _component The component to be removed
-         * @throws Exception when component is not found
          */
         removeComponent(_component: Component): void;
         serialize(): Serialization;
@@ -954,16 +944,10 @@ declare namespace FudgeCore {
         /**
          * Adds an event listener to the node. The given handler will be called when a matching event is passed to the node.
          * Deviating from the standard EventTarget, here the _handler must be a function and _capture is the only option.
-         * @param _type The type of the event, should be an enumerated value of NODE_EVENT, can be any string
-         * @param _handler The function to call when the event reaches this node
-         * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
          */
         addEventListener(_type: EVENT | string, _handler: EventListenerƒ, _capture?: boolean): void;
         /**
-         * Removes an event listener from the node. The signatur must match the one used with addEventListener
-         * @param _type The type of the event, should be an enumerated value of NODE_EVENT, can be any string
-         * @param _handler The function to call when the event reaches this node
-         * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
+         * Removes an event listener from the node. The signature must match the one used with addEventListener
          */
         removeEventListener(_type: EVENT | string, _handler: EventListenerƒ, _capture?: boolean): void;
         /**
@@ -979,7 +963,6 @@ declare namespace FudgeCore {
         /**
          * Broadcasts a synthetic event to this node and from there to all nodes deeper in the hierarchy,
          * invoking matching handlers of the nodes listening to the capture phase. Watch performance when there are many nodes involved
-         * @param _event The event to broadcast
          */
         broadcastEvent(_event: Event): void;
         private broadcastEventRecursive;

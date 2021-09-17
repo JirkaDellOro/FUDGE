@@ -30,7 +30,6 @@ namespace FudgeCore {
 
     /**
      * Creates a new node with a name and initializes all attributes
-     * @param _name The name by which the node can be called.
      */
     public constructor(_name: string) {
       super();
@@ -186,7 +185,6 @@ namespace FudgeCore {
 
     /**
      * Removes the reference to the give node from the list of children
-     * @param _child The node to be removed.
      */
     public removeChild(_child: Node): void {
       let found: number = this.findChild(_child);
@@ -210,7 +208,6 @@ namespace FudgeCore {
 
     /**
      * Returns the position of the node in the list of children or -1 if not found
-     * @param _search The node to be found.
      */
     public findChild(_search: Node): number {
       return this.children.indexOf(_search);
@@ -218,8 +215,6 @@ namespace FudgeCore {
 
     /**
      * Replaces a child node with another, preserving the position in the list of children
-     * @param _replace The node to be replaced
-     * @param _with The node to replace with
      */
     public replaceChild(_replace: Node, _with: Node): boolean {
       let found: number = this.findChild(_replace);
@@ -255,7 +250,6 @@ namespace FudgeCore {
 
     /**
      * Applies a Mutator from {@link Animation} to all its components and transfers it to its children.
-     * @param _mutator The mutator generated from an {@link Animation}
      */
     public applyAnimation(_mutator: Mutator): void {
       if (_mutator.components) {
@@ -302,14 +296,12 @@ namespace FudgeCore {
 
     /**
      * Returns a clone of the list of components of the given class attached to this node. 
-     * @param _class The class of the components to be found.
      */
     public getComponents<T extends Component>(_class: new () => T): T[] {
       return <T[]>(this.components[_class.name] || []).slice(0);
     }
     /**
      * Returns the first compontent found of the given class attached this node or null, if list is empty or doesn't exist
-     * @param _class The class of the components to be found.
      */
     public getComponent<T extends Component>(_class: new () => T): T {
       let list: T[] = <T[]>this.components[_class.name];
@@ -319,7 +311,7 @@ namespace FudgeCore {
     }
 
     /**
-     * Attach the given component to this node. Identical to addComponent
+     * Attach the given component to this node. Identical to {@link addComponent}
      */
     public attach(_component: Component): void {
       this.addComponent(_component);
@@ -343,17 +335,15 @@ namespace FudgeCore {
       _component.dispatchEvent(new Event(EVENT.COMPONENT_ADD));
       this.dispatchEventToTargetOnly(new CustomEvent(EVENT.COMPONENT_ADD, { detail: _component })); // TODO: see if this is be feasable
     }
-    
+
     /**
-     * Detach the given component from this node. Identical to removeComponent
+     * Detach the given component from this node. Identical to {@link removeComponent}
      */
-     public detach(_component: Component): void {
+    public detach(_component: Component): void {
       this.removeComponent(_component);
     }
     /** 
      * Removes the given component from the node, if it was attached, and sets its parent to null. 
-     * @param _component The component to be removed
-     * @throws Exception when component is not found
      */
     public removeComponent(_component: Component): void {
       try {
@@ -443,9 +433,6 @@ namespace FudgeCore {
     /**
      * Adds an event listener to the node. The given handler will be called when a matching event is passed to the node.
      * Deviating from the standard EventTarget, here the _handler must be a function and _capture is the only option.
-     * @param _type The type of the event, should be an enumerated value of NODE_EVENT, can be any string
-     * @param _handler The function to call when the event reaches this node
-     * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
      */
     public addEventListener(_type: EVENT | string, _handler: EventListenerƒ, _capture: boolean /*| AddEventListenerOptions*/ = false): void {
       let listListeners: MapEventTypeToListener = _capture ? this.captures : this.listeners;
@@ -454,10 +441,7 @@ namespace FudgeCore {
       listListeners[_type].push(_handler);
     }
     /**
-     * Removes an event listener from the node. The signatur must match the one used with addEventListener
-     * @param _type The type of the event, should be an enumerated value of NODE_EVENT, can be any string
-     * @param _handler The function to call when the event reaches this node
-     * @param _capture When true, the listener listens in the capture phase, when the event travels deeper into the hierarchy of nodes.
+     * Removes an event listener from the node. The signature must match the one used with addEventListener
      */
     public removeEventListener(_type: EVENT | string, _handler: EventListenerƒ, _capture: boolean /*| AddEventListenerOptions*/ = false): void {
       let listenersForType: EventListenerƒ[] = _capture ? this.captures[_type] : this.listeners[_type];
@@ -518,7 +502,6 @@ namespace FudgeCore {
     /**
      * Broadcasts a synthetic event to this node and from there to all nodes deeper in the hierarchy,
      * invoking matching handlers of the nodes listening to the capture phase. Watch performance when there are many nodes involved
-     * @param _event The event to broadcast
      */
     public broadcastEvent(_event: Event): void {
       // overwrite event target and phase
