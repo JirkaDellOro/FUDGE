@@ -40,7 +40,7 @@ var Script;
     document.addEventListener("interactiveViewportStarted", start);
     function start(_event) {
         viewport = _event.detail;
-        ƒ.Physics.adjustTransforms(viewport.getBranch());
+        ƒ.Physics.initializePhysics();
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         ƒ.Loop.start(); // start the game loop to continously draw the viewport and update the audiosystem
     }

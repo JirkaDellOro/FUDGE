@@ -123,9 +123,13 @@ namespace FudgeCore {
   /**
    * Texture created from a canvas
    */
+  // TODO: remove type fixes when experimental technology is standard
+  type OffscreenCanvasRenderingContext2D = General;
+  type OffscreenCanvas = General;
+  
   export class TextureCanvas extends Texture {
     public crc2: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
-
+    
     constructor (_name: string, _crc2: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D) {
       super(_name);
       this.crc2 = _crc2;

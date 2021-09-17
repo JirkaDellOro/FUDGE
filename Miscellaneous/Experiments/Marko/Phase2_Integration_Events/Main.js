@@ -17,24 +17,24 @@ var FudgePhysics_Communication;
     function init(_event) {
         f.Debug.log(app);
         hierarchy = new f.Node("Scene");
-        let ground = createCompleteMeshNode("GroundCollider", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.GROUP_1);
+        let ground = createCompleteMeshNode("GroundCollider", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
         let cmpGroundMesh = ground.getComponent(f.ComponentTransform);
         cmpGroundMesh.mtxLocal.scale(new f.Vector3(10, 0.3, 10));
         cmpGroundMesh.mtxLocal.translate(new f.Vector3(0, -1.5, 0));
         hierarchy.appendChild(ground);
-        cubes[0] = createCompleteMeshNode("Cube", normalMaterial, new f.MeshCube(), 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.GROUP_2);
+        cubes[0] = createCompleteMeshNode("Cube", normalMaterial, new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_2);
         let cmpCubeTransform = cubes[0].getComponent(f.ComponentTransform);
         hierarchy.appendChild(cubes[0]);
         cmpCubeTransform.mtxLocal.translate(new f.Vector3(0, 7, 0));
-        cubes[1] = createCompleteMeshNode("Cube", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.GROUP_1);
+        cubes[1] = createCompleteMeshNode("Cube", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1);
         let cmpCubeTransform2 = cubes[1].getComponent(f.ComponentTransform);
         hierarchy.appendChild(cubes[1]);
         cmpCubeTransform2.mtxLocal.translate(new f.Vector3(0, 3.5, 0.48));
-        cubes[2] = createCompleteMeshNode("Cube", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.PHYSICS_TYPE.DYNAMIC);
+        cubes[2] = createCompleteMeshNode("Cube", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC);
         let cmpCubeTransform3 = cubes[2].getComponent(f.ComponentTransform);
         hierarchy.appendChild(cubes[2]);
         cmpCubeTransform3.mtxLocal.translate(new f.Vector3(0.6, 7, 0.5));
-        cubes[3] = createCompleteMeshNode("Trigger", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0, 1, 0, 1))), new f.MeshSphere(), 1, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.SPHERE);
+        cubes[3] = createCompleteMeshNode("Trigger", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0, 1, 0, 1))), new f.MeshSphere(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.DEFAULT, f.COLLIDER_TYPE.SPHERE);
         cubes[3].getComponent(f.ComponentRigidbody).isTrigger = true;
         let cmpCubeTransform4 = cubes[3].getComponent(f.ComponentTransform);
         hierarchy.appendChild(cubes[3]);
@@ -108,7 +108,7 @@ var FudgePhysics_Communication;
             fpsDisplay.textContent = "FPS: " + fps.toString();
         });
     }
-    function createCompleteMeshNode(_name, _material, _mesh, _mass, _physicsType, _group = f.PHYSICS_GROUP.DEFAULT, _collider = f.COLLIDER_TYPE.CUBE) {
+    function createCompleteMeshNode(_name, _material, _mesh, _mass, _physicsType, _group = f.COLLISION_GROUP.DEFAULT, _collider = f.COLLIDER_TYPE.CUBE) {
         let node = new f.Node(_name);
         let cmpMesh = new f.ComponentMesh(_mesh);
         let cmpMaterial = new f.ComponentMaterial(_material);

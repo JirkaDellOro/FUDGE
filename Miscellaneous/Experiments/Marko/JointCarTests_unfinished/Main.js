@@ -42,7 +42,7 @@ var Turorials_FUDGEPhysics_Lesson1;
         //Experiment with defaultConstraintSolverType and defaultCorrectionAlgorithm
         //PHYSICS 
         //Creating a physically static ground plane for our physics playground. A simple scaled cube but with physics type set to static
-        bodies[0] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.GROUP_2);
+        bodies[0] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_2);
         bodies[0].mtxLocal.scale(new f.Vector3(14, 0.3, 14)); //Scale the body with it's standard ComponentTransform
         //bodies[0].mtxLocal.rotateX(4, true); //Give it a slight rotation so the physical objects are sliding, always from left when it's after a scaling
         hierarchy.appendChild(bodies[0]); //Add the node to the scene by adding it to the scene-root
@@ -76,7 +76,7 @@ var Turorials_FUDGEPhysics_Lesson1;
         viewPort.draw(); // Draw the current Fudge Scene to the canvas
     }
     // Function to quickly create a node with multiple needed FudgeComponents, including a physics component
-    function createCompleteNode(_name, _material, _mesh, _mass, _physicsType, _group = f.PHYSICS_GROUP.DEFAULT, _colType = f.COLLIDER_TYPE.CUBE, _convexMesh = null) {
+    function createCompleteNode(_name, _material, _mesh, _mass, _physicsType, _group = f.COLLISION_GROUP.DEFAULT, _colType = f.COLLIDER_TYPE.CUBE, _convexMesh = null) {
         let node = new f.Node(_name);
         let cmpMesh = new f.ComponentMesh(_mesh);
         let cmpMaterial = new f.ComponentMaterial(_material);
@@ -92,46 +92,46 @@ var Turorials_FUDGEPhysics_Lesson1;
         //Setting up visuals
         //Best practice to place the main body and place every suspension and wheel locally to the body. Not in this tutorial to make it more clear
         //CarBody
-        bodies[12] = createCompleteNode("Car_Base", materialPlayer, new f.MeshCube(), 500, f.PHYSICS_TYPE.DYNAMIC);
+        bodies[12] = createCompleteNode("Car_Base", materialPlayer, new f.MeshCube(), 500, f.BODY_TYPE.DYNAMIC);
         carBody = bodies[12].getComponent(f.ComponentRigidbody);
         bodies[12].mtxLocal.translate(new f.Vector3(0, 2.5, 0));
         bodies[12].mtxLocal.scale(new f.Vector3(1, 0.5, 2));
         hierarchy.appendChild(bodies[12]);
         //CarWheels - Important to balance the car out correctly
-        bodies[13] = createCompleteNode("Car_WheelRight_Front", materialPlayer, new f.MeshCube(), 5, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.CYLINDER);
+        bodies[13] = createCompleteNode("Car_WheelRight_Front", materialPlayer, new f.MeshCube(), 5, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.DEFAULT, f.COLLIDER_TYPE.CYLINDER);
         bodies[13].mtxLocal.translate(new f.Vector3(1, 1.50, -0.75));
         bodies[13].mtxLocal.scale(new f.Vector3(0.5, 0.85, 0.85)); //Wheels the as a cylinder use the x, for the height of the cylinder, y for the diameter and z is just for the f.MeshCube to scale.
         bodies[13].mtxLocal.rotateZ(90, false);
         hierarchy.appendChild(bodies[13]);
-        bodies[14] = createCompleteNode("Car_WheelRight_Back", materialPlayer, new f.MeshCube(), 5, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.CYLINDER);
+        bodies[14] = createCompleteNode("Car_WheelRight_Back", materialPlayer, new f.MeshCube(), 5, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.DEFAULT, f.COLLIDER_TYPE.CYLINDER);
         bodies[14].mtxLocal.translate(new f.Vector3(1, 1.50, 0.75));
         bodies[14].mtxLocal.scale(new f.Vector3(0.5, 0.85, 0.85));
         bodies[14].mtxLocal.rotateZ(90, false);
         hierarchy.appendChild(bodies[14]);
-        bodies[15] = createCompleteNode("Car_WheelLeft_Front", materialPlayer, new f.MeshCube(), 5, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.CYLINDER);
+        bodies[15] = createCompleteNode("Car_WheelLeft_Front", materialPlayer, new f.MeshCube(), 5, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.DEFAULT, f.COLLIDER_TYPE.CYLINDER);
         bodies[15].mtxLocal.translate(new f.Vector3(-1, 1.50, -0.75));
         bodies[15].mtxLocal.scale(new f.Vector3(0.5, 0.85, 0.85));
         bodies[15].mtxLocal.rotateZ(90, false);
         hierarchy.appendChild(bodies[15]);
-        bodies[16] = createCompleteNode("Car_WheelLeft_Back", materialPlayer, new f.MeshCube(), 5, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.CYLINDER);
+        bodies[16] = createCompleteNode("Car_WheelLeft_Back", materialPlayer, new f.MeshCube(), 5, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.DEFAULT, f.COLLIDER_TYPE.CYLINDER);
         bodies[16].mtxLocal.translate(new f.Vector3(-1, 1.50, 0.75));
         bodies[16].mtxLocal.scale(new f.Vector3(0.5, 0.85, 0.85));
         bodies[16].mtxLocal.rotateZ(90, false);
         hierarchy.appendChild(bodies[16]);
         //SuspensionHolders
-        bodies[17] = createCompleteNode("Car_HolderRight_Front", materialPlayer, new f.MeshCube(), 20, f.PHYSICS_TYPE.DYNAMIC);
+        bodies[17] = createCompleteNode("Car_HolderRight_Front", materialPlayer, new f.MeshCube(), 20, f.BODY_TYPE.DYNAMIC);
         bodies[17].mtxLocal.translate(new f.Vector3(0.4, 1.5, -0.75));
         bodies[17].mtxLocal.scale(new f.Vector3(0.5, 0.5, 0.5));
         hierarchy.appendChild(bodies[17]);
-        bodies[18] = createCompleteNode("Car_HolderRight_Back", materialPlayer, new f.MeshCube(), 20, f.PHYSICS_TYPE.DYNAMIC);
+        bodies[18] = createCompleteNode("Car_HolderRight_Back", materialPlayer, new f.MeshCube(), 20, f.BODY_TYPE.DYNAMIC);
         bodies[18].mtxLocal.translate(new f.Vector3(0.4, 1.5, 0.75));
         bodies[18].mtxLocal.scale(new f.Vector3(0.5, 0.5, 0.5));
         hierarchy.appendChild(bodies[18]);
-        bodies[19] = createCompleteNode("Car_HolderLeft_Front", materialPlayer, new f.MeshCube(), 20, f.PHYSICS_TYPE.DYNAMIC);
+        bodies[19] = createCompleteNode("Car_HolderLeft_Front", materialPlayer, new f.MeshCube(), 20, f.BODY_TYPE.DYNAMIC);
         bodies[19].mtxLocal.translate(new f.Vector3(-0.4, 1.5, -0.75));
         bodies[19].mtxLocal.scale(new f.Vector3(0.5, 0.5, 0.5));
         hierarchy.appendChild(bodies[19]);
-        bodies[20] = createCompleteNode("Car_HolderLeft_Back", materialPlayer, new f.MeshCube(), 20, f.PHYSICS_TYPE.DYNAMIC);
+        bodies[20] = createCompleteNode("Car_HolderLeft_Back", materialPlayer, new f.MeshCube(), 20, f.BODY_TYPE.DYNAMIC);
         bodies[20].mtxLocal.translate(new f.Vector3(-0.4, 1.5, 0.75));
         bodies[20].mtxLocal.scale(new f.Vector3(0.5, 0.5, 0.5));
         hierarchy.appendChild(bodies[20]);

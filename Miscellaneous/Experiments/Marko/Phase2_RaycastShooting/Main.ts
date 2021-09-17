@@ -31,36 +31,36 @@ namespace FudgePhysics_Communication {
 
         document.addEventListener("keypress", hndKey);
 
-        ground = createCompleteMeshNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.GROUP_1);
+        ground = createCompleteMeshNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
         ground.mtxLocal.scale(new f.Vector3(20, 0.3, 20));
         ground.mtxLocal.translate(new f.Vector3(0, -1.5, 0));
         hierarchy.appendChild(ground);
 
-        bodies[0] = createCompleteMeshNode("Target", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.GROUP_2);
+        bodies[0] = createCompleteMeshNode("Target", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_2);
         hierarchy.appendChild(bodies[0]);
         bodies[0].mtxLocal.translate(new f.Vector3(-10, 2, -10), true);
         bodies[0].mtxLocal.scale(new f.Vector3(3, 5, 3));
         bodies[0].mtxLocal.rotateY(45);
 
-        bodies[1] = createCompleteMeshNode("Target", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.GROUP_2);
+        bodies[1] = createCompleteMeshNode("Target", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_2);
         hierarchy.appendChild(bodies[1]);
         bodies[1].mtxLocal.translate(new f.Vector3(10, 2, 10), true);
         bodies[1].mtxLocal.scale(new f.Vector3(3, 5, 3));
         bodies[1].mtxLocal.rotateY(-45);
 
-        bodies[2] = createCompleteMeshNode("Target", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.GROUP_2);
+        bodies[2] = createCompleteMeshNode("Target", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_2);
         hierarchy.appendChild(bodies[2]);
         bodies[2].mtxLocal.translate(new f.Vector3(10, 2, 0), true);
         bodies[2].mtxLocal.scale(new f.Vector3(3, 5, 5));
 
-        bodies[3] = createCompleteMeshNode("Player", new f.Material("Player", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0, 1, 1))), new f.MeshCube(), 1, f.PHYSICS_TYPE.KINEMATIC);
+        bodies[3] = createCompleteMeshNode("Player", new f.Material("Player", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0, 1, 1))), new f.MeshCube(), 1, f.BODY_TYPE.KINEMATIC);
         moveableTransform = bodies[3].getComponent(f.ComponentTransform);
         hierarchy.appendChild(bodies[3]);
         moveableTransform.mtxLocal.scale(new f.Vector3(1, 2, 1));
         moveableTransform.mtxLocal.rotateY(180);
         moveableTransform.mtxLocal.translate(new f.Vector3(0, 0.5, 0));
 
-        bodies[4] = createCompleteMeshNode("PlayerGun", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0, 1, 1))), new f.MeshCube, 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.GROUP_1);
+        bodies[4] = createCompleteMeshNode("PlayerGun", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0, 1, 1))), new f.MeshCube, 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1);
         bodies[4].removeComponent(bodies[4].getComponent(f.ComponentRigidbody));
         bodies[4].mtxLocal.translate(new f.Vector3(-0.5, 0, 1), true);
         bodies[4].mtxLocal.scale(new f.Vector3(0.3, 0.3, 2));
@@ -109,7 +109,7 @@ namespace FudgePhysics_Communication {
         });
     }
 
-    function createCompleteMeshNode(_name: string, _material: f.Material, _mesh: f.Mesh, _mass: number, _physicsType: f.PHYSICS_TYPE, _group: f.PHYSICS_GROUP = f.PHYSICS_GROUP.DEFAULT, _colType: f.COLLIDER_TYPE = f.COLLIDER_TYPE.CUBE): f.Node {
+    function createCompleteMeshNode(_name: string, _material: f.Material, _mesh: f.Mesh, _mass: number, _physicsType: f.BODY_TYPE, _group: f.COLLISION_GROUP = f.COLLISION_GROUP.DEFAULT, _colType: f.COLLIDER_TYPE = f.COLLIDER_TYPE.CUBE): f.Node {
         let node: f.Node = new f.Node(_name);
         let cmpMesh: f.ComponentMesh = new f.ComponentMesh(_mesh);
         let cmpMaterial: f.ComponentMaterial = new f.ComponentMaterial(_material);

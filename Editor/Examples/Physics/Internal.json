@@ -1,4 +1,31 @@
 {
+  "MeshPyramid|2021-09-16T16:20:36.681Z|23832": {
+    "ƒ.MeshPyramid": {
+      "idResource": "MeshPyramid|2021-09-16T16:20:36.681Z|23832",
+      "name": "MeshPyramid",
+      "type": "MeshPyramid"
+    }
+  },
+  "Material|2021-09-16T16:20:39.493Z|82601": {
+    "ƒ.Material": {
+      "name": "NewMaterial",
+      "idResource": "Material|2021-09-16T16:20:39.493Z|82601",
+      "shader": "ShaderUniColor",
+      "coat": {
+        "ƒ.CoatColored": {
+          "name": "Coat",
+          "color": "[1, 1, 1, 1]"
+        }
+      }
+    }
+  },
+  "MeshCube|2021-09-16T16:30:20.263Z|92125": {
+    "ƒ.MeshCube": {
+      "idResource": "MeshCube|2021-09-16T16:30:20.263Z|92125",
+      "name": "MeshCube",
+      "type": "MeshCube"
+    }
+  },
   "Graph|2021-09-16T16:18:45.095Z|30710": {
     "ƒ.Graph": {
       "name": "NewGraph",
@@ -45,7 +72,7 @@
                 {
                   "ƒ.ComponentTransform": {
                     "local": {
-                      "translation": "[0, 2, 0]",
+                      "translation": "[0, 0, 0]",
                       "rotation": "[0, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },
@@ -67,7 +94,7 @@
                     "typeBody": "DYNAMIC",
                     "typeCollider": "CUBE",
                     "isTrigger": false,
-                    "id": 0,
+                    "id": 2,
                     "pivot": {
                       "translation": "[0, 0, 0]",
                       "rotation": "[0, 0, 0]",
@@ -124,7 +151,7 @@
                 {
                   "ƒ.ComponentTransform": {
                     "local": {
-                      "translation": "[0, 0, 0]",
+                      "translation": "[0, -1.3000000715255737, 0]",
                       "rotation": "[0, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },
@@ -142,11 +169,11 @@
                     "mass": 1,
                     "dampTranslation": 0.1,
                     "dampRotation": 0.1,
-                    "effectGravity": 0,
+                    "effectGravity": 1,
                     "typeBody": "STATIC",
                     "typeCollider": "CUBE",
                     "isTrigger": false,
-                    "id": 1,
+                    "id": 3,
                     "pivot": {
                       "translation": "[0, 0, 0]",
                       "rotation": "[0, 0, 0]",
@@ -165,33 +192,6 @@
       ],
       "idResource": "Graph|2021-09-16T16:18:45.095Z|30710",
       "type": "Graph"
-    }
-  },
-  "MeshPyramid|2021-09-16T16:20:36.681Z|23832": {
-    "ƒ.MeshPyramid": {
-      "idResource": "MeshPyramid|2021-09-16T16:20:36.681Z|23832",
-      "name": "MeshPyramid",
-      "type": "MeshPyramid"
-    }
-  },
-  "Material|2021-09-16T16:20:39.493Z|82601": {
-    "ƒ.Material": {
-      "name": "NewMaterial",
-      "idResource": "Material|2021-09-16T16:20:39.493Z|82601",
-      "shader": "ShaderUniColor",
-      "coat": {
-        "ƒ.CoatColored": {
-          "name": "Coat",
-          "color": "[1, 1, 1, 1]"
-        }
-      }
-    }
-  },
-  "MeshCube|2021-09-16T16:30:20.263Z|92125": {
-    "ƒ.MeshCube": {
-      "idResource": "MeshCube|2021-09-16T16:30:20.263Z|92125",
-      "name": "MeshCube",
-      "type": "MeshCube"
     }
   }
 }

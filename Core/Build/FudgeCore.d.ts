@@ -4926,10 +4926,10 @@ declare namespace FudgeCore {
       * @author Marko Fehrenbach, HFU 2020
       */
     class Physics {
-        /** The PHYSICAL WORLD that gives every {@link Node} with a ComponentRigidbody a physical representation and moves them accordingly to the laws of the physical world. */
-        static world: Physics;
         /** The SETTINGS that apply to the physical world. Ranging from things like sleeping, collisionShapeThickness and others */
         static settings: PhysicsSettings;
+        /** The PHYSICAL WORLD that gives every {@link Node} with a ComponentRigidbody a physical representation and moves them accordingly to the laws of the physical world. */
+        static world: Physics;
         /** The rendering of physical debug informations. Used internally no interaction needed.*/
         debugDraw: PhysicsDebugDraw;
         /** The camera/viewport the physics are debugged to. Used internally no interaction needed. */
@@ -5575,7 +5575,7 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    enum MIPMAP {
+    export enum MIPMAP {
         CRISP = 0,
         MEDIUM = 1,
         BLURRY = 2
@@ -5584,7 +5584,7 @@ declare namespace FudgeCore {
      * Baseclass for different kinds of textures.
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    abstract class Texture extends Mutable implements SerializableResource {
+    export abstract class Texture extends Mutable implements SerializableResource {
         name: string;
         idResource: string;
         mipmap: MIPMAP;
@@ -5601,7 +5601,7 @@ declare namespace FudgeCore {
     /**
      * Texture created from an existing image
      */
-    class TextureImage extends Texture {
+    export class TextureImage extends Texture {
         image: HTMLImageElement;
         url: RequestInfo;
         constructor(_url?: RequestInfo);
@@ -5617,7 +5617,7 @@ declare namespace FudgeCore {
     /**
      * Texture created from a canvas
      */
-    class TextureBase64 extends Texture {
+    export class TextureBase64 extends Texture {
         image: HTMLImageElement;
         constructor(_name: string, _base64: string, _mipmap?: MIPMAP);
         get texImageSource(): TexImageSource;
@@ -5625,7 +5625,8 @@ declare namespace FudgeCore {
     /**
      * Texture created from a canvas
      */
-    class TextureCanvas extends Texture {
+    type OffscreenCanvasRenderingContext2D = General;
+    export class TextureCanvas extends Texture {
         crc2: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
         constructor(_name: string, _crc2: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D);
         get texImageSource(): TexImageSource;
@@ -5633,15 +5634,16 @@ declare namespace FudgeCore {
     /**
      * Texture created from a FUDGE-Sketch
      */
-    class TextureSketch extends TextureCanvas {
+    export class TextureSketch extends TextureCanvas {
         get texImageSource(): TexImageSource;
     }
     /**
      * Texture created from an HTML-page
      */
-    class TextureHTML extends TextureCanvas {
+    export class TextureHTML extends TextureCanvas {
         get texImageSource(): TexImageSource;
     }
+    export {};
 }
 declare namespace FudgeCore {
     class TextureDefault extends TextureBase64 {

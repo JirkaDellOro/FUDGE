@@ -576,7 +576,7 @@ namespace FudgeCore {
 
       this.#typeBody = <number><unknown>BODY_TYPE[_serialization.typeBody];
       this.#typeCollider = <number><unknown>COLLIDER_TYPE[_serialization.typeCollider];
-      this.create(this.mass, this.#typeBody, this.#typeCollider, this.collisionGroup, this.mtxPivot, this.convexMesh);
+      this.create(this.mass, this.#typeBody, this.#typeCollider, this.collisionGroup, null, this.convexMesh);
       return this;
     }
 
