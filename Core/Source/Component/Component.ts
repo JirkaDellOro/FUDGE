@@ -45,10 +45,9 @@ namespace FudgeCore {
 
 
     /**
-     * Tries to add the component to the given node, removing it from the previous container if applicable
-     * @param _container The node to attach this component to
+     * Tries to attach the component to the given node, removing it from the node it was attached to if applicable
      */
-    public setContainer(_container: Node | null): void {
+    public attachToNode(_container: Node | null): void {
       if (this.#node == _container)
         return;
       let previousContainer: Node = this.#node;
@@ -77,7 +76,6 @@ namespace FudgeCore {
 
     protected reduceMutator(_mutator: Mutator): void {
       delete _mutator.singleton;
-      delete _mutator.container;
       delete _mutator.mtxWorld;
     }
     //#endregion

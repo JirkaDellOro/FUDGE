@@ -319,8 +319,13 @@ namespace FudgeCore {
     }
 
     /**
-     * Adds the supplied component into the nodes component map.
-     * @param _component The component to be pushed into the array.
+     * Attach the given component to this node. Identical to addComponent
+     */
+    public attach(_component: Component): void {
+      this.addComponent(_component);
+    }
+    /**
+     * Attach the given component to this node
      */
     public addComponent(_component: Component): void {
       if (_component.node == this)
@@ -334,9 +339,16 @@ namespace FudgeCore {
         else
           cmpList.push(_component);
 
-      _component.setContainer(this);
+      _component.attachToNode(this);
       _component.dispatchEvent(new Event(EVENT.COMPONENT_ADD));
       this.dispatchEventToTargetOnly(new CustomEvent(EVENT.COMPONENT_ADD, { detail: _component })); // TODO: see if this is be feasable
+    }
+    
+    /**
+     * Detach the given component from this node. Identical to removeComponent
+     */
+     public detach(_component: Component): void {
+      this.removeComponent(_component);
     }
     /** 
      * Removes the given component from the node, if it was attached, and sets its parent to null. 
@@ -352,7 +364,7 @@ namespace FudgeCore {
         _component.dispatchEvent(new Event(EVENT.COMPONENT_REMOVE));
         this.dispatchEventToTargetOnly(new CustomEvent(EVENT.COMPONENT_REMOVE, { detail: _component })); // TODO: see if this would be feasable
         componentsOfType.splice(foundAt, 1);
-        _component.setContainer(null);
+        _component.attachToNode(null);
       } catch (_error) {
         throw new Error(`Unable to remove component '${_component}'in node named '${this.name}'`);
       }

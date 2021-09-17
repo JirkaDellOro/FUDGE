@@ -928,10 +928,17 @@ declare namespace FudgeCore {
          */
         getComponent<T extends Component>(_class: new () => T): T;
         /**
-         * Adds the supplied component into the nodes component map.
-         * @param _component The component to be pushed into the array.
+         * Attach the given component to this node. Identical to addComponent
+         */
+        attach(_component: Component): void;
+        /**
+         * Attach the given component to this node
          */
         addComponent(_component: Component): void;
+        /**
+         * Detach the given component from this node. Identical to removeComponent
+         */
+        detach(_component: Component): void;
         /**
          * Removes the given component from the node, if it was attached, and sets its parent to null.
          * @param _component The component to be removed
@@ -1387,10 +1394,9 @@ declare namespace FudgeCore {
         get node(): Node | null;
         activate(_on: boolean): void;
         /**
-         * Tries to add the component to the given node, removing it from the previous container if applicable
-         * @param _container The node to attach this component to
+         * Tries to attach the component to the given node, removing it from the node it was attached to if applicable
          */
-        setContainer(_container: Node | null): void;
+        attachToNode(_container: Node | null): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
