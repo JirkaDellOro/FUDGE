@@ -38,26 +38,27 @@ var Mesh;
             let node = new ƒ.Node(subclass[i].name.replace("Mesh", ""));
             let mesh;
             switch (subclass[i].name) {
-                case "MeshPolygon":
-                    mesh = new ƒ.MeshPolygon();
-                    break;
-                case "MeshExtrusion":
-                    mesh = new ƒ.MeshExtrusion();
-                    break;
-                case "MeshRotation":
-                    mesh = new ƒ.MeshRotation();
-                    break;
-                case "MeshSphere":
-                    mesh = new ƒ.MeshSphere();
-                    break;
-                case "MeshTerrain":
-                    mesh = new ƒ.MeshTerrain();
-                    break;
-                case "MeshTorus":
-                    mesh = new ƒ.MeshTorus();
-                    break;
+                // case "MeshPolygon":
+                //   mesh = new ƒ.MeshPolygon();
+                //   break;
+                // case "MeshExtrusion":
+                //   mesh = new ƒ.MeshExtrusion();
+                //   break;
+                // case "MeshRotation":
+                //   mesh = new ƒ.MeshRotation();
+                //   break;
+                // case "MeshSphere":
+                //   mesh = new ƒ.MeshSphere();
+                //   break;
+                // case "MeshTerrain":
+                //   mesh = new ƒ.MeshTerrain();
+                //   break;
+                // case "MeshTorus":
+                //   mesh = new ƒ.MeshTorus();
+                //   break;
                 default:
-                    mesh = subclass[i].prototype;
+                    //@ts-ignore
+                    mesh = new subclass[i]();
                     break;
             }
             let cmpMesh = new ƒ.ComponentMesh(mesh);

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Fudge and Physics - Default</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="../../../../Physics/OimoPhysics.js"></script>
+  <script src="../../../../Core/Build/FudgeCore.js"></script>
+</head>
+
+<body>
+  <script src="../../dialog-polyfill.min.js"></script>
+  <script src="../../TestInstructions.js"></script>
+  <script>
+    TestInstructions.display({
+      Name: "Type the name of the test here",
+      Test: [
+        "Describe what is actually being tested here",
+      ],
+      Setup: [
+        "Explain the setup of the scene",
+        "Use multilple lines separated by comma"
+      ],
+      Act: [
+        "Describe what the tester can do",
+      ],
+      Observe: [
+        "Describe what the tester should pay attention to",
+      ],
+      Control: [
+        "Describe how the tester can perform actions, which controls to use",
+      ],
+      Expect: [
+        "Describe what the tester is supposed to see, which desired behavior is supposed to be observed while testing",
+      ]
+    });
+  </script>
+  
+  <h1>Fudge_Physics - Collision/Trigger-Events</h1>
+  <h2 id="FPS">FPS</h2>
+  <canvas width="600" height="400"></canvas>
+  <script src="Main.js"></script>
+</body>
+
+</html>

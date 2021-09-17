@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Fudge Physics ConvexWelding</title>
+
+  <!-- (Optional) Styling the html page just to be easier on the eyes -->
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: rgb(42, 42, 42);
+    }
+
+    h1 {
+      color: rgb(255, 227, 104);
+    }
+
+    h2 {
+      color: gainsboro;
+    }
+
+    /* Canvas needs a size either on the element directly or here in the css code */
+    canvas {
+      width: 64%;
+      height: 27%;
+    }
+  </style>
+  <!--  -->
+  <script src="../../dialog-polyfill.min.js"></script>
+  <script src="../../TestInstructions.js"></script>
+
+  <!-- Use Fudge and use the implemented physics engine OimoPhysics by referencing them at the start-->
+  <script src="../../../../Physics/OimoPhysics.js"></script>
+  <script src="../../../../Core/Build/FudgeCore.js"></script>
+  <!-- -->
+
+</head>
+
+<body>
+  <script src="../../dialog-polyfill.min.js"></script>
+  <script src="../../TestInstructions.js"></script>
+  <script>
+    TestInstructions.display({
+      Name: "Type the name of the test here",
+      Test: [
+        "Describe what is actually being tested here",
+      ],
+      Setup: [
+        "Explain the setup of the scene",
+        "Use multilple lines separated by comma"
+      ],
+      Act: [
+        "Describe what the tester can do",
+      ],
+      Observe: [
+        "Describe what the tester should pay attention to",
+      ],
+      Control: [
+        "Describe how the tester can perform actions, which controls to use",
+      ],
+      Expect: [
+        "Describe what the tester is supposed to see, which desired behavior is supposed to be observed while testing",
+      ]
+    });
+  </script>
+
+  <h1>Fudge Physics Test of Convex Colliders through WeldingJoints</h1>
+  <h2>Click canvas to spawn a new chair at the spawnpoint</h2>
+  <h2 id="FPS">FPS</h2>
+  <!-- The canvas to draw your Fudge scene too -->
+  <canvas></canvas>
+  <!-- Your actual code  -->
+  <script src="Main.js"></script>
+
+</body>
+
+</html>

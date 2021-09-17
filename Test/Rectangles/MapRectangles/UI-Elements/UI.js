@@ -2,6 +2,7 @@ var UI;
 (function (UI) {
     var ƒ = FudgeCore;
     class FieldSet extends HTMLFieldSetElement {
+        values;
         constructor(_name = "FieldSet") {
             super();
             this.name = _name;
@@ -115,6 +116,7 @@ var UI;
     }
     UI.Point = Point;
     class FramingScaled extends FieldSet {
+        result;
         constructor(_name = "FramingScaled") {
             super(_name);
             this.values = { normWidth: 1, normHeight: 1 };
