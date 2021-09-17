@@ -51,7 +51,7 @@ namespace FudgeCore {
     /** Creating a new rigidbody with a weight in kg, a physics type (default = dynamic), a collider type what physical form has the collider, to what group does it belong, is there a transform Matrix that should be used, and is the collider defined as a group of points that represent a convex mesh. */
     constructor(_mass: number = 1, _type: BODY_TYPE = BODY_TYPE.DYNAMIC, _colliderType: COLLIDER_TYPE = COLLIDER_TYPE.CUBE, _group: COLLISION_GROUP = Physics.settings.defaultCollisionGroup, _mtxTransform: Matrix4x4 = null, _convexMesh: Float32Array = null) {
       super();
-      this.create(_mass, _type, _colliderType, _group, _mtxTransform);
+      this.create(_mass, _type, _colliderType, _group, _mtxTransform, _convexMesh);
     }
 
     public get id(): number {
