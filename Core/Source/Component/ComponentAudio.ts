@@ -75,7 +75,7 @@ namespace FudgeCore {
       return this.playing;
     }
     public get isAttached(): boolean {
-      return this.getContainer() != null;
+      return this.node != null;
     }
     public get isListened(): boolean {
       return this.listened;
@@ -271,15 +271,15 @@ namespace FudgeCore {
     private handleAttach = (_event: Event): void => {
       // Debug.log(_event);
       if (_event.type == EVENT.COMPONENT_ADD) {
-        this.getContainer().addEventListener(EVENT_AUDIO.CHILD_APPEND, this.handleGraph, true);
-        this.getContainer().addEventListener(EVENT_AUDIO.CHILD_REMOVE, this.handleGraph, true);
-        this.getContainer().addEventListener(EVENT_AUDIO.UPDATE, this.update, true);
-        this.listened = this.getContainer().isDescendantOf(AudioManager.default.getGraphListeningTo());
+        this.node.addEventListener(EVENT_AUDIO.CHILD_APPEND, this.handleGraph, true);
+        this.node.addEventListener(EVENT_AUDIO.CHILD_REMOVE, this.handleGraph, true);
+        this.node.addEventListener(EVENT_AUDIO.UPDATE, this.update, true);
+        this.listened = this.node.isDescendantOf(AudioManager.default.getGraphListeningTo());
       }
       else {
-        this.getContainer().removeEventListener(EVENT_AUDIO.CHILD_APPEND, this.handleGraph, true);
-        this.getContainer().removeEventListener(EVENT_AUDIO.CHILD_REMOVE, this.handleGraph, true);
-        this.getContainer().removeEventListener(EVENT_AUDIO.UPDATE, this.update, true);
+        this.node.removeEventListener(EVENT_AUDIO.CHILD_APPEND, this.handleGraph, true);
+        this.node.removeEventListener(EVENT_AUDIO.CHILD_REMOVE, this.handleGraph, true);
+        this.node.removeEventListener(EVENT_AUDIO.UPDATE, this.update, true);
         this.listened = false;
       }
       this.updateConnection();
@@ -299,8 +299,8 @@ namespace FudgeCore {
      */
     private update = (_event: Event): void => {
       let mtxResult: Matrix4x4 = this.mtxPivot;
-      if (this.getContainer())
-        mtxResult = Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.mtxPivot);
+      if (this.node)
+        mtxResult = Matrix4x4.MULTIPLICATION(this.node.mtxWorld, this.mtxPivot);
 
       // Debug.log(mtxResult.toString());
       let position: Vector3 = mtxResult.translation;

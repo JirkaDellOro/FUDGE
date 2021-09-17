@@ -344,7 +344,7 @@ namespace FudgeCore {
       this.jointTwistMotor.setMotor(this.jointTwistMotorSpeed, this.jointTwistMotorTorque);
 
       this.config = new OIMO.RagdollJointConfig();
-      let attachedRBPos: Vector3 = this.attachedRigidbody.getContainer().mtxWorld.translation;
+      let attachedRBPos: Vector3 = this.attachedRigidbody.node.mtxWorld.translation;
       let worldAnchor: OIMO.Vec3 = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
       this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, this.jointFirstAxis, this.jointSecondAxis);
       this.config.swingSpringDamper = this.jointSwingSpringDamper;

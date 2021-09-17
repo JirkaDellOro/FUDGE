@@ -14,15 +14,15 @@ var Graph;
             this.addEventListener("componentRemove" /* COMPONENT_REMOVE */, this.hndRemoveComponent);
         }
         hndAddComponent = (_event) => {
-            this.getContainer().addEventListener("startSatellite", this.start, true);
+            this.node.addEventListener("startSatellite", this.start, true);
         };
         hndRemoveComponent = (_event) => {
-            this.getContainer().removeEventListener("startSatellite", this.start);
+            this.node.removeEventListener("startSatellite", this.start);
             ƒ.Loop.removeEventListener("loopFrame" /* LOOP_FRAME */, this.update);
         };
         start = (_event) => {
-            this.mtxLocal = this.getContainer().mtxLocal;
-            this.mtxPivot = this.getContainer().getComponent(ƒ.ComponentMesh).mtxPivot;
+            this.mtxLocal = this.node.mtxLocal;
+            this.mtxPivot = this.node.getComponent(ƒ.ComponentMesh).mtxPivot;
             this.mtxPivot.translateZ(-0.5);
             this.mtxPivot.scale(ƒ.Vector3.ONE(0.2));
             this.mtxLocal.rotateY(Math.random() * 360);

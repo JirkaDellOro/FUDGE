@@ -12,6 +12,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var FudgeCore;
 (function (FudgeCore) {
     class DebugTarget {
+        delegates;
         static mergeArguments(_message, ..._args) {
             let out = _message.toString();
             for (let arg of _args)
@@ -55,6 +56,18 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class DebugConsole extends FudgeCore.DebugTarget {
+        static delegates = {
+            [FudgeCore.DEBUG_FILTER.INFO]: console.info,
+            [FudgeCore.DEBUG_FILTER.LOG]: console.log,
+            [FudgeCore.DEBUG_FILTER.WARN]: console.warn,
+            [FudgeCore.DEBUG_FILTER.ERROR]: console.error,
+            [FudgeCore.DEBUG_FILTER.FUDGE]: DebugConsole.fudge,
+            [FudgeCore.DEBUG_FILTER.CLEAR]: console.clear,
+            [FudgeCore.DEBUG_FILTER.GROUP]: console.group,
+            [FudgeCore.DEBUG_FILTER.GROUPCOLLAPSED]: console.groupCollapsed,
+            [FudgeCore.DEBUG_FILTER.GROUPEND]: console.groupEnd,
+            [FudgeCore.DEBUG_FILTER.SOURCE]: DebugConsole.source
+        };
         static fudge(_message, ..._args) {
             console.debug(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.FUDGE], _message, ..._args);
         }
@@ -62,23 +75,12 @@ var FudgeCore;
             console.log(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.SOURCE], _message, ..._args);
         }
     }
-    DebugConsole.delegates = {
-        [FudgeCore.DEBUG_FILTER.INFO]: console.info,
-        [FudgeCore.DEBUG_FILTER.LOG]: console.log,
-        [FudgeCore.DEBUG_FILTER.WARN]: console.warn,
-        [FudgeCore.DEBUG_FILTER.ERROR]: console.error,
-        [FudgeCore.DEBUG_FILTER.FUDGE]: DebugConsole.fudge,
-        [FudgeCore.DEBUG_FILTER.CLEAR]: console.clear,
-        [FudgeCore.DEBUG_FILTER.GROUP]: console.group,
-        [FudgeCore.DEBUG_FILTER.GROUPCOLLAPSED]: console.groupCollapsed,
-        [FudgeCore.DEBUG_FILTER.GROUPEND]: console.groupEnd,
-        [FudgeCore.DEBUG_FILTER.SOURCE]: DebugConsole.source
-    };
     FudgeCore.DebugConsole = DebugConsole;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class Debug {
+        static delegates = Debug.setupConsole();
         static setFilter(_target, _filter) {
             for (let filter in Debug.delegates)
                 Debug.delegates[filter].delete(_target);
@@ -162,7 +164,6 @@ var FudgeCore;
             return result;
         }
     }
-    Debug.delegates = Debug.setupConsole();
     FudgeCore.Debug = Debug;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -180,6 +181,7 @@ var FudgeCore;
     }
     FudgeCore.EventTargetƒ = EventTargetƒ;
     class EventTargetStatic extends EventTargetƒ {
+        static targetStatic = new EventTargetStatic();
         constructor() {
             super();
         }
@@ -194,7 +196,6 @@ var FudgeCore;
             return true;
         }
     }
-    EventTargetStatic.targetStatic = new EventTargetStatic();
     FudgeCore.EventTargetStatic = EventTargetStatic;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -287,6 +288,7 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Serializer {
+        static namespaces = { "ƒ": FudgeCore };
         static registerNamespace(_namespace) {
             for (let name in Serializer.namespaces)
                 if (Serializer.namespaces[name] == _namespace)
@@ -400,18 +402,13 @@ var FudgeCore;
             return null;
         }
     }
-    Serializer.namespaces = { "ƒ": FudgeCore };
     FudgeCore.Serializer = Serializer;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class RecycableArray {
-        constructor() {
-            this.#length = 0;
-            this.#array = new Array();
-        }
-        #length;
-        #array;
+        #length = 0;
+        #array = new Array();
         get length() {
             return this.#length;
         }
@@ -685,6 +682,7 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Recycler {
+        static depot = {};
         static get(_T) {
             let key = _T.name;
             let instances = Recycler.depot[key];
@@ -718,12 +716,12 @@ var FudgeCore;
             Recycler.depot = {};
         }
     }
-    Recycler.depot = {};
     FudgeCore.Recycler = Recycler;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class Vector2 extends FudgeCore.Mutable {
+        data;
         constructor(_x = 0, _y = 0) {
             super();
             this.data = new Float32Array([_x, _y]);
@@ -928,10 +926,10 @@ var FudgeCore;
         ORIGIN2D[ORIGIN2D["BOTTOMRIGHT"] = 34] = "BOTTOMRIGHT";
     })(ORIGIN2D = FudgeCore.ORIGIN2D || (FudgeCore.ORIGIN2D = {}));
     class Rectangle extends FudgeCore.Mutable {
+        position = FudgeCore.Recycler.get(FudgeCore.Vector2);
+        size = FudgeCore.Recycler.get(FudgeCore.Vector2);
         constructor(_x = 0, _y = 0, _width = 1, _height = 1, _origin = ORIGIN2D.TOPLEFT) {
             super();
-            this.position = FudgeCore.Recycler.get(FudgeCore.Vector2);
-            this.size = FudgeCore.Recycler.get(FudgeCore.Vector2);
             this.setPositionAndSize(_x, _y, _width, _height, _origin);
         }
         static GET(_x = 0, _y = 0, _width = 1, _height = 1, _origin = ORIGIN2D.TOPLEFT) {
@@ -1086,6 +1084,10 @@ var FudgeCore;
         BLEND[BLEND["PARTICLE"] = 2] = "PARTICLE";
     })(BLEND = FudgeCore.BLEND || (FudgeCore.BLEND = {}));
     class RenderWebGL extends FudgeCore.EventTargetStatic {
+        static crc3 = RenderWebGL.initialize();
+        static ƒpicked;
+        static rectRender = RenderWebGL.getCanvasRect();
+        static sizePick;
         static initialize(_antialias, _alpha) {
             FudgeCore.fudgeConfig = FudgeCore.fudgeConfig || {};
             let contextAttributes = {
@@ -1260,7 +1262,7 @@ var FudgeCore;
                         RenderWebGL.crc3.uniform4fv(uni[`u_directional[${i}].color`], cmpLight.light.color.getArray());
                         let direction = FudgeCore.Vector3.Z();
                         direction.transform(cmpLight.mtxPivot, false);
-                        direction.transform(cmpLight.getContainer().mtxWorld);
+                        direction.transform(cmpLight.node.mtxWorld);
                         RenderWebGL.crc3.uniform3fv(uni[`u_directional[${i}].direction`], direction.get());
                     }
                 }
@@ -1275,8 +1277,6 @@ var FudgeCore;
             RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, _cmpMesh.mesh.renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
         }
     }
-    RenderWebGL.crc3 = RenderWebGL.initialize();
-    RenderWebGL.rectRender = RenderWebGL.getCanvasRect();
     FudgeCore.RenderWebGL = RenderWebGL;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -1329,23 +1329,23 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Node extends FudgeCore.EventTargetƒ {
-        constructor(_name) {
-            super();
-            this.mtxWorld = FudgeCore.Matrix4x4.IDENTITY();
-            this.timestampUpdate = 0;
-            this.nNodesInBranch = 0;
-            this.radius = 0;
-            this.parent = null;
-            this.children = [];
-            this.components = {};
-            this.listeners = {};
-            this.captures = {};
-            this.active = true;
-            this.appendChild = this.addChild;
-            this.name = _name;
-        }
+        name;
+        mtxWorld = FudgeCore.Matrix4x4.IDENTITY();
+        timestampUpdate = 0;
+        nNodesInBranch = 0;
+        radius = 0;
         #mtxWorldInverseUpdated;
         #mtxWorldInverse;
+        parent = null;
+        children = [];
+        components = {};
+        listeners = {};
+        captures = {};
+        active = true;
+        constructor(_name) {
+            super();
+            this.name = _name;
+        }
         get isActive() {
             return this.active;
         }
@@ -1405,6 +1405,7 @@ var FudgeCore;
             found = this.children.filter((_node) => _node.name == _name);
             return found;
         }
+        appendChild = this.addChild;
         addChild(_child) {
             if (this.children.includes(_child))
                 return;
@@ -1515,7 +1516,7 @@ var FudgeCore;
             return null;
         }
         addComponent(_component) {
-            if (_component.getContainer() == this)
+            if (_component.node == this)
                 return;
             let cmpList = this.components[_component.type];
             if (cmpList === undefined)
@@ -1682,14 +1683,17 @@ var FudgeCore;
         ANIMATION_PLAYBACK[ANIMATION_PLAYBACK["FRAMEBASED"] = 2] = "FRAMEBASED";
     })(ANIMATION_PLAYBACK = FudgeCore.ANIMATION_PLAYBACK || (FudgeCore.ANIMATION_PLAYBACK = {}));
     class Animation extends FudgeCore.Mutable {
+        idResource;
+        name;
+        totalTime = 0;
+        labels = {};
+        animationStructure;
+        events = {};
+        framesPerSecond = 60;
+        eventsProcessed = new Map();
+        animationStructuresProcessed = new Map();
         constructor(_name, _animStructure = {}, _fps = 60) {
             super();
-            this.totalTime = 0;
-            this.labels = {};
-            this.events = {};
-            this.framesPerSecond = 60;
-            this.eventsProcessed = new Map();
-            this.animationStructuresProcessed = new Map();
             this.name = _name;
             this.animationStructure = _animStructure;
             this.animationStructuresProcessed.set(ANIMATION_STRUCTURE_TYPE.NORMAL, _animStructure);
@@ -1996,11 +2000,13 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class AnimationFunction {
+        a = 0;
+        b = 0;
+        c = 0;
+        d = 0;
+        keyIn;
+        keyOut;
         constructor(_keyIn, _keyOut = null) {
-            this.a = 0;
-            this.b = 0;
-            this.c = 0;
-            this.d = 0;
             this.keyIn = _keyIn;
             this.keyOut = _keyOut;
             this.calculate();
@@ -2041,11 +2047,16 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class AnimationKey extends FudgeCore.Mutable {
+        functionIn;
+        functionOut;
+        broken;
+        time;
+        value;
+        constant = false;
+        slopeIn = 0;
+        slopeOut = 0;
         constructor(_time = 0, _value = 0, _slopeIn = 0, _slopeOut = 0, _constant = false) {
             super();
-            this.constant = false;
-            this.slopeIn = 0;
-            this.slopeOut = 0;
             this.time = _time;
             this.value = _value;
             this.slopeIn = _slopeIn;
@@ -2124,10 +2135,7 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class AnimationSequence extends FudgeCore.Mutable {
-        constructor() {
-            super(...arguments);
-            this.keys = [];
-        }
+        keys = [];
         get length() {
             return this.keys.length;
         }
@@ -2211,14 +2219,14 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Audio extends FudgeCore.Mutable {
+        name = "Audio";
+        idResource = undefined;
+        buffer = undefined;
+        path = undefined;
+        url = undefined;
+        ready = false;
         constructor(_url) {
             super();
-            this.name = "Audio";
-            this.idResource = undefined;
-            this.buffer = undefined;
-            this.path = undefined;
-            this.url = undefined;
-            this.ready = false;
             if (_url) {
                 this.load(_url);
                 this.name = _url.toString().split("/").pop();
@@ -2271,29 +2279,12 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class AudioManager extends AudioContext {
+        static default = new AudioManager({ latencyHint: "interactive", sampleRate: 44100 });
+        gain;
+        graph = null;
+        cmpListener = null;
         constructor(contextOptions) {
             super(contextOptions);
-            this.graph = null;
-            this.cmpListener = null;
-            this.listenTo = (_graph) => {
-                if (this.graph)
-                    this.graph.broadcastEvent(new Event("childRemoveFromAudioGraph"));
-                if (!_graph)
-                    return;
-                this.graph = _graph;
-                this.graph.broadcastEvent(new Event("childAppendToAudioGraph"));
-            };
-            this.getGraphListeningTo = () => {
-                return this.graph;
-            };
-            this.listenWith = (_cmpListener) => {
-                this.cmpListener = _cmpListener;
-            };
-            this.update = () => {
-                this.graph.broadcastEvent(new Event("updateAudioGraph"));
-                if (this.cmpListener)
-                    this.cmpListener.update(this.listener);
-            };
             this.gain = this.createGain();
             this.gain.connect(this.destination);
         }
@@ -2303,19 +2294,37 @@ var FudgeCore;
         get volume() {
             return this.gain.gain.value;
         }
+        listenTo = (_graph) => {
+            if (this.graph)
+                this.graph.broadcastEvent(new Event("childRemoveFromAudioGraph"));
+            if (!_graph)
+                return;
+            this.graph = _graph;
+            this.graph.broadcastEvent(new Event("childAppendToAudioGraph"));
+        };
+        getGraphListeningTo = () => {
+            return this.graph;
+        };
+        listenWith = (_cmpListener) => {
+            this.cmpListener = _cmpListener;
+        };
+        update = () => {
+            this.graph.broadcastEvent(new Event("updateAudioGraph"));
+            if (this.cmpListener)
+                this.cmpListener.update(this.listener);
+        };
     }
-    AudioManager.default = new AudioManager({ latencyHint: "interactive", sampleRate: 44100 });
     FudgeCore.AudioManager = AudioManager;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class Component extends FudgeCore.Mutable {
-        constructor() {
-            super(...arguments);
-            this.singleton = true;
-            this.active = true;
-            this.container = null;
-        }
+        static iSubclass;
+        static baseClass = Component;
+        static subclasses = [];
+        #node = null;
+        singleton = true;
+        active = true;
         static registerSubclass(_subclass) { return Component.subclasses.push(_subclass) - 1; }
         get isActive() {
             return this.active;
@@ -2323,26 +2332,26 @@ var FudgeCore;
         get isSingleton() {
             return this.singleton;
         }
+        get node() {
+            return this.#node;
+        }
         activate(_on) {
             this.active = _on;
             this.dispatchEvent(new Event(_on ? "componentActivate" : "componentDeactivate"));
         }
-        getContainer() {
-            return this.container;
-        }
         setContainer(_container) {
-            if (this.container == _container)
+            if (this.#node == _container)
                 return;
-            let previousContainer = this.container;
+            let previousContainer = this.#node;
             try {
                 if (previousContainer)
                     previousContainer.removeComponent(this);
-                this.container = _container;
-                if (this.container)
-                    this.container.addComponent(this);
+                this.#node = _container;
+                if (this.#node)
+                    this.#node.addComponent(this);
             }
             catch (_error) {
-                this.container = previousContainer;
+                this.#node = previousContainer;
             }
         }
         serialize() {
@@ -2361,45 +2370,21 @@ var FudgeCore;
             delete _mutator.mtxWorld;
         }
     }
-    Component.baseClass = Component;
-    Component.subclasses = [];
     FudgeCore.Component = Component;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ComponentAnimator extends FudgeCore.Component {
+        static iSubclass = FudgeCore.Component.registerSubclass(ComponentAnimator);
+        animation;
+        playmode;
+        playback;
+        scaleWithGameTime = true;
+        #scale = 1;
+        #timeLocal;
+        #previous = 0;
         constructor(_animation = new FudgeCore.Animation(""), _playmode = FudgeCore.ANIMATION_PLAYMODE.LOOP, _playback = FudgeCore.ANIMATION_PLAYBACK.TIMEBASED_CONTINOUS) {
             super();
-            this.scaleWithGameTime = true;
-            this.#scale = 1;
-            this.#previous = 0;
-            this.updateAnimationLoop = (_e, _time) => {
-                if (this.animation.totalTime == 0)
-                    return [null, 0];
-                let time = _time || this.#timeLocal.get();
-                if (this.playback == FudgeCore.ANIMATION_PLAYBACK.FRAMEBASED) {
-                    time = this.#previous + (1000 / this.animation.fps);
-                }
-                let direction = this.animation.calculateDirection(time, this.playmode);
-                time = this.animation.getModalTime(time, this.playmode, this.#timeLocal.getOffset());
-                this.executeEvents(this.animation.getEventsToFire(this.#previous, time, this.playback, direction));
-                if (this.#previous != time) {
-                    this.#previous = time;
-                    time = time % this.animation.totalTime;
-                    let mutator = this.animation.getMutated(time, direction, this.playback);
-                    if (this.getContainer()) {
-                        this.getContainer().applyAnimation(mutator);
-                    }
-                    return [mutator, time];
-                }
-                return [null, time];
-            };
-            this.updateScale = () => {
-                let newScale = this.#scale;
-                if (this.scaleWithGameTime)
-                    newScale *= FudgeCore.Time.game.getScale();
-                this.#timeLocal.setScale(newScale);
-            };
             this.animation = _animation;
             this.playmode = _playmode;
             this.playback = _playback;
@@ -2407,13 +2392,10 @@ var FudgeCore;
             this.animation.calculateTotalTime();
             this.addEventListener("componentRemove", () => this.activate(false));
             this.addEventListener("componentAdd", () => {
-                this.getContainer().addEventListener("childRemove", () => this.activate(false));
+                this.node.addEventListener("childRemove", () => this.activate(false));
                 this.activate(true);
             });
         }
-        #scale;
-        #timeLocal;
-        #previous;
         set scale(_scale) {
             this.#scale = _scale;
             this.updateScale();
@@ -2426,15 +2408,15 @@ var FudgeCore;
         }
         activate(_on) {
             super.activate(_on);
-            if (!this.getContainer())
+            if (!this.node)
                 return;
             if (_on) {
                 FudgeCore.Time.game.addEventListener("timeScaled", this.updateScale);
-                this.getContainer().addEventListener("renderPrepare", this.updateAnimationLoop);
+                this.node.addEventListener("renderPrepare", this.updateAnimationLoop);
             }
             else {
                 FudgeCore.Time.game.addEventListener("timeScaled", this.updateScale);
-                this.getContainer().removeEventListener("renderPrepare", this.updateAnimationLoop);
+                this.node.removeEventListener("renderPrepare", this.updateAnimationLoop);
             }
         }
         jumpTo(_time) {
@@ -2442,7 +2424,7 @@ var FudgeCore;
             this.#previous = _time;
             _time = _time % this.animation.totalTime;
             let mutator = this.animation.getMutated(_time, this.animation.calculateDirection(_time, this.playmode), this.playback);
-            this.getContainer().applyAnimation(mutator);
+            this.node.applyAnimation(mutator);
         }
         jumpToLabel(_label) {
             let time = this.animation.labels[_label];
@@ -2471,13 +2453,39 @@ var FudgeCore;
             this.scaleWithGameTime = _serialization.scaleWithGameTime;
             return this;
         }
+        updateAnimationLoop = (_e, _time) => {
+            if (this.animation.totalTime == 0)
+                return [null, 0];
+            let time = _time || this.#timeLocal.get();
+            if (this.playback == FudgeCore.ANIMATION_PLAYBACK.FRAMEBASED) {
+                time = this.#previous + (1000 / this.animation.fps);
+            }
+            let direction = this.animation.calculateDirection(time, this.playmode);
+            time = this.animation.getModalTime(time, this.playmode, this.#timeLocal.getOffset());
+            this.executeEvents(this.animation.getEventsToFire(this.#previous, time, this.playback, direction));
+            if (this.#previous != time) {
+                this.#previous = time;
+                time = time % this.animation.totalTime;
+                let mutator = this.animation.getMutated(time, direction, this.playback);
+                if (this.node) {
+                    this.node.applyAnimation(mutator);
+                }
+                return [mutator, time];
+            }
+            return [null, time];
+        };
         executeEvents(events) {
             for (let i = 0; i < events.length; i++) {
                 this.dispatchEvent(new Event(events[i]));
             }
         }
+        updateScale = () => {
+            let newScale = this.#scale;
+            if (this.scaleWithGameTime)
+                newScale *= FudgeCore.Time.game.getScale();
+            this.#timeLocal.setScale(newScale);
+        };
     }
-    ComponentAnimator.iSubclass = FudgeCore.Component.registerSubclass(ComponentAnimator);
     FudgeCore.ComponentAnimator = ComponentAnimator;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -2500,52 +2508,18 @@ var FudgeCore;
         AUDIO_NODE_TYPE[AUDIO_NODE_TYPE["GAIN"] = 2] = "GAIN";
     })(AUDIO_NODE_TYPE = FudgeCore.AUDIO_NODE_TYPE || (FudgeCore.AUDIO_NODE_TYPE = {}));
     class ComponentAudio extends FudgeCore.Component {
+        static iSubclass = FudgeCore.Component.registerSubclass(ComponentAudio);
+        mtxPivot = FudgeCore.Matrix4x4.IDENTITY();
+        singleton = false;
+        audio;
+        gain;
+        panner;
+        source;
+        audioManager;
+        playing = false;
+        listened = false;
         constructor(_audio = null, _loop = false, _start = false, _audioManager = FudgeCore.AudioManager.default) {
             super();
-            this.mtxPivot = FudgeCore.Matrix4x4.IDENTITY();
-            this.singleton = false;
-            this.playing = false;
-            this.listened = false;
-            this.hndAudioReady = (_event) => {
-                FudgeCore.Debug.fudge("Audio start", Reflect.get(_event.target, "url"));
-                if (this.playing)
-                    this.play(true);
-            };
-            this.hndAudioEnded = (_event) => {
-                this.playing = false;
-            };
-            this.handleAttach = (_event) => {
-                if (_event.type == "componentAdd") {
-                    this.getContainer().addEventListener("childAppendToAudioGraph", this.handleGraph, true);
-                    this.getContainer().addEventListener("childRemoveFromAudioGraph", this.handleGraph, true);
-                    this.getContainer().addEventListener("updateAudioGraph", this.update, true);
-                    this.listened = this.getContainer().isDescendantOf(FudgeCore.AudioManager.default.getGraphListeningTo());
-                }
-                else {
-                    this.getContainer().removeEventListener("childAppendToAudioGraph", this.handleGraph, true);
-                    this.getContainer().removeEventListener("childRemoveFromAudioGraph", this.handleGraph, true);
-                    this.getContainer().removeEventListener("updateAudioGraph", this.update, true);
-                    this.listened = false;
-                }
-                this.updateConnection();
-            };
-            this.handleGraph = (_event) => {
-                this.listened = (_event.type == "childAppendToAudioGraph");
-                this.updateConnection();
-            };
-            this.update = (_event) => {
-                let mtxResult = this.mtxPivot;
-                if (this.getContainer())
-                    mtxResult = FudgeCore.Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.mtxPivot);
-                let position = mtxResult.translation;
-                let forward = FudgeCore.Vector3.TRANSFORMATION(FudgeCore.Vector3.Z(1), mtxResult, false);
-                this.panner.positionX.value = position.x;
-                this.panner.positionY.value = position.y;
-                this.panner.positionZ.value = position.z;
-                this.panner.orientationX.value = forward.x;
-                this.panner.orientationY.value = forward.y;
-                this.panner.orientationZ.value = forward.z;
-            };
             this.install(_audioManager);
             this.createSource(_audio, _loop);
             this.addEventListener("componentAdd", this.handleAttach);
@@ -2569,7 +2543,7 @@ var FudgeCore;
             return this.playing;
         }
         get isAttached() {
-            return this.getContainer() != null;
+            return this.node != null;
         }
         get isListened() {
             return this.listened;
@@ -2663,6 +2637,14 @@ var FudgeCore;
             super.reduceMutator(_mutator);
             delete _mutator.listened;
         }
+        hndAudioReady = (_event) => {
+            FudgeCore.Debug.fudge("Audio start", Reflect.get(_event.target, "url"));
+            if (this.playing)
+                this.play(true);
+        };
+        hndAudioEnded = (_event) => {
+            this.playing = false;
+        };
         install(_audioManager = FudgeCore.AudioManager.default) {
             let active = this.isActive;
             this.activate(false);
@@ -2693,21 +2675,50 @@ var FudgeCore;
             catch (_error) {
             }
         }
+        handleAttach = (_event) => {
+            if (_event.type == "componentAdd") {
+                this.node.addEventListener("childAppendToAudioGraph", this.handleGraph, true);
+                this.node.addEventListener("childRemoveFromAudioGraph", this.handleGraph, true);
+                this.node.addEventListener("updateAudioGraph", this.update, true);
+                this.listened = this.node.isDescendantOf(FudgeCore.AudioManager.default.getGraphListeningTo());
+            }
+            else {
+                this.node.removeEventListener("childAppendToAudioGraph", this.handleGraph, true);
+                this.node.removeEventListener("childRemoveFromAudioGraph", this.handleGraph, true);
+                this.node.removeEventListener("updateAudioGraph", this.update, true);
+                this.listened = false;
+            }
+            this.updateConnection();
+        };
+        handleGraph = (_event) => {
+            this.listened = (_event.type == "childAppendToAudioGraph");
+            this.updateConnection();
+        };
+        update = (_event) => {
+            let mtxResult = this.mtxPivot;
+            if (this.node)
+                mtxResult = FudgeCore.Matrix4x4.MULTIPLICATION(this.node.mtxWorld, this.mtxPivot);
+            let position = mtxResult.translation;
+            let forward = FudgeCore.Vector3.TRANSFORMATION(FudgeCore.Vector3.Z(1), mtxResult, false);
+            this.panner.positionX.value = position.x;
+            this.panner.positionY.value = position.y;
+            this.panner.positionZ.value = position.z;
+            this.panner.orientationX.value = forward.x;
+            this.panner.orientationY.value = forward.y;
+            this.panner.orientationZ.value = forward.z;
+        };
     }
-    ComponentAudio.iSubclass = FudgeCore.Component.registerSubclass(ComponentAudio);
     FudgeCore.ComponentAudio = ComponentAudio;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ComponentAudioListener extends FudgeCore.Component {
-        constructor() {
-            super(...arguments);
-            this.mtxPivot = FudgeCore.Matrix4x4.IDENTITY();
-        }
+        static iSubclass = FudgeCore.Component.registerSubclass(ComponentAudioListener);
+        mtxPivot = FudgeCore.Matrix4x4.IDENTITY();
         update(_listener) {
             let mtxResult = this.mtxPivot;
-            if (this.getContainer())
-                mtxResult = FudgeCore.Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.mtxPivot);
+            if (this.node)
+                mtxResult = FudgeCore.Matrix4x4.MULTIPLICATION(this.node.mtxWorld, this.mtxPivot);
             let position = mtxResult.translation;
             let forward = FudgeCore.Vector3.TRANSFORMATION(FudgeCore.Vector3.Z(1), mtxResult, false);
             let up = FudgeCore.Vector3.TRANSFORMATION(FudgeCore.Vector3.Y(), mtxResult, false);
@@ -2728,7 +2739,6 @@ var FudgeCore;
             }
         }
     }
-    ComponentAudioListener.iSubclass = FudgeCore.Component.registerSubclass(ComponentAudioListener);
     FudgeCore.ComponentAudioListener = ComponentAudioListener;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -2747,23 +2757,21 @@ var FudgeCore;
         PROJECTION["STEREO"] = "stereo";
     })(PROJECTION = FudgeCore.PROJECTION || (FudgeCore.PROJECTION = {}));
     class ComponentCamera extends FudgeCore.Component {
-        constructor() {
-            super(...arguments);
-            this.mtxPivot = FudgeCore.Matrix4x4.IDENTITY();
-            this.clrBackground = new FudgeCore.Color(0, 0, 0, 1);
-            this.projection = PROJECTION.CENTRAL;
-            this.mtxProjection = new FudgeCore.Matrix4x4;
-            this.fieldOfView = 45;
-            this.aspectRatio = 1.0;
-            this.direction = FIELD_OF_VIEW.DIAGONAL;
-            this.near = 1;
-            this.far = 2000;
-            this.backgroundEnabled = true;
-        }
+        static iSubclass = FudgeCore.Component.registerSubclass(ComponentCamera);
+        mtxPivot = FudgeCore.Matrix4x4.IDENTITY();
+        clrBackground = new FudgeCore.Color(0, 0, 0, 1);
+        projection = PROJECTION.CENTRAL;
+        mtxProjection = new FudgeCore.Matrix4x4;
+        fieldOfView = 45;
+        aspectRatio = 1.0;
+        direction = FIELD_OF_VIEW.DIAGONAL;
+        near = 1;
+        far = 2000;
+        backgroundEnabled = true;
         get mtxWorldToView() {
             let mtxCamera = this.mtxPivot;
             try {
-                mtxCamera = FudgeCore.Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.mtxPivot);
+                mtxCamera = FudgeCore.Matrix4x4.MULTIPLICATION(this.node.mtxWorld, this.mtxPivot);
             }
             catch (_error) {
             }
@@ -2893,12 +2901,12 @@ var FudgeCore;
             super.reduceMutator(_mutator);
         }
     }
-    ComponentCamera.iSubclass = FudgeCore.Component.registerSubclass(ComponentCamera);
     FudgeCore.ComponentCamera = ComponentCamera;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class Light extends FudgeCore.Mutable {
+        color;
         constructor(_color = new FudgeCore.Color(1, 1, 1, 1)) {
             super();
             this.color = _color;
@@ -2932,10 +2940,7 @@ var FudgeCore;
     }
     FudgeCore.LightDirectional = LightDirectional;
     class LightPoint extends Light {
-        constructor() {
-            super(...arguments);
-            this.range = 10;
-        }
+        range = 10;
     }
     FudgeCore.LightPoint = LightPoint;
     class LightSpot extends Light {
@@ -2952,10 +2957,11 @@ var FudgeCore;
         LIGHT_TYPE["SPOT"] = "LightSpot";
     })(LIGHT_TYPE = FudgeCore.LIGHT_TYPE || (FudgeCore.LIGHT_TYPE = {}));
     class ComponentLight extends FudgeCore.Component {
+        static iSubclass = FudgeCore.Component.registerSubclass(ComponentLight);
+        mtxPivot = FudgeCore.Matrix4x4.IDENTITY();
+        light = null;
         constructor(_light = new FudgeCore.LightAmbient()) {
             super();
-            this.mtxPivot = FudgeCore.Matrix4x4.IDENTITY();
-            this.light = null;
             this.singleton = false;
             this.light = _light;
         }
@@ -2998,18 +3004,19 @@ var FudgeCore;
             _mutator.type = type;
         }
     }
-    ComponentLight.iSubclass = FudgeCore.Component.registerSubclass(ComponentLight);
     FudgeCore.ComponentLight = ComponentLight;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ComponentMaterial extends FudgeCore.Component {
+        static iSubclass = FudgeCore.Component.registerSubclass(ComponentMaterial);
+        material;
+        clrPrimary = FudgeCore.Color.CSS("white");
+        clrSecondary = FudgeCore.Color.CSS("white");
+        mtxPivot = FudgeCore.Matrix3x3.IDENTITY();
+        sortForAlpha = false;
         constructor(_material = null) {
             super();
-            this.clrPrimary = FudgeCore.Color.CSS("white");
-            this.clrSecondary = FudgeCore.Color.CSS("white");
-            this.mtxPivot = FudgeCore.Matrix3x3.IDENTITY();
-            this.sortForAlpha = false;
             this.material = _material;
         }
         serialize() {
@@ -3033,17 +3040,17 @@ var FudgeCore;
             return this;
         }
     }
-    ComponentMaterial.iSubclass = FudgeCore.Component.registerSubclass(ComponentMaterial);
     FudgeCore.ComponentMaterial = ComponentMaterial;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ComponentMesh extends FudgeCore.Component {
+        static iSubclass = FudgeCore.Component.registerSubclass(ComponentMesh);
+        mtxPivot = FudgeCore.Matrix4x4.IDENTITY();
+        mtxWorld = FudgeCore.Matrix4x4.IDENTITY();
+        mesh = null;
         constructor(_mesh = null) {
             super();
-            this.mtxPivot = FudgeCore.Matrix4x4.IDENTITY();
-            this.mtxWorld = FudgeCore.Matrix4x4.IDENTITY();
-            this.mesh = null;
             this.mesh = _mesh;
         }
         get radius() {
@@ -3078,12 +3085,12 @@ var FudgeCore;
             return mutator;
         }
     }
-    ComponentMesh.iSubclass = FudgeCore.Component.registerSubclass(ComponentMesh);
     FudgeCore.ComponentMesh = ComponentMesh;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ComponentScript extends FudgeCore.Component {
+        static iSubclass = FudgeCore.Component.registerSubclass(ComponentScript);
         constructor() {
             super();
             this.singleton = false;
@@ -3096,7 +3103,6 @@ var FudgeCore;
             return this;
         }
     }
-    ComponentScript.iSubclass = FudgeCore.Component.registerSubclass(ComponentScript);
     FudgeCore.ComponentScript = ComponentScript;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -3109,12 +3115,14 @@ var FudgeCore;
         BASE[BASE["NODE"] = 3] = "NODE";
     })(BASE = FudgeCore.BASE || (FudgeCore.BASE = {}));
     class ComponentTransform extends FudgeCore.Component {
+        static iSubclass = FudgeCore.Component.registerSubclass(ComponentTransform);
+        mtxLocal;
         constructor(_mtxInit = FudgeCore.Matrix4x4.IDENTITY()) {
             super();
             this.mtxLocal = _mtxInit;
         }
         lookAt(_targetWorld, _up) {
-            let container = this.getContainer();
+            let container = this.node;
             if (!container && !container.getParent())
                 return this.mtxLocal.lookAt(_targetWorld, _up);
             let mtxWorld = container.mtxWorld.copy;
@@ -3123,7 +3131,7 @@ var FudgeCore;
             this.mtxLocal = mtxLocal;
         }
         showTo(_targetWorld, _up) {
-            let container = this.getContainer();
+            let container = this.node;
             if (!container && !container.getParent())
                 return this.mtxLocal.showTo(_targetWorld, _up);
             let mtxWorld = container.mtxWorld.copy;
@@ -3133,7 +3141,7 @@ var FudgeCore;
         }
         rebase(_node = null) {
             let mtxResult = this.mtxLocal;
-            let container = this.getContainer();
+            let container = this.node;
             if (container)
                 mtxResult = container.mtxWorld;
             if (_node)
@@ -3154,7 +3162,7 @@ var FudgeCore;
                 case BASE.WORLD:
                     this.rebase(_node);
                     this.mtxLocal.multiply(_mtxTransform, true);
-                    let container = this.getContainer();
+                    let container = this.node;
                     if (container) {
                         if (_base == BASE.NODE)
                             container.mtxWorld.set(FudgeCore.Matrix4x4.MULTIPLICATION(_node.mtxWorld, container.mtxLocal));
@@ -3184,48 +3192,27 @@ var FudgeCore;
             super.reduceMutator(_mutator);
         }
     }
-    ComponentTransform.iSubclass = FudgeCore.Component.registerSubclass(ComponentTransform);
     FudgeCore.ComponentTransform = ComponentTransform;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class Control extends EventTarget {
+        type;
+        active;
+        name;
+        rateDispatchOutput = 0;
+        valuePrevious = 0;
+        outputBase = 0;
+        outputTarget = 0;
+        outputPrevious = 0;
+        outputTargetPrevious = 0;
+        factor = 0;
+        time = FudgeCore.Time.game;
+        timeValueDelay = 0;
+        timeOutputTargetSet = 0;
+        idTimer = undefined;
         constructor(_name, _factor = 1, _type = 0, _active = true) {
             super();
-            this.rateDispatchOutput = 0;
-            this.valuePrevious = 0;
-            this.outputBase = 0;
-            this.outputTarget = 0;
-            this.outputPrevious = 0;
-            this.outputTargetPrevious = 0;
-            this.factor = 0;
-            this.time = FudgeCore.Time.game;
-            this.timeValueDelay = 0;
-            this.timeOutputTargetSet = 0;
-            this.idTimer = undefined;
-            this.dispatchOutput = (_eventOrValue) => {
-                if (!this.active)
-                    return;
-                let timer = this.time.getTimer(this.idTimer);
-                let output;
-                if (typeof (_eventOrValue) == "number")
-                    output = _eventOrValue;
-                else
-                    output = this.calculateOutput();
-                let outputChanged = (output != this.outputPrevious);
-                if (timer) {
-                    timer.active = outputChanged;
-                    if (!outputChanged)
-                        return;
-                }
-                this.outputPrevious = output;
-                let event = new CustomEvent("output", {
-                    detail: {
-                        output: output
-                    }
-                });
-                this.dispatchEvent(event);
-            };
             this.factor = _factor;
             this.type = _type;
             this.active = _active;
@@ -3309,34 +3296,37 @@ var FudgeCore;
             }
             return this.outputTarget;
         }
+        dispatchOutput = (_eventOrValue) => {
+            if (!this.active)
+                return;
+            let timer = this.time.getTimer(this.idTimer);
+            let output;
+            if (typeof (_eventOrValue) == "number")
+                output = _eventOrValue;
+            else
+                output = this.calculateOutput();
+            let outputChanged = (output != this.outputPrevious);
+            if (timer) {
+                timer.active = outputChanged;
+                if (!outputChanged)
+                    return;
+            }
+            this.outputPrevious = output;
+            let event = new CustomEvent("output", {
+                detail: {
+                    output: output
+                }
+            });
+            this.dispatchEvent(event);
+        };
     }
     FudgeCore.Control = Control;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class Axis extends FudgeCore.Control {
-        constructor() {
-            super(...arguments);
-            this.controls = new Map();
-            this.sumPrevious = 0;
-            this.hndOutputEvent = (_event) => {
-                if (!this.active)
-                    return;
-                let control = _event.target;
-                let event = new CustomEvent("output", { detail: {
-                        control: control,
-                        input: _event.detail.output,
-                        output: this.getOutput()
-                    } });
-                this.dispatchEvent(event);
-            };
-            this.hndInputEvent = (_event) => {
-                if (!this.active)
-                    return;
-                let event = new Event("input", _event);
-                this.dispatchEvent(event);
-            };
-        }
+        controls = new Map();
+        sumPrevious = 0;
         addControl(_control) {
             this.controls.set(_control.name, _control);
             _control.addEventListener("input", this.hndInputEvent);
@@ -3364,12 +3354,30 @@ var FudgeCore;
             this.sumPrevious = sumInput;
             return super.getOutput();
         }
+        hndOutputEvent = (_event) => {
+            if (!this.active)
+                return;
+            let control = _event.target;
+            let event = new CustomEvent("output", { detail: {
+                    control: control,
+                    input: _event.detail.output,
+                    output: this.getOutput()
+                } });
+            this.dispatchEvent(event);
+        };
+        hndInputEvent = (_event) => {
+            if (!this.active)
+                return;
+            let event = new Event("input", _event);
+            this.dispatchEvent(event);
+        };
     }
     FudgeCore.Axis = Axis;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class Keyboard {
+        static keysPressed = Keyboard.initialize();
         static isPressedOne(_keys) {
             for (let code of _keys) {
                 if (Keyboard.keysPressed[code])
@@ -3401,12 +3409,19 @@ var FudgeCore;
             Keyboard.keysPressed[_event.code] = (_event.type == "keydown");
         }
     }
-    Keyboard.keysPressed = Keyboard.initialize();
     FudgeCore.Keyboard = Keyboard;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class DebugAlert extends FudgeCore.DebugTarget {
+        static delegates = {
+            [FudgeCore.DEBUG_FILTER.INFO]: DebugAlert.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.INFO]),
+            [FudgeCore.DEBUG_FILTER.LOG]: DebugAlert.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.LOG]),
+            [FudgeCore.DEBUG_FILTER.WARN]: DebugAlert.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.WARN]),
+            [FudgeCore.DEBUG_FILTER.ERROR]: DebugAlert.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.ERROR]),
+            [FudgeCore.DEBUG_FILTER.FUDGE]: DebugAlert.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.FUDGE]),
+            [FudgeCore.DEBUG_FILTER.SOURCE]: DebugAlert.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.SOURCE])
+        };
         static createDelegate(_headline) {
             let delegate = function (_message, ..._args) {
                 let args = _args.map(_arg => _arg.toString());
@@ -3416,14 +3431,6 @@ var FudgeCore;
             return delegate;
         }
     }
-    DebugAlert.delegates = {
-        [FudgeCore.DEBUG_FILTER.INFO]: DebugAlert.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.INFO]),
-        [FudgeCore.DEBUG_FILTER.LOG]: DebugAlert.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.LOG]),
-        [FudgeCore.DEBUG_FILTER.WARN]: DebugAlert.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.WARN]),
-        [FudgeCore.DEBUG_FILTER.ERROR]: DebugAlert.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.ERROR]),
-        [FudgeCore.DEBUG_FILTER.FUDGE]: DebugAlert.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.FUDGE]),
-        [FudgeCore.DEBUG_FILTER.SOURCE]: DebugAlert.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.SOURCE])
-    };
     FudgeCore.DebugAlert = DebugAlert;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -3435,6 +3442,21 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class DebugTextArea extends FudgeCore.DebugTarget {
+        static textArea = document.createElement("textarea");
+        static autoScroll = true;
+        static delegates = {
+            [FudgeCore.DEBUG_FILTER.INFO]: DebugTextArea.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.INFO]),
+            [FudgeCore.DEBUG_FILTER.LOG]: DebugTextArea.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.LOG]),
+            [FudgeCore.DEBUG_FILTER.WARN]: DebugTextArea.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.WARN]),
+            [FudgeCore.DEBUG_FILTER.ERROR]: DebugTextArea.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.ERROR]),
+            [FudgeCore.DEBUG_FILTER.FUDGE]: DebugTextArea.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.FUDGE]),
+            [FudgeCore.DEBUG_FILTER.CLEAR]: DebugTextArea.clear,
+            [FudgeCore.DEBUG_FILTER.GROUP]: DebugTextArea.group,
+            [FudgeCore.DEBUG_FILTER.GROUPCOLLAPSED]: DebugTextArea.group,
+            [FudgeCore.DEBUG_FILTER.GROUPEND]: DebugTextArea.groupEnd,
+            [FudgeCore.DEBUG_FILTER.SOURCE]: DebugTextArea.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.SOURCE])
+        };
+        static groups = [];
         static clear() {
             DebugTextArea.textArea.textContent = "";
             DebugTextArea.groups = [];
@@ -3464,26 +3486,16 @@ var FudgeCore;
                 DebugTextArea.textArea.scrollTop = DebugTextArea.textArea.scrollHeight;
         }
     }
-    DebugTextArea.textArea = document.createElement("textarea");
-    DebugTextArea.autoScroll = true;
-    DebugTextArea.delegates = {
-        [FudgeCore.DEBUG_FILTER.INFO]: DebugTextArea.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.INFO]),
-        [FudgeCore.DEBUG_FILTER.LOG]: DebugTextArea.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.LOG]),
-        [FudgeCore.DEBUG_FILTER.WARN]: DebugTextArea.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.WARN]),
-        [FudgeCore.DEBUG_FILTER.ERROR]: DebugTextArea.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.ERROR]),
-        [FudgeCore.DEBUG_FILTER.FUDGE]: DebugTextArea.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.FUDGE]),
-        [FudgeCore.DEBUG_FILTER.CLEAR]: DebugTextArea.clear,
-        [FudgeCore.DEBUG_FILTER.GROUP]: DebugTextArea.group,
-        [FudgeCore.DEBUG_FILTER.GROUPCOLLAPSED]: DebugTextArea.group,
-        [FudgeCore.DEBUG_FILTER.GROUPEND]: DebugTextArea.groupEnd,
-        [FudgeCore.DEBUG_FILTER.SOURCE]: DebugTextArea.createDelegate(FudgeCore.DEBUG_SYMBOL[FudgeCore.DEBUG_FILTER.SOURCE])
-    };
-    DebugTextArea.groups = [];
     FudgeCore.DebugTextArea = DebugTextArea;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class EventDragDrop extends DragEvent {
+        pointerX;
+        pointerY;
+        canvasX;
+        canvasY;
+        clientRect;
         constructor(type, _event) {
             super(type, _event);
             let target = _event.target;
@@ -3674,6 +3686,11 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class EventPointer extends PointerEvent {
+        pointerX;
+        pointerY;
+        canvasX;
+        canvasY;
+        clientRect;
         constructor(type, _event) {
             super(type, _event);
             let target = _event.target;
@@ -3687,10 +3704,13 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class EventTimer {
+        type = "\u0192lapse";
+        target;
+        arguments;
+        firstCall = true;
+        lastCall = false;
+        count;
         constructor(_timer, ..._arguments) {
-            this.type = "\u0192lapse";
-            this.firstCall = true;
-            this.lastCall = false;
             this.target = _timer;
             this.arguments = _arguments;
             this.firstCall = true;
@@ -3710,11 +3730,8 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Graph extends FudgeCore.Node {
-        constructor() {
-            super(...arguments);
-            this.idResource = undefined;
-            this.type = "Graph";
-        }
+        idResource = undefined;
+        type = "Graph";
         serialize() {
             let serialization = super.serialize();
             serialization.idResource = this.idResource;
@@ -3732,9 +3749,9 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class GraphInstance extends FudgeCore.Node {
+        idSource = undefined;
         constructor(_graph) {
             super("Graph");
-            this.idSource = undefined;
             if (!_graph)
                 return;
             this.idSource = _graph.idResource;
@@ -3769,10 +3786,8 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Coat extends FudgeCore.Mutable {
-        constructor() {
-            super(...arguments);
-            this.name = "Coat";
-        }
+        name = "Coat";
+        renderData;
         useRenderData(_shader, _cmpMaterial) { }
         serialize() {
             let serialization = { name: this.name };
@@ -3786,6 +3801,7 @@ var FudgeCore;
     }
     FudgeCore.Coat = Coat;
     let CoatColored = class CoatColored extends Coat {
+        color;
         constructor(_color) {
             super();
             this.color = _color || new FudgeCore.Color();
@@ -3806,10 +3822,11 @@ var FudgeCore;
     ], CoatColored);
     FudgeCore.CoatColored = CoatColored;
     let CoatMatCap = class CoatMatCap extends Coat {
+        texture = null;
+        color = new FudgeCore.Color();
+        shadeSmooth;
         constructor(_texture, _color, _shadeSmooth) {
             super();
-            this.texture = null;
-            this.color = new FudgeCore.Color();
             this.texture = _texture || new FudgeCore.TextureImage();
             this.color = _color || new FudgeCore.Color();
             this.shadeSmooth = _shadeSmooth || 0;
@@ -3823,9 +3840,9 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     let CoatTextured = class CoatTextured extends FudgeCore.CoatColored {
+        texture = null;
         constructor(_color, _texture) {
             super(_color);
-            this.texture = null;
             this.texture = _texture || FudgeCore.TextureDefault.texture;
         }
         serialize() {
@@ -3849,6 +3866,11 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Color extends FudgeCore.Mutable {
+        static crc2 = document.createElement("canvas").getContext("2d");
+        r;
+        g;
+        b;
+        a;
         constructor(_r = 1, _g = 1, _b = 1, _a = 1) {
             super();
             this.setNormRGBA(_r, _g, _b, _a);
@@ -3934,15 +3956,17 @@ var FudgeCore;
         }
         reduceMutator(_mutator) { }
     }
-    Color.crc2 = document.createElement("canvas").getContext("2d");
     FudgeCore.Color = Color;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class Material extends FudgeCore.Mutable {
+        name;
+        idResource = undefined;
+        shaderType;
+        coat;
         constructor(_name, _shader, _coat) {
             super();
-            this.idResource = undefined;
             this.name = _name;
             this.shaderType = _shader;
             if (_shader) {
@@ -4006,10 +4030,10 @@ var FudgeCore;
     }
     FudgeCore.Framing = Framing;
     class FramingFixed extends Framing {
+        width = 300;
+        height = 150;
         constructor(_width = 300, _height = 150) {
             super();
-            this.width = 300;
-            this.height = 150;
             this.setSize(_width, _height);
         }
         setSize(_width, _height) {
@@ -4030,11 +4054,8 @@ var FudgeCore;
     }
     FudgeCore.FramingFixed = FramingFixed;
     class FramingScaled extends Framing {
-        constructor() {
-            super(...arguments);
-            this.normWidth = 1.0;
-            this.normHeight = 1.0;
-        }
+        normWidth = 1.0;
+        normHeight = 1.0;
         setScale(_normWidth, _normHeight) {
             this.normWidth = _normWidth;
             this.normHeight = _normHeight;
@@ -4053,11 +4074,8 @@ var FudgeCore;
     }
     FudgeCore.FramingScaled = FramingScaled;
     class FramingComplex extends Framing {
-        constructor() {
-            super(...arguments);
-            this.margin = { left: 0, top: 0, right: 0, bottom: 0 };
-            this.padding = { left: 0, top: 0, right: 0, bottom: 0 };
-        }
+        margin = { left: 0, top: 0, right: 0, bottom: 0 };
+        padding = { left: 0, top: 0, right: 0, bottom: 0 };
         getPoint(_pointInFrame, _rectFrame) {
             let result = new FudgeCore.Vector2(_pointInFrame.x - this.padding.left - this.margin.left * _rectFrame.width, _pointInFrame.y - this.padding.top - this.margin.top * _rectFrame.height);
             return result;
@@ -4084,9 +4102,9 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Geo2 {
+        magnitude = 0;
+        angle = 0;
         constructor(_angle = 0, _magnitude = 1) {
-            this.magnitude = 0;
-            this.angle = 0;
             this.set(_angle, _magnitude);
         }
         set(_angle = 0, _magnitude = 1) {
@@ -4102,10 +4120,10 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Geo3 {
+        magnitude = 0;
+        latitude = 0;
+        longitude = 0;
         constructor(_longitude = 0, _latitude = 0, _magnitude = 1) {
-            this.magnitude = 0;
-            this.latitude = 0;
-            this.longitude = 0;
             this.set(_longitude, _latitude, _magnitude);
         }
         set(_longitude = 0, _latitude = 0, _magnitude = 1) {
@@ -4192,10 +4210,12 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Matrix3x3 extends FudgeCore.Mutable {
+        static deg2rad = Math.PI / 180;
+        data = new Float32Array(3);
+        mutator = null;
+        vectors;
         constructor() {
             super();
-            this.data = new Float32Array(3);
-            this.mutator = null;
             this.data = new Float32Array([
                 1, 0, 0,
                 0, 1, 0,
@@ -4453,16 +4473,17 @@ var FudgeCore;
             this.mutator = null;
         }
     }
-    Matrix3x3.deg2rad = Math.PI / 180;
     FudgeCore.Matrix3x3 = Matrix3x3;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class Matrix4x4 extends FudgeCore.Mutable {
+        static deg2rad = Math.PI / 180;
+        data = new Float32Array(16);
+        mutator = null;
+        vectors;
         constructor() {
             super();
-            this.data = new Float32Array(16);
-            this.mutator = null;
             this.data.set([
                 1, 0, 0, 0,
                 0, 1, 0, 0,
@@ -5084,15 +5105,14 @@ var FudgeCore;
             this.mutator = null;
         }
     }
-    Matrix4x4.deg2rad = Math.PI / 180;
     FudgeCore.Matrix4x4 = Matrix4x4;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class Noise {
+        perm = new Uint8Array(512);
+        permMod12 = new Uint8Array(512);
         constructor(_random = Math.random) {
-            this.perm = new Uint8Array(512);
-            this.permMod12 = new Uint8Array(512);
             const p = new Uint8Array(256);
             for (let i = 0; i < 256; i++)
                 p[i] = i;
@@ -5115,12 +5135,11 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Noise2 extends FudgeCore.Noise {
+        static offset = (3.0 - Math.sqrt(3.0)) / 6.0;
+        static gradient = [[1, 1], [-1, 1], [1, -1], [-1, -1], [1, 0], [-1, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [0, 1], [0, -1]];
+        #sample = null;
         constructor(_random = Math.random) {
             super(_random);
-            this.#sample = null;
-            this.sample = (_x, _y) => {
-                return this.#sample(_x, _y);
-            };
             this.#sample = (_x, _y) => {
                 const s = (_x + _y) * 0.5 * (Math.sqrt(3.0) - 1.0);
                 const i = Math.floor(_x + s);
@@ -5150,21 +5169,21 @@ var FudgeCore;
                 return 70.14805770653952 * (n0 + n1 + n2);
             };
         }
-        #sample;
+        sample = (_x, _y) => {
+            return this.#sample(_x, _y);
+        };
     }
-    Noise2.offset = (3.0 - Math.sqrt(3.0)) / 6.0;
-    Noise2.gradient = [[1, 1], [-1, 1], [1, -1], [-1, -1], [1, 0], [-1, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [0, 1], [0, -1]];
     FudgeCore.Noise2 = Noise2;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class Noise3 extends FudgeCore.Noise {
+        static offset = 1.0 / 6.0;
+        static gradient = [[1, 1, 0], [-1, 1, 0], [1, -1, 0], [-1, -1, 0], [1, 0, 1], [-1, 0, 1], [1, 0, -1], [-1, 0, -1], [0, 1, 1], [0, -1, -1], [0, 1, -1], [0, -1, -1]
+        ];
+        #sample = null;
         constructor(_random = Math.random) {
             super(_random);
-            this.#sample = null;
-            this.sample = (_x, _y, _z) => {
-                return this.#sample(_x, _y, _z);
-            };
             this.#sample = (_x, _y, _z) => {
                 const s = (_x + _y + _z) / 3.0;
                 const i = Math.floor(_x + s);
@@ -5242,22 +5261,20 @@ var FudgeCore;
                 return 94.68493150681972 * (n0 + n1 + n2 + n3);
             };
         }
-        #sample;
+        sample = (_x, _y, _z) => {
+            return this.#sample(_x, _y, _z);
+        };
     }
-    Noise3.offset = 1.0 / 6.0;
-    Noise3.gradient = [[1, 1, 0], [-1, 1, 0], [1, -1, 0], [-1, -1, 0], [1, 0, 1], [-1, 0, 1], [1, 0, -1], [-1, 0, -1], [0, 1, 1], [0, -1, -1], [0, 1, -1], [0, -1, -1]
-    ];
     FudgeCore.Noise3 = Noise3;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class Noise4 extends FudgeCore.Noise {
+        static offset = (5.0 - Math.sqrt(5.0)) / 20.0;
+        static gradient = [[0, 1, 1, 1], [0, 1, 1, -1], [0, 1, -1, 1], [0, 1, -1, -1], [0, -1, 1, 1], [0, -1, 1, -1], [0, -1, -1, 1], [0, -1, -1, -1], [1, 0, 1, 1], [1, 0, 1, -1], [1, 0, -1, 1], [1, 0, -1, -1], [-1, 0, 1, 1], [-1, 0, 1, -1], [-1, 0, -1, 1], [-1, 0, -1, -1], [1, 1, 0, 1], [1, 1, 0, -1], [1, -1, 0, 1], [1, -1, 0, -1], [-1, 1, 0, 1], [-1, 1, 0, -1], [-1, -1, 0, 1], [-1, -1, 0, -1], [1, 1, 1, 0], [1, 1, -1, 0], [1, -1, 1, 0], [1, -1, -1, 0], [-1, 1, 1, 0], [-1, 1, -1, 0], [-1, -1, 1, 0], [-1, -1, -1, 0]];
+        #sample = null;
         constructor(_random = Math.random) {
             super(_random);
-            this.#sample = null;
-            this.sample = (_x, _y, _z, _w) => {
-                return this.#sample(_x, _y, _z, _w);
-            };
             this.#sample = (x, y, z, w) => {
                 const s = (x + y + z + w) * (Math.sqrt(5.0) - 1.0) / 4.0;
                 const i = Math.floor(x + s);
@@ -5362,17 +5379,18 @@ var FudgeCore;
                 return 72.37855765153665 * (n0 + n1 + n2 + n3 + n4);
             };
         }
-        #sample;
+        sample = (_x, _y, _z, _w) => {
+            return this.#sample(_x, _y, _z, _w);
+        };
     }
-    Noise4.offset = (5.0 - Math.sqrt(5.0)) / 20.0;
-    Noise4.gradient = [[0, 1, 1, 1], [0, 1, 1, -1], [0, 1, -1, 1], [0, 1, -1, -1], [0, -1, 1, 1], [0, -1, 1, -1], [0, -1, -1, 1], [0, -1, -1, -1], [1, 0, 1, 1], [1, 0, 1, -1], [1, 0, -1, 1], [1, 0, -1, -1], [-1, 0, 1, 1], [-1, 0, 1, -1], [-1, 0, -1, 1], [-1, 0, -1, -1], [1, 1, 0, 1], [1, 1, 0, -1], [1, -1, 0, 1], [1, -1, 0, -1], [-1, 1, 0, 1], [-1, 1, 0, -1], [-1, -1, 0, 1], [-1, -1, 0, -1], [1, 1, 1, 0], [1, 1, -1, 0], [1, -1, 1, 0], [1, -1, -1, 0], [-1, 1, 1, 0], [-1, 1, -1, 0], [-1, -1, 1, 0], [-1, -1, -1, 0]];
     FudgeCore.Noise4 = Noise4;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class Random {
+        static default = new Random();
+        generate = Math.random;
         constructor(_seedOrFunction) {
-            this.generate = Math.random;
             if (_seedOrFunction instanceof Function)
                 this.generate = _seedOrFunction;
             else if (_seedOrFunction == undefined)
@@ -5427,13 +5445,13 @@ var FudgeCore;
             return new FudgeCore.Vector2(this.getRange(_corner0.x, _corner1.x), this.getRange(_corner0.y, _corner1.y));
         }
     }
-    Random.default = new Random();
     FudgeCore.Random = Random;
     FudgeCore.random = new Random();
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class Vector3 extends FudgeCore.Mutable {
+        data;
         constructor(_x = 0, _y = 0, _z = 0) {
             super();
             this.data = new Float32Array([_x, _y, _z]);
@@ -5682,10 +5700,20 @@ var FudgeCore;
 (function (FudgeCore) {
     var Mesh_1;
     let Mesh = Mesh_1 = class Mesh extends FudgeCore.Mutable {
+        static baseClass = Mesh_1;
+        static subclasses = [];
+        idResource = undefined;
+        name = "Mesh";
+        renderBuffers;
+        ƒvertices;
+        ƒindices;
+        ƒtextureUVs;
+        ƒnormalsFace;
+        ƒnormals;
+        ƒbox;
+        ƒradius;
         constructor(_name = "Mesh") {
             super();
-            this.idResource = undefined;
-            this.name = "Mesh";
             this.name = _name;
             this.clear();
             FudgeCore.Project.register(this);
@@ -5837,8 +5865,6 @@ var FudgeCore;
             delete _mutator.renderBuffers;
         }
     };
-    Mesh.baseClass = Mesh_1;
-    Mesh.subclasses = [];
     Mesh = Mesh_1 = __decorate([
         FudgeCore.RenderInjectorMesh.decorate
     ], Mesh);
@@ -5847,6 +5873,7 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class MeshCube extends FudgeCore.Mesh {
+        static iSubclass = FudgeCore.Mesh.registerSubclass(MeshCube);
         constructor(_name = "MeshCube") {
             super(_name);
         }
@@ -5890,15 +5917,21 @@ var FudgeCore;
             return normals;
         }
     }
-    MeshCube.iSubclass = FudgeCore.Mesh.registerSubclass(MeshCube);
     FudgeCore.MeshCube = MeshCube;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class MeshPolygon extends FudgeCore.Mesh {
+        static iSubclass = FudgeCore.Mesh.registerSubclass(MeshPolygon);
+        static verticesDefault = [
+            new FudgeCore.Vector2(-1, -1),
+            new FudgeCore.Vector2(1, -1),
+            new FudgeCore.Vector2(0, 1)
+        ];
+        shape = new FudgeCore.MutableArray();
+        fitTexture;
         constructor(_name = "MeshPolygon", _shape = MeshPolygon.verticesDefault, _fitTexture = true) {
             super(_name);
-            this.shape = new FudgeCore.MutableArray();
             this.create(_shape, _fitTexture);
         }
         get minVertices() {
@@ -5970,20 +6003,19 @@ var FudgeCore;
             return new Uint16Array(indices);
         }
     }
-    MeshPolygon.iSubclass = FudgeCore.Mesh.registerSubclass(MeshPolygon);
-    MeshPolygon.verticesDefault = [
-        new FudgeCore.Vector2(-1, -1),
-        new FudgeCore.Vector2(1, -1),
-        new FudgeCore.Vector2(0, 1)
-    ];
     FudgeCore.MeshPolygon = MeshPolygon;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class MeshExtrusion extends FudgeCore.MeshPolygon {
+        static iSubclass = FudgeCore.Mesh.registerSubclass(MeshExtrusion);
+        static mtxDefaults = [
+            FudgeCore.Matrix4x4.TRANSLATION(FudgeCore.Vector3.Z(0.5)),
+            FudgeCore.Matrix4x4.TRANSLATION(FudgeCore.Vector3.Z(-0.5))
+        ];
+        mtxTransforms = new FudgeCore.MutableArray();
         constructor(_name = "MeshExtrusion", _vertices = FudgeCore.MeshPolygon.verticesDefault, _mtxTransforms = MeshExtrusion.mtxDefaults, _fitTexture = true) {
             super(_name, _vertices, _fitTexture);
-            this.mtxTransforms = new FudgeCore.MutableArray();
             this.extrude(_mtxTransforms);
         }
         serialize() {
@@ -6069,16 +6101,15 @@ var FudgeCore;
             this.ƒtextureUVs = new Float32Array(textureUVs);
         }
     }
-    MeshExtrusion.iSubclass = FudgeCore.Mesh.registerSubclass(MeshExtrusion);
-    MeshExtrusion.mtxDefaults = [
-        FudgeCore.Matrix4x4.TRANSLATION(FudgeCore.Vector3.Z(0.5)),
-        FudgeCore.Matrix4x4.TRANSLATION(FudgeCore.Vector3.Z(-0.5))
-    ];
     FudgeCore.MeshExtrusion = MeshExtrusion;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class MeshFromData extends FudgeCore.Mesh {
+        verticesToSet;
+        textureUVsToSet;
+        indicesToSet;
+        faceNormalsToSet;
         constructor(_vertices, _textureUVs, _indices, _faceNormals) {
             super();
             this.verticesToSet = _vertices;
@@ -6104,12 +6135,12 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class MeshObj extends FudgeCore.Mesh {
+        verts = [];
+        uvs = [];
+        inds = [];
+        facenormals = [];
         constructor(objString) {
             super();
-            this.verts = [];
-            this.uvs = [];
-            this.inds = [];
-            this.facenormals = [];
             this.parseObj(objString);
             this.splitVertices();
         }
@@ -6184,6 +6215,7 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class MeshPyramid extends FudgeCore.Mesh {
+        static iSubclass = FudgeCore.Mesh.registerSubclass(MeshPyramid);
         constructor(_name = "MeshPyramid") {
             super(_name);
         }
@@ -6215,12 +6247,12 @@ var FudgeCore;
             return textureUVs;
         }
     }
-    MeshPyramid.iSubclass = FudgeCore.Mesh.registerSubclass(MeshPyramid);
     FudgeCore.MeshPyramid = MeshPyramid;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class MeshQuad extends FudgeCore.Mesh {
+        static iSubclass = FudgeCore.Mesh.registerSubclass(MeshQuad);
         constructor(_name = "MeshQuad") {
             super(_name);
         }
@@ -6249,18 +6281,23 @@ var FudgeCore;
             ]);
         }
     }
-    MeshQuad.iSubclass = FudgeCore.Mesh.registerSubclass(MeshQuad);
     FudgeCore.MeshQuad = MeshQuad;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class PositionOnTerrain {
+        position;
+        normal;
     }
     FudgeCore.PositionOnTerrain = PositionOnTerrain;
     class MeshTerrain extends FudgeCore.Mesh {
+        static iSubclass = FudgeCore.Mesh.registerSubclass(MeshTerrain);
+        resolution;
+        scale;
+        seed;
+        heightMapFunction = null;
         constructor(_name = "MeshTerrain", _resolution = FudgeCore.Vector2.ONE(2), _scaleInput = FudgeCore.Vector2.ONE(), _functionOrSeed = 0) {
             super(_name);
-            this.heightMapFunction = null;
             this.create(_resolution, _scaleInput, _functionOrSeed);
         }
         create(_resolution = FudgeCore.Vector2.ONE(2), _scaleInput = FudgeCore.Vector2.ONE(), _functionOrSeed = 0) {
@@ -6363,15 +6400,10 @@ var FudgeCore;
             return indices;
         }
         createTextureUVs() {
-            let textureUVs = new Float32Array(this.indices.length * 2);
-            for (let i = 0, z = 0; z <= this.resolution.y; z++) {
-                for (let x = 0; x <= this.resolution.x; x++) {
-                    textureUVs[i] = x / this.resolution.x;
-                    textureUVs[i + 1] = z / this.resolution.y;
-                    i += 2;
-                }
-            }
-            return textureUVs;
+            let textureUVs = [];
+            for (let i = 0; i < this.vertices.length; i += 3)
+                textureUVs.push(new FudgeCore.Vector2(this.vertices[i], this.vertices[i + 2]));
+            return new Float32Array(textureUVs.map((_v) => [_v.x + 0.5, _v.y + 0.5]).flat());
         }
         calculateHeight(face, relativePosObject) {
             let ray = new FudgeCore.Ray(new FudgeCore.Vector3(0, 1, 0), relativePosObject);
@@ -6407,9 +6439,16 @@ var FudgeCore;
                 return face2;
         }
     }
-    MeshTerrain.iSubclass = FudgeCore.Mesh.registerSubclass(MeshTerrain);
     FudgeCore.MeshTerrain = MeshTerrain;
     class DistanceToFaceVertices {
+        vertexONE;
+        vertexTWO;
+        vertexTHREE;
+        distanceONE;
+        distanceTWO;
+        distanceTHREE;
+        distance;
+        faceNormal;
         constructor(vertexONE, vertexTWO, vertexTHREE, relativPosObject) {
             this.vertexONE = vertexONE;
             this.vertexTWO = vertexTWO;
@@ -6430,9 +6469,10 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class MeshRelief extends FudgeCore.MeshTerrain {
+        static iSubclass = FudgeCore.Mesh.registerSubclass(MeshRelief);
+        texture = null;
         constructor(_name = "MeshRelief", _texture = null) {
             super(_name, FudgeCore.Vector2.ONE(2), undefined, (_x, _z) => 0);
-            this.texture = null;
             this.setTexture(_texture);
         }
         static createHeightMapFunction(_texture) {
@@ -6485,27 +6525,33 @@ var FudgeCore;
             delete _mutator.resolution;
         }
         createVertices() {
-            let vertices = new Float32Array((this.resolution.x + 1) * (this.resolution.y + 1) * 3);
-            let i = 0;
+            let vertices = [];
+            let row;
             for (let z = 0; z <= this.resolution.y; z++) {
+                row = [];
                 for (let x = 0; x <= this.resolution.x; x++) {
                     let xNorm = x / this.resolution.x;
                     let zNorm = z / this.resolution.y;
-                    vertices[i] = xNorm - 0.5;
-                    vertices[i + 1] = this.heightMapFunction(x, z);
-                    vertices[i + 2] = zNorm - 0.5;
-                    i += 3;
+                    row.push(new FudgeCore.Vector3(xNorm - 0.5, this.heightMapFunction(x, z), zNorm - 0.5));
                 }
+                vertices.push(...row);
+                if (z > 0 && z <= this.resolution.y - 1)
+                    vertices.push(...row);
             }
-            return vertices;
+            return new Float32Array(vertices.map((_v) => [_v.x, _v.y, _v.z]).flat());
         }
     }
-    MeshRelief.iSubclass = FudgeCore.Mesh.registerSubclass(MeshRelief);
     FudgeCore.MeshRelief = MeshRelief;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class MeshRotation extends FudgeCore.MeshPolygon {
+        static iSubclass = FudgeCore.Mesh.registerSubclass(MeshRotation);
+        static verticesDefault = [
+            new FudgeCore.Vector2(0.5, 0.5),
+            new FudgeCore.Vector2(0.5, -0.5)
+        ];
+        sectors;
         constructor(_name = "MeshRotation", _vertices = MeshRotation.verticesDefault, _sectors = 3, _fitTexture = true) {
             super(_name, _vertices, _fitTexture);
             this.rotate(_sectors);
@@ -6567,16 +6613,14 @@ var FudgeCore;
             this.ƒtextureUVs = new Float32Array(textureUVs);
         }
     }
-    MeshRotation.iSubclass = FudgeCore.Mesh.registerSubclass(MeshRotation);
-    MeshRotation.verticesDefault = [
-        new FudgeCore.Vector2(0.5, 0.5),
-        new FudgeCore.Vector2(0.5, -0.5)
-    ];
     FudgeCore.MeshRotation = MeshRotation;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class MeshSphere extends FudgeCore.Mesh {
+        static iSubclass = FudgeCore.Mesh.registerSubclass(MeshSphere);
+        sectors;
+        stacks;
         constructor(_name = "MeshSphere", _sectors = 8, _stacks = 8) {
             super(_name);
             this.create(_sectors, _stacks);
@@ -6661,12 +6705,12 @@ var FudgeCore;
             return indices;
         }
     }
-    MeshSphere.iSubclass = FudgeCore.Mesh.registerSubclass(MeshSphere);
     FudgeCore.MeshSphere = MeshSphere;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class MeshSprite extends FudgeCore.Mesh {
+        static iSubclass = FudgeCore.Mesh.registerSubclass(MeshSprite);
         constructor(_name = "MeshSprite") {
             super(_name);
         }
@@ -6699,17 +6743,17 @@ var FudgeCore;
             ]);
         }
     }
-    MeshSprite.iSubclass = FudgeCore.Mesh.registerSubclass(MeshSprite);
     FudgeCore.MeshSprite = MeshSprite;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class MeshTorus extends FudgeCore.Mesh {
+        static iSubclass = FudgeCore.Mesh.registerSubclass(MeshTorus);
+        thickness = 0.25;
+        majorSegments = 32;
+        minorSegments = 12;
         constructor(_name = "MeshTorus", _thickness = 0.25, _majorSegments = 32, _minorSegments = 12) {
             super(_name);
-            this.thickness = 0.25;
-            this.majorSegments = 32;
-            this.minorSegments = 12;
             this.create(_thickness, _majorSegments, _minorSegments);
         }
         create(_thickness = 0.25, _majorSegments = 32, _minorSegments = 12) {
@@ -6773,21 +6817,13 @@ var FudgeCore;
             return indices;
         }
     }
-    MeshTorus.iSubclass = FudgeCore.Mesh.registerSubclass(MeshTorus);
     FudgeCore.MeshTorus = MeshTorus;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ComponentJoint extends FudgeCore.Component {
-        constructor(_attachedRigidbody = null, _connectedRigidbody = null) {
-            super();
-            this.singleton = false;
-            this.idAttachedRB = 0;
-            this.idConnectedRB = 0;
-            this.connected = false;
-            this.attachedRigidbody = _attachedRigidbody;
-            this.connectedRigidbody = _connectedRigidbody;
-        }
+        static iSubclass = FudgeCore.Component.registerSubclass(ComponentJoint);
+        singleton = false;
         get attachedRigidbody() {
             return this.attachedRB;
         }
@@ -6811,6 +6847,17 @@ var FudgeCore;
         }
         set selfCollision(_value) {
             this.collisionBetweenConnectedBodies = _value;
+        }
+        idAttachedRB = 0;
+        idConnectedRB = 0;
+        attachedRB;
+        connectedRB;
+        connected = false;
+        collisionBetweenConnectedBodies;
+        constructor(_attachedRigidbody = null, _connectedRigidbody = null) {
+            super();
+            this.attachedRigidbody = _attachedRigidbody;
+            this.connectedRigidbody = _connectedRigidbody;
         }
         checkConnection() {
             return this.connected;
@@ -6836,29 +6883,37 @@ var FudgeCore;
             return serialization;
         }
     }
-    ComponentJoint.iSubclass = FudgeCore.Component.registerSubclass(ComponentJoint);
     FudgeCore.ComponentJoint = ComponentJoint;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ComponentJointCylindrical extends FudgeCore.ComponentJoint {
+        static iSubclass = FudgeCore.Component.registerSubclass(ComponentJointCylindrical);
+        jointSpringDampingRatio = 0;
+        jointSpringFrequency = 0;
+        jointRotationSpringDampingRatio = 0;
+        jointRotationSpringFrequency = 0;
+        jointMotorLimitUpper = 10;
+        jointMotorLimitLower = -10;
+        jointMotorForce = 0;
+        jointMotorSpeed = 0;
+        jointRotationMotorLimitUpper = 360;
+        jointRotationMotorLimitLower = 0;
+        jointRotationMotorTorque = 0;
+        jointRotationMotorSpeed = 0;
+        jointBreakForce = 0;
+        jointBreakTorque = 0;
+        config = new OIMO.CylindricalJointConfig();
+        rotationalMotor;
+        translationMotor;
+        springDamper;
+        rotationSpringDamper;
+        jointAnchor;
+        jointAxis;
+        jointInternalCollision;
+        oimoJoint;
         constructor(_attachedRigidbody = null, _connectedRigidbody = null, _axis = new FudgeCore.Vector3(0, 1, 0), _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
             super(_attachedRigidbody, _connectedRigidbody);
-            this.jointSpringDampingRatio = 0;
-            this.jointSpringFrequency = 0;
-            this.jointRotationSpringDampingRatio = 0;
-            this.jointRotationSpringFrequency = 0;
-            this.jointMotorLimitUpper = 10;
-            this.jointMotorLimitLower = -10;
-            this.jointMotorForce = 0;
-            this.jointMotorSpeed = 0;
-            this.jointRotationMotorLimitUpper = 360;
-            this.jointRotationMotorLimitLower = 0;
-            this.jointRotationMotorTorque = 0;
-            this.jointRotationMotorSpeed = 0;
-            this.jointBreakForce = 0;
-            this.jointBreakTorque = 0;
-            this.config = new OIMO.CylindricalJointConfig();
             this.jointAxis = new OIMO.Vec3(_axis.x, _axis.y, _axis.z);
             this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
             this.addEventListener("componentAdd", this.dirtyStatus);
@@ -7077,7 +7132,7 @@ var FudgeCore;
             this.rotationalMotor = new OIMO.RotationalLimitMotor().setLimits(this.jointRotationMotorLimitLower, this.jointRotationMotorLimitUpper);
             this.rotationalMotor.setMotor(this.jointRotationMotorSpeed, this.jointRotationMotorTorque);
             this.config = new OIMO.CylindricalJointConfig();
-            let attachedRBPos = this.attachedRigidbody.getContainer().mtxWorld.translation;
+            let attachedRBPos = this.attachedRigidbody.node.mtxWorld.translation;
             let worldAnchor = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
             this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, this.jointAxis);
             this.config.translationalSpringDamper = this.springDamper;
@@ -7097,23 +7152,29 @@ var FudgeCore;
             this.removeConstraintFromWorld(this);
         }
     }
-    ComponentJointCylindrical.iSubclass = FudgeCore.Component.registerSubclass(ComponentJointCylindrical);
     FudgeCore.ComponentJointCylindrical = ComponentJointCylindrical;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ComponentJointPrismatic extends FudgeCore.ComponentJoint {
+        static iSubclass = FudgeCore.Component.registerSubclass(ComponentJointPrismatic);
+        jointSpringDampingRatio = 0;
+        jointSpringFrequency = 0;
+        jointMotorLimitUpper = 10;
+        jointMotorLimitLower = -10;
+        jointMotorForce = 0;
+        jointMotorSpeed = 0;
+        jointBreakForce = 0;
+        jointBreakTorque = 0;
+        config = new OIMO.PrismaticJointConfig();
+        translationalMotor;
+        springDamper;
+        jointAnchor;
+        jointAxis;
+        jointInternalCollision;
+        oimoJoint;
         constructor(_attachedRigidbody = null, _connectedRigidbody = null, _axis = new FudgeCore.Vector3(0, 1, 0), _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
             super(_attachedRigidbody, _connectedRigidbody);
-            this.jointSpringDampingRatio = 0;
-            this.jointSpringFrequency = 0;
-            this.jointMotorLimitUpper = 10;
-            this.jointMotorLimitLower = -10;
-            this.jointMotorForce = 0;
-            this.jointMotorSpeed = 0;
-            this.jointBreakForce = 0;
-            this.jointBreakTorque = 0;
-            this.config = new OIMO.PrismaticJointConfig();
             this.jointAxis = new OIMO.Vec3(_axis.x, _axis.y, _axis.z);
             this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
             this.addEventListener("componentAdd", this.dirtyStatus);
@@ -7212,7 +7273,7 @@ var FudgeCore;
                 this.constructJoint();
                 this.connected = true;
                 this.superAdd();
-                FudgeCore.Debug.log("called Connection For: " + this.attachedRB.getContainer().name + " / " + this.connectedRB.getContainer().name);
+                FudgeCore.Debug.log("called Connection For: " + this.attachedRB.node.name + " / " + this.connectedRB.node.name);
                 FudgeCore.Debug.log("Strength: " + this.springDamping + " / " + this.springFrequency);
                 FudgeCore.Debug.log(this.oimoJoint);
             }
@@ -7273,7 +7334,7 @@ var FudgeCore;
             this.translationalMotor = new OIMO.TranslationalLimitMotor().setLimits(this.jointMotorLimitLower, this.jointMotorLimitUpper);
             this.translationalMotor.setMotor(this.jointMotorSpeed, this.jointMotorForce);
             this.config = new OIMO.PrismaticJointConfig();
-            let attachedRBPos = this.attachedRigidbody.getContainer().mtxWorld.translation;
+            let attachedRBPos = this.attachedRigidbody.node.mtxWorld.translation;
             let worldAnchor = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
             this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, this.jointAxis);
             this.config.springDamper = this.springDamper;
@@ -7291,25 +7352,35 @@ var FudgeCore;
             this.removeConstraintFromWorld(this);
         }
     }
-    ComponentJointPrismatic.iSubclass = FudgeCore.Component.registerSubclass(ComponentJointPrismatic);
     FudgeCore.ComponentJointPrismatic = ComponentJointPrismatic;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ComponentJointRagdoll extends FudgeCore.ComponentJoint {
+        static iSubclass = FudgeCore.Component.registerSubclass(ComponentJointRagdoll);
+        jointTwistSpringDampingRatio = 0;
+        jointTwistSpringFrequency = 0;
+        jointSwingSpringDampingRatio = 0;
+        jointSwingSpringFrequency = 0;
+        jointTwistMotorLimitUpper = 360;
+        jointTwistMotorLimitLower = 0;
+        jointTwistMotorTorque = 0;
+        jointTwistMotorSpeed = 0;
+        jointBreakForce = 0;
+        jointBreakTorque = 0;
+        config = new OIMO.RagdollJointConfig();
+        jointTwistMotor;
+        jointTwistSpringDamper;
+        jointSwingSpringDamper;
+        jointAnchor;
+        jointFirstAxis;
+        jointSecondAxis;
+        jointInternalCollision;
+        jointMaxAngle1;
+        jointMaxAngle2;
+        oimoJoint;
         constructor(_attachedRigidbody = null, _connectedRigidbody = null, _firstAxis = new FudgeCore.Vector3(1, 0, 0), _secondAxis = new FudgeCore.Vector3(0, 0, 1), _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
             super(_attachedRigidbody, _connectedRigidbody);
-            this.jointTwistSpringDampingRatio = 0;
-            this.jointTwistSpringFrequency = 0;
-            this.jointSwingSpringDampingRatio = 0;
-            this.jointSwingSpringFrequency = 0;
-            this.jointTwistMotorLimitUpper = 360;
-            this.jointTwistMotorLimitLower = 0;
-            this.jointTwistMotorTorque = 0;
-            this.jointTwistMotorSpeed = 0;
-            this.jointBreakForce = 0;
-            this.jointBreakTorque = 0;
-            this.config = new OIMO.RagdollJointConfig();
             this.jointFirstAxis = new OIMO.Vec3(_firstAxis.x, _firstAxis.y, _firstAxis.z);
             this.jointSecondAxis = new OIMO.Vec3(_secondAxis.x, _secondAxis.y, _secondAxis.z);
             this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
@@ -7517,7 +7588,7 @@ var FudgeCore;
             this.jointTwistMotor = new OIMO.RotationalLimitMotor().setLimits(this.jointTwistMotorLimitLower, this.jointTwistMotorLimitUpper);
             this.jointTwistMotor.setMotor(this.jointTwistMotorSpeed, this.jointTwistMotorTorque);
             this.config = new OIMO.RagdollJointConfig();
-            let attachedRBPos = this.attachedRigidbody.getContainer().mtxWorld.translation;
+            let attachedRBPos = this.attachedRigidbody.node.mtxWorld.translation;
             let worldAnchor = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
             this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, this.jointFirstAxis, this.jointSecondAxis);
             this.config.swingSpringDamper = this.jointSwingSpringDamper;
@@ -7538,23 +7609,29 @@ var FudgeCore;
             this.removeConstraintFromWorld(this);
         }
     }
-    ComponentJointRagdoll.iSubclass = FudgeCore.Component.registerSubclass(ComponentJointRagdoll);
     FudgeCore.ComponentJointRagdoll = ComponentJointRagdoll;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ComponentJointRevolute extends FudgeCore.ComponentJoint {
+        static iSubclass = FudgeCore.Component.registerSubclass(ComponentJointRevolute);
+        jointSpringDampingRatio = 0;
+        jointSpringFrequency = 0;
+        jointMotorLimitUpper = 360;
+        jointMotorLimitLower = 0;
+        jointmotorTorque = 0;
+        jointMotorSpeed = 0;
+        jointBreakForce = 0;
+        jointBreakTorque = 0;
+        config = new OIMO.RevoluteJointConfig();
+        rotationalMotor;
+        springDamper;
+        jointAnchor;
+        jointAxis;
+        jointInternalCollision;
+        oimoJoint;
         constructor(_attachedRigidbody = null, _connectedRigidbody = null, _axis = new FudgeCore.Vector3(0, 1, 0), _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
             super(_attachedRigidbody, _connectedRigidbody);
-            this.jointSpringDampingRatio = 0;
-            this.jointSpringFrequency = 0;
-            this.jointMotorLimitUpper = 360;
-            this.jointMotorLimitLower = 0;
-            this.jointmotorTorque = 0;
-            this.jointMotorSpeed = 0;
-            this.jointBreakForce = 0;
-            this.jointBreakTorque = 0;
-            this.config = new OIMO.RevoluteJointConfig();
             this.jointAxis = new OIMO.Vec3(_axis.x, _axis.y, _axis.z);
             this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
             this.addEventListener("componentAdd", this.dirtyStatus);
@@ -7710,7 +7787,7 @@ var FudgeCore;
             this.rotationalMotor = new OIMO.RotationalLimitMotor().setLimits(this.jointMotorLimitLower, this.jointMotorLimitUpper);
             this.rotationalMotor.setMotor(this.jointMotorSpeed, this.jointmotorTorque);
             this.config = new OIMO.RevoluteJointConfig();
-            let attachedRBPos = this.attachedRigidbody.getContainer().mtxWorld.translation;
+            let attachedRBPos = this.attachedRigidbody.node.mtxWorld.translation;
             let worldAnchor = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
             this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, this.jointAxis);
             this.config.springDamper = this.springDamper;
@@ -7728,19 +7805,23 @@ var FudgeCore;
             this.removeConstraintFromWorld(this);
         }
     }
-    ComponentJointRevolute.iSubclass = FudgeCore.Component.registerSubclass(ComponentJointRevolute);
     FudgeCore.ComponentJointRevolute = ComponentJointRevolute;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ComponentJointSpherical extends FudgeCore.ComponentJoint {
+        static iSubclass = FudgeCore.Component.registerSubclass(ComponentJointSpherical);
+        jointSpringDampingRatio = 0;
+        jointSpringFrequency = 0;
+        jointBreakForce = 0;
+        jointBreakTorque = 0;
+        config = new OIMO.SphericalJointConfig();
+        springDamper;
+        jointAnchor;
+        jointInternalCollision;
+        oimoJoint;
         constructor(_attachedRigidbody = null, _connectedRigidbody = null, _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
             super(_attachedRigidbody, _connectedRigidbody);
-            this.jointSpringDampingRatio = 0;
-            this.jointSpringFrequency = 0;
-            this.jointBreakForce = 0;
-            this.jointBreakTorque = 0;
-            this.config = new OIMO.SphericalJointConfig();
             this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
             this.addEventListener("componentAdd", this.dirtyStatus);
             this.addEventListener("componentRemove", this.superRemove);
@@ -7843,7 +7924,7 @@ var FudgeCore;
         constructJoint() {
             this.springDamper = new OIMO.SpringDamper().setSpring(this.jointSpringFrequency, this.jointSpringDampingRatio);
             this.config = new OIMO.SphericalJointConfig();
-            let attachedRBPos = this.attachedRigidbody.getContainer().mtxWorld.translation;
+            let attachedRBPos = this.attachedRigidbody.node.mtxWorld.translation;
             let worldAnchor = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
             this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor);
             this.config.springDamper = this.springDamper;
@@ -7860,29 +7941,38 @@ var FudgeCore;
             this.removeConstraintFromWorld(this);
         }
     }
-    ComponentJointSpherical.iSubclass = FudgeCore.Component.registerSubclass(ComponentJointSpherical);
     FudgeCore.ComponentJointSpherical = ComponentJointSpherical;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ComponentJointUniversal extends FudgeCore.ComponentJoint {
+        static iSubclass = FudgeCore.Component.registerSubclass(ComponentJointUniversal);
+        jointFirstSpringDampingRatio = 0;
+        jointFirstSpringFrequency = 0;
+        jointSecondSpringDampingRatio = 0;
+        jointSecondSpringFrequency = 0;
+        jointFirstMotorLimitUpper = 360;
+        jointFirstMotorLimitLower = 0;
+        jointFirstMotorTorque = 0;
+        jointFirstMotorSpeed = 0;
+        jointSecondMotorLimitUpper = 360;
+        jointSecondMotorLimitLower = 0;
+        jointSecondMotorTorque = 0;
+        jointSecondMotorSpeed = 0;
+        jointBreakForce = 0;
+        jointBreakTorque = 0;
+        config = new OIMO.UniversalJointConfig();
+        firstAxisMotor;
+        secondAxisMotor;
+        firstAxisSpringDamper;
+        secondAxisSpringDamper;
+        jointAnchor;
+        jointFirstAxis;
+        jointSecondAxis;
+        jointInternalCollision;
+        oimoJoint;
         constructor(_attachedRigidbody = null, _connectedRigidbody = null, _firstAxis = new FudgeCore.Vector3(1, 0, 0), _secondAxis = new FudgeCore.Vector3(0, 0, 1), _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
             super(_attachedRigidbody, _connectedRigidbody);
-            this.jointFirstSpringDampingRatio = 0;
-            this.jointFirstSpringFrequency = 0;
-            this.jointSecondSpringDampingRatio = 0;
-            this.jointSecondSpringFrequency = 0;
-            this.jointFirstMotorLimitUpper = 360;
-            this.jointFirstMotorLimitLower = 0;
-            this.jointFirstMotorTorque = 0;
-            this.jointFirstMotorSpeed = 0;
-            this.jointSecondMotorLimitUpper = 360;
-            this.jointSecondMotorLimitLower = 0;
-            this.jointSecondMotorTorque = 0;
-            this.jointSecondMotorSpeed = 0;
-            this.jointBreakForce = 0;
-            this.jointBreakTorque = 0;
-            this.config = new OIMO.UniversalJointConfig();
             this.jointFirstAxis = new OIMO.Vec3(_firstAxis.x, _firstAxis.y, _firstAxis.z);
             this.jointSecondAxis = new OIMO.Vec3(_secondAxis.x, _secondAxis.y, _secondAxis.z);
             this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
@@ -8112,7 +8202,7 @@ var FudgeCore;
             this.secondAxisMotor = new OIMO.RotationalLimitMotor().setLimits(this.jointFirstMotorLimitLower, this.jointFirstMotorLimitUpper);
             this.secondAxisMotor.setMotor(this.jointFirstMotorSpeed, this.jointFirstMotorTorque);
             this.config = new OIMO.UniversalJointConfig();
-            let attachedRBPos = this.attachedRigidbody.getContainer().mtxWorld.translation;
+            let attachedRBPos = this.attachedRigidbody.node.mtxWorld.translation;
             let worldAnchor = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
             this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, this.jointFirstAxis, this.jointSecondAxis);
             this.config.limitMotor1 = this.firstAxisMotor;
@@ -8132,22 +8222,12 @@ var FudgeCore;
             this.removeConstraintFromWorld(this);
         }
     }
-    ComponentJointUniversal.iSubclass = FudgeCore.Component.registerSubclass(ComponentJointUniversal);
     FudgeCore.ComponentJointUniversal = ComponentJointUniversal;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ComponentJointWelding extends FudgeCore.ComponentJoint {
-        constructor(_attachedRigidbody = null, _connectedRigidbody = null, _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
-            super(_attachedRigidbody, _connectedRigidbody);
-            this.jointInternalCollision = false;
-            this.jointBreakForce = 0;
-            this.jointBreakTorque = 0;
-            this.config = new OIMO.GenericJointConfig();
-            this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
-            this.addEventListener("componentAdd", this.dirtyStatus);
-            this.addEventListener("componentRemove", this.superRemove);
-        }
+        static iSubclass = FudgeCore.Component.registerSubclass(ComponentJointWelding);
         get internalCollision() {
             return this.jointInternalCollision;
         }
@@ -8180,6 +8260,18 @@ var FudgeCore;
             this.disconnect();
             this.dirtyStatus();
         }
+        jointAnchor;
+        jointInternalCollision = false;
+        jointBreakForce = 0;
+        jointBreakTorque = 0;
+        config = new OIMO.GenericJointConfig();
+        oimoJoint;
+        constructor(_attachedRigidbody = null, _connectedRigidbody = null, _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
+            super(_attachedRigidbody, _connectedRigidbody);
+            this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
+            this.addEventListener("componentAdd", this.dirtyStatus);
+            this.addEventListener("componentRemove", this.superRemove);
+        }
         connect() {
             if (this.connected == false) {
                 this.constructJoint();
@@ -8201,7 +8293,7 @@ var FudgeCore;
         }
         constructJoint() {
             this.config = new OIMO.GenericJointConfig();
-            let attachedRBPos = this.attachedRigidbody.getContainer().mtxWorld.translation;
+            let attachedRBPos = this.attachedRigidbody.node.mtxWorld.translation;
             let worldAnchor = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
             this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, new OIMO.Mat3(), new OIMO.Mat3());
             var j = new OIMO.GenericJoint(this.config);
@@ -8239,164 +8331,162 @@ var FudgeCore;
             return this;
         }
     }
-    ComponentJointWelding.iSubclass = FudgeCore.Component.registerSubclass(ComponentJointWelding);
     FudgeCore.ComponentJointWelding = ComponentJointWelding;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
+    let BODY_ADJUST;
+    (function (BODY_ADJUST) {
+        BODY_ADJUST[BODY_ADJUST["TO_MESH"] = 0] = "TO_MESH";
+        BODY_ADJUST[BODY_ADJUST["TO_NODE"] = 1] = "TO_NODE";
+        BODY_ADJUST[BODY_ADJUST["TO_PIVOT"] = 2] = "TO_PIVOT";
+    })(BODY_ADJUST = FudgeCore.BODY_ADJUST || (FudgeCore.BODY_ADJUST = {}));
     class ComponentRigidbody extends FudgeCore.Component {
-        constructor(_mass = 1, _type = FudgeCore.PHYSICS_TYPE.DYNAMIC, _colliderType = FudgeCore.COLLIDER_TYPE.CUBE, _group = FudgeCore.Physics.settings.defaultCollisionGroup, _mtxTransform = null, _convexMesh = null) {
+        static iSubclass = FudgeCore.Component.registerSubclass(ComponentRigidbody);
+        mtxPivot = FudgeCore.Matrix4x4.IDENTITY();
+        convexMesh = null;
+        collisions = new Array();
+        triggerings = new Array();
+        collisionMask;
+        adjust;
+        #id = 0;
+        #collider;
+        #colliderInfo;
+        #collisionGroup = FudgeCore.COLLISION_GROUP.DEFAULT;
+        #typeCollider = FudgeCore.COLLIDER_TYPE.CUBE;
+        #rigidbody;
+        #rigidbodyInfo = new OIMO.RigidBodyConfig();
+        #typeBody = FudgeCore.BODY_TYPE.DYNAMIC;
+        #massData = new OIMO.MassData();
+        #restitution;
+        #friction;
+        #dampingLinear = 0.1;
+        #dampingAngular = 0.1;
+        #effectRotation = FudgeCore.Vector3.ONE();
+        #effectGravity = 1;
+        #isTrigger = false;
+        #callbacks;
+        constructor(_mass = 1, _type = FudgeCore.BODY_TYPE.DYNAMIC, _colliderType = FudgeCore.COLLIDER_TYPE.CUBE, _group = FudgeCore.Physics.settings.defaultCollisionGroup, _mtxTransform = null, _convexMesh = null) {
             super();
-            this.mtxPivot = FudgeCore.Matrix4x4.IDENTITY();
-            this.convexMesh = null;
-            this.collisions = new Array();
-            this.triggerings = new Array();
-            this.id = 0;
-            this.massData = new OIMO.MassData();
-            this.rigidbodyInfo = new OIMO.RigidBodyConfig();
-            this.rbType = FudgeCore.PHYSICS_TYPE.DYNAMIC;
-            this.colType = FudgeCore.COLLIDER_TYPE.CUBE;
-            this.colGroup = FudgeCore.PHYSICS_GROUP.DEFAULT;
-            this.linDamping = 0.1;
-            this.angDamping = 0.1;
-            this.rotationalInfluenceFactor = FudgeCore.Vector3.ONE();
-            this.gravityInfluenceFactor = 1;
-            this.bodyIsTrigger = false;
-            this.convexMesh = _convexMesh;
-            this.rbType = _type;
-            this.collisionGroup = _group;
-            this.colliderType = _colliderType;
-            this.mass = _mass;
-            this.bodyRestitution = FudgeCore.Physics.settings.defaultRestitution;
-            this.bodyFriction = FudgeCore.Physics.settings.defaultFriction;
-            this.colMask = FudgeCore.Physics.settings.defaultCollisionMask;
-            this.createRigidbody(_mass, _type, this.colliderType, _mtxTransform, this.collisionGroup);
-            this.id = FudgeCore.Physics.world.distributeBodyID();
-            this.callbacks = new OIMO.ContactCallback();
-            this.callbacks.beginTriggerContact = this.triggerEnter;
-            this.callbacks.endTriggerContact = this.triggerExit;
-            this.addEventListener("componentAdd", this.addRigidbodyToWorld);
-            this.addEventListener("componentRemove", this.removeRigidbodyFromWorld);
+            this.create(_mass, _type, _colliderType, _group, _mtxTransform, _convexMesh);
         }
-        get physicsType() {
-            return this.rbType;
+        get id() {
+            return this.#id;
         }
-        set physicsType(_value) {
-            this.rbType = _value;
+        get typeBody() {
+            return this.#typeBody;
+        }
+        set typeBody(_value) {
+            this.#typeBody = _value;
             let oimoType;
-            switch (this.rbType) {
-                case FudgeCore.PHYSICS_TYPE.DYNAMIC:
+            switch (this.#typeBody) {
+                case FudgeCore.BODY_TYPE.DYNAMIC:
                     oimoType = OIMO.RigidBodyType.DYNAMIC;
                     break;
-                case FudgeCore.PHYSICS_TYPE.STATIC:
+                case FudgeCore.BODY_TYPE.STATIC:
                     oimoType = OIMO.RigidBodyType.STATIC;
                     break;
-                case FudgeCore.PHYSICS_TYPE.KINEMATIC:
+                case FudgeCore.BODY_TYPE.KINEMATIC:
                     oimoType = OIMO.RigidBodyType.KINEMATIC;
                     break;
                 default:
                     oimoType = OIMO.RigidBodyType.DYNAMIC;
                     break;
             }
-            this.rigidbody.setType(oimoType);
-            this.rigidbody.setMassData(this.massData);
+            this.#rigidbody.setType(oimoType);
+            this.#rigidbody.setMassData(this.#massData);
         }
-        get colliderType() {
-            return this.colType;
+        get typeCollider() {
+            return this.#typeCollider;
         }
-        set colliderType(_value) {
-            if (_value != this.colType && this.rigidbody != null)
+        set typeCollider(_value) {
+            if (_value != this.#typeCollider && this.#rigidbody != null) {
+                this.#typeCollider = _value;
                 this.updateFromWorld();
-            this.colType = _value;
+            }
         }
         get collisionGroup() {
-            return this.colGroup;
+            return this.#collisionGroup;
         }
         set collisionGroup(_value) {
-            this.colGroup = _value;
-            if (this.rigidbody != null)
-                this.rigidbody.getShapeList().setCollisionGroup(this.colGroup);
-        }
-        get collisionMask() {
-            return this.colMask;
-        }
-        set collisionMask(_value) {
-            this.colMask = _value;
+            this.#collisionGroup = _value;
+            if (this.#rigidbody != null)
+                this.#rigidbody.getShapeList().setCollisionGroup(this.#collisionGroup);
         }
         get isTrigger() {
-            return this.bodyIsTrigger;
+            return this.#isTrigger;
         }
         set isTrigger(_value) {
-            this.bodyIsTrigger = _value;
+            this.#isTrigger = _value;
             if (this.getOimoRigidbody() != null) {
-                this.getOimoRigidbody()._isTrigger = this.bodyIsTrigger;
+                this.getOimoRigidbody()._isTrigger = this.#isTrigger;
             }
         }
         get mass() {
-            return this.rigidbody.getMass();
+            return this.#rigidbody.getMass();
         }
         set mass(_value) {
-            this.massData.mass = _value;
-            if (this.getContainer() != null)
-                if (this.rigidbody != null)
-                    this.rigidbody.setMassData(this.massData);
+            this.#massData.mass = _value;
+            if (this.node != null)
+                if (this.#rigidbody != null)
+                    this.#rigidbody.setMassData(this.#massData);
         }
-        get linearDamping() {
-            return this.rigidbody.getLinearDamping();
+        get dampTranslation() {
+            return this.#rigidbody.getLinearDamping();
         }
-        set linearDamping(_value) {
-            this.linDamping = _value;
-            this.rigidbody.setLinearDamping(_value);
+        set dampTranslation(_value) {
+            this.#dampingLinear = _value;
+            this.#rigidbody.setLinearDamping(_value);
         }
-        get angularDamping() {
-            return this.rigidbody.getAngularDamping();
+        get dampRotation() {
+            return this.#rigidbody.getAngularDamping();
         }
-        set angularDamping(_value) {
-            this.angDamping = _value;
-            this.rigidbody.setAngularDamping(_value);
+        set dampRotation(_value) {
+            this.#dampingAngular = _value;
+            this.#rigidbody.setAngularDamping(_value);
         }
-        get rotationInfluenceFactor() {
-            return this.rotationalInfluenceFactor;
+        get effectRotation() {
+            return this.#effectRotation;
         }
-        set rotationInfluenceFactor(_influence) {
-            this.rotationalInfluenceFactor = _influence;
-            this.rigidbody.setRotationFactor(new OIMO.Vec3(this.rotationalInfluenceFactor.x, this.rotationalInfluenceFactor.y, this.rotationalInfluenceFactor.z));
+        set effectRotation(_effect) {
+            this.#effectRotation = _effect;
+            this.#rigidbody.setRotationFactor(new OIMO.Vec3(this.#effectRotation.x, this.#effectRotation.y, this.#effectRotation.z));
         }
-        get gravityScale() {
-            return this.gravityInfluenceFactor;
+        get effectGravity() {
+            return this.#effectGravity;
         }
-        set gravityScale(_influence) {
-            this.gravityInfluenceFactor = _influence;
-            if (this.rigidbody != null)
-                this.rigidbody.setGravityScale(this.gravityInfluenceFactor);
+        set effectGravity(_effect) {
+            this.#effectGravity = _effect;
+            if (this.#rigidbody != null)
+                this.#rigidbody.setGravityScale(this.#effectGravity);
         }
         get friction() {
-            return this.bodyFriction;
+            return this.#friction;
         }
         set friction(_friction) {
-            this.bodyFriction = _friction;
-            if (this.rigidbody.getShapeList() != null)
-                this.rigidbody.getShapeList().setFriction(this.bodyFriction);
+            this.#friction = _friction;
+            if (this.#rigidbody.getShapeList() != null)
+                this.#rigidbody.getShapeList().setFriction(this.#friction);
         }
         get restitution() {
-            return this.bodyRestitution;
+            return this.#restitution;
         }
         set restitution(_restitution) {
-            this.bodyRestitution = _restitution;
-            if (this.rigidbody.getShapeList() != null)
-                this.rigidbody.getShapeList().setRestitution(this.bodyRestitution);
+            this.#restitution = _restitution;
+            if (this.#rigidbody.getShapeList() != null)
+                this.#rigidbody.getShapeList().setRestitution(this.#restitution);
         }
         getOimoRigidbody() {
-            return this.rigidbody;
+            return this.#rigidbody;
         }
         rotateBody(_rotationChange) {
-            this.rigidbody.rotateXyz(new OIMO.Vec3(_rotationChange.x * Math.PI / 180, _rotationChange.y * Math.PI / 180, _rotationChange.z * Math.PI / 180));
+            this.#rigidbody.rotateXyz(new OIMO.Vec3(_rotationChange.x * Math.PI / 180, _rotationChange.y * Math.PI / 180, _rotationChange.z * Math.PI / 180));
         }
         translateBody(_translationChange) {
-            this.rigidbody.translate(new OIMO.Vec3(_translationChange.x, _translationChange.y, _translationChange.z));
+            this.#rigidbody.translate(new OIMO.Vec3(_translationChange.x, _translationChange.y, _translationChange.z));
         }
         checkCollisionEvents() {
-            let list = this.rigidbody.getContactLinkList();
+            let list = this.#rigidbody.getContactLinkList();
             let objHit;
             let objHit2;
             let event;
@@ -8404,7 +8494,7 @@ var FudgeCore;
             let binormalImpulse = 0;
             let tangentImpulse = 0;
             let colPoint;
-            for (let i = 0; i < this.rigidbody.getNumContactLinks(); i++) {
+            for (let i = 0; i < this.#rigidbody.getNumContactLinks(); i++) {
                 let collisionManifold = list.getContact().getManifold();
                 objHit = list.getContact().getShape1().userData;
                 if (objHit == null || list.getContact().isTouching() == false)
@@ -8442,8 +8532,8 @@ var FudgeCore;
             }
             this.collisions.forEach((value) => {
                 let isColliding = false;
-                list = this.rigidbody.getContactLinkList();
-                for (let i = 0; i < this.rigidbody.getNumContactLinks(); i++) {
+                list = this.#rigidbody.getContactLinkList();
+                for (let i = 0; i < this.#rigidbody.getNumContactLinks(); i++) {
                     objHit = list.getContact().getShape1().userData;
                     objHit2 = list.getContact().getShape2().userData;
                     if (value == objHit || value == objHit2) {
@@ -8460,8 +8550,8 @@ var FudgeCore;
             });
         }
         updateFromWorld(_toMesh = false) {
-            let cmpMesh = this.getContainer().getComponent(FudgeCore.ComponentMesh);
-            let worldTransform = (_toMesh && cmpMesh) ? cmpMesh.mtxWorld : this.getContainer().mtxWorld;
+            let cmpMesh = this.node.getComponent(FudgeCore.ComponentMesh);
+            let worldTransform = (_toMesh && cmpMesh) ? cmpMesh.mtxWorld : this.node.mtxWorld;
             let position = worldTransform.translation;
             position.add(this.mtxPivot.translation);
             let rotation = worldTransform.getEulerAngles();
@@ -8470,32 +8560,32 @@ var FudgeCore;
             scaling.x *= this.mtxPivot.scaling.x;
             scaling.y *= this.mtxPivot.scaling.y;
             scaling.z *= this.mtxPivot.scaling.z;
-            this.createCollider(new OIMO.Vec3(scaling.x / 2, scaling.y / 2, scaling.z / 2), this.colliderType);
-            this.collider = new OIMO.Shape(this.colliderInfo);
-            let oldCollider = this.rigidbody.getShapeList();
-            this.rigidbody.addShape(this.collider);
-            this.rigidbody.removeShape(oldCollider);
-            this.collider.userData = this;
-            this.collider.setCollisionGroup(this.collisionGroup);
-            this.collider.setCollisionMask(this.colMask);
-            if (this.rigidbody.getShapeList() != null) {
-                this.rigidbody.getShapeList().setRestitution(this.bodyRestitution);
-                this.rigidbody.getShapeList().setFriction(this.bodyFriction);
-                this.rigidbody.getShapeList().setContactCallback(this.callbacks);
+            this.createCollider(new OIMO.Vec3(scaling.x / 2, scaling.y / 2, scaling.z / 2), this.#typeCollider);
+            this.#collider = new OIMO.Shape(this.#colliderInfo);
+            let oldCollider = this.#rigidbody.getShapeList();
+            this.#rigidbody.addShape(this.#collider);
+            this.#rigidbody.removeShape(oldCollider);
+            this.#collider.userData = this;
+            this.#collider.setCollisionGroup(this.collisionGroup);
+            this.#collider.setCollisionMask(this.collisionMask);
+            if (this.#rigidbody.getShapeList() != null) {
+                this.#rigidbody.getShapeList().setRestitution(this.#restitution);
+                this.#rigidbody.getShapeList().setFriction(this.#friction);
+                this.#rigidbody.getShapeList().setContactCallback(this.#callbacks);
             }
-            this.rigidbody.setMassData(this.massData);
+            this.#rigidbody.setMassData(this.#massData);
             this.setPosition(position);
             this.setRotation(rotation);
         }
         getPosition() {
-            let tmpPos = this.rigidbody.getPosition();
+            let tmpPos = this.#rigidbody.getPosition();
             return new FudgeCore.Vector3(tmpPos.x, tmpPos.y, tmpPos.z);
         }
         setPosition(_value) {
-            this.rigidbody.setPosition(new OIMO.Vec3(_value.x, _value.y, _value.z));
+            this.#rigidbody.setPosition(new OIMO.Vec3(_value.x, _value.y, _value.z));
         }
         getRotation() {
-            let orientation = this.rigidbody.getOrientation();
+            let orientation = this.#rigidbody.getOrientation();
             let tmpQuat = new FudgeCore.Quaternion(orientation.x, orientation.y, orientation.z, orientation.w);
             return tmpQuat.toDegrees();
         }
@@ -8506,10 +8596,10 @@ var FudgeCore;
             let array = mtxRot.get();
             let rot = new OIMO.Mat3(array[0], array[4], array[8], array[1], array[5], array[9], array[2], array[6], array[10]);
             quat.fromMat3(rot);
-            this.rigidbody.setOrientation(quat);
+            this.#rigidbody.setOrientation(quat);
         }
         getScaling() {
-            let scaling = this.getContainer().mtxWorld.scaling.copy;
+            let scaling = this.node.mtxWorld.scaling.copy;
             scaling.x *= this.mtxPivot.scaling.x;
             scaling.y *= this.mtxPivot.scaling.y;
             scaling.z *= this.mtxPivot.scaling.z;
@@ -8520,74 +8610,74 @@ var FudgeCore;
             scaling.x *= this.mtxPivot.scaling.x;
             scaling.y *= this.mtxPivot.scaling.y;
             scaling.z *= this.mtxPivot.scaling.z;
-            this.createCollider(new OIMO.Vec3(scaling.x / 2, scaling.y / 2, scaling.z / 2), this.colliderType);
-            this.collider = new OIMO.Shape(this.colliderInfo);
-            let oldCollider = this.rigidbody.getShapeList();
-            this.rigidbody.addShape(this.collider);
-            this.rigidbody.removeShape(oldCollider);
-            this.collider.userData = this;
-            this.collider.setCollisionGroup(this.collisionGroup);
-            this.collider.setCollisionMask(this.colMask);
-            if (this.rigidbody.getShapeList() != null) {
-                this.rigidbody.getShapeList().setRestitution(this.bodyRestitution);
-                this.rigidbody.getShapeList().setFriction(this.bodyFriction);
-                this.rigidbody.getShapeList().setContactCallback(this.callbacks);
+            this.createCollider(new OIMO.Vec3(scaling.x / 2, scaling.y / 2, scaling.z / 2), this.typeCollider);
+            this.#collider = new OIMO.Shape(this.#colliderInfo);
+            let oldCollider = this.#rigidbody.getShapeList();
+            this.#rigidbody.addShape(this.#collider);
+            this.#rigidbody.removeShape(oldCollider);
+            this.#collider.userData = this;
+            this.#collider.setCollisionGroup(this.collisionGroup);
+            this.#collider.setCollisionMask(this.collisionMask);
+            if (this.#rigidbody.getShapeList() != null) {
+                this.#rigidbody.getShapeList().setRestitution(this.#restitution);
+                this.#rigidbody.getShapeList().setFriction(this.#friction);
+                this.#rigidbody.getShapeList().setContactCallback(this.#callbacks);
             }
             let mutator = {};
             mutator["scaling"] = _value;
-            this.getContainer().mtxLocal.mutate(mutator);
+            this.node.mtxLocal.mutate(mutator);
         }
         getVelocity() {
-            let velocity = this.rigidbody.getLinearVelocity();
+            let velocity = this.#rigidbody.getLinearVelocity();
             return new FudgeCore.Vector3(velocity.x, velocity.y, velocity.z);
         }
         setVelocity(_value) {
             let velocity = new OIMO.Vec3(_value.x, _value.y, _value.z);
-            this.rigidbody.setLinearVelocity(velocity);
+            this.#rigidbody.setLinearVelocity(velocity);
         }
         getAngularVelocity() {
-            let velocity = this.rigidbody.getAngularVelocity();
+            let velocity = this.#rigidbody.getAngularVelocity();
             return new FudgeCore.Vector3(velocity.x, velocity.y, velocity.z);
         }
         setAngularVelocity(_value) {
             let velocity = new OIMO.Vec3(_value.x, _value.y, _value.z);
-            this.rigidbody.setAngularVelocity(velocity);
+            this.#rigidbody.setAngularVelocity(velocity);
         }
         applyForce(_force) {
-            this.rigidbody.applyForceToCenter(new OIMO.Vec3(_force.x, _force.y, _force.z));
+            this.#rigidbody.applyForceToCenter(new OIMO.Vec3(_force.x, _force.y, _force.z));
         }
         applyForceAtPoint(_force, _worldPoint) {
-            this.rigidbody.applyForce(new OIMO.Vec3(_force.x, _force.y, _force.z), new OIMO.Vec3(_worldPoint.x, _worldPoint.y, _worldPoint.z));
+            this.#rigidbody.applyForce(new OIMO.Vec3(_force.x, _force.y, _force.z), new OIMO.Vec3(_worldPoint.x, _worldPoint.y, _worldPoint.z));
         }
         applyTorque(_rotationalForce) {
-            this.rigidbody.applyTorque(new OIMO.Vec3(_rotationalForce.x, _rotationalForce.y, _rotationalForce.z));
+            this.#rigidbody.applyTorque(new OIMO.Vec3(_rotationalForce.x, _rotationalForce.y, _rotationalForce.z));
         }
         applyImpulseAtPoint(_impulse, _worldPoint = null) {
             _worldPoint = _worldPoint != null ? _worldPoint : this.getPosition();
-            this.rigidbody.applyImpulse(new OIMO.Vec3(_impulse.x, _impulse.y, _impulse.z), new OIMO.Vec3(_worldPoint.x, _worldPoint.y, _worldPoint.z));
+            this.#rigidbody.applyImpulse(new OIMO.Vec3(_impulse.x, _impulse.y, _impulse.z), new OIMO.Vec3(_worldPoint.x, _worldPoint.y, _worldPoint.z));
         }
         applyLinearImpulse(_impulse) {
-            this.rigidbody.applyLinearImpulse(new OIMO.Vec3(_impulse.x, _impulse.y, _impulse.z));
+            this.#rigidbody.applyLinearImpulse(new OIMO.Vec3(_impulse.x, _impulse.y, _impulse.z));
         }
         applyAngularImpulse(_rotationalImpulse) {
-            this.rigidbody.applyAngularImpulse(new OIMO.Vec3(_rotationalImpulse.x, _rotationalImpulse.y, _rotationalImpulse.z));
+            this.#rigidbody.applyAngularImpulse(new OIMO.Vec3(_rotationalImpulse.x, _rotationalImpulse.y, _rotationalImpulse.z));
         }
         addVelocity(_value) {
-            this.rigidbody.addLinearVelocity(new OIMO.Vec3(_value.x, _value.y, _value.z));
+            this.#rigidbody.addLinearVelocity(new OIMO.Vec3(_value.x, _value.y, _value.z));
         }
         addAngularVelocity(_value) {
-            this.rigidbody.addAngularVelocity(new OIMO.Vec3(_value.x, _value.y, _value.z));
+            this.#rigidbody.addAngularVelocity(new OIMO.Vec3(_value.x, _value.y, _value.z));
         }
         deactivateAutoSleep() {
-            this.rigidbody.setAutoSleep(false);
+            this.#rigidbody.setAutoSleep(false);
         }
         activateAutoSleep() {
-            this.rigidbody.setAutoSleep(true);
+            this.#rigidbody.setAutoSleep(true);
         }
         raycastThisBody(_origin, _direction, _length) {
             let hitInfo = new FudgeCore.RayHitInfo();
-            let geometry = this.rigidbody.getShapeList().getGeometry();
-            let transform = this.rigidbody.getTransform();
+            let geometry = this.#rigidbody.getShapeList().getGeometry();
+            let transform = this.#rigidbody.getTransform();
             let scaledDirection = _direction.copy;
             scaledDirection.scale(_length);
             let endpoint = FudgeCore.Vector3.SUM(scaledDirection, _origin.copy);
@@ -8615,105 +8705,139 @@ var FudgeCore;
             return hitInfo;
         }
         serialize() {
-            let serialization = {
-                pivot: this.mtxPivot.serialize(),
-                id: this.id,
-                physicsType: this.rbType,
-                mass: this.massData.mass,
-                colliderType: this.colType,
-                linearDamping: this.linDamping,
-                angularDamping: this.angDamping,
-                collisionGroup: this.colGroup,
-                rotationInfluence: this.rotationalInfluenceFactor,
-                gravityScale: this.gravityInfluenceFactor,
-                friction: this.bodyFriction,
-                restitution: this.bodyRestitution,
-                trigger: this.isTrigger,
-                [super.constructor.name]: super.serialize()
-            };
+            let serialization = this.getMutator();
+            delete serialization.mtxPivot;
+            delete serialization.active;
+            serialization.typeBody = FudgeCore.BODY_TYPE[this.#typeBody];
+            serialization.typeCollider = FudgeCore.COLLIDER_TYPE[this.#typeCollider];
+            serialization.id = this.#id;
+            serialization.pivot = this.mtxPivot.serialize();
+            serialization[super.constructor.name] = super.serialize();
             return serialization;
         }
         async deserialize(_serialization) {
-            this.mtxPivot.deserialize(_serialization.pivot);
-            this.id = _serialization.id;
-            this.physicsType = _serialization.physicsType;
-            this.mass = _serialization.mass != null ? _serialization.mass : 1;
-            this.colliderType = _serialization.colliderType != null ? _serialization.colliderType : FudgeCore.COLLIDER_TYPE.CUBE;
-            this.linearDamping = _serialization.linearDamping != null ? _serialization.linearDamping : this.linDamping;
-            this.angularDamping = _serialization.angularDamping != null ? _serialization.angularDamping : this.angDamping;
-            this.collisionGroup = _serialization.collisionGroup != null ? _serialization.collisionGroup : this.colGroup;
-            this.rotationInfluenceFactor = _serialization.rotationInfluence != null ? _serialization.rotationInfluence : this.rotationalInfluenceFactor;
-            this.gravityScale = _serialization.gravityScale != null ? _serialization.gravityScale : 1;
-            this.friction = _serialization.friction != null ? _serialization.friction : this.bodyFriction;
-            this.restitution = _serialization.restitution != null ? _serialization.restitution : this.bodyRestitution;
-            this.bodyIsTrigger = _serialization.trigger != null ? _serialization.trigger : this.bodyIsTrigger;
             super.deserialize(_serialization[super.constructor.name]);
+            this.mtxPivot.deserialize(_serialization.pivot);
+            this.#id = _serialization.id;
+            this.mass = _serialization.mass || this.mass;
+            this.dampTranslation = _serialization.dampTranslation || this.dampTranslation;
+            this.dampRotation = _serialization.dampRotation || this.dampRotation;
+            this.collisionGroup = _serialization.collisionGroup || this.collisionGroup;
+            this.effectRotation = _serialization.effectRotation || this.effectRotation;
+            this.effectGravity = _serialization.effectGravity || this.effectGravity;
+            this.friction = _serialization.friction || this.friction;
+            this.restitution = _serialization.restitution || this.restitution;
+            this.isTrigger = _serialization.trigger || this.isTrigger;
+            this.#typeBody = FudgeCore.BODY_TYPE[_serialization.typeBody];
+            this.#typeCollider = FudgeCore.COLLIDER_TYPE[_serialization.typeCollider];
+            this.create(this.mass, this.#typeBody, this.#typeCollider, this.collisionGroup, null, this.convexMesh);
             return this;
         }
         async mutate(_mutator) {
-            if (_mutator["friction"])
-                this.friction = _mutator["friction"];
-            if (_mutator["restitution"])
-                this.restitution = _mutator["restituion"];
-            if (_mutator["mass"])
-                this.mass = _mutator["mass"];
-            if (_mutator["linearDamping"])
-                this.linearDamping = _mutator["linearDamping"];
-            if (_mutator["angularDamping"])
-                this.angularDamping = _mutator["angularDamping"];
-            if (_mutator["gravityScale"])
-                this.gravityScale = _mutator["gravityScale"];
+            super.mutate(_mutator);
+            let callIfExist = (_key, _setter) => {
+                if (_mutator[_key])
+                    _setter(_mutator[_key]);
+            };
+            callIfExist("friction", (_value) => this.friction = _value);
+            callIfExist("restitution", (_value) => this.restitution = _value);
+            callIfExist("mass", (_value) => this.mass = _value);
+            callIfExist("dampTranslation", (_value) => this.dampTranslation = _value);
+            callIfExist("dampRotation", (_value) => this.dampRotation = _value);
+            callIfExist("effectGravity", (_value) => this.effectGravity = _value);
+            callIfExist("collisionGroup", (_value) => this.collisionGroup = _value);
+            callIfExist("typeBody", (_value) => this.typeBody = parseInt(_value));
+            callIfExist("typeCollider", (_value) => this.typeCollider = parseInt(_value));
             this.dispatchEvent(new Event("mutate"));
         }
-        reduceMutator(_mutator) {
-            delete _mutator.convexMesh;
-            delete _mutator.colMask;
+        getMutator() {
+            let mutator = super.getMutator(true);
+            mutator.friction = this.friction;
+            mutator.restitution = this.restitution;
+            mutator.mass = this.mass;
+            mutator.dampTranslation = this.dampTranslation;
+            mutator.dampRotation = this.dampRotation;
+            mutator.effectGravity = this.effectGravity;
+            mutator.typeBody = this.#typeBody;
+            mutator.typeCollider = this.#typeCollider;
+            mutator.isTrigger = this.#isTrigger;
+            return mutator;
         }
-        createRigidbody(_mass, _type, _colliderType, _mtxTransform, _collisionGroup = FudgeCore.PHYSICS_GROUP.DEFAULT) {
+        getMutatorAttributeTypes(_mutator) {
+            let types = super.getMutatorAttributeTypes(_mutator);
+            if (types.typeBody)
+                types.typeBody = FudgeCore.BODY_TYPE;
+            if (types.typeCollider)
+                types.typeCollider = FudgeCore.COLLIDER_TYPE;
+            return types;
+        }
+        reduceMutator(_mutator) {
+            super.reduceMutator(_mutator);
+            delete _mutator.convexMesh;
+            delete _mutator.collisionMask;
+        }
+        create(_mass = 1, _type = FudgeCore.BODY_TYPE.DYNAMIC, _colliderType = FudgeCore.COLLIDER_TYPE.CUBE, _group = FudgeCore.Physics.settings.defaultCollisionGroup, _mtxTransform = null, _convexMesh = null) {
+            this.convexMesh = _convexMesh;
+            this.#typeBody = _type;
+            this.#collisionGroup = _group;
+            this.#typeCollider = _colliderType;
+            this.mass = _mass;
+            this.#restitution = FudgeCore.Physics.settings.defaultRestitution;
+            this.#friction = FudgeCore.Physics.settings.defaultFriction;
+            this.collisionMask = FudgeCore.Physics.settings.defaultCollisionMask;
+            this.createRigidbody(_mass, _type, this.#typeCollider, _mtxTransform, this.#collisionGroup);
+            this.#id = FudgeCore.Physics.world.distributeBodyID();
+            this.#callbacks = new OIMO.ContactCallback();
+            this.#callbacks.beginTriggerContact = this.triggerEnter;
+            this.#callbacks.endTriggerContact = this.triggerExit;
+            this.addEventListener("componentAdd", this.addRigidbodyToWorld);
+            this.addEventListener("componentRemove", this.removeRigidbodyFromWorld);
+        }
+        createRigidbody(_mass, _type, _colliderType, _mtxTransform, _collisionGroup = FudgeCore.COLLISION_GROUP.DEFAULT) {
             let oimoType;
             switch (_type) {
-                case FudgeCore.PHYSICS_TYPE.DYNAMIC:
+                case FudgeCore.BODY_TYPE.DYNAMIC:
                     oimoType = OIMO.RigidBodyType.DYNAMIC;
                     break;
-                case FudgeCore.PHYSICS_TYPE.STATIC:
+                case FudgeCore.BODY_TYPE.STATIC:
                     oimoType = OIMO.RigidBodyType.STATIC;
                     break;
-                case FudgeCore.PHYSICS_TYPE.KINEMATIC:
+                case FudgeCore.BODY_TYPE.KINEMATIC:
                     oimoType = OIMO.RigidBodyType.KINEMATIC;
                     break;
                 default:
                     oimoType = OIMO.RigidBodyType.DYNAMIC;
                     break;
             }
-            let tmpTransform = _mtxTransform == null ? super.getContainer() != null ? super.getContainer().mtxWorld : FudgeCore.Matrix4x4.IDENTITY() : _mtxTransform;
+            let tmpTransform = _mtxTransform == null ? super.node != null ? super.node.mtxWorld : FudgeCore.Matrix4x4.IDENTITY() : _mtxTransform;
             let scale = new OIMO.Vec3((tmpTransform.scaling.x * this.mtxPivot.scaling.x) / 2, (tmpTransform.scaling.y * this.mtxPivot.scaling.y) / 2, (tmpTransform.scaling.z * this.mtxPivot.scaling.z) / 2);
             let position = new OIMO.Vec3(tmpTransform.translation.x + this.mtxPivot.translation.x, tmpTransform.translation.y + this.mtxPivot.translation.y, tmpTransform.translation.z + this.mtxPivot.translation.z);
             let rotation = new OIMO.Vec3(tmpTransform.rotation.x + this.mtxPivot.rotation.x, tmpTransform.rotation.y + this.mtxPivot.rotation.y, tmpTransform.rotation.z + this.mtxPivot.rotation.z);
             this.createCollider(scale, _colliderType);
-            this.massData.mass = _mass;
-            this.rigidbodyInfo.type = oimoType;
-            this.rigidbodyInfo.position = position;
-            this.rigidbodyInfo.rotation.fromEulerXyz(new OIMO.Vec3(rotation.x, rotation.y, rotation.z));
-            this.rigidbody = new OIMO.RigidBody(this.rigidbodyInfo);
-            this.collider = new OIMO.Shape(this.colliderInfo);
-            this.collider.userData = this;
-            this.collider.setCollisionGroup(_collisionGroup);
-            this.collider.setCollisionMask(this.colMask);
-            this.rigidbody.addShape(this.collider);
-            this.rigidbody.setMassData(this.massData);
-            this.rigidbody.getShapeList().setRestitution(this.bodyRestitution);
-            this.rigidbody.getShapeList().setFriction(this.bodyFriction);
-            this.rigidbody.getShapeList().setContactCallback(this.callbacks);
-            this.rigidbody.setLinearDamping(this.linDamping);
-            this.rigidbody.setAngularDamping(this.angDamping);
-            this.rigidbody.setGravityScale(this.gravityInfluenceFactor);
-            this.rigidbody.setRotationFactor(new OIMO.Vec3(this.rotationalInfluenceFactor.x, this.rotationalInfluenceFactor.y, this.rotationalInfluenceFactor.z));
+            this.#massData.mass = _mass;
+            this.#rigidbodyInfo.type = oimoType;
+            this.#rigidbodyInfo.position = position;
+            this.#rigidbodyInfo.rotation.fromEulerXyz(new OIMO.Vec3(rotation.x, rotation.y, rotation.z));
+            this.#rigidbody = new OIMO.RigidBody(this.#rigidbodyInfo);
+            this.#collider = new OIMO.Shape(this.#colliderInfo);
+            this.#collider.userData = this;
+            this.#collider.setCollisionGroup(_collisionGroup);
+            this.#collider.setCollisionMask(this.collisionMask);
+            this.#rigidbody.addShape(this.#collider);
+            this.#rigidbody.setMassData(this.#massData);
+            this.#rigidbody.getShapeList().setRestitution(this.#restitution);
+            this.#rigidbody.getShapeList().setFriction(this.#friction);
+            this.#rigidbody.getShapeList().setContactCallback(this.#callbacks);
+            this.#rigidbody.setLinearDamping(this.#dampingLinear);
+            this.#rigidbody.setAngularDamping(this.#dampingAngular);
+            this.#rigidbody.setGravityScale(this.#effectGravity);
+            this.#rigidbody.setRotationFactor(new OIMO.Vec3(this.#effectRotation.x, this.#effectRotation.y, this.#effectRotation.z));
         }
         createCollider(_scale, _colliderType) {
             let shapeConf = new OIMO.ShapeConfig();
             let geometry;
-            if (this.colliderType != _colliderType)
-                this.colliderType = _colliderType;
+            if (this.typeCollider != _colliderType)
+                this.typeCollider = _colliderType;
             switch (_colliderType) {
                 case FudgeCore.COLLIDER_TYPE.CUBE:
                     geometry = new OIMO.BoxGeometry(_scale);
@@ -8738,7 +8862,7 @@ var FudgeCore;
                     break;
             }
             shapeConf.geometry = geometry;
-            this.colliderInfo = shapeConf;
+            this.#colliderInfo = shapeConf;
         }
         createConvexGeometryCollider(_vertices, _scale) {
             let verticesAsVec3 = new Array();
@@ -8826,14 +8950,20 @@ var FudgeCore;
             }
         }
     }
-    ComponentRigidbody.iSubclass = FudgeCore.Component.registerSubclass(ComponentRigidbody);
     FudgeCore.ComponentRigidbody = ComponentRigidbody;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class PhysicsDebugVertexBuffer {
+        gl;
+        numVertices = 0;
+        attribs;
+        indices;
+        offsets;
+        stride;
+        buffer;
+        dataLength;
         constructor(_renderingContext) {
-            this.numVertices = 0;
             this.gl = _renderingContext;
             this.buffer = this.gl.createBuffer();
         }
@@ -8870,6 +9000,9 @@ var FudgeCore;
     }
     FudgeCore.PhysicsDebugVertexBuffer = PhysicsDebugVertexBuffer;
     class PhysicsDebugIndexBuffer {
+        gl;
+        buffer;
+        count;
         constructor(_renderingContext) {
             this.gl = _renderingContext;
             this.buffer = this.gl.createBuffer();
@@ -8886,6 +9019,8 @@ var FudgeCore;
     }
     FudgeCore.PhysicsDebugIndexBuffer = PhysicsDebugIndexBuffer;
     class PhysicsDebugVertexAttribute {
+        float32Count;
+        name;
         constructor(_float32Count, _name) {
             this.name = _name;
             this.float32Count = _float32Count;
@@ -8893,6 +9028,11 @@ var FudgeCore;
     }
     FudgeCore.PhysicsDebugVertexAttribute = PhysicsDebugVertexAttribute;
     class PhysicsDebugShader {
+        gl;
+        program;
+        vertexShader;
+        fragmentShader;
+        uniformLocationMap;
         constructor(_renderingContext) {
             this.gl = _renderingContext;
             this.program = this.gl.createProgram();
@@ -8945,6 +9085,26 @@ var FudgeCore;
     }
     FudgeCore.PhysicsDebugShader = PhysicsDebugShader;
     class PhysicsDebugDraw extends FudgeCore.RenderWebGL {
+        oimoDebugDraw;
+        style;
+        gl;
+        program;
+        shader;
+        pointVBO;
+        pointIBO;
+        lineVBO;
+        lineIBO;
+        triVBO;
+        triIBO;
+        pointData;
+        pointIboData;
+        numPointData;
+        lineData;
+        lineIboData;
+        numLineData;
+        triData;
+        triIboData;
+        numTriData;
         constructor() {
             super();
             this.style = new OIMO.DebugDrawStyle();
@@ -9137,6 +9297,12 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class EventPhysics extends Event {
+        cmpRigidbody;
+        normalImpulse;
+        tangentImpulse;
+        binomalImpulse;
+        collisionPoint;
+        collisionNormal;
         constructor(_type, _hitRigidbody, _normalImpulse, _tangentImpulse, _binormalImpulse, _collisionPoint = null, _collisionNormal = null) {
             super(_type);
             this.cmpRigidbody = _hitRigidbody;
@@ -9148,21 +9314,21 @@ var FudgeCore;
         }
     }
     FudgeCore.EventPhysics = EventPhysics;
-    let PHYSICS_GROUP;
-    (function (PHYSICS_GROUP) {
-        PHYSICS_GROUP[PHYSICS_GROUP["DEFAULT"] = 1] = "DEFAULT";
-        PHYSICS_GROUP[PHYSICS_GROUP["GROUP_1"] = 2] = "GROUP_1";
-        PHYSICS_GROUP[PHYSICS_GROUP["GROUP_2"] = 4] = "GROUP_2";
-        PHYSICS_GROUP[PHYSICS_GROUP["GROUP_3"] = 8] = "GROUP_3";
-        PHYSICS_GROUP[PHYSICS_GROUP["GROUP_4"] = 16] = "GROUP_4";
-        PHYSICS_GROUP[PHYSICS_GROUP["GROUP_5"] = 32] = "GROUP_5";
-    })(PHYSICS_GROUP = FudgeCore.PHYSICS_GROUP || (FudgeCore.PHYSICS_GROUP = {}));
-    let PHYSICS_TYPE;
-    (function (PHYSICS_TYPE) {
-        PHYSICS_TYPE[PHYSICS_TYPE["DYNAMIC"] = 0] = "DYNAMIC";
-        PHYSICS_TYPE[PHYSICS_TYPE["STATIC"] = 1] = "STATIC";
-        PHYSICS_TYPE[PHYSICS_TYPE["KINEMATIC"] = 2] = "KINEMATIC";
-    })(PHYSICS_TYPE = FudgeCore.PHYSICS_TYPE || (FudgeCore.PHYSICS_TYPE = {}));
+    let COLLISION_GROUP;
+    (function (COLLISION_GROUP) {
+        COLLISION_GROUP[COLLISION_GROUP["DEFAULT"] = 1] = "DEFAULT";
+        COLLISION_GROUP[COLLISION_GROUP["GROUP_1"] = 2] = "GROUP_1";
+        COLLISION_GROUP[COLLISION_GROUP["GROUP_2"] = 4] = "GROUP_2";
+        COLLISION_GROUP[COLLISION_GROUP["GROUP_3"] = 8] = "GROUP_3";
+        COLLISION_GROUP[COLLISION_GROUP["GROUP_4"] = 16] = "GROUP_4";
+        COLLISION_GROUP[COLLISION_GROUP["GROUP_5"] = 32] = "GROUP_5";
+    })(COLLISION_GROUP = FudgeCore.COLLISION_GROUP || (FudgeCore.COLLISION_GROUP = {}));
+    let BODY_TYPE;
+    (function (BODY_TYPE) {
+        BODY_TYPE[BODY_TYPE["DYNAMIC"] = 0] = "DYNAMIC";
+        BODY_TYPE[BODY_TYPE["STATIC"] = 1] = "STATIC";
+        BODY_TYPE[BODY_TYPE["KINEMATIC"] = 2] = "KINEMATIC";
+    })(BODY_TYPE = FudgeCore.BODY_TYPE || (FudgeCore.BODY_TYPE = {}));
     let COLLIDER_TYPE;
     (function (COLLIDER_TYPE) {
         COLLIDER_TYPE[COLLIDER_TYPE["CUBE"] = 0] = "CUBE";
@@ -9182,9 +9348,14 @@ var FudgeCore;
         PHYSICS_DEBUGMODE[PHYSICS_DEBUGMODE["PHYSIC_OBJECTS_ONLY"] = 4] = "PHYSIC_OBJECTS_ONLY";
     })(PHYSICS_DEBUGMODE = FudgeCore.PHYSICS_DEBUGMODE || (FudgeCore.PHYSICS_DEBUGMODE = {}));
     class RayHitInfo {
+        hit;
+        hitDistance;
+        hitPoint;
+        rigidbodyComponent;
+        hitNormal;
+        rayOrigin = FudgeCore.Vector3.ZERO();
+        rayEnd = FudgeCore.Vector3.ZERO();
         constructor() {
-            this.rayOrigin = FudgeCore.Vector3.ZERO();
-            this.rayEnd = FudgeCore.Vector3.ZERO();
             this.hit = false;
             this.hitDistance = 0;
             this.hitPoint = FudgeCore.Vector3.ZERO();
@@ -9193,9 +9364,9 @@ var FudgeCore;
     }
     FudgeCore.RayHitInfo = RayHitInfo;
     class PhysicsSettings {
+        debugDraw = false;
+        physicsDebugMode = PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
         constructor(_defGroup, _defMask) {
-            this.debugDraw = false;
-            this.physicsDebugMode = PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
             this.defaultCollisionGroup = _defGroup;
             this.defaultCollisionMask = _defMask;
         }
@@ -9277,27 +9448,30 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Physics {
-        constructor() {
-            this.bodyList = new Array();
-            this.jointList = new Array();
-        }
+        static settings;
+        static world = Physics.initializePhysics();
+        debugDraw;
+        mainCam;
+        oimoWorld;
+        bodyList = new Array();
+        jointList = new Array();
         static initializePhysics() {
             if (typeof OIMO !== "undefined" && this.world == null) {
                 this.world = new Physics();
-                this.settings = new FudgeCore.PhysicsSettings(FudgeCore.PHYSICS_GROUP.DEFAULT, (FudgeCore.PHYSICS_GROUP.DEFAULT | FudgeCore.PHYSICS_GROUP.GROUP_1 | FudgeCore.PHYSICS_GROUP.GROUP_2 | FudgeCore.PHYSICS_GROUP.GROUP_3 | FudgeCore.PHYSICS_GROUP.GROUP_4));
+                this.settings = new FudgeCore.PhysicsSettings(FudgeCore.COLLISION_GROUP.DEFAULT, (FudgeCore.COLLISION_GROUP.DEFAULT | FudgeCore.COLLISION_GROUP.GROUP_1 | FudgeCore.COLLISION_GROUP.GROUP_2 | FudgeCore.COLLISION_GROUP.GROUP_3 | FudgeCore.COLLISION_GROUP.GROUP_4));
                 this.world.createWorld();
                 this.world.debugDraw = new FudgeCore.PhysicsDebugDraw();
                 this.world.oimoWorld.setDebugDraw(this.world.debugDraw.oimoDebugDraw);
             }
             return this.world;
         }
-        static raycast(_origin, _direction, _length = 1, _group = FudgeCore.PHYSICS_GROUP.DEFAULT) {
+        static raycast(_origin, _direction, _length = 1, _group = FudgeCore.COLLISION_GROUP.DEFAULT) {
             let hitInfo = new FudgeCore.RayHitInfo();
             let ray = new OIMO.RayCastClosest();
             let begin = new OIMO.Vec3(_origin.x, _origin.y, _origin.z);
             let end = this.getRayEndPoint(begin, new FudgeCore.Vector3(_direction.x, _direction.y, _direction.z), _length);
             ray.clear();
-            if (_group == FudgeCore.PHYSICS_GROUP.DEFAULT) {
+            if (_group == FudgeCore.COLLISION_GROUP.DEFAULT) {
                 Physics.world.oimoWorld.rayCast(begin, end, ray);
             }
             else {
@@ -9459,12 +9633,15 @@ var FudgeCore;
             Physics.world.oimoWorld = new OIMO.World();
         }
     }
-    Physics.world = Physics.initializePhysics();
     FudgeCore.Physics = Physics;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class Quaternion extends FudgeCore.Mutable {
+        x;
+        y;
+        z;
+        w;
         constructor(_x = 0, _y = 0, _z = 0, _w = 0) {
             super();
             this.x = _x;
@@ -9546,6 +9723,8 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Box {
+        min;
+        max;
         constructor(_min = FudgeCore.Vector3.ONE(Infinity), _max = FudgeCore.Vector3.ONE(-Infinity)) {
             this.set(_min, _max);
         }
@@ -9563,12 +9742,16 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Pick {
-        constructor(_node) {
-            this.node = _node;
-        }
+        node;
+        zBuffer;
+        color;
+        textureUV;
         #mtxViewToWorld;
         #posWorld;
         #posMesh;
+        constructor(_node) {
+            this.node = _node;
+        }
         get posWorld() {
             if (this.#posWorld)
                 return this.#posWorld;
@@ -9633,8 +9816,8 @@ var FudgeCore;
             let ray = new FudgeCore.Ray(new FudgeCore.Vector3(-_posProjection.x, _posProjection.y, 1));
             let length = ray.direction.magnitude;
             let mtxCamera = _cmpCamera.mtxPivot;
-            if (_cmpCamera.getContainer())
-                mtxCamera = FudgeCore.Matrix4x4.MULTIPLICATION(_cmpCamera.getContainer().mtxWorld, _cmpCamera.mtxPivot);
+            if (_cmpCamera.node)
+                mtxCamera = FudgeCore.Matrix4x4.MULTIPLICATION(_cmpCamera.node.mtxWorld, _cmpCamera.mtxPivot);
             ray.transform(mtxCamera);
             let picks = Picker.pickRay(_branch, ray, length * _cmpCamera.getNear(), length * _cmpCamera.getFar());
             return picks;
@@ -9650,6 +9833,9 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Ray {
+        origin;
+        direction;
+        length;
         constructor(_direction = FudgeCore.Vector3.Z(-1), _origin = FudgeCore.Vector3.ZERO(), _length = 1) {
             this.origin = _origin;
             this.direction = _direction;
@@ -9683,6 +9869,12 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Render extends FudgeCore.RenderWebGL {
+        static rectClip = new FudgeCore.Rectangle(-1, 1, 2, -2);
+        static pickBuffer;
+        static nodesPhysics = new FudgeCore.RecycableArray();
+        static nodesSimple = new FudgeCore.RecycableArray();
+        static nodesAlpha = new FudgeCore.RecycableArray();
+        static timestampUpdate;
         static prepare(_branch, _options = {}, _mtxWorld = FudgeCore.Matrix4x4.IDENTITY(), _lights = new Map(), _shadersUsed = null) {
             let firstLevel = (_shadersUsed == null);
             if (firstLevel) {
@@ -9795,7 +9987,7 @@ var FudgeCore;
                 throw (new Error("ComponentRigidbody requires ComponentTransform at the same Node"));
             }
             _cmpRigidbody.checkCollisionEvents();
-            if (_cmpRigidbody.physicsType == FudgeCore.PHYSICS_TYPE.KINEMATIC) {
+            if (_cmpRigidbody.typeBody == FudgeCore.BODY_TYPE.KINEMATIC) {
                 let mtxPivotWorld = FudgeCore.Matrix4x4.MULTIPLICATION(_node.mtxWorld, _cmpRigidbody.mtxPivot);
                 _cmpRigidbody.setPosition(mtxPivotWorld.translation);
                 _cmpRigidbody.setRotation(mtxPivotWorld.rotation);
@@ -9808,10 +10000,6 @@ var FudgeCore;
             _node.mtxLocal.set(FudgeCore.Matrix4x4.RELATIVE(_node.mtxWorld, _node.getParent().mtxWorld));
         }
     }
-    Render.rectClip = new FudgeCore.Rectangle(-1, 1, 2, -2);
-    Render.nodesPhysics = new FudgeCore.RecycableArray();
-    Render.nodesSimple = new FudgeCore.RecycableArray();
-    Render.nodesAlpha = new FudgeCore.RecycableArray();
     FudgeCore.Render = Render;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -9825,55 +10013,20 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Viewport extends FudgeCore.EventTargetƒ {
-        constructor() {
-            super(...arguments);
-            this.name = "Viewport";
-            this.camera = null;
-            this.frameClientToCanvas = new FudgeCore.FramingScaled();
-            this.frameCanvasToDestination = new FudgeCore.FramingComplex();
-            this.frameDestinationToSource = new FudgeCore.FramingScaled();
-            this.frameSourceToRender = new FudgeCore.FramingScaled();
-            this.adjustingFrames = true;
-            this.adjustingCamera = true;
-            this.#branch = null;
-            this.#crc2 = null;
-            this.#canvas = null;
-            this.hndDragDropEvent = (_event) => {
-                let _dragevent = _event;
-                switch (_dragevent.type) {
-                    case "dragover":
-                    case "drop":
-                        _dragevent.preventDefault();
-                        _dragevent.dataTransfer.effectAllowed = "none";
-                        break;
-                    case "dragstart":
-                        _dragevent.dataTransfer.setData("text", "Hallo");
-                        _dragevent.dataTransfer.setDragImage(new Image(), 0, 0);
-                        break;
-                }
-                let event = new FudgeCore.EventDragDrop("ƒ" + _event.type, _dragevent);
-                this.addCanvasPosition(event);
-                this.dispatchEvent(event);
-            };
-            this.hndPointerEvent = (_event) => {
-                let event = new FudgeCore.EventPointer("ƒ" + _event.type, _event);
-                this.addCanvasPosition(event);
-                this.dispatchEvent(event);
-            };
-            this.hndKeyboardEvent = (_event) => {
-                if (!this.hasFocus)
-                    return;
-                let event = new FudgeCore.EventKeyboard("ƒ" + _event.type, _event);
-                this.dispatchEvent(event);
-            };
-            this.hndWheelEvent = (_event) => {
-                let event = new FudgeCore.EventWheel("ƒ" + _event.type, _event);
-                this.dispatchEvent(event);
-            };
-        }
-        #branch;
-        #crc2;
-        #canvas;
+        static focus;
+        name = "Viewport";
+        camera = null;
+        rectSource;
+        rectDestination;
+        frameClientToCanvas = new FudgeCore.FramingScaled();
+        frameCanvasToDestination = new FudgeCore.FramingComplex();
+        frameDestinationToSource = new FudgeCore.FramingScaled();
+        frameSourceToRender = new FudgeCore.FramingScaled();
+        adjustingFrames = true;
+        adjustingCamera = true;
+        #branch = null;
+        #crc2 = null;
+        #canvas = null;
         get hasFocus() {
             return (Viewport.focus == this);
         }
@@ -9963,7 +10116,7 @@ var FudgeCore;
             let ray = new FudgeCore.Ray(new FudgeCore.Vector3(-posProjection.x, posProjection.y, 1));
             ray.origin.transform(this.camera.mtxPivot);
             ray.direction.transform(this.camera.mtxPivot, false);
-            let cameraNode = this.camera.getContainer();
+            let cameraNode = this.camera.node;
             if (cameraNode) {
                 ray.origin.transform(cameraNode.mtxWorld);
                 ray.direction.transform(cameraNode.mtxWorld, false);
@@ -10042,10 +10195,42 @@ var FudgeCore;
         activateWheelEvent(_type, _on) {
             this.activateEvent(this.#canvas, _type, this.hndWheelEvent, _on);
         }
+        hndDragDropEvent = (_event) => {
+            let _dragevent = _event;
+            switch (_dragevent.type) {
+                case "dragover":
+                case "drop":
+                    _dragevent.preventDefault();
+                    _dragevent.dataTransfer.effectAllowed = "none";
+                    break;
+                case "dragstart":
+                    _dragevent.dataTransfer.setData("text", "Hallo");
+                    _dragevent.dataTransfer.setDragImage(new Image(), 0, 0);
+                    break;
+            }
+            let event = new FudgeCore.EventDragDrop("ƒ" + _event.type, _dragevent);
+            this.addCanvasPosition(event);
+            this.dispatchEvent(event);
+        };
         addCanvasPosition(event) {
             event.canvasX = this.#canvas.width * event.pointerX / event.clientRect.width;
             event.canvasY = this.#canvas.height * event.pointerY / event.clientRect.height;
         }
+        hndPointerEvent = (_event) => {
+            let event = new FudgeCore.EventPointer("ƒ" + _event.type, _event);
+            this.addCanvasPosition(event);
+            this.dispatchEvent(event);
+        };
+        hndKeyboardEvent = (_event) => {
+            if (!this.hasFocus)
+                return;
+            let event = new FudgeCore.EventKeyboard("ƒ" + _event.type, _event);
+            this.dispatchEvent(event);
+        };
+        hndWheelEvent = (_event) => {
+            let event = new FudgeCore.EventWheel("ƒ" + _event.type, _event);
+            this.dispatchEvent(event);
+        };
         activateEvent(_target, _type, _handler, _on) {
             _type = _type.slice(1);
             if (_on)
@@ -10054,7 +10239,6 @@ var FudgeCore;
                 _target.removeEventListener(_type, _handler);
         }
         hndComponentEvent(_event) {
-            FudgeCore.Debug.fudge(_event);
         }
     }
     FudgeCore.Viewport = Viewport;
@@ -10062,6 +10246,7 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class FileIoBrowserLocal extends FudgeCore.EventTargetStatic {
+        static selector;
         static async load(_multiple = false) {
             FileIoBrowserLocal.selector = document.createElement("input");
             FileIoBrowserLocal.selector.type = "file";
@@ -10168,6 +10353,11 @@ var FudgeCore;
         MODE[MODE["RUNTIME"] = 1] = "RUNTIME";
     })(MODE = FudgeCore.MODE || (FudgeCore.MODE = {}));
     class Project {
+        static resources = {};
+        static serialization = {};
+        static scriptNamespaces = {};
+        static baseURL = new URL(location.toString());
+        static mode = MODE.RUNTIME;
         static register(_resource, _idResource) {
             if (_resource.idResource)
                 if (_resource.idResource == _idResource)
@@ -10307,17 +10497,17 @@ var FudgeCore;
             return FudgeCore.Serializer.deserialize(_serialization);
         }
     }
-    Project.resources = {};
-    Project.serialization = {};
-    Project.scriptNamespaces = {};
-    Project.baseURL = new URL(location.toString());
-    Project.mode = MODE.RUNTIME;
     FudgeCore.Project = Project;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     var Shader_1;
     let Shader = Shader_1 = class Shader {
+        static baseClass = Shader_1;
+        static subclasses = [];
+        static program;
+        static attributes;
+        static uniforms;
         static getCoat() { return null; }
         static getVertexShaderSource() { return null; }
         static getFragmentShaderSource() { return null; }
@@ -10326,8 +10516,6 @@ var FudgeCore;
         static createProgram() { }
         static registerSubclass(_subclass) { return Shader_1.subclasses.push(_subclass) - 1; }
     };
-    Shader.baseClass = Shader_1;
-    Shader.subclasses = [];
     Shader = Shader_1 = __decorate([
         FudgeCore.RenderInjectorShader.decorate
     ], Shader);
@@ -10337,6 +10525,7 @@ var FudgeCore;
 (function (FudgeCore) {
     var ShaderFlat_1;
     let ShaderFlat = ShaderFlat_1 = class ShaderFlat extends FudgeCore.Shader {
+        static iSubclass = FudgeCore.Shader.registerSubclass(ShaderFlat_1);
         static getCoat() {
             return FudgeCore.CoatColored;
         }
@@ -10389,7 +10578,6 @@ var FudgeCore;
         }`;
         }
     };
-    ShaderFlat.iSubclass = FudgeCore.Shader.registerSubclass(ShaderFlat_1);
     ShaderFlat = ShaderFlat_1 = __decorate([
         FudgeCore.RenderInjectorShader.decorate
     ], ShaderFlat);
@@ -10398,6 +10586,7 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class ShaderMatCap extends FudgeCore.Shader {
+        static iSubclass = FudgeCore.Shader.registerSubclass(ShaderMatCap);
         static getCoat() {
             return FudgeCore.CoatMatCap;
         }
@@ -10440,7 +10629,6 @@ var FudgeCore;
         }`;
         }
     }
-    ShaderMatCap.iSubclass = FudgeCore.Shader.registerSubclass(ShaderMatCap);
     FudgeCore.ShaderMatCap = ShaderMatCap;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -10529,6 +10717,7 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class ShaderTexture extends FudgeCore.Shader {
+        static iSubclass = FudgeCore.Shader.registerSubclass(ShaderTexture);
         static getCoat() {
             return FudgeCore.CoatTextured;
         }
@@ -10565,12 +10754,12 @@ var FudgeCore;
         }`;
         }
     }
-    ShaderTexture.iSubclass = FudgeCore.Shader.registerSubclass(ShaderTexture);
     FudgeCore.ShaderTexture = ShaderTexture;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class ShaderUniColor extends FudgeCore.Shader {
+        static iSubclass = FudgeCore.Shader.registerSubclass(ShaderUniColor);
         static getCoat() {
             return FudgeCore.CoatColored;
         }
@@ -10597,7 +10786,6 @@ var FudgeCore;
         }`;
         }
     }
-    ShaderUniColor.iSubclass = FudgeCore.Shader.registerSubclass(ShaderUniColor);
     FudgeCore.ShaderUniColor = ShaderUniColor;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -10609,10 +10797,12 @@ var FudgeCore;
         MIPMAP[MIPMAP["BLURRY"] = 2] = "BLURRY";
     })(MIPMAP = FudgeCore.MIPMAP || (FudgeCore.MIPMAP = {}));
     let Texture = class Texture extends FudgeCore.Mutable {
+        name;
+        idResource = undefined;
+        mipmap = MIPMAP.CRISP;
+        renderData;
         constructor(_name = "Texture") {
             super();
-            this.idResource = undefined;
-            this.mipmap = MIPMAP.CRISP;
             this.name = _name;
         }
         useRenderData() { }
@@ -10631,9 +10821,10 @@ var FudgeCore;
     ], Texture);
     FudgeCore.Texture = Texture;
     class TextureImage extends Texture {
+        image = null;
+        url;
         constructor(_url) {
             super();
-            this.image = null;
             if (_url) {
                 this.load(_url);
                 this.name = _url.toString().split("/").pop();
@@ -10678,9 +10869,9 @@ var FudgeCore;
     }
     FudgeCore.TextureImage = TextureImage;
     class TextureBase64 extends Texture {
+        image = new Image();
         constructor(_name, _base64, _mipmap = MIPMAP.CRISP) {
             super(_name);
-            this.image = new Image();
             this.image.src = _base64;
             this.mipmap = _mipmap;
         }
@@ -10690,6 +10881,7 @@ var FudgeCore;
     }
     FudgeCore.TextureBase64 = TextureBase64;
     class TextureCanvas extends Texture {
+        crc2;
         constructor(_name, _crc2) {
             super(_name);
             this.crc2 = _crc2;
@@ -10715,11 +10907,11 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class TextureDefault extends FudgeCore.TextureBase64 {
+        static texture = new TextureDefault("TextureDefault", TextureDefault.get(), FudgeCore.MIPMAP.MEDIUM);
         static get() {
             return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAAGQCAYAAACAvzbMAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAADWLSURBVHhe7d0HnFTlvf/xH9uXZYGl9yrSRJpEUexYsJIba8Re498WNcZEb+41epOIsWs0Niyxm2g0duwaewO7oqJCAGnSt7H/8304B4dldpk5Z3b3zO7nzeu85pwzM8vMs7PPb35PO61qPBZjrVq18vfiKebFR/lFRPlFQ/lFE/fyy/FvAQBICwEEABAKAQQAEAp9IBHRhhoN5RcN5RdNSyg//YzCwkJr3bq1O169erXbMoEAEhF/wNFQftFQftE09/LLzc21Ll262E9+8hMbP368VVdX2+uvv27Tp093QSTq+yeARMQfcDSUXzSUXzTNtfxycnKspKTEBg0aZEceeaQdeuihtmLFCvvss89s3rx59vjjj9vDDz8cOROJHECqqqps9uzZtmzZMlu5cqVLldq1a2d9+/Z1+1HxAYyG8ouG8ouG8osmTPnl5+db9+7dbffdd7dTTz3V1cXvvvuuvfzyyy4DkVWrVtmNN95oS5YsccdhhQ4g5eXl9uyzz9qMGTNszZo1/tkfKQIq+u29995WWlrqn00fH8BoKL9oKL9oKL9o0ik/PbZNmza2xRZb2HHHHWeTJ0+2hQsX2pNPPmmLFy/2H7XOf/7zH7v11ltdPR5FqACyYMECu+eee1KKXmvXrrX99tvPRo8e7YJKuvgARkP5RROUnz67+iKUl5dnlZWVtnz58li8dj5/0TSn8lOT1b777msXXHCBde7c2V577TV78803k77Hb7/91u644w6rqKjwz4STdgBRtqHUJ4hoChCffPKJffXVV649rX379jZgwAC3BZQuTZo0ybbbbjuXXqWDD2A0lF80Qfl17NjRjjnmGOvUqZN988039sADD7gvUk39+vn8RdOcyq9r1642depU23rrre3RRx91X3JEdbSasIqLi23YsGHuXKYCSNopgXrvg+Ch/o/77rvPvVi9+J///Od29NFH29ChQ90LDGj4mNIlBZm4/8LQssycOdM1xb766qtJm2JF2UfPnj3t17/+tU2YMMF23XVXO/bYY11QQfM1f/58u+mmm1zfgfp44071sV6zPstB8FA9rC/8Tz31lOsXybS0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";
         }
     }
-    TextureDefault.texture = new TextureDefault("TextureDefault", TextureDefault.get(), FudgeCore.MIPMAP.MEDIUM);
     FudgeCore.TextureDefault = TextureDefault;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -10731,6 +10923,22 @@ var FudgeCore;
         LOOP_MODE["TIME_REAL"] = "timeReal";
     })(LOOP_MODE = FudgeCore.LOOP_MODE || (FudgeCore.LOOP_MODE = {}));
     class Loop extends FudgeCore.EventTargetStatic {
+        static ƒTimeStartGame = 0;
+        static ƒTimeStartReal = 0;
+        static ƒTimeFrameGame = 0;
+        static ƒTimeFrameReal = 0;
+        static ƒTimeFrameStartGame = 0;
+        static ƒTimeFrameStartReal = 0;
+        static ƒTimeLastFrameGameAvg = 0;
+        static ƒTimeLastFrameRealAvg = 0;
+        static ƒFrames = 0;
+        static running = false;
+        static mode = LOOP_MODE.FRAME_REQUEST;
+        static idIntervall = 0;
+        static idRequest = 0;
+        static fpsDesired = 30;
+        static framesToAverage = 30;
+        static syncWithAnimationFrame = false;
         static get timeStartGame() { return Loop.ƒTimeStartGame; }
         static get timeStartReal() { return Loop.ƒTimeStartReal; }
         static get timeFrameGame() { return Loop.ƒTimeFrameGame; }
@@ -10823,31 +11031,20 @@ var FudgeCore;
                 Loop.loop();
         }
     }
-    Loop.ƒTimeStartGame = 0;
-    Loop.ƒTimeStartReal = 0;
-    Loop.ƒTimeFrameGame = 0;
-    Loop.ƒTimeFrameReal = 0;
-    Loop.ƒTimeFrameStartGame = 0;
-    Loop.ƒTimeFrameStartReal = 0;
-    Loop.ƒTimeLastFrameGameAvg = 0;
-    Loop.ƒTimeLastFrameRealAvg = 0;
-    Loop.ƒFrames = 0;
-    Loop.running = false;
-    Loop.mode = LOOP_MODE.FRAME_REQUEST;
-    Loop.idIntervall = 0;
-    Loop.idRequest = 0;
-    Loop.fpsDesired = 30;
-    Loop.framesToAverage = 30;
-    Loop.syncWithAnimationFrame = false;
     FudgeCore.Loop = Loop;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class Time extends FudgeCore.EventTargetƒ {
+        static game = new Time();
+        start;
+        scale;
+        offset;
+        lastCallToElapsed;
+        timers = {};
+        idTimerAddedLast = 0;
         constructor() {
             super();
-            this.timers = {};
-            this.idTimerAddedLast = 0;
             this.start = performance.now();
             this.scale = 1.0;
             this.offset = 0.0;
@@ -10952,12 +11149,19 @@ var FudgeCore;
             }
         }
     }
-    Time.game = new Time();
     FudgeCore.Time = Time;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
     class Timer {
+        active;
+        count;
+        handler;
+        time;
+        elapse;
+        event;
+        timeoutReal;
+        idWindow;
         constructor(_time, _elapse, _count, _handler, ..._arguments) {
             this.time = _time;
             this.elapse = _elapse;

@@ -13,8 +13,8 @@ namespace FudgeCore {
      */
     public update(_listener: AudioListener): void {
       let mtxResult: Matrix4x4 = this.mtxPivot;
-      if (this.getContainer())
-        mtxResult = Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.mtxPivot);
+      if (this.node)
+        mtxResult = Matrix4x4.MULTIPLICATION(this.node.mtxWorld, this.mtxPivot);
 
       // Debug.log(mtxResult.toString());
       let position: Vector3 = mtxResult.translation;

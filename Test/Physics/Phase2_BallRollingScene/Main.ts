@@ -1,4 +1,4 @@
-///<reference types="../../../../Core/Build/FudgeCore.js"/>
+// /<reference types="../../../../Core/Build/FudgeCore.js"/>
 import f = FudgeCore;
 
 namespace FudgePhysics_Communication {
@@ -92,7 +92,7 @@ namespace FudgePhysics_Communication {
 
 
     function resetBall(_event: f.EventPhysics): void {
-        if (_event.cmpRigidbody.getContainer().name == "Ball") {
+        if (_event.cmpRigidbody.node.name == "Ball") {
             ballRB.setPosition(new f.Vector3(0, 5, 0));
         }
     }

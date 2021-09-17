@@ -1,4 +1,4 @@
-///<reference types="../../../../Core/Build/FudgeCore.js"/>
+// /<reference types="../../../../Core/Build/FudgeCore.js"/>
 import f = FudgeCore;
 
 
@@ -323,14 +323,15 @@ namespace FudgePhysics_Communication {
         //Ray
         let hitInfo: f.RayHitInfo = f.Physics.raycast(ray.origin, ray.direction, 20);
         if (hitInfo.hit)
-            f.Debug.log(hitInfo.rigidbodyComponent.getContainer().name);
+            f.Debug.log(hitInfo.rigidbodyComponent.node.name);
         else
             f.Debug.log("miss");
         let pos: f.Vector3 = hitInfo.hitPoint;
         moveableTransform.mtxLocal.translation = pos;
     }
 
-    function hndPointerUp(_event: f.EventPointer) {
+    function hndPointerUp(_event: f.EventPointer): void {
+      //
     }
 
     function createRagdoll(): void {
@@ -455,8 +456,8 @@ namespace FudgePhysics_Communication {
         jointBodyLegR.springDampingTwist = 1;
         legR.addComponent(jointBodyLegR);
 
-        holder = new f.ComponentJointSpherical(moveableTransform.getContainer().getComponent(f.ComponentRigidbody), head.getComponent(f.ComponentRigidbody), new f.Vector3(0, 0, 0));
-        moveableTransform.getContainer().addComponent(holder);
+        holder = new f.ComponentJointSpherical(moveableTransform.node.getComponent(f.ComponentRigidbody), head.getComponent(f.ComponentRigidbody), new f.Vector3(0, 0, 0));
+        moveableTransform.node.addComponent(holder);
         holder.springDamping = 0.1;
         holder.springFrequency = 1;
 

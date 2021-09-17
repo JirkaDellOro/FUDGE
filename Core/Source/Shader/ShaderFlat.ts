@@ -3,7 +3,7 @@ namespace FudgeCore {
    * Single color shading
    * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
    */
-  @RenderInjectorShader.decorate
+  // @RenderInjectorShader.decorate
   export abstract class ShaderFlat extends Shader {
     public static readonly iSubclass: number = Shader.registerSubclass(ShaderFlat);
 

@@ -40,7 +40,7 @@ namespace FudgeCore {
       //TODO: optimize, no need to recalculate if neither mtxWorld nor pivot have changed
       let mtxCamera: Matrix4x4 = this.mtxPivot;
       try {
-        mtxCamera = Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.mtxPivot);
+        mtxCamera = Matrix4x4.MULTIPLICATION(this.node.mtxWorld, this.mtxPivot);
       } catch (_error) {
         // no container node or no world transformation found -> continue with pivot only
       }

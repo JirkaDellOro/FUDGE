@@ -1,4 +1,4 @@
-///<reference types="../../../../Core/Build/FudgeCore.js"/>
+// /<reference types="../../../../Core/Build/FudgeCore.js"/>
 import f = FudgeCore;
 
 
@@ -159,7 +159,7 @@ namespace FudgePhysics_Communication {
 
         hitInfo = f.Physics.raycast(origin, forward, 20);
 
-        if (hitInfo.hit == true && hitInfo.rigidbodyComponent.getContainer().name == "Target") {
+        if (hitInfo.hit == true && hitInfo.rigidbodyComponent.node.name == "Target") {
             f.Debug.log("hit");
         }
     }

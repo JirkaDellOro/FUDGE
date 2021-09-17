@@ -177,9 +177,11 @@ namespace Fudge {
         function init(_event: Event): void {
           dialog = document.querySelector("dialog");
           dialog.addEventListener("click", function (_event: Event): void {
+            //@ts-ignore
             dialog.close();
             startInteractiveViewport();
           });
+          //@ts-ignore
           dialog.showModal();
         }
 
@@ -213,7 +215,7 @@ namespace Fudge {
 
           // setup audio
           let cmpListener: ƒ.ComponentAudioListener = new ƒ.ComponentAudioListener();
-          cmpCamera.getContainer().addComponent(cmpListener);
+          cmpCamera.node.addComponent(cmpListener);
           FudgeCore.AudioManager.default.listenWith(cmpListener);
           FudgeCore.AudioManager.default.listenTo(graph);
           FudgeCore.Debug.log("Audio:", FudgeCore.AudioManager.default);

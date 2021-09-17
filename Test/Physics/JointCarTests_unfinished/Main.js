@@ -1,4 +1,5 @@
-///<reference types="../../../../Core/Build/FudgeCore.js"/>
+"use strict";
+// /<reference types="../../../../Core/Build/FudgeCore.js"/>
 var f = FudgeCore;
 //Reference Fudge, getting code completion ready and creating a shortcut f to write FudgeCode more comfortably
 var Turorials_FUDGEPhysics_Lesson1;
@@ -138,7 +139,7 @@ var Turorials_FUDGEPhysics_Lesson1;
         //Sliding, Prismatic, Spring Joint between the body and the suspension
         //In -Y-Axis positioned where the holder is located locally to the car_base
         frontSuspensionRight = new f.ComponentJointCylindrical(carBody, bodies[17].getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(0.50, -1, -0.75));
-        carBody.getContainer().addComponent(frontSuspensionRight);
+        carBody.node.addComponent(frontSuspensionRight);
         frontSuspensionRight.springDamping = 100;
         frontSuspensionRight.springFrequency = 2;
         frontSuspensionRight.translationMotorLimitUpper = 0;
@@ -147,7 +148,7 @@ var Turorials_FUDGEPhysics_Lesson1;
         frontSuspensionRight.rotationalMotorLimitLower = 0;
         frontSuspensionRight.internalCollision = true;
         frontSuspensionLeft = new f.ComponentJointCylindrical(carBody, bodies[19].getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(-0.50, -1, -0.75));
-        carBody.getContainer().addComponent(frontSuspensionLeft);
+        carBody.node.addComponent(frontSuspensionLeft);
         frontSuspensionLeft.springDamping = 100;
         frontSuspensionLeft.springFrequency = 2;
         frontSuspensionLeft.translationMotorLimitUpper = 0;
@@ -156,7 +157,7 @@ var Turorials_FUDGEPhysics_Lesson1;
         frontSuspensionLeft.rotationalMotorLimitLower = 0;
         frontSuspensionLeft.internalCollision = true;
         backSuspensionLeft = new f.ComponentJointCylindrical(carBody, bodies[20].getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(-0.50, -1, 0.75));
-        carBody.getContainer().addComponent(backSuspensionLeft);
+        carBody.node.addComponent(backSuspensionLeft);
         backSuspensionLeft.springDamping = 100;
         backSuspensionLeft.springFrequency = 2;
         backSuspensionLeft.translationMotorLimitUpper = 0;
@@ -165,7 +166,7 @@ var Turorials_FUDGEPhysics_Lesson1;
         backSuspensionLeft.rotationalMotorLimitLower = 0;
         backSuspensionLeft.internalCollision = true;
         backSuspensionRight = new f.ComponentJointCylindrical(carBody, bodies[18].getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(0.50, -1, 0.75));
-        carBody.getContainer().addComponent(backSuspensionRight);
+        carBody.node.addComponent(backSuspensionRight);
         backSuspensionRight.springDamping = 100;
         backSuspensionRight.springFrequency = 2;
         backSuspensionRight.translationMotorLimitUpper = 0;
@@ -205,6 +206,7 @@ var Turorials_FUDGEPhysics_Lesson1;
             wheelJoint_frontL.motorSpeed++;
         }
         if (_event.code == f.KEYBOARD_CODE.S) {
+            //
         }
         if (_event.code == f.KEYBOARD_CODE.D) {
             frontSuspensionLeft.rotationalMotorLimitUpper = currentAngle > -maxAngle ? currentAngle-- : currentAngle;
@@ -217,4 +219,3 @@ var Turorials_FUDGEPhysics_Lesson1;
         }
     }
 })(Turorials_FUDGEPhysics_Lesson1 || (Turorials_FUDGEPhysics_Lesson1 = {}));
-//# sourceMappingURL=Main.js.map

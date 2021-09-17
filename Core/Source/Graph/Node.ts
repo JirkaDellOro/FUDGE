@@ -323,7 +323,7 @@ namespace FudgeCore {
      * @param _component The component to be pushed into the array.
      */
     public addComponent(_component: Component): void {
-      if (_component.getContainer() == this)
+      if (_component.node == this)
         return;
       let cmpList: Component[] = this.components[_component.type];
       if (cmpList === undefined)

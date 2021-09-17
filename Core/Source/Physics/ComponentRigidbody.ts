@@ -1,4 +1,8 @@
 namespace FudgeCore {
+  export enum BODY_ADJUST {
+    TO_MESH, TO_NODE, TO_PIVOT
+  }
+
   /**
      * Acts as the physical representation of the {@link Node} it's attached to.
      * It's the connection between the Fudge Rendered world and the Physics world.
@@ -23,6 +27,7 @@ namespace FudgeCore {
     /** The groups this object collides with. Groups must be writen in form of
      *  e.g. collisionMask = PHYSICS_GROUP.DEFAULT | PHYSICS_GROUP.GROUP_1 and so on to collide with multiple groups. */
     public collisionMask: number;
+    public adjust: BODY_ADJUST.TO_MESH;
 
     /** ID to reference this specific ComponentRigidbody */
     #id: number = 0;
@@ -32,11 +37,11 @@ namespace FudgeCore {
     #colliderInfo: OIMO.ShapeConfig;
     #collisionGroup: COLLISION_GROUP = COLLISION_GROUP.DEFAULT;
     #typeCollider: COLLIDER_TYPE = COLLIDER_TYPE.CUBE;
-    
+
     #rigidbody: OIMO.RigidBody;
     #rigidbodyInfo: OIMO.RigidBodyConfig = new OIMO.RigidBodyConfig();
     #typeBody: BODY_TYPE = BODY_TYPE.DYNAMIC;
-    
+
     #massData: OIMO.MassData = new OIMO.MassData();
     #restitution: number;
     #friction: number;
@@ -45,7 +50,7 @@ namespace FudgeCore {
     #effectRotation: Vector3 = Vector3.ONE();
     #effectGravity: number = 1;
     #isTrigger: boolean = false;
-    
+
     #callbacks: OIMO.ContactCallback; //Callback Methods when within the oimoSystem a event is happening
 
     /** Creating a new rigidbody with a weight in kg, a physics type (default = dynamic), a collider type what physical form has the collider, to what group does it belong, is there a transform Matrix that should be used, and is the collider defined as a group of points that represent a convex mesh. */
@@ -128,7 +133,7 @@ namespace FudgeCore {
   */
     public set mass(_value: number) {
       this.#massData.mass = _value;
-      if (this.getContainer() != null)
+      if (this.node != null)
         if (this.#rigidbody != null)
           this.#rigidbody.setMassData(this.#massData);
     }
@@ -298,8 +303,8 @@ namespace FudgeCore {
    * Checks that the Rigidbody is positioned correctly and recreates the Collider with new scale/position/rotation
    */
     public updateFromWorld(_toMesh: boolean = false): void {
-      let cmpMesh: ComponentMesh = this.getContainer().getComponent(ComponentMesh);
-      let worldTransform: Matrix4x4 = (_toMesh && cmpMesh) ? cmpMesh.mtxWorld : this.getContainer().mtxWorld; //super.getContainer() != null ? super.getContainer().mtxWorld : Matrix4x4.IDENTITY(); //The the world information about where to position/scale/rotate
+      let cmpMesh: ComponentMesh = this.node.getComponent(ComponentMesh);
+      let worldTransform: Matrix4x4 = (_toMesh && cmpMesh) ? cmpMesh.mtxWorld : this.node.mtxWorld; //super.getContainer() != null ? super.getContainer().mtxWorld : Matrix4x4.IDENTITY(); //The the world information about where to position/scale/rotate
       let position: Vector3 = worldTransform.translation; //Adding the offsets from the pivot
       position.add(this.mtxPivot.translation);
       let rotation: Vector3 = worldTransform.getEulerAngles();
@@ -368,7 +373,7 @@ namespace FudgeCore {
 
     /** Get the current SCALING in the physical space. */
     public getScaling(): Vector3 {
-      let scaling: Vector3 = this.getContainer().mtxWorld.scaling.copy;
+      let scaling: Vector3 = this.node.mtxWorld.scaling.copy;
       scaling.x *= this.mtxPivot.scaling.x;
       scaling.y *= this.mtxPivot.scaling.y;
       scaling.z *= this.mtxPivot.scaling.z;
@@ -396,7 +401,7 @@ namespace FudgeCore {
       }
       let mutator: Mutator = {};
       mutator["scaling"] = _value;
-      this.getContainer().mtxLocal.mutate(mutator);
+      this.node.mtxLocal.mutate(mutator);
     }
     //#region Velocity and Forces
 
@@ -682,7 +687,7 @@ namespace FudgeCore {
       // while (this.#rigidbody && this.#rigidbody.getShapeList() != null)
       //   this.#rigidbody.removeShape(this.#rigidbody.getShapeList());
 
-      let tmpTransform: Matrix4x4 = _mtxTransform == null ? super.getContainer() != null ? super.getContainer().mtxWorld : Matrix4x4.IDENTITY() : _mtxTransform; //Get transform informations from the world, since physics does not care about hierarchy
+      let tmpTransform: Matrix4x4 = _mtxTransform == null ? super.node != null ? super.node.mtxWorld : Matrix4x4.IDENTITY() : _mtxTransform; //Get transform informations from the world, since physics does not care about hierarchy
       //Convert informations from Fudge to OimoPhysics and creating a collider with it, while also adding a pivot to derivate from the transform informations if needed
       let scale: OIMO.Vec3 = new OIMO.Vec3((tmpTransform.scaling.x * this.mtxPivot.scaling.x) / 2, (tmpTransform.scaling.y * this.mtxPivot.scaling.y) / 2, (tmpTransform.scaling.z * this.mtxPivot.scaling.z) / 2);
       let position: OIMO.Vec3 = new OIMO.Vec3(tmpTransform.translation.x + this.mtxPivot.translation.x, tmpTransform.translation.y + this.mtxPivot.translation.y, tmpTransform.translation.z + this.mtxPivot.translation.z);

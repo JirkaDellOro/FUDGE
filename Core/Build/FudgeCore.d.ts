@@ -1366,6 +1366,7 @@ declare namespace FudgeCore {
      * @link https://github.com/JirkaDellOro/FUDGE/wiki/Component
      */
     abstract class Component extends Mutable implements Serializable {
+        #private;
         /** subclasses get a iSubclass number for identification */
         static readonly iSubclass: number;
         /** refers back to this class from any subclass e.g. in order to find compatible other resources*/
@@ -1374,19 +1375,17 @@ declare namespace FudgeCore {
         static readonly subclasses: typeof Component[];
         protected singleton: boolean;
         protected active: boolean;
-        private container;
         protected static registerSubclass(_subclass: typeof Component): number;
         get isActive(): boolean;
         /**
          * Is true, when only one instance of the component class can be attached to a node
          */
         get isSingleton(): boolean;
-        activate(_on: boolean): void;
         /**
          * Retrieves the node, this component is currently attached to
-         * @returns The container node or null, if the component is not attached to
          */
-        getContainer(): Node | null;
+        get node(): Node | null;
+        activate(_on: boolean): void;
         /**
          * Tries to add the component to the given node, removing it from the previous container if applicable
          * @param _container The node to attach this component to
@@ -4462,6 +4461,11 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    enum BODY_ADJUST {
+        TO_MESH = 0,
+        TO_NODE = 1,
+        TO_PIVOT = 2
+    }
     /**
        * Acts as the physical representation of the {@link Node} it's attached to.
        * It's the connection between the Fudge Rendered world and the Physics world.
@@ -4483,6 +4487,7 @@ declare namespace FudgeCore {
         /** The groups this object collides with. Groups must be writen in form of
          *  e.g. collisionMask = PHYSICS_GROUP.DEFAULT | PHYSICS_GROUP.GROUP_1 and so on to collide with multiple groups. */
         collisionMask: number;
+        adjust: BODY_ADJUST.TO_MESH;
         /** Creating a new rigidbody with a weight in kg, a physics type (default = dynamic), a collider type what physical form has the collider, to what group does it belong, is there a transform Matrix that should be used, and is the collider defined as a group of points that represent a convex mesh. */
         constructor(_mass?: number, _type?: BODY_TYPE, _colliderType?: COLLIDER_TYPE, _group?: COLLISION_GROUP, _mtxTransform?: Matrix4x4, _convexMesh?: Float32Array);
         get id(): number;

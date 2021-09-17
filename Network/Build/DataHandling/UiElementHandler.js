@@ -2,6 +2,53 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UiElementHandler = void 0;
 class UiElementHandler {
+    // tslint:disable-next-line: typedef
+    static electronWindow;
+    static signalingSubmit;
+    static signalingUrl;
+    static loginNameInput;
+    static loginButton;
+    static msgInput;
+    static chatbox;
+    static sendMsgButton;
+    static connectToUserButton;
+    static usernameToConnectTo;
+    static disconnectButton;
+    static startSignalingButton;
+    static peerToPeerHtmlElements;
+    static authoritativeElements;
+    static switchModeButton;
+    static stopSignalingServer;
+    static broadcastButton;
+    static moveableBoxElement;
+    static signalingElements;
+    static serverElements;
+    static webSocketServerChatBox;
+    static webSocketServerMessageInput;
+    static webSocketServerSendMessageButton;
+    static authoritativeSwitchToServerOrClientModeButton;
+    static authoritativeServerElements;
+    static authoritativeServerStartSignalingButton;
+    static authoritativeServerStopSignalingButton;
+    static authoritativeServerBroadcastButton;
+    static authoritativeServerMessageInput;
+    static authoritativeServerMovingDiv;
+    static authoritativeClientElements;
+    static authoritativeClientSignalingUrlInput;
+    static authoritativeClientConnectToServerButton;
+    static authoritativeClientLoginNameInput;
+    static authoritativeClientLoginButton;
+    static authoritativeClientChatArea;
+    static authoritativeClientMessageInput;
+    static authoritativeClientSendMessageButton;
+    static meshNetworkClientOrServerSwitch;
+    static meshServerElements;
+    static meshServerStartSignalingButton;
+    static meshServerStopSignalingButton;
+    static meshClientElements;
+    static meshClientSignalingURL;
+    static meshClientSubmitButton;
+    static meshClientReadyButton;
     static getFundamentalDOMElements() {
         UiElementHandler.electronWindow = document;
     }
@@ -73,6 +120,8 @@ class UiElementHandler {
         UiElementHandler.peerToPeerHtmlElements = document.getElementById("peer_to_peer_elements");
         UiElementHandler.broadcastButton = document.getElementById("broadcastButton");
     }
+    static colorList = ["#ff1100", "#ffe600", "#aaff00", "#26ff00", "#00ffd9", "#0059ff", "#d900ff", "#ff0084"];
+    static colorListIndex = 0;
     static addMovingDivForAuth() {
         let movingDiv = document.createElement('div');
         movingDiv.style.cssText = "style=height:50px;width:50px;background-color:" + this.colorList[this.colorListIndex] + "; position:relative; left: 0px; top: 0px;";
@@ -82,5 +131,3 @@ class UiElementHandler {
     }
 }
 exports.UiElementHandler = UiElementHandler;
-UiElementHandler.colorList = ["#ff1100", "#ffe600", "#aaff00", "#26ff00", "#00ffd9", "#0059ff", "#d900ff", "#ff0084"];
-UiElementHandler.colorListIndex = 0;

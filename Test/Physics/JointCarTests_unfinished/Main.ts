@@ -1,4 +1,4 @@
-///<reference types="../../../../Core/Build/FudgeCore.js"/>
+// /<reference types="../../../../Core/Build/FudgeCore.js"/>
 import f = FudgeCore;
 //Reference Fudge, getting code completion ready and creating a shortcut f to write FudgeCode more comfortably
 
@@ -127,53 +127,53 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
         bodies[13].mtxLocal.translate(new f.Vector3(1, 1.50, -0.75));
         bodies[13].mtxLocal.scale(new f.Vector3(0.5, 0.85, 0.85)); //Wheels the as a cylinder use the x, for the height of the cylinder, y for the diameter and z is just for the f.MeshCube to scale.
         bodies[13].mtxLocal.rotateZ(90, false);
-        hierarchy.appendChild(bodies[13])
+        hierarchy.appendChild(bodies[13]);
 
         bodies[14] = createCompleteNode("Car_WheelRight_Back", materialPlayer, new f.MeshCube(), 5, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.DEFAULT, f.COLLIDER_TYPE.CYLINDER);
         bodies[14].mtxLocal.translate(new f.Vector3(1, 1.50, 0.75));
         bodies[14].mtxLocal.scale(new f.Vector3(0.5, 0.85, 0.85));
         bodies[14].mtxLocal.rotateZ(90, false);
-        hierarchy.appendChild(bodies[14])
+        hierarchy.appendChild(bodies[14]);
 
         bodies[15] = createCompleteNode("Car_WheelLeft_Front", materialPlayer, new f.MeshCube(), 5, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.DEFAULT, f.COLLIDER_TYPE.CYLINDER);
         bodies[15].mtxLocal.translate(new f.Vector3(-1, 1.50, -0.75));
         bodies[15].mtxLocal.scale(new f.Vector3(0.5, 0.85, 0.85));
         bodies[15].mtxLocal.rotateZ(90, false);
-        hierarchy.appendChild(bodies[15])
+        hierarchy.appendChild(bodies[15]);
 
         bodies[16] = createCompleteNode("Car_WheelLeft_Back", materialPlayer, new f.MeshCube(), 5, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.DEFAULT, f.COLLIDER_TYPE.CYLINDER);
         bodies[16].mtxLocal.translate(new f.Vector3(-1, 1.50, 0.75));
         bodies[16].mtxLocal.scale(new f.Vector3(0.5, 0.85, 0.85));
         bodies[16].mtxLocal.rotateZ(90, false);
-        hierarchy.appendChild(bodies[16])
+        hierarchy.appendChild(bodies[16]);
 
         //SuspensionHolders
         bodies[17] = createCompleteNode("Car_HolderRight_Front", materialPlayer, new f.MeshCube(), 20, f.BODY_TYPE.DYNAMIC);
         bodies[17].mtxLocal.translate(new f.Vector3(0.4, 1.5, -0.75));
         bodies[17].mtxLocal.scale(new f.Vector3(0.5, 0.5, 0.5));
-        hierarchy.appendChild(bodies[17])
+        hierarchy.appendChild(bodies[17]);
 
         bodies[18] = createCompleteNode("Car_HolderRight_Back", materialPlayer, new f.MeshCube(), 20, f.BODY_TYPE.DYNAMIC);
         bodies[18].mtxLocal.translate(new f.Vector3(0.4, 1.5, 0.75));
         bodies[18].mtxLocal.scale(new f.Vector3(0.5, 0.5, 0.5));
-        hierarchy.appendChild(bodies[18])
+        hierarchy.appendChild(bodies[18]);
 
         bodies[19] = createCompleteNode("Car_HolderLeft_Front", materialPlayer, new f.MeshCube(), 20, f.BODY_TYPE.DYNAMIC);
         bodies[19].mtxLocal.translate(new f.Vector3(-0.4, 1.5, -0.75));
         bodies[19].mtxLocal.scale(new f.Vector3(0.5, 0.5, 0.5));
-        hierarchy.appendChild(bodies[19])
+        hierarchy.appendChild(bodies[19]);
 
         bodies[20] = createCompleteNode("Car_HolderLeft_Back", materialPlayer, new f.MeshCube(), 20, f.BODY_TYPE.DYNAMIC);
         bodies[20].mtxLocal.translate(new f.Vector3(-0.4, 1.5, 0.75));
         bodies[20].mtxLocal.scale(new f.Vector3(0.5, 0.5, 0.5));
-        hierarchy.appendChild(bodies[20])
+        hierarchy.appendChild(bodies[20]);
 
 
         //Connecting them with joints
         //Sliding, Prismatic, Spring Joint between the body and the suspension
         //In -Y-Axis positioned where the holder is located locally to the car_base
         frontSuspensionRight = new f.ComponentJointCylindrical(carBody, bodies[17].getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(0.50, -1, -0.75));
-        carBody.getContainer().addComponent(frontSuspensionRight);
+        carBody.node.addComponent(frontSuspensionRight);
         frontSuspensionRight.springDamping = 100;
         frontSuspensionRight.springFrequency = 2;
         frontSuspensionRight.translationMotorLimitUpper = 0;
@@ -182,7 +182,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
         frontSuspensionRight.rotationalMotorLimitLower = 0;
         frontSuspensionRight.internalCollision = true;
         frontSuspensionLeft = new f.ComponentJointCylindrical(carBody, bodies[19].getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(-0.50, -1, -0.75));
-        carBody.getContainer().addComponent(frontSuspensionLeft);
+        carBody.node.addComponent(frontSuspensionLeft);
         frontSuspensionLeft.springDamping = 100;
         frontSuspensionLeft.springFrequency = 2;
         frontSuspensionLeft.translationMotorLimitUpper = 0;
@@ -191,7 +191,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
         frontSuspensionLeft.rotationalMotorLimitLower = 0;
         frontSuspensionLeft.internalCollision = true;
         backSuspensionLeft = new f.ComponentJointCylindrical(carBody, bodies[20].getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(-0.50, -1, 0.75));
-        carBody.getContainer().addComponent(backSuspensionLeft);
+        carBody.node.addComponent(backSuspensionLeft);
         backSuspensionLeft.springDamping = 100;
         backSuspensionLeft.springFrequency = 2;
         backSuspensionLeft.translationMotorLimitUpper = 0;
@@ -200,7 +200,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
         backSuspensionLeft.rotationalMotorLimitLower = 0;
         backSuspensionLeft.internalCollision = true;
         backSuspensionRight = new f.ComponentJointCylindrical(carBody, bodies[18].getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(0.50, -1, 0.75));
-        carBody.getContainer().addComponent(backSuspensionRight);
+        carBody.node.addComponent(backSuspensionRight);
         backSuspensionRight.springDamping = 100;
         backSuspensionRight.springFrequency = 2;
         backSuspensionRight.translationMotorLimitUpper = 0;
@@ -245,7 +245,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
             wheelJoint_frontL.motorSpeed++;
         }
         if (_event.code == f.KEYBOARD_CODE.S) {
-
+          //
         }
         if (_event.code == f.KEYBOARD_CODE.D) {
             frontSuspensionLeft.rotationalMotorLimitUpper = currentAngle > -maxAngle ? currentAngle-- : currentAngle;

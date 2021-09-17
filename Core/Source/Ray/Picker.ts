@@ -28,8 +28,8 @@ namespace FudgeCore {
       let length: number = ray.direction.magnitude;
       
       let mtxCamera: Matrix4x4 = _cmpCamera.mtxPivot;
-      if (_cmpCamera.getContainer())
-        mtxCamera = Matrix4x4.MULTIPLICATION(_cmpCamera.getContainer().mtxWorld, _cmpCamera.mtxPivot);
+      if (_cmpCamera.node)
+        mtxCamera = Matrix4x4.MULTIPLICATION(_cmpCamera.node.mtxWorld, _cmpCamera.mtxPivot);
       ray.transform(mtxCamera);
 
 

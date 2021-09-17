@@ -182,7 +182,7 @@ namespace FudgeCore {
         this.constructJoint();
         this.connected = true;
         this.superAdd();
-        Debug.log("called Connection For: " + this.attachedRB.getContainer().name + " / " + this.connectedRB.getContainer().name);
+        Debug.log("called Connection For: " + this.attachedRB.node.name + " / " + this.connectedRB.node.name);
         Debug.log("Strength: " + this.springDamping + " / " + this.springFrequency);
         Debug.log(this.oimoJoint);
       }
@@ -261,7 +261,7 @@ namespace FudgeCore {
       this.translationalMotor = new OIMO.TranslationalLimitMotor().setLimits(this.jointMotorLimitLower, this.jointMotorLimitUpper); //Create motor settings, to hold positions, set constraint min/max
       this.translationalMotor.setMotor(this.jointMotorSpeed, this.jointMotorForce);
       this.config = new OIMO.PrismaticJointConfig(); //Create a specific config for this joint type that is calculating the local axis for both bodies
-      let attachedRBPos: Vector3 = this.attachedRigidbody.getContainer().mtxWorld.translation; //Setting the anchor position locally from the first rigidbody
+      let attachedRBPos: Vector3 = this.attachedRigidbody.node.mtxWorld.translation; //Setting the anchor position locally from the first rigidbody
       let worldAnchor: OIMO.Vec3 = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
       this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, this.jointAxis); //Initialize the config to calculate the local axis/anchors for the OimoPhysics Engine
       this.config.springDamper = this.springDamper; //Telling the config to use the motor/spring of the Fudge Component

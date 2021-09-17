@@ -1,4 +1,4 @@
-///<reference types="../../../../Core/Build/FudgeCore.js"/>
+// /<reference types="../../../../Core/Build/FudgeCore.js"/>
 import f = FudgeCore;
 
 
@@ -82,36 +82,36 @@ namespace FudgePhysics_Communication {
     }
 
     function onCollisionEnter(_event: f.EventPhysics): void {
-        f.Debug.log("ColEnter: " + _event.cmpRigidbody.getContainer().name);
+        f.Debug.log("ColEnter: " + _event.cmpRigidbody.node.name);
         f.Debug.log("ColEnterIMPULSE: " + _event.normalImpulse);
         f.Debug.log("ColEnterPoint: " + _event.collisionPoint);
-        if (_event.cmpRigidbody.getContainer().name == "Cube") {
-            let cmpMaterial: f.ComponentMaterial = _event.cmpRigidbody.getContainer().getComponent(f.ComponentMaterial);
+        if (_event.cmpRigidbody.node.name == "Cube") {
+            let cmpMaterial: f.ComponentMaterial = _event.cmpRigidbody.node.getComponent(f.ComponentMaterial);
             cmpMaterial.material = hitMaterial;
         }
     }
 
     function onCollisionExit(_event: f.EventPhysics): void {
-        f.Debug.log("ColExit: " + _event.cmpRigidbody.getContainer().name);
-        if (_event.cmpRigidbody.getContainer().name == "Cube") {
-            let cmpMaterial: f.ComponentMaterial = _event.cmpRigidbody.getContainer().getComponent(f.ComponentMaterial);
+        f.Debug.log("ColExit: " + _event.cmpRigidbody.node.name);
+        if (_event.cmpRigidbody.node.name == "Cube") {
+            let cmpMaterial: f.ComponentMaterial = _event.cmpRigidbody.node.getComponent(f.ComponentMaterial);
             cmpMaterial.material = normalMaterial;
         }
     }
 
     function onTriggerEnter(_event: f.EventPhysics): void {
-        f.Debug.log("TriggerEnter: " + _event.cmpRigidbody.getContainer().name);
+        f.Debug.log("TriggerEnter: " + _event.cmpRigidbody.node.name);
         f.Debug.log("TriggerEnterPoint: " + _event.collisionPoint);
-        if (_event.cmpRigidbody.getContainer().name == "Cube") {
-            let cmpMaterial: f.ComponentMaterial = _event.cmpRigidbody.getContainer().getComponent(f.ComponentMaterial);
+        if (_event.cmpRigidbody.node.name == "Cube") {
+            let cmpMaterial: f.ComponentMaterial = _event.cmpRigidbody.node.getComponent(f.ComponentMaterial);
             cmpMaterial.material = triggeredMaterial;
         }
     }
 
     function onTriggerExit(_event: f.EventPhysics): void {
-        f.Debug.log("TriggerExit: " + _event.cmpRigidbody.getContainer().name);
-        if (_event.cmpRigidbody.getContainer().name == "Cube") {
-            let cmpMaterial: f.ComponentMaterial = _event.cmpRigidbody.getContainer().getComponent(f.ComponentMaterial);
+        f.Debug.log("TriggerExit: " + _event.cmpRigidbody.node.name);
+        if (_event.cmpRigidbody.node.name == "Cube") {
+            let cmpMaterial: f.ComponentMaterial = _event.cmpRigidbody.node.getComponent(f.ComponentMaterial);
             cmpMaterial.material = normalMaterial;
         }
     }

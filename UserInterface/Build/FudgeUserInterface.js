@@ -9,43 +9,17 @@ var FudgeUserInterface;
      * Updates the mutable on interaction with the element and the element in time intervals.
      */
     class Controller {
+        // TODO: examine the use of the attribute key vs name. Key signals the use by FUDGE while name is standard and supported by forms
+        domElement;
+        timeUpdate = 190;
+        /** Refererence to the [[FudgeCore.Mutable]] this ui refers to */
+        mutable;
+        /** [[FudgeCore.Mutator]] used to convey data to and from the mutable*/
+        mutator;
+        /** [[FudgeCore.Mutator]] used to store the data types of the mutator attributes*/
+        mutatorTypes = null;
+        idInterval;
         constructor(_mutable, _domElement) {
-            this.timeUpdate = 190;
-            /** [[FudgeCore.Mutator]] used to store the data types of the mutator attributes*/
-            this.mutatorTypes = null;
-            this.mutateOnInput = async (_event) => {
-                this.mutator = this.getMutator();
-                await this.mutable.mutate(this.mutator);
-                _event.stopPropagation();
-                this.domElement.dispatchEvent(new Event("mutate" /* MUTATE */, { bubbles: true }));
-            };
-            this.rearrangeArray = async (_event) => {
-                let sequence = _event.detail.sequence;
-                let path = [];
-                let details = _event.target;
-                let mutable;
-                { // find the MutableArray connected to this DetailsArray
-                    let element = details;
-                    while (element != this.domElement) {
-                        if (element.getAttribute("key"))
-                            path.push(element.getAttribute("key"));
-                        element = element.parentElement;
-                    }
-                    // console.log(path);
-                    mutable = this.mutable;
-                    for (let key of path)
-                        mutable = Reflect.get(mutable, key);
-                }
-                // rearrange that mutable
-                mutable.rearrange(sequence);
-            };
-            this.refresh = (_event) => {
-                if (document.body.contains(this.domElement)) {
-                    this.updateUserInterface();
-                    return;
-                }
-                window.clearInterval(this.idInterval);
-            };
             this.domElement = _domElement;
             this.setMutable(_mutable);
             // TODO: examine, if this should register to one common interval, instead of each installing its own.
@@ -157,6 +131,39 @@ var FudgeUserInterface;
             window.clearInterval(this.idInterval);
             this.idInterval = window.setInterval(this.refresh, this.timeUpdate);
         }
+        mutateOnInput = async (_event) => {
+            this.mutator = this.getMutator();
+            await this.mutable.mutate(this.mutator);
+            _event.stopPropagation();
+            this.domElement.dispatchEvent(new Event("mutate" /* MUTATE */, { bubbles: true }));
+        };
+        rearrangeArray = async (_event) => {
+            let sequence = _event.detail.sequence;
+            let path = [];
+            let details = _event.target;
+            let mutable;
+            { // find the MutableArray connected to this DetailsArray
+                let element = details;
+                while (element != this.domElement) {
+                    if (element.getAttribute("key"))
+                        path.push(element.getAttribute("key"));
+                    element = element.parentElement;
+                }
+                // console.log(path);
+                mutable = this.mutable;
+                for (let key of path)
+                    mutable = Reflect.get(mutable, key);
+            }
+            // rearrange that mutable
+            mutable.rearrange(sequence);
+        };
+        refresh = (_event) => {
+            if (document.body.contains(this.domElement)) {
+                this.updateUserInterface();
+                return;
+            }
+            window.clearInterval(this.idInterval);
+        };
     }
     FudgeUserInterface.Controller = Controller;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
@@ -292,9 +299,12 @@ var FudgeUserInterface;
      * and to the data types and [[FudgeCore.Mutable]]s they render an interface for.
      */
     class CustomElement extends HTMLElement {
+        static tag;
+        static mapObjectToCustomElement = new Map();
+        static idCounter = 0;
+        initialized = false;
         constructor(_attributes) {
             super();
-            this.initialized = false;
             if (_attributes)
                 for (let name in _attributes) {
                     this.setAttribute(name, _attributes[name]);
@@ -374,8 +384,6 @@ var FudgeUserInterface;
             return clone;
         }
     }
-    CustomElement.mapObjectToCustomElement = new Map();
-    CustomElement.idCounter = 0;
     FudgeUserInterface.CustomElement = CustomElement;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
@@ -384,6 +392,8 @@ var FudgeUserInterface;
      * A standard checkbox with a label to it
      */
     class CustomElementBoolean extends FudgeUserInterface.CustomElement {
+        // @ts-ignore
+        static customElement = FudgeUserInterface.CustomElement.register("fudge-boolean", CustomElementBoolean, Boolean);
         constructor(_attributes) {
             super(_attributes);
             if (!_attributes.label)
@@ -418,8 +428,6 @@ var FudgeUserInterface;
             this.querySelector("input").checked = _value;
         }
     }
-    // @ts-ignore
-    CustomElementBoolean.customElement = FudgeUserInterface.CustomElement.register("fudge-boolean", CustomElementBoolean, Boolean);
     FudgeUserInterface.CustomElementBoolean = CustomElementBoolean;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
@@ -429,9 +437,11 @@ var FudgeUserInterface;
      * A color picker with a label to it and a slider for opacity
      */
     class CustomElementColor extends FudgeUserInterface.CustomElement {
+        // @ts-ignore
+        static customElement = FudgeUserInterface.CustomElement.register("fudge-color", CustomElementColor, ƒ.Color);
+        color = new ƒ.Color();
         constructor(_attributes) {
             super(_attributes);
-            this.color = new ƒ.Color();
             if (!_attributes.label)
                 this.setAttribute("label", _attributes.key);
             this.addEventListener("keydown" /* KEY_DOWN */, this.hndKey);
@@ -490,8 +500,6 @@ var FudgeUserInterface;
             slider.dispatchEvent(new Event("input" /* INPUT */, { bubbles: true }));
         }
     }
-    // @ts-ignore
-    CustomElementColor.customElement = FudgeUserInterface.CustomElement.register("fudge-color", CustomElementColor, ƒ.Color);
     FudgeUserInterface.CustomElementColor = CustomElementColor;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
@@ -501,9 +509,11 @@ var FudgeUserInterface;
      * Is tabbable and in-/decreases previous sibling when flowing over/under.
      */
     class CustomElementDigit extends HTMLElement {
+        // @ts-ignore
+        static customElement = FudgeUserInterface.CustomElement.register("fudge-digit", CustomElementDigit);
+        initialized = false;
         constructor() {
             super();
-            this.initialized = false;
         }
         set value(_value) {
             _value = Math.trunc(_value);
@@ -549,8 +559,6 @@ var FudgeUserInterface;
             }
         }
     }
-    // @ts-ignore
-    CustomElementDigit.customElement = FudgeUserInterface.CustomElement.register("fudge-digit", CustomElementDigit);
     FudgeUserInterface.CustomElementDigit = CustomElementDigit;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 ///<reference path="CustomElement.ts"/>
@@ -562,6 +570,7 @@ var FudgeUserInterface;
      * Creates a CustomElement from an HTML-Template-Tag
      */
     class CustomElementTemplate extends FudgeUserInterface.CustomElement {
+        static fragment = new Map();
         constructor(_attributes) {
             super(_attributes);
         }
@@ -624,7 +633,6 @@ var FudgeUserInterface;
                 label.textContent = this.getAttribute("label");
         }
     }
-    CustomElementTemplate.fragment = new Map();
     FudgeUserInterface.CustomElementTemplate = CustomElementTemplate;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 ///<reference path="CustomElementTemplate.ts"/>
@@ -695,6 +703,9 @@ var FudgeUserInterface;
      * A dropdown menu to display enums
      */
     class CustomElementSelect extends FudgeUserInterface.CustomElement {
+        // @ts-ignore
+        static customElement = FudgeUserInterface.CustomElement.register("fudge-select", CustomElementSelect, Object);
+        content;
         constructor(_attributes, _content = {}) {
             super(_attributes);
             if (!_attributes.label)
@@ -739,8 +750,6 @@ var FudgeUserInterface;
             // this.value = _value;
         }
     }
-    // @ts-ignore
-    CustomElementSelect.customElement = FudgeUserInterface.CustomElement.register("fudge-select", CustomElementSelect, Object);
     FudgeUserInterface.CustomElementSelect = CustomElementSelect;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
@@ -750,112 +759,11 @@ var FudgeUserInterface;
      * An interactive number stepper with exponential display and complex handling using keyboard and mouse
      */
     class CustomElementStepper extends FudgeUserInterface.CustomElement {
+        // @ts-ignore
+        static customElement = FudgeUserInterface.CustomElement.register("fudge-stepper", CustomElementStepper, Number);
+        value = 0;
         constructor(_attributes) {
             super(_attributes);
-            this.value = 0;
-            /**
-             * Handle keyboard input on this element and its digits
-             */
-            this.hndKey = (_event) => {
-                let active = document.activeElement;
-                let numEntered = _event.key.charCodeAt(0) - 48;
-                _event.stopPropagation();
-                // if focus is on stepper, enter it and focus digit
-                if (active == this) {
-                    switch (_event.code) {
-                        case ƒ.KEYBOARD_CODE.ENTER:
-                        case ƒ.KEYBOARD_CODE.NUMPAD_ENTER:
-                        case ƒ.KEYBOARD_CODE.SPACE:
-                        case ƒ.KEYBOARD_CODE.ARROW_UP:
-                        case ƒ.KEYBOARD_CODE.ARROW_DOWN:
-                            this.activateInnerTabs(true);
-                            this.querySelectorAll("fudge-digit")[2].focus();
-                            break;
-                        case ƒ.KEYBOARD_CODE.F2:
-                            this.openInput(true);
-                            break;
-                    }
-                    if ((numEntered >= 0 && numEntered <= 9) || _event.key == "-" || _event.key == "+") {
-                        this.openInput(true);
-                        this.querySelector("input").value = "";
-                        // _event.stopImmediatePropagation();
-                    }
-                    return;
-                }
-                // input field overlay is active
-                if (active.getAttribute("type") == "number") {
-                    if (_event.key == ƒ.KEYBOARD_CODE.ENTER || _event.key == ƒ.KEYBOARD_CODE.NUMPAD_ENTER || _event.key == ƒ.KEYBOARD_CODE.TABULATOR) {
-                        this.value = Number(active.value);
-                        this.display();
-                        this.openInput(false);
-                        this.focus();
-                        this.dispatchEvent(new Event("input" /* INPUT */, { bubbles: true }));
-                    }
-                    return;
-                }
-                if (numEntered >= 0 && numEntered <= 9) {
-                    let difference = numEntered - Number(active.textContent) * (this.value < 0 ? -1 : 1);
-                    this.changeDigitFocussed(difference);
-                    let next = active.nextElementSibling;
-                    if (next)
-                        next.focus();
-                    this.dispatchEvent(new Event("input" /* INPUT */, { bubbles: true }));
-                    return;
-                }
-                if (_event.key == "-" || _event.key == "+") {
-                    this.value = (_event.key == "-" ? -1 : 1) * Math.abs(this.value);
-                    this.display();
-                    this.dispatchEvent(new Event("input" /* INPUT */, { bubbles: true }));
-                    return;
-                }
-                if (_event.code != ƒ.KEYBOARD_CODE.TABULATOR)
-                    _event.preventDefault();
-                switch (_event.code) {
-                    case ƒ.KEYBOARD_CODE.ARROW_DOWN:
-                        this.changeDigitFocussed(-1);
-                        this.dispatchEvent(new Event("input" /* INPUT */, { bubbles: true }));
-                        break;
-                    case ƒ.KEYBOARD_CODE.ARROW_UP:
-                        this.changeDigitFocussed(+1);
-                        this.dispatchEvent(new Event("input" /* INPUT */, { bubbles: true }));
-                        break;
-                    case ƒ.KEYBOARD_CODE.ARROW_LEFT:
-                        active.previousElementSibling.focus();
-                        break;
-                    case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
-                        let next = active.nextElementSibling;
-                        if (next)
-                            next.focus();
-                        break;
-                    case ƒ.KEYBOARD_CODE.ENTER:
-                    case ƒ.KEYBOARD_CODE.NUMPAD_ENTER:
-                    case ƒ.KEYBOARD_CODE.ESC:
-                        this.activateInnerTabs(false);
-                        this.focus();
-                        break;
-                    case ƒ.KEYBOARD_CODE.F2:
-                        this.activateInnerTabs(false);
-                        this.openInput(true);
-                        break;
-                    default:
-                        break;
-                }
-            };
-            this.hndWheel = (_event) => {
-                _event.stopPropagation();
-                _event.preventDefault();
-                let change = _event.deltaY < 0 ? +1 : -1;
-                this.changeDigitFocussed(change);
-                this.dispatchEvent(new Event("input" /* INPUT */, { bubbles: true }));
-            };
-            this.hndInput = (_event) => {
-                this.openInput(false);
-            };
-            this.hndFocus = (_event) => {
-                if (this.contains(document.activeElement))
-                    return;
-                this.activateInnerTabs(false);
-            };
             if (_attributes && _attributes["value"])
                 this.value = parseFloat(_attributes["value"]);
         }
@@ -983,6 +891,109 @@ var FudgeUserInterface;
                     digit.innerHTML = "&nbsp;";
             }
         }
+        /**
+         * Handle keyboard input on this element and its digits
+         */
+        hndKey = (_event) => {
+            let active = document.activeElement;
+            let numEntered = _event.key.charCodeAt(0) - 48;
+            _event.stopPropagation();
+            // if focus is on stepper, enter it and focus digit
+            if (active == this) {
+                switch (_event.code) {
+                    case ƒ.KEYBOARD_CODE.ENTER:
+                    case ƒ.KEYBOARD_CODE.NUMPAD_ENTER:
+                    case ƒ.KEYBOARD_CODE.SPACE:
+                    case ƒ.KEYBOARD_CODE.ARROW_UP:
+                    case ƒ.KEYBOARD_CODE.ARROW_DOWN:
+                        this.activateInnerTabs(true);
+                        this.querySelectorAll("fudge-digit")[2].focus();
+                        break;
+                    case ƒ.KEYBOARD_CODE.F2:
+                        this.openInput(true);
+                        break;
+                }
+                if ((numEntered >= 0 && numEntered <= 9) || _event.key == "-" || _event.key == "+") {
+                    this.openInput(true);
+                    this.querySelector("input").value = "";
+                    // _event.stopImmediatePropagation();
+                }
+                return;
+            }
+            // input field overlay is active
+            if (active.getAttribute("type") == "number") {
+                if (_event.key == ƒ.KEYBOARD_CODE.ENTER || _event.key == ƒ.KEYBOARD_CODE.NUMPAD_ENTER || _event.key == ƒ.KEYBOARD_CODE.TABULATOR) {
+                    this.value = Number(active.value);
+                    this.display();
+                    this.openInput(false);
+                    this.focus();
+                    this.dispatchEvent(new Event("input" /* INPUT */, { bubbles: true }));
+                }
+                return;
+            }
+            if (numEntered >= 0 && numEntered <= 9) {
+                let difference = numEntered - Number(active.textContent) * (this.value < 0 ? -1 : 1);
+                this.changeDigitFocussed(difference);
+                let next = active.nextElementSibling;
+                if (next)
+                    next.focus();
+                this.dispatchEvent(new Event("input" /* INPUT */, { bubbles: true }));
+                return;
+            }
+            if (_event.key == "-" || _event.key == "+") {
+                this.value = (_event.key == "-" ? -1 : 1) * Math.abs(this.value);
+                this.display();
+                this.dispatchEvent(new Event("input" /* INPUT */, { bubbles: true }));
+                return;
+            }
+            if (_event.code != ƒ.KEYBOARD_CODE.TABULATOR)
+                _event.preventDefault();
+            switch (_event.code) {
+                case ƒ.KEYBOARD_CODE.ARROW_DOWN:
+                    this.changeDigitFocussed(-1);
+                    this.dispatchEvent(new Event("input" /* INPUT */, { bubbles: true }));
+                    break;
+                case ƒ.KEYBOARD_CODE.ARROW_UP:
+                    this.changeDigitFocussed(+1);
+                    this.dispatchEvent(new Event("input" /* INPUT */, { bubbles: true }));
+                    break;
+                case ƒ.KEYBOARD_CODE.ARROW_LEFT:
+                    active.previousElementSibling.focus();
+                    break;
+                case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
+                    let next = active.nextElementSibling;
+                    if (next)
+                        next.focus();
+                    break;
+                case ƒ.KEYBOARD_CODE.ENTER:
+                case ƒ.KEYBOARD_CODE.NUMPAD_ENTER:
+                case ƒ.KEYBOARD_CODE.ESC:
+                    this.activateInnerTabs(false);
+                    this.focus();
+                    break;
+                case ƒ.KEYBOARD_CODE.F2:
+                    this.activateInnerTabs(false);
+                    this.openInput(true);
+                    break;
+                default:
+                    break;
+            }
+        };
+        hndWheel = (_event) => {
+            _event.stopPropagation();
+            _event.preventDefault();
+            let change = _event.deltaY < 0 ? +1 : -1;
+            this.changeDigitFocussed(change);
+            this.dispatchEvent(new Event("input" /* INPUT */, { bubbles: true }));
+        };
+        hndInput = (_event) => {
+            this.openInput(false);
+        };
+        hndFocus = (_event) => {
+            if (this.contains(document.activeElement))
+                return;
+            this.activateInnerTabs(false);
+        };
         changeDigitFocussed(_amount) {
             let digit = document.activeElement;
             if (digit == this || !this.contains(digit))
@@ -1025,8 +1036,6 @@ var FudgeUserInterface;
             }
         }
     }
-    // @ts-ignore
-    CustomElementStepper.customElement = FudgeUserInterface.CustomElement.register("fudge-stepper", CustomElementStepper, Number);
     FudgeUserInterface.CustomElementStepper = CustomElementStepper;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
@@ -1035,6 +1044,8 @@ var FudgeUserInterface;
      * A standard text input field with a label to it.
      */
     class CustomElementTextInput extends FudgeUserInterface.CustomElement {
+        // @ts-ignore
+        static customElement = FudgeUserInterface.CustomElement.register("fudge-textinput", CustomElementTextInput, String);
         constructor(_attributes) {
             super(_attributes);
         }
@@ -1064,95 +1075,15 @@ var FudgeUserInterface;
             this.querySelector("input").value = _value;
         }
     }
-    // @ts-ignore
-    CustomElementTextInput.customElement = FudgeUserInterface.CustomElement.register("fudge-textinput", CustomElementTextInput, String);
     FudgeUserInterface.CustomElementTextInput = CustomElementTextInput;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
 var FudgeUserInterface;
 (function (FudgeUserInterface) {
     var ƒ = FudgeCore;
     class Details extends HTMLDetailsElement {
+        content;
         constructor(_legend = "", _type) {
             super();
-            this.hndToggle = (_event) => {
-                if (_event)
-                    _event.stopPropagation();
-                this.dispatchEvent(new Event(this.isExpanded ? "expand" /* EXPAND */ : "collapse" /* COLLAPSE */, { bubbles: true }));
-            };
-            this.hndFocus = (_event) => {
-                switch (_event.type) {
-                    case "focusNext" /* FOCUS_NEXT */:
-                        let next = this.nextElementSibling;
-                        if (next && next.tabIndex > -1) {
-                            next.focus();
-                            _event.stopPropagation();
-                        }
-                        break;
-                    case "focusPrevious" /* FOCUS_PREVIOUS */:
-                        let previous = this.previousElementSibling;
-                        if (previous && previous.tabIndex > -1) {
-                            let sets = previous.querySelectorAll("details");
-                            let i = sets.length;
-                            if (i)
-                                do { // focus the last visible set
-                                    sets[--i].focus();
-                                } while (!sets[i].offsetParent);
-                            else
-                                previous.focus();
-                            _event.stopPropagation();
-                        }
-                        break;
-                    case "focusSet" /* FOCUS_SET */:
-                        if (_event.target != this) {
-                            this.focus();
-                            _event.stopPropagation();
-                        }
-                        break;
-                }
-            };
-            this.hndKey = (_event) => {
-                _event.stopPropagation();
-                // let target: HTMLElement = <HTMLElement>_event.target;
-                switch (_event.code) {
-                    case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
-                        if (!this.isExpanded) {
-                            this.expand(true);
-                            return;
-                        }
-                    case ƒ.KEYBOARD_CODE.ARROW_DOWN:
-                        let next = this;
-                        if (this.isExpanded)
-                            next = this.querySelector("details");
-                        else
-                            do {
-                                next = next.nextElementSibling;
-                            } while (next && next.tabIndex > -1);
-                        if (next)
-                            next.focus();
-                        // next.dispatchEvent(new KeyboardEvent(EVENT_TREE.FOCUS_NEXT, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
-                        else
-                            this.dispatchEvent(new KeyboardEvent("focusNext" /* FOCUS_NEXT */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
-                        break;
-                    case ƒ.KEYBOARD_CODE.ARROW_LEFT:
-                        if (this.isExpanded) {
-                            this.expand(false);
-                            return;
-                        }
-                    case ƒ.KEYBOARD_CODE.ARROW_UP:
-                        let previous = this;
-                        do {
-                            previous = previous.previousElementSibling;
-                        } while (previous && !(previous instanceof Details));
-                        if (previous)
-                            if (previous.isExpanded)
-                                this.dispatchEvent(new KeyboardEvent("focusPrevious" /* FOCUS_PREVIOUS */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
-                            else
-                                previous.focus();
-                        else
-                            this.parentElement.dispatchEvent(new KeyboardEvent("focusSet" /* FOCUS_SET */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
-                        break;
-                }
-            };
             this.setAttribute("key", _legend);
             this.setAttribute("type", _type);
             this.open = true;
@@ -1181,6 +1112,85 @@ var FudgeUserInterface;
             this.open = _expand;
             this.hndToggle(null);
         }
+        hndToggle = (_event) => {
+            if (_event)
+                _event.stopPropagation();
+            this.dispatchEvent(new Event(this.isExpanded ? "expand" /* EXPAND */ : "collapse" /* COLLAPSE */, { bubbles: true }));
+        };
+        hndFocus = (_event) => {
+            switch (_event.type) {
+                case "focusNext" /* FOCUS_NEXT */:
+                    let next = this.nextElementSibling;
+                    if (next && next.tabIndex > -1) {
+                        next.focus();
+                        _event.stopPropagation();
+                    }
+                    break;
+                case "focusPrevious" /* FOCUS_PREVIOUS */:
+                    let previous = this.previousElementSibling;
+                    if (previous && previous.tabIndex > -1) {
+                        let sets = previous.querySelectorAll("details");
+                        let i = sets.length;
+                        if (i)
+                            do { // focus the last visible set
+                                sets[--i].focus();
+                            } while (!sets[i].offsetParent);
+                        else
+                            previous.focus();
+                        _event.stopPropagation();
+                    }
+                    break;
+                case "focusSet" /* FOCUS_SET */:
+                    if (_event.target != this) {
+                        this.focus();
+                        _event.stopPropagation();
+                    }
+                    break;
+            }
+        };
+        hndKey = (_event) => {
+            _event.stopPropagation();
+            // let target: HTMLElement = <HTMLElement>_event.target;
+            switch (_event.code) {
+                case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
+                    if (!this.isExpanded) {
+                        this.expand(true);
+                        return;
+                    }
+                case ƒ.KEYBOARD_CODE.ARROW_DOWN:
+                    let next = this;
+                    if (this.isExpanded)
+                        next = this.querySelector("details");
+                    else
+                        do {
+                            next = next.nextElementSibling;
+                        } while (next && next.tabIndex > -1);
+                    if (next)
+                        next.focus();
+                    // next.dispatchEvent(new KeyboardEvent(EVENT_TREE.FOCUS_NEXT, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                    else
+                        this.dispatchEvent(new KeyboardEvent("focusNext" /* FOCUS_NEXT */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                    break;
+                case ƒ.KEYBOARD_CODE.ARROW_LEFT:
+                    if (this.isExpanded) {
+                        this.expand(false);
+                        return;
+                    }
+                case ƒ.KEYBOARD_CODE.ARROW_UP:
+                    let previous = this;
+                    do {
+                        previous = previous.previousElementSibling;
+                    } while (previous && !(previous instanceof Details));
+                    if (previous)
+                        if (previous.isExpanded)
+                            this.dispatchEvent(new KeyboardEvent("focusPrevious" /* FOCUS_PREVIOUS */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                        else
+                            previous.focus();
+                    else
+                        this.parentElement.dispatchEvent(new KeyboardEvent("focusSet" /* FOCUS_SET */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                    break;
+            }
+        };
     }
     FudgeUserInterface.Details = Details;
     // TODO: use CustomElement.register?
@@ -1192,86 +1202,6 @@ var FudgeUserInterface;
     class DetailsArray extends FudgeUserInterface.Details {
         constructor(_legend) {
             super(_legend, "Array");
-            this.hndDragStart = (_event) => {
-                // _event.preventDefault; 
-                let keyDrag = _event.currentTarget.getAttribute("key");
-                _event.dataTransfer.setData("index", keyDrag);
-                console.log(keyDrag);
-            };
-            this.hndDragOver = (_event) => {
-                _event.preventDefault();
-                if (_event.ctrlKey)
-                    _event.dataTransfer.dropEffect = "copy";
-                if (_event.shiftKey)
-                    _event.dataTransfer.dropEffect = "link";
-            };
-            this.hndDrop = (_event) => {
-                let drop = _event.currentTarget;
-                let keyDrop = drop.getAttribute("key");
-                let keyDrag = _event.dataTransfer.getData("index");
-                let drag = this.querySelector(`[key=${keyDrag}]`);
-                let position = keyDrag > keyDrop ? "beforebegin" : "afterend";
-                if (_event.ctrlKey)
-                    drag = drag.cloneNode(true);
-                if (_event.shiftKey)
-                    drag.parentNode.removeChild(drag);
-                else
-                    drop.insertAdjacentElement(position, drag);
-                this.rearrange();
-                this.addEventListeners(drag);
-                drag.focus();
-            };
-            this.hndkey = (_event) => {
-                let item = _event.currentTarget;
-                // only work on items of list, not their children
-                if (_event.target != item)
-                    return;
-                let focus = parseInt(item.getAttribute("label"));
-                let sibling = item;
-                let insert = item;
-                let passEvent = false;
-                switch (_event.code) {
-                    case ƒ.KEYBOARD_CODE.DELETE:
-                        item.parentNode.removeChild(item);
-                        this.rearrange(focus);
-                        break;
-                    case ƒ.KEYBOARD_CODE.ARROW_UP:
-                        if (!_event.altKey) {
-                            this.setFocus(--focus);
-                            break;
-                        }
-                        if (_event.shiftKey) {
-                            insert = item.cloneNode(true);
-                            this.addEventListeners(insert);
-                        }
-                        else
-                            sibling = item.previousSibling;
-                        if (sibling)
-                            sibling.insertAdjacentElement("beforebegin", insert);
-                        this.rearrange(--focus);
-                        break;
-                    case ƒ.KEYBOARD_CODE.ARROW_DOWN:
-                        if (!_event.altKey) {
-                            this.setFocus(++focus);
-                            break;
-                        }
-                        if (_event.shiftKey) {
-                            insert = item.cloneNode(true);
-                            this.addEventListeners(insert);
-                        }
-                        else
-                            sibling = item.nextSibling;
-                        if (sibling)
-                            sibling.insertAdjacentElement("afterend", insert);
-                        this.rearrange(++focus);
-                        break;
-                    default:
-                        passEvent = true;
-                }
-                if (!passEvent) {
-                    _event.stopPropagation();
-                }
-            };
         }
         setContent(_content) {
             super.setContent(_content);
@@ -1317,6 +1247,86 @@ var FudgeUserInterface;
             _focus = Math.max(0, Math.min(_focus, this.content.children.length - 1));
             this.content.children[_focus].focus();
         }
+        hndDragStart = (_event) => {
+            // _event.preventDefault; 
+            let keyDrag = _event.currentTarget.getAttribute("key");
+            _event.dataTransfer.setData("index", keyDrag);
+            console.log(keyDrag);
+        };
+        hndDragOver = (_event) => {
+            _event.preventDefault();
+            if (_event.ctrlKey)
+                _event.dataTransfer.dropEffect = "copy";
+            if (_event.shiftKey)
+                _event.dataTransfer.dropEffect = "link";
+        };
+        hndDrop = (_event) => {
+            let drop = _event.currentTarget;
+            let keyDrop = drop.getAttribute("key");
+            let keyDrag = _event.dataTransfer.getData("index");
+            let drag = this.querySelector(`[key=${keyDrag}]`);
+            let position = keyDrag > keyDrop ? "beforebegin" : "afterend";
+            if (_event.ctrlKey)
+                drag = drag.cloneNode(true);
+            if (_event.shiftKey)
+                drag.parentNode.removeChild(drag);
+            else
+                drop.insertAdjacentElement(position, drag);
+            this.rearrange();
+            this.addEventListeners(drag);
+            drag.focus();
+        };
+        hndkey = (_event) => {
+            let item = _event.currentTarget;
+            // only work on items of list, not their children
+            if (_event.target != item)
+                return;
+            let focus = parseInt(item.getAttribute("label"));
+            let sibling = item;
+            let insert = item;
+            let passEvent = false;
+            switch (_event.code) {
+                case ƒ.KEYBOARD_CODE.DELETE:
+                    item.parentNode.removeChild(item);
+                    this.rearrange(focus);
+                    break;
+                case ƒ.KEYBOARD_CODE.ARROW_UP:
+                    if (!_event.altKey) {
+                        this.setFocus(--focus);
+                        break;
+                    }
+                    if (_event.shiftKey) {
+                        insert = item.cloneNode(true);
+                        this.addEventListeners(insert);
+                    }
+                    else
+                        sibling = item.previousSibling;
+                    if (sibling)
+                        sibling.insertAdjacentElement("beforebegin", insert);
+                    this.rearrange(--focus);
+                    break;
+                case ƒ.KEYBOARD_CODE.ARROW_DOWN:
+                    if (!_event.altKey) {
+                        this.setFocus(++focus);
+                        break;
+                    }
+                    if (_event.shiftKey) {
+                        insert = item.cloneNode(true);
+                        this.addEventListeners(insert);
+                    }
+                    else
+                        sibling = item.nextSibling;
+                    if (sibling)
+                        sibling.insertAdjacentElement("afterend", insert);
+                    this.rearrange(++focus);
+                    break;
+                default:
+                    passEvent = true;
+            }
+            if (!passEvent) {
+                _event.stopPropagation();
+            }
+        };
     }
     FudgeUserInterface.DetailsArray = DetailsArray;
     customElements.define("ui-list", DetailsArray, { extends: "details" });
@@ -1328,6 +1338,7 @@ var FudgeUserInterface;
      * Static class to display a modal or non-modal dialog with an interface for the given mutator.
      */
     class Dialog {
+        static dom;
         /**
          * Prompt the dialog to the user with the given headline, call to action and labels for the cancel- and ok-button
          * Use `await` on call, to continue after the user has pressed one of the buttons.
@@ -1353,8 +1364,10 @@ var FudgeUserInterface;
             div.appendChild(btnOk);
             Dialog.dom.appendChild(div);
             if (_modal)
+                //@ts-ignore
                 Dialog.dom.showModal();
             else
+                //@ts-ignore
                 Dialog.dom.show();
             return new Promise((_resolve) => {
                 let hndButton = (_event) => {
@@ -1362,6 +1375,7 @@ var FudgeUserInterface;
                     btnOk.removeEventListener("click", hndButton);
                     if (_event.target == btnOk)
                         FudgeUserInterface.Controller.updateMutator(content, _data);
+                    //@ts-ignore
                     Dialog.dom.close();
                     document.body.removeChild(Dialog.dom);
                     _resolve(_event.target == btnOk);
@@ -1409,66 +1423,10 @@ var FudgeUserInterface;
      * ```
      */
     class Table extends HTMLTableElement {
+        controller;
+        data;
         constructor(_controller, _data) {
             super();
-            // private hndDrop(_event: DragEvent): void {
-            //   // _event.stopPropagation();
-            //   // this.addChildren(this.controller.dragDrop.sources, this.controller.dragDrop.target);
-            // }
-            this.hndDelete = (_event) => {
-                let target = _event.target;
-                _event.stopPropagation();
-                let remove = this.controller.delete([target.data]);
-                console.log(remove);
-                // this.delete(remove);
-            };
-            this.hndEscape = (_event) => {
-                this.clearSelection();
-            };
-            // private hndCopyPaste = async (_event: Event): Promise<void> => {
-            //   // // console.log(_event);
-            //   // _event.stopPropagation();
-            //   // let target: TreeItem<T> = <TreeItem<T>>_event.target;
-            //   // switch (_event.type) {
-            //   //   case EVENT_TREE.COPY:
-            //   //     this.controller.copyPaste.sources = await this.controller.copy([...this.controller.selection]);
-            //   //     break;
-            //   //   case EVENT_TREE.PASTE:
-            //   //     this.addChildren(this.controller.copyPaste.sources, target.data);
-            //   //     break;
-            //   //   case EVENT_TREE.CUT:
-            //   //     this.controller.copyPaste.sources = await this.controller.copy([...this.controller.selection]);
-            //   //     let cut: T[] = this.controller.delete(this.controller.selection);
-            //   //     this.delete(cut);
-            //   //     break;
-            //   // }
-            // }
-            this.hndFocus = (_event) => {
-                _event.stopPropagation();
-                let items = Array.from(this.querySelectorAll("tr"));
-                let target = _event.target;
-                let index = items.indexOf(target);
-                if (index < 0)
-                    return;
-                if (_event.shiftKey && this.controller.selection.length == 0)
-                    target.select(true);
-                switch (_event.type) {
-                    case "focusNext" /* FOCUS_NEXT */:
-                        if (++index < items.length)
-                            items[index].focus();
-                        break;
-                    case "focusPrevious" /* FOCUS_PREVIOUS */:
-                        if (--index >= 0)
-                            items[index].focus();
-                        break;
-                    default:
-                        break;
-                }
-                if (_event.shiftKey)
-                    document.activeElement.select(true);
-                else if (!_event.ctrlKey)
-                    this.clearSelection();
-            };
             this.controller = _controller;
             this.data = _data;
             this.create();
@@ -1610,6 +1568,64 @@ var FudgeUserInterface;
             }
             this.displaySelection(this.controller.selection);
         }
+        // private hndDrop(_event: DragEvent): void {
+        //   // _event.stopPropagation();
+        //   // this.addChildren(this.controller.dragDrop.sources, this.controller.dragDrop.target);
+        // }
+        hndDelete = (_event) => {
+            let target = _event.target;
+            _event.stopPropagation();
+            let remove = this.controller.delete([target.data]);
+            console.log(remove);
+            // this.delete(remove);
+        };
+        hndEscape = (_event) => {
+            this.clearSelection();
+        };
+        // private hndCopyPaste = async (_event: Event): Promise<void> => {
+        //   // // console.log(_event);
+        //   // _event.stopPropagation();
+        //   // let target: TreeItem<T> = <TreeItem<T>>_event.target;
+        //   // switch (_event.type) {
+        //   //   case EVENT_TREE.COPY:
+        //   //     this.controller.copyPaste.sources = await this.controller.copy([...this.controller.selection]);
+        //   //     break;
+        //   //   case EVENT_TREE.PASTE:
+        //   //     this.addChildren(this.controller.copyPaste.sources, target.data);
+        //   //     break;
+        //   //   case EVENT_TREE.CUT:
+        //   //     this.controller.copyPaste.sources = await this.controller.copy([...this.controller.selection]);
+        //   //     let cut: T[] = this.controller.delete(this.controller.selection);
+        //   //     this.delete(cut);
+        //   //     break;
+        //   // }
+        // }
+        hndFocus = (_event) => {
+            _event.stopPropagation();
+            let items = Array.from(this.querySelectorAll("tr"));
+            let target = _event.target;
+            let index = items.indexOf(target);
+            if (index < 0)
+                return;
+            if (_event.shiftKey && this.controller.selection.length == 0)
+                target.select(true);
+            switch (_event.type) {
+                case "focusNext" /* FOCUS_NEXT */:
+                    if (++index < items.length)
+                        items[index].focus();
+                    break;
+                case "focusPrevious" /* FOCUS_PREVIOUS */:
+                    if (--index >= 0)
+                        items[index].focus();
+                    break;
+                default:
+                    break;
+            }
+            if (_event.shiftKey)
+                document.activeElement.select(true);
+            else if (!_event.ctrlKey)
+                this.clearSelection();
+        };
     }
     FudgeUserInterface.Table = Table;
     customElements.define("table-sortable", Table, { extends: "table" });
@@ -1621,14 +1637,12 @@ var FudgeUserInterface;
      * The [[Table]] doesn't know how your data is structured and how to handle it, the controller implements the methods needed
      */
     class TableController {
-        constructor() {
-            /** Stores references to selected objects. Override with a reference in outer scope, if selection should also operate outside of table */
-            this.selection = [];
-            /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of table */
-            this.dragDrop = { sources: [], target: null };
-            /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of table */
-            this.copyPaste = { sources: [], target: null };
-        }
+        /** Stores references to selected objects. Override with a reference in outer scope, if selection should also operate outside of table */
+        selection = [];
+        /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of table */
+        dragDrop = { sources: [], target: null };
+        /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of table */
+        copyPaste = { sources: [], target: null };
     }
     FudgeUserInterface.TableController = TableController;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
@@ -1639,90 +1653,10 @@ var FudgeUserInterface;
      * Extension of tr-element that represents an object in a [[Table]]
      */
     class TableItem extends HTMLTableRowElement {
+        data = null;
+        controller;
         constructor(_controller, _data) {
             super();
-            this.data = null;
-            this.hndInputEvent = (_event) => {
-                if (_event instanceof KeyboardEvent && _event.code != ƒ.KEYBOARD_CODE.F2)
-                    return;
-                let input = _event.target;
-                input.readOnly = false;
-                input.focus();
-            };
-            this.hndChange = (_event) => {
-                let target = _event.target;
-                target.readOnly = true;
-                let key = target.getAttribute("key");
-                Reflect.set(this.data, key, target.value);
-                this.focus();
-            };
-            this.hndKey = (_event) => {
-                _event.stopPropagation();
-                // if (!this.label.disabled)
-                //   return;
-                // let content: TreeList<T> = <TreeList<T>>this.querySelector("ul");
-                switch (_event.code) {
-                    // case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
-                    //   this.dispatchEvent(new KeyboardEvent(EVENT.FOCUS_NEXT, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
-                    //   break;
-                    // case ƒ.KEYBOARD_CODE.ARROW_LEFT:
-                    //   this.dispatchEvent(new KeyboardEvent(EVENT.FOCUS_PREVIOUS, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
-                    //   break;
-                    case ƒ.KEYBOARD_CODE.ARROW_DOWN:
-                        this.dispatchEvent(new KeyboardEvent("focusNext" /* FOCUS_NEXT */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
-                        break;
-                    case ƒ.KEYBOARD_CODE.ARROW_UP:
-                        this.dispatchEvent(new KeyboardEvent("focusPrevious" /* FOCUS_PREVIOUS */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
-                        break;
-                    case ƒ.KEYBOARD_CODE.SPACE:
-                        this.select(_event.ctrlKey, _event.shiftKey);
-                        break;
-                    case ƒ.KEYBOARD_CODE.ESC:
-                        this.dispatchEvent(new Event("escape" /* ESCAPE */, { bubbles: true }));
-                        break;
-                    case ƒ.KEYBOARD_CODE.DELETE:
-                        this.dispatchEvent(new Event("delete" /* DELETE */, { bubbles: true }));
-                        break;
-                    case ƒ.KEYBOARD_CODE.C:
-                        if (!_event.ctrlKey)
-                            break;
-                        _event.preventDefault();
-                        this.dispatchEvent(new Event("copy" /* COPY */, { bubbles: true }));
-                        break;
-                    case ƒ.KEYBOARD_CODE.V:
-                        if (!_event.ctrlKey)
-                            break;
-                        _event.preventDefault();
-                        this.dispatchEvent(new Event("paste" /* PASTE */, { bubbles: true }));
-                        break;
-                    case ƒ.KEYBOARD_CODE.X:
-                        if (!_event.ctrlKey)
-                            break;
-                        _event.preventDefault();
-                        this.dispatchEvent(new Event("cut" /* CUT */, { bubbles: true }));
-                        break;
-                }
-            };
-            this.hndDragStart = (_event) => {
-                // _event.stopPropagation();
-                this.controller.dragDrop.sources = [];
-                if (this.selected)
-                    this.controller.dragDrop.sources = this.controller.selection;
-                else
-                    this.controller.dragDrop.sources = [this.data];
-                _event.dataTransfer.effectAllowed = "all";
-            };
-            this.hndDragOver = (_event) => {
-                // _event.stopPropagation();
-                _event.preventDefault();
-                this.controller.dragDrop.target = this.data;
-                // _event.dataTransfer.dropEffect = "link";
-            };
-            this.hndPointerUp = (_event) => {
-                _event.stopPropagation();
-                this.focus();
-                this.select(_event.ctrlKey, _event.shiftKey);
-            };
             this.controller = _controller;
             this.data = _data;
             // this.display = this.controller.getLabel(_data);
@@ -1782,6 +1716,87 @@ var FudgeUserInterface;
             }
             this.tabIndex = 0;
         }
+        hndInputEvent = (_event) => {
+            if (_event instanceof KeyboardEvent && _event.code != ƒ.KEYBOARD_CODE.F2)
+                return;
+            let input = _event.target;
+            input.readOnly = false;
+            input.focus();
+        };
+        hndChange = (_event) => {
+            let target = _event.target;
+            target.readOnly = true;
+            let key = target.getAttribute("key");
+            Reflect.set(this.data, key, target.value);
+            this.focus();
+        };
+        hndKey = (_event) => {
+            _event.stopPropagation();
+            // if (!this.label.disabled)
+            //   return;
+            // let content: TreeList<T> = <TreeList<T>>this.querySelector("ul");
+            switch (_event.code) {
+                // case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
+                //   this.dispatchEvent(new KeyboardEvent(EVENT.FOCUS_NEXT, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                //   break;
+                // case ƒ.KEYBOARD_CODE.ARROW_LEFT:
+                //   this.dispatchEvent(new KeyboardEvent(EVENT.FOCUS_PREVIOUS, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                //   break;
+                case ƒ.KEYBOARD_CODE.ARROW_DOWN:
+                    this.dispatchEvent(new KeyboardEvent("focusNext" /* FOCUS_NEXT */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                    break;
+                case ƒ.KEYBOARD_CODE.ARROW_UP:
+                    this.dispatchEvent(new KeyboardEvent("focusPrevious" /* FOCUS_PREVIOUS */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                    break;
+                case ƒ.KEYBOARD_CODE.SPACE:
+                    this.select(_event.ctrlKey, _event.shiftKey);
+                    break;
+                case ƒ.KEYBOARD_CODE.ESC:
+                    this.dispatchEvent(new Event("escape" /* ESCAPE */, { bubbles: true }));
+                    break;
+                case ƒ.KEYBOARD_CODE.DELETE:
+                    this.dispatchEvent(new Event("delete" /* DELETE */, { bubbles: true }));
+                    break;
+                case ƒ.KEYBOARD_CODE.C:
+                    if (!_event.ctrlKey)
+                        break;
+                    _event.preventDefault();
+                    this.dispatchEvent(new Event("copy" /* COPY */, { bubbles: true }));
+                    break;
+                case ƒ.KEYBOARD_CODE.V:
+                    if (!_event.ctrlKey)
+                        break;
+                    _event.preventDefault();
+                    this.dispatchEvent(new Event("paste" /* PASTE */, { bubbles: true }));
+                    break;
+                case ƒ.KEYBOARD_CODE.X:
+                    if (!_event.ctrlKey)
+                        break;
+                    _event.preventDefault();
+                    this.dispatchEvent(new Event("cut" /* CUT */, { bubbles: true }));
+                    break;
+            }
+        };
+        hndDragStart = (_event) => {
+            // _event.stopPropagation();
+            this.controller.dragDrop.sources = [];
+            if (this.selected)
+                this.controller.dragDrop.sources = this.controller.selection;
+            else
+                this.controller.dragDrop.sources = [this.data];
+            _event.dataTransfer.effectAllowed = "all";
+        };
+        hndDragOver = (_event) => {
+            // _event.stopPropagation();
+            _event.preventDefault();
+            this.controller.dragDrop.target = this.data;
+            // _event.dataTransfer.dropEffect = "link";
+        };
+        hndPointerUp = (_event) => {
+            _event.stopPropagation();
+            this.focus();
+            this.select(_event.ctrlKey, _event.shiftKey);
+        };
     }
     FudgeUserInterface.TableItem = TableItem;
     customElements.define("table-item", TableItem, { extends: "tr" });
@@ -1932,61 +1947,9 @@ var FudgeUserInterface;
      * ```
      */
     class Tree extends FudgeUserInterface.TreeList {
+        controller;
         constructor(_controller, _root) {
             super([]);
-            this.hndDelete = (_event) => {
-                let target = _event.target;
-                _event.stopPropagation();
-                let remove = this.controller.delete([target.data]);
-                this.delete(remove);
-            };
-            this.hndEscape = (_event) => {
-                this.clearSelection();
-            };
-            this.hndCopyPaste = async (_event) => {
-                // console.log(_event);
-                _event.stopPropagation();
-                let target = _event.target;
-                switch (_event.type) {
-                    case "copy" /* COPY */:
-                        this.controller.copyPaste.sources = await this.controller.copy([...this.controller.selection]);
-                        break;
-                    case "paste" /* PASTE */:
-                        this.addChildren(this.controller.copyPaste.sources, target.data);
-                        break;
-                    case "cut" /* CUT */:
-                        this.controller.copyPaste.sources = await this.controller.copy([...this.controller.selection]);
-                        let cut = this.controller.delete(this.controller.selection);
-                        this.delete(cut);
-                        break;
-                }
-            };
-            this.hndFocus = (_event) => {
-                _event.stopPropagation();
-                let items = Array.from(this.querySelectorAll("li"));
-                let target = _event.target;
-                let index = items.indexOf(target);
-                if (index < 0)
-                    return;
-                if (_event.shiftKey && this.controller.selection.length == 0)
-                    target.select(true);
-                switch (_event.type) {
-                    case "focusNext" /* FOCUS_NEXT */:
-                        if (++index < items.length)
-                            items[index].focus();
-                        break;
-                    case "focusPrevious" /* FOCUS_PREVIOUS */:
-                        if (--index >= 0)
-                            items[index].focus();
-                        break;
-                    default:
-                        break;
-                }
-                if (_event.shiftKey)
-                    document.activeElement.select(true);
-                else if (!_event.ctrlKey)
-                    this.clearSelection();
-            };
             this.controller = _controller;
             let root = new FudgeUserInterface.TreeItem(this.controller, _root);
             this.appendChild(root);
@@ -2091,6 +2054,59 @@ var FudgeUserInterface;
             _children = [];
             _target = null;
         }
+        hndDelete = (_event) => {
+            let target = _event.target;
+            _event.stopPropagation();
+            let remove = this.controller.delete([target.data]);
+            this.delete(remove);
+        };
+        hndEscape = (_event) => {
+            this.clearSelection();
+        };
+        hndCopyPaste = async (_event) => {
+            // console.log(_event);
+            _event.stopPropagation();
+            let target = _event.target;
+            switch (_event.type) {
+                case "copy" /* COPY */:
+                    this.controller.copyPaste.sources = await this.controller.copy([...this.controller.selection]);
+                    break;
+                case "paste" /* PASTE */:
+                    this.addChildren(this.controller.copyPaste.sources, target.data);
+                    break;
+                case "cut" /* CUT */:
+                    this.controller.copyPaste.sources = await this.controller.copy([...this.controller.selection]);
+                    let cut = this.controller.delete(this.controller.selection);
+                    this.delete(cut);
+                    break;
+            }
+        };
+        hndFocus = (_event) => {
+            _event.stopPropagation();
+            let items = Array.from(this.querySelectorAll("li"));
+            let target = _event.target;
+            let index = items.indexOf(target);
+            if (index < 0)
+                return;
+            if (_event.shiftKey && this.controller.selection.length == 0)
+                target.select(true);
+            switch (_event.type) {
+                case "focusNext" /* FOCUS_NEXT */:
+                    if (++index < items.length)
+                        items[index].focus();
+                    break;
+                case "focusPrevious" /* FOCUS_PREVIOUS */:
+                    if (--index >= 0)
+                        items[index].focus();
+                    break;
+                default:
+                    break;
+            }
+            if (_event.shiftKey)
+                document.activeElement.select(true);
+            else if (!_event.ctrlKey)
+                this.clearSelection();
+        };
     }
     FudgeUserInterface.Tree = Tree;
     customElements.define("ul-tree", Tree, { extends: "ul" });
@@ -2102,21 +2118,12 @@ var FudgeUserInterface;
      * The [[Tree]] doesn't know how your data is structured and how to handle it, the controller implements the methods needed
      */
     class TreeController {
-        constructor() {
-            /** Stores references to selected objects. Override with a reference in outer scope, if selection should also operate outside of tree */
-            this.selection = [];
-            /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
-            this.dragDrop = { sources: [], target: null };
-            /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
-            this.copyPaste = { sources: [], target: null };
-            // public abstract hndDragOver = (_event: DragEvent): void => {
-            //   _event.stopPropagation();
-            //   _event.preventDefault();
-            //   this.dragDrop.target = (<TreeItem<T>>_event.currentTarget).data;
-            //   console.log(_event.currentTarget);
-            //   _event.dataTransfer.dropEffect = "move";
-            // }
-        }
+        /** Stores references to selected objects. Override with a reference in outer scope, if selection should also operate outside of tree */
+        selection = [];
+        /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
+        dragDrop = { sources: [], target: null };
+        /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of tree */
+        copyPaste = { sources: [], target: null };
     }
     FudgeUserInterface.TreeController = TreeController;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
@@ -2130,130 +2137,14 @@ var FudgeUserInterface;
      * Additionally, may hold an instance of [[TreeList]] as branch to display children of the corresponding object.
      */
     class TreeItem extends HTMLLIElement {
+        display = "TreeItem";
+        classes = [];
+        data = null;
+        controller;
+        checkbox;
+        label;
         constructor(_controller, _data) {
             super();
-            this.display = "TreeItem";
-            this.classes = [];
-            this.data = null;
-            this.hndFocus = (_event) => {
-                if (_event.target == this.label)
-                    this.label.disabled = true;
-            };
-            this.hndKey = (_event) => {
-                _event.stopPropagation();
-                if (!this.label.disabled)
-                    return;
-                let content = this.querySelector("ul");
-                switch (_event.code) {
-                    case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
-                        if (this.hasChildren && !content)
-                            this.expand(true);
-                        else
-                            this.dispatchEvent(new KeyboardEvent("focusNext" /* FOCUS_NEXT */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
-                        break;
-                    case ƒ.KEYBOARD_CODE.ARROW_LEFT:
-                        if (content)
-                            this.expand(false);
-                        else
-                            this.dispatchEvent(new KeyboardEvent("focusPrevious" /* FOCUS_PREVIOUS */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
-                        break;
-                    case ƒ.KEYBOARD_CODE.ARROW_DOWN:
-                        this.dispatchEvent(new KeyboardEvent("focusNext" /* FOCUS_NEXT */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
-                        break;
-                    case ƒ.KEYBOARD_CODE.ARROW_UP:
-                        this.dispatchEvent(new KeyboardEvent("focusPrevious" /* FOCUS_PREVIOUS */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
-                        break;
-                    case ƒ.KEYBOARD_CODE.F2:
-                        this.startTypingLabel();
-                        break;
-                    case ƒ.KEYBOARD_CODE.SPACE:
-                        this.select(_event.ctrlKey, _event.shiftKey);
-                        break;
-                    case ƒ.KEYBOARD_CODE.ESC:
-                        this.dispatchEvent(new Event("escape" /* ESCAPE */, { bubbles: true }));
-                        break;
-                    case ƒ.KEYBOARD_CODE.DELETE:
-                        this.dispatchEvent(new Event("delete" /* DELETE */, { bubbles: true }));
-                        break;
-                    case ƒ.KEYBOARD_CODE.C:
-                        if (!_event.ctrlKey)
-                            break;
-                        _event.preventDefault();
-                        this.dispatchEvent(new Event("copy" /* COPY */, { bubbles: true }));
-                        break;
-                    case ƒ.KEYBOARD_CODE.V:
-                        if (!_event.ctrlKey)
-                            break;
-                        _event.preventDefault();
-                        this.dispatchEvent(new Event("paste" /* PASTE */, { bubbles: true }));
-                        break;
-                    case ƒ.KEYBOARD_CODE.X:
-                        if (!_event.ctrlKey)
-                            break;
-                        _event.preventDefault();
-                        this.dispatchEvent(new Event("cut" /* CUT */, { bubbles: true }));
-                        break;
-                }
-            };
-            this.hndDblClick = (_event) => {
-                _event.stopPropagation();
-                if (_event.target != this.checkbox)
-                    this.startTypingLabel();
-            };
-            this.hndChange = (_event) => {
-                let target = _event.target;
-                let item = target.parentElement;
-                _event.stopPropagation();
-                switch (target.type) {
-                    case "checkbox":
-                        this.expand(target.checked);
-                        break;
-                    case "text":
-                        target.disabled = true;
-                        item.focus();
-                        target.dispatchEvent(new Event("rename" /* RENAME */, { bubbles: true }));
-                        break;
-                    case "default":
-                        // console.log(target);
-                        break;
-                }
-            };
-            this.hndDragStart = (_event) => {
-                // _event.stopPropagation();
-                if (_event.dataTransfer.getData("dragstart"))
-                    return;
-                this.controller.dragDrop.sources = [];
-                if (this.selected)
-                    this.controller.dragDrop.sources = this.controller.selection;
-                else
-                    this.controller.dragDrop.sources = [this.data];
-                _event.dataTransfer.effectAllowed = "all";
-                this.controller.dragDrop.target = null;
-                // mark as already processed by this tree item to ignore it in further propagation through the tree
-                _event.dataTransfer.setData("dragstart", this.label.value);
-            };
-            this.hndDragOver = (_event) => {
-                // this.controller.hndDragOver(_event);
-                if (Reflect.get(_event, "dragoverDone"))
-                    return;
-                Reflect.set(_event, "dragoverDone", true);
-                // _event.stopPropagation();
-                _event.preventDefault();
-                this.controller.dragDrop.target = this.data;
-                _event.dataTransfer.dropEffect = "move";
-            };
-            this.hndPointerUp = (_event) => {
-                _event.stopPropagation();
-                if (_event.target == this.checkbox)
-                    return;
-                this.select(_event.ctrlKey, _event.shiftKey);
-            };
-            this.hndRemove = (_event) => {
-                if (_event.currentTarget == _event.target)
-                    return;
-                _event.stopPropagation();
-                this.hasChildren = this.controller.hasChildren(this.data);
-            };
             this.controller = _controller;
             this.data = _data;
             this.display = this.controller.getLabel(_data);
@@ -2375,10 +2266,129 @@ var FudgeUserInterface;
             this.appendChild(this.label);
             this.tabIndex = 0;
         }
+        hndFocus = (_event) => {
+            if (_event.target == this.label)
+                this.label.disabled = true;
+        };
+        hndKey = (_event) => {
+            _event.stopPropagation();
+            if (!this.label.disabled)
+                return;
+            let content = this.querySelector("ul");
+            switch (_event.code) {
+                case ƒ.KEYBOARD_CODE.ARROW_RIGHT:
+                    if (this.hasChildren && !content)
+                        this.expand(true);
+                    else
+                        this.dispatchEvent(new KeyboardEvent("focusNext" /* FOCUS_NEXT */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                    break;
+                case ƒ.KEYBOARD_CODE.ARROW_LEFT:
+                    if (content)
+                        this.expand(false);
+                    else
+                        this.dispatchEvent(new KeyboardEvent("focusPrevious" /* FOCUS_PREVIOUS */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                    break;
+                case ƒ.KEYBOARD_CODE.ARROW_DOWN:
+                    this.dispatchEvent(new KeyboardEvent("focusNext" /* FOCUS_NEXT */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                    break;
+                case ƒ.KEYBOARD_CODE.ARROW_UP:
+                    this.dispatchEvent(new KeyboardEvent("focusPrevious" /* FOCUS_PREVIOUS */, { bubbles: true, shiftKey: _event.shiftKey, ctrlKey: _event.ctrlKey }));
+                    break;
+                case ƒ.KEYBOARD_CODE.F2:
+                    this.startTypingLabel();
+                    break;
+                case ƒ.KEYBOARD_CODE.SPACE:
+                    this.select(_event.ctrlKey, _event.shiftKey);
+                    break;
+                case ƒ.KEYBOARD_CODE.ESC:
+                    this.dispatchEvent(new Event("escape" /* ESCAPE */, { bubbles: true }));
+                    break;
+                case ƒ.KEYBOARD_CODE.DELETE:
+                    this.dispatchEvent(new Event("delete" /* DELETE */, { bubbles: true }));
+                    break;
+                case ƒ.KEYBOARD_CODE.C:
+                    if (!_event.ctrlKey)
+                        break;
+                    _event.preventDefault();
+                    this.dispatchEvent(new Event("copy" /* COPY */, { bubbles: true }));
+                    break;
+                case ƒ.KEYBOARD_CODE.V:
+                    if (!_event.ctrlKey)
+                        break;
+                    _event.preventDefault();
+                    this.dispatchEvent(new Event("paste" /* PASTE */, { bubbles: true }));
+                    break;
+                case ƒ.KEYBOARD_CODE.X:
+                    if (!_event.ctrlKey)
+                        break;
+                    _event.preventDefault();
+                    this.dispatchEvent(new Event("cut" /* CUT */, { bubbles: true }));
+                    break;
+            }
+        };
         startTypingLabel() {
             this.label.disabled = false;
             this.label.focus();
         }
+        hndDblClick = (_event) => {
+            _event.stopPropagation();
+            if (_event.target != this.checkbox)
+                this.startTypingLabel();
+        };
+        hndChange = (_event) => {
+            let target = _event.target;
+            let item = target.parentElement;
+            _event.stopPropagation();
+            switch (target.type) {
+                case "checkbox":
+                    this.expand(target.checked);
+                    break;
+                case "text":
+                    target.disabled = true;
+                    item.focus();
+                    target.dispatchEvent(new Event("rename" /* RENAME */, { bubbles: true }));
+                    break;
+                case "default":
+                    // console.log(target);
+                    break;
+            }
+        };
+        hndDragStart = (_event) => {
+            // _event.stopPropagation();
+            if (_event.dataTransfer.getData("dragstart"))
+                return;
+            this.controller.dragDrop.sources = [];
+            if (this.selected)
+                this.controller.dragDrop.sources = this.controller.selection;
+            else
+                this.controller.dragDrop.sources = [this.data];
+            _event.dataTransfer.effectAllowed = "all";
+            this.controller.dragDrop.target = null;
+            // mark as already processed by this tree item to ignore it in further propagation through the tree
+            _event.dataTransfer.setData("dragstart", this.label.value);
+        };
+        hndDragOver = (_event) => {
+            // this.controller.hndDragOver(_event);
+            if (Reflect.get(_event, "dragoverDone"))
+                return;
+            Reflect.set(_event, "dragoverDone", true);
+            // _event.stopPropagation();
+            _event.preventDefault();
+            this.controller.dragDrop.target = this.data;
+            _event.dataTransfer.dropEffect = "move";
+        };
+        hndPointerUp = (_event) => {
+            _event.stopPropagation();
+            if (_event.target == this.checkbox)
+                return;
+            this.select(_event.ctrlKey, _event.shiftKey);
+        };
+        hndRemove = (_event) => {
+            if (_event.currentTarget == _event.target)
+                return;
+            _event.stopPropagation();
+            this.hasChildren = this.controller.hasChildren(this.data);
+        };
     }
     FudgeUserInterface.TreeItem = TreeItem;
     customElements.define("li-tree-item", TreeItem, { extends: "li" });

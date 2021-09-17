@@ -1,4 +1,4 @@
-///<reference types="../../../../Core/Build/FudgeCore.js"/>
+// /<reference types="../../../../Core/Build/FudgeCore.js"/>
 import f = FudgeCore;
 
 
@@ -157,7 +157,7 @@ namespace FudgePhysics_Communication {
     function update(): void {
         f.Physics.world.simulate();
         hitInfo = f.Physics.raycast(origin, direction, 10);
-        if (hitInfo.hit == true && hitInfo.rigidbodyComponent.getContainer().name == "Cube_1") {
+        if (hitInfo.hit == true && hitInfo.rigidbodyComponent.node.name == "Cube_1") {
             f.Debug.log(hitInfo);
         }
 

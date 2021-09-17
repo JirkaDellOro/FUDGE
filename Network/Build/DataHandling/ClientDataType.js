@@ -2,6 +2,13 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ClientDataType = void 0;
 class ClientDataType {
+    clientConnection;
+    id;
+    userName;
+    rtcPeerConnection;
+    rtcDataChannel;
+    isPeerMeshReady;
+    rtcMediaStream;
     constructor(websocketConnection, _remoteId, _rtcPeerConnection, _rtcDataChannel, _rtcMediaStream, _userName) {
         this.id = _remoteId || "";
         this.userName = _userName || "";

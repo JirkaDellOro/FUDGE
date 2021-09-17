@@ -201,7 +201,7 @@ namespace FudgeCore {
       // ray.direction.scale(camera.distance);
       ray.origin.transform(this.camera.mtxPivot);
       ray.direction.transform(this.camera.mtxPivot, false);
-      let cameraNode: Node = this.camera.getContainer();
+      let cameraNode: Node = this.camera.node;
       if (cameraNode) {
         ray.origin.transform(cameraNode.mtxWorld);
         ray.direction.transform(cameraNode.mtxWorld, false);

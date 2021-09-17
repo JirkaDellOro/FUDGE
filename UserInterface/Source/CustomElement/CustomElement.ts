@@ -57,7 +57,7 @@ namespace FudgeUserInterface {
      * Retrieve the element representing the given data type (if registered)
      */
     public static get(_type: string): typeof CustomElement {
-      let element: string | typeof CustomElement = CustomElement.mapObjectToCustomElement.get(_type);
+      let element: string | typeof CustomElement | CustomElementConstructor = CustomElement.mapObjectToCustomElement.get(_type);
       if (typeof (element) == "string")
         element = customElements.get(element);
       return <typeof CustomElement>element;

@@ -26,103 +26,21 @@ exports.FudgeServerAuthoritativeSignaling = void 0;
 const ws_1 = __importDefault(require("ws"));
 const FudgeNetwork = __importStar(require("../ModuleCollector"));
 class FudgeServerAuthoritativeSignaling {
-    constructor() {
-        this.connectedClientsCollection = new Array();
-        this.startUpServer = (_serverPort) => {
-            console.log(_serverPort);
-            if (!_serverPort) {
-                this.websocketServer = new ws_1.default.Server({ port: 8080 });
-            }
-            else {
-                this.websocketServer = new ws_1.default.Server({ port: _serverPort });
-            }
-            this.setAuthoritativeServerEntity(new FudgeNetwork.FudgeServerAuthoritativeManager());
-            this.authoritativeServerManager.signalingServer = this;
-            this.addServerEventHandling();
-        };
-        this.closeDownServer = () => {
-            this.websocketServer.close();
-        };
-        this.addServerEventHandling = () => {
-            // tslint:disable-next-line: no-any
-            this.websocketServer.on("connection", (_websocketClient) => {
-                console.log("User connected to autho-SignalingServer");
-                const uniqueIdOnConnection = this.createID();
-                const freshlyConnectedClient = new FudgeNetwork.ClientDataType(_websocketClient, uniqueIdOnConnection);
-                this.sendTo(_websocketClient, new FudgeNetwork.NetworkMessageIdAssigned(uniqueIdOnConnection));
-                this.connectedClientsCollection.push(freshlyConnectedClient);
-                this.authoritativeServerManager.collectClientCreatePeerConnectionAndCreateOffer(freshlyConnectedClient);
-                _websocketClient.on("message", (_message) => {
-                    this.serverDistributeMessageToAppropriateMethod(_message, _websocketClient);
-                });
-                _websocketClient.addEventListener("close", (error) => {
-                    console.error("Error at connection", error);
-                    for (let i = 0; i < this.connectedClientsCollection.length; i++) {
-                        if (this.connectedClientsCollection[i].clientConnection === _websocketClient) {
-                            console.log("FudgeNetwork.Client found, deleting");
-                            this.connectedClientsCollection.splice(i, 1);
-                            console.log(this.connectedClientsCollection);
-                        }
-                        else {
-                            console.log("Wrong client to delete, moving on");
-                        }
-                    }
-                });
-            });
-        };
-        this.createID = () => {
-            // Math.random should be random enough because of it's seed
-            // convert to base 36 and pick the first few digits after comma
-            return "_" + Math.random().toString(36).substr(2, 7);
-        };
-        // TODO Type Websocket not assignable to type WebSocket ?!
-        // tslint:disable-next-line: no-any
-        this.sendTo = (_connection, _message) => {
-            let stringifiedObject = this.stringifyObjectAndReturnJson(_message);
-            _connection.send(stringifiedObject);
-        };
-        this.sendToId = (_clientId, _message) => {
-            let client = this.searchForClientWithId(_clientId);
-            let stringifiedObject = this.stringifyObjectAndReturnJson(_message);
-            if (client.clientConnection) {
-                client.clientConnection.send(stringifiedObject);
-            }
-        };
-        // Helper function for searching through a collection, finding objects by key and value, returning
-        // Object that has that value
-        // tslint:disable-next-line: no-any
-        this.searchForPropertyValueInCollection = (propertyValue, key, collectionToSearch) => {
-            for (const propertyObject in collectionToSearch) {
-                if (this.connectedClientsCollection.hasOwnProperty(propertyObject)) {
-                    // tslint:disable-next-line: typedef
-                    const objectToSearchThrough = collectionToSearch[propertyObject];
-                    if (objectToSearchThrough[key] === propertyValue) {
-                        return objectToSearchThrough;
-                    }
-                }
-            }
-            return null;
-        };
-        this.searchUserByUserNameAndReturnUser = (_userNameToSearchFor, _collectionToSearch) => {
-            return this.searchForPropertyValueInCollection(_userNameToSearchFor, "userName", _collectionToSearch);
-        };
-        this.searchUserByUserIdAndReturnUser = (_userIdToSearchFor, _collectionToSearch) => {
-            return this.searchForPropertyValueInCollection(_userIdToSearchFor, "id", _collectionToSearch);
-        };
-        this.searchUserByWebsocketConnectionAndReturnUser = (_websocketConnectionToSearchFor, _collectionToSearch) => {
-            return this.searchForPropertyValueInCollection(_websocketConnectionToSearchFor, "clientConnection", _collectionToSearch);
-        };
-        this.stringifyObjectAndReturnJson = (_objectToStringify) => {
-            let stringifiedObject = "";
-            try {
-                stringifiedObject = JSON.stringify(_objectToStringify);
-            }
-            catch (error) {
-                console.error("Unhandled Exception: Unable to stringify Object", error);
-            }
-            return stringifiedObject;
-        };
-    }
+    websocketServer;
+    connectedClientsCollection = new Array();
+    authoritativeServerManager;
+    startUpServer = (_serverPort) => {
+        console.log(_serverPort);
+        if (!_serverPort) {
+            this.websocketServer = new ws_1.default.Server({ port: 8080 });
+        }
+        else {
+            this.websocketServer = new ws_1.default.Server({ port: _serverPort });
+        }
+        this.setAuthoritativeServerEntity(new FudgeNetwork.FudgeServerAuthoritativeManager());
+        this.authoritativeServerManager.signalingServer = this;
+        this.addServerEventHandling();
+    };
     setAuthoritativeServerEntity(_entity) {
         if (this.authoritativeServerManager) {
             console.error("Server Entity already exists, did you try to assign it twice?");
@@ -134,6 +52,36 @@ class FudgeServerAuthoritativeSignaling {
     getAuthoritativeServerEntity() {
         return this.authoritativeServerManager;
     }
+    closeDownServer = () => {
+        this.websocketServer.close();
+    };
+    addServerEventHandling = () => {
+        // tslint:disable-next-line: no-any
+        this.websocketServer.on("connection", (_websocketClient) => {
+            console.log("User connected to autho-SignalingServer");
+            const uniqueIdOnConnection = this.createID();
+            const freshlyConnectedClient = new FudgeNetwork.ClientDataType(_websocketClient, uniqueIdOnConnection);
+            this.sendTo(_websocketClient, new FudgeNetwork.NetworkMessageIdAssigned(uniqueIdOnConnection));
+            this.connectedClientsCollection.push(freshlyConnectedClient);
+            this.authoritativeServerManager.collectClientCreatePeerConnectionAndCreateOffer(freshlyConnectedClient);
+            _websocketClient.on("message", (_message) => {
+                this.serverDistributeMessageToAppropriateMethod(_message, _websocketClient);
+            });
+            _websocketClient.addEventListener("close", (error) => {
+                console.error("Error at connection", error);
+                for (let i = 0; i < this.connectedClientsCollection.length; i++) {
+                    if (this.connectedClientsCollection[i].clientConnection === _websocketClient) {
+                        console.log("FudgeNetwork.Client found, deleting");
+                        this.connectedClientsCollection.splice(i, 1);
+                        console.log(this.connectedClientsCollection);
+                    }
+                    else {
+                        console.log("Wrong client to delete, moving on");
+                    }
+                }
+            });
+        });
+    };
     // TODO Check if event.type can be used for identification instead => It cannot
     serverDistributeMessageToAppropriateMethod(_message, _websocketClient) {
         let parsedMessage = { originatorId: " ", messageType: FudgeNetwork.MESSAGE_TYPE.UNDEFINED };
@@ -207,6 +155,11 @@ class FudgeServerAuthoritativeSignaling {
     searchForClientWithId(_idToFind) {
         return this.searchForPropertyValueInCollection(_idToFind, "id", this.connectedClientsCollection);
     }
+    createID = () => {
+        // Math.random should be random enough because of it's seed
+        // convert to base 36 and pick the first few digits after comma
+        return "_" + Math.random().toString(36).substr(2, 7);
+    };
     //#endregion
     parseMessageToJson(_messageToParse) {
         let parsedMessage = { originatorId: " ", messageType: FudgeNetwork.MESSAGE_TYPE.UNDEFINED };
@@ -218,5 +171,52 @@ class FudgeServerAuthoritativeSignaling {
         }
         return parsedMessage;
     }
+    // TODO Type Websocket not assignable to type WebSocket ?!
+    // tslint:disable-next-line: no-any
+    sendTo = (_connection, _message) => {
+        let stringifiedObject = this.stringifyObjectAndReturnJson(_message);
+        _connection.send(stringifiedObject);
+    };
+    sendToId = (_clientId, _message) => {
+        let client = this.searchForClientWithId(_clientId);
+        let stringifiedObject = this.stringifyObjectAndReturnJson(_message);
+        if (client.clientConnection) {
+            client.clientConnection.send(stringifiedObject);
+        }
+    };
+    // Helper function for searching through a collection, finding objects by key and value, returning
+    // Object that has that value
+    // tslint:disable-next-line: no-any
+    searchForPropertyValueInCollection = (propertyValue, key, collectionToSearch) => {
+        for (const propertyObject in collectionToSearch) {
+            if (this.connectedClientsCollection.hasOwnProperty(propertyObject)) {
+                // tslint:disable-next-line: typedef
+                const objectToSearchThrough = collectionToSearch[propertyObject];
+                if (objectToSearchThrough[key] === propertyValue) {
+                    return objectToSearchThrough;
+                }
+            }
+        }
+        return null;
+    };
+    searchUserByUserNameAndReturnUser = (_userNameToSearchFor, _collectionToSearch) => {
+        return this.searchForPropertyValueInCollection(_userNameToSearchFor, "userName", _collectionToSearch);
+    };
+    searchUserByUserIdAndReturnUser = (_userIdToSearchFor, _collectionToSearch) => {
+        return this.searchForPropertyValueInCollection(_userIdToSearchFor, "id", _collectionToSearch);
+    };
+    searchUserByWebsocketConnectionAndReturnUser = (_websocketConnectionToSearchFor, _collectionToSearch) => {
+        return this.searchForPropertyValueInCollection(_websocketConnectionToSearchFor, "clientConnection", _collectionToSearch);
+    };
+    stringifyObjectAndReturnJson = (_objectToStringify) => {
+        let stringifiedObject = "";
+        try {
+            stringifiedObject = JSON.stringify(_objectToStringify);
+        }
+        catch (error) {
+            console.error("Unhandled Exception: Unable to stringify Object", error);
+        }
+        return stringifiedObject;
+    };
 }
 exports.FudgeServerAuthoritativeSignaling = FudgeServerAuthoritativeSignaling;

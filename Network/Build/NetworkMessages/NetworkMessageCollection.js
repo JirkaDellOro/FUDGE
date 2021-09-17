@@ -22,25 +22,30 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PeerMessageKeysInput = exports.PeerMessageDisconnectClient = exports.PeerMessageSimpleText = exports.NetworkMessageClientIsMeshConnected = exports.NetworkMessageClientMeshReady = exports.NetworkMessageServerSendMeshClientArray = exports.NetworkMessageClientReady = exports.NetworkMessageMessageToClient = exports.NetworkMessageMessageToServer = exports.NetworkMessageIceCandidate = exports.NetworkMessageRtcAnswer = exports.NetworkMessageRtcOffer = exports.NetworkMessageLoginResponse = exports.NetworkMessageLoginRequest = exports.NetworkMessageIdAssigned = void 0;
 const FudgeNetwork = __importStar(require("../ModuleCollector"));
 class NetworkMessageIdAssigned {
+    originatorId = "Server";
+    assignedId;
+    messageType = FudgeNetwork.MESSAGE_TYPE.ID_ASSIGNED;
     constructor(_assignedId) {
-        this.originatorId = "Server";
-        this.messageType = FudgeNetwork.MESSAGE_TYPE.ID_ASSIGNED;
         this.assignedId = _assignedId;
     }
 }
 exports.NetworkMessageIdAssigned = NetworkMessageIdAssigned;
 class NetworkMessageLoginRequest {
+    originatorId;
+    messageType = FudgeNetwork.MESSAGE_TYPE.LOGIN_REQUEST;
+    loginUserName = "";
     constructor(_originatorId, _loginUserName) {
-        this.messageType = FudgeNetwork.MESSAGE_TYPE.LOGIN_REQUEST;
-        this.loginUserName = "";
         this.loginUserName = _loginUserName;
         this.originatorId = _originatorId;
     }
 }
 exports.NetworkMessageLoginRequest = NetworkMessageLoginRequest;
 class NetworkMessageLoginResponse {
+    originatorId;
+    originatorUsername;
+    messageType = FudgeNetwork.MESSAGE_TYPE.LOGIN_RESPONSE;
+    loginSuccess;
     constructor(_loginSuccess, _assignedId, _originatorUsername) {
-        this.messageType = FudgeNetwork.MESSAGE_TYPE.LOGIN_RESPONSE;
         this.loginSuccess = _loginSuccess;
         this.originatorId = _assignedId;
         this.originatorUsername = _originatorUsername;
@@ -48,8 +53,11 @@ class NetworkMessageLoginResponse {
 }
 exports.NetworkMessageLoginResponse = NetworkMessageLoginResponse;
 class NetworkMessageRtcOffer {
+    originatorId;
+    messageType = FudgeNetwork.MESSAGE_TYPE.RTC_OFFER;
+    userNameToConnectTo;
+    offer;
     constructor(_originatorId, _userNameToConnectTo, _offer) {
-        this.messageType = FudgeNetwork.MESSAGE_TYPE.RTC_OFFER;
         this.originatorId = _originatorId;
         this.userNameToConnectTo = _userNameToConnectTo;
         this.offer = _offer;
@@ -57,8 +65,11 @@ class NetworkMessageRtcOffer {
 }
 exports.NetworkMessageRtcOffer = NetworkMessageRtcOffer;
 class NetworkMessageRtcAnswer {
+    originatorId;
+    targetId;
+    messageType = FudgeNetwork.MESSAGE_TYPE.RTC_ANSWER;
+    answer;
     constructor(_originatorId, _targetId, _userNameToConnectTo, _answer) {
-        this.messageType = FudgeNetwork.MESSAGE_TYPE.RTC_ANSWER;
         this.originatorId = _originatorId;
         this.targetId = _targetId;
         this.answer = _answer;
@@ -66,8 +77,11 @@ class NetworkMessageRtcAnswer {
 }
 exports.NetworkMessageRtcAnswer = NetworkMessageRtcAnswer;
 class NetworkMessageIceCandidate {
+    originatorId;
+    targetId;
+    messageType = FudgeNetwork.MESSAGE_TYPE.ICE_CANDIDATE;
+    candidate;
     constructor(_originatorId, _targetId, _candidate) {
-        this.messageType = FudgeNetwork.MESSAGE_TYPE.ICE_CANDIDATE;
         this.originatorId = _originatorId;
         this.targetId = _targetId;
         this.candidate = _candidate;
@@ -75,8 +89,11 @@ class NetworkMessageIceCandidate {
 }
 exports.NetworkMessageIceCandidate = NetworkMessageIceCandidate;
 class NetworkMessageMessageToServer {
+    messageType = FudgeNetwork.MESSAGE_TYPE.CLIENT_TO_SERVER_MESSAGE;
+    originatorId;
+    originatorUserName;
+    messageData;
     constructor(_originatorId, _messageData, _originatorUserName) {
-        this.messageType = FudgeNetwork.MESSAGE_TYPE.CLIENT_TO_SERVER_MESSAGE;
         this.originatorId = _originatorId;
         this.messageData = _messageData;
         this.originatorUserName = _originatorUserName;
@@ -84,46 +101,54 @@ class NetworkMessageMessageToServer {
 }
 exports.NetworkMessageMessageToServer = NetworkMessageMessageToServer;
 class NetworkMessageMessageToClient {
+    messageType = FudgeNetwork.MESSAGE_TYPE.SERVER_TO_CLIENT_MESSAGE;
+    originatorId = "SERVER";
+    messageData;
     constructor(_messageData) {
-        this.messageType = FudgeNetwork.MESSAGE_TYPE.SERVER_TO_CLIENT_MESSAGE;
-        this.originatorId = "SERVER";
         this.messageData = _messageData;
     }
 }
 exports.NetworkMessageMessageToClient = NetworkMessageMessageToClient;
 class NetworkMessageClientReady {
+    messageType = FudgeNetwork.MESSAGE_TYPE.CLIENT_READY_FOR_MESH_CONNECTION;
+    originatorId;
     constructor(_originatorId) {
-        this.messageType = FudgeNetwork.MESSAGE_TYPE.CLIENT_READY_FOR_MESH_CONNECTION;
         this.originatorId = _originatorId;
     }
 }
 exports.NetworkMessageClientReady = NetworkMessageClientReady;
 class NetworkMessageServerSendMeshClientArray {
+    messageType = FudgeNetwork.MESSAGE_TYPE.SERVER_SEND_MESH_CANDIDATES_TO_CLIENT;
+    originatorId = "SERVER";
+    candidateArray;
     constructor(_candidateArray) {
-        this.messageType = FudgeNetwork.MESSAGE_TYPE.SERVER_SEND_MESH_CANDIDATES_TO_CLIENT;
-        this.originatorId = "SERVER";
         this.candidateArray = _candidateArray;
     }
 }
 exports.NetworkMessageServerSendMeshClientArray = NetworkMessageServerSendMeshClientArray;
 class NetworkMessageClientMeshReady {
+    messageType = FudgeNetwork.MESSAGE_TYPE.CLIENT_READY_FOR_MESH_CONNECTION;
+    originatorId;
     constructor(_originatorId) {
-        this.messageType = FudgeNetwork.MESSAGE_TYPE.CLIENT_READY_FOR_MESH_CONNECTION;
         this.originatorId = _originatorId;
     }
 }
 exports.NetworkMessageClientMeshReady = NetworkMessageClientMeshReady;
 class NetworkMessageClientIsMeshConnected {
+    messageType = FudgeNetwork.MESSAGE_TYPE.CLIENT_MESH_CONNECTED;
+    originatorId;
     constructor(_originatorId) {
-        this.messageType = FudgeNetwork.MESSAGE_TYPE.CLIENT_MESH_CONNECTED;
         this.originatorId = _originatorId;
     }
 }
 exports.NetworkMessageClientIsMeshConnected = NetworkMessageClientIsMeshConnected;
 class PeerMessageSimpleText {
+    originatorId;
+    originatorUserName;
+    messageType = FudgeNetwork.MESSAGE_TYPE.PEER_TEXT_MESSAGE;
+    commandType = FudgeNetwork.SERVER_COMMAND_TYPE.UNDEFINED;
+    messageData;
     constructor(_originatorId, _messageData, _originatorUserName) {
-        this.messageType = FudgeNetwork.MESSAGE_TYPE.PEER_TEXT_MESSAGE;
-        this.commandType = FudgeNetwork.SERVER_COMMAND_TYPE.UNDEFINED;
         this.originatorId = _originatorId;
         this.originatorUserName = _originatorUserName;
         this.messageData = _messageData;
@@ -131,17 +156,21 @@ class PeerMessageSimpleText {
 }
 exports.PeerMessageSimpleText = PeerMessageSimpleText;
 class PeerMessageDisconnectClient {
+    originatorId;
+    messageType = FudgeNetwork.MESSAGE_TYPE.PEER_TO_SERVER_COMMAND;
+    commandType = FudgeNetwork.SERVER_COMMAND_TYPE.DISCONNECT_CLIENT;
     constructor(_originatorId) {
-        this.messageType = FudgeNetwork.MESSAGE_TYPE.PEER_TO_SERVER_COMMAND;
-        this.commandType = FudgeNetwork.SERVER_COMMAND_TYPE.DISCONNECT_CLIENT;
         this.originatorId = _originatorId;
     }
 }
 exports.PeerMessageDisconnectClient = PeerMessageDisconnectClient;
 class PeerMessageKeysInput {
+    originatorId;
+    messageType = FudgeNetwork.MESSAGE_TYPE.PEER_TO_SERVER_COMMAND;
+    commandType = FudgeNetwork.SERVER_COMMAND_TYPE.KEYS_INPUT;
+    pressedKey;
+    pressedKeys;
     constructor(_originatorId, _pressedKeycode, _pressedKeyCodes) {
-        this.messageType = FudgeNetwork.MESSAGE_TYPE.PEER_TO_SERVER_COMMAND;
-        this.commandType = FudgeNetwork.SERVER_COMMAND_TYPE.KEYS_INPUT;
         this.originatorId = _originatorId;
         this.pressedKey = _pressedKeycode;
         if (_pressedKeyCodes) {

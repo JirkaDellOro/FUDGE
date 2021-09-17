@@ -24,7 +24,7 @@ namespace FudgeCore {
      * respectively calculating yaw and pitch. If no up vector is given, the previous up-vector is used. 
      */
     public lookAt(_targetWorld: Vector3, _up?: Vector3): void {
-      let container: Node = this.getContainer();
+      let container: Node = this.node;
       if (!container && !container.getParent())
         return this.mtxLocal.lookAt(_targetWorld, _up);
 
@@ -40,7 +40,7 @@ namespace FudgeCore {
      * respectively calculating yaw only. If no up vector is given, the previous up-vector is used. 
      */
     public showTo(_targetWorld: Vector3, _up?: Vector3): void {
-      let container: Node = this.getContainer();
+      let container: Node = this.node;
       if (!container && !container.getParent())
         return this.mtxLocal.showTo(_targetWorld, _up);
 
@@ -57,7 +57,7 @@ namespace FudgeCore {
      */
     public rebase(_node: Node = null): void {
       let mtxResult: Matrix4x4 = this.mtxLocal;
-      let container: Node = this.getContainer();
+      let container: Node = this.node;
       if (container)
         mtxResult = container.mtxWorld;
 
@@ -85,7 +85,7 @@ namespace FudgeCore {
           this.rebase(_node);
           this.mtxLocal.multiply(_mtxTransform, true);
 
-          let container: Node = this.getContainer();
+          let container: Node = this.node;
           if (container) {
             if (_base == BASE.NODE)
               // fix mtxWorld of container for subsequent rebasing 
