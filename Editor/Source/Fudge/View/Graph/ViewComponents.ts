@@ -105,12 +105,14 @@ namespace Fudge {
           this.setTitle("Components | " + this.node.name);
           this.dom.title = "Drop internal resources or use right click to create new components";
 
-          let nodeComponents: ƒ.Component[] = this.node.getAllComponents();
-          for (let nodeComponent of nodeComponents) {
-            let details: ƒUi.Details = ƒUi.Generator.createDetailsFromMutable(nodeComponent);
-            let controller: ControllerComponent = new ControllerComponent(nodeComponent, details);
-            details.expand(this.expanded[nodeComponent.type]);
+          let components: ƒ.Component[] = this.node.getAllComponents();
+          for (let component of components) {
+            let details: ƒUi.Details = ƒUi.Generator.createDetailsFromMutable(component);
+            let controller: ControllerComponent = new ControllerComponent(component, details);
+            details.expand(this.expanded[component.type]);
             this.dom.append(controller.domElement);
+            if (component instanceof ƒ.ComponentRigidbody)
+              controller.domElement.title = "Right click to adjust pivot automatically";
           }
         }
       }

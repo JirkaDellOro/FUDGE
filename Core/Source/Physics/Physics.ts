@@ -88,7 +88,7 @@ namespace FudgeCore {
     public static adjustTransforms(_branch: Node, _toMesh: boolean = false): void {
       Render.prepare(_branch, { ignorePhysics: true });
       for (let node of Render.nodesPhysics)
-        node.getComponent(ComponentRigidbody).updateFromWorld(_toMesh);
+        node.getComponent(ComponentRigidbody).initialize();
       // this.world.updateWorldFromWorldMatrix(_toMesh);
       // for (let body of this.world.bodyList)
       //   body.updateFromWorld(_toMesh);

@@ -174,9 +174,12 @@ namespace FudgeCore {
                 throw (new Error("ComponentRigidbody requires ComponentTransform at the same Node"));
             }
 
+            if (!_cmpRigidbody.isInitialized ||  Project.mode == MODE.EDITOR)
+              _cmpRigidbody.initialize();
+
             _cmpRigidbody.checkCollisionEvents();
 
-            if (_cmpRigidbody.typeBody == BODY_TYPE.KINEMATIC) { //Case of Kinematic Rigidbody
+            if (_cmpRigidbody.typeBody == BODY_TYPE.KINEMATIC ||  Project.mode == MODE.EDITOR) { //Case of Kinematic Rigidbody
                 let mtxPivotWorld: Matrix4x4 = Matrix4x4.MULTIPLICATION(_node.mtxWorld, _cmpRigidbody.mtxPivot);
                 _cmpRigidbody.setPosition(mtxPivotWorld.translation);
                 _cmpRigidbody.setRotation(mtxPivotWorld.rotation);

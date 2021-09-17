@@ -59,7 +59,7 @@
                     FudgeAid.Viewport.expandCameraToInteractiveOrbit(viewport);
                     // setup audio
                     let cmpListener = new ƒ.ComponentAudioListener();
-                    cmpCamera.getContainer().addComponent(cmpListener);
+                    cmpCamera.node.addComponent(cmpListener);
                     FudgeCore.AudioManager.default.listenWith(cmpListener);
                     FudgeCore.AudioManager.default.listenTo(graph);
                     FudgeCore.Debug.log("Audio:", FudgeCore.AudioManager.default);

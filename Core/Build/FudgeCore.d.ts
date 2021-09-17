@@ -4450,7 +4450,7 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    enum BODY_ADJUST {
+    enum BODY_INIT {
         TO_MESH = 0,
         TO_NODE = 1,
         TO_PIVOT = 2
@@ -4476,7 +4476,8 @@ declare namespace FudgeCore {
         /** The groups this object collides with. Groups must be writen in form of
          *  e.g. collisionMask = PHYSICS_GROUP.DEFAULT | PHYSICS_GROUP.GROUP_1 and so on to collide with multiple groups. */
         collisionMask: number;
-        adjust: BODY_ADJUST.TO_MESH;
+        initialization: BODY_INIT;
+        isInitialized: boolean;
         /** Creating a new rigidbody with a weight in kg, a physics type (default = dynamic), a collider type what physical form has the collider, to what group does it belong, is there a transform Matrix that should be used, and is the collider defined as a group of points that represent a convex mesh. */
         constructor(_mass?: number, _type?: BODY_TYPE, _colliderType?: COLLIDER_TYPE, _group?: COLLISION_GROUP, _mtxTransform?: Matrix4x4, _convexMesh?: Float32Array);
         get id(): number;
@@ -4536,28 +4537,19 @@ declare namespace FudgeCore {
         */
         getOimoRigidbody(): OIMO.RigidBody;
         /** Rotating the rigidbody therefore changing it's rotation over time directly in physics. This way physics is changing instead of transform.
-     *  But you are able to incremental changing it instead of a direct rotation.  Although it's always prefered to use forces in physics.
-    */
+         *  But you are able to incremental changing it instead of a direct rotation.  Although it's always prefered to use forces in physics.
+         */
         rotateBody(_rotationChange: Vector3): void;
         /** Translating the rigidbody therefore changing it's place over time directly in physics. This way physics is changing instead of transform.
          *  But you are able to incremental changing it instead of a direct position. Although it's always prefered to use forces in physics. */
         translateBody(_translationChange: Vector3): void;
         /**
-       * Checking for Collision with other Colliders and dispatches a custom event with information about the collider.
-       * Automatically called in the RenderManager, no interaction needed.
-       */
-        checkCollisionEvents(): void;
-        /**
-       * Checks that the Rigidbody is positioned correctly and recreates the Collider with new scale/position/rotation
-       */
-        updateFromWorld(_toMesh?: boolean): void;
-        /**
-       * Get the current POSITION of the {@link Node} in the physical space
-       */
+         * Get the current POSITION of the {@link Node} in the physical space
+         */
         getPosition(): Vector3;
         /**
-      * Sets the current POSITION of the {@link Node} in the physical space
-      */
+         * Sets the current POSITION of the {@link Node} in the physical space
+         */
         setPosition(_value: Vector3): void;
         /**
          * Get the current ROTATION of the {@link Node} in the physical space. Note this range from -pi to pi, so -90 to 90.
@@ -4572,6 +4564,10 @@ declare namespace FudgeCore {
         /** Sets the current SCALING of the {@link Node} in the physical space. Also applying this scaling to the node itself. */
         setScaling(_value: Vector3): void;
         /**
+         * Initializes the rigidbody according to its initialization setting to match the mesh, the node or its own pivot matrix
+         */
+        initialize(): void;
+        /**
         * Get the current VELOCITY of the {@link Node}
         */
         getVelocity(): Vector3;
@@ -4580,12 +4576,12 @@ declare namespace FudgeCore {
          */
         setVelocity(_value: Vector3): void;
         /**
-    * Get the current ANGULAR - VELOCITY of the {@link Node}
-    */
+         * Get the current ANGULAR - VELOCITY of the {@link Node}
+         */
         getAngularVelocity(): Vector3;
         /**
-       * Sets the current ANGULAR - VELOCITY of the {@link Node}
-       */
+         * Sets the current ANGULAR - VELOCITY of the {@link Node}
+         */
         setAngularVelocity(_value: Vector3): void;
         /**
         * Applies a continous FORCE at the center of the RIGIDBODY in the three dimensions. Considering the rigidbody's MASS.
@@ -4626,6 +4622,11 @@ declare namespace FudgeCore {
         /** Stops the rigidbody from sleeping when movement is too minimal. Decreasing performance, for rarely more precise physics results */
         deactivateAutoSleep(): void;
         activateAutoSleep(): void;
+        /**
+         * Checking for Collision with other Colliders and dispatches a custom event with information about the collider.
+         * Automatically called in the RenderManager, no interaction needed.
+         */
+        checkCollisionEvents(): void;
         /**
          * Sends a ray through this specific body ignoring the rest of the world and checks if this body was hit by the ray,
          * returning info about the hit. Provides the same functionality and information a regular raycast does but the ray is only testing against this specific body.

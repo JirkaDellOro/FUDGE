@@ -94,6 +94,7 @@
                     "typeBody": "DYNAMIC",
                     "typeCollider": "CUBE",
                     "isTrigger": false,
+                    "initialization": "TO_MESH",
                     "id": 2,
                     "pivot": {
                       "translation": "[0, 0, 0]",
@@ -173,6 +174,7 @@
                     "typeBody": "STATIC",
                     "typeCollider": "CUBE",
                     "isTrigger": false,
+                    "initialization": "TO_MESH",
                     "id": 3,
                     "pivot": {
                       "translation": "[0, 0, 0]",

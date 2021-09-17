@@ -2336,12 +2336,14 @@ var Fudge;
                 if (this.node instanceof ƒ.Node) {
                     this.setTitle("Components | " + this.node.name);
                     this.dom.title = "Drop internal resources or use right click to create new components";
-                    let nodeComponents = this.node.getAllComponents();
-                    for (let nodeComponent of nodeComponents) {
-                        let details = ƒUi.Generator.createDetailsFromMutable(nodeComponent);
-                        let controller = new Fudge.ControllerComponent(nodeComponent, details);
-                        details.expand(this.expanded[nodeComponent.type]);
+                    let components = this.node.getAllComponents();
+                    for (let component of components) {
+                        let details = ƒUi.Generator.createDetailsFromMutable(component);
+                        let controller = new Fudge.ControllerComponent(component, details);
+                        details.expand(this.expanded[component.type]);
                         this.dom.append(controller.domElement);
+                        if (component instanceof ƒ.ComponentRigidbody)
+                            controller.domElement.title = "Right click to adjust pivot automatically";
                     }
                 }
             }
