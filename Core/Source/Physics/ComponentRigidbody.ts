@@ -610,10 +610,10 @@ namespace FudgeCore {
       this.isTrigger = _serialization.trigger || this.isTrigger;
       this.initialization = _serialization.initialization;
 
-      this.#typeBody = <number><unknown>BODY_TYPE[_serialization.typeBody];
-      this.#typeCollider = <number><unknown>COLLIDER_TYPE[_serialization.typeCollider];
       this.initialization = <number><unknown>BODY_INIT[_serialization.initialization];
-      this.create(this.mass, this.#typeBody, this.#typeCollider, this.collisionGroup, null, this.convexMesh);
+      this.typeBody = <number><unknown>BODY_TYPE[_serialization.typeBody];
+      this.typeCollider = <number><unknown>COLLIDER_TYPE[_serialization.typeCollider];
+      // this.create(this.mass, this.#typeBody, this.#typeCollider, this.collisionGroup, null, this.convexMesh);
       return this;
     }
 

@@ -74,7 +74,7 @@
                     "local": {
                       "translation": "[0, 0, 0]",
                       "rotation": "[0, 0, 0]",
-                      "scaling": "[1, 2, 1]"
+                      "scaling": "[1, 1, 1]"
                     },
                     "Component": {
                       "active": true
@@ -97,8 +97,8 @@
                     "isTrigger": false,
                     "id": 0,
                     "pivot": {
-                      "translation": "[1, 0, 0]",
-                      "rotation": "[0, 0, 47]",
+                      "translation": "[-0.16999998688697815, 2.299999713897705, -0.28000012040138245]",
+                      "rotation": "[-40, 0, 30]",
                       "scaling": "[1, 1, 1]"
                     },
                     "Component": {
@@ -195,7 +195,7 @@
                   "ƒ.ComponentTransform": {
                     "local": {
                       "translation": "[0, -1.3000000715255737, 0]",
-                      "rotation": "[0, 0, 0]",
+                      "rotation": "[20, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },
                     "Component": {
@@ -208,7 +208,7 @@
                 {
                   "ƒ.ComponentRigidbody": {
                     "initialization": "TO_MESH",
-                    "friction": 0.2,
+                    "friction": 1.2,
                     "restitution": 0.2,
                     "mass": 1,
                     "dampTranslation": 0.1,
