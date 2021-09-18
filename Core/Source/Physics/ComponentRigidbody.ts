@@ -318,6 +318,8 @@ namespace FudgeCore {
      * Initializes the rigidbody according to its initialization setting to match the mesh, the node or its own pivot matrix
      */
     public initialize(): void {
+      if (!this.node) // dealay initialization until this rigidbody is attached to a node
+        return;
       switch (Number(this.initialization)) {
         case BODY_INIT.TO_NODE:
           this.mtxPivot = Matrix4x4.IDENTITY();

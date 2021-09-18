@@ -85,7 +85,7 @@
               "ComponentRigidbody": [
                 {
                   "ƒ.ComponentRigidbody": {
-                    "initialization": "TO_NODE",
+                    "initialization": "TO_PIVOT",
                     "friction": 0.2,
                     "restitution": 0.2,
                     "mass": 1,
@@ -93,12 +93,12 @@
                     "dampRotation": 0.1,
                     "effectGravity": 1,
                     "typeBody": "DYNAMIC",
-                    "typeCollider": "CUBE",
+                    "typeCollider": "CYLINDER",
                     "isTrigger": false,
                     "id": 0,
                     "pivot": {
                       "translation": "[0, 0, 0]",
-                      "rotation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 40]",
                       "scaling": "[1, 1, 1]"
                     },
                     "Component": {

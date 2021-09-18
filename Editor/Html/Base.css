@@ -203,6 +203,19 @@ dialog>div#content {
   background-color: var(--color-background-content);
 }
 
+/* Select */
+
+select {
+  border-width: 0px;
+  background-color: #00000000;
+  color: var(--color-text);
+}
+
+option {
+  background-color: var(--color-background-content);
+  color: var(--color-text);
+}
+
 /* standard fudge elements */
 
 fudge-boolean, fudge-color, fudge-textinput, fudge-stepper, fudge-select {
