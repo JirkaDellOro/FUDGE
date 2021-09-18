@@ -1,22 +1,35 @@
 namespace FudgeCore {
+  /**
+   * Defines automatic adjustment of the collider
+   */
   export enum BODY_INIT {
-    TO_MESH, TO_NODE, TO_PIVOT
+    /** Collider uses the pivot of the mesh for initilialization */
+    TO_MESH,
+    /** Collider uses the transform of the node for initilialization */
+    TO_NODE,
+    /** Collider uses its own pivot for initilialization */
+    TO_PIVOT
   }
 
   /**
      * Acts as the physical representation of the {@link Node} it's attached to.
-     * It's the connection between the Fudge Rendered world and the Physics world.
+     * It's the connection between the Fudge rendered world and the Physics world.
      * For the physics to correctly get the transformations rotations need to be applied with from left = true.
      * Or rotations need to happen before scaling.
-     * @author Marko Fehrenbach, HFU 2020
+     * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
      */
   export class ComponentRigidbody extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentRigidbody);
 
-    /** The pivot of the physics itself. Default the pivot is identical to the transform. It's used like an offset. */
+    /** Transformation of the collider relative to the node's transform. Once set mostly remains constant. 
+     * If altered, {@link isInitialized} must be reset to false to recreate the collider in the next {@link Render.prepare}
+     */
     public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
 
-    /** Vertices that build a convex mesh (form that is in itself closed). Needs to set in the construction of the rb if none of the standard colliders is used. */
+    /** 
+     * Vertices that build a convex mesh (form that is in itself closed). Needs to set in the construction of the rb if none of the standard colliders is used. 
+     * Untested and not yet fully supported by serialization and mutation.
+     */
     public convexMesh: Float32Array = null;
 
     /** Collisions with rigidbodies happening to this body, can be used to build a custom onCollisionStay functionality. */
@@ -24,11 +37,17 @@ namespace FudgeCore {
     /** Triggers that are currently triggering this body */
     public triggerings: ComponentRigidbody[] = new Array();
 
-    /** The groups this object collides with. Groups must be writen in form of
-     *  e.g. collisionMask = PHYSICS_GROUP.DEFAULT | PHYSICS_GROUP.GROUP_1 and so on to collide with multiple groups. */
-
+    /** 
+     * The groups this object collides with. Groups must be writen in form of
+     *  e.g. collisionMask = {@link COLLISION_GROUP.DEFAULT} | {@link COLLISION_GROUP}.... and so on to collide with multiple groups. 
+     */
     public collisionMask: number;
-    public initialization: BODY_INIT = BODY_INIT.TO_MESH;
+
+    /** 
+     * Automatic adjustment of the pivot when {@link Render.prepare} is called according to {@link BODY_INIT}
+     */
+    public initialization: BODY_INIT = BODY_INIT.TO_PIVOT;
+    /** Marks if collider was initialized. Reset to false to initialize again e.g. after manipulation of mtxPivot */
     public isInitialized: boolean = false;
 
     /** ID to reference this specific ComponentRigidbody */
@@ -68,19 +87,20 @@ namespace FudgeCore {
       return this.#id;
     }
 
+    /** Used for calculation of the geometrical relationship of node and collider by {@link Render}*/
     public get mtxPivotInverse(): Matrix4x4 {
       return this.#mtxPivotInverse;
     }
+    /** Used for calculation of the geometrical relationship of node and collider by {@link Render}*/
     public get mtxPivotUnscaled(): Matrix4x4 {
       return this.#mtxPivotUnscaled;
     }
 
-    /** The type of interaction between the physical world and the transform hierarchy world. DYNAMIC means the body ignores hierarchy and moves by physics. KINEMATIC it's
-     * reacting to a {@link Node} that is using physics but can still be controlled by animation or transform. And STATIC means its immovable.
-     */
+    /** Retrieve the body type. See {@link BODY_TYPE} */
     public get typeBody(): BODY_TYPE {
       return this.#typeBody;
     }
+    /** Set the body type. See {@link BODY_TYPE} */
     public set typeBody(_value: BODY_TYPE) {
       this.#typeBody = _value;
       let oimoType: number;
@@ -113,7 +133,7 @@ namespace FudgeCore {
       }
     }
 
-    /** The physics group this {@link Node} belongs to it's the default group normally which means it physically collides with every group besides trigger. */
+    /** The collision group this {@link Node} belongs to it's the default group normally which means it physically collides with every group besides trigger. */
     public get collisionGroup(): COLLISION_GROUP {
       return this.#collisionGroup;
     }
@@ -135,14 +155,14 @@ namespace FudgeCore {
     }
 
     /**
-   * Returns the physical weight of the {@link Node}
-   */
+     * Returns the physical weight of the {@link Node}
+     */
     public get mass(): number {
       return this.#rigidbody.getMass();
     }
     /**
-  * Setting the physical weight of the {@link Node} in kg
-  */
+     * Setting the physical weight of the {@link Node} in kg
+     */
     public set mass(_value: number) {
       this.#massData.mass = _value;
       if (this.node != null)
@@ -150,7 +170,7 @@ namespace FudgeCore {
           this.#rigidbody.setMassData(this.#massData);
     }
 
-    /** Air reistance, when moving. A Body does slow down even on a surface without friction. */
+    /** Drag of linear movement. A Body does slow down even on a surface without friction. */
     public get dampTranslation(): number {
       return this.#rigidbody.getLinearDamping();
     }
@@ -159,7 +179,7 @@ namespace FudgeCore {
       this.#rigidbody.setLinearDamping(_value);
     }
 
-    /** Air resistance, when rotating. */
+    /** Drag of rotation. */
     public get dampRotation(): number {
       return this.#rigidbody.getAngularDamping();
     }
@@ -187,15 +207,15 @@ namespace FudgeCore {
     }
 
     /**
-  * Get the friction of the rigidbody, which is the factor of sliding resistance of this rigidbody on surfaces
-  */
+     * Get the friction of the rigidbody, which is the factor of sliding resistance of this rigidbody on surfaces
+     */
     public get friction(): number {
       return this.#friction;
     }
 
     /**
-   * Set the friction of the rigidbody, which is the factor of  sliding resistance of this rigidbody on surfaces
-   */
+     * Set the friction of the rigidbody, which is the factor of  sliding resistance of this rigidbody on surfaces
+     */
     public set friction(_friction: number) {
       this.#friction = _friction;
       if (this.#rigidbody.getShapeList() != null)
@@ -203,15 +223,15 @@ namespace FudgeCore {
     }
 
     /**
-  * Get the restitution of the rigidbody, which is the factor of bounciness of this rigidbody on surfaces
-  */
+     * Get the restitution of the rigidbody, which is the factor of bounciness of this rigidbody on surfaces
+     */
     public get restitution(): number {
       return this.#restitution;
     }
 
     /**
-   * Set the restitution of the rigidbody, which is the factor of bounciness of this rigidbody on surfaces
-   */
+     * Set the restitution of the rigidbody, which is the factor of bounciness of this rigidbody on surfaces
+     */
     public set restitution(_restitution: number) {
       this.#restitution = _restitution;
       if (this.#rigidbody.getShapeList() != null)
@@ -221,9 +241,9 @@ namespace FudgeCore {
 
     //#region Transformation
     /**
-    * Returns the rigidbody in the form the physics engine is using it, should not be used unless a functionality
-    * is not provided through the FUDGE Integration.
-    */
+     * Returns the rigidbody in the form the physics engine is using it, should not be used unless a functionality
+     * is not provided through the FUDGE Integration.
+     */
     public getOimoRigidbody(): OIMO.RigidBody {
       return this.#rigidbody;
     }
@@ -236,7 +256,8 @@ namespace FudgeCore {
     }
 
     /** Translating the rigidbody therefore changing it's place over time directly in physics. This way physics is changing instead of transform. 
-     *  But you are able to incremental changing it instead of a direct position. Although it's always prefered to use forces in physics. */
+     *  But you are able to incrementally changing it instead of a direct position. Although it's always prefered to use forces in physics. 
+     */
     public translateBody(_translationChange: Vector3): void {
       this.#rigidbody.translate(new OIMO.Vec3(_translationChange.x, _translationChange.y, _translationChange.z));
     }
@@ -290,13 +311,10 @@ namespace FudgeCore {
       return scaling;
     }
 
-    /** Sets the current SCALING of the {@link Node} in the physical space. Also applying this scaling to the node itself. */
+    /** Scaling requires the collider to be completely recreated anew */
     public setScaling(_value: Vector3): void {
-      let scaling: Vector3 = _value.copy;
-      scaling.x *= this.mtxPivot.scaling.x;
-      scaling.y *= this.mtxPivot.scaling.y;
-      scaling.z *= this.mtxPivot.scaling.z;
-      this.createCollider(new OIMO.Vec3(scaling.x / 2, scaling.y / 2, scaling.z / 2), this.typeCollider); //recreate the collider
+      let scaling: Vector3 = _value.copy;   
+      this.createCollider(new OIMO.Vec3(scaling.x / 2, scaling.y / 2, scaling.z / 2), this.#typeCollider); //recreate the collider
       this.#collider = new OIMO.Shape(this.#colliderInfo);
       let oldCollider: OIMO.Shape = this.#rigidbody.getShapeList();
       this.#rigidbody.addShape(this.#collider); //add new collider, before removing the old, so the rb is never active with 0 colliders
@@ -304,14 +322,10 @@ namespace FudgeCore {
       this.#collider.userData = this; //reset the extra information so that this collider knows to which Fudge Component it's connected
       this.#collider.setCollisionGroup(this.collisionGroup);
       this.#collider.setCollisionMask(this.collisionMask);
-      if (this.#rigidbody.getShapeList() != null) { //reset the informations about physics handling, has to be done because the shape is new
-        this.#rigidbody.getShapeList().setRestitution(this.#restitution);
-        this.#rigidbody.getShapeList().setFriction(this.#friction);
-        this.#rigidbody.getShapeList().setContactCallback(this.#callbacks);
-      }
-      let mutator: Mutator = {};
-      mutator["scaling"] = _value;
-      this.node.mtxLocal.mutate(mutator);
+      
+      this.#collider.setRestitution(this.#restitution);
+      this.#collider.setFriction(this.#friction);
+      this.#collider.setContactCallback(this.#callbacks);
     }
 
     /**
@@ -335,31 +349,11 @@ namespace FudgeCore {
       let mtxWorld: Matrix4x4 = Matrix4x4.MULTIPLICATION(this.node.mtxWorld, this.mtxPivot);
 
       let position: Vector3 = mtxWorld.translation; //Adding the offsets from the pivot
-      // position.add(this.mtxPivot.translation);
       let rotation: Vector3 = mtxWorld.getEulerAngles();
-      // rotation.add(this.mtxPivot.rotation);
-      let scaling: Vector3 = mtxWorld.scaling;  // having scaling in pivot may cause problems when calculating back
-      // scaling.x *= this.mtxPivot.scaling.x;
-      // scaling.y *= this.mtxPivot.scaling.y;
-      // scaling.z *= this.mtxPivot.scaling.z;
-      this.createCollider(new OIMO.Vec3(scaling.x / 2, scaling.y / 2, scaling.z / 2), this.#typeCollider); //recreate the collider
-      this.#collider = new OIMO.Shape(this.#colliderInfo);
-      let oldCollider: OIMO.Shape = this.#rigidbody.getShapeList();
-      this.#rigidbody.addShape(this.#collider); //add new collider, before removing the old, so the rb is never active with 0 colliders
-      this.#rigidbody.removeShape(oldCollider); //remove the old collider
-      this.#collider.userData = this; //reset the extra information so that this collider knows to which Fudge Component it's connected
-      this.#collider.setCollisionGroup(this.collisionGroup);
-      this.#collider.setCollisionMask(this.collisionMask);
-      // if (this.#rigidbody.getShapeList() != null) { //reset the informations about physics handling, has to be done because the shape is new
-      //   this.#rigidbody.getShapeList().setRestitution(this.#restitution);
-      //   this.#rigidbody.getShapeList().setFriction(this.#friction);
-      //   this.#rigidbody.getShapeList().setContactCallback(this.#callbacks); //Re-Adding Trigger Callbacks
-      // }
-      //----should be the same
-      this.#collider.setRestitution(this.#restitution);
-      this.#collider.setFriction(this.#friction);
-      this.#collider.setContactCallback(this.#callbacks);
-      // ----
+      let scaling: Vector3 = mtxWorld.scaling;  
+      //scaling requires collider to be recreated
+      this.setScaling(scaling);
+
       this.#rigidbody.setMassData(this.#massData);
       this.setPosition(position); //set the actual new rotation/position for this Rb again since it's now updated
       this.setRotation(rotation);

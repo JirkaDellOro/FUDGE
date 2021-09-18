@@ -4450,65 +4450,83 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Defines automatic adjustment of the collider
+     */
     enum BODY_INIT {
+        /** Collider uses the pivot of the mesh for initilialization */
         TO_MESH = 0,
+        /** Collider uses the transform of the node for initilialization */
         TO_NODE = 1,
+        /** Collider uses its own pivot for initilialization */
         TO_PIVOT = 2
     }
     /**
        * Acts as the physical representation of the {@link Node} it's attached to.
-       * It's the connection between the Fudge Rendered world and the Physics world.
+       * It's the connection between the Fudge rendered world and the Physics world.
        * For the physics to correctly get the transformations rotations need to be applied with from left = true.
        * Or rotations need to happen before scaling.
-       * @author Marko Fehrenbach, HFU 2020
+       * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
        */
     class ComponentRigidbody extends Component {
         #private;
         static readonly iSubclass: number;
-        /** The pivot of the physics itself. Default the pivot is identical to the transform. It's used like an offset. */
+        /** Transformation of the collider relative to the node's transform. Once set mostly remains constant.
+         * If altered, {@link isInitialized} must be reset to false to recreate the collider in the next {@link Render.prepare}
+         */
         mtxPivot: Matrix4x4;
-        /** Vertices that build a convex mesh (form that is in itself closed). Needs to set in the construction of the rb if none of the standard colliders is used. */
+        /**
+         * Vertices that build a convex mesh (form that is in itself closed). Needs to set in the construction of the rb if none of the standard colliders is used.
+         * Untested and not yet fully supported by serialization and mutation.
+         */
         convexMesh: Float32Array;
         /** Collisions with rigidbodies happening to this body, can be used to build a custom onCollisionStay functionality. */
         collisions: ComponentRigidbody[];
         /** Triggers that are currently triggering this body */
         triggerings: ComponentRigidbody[];
-        /** The groups this object collides with. Groups must be writen in form of
-         *  e.g. collisionMask = PHYSICS_GROUP.DEFAULT | PHYSICS_GROUP.GROUP_1 and so on to collide with multiple groups. */
+        /**
+         * The groups this object collides with. Groups must be writen in form of
+         *  e.g. collisionMask = {@link COLLISION_GROUP.DEFAULT} | {@link COLLISION_GROUP}.... and so on to collide with multiple groups.
+         */
         collisionMask: number;
+        /**
+         * Automatic adjustment of the pivot when {@link Render.prepare} is called according to {@link BODY_INIT}
+         */
         initialization: BODY_INIT;
+        /** Marks if collider was initialized. Reset to false to initialize again e.g. after manipulation of mtxPivot */
         isInitialized: boolean;
         /** Creating a new rigidbody with a weight in kg, a physics type (default = dynamic), a collider type what physical form has the collider, to what group does it belong, is there a transform Matrix that should be used, and is the collider defined as a group of points that represent a convex mesh. */
         constructor(_mass?: number, _type?: BODY_TYPE, _colliderType?: COLLIDER_TYPE, _group?: COLLISION_GROUP, _mtxTransform?: Matrix4x4, _convexMesh?: Float32Array);
         get id(): number;
+        /** Used for calculation of the geometrical relationship of node and collider by {@link Render}*/
         get mtxPivotInverse(): Matrix4x4;
+        /** Used for calculation of the geometrical relationship of node and collider by {@link Render}*/
         get mtxPivotUnscaled(): Matrix4x4;
-        /** The type of interaction between the physical world and the transform hierarchy world. DYNAMIC means the body ignores hierarchy and moves by physics. KINEMATIC it's
-         * reacting to a {@link Node} that is using physics but can still be controlled by animation or transform. And STATIC means its immovable.
-         */
+        /** Retrieve the body type. See {@link BODY_TYPE} */
         get typeBody(): BODY_TYPE;
+        /** Set the body type. See {@link BODY_TYPE} */
         set typeBody(_value: BODY_TYPE);
         /** The shape that represents the {@link Node} in the physical world. Default is a Cube. */
         get typeCollider(): COLLIDER_TYPE;
         set typeCollider(_value: COLLIDER_TYPE);
-        /** The physics group this {@link Node} belongs to it's the default group normally which means it physically collides with every group besides trigger. */
+        /** The collision group this {@link Node} belongs to it's the default group normally which means it physically collides with every group besides trigger. */
         get collisionGroup(): COLLISION_GROUP;
         set collisionGroup(_value: COLLISION_GROUP);
         /** Marking the Body as a trigger therefore not influencing the collision system but only sending triggerEvents */
         get isTrigger(): boolean;
         set isTrigger(_value: boolean);
         /**
-       * Returns the physical weight of the {@link Node}
-       */
+         * Returns the physical weight of the {@link Node}
+         */
         get mass(): number;
         /**
-      * Setting the physical weight of the {@link Node} in kg
-      */
+         * Setting the physical weight of the {@link Node} in kg
+         */
         set mass(_value: number);
-        /** Air reistance, when moving. A Body does slow down even on a surface without friction. */
+        /** Drag of linear movement. A Body does slow down even on a surface without friction. */
         get dampTranslation(): number;
         set dampTranslation(_value: number);
-        /** Air resistance, when rotating. */
+        /** Drag of rotation. */
         get dampRotation(): number;
         set dampRotation(_value: number);
         /** The factor this rigidbody reacts rotations that happen in the physical world. 0 to lock rotation this axis. */
@@ -4518,32 +4536,33 @@ declare namespace FudgeCore {
         get effectGravity(): number;
         set effectGravity(_effect: number);
         /**
-      * Get the friction of the rigidbody, which is the factor of sliding resistance of this rigidbody on surfaces
-      */
+         * Get the friction of the rigidbody, which is the factor of sliding resistance of this rigidbody on surfaces
+         */
         get friction(): number;
         /**
-       * Set the friction of the rigidbody, which is the factor of  sliding resistance of this rigidbody on surfaces
-       */
+         * Set the friction of the rigidbody, which is the factor of  sliding resistance of this rigidbody on surfaces
+         */
         set friction(_friction: number);
         /**
-      * Get the restitution of the rigidbody, which is the factor of bounciness of this rigidbody on surfaces
-      */
+         * Get the restitution of the rigidbody, which is the factor of bounciness of this rigidbody on surfaces
+         */
         get restitution(): number;
         /**
-       * Set the restitution of the rigidbody, which is the factor of bounciness of this rigidbody on surfaces
-       */
+         * Set the restitution of the rigidbody, which is the factor of bounciness of this rigidbody on surfaces
+         */
         set restitution(_restitution: number);
         /**
-        * Returns the rigidbody in the form the physics engine is using it, should not be used unless a functionality
-        * is not provided through the FUDGE Integration.
-        */
+         * Returns the rigidbody in the form the physics engine is using it, should not be used unless a functionality
+         * is not provided through the FUDGE Integration.
+         */
         getOimoRigidbody(): OIMO.RigidBody;
         /** Rotating the rigidbody therefore changing it's rotation over time directly in physics. This way physics is changing instead of transform.
          *  But you are able to incremental changing it instead of a direct rotation.  Although it's always prefered to use forces in physics.
          */
         rotateBody(_rotationChange: Vector3): void;
         /** Translating the rigidbody therefore changing it's place over time directly in physics. This way physics is changing instead of transform.
-         *  But you are able to incremental changing it instead of a direct position. Although it's always prefered to use forces in physics. */
+         *  But you are able to incrementally changing it instead of a direct position. Although it's always prefered to use forces in physics.
+         */
         translateBody(_translationChange: Vector3): void;
         /**
          * Get the current POSITION of the {@link Node} in the physical space
@@ -4563,7 +4582,7 @@ declare namespace FudgeCore {
         setRotation(_value: Vector3): void;
         /** Get the current SCALING in the physical space. */
         getScaling(): Vector3;
-        /** Sets the current SCALING of the {@link Node} in the physical space. Also applying this scaling to the node itself. */
+        /** Scaling requires the collider to be completely recreated anew */
         setScaling(_value: Vector3): void;
         /**
          * Initializes the rigidbody according to its initialization setting to match the mesh, the node or its own pivot matrix
@@ -4826,12 +4845,14 @@ declare namespace FudgeCore {
         GROUP_5 = 32
     }
     /**
-    * Different types of physical interaction, DYNAMIC is fully influenced by physics and only physics, STATIC means immovable,
-    * KINEMATIC is moved through transform and animation instead of physics code.
+    * Defines the type of the rigidbody which determines the way it interacts with the physical and the visual world
     */
     enum BODY_TYPE {
+        /** The body ignores the hierarchy of the render graph, is completely controlled  by physics and takes its node with it  */
         DYNAMIC = 0,
+        /** The body ignores the hierarchy of the render graph, is completely immoveble and keeps its node from moving  */
         STATIC = 1,
+        /** The body is controlled by its node and moves with it, while it impacts the physical world e.g. by collisions */
         KINEMATIC = 2
     }
     /**

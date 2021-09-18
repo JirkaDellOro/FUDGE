@@ -53,12 +53,15 @@ namespace FudgeCore {
   }
 
   /**
-  * Different types of physical interaction, DYNAMIC is fully influenced by physics and only physics, STATIC means immovable, 
-  * KINEMATIC is moved through transform and animation instead of physics code.
+  * Defines the type of the rigidbody which determines the way it interacts with the physical and the visual world
   */
   export enum BODY_TYPE {
+    
+    /** The body ignores the hierarchy of the render graph, is completely controlled  by physics and takes its node with it  */
     DYNAMIC, // = OIMO.RigidBodyType.DYNAMIC,
+    /** The body ignores the hierarchy of the render graph, is completely immoveble and keeps its node from moving  */
     STATIC, // = OIMO.RigidBodyType.STATIC,
+    /** The body is controlled by its node and moves with it, while it impacts the physical world e.g. by collisions */
     KINEMATIC // = OIMO.RigidBodyType.KINEMATIC
   }
 
