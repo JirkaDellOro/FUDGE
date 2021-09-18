@@ -116,7 +116,7 @@ var FudgeUserInterface;
         getMutator(_mutator, _types) {
             // TODO: should get Mutator for UI or work with this.mutator (examine)
             this.mutable.updateMutator(this.mutator);
-            return Controller.getMutator(this.mutable, this.domElement);
+            return Controller.getMutator(this.mutable, this.domElement, _mutator, _types);
         }
         updateUserInterface() {
             Controller.updateUserInterface(this.mutable, this.domElement);

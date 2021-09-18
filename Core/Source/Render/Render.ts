@@ -180,14 +180,14 @@ namespace FudgeCore {
       _cmpRigidbody.checkCollisionEvents();
 
       if (_cmpRigidbody.typeBody == BODY_TYPE.KINEMATIC || Project.mode == MODE.EDITOR) { //Case of Kinematic Rigidbody
-        let mtxPivotWorld: Matrix4x4 = Matrix4x4.MULTIPLICATION(_node.mtxWorld, _cmpRigidbody.mtxPivot);
+        let mtxPivotWorld: Matrix4x4 = Matrix4x4.MULTIPLICATION(_node.mtxWorld, _cmpRigidbody.mtxPivotUnscaled);
         _cmpRigidbody.setPosition(mtxPivotWorld.translation);
         _cmpRigidbody.setRotation(mtxPivotWorld.rotation);
         return;
       }
 
       let mtxWorld: Matrix4x4 = Matrix4x4.CONSTRUCTION(
-        { translation: _cmpRigidbody.getPosition(), rotation: _cmpRigidbody.getRotation(), scaling: _cmpRigidbody.mtxPivot.scaling }
+        { translation: _cmpRigidbody.getPosition(), rotation: _cmpRigidbody.getRotation(), scaling: Vector3.ONE() }
       );
       mtxWorld.multiply(_cmpRigidbody.mtxPivotInverse);
       _node.mtxWorld.translation = mtxWorld.translation;

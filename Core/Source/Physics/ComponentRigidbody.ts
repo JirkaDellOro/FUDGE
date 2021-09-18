@@ -15,7 +15,6 @@ namespace FudgeCore {
 
     /** The pivot of the physics itself. Default the pivot is identical to the transform. It's used like an offset. */
     public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
-    public mtxPivotInverse: Matrix4x4 = Matrix4x4.IDENTITY();
 
     /** Vertices that build a convex mesh (form that is in itself closed). Needs to set in the construction of the rb if none of the standard colliders is used. */
     public convexMesh: Float32Array = null;
@@ -53,6 +52,8 @@ namespace FudgeCore {
     #effectRotation: Vector3 = Vector3.ONE();
     #effectGravity: number = 1;
     #isTrigger: boolean = false;
+    #mtxPivotUnscaled: Matrix4x4 = Matrix4x4.IDENTITY();
+    #mtxPivotInverse: Matrix4x4 = Matrix4x4.IDENTITY();
 
     #callbacks: OIMO.ContactCallback; //Callback Methods when within the oimoSystem a event is happening
 
@@ -65,6 +66,13 @@ namespace FudgeCore {
     //#region Accessors
     public get id(): number {
       return this.#id;
+    }
+
+    public get mtxPivotInverse(): Matrix4x4 {
+      return this.#mtxPivotInverse;
+    }
+    public get mtxPivotUnscaled(): Matrix4x4 {
+      return this.#mtxPivotUnscaled;
     }
 
     /** The type of interaction between the physical world and the transform hierarchy world. DYNAMIC means the body ignores hierarchy and moves by physics. KINEMATIC it's
@@ -323,7 +331,7 @@ namespace FudgeCore {
           break;
       }
       let mtxWorld: Matrix4x4 = Matrix4x4.MULTIPLICATION(this.node.mtxWorld, this.mtxPivot);
-      
+
       let position: Vector3 = mtxWorld.translation; //Adding the offsets from the pivot
       // position.add(this.mtxPivot.translation);
       let rotation: Vector3 = mtxWorld.getEulerAngles();
@@ -354,8 +362,8 @@ namespace FudgeCore {
       this.setPosition(position); //set the actual new rotation/position for this Rb again since it's now updated
       this.setRotation(rotation);
 
-      this.mtxPivot.scaling = Vector3.ONE();
-      this.mtxPivotInverse = Matrix4x4.INVERSION(this.mtxPivot);
+      this.#mtxPivotUnscaled = Matrix4x4.CONSTRUCTION({ translation: this.mtxPivot.translation, rotation: this.mtxPivot.rotation, scaling: Vector3.ONE() });
+      this.#mtxPivotInverse = Matrix4x4.INVERSION(this.#mtxPivotUnscaled);
 
       this.isInitialized = true;
     }
@@ -672,7 +680,6 @@ namespace FudgeCore {
       delete _mutator.convexMesh; //Convex Mesh can't be shown in the editor because float32Array is not a viable mutator
       delete _mutator.collisionMask;
       delete _mutator.isInitialized;
-      delete _mutator.mtxPivotInverse;
     }
     //#endregion
 

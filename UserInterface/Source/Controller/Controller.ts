@@ -126,7 +126,7 @@ namespace FudgeUserInterface {
     public getMutator(_mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator {
       // TODO: should get Mutator for UI or work with this.mutator (examine)
       this.mutable.updateMutator(this.mutator);
-      return Controller.getMutator(this.mutable, this.domElement);
+      return Controller.getMutator(this.mutable, this.domElement, _mutator, _types);
     }
 
     public updateUserInterface(): void {

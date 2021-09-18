@@ -111,8 +111,16 @@ namespace Fudge {
             let controller: ControllerComponent = new ControllerComponent(component, details);
             details.expand(this.expanded[component.type]);
             this.dom.append(controller.domElement);
-            if (component instanceof ƒ.ComponentRigidbody)
-              controller.domElement.title = "Right click to adjust pivot automatically";
+            if (component instanceof ƒ.ComponentRigidbody) {
+              let pivot: HTMLElement = controller.domElement.querySelector("[key=mtxPivot");
+              let opacity: string = pivot.style.opacity;
+              setPivotOpacity(null);
+              controller.domElement.addEventListener(ƒUi.EVENT.MUTATE, setPivotOpacity);
+              function setPivotOpacity(_event: Event): void {
+                let initialization: ƒ.BODY_INIT = controller.getMutator({ initialization: 0 }).initialization;
+                pivot.style.opacity = initialization == ƒ.BODY_INIT.TO_PIVOT ? opacity : "0.3";
+              }
+            }
           }
         }
       }
