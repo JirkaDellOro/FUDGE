@@ -15,6 +15,7 @@ namespace FudgeCore {
 
     /** The pivot of the physics itself. Default the pivot is identical to the transform. It's used like an offset. */
     public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
+    public mtxPivotInverse: Matrix4x4 = Matrix4x4.IDENTITY();
 
     /** Vertices that build a convex mesh (form that is in itself closed). Needs to set in the construction of the rb if none of the standard colliders is used. */
     public convexMesh: Float32Array = null;
@@ -327,7 +328,7 @@ namespace FudgeCore {
       // position.add(this.mtxPivot.translation);
       let rotation: Vector3 = mtxWorld.getEulerAngles();
       // rotation.add(this.mtxPivot.rotation);
-      let scaling: Vector3 = mtxWorld.scaling;
+      let scaling: Vector3 = mtxWorld.scaling;  // having scaling in pivot may cause problems when calculating back
       // scaling.x *= this.mtxPivot.scaling.x;
       // scaling.y *= this.mtxPivot.scaling.y;
       // scaling.z *= this.mtxPivot.scaling.z;
@@ -352,6 +353,9 @@ namespace FudgeCore {
       this.#rigidbody.setMassData(this.#massData);
       this.setPosition(position); //set the actual new rotation/position for this Rb again since it's now updated
       this.setRotation(rotation);
+
+      this.mtxPivot.scaling = Vector3.ONE();
+      this.mtxPivotInverse = Matrix4x4.INVERSION(this.mtxPivot);
 
       this.isInitialized = true;
     }
@@ -668,6 +672,7 @@ namespace FudgeCore {
       delete _mutator.convexMesh; //Convex Mesh can't be shown in the editor because float32Array is not a viable mutator
       delete _mutator.collisionMask;
       delete _mutator.isInitialized;
+      delete _mutator.mtxPivotInverse;
     }
     //#endregion
 
