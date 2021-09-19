@@ -270,7 +270,8 @@
                     "ComponentMaterial": [
                       {
                         "ƒ.ComponentMaterial": {
-                          "clrPrimary": "[0.35294117647058826, 0.7843137254901961, 0.19607843137254902, 1]",
+                          "sortForAlpha": "undefined",
+                          "clrPrimary": "[1, 0, 0, 1]",
                           "clrSecondary": "[1, 1, 1, 1]",
                           "pivot": {
                             "translation": "[0, 0]",

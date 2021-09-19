@@ -328,6 +328,7 @@ var Fudge;
             }
             const resourceLink = head.querySelector("link[type=resources]");
             let resourceFile = resourceLink.getAttribute("src");
+            Fudge.project.fileInternal = resourceFile;
             ƒ.Project.baseURL = this.base;
             let reconstruction = await ƒ.Project.loadResources(new URL(resourceFile, this.base).toString());
             ƒ.Debug.groupCollapsed("Deserialized");
@@ -554,8 +555,6 @@ var Fudge;
             return JSON.stringify(panelInfos);
         }
         static setPanelInfo(_panelInfos) {
-            for (let panel of Page.panels)
-                panel.destroy();
             Page.goldenLayout.clear();
             Page.panels = [];
             let panelInfos = JSON.parse(_panelInfos);
@@ -1449,9 +1448,6 @@ var Fudge;
                 view.dom.dispatchEvent(event);
             }
         };
-        destroy() {
-            this.goldenLayout.destroy();
-        }
         addViewComponent = (_event) => {
             // adjustmens for GoldenLayout 2
             let target = _event.target;

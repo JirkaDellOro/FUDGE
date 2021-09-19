@@ -322,7 +322,6 @@ declare namespace Fudge {
         /** Send custom copies of the given event to the views */
         broadcastEvent: (_event: Event) => void;
         abstract getState(): PanelState;
-        destroy(): void;
         private addViewComponent;
     }
 }

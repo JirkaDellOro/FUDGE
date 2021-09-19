@@ -42,8 +42,6 @@ namespace Fudge {
     }
 
     public static setPanelInfo(_panelInfos: string): void {
-      for (let panel of Page.panels)
-        panel.destroy();
       Page.goldenLayout.clear();
       Page.panels = [];
 

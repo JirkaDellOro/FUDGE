@@ -66,6 +66,7 @@ namespace Fudge {
 
       const resourceLink: HTMLLinkElement = head.querySelector("link[type=resources]");
       let resourceFile: string = resourceLink.getAttribute("src");
+      project.fileInternal = resourceFile;
       ƒ.Project.baseURL = this.base;
       let reconstruction: ƒ.Resources = await ƒ.Project.loadResources(new URL(resourceFile, this.base).toString());
 
