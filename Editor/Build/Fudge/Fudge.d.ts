@@ -117,6 +117,7 @@ declare namespace Fudge {
         private createProjectHTML;
         private getAutoViewScript;
         private settingsStringify;
+        private panelsStringify;
         private stringifyHTML;
     }
 }
@@ -138,6 +139,8 @@ declare namespace Fudge {
         private static idCounter;
         private static goldenLayout;
         private static panels;
+        static getPanelInfo(): string;
+        static setPanelInfo(_panelInfos: string): void;
         private static start;
         private static setupGoldenLayout;
         private static add;

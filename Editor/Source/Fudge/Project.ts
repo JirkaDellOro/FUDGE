@@ -40,20 +40,12 @@ namespace Fudge {
     public hndChange = (_event: Event): void => {
       let mutator: ƒ.Mutator = ƒui.Controller.getMutator(this, ƒui.Dialog.dom, this.getMutator());
       console.log(mutator, this);
-      // if (mutator.title != this.title) {
-      //   this.updateFilenames(mutator.title, false, mutator);
-      //   ƒui.Controller.updateUserInterface(this, ƒui.Dialog.dom, mutator);
-      // }
     }
 
     public async load(htmlContent: string): Promise<void> {
       const parser: DOMParser = new DOMParser();
       this.#document = parser.parseFromString(htmlContent, "application/xhtml+xml");
       const head: HTMLHeadElement = this.#document.querySelector("head");
-
-      let settings: string = head.querySelectorAll("meta[type=settings]")[0].getAttribute("project");
-      settings = settings.replace(/'/g, "\"");
-      project.mutate(JSON.parse(settings));
 
       //TODO: should old scripts be removed from memory first? How?
       const scripts: NodeListOf<HTMLScriptElement> = head.querySelectorAll("script");
@@ -75,6 +67,14 @@ namespace Fudge {
       ƒ.Debug.groupCollapsed("Deserialized");
       ƒ.Debug.info(reconstruction);
       ƒ.Debug.groupEnd();
+      
+      let settings: HTMLMetaElement = head.querySelector("meta[type=settings]");
+      let projectSettings: string = settings.getAttribute("project");
+      projectSettings = projectSettings.replace(/'/g, "\"");
+      project.mutate(JSON.parse(projectSettings));
+      let panelInfo: string = settings.getAttribute("panels");
+      panelInfo = panelInfo.replace(/'/g, "\"");
+      Page.setPanelInfo(panelInfo);
     }
 
     public getProjectJSON(): string {
@@ -98,8 +98,9 @@ namespace Fudge {
         return this.createProjectHTML(_title);
 
       let settings: HTMLElement = this.#document.head.querySelector("meta[type=settings]");
-      settings.setAttribute("project", this.settingsStringify());
       settings.setAttribute("autoview", this.graphAutoView);
+      settings.setAttribute("project", this.settingsStringify());
+      settings.setAttribute("panels", this.panelsStringify());
 
       let autoViewScript: HTMLScriptElement = this.#document.querySelector("script[name=autoView]");
       if (this.includeAutoViewScript) {
@@ -146,7 +147,9 @@ namespace Fudge {
       html.head.appendChild(html.createComment("CRLF"));
 
       html.head.appendChild(html.createComment("Editor settings of this project"));
-      html.head.appendChild(createTag("meta", { type: "settings", autoview: this.graphAutoView, project: this.settingsStringify() }));
+      html.head.appendChild(createTag("meta", {
+        type: "settings", autoview: this.graphAutoView, project: this.settingsStringify(), panels: this.panelsStringify()
+      }));
       html.head.appendChild(html.createComment("CRLF"));
 
       html.head.appendChild(html.createComment("Activate the following line to include the FUDGE-version of Oimo-Physics. You may want to download a local copy to work offline and be independent from future changes!"));
@@ -270,6 +273,12 @@ namespace Fudge {
       let settings: string = JSON.stringify(project.getMutator());
       settings = settings.replace(/"/g, "'");
       return settings;
+    }
+
+    private panelsStringify(): string {
+      let panels: string = Page.getPanelInfo();
+      panels = panels.replace(/"/g, "'");
+      return panels;
     }
 
     private stringifyHTML(_html: Document): string {

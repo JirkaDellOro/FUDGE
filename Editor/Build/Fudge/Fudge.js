@@ -305,18 +305,11 @@ var Fudge;
         hndChange = (_event) => {
             let mutator = ƒui.Controller.getMutator(this, ƒui.Dialog.dom, this.getMutator());
             console.log(mutator, this);
-            // if (mutator.title != this.title) {
-            //   this.updateFilenames(mutator.title, false, mutator);
-            //   ƒui.Controller.updateUserInterface(this, ƒui.Dialog.dom, mutator);
-            // }
         };
         async load(htmlContent) {
             const parser = new DOMParser();
             this.#document = parser.parseFromString(htmlContent, "application/xhtml+xml");
             const head = this.#document.querySelector("head");
-            let settings = head.querySelectorAll("meta[type=settings]")[0].getAttribute("project");
-            settings = settings.replace(/'/g, "\"");
-            Fudge.project.mutate(JSON.parse(settings));
             //TODO: should old scripts be removed from memory first? How?
             const scripts = head.querySelectorAll("script");
             for (let script of scripts) {
@@ -335,6 +328,13 @@ var Fudge;
             ƒ.Debug.groupCollapsed("Deserialized");
             ƒ.Debug.info(reconstruction);
             ƒ.Debug.groupEnd();
+            let settings = head.querySelector("meta[type=settings]");
+            let projectSettings = settings.getAttribute("project");
+            projectSettings = projectSettings.replace(/'/g, "\"");
+            Fudge.project.mutate(JSON.parse(projectSettings));
+            let panelInfo = settings.getAttribute("panels");
+            panelInfo = panelInfo.replace(/'/g, "\"");
+            Fudge.Page.setPanelInfo(panelInfo);
         }
         getProjectJSON() {
             let serialization = ƒ.Project.serialize();
@@ -352,8 +352,9 @@ var Fudge;
             if (!this.#document)
                 return this.createProjectHTML(_title);
             let settings = this.#document.head.querySelector("meta[type=settings]");
-            settings.setAttribute("project", this.settingsStringify());
             settings.setAttribute("autoview", this.graphAutoView);
+            settings.setAttribute("project", this.settingsStringify());
+            settings.setAttribute("panels", this.panelsStringify());
             let autoViewScript = this.#document.querySelector("script[name=autoView]");
             if (this.includeAutoViewScript) {
                 if (!autoViewScript)
@@ -391,7 +392,9 @@ var Fudge;
             html.head.appendChild(createTag("link", { rel: "stylesheet", href: this.fileStyles }));
             html.head.appendChild(html.createComment("CRLF"));
             html.head.appendChild(html.createComment("Editor settings of this project"));
-            html.head.appendChild(createTag("meta", { type: "settings", autoview: this.graphAutoView, project: this.settingsStringify() }));
+            html.head.appendChild(createTag("meta", {
+                type: "settings", autoview: this.graphAutoView, project: this.settingsStringify(), panels: this.panelsStringify()
+            }));
             html.head.appendChild(html.createComment("CRLF"));
             html.head.appendChild(html.createComment("Activate the following line to include the FUDGE-version of Oimo-Physics. You may want to download a local copy to work offline and be independent from future changes!"));
             html.head.appendChild(html.createComment(`<script type="text/javascript" src="../../../Physics/OimoPhysics.js"></script>`));
@@ -494,6 +497,11 @@ var Fudge;
             settings = settings.replace(/"/g, "'");
             return settings;
         }
+        panelsStringify() {
+            let panels = Fudge.Page.getPanelInfo();
+            panels = panels.replace(/"/g, "'");
+            return panels;
+        }
         stringifyHTML(_html) {
             let result = (new XMLSerializer()).serializeToString(_html);
             result = result.replace(/></g, ">\n<");
@@ -528,6 +536,17 @@ var Fudge;
         static idCounter = 0;
         static goldenLayout;
         static panels = [];
+        static getPanelInfo() {
+            let panelInfos = [];
+            for (let panel of Page.panels)
+                panelInfos.push({ type: panel.constructor.name, state: panel.getState() });
+            return JSON.stringify(panelInfos);
+        }
+        static setPanelInfo(_panelInfos) {
+            let panelInfos = JSON.parse(_panelInfos);
+            for (let panelInfo of panelInfos)
+                Page.add(Fudge[panelInfo.type], panelInfo.state);
+        }
         // called by windows load-listener
         static async start() {
             ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
@@ -549,10 +568,6 @@ var Fudge;
             if (localStorage.project) {
                 console.log("Load project referenced in local storage", localStorage.project);
                 await Page.loadProject(new URL(localStorage.project));
-                let panelInfos = JSON.parse(localStorage.panels);
-                for (let panelInfo of panelInfos) {
-                    Page.add(Fudge[panelInfo.type], panelInfo.state);
-                }
             }
         }
         static setupGoldenLayout() {
@@ -673,10 +688,6 @@ var Fudge;
             });
             Fudge.ipcRenderer.on(Fudge.MENU.QUIT, (_event, _args) => {
                 localStorage.setItem("project", Fudge.project.base.toString());
-                let panelInfos = [];
-                for (let panel of this.panels)
-                    panelInfos.push({ type: panel.constructor.name, state: panel.getState() });
-                localStorage.setItem("panels", JSON.stringify(panelInfos));
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_ANIMATION_OPEN, (_event, _args) => {
                 //   let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
@@ -2551,7 +2562,7 @@ var Fudge;
         graph;
         constructor(_container, _state) {
             super(_container, _state);
-            this.graph = _state["node"];
+            this.graph = ƒ.Project.resources[_state["graph"]];
             this.createUserInterface();
             _container.on("resize", this.redraw);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);

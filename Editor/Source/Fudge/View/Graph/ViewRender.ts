@@ -15,7 +15,7 @@ namespace Fudge {
 
     constructor(_container: ComponentContainer, _state: JsonValue) {
       super(_container, _state);
-      this.graph = <ƒ.Node><unknown>_state["node"];
+      this.graph = <ƒ.Graph>ƒ.Project.resources[_state["graph"]];
       this.createUserInterface();
 
       _container.on("resize", this.redraw);

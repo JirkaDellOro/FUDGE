@@ -29,6 +29,19 @@ namespace Fudge {
     private static goldenLayout: GoldenLayout;
     private static panels: Panel[] = [];
 
+    public static getPanelInfo(): string {
+      let panelInfos: PanelInfo[] = [];
+      for (let panel of Page.panels)
+        panelInfos.push({ type: panel.constructor.name, state: panel.getState() });
+      return JSON.stringify(panelInfos);
+    }
+
+    public static setPanelInfo(_panelInfos: string): void {
+      let panelInfos: PanelInfo[] = JSON.parse(_panelInfos);
+      for (let panelInfo of panelInfos)
+        Page.add(Fudge[panelInfo.type], panelInfo.state);
+    }
+
     // called by windows load-listener
     private static async start(): Promise<void> {
       ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
@@ -40,7 +53,7 @@ namespace Fudge {
 
       Page.setupGoldenLayout();
       ƒ.Project.mode = ƒ.MODE.EDITOR;
-      
+
       Page.setupMainListeners();
       Page.setupPageListeners();
       // for testing:
@@ -54,11 +67,6 @@ namespace Fudge {
       if (localStorage.project) {
         console.log("Load project referenced in local storage", localStorage.project);
         await Page.loadProject(new URL(localStorage.project));
-
-        let panelInfos: PanelInfo[] = JSON.parse(localStorage.panels);
-        for (let panelInfo of panelInfos) {
-          Page.add(Fudge[panelInfo.type], panelInfo.state);
-        }
       }
     }
 
@@ -195,15 +203,11 @@ namespace Fudge {
       });
 
       ipcRenderer.on(MENU.PANEL_PROJECT_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-        Page.add(PanelProject, null); 
+        Page.add(PanelProject, null);
       });
 
       ipcRenderer.on(MENU.QUIT, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
         localStorage.setItem("project", project.base.toString());
-        let panelInfos: PanelInfo[] = [];
-        for (let panel of this.panels)
-          panelInfos.push({type: panel.constructor.name, state: panel.getState()});
-        localStorage.setItem("panels", JSON.stringify(panelInfos));
       });
 
       ipcRenderer.on(MENU.PANEL_ANIMATION_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
