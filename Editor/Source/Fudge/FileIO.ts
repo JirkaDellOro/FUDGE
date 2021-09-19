@@ -58,7 +58,7 @@ namespace Fudge {
 
     if (!await project.openDialog())
       return;
-
+ƒ
     if (watcher)
       watcher.close();
 
@@ -98,7 +98,6 @@ namespace Fudge {
     if (watcher)
       watcher.close();
 
-    ƒ.Project.clear();
     project = new Project(_url);
 
     await project.load(htmlContent);

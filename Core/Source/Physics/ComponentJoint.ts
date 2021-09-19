@@ -10,7 +10,24 @@ namespace FudgeCore {
      */
   export abstract class ComponentJoint extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJoint);
-    protected singleton = false; //Multiple joints can be attached to one Node
+    protected singleton: boolean = false; //Multiple joints can be attached to one Node
+
+    protected idAttachedRB: number = 0;
+    protected idConnectedRB: number = 0;
+
+    protected attachedRB: ComponentRigidbody;
+    protected connectedRB: ComponentRigidbody;
+
+    protected connected: boolean = false;
+    private collisionBetweenConnectedBodies: boolean;
+
+    
+    /** Create a joint connection between the two given RigidbodyComponents. */
+    constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null) {
+      super();
+      this.attachedRigidbody = _attachedRigidbody;
+      this.connectedRigidbody = _connectedRigidbody;
+    }
 
     /** Get/Set the first ComponentRigidbody of this connection. It should always be the one that this component is attached too in the sceneTree. */
     get attachedRigidbody(): ComponentRigidbody {
@@ -44,22 +61,6 @@ namespace FudgeCore {
       this.collisionBetweenConnectedBodies = _value;
     }
 
-    protected idAttachedRB: number = 0;
-    protected idConnectedRB: number = 0;
-
-    protected attachedRB: ComponentRigidbody;
-    protected connectedRB: ComponentRigidbody;
-
-    protected connected: boolean = false;
-    private collisionBetweenConnectedBodies: boolean;
-
-    /** Create a joint connection between the two given RigidbodyComponents. */
-    constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null) {
-      super();
-      this.attachedRigidbody = _attachedRigidbody;
-      this.connectedRigidbody = _connectedRigidbody;
-    }
-
     /** Check if connection is dirty, so when either rb is changed disconnect and reconnect. Internally used no user interaction needed. */
     public checkConnection(): boolean {
       return this.connected;
@@ -78,7 +79,7 @@ namespace FudgeCore {
     public abstract getOimoJoint(): OIMO.Joint;
 
     /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
-    protected abstract dirtyStatus(): void
+    protected abstract dirtyStatus(): void;
 
     /** Adding the given Fudge ComponentJoint to the oimoPhysics World */
     protected addConstraintToWorld(cmpJoint: ComponentJoint): void {

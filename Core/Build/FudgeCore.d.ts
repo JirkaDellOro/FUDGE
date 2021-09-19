@@ -3559,6 +3559,14 @@ declare namespace FudgeCore {
     abstract class ComponentJoint extends Component {
         static readonly iSubclass: number;
         protected singleton: boolean;
+        protected idAttachedRB: number;
+        protected idConnectedRB: number;
+        protected attachedRB: ComponentRigidbody;
+        protected connectedRB: ComponentRigidbody;
+        protected connected: boolean;
+        private collisionBetweenConnectedBodies;
+        /** Create a joint connection between the two given RigidbodyComponents. */
+        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody);
         /** Get/Set the first ComponentRigidbody of this connection. It should always be the one that this component is attached too in the sceneTree. */
         get attachedRigidbody(): ComponentRigidbody;
         set attachedRigidbody(_cmpRB: ComponentRigidbody);
@@ -3570,14 +3578,6 @@ declare namespace FudgeCore {
          */
         get selfCollision(): boolean;
         set selfCollision(_value: boolean);
-        protected idAttachedRB: number;
-        protected idConnectedRB: number;
-        protected attachedRB: ComponentRigidbody;
-        protected connectedRB: ComponentRigidbody;
-        protected connected: boolean;
-        private collisionBetweenConnectedBodies;
-        /** Create a joint connection between the two given RigidbodyComponents. */
-        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody);
         /** Check if connection is dirty, so when either rb is changed disconnect and reconnect. Internally used no user interaction needed. */
         checkConnection(): boolean;
         /** Connect when both bodies are set, and it was not connected yet, or if any of the bodies has changed. This needs to be handled this way to ensure there are no errors

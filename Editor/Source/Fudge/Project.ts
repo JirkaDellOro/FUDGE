@@ -22,6 +22,11 @@ namespace Fudge {
       this.base = _base;
       this.name = _base.toString().split("/").slice(-2, -1)[0];
       this.fileIndex = _base.toString().split("/").pop() || this.fileIndex;
+
+      ƒ.Project.clear();
+      ƒ.Physics.initializePhysics();
+      ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
+      ƒ.Physics.settings.debugDraw = true;
     }
 
     public async openDialog(): Promise<boolean> {
@@ -96,6 +101,8 @@ namespace Fudge {
     public getProjectHTML(_title: string): string {
       if (!this.#document)
         return this.createProjectHTML(_title);
+
+      this.#document.title = _title;
 
       let settings: HTMLElement = this.#document.head.querySelector("meta[type=settings]");
       settings.setAttribute("autoview", this.graphAutoView);
@@ -178,7 +185,7 @@ namespace Fudge {
 
       html.body.appendChild(html.createComment("Dialog shown at startup only"));
       let dialog: HTMLElement = createTag("dialog");
-      dialog.appendChild(createTag("h1", {}, _title));
+      dialog.appendChild(createTag("h1", {}, "Title (will be replaced by autoView)"));
       dialog.appendChild(createTag("p", {}, "click to start"));
       html.body.appendChild(dialog);
 
@@ -212,6 +219,7 @@ namespace Fudge {
         let dialog: HTMLDialogElement;
         function init(_event: Event): void {
           dialog = document.querySelector("dialog");
+          dialog.querySelector("h1").textContent = document.title;
           dialog.addEventListener("click", function (_event: Event): void {
             // @ts-ignore until HTMLDialog is implemented by all browsers and available in dom.d.ts
             dialog.close();

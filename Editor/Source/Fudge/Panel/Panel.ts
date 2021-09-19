@@ -53,6 +53,10 @@ namespace Fudge {
     }
 
     public abstract getState(): PanelState;
+    
+    public destroy(): void {
+      this.goldenLayout.destroy();
+    }
 
     private addViewComponent = (_event: EventEmitter.BubblingEvent): void => {
       // adjustmens for GoldenLayout 2

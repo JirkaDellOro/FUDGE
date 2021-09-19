@@ -25,7 +25,7 @@ namespace FudgeCore {
      * rigidbodies.
      */
     public static initializePhysics(): Physics {
-      if (typeof OIMO !== "undefined" && this.world == null) { //Check if OIMO Namespace was loaded, else do not use any physics. Check is needed to ensure FUDGE can be used without Physics
+      if (typeof OIMO !== "undefined" /* && this.world == null */) { //Check if OIMO Namespace was loaded, else do not use any physics. Check is needed to ensure FUDGE can be used without Physics
         this.world = new Physics();
         this.settings = new PhysicsSettings(COLLISION_GROUP.DEFAULT, (COLLISION_GROUP.DEFAULT | COLLISION_GROUP.GROUP_1 | COLLISION_GROUP.GROUP_2 | COLLISION_GROUP.GROUP_3 | COLLISION_GROUP.GROUP_4));
         this.world.createWorld(); //create the actual oimoPhysics World

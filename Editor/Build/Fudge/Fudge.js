@@ -215,6 +215,7 @@ var Fudge;
             return;
         if (!await Fudge.project.openDialog())
             return;
+        ƒ;
         if (Fudge.watcher)
             Fudge.watcher.close();
         let base = Fudge.project.base;
@@ -247,7 +248,6 @@ var Fudge;
         ƒ.Debug.groupEnd();
         if (Fudge.watcher)
             Fudge.watcher.close();
-        ƒ.Project.clear();
         Fudge.project = new Fudge.Project(_url);
         await Fudge.project.load(htmlContent);
         watchFolder();
@@ -291,6 +291,10 @@ var Fudge;
             this.base = _base;
             this.name = _base.toString().split("/").slice(-2, -1)[0];
             this.fileIndex = _base.toString().split("/").pop() || this.fileIndex;
+            ƒ.Project.clear();
+            ƒ.Physics.initializePhysics();
+            ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
+            ƒ.Physics.settings.debugDraw = true;
         }
         async openDialog() {
             let promise = ƒui.Dialog.prompt(Fudge.project, false, "Review project settings", "Adjust settings and press OK", "OK", "Cancel");
@@ -352,6 +356,7 @@ var Fudge;
         getProjectHTML(_title) {
             if (!this.#document)
                 return this.createProjectHTML(_title);
+            this.#document.title = _title;
             let settings = this.#document.head.querySelector("meta[type=settings]");
             settings.setAttribute("autoview", this.graphAutoView);
             settings.setAttribute("project", this.settingsStringify());
@@ -417,7 +422,7 @@ var Fudge;
                 html.head.appendChild(this.getAutoViewScript());
             html.body.appendChild(html.createComment("Dialog shown at startup only"));
             let dialog = createTag("dialog");
-            dialog.appendChild(createTag("h1", {}, _title));
+            dialog.appendChild(createTag("h1", {}, "Title (will be replaced by autoView)"));
             dialog.appendChild(createTag("p", {}, "click to start"));
             html.body.appendChild(dialog);
             html.body.appendChild(html.createComment("Canvas for FUDGE to render to"));
@@ -445,6 +450,7 @@ var Fudge;
                 let dialog;
                 function init(_event) {
                     dialog = document.querySelector("dialog");
+                    dialog.querySelector("h1").textContent = document.title;
                     dialog.addEventListener("click", function (_event) {
                         // @ts-ignore until HTMLDialog is implemented by all browsers and available in dom.d.ts
                         dialog.close();
@@ -548,14 +554,16 @@ var Fudge;
             return JSON.stringify(panelInfos);
         }
         static setPanelInfo(_panelInfos) {
+            for (let panel of Page.panels)
+                panel.destroy();
+            Page.goldenLayout.clear();
+            Page.panels = [];
             let panelInfos = JSON.parse(_panelInfos);
             for (let panelInfo of panelInfos)
                 Page.add(Fudge[panelInfo.type], panelInfo.state);
         }
         // called by windows load-listener
         static async start() {
-            ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
-            ƒ.Physics.settings.debugDraw = true;
             // ƒ.Debug.setFilter(ƒ.DebugConsole, ƒ.DEBUG_FILTER.ALL | ƒ.DEBUG_FILTER.SOURCE);
             console.log("LocalStorage", localStorage);
             Page.setupGoldenLayout();
@@ -1441,6 +1449,9 @@ var Fudge;
                 view.dom.dispatchEvent(event);
             }
         };
+        destroy() {
+            this.goldenLayout.destroy();
+        }
         addViewComponent = (_event) => {
             // adjustmens for GoldenLayout 2
             let target = _event.target;

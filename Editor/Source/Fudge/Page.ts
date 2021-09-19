@@ -42,6 +42,11 @@ namespace Fudge {
     }
 
     public static setPanelInfo(_panelInfos: string): void {
+      for (let panel of Page.panels)
+        panel.destroy();
+      Page.goldenLayout.clear();
+      Page.panels = [];
+
       let panelInfos: PanelInfo[] = JSON.parse(_panelInfos);
       for (let panelInfo of panelInfos)
         Page.add(Fudge[panelInfo.type], panelInfo.state);
@@ -49,8 +54,6 @@ namespace Fudge {
 
     // called by windows load-listener
     private static async start(): Promise<void> {
-      ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
-      ƒ.Physics.settings.debugDraw = true;
       // ƒ.Debug.setFilter(ƒ.DebugConsole, ƒ.DEBUG_FILTER.ALL | ƒ.DEBUG_FILTER.SOURCE);
 
       console.log("LocalStorage", localStorage);
