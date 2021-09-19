@@ -2,46 +2,27 @@ namespace Fudge {
   import ƒ = FudgeCore;
   import ƒui = FudgeUserInterface;
 
-  class FileInfo extends ƒ.Mutable {
-    overwrite: boolean;
-    filename: string;
-    constructor(_overwrite: boolean, _filename: string) {
-      super();
-      this.overwrite = _overwrite;
-      this.filename = _filename;
-    }
-    protected reduceMutator(_mutator: ƒ.Mutator): void {/* */ }
-  }
-
-  export class Files extends ƒ.Mutable {
-    public index: FileInfo = new FileInfo(true, "index.html");
-    public style: FileInfo = new FileInfo(true, "style.css");
-    public internal: FileInfo = new FileInfo(true, "Internal.json");
-    public script: FileInfo = new FileInfo(true, "Script/Build/Script.js");
-
-    constructor() {
-      super();
-      Reflect.deleteProperty(this.script, "overwrite");
-      Reflect.set(this.script, "include", true);
-      this.script.filename = "Script/Build/Script.js";
-    }
-    protected reduceMutator(_mutator: ƒ.Mutator): void {/* */ }
-  }
 
   export class Project extends ƒ.Mutable {
-    public files: Files = new Files();
     // public title: string = "NewProject";
     public base: URL;
     public name: string;
+
+    public fileIndex: string = "index.html";
+    public fileInternal: string = "Internal.json";
+    public fileScript: string = "Script/Build/Script.js";
+    public fileStyles: string = "styles.css";
+
+    #document: Document;
     private includePhysics: boolean = false;
     private includeAutoViewScript: boolean = true;
     private graphToStartWith: string = "";
 
     public constructor(_base: URL) {
       super();
-      // this.updateFilenames("NewProject", true, this);
       this.base = _base;
       this.name = _base.toString().split("/").slice(-2, -1)[0];
+      this.fileIndex = _base.toString().split("/").pop() || this.fileIndex;
     }
 
     public async openDialog(): Promise<boolean> {
@@ -66,6 +47,37 @@ namespace Fudge {
       // }
     }
 
+    public async load(htmlContent: string): Promise<void> {
+      const parser: DOMParser = new DOMParser();
+      this.#document = parser.parseFromString(htmlContent, "application/xhtml+xml");
+      const head: HTMLHeadElement = this.#document.querySelector("head");
+
+      let settings: string = head.querySelectorAll("meta[type=settings]")[0].getAttribute("project");
+      settings = settings.replace(/'/g, "\"");
+      project.mutate(JSON.parse(settings));
+
+      //TODO: should old scripts be removed from memory first? How?
+      const scripts: NodeListOf<HTMLScriptElement> = head.querySelectorAll("script");
+      for (let script of scripts) {
+        if (script.getAttribute("editor") == "true") {
+          let url: string = script.getAttribute("src");
+          ƒ.Debug.fudge("Load script: ", url);
+          await ƒ.Project.loadScript(new URL(url, this.base).toString());
+          console.log("ComponentScripts", ƒ.Project.getComponentScripts());
+          console.log("Script Namespaces", ƒ.Project.scriptNamespaces);
+        }
+      }
+
+      const resourceLink: HTMLLinkElement = head.querySelector("link[type=resources]");
+      let resourceFile: string = resourceLink.getAttribute("src");
+      ƒ.Project.baseURL = this.base;
+      let reconstruction: ƒ.Resources = await ƒ.Project.loadResources(new URL(resourceFile, this.base).toString());
+
+      ƒ.Debug.groupCollapsed("Deserialized");
+      ƒ.Debug.info(reconstruction);
+      ƒ.Debug.groupEnd();
+    }
+
     public getProjectJSON(): string {
       let serialization: ƒ.SerializationOfResources = ƒ.Project.serialize();
       let json: string = ƒ.Serializer.stringify(serialization);
@@ -83,13 +95,47 @@ namespace Fudge {
     }
 
     public getProjectHTML(_title: string): string {
+      if (!this.#document)
+        return this.createProjectHTML(_title);
+
+      let settings: HTMLElement = this.#document.head.querySelector("meta[type=settings]");
+      settings.setAttribute("project", this.settingsStringify());
+      settings.setAttribute("graph", this.graphToStartWith);
+      return this.stringifyHTML(this.#document);
+    }
+
+    public getGraphs(): Object {
+      let graphs: ƒ.Resources = ƒ.Project.getResourcesOfType(ƒ.Graph);
+      let result: Object = {};
+      for (let id in graphs) {
+        let graph: ƒ.Graph = <ƒ.Graph>graphs[id];
+        result[graph.name] = id;
+      }
+      return result;
+    }
+
+    public getMutatorAttributeTypes(_mutator: ƒ.Mutator): ƒ.MutatorAttributeTypes {
+      let types: ƒ.MutatorAttributeTypes = super.getMutatorAttributeTypes(_mutator);
+      if (types.graphToStartWith)
+        types.graphToStartWith = this.getGraphs();
+      return types;
+    }
+
+    protected reduceMutator(_mutator: ƒ.Mutator): void {
+      delete _mutator.base;
+      delete _mutator.fileIndex;
+      delete _mutator.fileInternal;
+      delete _mutator.fileScript;
+      delete _mutator.fileStyles;
+    }
+
+    private createProjectHTML(_title: string): string {
       let html: Document = document.implementation.createHTMLDocument(_title);
 
       html.head.appendChild(createTag("meta", { charset: "utf-8" }));
-      let settings: string = JSON.stringify(project.getMutator());
-      settings = settings.replace(/"/g, "'");
+
       html.head.appendChild(html.createComment("Editor settings of this project"));
-      html.head.appendChild(createTag("link", { type: "settings", content: settings }));
+      html.head.appendChild(createTag("meta", { type: "settings", graph: this.graphToStartWith, project: this.settingsStringify() }));
 
       if (this.includePhysics) {
         html.head.appendChild(html.createComment("FUDGE-version of Oimo-Physics. You may want to download a local copy to work offline and be independent from future changes!"));
@@ -108,14 +154,13 @@ namespace Fudge {
         ));
       }
 
-      html.head.appendChild(html.createComment("Link stylesheet and internal resources"));
-      html.head.appendChild(createTag("link", { rel: "stylesheet", href: this.files.style.filename }));
-      html.head.appendChild(createTag("link", { type: "resources", src: this.files.internal.filename }));
+      html.head.appendChild(html.createComment("Link stylesheet"));
+      html.head.appendChild(createTag("link", { rel: "stylesheet", href: this.fileStyles }));
+      html.head.appendChild(html.createComment("Link internal resources. The editor only loads the first, but at runtime, multiple files can contribute"));
+      html.head.appendChild(createTag("link", { type: "resources", src: this.fileInternal }));
 
-      if (Reflect.get(this.files.script, "include")) {
-        html.head.appendChild(html.createComment("Load custom scripts"));
-        html.head.appendChild(createTag("script", { type: "text/javascript", src: this.files.script.filename, editor: "true" }));
-      }
+      html.head.appendChild(html.createComment("Load custom scripts"));
+      html.head.appendChild(createTag("script", { type: "text/javascript", src: this.fileScript, editor: "true" }));
 
       if (this.includeAutoViewScript) {
         html.head.appendChild(html.createComment("Auto-View"));
@@ -140,32 +185,8 @@ namespace Fudge {
         return element;
       }
 
-      let result: string = (new XMLSerializer()).serializeToString(html);
-      result = result.replace(/></g, ">\n<");
-      // result = result.replaceAll("><", ">\n<");
-      return result;
+      return this.stringifyHTML(html);
     }
-
-    public getGraphs(): Object {
-      let graphs: ƒ.Resources = ƒ.Project.getResourcesOfType(ƒ.Graph);
-      let result: Object = {};
-      for (let id in graphs) {
-        let graph: ƒ.Graph = <ƒ.Graph>graphs[id];
-        result[graph.name] = id;
-      }
-      return result;
-    }
-
-    public getMutatorAttributeTypes(_mutator: ƒ.Mutator): ƒ.MutatorAttributeTypes {
-      let types: ƒ.MutatorAttributeTypes = super.getMutatorAttributeTypes(_mutator);
-      if (types.graphToStartWith)
-        types.graphToStartWith = this.getGraphs();
-      return types;
-    }
-
-    protected reduceMutator(_mutator: ƒ.Mutator): void {
-      delete _mutator.base;
-     }
 
     private getAutoViewScript(_graphId: string): HTMLScriptElement {
       let code: string;
@@ -231,5 +252,18 @@ namespace Fudge {
       script.textContent = code;
       return script;
     }
+
+    private settingsStringify(): string {
+      let settings: string = JSON.stringify(project.getMutator());
+      settings = settings.replace(/"/g, "'");
+      return settings;
+    }
+
+    private stringifyHTML(_html: Document): string {
+      let result: string = (new XMLSerializer()).serializeToString(_html);
+      result = result.replace(/></g, ">\n<");
+      return result;
+    }
   }
 }
+

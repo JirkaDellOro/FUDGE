@@ -88,45 +88,38 @@ declare namespace Fudge {
 declare namespace Fudge {
     let watcher: ƒ.General;
     function newProject(): Promise<void>;
-    function saveProject(): Promise<void>;
+    function saveProject(_new?: boolean): Promise<void>;
     function promptLoadProject(): Promise<URL>;
     function loadProject(_url: URL): Promise<void>;
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
-    class FileInfo extends ƒ.Mutable {
-        overwrite: boolean;
-        filename: string;
-        constructor(_overwrite: boolean, _filename: string);
-        protected reduceMutator(_mutator: ƒ.Mutator): void;
-    }
-    export class Files extends ƒ.Mutable {
-        index: FileInfo;
-        style: FileInfo;
-        internal: FileInfo;
-        script: FileInfo;
-        constructor();
-        protected reduceMutator(_mutator: ƒ.Mutator): void;
-    }
-    export class Project extends ƒ.Mutable {
-        files: Files;
+    class Project extends ƒ.Mutable {
+        #private;
         base: URL;
         name: string;
+        fileIndex: string;
+        fileInternal: string;
+        fileScript: string;
+        fileStyles: string;
         private includePhysics;
         private includeAutoViewScript;
         private graphToStartWith;
         constructor(_base: URL);
         openDialog(): Promise<boolean>;
         hndChange: (_event: Event) => void;
+        load(htmlContent: string): Promise<void>;
         getProjectJSON(): string;
         getProjectCSS(): string;
         getProjectHTML(_title: string): string;
         getGraphs(): Object;
         getMutatorAttributeTypes(_mutator: ƒ.Mutator): ƒ.MutatorAttributeTypes;
         protected reduceMutator(_mutator: ƒ.Mutator): void;
+        private createProjectHTML;
         private getAutoViewScript;
+        private settingsStringify;
+        private stringifyHTML;
     }
-    export {};
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
