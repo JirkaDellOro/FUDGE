@@ -96,7 +96,7 @@ namespace Fudge {
 
     private hndEvent = (_event: CustomEvent): void => {
       switch (_event.type) {
-        case EVENT_EDITOR.SET_PROJECT:
+        case EVENT_EDITOR.CLEAR_PROJECT:
           this.setGraph(null);
           break;
         case EVENT_EDITOR.SET_GRAPH:

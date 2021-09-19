@@ -29,6 +29,11 @@ namespace Fudge {
     private static goldenLayout: GoldenLayout;
     private static panels: Panel[] = [];
 
+    public static setDefaultProject(): void {
+      if (project)
+        localStorage.setItem("project", project.base.toString());
+    }
+
     public static getPanelInfo(): string {
       let panelInfos: PanelInfo[] = [];
       for (let panel of Page.panels)
@@ -49,7 +54,6 @@ namespace Fudge {
       // ƒ.Debug.setFilter(ƒ.DebugConsole, ƒ.DEBUG_FILTER.ALL | ƒ.DEBUG_FILTER.SOURCE);
 
       console.log("LocalStorage", localStorage);
-      //window.localStorage.clear();
 
       Page.setupGoldenLayout();
       ƒ.Project.mode = ƒ.MODE.EDITOR;
@@ -168,6 +172,7 @@ namespace Fudge {
     }
 
     private static async loadProject(_url: URL): Promise<void> {
+      Page.broadcastEvent(new CustomEvent(EVENT_EDITOR.CLEAR_PROJECT));
       await loadProject(_url);
       ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
       ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
@@ -188,6 +193,7 @@ namespace Fudge {
 
       ipcRenderer.on(MENU.PROJECT_SAVE, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
         saveProject();
+        Page.setDefaultProject();
       });
 
       ipcRenderer.on(MENU.PROJECT_LOAD, async (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
@@ -207,7 +213,7 @@ namespace Fudge {
       });
 
       ipcRenderer.on(MENU.QUIT, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
-        localStorage.setItem("project", project.base.toString());
+        Page.setDefaultProject();
       });
 
       ipcRenderer.on(MENU.PANEL_ANIMATION_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {

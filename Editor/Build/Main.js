@@ -35,6 +35,7 @@ var Fudge;
         EVENT_EDITOR["SET_PROJECT"] = "setProject";
         EVENT_EDITOR["UPDATE"] = "update";
         EVENT_EDITOR["DESTROY"] = "destroy";
+        EVENT_EDITOR["CLEAR_PROJECT"] = "clearProject";
         /* obsolete ?
         REMOVE = "removeNode",
         HIDE = "hideNode",

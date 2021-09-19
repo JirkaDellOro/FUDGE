@@ -67,14 +67,14 @@ namespace Fudge {
       ƒ.Debug.groupCollapsed("Deserialized");
       ƒ.Debug.info(reconstruction);
       ƒ.Debug.groupEnd();
-      
+
       let settings: HTMLMetaElement = head.querySelector("meta[type=settings]");
-      let projectSettings: string = settings.getAttribute("project");
-      projectSettings = projectSettings.replace(/'/g, "\"");
-      project.mutate(JSON.parse(projectSettings));
-      let panelInfo: string = settings.getAttribute("panels");
-      panelInfo = panelInfo.replace(/'/g, "\"");
-      Page.setPanelInfo(panelInfo);
+      let projectSettings: string = settings?.getAttribute("project");
+      projectSettings = projectSettings?.replace(/'/g, "\"");
+      project.mutate(JSON.parse(projectSettings || "{}"));
+      let panelInfo: string = settings?.getAttribute("panels");
+      panelInfo = panelInfo?.replace(/'/g, "\"");
+      Page.setPanelInfo(panelInfo || "[]");
     }
 
     public getProjectJSON(): string {

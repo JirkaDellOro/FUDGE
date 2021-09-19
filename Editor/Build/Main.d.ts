@@ -25,7 +25,8 @@ declare namespace Fudge {
         FOCUS_NODE = "focusNode",
         SET_PROJECT = "setProject",
         UPDATE = "update",
-        DESTROY = "destroy"
+        DESTROY = "destroy",
+        CLEAR_PROJECT = "clearProject"
     }
     enum PANEL {
         GRAPH = "PanelGraph",

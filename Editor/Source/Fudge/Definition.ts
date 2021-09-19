@@ -27,13 +27,14 @@ namespace Fudge {
     */
   }
 
+
   export enum EVENT_EDITOR {
     SET_GRAPH = "setGraph",
     FOCUS_NODE = "focusNode",
     SET_PROJECT = "setProject",
     UPDATE = "update",
-    DESTROY = "destroy"
-
+    DESTROY = "destroy",
+    CLEAR_PROJECT = "clearProject"
     /* obsolete ?
     REMOVE = "removeNode",
     HIDE = "hideNode",

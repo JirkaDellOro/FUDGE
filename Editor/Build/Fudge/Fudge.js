@@ -59,6 +59,7 @@ var Fudge;
         EVENT_EDITOR["SET_PROJECT"] = "setProject";
         EVENT_EDITOR["UPDATE"] = "update";
         EVENT_EDITOR["DESTROY"] = "destroy";
+        EVENT_EDITOR["CLEAR_PROJECT"] = "clearProject";
         /* obsolete ?
         REMOVE = "removeNode",
         HIDE = "hideNode",
@@ -329,12 +330,12 @@ var Fudge;
             ƒ.Debug.info(reconstruction);
             ƒ.Debug.groupEnd();
             let settings = head.querySelector("meta[type=settings]");
-            let projectSettings = settings.getAttribute("project");
-            projectSettings = projectSettings.replace(/'/g, "\"");
-            Fudge.project.mutate(JSON.parse(projectSettings));
-            let panelInfo = settings.getAttribute("panels");
-            panelInfo = panelInfo.replace(/'/g, "\"");
-            Fudge.Page.setPanelInfo(panelInfo);
+            let projectSettings = settings?.getAttribute("project");
+            projectSettings = projectSettings?.replace(/'/g, "\"");
+            Fudge.project.mutate(JSON.parse(projectSettings || "{}"));
+            let panelInfo = settings?.getAttribute("panels");
+            panelInfo = panelInfo?.replace(/'/g, "\"");
+            Fudge.Page.setPanelInfo(panelInfo || "[]");
         }
         getProjectJSON() {
             let serialization = ƒ.Project.serialize();
@@ -536,6 +537,10 @@ var Fudge;
         static idCounter = 0;
         static goldenLayout;
         static panels = [];
+        static setDefaultProject() {
+            if (Fudge.project)
+                localStorage.setItem("project", Fudge.project.base.toString());
+        }
         static getPanelInfo() {
             let panelInfos = [];
             for (let panel of Page.panels)
@@ -553,7 +558,6 @@ var Fudge;
             ƒ.Physics.settings.debugDraw = true;
             // ƒ.Debug.setFilter(ƒ.DebugConsole, ƒ.DEBUG_FILTER.ALL | ƒ.DEBUG_FILTER.SOURCE);
             console.log("LocalStorage", localStorage);
-            //window.localStorage.clear();
             Page.setupGoldenLayout();
             ƒ.Project.mode = ƒ.MODE.EDITOR;
             Page.setupMainListeners();
@@ -654,6 +658,7 @@ var Fudge;
             }
         };
         static async loadProject(_url) {
+            Page.broadcastEvent(new CustomEvent(Fudge.EVENT_EDITOR.CLEAR_PROJECT));
             await Fudge.loadProject(_url);
             Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: true });
             Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: true });
@@ -672,6 +677,7 @@ var Fudge;
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PROJECT_SAVE, (_event, _args) => {
                 Fudge.saveProject();
+                Page.setDefaultProject();
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PROJECT_LOAD, async (_event, _args) => {
                 let url = await Fudge.promptLoadProject();
@@ -687,7 +693,7 @@ var Fudge;
                 Page.add(Fudge.PanelProject, null);
             });
             Fudge.ipcRenderer.on(Fudge.MENU.QUIT, (_event, _args) => {
-                localStorage.setItem("project", Fudge.project.base.toString());
+                Page.setDefaultProject();
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_ANIMATION_OPEN, (_event, _args) => {
                 //   let panel: Panel = PanelManager.instance.createPanelFromTemplate(new ViewAnimationTemplate(), "Animation Panel");
@@ -2629,7 +2635,7 @@ var Fudge;
         }
         hndEvent = (_event) => {
             switch (_event.type) {
-                case Fudge.EVENT_EDITOR.SET_PROJECT:
+                case Fudge.EVENT_EDITOR.CLEAR_PROJECT:
                     this.setGraph(null);
                     break;
                 case Fudge.EVENT_EDITOR.SET_GRAPH:

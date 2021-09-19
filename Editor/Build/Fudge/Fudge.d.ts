@@ -39,7 +39,8 @@ declare namespace Fudge {
         FOCUS_NODE = "focusNode",
         SET_PROJECT = "setProject",
         UPDATE = "update",
-        DESTROY = "destroy"
+        DESTROY = "destroy",
+        CLEAR_PROJECT = "clearProject"
     }
     enum PANEL {
         GRAPH = "PanelGraph",
@@ -139,6 +140,7 @@ declare namespace Fudge {
         private static idCounter;
         private static goldenLayout;
         private static panels;
+        static setDefaultProject(): void;
         static getPanelInfo(): string;
         static setPanelInfo(_panelInfos: string): void;
         private static start;
