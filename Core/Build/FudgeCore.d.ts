@@ -1730,10 +1730,10 @@ declare namespace FudgeCore {
      */
     class ComponentMaterial extends Component {
         static readonly iSubclass: number;
-        material: Material;
         clrPrimary: Color;
         clrSecondary: Color;
         mtxPivot: Matrix3x3;
+        material: Material;
         sortForAlpha: boolean;
         constructor(_material?: Material);
         serialize(): Serialization;

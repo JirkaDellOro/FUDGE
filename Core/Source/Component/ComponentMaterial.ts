@@ -5,10 +5,10 @@ namespace FudgeCore {
    */
   export class ComponentMaterial extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentMaterial);
-    public material: Material;
     public clrPrimary: Color = Color.CSS("white");
     public clrSecondary: Color = Color.CSS("white");
     public mtxPivot: Matrix3x3 = Matrix3x3.IDENTITY();
+    public material: Material;
     //** support sorting of objects with transparency when rendering, render objects in the back first */
     public sortForAlpha: boolean = false;
     // public mutatorCoat: MutatorForComponent;

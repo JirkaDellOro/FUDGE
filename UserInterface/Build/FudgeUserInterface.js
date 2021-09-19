@@ -480,7 +480,7 @@ var FudgeUserInterface;
          * Sets the values of color picker and slider
          */
         setMutatorValue(_value) {
-            // this.color.mutate(_value);
+            this.color.mutate(_value);
             let hex = this.color.getHex();
             this.querySelector("input[type=color").value = "#" + hex.substr(0, 6);
             this.querySelector("input[type=range").value = this.color.a.toString();

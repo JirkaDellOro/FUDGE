@@ -55,7 +55,7 @@ namespace FudgeUserInterface {
      * Sets the values of color picker and slider
      */
     public setMutatorValue(_value: ƒ.Mutator): void {
-      // this.color.mutate(_value);
+      this.color.mutate(_value);
       let hex: string = this.color.getHex();
       (<HTMLInputElement>this.querySelector("input[type=color")).value = "#" + hex.substr(0, 6);
       (<HTMLInputElement>this.querySelector("input[type=range")).value = this.color.a.toString();
