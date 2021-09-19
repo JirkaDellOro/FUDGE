@@ -102,9 +102,8 @@ declare namespace Fudge {
         fileInternal: string;
         fileScript: string;
         fileStyles: string;
-        private includePhysics;
         private includeAutoViewScript;
-        private graphToStartWith;
+        private graphAutoView;
         constructor(_base: URL);
         openDialog(): Promise<boolean>;
         hndChange: (_event: Event) => void;
@@ -112,9 +111,9 @@ declare namespace Fudge {
         getProjectJSON(): string;
         getProjectCSS(): string;
         getProjectHTML(_title: string): string;
-        getGraphs(): Object;
         getMutatorAttributeTypes(_mutator: ƒ.Mutator): ƒ.MutatorAttributeTypes;
         protected reduceMutator(_mutator: ƒ.Mutator): void;
+        private getGraphs;
         private createProjectHTML;
         private getAutoViewScript;
         private settingsStringify;

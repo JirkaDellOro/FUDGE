@@ -14,9 +14,8 @@ namespace Fudge {
     public fileStyles: string = "styles.css";
 
     #document: Document;
-    private includePhysics: boolean = false;
     private includeAutoViewScript: boolean = true;
-    private graphToStartWith: string = "";
+    private graphAutoView: string = "";
 
     public constructor(_base: URL) {
       super();
@@ -100,24 +99,24 @@ namespace Fudge {
 
       let settings: HTMLElement = this.#document.head.querySelector("meta[type=settings]");
       settings.setAttribute("project", this.settingsStringify());
-      settings.setAttribute("graph", this.graphToStartWith);
-      return this.stringifyHTML(this.#document);
-    }
+      settings.setAttribute("autoview", this.graphAutoView);
 
-    public getGraphs(): Object {
-      let graphs: ƒ.Resources = ƒ.Project.getResourcesOfType(ƒ.Graph);
-      let result: Object = {};
-      for (let id in graphs) {
-        let graph: ƒ.Graph = <ƒ.Graph>graphs[id];
-        result[graph.name] = id;
+      let autoViewScript: HTMLScriptElement = this.#document.querySelector("script[name=autoView]");
+      if (this.includeAutoViewScript) {
+        if (!autoViewScript)
+          this.#document.head.appendChild(this.getAutoViewScript());
       }
-      return result;
+      else
+        if (autoViewScript)
+          this.#document.head.removeChild(autoViewScript);
+
+      return this.stringifyHTML(this.#document);
     }
 
     public getMutatorAttributeTypes(_mutator: ƒ.Mutator): ƒ.MutatorAttributeTypes {
       let types: ƒ.MutatorAttributeTypes = super.getMutatorAttributeTypes(_mutator);
-      if (types.graphToStartWith)
-        types.graphToStartWith = this.getGraphs();
+      if (types.graphAutoView)
+        types.graphAutoView = this.getGraphs();
       return types;
     }
 
@@ -129,43 +128,50 @@ namespace Fudge {
       delete _mutator.fileStyles;
     }
 
+    private getGraphs(): Object {
+      let graphs: ƒ.Resources = ƒ.Project.getResourcesOfType(ƒ.Graph);
+      let result: Object = {};
+      for (let id in graphs) {
+        let graph: ƒ.Graph = <ƒ.Graph>graphs[id];
+        result[graph.name] = id;
+      }
+      return result;
+    }
+
     private createProjectHTML(_title: string): string {
       let html: Document = document.implementation.createHTMLDocument(_title);
 
       html.head.appendChild(createTag("meta", { charset: "utf-8" }));
+      html.head.appendChild(createTag("link", { rel: "stylesheet", href: this.fileStyles }));
+      html.head.appendChild(html.createComment("CRLF"));
 
       html.head.appendChild(html.createComment("Editor settings of this project"));
-      html.head.appendChild(createTag("meta", { type: "settings", graph: this.graphToStartWith, project: this.settingsStringify() }));
+      html.head.appendChild(createTag("meta", { type: "settings", autoview: this.graphAutoView, project: this.settingsStringify() }));
+      html.head.appendChild(html.createComment("CRLF"));
 
-      if (this.includePhysics) {
-        html.head.appendChild(html.createComment("FUDGE-version of Oimo-Physics. You may want to download a local copy to work offline and be independent from future changes!"));
-        html.head.appendChild(createTag("script", { type: "text/javascript", src: "https://jirkadelloro.github.io/FUDGE/Physics/OimoPhysics.js" }));
-      }
+      html.head.appendChild(html.createComment("Activate the following line to include the FUDGE-version of Oimo-Physics. You may want to download a local copy to work offline and be independent from future changes!"));
+      html.head.appendChild(html.createComment(`<script type="text/javascript" src="../../../Physics/OimoPhysics.js"></script>`));
+      html.head.appendChild(html.createComment("CRLF"));
 
       html.head.appendChild(html.createComment("Load FUDGE. You may want to download local copies to work offline and be independent from future changes! Developers working on FUDGE itself may want to create symlinks"));
       html.head.appendChild(createTag("script", { type: "text/javascript", src: "https://jirkadelloro.github.io/FUDGE/Core/Build/FudgeCore.js" }));
       html.head.appendChild(createTag("script", { type: "text/javascript", src: "https://jirkadelloro.github.io/FUDGE/Aid/Build/FudgeAid.js" }));
+      html.head.appendChild(html.createComment("CRLF"));
 
-      if (this.includePhysics) {
-        html.head.appendChild(html.createComment("Render physics-components"));
-        html.head.appendChild(createTag(
-          "script", { type: "text/javascript" },
-          "FudgeCore.Physics.settings.debugDraw = true;"
-        ));
-      }
+      html.head.appendChild(html.createComment("Activate the following line to see renderings of physics components"));
+      html.head.appendChild(html.createComment(`<script type="text/javascript">FudgeCore.Physics.settings.debugDraw = true;</script>`));
+      html.head.appendChild(html.createComment("CRLF"));
 
-      html.head.appendChild(html.createComment("Link stylesheet"));
-      html.head.appendChild(createTag("link", { rel: "stylesheet", href: this.fileStyles }));
       html.head.appendChild(html.createComment("Link internal resources. The editor only loads the first, but at runtime, multiple files can contribute"));
       html.head.appendChild(createTag("link", { type: "resources", src: this.fileInternal }));
+      html.head.appendChild(html.createComment("CRLF"));
 
       html.head.appendChild(html.createComment("Load custom scripts"));
       html.head.appendChild(createTag("script", { type: "text/javascript", src: this.fileScript, editor: "true" }));
+      html.head.appendChild(html.createComment("CRLF"));
 
-      if (this.includeAutoViewScript) {
-        html.head.appendChild(html.createComment("Auto-View"));
-        html.head.appendChild(this.getAutoViewScript(this.graphToStartWith));
-      }
+      if (this.includeAutoViewScript)
+        html.head.appendChild(this.getAutoViewScript());
 
       html.body.appendChild(html.createComment("Dialog shown at startup only"));
       let dialog: HTMLElement = createTag("dialog");
@@ -188,9 +194,15 @@ namespace Fudge {
       return this.stringifyHTML(html);
     }
 
-    private getAutoViewScript(_graphId: string): HTMLScriptElement {
+    private getAutoViewScript(): HTMLScriptElement {
       let code: string;
       code = (function (_graphId: string): void {
+        /**
+         * AutoView-Script
+         * Loads and displays the selected graph and implements a basic orbit camera
+         * @author Jirka Dell'Oro-Friedl, HFU, 2021
+         */
+
         window.addEventListener("load", init);
 
         // show dialog for startup
@@ -198,7 +210,7 @@ namespace Fudge {
         function init(_event: Event): void {
           dialog = document.querySelector("dialog");
           dialog.addEventListener("click", function (_event: Event): void {
-            //@ts-ignore
+            // @ts-ignore until HTMLDialog is implemented by all browsers and available in dom.d.ts
             dialog.close();
             startInteractiveViewport();
           });
@@ -247,8 +259,9 @@ namespace Fudge {
         }
       }).toString();
 
-      code = "(" + code + `)("${_graphId}");\n`;
+      code = "(" + code + `)(document.head.querySelector("meta[autoView]").getAttribute("autoView"));\n`;
       let script: HTMLScriptElement = document.createElement("script");
+      script.setAttribute("name", "autoView");
       script.textContent = code;
       return script;
     }
@@ -262,6 +275,8 @@ namespace Fudge {
     private stringifyHTML(_html: Document): string {
       let result: string = (new XMLSerializer()).serializeToString(_html);
       result = result.replace(/></g, ">\n<");
+      result = result.replace(/<!--CRLF-->/g, "");
+      result = result.replace(/">\n<\/script/g, `"></script`);
       return result;
     }
   }

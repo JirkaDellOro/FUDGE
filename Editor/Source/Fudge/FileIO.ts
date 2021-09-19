@@ -101,7 +101,7 @@ namespace Fudge {
     ƒ.Project.clear();
     project = new Project(_url);
 
-    project.load(htmlContent);
+    await project.load(htmlContent);
 
     watchFolder();
   }
