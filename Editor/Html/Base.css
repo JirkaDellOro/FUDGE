@@ -60,6 +60,19 @@ div[panel] .lm_close {
   background-color: var(--color-background-main);
 }
 
+/* Checkbox */
+input[type="checkbox"] {
+  appearance: none;
+}
+
+input[type="checkbox"]::before {
+  /* appearance: unset; */
+  content: "☐";
+}
+
+input[type="checkbox"]:checked:before {
+  content: "☒";
+}
 /* Tree Control */
 
 ul.tree {
@@ -75,11 +88,7 @@ ul.tree ul {
 }
 
 ul.tree input[type=checkbox] {
-  height: 0px;
-  top: -1em;
-  display: inline-block;
-  position: relative;
-  color: var(--color-text);
+  appearance: none;
 }
 
 ul.tree input[type=checkbox]:checked::before {
