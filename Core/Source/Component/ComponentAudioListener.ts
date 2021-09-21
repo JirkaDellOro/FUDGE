@@ -39,6 +39,9 @@ namespace FudgeCore {
         _listener.setOrientation(forward.x, forward.y, forward.z, up.x, up.y, up.z);
       }
 
+      Recycler.store(forward);
+      Recycler.store(up);
+
       // Debug.log(mtxResult.translation.toString(), forward.toString(), up.toString());
     }
   }

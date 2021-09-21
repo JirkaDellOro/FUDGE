@@ -313,8 +313,8 @@ namespace FudgeCore {
 
     /** Scaling requires the collider to be completely recreated anew */
     public setScaling(_value: Vector3): void {
-      let scaling: Vector3 = _value.clone;   
-      this.createCollider(new OIMO.Vec3(scaling.x / 2, scaling.y / 2, scaling.z / 2), this.#typeCollider); //recreate the collider
+      // let scaling: Vector3 = _value.clone;   
+      this.createCollider(new OIMO.Vec3(_value.x / 2, _value.y / 2, _value.z / 2), this.#typeCollider); //recreate the collider
       this.#collider = new OIMO.Shape(this.#colliderInfo);
       let oldCollider: OIMO.Shape = this.#rigidbody.getShapeList();
       this.#rigidbody.addShape(this.#collider); //add new collider, before removing the old, so the rb is never active with 0 colliders

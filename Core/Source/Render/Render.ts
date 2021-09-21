@@ -98,8 +98,9 @@ namespace FudgeCore {
         _branch.nNodesInBranch += child.nNodesInBranch;
         let cmpMeshChild: ComponentMesh = child.getComponent(ComponentMesh);
         let position: Vector3 = cmpMeshChild ? cmpMeshChild.mtxWorld.translation : child.mtxWorld.translation;
-
+        position = position.clone;
         _branch.radius = Math.max(_branch.radius, position.getDistance(_branch.mtxWorld.translation) + child.radius);
+        Recycler.store(position);
       }
 
       if (firstLevel) {

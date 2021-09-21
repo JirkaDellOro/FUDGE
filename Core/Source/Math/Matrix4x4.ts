@@ -23,6 +23,9 @@ namespace FudgeCore {
 
   export class Matrix4x4 extends Mutable implements Serializable, Recycable {
     private static deg2rad: number = Math.PI / 180;
+    #eulerAngles: Vector3 = Vector3.ZERO();
+    #vectors: VectorRepresentation = { translation: Vector3.ZERO(), rotation: Vector3.ZERO(), scaling: Vector3.ZERO() };
+
     private data: Float32Array = new Float32Array(16); // The data of the matrix.
     private mutator: Mutator = null; // prepared for optimization, keep mutator to reduce redundant calculation and for comparison. Set to null when data changes!
     private vectors: VectorRepresentation; // vector representation of this matrix
@@ -350,8 +353,12 @@ namespace FudgeCore {
      * If known, pass the inverse of the base to avoid unneccesary calculation 
      */
     public static RELATIVE(_mtx: Matrix4x4, _mtxBase: Matrix4x4, _mtxInverse?: Matrix4x4): Matrix4x4 {
-      let mtxResult: Matrix4x4 = _mtxInverse ? _mtxInverse : Matrix4x4.INVERSION(_mtxBase);
-      mtxResult = Matrix4x4.MULTIPLICATION(mtxResult, _mtx);
+      if (_mtxInverse)
+       return Matrix4x4.MULTIPLICATION(_mtxInverse, _mtx);
+
+      let mtxInverse: Matrix4x4 = Matrix4x4.INVERSION(_mtxBase);
+      let mtxResult: Matrix4x4 = Matrix4x4.MULTIPLICATION(mtxInverse, _mtx);
+      Recycler.store(mtxInverse);
       return mtxResult;
     }
     //#endregion
@@ -421,18 +428,21 @@ namespace FudgeCore {
     //#region  Accessors
     /** 
      * - get: return a vector representation of the translation {@link Vector3}.  
-     * **Caution!** Do not manipulate result, instead create a clone!    
+     * **Caution!** Use immediately and readonly, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate. 
      * - set: effect the matrix ignoring its rotation and scaling
      */
     public set translation(_translation: Vector3) {
       this.data.set(_translation.get(), 12);
       // no full cache reset required
-      this.vectors.translation = _translation.clone;
+      if (this.vectors.translation)
+        this.vectors.translation.set(_translation.x, _translation.y, _translation.z);
+      else
+        this.vectors.translation = _translation.clone;
       this.mutator = null;
     }
     public get translation(): Vector3 {
       if (!this.vectors.translation) {
-        this.vectors.translation = Recycler.get(Vector3);
+        this.vectors.translation = this.#vectors.translation;
         this.vectors.translation.set(this.data[12], this.data[13], this.data[14]);
       }
       return this.vectors.translation; // .clone;
@@ -440,12 +450,12 @@ namespace FudgeCore {
 
     /** 
      * - get: return a vector representation of the rotation {@link Vector3}.  
-     * **Caution!** Do not manipulate result, instead create a clone!   
+     * **Caution!** Use immediately and readonly, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate. 
      * - set: effect the matrix
      */
     public get rotation(): Vector3 {
       if (!this.vectors.rotation)
-        this.vectors.rotation = this.getEulerAngles();
+        this.vectors.rotation = this.getEulerAngles().clone;
       return this.vectors.rotation; //.clone;
     }
     public set rotation(_rotation: Vector3) {
@@ -455,12 +465,12 @@ namespace FudgeCore {
 
     /** 
      * - get: return a vector representation of the scaling {@link Vector3}.  
-     * **Caution!** Do not manipulate result, instead create a clone!   
+     * **Caution!** Use immediately and readonly, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate. 
      * - set: effect the matrix
      */
     public get scaling(): Vector3 {
       if (!this.vectors.scaling) {
-        this.vectors.scaling = Recycler.get(Vector3);
+        this.vectors.scaling = this.#vectors.scaling;
         this.vectors.scaling.set(
           Math.hypot(this.data[0], this.data[1], this.data[2]),
           Math.hypot(this.data[4], this.data[5], this.data[6]),
@@ -704,7 +714,8 @@ namespace FudgeCore {
 
     //#region Transfer
     /**
-     * Calculates and returns the euler-angles representing the current rotation of this matrix
+     * Calculates and returns the euler-angles representing the current rotation of this matrix.  
+     * **Caution!** Use immediately and readonly, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate. 
      */
     public getEulerAngles(): Vector3 {
       let scaling: Vector3 = this.scaling;
@@ -743,11 +754,11 @@ namespace FudgeCore {
         z1 = 0;
       }
 
-      let rotation: Vector3 = Recycler.get(Vector3);
-      rotation.set(x1, y1, z1);
-      rotation.scale(180 / Math.PI);
+      // let rotation: Vector3 = Recycler.borrow(Vector3);
+      this.#eulerAngles.set(x1, y1, z1);
+      this.#eulerAngles.scale(180 / Math.PI);
 
-      return rotation;
+      return this.#eulerAngles;
     }
 
     /**
@@ -877,7 +888,7 @@ namespace FudgeCore {
       let newScaling: Vector3 = <Vector3>_mutator["scaling"];
       let vectors: VectorRepresentation = { translation: oldTranslation, rotation: oldRotation, scaling: oldScaling };
       if (newTranslation) {
-        vectors.translation = vectors.translation || Recycler.get(Vector3);
+        vectors.translation = vectors.translation || this.#vectors.translation;
         vectors.translation.set(
           newTranslation.x != undefined ? newTranslation.x : oldTranslation.x,
           newTranslation.y != undefined ? newTranslation.y : oldTranslation.y,
@@ -885,7 +896,7 @@ namespace FudgeCore {
         );
       }
       if (newRotation) {
-        vectors.rotation = vectors.rotation || Recycler.get(Vector3);
+        vectors.rotation = vectors.rotation || this.#vectors.rotation;
         vectors.rotation.set(
           newRotation.x != undefined ? newRotation.x : oldRotation.x,
           newRotation.y != undefined ? newRotation.y : oldRotation.y,
@@ -893,7 +904,7 @@ namespace FudgeCore {
         );
       }
       if (newScaling) {
-        vectors.scaling = vectors.scaling || Recycler.get(Vector3);
+        vectors.scaling = vectors.scaling || this.#vectors.scaling;
         vectors.scaling.set(
           newScaling.x != undefined ? newScaling.x : oldScaling.x,
           newScaling.y != undefined ? newScaling.y : oldScaling.y,

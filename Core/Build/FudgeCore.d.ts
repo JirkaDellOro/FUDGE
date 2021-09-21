@@ -2569,7 +2569,7 @@ declare namespace FudgeCore {
         static MULTIPLICATION(_mtxLeft: Matrix3x3, _mtxRight: Matrix3x3): Matrix3x3;
         /**
          * - get: return a vector representation of the translation {@link Vector2}.
-         * **Caution!** Do not manipulate result, instead create a clone!
+         * **Caution!** Use immediately, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate.
          * - set: effect the matrix ignoring its rotation and scaling
          */
         get translation(): Vector2;
@@ -2627,7 +2627,7 @@ declare namespace FudgeCore {
         /**
          * Calculates and returns the euler-angles representing the current rotation of this matrix
          */
-        getEulerAngles(): number;
+        getEulerAngle(): number;
         /**
          * Sets the elements of this matrix to the values of the given matrix
          */
@@ -2667,6 +2667,7 @@ declare namespace FudgeCore {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     export class Matrix4x4 extends Mutable implements Serializable, Recycable {
+        #private;
         private static deg2rad;
         private data;
         private mutator;
@@ -2752,21 +2753,21 @@ declare namespace FudgeCore {
         static PROJECTION_ORTHOGRAPHIC(_left: number, _right: number, _bottom: number, _top: number, _near?: number, _far?: number): Matrix4x4;
         /**
          * - get: return a vector representation of the translation {@link Vector3}.
-         * **Caution!** Do not manipulate result, instead create a clone!
+         * **Caution!** Use immediately and readonly, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate.
          * - set: effect the matrix ignoring its rotation and scaling
          */
         set translation(_translation: Vector3);
         get translation(): Vector3;
         /**
          * - get: return a vector representation of the rotation {@link Vector3}.
-         * **Caution!** Do not manipulate result, instead create a clone!
+         * **Caution!** Use immediately and readonly, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate.
          * - set: effect the matrix
          */
         get rotation(): Vector3;
         set rotation(_rotation: Vector3);
         /**
          * - get: return a vector representation of the scaling {@link Vector3}.
-         * **Caution!** Do not manipulate result, instead create a clone!
+         * **Caution!** Use immediately and readonly, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate.
          * - set: effect the matrix
          */
         get scaling(): Vector3;
@@ -2848,7 +2849,8 @@ declare namespace FudgeCore {
          */
         multiply(_matrix: Matrix4x4, _fromLeft?: boolean): void;
         /**
-         * Calculates and returns the euler-angles representing the current rotation of this matrix
+         * Calculates and returns the euler-angles representing the current rotation of this matrix.
+         * **Caution!** Use immediately and readonly, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate.
          */
         getEulerAngles(): Vector3;
         /**

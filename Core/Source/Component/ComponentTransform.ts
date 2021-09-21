@@ -85,17 +85,23 @@ namespace FudgeCore {
           this.rebase(_node);
           this.mtxLocal.multiply(_mtxTransform, true);
 
-          let container: Node = this.node;
-          if (container) {
-            if (_base == BASE.NODE)
+          let node: Node = this.node;
+          if (node) {
+            let mtxTemp: Matrix4x4;
+            if (_base == BASE.NODE) {
               // fix mtxWorld of container for subsequent rebasing 
-              container.mtxWorld.set(Matrix4x4.MULTIPLICATION(_node.mtxWorld, container.mtxLocal));
+              mtxTemp = Matrix4x4.MULTIPLICATION(_node.mtxWorld, node.mtxLocal);
+              node.mtxWorld.set(mtxTemp);
+              Recycler.store(mtxTemp);
+            }
 
-            let parent: Node = container.getParent();
+            let parent: Node = node.getParent();
             if (parent) {
               // fix mtxLocal for current parent
-              this.rebase(container.getParent());
-              container.mtxWorld.set(Matrix4x4.MULTIPLICATION(container.getParent().mtxWorld, container.mtxLocal));
+              this.rebase(node.getParent());
+              mtxTemp = Matrix4x4.MULTIPLICATION(node.getParent().mtxWorld, node.mtxLocal);
+              node.mtxWorld.set(mtxTemp);
+              Recycler.store(mtxTemp);
             }
           }
           break;

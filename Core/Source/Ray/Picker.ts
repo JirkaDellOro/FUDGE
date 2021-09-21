@@ -26,11 +26,14 @@ namespace FudgeCore {
     public static pickCamera(_branch: Node, _cmpCamera: ComponentCamera, _posProjection: Vector2): Pick[] {
       let ray: Ray = new Ray(new Vector3(-_posProjection.x, _posProjection.y, 1));
       let length: number = ray.direction.magnitude;
-      
-      let mtxCamera: Matrix4x4 = _cmpCamera.mtxPivot;
-      if (_cmpCamera.node)
-        mtxCamera = Matrix4x4.MULTIPLICATION(_cmpCamera.node.mtxWorld, _cmpCamera.mtxPivot);
-      ray.transform(mtxCamera);
+
+      if (_cmpCamera.node) {
+        let mtxCamera: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.node.mtxWorld, _cmpCamera.mtxPivot);
+        ray.transform(mtxCamera);
+        Recycler.store(mtxCamera);
+      }
+      else
+        ray.transform(_cmpCamera.mtxPivot);
 
 
       let picks: Pick[] = Picker.pickRay(_branch, ray, length * _cmpCamera.getNear(), length * _cmpCamera.getFar());

@@ -313,6 +313,10 @@ namespace FudgeCore {
       this.panner.orientationX.value = forward.x;
       this.panner.orientationY.value = forward.y;
       this.panner.orientationZ.value = forward.z;
+
+      Recycler.store(forward);
+      if (this.node)
+        Recycler.store(mtxResult);
     }
   }
 }

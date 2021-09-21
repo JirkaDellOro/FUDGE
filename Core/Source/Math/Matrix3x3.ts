@@ -123,13 +123,13 @@ namespace FudgeCore {
 
     /** 
      * - get: return a vector representation of the translation {@link Vector2}.  
-     * **Caution!** Do not manipulate result, instead create a clone!     
+     * **Caution!** Use immediately, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate. 
      * - set: effect the matrix ignoring its rotation and scaling
      */
     public get translation(): Vector2 {
       if (!this.vectors.translation)
         this.vectors.translation = new Vector2(this.data[6], this.data[7]);
-      return this.vectors.translation; //.clone;
+      return this.vectors.translation; // .clone;
     }
     public set translation(_translation: Vector2) {
       this.data.set(_translation.get(), 12);
@@ -144,7 +144,7 @@ namespace FudgeCore {
      */
     public get rotation(): number {
       if (!this.vectors.rotation)
-        this.vectors.rotation = this.getEulerAngles();
+        this.vectors.rotation = this.getEulerAngle();
       return this.vectors.rotation;
     }
     public set rotation(_rotation: number) {
@@ -163,7 +163,7 @@ namespace FudgeCore {
           Math.hypot(this.data[0], this.data[1]),
           Math.hypot(this.data[3], this.data[4])
         );
-      return this.vectors.scaling; //.clone;
+      return this.vectors.scaling; // .clone;
     }
     public set scaling(_scaling: Vector2) {
       this.mutate({ "scaling": _scaling });
@@ -260,7 +260,9 @@ namespace FudgeCore {
      * Multiply this matrix with the given matrix
      */
     public multiply(_mtxRight: Matrix3x3): void {
-      this.set(Matrix3x3.MULTIPLICATION(this, _mtxRight));
+      let mtxResult: Matrix3x3 = Matrix3x3.MULTIPLICATION(this, _mtxRight);
+      this.set(mtxResult);
+      Recycler.store(mtxResult);
       this.mutator = null;
     }
     //#endregion
@@ -270,7 +272,7 @@ namespace FudgeCore {
     /**
      * Calculates and returns the euler-angles representing the current rotation of this matrix
      */
-    public getEulerAngles(): number {
+    public getEulerAngle(): number {
       let scaling: Vector2 = this.scaling;
 
       let s0: number = this.data[0] / scaling.x;
