@@ -54,7 +54,7 @@ namespace FudgeAid {
         if (!_event.buttons)
           return;
 
-        let posCamera: ƒ.Vector3 = camera.nodeCamera.mtxWorld.translation.copy;
+        let posCamera: ƒ.Vector3 = camera.nodeCamera.mtxWorld.translation.clone;
 
         cntMouseHorizontal.setInput(_event.movementX);
         cntMouseVertical.setInput(_event.movementY);
