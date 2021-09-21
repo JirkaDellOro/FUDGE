@@ -38,16 +38,17 @@ namespace FudgeCore {
      */
     public get mtxWorldToView(): Matrix4x4 {
       //TODO: optimize, no need to recalculate if neither mtxWorld nor pivot have changed
-      let mtxCamera: Matrix4x4;
+      let mtxCamera: Matrix4x4 = this.mtxPivot.clone;
       try {
         mtxCamera = Matrix4x4.MULTIPLICATION(this.node.mtxWorld, this.mtxPivot);
-      } catch (_error) {
-        mtxCamera = this.mtxPivot.clone;
+      } catch (_error) {   
+        // no container node or no world transformation found -> continue with pivot only
       }
       let mtxInversion: Matrix4x4 = Matrix4x4.INVERSION(mtxCamera);
       let mtxResult: Matrix4x4 = Matrix4x4.MULTIPLICATION(this.mtxProjection, mtxInversion);
       Recycler.store(mtxCamera);
       Recycler.store(mtxInversion);
+      
       return mtxResult;
     }
 
