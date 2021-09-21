@@ -559,7 +559,7 @@ declare namespace FudgeCore {
          * @returns A deep copy of the vector.
          * TODO: rename this clone and create a new method copy, which copies the values from a vector given
          */
-        get copy(): Vector2;
+        get clone(): Vector2;
         /**
          * Returns a polar representation of this vector
          */
@@ -675,7 +675,7 @@ declare namespace FudgeCore {
         set top(_value: number);
         set right(_value: number);
         set bottom(_value: number);
-        get copy(): Rectangle;
+        get clone(): Rectangle;
         recycle(): void;
         /**
          * Sets the position and size of the rectangle according to the given parameters
@@ -1754,7 +1754,7 @@ declare namespace FudgeCore {
     class ComponentMesh extends Component {
         static readonly iSubclass: number;
         mtxPivot: Matrix4x4;
-        mtxWorld: Matrix4x4;
+        readonly mtxWorld: Matrix4x4;
         mesh: Mesh;
         constructor(_mesh?: Mesh);
         get radius(): number;
@@ -2568,7 +2568,8 @@ declare namespace FudgeCore {
         static SCALING(_scalar: Vector2): Matrix3x3;
         static MULTIPLICATION(_mtxLeft: Matrix3x3, _mtxRight: Matrix3x3): Matrix3x3;
         /**
-         * - get: a copy of the calculated translation {@link Vector2}
+         * - get: return a vector representation of the translation {@link Vector2}.
+         * **Caution!** Do not manipulate result, instead create a clone!
          * - set: effect the matrix ignoring its rotation and scaling
          */
         get translation(): Vector2;
@@ -2580,7 +2581,8 @@ declare namespace FudgeCore {
         get rotation(): number;
         set rotation(_rotation: number);
         /**
-         * - get: a copy of the calculated scale {@link Vector2}
+         * - get: return a vector representation of the scale {@link Vector3}.
+         * **Caution!** Do not manipulate result, instead create a clone!
          * - set: effect the matrix
          */
         get scaling(): Vector2;
@@ -2588,7 +2590,7 @@ declare namespace FudgeCore {
         /**
          * Return a copy of this
          */
-        get copy(): Matrix3x3;
+        get clone(): Matrix3x3;
         recycle(): void;
         /**
          * Add a translation by the given {@link Vector2} to this matrix
@@ -2749,19 +2751,22 @@ declare namespace FudgeCore {
          */
         static PROJECTION_ORTHOGRAPHIC(_left: number, _right: number, _bottom: number, _top: number, _near?: number, _far?: number): Matrix4x4;
         /**
-         * - get: a copy of the calculated translation {@link Vector3}
+         * - get: return a vector representation of the translation {@link Vector3}.
+         * **Caution!** Do not manipulate result, instead create a clone!
          * - set: effect the matrix ignoring its rotation and scaling
          */
         set translation(_translation: Vector3);
         get translation(): Vector3;
         /**
-         * - get: a copy of the calculated rotation {@link Vector3}
+         * - get: return a vector representation of the rotation {@link Vector3}.
+         * **Caution!** Do not manipulate result, instead create a clone!
          * - set: effect the matrix
          */
         get rotation(): Vector3;
         set rotation(_rotation: Vector3);
         /**
-         * - get: a copy of the calculated scale {@link Vector3}
+         * - get: return a vector representation of the scaling {@link Vector3}.
+         * **Caution!** Do not manipulate result, instead create a clone!
          * - set: effect the matrix
          */
         get scaling(): Vector3;
@@ -2769,7 +2774,7 @@ declare namespace FudgeCore {
         /**
          * Return a copy of this
          */
-        get copy(): Matrix4x4;
+        get clone(): Matrix4x4;
         recycle(): void;
         /**
          * Rotate this matrix by given {@link Vector3} in the order Z, Y, X. Right hand rotation is used, thumb points in axis direction, fingers curling indicate rotation
@@ -3140,7 +3145,7 @@ declare namespace FudgeCore {
          * Returns a copy of this vector
          * TODO: rename this clone and create a new method copy, which copies the values from a vector given
          */
-        get copy(): Vector3;
+        get clone(): Vector3;
         /**
          * - get: returns a geographic representation of this vector
          * - set: adjust the cartesian values of this vector to represent the given as geographic coordinates
@@ -3202,6 +3207,7 @@ declare namespace FudgeCore {
          * Shuffles the components of this vector
          */
         shuffle(): void;
+        getDistance(_to: Vector3): number;
         /**
          * For each dimension, moves the component to the minimum of this and the given vector
          */

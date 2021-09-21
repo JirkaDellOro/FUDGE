@@ -29,7 +29,7 @@ namespace FudgeCore {
         return this.mtxLocal.lookAt(_targetWorld, _up);
 
       // component is attached to a child node -> transform respecting the hierarchy
-      let mtxWorld: Matrix4x4 = container.mtxWorld.copy;
+      let mtxWorld: Matrix4x4 = container.mtxWorld.clone;
       mtxWorld.lookAt(_targetWorld, _up, true);
       let mtxLocal: Matrix4x4 = Matrix4x4.RELATIVE(mtxWorld, null, container.getParent().mtxWorldInverse);
       this.mtxLocal = mtxLocal;
@@ -45,7 +45,7 @@ namespace FudgeCore {
         return this.mtxLocal.showTo(_targetWorld, _up);
 
       // component is attached to a child node -> transform respecting the hierarchy
-      let mtxWorld: Matrix4x4 = container.mtxWorld.copy;
+      let mtxWorld: Matrix4x4 = container.mtxWorld.clone;
       mtxWorld.showTo(_targetWorld, _up, true);
       let mtxLocal: Matrix4x4 = Matrix4x4.RELATIVE(mtxWorld, null, container.getParent().mtxWorldInverse);
       this.mtxLocal = mtxLocal;

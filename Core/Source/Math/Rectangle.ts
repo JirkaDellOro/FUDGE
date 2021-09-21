@@ -112,7 +112,7 @@ namespace FudgeCore {
       this.size.y = this.position.y + _value;
     }
     
-    public get copy(): Rectangle {
+    public get clone(): Rectangle {
       return Rectangle.GET(this.x, this.y, this.width, this.height);
     }
 
@@ -138,7 +138,7 @@ namespace FudgeCore {
     }
 
     public pointToRect(_point: Vector2, _target: Rectangle): Vector2 {
-      let result: Vector2 = _point.copy;
+      let result: Vector2 = _point.clone;
       result.subtract(this.position);
       result.x *= _target.width / this.width;
       result.y *= _target.height / this.height;

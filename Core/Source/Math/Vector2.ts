@@ -202,10 +202,10 @@ namespace FudgeCore {
      * @returns A deep copy of the vector.
      * TODO: rename this clone and create a new method copy, which copies the values from a vector given 
      */
-    public get copy(): Vector2 {
-      let copy: Vector2 = Recycler.get(Vector2);
-      copy.data.set(this.data);
-      return copy;
+    public get clone(): Vector2 {
+      let clone: Vector2 = Recycler.get(Vector2);
+      clone.data.set(this.data);
+      return clone;
     }
 
     /**

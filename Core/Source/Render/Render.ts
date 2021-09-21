@@ -44,8 +44,11 @@ namespace FudgeCore {
       _branch.dispatchEventToTargetOnly(new Event(EVENT.RENDER_PREPARE));
       _branch.timestampUpdate = Render.timestampUpdate;
 
-      if (_branch.cmpTransform && _branch.cmpTransform.isActive)
-        _branch.mtxWorld.set(Matrix4x4.MULTIPLICATION(_mtxWorld, _branch.cmpTransform.mtxLocal));
+      if (_branch.cmpTransform && _branch.cmpTransform.isActive) {
+        let mtxWorldBranch: Matrix4x4 = Matrix4x4.MULTIPLICATION(_mtxWorld, _branch.cmpTransform.mtxLocal);
+        _branch.mtxWorld.set(mtxWorldBranch);
+        Recycler.store(mtxWorldBranch);
+      }
       else
         _branch.mtxWorld.set(_mtxWorld); // overwrite readonly mtxWorld of the current node
 
@@ -75,7 +78,9 @@ namespace FudgeCore {
       let cmpMaterial: ComponentMaterial = _branch.getComponent(ComponentMaterial);
       if (cmpMesh && cmpMesh.isActive && cmpMaterial && cmpMaterial.isActive) {
         // TODO: careful when using particlesystem, pivot must not change node position
-        cmpMesh.mtxWorld = Matrix4x4.MULTIPLICATION(_branch.mtxWorld, cmpMesh.mtxPivot);
+        let mtxWorldMesh: Matrix4x4 = Matrix4x4.MULTIPLICATION(_branch.mtxWorld, cmpMesh.mtxPivot);
+        cmpMesh.mtxWorld.set(mtxWorldMesh);
+        Recycler.store(mtxWorldMesh);
         let shader: typeof Shader = cmpMaterial.material.getShader();
         if (_shadersUsed.indexOf(shader) < 0)
           _shadersUsed.push(shader);
@@ -94,7 +99,7 @@ namespace FudgeCore {
         let cmpMeshChild: ComponentMesh = child.getComponent(ComponentMesh);
         let position: Vector3 = cmpMeshChild ? cmpMeshChild.mtxWorld.translation : child.mtxWorld.translation;
 
-        _branch.radius = Math.max(_branch.radius, Vector3.DIFFERENCE(position, _branch.mtxWorld.translation).magnitude + child.radius);
+        _branch.radius = Math.max(_branch.radius, position.getDistance(_branch.mtxWorld.translation) + child.radius);
       }
 
       if (firstLevel) {
@@ -183,16 +188,20 @@ namespace FudgeCore {
         let mtxPivotWorld: Matrix4x4 = Matrix4x4.MULTIPLICATION(_node.mtxWorld, _cmpRigidbody.mtxPivotUnscaled);
         _cmpRigidbody.setPosition(mtxPivotWorld.translation);
         _cmpRigidbody.setRotation(mtxPivotWorld.rotation);
+        Recycler.store(mtxPivotWorld);
         return;
       }
 
       let mtxWorld: Matrix4x4 = Matrix4x4.CONSTRUCTION(
-        { translation: _cmpRigidbody.getPosition(), rotation: _cmpRigidbody.getRotation(), scaling: Vector3.ONE() }
+        { translation: _cmpRigidbody.getPosition(), rotation: _cmpRigidbody.getRotation(), scaling: null }
       );
       mtxWorld.multiply(_cmpRigidbody.mtxPivotInverse);
       _node.mtxWorld.translation = mtxWorld.translation;
       _node.mtxWorld.rotation = mtxWorld.rotation;
-      _node.mtxLocal.set(Matrix4x4.RELATIVE(_node.mtxWorld, _node.getParent().mtxWorld));
+      let mtxLocal: Matrix4x4 = Matrix4x4.RELATIVE(_node.mtxWorld, _node.getParent().mtxWorld);
+      _node.mtxLocal.set(mtxLocal);
+      Recycler.store(mtxWorld);
+      Recycler.store(mtxLocal);
     }
   }
   //#endregion

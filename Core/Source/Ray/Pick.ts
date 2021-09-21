@@ -66,7 +66,7 @@ namespace FudgeCore {
         let difference: Vector3 = Vector3.DIFFERENCE(this.posMesh, vertex);
         let distance: number = Math.abs(Vector3.DOT(normal, difference));
         if (distance < minDistance) {
-          result = normal.copy;
+          result = normal.clone;
           minDistance = distance;
         }
       }

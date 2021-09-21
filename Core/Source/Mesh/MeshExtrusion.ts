@@ -77,14 +77,14 @@ namespace FudgeCore {
       vertices.push(...lid);
 
       // duplicate first vertex of polygon to the end to create a texturable wrapping
-      polygon.push(polygon[0].copy);
+      polygon.push(polygon[0].clone);
       let wrap: Vector3[];
       for (let i: number = 0; i < nTransforms; i++) {
         let mtxTransform: Matrix4x4 = _mtxTransforms[i];
         wrap = polygon.map((_v: Vector3) => Vector3.TRANSFORMATION(_v, mtxTransform, true));
         vertices.push(...wrap);
         if (i > 0 && i < nTransforms - 1)
-          vertices.push(...wrap.map((_vector: Vector3) => _vector.copy));
+          vertices.push(...wrap.map((_vector: Vector3) => _vector.clone));
       }
 
 

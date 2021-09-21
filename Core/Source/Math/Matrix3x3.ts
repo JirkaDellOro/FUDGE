@@ -122,13 +122,14 @@ namespace FudgeCore {
     }
 
     /** 
-     * - get: a copy of the calculated translation {@link Vector2}   
+     * - get: return a vector representation of the translation {@link Vector2}.  
+     * **Caution!** Do not manipulate result, instead create a clone!     
      * - set: effect the matrix ignoring its rotation and scaling
      */
     public get translation(): Vector2 {
       if (!this.vectors.translation)
         this.vectors.translation = new Vector2(this.data[6], this.data[7]);
-      return this.vectors.translation.copy;
+      return this.vectors.translation; //.clone;
     }
     public set translation(_translation: Vector2) {
       this.data.set(_translation.get(), 12);
@@ -152,7 +153,8 @@ namespace FudgeCore {
     }
 
     /** 
-     * - get: a copy of the calculated scale {@link Vector2}   
+     * - get: return a vector representation of the scale {@link Vector3}.  
+     * **Caution!** Do not manipulate result, instead create a clone!    
      * - set: effect the matrix
      */
     public get scaling(): Vector2 {
@@ -161,7 +163,7 @@ namespace FudgeCore {
           Math.hypot(this.data[0], this.data[1]),
           Math.hypot(this.data[3], this.data[4])
         );
-      return this.vectors.scaling.copy;
+      return this.vectors.scaling; //.clone;
     }
     public set scaling(_scaling: Vector2) {
       this.mutate({ "scaling": _scaling });
@@ -171,10 +173,10 @@ namespace FudgeCore {
     /**
      * Return a copy of this
      */
-    public get copy(): Matrix3x3 {
-      let mtxCopy: Matrix3x3 = Recycler.get(Matrix3x3);
-      mtxCopy.set(this);
-      return mtxCopy;
+    public get clone(): Matrix3x3 {
+      let mtxClone: Matrix3x3 = Recycler.get(Matrix3x3);
+      mtxClone.set(this);
+      return mtxClone;
     }
 
     public recycle(): void {

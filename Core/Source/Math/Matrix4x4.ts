@@ -420,13 +420,14 @@ namespace FudgeCore {
 
     //#region  Accessors
     /** 
-     * - get: a copy of the calculated translation {@link Vector3}   
+     * - get: return a vector representation of the translation {@link Vector3}.  
+     * **Caution!** Do not manipulate result, instead create a clone!    
      * - set: effect the matrix ignoring its rotation and scaling
      */
     public set translation(_translation: Vector3) {
       this.data.set(_translation.get(), 12);
       // no full cache reset required
-      this.vectors.translation = _translation.copy;
+      this.vectors.translation = _translation.clone;
       this.mutator = null;
     }
     public get translation(): Vector3 {
@@ -434,17 +435,18 @@ namespace FudgeCore {
         this.vectors.translation = Recycler.get(Vector3);
         this.vectors.translation.set(this.data[12], this.data[13], this.data[14]);
       }
-      return this.vectors.translation.copy;
+      return this.vectors.translation; // .clone;
     }
 
     /** 
-     * - get: a copy of the calculated rotation {@link Vector3}   
+     * - get: return a vector representation of the rotation {@link Vector3}.  
+     * **Caution!** Do not manipulate result, instead create a clone!   
      * - set: effect the matrix
      */
     public get rotation(): Vector3 {
       if (!this.vectors.rotation)
         this.vectors.rotation = this.getEulerAngles();
-      return this.vectors.rotation.copy;
+      return this.vectors.rotation; //.clone;
     }
     public set rotation(_rotation: Vector3) {
       this.mutate({ "rotation": _rotation });
@@ -452,7 +454,8 @@ namespace FudgeCore {
     }
 
     /** 
-     * - get: a copy of the calculated scale {@link Vector3}   
+     * - get: return a vector representation of the scaling {@link Vector3}.  
+     * **Caution!** Do not manipulate result, instead create a clone!   
      * - set: effect the matrix
      */
     public get scaling(): Vector3 {
@@ -464,7 +467,7 @@ namespace FudgeCore {
           Math.hypot(this.data[8], this.data[9], this.data[10])
         );
       }
-      return this.vectors.scaling.copy;
+      return this.vectors.scaling; // .clone;
     }
     public set scaling(_scaling: Vector3) {
       this.mutate({ "scaling": _scaling });
@@ -474,10 +477,10 @@ namespace FudgeCore {
     /**
      * Return a copy of this
      */
-    public get copy(): Matrix4x4 {
-      let mtxCopy: Matrix4x4 = Recycler.get(Matrix4x4);
-      mtxCopy.set(this);
-      return mtxCopy;
+    public get clone(): Matrix4x4 {
+      let mtxClone: Matrix4x4 = Recycler.get(Matrix4x4);
+      mtxClone.set(this);
+      return mtxClone;
     }
     //#endregion
 
@@ -874,7 +877,7 @@ namespace FudgeCore {
       let newScaling: Vector3 = <Vector3>_mutator["scaling"];
       let vectors: VectorRepresentation = { translation: oldTranslation, rotation: oldRotation, scaling: oldScaling };
       if (newTranslation) {
-        vectors.translation = Recycler.get(Vector3);
+        vectors.translation = vectors.translation || Recycler.get(Vector3);
         vectors.translation.set(
           newTranslation.x != undefined ? newTranslation.x : oldTranslation.x,
           newTranslation.y != undefined ? newTranslation.y : oldTranslation.y,
@@ -882,7 +885,7 @@ namespace FudgeCore {
         );
       }
       if (newRotation) {
-        vectors.rotation = Recycler.get(Vector3);
+        vectors.rotation = vectors.rotation || Recycler.get(Vector3);
         vectors.rotation.set(
           newRotation.x != undefined ? newRotation.x : oldRotation.x,
           newRotation.y != undefined ? newRotation.y : oldRotation.y,
@@ -890,7 +893,7 @@ namespace FudgeCore {
         );
       }
       if (newScaling) {
-        vectors.scaling = Recycler.get(Vector3);
+        vectors.scaling = vectors.scaling || Recycler.get(Vector3);
         vectors.scaling.set(
           newScaling.x != undefined ? newScaling.x : oldScaling.x,
           newScaling.y != undefined ? newScaling.y : oldScaling.y,

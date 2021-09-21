@@ -64,7 +64,7 @@ namespace FudgeCore {
 
       let vertices: Vector3[] = [];
       for (let sector: number = 0; sector <= this.sectors; sector++) {
-        vertices.push(...polygon.map((_vector: Vector3) => _vector.copy));
+        vertices.push(...polygon.map((_vector: Vector3) => _vector.clone));
         polygon.forEach((_vector: Vector3) => _vector.transform(mtxRotate));
         // vertices.push(...polygon.map((_vector: Vector3) => _vector.copy));
       }

@@ -225,10 +225,10 @@ namespace FudgeCore {
      * Returns a copy of this vector
      * TODO: rename this clone and create a new method copy, which copies the values from a vector given 
      */
-    public get copy(): Vector3 {
-      let copy: Vector3 = Recycler.get(Vector3);
-      copy.data.set(this.data);
-      return copy;
+    public get clone(): Vector3 {
+      let clone: Vector3 = Recycler.get(Vector3);
+      clone.data.set(this.data);
+      return clone;
     }
 
     /**
@@ -341,7 +341,9 @@ namespace FudgeCore {
      * Including is the default, excluding will only rotate and scale this vector.
      */
     public transform(_mtxTransform: Matrix4x4, _includeTranslation: boolean = true): void {
-      this.data = Vector3.TRANSFORMATION(this, _mtxTransform, _includeTranslation).data;
+      let transformed: Vector3 = Vector3.TRANSFORMATION(this, _mtxTransform, _includeTranslation);
+      this.data.set(transformed.data);
+      Recycler.store(transformed);
     }
 
     /**
@@ -363,11 +365,16 @@ namespace FudgeCore {
     /**
      * Shuffles the components of this vector
      */
-    public shuffle(): void {
+    shuffle(): void {
       let a: number[] = Array.from(this.data);
       this.set(Random.default.splice(a), Random.default.splice(a), a[0]);
     }
 
+    public getDistance(_to: Vector3): number {
+      let difference: Vector3 = Vector3.DIFFERENCE(this, _to);
+      Recycler.store(difference);
+      return difference.magnitude;
+    }
     /**
      * For each dimension, moves the component to the minimum of this and the given vector
      */

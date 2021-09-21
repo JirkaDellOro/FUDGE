@@ -32,8 +32,8 @@ namespace FudgeCore {
     public create(_resolution: Vector2 = Vector2.ONE(2), _scaleInput: Vector2 = Vector2.ONE(), _functionOrSeed: HeightMapFunction | number = 0): void {
       this.clear();
       this.seed = undefined;
-      this.resolution = _resolution.copy;
-      this.scale = _scaleInput.copy;
+      this.resolution = _resolution.clone;
+      this.scale = _scaleInput.clone;
 
       if (_functionOrSeed instanceof Function)
         this.heightMapFunction = _functionOrSeed;

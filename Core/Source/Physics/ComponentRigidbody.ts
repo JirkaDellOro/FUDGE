@@ -304,7 +304,7 @@ namespace FudgeCore {
 
     /** Get the current SCALING in the physical space. */
     public getScaling(): Vector3 {
-      let scaling: Vector3 = this.node.mtxWorld.scaling.copy;
+      let scaling: Vector3 = this.node.mtxWorld.scaling.clone;
       scaling.x *= this.mtxPivot.scaling.x;
       scaling.y *= this.mtxPivot.scaling.y;
       scaling.z *= this.mtxPivot.scaling.z;
@@ -313,7 +313,7 @@ namespace FudgeCore {
 
     /** Scaling requires the collider to be completely recreated anew */
     public setScaling(_value: Vector3): void {
-      let scaling: Vector3 = _value.copy;   
+      let scaling: Vector3 = _value.clone;   
       this.createCollider(new OIMO.Vec3(scaling.x / 2, scaling.y / 2, scaling.z / 2), this.#typeCollider); //recreate the collider
       this.#collider = new OIMO.Shape(this.#colliderInfo);
       let oldCollider: OIMO.Shape = this.#rigidbody.getShapeList();
@@ -341,7 +341,7 @@ namespace FudgeCore {
         case BODY_INIT.TO_MESH:
           let cmpMesh: ComponentMesh = this.node.getComponent(ComponentMesh);
           if (cmpMesh)
-            this.mtxPivot = cmpMesh.mtxPivot.copy;
+            this.mtxPivot = cmpMesh.mtxPivot.clone;
           break;
         case BODY_INIT.TO_PIVOT:
           break;
@@ -554,9 +554,9 @@ namespace FudgeCore {
       let hitInfo: RayHitInfo = new RayHitInfo();
       let geometry: OIMO.Geometry = this.#rigidbody.getShapeList().getGeometry();
       let transform: OIMO.Transform = this.#rigidbody.getTransform();
-      let scaledDirection: Vector3 = _direction.copy;
+      let scaledDirection: Vector3 = _direction.clone;
       scaledDirection.scale(_length);
-      let endpoint: Vector3 = Vector3.SUM(scaledDirection, _origin.copy);
+      let endpoint: Vector3 = Vector3.SUM(scaledDirection, _origin.clone);
       let oimoRay: OIMO.RayCastHit = new OIMO.RayCastHit();
       let hit: boolean = geometry.rayCast(new OIMO.Vec3(_origin.x, _origin.y, _origin.z), new OIMO.Vec3(endpoint.x, endpoint.y, endpoint.z), transform, oimoRay); //the actual OimoPhysics Raycast
       if (hit) {  //If hit return a bunch of informations about the hit
