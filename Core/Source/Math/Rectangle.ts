@@ -21,7 +21,7 @@ namespace FudgeCore {
    * Defines a rectangle with position and size and add comfortable methods to it
    * @author Jirka Dell'Oro-Friedl, HFU, 2019
    */
-  export class Rectangle extends Mutable {
+  export class Rectangle extends Mutable implements Recycable {
     public position: Vector2 = Recycler.get(Vector2);
     public size: Vector2 = Recycler.get(Vector2);
 
@@ -114,6 +114,10 @@ namespace FudgeCore {
     
     public get copy(): Rectangle {
       return Rectangle.GET(this.x, this.y, this.width, this.height);
+    }
+
+    public recycle(): void {
+      this.setPositionAndSize();
     }
 
     /**

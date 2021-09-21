@@ -425,6 +425,9 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    interface Recycable {
+        recycle(): void;
+    }
     /**
      * Keeps a depot of objects that have been marked for reuse, sorted by type.
      * Using {@link Recycler} reduces load on the carbage collector and thus supports smooth performance
@@ -432,17 +435,18 @@ declare namespace FudgeCore {
     abstract class Recycler {
         private static depot;
         /**
-         * Fetches an object of the requested type from the depot, or returns a new one, if the depot was empty
+         * Fetches an object of the requested type from the depot, calls its recycle-method and returns it.
+         * If the depot for that type is empty it returns a new object of the requested type
          * @param _T The class identifier of the desired object
          */
-        static get<T>(_T: new () => T): T;
+        static get<T extends Recycable>(_T: new () => T): T;
         /**
          * Returns a reference to an object of the requested type in the depot, but does not remove it there.
          * If no object of the requested type was in the depot, one is created, stored and borrowed.
          * For short term usage of objects in a local scope, when there will be no other call to Recycler.get or .borrow!
          * @param _T The class identifier of the desired object
          */
-        static borrow<T>(_T: new () => T): T;
+        static borrow<T extends Recycable>(_T: new () => T): T;
         /**
          * Stores the object in the depot for later recycling. Users are responsible for throwing in objects that are about to loose scope and are not referenced by any other
          * @param _instance
@@ -468,7 +472,7 @@ declare namespace FudgeCore {
      * ```
      * @authors Lukas Scheuerle, Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Vector2 extends Mutable {
+    class Vector2 extends Mutable implements Recycable {
         private data;
         constructor(_x?: number, _y?: number);
         /**
@@ -564,6 +568,7 @@ declare namespace FudgeCore {
          * Adjust the cartesian values of this vector to represent the given as polar coordinates
          */
         set geo(_geo: Geo2);
+        recycle(): void;
         /**
          * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
          * TODO: examine, if tolerance as criterium for the difference is appropriate with very large coordinate values or if _tolerance should be multiplied by coordinate value
@@ -634,7 +639,7 @@ declare namespace FudgeCore {
      * Defines a rectangle with position and size and add comfortable methods to it
      * @author Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Rectangle extends Mutable {
+    class Rectangle extends Mutable implements Recycable {
         position: Vector2;
         size: Vector2;
         constructor(_x?: number, _y?: number, _width?: number, _height?: number, _origin?: ORIGIN2D);
@@ -671,6 +676,7 @@ declare namespace FudgeCore {
         set right(_value: number);
         set bottom(_value: number);
         get copy(): Rectangle;
+        recycle(): void;
         /**
          * Sets the position and size of the rectangle according to the given parameters
          */
@@ -2490,7 +2496,7 @@ declare namespace FudgeCore {
      *  -→ Magnitude (Distance from the center)
      * ```
      */
-    class Geo2 {
+    class Geo2 implements Recycable {
         magnitude: number;
         angle: number;
         constructor(_angle?: number, _magnitude?: number);
@@ -2498,6 +2504,7 @@ declare namespace FudgeCore {
          * Set the properties of this instance at once
          */
         set(_angle?: number, _magnitude?: number): void;
+        recycle(): void;
         /**
          * Returns a pretty string representation
          */
@@ -2513,7 +2520,7 @@ declare namespace FudgeCore {
      *  -→ Magnitude (Distance from the center)
      * ```
      */
-    class Geo3 {
+    class Geo3 implements Recycable {
         magnitude: number;
         latitude: number;
         longitude: number;
@@ -2522,6 +2529,7 @@ declare namespace FudgeCore {
          * Set the properties of this instance at once
          */
         set(_longitude?: number, _latitude?: number, _magnitude?: number): void;
+        recycle(): void;
         /**
          * Returns a pretty string representation
          */
@@ -2537,7 +2545,7 @@ declare namespace FudgeCore {
      * Simple class for 3x3 matrix operations
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
-    class Matrix3x3 extends Mutable implements Serializable {
+    class Matrix3x3 extends Mutable implements Serializable, Recycable {
         private static deg2rad;
         private data;
         private mutator;
@@ -2581,6 +2589,7 @@ declare namespace FudgeCore {
          * Return a copy of this
          */
         get copy(): Matrix3x3;
+        recycle(): void;
         /**
          * Add a translation by the given {@link Vector2} to this matrix
          */
@@ -2655,7 +2664,7 @@ declare namespace FudgeCore {
      * ```
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    export class Matrix4x4 extends Mutable implements Serializable {
+    export class Matrix4x4 extends Mutable implements Serializable, Recycable {
         private static deg2rad;
         private data;
         private mutator;
@@ -2761,6 +2770,7 @@ declare namespace FudgeCore {
          * Return a copy of this
          */
         get copy(): Matrix4x4;
+        recycle(): void;
         /**
          * Rotate this matrix by given {@link Vector3} in the order Z, Y, X. Right hand rotation is used, thumb points in axis direction, fingers curling indicate rotation
          * The rotation is appended to already applied transforms, thus multiplied from the right. Set _fromLeft to true to switch and put it in front.
@@ -3043,7 +3053,7 @@ declare namespace FudgeCore {
      * ```
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
-    class Vector3 extends Mutable {
+    class Vector3 extends Mutable implements Recycable {
         private data;
         constructor(_x?: number, _y?: number, _z?: number);
         /**
@@ -3137,6 +3147,7 @@ declare namespace FudgeCore {
          */
         set geo(_geo: Geo3);
         get geo(): Geo3;
+        recycle(): void;
         /**
          * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
          * TODO: examine, if tolerance as criterium for the difference is appropriate with very large coordinate values or if _tolerance should be multiplied by coordinate value
@@ -4891,6 +4902,7 @@ declare namespace FudgeCore {
         rayOrigin: Vector3;
         rayEnd: Vector3;
         constructor();
+        recycle(): void;
     }
     /** General settings for the physic simulation and the debug of it. */
     class PhysicsSettings {
@@ -5082,7 +5094,7 @@ declare namespace FudgeCore {
     /**
      * Defines a threedimensional box by two corner-points, one with minimal values and one with maximum values
      */
-    class Box {
+    class Box implements Recycable {
         min: Vector3;
         max: Vector3;
         constructor(_min?: Vector3, _max?: Vector3);
@@ -5095,6 +5107,7 @@ declare namespace FudgeCore {
          * Expand the box if necessary to include the given point
          */
         expand(_include: Vector3): void;
+        recycle(): void;
     }
 }
 declare namespace FudgeCore {

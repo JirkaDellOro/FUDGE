@@ -2,7 +2,7 @@ namespace FudgeCore {
   /**
    * Defines a threedimensional box by two corner-points, one with minimal values and one with maximum values
    */
-  export class Box {
+  export class Box implements Recycable {
     public min: Vector3;
     public max: Vector3;
 
@@ -25,6 +25,11 @@ namespace FudgeCore {
     public expand(_include: Vector3): void {
       this.min.min(_include);
       this.max.max(_include);
+    }
+    
+    public recycle(): void {
+      this.min.set(Infinity, Infinity, Infinity);
+      this.max.set(-Infinity, -Infinity, -Infinity);
     }
   }
 }

@@ -9,7 +9,7 @@ namespace FudgeCore {
    * ```
    * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
    */
-  export class Vector3 extends Mutable {
+  export class Vector3 extends Mutable implements Recycable {
     private data: Float32Array; // TODO: check why this shouldn't be x,y,z as numbers...
 
     public constructor(_x: number = 0, _y: number = 0, _z: number = 0) {
@@ -252,6 +252,10 @@ namespace FudgeCore {
       return geo;
     }
     //#endregion
+
+    public recycle(): void {
+      this.data.set([0, 0, 0]);
+    }
 
     /**
      * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance

@@ -6,7 +6,7 @@ namespace FudgeCore {
    *  -→ Magnitude (Distance from the center)  
    * ```
    */
-  export class Geo2 {
+  export class Geo2 implements Recycable {
     public magnitude: number = 0;
     public angle: number = 0;
 
@@ -20,6 +20,10 @@ namespace FudgeCore {
     public set(_angle: number = 0, _magnitude: number = 1): void {
       this.magnitude = _magnitude;
       this.angle = _angle;
+    }
+
+    public recycle(): void {
+      this.set();
     }
 
     /**

@@ -100,14 +100,21 @@ namespace FudgeCore {
     public hitPoint: Vector3;
     public rigidbodyComponent: ComponentRigidbody;
     public hitNormal: Vector3;
-    public rayOrigin: Vector3 = Vector3.ZERO();
-    public rayEnd: Vector3 = Vector3.ZERO();
+    public rayOrigin: Vector3;
+    public rayEnd: Vector3;
 
     constructor() {
+      this.recycle();
+    }
+
+    public recycle(): void {
       this.hit = false;
       this.hitDistance = 0;
       this.hitPoint = Vector3.ZERO();
+      this.rigidbodyComponent = null;
       this.hitNormal = Vector3.ZERO();
+      this.rayOrigin = Vector3.ZERO();
+      this.rayEnd = Vector3.ZERO();
     }
   }
 

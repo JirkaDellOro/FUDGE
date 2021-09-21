@@ -21,7 +21,7 @@ namespace FudgeCore {
    * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
    */
 
-  export class Matrix4x4 extends Mutable implements Serializable {
+  export class Matrix4x4 extends Mutable implements Serializable, Recycable {
     private static deg2rad: number = Math.PI / 180;
     private data: Float32Array = new Float32Array(16); // The data of the matrix.
     private mutator: Mutator = null; // prepared for optimization, keep mutator to reduce redundant calculation and for comparison. Set to null when data changes!
@@ -29,12 +29,7 @@ namespace FudgeCore {
 
     public constructor() {
       super();
-      this.data.set([
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-      ]);
+      this.recycle();
       this.resetCache();
     }
 
@@ -44,12 +39,6 @@ namespace FudgeCore {
      */
     public static IDENTITY(): Matrix4x4 {
       const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
-      mtxResult.data.set([
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-      ]);
       return mtxResult;
     }
 
@@ -491,6 +480,15 @@ namespace FudgeCore {
       return mtxCopy;
     }
     //#endregion
+
+    public recycle(): void {
+      this.data.set([
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+      ]);
+    }
 
     //#region Rotation
     /**

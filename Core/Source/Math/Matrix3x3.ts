@@ -13,19 +13,15 @@ namespace FudgeCore {
    * Simple class for 3x3 matrix operations
    * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
    */
-  export class Matrix3x3 extends Mutable implements Serializable {
+  export class Matrix3x3 extends Mutable implements Serializable, Recycable {
     private static deg2rad: number = Math.PI / 180;
-    private data: Float32Array = new Float32Array(3); // The data of the matrix.
+    private data: Float32Array = new Float32Array(9); // The data of the matrix.
     private mutator: Mutator = null; // prepared for optimization, keep mutator to reduce redundant calculation and for comparison. Set to null when data changes!
     private vectors: VectorRepresentation; // vector representation of this matrix
 
     public constructor() {
       super();
-      this.data = new Float32Array([
-        1, 0, 0,
-        0, 1, 0,
-        0, 0, 1
-      ]);
+      this.recycle();
       this.resetCache();
     }
 
@@ -43,11 +39,6 @@ namespace FudgeCore {
 
     public static IDENTITY(): Matrix3x3 {
       const mtxResult: Matrix3x3 = Recycler.get(Matrix3x3);
-      mtxResult.data.set([
-        1, 0, 0,
-        0, 1, 0,
-        0, 0, 1
-      ]);
       return mtxResult;
     }
 
@@ -176,7 +167,7 @@ namespace FudgeCore {
       this.mutate({ "scaling": _scaling });
       this.resetCache();
     }
-    
+
     /**
      * Return a copy of this
      */
@@ -184,6 +175,14 @@ namespace FudgeCore {
       let mtxCopy: Matrix3x3 = Recycler.get(Matrix3x3);
       mtxCopy.set(this);
       return mtxCopy;
+    }
+
+    public recycle(): void {
+      this.data = new Float32Array([
+        1, 0, 0,
+        0, 1, 0,
+        0, 0, 1
+      ]);
     }
 
     //#region Translation
