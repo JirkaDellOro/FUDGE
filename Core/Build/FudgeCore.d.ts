@@ -677,6 +677,7 @@ declare namespace FudgeCore {
         set bottom(_value: number);
         get clone(): Rectangle;
         recycle(): void;
+        copy(_rect: Rectangle): void;
         /**
          * Sets the position and size of the rectangle according to the given parameters
          */
@@ -1594,6 +1595,7 @@ declare namespace FudgeCore {
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentCamera extends Component {
+        #private;
         static readonly iSubclass: number;
         mtxPivot: Matrix4x4;
         clrBackground: Color;
@@ -1606,7 +1608,7 @@ declare namespace FudgeCore {
         private far;
         private backgroundEnabled;
         /**
-         * Returns the multiplikation of the worldtransformation of the camera container, the pivot of this camera and the inversion of the projection matrix
+         * Returns the multiplication of the worldtransformation of the camera container, the pivot of this camera and the inversion of the projection matrix
          * yielding the worldspace to viewspace matrix
          */
         get mtxWorldToView(): Matrix4x4;

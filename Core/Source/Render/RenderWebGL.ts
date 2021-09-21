@@ -115,7 +115,7 @@ namespace FudgeCore {
      * @param _rect
      */
     public static setRenderRectangle(_rect: Rectangle): void {
-      Object.assign(RenderWebGL.rectRender, _rect);
+      RenderWebGL.rectRender.setPositionAndSize(_rect.x, _rect.y, _rect.width, _rect.height);
       RenderWebGL.crc3.viewport(_rect.x, _rect.y, _rect.width, _rect.height);
     }
 

@@ -120,6 +120,10 @@ namespace FudgeCore {
       this.setPositionAndSize();
     }
 
+    public copy(_rect: Rectangle): void {
+      this.setPositionAndSize(_rect.x, _rect.y, _rect.width, _rect.height);
+    }
+
     /**
      * Sets the position and size of the rectangle according to the given parameters
      */

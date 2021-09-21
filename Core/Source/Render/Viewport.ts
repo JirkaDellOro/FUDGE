@@ -168,10 +168,17 @@ namespace FudgeCore {
       let rectCanvas: Rectangle = this.frameClientToCanvas.getRect(rectClient);
       this.#canvas.width = rectCanvas.width;
       this.#canvas.height = rectCanvas.height;
+
+      let rectTemp: Rectangle;
       // adjust the destination area on the target-canvas to render to by applying the framing to canvas
-      this.rectDestination = this.frameCanvasToDestination.getRect(rectCanvas);
+      rectTemp = this.frameCanvasToDestination.getRect(rectCanvas);
+      this.rectDestination.copy(rectTemp);
+      Recycler.store(rectTemp);
       // adjust the area on the source-canvas to render from by applying the framing to destination area
-      this.rectSource = this.frameDestinationToSource.getRect(this.rectDestination);
+      rectTemp = this.frameDestinationToSource.getRect(this.rectDestination);
+      this.rectSource.copy(rectTemp); 
+      Recycler.store(rectTemp);
+      
       // having an offset source does make sense only when multiple viewports display parts of the same rendering. For now: shift it to 0,0
       this.rectSource.x = this.rectSource.y = 0;
       // still, a partial image of the rendering may be retrieved by moving and resizing the render viewport. For now, it's always adjusted to the current viewport
@@ -179,6 +186,10 @@ namespace FudgeCore {
       Render.setRenderRectangle(rectRender);
       // no more transformation after this for now, offscreen canvas and render-viewport have the same size
       Render.setCanvasSize(rectRender.width, rectRender.height);
+
+      Recycler.store(rectClient);
+      Recycler.store(rectCanvas);
+      Recycler.store(rectRender);
     }
     /**
      * Adjust the camera parameters to fit the rendering into the render vieport
