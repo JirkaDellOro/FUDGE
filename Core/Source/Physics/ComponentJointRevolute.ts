@@ -80,14 +80,14 @@ namespace FudgeCore {
     //#region Saving/Loading
     public serialize(): Serialization {
       let serialization: Serialization = {
-        motorTorque: this.jointmotorTorque,
+        motorTorque: this.motorTorque,
         [super.constructor.name]: super.serialize()
       };
       return serialization;
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.motorTorque = _serialization.motorForce || this.jointmotorTorque;
+      this.motorTorque = _serialization.motorTorque || this.motorTorque;
       super.deserialize(_serialization);
       return this;
     }

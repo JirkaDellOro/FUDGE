@@ -200,12 +200,12 @@ namespace FudgeCore {
     //#endregion
 
     protected constructJoint(): void {
-      this.rotationSpringDamper = new OIMO.SpringDamper().setSpring(this.jointRotationSpringFrequency, this.rotationSpringDamping);
+      this.rotationSpringDamper = new OIMO.SpringDamper().setSpring(this.rotationSpringFrequency, this.rotationSpringDamping);
 
-      this.translationMotor = new OIMO.TranslationalLimitMotor().setLimits(this.jointMotorLimitLower, this.jointMotorLimitUpper);
-      this.translationMotor.setMotor(this.jointMotorSpeed, this.jointMotorForce);
-      this.rotationalMotor = new OIMO.RotationalLimitMotor().setLimits(this.jointRotationMotorLimitLower, this.jointRotationMotorLimitUpper);
-      this.rotationalMotor.setMotor(this.jointRotationMotorSpeed, this.jointRotationMotorTorque);
+      this.translationMotor = new OIMO.TranslationalLimitMotor().setLimits(this.motorLimitLower, this.motorLimitUpper);
+      this.translationMotor.setMotor(this.motorSpeed, this.motorForce);
+      this.rotationalMotor = new OIMO.RotationalLimitMotor().setLimits(this.rotationalMotorLimitLower, this.rotationalMotorLimitUpper);
+      this.rotationalMotor.setMotor(this.rotationalMotorSpeed, this.motorTorque);
 
       this.config = new OIMO.CylindricalJointConfig();
       super.constructJoint();
