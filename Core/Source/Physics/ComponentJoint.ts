@@ -18,7 +18,7 @@ namespace FudgeCore {
     protected attachedRB: ComponentRigidbody;
     protected connectedRB: ComponentRigidbody;
 
-    protected abstract oimoJoint: OIMO.CylindricalJoint;
+    protected abstract oimoJoint: OIMO.Joint;
     protected connected: boolean = false;
     protected jointAnchor: OIMO.Vec3;
     protected jointInternalCollision: boolean;

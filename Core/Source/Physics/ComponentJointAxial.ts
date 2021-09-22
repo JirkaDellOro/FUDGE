@@ -5,6 +5,7 @@ namespace FudgeCore {
    */
   export abstract class ComponentJointAxial extends ComponentJoint {
 
+    protected abstract config: OIMO.JointConfig;
     //Internal Variables
     protected jointSpringDampingRatio: number = 0;
     protected jointSpringFrequency: number = 0;
@@ -15,14 +16,9 @@ namespace FudgeCore {
     protected jointMotorLimitUpper: number = 10;
     protected jointMotorLimitLower: number = -10;
     protected jointMotorSpeed: number = 0;
-    
-
-    private config: OIMO.CylindricalJointConfig = new OIMO.CylindricalJointConfig();
-    private rotationalMotor: OIMO.RotationalLimitMotor;
-    private translationMotor: OIMO.TranslationalLimitMotor;
-    private springDamper: OIMO.SpringDamper;
-    private rotationSpringDamper: OIMO.SpringDamper;
-    private jointAxis: OIMO.Vec3;
+    protected springDamper: OIMO.SpringDamper;
+    protected jointAxis: OIMO.Vec3;
+    protected translationMotor: OIMO.TranslationalLimitMotor;
 
     /** Creating a cylindrical joint between two ComponentRigidbodies moving on one axis and rotating around another bound on a local anchorpoint. */
     constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null, _axis: Vector3 = new Vector3(0, 1, 0), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
@@ -65,91 +61,67 @@ namespace FudgeCore {
     }
 
     /**
-    * The damping of the spring. 1 equals completly damped. Influencing TORQUE / ROTATION
-    */
-    get rotationSpringDamping(): number {
-      return this.jointRotationSpringDampingRatio;
+      * The target speed of the motor in m/s.
+     */
+    public get motorSpeed(): number {
+      return this.jointMotorSpeed;
     }
-    set rotationSpringDamping(_value: number) {
-      this.jointRotationSpringDampingRatio = _value;
-      if (this.oimoJoint != null) this.oimoJoint.getRotationalSpringDamper().dampingRatio = this.jointRotationSpringDampingRatio;
+
+    public set motorSpeed(_value: number) {
+      this.jointMotorSpeed = _value;
+      if (this.oimoJoint != null)
+        (<OIMO.PrismaticJoint>this.oimoJoint).getLimitMotor().motorSpeed = this.jointMotorSpeed;
     }
 
     /**
-     * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. Influencing TORQUE / ROTATION
+     * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. The smaller the value the less restrictive is the spring.
     */
-    get rotationSpringFrequency(): number {
-      return this.jointRotationSpringFrequency;
+    public get springFrequency(): number {
+      return this.jointSpringFrequency;
     }
-    set rotationSpringFrequency(_value: number) {
-      this.jointRotationSpringFrequency = _value;
-      if (this.oimoJoint != null) this.oimoJoint.getRotationalSpringDamper().frequency = this.jointRotationSpringFrequency;
+    public set springFrequency(_value: number) {
+      this.jointSpringFrequency = _value;
+      if (this.oimoJoint != null)
+        (<OIMO.PrismaticJoint>this.oimoJoint).getSpringDamper().frequency = this.jointSpringFrequency;
     }
 
+    /**
+      * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. 
+     */
+    public abstract get motorLimitUpper(): number;
+    public abstract set motorLimitUpper(_value: number);
     /**
       * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. 
      */
-    get translationMotorLimitLower(): number {
-      return this.jointMotorLimitUpper;
-    }
-    set translationMotorLimitLower(_value: number) {
-      this.jointMotorLimitLower = _value;
-      if (this.oimoJoint != null) this.oimoJoint.getTranslationalLimitMotor().lowerLimit = this.jointMotorLimitLower;
-    }
-    /**
-      * The target speed of the motor in m/s.
-     */
-    get translationMotorSpeed(): number {
-      return this.jointMotorSpeed;
-    }
-    set translationMotorSpeed(_value: number) {
-      this.jointMotorSpeed = _value;
-      if (this.oimoJoint != null) this.oimoJoint.getTranslationalLimitMotor().motorSpeed = this.jointMotorSpeed;
-    }
-
-    /**
-      * If the two connected RigidBodies collide with eath other. (Default = false)
-     */
-
+    public abstract get motorLimitLower(): number;
+    public abstract set motorLimitLower(_value: number);
     //#endregion
 
     //#region Saving/Loading
     public serialize(): Serialization {
       let serialization: Serialization = {
-        springDamping: this.jointSpringDampingRatio,
-        springFrequency: this.jointSpringFrequency,
-        motorLimitUpper: this.jointMotorLimitUpper,
-        motorLimitLower: this.jointMotorLimitLower,
-        motorSpeed: this.jointMotorSpeed,
-        springDampingRotation: this.jointRotationSpringDampingRatio,
-        springFrequencyRotation: this.jointRotationSpringFrequency,
-        // upperLimitRotation: this.jointRotationMotorLimitUpper,
-        // lowerLimitRotation: this.jointRotationMotorLimitLower,
-        // motorSpeedRotation: this.jointRotationMotorSpeed,
-        // motorTorque: this.jointRotationMotorTorque,
         axis: this.axis,
+        anchor: this.anchor,
+        springDamping: this.springDamping,
+        springFrequency: this.springFrequency,
+        motorLimitUpper: this.motorLimitUpper,
+        motorLimitLower: this.motorLimitLower,
+        motorSpeed: this.motorSpeed,
         [super.constructor.name]: super.serialize()
       };
       return serialization;
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.axis = _serialization.axis != null ? _serialization.axis : this.jointAxis;
-      this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
-      this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
-      this.springDamping = _serialization.springDamping != null ? _serialization.springDamping : this.jointSpringDampingRatio;
-      // this.springFrequency = _serialization.springFrequency != null ? _serialization.springFrequency : this.jointSpringFrequency;
-      this.breakForce = _serialization.breakForce != null ? _serialization.breakForce : this.jointBreakForce;
-      this.breakTorque = _serialization.breakTorque != null ? _serialization.breakTorque : this.jointBreakTorque;
-      // this.translationMotorLimitUpper = _serialization.upperLimitTranslation != null ? _serialization.upperLimitTranslation : this.jointMotorLimitUpper;
-      this.translationMotorLimitLower = _serialization.lowerLimitTranslation != null ? _serialization.lowerLimitTranslation : this.jointMotorLimitLower;
-      this.translationMotorSpeed = _serialization.motorSpeedTranslation != null ? _serialization.motorSpeedTranslation : this.jointMotorSpeed;
-      this.rotationSpringDamping = _serialization.springDampingRotation != null ? _serialization.springDampingRotation : this.jointRotationSpringDampingRatio;
-      this.rotationSpringFrequency = _serialization.springFrequencyRotation != null ? _serialization.springFrequencyRotation : this.jointRotationSpringFrequency;
-      // this.rotationalMotorLimitUpper = _serialization.upperLimitRotation != null ? _serialization.upperLimitRotation : this.jointRotationMotorLimitUpper;
-      // this.rotationalMotorLimitLower = _serialization.lowerLimitRotation != null ? _serialization.lowerLimitRotation : this.jointRotationMotorLimitLower;
-      // this.rotationalMotorSpeed = _serialization.motorSpeedRotation != null ? _serialization.motorSpeedRotation : this.jointRotationMotorSpeed;
-      // this.rotationalMotorTorque = _serialization.motorTorque != null ? _serialization.motorTorque : this.jointRotationMotorTorque;
+      this.axis = _serialization.axis || this.axis;
+      this.anchor = _serialization.anchor || this.anchor;
+      this.motorLimitUpper = _serialization.motorLimitUpper || this.motorLimitUpper;
+      this.motorLimitLower = _serialization.motorLimitLower || this.motorLimitLower;
+      this.motorSpeed = _serialization.motorSpeed || this.motorSpeed;
+      this.internalCollision = _serialization.internalCollision || false;
+      this.springDamping = _serialization.springDamping || this.springDamping;
+      this.breakForce = _serialization.breakForce || this.breakForce;
+      this.breakTorque = _serialization.breakTorque || this.breakTorque;
       super.deserialize(_serialization);
       return this;
     }
@@ -157,28 +129,17 @@ namespace FudgeCore {
 
     protected constructJoint(): void {
       this.springDamper = new OIMO.SpringDamper().setSpring(this.jointSpringFrequency, this.jointSpringDampingRatio);
-      this.rotationSpringDamper = new OIMO.SpringDamper().setSpring(this.jointRotationSpringFrequency, this.rotationSpringDamping);
-
-      this.translationMotor = new OIMO.TranslationalLimitMotor().setLimits(this.jointMotorLimitLower, this.jointMotorLimitUpper);
-      // this.translationMotor.setMotor(this.jointMotorSpeed, this.jointMotorForce);
-      this.rotationalMotor = new OIMO.RotationalLimitMotor().setLimits(this.jointRotationMotorLimitLower, this.jointRotationMotorLimitUpper);
-      this.rotationalMotor.setMotor(this.jointRotationMotorSpeed, this.jointRotationMotorTorque);
-
-      this.config = new OIMO.CylindricalJointConfig();
-      let attachedRBPos: Vector3 = this.attachedRigidbody.node.mtxWorld.translation;
+      let attachedRBPos: Vector3 = this.attachedRigidbody.node.mtxWorld.translation; //Setting the anchor position locally from the first rigidbody
       let worldAnchor: OIMO.Vec3 = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
+
+      // @ts-ignore
       this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, this.jointAxis);
-      this.config.translationalSpringDamper = this.springDamper;
-      this.config.translationalLimitMotor = this.translationMotor;
-      this.config.rotationalLimitMotor = this.rotationalMotor;
-      this.config.rotationalSpringDamper = this.rotationSpringDamper;
+    }
 
-      var j: OIMO.CylindricalJoint = new OIMO.CylindricalJoint(this.config);
-      j.setBreakForce(this.breakForce);
-      j.setBreakTorque(this.breakTorque);
-      j.setAllowCollision(this.jointInternalCollision);
-
-      this.oimoJoint = j;
+    protected configureJoint(): void {
+      this.oimoJoint.setBreakForce(this.breakForce);
+      this.oimoJoint.setBreakTorque(this.breakTorque);
+      this.oimoJoint.setAllowCollision(this.jointInternalCollision);
     }
   }
 }

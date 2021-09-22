@@ -3583,7 +3583,7 @@ declare namespace FudgeCore {
         protected idConnectedRB: number;
         protected attachedRB: ComponentRigidbody;
         protected connectedRB: ComponentRigidbody;
-        protected abstract oimoJoint: OIMO.CylindricalJoint;
+        protected abstract oimoJoint: OIMO.Joint;
         protected connected: boolean;
         protected jointAnchor: OIMO.Vec3;
         protected jointInternalCollision: boolean;
@@ -3657,6 +3657,7 @@ declare namespace FudgeCore {
        * @author Jirka Dell'Oro-Friedl, HFU, 2021
      */
     abstract class ComponentJointAxial extends ComponentJoint {
+        protected abstract config: OIMO.JointConfig;
         protected jointSpringDampingRatio: number;
         protected jointSpringFrequency: number;
         protected jointRotationSpringDampingRatio: number;
@@ -3664,12 +3665,9 @@ declare namespace FudgeCore {
         protected jointMotorLimitUpper: number;
         protected jointMotorLimitLower: number;
         protected jointMotorSpeed: number;
-        private config;
-        private rotationalMotor;
-        private translationMotor;
-        private springDamper;
-        private rotationSpringDamper;
-        private jointAxis;
+        protected springDamper: OIMO.SpringDamper;
+        protected jointAxis: OIMO.Vec3;
+        protected translationMotor: OIMO.TranslationalLimitMotor;
         /** Creating a cylindrical joint between two ComponentRigidbodies moving on one axis and rotating around another bound on a local anchorpoint. */
         constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
@@ -3684,31 +3682,29 @@ declare namespace FudgeCore {
         get springDamping(): number;
         set springDamping(_value: number);
         /**
-        * The damping of the spring. 1 equals completly damped. Influencing TORQUE / ROTATION
-        */
-        get rotationSpringDamping(): number;
-        set rotationSpringDamping(_value: number);
+          * The target speed of the motor in m/s.
+         */
+        get motorSpeed(): number;
+        set motorSpeed(_value: number);
         /**
-         * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. Influencing TORQUE / ROTATION
+         * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. The smaller the value the less restrictive is the spring.
         */
-        get rotationSpringFrequency(): number;
-        set rotationSpringFrequency(_value: number);
+        get springFrequency(): number;
+        set springFrequency(_value: number);
+        /**
+          * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
+         */
+        abstract get motorLimitUpper(): number;
+        abstract set motorLimitUpper(_value: number);
         /**
           * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
          */
-        get translationMotorLimitLower(): number;
-        set translationMotorLimitLower(_value: number);
-        /**
-          * The target speed of the motor in m/s.
-         */
-        get translationMotorSpeed(): number;
-        set translationMotorSpeed(_value: number);
-        /**
-          * If the two connected RigidBodies collide with eath other. (Default = false)
-         */
+        abstract get motorLimitLower(): number;
+        abstract set motorLimitLower(_value: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected constructJoint(): void;
+        protected configureJoint(): void;
     }
 }
 declare namespace FudgeCore {
@@ -3730,17 +3726,14 @@ declare namespace FudgeCore {
     class ComponentJointCylindrical extends ComponentJointAxial {
         static readonly iSubclass: number;
         protected oimoJoint: OIMO.CylindricalJoint;
+        protected config: OIMO.CylindricalJointConfig;
         private jointMotorForce;
         private jointRotationMotorLimitUpper;
         private jointRotationMotorLimitLower;
         private jointRotationMotorTorque;
         private jointRotationMotorSpeed;
-        private config;
         private rotationalMotor;
-        private translationMotor;
-        private springDamper;
         private rotationSpringDamper;
-        private jointAxis;
         /** Creating a cylindrical joint between two ComponentRigidbodies moving on one axis and rotating around another bound on a local anchorpoint. */
         constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
@@ -3750,7 +3743,6 @@ declare namespace FudgeCore {
         /**
          * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. The smaller the value the less restrictive is the spring.
         */
-        get springFrequency(): number;
         set springFrequency(_value: number);
         /**
         * The damping of the spring. 1 equals completly damped. Influencing TORQUE / ROTATION
@@ -3780,28 +3772,24 @@ declare namespace FudgeCore {
         /**
           * The maximum motor torque in Newton. force <= 0 equals disabled.
          */
-        get rotationalMotorTorque(): number;
-        set rotationalMotorTorque(_value: number);
+        get motorTorque(): number;
+        set motorTorque(_value: number);
         /**
           * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
          */
-        get translationMotorLimitUpper(): number;
-        set translationMotorLimitUpper(_value: number);
+        get motorLimitUpper(): number;
+        set motorLimitUpper(_value: number);
         /**
           * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
          */
-        get translationMotorLimitLower(): number;
-        set translationMotorLimitLower(_value: number);
-        /**
-          * The target speed of the motor in m/s.
-         */
-        get translationMotorSpeed(): number;
-        set translationMotorSpeed(_value: number);
+        get motorLimitLower(): number;
+        set motorLimitLower(_value: number);
+        set motorSpeed(_value: number);
         /**
           * The maximum motor force in Newton. force <= 0 equals disabled.
          */
-        get translationMotorForce(): number;
-        set translationMotorForce(_value: number);
+        get motorForce(): number;
+        set motorForce(_value: number);
         /**
           * If the two connected RigidBodies collide with eath other. (Default = false)
          */
@@ -3829,23 +3817,10 @@ declare namespace FudgeCore {
     class ComponentJointPrismatic extends ComponentJointAxial {
         static readonly iSubclass: number;
         protected oimoJoint: OIMO.PrismaticJoint;
-        private jointSpringDampingRatio;
-        private jointSpringFrequency;
-        private jointMotorLimitUpper;
-        private jointMotorLimitLower;
+        protected config: OIMO.PrismaticJointConfig;
         private jointMotorForce;
-        private jointMotorSpeed;
-        private config;
-        private translationalMotor;
-        private springDamper;
-        private jointAxis;
         /** Creating a prismatic joint between two ComponentRigidbodies only moving on one axis bound on a local anchorpoint. */
         constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
-        /**
-         * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. The smaller the value the less restrictive is the spring.
-        */
-        get springFrequency(): number;
-        set springFrequency(_value: number);
         /**
           * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
          */
@@ -3856,11 +3831,6 @@ declare namespace FudgeCore {
          */
         get motorLimitLower(): number;
         set motorLimitLower(_value: number);
-        /**
-          * The target speed of the motor in m/s.
-         */
-        get motorSpeed(): number;
-        set motorSpeed(_value: number);
         /**
           * The maximum motor force in Newton. force <= 0 equals disabled. This is the force that the motor is using to hold the position, or reach it if a motorSpeed is defined.
          */
@@ -4009,22 +3979,10 @@ declare namespace FudgeCore {
     class ComponentJointRevolute extends ComponentJointAxial {
         static readonly iSubclass: number;
         protected oimoJoint: OIMO.RevoluteJoint;
-        private jointSpringDampingRatio;
-        private jointSpringFrequency;
-        private jointMotorLimitUpper;
-        private jointMotorLimitLower;
+        protected config: OIMO.RevoluteJointConfig;
         private jointmotorTorque;
-        private jointMotorSpeed;
-        private config;
         private rotationalMotor;
-        private springDamper;
-        private jointAxis;
         constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
-        /**
-         * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. The smaller the value the less restrictive is the spring.
-        */
-        get springFrequency(): number;
-        set springFrequency(_value: number);
         /**
           * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
          */
@@ -4035,11 +3993,6 @@ declare namespace FudgeCore {
          */
         get motorLimitLower(): number;
         set motorLimitLower(_value: number);
-        /**
-          * The target speed of the motor in m/s.
-         */
-        get motorSpeed(): number;
-        set motorSpeed(_value: number);
         /**
           * The maximum motor force in Newton. force <= 0 equals disabled.
          */
