@@ -10,12 +10,6 @@ namespace FudgeCore {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointWelding);
 
     protected oimoJoint: OIMO.GenericJoint;
-
-    private jointInternalCollision: boolean = false;
-
-    private jointBreakForce: number = 0;
-    private jointBreakTorque: number = 0;
-
     private config: OIMO.GenericJointConfig = new OIMO.GenericJointConfig();
 
 
@@ -30,51 +24,12 @@ namespace FudgeCore {
       this.addEventListener(EVENT.COMPONENT_ADD, this.dirtyStatus);
       this.addEventListener(EVENT.COMPONENT_REMOVE, this.removeJoint);
     }
-
-    /**
-      * If the two connected RigidBodies collide with eath other. (Default = false)
-      * On a welding joint the connected bodies should not be colliding with each other,
-      * for best results
-     */
-    get internalCollision(): boolean {
-      return this.jointInternalCollision;
-    }
-    set internalCollision(_value: boolean) {
-      this.jointInternalCollision = _value;
-      if (this.oimoJoint != null) this.oimoJoint.setAllowCollision(this.jointInternalCollision);
-    }
-
-    /**
-* The amount of force needed to break the JOINT, in Newton. 0 equals unbreakable (default) 
-*/
-    get breakForce(): number {
-      return this.jointBreakForce;
-    }
-    set breakForce(_value: number) {
-      this.jointBreakForce = _value;
-      if (this.oimoJoint != null) this.oimoJoint.setBreakForce(this.jointBreakForce);
-    }
-
-    /**
-       * The amount of force needed to break the JOINT, while rotating, in Newton. 0 equals unbreakable (default) 
-      */
-    get breakTorque(): number {
-      return this.jointBreakTorque;
-    }
-    set breakTorque(_value: number) {
-      this.jointBreakTorque = _value;
-      if (this.oimoJoint != null) this.oimoJoint.setBreakTorque(this.jointBreakTorque);
-    }
     //#endregion
 
 
     //#region Saving/Loading
     public serialize(): Serialization {
       let serialization: Serialization = {
-        anchor: this.anchor,
-        internalCollision: this.jointInternalCollision,
-        breakForce: this.jointBreakForce,
-        breakTorque: this.jointBreakTorque,
 
         [super.constructor.name]: super.serialize()
       };

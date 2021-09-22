@@ -24,13 +24,9 @@ namespace FudgeCore {
     private jointSpringDampingRatio: number = 0;
     private jointSpringFrequency: number = 0;
 
-    private jointBreakForce: number = 0;
-    private jointBreakTorque: number = 0;
-
     private config: OIMO.SphericalJointConfig = new OIMO.SphericalJointConfig();
     private springDamper: OIMO.SpringDamper;
 
-    private jointInternalCollision: boolean;
 
 
 
@@ -46,19 +42,6 @@ namespace FudgeCore {
     }
 
     //#region Get/Set transfor of fudge properties to the physics engine
-    /**
-
-    /**
-     * The exact position where the two {@link Node}s are connected. When changed after initialization the joint needs to be reconnected.
-     */
-    get anchor(): Vector3 {
-      return new Vector3(this.jointAnchor.x, this.jointAnchor.y, this.jointAnchor.z);
-    }
-    set anchor(_value: Vector3) {
-      this.jointAnchor = new OIMO.Vec3(_value.x, _value.y, _value.z);
-      this.disconnect();
-      this.dirtyStatus();
-    }
 
     /**
      * The damping of the spring. 1 equals completly damped.
@@ -82,49 +65,20 @@ namespace FudgeCore {
       if (this.oimoJoint != null) this.oimoJoint.getSpringDamper().frequency = this.jointSpringFrequency;
     }
 
-    /**
-     * The amount of force needed to break the JOINT, in Newton. 0 equals unbreakable (default) 
-    */
-    get breakForce(): number {
-      return this.jointBreakForce;
-    }
-    set breakForce(_value: number) {
-      this.jointBreakForce = _value;
-      if (this.oimoJoint != null) this.oimoJoint.setBreakForce(this.jointBreakForce);
-    }
 
-    /**
-       * The amount of force needed to break the JOINT, while rotating, in Newton. 0 equals unbreakable (default) 
-      */
-    get breakTorque(): number {
-      return this.jointBreakTorque;
-    }
-    set breakTorque(_value: number) {
-      this.jointBreakTorque = _value;
-      if (this.oimoJoint != null) this.oimoJoint.setBreakTorque(this.jointBreakTorque);
-    }
+
 
     /**
       * If the two connected RigidBodies collide with eath other. (Default = false)
      */
-    get internalCollision(): boolean {
-      return this.jointInternalCollision;
-    }
-    set internalCollision(_value: boolean) {
-      this.jointInternalCollision = _value;
-      if (this.oimoJoint != null) this.oimoJoint.setAllowCollision(this.jointInternalCollision);
-    }
+
     //#endregion
 
     //#region Saving/Loading
     public serialize(): Serialization {
       let serialization: Serialization = {
-        anchor: this.anchor,
-        internalCollision: this.jointInternalCollision,
         springDamping: this.jointSpringDampingRatio,
         springFrequency: this.jointSpringFrequency,
-        breakForce: this.jointBreakForce,
-        breakTorque: this.jointBreakTorque,
         [super.constructor.name]: super.serialize()
       };
       return serialization;

@@ -18,24 +18,29 @@ namespace FudgeCore {
     protected attachedRB: ComponentRigidbody;
     protected connectedRB: ComponentRigidbody;
 
-    protected abstract oimoJoint: OIMO.Joint;
+    protected abstract oimoJoint: OIMO.CylindricalJoint;
     protected connected: boolean = false;
     protected jointAnchor: OIMO.Vec3;
+    protected jointInternalCollision: boolean;
+
+    protected jointBreakForce: number = 0;
+    protected jointBreakTorque: number = 0;
+
     private collisionBetweenConnectedBodies: boolean;
 
 
     /** Create a joint connection between the two given RigidbodyComponents. */
-    constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null) {
+    public constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null) {
       super();
       this.attachedRigidbody = _attachedRigidbody;
       this.connectedRigidbody = _connectedRigidbody;
     }
 
     /** Get/Set the first ComponentRigidbody of this connection. It should always be the one that this component is attached too in the sceneTree. */
-    get attachedRigidbody(): ComponentRigidbody {
+    public get attachedRigidbody(): ComponentRigidbody {
       return this.attachedRB;
     }
-    set attachedRigidbody(_cmpRB: ComponentRigidbody) {
+    public set attachedRigidbody(_cmpRB: ComponentRigidbody) {
       this.idAttachedRB = _cmpRB != null ? _cmpRB.id : 0;
       this.attachedRB = _cmpRB;
       this.disconnect();
@@ -43,10 +48,10 @@ namespace FudgeCore {
     }
 
     /** Get/Set the second ComponentRigidbody of this connection. */
-    get connectedRigidbody(): ComponentRigidbody {
+    public get connectedRigidbody(): ComponentRigidbody {
       return this.connectedRB;
     }
-    set connectedRigidbody(_cmpRB: ComponentRigidbody) {
+    public set connectedRigidbody(_cmpRB: ComponentRigidbody) {
       this.idConnectedRB = _cmpRB != null ? _cmpRB.id : 0;
       this.connectedRB = _cmpRB;
       this.disconnect();
@@ -56,22 +61,58 @@ namespace FudgeCore {
     /**
      * The exact position where the two {@link Node}s are connected. When changed after initialization the joint needs to be reconnected.
      */
-    get anchor(): Vector3 {
+    public get anchor(): Vector3 {
       return new Vector3(this.jointAnchor.x, this.jointAnchor.y, this.jointAnchor.z);
     }
-    set anchor(_value: Vector3) {
+    public set anchor(_value: Vector3) {
       this.jointAnchor = new OIMO.Vec3(_value.x, _value.y, _value.z);
       this.disconnect();
       this.dirtyStatus();
     }
+
     /** Get/Set if the two bodies collide with each other or only with the world but not with themselves. Default = no internal collision.
      *  In most cases it's prefered to declare a minimum and maximum angle/length the bodies can move from one another instead of having them collide.
      */
-    get selfCollision(): boolean {
+    public get selfCollision(): boolean {
       return this.collisionBetweenConnectedBodies;
     }
-    set selfCollision(_value: boolean) {
+    public set selfCollision(_value: boolean) {
       this.collisionBetweenConnectedBodies = _value;
+    }
+
+    /**
+     * The amount of force needed to break the JOINT, while rotating, in Newton. 0 equals unbreakable (default) 
+    */
+    public get breakTorque(): number {
+      return this.jointBreakTorque;
+    }
+    public set breakTorque(_value: number) {
+      this.jointBreakTorque = _value;
+      if (this.oimoJoint != null) this.oimoJoint.setBreakTorque(this.jointBreakTorque);
+    }
+
+    /**
+     * The amount of force needed to break the JOINT, in Newton. 0 equals unbreakable (default) 
+     */
+    public get breakForce(): number {
+      return this.jointBreakForce;
+    }
+    public set breakForce(_value: number) {
+      this.jointBreakForce = _value;
+      if (this.oimoJoint != null) this.oimoJoint.setBreakForce(this.jointBreakForce);
+    }
+
+    /**
+      * If the two connected RigidBodies collide with eath other. (Default = false)
+      * On a welding joint the connected bodies should not be colliding with each other,
+      * for best results
+     */
+    public get internalCollision(): boolean {
+      return this.jointInternalCollision;
+    }
+    public set internalCollision(_value: boolean) {
+      this.jointInternalCollision = _value;
+      if (this.oimoJoint != null) this.oimoJoint.setAllowCollision(this.jointInternalCollision);
     }
 
     /** Check if connection is dirty, so when either rb is changed disconnect and reconnect. Internally used no user interaction needed. */
@@ -116,8 +157,13 @@ namespace FudgeCore {
     }
 
     public serialize(): Serialization {
-      let serialization: Serialization;
-      serialization = super.serialize();
+      let serialization: Serialization = {
+        anchor: this.anchor,
+        internalCollision: this.jointInternalCollision,
+        breakForce: this.jointBreakForce,
+        breakTorque: this.jointBreakTorque,
+        [super.constructor.name]: super.serialize()
+      };
       return serialization;
     }
 
@@ -127,14 +173,14 @@ namespace FudgeCore {
       Physics.world.changeJointStatus(this);
     }
 
-  protected addJoint(): void {
+    protected addJoint(): void {
       Physics.world.addJoint(this);
     }
-    
+
     protected removeJoint(): void {
       Physics.world.removeJoint(this);
     }
-    
+
     protected abstract constructJoint(): void;
 
 
