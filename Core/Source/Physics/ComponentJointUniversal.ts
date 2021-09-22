@@ -21,6 +21,8 @@ namespace FudgeCore {
   export class ComponentJointUniversal extends ComponentJoint {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointUniversal);
 
+    protected oimoJoint: OIMO.UniversalJoint;
+
     private jointFirstSpringDampingRatio: number = 0;
     private jointFirstSpringFrequency: number = 0;
 
@@ -45,13 +47,11 @@ namespace FudgeCore {
     private secondAxisMotor: OIMO.RotationalLimitMotor;
     private firstAxisSpringDamper: OIMO.SpringDamper;
     private secondAxisSpringDamper: OIMO.SpringDamper;
-    private jointAnchor: OIMO.Vec3;
     private jointFirstAxis: OIMO.Vec3;
     private jointSecondAxis: OIMO.Vec3;
 
     private jointInternalCollision: boolean;
 
-    private oimoJoint: OIMO.UniversalJoint;
 
 
     constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null, _firstAxis: Vector3 = new Vector3(1, 0, 0), _secondAxis: Vector3 = new Vector3(0, 0, 1), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
@@ -64,7 +64,7 @@ namespace FudgeCore {
         actual constraint ain't existent until the game starts
       */
       this.addEventListener(EVENT.COMPONENT_ADD, this.dirtyStatus);
-      this.addEventListener(EVENT.COMPONENT_REMOVE, this.superRemove);
+      this.addEventListener(EVENT.COMPONENT_REMOVE, this.removeJoint);
     }
 
     //#region Get/Set transfor of fudge properties to the physics engine
@@ -264,43 +264,10 @@ namespace FudgeCore {
       if (this.oimoJoint != null) this.oimoJoint.setAllowCollision(this.jointInternalCollision);
     }
     //#endregion
-
-    /**
-     * Initializing and connecting the two rigidbodies with the configured joint properties
-     * is automatically called by the physics system. No user interaction needed.
-     */
-    public connect(): void {
-      if (this.connected == false) {
-        this.constructJoint();
-        this.connected = true;
-        this.superAdd();
-      }
-    }
-
-    /**
-     * Disconnecting the two rigidbodies and removing them from the physics system,
-     * is automatically called by the physics system. No user interaction needed.
-     */
-    public disconnect(): void {
-      if (this.connected == true) {
-        this.superRemove();
-        this.connected = false;
-      }
-    }
-
-    /**
-     * Returns the original Joint used by the physics engine. Used internally no user interaction needed.
-     * Only to be used when functionality that is not added within Fudge is needed.
-    */
-    public getOimoJoint(): OIMO.Joint {
-      return this.oimoJoint;
-    }
     
     //#region Saving/Loading
     public serialize(): Serialization {
       let serialization: Serialization = {
-        attID: super.idAttachedRB,
-        conID: super.idConnectedRB,
         anchor: this.anchor,
         internalCollision: this.jointInternalCollision,
         breakForce: this.jointBreakForce,
@@ -319,16 +286,12 @@ namespace FudgeCore {
         motorLimitLowerSecondAxis: this.jointSecondMotorLimitLower,
         motorSpeedSecondAxis: this.jointSecondMotorSpeed,
         motorTorqueSecondAxis: this.jointSecondMotorTorque,
-        [super.constructor.name]: super.baseSerialize()
+        [super.constructor.name]: super.serialize()
       };
       return serialization;
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      super.idAttachedRB = _serialization.attID;
-      super.idConnectedRB = _serialization.conID;
-      if (_serialization.attID != null && _serialization.conID != null)
-        super.setBodiesFromLoadedIDs();
       this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
       this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
       this.breakForce = _serialization.breakForce != null ? _serialization.breakForce : this.jointBreakForce;
@@ -347,17 +310,12 @@ namespace FudgeCore {
       this.motorLimitLowerSecondAxis = _serialization.motorLimitLowerSecondAxis != null ? _serialization.motorLimitLowerSecondAxis : this.jointSecondMotorLimitUpper;
       this.motorSpeedSecondAxis = _serialization.motorSpeedSecondAxis != null ? _serialization.motorSpeedSecondAxis : this.jointSecondMotorSpeed;
       this.motorTorqueSecondAxis = _serialization.motorTorqueSecondAxis != null ? _serialization.motorTorqueSecondAxis : this.jointSecondMotorTorque;
-      super.baseDeserialize(_serialization);
+      super.deserialize(_serialization);
       return this;
     }
     //#endregion
 
-
-    protected dirtyStatus(): void {
-      Physics.world.changeJointStatus(this);
-    }
-
-    private constructJoint(): void {
+    protected constructJoint(): void {
       this.firstAxisSpringDamper = new OIMO.SpringDamper().setSpring(this.jointFirstSpringFrequency, this.jointFirstSpringDampingRatio);
       this.secondAxisSpringDamper = new OIMO.SpringDamper().setSpring(this.jointSecondSpringFrequency, this.jointSecondSpringDampingRatio);
 
@@ -381,14 +339,6 @@ namespace FudgeCore {
       j.setAllowCollision(this.jointInternalCollision);
 
       this.oimoJoint = j;
-    }
-
-    private superAdd(): void {
-      this.addConstraintToWorld(this);
-    }
-
-    private superRemove(): void {
-      this.removeConstraintFromWorld(this);
     }
   }
 }

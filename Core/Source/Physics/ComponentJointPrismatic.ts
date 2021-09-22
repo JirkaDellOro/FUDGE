@@ -17,6 +17,7 @@ namespace FudgeCore {
   export class ComponentJointPrismatic extends ComponentJoint {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointPrismatic);
 
+    protected oimoJoint: OIMO.PrismaticJoint;
     //Internally used variables - Joint Properties that are used even when no actual oimoJoint is currently existend
     private jointSpringDampingRatio: number = 0;
     private jointSpringFrequency: number = 0;
@@ -32,11 +33,9 @@ namespace FudgeCore {
     private config: OIMO.PrismaticJointConfig = new OIMO.PrismaticJointConfig();
     private translationalMotor: OIMO.TranslationalLimitMotor;
     private springDamper: OIMO.SpringDamper;
-    private jointAnchor: OIMO.Vec3;
     private jointAxis: OIMO.Vec3;
 
     private jointInternalCollision: boolean;
-    private oimoJoint: OIMO.PrismaticJoint;
 
     /** Creating a prismatic joint between two ComponentRigidbodies only moving on one axis bound on a local anchorpoint. */
     constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null, _axis: Vector3 = new Vector3(0, 1, 0), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
@@ -48,7 +47,7 @@ namespace FudgeCore {
         actual constraint ain't existent until the game starts
       */
       this.addEventListener(EVENT.COMPONENT_ADD, this.dirtyStatus);
-      this.addEventListener(EVENT.COMPONENT_REMOVE, this.superRemove);
+      this.addEventListener(EVENT.COMPONENT_REMOVE, this.removeJoint);
     }
     //#region Get/Set transfor of fudge properties to the physics engine
     /**
@@ -173,45 +172,9 @@ namespace FudgeCore {
     }
     //#endregion
 
-    /**
-     * Initializing and connecting the two rigidbodies with the configured joint properties
-     * is automatically called by the physics system. No user interaction needed.
-     */
-    public connect(): void {
-      if (this.connected == false) {
-        this.constructJoint();
-        this.connected = true;
-        this.superAdd();
-        Debug.log("called Connection For: " + this.attachedRB.node.name + " / " + this.connectedRB.node.name);
-        Debug.log("Strength: " + this.springDamping + " / " + this.springFrequency);
-        Debug.log(this.oimoJoint);
-      }
-    }
-
-    /**
-     * Disconnecting the two rigidbodies and removing them from the physics system,
-     * is automatically called by the physics system. No user interaction needed.
-     */
-    public disconnect(): void {
-      if (this.connected == true) {
-        this.superRemove();
-        this.connected = false;
-      }
-    }
-
-    /**
-     * Returns the original Joint used by the physics engine. Used internally no user interaction needed.
-     * Only to be used when functionality that is not added within Fudge is needed.
-    */
-    public getOimoJoint(): OIMO.Joint {
-      return this.oimoJoint;
-    }
-
     //#region Saving/Loading
     public serialize(): Serialization {
       let serialization: Serialization = {
-        attID: super.idAttachedRB,
-        conID: super.idConnectedRB,
         axis: this.axis,
         anchor: this.anchor,
         internalCollision: this.jointInternalCollision,
@@ -223,16 +186,12 @@ namespace FudgeCore {
         motorLimitLower: this.jointMotorLimitLower,
         motorSpeed: this.jointMotorSpeed,
         motorForce: this.jointMotorForce,
-        [super.constructor.name]: super.baseSerialize()
+        [super.constructor.name]: super.serialize()
       };
       return serialization;
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      super.idAttachedRB = _serialization.attID;
-      super.idConnectedRB = _serialization.conID;
-      if (_serialization.attID != null && _serialization.conID != null)
-        super.setBodiesFromLoadedIDs();
       this.axis = _serialization.axis != null ? _serialization.axis : this.jointAxis;
       this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
       this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
@@ -244,19 +203,13 @@ namespace FudgeCore {
       this.motorLimitLower = _serialization.motorLimitLower != null ? _serialization.motorLimitLower : this.jointMotorLimitLower;
       this.motorSpeed = _serialization.motorSpeed != null ? _serialization.motorSpeed : this.jointMotorSpeed;
       this.motorForce = _serialization.motorForce != null ? _serialization.motorForce : this.jointMotorForce;
-      super.baseDeserialize(_serialization); //Super, Super, Component != ComponentJoint
+      super.deserialize(_serialization); //Super, Super, Component != ComponentJoint
       return this;
     }
     //#endregion
 
-    /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
-    protected dirtyStatus(): void {
-      Debug.log("Dirty Status");
-      Physics.world.changeJointStatus(this);
-    }
-
     /** Actual creation of a joint in the OimoPhysics system */
-    private constructJoint(): void {
+    protected constructJoint(): void {
       this.springDamper = new OIMO.SpringDamper().setSpring(this.jointSpringFrequency, this.jointSpringDampingRatio); //Create spring settings, either as a spring or totally rigid
       this.translationalMotor = new OIMO.TranslationalLimitMotor().setLimits(this.jointMotorLimitLower, this.jointMotorLimitUpper); //Create motor settings, to hold positions, set constraint min/max
       this.translationalMotor.setMotor(this.jointMotorSpeed, this.jointMotorForce);
@@ -271,16 +224,6 @@ namespace FudgeCore {
       j.setBreakTorque(this.breakTorque);
       j.setAllowCollision(this.jointInternalCollision);
       this.oimoJoint = j; //Tell the Fudge Component which joint in the OimoPhysics system it represents
-    }
-
-    /** Adding this joint to the world through the general function of the base class ComponentJoint. Happening when the joint is connecting.  */
-    private superAdd(): void {
-      this.addConstraintToWorld(this);
-    }
-
-    /** Removing this joint to the world through the general function of the base class ComponentJoint. Happening when this component is removed from the Node. */
-    private superRemove(): void {
-      this.removeConstraintFromWorld(this);
     }
   }
 }

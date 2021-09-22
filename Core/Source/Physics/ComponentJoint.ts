@@ -9,7 +9,7 @@ namespace FudgeCore {
      * @author Marko Fehrenbach, HFU 2020
      */
   export abstract class ComponentJoint extends Component {
-    public static readonly iSubclass: number = Component.registerSubclass(ComponentJoint);
+    // public static readonly iSubclass: number = Component.registerSubclass(ComponentJoint);
     protected singleton: boolean = false; //Multiple joints can be attached to one Node
 
     protected idAttachedRB: number = 0;
@@ -18,10 +18,12 @@ namespace FudgeCore {
     protected attachedRB: ComponentRigidbody;
     protected connectedRB: ComponentRigidbody;
 
+    protected abstract oimoJoint: OIMO.Joint;
     protected connected: boolean = false;
+    protected jointAnchor: OIMO.Vec3;
     private collisionBetweenConnectedBodies: boolean;
 
-    
+
     /** Create a joint connection between the two given RigidbodyComponents. */
     constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null) {
       super();
@@ -51,6 +53,17 @@ namespace FudgeCore {
       this.dirtyStatus();
     }
 
+    /**
+     * The exact position where the two {@link Node}s are connected. When changed after initialization the joint needs to be reconnected.
+     */
+    get anchor(): Vector3 {
+      return new Vector3(this.jointAnchor.x, this.jointAnchor.y, this.jointAnchor.z);
+    }
+    set anchor(_value: Vector3) {
+      this.jointAnchor = new OIMO.Vec3(_value.x, _value.y, _value.z);
+      this.disconnect();
+      this.dirtyStatus();
+    }
     /** Get/Set if the two bodies collide with each other or only with the world but not with themselves. Default = no internal collision.
      *  In most cases it's prefered to declare a minimum and maximum angle/length the bodies can move from one another instead of having them collide.
      */
@@ -66,52 +79,70 @@ namespace FudgeCore {
       return this.connected;
     }
 
-    /** Connect when both bodies are set, and it was not connected yet, or if any of the bodies has changed. This needs to be handled this way to ensure there are no errors
-     * in the simulation because a ComponentRigidbody was not yet fully created or any other piece like ComponentTransform is missing. But values are also remembered correctly.
+    /**
+     * Initializing and connecting the two rigidbodies with the configured joint properties
+     * is automatically called by the physics system. No user interaction needed.
      */
-    public abstract connect(): void;
+    public connect(): void {
+      if (this.connected == false) {
+        this.constructJoint();
+        this.connected = true;
+        this.addJoint();
+      }
+    }
 
-    /** Disconnect on any changes to the two bodies, so they can potentially reconnect if the component is not removed.
+    /**
+     * Disconnecting the two rigidbodies and removing them from the physics system,
+     * is automatically called by the physics system. No user interaction needed.
+     */
+    public disconnect(): void {
+      if (this.connected == true) {
+        this.removeJoint();
+        this.connected = false;
+      }
+    }
+
+    /**
+     * Returns the original Joint used by the physics engine. Used internally no user interaction needed.
+     * Only to be used when functionality that is not added within Fudge is needed.
     */
-    public abstract disconnect(): void;
-
-    /** Get the actual joint in form of the physics engine OimoPhysics.joint. Used to expand functionality, normally no user interaction needed. */
-    public abstract getOimoJoint(): OIMO.Joint;
-
-    /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
-    protected abstract dirtyStatus(): void;
-
-    /** Adding the given Fudge ComponentJoint to the oimoPhysics World */
-    protected addConstraintToWorld(cmpJoint: ComponentJoint): void {
-      Physics.world.addJoint(cmpJoint);
+    public getOimoJoint(): OIMO.Joint {
+      return this.oimoJoint;
     }
 
-    /** Removing the given Fudge ComponentJoint to the oimoPhysics World */
-    protected removeConstraintFromWorld(cmpJoint: ComponentJoint): void {
-      Physics.world.removeJoint(cmpJoint);
-    }
-
-
-    /** Setting both bodies to the bodies that belong to the loaded IDs and reconnecting them */
-    protected setBodiesFromLoadedIDs(): void {
-      Debug.log("Set From: " + this.idAttachedRB + " / " + this.idConnectedRB);
-      this.attachedRigidbody = Physics.world.getBodyByID(this.idAttachedRB);
-      this.connectedRigidbody = Physics.world.getBodyByID(this.idConnectedRB);
-    }
-
-    /** Deserialize Base Class Information - Component, since Typescript does not give the ability to call super.super */
-    protected async baseDeserialize(_serialization: Serialization): Promise<Serializable> {
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
       await super.deserialize(_serialization[super.constructor.name]);
       return this;
     }
 
-    /** Serialize Base Class Information - Component, since Typescript does not give the ability to call super.super in Child classes of e.g. ComponentJointPrismatic */
-    protected baseSerialize(): Serialization {
+    public serialize(): Serialization {
       let serialization: Serialization;
       serialization = super.serialize();
       return serialization;
     }
 
-  }
 
+    /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
+    protected dirtyStatus(): void {
+      Physics.world.changeJointStatus(this);
+    }
+
+  protected addJoint(): void {
+      Physics.world.addJoint(this);
+    }
+    
+    protected removeJoint(): void {
+      Physics.world.removeJoint(this);
+    }
+    
+    protected abstract constructJoint(): void;
+
+
+    /** Setting both bodies to the bodies that belong to the loaded IDs and reconnecting them */
+    // protected setBodiesFromLoadedIDs(): void {
+    //   Debug.log("Set From: " + this.idAttachedRB + " / " + this.idConnectedRB);
+    //   this.attachedRigidbody = Physics.world.getBodyByID(this.idAttachedRB);
+    //   this.connectedRigidbody = Physics.world.getBodyByID(this.idConnectedRB);
+    // }
+  }
 }
