@@ -3583,9 +3583,12 @@ declare namespace FudgeCore {
         protected idConnectedRB: number;
         protected attachedRB: ComponentRigidbody;
         protected connectedRB: ComponentRigidbody;
-        protected abstract oimoJoint: OIMO.Joint;
+        protected abstract oimoJoint: OIMO.CylindricalJoint;
         protected connected: boolean;
         protected jointAnchor: OIMO.Vec3;
+        protected jointInternalCollision: boolean;
+        protected jointBreakForce: number;
+        protected jointBreakTorque: number;
         private collisionBetweenConnectedBodies;
         /** Create a joint connection between the two given RigidbodyComponents. */
         constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody);
@@ -3605,6 +3608,23 @@ declare namespace FudgeCore {
          */
         get selfCollision(): boolean;
         set selfCollision(_value: boolean);
+        /**
+         * The amount of force needed to break the JOINT, while rotating, in Newton. 0 equals unbreakable (default)
+        */
+        get breakTorque(): number;
+        set breakTorque(_value: number);
+        /**
+         * The amount of force needed to break the JOINT, in Newton. 0 equals unbreakable (default)
+         */
+        get breakForce(): number;
+        set breakForce(_value: number);
+        /**
+          * If the two connected RigidBodies collide with eath other. (Default = false)
+          * On a welding joint the connected bodies should not be colliding with each other,
+          * for best results
+         */
+        get internalCollision(): boolean;
+        set internalCollision(_value: boolean);
         /** Check if connection is dirty, so when either rb is changed disconnect and reconnect. Internally used no user interaction needed. */
         checkConnection(): boolean;
         /**
@@ -3633,6 +3653,66 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
+       * Base class for joints operating with exactly on axis
+       * @author Jirka Dell'Oro-Friedl, HFU, 2021
+     */
+    abstract class ComponentJointAxial extends ComponentJoint {
+        protected jointSpringDampingRatio: number;
+        protected jointSpringFrequency: number;
+        protected jointRotationSpringDampingRatio: number;
+        protected jointRotationSpringFrequency: number;
+        protected jointMotorLimitUpper: number;
+        protected jointMotorLimitLower: number;
+        protected jointMotorSpeed: number;
+        private config;
+        private rotationalMotor;
+        private translationMotor;
+        private springDamper;
+        private rotationSpringDamper;
+        private jointAxis;
+        /** Creating a cylindrical joint between two ComponentRigidbodies moving on one axis and rotating around another bound on a local anchorpoint. */
+        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
+        /**
+         * The axis connecting the the two {@link Node}s e.g. Vector3(0,1,0) to have a upward connection.
+         *  When changed after initialization the joint needs to be reconnected.
+         */
+        get axis(): Vector3;
+        set axis(_value: Vector3);
+        /**
+         * The damping of the spring. 1 equals completly damped.
+         */
+        get springDamping(): number;
+        set springDamping(_value: number);
+        /**
+        * The damping of the spring. 1 equals completly damped. Influencing TORQUE / ROTATION
+        */
+        get rotationSpringDamping(): number;
+        set rotationSpringDamping(_value: number);
+        /**
+         * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. Influencing TORQUE / ROTATION
+        */
+        get rotationSpringFrequency(): number;
+        set rotationSpringFrequency(_value: number);
+        /**
+          * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
+         */
+        get translationMotorLimitLower(): number;
+        set translationMotorLimitLower(_value: number);
+        /**
+          * The target speed of the motor in m/s.
+         */
+        get translationMotorSpeed(): number;
+        set translationMotorSpeed(_value: number);
+        /**
+          * If the two connected RigidBodies collide with eath other. (Default = false)
+         */
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        protected constructJoint(): void;
+    }
+}
+declare namespace FudgeCore {
+    /**
        * A physical connection between two bodies with a defined axe of rotation and rotation. Two Degrees of Freedom in the defined axis.
        * Two RigidBodies need to be defined to use it. A motor can be defined for rotation and translation, along with spring settings.
        *
@@ -3647,47 +3727,25 @@ declare namespace FudgeCore {
        *
        * @author Marko Fehrenbach, HFU 2020
      */
-    class ComponentJointCylindrical extends ComponentJoint {
+    class ComponentJointCylindrical extends ComponentJointAxial {
         static readonly iSubclass: number;
         protected oimoJoint: OIMO.CylindricalJoint;
-        private jointSpringDampingRatio;
-        private jointSpringFrequency;
-        private jointRotationSpringDampingRatio;
-        private jointRotationSpringFrequency;
-        private jointMotorLimitUpper;
-        private jointMotorLimitLower;
         private jointMotorForce;
-        private jointMotorSpeed;
         private jointRotationMotorLimitUpper;
         private jointRotationMotorLimitLower;
         private jointRotationMotorTorque;
         private jointRotationMotorSpeed;
-        private jointBreakForce;
-        private jointBreakTorque;
         private config;
         private rotationalMotor;
         private translationMotor;
         private springDamper;
         private rotationSpringDamper;
         private jointAxis;
-        private jointInternalCollision;
         /** Creating a cylindrical joint between two ComponentRigidbodies moving on one axis and rotating around another bound on a local anchorpoint. */
         constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
-         * The axis connecting the the two {@link Node}s e.g. Vector3(0,1,0) to have a upward connection.
-         *  When changed after initialization the joint needs to be reconnected.
-         */
-        get axis(): Vector3;
-        set axis(_value: Vector3);
-        /**
-         * The exact position where the two {@link Node}s are connected. When changed after initialization the joint needs to be reconnected.
-         */
-        get anchor(): Vector3;
-        set anchor(_value: Vector3);
-        /**
          * The damping of the spring. 1 equals completly damped.
          */
-        get springDamping(): number;
         set springDamping(_value: number);
         /**
          * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. The smaller the value the less restrictive is the spring.
@@ -3704,16 +3762,6 @@ declare namespace FudgeCore {
         */
         get rotationSpringFrequency(): number;
         set rotationSpringFrequency(_value: number);
-        /**
-         * The amount of force needed to break the JOINT, in Newton. 0 equals unbreakable (default)
-        */
-        get breakForce(): number;
-        set breakForce(_value: number);
-        /**
-           * The amount of force needed to break the JOINT, while rotating, in Newton. 0 equals unbreakable (default)
-          */
-        get breakTorque(): number;
-        set breakTorque(_value: number);
         /**
           * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
          */
@@ -3757,8 +3805,6 @@ declare namespace FudgeCore {
         /**
           * If the two connected RigidBodies collide with eath other. (Default = false)
          */
-        get internalCollision(): boolean;
-        set internalCollision(_value: boolean);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected constructJoint(): void;
@@ -3780,7 +3826,7 @@ declare namespace FudgeCore {
        * ```
        * @author Marko Fehrenbach, HFU 2020
        */
-    class ComponentJointPrismatic extends ComponentJoint {
+    class ComponentJointPrismatic extends ComponentJointAxial {
         static readonly iSubclass: number;
         protected oimoJoint: OIMO.PrismaticJoint;
         private jointSpringDampingRatio;
@@ -3789,46 +3835,17 @@ declare namespace FudgeCore {
         private jointMotorLimitLower;
         private jointMotorForce;
         private jointMotorSpeed;
-        private jointBreakForce;
-        private jointBreakTorque;
         private config;
         private translationalMotor;
         private springDamper;
         private jointAxis;
-        private jointInternalCollision;
         /** Creating a prismatic joint between two ComponentRigidbodies only moving on one axis bound on a local anchorpoint. */
         constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
-        /**
-         * The axis connecting the the two {@link Node}s e.g. Vector3(0,1,0) to have a upward connection.
-         *  When changed after initialization the joint needs to be reconnected.
-         */
-        get axis(): Vector3;
-        set axis(_value: Vector3);
-        /**
-         * The exact position where the two {@link Node}s are connected. When changed after initialization the joint needs to be reconnected.
-         */
-        get anchor(): Vector3;
-        set anchor(_value: Vector3);
-        /**
-         * The damping of the spring. 1 equals completly damped.
-         */
-        get springDamping(): number;
-        set springDamping(_value: number);
         /**
          * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. The smaller the value the less restrictive is the spring.
         */
         get springFrequency(): number;
         set springFrequency(_value: number);
-        /**
-         * The amount of force needed to break the JOINT, in Newton. 0 equals unbreakable (default)
-        */
-        get breakForce(): number;
-        set breakForce(_value: number);
-        /**
-           * The amount of force needed to break the JOINT, while rotating, in Newton. 0 equals unbreakable (default)
-          */
-        get breakTorque(): number;
-        set breakTorque(_value: number);
         /**
           * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
          */
@@ -3852,8 +3869,6 @@ declare namespace FudgeCore {
         /**
           * If the two connected RigidBodies collide with eath other. (Default = false)
          */
-        get internalCollision(): boolean;
-        set internalCollision(_value: boolean);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         /** Actual creation of a joint in the OimoPhysics system */
@@ -3894,15 +3909,12 @@ declare namespace FudgeCore {
         private jointTwistMotorLimitLower;
         private jointTwistMotorTorque;
         private jointTwistMotorSpeed;
-        private jointBreakForce;
-        private jointBreakTorque;
         private config;
         private jointTwistMotor;
         private jointTwistSpringDamper;
         private jointSwingSpringDamper;
         private jointFirstAxis;
         private jointSecondAxis;
-        private jointInternalCollision;
         private jointMaxAngle1;
         private jointMaxAngle2;
         constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _firstAxis?: Vector3, _secondAxis?: Vector3, _localAnchor?: Vector3);
@@ -3918,11 +3930,6 @@ declare namespace FudgeCore {
         */
         get secondAxis(): Vector3;
         set secondAxis(_value: Vector3);
-        /**
-         * The exact position where the two {@link Node}s are connected. When changed after initialization the joint needs to be reconnected.
-         */
-        get anchor(): Vector3;
-        set anchor(_value: Vector3);
         /**
          * The maximum angle of rotation along the first axis. Value needs to be positive. Changes do rebuild the joint
          */
@@ -3954,16 +3961,6 @@ declare namespace FudgeCore {
         get springFrequencySwing(): number;
         set springFrequencySwing(_value: number);
         /**
-         * The amount of force needed to break the JOINT, in Newton. 0 equals unbreakable (default)
-        */
-        get breakForce(): number;
-        set breakForce(_value: number);
-        /**
-           * The amount of force needed to break the JOINT, while rotating, in Newton. 0 equals unbreakable (default)
-          */
-        get breakTorque(): number;
-        set breakTorque(_value: number);
-        /**
           * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
          */
         get twistMotorLimitUpper(): number;
@@ -3986,8 +3983,6 @@ declare namespace FudgeCore {
         /**
           * If the two connected RigidBodies collide with eath other. (Default = false)
          */
-        get internalCollision(): boolean;
-        set internalCollision(_value: boolean);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected constructJoint(): void;
@@ -4011,7 +4006,7 @@ declare namespace FudgeCore {
        * ```
        * @author Marko Fehrenbach, HFU, 2020
        */
-    class ComponentJointRevolute extends ComponentJoint {
+    class ComponentJointRevolute extends ComponentJointAxial {
         static readonly iSubclass: number;
         protected oimoJoint: OIMO.RevoluteJoint;
         private jointSpringDampingRatio;
@@ -4020,45 +4015,16 @@ declare namespace FudgeCore {
         private jointMotorLimitLower;
         private jointmotorTorque;
         private jointMotorSpeed;
-        private jointBreakForce;
-        private jointBreakTorque;
         private config;
         private rotationalMotor;
         private springDamper;
         private jointAxis;
-        private jointInternalCollision;
         constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
-        /**
-         * The axis connecting the the two {@link Node}s e.g. Vector3(0,1,0) to have a upward connection.
-         *  When changed after initialization the joint needs to be reconnected.
-         */
-        get axis(): Vector3;
-        set axis(_value: Vector3);
-        /**
-         * The exact position where the two {@link Node}s are connected. When changed after initialization the joint needs to be reconnected.
-         */
-        get anchor(): Vector3;
-        set anchor(_value: Vector3);
-        /**
-         * The damping of the spring. 1 equals completly damped.
-         */
-        get springDamping(): number;
-        set springDamping(_value: number);
         /**
          * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. The smaller the value the less restrictive is the spring.
         */
         get springFrequency(): number;
         set springFrequency(_value: number);
-        /**
-         * The amount of force needed to break the JOINT, in Newton. 0 equals unbreakable (default)
-        */
-        get breakForce(): number;
-        set breakForce(_value: number);
-        /**
-           * The amount of force needed to break the JOINT, while rotating, in Newton. 0 equals unbreakable (default)
-          */
-        get breakTorque(): number;
-        set breakTorque(_value: number);
         /**
           * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
          */
@@ -4082,8 +4048,6 @@ declare namespace FudgeCore {
         /**
           * If the two connected RigidBodies collide with eath other. (Default = false)
          */
-        get internalCollision(): boolean;
-        set internalCollision(_value: boolean);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected constructJoint(): void;
@@ -4112,19 +4076,9 @@ declare namespace FudgeCore {
         protected oimoJoint: OIMO.SphericalJoint;
         private jointSpringDampingRatio;
         private jointSpringFrequency;
-        private jointBreakForce;
-        private jointBreakTorque;
         private config;
         private springDamper;
-        private jointInternalCollision;
         constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _localAnchor?: Vector3);
-        /**
-    
-        /**
-         * The exact position where the two {@link Node}s are connected. When changed after initialization the joint needs to be reconnected.
-         */
-        get anchor(): Vector3;
-        set anchor(_value: Vector3);
         /**
          * The damping of the spring. 1 equals completly damped.
          */
@@ -4136,20 +4090,8 @@ declare namespace FudgeCore {
         get springFrequency(): number;
         set springFrequency(_value: number);
         /**
-         * The amount of force needed to break the JOINT, in Newton. 0 equals unbreakable (default)
-        */
-        get breakForce(): number;
-        set breakForce(_value: number);
-        /**
-           * The amount of force needed to break the JOINT, while rotating, in Newton. 0 equals unbreakable (default)
-          */
-        get breakTorque(): number;
-        set breakTorque(_value: number);
-        /**
           * If the two connected RigidBodies collide with eath other. (Default = false)
          */
-        get internalCollision(): boolean;
-        set internalCollision(_value: boolean);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected constructJoint(): void;
@@ -4190,8 +4132,6 @@ declare namespace FudgeCore {
         private jointSecondMotorLimitLower;
         private jointSecondMotorTorque;
         private jointSecondMotorSpeed;
-        private jointBreakForce;
-        private jointBreakTorque;
         private config;
         private firstAxisMotor;
         private secondAxisMotor;
@@ -4199,7 +4139,6 @@ declare namespace FudgeCore {
         private secondAxisSpringDamper;
         private jointFirstAxis;
         private jointSecondAxis;
-        private jointInternalCollision;
         constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _firstAxis?: Vector3, _secondAxis?: Vector3, _localAnchor?: Vector3);
         /**
          * The axis connecting the the two {@link Node}s e.g. Vector3(0,1,0) to have a upward connection.
@@ -4213,11 +4152,6 @@ declare namespace FudgeCore {
         */
         get secondAxis(): Vector3;
         set secondAxis(_value: Vector3);
-        /**
-         * The exact position where the two {@link Node}s are connected. When changed after initialization the joint needs to be reconnected.
-         */
-        get anchor(): Vector3;
-        set anchor(_value: Vector3);
         /**
          * The damping of the spring. 1 equals completly damped.
          */
@@ -4238,16 +4172,6 @@ declare namespace FudgeCore {
         */
         get springFrequencySecondAxis(): number;
         set springFrequencySecondAxis(_value: number);
-        /**
-         * The amount of force needed to break the JOINT, in Newton. 0 equals unbreakable (default)
-        */
-        get breakForce(): number;
-        set breakForce(_value: number);
-        /**
-           * The amount of force needed to break the JOINT, while rotating, in Newton. 0 equals unbreakable (default)
-          */
-        get breakTorque(): number;
-        set breakTorque(_value: number);
         /**
           * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
          */
@@ -4291,8 +4215,6 @@ declare namespace FudgeCore {
         /**
           * If the two connected RigidBodies collide with eath other. (Default = false)
          */
-        get internalCollision(): boolean;
-        set internalCollision(_value: boolean);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected constructJoint(): void;
@@ -4309,28 +4231,8 @@ declare namespace FudgeCore {
     class ComponentJointWelding extends ComponentJoint {
         static readonly iSubclass: number;
         protected oimoJoint: OIMO.GenericJoint;
-        private jointInternalCollision;
-        private jointBreakForce;
-        private jointBreakTorque;
         private config;
         constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _localAnchor?: Vector3);
-        /**
-          * If the two connected RigidBodies collide with eath other. (Default = false)
-          * On a welding joint the connected bodies should not be colliding with each other,
-          * for best results
-         */
-        get internalCollision(): boolean;
-        set internalCollision(_value: boolean);
-        /**
-    * The amount of force needed to break the JOINT, in Newton. 0 equals unbreakable (default)
-    */
-        get breakForce(): number;
-        set breakForce(_value: number);
-        /**
-           * The amount of force needed to break the JOINT, while rotating, in Newton. 0 equals unbreakable (default)
-          */
-        get breakTorque(): number;
-        set breakTorque(_value: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected constructJoint(): void;

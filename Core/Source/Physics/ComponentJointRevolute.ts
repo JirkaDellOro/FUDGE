@@ -16,7 +16,7 @@ namespace FudgeCore {
      * ```
      * @author Marko Fehrenbach, HFU, 2020
      */
-  export class ComponentJointRevolute extends ComponentJoint {
+  export class ComponentJointRevolute extends ComponentJointAxial {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointRevolute);
 
     protected oimoJoint: OIMO.RevoluteJoint;
@@ -29,15 +29,11 @@ namespace FudgeCore {
     private jointmotorTorque: number = 0;
     private jointMotorSpeed: number = 0;
 
-    private jointBreakForce: number = 0;
-    private jointBreakTorque: number = 0;
-
     private config: OIMO.RevoluteJointConfig = new OIMO.RevoluteJointConfig();
     private rotationalMotor: OIMO.RotationalLimitMotor;
     private springDamper: OIMO.SpringDamper;
     private jointAxis: OIMO.Vec3;
 
-    private jointInternalCollision: boolean;
 
 
     constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null, _axis: Vector3 = new Vector3(0, 1, 0), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
@@ -52,43 +48,6 @@ namespace FudgeCore {
       this.addEventListener(EVENT.COMPONENT_REMOVE, this.removeJoint);
     }
     
-    //#region Get/Set transfor of fudge properties to the physics engine
-    /**
-     * The axis connecting the the two {@link Node}s e.g. Vector3(0,1,0) to have a upward connection.
-     *  When changed after initialization the joint needs to be reconnected.
-     */
-    get axis(): Vector3 {
-      return new Vector3(this.jointAxis.x, this.jointAxis.y, this.jointAxis.z);
-    }
-    set axis(_value: Vector3) {
-      this.jointAxis = new OIMO.Vec3(_value.x, _value.y, _value.z);
-      this.disconnect();
-      this.dirtyStatus();
-    }
-
-    /**
-     * The exact position where the two {@link Node}s are connected. When changed after initialization the joint needs to be reconnected.
-     */
-    get anchor(): Vector3 {
-      return new Vector3(this.jointAnchor.x, this.jointAnchor.y, this.jointAnchor.z);
-    }
-    set anchor(_value: Vector3) {
-      this.jointAnchor = new OIMO.Vec3(_value.x, _value.y, _value.z);
-      this.disconnect();
-      this.dirtyStatus();
-    }
-
-    /**
-     * The damping of the spring. 1 equals completly damped.
-     */
-    get springDamping(): number {
-      return this.jointSpringDampingRatio;
-    }
-    set springDamping(_value: number) {
-      this.jointSpringDampingRatio = _value;
-      if (this.oimoJoint != null) this.oimoJoint.getSpringDamper().dampingRatio = this.jointSpringDampingRatio;
-    }
-
     /**
      * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. The smaller the value the less restrictive is the spring.
     */
@@ -98,28 +57,6 @@ namespace FudgeCore {
     set springFrequency(_value: number) {
       this.jointSpringFrequency = _value;
       if (this.oimoJoint != null) this.oimoJoint.getSpringDamper().frequency = this.jointSpringFrequency;
-    }
-
-    /**
-     * The amount of force needed to break the JOINT, in Newton. 0 equals unbreakable (default) 
-    */
-    get breakForce(): number {
-      return this.jointBreakForce;
-    }
-    set breakForce(_value: number) {
-      this.jointBreakForce = _value;
-      if (this.oimoJoint != null) this.oimoJoint.setBreakForce(this.jointBreakForce);
-    }
-
-    /**
-       * The amount of force needed to break the JOINT, while rotating, in Newton. 0 equals unbreakable (default) 
-      */
-    get breakTorque(): number {
-      return this.jointBreakTorque;
-    }
-    set breakTorque(_value: number) {
-      this.jointBreakTorque = _value;
-      if (this.oimoJoint != null) this.oimoJoint.setBreakTorque(this.jointBreakTorque);
     }
 
     /**
@@ -166,25 +103,15 @@ namespace FudgeCore {
     /**
       * If the two connected RigidBodies collide with eath other. (Default = false)
      */
-    get internalCollision(): boolean {
-      return this.jointInternalCollision;
-    }
-    set internalCollision(_value: boolean) {
-      this.jointInternalCollision = _value;
-      if (this.oimoJoint != null) this.oimoJoint.setAllowCollision(this.jointInternalCollision);
-    }
+
     //#endregion
 
     //#region Saving/Loading
     public serialize(): Serialization {
       let serialization: Serialization = {
         axis: this.axis,
-        anchor: this.anchor,
-        internalCollision: this.jointInternalCollision,
         springDamping: this.jointSpringDampingRatio,
         springFrequency: this.jointSpringFrequency,
-        breakForce: this.jointBreakForce,
-        breakTorque: this.jointBreakTorque,
         motorLimitUpper: this.jointMotorLimitUpper,
         motorLimitLower: this.jointMotorLimitLower,
         motorSpeed: this.jointMotorSpeed,
