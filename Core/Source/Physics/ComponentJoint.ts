@@ -18,6 +18,8 @@ namespace FudgeCore {
     protected attachedRB: ComponentRigidbody;
     protected connectedRB: ComponentRigidbody;
 
+    protected nameChildToConnect: string;
+
     protected abstract oimoJoint: OIMO.Joint;
     protected connected: boolean = false;
     protected jointAnchor: OIMO.Vec3;
@@ -40,6 +42,7 @@ namespace FudgeCore {
     public get attachedRigidbody(): ComponentRigidbody {
       return this.attachedRB;
     }
+
     public set attachedRigidbody(_cmpRB: ComponentRigidbody) {
       this.idAttachedRB = _cmpRB != null ? _cmpRB.id : 0;
       this.attachedRB = _cmpRB;
@@ -115,6 +118,27 @@ namespace FudgeCore {
       if (this.oimoJoint != null) this.oimoJoint.setAllowCollision(this.jointInternalCollision);
     }
 
+    public connectChild(_name: string): void {
+      this.nameChildToConnect = _name;
+      let children: Node[] = this.node.getChildrenByName(_name);
+      if (children.length != 1)
+        Debug.warn(`Joint trying to connect child ${_name} which is non existent or ambigous`);
+      this.connectNode(children.pop());
+    }
+
+    public connectNode(_node: Node): void {
+      if (!_node || !this.node)
+        return;
+
+      Debug.fudge(`${this.constructor.name} connected ${this.node.name} and ${_node.name}`);
+
+      let connectBody: ComponentRigidbody = _node.getComponent(ComponentRigidbody);
+      let thisBody: ComponentRigidbody = this.node.getComponent(ComponentRigidbody);
+
+      this.attachedRigidbody = thisBody;
+      this.connectedRigidbody = connectBody;
+    }
+
     /** Check if connection is dirty, so when either rb is changed disconnect and reconnect. Internally used no user interaction needed. */
     public checkConnection(): boolean {
       return this.connected;
@@ -126,6 +150,12 @@ namespace FudgeCore {
      */
     public connect(): void {
       if (this.connected == false) {
+        if (this.idAttachedRB == 0 || this.idConnectedRB == 0)
+          if (this.nameChildToConnect) {
+            this.connectChild(this.nameChildToConnect);
+            return;
+          }
+
         this.constructJoint();
         this.connected = true;
         this.addJoint();
@@ -153,6 +183,7 @@ namespace FudgeCore {
 
     public serialize(): Serialization {
       let serialization: Serialization = {
+        nameChildToConnect: this.nameChildToConnect,
         anchor: this.anchor.serialize(),
         internalCollision: this.jointInternalCollision,
         breakForce: this.jointBreakForce,
@@ -163,11 +194,13 @@ namespace FudgeCore {
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      this.nameChildToConnect = _serialization.nameChildToConnect;
       this.anchor = await new Vector3().deserialize(_serialization.anchor) || this.anchor;
       this.internalCollision = _serialization.internalCollision || false;
       this.breakForce = _serialization.breakForce || this.breakForce;
       this.breakTorque = _serialization.breakTorque || this.breakTorque;
       await super.deserialize(_serialization[super.constructor.name]);
+      this.connectChild(this.nameChildToConnect);
       return this;
     }
 
@@ -175,6 +208,7 @@ namespace FudgeCore {
       let mutator: Mutator = {};
 
       mutator.active = this.active;
+      mutator.nameChildToConnect = this.nameChildToConnect;
       mutator.anchor = this.anchor.getMutator();
       mutator.internalCollision = this.jointInternalCollision;
       mutator.breakForce = this.jointBreakForce;
@@ -185,6 +219,7 @@ namespace FudgeCore {
 
     public async mutate(_mutator: Mutator): Promise<void> {
       this.anchor = new Vector3(...<number[]>(Object.values(_mutator.anchor)));
+      this.connectChild(_mutator.nameChildToConnect);
       delete _mutator.anchor;
       super.mutate(_mutator);
     }

@@ -3583,6 +3583,7 @@ declare namespace FudgeCore {
         protected idConnectedRB: number;
         protected attachedRB: ComponentRigidbody;
         protected connectedRB: ComponentRigidbody;
+        protected nameChildToConnect: string;
         protected abstract oimoJoint: OIMO.Joint;
         protected connected: boolean;
         protected jointAnchor: OIMO.Vec3;
@@ -3625,6 +3626,8 @@ declare namespace FudgeCore {
          */
         get internalCollision(): boolean;
         set internalCollision(_value: boolean);
+        connectChild(_name: string): void;
+        connectNode(_node: Node): void;
         /** Check if connection is dirty, so when either rb is changed disconnect and reconnect. Internally used no user interaction needed. */
         checkConnection(): boolean;
         /**

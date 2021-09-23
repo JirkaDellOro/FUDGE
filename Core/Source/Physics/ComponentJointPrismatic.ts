@@ -87,7 +87,7 @@ namespace FudgeCore {
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.motorForce = _serialization.motorForce || this.jointMotorForce;
-      super.deserialize(_serialization); //Super, Super, Component != ComponentJoint
+      super.deserialize(_serialization[super.constructor.name]);
       return this;
     }
 

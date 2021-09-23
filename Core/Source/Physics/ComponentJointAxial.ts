@@ -118,7 +118,7 @@ namespace FudgeCore {
       this.motorLimitUpper = _serialization.motorLimitUpper || this.motorLimitUpper;
       this.motorLimitLower = _serialization.motorLimitLower || this.motorLimitLower;
       this.motorSpeed = _serialization.motorSpeed || this.motorSpeed;
-      super.deserialize(_serialization);
+      super.deserialize(_serialization[super.constructor.name]);
       return this;
     }
 
