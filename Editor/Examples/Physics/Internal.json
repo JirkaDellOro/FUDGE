@@ -106,6 +106,30 @@
                     }
                   }
                 }
+              ],
+              "ComponentJointPrismatic": [
+                {
+                  "ƒ.ComponentJointPrismatic": {
+                    "motorForce": 0,
+                    "ComponentJointAxial": {
+                      "axis": "[0, 0, 0]",
+                      "springDamping": 0,
+                      "springFrequency": 0,
+                      "motorLimitUpper": 10,
+                      "motorLimitLower": -10,
+                      "motorSpeed": 0,
+                      "ComponentJoint": {
+                        "anchor": "[2, 0, 0]",
+                        "internalCollision": false,
+                        "breakForce": 0,
+                        "breakTorque": 0,
+                        "Component": {
+                          "active": true
+                        }
+                      }
+                    }
+                  }
+                }
               ]
             },
             "children": [

@@ -21,7 +21,7 @@ namespace FudgeCore {
     protected abstract oimoJoint: OIMO.Joint;
     protected connected: boolean = false;
     protected jointAnchor: OIMO.Vec3;
-    protected jointInternalCollision: boolean;
+    protected jointInternalCollision: boolean = false;
 
     protected jointBreakForce: number = 0;
     protected jointBreakTorque: number = 0;
@@ -153,7 +153,7 @@ namespace FudgeCore {
 
     public serialize(): Serialization {
       let serialization: Serialization = {
-        anchor: this.anchor,
+        anchor: this.anchor.serialize(),
         internalCollision: this.jointInternalCollision,
         breakForce: this.jointBreakForce,
         breakTorque: this.jointBreakTorque,
@@ -163,12 +163,30 @@ namespace FudgeCore {
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.anchor = _serialization.anchor || this.anchor;
+      this.anchor = await new Vector3().deserialize(_serialization.anchor) || this.anchor;
       this.internalCollision = _serialization.internalCollision || false;
       this.breakForce = _serialization.breakForce || this.breakForce;
       this.breakTorque = _serialization.breakTorque || this.breakTorque;
       await super.deserialize(_serialization[super.constructor.name]);
       return this;
+    }
+
+    public getMutator(): Mutator {
+      let mutator: Mutator = {};
+
+      mutator.active = this.active;
+      mutator.anchor = this.anchor.getMutator();
+      mutator.internalCollision = this.jointInternalCollision;
+      mutator.breakForce = this.jointBreakForce;
+      mutator.breakTorque = this.jointBreakTorque;
+
+      return mutator;
+    }
+
+    public async mutate(_mutator: Mutator): Promise<void> {
+      this.anchor = new Vector3(...<number[]>(Object.values(_mutator.anchor)));
+      delete _mutator.anchor;
+      super.mutate(_mutator);
     }
 
     /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
@@ -197,6 +215,7 @@ namespace FudgeCore {
       this.oimoJoint.setBreakTorque(this.breakTorque);
       this.oimoJoint.setAllowCollision(this.jointInternalCollision);
     }
+
 
 
     /** Setting both bodies to the bodies that belong to the loaded IDs and reconnecting them */

@@ -3644,6 +3644,8 @@ declare namespace FudgeCore {
         getOimoJoint(): OIMO.Joint;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        getMutator(): Mutator;
+        mutate(_mutator: Mutator): Promise<void>;
         /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
         protected dirtyStatus(): void;
         protected addJoint(): void;
@@ -3704,6 +3706,7 @@ declare namespace FudgeCore {
         abstract set motorLimitLower(_value: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        getMutator(): Mutator;
         protected constructJoint(): void;
     }
 }
@@ -3841,6 +3844,7 @@ declare namespace FudgeCore {
          */
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        getMutator(): Mutator;
         /** Actual creation of a joint in the OimoPhysics system */
         protected constructJoint(): void;
     }

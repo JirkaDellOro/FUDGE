@@ -100,7 +100,7 @@ namespace FudgeCore {
     //#region Saving/Loading
     public serialize(): Serialization {
       let serialization: Serialization = {
-        axis: this.axis,
+        axis: this.axis.serialize(),
         springDamping: this.springDamping,
         springFrequency: this.springFrequency,
         motorLimitUpper: this.motorLimitUpper,
@@ -112,7 +112,7 @@ namespace FudgeCore {
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.axis = _serialization.axis || this.axis;
+      this.axis = await new Vector3().deserialize(_serialization.axis) || this.axis;
       this.springDamping = _serialization.springDamping || this.springDamping;
       this.springFrequency = _serialization.springFrequency || this.springFrequency;
       this.motorLimitUpper = _serialization.motorLimitUpper || this.motorLimitUpper;
@@ -120,6 +120,10 @@ namespace FudgeCore {
       this.motorSpeed = _serialization.motorSpeed || this.motorSpeed;
       super.deserialize(_serialization);
       return this;
+    }
+
+    public getMutator(): Mutator {
+      return super.getMutator();
     }
     //#endregion
 

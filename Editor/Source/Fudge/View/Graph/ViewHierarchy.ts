@@ -43,7 +43,7 @@ namespace Fudge {
       this.tree.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
       this.tree.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.append(this.tree);
-      this.dom.title = "Right click to create new node";
+      this.dom.title = "Right click on existing node to create child node";
       this.tree.title = "Select node to edit";
     }
 

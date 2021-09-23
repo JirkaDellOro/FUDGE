@@ -90,6 +90,10 @@ namespace FudgeCore {
       super.deserialize(_serialization); //Super, Super, Component != ComponentJoint
       return this;
     }
+
+    public getMutator(): Mutator {
+      return super.getMutator();
+    }
     //#endregion
 
     /** Actual creation of a joint in the OimoPhysics system */

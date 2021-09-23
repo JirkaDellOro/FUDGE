@@ -2456,7 +2456,7 @@ var Fudge;
             this.tree.addEventListener("delete" /* DELETE */, this.hndEvent);
             this.tree.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.append(this.tree);
-            this.dom.title = "Right click to create new node";
+            this.dom.title = "Right click on existing node to create child node";
             this.tree.title = "Select node to edit";
         }
         getSelection() {

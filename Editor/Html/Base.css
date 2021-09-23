@@ -67,6 +67,9 @@ input[type="checkbox"] {
 
 input[type="checkbox"]::before {
   /* appearance: unset; */
+  /* color: var(--color-); */
+  font-weight: 900;
+  text-shadow: 1px 1px var(--color-background-main);
   content: "⭘";
   /* □⚐◎◯⭘⦾○○ */
 }
