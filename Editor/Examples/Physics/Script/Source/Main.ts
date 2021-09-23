@@ -8,8 +8,6 @@ namespace Script {
   function start(_event: CustomEvent): void {
     viewport = _event.detail;
 
-    // ƒ.Physics.initializePhysics();
-
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
     ƒ.Loop.start();  // start the game loop to continously draw the viewport and update the audiosystem
   }

@@ -232,7 +232,8 @@ namespace FudgeCore {
     * be recreated.
     */
     public changeJointStatus(_cmpJoint: ComponentJoint): void {
-      this.jointList.push(_cmpJoint);
+      if (this.jointList.indexOf(_cmpJoint) < 0)
+        this.jointList.push(_cmpJoint);
     }
 
     /** Giving a ComponentRigidbody a specific identification number so it can be referenced in the loading process. And removed rb's can receive a new id. */

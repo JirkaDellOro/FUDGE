@@ -80,7 +80,7 @@ namespace FudgeCore {
         // TODO: careful when using particlesystem, pivot must not change node position
         let mtxWorldMesh: Matrix4x4 = Matrix4x4.MULTIPLICATION(_branch.mtxWorld, cmpMesh.mtxPivot);
         cmpMesh.mtxWorld.set(mtxWorldMesh);
-        Recycler.store(mtxWorldMesh);
+        // Recycler.store(mtxWorldMesh); // TODO: examine, why recycling this causes meshes to be misplaced...
         let shader: typeof Shader = cmpMaterial.material.getShader();
         if (_shadersUsed.indexOf(shader) < 0)
           _shadersUsed.push(shader);

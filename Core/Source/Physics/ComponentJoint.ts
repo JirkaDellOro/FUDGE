@@ -44,7 +44,7 @@ namespace FudgeCore {
     }
 
     public set attachedRigidbody(_cmpRB: ComponentRigidbody) {
-      this.idAttachedRB = _cmpRB != null ? _cmpRB.id : 0;
+      this.idAttachedRB = _cmpRB != null ? _cmpRB.id : -1;
       this.attachedRB = _cmpRB;
       this.disconnect();
       this.dirtyStatus();
@@ -55,7 +55,7 @@ namespace FudgeCore {
       return this.connectedRB;
     }
     public set connectedRigidbody(_cmpRB: ComponentRigidbody) {
-      this.idConnectedRB = _cmpRB != null ? _cmpRB.id : 0;
+      this.idConnectedRB = _cmpRB != null ? _cmpRB.id : -1;
       this.connectedRB = _cmpRB;
       this.disconnect();
       this.dirtyStatus();
@@ -122,7 +122,7 @@ namespace FudgeCore {
       this.nameChildToConnect = _name;
       let children: Node[] = this.node.getChildrenByName(_name);
       if (children.length != 1)
-        Debug.warn(`Joint trying to connect child ${_name} which is non existent or ambigous`);
+        Debug.warn(`${this.constructor.name} at ${this.node.name} fails to connect child with non existent or ambigous name ${_name}`);
       this.connectNode(children.pop());
     }
 
@@ -134,6 +134,11 @@ namespace FudgeCore {
 
       let connectBody: ComponentRigidbody = _node.getComponent(ComponentRigidbody);
       let thisBody: ComponentRigidbody = this.node.getComponent(ComponentRigidbody);
+
+      if (!connectBody || !thisBody) {
+        Debug.warn(`${this.constructor.name} at ${this.node.name} fails due to missing rigidbodies on ${this.node.name} or ${_node.name}`);
+        return;
+      }
 
       this.attachedRigidbody = thisBody;
       this.connectedRigidbody = connectBody;
@@ -150,7 +155,7 @@ namespace FudgeCore {
      */
     public connect(): void {
       if (this.connected == false) {
-        if (this.idAttachedRB == 0 || this.idConnectedRB == 0)
+        if (this.idAttachedRB == -1 || this.idConnectedRB == -1)
           if (this.nameChildToConnect) {
             this.connectChild(this.nameChildToConnect);
             return;
