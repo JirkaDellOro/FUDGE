@@ -1,7 +1,7 @@
 namespace FudgeCore {
   /**
      * A physical connection between two bodies with no movement. 
-     * Best way to simulate convex objects like a char seat connected to chair legs.
+     * Best way to simulate convex objects like a chair seat connected to chair legs.
      * The actual anchor point does not matter that much, only in very specific edge cases.
      * Because welding means they simply do not disconnect. (unless you add Breakability)
      * @author Marko Fehrenbach, HFU 2020
@@ -30,17 +30,12 @@ namespace FudgeCore {
     //#region Saving/Loading
     public serialize(): Serialization {
       let serialization: Serialization = {
-
         [super.constructor.name]: super.serialize()
       };
       return serialization;
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
-      this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
-      this.breakForce = _serialization.breakForce != null ? _serialization.breakForce : this.jointBreakForce;
-      this.breakTorque = _serialization.breakTorque != null ? _serialization.breakTorque : this.jointBreakTorque;
       super.deserialize(_serialization);
       return this;
     }
@@ -48,17 +43,14 @@ namespace FudgeCore {
 
 
     protected constructJoint(): void {
-
       this.config = new OIMO.GenericJointConfig();
       let attachedRBPos: Vector3 = this.attachedRigidbody.node.mtxWorld.translation;
       let worldAnchor: OIMO.Vec3 = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
       this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, new OIMO.Mat3(), new OIMO.Mat3());
 
 
-      var j: OIMO.GenericJoint = new OIMO.GenericJoint(this.config);
-      j.setAllowCollision(this.jointInternalCollision);
-
-      this.oimoJoint = j;
+      this.oimoJoint = new OIMO.GenericJoint(this.config);
+      this.oimoJoint.setAllowCollision(this.jointInternalCollision);
     }
   }
 }

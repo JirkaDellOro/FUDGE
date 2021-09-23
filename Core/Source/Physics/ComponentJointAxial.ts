@@ -101,7 +101,6 @@ namespace FudgeCore {
     public serialize(): Serialization {
       let serialization: Serialization = {
         axis: this.axis,
-        anchor: this.anchor,
         springDamping: this.springDamping,
         springFrequency: this.springFrequency,
         motorLimitUpper: this.motorLimitUpper,
@@ -114,14 +113,11 @@ namespace FudgeCore {
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.axis = _serialization.axis || this.axis;
-      this.anchor = _serialization.anchor || this.anchor;
+      this.springDamping = _serialization.springDamping || this.springDamping;
+      this.springFrequency = _serialization.springFrequency || this.springFrequency;
       this.motorLimitUpper = _serialization.motorLimitUpper || this.motorLimitUpper;
       this.motorLimitLower = _serialization.motorLimitLower || this.motorLimitLower;
       this.motorSpeed = _serialization.motorSpeed || this.motorSpeed;
-      this.internalCollision = _serialization.internalCollision || false;
-      this.springDamping = _serialization.springDamping || this.springDamping;
-      this.breakForce = _serialization.breakForce || this.breakForce;
-      this.breakTorque = _serialization.breakTorque || this.breakTorque;
       super.deserialize(_serialization);
       return this;
     }
@@ -129,17 +125,7 @@ namespace FudgeCore {
 
     protected constructJoint(): void {
       this.springDamper = new OIMO.SpringDamper().setSpring(this.jointSpringFrequency, this.jointSpringDampingRatio);
-      let attachedRBPos: Vector3 = this.attachedRigidbody.node.mtxWorld.translation; //Setting the anchor position locally from the first rigidbody
-      let worldAnchor: OIMO.Vec3 = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
-
-      // @ts-ignore
-      this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, this.jointAxis);
-    }
-
-    protected configureJoint(): void {
-      this.oimoJoint.setBreakForce(this.breakForce);
-      this.oimoJoint.setBreakTorque(this.breakTorque);
-      this.oimoJoint.setAllowCollision(this.jointInternalCollision);
+      super.constructJoint();
     }
   }
 }

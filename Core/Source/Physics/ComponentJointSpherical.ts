@@ -27,9 +27,6 @@ namespace FudgeCore {
     private config: OIMO.SphericalJointConfig = new OIMO.SphericalJointConfig();
     private springDamper: OIMO.SpringDamper;
 
-
-
-
     constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null, _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
       super(_attachedRigidbody, _connectedRigidbody);
       this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
@@ -64,33 +61,21 @@ namespace FudgeCore {
       this.jointSpringFrequency = _value;
       if (this.oimoJoint != null) this.oimoJoint.getSpringDamper().frequency = this.jointSpringFrequency;
     }
-
-
-
-
-    /**
-      * If the two connected RigidBodies collide with eath other. (Default = false)
-     */
-
     //#endregion
 
     //#region Saving/Loading
     public serialize(): Serialization {
       let serialization: Serialization = {
-        springDamping: this.jointSpringDampingRatio,
-        springFrequency: this.jointSpringFrequency,
+        springDamping: this.springDamping,
+        springFrequency: this.springFrequency,
         [super.constructor.name]: super.serialize()
       };
       return serialization;
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
-      this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
-      this.springDamping = _serialization.springDamping != null ? _serialization.springDamping : this.jointSpringDampingRatio;
-      this.springFrequency = _serialization.springFrequency != null ? _serialization.springFrequency : this.jointSpringFrequency;
-      this.breakForce = _serialization.breakForce != null ? _serialization.breakForce : this.jointBreakForce;
-      this.breakTorque = _serialization.breakTorque != null ? _serialization.breakTorque : this.jointBreakTorque;
+      this.springDamping = _serialization.springDamping || this.jointSpringDampingRatio;
+      this.springFrequency = _serialization.springFrequency || this.jointSpringFrequency;
       super.deserialize(_serialization);
       return this;
     }
@@ -99,17 +84,11 @@ namespace FudgeCore {
     protected constructJoint(): void {
       this.springDamper = new OIMO.SpringDamper().setSpring(this.jointSpringFrequency, this.jointSpringDampingRatio);
       this.config = new OIMO.SphericalJointConfig();
-      let attachedRBPos: Vector3 = this.attachedRigidbody.node.mtxWorld.translation;
-      let worldAnchor: OIMO.Vec3 = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
-      this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor);
+      super.constructJoint();
       this.config.springDamper = this.springDamper;
 
-      var j: OIMO.SphericalJoint = new OIMO.SphericalJoint(this.config);
-      j.setBreakForce(this.breakForce);
-      j.setBreakTorque(this.breakTorque);
-      j.setAllowCollision(this.jointInternalCollision);
-
-      this.oimoJoint = j;
+      this.oimoJoint = new OIMO.SphericalJoint(this.config);
+      super.configureJoint();
     }
   }
 }

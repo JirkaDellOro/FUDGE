@@ -25,7 +25,7 @@ namespace FudgeCore {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointRagdoll);
 
     protected oimoJoint: OIMO.RagdollJoint;
-    
+
     private jointTwistSpringDampingRatio: number = 0;
     private jointTwistSpringFrequency: number = 0;
 
@@ -229,22 +229,18 @@ namespace FudgeCore {
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
-      this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
-      this.breakForce = _serialization.breakForce != null ? _serialization.breakForce : this.jointBreakForce;
-      this.breakTorque = _serialization.breakTorque != null ? _serialization.breakTorque : this.jointBreakTorque;
-      this.firstAxis = _serialization.firstAxis != null ? _serialization.firstAxis : this.jointFirstAxis;
-      this.secondAxis = _serialization.secondAxis != null ? _serialization.secondAxis : this.jointSecondAxis;
-      this.maxAngleFirstAxis = _serialization.maxAngleFirstAxis != null ? _serialization.maxAngleFirstAxis : this.jointMaxAngle1;
-      this.maxAngleSecondAxis = _serialization.maxAngleSecondAxis != null ? _serialization.maxAngleSecondAxis : this.jointMaxAngle2;
-      this.springDampingTwist = _serialization.springDampingTwist != null ? _serialization.springDampingTwist : this.jointTwistSpringDampingRatio;
-      this.springFrequencyTwist = _serialization.springFrequencyTwist != null ? _serialization.springFrequencyTwist : this.jointTwistSpringFrequency;
-      this.springDampingSwing = _serialization.springDampingSwing != null ? _serialization.springDampingSwing : this.jointSwingSpringDampingRatio;
-      this.springFrequencySwing = _serialization.springFrequencySwing != null ? _serialization.springFrequencySwing : this.jointSwingSpringFrequency;
-      this.twistMotorLimitUpper = _serialization.twistMotorLimitUpper != null ? _serialization.twistMotorLimitUpper : this.jointTwistMotorLimitUpper;
-      this.twistMotorLimitLower = _serialization.twistMotorLimitLower != null ? _serialization.twistMotorLimitLower : this.jointTwistMotorLimitLower;
-      this.twistMotorSpeed = _serialization.twistMotorSpeed != null ? _serialization.twistMotorSpeed : this.jointTwistMotorSpeed;
-      this.twistMotorTorque = _serialization.twistMotorTorque != null ? _serialization.twistMotorTorque : this.jointTwistMotorTorque;
+      this.firstAxis = _serialization.firstAxis || this.jointFirstAxis;
+      this.secondAxis = _serialization.secondAxis || this.jointSecondAxis;
+      this.maxAngleFirstAxis = _serialization.maxAngleFirstAxis || this.jointMaxAngle1;
+      this.maxAngleSecondAxis = _serialization.maxAngleSecondAxis || this.jointMaxAngle2;
+      this.springDampingTwist = _serialization.springDampingTwist || this.jointTwistSpringDampingRatio;
+      this.springFrequencyTwist = _serialization.springFrequencyTwist || this.jointTwistSpringFrequency;
+      this.springDampingSwing = _serialization.springDampingSwing || this.jointSwingSpringDampingRatio;
+      this.springFrequencySwing = _serialization.springFrequencySwing || this.jointSwingSpringFrequency;
+      this.twistMotorLimitUpper = _serialization.twistMotorLimitUpper || this.jointTwistMotorLimitUpper;
+      this.twistMotorLimitLower = _serialization.twistMotorLimitLower || this.jointTwistMotorLimitLower;
+      this.twistMotorSpeed = _serialization.twistMotorSpeed || this.jointTwistMotorSpeed;
+      this.twistMotorTorque = _serialization.twistMotorTorque || this.jointTwistMotorTorque;
       super.deserialize(_serialization);
       return this;
     }
@@ -260,18 +256,15 @@ namespace FudgeCore {
       this.config = new OIMO.RagdollJointConfig();
       let attachedRBPos: Vector3 = this.attachedRigidbody.node.mtxWorld.translation;
       let worldAnchor: OIMO.Vec3 = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
-      this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, this.jointFirstAxis, this.jointSecondAxis);
+      this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, this.jointFirstAxis, this.jointSecondAxis); // last parameter differs from ComponentJoint
       this.config.swingSpringDamper = this.jointSwingSpringDamper;
       this.config.twistSpringDamper = this.jointTwistSpringDamper;
       this.config.twistLimitMotor = this.jointTwistMotor;
       this.config.maxSwingAngle1 = this.jointMaxAngle1;
       this.config.maxSwingAngle2 = this.jointMaxAngle2;
 
-      var j: OIMO.RagdollJoint = new OIMO.RagdollJoint(this.config);
-      j.setBreakForce(this.breakForce);
-      j.setBreakTorque(this.breakTorque);
-      j.setAllowCollision(this.jointInternalCollision);
-      this.oimoJoint = j;
+      this.oimoJoint = new OIMO.RagdollJoint(this.config);
+      super.configureJoint();
     }
   }
 }

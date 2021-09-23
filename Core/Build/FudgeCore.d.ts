@@ -3642,13 +3642,14 @@ declare namespace FudgeCore {
          * Only to be used when functionality that is not added within Fudge is needed.
         */
         getOimoJoint(): OIMO.Joint;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
         serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
         protected dirtyStatus(): void;
         protected addJoint(): void;
         protected removeJoint(): void;
-        protected abstract constructJoint(): void;
+        protected constructJoint(): void;
+        protected configureJoint(): void;
     }
 }
 declare namespace FudgeCore {
@@ -3704,7 +3705,6 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected constructJoint(): void;
-        protected configureJoint(): void;
     }
 }
 declare namespace FudgeCore {
@@ -4042,9 +4042,6 @@ declare namespace FudgeCore {
         */
         get springFrequency(): number;
         set springFrequency(_value: number);
-        /**
-          * If the two connected RigidBodies collide with eath other. (Default = false)
-         */
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected constructJoint(): void;
@@ -4176,7 +4173,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
        * A physical connection between two bodies with no movement.
-       * Best way to simulate convex objects like a char seat connected to chair legs.
+       * Best way to simulate convex objects like a chair seat connected to chair legs.
        * The actual anchor point does not matter that much, only in very specific edge cases.
        * Because welding means they simply do not disconnect. (unless you add Breakability)
        * @author Marko Fehrenbach, HFU 2020

@@ -151,11 +151,6 @@ namespace FudgeCore {
       return this.oimoJoint;
     }
 
-    public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      await super.deserialize(_serialization[super.constructor.name]);
-      return this;
-    }
-
     public serialize(): Serialization {
       let serialization: Serialization = {
         anchor: this.anchor,
@@ -167,6 +162,14 @@ namespace FudgeCore {
       return serialization;
     }
 
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      this.anchor = _serialization.anchor || this.anchor;
+      this.internalCollision = _serialization.internalCollision || false;
+      this.breakForce = _serialization.breakForce || this.breakForce;
+      this.breakTorque = _serialization.breakTorque || this.breakTorque;
+      await super.deserialize(_serialization[super.constructor.name]);
+      return this;
+    }
 
     /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
     protected dirtyStatus(): void {
@@ -181,7 +184,19 @@ namespace FudgeCore {
       Physics.world.removeJoint(this);
     }
 
-    protected abstract constructJoint(): void;
+    protected constructJoint(): void {
+      let attachedRBPos: Vector3 = this.attachedRigidbody.node.mtxWorld.translation; //Setting the anchor position locally from the first rigidbody
+      let worldAnchor: OIMO.Vec3 = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
+
+      // @ts-ignore
+      this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, this.jointAxis);
+    }
+
+    protected configureJoint(): void {
+      this.oimoJoint.setBreakForce(this.breakForce);
+      this.oimoJoint.setBreakTorque(this.breakTorque);
+      this.oimoJoint.setAllowCollision(this.jointInternalCollision);
+    }
 
 
     /** Setting both bodies to the bodies that belong to the loaded IDs and reconnecting them */

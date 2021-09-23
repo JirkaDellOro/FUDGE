@@ -220,7 +220,7 @@ namespace FudgeCore {
      */
 
     //#endregion
-    
+
     //#region Saving/Loading
     public serialize(): Serialization {
       let serialization: Serialization = {
@@ -244,24 +244,20 @@ namespace FudgeCore {
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
-      this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
-      this.breakForce = _serialization.breakForce != null ? _serialization.breakForce : this.jointBreakForce;
-      this.breakTorque = _serialization.breakTorque != null ? _serialization.breakTorque : this.jointBreakTorque;
-      this.firstAxis = _serialization.firstAxis != null ? _serialization.firstAxis : this.jointFirstAxis;
-      this.secondAxis = _serialization.secondAxis != null ? _serialization.secondAxis : this.jointSecondAxis;
-      this.springDampingFirstAxis = _serialization.springDampingFirstAxis != null ? _serialization.springDampingFirstAxis : this.jointFirstSpringDampingRatio;
-      this.springFrequencyFirstAxis = _serialization.springFrequencyFirstAxis != null ? _serialization.springFrequencyFirstAxis : this.jointFirstSpringFrequency;
-      this.springDampingSecondAxis = _serialization.springDampingSecondAxis != null ? _serialization.springDampingSecondAxis : this.jointSecondSpringDampingRatio;
-      this.springFrequencySecondAxis = _serialization.springFrequencySecondAxis != null ? _serialization.springFrequencySecondAxis : this.jointSecondSpringFrequency;
-      this.motorLimitUpperFirstAxis = _serialization.motorLimitUpperFirstAxis != null ? _serialization.motorLimitUpperFirstAxis : this.jointFirstMotorLimitUpper;
-      this.motorLimitLowerFirstAxis = _serialization.motorLimitLowerFirstAxis != null ? _serialization.motorLimitLowerFirstAxis : this.jointFirstMotorLimitUpper;
-      this.motorSpeedFirstAxis = _serialization.motorSpeedFirstAxis != null ? _serialization.motorSpeedFirstAxis : this.jointFirstMotorSpeed;
-      this.motorTorqueFirstAxis = _serialization.motorTorqueFirstAxis != null ? _serialization.motorTorqueFirstAxis : this.jointFirstMotorTorque;
-      this.motorLimitUpperSecondAxis = _serialization.motorLimitUpperSecondAxis != null ? _serialization.motorLimitUpperSecondAxis : this.jointSecondMotorLimitUpper;
-      this.motorLimitLowerSecondAxis = _serialization.motorLimitLowerSecondAxis != null ? _serialization.motorLimitLowerSecondAxis : this.jointSecondMotorLimitUpper;
-      this.motorSpeedSecondAxis = _serialization.motorSpeedSecondAxis != null ? _serialization.motorSpeedSecondAxis : this.jointSecondMotorSpeed;
-      this.motorTorqueSecondAxis = _serialization.motorTorqueSecondAxis != null ? _serialization.motorTorqueSecondAxis : this.jointSecondMotorTorque;
+      this.firstAxis =  _serialization.firstAxis || this.jointFirstAxis;
+      this.secondAxis = _serialization.secondAxis || this.jointSecondAxis;
+      this.springDampingFirstAxis =   _serialization.springDampingFirstAxis || this.jointFirstSpringDampingRatio;
+      this.springFrequencyFirstAxis =  _serialization.springFrequencyFirstAxis || this.jointFirstSpringFrequency;
+      this.springDampingSecondAxis =  _serialization.springDampingSecondAxis || this.jointSecondSpringDampingRatio;
+      this.springFrequencySecondAxis =  _serialization.springFrequencySecondAxis || this.jointSecondSpringFrequency;
+      this.motorLimitUpperFirstAxis = _serialization.motorLimitUpperFirstAxis || this.jointFirstMotorLimitUpper;
+      this.motorLimitLowerFirstAxis =  _serialization.motorLimitLowerFirstAxis || this.jointFirstMotorLimitUpper;
+      this.motorSpeedFirstAxis =  _serialization.motorSpeedFirstAxis || this.jointFirstMotorSpeed;
+      this.motorTorqueFirstAxis =  _serialization.motorTorqueFirstAxis || this.jointFirstMotorTorque;
+      this.motorLimitUpperSecondAxis =  _serialization.motorLimitUpperSecondAxis || this.jointSecondMotorLimitUpper;
+      this.motorLimitLowerSecondAxis =  _serialization.motorLimitLowerSecondAxis || this.jointSecondMotorLimitUpper;
+      this.motorSpeedSecondAxis =  _serialization.motorSpeedSecondAxis || this.jointSecondMotorSpeed;
+      this.motorTorqueSecondAxis =  _serialization.motorTorqueSecondAxis || this.jointSecondMotorTorque;
       super.deserialize(_serialization);
       return this;
     }
@@ -285,12 +281,8 @@ namespace FudgeCore {
       this.config.springDamper1 = this.firstAxisSpringDamper;
       this.config.springDamper2 = this.secondAxisSpringDamper;
 
-      var j: OIMO.UniversalJoint = new OIMO.UniversalJoint(this.config);
-      j.setBreakForce(this.breakForce);
-      j.setBreakTorque(this.breakTorque);
-      j.setAllowCollision(this.jointInternalCollision);
-
-      this.oimoJoint = j;
+      this.oimoJoint = new OIMO.UniversalJoint(this.config);
+      super.configureJoint();
     }
   }
 }
