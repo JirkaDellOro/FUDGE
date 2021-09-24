@@ -215,14 +215,16 @@ namespace FudgeCore {
      * if any of the two paired ComponentRigidbodies change.
      */
     public connectJoints(): void { //Try to connect dirty joints until they are connected
-      let jointsToConnect: ComponentJoint[] = new Array(); //Copy original Array because removing/readding in the connecting process
-      this.jointList.forEach(function (value: ComponentJoint): void {
-        jointsToConnect.push(value);
-      });
-      this.jointList.splice(0, this.jointList.length);
-      jointsToConnect.forEach((value: ComponentJoint): void => {
-        if (value.checkConnection() == false) {
-          value.connect();
+      // let jointsToConnect: ComponentJoint[] = new Array(); //Copy original Array because removing/readding in the connecting process
+      // this.jointList.forEach(function (value: ComponentJoint): void {
+      //   jointsToConnect.push(value);
+      // });
+      // this.jointList.splice(0, this.jointList.length);
+      let jointsToConnect: ComponentJoint[] = this.jointList;
+      this.jointList = [];
+      jointsToConnect.forEach((_joint: ComponentJoint): void => {
+        if (_joint.checkConnection() == false) {
+          _joint.connect();
         }
       });
     }

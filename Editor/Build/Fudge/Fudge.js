@@ -293,7 +293,7 @@ var Fudge;
             this.fileIndex = _base.toString().split("/").pop() || this.fileIndex;
             ƒ.Project.clear();
             ƒ.Physics.initializePhysics();
-            ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
+            ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
             ƒ.Physics.settings.debugDraw = true;
         }
         async openDialog() {
@@ -2641,6 +2641,7 @@ var Fudge;
             this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: source }));
         }
         hndEvent = (_event) => {
+            ƒ.Physics.world.connectJoints();
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.CLEAR_PROJECT:
                     this.setGraph(null);

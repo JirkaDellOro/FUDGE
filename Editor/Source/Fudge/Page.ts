@@ -146,6 +146,7 @@ namespace Fudge {
 
     private static hndEvent(_event: CustomEvent): void {
       // ƒ.Debug.fudge("Page received", _event.type, _event);
+      
       switch (_event.type) {
         case EVENT_EDITOR.DESTROY:
           let view: View = _event.detail;

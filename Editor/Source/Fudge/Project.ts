@@ -25,7 +25,7 @@ namespace Fudge {
 
       ƒ.Project.clear();
       ƒ.Physics.initializePhysics();
-      ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
+      ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
       ƒ.Physics.settings.debugDraw = true;
     }
 
