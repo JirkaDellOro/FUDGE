@@ -26,10 +26,10 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
     let frontSuspensionLeft: f.ComponentJointCylindrical;
     let backSuspensionRight: f.ComponentJointCylindrical;
     let backSuspensionLeft: f.ComponentJointCylindrical;
-    let wheelJoint_frontR: f.ComponentJointRevolute;
-    let wheelJoint_frontL: f.ComponentJointRevolute;
-    let wheelJoint_backR: f.ComponentJointRevolute;
-    let wheelJoint_backL: f.ComponentJointRevolute;
+    let wheelJointFrontRight: f.ComponentJointRevolute;
+    let wheelJointFrontLeft: f.ComponentJointRevolute;
+    let wheelJointBackRight: f.ComponentJointRevolute;
+    let wheelJointBackLeft: f.ComponentJointRevolute;
     let maxAngle: number = 30;
     let currentAngle: number = 0;
 
@@ -176,8 +176,8 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
         carBody.node.addComponent(frontSuspensionRight);
         frontSuspensionRight.springDamping = 100;
         frontSuspensionRight.springFrequency = 2;
-        frontSuspensionRight.translationMotorLimitUpper = 0;
-        frontSuspensionRight.translationMotorLimitLower = 0;
+        frontSuspensionRight.motorLimitUpper = 0;
+        frontSuspensionRight.motorLimitLower = 0;
         frontSuspensionRight.rotationalMotorLimitUpper = 0;
         frontSuspensionRight.rotationalMotorLimitLower = 0;
         frontSuspensionRight.internalCollision = true;
@@ -185,8 +185,8 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
         carBody.node.addComponent(frontSuspensionLeft);
         frontSuspensionLeft.springDamping = 100;
         frontSuspensionLeft.springFrequency = 2;
-        frontSuspensionLeft.translationMotorLimitUpper = 0;
-        frontSuspensionLeft.translationMotorLimitLower = 0;
+        frontSuspensionLeft.motorLimitUpper = 0;
+        frontSuspensionLeft.motorLimitLower = 0;
         frontSuspensionLeft.rotationalMotorLimitUpper = 0;
         frontSuspensionLeft.rotationalMotorLimitLower = 0;
         frontSuspensionLeft.internalCollision = true;
@@ -194,8 +194,8 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
         carBody.node.addComponent(backSuspensionLeft);
         backSuspensionLeft.springDamping = 100;
         backSuspensionLeft.springFrequency = 2;
-        backSuspensionLeft.translationMotorLimitUpper = 0;
-        backSuspensionLeft.translationMotorLimitLower = 0;
+        backSuspensionLeft.motorLimitUpper = 0;
+        backSuspensionLeft.motorLimitLower = 0;
         backSuspensionLeft.rotationalMotorLimitUpper = 0;
         backSuspensionLeft.rotationalMotorLimitLower = 0;
         backSuspensionLeft.internalCollision = true;
@@ -203,26 +203,26 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
         carBody.node.addComponent(backSuspensionRight);
         backSuspensionRight.springDamping = 100;
         backSuspensionRight.springFrequency = 2;
-        backSuspensionRight.translationMotorLimitUpper = 0;
-        backSuspensionRight.translationMotorLimitLower = 0;
+        backSuspensionRight.motorLimitUpper = 0;
+        backSuspensionRight.motorLimitLower = 0;
         backSuspensionRight.rotationalMotorLimitUpper = 0;
         backSuspensionRight.rotationalMotorLimitLower = 0;
         backSuspensionRight.internalCollision = true;
 
         //Connect Wheels to suspension - Hinge (revolute) joints that can rotate 360° in X-Axis but not move
-        wheelJoint_frontR = new f.ComponentJointRevolute(bodies[17].getComponent(f.ComponentRigidbody), bodies[13].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
-        bodies[17].addComponent(wheelJoint_frontR);
-        wheelJoint_frontL = new f.ComponentJointRevolute(bodies[19].getComponent(f.ComponentRigidbody), bodies[15].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
-        bodies[19].addComponent(wheelJoint_frontL);
-        wheelJoint_backR = new f.ComponentJointRevolute(bodies[18].getComponent(f.ComponentRigidbody), bodies[14].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
-        bodies[18].addComponent(wheelJoint_backR);
-        wheelJoint_backL = new f.ComponentJointRevolute(bodies[20].getComponent(f.ComponentRigidbody), bodies[16].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
-        bodies[20].addComponent(wheelJoint_backL);
+        wheelJointFrontRight = new f.ComponentJointRevolute(bodies[17].getComponent(f.ComponentRigidbody), bodies[13].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
+        bodies[17].addComponent(wheelJointFrontRight);
+        wheelJointFrontLeft = new f.ComponentJointRevolute(bodies[19].getComponent(f.ComponentRigidbody), bodies[15].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
+        bodies[19].addComponent(wheelJointFrontLeft);
+        wheelJointBackRight = new f.ComponentJointRevolute(bodies[18].getComponent(f.ComponentRigidbody), bodies[14].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
+        bodies[18].addComponent(wheelJointBackRight);
+        wheelJointBackLeft = new f.ComponentJointRevolute(bodies[20].getComponent(f.ComponentRigidbody), bodies[16].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
+        bodies[20].addComponent(wheelJointBackLeft);
 
-        wheelJoint_frontR.motorSpeed = -5;
-        wheelJoint_frontR.motorTorque = 50;
-        wheelJoint_frontL.motorSpeed = -5;
-        wheelJoint_frontL.motorTorque = 50;
+        wheelJointFrontRight.motorSpeed = -5;
+        wheelJointFrontRight.motorTorque = 50;
+        wheelJointFrontLeft.motorSpeed = -5;
+        wheelJointFrontLeft.motorTorque = 50;
         // wheelJoint_backR.motorSpeed = -5;
         // wheelJoint_backR.motorTorque = 50;
         // wheelJoint_backL.motorSpeed = -5;
@@ -241,8 +241,8 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
         }
         if (_event.code == f.KEYBOARD_CODE.W) {
             bodies[12].getComponent(f.ComponentRigidbody).applyForce(new f.Vector3(0, 10, 0));
-            wheelJoint_frontR.motorSpeed++;
-            wheelJoint_frontL.motorSpeed++;
+            wheelJointFrontRight.motorSpeed++;
+            wheelJointFrontLeft.motorSpeed++;
         }
         if (_event.code == f.KEYBOARD_CODE.S) {
           //
@@ -260,5 +260,4 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
 
 
     }
-
 }
