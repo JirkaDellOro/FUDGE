@@ -36,6 +36,13 @@ namespace FudgeCore {
       super();
       this.attachedRigidbody = _attachedRigidbody;
       this.connectedRigidbody = _connectedRigidbody;
+
+      /*
+        Tell the physics that there is a new joint and on the physics start the actual joint is first created. Values can be set but the
+        actual constraint ain't existent until the game starts
+      */
+      this.addEventListener(EVENT.COMPONENT_ADD, this.dirtyStatus);
+      this.addEventListener(EVENT.COMPONENT_REMOVE, this.removeJoint);
     }
 
     /** Get/Set the first ComponentRigidbody of this connection. It should always be the one that this component is attached too in the sceneTree. */

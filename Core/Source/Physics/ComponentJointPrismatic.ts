@@ -31,11 +31,6 @@ namespace FudgeCore {
 
       this.jointMotorLimitUpper = 10;
       this.jointMotorLimitLower = -10;
-      /*Tell the physics that there is a new joint and on the physics start the actual joint is first created. Values can be set but the
-        actual constraint ain't existent until the game starts
-      */
-      this.addEventListener(EVENT.COMPONENT_ADD, this.dirtyStatus);
-      this.addEventListener(EVENT.COMPONENT_REMOVE, this.removeJoint);
     }
     //#region Get/Set transfor of fudge properties to the physics engine
     /**
