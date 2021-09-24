@@ -21,12 +21,16 @@ namespace FudgeCore {
     protected config: OIMO.CylindricalJointConfig = new OIMO.CylindricalJointConfig();
 
     //Internal Variables
+    protected jointRotationSpringDampingRatio: number = 0;
+    protected jointRotationSpringFrequency: number = 0;
+    
     private jointMotorForce: number = 0;
 
     private jointRotationMotorLimitUpper: number = 360;
     private jointRotationMotorLimitLower: number = 0;
     private jointRotationMotorTorque: number = 0;
     private jointRotationMotorSpeed: number = 0;
+
 
     private rotationalMotor: OIMO.RotationalLimitMotor;
     private rotationSpringDamper: OIMO.SpringDamper;

@@ -3666,8 +3666,6 @@ declare namespace FudgeCore {
         protected abstract config: OIMO.JointConfig;
         protected jointSpringDampingRatio: number;
         protected jointSpringFrequency: number;
-        protected jointRotationSpringDampingRatio: number;
-        protected jointRotationSpringFrequency: number;
         protected jointMotorLimitUpper: number;
         protected jointMotorLimitLower: number;
         protected jointMotorSpeed: number;
@@ -3709,6 +3707,7 @@ declare namespace FudgeCore {
         abstract set motorLimitLower(_value: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
         getMutator(): Mutator;
         protected constructJoint(): void;
     }
@@ -3733,6 +3732,8 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         protected oimoJoint: OIMO.CylindricalJoint;
         protected config: OIMO.CylindricalJointConfig;
+        protected jointRotationSpringDampingRatio: number;
+        protected jointRotationSpringFrequency: number;
         private jointMotorForce;
         private jointRotationMotorLimitUpper;
         private jointRotationMotorLimitLower;
@@ -3842,9 +3843,6 @@ declare namespace FudgeCore {
          */
         get motorForce(): number;
         set motorForce(_value: number);
-        /**
-          * If the two connected RigidBodies collide with eath other. (Default = false)
-         */
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutator(): Mutator;

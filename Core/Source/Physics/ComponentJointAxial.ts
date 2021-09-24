@@ -10,9 +10,6 @@ namespace FudgeCore {
     protected jointSpringDampingRatio: number = 0;
     protected jointSpringFrequency: number = 0;
 
-    protected jointRotationSpringDampingRatio: number = 0;
-    protected jointRotationSpringFrequency: number = 0;
-
     protected jointMotorLimitUpper: number = 10;
     protected jointMotorLimitLower: number = -10;
     protected jointMotorSpeed: number = 0;
@@ -116,8 +113,21 @@ namespace FudgeCore {
       return this;
     }
 
+    public async mutate(_mutator: Mutator): Promise<void> {
+      this.axis = new Vector3(...<number[]>(Object.values(_mutator.axis)));
+      delete _mutator.axis;
+      super.mutate(_mutator);
+    }
+
     public getMutator(): Mutator {
-      return super.getMutator();
+      let mutator: Mutator = super.getMutator();
+      mutator.axis = this.axis.getMutator();
+      mutator.springDamping = this.springDamping;
+      mutator.springFrequency = this.springFrequency;
+      mutator.motorLimitUpper = this.motorLimitUpper;
+      mutator.motorLimitLower = this.motorLimitLower;
+      mutator.motorSpeed = this.motorSpeed;
+      return mutator;
     }
     //#endregion
 

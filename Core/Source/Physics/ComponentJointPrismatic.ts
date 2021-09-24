@@ -64,11 +64,6 @@ namespace FudgeCore {
       this.jointMotorForce = _value;
       if (this.oimoJoint != null) this.oimoJoint.getLimitMotor().motorForce = this.jointMotorForce;
     }
-
-    /**
-      * If the two connected RigidBodies collide with eath other. (Default = false)
-     */
-
     //#endregion
 
     //#region Saving/Loading
@@ -87,7 +82,9 @@ namespace FudgeCore {
     }
 
     public getMutator(): Mutator {
-      return super.getMutator();
+      let mutator: Mutator = super.getMutator();
+      mutator.motorForce = this.motorForce;
+      return mutator;
     }
     //#endregion
 

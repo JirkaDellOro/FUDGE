@@ -233,6 +233,7 @@ namespace FudgeCore {
       this.anchor = new Vector3(...<number[]>(Object.values(_mutator.anchor)));
       this.connectChild(_mutator.nameChildToConnect);
       delete _mutator.anchor;
+      delete _mutator.nameChildToConnect;
       super.mutate(_mutator);
     }
 
@@ -262,14 +263,26 @@ namespace FudgeCore {
       this.oimoJoint.setBreakTorque(this.breakTorque);
       this.oimoJoint.setAllowCollision(this.jointInternalCollision);
     }
-
-
-
-    /** Setting both bodies to the bodies that belong to the loaded IDs and reconnecting them */
-    // protected setBodiesFromLoadedIDs(): void {
-    //   Debug.log("Set From: " + this.idAttachedRB + " / " + this.idConnectedRB);
-    //   this.attachedRigidbody = Physics.world.getBodyByID(this.idAttachedRB);
-    //   this.connectedRigidbody = Physics.world.getBodyByID(this.idConnectedRB);
-    // }
   }
+
+  // class PhysicsAccessor<Joint, Value> {
+  //   #component: ComponentJoint;
+  //   #getter: Function;
+  //   #property: string;
+  //   #value: Value;
+  //   public constructor(_component: ComponentJoint, _getter: Function, _property: string ) {
+  //     this.#component = _component;
+  //     this.#getter = _getter;
+  //     this.#property = _property;
+  //   }
+
+  //   public get(): Value {
+  //     return this.#value;
+  //   }
+  //   public set(_value: Value): void {
+  //     this.#value = _value;
+  //     Object.call(this.#getter, this.#component.getOimoJoint())[this.#property] = _value;
+  //   }
+  // }
+
 }
