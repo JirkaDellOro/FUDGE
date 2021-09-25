@@ -41,8 +41,6 @@ namespace FudgeCore {
       this.dirtyStatus();
     }
 
-
-
     /**
       * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. 
      */

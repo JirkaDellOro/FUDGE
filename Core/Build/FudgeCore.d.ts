@@ -3800,10 +3800,10 @@ declare namespace FudgeCore {
        * @author Marko Fehrenbach, HFU 2020
        */
     class ComponentJointPrismatic extends ComponentJointAxial {
+        #private;
         static readonly iSubclass: number;
         protected joint: OIMO.PrismaticJoint;
         protected config: OIMO.PrismaticJointConfig;
-        private jointMotorForce;
         /** Creating a prismatic joint between two ComponentRigidbodies only moving on one axis bound on a local anchorpoint. */
         constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**

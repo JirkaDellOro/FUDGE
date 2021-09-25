@@ -17,11 +17,11 @@ namespace FudgeCore {
   export class ComponentJointPrismatic extends ComponentJointAxial {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointPrismatic);
 
+    #motorForce: number = 0;
+
     protected joint: OIMO.PrismaticJoint;
     protected config: OIMO.PrismaticJointConfig = new OIMO.PrismaticJointConfig();
     //Internally used variables - Joint Properties that are used even when no actual joint is currently existend
-
-    private jointMotorForce: number = 0;
 
     /** Creating a prismatic joint between two ComponentRigidbodies only moving on one axis bound on a local anchorpoint. */
     constructor(_bodyAnchor: ComponentRigidbody = null, _bodyTied: ComponentRigidbody = null, _axis: Vector3 = new Vector3(0, 1, 0), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
@@ -35,11 +35,11 @@ namespace FudgeCore {
       * The maximum motor force in Newton. force <= 0 equals disabled. This is the force that the motor is using to hold the position, or reach it if a motorSpeed is defined.
      */
     public get motorForce(): number {
-      return this.jointMotorForce;
+      return this.#motorForce;
     }
     public set motorForce(_value: number) {
-      this.jointMotorForce = _value;
-      if (this.joint != null) this.joint.getLimitMotor().motorForce = this.jointMotorForce;
+      this.#motorForce = _value;
+      if (this.joint != null) this.joint.getLimitMotor().motorForce = _value;
     }
     //#endregion
 
@@ -53,7 +53,7 @@ namespace FudgeCore {
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.motorForce = _serialization.motorForce || this.jointMotorForce;
+      this.motorForce = _serialization.motorForce || this.motorForce;
       super.deserialize(_serialization[super.constructor.name]);
       return this;
     }
