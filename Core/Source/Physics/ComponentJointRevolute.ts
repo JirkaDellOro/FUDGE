@@ -18,12 +18,13 @@ namespace FudgeCore {
      */
   export class ComponentJointRevolute extends ComponentJointAxial {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointRevolute);
+    
+    #motorTorque: number = 0;
+    #rotor: OIMO.RotationalLimitMotor;
 
     protected joint: OIMO.RevoluteJoint;
     protected config: OIMO.RevoluteJointConfig = new OIMO.RevoluteJointConfig();
     
-    private jointmotorTorque: number = 0;
-    private rotationalMotor: OIMO.RotationalLimitMotor;
 
     constructor(_bodyAnchor: ComponentRigidbody = null, _bodyTied: ComponentRigidbody = null, _axis: Vector3 = new Vector3(0, 1, 0), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
       super(_bodyAnchor, _bodyTied, _axis, _localAnchor);
@@ -57,11 +58,11 @@ namespace FudgeCore {
       * The maximum motor force in Newton. force <= 0 equals disabled. 
      */
     get motorTorque(): number {
-      return this.jointmotorTorque;
+      return this.#motorTorque;
     }
     set motorTorque(_value: number) {
-      this.jointmotorTorque = _value;
-      if (this.joint != null) this.joint.getLimitMotor().motorTorque = this.jointmotorTorque;
+      this.#motorTorque = _value;
+      if (this.joint != null) this.joint.getLimitMotor().motorTorque = _value;
     }
 
     /**
@@ -87,14 +88,14 @@ namespace FudgeCore {
     //#endregion
 
     protected constructJoint(): void {
-      this.rotationalMotor = new OIMO.RotationalLimitMotor().setLimits(this.motorLimitLower, this.motorLimitUpper);
-      this.rotationalMotor.setMotor(this.motorSpeed, this.jointmotorTorque);
+      this.#rotor = new OIMO.RotationalLimitMotor().setLimits(this.motorLimitLower, this.motorLimitUpper);
+      this.#rotor.setMotor(this.motorSpeed, this.motorTorque);
 
       this.config = new OIMO.RevoluteJointConfig();
       super.constructJoint();
       
       this.config.springDamper = this.springDamper;
-      this.config.limitMotor = this.rotationalMotor;
+      this.config.limitMotor = this.#rotor;
 
       this.joint = new OIMO.RevoluteJoint(this.config);
       this.configureJoint();

@@ -3950,11 +3950,10 @@ declare namespace FudgeCore {
        * @author Marko Fehrenbach, HFU, 2020
        */
     class ComponentJointRevolute extends ComponentJointAxial {
+        #private;
         static readonly iSubclass: number;
         protected joint: OIMO.RevoluteJoint;
         protected config: OIMO.RevoluteJointConfig;
-        private jointmotorTorque;
-        private rotationalMotor;
         constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
           * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
