@@ -3842,24 +3842,10 @@ declare namespace FudgeCore {
         * @author Marko Fehrenbach, HFU, 2020
         */
     class ComponentJointRagdoll extends ComponentJoint {
+        #private;
         static readonly iSubclass: number;
         protected joint: OIMO.RagdollJoint;
         protected config: OIMO.RagdollJointConfig;
-        private jointTwistSpringDampingRatio;
-        private jointTwistSpringFrequency;
-        private jointSwingSpringDampingRatio;
-        private jointSwingSpringFrequency;
-        private jointTwistMotorLimitUpper;
-        private jointTwistMotorLimitLower;
-        private jointTwistMotorTorque;
-        private jointTwistMotorSpeed;
-        private jointTwistMotor;
-        private jointTwistSpringDamper;
-        private jointSwingSpringDamper;
-        private jointFirstAxis;
-        private jointSecondAxis;
-        private jointMaxAngle1;
-        private jointMaxAngle2;
         constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody, _firstAxis?: Vector3, _secondAxis?: Vector3, _localAnchor?: Vector3);
         /**
          * The axis connecting the the two {@link Node}s e.g. Vector3(0,1,0) to have a upward connection.

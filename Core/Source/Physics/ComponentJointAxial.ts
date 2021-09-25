@@ -12,7 +12,7 @@ namespace FudgeCore {
     #motorSpeed: number = 0;
     #axis: OIMO.Vec3;
     #springFrequency: number = 0;
-    #jointSpringDampingRatio: number = 0;
+    #springDamping: number = 0;
 
     protected springDamper: OIMO.SpringDamper;
     protected translationMotor: OIMO.TranslationalLimitMotor;
@@ -72,13 +72,13 @@ namespace FudgeCore {
      * The damping of the spring. 1 equals completly damped.
      */
     public get springDamping(): number {
-      return this.#jointSpringDampingRatio;
+      return this.#springDamping;
     }
     public set springDamping(_value: number) {
-      this.#jointSpringDampingRatio = _value;
+      this.#springDamping = _value;
       if (this.joint != null)
         // overwrite for e.g. CylindricalJoint
-        (<OIMO.PrismaticJoint><unknown>this.joint).getSpringDamper().dampingRatio = this.#jointSpringDampingRatio;
+        (<OIMO.PrismaticJoint><unknown>this.joint).getSpringDamper().dampingRatio = this.#springDamping;
     }
 
     /**
@@ -151,7 +151,7 @@ namespace FudgeCore {
     //#endregion
 
     protected constructJoint(): void {
-      this.springDamper = new OIMO.SpringDamper().setSpring(this.#springFrequency, this.#jointSpringDampingRatio);
+      this.springDamper = new OIMO.SpringDamper().setSpring(this.#springFrequency, this.#springDamping);
       super.constructJoint(this.#axis);
     }
   }
