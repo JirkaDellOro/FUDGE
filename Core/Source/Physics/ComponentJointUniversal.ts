@@ -22,6 +22,7 @@ namespace FudgeCore {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointUniversal);
 
     protected oimoJoint: OIMO.UniversalJoint;
+    protected config: OIMO.UniversalJointConfig = new OIMO.UniversalJointConfig();
 
     private jointFirstSpringDampingRatio: number = 0;
     private jointFirstSpringFrequency: number = 0;
@@ -39,7 +40,6 @@ namespace FudgeCore {
     private jointSecondMotorTorque: number = 0;
     private jointSecondMotorSpeed: number = 0;
 
-    private config: OIMO.UniversalJointConfig = new OIMO.UniversalJointConfig();
     private firstAxisMotor: OIMO.RotationalLimitMotor;
     private secondAxisMotor: OIMO.RotationalLimitMotor;
     private firstAxisSpringDamper: OIMO.SpringDamper;
@@ -238,20 +238,20 @@ namespace FudgeCore {
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.firstAxis =  _serialization.firstAxis || this.jointFirstAxis;
+      this.firstAxis = _serialization.firstAxis || this.jointFirstAxis;
       this.secondAxis = _serialization.secondAxis || this.jointSecondAxis;
-      this.springDampingFirstAxis =   _serialization.springDampingFirstAxis || this.jointFirstSpringDampingRatio;
-      this.springFrequencyFirstAxis =  _serialization.springFrequencyFirstAxis || this.jointFirstSpringFrequency;
-      this.springDampingSecondAxis =  _serialization.springDampingSecondAxis || this.jointSecondSpringDampingRatio;
-      this.springFrequencySecondAxis =  _serialization.springFrequencySecondAxis || this.jointSecondSpringFrequency;
+      this.springDampingFirstAxis = _serialization.springDampingFirstAxis || this.jointFirstSpringDampingRatio;
+      this.springFrequencyFirstAxis = _serialization.springFrequencyFirstAxis || this.jointFirstSpringFrequency;
+      this.springDampingSecondAxis = _serialization.springDampingSecondAxis || this.jointSecondSpringDampingRatio;
+      this.springFrequencySecondAxis = _serialization.springFrequencySecondAxis || this.jointSecondSpringFrequency;
       this.motorLimitUpperFirstAxis = _serialization.motorLimitUpperFirstAxis || this.jointFirstMotorLimitUpper;
-      this.motorLimitLowerFirstAxis =  _serialization.motorLimitLowerFirstAxis || this.jointFirstMotorLimitUpper;
-      this.motorSpeedFirstAxis =  _serialization.motorSpeedFirstAxis || this.jointFirstMotorSpeed;
-      this.motorTorqueFirstAxis =  _serialization.motorTorqueFirstAxis || this.jointFirstMotorTorque;
-      this.motorLimitUpperSecondAxis =  _serialization.motorLimitUpperSecondAxis || this.jointSecondMotorLimitUpper;
-      this.motorLimitLowerSecondAxis =  _serialization.motorLimitLowerSecondAxis || this.jointSecondMotorLimitUpper;
-      this.motorSpeedSecondAxis =  _serialization.motorSpeedSecondAxis || this.jointSecondMotorSpeed;
-      this.motorTorqueSecondAxis =  _serialization.motorTorqueSecondAxis || this.jointSecondMotorTorque;
+      this.motorLimitLowerFirstAxis = _serialization.motorLimitLowerFirstAxis || this.jointFirstMotorLimitUpper;
+      this.motorSpeedFirstAxis = _serialization.motorSpeedFirstAxis || this.jointFirstMotorSpeed;
+      this.motorTorqueFirstAxis = _serialization.motorTorqueFirstAxis || this.jointFirstMotorTorque;
+      this.motorLimitUpperSecondAxis = _serialization.motorLimitUpperSecondAxis || this.jointSecondMotorLimitUpper;
+      this.motorLimitLowerSecondAxis = _serialization.motorLimitLowerSecondAxis || this.jointSecondMotorLimitUpper;
+      this.motorSpeedSecondAxis = _serialization.motorSpeedSecondAxis || this.jointSecondMotorSpeed;
+      this.motorTorqueSecondAxis = _serialization.motorTorqueSecondAxis || this.jointSecondMotorTorque;
       super.deserialize(_serialization);
       return this;
     }
@@ -267,9 +267,7 @@ namespace FudgeCore {
       this.secondAxisMotor.setMotor(this.jointFirstMotorSpeed, this.jointFirstMotorTorque);
 
       this.config = new OIMO.UniversalJointConfig();
-      let attachedRBPos: Vector3 = this.bodyAnchor.node.mtxWorld.translation;
-      let worldAnchor: OIMO.Vec3 = new OIMO.Vec3(attachedRBPos.x + this.anchor.x, attachedRBPos.y + this.anchor.y, attachedRBPos.z + this.anchor.z);
-      this.config.init(this.bodyAnchor.getOimoRigidbody(), this.bodyTied.getOimoRigidbody(), worldAnchor, this.jointFirstAxis, this.jointSecondAxis);
+      super.constructJoint(this.jointFirstAxis, this.jointSecondAxis);
       this.config.limitMotor1 = this.firstAxisMotor;
       this.config.limitMotor2 = this.secondAxisMotor;
       this.config.springDamper1 = this.firstAxisSpringDamper;

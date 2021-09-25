@@ -26,6 +26,7 @@ namespace FudgeCore {
     // public static readonly iSubclass: number = Component.registerSubclass(ComponentJoint);
     protected singleton: boolean = false; //Multiple joints can be attached to one Node
     protected abstract oimoJoint: OIMO.Joint;
+    protected abstract config: OIMO.JointConfig;
 
 
     /** Create a joint connection between the two given RigidbodyComponents. */
@@ -236,12 +237,12 @@ namespace FudgeCore {
       Physics.world.removeJoint(this);
     }
 
-    protected constructJoint(): void {
+    protected constructJoint(..._configParams: Object[]): void {
       let posBodyAnchor: Vector3 = this.bodyAnchor.node.mtxWorld.translation; //Setting the anchor position locally from the first rigidbody
       let worldAnchor: OIMO.Vec3 = new OIMO.Vec3(posBodyAnchor.x + this.#anchor.x, posBodyAnchor.y + this.#anchor.y, posBodyAnchor.z + this.#anchor.z);
 
-      // @ts-ignore
-      this.config.init(this.#bodyAnchor.getOimoRigidbody(), this.#bodyTied.getOimoRigidbody(), worldAnchor, this.jointAxis);
+      // @ts-ignore    // unfortunately, method init is not a member of the base class OIMO.JointConfig
+      this.config.init(this.#bodyAnchor.getOimoRigidbody(), this.#bodyTied.getOimoRigidbody(), worldAnchor, ..._configParams);
     }
 
     protected configureJoint(): void {
@@ -250,25 +251,4 @@ namespace FudgeCore {
       this.oimoJoint.setAllowCollision(this.#internalCollision);
     }
   }
-
-  // class PhysicsAccessor<Joint, Value> {
-  //   #component: ComponentJoint;
-  //   #getter: Function;
-  //   #property: string;
-  //   #value: Value;
-  //   public constructor(_component: ComponentJoint, _getter: Function, _property: string ) {
-  //     this.#component = _component;
-  //     this.#getter = _getter;
-  //     this.#property = _property;
-  //   }
-
-  //   public get(): Value {
-  //     return this.#value;
-  //   }
-  //   public set(_value: Value): void {
-  //     this.#value = _value;
-  //     Object.call(this.#getter, this.#component.getOimoJoint())[this.#property] = _value;
-  //   }
-  // }
-
 }

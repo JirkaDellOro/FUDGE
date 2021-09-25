@@ -20,11 +20,11 @@ namespace FudgeCore {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointSpherical);
 
     protected oimoJoint: OIMO.SphericalJoint;
+    protected config: OIMO.SphericalJointConfig = new OIMO.SphericalJointConfig();
 
     private jointSpringDampingRatio: number = 0;
     private jointSpringFrequency: number = 0;
 
-    private config: OIMO.SphericalJointConfig = new OIMO.SphericalJointConfig();
     private springDamper: OIMO.SpringDamper;
 
     constructor(_bodyAnchor: ComponentRigidbody = null, _bodyTied: ComponentRigidbody = null, _localAnchor: Vector3 = new Vector3(0, 0, 0)) {

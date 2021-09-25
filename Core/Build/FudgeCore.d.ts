@@ -3581,6 +3581,7 @@ declare namespace FudgeCore {
         #private;
         protected singleton: boolean;
         protected abstract oimoJoint: OIMO.Joint;
+        protected abstract config: OIMO.JointConfig;
         /** Create a joint connection between the two given RigidbodyComponents. */
         constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody);
         /** Get/Set the first ComponentRigidbody of this connection. It should always be the one that this component is attached too in the sceneTree. */
@@ -3638,7 +3639,7 @@ declare namespace FudgeCore {
         protected dirtyStatus(): void;
         protected addJoint(): void;
         protected removeJoint(): void;
-        protected constructJoint(): void;
+        protected constructJoint(..._configParams: Object[]): void;
         protected configureJoint(): void;
     }
 }
@@ -3650,11 +3651,9 @@ declare namespace FudgeCore {
     abstract class ComponentJointAxial extends ComponentJoint {
         #private;
         springDamper: OIMO.SpringDamper;
-        jointAxis: OIMO.Vec3;
         translationMotor: OIMO.TranslationalLimitMotor;
         protected jointSpringFrequency: number;
         protected jointSpringDampingRatio: number;
-        protected abstract config: OIMO.JointConfig;
         /** Creating a cylindrical joint between two ComponentRigidbodies moving on one axis and rotating around another bound on a local anchorpoint. */
         constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
@@ -3847,6 +3846,7 @@ declare namespace FudgeCore {
     class ComponentJointRagdoll extends ComponentJoint {
         static readonly iSubclass: number;
         protected oimoJoint: OIMO.RagdollJoint;
+        protected config: OIMO.RagdollJointConfig;
         private jointTwistSpringDampingRatio;
         private jointTwistSpringFrequency;
         private jointSwingSpringDampingRatio;
@@ -3855,7 +3855,6 @@ declare namespace FudgeCore {
         private jointTwistMotorLimitLower;
         private jointTwistMotorTorque;
         private jointTwistMotorSpeed;
-        private config;
         private jointTwistMotor;
         private jointTwistSpringDamper;
         private jointSwingSpringDamper;
@@ -4003,9 +4002,9 @@ declare namespace FudgeCore {
     class ComponentJointSpherical extends ComponentJoint {
         static readonly iSubclass: number;
         protected oimoJoint: OIMO.SphericalJoint;
+        protected config: OIMO.SphericalJointConfig;
         private jointSpringDampingRatio;
         private jointSpringFrequency;
-        private config;
         private springDamper;
         constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody, _localAnchor?: Vector3);
         /**
@@ -4046,6 +4045,7 @@ declare namespace FudgeCore {
     class ComponentJointUniversal extends ComponentJoint {
         static readonly iSubclass: number;
         protected oimoJoint: OIMO.UniversalJoint;
+        protected config: OIMO.UniversalJointConfig;
         private jointFirstSpringDampingRatio;
         private jointFirstSpringFrequency;
         private jointSecondSpringDampingRatio;
@@ -4058,7 +4058,6 @@ declare namespace FudgeCore {
         private jointSecondMotorLimitLower;
         private jointSecondMotorTorque;
         private jointSecondMotorSpeed;
-        private config;
         private firstAxisMotor;
         private secondAxisMotor;
         private firstAxisSpringDamper;
@@ -4157,7 +4156,7 @@ declare namespace FudgeCore {
     class ComponentJointWelding extends ComponentJoint {
         static readonly iSubclass: number;
         protected oimoJoint: OIMO.GenericJoint;
-        private config;
+        protected config: OIMO.GenericJointConfig;
         constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody, _localAnchor?: Vector3);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;

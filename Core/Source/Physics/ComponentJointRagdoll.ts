@@ -25,6 +25,7 @@ namespace FudgeCore {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointRagdoll);
 
     protected oimoJoint: OIMO.RagdollJoint;
+    protected config: OIMO.RagdollJointConfig = new OIMO.RagdollJointConfig();
 
     private jointTwistSpringDampingRatio: number = 0;
     private jointTwistSpringFrequency: number = 0;
@@ -37,7 +38,6 @@ namespace FudgeCore {
     private jointTwistMotorTorque: number = 0;
     private jointTwistMotorSpeed: number = 0;
 
-    private config: OIMO.RagdollJointConfig = new OIMO.RagdollJointConfig();
     private jointTwistMotor: OIMO.RotationalLimitMotor;
     private jointTwistSpringDamper: OIMO.SpringDamper;
     private jointSwingSpringDamper: OIMO.SpringDamper;
@@ -248,9 +248,7 @@ namespace FudgeCore {
       this.jointTwistMotor.setMotor(this.jointTwistMotorSpeed, this.jointTwistMotorTorque);
 
       this.config = new OIMO.RagdollJointConfig();
-      let attachedRBPos: Vector3 = this.bodyAnchor.node.mtxWorld.translation;
-      let worldAnchor: OIMO.Vec3 = new OIMO.Vec3(attachedRBPos.x + this.anchor.x, attachedRBPos.y + this.anchor.y, attachedRBPos.z + this.anchor.z);
-      this.config.init(this.bodyAnchor.getOimoRigidbody(), this.bodyTied.getOimoRigidbody(), worldAnchor, this.jointFirstAxis, this.jointSecondAxis); // last parameter differs from ComponentJoint
+      super.constructJoint(this.jointFirstAxis, this.jointSecondAxis); // last parameter differs from ComponentJoint
       this.config.swingSpringDamper = this.jointSwingSpringDamper;
       this.config.twistSpringDamper = this.jointTwistSpringDamper;
       this.config.twistLimitMotor = this.jointTwistMotor;

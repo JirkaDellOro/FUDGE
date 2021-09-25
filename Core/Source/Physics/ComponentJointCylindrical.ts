@@ -37,9 +37,7 @@ namespace FudgeCore {
 
     /** Creating a cylindrical joint between two ComponentRigidbodies moving on one axis and rotating around another bound on a local anchorpoint. */
     constructor(_bodyAnchor: ComponentRigidbody = null, _bodyTied: ComponentRigidbody = null, _axis: Vector3 = new Vector3(0, 1, 0), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
-      super(_bodyAnchor, _bodyTied);
-      this.jointAxis = new OIMO.Vec3(_axis.x, _axis.y, _axis.z);
-      this.anchor = new Vector3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
+      super(_bodyAnchor, _bodyTied, _axis, _localAnchor);
     }
 
     //#region Get/Set transfor of fudge properties to the physics engine

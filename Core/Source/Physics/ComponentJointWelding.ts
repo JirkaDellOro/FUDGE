@@ -10,8 +10,7 @@ namespace FudgeCore {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointWelding);
 
     protected oimoJoint: OIMO.GenericJoint;
-    private config: OIMO.GenericJointConfig = new OIMO.GenericJointConfig();
-
+    protected config: OIMO.GenericJointConfig = new OIMO.GenericJointConfig();
 
     constructor(_bodyAnchor: ComponentRigidbody = null, _bodyTied: ComponentRigidbody = null, _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
       super(_bodyAnchor, _bodyTied);
@@ -38,10 +37,7 @@ namespace FudgeCore {
 
     protected constructJoint(): void {
       this.config = new OIMO.GenericJointConfig();
-      let attachedRBPos: Vector3 = this.bodyAnchor.node.mtxWorld.translation;
-      let worldAnchor: OIMO.Vec3 = new OIMO.Vec3(attachedRBPos.x + this.anchor.x, attachedRBPos.y + this.anchor.y, attachedRBPos.z + this.anchor.z);
-      this.config.init(this.bodyAnchor.getOimoRigidbody(), this.bodyTied.getOimoRigidbody(), worldAnchor, new OIMO.Mat3(), new OIMO.Mat3());
-
+      super.constructJoint(new OIMO.Mat3(), new OIMO.Mat3());
 
       this.oimoJoint = new OIMO.GenericJoint(this.config);
       this.oimoJoint.setAllowCollision(this.internalCollision);

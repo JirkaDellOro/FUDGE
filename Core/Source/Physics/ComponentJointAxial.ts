@@ -11,18 +11,17 @@ namespace FudgeCore {
     #motorLimitLower: number = -10;
     #motorSpeed: number = 0;
     springDamper: OIMO.SpringDamper;
-    jointAxis: OIMO.Vec3;
+    #jointAxis: OIMO.Vec3;
     translationMotor: OIMO.TranslationalLimitMotor;
 
     protected jointSpringFrequency: number = 0;
     protected jointSpringDampingRatio: number = 0;
-    protected abstract config: OIMO.JointConfig;
 
     /** Creating a cylindrical joint between two ComponentRigidbodies moving on one axis and rotating around another bound on a local anchorpoint. */
     constructor(_bodyAnchor: ComponentRigidbody = null, _bodyTied: ComponentRigidbody = null, _axis: Vector3 = new Vector3(0, 1, 0), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
       super(_bodyAnchor, _bodyTied);
-      this.jointAxis = new OIMO.Vec3(_axis.x, _axis.y, _axis.z);
-      this.anchor = new Vector3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
+      this.axis = _axis;
+      this.anchor = _localAnchor;
       this.motorLimitLower = -10;
       this.motorLimitUpper = 10;
     }
@@ -33,10 +32,10 @@ namespace FudgeCore {
      *  When changed after initialization the joint needs to be reconnected.
      */
     public get axis(): Vector3 {
-      return new Vector3(this.jointAxis.x, this.jointAxis.y, this.jointAxis.z);
+      return new Vector3(this.#jointAxis.x, this.#jointAxis.y, this.#jointAxis.z);
     }
     public set axis(_value: Vector3) {
-      this.jointAxis = new OIMO.Vec3(_value.x, _value.y, _value.z);
+      this.#jointAxis = new OIMO.Vec3(_value.x, _value.y, _value.z);
       this.disconnect();
       this.dirtyStatus();
     }
@@ -154,7 +153,7 @@ namespace FudgeCore {
 
     protected constructJoint(): void {
       this.springDamper = new OIMO.SpringDamper().setSpring(this.jointSpringFrequency, this.jointSpringDampingRatio);
-      super.constructJoint();
+      super.constructJoint(this.#jointAxis);
     }
   }
 }
