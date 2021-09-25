@@ -23,6 +23,8 @@ namespace FudgeCore {
       super(_attachedRigidbody, _connectedRigidbody);
       this.jointAxis = new OIMO.Vec3(_axis.x, _axis.y, _axis.z);
       this.anchor = new Vector3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
+      this.motorLimitLower = -10;
+      this.motorLimitUpper = 10;
     }
 
     //#region Get/Set transfor of fudge properties to the physics engine

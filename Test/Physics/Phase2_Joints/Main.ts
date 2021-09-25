@@ -116,10 +116,10 @@ namespace FudgePhysics_Communication {
         bodies[8].mtxLocal.scale(new f.Vector3(0.3, 2, 0.3));
         cylindricalJoint = new f.ComponentJointCylindrical(bodies[7].getComponent(f.ComponentRigidbody), bodies[8].getComponent(f.ComponentRigidbody), new f.Vector3(0, 1, 0));
         bodies[7].addComponent(cylindricalJoint);
-        cylindricalJoint.translationMotorLimitLower = -1.25;
-        cylindricalJoint.translationMotorLimitUpper = 0;
+        cylindricalJoint.motorLimitLower = -1.25;
         cylindricalJoint.rotationalMotorSpeed = 1;
-        cylindricalJoint.rotationalMotorTorque = 10;
+        // cylindricalJoint.rotationalMotorTorque = 10;
+        cylindricalJoint.motorTorque = 10;
 
         //Spherical Joint
         bodies[9] = createCompleteMeshNode("Socket", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.4, 0.4, 0.4, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
@@ -271,31 +271,31 @@ namespace FudgePhysics_Communication {
 
     function hndKeyDown(_event: KeyboardEvent): void { //Test for joint changes
         if (_event.code == f.KEYBOARD_CODE.Y) {
-            prismaticJoint.attachedRigidbody.applyForce(new f.Vector3(0, 1 * 1000, 0));
+            prismaticJoint.bodyAnchor.applyForce(new f.Vector3(0, 1 * 1000, 0));
         }
         if (_event.code == f.KEYBOARD_CODE.U) {
-            prismaticJointSlide.connectedRigidbody.applyForce(new f.Vector3(1 * -100, 0, 0));
+            prismaticJointSlide.bodyTied.applyForce(new f.Vector3(1 * -100, 0, 0));
         }
         if (_event.code == f.KEYBOARD_CODE.I) {
-            prismaticJointSlide.connectedRigidbody.applyForce(new f.Vector3(1 * 100, 0, 0));
+            prismaticJointSlide.bodyTied.applyForce(new f.Vector3(1 * 100, 0, 0));
         }
         if (_event.code == f.KEYBOARD_CODE.O) {
-            revoluteJointSwingDoor.connectedRigidbody.applyForce(new f.Vector3(0, 0, 1 * 100));
+            revoluteJointSwingDoor.bodyTied.applyForce(new f.Vector3(0, 0, 1 * 100));
         }
         if (_event.code == f.KEYBOARD_CODE.P) {
-            revoluteJointSwingDoor.connectedRigidbody.applyForce(new f.Vector3(0, 0, 1 * -100));
+            revoluteJointSwingDoor.bodyTied.applyForce(new f.Vector3(0, 0, 1 * -100));
         }
         if (_event.code == f.KEYBOARD_CODE.F) {
-            cylindricalJoint.connectedRigidbody.applyForce(new f.Vector3(0, 1 * 300, 0));
+            cylindricalJoint.bodyTied.applyForce(new f.Vector3(0, 1 * 300, 0));
         }
         if (_event.code == f.KEYBOARD_CODE.G) {
-            sphericalJoint.connectedRigidbody.applyTorque(new f.Vector3(0, 1 * 100, 0));
+            sphericalJoint.bodyTied.applyTorque(new f.Vector3(0, 1 * 100, 0));
         }
         if (_event.code == f.KEYBOARD_CODE.H) {
-            secondUniversalJoint.connectedRigidbody.applyForce(new f.Vector3(0, 0, 1 * 100));
+            secondUniversalJoint.bodyTied.applyForce(new f.Vector3(0, 0, 1 * 100));
         }
         if (_event.code == f.KEYBOARD_CODE.J) {
-            secondUniversalJoint.connectedRigidbody.applyTorque(new f.Vector3(0, 1 * 100, 0));
+            secondUniversalJoint.bodyTied.applyTorque(new f.Vector3(0, 1 * 100, 0));
         }
 
         //Physics Debugs

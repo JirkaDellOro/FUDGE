@@ -136,9 +136,9 @@ namespace FudgeCore {
       * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. 
      */
     public set motorLimitLower(_value: number) {
-      this.motorLimitLower = _value;
-      if (this.oimoJoint != null) 
-      this.oimoJoint.getTranslationalLimitMotor().lowerLimit = _value;
+      super.motorLimitLower = _value;
+      if (this.oimoJoint != null)
+        this.oimoJoint.getTranslationalLimitMotor().lowerLimit = _value;
     }
 
     public set motorSpeed(_value: number) {
