@@ -3846,19 +3846,19 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         protected joint: OIMO.RagdollJoint;
         protected config: OIMO.RagdollJointConfig;
-        constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody, _firstAxis?: Vector3, _secondAxis?: Vector3, _localAnchor?: Vector3);
+        constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody, _axisFirst?: Vector3, _axisSecond?: Vector3, _localAnchor?: Vector3);
         /**
          * The axis connecting the the two {@link Node}s e.g. Vector3(0,1,0) to have a upward connection.
          *  When changed after initialization the joint needs to be reconnected.
          */
-        get firstAxis(): Vector3;
-        set firstAxis(_value: Vector3);
+        get axisFirst(): Vector3;
+        set axisFirst(_value: Vector3);
         /**
         * The axis connecting the the two {@link Node}s e.g. Vector3(0,1,0) to have a upward connection.
         *  When changed after initialization the joint needs to be reconnected.
         */
-        get secondAxis(): Vector3;
-        set secondAxis(_value: Vector3);
+        get axisSecond(): Vector3;
+        set axisSecond(_value: Vector3);
         /**
          * The maximum angle of rotation along the first axis. Value needs to be positive. Changes do rebuild the joint
          */
@@ -3892,23 +3892,23 @@ declare namespace FudgeCore {
         /**
           * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
          */
-        get twistMotorLimitUpper(): number;
-        set twistMotorLimitUpper(_value: number);
+        get motorLimitUpperTwist(): number;
+        set motorLimitUpperTwist(_value: number);
         /**
-          * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
+         * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
          */
-        get twistMotorLimitLower(): number;
-        set twistMotorLimitLower(_value: number);
+        get motorLimitLowerTwist(): number;
+        set motorLimitLowerTwist(_value: number);
         /**
           * The target rotational speed of the motor in m/s.
          */
-        get twistMotorSpeed(): number;
-        set twistMotorSpeed(_value: number);
+        get motorSpeedTwist(): number;
+        set motorSpeedTwist(_value: number);
         /**
           * The maximum motor torque in Newton. force <= 0 equals disabled.
          */
-        get twistMotorTorque(): number;
-        set twistMotorTorque(_value: number);
+        get motorTorqueTwist(): number;
+        set motorTorqueTwist(_value: number);
         /**
           * If the two connected RigidBodies collide with eath other. (Default = false)
          */
