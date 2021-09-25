@@ -16,7 +16,7 @@ namespace FudgeCore {
     constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null, _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
       super(_attachedRigidbody, _connectedRigidbody);
 
-      this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
+      this.anchor = new Vector3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
     }
     //#endregion
 
@@ -39,12 +39,12 @@ namespace FudgeCore {
     protected constructJoint(): void {
       this.config = new OIMO.GenericJointConfig();
       let attachedRBPos: Vector3 = this.attachedRigidbody.node.mtxWorld.translation;
-      let worldAnchor: OIMO.Vec3 = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
-      this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, new OIMO.Mat3(), new OIMO.Mat3());
+      let worldAnchor: OIMO.Vec3 = new OIMO.Vec3(attachedRBPos.x + this.anchor.x, attachedRBPos.y + this.anchor.y, attachedRBPos.z + this.anchor.z);
+      this.config.init(this.attachedRigidbody.getOimoRigidbody(), this.connectedRigidbody.getOimoRigidbody(), worldAnchor, new OIMO.Mat3(), new OIMO.Mat3());
 
 
       this.oimoJoint = new OIMO.GenericJoint(this.config);
-      this.oimoJoint.setAllowCollision(this.jointInternalCollision);
+      this.oimoJoint.setAllowCollision(this.internalCollision);
     }
   }
 }

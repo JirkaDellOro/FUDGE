@@ -51,7 +51,7 @@ namespace FudgeCore {
       super(_attachedRigidbody, _connectedRigidbody);
       this.jointFirstAxis = new OIMO.Vec3(_firstAxis.x, _firstAxis.y, _firstAxis.z);
       this.jointSecondAxis = new OIMO.Vec3(_secondAxis.x, _secondAxis.y, _secondAxis.z);
-      this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
+      this.anchor = new Vector3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
     }
 
     //#region Get/Set transfor of fudge properties to the physics engine
@@ -268,8 +268,8 @@ namespace FudgeCore {
 
       this.config = new OIMO.UniversalJointConfig();
       let attachedRBPos: Vector3 = this.attachedRigidbody.node.mtxWorld.translation;
-      let worldAnchor: OIMO.Vec3 = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
-      this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, this.jointFirstAxis, this.jointSecondAxis);
+      let worldAnchor: OIMO.Vec3 = new OIMO.Vec3(attachedRBPos.x + this.anchor.x, attachedRBPos.y + this.anchor.y, attachedRBPos.z + this.anchor.z);
+      this.config.init(this.attachedRigidbody.getOimoRigidbody(), this.connectedRigidbody.getOimoRigidbody(), worldAnchor, this.jointFirstAxis, this.jointSecondAxis);
       this.config.limitMotor1 = this.firstAxisMotor;
       this.config.limitMotor2 = this.secondAxisMotor;
       this.config.springDamper1 = this.firstAxisSpringDamper;

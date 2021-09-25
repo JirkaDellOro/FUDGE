@@ -29,7 +29,7 @@ namespace FudgeCore {
 
     constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null, _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
       super(_attachedRigidbody, _connectedRigidbody);
-      this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
+      this.anchor = new Vector3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
     }
 
     //#region Get/Set transfor of fudge properties to the physics engine

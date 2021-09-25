@@ -3578,19 +3578,9 @@ declare namespace FudgeCore {
        * @author Marko Fehrenbach, HFU 2020
        */
     abstract class ComponentJoint extends Component {
+        #private;
         protected singleton: boolean;
-        protected idAttachedRB: number;
-        protected idConnectedRB: number;
-        protected attachedRB: ComponentRigidbody;
-        protected connectedRB: ComponentRigidbody;
-        protected nameChildToConnect: string;
         protected abstract oimoJoint: OIMO.Joint;
-        protected connected: boolean;
-        protected jointAnchor: OIMO.Vec3;
-        protected jointInternalCollision: boolean;
-        protected jointBreakForce: number;
-        protected jointBreakTorque: number;
-        private collisionBetweenConnectedBodies;
         /** Create a joint connection between the two given RigidbodyComponents. */
         constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody);
         /** Get/Set the first ComponentRigidbody of this connection. It should always be the one that this component is attached too in the sceneTree. */
