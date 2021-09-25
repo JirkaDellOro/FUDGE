@@ -9,7 +9,7 @@ namespace FudgeCore {
 
     #motorLimitUpper: number = 10;
     #motorLimitLower: number = -10;
-    jointMotorSpeed: number = 0;
+    #motorSpeed: number = 0;
     springDamper: OIMO.SpringDamper;
     jointAxis: OIMO.Vec3;
     translationMotor: OIMO.TranslationalLimitMotor;
@@ -19,8 +19,8 @@ namespace FudgeCore {
     protected abstract config: OIMO.JointConfig;
 
     /** Creating a cylindrical joint between two ComponentRigidbodies moving on one axis and rotating around another bound on a local anchorpoint. */
-    constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null, _axis: Vector3 = new Vector3(0, 1, 0), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
-      super(_attachedRigidbody, _connectedRigidbody);
+    constructor(_bodyAnchor: ComponentRigidbody = null, _bodyTied: ComponentRigidbody = null, _axis: Vector3 = new Vector3(0, 1, 0), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
+      super(_bodyAnchor, _bodyTied);
       this.jointAxis = new OIMO.Vec3(_axis.x, _axis.y, _axis.z);
       this.anchor = new Vector3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
       this.motorLimitLower = -10;
@@ -87,13 +87,13 @@ namespace FudgeCore {
       * The target speed of the motor in m/s.
      */
     public get motorSpeed(): number {
-      return this.jointMotorSpeed;
+      return this.#motorSpeed;
     }
 
     public set motorSpeed(_value: number) {
-      this.jointMotorSpeed = _value;
+      this.#motorSpeed = _value;
       if (this.oimoJoint != null)
-        (<OIMO.PrismaticJoint>this.oimoJoint).getLimitMotor().motorSpeed = this.jointMotorSpeed;
+        (<OIMO.PrismaticJoint>this.oimoJoint).getLimitMotor().motorSpeed = this.#motorSpeed;
     }
 
     /**

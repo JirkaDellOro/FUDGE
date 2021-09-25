@@ -25,8 +25,8 @@ namespace FudgeCore {
     private jointmotorTorque: number = 0;
     private rotationalMotor: OIMO.RotationalLimitMotor;
 
-    constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null, _axis: Vector3 = new Vector3(0, 1, 0), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
-      super(_attachedRigidbody, _connectedRigidbody);
+    constructor(_bodyAnchor: ComponentRigidbody = null, _bodyTied: ComponentRigidbody = null, _axis: Vector3 = new Vector3(0, 1, 0), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
+      super(_bodyAnchor, _bodyTied);
       this.jointAxis = new OIMO.Vec3(_axis.x, _axis.y, _axis.z);
       this.anchor = new Vector3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
 
@@ -90,7 +90,7 @@ namespace FudgeCore {
 
     protected constructJoint(): void {
       this.rotationalMotor = new OIMO.RotationalLimitMotor().setLimits(this.motorLimitLower, this.motorLimitUpper);
-      this.rotationalMotor.setMotor(this.jointMotorSpeed, this.jointmotorTorque);
+      this.rotationalMotor.setMotor(this.motorSpeed, this.jointmotorTorque);
 
       this.config = new OIMO.RevoluteJointConfig();
       super.constructJoint();

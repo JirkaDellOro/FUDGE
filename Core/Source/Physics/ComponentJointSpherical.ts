@@ -27,8 +27,8 @@ namespace FudgeCore {
     private config: OIMO.SphericalJointConfig = new OIMO.SphericalJointConfig();
     private springDamper: OIMO.SpringDamper;
 
-    constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null, _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
-      super(_attachedRigidbody, _connectedRigidbody);
+    constructor(_bodyAnchor: ComponentRigidbody = null, _bodyTied: ComponentRigidbody = null, _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
+      super(_bodyAnchor, _bodyTied);
       this.anchor = new Vector3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
     }
 

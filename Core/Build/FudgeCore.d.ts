@@ -3649,7 +3649,6 @@ declare namespace FudgeCore {
      */
     abstract class ComponentJointAxial extends ComponentJoint {
         #private;
-        jointMotorSpeed: number;
         springDamper: OIMO.SpringDamper;
         jointAxis: OIMO.Vec3;
         translationMotor: OIMO.TranslationalLimitMotor;
@@ -3657,7 +3656,7 @@ declare namespace FudgeCore {
         protected jointSpringDampingRatio: number;
         protected abstract config: OIMO.JointConfig;
         /** Creating a cylindrical joint between two ComponentRigidbodies moving on one axis and rotating around another bound on a local anchorpoint. */
-        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
+        constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
          * The axis connecting the the two {@link Node}s e.g. Vector3(0,1,0) to have a upward connection.
          *  When changed after initialization the joint needs to be reconnected.
@@ -3726,7 +3725,7 @@ declare namespace FudgeCore {
         private rotationalMotor;
         private rotationSpringDamper;
         /** Creating a cylindrical joint between two ComponentRigidbodies moving on one axis and rotating around another bound on a local anchorpoint. */
-        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
+        constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
          * The damping of the spring. 1 equals completly damped.
          */
@@ -3809,7 +3808,7 @@ declare namespace FudgeCore {
         protected config: OIMO.PrismaticJointConfig;
         private jointMotorForce;
         /** Creating a prismatic joint between two ComponentRigidbodies only moving on one axis bound on a local anchorpoint. */
-        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
+        constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
           * The maximum motor force in Newton. force <= 0 equals disabled. This is the force that the motor is using to hold the position, or reach it if a motorSpeed is defined.
          */
@@ -3864,7 +3863,7 @@ declare namespace FudgeCore {
         private jointSecondAxis;
         private jointMaxAngle1;
         private jointMaxAngle2;
-        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _firstAxis?: Vector3, _secondAxis?: Vector3, _localAnchor?: Vector3);
+        constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody, _firstAxis?: Vector3, _secondAxis?: Vector3, _localAnchor?: Vector3);
         /**
          * The axis connecting the the two {@link Node}s e.g. Vector3(0,1,0) to have a upward connection.
          *  When changed after initialization the joint needs to be reconnected.
@@ -3959,7 +3958,7 @@ declare namespace FudgeCore {
         protected config: OIMO.RevoluteJointConfig;
         private jointmotorTorque;
         private rotationalMotor;
-        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
+        constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
           * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
          */
@@ -4008,7 +4007,7 @@ declare namespace FudgeCore {
         private jointSpringFrequency;
         private config;
         private springDamper;
-        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _localAnchor?: Vector3);
+        constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody, _localAnchor?: Vector3);
         /**
          * The damping of the spring. 1 equals completly damped.
          */
@@ -4066,7 +4065,7 @@ declare namespace FudgeCore {
         private secondAxisSpringDamper;
         private jointFirstAxis;
         private jointSecondAxis;
-        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _firstAxis?: Vector3, _secondAxis?: Vector3, _localAnchor?: Vector3);
+        constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody, _firstAxis?: Vector3, _secondAxis?: Vector3, _localAnchor?: Vector3);
         /**
          * The axis connecting the the two {@link Node}s e.g. Vector3(0,1,0) to have a upward connection.
          *  When changed after initialization the joint needs to be reconnected.
@@ -4159,7 +4158,7 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         protected oimoJoint: OIMO.GenericJoint;
         private config;
-        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _localAnchor?: Vector3);
+        constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody, _localAnchor?: Vector3);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected constructJoint(): void;
