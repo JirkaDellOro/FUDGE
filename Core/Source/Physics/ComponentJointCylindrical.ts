@@ -195,7 +195,7 @@ namespace FudgeCore {
     protected constructJoint(): void {
       this.rotationSpringDamper = new OIMO.SpringDamper().setSpring(this.rotationSpringFrequency, this.rotationSpringDamping);
 
-      this.translationMotor = new OIMO.TranslationalLimitMotor().setLimits(this.motorLimitLower, this.motorLimitUpper);
+      this.translationMotor = new OIMO.TranslationalLimitMotor().setLimits(super.motorLimitLower, super.motorLimitUpper);
       this.translationMotor.setMotor(this.motorSpeed, this.motorForce);
       this.rotationalMotor = new OIMO.RotationalLimitMotor().setLimits(this.rotationalMotorLimitLower, this.rotationalMotorLimitUpper);
       this.rotationalMotor.setMotor(this.rotationalMotorSpeed, this.motorTorque);
