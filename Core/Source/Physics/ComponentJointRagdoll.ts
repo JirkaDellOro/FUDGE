@@ -24,7 +24,7 @@ namespace FudgeCore {
   export class ComponentJointRagdoll extends ComponentJoint {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointRagdoll);
 
-    protected oimoJoint: OIMO.RagdollJoint;
+    protected joint: OIMO.RagdollJoint;
     protected config: OIMO.RagdollJointConfig = new OIMO.RagdollJointConfig();
 
     private jointTwistSpringDampingRatio: number = 0;
@@ -116,7 +116,7 @@ namespace FudgeCore {
     }
     set springDampingTwist(_value: number) {
       this.jointTwistSpringDampingRatio = _value;
-      if (this.oimoJoint != null) this.oimoJoint.getTwistSpringDamper().dampingRatio = this.jointTwistSpringDampingRatio;
+      if (this.joint != null) this.joint.getTwistSpringDamper().dampingRatio = this.jointTwistSpringDampingRatio;
     }
 
     /**
@@ -127,7 +127,7 @@ namespace FudgeCore {
     }
     set springFrequencyTwist(_value: number) {
       this.jointTwistSpringFrequency = _value;
-      if (this.oimoJoint != null) this.oimoJoint.getTwistSpringDamper().frequency = this.jointTwistSpringFrequency;
+      if (this.joint != null) this.joint.getTwistSpringDamper().frequency = this.jointTwistSpringFrequency;
     }
 
     /**
@@ -138,7 +138,7 @@ namespace FudgeCore {
     }
     set springDampingSwing(_value: number) {
       this.jointSwingSpringDampingRatio = _value;
-      if (this.oimoJoint != null) this.oimoJoint.getSwingSpringDamper().dampingRatio = this.jointSwingSpringDampingRatio;
+      if (this.joint != null) this.joint.getSwingSpringDamper().dampingRatio = this.jointSwingSpringDampingRatio;
     }
 
     /**
@@ -149,7 +149,7 @@ namespace FudgeCore {
     }
     set springFrequencySwing(_value: number) {
       this.jointSwingSpringFrequency = _value;
-      if (this.oimoJoint != null) this.oimoJoint.getSwingSpringDamper().frequency = this.jointSwingSpringFrequency;
+      if (this.joint != null) this.joint.getSwingSpringDamper().frequency = this.jointSwingSpringFrequency;
     }
 
 
@@ -163,7 +163,7 @@ namespace FudgeCore {
     }
     set twistMotorLimitUpper(_value: number) {
       this.jointTwistMotorLimitUpper = _value * Math.PI / 180;
-      if (this.oimoJoint != null) this.oimoJoint.getTwistLimitMotor().upperLimit = this.jointTwistMotorLimitUpper;
+      if (this.joint != null) this.joint.getTwistLimitMotor().upperLimit = this.jointTwistMotorLimitUpper;
     }
     /**
       * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
@@ -173,7 +173,7 @@ namespace FudgeCore {
     }
     set twistMotorLimitLower(_value: number) {
       this.jointTwistMotorLimitLower = _value * Math.PI / 180;
-      if (this.oimoJoint != null) this.oimoJoint.getTwistLimitMotor().lowerLimit = this.jointTwistMotorLimitLower;
+      if (this.joint != null) this.joint.getTwistLimitMotor().lowerLimit = this.jointTwistMotorLimitLower;
     }
     /**
       * The target rotational speed of the motor in m/s. 
@@ -183,7 +183,7 @@ namespace FudgeCore {
     }
     set twistMotorSpeed(_value: number) {
       this.jointTwistMotorSpeed = _value;
-      if (this.oimoJoint != null) this.oimoJoint.getTwistLimitMotor().motorSpeed = this.jointTwistMotorSpeed;
+      if (this.joint != null) this.joint.getTwistLimitMotor().motorSpeed = this.jointTwistMotorSpeed;
     }
     /**
       * The maximum motor torque in Newton. force <= 0 equals disabled. 
@@ -193,7 +193,7 @@ namespace FudgeCore {
     }
     set twistMotorTorque(_value: number) {
       this.twistMotorTorque = _value;
-      if (this.oimoJoint != null) this.oimoJoint.getTwistLimitMotor().motorTorque = this.twistMotorTorque;
+      if (this.joint != null) this.joint.getTwistLimitMotor().motorTorque = this.twistMotorTorque;
     }
 
     /**
@@ -255,7 +255,7 @@ namespace FudgeCore {
       this.config.maxSwingAngle1 = this.jointMaxAngle1;
       this.config.maxSwingAngle2 = this.jointMaxAngle2;
 
-      this.oimoJoint = new OIMO.RagdollJoint(this.config);
+      this.joint = new OIMO.RagdollJoint(this.config);
       super.configureJoint();
     }
   }

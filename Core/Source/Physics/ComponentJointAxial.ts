@@ -10,12 +10,13 @@ namespace FudgeCore {
     #motorLimitUpper: number = 10;
     #motorLimitLower: number = -10;
     #motorSpeed: number = 0;
-    springDamper: OIMO.SpringDamper;
-    #jointAxis: OIMO.Vec3;
-    translationMotor: OIMO.TranslationalLimitMotor;
+    #axis: OIMO.Vec3;
+    #springFrequency: number = 0;
+    #jointSpringDampingRatio: number = 0;
 
-    protected jointSpringFrequency: number = 0;
-    protected jointSpringDampingRatio: number = 0;
+    protected springDamper: OIMO.SpringDamper;
+    protected translationMotor: OIMO.TranslationalLimitMotor;
+
 
     /** Creating a cylindrical joint between two ComponentRigidbodies moving on one axis and rotating around another bound on a local anchorpoint. */
     constructor(_bodyAnchor: ComponentRigidbody = null, _bodyTied: ComponentRigidbody = null, _axis: Vector3 = new Vector3(0, 1, 0), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
@@ -32,10 +33,10 @@ namespace FudgeCore {
      *  When changed after initialization the joint needs to be reconnected.
      */
     public get axis(): Vector3 {
-      return new Vector3(this.#jointAxis.x, this.#jointAxis.y, this.#jointAxis.z);
+      return new Vector3(this.#axis.x, this.#axis.y, this.#axis.z);
     }
     public set axis(_value: Vector3) {
-      this.#jointAxis = new OIMO.Vec3(_value.x, _value.y, _value.z);
+      this.#axis = new OIMO.Vec3(_value.x, _value.y, _value.z);
       this.disconnect();
       this.dirtyStatus();
     }
@@ -52,7 +53,7 @@ namespace FudgeCore {
     public set motorLimitUpper(_value: number) {
       this.#motorLimitUpper = _value;
       try {
-        (<OIMO.PrismaticJoint><unknown>this.oimoJoint).getLimitMotor().upperLimit = _value;
+        (<OIMO.PrismaticJoint><unknown>this.joint).getLimitMotor().upperLimit = _value;
       } catch (_e: unknown) { /* */ }
     }
 
@@ -65,7 +66,7 @@ namespace FudgeCore {
     public set motorLimitLower(_value: number) {
       this.#motorLimitLower = _value;
       try {
-        (<OIMO.PrismaticJoint><unknown>this.oimoJoint).getLimitMotor().lowerLimit = _value;
+        (<OIMO.PrismaticJoint><unknown>this.joint).getLimitMotor().lowerLimit = _value;
       } catch (_e: unknown) { /* */ }
     }
 
@@ -73,13 +74,13 @@ namespace FudgeCore {
      * The damping of the spring. 1 equals completly damped.
      */
     public get springDamping(): number {
-      return this.jointSpringDampingRatio;
+      return this.#jointSpringDampingRatio;
     }
     public set springDamping(_value: number) {
-      this.jointSpringDampingRatio = _value;
-      if (this.oimoJoint != null)
+      this.#jointSpringDampingRatio = _value;
+      if (this.joint != null)
         // overwrite for e.g. CylindricalJoint
-        (<OIMO.PrismaticJoint><unknown>this.oimoJoint).getSpringDamper().dampingRatio = this.jointSpringDampingRatio;
+        (<OIMO.PrismaticJoint><unknown>this.joint).getSpringDamper().dampingRatio = this.#jointSpringDampingRatio;
     }
 
     /**
@@ -91,20 +92,20 @@ namespace FudgeCore {
 
     public set motorSpeed(_value: number) {
       this.#motorSpeed = _value;
-      if (this.oimoJoint != null)
-        (<OIMO.PrismaticJoint>this.oimoJoint).getLimitMotor().motorSpeed = this.#motorSpeed;
+      if (this.joint != null)
+        (<OIMO.PrismaticJoint>this.joint).getLimitMotor().motorSpeed = this.#motorSpeed;
     }
 
     /**
      * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. The smaller the value the less restrictive is the spring.
     */
     public get springFrequency(): number {
-      return this.jointSpringFrequency;
+      return this.#springFrequency;
     }
     public set springFrequency(_value: number) {
-      this.jointSpringFrequency = _value;
-      if (this.oimoJoint != null)
-        (<OIMO.PrismaticJoint>this.oimoJoint).getSpringDamper().frequency = this.jointSpringFrequency;
+      this.#springFrequency = _value;
+      if (this.joint != null)
+        (<OIMO.PrismaticJoint>this.joint).getSpringDamper().frequency = this.#springFrequency;
     }
     //#endregion
 
@@ -152,8 +153,8 @@ namespace FudgeCore {
     //#endregion
 
     protected constructJoint(): void {
-      this.springDamper = new OIMO.SpringDamper().setSpring(this.jointSpringFrequency, this.jointSpringDampingRatio);
-      super.constructJoint(this.#jointAxis);
+      this.springDamper = new OIMO.SpringDamper().setSpring(this.#springFrequency, this.#jointSpringDampingRatio);
+      super.constructJoint(this.#axis);
     }
   }
 }

@@ -25,7 +25,7 @@ namespace FudgeCore {
 
     // public static readonly iSubclass: number = Component.registerSubclass(ComponentJoint);
     protected singleton: boolean = false; //Multiple joints can be attached to one Node
-    protected abstract oimoJoint: OIMO.Joint;
+    protected abstract joint: OIMO.Joint;
     protected abstract config: OIMO.JointConfig;
 
 
@@ -86,7 +86,7 @@ namespace FudgeCore {
     }
     public set breakTorque(_value: number) {
       this.#breakTorque = _value;
-      if (this.oimoJoint != null) this.oimoJoint.setBreakTorque(this.#breakTorque);
+      if (this.joint != null) this.joint.setBreakTorque(this.#breakTorque);
     }
 
     /**
@@ -97,7 +97,7 @@ namespace FudgeCore {
     }
     public set breakForce(_value: number) {
       this.#breakForce = _value;
-      if (this.oimoJoint != null) this.oimoJoint.setBreakForce(this.#breakForce);
+      if (this.joint != null) this.joint.setBreakForce(this.#breakForce);
     }
 
     /**
@@ -110,7 +110,7 @@ namespace FudgeCore {
     }
     public set internalCollision(_value: boolean) {
       this.#internalCollision = _value;
-      if (this.oimoJoint != null) this.oimoJoint.setAllowCollision(this.#internalCollision);
+      if (this.joint != null) this.joint.setAllowCollision(this.#internalCollision);
     }
 
     public connectChild(_name: string): void {
@@ -178,7 +178,7 @@ namespace FudgeCore {
      * Only to be used when functionality that is not added within Fudge is needed.
     */
     public getOimoJoint(): OIMO.Joint {
-      return this.oimoJoint;
+      return this.joint;
     }
 
     public serialize(): Serialization {
@@ -246,9 +246,9 @@ namespace FudgeCore {
     }
 
     protected configureJoint(): void {
-      this.oimoJoint.setBreakForce(this.breakForce);
-      this.oimoJoint.setBreakTorque(this.breakTorque);
-      this.oimoJoint.setAllowCollision(this.#internalCollision);
+      this.joint.setBreakForce(this.breakForce);
+      this.joint.setBreakTorque(this.breakTorque);
+      this.joint.setAllowCollision(this.#internalCollision);
     }
   }
 }

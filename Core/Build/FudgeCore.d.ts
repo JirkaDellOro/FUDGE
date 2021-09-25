@@ -3580,7 +3580,7 @@ declare namespace FudgeCore {
     abstract class ComponentJoint extends Component {
         #private;
         protected singleton: boolean;
-        protected abstract oimoJoint: OIMO.Joint;
+        protected abstract joint: OIMO.Joint;
         protected abstract config: OIMO.JointConfig;
         /** Create a joint connection between the two given RigidbodyComponents. */
         constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody);
@@ -3650,10 +3650,8 @@ declare namespace FudgeCore {
      */
     abstract class ComponentJointAxial extends ComponentJoint {
         #private;
-        springDamper: OIMO.SpringDamper;
-        translationMotor: OIMO.TranslationalLimitMotor;
-        protected jointSpringFrequency: number;
-        protected jointSpringDampingRatio: number;
+        protected springDamper: OIMO.SpringDamper;
+        protected translationMotor: OIMO.TranslationalLimitMotor;
         /** Creating a cylindrical joint between two ComponentRigidbodies moving on one axis and rotating around another bound on a local anchorpoint. */
         constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
@@ -3712,7 +3710,7 @@ declare namespace FudgeCore {
      */
     class ComponentJointCylindrical extends ComponentJointAxial {
         static readonly iSubclass: number;
-        protected oimoJoint: OIMO.CylindricalJoint;
+        protected joint: OIMO.CylindricalJoint;
         protected config: OIMO.CylindricalJointConfig;
         protected jointRotationSpringDampingRatio: number;
         protected jointRotationSpringFrequency: number;
@@ -3803,7 +3801,7 @@ declare namespace FudgeCore {
        */
     class ComponentJointPrismatic extends ComponentJointAxial {
         static readonly iSubclass: number;
-        protected oimoJoint: OIMO.PrismaticJoint;
+        protected joint: OIMO.PrismaticJoint;
         protected config: OIMO.PrismaticJointConfig;
         private jointMotorForce;
         /** Creating a prismatic joint between two ComponentRigidbodies only moving on one axis bound on a local anchorpoint. */
@@ -3845,7 +3843,7 @@ declare namespace FudgeCore {
         */
     class ComponentJointRagdoll extends ComponentJoint {
         static readonly iSubclass: number;
-        protected oimoJoint: OIMO.RagdollJoint;
+        protected joint: OIMO.RagdollJoint;
         protected config: OIMO.RagdollJointConfig;
         private jointTwistSpringDampingRatio;
         private jointTwistSpringFrequency;
@@ -3953,7 +3951,7 @@ declare namespace FudgeCore {
        */
     class ComponentJointRevolute extends ComponentJointAxial {
         static readonly iSubclass: number;
-        protected oimoJoint: OIMO.RevoluteJoint;
+        protected joint: OIMO.RevoluteJoint;
         protected config: OIMO.RevoluteJointConfig;
         private jointmotorTorque;
         private rotationalMotor;
@@ -4001,7 +3999,7 @@ declare namespace FudgeCore {
        */
     class ComponentJointSpherical extends ComponentJoint {
         static readonly iSubclass: number;
-        protected oimoJoint: OIMO.SphericalJoint;
+        protected joint: OIMO.SphericalJoint;
         protected config: OIMO.SphericalJointConfig;
         private jointSpringDampingRatio;
         private jointSpringFrequency;
@@ -4044,7 +4042,7 @@ declare namespace FudgeCore {
        */
     class ComponentJointUniversal extends ComponentJoint {
         static readonly iSubclass: number;
-        protected oimoJoint: OIMO.UniversalJoint;
+        protected joint: OIMO.UniversalJoint;
         protected config: OIMO.UniversalJointConfig;
         private jointFirstSpringDampingRatio;
         private jointFirstSpringFrequency;
@@ -4155,7 +4153,7 @@ declare namespace FudgeCore {
        */
     class ComponentJointWelding extends ComponentJoint {
         static readonly iSubclass: number;
-        protected oimoJoint: OIMO.GenericJoint;
+        protected joint: OIMO.GenericJoint;
         protected config: OIMO.GenericJointConfig;
         constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody, _localAnchor?: Vector3);
         serialize(): Serialization;

@@ -19,7 +19,7 @@ namespace FudgeCore {
   export class ComponentJointSpherical extends ComponentJoint {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointSpherical);
 
-    protected oimoJoint: OIMO.SphericalJoint;
+    protected joint: OIMO.SphericalJoint;
     protected config: OIMO.SphericalJointConfig = new OIMO.SphericalJointConfig();
 
     private jointSpringDampingRatio: number = 0;
@@ -42,7 +42,7 @@ namespace FudgeCore {
     }
     set springDamping(_value: number) {
       this.jointSpringDampingRatio = _value;
-      if (this.oimoJoint != null) this.oimoJoint.getSpringDamper().dampingRatio = this.jointSpringDampingRatio;
+      if (this.joint != null) this.joint.getSpringDamper().dampingRatio = this.jointSpringDampingRatio;
     }
 
     /**
@@ -53,7 +53,7 @@ namespace FudgeCore {
     }
     set springFrequency(_value: number) {
       this.jointSpringFrequency = _value;
-      if (this.oimoJoint != null) this.oimoJoint.getSpringDamper().frequency = this.jointSpringFrequency;
+      if (this.joint != null) this.joint.getSpringDamper().frequency = this.jointSpringFrequency;
     }
     //#endregion
 
@@ -81,7 +81,7 @@ namespace FudgeCore {
       super.constructJoint();
       this.config.springDamper = this.springDamper;
 
-      this.oimoJoint = new OIMO.SphericalJoint(this.config);
+      this.joint = new OIMO.SphericalJoint(this.config);
       super.configureJoint();
     }
   }

@@ -19,7 +19,7 @@ namespace FudgeCore {
   export class ComponentJointRevolute extends ComponentJointAxial {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointRevolute);
 
-    protected oimoJoint: OIMO.RevoluteJoint;
+    protected joint: OIMO.RevoluteJoint;
     protected config: OIMO.RevoluteJointConfig = new OIMO.RevoluteJointConfig();
     
     private jointmotorTorque: number = 0;
@@ -61,7 +61,7 @@ namespace FudgeCore {
     }
     set motorTorque(_value: number) {
       this.jointmotorTorque = _value;
-      if (this.oimoJoint != null) this.oimoJoint.getLimitMotor().motorTorque = this.jointmotorTorque;
+      if (this.joint != null) this.joint.getLimitMotor().motorTorque = this.jointmotorTorque;
     }
 
     /**
@@ -96,7 +96,7 @@ namespace FudgeCore {
       this.config.springDamper = this.springDamper;
       this.config.limitMotor = this.rotationalMotor;
 
-      this.oimoJoint = new OIMO.RevoluteJoint(this.config);
+      this.joint = new OIMO.RevoluteJoint(this.config);
       this.configureJoint();
     }
   }

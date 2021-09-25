@@ -17,7 +17,7 @@ namespace FudgeCore {
    */
   export class ComponentJointCylindrical extends ComponentJointAxial {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointCylindrical);
-    protected oimoJoint: OIMO.CylindricalJoint;
+    protected joint: OIMO.CylindricalJoint;
     protected config: OIMO.CylindricalJointConfig = new OIMO.CylindricalJointConfig();
 
     //Internal Variables
@@ -46,16 +46,16 @@ namespace FudgeCore {
      * The damping of the spring. 1 equals completly damped.
      */
     public set springDamping(_value: number) {
-      this.jointSpringDampingRatio = _value;
-      if (this.oimoJoint != null) this.oimoJoint.getTranslationalSpringDamper().dampingRatio = this.jointSpringDampingRatio;
+      super.springDamping = _value;
+      if (this.joint != null) this.joint.getTranslationalSpringDamper().dampingRatio = _value;
     }
 
     /**
      * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. The smaller the value the less restrictive is the spring.
     */
     public set springFrequency(_value: number) {
-      this.jointSpringFrequency = _value;
-      if (this.oimoJoint != null) this.oimoJoint.getTranslationalSpringDamper().frequency = this.jointSpringFrequency;
+      super.springFrequency = _value;
+      if (this.joint != null) this.joint.getTranslationalSpringDamper().frequency = _value;
     }
 
     /**
@@ -66,7 +66,7 @@ namespace FudgeCore {
     }
     set rotationSpringDamping(_value: number) {
       this.jointRotationSpringDampingRatio = _value;
-      if (this.oimoJoint != null) this.oimoJoint.getRotationalSpringDamper().dampingRatio = this.jointRotationSpringDampingRatio;
+      if (this.joint != null) this.joint.getRotationalSpringDamper().dampingRatio = this.jointRotationSpringDampingRatio;
     }
 
     /**
@@ -77,7 +77,7 @@ namespace FudgeCore {
     }
     set rotationSpringFrequency(_value: number) {
       this.jointRotationSpringFrequency = _value;
-      if (this.oimoJoint != null) this.oimoJoint.getRotationalSpringDamper().frequency = this.jointRotationSpringFrequency;
+      if (this.joint != null) this.joint.getRotationalSpringDamper().frequency = this.jointRotationSpringFrequency;
     }
 
 
@@ -89,7 +89,7 @@ namespace FudgeCore {
     }
     set rotationalMotorLimitUpper(_value: number) {
       this.jointRotationMotorLimitUpper = _value * Math.PI / 180;
-      if (this.oimoJoint != null) this.oimoJoint.getRotationalLimitMotor().upperLimit = this.jointRotationMotorLimitUpper;
+      if (this.joint != null) this.joint.getRotationalLimitMotor().upperLimit = this.jointRotationMotorLimitUpper;
     }
     /**
       * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
@@ -99,7 +99,7 @@ namespace FudgeCore {
     }
     set rotationalMotorLimitLower(_value: number) {
       this.jointRotationMotorLimitLower = _value * Math.PI / 180;
-      if (this.oimoJoint != null) this.oimoJoint.getRotationalLimitMotor().lowerLimit = this.jointRotationMotorLimitLower;
+      if (this.joint != null) this.joint.getRotationalLimitMotor().lowerLimit = this.jointRotationMotorLimitLower;
     }
     /**
       * The target rotational speed of the motor in m/s. 
@@ -109,7 +109,7 @@ namespace FudgeCore {
     }
     set rotationalMotorSpeed(_value: number) {
       this.jointRotationMotorSpeed = _value;
-      if (this.oimoJoint != null) this.oimoJoint.getRotationalLimitMotor().motorSpeed = this.jointRotationMotorSpeed;
+      if (this.joint != null) this.joint.getRotationalLimitMotor().motorSpeed = this.jointRotationMotorSpeed;
     }
     /**
       * The maximum motor torque in Newton. force <= 0 equals disabled. 
@@ -119,7 +119,7 @@ namespace FudgeCore {
     }
     set motorTorque(_value: number) {
       this.jointRotationMotorTorque = _value;
-      if (this.oimoJoint != null) this.oimoJoint.getRotationalLimitMotor().motorTorque = this.jointRotationMotorTorque;
+      if (this.joint != null) this.joint.getRotationalLimitMotor().motorTorque = this.jointRotationMotorTorque;
     }
 
     /**
@@ -127,22 +127,22 @@ namespace FudgeCore {
      */
     public set motorLimitUpper(_value: number) {
       super.motorLimitUpper = _value;
-      if (this.oimoJoint != null)
-        this.oimoJoint.getTranslationalLimitMotor().upperLimit = _value;
+      if (this.joint != null)
+        this.joint.getTranslationalLimitMotor().upperLimit = _value;
     }
     /**
       * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. 
      */
     public set motorLimitLower(_value: number) {
       super.motorLimitLower = _value;
-      if (this.oimoJoint != null)
-        this.oimoJoint.getTranslationalLimitMotor().lowerLimit = _value;
+      if (this.joint != null)
+        this.joint.getTranslationalLimitMotor().lowerLimit = _value;
     }
 
     public set motorSpeed(_value: number) {
       super.motorSpeed = _value;
-      if (this.oimoJoint != null)
-        this.oimoJoint.getTranslationalLimitMotor().motorSpeed = super.motorSpeed;
+      if (this.joint != null)
+        this.joint.getTranslationalLimitMotor().motorSpeed = super.motorSpeed;
     }
     /**
       * The maximum motor force in Newton. force <= 0 equals disabled. 
@@ -152,7 +152,7 @@ namespace FudgeCore {
     }
     set motorForce(_value: number) {
       this.jointMotorForce = _value;
-      if (this.oimoJoint != null) this.oimoJoint.getTranslationalLimitMotor().motorForce = this.jointMotorForce;
+      if (this.joint != null) this.joint.getTranslationalLimitMotor().motorForce = this.jointMotorForce;
     }
 
     /**
@@ -206,7 +206,7 @@ namespace FudgeCore {
       this.config.rotationalLimitMotor = this.rotationalMotor;
       this.config.rotationalSpringDamper = this.rotationSpringDamper;
 
-      this.oimoJoint = new OIMO.CylindricalJoint(this.config);
+      this.joint = new OIMO.CylindricalJoint(this.config);
       this.configureJoint();
     }
   }

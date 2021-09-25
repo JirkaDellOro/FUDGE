@@ -17,9 +17,9 @@ namespace FudgeCore {
   export class ComponentJointPrismatic extends ComponentJointAxial {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointPrismatic);
 
-    protected oimoJoint: OIMO.PrismaticJoint;
+    protected joint: OIMO.PrismaticJoint;
     protected config: OIMO.PrismaticJointConfig = new OIMO.PrismaticJointConfig();
-    //Internally used variables - Joint Properties that are used even when no actual oimoJoint is currently existend
+    //Internally used variables - Joint Properties that are used even when no actual joint is currently existend
 
     private jointMotorForce: number = 0;
 
@@ -39,7 +39,7 @@ namespace FudgeCore {
     }
     public set motorForce(_value: number) {
       this.jointMotorForce = _value;
-      if (this.oimoJoint != null) this.oimoJoint.getLimitMotor().motorForce = this.jointMotorForce;
+      if (this.joint != null) this.joint.getLimitMotor().motorForce = this.jointMotorForce;
     }
     //#endregion
 
@@ -76,7 +76,7 @@ namespace FudgeCore {
       this.config.springDamper = this.springDamper; //Telling the config to use the motor/spring of the Fudge Component
       this.config.limitMotor = this.translationMotor;
 
-      this.oimoJoint = new OIMO.PrismaticJoint(this.config);
+      this.joint = new OIMO.PrismaticJoint(this.config);
       this.configureJoint();
     }
   }

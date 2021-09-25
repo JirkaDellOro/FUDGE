@@ -9,7 +9,7 @@ namespace FudgeCore {
   export class ComponentJointWelding extends ComponentJoint {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointWelding);
 
-    protected oimoJoint: OIMO.GenericJoint;
+    protected joint: OIMO.GenericJoint;
     protected config: OIMO.GenericJointConfig = new OIMO.GenericJointConfig();
 
     constructor(_bodyAnchor: ComponentRigidbody = null, _bodyTied: ComponentRigidbody = null, _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
@@ -39,8 +39,8 @@ namespace FudgeCore {
       this.config = new OIMO.GenericJointConfig();
       super.constructJoint(new OIMO.Mat3(), new OIMO.Mat3());
 
-      this.oimoJoint = new OIMO.GenericJoint(this.config);
-      this.oimoJoint.setAllowCollision(this.internalCollision);
+      this.joint = new OIMO.GenericJoint(this.config);
+      this.joint.setAllowCollision(this.internalCollision);
     }
   }
 }
