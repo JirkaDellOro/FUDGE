@@ -23,7 +23,7 @@ namespace FudgeCore {
     //Internal Variables
     protected jointRotationSpringDampingRatio: number = 0;
     protected jointRotationSpringFrequency: number = 0;
-    
+
     private jointMotorForce: number = 0;
 
     private jointRotationMotorLimitUpper: number = 360;
@@ -127,23 +127,18 @@ namespace FudgeCore {
     /**
       * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. 
      */
-    public get motorLimitUpper(): number {
-      return this.jointMotorLimitUpper;
-    }
     public set motorLimitUpper(_value: number) {
-      this.jointMotorLimitUpper = _value;
+      super.motorLimitUpper = _value;
       if (this.oimoJoint != null)
-        this.oimoJoint.getTranslationalLimitMotor().upperLimit = this.jointMotorLimitUpper;
+        this.oimoJoint.getTranslationalLimitMotor().upperLimit = _value;
     }
     /**
       * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. 
      */
-    public get motorLimitLower(): number {
-      return this.jointMotorLimitLower;
-    }
     public set motorLimitLower(_value: number) {
-      this.jointMotorLimitLower = _value;
-      if (this.oimoJoint != null) this.oimoJoint.getTranslationalLimitMotor().lowerLimit = this.jointMotorLimitLower;
+      this.motorLimitLower = _value;
+      if (this.oimoJoint != null) 
+      this.oimoJoint.getTranslationalLimitMotor().lowerLimit = _value;
     }
 
     public set motorSpeed(_value: number) {

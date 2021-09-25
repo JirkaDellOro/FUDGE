@@ -5,17 +5,18 @@ namespace FudgeCore {
    */
   export abstract class ComponentJointAxial extends ComponentJoint {
 
-    protected abstract config: OIMO.JointConfig;
     //Internal Variables
-    protected jointSpringDampingRatio: number = 0;
-    protected jointSpringFrequency: number = 0;
 
-    protected jointMotorLimitUpper: number = 10;
-    protected jointMotorLimitLower: number = -10;
-    protected jointMotorSpeed: number = 0;
-    protected springDamper: OIMO.SpringDamper;
-    protected jointAxis: OIMO.Vec3;
-    protected translationMotor: OIMO.TranslationalLimitMotor;
+    #motorLimitUpper: number = 10;
+    #motorLimitLower: number = -10;
+    jointMotorSpeed: number = 0;
+    springDamper: OIMO.SpringDamper;
+    jointAxis: OIMO.Vec3;
+    translationMotor: OIMO.TranslationalLimitMotor;
+
+    protected jointSpringFrequency: number = 0;
+    protected jointSpringDampingRatio: number = 0;
+    protected abstract config: OIMO.JointConfig;
 
     /** Creating a cylindrical joint between two ComponentRigidbodies moving on one axis and rotating around another bound on a local anchorpoint. */
     constructor(_attachedRigidbody: ComponentRigidbody = null, _connectedRigidbody: ComponentRigidbody = null, _axis: Vector3 = new Vector3(0, 1, 0), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
@@ -36,6 +37,35 @@ namespace FudgeCore {
       this.jointAxis = new OIMO.Vec3(_value.x, _value.y, _value.z);
       this.disconnect();
       this.dirtyStatus();
+    }
+
+
+
+    /**
+      * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. 
+     */
+    public get motorLimitUpper(): number {
+      return this.#motorLimitUpper;
+    }
+
+    public set motorLimitUpper(_value: number) {
+      this.#motorLimitUpper = _value;
+      try {
+        (<OIMO.PrismaticJoint><unknown>this.oimoJoint).getLimitMotor().upperLimit = _value;
+      } catch (_e: unknown) { /* */ }
+    }
+
+    /**
+      * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
+     */
+    public get motorLimitLower(): number {
+      return this.#motorLimitLower;
+    }
+    public set motorLimitLower(_value: number) {
+      this.#motorLimitLower = _value;
+      try {
+        (<OIMO.PrismaticJoint><unknown>this.oimoJoint).getLimitMotor().lowerLimit = _value;
+      } catch (_e: unknown) { /* */ }
     }
 
     /**
@@ -75,17 +105,6 @@ namespace FudgeCore {
       if (this.oimoJoint != null)
         (<OIMO.PrismaticJoint>this.oimoJoint).getSpringDamper().frequency = this.jointSpringFrequency;
     }
-
-    /**
-      * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. 
-     */
-    public abstract get motorLimitUpper(): number;
-    public abstract set motorLimitUpper(_value: number);
-    /**
-      * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. 
-     */
-    public abstract get motorLimitLower(): number;
-    public abstract set motorLimitLower(_value: number);
     //#endregion
 
     //#region Saving/Loading

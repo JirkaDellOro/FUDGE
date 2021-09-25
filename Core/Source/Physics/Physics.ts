@@ -223,7 +223,7 @@ namespace FudgeCore {
       let jointsToConnect: ComponentJoint[] = this.jointList;
       this.jointList = [];
       jointsToConnect.forEach((_joint: ComponentJoint): void => {
-        if (_joint.checkConnection() == false) {
+        if (_joint.isConnected() == false) {
           _joint.connect();
         }
       });

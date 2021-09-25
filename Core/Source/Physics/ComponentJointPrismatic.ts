@@ -29,31 +29,10 @@ namespace FudgeCore {
       this.jointAxis = new OIMO.Vec3(_axis.x, _axis.y, _axis.z);
       this.anchor = new Vector3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
 
-      this.jointMotorLimitUpper = 10;
-      this.jointMotorLimitLower = -10;
+      this.motorLimitUpper = 10;
+      this.motorLimitLower = -10;
     }
     //#region Get/Set transfor of fudge properties to the physics engine
-    /**
-      * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
-     */
-    public get motorLimitUpper(): number {
-      return this.jointMotorLimitUpper;
-    }
-    public set motorLimitUpper(_value: number) {
-      this.jointMotorLimitUpper = _value;
-      if (this.oimoJoint != null)
-        this.oimoJoint.getLimitMotor().upperLimit = this.jointMotorLimitUpper;
-    }
-    /**
-      * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
-     */
-    public get motorLimitLower(): number {
-      return this.jointMotorLimitLower;
-    }
-    public set motorLimitLower(_value: number) {
-      this.jointMotorLimitLower = _value;
-      if (this.oimoJoint != null) this.oimoJoint.getLimitMotor().lowerLimit = this.jointMotorLimitLower;
-    }
     /**
       * The maximum motor force in Newton. force <= 0 equals disabled. This is the force that the motor is using to hold the position, or reach it if a motorSpeed is defined.
      */
@@ -90,7 +69,7 @@ namespace FudgeCore {
 
     /** Actual creation of a joint in the OimoPhysics system */
     protected constructJoint(): void {
-      this.translationMotor = new OIMO.TranslationalLimitMotor().setLimits(this.jointMotorLimitLower, this.jointMotorLimitUpper); //Create motor settings, to hold positions, set constraint min/max
+      this.translationMotor = new OIMO.TranslationalLimitMotor().setLimits(this.motorLimitLower, this.motorLimitUpper); //Create motor settings, to hold positions, set constraint min/max
       this.translationMotor.setMotor(this.motorSpeed, this.motorForce);
 
       this.config = new OIMO.PrismaticJointConfig(); //Create a specific config for this joint type that is calculating the local axis for both bodies

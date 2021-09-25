@@ -3582,23 +3582,18 @@ declare namespace FudgeCore {
         protected singleton: boolean;
         protected abstract oimoJoint: OIMO.Joint;
         /** Create a joint connection between the two given RigidbodyComponents. */
-        constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody);
+        constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody);
         /** Get/Set the first ComponentRigidbody of this connection. It should always be the one that this component is attached too in the sceneTree. */
-        get attachedRigidbody(): ComponentRigidbody;
-        set attachedRigidbody(_cmpRB: ComponentRigidbody);
+        get bodyAnchor(): ComponentRigidbody;
+        set bodyAnchor(_cmpRB: ComponentRigidbody);
         /** Get/Set the second ComponentRigidbody of this connection. */
-        get connectedRigidbody(): ComponentRigidbody;
-        set connectedRigidbody(_cmpRB: ComponentRigidbody);
+        get bodyTied(): ComponentRigidbody;
+        set bodyTied(_cmpRB: ComponentRigidbody);
         /**
          * The exact position where the two {@link Node}s are connected. When changed after initialization the joint needs to be reconnected.
          */
         get anchor(): Vector3;
         set anchor(_value: Vector3);
-        /** Get/Set if the two bodies collide with each other or only with the world but not with themselves. Default = no internal collision.
-         *  In most cases it's prefered to declare a minimum and maximum angle/length the bodies can move from one another instead of having them collide.
-         */
-        get selfCollision(): boolean;
-        set selfCollision(_value: boolean);
         /**
          * The amount of force needed to break the JOINT, while rotating, in Newton. 0 equals unbreakable (default)
         */
@@ -3619,7 +3614,7 @@ declare namespace FudgeCore {
         connectChild(_name: string): void;
         connectNode(_node: Node): void;
         /** Check if connection is dirty, so when either rb is changed disconnect and reconnect. Internally used no user interaction needed. */
-        checkConnection(): boolean;
+        isConnected(): boolean;
         /**
          * Initializing and connecting the two rigidbodies with the configured joint properties
          * is automatically called by the physics system. No user interaction needed.
@@ -3653,15 +3648,14 @@ declare namespace FudgeCore {
        * @author Jirka Dell'Oro-Friedl, HFU, 2021
      */
     abstract class ComponentJointAxial extends ComponentJoint {
-        protected abstract config: OIMO.JointConfig;
-        protected jointSpringDampingRatio: number;
+        #private;
+        jointMotorSpeed: number;
+        springDamper: OIMO.SpringDamper;
+        jointAxis: OIMO.Vec3;
+        translationMotor: OIMO.TranslationalLimitMotor;
         protected jointSpringFrequency: number;
-        protected jointMotorLimitUpper: number;
-        protected jointMotorLimitLower: number;
-        protected jointMotorSpeed: number;
-        protected springDamper: OIMO.SpringDamper;
-        protected jointAxis: OIMO.Vec3;
-        protected translationMotor: OIMO.TranslationalLimitMotor;
+        protected jointSpringDampingRatio: number;
+        protected abstract config: OIMO.JointConfig;
         /** Creating a cylindrical joint between two ComponentRigidbodies moving on one axis and rotating around another bound on a local anchorpoint. */
         constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
@@ -3670,6 +3664,16 @@ declare namespace FudgeCore {
          */
         get axis(): Vector3;
         set axis(_value: Vector3);
+        /**
+          * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
+         */
+        get motorLimitUpper(): number;
+        set motorLimitUpper(_value: number);
+        /**
+          * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
+         */
+        get motorLimitLower(): number;
+        set motorLimitLower(_value: number);
         /**
          * The damping of the spring. 1 equals completly damped.
          */
@@ -3685,16 +3689,6 @@ declare namespace FudgeCore {
         */
         get springFrequency(): number;
         set springFrequency(_value: number);
-        /**
-          * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
-         */
-        abstract get motorLimitUpper(): number;
-        abstract set motorLimitUpper(_value: number);
-        /**
-          * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
-         */
-        abstract get motorLimitLower(): number;
-        abstract set motorLimitLower(_value: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;
@@ -3774,12 +3768,10 @@ declare namespace FudgeCore {
         /**
           * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
          */
-        get motorLimitUpper(): number;
         set motorLimitUpper(_value: number);
         /**
           * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
          */
-        get motorLimitLower(): number;
         set motorLimitLower(_value: number);
         set motorSpeed(_value: number);
         /**
@@ -3818,16 +3810,6 @@ declare namespace FudgeCore {
         private jointMotorForce;
         /** Creating a prismatic joint between two ComponentRigidbodies only moving on one axis bound on a local anchorpoint. */
         constructor(_attachedRigidbody?: ComponentRigidbody, _connectedRigidbody?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
-        /**
-          * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
-         */
-        get motorLimitUpper(): number;
-        set motorLimitUpper(_value: number);
-        /**
-          * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
-         */
-        get motorLimitLower(): number;
-        set motorLimitLower(_value: number);
         /**
           * The maximum motor force in Newton. force <= 0 equals disabled. This is the force that the motor is using to hold the position, or reach it if a motorSpeed is defined.
          */

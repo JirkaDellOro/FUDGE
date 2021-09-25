@@ -30,29 +30,29 @@ namespace FudgeCore {
       this.jointAxis = new OIMO.Vec3(_axis.x, _axis.y, _axis.z);
       this.anchor = new Vector3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
 
-      this.jointMotorLimitUpper = 360;
-      this.jointMotorLimitLower = 0;
+      this.motorLimitUpper = 360;
+      this.motorLimitLower = 0;
     }
     
     /**
       * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
      */
    public get motorLimitUpper(): number {
-      return this.jointMotorLimitUpper * 180 / Math.PI;
+      return super.motorLimitUpper * 180 / Math.PI;
     }
     public  set motorLimitUpper(_value: number) {
-      this.jointMotorLimitUpper = _value * Math.PI / 180;
-      if (this.oimoJoint != null) this.oimoJoint.getLimitMotor().upperLimit = this.jointMotorLimitUpper;
+      _value *= Math.PI / 180;
+      super.motorLimitUpper = _value;
     }
     /**
       * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
      */
      public  get motorLimitLower(): number {
-      return this.jointMotorLimitLower * 180 / Math.PI;
+      return super.motorLimitLower * 180 / Math.PI;
     }
     public  set motorLimitLower(_value: number) {
-      this.jointMotorLimitLower = _value * Math.PI / 180;
-      if (this.oimoJoint != null) this.oimoJoint.getLimitMotor().lowerLimit = this.jointMotorLimitLower;
+      _value *= Math.PI / 180;
+      super.motorLimitLower = _value;
     }
 
     /**
@@ -89,7 +89,7 @@ namespace FudgeCore {
     //#endregion
 
     protected constructJoint(): void {
-      this.rotationalMotor = new OIMO.RotationalLimitMotor().setLimits(this.jointMotorLimitLower, this.jointMotorLimitUpper);
+      this.rotationalMotor = new OIMO.RotationalLimitMotor().setLimits(this.motorLimitLower, this.motorLimitUpper);
       this.rotationalMotor.setMotor(this.jointMotorSpeed, this.jointmotorTorque);
 
       this.config = new OIMO.RevoluteJointConfig();

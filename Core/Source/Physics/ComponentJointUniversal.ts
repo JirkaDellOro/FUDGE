@@ -267,9 +267,9 @@ namespace FudgeCore {
       this.secondAxisMotor.setMotor(this.jointFirstMotorSpeed, this.jointFirstMotorTorque);
 
       this.config = new OIMO.UniversalJointConfig();
-      let attachedRBPos: Vector3 = this.attachedRigidbody.node.mtxWorld.translation;
+      let attachedRBPos: Vector3 = this.bodyAnchor.node.mtxWorld.translation;
       let worldAnchor: OIMO.Vec3 = new OIMO.Vec3(attachedRBPos.x + this.anchor.x, attachedRBPos.y + this.anchor.y, attachedRBPos.z + this.anchor.z);
-      this.config.init(this.attachedRigidbody.getOimoRigidbody(), this.connectedRigidbody.getOimoRigidbody(), worldAnchor, this.jointFirstAxis, this.jointSecondAxis);
+      this.config.init(this.bodyAnchor.getOimoRigidbody(), this.bodyTied.getOimoRigidbody(), worldAnchor, this.jointFirstAxis, this.jointSecondAxis);
       this.config.limitMotor1 = this.firstAxisMotor;
       this.config.limitMotor2 = this.secondAxisMotor;
       this.config.springDamper1 = this.firstAxisSpringDamper;

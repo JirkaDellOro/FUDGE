@@ -216,6 +216,7 @@ var Turorials_FUDGEPhysics_Lesson1;
         }
         if (_event.code == f.KEYBOARD_CODE.T) {
             f.Physics.settings.debugMode = f.Physics.settings.debugMode == f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER ? f.PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY : f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
+            frontSuspensionRight.motorLimitUpper = 0;
         }
     }
 })(Turorials_FUDGEPhysics_Lesson1 || (Turorials_FUDGEPhysics_Lesson1 = {}));
