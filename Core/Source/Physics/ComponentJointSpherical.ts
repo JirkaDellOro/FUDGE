@@ -19,13 +19,14 @@ namespace FudgeCore {
   export class ComponentJointSpherical extends ComponentJoint {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointSpherical);
 
+    #springDamping: number = 0;
+    #springFrequency: number = 0;
+    #springDamper: OIMO.SpringDamper;
+    
     protected joint: OIMO.SphericalJoint;
     protected config: OIMO.SphericalJointConfig = new OIMO.SphericalJointConfig();
 
-    private jointSpringDampingRatio: number = 0;
-    private jointSpringFrequency: number = 0;
 
-    private springDamper: OIMO.SpringDamper;
 
     constructor(_bodyAnchor: ComponentRigidbody = null, _bodyTied: ComponentRigidbody = null, _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
       super(_bodyAnchor, _bodyTied);
@@ -38,22 +39,22 @@ namespace FudgeCore {
      * The damping of the spring. 1 equals completly damped.
      */
     get springDamping(): number {
-      return this.jointSpringDampingRatio;
+      return this.#springDamping;
     }
     set springDamping(_value: number) {
-      this.jointSpringDampingRatio = _value;
-      if (this.joint != null) this.joint.getSpringDamper().dampingRatio = this.jointSpringDampingRatio;
+      this.#springDamping = _value;
+      if (this.joint != null) this.joint.getSpringDamper().dampingRatio = _value;
     }
 
     /**
      * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. The smaller the value the less restrictive is the spring.
     */
     get springFrequency(): number {
-      return this.jointSpringFrequency;
+      return this.#springFrequency;
     }
     set springFrequency(_value: number) {
-      this.jointSpringFrequency = _value;
-      if (this.joint != null) this.joint.getSpringDamper().frequency = this.jointSpringFrequency;
+      this.#springFrequency = _value;
+      if (this.joint != null) this.joint.getSpringDamper().frequency = _value;
     }
     //#endregion
 
@@ -68,18 +69,18 @@ namespace FudgeCore {
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.springDamping = _serialization.springDamping || this.jointSpringDampingRatio;
-      this.springFrequency = _serialization.springFrequency || this.jointSpringFrequency;
+      this.springDamping = _serialization.springDamping || this.springDamping;
+      this.springFrequency = _serialization.springFrequency || this.springFrequency;
       super.deserialize(_serialization);
       return this;
     }
     //#endregion
 
     protected constructJoint(): void {
-      this.springDamper = new OIMO.SpringDamper().setSpring(this.jointSpringFrequency, this.jointSpringDampingRatio);
+      this.#springDamper = new OIMO.SpringDamper().setSpring(this.springFrequency, this.springDamping);
       this.config = new OIMO.SphericalJointConfig();
       super.constructJoint();
-      this.config.springDamper = this.springDamper;
+      this.config.springDamper = this.#springDamper;
 
       this.joint = new OIMO.SphericalJoint(this.config);
       super.configureJoint();

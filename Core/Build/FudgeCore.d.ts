@@ -3997,12 +3997,10 @@ declare namespace FudgeCore {
        * @authors Marko Fehrenbach, HFU, 2020
        */
     class ComponentJointSpherical extends ComponentJoint {
+        #private;
         static readonly iSubclass: number;
         protected joint: OIMO.SphericalJoint;
         protected config: OIMO.SphericalJointConfig;
-        private jointSpringDampingRatio;
-        private jointSpringFrequency;
-        private springDamper;
         constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody, _localAnchor?: Vector3);
         /**
          * The damping of the spring. 1 equals completly damped.
