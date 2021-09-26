@@ -3694,7 +3694,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-       * A physical connection between two bodies with a defined axe of rotation and rotation. Two Degrees of Freedom in the defined axis.
+       * A physical connection between two bodies with a defined axe of translation and rotation. Two Degrees of Freedom in the defined axis.
        * Two RigidBodies need to be defined to use it. A motor can be defined for rotation and translation, along with spring settings.
        *
        * ```plaintext
@@ -3709,19 +3709,11 @@ declare namespace FudgeCore {
        * @author Marko Fehrenbach, HFU 2020
      */
     class ComponentJointCylindrical extends ComponentJointAxial {
+        #private;
         static readonly iSubclass: number;
         protected joint: OIMO.CylindricalJoint;
         protected config: OIMO.CylindricalJointConfig;
         protected motor: OIMO.TranslationalLimitMotor;
-        protected jointRotationSpringDampingRatio: number;
-        protected jointRotationSpringFrequency: number;
-        private jointMotorForce;
-        private jointRotationMotorLimitUpper;
-        private jointRotationMotorLimitLower;
-        private jointRotationMotorTorque;
-        private jointRotationMotorSpeed;
-        private rotationalMotor;
-        private rotationSpringDamper;
         /** Creating a cylindrical joint between two ComponentRigidbodies moving on one axis and rotating around another bound on a local anchorpoint. */
         constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
@@ -3735,33 +3727,33 @@ declare namespace FudgeCore {
         /**
         * The damping of the spring. 1 equals completly damped. Influencing TORQUE / ROTATION
         */
-        get rotationSpringDamping(): number;
-        set rotationSpringDamping(_value: number);
+        get springDampingRotation(): number;
+        set springDampingRotation(_value: number);
         /**
          * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. Influencing TORQUE / ROTATION
         */
-        get rotationSpringFrequency(): number;
-        set rotationSpringFrequency(_value: number);
+        get springFrequencyRotation(): number;
+        set springFrequencyRotation(_value: number);
         /**
           * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
          */
-        get rotationalMotorLimitUpper(): number;
-        set rotationalMotorLimitUpper(_value: number);
+        get rotorLimitUpper(): number;
+        set rotorLimitUpper(_value: number);
         /**
           * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
          */
-        get rotationalMotorLimitLower(): number;
-        set rotationalMotorLimitLower(_value: number);
+        get rotorLimitLower(): number;
+        set rotorLimitLower(_value: number);
         /**
           * The target rotational speed of the motor in m/s.
          */
-        get rotationalMotorSpeed(): number;
-        set rotationalMotorSpeed(_value: number);
+        get rotorSpeed(): number;
+        set rotorSpeed(_value: number);
         /**
           * The maximum motor torque in Newton. force <= 0 equals disabled.
          */
-        get motorTorque(): number;
-        set motorTorque(_value: number);
+        get rotorTorque(): number;
+        set rotorTorque(_value: number);
         /**
           * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
          */
@@ -3776,9 +3768,6 @@ declare namespace FudgeCore {
          */
         get motorForce(): number;
         set motorForce(_value: number);
-        /**
-          * If the two connected RigidBodies collide with eath other. (Default = false)
-         */
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected constructJoint(): void;

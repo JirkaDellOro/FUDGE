@@ -77,7 +77,7 @@ namespace FudgeCore {
       this.#springDamping = _value;
       if (this.joint != null)
         // overwrite for e.g. CylindricalJoint
-        (<OIMO.PrismaticJoint><unknown>this.joint).getSpringDamper().dampingRatio = this.#springDamping;
+        (<OIMO.PrismaticJoint><unknown>this.joint).getSpringDamper().dampingRatio = _value;
     }
 
     /**
@@ -89,8 +89,10 @@ namespace FudgeCore {
 
     public set motorSpeed(_value: number) {
       this.#motorSpeed = _value;
+      try {
+        (<OIMO.PrismaticJoint>this.joint).getLimitMotor().motorSpeed = _value;
+      } catch (_e: unknown) { /* */ }
       if (this.joint != null)
-        (<OIMO.PrismaticJoint>this.joint).getLimitMotor().motorSpeed = this.#motorSpeed;
     }
 
     /**
@@ -102,7 +104,7 @@ namespace FudgeCore {
     public set springFrequency(_value: number) {
       this.#springFrequency = _value;
       if (this.joint != null)
-        (<OIMO.PrismaticJoint>this.joint).getSpringDamper().frequency = this.#springFrequency;
+        (<OIMO.PrismaticJoint>this.joint).getSpringDamper().frequency = _value;
     }
     //#endregion
 
