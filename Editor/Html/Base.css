@@ -63,6 +63,7 @@ div[panel] .lm_close {
 /* Checkbox */
 input[type="checkbox"] {
   appearance: none;
+  margin-right: 0.2em;
 }
 
 input[type="checkbox"]::before {

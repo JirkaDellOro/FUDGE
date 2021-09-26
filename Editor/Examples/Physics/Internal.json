@@ -107,17 +107,16 @@
                   }
                 }
               ],
-              "ComponentJointCylindrical": [],
               "ComponentJointRagdoll": [
                 {
                   "ƒ.ComponentJointRagdoll": {
-                    "maxAngleFirst": "undefined",
-                    "maxAngleSecond": "undefined",
+                    "maxAngleFirst": 0,
+                    "maxAngleSecond": 0,
                     "springDampingTwist": 0,
                     "springFrequencyTwist": 0,
                     "springDampingSwing": 0,
                     "springFrequencySwing": 0,
-                    "motorLimitUpperTwist": 0.1096622711232151,
+                    "motorLimitUpperTwist": 0.0019139676963148037,
                     "motorLimitLowerTwist": 0,
                     "motorSpeedTwist": 0,
                     "motorTorqueTwist": 0,

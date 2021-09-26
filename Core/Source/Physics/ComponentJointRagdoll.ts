@@ -44,8 +44,8 @@ namespace FudgeCore {
     #axisSecond: OIMO.Vec3;
 
 
-    #maxAngleFirst: number;
-    #maxAngleSecond: number;
+    #maxAngleFirst: number = 0;
+    #maxAngleSecond: number = 0;
 
     protected joint: OIMO.RagdollJoint;
     protected config: OIMO.RagdollJointConfig = new OIMO.RagdollJointConfig();

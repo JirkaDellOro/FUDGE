@@ -115,10 +115,14 @@ namespace FudgeCore {
 
     public connectChild(_name: string): void {
       this.#nameChildToConnect = _name;
+      if (!this.node)
+        return;
+
       let children: Node[] = this.node.getChildrenByName(_name);
-      if (children.length != 1)
+      if (children.length == 1)
+        this.connectNode(children.pop());
+      else
         Debug.warn(`${this.constructor.name} at ${this.node.name} fails to connect child with non existent or ambigous name ${_name}`);
-      this.connectNode(children.pop());
     }
 
     public connectNode(_node: Node): void {
