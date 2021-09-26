@@ -5,14 +5,14 @@ namespace FudgeCore {
      * A motor can be defined to move the connected along the defined axis. Great to construct standard springs or physical sliders.
      * 
      * ```plaintext
-     *          JointHolder - attachedRigidbody
-     *                    --------
-     *                    |      |
-     *          <---------|      |--------------> connectedRigidbody, sliding on one Axis, 1 Degree of Freedom
-     *                    |      |
-     *                    --------
+     *          JointHolder - bodyAnchor
+     *                    ┌───┐
+     *                    │   │
+     *           <────────│   │──────> tied body, sliding on one Axis, 1 Degree of Freedom
+     *                    │   │
+     *                    └───┘
      * ```
-     * @author Marko Fehrenbach, HFU 2020
+     * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
      */
   export class ComponentJointPrismatic extends ComponentJointAxial {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointPrismatic);
@@ -54,7 +54,7 @@ namespace FudgeCore {
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.motorForce = _serialization.motorForce || this.motorForce;
+      this.motorForce = _serialization.motorForce;
       super.deserialize(_serialization[super.constructor.name]);
       return this;
     }
@@ -63,6 +63,12 @@ namespace FudgeCore {
       let mutator: Mutator = super.getMutator();
       mutator.motorForce = this.motorForce;
       return mutator;
+    }
+
+    public async mutate(_mutator: Mutator): Promise<void> { 
+      this.motorForce = _mutator.motorForce;
+      delete _mutator.motorForce;
+      super.mutate(_mutator);
     }
     //#endregion
 

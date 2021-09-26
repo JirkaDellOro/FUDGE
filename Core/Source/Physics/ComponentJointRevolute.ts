@@ -6,15 +6,16 @@ namespace FudgeCore {
      * ```plaintext        
      *                  rotation axis, 1st Degree of freedom
      *                    ↑
-     *              ---   |   ------------
-     *             |   |  |  |            | 
-     *             |   |  |  |            | 
-     *             |   |  |  |            | 
-     *              ---   |   ------------
-     *      attachedRB    ↓    connectedRB
+     *               ┌───┐│┌────┐     
+     *               │   │││    │  
+     *               │   │││    │ 
+     *               │   │││    │ 
+     *               └───┘│└────┘
+     *                    │   
+     *      bodyAnchor         bodyTied
      *   (e.g. Doorhinge)       (e.g. Door)
      * ```
-     * @author Marko Fehrenbach, HFU, 2020
+     * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
      */
   export class ComponentJointRevolute extends ComponentJointAxial {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointRevolute);
@@ -78,12 +79,19 @@ namespace FudgeCore {
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.motorTorque = _serialization.motorTorque || this.motorTorque;
+      this.motorTorque = _serialization.motorTorque;
       super.deserialize(_serialization[super.constructor.name]);
       return this;
     }
 
+    public getMutator(): Mutator {
+      let mutator: Mutator = super.getMutator();
+      mutator.motorTorque = this.motorTorque;
+      return mutator;
+    }
+
     public async mutate(_mutator: Mutator): Promise<void> {
+      this.motorTorque = _mutator.motorTorque;
       delete _mutator.motorTorque;
       super.mutate(_mutator);
     }

@@ -3646,7 +3646,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-       * Base class for joints operating with exactly on axis
+       * Base class for joints operating with exactly one axis
        * @author Jirka Dell'Oro-Friedl, HFU, 2021
      */
     abstract class ComponentJointAxial extends ComponentJoint {
@@ -3791,14 +3791,14 @@ declare namespace FudgeCore {
        * A motor can be defined to move the connected along the defined axis. Great to construct standard springs or physical sliders.
        *
        * ```plaintext
-       *          JointHolder - attachedRigidbody
-       *                    --------
-       *                    |      |
-       *          <---------|      |--------------> connectedRigidbody, sliding on one Axis, 1 Degree of Freedom
-       *                    |      |
-       *                    --------
+       *          JointHolder - bodyAnchor
+       *                    ┌───┐
+       *                    │   │
+       *           <────────│   │──────> tied body, sliding on one Axis, 1 Degree of Freedom
+       *                    │   │
+       *                    └───┘
        * ```
-       * @author Marko Fehrenbach, HFU 2020
+       * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
        */
     class ComponentJointPrismatic extends ComponentJointAxial {
         #private;
@@ -3816,6 +3816,7 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutator(): Mutator;
+        mutate(_mutator: Mutator): Promise<void>;
         /** Actual creation of a joint in the OimoPhysics system */
         protected constructJoint(): void;
     }
@@ -3927,15 +3928,16 @@ declare namespace FudgeCore {
        * ```plaintext
        *                  rotation axis, 1st Degree of freedom
        *                    ↑
-       *              ---   |   ------------
-       *             |   |  |  |            |
-       *             |   |  |  |            |
-       *             |   |  |  |            |
-       *              ---   |   ------------
-       *      attachedRB    ↓    connectedRB
+       *               ┌───┐│┌────┐
+       *               │   │││    │
+       *               │   │││    │
+       *               │   │││    │
+       *               └───┘│└────┘
+       *                    │
+       *      bodyAnchor         bodyTied
        *   (e.g. Doorhinge)       (e.g. Door)
        * ```
-       * @author Marko Fehrenbach, HFU, 2020
+       * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
        */
     class ComponentJointRevolute extends ComponentJointAxial {
         #private;
@@ -3961,6 +3963,7 @@ declare namespace FudgeCore {
          */
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        getMutator(): Mutator;
         mutate(_mutator: Mutator): Promise<void>;
         protected constructJoint(): void;
     }
