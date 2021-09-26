@@ -1,26 +1,27 @@
 namespace FudgeCore {
   /**
-      * A physical connection between two bodies, designed to simulate behaviour within a real body. It has two axis, a swing and twist axis, and also the perpendicular axis, 
-      * similar to a Spherical joint, but more restrictive in it's angles and only two degrees of freedom. Two RigidBodies need to be defined to use it. Mostly used to create humanlike joints that behave like a 
-      * lifeless body.
-      * ```plaintext        
-      *                  
-      *                      anchor - it can twist on one axis and swing on another
-      *         z                   |
-      *         ↑            -----  |  ------------
-      *         |           |     | ↓ |            |        e.g. z = TwistAxis, it can rotate in-itself around this axis 
-      *  -x <---|---> x     |     | x |            |        e.g. x = SwingAxis, it can rotate anchored around the base on this axis   
-      *         |           |     |   |            |           
-      *         ↓            -----     ------------         e.g. you can twist the leg in-itself to a certain degree,
-      *        -z                                           but also rotate it forward/backward/left/right to a certain degree
-      *                attachedRB          connectedRB
-      *              (e.g. upper-leg)         (e.g. pelvis)
-      * 
-      * ```
-      * Twist equals a rotation around a point without moving on an axis.
-      * Swing equals a rotation on a point with a moving local axis.
-      * @author Marko Fehrenbach, HFU, 2020
-      */
+    * A physical connection between two bodies, designed to simulate behaviour within a real body. It has two axis, a swing and twist axis, and also the perpendicular axis, 
+    * similar to a Spherical joint, but more restrictive in it's angles and only two degrees of freedom. Two RigidBodies need to be defined to use it. Mostly used to create humanlike joints that behave like a 
+    * lifeless body.
+    * ```plaintext        
+    *                  
+    *                      anchor - it can twist on one axis and swing on another
+    *                            │
+    *         z            ┌───┐ │ ┌───┐
+    *         ↑            │   │ ↓ │   │        e.g. z = TwistAxis, it can rotate in-itself around this axis 
+    *    -x ←─┼─→ x        │   │ x │   │        e.g. x = SwingAxis, it can rotate anchored around the base on this axis   
+    *         ↓            │   │   │   │           
+    *        -z            └───┘   └───┘         e.g. you can twist the leg in-itself to a certain degree,
+    *                                                     but also rotate it forward/backward/left/right to a certain degree
+    *                bodyAnchor          bodyTied
+    *              (e.g. pelvis)         (e.g. upper-leg)
+    * 
+    * ```
+    * Twist equals a rotation around a point without moving on an axis.
+    * Swing equals a rotation on a point with a moving local axis.
+    * @author Marko Fehrenbach, HFU, 2020
+    */
+
   export class ComponentJointRagdoll extends ComponentJoint {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointRagdoll);
 
@@ -204,10 +205,8 @@ namespace FudgeCore {
     //#endregion
 
     //#region Saving/Loading
-    public serialize(): Serialization {
-      let serialization: Serialization = {
-        axisFirst: this.axisFirst.serialize(),
-        axisSecond: this.axisSecond.serialize(),
+    #getMutator = (): Mutator => {
+      let mutator: Mutator = {
         maxAngleFirst: this.#maxAngleFirst,
         maxAngleSecond: this.#maxAngleSecond,
         springDampingTwist: this.springDampingTwist,
@@ -217,27 +216,48 @@ namespace FudgeCore {
         motorLimitUpperTwist: this.#motorLimitUpperTwist,
         motorLimitLowerTwist: this.#motorLimitLowerTwist,
         motorSpeedTwist: this.motorSpeedTwist,
-        motorTorqueTwist: this.motorTorqueTwist,
-        [super.constructor.name]: super.serialize()
+        motorTorqueTwist: this.motorTorqueTwist
       };
+      return mutator;
+    }
+    #mutate = (_mutator: Mutator): void => {
+      this.#maxAngleFirst = _mutator.maxAngleFirst;
+      this.#maxAngleSecond = _mutator.maxAngleSecond;
+      this.springDampingTwist = _mutator.springDampingTwist;
+      this.springFrequencyTwist = _mutator.springFrequencyTwist;
+      this.springDampingSwing = _mutator.springDampingSwing;
+      this.springFrequencySwing = _mutator.springFrequencySwing;
+      this.motorLimitUpperTwist = _mutator.motorLimitUpperTwist;
+      this.motorLimitLowerTwist = _mutator.motorLimitLowerTwist;
+      this.motorSpeedTwist = _mutator.motorSpeedTwist;
+      this.motorTorqueTwist = _mutator.motorTorqueTwist;
+    }
+    public serialize(): Serialization {
+      let serialization: Serialization = this.#getMutator();
+      serialization.axisFirst = this.axisFirst.serialize();
+      serialization.axisSecond = this.axisSecond.serialize();
+      serialization[super.constructor.name] = super.serialize();
       return serialization;
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      await this.axisFirst.deserialize(_serialization.axisFirst); 
-      await this.axisSecond.deserialize(_serialization.axisSecond); 
-      this.#maxAngleFirst = _serialization.maxAngleFirst || this.#maxAngleFirst;
-      this.#maxAngleSecond = _serialization.maxAngleSecond || this.#maxAngleSecond;
-      this.springDampingTwist = _serialization.springDampingTwist || this.springDampingTwist;
-      this.springFrequencyTwist = _serialization.springFrequencyTwist || this.springFrequencyTwist;
-      this.springDampingSwing = _serialization.springDampingSwing || this.springDampingSwing;
-      this.springFrequencySwing = _serialization.springFrequencySwing || this.springFrequencySwing;
-      this.motorLimitUpperTwist = _serialization.motorLimitUpperTwist || this.motorLimitUpperTwist;
-      this.motorLimitLowerTwist = _serialization.motorLimitLowerTwist || this.motorLimitLowerTwist;
-      this.motorSpeedTwist = _serialization.motorSpeedTwist || this.motorSpeedTwist;
-      this.motorTorqueTwist = _serialization.motorTorqueTwist || this.motorTorqueTwist;
-      super.deserialize(_serialization);
+      await this.axisFirst.deserialize(_serialization.axisFirst);
+      await this.axisSecond.deserialize(_serialization.axisSecond);
+      this.#mutate(_serialization);
+      super.deserialize(_serialization[super.constructor.name]);
       return this;
+    }
+
+    public async mutate(_mutator: Mutator): Promise<void> {
+      this.#mutate(_mutator);
+      this.deleteFromMutator(_mutator, this.#getMutator());
+      super.mutate(_mutator);
+    }
+    
+    public getMutator(): Mutator {
+      let mutator: Mutator = super.getMutator();
+      Object.assign(mutator, this.#getMutator());
+      return mutator;
     }
     //#endregion
 
@@ -249,7 +269,7 @@ namespace FudgeCore {
       this.#motorTwist.setMotor(this.motorSpeedTwist, this.motorTorqueTwist);
 
       this.config = new OIMO.RagdollJointConfig();
-      super.constructJoint(this.axisFirst, this.axisSecond); 
+      super.constructJoint(this.axisFirst, this.axisSecond);
       this.config.swingSpringDamper = this.#springDamperSwing;
       this.config.twistSpringDamper = this.#springDamperTwist;
       this.config.twistLimitMotor = this.#motorTwist;

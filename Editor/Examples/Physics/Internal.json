@@ -107,32 +107,30 @@
                   }
                 }
               ],
-              "ComponentJointCylindrical": [
+              "ComponentJointCylindrical": [],
+              "ComponentJointRagdoll": [
                 {
-                  "ƒ.ComponentJointCylindrical": {
-                    "motorForce": 0,
-                    "rotorTorque": 0,
-                    "rotorSpeed": 0,
-                    "rotorLimitUpper": 360,
-                    "rotorLimitLower": 0,
-                    "springDampingRotation": 0,
-                    "springFrequencyRotation": 0,
-                    "ComponentJointAxial": {
-                      "axis": "[0, 1, 0]",
-                      "springDamping": 0,
-                      "springFrequency": 0,
-                      "motorLimitUpper": 10,
-                      "motorLimitLower": -10,
-                      "motorSpeed": 0,
-                      "ComponentJoint": {
-                        "nameChildToConnect": "Box",
-                        "anchor": "[0, 0, 0]",
-                        "internalCollision": false,
-                        "breakForce": 0,
-                        "breakTorque": 0,
-                        "Component": {
-                          "active": true
-                        }
+                  "ƒ.ComponentJointRagdoll": {
+                    "maxAngleFirst": "undefined",
+                    "maxAngleSecond": "undefined",
+                    "springDampingTwist": 0,
+                    "springFrequencyTwist": 0,
+                    "springDampingSwing": 0,
+                    "springFrequencySwing": 0,
+                    "motorLimitUpperTwist": 0.1096622711232151,
+                    "motorLimitLowerTwist": 0,
+                    "motorSpeedTwist": 0,
+                    "motorTorqueTwist": 0,
+                    "axisFirst": "[1, 0, 0]",
+                    "axisSecond": "[0, 0, 1]",
+                    "ComponentJoint": {
+                      "nameChildToConnect": "Box",
+                      "anchor": "[0, 0, 0]",
+                      "internalCollision": false,
+                      "breakForce": 0,
+                      "breakTorque": 0,
+                      "Component": {
+                        "active": true
                       }
                     }
                   }

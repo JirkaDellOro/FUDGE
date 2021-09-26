@@ -3814,27 +3814,27 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-        * A physical connection between two bodies, designed to simulate behaviour within a real body. It has two axis, a swing and twist axis, and also the perpendicular axis,
-        * similar to a Spherical joint, but more restrictive in it's angles and only two degrees of freedom. Two RigidBodies need to be defined to use it. Mostly used to create humanlike joints that behave like a
-        * lifeless body.
-        * ```plaintext
-        *
-        *                      anchor - it can twist on one axis and swing on another
-        *         z                   |
-        *         ↑            -----  |  ------------
-        *         |           |     | ↓ |            |        e.g. z = TwistAxis, it can rotate in-itself around this axis
-        *  -x <---|---> x     |     | x |            |        e.g. x = SwingAxis, it can rotate anchored around the base on this axis
-        *         |           |     |   |            |
-        *         ↓            -----     ------------         e.g. you can twist the leg in-itself to a certain degree,
-        *        -z                                           but also rotate it forward/backward/left/right to a certain degree
-        *                attachedRB          connectedRB
-        *              (e.g. upper-leg)         (e.g. pelvis)
-        *
-        * ```
-        * Twist equals a rotation around a point without moving on an axis.
-        * Swing equals a rotation on a point with a moving local axis.
-        * @author Marko Fehrenbach, HFU, 2020
-        */
+      * A physical connection between two bodies, designed to simulate behaviour within a real body. It has two axis, a swing and twist axis, and also the perpendicular axis,
+      * similar to a Spherical joint, but more restrictive in it's angles and only two degrees of freedom. Two RigidBodies need to be defined to use it. Mostly used to create humanlike joints that behave like a
+      * lifeless body.
+      * ```plaintext
+      *
+      *                      anchor - it can twist on one axis and swing on another
+      *                            │
+      *         z            ┌───┐ │ ┌───┐
+      *         ↑            │   │ ↓ │   │        e.g. z = TwistAxis, it can rotate in-itself around this axis
+      *    -x ←─┼─→ x        │   │ x │   │        e.g. x = SwingAxis, it can rotate anchored around the base on this axis
+      *         ↓            │   │   │   │
+      *        -z            └───┘   └───┘         e.g. you can twist the leg in-itself to a certain degree,
+      *                                                     but also rotate it forward/backward/left/right to a certain degree
+      *                bodyAnchor          bodyTied
+      *              (e.g. pelvis)         (e.g. upper-leg)
+      *
+      * ```
+      * Twist equals a rotation around a point without moving on an axis.
+      * Swing equals a rotation on a point with a moving local axis.
+      * @author Marko Fehrenbach, HFU, 2020
+      */
     class ComponentJointRagdoll extends ComponentJoint {
         #private;
         static readonly iSubclass: number;
@@ -3903,11 +3903,10 @@ declare namespace FudgeCore {
          */
         get motorTorqueTwist(): number;
         set motorTorqueTwist(_value: number);
-        /**
-          * If the two connected RigidBodies collide with eath other. (Default = false)
-         */
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+        getMutator(): Mutator;
         protected constructJoint(): void;
     }
 }
