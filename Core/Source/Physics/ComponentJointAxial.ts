@@ -15,7 +15,6 @@ namespace FudgeCore {
     #springDamping: number = 0;
 
     protected springDamper: OIMO.SpringDamper;
-    protected translationMotor: OIMO.TranslationalLimitMotor;
 
 
     /** Creating a cylindrical joint between two ComponentRigidbodies moving on one axis and rotating around another bound on a local anchorpoint. */
@@ -108,26 +107,32 @@ namespace FudgeCore {
     //#endregion
 
     //#region Saving/Loading
-    public serialize(): Serialization {
-      let serialization: Serialization = {
-        axis: this.axis.serialize(),
+    #getMutatorLocal = (): Mutator => {
+      let mutator: Mutator = {
+        axis: this.axis.getMutator(),
         springDamping: this.springDamping,
         springFrequency: this.springFrequency,
         motorLimitUpper: this.#motorLimitUpper,
         motorLimitLower: this.#motorLimitLower,
-        motorSpeed: this.motorSpeed,
-        [super.constructor.name]: super.serialize()
+        motorSpeed: this.motorSpeed
       };
+      return mutator;
+    }
+
+    public serialize(): Serialization {
+      let serialization: Serialization = this.#getMutatorLocal();
+      serialization.axis = this.axis.serialize();
+      serialization[super.constructor.name] = super.serialize();
       return serialization;
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.axis = await new Vector3().deserialize(_serialization.axis) || this.axis;
-      this.springDamping = _serialization.springDamping || this.springDamping;
-      this.springFrequency = _serialization.springFrequency || this.springFrequency;
-      this.motorLimitUpper = _serialization.motorLimitUpper || this.#motorLimitUpper;
-      this.motorLimitLower = _serialization.motorLimitLower || this.#motorLimitLower;
-      this.motorSpeed = _serialization.motorSpeed || this.motorSpeed;
+      this.axis = await new Vector3().deserialize(_serialization.axis);
+      this.springDamping = _serialization.springDamping;
+      this.springFrequency = _serialization.springFrequency;
+      this.motorLimitUpper = _serialization.motorLimitUpper;
+      this.motorLimitLower = _serialization.motorLimitLower;
+      this.motorSpeed = _serialization.motorSpeed;
       super.deserialize(_serialization[super.constructor.name]);
       return this;
     }
@@ -136,26 +141,16 @@ namespace FudgeCore {
       this.axis = new Vector3(...<number[]>(Object.values(_mutator.axis)));
       this.springDamping = _mutator.springDamping;
       this.springFrequency = _mutator.springFrequency;
-      this.motorLimitUpper = _mutator.motorLimitUpper || this.#motorLimitUpper;
-      this.motorLimitLower = _mutator.motorLimitLower || this.#motorLimitLower;
+      this.motorLimitUpper = _mutator.motorLimitUpper;
+      this.motorLimitLower = _mutator.motorLimitLower;
       this.motorSpeed = _mutator.motorSpeed;
-      delete _mutator.axis;
-      delete _mutator.springDamping;
-      delete _mutator.springFrequency;
-      delete _mutator.motorLimitUpper;
-      delete _mutator.motorLimitLower;
-      delete _mutator.motorSpeed;
+      this.deleteFromMutator(_mutator, this.#getMutatorLocal());
       super.mutate(_mutator);
     }
 
     public getMutator(): Mutator {
       let mutator: Mutator = super.getMutator();
-      mutator.axis = this.axis.getMutator();
-      mutator.springDamping = this.springDamping;
-      mutator.springFrequency = this.springFrequency;
-      mutator.motorLimitUpper = this.#motorLimitUpper;
-      mutator.motorLimitLower = this.#motorLimitLower;
-      mutator.motorSpeed = this.motorSpeed;
+      Object.assign(mutator, this.#getMutatorLocal());
       return mutator;
     }
     //#endregion

@@ -82,6 +82,11 @@ namespace FudgeCore {
       super.deserialize(_serialization[super.constructor.name]);
       return this;
     }
+
+    public async mutate(_mutator: Mutator): Promise<void> {
+      delete _mutator.motorTorque;
+      super.mutate(_mutator);
+    }
     //#endregion
 
     protected constructJoint(): void {

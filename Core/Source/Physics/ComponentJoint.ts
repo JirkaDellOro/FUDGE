@@ -182,49 +182,47 @@ namespace FudgeCore {
     }
 
     public serialize(): Serialization {
-      let serialization: Serialization = {
-        nameChildToConnect: this.#nameChildToConnect,
-        anchor: this.anchor.serialize(),
-        internalCollision: this.#internalCollision,
-        breakForce: this.#breakForce,
-        breakTorque: this.#breakTorque,
-        [super.constructor.name]: super.serialize()
-      };
+      let serialization: Serialization = this.#getMutatorLocal();
+      serialization.anchor = this.anchor.serialize();
+      serialization[super.constructor.name] = super.serialize();
       return serialization;
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.anchor = await new Vector3().deserialize(_serialization.anchor) || this.anchor;
-      this.internalCollision = _serialization.internalCollision || false;
-      this.breakForce = _serialization.breakForce || this.breakForce;
-      this.breakTorque = _serialization.breakTorque || this.breakTorque;
+      this.anchor = await new Vector3().deserialize(_serialization.anchor);
+      this.internalCollision = _serialization.internalCollision;
+      this.breakForce = _serialization.breakForce;
+      this.breakTorque = _serialization.breakTorque;
       await super.deserialize(_serialization[super.constructor.name]);
       this.connectChild(_serialization.nameChildToConnect);
       return this;
     }
 
     public getMutator(): Mutator {
-      let mutator: Mutator = {};
-
-      mutator.active = this.active;
-      mutator.nameChildToConnect = this.#nameChildToConnect;
-      mutator.anchor = this.anchor.getMutator();
-      mutator.internalCollision = this.#internalCollision;
-      mutator.breakForce = this.#breakForce;
-      mutator.breakTorque = this.#breakTorque;
-
+      let mutator: Mutator = super.getMutator(true);
+      Object.assign(mutator, this.#getMutatorLocal());
       return mutator;
     }
 
     public async mutate(_mutator: Mutator): Promise<void> {
       this.anchor = new Vector3(...<number[]>(Object.values(_mutator.anchor)));
       this.connectChild(_mutator.nameChildToConnect);
-      delete _mutator.anchor;
-      delete _mutator.nameChildToConnect;
-      delete _mutator.internalCollision;
-      delete _mutator.breakForce;
-      delete _mutator.breakTorque;
+      this.internalCollision = _mutator.internalCollision;
+      this.breakForce = _mutator.breakForce;
+      this.breakTorque = _mutator.breakTorque;
+      this.deleteFromMutator(_mutator, this.#getMutatorLocal());
       super.mutate(_mutator);
+    }
+
+    #getMutatorLocal = (): Mutator => {
+      let mutator: Mutator = {
+        anchor: this.anchor.getMutator(),
+        nameChildToConnect: this.#nameChildToConnect,
+        internalCollision: this.#internalCollision,
+        breakForce: this.#breakForce,
+        breakTorque: this.#breakTorque
+      };
+      return mutator;
     }
 
     /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
@@ -252,6 +250,11 @@ namespace FudgeCore {
       this.joint.setBreakForce(this.breakForce);
       this.joint.setBreakTorque(this.breakTorque);
       this.joint.setAllowCollision(this.#internalCollision);
+    }
+
+    protected deleteFromMutator(_mutator: Mutator, _delete: Mutator): void {
+      for (let key in _delete)
+        delete _mutator[key];
     }
   }
 }

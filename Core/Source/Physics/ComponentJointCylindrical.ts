@@ -19,6 +19,7 @@ namespace FudgeCore {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointCylindrical);
     protected joint: OIMO.CylindricalJoint;
     protected config: OIMO.CylindricalJointConfig = new OIMO.CylindricalJointConfig();
+    protected motor: OIMO.TranslationalLimitMotor;
 
     //Internal Variables
     protected jointRotationSpringDampingRatio: number = 0;
@@ -193,8 +194,8 @@ namespace FudgeCore {
     protected constructJoint(): void {
       this.rotationSpringDamper = new OIMO.SpringDamper().setSpring(this.rotationSpringFrequency, this.rotationSpringDamping);
 
-      this.translationMotor = new OIMO.TranslationalLimitMotor().setLimits(super.motorLimitLower, super.motorLimitUpper);
-      this.translationMotor.setMotor(this.motorSpeed, this.motorForce);
+      this.motor = new OIMO.TranslationalLimitMotor().setLimits(super.motorLimitLower, super.motorLimitUpper);
+      this.motor.setMotor(this.motorSpeed, this.motorForce);
       this.rotationalMotor = new OIMO.RotationalLimitMotor().setLimits(this.rotationalMotorLimitLower, this.rotationalMotorLimitUpper);
       this.rotationalMotor.setMotor(this.rotationalMotorSpeed, this.motorTorque);
 
@@ -202,7 +203,7 @@ namespace FudgeCore {
       super.constructJoint();
 
       this.config.translationalSpringDamper = this.springDamper;
-      this.config.translationalLimitMotor = this.translationMotor;
+      this.config.translationalLimitMotor = this.motor;
       this.config.rotationalLimitMotor = this.rotationalMotor;
       this.config.rotationalSpringDamper = this.rotationSpringDamper;
 

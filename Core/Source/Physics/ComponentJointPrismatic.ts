@@ -21,6 +21,7 @@ namespace FudgeCore {
 
     protected joint: OIMO.PrismaticJoint;
     protected config: OIMO.PrismaticJointConfig = new OIMO.PrismaticJointConfig();
+    protected motor: OIMO.TranslationalLimitMotor;
     //Internally used variables - Joint Properties that are used even when no actual joint is currently existend
 
     /** Creating a prismatic joint between two ComponentRigidbodies only moving on one axis bound on a local anchorpoint. */
@@ -67,14 +68,14 @@ namespace FudgeCore {
 
     /** Actual creation of a joint in the OimoPhysics system */
     protected constructJoint(): void {
-      this.translationMotor = new OIMO.TranslationalLimitMotor().setLimits(this.motorLimitLower, this.motorLimitUpper); //Create motor settings, to hold positions, set constraint min/max
-      this.translationMotor.setMotor(this.motorSpeed, this.motorForce);
+      this.motor = new OIMO.TranslationalLimitMotor().setLimits(this.motorLimitLower, this.motorLimitUpper); //Create motor settings, to hold positions, set constraint min/max
+      this.motor.setMotor(this.motorSpeed, this.motorForce);
 
       this.config = new OIMO.PrismaticJointConfig(); //Create a specific config for this joint type that is calculating the local axis for both bodies
       super.constructJoint();
 
       this.config.springDamper = this.springDamper; //Telling the config to use the motor/spring of the Fudge Component
-      this.config.limitMotor = this.translationMotor;
+      this.config.limitMotor = this.motor;
 
       this.joint = new OIMO.PrismaticJoint(this.config);
       this.configureJoint();

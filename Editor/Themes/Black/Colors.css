@@ -7,7 +7,7 @@
   
   --color-background-main: var(--color-dark);
   --color-background-content: var(--color-darkest);
-  --color-text: var(--color-medium);
+  --color-text: var(--color-bright);
   --color-dragdrop-outline: var(--color-medium);
   --color-highlight: var(--color-bright);
   --color-signal: var(--color-brightest);

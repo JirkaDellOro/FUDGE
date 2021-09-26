@@ -3641,6 +3641,7 @@ declare namespace FudgeCore {
         protected removeJoint(): void;
         protected constructJoint(..._configParams: Object[]): void;
         protected configureJoint(): void;
+        protected deleteFromMutator(_mutator: Mutator, _delete: Mutator): void;
     }
 }
 declare namespace FudgeCore {
@@ -3651,7 +3652,6 @@ declare namespace FudgeCore {
     abstract class ComponentJointAxial extends ComponentJoint {
         #private;
         protected springDamper: OIMO.SpringDamper;
-        protected translationMotor: OIMO.TranslationalLimitMotor;
         /** Creating a cylindrical joint between two ComponentRigidbodies moving on one axis and rotating around another bound on a local anchorpoint. */
         constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
@@ -3712,6 +3712,7 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         protected joint: OIMO.CylindricalJoint;
         protected config: OIMO.CylindricalJointConfig;
+        protected motor: OIMO.TranslationalLimitMotor;
         protected jointRotationSpringDampingRatio: number;
         protected jointRotationSpringFrequency: number;
         private jointMotorForce;
@@ -3804,6 +3805,7 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         protected joint: OIMO.PrismaticJoint;
         protected config: OIMO.PrismaticJointConfig;
+        protected motor: OIMO.TranslationalLimitMotor;
         /** Creating a prismatic joint between two ComponentRigidbodies only moving on one axis bound on a local anchorpoint. */
         constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody, _axis?: Vector3, _localAnchor?: Vector3);
         /**
@@ -3959,6 +3961,7 @@ declare namespace FudgeCore {
          */
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
         protected constructJoint(): void;
     }
 }
