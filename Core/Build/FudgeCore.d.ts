@@ -3635,6 +3635,7 @@ declare namespace FudgeCore {
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutator(): Mutator;
         mutate(_mutator: Mutator): Promise<void>;
+        protected reduceMutator(_mutator: Mutator): void;
         /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
         protected dirtyStatus(): void;
         protected addJoint(): void;
@@ -3770,6 +3771,8 @@ declare namespace FudgeCore {
         set motorForce(_value: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+        getMutator(): Mutator;
         protected constructJoint(): void;
     }
 }

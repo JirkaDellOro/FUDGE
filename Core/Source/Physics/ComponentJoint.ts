@@ -182,7 +182,7 @@ namespace FudgeCore {
     }
 
     public serialize(): Serialization {
-      let serialization: Serialization = this.#getMutatorLocal();
+      let serialization: Serialization = this.#getMutator();
       serialization.anchor = this.anchor.serialize();
       serialization[super.constructor.name] = super.serialize();
       return serialization;
@@ -190,9 +190,7 @@ namespace FudgeCore {
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.anchor = await new Vector3().deserialize(_serialization.anchor);
-      this.internalCollision = _serialization.internalCollision;
-      this.breakForce = _serialization.breakForce;
-      this.breakTorque = _serialization.breakTorque;
+      this.#mutate(_serialization);
       await super.deserialize(_serialization[super.constructor.name]);
       this.connectChild(_serialization.nameChildToConnect);
       return this;
@@ -200,29 +198,40 @@ namespace FudgeCore {
 
     public getMutator(): Mutator {
       let mutator: Mutator = super.getMutator(true);
-      Object.assign(mutator, this.#getMutatorLocal());
+      Object.assign(mutator, this.#getMutator());
       return mutator;
     }
 
     public async mutate(_mutator: Mutator): Promise<void> {
       this.anchor = new Vector3(...<number[]>(Object.values(_mutator.anchor)));
       this.connectChild(_mutator.nameChildToConnect);
-      this.internalCollision = _mutator.internalCollision;
-      this.breakForce = _mutator.breakForce;
-      this.breakTorque = _mutator.breakTorque;
-      this.deleteFromMutator(_mutator, this.#getMutatorLocal());
+      this.#mutate(_mutator);
+      this.deleteFromMutator(_mutator, this.#getMutator());
       super.mutate(_mutator);
     }
 
-    #getMutatorLocal = (): Mutator => {
+    #getMutator = (): Mutator => {
       let mutator: Mutator = {
-        anchor: this.anchor.getMutator(),
         nameChildToConnect: this.#nameChildToConnect,
+        anchor: this.anchor.getMutator(),
         internalCollision: this.#internalCollision,
         breakForce: this.#breakForce,
         breakTorque: this.#breakTorque
       };
       return mutator;
+    }
+
+    #mutate = (_mutator: Mutator): void => {
+      this.internalCollision = _mutator.internalCollision;
+      this.breakForce = _mutator.breakForce;
+      this.breakTorque = _mutator.breakTorque;
+    }
+
+    protected reduceMutator(_mutator: Mutator): void {
+      delete _mutator.springDamper;
+      delete _mutator.joint;
+      delete _mutator.motor;
+      super.reduceMutator(_mutator);
     }
 
     /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */

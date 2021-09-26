@@ -92,7 +92,7 @@
                     "dampTranslation": 0.1,
                     "dampRotation": 0.1,
                     "effectGravity": 1,
-                    "typeBody": "STATIC",
+                    "typeBody": "DYNAMIC",
                     "typeCollider": "CYLINDER",
                     "isTrigger": false,
                     "id": 0,
@@ -107,20 +107,26 @@
                   }
                 }
               ],
-              "ComponentJointRevolute": [
+              "ComponentJointCylindrical": [
                 {
-                  "ƒ.ComponentJointRevolute": {
-                    "motorTorque": 0,
+                  "ƒ.ComponentJointCylindrical": {
+                    "motorForce": 0,
+                    "rotorTorque": 0,
+                    "rotorSpeed": 0,
+                    "rotorLimitUpper": 360,
+                    "rotorLimitLower": 0,
+                    "springDampingRotation": 0,
+                    "springFrequencyRotation": 0,
                     "ComponentJointAxial": {
-                      "axis": "[0, 0, 0]",
-                      "springDamping": 0.2,
-                      "springFrequency": 10,
-                      "motorLimitUpper": 30,
-                      "motorLimitLower": -30,
-                      "motorSpeed": 4,
+                      "axis": "[0, 1, 0]",
+                      "springDamping": 0,
+                      "springFrequency": 0,
+                      "motorLimitUpper": 10,
+                      "motorLimitLower": -10,
+                      "motorSpeed": 0,
                       "ComponentJoint": {
-                        "anchor": "[0, 1.3000000715255737, 0]",
                         "nameChildToConnect": "Box",
+                        "anchor": "[0, 0, 0]",
                         "internalCollision": false,
                         "breakForce": 0,
                         "breakTorque": 0,

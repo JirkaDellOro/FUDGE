@@ -92,7 +92,6 @@ namespace FudgeCore {
       try {
         (<OIMO.PrismaticJoint>this.joint).getLimitMotor().motorSpeed = _value;
       } catch (_e: unknown) { /* */ }
-      if (this.joint != null)
     }
 
     /**
@@ -109,20 +108,27 @@ namespace FudgeCore {
     //#endregion
 
     //#region Saving/Loading
-    #getMutatorLocal = (): Mutator => {
+    #getMutator = (): Mutator => {
       let mutator: Mutator = {
         axis: this.axis.getMutator(),
-        springDamping: this.springDamping,
-        springFrequency: this.springFrequency,
+        springDamping: this.#springDamping,
+        springFrequency: this.#springFrequency,
         motorLimitUpper: this.#motorLimitUpper,
         motorLimitLower: this.#motorLimitLower,
-        motorSpeed: this.motorSpeed
+        motorSpeed: this.#motorSpeed
       };
       return mutator;
     }
+    #mutate = (_mutator: Mutator): void => {
+      this.springDamping = _mutator.springDamping;
+      this.springFrequency = _mutator.springFrequency;
+      this.motorLimitUpper = _mutator.motorLimitUpper;
+      this.motorLimitLower = _mutator.motorLimitLower;
+      this.motorSpeed = _mutator.motorSpeed;
+    }
 
     public serialize(): Serialization {
-      let serialization: Serialization = this.#getMutatorLocal();
+      let serialization: Serialization = this.#getMutator();
       serialization.axis = this.axis.serialize();
       serialization[super.constructor.name] = super.serialize();
       return serialization;
@@ -130,29 +136,21 @@ namespace FudgeCore {
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.axis = await new Vector3().deserialize(_serialization.axis);
-      this.springDamping = _serialization.springDamping;
-      this.springFrequency = _serialization.springFrequency;
-      this.motorLimitUpper = _serialization.motorLimitUpper;
-      this.motorLimitLower = _serialization.motorLimitLower;
-      this.motorSpeed = _serialization.motorSpeed;
+      this.#mutate(_serialization);
       super.deserialize(_serialization[super.constructor.name]);
       return this;
     }
 
     public async mutate(_mutator: Mutator): Promise<void> {
       this.axis = new Vector3(...<number[]>(Object.values(_mutator.axis)));
-      this.springDamping = _mutator.springDamping;
-      this.springFrequency = _mutator.springFrequency;
-      this.motorLimitUpper = _mutator.motorLimitUpper;
-      this.motorLimitLower = _mutator.motorLimitLower;
-      this.motorSpeed = _mutator.motorSpeed;
-      this.deleteFromMutator(_mutator, this.#getMutatorLocal());
+      this.#mutate(_mutator);
+      this.deleteFromMutator(_mutator, this.#getMutator());
       super.mutate(_mutator);
     }
 
     public getMutator(): Mutator {
       let mutator: Mutator = super.getMutator();
-      Object.assign(mutator, this.#getMutatorLocal());
+      Object.assign(mutator, this.#getMutator());
       return mutator;
     }
     //#endregion

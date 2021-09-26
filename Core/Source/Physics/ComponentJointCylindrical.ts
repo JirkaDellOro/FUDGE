@@ -158,31 +158,51 @@ namespace FudgeCore {
     //#endregion
 
     //#region Saving/Loading
-    public serialize(): Serialization {
-      let serialization: Serialization = {
+    #getMutator = (): Mutator => {
+      let mutator: Mutator = {
         motorForce: this.motorForce,
         rotorTorque: this.rotorTorque,
         rotorSpeed: this.rotorSpeed,
         rotorLimitUpper: this.rotorLimitUpper,
         rotorLimitLower: this.rotorLimitLower,
         springDampingRotation: this.springDampingRotation,
-        springFrequencyRotation: this.springFrequencyRotation,
-        [super.constructor.name]: super.serialize()
+        springFrequencyRotation: this.springFrequencyRotation
       };
+      return mutator;
+    }
+    #mutate = (_mutator: Mutator): void => {
+      this.motorForce = _mutator.motorForce;
+      this.rotorTorque = _mutator.rotorTorque;
+      this.rotorSpeed = _mutator.rotorSpeed;
+      this.rotorLimitUpper = _mutator.rotorLimitUpper;
+      this.rotorLimitLower = _mutator.rotorLimitLower;
+      this.springDampingRotation = _mutator.springDampingRotation;
+      this.springFrequencyRotation = _mutator.springFrequencyRotation;
+      this.springFrequency = _mutator.springFrequency;
+    }
+
+    public serialize(): Serialization {
+      let serialization: Serialization = this.#getMutator();
+      serialization[super.constructor.name] = super.serialize();
       return serialization;
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.motorForce = _serialization.motorForce;             
-      this.rotorTorque = _serialization.rotorTorque;           
-      this.rotorSpeed = _serialization.rotorSpeed;             
-      this.rotorLimitUpper = _serialization.rotorLimitUpper;   
-      this.rotorLimitLower = _serialization.rotorLimitLower;   
-      this.springDampingRotation = _serialization.springDampingRotation;     
-      this.springFrequencyRotation = _serialization.springFrequencyRotation; 
-      this.springFrequency = _serialization.springFrequency;  
-      super.deserialize(_serialization);
+      this.#mutate(_serialization);
+      super.deserialize(_serialization[super.constructor.name]);
       return this;
+    }
+    
+    public async mutate(_mutator: Mutator): Promise<void> {
+      this.#mutate(_mutator);
+      this.deleteFromMutator(_mutator, this.#getMutator());
+      super.mutate(_mutator);
+    }
+    
+    public getMutator(): Mutator {
+      let mutator: Mutator = super.getMutator();
+      Object.assign(mutator, this.#getMutator());
+      return mutator;
     }
     //#endregion
 
@@ -190,7 +210,7 @@ namespace FudgeCore {
       this.#rotorSpringDamper = new OIMO.SpringDamper().setSpring(this.springFrequencyRotation, this.springDampingRotation);
 
       this.motor = new OIMO.TranslationalLimitMotor().setLimits(super.motorLimitLower, super.motorLimitUpper);
-      this.motor.setMotor(this.motorSpeed, this.motorForce);
+      this.motor.setMotor(super.motorSpeed, this.motorForce);
       this.#rotor = new OIMO.RotationalLimitMotor().setLimits(this.rotorLimitLower, this.rotorLimitUpper);
       this.#rotor.setMotor(this.rotorSpeed, this.rotorTorque);
 
