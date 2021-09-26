@@ -3944,12 +3944,10 @@ declare namespace FudgeCore {
         /**
           * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
          */
-        get motorLimitUpper(): number;
         set motorLimitUpper(_value: number);
         /**
           * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
          */
-        get motorLimitLower(): number;
         set motorLimitLower(_value: number);
         /**
           * The maximum motor force in Newton. force <= 0 equals disabled.

@@ -150,11 +150,11 @@ namespace FudgeCore {
      */
     public connect(): void {
       if (this.#connected == false) {
-        if (this.#idBodyAnchor == -1 || this.#idBodyTied == -1)
-          if (this.#nameChildToConnect) {
+        if (this.#idBodyAnchor == -1 || this.#idBodyTied == -1) {
+          if (this.#nameChildToConnect)
             this.connectChild(this.#nameChildToConnect);
-            return;
-          }
+          return;
+        }
 
         this.constructJoint();
         this.#connected = true;
@@ -199,7 +199,7 @@ namespace FudgeCore {
       this.breakForce = _serialization.breakForce || this.breakForce;
       this.breakTorque = _serialization.breakTorque || this.breakTorque;
       await super.deserialize(_serialization[super.constructor.name]);
-      this.connectChild(this.#nameChildToConnect);
+      this.connectChild(_serialization.nameChildToConnect);
       return this;
     }
 
@@ -221,6 +221,9 @@ namespace FudgeCore {
       this.connectChild(_mutator.nameChildToConnect);
       delete _mutator.anchor;
       delete _mutator.nameChildToConnect;
+      delete _mutator.internalCollision;
+      delete _mutator.breakForce;
+      delete _mutator.breakTorque;
       super.mutate(_mutator);
     }
 

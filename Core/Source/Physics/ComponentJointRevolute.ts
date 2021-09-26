@@ -18,13 +18,13 @@ namespace FudgeCore {
      */
   export class ComponentJointRevolute extends ComponentJointAxial {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointRevolute);
-    
+
     #motorTorque: number = 0;
     #rotor: OIMO.RotationalLimitMotor;
 
     protected joint: OIMO.RevoluteJoint;
     protected config: OIMO.RevoluteJointConfig = new OIMO.RevoluteJointConfig();
-    
+
 
     constructor(_bodyAnchor: ComponentRigidbody = null, _bodyTied: ComponentRigidbody = null, _axis: Vector3 = new Vector3(0, 1, 0), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
       super(_bodyAnchor, _bodyTied, _axis, _localAnchor);
@@ -32,26 +32,23 @@ namespace FudgeCore {
       this.motorLimitUpper = 360;
       this.motorLimitLower = 0;
     }
-    
+
     /**
       * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
      */
-   public get motorLimitUpper(): number {
-      return super.motorLimitUpper * 180 / Math.PI;
-    }
-    public  set motorLimitUpper(_value: number) {
-      _value *= Math.PI / 180;
+    public set motorLimitUpper(_value: number) {
       super.motorLimitUpper = _value;
+      _value *= Math.PI / 180;
+      if (this.joint)
+        this.joint.getLimitMotor().upperLimit = _value;
     }
     /**
       * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
      */
-     public  get motorLimitLower(): number {
-      return super.motorLimitLower * 180 / Math.PI;
-    }
-    public  set motorLimitLower(_value: number) {
-      _value *= Math.PI / 180;
+    public set motorLimitLower(_value: number) {
       super.motorLimitLower = _value;
+      if (this.joint)
+        this.joint.getLimitMotor().lowerLimit = _value * Math.PI / 180;
     }
 
     /**
@@ -82,18 +79,18 @@ namespace FudgeCore {
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.motorTorque = _serialization.motorTorque || this.motorTorque;
-      super.deserialize(_serialization);
+      super.deserialize(_serialization[super.constructor.name]);
       return this;
     }
     //#endregion
 
     protected constructJoint(): void {
-      this.#rotor = new OIMO.RotationalLimitMotor().setLimits(this.motorLimitLower, this.motorLimitUpper);
+      this.#rotor = new OIMO.RotationalLimitMotor().setLimits(super.motorLimitLower * Math.PI / 180, super.motorLimitUpper * Math.PI / 180);
       this.#rotor.setMotor(this.motorSpeed, this.motorTorque);
 
       this.config = new OIMO.RevoluteJointConfig();
       super.constructJoint();
-      
+
       this.config.springDamper = this.springDamper;
       this.config.limitMotor = this.#rotor;
 

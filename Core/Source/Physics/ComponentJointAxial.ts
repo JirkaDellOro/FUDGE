@@ -113,8 +113,8 @@ namespace FudgeCore {
         axis: this.axis.serialize(),
         springDamping: this.springDamping,
         springFrequency: this.springFrequency,
-        motorLimitUpper: this.motorLimitUpper,
-        motorLimitLower: this.motorLimitLower,
+        motorLimitUpper: this.#motorLimitUpper,
+        motorLimitLower: this.#motorLimitLower,
         motorSpeed: this.motorSpeed,
         [super.constructor.name]: super.serialize()
       };
@@ -125,8 +125,8 @@ namespace FudgeCore {
       this.axis = await new Vector3().deserialize(_serialization.axis) || this.axis;
       this.springDamping = _serialization.springDamping || this.springDamping;
       this.springFrequency = _serialization.springFrequency || this.springFrequency;
-      this.motorLimitUpper = _serialization.motorLimitUpper || this.motorLimitUpper;
-      this.motorLimitLower = _serialization.motorLimitLower || this.motorLimitLower;
+      this.motorLimitUpper = _serialization.motorLimitUpper || this.#motorLimitUpper;
+      this.motorLimitLower = _serialization.motorLimitLower || this.#motorLimitLower;
       this.motorSpeed = _serialization.motorSpeed || this.motorSpeed;
       super.deserialize(_serialization[super.constructor.name]);
       return this;
@@ -134,7 +134,17 @@ namespace FudgeCore {
 
     public async mutate(_mutator: Mutator): Promise<void> {
       this.axis = new Vector3(...<number[]>(Object.values(_mutator.axis)));
+      this.springDamping = _mutator.springDamping;
+      this.springFrequency = _mutator.springFrequency;
+      this.motorLimitUpper = _mutator.motorLimitUpper || this.#motorLimitUpper;
+      this.motorLimitLower = _mutator.motorLimitLower || this.#motorLimitLower;
+      this.motorSpeed = _mutator.motorSpeed;
       delete _mutator.axis;
+      delete _mutator.springDamping;
+      delete _mutator.springFrequency;
+      delete _mutator.motorLimitUpper;
+      delete _mutator.motorLimitLower;
+      delete _mutator.motorSpeed;
       super.mutate(_mutator);
     }
 
@@ -143,8 +153,8 @@ namespace FudgeCore {
       mutator.axis = this.axis.getMutator();
       mutator.springDamping = this.springDamping;
       mutator.springFrequency = this.springFrequency;
-      mutator.motorLimitUpper = this.motorLimitUpper;
-      mutator.motorLimitLower = this.motorLimitLower;
+      mutator.motorLimitUpper = this.#motorLimitUpper;
+      mutator.motorLimitLower = this.#motorLimitLower;
       mutator.motorSpeed = this.motorSpeed;
       return mutator;
     }
