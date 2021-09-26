@@ -1,19 +1,18 @@
 ///<reference path="ComponentJointAxial.ts"/>
 namespace FudgeCore {
   /**
-     * A physical connection between two bodies with a defined axe of translation and rotation. Two Degrees of Freedom in the defined axis.
-     * Two RigidBodies need to be defined to use it. A motor can be defined for rotation and translation, along with spring settings.
-     * 
-     * ```plaintext
-     *          JointHolder - attachedRigidbody
-     *                    ----------  ↑
-     *                    |        |  |
-     *          <---------|        |--------------> connectedRigidbody, sliding on one Axis, 1st Degree of Freedom
-     *                    |        |  |   
-     *                    ----------  ↓ rotating on one Axis, 2nd Degree of Freedom   
-     * ```
-     * 
-     * @author Marko Fehrenbach, HFU 2020
+   * A physical connection between two bodies with a defined axe of translation and rotation. Two Degrees of Freedom in the defined axis.
+   * Two RigidBodies need to be defined to use it. A motor can be defined for rotation and translation, along with spring settings.
+   * 
+   * ```plaintext
+   *          JointHolder - bodyAnchor
+   *                    ┌───┐
+   *                    │   │
+   *           <────────│   │──────> tied body, sliding on axis = 1st degree of freedom
+   *                    │   │        rotating around axis = 2nd degree of freedom 
+   *                    └───┘
+   * ```  
+   * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
    */
   export class ComponentJointCylindrical extends ComponentJointAxial {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointCylindrical);
