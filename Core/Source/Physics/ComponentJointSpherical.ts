@@ -5,16 +5,16 @@ namespace FudgeCore {
      * 3 Degrees are swing horizontal, swing vertical and twist.
      * 
      * ```plaintext
-     *              JointHolder - attachedRigidbody (e.g. Human-Shoulder)
-     *         z                             -------
-     *      y  ↑                            |      |
-     *        \|            ----------------|      |
-     *  -x <---|---> x     |                |      |
-     *         |\           ----------------|      |
-     *         ↓ -y       conntectedRb      |      |
-     *        -z         (e.g. Upper-Arm)    -------
+     *              JointHolder
+     *         z      bodyAnchor (e.g. Human-Shoulder)     
+     *      y  ↑          
+     *        \|          ───(●───
+     *  -x <---|---> x           bodyTied        
+     *         |\                (e.g. Upper-Arm) 
+     *         ↓ -y       
+     *        -z          
      * ```
-     * @authors Marko Fehrenbach, HFU, 2020
+     * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
      */
   export class ComponentJointSpherical extends ComponentJoint {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentJointSpherical);
@@ -22,7 +22,7 @@ namespace FudgeCore {
     #springDamping: number = 0;
     #springFrequency: number = 0;
     #springDamper: OIMO.SpringDamper;
-    
+
     protected joint: OIMO.SphericalJoint;
     protected config: OIMO.SphericalJointConfig = new OIMO.SphericalJointConfig();
 
@@ -67,10 +67,25 @@ namespace FudgeCore {
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.springDamping = _serialization.springDamping || this.springDamping;
-      this.springFrequency = _serialization.springFrequency || this.springFrequency;
+      this.springDamping = _serialization.springDamping;
+      this.springFrequency = _serialization.springFrequency;
       super.deserialize(_serialization);
       return this;
+    }
+
+    public getMutator(): Mutator {
+      let mutator: Mutator = super.getMutator();
+      mutator.springDamping = this.springDamping;
+      mutator.springFrequency = this.springFrequency;
+      return mutator;
+    }
+
+    public async mutate(_mutator: Mutator): Promise<void> {
+      this.springDamping = _mutator.springDamping;
+      this.springFrequency = _mutator.springFrequency;
+      delete _mutator.springDamping;
+      delete _mutator.springFrequency;
+      super.mutate(_mutator);
     }
     //#endregion
 

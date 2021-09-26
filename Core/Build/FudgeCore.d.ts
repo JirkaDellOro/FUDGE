@@ -3833,7 +3833,7 @@ declare namespace FudgeCore {
       * ```
       * Twist equals a rotation around a point without moving on an axis.
       * Swing equals a rotation on a point with a moving local axis.
-      * @author Marko Fehrenbach, HFU, 2020
+       * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
       */
     class ComponentJointRagdoll extends ComponentJoint {
         #private;
@@ -3965,16 +3965,16 @@ declare namespace FudgeCore {
        * 3 Degrees are swing horizontal, swing vertical and twist.
        *
        * ```plaintext
-       *              JointHolder - attachedRigidbody (e.g. Human-Shoulder)
-       *         z                             -------
-       *      y  ↑                            |      |
-       *        \|            ----------------|      |
-       *  -x <---|---> x     |                |      |
-       *         |\           ----------------|      |
-       *         ↓ -y       conntectedRb      |      |
-       *        -z         (e.g. Upper-Arm)    -------
+       *              JointHolder
+       *         z      bodyAnchor (e.g. Human-Shoulder)
+       *      y  ↑
+       *        \|          ───(●───
+       *  -x <---|---> x           bodyTied
+       *         |\                (e.g. Upper-Arm)
+       *         ↓ -y
+       *        -z
        * ```
-       * @authors Marko Fehrenbach, HFU, 2020
+       * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
        */
     class ComponentJointSpherical extends ComponentJoint {
         #private;
@@ -3994,6 +3994,8 @@ declare namespace FudgeCore {
         set springFrequency(_value: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        getMutator(): Mutator;
+        mutate(_mutator: Mutator): Promise<void>;
         protected constructJoint(): void;
     }
 }

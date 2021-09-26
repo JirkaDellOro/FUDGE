@@ -19,7 +19,7 @@ namespace FudgeCore {
     * ```
     * Twist equals a rotation around a point without moving on an axis.
     * Swing equals a rotation on a point with a moving local axis.
-    * @author Marko Fehrenbach, HFU, 2020
+     * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
     */
 
   export class ComponentJointRagdoll extends ComponentJoint {
