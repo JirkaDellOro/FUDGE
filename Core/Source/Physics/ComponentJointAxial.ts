@@ -7,8 +7,8 @@ namespace FudgeCore {
 
     //Internal Variables
 
-    #motorLimitUpper: number = 10;
-    #motorLimitLower: number = -10;
+    #maxMotor: number = 10;
+    #minMotor: number = -10;
     #motorSpeed: number = 0;
     #axis: OIMO.Vec3;
     #springFrequency: number = 0;
@@ -22,8 +22,8 @@ namespace FudgeCore {
       super(_bodyAnchor, _bodyTied);
       this.axis = _axis;
       this.anchor = _localAnchor;
-      this.motorLimitLower = -10;
-      this.motorLimitUpper = 10;
+      this.minMotor = -10;
+      this.maxMotor = 10;
     }
 
     //#region Get/Set transfor of fudge properties to the physics engine
@@ -43,12 +43,12 @@ namespace FudgeCore {
     /**
       * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. 
      */
-    public get motorLimitUpper(): number {
-      return this.#motorLimitUpper;
+    public get maxMotor(): number {
+      return this.#maxMotor;
     }
 
-    public set motorLimitUpper(_value: number) {
-      this.#motorLimitUpper = _value;
+    public set maxMotor(_value: number) {
+      this.#maxMotor = _value;
       try {
         (<OIMO.PrismaticJoint><unknown>this.joint).getLimitMotor().upperLimit = _value;
       } catch (_e: unknown) { /* */ }
@@ -57,11 +57,11 @@ namespace FudgeCore {
     /**
       * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
      */
-    public get motorLimitLower(): number {
-      return this.#motorLimitLower;
+    public get minMotor(): number {
+      return this.#minMotor;
     }
-    public set motorLimitLower(_value: number) {
-      this.#motorLimitLower = _value;
+    public set minMotor(_value: number) {
+      this.#minMotor = _value;
       try {
         (<OIMO.PrismaticJoint><unknown>this.joint).getLimitMotor().lowerLimit = _value;
       } catch (_e: unknown) { /* */ }
@@ -142,8 +142,8 @@ namespace FudgeCore {
       let mutator: Mutator = {
         springDamping: this.#springDamping,
         springFrequency: this.#springFrequency,
-        motorLimitUpper: this.#motorLimitUpper,
-        motorLimitLower: this.#motorLimitLower,
+        maxMotor: this.#maxMotor,
+        minMotor: this.#minMotor,
         motorSpeed: this.#motorSpeed
       };
       return mutator;
@@ -151,8 +151,8 @@ namespace FudgeCore {
     #mutate = (_mutator: Mutator): void => {
       this.springDamping = _mutator.springDamping;
       this.springFrequency = _mutator.springFrequency;
-      this.motorLimitUpper = _mutator.motorLimitUpper;
-      this.motorLimitLower = _mutator.motorLimitLower;
+      this.maxMotor = _mutator.maxMotor;
+      this.minMotor = _mutator.minMotor;
       this.motorSpeed = _mutator.motorSpeed;
     }
 

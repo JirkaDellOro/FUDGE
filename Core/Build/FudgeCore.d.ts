@@ -3664,13 +3664,13 @@ declare namespace FudgeCore {
         /**
           * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
          */
-        get motorLimitUpper(): number;
-        set motorLimitUpper(_value: number);
+        get maxMotor(): number;
+        set maxMotor(_value: number);
         /**
           * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
          */
-        get motorLimitLower(): number;
-        set motorLimitLower(_value: number);
+        get minMotor(): number;
+        set minMotor(_value: number);
         /**
          * The damping of the spring. 1 equals completly damped.
          */
@@ -3737,13 +3737,13 @@ declare namespace FudgeCore {
         /**
           * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
          */
-        get rotorLimitUpper(): number;
-        set rotorLimitUpper(_value: number);
+        get maxRotor(): number;
+        set maxRotor(_value: number);
         /**
           * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
          */
-        get rotorLimitLower(): number;
-        set rotorLimitLower(_value: number);
+        get minRotor(): number;
+        set minRotor(_value: number);
         /**
           * The target rotational speed of the motor in m/s.
          */
@@ -3757,11 +3757,11 @@ declare namespace FudgeCore {
         /**
           * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
          */
-        set motorLimitUpper(_value: number);
+        set maxMotor(_value: number);
         /**
           * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit.
          */
-        set motorLimitLower(_value: number);
+        set minMotor(_value: number);
         set motorSpeed(_value: number);
         /**
           * The maximum motor force in Newton. force <= 0 equals disabled.
@@ -3886,13 +3886,13 @@ declare namespace FudgeCore {
         /**
           * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
          */
-        get motorLimitUpperTwist(): number;
-        set motorLimitUpperTwist(_value: number);
+        get maxMotorTwist(): number;
+        set maxMotorTwist(_value: number);
         /**
          * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
          */
-        get motorLimitLowerTwist(): number;
-        set motorLimitLowerTwist(_value: number);
+        get minMotorTwist(): number;
+        set minMotorTwist(_value: number);
         /**
           * The target rotational speed of the motor in m/s.
          */
@@ -3941,11 +3941,11 @@ declare namespace FudgeCore {
         /**
           * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
          */
-        set motorLimitUpper(_value: number);
+        set maxMotor(_value: number);
         /**
           * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
          */
-        set motorLimitLower(_value: number);
+        set minMotor(_value: number);
         /**
           * The maximum motor force in Newton. force <= 0 equals disabled.
          */
@@ -4063,13 +4063,13 @@ declare namespace FudgeCore {
         /**
           * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
          */
-        get rotorLimitUpperFirst(): number;
-        set rotorLimitUpperFirst(_value: number);
+        get maxRotorFirst(): number;
+        set maxRotorFirst(_value: number);
         /**
           * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
          */
-        get rotorLimitLowerFirst(): number;
-        set rotorLimitLowerFirst(_value: number);
+        get minRotorFirst(): number;
+        set minRotorFirst(_value: number);
         /**
           * The target rotational speed of the motor in m/s.
          */
@@ -4083,13 +4083,13 @@ declare namespace FudgeCore {
         /**
         * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
        */
-        get rotorLimitUpperSecond(): number;
-        set rotorLimitUpperSecond(_value: number);
+        get maxRotorSecond(): number;
+        set maxRotorSecond(_value: number);
         /**
           * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
          */
-        get rotorLimitLowerSecond(): number;
-        set rotorLimitLowerSecond(_value: number);
+        get minRotorSecond(): number;
+        set minRotorSecond(_value: number);
         /**
           * The target rotational speed of the motor in m/s.
          */

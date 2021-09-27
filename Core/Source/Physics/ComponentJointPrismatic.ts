@@ -28,8 +28,8 @@ namespace FudgeCore {
     constructor(_bodyAnchor: ComponentRigidbody = null, _bodyTied: ComponentRigidbody = null, _axis: Vector3 = new Vector3(0, 1, 0), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
       super(_bodyAnchor, _bodyTied, _axis, _localAnchor);
 
-      this.motorLimitUpper = 10;
-      this.motorLimitLower = -10;
+      this.maxMotor = 10;
+      this.minMotor = -10;
     }
     //#region Get/Set transfor of fudge properties to the physics engine
     /**
@@ -74,7 +74,7 @@ namespace FudgeCore {
 
     /** Actual creation of a joint in the OimoPhysics system */
     protected constructJoint(): void {
-      this.motor = new OIMO.TranslationalLimitMotor().setLimits(this.motorLimitLower, this.motorLimitUpper); //Create motor settings, to hold positions, set constraint min/max
+      this.motor = new OIMO.TranslationalLimitMotor().setLimits(this.minMotor, this.maxMotor); //Create motor settings, to hold positions, set constraint min/max
       this.motor.setMotor(this.motorSpeed, this.motorForce);
 
       this.config = new OIMO.PrismaticJointConfig(); //Create a specific config for this joint type that is calculating the local axis for both bodies

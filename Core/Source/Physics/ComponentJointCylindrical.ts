@@ -21,8 +21,8 @@ namespace FudgeCore {
 
     #motorForce: number = 0;
 
-    #rotorLimitUpper: number = 360;
-    #rotorLimitLower: number = 0;
+    #maxRotor: number = 360;
+    #minRotor: number = 0;
     #rotorTorque: number = 0;
     #rotorSpeed: number = 0;
 
@@ -83,21 +83,21 @@ namespace FudgeCore {
     /**
       * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
      */
-    get rotorLimitUpper(): number {
-      return this.#rotorLimitUpper;
+    get maxRotor(): number {
+      return this.#maxRotor;
     }
-    set rotorLimitUpper(_value: number) {
-      this.#rotorLimitUpper = _value;
+    set maxRotor(_value: number) {
+      this.#maxRotor = _value;
       if (this.joint != null) this.joint.getRotationalLimitMotor().upperLimit = _value * Math.PI / 180;
     }
     /**
       * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
      */
-    get rotorLimitLower(): number {
-      return this.#rotorLimitLower;
+    get minRotor(): number {
+      return this.#minRotor;
     }
-    set rotorLimitLower(_value: number) {
-      this.#rotorLimitLower = _value;
+    set minRotor(_value: number) {
+      this.#minRotor = _value;
       if (this.joint != null) this.joint.getRotationalLimitMotor().lowerLimit = _value * Math.PI / 180;
     }
     /**
@@ -124,16 +124,16 @@ namespace FudgeCore {
     /**
       * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. 
      */
-    public set motorLimitUpper(_value: number) {
-      super.motorLimitUpper = _value;
+    public set maxMotor(_value: number) {
+      super.maxMotor = _value;
       if (this.joint != null)
         this.joint.getTranslationalLimitMotor().upperLimit = _value;
     }
     /**
       * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. 
      */
-    public set motorLimitLower(_value: number) {
-      super.motorLimitLower = _value;
+    public set minMotor(_value: number) {
+      super.minMotor = _value;
       if (this.joint != null)
         this.joint.getTranslationalLimitMotor().lowerLimit = _value;
     }
@@ -186,8 +186,8 @@ namespace FudgeCore {
         motorForce: this.motorForce,
         rotorTorque: this.rotorTorque,
         rotorSpeed: this.rotorSpeed,
-        rotorLimitUpper: this.rotorLimitUpper,
-        rotorLimitLower: this.rotorLimitLower,
+        maxRotor: this.maxRotor,
+        minRotor: this.minRotor,
         springDampingRotation: this.springDampingRotation,
         springFrequencyRotation: this.springFrequencyRotation
       };
@@ -198,8 +198,8 @@ namespace FudgeCore {
       this.motorForce = _mutator.motorForce;
       this.rotorTorque = _mutator.rotorTorque;
       this.rotorSpeed = _mutator.rotorSpeed;
-      this.rotorLimitUpper = _mutator.rotorLimitUpper;
-      this.rotorLimitLower = _mutator.rotorLimitLower;
+      this.maxRotor = _mutator.maxRotor;
+      this.minRotor = _mutator.minRotor;
       this.springDampingRotation = _mutator.springDampingRotation;
       this.springFrequencyRotation = _mutator.springFrequencyRotation;
       this.springFrequency = _mutator.springFrequency;
@@ -209,9 +209,9 @@ namespace FudgeCore {
     protected constructJoint(): void {
       this.#rotorSpringDamper = new OIMO.SpringDamper().setSpring(this.springFrequencyRotation, this.springDampingRotation);
 
-      this.motor = new OIMO.TranslationalLimitMotor().setLimits(super.motorLimitLower, super.motorLimitUpper);
+      this.motor = new OIMO.TranslationalLimitMotor().setLimits(super.minMotor, super.maxMotor);
       this.motor.setMotor(super.motorSpeed, this.motorForce);
-      this.#rotor = new OIMO.RotationalLimitMotor().setLimits(this.rotorLimitLower * Math.PI / 180, this.rotorLimitUpper * Math.PI / 180);
+      this.#rotor = new OIMO.RotationalLimitMotor().setLimits(this.minRotor * Math.PI / 180, this.maxRotor * Math.PI / 180);
       this.#rotor.setMotor(this.rotorSpeed, this.rotorTorque);
 
       this.config = new OIMO.CylindricalJointConfig();

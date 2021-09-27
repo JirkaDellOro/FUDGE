@@ -32,8 +32,8 @@ namespace FudgeCore {
     #springDampingSwing: number = 0;
     #springFrequencySwing: number = 0;
 
-    #motorLimitUpperTwist: number = 360;
-    #motorLimitLowerTwist: number = 0;
+    #maxMotorTwist: number = 360;
+    #minMotorTwist: number = 0;
     #motorTorqueTwist: number = 0;
     #motorSpeedTwist: number = 0;
 
@@ -158,23 +158,23 @@ namespace FudgeCore {
     /**
       * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
      */
-    get motorLimitUpperTwist(): number {
-      return this.#motorLimitUpperTwist * 180 / Math.PI;
+    get maxMotorTwist(): number {
+      return this.#maxMotorTwist * 180 / Math.PI;
     }
-    set motorLimitUpperTwist(_value: number) {
+    set maxMotorTwist(_value: number) {
       _value *= Math.PI / 180;
-      this.#motorLimitUpperTwist = _value;
+      this.#maxMotorTwist = _value;
       if (this.joint != null) this.joint.getTwistLimitMotor().upperLimit = _value;
     }
     /**
      * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
      */
-    get motorLimitLowerTwist(): number {
-      return this.#motorLimitLowerTwist * 180 / Math.PI;
+    get minMotorTwist(): number {
+      return this.#minMotorTwist * 180 / Math.PI;
     }
-    set motorLimitLowerTwist(_value: number) {
+    set minMotorTwist(_value: number) {
       _value *= Math.PI / 180;
-      this.#motorLimitLowerTwist = _value;
+      this.#minMotorTwist = _value;
       if (this.joint != null) this.joint.getTwistLimitMotor().lowerLimit = _value;
     }
     /**
@@ -247,8 +247,8 @@ namespace FudgeCore {
         springFrequencyTwist: this.springFrequencyTwist,
         springDampingSwing: this.springDampingSwing,
         springFrequencySwing: this.springFrequencySwing,
-        motorLimitUpperTwist: this.#motorLimitUpperTwist,
-        motorLimitLowerTwist: this.#motorLimitLowerTwist,
+        maxMotorTwist: this.#maxMotorTwist,
+        minMotorTwist: this.#minMotorTwist,
         motorSpeedTwist: this.motorSpeedTwist,
         motorTorqueTwist: this.motorTorqueTwist
       };
@@ -262,8 +262,8 @@ namespace FudgeCore {
       this.springFrequencyTwist = _mutator.springFrequencyTwist;
       this.springDampingSwing = _mutator.springDampingSwing;
       this.springFrequencySwing = _mutator.springFrequencySwing;
-      this.motorLimitUpperTwist = _mutator.motorLimitUpperTwist;
-      this.motorLimitLowerTwist = _mutator.motorLimitLowerTwist;
+      this.maxMotorTwist = _mutator.maxMotorTwist;
+      this.minMotorTwist = _mutator.minMotorTwist;
       this.motorSpeedTwist = _mutator.motorSpeedTwist;
       this.motorTorqueTwist = _mutator.motorTorqueTwist;
     }
@@ -273,7 +273,7 @@ namespace FudgeCore {
       this.#springDamperTwist = new OIMO.SpringDamper().setSpring(this.springFrequencyTwist, this.springDampingTwist);
       this.#springDamperSwing = new OIMO.SpringDamper().setSpring(this.springFrequencySwing, this.springDampingSwing);
 
-      this.#motorTwist = new OIMO.RotationalLimitMotor().setLimits(this.motorLimitLowerTwist, this.motorLimitUpperTwist);
+      this.#motorTwist = new OIMO.RotationalLimitMotor().setLimits(this.minMotorTwist, this.maxMotorTwist);
       this.#motorTwist.setMotor(this.motorSpeedTwist, this.motorTorqueTwist);
 
       this.config = new OIMO.RagdollJointConfig();

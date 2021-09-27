@@ -27,13 +27,13 @@ namespace FudgeCore {
     #springDampingSecond: number = 0;
     #springFrequencySecond: number = 0;
 
-    #rotorLimitUpperFirst: number = 360;
-    #rotorLimitLowerFirst: number = 0;
+    #maxRotorFirst: number = 360;
+    #minRotorFirst: number = 0;
     #rotorTorqueFirst: number = 0;
     #rotorSpeedFirst: number = 0;
 
-    #rotorLimitUpperSecond: number = 360;
-    #rotorLimitLowerSecond: number = 0;
+    #maxRotorSecond: number = 360;
+    #minRotorSecond: number = 0;
     #rotorTorqueSecond: number = 0;
     #rotorSpeedSecond: number = 0;
 
@@ -130,21 +130,21 @@ namespace FudgeCore {
     /**
       * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
      */
-    get rotorLimitUpperFirst(): number {
-      return this.#rotorLimitUpperFirst;
+    get maxRotorFirst(): number {
+      return this.#maxRotorFirst;
     }
-    set rotorLimitUpperFirst(_value: number) {
-      this.#rotorLimitUpperFirst = _value;
+    set maxRotorFirst(_value: number) {
+      this.#maxRotorFirst = _value;
       if (this.joint != null) this.joint.getLimitMotor1().upperLimit = _value * Math.PI / 180;
     }
     /**
       * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
      */
-    get rotorLimitLowerFirst(): number {
-      return this.#rotorLimitLowerFirst;
+    get minRotorFirst(): number {
+      return this.#minRotorFirst;
     }
-    set rotorLimitLowerFirst(_value: number) {
-      this.#rotorLimitLowerFirst = _value;
+    set minRotorFirst(_value: number) {
+      this.#minRotorFirst = _value;
       if (this.joint != null) this.joint.getLimitMotor1().lowerLimit = _value * Math.PI / 180;
     }
     /**
@@ -171,21 +171,21 @@ namespace FudgeCore {
     /**
     * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
    */
-    get rotorLimitUpperSecond(): number {
-      return this.#rotorLimitUpperSecond;
+    get maxRotorSecond(): number {
+      return this.#maxRotorSecond;
     }
-    set rotorLimitUpperSecond(_value: number) {
-      this.#rotorLimitUpperSecond = _value;
+    set maxRotorSecond(_value: number) {
+      this.#maxRotorSecond = _value;
       if (this.joint != null) this.joint.getLimitMotor2().upperLimit = _value * Math.PI / 180;
     }
     /**
       * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
      */
-    get rotorLimitLowerSecond(): number {
-      return this.#rotorLimitLowerSecond;
+    get minRotorSecond(): number {
+      return this.#minRotorSecond;
     }
-    set rotorLimitLowerSecond(_value: number) {
-      this.#rotorLimitLowerSecond = _value;
+    set minRotorSecond(_value: number) {
+      this.#minRotorSecond = _value;
       if (this.joint != null) this.joint.getLimitMotor2().lowerLimit = _value * Math.PI / 180;
     }
     /**
@@ -256,12 +256,12 @@ namespace FudgeCore {
         springFrequencyFirst: this.#springFrequencyFirst,
         springDampingSecond: this.#springDampingSecond,
         springFrequencySecond: this.#springFrequencySecond,
-        rotorLimitUpperFirst: this.#rotorLimitUpperFirst,
-        rotorLimitLowerFirst: this.#rotorLimitLowerFirst,
+        maxRotorFirst: this.#maxRotorFirst,
+        minRotorFirst: this.#minRotorFirst,
         rotorSpeedFirst: this.#rotorSpeedFirst,
         rotorTorqueFirst: this.#rotorTorqueFirst,
-        rotorLimitUpperSecond: this.#rotorLimitUpperSecond,
-        rotorLimitLowerSecond: this.#rotorLimitLowerSecond,
+        maxRotorSecond: this.#maxRotorSecond,
+        minRotorSecond: this.#minRotorSecond,
         rotorSpeedSecond: this.#rotorSpeedSecond,
         rotorTorqueSecond: this.#rotorTorqueSecond,
       };
@@ -273,12 +273,12 @@ namespace FudgeCore {
       this.springFrequencyFirst = _mutator.springFrequencyFirst;
       this.springDampingSecond = _mutator.springDampingSecond;
       this.springFrequencySecond = _mutator.springFrequencySecond;
-      this.rotorLimitUpperFirst = _mutator.rotorLimitUpperFirst;
-      this.rotorLimitLowerFirst = _mutator.rotorLimitLowerFirst;
+      this.maxRotorFirst = _mutator.maxRotorFirst;
+      this.minRotorFirst = _mutator.minRotorFirst;
       this.rotorSpeedFirst = _mutator.rotorSpeedFirst;
       this.rotorTorqueFirst = _mutator.rotorTorqueFirst;
-      this.rotorLimitUpperSecond = _mutator.rotorLimitUpperSecond;
-      this.rotorLimitLowerSecond = _mutator.rotorLimitLowerSecond;
+      this.maxRotorSecond = _mutator.maxRotorSecond;
+      this.minRotorSecond = _mutator.minRotorSecond;
       this.rotorSpeedSecond = _mutator.rotorSpeedSecond;
       this.rotorTorqueSecond = _mutator.rotorTorqueSecond;
     }
@@ -288,9 +288,9 @@ namespace FudgeCore {
       this.#axisSpringDamperFirst = new OIMO.SpringDamper().setSpring(this.#springFrequencyFirst, this.#springDampingFirst);
       this.#axisSpringDamperSecond = new OIMO.SpringDamper().setSpring(this.#springFrequencySecond, this.#springDampingSecond);
 
-      this.#motorFirst = new OIMO.RotationalLimitMotor().setLimits(this.#rotorLimitLowerFirst * Math.PI / 180, this.#rotorLimitUpperFirst * Math.PI / 180);
+      this.#motorFirst = new OIMO.RotationalLimitMotor().setLimits(this.#minRotorFirst * Math.PI / 180, this.#maxRotorFirst * Math.PI / 180);
       this.#motorFirst.setMotor(this.#rotorSpeedFirst, this.#rotorTorqueFirst);
-      this.#motorSecond = new OIMO.RotationalLimitMotor().setLimits(this.#rotorLimitLowerFirst * Math.PI / 180, this.#rotorLimitUpperFirst * Math.PI / 180);
+      this.#motorSecond = new OIMO.RotationalLimitMotor().setLimits(this.#minRotorFirst * Math.PI / 180, this.#maxRotorFirst * Math.PI / 180);
       this.#motorSecond.setMotor(this.#rotorSpeedFirst, this.#rotorTorqueFirst);
 
       this.config = new OIMO.UniversalJointConfig();

@@ -30,15 +30,15 @@ namespace FudgeCore {
     constructor(_bodyAnchor: ComponentRigidbody = null, _bodyTied: ComponentRigidbody = null, _axis: Vector3 = new Vector3(0, 1, 0), _localAnchor: Vector3 = new Vector3(0, 0, 0)) {
       super(_bodyAnchor, _bodyTied, _axis, _localAnchor);
 
-      this.motorLimitUpper = 360;
-      this.motorLimitLower = 0;
+      this.maxMotor = 360;
+      this.minMotor = 0;
     }
 
     /**
       * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
      */
-    public set motorLimitUpper(_value: number) {
-      super.motorLimitUpper = _value;
+    public set maxMotor(_value: number) {
+      super.maxMotor = _value;
       _value *= Math.PI / 180;
       if (this.joint)
         this.joint.getLimitMotor().upperLimit = _value;
@@ -46,8 +46,8 @@ namespace FudgeCore {
     /**
       * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
      */
-    public set motorLimitLower(_value: number) {
-      super.motorLimitLower = _value;
+    public set minMotor(_value: number) {
+      super.minMotor = _value;
       if (this.joint)
         this.joint.getLimitMotor().lowerLimit = _value * Math.PI / 180;
     }
@@ -98,7 +98,7 @@ namespace FudgeCore {
     //#endregion
 
     protected constructJoint(): void {
-      this.#rotor = new OIMO.RotationalLimitMotor().setLimits(super.motorLimitLower * Math.PI / 180, super.motorLimitUpper * Math.PI / 180);
+      this.#rotor = new OIMO.RotationalLimitMotor().setLimits(super.minMotor * Math.PI / 180, super.maxMotor * Math.PI / 180);
       this.#rotor.setMotor(this.motorSpeed, this.motorTorque);
 
       this.config = new OIMO.RevoluteJointConfig();
