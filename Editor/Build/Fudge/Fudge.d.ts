@@ -4,14 +4,16 @@
 /// <reference types="../../GoldenLayout/golden-layout" />
 /// <reference types="../../../userinterface/build/fudgeuserinterface" />
 declare namespace Fudge {
-    type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
-    class ContextMenu {
+    export type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
+    type Subclass<T> = {
+        subclasses: T[];
+        name: string;
+    };
+    export class ContextMenu {
         static appendCopyPaste(_menu: Electron.Menu): void;
-        static getSubclassMenu<T extends {
-            subclasses: T[];
-            name: string;
-        }>(_id: CONTEXTMENU, _class: T, _callback: ContextMenuCallback): Electron.Menu;
+        static getSubclassMenu<T extends Subclass<T>>(_id: CONTEXTMENU, _class: T, _callback: ContextMenuCallback): Electron.Menu;
     }
+    export {};
 }
 declare namespace Fudge {
     enum CONTEXTMENU {
@@ -22,7 +24,8 @@ declare namespace Fudge {
         CREATE_MESH = 4,
         CREATE_MATERIAL = 5,
         CREATE_GRAPH = 6,
-        REMOVE_COMPONENT = 7
+        REMOVE_COMPONENT = 7,
+        ADD_JOINT = 8
     }
     enum MENU {
         QUIT = "quit",

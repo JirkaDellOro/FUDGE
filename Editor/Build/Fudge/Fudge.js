@@ -35,6 +35,7 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["CREATE_MATERIAL"] = 5] = "CREATE_MATERIAL";
         CONTEXTMENU[CONTEXTMENU["CREATE_GRAPH"] = 6] = "CREATE_GRAPH";
         CONTEXTMENU[CONTEXTMENU["REMOVE_COMPONENT"] = 7] = "REMOVE_COMPONENT";
+        CONTEXTMENU[CONTEXTMENU["ADD_JOINT"] = 8] = "ADD_JOINT";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -2304,22 +2305,30 @@ var Fudge;
                 submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.ADD_COMPONENT, ƒ.Component, _callback)
             });
             menu.append(item);
+            item = new Fudge.remote.MenuItem({
+                label: "Add Joint",
+                submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.ADD_JOINT, ƒ.Joint, _callback)
+            });
+            menu.append(item);
             // ContextMenu.appendCopyPaste(menu);
             return menu;
         }
         contextMenuCallback(_item, _window, _event) {
             ƒ.Debug.info(`MenuSelect: Item-id=${Fudge.CONTEXTMENU[_item.id]}`);
+            let iSubclass = _item["iSubclass"];
+            let component;
             switch (Number(_item.id)) {
                 case Fudge.CONTEXTMENU.ADD_COMPONENT:
-                    let iSubclass = _item["iSubclass"];
-                    let component = ƒ.Component.subclasses[iSubclass];
-                    //@ts-ignore
-                    let cmpNew = new component();
-                    ƒ.Debug.info(cmpNew.type, cmpNew);
-                    this.node.addComponent(cmpNew);
-                    this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { bubbles: true, detail: { data: this.node } }));
+                    component = ƒ.Component.subclasses[iSubclass];
                     break;
+                case Fudge.CONTEXTMENU.ADD_JOINT:
+                    component = ƒ.Joint.subclasses[iSubclass];
             }
+            //@ts-ignore
+            let cmpNew = new component();
+            ƒ.Debug.info(cmpNew.type, cmpNew);
+            this.node.addComponent(cmpNew);
+            this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { bubbles: true, detail: { data: this.node } }));
         }
         //#endregion
         hndDragOver(_event, _viewSource) {

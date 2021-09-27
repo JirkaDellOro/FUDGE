@@ -44,6 +44,11 @@ namespace Fudge {
         submenu: ContextMenu.getSubclassMenu(CONTEXTMENU.ADD_COMPONENT, ƒ.Component, _callback)
       });
       menu.append(item);
+      item = new remote.MenuItem({
+        label: "Add Joint",
+        submenu: ContextMenu.getSubclassMenu(CONTEXTMENU.ADD_JOINT, ƒ.Joint, _callback)
+      });
+      menu.append(item);
 
       // ContextMenu.appendCopyPaste(menu);
       return menu;
@@ -51,19 +56,22 @@ namespace Fudge {
 
     protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
       ƒ.Debug.info(`MenuSelect: Item-id=${CONTEXTMENU[_item.id]}`);
+      let iSubclass: number = _item["iSubclass"];
+      let component: typeof ƒ.Component;
 
       switch (Number(_item.id)) {
         case CONTEXTMENU.ADD_COMPONENT:
-          let iSubclass: number = _item["iSubclass"];
-          let component: typeof ƒ.Component = ƒ.Component.subclasses[iSubclass];
-          //@ts-ignore
-          let cmpNew: ƒ.Component = new component();
-          ƒ.Debug.info(cmpNew.type, cmpNew);
-
-          this.node.addComponent(cmpNew);
-          this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.SELECT, { bubbles: true, detail: { data: this.node } }));
+          component = ƒ.Component.subclasses[iSubclass];
           break;
+        case CONTEXTMENU.ADD_JOINT:
+          component = ƒ.Joint.subclasses[iSubclass];
       }
+      //@ts-ignore
+      let cmpNew: ƒ.Component = new component();
+      ƒ.Debug.info(cmpNew.type, cmpNew);
+
+      this.node.addComponent(cmpNew);
+      this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.SELECT, { bubbles: true, detail: { data: this.node } }));
     }
     //#endregion
 

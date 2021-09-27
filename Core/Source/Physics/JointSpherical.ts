@@ -17,7 +17,7 @@ namespace FudgeCore {
      * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
      */
   export class JointSpherical extends Joint {
-    public static readonly iSubclass: number = Component.registerSubclass(JointSpherical);
+    public static readonly iSubclass: number = Joint.registerSubclass(JointSpherical);
 
     #springDamping: number = 0;
     #springFrequency: number = 0;

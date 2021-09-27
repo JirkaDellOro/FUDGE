@@ -15,7 +15,7 @@ namespace FudgeCore {
      * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
      */
   export class JointPrismatic extends JointAxial {
-    public static readonly iSubclass: number = Component.registerSubclass(JointPrismatic);
+    public static readonly iSubclass: number = Joint.registerSubclass(JointPrismatic);
 
     #motorForce: number = 0;
 

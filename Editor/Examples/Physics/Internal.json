@@ -73,7 +73,7 @@
                   "ƒ.ComponentTransform": {
                     "local": {
                       "translation": "[0, 0, 0]",
-                      "rotation": "[-32, 0, 0]",
+                      "rotation": "[-45, 0, 0]",
                       "scaling": "[1, 1, 1]"
                     },
                     "Component": {
@@ -88,9 +88,9 @@
                     "initialization": "TO_NODE",
                     "friction": 0.2,
                     "restitution": 0.2,
-                    "mass": 1,
+                    "mass": 2,
                     "dampTranslation": 0.1,
-                    "dampRotation": 0.1,
+                    "dampRotation": 0,
                     "effectGravity": 1,
                     "typeBody": "DYNAMIC",
                     "typeCollider": "CYLINDER",
@@ -107,32 +107,18 @@
                   }
                 }
               ],
-              "ComponentJointCylindrical": [
+              "JointCylindrical": [],
+              "JointWelding": [
                 {
-                  "ƒ.ComponentJointCylindrical": {
-                    "motorForce": 0,
-                    "springDampingRotation": 0,
-                    "springFrequencyRotation": 0,
-                    "maxRotor": 360,
-                    "minRotor": 0,
-                    "rotorTorque": 0,
-                    "rotorSpeed": 0,
-                    "ComponentJointAxial": {
-                      "springDamping": 0,
-                      "springFrequency": 0,
-                      "maxMotor": 10,
-                      "minMotor": -10,
-                      "motorSpeed": 0,
-                      "axis": "[0, 1, 0]",
-                      "ComponentJoint": {
-                        "nameChildToConnect": "Box",
-                        "internalCollision": false,
-                        "breakForce": 0,
-                        "breakTorque": 0,
-                        "anchor": "[0, 0, 0]",
-                        "Component": {
-                          "active": true
-                        }
+                  "ƒ.JointWelding": {
+                    "Joint": {
+                      "nameChildToConnect": "Box",
+                      "internalCollision": false,
+                      "breakForce": 0,
+                      "breakTorque": 0,
+                      "anchor": "[0, 0, 0]",
+                      "Component": {
+                        "active": true
                       }
                     }
                   }
@@ -183,10 +169,10 @@
                           "initialization": "TO_MESH",
                           "friction": 0.2,
                           "restitution": 0.2,
-                          "mass": 1,
+                          "mass": 0.5000000000000001,
                           "dampTranslation": 0.1,
                           "dampRotation": 0.1,
-                          "effectGravity": 1,
+                          "effectGravity": -1,
                           "typeBody": "DYNAMIC",
                           "typeCollider": "CUBE",
                           "isTrigger": false,

@@ -4,6 +4,11 @@ namespace Fudge {
 
   export type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
 
+  type Subclass<T> = {
+    subclasses: T[]
+    name: string
+  }
+
   export class ContextMenu {
     public static appendCopyPaste(_menu: Electron.Menu): void {
       _menu.append(new remote.MenuItem({ role: "copy" }));
@@ -11,7 +16,8 @@ namespace Fudge {
       _menu.append(new remote.MenuItem({ role: "paste" }));
     }
 
-    public static getSubclassMenu<T extends { subclasses: T[]; name: string; }>(_id: CONTEXTMENU, _class: T, _callback: ContextMenuCallback): Electron.Menu {
+
+    public static getSubclassMenu<T extends Subclass<T>>(_id: CONTEXTMENU, _class: T, _callback: ContextMenuCallback): Electron.Menu {
       const menu: Electron.Menu = new remote.Menu();
       for (let iSubclass in _class.subclasses) {
         let subclass: T = _class.subclasses[iSubclass];

@@ -9,6 +9,11 @@ namespace FudgeCore {
      * @author Marko Fehrenbach, HFU 2020
      */
   export abstract class Joint extends Component {
+    /** refers back to this class from any subclass e.g. in order to find compatible other resources*/
+    public static readonly baseClass: typeof Joint = Joint;
+    /** list of all the subclasses derived from this class, if they registered properly*/
+    public static readonly subclasses: typeof Joint[] = [];
+
     #idBodyAnchor: number = 0;
     #idBodyTied: number = 0;
     #bodyAnchor: ComponentRigidbody;
@@ -22,6 +27,7 @@ namespace FudgeCore {
     #breakTorque: number = 0;
 
     #nameChildToConnect: string;
+
 
     // public static readonly iSubclass: number = Component.registerSubclass(ComponentJoint);
     protected singleton: boolean = false; //Multiple joints can be attached to one Node
@@ -42,6 +48,8 @@ namespace FudgeCore {
       this.addEventListener(EVENT.COMPONENT_ADD, this.dirtyStatus);
       this.addEventListener(EVENT.COMPONENT_REMOVE, this.removeJoint);
     }
+    
+    protected static registerSubclass(_subclass: typeof Joint): number { return Joint.subclasses.push(_subclass) - 1; }
 
     /** Get/Set the first ComponentRigidbody of this connection. It should always be the one that this component is attached too in the sceneTree. */
     public get bodyAnchor(): ComponentRigidbody {

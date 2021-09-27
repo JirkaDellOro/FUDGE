@@ -15,7 +15,7 @@ namespace FudgeCore {
    * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
    */
   export class JointCylindrical extends JointAxial {
-    public static readonly iSubclass: number = Component.registerSubclass(JointCylindrical);
+    public static readonly iSubclass: number = Joint.registerSubclass(JointCylindrical);
     #springDampingRotation: number = 0;
     #springFrequencyRotation: number = 0;
 

@@ -23,7 +23,7 @@ namespace FudgeCore {
     */
 
   export class JointRagdoll extends Joint {
-    public static readonly iSubclass: number = Component.registerSubclass(JointRagdoll);
+    public static readonly iSubclass: number = Joint.registerSubclass(JointRagdoll);
 
 
     #springDampingTwist: number = 0;

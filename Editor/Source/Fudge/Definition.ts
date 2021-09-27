@@ -8,7 +8,8 @@ namespace Fudge {
     CREATE_MESH,
     CREATE_MATERIAL,
     CREATE_GRAPH,
-    REMOVE_COMPONENT
+    REMOVE_COMPONENT,
+    ADD_JOINT
   }
 
   export enum MENU {

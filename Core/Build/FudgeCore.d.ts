@@ -1024,11 +1024,16 @@ declare namespace FudgeCore {
        */
     abstract class Joint extends Component {
         #private;
+        /** refers back to this class from any subclass e.g. in order to find compatible other resources*/
+        static readonly baseClass: typeof Joint;
+        /** list of all the subclasses derived from this class, if they registered properly*/
+        static readonly subclasses: typeof Joint[];
         protected singleton: boolean;
         protected abstract joint: OIMO.Joint;
         protected abstract config: OIMO.JointConfig;
         /** Create a joint connection between the two given RigidbodyComponents. */
         constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody);
+        protected static registerSubclass(_subclass: typeof Joint): number;
         /** Get/Set the first ComponentRigidbody of this connection. It should always be the one that this component is attached too in the sceneTree. */
         get bodyAnchor(): ComponentRigidbody;
         set bodyAnchor(_cmpRB: ComponentRigidbody);
@@ -4510,7 +4515,7 @@ declare namespace FudgeCore {
        *                 attachedRB          connectedRB
        *                (e.g. wheel)       (e.g. wheel-axis)
        * ```
-       * @author Marko Fehrenbach, HFU 2020
+     * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
        */
     class JointUniversal extends Joint {
         #private;
@@ -4606,7 +4611,7 @@ declare namespace FudgeCore {
        * Best way to simulate convex objects like a chair seat connected to chair legs.
        * The actual anchor point does not matter that much, only in very specific edge cases.
        * Because welding means they simply do not disconnect. (unless you add Breakability)
-       * @author Marko Fehrenbach, HFU 2020
+     * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
        */
     class JointWelding extends Joint {
         static readonly iSubclass: number;

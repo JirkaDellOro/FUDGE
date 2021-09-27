@@ -18,7 +18,7 @@ namespace FudgeCore {
      * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
      */
   export class JointRevolute extends JointAxial {
-    public static readonly iSubclass: number = Component.registerSubclass(JointRevolute);
+    public static readonly iSubclass: number = Joint.registerSubclass(JointRevolute);
 
     #motorTorque: number = 0;
     #rotor: OIMO.RotationalLimitMotor;

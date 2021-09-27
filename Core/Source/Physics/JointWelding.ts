@@ -4,10 +4,10 @@ namespace FudgeCore {
      * Best way to simulate convex objects like a chair seat connected to chair legs.
      * The actual anchor point does not matter that much, only in very specific edge cases.
      * Because welding means they simply do not disconnect. (unless you add Breakability)
-     * @author Marko Fehrenbach, HFU 2020
+   * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
      */
   export class JointWelding extends Joint {
-    public static readonly iSubclass: number = Component.registerSubclass(JointWelding);
+    public static readonly iSubclass: number = Joint.registerSubclass(JointWelding);
 
     protected joint: OIMO.GenericJoint;
     protected config: OIMO.GenericJointConfig = new OIMO.GenericJointConfig();

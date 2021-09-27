@@ -16,10 +16,10 @@ namespace FudgeCore {
      *                 attachedRB          connectedRB
      *                (e.g. wheel)       (e.g. wheel-axis)
      * ```
-     * @author Marko Fehrenbach, HFU 2020
+   * @author Marko Fehrenbach, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
      */
   export class JointUniversal extends Joint {
-    public static readonly iSubclass: number = Component.registerSubclass(JointUniversal);
+    public static readonly iSubclass: number = Joint.registerSubclass(JointUniversal);
 
     #springDampingFirst: number = 0;
     #springFrequencyFirst: number = 0;
