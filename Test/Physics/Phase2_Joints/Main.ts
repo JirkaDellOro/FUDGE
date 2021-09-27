@@ -70,8 +70,8 @@ namespace FudgePhysics_Communication {
         bodies[0].addComponent(prismaticJoint);
         prismaticJoint.springDamping = 0;
         prismaticJoint.springFrequency = 1;
-        prismaticJoint.motorLimitUpper = 0;
-        prismaticJoint.motorLimitLower = 0;
+        prismaticJoint.maxMotor = 0;
+        prismaticJoint.minMotor = 0;
         prismaticJoint.internalCollision = true;
 
         bodies[3] = createCompleteMeshNode("CubeJointBase", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.4, 0.4, 0.4, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
@@ -85,8 +85,8 @@ namespace FudgePhysics_Communication {
         prismaticJointSlide = new f.ComponentJointPrismatic(bodies[3].getComponent(f.ComponentRigidbody), bodies[4].getComponent(f.ComponentRigidbody), new f.Vector3(1, 0, 0));
         bodies[3].addComponent(prismaticJointSlide);
         prismaticJointSlide.motorForce = 10; //so it does not slide too much on it's own.
-        prismaticJointSlide.motorLimitLower = -1;
-        prismaticJointSlide.motorLimitUpper = 1;
+        prismaticJointSlide.minMotor = -1;
+        prismaticJointSlide.maxMotor = 1;
 
         //Revolute Joint
         bodies[5] = createCompleteMeshNode("Handle", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.4, 0.4, 0.4, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
@@ -101,8 +101,8 @@ namespace FudgePhysics_Communication {
 
         revoluteJointSwingDoor = new f.ComponentJointRevolute(bodies[5].getComponent(f.ComponentRigidbody), bodies[6].getComponent(f.ComponentRigidbody), new f.Vector3(0, 1, 0));
         bodies[5].addComponent(revoluteJointSwingDoor);
-        revoluteJointSwingDoor.motorLimitLower = -60;
-        revoluteJointSwingDoor.motorLimitUpper = 60;
+        revoluteJointSwingDoor.minMotor = -60;
+        revoluteJointSwingDoor.maxMotor = 60;
 
         //Cylindrical Joint
         bodies[7] = createCompleteMeshNode("Holder", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.4, 0.4, 0.4, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
@@ -116,7 +116,7 @@ namespace FudgePhysics_Communication {
         bodies[8].mtxLocal.scale(new f.Vector3(0.3, 2, 0.3));
         cylindricalJoint = new f.ComponentJointCylindrical(bodies[7].getComponent(f.ComponentRigidbody), bodies[8].getComponent(f.ComponentRigidbody), new f.Vector3(0, 1, 0));
         bodies[7].addComponent(cylindricalJoint);
-        cylindricalJoint.motorLimitLower = -1.25;
+        cylindricalJoint.minMotor = -1.25;
         cylindricalJoint.rotorSpeed = 1;
         // cylindricalJoint.rotationalMotorTorque = 10;
         cylindricalJoint.rotorTorque = 10;
@@ -397,8 +397,8 @@ namespace FudgePhysics_Communication {
         jointHeadBody.springDampingSwing = 1;
         jointHeadBody.maxAngleFirstAxis = 90;
         jointHeadBody.maxAngleSecondAxis = 70;
-        jointHeadBody.motorLimitLowerTwist = -90;
-        jointHeadBody.motorLimitUpperTwist = 90;
+        jointHeadBody.minMotorTwist = -90;
+        jointHeadBody.maxMotorTwist = 90;
         jointHeadBody.springFrequencyTwist = 10;
         jointHeadBody.springDampingTwist = 1;
         head.addComponent(jointHeadBody);
@@ -408,8 +408,8 @@ namespace FudgePhysics_Communication {
         jointUpperLowerBody.springDampingSwing = 1;
         jointUpperLowerBody.maxAngleFirstAxis = 90;
         jointUpperLowerBody.maxAngleSecondAxis = 90;
-        jointUpperLowerBody.motorLimitLowerTwist = -90;
-        jointUpperLowerBody.motorLimitUpperTwist = 90;
+        jointUpperLowerBody.minMotorTwist = -90;
+        jointUpperLowerBody.maxMotorTwist = 90;
         jointUpperLowerBody.springFrequencyTwist = 10;
         jointUpperLowerBody.springDampingTwist = 1;
         body1.addComponent(jointUpperLowerBody);
@@ -419,8 +419,8 @@ namespace FudgePhysics_Communication {
         jointBodyArmL.springDampingSwing = 1;
         jointBodyArmL.maxAngleFirstAxis = 90;
         jointBodyArmL.maxAngleSecondAxis = 90;
-        jointBodyArmL.motorLimitLowerTwist = -90;
-        jointBodyArmL.motorLimitUpperTwist = 90;
+        jointBodyArmL.minMotorTwist = -90;
+        jointBodyArmL.maxMotorTwist = 90;
         jointBodyArmL.springFrequencyTwist = 10;
         jointBodyArmL.springDampingTwist = 1;
         armL.addComponent(jointBodyArmL);
@@ -431,8 +431,8 @@ namespace FudgePhysics_Communication {
         jointBodyArmR.springDampingSwing = 1;
         jointBodyArmR.maxAngleFirstAxis = 90;
         jointBodyArmR.maxAngleSecondAxis = 90;
-        jointBodyArmR.motorLimitLowerTwist = -90;
-        jointBodyArmR.motorLimitUpperTwist = 90;
+        jointBodyArmR.minMotorTwist = -90;
+        jointBodyArmR.maxMotorTwist = 90;
         jointBodyArmR.springFrequencyTwist = 10;
         jointBodyArmR.springDampingTwist = 1;
         armR.addComponent(jointBodyArmR);
@@ -442,8 +442,8 @@ namespace FudgePhysics_Communication {
         jointBodyLegL.springDampingSwing = 1;
         jointBodyLegL.maxAngleFirstAxis = 90;
         jointBodyLegL.maxAngleSecondAxis = 90;
-        jointBodyLegL.motorLimitLowerTwist = -90;
-        jointBodyLegL.motorLimitUpperTwist = 90;
+        jointBodyLegL.minMotorTwist = -90;
+        jointBodyLegL.maxMotorTwist = 90;
         jointBodyLegL.springFrequencyTwist = 10;
         jointBodyLegL.springDampingTwist = 1;
         legL.addComponent(jointBodyLegL);
@@ -453,8 +453,8 @@ namespace FudgePhysics_Communication {
         jointBodyLegR.springDampingSwing = 1;
         jointBodyLegR.maxAngleFirstAxis = 90;
         jointBodyLegR.maxAngleSecondAxis = 90;
-        jointBodyLegR.motorLimitLowerTwist = -90;
-        jointBodyLegR.motorLimitUpperTwist = 90;
+        jointBodyLegR.minMotorTwist = -90;
+        jointBodyLegR.maxMotorTwist = 90;
         jointBodyLegR.springFrequencyTwist = 10;
         jointBodyLegR.springDampingTwist = 1;
         legR.addComponent(jointBodyLegR);

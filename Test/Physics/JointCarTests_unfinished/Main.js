@@ -142,37 +142,37 @@ var Turorials_FUDGEPhysics_Lesson1;
         carBody.node.addComponent(frontSuspensionRight);
         frontSuspensionRight.springDamping = 100;
         frontSuspensionRight.springFrequency = 2;
-        frontSuspensionRight.motorLimitUpper = 0;
-        frontSuspensionRight.motorLimitLower = 0;
-        frontSuspensionRight.rotorLimitUpper = 0;
-        frontSuspensionRight.rotorLimitLower = 0;
+        frontSuspensionRight.maxMotor = 0;
+        frontSuspensionRight.minMotor = 0;
+        frontSuspensionRight.maxRotor = 0;
+        frontSuspensionRight.minRotor = 0;
         frontSuspensionRight.internalCollision = true;
         frontSuspensionLeft = new f.ComponentJointCylindrical(carBody, bodies[19].getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(-0.50, -1, -0.75));
         carBody.node.addComponent(frontSuspensionLeft);
         frontSuspensionLeft.springDamping = 100;
         frontSuspensionLeft.springFrequency = 2;
-        frontSuspensionLeft.motorLimitUpper = 0;
-        frontSuspensionLeft.motorLimitLower = 0;
-        frontSuspensionLeft.rotorLimitUpper = 0;
-        frontSuspensionLeft.rotorLimitLower = 0;
+        frontSuspensionLeft.maxMotor = 0;
+        frontSuspensionLeft.minMotor = 0;
+        frontSuspensionLeft.maxRotor = 0;
+        frontSuspensionLeft.minRotor = 0;
         frontSuspensionLeft.internalCollision = true;
         backSuspensionLeft = new f.ComponentJointCylindrical(carBody, bodies[20].getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(-0.50, -1, 0.75));
         carBody.node.addComponent(backSuspensionLeft);
         backSuspensionLeft.springDamping = 100;
         backSuspensionLeft.springFrequency = 2;
-        backSuspensionLeft.motorLimitUpper = 0;
-        backSuspensionLeft.motorLimitLower = 0;
-        backSuspensionLeft.rotorLimitUpper = 0;
-        backSuspensionLeft.rotorLimitLower = 0;
+        backSuspensionLeft.maxMotor = 0;
+        backSuspensionLeft.minMotor = 0;
+        backSuspensionLeft.maxRotor = 0;
+        backSuspensionLeft.minRotor = 0;
         backSuspensionLeft.internalCollision = true;
         backSuspensionRight = new f.ComponentJointCylindrical(carBody, bodies[18].getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(0.50, -1, 0.75));
         carBody.node.addComponent(backSuspensionRight);
         backSuspensionRight.springDamping = 100;
         backSuspensionRight.springFrequency = 2;
-        backSuspensionRight.motorLimitUpper = 0;
-        backSuspensionRight.motorLimitLower = 0;
-        backSuspensionRight.rotorLimitUpper = 0;
-        backSuspensionRight.rotorLimitLower = 0;
+        backSuspensionRight.maxMotor = 0;
+        backSuspensionRight.minMotor = 0;
+        backSuspensionRight.maxRotor = 0;
+        backSuspensionRight.minRotor = 0;
         backSuspensionRight.internalCollision = true;
         //Connect Wheels to suspension - Hinge (revolute) joints that can rotate 360° in X-Axis but not move
         wheelJointFrontRight = new f.ComponentJointRevolute(bodies[17].getComponent(f.ComponentRigidbody), bodies[13].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
@@ -195,10 +195,10 @@ var Turorials_FUDGEPhysics_Lesson1;
     // Event Function handling keyboard input
     function hndKey(_event) {
         if (_event.code == f.KEYBOARD_CODE.A) { //Steering the wheels by giving them a new angle limit so they are fixed on this angle
-            frontSuspensionLeft.rotorLimitUpper = currentAngle < maxAngle ? currentAngle++ : currentAngle;
-            frontSuspensionLeft.rotorLimitLower = currentAngle < maxAngle ? currentAngle++ : currentAngle;
-            frontSuspensionRight.rotorLimitUpper = currentAngle < maxAngle ? currentAngle++ : currentAngle;
-            frontSuspensionRight.rotorLimitLower = currentAngle < maxAngle ? currentAngle++ : currentAngle;
+            frontSuspensionLeft.maxRotor = currentAngle < maxAngle ? currentAngle++ : currentAngle;
+            frontSuspensionLeft.minRotor = currentAngle < maxAngle ? currentAngle++ : currentAngle;
+            frontSuspensionRight.maxRotor = currentAngle < maxAngle ? currentAngle++ : currentAngle;
+            frontSuspensionRight.minRotor = currentAngle < maxAngle ? currentAngle++ : currentAngle;
         }
         if (_event.code == f.KEYBOARD_CODE.W) {
             bodies[12].getComponent(f.ComponentRigidbody).applyForce(new f.Vector3(0, 10, 0));
@@ -209,14 +209,14 @@ var Turorials_FUDGEPhysics_Lesson1;
             //
         }
         if (_event.code == f.KEYBOARD_CODE.D) {
-            frontSuspensionLeft.rotorLimitUpper = currentAngle > -maxAngle ? currentAngle-- : currentAngle;
-            frontSuspensionLeft.rotorLimitLower = currentAngle > -maxAngle ? currentAngle-- : currentAngle;
-            frontSuspensionRight.rotorLimitUpper = currentAngle < maxAngle ? currentAngle-- : currentAngle;
-            frontSuspensionRight.rotorLimitLower = currentAngle < maxAngle ? currentAngle-- : currentAngle;
+            frontSuspensionLeft.maxRotor = currentAngle > -maxAngle ? currentAngle-- : currentAngle;
+            frontSuspensionLeft.minRotor = currentAngle > -maxAngle ? currentAngle-- : currentAngle;
+            frontSuspensionRight.maxRotor = currentAngle < maxAngle ? currentAngle-- : currentAngle;
+            frontSuspensionRight.minRotor = currentAngle < maxAngle ? currentAngle-- : currentAngle;
         }
         if (_event.code == f.KEYBOARD_CODE.T) {
             f.Physics.settings.debugMode = f.Physics.settings.debugMode == f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER ? f.PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY : f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
-            frontSuspensionRight.motorLimitUpper = 0;
+            frontSuspensionRight.maxMotor = 0;
         }
     }
 })(Turorials_FUDGEPhysics_Lesson1 || (Turorials_FUDGEPhysics_Lesson1 = {}));
