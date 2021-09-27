@@ -92,7 +92,7 @@
                     "dampTranslation": 0.1,
                     "dampRotation": 0.1,
                     "effectGravity": 1,
-                    "typeBody": "DYNAMIC",
+                    "typeBody": "STATIC",
                     "typeCollider": "CYLINDER",
                     "isTrigger": false,
                     "id": 0,
@@ -107,31 +107,33 @@
                   }
                 }
               ],
-              "ComponentJointUniversal": [
+              "ComponentJointUniversal": [],
+              "ComponentJointCylindrical": [
                 {
-                  "ƒ.ComponentJointUniversal": {
-                    "springDampingFirst": 0,
-                    "springFrequencyFirst": 0,
-                    "springDampingSecond": 0,
-                    "springFrequencySecond": 0,
-                    "rotorLimitUpperFirst": 360,
-                    "rotorLimitLowerFirst": 0,
-                    "rotorSpeedFirst": 0,
-                    "rotorTorqueFirst": 0,
-                    "rotorLimitUpperSecond": 360,
-                    "rotorLimitLowerSecond": 0,
-                    "rotorSpeedSecond": 0,
-                    "rotorTorqueSecond": 0,
-                    "firstAxis": "[0, 0, 0]",
-                    "secondAxis": "[0, 0, 0]",
-                    "ComponentJoint": {
-                      "nameChildToConnect": "Box",
-                      "internalCollision": false,
-                      "breakForce": 0,
-                      "breakTorque": 0,
-                      "anchor": "[0, 0, 0]",
-                      "Component": {
-                        "active": true
+                  "ƒ.ComponentJointCylindrical": {
+                    "motorForce": 0,
+                    "rotorTorque": -0.5,
+                    "rotorSpeed": 0,
+                    "rotorLimitUpper": 60,
+                    "rotorLimitLower": -60,
+                    "springDampingRotation": 0,
+                    "springFrequencyRotation": 0,
+                    "ComponentJointAxial": {
+                      "springDamping": 0,
+                      "springFrequency": 0,
+                      "motorLimitUpper": 1,
+                      "motorLimitLower": -1,
+                      "motorSpeed": 0,
+                      "axis": "[-1, 0, 0]",
+                      "ComponentJoint": {
+                        "nameChildToConnect": "Box",
+                        "internalCollision": false,
+                        "breakForce": 0,
+                        "breakTorque": 0,
+                        "anchor": "[0, 1, 0]",
+                        "Component": {
+                          "active": true
+                        }
                       }
                     }
                   }
