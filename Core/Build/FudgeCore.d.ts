@@ -3903,6 +3903,9 @@ declare namespace FudgeCore {
          */
         get motorTorqueTwist(): number;
         set motorTorqueTwist(_value: number);
+        /**
+          * If the two connected RigidBodies collide with eath other. (Default = false)
+         */
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;
@@ -4020,105 +4023,90 @@ declare namespace FudgeCore {
        * @author Marko Fehrenbach, HFU 2020
        */
     class ComponentJointUniversal extends ComponentJoint {
+        #private;
         static readonly iSubclass: number;
         protected joint: OIMO.UniversalJoint;
         protected config: OIMO.UniversalJointConfig;
-        private jointFirstSpringDampingRatio;
-        private jointFirstSpringFrequency;
-        private jointSecondSpringDampingRatio;
-        private jointSecondSpringFrequency;
-        private jointFirstMotorLimitUpper;
-        private jointFirstMotorLimitLower;
-        private jointFirstMotorTorque;
-        private jointFirstMotorSpeed;
-        private jointSecondMotorLimitUpper;
-        private jointSecondMotorLimitLower;
-        private jointSecondMotorTorque;
-        private jointSecondMotorSpeed;
-        private firstAxisMotor;
-        private secondAxisMotor;
-        private firstAxisSpringDamper;
-        private secondAxisSpringDamper;
-        private jointFirstAxis;
-        private jointSecondAxis;
-        constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody, _firstAxis?: Vector3, _secondAxis?: Vector3, _localAnchor?: Vector3);
+        constructor(_bodyAnchor?: ComponentRigidbody, _bodyTied?: ComponentRigidbody, _axisFirst?: Vector3, _axisSecond?: Vector3, _localAnchor?: Vector3);
         /**
          * The axis connecting the the two {@link Node}s e.g. Vector3(0,1,0) to have a upward connection.
          *  When changed after initialization the joint needs to be reconnected.
          */
-        get firstAxis(): Vector3;
-        set firstAxis(_value: Vector3);
+        get axisFirst(): Vector3;
+        set axisFirst(_value: Vector3);
         /**
         * The axis connecting the the two {@link Node}s e.g. Vector3(0,1,0) to have a upward connection.
         *  When changed after initialization the joint needs to be reconnected.
         */
-        get secondAxis(): Vector3;
-        set secondAxis(_value: Vector3);
+        get axisSecond(): Vector3;
+        set axisSecond(_value: Vector3);
         /**
          * The damping of the spring. 1 equals completly damped.
          */
-        get springDampingFirstAxis(): number;
-        set springDampingFirstAxis(_value: number);
+        get springDampingFirst(): number;
+        set springDampingFirst(_value: number);
         /**
          * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. The smaller the value the less restrictive is the spring.
         */
-        get springFrequencyFirstAxis(): number;
-        set springFrequencyFirstAxis(_value: number);
+        get springFrequencyFirst(): number;
+        set springFrequencyFirst(_value: number);
         /**
          * The damping of the spring. 1 equals completly damped.
          */
-        get springDampingSecondAxis(): number;
-        set springDampingSecondAxis(_value: number);
+        get springDampingSecond(): number;
+        set springDampingSecond(_value: number);
         /**
          * The frequency of the spring in Hz. At 0 the spring is rigid, equals no spring. The smaller the value the less restrictive is the spring.
         */
-        get springFrequencySecondAxis(): number;
-        set springFrequencySecondAxis(_value: number);
+        get springFrequencySecond(): number;
+        set springFrequencySecond(_value: number);
         /**
           * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
          */
-        get motorLimitUpperFirstAxis(): number;
-        set motorLimitUpperFirstAxis(_value: number);
+        get rotorLimitUpperFirst(): number;
+        set rotorLimitUpperFirst(_value: number);
         /**
           * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
          */
-        get motorLimitLowerFirstAxis(): number;
-        set motorLimitLowerFirstAxis(_value: number);
+        get rotorLimitLowerFirst(): number;
+        set rotorLimitLowerFirst(_value: number);
         /**
           * The target rotational speed of the motor in m/s.
          */
-        get motorSpeedFirstAxis(): number;
-        set motorSpeedFirstAxis(_value: number);
+        get rotorSpeedFirst(): number;
+        set rotorSpeedFirst(_value: number);
         /**
           * The maximum motor torque in Newton. force <= 0 equals disabled.
          */
-        get motorTorqueFirstAxis(): number;
-        set motorTorqueFirstAxis(_value: number);
+        get rotorTorqueFirst(): number;
+        set rotorTorqueFirst(_value: number);
         /**
         * The Upper Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis-Angle measured in Degree.
        */
-        get motorLimitUpperSecondAxis(): number;
-        set motorLimitUpperSecondAxis(_value: number);
+        get rotorLimitUpperSecond(): number;
+        set rotorLimitUpperSecond(_value: number);
         /**
           * The Lower Limit of movement along the axis of this joint. The limiter is disable if lowerLimit > upperLimit. Axis Angle measured in Degree.
          */
-        get motorLimitLowerSecondAxis(): number;
-        set motorLimitLowerSecondAxis(_value: number);
+        get rotorLimitLowerSecond(): number;
+        set rotorLimitLowerSecond(_value: number);
         /**
           * The target rotational speed of the motor in m/s.
          */
-        get motorSpeedSecondAxis(): number;
-        set motorSpeedSecondAxis(_value: number);
+        get rotorSpeedSecond(): number;
+        set rotorSpeedSecond(_value: number);
         /**
           * The maximum motor torque in Newton. force <= 0 equals disabled.
          */
-        get motorTorqueSecondAxis(): number;
-        set motorTorqueSecondAxis(_value: number);
+        get rotorTorqueSecond(): number;
+        set rotorTorqueSecond(_value: number);
         /**
           * If the two connected RigidBodies collide with eath other. (Default = false)
          */
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
+        getMutator(): Mutator;
         protected constructJoint(): void;
     }
 }

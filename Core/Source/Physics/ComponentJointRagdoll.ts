@@ -205,33 +205,6 @@ namespace FudgeCore {
     //#endregion
 
     //#region Saving/Loading
-    #getMutator = (): Mutator => {
-      let mutator: Mutator = {
-        maxAngleFirst: this.#maxAngleFirst,
-        maxAngleSecond: this.#maxAngleSecond,
-        springDampingTwist: this.springDampingTwist,
-        springFrequencyTwist: this.springFrequencyTwist,
-        springDampingSwing: this.springDampingSwing,
-        springFrequencySwing: this.springFrequencySwing,
-        motorLimitUpperTwist: this.#motorLimitUpperTwist,
-        motorLimitLowerTwist: this.#motorLimitLowerTwist,
-        motorSpeedTwist: this.motorSpeedTwist,
-        motorTorqueTwist: this.motorTorqueTwist
-      };
-      return mutator;
-    }
-    #mutate = (_mutator: Mutator): void => {
-      this.#maxAngleFirst = _mutator.maxAngleFirst;
-      this.#maxAngleSecond = _mutator.maxAngleSecond;
-      this.springDampingTwist = _mutator.springDampingTwist;
-      this.springFrequencyTwist = _mutator.springFrequencyTwist;
-      this.springDampingSwing = _mutator.springDampingSwing;
-      this.springFrequencySwing = _mutator.springFrequencySwing;
-      this.motorLimitUpperTwist = _mutator.motorLimitUpperTwist;
-      this.motorLimitLowerTwist = _mutator.motorLimitLowerTwist;
-      this.motorSpeedTwist = _mutator.motorSpeedTwist;
-      this.motorTorqueTwist = _mutator.motorTorqueTwist;
-    }
     public serialize(): Serialization {
       let serialization: Serialization = this.#getMutator();
       serialization.axisFirst = this.axisFirst.serialize();
@@ -249,15 +222,50 @@ namespace FudgeCore {
     }
 
     public async mutate(_mutator: Mutator): Promise<void> {
+      this.axisFirst = new Vector3(...<number[]>(Object.values(_mutator.axisFirst)));
+      this.axisSecond = new Vector3(...<number[]>(Object.values(_mutator.axisSecond)));
+      delete _mutator.axisFirst;
+      delete _mutator.axisSecond;
       this.#mutate(_mutator);
       this.deleteFromMutator(_mutator, this.#getMutator());
       super.mutate(_mutator);
     }
-    
+
     public getMutator(): Mutator {
       let mutator: Mutator = super.getMutator();
       Object.assign(mutator, this.#getMutator());
+      mutator.axisFirst = this.axisFirst.getMutator();
+      mutator.axisSecond = this.axisSecond.getMutator();
       return mutator;
+    }
+
+    #getMutator = (): Mutator => {
+      let mutator: Mutator = {
+        maxAngleFirst: this.#maxAngleFirst,
+        maxAngleSecond: this.#maxAngleSecond,
+        springDampingTwist: this.springDampingTwist,
+        springFrequencyTwist: this.springFrequencyTwist,
+        springDampingSwing: this.springDampingSwing,
+        springFrequencySwing: this.springFrequencySwing,
+        motorLimitUpperTwist: this.#motorLimitUpperTwist,
+        motorLimitLowerTwist: this.#motorLimitLowerTwist,
+        motorSpeedTwist: this.motorSpeedTwist,
+        motorTorqueTwist: this.motorTorqueTwist
+      };
+      return mutator;
+    }
+
+    #mutate = (_mutator: Mutator): void => {
+      this.#maxAngleFirst = _mutator.maxAngleFirst;
+      this.#maxAngleSecond = _mutator.maxAngleSecond;
+      this.springDampingTwist = _mutator.springDampingTwist;
+      this.springFrequencyTwist = _mutator.springFrequencyTwist;
+      this.springDampingSwing = _mutator.springDampingSwing;
+      this.springFrequencySwing = _mutator.springFrequencySwing;
+      this.motorLimitUpperTwist = _mutator.motorLimitUpperTwist;
+      this.motorLimitLowerTwist = _mutator.motorLimitLowerTwist;
+      this.motorSpeedTwist = _mutator.motorSpeedTwist;
+      this.motorTorqueTwist = _mutator.motorTorqueTwist;
     }
     //#endregion
 

@@ -157,29 +157,6 @@ namespace FudgeCore {
     //#endregion
 
     //#region Saving/Loading
-    #getMutator = (): Mutator => {
-      let mutator: Mutator = {
-        motorForce: this.motorForce,
-        rotorTorque: this.rotorTorque,
-        rotorSpeed: this.rotorSpeed,
-        rotorLimitUpper: this.rotorLimitUpper,
-        rotorLimitLower: this.rotorLimitLower,
-        springDampingRotation: this.springDampingRotation,
-        springFrequencyRotation: this.springFrequencyRotation
-      };
-      return mutator;
-    }
-    #mutate = (_mutator: Mutator): void => {
-      this.motorForce = _mutator.motorForce;
-      this.rotorTorque = _mutator.rotorTorque;
-      this.rotorSpeed = _mutator.rotorSpeed;
-      this.rotorLimitUpper = _mutator.rotorLimitUpper;
-      this.rotorLimitLower = _mutator.rotorLimitLower;
-      this.springDampingRotation = _mutator.springDampingRotation;
-      this.springFrequencyRotation = _mutator.springFrequencyRotation;
-      this.springFrequency = _mutator.springFrequency;
-    }
-
     public serialize(): Serialization {
       let serialization: Serialization = this.#getMutator();
       serialization[super.constructor.name] = super.serialize();
@@ -203,6 +180,30 @@ namespace FudgeCore {
       Object.assign(mutator, this.#getMutator());
       return mutator;
     }
+
+    #getMutator = (): Mutator => {
+      let mutator: Mutator = {
+        motorForce: this.motorForce,
+        rotorTorque: this.rotorTorque,
+        rotorSpeed: this.rotorSpeed,
+        rotorLimitUpper: this.rotorLimitUpper,
+        rotorLimitLower: this.rotorLimitLower,
+        springDampingRotation: this.springDampingRotation,
+        springFrequencyRotation: this.springFrequencyRotation
+      };
+      return mutator;
+    }
+    
+    #mutate = (_mutator: Mutator): void => {
+      this.motorForce = _mutator.motorForce;
+      this.rotorTorque = _mutator.rotorTorque;
+      this.rotorSpeed = _mutator.rotorSpeed;
+      this.rotorLimitUpper = _mutator.rotorLimitUpper;
+      this.rotorLimitLower = _mutator.rotorLimitLower;
+      this.springDampingRotation = _mutator.springDampingRotation;
+      this.springFrequencyRotation = _mutator.springFrequencyRotation;
+      this.springFrequency = _mutator.springFrequency;
+    }
     //#endregion
 
     protected constructJoint(): void {
@@ -210,7 +211,7 @@ namespace FudgeCore {
 
       this.motor = new OIMO.TranslationalLimitMotor().setLimits(super.motorLimitLower, super.motorLimitUpper);
       this.motor.setMotor(super.motorSpeed, this.motorForce);
-      this.#rotor = new OIMO.RotationalLimitMotor().setLimits(this.rotorLimitLower, this.rotorLimitUpper);
+      this.#rotor = new OIMO.RotationalLimitMotor().setLimits(this.rotorLimitLower * Math.PI / 180, this.rotorLimitUpper * Math.PI / 180);
       this.#rotor.setMotor(this.rotorSpeed, this.rotorTorque);
 
       this.config = new OIMO.CylindricalJointConfig();

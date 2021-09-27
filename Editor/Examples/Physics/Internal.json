@@ -92,7 +92,7 @@
                     "dampTranslation": 0.1,
                     "dampRotation": 0.1,
                     "effectGravity": 1,
-                    "typeBody": "STATIC",
+                    "typeBody": "DYNAMIC",
                     "typeCollider": "CYLINDER",
                     "isTrigger": false,
                     "id": 0,
@@ -107,18 +107,29 @@
                   }
                 }
               ],
-              "ComponentJointRagdoll": [],
-              "ComponentJointSpherical": [
+              "ComponentJointUniversal": [
                 {
-                  "ƒ.ComponentJointSpherical": {
-                    "springDamping": 3,
-                    "springFrequency": 0,
+                  "ƒ.ComponentJointUniversal": {
+                    "springDampingFirst": 0,
+                    "springFrequencyFirst": 0,
+                    "springDampingSecond": 0,
+                    "springFrequencySecond": 0,
+                    "rotorLimitUpperFirst": 360,
+                    "rotorLimitLowerFirst": 0,
+                    "rotorSpeedFirst": 0,
+                    "rotorTorqueFirst": 0,
+                    "rotorLimitUpperSecond": 360,
+                    "rotorLimitLowerSecond": 0,
+                    "rotorSpeedSecond": 0,
+                    "rotorTorqueSecond": 0,
+                    "firstAxis": "[0, 0, 0]",
+                    "secondAxis": "[0, 0, 0]",
                     "ComponentJoint": {
                       "nameChildToConnect": "Box",
-                      "anchor": "[0, 2, 0]",
                       "internalCollision": false,
                       "breakForce": 0,
                       "breakTorque": 0,
+                      "anchor": "[0, 0, 0]",
                       "Component": {
                         "active": true
                       }

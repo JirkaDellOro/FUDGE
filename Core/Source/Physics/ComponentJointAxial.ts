@@ -108,25 +108,6 @@ namespace FudgeCore {
     //#endregion
 
     //#region Saving/Loading
-    #getMutator = (): Mutator => {
-      let mutator: Mutator = {
-        axis: this.axis.getMutator(),
-        springDamping: this.#springDamping,
-        springFrequency: this.#springFrequency,
-        motorLimitUpper: this.#motorLimitUpper,
-        motorLimitLower: this.#motorLimitLower,
-        motorSpeed: this.#motorSpeed
-      };
-      return mutator;
-    }
-    #mutate = (_mutator: Mutator): void => {
-      this.springDamping = _mutator.springDamping;
-      this.springFrequency = _mutator.springFrequency;
-      this.motorLimitUpper = _mutator.motorLimitUpper;
-      this.motorLimitLower = _mutator.motorLimitLower;
-      this.motorSpeed = _mutator.motorSpeed;
-    }
-
     public serialize(): Serialization {
       let serialization: Serialization = this.#getMutator();
       serialization.axis = this.axis.serialize();
@@ -143,6 +124,7 @@ namespace FudgeCore {
 
     public async mutate(_mutator: Mutator): Promise<void> {
       this.axis = new Vector3(...<number[]>(Object.values(_mutator.axis)));
+      delete _mutator.axis;
       this.#mutate(_mutator);
       this.deleteFromMutator(_mutator, this.#getMutator());
       super.mutate(_mutator);
@@ -151,8 +133,28 @@ namespace FudgeCore {
     public getMutator(): Mutator {
       let mutator: Mutator = super.getMutator();
       Object.assign(mutator, this.#getMutator());
+      mutator.axis = this.axis.getMutator();
       return mutator;
     }
+
+    #getMutator = (): Mutator => {
+      let mutator: Mutator = {
+        springDamping: this.#springDamping,
+        springFrequency: this.#springFrequency,
+        motorLimitUpper: this.#motorLimitUpper,
+        motorLimitLower: this.#motorLimitLower,
+        motorSpeed: this.#motorSpeed
+      };
+      return mutator;
+    }
+    #mutate = (_mutator: Mutator): void => {
+      this.springDamping = _mutator.springDamping;
+      this.springFrequency = _mutator.springFrequency;
+      this.motorLimitUpper = _mutator.motorLimitUpper;
+      this.motorLimitLower = _mutator.motorLimitLower;
+      this.motorSpeed = _mutator.motorSpeed;
+    }
+
     //#endregion
 
     protected constructJoint(): void {

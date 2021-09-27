@@ -69,7 +69,7 @@ namespace FudgeCore {
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       this.springDamping = _serialization.springDamping;
       this.springFrequency = _serialization.springFrequency;
-      super.deserialize(_serialization);
+      super.deserialize(_serialization[super.constructor.name]);
       return this;
     }
 

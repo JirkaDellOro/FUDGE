@@ -203,11 +203,13 @@ namespace FudgeCore {
     public getMutator(): Mutator {
       let mutator: Mutator = super.getMutator(true);
       Object.assign(mutator, this.#getMutator());
+      mutator.anchor = this.anchor.getMutator();
       return mutator;
     }
 
     public async mutate(_mutator: Mutator): Promise<void> {
       this.anchor = new Vector3(...<number[]>(Object.values(_mutator.anchor)));
+      delete _mutator.anchor;
       this.connectChild(_mutator.nameChildToConnect);
       this.#mutate(_mutator);
       this.deleteFromMutator(_mutator, this.#getMutator());
@@ -217,7 +219,6 @@ namespace FudgeCore {
     #getMutator = (): Mutator => {
       let mutator: Mutator = {
         nameChildToConnect: this.#nameChildToConnect,
-        anchor: this.anchor.getMutator(),
         internalCollision: this.#internalCollision,
         breakForce: this.#breakForce,
         breakTorque: this.#breakTorque

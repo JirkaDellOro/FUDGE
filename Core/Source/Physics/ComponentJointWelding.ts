@@ -29,7 +29,7 @@ namespace FudgeCore {
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      super.deserialize(_serialization);
+      super.deserialize(_serialization[super.constructor.name]);
       return this;
     }
     //#endregion
