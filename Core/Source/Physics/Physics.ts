@@ -18,7 +18,7 @@ namespace FudgeCore {
 
     private oimoWorld: OIMO.World;
     private bodyList: ComponentRigidbody[] = new Array();
-    private jointList: ComponentJoint[] = new Array();
+    private jointList: Joint[] = new Array();
 
     /**
      * Creating a physical world to represent the {@link Node} Scene Tree. Call once before using any physics functions or
@@ -172,14 +172,14 @@ namespace FudgeCore {
     /**
     * Adding a new OIMO Joint/Constraint to the OIMO World, happens automatically when adding a FUDGE Joint Component
     */
-    public addJoint(_cmpJoint: ComponentJoint): void {
+    public addJoint(_cmpJoint: Joint): void {
       Physics.world.oimoWorld.addJoint(_cmpJoint.getOimoJoint());
     }
 
     /**
       * Removing a OIMO Joint/Constraint to the OIMO World, happens automatically when removeing a FUDGE Joint Component
       */
-    public removeJoint(_cmpJoint: ComponentJoint): void {
+    public removeJoint(_cmpJoint: Joint): void {
       Physics.world.oimoWorld.removeJoint(_cmpJoint.getOimoJoint());
     }
 
@@ -220,9 +220,9 @@ namespace FudgeCore {
       //   jointsToConnect.push(value);
       // });
       // this.jointList.splice(0, this.jointList.length);
-      let jointsToConnect: ComponentJoint[] = this.jointList;
+      let jointsToConnect: Joint[] = this.jointList;
       this.jointList = [];
-      jointsToConnect.forEach((_joint: ComponentJoint): void => {
+      jointsToConnect.forEach((_joint: Joint): void => {
         if (_joint.isConnected() == false) {
           _joint.connect();
         }
@@ -233,7 +233,7 @@ namespace FudgeCore {
     * Called internally to inform the physics system that a joint has a change of core properties like ComponentRigidbody and needs to
     * be recreated.
     */
-    public changeJointStatus(_cmpJoint: ComponentJoint): void {
+    public changeJointStatus(_cmpJoint: Joint): void {
       if (this.jointList.indexOf(_cmpJoint) < 0)
         this.jointList.push(_cmpJoint);
     }

@@ -47,13 +47,13 @@ namespace Fudge {
 
       item = new remote.MenuItem({
         label: "Create Mesh",
-        submenu: ContextMenu.getSubclassMenu<typeof ƒ.Mesh>(CONTEXTMENU.CREATE_MESH, ƒ.Mesh.subclasses, _callback)
+        submenu: ContextMenu.getSubclassMenu(CONTEXTMENU.CREATE_MESH, ƒ.Mesh, _callback)
       });
       menu.append(item);
 
       item = new remote.MenuItem({
         label: "Create Material",
-        submenu: ContextMenu.getSubclassMenu<typeof ƒ.Shader>(CONTEXTMENU.CREATE_MATERIAL, ƒ.Shader.subclasses, _callback)
+        submenu: ContextMenu.getSubclassMenu(CONTEXTMENU.CREATE_MATERIAL, ƒ.Shader, _callback)
       });
       menu.append(item);
 

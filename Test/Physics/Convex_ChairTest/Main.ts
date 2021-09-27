@@ -100,7 +100,7 @@ namespace FudgeExperiments_Marko_ConvexColliderThroughWelding {
     back.mtxLocal.translate(new f.Vector3(0.4, 4 + spawnHeight, 0));
     back.mtxLocal.scale(new f.Vector3(0.2, 1, 1));
     hierarchy.appendChild(back);
-    let weldingJoint: f.ComponentJointWelding = new f.ComponentJointWelding(base.getComponent(f.ComponentRigidbody), back.getComponent(f.ComponentRigidbody));
+    let weldingJoint: f.JointWelding = new f.JointWelding(base.getComponent(f.ComponentRigidbody), back.getComponent(f.ComponentRigidbody));
     back.addComponent(weldingJoint);
 
     let leg: f.Node = createCompleteNode("Leg_BL", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_2);
@@ -108,7 +108,7 @@ namespace FudgeExperiments_Marko_ConvexColliderThroughWelding {
     leg.mtxLocal.scale(new f.Vector3(0.2, 0.8, 0.2));
     hierarchy.appendChild(leg);
 
-    weldingJoint = new f.ComponentJointWelding(base.getComponent(f.ComponentRigidbody), leg.getComponent(f.ComponentRigidbody));
+    weldingJoint = new f.JointWelding(base.getComponent(f.ComponentRigidbody), leg.getComponent(f.ComponentRigidbody));
     back.addComponent(weldingJoint);
 
     leg = createCompleteNode("Leg_BR", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_2);
@@ -116,7 +116,7 @@ namespace FudgeExperiments_Marko_ConvexColliderThroughWelding {
     leg.mtxLocal.scale(new f.Vector3(0.2, 0.8, 0.2));
     hierarchy.appendChild(leg);
 
-    weldingJoint = new f.ComponentJointWelding(base.getComponent(f.ComponentRigidbody), leg.getComponent(f.ComponentRigidbody));
+    weldingJoint = new f.JointWelding(base.getComponent(f.ComponentRigidbody), leg.getComponent(f.ComponentRigidbody));
     back.addComponent(weldingJoint);
 
     leg = createCompleteNode("Leg_FR", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_2);
@@ -124,7 +124,7 @@ namespace FudgeExperiments_Marko_ConvexColliderThroughWelding {
     leg.mtxLocal.scale(new f.Vector3(0.2, 0.8, 0.2));
     hierarchy.appendChild(leg);
 
-    weldingJoint = new f.ComponentJointWelding(base.getComponent(f.ComponentRigidbody), leg.getComponent(f.ComponentRigidbody));
+    weldingJoint = new f.JointWelding(base.getComponent(f.ComponentRigidbody), leg.getComponent(f.ComponentRigidbody));
     back.addComponent(weldingJoint);
 
     leg = createCompleteNode("Leg_FR", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_2);
@@ -132,7 +132,7 @@ namespace FudgeExperiments_Marko_ConvexColliderThroughWelding {
     leg.mtxLocal.scale(new f.Vector3(0.2, 0.8, 0.2));
     hierarchy.appendChild(leg);
 
-    weldingJoint = new f.ComponentJointWelding(base.getComponent(f.ComponentRigidbody), leg.getComponent(f.ComponentRigidbody));
+    weldingJoint = new f.JointWelding(base.getComponent(f.ComponentRigidbody), leg.getComponent(f.ComponentRigidbody));
     back.addComponent(weldingJoint);
     f.Physics.adjustTransforms(hierarchy); // Important! You need to at least adjust Transforms for the parts of the chair
   }

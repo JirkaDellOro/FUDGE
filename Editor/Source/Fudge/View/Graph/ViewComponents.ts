@@ -41,7 +41,7 @@ namespace Fudge {
       let item: Electron.MenuItem;
       item = new remote.MenuItem({
         label: "Add Component",
-        submenu: ContextMenu.getSubclassMenu<typeof ƒ.Component>(CONTEXTMENU.ADD_COMPONENT, ƒ.Component.subclasses, _callback)
+        submenu: ContextMenu.getSubclassMenu(CONTEXTMENU.ADD_COMPONENT, ƒ.Component, _callback)
       });
       menu.append(item);
 

@@ -22,14 +22,14 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
   let materialPlayer: f.Material = new f.Material("Player", f.ShaderFlat, new f.CoatColored(new f.Color(0.7, 0.5, 0.35, 1)));
 
   //Car Settings / Joints
-  let frontSuspensionRight: f.ComponentJointCylindrical;
-  let frontSuspensionLeft: f.ComponentJointCylindrical;
-  let backSuspensionRight: f.ComponentJointCylindrical;
-  let backSuspensionLeft: f.ComponentJointCylindrical;
-  let wheelJointFrontRight: f.ComponentJointRevolute;
-  let wheelJointFrontLeft: f.ComponentJointRevolute;
-  let wheelJointBackRight: f.ComponentJointRevolute;
-  let wheelJointBackLeft: f.ComponentJointRevolute;
+  let frontSuspensionRight: f.JointCylindrical;
+  let frontSuspensionLeft: f.JointCylindrical;
+  let backSuspensionRight: f.JointCylindrical;
+  let backSuspensionLeft: f.JointCylindrical;
+  let wheelJointFrontRight: f.JointRevolute;
+  let wheelJointFrontLeft: f.JointRevolute;
+  let wheelJointBackRight: f.JointRevolute;
+  let wheelJointBackLeft: f.JointRevolute;
   let maxAngle: number = 30;
   let currentAngle: number = 0;
 
@@ -172,7 +172,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
     //Connecting them with joints
     //Sliding, Prismatic, Spring Joint between the body and the suspension
     //In -Y-Axis positioned where the holder is located locally to the car_base
-    frontSuspensionRight = new f.ComponentJointCylindrical(carBody, bodies[17].getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(0.50, -1, -0.75));
+    frontSuspensionRight = new f.JointCylindrical(carBody, bodies[17].getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(0.50, -1, -0.75));
     carBody.node.addComponent(frontSuspensionRight);
     frontSuspensionRight.springDamping = 100;
     frontSuspensionRight.springFrequency = 2;
@@ -181,7 +181,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
     frontSuspensionRight.maxRotor = 0;
     frontSuspensionRight.minRotor = 0;
     frontSuspensionRight.internalCollision = true;
-    frontSuspensionLeft = new f.ComponentJointCylindrical(carBody, bodies[19].getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(-0.50, -1, -0.75));
+    frontSuspensionLeft = new f.JointCylindrical(carBody, bodies[19].getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(-0.50, -1, -0.75));
     carBody.node.addComponent(frontSuspensionLeft);
     frontSuspensionLeft.springDamping = 100;
     frontSuspensionLeft.springFrequency = 2;
@@ -190,7 +190,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
     frontSuspensionLeft.maxRotor = 0;
     frontSuspensionLeft.minRotor = 0;
     frontSuspensionLeft.internalCollision = true;
-    backSuspensionLeft = new f.ComponentJointCylindrical(carBody, bodies[20].getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(-0.50, -1, 0.75));
+    backSuspensionLeft = new f.JointCylindrical(carBody, bodies[20].getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(-0.50, -1, 0.75));
     carBody.node.addComponent(backSuspensionLeft);
     backSuspensionLeft.springDamping = 100;
     backSuspensionLeft.springFrequency = 2;
@@ -199,7 +199,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
     backSuspensionLeft.maxRotor = 0;
     backSuspensionLeft.minRotor = 0;
     backSuspensionLeft.internalCollision = true;
-    backSuspensionRight = new f.ComponentJointCylindrical(carBody, bodies[18].getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(0.50, -1, 0.75));
+    backSuspensionRight = new f.JointCylindrical(carBody, bodies[18].getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(0.50, -1, 0.75));
     carBody.node.addComponent(backSuspensionRight);
     backSuspensionRight.springDamping = 100;
     backSuspensionRight.springFrequency = 2;
@@ -210,13 +210,13 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
     backSuspensionRight.internalCollision = true;
 
     //Connect Wheels to suspension - Hinge (revolute) joints that can rotate 360° in X-Axis but not move
-    wheelJointFrontRight = new f.ComponentJointRevolute(bodies[17].getComponent(f.ComponentRigidbody), bodies[13].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
+    wheelJointFrontRight = new f.JointRevolute(bodies[17].getComponent(f.ComponentRigidbody), bodies[13].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
     bodies[17].addComponent(wheelJointFrontRight);
-    wheelJointFrontLeft = new f.ComponentJointRevolute(bodies[19].getComponent(f.ComponentRigidbody), bodies[15].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
+    wheelJointFrontLeft = new f.JointRevolute(bodies[19].getComponent(f.ComponentRigidbody), bodies[15].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
     bodies[19].addComponent(wheelJointFrontLeft);
-    wheelJointBackRight = new f.ComponentJointRevolute(bodies[18].getComponent(f.ComponentRigidbody), bodies[14].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
+    wheelJointBackRight = new f.JointRevolute(bodies[18].getComponent(f.ComponentRigidbody), bodies[14].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
     bodies[18].addComponent(wheelJointBackRight);
-    wheelJointBackLeft = new f.ComponentJointRevolute(bodies[20].getComponent(f.ComponentRigidbody), bodies[16].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
+    wheelJointBackLeft = new f.JointRevolute(bodies[20].getComponent(f.ComponentRigidbody), bodies[16].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
     bodies[20].addComponent(wheelJointBackLeft);
 
     wheelJointFrontRight.motorSpeed = -5;

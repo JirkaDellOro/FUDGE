@@ -92,7 +92,7 @@
                     "dampTranslation": 0.1,
                     "dampRotation": 0.1,
                     "effectGravity": 1,
-                    "typeBody": "STATIC",
+                    "typeBody": "DYNAMIC",
                     "typeCollider": "CYLINDER",
                     "isTrigger": false,
                     "id": 0,
@@ -111,12 +111,12 @@
                 {
                   "ƒ.ComponentJointCylindrical": {
                     "motorForce": 0,
-                    "rotorTorque": 0,
-                    "rotorSpeed": 0,
-                    "maxRotor": 360,
-                    "minRotor": 0,
                     "springDampingRotation": 0,
                     "springFrequencyRotation": 0,
+                    "maxRotor": 360,
+                    "minRotor": 0,
+                    "rotorTorque": 0,
+                    "rotorSpeed": 0,
                     "ComponentJointAxial": {
                       "springDamping": 0,
                       "springFrequency": 0,

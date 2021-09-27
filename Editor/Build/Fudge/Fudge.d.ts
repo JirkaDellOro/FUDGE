@@ -8,8 +8,9 @@ declare namespace Fudge {
     class ContextMenu {
         static appendCopyPaste(_menu: Electron.Menu): void;
         static getSubclassMenu<T extends {
+            subclasses: T[];
             name: string;
-        }>(_id: CONTEXTMENU, _superclass: T[], _callback: ContextMenuCallback): Electron.Menu;
+        }>(_id: CONTEXTMENU, _class: T, _callback: ContextMenuCallback): Electron.Menu;
     }
 }
 declare namespace Fudge {

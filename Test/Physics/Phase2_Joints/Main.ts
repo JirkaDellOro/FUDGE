@@ -21,13 +21,13 @@ namespace FudgePhysics_Communication {
     let moveableTransform: f.ComponentTransform;
 
     //Joints
-    let prismaticJoint: f.ComponentJointPrismatic;
-    let prismaticJointSlide: f.ComponentJointPrismatic;
-    let revoluteJointSwingDoor: f.ComponentJointRevolute;
-    let cylindricalJoint: f.ComponentJointCylindrical;
-    let sphericalJoint: f.ComponentJointSpherical;
-    let universalJoint: f.ComponentJointUniversal;
-    let secondUniversalJoint: f.ComponentJointUniversal;
+    let prismaticJoint: f.JointPrismatic;
+    let prismaticJointSlide: f.JointPrismatic;
+    let revoluteJointSwingDoor: f.JointRevolute;
+    let cylindricalJoint: f.JointCylindrical;
+    let sphericalJoint: f.JointSpherical;
+    let universalJoint: f.JointUniversal;
+    let secondUniversalJoint: f.JointUniversal;
 
     //Ragdoll
     let head: f.Node;
@@ -37,13 +37,13 @@ namespace FudgePhysics_Communication {
     let armR: f.Node;
     let legL: f.Node;
     let legR: f.Node;
-    let jointHeadBody: f.ComponentJointRagdoll;
-    let jointUpperLowerBody: f.ComponentJointRagdoll;
-    let jointBodyArmL: f.ComponentJointRagdoll;
-    let jointBodyArmR: f.ComponentJointRagdoll;
-    let jointBodyLegL: f.ComponentJointRagdoll;
-    let jointBodyLegR: f.ComponentJointRagdoll;
-    let holder: f.ComponentJointSpherical;
+    let jointHeadBody: f.JointRagdoll;
+    let jointUpperLowerBody: f.JointRagdoll;
+    let jointBodyArmL: f.JointRagdoll;
+    let jointBodyArmR: f.JointRagdoll;
+    let jointBodyLegL: f.JointRagdoll;
+    let jointBodyLegR: f.JointRagdoll;
+    let holder: f.JointSpherical;
 
 
     function init(_event: Event): void {
@@ -66,7 +66,7 @@ namespace FudgePhysics_Communication {
         hierarchy.appendChild(bodies[0]);
         cmpCubeTransform.mtxLocal.translate(new f.Vector3(0, 1, 0));
         cmpCubeTransform.mtxLocal.scaleY(0.2);
-        prismaticJoint = new f.ComponentJointPrismatic(bodies[0].getComponent(f.ComponentRigidbody), ground.getComponent(f.ComponentRigidbody), new f.Vector3(0, 1, 0));
+        prismaticJoint = new f.JointPrismatic(bodies[0].getComponent(f.ComponentRigidbody), ground.getComponent(f.ComponentRigidbody), new f.Vector3(0, 1, 0));
         bodies[0].addComponent(prismaticJoint);
         prismaticJoint.springDamping = 0;
         prismaticJoint.springFrequency = 1;
@@ -82,7 +82,7 @@ namespace FudgePhysics_Communication {
         bodies[4] = createCompleteMeshNode("CubeJointSlide", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 1, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1);
         hierarchy.appendChild(bodies[4]);
         bodies[4].mtxLocal.translate(new f.Vector3(-4, 2, -2));
-        prismaticJointSlide = new f.ComponentJointPrismatic(bodies[3].getComponent(f.ComponentRigidbody), bodies[4].getComponent(f.ComponentRigidbody), new f.Vector3(1, 0, 0));
+        prismaticJointSlide = new f.JointPrismatic(bodies[3].getComponent(f.ComponentRigidbody), bodies[4].getComponent(f.ComponentRigidbody), new f.Vector3(1, 0, 0));
         bodies[3].addComponent(prismaticJointSlide);
         prismaticJointSlide.motorForce = 10; //so it does not slide too much on it's own.
         prismaticJointSlide.minMotor = -1;
@@ -99,7 +99,7 @@ namespace FudgePhysics_Communication {
         bodies[6].mtxLocal.translate(new f.Vector3(4.25, 2, -2));
         bodies[6].mtxLocal.scale(new f.Vector3(1.5, 2, 0.2));
 
-        revoluteJointSwingDoor = new f.ComponentJointRevolute(bodies[5].getComponent(f.ComponentRigidbody), bodies[6].getComponent(f.ComponentRigidbody), new f.Vector3(0, 1, 0));
+        revoluteJointSwingDoor = new f.JointRevolute(bodies[5].getComponent(f.ComponentRigidbody), bodies[6].getComponent(f.ComponentRigidbody), new f.Vector3(0, 1, 0));
         bodies[5].addComponent(revoluteJointSwingDoor);
         revoluteJointSwingDoor.minMotor = -60;
         revoluteJointSwingDoor.maxMotor = 60;
@@ -114,7 +114,7 @@ namespace FudgePhysics_Communication {
         hierarchy.appendChild(bodies[8]);
         bodies[8].mtxLocal.translate(new f.Vector3(1.5, 2.5, -2));
         bodies[8].mtxLocal.scale(new f.Vector3(0.3, 2, 0.3));
-        cylindricalJoint = new f.ComponentJointCylindrical(bodies[7].getComponent(f.ComponentRigidbody), bodies[8].getComponent(f.ComponentRigidbody), new f.Vector3(0, 1, 0));
+        cylindricalJoint = new f.JointCylindrical(bodies[7].getComponent(f.ComponentRigidbody), bodies[8].getComponent(f.ComponentRigidbody), new f.Vector3(0, 1, 0));
         bodies[7].addComponent(cylindricalJoint);
         cylindricalJoint.minMotor = -1.25;
         cylindricalJoint.rotorSpeed = 1;
@@ -131,7 +131,7 @@ namespace FudgePhysics_Communication {
         hierarchy.appendChild(bodies[10]);
         bodies[10].mtxLocal.translate(new f.Vector3(-1.5, 2, 2.5));
         bodies[10].mtxLocal.scale(new f.Vector3(0.3, 2, 0.3));
-        sphericalJoint = new f.ComponentJointSpherical(bodies[9].getComponent(f.ComponentRigidbody), bodies[10].getComponent(f.ComponentRigidbody));
+        sphericalJoint = new f.JointSpherical(bodies[9].getComponent(f.ComponentRigidbody), bodies[10].getComponent(f.ComponentRigidbody));
         bodies[9].addComponent(sphericalJoint);
 
         //Universal Joint
@@ -144,7 +144,7 @@ namespace FudgePhysics_Communication {
         hierarchy.appendChild(bodies[12]);
         bodies[12].mtxLocal.translate(new f.Vector3(-5.5, 3.75, 2.5));
         bodies[12].mtxLocal.scale(new f.Vector3(0.3, 2, 0.3));
-        universalJoint = new f.ComponentJointUniversal(bodies[11].getComponent(f.ComponentRigidbody), bodies[12].getComponent(f.ComponentRigidbody), new f.Vector3(0, 1, 0), new f.Vector3(1, 0, 0));
+        universalJoint = new f.JointUniversal(bodies[11].getComponent(f.ComponentRigidbody), bodies[12].getComponent(f.ComponentRigidbody), new f.Vector3(0, 1, 0), new f.Vector3(1, 0, 0));
         bodies[11].addComponent(universalJoint);
 
 
@@ -152,7 +152,7 @@ namespace FudgePhysics_Communication {
         hierarchy.appendChild(bodies[13]);
         bodies[13].mtxLocal.translate(new f.Vector3(-5.5, 1.75, 2.5));
         bodies[13].mtxLocal.scale(new f.Vector3(0.3, 2, 0.3));
-        secondUniversalJoint = new f.ComponentJointUniversal(bodies[12].getComponent(f.ComponentRigidbody), bodies[13].getComponent(f.ComponentRigidbody), new f.Vector3(0, 0, 1), new f.Vector3(1, 0, 0), new f.Vector3(0, -1, 0));
+        secondUniversalJoint = new f.JointUniversal(bodies[12].getComponent(f.ComponentRigidbody), bodies[13].getComponent(f.ComponentRigidbody), new f.Vector3(0, 0, 1), new f.Vector3(1, 0, 0), new f.Vector3(0, -1, 0));
         bodies[12].addComponent(secondUniversalJoint);
 
 
@@ -392,7 +392,7 @@ namespace FudgePhysics_Communication {
         let y: f.Vector3 = new f.Vector3(0, 1, 0);
         let z: f.Vector3 = new f.Vector3(0, 0, 1);
 
-        jointHeadBody = new f.ComponentJointRagdoll(head.getComponent(f.ComponentRigidbody), body1.getComponent(f.ComponentRigidbody), y, x, new f.Vector3(0, -0.2, 0));
+        jointHeadBody = new f.JointRagdoll(head.getComponent(f.ComponentRigidbody), body1.getComponent(f.ComponentRigidbody), y, x, new f.Vector3(0, -0.2, 0));
         jointHeadBody.springFrequencySwing = 10;
         jointHeadBody.springDampingSwing = 1;
         jointHeadBody.maxAngleFirstAxis = 90;
@@ -403,7 +403,7 @@ namespace FudgePhysics_Communication {
         jointHeadBody.springDampingTwist = 1;
         head.addComponent(jointHeadBody);
 
-        jointUpperLowerBody = new f.ComponentJointRagdoll(body1.getComponent(f.ComponentRigidbody), body2.getComponent(f.ComponentRigidbody), y, x, new f.Vector3(0, -0.4, 0));
+        jointUpperLowerBody = new f.JointRagdoll(body1.getComponent(f.ComponentRigidbody), body2.getComponent(f.ComponentRigidbody), y, x, new f.Vector3(0, -0.4, 0));
         jointUpperLowerBody.springFrequencySwing = 10;
         jointUpperLowerBody.springDampingSwing = 1;
         jointUpperLowerBody.maxAngleFirstAxis = 90;
@@ -414,7 +414,7 @@ namespace FudgePhysics_Communication {
         jointUpperLowerBody.springDampingTwist = 1;
         body1.addComponent(jointUpperLowerBody);
 
-        jointBodyArmL = new f.ComponentJointRagdoll(armL.getComponent(f.ComponentRigidbody), body1.getComponent(f.ComponentRigidbody), x, z, new f.Vector3(0.5, 0, 0));
+        jointBodyArmL = new f.JointRagdoll(armL.getComponent(f.ComponentRigidbody), body1.getComponent(f.ComponentRigidbody), x, z, new f.Vector3(0.5, 0, 0));
         jointBodyArmL.springFrequencySwing = 10;
         jointBodyArmL.springDampingSwing = 1;
         jointBodyArmL.maxAngleFirstAxis = 90;
@@ -426,7 +426,7 @@ namespace FudgePhysics_Communication {
         armL.addComponent(jointBodyArmL);
 
         x.x = -1;
-        jointBodyArmR = new f.ComponentJointRagdoll(armR.getComponent(f.ComponentRigidbody), body1.getComponent(f.ComponentRigidbody), x, z, new f.Vector3(-0.5, 0, 0));
+        jointBodyArmR = new f.JointRagdoll(armR.getComponent(f.ComponentRigidbody), body1.getComponent(f.ComponentRigidbody), x, z, new f.Vector3(-0.5, 0, 0));
         jointBodyArmR.springFrequencySwing = 10;
         jointBodyArmR.springDampingSwing = 1;
         jointBodyArmR.maxAngleFirstAxis = 90;
@@ -437,7 +437,7 @@ namespace FudgePhysics_Communication {
         jointBodyArmR.springDampingTwist = 1;
         armR.addComponent(jointBodyArmR);
 
-        jointBodyLegL = new f.ComponentJointRagdoll(legL.getComponent(f.ComponentRigidbody), body1.getComponent(f.ComponentRigidbody), y, x, new f.Vector3(0, 0.5, 0));
+        jointBodyLegL = new f.JointRagdoll(legL.getComponent(f.ComponentRigidbody), body1.getComponent(f.ComponentRigidbody), y, x, new f.Vector3(0, 0.5, 0));
         jointBodyLegL.springFrequencySwing = 10;
         jointBodyLegL.springDampingSwing = 1;
         jointBodyLegL.maxAngleFirstAxis = 90;
@@ -448,7 +448,7 @@ namespace FudgePhysics_Communication {
         jointBodyLegL.springDampingTwist = 1;
         legL.addComponent(jointBodyLegL);
 
-        jointBodyLegR = new f.ComponentJointRagdoll(legR.getComponent(f.ComponentRigidbody), body1.getComponent(f.ComponentRigidbody), y, x, new f.Vector3(0, 0.5, 0));
+        jointBodyLegR = new f.JointRagdoll(legR.getComponent(f.ComponentRigidbody), body1.getComponent(f.ComponentRigidbody), y, x, new f.Vector3(0, 0.5, 0));
         jointBodyLegR.springFrequencySwing = 10;
         jointBodyLegR.springDampingSwing = 1;
         jointBodyLegR.maxAngleFirstAxis = 90;
@@ -459,7 +459,7 @@ namespace FudgePhysics_Communication {
         jointBodyLegR.springDampingTwist = 1;
         legR.addComponent(jointBodyLegR);
 
-        holder = new f.ComponentJointSpherical(moveableTransform.node.getComponent(f.ComponentRigidbody), head.getComponent(f.ComponentRigidbody), new f.Vector3(0, 0, 0));
+        holder = new f.JointSpherical(moveableTransform.node.getComponent(f.ComponentRigidbody), head.getComponent(f.ComponentRigidbody), new f.Vector3(0, 0, 0));
         moveableTransform.node.addComponent(holder);
         holder.springDamping = 0.1;
         holder.springFrequency = 1;

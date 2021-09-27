@@ -8,10 +8,10 @@ var Fudge;
             _menu.append(new Fudge.remote.MenuItem({ role: "cut" }));
             _menu.append(new Fudge.remote.MenuItem({ role: "paste" }));
         }
-        static getSubclassMenu(_id, _superclass, _callback) {
+        static getSubclassMenu(_id, _class, _callback) {
             const menu = new Fudge.remote.Menu();
-            for (let iSubclass in _superclass) {
-                let subclass = _superclass[iSubclass];
+            for (let iSubclass in _class.subclasses) {
+                let subclass = _class.subclasses[iSubclass];
                 let item = new Fudge.remote.MenuItem({ label: subclass.name, id: String(_id), click: _callback });
                 //@ts-ignore
                 item.overrideProperty("iSubclass", iSubclass);
@@ -972,12 +972,12 @@ var Fudge;
             let item;
             item = new Fudge.remote.MenuItem({
                 label: "Create Mesh",
-                submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE_MESH, ƒ.Mesh.subclasses, _callback)
+                submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE_MESH, ƒ.Mesh, _callback)
             });
             menu.append(item);
             item = new Fudge.remote.MenuItem({
                 label: "Create Material",
-                submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE_MATERIAL, ƒ.Shader.subclasses, _callback)
+                submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.CREATE_MATERIAL, ƒ.Shader, _callback)
             });
             menu.append(item);
             item = new Fudge.remote.MenuItem({ label: "Create Graph", id: String(Fudge.CONTEXTMENU.CREATE_GRAPH), click: _callback, accelerator: "G" });
@@ -2301,7 +2301,7 @@ var Fudge;
             let item;
             item = new Fudge.remote.MenuItem({
                 label: "Add Component",
-                submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.ADD_COMPONENT, ƒ.Component.subclasses, _callback)
+                submenu: Fudge.ContextMenu.getSubclassMenu(Fudge.CONTEXTMENU.ADD_COMPONENT, ƒ.Component, _callback)
             });
             menu.append(item);
             // ContextMenu.appendCopyPaste(menu);

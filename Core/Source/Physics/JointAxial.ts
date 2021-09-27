@@ -3,7 +3,7 @@ namespace FudgeCore {
      * Base class for joints operating with exactly one axis
      * @author Jirka Dell'Oro-Friedl, HFU, 2021
    */
-  export abstract class ComponentJointAxial extends ComponentJoint {
+  export abstract class JointAxial extends Joint {
 
     //Internal Variables
 
