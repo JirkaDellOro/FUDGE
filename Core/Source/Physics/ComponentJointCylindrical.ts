@@ -184,12 +184,12 @@ namespace FudgeCore {
     #getMutator = (): Mutator => {
       let mutator: Mutator = {
         motorForce: this.motorForce,
-        rotorTorque: this.rotorTorque,
-        rotorSpeed: this.rotorSpeed,
+        springDampingRotation: this.springDampingRotation,
+        springFrequencyRotation: this.springFrequencyRotation,
         maxRotor: this.maxRotor,
         minRotor: this.minRotor,
-        springDampingRotation: this.springDampingRotation,
-        springFrequencyRotation: this.springFrequencyRotation
+        rotorTorque: this.rotorTorque,
+        rotorSpeed: this.rotorSpeed
       };
       return mutator;
     }

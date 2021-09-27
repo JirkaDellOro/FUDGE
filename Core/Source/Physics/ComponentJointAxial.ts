@@ -133,8 +133,8 @@ namespace FudgeCore {
 
     public getMutator(): Mutator {
       let mutator: Mutator = super.getMutator();
-      Object.assign(mutator, this.#getMutator());
       mutator.axis = this.axis.getMutator();
+      Object.assign(mutator, this.#getMutator());
       return mutator;
     }
 

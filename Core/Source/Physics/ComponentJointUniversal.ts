@@ -263,7 +263,7 @@ namespace FudgeCore {
         maxRotorSecond: this.#maxRotorSecond,
         minRotorSecond: this.#minRotorSecond,
         rotorSpeedSecond: this.#rotorSpeedSecond,
-        rotorTorqueSecond: this.#rotorTorqueSecond,
+        rotorTorqueSecond: this.#rotorTorqueSecond
       };
       return mutator;
     }

@@ -196,8 +196,10 @@ label {
 
 /* set (details) */
 
-details details {
-  /* border: none; */
+/* details details {
+  padding-left: 1em;
+} */
+details div {
   padding-left: 1em;
 }
 
