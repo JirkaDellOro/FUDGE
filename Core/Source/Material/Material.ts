@@ -5,10 +5,10 @@ namespace FudgeCore {
    */
   export class Material extends Mutable implements SerializableResource {
     /** The name to call the Material by. */
+    #coat: Coat;
     public name: string;
     public idResource: string = undefined;
     private shaderType: typeof Shader; // The shader program used by this BaseMaterial
-    private coat: Coat;
 
     public constructor(_name: string, _shader?: typeof Shader, _coat?: Coat) {
       super();
@@ -16,11 +16,29 @@ namespace FudgeCore {
       this.shaderType = _shader;
       if (_shader) {
         if (_coat)
-          this.setCoat(_coat);
+          this.coat = _coat;
         else
-          this.setCoat(this.createCoatMatchingShader());
+          this.coat = this.createCoatMatchingShader();
       }
       Project.register(this);
+    }
+
+    /**
+     * Returns the currently referenced {@link Coat} instance
+     */
+     public get coat(): Coat {
+      return this.#coat;
+    }
+    /**
+     * Makes this material reference the given {@link Coat} if it is compatible with the referenced {@link Shader}
+     */
+    public set coat(_coat: Coat) {
+      if (_coat.constructor != this.shaderType.getCoat())
+        if (_coat instanceof this.shaderType.getCoat())
+          Debug.fudge("Coat is extension of Coat required by shader");
+        else
+          throw (new Error("Shader and coat don't match"));
+      this.#coat = _coat;
     }
 
     /**
@@ -32,26 +50,6 @@ namespace FudgeCore {
     }
 
     /**
-     * Makes this material reference the given {@link Coat} if it is compatible with the referenced {@link Shader}
-     * @param _coat 
-     */
-    public setCoat(_coat: Coat): void {
-      if (_coat.constructor != this.shaderType.getCoat())
-        if (_coat instanceof this.shaderType.getCoat())
-          Debug.fudge("Coat is extension of Coat required by shader");
-        else
-          throw (new Error("Shader and coat don't match"));
-      this.coat = _coat;
-    }
-
-    /**
-     * Returns the currently referenced {@link Coat} instance
-     */
-    public getCoat(): Coat {
-      return this.coat;
-    }
-
-    /**
      * Changes the materials reference to the given {@link Shader}, creates and references a new {@link Coat} instance  
      * and mutates the new coat to preserve matching properties.
      * @param _shaderType 
@@ -59,8 +57,8 @@ namespace FudgeCore {
     public setShader(_shaderType: typeof Shader): void {
       this.shaderType = _shaderType;
       let coat: Coat = this.createCoatMatchingShader();
-      coat.mutate(this.coat.getMutator());
-      this.setCoat(coat);
+      coat.mutate(this.#coat.getMutator());
+      this.coat = coat;
     }
 
     /**
@@ -78,7 +76,7 @@ namespace FudgeCore {
         name: this.name,
         idResource: this.idResource,
         shader: this.shaderType.name,
-        coat: Serializer.serialize(this.coat)
+        coat: Serializer.serialize(this.#coat)
       };
       return serialization;
     }
@@ -86,9 +84,20 @@ namespace FudgeCore {
       this.name = _serialization.name;
       Project.register(this, _serialization.idResource);
       this.shaderType = (<General>FudgeCore)[_serialization.shader];
-      let coat: Coat = <Coat> await Serializer.deserialize(_serialization.coat);
-      this.setCoat(coat);
+      let coat: Coat = <Coat>await Serializer.deserialize(_serialization.coat);
+      this.coat = coat;
       return this;
+    }
+
+    public getMutator(): Mutator {
+      let mutator: Mutator = super.getMutator(true);
+      mutator.coat = this.coat.getMutator();
+      return mutator;
+    }
+
+    public async mutate(_mutator: Mutator): Promise<void> {
+      await super.mutate(_mutator);
+      await this.coat.mutate(_mutator.coat);
     }
 
     protected reduceMutator(_mutator: Mutator): void {

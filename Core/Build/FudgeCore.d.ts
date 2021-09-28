@@ -2378,25 +2378,23 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class Material extends Mutable implements SerializableResource {
-        /** The name to call the Material by. */
+        #private;
         name: string;
         idResource: string;
         private shaderType;
-        private coat;
         constructor(_name: string, _shader?: typeof Shader, _coat?: Coat);
+        /**
+         * Returns the currently referenced {@link Coat} instance
+         */
+        get coat(): Coat;
+        /**
+         * Makes this material reference the given {@link Coat} if it is compatible with the referenced {@link Shader}
+         */
+        set coat(_coat: Coat);
         /**
          * Creates a new {@link Coat} instance that is valid for the {@link Shader} referenced by this material
          */
         createCoatMatchingShader(): Coat;
-        /**
-         * Makes this material reference the given {@link Coat} if it is compatible with the referenced {@link Shader}
-         * @param _coat
-         */
-        setCoat(_coat: Coat): void;
-        /**
-         * Returns the currently referenced {@link Coat} instance
-         */
-        getCoat(): Coat;
         /**
          * Changes the materials reference to the given {@link Shader}, creates and references a new {@link Coat} instance
          * and mutates the new coat to preserve matching properties.
@@ -2409,6 +2407,8 @@ declare namespace FudgeCore {
         getShader(): typeof Shader;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        getMutator(): Mutator;
+        mutate(_mutator: Mutator): Promise<void>;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
