@@ -2301,14 +2301,13 @@ declare namespace FudgeCore {
      * The method useRenderData will be injected by {@link RenderInjector} at runtime, extending the functionality of this class to deal with the renderer.
      */
     class Coat extends Mutable implements Serializable {
-        name: string;
         protected renderData: {
             [key: string]: unknown;
         };
         useRenderData(_shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
-        protected reduceMutator(): void;
+        protected reduceMutator(_mutator: Mutator): void;
     }
     /**
      * The simplest {@link Coat} providing just a color
@@ -2327,6 +2326,8 @@ declare namespace FudgeCore {
         color: Color;
         shadeSmooth: number;
         constructor(_texture?: TextureImage, _color?: Color, _shadeSmooth?: number);
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 }
 declare namespace FudgeCore {
@@ -5614,6 +5615,7 @@ declare namespace FudgeCore {
         useRenderData(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
         protected reduceMutator(_mutator: Mutator): void;
     }
     /**
