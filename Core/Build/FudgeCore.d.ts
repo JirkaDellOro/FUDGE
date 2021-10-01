@@ -2204,6 +2204,19 @@ declare namespace FudgeCore {
         NUMPAD_PARENT_RIGHT = "NumpadParentRight",
         SLEEP = "Sleep"
     }
+    enum KEYBOARD_CODE_DE {
+        Z = "KeyY",
+        Y = "KeyZ",
+        Ö = "Semicolon",
+        Ä = "Quote",
+        Ü = "BracketLeft",
+        HASH = "Backslash",
+        PLUS = "BracketRight",
+        ß = "Minus",
+        ACUTE = "Equal",
+        LESS_THAN = "IntlBackSlash",
+        MINUS = "Slash"
+    }
 }
 declare namespace FudgeCore {
     const enum EVENT_POINTER {
