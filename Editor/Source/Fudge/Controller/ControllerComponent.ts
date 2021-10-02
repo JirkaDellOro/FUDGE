@@ -36,8 +36,11 @@ namespace Fudge {
 
     private hndKey = (_event: KeyboardEvent): void => {
       _event.stopPropagation();
-      if (_event.code == ƒ.KEYBOARD_CODE.DELETE)
-        this.domElement.dispatchEvent(new CustomEvent(ƒUi.EVENT.DELETE, { bubbles: true, detail: this }));
+      switch (_event.code) {
+        case ƒ.KEYBOARD_CODE.DELETE:
+          this.domElement.dispatchEvent(new CustomEvent(ƒUi.EVENT.DELETE, { bubbles: true, detail: this }));
+          break;
+      }
     }
 
     private hndDragOver = (_event: DragEvent): void => {

@@ -1135,8 +1135,11 @@ var Fudge;
         }
         hndKey = (_event) => {
             _event.stopPropagation();
-            if (_event.code == ƒ.KEYBOARD_CODE.DELETE)
-                this.domElement.dispatchEvent(new CustomEvent("delete" /* DELETE */, { bubbles: true, detail: this }));
+            switch (_event.code) {
+                case ƒ.KEYBOARD_CODE.DELETE:
+                    this.domElement.dispatchEvent(new CustomEvent("delete" /* DELETE */, { bubbles: true, detail: this }));
+                    break;
+            }
         };
         hndDragOver = (_event) => {
             // url on texture
@@ -2327,6 +2330,8 @@ var Fudge;
             this.dom.addEventListener("collapse" /* COLLAPSE */, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.TRANSFORM, this.hndTransform);
+            this.dom.addEventListener("click" /* CLICK */, this.hndEvent, true);
+            this.dom.addEventListener("keydown" /* KEY_DOWN */, this.hndEvent, true);
         }
         //#region  ContextMenu
         getContextMenu(_callback) {
@@ -2394,7 +2399,7 @@ var Fudge;
                         let details = ƒUi.Generator.createDetailsFromMutable(component);
                         let controller = new Fudge.ControllerComponent(component, details);
                         details.expand(this.expanded[component.type]);
-                        this.dom.append(controller.domElement);
+                        this.dom.append(details);
                         if (component instanceof ƒ.ComponentRigidbody) {
                             let pivot = controller.domElement.querySelector("[key=mtxPivot");
                             let opacity = pivot.style.opacity;
@@ -2429,6 +2434,26 @@ var Fudge;
                     this.node.removeComponent(component);
                     this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
                     break;
+                case "keydown" /* KEY_DOWN */:
+                case "click" /* CLICK */:
+                    if (_event instanceof KeyboardEvent && _event.code != ƒ.KEYBOARD_CODE.SPACE)
+                        break;
+                    let target = _event.target;
+                    if (target.tagName == "SUMMARY")
+                        target = target.parentElement;
+                    if (!(_event.target instanceof HTMLDetailsElement || _event.target))
+                        break;
+                    try {
+                        if (this.dom.replaceChild(target, target)) {
+                            if (_event instanceof KeyboardEvent || this.getSelected() != target) {
+                                target.expand(true);
+                                _event.preventDefault();
+                            }
+                            this.select(target);
+                        }
+                    }
+                    catch (_e) { /* */ }
+                    break;
                 case "expand" /* EXPAND */:
                 case "collapse" /* COLLAPSE */:
                     this.expanded[_event.target.getAttribute("type")] = (_event.type == "expand" /* EXPAND */);
@@ -2439,6 +2464,17 @@ var Fudge;
         hndTransform = (_event) => {
             console.log(_event);
         };
+        select(_details) {
+            for (let child of this.dom.children)
+                child.classList.remove("selected");
+            _details.classList.add("selected");
+            _details.focus();
+        }
+        getSelected() {
+            for (let child of this.dom.children)
+                if (child.classList.contains("selected"))
+                    return child;
+        }
         createComponent(_resource) {
             if (_resource instanceof Fudge.ScriptInfo)
                 if (_resource.isComponent)

@@ -34,6 +34,8 @@ namespace Fudge {
       this.dom.addEventListener(ƒUi.EVENT.COLLAPSE, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener(EVENT_EDITOR.TRANSFORM, this.hndTransform);
+      this.dom.addEventListener(ƒUi.EVENT.CLICK, this.hndEvent, true);
+      this.dom.addEventListener(ƒUi.EVENT.KEY_DOWN, this.hndEvent, true);
     }
 
     //#region  ContextMenu
@@ -111,7 +113,7 @@ namespace Fudge {
             let details: ƒUi.Details = ƒUi.Generator.createDetailsFromMutable(component);
             let controller: ControllerComponent = new ControllerComponent(component, details);
             details.expand(this.expanded[component.type]);
-            this.dom.append(controller.domElement);
+            this.dom.append(details);
             if (component instanceof ƒ.ComponentRigidbody) {
               let pivot: HTMLElement = controller.domElement.querySelector("[key=mtxPivot");
               let opacity: string = pivot.style.opacity;
@@ -147,6 +149,25 @@ namespace Fudge {
           this.node.removeComponent(component);
           this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
           break;
+        case ƒUi.EVENT.KEY_DOWN:
+        case ƒUi.EVENT.CLICK:
+          if (_event instanceof KeyboardEvent && _event.code != ƒ.KEYBOARD_CODE.SPACE)
+            break;
+          let target: ƒUi.Details = <ƒUi.Details>_event.target;
+          if (target.tagName == "SUMMARY")
+            target = <ƒUi.Details>target.parentElement;
+          if (!(_event.target instanceof HTMLDetailsElement || (<HTMLElement>_event.target)))
+            break;
+          try {
+            if (this.dom.replaceChild(target, target)) {
+              if (_event instanceof KeyboardEvent || this.getSelected() != target){
+                target.expand(true);
+                _event.preventDefault();
+              }
+              this.select(target);
+            }
+          } catch (_e: unknown) { /* */ }
+          break;
         case ƒUi.EVENT.EXPAND:
         case ƒUi.EVENT.COLLAPSE:
           this.expanded[(<ƒUi.Details>_event.target).getAttribute("type")] = (_event.type == ƒUi.EVENT.EXPAND);
@@ -157,6 +178,19 @@ namespace Fudge {
 
     private hndTransform = (_event: CustomEvent): void => {
       console.log(_event);
+    }
+
+    private select(_details: ƒUi.Details): void {
+      for (let child of this.dom.children)
+        child.classList.remove("selected");
+      _details.classList.add("selected");
+      _details.focus();
+    }
+
+    private getSelected(): ƒUi.Details {
+      for (let child of this.dom.children)
+        if (child.classList.contains("selected"))
+          return <ƒUi.Details>child;
     }
 
     private createComponent(_resource: Object): ƒ.Component {

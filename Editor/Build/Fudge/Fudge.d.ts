@@ -480,6 +480,8 @@ declare namespace Fudge {
         private fillContent;
         private hndEvent;
         private hndTransform;
+        private select;
+        private getSelected;
         private createComponent;
         private findComponentType;
     }
