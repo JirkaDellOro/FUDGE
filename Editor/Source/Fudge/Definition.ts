@@ -8,7 +8,10 @@ namespace Fudge {
     CREATE_MESH,
     CREATE_MATERIAL,
     CREATE_GRAPH,
-    REMOVE_COMPONENT
+    REMOVE_COMPONENT,
+    TRANSLATE,
+    ROTATE,
+    SCALE
   }
 
   export enum MENU {
@@ -34,7 +37,8 @@ namespace Fudge {
     SET_PROJECT = "setProject",
     UPDATE = "update",
     DESTROY = "destroy",
-    CLEAR_PROJECT = "clearProject"
+    CLEAR_PROJECT = "clearProject",
+    TRANSFORM = "transform"
     /* obsolete ?
     REMOVE = "removeNode",
     HIDE = "hideNode",
@@ -62,5 +66,11 @@ namespace Fudge {
     
     // SKETCH = ViewSketch,
     // MESH = ViewMesh,
+  }
+
+  export enum TRANSFORM {
+    TRANSLATE = "translate",
+    ROTATE = "rotate",
+    SCALE = "scale"
   }
 }

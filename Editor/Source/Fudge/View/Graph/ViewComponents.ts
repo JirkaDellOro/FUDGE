@@ -33,6 +33,7 @@ namespace Fudge {
       this.dom.addEventListener(ƒUi.EVENT.EXPAND, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.COLLAPSE, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
+      this.dom.addEventListener(EVENT_EDITOR.TRANSFORM, this.hndTransform);
     }
 
     //#region  ContextMenu
@@ -152,6 +153,10 @@ namespace Fudge {
         default:
           break;
       }
+    }
+
+    private hndTransform = (_event: CustomEvent): void => {
+      console.log(_event);
     }
 
     private createComponent(_resource: Object): ƒ.Component {

@@ -25,6 +25,7 @@ namespace Fudge {
    */
   export class Page {
     public static goldenLayoutModule: ƒ.General = (globalThis as ƒ.General).goldenLayout;  // ƒ.General is synonym for any... hack to get GoldenLayout to work
+    public static modeTransform: TRANSFORM = TRANSFORM.TRANSLATE;
     private static idCounter: number = 0;
     private static goldenLayout: GoldenLayout;
     private static panels: Panel[] = [];
@@ -48,6 +49,11 @@ namespace Fudge {
       let panelInfos: PanelInfo[] = JSON.parse(_panelInfos);
       for (let panelInfo of panelInfos)
         Page.add(Fudge[panelInfo.type], panelInfo.state);
+    }
+
+    public static setTransform(_mode: TRANSFORM): void {
+      Page.modeTransform = _mode;
+      ƒ.Debug.fudge(`Transform mode: ${_mode}`);
     }
 
     // called by windows load-listener
@@ -134,6 +140,7 @@ namespace Fudge {
       document.addEventListener(ƒui.EVENT.MUTATE, Page.hndEvent);
       document.addEventListener(EVENT_EDITOR.UPDATE, Page.hndEvent);
       document.addEventListener(EVENT_EDITOR.DESTROY, Page.hndEvent);
+      document.addEventListener("keyup", Page.hndKey);
     }
 
     /** Send custom copies of the given event to the views */
@@ -141,6 +148,23 @@ namespace Fudge {
       for (let panel of Page.panels) {
         let event: CustomEvent = new CustomEvent(_event.type, { bubbles: false, cancelable: true, detail: (<CustomEvent>_event).detail });
         panel.dom.dispatchEvent(event);
+      }
+    }
+
+    private static hndKey = (_event: KeyboardEvent): void => {
+      document.exitPointerLock();
+      
+      switch (_event.code) {
+        case ƒ.KEYBOARD_CODE.T:
+          Page.setTransform(TRANSFORM.TRANSLATE);
+          break;
+        case ƒ.KEYBOARD_CODE.R:
+          Page.setTransform(TRANSFORM.ROTATE);
+          break;
+        case ƒ.KEYBOARD_CODE.E:
+          // TODO: don't switch to scale mode when using fly-camera and pressing E
+          Page.setTransform(TRANSFORM.SCALE);
+          break;
       }
     }
 

@@ -17,6 +17,12 @@ namespace Fudge {
       super(_container, _state);
       this.graph = <ƒ.Graph>ƒ.Project.resources[_state["graph"]];
       this.createUserInterface();
+      
+      let title: string = "● Use mousebuttons and ctrl-, shift- or alt-key to navigate view.\n";
+      title += "● Click to select node, rightclick to select transformations.\n";
+      title += "● Hold X, Y or Z to transform.Add shift - key to restrict to remaining axis.";
+      this.dom.title = title;
+      this.dom.tabIndex = 0;
 
       _container.on("resize", this.redraw);
       this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent);
@@ -26,6 +32,8 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent, true);
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
+      this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
+      this.dom.addEventListener("pointermove", this.hndPointer);
     }
 
     createUserInterface(): void {
@@ -70,6 +78,32 @@ namespace Fudge {
       this.viewport.setBranch(this.graph);
       this.redraw();
     }
+
+    //#region  ContextMenu
+    protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
+      const menu: Electron.Menu = new remote.Menu();
+      let item: Electron.MenuItem;
+
+      item = new remote.MenuItem({ label: "Translate", id: TRANSFORM.TRANSLATE, click: _callback, accelerator: process.platform == "darwin" ? "T" : "T" });
+      menu.append(item);
+      item = new remote.MenuItem({ label: "Rotate", id: TRANSFORM.ROTATE, click: _callback, accelerator: process.platform == "darwin" ? "R" : "R" });
+      menu.append(item);
+      item = new remote.MenuItem({ label: "Scale", id: TRANSFORM.SCALE, click: _callback, accelerator: process.platform == "darwin" ? "E" : "E" });
+      menu.append(item);
+      return menu;
+    }
+
+    protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
+      ƒ.Debug.info(`MenuSelect: Item-id=${CONTEXTMENU[_item.id]}`);
+
+      switch (_item.id) {
+        case TRANSFORM.TRANSLATE:
+        case TRANSFORM.ROTATE:
+        case TRANSFORM.SCALE:
+          Page.setTransform(_item.id);
+      }
+    }
+    //#endregion
 
     protected hndDragOver(_event: DragEvent, _viewSource: View): void {
       _event.dataTransfer.dropEffect = "none";
@@ -125,6 +159,25 @@ namespace Fudge {
     //   if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
     //     this.viewport.draw();
     // }
+
+    private hndPointer = (_event: PointerEvent): void => {
+      this.dom.focus();
+      let restriction: string;
+      if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.X]))
+        restriction = "x";
+      else if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.Y]))
+        restriction = "z";
+      else if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.Z]))
+        restriction = "y";
+
+      if (!restriction)
+        return;
+
+      this.canvas.requestPointerLock();
+      this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.TRANSFORM, {
+        bubbles: true, detail: {transform: Page.modeTransform, restriction: restriction, x: _event.movementX, y: _event.movementY }
+      }));
+    }
 
     private activeViewport = (_event: MouseEvent): void => {
       // let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });

@@ -11,6 +11,9 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["CREATE_MATERIAL"] = 5] = "CREATE_MATERIAL";
         CONTEXTMENU[CONTEXTMENU["CREATE_GRAPH"] = 6] = "CREATE_GRAPH";
         CONTEXTMENU[CONTEXTMENU["REMOVE_COMPONENT"] = 7] = "REMOVE_COMPONENT";
+        CONTEXTMENU[CONTEXTMENU["TRANSLATE"] = 8] = "TRANSLATE";
+        CONTEXTMENU[CONTEXTMENU["ROTATE"] = 9] = "ROTATE";
+        CONTEXTMENU[CONTEXTMENU["SCALE"] = 10] = "SCALE";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -36,6 +39,7 @@ var Fudge;
         EVENT_EDITOR["UPDATE"] = "update";
         EVENT_EDITOR["DESTROY"] = "destroy";
         EVENT_EDITOR["CLEAR_PROJECT"] = "clearProject";
+        EVENT_EDITOR["TRANSFORM"] = "transform";
         /* obsolete ?
         REMOVE = "removeNode",
         HIDE = "hideNode",
@@ -62,6 +66,12 @@ var Fudge;
         // SKETCH = ViewSketch,
         // MESH = ViewMesh,
     })(VIEW = Fudge.VIEW || (Fudge.VIEW = {}));
+    let TRANSFORM;
+    (function (TRANSFORM) {
+        TRANSFORM["TRANSLATE"] = "translate";
+        TRANSFORM["ROTATE"] = "rotate";
+        TRANSFORM["SCALE"] = "scale";
+    })(TRANSFORM = Fudge.TRANSFORM || (Fudge.TRANSFORM = {}));
 })(Fudge || (Fudge = {}));
 ///<reference types="../../node_modules/electron"/>
 /**
