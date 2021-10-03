@@ -2401,6 +2401,7 @@ var Fudge;
                     for (let component of components) {
                         let details = ƒUi.Generator.createDetailsFromMutable(component);
                         let controller = new Fudge.ControllerComponent(component, details);
+                        Reflect.set(details, "controller", controller); // insert a link back to the controller
                         details.expand(this.expanded[component.type]);
                         this.dom.append(details);
                         if (component instanceof ƒ.ComponentRigidbody) {
@@ -2465,6 +2466,13 @@ var Fudge;
             }
         };
         hndTransform = (_event) => {
+            if (!this.getSelected())
+                return;
+            let controller = Reflect.get(this.getSelected(), "controller");
+            let component = controller.getMutable();
+            let mtxTransform = Reflect.get(component, "mtxLocal") || Reflect.get(component, "mtxPivot");
+            if (!mtxTransform)
+                return;
             let dtl = _event.detail;
             let mtxCamera = dtl.camera.node.mtxWorld;
             let distance = mtxCamera.getTranslationTo(this.node.mtxWorld).magnitude;
@@ -2476,30 +2484,59 @@ var Fudge;
             value.z = (dtl.restriction == "z" ? !dtl.inverted : dtl.inverted) ?
                 ((value.x == undefined) ? -dtl.y : dtl.x) : undefined;
             value = value.map((_c) => _c || 0);
-            switch (dtl.transform) {
+            if (mtxTransform instanceof ƒ.Matrix4x4)
+                this.transform3(dtl.transform, value, mtxTransform, distance);
+            if (mtxTransform instanceof ƒ.Matrix3x3)
+                this.transform2(dtl.transform, value.toVector2(), mtxTransform, distance);
+        };
+        transform3(_transform, _value, _mtxTransform, _distance) {
+            switch (_transform) {
                 case Fudge.TRANSFORM.TRANSLATE:
                     let factorTranslation = 0.001; // TODO: eliminate magic numbers
-                    value.scale(factorTranslation * distance);
-                    let translation = this.node.mtxLocal.translation;
-                    translation.add(value);
-                    this.node.mtxLocal.translation = translation;
+                    _value.scale(factorTranslation * _distance);
+                    let translation = _mtxTransform.translation;
+                    translation.add(_value);
+                    _mtxTransform.translation = translation;
                     break;
                 case Fudge.TRANSFORM.ROTATE:
                     let factorRotation = 1; // TODO: eliminate magic numbers
-                    value.scale(factorRotation);
-                    let rotation = this.node.mtxLocal.rotation;
-                    rotation.add(value);
-                    this.node.mtxLocal.rotation = rotation;
+                    _value.scale(factorRotation);
+                    let rotation = _mtxTransform.rotation;
+                    rotation.add(_value);
+                    _mtxTransform.rotation = rotation;
                     break;
                 case Fudge.TRANSFORM.SCALE:
                     let factorScaling = 0.001; // TODO: eliminate magic numbers
-                    value.scale(factorScaling);
-                    let scaling = this.node.mtxLocal.scaling;
-                    scaling.add(value);
-                    this.node.mtxLocal.scaling = scaling;
+                    _value.scale(factorScaling);
+                    let scaling = _mtxTransform.scaling;
+                    scaling.add(_value);
+                    _mtxTransform.scaling = scaling;
                     break;
             }
-        };
+        }
+        transform2(_transform, _value, _mtxTransform, _distance) {
+            switch (_transform) {
+                case Fudge.TRANSFORM.TRANSLATE:
+                    let factorTranslation = 0.001; // TODO: eliminate magic numbers
+                    _value.scale(factorTranslation * _distance);
+                    let translation = _mtxTransform.translation;
+                    translation.add(_value);
+                    _mtxTransform.translation = translation;
+                    break;
+                case Fudge.TRANSFORM.ROTATE:
+                    let factorRotation = 1; // TODO: eliminate magic numbers
+                    _value.scale(factorRotation);
+                    _mtxTransform.rotation += _value.x;
+                    break;
+                case Fudge.TRANSFORM.SCALE:
+                    let factorScaling = 0.001; // TODO: eliminate magic numbers
+                    _value.scale(factorScaling);
+                    let scaling = _mtxTransform.scaling;
+                    scaling.add(_value);
+                    _mtxTransform.scaling = scaling;
+                    break;
+            }
+        }
         select(_details) {
             for (let child of this.dom.children)
                 child.classList.remove("selected");

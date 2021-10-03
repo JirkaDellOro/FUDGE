@@ -18,7 +18,7 @@ namespace FudgeUserInterface {
     public static register(_tagName: string): void {
       for (let template of document.querySelectorAll("template")) {
         if (template.content.firstElementChild.localName == _tagName) {
-          ƒ.Debug.fudge("Register", template);
+          ƒ.Debug.fudge("Register", template.content.children[0]);
           CustomElementTemplate.fragment.set(_tagName, template.content);
         }
       }

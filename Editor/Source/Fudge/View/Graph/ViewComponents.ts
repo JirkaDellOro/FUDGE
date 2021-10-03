@@ -112,6 +112,7 @@ namespace Fudge {
           for (let component of components) {
             let details: ƒUi.Details = ƒUi.Generator.createDetailsFromMutable(component);
             let controller: ControllerComponent = new ControllerComponent(component, details);
+            Reflect.set(details, "controller", controller); // insert a link back to the controller
             details.expand(this.expanded[component.type]);
             this.dom.append(details);
             if (component instanceof ƒ.ComponentRigidbody) {
@@ -177,6 +178,15 @@ namespace Fudge {
     }
 
     private hndTransform = (_event: CustomEvent): void => {
+      if (!this.getSelected())
+        return;
+
+      let controller: ControllerComponent = Reflect.get(this.getSelected(), "controller");
+      let component: ƒ.Component = <ƒ.Component>controller.getMutable();
+      let mtxTransform: ƒ.Matrix4x4 = Reflect.get(component, "mtxLocal") || Reflect.get(component, "mtxPivot");
+      if (!mtxTransform)
+        return;
+
       let dtl: ƒ.General = _event.detail;
       let mtxCamera: ƒ.Matrix4x4 = (<ƒ.ComponentCamera>dtl.camera).node.mtxWorld;
       let distance: number = mtxCamera.getTranslationTo(this.node.mtxWorld).magnitude;
@@ -190,27 +200,58 @@ namespace Fudge {
         ((value.x == undefined) ? -dtl.y : dtl.x) : undefined;
       value = value.map((_c: number) => _c || 0);
 
-      switch (dtl.transform) {
+      if (mtxTransform instanceof ƒ.Matrix4x4)
+        this.transform3(dtl.transform, value, mtxTransform, distance);
+      if (mtxTransform instanceof ƒ.Matrix3x3)
+        this.transform2(dtl.transform, value.toVector2(), mtxTransform, distance);
+    }
+
+    private transform3(_transform: TRANSFORM, _value: ƒ.Vector3, _mtxTransform: ƒ.Matrix4x4, _distance: number): void {
+      switch (_transform) {
         case TRANSFORM.TRANSLATE:
           let factorTranslation: number = 0.001; // TODO: eliminate magic numbers
-          value.scale(factorTranslation * distance);
-          let translation: ƒ.Vector3 = this.node.mtxLocal.translation;
-          translation.add(value);
-          this.node.mtxLocal.translation = translation;
+          _value.scale(factorTranslation * _distance);
+          let translation: ƒ.Vector3 = _mtxTransform.translation;
+          translation.add(_value);
+          _mtxTransform.translation = translation;
           break;
         case TRANSFORM.ROTATE:
           let factorRotation: number = 1; // TODO: eliminate magic numbers
-          value.scale(factorRotation);
-          let rotation: ƒ.Vector3 = this.node.mtxLocal.rotation;
-          rotation.add(value);
-          this.node.mtxLocal.rotation = rotation;
+          _value.scale(factorRotation);
+          let rotation: ƒ.Vector3 = _mtxTransform.rotation;
+          rotation.add(_value);
+          _mtxTransform.rotation = rotation;
           break;
         case TRANSFORM.SCALE:
           let factorScaling: number = 0.001; // TODO: eliminate magic numbers
-          value.scale(factorScaling);
-          let scaling: ƒ.Vector3 = this.node.mtxLocal.scaling;
-          scaling.add(value);
-          this.node.mtxLocal.scaling = scaling;
+          _value.scale(factorScaling);
+          let scaling: ƒ.Vector3 = _mtxTransform.scaling;
+          scaling.add(_value);
+          _mtxTransform.scaling = scaling;
+          break;
+      }
+    }
+    
+    private transform2(_transform: TRANSFORM, _value: ƒ.Vector2,  _mtxTransform: ƒ.Matrix3x3, _distance: number): void {
+      switch (_transform) {
+        case TRANSFORM.TRANSLATE:
+          let factorTranslation: number = 0.001; // TODO: eliminate magic numbers
+          _value.scale(factorTranslation * _distance);
+          let translation: ƒ.Vector2 = _mtxTransform.translation;
+          translation.add(_value);
+          _mtxTransform.translation = translation;
+          break;
+        case TRANSFORM.ROTATE:
+          let factorRotation: number = 1; // TODO: eliminate magic numbers
+          _value.scale(factorRotation);
+          _mtxTransform.rotation += _value.x;
+          break;
+        case TRANSFORM.SCALE:
+          let factorScaling: number = 0.001; // TODO: eliminate magic numbers
+          _value.scale(factorScaling);
+          let scaling: ƒ.Vector2 = _mtxTransform.scaling;
+          scaling.add(_value);
+          _mtxTransform.scaling = scaling;
           break;
       }
     }
