@@ -2465,16 +2465,40 @@ var Fudge;
             }
         };
         hndTransform = (_event) => {
-            let mtxCamera = _event.detail.camera.node.mtxWorld;
+            let dtl = _event.detail;
+            let mtxCamera = dtl.camera.node.mtxWorld;
             let distance = mtxCamera.getTranslationTo(this.node.mtxWorld).magnitude;
-            let factorTranslation = 0.001; // TODO: eliminate magic numbers
-            let factorRotation = 1; // TODO: eliminate magic numbers
-            let factorScaling = 0.001; // TODO: eliminate magic numbers
-            let scaling = this.node.mtxLocal.scaling;
-            scaling.x += _event.detail.x * factorScaling;
-            this.node.mtxLocal.scaling = scaling;
-            // this.node.mtxLocal.rotateX(_event.detail.y * factorRotation);
-            // this.node.mtxLocal.translateX(_event.detail.x * distance * factorTranslation);
+            if (dtl.transform == Fudge.TRANSFORM.ROTATE)
+                [dtl.x, dtl.y] = [dtl.y, dtl.x];
+            let value = new ƒ.Vector3();
+            value.x = (dtl.restriction == "x" ? !dtl.inverted : dtl.inverted) ? dtl.x : undefined;
+            value.y = (dtl.restriction == "y" ? !dtl.inverted : dtl.inverted) ? -dtl.y : undefined;
+            value.z = (dtl.restriction == "z" ? !dtl.inverted : dtl.inverted) ?
+                ((value.x == undefined) ? -dtl.y : dtl.x) : undefined;
+            value = value.map((_c) => _c || 0);
+            switch (dtl.transform) {
+                case Fudge.TRANSFORM.TRANSLATE:
+                    let factorTranslation = 0.001; // TODO: eliminate magic numbers
+                    value.scale(factorTranslation * distance);
+                    let translation = this.node.mtxLocal.translation;
+                    translation.add(value);
+                    this.node.mtxLocal.translation = translation;
+                    break;
+                case Fudge.TRANSFORM.ROTATE:
+                    let factorRotation = 1; // TODO: eliminate magic numbers
+                    value.scale(factorRotation);
+                    let rotation = this.node.mtxLocal.rotation;
+                    rotation.add(value);
+                    this.node.mtxLocal.rotation = rotation;
+                    break;
+                case Fudge.TRANSFORM.SCALE:
+                    let factorScaling = 0.001; // TODO: eliminate magic numbers
+                    value.scale(factorScaling);
+                    let scaling = this.node.mtxLocal.scaling;
+                    scaling.add(value);
+                    this.node.mtxLocal.scaling = scaling;
+                    break;
+            }
         };
         select(_details) {
             for (let child of this.dom.children)
@@ -2796,7 +2820,7 @@ var Fudge;
                 return;
             this.canvas.requestPointerLock();
             let detail = {
-                transform: Fudge.Page.modeTransform, restriction: restriction, x: _event.movementX, y: _event.movementY, camera: this.viewport.camera
+                transform: Fudge.Page.modeTransform, restriction: restriction, x: _event.movementX, y: _event.movementY, camera: this.viewport.camera, inverted: _event.shiftKey
             };
             this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.TRANSFORM, { bubbles: true, detail: detail }));
             this.redraw();

@@ -177,7 +177,7 @@ namespace Fudge {
 
       this.canvas.requestPointerLock();
       let detail: Object = {
-        transform: Page.modeTransform, restriction: restriction, x: _event.movementX, y: _event.movementY, camera: this.viewport.camera
+        transform: Page.modeTransform, restriction: restriction, x: _event.movementX, y: _event.movementY, camera: this.viewport.camera, inverted: _event.shiftKey
       };
       this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.TRANSFORM, { bubbles: true, detail: detail }));
       this.redraw();

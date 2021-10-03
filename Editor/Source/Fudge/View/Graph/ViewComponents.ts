@@ -177,16 +177,42 @@ namespace Fudge {
     }
 
     private hndTransform = (_event: CustomEvent): void => {
-      let mtxCamera: ƒ.Matrix4x4 = (<ƒ.ComponentCamera>_event.detail.camera).node.mtxWorld;
+      let dtl: ƒ.General = _event.detail;
+      let mtxCamera: ƒ.Matrix4x4 = (<ƒ.ComponentCamera>dtl.camera).node.mtxWorld;
       let distance: number = mtxCamera.getTranslationTo(this.node.mtxWorld).magnitude;
-      let factorTranslation: number = 0.001; // TODO: eliminate magic numbers
-      let factorRotation: number = 1; // TODO: eliminate magic numbers
-      let factorScaling: number = 0.001; // TODO: eliminate magic numbers
-      let scaling: ƒ.Vector3 = this.node.mtxLocal.scaling;
-      scaling.x += _event.detail.x * factorScaling;
-      this.node.mtxLocal.scaling = scaling;
-      // this.node.mtxLocal.rotateX(_event.detail.y * factorRotation);
-      // this.node.mtxLocal.translateX(_event.detail.x * distance * factorTranslation);
+      if (dtl.transform == TRANSFORM.ROTATE)
+        [dtl.x, dtl.y] = [dtl.y, dtl.x];
+
+      let value: ƒ.Vector3 = new ƒ.Vector3();
+      value.x = (dtl.restriction == "x" ? !dtl.inverted : dtl.inverted) ? dtl.x : undefined;
+      value.y = (dtl.restriction == "y" ? !dtl.inverted : dtl.inverted) ? -dtl.y : undefined;
+      value.z = (dtl.restriction == "z" ? !dtl.inverted : dtl.inverted) ?
+        ((value.x == undefined) ? -dtl.y : dtl.x) : undefined;
+      value = value.map((_c: number) => _c || 0);
+
+      switch (dtl.transform) {
+        case TRANSFORM.TRANSLATE:
+          let factorTranslation: number = 0.001; // TODO: eliminate magic numbers
+          value.scale(factorTranslation * distance);
+          let translation: ƒ.Vector3 = this.node.mtxLocal.translation;
+          translation.add(value);
+          this.node.mtxLocal.translation = translation;
+          break;
+        case TRANSFORM.ROTATE:
+          let factorRotation: number = 1; // TODO: eliminate magic numbers
+          value.scale(factorRotation);
+          let rotation: ƒ.Vector3 = this.node.mtxLocal.rotation;
+          rotation.add(value);
+          this.node.mtxLocal.rotation = rotation;
+          break;
+        case TRANSFORM.SCALE:
+          let factorScaling: number = 0.001; // TODO: eliminate magic numbers
+          value.scale(factorScaling);
+          let scaling: ƒ.Vector3 = this.node.mtxLocal.scaling;
+          scaling.add(value);
+          this.node.mtxLocal.scaling = scaling;
+          break;
+      }
     }
 
     private select(_details: ƒUi.Details): void {
