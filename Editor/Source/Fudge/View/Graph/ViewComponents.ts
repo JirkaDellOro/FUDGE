@@ -160,7 +160,7 @@ namespace Fudge {
             break;
           try {
             if (this.dom.replaceChild(target, target)) {
-              if (_event instanceof KeyboardEvent || this.getSelected() != target){
+              if (_event instanceof KeyboardEvent || this.getSelected() != target) {
                 target.expand(true);
                 _event.preventDefault();
               }
@@ -177,7 +177,16 @@ namespace Fudge {
     }
 
     private hndTransform = (_event: CustomEvent): void => {
-      console.log(_event);
+      let mtxCamera: ƒ.Matrix4x4 = (<ƒ.ComponentCamera>_event.detail.camera).node.mtxWorld;
+      let distance: number = mtxCamera.getTranslationTo(this.node.mtxWorld).magnitude;
+      let factorTranslation: number = 0.001; // TODO: eliminate magic numbers
+      let factorRotation: number = 1; // TODO: eliminate magic numbers
+      let factorScaling: number = 0.001; // TODO: eliminate magic numbers
+      let scaling: ƒ.Vector3 = this.node.mtxLocal.scaling;
+      scaling.x += _event.detail.x * factorScaling;
+      this.node.mtxLocal.scaling = scaling;
+      // this.node.mtxLocal.rotateX(_event.detail.y * factorRotation);
+      // this.node.mtxLocal.translateX(_event.detail.x * distance * factorTranslation);
     }
 
     private select(_details: ƒUi.Details): void {

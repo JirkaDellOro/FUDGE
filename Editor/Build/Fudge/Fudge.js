@@ -61,6 +61,7 @@ var Fudge;
         EVENT_EDITOR["FOCUS_NODE"] = "focusNode";
         EVENT_EDITOR["SET_PROJECT"] = "setProject";
         EVENT_EDITOR["UPDATE"] = "update";
+        EVENT_EDITOR["REFRESH"] = "refresh";
         EVENT_EDITOR["DESTROY"] = "destroy";
         EVENT_EDITOR["CLEAR_PROJECT"] = "clearProject";
         EVENT_EDITOR["TRANSFORM"] = "transform";
@@ -1574,6 +1575,8 @@ var Fudge;
                 case Fudge.EVENT_EDITOR.SET_GRAPH:
                     this.setGraph(_event.detail);
                     break;
+                case Fudge.EVENT_EDITOR.REFRESH:
+                    console.log("Refresh");
                 case Fudge.EVENT_EDITOR.SET_PROJECT:
                 case Fudge.EVENT_EDITOR.UPDATE:
                     // TODO: meaningful difference between update and setgraph
@@ -2462,7 +2465,16 @@ var Fudge;
             }
         };
         hndTransform = (_event) => {
-            console.log(_event);
+            let mtxCamera = _event.detail.camera.node.mtxWorld;
+            let distance = mtxCamera.getTranslationTo(this.node.mtxWorld).magnitude;
+            let factorTranslation = 0.001; // TODO: eliminate magic numbers
+            let factorRotation = 1; // TODO: eliminate magic numbers
+            let factorScaling = 0.001; // TODO: eliminate magic numbers
+            let scaling = this.node.mtxLocal.scaling;
+            scaling.x += _event.detail.x * factorScaling;
+            this.node.mtxLocal.scaling = scaling;
+            // this.node.mtxLocal.rotateX(_event.detail.y * factorRotation);
+            // this.node.mtxLocal.translateX(_event.detail.x * distance * factorTranslation);
         };
         select(_details) {
             for (let child of this.dom.children)
@@ -2651,12 +2663,13 @@ var Fudge;
             this.createUserInterface();
             let title = "● Use mousebuttons and ctrl-, shift- or alt-key to navigate view.\n";
             title += "● Click to select node, rightclick to select transformations.\n";
-            title += "● Hold X, Y or Z to transform.Add shift - key to restrict to remaining axis.";
+            title += "● Hold X, Y or Z to transform. Add shift-key to invert restriction.";
             this.dom.title = title;
             this.dom.tabIndex = 0;
             _container.on("resize", this.redraw);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.REFRESH, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener("delete" /* DELETE */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent, true);
@@ -2756,6 +2769,7 @@ var Fudge;
                 case "mutate" /* MUTATE */:
                 case "delete" /* DELETE */:
                 case Fudge.EVENT_EDITOR.UPDATE:
+                case Fudge.EVENT_EDITOR.REFRESH:
                     this.redraw();
             }
         };
@@ -2781,9 +2795,11 @@ var Fudge;
             if (!restriction)
                 return;
             this.canvas.requestPointerLock();
-            this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.TRANSFORM, {
-                bubbles: true, detail: { transform: Fudge.Page.modeTransform, restriction: restriction, x: _event.movementX, y: _event.movementY }
-            }));
+            let detail = {
+                transform: Fudge.Page.modeTransform, restriction: restriction, x: _event.movementX, y: _event.movementY, camera: this.viewport.camera
+            };
+            this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.TRANSFORM, { bubbles: true, detail: detail }));
+            this.redraw();
         };
         activeViewport = (_event) => {
             // let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });

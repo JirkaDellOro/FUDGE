@@ -42,6 +42,7 @@ declare namespace Fudge {
         FOCUS_NODE = "focusNode",
         SET_PROJECT = "setProject",
         UPDATE = "update",
+        REFRESH = "refresh",
         DESTROY = "destroy",
         CLEAR_PROJECT = "clearProject",
         TRANSFORM = "transform"

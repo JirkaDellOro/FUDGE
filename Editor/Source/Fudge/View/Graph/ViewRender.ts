@@ -17,16 +17,17 @@ namespace Fudge {
       super(_container, _state);
       this.graph = <ƒ.Graph>ƒ.Project.resources[_state["graph"]];
       this.createUserInterface();
-      
+
       let title: string = "● Use mousebuttons and ctrl-, shift- or alt-key to navigate view.\n";
       title += "● Click to select node, rightclick to select transformations.\n";
-      title += "● Hold X, Y or Z to transform.Add shift - key to restrict to remaining axis.";
+      title += "● Hold X, Y or Z to transform. Add shift-key to invert restriction.";
       this.dom.title = title;
       this.dom.tabIndex = 0;
 
       _container.on("resize", this.redraw);
       this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.REFRESH, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent, true);
@@ -143,6 +144,7 @@ namespace Fudge {
         case ƒUi.EVENT.MUTATE:
         case ƒUi.EVENT.DELETE:
         case EVENT_EDITOR.UPDATE:
+        case EVENT_EDITOR.REFRESH:
           this.redraw();
       }
     }
@@ -174,9 +176,11 @@ namespace Fudge {
         return;
 
       this.canvas.requestPointerLock();
-      this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.TRANSFORM, {
-        bubbles: true, detail: {transform: Page.modeTransform, restriction: restriction, x: _event.movementX, y: _event.movementY }
-      }));
+      let detail: Object = {
+        transform: Page.modeTransform, restriction: restriction, x: _event.movementX, y: _event.movementY, camera: this.viewport.camera
+      };
+      this.dom.dispatchEvent(new CustomEvent(EVENT_EDITOR.TRANSFORM, { bubbles: true, detail: detail }));
+      this.redraw();
     }
 
     private activeViewport = (_event: MouseEvent): void => {
