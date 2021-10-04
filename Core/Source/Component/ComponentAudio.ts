@@ -315,8 +315,9 @@ namespace FudgeCore {
       this.panner.orientationZ.value = forward.z;
 
       Recycler.store(forward);
-      if (this.node)
-        Recycler.store(mtxResult);
+      // TODO: examine why the following produces erroneous results, see test "Spatial Audio"
+      // if (this.node)
+      //   Recycler.store(mtxResult);
     }
   }
 }
