@@ -132,7 +132,7 @@ namespace FudgeCore {
       return this.vectors.translation; // .clone;
     }
     public set translation(_translation: Vector2) {
-      this.data.set(_translation.get(), 12);
+      this.data.set(_translation.get(), 6);
       // no full cache reset required
       this.vectors.translation = _translation;
       this.mutator = null;

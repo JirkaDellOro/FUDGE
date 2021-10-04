@@ -247,7 +247,7 @@ namespace FudgeCore {
         let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
         let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
 
-        let coat: Coat = cmpMaterial.material.getCoat();
+        let coat: Coat = cmpMaterial.material.coat;
         let shader: typeof Shader = coat instanceof CoatTextured ? ShaderPickTextured : ShaderPick;
 
         shader.useProgram();
@@ -316,7 +316,7 @@ namespace FudgeCore {
      */
     protected static drawMesh(_cmpMesh: ComponentMesh, cmpMaterial: ComponentMaterial, _mtxMeshToWorld: Matrix4x4, _mtxWorldToView: Matrix4x4): void {
       let shader: typeof Shader = cmpMaterial.material.getShader();
-      let coat: Coat = cmpMaterial.material.getCoat();
+      let coat: Coat = cmpMaterial.material.coat;
       shader.useProgram();
       _cmpMesh.mesh.useRenderBuffers(shader, _mtxMeshToWorld, _mtxWorldToView);
       coat.useRenderData(shader, cmpMaterial);

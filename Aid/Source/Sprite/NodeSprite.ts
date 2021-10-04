@@ -48,7 +48,7 @@ namespace FudgeAid {
       let spriteFrame: SpriteFrame = this.animation.frames[_index];
       this.cmpMesh.mtxPivot = spriteFrame.mtxPivot;
       this.cmpMaterial.mtxPivot = spriteFrame.mtxTexture;
-      this.cmpMaterial.material.setCoat(this.animation.spritesheet);
+      this.cmpMaterial.material.coat = this.animation.spritesheet;
       this.frameCurrent = _index;
       this.timer = ƒ.Time.game.setTimer(spriteFrame.timeScale * 1000 / this.framerate, 1, this.showFrameNext);
     }

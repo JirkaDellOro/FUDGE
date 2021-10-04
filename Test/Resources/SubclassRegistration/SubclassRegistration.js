@@ -2,9 +2,10 @@ var SubclassRegistration;
 (function (SubclassRegistration) {
     var ƒ = FudgeCore;
     // ƒ.Debug.setFilter(ƒ.DebugConsole, ƒ.DEBUG_FILTER.ALL | ƒ.DEBUG_FILTER.SOURCE);
+    test(ƒ.Shader);
     test(ƒ.Mesh);
     test(ƒ.Component);
-    test(ƒ.Shader);
+    test(ƒ.Joint);
     function test(_class) {
         console.group(_class.name);
         //@ts-ignore

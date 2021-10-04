@@ -16,7 +16,6 @@ namespace FudgeAid {
    */
   export function createSpriteSheet(_name: string, _image: HTMLImageElement): ƒ.CoatTextured {
     let coat: ƒ.CoatTextured = new ƒ.CoatTextured();
-    coat.name = _name;
     let texture: ƒ.TextureImage = new ƒ.TextureImage();
     texture.image = _image;
     coat.texture = texture;

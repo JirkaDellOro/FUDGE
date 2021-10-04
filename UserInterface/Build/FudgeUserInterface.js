@@ -127,6 +127,9 @@ var FudgeUserInterface;
             if (_mutable instanceof ƒ.Mutable)
                 this.mutatorTypes = _mutable.getMutatorAttributeTypes(this.mutator);
         }
+        getMutable() {
+            return this.mutable;
+        }
         startRefresh() {
             window.clearInterval(this.idInterval);
             this.idInterval = window.setInterval(this.refresh, this.timeUpdate);
@@ -340,7 +343,7 @@ var FudgeUserInterface;
             return element;
         }
         static map(_type, _typeCustomElement) {
-            ƒ.Debug.fudge("Map", _type.constructor.name, _typeCustomElement.constructor.name);
+            ƒ.Debug.fudge("Map", _type, _typeCustomElement.name);
             CustomElement.mapObjectToCustomElement.set(_type, _typeCustomElement);
         }
         /**
@@ -581,7 +584,7 @@ var FudgeUserInterface;
         static register(_tagName) {
             for (let template of document.querySelectorAll("template")) {
                 if (template.content.firstElementChild.localName == _tagName) {
-                    ƒ.Debug.fudge("Register", template);
+                    ƒ.Debug.fudge("Register", template.content.children[0]);
                     CustomElementTemplate.fragment.set(_tagName, template.content);
                 }
             }

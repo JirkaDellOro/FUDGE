@@ -36,6 +36,9 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["CREATE_GRAPH"] = 6] = "CREATE_GRAPH";
         CONTEXTMENU[CONTEXTMENU["REMOVE_COMPONENT"] = 7] = "REMOVE_COMPONENT";
         CONTEXTMENU[CONTEXTMENU["ADD_JOINT"] = 8] = "ADD_JOINT";
+        CONTEXTMENU[CONTEXTMENU["TRANSLATE"] = 9] = "TRANSLATE";
+        CONTEXTMENU[CONTEXTMENU["ROTATE"] = 10] = "ROTATE";
+        CONTEXTMENU[CONTEXTMENU["SCALE"] = 11] = "SCALE";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -59,8 +62,10 @@ var Fudge;
         EVENT_EDITOR["FOCUS_NODE"] = "focusNode";
         EVENT_EDITOR["SET_PROJECT"] = "setProject";
         EVENT_EDITOR["UPDATE"] = "update";
+        EVENT_EDITOR["REFRESH"] = "refresh";
         EVENT_EDITOR["DESTROY"] = "destroy";
         EVENT_EDITOR["CLEAR_PROJECT"] = "clearProject";
+        EVENT_EDITOR["TRANSFORM"] = "transform";
         /* obsolete ?
         REMOVE = "removeNode",
         HIDE = "hideNode",
@@ -87,6 +92,12 @@ var Fudge;
         // SKETCH = ViewSketch,
         // MESH = ViewMesh,
     })(VIEW = Fudge.VIEW || (Fudge.VIEW = {}));
+    let TRANSFORM;
+    (function (TRANSFORM) {
+        TRANSFORM["TRANSLATE"] = "translate";
+        TRANSFORM["ROTATE"] = "rotate";
+        TRANSFORM["SCALE"] = "scale";
+    })(TRANSFORM = Fudge.TRANSFORM || (Fudge.TRANSFORM = {}));
 })(Fudge || (Fudge = {}));
 // /<reference types="../../../node_modules/@types/node/fs"/>
 var Fudge;
@@ -542,6 +553,7 @@ var Fudge;
      */
     class Page {
         static goldenLayoutModule = globalThis.goldenLayout; // ƒ.General is synonym for any... hack to get GoldenLayout to work
+        static modeTransform = Fudge.TRANSFORM.TRANSLATE;
         static idCounter = 0;
         static goldenLayout;
         static panels = [];
@@ -561,6 +573,10 @@ var Fudge;
             let panelInfos = JSON.parse(_panelInfos);
             for (let panelInfo of panelInfos)
                 Page.add(Fudge[panelInfo.type], panelInfo.state);
+        }
+        static setTransform(_mode) {
+            Page.modeTransform = _mode;
+            ƒ.Debug.fudge(`Transform mode: ${_mode}`);
         }
         // called by windows load-listener
         static async start() {
@@ -631,6 +647,7 @@ var Fudge;
             document.addEventListener("mutate" /* MUTATE */, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.UPDATE, Page.hndEvent);
             document.addEventListener(Fudge.EVENT_EDITOR.DESTROY, Page.hndEvent);
+            document.addEventListener("keyup", Page.hndKey);
         }
         /** Send custom copies of the given event to the views */
         static broadcastEvent(_event) {
@@ -639,6 +656,21 @@ var Fudge;
                 panel.dom.dispatchEvent(event);
             }
         }
+        static hndKey = (_event) => {
+            document.exitPointerLock();
+            switch (_event.code) {
+                case ƒ.KEYBOARD_CODE.T:
+                    Page.setTransform(Fudge.TRANSFORM.TRANSLATE);
+                    break;
+                case ƒ.KEYBOARD_CODE.R:
+                    Page.setTransform(Fudge.TRANSFORM.ROTATE);
+                    break;
+                case ƒ.KEYBOARD_CODE.E:
+                    // TODO: don't switch to scale mode when using fly-camera and pressing E
+                    Page.setTransform(Fudge.TRANSFORM.SCALE);
+                    break;
+            }
+        };
         static hndEvent(_event) {
             // ƒ.Debug.fudge("Page received", _event.type, _event);
             switch (_event.type) {
@@ -1105,8 +1137,11 @@ var Fudge;
         }
         hndKey = (_event) => {
             _event.stopPropagation();
-            if (_event.code == ƒ.KEYBOARD_CODE.DELETE)
-                this.domElement.dispatchEvent(new CustomEvent("delete" /* DELETE */, { bubbles: true, detail: this }));
+            switch (_event.code) {
+                case ƒ.KEYBOARD_CODE.DELETE:
+                    this.domElement.dispatchEvent(new CustomEvent("delete" /* DELETE */, { bubbles: true, detail: this }));
+                    break;
+            }
         };
         hndDragOver = (_event) => {
             // url on texture
@@ -1512,6 +1547,7 @@ var Fudge;
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndFocusNode);
             this.dom.addEventListener("rename" /* RENAME */, this.broadcastEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.TRANSFORM, this.hndEvent);
             if (_state["graph"])
                 ƒ.Project.getResource(_state["graph"]).then((_graph) => {
                     this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { detail: _graph }));
@@ -1540,6 +1576,8 @@ var Fudge;
                 case Fudge.EVENT_EDITOR.SET_GRAPH:
                     this.setGraph(_event.detail);
                     break;
+                case Fudge.EVENT_EDITOR.REFRESH:
+                    console.log("Refresh");
                 case Fudge.EVENT_EDITOR.SET_PROJECT:
                 case Fudge.EVENT_EDITOR.UPDATE:
                     // TODO: meaningful difference between update and setgraph
@@ -2295,6 +2333,9 @@ var Fudge;
             this.dom.addEventListener("expand" /* EXPAND */, this.hndEvent);
             this.dom.addEventListener("collapse" /* COLLAPSE */, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.TRANSFORM, this.hndTransform);
+            this.dom.addEventListener("click" /* CLICK */, this.hndEvent, true);
+            this.dom.addEventListener("keydown" /* KEY_DOWN */, this.hndEvent, true);
         }
         //#region  ContextMenu
         getContextMenu(_callback) {
@@ -2369,8 +2410,9 @@ var Fudge;
                     for (let component of components) {
                         let details = ƒUi.Generator.createDetailsFromMutable(component);
                         let controller = new Fudge.ControllerComponent(component, details);
+                        Reflect.set(details, "controller", controller); // insert a link back to the controller
                         details.expand(this.expanded[component.type]);
-                        this.dom.append(controller.domElement);
+                        this.dom.append(details);
                         if (component instanceof ƒ.ComponentRigidbody) {
                             let pivot = controller.domElement.querySelector("[key=mtxPivot");
                             let opacity = pivot.style.opacity;
@@ -2405,6 +2447,26 @@ var Fudge;
                     this.node.removeComponent(component);
                     this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
                     break;
+                case "keydown" /* KEY_DOWN */:
+                case "click" /* CLICK */:
+                    if (_event instanceof KeyboardEvent && _event.code != ƒ.KEYBOARD_CODE.SPACE)
+                        break;
+                    let target = _event.target;
+                    if (target.tagName == "SUMMARY")
+                        target = target.parentElement;
+                    if (!(_event.target instanceof HTMLDetailsElement || _event.target))
+                        break;
+                    try {
+                        if (this.dom.replaceChild(target, target)) {
+                            if (_event instanceof KeyboardEvent || this.getSelected() != target) {
+                                target.expand(true);
+                                _event.preventDefault();
+                            }
+                            this.select(target);
+                        }
+                    }
+                    catch (_e) { /* */ }
+                    break;
                 case "expand" /* EXPAND */:
                 case "collapse" /* COLLAPSE */:
                     this.expanded[_event.target.getAttribute("type")] = (_event.type == "expand" /* EXPAND */);
@@ -2412,6 +2474,89 @@ var Fudge;
                     break;
             }
         };
+        hndTransform = (_event) => {
+            if (!this.getSelected())
+                return;
+            let controller = Reflect.get(this.getSelected(), "controller");
+            let component = controller.getMutable();
+            let mtxTransform = Reflect.get(component, "mtxLocal") || Reflect.get(component, "mtxPivot");
+            if (!mtxTransform)
+                return;
+            let dtl = _event.detail;
+            let mtxCamera = dtl.camera.node.mtxWorld;
+            let distance = mtxCamera.getTranslationTo(this.node.mtxWorld).magnitude;
+            if (dtl.transform == Fudge.TRANSFORM.ROTATE)
+                [dtl.x, dtl.y] = [dtl.y, dtl.x];
+            let value = new ƒ.Vector3();
+            value.x = (dtl.restriction == "x" ? !dtl.inverted : dtl.inverted) ? dtl.x : undefined;
+            value.y = (dtl.restriction == "y" ? !dtl.inverted : dtl.inverted) ? -dtl.y : undefined;
+            value.z = (dtl.restriction == "z" ? !dtl.inverted : dtl.inverted) ?
+                ((value.x == undefined) ? -dtl.y : dtl.x) : undefined;
+            value = value.map((_c) => _c || 0);
+            if (mtxTransform instanceof ƒ.Matrix4x4)
+                this.transform3(dtl.transform, value, mtxTransform, distance);
+            if (mtxTransform instanceof ƒ.Matrix3x3)
+                this.transform2(dtl.transform, value.toVector2(), mtxTransform, distance);
+        };
+        transform3(_transform, _value, _mtxTransform, _distance) {
+            switch (_transform) {
+                case Fudge.TRANSFORM.TRANSLATE:
+                    let factorTranslation = 0.001; // TODO: eliminate magic numbers
+                    _value.scale(factorTranslation * _distance);
+                    let translation = _mtxTransform.translation;
+                    translation.add(_value);
+                    _mtxTransform.translation = translation;
+                    break;
+                case Fudge.TRANSFORM.ROTATE:
+                    let factorRotation = 1; // TODO: eliminate magic numbers
+                    _value.scale(factorRotation);
+                    let rotation = _mtxTransform.rotation;
+                    rotation.add(_value);
+                    _mtxTransform.rotation = rotation;
+                    break;
+                case Fudge.TRANSFORM.SCALE:
+                    let factorScaling = 0.001; // TODO: eliminate magic numbers
+                    _value.scale(factorScaling);
+                    let scaling = _mtxTransform.scaling;
+                    scaling.add(_value);
+                    _mtxTransform.scaling = scaling;
+                    break;
+            }
+        }
+        transform2(_transform, _value, _mtxTransform, _distance) {
+            switch (_transform) {
+                case Fudge.TRANSFORM.TRANSLATE:
+                    let factorTranslation = 0.001; // TODO: eliminate magic numbers
+                    _value.scale(factorTranslation * _distance);
+                    let translation = _mtxTransform.translation;
+                    translation.add(_value);
+                    _mtxTransform.translation = translation;
+                    break;
+                case Fudge.TRANSFORM.ROTATE:
+                    let factorRotation = 1; // TODO: eliminate magic numbers
+                    _value.scale(factorRotation);
+                    _mtxTransform.rotation += _value.x;
+                    break;
+                case Fudge.TRANSFORM.SCALE:
+                    let factorScaling = 0.001; // TODO: eliminate magic numbers
+                    _value.scale(factorScaling);
+                    let scaling = _mtxTransform.scaling;
+                    scaling.add(_value);
+                    _mtxTransform.scaling = scaling;
+                    break;
+            }
+        }
+        select(_details) {
+            for (let child of this.dom.children)
+                child.classList.remove("selected");
+            _details.classList.add("selected");
+            _details.focus();
+        }
+        getSelected() {
+            for (let child of this.dom.children)
+                if (child.classList.contains("selected"))
+                    return child;
+        }
         createComponent(_resource) {
             if (_resource instanceof Fudge.ScriptInfo)
                 if (_resource.isComponent)
@@ -2586,14 +2731,22 @@ var Fudge;
             super(_container, _state);
             this.graph = ƒ.Project.resources[_state["graph"]];
             this.createUserInterface();
+            let title = "● Use mousebuttons and ctrl-, shift- or alt-key to navigate view.\n";
+            title += "● Click to select node, rightclick to select transformations.\n";
+            title += "● Hold X, Y or Z to transform. Add shift-key to invert restriction.";
+            this.dom.title = title;
+            this.dom.tabIndex = 0;
             _container.on("resize", this.redraw);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.REFRESH, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener("delete" /* DELETE */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent, true);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
+            this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
+            this.dom.addEventListener("pointermove", this.hndPointer);
         }
         createUserInterface() {
             let cmpCamera = new ƒ.ComponentCamera();
@@ -2631,6 +2784,28 @@ var Fudge;
             this.viewport.setBranch(this.graph);
             this.redraw();
         }
+        //#region  ContextMenu
+        getContextMenu(_callback) {
+            const menu = new Fudge.remote.Menu();
+            let item;
+            item = new Fudge.remote.MenuItem({ label: "Translate", id: Fudge.TRANSFORM.TRANSLATE, click: _callback, accelerator: process.platform == "darwin" ? "T" : "T" });
+            menu.append(item);
+            item = new Fudge.remote.MenuItem({ label: "Rotate", id: Fudge.TRANSFORM.ROTATE, click: _callback, accelerator: process.platform == "darwin" ? "R" : "R" });
+            menu.append(item);
+            item = new Fudge.remote.MenuItem({ label: "Scale", id: Fudge.TRANSFORM.SCALE, click: _callback, accelerator: process.platform == "darwin" ? "E" : "E" });
+            menu.append(item);
+            return menu;
+        }
+        contextMenuCallback(_item, _window, _event) {
+            ƒ.Debug.info(`MenuSelect: Item-id=${Fudge.CONTEXTMENU[_item.id]}`);
+            switch (_item.id) {
+                case Fudge.TRANSFORM.TRANSLATE:
+                case Fudge.TRANSFORM.ROTATE:
+                case Fudge.TRANSFORM.SCALE:
+                    Fudge.Page.setTransform(_item.id);
+            }
+        }
+        //#endregion
         hndDragOver(_event, _viewSource) {
             _event.dataTransfer.dropEffect = "none";
             // if (this.dom != _event.target)
@@ -2665,6 +2840,7 @@ var Fudge;
                 case "mutate" /* MUTATE */:
                 case "delete" /* DELETE */:
                 case Fudge.EVENT_EDITOR.UPDATE:
+                case Fudge.EVENT_EDITOR.REFRESH:
                     this.redraw();
             }
         };
@@ -2678,6 +2854,24 @@ var Fudge;
         //   if (this.canvas.clientHeight > 0 && this.canvas.clientWidth > 0)
         //     this.viewport.draw();
         // }
+        hndPointer = (_event) => {
+            this.dom.focus();
+            let restriction;
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.X]))
+                restriction = "x";
+            else if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.Y]))
+                restriction = "z";
+            else if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.Z]))
+                restriction = "y";
+            if (!restriction)
+                return;
+            this.canvas.requestPointerLock();
+            let detail = {
+                transform: Fudge.Page.modeTransform, restriction: restriction, x: _event.movementX, y: _event.movementY, camera: this.viewport.camera, inverted: _event.shiftKey
+            };
+            this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.TRANSFORM, { bubbles: true, detail: detail }));
+            this.redraw();
+        };
         activeViewport = (_event) => {
             // let event: CustomEvent = new CustomEvent(EVENT_EDITOR.ACTIVATE_VIEWPORT, { detail: this.viewport.camera, bubbles: false });
             _event.cancelBubble = true;

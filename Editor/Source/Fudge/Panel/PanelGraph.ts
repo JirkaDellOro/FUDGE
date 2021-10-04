@@ -61,6 +61,7 @@ namespace Fudge {
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndFocusNode);
       this.dom.addEventListener(ƒui.EVENT.RENAME, this.broadcastEvent);
+      this.dom.addEventListener(EVENT_EDITOR.TRANSFORM, this.hndEvent);
 
       if (_state["graph"])
         ƒ.Project.getResource(_state["graph"]).then((_graph: ƒ.Graph) => {
@@ -94,6 +95,8 @@ namespace Fudge {
         case EVENT_EDITOR.SET_GRAPH:
           this.setGraph(_event.detail);
           break;
+        case EVENT_EDITOR.REFRESH:
+          console.log("Refresh");
         case EVENT_EDITOR.SET_PROJECT:
         case EVENT_EDITOR.UPDATE:
           // TODO: meaningful difference between update and setgraph

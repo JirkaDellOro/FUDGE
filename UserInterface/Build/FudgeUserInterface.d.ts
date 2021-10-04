@@ -35,6 +35,7 @@ declare namespace FudgeUserInterface {
         getMutator(_mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator;
         updateUserInterface(): void;
         setMutable(_mutable: ƒ.Mutable | ƒ.MutableArray<ƒ.Mutable>): void;
+        getMutable(): ƒ.Mutable | ƒ.MutableArray<ƒ.Mutable>;
         startRefresh(): void;
         protected mutateOnInput: (_event: Event) => Promise<void>;
         protected rearrangeArray: (_event: Event) => Promise<void>;

@@ -25,7 +25,10 @@ declare namespace Fudge {
         CREATE_MATERIAL = 5,
         CREATE_GRAPH = 6,
         REMOVE_COMPONENT = 7,
-        ADD_JOINT = 8
+        ADD_JOINT = 8,
+        TRANSLATE = 9,
+        ROTATE = 10,
+        SCALE = 11
     }
     enum MENU {
         QUIT = "quit",
@@ -43,8 +46,10 @@ declare namespace Fudge {
         FOCUS_NODE = "focusNode",
         SET_PROJECT = "setProject",
         UPDATE = "update",
+        REFRESH = "refresh",
         DESTROY = "destroy",
-        CLEAR_PROJECT = "clearProject"
+        CLEAR_PROJECT = "clearProject",
+        TRANSFORM = "transform"
     }
     enum PANEL {
         GRAPH = "PanelGraph",
@@ -61,6 +66,11 @@ declare namespace Fudge {
         PROPERTIES = "ViewProperties",
         PREVIEW = "ViewPreview",
         SCRIPT = "ViewScript"
+    }
+    enum TRANSFORM {
+        TRANSLATE = "translate",
+        ROTATE = "rotate",
+        SCALE = "scale"
     }
 }
 declare namespace Fudge {
@@ -141,12 +151,14 @@ declare namespace Fudge {
      */
     class Page {
         static goldenLayoutModule: ƒ.General;
+        static modeTransform: TRANSFORM;
         private static idCounter;
         private static goldenLayout;
         private static panels;
         static setDefaultProject(): void;
         static getPanelInfo(): string;
         static setPanelInfo(_panelInfos: string): void;
+        static setTransform(_mode: TRANSFORM): void;
         private static start;
         private static setupGoldenLayout;
         private static add;
@@ -156,6 +168,7 @@ declare namespace Fudge {
         private static setupPageListeners;
         /** Send custom copies of the given event to the views */
         private static broadcastEvent;
+        private static hndKey;
         private static hndEvent;
         private static hndPanelCreated;
         private static loadProject;
@@ -471,6 +484,11 @@ declare namespace Fudge {
         protected hndDrop(_event: DragEvent, _viewSource: View): void;
         private fillContent;
         private hndEvent;
+        private hndTransform;
+        private transform3;
+        private transform2;
+        private select;
+        private getSelected;
         private createComponent;
         private findComponentType;
     }
@@ -510,10 +528,13 @@ declare namespace Fudge {
         constructor(_container: ComponentContainer, _state: JsonValue);
         createUserInterface(): void;
         setGraph(_node: ƒ.Node): void;
+        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
+        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): void;
         private hndEvent;
         private hndPick;
+        private hndPointer;
         private activeViewport;
         private redraw;
     }

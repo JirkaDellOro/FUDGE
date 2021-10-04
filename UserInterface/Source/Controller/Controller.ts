@@ -140,6 +140,10 @@ namespace FudgeUserInterface {
         this.mutatorTypes = _mutable.getMutatorAttributeTypes(this.mutator);
     }
 
+    public getMutable(): ƒ.Mutable | ƒ.MutableArray<ƒ.Mutable> {
+      return this.mutable;
+    }
+
     public startRefresh(): void {
       window.clearInterval(this.idInterval);
       this.idInterval = window.setInterval(this.refresh, this.timeUpdate);

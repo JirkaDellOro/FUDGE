@@ -5,22 +5,22 @@ namespace FudgeCore {
    * The method useRenderData will be injected by {@link RenderInjector} at runtime, extending the functionality of this class to deal with the renderer.
    */
   export class Coat extends Mutable implements Serializable {
-    public name: string = "Coat";
+    // public name: string = "Coat";
     protected renderData: { [key: string]: unknown };
 
     public useRenderData(_shader: typeof Shader, _cmpMaterial: ComponentMaterial): void {/* injected by RenderInjector*/ }
 
     //#region Transfer
     public serialize(): Serialization {
-      let serialization: Serialization = { name: this.name };
-      return serialization;
+      return {};
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.name = _serialization.name;
       return this;
     }
 
-    protected reduceMutator(): void { /**/ }
+    protected reduceMutator(_mutator: Mutator): void { 
+      delete _mutator.renderData;
+     }
     //#endregion
   }
 
@@ -65,5 +65,18 @@ namespace FudgeCore {
       this.color = _color || new Color();
       this.shadeSmooth = _shadeSmooth || 0;
     }
+    
+    //#region Transfer
+    public serialize(): Serialization {
+      let serialization: Serialization = super.serialize();
+      serialization.color = this.color.serialize();
+      return serialization;
+    }
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      await super.deserialize(_serialization);
+      await this.color.deserialize(_serialization.color);
+      return this;
+    }
+    //#endregion
   }
 }

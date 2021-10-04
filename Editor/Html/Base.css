@@ -61,6 +61,7 @@ div[panel] .lm_close {
 }
 
 /* Checkbox */
+
 input[type="checkbox"] {
   appearance: none;
   margin-right: 0.2em;
@@ -79,6 +80,7 @@ input[type="checkbox"]:checked:before {
   content: "⭙";
   /* ☑✔⮽⚑◉⦻⭙⦿⮿●■ */
 }
+
 /* Tree Control */
 
 ul.tree {
@@ -201,6 +203,11 @@ label {
 } */
 details div {
   padding-left: 1em;
+}
+
+details.selected > summary {
+  color: var(--color-highlight);
+  font-weight: bold;
 }
 
 /* Dialog */

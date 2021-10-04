@@ -64,7 +64,7 @@ namespace FudgeUserInterface {
     }
 
     private static map(_type: string, _typeCustomElement: typeof CustomElement): void {
-      ƒ.Debug.fudge("Map", _type.constructor.name, _typeCustomElement.constructor.name);
+      ƒ.Debug.fudge("Map", _type, _typeCustomElement.name);
       CustomElement.mapObjectToCustomElement.set(_type, _typeCustomElement);
     }
 

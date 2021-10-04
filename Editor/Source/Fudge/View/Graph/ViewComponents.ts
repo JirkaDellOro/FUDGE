@@ -33,6 +33,9 @@ namespace Fudge {
       this.dom.addEventListener(ƒUi.EVENT.EXPAND, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.COLLAPSE, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
+      this.dom.addEventListener(EVENT_EDITOR.TRANSFORM, this.hndTransform);
+      this.dom.addEventListener(ƒUi.EVENT.CLICK, this.hndEvent, true);
+      this.dom.addEventListener(ƒUi.EVENT.KEY_DOWN, this.hndEvent, true);
     }
 
     //#region  ContextMenu
@@ -117,8 +120,9 @@ namespace Fudge {
           for (let component of components) {
             let details: ƒUi.Details = ƒUi.Generator.createDetailsFromMutable(component);
             let controller: ControllerComponent = new ControllerComponent(component, details);
+            Reflect.set(details, "controller", controller); // insert a link back to the controller
             details.expand(this.expanded[component.type]);
-            this.dom.append(controller.domElement);
+            this.dom.append(details);
             if (component instanceof ƒ.ComponentRigidbody) {
               let pivot: HTMLElement = controller.domElement.querySelector("[key=mtxPivot");
               let opacity: string = pivot.style.opacity;
@@ -154,12 +158,123 @@ namespace Fudge {
           this.node.removeComponent(component);
           this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
           break;
+        case ƒUi.EVENT.KEY_DOWN:
+        case ƒUi.EVENT.CLICK:
+          if (_event instanceof KeyboardEvent && _event.code != ƒ.KEYBOARD_CODE.SPACE)
+            break;
+          let target: ƒUi.Details = <ƒUi.Details>_event.target;
+          if (target.tagName == "SUMMARY")
+            target = <ƒUi.Details>target.parentElement;
+          if (!(_event.target instanceof HTMLDetailsElement || (<HTMLElement>_event.target)))
+            break;
+          try {
+            if (this.dom.replaceChild(target, target)) {
+              if (_event instanceof KeyboardEvent || this.getSelected() != target) {
+                target.expand(true);
+                _event.preventDefault();
+              }
+              this.select(target);
+            }
+          } catch (_e: unknown) { /* */ }
+          break;
         case ƒUi.EVENT.EXPAND:
         case ƒUi.EVENT.COLLAPSE:
           this.expanded[(<ƒUi.Details>_event.target).getAttribute("type")] = (_event.type == ƒUi.EVENT.EXPAND);
         default:
           break;
       }
+    }
+
+    private hndTransform = (_event: CustomEvent): void => {
+      if (!this.getSelected())
+        return;
+
+      let controller: ControllerComponent = Reflect.get(this.getSelected(), "controller");
+      let component: ƒ.Component = <ƒ.Component>controller.getMutable();
+      let mtxTransform: ƒ.Matrix4x4 = Reflect.get(component, "mtxLocal") || Reflect.get(component, "mtxPivot");
+      if (!mtxTransform)
+        return;
+
+      let dtl: ƒ.General = _event.detail;
+      let mtxCamera: ƒ.Matrix4x4 = (<ƒ.ComponentCamera>dtl.camera).node.mtxWorld;
+      let distance: number = mtxCamera.getTranslationTo(this.node.mtxWorld).magnitude;
+      if (dtl.transform == TRANSFORM.ROTATE)
+        [dtl.x, dtl.y] = [dtl.y, dtl.x];
+
+      let value: ƒ.Vector3 = new ƒ.Vector3();
+      value.x = (dtl.restriction == "x" ? !dtl.inverted : dtl.inverted) ? dtl.x : undefined;
+      value.y = (dtl.restriction == "y" ? !dtl.inverted : dtl.inverted) ? -dtl.y : undefined;
+      value.z = (dtl.restriction == "z" ? !dtl.inverted : dtl.inverted) ?
+        ((value.x == undefined) ? -dtl.y : dtl.x) : undefined;
+      value = value.map((_c: number) => _c || 0);
+
+      if (mtxTransform instanceof ƒ.Matrix4x4)
+        this.transform3(dtl.transform, value, mtxTransform, distance);
+      if (mtxTransform instanceof ƒ.Matrix3x3)
+        this.transform2(dtl.transform, value.toVector2(), mtxTransform, distance);
+    }
+
+    private transform3(_transform: TRANSFORM, _value: ƒ.Vector3, _mtxTransform: ƒ.Matrix4x4, _distance: number): void {
+      switch (_transform) {
+        case TRANSFORM.TRANSLATE:
+          let factorTranslation: number = 0.001; // TODO: eliminate magic numbers
+          _value.scale(factorTranslation * _distance);
+          let translation: ƒ.Vector3 = _mtxTransform.translation;
+          translation.add(_value);
+          _mtxTransform.translation = translation;
+          break;
+        case TRANSFORM.ROTATE:
+          let factorRotation: number = 1; // TODO: eliminate magic numbers
+          _value.scale(factorRotation);
+          let rotation: ƒ.Vector3 = _mtxTransform.rotation;
+          rotation.add(_value);
+          _mtxTransform.rotation = rotation;
+          break;
+        case TRANSFORM.SCALE:
+          let factorScaling: number = 0.001; // TODO: eliminate magic numbers
+          _value.scale(factorScaling);
+          let scaling: ƒ.Vector3 = _mtxTransform.scaling;
+          scaling.add(_value);
+          _mtxTransform.scaling = scaling;
+          break;
+      }
+    }
+    
+    private transform2(_transform: TRANSFORM, _value: ƒ.Vector2,  _mtxTransform: ƒ.Matrix3x3, _distance: number): void {
+      switch (_transform) {
+        case TRANSFORM.TRANSLATE:
+          let factorTranslation: number = 0.001; // TODO: eliminate magic numbers
+          _value.scale(factorTranslation * _distance);
+          let translation: ƒ.Vector2 = _mtxTransform.translation;
+          translation.add(_value);
+          _mtxTransform.translation = translation;
+          break;
+        case TRANSFORM.ROTATE:
+          let factorRotation: number = 1; // TODO: eliminate magic numbers
+          _value.scale(factorRotation);
+          _mtxTransform.rotation += _value.x;
+          break;
+        case TRANSFORM.SCALE:
+          let factorScaling: number = 0.001; // TODO: eliminate magic numbers
+          _value.scale(factorScaling);
+          let scaling: ƒ.Vector2 = _mtxTransform.scaling;
+          scaling.add(_value);
+          _mtxTransform.scaling = scaling;
+          break;
+      }
+    }
+
+    private select(_details: ƒUi.Details): void {
+      for (let child of this.dom.children)
+        child.classList.remove("selected");
+      _details.classList.add("selected");
+      _details.focus();
+    }
+
+    private getSelected(): ƒUi.Details {
+      for (let child of this.dom.children)
+        if (child.classList.contains("selected"))
+          return <ƒUi.Details>child;
     }
 
     private createComponent(_resource: Object): ƒ.Component {

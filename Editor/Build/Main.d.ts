@@ -8,7 +8,10 @@ declare namespace Fudge {
         CREATE_MATERIAL = 5,
         CREATE_GRAPH = 6,
         REMOVE_COMPONENT = 7,
-        ADD_JOINT = 8
+        ADD_JOINT = 8,
+        TRANSLATE = 9,
+        ROTATE = 10,
+        SCALE = 11
     }
     enum MENU {
         QUIT = "quit",
@@ -26,8 +29,10 @@ declare namespace Fudge {
         FOCUS_NODE = "focusNode",
         SET_PROJECT = "setProject",
         UPDATE = "update",
+        REFRESH = "refresh",
         DESTROY = "destroy",
-        CLEAR_PROJECT = "clearProject"
+        CLEAR_PROJECT = "clearProject",
+        TRANSFORM = "transform"
     }
     enum PANEL {
         GRAPH = "PanelGraph",
@@ -44,6 +49,11 @@ declare namespace Fudge {
         PROPERTIES = "ViewProperties",
         PREVIEW = "ViewPreview",
         SCRIPT = "ViewScript"
+    }
+    enum TRANSFORM {
+        TRANSLATE = "translate",
+        ROTATE = "rotate",
+        SCALE = "scale"
     }
 }
 /**

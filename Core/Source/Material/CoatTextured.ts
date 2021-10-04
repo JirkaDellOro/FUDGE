@@ -14,10 +14,8 @@ namespace FudgeCore {
     }
 
     //#region Transfer
-    //TODO: examine if using super in serialization works with decorators... should.
     public serialize(): Serialization {
       let serialization: Serialization = super.serialize();
-      delete serialization.texture;
       serialization.idTexture = this.texture.idResource;
       return serialization;
     }
@@ -28,25 +26,5 @@ namespace FudgeCore {
       return this;
     }
     //#endregion
-
-    // just ideas so far
-    // public tilingX: number;
-    // public tilingY: number;
-    // public repetition: boolean;
-
-    // constructor(_texture: TextureImage, _color?: Color) {
-    //   super();
-    //   this.texture = _texture;
-    //   this.color = _color || new Color(1, 1, 1, 1);
-    // }
-
-    // public getMutatorForComponent(): MutatorForComponent {
-    //   let mutatorPivot: MutatorForComponent = <MutatorForComponent><unknown>this.pivot.getMutator();
-    //   return mutatorPivot;
-    // }
-
-    // public mutate(_mutator: MutatorForComponent): void {
-    //   this.pivot.mutate(_mutator);
-    // }
   }
 }
