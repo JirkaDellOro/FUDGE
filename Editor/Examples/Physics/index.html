@@ -15,9 +15,6 @@
 <script type="text/javascript" src="../../../Core/Build/FudgeCore.js"></script>
 <script type="text/javascript" src="../../../Aid/Build/FudgeAid.js"></script>
 
-<!--Activate the following line to see renderings of physics components-->
-<script type="text/javascript">FudgeCore.Physics.settings.debugDraw = true;</script>
-
 <!--Link internal resources. The editor only loads the first, but at runtime, multiple files can contribute-->
 <link type="resources" src="Internal.json" />
 
@@ -73,6 +70,7 @@
                     FudgeCore.AudioManager.default.listenWith(cmpListener);
                     FudgeCore.AudioManager.default.listenTo(graph);
                     FudgeCore.Debug.log("Audio:", FudgeCore.AudioManager.default);
+                    viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
                     // draw viewport once for immediate feedback
                     viewport.draw();
                     canvas.dispatchEvent(new CustomEvent("interactiveViewportStarted", { bubbles: true, detail: viewport }));

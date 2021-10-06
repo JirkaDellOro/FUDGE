@@ -305,7 +305,6 @@ var Fudge;
             this.fileIndex = _base.toString().split("/").pop() || this.fileIndex;
             ƒ.Project.clear();
             ƒ.Physics.initializePhysics();
-            // ƒ.Physics.settings.debugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
         }
         async openDialog() {
             let promise = ƒui.Dialog.prompt(Fudge.project, false, "Review project settings", "Adjust settings and press OK", "OK", "Cancel");
@@ -420,9 +419,6 @@ var Fudge;
             html.head.appendChild(html.createComment("Load FUDGE. You may want to download local copies to work offline and be independent from future changes! Developers working on FUDGE itself may want to create symlinks"));
             html.head.appendChild(createTag("script", { type: "text/javascript", src: "https://jirkadelloro.github.io/FUDGE/Core/Build/FudgeCore.js" }));
             html.head.appendChild(createTag("script", { type: "text/javascript", src: "https://jirkadelloro.github.io/FUDGE/Aid/Build/FudgeAid.js" }));
-            html.head.appendChild(html.createComment("CRLF"));
-            html.head.appendChild(html.createComment("Activate the following line to see renderings of physics components"));
-            html.head.appendChild(html.createComment(`<script type="text/javascript">FudgeCore.Physics.settings.debugDraw = true;</script>`));
             html.head.appendChild(html.createComment("CRLF"));
             html.head.appendChild(html.createComment("Link internal resources. The editor only loads the first, but at runtime, multiple files can contribute"));
             html.head.appendChild(createTag("link", { type: "resources", src: this.fileInternal }));
