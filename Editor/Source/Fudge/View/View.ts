@@ -23,7 +23,7 @@ namespace Fudge {
       this.dom.setAttribute("view", this.constructor.name);
 
       //_container.getElement().append(this.dom); //old
-      _container.element.appendChild(this.dom)
+      _container.element.appendChild(this.dom);
       this.container = _container;
 
       this.container.on("destroy", () => this.dom.dispatchEvent(

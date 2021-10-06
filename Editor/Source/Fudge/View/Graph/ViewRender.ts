@@ -8,6 +8,7 @@ namespace Fudge {
    * @author Jirka Dell'Oro-Friedl, HFU, 2020
    */
   export class ViewRender extends View {
+    #pointerMoved: boolean = false;
     private cmrOrbit: ƒAid.CameraOrbit;
     private viewport: ƒ.Viewport;
     private canvas: HTMLCanvasElement;
@@ -35,6 +36,7 @@ namespace Fudge {
       this.dom.addEventListener(EVENT_EDITOR.FOCUS_NODE, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.addEventListener("pointermove", this.hndPointer);
+      this.dom.addEventListener("pointerdown", this.hndPointer);
     }
 
     createUserInterface(): void {
@@ -92,18 +94,45 @@ namespace Fudge {
       menu.append(item);
       item = new remote.MenuItem({ label: "Scale", id: TRANSFORM.SCALE, click: _callback, accelerator: process.platform == "darwin" ? "E" : "E" });
       menu.append(item);
+      item = new remote.MenuItem({
+        label: "Physics Debug", submenu: [
+          { "label": "None", id: String(ƒ.PHYSICS_DEBUGMODE[0]), click: _callback },
+          { "label": "Colliders", id: String(ƒ.PHYSICS_DEBUGMODE[1]), click: _callback },
+          { "label": "Colliders and Joints (Default)", id: String(ƒ.PHYSICS_DEBUGMODE[2]), click: _callback },
+          { "label": "Bounding Boxes", id: String(ƒ.PHYSICS_DEBUGMODE[3]), click: _callback },
+          { "label": "Contacts", id: String(ƒ.PHYSICS_DEBUGMODE[4]), click: _callback },
+          { "label": "Only Physics", id: String(ƒ.PHYSICS_DEBUGMODE[5]), click: _callback }
+        ]
+      });
+      menu.append(item);
       return menu;
     }
 
     protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
-      ƒ.Debug.info(`MenuSelect: Item-id=${CONTEXTMENU[_item.id]}`);
+      ƒ.Debug.info(`MenuSelect: Item-id=${CONTEXTMENU[_item.id] || _item.id}`);
 
       switch (_item.id) {
         case TRANSFORM.TRANSLATE:
         case TRANSFORM.ROTATE:
         case TRANSFORM.SCALE:
           Page.setTransform(_item.id);
+          break;
+        case ƒ.PHYSICS_DEBUGMODE[ƒ.PHYSICS_DEBUGMODE.NONE]:
+        case ƒ.PHYSICS_DEBUGMODE[ƒ.PHYSICS_DEBUGMODE.COLLIDERS]:
+        case ƒ.PHYSICS_DEBUGMODE[ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER]:
+        case ƒ.PHYSICS_DEBUGMODE[ƒ.PHYSICS_DEBUGMODE.BOUNDING_BOXES]:
+        case ƒ.PHYSICS_DEBUGMODE[ƒ.PHYSICS_DEBUGMODE.CONTACTS]:
+        case ƒ.PHYSICS_DEBUGMODE[ƒ.PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY]:
+          this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE[_item.id];
+          this.redraw();
+          break;
       }
+    }
+
+    protected openContextMenu = (_event: Event): void => {
+      if (!this.#pointerMoved)
+        this.contextMenu.popup();
+      this.#pointerMoved = false;
     }
     //#endregion
 
@@ -165,6 +194,12 @@ namespace Fudge {
     // }
 
     private hndPointer = (_event: PointerEvent): void => {
+      if (_event.type == "pointerdown") {
+        this.#pointerMoved = false;
+        return;
+      }
+      this.#pointerMoved ||= (_event.movementX != 0 || _event.movementY != 0);
+
       this.dom.focus();
       let restriction: string;
       if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.X]))

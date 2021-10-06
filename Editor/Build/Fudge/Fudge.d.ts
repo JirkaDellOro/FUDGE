@@ -521,6 +521,7 @@ declare namespace Fudge {
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class ViewRender extends View {
+        #private;
         private cmrOrbit;
         private viewport;
         private canvas;
@@ -530,6 +531,7 @@ declare namespace Fudge {
         setGraph(_node: ƒ.Node): void;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        protected openContextMenu: (_event: Event) => void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): void;
         private hndEvent;
