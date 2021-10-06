@@ -134,11 +134,10 @@ namespace FudgeCore {
 
       Render.clear(this.camera.clrBackground);
 
-      let physicsDebugMode: PHYSICS_DEBUGMODE = this.physicsDebugMode || Physics.settings?.debugMode;
-      if (physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
+      if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
         Render.draw(this.camera);
-      if (physicsDebugMode != PHYSICS_DEBUGMODE.NONE) {
-        Physics.world.draw(this.camera, physicsDebugMode);
+      if (this.physicsDebugMode != PHYSICS_DEBUGMODE.NONE) {
+        Physics.world.draw(this.camera, this.physicsDebugMode);
       }
 
       this.#crc2.imageSmoothingEnabled = false;
@@ -178,9 +177,9 @@ namespace FudgeCore {
       Recycler.store(rectTemp);
       // adjust the area on the source-canvas to render from by applying the framing to destination area
       rectTemp = this.frameDestinationToSource.getRect(this.rectDestination);
-      this.rectSource.copy(rectTemp); 
+      this.rectSource.copy(rectTemp);
       Recycler.store(rectTemp);
-      
+
       // having an offset source does make sense only when multiple viewports display parts of the same rendering. For now: shift it to 0,0
       this.rectSource.x = this.rectSource.y = 0;
       // still, a partial image of the rendering may be retrieved by moving and resizing the render viewport. For now, it's always adjusted to the current viewport

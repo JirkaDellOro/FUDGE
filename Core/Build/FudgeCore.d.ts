@@ -3915,7 +3915,7 @@ declare namespace FudgeCore {
          * Sends a ray through this specific body ignoring the rest of the world and checks if this body was hit by the ray,
          * returning info about the hit. Provides the same functionality and information a regular raycast does but the ray is only testing against this specific body.
          */
-        raycastThisBody(_origin: Vector3, _direction: Vector3, _length: number): RayHitInfo;
+        raycastThisBody(_origin: Vector3, _direction: Vector3, _length: number, _debugDraw?: boolean): RayHitInfo;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         /** Change properties by an associative array */
@@ -4159,10 +4159,7 @@ declare namespace FudgeCore {
     }
     /** General settings for the physic simulation and the debug of it. */
     class PhysicsSettings {
-        private physicsDebugMode;
         constructor(_defGroup: number, _defMask: number);
-        get debugMode(): PHYSICS_DEBUGMODE;
-        set debugMode(_value: PHYSICS_DEBUGMODE);
         /** Change if rigidbodies are able to sleep (don't be considered in physical calculations) when their movement is below a threshold. Deactivation is decreasing performance for minor advantage in precision. */
         get disableSleeping(): boolean;
         set disableSleeping(_value: boolean);
@@ -4662,7 +4659,7 @@ declare namespace FudgeCore {
         * Cast a RAY into the physical world from a origin point in a certain direction. Receiving informations about the hit object and the
         * hit point. Do not specify a _group to raycast the whole world, else only bodies within the specific group can be hit.
         */
-        static raycast(_origin: Vector3, _direction: Vector3, _length?: number, _group?: COLLISION_GROUP): RayHitInfo;
+        static raycast(_origin: Vector3, _direction: Vector3, _length?: number, _debugDraw?: boolean, _group?: COLLISION_GROUP): RayHitInfo;
         /**
           * Adjusts the transforms of the {@link ComponentRigidbody}s in the given branch to match their nodes or meshes
           */

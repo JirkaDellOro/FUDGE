@@ -217,7 +217,7 @@ namespace FudgeCore {
      * Needed since some debug informations exclude others, and can't be drawn at the same time, by OimoPhysics. And for users it provides more readability
      * to debug only what they need and is commonly debugged.
      */
-    public setDebugMode(_mode: PHYSICS_DEBUGMODE = Physics.settings.debugMode): void {
+    public setDebugMode(_mode: PHYSICS_DEBUGMODE = PHYSICS_DEBUGMODE.NONE): void {
       // tslint:disable-next-line
       let draw = { drawAabbs: false, drawBases: false, drawBvh: false, drawContactBases: false, drawContacts: false, drawJointLimits: false, drawJoints: false, drawPairs: false, drawShapes: false };
 

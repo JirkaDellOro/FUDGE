@@ -316,8 +316,8 @@ namespace FudgeCore {
 
       Recycler.store(forward);
       // TODO: examine why the following produces erroneous results, see test "Spatial Audio"
-      // if (this.node)
-      //   Recycler.store(mtxResult);
+      if (this.node)
+        Recycler.store(mtxResult);
     }
   }
 }

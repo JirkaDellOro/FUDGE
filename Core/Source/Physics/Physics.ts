@@ -39,7 +39,7 @@ namespace FudgeCore {
     * Cast a RAY into the physical world from a origin point in a certain direction. Receiving informations about the hit object and the
     * hit point. Do not specify a _group to raycast the whole world, else only bodies within the specific group can be hit.
     */
-    public static raycast(_origin: Vector3, _direction: Vector3, _length: number = 1, _group: COLLISION_GROUP = COLLISION_GROUP.DEFAULT): RayHitInfo {
+    public static raycast(_origin: Vector3, _direction: Vector3, _length: number = 1, _debugDraw: boolean = false, _group: COLLISION_GROUP = COLLISION_GROUP.DEFAULT): RayHitInfo {
       let hitInfo: RayHitInfo = new RayHitInfo();
       let ray: OIMO.RayCastClosest = new OIMO.RayCastClosest();
       let begin: OIMO.Vec3 = new OIMO.Vec3(_origin.x, _origin.y, _origin.z);
@@ -75,7 +75,7 @@ namespace FudgeCore {
         hitInfo.rayOrigin = _origin;
         hitInfo.hitPoint = new Vector3(end.x, end.y, end.z);
       }
-      if (Physics.settings?.debugMode != PHYSICS_DEBUGMODE.NONE) { //Handle debugging
+      if (_debugDraw) { //Handle debugging
         Physics.world.debugDraw.debugRay(hitInfo.rayOrigin, hitInfo.hitPoint, new Color(0, 1, 0, 1));
       }
       return hitInfo;

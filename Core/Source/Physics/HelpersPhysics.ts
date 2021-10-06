@@ -121,18 +121,10 @@ namespace FudgeCore {
 
   /** General settings for the physic simulation and the debug of it. */
   export class PhysicsSettings {
-    private physicsDebugMode: PHYSICS_DEBUGMODE = PHYSICS_DEBUGMODE.NONE;
 
     constructor(_defGroup: number, _defMask: number) {
       this.defaultCollisionGroup = _defGroup;
       this.defaultCollisionMask = _defMask;
-    }
-
-    get debugMode(): PHYSICS_DEBUGMODE {
-      return this.physicsDebugMode;
-    }
-    set debugMode(_value: PHYSICS_DEBUGMODE) {
-      this.physicsDebugMode = _value;
     }
 
     /** Change if rigidbodies are able to sleep (don't be considered in physical calculations) when their movement is below a threshold. Deactivation is decreasing performance for minor advantage in precision. */

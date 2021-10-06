@@ -550,7 +550,7 @@ namespace FudgeCore {
      * Sends a ray through this specific body ignoring the rest of the world and checks if this body was hit by the ray,
      * returning info about the hit. Provides the same functionality and information a regular raycast does but the ray is only testing against this specific body.
      */
-    public raycastThisBody(_origin: Vector3, _direction: Vector3, _length: number): RayHitInfo {
+    public raycastThisBody(_origin: Vector3, _direction: Vector3, _length: number, _debugDraw: boolean = false): RayHitInfo {
       let hitInfo: RayHitInfo = new RayHitInfo();
       let geometry: OIMO.Geometry = this.#rigidbody.getShapeList().getGeometry();
       let transform: OIMO.Transform = this.#rigidbody.getTransform();
@@ -574,7 +574,7 @@ namespace FudgeCore {
         hitInfo.rayOrigin = _origin;
         hitInfo.hitPoint = new Vector3(endpoint.x, endpoint.y, endpoint.z);
       }
-      if (Physics.settings?.debugMode != PHYSICS_DEBUGMODE.NONE) {
+      if (_debugDraw) {
         Physics.world.debugDraw.debugRay(hitInfo.rayOrigin, hitInfo.hitPoint, new Color(0, 1, 0, 1));
       }
       return hitInfo;

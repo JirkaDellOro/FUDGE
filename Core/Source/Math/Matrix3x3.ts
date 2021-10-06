@@ -185,6 +185,7 @@ namespace FudgeCore {
         0, 1, 0,
         0, 0, 1
       ]);
+      this.resetCache(); 
     }
 
     //#region Translation
