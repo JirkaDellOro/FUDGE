@@ -69,7 +69,6 @@ namespace FudgePhysics_Communication {
         ground.getComponent(f.ComponentRigidbody).addEventListener(f.EVENT_PHYSICS.COLLISION_EXIT, onCollisionExit);
         cubes[3].getComponent(f.ComponentRigidbody).addEventListener(f.EVENT_PHYSICS.TRIGGER_EXIT, onTriggerExit);
 
-        f.Physics.settings.debugDraw = true;
         f.Physics.settings.debugMode = f.PHYSICS_DEBUGMODE.CONTACTS;
         viewPort = new f.Viewport();
         viewPort.initialize("Viewport", hierarchy, cmpCamera, app);

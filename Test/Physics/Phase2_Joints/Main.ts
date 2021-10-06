@@ -302,12 +302,9 @@ namespace FudgePhysics_Communication {
         }
 
         //Physics Debugs
-        if (_event.code == f.KEYBOARD_CODE.N) { //Toggle Debug Draw
-            f.Physics.settings.debugDraw = !f.Physics.settings.debugDraw;
-        }
         if (_event.code == f.KEYBOARD_CODE.M) { //Go through the different modes
             let currentMode: number = f.Physics.settings.debugMode;
-            currentMode = currentMode == 4 ? 0 : f.Physics.settings.debugMode += 1;
+            currentMode = currentMode == 5 ? 0 : f.Physics.settings.debugMode += 1;
             f.Physics.settings.debugMode = currentMode;
         }
 

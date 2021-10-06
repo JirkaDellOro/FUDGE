@@ -574,7 +574,7 @@ namespace FudgeCore {
         hitInfo.rayOrigin = _origin;
         hitInfo.hitPoint = new Vector3(endpoint.x, endpoint.y, endpoint.z);
       }
-      if (Physics.settings.debugDraw) {
+      if (Physics.settings?.debugMode != PHYSICS_DEBUGMODE.NONE) {
         Physics.world.debugDraw.debugRay(hitInfo.rayOrigin, hitInfo.hitPoint, new Color(0, 1, 0, 1));
       }
       return hitInfo;

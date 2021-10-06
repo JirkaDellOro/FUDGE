@@ -151,7 +151,7 @@ namespace FudgePhysics_Communication {
         f.Loop.addEventListener(f.EVENT.LOOP_FRAME, update);
         f.Physics.adjustTransforms(hierarchy);
         f.Loop.start();
-        f.Physics.settings.debugDraw = true;
+        f.Physics.settings.debugMode = f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
     }
 
     function update(): void {

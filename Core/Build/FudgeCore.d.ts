@@ -4044,7 +4044,7 @@ declare namespace FudgeCore {
          * Needed since some debug informations exclude others, and can't be drawn at the same time, by OimoPhysics. And for users it provides more readability
          * to debug only what they need and is commonly debugged.
          */
-        getDebugModeFromSettings(): void;
+        setDebugMode(_mode?: PHYSICS_DEBUGMODE): void;
         /** Creating the empty render buffers. Defining the attributes used in shaders.
          * Needs to create empty buffers to already have them ready to draw later on, linking is only possible with existing buffers. */
         initializeBuffers(): void;
@@ -4138,11 +4138,12 @@ declare namespace FudgeCore {
     }
     /** Displaying different types of debug information about different physic features. Default = JOINTS_AND_COLLIDER. debugDraw in the settings must be active to see anything. */
     enum PHYSICS_DEBUGMODE {
-        COLLIDERS = 0,
-        JOINTS_AND_COLLIDER = 1,
-        BOUNDING_BOXES = 2,
-        CONTACTS = 3,
-        PHYSIC_OBJECTS_ONLY = 4
+        NONE = 0,
+        COLLIDERS = 1,
+        JOINTS_AND_COLLIDER = 2,
+        BOUNDING_BOXES = 3,
+        CONTACTS = 4,
+        PHYSIC_OBJECTS_ONLY = 5
     }
     /** Info about Raycasts shot from the physics system. */
     class RayHitInfo {
@@ -4158,8 +4159,6 @@ declare namespace FudgeCore {
     }
     /** General settings for the physic simulation and the debug of it. */
     class PhysicsSettings {
-        /** Whether the debug informations of the physics should be displayed or not (default = false) */
-        debugDraw: boolean;
         private physicsDebugMode;
         constructor(_defGroup: number, _defMask: number);
         get debugMode(): PHYSICS_DEBUGMODE;
@@ -4715,7 +4714,7 @@ declare namespace FudgeCore {
         * A frame timing can't be smaller than 1/30 of a second, or else it will be set to 30 frames, to have more consistent frame calculations.
         */
         simulate(_deltaTime?: number): void;
-        draw(_cmpCamera: ComponentCamera): void;
+        draw(_cmpCamera: ComponentCamera, _mode?: PHYSICS_DEBUGMODE): void;
         /** Connect all joints that are not connected yet. Used internally no user interaction needed. This functionality is called and needed to make sure joints connect/disconnect
          * if any of the two paired ComponentRigidbodies change.
          */
@@ -4943,6 +4942,7 @@ declare namespace FudgeCore {
         frameSourceToRender: FramingScaled;
         adjustingFrames: boolean;
         adjustingCamera: boolean;
+        physicsDebugMode: PHYSICS_DEBUGMODE;
         /**
          * Returns true if this viewport currently has focus and thus receives keyboard events
          */

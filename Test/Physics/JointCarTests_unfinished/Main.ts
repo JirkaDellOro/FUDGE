@@ -82,7 +82,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
     //PHYSICS - Start using physics by telling the physics the scene root object. Physics will recalculate every transform and initialize
     f.Physics.adjustTransforms(hierarchy);
 
-    f.Physics.settings.debugDraw = true;
+    f.Physics.settings.debugMode = f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
 
     //Important start the game loop after starting physics, so physics can use the current transform before it's first iteration
     f.Loop.addEventListener(f.EVENT.LOOP_FRAME, update); //Tell the game loop to call the update function on each frame

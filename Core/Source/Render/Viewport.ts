@@ -25,6 +25,7 @@ namespace FudgeCore {
 
     public adjustingFrames: boolean = true;
     public adjustingCamera: boolean = true;
+    public physicsDebugMode: PHYSICS_DEBUGMODE = PHYSICS_DEBUGMODE.NONE;
 
 
     #branch: Node = null; // The to render with all its descendants.
@@ -133,10 +134,11 @@ namespace FudgeCore {
 
       Render.clear(this.camera.clrBackground);
 
-      if (Physics.settings?.debugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
+      let physicsDebugMode: PHYSICS_DEBUGMODE = this.physicsDebugMode || Physics.settings?.debugMode;
+      if (physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
         Render.draw(this.camera);
-      if (Physics.settings?.debugDraw) {
-        Physics.world.draw(this.camera);
+      if (physicsDebugMode != PHYSICS_DEBUGMODE.NONE) {
+        Physics.world.draw(this.camera, physicsDebugMode);
       }
 
       this.#crc2.imageSmoothingEnabled = false;

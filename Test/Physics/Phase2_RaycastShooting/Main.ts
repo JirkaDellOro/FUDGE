@@ -83,7 +83,7 @@ namespace FudgePhysics_Communication {
         viewPort.addEventListener(f.EVENT_POINTER.MOVE, hndPointerMove);
 
         viewPort.showSceneGraph();
-        f.Physics.settings.debugDraw = true;
+        f.Physics.settings.debugMode = f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
 
         f.Loop.addEventListener(f.EVENT.LOOP_FRAME, update);
         f.Physics.adjustTransforms(hierarchy);

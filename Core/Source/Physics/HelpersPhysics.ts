@@ -86,11 +86,12 @@ namespace FudgeCore {
 
   /** Displaying different types of debug information about different physic features. Default = JOINTS_AND_COLLIDER. debugDraw in the settings must be active to see anything. */
   export enum PHYSICS_DEBUGMODE {
-    COLLIDERS = 0,
-    JOINTS_AND_COLLIDER = 1,
-    BOUNDING_BOXES = 2,
-    CONTACTS = 3,
-    PHYSIC_OBJECTS_ONLY = 4
+    NONE,
+    COLLIDERS,
+    JOINTS_AND_COLLIDER,
+    BOUNDING_BOXES,
+    CONTACTS,
+    PHYSIC_OBJECTS_ONLY
   }
 
   /** Info about Raycasts shot from the physics system. */
@@ -120,11 +121,7 @@ namespace FudgeCore {
 
   /** General settings for the physic simulation and the debug of it. */
   export class PhysicsSettings {
-
-    /** Whether the debug informations of the physics should be displayed or not (default = false) */
-    public debugDraw: boolean = false;
-
-    private physicsDebugMode: PHYSICS_DEBUGMODE = PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
+    private physicsDebugMode: PHYSICS_DEBUGMODE = PHYSICS_DEBUGMODE.NONE;
 
     constructor(_defGroup: number, _defMask: number) {
       this.defaultCollisionGroup = _defGroup;

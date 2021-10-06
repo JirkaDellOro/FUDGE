@@ -217,35 +217,28 @@ namespace FudgeCore {
      * Needed since some debug informations exclude others, and can't be drawn at the same time, by OimoPhysics. And for users it provides more readability
      * to debug only what they need and is commonly debugged.
      */
-    public getDebugModeFromSettings(): void {
-      let mode: PHYSICS_DEBUGMODE = Physics.settings.debugMode;
-      let elementsToDraw: boolean[] = new Array();
-      switch (mode) {
-        case 0: //Colliders and Bases
-          elementsToDraw = [false, true, false, false, false, false, false, false, true];
+    public setDebugMode(_mode: PHYSICS_DEBUGMODE = Physics.settings.debugMode): void {
+      // tslint:disable-next-line
+      let draw = { drawAabbs: false, drawBases: false, drawBvh: false, drawContactBases: false, drawContacts: false, drawJointLimits: false, drawJoints: false, drawPairs: false, drawShapes: false };
+
+      switch (_mode) {
+        case PHYSICS_DEBUGMODE.COLLIDERS: //Colliders and Bases
+          draw.drawBases = draw.drawShapes = true;
           break;
-        case 1: //Colliders and joints
-          elementsToDraw = [false, false, false, false, false, true, true, false, true];
+        case PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER: //Colliders and joints
+          draw.drawJoints = draw.drawJointLimits = draw.drawShapes = true;
           break;
-        case 2: //Bounding Box / Broadphase Bvh / Bases
-          elementsToDraw = [true, true, true, false, false, false, false, false, false];
+        case PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY: //Physics Objects only, shows same as Collider / Joints but also hiding every other fudge object
+          draw.drawBases = draw.drawJointLimits = draw.drawJoints = draw.drawShapes = true;
           break;
-        case 3: //Contacts
-          elementsToDraw = [false, true, false, true, true, false, false, true, true];
+        case PHYSICS_DEBUGMODE.CONTACTS: //Contacts
+          draw.drawBases = draw.drawContactBases = draw.drawContacts = draw.drawPairs = draw.drawShapes = true;
           break;
-        case 4: //Physics Objects only, shows same as Collider / Joints but also hiding every other fudge object
-          elementsToDraw = [false, true, false, false, false, true, true, false, true];
+        case PHYSICS_DEBUGMODE.BOUNDING_BOXES: //Bounding Box / Broadphase Bvh / Bases
+          draw.drawAabbs = draw.drawBases = draw.drawBvh = true;
           break;
       }
-      this.oimoDebugDraw.drawAabbs = elementsToDraw[0];
-      this.oimoDebugDraw.drawBases = elementsToDraw[1];
-      this.oimoDebugDraw.drawBvh = elementsToDraw[2];
-      this.oimoDebugDraw.drawContactBases = elementsToDraw[3];
-      this.oimoDebugDraw.drawContacts = elementsToDraw[4];
-      this.oimoDebugDraw.drawJointLimits = elementsToDraw[5];
-      this.oimoDebugDraw.drawJoints = elementsToDraw[6];
-      this.oimoDebugDraw.drawPairs = elementsToDraw[7];
-      this.oimoDebugDraw.drawShapes = elementsToDraw[8];
+      Object.assign(this.oimoDebugDraw, draw);
     }
 
     /** Creating the empty render buffers. Defining the attributes used in shaders.

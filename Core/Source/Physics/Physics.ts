@@ -75,7 +75,7 @@ namespace FudgeCore {
         hitInfo.rayOrigin = _origin;
         hitInfo.hitPoint = new Vector3(end.x, end.y, end.z);
       }
-      if (Physics.settings.debugDraw) { //Handle debugging
+      if (Physics.settings?.debugMode != PHYSICS_DEBUGMODE.NONE) { //Handle debugging
         Physics.world.debugDraw.debugRay(hitInfo.rayOrigin, hitInfo.hitPoint, new Color(0, 1, 0, 1));
       }
       return hitInfo;
@@ -201,8 +201,8 @@ namespace FudgeCore {
       }
     }
 
-    public draw(_cmpCamera: ComponentCamera): void {
-      Physics.world.debugDraw.getDebugModeFromSettings();
+    public draw(_cmpCamera: ComponentCamera, _mode?: PHYSICS_DEBUGMODE): void {
+      Physics.world.debugDraw.setDebugMode(_mode);
       Physics.world.mainCam = _cmpCamera;
       Physics.world.oimoWorld.debugDraw(); //Filling the physics world debug informations into the debug rendering handler
       Physics.world.debugDraw.drawBuffers();
