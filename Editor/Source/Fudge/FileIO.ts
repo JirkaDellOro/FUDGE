@@ -15,7 +15,7 @@ namespace Fudge {
     if (!filename)
       return;
 
-    let base: URL = new URL(new URL(filename[0]).toString() + "/");
+    let base: URL = new URL(new URL("file://" + filename[0]).toString() + "/");
     console.log("Path", base.toString());
 
     project = new Project(base);
@@ -58,7 +58,7 @@ namespace Fudge {
 
     if (!await project.openDialog())
       return;
-ƒ
+
     if (watcher)
       watcher.close();
 

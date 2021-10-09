@@ -193,7 +193,7 @@ var Fudge;
         });
         if (!filename)
             return;
-        let base = new URL(new URL(filename[0]).toString() + "/");
+        let base = new URL(new URL("file://" + filename[0]).toString() + "/");
         console.log("Path", base.toString());
         Fudge.project = new Fudge.Project(base);
         await saveProject(true);
@@ -227,7 +227,6 @@ var Fudge;
             return;
         if (!await Fudge.project.openDialog())
             return;
-        ƒ;
         if (Fudge.watcher)
             Fudge.watcher.close();
         let base = Fudge.project.base;
