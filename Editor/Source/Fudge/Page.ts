@@ -9,8 +9,10 @@ namespace Fudge {
   import ƒaid = FudgeAid;
   import ƒui = FudgeUserInterface;
 
-  export const ipcRenderer: Electron.IpcRenderer = require("electron").ipcRenderer;
+  export const ipcRenderer: Electron.IpcRenderer = require("electron").ipcRenderer; // Replace with:
   export const remote: Electron.Remote = require("electron").remote;
+  // TODO: use the following line instead in Electron version 14 and up
+  // export const remote: Electron.Remote = require("@electron/remote");
 
   export let project: Project; // = new Project();
 

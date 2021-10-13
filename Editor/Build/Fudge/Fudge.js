@@ -539,7 +539,7 @@ var Fudge;
 ///<reference path="Project.ts"/>
 (function (Fudge) {
     var ƒ = FudgeCore;
-    Fudge.ipcRenderer = require("electron").ipcRenderer;
+    Fudge.ipcRenderer = require("electron").ipcRenderer; // Replace with:
     Fudge.remote = require("electron").remote;
     /**
      * The uppermost container for all panels controlling data flow between.

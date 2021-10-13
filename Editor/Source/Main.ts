@@ -8,6 +8,8 @@ namespace Main {
   //#region Types and Data
 
   const { app, BrowserWindow, Menu, ipcMain } = require("electron");
+  // TODO: use the following line in Electron version 14 and up
+  // require("@electron/remote/main").initialize();
 
   let fudge: Electron.BrowserWindow;
   let defaultWidth: number = 800;
