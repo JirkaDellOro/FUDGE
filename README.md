@@ -3,6 +3,15 @@
 # Welcome!
 FUDGE is a lightweight open-source game engine and editor created for educating students in an academic environment in the field of design and development of games and highly interactive applications. It may also be used as a rapid prototyping tool to easly convey and evaluate ideas for applications and games and as a tool to create educational games.
 
+# Setup Runtime Environment
+Include the script FudgeCore.js in the head of your HTML-page for the minimal setup.  
+```html 
+<script src="https://jirkadelloro.github.io/FUDGE/Core/Build/FudgeCore.js"></script>
+```
+See and examine this example for a minimal scene
+
+
+
 # Wiki
 To get started with FUDGE, please browse through the [Wiki](https://github.com/JirkaDellOro/FUDGE/wiki) to learn about the core concepts and the inner workings of FUDGE. Doing so will grant you an intuitive understanding extremely helpful for further working with FUDGE.
 
@@ -61,7 +70,7 @@ A collection of various other helpful documents and resources
 | Monika Galkewitsch | UI-Components                     |
 | Lea Stegk          | UI-Design                         |
 | Elke Scherffius    | Tutorials                         |
-| Marko Fehrenbach   | Physics                         |
-| Jonas Plotzky      | Particlesystem                         |
-| Robin Schwab      | Modeller                         |
-| Luis Keck      | Shader-System                         |
+| Marko Fehrenbach   | Physics                           |
+| Jonas Plotzky      | Particlesystem                    |
+| Robin Schwab       | Modeller                          |
+| Luis Keck          | Shader-System                     |
