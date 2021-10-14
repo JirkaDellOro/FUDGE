@@ -12,7 +12,9 @@ function createWindow() {
     // require is not possible
     win = new BrowserWindow({
         webPreferences: {
-            nodeIntegration: true
+            nodeIntegration: true,
+            enableRemoteModule: true,
+            contextIsolation: false
         }
     });
     if (win === null) {
