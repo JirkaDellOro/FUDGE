@@ -11,7 +11,7 @@ Include the script FudgeCore.js in the head of your HTML-page for the minimal se
 See and examine this example for a minimal scene below or in this [codepen](https://codepen.io/JirkaDellOro/pen/VwzveRP)
 <details>
 <summary>Minimal.html</summary>
-<xmp>
+<pre><code>
 <head>
   <script src="https://jirkadelloro.github.io/FUDGE/Core/Build/FudgeCore.js"></script>
   <script>
@@ -43,7 +43,7 @@ See and examine this example for a minimal scene below or in this [codepen](http
 </body>
 
 </html>
-</xmp>
+</code></pre>
 </details>
 
 # Setup Editor Environment
