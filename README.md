@@ -41,8 +41,6 @@ See and examine this example for a minimal scene below or in this [codepen](http
 <body>
   <canvas></canvas>
 </body>
-
-</html>
 </pre>
 </details>
 
