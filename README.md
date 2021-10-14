@@ -8,32 +8,71 @@ Include the script FudgeCore.js in the head of your HTML-page for the minimal se
 ```html 
 <script src="https://jirkadelloro.github.io/FUDGE/Core/Build/FudgeCore.js"></script>
 ```
-See and examine this example for a minimal scene
+See and examine this example for a minimal scene below or in this [codepen](https://codepen.io/JirkaDellOro/pen/VwzveRP)
+<details>
+<summary>Minimal.html</summary>
+<xmp>
+<head>
+  <script src="https://jirkadelloro.github.io/FUDGE/Core/Build/FudgeCore.js"></script>
+  <script>
+    window.addEventListener("load", start); // call start when load completed
 
+    function start() {
+      let ƒ = FudgeCore;
+      let mesh = new ƒ.MeshQuad("Quad"); // create a simple mesh representing a square
+      let material = new ƒ.Material("Texture", FudgeCore.ShaderTexture); // create a material with the default texture for testing
 
+      let node = new ƒ.Node(); // create a node as the scene graph
+      node.addComponent(new ƒ.ComponentMesh(mesh)); // refer the mesh to the node
+      node.addComponent(new ƒ.ComponentMaterial(material)); // refer the material to the node
 
-# Wiki
+      let cmpCamera = new ƒ.ComponentCamera(); // setup a camera
+      cmpCamera.mtxPivot.translateZ(2); // move the camera forward
+      cmpCamera.mtxPivot.rotateY(180); // and turn it around so it looks back toward the node
+
+      let viewport = new ƒ.Viewport(); // create a viewport to manage rendering of the graph to the canvas via the camera
+      viewport.initialize("Viewport", node, cmpCamera, document.querySelector("canvas"));
+
+      viewport.draw(); // render
+    }
+  </script>
+</head>
+
+<body>
+  <canvas></canvas>
+</body>
+
+</html>
+</xmp>
+</details>
+
+# Setup Editor Environment
+- clone this repository
+- install modules required by typing `npm install` in a terminal on the FUDGE-folder
+- start the editor by typing `electron Editor/Electron` or `npm run-script run` or envoking the file FUDGE.bat using the mouse 
+
+# Learn fundamentals
 To get started with FUDGE, please browse through the [Wiki](https://github.com/JirkaDellOro/FUDGE/wiki) to learn about the core concepts and the inner workings of FUDGE. Doing so will grant you an intuitive understanding extremely helpful for further working with FUDGE.
 
-# Code Overview
+# Overview
 Find the source code on [Github](https://github.com/JirkaDellOro)  
-## Core
+- Core  
 Contains the core functionality of FUDGE needed to create games. For many games it's sufficient to work only with this module.
-## Aid
+- Aid  
 Contains collections of classes for convenience, bundling and simplifying common procedures.
-## Physics
+- Physics  
 Contains an adapted version of the Oimo-Physics-Engine that works with FUDGE  
-## UserInterface
+- UserInterface  
 Contains the classes for easy and even automatic creation of graphical interfaces using the mutator concept (see Wiki). This module is heavily used in the editor and can be used and extended for games.
-## Network
+- Network  
 Contains components for gaming over networks. This module is not fully evaluated yet.
-## Editor
+- Editor  
 The directory of the actual standalone editor to be executed with Electron or packed as executable by an Electron packager
-## Documentation
+- Documentation
 Contains the design logs, diagrams (partially used in the wiki), tutorials and the API-References
-## Test
+- Test  
 Contains programs to test the functionality of various components of FUDGE separately, thus also serve as a resource for learning about those functionalities and how to set them up.
-## Miscellaneous	
+- Miscellaneous	
 A collection of various other helpful documents and resources
 
 # Documentation
@@ -43,7 +82,6 @@ A collection of various other helpful documents and resources
 
 # Call for papers
 ## ToDo
-- Bones
 - Cameratransformation, Axonometry and VR
 - Diegetic User-Interface
 - Grapheditor/Wiring for Shader and Animation
@@ -54,9 +92,10 @@ A collection of various other helpful documents and resources
 - Undo/Rollback
 - Selection-Sets to store temporary Groups
 - Advanced texturing
-## In Progress
-- Redesign Golden Layout
 - Input-Manager  
+## In Progress
+- Skeleton System
+- Particle Editor
 ## Done  
 
 | Name               | Area                              |
@@ -74,3 +113,4 @@ A collection of various other helpful documents and resources
 | Jonas Plotzky      | Particlesystem                    |
 | Robin Schwab       | Modeller                          |
 | Luis Keck          | Shader-System                     |
+| Marius König       | Integration Golden Layout 2       |
