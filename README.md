@@ -12,6 +12,7 @@ See and examine this example for a minimal scene below or in this [codepen](http
 <details>
 <summary>Minimal.html</summary>
 <pre>
+<html>
 <head>
   <script src="https://jirkadelloro.github.io/FUDGE/Core/Build/FudgeCore.js"></script>
   <script>
@@ -41,6 +42,7 @@ See and examine this example for a minimal scene below or in this [codepen](http
 <body>
   <canvas></canvas>
 </body>
+</html>
 </pre>
 </details>
 
