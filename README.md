@@ -38,9 +38,9 @@ Visit the [reference](https://JirkaDellOro.github.io/FUDGE/Documentation/Referen
 ### Network  
 Contains components for gaming over networks. This module is not fully evaluated yet.
 ### Documentation
-Contains the design logs, diagrams (partially used in the wiki), tutorials and the API-References
+Contains the design logs, diagrams (partially used in the wiki), tutorials and the API-References.  
 ### Test  
-Contains programs to test the functionality of various components of FUDGE separately, thus also serve as a resource for learning about those functionalities and how to set them up.
+Contains programs to test the functionality of various components of FUDGE separately, thus also serve as a resource for learning about those functionalities and how to set them up. Use a local server to run the tests locally on your machine.  
 ### Miscellaneous	
 A collection of various other helpful documents and resources
 
