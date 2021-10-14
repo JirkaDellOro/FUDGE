@@ -8,43 +8,7 @@ Include the script FudgeCore.js in the head of your HTML-page for the minimal se
 ```html 
 <script src="https://jirkadelloro.github.io/FUDGE/Core/Build/FudgeCore.js"></script>
 ```
-See and examine this example for a minimal scene below or in this [codepen](https://codepen.io/JirkaDellOro/pen/VwzveRP)
-<details>
-<summary>Minimal.html</summary>
-<pre><code>
-<html>
-<head>
-  <script src="https://jirkadelloro.github.io/FUDGE/Core/Build/FudgeCore.js"></script>
-  <script>
-    window.addEventListener("load", start); // call start when load completed
-
-    function start() {
-      let ƒ = FudgeCore;
-      let mesh = new ƒ.MeshQuad("Quad"); // create a simple mesh representing a square
-      let material = new ƒ.Material("Texture", FudgeCore.ShaderTexture); // create a material with the default texture for testing
-
-      let node = new ƒ.Node(); // create a node as the scene graph
-      node.addComponent(new ƒ.ComponentMesh(mesh)); // refer the mesh to the node
-      node.addComponent(new ƒ.ComponentMaterial(material)); // refer the material to the node
-
-      let cmpCamera = new ƒ.ComponentCamera(); // setup a camera
-      cmpCamera.mtxPivot.translateZ(2); // move the camera forward
-      cmpCamera.mtxPivot.rotateY(180); // and turn it around so it looks back toward the node
-
-      let viewport = new ƒ.Viewport(); // create a viewport to manage rendering of the graph to the canvas via the camera
-      viewport.initialize("Viewport", node, cmpCamera, document.querySelector("canvas"));
-
-      viewport.draw(); // render
-    }
-  </script>
-</head>
-
-<body>
-  <canvas></canvas>
-</body>
-</html>
-</pre></code>
-</details>
+See and examine this example of a [minimal scene on codepen](https://codepen.io/JirkaDellOro/pen/VwzveRP)
 
 # Setup Editor Environment
 - clone this repository
