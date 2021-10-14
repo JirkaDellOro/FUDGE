@@ -1,6 +1,6 @@
 namespace Script {
   import ƒ = FudgeCore;
-  ƒ.Debug.info("Main Program Template running!")
+  ƒ.Debug.info("Main Program Template running!");
 
   let viewport: ƒ.Viewport;
   document.addEventListener("interactiveViewportStarted", <EventListener>start);
