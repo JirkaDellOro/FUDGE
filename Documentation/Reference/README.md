@@ -1,4 +1,4 @@
 # API-Reference
-[Core](Core/modules/fudgecore.html)  
-[Aid](Aid/modules/fudgeaid.html)  
-[UserInterface](UserInterface/modules/fudgeuserinterface.html)  
+[Core](Core/modules/FudgeCore.html)  
+[Aid](Aid/modules/FudgeAid.html)  
+[UserInterface](UserInterface/modules/FudgeUserinterface.html)  
