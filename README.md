@@ -21,17 +21,20 @@ To get started with FUDGE, please browse through the [Wiki](https://github.com/J
 # Overview
 Find the source code on [Github](https://github.com/JirkaDellOro)  
 - Core  
-Contains the core functionality of FUDGE needed to create games. For many games it's sufficient to work only with this module.
+Contains the core functionality of FUDGE needed to create games. For many games it's sufficient to work only with this module.  
+See this [diagram](https://jirkadelloro.github.io/FUDGE/Documentation/Design/FUDGECoreClassdiagram.svg) to get an overview of its structure.  
+Visit the [reference](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/Core/modules/FudgeCore.html) for detailed explanation.  
+- Editor  
+The directory of the actual standalone editor to be executed with Electron or packed as executable by an Electron packager
 - Aid  
-Contains collections of classes for convenience, bundling and simplifying common procedures.
+Contains collections of classes for convenience, bundling and simplifying common procedures.  
+Visit the [reference](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/Aid/modules/FudgeAid.html) for detailed explanation.  
 - Physics  
 Contains an adapted version of the Oimo-Physics-Engine that works with FUDGE  
 - UserInterface  
 Contains the classes for easy and even automatic creation of graphical interfaces using the mutator concept (see Wiki). This module is heavily used in the editor and can be used and extended for games.
 - Network  
 Contains components for gaming over networks. This module is not fully evaluated yet.
-- Editor  
-The directory of the actual standalone editor to be executed with Electron or packed as executable by an Electron packager
 - Documentation
 Contains the design logs, diagrams (partially used in the wiki), tutorials and the API-References
 - Test  
