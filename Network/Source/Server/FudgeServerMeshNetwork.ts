@@ -1,5 +1,5 @@
 import WebSocket from "ws";
-import * as FudgeNetwork from "../ModuleCollector";
+import * as FudgeNetwork from "../ModuleCollector.js";
 
 export class FudgeServerMeshNetwork implements FudgeNetwork.MeshNetworkSignalingServer {
 

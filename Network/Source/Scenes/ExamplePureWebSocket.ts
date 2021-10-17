@@ -1,4 +1,4 @@
-import * as FudgeNetwork from "../ModuleCollector";
+import * as FudgeNetwork from "../ModuleCollector.js";
 
 let isServer: boolean = false;
 const pureWebSocketClient: FudgeNetwork.ClientManagerWebSocketOnly = new FudgeNetwork.ClientManagerWebSocketOnly();
@@ -17,50 +17,50 @@ FudgeNetwork.UiElementHandler.webSocketServerSendMessageButton.addEventListener(
 FudgeNetwork.UiElementHandler.signalingElements.style.display = "block";
 FudgeNetwork.UiElementHandler.serverElements.style.display = "none";
 
-function broadcastMessageToClients() {
-    let messageToBroadcast = new FudgeNetwork.NetworkMessageMessageToClient(FudgeNetwork.UiElementHandler.webSocketServerMessageInput.value);
-    pureWebSocketServer.broadcastMessageToAllConnectedClients(messageToBroadcast);
+function broadcastMessageToClients(): void {
+  let messageToBroadcast: FudgeNetwork.NetworkMessageMessageToClient = new FudgeNetwork.NetworkMessageMessageToClient(FudgeNetwork.UiElementHandler.webSocketServerMessageInput.value);
+  pureWebSocketServer.broadcastMessageToAllConnectedClients(messageToBroadcast);
 }
 function startingUpSignalingServer(): void {
-    pureWebSocketServer.startUpServer();
+  pureWebSocketServer.startUpServer();
 }
 
 function connectToSignalingServer(): void {
-    pureWebSocketClient.signalingServerConnectionUrl = "ws://" + FudgeNetwork.UiElementHandler.signalingUrl.value;
-    pureWebSocketClient.connectToSignalingServer();
+  pureWebSocketClient.signalingServerConnectionUrl = "ws://" + FudgeNetwork.UiElementHandler.signalingUrl.value;
+  pureWebSocketClient.connectToSignalingServer();
 }
 
 function createLoginRequestWithUsername(): void {
-    let chosenUserName: string = "";
-    console.log(FudgeNetwork.UiElementHandler.sendMsgButton);
-    if (FudgeNetwork.UiElementHandler.loginNameInput) {
-        chosenUserName = FudgeNetwork.UiElementHandler.loginNameInput.value;
-        console.log("Username:" + chosenUserName);
-        pureWebSocketClient.checkChosenUsernameAndCreateLoginRequest(chosenUserName);
-    }
-    else {
-        console.error("UI element missing: Loginname Input field");
-    }
+  let chosenUserName: string = "";
+  console.log(FudgeNetwork.UiElementHandler.sendMsgButton);
+  if (FudgeNetwork.UiElementHandler.loginNameInput) {
+    chosenUserName = FudgeNetwork.UiElementHandler.loginNameInput.value;
+    console.log("Username:" + chosenUserName);
+    pureWebSocketClient.checkChosenUsernameAndCreateLoginRequest(chosenUserName);
+  }
+  else {
+    console.error("UI element missing: Loginname Input field");
+  }
 }
 
-function sendMessageToServer() {
-    console.log("sending message");
-    let messageToSend: FudgeNetwork.NetworkMessageMessageToServer = new FudgeNetwork.NetworkMessageMessageToServer(pureWebSocketClient.getLocalClientId(), FudgeNetwork.UiElementHandler.msgInput.value, pureWebSocketClient.localUserName);
-    pureWebSocketClient.sendTextMessageToSignalingServer(messageToSend);
+function sendMessageToServer(): void {
+  console.log("sending message");
+  let messageToSend: FudgeNetwork.NetworkMessageMessageToServer = new FudgeNetwork.NetworkMessageMessageToServer(pureWebSocketClient.getLocalClientId(), FudgeNetwork.UiElementHandler.msgInput.value, pureWebSocketClient.localUserName);
+  pureWebSocketClient.sendTextMessageToSignalingServer(messageToSend);
 }
 
 function switchServerMode(): void {
-    let switchbutton: HTMLButtonElement = FudgeNetwork.UiElementHandler.switchModeButton as HTMLButtonElement;
-    if (!isServer) {
-        switchbutton.textContent = "Switch to Clientmode";
-        FudgeNetwork.UiElementHandler.signalingElements.style.display = "none";
-        FudgeNetwork.UiElementHandler.serverElements.style.display = "block";
-        isServer = true;
-    }
-    else {
-        switchbutton.textContent = "Switch to Servermode";
-        FudgeNetwork.UiElementHandler.signalingElements.style.display = "block";
-        FudgeNetwork.UiElementHandler.serverElements.style.display = "none";
-        isServer = false;
-    }
+  let switchbutton: HTMLButtonElement = FudgeNetwork.UiElementHandler.switchModeButton as HTMLButtonElement;
+  if (!isServer) {
+    switchbutton.textContent = "Switch to Clientmode";
+    FudgeNetwork.UiElementHandler.signalingElements.style.display = "none";
+    FudgeNetwork.UiElementHandler.serverElements.style.display = "block";
+    isServer = true;
+  }
+  else {
+    switchbutton.textContent = "Switch to Servermode";
+    FudgeNetwork.UiElementHandler.signalingElements.style.display = "block";
+    FudgeNetwork.UiElementHandler.serverElements.style.display = "none";
+    isServer = false;
+  }
 }

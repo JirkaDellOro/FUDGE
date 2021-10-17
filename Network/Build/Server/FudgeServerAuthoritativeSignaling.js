@@ -1,54 +1,21 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.FudgeServerAuthoritativeSignaling = void 0;
-const ws_1 = __importDefault(require("ws"));
-const FudgeNetwork = __importStar(require("../ModuleCollector"));
-class FudgeServerAuthoritativeSignaling {
+import WebSocket from "ws";
+import * as FudgeNetwork from "../ModuleCollector.js";
+export class FudgeServerAuthoritativeSignaling {
     websocketServer;
     connectedClientsCollection = new Array();
     authoritativeServerManager;
     startUpServer = (_serverPort) => {
         console.log(_serverPort);
         if (!_serverPort) {
-            this.websocketServer = new ws_1.default.Server({ port: 8080 });
+            this.websocketServer = new WebSocket.Server({ port: 8080 });
         }
         else {
-            this.websocketServer = new ws_1.default.Server({ port: _serverPort });
+            this.websocketServer = new WebSocket.Server({ port: _serverPort });
         }
         this.setAuthoritativeServerEntity(new FudgeNetwork.FudgeServerAuthoritativeManager());
         this.authoritativeServerManager.signalingServer = this;
         this.addServerEventHandling();
     };
-    setAuthoritativeServerEntity(_entity) {
-        if (this.authoritativeServerManager) {
-            console.error("Server Entity already exists, did you try to assign it twice?");
-        }
-        else {
-            this.authoritativeServerManager = _entity;
-        }
-    }
     getAuthoritativeServerEntity() {
         return this.authoritativeServerManager;
     }
@@ -184,6 +151,14 @@ class FudgeServerAuthoritativeSignaling {
             client.clientConnection.send(stringifiedObject);
         }
     };
+    setAuthoritativeServerEntity(_entity) {
+        if (this.authoritativeServerManager) {
+            console.error("Server Entity already exists, did you try to assign it twice?");
+        }
+        else {
+            this.authoritativeServerManager = _entity;
+        }
+    }
     // Helper function for searching through a collection, finding objects by key and value, returning
     // Object that has that value
     // tslint:disable-next-line: no-any
@@ -219,4 +194,3 @@ class FudgeServerAuthoritativeSignaling {
         return stringifiedObject;
     };
 }
-exports.FudgeServerAuthoritativeSignaling = FudgeServerAuthoritativeSignaling;

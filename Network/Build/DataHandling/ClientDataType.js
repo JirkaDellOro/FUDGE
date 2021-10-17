@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ClientDataType = void 0;
-class ClientDataType {
+export class ClientDataType {
     clientConnection;
     id;
     userName;
@@ -20,4 +17,3 @@ class ClientDataType {
         // this.connectedRoom = connectedToRoom || null;
     }
 }
-exports.ClientDataType = ClientDataType;

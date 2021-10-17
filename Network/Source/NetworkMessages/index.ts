@@ -1,1 +1,1 @@
-export * from "./NetworkMessageCollection";
+export * from "./NetworkMessageCollection.js";

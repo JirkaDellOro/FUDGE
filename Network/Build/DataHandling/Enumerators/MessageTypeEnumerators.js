@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.SERVER_COMMAND_TYPE = exports.MESSAGE_TYPE = void 0;
-var MESSAGE_TYPE;
+export var MESSAGE_TYPE;
 (function (MESSAGE_TYPE) {
     MESSAGE_TYPE["UNDEFINED"] = "undefined";
     MESSAGE_TYPE["ID_ASSIGNED"] = "id_assigned";
@@ -19,8 +16,8 @@ var MESSAGE_TYPE;
     MESSAGE_TYPE["PEER_TO_SERVER_COMMAND"] = "server_command";
     MESSAGE_TYPE["PEER_TEXT_MESSAGE"] = "peer_text_message";
     MESSAGE_TYPE["SERVER_TO_PEER_MESSAGE"] = "server_to_peer_message";
-})(MESSAGE_TYPE = exports.MESSAGE_TYPE || (exports.MESSAGE_TYPE = {}));
-var SERVER_COMMAND_TYPE;
+})(MESSAGE_TYPE || (MESSAGE_TYPE = {}));
+export var SERVER_COMMAND_TYPE;
 (function (SERVER_COMMAND_TYPE) {
     SERVER_COMMAND_TYPE["UNDEFINED"] = "undefined";
     SERVER_COMMAND_TYPE["DISCONNECT_CLIENT"] = "disconnect_client";
@@ -29,4 +26,4 @@ var SERVER_COMMAND_TYPE;
     SERVER_COMMAND_TYPE["DESTROY_OBJECT"] = "destroy_object";
     SERVER_COMMAND_TYPE["KEYS_INPUT"] = "keys_input";
     SERVER_COMMAND_TYPE["MOVEMENT_VALUE"] = "movement_value";
-})(SERVER_COMMAND_TYPE = exports.SERVER_COMMAND_TYPE || (exports.SERVER_COMMAND_TYPE = {}));
+})(SERVER_COMMAND_TYPE || (SERVER_COMMAND_TYPE = {}));

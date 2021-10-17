@@ -1,41 +1,16 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.FudgeServerWebSocket = void 0;
-const ws_1 = __importDefault(require("ws"));
-const FudgeNetwork = __importStar(require("../ModuleCollector"));
-const DataHandling_1 = require("../DataHandling");
-class FudgeServerWebSocket {
+import WebSocket from "ws";
+import * as FudgeNetwork from "../ModuleCollector.js";
+import { UiElementHandler } from "../DataHandling/index.js";
+export class FudgeServerWebSocket {
     websocketServer;
     connectedClientsCollection = new Array();
     startUpServer = (_serverPort) => {
         console.log(_serverPort);
         if (!_serverPort) {
-            this.websocketServer = new ws_1.default.Server({ port: 8080 });
+            this.websocketServer = new WebSocket.Server({ port: 8080 });
         }
         else {
-            this.websocketServer = new ws_1.default.Server({ port: _serverPort });
+            this.websocketServer = new WebSocket.Server({ port: _serverPort });
         }
         this.addServerEventHandling();
     };
@@ -111,9 +86,9 @@ class FudgeServerWebSocket {
         }
     }
     displayMessageOnServer(_objectifiedMessage) {
-        if (DataHandling_1.UiElementHandler.webSocketServerChatBox != null || undefined) {
+        if (UiElementHandler.webSocketServerChatBox != null || undefined) {
             let username = this.searchForClientWithId(_objectifiedMessage.originatorId).userName;
-            DataHandling_1.UiElementHandler.webSocketServerChatBox.innerHTML += "\n" + _objectifiedMessage.originatorUserName + ": " + _objectifiedMessage.messageData;
+            UiElementHandler.webSocketServerChatBox.innerHTML += "\n" + _objectifiedMessage.originatorUserName + ": " + _objectifiedMessage.messageData;
         }
         else {
             console.log("To display the message, add appropriate UiElemenHandler object");
@@ -142,8 +117,8 @@ class FudgeServerWebSocket {
         }
     }
     broadcastMessageToAllConnectedClients(_messageToBroadcast) {
-        if (DataHandling_1.UiElementHandler.webSocketServerChatBox != null || undefined) {
-            DataHandling_1.UiElementHandler.webSocketServerChatBox.innerHTML += "\n" + "SERVER: " + _messageToBroadcast.messageData;
+        if (UiElementHandler.webSocketServerChatBox != null || undefined) {
+            UiElementHandler.webSocketServerChatBox.innerHTML += "\n" + "SERVER: " + _messageToBroadcast.messageData;
         }
         else {
             console.log("To display the message, add appropriate UiElemenHandler object");
@@ -212,4 +187,3 @@ class FudgeServerWebSocket {
         return this.searchForPropertyValueInCollection(_websocketConnectionToSearchFor, "clientConnection", _collectionToSearch);
     };
 }
-exports.FudgeServerWebSocket = FudgeServerWebSocket;

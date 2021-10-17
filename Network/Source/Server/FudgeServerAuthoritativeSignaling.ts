@@ -1,5 +1,5 @@
 import WebSocket from "ws";
-import * as FudgeNetwork from "../ModuleCollector";
+import * as FudgeNetwork from "../ModuleCollector.js";
 export class FudgeServerAuthoritativeSignaling implements FudgeNetwork.SignalingServer {
 
     public websocketServer!: WebSocket.Server;
@@ -20,14 +20,6 @@ export class FudgeServerAuthoritativeSignaling implements FudgeNetwork.Signaling
         this.addServerEventHandling();
     }
 
-    private setAuthoritativeServerEntity(_entity: FudgeNetwork.FudgeServerAuthoritativeManager) {
-        if (this.authoritativeServerManager) {
-            console.error("Server Entity already exists, did you try to assign it twice?");
-        }
-        else {
-            this.authoritativeServerManager = _entity;
-        }
-    }
     public getAuthoritativeServerEntity(): FudgeNetwork.FudgeServerAuthoritativeManager {
         return this.authoritativeServerManager;
     }
@@ -193,6 +185,16 @@ export class FudgeServerAuthoritativeSignaling implements FudgeNetwork.Signaling
             client.clientConnection.send(stringifiedObject);
         }
 
+    }
+
+
+    private setAuthoritativeServerEntity(_entity: FudgeNetwork.FudgeServerAuthoritativeManager): void {
+        if (this.authoritativeServerManager) {
+            console.error("Server Entity already exists, did you try to assign it twice?");
+        }
+        else {
+            this.authoritativeServerManager = _entity;
+        }
     }
 
     // Helper function for searching through a collection, finding objects by key and value, returning

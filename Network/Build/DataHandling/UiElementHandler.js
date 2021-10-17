@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.UiElementHandler = void 0;
-class UiElementHandler {
+export class UiElementHandler {
     // tslint:disable-next-line: typedef
     static electronWindow;
     static signalingSubmit;
@@ -130,4 +127,3 @@ class UiElementHandler {
         return movingDiv;
     }
 }
-exports.UiElementHandler = UiElementHandler;

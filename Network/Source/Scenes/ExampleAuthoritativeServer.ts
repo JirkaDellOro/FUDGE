@@ -1,5 +1,5 @@
-import * as FudgeNetwork from "../ModuleCollector";
-import { PeerMessageSimpleText } from "../NetworkMessages";
+import * as FudgeNetwork from "../ModuleCollector.js";
+import { PeerMessageSimpleText } from "../NetworkMessages/index.js";
 
 let isServer: boolean = false;
 const networkClient: FudgeNetwork.ClientManagerAuthoritativeStructure = new FudgeNetwork.ClientManagerAuthoritativeStructure();
