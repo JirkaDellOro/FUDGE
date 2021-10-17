@@ -1,4 +1,4 @@
-import * as FudgeNetwork from "../ModuleCollector.js";
+import * as FudgeNetwork from "../ModuleCollectorServer.js";
 export class FudgeServerAuthoritativeManager {
 
     // tslint:disable-next-line: no-any

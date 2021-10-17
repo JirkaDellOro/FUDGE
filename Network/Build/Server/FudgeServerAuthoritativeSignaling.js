@@ -1,5 +1,5 @@
 import WebSocket from "ws";
-import * as FudgeNetwork from "../ModuleCollector.js";
+import * as FudgeNetwork from "../ModuleCollectorServer.js";
 export class FudgeServerAuthoritativeSignaling {
     websocketServer;
     connectedClientsCollection = new Array();

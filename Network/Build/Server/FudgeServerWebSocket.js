@@ -1,6 +1,8 @@
 import WebSocket from "ws";
-import * as FudgeNetwork from "../ModuleCollector.js";
-import { UiElementHandler } from "../DataHandling/index.js";
+import * as FudgeNetwork from "../ModuleCollectorServer.js";
+import * as DataHandling from "../DataHandling/index.js";
+const UiElementHandler = DataHandling.UiElementHandler;
+
 export class FudgeServerWebSocket {
     websocketServer;
     connectedClientsCollection = new Array();

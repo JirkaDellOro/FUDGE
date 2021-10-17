@@ -1,4 +1,4 @@
-import * as FudgeNetwork from "../ModuleCollector.js";
+import * as FudgeNetwork from "../ModuleCollectorClient.js";
 export class ClientManagerAuthoritativeStructure {
     signalingServerConnectionUrl = "ws://localhost:8080";
     localUserName;
@@ -84,24 +84,6 @@ export class ClientManagerAuthoritativeStructure {
         }
         this.createLoginRequestAndSendToServer(_loginName);
     };
-    createLoginRequestAndSendToServer = (_requestingUsername) => {
-        try {
-            const loginMessage = new FudgeNetwork.NetworkMessageLoginRequest(this.localClientID, _requestingUsername);
-            this.sendMessageToSignalingServer(loginMessage);
-        }
-        catch (error) {
-            console.error("Unexpected error: Sending Login Request", error);
-        }
-    };
-    loginValidAddUser = (_assignedId, _loginSuccess, _originatorUserName) => {
-        if (_loginSuccess) {
-            this.setOwnUserName(_originatorUserName);
-            console.log("Local Username: " + this.localUserName);
-        }
-        else {
-            console.log("Login failed, username taken");
-        }
-    };
     createRTCPeerConnectionAndAddEventListeners = () => {
         console.log("Creating RTC Connection");
         try {
@@ -110,15 +92,6 @@ export class ClientManagerAuthoritativeStructure {
         }
         catch (error) {
             console.error("Unexpecte Error: Creating Client Peerconnection", error);
-        }
-    };
-    assignIdAndSendConfirmation = (_message) => {
-        try {
-            this.setOwnClientId(_message.assignedId);
-            this.sendMessageToSignalingServer(new FudgeNetwork.NetworkMessageIdAssigned(this.localClientID));
-        }
-        catch (error) {
-            console.error("Unexpected Error: Sending ID Confirmation", error);
         }
     };
     beginPeerConnectionNegotiation = (_userNameForOffer) => {
@@ -239,16 +212,6 @@ export class ClientManagerAuthoritativeStructure {
             console.error("Unexpected Error: RemoteDatachannel");
         }
     };
-    stringifyObjectForNetworkSending = (_objectToStringify) => {
-        let stringifiedObject = "";
-        try {
-            stringifiedObject = JSON.stringify(_objectToStringify);
-        }
-        catch (error) {
-            console.error("JSON Parse failed", error);
-        }
-        return stringifiedObject;
-    };
     sendMessageToSignalingServer = (_message) => {
         let stringifiedMessage = this.stringifyObjectForNetworkSending(_message);
         if (this.webSocketConnectionToSignalingServer.readyState == 1) {
@@ -337,17 +300,54 @@ export class ClientManagerAuthoritativeStructure {
             }
         }
     };
-    setOwnClientId(_id) {
-        this.localClientID = _id;
-    }
     getLocalClientId() {
         return this.localClientID;
+    }
+    getLocalUserName() {
+        return this.localUserName == "" || undefined ? "Kein Username vergeben" : this.localUserName;
     }
     setOwnUserName(_name) {
         this.localUserName = _name;
     }
-    getLocalUserName() {
-        return this.localUserName == "" || undefined ? "Kein Username vergeben" : this.localUserName;
+    createLoginRequestAndSendToServer = (_requestingUsername) => {
+        try {
+            const loginMessage = new FudgeNetwork.NetworkMessageLoginRequest(this.localClientID, _requestingUsername);
+            this.sendMessageToSignalingServer(loginMessage);
+        }
+        catch (error) {
+            console.error("Unexpected error: Sending Login Request", error);
+        }
+    };
+    loginValidAddUser = (_assignedId, _loginSuccess, _originatorUserName) => {
+        if (_loginSuccess) {
+            this.setOwnUserName(_originatorUserName);
+            console.log("Local Username: " + this.localUserName);
+        }
+        else {
+            console.log("Login failed, username taken");
+        }
+    };
+    assignIdAndSendConfirmation = (_message) => {
+        try {
+            this.setOwnClientId(_message.assignedId);
+            this.sendMessageToSignalingServer(new FudgeNetwork.NetworkMessageIdAssigned(this.localClientID));
+        }
+        catch (error) {
+            console.error("Unexpected Error: Sending ID Confirmation", error);
+        }
+    };
+    stringifyObjectForNetworkSending = (_objectToStringify) => {
+        let stringifiedObject = "";
+        try {
+            stringifiedObject = JSON.stringify(_objectToStringify);
+        }
+        catch (error) {
+            console.error("JSON Parse failed", error);
+        }
+        return stringifiedObject;
+    };
+    setOwnClientId(_id) {
+        this.localClientID = _id;
     }
     dataChannelStatusChangeHandler = (event) => {
         //TODO Reconnection logic

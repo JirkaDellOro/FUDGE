@@ -1,4 +1,4 @@
-import * as FudgeNetwork from "../ModuleCollector.js";
+import * as FudgeNetwork from "../ModuleCollectorServer.js";
 import WebSocket from "ws";
 
 export interface WSServer {

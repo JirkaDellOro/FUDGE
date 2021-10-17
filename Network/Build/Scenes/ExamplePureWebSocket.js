@@ -1,4 +1,4 @@
-import * as FudgeNetwork from "../ModuleCollector.js";
+import * as FudgeNetwork from "../ModuleCollectorServer.js";
 let isServer = false;
 const pureWebSocketClient = new FudgeNetwork.ClientManagerWebSocketOnly();
 const pureWebSocketServer = new FudgeNetwork.FudgeServerWebSocket();

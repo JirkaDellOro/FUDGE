@@ -1,4 +1,4 @@
-import * as FudgeNetwork from "../ModuleCollector.js";
+import * as FudgeNetwork from "../ModuleCollectorClient.js";
 
 export class ClientManagerWebSocketOnly implements FudgeNetwork.ClientManagerWebSocketTemplate {
 

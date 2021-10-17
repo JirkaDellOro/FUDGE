@@ -1,4 +1,4 @@
-import * as FudgeNetwork from "../ModuleCollector.js";
+import * as FudgeNetwork from "../ModuleCollectorClient.js";
 
 export class ClientManagerSinglePeer implements FudgeNetwork.ClientManagerSinglePeer {
     public signalingServerConnectionUrl: string = "ws://localhost:8080";

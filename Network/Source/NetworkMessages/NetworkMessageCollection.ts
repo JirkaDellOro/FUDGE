@@ -1,4 +1,4 @@
-import * as FudgeNetwork from "../ModuleCollector.js";
+import * as FudgeNetwork from "../ModuleCollectorClient.js";
 export interface NetworkMessageMessageBase {
     readonly messageType: FudgeNetwork.MESSAGE_TYPE;
     readonly originatorId: string;

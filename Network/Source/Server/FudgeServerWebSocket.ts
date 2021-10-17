@@ -1,5 +1,5 @@
 import WebSocket from "ws";
-import * as FudgeNetwork from "../ModuleCollector.js";
+import * as FudgeNetwork from "../ModuleCollectorServer.js";
 import { UiElementHandler } from "../DataHandling/index.js";
 import { NetworkMessageMessageToServer, NetworkMessageMessageToClient } from "../NetworkMessages";
 

@@ -1,4 +1,4 @@
-import * as FudgeNetwork from "../ModuleCollector.js";
+import * as FudgeNetwork from "../ModuleCollectorServer.js";
 
 let asMode: boolean = false;
 const networkClient: FudgeNetwork.ClientManagerSinglePeer = new FudgeNetwork.ClientManagerSinglePeer();

@@ -1,8 +1,7 @@
-import * as FudgeNetwork from "../ModuleCollector.js";
+import * as FudgeNetwork from "../ModuleCollectorClient.js";
 export class ClientManagerFullMeshStructure {
     remoteMeshClients;
     currentlyNegotiatingClient;
-    serverSentMeshClients;
     establishedDataChannelsWithRemoteIds;
     signalingServerConnectionUrl = "ws://localhost:8080";
     localUserName;
@@ -17,6 +16,7 @@ export class ClientManagerFullMeshStructure {
             { urls: "stun:stun.example.com" }
         ]
     };
+    serverSentMeshClients;
     constructor() {
         this.localUserName = "";
         this.localClientID = "undefined";
@@ -110,35 +110,6 @@ export class ClientManagerFullMeshStructure {
             return;
         }
         this.createLoginRequestAndSendToServer(_loginName);
-    };
-    createLoginRequestAndSendToServer = (_requestingUsername) => {
-        try {
-            const loginMessage = new FudgeNetwork.NetworkMessageLoginRequest(this.localClientID, _requestingUsername);
-            this.sendMessageToSignalingServer(loginMessage);
-        }
-        catch (error) {
-            console.error("Unexpected error: Sending Login Request", error);
-        }
-    };
-    loginValidAddUser = (_loginResponse) => {
-        let loginSuccess = _loginResponse.loginSuccess;
-        let originatorUserName = _loginResponse.originatorUsername;
-        if (loginSuccess) {
-            this.setOwnUserName(originatorUserName);
-            console.log("Local Username: " + this.localUserName);
-        }
-        else {
-            console.log("Login failed, username taken");
-        }
-    };
-    assignIdAndSendConfirmation = (_message) => {
-        try {
-            this.setOwnClientId(_message.assignedId);
-            this.sendMessageToSignalingServer(new FudgeNetwork.NetworkMessageIdAssigned(this.localClientID));
-        }
-        catch (error) {
-            console.error("Unexpected Error: Sending ID Confirmation", error);
-        }
     };
     createMeshClientAndAddPeerConnection() {
         let newMeshClient = new FudgeNetwork.ClientDataType();
@@ -273,16 +244,6 @@ export class ClientManagerFullMeshStructure {
             console.error("Unexpected Error: RemoteDatachannel");
         }
     };
-    stringifyObjectForNetworkSending = (_objectToStringify) => {
-        let stringifiedObject = "";
-        try {
-            stringifiedObject = JSON.stringify(_objectToStringify);
-        }
-        catch (error) {
-            console.error("JSON Parse failed", error);
-        }
-        return stringifiedObject;
-    };
     sendMessageToSignalingServer = (_message) => {
         let stringifiedMessage = this.stringifyObjectForNetworkSending(_message);
         if (this.webSocketConnectionToSignalingServer.readyState == 1) {
@@ -295,6 +256,7 @@ export class ClientManagerFullMeshStructure {
     enableKeyboardPressesForSending = (_keyCode) => {
         //EScape knopf
         if (_keyCode == 27) {
+            //
         }
         else {
             this.sendKeyPress(_keyCode);
@@ -309,14 +271,6 @@ export class ClientManagerFullMeshStructure {
         //     }
         // } catch (error) { console.error("Unexpected Error: Send Key Press", error); }
     };
-    searchNegotiatingClientById(_idToSearch, arrayToSearch) {
-        arrayToSearch.forEach(meshClient => {
-            if (meshClient.id === _idToSearch) {
-                return meshClient;
-            }
-        });
-        return null;
-    }
     // tslint:disable-next-line: no-any
     parseReceivedMessageAndReturnObject = (_receivedMessage) => {
         // tslint:disable-next-line: no-any
@@ -338,17 +292,64 @@ export class ClientManagerFullMeshStructure {
             FudgeNetwork.UiElementHandler.chatbox.scrollTop = FudgeNetwork.UiElementHandler.chatbox.scrollHeight;
         }
     };
-    setOwnClientId(_id) {
-        this.localClientID = _id;
-    }
     getLocalClientId() {
         return this.localClientID;
     }
-    setOwnUserName(_name) {
-        this.localUserName = _name;
-    }
     getLocalUserName() {
         return this.localUserName == "" || undefined ? "Kein Username vergeben" : this.localUserName;
+    }
+    searchNegotiatingClientById(_idToSearch, arrayToSearch) {
+        arrayToSearch.forEach(meshClient => {
+            if (meshClient.id === _idToSearch) {
+                return meshClient;
+            }
+        });
+        return null;
+    }
+    createLoginRequestAndSendToServer = (_requestingUsername) => {
+        try {
+            const loginMessage = new FudgeNetwork.NetworkMessageLoginRequest(this.localClientID, _requestingUsername);
+            this.sendMessageToSignalingServer(loginMessage);
+        }
+        catch (error) {
+            console.error("Unexpected error: Sending Login Request", error);
+        }
+    };
+    loginValidAddUser = (_loginResponse) => {
+        let loginSuccess = _loginResponse.loginSuccess;
+        let originatorUserName = _loginResponse.originatorUsername;
+        if (loginSuccess) {
+            this.setOwnUserName(originatorUserName);
+            console.log("Local Username: " + this.localUserName);
+        }
+        else {
+            console.log("Login failed, username taken");
+        }
+    };
+    assignIdAndSendConfirmation = (_message) => {
+        try {
+            this.setOwnClientId(_message.assignedId);
+            this.sendMessageToSignalingServer(new FudgeNetwork.NetworkMessageIdAssigned(this.localClientID));
+        }
+        catch (error) {
+            console.error("Unexpected Error: Sending ID Confirmation", error);
+        }
+    };
+    stringifyObjectForNetworkSending = (_objectToStringify) => {
+        let stringifiedObject = "";
+        try {
+            stringifiedObject = JSON.stringify(_objectToStringify);
+        }
+        catch (error) {
+            console.error("JSON Parse failed", error);
+        }
+        return stringifiedObject;
+    };
+    setOwnClientId(_id) {
+        this.localClientID = _id;
+    }
+    setOwnUserName(_name) {
+        this.localUserName = _name;
     }
     dataChannelStatusChangeHandler = (event) => {
         //TODO Reconnection logic
