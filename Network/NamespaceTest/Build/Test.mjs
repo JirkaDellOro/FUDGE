@@ -1,5 +1,5 @@
 "use strict";
-export var nt = NamespaceTest = {};
+// export var nt = NamespaceTest = {};
 var NamespaceTest;
 (function (NamespaceTest) {
     class A {

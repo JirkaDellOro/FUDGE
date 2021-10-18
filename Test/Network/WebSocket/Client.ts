@@ -1,5 +1,6 @@
 namespace ClientWebSocket {
   //@ts-ignore
-  const pureWebSocketClient = new FudgeNetwork.ClientManagerWebSocketOnly();
-  console.log(pureWebSocketClient);
+  const client = new FudgeNetwork.ClientManagerWebSocketOnly();
+  console.log(client);
+  client.connectToSignalingServer();
 }
