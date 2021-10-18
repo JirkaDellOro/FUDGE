@@ -1,4 +1,10 @@
 import * as FudgeNetwork from "../ModuleCollectorClient.js";
+try {
+    Reflect.set(window, "FudgeNetwork", FudgeNetwork);
+}
+catch (_e) {
+    //
+}
 export class ClientManagerWebSocketOnly {
     signalingServerConnectionUrl = "ws://localhost:8080";
     localUserName;

@@ -1,19 +1,12 @@
 import WebSocket from "ws";
 import * as FudgeNetwork from "../ModuleCollectorServer.js";
-import * as DataHandling from "../DataHandling/index.js";
-const UiElementHandler = DataHandling.UiElementHandler;
-
+import { UiElementHandler } from "../DataHandling/index.js";
 export class FudgeServerWebSocket {
     websocketServer;
     connectedClientsCollection = new Array();
-    startUpServer = (_serverPort) => {
+    startUpServer = (_serverPort = 8080) => {
         console.log(_serverPort);
-        if (!_serverPort) {
-            this.websocketServer = new WebSocket.Server({ port: 8080 });
-        }
-        else {
-            this.websocketServer = new WebSocket.Server({ port: _serverPort });
-        }
+        this.websocketServer = new WebSocket.Server({ port: _serverPort });
         this.addServerEventHandling();
     };
     closeDownServer = () => {

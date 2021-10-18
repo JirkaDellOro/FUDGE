@@ -7,16 +7,10 @@ export class FudgeServerWebSocket implements FudgeNetwork.WSServer {
   public websocketServer!: WebSocket.Server;
   public connectedClientsCollection: FudgeNetwork.ClientDataType[] = new Array();
 
-  public startUpServer = (_serverPort?: number) => {
+  public startUpServer = (_serverPort: number = 8080) => {
     console.log(_serverPort);
-    if (!_serverPort) {
-      this.websocketServer = new WebSocket.Server({ port: 8080 });
-    }
-    else {
-      this.websocketServer = new WebSocket.Server({ port: _serverPort });
-
-    }
-    this.addServerEventHandling();
+    this.websocketServer = new WebSocket.Server({ port: _serverPort });
+    this.addServerEventHandling(); 
   }
 
   public closeDownServer = () => {
