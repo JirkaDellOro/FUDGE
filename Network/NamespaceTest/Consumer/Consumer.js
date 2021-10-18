@@ -6,4 +6,3 @@ console.log("Hallo");
 let x = new nt.A();
 x.test();
 x.test();
-let y;
