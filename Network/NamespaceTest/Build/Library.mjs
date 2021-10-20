@@ -1,5 +1,5 @@
 "use strict";
-// export var nt = NamespaceTest = {};
+export var nt = NamespaceTest = {};
 var NamespaceTest;
 (function (NamespaceTest) {
     class A {
@@ -18,4 +18,4 @@ var NamespaceTest;
     }
     NamespaceTest.B = B;
 })(NamespaceTest || (NamespaceTest = {}));
-//# sourceMappingURL=Test.mjs.map
+//# sourceMappingURL=Library.mjs.map
