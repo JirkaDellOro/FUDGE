@@ -230,17 +230,19 @@ namespace FudgeCore {
      * Add a scaling along the x-Axis by the given amount to this matrix 
      */
     public scaleX(_by: number): void {
-      let vector: Vector2 = Recycler.borrow(Vector2);
+      let vector: Vector2 = Recycler.get(Vector2);
       vector.set(_by, 1);
       this.scale(vector);
+      Recycler.store(vector);
     }
     /**
      * Add a scaling along the y-Axis by the given amount to this matrix 
      */
     public scaleY(_by: number): void {
-      let vector: Vector2 = Recycler.borrow(Vector2);
+      let vector: Vector2 = Recycler.get(Vector2);
       vector.set(1, _by);
       this.scale(vector);
+      Recycler.store(vector);
     }
     //#endregion
 
