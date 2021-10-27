@@ -2433,6 +2433,11 @@ declare namespace FudgeCore {
     class GraphInstance extends Node {
         /** id of the resource that instance was created from */
         private idSource;
+        /**
+         * This constructor allone will not create a reconstruction, but only save the id.
+         * To create an instance of the graph, call reset on this or set with a graph as parameter.
+         * Prefer Project.createGraphInstance(_graph).
+         */
         constructor(_graph?: Graph);
         /**
          * Recreate this node from the {@link Graph} referenced

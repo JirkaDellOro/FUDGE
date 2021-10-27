@@ -127,7 +127,7 @@ namespace FudgeCore {
       Project.register(graph);
 
       if (_replaceWithInstance && _node.getParent()) {
-        let instance: GraphInstance = new GraphInstance(graph);
+        let instance: GraphInstance = await Project.createGraphInstance(graph);
         _node.getParent().replaceChild(_node, instance);
       }
 
@@ -135,7 +135,7 @@ namespace FudgeCore {
     }
 
     public static async createGraphInstance(_graph: Graph): Promise<GraphInstance> {
-      let instance: GraphInstance = new GraphInstance(null); // TODO: cleanup since creation moved here
+      let instance: GraphInstance = new GraphInstance(); // TODO: cleanup since creation moved here
       await instance.set(_graph);
       return instance;
     }
