@@ -8,11 +8,11 @@ export interface ClientManagerTemplate {
 }
 
 export interface ClientManagerWebSocketTemplate extends ClientManagerTemplate {
-    signalingServerConnectionUrl: string;
+    // signalingServerConnectionUrl: string;
     webSocketConnectionToSignalingServer: WebSocket;
 
     addWebSocketEventListeners(): void;
-    connectToSignalingServer(): void;
+    connectToSignalingServer(_url: string): void;
     parseMessageAndHandleMessageType(_receivedMessage: MessageEvent): void;
     sendMessageToSignalingServer(_message: Object): void;
 

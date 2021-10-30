@@ -19,8 +19,7 @@ function startingUpSignalingServer() {
     pureWebSocketServer.startUpServer();
 }
 function connectToSignalingServer() {
-    pureWebSocketClient.signalingServerConnectionUrl = "ws://" + FudgeNetwork.UiElementHandler.signalingUrl.value;
-    pureWebSocketClient.connectToSignalingServer();
+    pureWebSocketClient.connectToSignalingServer("ws://" + FudgeNetwork.UiElementHandler.signalingUrl.value);
 }
 function createLoginRequestWithUsername() {
     let chosenUserName = "";

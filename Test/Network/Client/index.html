@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta settings='"server": "ws://localhost:8080", "login": "Test"'>
+  <script type="module" src="../../../Network/Build/ClientManagers/ClientManagerPureWebSocket.js"></script>
+  <script src="Client.js" defer></script>
+  <title>Test CLient</title>
+</head>
+
+<body>
+  <form id="logon">
+    <fieldset>
+      <legend>Common</legend>
+      <input type="text" name="server"> Server<br />
+      <input type="text" name="login"> Login name
+    </fieldset>
+  </form>
+  <form id="connection">
+    <fieldset>
+      <legend>Connect</legend>
+      <fieldset>
+        <legend>
+          <input type="radio" name="type" value="WebSocket" id="WebSocket" />
+          <label for="WebSocket"> WebSocket</label>
+        </legend>
+        Establish a simple WebSocket connection to the server.<br />
+        Make sure, a WebSocket-Server is running at the address given above and observe it's output.
+      </fieldset>
+      <fieldset>
+        <legend>
+          <input type="radio" name="type" value="SinglePeer" id="SinglePeer" />
+          <label for="SinglePeer"> SinglePeer</label>
+        </legend>
+        Establish a peer to peer connection to one specific other client via the server.<br />
+        Make sure, a SinglePeer-Server is running at the address given above and another client logs in with the
+        partner's name.<br />
+        <input type="text" name="partner"> Partner's login name
+      </fieldset>
+      <br />
+      <button type="button" id="connect">Connect</button>
+    </fieldset>
+  </form>
+  <form id="messages">
+    <fieldset>
+      <legend>Messages</legend>
+      <fieldset>
+        <legend>TCP</legend>
+        <input type="text" name="send" value="Hello" />
+        <button type="button" id="sendTCP">Send</button><br/>
+        <textarea name="received" cols="30" rows="10"></textarea>
+      </fieldset>
+      <fieldset>
+        <legend>RTC</legend>
+        <input type="text" name="send" value="Hello" />
+        <button type="button" id="sendRTC">Send</button><br/>
+        <textarea name="received" cols="30" rows="10"></textarea>
+      </fieldset>
+    </fieldset>
+  </form>
+</body>
+
+</html>

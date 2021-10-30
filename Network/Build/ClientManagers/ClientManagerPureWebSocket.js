@@ -6,20 +6,20 @@ catch (_e) {
     //
 }
 export class ClientManagerWebSocketOnly {
-    signalingServerConnectionUrl = "ws://localhost:8080";
+    // public signalingServerConnectionUrl: string = "ws://localhost:8080";
     localUserName;
     webSocketConnectionToSignalingServer;
     localClientID;
     constructor() {
         this.localUserName = "";
     }
-    connectToSignalingServer = () => {
+    connectToSignalingServer = (_url) => {
         try {
-            this.webSocketConnectionToSignalingServer = new WebSocket(this.signalingServerConnectionUrl);
+            this.webSocketConnectionToSignalingServer = new WebSocket(_url);
             this.addWebSocketEventListeners();
         }
         catch (error) {
-            console.log("Websocket Generation gescheitert");
+            console.log("Websocket generation failed");
         }
     };
     checkChosenUsernameAndCreateLoginRequest = (_loginName) => {

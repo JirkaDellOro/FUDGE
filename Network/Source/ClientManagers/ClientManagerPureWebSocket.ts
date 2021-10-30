@@ -6,7 +6,7 @@ try {
 }
 export class ClientManagerWebSocketOnly implements FudgeNetwork.ClientManagerWebSocketTemplate {
 
-  public signalingServerConnectionUrl: string = "ws://localhost:8080";
+  // public signalingServerConnectionUrl: string = "ws://localhost:8080";
   public localUserName: string;
   public webSocketConnectionToSignalingServer!: WebSocket;
   public localClientID!: string;
@@ -15,12 +15,12 @@ export class ClientManagerWebSocketOnly implements FudgeNetwork.ClientManagerWeb
     this.localUserName = "";
   }
 
-  public connectToSignalingServer = () => {
+  public connectToSignalingServer = (_url: string): void => {
     try {
-      this.webSocketConnectionToSignalingServer = new WebSocket(this.signalingServerConnectionUrl);
+      this.webSocketConnectionToSignalingServer = new WebSocket(_url);
       this.addWebSocketEventListeners();
     } catch (error) {
-      console.log("Websocket Generation gescheitert");
+      console.log("Websocket generation failed");
     }
   }
 

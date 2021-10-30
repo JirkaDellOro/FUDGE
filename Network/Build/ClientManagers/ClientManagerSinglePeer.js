@@ -263,7 +263,7 @@ export class ClientManagerSinglePeer {
         // tslint:disable-next-line: no-any
         let objectifiedMessage;
         try {
-            console.log("RECEIVED: ", _receivedMessage);
+            console.log("Received: ", _receivedMessage);
             objectifiedMessage = JSON.parse(_receivedMessage.data);
         }
         catch (error) {

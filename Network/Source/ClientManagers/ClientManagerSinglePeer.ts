@@ -296,7 +296,7 @@ export class ClientManagerSinglePeer implements FudgeNetwork.ClientManagerSingle
     // tslint:disable-next-line: no-any
     let objectifiedMessage: any;
     try {
-      console.log("RECEIVED: ", _receivedMessage);
+      console.log("Received: ", _receivedMessage);
       objectifiedMessage = JSON.parse(_receivedMessage.data);
 
     } catch (error) {
