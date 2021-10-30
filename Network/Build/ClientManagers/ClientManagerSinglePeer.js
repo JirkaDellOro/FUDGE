@@ -86,24 +86,6 @@ export class ClientManagerSinglePeer {
         }
         this.createLoginRequestAndSendToServer(_loginName);
     };
-    createLoginRequestAndSendToServer = (_requestingUsername) => {
-        try {
-            const loginMessage = new FudgeNetwork.NetworkMessageLoginRequest(this.localClientID, _requestingUsername);
-            this.sendMessageToSignalingServer(loginMessage);
-        }
-        catch (error) {
-            console.error("Unexpected error: Sending Login Request", error);
-        }
-    };
-    loginValidAddUser = (_assignedId, _loginSuccess, _originatorUserName) => {
-        if (_loginSuccess) {
-            this.setOwnUserName(_originatorUserName);
-            console.log("Local Username: " + this.localUserName);
-        }
-        else {
-            console.log("Login failed, username taken");
-        }
-    };
     checkUsernameToConnectToAndInitiateConnection = (_chosenUserNameToConnectTo) => {
         if (_chosenUserNameToConnectTo.length === 0) {
             console.error("Enter a username 😉");
@@ -120,15 +102,6 @@ export class ClientManagerSinglePeer {
         }
         catch (error) {
             console.error("Unexpecte Error: Creating Client Peerconnection", error);
-        }
-    };
-    assignIdAndSendConfirmation = (_message) => {
-        try {
-            this.setOwnClientId(_message.assignedId);
-            this.sendMessageToSignalingServer(new FudgeNetwork.NetworkMessageIdAssigned(this.localClientID));
-        }
-        catch (error) {
-            console.error("Unexpected Error: Sending ID Confirmation", error);
         }
     };
     beginPeerConnectionNegotiation = (_userNameForOffer) => {
@@ -250,16 +223,6 @@ export class ClientManagerSinglePeer {
             console.error("Unexpected Error: RemoteDatachannel");
         }
     };
-    stringifyObjectForNetworkSending = (_objectToStringify) => {
-        let stringifiedObject = "";
-        try {
-            stringifiedObject = JSON.stringify(_objectToStringify);
-        }
-        catch (error) {
-            console.error("JSON Parse failed", error);
-        }
-        return stringifiedObject;
-    };
     sendMessageToSignalingServer = (_message) => {
         let stringifiedMessage = this.stringifyObjectForNetworkSending(_message);
         if (this.webSocketConnectionToSignalingServer.readyState == 1) {
@@ -317,17 +280,54 @@ export class ClientManagerSinglePeer {
             FudgeNetwork.UiElementHandler.chatbox.scrollTop = FudgeNetwork.UiElementHandler.chatbox.scrollHeight;
         }
     };
-    setOwnClientId(_id) {
-        this.localClientID = _id;
-    }
     getLocalClientId() {
         return this.localClientID;
     }
-    setOwnUserName(_name) {
-        this.localUserName = _name;
-    }
     getLocalUserName() {
         return this.localUserName == "" || undefined ? "Kein Username vergeben" : this.localUserName;
+    }
+    createLoginRequestAndSendToServer = (_requestingUsername) => {
+        try {
+            const loginMessage = new FudgeNetwork.NetworkMessageLoginRequest(this.localClientID, _requestingUsername);
+            this.sendMessageToSignalingServer(loginMessage);
+        }
+        catch (error) {
+            console.error("Unexpected error: Sending Login Request", error);
+        }
+    };
+    loginValidAddUser = (_assignedId, _loginSuccess, _originatorUserName) => {
+        if (_loginSuccess) {
+            this.setOwnUserName(_originatorUserName);
+            console.log("Local Username: " + this.localUserName);
+        }
+        else {
+            console.log("Login failed, username taken");
+        }
+    };
+    assignIdAndSendConfirmation = (_message) => {
+        try {
+            this.setOwnClientId(_message.assignedId);
+            this.sendMessageToSignalingServer(new FudgeNetwork.NetworkMessageIdAssigned(this.localClientID));
+        }
+        catch (error) {
+            console.error("Unexpected Error: Sending ID Confirmation", error);
+        }
+    };
+    stringifyObjectForNetworkSending = (_objectToStringify) => {
+        let stringifiedObject = "";
+        try {
+            stringifiedObject = JSON.stringify(_objectToStringify);
+        }
+        catch (error) {
+            console.error("JSON Parse failed", error);
+        }
+        return stringifiedObject;
+    };
+    setOwnClientId(_id) {
+        this.localClientID = _id;
+    }
+    setOwnUserName(_name) {
+        this.localUserName = _name;
     }
     dataChannelStatusChangeHandler = (event) => {
         //TODO Reconnection logic

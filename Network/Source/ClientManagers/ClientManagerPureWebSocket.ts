@@ -35,31 +35,22 @@ export class ClientManagerWebSocketOnly implements FudgeNetwork.ClientManagerWeb
 
   public sendDisconnectRequest = () => {
     try {
-
+      //
     } catch (error) { console.error("Unexpected Error: Disconnect Request", error); }
 
   }
   public sendKeyPress = (_keyCode: number) => {
-
+    //
   }
 
   public enableKeyboardPressesForSending = (_keyCode: number) => {
+    //
   }
-
-  private createLoginRequestAndSendToServer = (_requestingUsername: string) => {
-    try {
-      const loginMessage: FudgeNetwork.NetworkMessageLoginRequest = new FudgeNetwork.NetworkMessageLoginRequest(this.getLocalClientId(), _requestingUsername);
-      this.sendMessageToSignalingServer(loginMessage);
-    } catch (error) {
-      console.error("Unexpected error: Sending Login Request", error);
-    }
-  }
-
 
   public addWebSocketEventListeners = (): void => {
     try {
       this.webSocketConnectionToSignalingServer.addEventListener("open", (_connOpen: Event) => {
-        console.log("Conneced to the signaling server", _connOpen);
+        console.log("Client connects to signaling server", _connOpen);
       });
 
       this.webSocketConnectionToSignalingServer.addEventListener("error", (_err: Event) => {
@@ -103,22 +94,6 @@ export class ClientManagerWebSocketOnly implements FudgeNetwork.ClientManagerWeb
     }
   }
 
-  private displayServerMessage(_messageToDisplay: any) {
-    // tslint:disable-next-line: no-any
-    let parsedObject: FudgeNetwork.NetworkMessageMessageToClient = this.parseReceivedMessageAndReturnObject(_messageToDisplay);
-    FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + parsedObject.originatorId + ": " + parsedObject.messageData;
-    FudgeNetwork.UiElementHandler.chatbox.scrollTop = FudgeNetwork.UiElementHandler.chatbox.scrollHeight;
-  }
-
-  private assignIdAndSendConfirmation = (_message: FudgeNetwork.NetworkMessageIdAssigned) => {
-    try {
-      this.setLocalClientId(_message.assignedId);
-      this.sendMessageToSignalingServer(new FudgeNetwork.NetworkMessageIdAssigned(this.getLocalClientId()));
-    } catch (error) {
-      console.error("Unexpected Error: Sending ID Confirmation", error);
-    }
-  }
-
   public sendMessageToSignalingServer = (_message: Object) => {
     console.log("Sending Message to Server");
     let stringifiedMessage: string = this.stringifyObjectForNetworkSending(_message);
@@ -142,8 +117,37 @@ export class ClientManagerWebSocketOnly implements FudgeNetwork.ClientManagerWeb
       console.error("Websocket Connection closed unexpectedly");
     }
   }
+  public getLocalClientId(): string {
+    return this.localClientID;
+  }
+  public getLocalUserName(): string {
+    return this.localUserName;
+  }
 
+  private createLoginRequestAndSendToServer = (_requestingUsername: string) => {
+    try {
+      const loginMessage: FudgeNetwork.NetworkMessageLoginRequest = new FudgeNetwork.NetworkMessageLoginRequest(this.getLocalClientId(), _requestingUsername);
+      this.sendMessageToSignalingServer(loginMessage);
+    } catch (error) {
+      console.error("Unexpected error: Sending Login Request", error);
+    }
+  }
 
+  private displayServerMessage(_messageToDisplay: any): void {
+    // tslint:disable-next-line: no-any
+    let parsedObject: FudgeNetwork.NetworkMessageMessageToClient = this.parseReceivedMessageAndReturnObject(_messageToDisplay);
+    FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + parsedObject.originatorId + ": " + parsedObject.messageData;
+    FudgeNetwork.UiElementHandler.chatbox.scrollTop = FudgeNetwork.UiElementHandler.chatbox.scrollHeight;
+  }
+
+  private assignIdAndSendConfirmation = (_message: FudgeNetwork.NetworkMessageIdAssigned) => {
+    try {
+      this.setLocalClientId(_message.assignedId);
+      this.sendMessageToSignalingServer(new FudgeNetwork.NetworkMessageIdAssigned(this.getLocalClientId()));
+    } catch (error) {
+      console.error("Unexpected Error: Sending ID Confirmation", error);
+    }
+  }
 
   private loginValidAddUser = (_assignedId: string, _loginSuccess: boolean, _originatorUserName: string): void => {
     if (_loginSuccess) {
@@ -190,11 +194,5 @@ export class ClientManagerWebSocketOnly implements FudgeNetwork.ClientManagerWeb
       this.localClientID = _id;
       return true;
     }
-  }
-  public getLocalClientId(): string {
-    return this.localClientID;
-  }
-  public getLocalUserName(): string {
-    return this.localUserName;
   }
 }

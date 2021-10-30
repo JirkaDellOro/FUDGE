@@ -147,22 +147,22 @@ export class ClientManagerFullMeshStructure implements FudgeNetwork.ClientManage
     currentlyNegotiatingPeer.id = _userIdToOffer;
     if (currentlyNegotiatingPeer != null) {
       try {
-        currentlyNegotiatingPeer.rtcDataChannel = currentlyNegotiatingPeer.rtcPeerConnection.createDataChannel(currentlyNegotiatingPeer.id);
-        currentlyNegotiatingPeer.rtcDataChannel.addEventListener("open", this.dataChannelStatusChangeHandler);
-        currentlyNegotiatingPeer.rtcDataChannel.addEventListener("close", this.dataChannelStatusChangeHandler);
-        currentlyNegotiatingPeer.rtcDataChannel.addEventListener("message", this.dataChannelMessageHandler);
+        currentlyNegotiatingPeer.rtcDataChannel = currentlyNegotiatingPeer.rtcPeerConnection?.createDataChannel(currentlyNegotiatingPeer.id);
+        currentlyNegotiatingPeer.rtcDataChannel?.addEventListener("open", this.dataChannelStatusChangeHandler);
+        currentlyNegotiatingPeer.rtcDataChannel?.addEventListener("close", this.dataChannelStatusChangeHandler);
+        currentlyNegotiatingPeer.rtcDataChannel?.addEventListener("message", this.dataChannelMessageHandler);
 
       } catch (error) {
         console.error("Unexpected Error: Creating Client Datachannel and adding Listeners", error);
       }
-      currentlyNegotiatingPeer.rtcPeerConnection.createOffer()
+      currentlyNegotiatingPeer.rtcPeerConnection?.createOffer()
         .then(async (offer) => {
-          console.log("Beginning of createOffer in InitiateConnection, Expected 'stable', got:  ", currentlyNegotiatingPeer.rtcPeerConnection.signalingState);
+          console.log("Beginning of createOffer in InitiateConnection, Expected 'stable', got:  ", currentlyNegotiatingPeer.rtcPeerConnection?.signalingState);
           return offer;
         })
         .then(async (offer) => {
-          await currentlyNegotiatingPeer.rtcPeerConnection.setLocalDescription(offer);
-          console.log("Setting LocalDesc, Expected 'have-local-offer', got:  ", currentlyNegotiatingPeer.rtcPeerConnection.signalingState);
+          await currentlyNegotiatingPeer.rtcPeerConnection?.setLocalDescription(offer);
+          console.log("Setting LocalDesc, Expected 'have-local-offer', got:  ", currentlyNegotiatingPeer.rtcPeerConnection?.signalingState);
         })
         .then(() => {
           this.addNewMeshClientToMeshClientCollection(currentlyNegotiatingPeer);
@@ -175,9 +175,9 @@ export class ClientManagerFullMeshStructure implements FudgeNetwork.ClientManage
   }
   public createNegotiationOfferAndSendToPeer = (_currentlyNegotiatingPeer: FudgeNetwork.ClientDataType) => {
     try {
-      const offerMessage: FudgeNetwork.NetworkMessageRtcOffer = new FudgeNetwork.NetworkMessageRtcOffer(this.localClientID, _currentlyNegotiatingPeer.id, _currentlyNegotiatingPeer.rtcPeerConnection.localDescription);
+      const offerMessage: FudgeNetwork.NetworkMessageRtcOffer = new FudgeNetwork.NetworkMessageRtcOffer(this.localClientID, _currentlyNegotiatingPeer.id, _currentlyNegotiatingPeer.rtcPeerConnection?.localDescription);
       this.sendMessageToSignalingServer(offerMessage);
-      console.log("Sent offer to remote peer, Expected 'have-local-offer', got:  ", _currentlyNegotiatingPeer.rtcPeerConnection.signalingState);
+      console.log("Sent offer to remote peer, Expected 'have-local-offer', got:  ", _currentlyNegotiatingPeer.rtcPeerConnection?.signalingState);
     } catch (error) {
       console.error("Unexpected Error: Creating Object and Sending RTC Offer", error);
     }
@@ -187,33 +187,33 @@ export class ClientManagerFullMeshStructure implements FudgeNetwork.ClientManage
     let newlyReceivedClient: FudgeNetwork.ClientDataType = new FudgeNetwork.ClientDataType(undefined, _offerMessage.originatorId, new RTCPeerConnection(this.configuration));
     this.remoteMeshClients.push(newlyReceivedClient);
 
-    newlyReceivedClient.rtcPeerConnection.addEventListener("datachannel", this.receiveDataChannelAndEstablishConnection);
+    newlyReceivedClient.rtcPeerConnection?.addEventListener("datachannel", this.receiveDataChannelAndEstablishConnection);
 
-    let offerToSet: RTCSessionDescription | RTCSessionDescriptionInit | null = _offerMessage.offer;
+    let offerToSet: RTCSessionDescription | RTCSessionDescriptionInit | null | undefined = _offerMessage.offer;
     if (!offerToSet) {
       return;
     }
-    newlyReceivedClient.rtcPeerConnection.setRemoteDescription(new RTCSessionDescription(offerToSet))
+    newlyReceivedClient.rtcPeerConnection?.setRemoteDescription(new RTCSessionDescription(offerToSet))
       .then(async () => {
-        console.log("Received Offer and Set Descirpton, Expected 'have-remote-offer', got:  ", newlyReceivedClient.rtcPeerConnection.signalingState);
+        console.log("Received Offer and Set Descirpton, Expected 'have-remote-offer', got:  ", newlyReceivedClient.rtcPeerConnection?.signalingState);
         await this.answerNegotiationOffer(newlyReceivedClient);
       })
       .catch((error) => {
         console.error("Unexpected Error: Setting Remote Description and Creating Answer", error);
       });
-    console.log("End of Function Receive offer, Expected 'stable', got:  ", newlyReceivedClient.rtcPeerConnection.signalingState);
+    console.log("End of Function Receive offer, Expected 'stable', got:  ", newlyReceivedClient.rtcPeerConnection?.signalingState);
   }
 
   public answerNegotiationOffer = (_remoteMeshClient: FudgeNetwork.ClientDataType) => {
     let ultimateAnswer: RTCSessionDescription;
     // Signaling example from here https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/createAnswer
-    _remoteMeshClient.rtcPeerConnection.createAnswer()
+    _remoteMeshClient.rtcPeerConnection?.createAnswer()
       .then(async (answer) => {
-        console.log("Create Answer before settign local desc: Expected 'have-remote-offer', got:  ", _remoteMeshClient.rtcPeerConnection.signalingState);
+        console.log("Create Answer before settign local desc: Expected 'have-remote-offer', got:  ", _remoteMeshClient.rtcPeerConnection?.signalingState);
         ultimateAnswer = new RTCSessionDescription(answer);
-        return await _remoteMeshClient.rtcPeerConnection.setLocalDescription(ultimateAnswer);
+        return await _remoteMeshClient.rtcPeerConnection?.setLocalDescription(ultimateAnswer);
       }).then(async () => {
-        console.log("CreateAnswerFunction after setting local descp, Expected 'stable', got:  ", _remoteMeshClient.rtcPeerConnection.signalingState);
+        console.log("CreateAnswerFunction after setting local descp, Expected 'stable', got:  ", _remoteMeshClient.rtcPeerConnection?.signalingState);
 
         const answerMessage: FudgeNetwork.NetworkMessageRtcAnswer =
           new FudgeNetwork.NetworkMessageRtcAnswer(this.localClientID, _remoteMeshClient.id, "", ultimateAnswer);
@@ -229,7 +229,7 @@ export class ClientManagerFullMeshStructure implements FudgeNetwork.ClientManage
       let descriptionAnswer: RTCSessionDescription = new RTCSessionDescription(_rtcAnswer.answer);
       let remoteClientId: string = _rtcAnswer.originatorId;
 
-      this.currentlyNegotiatingClient.rtcPeerConnection.setRemoteDescription(descriptionAnswer);
+      this.currentlyNegotiatingClient.rtcPeerConnection?.setRemoteDescription(descriptionAnswer);
 
     } catch (error) {
       console.error("Unexpected Error: Setting Remote Description from Answer", error);
@@ -253,7 +253,7 @@ export class ClientManagerFullMeshStructure implements FudgeNetwork.ClientManage
 
     try {
       if (relevantClient) {
-        await relevantClient.rtcPeerConnection.addIceCandidate(_receivedIceMessage.candidate);
+        await relevantClient.rtcPeerConnection?.addIceCandidate(_receivedIceMessage.candidate);
       }
     } catch (error) {
       console.error("Unexpected Error: Adding Ice Candidate", error);

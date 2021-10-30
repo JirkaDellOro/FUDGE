@@ -5,17 +5,17 @@ export class FudgeServerAuthoritativeManager {
     public signalingServer: any;
     public authServerPeerConnectedClientCollection: FudgeNetwork.ClientDataType[] = new Array();
     public peerConnectionBufferCollection: RTCDataChannel[] = new Array();
-    private divAndPlayerMap: [string, HTMLElement][] = new Array();
 
-    private movementSpeed = 3;
-
-    // tslint:disable-next-line: typedef
-    public configuration = {
+    // tslint:dis able-next-line: typedef
+    public configuration: {} = {
         iceServers: [
             { urls: "stun:stun2.1.google.com:19302" },
             { urls: "stun:stun.example.com" }
         ]
     };
+
+    private divAndPlayerMap: [string, HTMLElement][] = new Array();
+    private movementSpeed: number = 3;
 
     constructor() {
         console.log("AuthoritativeServerStartet");
@@ -40,7 +40,7 @@ export class FudgeServerAuthoritativeManager {
         if (_receivedIceMessage.candidate) {
             let client: FudgeNetwork.ClientDataType = this.searchUserByUserIdAndReturnUser(_receivedIceMessage.originatorId, this.authServerPeerConnectedClientCollection);
             console.log("server received candidates from: ", client);
-            await client.rtcPeerConnection.addIceCandidate(_receivedIceMessage.candidate);
+            await client.rtcPeerConnection?.addIceCandidate(_receivedIceMessage.candidate);
         }
     }
 
@@ -60,14 +60,14 @@ export class FudgeServerAuthoritativeManager {
         let clientToConnect: FudgeNetwork.ClientDataType = this.searchUserByWebsocketConnectionAndReturnUser(_websocketClient, this.authServerPeerConnectedClientCollection);
         console.log(clientToConnect);
         let descriptionAnswer: RTCSessionDescription = new RTCSessionDescription(_answer.answer);
-        clientToConnect.rtcPeerConnection.setRemoteDescription(descriptionAnswer);
+        clientToConnect.rtcPeerConnection?.setRemoteDescription(descriptionAnswer);
         console.log("Remote Description set");
     }
 
     public broadcastMessageToAllConnectedClients = (_messageToBroadcast: string) => {
         this.authServerPeerConnectedClientCollection.forEach(client => {
-            if (client.rtcDataChannel.readyState == "open") {
-                client.rtcDataChannel.send(_messageToBroadcast);
+            if (client.rtcDataChannel?.readyState == "open") {
+                client.rtcDataChannel?.send(_messageToBroadcast);
             }
             else {
                 console.error("Connection closed abnormally for: ", client);
@@ -105,19 +105,19 @@ export class FudgeServerAuthoritativeManager {
 
     private initiateConnectionByCreatingDataChannelAndCreatingOffer = (_clientToConnect: FudgeNetwork.ClientDataType): void => {
         console.log("Initiating connection to : " + _clientToConnect);
-        let newDataChannel: RTCDataChannel = _clientToConnect.rtcPeerConnection.createDataChannel(_clientToConnect.id);
+        let newDataChannel: RTCDataChannel | undefined = _clientToConnect.rtcPeerConnection?.createDataChannel(_clientToConnect.id);
         _clientToConnect.rtcDataChannel = newDataChannel;
-        newDataChannel.addEventListener("open", this.dataChannelStatusChangeHandler);
+        newDataChannel?.addEventListener("open", this.dataChannelStatusChangeHandler);
         // newDataChannel.addEventListener("close", this.dataChannelStatusChangeHandler);
-        newDataChannel.addEventListener("message", this.dataChannelMessageHandler);
-        _clientToConnect.rtcPeerConnection.createOffer()
+        newDataChannel?.addEventListener("message", this.dataChannelMessageHandler);
+        _clientToConnect.rtcPeerConnection?.createOffer()
             .then(async (offer) => {
-                console.log("Beginning of createOffer in InitiateConnection, Expected 'stable', got:  ", _clientToConnect.rtcPeerConnection.signalingState);
+                console.log("Beginning of createOffer in InitiateConnection, Expected 'stable', got:  ", _clientToConnect.rtcPeerConnection?.signalingState);
                 return offer;
             })
             .then(async (offer) => {
-                await _clientToConnect.rtcPeerConnection.setLocalDescription(offer);
-                console.log("Setting LocalDesc, Expected 'have-local-offer', got:  ", _clientToConnect.rtcPeerConnection.signalingState);
+                await _clientToConnect.rtcPeerConnection?.setLocalDescription(offer);
+                console.log("Setting LocalDesc, Expected 'have-local-offer', got:  ", _clientToConnect.rtcPeerConnection?.signalingState);
             })
             .then(() => {
                 this.createOfferMessageAndSendToRemote(_clientToConnect);
@@ -129,7 +129,7 @@ export class FudgeServerAuthoritativeManager {
 
     private createOfferMessageAndSendToRemote = (_clientToConnect: FudgeNetwork.ClientDataType) => {
         console.log("Sending offer now");
-        const offerMessage: FudgeNetwork.NetworkMessageRtcOffer = new FudgeNetwork.NetworkMessageRtcOffer("SERVER", _clientToConnect.id, _clientToConnect.rtcPeerConnection.localDescription);
+        const offerMessage: FudgeNetwork.NetworkMessageRtcOffer = new FudgeNetwork.NetworkMessageRtcOffer("SERVER", _clientToConnect.id, _clientToConnect.rtcPeerConnection?.localDescription);
         this.signalingServer.sendToId(_clientToConnect.id, offerMessage);
     }
 
@@ -137,7 +137,7 @@ export class FudgeServerAuthoritativeManager {
 
     private disconnectClientByOwnCommand = (_commandMessage: FudgeNetwork.PeerMessageDisconnectClient) => {
         let clientToDisconnect: FudgeNetwork.ClientDataType = this.searchUserByUserIdAndReturnUser(_commandMessage.originatorId, this.authServerPeerConnectedClientCollection);
-        clientToDisconnect.rtcDataChannel.close();
+        clientToDisconnect.rtcDataChannel?.close();
     }
 
     private handleKeyInputFromClient = (_commandMessage: FudgeNetwork.PeerMessageKeysInput) => {
@@ -151,28 +151,28 @@ export class FudgeServerAuthoritativeManager {
                 switch (+_commandMessage.pressedKey) {
                     case 37:
                         if (movingBox.style.left != null) {
-                            let previousLeft = parseInt(movingBox.style.left);
+                            let previousLeft: number = parseInt(movingBox.style.left);
                             movingBox.style.left = previousLeft - this.movementSpeed + "px";
                         }
                         break;
                     case 38:
 
                         if (movingBox.style.top != null) {
-                            let previousTop = parseInt(movingBox.style.top);
+                            let previousTop: number = parseInt(movingBox.style.top);
                             movingBox.style.top = previousTop - this.movementSpeed + "px";
                         }
                         break;
 
                     case 39:
                         if (movingBox.style.left != null) {
-                            let previousLeft = parseInt(movingBox.style.left);
+                            let previousLeft: number = parseInt(movingBox.style.left);
                             movingBox.style.left = previousLeft + this.movementSpeed + "px";
                         }
                         break;
 
                     case 40:
                         if (movingBox.style.top != null) {
-                            let previousTop = parseInt(movingBox.style.top);
+                            let previousTop: number = parseInt(movingBox.style.top);
                             movingBox.style.top = previousTop + this.movementSpeed + "px";
                         }
                         break;
@@ -194,9 +194,9 @@ export class FudgeServerAuthoritativeManager {
         console.log("Server Datachannel opened");
     }
 
-    private addMovingDivForClient(_playerId: string) {
+    private addMovingDivForClient(_playerId: string): void {
         let newPlayer: HTMLElement = FudgeNetwork.UiElementHandler.addMovingDivForAuth();
-        this.divAndPlayerMap.push([_playerId, newPlayer])
+        this.divAndPlayerMap.push([_playerId, newPlayer]);
     }
 
     private dataChannelMessageHandler = (_message: MessageEvent) => {

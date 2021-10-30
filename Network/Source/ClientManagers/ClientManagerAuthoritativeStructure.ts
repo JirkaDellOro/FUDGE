@@ -152,7 +152,7 @@ export class ClientManagerAuthoritativeStructure implements FudgeNetwork.ClientM
     }
     this.ownPeerConnection.addEventListener("datachannel", this.receiveDataChannelAndEstablishConnection);
 
-    let offerToSet: RTCSessionDescription | RTCSessionDescriptionInit | null = _offerMessage.offer;
+    let offerToSet: RTCSessionDescription | RTCSessionDescriptionInit | null | undefined = _offerMessage.offer;
     if (!offerToSet) {
       return;
     }

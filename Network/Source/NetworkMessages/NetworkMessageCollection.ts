@@ -44,8 +44,8 @@ export class NetworkMessageRtcOffer implements NetworkMessageMessageBase {
     public originatorId: string;
     public messageType: FudgeNetwork.MESSAGE_TYPE = FudgeNetwork.MESSAGE_TYPE.RTC_OFFER;
     public userNameToConnectTo: string;
-    public offer: RTCSessionDescription | RTCSessionDescriptionInit | null;
-    constructor(_originatorId: string, _userNameToConnectTo: string, _offer: RTCSessionDescription | RTCSessionDescriptionInit | null) {
+    public offer: RTCSessionDescription | RTCSessionDescriptionInit | null | undefined;
+    constructor(_originatorId: string, _userNameToConnectTo: string, _offer: RTCSessionDescription | RTCSessionDescriptionInit | null | undefined) {
         this.originatorId = _originatorId;
         this.userNameToConnectTo = _userNameToConnectTo;
         this.offer = _offer;

@@ -31,28 +31,22 @@ export class ClientManagerWebSocketOnly {
     };
     sendDisconnectRequest = () => {
         try {
+            //
         }
         catch (error) {
             console.error("Unexpected Error: Disconnect Request", error);
         }
     };
     sendKeyPress = (_keyCode) => {
+        //
     };
     enableKeyboardPressesForSending = (_keyCode) => {
-    };
-    createLoginRequestAndSendToServer = (_requestingUsername) => {
-        try {
-            const loginMessage = new FudgeNetwork.NetworkMessageLoginRequest(this.getLocalClientId(), _requestingUsername);
-            this.sendMessageToSignalingServer(loginMessage);
-        }
-        catch (error) {
-            console.error("Unexpected error: Sending Login Request", error);
-        }
+        //
     };
     addWebSocketEventListeners = () => {
         try {
             this.webSocketConnectionToSignalingServer.addEventListener("open", (_connOpen) => {
-                console.log("Conneced to the signaling server", _connOpen);
+                console.log("Client connects to signaling server", _connOpen);
             });
             this.webSocketConnectionToSignalingServer.addEventListener("error", (_err) => {
                 console.error(_err);
@@ -86,21 +80,6 @@ export class ClientManagerWebSocketOnly {
                 console.error("Unrecognized Messagetype, did you handle it in Client?");
         }
     };
-    displayServerMessage(_messageToDisplay) {
-        // tslint:disable-next-line: no-any
-        let parsedObject = this.parseReceivedMessageAndReturnObject(_messageToDisplay);
-        FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + parsedObject.originatorId + ": " + parsedObject.messageData;
-        FudgeNetwork.UiElementHandler.chatbox.scrollTop = FudgeNetwork.UiElementHandler.chatbox.scrollHeight;
-    }
-    assignIdAndSendConfirmation = (_message) => {
-        try {
-            this.setLocalClientId(_message.assignedId);
-            this.sendMessageToSignalingServer(new FudgeNetwork.NetworkMessageIdAssigned(this.getLocalClientId()));
-        }
-        catch (error) {
-            console.error("Unexpected Error: Sending ID Confirmation", error);
-        }
-    };
     sendMessageToSignalingServer = (_message) => {
         console.log("Sending Message to Server");
         let stringifiedMessage = this.stringifyObjectForNetworkSending(_message);
@@ -120,6 +99,36 @@ export class ClientManagerWebSocketOnly {
         }
         else {
             console.error("Websocket Connection closed unexpectedly");
+        }
+    };
+    getLocalClientId() {
+        return this.localClientID;
+    }
+    getLocalUserName() {
+        return this.localUserName;
+    }
+    createLoginRequestAndSendToServer = (_requestingUsername) => {
+        try {
+            const loginMessage = new FudgeNetwork.NetworkMessageLoginRequest(this.getLocalClientId(), _requestingUsername);
+            this.sendMessageToSignalingServer(loginMessage);
+        }
+        catch (error) {
+            console.error("Unexpected error: Sending Login Request", error);
+        }
+    };
+    displayServerMessage(_messageToDisplay) {
+        // tslint:disable-next-line: no-any
+        let parsedObject = this.parseReceivedMessageAndReturnObject(_messageToDisplay);
+        FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + parsedObject.originatorId + ": " + parsedObject.messageData;
+        FudgeNetwork.UiElementHandler.chatbox.scrollTop = FudgeNetwork.UiElementHandler.chatbox.scrollHeight;
+    }
+    assignIdAndSendConfirmation = (_message) => {
+        try {
+            this.setLocalClientId(_message.assignedId);
+            this.sendMessageToSignalingServer(new FudgeNetwork.NetworkMessageIdAssigned(this.getLocalClientId()));
+        }
+        catch (error) {
+            console.error("Unexpected Error: Sending ID Confirmation", error);
         }
     };
     loginValidAddUser = (_assignedId, _loginSuccess, _originatorUserName) => {
@@ -163,11 +172,5 @@ export class ClientManagerWebSocketOnly {
             this.localClientID = _id;
             return true;
         }
-    }
-    getLocalClientId() {
-        return this.localClientID;
-    }
-    getLocalUserName() {
-        return this.localUserName;
     }
 }

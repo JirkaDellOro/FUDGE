@@ -4,15 +4,15 @@ export class FudgeServerAuthoritativeManager {
     signalingServer;
     authServerPeerConnectedClientCollection = new Array();
     peerConnectionBufferCollection = new Array();
-    divAndPlayerMap = new Array();
-    movementSpeed = 3;
-    // tslint:disable-next-line: typedef
+    // tslint:dis able-next-line: typedef
     configuration = {
         iceServers: [
             { urls: "stun:stun2.1.google.com:19302" },
             { urls: "stun:stun.example.com" }
         ]
     };
+    divAndPlayerMap = new Array();
+    movementSpeed = 3;
     constructor() {
         console.log("AuthoritativeServerStartet");
     }
@@ -33,7 +33,7 @@ export class FudgeServerAuthoritativeManager {
         if (_receivedIceMessage.candidate) {
             let client = this.searchUserByUserIdAndReturnUser(_receivedIceMessage.originatorId, this.authServerPeerConnectedClientCollection);
             console.log("server received candidates from: ", client);
-            await client.rtcPeerConnection.addIceCandidate(_receivedIceMessage.candidate);
+            await client.rtcPeerConnection?.addIceCandidate(_receivedIceMessage.candidate);
         }
     };
     parseMessageToJson = (_messageToParse) => {
@@ -52,13 +52,13 @@ export class FudgeServerAuthoritativeManager {
         let clientToConnect = this.searchUserByWebsocketConnectionAndReturnUser(_websocketClient, this.authServerPeerConnectedClientCollection);
         console.log(clientToConnect);
         let descriptionAnswer = new RTCSessionDescription(_answer.answer);
-        clientToConnect.rtcPeerConnection.setRemoteDescription(descriptionAnswer);
+        clientToConnect.rtcPeerConnection?.setRemoteDescription(descriptionAnswer);
         console.log("Remote Description set");
     };
     broadcastMessageToAllConnectedClients = (_messageToBroadcast) => {
         this.authServerPeerConnectedClientCollection.forEach(client => {
-            if (client.rtcDataChannel.readyState == "open") {
-                client.rtcDataChannel.send(_messageToBroadcast);
+            if (client.rtcDataChannel?.readyState == "open") {
+                client.rtcDataChannel?.send(_messageToBroadcast);
             }
             else {
                 console.error("Connection closed abnormally for: ", client);
@@ -87,19 +87,19 @@ export class FudgeServerAuthoritativeManager {
     };
     initiateConnectionByCreatingDataChannelAndCreatingOffer = (_clientToConnect) => {
         console.log("Initiating connection to : " + _clientToConnect);
-        let newDataChannel = _clientToConnect.rtcPeerConnection.createDataChannel(_clientToConnect.id);
+        let newDataChannel = _clientToConnect.rtcPeerConnection?.createDataChannel(_clientToConnect.id);
         _clientToConnect.rtcDataChannel = newDataChannel;
-        newDataChannel.addEventListener("open", this.dataChannelStatusChangeHandler);
+        newDataChannel?.addEventListener("open", this.dataChannelStatusChangeHandler);
         // newDataChannel.addEventListener("close", this.dataChannelStatusChangeHandler);
-        newDataChannel.addEventListener("message", this.dataChannelMessageHandler);
-        _clientToConnect.rtcPeerConnection.createOffer()
+        newDataChannel?.addEventListener("message", this.dataChannelMessageHandler);
+        _clientToConnect.rtcPeerConnection?.createOffer()
             .then(async (offer) => {
-            console.log("Beginning of createOffer in InitiateConnection, Expected 'stable', got:  ", _clientToConnect.rtcPeerConnection.signalingState);
+            console.log("Beginning of createOffer in InitiateConnection, Expected 'stable', got:  ", _clientToConnect.rtcPeerConnection?.signalingState);
             return offer;
         })
             .then(async (offer) => {
-            await _clientToConnect.rtcPeerConnection.setLocalDescription(offer);
-            console.log("Setting LocalDesc, Expected 'have-local-offer', got:  ", _clientToConnect.rtcPeerConnection.signalingState);
+            await _clientToConnect.rtcPeerConnection?.setLocalDescription(offer);
+            console.log("Setting LocalDesc, Expected 'have-local-offer', got:  ", _clientToConnect.rtcPeerConnection?.signalingState);
         })
             .then(() => {
             this.createOfferMessageAndSendToRemote(_clientToConnect);
@@ -110,12 +110,12 @@ export class FudgeServerAuthoritativeManager {
     };
     createOfferMessageAndSendToRemote = (_clientToConnect) => {
         console.log("Sending offer now");
-        const offerMessage = new FudgeNetwork.NetworkMessageRtcOffer("SERVER", _clientToConnect.id, _clientToConnect.rtcPeerConnection.localDescription);
+        const offerMessage = new FudgeNetwork.NetworkMessageRtcOffer("SERVER", _clientToConnect.id, _clientToConnect.rtcPeerConnection?.localDescription);
         this.signalingServer.sendToId(_clientToConnect.id, offerMessage);
     };
     disconnectClientByOwnCommand = (_commandMessage) => {
         let clientToDisconnect = this.searchUserByUserIdAndReturnUser(_commandMessage.originatorId, this.authServerPeerConnectedClientCollection);
-        clientToDisconnect.rtcDataChannel.close();
+        clientToDisconnect.rtcDataChannel?.close();
     };
     handleKeyInputFromClient = (_commandMessage) => {
         console.log(_commandMessage);
