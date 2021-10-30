@@ -8,9 +8,9 @@ var ClientWebSocket;
         let domLogin = document.forms[0].querySelector("input[name=login");
         domServer.setAttribute("value", settings.server);
         domLogin.setAttribute("value", settings.login);
-        document.forms[1].querySelector("button[id=connect]").addEventListener("click", connect);
-        document.forms[2].querySelector("button[id=sendTCP]").addEventListener("click", sendTCP);
-        document.forms[2].querySelector("button[id=sendRTC]").addEventListener("click", sendRTC);
+        document.forms[1].querySelector("button#connect").addEventListener("click", connect);
+        document.forms[2].querySelector("button#sendTCP").addEventListener("click", sendTCP);
+        document.forms[2].querySelector("button#sendRTC").addEventListener("click", sendRTC);
         let client;
         const messageTypes = FudgeNetwork.MESSAGE_TYPE;
         async function connect() {
@@ -33,20 +33,21 @@ var ClientWebSocket;
             console.log("Username checked", domLogin.value);
             // let messageToSend: ƒ.General = new client.NetworkMessageMessageToServer(client.getLocalClientId(), "Hallo", client.localUserName);
             // client.sendTextMessageToSignalingServer(messageToSend);
-            client.sendMessageToSignalingServer({
-                messageType: messageTypes.CLIENT_TO_SERVER_MESSAGE, originatorId: client.getLocalClientId,
-                originatorUserName: name, messageData: "Hallo"
-            });
             if (connectionType == "SinglePeer") {
-                let domPartner = document.forms[1].querySelector("input[name=partner");
+                let domPartner = document.forms[1].querySelector("input#partner");
                 client.checkUsernameToConnectToAndInitiateConnection(domPartner.value);
             }
         }
         async function sendTCP() {
-            console.log("sendTCP");
+            let domMessage = document.forms[2].querySelector("input#messageTCP");
+            client.sendMessageToSignalingServer({
+                messageType: messageTypes.CLIENT_TO_SERVER_MESSAGE, originatorId: client.getLocalClientId,
+                originatorUserName: domLogin.value, messageData: domMessage.value
+            });
         }
         async function sendRTC() {
-            console.log("sendRTC");
+            let domMessage = document.forms[2].querySelector("input#messageRTC");
+            client.sendMessageToSingularPeer(domMessage.value);
         }
         function delay(_milisec) {
             return new Promise(resolve => {

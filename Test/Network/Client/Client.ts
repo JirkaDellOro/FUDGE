@@ -10,9 +10,9 @@ namespace ClientWebSocket {
     let domLogin: HTMLInputElement = document.forms[0].querySelector("input[name=login");
     domServer.setAttribute("value", settings.server);
     domLogin.setAttribute("value", settings.login);
-    document.forms[1].querySelector("button[id=connect]").addEventListener("click", connect);
-    document.forms[2].querySelector("button[id=sendTCP]").addEventListener("click", sendTCP);
-    document.forms[2].querySelector("button[id=sendRTC]").addEventListener("click", sendRTC);
+    document.forms[1].querySelector("button#connect").addEventListener("click", connect);
+    document.forms[2].querySelector("button#sendTCP").addEventListener("click", sendTCP);
+    document.forms[2].querySelector("button#sendRTC").addEventListener("click", sendRTC);
 
     let client: ƒ.General;
     const messageTypes: ƒ.General = FudgeNetwork.MESSAGE_TYPE;
@@ -41,22 +41,23 @@ namespace ClientWebSocket {
 
       // let messageToSend: ƒ.General = new client.NetworkMessageMessageToServer(client.getLocalClientId(), "Hallo", client.localUserName);
       // client.sendTextMessageToSignalingServer(messageToSend);
-      client.sendMessageToSignalingServer({
-        messageType: messageTypes.CLIENT_TO_SERVER_MESSAGE, originatorId: client.getLocalClientId,
-        originatorUserName: name, messageData: "Hallo"
-      });
 
       if (connectionType == "SinglePeer") {
-        let domPartner: HTMLInputElement = document.forms[1].querySelector("input[name=partner");
+        let domPartner: HTMLInputElement = document.forms[1].querySelector("input#partner");
         client.checkUsernameToConnectToAndInitiateConnection(domPartner.value);
       }
     }
 
     async function sendTCP(): Promise<void> {
-      console.log("sendTCP");
+      let domMessage: HTMLInputElement = document.forms[2].querySelector("input#messageTCP");
+      client.sendMessageToSignalingServer({
+        messageType: messageTypes.CLIENT_TO_SERVER_MESSAGE, originatorId: client.getLocalClientId,
+        originatorUserName: domLogin.value, messageData: domMessage.value
+      });
     }
     async function sendRTC(): Promise<void> {
-      console.log("sendRTC");
+      let domMessage: HTMLInputElement = document.forms[2].querySelector("input#messageRTC");
+      client.sendMessageToSingularPeer(domMessage.value);
     }
 
     function delay(_milisec: number): Promise<void> {

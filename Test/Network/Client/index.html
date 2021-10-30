@@ -36,7 +36,7 @@
         Establish a peer to peer connection to one specific other client via the server.<br />
         Make sure, a SinglePeer-Server is running at the address given above and another client logs in with the
         partner's name.<br />
-        <input type="text" name="partner"> Partner's login name
+        <input type="text" name="partner" id="partner"> Partner's login name
       </fieldset>
       <br />
       <button type="button" id="connect">Connect</button>
@@ -47,14 +47,14 @@
       <legend>Messages</legend>
       <fieldset>
         <legend>TCP</legend>
-        <input type="text" name="send" value="Hello" />
-        <button type="button" id="sendTCP">Send</button><br/>
+        <input type="text" name="send" value="Hello" id="messageTCP" />
+        <button type="button" id="sendTCP">Send</button><br />
         <textarea name="received" cols="30" rows="10"></textarea>
       </fieldset>
       <fieldset>
         <legend>RTC</legend>
-        <input type="text" name="send" value="Hello" />
-        <button type="button" id="sendRTC">Send</button><br/>
+        <input type="text" name="send" value="Hello" id="messageRTC" />
+        <button type="button" id="sendRTC">Send</button><br />
         <textarea name="received" cols="30" rows="10"></textarea>
       </fieldset>
     </fieldset>

@@ -249,7 +249,7 @@ export class ClientManagerSinglePeer implements FudgeNetwork.ClientManagerSingle
   }
 
 
-
+  // TODO: identical to pure WebSocket -> generalize
   public sendMessageToSignalingServer = (_message: Object) => {
     let stringifiedMessage: string = this.stringifyObjectForNetworkSending(_message);
     if (this.webSocketConnectionToSignalingServer.readyState == 1) {
@@ -291,7 +291,7 @@ export class ClientManagerSinglePeer implements FudgeNetwork.ClientManagerSingle
   }
 
 
-  // tslint:disable-next-line: no-any
+  // tslint:disable-next-line: not recognized-any
   public parseReceivedMessageAndReturnObject = (_receivedMessage: MessageEvent): any => {
     // tslint:disable-next-line: no-any
     let objectifiedMessage: any;
