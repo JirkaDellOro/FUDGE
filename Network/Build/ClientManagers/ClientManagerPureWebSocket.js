@@ -46,7 +46,7 @@ export class ClientManagerWebSocketOnly {
     addWebSocketEventListeners = () => {
         try {
             this.webSocketConnectionToSignalingServer.addEventListener("open", (_connOpen) => {
-                console.log("Client connects to signaling server", _connOpen);
+                console.log("Connection", _connOpen);
             });
             this.webSocketConnectionToSignalingServer.addEventListener("error", (_err) => {
                 console.error(_err);
@@ -64,8 +64,8 @@ export class ClientManagerWebSocketOnly {
         let objectifiedMessage = this.parseReceivedMessageAndReturnObject(_receivedMessage);
         switch (objectifiedMessage.messageType) {
             case FudgeNetwork.MESSAGE_TYPE.ID_ASSIGNED:
-                console.log("ID received, assigning to self");
                 this.assignIdAndSendConfirmation(objectifiedMessage);
+                console.log("localClientId", this.localClientID);
                 break;
             case FudgeNetwork.MESSAGE_TYPE.LOGIN_RESPONSE:
                 this.loginValidAddUser(objectifiedMessage.originatorId, objectifiedMessage.loginSuccess, objectifiedMessage.originatorUsername);
@@ -81,7 +81,7 @@ export class ClientManagerWebSocketOnly {
         }
     };
     sendMessageToSignalingServer = (_message) => {
-        console.log("Sending Message to Server");
+        console.log("Send", _message);
         let stringifiedMessage = this.stringifyObjectForNetworkSending(_message);
         if (this.webSocketConnectionToSignalingServer.readyState == 1) {
             this.webSocketConnectionToSignalingServer.send(stringifiedMessage);
@@ -145,7 +145,7 @@ export class ClientManagerWebSocketOnly {
         // tslint:disable-next-line: no-any
         let objectifiedMessage;
         try {
-            console.log("RECEIVED: ", _receivedMessage);
+            console.log("Receive", _receivedMessage);
             objectifiedMessage = JSON.parse(_receivedMessage.data);
         }
         catch (error) {
