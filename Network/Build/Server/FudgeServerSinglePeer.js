@@ -3,14 +3,9 @@ import * as FudgeNetwork from "../ModuleCollectorServer.js";
 export class FudgeServerSinglePeer {
     websocketServer;
     connectedClientsCollection = new Array();
-    startUpServer = (_serverPort) => {
+    startUpServer = (_serverPort = 8080) => {
         console.log(_serverPort);
-        if (!_serverPort) {
-            this.websocketServer = new WebSocket.Server({ port: 8080 });
-        }
-        else {
-            this.websocketServer = new WebSocket.Server({ port: _serverPort });
-        }
+        this.websocketServer = new WebSocket.Server({ port: _serverPort });
         this.addServerEventHandling();
     };
     closeDownServer = () => {

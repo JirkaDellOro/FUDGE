@@ -15,7 +15,7 @@ var ClientWebSocket;
         const messageTypes = FudgeNetwork.MESSAGE_TYPE;
         async function connect() {
             let formData = new FormData(document.forms[1]);
-            let connectionType = formData.get("type").toString();
+            let connectionType = formData.get("type")?.toString();
             console.log(`%c${connectionType}`, "color:blue; font-size: large");
             switch (connectionType) {
                 case "WebSocket":
@@ -24,6 +24,9 @@ var ClientWebSocket;
                 case "SinglePeer":
                     client = new FudgeNetwork.ClientManagerSinglePeer();
                     break;
+                default:
+                    console.error("Select a connection type!");
+                    return;
             }
             console.log("Create", client);
             await client.connectToSignalingServer(domServer.value);

@@ -124,7 +124,7 @@ export class ClientManagerSinglePeer implements FudgeNetwork.ClientManagerSingle
       this.ownPeerDataChannel.addEventListener("open", this.dataChannelStatusChangeHandler);
       this.ownPeerDataChannel.addEventListener("close", this.dataChannelStatusChangeHandler);
       this.ownPeerDataChannel.addEventListener("message", this.dataChannelMessageHandler);
-      console.log(this.ownPeerConnection.getSenders);
+      console.log("Senders", this.ownPeerConnection.getSenders());
 
     } catch (error) {
       console.error("Unexpected Error: Creating Client Datachannel and adding Listeners", error);
@@ -169,7 +169,7 @@ export class ClientManagerSinglePeer implements FudgeNetwork.ClientManagerSingle
     }
     this.ownPeerConnection.setRemoteDescription(new RTCSessionDescription(offerToSet))
       .then(async () => {
-        console.log("Received Offer and Set Descirpton, Expected 'have-remote-offer', got:  ", this.ownPeerConnection.signalingState);
+        console.log("Received Offer and Set Descripton, Expected 'have-remote-offer', got:  ", this.ownPeerConnection.signalingState);
         await this.answerNegotiationOffer(_offerMessage.originatorId);
       })
       .catch((error) => {
@@ -186,7 +186,7 @@ export class ClientManagerSinglePeer implements FudgeNetwork.ClientManagerSingle
     // Signaling example from here https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/createAnswer
     this.ownPeerConnection.createAnswer()
       .then(async (answer) => {
-        console.log("Create Answer before settign local desc: Expected 'have-remote-offer', got:  ", this.ownPeerConnection.signalingState);
+        console.log("Create Answer before setting local desc: Expected 'have-remote-offer', got:  ", this.ownPeerConnection.signalingState);
         ultimateAnswer = new RTCSessionDescription(answer);
         return await this.ownPeerConnection.setLocalDescription(ultimateAnswer);
       }).then(async () => {

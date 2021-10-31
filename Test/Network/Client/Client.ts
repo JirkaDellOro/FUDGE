@@ -19,7 +19,7 @@ namespace ClientWebSocket {
 
     async function connect(): Promise<void> {
       let formData: FormData = new FormData(document.forms[1]);
-      let connectionType: string = formData.get("type").toString();
+      let connectionType: string = formData.get("type")?.toString();
       console.log(`%c${connectionType}`, "color:blue; font-size: large");
 
       switch (connectionType) {
@@ -29,6 +29,9 @@ namespace ClientWebSocket {
         case "SinglePeer":
           client = new FudgeNetwork.ClientManagerSinglePeer();
           break;
+        default:
+          console.error("Select a connection type!");
+          return;
       }
 
       console.log("Create", client);

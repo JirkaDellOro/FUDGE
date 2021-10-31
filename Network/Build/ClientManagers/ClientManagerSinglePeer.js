@@ -112,7 +112,7 @@ export class ClientManagerSinglePeer {
             this.ownPeerDataChannel.addEventListener("open", this.dataChannelStatusChangeHandler);
             this.ownPeerDataChannel.addEventListener("close", this.dataChannelStatusChangeHandler);
             this.ownPeerDataChannel.addEventListener("message", this.dataChannelMessageHandler);
-            console.log(this.ownPeerConnection.getSenders);
+            console.log("Senders", this.ownPeerConnection.getSenders());
         }
         catch (error) {
             console.error("Unexpected Error: Creating Client Datachannel and adding Listeners", error);
@@ -156,7 +156,7 @@ export class ClientManagerSinglePeer {
         }
         this.ownPeerConnection.setRemoteDescription(new RTCSessionDescription(offerToSet))
             .then(async () => {
-            console.log("Received Offer and Set Descirpton, Expected 'have-remote-offer', got:  ", this.ownPeerConnection.signalingState);
+            console.log("Received Offer and Set Descripton, Expected 'have-remote-offer', got:  ", this.ownPeerConnection.signalingState);
             await this.answerNegotiationOffer(_offerMessage.originatorId);
         })
             .catch((error) => {
@@ -169,7 +169,7 @@ export class ClientManagerSinglePeer {
         // Signaling example from here https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/createAnswer
         this.ownPeerConnection.createAnswer()
             .then(async (answer) => {
-            console.log("Create Answer before settign local desc: Expected 'have-remote-offer', got:  ", this.ownPeerConnection.signalingState);
+            console.log("Create Answer before setting local desc: Expected 'have-remote-offer', got:  ", this.ownPeerConnection.signalingState);
             ultimateAnswer = new RTCSessionDescription(answer);
             return await this.ownPeerConnection.setLocalDescription(ultimateAnswer);
         }).then(async () => {
@@ -223,6 +223,7 @@ export class ClientManagerSinglePeer {
             console.error("Unexpected Error: RemoteDatachannel");
         }
     };
+    // TODO: identical to pure WebSocket -> generalize
     sendMessageToSignalingServer = (_message) => {
         let stringifiedMessage = this.stringifyObjectForNetworkSending(_message);
         if (this.webSocketConnectionToSignalingServer.readyState == 1) {
@@ -258,7 +259,7 @@ export class ClientManagerSinglePeer {
             console.error("Datachannel: Connection unexpectedly lost");
         }
     };
-    // tslint:disable-next-line: no-any
+    // tslint:disable-next-line: not recognized-any
     parseReceivedMessageAndReturnObject = (_receivedMessage) => {
         // tslint:disable-next-line: no-any
         let objectifiedMessage;
