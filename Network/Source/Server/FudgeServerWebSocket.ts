@@ -86,7 +86,7 @@ export class FudgeServerWebSocket implements FudgeNetwork.WSServer {
           break;
 
         default:
-          console.log("Message type not recognized");
+          console.log("WebSocket: Message type not recognized");
           break;
 
       }

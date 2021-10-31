@@ -73,7 +73,7 @@ export class FudgeServerWebSocket {
                     this.broadcastMessageToAllConnectedClients(objectifiedMessage);
                     break;
                 default:
-                    console.log("Message type not recognized");
+                    console.log("WebSocket: Message type not recognized");
                     break;
             }
         }

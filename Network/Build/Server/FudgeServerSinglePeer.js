@@ -78,7 +78,7 @@ export class FudgeServerSinglePeer {
                     this.sendIceCandidatesToRelevantPeer(_websocketClient, objectifiedMessage);
                     break;
                 default:
-                    console.log("Message type not recognized");
+                    console.log("SinglePeer: Message type not recognized", objectifiedMessage.messageType, objectifiedMessage);
                     break;
             }
         }

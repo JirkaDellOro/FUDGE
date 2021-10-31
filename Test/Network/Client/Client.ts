@@ -48,6 +48,7 @@ namespace ClientWebSocket {
       if (connectionType == "SinglePeer") {
         let domPartner: HTMLInputElement = document.forms[1].querySelector("input#partner");
         client.checkUsernameToConnectToAndInitiateConnection(domPartner.value);
+        client.ownPeerConnection.addEventListener("receive", receiveRTC);
       }
     }
 
@@ -61,6 +62,10 @@ namespace ClientWebSocket {
     async function sendRTC(): Promise<void> {
       let domMessage: HTMLInputElement = document.forms[2].querySelector("input#messageRTC");
       client.sendMessageToSingularPeer(domMessage.value);
+    }
+    async function receiveRTC(_event: CustomEvent): Promise<void> {
+      let domReceive: HTMLTextAreaElement = document.forms[2].querySelector("textarea#receivedRTC");
+      domReceive.value += _event.detail.originatorUserName + ": " + _event.detail.messageData;
     }
 
     function delay(_milisec: number): Promise<void> {

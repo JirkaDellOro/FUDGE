@@ -272,13 +272,15 @@ export class ClientManagerSinglePeer {
         }
         return objectifiedMessage;
     };
+    // TODO: see if this should send a custom event for further processing.
     dataChannelMessageHandler = (_messageEvent) => {
         if (_messageEvent) {
             // tslint:disable-next-line: no-any
-            console.log(_messageEvent);
             let parsedObject = this.parseReceivedMessageAndReturnObject(_messageEvent);
-            FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + parsedObject.originatorUserName + ": " + parsedObject.messageData;
-            FudgeNetwork.UiElementHandler.chatbox.scrollTop = FudgeNetwork.UiElementHandler.chatbox.scrollHeight;
+            console.log(_messageEvent.type, parsedObject);
+            // FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + parsedObject.originatorUserName + ": " + parsedObject.messageData;
+            // FudgeNetwork.UiElementHandler.chatbox.scrollTop = FudgeNetwork.UiElementHandler.chatbox.scrollHeight;
+            this.ownPeerConnection.dispatchEvent(new CustomEvent("receive", { detail: parsedObject }));
         }
     };
     getLocalClientId() {

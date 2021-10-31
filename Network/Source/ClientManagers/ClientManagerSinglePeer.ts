@@ -305,13 +305,15 @@ export class ClientManagerSinglePeer implements FudgeNetwork.ClientManagerSingle
     return objectifiedMessage;
   }
 
+  // TODO: see if this should send a custom event for further processing.
   public dataChannelMessageHandler = (_messageEvent: MessageEvent) => {
     if (_messageEvent) {
       // tslint:disable-next-line: no-any
-      console.log(_messageEvent);
       let parsedObject: FudgeNetwork.PeerMessageSimpleText = this.parseReceivedMessageAndReturnObject(_messageEvent);
-      FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + parsedObject.originatorUserName + ": " + parsedObject.messageData;
-      FudgeNetwork.UiElementHandler.chatbox.scrollTop = FudgeNetwork.UiElementHandler.chatbox.scrollHeight;
+      console.log(_messageEvent.type, parsedObject);
+      // FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + parsedObject.originatorUserName + ": " + parsedObject.messageData;
+      // FudgeNetwork.UiElementHandler.chatbox.scrollTop = FudgeNetwork.UiElementHandler.chatbox.scrollHeight;
+      this.ownPeerConnection.dispatchEvent(new CustomEvent("receive", {detail: parsedObject}));
     }
   }
 

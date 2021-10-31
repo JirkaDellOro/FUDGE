@@ -39,6 +39,7 @@ var ClientWebSocket;
             if (connectionType == "SinglePeer") {
                 let domPartner = document.forms[1].querySelector("input#partner");
                 client.checkUsernameToConnectToAndInitiateConnection(domPartner.value);
+                client.ownPeerConnection.addEventListener("receive", receiveRTC);
             }
         }
         async function sendTCP() {
@@ -51,6 +52,10 @@ var ClientWebSocket;
         async function sendRTC() {
             let domMessage = document.forms[2].querySelector("input#messageRTC");
             client.sendMessageToSingularPeer(domMessage.value);
+        }
+        async function receiveRTC(_event) {
+            let domReceive = document.forms[2].querySelector("textarea#receivedRTC");
+            domReceive.value += _event.detail.originatorUserName + ": " + _event.detail.messageData;
         }
         function delay(_milisec) {
             return new Promise(resolve => {

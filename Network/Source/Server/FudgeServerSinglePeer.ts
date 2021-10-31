@@ -92,7 +92,7 @@ export class FudgeServerSinglePeer implements FudgeNetwork.SignalingServer {
           break;
 
         default:
-          console.log("Message type not recognized");
+          console.log("SinglePeer: Message type not recognized", objectifiedMessage.messageType, objectifiedMessage);
           break;
 
       }
