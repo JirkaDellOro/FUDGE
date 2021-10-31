@@ -21,6 +21,10 @@ namespace FudgeCore {
     public abstract get texImageSource(): TexImageSource;
     public useRenderData(): void {/* injected by RenderInjector*/ }
 
+    public refresh(): void {
+      this.renderData = null;
+    }
+
     //#region Transfer
     public serialize(): Serialization {
       let serialization: Serialization = {

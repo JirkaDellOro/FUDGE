@@ -5314,6 +5314,7 @@ declare namespace FudgeCore {
         constructor(_name?: string);
         abstract get texImageSource(): TexImageSource;
         useRenderData(): void;
+        refresh(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
