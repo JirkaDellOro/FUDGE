@@ -4,14 +4,8 @@ export class FudgeServerMeshNetwork {
     websocketServer;
     connectedClientsCollection = new Array();
     peerMeshReadyClientCollection = new Array();
-    startUpServer = (_serverPort) => {
-        console.log(_serverPort);
-        if (!_serverPort) {
-            this.websocketServer = new WebSocket.Server({ port: 8080 });
-        }
-        else {
-            this.websocketServer = new WebSocket.Server({ port: _serverPort });
-        }
+    startUpServer = (_serverPort = 8080) => {
+        this.websocketServer = new WebSocket.Server({ port: _serverPort });
         this.addServerEventHandling();
     };
     closeDownServer = () => {

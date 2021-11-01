@@ -30,7 +30,7 @@
       </fieldset>
       <fieldset>
         <legend>
-          <input type="radio" name="type" value="SinglePeer" id="SinglePeer" checked />
+          <input type="radio" name="type" value="SinglePeer" id="SinglePeer" />
           <label for="SinglePeer"> SinglePeer</label>
         </legend>
         Establish a peer to peer connection to one specific other client via the server.<br />
@@ -38,6 +38,15 @@
         peer's name.<br />
         <button type="button" id="peer" disabled>Connect to peer: </button>
         <input type="text" name="partner" id="partner">
+      </fieldset>
+      <fieldset>
+        <legend>
+          <input type="radio" name="type" value="Mesh" id="Mesh" checked />
+          <label for="Mesh"> Mesh</label>
+        </legend>
+        Establish a mesh with all other clients marshalled by the server.<br />
+        Make sure, a Mesh-Server is running at the address given above and other client log in.<br />
+        <button type="button" id="createMesh" disabled>Create mesh </button>
       </fieldset>
       <br />
       <button type="button" id="login">Login</button>

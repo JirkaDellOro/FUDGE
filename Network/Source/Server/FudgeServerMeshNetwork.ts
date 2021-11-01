@@ -6,15 +6,9 @@ export class FudgeServerMeshNetwork implements FudgeNetwork.MeshNetworkSignaling
   public websocketServer!: WebSocket.Server;
   public connectedClientsCollection: FudgeNetwork.ClientDataType[] = new Array();
   public peerMeshReadyClientCollection: FudgeNetwork.ClientDataType[] = new Array();
-  public startUpServer = (_serverPort?: number) => {
-    console.log(_serverPort);
-    if (!_serverPort) {
-      this.websocketServer = new WebSocket.Server({ port: 8080 });
-    }
-    else {
-      this.websocketServer = new WebSocket.Server({ port: _serverPort });
 
-    }
+  public startUpServer = (_serverPort: number = 8080) => {
+    this.websocketServer = new WebSocket.Server({ port: _serverPort });
     this.addServerEventHandling();
   }
 

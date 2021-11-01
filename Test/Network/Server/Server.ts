@@ -1,5 +1,5 @@
 //@ts-ignore
-import { FudgeServerWebSocket, FudgeServerSinglePeer } from "../../../Network/Build/Server/index.js";
+import { FudgeServerWebSocket, FudgeServerSinglePeer, FudgeServerMeshNetwork } from "../../../Network/Build/Server/index.js";
 // import RTCPeerConnection from "webrtc-adapter";
 
 let type: string = process.argv[2];
@@ -19,4 +19,9 @@ switch (type) {
     let ssp: FudgeServerSinglePeer = new FudgeServerSinglePeer();
     ssp.startUpServer(port);
     console.log(ssp);
+    break;
+  case "Mesh":
+    let smn: FudgeServerMeshNetwork = new FudgeServerMeshNetwork();
+    smn.startUpServer(port);
+    console.log(smn);
 }

@@ -14,8 +14,8 @@ namespace ClientWebSocket {
 
     document.forms[1].querySelector("button#login").addEventListener("click", login);
     document.forms[1].querySelector("button#peer").addEventListener("click", connectToPeer);
+    document.forms[1].querySelector("button#createMesh").addEventListener("click", createMesh);
     document.forms[2].querySelector("button#sendTCP").addEventListener("click", sendTCP);
-    document.forms[2].querySelector("button#sendRTC").addEventListener("click", sendRTC);
 
     let client: ƒ.General;
     const messageTypes: ƒ.General = FudgeNetwork.MESSAGE_TYPE;
@@ -35,6 +35,16 @@ namespace ClientWebSocket {
           document.forms[1].querySelector("button#peer").removeAttribute("disabled");
           document.forms[2].querySelector("button#sendRTC").removeAttribute("disabled");
           client.ownPeerConnection.addEventListener("receive", receiveRTC);
+          document.forms[2].querySelector("button#sendRTC").addEventListener("click", sendRTCSinglePeer);
+
+          // this.ownPeerConnection.dispatchEvent(new CustomEvent("remoteConnected", {detail: this}));
+          break;
+        case "Mesh":
+          client = new FudgeNetwork.ClientManagerFullMeshStructure();
+          document.forms[1].querySelector("button#createMesh").removeAttribute("disabled");
+          document.forms[2].querySelector("button#sendRTC").removeAttribute("disabled");
+          client.currentlyNegotiatingClient.rtcDataChannel.addEventListener("receive", receiveRTC); 
+          document.forms[2].querySelector("button#sendRTC").addEventListener("click", sendRTCMesh);
 
           // this.ownPeerConnection.dispatchEvent(new CustomEvent("remoteConnected", {detail: this}));
           break;
@@ -59,6 +69,9 @@ namespace ClientWebSocket {
       let domPartner: HTMLInputElement = document.forms[1].querySelector("input#partner");
       client.checkUsernameToConnectToAndInitiateConnection(domPartner.value);
     }
+    async function createMesh(_event: Event): Promise<void> {
+      client.sendReadySignalToServer();
+    }
 
     async function sendTCP(): Promise<void> {
       let domMessage: HTMLInputElement = document.forms[2].querySelector("input#messageTCP");
@@ -67,9 +80,13 @@ namespace ClientWebSocket {
         originatorUserName: domLogin.value, messageData: domMessage.value
       });
     }
-    async function sendRTC(): Promise<void> {
+    async function sendRTCSinglePeer(): Promise<void> {
       let domMessage: HTMLInputElement = document.forms[2].querySelector("input#messageRTC");
       client.sendMessageToSingularPeer(domMessage.value);
+    }
+    async function sendRTCMesh(): Promise<void> {
+      let domMessage: HTMLInputElement = document.forms[2].querySelector("input#messageRTC");
+      client.sendMessageToPeers(domMessage.value);
     }
     async function receiveRTC(_event: CustomEvent): Promise<void> {
       let domReceive: HTMLTextAreaElement = document.forms[2].querySelector("textarea#receivedRTC");

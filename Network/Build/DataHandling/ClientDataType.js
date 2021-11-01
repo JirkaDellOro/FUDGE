@@ -11,8 +11,8 @@ export class ClientDataType {
         this.id = _remoteId || "";
         this.userName = _userName || "";
         // TODO: cleanup Node workaround... the server doesn't know RTC
-        this.rtcPeerConnection = _rtcPeerConnection || (process ? undefined : new RTCPeerConnection());
-        this.rtcDataChannel = _rtcDataChannel || (process ? undefined : this.rtcPeerConnection?.createDataChannel("error"));
+        this.rtcPeerConnection = _rtcPeerConnection || (typeof process == "undefined" ? new RTCPeerConnection() : undefined);
+        this.rtcDataChannel = _rtcDataChannel || (typeof process == "undefined" ? this.rtcPeerConnection?.createDataChannel("error") : undefined);
         this.rtcMediaStream = _rtcMediaStream;
         this.clientConnection = websocketConnection || null;
         this.isPeerMeshReady = false;

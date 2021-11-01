@@ -4,7 +4,7 @@ export class ClientManagerFullMeshStructure implements FudgeNetwork.ClientManage
   remoteMeshClients: FudgeNetwork.ClientDataType[];
   currentlyNegotiatingClient: FudgeNetwork.ClientDataType;
 
-  public establishedDataChannelsWithRemoteIds!: [RTCDataChannel];
+  // public establishedDataChannelsWithRemoteIds!: [RTCDataChannel];
 
 
   public signalingServerConnectionUrl: string = "ws://localhost:8080";
@@ -309,6 +309,18 @@ export class ClientManagerFullMeshStructure implements FudgeNetwork.ClientManage
     //     }
     // } catch (error) { console.error("Unexpected Error: Send Key Press", error); }
   }
+  public sendMessageToPeers = (_messageToSend: string) => {
+    let messageObject: FudgeNetwork.PeerMessageSimpleText = new FudgeNetwork.PeerMessageSimpleText(this.localClientID, _messageToSend, this.localUserName);
+
+    let stringifiedMessage: string = this.stringifyObjectForNetworkSending(messageObject);
+    console.log(stringifiedMessage);
+    if (this.currentlyNegotiatingClient.rtcDataChannel) {
+      this.currentlyNegotiatingClient.rtcDataChannel.send(stringifiedMessage);
+    }
+    else {
+      console.error("Datachannel: Connection unexpectedly lost");
+    }
+  }
 
 
 
@@ -330,8 +342,10 @@ export class ClientManagerFullMeshStructure implements FudgeNetwork.ClientManage
     if (_messageEvent) {
       // tslint:disable-next-line: no-any
       let parsedObject: any = this.parseReceivedMessageAndReturnObject(_messageEvent);
-      FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + parsedObject.messageData.originatorId + ": " + parsedObject.messageData;
-      FudgeNetwork.UiElementHandler.chatbox.scrollTop = FudgeNetwork.UiElementHandler.chatbox.scrollHeight;
+      this.currentlyNegotiatingClient.rtcDataChannel?.dispatchEvent(new CustomEvent("receive", {detail: parsedObject}));
+      // this.remoteEventPeerDataChannel?.dispatchEvent(new CustomEvent("receive", {detail: parsedObject}));
+      // FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + parsedObject.messageData.originatorId + ": " + parsedObject.messageData;
+      // FudgeNetwork.UiElementHandler.chatbox.scrollTop = FudgeNetwork.UiElementHandler.chatbox.scrollHeight;
     }
   }
   
