@@ -30,14 +30,14 @@
       </fieldset>
       <fieldset>
         <legend>
-          <input type="radio" name="type" value="SinglePeer" id="SinglePeer" checked/>
+          <input type="radio" name="type" value="SinglePeer" id="SinglePeer" checked />
           <label for="SinglePeer"> SinglePeer</label>
         </legend>
         Establish a peer to peer connection to one specific other client via the server.<br />
-        Make sure, a SinglePeer-Server is running at the address given above and another client logs in with the
-        peer's name below.<br />
+        Make sure, a SinglePeer-Server is running at the address given above and another client is logged in with the
+        peer's name.<br />
+        <button type="button" id="peer" disabled>Connect to peer: </button>
         <input type="text" name="partner" id="partner">
-        <button type="button" id="peer" disabled>Connect to peer</button>
       </fieldset>
       <br />
       <button type="button" id="login">Login</button>

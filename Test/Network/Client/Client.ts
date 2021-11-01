@@ -35,8 +35,8 @@ namespace ClientWebSocket {
           document.forms[1].querySelector("button#peer").removeAttribute("disabled");
           document.forms[2].querySelector("button#sendRTC").removeAttribute("disabled");
           client.ownPeerConnection.addEventListener("receive", receiveRTC);
-          
-        // this.ownPeerConnection.dispatchEvent(new CustomEvent("remoteConnected", {detail: this}));
+
+          // this.ownPeerConnection.dispatchEvent(new CustomEvent("remoteConnected", {detail: this}));
           break;
         default:
           console.error("Select a connection type!");
@@ -50,6 +50,9 @@ namespace ClientWebSocket {
 
       client.checkChosenUsernameAndCreateLoginRequest(domLogin.value);
       console.log("Username checked", domLogin.value);
+
+      if (connectionType == "WebSocket")
+        client.webSocketConnectionToSignalingServer.addEventListener("receive", receiveTCP);
     }
 
     async function connectToPeer(_event: Event): Promise<void> {
@@ -70,6 +73,10 @@ namespace ClientWebSocket {
     }
     async function receiveRTC(_event: CustomEvent): Promise<void> {
       let domReceive: HTMLTextAreaElement = document.forms[2].querySelector("textarea#receivedRTC");
+      domReceive.value += _event.detail.originatorUserName + ": " + _event.detail.messageData + "\n";
+    }
+    async function receiveTCP(_event: CustomEvent): Promise<void> {
+      let domReceive: HTMLTextAreaElement = document.forms[2].querySelector("textarea#receivedTCP");
       domReceive.value += _event.detail.originatorUserName + ": " + _event.detail.messageData + "\n";
     }
 

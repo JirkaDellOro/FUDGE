@@ -41,6 +41,8 @@ var ClientWebSocket;
             console.log("Logged in");
             client.checkChosenUsernameAndCreateLoginRequest(domLogin.value);
             console.log("Username checked", domLogin.value);
+            if (connectionType == "WebSocket")
+                client.webSocketConnectionToSignalingServer.addEventListener("receive", receiveTCP);
         }
         async function connectToPeer(_event) {
             let domPartner = document.forms[1].querySelector("input#partner");
@@ -59,6 +61,10 @@ var ClientWebSocket;
         }
         async function receiveRTC(_event) {
             let domReceive = document.forms[2].querySelector("textarea#receivedRTC");
+            domReceive.value += _event.detail.originatorUserName + ": " + _event.detail.messageData + "\n";
+        }
+        async function receiveTCP(_event) {
+            let domReceive = document.forms[2].querySelector("textarea#receivedTCP");
             domReceive.value += _event.detail.originatorUserName + ": " + _event.detail.messageData + "\n";
         }
         function delay(_milisec) {

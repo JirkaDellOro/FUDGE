@@ -89,6 +89,8 @@ export class ClientManagerWebSocketOnly implements FudgeNetwork.ClientManagerWeb
       default:
         console.error("Unrecognized Messagetype, did you handle it in Client?");
     }
+
+    this.webSocketConnectionToSignalingServer.dispatchEvent(new CustomEvent("receive", {detail: objectifiedMessage}));
   }
 
   public sendMessageToSignalingServer = (_message: Object) => {
@@ -133,8 +135,8 @@ export class ClientManagerWebSocketOnly implements FudgeNetwork.ClientManagerWeb
   private displayServerMessage(_messageToDisplay: any): void {
     // tslint:disable-next-line: no-any
     let parsedObject: FudgeNetwork.NetworkMessageMessageToClient = this.parseReceivedMessageAndReturnObject(_messageToDisplay);
-    FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + parsedObject.originatorId + ": " + parsedObject.messageData;
-    FudgeNetwork.UiElementHandler.chatbox.scrollTop = FudgeNetwork.UiElementHandler.chatbox.scrollHeight;
+    // FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + parsedObject.originatorId + ": " + parsedObject.messageData;
+    // FudgeNetwork.UiElementHandler.chatbox.scrollTop = FudgeNetwork.UiElementHandler.chatbox.scrollHeight;
   }
 
   private assignIdAndSendConfirmation = (_message: FudgeNetwork.NetworkMessageIdAssigned) => {

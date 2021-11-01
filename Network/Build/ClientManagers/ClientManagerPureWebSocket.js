@@ -79,6 +79,7 @@ export class ClientManagerWebSocketOnly {
             default:
                 console.error("Unrecognized Messagetype, did you handle it in Client?");
         }
+        this.webSocketConnectionToSignalingServer.dispatchEvent(new CustomEvent("receive", { detail: objectifiedMessage }));
     };
     sendMessageToSignalingServer = (_message) => {
         console.log("Send", _message);
@@ -119,8 +120,8 @@ export class ClientManagerWebSocketOnly {
     displayServerMessage(_messageToDisplay) {
         // tslint:disable-next-line: no-any
         let parsedObject = this.parseReceivedMessageAndReturnObject(_messageToDisplay);
-        FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + parsedObject.originatorId + ": " + parsedObject.messageData;
-        FudgeNetwork.UiElementHandler.chatbox.scrollTop = FudgeNetwork.UiElementHandler.chatbox.scrollHeight;
+        // FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + parsedObject.originatorId + ": " + parsedObject.messageData;
+        // FudgeNetwork.UiElementHandler.chatbox.scrollTop = FudgeNetwork.UiElementHandler.chatbox.scrollHeight;
     }
     assignIdAndSendConfirmation = (_message) => {
         try {
