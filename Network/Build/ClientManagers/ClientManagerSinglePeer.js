@@ -281,6 +281,7 @@ export class ClientManagerSinglePeer {
             // FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + parsedObject.originatorUserName + ": " + parsedObject.messageData;
             // FudgeNetwork.UiElementHandler.chatbox.scrollTop = FudgeNetwork.UiElementHandler.chatbox.scrollHeight;
             this.ownPeerConnection.dispatchEvent(new CustomEvent("receive", { detail: parsedObject }));
+            this.remoteEventPeerDataChannel?.dispatchEvent(new CustomEvent("receive", { detail: parsedObject }));
         }
     };
     getLocalClientId() {

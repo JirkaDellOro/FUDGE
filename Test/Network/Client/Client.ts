@@ -34,6 +34,9 @@ namespace ClientWebSocket {
           client = new FudgeNetwork.ClientManagerSinglePeer();
           document.forms[1].querySelector("button#peer").removeAttribute("disabled");
           document.forms[2].querySelector("button#sendRTC").removeAttribute("disabled");
+          client.ownPeerConnection.addEventListener("receive", receiveRTC);
+          
+        // this.ownPeerConnection.dispatchEvent(new CustomEvent("remoteConnected", {detail: this}));
           break;
         default:
           console.error("Select a connection type!");
@@ -52,7 +55,6 @@ namespace ClientWebSocket {
     async function connectToPeer(_event: Event): Promise<void> {
       let domPartner: HTMLInputElement = document.forms[1].querySelector("input#partner");
       client.checkUsernameToConnectToAndInitiateConnection(domPartner.value);
-      client.ownPeerConnection.addEventListener("receive", receiveRTC);
     }
 
     async function sendTCP(): Promise<void> {
