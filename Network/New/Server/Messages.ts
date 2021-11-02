@@ -60,7 +60,7 @@ export class RtcOffer extends MessageBase {
 
 export class RtcAnswer extends MessageBase {
   constructor(_originatorId: string, public targetId: string, public answer: RTCSessionDescription) {
-    super(MESSAGE_TYPE.RTC_ANSWER, _originatorId)
+    super(MESSAGE_TYPE.RTC_ANSWER, _originatorId);
   }
 }
 

@@ -7,7 +7,7 @@ enum CONNECTION {
 
 export interface Client {
   id: string;
-  name: string;
+  name?: string;
   connection: WebSocket;
   peers: { [id: string]: CONNECTION[] };
 }
@@ -35,7 +35,7 @@ export class FudgeServer {
         const uniqueIdOnConnection: string = this.createID();
         // this.sendTo(_websocketClient, new Message.IdAssigned(uniqueIdOnConnection));
         _websocketClient.send(new Message.IdAssigned(uniqueIdOnConnection));
-        const freshlyConnectedClient: Client = { connection: _websocketClient, id: uniqueIdOnConnection, name: undefined, peers: {} };
+        const freshlyConnectedClient: Client = { connection: _websocketClient, id: uniqueIdOnConnection, peers: {} };
         this.clients.push(freshlyConnectedClient);
       } catch (error) {
         console.error("Unhandled Exception SERVER: Sending ID to ClientDataType", error);
