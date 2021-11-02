@@ -1,5 +1,5 @@
 //@ts-ignore
-import { FudgeServerWebSocket, FudgeServerSinglePeer, FudgeServerMeshNetwork } from "../../../Network/Build/Server/index.js";
+import { FudgeServerWebSocket, FudgeServerSinglePeer, FudgeServerMeshNetwork, FudgeServerAuthoritativeSignaling, FudgeServerAuthoritativeManager } from "../../../Network/Build/Server/index.js";
 // import RTCPeerConnection from "webrtc-adapter";
 
 let type: string = process.argv[2];
@@ -24,4 +24,8 @@ switch (type) {
     let smn: FudgeServerMeshNetwork = new FudgeServerMeshNetwork();
     smn.startUpServer(port);
     console.log(smn);
+  case "Authoritative":
+    let sas: FudgeServerAuthoritativeSignaling = new FudgeServerAuthoritativeSignaling();
+    sas.startUpServer(port);
+    console.log(sas);
 }

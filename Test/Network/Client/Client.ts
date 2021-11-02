@@ -43,7 +43,16 @@ namespace ClientWebSocket {
           client = new FudgeNetwork.ClientManagerFullMeshStructure();
           document.forms[1].querySelector("button#createMesh").removeAttribute("disabled");
           document.forms[2].querySelector("button#sendRTC").removeAttribute("disabled");
-          client.currentlyNegotiatingClient.rtcDataChannel.addEventListener("receive", receiveRTC); 
+          client.currentlyNegotiatingClient.rtcDataChannel.addEventListener("receive", receiveRTC);
+          document.forms[2].querySelector("button#sendRTC").addEventListener("click", sendRTCMesh);
+
+          // this.ownPeerConnection.dispatchEvent(new CustomEvent("remoteConnected", {detail: this}));
+          break;
+        case "Authoritative":
+          client = new FudgeNetwork.ClientManagerAuthoritativeStructure();
+          document.forms[1].querySelector("button#createAuthoritative").removeAttribute("disabled");
+          document.forms[2].querySelector("button#sendRTC").removeAttribute("disabled");
+          // client.currentlyNegotiatingClient.rtcDataChannel.addEventListener("receive", receiveRTC);
           document.forms[2].querySelector("button#sendRTC").addEventListener("click", sendRTCMesh);
 
           // this.ownPeerConnection.dispatchEvent(new CustomEvent("remoteConnected", {detail: this}));

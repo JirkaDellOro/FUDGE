@@ -18,7 +18,7 @@ export class FudgeServerAuthoritativeManager {
     private movementSpeed: number = 3;
 
     constructor() {
-        console.log("AuthoritativeServerStartet");
+        console.log("AuthoritativeServerStarted");
     }
 
     public collectClientCreatePeerConnectionAndCreateOffer = (_freshlyConnectedClient: FudgeNetwork.ClientDataType) => {

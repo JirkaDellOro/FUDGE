@@ -41,12 +41,20 @@
       </fieldset>
       <fieldset>
         <legend>
-          <input type="radio" name="type" value="Mesh" id="Mesh" checked />
+          <input type="radio" name="type" value="Mesh" id="Mesh" />
           <label for="Mesh"> Mesh</label>
         </legend>
         Establish a mesh with all other clients marshalled by the server.<br />
         Make sure, a Mesh-Server is running at the address given above and other client log in.<br />
         <button type="button" id="createMesh" disabled>Create mesh </button>
+      </fieldset>
+      <fieldset>
+        <legend>
+          <input type="radio" name="type" value="Authoritative" id="Authoritative" checked />
+          <label for="Authoritative"> Authoritative</label>
+        </legend>
+        ?<br />
+        <button type="button" id="createAuthoritative">Create authoritative </button>
       </fieldset>
       <br />
       <button type="button" id="login">Login</button>

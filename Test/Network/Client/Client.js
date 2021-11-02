@@ -40,6 +40,14 @@ var ClientWebSocket;
                     document.forms[2].querySelector("button#sendRTC").addEventListener("click", sendRTCMesh);
                     // this.ownPeerConnection.dispatchEvent(new CustomEvent("remoteConnected", {detail: this}));
                     break;
+                case "Authoritative":
+                    client = new FudgeNetwork.ClientManagerAuthoritativeStructure();
+                    document.forms[1].querySelector("button#createAuthoritative").removeAttribute("disabled");
+                    document.forms[2].querySelector("button#sendRTC").removeAttribute("disabled");
+                    // client.currentlyNegotiatingClient.rtcDataChannel.addEventListener("receive", receiveRTC);
+                    document.forms[2].querySelector("button#sendRTC").addEventListener("click", sendRTCMesh);
+                    // this.ownPeerConnection.dispatchEvent(new CustomEvent("remoteConnected", {detail: this}));
+                    break;
                 default:
                     console.error("Select a connection type!");
                     return;
