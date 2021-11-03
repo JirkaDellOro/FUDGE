@@ -13,22 +13,17 @@ export interface Client {
     };
 }
 export declare class FudgeServer {
-    websocketServer: WebSocket.Server;
+    wsServer: WebSocket.Server;
     clients: Client[];
-    startUpServer: (_serverPort?: number) => void;
-    closeDownServer: () => void;
-    addServerEventHandling: () => void;
-    serverDistributeMessageToAppropriateMethod(_message: string, _websocketClient: WebSocket): void;
-    addUserOnValidLoginRequest(_websocketConnection: WebSocket, _messageData: Message.LoginRequest): void;
-    broadcastMessageToAllConnectedClients(_messageToBroadcast: Message.ToClient): void;
-    searchForClientWithId(_idToFind: string): Client;
+    startUp: (_port?: number) => void;
+    closeDown: () => void;
+    addEventListeners: () => void;
+    handleMessage(_message: string, _wsConnection: WebSocket): void;
+    addUserOnValidLoginRequest(_wsConnection: WebSocket, _message: Message.LoginRequest): void;
+    broadcastMessageToAllConnectedClients(_message: Message.ToClient): void;
+    sendRtcOfferToRequestedClient(_wsConnection: WebSocket, _message: Message.RtcOffer): void;
+    answerRtcOfferOfClient(_wsConnection: WebSocket, _message: Message.RtcAnswer): void;
+    sendIceCandidatesToRelevantPeer(_wsConnection: WebSocket, _message: Message.IceCandidate): void;
     createID: () => string;
-    parseMessageToJson(_messageToParse: string): Message.MessageBase;
-    stringifyObjectToString: (_objectToStringify: Object) => string;
-    sendTo: (_connection: WebSocket, _message: Object) => void;
-    private searchForPropertyValueInCollection;
-    private searchUserByUserNameAndReturnUser;
-    private searchUserByUserIdAndReturnUser;
-    private searchUserByWebsocketConnectionAndReturnUser;
 }
 export {};

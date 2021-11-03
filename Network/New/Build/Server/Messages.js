@@ -38,8 +38,9 @@ class MessageBase {
         this.originatorId = originatorId;
     }
     static deserialize(_message) {
-        let message = this.constructor();
-        Object.assign(message, JSON.parse(_message));
+        let parsed = JSON.parse(_message);
+        let message = new MessageBase(parsed.messageType, parsed.originatorId);
+        Object.assign(message, parsed);
         return message;
     }
     serialize() {

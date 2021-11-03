@@ -30,7 +30,7 @@
       </fieldset>
       <fieldset>
         <legend>
-          <input type="radio" name="type" value="SinglePeer" id="SinglePeer" />
+          <input type="radio" name="type" value="SinglePeer" id="SinglePeer" checked/>
           <label for="SinglePeer"> SinglePeer</label>
         </legend>
         Establish a peer to peer connection to one specific other client via the server.<br />
@@ -50,7 +50,7 @@
       </fieldset>
       <fieldset>
         <legend>
-          <input type="radio" name="type" value="Authoritative" id="Authoritative" checked />
+          <input type="radio" name="type" value="Authoritative" id="Authoritative" />
           <label for="Authoritative"> Authoritative</label>
         </legend>
         ?<br />
@@ -66,7 +66,7 @@
       <fieldset>
         <legend>TCP</legend>
         <input type="text" value="Hello" id="messageTCP" />
-        <button type="button" id="sendTCP" disabled>Send</button><br />
+        <button type="button" id="sendTCP" >Send</button><br />
         <textarea id="receivedTCP" cols="30" rows="10"></textarea>
       </fieldset>
       <fieldset>

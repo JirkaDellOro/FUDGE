@@ -12,44 +12,40 @@ export interface Client {
   peers: { [id: string]: CONNECTION[] };
 }
 
-
 export class FudgeServer {
-  public websocketServer!: WebSocket.Server;
+  public wsServer!: WebSocket.Server;
   public clients: Client[] = [];
 
-  public startUpServer = (_serverPort: number = 8080) => {
-    console.log(_serverPort);
-    this.websocketServer = new WebSocket.Server({ port: _serverPort });
-    this.addServerEventHandling();
+  public startUp = (_port: number = 8080) => {
+    console.log(_port);
+    this.wsServer = new WebSocket.Server({ port: _port });
+    this.addEventListeners();
   }
 
-  public closeDownServer = () => {
-    this.websocketServer.close();
+  public closeDown = () => {
+    this.wsServer.close();
   }
-  public addServerEventHandling = (): void => {
-    // tslint:disable-next-line: no-any
-    this.websocketServer.on("connection", (_websocketClient: WebSocket) => {
+  public addEventListeners = (): void => {
+    this.wsServer.on("connection", (_wsConnection: WebSocket) => {
       console.log("User connected to FudgeServer");
 
       try {
-        const uniqueIdOnConnection: string = this.createID();
-        // this.sendTo(_websocketClient, new Message.IdAssigned(uniqueIdOnConnection));
-        _websocketClient.send(new Message.IdAssigned(uniqueIdOnConnection).serialize());
-        const freshlyConnectedClient: Client = { connection: _websocketClient, id: uniqueIdOnConnection, peers: {} };
-        this.clients.push(freshlyConnectedClient);
+        const id: string = this.createID();
+        _wsConnection.send(new Message.IdAssigned(id).serialize());
+        const client: Client = { connection: _wsConnection, id: id, peers: {} };
+        this.clients.push(client);
       } catch (error) {
         console.error("Unhandled Exception SERVER: Sending ID to ClientDataType", error);
       }
 
-
-      _websocketClient.on("message", (_message: string) => {
-        this.serverDistributeMessageToAppropriateMethod(_message, _websocketClient);
+      _wsConnection.on("message", (_message: string) => {
+        this.handleMessage(_message, _wsConnection);
       });
 
-      _websocketClient.addEventListener("close", () => {
+      _wsConnection.addEventListener("close", () => {
         console.error("Error at connection");
         for (let i: number = 0; i < this.clients.length; i++) {
-          if (this.clients[i].connection === _websocketClient) {
+          if (this.clients[i].connection === _wsConnection) {
             console.log("Client connection found, deleting");
             this.clients.splice(i, 1);
             console.log(this.clients);
@@ -59,68 +55,60 @@ export class FudgeServer {
           }
         }
       });
-
     });
   }
 
-  // public parseMessageAndReturnObject = (_stringifiedMessage: string): Object => {
-  //   let parsedMessage: Message.MessageBase = { originatorId: " ", messageType: Message.MESSAGE_TYPE.UNDEFINED };
-  //   try {
-  //     parsedMessage = JSON.parse(_stringifiedMessage);
-  //     return parsedMessage;
-
-  //   } catch (error) {
-  //     console.error("Invalid JSON", error);
-  //   }
-  //   return parsedMessage;
-  // }
-
   // TODO Check if event.type can be used for identification instead => It cannot
-  public serverDistributeMessageToAppropriateMethod(_message: string, _websocketClient: WebSocket): void {
-    // let objectifiedMessage: Message.MessageBase = <Message.MessageBase>this.parseMessageAndReturnObject(_message);
-    let objectifiedMessage: Message.MessageBase = Message.MessageBase.deserialize(_message);
-    if (!objectifiedMessage.messageType) {
+  public handleMessage(_message: string, _wsConnection: WebSocket): void {
+    let message: Message.MessageBase = Message.MessageBase.deserialize(_message);
+    if (!message || !message.messageType) {
       console.error("Unhandled Exception: Invalid Message Object received. Does it implement MessageBase?");
       return;
     }
-    console.log(objectifiedMessage, _message);
-    if (objectifiedMessage != null) {
-      switch (objectifiedMessage.messageType) {
-        case Message.MESSAGE_TYPE.ID_ASSIGNED:
-          console.log("Id confirmation received for client: " + objectifiedMessage.originatorId);
-          break;
+    console.log("Message received", message);
 
-        case Message.MESSAGE_TYPE.LOGIN_REQUEST:
-          this.addUserOnValidLoginRequest(_websocketClient, <Message.LoginRequest>objectifiedMessage);
-          break;
+    switch (message.messageType) {
+      case Message.MESSAGE_TYPE.ID_ASSIGNED:
+        console.log("Id confirmation received for client: " + message.originatorId);
+        break;
 
-        case Message.MESSAGE_TYPE.CLIENT_TO_SERVER_MESSAGE:
-          this.broadcastMessageToAllConnectedClients(<Message.ToClient>objectifiedMessage);
-          break;
+      case Message.MESSAGE_TYPE.LOGIN_REQUEST:
+        this.addUserOnValidLoginRequest(_wsConnection, <Message.LoginRequest>message);
+        break;
 
-        default:
-          console.log("WebSocket: Message type not recognized");
-          break;
+      case Message.MESSAGE_TYPE.CLIENT_TO_SERVER_MESSAGE:
+        this.broadcastMessageToAllConnectedClients(<Message.ToClient>message);
+        break;
 
-      }
+      case Message.MESSAGE_TYPE.RTC_OFFER:
+        this.sendRtcOfferToRequestedClient(_wsConnection, <Message.RtcOffer>message);
+        break;
+
+      case Message.MESSAGE_TYPE.RTC_ANSWER:
+        this.answerRtcOfferOfClient(_wsConnection, <Message.RtcAnswer>message);
+        break;
+
+      case Message.MESSAGE_TYPE.ICE_CANDIDATE:
+        this.sendIceCandidatesToRelevantPeer(_wsConnection, <Message.IceCandidate>message);
+        break;
+      default:
+        console.log("WebSocket: Message type not recognized");
+        break;
     }
   }
 
-  //#region MessageHandler
-  public addUserOnValidLoginRequest(_websocketConnection: WebSocket, _messageData: Message.LoginRequest): void {
-    let usernameTaken: boolean = true;
-    usernameTaken = this.searchUserByUserNameAndReturnUser(_messageData.loginUserName, this.clients) != null;
+  public addUserOnValidLoginRequest(_wsConnection: WebSocket, _message: Message.LoginRequest): void {
+    let usernameTaken: Client | undefined = this.clients.find(_client => _client.name == _message.loginUserName);
     try {
       if (!usernameTaken) {
-        const clientBeingLoggedIn: Client = this.searchUserByWebsocketConnectionAndReturnUser(_websocketConnection, this.clients);
+        const clientBeingLoggedIn: Client | undefined = this.clients.find(_client => _client.connection == _wsConnection);
 
-        if (clientBeingLoggedIn != null) {
-          clientBeingLoggedIn.name = _messageData.loginUserName;
-          this.sendTo(_websocketConnection, new Message.LoginResponse(true, clientBeingLoggedIn.id, clientBeingLoggedIn.name));
+        if (clientBeingLoggedIn) {
+          clientBeingLoggedIn.name = _message.loginUserName;
+          _wsConnection.send(new Message.LoginResponse(true, clientBeingLoggedIn.id, clientBeingLoggedIn.name).serialize());
         }
       } else {
-        this.sendTo(_websocketConnection, new Message.LoginResponse(false, "", ""));
-        usernameTaken = true;
+        _wsConnection.send(new Message.LoginResponse(false, "", "").serialize());
         console.log("UsernameTaken");
       }
     } catch (error) {
@@ -128,71 +116,53 @@ export class FudgeServer {
     }
   }
 
-  public broadcastMessageToAllConnectedClients(_messageToBroadcast: Message.ToClient): void {
-    let clientArray: WebSocket[] = Array.from(this.websocketServer.clients);
+  public broadcastMessageToAllConnectedClients(_message: Message.ToClient): void {
+    console.log("Broadcast", _message);
+    // TODO: appearently, websocketServer keeps its own list of clients. Examine if it makes sense to double this information in this.clients
+    let clientArray: WebSocket[] = Array.from(this.wsServer.clients);
 
     clientArray.forEach(_client => {
-      this.sendTo(_client, _messageToBroadcast);
+      _client.send(_message.serialize());
     });
   }
 
+  public sendRtcOfferToRequestedClient(_wsConnection: WebSocket, _message: Message.RtcOffer): void {
+    console.log("Sending offer to: ", _message.userNameToConnectTo);
+    const client: Client | undefined = this.clients.find(_client => _client.name == _message.userNameToConnectTo);
 
-  public searchForClientWithId(_idToFind: string): Client {
-    return this.searchForPropertyValueInCollection(_idToFind, "id", this.clients);
+    if (client) {
+      const offerMessage: Message.RtcOffer = new Message.RtcOffer(_message.originatorId, <string>client.name, _message.offer);
+      try {
+        client.connection.send(offerMessage.serialize());
+      } catch (error) {
+        console.error("Unhandled Exception: Unable to relay Offer to Client", error);
+      }
+    } else { console.error("User to connect to doesn't exist under that Name"); }
+  }
+
+  public answerRtcOfferOfClient(_wsConnection: WebSocket, _message: Message.RtcAnswer): void {
+    console.log("Sending answer to: ", _message.targetId);
+    const client: Client | undefined = this.clients.find(_client => _client.id == _message.targetId);
+
+    if (client) {
+      // TODO Probable source of error, need to test
+      if (client.connection != null)
+        client.connection.send(_message.serialize());
+    }
+  }
+
+  public sendIceCandidatesToRelevantPeer(_wsConnection: WebSocket, _message: Message.IceCandidate): void {
+    const client: Client | undefined = this.clients.find(_client => _client.id == _message.targetId);
+
+    if (client) {
+      const candidateToSend: Message.IceCandidate = new Message.IceCandidate(_message.originatorId, client.id, _message.candidate);
+      client.connection.send(candidateToSend.serialize());
+    }
   }
 
   public createID = (): string => {
-    // Math.random should be random enough because of it's seed
+    // Math.random should be random enough because of its seed
     // convert to base 36 and pick the first few digits after comma
     return "_" + Math.random().toString(36).substr(2, 7);
-  }
-  //#endregion
-
-
-  public parseMessageToJson(_messageToParse: string): Message.MessageBase {
-    let parsedMessage: Message.MessageBase = new Message.MessageBase(Message.MESSAGE_TYPE.UNDEFINED, "");
-
-    try {
-      parsedMessage = JSON.parse(_messageToParse);
-    } catch (error) {
-      console.error("Invalid JSON", error);
-    }
-    return parsedMessage;
-  }
-
-  public stringifyObjectToString = (_objectToStringify: Object): string => {
-    return JSON.stringify(_objectToStringify);
-  }
-
-
-  public sendTo = (_connection: WebSocket, _message: Object) => {
-    _connection.send(JSON.stringify(_message));
-  }
-
-  // Helper function for searching through a collection, finding objects by key and value, returning
-  // Object that has that value
-  // tslint:disable-next-line: no-any
-  private searchForPropertyValueInCollection = (propertyValue: any, key: string, collectionToSearch: any[]) => {
-    for (const propertyObject in collectionToSearch) {
-      if (this.clients.hasOwnProperty(propertyObject)) {
-        // tslint:disable-next-line: typedef
-        const objectToSearchThrough = collectionToSearch[propertyObject];
-        if (objectToSearchThrough[key] === propertyValue) {
-          return objectToSearchThrough;
-        }
-      }
-    }
-    return null;
-  }
-
-  private searchUserByUserNameAndReturnUser = (_userNameToSearchFor: string, _collectionToSearch: Client[]): Client => {
-    return this.searchForPropertyValueInCollection(_userNameToSearchFor, "userName", _collectionToSearch);
-  }
-  private searchUserByUserIdAndReturnUser = (_userIdToSearchFor: string, _collectionToSearch: Client[]): Client => {
-    return this.searchForPropertyValueInCollection(_userIdToSearchFor, "id", _collectionToSearch);
-  }
-
-  private searchUserByWebsocketConnectionAndReturnUser = (_websocketConnectionToSearchFor: WebSocket, _collectionToSearch: Client[]) => {
-    return this.searchForPropertyValueInCollection(_websocketConnectionToSearchFor, "clientConnection", _collectionToSearch);
   }
 }

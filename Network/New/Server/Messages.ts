@@ -34,8 +34,9 @@ export class MessageBase {
   }
 
   public static deserialize(_message: string): MessageBase {
-    let message: MessageBase = this.constructor();
-    Object.assign(message, JSON.parse(_message));
+    let parsed: MessageBase = JSON.parse(_message);
+    let message: MessageBase = new MessageBase(parsed.messageType, parsed.originatorId);
+    Object.assign(message, parsed);
     return message;
   }
 
