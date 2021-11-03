@@ -4,11 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FudgeServer = void 0;
-///<reference path="../Messages.d.ts"/>
 const ws_1 = __importDefault(require("ws"));
-//@ts-ign ore
-const Messages_js_1 = require("../Messages.js");
-// let Messages = import("./Build/Server/Messages.js");
+const Messages_js_1 = require("../../Build/Messages.js");
 var CONNECTION;
 (function (CONNECTION) {
     CONNECTION[CONNECTION["TCP"] = 0] = "TCP";

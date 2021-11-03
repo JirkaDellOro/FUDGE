@@ -1,5 +1,5 @@
 import WebSocket from "ws";
-import { Messages } from "../Messages.js";
+import { Messages } from "../../Build/Messages.js";
 declare enum CONNECTION {
     TCP = 0,
     RTC = 1
