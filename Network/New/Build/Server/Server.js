@@ -48,7 +48,7 @@ class FudgeServer {
             try {
                 const uniqueIdOnConnection = this.createID();
                 // this.sendTo(_websocketClient, new Message.IdAssigned(uniqueIdOnConnection));
-                _websocketClient.send(new Message.IdAssigned(uniqueIdOnConnection));
+                _websocketClient.send(new Message.IdAssigned(uniqueIdOnConnection).serialize());
                 const freshlyConnectedClient = { connection: _websocketClient, id: uniqueIdOnConnection, peers: {} };
                 this.clients.push(freshlyConnectedClient);
             }
@@ -73,20 +73,20 @@ class FudgeServer {
             });
         });
     };
-    parseMessageAndReturnObject = (_stringifiedMessage) => {
-        let parsedMessage = { originatorId: " ", messageType: Message.MESSAGE_TYPE.UNDEFINED };
-        try {
-            parsedMessage = JSON.parse(_stringifiedMessage);
-            return parsedMessage;
-        }
-        catch (error) {
-            console.error("Invalid JSON", error);
-        }
-        return parsedMessage;
-    };
+    // public parseMessageAndReturnObject = (_stringifiedMessage: string): Object => {
+    //   let parsedMessage: Message.MessageBase = { originatorId: " ", messageType: Message.MESSAGE_TYPE.UNDEFINED };
+    //   try {
+    //     parsedMessage = JSON.parse(_stringifiedMessage);
+    //     return parsedMessage;
+    //   } catch (error) {
+    //     console.error("Invalid JSON", error);
+    //   }
+    //   return parsedMessage;
+    // }
     // TODO Check if event.type can be used for identification instead => It cannot
     serverDistributeMessageToAppropriateMethod(_message, _websocketClient) {
-        let objectifiedMessage = this.parseMessageAndReturnObject(_message);
+        // let objectifiedMessage: Message.MessageBase = <Message.MessageBase>this.parseMessageAndReturnObject(_message);
+        let objectifiedMessage = Message.MessageBase.deserialize(_message);
         if (!objectifiedMessage.messageType) {
             console.error("Unhandled Exception: Invalid Message Object received. Does it implement MessageBase?");
             return;
@@ -147,7 +147,7 @@ class FudgeServer {
     };
     //#endregion
     parseMessageToJson(_messageToParse) {
-        let parsedMessage = { originatorId: " ", messageType: Message.MESSAGE_TYPE.UNDEFINED };
+        let parsedMessage = new Message.MessageBase(Message.MESSAGE_TYPE.UNDEFINED, "");
         try {
             parsedMessage = JSON.parse(_messageToParse);
         }

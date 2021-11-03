@@ -37,6 +37,14 @@ class MessageBase {
         this.messageType = messageType;
         this.originatorId = originatorId;
     }
+    static deserialize(_message) {
+        let message = this.constructor();
+        Object.assign(message, JSON.parse(_message));
+        return message;
+    }
+    serialize() {
+        return JSON.stringify(this);
+    }
 }
 exports.MessageBase = MessageBase;
 class IdAssigned extends MessageBase {

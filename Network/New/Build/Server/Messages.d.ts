@@ -29,6 +29,8 @@ export declare class MessageBase {
     readonly messageType: MESSAGE_TYPE;
     readonly originatorId: string;
     constructor(messageType: MESSAGE_TYPE, originatorId: string);
+    static deserialize(_message: string): MessageBase;
+    serialize(): string;
 }
 export declare class IdAssigned extends MessageBase {
     assignedId: string;

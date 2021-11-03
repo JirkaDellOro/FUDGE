@@ -18,7 +18,6 @@ export declare class FudgeServer {
     startUpServer: (_serverPort?: number) => void;
     closeDownServer: () => void;
     addServerEventHandling: () => void;
-    parseMessageAndReturnObject: (_stringifiedMessage: string) => Object;
     serverDistributeMessageToAppropriateMethod(_message: string, _websocketClient: WebSocket): void;
     addUserOnValidLoginRequest(_websocketConnection: WebSocket, _messageData: Message.LoginRequest): void;
     broadcastMessageToAllConnectedClients(_messageToBroadcast: Message.ToClient): void;

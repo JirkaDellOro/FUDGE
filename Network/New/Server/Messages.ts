@@ -32,6 +32,16 @@ export enum SERVER_COMMAND_TYPE {
 export class MessageBase {
   constructor(public readonly messageType: MESSAGE_TYPE, public readonly originatorId: string) {
   }
+
+  public static deserialize(_message: string): MessageBase {
+    let message: MessageBase = this.constructor();
+    Object.assign(message, JSON.parse(_message));
+    return message;
+  }
+
+  public serialize(): string {
+    return JSON.stringify(this);
+  }
 }
 
 export class IdAssigned extends MessageBase {
