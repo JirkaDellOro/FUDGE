@@ -1,5 +1,5 @@
 //@ts-ignore
-import { FudgeServer } from "../../../Network/New/Build/Server/Server.js";
+import { FudgeServer } from "../../../Network/New/Build/Server/FudgeServer.js";
 // import RTCPeerConnection from "webrtc-adapter";
 let port = parseInt(process.argv[2]);
 if (!port) {

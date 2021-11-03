@@ -1,5 +1,5 @@
 import WebSocket from "ws";
-import * as Message from "./Messages.js";
+import { Messages } from "../Messages.js";
 declare enum CONNECTION {
     TCP = 0,
     RTC = 1
@@ -19,11 +19,11 @@ export declare class FudgeServer {
     closeDown: () => void;
     addEventListeners: () => void;
     handleMessage(_message: string, _wsConnection: WebSocket): void;
-    addUserOnValidLoginRequest(_wsConnection: WebSocket, _message: Message.LoginRequest): void;
-    broadcastMessageToAllConnectedClients(_message: Message.ToClient): void;
-    sendRtcOfferToRequestedClient(_wsConnection: WebSocket, _message: Message.RtcOffer): void;
-    answerRtcOfferOfClient(_wsConnection: WebSocket, _message: Message.RtcAnswer): void;
-    sendIceCandidatesToRelevantPeer(_wsConnection: WebSocket, _message: Message.IceCandidate): void;
+    addUserOnValidLoginRequest(_wsConnection: WebSocket, _message: Messages.LoginRequest): void;
+    broadcastMessageToAllConnectedClients(_message: Messages.ToClient): void;
+    sendRtcOfferToRequestedClient(_wsConnection: WebSocket, _message: Messages.RtcOffer): void;
+    answerRtcOfferOfClient(_wsConnection: WebSocket, _message: Messages.RtcAnswer): void;
+    sendIceCandidatesToRelevantPeer(_wsConnection: WebSocket, _message: Messages.IceCandidate): void;
     createID: () => string;
 }
 export {};

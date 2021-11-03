@@ -1,5 +1,5 @@
 import WebSocket from "ws";
-import * as Message from "./Messages.js";
+import {Messages} from "../../Build/Messages.js";
 
 enum CONNECTION {
   TCP, RTC
@@ -31,7 +31,7 @@ export class FudgeServer {
 
       try {
         const id: string = this.createID();
-        _wsConnection.send(new Message.IdAssigned(id).serialize());
+        _wsConnection.send(new Messages.IdAssigned(id).serialize());
         const client: Client = { connection: _wsConnection, id: id, peers: {} };
         this.clients.push(client);
       } catch (error) {
@@ -60,7 +60,7 @@ export class FudgeServer {
 
   // TODO Check if event.type can be used for identification instead => It cannot
   public handleMessage(_message: string, _wsConnection: WebSocket): void {
-    let message: Message.MessageBase = Message.MessageBase.deserialize(_message);
+    let message: Messages.MessageBase = Messages.MessageBase.deserialize(_message);
     if (!message || !message.messageType) {
       console.error("Unhandled Exception: Invalid Message Object received. Does it implement MessageBase?");
       return;
@@ -68,28 +68,28 @@ export class FudgeServer {
     console.log("Message received", message);
 
     switch (message.messageType) {
-      case Message.MESSAGE_TYPE.ID_ASSIGNED:
+      case Messages.MESSAGE_TYPE.ID_ASSIGNED:
         console.log("Id confirmation received for client: " + message.originatorId);
         break;
 
-      case Message.MESSAGE_TYPE.LOGIN_REQUEST:
-        this.addUserOnValidLoginRequest(_wsConnection, <Message.LoginRequest>message);
+      case Messages.MESSAGE_TYPE.LOGIN_REQUEST:
+        this.addUserOnValidLoginRequest(_wsConnection, <Messages.LoginRequest>message);
         break;
 
-      case Message.MESSAGE_TYPE.CLIENT_TO_SERVER_MESSAGE:
-        this.broadcastMessageToAllConnectedClients(<Message.ToClient>message);
+      case Messages.MESSAGE_TYPE.CLIENT_TO_SERVER_MESSAGE:
+        this.broadcastMessageToAllConnectedClients(<Messages.ToClient>message);
         break;
 
-      case Message.MESSAGE_TYPE.RTC_OFFER:
-        this.sendRtcOfferToRequestedClient(_wsConnection, <Message.RtcOffer>message);
+      case Messages.MESSAGE_TYPE.RTC_OFFER:
+        this.sendRtcOfferToRequestedClient(_wsConnection, <Messages.RtcOffer>message);
         break;
 
-      case Message.MESSAGE_TYPE.RTC_ANSWER:
-        this.answerRtcOfferOfClient(_wsConnection, <Message.RtcAnswer>message);
+      case Messages.MESSAGE_TYPE.RTC_ANSWER:
+        this.answerRtcOfferOfClient(_wsConnection, <Messages.RtcAnswer>message);
         break;
 
-      case Message.MESSAGE_TYPE.ICE_CANDIDATE:
-        this.sendIceCandidatesToRelevantPeer(_wsConnection, <Message.IceCandidate>message);
+      case Messages.MESSAGE_TYPE.ICE_CANDIDATE:
+        this.sendIceCandidatesToRelevantPeer(_wsConnection, <Messages.IceCandidate>message);
         break;
       default:
         console.log("WebSocket: Message type not recognized");
@@ -97,7 +97,7 @@ export class FudgeServer {
     }
   }
 
-  public addUserOnValidLoginRequest(_wsConnection: WebSocket, _message: Message.LoginRequest): void {
+  public addUserOnValidLoginRequest(_wsConnection: WebSocket, _message: Messages.LoginRequest): void {
     let usernameTaken: Client | undefined = this.clients.find(_client => _client.name == _message.loginUserName);
     try {
       if (!usernameTaken) {
@@ -105,10 +105,10 @@ export class FudgeServer {
 
         if (clientBeingLoggedIn) {
           clientBeingLoggedIn.name = _message.loginUserName;
-          _wsConnection.send(new Message.LoginResponse(true, clientBeingLoggedIn.id, clientBeingLoggedIn.name).serialize());
+          _wsConnection.send(new Messages.LoginResponse(true, clientBeingLoggedIn.id, clientBeingLoggedIn.name).serialize());
         }
       } else {
-        _wsConnection.send(new Message.LoginResponse(false, "", "").serialize());
+        _wsConnection.send(new Messages.LoginResponse(false, "", "").serialize());
         console.log("UsernameTaken");
       }
     } catch (error) {
@@ -116,7 +116,7 @@ export class FudgeServer {
     }
   }
 
-  public broadcastMessageToAllConnectedClients(_message: Message.ToClient): void {
+  public broadcastMessageToAllConnectedClients(_message: Messages.ToClient): void {
     console.log("Broadcast", _message);
     // TODO: appearently, websocketServer keeps its own list of clients. Examine if it makes sense to double this information in this.clients
     let clientArray: WebSocket[] = Array.from(this.wsServer.clients);
@@ -126,12 +126,12 @@ export class FudgeServer {
     });
   }
 
-  public sendRtcOfferToRequestedClient(_wsConnection: WebSocket, _message: Message.RtcOffer): void {
+  public sendRtcOfferToRequestedClient(_wsConnection: WebSocket, _message: Messages.RtcOffer): void {
     console.log("Sending offer to: ", _message.userNameToConnectTo);
     const client: Client | undefined = this.clients.find(_client => _client.name == _message.userNameToConnectTo);
 
     if (client) {
-      const offerMessage: Message.RtcOffer = new Message.RtcOffer(_message.originatorId, <string>client.name, _message.offer);
+      const offerMessage: Messages.RtcOffer = new Messages.RtcOffer(_message.originatorId, <string>client.name, _message.offer);
       try {
         client.connection.send(offerMessage.serialize());
       } catch (error) {
@@ -140,7 +140,7 @@ export class FudgeServer {
     } else { console.error("User to connect to doesn't exist under that Name"); }
   }
 
-  public answerRtcOfferOfClient(_wsConnection: WebSocket, _message: Message.RtcAnswer): void {
+  public answerRtcOfferOfClient(_wsConnection: WebSocket, _message: Messages.RtcAnswer): void {
     console.log("Sending answer to: ", _message.targetId);
     const client: Client | undefined = this.clients.find(_client => _client.id == _message.targetId);
 
@@ -151,11 +151,11 @@ export class FudgeServer {
     }
   }
 
-  public sendIceCandidatesToRelevantPeer(_wsConnection: WebSocket, _message: Message.IceCandidate): void {
+  public sendIceCandidatesToRelevantPeer(_wsConnection: WebSocket, _message: Messages.IceCandidate): void {
     const client: Client | undefined = this.clients.find(_client => _client.id == _message.targetId);
 
     if (client) {
-      const candidateToSend: Message.IceCandidate = new Message.IceCandidate(_message.originatorId, client.id, _message.candidate);
+      const candidateToSend: Messages.IceCandidate = new Messages.IceCandidate(_message.originatorId, client.id, _message.candidate);
       client.connection.send(candidateToSend.serialize());
     }
   }
