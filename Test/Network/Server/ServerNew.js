@@ -7,5 +7,5 @@ if (!port) {
     process.exit();
 }
 let server = new FudgeServer();
-server.startUpServer(port);
+server.startUp(port);
 console.log(server);

@@ -9,5 +9,5 @@ if (!port) {
   process.exit();
 }
 let server: FudgeServer = new FudgeServer();
-server.startUpServer(port);
+server.startUp(port);
 console.log(server);
