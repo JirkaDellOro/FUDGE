@@ -14,7 +14,7 @@ export class FudgeServerAuthoritativeManager {
     divAndPlayerMap = new Array();
     movementSpeed = 3;
     constructor() {
-        console.log("AuthoritativeServerStartet");
+        console.log("AuthoritativeServerStarted");
     }
     collectClientCreatePeerConnectionAndCreateOffer = (_freshlyConnectedClient) => {
         let newPeerConnection = new RTCPeerConnection(this.configuration);
