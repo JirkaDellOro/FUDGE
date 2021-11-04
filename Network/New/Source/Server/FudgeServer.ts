@@ -1,6 +1,8 @@
 import WebSocket from "ws";
 import {Messages} from "../../Build/Messages.js";
 
+console.log("Messages", Messages);
+
 enum CONNECTION {
   TCP, RTC
 }

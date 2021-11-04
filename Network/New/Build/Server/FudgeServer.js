@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FudgeServer = void 0;
 const ws_1 = __importDefault(require("ws"));
 const Messages_js_1 = require("../../Build/Messages.js");
+console.log("Messages", Messages_js_1.Messages);
 var CONNECTION;
 (function (CONNECTION) {
     CONNECTION[CONNECTION["TCP"] = 0] = "TCP";

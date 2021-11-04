@@ -173,3 +173,4 @@ var Messages;
     }
     Messages.PeerDisconnectClient = PeerDisconnectClient;
 })(Messages || (Messages = {}));
+module.exports = {Messages: Messages}; 

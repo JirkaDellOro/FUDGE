@@ -29,6 +29,14 @@
       "type": "shell",
       "command": "AddExport .\\New\\Build\\Messages.d.ts",
       "dependsOn": [
+        "CustomTask: Add Module.Export"
+      ]
+    },
+    {
+      "label": "CustomTask: Add Module.Export",
+      "type": "shell",
+      "command": "echo module.exports = {Messages: Messages}; >> .\\New\\Build\\Messages.js",
+      "dependsOn": [
         "CustomTask: Compile Messages"
       ]
     },
