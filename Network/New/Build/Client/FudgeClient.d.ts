@@ -96,6 +96,30 @@ declare namespace Messages {
 }
 declare namespace FudgeClient {
     class FudgeClient {
-        static x: Messages.MessageBase;
+        signalingServerConnectionUrl: string | undefined;
+        localUserName: string;
+        localClientID: string;
+        webSocketConnectionToSignalingServer: WebSocket;
+        ownPeerConnection: RTCPeerConnection;
+        remoteClientId: string;
+        ownPeerDataChannel: RTCDataChannel | undefined;
+        remoteEventPeerDataChannel: RTCDataChannel | undefined;
+        isInitiator: boolean;
+        readonly configuration: {
+            iceServers: {
+                urls: string;
+            }[];
+        };
+        constructor();
+        connectToSignalingServer: (_uri?: string) => void;
+        addWebSocketEventListeners: () => void;
+        parseMessageAndHandleMessageType: (_receivedMessage: MessageEvent) => void;
+        sendMessageToSignalingServer: (_message: Messages.MessageBase) => void;
+        private displayServerMessage;
+        private loginValidAddUser;
+        private assignIdAndSendConfirmation;
+        private stringifyObjectForNetworkSending;
+        private setOwnClientId;
+        private setOwnUserName;
     }
 }
