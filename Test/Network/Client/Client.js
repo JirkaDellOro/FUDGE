@@ -32,6 +32,16 @@ var ClientTest;
             setTimeout(() => { resolve(); }, _milisec);
         });
     }
+    function proposeName() {
+        {
+            // search for a free number i to use for the proposal of the name "Client" + i
+            let domLogin = document.forms[0].querySelector("input[name=login");
+            if (document.activeElement == domLogin)
+                return; // don't interfere when user's at the element
+            for (let i = 0; clients.find(_client => _client.name == "Client-" + i); i++)
+                domLogin.value = "Client-" + (i + 1);
+        }
+    }
     async function receiveTCP(_event) {
         if (_event.detail.messageType == Messages.MESSAGE_TYPE.SERVER_HEARTBEAT) {
             let message = _event.detail;
@@ -48,22 +58,17 @@ var ClientTest;
         let html = "<tr><th>login</th><th>id</th><th>#</th>";
         let count = 0;
         for (let client of _clients)
-            html += `<td>${count++}</td>`;
+            html += `<th>${count++}</th>`;
         html += `<th>Server</th></tr>`;
         count = 0;
-        for (let client of _clients)
-            html += `<tr><td>${client.name}</td><td>${client.id}</td><td>${count++}</td></tr>`;
-        table.innerHTML = html;
-    }
-    function proposeName() {
-        {
-            // search for a free number i to use for the proposal of the name "Client" + i
-            let domLogin = document.forms[0].querySelector("input[name=login");
-            if (document.activeElement == domLogin)
-                return; // don't interfere when user's at the element
-            for (let i = 0; clients.find(_client => _client.name == "Client-" + i); i++)
-                domLogin.value = "Client-" + (i + 1);
+        for (let client of _clients) {
+            html += `<tr><td>${client.name}</td><td>${client.id}</td><td>${count++}</td>`;
+            for (let i = 0; i < _clients.length; i++) {
+                html += `<td><span>W</span><span>R</span></td>`;
+            }
+            html += `<td><span style="background-color: white;">W</span></td></tr>`;
         }
+        table.innerHTML = html;
     }
 })(ClientTest || (ClientTest = {}));
 //# sourceMappingURL=Client.js.map
