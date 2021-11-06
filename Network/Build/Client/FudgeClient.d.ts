@@ -1,6 +1,8 @@
+/// <reference path="../../../Core/Build/FudgeCore.d.ts" />
 declare namespace Messages {
     enum MESSAGE_TYPE {
         UNDEFINED = "undefined",
+        ERROR = "error",
         ID_ASSIGNED = "id_assigned",
         LOGIN_REQUEST = "login_request",
         LOGIN_RESPONSE = "login_response",
@@ -107,9 +109,9 @@ declare namespace Messages {
 declare namespace FudgeClient {
     class FudgeClient {
         signalingServerConnectionUrl: string | undefined;
-        localUserName: string;
-        localClientID: string;
-        webSocketConnectionToSignalingServer: WebSocket;
+        name: string;
+        id: string;
+        wsServer: WebSocket;
         ownPeerConnection: RTCPeerConnection;
         remoteClientId: string;
         ownPeerDataChannel: RTCDataChannel | undefined;

@@ -7,7 +7,7 @@ declare enum CONNECTION {
 export interface Client {
     id: string;
     name?: string;
-    connection?: WebSocket;
+    wsServer?: WebSocket;
     peers: {
         [id: string]: CONNECTION[];
     };

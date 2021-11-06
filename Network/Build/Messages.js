@@ -4,6 +4,7 @@ var Messages;
     let MESSAGE_TYPE;
     (function (MESSAGE_TYPE) {
         MESSAGE_TYPE["UNDEFINED"] = "undefined";
+        MESSAGE_TYPE["ERROR"] = "error";
         MESSAGE_TYPE["ID_ASSIGNED"] = "id_assigned";
         MESSAGE_TYPE["LOGIN_REQUEST"] = "login_request";
         MESSAGE_TYPE["LOGIN_RESPONSE"] = "login_response";
