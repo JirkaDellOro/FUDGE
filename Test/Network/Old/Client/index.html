@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta settings='"server": "ws://localhost:8080", "login": "Test", "partner": "Test"'>
+  <script type="module" src="../../../Network/Build/ClientManagers/ClientManagerPureWebSocket.js"></script>
+  <script src="Client.js" defer></script>
+  <title>Test CLient</title>
+</head>
+
+<body>
+  <form id="logon">
+    <fieldset>
+      <legend>Common</legend>
+      <input type="text" name="server"> Server<br />
+      <input type="text" name="login"> Login name
+    </fieldset>
+  </form>
+  <form id="connection">
+    <fieldset>
+      <legend>Connect</legend>
+      <fieldset>
+        <legend>
+          <input type="radio" name="type" value="WebSocket" id="WebSocket" />
+          <label for="WebSocket"> WebSocket</label>
+        </legend>
+        Establish a simple WebSocket connection to the server.<br />
+        Make sure, a WebSocket-Server is running at the address given above and observe it's output.
+      </fieldset>
+      <fieldset>
+        <legend>
+          <input type="radio" name="type" value="SinglePeer" id="SinglePeer" checked/>
+          <label for="SinglePeer"> SinglePeer</label>
+        </legend>
+        Establish a peer to peer connection to one specific other client via the server.<br />
+        Make sure, a SinglePeer-Server is running at the address given above and another client is logged in with the
+        peer's name.<br />
+        <button type="button" id="peer" disabled>Connect to peer: </button>
+        <input type="text" name="partner" id="partner">
+      </fieldset>
+      <fieldset>
+        <legend>
+          <input type="radio" name="type" value="Mesh" id="Mesh" />
+          <label for="Mesh"> Mesh</label>
+        </legend>
+        Establish a mesh with all other clients marshalled by the server.<br />
+        Make sure, a Mesh-Server is running at the address given above and other client log in.<br />
+        <button type="button" id="createMesh" disabled>Create mesh </button>
+      </fieldset>
+      <fieldset>
+        <legend>
+          <input type="radio" name="type" value="Authoritative" id="Authoritative" />
+          <label for="Authoritative"> Authoritative</label>
+        </legend>
+        ?<br />
+        <button type="button" id="createAuthoritative">Create authoritative </button>
+      </fieldset>
+      <br />
+      <button type="button" id="login">Login</button>
+    </fieldset>
+  </form>
+  <form id="messages">
+    <fieldset>
+      <legend>Messages</legend>
+      <fieldset>
+        <legend>TCP</legend>
+        <input type="text" value="Hello" id="messageTCP" />
+        <button type="button" id="sendTCP" >Send</button><br />
+        <textarea id="receivedTCP" cols="30" rows="10"></textarea>
+      </fieldset>
+      <fieldset>
+        <legend>RTC</legend>
+        <input type="text" value="Hello" id="messageRTC" />
+        <button type="button" id="sendRTC" disabled>Send</button><br />
+        <textarea id="receivedRTC" cols="30" rows="10"></textarea>
+      </fieldset>
+    </fieldset>
+  </form>
+</body>
+
+</html>

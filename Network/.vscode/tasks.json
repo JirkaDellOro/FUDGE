@@ -6,7 +6,7 @@
     {
       "label": "CustomTask: Compile All",
       "type": "shell",
-      "command": "tsc -p ./New/tsconfig.client.json",
+      "command": "tsc -p ./tsconfig.client.json",
       "dependsOn": [
         "CustomTask: Compile Server"
       ],
@@ -19,7 +19,7 @@
     {
       "label": "CustomTask: Compile Server",
       "type": "shell",
-      "command": "tsc -p ./New/tsconfig.server.json",
+      "command": "tsc -p ./tsconfig.server.json",
       "dependsOn": [
         "CustomTask: Add Export"
       ]
@@ -27,7 +27,7 @@
     {
       "label": "CustomTask: Add Export",
       "type": "shell",
-      "command": "AddExport .\\New\\Build\\Messages.d.ts",
+      "command": "AddExport .\\Build\\Messages.d.ts",
       "dependsOn": [
         "CustomTask: Add Module.Export"
       ]
@@ -35,7 +35,7 @@
     {
       "label": "CustomTask: Add Module.Export",
       "type": "shell",
-      "command": "echo module.exports = {Messages: Messages}; >> .\\New\\Build\\Messages.js",
+      "command": "echo module.exports = {Messages: Messages}; >> .\\Build\\Messages.js",
       "dependsOn": [
         "CustomTask: Compile Messages"
       ]
@@ -43,7 +43,7 @@
     {
       "label": "CustomTask: Compile Messages",
       "type": "shell",
-      "command": "tsc -p ./New/tsconfig.messages.json"
+      "command": "tsc -p ./tsconfig.messages.json"
     }
   ]
 }
