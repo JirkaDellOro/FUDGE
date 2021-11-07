@@ -134,16 +134,16 @@ declare namespace FudgeClient {
         sendMessageToSignalingServer: (_message: Messages.MessageBase) => void;
         initiateRtcConnection: (_idRemote: string) => void;
         createRTCPeerConnectionAndAddEventListeners: () => void;
-        beginPeerConnectionNegotiation: (_idRemote: string) => void;
-        createNegotiationOfferAndSendToPeer: (_idRemote: string) => void;
-        receiveNegotiationOfferAndSetRemoteDescription: (_offerMessage: Messages.RtcOffer) => void;
-        answerNegotiationOffer: (_idRemote: string) => void;
-        receiveAnswerAndSetRemoteDescription: (_localhostId: string, _answer: RTCSessionDescriptionInit) => void;
-        sendIceCandidatesToPeer: ({ candidate }: any) => void;
-        receiveDataChannelAndEstablishConnection: (_event: {
-            channel: RTCDataChannel | undefined;
-        }) => void;
-        dataChannelMessageHandler: (_messageEvent: MessageEvent) => void;
+        sendMessageToSingularPeer: (_messageToSend: string) => void;
+        private beginPeerConnectionNegotiation;
+        private createNegotiationOfferAndSendToPeer;
+        private receiveNegotiationOfferAndSetRemoteDescription;
+        private answerNegotiationOffer;
+        private receiveAnswerAndSetRemoteDescription;
+        private sendIceCandidatesToPeer;
+        private addReceivedCandidateToPeerConnection;
+        private receiveDataChannelAndEstablishConnection;
+        private dataChannelMessageHandler;
         private displayServerMessage;
         private loginValidAddUser;
         private assignIdAndSendConfirmation;

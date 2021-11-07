@@ -157,7 +157,7 @@ export class FudgeServer {
 
   public sendIceCandidatesToRelevantPeer(_wsConnection: WebSocket, _message: Messages.IceCandidate): void {
     const client: Client | undefined = this.clients.find(_client => _client.id == _message.targetId);
-
+    console.warn("Send Candidate", client, _message.candidate);
     if (client) {
       const candidateToSend: Messages.IceCandidate = new Messages.IceCandidate(_message.originatorId, client.id, _message.candidate);
       client.wsServer?.send(candidateToSend.serialize());

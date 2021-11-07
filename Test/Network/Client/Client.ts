@@ -10,6 +10,7 @@ namespace ClientTest {
     document.forms[0].querySelector("button#connect").addEventListener("click", connectToServer);
     document.forms[0].querySelector("button#login").addEventListener("click", loginToServer);
     document.querySelector("table").addEventListener("click", createStructure);
+    setTable(clients);
   }
 
   async function connectToServer(_event: Event): Promise<void> {
@@ -60,6 +61,9 @@ namespace ClientTest {
             proposeName();
 
           setTable(clients);
+
+          if (client.remoteEventPeerDataChannel)
+            client.sendMessageToSingularPeer("Test");
         }
         break;
       case Messages.MESSAGE_TYPE.CLIENT_TO_SERVER_MESSAGE:
@@ -114,7 +118,7 @@ namespace ClientTest {
   function createRtcConnectionToAllClients(): void {
     console.log("Connect all clients");
     for (let remote of clients) {
-      if (client.id == remote.id)
+      if (client.id == remote.id || client.name != "Client-0")
         continue;
       client.initiateRtcConnection(remote.id);
     }

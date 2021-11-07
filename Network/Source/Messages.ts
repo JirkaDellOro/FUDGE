@@ -18,7 +18,7 @@ namespace Messages {
     PEER_TEXT_MESSAGE = "peer_text_message",
     SERVER_TO_PEER_MESSAGE = "server_to_peer_message",
     SERVER_HEARTBEAT = "server_heartbeat",
-    CLIENT_HEARTBEAT = "client_heartbeat",
+    CLIENT_HEARTBEAT = "client_heartbeat"
 
   }
 
