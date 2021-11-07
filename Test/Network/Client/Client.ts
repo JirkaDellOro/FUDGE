@@ -1,6 +1,8 @@
 ///<reference path="../../../Network/Build/Client/FudgeClient.d.ts"/>
 namespace ClientTest {
+  import ƒ = FudgeCore;
   import ƒClient = FudgeClient.FudgeClient;
+  ƒ.Debug.setFilter(ƒ.DebugConsole, ƒ.DEBUG_FILTER.ALL);
 
   let client: ƒClient = new ƒClient();
   let clients: ƒClient[] = [];
@@ -16,7 +18,7 @@ namespace ClientTest {
   async function connectToServer(_event: Event): Promise<void> {
     let domServer: HTMLInputElement = document.forms[0].querySelector("input[name=server");
     try {
-      client.connectToSignalingServer(domServer.value);
+      client.connectToServer(domServer.value);
       await delay(1000);
       document.forms[0].querySelector("button#login").removeAttribute("disabled");
       client.wsServer.addEventListener("receive", receiveTCP);
@@ -28,7 +30,7 @@ namespace ClientTest {
 
   async function loginToServer(_event: Event): Promise<void> {
     let domLogin: HTMLInputElement = document.forms[0].querySelector("input[name=login");
-    client.createLoginRequestAndSendToServer(domLogin.value);
+    client.loginToServer(domLogin.value);
   }
 
   function delay(_milisec: number): Promise<void> {
@@ -63,7 +65,7 @@ namespace ClientTest {
           setTable(clients);
 
           if (client.remoteEventPeerDataChannel)
-            client.sendMessageToSingularPeer("Test");
+            client.sendToPeer("Test");
         }
         break;
       case Messages.MESSAGE_TYPE.CLIENT_TO_SERVER_MESSAGE:
@@ -112,7 +114,7 @@ namespace ClientTest {
   }
 
   function createMesh(): void {
-    client.sendMessageToSignalingServer(new Messages.ToServer(client.id, Messages.SERVER_COMMAND.CREATE_MESH, client.name));
+    client.sendToServer(new Messages.ToServer(client.id, Messages.SERVER_COMMAND.CREATE_MESH, client.name));
   }
 
   function createRtcConnectionToAllClients(): void {
@@ -120,7 +122,12 @@ namespace ClientTest {
     for (let remote of clients) {
       if (client.id == remote.id || client.name != "Client-0")
         continue;
-      client.initiateRtcConnection(remote.id);
+      client.connectToPeer(remote.id);
+      client.addEventListener("receive", hndPeerMessage);
     }
+  }
+
+  function hndPeerMessage(_message: CustomEvent): void {
+    console.log("Peer Message received", _message.detail);
   }
 }

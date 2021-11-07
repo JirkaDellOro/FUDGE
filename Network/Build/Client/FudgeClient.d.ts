@@ -108,7 +108,7 @@ declare namespace Messages {
     }
 }
 declare namespace FudgeClient {
-    class FudgeClient {
+    class FudgeClient extends EventTarget {
         id: string;
         name: string;
         wsServerUrl: string | undefined;
@@ -127,14 +127,14 @@ declare namespace FudgeClient {
             }[];
         };
         constructor();
-        connectToSignalingServer: (_uri?: string) => void;
-        addWebSocketEventListeners: () => void;
-        parseMessageAndHandleMessageType: (_receivedMessage: MessageEvent) => void;
-        createLoginRequestAndSendToServer: (_requestingUsername: string) => void;
-        sendMessageToSignalingServer: (_message: Messages.MessageBase) => void;
-        initiateRtcConnection: (_idRemote: string) => void;
-        createRTCPeerConnectionAndAddEventListeners: () => void;
-        sendMessageToSingularPeer: (_messageToSend: string) => void;
+        connectToServer: (_uri?: string) => void;
+        loginToServer: (_requestingUsername: string) => void;
+        sendToServer: (_message: Messages.MessageBase) => void;
+        connectToPeer: (_idRemote: string) => void;
+        sendToPeer: (_messageToSend: string) => void;
+        private createRTCPeerConnectionAndAddEventListeners;
+        private addWebSocketEventListeners;
+        private parseMessageAndHandleMessageType;
         private beginPeerConnectionNegotiation;
         private createNegotiationOfferAndSendToPeer;
         private receiveNegotiationOfferAndSetRemoteDescription;
