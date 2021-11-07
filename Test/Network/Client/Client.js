@@ -56,8 +56,8 @@ var ClientTest;
                     if (client.name == "")
                         proposeName();
                     setTable(clients);
-                    // for (let id in client.peers)
-                    //   client.sendToPeer(id, "Message from " + client.id + "|" + client.name);
+                    for (let id in client.peers)
+                        client.sendToPeer(id, "Message from " + client.id + "|" + client.name);
                 }
                 break;
             case Messages.MESSAGE_TYPE.CLIENT_TO_SERVER:

@@ -10,9 +10,7 @@ var Messages;
         MESSAGE_TYPE["LOGIN_RESPONSE"] = "loginResponse";
         MESSAGE_TYPE["CLIENT_TO_SERVER"] = "clientToServer";
         MESSAGE_TYPE["SERVER_TO_CLIENT"] = "serverToClient";
-        MESSAGE_TYPE["PEER_TO_SERVER_COMMAND"] = "serverCommand";
-        MESSAGE_TYPE["PEER_TEXT_MESSAGE"] = "peerTextMessage";
-        MESSAGE_TYPE["SERVER_TO_PEER"] = "serverToPeer";
+        MESSAGE_TYPE["PEER_TO_PEER"] = "peerToPeer";
         MESSAGE_TYPE["SERVER_HEARTBEAT"] = "serverHeartbeat";
         MESSAGE_TYPE["CLIENT_HEARTBEAT"] = "clientHeartbeat";
         MESSAGE_TYPE["RTC_OFFER"] = "rtcOffer";
@@ -123,33 +121,14 @@ var Messages;
         }
     }
     Messages.ToClient = ToClient;
-    class PeerTemplate {
-        messageType;
-        originatorId;
-        commandType;
-        constructor(messageType, originatorId, commandType) {
-            this.messageType = messageType;
-            this.originatorId = originatorId;
-            this.commandType = commandType;
-        }
-    }
-    Messages.PeerTemplate = PeerTemplate;
-    class PeerSimpleText extends PeerTemplate {
+    class PeerToPeer extends MessageBase {
         messageData;
-        originatorUserName;
-        constructor(_originatorId, messageData, originatorUserName) {
-            super(MESSAGE_TYPE.PEER_TEXT_MESSAGE, _originatorId, SERVER_COMMAND.UNDEFINED);
+        constructor(_originatorId, messageData) {
+            super(MESSAGE_TYPE.PEER_TO_PEER, _originatorId);
             this.messageData = messageData;
-            this.originatorUserName = originatorUserName;
         }
     }
-    Messages.PeerSimpleText = PeerSimpleText;
-    class PeerDisconnectClient extends PeerTemplate {
-        constructor(_originatorId) {
-            super(MESSAGE_TYPE.PEER_TO_SERVER_COMMAND, _originatorId, SERVER_COMMAND.DISCONNECT_CLIENT);
-        }
-    }
-    Messages.PeerDisconnectClient = PeerDisconnectClient;
+    Messages.PeerToPeer = PeerToPeer;
     class ServerHeartbeat extends MessageBase {
         messageData;
         constructor(messageData) {

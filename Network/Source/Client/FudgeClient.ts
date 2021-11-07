@@ -49,16 +49,12 @@ namespace FudgeClient {
         this.beginPeerConnectionNegotiation(_idRemote);
     }
 
-    public sendToPeer = (_idRemote: string, _messageToSend: string) => {
-      let messageObject: Messages.PeerSimpleText = new Messages.PeerSimpleText(this.id, _messageToSend, this.name);
-
-      let stringifiedMessage: string = JSON.stringify(messageObject);
-      ƒ.Debug.fudge(stringifiedMessage);
-
+    public sendToPeer = (_idRemote: string, _message: string) => {
+      let message: Messages.PeerToPeer = new Messages.PeerToPeer(this.id, _message);
       let dataChannel: RTCDataChannel | undefined = this.peers[_idRemote].dataChannel;
 
       if (dataChannel && dataChannel.readyState == "open")
-        dataChannel.send(stringifiedMessage);
+        dataChannel.send(message.serialize());
       else {
         console.error("Datachannel: Connection unexpectedly lost");
       }

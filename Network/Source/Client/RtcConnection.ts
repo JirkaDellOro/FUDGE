@@ -41,7 +41,7 @@ namespace FudgeClient {
       }
 
       function dispatchMessage(_messageEvent: MessageEvent): void {
-        let message: Messages.PeerSimpleText = JSON.parse(_messageEvent.data);
+        let message: Messages.PeerToPeer = JSON.parse(_messageEvent.data);
         ƒ.Debug.fudge("Received", _messageEvent.type, message);
         _client.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, { detail: message }));
       }

@@ -8,9 +8,7 @@ LOGIN_REQUEST = "loginRequest",
 LOGIN_RESPONSE = "loginResponse", 
 CLIENT_TO_SERVER = "clientToServer", 
 SERVER_TO_CLIENT = "serverToClient", 
-PEER_TO_SERVER_COMMAND = "serverCommand", 
-PEER_TEXT_MESSAGE = "peerTextMessage", 
-SERVER_TO_PEER = "serverToPeer", 
+PEER_TO_PEER = "peerToPeer", 
 SERVER_HEARTBEAT = "serverHeartbeat", 
 CLIENT_HEARTBEAT = "clientHeartbeat", 
 RTC_OFFER = "rtcOffer", 
@@ -71,19 +69,9 @@ class ToClient extends MessageBase {
 messageData: string; 
 constructor(messageData: string); 
 } 
-class PeerTemplate { 
-messageType: MESSAGE_TYPE; 
-originatorId: string; 
-commandType: SERVER_COMMAND; 
-constructor(messageType: MESSAGE_TYPE, originatorId: string, commandType: SERVER_COMMAND); 
-} 
-class PeerSimpleText extends PeerTemplate { 
+class PeerToPeer extends MessageBase { 
 messageData: string; 
-originatorUserName: string; 
-constructor(_originatorId: string, messageData: string, originatorUserName: string); 
-} 
-class PeerDisconnectClient extends PeerTemplate { 
-constructor(_originatorId: string); 
+constructor(_originatorId: string, messageData: string); 
 } 
 class ServerHeartbeat extends MessageBase { 
 messageData: string; 

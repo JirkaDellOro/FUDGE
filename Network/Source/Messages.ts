@@ -7,9 +7,7 @@ namespace Messages {
     LOGIN_RESPONSE = "loginResponse",
     CLIENT_TO_SERVER = "clientToServer",
     SERVER_TO_CLIENT = "serverToClient",
-    PEER_TO_SERVER_COMMAND = "serverCommand",
-    PEER_TEXT_MESSAGE = "peerTextMessage",
-    SERVER_TO_PEER = "serverToPeer",
+    PEER_TO_PEER = "peerToPeer",
     SERVER_HEARTBEAT = "serverHeartbeat",
     CLIENT_HEARTBEAT = "clientHeartbeat",
     RTC_OFFER = "rtcOffer",
@@ -93,20 +91,9 @@ namespace Messages {
     }
   }
 
-  export class PeerTemplate {
-    constructor(public messageType: MESSAGE_TYPE, public originatorId: string, public commandType: SERVER_COMMAND) {
-    }
-  }
-
-  export class PeerSimpleText extends PeerTemplate {
-    constructor(_originatorId: string, public messageData: string, public originatorUserName: string) {
-      super(MESSAGE_TYPE.PEER_TEXT_MESSAGE, _originatorId, SERVER_COMMAND.UNDEFINED);
-    }
-  }
-
-  export class PeerDisconnectClient extends PeerTemplate {
-    constructor(_originatorId: string) {
-      super(MESSAGE_TYPE.PEER_TO_SERVER_COMMAND, _originatorId, SERVER_COMMAND.DISCONNECT_CLIENT);
+  export class PeerToPeer extends MessageBase {
+    constructor(_originatorId: string, public messageData: string) {
+      super(MESSAGE_TYPE.PEER_TO_PEER, _originatorId);
     }
   }
 
