@@ -69,7 +69,7 @@ class FudgeServer {
             case Messages_js_1.Messages.MESSAGE_TYPE.LOGIN_REQUEST:
                 this.addUserOnValidLoginRequest(_wsConnection, message);
                 break;
-            case Messages_js_1.Messages.MESSAGE_TYPE.CLIENT_TO_SERVER_MESSAGE:
+            case Messages_js_1.Messages.MESSAGE_TYPE.CLIENT_TO_SERVER:
                 this.broadcastMessageToAllConnectedClients(message);
                 break;
             case Messages_js_1.Messages.MESSAGE_TYPE.RTC_OFFER:
@@ -118,7 +118,7 @@ class FudgeServer {
         console.log("Sending offer to: ", _message.idRemote);
         const client = this.clients.find(_client => _client.id == _message.idRemote);
         if (client) {
-            const offerMessage = new Messages_js_1.Messages.RtcOffer(_message.originatorId, client.name, _message.offer);
+            const offerMessage = new Messages_js_1.Messages.RtcOffer(_message.originatorId, client.id, _message.offer);
             try {
                 client.wsServer?.send(offerMessage.serialize());
             }

@@ -5,23 +5,19 @@ var Messages;
     (function (MESSAGE_TYPE) {
         MESSAGE_TYPE["UNDEFINED"] = "undefined";
         MESSAGE_TYPE["ERROR"] = "error";
-        MESSAGE_TYPE["ID_ASSIGNED"] = "id_assigned";
-        MESSAGE_TYPE["LOGIN_REQUEST"] = "login_request";
-        MESSAGE_TYPE["LOGIN_RESPONSE"] = "login_response";
-        MESSAGE_TYPE["RTC_OFFER"] = "offer";
-        MESSAGE_TYPE["RTC_ANSWER"] = "answer";
-        MESSAGE_TYPE["ICE_CANDIDATE"] = "candidate";
-        MESSAGE_TYPE["SERVER_ASSIGNMENT_REQUEST"] = "server_assignment_request";
-        MESSAGE_TYPE["CLIENT_TO_SERVER_MESSAGE"] = "client_to_server_message";
-        MESSAGE_TYPE["CLIENT_READY_FOR_MESH_CONNECTION"] = "client_ready_for_mesh_connection";
-        MESSAGE_TYPE["CLIENT_MESH_CONNECTED"] = "client_mesh_connected";
-        MESSAGE_TYPE["SERVER_SEND_MESH_CANDIDATES_TO_CLIENT"] = "server_send_mesh_candidates_to_client";
-        MESSAGE_TYPE["SERVER_TO_CLIENT_MESSAGE"] = "server_to_client_message";
-        MESSAGE_TYPE["PEER_TO_SERVER_COMMAND"] = "server_command";
-        MESSAGE_TYPE["PEER_TEXT_MESSAGE"] = "peer_text_message";
-        MESSAGE_TYPE["SERVER_TO_PEER_MESSAGE"] = "server_to_peer_message";
-        MESSAGE_TYPE["SERVER_HEARTBEAT"] = "server_heartbeat";
-        MESSAGE_TYPE["CLIENT_HEARTBEAT"] = "client_heartbeat";
+        MESSAGE_TYPE["ID_ASSIGNED"] = "idAssigned";
+        MESSAGE_TYPE["LOGIN_REQUEST"] = "loginRequest";
+        MESSAGE_TYPE["LOGIN_RESPONSE"] = "loginResponse";
+        MESSAGE_TYPE["CLIENT_TO_SERVER"] = "clientToServer";
+        MESSAGE_TYPE["SERVER_TO_CLIENT"] = "serverToClient";
+        MESSAGE_TYPE["PEER_TO_SERVER_COMMAND"] = "serverCommand";
+        MESSAGE_TYPE["PEER_TEXT_MESSAGE"] = "peerTextMessage";
+        MESSAGE_TYPE["SERVER_TO_PEER"] = "serverToPeer";
+        MESSAGE_TYPE["SERVER_HEARTBEAT"] = "serverHeartbeat";
+        MESSAGE_TYPE["CLIENT_HEARTBEAT"] = "clientHeartbeat";
+        MESSAGE_TYPE["RTC_OFFER"] = "rtcOffer";
+        MESSAGE_TYPE["RTC_ANSWER"] = "rtcAnswer";
+        MESSAGE_TYPE["ICE_CANDIDATE"] = "rtcCandidate";
     })(MESSAGE_TYPE = Messages.MESSAGE_TYPE || (Messages.MESSAGE_TYPE = {}));
     let SERVER_COMMAND;
     (function (SERVER_COMMAND) {
@@ -113,7 +109,7 @@ var Messages;
         messageData;
         originatorUserName;
         constructor(_originatorId, messageData, originatorUserName) {
-            super(MESSAGE_TYPE.CLIENT_TO_SERVER_MESSAGE, _originatorId);
+            super(MESSAGE_TYPE.CLIENT_TO_SERVER, _originatorId);
             this.messageData = messageData;
             this.originatorUserName = originatorUserName;
         }
@@ -122,34 +118,11 @@ var Messages;
     class ToClient extends MessageBase {
         messageData;
         constructor(messageData) {
-            super(MESSAGE_TYPE.SERVER_TO_CLIENT_MESSAGE, "SERVER");
+            super(MESSAGE_TYPE.SERVER_TO_CLIENT, "SERVER");
             this.messageData = messageData;
         }
     }
     Messages.ToClient = ToClient;
-    class ClientReady extends MessageBase {
-        constructor(_originatorId) {
-            super(MESSAGE_TYPE.CLIENT_READY_FOR_MESH_CONNECTION, _originatorId);
-        }
-    }
-    Messages.ClientReady = ClientReady;
-    // export class ServerSendMeshClientArray extends MessageBase {
-    //   constructor(public candidateArray: Client[]) {
-    //     super(MESSAGE_TYPE.SERVER_SEND_MESH_CANDIDATES_TO_CLIENT, "SERVER");
-    //   }
-    // }
-    class ClientMeshReady extends MessageBase {
-        constructor(_originatorId) {
-            super(MESSAGE_TYPE.CLIENT_READY_FOR_MESH_CONNECTION, _originatorId);
-        }
-    }
-    Messages.ClientMeshReady = ClientMeshReady;
-    class ClientIsMeshConnected extends MessageBase {
-        constructor(_originatorId) {
-            super(MESSAGE_TYPE.CLIENT_MESH_CONNECTED, _originatorId);
-        }
-    }
-    Messages.ClientIsMeshConnected = ClientIsMeshConnected;
     class PeerTemplate {
         messageType;
         originatorId;
@@ -207,27 +180,15 @@ var FudgeClient;
         wsServerUrl = undefined;
         wsServer;
         peers = {};
-        ownPeerConnection;
-        idRemote;
-        ownPeerDataChannel;
-        remoteEventPeerDataChannel;
-        isInitiator;
-        // More info from here https://developer.mozilla.org/en-US/docs/Web/API/RTCConfiguration
-        // tslint:disable-next-line: typedef
-        configuration = {
-            iceServers: [
-                { urls: "stun:stun2.1.google.com:19302" },
-                { urls: "stun:stun.example.com" }
-            ]
-        };
+        // public ownPeerConnection!: RTCPeerConnection;
+        // public idRemote: string;
+        // public ownPeerDataChannel: RTCDataChannel | undefined;
+        // public remoteEventPeerDataChannel: RTCDataChannel | undefined;
+        // public isInitiator: boolean;
         constructor() {
             super();
             this.name = "";
             this.id = "undefined";
-            this.idRemote = "";
-            this.isInitiator = false;
-            this.remoteEventPeerDataChannel = undefined;
-            this.createRTCPeerConnectionAndAddEventListeners();
         }
         connectToServer = (_uri = "ws://localhost:8080") => {
             this.wsServerUrl = _uri;
@@ -253,35 +214,31 @@ var FudgeClient;
             }
         };
         connectToPeer = (_idRemote) => {
-            this.idRemote = _idRemote;
-            this.beginPeerConnectionNegotiation(this.idRemote);
+            if (this.peers[_idRemote])
+                ƒ.Debug.warn("Peers already connected, ignoring request", this.id, _idRemote);
+            else
+                // this.idRemote = _idRemote;
+                this.beginPeerConnectionNegotiation(_idRemote);
         };
-        sendToPeer = (_messageToSend) => {
+        sendToPeer = (_idRemote, _messageToSend) => {
             let messageObject = new Messages.PeerSimpleText(this.id, _messageToSend, this.name);
             let stringifiedMessage = JSON.stringify(messageObject);
             ƒ.Debug.fudge(stringifiedMessage);
-            if (this.isInitiator && this.ownPeerDataChannel) {
-                this.ownPeerDataChannel.send(stringifiedMessage);
-            }
-            else if (!this.isInitiator && this.remoteEventPeerDataChannel && this.remoteEventPeerDataChannel.readyState === "open") {
-                ƒ.Debug.fudge("Sending Message via received Datachannel");
-                this.remoteEventPeerDataChannel.send(stringifiedMessage);
-            }
+            let dataChannel = this.peers[_idRemote].dataChannel;
+            // if (this.isInitiator && this.ownPeerDataChannel) {
+            //   this.ownPeerDataChannel.send(stringifiedMessage);
+            // }
+            // else if (!this.isInitiator && this.remoteEventPeerDataChannel && this.remoteEventPeerDataChannel.readyState === "open") {
+            //   ƒ.Debug.fudge("Sending Message via received Datachannel");
+            //   this.remoteEventPeerDataChannel.send(stringifiedMessage);
+            // }
+            if (dataChannel && dataChannel.readyState == "open")
+                dataChannel.send(stringifiedMessage);
             else {
                 console.error("Datachannel: Connection unexpectedly lost");
             }
         };
         // ----------------------
-        createRTCPeerConnectionAndAddEventListeners = () => {
-            ƒ.Debug.fudge("Creating RTC Connection");
-            try {
-                this.ownPeerConnection = new RTCPeerConnection(this.configuration);
-                this.ownPeerConnection.addEventListener("icecandidate", this.sendIceCandidatesToPeer);
-            }
-            catch (error) {
-                console.error("Unexpecte Error: Creating Client Peerconnection", error);
-            }
-        };
         addWebSocketEventListeners = () => {
             try {
                 this.wsServer.addEventListener("open", (_connOpen) => {
@@ -311,11 +268,11 @@ var FudgeClient;
                 case Messages.MESSAGE_TYPE.SERVER_HEARTBEAT:
                     this.wsServer.dispatchEvent(new CustomEvent("receive", { detail: message }));
                     break;
-                case Messages.MESSAGE_TYPE.CLIENT_TO_SERVER_MESSAGE:
+                case Messages.MESSAGE_TYPE.CLIENT_TO_SERVER:
                     // ƒ.Debug.fudge("BroadcastMessage received, requires further handling", _receivedMessage);
                     this.wsServer.dispatchEvent(new CustomEvent("receive", { detail: message }));
                     break;
-                case Messages.MESSAGE_TYPE.SERVER_TO_CLIENT_MESSAGE:
+                case Messages.MESSAGE_TYPE.SERVER_TO_CLIENT:
                     this.displayServerMessage(_receivedMessage.data);
                     break;
                 case Messages.MESSAGE_TYPE.RTC_OFFER:
@@ -324,7 +281,7 @@ var FudgeClient;
                     break;
                 case Messages.MESSAGE_TYPE.RTC_ANSWER:
                     // ƒ.Debug.fudge("Received answer, current signaling state: ", this.connection.signalingState);
-                    this.receiveAnswerAndSetRemoteDescription(message.originatorId, message.answer);
+                    this.receiveAnswerAndSetRemoteDescription(message.originatorId, message);
                     break;
                 case Messages.MESSAGE_TYPE.ICE_CANDIDATE:
                     // ƒ.Debug.fudge("Received candidate, current signaling state: ", this.connection.signalingState);
@@ -333,26 +290,22 @@ var FudgeClient;
             }
         };
         beginPeerConnectionNegotiation = (_idRemote) => {
-            // Initiator is important for direct p2p connections
-            this.isInitiator = true;
             try {
-                this.ownPeerDataChannel = this.ownPeerConnection.createDataChannel("localDataChannel");
-                this.ownPeerDataChannel.addEventListener("open", this.dataChannelStatusChangeHandler);
-                this.ownPeerDataChannel.addEventListener("close", this.dataChannelStatusChangeHandler);
-                this.ownPeerDataChannel.addEventListener("message", this.dataChannelMessageHandler);
-                ƒ.Debug.fudge("Senders", this.ownPeerConnection.getSenders());
+                this.peers[_idRemote] = new FudgeClient_1.RtcConnection();
             }
             catch (error) {
                 console.error("Unexpected Error: Creating Client Datachannel and adding Listeners", error);
             }
-            this.ownPeerConnection.createOffer()
+            let peerConnection = this.peers[_idRemote].peerConnection;
+            peerConnection.addEventListener("icecandidate", (_event) => this.sendIceCandidatesToPeer(_event.candidate, _idRemote));
+            peerConnection.createOffer()
                 .then(async (offer) => {
-                ƒ.Debug.fudge("Beginning of createOffer in InitiateConnection, Expected 'stable', got:  ", this.ownPeerConnection.signalingState);
+                ƒ.Debug.fudge("Beginning of createOffer in InitiateConnection, Expected 'stable', got:  ", peerConnection.signalingState);
                 return offer;
             })
                 .then(async (offer) => {
-                await this.ownPeerConnection.setLocalDescription(offer);
-                ƒ.Debug.fudge("Setting LocalDesc, Expected 'have-local-offer', got:  ", this.ownPeerConnection.signalingState);
+                await peerConnection.setLocalDescription(offer);
+                ƒ.Debug.fudge("Setting LocalDesc, Expected 'have-local-offer', got:  ", peerConnection.signalingState);
             })
                 .then(() => {
                 this.createNegotiationOfferAndSendToPeer(_idRemote);
@@ -363,45 +316,48 @@ var FudgeClient;
         };
         createNegotiationOfferAndSendToPeer = (_idRemote) => {
             try {
-                const offerMessage = new Messages.RtcOffer(this.id, _idRemote, this.ownPeerConnection.localDescription);
+                let peerConnection = this.peers[_idRemote].peerConnection;
+                const offerMessage = new Messages.RtcOffer(this.id, _idRemote, peerConnection.localDescription);
                 this.sendToServer(offerMessage);
-                ƒ.Debug.fudge("Sent offer to remote peer, Expected 'have-local-offer', got:  ", this.ownPeerConnection.signalingState);
+                ƒ.Debug.fudge("Sent offer to remote peer, Expected 'have-local-offer', got:  ", peerConnection.signalingState);
             }
             catch (error) {
                 console.error("Unexpected Error: Creating Object and Sending RTC Offer", error);
             }
         };
         receiveNegotiationOfferAndSetRemoteDescription = (_offerMessage) => {
-            if (!this.ownPeerConnection) {
-                console.error("Unexpected Error: OwnPeerConnection error");
-                return;
+            let peerConnection = this.peers[_offerMessage.originatorId]?.peerConnection;
+            if (!peerConnection) {
+                this.peers[_offerMessage.originatorId] = new FudgeClient_1.RtcConnection();
+                peerConnection = this.peers[_offerMessage.originatorId].peerConnection;
             }
-            this.ownPeerConnection.addEventListener("datachannel", this.receiveDataChannelAndEstablishConnection);
-            this.idRemote = _offerMessage.originatorId;
+            peerConnection.addEventListener("datachannel", this.receiveDataChannelAndEstablishConnection);
+            // this.idRemote = _offerMessage.originatorId;
             let offerToSet = _offerMessage.offer;
             if (!offerToSet) {
                 return;
             }
-            this.ownPeerConnection.setRemoteDescription(new RTCSessionDescription(offerToSet))
+            peerConnection.setRemoteDescription(new RTCSessionDescription(offerToSet))
                 .then(async () => {
-                ƒ.Debug.fudge("Received Offer and Set Descripton, Expected 'have-remote-offer', got:  ", this.ownPeerConnection.signalingState);
+                ƒ.Debug.fudge("Received Offer and Set Descripton, Expected 'have-remote-offer', got:  ", peerConnection.signalingState);
                 this.answerNegotiationOffer(_offerMessage.originatorId);
             })
                 .catch((error) => {
                 console.error("Unexpected Error: Setting Remote Description and Creating Answer", error);
             });
-            ƒ.Debug.fudge("End of Function Receive offer, Expected 'stable', got:  ", this.ownPeerConnection.signalingState);
+            ƒ.Debug.fudge("End of Function Receive offer, Expected 'stable', got:  ", peerConnection.signalingState);
         };
         answerNegotiationOffer = (_idRemote) => {
             let ultimateAnswer;
+            let peerConnection = this.peers[_idRemote]?.peerConnection;
             // Signaling example from here https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/createAnswer
-            this.ownPeerConnection.createAnswer()
+            peerConnection.createAnswer()
                 .then(async (answer) => {
-                ƒ.Debug.fudge("Create Answer before setting local desc: Expected 'have-remote-offer', got:  ", this.ownPeerConnection.signalingState);
+                ƒ.Debug.fudge("Create Answer before setting local desc: Expected 'have-remote-offer', got:  ", peerConnection.signalingState);
                 ultimateAnswer = new RTCSessionDescription(answer);
-                return await this.ownPeerConnection.setLocalDescription(ultimateAnswer);
+                return await peerConnection.setLocalDescription(ultimateAnswer);
             }).then(async () => {
-                ƒ.Debug.fudge("CreateAnswerFunction after setting local descp, Expected 'stable', got:  ", this.ownPeerConnection.signalingState);
+                ƒ.Debug.fudge("CreateAnswerFunction after setting local descp, Expected 'stable', got:  ", peerConnection.signalingState);
                 const answerMessage = new Messages.RtcAnswer(this.id, _idRemote, ultimateAnswer);
                 ƒ.Debug.fudge("AnswerObject: ", answerMessage);
                 await this.sendToServer(answerMessage);
@@ -411,30 +367,31 @@ var FudgeClient;
             });
         };
         // TODO: find the purpose of localhostId
-        receiveAnswerAndSetRemoteDescription = (_localhostId, _answer) => {
+        receiveAnswerAndSetRemoteDescription = (_localhostId, _message) => {
             try {
-                let descriptionAnswer = new RTCSessionDescription(_answer);
-                this.ownPeerConnection.setRemoteDescription(descriptionAnswer);
+                let descriptionAnswer = new RTCSessionDescription(_message.answer);
+                this.peers[_message.originatorId].peerConnection.setRemoteDescription(descriptionAnswer);
             }
             catch (error) {
                 console.error("Unexpected Error: Setting Remote Description from Answer", error);
             }
         };
-        // tslint:disable-next-line: no-any
-        sendIceCandidatesToPeer = ({ candidate }) => {
+        sendIceCandidatesToPeer = (_candidate, _idRemote) => {
+            if (!_candidate)
+                return;
             try {
                 ƒ.Debug.fudge("Sending ICECandidates from: ", this.id);
-                let message = new Messages.IceCandidate(this.id, this.idRemote, candidate);
+                let message = new Messages.IceCandidate(this.id, _idRemote, _candidate);
                 this.sendToServer(message);
             }
             catch (error) {
                 console.error("Unexpected Error: Creating and Sending ICECandidates to Peer", error);
             }
         };
-        addReceivedCandidateToPeerConnection = async (_receivedIceMessage) => {
-            if (_receivedIceMessage.candidate) {
+        addReceivedCandidateToPeerConnection = async (_message) => {
+            if (_message.candidate) {
                 try {
-                    await this.ownPeerConnection.addIceCandidate(_receivedIceMessage.candidate);
+                    await this.peers[_message.targetId].peerConnection.addIceCandidate(_message.candidate);
                 }
                 catch (error) {
                     console.error("Unexpected Error: Adding Ice Candidate", error);
@@ -442,15 +399,15 @@ var FudgeClient;
             }
         };
         receiveDataChannelAndEstablishConnection = (_event) => {
-            this.remoteEventPeerDataChannel = _event.channel;
-            if (this.remoteEventPeerDataChannel) {
-                this.remoteEventPeerDataChannel.addEventListener("message", this.dataChannelMessageHandler);
-                // this.remoteEventPeerDataChannel.addEventListener("open", this.enableKeyboardPressesForSending);
-                this.remoteEventPeerDataChannel.addEventListener("close", this.dataChannelStatusChangeHandler);
-            }
-            else {
-                console.error("Unexpected Error: RemoteDatachannel");
-            }
+            console.log(_event.channel.id);
+            // this.remoteEventPeerDataChannel = _event.channel;
+            // if (this.remoteEventPeerDataChannel) {
+            //   this.remoteEventPeerDataChannel.addEventListener("message", this.dataChannelMessageHandler);
+            //   this.remoteEventPeerDataChannel.addEventListener("close", this.dataChannelStatusChangeHandler);
+            // }
+            // else {
+            //   console.error("Unexpected Error: RemoteDatachannel");
+            // }
         };
         //   public sendMessageToServerViaDataChannel = (_messageToSend: string) => {
         //     try {
@@ -462,18 +419,6 @@ var FudgeClient;
         //       console.error(error);
         //     }
         //   }
-        dataChannelMessageHandler = (_messageEvent) => {
-            if (_messageEvent) {
-                // tslint:disable-next-line: no-any
-                let parsedObject = JSON.parse(_messageEvent.data);
-                ƒ.Debug.fudge(_messageEvent.type, parsedObject);
-                // FudgeNetwork.UiElementHandler.chatbox.innerHTML += "\n" + parsedObject.originatorUserName + ": " + parsedObject.messageData;
-                // FudgeNetwork.UiElementHandler.chatbox.scrollTop = FudgeNetwork.UiElementHandler.chatbox.scrollHeight;
-                // this.ownPeerConnection.dispatchEvent(new CustomEvent("receive", { detail: parsedObject }));
-                // this.remoteEventPeerDataChannel?.dispatchEvent(new CustomEvent("receive", { detail: parsedObject }));
-                this.dispatchEvent(new CustomEvent("receive", { detail: parsedObject }));
-            }
-        };
         //   public getLocalClientId(): string {
         //     return this.localClientID;
         //   }
@@ -527,12 +472,37 @@ var FudgeClient;
 })(FudgeClient || (FudgeClient = {}));
 var FudgeClient;
 (function (FudgeClient) {
+    var ƒ = FudgeCore;
+    // More info from here https://developer.mozilla.org/en-US/docs/Web/API/RTCConfiguration
+    // tslint:disable-next-line: typedef
+    FudgeClient.configuration = {
+        iceServers: [
+            { urls: "stun:stun2.1.google.com:19302" },
+            { urls: "stun:stun.example.com" }
+        ]
+    };
     class RtcConnection {
-        idRemote = "";
         // TODO: figure out if it makes sense to create all these connections... RTCPeerConnection is undefined.
-        dataChannel;
         peerConnection;
+        dataChannel;
         mediaStream;
+        constructor() {
+            this.peerConnection = new RTCPeerConnection(FudgeClient.configuration);
+        }
+        createDataChannel(_client, _idRemote) {
+            this.dataChannel = this.peerConnection.createDataChannel(_client.id + "->" + _idRemote);
+            this.dataChannel.addEventListener("open", dispatchRtcEvent);
+            this.dataChannel.addEventListener("close", dispatchRtcEvent);
+            this.dataChannel.addEventListener("message", dispatchMessage);
+            function dispatchRtcEvent(_event) {
+                _client.dispatchEvent(new CustomEvent("receive", { detail: _event }));
+            }
+            function dispatchMessage(_messageEvent) {
+                let message = JSON.parse(_messageEvent.data);
+                ƒ.Debug.fudge("Received", _messageEvent.type, message);
+                _client.dispatchEvent(new CustomEvent("receive", { detail: message }));
+            }
+        }
     }
     FudgeClient.RtcConnection = RtcConnection;
 })(FudgeClient || (FudgeClient = {}));

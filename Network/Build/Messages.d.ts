@@ -3,23 +3,19 @@ export declare namespace Messages {
 enum MESSAGE_TYPE { 
 UNDEFINED = "undefined", 
 ERROR = "error", 
-ID_ASSIGNED = "id_assigned", 
-LOGIN_REQUEST = "login_request", 
-LOGIN_RESPONSE = "login_response", 
-RTC_OFFER = "offer", 
-RTC_ANSWER = "answer", 
-ICE_CANDIDATE = "candidate", 
-SERVER_ASSIGNMENT_REQUEST = "server_assignment_request", 
-CLIENT_TO_SERVER_MESSAGE = "client_to_server_message", 
-CLIENT_READY_FOR_MESH_CONNECTION = "client_ready_for_mesh_connection", 
-CLIENT_MESH_CONNECTED = "client_mesh_connected", 
-SERVER_SEND_MESH_CANDIDATES_TO_CLIENT = "server_send_mesh_candidates_to_client", 
-SERVER_TO_CLIENT_MESSAGE = "server_to_client_message", 
-PEER_TO_SERVER_COMMAND = "server_command", 
-PEER_TEXT_MESSAGE = "peer_text_message", 
-SERVER_TO_PEER_MESSAGE = "server_to_peer_message", 
-SERVER_HEARTBEAT = "server_heartbeat", 
-CLIENT_HEARTBEAT = "client_heartbeat" 
+ID_ASSIGNED = "idAssigned", 
+LOGIN_REQUEST = "loginRequest", 
+LOGIN_RESPONSE = "loginResponse", 
+CLIENT_TO_SERVER = "clientToServer", 
+SERVER_TO_CLIENT = "serverToClient", 
+PEER_TO_SERVER_COMMAND = "serverCommand", 
+PEER_TEXT_MESSAGE = "peerTextMessage", 
+SERVER_TO_PEER = "serverToPeer", 
+SERVER_HEARTBEAT = "serverHeartbeat", 
+CLIENT_HEARTBEAT = "clientHeartbeat", 
+RTC_OFFER = "rtcOffer", 
+RTC_ANSWER = "rtcAnswer", 
+ICE_CANDIDATE = "rtcCandidate" 
 } 
 enum SERVER_COMMAND { 
 UNDEFINED = "undefined", 
@@ -74,15 +70,6 @@ constructor(_originatorId: string, messageData: string, originatorUserName: stri
 class ToClient extends MessageBase { 
 messageData: string; 
 constructor(messageData: string); 
-} 
-class ClientReady extends MessageBase { 
-constructor(_originatorId: string); 
-} 
-class ClientMeshReady extends MessageBase { 
-constructor(_originatorId: string); 
-} 
-class ClientIsMeshConnected extends MessageBase { 
-constructor(_originatorId: string); 
 } 
 class PeerTemplate { 
 messageType: MESSAGE_TYPE; 

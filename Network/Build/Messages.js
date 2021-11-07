@@ -5,23 +5,19 @@ var Messages;
     (function (MESSAGE_TYPE) {
         MESSAGE_TYPE["UNDEFINED"] = "undefined";
         MESSAGE_TYPE["ERROR"] = "error";
-        MESSAGE_TYPE["ID_ASSIGNED"] = "id_assigned";
-        MESSAGE_TYPE["LOGIN_REQUEST"] = "login_request";
-        MESSAGE_TYPE["LOGIN_RESPONSE"] = "login_response";
-        MESSAGE_TYPE["RTC_OFFER"] = "offer";
-        MESSAGE_TYPE["RTC_ANSWER"] = "answer";
-        MESSAGE_TYPE["ICE_CANDIDATE"] = "candidate";
-        MESSAGE_TYPE["SERVER_ASSIGNMENT_REQUEST"] = "server_assignment_request";
-        MESSAGE_TYPE["CLIENT_TO_SERVER_MESSAGE"] = "client_to_server_message";
-        MESSAGE_TYPE["CLIENT_READY_FOR_MESH_CONNECTION"] = "client_ready_for_mesh_connection";
-        MESSAGE_TYPE["CLIENT_MESH_CONNECTED"] = "client_mesh_connected";
-        MESSAGE_TYPE["SERVER_SEND_MESH_CANDIDATES_TO_CLIENT"] = "server_send_mesh_candidates_to_client";
-        MESSAGE_TYPE["SERVER_TO_CLIENT_MESSAGE"] = "server_to_client_message";
-        MESSAGE_TYPE["PEER_TO_SERVER_COMMAND"] = "server_command";
-        MESSAGE_TYPE["PEER_TEXT_MESSAGE"] = "peer_text_message";
-        MESSAGE_TYPE["SERVER_TO_PEER_MESSAGE"] = "server_to_peer_message";
-        MESSAGE_TYPE["SERVER_HEARTBEAT"] = "server_heartbeat";
-        MESSAGE_TYPE["CLIENT_HEARTBEAT"] = "client_heartbeat";
+        MESSAGE_TYPE["ID_ASSIGNED"] = "idAssigned";
+        MESSAGE_TYPE["LOGIN_REQUEST"] = "loginRequest";
+        MESSAGE_TYPE["LOGIN_RESPONSE"] = "loginResponse";
+        MESSAGE_TYPE["CLIENT_TO_SERVER"] = "clientToServer";
+        MESSAGE_TYPE["SERVER_TO_CLIENT"] = "serverToClient";
+        MESSAGE_TYPE["PEER_TO_SERVER_COMMAND"] = "serverCommand";
+        MESSAGE_TYPE["PEER_TEXT_MESSAGE"] = "peerTextMessage";
+        MESSAGE_TYPE["SERVER_TO_PEER"] = "serverToPeer";
+        MESSAGE_TYPE["SERVER_HEARTBEAT"] = "serverHeartbeat";
+        MESSAGE_TYPE["CLIENT_HEARTBEAT"] = "clientHeartbeat";
+        MESSAGE_TYPE["RTC_OFFER"] = "rtcOffer";
+        MESSAGE_TYPE["RTC_ANSWER"] = "rtcAnswer";
+        MESSAGE_TYPE["ICE_CANDIDATE"] = "rtcCandidate";
     })(MESSAGE_TYPE = Messages.MESSAGE_TYPE || (Messages.MESSAGE_TYPE = {}));
     let SERVER_COMMAND;
     (function (SERVER_COMMAND) {
@@ -113,7 +109,7 @@ var Messages;
         messageData;
         originatorUserName;
         constructor(_originatorId, messageData, originatorUserName) {
-            super(MESSAGE_TYPE.CLIENT_TO_SERVER_MESSAGE, _originatorId);
+            super(MESSAGE_TYPE.CLIENT_TO_SERVER, _originatorId);
             this.messageData = messageData;
             this.originatorUserName = originatorUserName;
         }
@@ -122,34 +118,11 @@ var Messages;
     class ToClient extends MessageBase {
         messageData;
         constructor(messageData) {
-            super(MESSAGE_TYPE.SERVER_TO_CLIENT_MESSAGE, "SERVER");
+            super(MESSAGE_TYPE.SERVER_TO_CLIENT, "SERVER");
             this.messageData = messageData;
         }
     }
     Messages.ToClient = ToClient;
-    class ClientReady extends MessageBase {
-        constructor(_originatorId) {
-            super(MESSAGE_TYPE.CLIENT_READY_FOR_MESH_CONNECTION, _originatorId);
-        }
-    }
-    Messages.ClientReady = ClientReady;
-    // export class ServerSendMeshClientArray extends MessageBase {
-    //   constructor(public candidateArray: Client[]) {
-    //     super(MESSAGE_TYPE.SERVER_SEND_MESH_CANDIDATES_TO_CLIENT, "SERVER");
-    //   }
-    // }
-    class ClientMeshReady extends MessageBase {
-        constructor(_originatorId) {
-            super(MESSAGE_TYPE.CLIENT_READY_FOR_MESH_CONNECTION, _originatorId);
-        }
-    }
-    Messages.ClientMeshReady = ClientMeshReady;
-    class ClientIsMeshConnected extends MessageBase {
-        constructor(_originatorId) {
-            super(MESSAGE_TYPE.CLIENT_MESH_CONNECTED, _originatorId);
-        }
-    }
-    Messages.ClientIsMeshConnected = ClientIsMeshConnected;
     class PeerTemplate {
         messageType;
         originatorId;

@@ -63,12 +63,9 @@ namespace ClientTest {
             proposeName();
 
           setTable(clients);
-
-          if (client.remoteEventPeerDataChannel)
-            client.sendToPeer("Test");
         }
         break;
-      case Messages.MESSAGE_TYPE.CLIENT_TO_SERVER_MESSAGE:
+      case Messages.MESSAGE_TYPE.CLIENT_TO_SERVER:
         {
           console.log("Message received", _event.detail);
           let message: Messages.ToServer = <Messages.ToServer>_event.detail;

@@ -80,7 +80,7 @@ export class FudgeServer {
         this.addUserOnValidLoginRequest(_wsConnection, <Messages.LoginRequest>message);
         break;
 
-      case Messages.MESSAGE_TYPE.CLIENT_TO_SERVER_MESSAGE:
+      case Messages.MESSAGE_TYPE.CLIENT_TO_SERVER:
         this.broadcastMessageToAllConnectedClients(<Messages.ToClient>message);
         break;
 
@@ -135,7 +135,7 @@ export class FudgeServer {
     const client: Client | undefined = this.clients.find(_client => _client.id == _message.idRemote);
 
     if (client) {
-      const offerMessage: Messages.RtcOffer = new Messages.RtcOffer(_message.originatorId, <string>client.name, _message.offer);
+      const offerMessage: Messages.RtcOffer = new Messages.RtcOffer(_message.originatorId, client.id, _message.offer);
       try {
         client.wsServer?.send(offerMessage.serialize());
       } catch (error) {
