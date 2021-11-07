@@ -20,7 +20,7 @@ var ClientTest;
             client.connectToServer(domServer.value);
             await delay(1000);
             document.forms[0].querySelector("button#login").removeAttribute("disabled");
-            client.wsServer.addEventListener("receive", receiveTCP);
+            client.addEventListener(FudgeClient.EVENT.MESSAGE_RECEIVED, receiveMessage);
         }
         catch (_error) {
             console.log(_error);
@@ -46,7 +46,7 @@ var ClientTest;
                 domLogin.value = "Client-" + (i + 1);
         }
     }
-    async function receiveTCP(_event) {
+    async function receiveMessage(_event) {
         switch (_event.detail.messageType) {
             case Messages.MESSAGE_TYPE.SERVER_HEARTBEAT:
                 {
@@ -56,6 +56,8 @@ var ClientTest;
                     if (client.name == "")
                         proposeName();
                     setTable(clients);
+                    // for (let id in client.peers)
+                    //   client.sendToPeer(id, "Message from " + client.id + "|" + client.name);
                 }
                 break;
             case Messages.MESSAGE_TYPE.CLIENT_TO_SERVER:
@@ -107,11 +109,7 @@ var ClientTest;
             if (client.id == remote.id || client.name != "Client-0")
                 continue;
             client.connectToPeer(remote.id);
-            client.addEventListener("receive", hndPeerMessage);
         }
-    }
-    function hndPeerMessage(_message) {
-        console.log("Peer Message received", _message.detail);
     }
 })(ClientTest || (ClientTest = {}));
 //# sourceMappingURL=Client.js.map

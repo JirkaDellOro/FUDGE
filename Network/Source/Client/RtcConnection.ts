@@ -1,5 +1,12 @@
 namespace FudgeClient {
   import ƒ = FudgeCore;
+
+  export enum EVENT {
+    CONNECTION_OPENED = "open",
+    CONNECTION_CLOSED = "close",
+    MESSAGE_RECEIVED = "message"
+  }
+
   // More info from here https://developer.mozilla.org/en-US/docs/Web/API/RTCConfiguration
   // tslint:disable-next-line: typedef
   export let configuration = {
@@ -20,20 +27,23 @@ namespace FudgeClient {
     }
 
     public createDataChannel(_client: FudgeClient, _idRemote: string): void {
-      this.dataChannel = this.peerConnection.createDataChannel(_client.id + "->" + _idRemote);
+      this.addDataChannel(_client, this.peerConnection.createDataChannel(_client.id + "->" + _idRemote));
+    }
 
-      this.dataChannel.addEventListener("open", dispatchRtcEvent);
-      this.dataChannel.addEventListener("close", dispatchRtcEvent);
-      this.dataChannel.addEventListener("message", dispatchMessage);
+    public addDataChannel(_client: FudgeClient, _dataChannel: RTCDataChannel): void {
+      this.dataChannel = _dataChannel;
+      this.dataChannel.addEventListener(EVENT.CONNECTION_OPENED, dispatchRtcEvent);
+      this.dataChannel.addEventListener(EVENT.CONNECTION_CLOSED, dispatchRtcEvent);
+      this.dataChannel.addEventListener(EVENT.MESSAGE_RECEIVED, dispatchMessage);
 
       function dispatchRtcEvent(this: RTCDataChannel, _event: Event): void {
-        _client.dispatchEvent(new CustomEvent("receive", { detail: _event }));
+        _client.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, { detail: _event }));
       }
 
       function dispatchMessage(_messageEvent: MessageEvent): void {
         let message: Messages.PeerSimpleText = JSON.parse(_messageEvent.data);
         ƒ.Debug.fudge("Received", _messageEvent.type, message);
-        _client.dispatchEvent(new CustomEvent("receive", { detail: message }));
+        _client.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, { detail: message }));
       }
     }
   }

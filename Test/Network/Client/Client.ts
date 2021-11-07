@@ -21,7 +21,7 @@ namespace ClientTest {
       client.connectToServer(domServer.value);
       await delay(1000);
       document.forms[0].querySelector("button#login").removeAttribute("disabled");
-      client.wsServer.addEventListener("receive", receiveTCP);
+      client.addEventListener(FudgeClient.EVENT.MESSAGE_RECEIVED, receiveMessage);
     } catch (_error) {
       console.log(_error);
       console.log("Make sure, FudgeServer is running and accessable");
@@ -51,7 +51,7 @@ namespace ClientTest {
     }
   }
 
-  async function receiveTCP(_event: CustomEvent): Promise<void> {
+  async function receiveMessage(_event: CustomEvent): Promise<void> {
     switch (_event.detail.messageType) {
       case Messages.MESSAGE_TYPE.SERVER_HEARTBEAT:
         {
@@ -63,6 +63,9 @@ namespace ClientTest {
             proposeName();
 
           setTable(clients);
+
+          // for (let id in client.peers)
+          //   client.sendToPeer(id, "Message from " + client.id + "|" + client.name);
         }
         break;
       case Messages.MESSAGE_TYPE.CLIENT_TO_SERVER:
@@ -120,11 +123,6 @@ namespace ClientTest {
       if (client.id == remote.id || client.name != "Client-0")
         continue;
       client.connectToPeer(remote.id);
-      client.addEventListener("receive", hndPeerMessage);
     }
-  }
-
-  function hndPeerMessage(_message: CustomEvent): void {
-    console.log("Peer Message received", _message.detail);
   }
 }

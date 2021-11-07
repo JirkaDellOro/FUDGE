@@ -122,13 +122,14 @@ declare namespace FudgeClient {
         private displayServerMessage;
         private loginValidAddUser;
         private assignIdAndSendConfirmation;
-        private stringifyObjectForNetworkSending;
-        private setOwnClientId;
-        private setOwnUserName;
-        private dataChannelStatusChangeHandler;
     }
 }
 declare namespace FudgeClient {
+    enum EVENT {
+        CONNECTION_OPENED = "open",
+        CONNECTION_CLOSED = "close",
+        MESSAGE_RECEIVED = "message"
+    }
     let configuration: {
         iceServers: {
             urls: string;
@@ -140,5 +141,6 @@ declare namespace FudgeClient {
         mediaStream: MediaStream | undefined;
         constructor();
         createDataChannel(_client: FudgeClient, _idRemote: string): void;
+        addDataChannel(_client: FudgeClient, _dataChannel: RTCDataChannel): void;
     }
 }
