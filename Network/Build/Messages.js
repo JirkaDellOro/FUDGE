@@ -23,16 +23,18 @@ var Messages;
         MESSAGE_TYPE["SERVER_HEARTBEAT"] = "server_heartbeat";
         MESSAGE_TYPE["CLIENT_HEARTBEAT"] = "client_heartbeat";
     })(MESSAGE_TYPE = Messages.MESSAGE_TYPE || (Messages.MESSAGE_TYPE = {}));
-    let SERVER_COMMAND_TYPE;
-    (function (SERVER_COMMAND_TYPE) {
-        SERVER_COMMAND_TYPE["UNDEFINED"] = "undefined";
-        SERVER_COMMAND_TYPE["DISCONNECT_CLIENT"] = "disconnect_client";
-        SERVER_COMMAND_TYPE["SPAWN_OBJECT"] = "spawn_object";
-        SERVER_COMMAND_TYPE["ASSIGN_OBJECT_TO_CLIENT"] = "assign_object_to_client";
-        SERVER_COMMAND_TYPE["DESTROY_OBJECT"] = "destroy_object";
-        SERVER_COMMAND_TYPE["KEYS_INPUT"] = "keys_input";
-        SERVER_COMMAND_TYPE["MOVEMENT_VALUE"] = "movement_value";
-    })(SERVER_COMMAND_TYPE = Messages.SERVER_COMMAND_TYPE || (Messages.SERVER_COMMAND_TYPE = {}));
+    let SERVER_COMMAND;
+    (function (SERVER_COMMAND) {
+        SERVER_COMMAND["UNDEFINED"] = "undefined";
+        SERVER_COMMAND["DISCONNECT_CLIENT"] = "disconnect_client";
+        SERVER_COMMAND["SPAWN_OBJECT"] = "spawn_object";
+        SERVER_COMMAND["ASSIGN_OBJECT_TO_CLIENT"] = "assign_object_to_client";
+        SERVER_COMMAND["DESTROY_OBJECT"] = "destroy_object";
+        SERVER_COMMAND["KEYS_INPUT"] = "keys_input";
+        SERVER_COMMAND["MOVEMENT_VALUE"] = "movement_value";
+        //
+        SERVER_COMMAND["CREATE_MESH"] = "createMesh";
+    })(SERVER_COMMAND = Messages.SERVER_COMMAND || (Messages.SERVER_COMMAND = {}));
     class MessageBase {
         messageType;
         originatorId;
@@ -78,11 +80,11 @@ var Messages;
     }
     Messages.LoginResponse = LoginResponse;
     class RtcOffer extends MessageBase {
-        userNameToConnectTo;
+        idRemote;
         offer;
-        constructor(_originatorId, userNameToConnectTo, offer) {
+        constructor(_originatorId, idRemote, offer) {
             super(MESSAGE_TYPE.RTC_OFFER, _originatorId);
-            this.userNameToConnectTo = userNameToConnectTo;
+            this.idRemote = idRemote;
             this.offer = offer;
         }
     }
@@ -163,7 +165,7 @@ var Messages;
         messageData;
         originatorUserName;
         constructor(_originatorId, messageData, originatorUserName) {
-            super(MESSAGE_TYPE.PEER_TEXT_MESSAGE, _originatorId, SERVER_COMMAND_TYPE.UNDEFINED);
+            super(MESSAGE_TYPE.PEER_TEXT_MESSAGE, _originatorId, SERVER_COMMAND.UNDEFINED);
             this.messageData = messageData;
             this.originatorUserName = originatorUserName;
         }
@@ -171,7 +173,7 @@ var Messages;
     Messages.PeerSimpleText = PeerSimpleText;
     class PeerDisconnectClient extends PeerTemplate {
         constructor(_originatorId) {
-            super(MESSAGE_TYPE.PEER_TO_SERVER_COMMAND, _originatorId, SERVER_COMMAND_TYPE.DISCONNECT_CLIENT);
+            super(MESSAGE_TYPE.PEER_TO_SERVER_COMMAND, _originatorId, SERVER_COMMAND.DISCONNECT_CLIENT);
         }
     }
     Messages.PeerDisconnectClient = PeerDisconnectClient;

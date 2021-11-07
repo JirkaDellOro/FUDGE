@@ -21,14 +21,15 @@ SERVER_TO_PEER_MESSAGE = "server_to_peer_message",
 SERVER_HEARTBEAT = "server_heartbeat", 
 CLIENT_HEARTBEAT = "client_heartbeat" 
 } 
-enum SERVER_COMMAND_TYPE { 
+enum SERVER_COMMAND { 
 UNDEFINED = "undefined", 
 DISCONNECT_CLIENT = "disconnect_client", 
 SPAWN_OBJECT = "spawn_object", 
 ASSIGN_OBJECT_TO_CLIENT = "assign_object_to_client", 
 DESTROY_OBJECT = "destroy_object", 
 KEYS_INPUT = "keys_input", 
-MOVEMENT_VALUE = "movement_value" 
+MOVEMENT_VALUE = "movement_value", 
+CREATE_MESH = "createMesh" 
 } 
 class MessageBase { 
 readonly messageType: MESSAGE_TYPE; 
@@ -51,9 +52,9 @@ originatorUsername: string;
 constructor(loginSuccess: boolean, _assignedId: string, originatorUsername: string); 
 } 
 class RtcOffer extends MessageBase { 
-userNameToConnectTo: string; 
+idRemote: string; 
 offer: RTCSessionDescription | RTCSessionDescriptionInit | null | undefined; 
-constructor(_originatorId: string, userNameToConnectTo: string, offer: RTCSessionDescription | RTCSessionDescriptionInit | null | undefined); 
+constructor(_originatorId: string, idRemote: string, offer: RTCSessionDescription | RTCSessionDescriptionInit | null | undefined); 
 } 
 class RtcAnswer extends MessageBase { 
 targetId: string; 
@@ -86,8 +87,8 @@ constructor(_originatorId: string);
 class PeerTemplate { 
 messageType: MESSAGE_TYPE; 
 originatorId: string; 
-commandType: SERVER_COMMAND_TYPE; 
-constructor(messageType: MESSAGE_TYPE, originatorId: string, commandType: SERVER_COMMAND_TYPE); 
+commandType: SERVER_COMMAND; 
+constructor(messageType: MESSAGE_TYPE, originatorId: string, commandType: SERVER_COMMAND); 
 } 
 class PeerSimpleText extends PeerTemplate { 
 messageData: string; 

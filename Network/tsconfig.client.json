@@ -91,6 +91,6 @@
   },
   "include": [
     "./Source/Messages.ts",
-    "./Source/Client/FudgeClient.ts",
+    "./Source/Client/*",
   ]
 }

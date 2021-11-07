@@ -18,19 +18,21 @@ namespace Messages {
     PEER_TEXT_MESSAGE = "peer_text_message",
     SERVER_TO_PEER_MESSAGE = "server_to_peer_message",
     SERVER_HEARTBEAT = "server_heartbeat",
-    CLIENT_HEARTBEAT = "client_heartbeat"
+    CLIENT_HEARTBEAT = "client_heartbeat",
+
   }
 
 
-  export enum SERVER_COMMAND_TYPE {
+  export enum SERVER_COMMAND {
     UNDEFINED = "undefined",
     DISCONNECT_CLIENT = "disconnect_client",
     SPAWN_OBJECT = "spawn_object",
     ASSIGN_OBJECT_TO_CLIENT = "assign_object_to_client",
     DESTROY_OBJECT = "destroy_object",
     KEYS_INPUT = "keys_input",
-    MOVEMENT_VALUE = "movement_value"
-
+    MOVEMENT_VALUE = "movement_value",
+    //
+    CREATE_MESH = "createMesh"
   }
 
   export class MessageBase {
@@ -68,7 +70,7 @@ namespace Messages {
   }
 
   export class RtcOffer extends MessageBase {
-    constructor(_originatorId: string, public userNameToConnectTo: string, public offer: RTCSessionDescription | RTCSessionDescriptionInit | null | undefined) {
+    constructor(_originatorId: string, public idRemote: string, public offer: RTCSessionDescription | RTCSessionDescriptionInit | null | undefined) {
       super(MESSAGE_TYPE.RTC_OFFER, _originatorId);
     }
   }
@@ -123,19 +125,19 @@ namespace Messages {
 
 
   export class PeerTemplate {
-    constructor(public messageType: MESSAGE_TYPE, public originatorId: string, public commandType: SERVER_COMMAND_TYPE) {
+    constructor(public messageType: MESSAGE_TYPE, public originatorId: string, public commandType: SERVER_COMMAND) {
     }
   }
 
   export class PeerSimpleText extends PeerTemplate {
     constructor(_originatorId: string, public messageData: string, public originatorUserName: string) {
-      super(MESSAGE_TYPE.PEER_TEXT_MESSAGE, _originatorId, SERVER_COMMAND_TYPE.UNDEFINED);
+      super(MESSAGE_TYPE.PEER_TEXT_MESSAGE, _originatorId, SERVER_COMMAND.UNDEFINED);
     }
   }
 
   export class PeerDisconnectClient extends PeerTemplate {
     constructor(_originatorId: string) {
-      super(MESSAGE_TYPE.PEER_TO_SERVER_COMMAND, _originatorId, SERVER_COMMAND_TYPE.DISCONNECT_CLIENT);
+      super(MESSAGE_TYPE.PEER_TO_SERVER_COMMAND, _originatorId, SERVER_COMMAND.DISCONNECT_CLIENT);
     }
   }
 

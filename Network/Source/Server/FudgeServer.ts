@@ -121,7 +121,7 @@ export class FudgeServer {
   }
 
   public broadcastMessageToAllConnectedClients(_message: Messages.ToClient): void {
-    console.log("Broadcast", _message);
+    console.info("Broadcast", _message);
     // TODO: appearently, websocketServer keeps its own list of clients. Examine if it makes sense to double this information in this.clients
     let clientArray: WebSocket[] = Array.from(this.wsServer.clients);
     let message: string = _message.serialize();
@@ -131,8 +131,8 @@ export class FudgeServer {
   }
 
   public sendRtcOfferToRequestedClient(_wsConnection: WebSocket, _message: Messages.RtcOffer): void {
-    console.log("Sending offer to: ", _message.userNameToConnectTo);
-    const client: Client | undefined = this.clients.find(_client => _client.name == _message.userNameToConnectTo);
+    console.log("Sending offer to: ", _message.idRemote);
+    const client: Client | undefined = this.clients.find(_client => _client.id == _message.idRemote);
 
     if (client) {
       const offerMessage: Messages.RtcOffer = new Messages.RtcOffer(_message.originatorId, <string>client.name, _message.offer);

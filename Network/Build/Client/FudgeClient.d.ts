@@ -21,14 +21,15 @@ declare namespace Messages {
         SERVER_HEARTBEAT = "server_heartbeat",
         CLIENT_HEARTBEAT = "client_heartbeat"
     }
-    enum SERVER_COMMAND_TYPE {
+    enum SERVER_COMMAND {
         UNDEFINED = "undefined",
         DISCONNECT_CLIENT = "disconnect_client",
         SPAWN_OBJECT = "spawn_object",
         ASSIGN_OBJECT_TO_CLIENT = "assign_object_to_client",
         DESTROY_OBJECT = "destroy_object",
         KEYS_INPUT = "keys_input",
-        MOVEMENT_VALUE = "movement_value"
+        MOVEMENT_VALUE = "movement_value",
+        CREATE_MESH = "createMesh"
     }
     class MessageBase {
         readonly messageType: MESSAGE_TYPE;
@@ -51,9 +52,9 @@ declare namespace Messages {
         constructor(loginSuccess: boolean, _assignedId: string, originatorUsername: string);
     }
     class RtcOffer extends MessageBase {
-        userNameToConnectTo: string;
+        idRemote: string;
         offer: RTCSessionDescription | RTCSessionDescriptionInit | null | undefined;
-        constructor(_originatorId: string, userNameToConnectTo: string, offer: RTCSessionDescription | RTCSessionDescriptionInit | null | undefined);
+        constructor(_originatorId: string, idRemote: string, offer: RTCSessionDescription | RTCSessionDescriptionInit | null | undefined);
     }
     class RtcAnswer extends MessageBase {
         targetId: string;
@@ -86,8 +87,8 @@ declare namespace Messages {
     class PeerTemplate {
         messageType: MESSAGE_TYPE;
         originatorId: string;
-        commandType: SERVER_COMMAND_TYPE;
-        constructor(messageType: MESSAGE_TYPE, originatorId: string, commandType: SERVER_COMMAND_TYPE);
+        commandType: SERVER_COMMAND;
+        constructor(messageType: MESSAGE_TYPE, originatorId: string, commandType: SERVER_COMMAND);
     }
     class PeerSimpleText extends PeerTemplate {
         messageData: string;
@@ -108,12 +109,15 @@ declare namespace Messages {
 }
 declare namespace FudgeClient {
     class FudgeClient {
-        signalingServerConnectionUrl: string | undefined;
-        name: string;
         id: string;
+        name: string;
+        wsServerUrl: string | undefined;
         wsServer: WebSocket;
+        peers: {
+            [id: string]: RtcConnection;
+        };
         ownPeerConnection: RTCPeerConnection;
-        remoteClientId: string;
+        idRemote: string;
         ownPeerDataChannel: RTCDataChannel | undefined;
         remoteEventPeerDataChannel: RTCDataChannel | undefined;
         isInitiator: boolean;
@@ -128,11 +132,32 @@ declare namespace FudgeClient {
         parseMessageAndHandleMessageType: (_receivedMessage: MessageEvent) => void;
         createLoginRequestAndSendToServer: (_requestingUsername: string) => void;
         sendMessageToSignalingServer: (_message: Messages.MessageBase) => void;
+        initiateRtcConnection: (_idRemote: string) => void;
+        createRTCPeerConnectionAndAddEventListeners: () => void;
+        beginPeerConnectionNegotiation: (_idRemote: string) => void;
+        createNegotiationOfferAndSendToPeer: (_idRemote: string) => void;
+        receiveNegotiationOfferAndSetRemoteDescription: (_offerMessage: Messages.RtcOffer) => void;
+        answerNegotiationOffer: (_idRemote: string) => void;
+        receiveAnswerAndSetRemoteDescription: (_localhostId: string, _answer: RTCSessionDescriptionInit) => void;
+        sendIceCandidatesToPeer: ({ candidate }: any) => void;
+        receiveDataChannelAndEstablishConnection: (_event: {
+            channel: RTCDataChannel | undefined;
+        }) => void;
+        dataChannelMessageHandler: (_messageEvent: MessageEvent) => void;
         private displayServerMessage;
         private loginValidAddUser;
         private assignIdAndSendConfirmation;
         private stringifyObjectForNetworkSending;
         private setOwnClientId;
         private setOwnUserName;
+        private dataChannelStatusChangeHandler;
+    }
+}
+declare namespace FudgeClient {
+    class RtcConnection {
+        idRemote: string;
+        dataChannel: RTCDataChannel | undefined;
+        peerConnection: RTCPeerConnection | undefined;
+        mediaStream: MediaStream | undefined;
     }
 }
