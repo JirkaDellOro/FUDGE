@@ -103,7 +103,6 @@ declare namespace FudgeClient {
         private sendIceCandidatesToPeer;
         private addReceivedCandidateToPeerConnection;
         private receiveDataChannelAndEstablishConnection;
-        private displayServerMessage;
         private loginValidAddUser;
         private assignIdAndSendConfirmation;
     }

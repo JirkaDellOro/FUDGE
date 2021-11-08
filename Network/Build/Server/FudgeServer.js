@@ -90,7 +90,7 @@ class FudgeServer {
         switch (_message.messageData) {
             case Messages_js_1.Messages.SERVER_COMMAND.CREATE_MESH:
                 let message = new Messages_js_1.Messages.ToClient(JSON.stringify({ "connectPeers": Reflect.ownKeys(this.clients) }));
-                this.clients[_message.idSource].wsServer?.send(message);
+                this.clients[_message.idSource].wsServer?.send(message.serialize());
                 break;
             default:
                 this.broadcastMessageToAllConnectedClients(_message);

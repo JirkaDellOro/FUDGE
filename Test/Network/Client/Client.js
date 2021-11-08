@@ -50,6 +50,7 @@ var ClientTest;
         }
     }
     async function receiveMessage(_event) {
+        // console.log("received", _event);
         switch (_event.detail.messageType) {
             case Messages.MESSAGE_TYPE.SERVER_HEARTBEAT:
                 {
@@ -65,10 +66,18 @@ var ClientTest;
                 break;
             case Messages.MESSAGE_TYPE.CLIENT_TO_SERVER:
                 {
-                    console.log("Message received", _event.detail);
+                    console.log("Message client to server received", _event.detail);
                     let message = _event.detail;
-                    if (message.messageData == Messages.SERVER_COMMAND.CREATE_MESH)
-                        createRtcConnectionToAllClients();
+                    // if (message.messageData == Messages.SERVER_COMMAND.CREATE_MESH)
+                    //   createRtcConnectionToClients();
+                }
+                break;
+            case Messages.MESSAGE_TYPE.SERVER_TO_CLIENT:
+                {
+                    console.log("Message server to client received", _event.detail);
+                    let message = JSON.parse(_event.detail.messageData);
+                    if (message["connectPeers"])
+                        createRtcConnectionToClients(message["connectPeers"]);
                 }
                 break;
             case Messages.MESSAGE_TYPE.PEER_TO_PEER:
@@ -77,6 +86,8 @@ var ClientTest;
                     blink.style.backgroundColor = "white";
                 }
                 break;
+            default:
+                console.log("Unhandled event", _event);
         }
     }
     function setTable(_clients) {
@@ -84,7 +95,7 @@ var ClientTest;
         let html = `<tr><th>&nbsp;</th><th>name</th><th>id</th><th>Comment</th></tr>`;
         html += `<tr><td><span style="background-color: white;">&nbsp;</span></td><td>Server</td><td>&nbsp;</td><td>&nbsp;</td></tr>`;
         for (let id in _clients) {
-            html += `<tr><td><span id="${id}">&nbsp;</span></td><td>${_clients[id].name}</td><td>${_clients[id].id}</td><td></td></tr>`;
+            html += `<tr><td><span id="${id}">&nbsp;</span></td><td>${_clients[id].name}</td><td>${id}</td><td></td></tr>`;
         }
         table.innerHTML = html;
     }
@@ -103,13 +114,13 @@ var ClientTest;
     function createMesh() {
         client.sendToServer(new Messages.ToServer(client.id, Messages.SERVER_COMMAND.CREATE_MESH, client.name));
     }
-    function createRtcConnectionToAllClients() {
-        console.log("Connect all clients");
-        // for (let remote of clients) {
-        //   if (client.id == remote.id || client.name != "Client-0")
-        //     continue;
-        //   client.connectToPeer(remote.id);
-        // }
+    function createRtcConnectionToClients(_ids) {
+        for (let id in clients) {
+            if (client.id == id)
+                continue;
+            console.log("Try to connect", id);
+            client.connectToPeer(id);
+        }
     }
 })(ClientTest || (ClientTest = {}));
 //# sourceMappingURL=Client.js.map

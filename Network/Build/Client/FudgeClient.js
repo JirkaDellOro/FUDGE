@@ -232,11 +232,8 @@ var FudgeClient;
                     this.dispatchEvent(new CustomEvent(FudgeClient_1.EVENT.MESSAGE_RECEIVED, { detail: message }));
                     break;
                 case Messages.MESSAGE_TYPE.CLIENT_TO_SERVER:
-                    // ƒ.Debug.fudge("BroadcastMessage received, requires further handling", _receivedMessage);
-                    this.dispatchEvent(new CustomEvent(FudgeClient_1.EVENT.MESSAGE_RECEIVED, { detail: message }));
-                    break;
                 case Messages.MESSAGE_TYPE.SERVER_TO_CLIENT:
-                    this.displayServerMessage(_receivedMessage.data);
+                    this.dispatchEvent(new CustomEvent(FudgeClient_1.EVENT.MESSAGE_RECEIVED, { detail: message }));
                     break;
                 case Messages.MESSAGE_TYPE.RTC_OFFER:
                     // ƒ.Debug.fudge("Received offer, current signaling state: ", this.connection.signalingState);
@@ -370,26 +367,6 @@ var FudgeClient;
                 console.error("Unexpected Error: RemoteDatachannel");
             }
         };
-        //   public sendMessageToServerViaDataChannel = (_messageToSend: string) => {
-        //     try {
-        //       if (this.remoteEventPeerDataChannel) {
-        //         this.remoteEventPeerDataChannel.send(_messageToSend);
-        //       }
-        //     } catch (error) {
-        //       console.error("Error occured when stringifying PeerMessage");
-        //       console.error(error);
-        //     }
-        //   }
-        //   public getLocalClientId(): string {
-        //     return this.localClientID;
-        //   }
-        //   public getLocalUserName(): string {
-        //     return this.localUserName == "" || undefined ? "Kein Username vergeben" : this.localUserName;
-        //   }
-        displayServerMessage(_messageToDisplay) {
-            // TODO: this must be handled by creator
-            // let parsedObject: Messages.ToClient = this.parseReceivedMessageAndReturnObject(_messageToDisplay);
-        }
         loginValidAddUser = (_assignedId, _loginSuccess, _originatorUserName) => {
             if (_loginSuccess) {
                 this.name = _originatorUserName;

@@ -60,7 +60,7 @@ namespace FudgeClient {
       }
     }
 
-    public sendToAllPeers = ( _message: object) => {
+    public sendToAllPeers = (_message: object) => {
       for (let idPeer in this.peers) {
         this.sendToPeer(idPeer, _message);
       }
@@ -103,12 +103,8 @@ namespace FudgeClient {
           break;
 
         case Messages.MESSAGE_TYPE.CLIENT_TO_SERVER:
-          // ƒ.Debug.fudge("BroadcastMessage received, requires further handling", _receivedMessage);
-          this.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, { detail: message }));
-          break;
-
         case Messages.MESSAGE_TYPE.SERVER_TO_CLIENT:
-          this.displayServerMessage(_receivedMessage.data);
+          this.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, { detail: message }));
           break;
 
         case Messages.MESSAGE_TYPE.RTC_OFFER:
@@ -263,30 +259,6 @@ namespace FudgeClient {
       else {
         console.error("Unexpected Error: RemoteDatachannel");
       }
-    }
-
-    //   public sendMessageToServerViaDataChannel = (_messageToSend: string) => {
-    //     try {
-    //       if (this.remoteEventPeerDataChannel) {
-    //         this.remoteEventPeerDataChannel.send(_messageToSend);
-    //       }
-    //     } catch (error) {
-    //       console.error("Error occured when stringifying PeerMessage");
-    //       console.error(error);
-    //     }
-    //   }
-
-    //   public getLocalClientId(): string {
-    //     return this.localClientID;
-    //   }
-
-    //   public getLocalUserName(): string {
-    //     return this.localUserName == "" || undefined ? "Kein Username vergeben" : this.localUserName;
-    //   }
-
-    private displayServerMessage(_messageToDisplay: Messages.MessageBase): void {
-      // TODO: this must be handled by creator
-      // let parsedObject: Messages.ToClient = this.parseReceivedMessageAndReturnObject(_messageToDisplay);
     }
 
     private loginValidAddUser = (_assignedId: string, _loginSuccess: boolean, _originatorUserName: string): void => {
