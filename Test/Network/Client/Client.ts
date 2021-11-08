@@ -5,7 +5,7 @@ namespace ClientTest {
   ƒ.Debug.setFilter(ƒ.DebugConsole, ƒ.DEBUG_FILTER.ALL);
 
   let client: ƒClient = new ƒClient();
-  let clients: ƒClient[] = [];
+  let clients: { [id: string]: ƒClient } = {};
   window.addEventListener("load", start);
 
   async function start(_event: Event): Promise<void> {
@@ -49,7 +49,7 @@ namespace ClientTest {
       if (document.activeElement == domLogin)
         return; // don't interfere when user's at the element
 
-      for (let i: number = 0; clients.find(_client => _client.name == "Client-" + i); i++)
+      for (let i: number = 0; Object.values( clients).find(_client => _client.name == "Client-" + i); i++)
         domLogin.value = "Client-" + (i + 1);
     }
   }
@@ -68,7 +68,7 @@ namespace ClientTest {
           setTable(clients);
 
           for (let id in client.peers)
-            client.sendToPeer(id, "Message from " + client.id + "|" + client.name);
+            client.sendToPeer(id, new Messages.PeerToPeer(client.id, "Message from " + client.id + "|" + client.name));
         }
         break;
       case Messages.MESSAGE_TYPE.CLIENT_TO_SERVER:
@@ -88,14 +88,14 @@ namespace ClientTest {
     }
   }
 
-  function setTable(_clients: ƒClient[]): void {
+  function setTable(_clients: { [id: string]: ƒClient }): void {
     let table: HTMLTableElement = document.querySelector("table");
     let html: string = `<tr><th>&nbsp;</th><th>name</th><th>id</th><th>Comment</th></tr>`;
 
     html += `<tr><td><span style="background-color: white;">&nbsp;</span></td><td>Server</td><td>&nbsp;</td><td>&nbsp;</td></tr>`;
 
-    for (let client of _clients) {
-      html += `<tr><td><span id="${client.id}">&nbsp;</span></td><td>${client.name}</td><td>${client.id}</td><td></td></tr>`;
+    for (let id in _clients) {
+      html += `<tr><td><span id="${id}">&nbsp;</span></td><td>${_clients[id].name}</td><td>${_clients[id].id}</td><td></td></tr>`;
     }
 
     table.innerHTML = html;
@@ -120,10 +120,10 @@ namespace ClientTest {
 
   function createRtcConnectionToAllClients(): void {
     console.log("Connect all clients");
-    for (let remote of clients) {
-      if (client.id == remote.id || client.name != "Client-0")
-        continue;
-      client.connectToPeer(remote.id);
-    }
+    // for (let remote of clients) {
+    //   if (client.id == remote.id || client.name != "Client-0")
+    //     continue;
+    //   client.connectToPeer(remote.id);
+    // }
   }
 }

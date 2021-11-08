@@ -91,7 +91,8 @@ declare namespace FudgeClient {
         loginToServer: (_requestingUsername: string) => void;
         sendToServer: (_message: Messages.MessageBase) => void;
         connectToPeer: (_idRemote: string) => void;
-        sendToPeer: (_idRemote: string, _message: string) => void;
+        sendToPeer: (_idRemote: string, _message: object) => void;
+        sendToAllPeers: (_message: object) => void;
         private addWebSocketEventListeners;
         private parseMessageAndHandleMessageType;
         private beginPeerConnectionNegotiation;

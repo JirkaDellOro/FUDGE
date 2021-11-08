@@ -49,8 +49,8 @@ namespace FudgeClient {
         this.beginPeerConnectionNegotiation(_idRemote);
     }
 
-    public sendToPeer = (_idRemote: string, _message: string) => {
-      let message: Messages.PeerToPeer = new Messages.PeerToPeer(this.id, _message);
+    public sendToPeer = (_idRemote: string, _message: object) => {
+      let message: Messages.PeerToPeer = new Messages.PeerToPeer(this.id, JSON.stringify(_message));
       let dataChannel: RTCDataChannel | undefined = this.peers[_idRemote].dataChannel;
 
       if (dataChannel && dataChannel.readyState == "open")
@@ -60,6 +60,11 @@ namespace FudgeClient {
       }
     }
 
+    public sendToAllPeers = ( _message: object) => {
+      for (let idPeer in this.peers) {
+        this.sendToPeer(idPeer, _message);
+      }
+    }
     // ----------------------
 
 

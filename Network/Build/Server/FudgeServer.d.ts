@@ -14,11 +14,14 @@ export interface Client {
 }
 export declare class FudgeServer {
     wsServer: WebSocket.Server;
-    clients: Client[];
+    clients: {
+        [id: string]: Client;
+    };
     startUp: (_port?: number) => void;
     closeDown: () => void;
     addEventListeners: () => void;
     handleMessage(_message: string, _wsConnection: WebSocket): void;
+    receive(_message: Messages.ToServer): void;
     addUserOnValidLoginRequest(_wsConnection: WebSocket, _message: Messages.LoginRequest): void;
     broadcastMessageToAllConnectedClients(_message: Messages.ToClient): void;
     sendRtcOfferToRequestedClient(_wsConnection: WebSocket, _message: Messages.RtcOffer): void;

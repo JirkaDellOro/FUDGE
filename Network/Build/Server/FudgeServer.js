@@ -14,7 +14,7 @@ var CONNECTION;
 })(CONNECTION || (CONNECTION = {}));
 class FudgeServer {
     wsServer;
-    clients = [];
+    clients = {};
     startUp = (_port = 8080) => {
         console.log(_port);
         this.wsServer = new ws_1.default.Server({ port: _port });
@@ -31,7 +31,7 @@ class FudgeServer {
                 const id = this.createID();
                 _wsConnection.send(new Messages_js_1.Messages.IdAssigned(id).serialize());
                 const client = { wsServer: _wsConnection, id: id, peers: {} };
-                this.clients.push(client);
+                this.clients[id] = client;
             }
             catch (error) {
                 console.error("Unhandled Exception SERVER: Sending ID to ClientDataType", error);
@@ -41,10 +41,10 @@ class FudgeServer {
             });
             _wsConnection.addEventListener("close", () => {
                 console.error("Error at connection");
-                for (let i = 0; i < this.clients.length; i++) {
-                    if (this.clients[i].wsServer === _wsConnection) {
+                for (let id in this.clients) {
+                    if (this.clients[id].wsServer === _wsConnection) {
                         console.log("Client connection found, deleting");
-                        this.clients.splice(i, 1);
+                        delete this.clients[id];
                         console.log(this.clients);
                     }
                     else {
@@ -70,7 +70,7 @@ class FudgeServer {
                 this.addUserOnValidLoginRequest(_wsConnection, message);
                 break;
             case Messages_js_1.Messages.MESSAGE_TYPE.CLIENT_TO_SERVER:
-                this.broadcastMessageToAllConnectedClients(message);
+                this.receive(message);
                 break;
             case Messages_js_1.Messages.MESSAGE_TYPE.RTC_OFFER:
                 this.sendRtcOfferToRequestedClient(_wsConnection, message);
@@ -86,19 +86,32 @@ class FudgeServer {
                 break;
         }
     }
+    receive(_message) {
+        switch (_message.messageData) {
+            case Messages_js_1.Messages.SERVER_COMMAND.CREATE_MESH:
+                let message = new Messages_js_1.Messages.ToClient(JSON.stringify({ "connectPeers": Reflect.ownKeys(this.clients) }));
+                this.clients[_message.idSource].wsServer?.send(message);
+                break;
+            default:
+                this.broadcastMessageToAllConnectedClients(_message);
+        }
+    }
     addUserOnValidLoginRequest(_wsConnection, _message) {
-        let usernameTaken = this.clients.find(_client => _client.name == _message.loginUserName);
-        try {
-            if (!usernameTaken) {
-                const clientBeingLoggedIn = this.clients.find(_client => _client.wsServer == _wsConnection);
-                if (clientBeingLoggedIn) {
-                    clientBeingLoggedIn.name = _message.loginUserName;
-                    _wsConnection.send(new Messages_js_1.Messages.LoginResponse(true, clientBeingLoggedIn.id, clientBeingLoggedIn.name).serialize());
-                }
-            }
-            else {
+        for (let id in this.clients) {
+            if (this.clients[id].name == _message.loginUserName) {
                 _wsConnection.send(new Messages_js_1.Messages.LoginResponse(false, "", "").serialize());
-                console.log("UsernameTaken");
+                console.log("UsernameTaken", _message.loginUserName);
+                return;
+            }
+        }
+        try {
+            for (let id in this.clients) {
+                let client = this.clients[id];
+                if (client.wsServer == _wsConnection) {
+                    client.name = _message.loginUserName;
+                    _wsConnection.send(new Messages_js_1.Messages.LoginResponse(true, client.id, client.name).serialize());
+                    return;
+                }
             }
         }
         catch (error) {
@@ -116,7 +129,7 @@ class FudgeServer {
     }
     sendRtcOfferToRequestedClient(_wsConnection, _message) {
         console.log("Sending offer to: ", _message.idRemote);
-        const client = this.clients.find(_client => _client.id == _message.idRemote);
+        const client = this.clients[_message.idRemote];
         if (client) {
             const offerMessage = new Messages_js_1.Messages.RtcOffer(_message.idSource, client.id, _message.offer);
             try {
@@ -132,7 +145,7 @@ class FudgeServer {
     }
     answerRtcOfferOfClient(_wsConnection, _message) {
         console.log("Sending answer to: ", _message.idTarget);
-        const client = this.clients.find(_client => _client.id == _message.idTarget);
+        const client = this.clients[_message.idTarget];
         if (client) {
             // TODO Probable source of error, need to test
             if (client.wsServer != null)
@@ -140,7 +153,7 @@ class FudgeServer {
         }
     }
     sendIceCandidatesToRelevantPeer(_wsConnection, _message) {
-        const client = this.clients.find(_client => _client.id == _message.idTarget);
+        const client = this.clients[_message.idTarget];
         console.warn("Send Candidate", client, _message.candidate);
         if (client) {
             const candidateToSend = new Messages_js_1.Messages.IceCandidate(_message.idSource, client.id, _message.candidate);
@@ -154,7 +167,9 @@ class FudgeServer {
     };
     heartbeat = () => {
         console.log("Server Heartbeat");
-        let clients = this.clients.map(_client => { return { id: _client.id, name: _client.name, peers: _client.peers, connection: undefined }; });
+        let clients = {};
+        for (let id in this.clients)
+            clients[id] = { name: this.clients[id].name, peers: this.clients[id].peers };
         let message = new Messages_js_1.Messages.ServerHeartbeat(JSON.stringify(clients));
         this.broadcastMessageToAllConnectedClients(message);
     };

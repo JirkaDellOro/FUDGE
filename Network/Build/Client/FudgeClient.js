@@ -189,12 +189,17 @@ var FudgeClient;
                 this.beginPeerConnectionNegotiation(_idRemote);
         };
         sendToPeer = (_idRemote, _message) => {
-            let message = new Messages.PeerToPeer(this.id, _message);
+            let message = new Messages.PeerToPeer(this.id, JSON.stringify(_message));
             let dataChannel = this.peers[_idRemote].dataChannel;
             if (dataChannel && dataChannel.readyState == "open")
                 dataChannel.send(message.serialize());
             else {
                 console.error("Datachannel: Connection unexpectedly lost");
+            }
+        };
+        sendToAllPeers = (_message) => {
+            for (let idPeer in this.peers) {
+                this.sendToPeer(idPeer, _message);
             }
         };
         // ----------------------
