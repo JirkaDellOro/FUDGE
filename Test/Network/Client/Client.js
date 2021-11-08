@@ -11,7 +11,7 @@ var ClientTest;
     async function start(_event) {
         document.forms[0].querySelector("button#connect").addEventListener("click", connectToServer);
         document.forms[0].querySelector("button#login").addEventListener("click", loginToServer);
-        document.querySelector("table").addEventListener("click", createStructure);
+        document.forms[0].querySelector("button#mesh").addEventListener("click", createStructure);
         setTable(clients);
     }
     async function connectToServer(_event) {
@@ -20,6 +20,9 @@ var ClientTest;
             client.connectToServer(domServer.value);
             await delay(1000);
             document.forms[0].querySelector("button#login").removeAttribute("disabled");
+            document.forms[0].querySelector("button#mesh").removeAttribute("disabled");
+            document.forms[0].querySelector("button#host").removeAttribute("disabled");
+            document.forms[0].querySelector("input#id").value = client.id;
             client.addEventListener(FudgeClient.EVENT.MESSAGE_RECEIVED, receiveMessage);
         }
         catch (_error) {
@@ -68,34 +71,31 @@ var ClientTest;
                         createRtcConnectionToAllClients();
                 }
                 break;
+            case Messages.MESSAGE_TYPE.PEER_TO_PEER:
+                {
+                    let blink = document.querySelector(`#${_event.detail.idSource}`);
+                    blink.style.backgroundColor = "white";
+                }
+                break;
         }
     }
     function setTable(_clients) {
-        // console.log(_clients);
         let table = document.querySelector("table");
-        let html = `<tr><th><button type="button">Mesh</button></th><th>login</th><th>id</th><th>#</th>`;
-        let count = 0;
-        for (let client of _clients)
-            html += `<th>${count++}</th>`;
-        html += `<th>Server</th></tr>`;
-        count = 0;
+        let html = `<tr><th>&nbsp;</th><th>name</th><th>id</th><th>Comment</th></tr>`;
+        html += `<tr><td><span style="background-color: white;">&nbsp;</span></td><td>Server</td><td>&nbsp;</td><td>&nbsp;</td></tr>`;
         for (let client of _clients) {
-            html += `<tr><td><button type="button" id="${client.id}">Host</button></td><td>${client.name}</td><td>${client.id}</td><td>${count++}</td>`;
-            for (let i = 0; i < _clients.length; i++) {
-                html += `<td><span>R</span></td>`;
-            }
-            html += `<td><span style="background-color: white;">W</span></td></tr>`;
+            html += `<tr><td><span id="${client.id}">&nbsp;</span></td><td>${client.name}</td><td>${client.id}</td><td></td></tr>`;
         }
         table.innerHTML = html;
     }
     function createStructure(_event) {
         let button = _event.target;
         switch (button.textContent) {
-            case "Mesh":
+            case "create mesh":
                 console.log("createMesh");
                 createMesh();
                 break;
-            case "Host":
+            case "become host":
                 console.log("createHost", button.id);
                 break;
         }

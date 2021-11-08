@@ -15,13 +15,17 @@
   <form id="connect">
     <fieldset>
       <legend>Server</legend>
-      <input type="text" name="server" value="ws://localhost:8080"><button type="button"
-        id="connect">Connect</button><br />
-      <input type="text" name="login" value="Client-0"><button type="button" id="login" disabled>Login</button>
+      <input type="text" name="server" value="ws://localhost:8080">
+      <button type="button" id="connect">Connect</button><br />
+      <input type="text" name="login" value="Client-0">
+      <button type="button" id="login" disabled>Login</button><br />
+      <input type="text" id="id" value="" disabled> id <br />
+      <button type="button" id="mesh" disabled>create mesh</button>
+      <button type="button" id="host" disabled>become host</button><br />
     </fieldset>
   </form>
   <fieldset>
-    <legend>Clients</legend>
+    <legend>Connections</legend>
     <table> </table>
   </fieldset>
 </body>

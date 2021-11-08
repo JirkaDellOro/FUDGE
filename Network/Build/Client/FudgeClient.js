@@ -444,7 +444,7 @@ var FudgeClient;
             }
             function dispatchMessage(_messageEvent) {
                 let message = JSON.parse(_messageEvent.data);
-                ƒ.Debug.fudge("Received", _messageEvent.type, message);
+                ƒ.Debug.fudge("Received message from peer ", message.idSource);
                 _client.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, { detail: message }));
             }
         }

@@ -11,7 +11,7 @@ namespace ClientTest {
   async function start(_event: Event): Promise<void> {
     document.forms[0].querySelector("button#connect").addEventListener("click", connectToServer);
     document.forms[0].querySelector("button#login").addEventListener("click", loginToServer);
-    document.querySelector("table").addEventListener("click", createStructure);
+    document.forms[0].querySelector("button#mesh").addEventListener("click", createStructure);
     setTable(clients);
   }
 
@@ -21,6 +21,9 @@ namespace ClientTest {
       client.connectToServer(domServer.value);
       await delay(1000);
       document.forms[0].querySelector("button#login").removeAttribute("disabled");
+      document.forms[0].querySelector("button#mesh").removeAttribute("disabled");
+      document.forms[0].querySelector("button#host").removeAttribute("disabled");
+      (<HTMLInputElement>document.forms[0].querySelector("input#id")).value = client.id;
       client.addEventListener(FudgeClient.EVENT.MESSAGE_RECEIVED, receiveMessage);
     } catch (_error) {
       console.log(_error);
@@ -76,25 +79,23 @@ namespace ClientTest {
             createRtcConnectionToAllClients();
         }
         break;
+      case Messages.MESSAGE_TYPE.PEER_TO_PEER:
+        {
+          let blink: HTMLSpanElement = document.querySelector(`#${_event.detail.idSource}`);
+          blink.style.backgroundColor = "white";
+        }
+        break;
     }
   }
 
   function setTable(_clients: ƒClient[]): void {
-    // console.log(_clients);
     let table: HTMLTableElement = document.querySelector("table");
-    let html: string = `<tr><th><button type="button">Mesh</button></th><th>login</th><th>id</th><th>#</th>`;
-    let count: number = 0;
-    for (let client of _clients)
-      html += `<th>${count++}</th>`;
-    html += `<th>Server</th></tr>`;
+    let html: string = `<tr><th>&nbsp;</th><th>name</th><th>id</th><th>Comment</th></tr>`;
 
-    count = 0;
+    html += `<tr><td><span style="background-color: white;">&nbsp;</span></td><td>Server</td><td>&nbsp;</td><td>&nbsp;</td></tr>`;
+
     for (let client of _clients) {
-      html += `<tr><td><button type="button" id="${client.id}">Host</button></td><td>${client.name}</td><td>${client.id}</td><td>${count++}</td>`;
-      for (let i: number = 0; i < _clients.length; i++) {
-        html += `<td><span>R</span></td>`;
-      }
-      html += `<td><span style="background-color: white;">W</span></td></tr>`;
+      html += `<tr><td><span id="${client.id}">&nbsp;</span></td><td>${client.name}</td><td>${client.id}</td><td></td></tr>`;
     }
 
     table.innerHTML = html;
@@ -103,11 +104,11 @@ namespace ClientTest {
   function createStructure(_event: Event): void {
     let button: HTMLButtonElement = <HTMLButtonElement>_event.target;
     switch (button.textContent) {
-      case "Mesh":
+      case "create mesh":
         console.log("createMesh");
         createMesh();
         break;
-      case "Host":
+      case "become host":
         console.log("createHost", button.id);
         break;
     }
