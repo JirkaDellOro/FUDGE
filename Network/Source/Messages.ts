@@ -18,22 +18,16 @@ namespace Messages {
   export enum SERVER_COMMAND {
     UNDEFINED = "undefined",
     DISCONNECT_CLIENT = "disconnect_client",
-    SPAWN_OBJECT = "spawn_object",
-    ASSIGN_OBJECT_TO_CLIENT = "assign_object_to_client",
-    DESTROY_OBJECT = "destroy_object",
-    KEYS_INPUT = "keys_input",
-    MOVEMENT_VALUE = "movement_value",
-    //
     CREATE_MESH = "createMesh"
   }
 
   export class MessageBase {
-    constructor(public readonly messageType: MESSAGE_TYPE, public readonly originatorId: string) {
+    constructor(public readonly messageType: MESSAGE_TYPE, public readonly idSource: string) {
     }
 
     public static deserialize(_message: string): MessageBase {
       let parsed: MessageBase = JSON.parse(_message);
-      let message: MessageBase = new MessageBase(parsed.messageType, parsed.originatorId);
+      let message: MessageBase = new MessageBase(parsed.messageType, parsed.idSource);
       Object.assign(message, parsed);
       return message;
     }
@@ -50,8 +44,8 @@ namespace Messages {
   }
 
   export class LoginRequest extends MessageBase {
-    constructor(_originatorId: string, public loginUserName: string = "") {
-      super(MESSAGE_TYPE.LOGIN_REQUEST, _originatorId);
+    constructor(_idSource: string, public loginUserName: string = "") {
+      super(MESSAGE_TYPE.LOGIN_REQUEST, _idSource);
     }
   }
 
@@ -62,26 +56,26 @@ namespace Messages {
   }
 
   export class RtcOffer extends MessageBase {
-    constructor(_originatorId: string, public idRemote: string, public offer: RTCSessionDescription | RTCSessionDescriptionInit | null | undefined) {
-      super(MESSAGE_TYPE.RTC_OFFER, _originatorId);
+    constructor(_idSource: string, public idRemote: string, public offer: RTCSessionDescription | RTCSessionDescriptionInit | null | undefined) {
+      super(MESSAGE_TYPE.RTC_OFFER, _idSource);
     }
   }
 
   export class RtcAnswer extends MessageBase {
-    constructor(_originatorId: string, public targetId: string, public answer: RTCSessionDescription) {
-      super(MESSAGE_TYPE.RTC_ANSWER, _originatorId);
+    constructor(_idSource: string, public idTarget: string, public answer: RTCSessionDescription) {
+      super(MESSAGE_TYPE.RTC_ANSWER, _idSource);
     }
   }
 
   export class IceCandidate extends MessageBase {
-    constructor(_originatorId: string, public targetId: string, public candidate: RTCIceCandidate) {
-      super(MESSAGE_TYPE.ICE_CANDIDATE, _originatorId);
+    constructor(_idSource: string, public idTarget: string, public candidate: RTCIceCandidate) {
+      super(MESSAGE_TYPE.ICE_CANDIDATE, _idSource);
     }
   }
 
   export class ToServer extends MessageBase {
-    constructor(_originatorId: string, public messageData: string, public originatorUserName: string) {
-      super(MESSAGE_TYPE.CLIENT_TO_SERVER, _originatorId);
+    constructor(_idSource: string, public messageData: string, public originatorUserName: string) {
+      super(MESSAGE_TYPE.CLIENT_TO_SERVER, _idSource);
     }
   }
 
@@ -92,8 +86,8 @@ namespace Messages {
   }
 
   export class PeerToPeer extends MessageBase {
-    constructor(_originatorId: string, public messageData: string) {
-      super(MESSAGE_TYPE.PEER_TO_PEER, _originatorId);
+    constructor(_idSource: string, public messageData: string) {
+      super(MESSAGE_TYPE.PEER_TO_PEER, _idSource);
     }
   }
 
@@ -104,8 +98,8 @@ namespace Messages {
   }
   
   export class ClientHeartbeat extends MessageBase {
-    constructor(_originatorId: string, public messageData: string) {
-      super(MESSAGE_TYPE.CLIENT_HEARTBEAT, _originatorId);
+    constructor(_idSource: string, public messageData: string) {
+      super(MESSAGE_TYPE.CLIENT_HEARTBEAT, _idSource);
     }
   }
 }

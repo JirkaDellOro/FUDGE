@@ -73,7 +73,7 @@ export class FudgeServer {
 
     switch (message.messageType) {
       case Messages.MESSAGE_TYPE.ID_ASSIGNED:
-        console.log("Id confirmation received for client: " + message.originatorId);
+        console.log("Id confirmation received for client: " + message.idSource);
         break;
 
       case Messages.MESSAGE_TYPE.LOGIN_REQUEST:
@@ -135,7 +135,7 @@ export class FudgeServer {
     const client: Client | undefined = this.clients.find(_client => _client.id == _message.idRemote);
 
     if (client) {
-      const offerMessage: Messages.RtcOffer = new Messages.RtcOffer(_message.originatorId, client.id, _message.offer);
+      const offerMessage: Messages.RtcOffer = new Messages.RtcOffer(_message.idSource, client.id, _message.offer);
       try {
         client.wsServer?.send(offerMessage.serialize());
       } catch (error) {
@@ -145,8 +145,8 @@ export class FudgeServer {
   }
 
   public answerRtcOfferOfClient(_wsConnection: WebSocket, _message: Messages.RtcAnswer): void {
-    console.log("Sending answer to: ", _message.targetId);
-    const client: Client | undefined = this.clients.find(_client => _client.id == _message.targetId);
+    console.log("Sending answer to: ", _message.idTarget);
+    const client: Client | undefined = this.clients.find(_client => _client.id == _message.idTarget);
 
     if (client) {
       // TODO Probable source of error, need to test
@@ -156,10 +156,10 @@ export class FudgeServer {
   }
 
   public sendIceCandidatesToRelevantPeer(_wsConnection: WebSocket, _message: Messages.IceCandidate): void {
-    const client: Client | undefined = this.clients.find(_client => _client.id == _message.targetId);
+    const client: Client | undefined = this.clients.find(_client => _client.id == _message.idTarget);
     console.warn("Send Candidate", client, _message.candidate);
     if (client) {
-      const candidateToSend: Messages.IceCandidate = new Messages.IceCandidate(_message.originatorId, client.id, _message.candidate);
+      const candidateToSend: Messages.IceCandidate = new Messages.IceCandidate(_message.idSource, client.id, _message.candidate);
       client.wsServer?.send(candidateToSend.serialize());
     }
   }

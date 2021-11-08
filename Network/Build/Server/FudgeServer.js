@@ -64,7 +64,7 @@ class FudgeServer {
         console.log("Message received", message);
         switch (message.messageType) {
             case Messages_js_1.Messages.MESSAGE_TYPE.ID_ASSIGNED:
-                console.log("Id confirmation received for client: " + message.originatorId);
+                console.log("Id confirmation received for client: " + message.idSource);
                 break;
             case Messages_js_1.Messages.MESSAGE_TYPE.LOGIN_REQUEST:
                 this.addUserOnValidLoginRequest(_wsConnection, message);
@@ -118,7 +118,7 @@ class FudgeServer {
         console.log("Sending offer to: ", _message.idRemote);
         const client = this.clients.find(_client => _client.id == _message.idRemote);
         if (client) {
-            const offerMessage = new Messages_js_1.Messages.RtcOffer(_message.originatorId, client.id, _message.offer);
+            const offerMessage = new Messages_js_1.Messages.RtcOffer(_message.idSource, client.id, _message.offer);
             try {
                 client.wsServer?.send(offerMessage.serialize());
             }
@@ -131,8 +131,8 @@ class FudgeServer {
         }
     }
     answerRtcOfferOfClient(_wsConnection, _message) {
-        console.log("Sending answer to: ", _message.targetId);
-        const client = this.clients.find(_client => _client.id == _message.targetId);
+        console.log("Sending answer to: ", _message.idTarget);
+        const client = this.clients.find(_client => _client.id == _message.idTarget);
         if (client) {
             // TODO Probable source of error, need to test
             if (client.wsServer != null)
@@ -140,10 +140,10 @@ class FudgeServer {
         }
     }
     sendIceCandidatesToRelevantPeer(_wsConnection, _message) {
-        const client = this.clients.find(_client => _client.id == _message.targetId);
+        const client = this.clients.find(_client => _client.id == _message.idTarget);
         console.warn("Send Candidate", client, _message.candidate);
         if (client) {
-            const candidateToSend = new Messages_js_1.Messages.IceCandidate(_message.originatorId, client.id, _message.candidate);
+            const candidateToSend = new Messages_js_1.Messages.IceCandidate(_message.idSource, client.id, _message.candidate);
             client.wsServer?.send(candidateToSend.serialize());
         }
     }

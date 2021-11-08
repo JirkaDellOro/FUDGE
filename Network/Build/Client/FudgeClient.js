@@ -21,24 +21,18 @@ var Messages;
     (function (SERVER_COMMAND) {
         SERVER_COMMAND["UNDEFINED"] = "undefined";
         SERVER_COMMAND["DISCONNECT_CLIENT"] = "disconnect_client";
-        SERVER_COMMAND["SPAWN_OBJECT"] = "spawn_object";
-        SERVER_COMMAND["ASSIGN_OBJECT_TO_CLIENT"] = "assign_object_to_client";
-        SERVER_COMMAND["DESTROY_OBJECT"] = "destroy_object";
-        SERVER_COMMAND["KEYS_INPUT"] = "keys_input";
-        SERVER_COMMAND["MOVEMENT_VALUE"] = "movement_value";
-        //
         SERVER_COMMAND["CREATE_MESH"] = "createMesh";
     })(SERVER_COMMAND = Messages.SERVER_COMMAND || (Messages.SERVER_COMMAND = {}));
     class MessageBase {
         messageType;
-        originatorId;
-        constructor(messageType, originatorId) {
+        idSource;
+        constructor(messageType, idSource) {
             this.messageType = messageType;
-            this.originatorId = originatorId;
+            this.idSource = idSource;
         }
         static deserialize(_message) {
             let parsed = JSON.parse(_message);
-            let message = new MessageBase(parsed.messageType, parsed.originatorId);
+            let message = new MessageBase(parsed.messageType, parsed.idSource);
             Object.assign(message, parsed);
             return message;
         }
@@ -57,8 +51,8 @@ var Messages;
     Messages.IdAssigned = IdAssigned;
     class LoginRequest extends MessageBase {
         loginUserName;
-        constructor(_originatorId, loginUserName = "") {
-            super(MESSAGE_TYPE.LOGIN_REQUEST, _originatorId);
+        constructor(_idSource, loginUserName = "") {
+            super(MESSAGE_TYPE.LOGIN_REQUEST, _idSource);
             this.loginUserName = loginUserName;
         }
     }
@@ -76,29 +70,29 @@ var Messages;
     class RtcOffer extends MessageBase {
         idRemote;
         offer;
-        constructor(_originatorId, idRemote, offer) {
-            super(MESSAGE_TYPE.RTC_OFFER, _originatorId);
+        constructor(_idSource, idRemote, offer) {
+            super(MESSAGE_TYPE.RTC_OFFER, _idSource);
             this.idRemote = idRemote;
             this.offer = offer;
         }
     }
     Messages.RtcOffer = RtcOffer;
     class RtcAnswer extends MessageBase {
-        targetId;
+        idTarget;
         answer;
-        constructor(_originatorId, targetId, answer) {
-            super(MESSAGE_TYPE.RTC_ANSWER, _originatorId);
-            this.targetId = targetId;
+        constructor(_idSource, idTarget, answer) {
+            super(MESSAGE_TYPE.RTC_ANSWER, _idSource);
+            this.idTarget = idTarget;
             this.answer = answer;
         }
     }
     Messages.RtcAnswer = RtcAnswer;
     class IceCandidate extends MessageBase {
-        targetId;
+        idTarget;
         candidate;
-        constructor(_originatorId, targetId, candidate) {
-            super(MESSAGE_TYPE.ICE_CANDIDATE, _originatorId);
-            this.targetId = targetId;
+        constructor(_idSource, idTarget, candidate) {
+            super(MESSAGE_TYPE.ICE_CANDIDATE, _idSource);
+            this.idTarget = idTarget;
             this.candidate = candidate;
         }
     }
@@ -106,8 +100,8 @@ var Messages;
     class ToServer extends MessageBase {
         messageData;
         originatorUserName;
-        constructor(_originatorId, messageData, originatorUserName) {
-            super(MESSAGE_TYPE.CLIENT_TO_SERVER, _originatorId);
+        constructor(_idSource, messageData, originatorUserName) {
+            super(MESSAGE_TYPE.CLIENT_TO_SERVER, _idSource);
             this.messageData = messageData;
             this.originatorUserName = originatorUserName;
         }
@@ -123,8 +117,8 @@ var Messages;
     Messages.ToClient = ToClient;
     class PeerToPeer extends MessageBase {
         messageData;
-        constructor(_originatorId, messageData) {
-            super(MESSAGE_TYPE.PEER_TO_PEER, _originatorId);
+        constructor(_idSource, messageData) {
+            super(MESSAGE_TYPE.PEER_TO_PEER, _idSource);
             this.messageData = messageData;
         }
     }
@@ -139,8 +133,8 @@ var Messages;
     Messages.ServerHeartbeat = ServerHeartbeat;
     class ClientHeartbeat extends MessageBase {
         messageData;
-        constructor(_originatorId, messageData) {
-            super(MESSAGE_TYPE.CLIENT_HEARTBEAT, _originatorId);
+        constructor(_idSource, messageData) {
+            super(MESSAGE_TYPE.CLIENT_HEARTBEAT, _idSource);
             this.messageData = messageData;
         }
     }
@@ -227,7 +221,7 @@ var FudgeClient;
                     this.assignIdAndSendConfirmation(message);
                     break;
                 case Messages.MESSAGE_TYPE.LOGIN_RESPONSE:
-                    this.loginValidAddUser(message.originatorId, message.loginSuccess, message.originatorUsername);
+                    this.loginValidAddUser(message.idSource, message.loginSuccess, message.originatorUsername);
                     break;
                 case Messages.MESSAGE_TYPE.SERVER_HEARTBEAT:
                     this.dispatchEvent(new CustomEvent(FudgeClient_1.EVENT.MESSAGE_RECEIVED, { detail: message }));
@@ -292,7 +286,7 @@ var FudgeClient;
         };
         receiveNegotiationOfferAndSetRemoteDescription = (_offerMessage) => {
             ƒ.Debug.fudge("Remote: offer received, create connection", _offerMessage);
-            let peer = this.peers[_offerMessage.originatorId] || (this.peers[_offerMessage.originatorId] = new FudgeClient_1.RtcConnection());
+            let peer = this.peers[_offerMessage.idSource] || (this.peers[_offerMessage.idSource] = new FudgeClient_1.RtcConnection());
             let peerConnection = peer.peerConnection;
             peerConnection.addEventListener("datachannel", (_event) => this.receiveDataChannelAndEstablishConnection(_event, peer));
             let offerToSet = _offerMessage.offer;
@@ -302,7 +296,7 @@ var FudgeClient;
             peerConnection.setRemoteDescription(new RTCSessionDescription(offerToSet))
                 .then(async () => {
                 ƒ.Debug.fudge("Remote: set remote descripton, expected 'have-remote-offer', got:  ", peerConnection.signalingState);
-                this.answerNegotiationOffer(_offerMessage.originatorId);
+                this.answerNegotiationOffer(_offerMessage.idSource);
             })
                 .catch((error) => {
                 console.error("Unexpected Error: Setting Remote Description and Creating Answer", error);
@@ -332,8 +326,8 @@ var FudgeClient;
             try {
                 ƒ.Debug.fudge("Local: received answer, create data channel ", _message);
                 let descriptionAnswer = new RTCSessionDescription(_message.answer);
-                this.peers[_message.originatorId].peerConnection.setRemoteDescription(descriptionAnswer);
-                this.peers[_message.originatorId].createDataChannel(this, _message.originatorId);
+                this.peers[_message.idSource].peerConnection.setRemoteDescription(descriptionAnswer);
+                this.peers[_message.idSource].createDataChannel(this, _message.idSource);
             }
             catch (error) {
                 console.error("Unexpected Error: Setting Remote Description from Answer", error);
@@ -355,7 +349,7 @@ var FudgeClient;
             ƒ.Debug.fudge("Remote: try to add candidate to peer connection");
             if (_message.candidate) {
                 try {
-                    await this.peers[_message.originatorId].peerConnection.addIceCandidate(_message.candidate);
+                    await this.peers[_message.idSource].peerConnection.addIceCandidate(_message.candidate);
                 }
                 catch (error) {
                     console.error("Unexpected Error: Adding Ice Candidate", error);

@@ -18,17 +18,12 @@ ICE_CANDIDATE = "rtcCandidate"
 enum SERVER_COMMAND { 
 UNDEFINED = "undefined", 
 DISCONNECT_CLIENT = "disconnect_client", 
-SPAWN_OBJECT = "spawn_object", 
-ASSIGN_OBJECT_TO_CLIENT = "assign_object_to_client", 
-DESTROY_OBJECT = "destroy_object", 
-KEYS_INPUT = "keys_input", 
-MOVEMENT_VALUE = "movement_value", 
 CREATE_MESH = "createMesh" 
 } 
 class MessageBase { 
 readonly messageType: MESSAGE_TYPE; 
-readonly originatorId: string; 
-constructor(messageType: MESSAGE_TYPE, originatorId: string); 
+readonly idSource: string; 
+constructor(messageType: MESSAGE_TYPE, idSource: string); 
 static deserialize(_message: string): MessageBase; 
 serialize(): string; 
 } 
@@ -38,7 +33,7 @@ constructor(assignedId: string);
 } 
 class LoginRequest extends MessageBase { 
 loginUserName: string; 
-constructor(_originatorId: string, loginUserName?: string); 
+constructor(_idSource: string, loginUserName?: string); 
 } 
 class LoginResponse extends MessageBase { 
 loginSuccess: boolean; 
@@ -48,22 +43,22 @@ constructor(loginSuccess: boolean, _assignedId: string, originatorUsername: stri
 class RtcOffer extends MessageBase { 
 idRemote: string; 
 offer: RTCSessionDescription | RTCSessionDescriptionInit | null | undefined; 
-constructor(_originatorId: string, idRemote: string, offer: RTCSessionDescription | RTCSessionDescriptionInit | null | undefined); 
+constructor(_idSource: string, idRemote: string, offer: RTCSessionDescription | RTCSessionDescriptionInit | null | undefined); 
 } 
 class RtcAnswer extends MessageBase { 
-targetId: string; 
+idTarget: string; 
 answer: RTCSessionDescription; 
-constructor(_originatorId: string, targetId: string, answer: RTCSessionDescription); 
+constructor(_idSource: string, idTarget: string, answer: RTCSessionDescription); 
 } 
 class IceCandidate extends MessageBase { 
-targetId: string; 
+idTarget: string; 
 candidate: RTCIceCandidate; 
-constructor(_originatorId: string, targetId: string, candidate: RTCIceCandidate); 
+constructor(_idSource: string, idTarget: string, candidate: RTCIceCandidate); 
 } 
 class ToServer extends MessageBase { 
 messageData: string; 
 originatorUserName: string; 
-constructor(_originatorId: string, messageData: string, originatorUserName: string); 
+constructor(_idSource: string, messageData: string, originatorUserName: string); 
 } 
 class ToClient extends MessageBase { 
 messageData: string; 
@@ -71,7 +66,7 @@ constructor(messageData: string);
 } 
 class PeerToPeer extends MessageBase { 
 messageData: string; 
-constructor(_originatorId: string, messageData: string); 
+constructor(_idSource: string, messageData: string); 
 } 
 class ServerHeartbeat extends MessageBase { 
 messageData: string; 
@@ -79,6 +74,6 @@ constructor(messageData: string);
 } 
 class ClientHeartbeat extends MessageBase { 
 messageData: string; 
-constructor(_originatorId: string, messageData: string); 
+constructor(_idSource: string, messageData: string); 
 } 
 } 

@@ -90,7 +90,7 @@ namespace FudgeClient {
           break;
 
         case Messages.MESSAGE_TYPE.LOGIN_RESPONSE:
-          this.loginValidAddUser(message.originatorId, (<Messages.LoginResponse>message).loginSuccess, (<Messages.LoginResponse>message).originatorUsername);
+          this.loginValidAddUser(message.idSource, (<Messages.LoginResponse>message).loginSuccess, (<Messages.LoginResponse>message).originatorUsername);
           break;
 
         case Messages.MESSAGE_TYPE.SERVER_HEARTBEAT:
@@ -168,7 +168,7 @@ namespace FudgeClient {
 
     private receiveNegotiationOfferAndSetRemoteDescription = (_offerMessage: Messages.RtcOffer): void => {
       ƒ.Debug.fudge("Remote: offer received, create connection", _offerMessage);
-      let peer: RtcConnection = this.peers[_offerMessage.originatorId] || (this.peers[_offerMessage.originatorId] = new RtcConnection());
+      let peer: RtcConnection = this.peers[_offerMessage.idSource] || (this.peers[_offerMessage.idSource] = new RtcConnection());
       let peerConnection: RTCPeerConnection = peer.peerConnection;
       peerConnection.addEventListener(
         "datachannel", (_event: RTCDataChannelEvent) => this.receiveDataChannelAndEstablishConnection(_event, peer)
@@ -182,7 +182,7 @@ namespace FudgeClient {
       peerConnection.setRemoteDescription(new RTCSessionDescription(offerToSet))
         .then(async () => {
           ƒ.Debug.fudge("Remote: set remote descripton, expected 'have-remote-offer', got:  ", peerConnection.signalingState);
-          this.answerNegotiationOffer(_offerMessage.originatorId);
+          this.answerNegotiationOffer(_offerMessage.idSource);
         })
         .catch((error) => {
           console.error("Unexpected Error: Setting Remote Description and Creating Answer", error);
@@ -219,8 +219,8 @@ namespace FudgeClient {
       try {
         ƒ.Debug.fudge("Local: received answer, create data channel ", _message);
         let descriptionAnswer: RTCSessionDescription = new RTCSessionDescription(_message.answer);
-        this.peers[_message.originatorId].peerConnection.setRemoteDescription(descriptionAnswer);
-        this.peers[_message.originatorId].createDataChannel(this, _message.originatorId);
+        this.peers[_message.idSource].peerConnection.setRemoteDescription(descriptionAnswer);
+        this.peers[_message.idSource].createDataChannel(this, _message.idSource);
       } catch (error) {
         console.error("Unexpected Error: Setting Remote Description from Answer", error);
       }
@@ -242,7 +242,7 @@ namespace FudgeClient {
       ƒ.Debug.fudge("Remote: try to add candidate to peer connection");
       if (_message.candidate) {
         try {
-          await this.peers[_message.originatorId].peerConnection.addIceCandidate(_message.candidate);
+          await this.peers[_message.idSource].peerConnection.addIceCandidate(_message.candidate);
         } catch (error) {
           console.error("Unexpected Error: Adding Ice Candidate", error);
         }
