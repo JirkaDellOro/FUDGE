@@ -18,7 +18,9 @@ namespace Messages {
   export enum SERVER_COMMAND {
     UNDEFINED = "undefined",
     DISCONNECT_CLIENT = "disconnect_client",
-    CREATE_MESH = "createMesh"
+    CREATE_MESH = "createMesh",
+    CONNECT_HOST = "connectHost",
+    CONNECT_PEERS = "connectPeers"
   }
 
   export class MessageBase {

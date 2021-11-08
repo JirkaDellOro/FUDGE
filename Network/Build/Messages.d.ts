@@ -18,7 +18,9 @@ ICE_CANDIDATE = "rtcCandidate"
 enum SERVER_COMMAND { 
 UNDEFINED = "undefined", 
 DISCONNECT_CLIENT = "disconnect_client", 
-CREATE_MESH = "createMesh" 
+CREATE_MESH = "createMesh", 
+CONNECT_HOST = "connectHost", 
+CONNECT_PEERS = "connectPeers" 
 } 
 class MessageBase { 
 readonly messageType: MESSAGE_TYPE; 

@@ -22,6 +22,8 @@ var Messages;
         SERVER_COMMAND["UNDEFINED"] = "undefined";
         SERVER_COMMAND["DISCONNECT_CLIENT"] = "disconnect_client";
         SERVER_COMMAND["CREATE_MESH"] = "createMesh";
+        SERVER_COMMAND["CONNECT_HOST"] = "connectHost";
+        SERVER_COMMAND["CONNECT_PEERS"] = "connectPeers";
     })(SERVER_COMMAND = Messages.SERVER_COMMAND || (Messages.SERVER_COMMAND = {}));
     class MessageBase {
         messageType;

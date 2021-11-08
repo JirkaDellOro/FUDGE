@@ -63,7 +63,7 @@ export class FudgeServer {
   }
 
   // TODO Check if event.type can be used for identification instead => It cannot
-  public handleMessage(_message: string, _wsConnection: WebSocket): void {
+  public async handleMessage(_message: string, _wsConnection: WebSocket): Promise<void> {
     let message: Messages.MessageBase = Messages.MessageBase.deserialize(_message);
     if (!message || !message.messageType) {
       console.error("Unhandled Exception: Invalid Message Object received. Does it implement MessageBase?");
@@ -101,12 +101,23 @@ export class FudgeServer {
     }
   }
 
-  public receive(_message: Messages.ToServer): void {
+  public async receive(_message: Messages.ToServer): Promise<void> {
     switch (_message.messageData) {
-      case Messages.SERVER_COMMAND.CREATE_MESH:
-        let message: Messages.ToClient = new Messages.ToClient(JSON.stringify({ "connectPeers": Reflect.ownKeys(this.clients) }));
+      case Messages.SERVER_COMMAND.CREATE_MESH: {
+        let ids: string[] = <string[]>Reflect.ownKeys(this.clients);
+        while (ids.length > 1) {
+          let id: string = <string>ids.pop();
+          let message: Messages.ToClient = new Messages.ToClient(JSON.stringify({ [Messages.SERVER_COMMAND.CONNECT_PEERS]: ids }));
+          await new Promise((resolve) => { setTimeout(resolve, 200); });
+          this.clients[id].wsServer?.send(message.serialize());
+        }
+        break;
+      }
+      case Messages.SERVER_COMMAND.CONNECT_HOST: {
+        let message: Messages.ToClient = new Messages.ToClient(JSON.stringify({ [Messages.SERVER_COMMAND.CONNECT_PEERS]: Reflect.ownKeys(this.clients) }));
         this.clients[_message.idSource].wsServer?.send(message.serialize());
         break;
+      }
       default:
         this.broadcastMessageToAllConnectedClients(<Messages.ToClient>_message);
     }

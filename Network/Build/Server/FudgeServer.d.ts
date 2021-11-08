@@ -20,8 +20,8 @@ export declare class FudgeServer {
     startUp: (_port?: number) => void;
     closeDown: () => void;
     addEventListeners: () => void;
-    handleMessage(_message: string, _wsConnection: WebSocket): void;
-    receive(_message: Messages.ToServer): void;
+    handleMessage(_message: string, _wsConnection: WebSocket): Promise<void>;
+    receive(_message: Messages.ToServer): Promise<void>;
     addUserOnValidLoginRequest(_wsConnection: WebSocket, _message: Messages.LoginRequest): void;
     broadcastMessageToAllConnectedClients(_message: Messages.ToClient): void;
     sendRtcOfferToRequestedClient(_wsConnection: WebSocket, _message: Messages.RtcOffer): void;

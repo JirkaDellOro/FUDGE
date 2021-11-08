@@ -12,6 +12,7 @@ var ClientTest;
         document.forms[0].querySelector("button#connect").addEventListener("click", connectToServer);
         document.forms[0].querySelector("button#login").addEventListener("click", loginToServer);
         document.forms[0].querySelector("button#mesh").addEventListener("click", createStructure);
+        document.forms[0].querySelector("button#host").addEventListener("click", createStructure);
         setTable(clients);
     }
     async function connectToServer(_event) {
@@ -103,16 +104,13 @@ var ClientTest;
         let button = _event.target;
         switch (button.textContent) {
             case "create mesh":
-                console.log("createMesh");
-                createMesh();
+                client.sendToServer(new Messages.ToServer(client.id, Messages.SERVER_COMMAND.CREATE_MESH, client.name));
                 break;
             case "become host":
                 console.log("createHost", button.id);
+                client.sendToServer(new Messages.ToServer(client.id, Messages.SERVER_COMMAND.CONNECT_HOST, client.name));
                 break;
         }
-    }
-    function createMesh() {
-        client.sendToServer(new Messages.ToServer(client.id, Messages.SERVER_COMMAND.CREATE_MESH, client.name));
     }
     function createRtcConnectionToClients(_ids) {
         for (let id in clients) {
