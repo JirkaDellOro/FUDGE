@@ -1,19 +1,13 @@
 import WebSocket from "ws";
 import { Messages } from "../../Build/Messages.js";
-declare enum CONNECTION {
-    TCP = 0,
-    RTC = 1
-}
 export interface Client {
     id: string;
     name?: string;
-    wsServer?: WebSocket;
-    peers: {
-        [id: string]: CONNECTION[];
-    };
+    socket?: WebSocket;
+    peers: string[];
 }
 export declare class FudgeServer {
-    wsServer: WebSocket.Server;
+    socket: WebSocket.Server;
     clients: {
         [id: string]: Client;
     };
@@ -30,4 +24,3 @@ export declare class FudgeServer {
     createID: () => string;
     private heartbeat;
 }
-export {};

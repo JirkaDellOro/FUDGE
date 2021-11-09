@@ -22,6 +22,36 @@ CREATE_MESH = "createMesh",
 CONNECT_HOST = "connectHost", 
 CONNECT_PEERS = "connectPeers" 
 } 
+enum NET_COMMAND { 
+UNDEFINED = "undefined", 
+ERROR = "error", 
+ASSIGN_ID = "assignId", 
+LOGIN_REQUEST = "loginRequest", 
+LOGIN_RESPONSE = "loginResponse", 
+SERVER_HEARTBEAT = "serverHeartbeat", 
+CLIENT_HEARTBEAT = "clientHeartbeat", 
+RTC_OFFER = "rtcOffer", 
+RTC_ANSWER = "rtcAnswer", 
+ICE_CANDIDATE = "rtcCandidate" 
+} 
+enum NET_ROUTE { 
+SERVER = "toServer", 
+CLIENT = "toClient", 
+HOST = "toHost", 
+ALL = "toAll", 
+VIA_SERVER_CLIENT = "viaServerToClient", 
+VIA_SERVER_HOST = "viaServerToHost", 
+VIA_SERVER_ALL = "viaServerToAll" 
+} 
+interface NetMessage { 
+route: NET_ROUTE; 
+command: NET_COMMAND; 
+idSource: string; 
+idTarget: string; 
+timeServer: number; 
+timeSender: number; 
+data: Object; 
+} 
 class MessageBase { 
 readonly messageType: MESSAGE_TYPE; 
 readonly idSource: string; 

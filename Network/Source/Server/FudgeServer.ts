@@ -3,53 +3,50 @@ import { Messages } from "../../Build/Messages.js";
 
 console.log("Messages", Messages);
 
-enum CONNECTION {
-  TCP, RTC
-}
-
 export interface Client {
   id: string;
   name?: string;
-  wsServer?: WebSocket;
-  peers: { [id: string]: CONNECTION[] };
+  socket?: WebSocket;
+  peers: string[];
 }
 
 export class FudgeServer {
-  public wsServer!: WebSocket.Server;
+  public socket!: WebSocket.Server;
   public clients: { [id: string]: Client } = {};
 
   public startUp = (_port: number = 8080) => {
     console.log(_port);
-    this.wsServer = new WebSocket.Server({ port: _port });
+    this.socket = new WebSocket.Server({ port: _port });
     this.addEventListeners();
     setInterval(this.heartbeat, 1000);
   }
 
   public closeDown = () => {
-    this.wsServer.close();
+    this.socket.close();
   }
 
   public addEventListeners = (): void => {
-    this.wsServer.on("connection", (_wsConnection: WebSocket) => {
+    this.socket.on("connection", (_socket: WebSocket) => {
       console.log("User connected to FudgeServer");
 
       try {
         const id: string = this.createID();
-        _wsConnection.send(new Messages.IdAssigned(id).serialize());
-        const client: Client = { wsServer: _wsConnection, id: id, peers: {} };
+        const client: Client = { socket: _socket, id: id, peers: [] };
         this.clients[id] = client;
+        client.socket?.send(new Messages.IdAssigned(id).serialize());
+        // let netMessage: Messages.NetMessage = {};
       } catch (error) {
         console.error("Unhandled Exception SERVER: Sending ID to ClientDataType", error);
       }
 
-      _wsConnection.on("message", (_message: string) => {
-        this.handleMessage(_message, _wsConnection);
+      _socket.on("message", (_message: string) => {
+        this.handleMessage(_message, _socket);
       });
 
-      _wsConnection.addEventListener("close", () => {
+      _socket.addEventListener("close", () => {
         console.error("Error at connection");
         for (let id in this.clients) {
-          if (this.clients[id].wsServer === _wsConnection) {
+          if (this.clients[id].socket === _socket) {
             console.log("Client connection found, deleting");
             delete this.clients[id];
             console.log(this.clients);
@@ -109,13 +106,13 @@ export class FudgeServer {
           let id: string = <string>ids.pop();
           let message: Messages.ToClient = new Messages.ToClient(JSON.stringify({ [Messages.SERVER_COMMAND.CONNECT_PEERS]: ids }));
           await new Promise((resolve) => { setTimeout(resolve, 200); });
-          this.clients[id].wsServer?.send(message.serialize());
+          this.clients[id].socket?.send(message.serialize());
         }
         break;
       }
       case Messages.SERVER_COMMAND.CONNECT_HOST: {
         let message: Messages.ToClient = new Messages.ToClient(JSON.stringify({ [Messages.SERVER_COMMAND.CONNECT_PEERS]: Reflect.ownKeys(this.clients) }));
-        this.clients[_message.idSource].wsServer?.send(message.serialize());
+        this.clients[_message.idSource].socket?.send(message.serialize());
         break;
       }
       default:
@@ -134,7 +131,7 @@ export class FudgeServer {
     try {
       for (let id in this.clients) {
         let client: Client = this.clients[id];
-        if (client.wsServer == _wsConnection) {
+        if (client.socket == _wsConnection) {
           client.name = _message.loginUserName;
           _wsConnection.send(new Messages.LoginResponse(true, client.id, client.name).serialize());
           return;
@@ -148,7 +145,7 @@ export class FudgeServer {
   public broadcastMessageToAllConnectedClients(_message: Messages.ToClient): void {
     console.info("Broadcast", _message);
     // TODO: appearently, websocketServer keeps its own list of clients. Examine if it makes sense to double this information in this.clients
-    let clientArray: WebSocket[] = Array.from(this.wsServer.clients);
+    let clientArray: WebSocket[] = Array.from(this.socket.clients);
     let message: string = _message.serialize();
     clientArray.forEach(_client => {
       _client.send(message);
@@ -162,7 +159,7 @@ export class FudgeServer {
     if (client) {
       const offerMessage: Messages.RtcOffer = new Messages.RtcOffer(_message.idSource, client.id, _message.offer);
       try {
-        client.wsServer?.send(offerMessage.serialize());
+        client.socket?.send(offerMessage.serialize());
       } catch (error) {
         console.error("Unhandled Exception: Unable to relay Offer to Client", error);
       }
@@ -175,8 +172,8 @@ export class FudgeServer {
 
     if (client) {
       // TODO Probable source of error, need to test
-      if (client.wsServer != null)
-        client.wsServer.send(_message.serialize());
+      if (client.socket != null)
+        client.socket.send(_message.serialize());
     }
   }
 
@@ -186,7 +183,7 @@ export class FudgeServer {
     console.warn("Send Candidate", client, _message.candidate);
     if (client) {
       const candidateToSend: Messages.IceCandidate = new Messages.IceCandidate(_message.idSource, client.id, _message.candidate);
-      client.wsServer?.send(candidateToSend.serialize());
+      client.socket?.send(candidateToSend.serialize());
     }
   }
 

@@ -25,6 +25,29 @@ var Messages;
         SERVER_COMMAND["CONNECT_HOST"] = "connectHost";
         SERVER_COMMAND["CONNECT_PEERS"] = "connectPeers";
     })(SERVER_COMMAND = Messages.SERVER_COMMAND || (Messages.SERVER_COMMAND = {}));
+    let NET_COMMAND;
+    (function (NET_COMMAND) {
+        NET_COMMAND["UNDEFINED"] = "undefined";
+        NET_COMMAND["ERROR"] = "error";
+        NET_COMMAND["ASSIGN_ID"] = "assignId";
+        NET_COMMAND["LOGIN_REQUEST"] = "loginRequest";
+        NET_COMMAND["LOGIN_RESPONSE"] = "loginResponse";
+        NET_COMMAND["SERVER_HEARTBEAT"] = "serverHeartbeat";
+        NET_COMMAND["CLIENT_HEARTBEAT"] = "clientHeartbeat";
+        NET_COMMAND["RTC_OFFER"] = "rtcOffer";
+        NET_COMMAND["RTC_ANSWER"] = "rtcAnswer";
+        NET_COMMAND["ICE_CANDIDATE"] = "rtcCandidate";
+    })(NET_COMMAND = Messages.NET_COMMAND || (Messages.NET_COMMAND = {}));
+    let NET_ROUTE;
+    (function (NET_ROUTE) {
+        NET_ROUTE["SERVER"] = "toServer";
+        NET_ROUTE["CLIENT"] = "toClient";
+        NET_ROUTE["HOST"] = "toHost";
+        NET_ROUTE["ALL"] = "toAll";
+        NET_ROUTE["VIA_SERVER_CLIENT"] = "viaServerToClient";
+        NET_ROUTE["VIA_SERVER_HOST"] = "viaServerToHost";
+        NET_ROUTE["VIA_SERVER_ALL"] = "viaServerToAll";
+    })(NET_ROUTE = Messages.NET_ROUTE || (Messages.NET_ROUTE = {}));
     class MessageBase {
         messageType;
         idSource;
