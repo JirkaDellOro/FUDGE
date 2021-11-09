@@ -19,6 +19,12 @@ class FudgeServer {
     closeDown = () => {
         this.socket.close();
     };
+    dispatch(_message) {
+        _message.timeServer = Date.now();
+        let message = JSON.stringify(_message);
+        if (_message.idTarget)
+            this.clients[_message.idTarget].socket?.send(message);
+    }
     addEventListeners = () => {
         this.socket.on("connection", (_socket) => {
             console.log("User connected to FudgeServer");
@@ -27,10 +33,11 @@ class FudgeServer {
                 const client = { socket: _socket, id: id, peers: [] };
                 this.clients[id] = client;
                 client.socket?.send(new Messages_js_1.Messages.IdAssigned(id).serialize());
-                // let netMessage: Messages.NetMessage = {};
+                let netMessage = { idTarget: id, command: Messages_js_1.Messages.NET_COMMAND.ASSIGN_ID, route: Messages_js_1.Messages.NET_ROUTE.CLIENT };
+                this.dispatch(netMessage);
             }
             catch (error) {
-                console.error("Unhandled Exception SERVER: Sending ID to ClientDataType", error);
+                console.error("Unhandled Exception", error);
             }
             _socket.on("message", (_message) => {
                 this.handleMessage(_message, _socket);

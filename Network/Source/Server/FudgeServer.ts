@@ -25,7 +25,14 @@ export class FudgeServer {
     this.socket.close();
   }
 
-  public addEventListeners = (): void => {
+  public dispatch(_message: Messages.NetMessage): void {
+    _message.timeServer = Date.now();
+    let message: string = JSON.stringify(_message);
+    if (_message.idTarget)
+      this.clients[_message.idTarget].socket?.send(message);
+  }
+
+  private addEventListeners = (): void => {
     this.socket.on("connection", (_socket: WebSocket) => {
       console.log("User connected to FudgeServer");
 
@@ -34,9 +41,10 @@ export class FudgeServer {
         const client: Client = { socket: _socket, id: id, peers: [] };
         this.clients[id] = client;
         client.socket?.send(new Messages.IdAssigned(id).serialize());
-        // let netMessage: Messages.NetMessage = {};
+        let netMessage: Messages.NetMessage = { idTarget: id, command: Messages.NET_COMMAND.ASSIGN_ID, route: Messages.NET_ROUTE.CLIENT };
+        this.dispatch(netMessage);
       } catch (error) {
-        console.error("Unhandled Exception SERVER: Sending ID to ClientDataType", error);
+        console.error("Unhandled Exception", error);
       }
 
       _socket.on("message", (_message: string) => {
@@ -60,7 +68,7 @@ export class FudgeServer {
   }
 
   // TODO Check if event.type can be used for identification instead => It cannot
-  public async handleMessage(_message: string, _wsConnection: WebSocket): Promise<void> {
+  private async handleMessage(_message: string, _wsConnection: WebSocket): Promise<void> {
     let message: Messages.MessageBase = Messages.MessageBase.deserialize(_message);
     if (!message || !message.messageType) {
       console.error("Unhandled Exception: Invalid Message Object received. Does it implement MessageBase?");
@@ -98,7 +106,7 @@ export class FudgeServer {
     }
   }
 
-  public async receive(_message: Messages.ToServer): Promise<void> {
+  private async receive(_message: Messages.ToServer): Promise<void> {
     switch (_message.messageData) {
       case Messages.SERVER_COMMAND.CREATE_MESH: {
         let ids: string[] = <string[]>Reflect.ownKeys(this.clients);
@@ -120,7 +128,7 @@ export class FudgeServer {
     }
   }
 
-  public addUserOnValidLoginRequest(_wsConnection: WebSocket, _message: Messages.LoginRequest): void {
+  private addUserOnValidLoginRequest(_wsConnection: WebSocket, _message: Messages.LoginRequest): void {
     for (let id in this.clients) {
       if (this.clients[id].name == _message.loginUserName) {
         _wsConnection.send(new Messages.LoginResponse(false, "", "").serialize());
@@ -142,7 +150,7 @@ export class FudgeServer {
     }
   }
 
-  public broadcastMessageToAllConnectedClients(_message: Messages.ToClient): void {
+  private broadcastMessageToAllConnectedClients(_message: Messages.ToClient): void {
     console.info("Broadcast", _message);
     // TODO: appearently, websocketServer keeps its own list of clients. Examine if it makes sense to double this information in this.clients
     let clientArray: WebSocket[] = Array.from(this.socket.clients);
@@ -152,7 +160,7 @@ export class FudgeServer {
     });
   }
 
-  public sendRtcOfferToRequestedClient(_wsConnection: WebSocket, _message: Messages.RtcOffer): void {
+  private sendRtcOfferToRequestedClient(_wsConnection: WebSocket, _message: Messages.RtcOffer): void {
     console.log("Sending offer to: ", _message.idRemote);
     const client: Client | undefined = this.clients[_message.idRemote];
 
@@ -166,7 +174,7 @@ export class FudgeServer {
     } else { console.error("User to connect to doesn't exist under that Name"); }
   }
 
-  public answerRtcOfferOfClient(_wsConnection: WebSocket, _message: Messages.RtcAnswer): void {
+  private answerRtcOfferOfClient(_wsConnection: WebSocket, _message: Messages.RtcAnswer): void {
     console.log("Sending answer to: ", _message.idTarget);
     const client: Client | undefined = this.clients[_message.idTarget];
 
@@ -177,7 +185,7 @@ export class FudgeServer {
     }
   }
 
-  public sendIceCandidatesToRelevantPeer(_wsConnection: WebSocket, _message: Messages.IceCandidate): void {
+  private sendIceCandidatesToRelevantPeer(_wsConnection: WebSocket, _message: Messages.IceCandidate): void {
     const client: Client | undefined = this.clients[_message.idTarget];
 
     console.warn("Send Candidate", client, _message.candidate);
@@ -187,7 +195,7 @@ export class FudgeServer {
     }
   }
 
-  public createID = (): string => {
+  private createID = (): string => {
     // Math.random should be random enough because of its seed
     // convert to base 36 and pick the first few digits after comma
     return "_" + Math.random().toString(36).substr(2, 7);

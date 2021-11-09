@@ -44,13 +44,15 @@ VIA_SERVER_HOST = "viaServerToHost",
 VIA_SERVER_ALL = "viaServerToAll" 
 } 
 interface NetMessage { 
+/** the route the message is supposed to take */ 
 route: NET_ROUTE; 
+/** the command the message is supposed to trigger */ 
 command: NET_COMMAND; 
-idSource: string; 
-idTarget: string; 
-timeServer: number; 
-timeSender: number; 
-data: Object; 
+idSource?: string; /** the id of the client sending the message, undefined for server. Automatically inserted by send-method */ 
+idTarget?: string; /** the id of the intended recipient of the message, undefined for messages to the server or to all */ 
+timeServer?: number; /** the timestamp of the server sending or passing this message. Automatically set by send- or pass-method */ 
+timeSender?: number; /** the timestamp of the sender. Automatically set by send-method */ 
+content?: Object; /** the actual content of the message as a simple javascript object like a FUDGE-Mutator */ 
 } 
 class MessageBase { 
 readonly messageType: MESSAGE_TYPE; 

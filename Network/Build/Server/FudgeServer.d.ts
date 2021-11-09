@@ -13,14 +13,15 @@ export declare class FudgeServer {
     };
     startUp: (_port?: number) => void;
     closeDown: () => void;
-    addEventListeners: () => void;
-    handleMessage(_message: string, _wsConnection: WebSocket): Promise<void>;
-    receive(_message: Messages.ToServer): Promise<void>;
-    addUserOnValidLoginRequest(_wsConnection: WebSocket, _message: Messages.LoginRequest): void;
-    broadcastMessageToAllConnectedClients(_message: Messages.ToClient): void;
-    sendRtcOfferToRequestedClient(_wsConnection: WebSocket, _message: Messages.RtcOffer): void;
-    answerRtcOfferOfClient(_wsConnection: WebSocket, _message: Messages.RtcAnswer): void;
-    sendIceCandidatesToRelevantPeer(_wsConnection: WebSocket, _message: Messages.IceCandidate): void;
-    createID: () => string;
+    dispatch(_message: Messages.NetMessage): void;
+    private addEventListeners;
+    private handleMessage;
+    private receive;
+    private addUserOnValidLoginRequest;
+    private broadcastMessageToAllConnectedClients;
+    private sendRtcOfferToRequestedClient;
+    private answerRtcOfferOfClient;
+    private sendIceCandidatesToRelevantPeer;
+    private createID;
     private heartbeat;
 }

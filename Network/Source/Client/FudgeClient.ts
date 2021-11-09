@@ -6,8 +6,8 @@ namespace FudgeClient {
   export class FudgeClient extends EventTarget {
     public id: string;
     public name: string;
-    public wsServerUrl: string | undefined = undefined;
-    public wsServer!: WebSocket;
+    public urlServer: string | undefined = undefined;
+    public socket!: WebSocket;
     public peers: { [id: string]: RtcConnection } = {};
 
     constructor() {
@@ -17,8 +17,8 @@ namespace FudgeClient {
     }
 
     public connectToServer = (_uri: string = "ws://localhost:8080") => {
-      this.wsServerUrl = _uri;
-      this.wsServer = new WebSocket(_uri);
+      this.urlServer = _uri;
+      this.socket = new WebSocket(_uri);
       this.addWebSocketEventListeners();
     }
 
@@ -33,8 +33,8 @@ namespace FudgeClient {
 
     public sendToServer = (_message: Messages.MessageBase): void => {
       let stringifiedMessage: string = _message.serialize();
-      if (this.wsServer.readyState == 1) {
-        this.wsServer.send(stringifiedMessage);
+      if (this.socket.readyState == 1) {
+        this.socket.send(stringifiedMessage);
       }
       else {
         ƒ.Debug.fudge("Websocket Connection closed unexpectedly");
@@ -70,14 +70,14 @@ namespace FudgeClient {
 
     private addWebSocketEventListeners = (): void => {
       try {
-        this.wsServer.addEventListener(EVENT.CONNECTION_OPENED, (_connOpen: Event) => {
+        this.socket.addEventListener(EVENT.CONNECTION_OPENED, (_connOpen: Event) => {
           ƒ.Debug.fudge("Connected to the signaling server", _connOpen);
         });
 
         // this.wsServer.addEventListener("error", (_err: Event) => {
         // });
 
-        this.wsServer.addEventListener(EVENT.MESSAGE_RECEIVED, (_receivedMessage: MessageEvent) => {
+        this.socket.addEventListener(EVENT.MESSAGE_RECEIVED, (_receivedMessage: MessageEvent) => {
           this.parseMessageAndHandleMessageType(_receivedMessage);
         });
       } catch (error) {
@@ -87,7 +87,7 @@ namespace FudgeClient {
 
     private parseMessageAndHandleMessageType = (_receivedMessage: MessageEvent) => {
       let message: Messages.MessageBase = Messages.MessageBase.deserialize(_receivedMessage.data);
-
+      // console.log(_receivedMessage);
       switch (message.messageType) {
         case Messages.MESSAGE_TYPE.ID_ASSIGNED:
           ƒ.Debug.fudge("ID received", (<Messages.IdAssigned>message).assignedId);
@@ -120,6 +120,10 @@ namespace FudgeClient {
         case Messages.MESSAGE_TYPE.ICE_CANDIDATE:
           // ƒ.Debug.fudge("Received candidate, current signaling state: ", this.connection.signalingState);
           this.addReceivedCandidateToPeerConnection(<Messages.IceCandidate>message);
+          break;
+        default:
+          console.log("Dispatching message of unknown type", _receivedMessage);
+          this.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, _receivedMessage));
           break;
       }
     }

@@ -175,8 +175,8 @@ var FudgeClient;
     class FudgeClient extends EventTarget {
         id;
         name;
-        wsServerUrl = undefined;
-        wsServer;
+        urlServer = undefined;
+        socket;
         peers = {};
         constructor() {
             super();
@@ -184,8 +184,8 @@ var FudgeClient;
             this.id = "undefined";
         }
         connectToServer = (_uri = "ws://localhost:8080") => {
-            this.wsServerUrl = _uri;
-            this.wsServer = new WebSocket(_uri);
+            this.urlServer = _uri;
+            this.socket = new WebSocket(_uri);
             this.addWebSocketEventListeners();
         };
         loginToServer = (_requestingUsername) => {
@@ -199,8 +199,8 @@ var FudgeClient;
         };
         sendToServer = (_message) => {
             let stringifiedMessage = _message.serialize();
-            if (this.wsServer.readyState == 1) {
-                this.wsServer.send(stringifiedMessage);
+            if (this.socket.readyState == 1) {
+                this.socket.send(stringifiedMessage);
             }
             else {
                 ƒ.Debug.fudge("Websocket Connection closed unexpectedly");
@@ -230,12 +230,12 @@ var FudgeClient;
         // ----------------------
         addWebSocketEventListeners = () => {
             try {
-                this.wsServer.addEventListener(FudgeClient_1.EVENT.CONNECTION_OPENED, (_connOpen) => {
+                this.socket.addEventListener(FudgeClient_1.EVENT.CONNECTION_OPENED, (_connOpen) => {
                     ƒ.Debug.fudge("Connected to the signaling server", _connOpen);
                 });
                 // this.wsServer.addEventListener("error", (_err: Event) => {
                 // });
-                this.wsServer.addEventListener(FudgeClient_1.EVENT.MESSAGE_RECEIVED, (_receivedMessage) => {
+                this.socket.addEventListener(FudgeClient_1.EVENT.MESSAGE_RECEIVED, (_receivedMessage) => {
                     this.parseMessageAndHandleMessageType(_receivedMessage);
                 });
             }
@@ -245,6 +245,7 @@ var FudgeClient;
         };
         parseMessageAndHandleMessageType = (_receivedMessage) => {
             let message = Messages.MessageBase.deserialize(_receivedMessage.data);
+            // console.log(_receivedMessage);
             switch (message.messageType) {
                 case Messages.MESSAGE_TYPE.ID_ASSIGNED:
                     ƒ.Debug.fudge("ID received", message.assignedId);
@@ -271,6 +272,10 @@ var FudgeClient;
                 case Messages.MESSAGE_TYPE.ICE_CANDIDATE:
                     // ƒ.Debug.fudge("Received candidate, current signaling state: ", this.connection.signalingState);
                     this.addReceivedCandidateToPeerConnection(message);
+                    break;
+                default:
+                    console.log("Dispatching message of unknown type", _receivedMessage);
+                    this.dispatchEvent(new CustomEvent(FudgeClient_1.EVENT.MESSAGE_RECEIVED, _receivedMessage));
                     break;
             }
         };
