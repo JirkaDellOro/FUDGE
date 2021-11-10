@@ -322,7 +322,7 @@ var Fudge;
         };
         async load(htmlContent) {
             const parser = new DOMParser();
-            this.#document = parser.parseFromString(htmlContent, "application/xhtml+xml");
+            this.#document = parser.parseFromString(htmlContent, "text/html");
             const head = this.#document.querySelector("head");
             //TODO: should old scripts be removed from memory first? How?
             const scripts = head.querySelectorAll("script");
