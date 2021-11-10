@@ -51,20 +51,25 @@ var ClientTest;
         }
     }
     async function receiveMessage(_event) {
+        if (_event instanceof MessageEvent) {
+            let message = JSON.parse(_event.data);
+            console.table(message);
+            switch (message.command) {
+                case Messages.NET_COMMAND.SERVER_HEARTBEAT:
+                    {
+                        clients = message.content;
+                        if (client.name == "")
+                            proposeName();
+                        setTable(clients);
+                        for (let id in client.peers)
+                            client.sendToPeer(id, new Messages.PeerToPeer(client.id, "Message from " + client.id + "|" + client.name));
+                    }
+                    break;
+            }
+            return;
+        }
         // console.log("received", _event);
         switch (_event.detail.messageType) {
-            case Messages.MESSAGE_TYPE.SERVER_HEARTBEAT:
-                {
-                    let message = _event.detail;
-                    // carefull, parsing yields simple objects with matching structure, not real clients....
-                    clients = JSON.parse(message.messageData);
-                    if (client.name == "")
-                        proposeName();
-                    setTable(clients);
-                    for (let id in client.peers)
-                        client.sendToPeer(id, new Messages.PeerToPeer(client.id, "Message from " + client.id + "|" + client.name));
-                }
-                break;
             case Messages.MESSAGE_TYPE.CLIENT_TO_SERVER:
                 {
                     console.log("Message client to server received", _event.detail);
@@ -88,7 +93,7 @@ var ClientTest;
                 }
                 break;
             default:
-                console.log("Unhandled event", _event);
+                console.log("Unhandled type", _event);
         }
     }
     function setTable(_clients) {

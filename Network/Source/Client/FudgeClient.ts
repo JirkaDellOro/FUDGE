@@ -22,14 +22,41 @@ namespace FudgeClient {
       this.addWebSocketEventListeners();
     }
 
-    public loginToServer = (_requestingUsername: string): void => {
+    public loginToServer = (_name: string): void => {
       try {
-        const loginMessage: Messages.LoginRequest = new Messages.LoginRequest(this.id, _requestingUsername);
-        this.sendToServer(loginMessage);
+        // const loginMessage: Messages.LoginRequest = new Messages.LoginRequest(this.id, _name);
+        // this.sendToServer(loginMessage);
+        let message: Messages.NetMessage = {
+          command: Messages.NET_COMMAND.LOGIN_REQUEST, route: Messages.NET_ROUTE.SERVER, content: { name: _name }
+        };
+        this.dispatch(message);
       } catch (error) {
         ƒ.Debug.fudge("Unexpected error: Sending Login Request", error);
       }
     }
+
+    public dispatch(_message: Messages.NetMessage): void {
+      _message.timeSender = Date.now();
+      let message: string = JSON.stringify(_message);
+      try {
+        if (!_message.route || _message.route == Messages.NET_ROUTE.HOST) {
+          // send via RTC to specific peer (if idTarget set), all peers (if not set) or host (if route set to host)
+        } else {
+          _message.idSource = this.id;
+          this.socket.send(message);
+        }
+      } catch (_error) {
+        console.log(_error);
+      }
+    }
+
+    // public broadcast(_message: Messages.NetMessage): void {
+    //   _message.timeServer = Date.now();
+    //   let message: string = JSON.stringify(_message);
+    //   for (let id in this.clients)
+    //     // TODO: examine, if idTarget should be tweaked...
+    //     this.clients[id].socket?.send(message);
+    // }
 
     public sendToServer = (_message: Messages.MessageBase): void => {
       let stringifiedMessage: string = _message.serialize();
@@ -74,33 +101,52 @@ namespace FudgeClient {
           ƒ.Debug.fudge("Connected to the signaling server", _connOpen);
         });
 
-        // this.wsServer.addEventListener("error", (_err: Event) => {
+        // this.wsServer.addEventListener(EVENT.ERROR, (_err: Event) => {
         // });
 
         this.socket.addEventListener(EVENT.MESSAGE_RECEIVED, (_receivedMessage: MessageEvent) => {
-          this.parseMessageAndHandleMessageType(_receivedMessage);
+          // this.parseMessageAndHandleMessageType(_receivedMessage);
+          this.hndMessage(_receivedMessage);
         });
       } catch (error) {
         ƒ.Debug.fudge("Unexpected Error: Adding websocket Eventlistener", error);
       }
     }
 
-    private parseMessageAndHandleMessageType = (_receivedMessage: MessageEvent) => {
+    private hndMessage = (_event: MessageEvent): void => {
+      let message: Messages.NetMessage = JSON.parse(_event.data);
+
+      //tslint:disable-next-line: no-any
+      // let content: any = message.content ? JSON.parse(message.content) : null;
+      switch (message.command) {
+        case Messages.NET_COMMAND.ASSIGN_ID:
+          ƒ.Debug.fudge("ID received", (message.idTarget));
+          this.assignIdAndSendConfirmation(message.idTarget);
+          break;
+        case Messages.NET_COMMAND.LOGIN_RESPONSE:
+          this.loginValidAddUser(<string>message.idSource, message.content?.success, message.content?.name);
+          break;
+      }
+      console.log(_event.timeStamp, message);
+      this.dispatchEvent(new MessageEvent(_event.type, <MessageEventInit<unknown>><unknown>_event));
+    }
+
+    private parseMessageAndHandleMessageType = (_receivedMessage: MessageEvent): void => {
       let message: Messages.MessageBase = Messages.MessageBase.deserialize(_receivedMessage.data);
       // console.log(_receivedMessage);
       switch (message.messageType) {
-        case Messages.MESSAGE_TYPE.ID_ASSIGNED:
-          ƒ.Debug.fudge("ID received", (<Messages.IdAssigned>message).assignedId);
-          this.assignIdAndSendConfirmation(<Messages.IdAssigned>message);
-          break;
+        // case Messages.MESSAGE_TYPE.ID_ASSIGNED:
+        //   ƒ.Debug.fudge("ID received", (<Messages.IdAssigned>message).assignedId);
+        //   // this.assignIdAndSendConfirmation(<Messages.IdAssigned>message);
+        //   break;
 
-        case Messages.MESSAGE_TYPE.LOGIN_RESPONSE:
-          this.loginValidAddUser(message.idSource, (<Messages.LoginResponse>message).loginSuccess, (<Messages.LoginResponse>message).originatorUsername);
-          break;
+        // case Messages.MESSAGE_TYPE.LOGIN_RESPONSE:
+        //   this.loginValidAddUser(message.idSource, (<Messages.LoginResponse>message).loginSuccess, (<Messages.LoginResponse>message).originatorUsername);
+        //   break;
 
-        case Messages.MESSAGE_TYPE.SERVER_HEARTBEAT:
-          this.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, { detail: message }));
-          break;
+        // case Messages.MESSAGE_TYPE.SERVER_HEARTBEAT:
+        //   this.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, { detail: message }));
+        //   break;
 
         case Messages.MESSAGE_TYPE.CLIENT_TO_SERVER:
         case Messages.MESSAGE_TYPE.SERVER_TO_CLIENT:
@@ -123,7 +169,8 @@ namespace FudgeClient {
           break;
         default:
           console.log("Dispatching message of unknown type", _receivedMessage);
-          this.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, _receivedMessage));
+          // this.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, {detail: _receivedMessage}));
+          this.dispatchEvent(new MessageEvent(_receivedMessage.type, <MessageEventInit<unknown>><unknown>_receivedMessage));
           break;
       }
     }
@@ -265,19 +312,23 @@ namespace FudgeClient {
       }
     }
 
-    private loginValidAddUser = (_assignedId: string, _loginSuccess: boolean, _originatorUserName: string): void => {
-      if (_loginSuccess) {
-        this.name = _originatorUserName;
+    private loginValidAddUser = (_assignedId: string, _success: boolean, _name: string): void => {
+      if (_success) {
+        this.name = _name;
         ƒ.Debug.fudge("Logged in to server as: " + this.name, this.id);
       } else {
         ƒ.Debug.fudge("Login failed, username taken", this.name, this.id);
       }
     }
 
-    private assignIdAndSendConfirmation = (_message: Messages.IdAssigned) => {
+    private assignIdAndSendConfirmation = (_id: string | undefined) => {
       try {
-        this.id = _message.assignedId;
-        this.sendToServer(new Messages.IdAssigned(this.id));
+        if (!_id)
+          throw (new Error("id undefined"));
+        this.id = _id;
+        // this.sendToServer(new Messages.IdAssigned(_id));
+        let message: Messages.NetMessage = { command: Messages.NET_COMMAND.ASSIGN_ID, route: Messages.NET_ROUTE.SERVER };
+        this.dispatch(message);
       } catch (error) {
         ƒ.Debug.fudge("Unexpected Error: Sending ID Confirmation", error);
       }

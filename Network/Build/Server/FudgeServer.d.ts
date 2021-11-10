@@ -14,6 +14,7 @@ export declare class FudgeServer {
     startUp: (_port?: number) => void;
     closeDown: () => void;
     dispatch(_message: Messages.NetMessage): void;
+    broadcast(_message: Messages.NetMessage): void;
     private addEventListeners;
     private handleMessage;
     private receive;

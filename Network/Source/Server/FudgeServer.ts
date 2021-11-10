@@ -32,6 +32,14 @@ export class FudgeServer {
       this.clients[_message.idTarget].socket?.send(message);
   }
 
+  public broadcast(_message: Messages.NetMessage): void {
+    _message.timeServer = Date.now();
+    let message: string = JSON.stringify(_message);
+    for (let id in this.clients)
+      // TODO: examine, if idTarget should be tweaked...
+      this.clients[id].socket?.send(message);
+  }
+
   private addEventListeners = (): void => {
     this.socket.on("connection", (_socket: WebSocket) => {
       console.log("User connected to FudgeServer");
@@ -40,8 +48,7 @@ export class FudgeServer {
         const id: string = this.createID();
         const client: Client = { socket: _socket, id: id, peers: [] };
         this.clients[id] = client;
-        client.socket?.send(new Messages.IdAssigned(id).serialize());
-        let netMessage: Messages.NetMessage = { idTarget: id, command: Messages.NET_COMMAND.ASSIGN_ID, route: Messages.NET_ROUTE.CLIENT };
+        let netMessage: Messages.NetMessage = { idTarget: id, command: Messages.NET_COMMAND.ASSIGN_ID };
         this.dispatch(netMessage);
       } catch (error) {
         console.error("Unhandled Exception", error);
@@ -67,43 +74,43 @@ export class FudgeServer {
     });
   }
 
-  // TODO Check if event.type can be used for identification instead => It cannot
   private async handleMessage(_message: string, _wsConnection: WebSocket): Promise<void> {
-    let message: Messages.MessageBase = Messages.MessageBase.deserialize(_message);
-    if (!message || !message.messageType) {
-      console.error("Unhandled Exception: Invalid Message Object received. Does it implement MessageBase?");
-      return;
-    }
+    let message: Messages.NetMessage = JSON.parse(_message);
     console.log("Message received", message);
 
-    switch (message.messageType) {
-      case Messages.MESSAGE_TYPE.ID_ASSIGNED:
+    switch (message.command) {
+      case Messages.NET_COMMAND.ASSIGN_ID:
         console.log("Id confirmation received for client: " + message.idSource);
         break;
-
-      case Messages.MESSAGE_TYPE.LOGIN_REQUEST:
-        this.addUserOnValidLoginRequest(_wsConnection, <Messages.LoginRequest>message);
-        break;
-
-      case Messages.MESSAGE_TYPE.CLIENT_TO_SERVER:
-        this.receive(<Messages.ToServer>message);
-        break;
-
-      case Messages.MESSAGE_TYPE.RTC_OFFER:
-        this.sendRtcOfferToRequestedClient(_wsConnection, <Messages.RtcOffer>message);
-        break;
-
-      case Messages.MESSAGE_TYPE.RTC_ANSWER:
-        this.answerRtcOfferOfClient(_wsConnection, <Messages.RtcAnswer>message);
-        break;
-
-      case Messages.MESSAGE_TYPE.ICE_CANDIDATE:
-        this.sendIceCandidatesToRelevantPeer(_wsConnection, <Messages.IceCandidate>message);
-        break;
-      default:
-        console.log("WebSocket: Message type not recognized");
+      case Messages.NET_COMMAND.LOGIN_REQUEST:
+        this.addUserOnValidLoginRequest(_wsConnection, message);
         break;
     }
+
+
+    //   case Messages.MESSAGE_TYPE.LOGIN_REQUEST:
+    //     this.addUserOnValidLoginRequest(_wsConnection, <Messages.LoginRequest>message);
+    //     break;
+
+    //   case Messages.MESSAGE_TYPE.CLIENT_TO_SERVER:
+    //     this.receive(<Messages.ToServer>message);
+    //     break;
+
+    //   case Messages.MESSAGE_TYPE.RTC_OFFER:
+    //     this.sendRtcOfferToRequestedClient(_wsConnection, <Messages.RtcOffer>message);
+    //     break;
+
+    //   case Messages.MESSAGE_TYPE.RTC_ANSWER:
+    //     this.answerRtcOfferOfClient(_wsConnection, <Messages.RtcAnswer>message);
+    //     break;
+
+    //   case Messages.MESSAGE_TYPE.ICE_CANDIDATE:
+    //     this.sendIceCandidatesToRelevantPeer(_wsConnection, <Messages.IceCandidate>message);
+    //     break;
+    //   default:
+    //     console.log("WebSocket: Message type not recognized");
+    //     break;
+    // }
   }
 
   private async receive(_message: Messages.ToServer): Promise<void> {
@@ -128,11 +135,13 @@ export class FudgeServer {
     }
   }
 
-  private addUserOnValidLoginRequest(_wsConnection: WebSocket, _message: Messages.LoginRequest): void {
+  private addUserOnValidLoginRequest(_wsConnection: WebSocket, _message: Messages.NetMessage): void {
+    let name: string = _message.content?.name;
     for (let id in this.clients) {
-      if (this.clients[id].name == _message.loginUserName) {
-        _wsConnection.send(new Messages.LoginResponse(false, "", "").serialize());
-        console.log("UsernameTaken", _message.loginUserName);
+      if (this.clients[id].name == name) {
+        console.log("UsernameTaken", name);
+        let netMessage: Messages.NetMessage = { idTarget: id, command: Messages.NET_COMMAND.LOGIN_RESPONSE, content: { success: false } };
+        this.dispatch(netMessage);
         return;
       }
     }
@@ -140,8 +149,11 @@ export class FudgeServer {
       for (let id in this.clients) {
         let client: Client = this.clients[id];
         if (client.socket == _wsConnection) {
-          client.name = _message.loginUserName;
-          _wsConnection.send(new Messages.LoginResponse(true, client.id, client.name).serialize());
+          client.name = name;
+          // _wsConnection.send(new Messages.LoginResponse(true, client.id, client.name).serialize());
+
+          let netMessage: Messages.NetMessage = { idTarget: id, command: Messages.NET_COMMAND.ASSIGN_ID, content: { success: true } };
+          this.dispatch(netMessage);
           return;
         }
       }
@@ -151,7 +163,8 @@ export class FudgeServer {
   }
 
   private broadcastMessageToAllConnectedClients(_message: Messages.ToClient): void {
-    console.info("Broadcast", _message);
+    if (_message.messageType != Messages.MESSAGE_TYPE.SERVER_HEARTBEAT)
+      console.info("Broadcast", _message);
     // TODO: appearently, websocketServer keeps its own list of clients. Examine if it makes sense to double this information in this.clients
     let clientArray: WebSocket[] = Array.from(this.socket.clients);
     let message: string = _message.serialize();
@@ -166,12 +179,15 @@ export class FudgeServer {
 
     if (client) {
       const offerMessage: Messages.RtcOffer = new Messages.RtcOffer(_message.idSource, client.id, _message.offer);
+      let netMessage: Messages.NetMessage = { idSource: _message.idSource, idTarget: _message.idRemote, command: Messages.NET_COMMAND.RTC_OFFER, content: { offer: _message.offer } };
+
       try {
         client.socket?.send(offerMessage.serialize());
+        this.dispatch(netMessage);
       } catch (error) {
         console.error("Unhandled Exception: Unable to relay Offer to Client", error);
       }
-    } else { console.error("User to connect to doesn't exist under that Name"); }
+    } else { console.error("Server is not connected to client with this id", _message.idRemote); }
   }
 
   private answerRtcOfferOfClient(_wsConnection: WebSocket, _message: Messages.RtcAnswer): void {
@@ -182,6 +198,9 @@ export class FudgeServer {
       // TODO Probable source of error, need to test
       if (client.socket != null)
         client.socket.send(_message.serialize());
+      // TODO: with new messages, simply pass through
+      let netMessage: Messages.NetMessage = { idTarget: _message.idTarget, command: Messages.NET_COMMAND.RTC_ANSWER, content: { answer: _message.answer } };
+      this.dispatch(netMessage);
     }
   }
 
@@ -192,6 +211,8 @@ export class FudgeServer {
     if (client) {
       const candidateToSend: Messages.IceCandidate = new Messages.IceCandidate(_message.idSource, client.id, _message.candidate);
       client.socket?.send(candidateToSend.serialize());
+      let netMessage: Messages.NetMessage = { idTarget: _message.idTarget, command: Messages.NET_COMMAND.ICE_CANDIDATE, content: { candidate: _message.candidate } };
+      this.dispatch(netMessage);
     }
   }
 
@@ -202,11 +223,13 @@ export class FudgeServer {
   }
 
   private heartbeat = (): void => {
-    console.log("Server Heartbeat");
+    process.stdout.write("♥");
     let clients: { [id: string]: object } = {};
     for (let id in this.clients)
       clients[id] = { name: this.clients[id].name, peers: this.clients[id].peers };
-    let message: Messages.ServerHeartbeat = new Messages.ServerHeartbeat(JSON.stringify(clients));
-    this.broadcastMessageToAllConnectedClients(message);
+    // let message: Messages.ServerHeartbeat = new Messages.ServerHeartbeat(JSON.stringify(clients));
+    // this.broadcastMessageToAllConnectedClients(message);
+    let message: Messages.NetMessage = { command: Messages.NET_COMMAND.SERVER_HEARTBEAT, content: clients };
+    this.broadcast(message);
   }
 }

@@ -4,6 +4,7 @@ namespace FudgeClient {
   export enum EVENT {
     CONNECTION_OPENED = "open",
     CONNECTION_CLOSED = "close",
+    ERROR = "error",
     MESSAGE_RECEIVED = "message"
   }
 

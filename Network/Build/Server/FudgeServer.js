@@ -25,6 +25,13 @@ class FudgeServer {
         if (_message.idTarget)
             this.clients[_message.idTarget].socket?.send(message);
     }
+    broadcast(_message) {
+        _message.timeServer = Date.now();
+        let message = JSON.stringify(_message);
+        for (let id in this.clients)
+            // TODO: examine, if idTarget should be tweaked...
+            this.clients[id].socket?.send(message);
+    }
     addEventListeners = () => {
         this.socket.on("connection", (_socket) => {
             console.log("User connected to FudgeServer");
@@ -32,8 +39,7 @@ class FudgeServer {
                 const id = this.createID();
                 const client = { socket: _socket, id: id, peers: [] };
                 this.clients[id] = client;
-                client.socket?.send(new Messages_js_1.Messages.IdAssigned(id).serialize());
-                let netMessage = { idTarget: id, command: Messages_js_1.Messages.NET_COMMAND.ASSIGN_ID, route: Messages_js_1.Messages.NET_ROUTE.CLIENT };
+                let netMessage = { idTarget: id, command: Messages_js_1.Messages.NET_COMMAND.ASSIGN_ID };
                 this.dispatch(netMessage);
             }
             catch (error) {
@@ -57,37 +63,36 @@ class FudgeServer {
             });
         });
     };
-    // TODO Check if event.type can be used for identification instead => It cannot
     async handleMessage(_message, _wsConnection) {
-        let message = Messages_js_1.Messages.MessageBase.deserialize(_message);
-        if (!message || !message.messageType) {
-            console.error("Unhandled Exception: Invalid Message Object received. Does it implement MessageBase?");
-            return;
-        }
+        let message = JSON.parse(_message);
         console.log("Message received", message);
-        switch (message.messageType) {
-            case Messages_js_1.Messages.MESSAGE_TYPE.ID_ASSIGNED:
+        switch (message.command) {
+            case Messages_js_1.Messages.NET_COMMAND.ASSIGN_ID:
                 console.log("Id confirmation received for client: " + message.idSource);
                 break;
-            case Messages_js_1.Messages.MESSAGE_TYPE.LOGIN_REQUEST:
+            case Messages_js_1.Messages.NET_COMMAND.LOGIN_REQUEST:
                 this.addUserOnValidLoginRequest(_wsConnection, message);
                 break;
-            case Messages_js_1.Messages.MESSAGE_TYPE.CLIENT_TO_SERVER:
-                this.receive(message);
-                break;
-            case Messages_js_1.Messages.MESSAGE_TYPE.RTC_OFFER:
-                this.sendRtcOfferToRequestedClient(_wsConnection, message);
-                break;
-            case Messages_js_1.Messages.MESSAGE_TYPE.RTC_ANSWER:
-                this.answerRtcOfferOfClient(_wsConnection, message);
-                break;
-            case Messages_js_1.Messages.MESSAGE_TYPE.ICE_CANDIDATE:
-                this.sendIceCandidatesToRelevantPeer(_wsConnection, message);
-                break;
-            default:
-                console.log("WebSocket: Message type not recognized");
-                break;
         }
+        //   case Messages.MESSAGE_TYPE.LOGIN_REQUEST:
+        //     this.addUserOnValidLoginRequest(_wsConnection, <Messages.LoginRequest>message);
+        //     break;
+        //   case Messages.MESSAGE_TYPE.CLIENT_TO_SERVER:
+        //     this.receive(<Messages.ToServer>message);
+        //     break;
+        //   case Messages.MESSAGE_TYPE.RTC_OFFER:
+        //     this.sendRtcOfferToRequestedClient(_wsConnection, <Messages.RtcOffer>message);
+        //     break;
+        //   case Messages.MESSAGE_TYPE.RTC_ANSWER:
+        //     this.answerRtcOfferOfClient(_wsConnection, <Messages.RtcAnswer>message);
+        //     break;
+        //   case Messages.MESSAGE_TYPE.ICE_CANDIDATE:
+        //     this.sendIceCandidatesToRelevantPeer(_wsConnection, <Messages.IceCandidate>message);
+        //     break;
+        //   default:
+        //     console.log("WebSocket: Message type not recognized");
+        //     break;
+        // }
     }
     async receive(_message) {
         switch (_message.messageData) {
@@ -111,10 +116,12 @@ class FudgeServer {
         }
     }
     addUserOnValidLoginRequest(_wsConnection, _message) {
+        let name = _message.content?.name;
         for (let id in this.clients) {
-            if (this.clients[id].name == _message.loginUserName) {
-                _wsConnection.send(new Messages_js_1.Messages.LoginResponse(false, "", "").serialize());
-                console.log("UsernameTaken", _message.loginUserName);
+            if (this.clients[id].name == name) {
+                console.log("UsernameTaken", name);
+                let netMessage = { idTarget: id, command: Messages_js_1.Messages.NET_COMMAND.LOGIN_RESPONSE, content: { success: false } };
+                this.dispatch(netMessage);
                 return;
             }
         }
@@ -122,8 +129,10 @@ class FudgeServer {
             for (let id in this.clients) {
                 let client = this.clients[id];
                 if (client.socket == _wsConnection) {
-                    client.name = _message.loginUserName;
-                    _wsConnection.send(new Messages_js_1.Messages.LoginResponse(true, client.id, client.name).serialize());
+                    client.name = name;
+                    // _wsConnection.send(new Messages.LoginResponse(true, client.id, client.name).serialize());
+                    let netMessage = { idTarget: id, command: Messages_js_1.Messages.NET_COMMAND.ASSIGN_ID, content: { success: true } };
+                    this.dispatch(netMessage);
                     return;
                 }
             }
@@ -133,7 +142,8 @@ class FudgeServer {
         }
     }
     broadcastMessageToAllConnectedClients(_message) {
-        console.info("Broadcast", _message);
+        if (_message.messageType != Messages_js_1.Messages.MESSAGE_TYPE.SERVER_HEARTBEAT)
+            console.info("Broadcast", _message);
         // TODO: appearently, websocketServer keeps its own list of clients. Examine if it makes sense to double this information in this.clients
         let clientArray = Array.from(this.socket.clients);
         let message = _message.serialize();
@@ -146,15 +156,17 @@ class FudgeServer {
         const client = this.clients[_message.idRemote];
         if (client) {
             const offerMessage = new Messages_js_1.Messages.RtcOffer(_message.idSource, client.id, _message.offer);
+            let netMessage = { idSource: _message.idSource, idTarget: _message.idRemote, command: Messages_js_1.Messages.NET_COMMAND.RTC_OFFER, content: { offer: _message.offer } };
             try {
                 client.socket?.send(offerMessage.serialize());
+                this.dispatch(netMessage);
             }
             catch (error) {
                 console.error("Unhandled Exception: Unable to relay Offer to Client", error);
             }
         }
         else {
-            console.error("User to connect to doesn't exist under that Name");
+            console.error("Server is not connected to client with this id", _message.idRemote);
         }
     }
     answerRtcOfferOfClient(_wsConnection, _message) {
@@ -164,6 +176,9 @@ class FudgeServer {
             // TODO Probable source of error, need to test
             if (client.socket != null)
                 client.socket.send(_message.serialize());
+            // TODO: with new messages, simply pass through
+            let netMessage = { idTarget: _message.idTarget, command: Messages_js_1.Messages.NET_COMMAND.RTC_ANSWER, content: { answer: _message.answer } };
+            this.dispatch(netMessage);
         }
     }
     sendIceCandidatesToRelevantPeer(_wsConnection, _message) {
@@ -172,6 +187,8 @@ class FudgeServer {
         if (client) {
             const candidateToSend = new Messages_js_1.Messages.IceCandidate(_message.idSource, client.id, _message.candidate);
             client.socket?.send(candidateToSend.serialize());
+            let netMessage = { idTarget: _message.idTarget, command: Messages_js_1.Messages.NET_COMMAND.ICE_CANDIDATE, content: { candidate: _message.candidate } };
+            this.dispatch(netMessage);
         }
     }
     createID = () => {
@@ -180,12 +197,14 @@ class FudgeServer {
         return "_" + Math.random().toString(36).substr(2, 7);
     };
     heartbeat = () => {
-        console.log("Server Heartbeat");
+        process.stdout.write("♥");
         let clients = {};
         for (let id in this.clients)
             clients[id] = { name: this.clients[id].name, peers: this.clients[id].peers };
-        let message = new Messages_js_1.Messages.ServerHeartbeat(JSON.stringify(clients));
-        this.broadcastMessageToAllConnectedClients(message);
+        // let message: Messages.ServerHeartbeat = new Messages.ServerHeartbeat(JSON.stringify(clients));
+        // this.broadcastMessageToAllConnectedClients(message);
+        let message = { command: Messages_js_1.Messages.NET_COMMAND.SERVER_HEARTBEAT, content: clients };
+        this.broadcast(message);
     };
 }
 exports.FudgeServer = FudgeServer;
