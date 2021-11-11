@@ -5,8 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FudgeServer = void 0;
 const ws_1 = __importDefault(require("ws"));
-const Messages_js_1 = require("../../Build/Messages.js");
-console.log("Messages", Messages_js_1.Messages);
+const Message_js_1 = require("../../Build/Message.js");
 class FudgeServer {
     socket;
     clients = {};
@@ -39,7 +38,7 @@ class FudgeServer {
                 const id = this.createID();
                 const client = { socket: _socket, id: id, peers: [] };
                 this.clients[id] = client;
-                let netMessage = { idTarget: id, command: Messages_js_1.Messages.NET_COMMAND.ASSIGN_ID };
+                let netMessage = { idTarget: id, command: Message_js_1.FudgeNet.COMMAND.ASSIGN_ID };
                 this.dispatch(netMessage);
             }
             catch (error) {
@@ -67,25 +66,25 @@ class FudgeServer {
         let message = JSON.parse(_message);
         console.log("Message received", message);
         switch (message.command) {
-            case Messages_js_1.Messages.NET_COMMAND.ASSIGN_ID:
+            case Message_js_1.FudgeNet.COMMAND.ASSIGN_ID:
                 console.log("Id confirmation received for client: " + message.idSource);
                 break;
-            case Messages_js_1.Messages.NET_COMMAND.LOGIN_REQUEST:
+            case Message_js_1.FudgeNet.COMMAND.LOGIN_REQUEST:
                 this.addUserOnValidLoginRequest(_wsConnection, message);
                 break;
-            case Messages_js_1.Messages.NET_COMMAND.RTC_OFFER:
+            case Message_js_1.FudgeNet.COMMAND.RTC_OFFER:
                 this.sendRtcOfferToRequestedClient(_wsConnection, message);
                 break;
-            case Messages_js_1.Messages.NET_COMMAND.RTC_ANSWER:
+            case Message_js_1.FudgeNet.COMMAND.RTC_ANSWER:
                 this.answerRtcOfferOfClient(_wsConnection, message);
                 break;
-            case Messages_js_1.Messages.NET_COMMAND.ICE_CANDIDATE:
+            case Message_js_1.FudgeNet.COMMAND.ICE_CANDIDATE:
                 this.sendIceCandidatesToRelevantPeer(_wsConnection, message);
                 break;
-            case Messages_js_1.Messages.NET_COMMAND.CREATE_MESH:
+            case Message_js_1.FudgeNet.COMMAND.CREATE_MESH:
                 this.createMesh(message);
                 break;
-            case Messages_js_1.Messages.NET_COMMAND.CONNECT_HOST:
+            case Message_js_1.FudgeNet.COMMAND.CONNECT_HOST:
                 this.connectHost(message);
                 break;
             default:
@@ -99,7 +98,7 @@ class FudgeServer {
             let id = ids.pop();
             // let message: Messages.ToClient = new Messages.ToClient(JSON.stringify({ [Messages.SERVER_COMMAND.CONNECT_PEERS]: ids }));
             let message = {
-                command: Messages_js_1.Messages.NET_COMMAND.CONNECT_PEERS, idTarget: id, content: { peers: ids }
+                command: Message_js_1.FudgeNet.COMMAND.CONNECT_PEERS, idTarget: id, content: { peers: ids }
             };
             // new Messages.ToClient(JSON.stringify({ [Messages.SERVER_COMMAND.CONNECT_PEERS]: ids }));
             await new Promise((resolve) => { setTimeout(resolve, 200); });
@@ -109,7 +108,7 @@ class FudgeServer {
     async connectHost(_message) {
         let ids = Reflect.ownKeys(this.clients);
         let message = {
-            command: Messages_js_1.Messages.NET_COMMAND.CONNECT_PEERS, idTarget: _message.idSource, content: { peers: ids }
+            command: Message_js_1.FudgeNet.COMMAND.CONNECT_PEERS, idTarget: _message.idSource, content: { peers: ids }
         };
         // new Messages.ToClient(JSON.stringify({ [Messages.SERVER_COMMAND.CONNECT_PEERS]: Reflect.ownKeys(this.clients) }));
         this.dispatch(message);
@@ -119,7 +118,7 @@ class FudgeServer {
         for (let id in this.clients) {
             if (this.clients[id].name == name) {
                 console.log("UsernameTaken", name);
-                let netMessage = { idTarget: id, command: Messages_js_1.Messages.NET_COMMAND.LOGIN_RESPONSE, content: { success: false } };
+                let netMessage = { idTarget: id, command: Message_js_1.FudgeNet.COMMAND.LOGIN_RESPONSE, content: { success: false } };
                 this.dispatch(netMessage);
                 return;
             }
@@ -130,7 +129,7 @@ class FudgeServer {
                 if (client.socket == _wsConnection) {
                     client.name = name;
                     // _wsConnection.send(new Messages.LoginResponse(true, client.id, client.name).serialize());
-                    let netMessage = { idTarget: id, command: Messages_js_1.Messages.NET_COMMAND.ASSIGN_ID, content: { success: true } };
+                    let netMessage = { idTarget: id, command: Message_js_1.FudgeNet.COMMAND.ASSIGN_ID, content: { success: true } };
                     this.dispatch(netMessage);
                     return;
                 }
@@ -159,7 +158,7 @@ class FudgeServer {
             if (!client)
                 throw (new Error(`No client found with id ${_message.idTarget}`));
             let netMessage = {
-                idSource: _message.idSource, idTarget: _message.idTarget, command: Messages_js_1.Messages.NET_COMMAND.RTC_OFFER, content: { offer: _message.content.offer }
+                idSource: _message.idSource, idTarget: _message.idTarget, command: Message_js_1.FudgeNet.COMMAND.RTC_OFFER, content: { offer: _message.content.offer }
             };
             // client.socket?.send(_message.serialize());
             this.dispatch(netMessage);
@@ -176,8 +175,8 @@ class FudgeServer {
         if (client && client.socket && _message.content) {
             // client.socket.send(_message.serialize());
             // TODO: with new messages, simply pass through
-            // let netMessage: Messages.NetMessage = {
-            //   idTarget: _message.idTarget, command: Messages.NET_COMMAND.RTC_ANSWER, content: { answer: _message.content.answer }
+            // let netMessage: FudgeNet.Message = {
+            //   idTarget: _message.idTarget, command: FudgeNet.COMMAND.RTC_ANSWER, content: { answer: _message.content.answer }
             // };
             this.dispatch(_message);
         }
@@ -190,8 +189,8 @@ class FudgeServer {
         const client = this.clients[_message.idTarget];
         if (client && _message.content) {
             console.warn("Send Candidate", client, _message.content.candidate);
-            // let netMessage: Messages.NetMessage = {
-            //   idTarget: _message.idTarget, command: Messages.NET_COMMAND.ICE_CANDIDATE, content: _message.content
+            // let netMessage: FudgeNet.Message = {
+            //   idTarget: _message.idTarget, command: FudgeNet.COMMAND.ICE_CANDIDATE, content: _message.content
             // };
             this.dispatch(_message);
         }
@@ -211,7 +210,7 @@ class FudgeServer {
         // console.log(clients);
         // let message: Messages.ServerHeartbeat = new Messages.ServerHeartbeat(JSON.stringify(clients));
         // this.broadcastMessageToAllConnectedClients(message);
-        let message = { command: Messages_js_1.Messages.NET_COMMAND.SERVER_HEARTBEAT, content: clients };
+        let message = { command: Message_js_1.FudgeNet.COMMAND.SERVER_HEARTBEAT, content: clients };
         this.broadcast(message);
     };
 }

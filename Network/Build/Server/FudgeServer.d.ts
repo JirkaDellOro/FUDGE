@@ -1,5 +1,5 @@
 import WebSocket from "ws";
-import { Messages } from "../../Build/Messages.js";
+import { FudgeNet } from "../../Build/Message.js";
 export interface Client {
     id: string;
     name?: string;
@@ -13,8 +13,8 @@ export declare class FudgeServer {
     };
     startUp: (_port?: number) => void;
     closeDown: () => void;
-    dispatch(_message: Messages.NetMessage): void;
-    broadcast(_message: Messages.NetMessage): void;
+    dispatch(_message: FudgeNet.Message): void;
+    broadcast(_message: FudgeNet.Message): void;
     private addEventListeners;
     private handleMessage;
     private createMesh;

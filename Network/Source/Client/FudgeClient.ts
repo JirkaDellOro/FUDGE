@@ -1,6 +1,6 @@
-///<reference path="../Messages.ts"/>
+///<reference path="../Message.ts"/>
 ///<reference path="../../../Core/Build/FudgeCore.d.ts"/>
-namespace FudgeClient {
+namespace FudgeNet {
   import ƒ = FudgeCore;
 
   export class FudgeClient extends EventTarget {
@@ -24,10 +24,8 @@ namespace FudgeClient {
 
     public loginToServer = (_name: string): void => {
       try {
-        // const loginMessage: Messages.LoginRequest = new Messages.LoginRequest(this.id, _name);
-        // this.sendToServer(loginMessage);
-        let message: Messages.NetMessage = {
-          command: Messages.NET_COMMAND.LOGIN_REQUEST, route: Messages.NET_ROUTE.SERVER, content: { name: _name }
+        let message: FudgeNet.Message = {
+          command: FudgeNet.COMMAND.LOGIN_REQUEST, route: FudgeNet.ROUTE.SERVER, content: { name: _name }
         };
         this.dispatch(message);
       } catch (error) {
@@ -39,16 +37,15 @@ namespace FudgeClient {
       if (this.peers[_idRemote])
         ƒ.Debug.warn("Peers already connected, ignoring request", this.id, _idRemote);
       else
-        // this.idRemote = _idRemote;
         this.beginPeerConnectionNegotiation(_idRemote);
     }
 
-    public dispatch(_message: Messages.NetMessage): void {
+    public dispatch(_message: FudgeNet.Message): void {
       _message.timeSender = Date.now();
       _message.idSource = this.id;
       let message: string = JSON.stringify(_message);
       try {
-        if (!_message.route || _message.route == Messages.NET_ROUTE.HOST) {
+        if (!_message.route || _message.route == FudgeNet.ROUTE.HOST) {
           // send via RTC to specific peer (if idTarget set), all peers (if not set) or host (if route set to host)
           if (_message.idTarget)
             this.sendToPeer(_message.idTarget, message);
@@ -88,7 +85,6 @@ namespace FudgeClient {
         // });
 
         this.socket.addEventListener(EVENT.MESSAGE_RECEIVED, (_receivedMessage: MessageEvent) => {
-          // this.parseMessageAndHandleMessageType(_receivedMessage);
           this.hndMessage(_receivedMessage);
         });
       } catch (error) {
@@ -97,35 +93,31 @@ namespace FudgeClient {
     }
 
     private hndMessage = (_event: MessageEvent): void => {
-      let message: Messages.NetMessage = JSON.parse(_event.data);
+      let message: FudgeNet.Message = JSON.parse(_event.data);
 
       //tslint:disable-next-line: no-any
-      // let content: any = message.content ? JSON.parse(message.content) : null;
       switch (message.command) {
-        case Messages.NET_COMMAND.ASSIGN_ID:
+        case FudgeNet.COMMAND.ASSIGN_ID:
           ƒ.Debug.fudge("ID received", (message.idTarget));
           this.assignIdAndSendConfirmation(message.idTarget);
           break;
-        case Messages.NET_COMMAND.LOGIN_RESPONSE:
+        case FudgeNet.COMMAND.LOGIN_RESPONSE:
           this.loginValidAddUser(<string>message.idSource, message.content?.success, message.content?.name);
           break;
 
-        case Messages.NET_COMMAND.RTC_OFFER:
-          // ƒ.Debug.fudge("Received offer, current signaling state: ", this.connection.signalingState);
+        case FudgeNet.COMMAND.RTC_OFFER:
           this.receiveNegotiationOfferAndSetRemoteDescription(message);
           break;
 
-        case Messages.NET_COMMAND.RTC_ANSWER:
-          // ƒ.Debug.fudge("Received answer, current signaling state: ", this.connection.signalingState);
+        case FudgeNet.COMMAND.RTC_ANSWER:
           this.receiveAnswerAndSetRemoteDescription(message);
           break;
 
-        case Messages.NET_COMMAND.ICE_CANDIDATE:
-          // ƒ.Debug.fudge("Received candidate, current signaling state: ", this.connection.signalingState);
+        case FudgeNet.COMMAND.ICE_CANDIDATE:
           this.addReceivedCandidateToPeerConnection(message);
           break;
       }
-      if (message.command != Messages.NET_COMMAND.SERVER_HEARTBEAT)
+      if (message.command != FudgeNet.COMMAND.SERVER_HEARTBEAT)
         console.log(_event.timeStamp, message);
       this.dispatchEvent(new MessageEvent(_event.type, <MessageEventInit<unknown>><unknown>_event));
     }
@@ -165,8 +157,8 @@ namespace FudgeClient {
     private createNegotiationOfferAndSendToPeer = (_idRemote: string) => {
       try {
         let peerConnection: RTCPeerConnection = this.peers[_idRemote].peerConnection;
-        const offerMessage: Messages.NetMessage = {
-          route: Messages.NET_ROUTE.SERVER, command: Messages.NET_COMMAND.RTC_OFFER, idTarget: _idRemote, content: { offer: peerConnection.localDescription }
+        const offerMessage: FudgeNet.Message = {
+          route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.RTC_OFFER, idTarget: _idRemote, content: { offer: peerConnection.localDescription }
         };
         // this.sendToServer(offerMessage);
         this.dispatch(offerMessage);
@@ -176,7 +168,7 @@ namespace FudgeClient {
       }
     }
 
-    private receiveNegotiationOfferAndSetRemoteDescription = (_message: Messages.NetMessage): void => {
+    private receiveNegotiationOfferAndSetRemoteDescription = (_message: FudgeNet.Message): void => {
       ƒ.Debug.fudge("Remote: offer received, create connection", _message);
       if (!_message.idSource)
         throw (new Error("message lacks source."));
@@ -220,9 +212,8 @@ namespace FudgeClient {
         }).then(async () => {
           ƒ.Debug.fudge("Remote: create answer function, expected 'stable', got:  ", peerConnection.signalingState);
 
-          // const answerMessage: Messages.RtcAnswer = new Messages.RtcAnswer(this.id, _idRemote, ultimateAnswer);
-          const answerMessage: Messages.NetMessage = {
-            route: Messages.NET_ROUTE.SERVER, command: Messages.NET_COMMAND.RTC_ANSWER, idTarget: _idRemote, content: { answer: ultimateAnswer }
+          const answerMessage: FudgeNet.Message = {
+            route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.RTC_ANSWER, idTarget: _idRemote, content: { answer: ultimateAnswer }
           };
           ƒ.Debug.fudge("Remote: send answer to server ", answerMessage);
           this.dispatch(answerMessage);
@@ -232,7 +223,7 @@ namespace FudgeClient {
         });
     }
 
-    private receiveAnswerAndSetRemoteDescription = (_message: Messages.NetMessage) => {
+    private receiveAnswerAndSetRemoteDescription = (_message: FudgeNet.Message) => {
       try {
         ƒ.Debug.fudge("Local: received answer, create data channel ", _message);
         if (!_message.idSource || !_message.content)
@@ -250,9 +241,8 @@ namespace FudgeClient {
         return;
       try {
         ƒ.Debug.fudge("Local: send ICECandidates to server");
-        // let message: Messages.IceCandidate = new Messages.IceCandidate(this.id, _idRemote, _candidate);
-        let message: Messages.NetMessage = {
-          route: Messages.NET_ROUTE.SERVER, command: Messages.NET_COMMAND.ICE_CANDIDATE, idTarget: _idRemote, content: { candidate: _candidate }
+        let message: FudgeNet.Message = {
+          route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.ICE_CANDIDATE, idTarget: _idRemote, content: { candidate: _candidate }
         };
         this.dispatch(message);
       } catch (error) {
@@ -260,7 +250,7 @@ namespace FudgeClient {
       }
     }
 
-    private addReceivedCandidateToPeerConnection = async (_message: Messages.NetMessage) => {
+    private addReceivedCandidateToPeerConnection = async (_message: FudgeNet.Message) => {
       ƒ.Debug.fudge("Remote: try to add candidate to peer connection");
       try {
         if (!_message.idSource || !_message.content)
@@ -297,7 +287,7 @@ namespace FudgeClient {
           throw (new Error("id undefined"));
         this.id = _id;
         // this.sendToServer(new Messages.IdAssigned(_id));
-        let message: Messages.NetMessage = { command: Messages.NET_COMMAND.ASSIGN_ID, route: Messages.NET_ROUTE.SERVER };
+        let message: FudgeNet.Message = { command: FudgeNet.COMMAND.ASSIGN_ID, route: FudgeNet.ROUTE.SERVER };
         this.dispatch(message);
       } catch (error) {
         ƒ.Debug.fudge("Unexpected Error: Sending ID Confirmation", error);

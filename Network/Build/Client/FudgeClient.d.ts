@@ -1,11 +1,10 @@
 /// <reference path="../../../Core/Build/FudgeCore.d.ts" />
-declare namespace Messages {
-    enum NET_COMMAND {
+declare namespace FudgeNet {
+    enum COMMAND {
         UNDEFINED = "undefined",
         ERROR = "error",
         /** sent from server to assign an id for the connection and reconfirmed by the client. idTarget is used to carry the id  */
         ASSIGN_ID = "assignId",
-        /** sent from server to assign an id for the connection and reconfirmed by the client. idTarget is used to carry the id  */
         LOGIN_REQUEST = "loginRequest",
         LOGIN_RESPONSE = "loginResponse",
         SERVER_HEARTBEAT = "serverHeartbeat",
@@ -27,17 +26,17 @@ declare namespace Messages {
      * - route VIA_SERVER -> send message to client idTarget via server using websocket
      * - route VIA_SERVER_HOST -> send message to client acting as host via server using websocket, ignoring idTarget
      */
-    enum NET_ROUTE {
+    enum ROUTE {
         HOST = "toHost",
         SERVER = "toServer",
         VIA_SERVER = "viaServer",
         VIA_SERVER_HOST = "viaServerToHost"
     }
-    interface NetMessage {
+    interface Message {
         /** the command the message is supposed to trigger */
-        command?: NET_COMMAND;
+        command?: COMMAND;
         /** the route the message is supposed to take, undefined for peers */
-        route?: NET_ROUTE;
+        route?: ROUTE;
         /** the id of the client sending the message, undefined for server. Automatically inserted by dispatch-method */
         idSource?: string;
         /** the id of the intended recipient of the message, undefined for messages to the server or to all */
@@ -52,7 +51,7 @@ declare namespace Messages {
         };
     }
 }
-declare namespace FudgeClient {
+declare namespace FudgeNet {
     class FudgeClient extends EventTarget {
         id: string;
         name: string;
@@ -65,7 +64,7 @@ declare namespace FudgeClient {
         connectToServer: (_uri?: string) => void;
         loginToServer: (_name: string) => void;
         connectToPeer: (_idRemote: string) => void;
-        dispatch(_message: Messages.NetMessage): void;
+        dispatch(_message: FudgeNet.Message): void;
         private sendToPeer;
         private sendToAllPeers;
         private addWebSocketEventListeners;
@@ -82,7 +81,7 @@ declare namespace FudgeClient {
         private assignIdAndSendConfirmation;
     }
 }
-declare namespace FudgeClient {
+declare namespace FudgeNet {
     enum EVENT {
         CONNECTION_OPENED = "open",
         CONNECTION_CLOSED = "close",

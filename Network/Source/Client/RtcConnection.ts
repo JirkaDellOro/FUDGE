@@ -1,4 +1,4 @@
-namespace FudgeClient {
+namespace FudgeNet {
   import ƒ = FudgeCore;
 
   export enum EVENT {
@@ -18,9 +18,9 @@ namespace FudgeClient {
   };
 
   export class RtcConnection {
-    // TODO: figure out if it makes sense to create all these connections... RTCPeerConnection is undefined.
     public peerConnection: RTCPeerConnection;
     public dataChannel: RTCDataChannel | undefined;
+    // TODO: use mediaStream in the future? 
     public mediaStream: MediaStream | undefined;
 
     constructor() {
@@ -43,10 +43,6 @@ namespace FudgeClient {
 
       function dispatchMessage(_event: MessageEvent): void {
         _client.dispatchEvent(new MessageEvent(_event.type, <MessageEventInit<unknown>><unknown>_event));
-        // let message: Messages.NetMessage = JSON.parse(_messageEvent.data);
-        // ƒ.Debug.fudge("Received message from peer ", message.idSource);
-        // //TODO: dispatch copy of this event or have user register listener herself
-        // _client.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, { detail: message }));
       }
     }
   }

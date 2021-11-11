@@ -27,7 +27,7 @@
     {
       "label": "CustomTask: Add Export",
       "type": "shell",
-      "command": "AddExport .\\Build\\Messages.d.ts",
+      "command": "AddExport .\\Build\\Message.d.ts",
       "dependsOn": [
         "CustomTask: Add Module.Export"
       ]
@@ -35,15 +35,15 @@
     {
       "label": "CustomTask: Add Module.Export",
       "type": "shell",
-      "command": "echo module.exports = {Messages: Messages}; >> .\\Build\\Messages.js",
+      "command": "echo module.exports = {FudgeNet: FudgeNet}; >> .\\Build\\Message.js",
       "dependsOn": [
-        "CustomTask: Compile Messages"
+        "CustomTask: Compile Message"
       ]
     },
     {
-      "label": "CustomTask: Compile Messages",
+      "label": "CustomTask: Compile Message",
       "type": "shell",
-      "command": "tsc -p ./tsconfig.messages.json"
+      "command": "tsc -p ./tsconfig.message.json"
     }
   ]
 }

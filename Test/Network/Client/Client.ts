@@ -1,7 +1,7 @@
 ///<reference path="../../../Network/Build/Client/FudgeClient.d.ts"/>
 namespace ClientTest {
   import ƒ = FudgeCore;
-  import ƒClient = FudgeClient.FudgeClient;
+  import ƒClient = FudgeNet.FudgeClient;
   ƒ.Debug.setFilter(ƒ.DebugConsole, ƒ.DEBUG_FILTER.ALL);
 
   let client: ƒClient = new ƒClient();
@@ -25,7 +25,7 @@ namespace ClientTest {
       document.forms[0].querySelector("button#mesh").removeAttribute("disabled");
       document.forms[0].querySelector("button#host").removeAttribute("disabled");
       (<HTMLInputElement>document.forms[0].querySelector("input#id")).value = client.id;
-      client.addEventListener(FudgeClient.EVENT.MESSAGE_RECEIVED, receiveMessage);
+      client.addEventListener(FudgeNet.EVENT.MESSAGE_RECEIVED, receiveMessage);
     } catch (_error) {
       console.log(_error);
       console.log("Make sure, FudgeServer is running and accessable");
@@ -57,18 +57,18 @@ namespace ClientTest {
 
   async function receiveMessage(_event: CustomEvent | MessageEvent): Promise<void> {
     if (_event instanceof MessageEvent) {
-      let message: Messages.NetMessage = JSON.parse(_event.data);
-      if (message.command != Messages.NET_COMMAND.SERVER_HEARTBEAT)
+      let message: FudgeNet.Message = JSON.parse(_event.data);
+      if (message.command != FudgeNet.COMMAND.SERVER_HEARTBEAT)
         console.table(message);
       switch (message.command) {
-        case Messages.NET_COMMAND.SERVER_HEARTBEAT:
+        case FudgeNet.COMMAND.SERVER_HEARTBEAT:
           clients = message.content;
           if (client.name == "")
             proposeName();
           setTable(clients);
           client.dispatch({ content: { text: "Message from " + client.id + "|" + client.name } });
           break;
-        case Messages.NET_COMMAND.CONNECT_PEERS:
+        case FudgeNet.COMMAND.CONNECT_PEERS:
           createRtcConnectionToClients(message.content.peers);
           break;
         default:
@@ -96,14 +96,11 @@ namespace ClientTest {
     let button: HTMLButtonElement = <HTMLButtonElement>_event.target;
     switch (button.textContent) {
       case "create mesh":
-        // client.sendToServer(new Messages.ToServer(client.id, Messages.SERVER_COMMAND.CREATE_MESH, client.name));
-        // let message: Messages.NetMessage = { command: Messages.NET_COMMAND.CREATE_MESH , route: Messages.NET_ROUTE.SERVER};
-        client.dispatch({ command: Messages.NET_COMMAND.CREATE_MESH, route: Messages.NET_ROUTE.SERVER });
+        client.dispatch({ command: FudgeNet.COMMAND.CREATE_MESH, route: FudgeNet.ROUTE.SERVER });
         break;
       case "become host":
         console.log("createHost", button.id);
-        // client.sendToServer(new Messages.NetMessage(client.id, Messages.SERVER_COMMAND.CONNECT_HOST, client.name));
-        client.dispatch({ command: Messages.NET_COMMAND.CONNECT_HOST, route: Messages.NET_ROUTE.SERVER });
+        client.dispatch({ command: FudgeNet.COMMAND.CONNECT_HOST, route: FudgeNet.ROUTE.SERVER });
         break;
     }
   }

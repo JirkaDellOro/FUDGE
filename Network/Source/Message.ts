@@ -1,10 +1,9 @@
-namespace Messages {
-  export enum NET_COMMAND {
+namespace FudgeNet {
+  export enum COMMAND {
     UNDEFINED = "undefined",
     ERROR = "error",
     /** sent from server to assign an id for the connection and reconfirmed by the client. idTarget is used to carry the id  */
     ASSIGN_ID = "assignId",
-    /** sent from server to assign an id for the connection and reconfirmed by the client. idTarget is used to carry the id  */
     LOGIN_REQUEST = "loginRequest",
     LOGIN_RESPONSE = "loginResponse",
     SERVER_HEARTBEAT = "serverHeartbeat",
@@ -27,18 +26,18 @@ namespace Messages {
    * - route VIA_SERVER -> send message to client idTarget via server using websocket
    * - route VIA_SERVER_HOST -> send message to client acting as host via server using websocket, ignoring idTarget
    */
-  export enum NET_ROUTE {
+  export enum ROUTE {
     HOST = "toHost",
     SERVER = "toServer",
     VIA_SERVER = "viaServer",
     VIA_SERVER_HOST = "viaServerToHost"
   }
 
-  export interface NetMessage {
+  export interface Message {
     /** the command the message is supposed to trigger */ 
-    command?: NET_COMMAND; 
+    command?: COMMAND; 
     /** the route the message is supposed to take, undefined for peers */ 
-    route?: NET_ROUTE; 
+    route?: ROUTE; 
     /** the id of the client sending the message, undefined for server. Automatically inserted by dispatch-method */
     idSource?: string; 
     /** the id of the intended recipient of the message, undefined for messages to the server or to all */

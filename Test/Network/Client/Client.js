@@ -3,7 +3,7 @@ var ClientTest;
 ///<reference path="../../../Network/Build/Client/FudgeClient.d.ts"/>
 (function (ClientTest) {
     var ƒ = FudgeCore;
-    var ƒClient = FudgeClient.FudgeClient;
+    var ƒClient = FudgeNet.FudgeClient;
     ƒ.Debug.setFilter(ƒ.DebugConsole, ƒ.DEBUG_FILTER.ALL);
     let client = new ƒClient();
     let clients = {};
@@ -24,7 +24,7 @@ var ClientTest;
             document.forms[0].querySelector("button#mesh").removeAttribute("disabled");
             document.forms[0].querySelector("button#host").removeAttribute("disabled");
             document.forms[0].querySelector("input#id").value = client.id;
-            client.addEventListener(FudgeClient.EVENT.MESSAGE_RECEIVED, receiveMessage);
+            client.addEventListener(FudgeNet.EVENT.MESSAGE_RECEIVED, receiveMessage);
         }
         catch (_error) {
             console.log(_error);
@@ -53,17 +53,17 @@ var ClientTest;
     async function receiveMessage(_event) {
         if (_event instanceof MessageEvent) {
             let message = JSON.parse(_event.data);
-            if (message.command != Messages.NET_COMMAND.SERVER_HEARTBEAT)
+            if (message.command != FudgeNet.COMMAND.SERVER_HEARTBEAT)
                 console.table(message);
             switch (message.command) {
-                case Messages.NET_COMMAND.SERVER_HEARTBEAT:
+                case FudgeNet.COMMAND.SERVER_HEARTBEAT:
                     clients = message.content;
                     if (client.name == "")
                         proposeName();
                     setTable(clients);
                     client.dispatch({ content: { text: "Message from " + client.id + "|" + client.name } });
                     break;
-                case Messages.NET_COMMAND.CONNECT_PEERS:
+                case FudgeNet.COMMAND.CONNECT_PEERS:
                     createRtcConnectionToClients(message.content.peers);
                     break;
                 default:
@@ -86,14 +86,11 @@ var ClientTest;
         let button = _event.target;
         switch (button.textContent) {
             case "create mesh":
-                // client.sendToServer(new Messages.ToServer(client.id, Messages.SERVER_COMMAND.CREATE_MESH, client.name));
-                // let message: Messages.NetMessage = { command: Messages.NET_COMMAND.CREATE_MESH , route: Messages.NET_ROUTE.SERVER};
-                client.dispatch({ command: Messages.NET_COMMAND.CREATE_MESH, route: Messages.NET_ROUTE.SERVER });
+                client.dispatch({ command: FudgeNet.COMMAND.CREATE_MESH, route: FudgeNet.ROUTE.SERVER });
                 break;
             case "become host":
                 console.log("createHost", button.id);
-                // client.sendToServer(new Messages.NetMessage(client.id, Messages.SERVER_COMMAND.CONNECT_HOST, client.name));
-                client.dispatch({ command: Messages.NET_COMMAND.CONNECT_HOST, route: Messages.NET_ROUTE.SERVER });
+                client.dispatch({ command: FudgeNet.COMMAND.CONNECT_HOST, route: FudgeNet.ROUTE.SERVER });
                 break;
         }
     }
