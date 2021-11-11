@@ -36,7 +36,7 @@ namespace Messages {
 
   export interface NetMessage {
     /** the command the message is supposed to trigger */ 
-    command: NET_COMMAND; 
+    command?: NET_COMMAND; 
     /** the route the message is supposed to take, undefined for peers */ 
     route?: NET_ROUTE; 
     /** the id of the client sending the message, undefined for server. Automatically inserted by dispatch-method */

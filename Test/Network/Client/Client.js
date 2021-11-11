@@ -57,50 +57,21 @@ var ClientTest;
                 console.table(message);
             switch (message.command) {
                 case Messages.NET_COMMAND.SERVER_HEARTBEAT:
-                    {
-                        clients = message.content;
-                        if (client.name == "")
-                            proposeName();
-                        setTable(clients);
-                        for (let id in client.peers) {
-                            // client.sendToPeer(id, new Messages.PeerToPeer(client.id, "Message from " + client.id + "|" + client.name));
-                            let message = {
-                                command: Messages.NET_COMMAND.UNDEFINED, idTarget: client.id, content: { text: "Message from " + client.id + "|" + client.name }
-                            };
-                            client.dispatch(message);
-                        }
-                    }
+                    clients = message.content;
+                    if (client.name == "")
+                        proposeName();
+                    setTable(clients);
+                    client.dispatch({ content: { text: "Message from " + client.id + "|" + client.name } });
                     break;
+                case Messages.NET_COMMAND.CONNECT_PEERS:
+                    createRtcConnectionToClients(message.content.peers);
+                    break;
+                default:
+                    let blink = document.querySelector(`#${message.idSource}`);
+                    blink.style.backgroundColor = "white";
             }
             return;
         }
-        // console.log("received", _event);
-        // switch (_event.detail.messageType) {
-        //   case Messages.MESSAGE_TYPE.CLIENT_TO_SERVER:
-        //     {
-        //       console.log("Message client to server received", _event.detail);
-        //       let message: Messages.ToServer = <Messages.ToServer>_event.detail;
-        //       // if (message.messageData == Messages.SERVER_COMMAND.CREATE_MESH)
-        //       //   createRtcConnectionToClients();
-        //     }
-        //     break;
-        //   case Messages.MESSAGE_TYPE.SERVER_TO_CLIENT:
-        //     {
-        //       console.log("Message server to client received", _event.detail);
-        //       let message: object = JSON.parse(_event.detail.messageData);
-        //       if (message["connectPeers"])
-        //         createRtcConnectionToClients(message["connectPeers"]);
-        //     }
-        //     break;
-        //   case Messages.MESSAGE_TYPE.PEER_TO_PEER:
-        //     {
-        //       let blink: HTMLSpanElement = document.querySelector(`#${_event.detail.idSource}`);
-        //       blink.style.backgroundColor = "white";
-        //     }
-        //     break;
-        //   default:
-        //     console.log("Unhandled type", _event);
-        // }
     }
     function setTable(_clients) {
         let table = document.querySelector("table");

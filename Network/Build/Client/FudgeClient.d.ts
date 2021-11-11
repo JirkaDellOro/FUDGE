@@ -35,7 +35,7 @@ declare namespace Messages {
     }
     interface NetMessage {
         /** the command the message is supposed to trigger */
-        command: NET_COMMAND;
+        command?: NET_COMMAND;
         /** the route the message is supposed to take, undefined for peers */
         route?: NET_ROUTE;
         /** the id of the client sending the message, undefined for server. Automatically inserted by dispatch-method */
@@ -66,6 +66,8 @@ declare namespace FudgeClient {
         loginToServer: (_name: string) => void;
         dispatch(_message: Messages.NetMessage): void;
         connectToPeer: (_idRemote: string) => void;
+        private sendToPeer;
+        private sendToAllPeers;
         private addWebSocketEventListeners;
         private hndMessage;
         private beginPeerConnectionNegotiation;

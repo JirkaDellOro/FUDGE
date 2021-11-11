@@ -37,12 +37,16 @@ namespace FudgeClient {
 
     public dispatch(_message: Messages.NetMessage): void {
       _message.timeSender = Date.now();
+      _message.idSource = this.id;
       let message: string = JSON.stringify(_message);
       try {
         if (!_message.route || _message.route == Messages.NET_ROUTE.HOST) {
           // send via RTC to specific peer (if idTarget set), all peers (if not set) or host (if route set to host)
+          if (_message.idTarget)
+            this.sendToPeer(_message.idTarget, message);
+          else
+            this.sendToAllPeers(message);
         } else {
-          _message.idSource = this.id;
           this.socket.send(message);
         }
       } catch (_error) {
@@ -76,24 +80,22 @@ namespace FudgeClient {
         this.beginPeerConnectionNegotiation(_idRemote);
     }
 
-    // public sendToPeer = (_idRemote: string, _message: object) => {
-    //   let message: Messages.PeerToPeer = new Messages.PeerToPeer(this.id, JSON.stringify(_message));
-    //   let dataChannel: RTCDataChannel | undefined = this.peers[_idRemote].dataChannel;
-
-    //   if (dataChannel && dataChannel.readyState == "open")
-    //     dataChannel.send(message.serialize());
-    //   else {
-    //     console.error("Datachannel: Connection unexpectedly lost");
-    //   }
-    // }
-
-    // public sendToAllPeers = (_message: object) => {
-    //   for (let idPeer in this.peers) {
-    //     this.sendToPeer(idPeer, _message);
-    //   }
-    // }
     // ----------------------
 
+    private sendToPeer = (_idPeer: string, _message: string) => {
+      let dataChannel: RTCDataChannel | undefined = this.peers[_idPeer].dataChannel;
+      if (dataChannel && dataChannel.readyState == "open")
+        dataChannel.send(_message);
+      else {
+        console.error("Datachannel: Connection unexpectedly lost");
+      }
+    }
+
+    private sendToAllPeers = (_message: string) => {
+      for (let idPeer in this.peers) {
+        this.sendToPeer(idPeer, _message);
+      }
+    }
 
     private addWebSocketEventListeners = (): void => {
       try {
@@ -183,7 +185,7 @@ namespace FudgeClient {
       try {
         let peerConnection: RTCPeerConnection = this.peers[_idRemote].peerConnection;
         const offerMessage: Messages.NetMessage = {
-          command: Messages.NET_COMMAND.RTC_OFFER, idTarget: _idRemote, content: { peerConnection: peerConnection.localDescription }
+          route: Messages.NET_ROUTE.SERVER, command: Messages.NET_COMMAND.RTC_OFFER, idTarget: _idRemote, content: { offer: peerConnection.localDescription }
         };
         // this.sendToServer(offerMessage);
         this.dispatch(offerMessage);
@@ -239,7 +241,7 @@ namespace FudgeClient {
 
           // const answerMessage: Messages.RtcAnswer = new Messages.RtcAnswer(this.id, _idRemote, ultimateAnswer);
           const answerMessage: Messages.NetMessage = {
-            command: Messages.NET_COMMAND.RTC_ANSWER, idTarget: _idRemote, content: { answer: ultimateAnswer }
+            route: Messages.NET_ROUTE.SERVER, command: Messages.NET_COMMAND.RTC_ANSWER, idTarget: _idRemote, content: { answer: ultimateAnswer }
           };
           ƒ.Debug.fudge("Remote: send answer to server ", answerMessage);
           this.dispatch(answerMessage);
@@ -254,7 +256,7 @@ namespace FudgeClient {
         ƒ.Debug.fudge("Local: received answer, create data channel ", _message);
         if (!_message.idSource || !_message.content)
           throw (new Error("message lacks source or content."));
-        let descriptionAnswer: RTCSessionDescription = new RTCSessionDescription(_message.content?.answer);
+        let descriptionAnswer: RTCSessionDescription = new RTCSessionDescription(_message.content.answer);
         this.peers[_message.idSource].peerConnection.setRemoteDescription(descriptionAnswer);
         this.peers[_message.idSource].createDataChannel(this, _message.idSource);
       } catch (error) {
@@ -269,7 +271,7 @@ namespace FudgeClient {
         ƒ.Debug.fudge("Local: send ICECandidates to server");
         // let message: Messages.IceCandidate = new Messages.IceCandidate(this.id, _idRemote, _candidate);
         let message: Messages.NetMessage = {
-          command: Messages.NET_COMMAND.ICE_CANDIDATE, idTarget: _idRemote, content: { candidate: _candidate }
+          route: Messages.NET_ROUTE.SERVER, command: Messages.NET_COMMAND.ICE_CANDIDATE, idTarget: _idRemote, content: { candidate: _candidate }
         };
         this.dispatch(message);
       } catch (error) {
@@ -279,14 +281,12 @@ namespace FudgeClient {
 
     private addReceivedCandidateToPeerConnection = async (_message: Messages.NetMessage) => {
       ƒ.Debug.fudge("Remote: try to add candidate to peer connection");
-      if (_message.content?.candidate) {
-        try {
-          if (!_message.idSource || !_message.content)
-            throw (new Error("message lacks source or content."));
-          await this.peers[_message.idSource].peerConnection.addIceCandidate(_message.content?.candidate);
-        } catch (error) {
-          console.error("Unexpected Error: Adding Ice Candidate", error);
-        }
+      try {
+        if (!_message.idSource || !_message.content)
+          throw (new Error("message lacks source or content."));
+        await this.peers[_message.idSource].peerConnection.addIceCandidate(_message.content.candidate);
+      } catch (error) {
+        console.error("Unexpected Error: Adding Ice Candidate", error);
       }
     }
 

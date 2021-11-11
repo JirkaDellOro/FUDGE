@@ -176,10 +176,10 @@ class FudgeServer {
         if (client && client.socket && _message.content) {
             // client.socket.send(_message.serialize());
             // TODO: with new messages, simply pass through
-            let netMessage = {
-                idTarget: _message.idTarget, command: Messages_js_1.Messages.NET_COMMAND.RTC_ANSWER, content: { answer: _message.content.answer }
-            };
-            this.dispatch(netMessage);
+            // let netMessage: Messages.NetMessage = {
+            //   idTarget: _message.idTarget, command: Messages.NET_COMMAND.RTC_ANSWER, content: { answer: _message.content.answer }
+            // };
+            this.dispatch(_message);
         }
         else
             throw (new Error("Client or its socket not found or message lacks content."));
@@ -190,10 +190,10 @@ class FudgeServer {
         const client = this.clients[_message.idTarget];
         if (client && _message.content) {
             console.warn("Send Candidate", client, _message.content.candidate);
-            let netMessage = {
-                idTarget: _message.idTarget, command: Messages_js_1.Messages.NET_COMMAND.ICE_CANDIDATE, content: _message.content
-            };
-            this.dispatch(netMessage);
+            // let netMessage: Messages.NetMessage = {
+            //   idTarget: _message.idTarget, command: Messages.NET_COMMAND.ICE_CANDIDATE, content: _message.content
+            // };
+            this.dispatch(_message);
         }
         else
             throw (new Error("Client not found or message lacks content."));
@@ -208,6 +208,7 @@ class FudgeServer {
         let clients = {};
         for (let id in this.clients)
             clients[id] = { name: this.clients[id].name, peers: this.clients[id].peers };
+        // console.log(clients);
         // let message: Messages.ServerHeartbeat = new Messages.ServerHeartbeat(JSON.stringify(clients));
         // this.broadcastMessageToAllConnectedClients(message);
         let message = { command: Messages_js_1.Messages.NET_COMMAND.SERVER_HEARTBEAT, content: clients };
