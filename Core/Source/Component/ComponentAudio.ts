@@ -84,6 +84,9 @@ namespace FudgeCore {
     public setAudio(_audio: Audio): void {
       this.createSource(_audio, this.source.loop);
     }
+    public getAudio(): Audio {
+      return this.audio;
+    }
 
     /**
      * Set the property of the panner to the given value. Use to manipulate range and rolloff etc.

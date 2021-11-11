@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta settings='"server": "ws://localhost:8080", "login": "Test", "partner": "Test"'>
+  <script src="../../../Core/Build/FudgeCore.js"></script>
+  <script src="../../../Network/Build/Client/FudgeClient.js"></script>
+  <script src="Client.js" defer></script>
+  <title>New Test Client</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <form id="connect">
+    <fieldset>
+      <legend>Server</legend>
+      <input type="text" name="server" value="ws://localhost:8080">
+      <button type="button" id="connect">Connect</button><br />
+      <input type="text" name="login" value="Client-0">
+      <button type="button" id="login" disabled>Login</button><br />
+      <input type="text" id="id" value="" disabled> id <br />
+      <button type="button" id="mesh" disabled>create mesh</button>
+      <button type="button" id="host" disabled>become host</button><br />
+    </fieldset>
+  </form>
+  <fieldset>
+    <legend>Connections</legend>
+    <table> </table>
+  </fieldset>
+</body>
+
+</html>

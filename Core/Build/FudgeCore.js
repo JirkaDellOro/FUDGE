@@ -4093,6 +4093,9 @@ var FudgeCore;
         setAudio(_audio) {
             this.createSource(_audio, this.source.loop);
         }
+        getAudio() {
+            return this.audio;
+        }
         /**
          * Set the property of the panner to the given value. Use to manipulate range and rolloff etc.
          */

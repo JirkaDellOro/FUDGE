@@ -1627,6 +1627,7 @@ declare namespace FudgeCore {
         get isAttached(): boolean;
         get isListened(): boolean;
         setAudio(_audio: Audio): void;
+        getAudio(): Audio;
         /**
          * Set the property of the panner to the given value. Use to manipulate range and rolloff etc.
          */
