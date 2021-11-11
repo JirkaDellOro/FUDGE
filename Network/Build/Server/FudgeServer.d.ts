@@ -17,9 +17,9 @@ export declare class FudgeServer {
     broadcast(_message: Messages.NetMessage): void;
     private addEventListeners;
     private handleMessage;
-    private receive;
+    private createMesh;
+    private connectHost;
     private addUserOnValidLoginRequest;
-    private broadcastMessageToAllConnectedClients;
     private sendRtcOfferToRequestedClient;
     private answerRtcOfferOfClient;
     private sendIceCandidatesToRelevantPeer;

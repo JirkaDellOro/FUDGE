@@ -73,47 +73,46 @@ class FudgeServer {
             case Messages_js_1.Messages.NET_COMMAND.LOGIN_REQUEST:
                 this.addUserOnValidLoginRequest(_wsConnection, message);
                 break;
-        }
-        //   case Messages.MESSAGE_TYPE.LOGIN_REQUEST:
-        //     this.addUserOnValidLoginRequest(_wsConnection, <Messages.LoginRequest>message);
-        //     break;
-        //   case Messages.MESSAGE_TYPE.CLIENT_TO_SERVER:
-        //     this.receive(<Messages.ToServer>message);
-        //     break;
-        //   case Messages.MESSAGE_TYPE.RTC_OFFER:
-        //     this.sendRtcOfferToRequestedClient(_wsConnection, <Messages.RtcOffer>message);
-        //     break;
-        //   case Messages.MESSAGE_TYPE.RTC_ANSWER:
-        //     this.answerRtcOfferOfClient(_wsConnection, <Messages.RtcAnswer>message);
-        //     break;
-        //   case Messages.MESSAGE_TYPE.ICE_CANDIDATE:
-        //     this.sendIceCandidatesToRelevantPeer(_wsConnection, <Messages.IceCandidate>message);
-        //     break;
-        //   default:
-        //     console.log("WebSocket: Message type not recognized");
-        //     break;
-        // }
-    }
-    async receive(_message) {
-        switch (_message.messageData) {
-            case Messages_js_1.Messages.SERVER_COMMAND.CREATE_MESH: {
-                let ids = Reflect.ownKeys(this.clients);
-                while (ids.length > 1) {
-                    let id = ids.pop();
-                    let message = new Messages_js_1.Messages.ToClient(JSON.stringify({ [Messages_js_1.Messages.SERVER_COMMAND.CONNECT_PEERS]: ids }));
-                    await new Promise((resolve) => { setTimeout(resolve, 200); });
-                    this.clients[id].socket?.send(message.serialize());
-                }
+            case Messages_js_1.Messages.NET_COMMAND.RTC_OFFER:
+                this.sendRtcOfferToRequestedClient(_wsConnection, message);
                 break;
-            }
-            case Messages_js_1.Messages.SERVER_COMMAND.CONNECT_HOST: {
-                let message = new Messages_js_1.Messages.ToClient(JSON.stringify({ [Messages_js_1.Messages.SERVER_COMMAND.CONNECT_PEERS]: Reflect.ownKeys(this.clients) }));
-                this.clients[_message.idSource].socket?.send(message.serialize());
+            case Messages_js_1.Messages.NET_COMMAND.RTC_ANSWER:
+                this.answerRtcOfferOfClient(_wsConnection, message);
                 break;
-            }
+            case Messages_js_1.Messages.NET_COMMAND.ICE_CANDIDATE:
+                this.sendIceCandidatesToRelevantPeer(_wsConnection, message);
+                break;
+            case Messages_js_1.Messages.NET_COMMAND.CREATE_MESH:
+                this.createMesh(message);
+                break;
+            case Messages_js_1.Messages.NET_COMMAND.CONNECT_HOST:
+                this.connectHost(message);
+                break;
             default:
-                this.broadcastMessageToAllConnectedClients(_message);
+                console.log("WebSocket: Message type not recognized");
+                break;
         }
+    }
+    async createMesh(_message) {
+        let ids = Reflect.ownKeys(this.clients);
+        while (ids.length > 1) {
+            let id = ids.pop();
+            // let message: Messages.ToClient = new Messages.ToClient(JSON.stringify({ [Messages.SERVER_COMMAND.CONNECT_PEERS]: ids }));
+            let message = {
+                command: Messages_js_1.Messages.NET_COMMAND.CONNECT_PEERS, idTarget: id, content: { peers: ids }
+            };
+            // new Messages.ToClient(JSON.stringify({ [Messages.SERVER_COMMAND.CONNECT_PEERS]: ids }));
+            await new Promise((resolve) => { setTimeout(resolve, 200); });
+            this.dispatch(message);
+        }
+    }
+    async connectHost(_message) {
+        let ids = Reflect.ownKeys(this.clients);
+        let message = {
+            command: Messages_js_1.Messages.NET_COMMAND.CONNECT_PEERS, idTarget: _message.idSource, content: { peers: ids }
+        };
+        // new Messages.ToClient(JSON.stringify({ [Messages.SERVER_COMMAND.CONNECT_PEERS]: Reflect.ownKeys(this.clients) }));
+        this.dispatch(message);
     }
     addUserOnValidLoginRequest(_wsConnection, _message) {
         let name = _message.content?.name;
@@ -141,55 +140,63 @@ class FudgeServer {
             console.error("Unhandled Exception: Unable to create or send LoginResponse", error);
         }
     }
-    broadcastMessageToAllConnectedClients(_message) {
-        if (_message.messageType != Messages_js_1.Messages.MESSAGE_TYPE.SERVER_HEARTBEAT)
-            console.info("Broadcast", _message);
-        // TODO: appearently, websocketServer keeps its own list of clients. Examine if it makes sense to double this information in this.clients
-        let clientArray = Array.from(this.socket.clients);
-        let message = _message.serialize();
-        clientArray.forEach(_client => {
-            _client.send(message);
-        });
-    }
+    // private broadcastMessageToAllConnectedClients(_message: Messages.ToClient): void {
+    //   if (_message.messageType != Messages.MESSAGE_TYPE.SERVER_HEARTBEAT)
+    //     console.info("Broadcast", _message);
+    //   // TODO: appearently, websocketServer keeps its own list of clients. Examine if it makes sense to double this information in this.clients
+    //   let clientArray: WebSocket[] = Array.from(this.socket.clients);
+    //   let message: string = _message.serialize();
+    //   clientArray.forEach(_client => {
+    //     _client.send(message);
+    //   });
+    // }
     sendRtcOfferToRequestedClient(_wsConnection, _message) {
-        console.log("Sending offer to: ", _message.idRemote);
-        const client = this.clients[_message.idRemote];
-        if (client) {
-            const offerMessage = new Messages_js_1.Messages.RtcOffer(_message.idSource, client.id, _message.offer);
-            let netMessage = { idSource: _message.idSource, idTarget: _message.idRemote, command: Messages_js_1.Messages.NET_COMMAND.RTC_OFFER, content: { offer: _message.offer } };
-            try {
-                client.socket?.send(offerMessage.serialize());
-                this.dispatch(netMessage);
-            }
-            catch (error) {
-                console.error("Unhandled Exception: Unable to relay Offer to Client", error);
-            }
+        try {
+            if (!_message.idTarget || !_message.content)
+                throw (new Error("Message lacks idTarget or content."));
+            console.log("Sending offer to: ", _message.idTarget);
+            const client = this.clients[_message.idTarget];
+            if (!client)
+                throw (new Error(`No client found with id ${_message.idTarget}`));
+            let netMessage = {
+                idSource: _message.idSource, idTarget: _message.idTarget, command: Messages_js_1.Messages.NET_COMMAND.RTC_OFFER, content: { offer: _message.content.offer }
+            };
+            // client.socket?.send(_message.serialize());
+            this.dispatch(netMessage);
         }
-        else {
-            console.error("Server is not connected to client with this id", _message.idRemote);
+        catch (error) {
+            console.error("Unhandled Exception: Unable to relay Offer to Client", error);
         }
     }
     answerRtcOfferOfClient(_wsConnection, _message) {
+        if (!_message.idTarget)
+            throw (new Error("Message lacks target"));
         console.log("Sending answer to: ", _message.idTarget);
         const client = this.clients[_message.idTarget];
-        if (client) {
-            // TODO Probable source of error, need to test
-            if (client.socket != null)
-                client.socket.send(_message.serialize());
+        if (client && client.socket && _message.content) {
+            // client.socket.send(_message.serialize());
             // TODO: with new messages, simply pass through
-            let netMessage = { idTarget: _message.idTarget, command: Messages_js_1.Messages.NET_COMMAND.RTC_ANSWER, content: { answer: _message.answer } };
+            let netMessage = {
+                idTarget: _message.idTarget, command: Messages_js_1.Messages.NET_COMMAND.RTC_ANSWER, content: { answer: _message.content.answer }
+            };
             this.dispatch(netMessage);
         }
+        else
+            throw (new Error("Client or its socket not found or message lacks content."));
     }
     sendIceCandidatesToRelevantPeer(_wsConnection, _message) {
+        if (!_message.idTarget || !_message.idSource)
+            throw (new Error("Message lacks target or source."));
         const client = this.clients[_message.idTarget];
-        console.warn("Send Candidate", client, _message.candidate);
-        if (client) {
-            const candidateToSend = new Messages_js_1.Messages.IceCandidate(_message.idSource, client.id, _message.candidate);
-            client.socket?.send(candidateToSend.serialize());
-            let netMessage = { idTarget: _message.idTarget, command: Messages_js_1.Messages.NET_COMMAND.ICE_CANDIDATE, content: { candidate: _message.candidate } };
+        if (client && _message.content) {
+            console.warn("Send Candidate", client, _message.content.candidate);
+            let netMessage = {
+                idTarget: _message.idTarget, command: Messages_js_1.Messages.NET_COMMAND.ICE_CANDIDATE, content: _message.content
+            };
             this.dispatch(netMessage);
         }
+        else
+            throw (new Error("Client not found or message lacks content."));
     }
     createID = () => {
         // Math.random should be random enough because of its seed

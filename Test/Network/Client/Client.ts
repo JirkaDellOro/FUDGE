@@ -58,7 +58,8 @@ namespace ClientTest {
   async function receiveMessage(_event: CustomEvent | MessageEvent): Promise<void> {
     if (_event instanceof MessageEvent) {
       let message: Messages.NetMessage = JSON.parse(_event.data);
-      console.table(message);
+      if (message.command != Messages.NET_COMMAND.SERVER_HEARTBEAT)
+        console.table(message);
       switch (message.command) {
         case Messages.NET_COMMAND.SERVER_HEARTBEAT:
           {
@@ -66,40 +67,45 @@ namespace ClientTest {
             if (client.name == "")
               proposeName();
             setTable(clients);
-            for (let id in client.peers)
-              client.sendToPeer(id, new Messages.PeerToPeer(client.id, "Message from " + client.id + "|" + client.name));
+            for (let id in client.peers) {
+              // client.sendToPeer(id, new Messages.PeerToPeer(client.id, "Message from " + client.id + "|" + client.name));
+              let message: Messages.NetMessage = {
+                command: Messages.NET_COMMAND.UNDEFINED, idTarget: client.id, content: { text: "Message from " + client.id + "|" + client.name }
+              };
+              client.dispatch(message);
+            }
           }
           break;
       }
       return;
     }
     // console.log("received", _event);
-    switch (_event.detail.messageType) {
-      case Messages.MESSAGE_TYPE.CLIENT_TO_SERVER:
-        {
-          console.log("Message client to server received", _event.detail);
-          let message: Messages.ToServer = <Messages.ToServer>_event.detail;
-          // if (message.messageData == Messages.SERVER_COMMAND.CREATE_MESH)
-          //   createRtcConnectionToClients();
-        }
-        break;
-      case Messages.MESSAGE_TYPE.SERVER_TO_CLIENT:
-        {
-          console.log("Message server to client received", _event.detail);
-          let message: object = JSON.parse(_event.detail.messageData);
-          if (message["connectPeers"])
-            createRtcConnectionToClients(message["connectPeers"]);
-        }
-        break;
-      case Messages.MESSAGE_TYPE.PEER_TO_PEER:
-        {
-          let blink: HTMLSpanElement = document.querySelector(`#${_event.detail.idSource}`);
-          blink.style.backgroundColor = "white";
-        }
-        break;
-      default:
-        console.log("Unhandled type", _event);
-    }
+    // switch (_event.detail.messageType) {
+    //   case Messages.MESSAGE_TYPE.CLIENT_TO_SERVER:
+    //     {
+    //       console.log("Message client to server received", _event.detail);
+    //       let message: Messages.ToServer = <Messages.ToServer>_event.detail;
+    //       // if (message.messageData == Messages.SERVER_COMMAND.CREATE_MESH)
+    //       //   createRtcConnectionToClients();
+    //     }
+    //     break;
+    //   case Messages.MESSAGE_TYPE.SERVER_TO_CLIENT:
+    //     {
+    //       console.log("Message server to client received", _event.detail);
+    //       let message: object = JSON.parse(_event.detail.messageData);
+    //       if (message["connectPeers"])
+    //         createRtcConnectionToClients(message["connectPeers"]);
+    //     }
+    //     break;
+    //   case Messages.MESSAGE_TYPE.PEER_TO_PEER:
+    //     {
+    //       let blink: HTMLSpanElement = document.querySelector(`#${_event.detail.idSource}`);
+    //       blink.style.backgroundColor = "white";
+    //     }
+    //     break;
+    //   default:
+    //     console.log("Unhandled type", _event);
+    // }
   }
 
   function setTable(_clients: { [id: string]: ƒClient }): void {
@@ -119,11 +125,14 @@ namespace ClientTest {
     let button: HTMLButtonElement = <HTMLButtonElement>_event.target;
     switch (button.textContent) {
       case "create mesh":
-        client.sendToServer(new Messages.ToServer(client.id, Messages.SERVER_COMMAND.CREATE_MESH, client.name));
+        // client.sendToServer(new Messages.ToServer(client.id, Messages.SERVER_COMMAND.CREATE_MESH, client.name));
+        // let message: Messages.NetMessage = { command: Messages.NET_COMMAND.CREATE_MESH , route: Messages.NET_ROUTE.SERVER};
+        client.dispatch({ command: Messages.NET_COMMAND.CREATE_MESH, route: Messages.NET_ROUTE.SERVER });
         break;
       case "become host":
         console.log("createHost", button.id);
-        client.sendToServer(new Messages.ToServer(client.id, Messages.SERVER_COMMAND.CONNECT_HOST, client.name));
+        // client.sendToServer(new Messages.NetMessage(client.id, Messages.SERVER_COMMAND.CONNECT_HOST, client.name));
+        client.dispatch({ command: Messages.NET_COMMAND.CONNECT_HOST, route: Messages.NET_ROUTE.SERVER });
         break;
     }
   }
