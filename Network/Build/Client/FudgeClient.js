@@ -73,6 +73,13 @@ var FudgeClient;
                 ƒ.Debug.fudge("Unexpected error: Sending Login Request", error);
             }
         };
+        connectToPeer = (_idRemote) => {
+            if (this.peers[_idRemote])
+                ƒ.Debug.warn("Peers already connected, ignoring request", this.id, _idRemote);
+            else
+                // this.idRemote = _idRemote;
+                this.beginPeerConnectionNegotiation(_idRemote);
+        };
         dispatch(_message) {
             _message.timeSender = Date.now();
             _message.idSource = this.id;
@@ -93,29 +100,6 @@ var FudgeClient;
                 console.log(_error);
             }
         }
-        // public broadcast(_message: Messages.NetMessage): void {
-        //   _message.timeServer = Date.now();
-        //   let message: string = JSON.stringify(_message);
-        //   for (let id in this.clients)
-        //     // TODO: examine, if idTarget should be tweaked...
-        //     this.clients[id].socket?.send(message);
-        // }
-        // public sendToServer = (_message: Messages.MessageBase): void => {
-        //   let stringifiedMessage: string = _message.serialize();
-        //   if (this.socket.readyState == 1) {
-        //     this.socket.send(stringifiedMessage);
-        //   }
-        //   else {
-        //     ƒ.Debug.fudge("Websocket Connection closed unexpectedly");
-        //   }
-        // }
-        connectToPeer = (_idRemote) => {
-            if (this.peers[_idRemote])
-                ƒ.Debug.warn("Peers already connected, ignoring request", this.id, _idRemote);
-            else
-                // this.idRemote = _idRemote;
-                this.beginPeerConnectionNegotiation(_idRemote);
-        };
         // ----------------------
         sendToPeer = (_idPeer, _message) => {
             let dataChannel = this.peers[_idPeer].dataChannel;
@@ -335,7 +319,6 @@ var FudgeClient;
 })(FudgeClient || (FudgeClient = {}));
 var FudgeClient;
 (function (FudgeClient) {
-    var ƒ = FudgeCore;
     let EVENT;
     (function (EVENT) {
         EVENT["CONNECTION_OPENED"] = "open";
@@ -370,10 +353,12 @@ var FudgeClient;
             function dispatchRtcEvent(_event) {
                 _client.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, { detail: _event }));
             }
-            function dispatchMessage(_messageEvent) {
-                let message = JSON.parse(_messageEvent.data);
-                ƒ.Debug.fudge("Received message from peer ", message.idSource);
-                _client.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, { detail: message }));
+            function dispatchMessage(_event) {
+                _client.dispatchEvent(new MessageEvent(_event.type, _event));
+                // let message: Messages.NetMessage = JSON.parse(_messageEvent.data);
+                // ƒ.Debug.fudge("Received message from peer ", message.idSource);
+                // //TODO: dispatch copy of this event or have user register listener herself
+                // _client.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, { detail: message }));
             }
         }
     }

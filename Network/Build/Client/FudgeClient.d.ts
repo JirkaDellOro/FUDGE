@@ -64,8 +64,8 @@ declare namespace FudgeClient {
         constructor();
         connectToServer: (_uri?: string) => void;
         loginToServer: (_name: string) => void;
-        dispatch(_message: Messages.NetMessage): void;
         connectToPeer: (_idRemote: string) => void;
+        dispatch(_message: Messages.NetMessage): void;
         private sendToPeer;
         private sendToAllPeers;
         private addWebSocketEventListeners;

@@ -35,6 +35,14 @@ namespace FudgeClient {
       }
     }
 
+    public connectToPeer = (_idRemote: string): void => {
+      if (this.peers[_idRemote])
+        ƒ.Debug.warn("Peers already connected, ignoring request", this.id, _idRemote);
+      else
+        // this.idRemote = _idRemote;
+        this.beginPeerConnectionNegotiation(_idRemote);
+    }
+
     public dispatch(_message: Messages.NetMessage): void {
       _message.timeSender = Date.now();
       _message.idSource = this.id;
@@ -53,33 +61,6 @@ namespace FudgeClient {
         console.log(_error);
       }
     }
-
-    // public broadcast(_message: Messages.NetMessage): void {
-    //   _message.timeServer = Date.now();
-    //   let message: string = JSON.stringify(_message);
-    //   for (let id in this.clients)
-    //     // TODO: examine, if idTarget should be tweaked...
-    //     this.clients[id].socket?.send(message);
-    // }
-
-    // public sendToServer = (_message: Messages.MessageBase): void => {
-    //   let stringifiedMessage: string = _message.serialize();
-    //   if (this.socket.readyState == 1) {
-    //     this.socket.send(stringifiedMessage);
-    //   }
-    //   else {
-    //     ƒ.Debug.fudge("Websocket Connection closed unexpectedly");
-    //   }
-    // }
-
-    public connectToPeer = (_idRemote: string): void => {
-      if (this.peers[_idRemote])
-        ƒ.Debug.warn("Peers already connected, ignoring request", this.id, _idRemote);
-      else
-        // this.idRemote = _idRemote;
-        this.beginPeerConnectionNegotiation(_idRemote);
-    }
-
     // ----------------------
 
     private sendToPeer = (_idPeer: string, _message: string) => {

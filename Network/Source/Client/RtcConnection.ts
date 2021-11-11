@@ -41,10 +41,12 @@ namespace FudgeClient {
         _client.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, { detail: _event }));
       }
 
-      function dispatchMessage(_messageEvent: MessageEvent): void {
-        let message: Messages.NetMessage = JSON.parse(_messageEvent.data);
-        ƒ.Debug.fudge("Received message from peer ", message.idSource);
-        _client.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, { detail: message }));
+      function dispatchMessage(_event: MessageEvent): void {
+        _client.dispatchEvent(new MessageEvent(_event.type, <MessageEventInit<unknown>><unknown>_event));
+        // let message: Messages.NetMessage = JSON.parse(_messageEvent.data);
+        // ƒ.Debug.fudge("Received message from peer ", message.idSource);
+        // //TODO: dispatch copy of this event or have user register listener herself
+        // _client.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, { detail: message }));
       }
     }
   }
