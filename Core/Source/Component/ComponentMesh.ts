@@ -7,11 +7,19 @@ namespace FudgeCore {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentMesh);
     public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
     public readonly mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY();
-    public mesh: Mesh = null;
+    #mesh: Mesh = null;
 
     public constructor(_mesh: Mesh = null) {
       super();
       this.mesh = _mesh;
+    }
+
+    public get mesh(): Mesh {
+      return this.#mesh;
+    }
+
+    public set mesh(_mesh: Mesh) {
+      this.#mesh = _mesh;
     }
 
     public get radius(): number {
