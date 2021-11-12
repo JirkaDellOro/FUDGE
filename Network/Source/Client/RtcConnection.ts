@@ -17,6 +17,13 @@ namespace FudgeNet {
     ]
   };
 
+  /**
+   * Manages a single rtc peer-to-peer connection with multiple channels.  
+   * {@link FudgeNet.Message}s are passed on from the client using this connection
+   * for further processing by some observer. Instances of this class are
+   * used internally by the {@link FudgeClient} and should not be used otherwise.
+   * @author Jirka Dell'Oro-Friedl, HFU, 2021
+   */
   export class RtcConnection {
     public peerConnection: RTCPeerConnection;
     public dataChannel: RTCDataChannel | undefined;

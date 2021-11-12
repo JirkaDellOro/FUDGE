@@ -5,18 +5,33 @@ var FudgeNet;
     (function (COMMAND) {
         COMMAND["UNDEFINED"] = "undefined";
         COMMAND["ERROR"] = "error";
-        /** sent from server to assign an id for the connection and reconfirmed by the client. idTarget is used to carry the id  */
+        /** sent from server to assign an id for the connection and reconfirmed by the client. `idTarget` is used to carry the id  */
         COMMAND["ASSIGN_ID"] = "assignId";
+        /** sent from a client to the server to suggest a login name. `name` used for the suggested name  */
         COMMAND["LOGIN_REQUEST"] = "loginRequest";
+        /** sent from the server to the client requesting a login name. `content.success` is true or false for feedback */
         COMMAND["LOGIN_RESPONSE"] = "loginResponse";
+        /** sent from the server every second to check if the connection is still up.
+         * `content` is an array of objects with the ids of the clients and their connected peers as known to the server */
         COMMAND["SERVER_HEARTBEAT"] = "serverHeartbeat";
+        /** not used yet */
         COMMAND["CLIENT_HEARTBEAT"] = "clientHeartbeat";
+        /** command used internally when a client tries to connect to another via rtc to create a peer-to-peer-connection */
         COMMAND["RTC_OFFER"] = "rtcOffer";
+        /** command used internally when a client answers a conection request from another client */
         COMMAND["RTC_ANSWER"] = "rtcAnswer";
+        /** command used internally when a client send its connection candidates for peer-to-peer connetion */
         COMMAND["ICE_CANDIDATE"] = "rtcCandidate";
+        /** TODO: use to dissolve peer-to-peer-connections between clients to cleanup structures previously built */
         COMMAND["DISCONNECT_CLIENT"] = "disconnect_client";
+        /** command sent by a client to the server and from the server to all clients to initiate a mesh structure between the clients
+         * creating peer-to-peer-connections between all clients known to the server */
         COMMAND["CREATE_MESH"] = "createMesh";
+        /** command sent by a client, which is supposed to become the host, to the server and from the server to all clients
+         * to create peer-to-peer-connections between this host and all other clients known to the server */
         COMMAND["CONNECT_HOST"] = "connectHost";
+        /** command initializing peer-to-peer-connections between the client identified with `idTarget` and all the peers
+         * identified by the array giwen with `content.peers` */
         COMMAND["CONNECT_PEERS"] = "connectPeers";
     })(COMMAND = FudgeNet.COMMAND || (FudgeNet.COMMAND = {}));
     /**
@@ -36,13 +51,71 @@ var FudgeNet;
         ROUTE["VIA_SERVER_HOST"] = "viaServerToHost";
     })(ROUTE = FudgeNet.ROUTE || (FudgeNet.ROUTE = {}));
 })(FudgeNet || (FudgeNet = {}));
+var FudgeNet;
+(function (FudgeNet) {
+    let EVENT;
+    (function (EVENT) {
+        EVENT["CONNECTION_OPENED"] = "open";
+        EVENT["CONNECTION_CLOSED"] = "close";
+        EVENT["ERROR"] = "error";
+        EVENT["MESSAGE_RECEIVED"] = "message";
+    })(EVENT = FudgeNet.EVENT || (FudgeNet.EVENT = {}));
+    // More info from here https://developer.mozilla.org/en-US/docs/Web/API/RTCConfiguration
+    // tslint:disable-next-line: typedef
+    FudgeNet.configuration = {
+        iceServers: [
+            { urls: "stun:stun2.1.google.com:19302" },
+            { urls: "stun:stun.example.com" }
+        ]
+    };
+    /**
+     * Manages a single rtc peer-to-peer connection with multiple channels.
+     * {@link FudgeNet.Message}s are passed on from the client using this connection
+     * for further processing by some observer. Instances of this class are
+     * used internally by the {@link FudgeClient} and should not be used otherwise.
+     * @author Jirka Dell'Oro-Friedl, HFU, 2021
+     */
+    class RtcConnection {
+        peerConnection;
+        dataChannel;
+        // TODO: use mediaStream in the future? 
+        mediaStream;
+        constructor() {
+            this.peerConnection = new RTCPeerConnection(FudgeNet.configuration);
+        }
+        createDataChannel(_client, _idRemote) {
+            this.addDataChannel(_client, this.peerConnection.createDataChannel(_client.id + "->" + _idRemote));
+        }
+        addDataChannel(_client, _dataChannel) {
+            this.dataChannel = _dataChannel;
+            this.dataChannel.addEventListener(EVENT.CONNECTION_OPENED, dispatchRtcEvent);
+            this.dataChannel.addEventListener(EVENT.CONNECTION_CLOSED, dispatchRtcEvent);
+            this.dataChannel.addEventListener(EVENT.MESSAGE_RECEIVED, dispatchMessage);
+            function dispatchRtcEvent(_event) {
+                _client.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, { detail: _event }));
+            }
+            function dispatchMessage(_event) {
+                _client.dispatchEvent(new MessageEvent(_event.type, _event));
+            }
+        }
+    }
+    FudgeNet.RtcConnection = RtcConnection;
+})(FudgeNet || (FudgeNet = {}));
 ///<reference path="../Message.ts"/>
+///<reference path="./RtcConnection.ts"/>
 ///<reference path="../../../Core/Build/FudgeCore.d.ts"/>
 var FudgeNet;
 ///<reference path="../Message.ts"/>
+///<reference path="./RtcConnection.ts"/>
 ///<reference path="../../../Core/Build/FudgeCore.d.ts"/>
 (function (FudgeNet) {
     var ƒ = FudgeCore;
+    /**
+     * Manages a websocket connection to a FudgeServer and multiple rtc-connections to other FudgeClients.
+     * Processes messages from in the format {@link FudgeNet.Message} according to the controlling
+     * fields {@link FudgeNet.ROUTE} and {@link FudgeNet.COMMAND}.
+     * @author Falco Böhnke, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021
+     */
     class FudgeClient extends EventTarget {
         id;
         name;
@@ -54,11 +127,17 @@ var FudgeNet;
             this.name = "";
             this.id = "undefined";
         }
+        /**
+         * Tries to connect to the server at the given url and installs the appropriate listeners
+         */
         connectToServer = (_uri = "ws://localhost:8080") => {
             this.urlServer = _uri;
             this.socket = new WebSocket(_uri);
             this.addWebSocketEventListeners();
         };
+        /**
+         * Tries to publish a human readable name for this client. Identification still solely by `id`
+         */
         loginToServer = (_name) => {
             try {
                 let message = {
@@ -70,12 +149,19 @@ var FudgeNet;
                 ƒ.Debug.fudge("Unexpected error: Sending Login Request", error);
             }
         };
+        /**
+         * Tries to connect to another client with the given `id` via rtc
+         */
         connectToPeer = (_idRemote) => {
             if (this.peers[_idRemote])
                 ƒ.Debug.warn("Peers already connected, ignoring request", this.id, _idRemote);
             else
                 this.beginPeerConnectionNegotiation(_idRemote);
         };
+        /**
+         * Dispatches a {@link FudgeNet.Message} to the server, a specific client or all
+         * accourding to {@link FudgeNet.ROUTE} and `idTarget`
+         */
         dispatch(_message) {
             _message.timeSender = Date.now();
             _message.idSource = this.id;
@@ -305,48 +391,5 @@ var FudgeNet;
         };
     }
     FudgeNet.FudgeClient = FudgeClient;
-})(FudgeNet || (FudgeNet = {}));
-var FudgeNet;
-(function (FudgeNet) {
-    let EVENT;
-    (function (EVENT) {
-        EVENT["CONNECTION_OPENED"] = "open";
-        EVENT["CONNECTION_CLOSED"] = "close";
-        EVENT["ERROR"] = "error";
-        EVENT["MESSAGE_RECEIVED"] = "message";
-    })(EVENT = FudgeNet.EVENT || (FudgeNet.EVENT = {}));
-    // More info from here https://developer.mozilla.org/en-US/docs/Web/API/RTCConfiguration
-    // tslint:disable-next-line: typedef
-    FudgeNet.configuration = {
-        iceServers: [
-            { urls: "stun:stun2.1.google.com:19302" },
-            { urls: "stun:stun.example.com" }
-        ]
-    };
-    class RtcConnection {
-        peerConnection;
-        dataChannel;
-        // TODO: use mediaStream in the future? 
-        mediaStream;
-        constructor() {
-            this.peerConnection = new RTCPeerConnection(FudgeNet.configuration);
-        }
-        createDataChannel(_client, _idRemote) {
-            this.addDataChannel(_client, this.peerConnection.createDataChannel(_client.id + "->" + _idRemote));
-        }
-        addDataChannel(_client, _dataChannel) {
-            this.dataChannel = _dataChannel;
-            this.dataChannel.addEventListener(EVENT.CONNECTION_OPENED, dispatchRtcEvent);
-            this.dataChannel.addEventListener(EVENT.CONNECTION_CLOSED, dispatchRtcEvent);
-            this.dataChannel.addEventListener(EVENT.MESSAGE_RECEIVED, dispatchMessage);
-            function dispatchRtcEvent(_event) {
-                _client.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, { detail: _event }));
-            }
-            function dispatchMessage(_event) {
-                _client.dispatchEvent(new MessageEvent(_event.type, _event));
-            }
-        }
-    }
-    FudgeNet.RtcConnection = RtcConnection;
 })(FudgeNet || (FudgeNet = {}));
 //# sourceMappingURL=FudgeClient.js.map

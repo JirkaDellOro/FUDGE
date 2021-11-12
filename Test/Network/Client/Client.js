@@ -67,8 +67,10 @@ var ClientTest;
                     createRtcConnectionToClients(message.content.peers);
                     break;
                 default:
-                    let blink = document.querySelector(`#${message.idSource}`);
-                    blink.style.backgroundColor = "white";
+                    if (message.idSource) {
+                        let blink = document.querySelector(`#${message.idSource}`);
+                        blink.style.backgroundColor = "white";
+                    }
             }
             return;
         }

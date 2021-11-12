@@ -1,8 +1,15 @@
 ///<reference path="../Message.ts"/>
+///<reference path="./RtcConnection.ts"/>
 ///<reference path="../../../Core/Build/FudgeCore.d.ts"/>
 namespace FudgeNet {
   import ƒ = FudgeCore;
 
+  /**
+   * Manages a websocket connection to a FudgeServer and multiple rtc-connections to other FudgeClients.  
+   * Processes messages from in the format {@link FudgeNet.Message} according to the controlling
+   * fields {@link FudgeNet.ROUTE} and {@link FudgeNet.COMMAND}.  
+   * @author Falco Böhnke, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021
+   */
   export class FudgeClient extends EventTarget {
     public id: string;
     public name: string;
@@ -16,12 +23,18 @@ namespace FudgeNet {
       this.id = "undefined";
     }
 
+    /** 
+     * Tries to connect to the server at the given url and installs the appropriate listeners
+     */
     public connectToServer = (_uri: string = "ws://localhost:8080") => {
       this.urlServer = _uri;
       this.socket = new WebSocket(_uri);
       this.addWebSocketEventListeners();
     }
 
+    /** 
+     * Tries to publish a human readable name for this client. Identification still solely by `id` 
+     */
     public loginToServer = (_name: string): void => {
       try {
         let message: FudgeNet.Message = {
@@ -33,6 +46,9 @@ namespace FudgeNet {
       }
     }
 
+    /** 
+     * Tries to connect to another client with the given `id` via rtc
+     */
     public connectToPeer = (_idRemote: string): void => {
       if (this.peers[_idRemote])
         ƒ.Debug.warn("Peers already connected, ignoring request", this.id, _idRemote);
@@ -40,6 +56,10 @@ namespace FudgeNet {
         this.beginPeerConnectionNegotiation(_idRemote);
     }
 
+    /** 
+     * Dispatches a {@link FudgeNet.Message} to the server, a specific client or all  
+     * accourding to {@link FudgeNet.ROUTE} and `idTarget` 
+     */
     public dispatch(_message: FudgeNet.Message): void {
       _message.timeSender = Date.now();
       _message.idSource = this.id;

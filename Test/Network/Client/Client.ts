@@ -72,8 +72,10 @@ namespace ClientTest {
           createRtcConnectionToClients(message.content.peers);
           break;
         default:
-          let blink: HTMLSpanElement = document.querySelector(`#${message.idSource}`);
-          blink.style.backgroundColor = "white";
+          if (message.idSource) {
+            let blink: HTMLSpanElement = document.querySelector(`#${message.idSource}`);
+            blink.style.backgroundColor = "white";
+          }
       }
       return;
     }
