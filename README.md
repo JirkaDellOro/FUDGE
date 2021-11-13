@@ -16,37 +16,40 @@ See and examine this example of a [minimal scene on codepen](https://codepen.io/
 - start the editor by typing `electron Editor/Electron` or `npm run-script run` or envoking the file FUDGE.bat using the mouse 
 
 # Learn
-## Overview
-To get started with FUDGE, please browse through the [Wiki](https://github.com/JirkaDellOro/FUDGE/wiki) to learn about the core concepts and the inner workings of FUDGE. Doing so will grant you an intuitive understanding extremely helpful for further working with FUDGE.
+## Wiki
+To get started with FUDGE, please browse through the [Wiki](https://github.com/JirkaDellOro/FUDGE/wiki) to learn about the core concepts and the inner workings of FUDGE. Doing so will grant you an intuitive understanding extremely helpful for further working with FUDGE.  
 
-## Repository Structure
-Find the source code on [Github](https://github.com/JirkaDellOro)  
-### Core  
+## Code 
+Find the source code on [Github](https://github.com/JirkaDellOro). Below, you'll see a short description of the structure of the repository and links to the documentation.
+
+## Test
+Browse through the tests, as they are also a good starting point to examine isolated functionalities of Fudge and see code running.
+
+# Folders
+## Core  
 Contains the core functionality of FUDGE needed to create games. For many games it's sufficient to work only with this module.  
 See this [diagram](https://jirkadelloro.github.io/FUDGE/Documentation/Design/FUDGECoreClassdiagram.svg) to get an overview of its structure.  
 Visit the [reference](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/Core/modules/FudgeCore.html) for detailed explanation.  
-### Physics  
+## Physics  
 Contains an adapted version of the Oimo-Physics-Engine that works with FUDGE  
-### UserInterface  
+## UserInterface  
 Contains the classes for easy and even automatic creation of graphical interfaces using the mutator concept (see Wiki). This module is heavily used in the editor and can be used and extended for games.  
 Visit the [reference](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/UserInterface/modules/FudgeUserInterface.html) for detailed explanation.  
-### Net  
+## Net  
 Contains components for gaming over networks. This module is not fully evaluated yet.
 Visit the [reference for FudgeServer](https://jirkadelloro.github.io/FUDGE/Documentation/Reference/Net/index.html)
 and the [reference for FudgeClient](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/Net/modules/FudgeNet.html)
-### Aid  
+## Aid  
 Contains collections of classes for convenience, bundling and simplifying common procedures.  
 Visit the [reference](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/Aid/modules/FudgeAid.html) for detailed explanation.    
 
-<hr/>  
-
-### Editor  
+## Editor  
 The directory of the actual standalone editor to be executed with Electron or packed as executable by an Electron packager
-### Documentation
+## Documentation
 Contains the design logs, diagrams (partially used in the wiki), tutorials and the API-References.  
-### Test  
+## Test  
 Contains programs to test the functionality of various components of FUDGE separately, thus also serve as a resource for learning about those functionalities and how to set them up. Use a local server to run the tests locally on your machine.  
-### Miscellaneous	
+## Miscellaneous	
 A collection of various other helpful documents and resources
 
 # Call for papers
