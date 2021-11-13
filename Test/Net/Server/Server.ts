@@ -4,7 +4,7 @@
  * @author Jirka Dell'Oro-Friedl, HFU, 2021
  */
 
-import { FudgeServer } from "../../../Network/Build/Server/FudgeServer.js";
+import { FudgeServer } from "../../../Net/Build/Server/FudgeServer.js";
 
 let port: number = parseInt(process.argv[2]);
 

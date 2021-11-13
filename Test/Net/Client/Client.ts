@@ -1,4 +1,4 @@
-///<reference path="../../../Network/Build/Client/FudgeClient.d.ts"/>
+///<reference path="../../../Net/Build/Client/FudgeClient.d.ts"/>
 namespace ClientTest {
   import ƒ = FudgeCore;
   import ƒClient = FudgeNet.FudgeClient;

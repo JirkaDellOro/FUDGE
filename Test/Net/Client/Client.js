@@ -1,6 +1,6 @@
-///<reference path="../../../Network/Build/Client/FudgeClient.d.ts"/>
+///<reference path="../../../Net/Build/Client/FudgeClient.d.ts"/>
 var ClientTest;
-///<reference path="../../../Network/Build/Client/FudgeClient.d.ts"/>
+///<reference path="../../../Net/Build/Client/FudgeClient.d.ts"/>
 (function (ClientTest) {
     var ƒ = FudgeCore;
     var ƒClient = FudgeNet.FudgeClient;
