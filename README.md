@@ -25,18 +25,23 @@ Find the source code on [Github](https://github.com/JirkaDellOro)
 Contains the core functionality of FUDGE needed to create games. For many games it's sufficient to work only with this module.  
 See this [diagram](https://jirkadelloro.github.io/FUDGE/Documentation/Design/FUDGECoreClassdiagram.svg) to get an overview of its structure.  
 Visit the [reference](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/Core/modules/FudgeCore.html) for detailed explanation.  
-### Editor  
-The directory of the actual standalone editor to be executed with Electron or packed as executable by an Electron packager
-### Aid  
-Contains collections of classes for convenience, bundling and simplifying common procedures.  
-Visit the [reference](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/Aid/modules/FudgeAid.html) for detailed explanation.  
 ### Physics  
 Contains an adapted version of the Oimo-Physics-Engine that works with FUDGE  
 ### UserInterface  
 Contains the classes for easy and even automatic creation of graphical interfaces using the mutator concept (see Wiki). This module is heavily used in the editor and can be used and extended for games.  
 Visit the [reference](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/UserInterface/modules/FudgeUserInterface.html) for detailed explanation.  
-### Network  
+### Net  
 Contains components for gaming over networks. This module is not fully evaluated yet.
+Visit the [reference for FudgeServer](https://jirkadelloro.github.io/FUDGE/Documentation/Reference/Net/index.html)
+and the [reference for FudgeClient](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/Net/modules/FudgeNet.html)
+### Aid  
+Contains collections of classes for convenience, bundling and simplifying common procedures.  
+Visit the [reference](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/Aid/modules/FudgeAid.html) for detailed explanation.    
+
+<hr/>  
+
+### Editor  
+The directory of the actual standalone editor to be executed with Electron or packed as executable by an Electron packager
 ### Documentation
 Contains the design logs, diagrams (partially used in the wiki), tutorials and the API-References.  
 ### Test  
