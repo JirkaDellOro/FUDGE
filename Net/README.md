@@ -1,5 +1,6 @@
-# Compiling the Server
-1. Delete the directory Build/Server
-2. Compile using tsconfig.server.json
-3. Add the keyword `export` to Messages.d.ts so the the first line reads `export declare namespace Messages {`
-
+# Fudge Net
+## Compile
+Envoke "CustomTask: Compile All". This starts the following procedure
+- compiles message.ts and adjusts the output to be used as a module for the server
+- compiles FudgeServer
+- compiles FudgeClient together with messages.ts into a single file
