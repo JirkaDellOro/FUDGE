@@ -40,6 +40,8 @@ export declare class FudgeServer {
      * Broadcast a FudgeMet.Message to all clients known to the server.
      */
     broadcast(_message: FudgeNet.Message): void;
+    logMessage(_text: string, _message: FudgeNet.Message): void;
+    logClients(): void;
     private addEventListeners;
     private handleMessage;
     private createMesh;

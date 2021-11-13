@@ -56,7 +56,6 @@
   },
   "exclude": [
     "Physics/**",
-    "Network/Server/**",
-    "Network/Old/**"
+    "Net/Server/**"
   ]
 }

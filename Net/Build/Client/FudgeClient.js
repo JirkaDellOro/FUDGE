@@ -22,8 +22,6 @@ var FudgeNet;
         COMMAND["RTC_ANSWER"] = "rtcAnswer";
         /** command used internally when a client send its connection candidates for peer-to-peer connetion */
         COMMAND["ICE_CANDIDATE"] = "rtcCandidate";
-        /** TODO: use to dissolve peer-to-peer-connections between clients to cleanup structures previously built */
-        COMMAND["DISCONNECT_CLIENT"] = "disconnect_client";
         /** command sent by a client to the server and from the server to all clients to initiate a mesh structure between the clients
          * creating peer-to-peer-connections between all clients known to the server */
         COMMAND["CREATE_MESH"] = "createMesh";
@@ -33,6 +31,9 @@ var FudgeNet;
         /** command initializing peer-to-peer-connections between the client identified with `idTarget` and all the peers
          * identified by the array giwen with `content.peers` */
         COMMAND["CONNECT_PEERS"] = "connectPeers";
+        /** dissolve peer-to-peer-connection between the client identified with `idTarget` and all the peers
+         * identified by the array giwen with `content.peers` or to all peers the client is connected to, if content.peers is undefined */
+        COMMAND["DISCONNECT_PEERS"] = "disconnectPeers";
     })(COMMAND = FudgeNet.COMMAND || (FudgeNet.COMMAND = {}));
     /**
      * Defines the route the message should take.
@@ -90,12 +91,9 @@ var FudgeNet;
             this.dataChannel = _dataChannel;
             this.dataChannel.addEventListener(EVENT.CONNECTION_OPENED, dispatchRtcEvent);
             this.dataChannel.addEventListener(EVENT.CONNECTION_CLOSED, dispatchRtcEvent);
-            this.dataChannel.addEventListener(EVENT.MESSAGE_RECEIVED, dispatchMessage);
+            this.dataChannel.addEventListener(EVENT.MESSAGE_RECEIVED, _client.hndMessage);
             function dispatchRtcEvent(_event) {
                 _client.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, { detail: _event }));
-            }
-            function dispatchMessage(_event) {
-                _client.dispatchEvent(new MessageEvent(_event.type, _event));
             }
         }
     }
@@ -150,17 +148,49 @@ var FudgeNet;
             }
         };
         /**
-         * Tries to connect to another client with the given `id` via rtc
+         * Tries to connect to another client with the given id via rtc
          */
-        connectToPeer = (_idRemote) => {
-            if (this.peers[_idRemote])
-                ƒ.Debug.warn("Peers already connected, ignoring request", this.id, _idRemote);
+        connectToPeer = (_idPeer) => {
+            if (_idPeer == this.id || this.peers[_idPeer]) // don't connect to self or already connected peers
+                return;
+            if (this.peers[_idPeer])
+                ƒ.Debug.warn("Peers already connected, ignoring request", this.id, _idPeer);
             else
-                this.beginPeerConnectionNegotiation(_idRemote);
+                this.beginPeerConnectionNegotiation(_idPeer);
         };
+        connectPeers(_ids) {
+            for (let id of _ids) {
+                this.connectToPeer(id);
+            }
+        }
+        /**
+         * Tries to disconnect the peer given with id
+         */
+        disconnectPeer(_idRemote) {
+            let peer = this.peers[_idRemote];
+            if (!peer)
+                return;
+            peer.peerConnection.close();
+            delete this.peers[_idRemote];
+            console.log("Deleted peer", _idRemote, "remaining", this.peers);
+        }
+        /**
+         * Disconnect all peers
+         */
+        disconnectPeers(_ids) {
+            if (_ids)
+                for (let id of _ids) {
+                    this.disconnectPeer(id);
+                    return;
+                }
+            // no ids specified, disconnect all
+            for (let id in this.peers)
+                this.peers[id].peerConnection.close();
+            this.peers = {};
+        }
         /**
          * Dispatches a {@link FudgeNet.Message} to the server, a specific client or all
-         * accourding to {@link FudgeNet.ROUTE} and `idTarget`
+         * according to {@link FudgeNet.ROUTE} and `idTarget`
          */
         dispatch(_message) {
             _message.timeSender = Date.now();
@@ -182,6 +212,40 @@ var FudgeNet;
                 console.log(_error);
             }
         }
+        hndMessage = (_event) => {
+            let message = JSON.parse(_event.data);
+            if (message.command != FudgeNet.COMMAND.SERVER_HEARTBEAT && message.command != FudgeNet.COMMAND.CLIENT_HEARTBEAT)
+                console.log(_event.timeStamp, message);
+            //tslint:disable-next-line: no-any
+            switch (message.command) {
+                case FudgeNet.COMMAND.ASSIGN_ID:
+                    ƒ.Debug.fudge("ID received", (message.idTarget));
+                    this.assignIdAndSendConfirmation(message.idTarget);
+                    break;
+                case FudgeNet.COMMAND.LOGIN_RESPONSE:
+                    this.loginValidAddUser(message.idSource, message.content?.success, message.content?.name);
+                    break;
+                case FudgeNet.COMMAND.RTC_OFFER:
+                    this.receiveNegotiationOfferAndSetRemoteDescription(message);
+                    break;
+                case FudgeNet.COMMAND.RTC_ANSWER:
+                    this.receiveAnswerAndSetRemoteDescription(message);
+                    break;
+                case FudgeNet.COMMAND.ICE_CANDIDATE:
+                    this.addReceivedCandidateToPeerConnection(message);
+                    break;
+                case FudgeNet.COMMAND.CONNECT_PEERS:
+                    this.connectPeers(message.content?.peers);
+                    break;
+                case FudgeNet.COMMAND.DISCONNECT_PEERS:
+                    let ids = message.content?.peers;
+                    this.disconnectPeers(ids);
+                    break;
+            }
+            // if (message.command != FudgeNet.COMMAND.SERVER_HEARTBEAT)
+            //   console.log(_event.timeStamp, message);
+            this.dispatchEvent(new MessageEvent(_event.type, _event));
+        };
         // ----------------------
         sendToPeer = (_idPeer, _message) => {
             let dataChannel = this.peers[_idPeer].dataChannel;
@@ -210,31 +274,6 @@ var FudgeNet;
             catch (error) {
                 ƒ.Debug.fudge("Unexpected Error: Adding websocket Eventlistener", error);
             }
-        };
-        hndMessage = (_event) => {
-            let message = JSON.parse(_event.data);
-            //tslint:disable-next-line: no-any
-            switch (message.command) {
-                case FudgeNet.COMMAND.ASSIGN_ID:
-                    ƒ.Debug.fudge("ID received", (message.idTarget));
-                    this.assignIdAndSendConfirmation(message.idTarget);
-                    break;
-                case FudgeNet.COMMAND.LOGIN_RESPONSE:
-                    this.loginValidAddUser(message.idSource, message.content?.success, message.content?.name);
-                    break;
-                case FudgeNet.COMMAND.RTC_OFFER:
-                    this.receiveNegotiationOfferAndSetRemoteDescription(message);
-                    break;
-                case FudgeNet.COMMAND.RTC_ANSWER:
-                    this.receiveAnswerAndSetRemoteDescription(message);
-                    break;
-                case FudgeNet.COMMAND.ICE_CANDIDATE:
-                    this.addReceivedCandidateToPeerConnection(message);
-                    break;
-            }
-            if (message.command != FudgeNet.COMMAND.SERVER_HEARTBEAT)
-                console.log(_event.timeStamp, message);
-            this.dispatchEvent(new MessageEvent(_event.type, _event));
         };
         beginPeerConnectionNegotiation = (_idRemote) => {
             try {

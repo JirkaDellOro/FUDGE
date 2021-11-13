@@ -42,14 +42,10 @@ namespace FudgeNet {
       this.dataChannel = _dataChannel;
       this.dataChannel.addEventListener(EVENT.CONNECTION_OPENED, dispatchRtcEvent);
       this.dataChannel.addEventListener(EVENT.CONNECTION_CLOSED, dispatchRtcEvent);
-      this.dataChannel.addEventListener(EVENT.MESSAGE_RECEIVED, dispatchMessage);
+      this.dataChannel.addEventListener(EVENT.MESSAGE_RECEIVED, _client.hndMessage);
 
       function dispatchRtcEvent(this: RTCDataChannel, _event: Event): void {
         _client.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, { detail: _event }));
-      }
-
-      function dispatchMessage(_event: MessageEvent): void {
-        _client.dispatchEvent(new MessageEvent(_event.type, <MessageEventInit<unknown>><unknown>_event));
       }
     }
   }

@@ -19,8 +19,6 @@ namespace FudgeNet {
     RTC_ANSWER = "rtcAnswer",
     /** command used internally when a client send its connection candidates for peer-to-peer connetion */
     ICE_CANDIDATE = "rtcCandidate",
-    /** TODO: use to dissolve peer-to-peer-connections between clients to cleanup structures previously built */
-    DISCONNECT_CLIENT = "disconnect_client",
     /** command sent by a client to the server and from the server to all clients to initiate a mesh structure between the clients
      * creating peer-to-peer-connections between all clients known to the server */
     CREATE_MESH = "createMesh",
@@ -29,7 +27,10 @@ namespace FudgeNet {
     CONNECT_HOST = "connectHost",
     /** command initializing peer-to-peer-connections between the client identified with `idTarget` and all the peers  
      * identified by the array giwen with `content.peers` */
-    CONNECT_PEERS = "connectPeers"
+    CONNECT_PEERS = "connectPeers",
+    /** dissolve peer-to-peer-connection between the client identified with `idTarget` and all the peers  
+     * identified by the array giwen with `content.peers` or to all peers the client is connected to, if content.peers is undefined */
+    DISCONNECT_PEERS = "disconnectPeers"
   }
 
   /**

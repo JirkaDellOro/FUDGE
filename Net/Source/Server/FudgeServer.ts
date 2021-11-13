@@ -63,14 +63,25 @@ export class FudgeServer {
       this.clients[id].socket?.send(message);
   }
 
+  public logMessage(_text: string, _message: FudgeNet.Message): void {
+    console.log(_text, `command: ${_message.command}, route: ${_message.route}, idTarget: ${_message.idTarget}, idSource: ${_message.idSource}`);
+  }
+
+  public logClients(): void {
+    let ids: string[] = <string[]>Reflect.ownKeys(this.clients);
+    // TODO: also display known peer-connections?
+    console.log("Connected clients", ids);
+  }
+
   private addEventListeners = (): void => {
     this.socket.on("connection", (_socket: WebSocket) => {
-      console.log("User connected to FudgeServer");
+      console.log("Connection attempt");
 
       try {
         const id: string = this.createID();
         const client: Client = { socket: _socket, id: id, peers: [] };
         this.clients[id] = client;
+        this.logClients();
         let netMessage: FudgeNet.Message = { idTarget: id, command: FudgeNet.COMMAND.ASSIGN_ID };
         this.dispatch(netMessage);
       } catch (error) {
@@ -82,30 +93,23 @@ export class FudgeServer {
       });
 
       _socket.addEventListener("close", () => {
-        console.error("Error at connection");
+        console.log("Connection closed");
         for (let id in this.clients) {
           if (this.clients[id].socket == _socket) {
-            console.log("Client connection found, deleting");
+            console.log("Deleting from known clients: ", id);
             delete this.clients[id];
-            console.log(this.clients);
-          }
-          else {
-            // TODO: this messages shows often, examine
-            console.log("Wrong client to delete, moving on");
           }
         }
+        this.logClients();
       });
     });
   }
 
   private async handleMessage(_message: string, _wsConnection: WebSocket): Promise<void> {
     let message: FudgeNet.Message = JSON.parse(_message);
-    console.log("Message received", message);
+    this.logMessage("Received", message);
 
     switch (message.command) {
-      case FudgeNet.COMMAND.ASSIGN_ID:
-        console.log("Id confirmation received for client: " + message.idSource);
-        break;
       case FudgeNet.COMMAND.LOGIN_REQUEST:
         this.addUserOnValidLoginRequest(_wsConnection, message);
         break;
@@ -129,8 +133,10 @@ export class FudgeServer {
         this.connectHost(message);
         break;
       default:
-        // TODO: other command may be passed on the the clients to have messages travel via websockets and the server
-        console.log("WebSocket: Message command not recognized");
+        // // TODO: other command may be passed on the the clients to have messages travel via websockets and the server
+        // console.log("WebSocket: Message command not recognized");
+        this.logMessage("Pass", message);
+        this.dispatch(message);
         break;
     }
   }
@@ -152,6 +158,7 @@ export class FudgeServer {
     let message: FudgeNet.Message = {
       command: FudgeNet.COMMAND.CONNECT_PEERS, idTarget: _message.idSource, content: { peers: ids }
     };
+    console.log("Connect Host", _message.idSource, ids);
     this.dispatch(message);
   }
 
@@ -185,7 +192,7 @@ export class FudgeServer {
       if (!_message.idTarget || !_message.content)
         throw (new Error("Message lacks idTarget or content."));
 
-      console.log("Sending offer to: ", _message.idTarget);
+      // console.log("Sending offer to: ", _message.idTarget);
       const client: Client | undefined = this.clients[_message.idTarget];
       if (!client)
         throw (new Error(`No client found with id ${_message.idTarget}`));
@@ -204,7 +211,7 @@ export class FudgeServer {
     if (!_message.idTarget)
       throw (new Error("Message lacks target"));
 
-    console.log("Sending answer to: ", _message.idTarget);
+    // console.log("Sending answer to: ", _message.idTarget);
     const client: Client | undefined = this.clients[_message.idTarget];
 
     if (client && client.socket && _message.content) {
@@ -219,7 +226,7 @@ export class FudgeServer {
     const client: Client | undefined = this.clients[_message.idTarget];
 
     if (client && _message.content) {
-      console.warn("Send Candidate", client, _message.content.candidate);
+      // console.warn("Send Candidate", client, _message.content.candidate);
       this.dispatch(_message);
     } else
       throw (new Error("Client not found or message lacks content."));
@@ -235,7 +242,7 @@ export class FudgeServer {
     process.stdout.write("♥");
     let clients: { [id: string]: object } = {};
     for (let id in this.clients)
-    clients[id] = { name: this.clients[id].name, peers: this.clients[id].peers };
+      clients[id] = { name: this.clients[id].name, peers: this.clients[id].peers };
     let message: FudgeNet.Message = { command: FudgeNet.COMMAND.SERVER_HEARTBEAT, content: clients };
     this.broadcast(message);
   }

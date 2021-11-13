@@ -22,8 +22,6 @@ var FudgeNet;
         COMMAND["RTC_ANSWER"] = "rtcAnswer";
         /** command used internally when a client send its connection candidates for peer-to-peer connetion */
         COMMAND["ICE_CANDIDATE"] = "rtcCandidate";
-        /** TODO: use to dissolve peer-to-peer-connections between clients to cleanup structures previously built */
-        COMMAND["DISCONNECT_CLIENT"] = "disconnect_client";
         /** command sent by a client to the server and from the server to all clients to initiate a mesh structure between the clients
          * creating peer-to-peer-connections between all clients known to the server */
         COMMAND["CREATE_MESH"] = "createMesh";
@@ -33,6 +31,9 @@ var FudgeNet;
         /** command initializing peer-to-peer-connections between the client identified with `idTarget` and all the peers
          * identified by the array giwen with `content.peers` */
         COMMAND["CONNECT_PEERS"] = "connectPeers";
+        /** dissolve peer-to-peer-connection between the client identified with `idTarget` and all the peers
+         * identified by the array giwen with `content.peers` or to all peers the client is connected to, if content.peers is undefined */
+        COMMAND["DISCONNECT_PEERS"] = "disconnectPeers";
     })(COMMAND = FudgeNet.COMMAND || (FudgeNet.COMMAND = {}));
     /**
      * Defines the route the message should take.

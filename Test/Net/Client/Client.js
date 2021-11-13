@@ -13,6 +13,7 @@ var ClientTest;
         document.forms[0].querySelector("button#login").addEventListener("click", loginToServer);
         document.forms[0].querySelector("button#mesh").addEventListener("click", createStructure);
         document.forms[0].querySelector("button#host").addEventListener("click", createStructure);
+        document.forms[0].querySelector("button#disconnect").addEventListener("click", createStructure);
         setTable(clients);
     }
     async function connectToServer(_event) {
@@ -53,7 +54,7 @@ var ClientTest;
     async function receiveMessage(_event) {
         if (_event instanceof MessageEvent) {
             let message = JSON.parse(_event.data);
-            if (message.command != FudgeNet.COMMAND.SERVER_HEARTBEAT)
+            if (message.command != FudgeNet.COMMAND.SERVER_HEARTBEAT && message.command != FudgeNet.COMMAND.CLIENT_HEARTBEAT)
                 console.table(message);
             switch (message.command) {
                 case FudgeNet.COMMAND.SERVER_HEARTBEAT:
@@ -61,10 +62,7 @@ var ClientTest;
                     if (client.name == "")
                         proposeName();
                     setTable(clients);
-                    client.dispatch({ content: { text: "Message from " + client.id + "|" + client.name } });
-                    break;
-                case FudgeNet.COMMAND.CONNECT_PEERS:
-                    createRtcConnectionToClients(message.content.peers);
+                    client.dispatch({ command: FudgeNet.COMMAND.CLIENT_HEARTBEAT });
                     break;
                 default:
                     if (message.idSource) {
@@ -86,6 +84,8 @@ var ClientTest;
     }
     function createStructure(_event) {
         let button = _event.target;
+        client.dispatch({ command: FudgeNet.COMMAND.DISCONNECT_PEERS });
+        client.disconnectPeers();
         switch (button.textContent) {
             case "create mesh":
                 client.dispatch({ command: FudgeNet.COMMAND.CREATE_MESH, route: FudgeNet.ROUTE.SERVER });
@@ -94,14 +94,6 @@ var ClientTest;
                 console.log("createHost", button.id);
                 client.dispatch({ command: FudgeNet.COMMAND.CONNECT_HOST, route: FudgeNet.ROUTE.SERVER });
                 break;
-        }
-    }
-    function createRtcConnectionToClients(_ids) {
-        for (let id in clients) {
-            if (client.id == id)
-                continue;
-            console.log("Try to connect", id);
-            client.connectToPeer(id);
         }
     }
 })(ClientTest || (ClientTest = {}));

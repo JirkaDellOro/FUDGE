@@ -47,18 +47,53 @@ namespace FudgeNet {
     }
 
     /** 
-     * Tries to connect to another client with the given `id` via rtc
+     * Tries to connect to another client with the given id via rtc
      */
-    public connectToPeer = (_idRemote: string): void => {
-      if (this.peers[_idRemote])
-        ƒ.Debug.warn("Peers already connected, ignoring request", this.id, _idRemote);
+    public connectToPeer = (_idPeer: string): void => {
+      if (_idPeer == this.id || this.peers[_idPeer]) // don't connect to self or already connected peers
+        return;
+      if (this.peers[_idPeer])
+        ƒ.Debug.warn("Peers already connected, ignoring request", this.id, _idPeer);
       else
-        this.beginPeerConnectionNegotiation(_idRemote);
+        this.beginPeerConnectionNegotiation(_idPeer);
+    }
+
+    public connectPeers(_ids: string[]): void {
+      for (let id of _ids) {
+        this.connectToPeer(id);
+      }
+    }
+
+    /** 
+     * Tries to disconnect the peer given with id
+     */
+    public disconnectPeer(_idRemote: string): void {
+      let peer: RtcConnection = this.peers[_idRemote];
+      if (!peer)
+        return;
+      peer.peerConnection.close();
+      delete this.peers[_idRemote];
+      console.log("Deleted peer", _idRemote, "remaining", this.peers);
+    }
+
+    /**
+     * Disconnect all peers
+     */
+    public disconnectPeers(_ids?: string[]): void {
+      if (_ids)
+        for (let id of _ids) {
+          this.disconnectPeer(id);
+          return;
+        }
+      // no ids specified, disconnect all
+      for (let id in this.peers)
+        this.peers[id].peerConnection.close();
+      this.peers = {};
     }
 
     /** 
      * Dispatches a {@link FudgeNet.Message} to the server, a specific client or all  
-     * accourding to {@link FudgeNet.ROUTE} and `idTarget` 
+     * according to {@link FudgeNet.ROUTE} and `idTarget` 
      */
     public dispatch(_message: FudgeNet.Message): void {
       _message.timeSender = Date.now();
@@ -78,6 +113,46 @@ namespace FudgeNet {
         console.log(_error);
       }
     }
+
+    public hndMessage = (_event: MessageEvent): void => {
+      let message: FudgeNet.Message = JSON.parse(_event.data);
+      if (message.command != FudgeNet.COMMAND.SERVER_HEARTBEAT && message.command != FudgeNet.COMMAND.CLIENT_HEARTBEAT)
+        console.log(_event.timeStamp, message);
+
+      //tslint:disable-next-line: no-any
+      switch (message.command) {
+        case FudgeNet.COMMAND.ASSIGN_ID:
+          ƒ.Debug.fudge("ID received", (message.idTarget));
+          this.assignIdAndSendConfirmation(message.idTarget);
+          break;
+        case FudgeNet.COMMAND.LOGIN_RESPONSE:
+          this.loginValidAddUser(<string>message.idSource, message.content?.success, message.content?.name);
+          break;
+
+        case FudgeNet.COMMAND.RTC_OFFER:
+          this.receiveNegotiationOfferAndSetRemoteDescription(message);
+          break;
+
+        case FudgeNet.COMMAND.RTC_ANSWER:
+          this.receiveAnswerAndSetRemoteDescription(message);
+          break;
+
+        case FudgeNet.COMMAND.ICE_CANDIDATE:
+          this.addReceivedCandidateToPeerConnection(message);
+          break;
+        case FudgeNet.COMMAND.CONNECT_PEERS:
+          this.connectPeers(message.content?.peers);
+          break;
+        case FudgeNet.COMMAND.DISCONNECT_PEERS:
+          let ids: string[] = message.content?.peers;
+          this.disconnectPeers(ids);
+          break;
+      }
+      // if (message.command != FudgeNet.COMMAND.SERVER_HEARTBEAT)
+      //   console.log(_event.timeStamp, message);
+      this.dispatchEvent(new MessageEvent(_event.type, <MessageEventInit<unknown>><unknown>_event));
+    }
+
     // ----------------------
 
     private sendToPeer = (_idPeer: string, _message: string) => {
@@ -112,36 +187,6 @@ namespace FudgeNet {
       }
     }
 
-    private hndMessage = (_event: MessageEvent): void => {
-      let message: FudgeNet.Message = JSON.parse(_event.data);
-
-      //tslint:disable-next-line: no-any
-      switch (message.command) {
-        case FudgeNet.COMMAND.ASSIGN_ID:
-          ƒ.Debug.fudge("ID received", (message.idTarget));
-          this.assignIdAndSendConfirmation(message.idTarget);
-          break;
-        case FudgeNet.COMMAND.LOGIN_RESPONSE:
-          this.loginValidAddUser(<string>message.idSource, message.content?.success, message.content?.name);
-          break;
-
-        case FudgeNet.COMMAND.RTC_OFFER:
-          this.receiveNegotiationOfferAndSetRemoteDescription(message);
-          break;
-
-        case FudgeNet.COMMAND.RTC_ANSWER:
-          this.receiveAnswerAndSetRemoteDescription(message);
-          break;
-
-        case FudgeNet.COMMAND.ICE_CANDIDATE:
-          this.addReceivedCandidateToPeerConnection(message);
-          break;
-      }
-      if (message.command != FudgeNet.COMMAND.SERVER_HEARTBEAT)
-        console.log(_event.timeStamp, message);
-      this.dispatchEvent(new MessageEvent(_event.type, <MessageEventInit<unknown>><unknown>_event));
-    }
-
     private beginPeerConnectionNegotiation = (_idRemote: string): void => {
       try {
         this.peers[_idRemote] = new RtcConnection();
@@ -172,7 +217,6 @@ namespace FudgeNet {
         });
 
     }
-
 
     private createNegotiationOfferAndSendToPeer = (_idRemote: string) => {
       try {
@@ -215,9 +259,6 @@ namespace FudgeNet {
         });
       ƒ.Debug.fudge("Remote: remote description set, expected 'stable', got:  ", peerConnection.signalingState);
     }
-
-
-
 
     private answerNegotiationOffer = (_idRemote: string) => {
       let ultimateAnswer: RTCSessionDescription;
