@@ -19,7 +19,7 @@ See and examine this example of a [minimal scene on codepen](https://codepen.io/
 ## Wiki
 To get started with FUDGE, please browse through the [Wiki](https://github.com/JirkaDellOro/FUDGE/wiki) to learn about the core concepts and the inner workings of FUDGE. Doing so will grant you an intuitive understanding extremely helpful for further working with FUDGE.  
 ## Test
-Browse through the tests, as they are also a good starting point to examine isolated functionalities of Fudge and see code running.
+Browse through the tests, as they are also a good starting point to examine isolated functionalities of FUDGE and see code running. Run your local clone with a local server or visit [Test](https://JirkaDellOro.github.io/FUDGE/Test)
 ## Code 
 Find the source code on [Github](https://github.com/JirkaDellOro). Below, you'll see a short description of the structure of the repository and links to the documentation.
 
@@ -46,7 +46,7 @@ The directory of the actual standalone editor to be executed with Electron or pa
 ## Documentation
 Contains the design logs, diagrams (partially used in the wiki), tutorials and the API-References.  
 ## Test  
-Contains programs to test the functionality of various components of FUDGE separately, thus also serve as a resource for learning about those functionalities and how to set them up. Use a local server to run the tests locally on your machine.  
+Contains programs to test the functionality of various components of FUDGE separately, thus also serve as a resource for learning about those functionalities and how to set them up. Use a local server to run the tests locally on your machine.
 ## Miscellaneous	
 A collection of various other documents and resources, including unmaintained experiments of developers who worked on FUDGE, and the thesis documents about aspects FUDGE former students graduated with. 
 
