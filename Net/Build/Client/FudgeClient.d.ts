@@ -105,11 +105,18 @@ declare namespace FudgeNet {
     class FudgeClient extends EventTarget {
         id: string;
         name: string;
-        urlServer: string | undefined;
+        urlServer: string;
         socket: WebSocket;
         peers: {
             [id: string]: RtcConnection;
         };
+        clientsInfoFromServer: {
+            [id: string]: {
+                name?: string;
+                isHost?: boolean;
+            };
+        };
+        idHost: string;
         constructor();
         /**
          * Tries to connect to the server at the given url and installs the appropriate listeners
@@ -137,6 +144,8 @@ declare namespace FudgeNet {
          * according to {@link FudgeNet.ROUTE} and `idTarget`
          */
         dispatch(_message: FudgeNet.Message): void;
+        createMesh(): void;
+        becomeHost(): void;
         hndMessage: (_event: MessageEvent) => void;
         private sendToPeer;
         private sendToAllPeers;

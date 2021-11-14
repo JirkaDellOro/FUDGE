@@ -11,16 +11,17 @@ namespace FudgeNet {
    * @author Falco Böhnke, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2021
    */
   export class FudgeClient extends EventTarget {
-    public id: string;
-    public name: string;
-    public urlServer: string | undefined = undefined;
+    public id!: string;
+    public name!: string;
+    public urlServer!: string;
     public socket!: WebSocket;
     public peers: { [id: string]: RtcConnection } = {};
+    // TODO: examine, if server should know about connected peers and send this information also
+    public clientsInfoFromServer: { [id: string]: { name?: string, isHost?: boolean } } = {};
+    public idHost!: string;
 
     constructor() {
       super();
-      this.name = "";
-      this.id = "undefined";
     }
 
     /** 
@@ -114,6 +115,18 @@ namespace FudgeNet {
       }
     }
 
+    public createMesh(): void {
+      this.dispatch({ command: FudgeNet.COMMAND.DISCONNECT_PEERS });
+      this.disconnectPeers();
+      this.dispatch({ command: FudgeNet.COMMAND.CREATE_MESH, route: FudgeNet.ROUTE.SERVER });
+    }
+    public becomeHost(): void {
+      this.dispatch({ command: FudgeNet.COMMAND.DISCONNECT_PEERS });
+      this.disconnectPeers();
+      console.log("createHost", this.id);
+      this.dispatch({ command: FudgeNet.COMMAND.CONNECT_HOST, route: FudgeNet.ROUTE.SERVER });
+    }
+
     public hndMessage = (_event: MessageEvent): void => {
       let message: FudgeNet.Message = JSON.parse(_event.data);
       if (message.command != FudgeNet.COMMAND.SERVER_HEARTBEAT && message.command != FudgeNet.COMMAND.CLIENT_HEARTBEAT)
@@ -146,6 +159,18 @@ namespace FudgeNet {
         case FudgeNet.COMMAND.DISCONNECT_PEERS:
           let ids: string[] = message.content?.peers;
           this.disconnectPeers(ids);
+          break;
+        case FudgeNet.COMMAND.SERVER_HEARTBEAT:
+          //@ts-ignore
+          this.clientsInfoFromServer = message.content;
+          let host!: string;
+          for (let id in this.clientsInfoFromServer)
+            if (this.clientsInfoFromServer[id].isHost)
+              host = id;
+          if (host != this.idHost) {
+            this.idHost = host
+            console.log("New host", host);
+          }
           break;
       }
       // if (message.command != FudgeNet.COMMAND.SERVER_HEARTBEAT)

@@ -6,7 +6,6 @@ var ClientTest;
     var ƒClient = FudgeNet.FudgeClient;
     ƒ.Debug.setFilter(ƒ.DebugConsole, ƒ.DEBUG_FILTER.ALL);
     let client = new ƒClient();
-    let clients = {};
     window.addEventListener("load", start);
     async function start(_event) {
         document.forms[0].querySelector("button#connect").addEventListener("click", connectToServer);
@@ -14,7 +13,7 @@ var ClientTest;
         document.forms[0].querySelector("button#mesh").addEventListener("click", createStructure);
         document.forms[0].querySelector("button#host").addEventListener("click", createStructure);
         document.forms[0].querySelector("button#disconnect").addEventListener("click", createStructure);
-        setTable(clients);
+        setTable();
     }
     async function connectToServer(_event) {
         let domServer = document.forms[0].querySelector("input[name=server");
@@ -47,7 +46,7 @@ var ClientTest;
             let domLogin = document.forms[0].querySelector("input[name=login");
             if (document.activeElement == domLogin)
                 return; // don't interfere when user's at the element
-            for (let i = 0; Object.values(clients).find(_client => _client.name == "Client-" + i); i++)
+            for (let i = 0; Object.values(client.clientsInfoFromServer).find(_client => _client.name == "Client-" + i); i++)
                 domLogin.value = "Client-" + (i + 1);
         }
     }
@@ -58,10 +57,9 @@ var ClientTest;
                 console.table(message);
             switch (message.command) {
                 case FudgeNet.COMMAND.SERVER_HEARTBEAT:
-                    clients = message.content;
                     if (client.name == "")
                         proposeName();
-                    setTable(clients);
+                    setTable();
                     client.dispatch({ command: FudgeNet.COMMAND.CLIENT_HEARTBEAT });
                     break;
                 default:
@@ -73,26 +71,27 @@ var ClientTest;
             return;
         }
     }
-    function setTable(_clients) {
+    function setTable() {
         let table = document.querySelector("table");
         let html = `<tr><th>&nbsp;</th><th>name</th><th>id</th><th>Comment</th></tr>`;
         html += `<tr><td><span style="background-color: white;">&nbsp;</span></td><td>Server</td><td>&nbsp;</td><td>&nbsp;</td></tr>`;
-        for (let id in _clients) {
-            html += `<tr><td><span id="${id}">&nbsp;</span></td><td>${_clients[id].name}</td><td>${id}</td><td></td></tr>`;
+        for (let id in client.clientsInfoFromServer) {
+            html += `<tr><td><span id="${id}">&nbsp;</span></td><td>${client.clientsInfoFromServer[id].name}</td><td>${id}</td><td></td></tr>`;
         }
         table.innerHTML = html;
     }
     function createStructure(_event) {
         let button = _event.target;
-        client.dispatch({ command: FudgeNet.COMMAND.DISCONNECT_PEERS });
-        client.disconnectPeers();
         switch (button.textContent) {
             case "create mesh":
-                client.dispatch({ command: FudgeNet.COMMAND.CREATE_MESH, route: FudgeNet.ROUTE.SERVER });
+                client.createMesh();
                 break;
             case "become host":
-                console.log("createHost", button.id);
-                client.dispatch({ command: FudgeNet.COMMAND.CONNECT_HOST, route: FudgeNet.ROUTE.SERVER });
+                client.becomeHost();
+                break;
+            default:
+                client.dispatch({ command: FudgeNet.COMMAND.DISCONNECT_PEERS });
+                client.disconnectPeers();
                 break;
         }
     }

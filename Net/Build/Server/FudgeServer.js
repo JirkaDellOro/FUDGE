@@ -19,6 +19,7 @@ const Message_js_1 = require("../../Build/Message.js");
 class FudgeServer {
     socket;
     clients = {};
+    idHost;
     /**
      * Starts the server on the given port, installs the appropriate event-listeners and starts the heartbeat
      */
@@ -130,13 +131,17 @@ class FudgeServer {
             await new Promise((resolve) => { setTimeout(resolve, 200); });
             this.dispatch(message);
         }
+        this.idHost = undefined;
     }
     async connectHost(_message) {
+        if (!_message.idSource)
+            return;
         let ids = Reflect.ownKeys(this.clients);
         let message = {
             command: Message_js_1.FudgeNet.COMMAND.CONNECT_PEERS, idTarget: _message.idSource, content: { peers: ids }
         };
         console.log("Connect Host", _message.idSource, ids);
+        this.idHost = _message.idSource;
         this.dispatch(message);
     }
     addUserOnValidLoginRequest(_wsConnection, _message) {
@@ -212,7 +217,7 @@ class FudgeServer {
         process.stdout.write("♥");
         let clients = {};
         for (let id in this.clients)
-            clients[id] = { name: this.clients[id].name, peers: this.clients[id].peers };
+            clients[id] = { name: this.clients[id].name, peers: this.clients[id].peers, isHost: this.idHost == id };
         let message = { command: Message_js_1.FudgeNet.COMMAND.SERVER_HEARTBEAT, content: clients };
         this.broadcast(message);
     };

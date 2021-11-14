@@ -24,6 +24,7 @@ export declare class FudgeServer {
     clients: {
         [id: string]: Client;
     };
+    idHost: string | undefined;
     /**
      * Starts the server on the given port, installs the appropriate event-listeners and starts the heartbeat
      */

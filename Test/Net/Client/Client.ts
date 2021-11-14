@@ -5,7 +5,6 @@ namespace ClientTest {
   ƒ.Debug.setFilter(ƒ.DebugConsole, ƒ.DEBUG_FILTER.ALL);
 
   let client: ƒClient = new ƒClient();
-  let clients: { [id: string]: ƒClient } = {};
   window.addEventListener("load", start);
 
   async function start(_event: Event): Promise<void> {
@@ -14,7 +13,7 @@ namespace ClientTest {
     document.forms[0].querySelector("button#mesh").addEventListener("click", createStructure);
     document.forms[0].querySelector("button#host").addEventListener("click", createStructure);
     document.forms[0].querySelector("button#disconnect").addEventListener("click", createStructure);
-    setTable(clients);
+    setTable();
   }
 
   async function connectToServer(_event: Event): Promise<void> {
@@ -51,7 +50,7 @@ namespace ClientTest {
       if (document.activeElement == domLogin)
         return; // don't interfere when user's at the element
 
-      for (let i: number = 0; Object.values(clients).find(_client => _client.name == "Client-" + i); i++)
+      for (let i: number = 0; Object.values(client.clientsInfoFromServer).find(_client => _client.name == "Client-" + i); i++)
         domLogin.value = "Client-" + (i + 1);
     }
   }
@@ -63,10 +62,9 @@ namespace ClientTest {
         console.table(message);
       switch (message.command) {
         case FudgeNet.COMMAND.SERVER_HEARTBEAT:
-          clients = message.content;
           if (client.name == "")
             proposeName();
-          setTable(clients);
+          setTable();
           client.dispatch({ command: FudgeNet.COMMAND.CLIENT_HEARTBEAT });
           break;
         default:
@@ -79,14 +77,14 @@ namespace ClientTest {
     }
   }
 
-  function setTable(_clients: { [id: string]: ƒClient }): void {
+  function setTable(): void {
     let table: HTMLTableElement = document.querySelector("table");
     let html: string = `<tr><th>&nbsp;</th><th>name</th><th>id</th><th>Comment</th></tr>`;
 
     html += `<tr><td><span style="background-color: white;">&nbsp;</span></td><td>Server</td><td>&nbsp;</td><td>&nbsp;</td></tr>`;
 
-    for (let id in _clients) {
-      html += `<tr><td><span id="${id}">&nbsp;</span></td><td>${_clients[id].name}</td><td>${id}</td><td></td></tr>`;
+    for (let id in client.clientsInfoFromServer) {
+      html += `<tr><td><span id="${id}">&nbsp;</span></td><td>${client.clientsInfoFromServer[id].name}</td><td>${id}</td><td></td></tr>`;
     }
 
     table.innerHTML = html;
@@ -94,15 +92,16 @@ namespace ClientTest {
 
   function createStructure(_event: Event): void {
     let button: HTMLButtonElement = <HTMLButtonElement>_event.target;
-    client.dispatch({ command: FudgeNet.COMMAND.DISCONNECT_PEERS });
-    client.disconnectPeers();
     switch (button.textContent) {
       case "create mesh":
-        client.dispatch({ command: FudgeNet.COMMAND.CREATE_MESH, route: FudgeNet.ROUTE.SERVER });
+        client.createMesh();
         break;
       case "become host":
-        console.log("createHost", button.id);
-        client.dispatch({ command: FudgeNet.COMMAND.CONNECT_HOST, route: FudgeNet.ROUTE.SERVER });
+        client.becomeHost();
+        break;
+      default:
+        client.dispatch({ command: FudgeNet.COMMAND.DISCONNECT_PEERS });
+        client.disconnectPeers();
         break;
     }
   }

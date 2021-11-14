@@ -24,6 +24,7 @@ export interface Client {
 export class FudgeServer {
   public socket!: WebSocket.Server;
   public clients: { [id: string]: Client } = {};
+  public idHost: string | undefined;
 
   /**
    * Starts the server on the given port, installs the appropriate event-listeners and starts the heartbeat
@@ -70,6 +71,7 @@ export class FudgeServer {
   public logClients(): void {
     let ids: string[] = <string[]>Reflect.ownKeys(this.clients);
     // TODO: also display known peer-connections?
+
     console.log("Connected clients", ids);
   }
 
@@ -151,14 +153,18 @@ export class FudgeServer {
       await new Promise((resolve) => { setTimeout(resolve, 200); });
       this.dispatch(message);
     }
+    this.idHost = undefined;
   }
 
   private async connectHost(_message: FudgeNet.Message): Promise<void> {
+    if (!_message.idSource)
+      return;
     let ids: string[] = <string[]>Reflect.ownKeys(this.clients);
     let message: FudgeNet.Message = {
       command: FudgeNet.COMMAND.CONNECT_PEERS, idTarget: _message.idSource, content: { peers: ids }
     };
     console.log("Connect Host", _message.idSource, ids);
+    this.idHost = _message.idSource;
     this.dispatch(message);
   }
 
@@ -242,7 +248,7 @@ export class FudgeServer {
     process.stdout.write("♥");
     let clients: { [id: string]: object } = {};
     for (let id in this.clients)
-      clients[id] = { name: this.clients[id].name, peers: this.clients[id].peers };
+      clients[id] = { name: this.clients[id].name, peers: this.clients[id].peers, isHost: this.idHost == id };
     let message: FudgeNet.Message = { command: FudgeNet.COMMAND.SERVER_HEARTBEAT, content: clients };
     this.broadcast(message);
   }
