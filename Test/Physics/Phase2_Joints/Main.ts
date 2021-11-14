@@ -303,9 +303,9 @@ namespace FudgePhysics_Communication {
 
         //Physics Debugs
         if (_event.code == f.KEYBOARD_CODE.M) { //Go through the different modes
-            let currentMode: number = f.Physics.settings.debugMode;
-            currentMode = currentMode == 5 ? 0 : f.Physics.settings.debugMode += 1;
-            f.Physics.settings.debugMode = currentMode;
+            let currentMode: number = viewPort.physicsDebugMode;
+            currentMode = currentMode == 5 ? 0 : viewPort.physicsDebugMode += 1;
+            viewPort.physicsDebugMode = currentMode;
         }
 
     }
