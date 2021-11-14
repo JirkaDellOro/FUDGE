@@ -1,8 +1,6 @@
 // /<reference types="../../../../Core/Build/FudgeCore.js"/>
-import f = FudgeCore;
-//Reference Fudge, getting code completion ready and creating a shortcut f to write FudgeCode more comfortably
-
 namespace Turorials_FUDGEPhysics_Lesson1 {
+  import f = FudgeCore;
 
   //GOALS: Learning how to define shpes to create a not predefined collider shape.
   //Built a simple physics car with wheel colliders (different approach than a raycast car (default))
@@ -82,7 +80,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
     //PHYSICS - Start using physics by telling the physics the scene root object. Physics will recalculate every transform and initialize
     f.Physics.adjustTransforms(hierarchy);
 
-    f.Physics.settings.debugMode = f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
+    viewPort.physicsDebugMode = f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
 
     //Important start the game loop after starting physics, so physics can use the current transform before it's first iteration
     f.Loop.addEventListener(f.EVENT.LOOP_FRAME, update); //Tell the game loop to call the update function on each frame
@@ -255,7 +253,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
     }
 
     if (_event.code == f.KEYBOARD_CODE.T) {
-      f.Physics.settings.debugMode = f.Physics.settings.debugMode == f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER ? f.PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY : f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
+      viewPort.physicsDebugMode = viewPort.physicsDebugMode == f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER ? f.PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY : f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
       frontSuspensionRight.maxMotor = 0;
     }
   }
