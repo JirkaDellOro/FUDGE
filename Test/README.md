@@ -21,17 +21,37 @@ Complex test for spatial stereo audio. Orbit the camera around the world origin,
 - [Controls](Test\Controls\Test.html)  
 Test the amplifictation, delay and the proportional, integral or differential processing of inputs.
 ## Debug
-- [Debug](Test\Debug\Test.html)
+- [Debug](Test\Debug\Test.html)  
 Test the debug class that routes log-messages, warnings or error-messages to various outputs.
 ## Mesh
-- [Mesh](Test\Mesh\Test.html)
+- [Mesh](Test\Mesh\Test.html)  
 Display the built-in meshes.
 ## Net
-- [Client](Test\Net\Client\index.html)
+- [Client](Test\Net\Client\index.html)  
 - Server: start with `node Server.js <port>`  
 Test connectivity between Server and Clients with WebSockets and between Clients as peer-to-peer connections with RTC and the automatic setup of a mesh structure or an authoritative peer.
 ## Physics
-- [Welding](Test\Physics\Convex_ChairTest\FudgePhysics_ConvexWelding.html)
+- [Welding](Test\Physics\Convex_ChairTest\FudgePhysics_ConvexWelding.html)  
 Concave objects consisting of boxes welded together using welding joints fall from the sky and bounce around. 
-- [Joints](Test\Physics\Phase2_Joints\Main.html)
-Test all joint types and collisions.
+- [Joints](Test\Physics\Phase2_Joints\Main.html)  
+Test all joint types and collisions.  
+- There are more tests in the folder, view locally.
+## Random
+- [Random](Random\Test.html)  
+Test various formats and methods to create structures and information using random numbers.
+## Rectangles
+- [Collision](Rectangles\Collision\Test.html)  
+Test the collision detection of rectangles and the calculation of the overlapping area.
+- [MapRectangles](Rectangles\MapRectangles\Test.html)  
+Test the mapping of one Rectangle onto another used for viewport framing.
+## Resources
+- [Graph](Resources\Graph\Test.html)  
+Test the creation, serialization, deserialization and recreation of a graph and graphinstances.
+- [SubclassRegistration](Resources\SubclassRegistration\Test.html)  
+Test the registration of all classes creating resources which is crucial for deserialization
+## Sprite
+- [Sprites](Sprite\Test.html)  
+Test the spriteclass and spritesheets as defined in Aid at this point of time (11/2021). Sprites should be handled by Animation later.
+## Time
+- [Time](Time\Test.html)  
+Test the handling of time, the core game loop and timer events

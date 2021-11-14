@@ -36,7 +36,7 @@ var Test_sprites;
     }
     function hndLoop(_event) {
         let avg = document.querySelector("[name=currentframe]");
-        avg.value = spriteNode.getCurrentFrame + ""; //ToDo: see if I can get the current frame differently
+        avg.value = spriteNode.getCurrentFrame.toString();
         viewport.draw();
     }
     async function loadSprites() {
