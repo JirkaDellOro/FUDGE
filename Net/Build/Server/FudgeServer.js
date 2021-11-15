@@ -128,7 +128,7 @@ class FudgeServer {
             let message = {
                 command: Message_js_1.FudgeNet.COMMAND.CONNECT_PEERS, idTarget: id, content: { peers: ids }
             };
-            await new Promise((resolve) => { setTimeout(resolve, 200); });
+            await new Promise((resolve) => { setTimeout(resolve, 500); });
             this.dispatch(message);
         }
         this.idHost = undefined;
