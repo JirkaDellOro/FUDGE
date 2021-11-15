@@ -29,7 +29,7 @@ Display the built-in meshes.
 ## Net
 - [Client](Test\Net\Client\index.html)  
 - Server: start with `node Server.js <port>` in folder Test/Net/Server 
-Test connectivity between Server and Clients with WebSockets and between Clients as peer-to-peer connections with RTC and the automatic setup of a mesh structure or an authoritative peer.
+Test connectivity between Server and Clients with WebSockets and between Clients as peer-to-peer connections with RTC and the automatic setup of a mesh structure or an authoritative peer. Disable public firewall!
 ## Physics
 - [Welding](Test\Physics\Convex_ChairTest\FudgePhysics_ConvexWelding.html)  
 Concave objects consisting of boxes welded together using welding joints fall from the sky and bounce around. 
