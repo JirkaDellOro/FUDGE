@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "run": "electron Editor/Electron",
-    "build": "electron-packager Editor/Electron FUDGE --icon=Miscellaneous/Logo/Fudge_360.png --overwrite --all",
-    "start": "Test/Net/Server/Server.js"
+    "build": "electron-packager Editor/Electron FUDGE --icon=Miscellaneous/Logo/Fudge_360.png --overwrite --all"
   },
   "repository": {
     "type": "git",
