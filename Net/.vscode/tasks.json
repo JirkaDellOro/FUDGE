@@ -27,7 +27,7 @@
     {
       "label": "CustomTask: Add Export",
       "type": "shell",
-      "command": "AddExport .\\Build\\Message.d.ts",
+      "command": "AddExport .\\Source\\Server\\Message.d.ts",
       "dependsOn": [
         "CustomTask: Add Module.Export"
       ]
@@ -35,7 +35,7 @@
     {
       "label": "CustomTask: Add Module.Export",
       "type": "shell",
-      "command": "echo module.exports = {FudgeNet: FudgeNet}; >> .\\Build\\Message.js",
+      "command": "echo module.exports = {FudgeNet: FudgeNet}; >> .\\Source\\Server\\Message.js",
       "dependsOn": [
         "CustomTask: Compile Message"
       ]

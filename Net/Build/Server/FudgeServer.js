@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FudgeServer = void 0;
 const ws_1 = __importDefault(require("ws"));
-const Message_js_1 = require("../../Build/Message.js");
+const Message_js_1 = require("./Message.js");
 /**
  * Manages the websocket connections to FudgeClients, their ids and login names
  * and keeps track of the peer to peer connections between them. Processes messages

@@ -93,7 +93,7 @@
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
   "include": [
-    "./Source/Message.ts",
+    "./Message.ts",
     "./Source/Client/*",
   ]
 }

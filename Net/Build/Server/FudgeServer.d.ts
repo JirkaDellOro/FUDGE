@@ -1,5 +1,5 @@
 import WebSocket from "ws";
-import { FudgeNet } from "../../Build/Message.js";
+import { FudgeNet } from "./Message.js";
 /**
  * Keeps information about the connected clients
  */
