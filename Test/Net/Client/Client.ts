@@ -102,8 +102,10 @@ namespace ClientTest {
       let name: string = clientsKnown[id].name;
       let isHost: boolean = clientsKnown[id].isHost;
       let row: HTMLTableRowElement = table.querySelector(`#${id}`);
-      if (row)
+      if (row) {
         row.querySelector("td[name=name]").textContent = name + (isHost ? " (HOST)" : "");
+        row.querySelector("td[name=comment]").textContent = client.peers[id]?.dataChannel?.readyState;
+      }
       else {
         row = document.createElement("tr");
         table.appendChild(row);

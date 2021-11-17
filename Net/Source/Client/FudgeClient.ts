@@ -185,7 +185,7 @@ namespace FudgeNet {
       if (dataChannel && dataChannel.readyState == "open")
         dataChannel.send(_message);
       else {
-        console.error("Datachannel: Connection unexpectedly lost");
+        console.error("Datachannel disconnected, ready state: ", dataChannel.readyState);
       }
     }
 

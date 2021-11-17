@@ -91,8 +91,10 @@ var ClientTest;
             let name = clientsKnown[id].name;
             let isHost = clientsKnown[id].isHost;
             let row = table.querySelector(`#${id}`);
-            if (row)
+            if (row) {
                 row.querySelector("td[name=name]").textContent = name + (isHost ? " (HOST)" : "");
+                row.querySelector("td[name=comment]").textContent = client.peers[id]?.dataChannel?.readyState;
+            }
             else {
                 row = document.createElement("tr");
                 table.appendChild(row);
