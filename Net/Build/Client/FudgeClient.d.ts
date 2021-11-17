@@ -75,9 +75,15 @@ declare namespace FudgeNet {
         MESSAGE_RECEIVED = "message"
     }
     let configuration: {
-        iceServers: {
+        iceServers: ({
             urls: string;
-        }[];
+            username?: undefined;
+            credential?: undefined;
+        } | {
+            urls: string;
+            username: string;
+            credential: string;
+        })[];
     };
     /**
      * Manages a single rtc peer-to-peer connection with multiple channels.

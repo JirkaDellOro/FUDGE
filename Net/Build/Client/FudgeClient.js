@@ -65,8 +65,10 @@ var FudgeNet;
     // tslint:disable-next-line: typedef
     FudgeNet.configuration = {
         iceServers: [
-            { urls: "stun:stun2.1.google.com:19302" },
-            { urls: "stun:stun.example.com" }
+            // { urls: "stun:stun2.1.google.com:19302" },
+            // { urls: "stun:stun.example.com" }
+            { urls: "stun:stun.l.google.com:19302" },
+            { urls: "turn:0.peerjs.com:3478", username: "peerjs", credential: "peerjsp" }
         ]
     };
     /**
