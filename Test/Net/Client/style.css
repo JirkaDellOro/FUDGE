@@ -1,9 +1,9 @@
 span {
   display: inline-block;
-  width: 1em;
+  width: 3em;
   text-align: center;
-  background-color: orange;
-  animation: ping 0.5s;
+  animation: ping 1s;
+  background-color: white;
 }
 
 @keyframes ping {

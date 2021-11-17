@@ -5,6 +5,8 @@ namespace ClientTest {
   ƒ.Debug.setFilter(ƒ.DebugConsole, ƒ.DEBUG_FILTER.ALL);
 
   let client: ƒClient = new ƒClient();
+  let clientsKnown: { [id: string]: { name?: string; isHost?: boolean; } } = {};
+
   window.addEventListener("load", start);
 
   async function start(_event: Event): Promise<void> {
@@ -13,7 +15,7 @@ namespace ClientTest {
     document.forms[0].querySelector("button#mesh").addEventListener("click", createStructure);
     document.forms[0].querySelector("button#host").addEventListener("click", createStructure);
     document.forms[0].querySelector("button#disconnect").addEventListener("click", createStructure);
-    setTable();
+    createTable();
   }
 
   async function connectToServer(_event: Event): Promise<void> {
@@ -37,24 +39,6 @@ namespace ClientTest {
     client.loginToServer(domLogin.value);
   }
 
-  function delay(_milisec: number): Promise<void> {
-    return new Promise(resolve => {
-      setTimeout(() => { resolve(); }, _milisec);
-    });
-  }
-
-  function proposeName(): void {
-    {
-      // search for a free number i to use for the proposal of the name "Client" + i
-      let domLogin: HTMLInputElement = document.forms[0].querySelector("input[name=login");
-      if (document.activeElement == domLogin)
-        return; // don't interfere when user's at the element
-
-      for (let i: number = 0; Object.values(client.clientsInfoFromServer).find(_client => _client.name == "Client-" + i); i++)
-        domLogin.value = "Client-" + (i + 1);
-    }
-  }
-
   async function receiveMessage(_event: CustomEvent | MessageEvent): Promise<void> {
     if (_event instanceof MessageEvent) {
       let message: FudgeNet.Message = JSON.parse(_event.data);
@@ -62,32 +46,82 @@ namespace ClientTest {
         console.table(message);
       switch (message.command) {
         case FudgeNet.COMMAND.SERVER_HEARTBEAT:
-          if (client.name == "")
+          if (client.name == undefined)
             proposeName();
-          setTable();
+          updateTable();
           client.dispatch({ command: FudgeNet.COMMAND.CLIENT_HEARTBEAT });
           break;
+        case FudgeNet.COMMAND.CLIENT_HEARTBEAT:
+          let span: HTMLSpanElement = document.querySelector(`#${message.idSource} span`);
+          blink(span);
+          break;
         default:
-          if (message.idSource) {
-            let blink: HTMLSpanElement = document.querySelector(`#${message.idSource}`);
-            blink.style.backgroundColor = "white";
-          }
+          break;
       }
       return;
     }
   }
 
-  function setTable(): void {
+  function delay(_milisec: number): Promise<void> {
+    return new Promise(resolve => {
+      setTimeout(() => { resolve(); }, _milisec);
+    });
+  }
+
+  function proposeName(): void {
+    // search for a free number i to use for the proposal of the name "Client" + i
+    let domLogin: HTMLInputElement = document.forms[0].querySelector("input[name=login");
+    if (document.activeElement == domLogin)
+      return; // don't interfere when user's at the element
+
+    let i: number = 0;
+    for (; Object.values(client.clientsInfoFromServer).find(_info => _info.name == "Client-" + i); i++);
+    domLogin.value = "Client-" + i;
+  }
+
+  function createTable(): void {
     let table: HTMLTableElement = document.querySelector("table");
     let html: string = `<tr><th>&nbsp;</th><th>name</th><th>id</th><th>Comment</th></tr>`;
-
-    html += `<tr><td><span style="background-color: white;">&nbsp;</span></td><td>Server</td><td>&nbsp;</td><td>&nbsp;</td></tr>`;
-
-    for (let id in client.clientsInfoFromServer) {
-      html += `<tr><td><span id="${id}">&nbsp;</span></td><td>${client.clientsInfoFromServer[id].name}</td><td>${id}</td><td></td></tr>`;
-    }
-
+    html += `<tr><td><span>0</span></td><td>Server</td><td>&nbsp;</td><td>&nbsp;</td></tr>`;
     table.innerHTML = html;
+  }
+
+  function updateTable(): void {
+    let table: HTMLTableElement = document.querySelector("table");
+    let span: HTMLSpanElement = document.querySelector(`td>span`); // first cell is server blinker
+    blink(span);
+
+
+    for (let id in clientsKnown)
+      if (!client.clientsInfoFromServer[id])
+        comment(id, "Disconnected");
+
+    clientsKnown = client.clientsInfoFromServer;
+
+    for (let id in clientsKnown) {
+      let name: string = clientsKnown[id].name;
+      let isHost: boolean = clientsKnown[id].isHost;
+      let row: HTMLTableRowElement = table.querySelector(`#${id}`);
+      if (row)
+        row.querySelector("td[name=name]").textContent = name + (isHost ? " (HOST)" : "");
+      else {
+        row = document.createElement("tr");
+        table.appendChild(row);
+        row.outerHTML = `<tr id="${id}"><td><span>0</span></td><td name="name">${name}</td><td name="id">${id}</td><td name="comment"></td></tr>`;
+      }
+    }
+  }
+
+  function comment(_id: string, _comment: string): void {
+    let table: HTMLTableElement = document.querySelector("table");
+    let cell: HTMLTableCellElement = table.querySelector(`#${_id}>td[name=comment]`);
+    cell.textContent = _comment;
+  }
+
+  function blink(_span: HTMLSpanElement): void {
+    let newSpan: HTMLSpanElement = document.createElement("span");
+    newSpan.textContent = (parseInt(_span.textContent) + 1).toString().padStart(3, "0");
+    _span.parentElement.replaceChild(newSpan, _span);
   }
 
   function createStructure(_event: Event): void {
