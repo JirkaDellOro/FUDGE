@@ -29,7 +29,8 @@ Contains the core functionality of FUDGE needed to create games. It implements a
 See this [diagram](https://jirkadelloro.github.io/FUDGE/Documentation/Design/FUDGECoreClassdiagram.svg) to get an overview of its structure.  
 Visit the [reference](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/Core/modules/FudgeCore.html) for detailed explanation.  
 ## Physics  
-Contains an adapted version of the Oimo-Physics-Engine that works with FUDGE. It supports rigidbodies of different shapes to approximate visual structures and impose physical behaviour, joints with several degrees of freedom and restrictions connecting rigidbodies, collision detection triggering events and raycasting for rigidbodies.
+Contains an adapted version of the Oimo-Physics-Engine that works with FUDGE. It supports rigidbodies of different shapes to approximate visual structures and impose physical behaviour, joints with several degrees of freedom and restrictions connecting rigidbodies, collision detection triggering events and raycasting for rigidbodies.  
+For detailed explanation, visit the Physics-classes in the reference to FudgeCore and [OIMO.js](https://github.com/lo-th/Oimo.js)
 ## UserInterface  
 Contains the classes for easy and even automatic creation of graphical interfaces using the mutator concept (see Wiki). This module is heavily used in the editor and can be used and extended for games.  
 Visit the [reference](https://JirkaDellOro.github.io/FUDGE/Documentation/Reference/UserInterface/modules/FudgeUserInterface.html) for detailed explanation.  
