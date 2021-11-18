@@ -156,15 +156,15 @@ declare namespace FudgeNet {
         private sendToPeer;
         private sendToAllPeers;
         private addWebSocketEventListeners;
-        private beginPeerConnectionNegotiation;
-        private createNegotiationOfferAndSendToPeer;
-        private receiveNegotiationOfferAndSetRemoteDescription;
-        private answerNegotiationOffer;
-        private receiveAnswerAndSetRemoteDescription;
-        private sendIceCandidatesToPeer;
-        private addReceivedCandidateToPeerConnection;
-        private receiveDataChannelAndEstablishConnection;
         private loginValidAddUser;
         private assignIdAndSendConfirmation;
+        private cRstartNegotiation;
+        private cRsendOffer;
+        private cRreceiveAnswer;
+        private cRsendIceCandidates;
+        private cEreceiveOffer;
+        private cEanswerOffer;
+        private cEaddIceCandidate;
+        private cEestablishConnection;
     }
 }
