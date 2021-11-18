@@ -67,28 +67,26 @@ var FudgeNet;
         iceServers: [
             // { urls: "stun:stun2.1.google.com:19302" },
             // { urls: "stun:stun.example.com" }
-            { urls: "stun:stun.l.google.com:19302" },
+            // { urls: "stun:stun.l.google.com:19302" },
             // { urls: "turn:0.peerjs.com:3478", username: "peerjs", credential: "peerjsp" }
+            // {
+            //   urls: "turn:192.158.29.39:3478?transport=udp",
+            //   credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
+            //   username: "28224511:1379330808"
+            // }
+            { urls: "stun:relay.backups.cz" },
             {
-                urls: "turn:192.158.29.39:3478?transport=udp",
-                credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
-                username: "28224511:1379330808"
+                urls: "turn:relay.backups.cz",
+                credential: "webrtc",
+                username: "webrtc"
+            },
+            {
+                urls: "turn:relay.backups.cz?transport=tcp",
+                credential: "webrtc",
+                username: "webrtc"
             }
         ]
     };
-    // stun:
-    //  stun:relay.backups.cz
-    // turn:
-    //  {
-    //      url: 'turn:relay.backups.cz',
-    //      credential: 'webrtc',
-    //      username: 'webrtc'
-    //  },
-    //  {
-    //      url: 'turn:relay.backups.cz?transport=tcp',
-    //      credential: 'webrtc',
-    //      username: 'webrtc'
-    //  },
     /**
      * Manages a single rtc peer-to-peer connection with multiple channels.
      * {@link FudgeNet.Message}s are passed on from the client using this connection
