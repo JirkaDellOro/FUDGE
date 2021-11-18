@@ -289,8 +289,8 @@ namespace FudgeNet {
           throw (new Error("message lacks source or content."));
         let descriptionAnswer: RTCSessionDescription = new RTCSessionDescription(_message.content.answer);
         this.peers[_message.idSource].peerConnection.setRemoteDescription(descriptionAnswer);
-        // this.peers[_message.idSource].createDataChannel(this, _message.idSource);
-        this.peers[_message.idSource].peerConnection.dispatchEvent(new Event("datachannel"));
+        this.peers[_message.idSource].createDataChannel(this, _message.idSource);
+        // this.peers[_message.idSource].peerConnection.dispatchEvent(new Event("datachannel"));
       } catch (error) {
         console.error("Unexpected Error: Setting Remote Description from Answer", error);
       }
