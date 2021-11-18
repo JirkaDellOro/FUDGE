@@ -304,7 +304,7 @@ var FudgeNet;
         beginPeerConnectionNegotiation = (_idRemote) => {
             try {
                 this.peers[_idRemote] = new FudgeNet.RtcConnection();
-                // this.peers[_idRemote].createDataChannel(this, _idRemote);
+                this.peers[_idRemote].createDataChannel(this, _idRemote);
             }
             catch (error) {
                 console.error("Unexpected Error: Creating Client Datachannel and adding Listeners", error);
