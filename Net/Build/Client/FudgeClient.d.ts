@@ -77,12 +77,12 @@ declare namespace FudgeNet {
     let configuration: {
         iceServers: ({
             urls: string;
-            username?: undefined;
             credential?: undefined;
+            username?: undefined;
         } | {
             urls: string;
-            username: string;
             credential: string;
+            username: string;
         })[];
     };
     /**

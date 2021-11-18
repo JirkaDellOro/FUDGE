@@ -168,7 +168,7 @@ namespace FudgeNet {
             if (this.clientsInfoFromServer[id].isHost)
               host = id;
           if (host != this.idHost) {
-            this.idHost = host
+            this.idHost = host;
             console.log("New host", host);
           }
           break;
