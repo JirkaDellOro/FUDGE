@@ -205,7 +205,7 @@ namespace FudgeCore {
             .find(parent => parent instanceof Skeleton) as Skeleton;
 
           // map channels to 4 by 4 matrix animation sequences indexed by the bone indices
-          const boneSequences: Record<number, AnimationSequenceMatrix4x4> = gltfAnimation.channels.reduce(
+          const boneSequences: {[iBone: number]: AnimationSequenceMatrix4x4} = gltfAnimation.channels.reduce(
             (boneSequences, channel) => {
               const iBone: number = skeleton.bones.indexOf(this.nodes[channel.target.node]);
               
@@ -234,7 +234,7 @@ namespace FudgeCore {
 
               return boneSequences;
             },
-            {} as Record<number, AnimationSequenceMatrix4x4>
+            {} as {[iBone: number]: AnimationSequenceMatrix4x4}
           );
 
           const animationStructure: AnimationStructure = {
