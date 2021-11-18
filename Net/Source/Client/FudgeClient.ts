@@ -215,7 +215,7 @@ namespace FudgeNet {
     private beginPeerConnectionNegotiation = (_idRemote: string): void => {
       try {
         this.peers[_idRemote] = new RtcConnection();
-        this.peers[_idRemote].createDataChannel(this, _idRemote);
+        // this.peers[_idRemote].createDataChannel(this, _idRemote);
       } catch (error) {
         console.error("Unexpected Error: Creating Client Datachannel and adding Listeners", error);
       }
@@ -316,7 +316,7 @@ namespace FudgeNet {
           throw (new Error("message lacks source or content."));
         let descriptionAnswer: RTCSessionDescription = new RTCSessionDescription(_message.content.answer);
         this.peers[_message.idSource].peerConnection.setRemoteDescription(descriptionAnswer);
-        // this.peers[_message.idSource].createDataChannel(this, _message.idSource);
+        this.peers[_message.idSource].createDataChannel(this, _message.idSource);
       } catch (error) {
         console.error("Unexpected Error: Setting Remote Description from Answer", error);
       }
