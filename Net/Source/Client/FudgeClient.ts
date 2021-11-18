@@ -317,7 +317,7 @@ namespace FudgeNet {
         let descriptionAnswer: RTCSessionDescription = new RTCSessionDescription(_message.content.answer);
         this.peers[_message.idSource].peerConnection.setRemoteDescription(descriptionAnswer);
         // this.peers[_message.idSource].createDataChannel(this, _message.idSource);
-        this.peers[_message.idSource].dataChannel?.dispatchEvent(new Event("dataChannel"));
+        this.peers[_message.idSource].peerConnection.dispatchEvent(new Event("dataChannel"));
       } catch (error) {
         console.error("Unexpected Error: Setting Remote Description from Answer", error);
       }
