@@ -343,29 +343,35 @@ var FudgeNet;
         // cR = caller
         cRstartNegotiation = (_idRemote) => {
             try {
-                this.peers[_idRemote] = new FudgeNet.RtcConnection();
-                this.peers[_idRemote].createDataChannel(this, _idRemote);
+                let peer = new FudgeNet.RtcConnection();
+                this.peers[_idRemote] = peer;
+                peer.peerConnection.addEventListener("negotiationneeded", async (_event) => {
+                    console.log("Negotiation needed", _event);
+                    await peer.peerConnection.setLocalDescription();
+                    this.cRsendOffer(_idRemote);
+                });
+                peer.createDataChannel(this, _idRemote);
             }
             catch (error) {
                 console.error("Unexpected Error: Creating Client Datachannel and adding Listeners", error);
             }
             let peerConnection = this.peers[_idRemote].peerConnection;
             peerConnection.addEventListener("icecandidate", (_event) => this.cRsendIceCandidates(_event.candidate, _idRemote));
-            peerConnection.createOffer()
-                .then(async (offer) => {
-                ƒ.Debug.fudge("Caller: createOffer, expected 'stable', got:  ", peerConnection.signalingState);
-                return offer;
-            })
-                .then(async (offer) => {
-                await peerConnection.setLocalDescription(offer);
-                ƒ.Debug.fudge("Caller: setDescription, expected 'have-local-offer', got:  ", peerConnection.signalingState);
-            })
-                .then(() => {
-                this.cRsendOffer(_idRemote);
-            })
-                .catch((error) => {
-                console.error("Unexpected Error: Creating RTCOffer", error);
-            });
+            // peerConnection.createOffer()
+            //   .then(async (offer) => {
+            //     ƒ.Debug.fudge("Caller: createOffer, expected 'stable', got:  ", peerConnection.signalingState);
+            //     return offer;
+            //   })
+            //   .then(async (offer) => {
+            //     await peerConnection.setLocalDescription(offer);
+            //     ƒ.Debug.fudge("Caller: setDescription, expected 'have-local-offer', got:  ", peerConnection.signalingState);
+            //   })
+            //   .then(() => {
+            //     this.cRsendOffer(_idRemote);
+            //   })
+            //   .catch((error) => {
+            //     console.error("Unexpected Error: Creating RTCOffer", error);
+            //   });
         };
         cRsendOffer = (_idRemote) => {
             try {
