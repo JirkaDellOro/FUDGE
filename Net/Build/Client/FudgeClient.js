@@ -422,21 +422,23 @@ var FudgeNet;
                 throw (new Error("message lacks source."));
             let peer = this.peers[_message.idSource] || (this.peers[_message.idSource] = new FudgeNet.RtcConnection());
             let peerConnection = peer.peerConnection;
-            peerConnection.addEventListener("datachannel", (_event) => this.cEestablishConnection(_event, peer));
+            // peerConnection.addEventListener(
+            //   "datachannel", (_event: RTCDataChannelEvent) => this.cEestablishConnection(_event, peer)
+            // );
             let offerToSet = _message.content?.offer;
             if (!offerToSet) {
                 return;
             }
-            peerConnection.setRemoteDescription(new RTCSessionDescription(offerToSet))
-                .then(async () => {
-                ƒ.Debug.fudge("Callee: set remote descripton, expected 'have-remote-offer', got:  ", peerConnection.signalingState);
-                if (!_message.idSource)
-                    throw (new Error("message lacks source"));
-                this.cEanswerOffer(_message.idSource);
-            })
-                .catch((error) => {
-                console.error("Unexpected Error: Setting Remote Description and Creating Answer", error);
-            });
+            peerConnection.setRemoteDescription(new RTCSessionDescription(offerToSet));
+            // .then(async () => {
+            //   ƒ.Debug.fudge("Callee: set remote descripton, expected 'have-remote-offer', got:  ", peerConnection.signalingState);
+            //   if (!_message.idSource)
+            //     throw (new Error("message lacks source"));
+            //   this.cEanswerOffer(_message.idSource);
+            // })
+            // .catch((error) => {
+            //   console.error("Unexpected Error: Setting Remote Description and Creating Answer", error);
+            // });
             ƒ.Debug.fudge("Callee: remote description set, expected 'stable', got:  ", peerConnection.signalingState);
         };
         cEanswerOffer = (_idRemote) => {

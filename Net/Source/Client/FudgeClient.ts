@@ -324,51 +324,51 @@ namespace FudgeNet {
         throw (new Error("message lacks source."));
       let peer: RtcConnection = this.peers[_message.idSource] || (this.peers[_message.idSource] = new RtcConnection());
       let peerConnection: RTCPeerConnection = peer.peerConnection;
-      peerConnection.addEventListener(
-        "datachannel", (_event: RTCDataChannelEvent) => this.cEestablishConnection(_event, peer)
-      );
+      // peerConnection.addEventListener(
+      //   "datachannel", (_event: RTCDataChannelEvent) => this.cEestablishConnection(_event, peer)
+      // );
 
       let offerToSet: RTCSessionDescription | RTCSessionDescriptionInit = _message.content?.offer;
       if (!offerToSet) {
         return;
       }
 
-      peerConnection.setRemoteDescription(new RTCSessionDescription(offerToSet))
-        .then(async () => {
-          ƒ.Debug.fudge("Callee: set remote descripton, expected 'have-remote-offer', got:  ", peerConnection.signalingState);
-          if (!_message.idSource)
-            throw (new Error("message lacks source"));
-          this.cEanswerOffer(_message.idSource);
-        })
-        .catch((error) => {
-          console.error("Unexpected Error: Setting Remote Description and Creating Answer", error);
-        });
+      peerConnection.setRemoteDescription(new RTCSessionDescription(offerToSet));
+        // .then(async () => {
+        //   ƒ.Debug.fudge("Callee: set remote descripton, expected 'have-remote-offer', got:  ", peerConnection.signalingState);
+        //   if (!_message.idSource)
+        //     throw (new Error("message lacks source"));
+        //   this.cEanswerOffer(_message.idSource);
+        // })
+        // .catch((error) => {
+        //   console.error("Unexpected Error: Setting Remote Description and Creating Answer", error);
+        // });
       ƒ.Debug.fudge("Callee: remote description set, expected 'stable', got:  ", peerConnection.signalingState);
     }
 
-    private cEanswerOffer = (_idRemote: string) => {
-      let ultimateAnswer: RTCSessionDescription;
-      let peerConnection: RTCPeerConnection = this.peers[_idRemote]?.peerConnection;
+    // private cEanswerOffer = (_idRemote: string) => {
+    //   let ultimateAnswer: RTCSessionDescription;
+    //   let peerConnection: RTCPeerConnection = this.peers[_idRemote]?.peerConnection;
 
-      // Signaling example from here https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/createAnswer
-      peerConnection.createAnswer()
-        .then(async (answer) => {
-          ƒ.Debug.fudge("Callee: create answer, expected 'have-remote-offer', got:  ", peerConnection.signalingState);
-          ultimateAnswer = new RTCSessionDescription(answer);
-          return await peerConnection.setLocalDescription(ultimateAnswer);
-        }).then(async () => {
-          ƒ.Debug.fudge("Callee: create answer function, expected 'stable', got:  ", peerConnection.signalingState);
+    //   // Signaling example from here https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/createAnswer
+    //   peerConnection.createAnswer()
+    //     .then(async (answer) => {
+    //       ƒ.Debug.fudge("Callee: create answer, expected 'have-remote-offer', got:  ", peerConnection.signalingState);
+    //       ultimateAnswer = new RTCSessionDescription(answer);
+    //       return await peerConnection.setLocalDescription(ultimateAnswer);
+    //     }).then(async () => {
+    //       ƒ.Debug.fudge("Callee: create answer function, expected 'stable', got:  ", peerConnection.signalingState);
 
-          const answerMessage: FudgeNet.Message = {
-            route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.RTC_ANSWER, idTarget: _idRemote, content: { answer: ultimateAnswer }
-          };
-          ƒ.Debug.fudge("Callee: send answer to server ", answerMessage);
-          this.dispatch(answerMessage);
-        })
-        .catch((error) => {
-          console.error("Unexpected error: Creating RTC Answer failed", error);
-        });
-    }
+    //       const answerMessage: FudgeNet.Message = {
+    //         route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.RTC_ANSWER, idTarget: _idRemote, content: { answer: ultimateAnswer }
+    //       };
+    //       ƒ.Debug.fudge("Callee: send answer to server ", answerMessage);
+    //       this.dispatch(answerMessage);
+    //     })
+    //     .catch((error) => {
+    //       console.error("Unexpected error: Creating RTC Answer failed", error);
+    //     });
+    // }
 
     private cEaddIceCandidate = async (_message: FudgeNet.Message) => {
       ƒ.Debug.fudge("Callee: try to add candidate to peer connection");
