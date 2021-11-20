@@ -297,7 +297,7 @@ namespace FudgeNet {
     private cEreceiveOffer = async (_message: FudgeNet.Message): Promise<void> => {
       console.info("Callee: offer received, create connection", _message);
 
-      let peer: Rtc = this.peers[_message.idSource] || (this.peers[_message.idSource!] = new Rtc());
+      let peer: Rtc = this.peers[_message.idSource!] || (this.peers[_message.idSource!] = new Rtc());
       let peerConnection: RTCPeerConnection = peer.peerConnection;
 
       await peerConnection.setRemoteDescription(new RTCSessionDescription(_message.content?.offer));
@@ -318,7 +318,7 @@ namespace FudgeNet {
     private cEaddIceCandidate = async (_message: FudgeNet.Message) => {
       console.info("Callee: try to add candidate to peer connection");
       // try {
-      await this.peers[_message.idSource].peerConnection.addIceCandidate(_message.content.candidate);
+      await this.peers[_message.idSource!].peerConnection.addIceCandidate(_message.content?.candidate);
       // } catch (error) {
       //   console.error("Unexpected Error: Adding Ice Candidate", error);
       // }

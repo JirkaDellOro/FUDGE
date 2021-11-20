@@ -410,7 +410,7 @@ var FudgeNet;
         cEaddIceCandidate = async (_message) => {
             console.info("Callee: try to add candidate to peer connection");
             // try {
-            await this.peers[_message.idSource].peerConnection.addIceCandidate(_message.content.candidate);
+            await this.peers[_message.idSource].peerConnection.addIceCandidate(_message.content?.candidate);
             // } catch (error) {
             //   console.error("Unexpected Error: Adding Ice Candidate", error);
             // }
