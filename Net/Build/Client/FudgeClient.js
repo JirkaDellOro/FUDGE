@@ -101,6 +101,8 @@ var FudgeNet;
         mediaStream;
         constructor() {
             this.peerConnection = new RTCPeerConnection(FudgeNet.configuration);
+            this.peerConnection.addEventListener("signalingstatechange", (_event) => console.log("Signaling state change", _event));
+            this.peerConnection.addEventListener("connectionstatechange", (_event) => console.log("Connection state change", _event));
         }
         createDataChannel(_client, _idRemote) {
             this.addDataChannel(_client, this.peerConnection.createDataChannel(_client.id + "->" + _idRemote));

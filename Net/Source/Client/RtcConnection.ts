@@ -21,7 +21,7 @@ namespace FudgeNet {
       //   credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
       //   username: "28224511:1379330808"
       // }
-      { urls: "stun:relay.backups.cz"},
+      { urls: "stun:relay.backups.cz" },
       {
         urls: "turn:relay.backups.cz",
         credential: "webrtc",
@@ -51,6 +51,12 @@ namespace FudgeNet {
 
     constructor() {
       this.peerConnection = new RTCPeerConnection(configuration);
+      this.peerConnection.addEventListener(
+        "signalingstatechange", (_event: Event) => console.log("Signaling state change", _event)
+      );
+      this.peerConnection.addEventListener(
+        "connectionstatechange", (_event: Event) => console.log("Connection state change", _event)
+      );
     }
 
     public createDataChannel(_client: FudgeClient, _idRemote: string): void {
