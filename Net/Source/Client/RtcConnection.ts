@@ -60,7 +60,7 @@ namespace FudgeNet {
     }
 
     public createDataChannel(_client: FudgeClient, _idRemote: string): void {
-      this.addDataChannel(_client, this.peerConnection. createDataChannel(_client.id + "->" + _idRemote, {negotiated: true, id: 0}));
+      this.addDataChannel(_client, this.peerConnection.createDataChannel(_client.id + "->" + _idRemote, { negotiated: true, id: 0 }));
     }
 
     public addDataChannel(_client: FudgeClient, _dataChannel: RTCDataChannel): void {
@@ -76,7 +76,7 @@ namespace FudgeNet {
 
     private logState(_type: string, _event: Event): void {
       let target: RTCPeerConnection = <RTCPeerConnection>_event.target;
-      let state: Object = {type: _type, connection: target.connectionState, iceState: target.iceConnectionState, iceGather: target.iceGatheringState };
+      let state: Object = { type: _type, connection: target.connectionState, iceState: target.iceConnectionState, iceGather: target.iceGatheringState };
       console.table(state);
     }
   }
