@@ -166,5 +166,6 @@ declare namespace FudgeNet {
         private cEreceiveOffer;
         private cEaddIceCandidate;
         private cEestablishConnection;
+        private delay;
     }
 }

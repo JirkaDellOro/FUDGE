@@ -379,16 +379,18 @@ var FudgeNet;
         cRreceiveAnswer = async (_message) => {
             console.info("Caller: received answer, create data channel ", _message);
             // try {
-            await this.peers[_message.idSource].peerConnection.setRemoteDescription(_message.content?.answer);
-            // this.peers[_message.idSource!].createDataChannel(this, _message.idSource!);
+            let peerConnection = this.peers[_message.idSource].peerConnection;
+            await peerConnection.setRemoteDescription(_message.content?.answer);
             // this.peers[_message.idSource!].peerConnection.dispatchEvent(new Event("datachannel"));
             // } catch (error) {
             //   console.error(error);
             // }
         };
-        cRsendIceCandidates = (_candidate, _idRemote) => {
+        cRsendIceCandidates = async (_candidate, _idRemote) => {
+            await this.delay(5000);
             if (!_candidate)
                 return;
+            this.peers[_idRemote].peerConnection.addEventListener("datachannel", (_event) => this.cEestablishConnection(_event, this.peers[_idRemote]));
             // try {
             console.info("Caller: send ICECandidates to server");
             let message = {
@@ -406,7 +408,6 @@ var FudgeNet;
                 throw (new Error("message lacks source."));
             let peer = this.peers[_message.idSource] || (this.peers[_message.idSource] = new FudgeNet.Rtc());
             let peerConnection = peer.peerConnection;
-            peerConnection.addEventListener("datachannel", (_event) => this.cEestablishConnection(_event, peer));
             let offerToSet = _message.content?.offer;
             if (!offerToSet) {
                 return;
@@ -456,6 +457,7 @@ var FudgeNet;
             if (!_message.idSource || !_message.content)
                 throw (new Error("message lacks source or content."));
             await this.peers[_message.idSource].peerConnection.addIceCandidate(_message.content.candidate);
+            this.peers[_message.idSource].createDataChannel(this, _message.idSource);
             // } catch (error) {
             //   console.error("Unexpected Error: Adding Ice Candidate", error);
             // }
@@ -469,6 +471,11 @@ var FudgeNet;
                 console.error("Unexpected Error: RemoteDatachannel");
             }
         };
+        async delay(_milisec) {
+            return new Promise(resolve => {
+                setTimeout(() => { resolve(); }, _milisec);
+            });
+        }
     }
     FudgeNet.FudgeClient = FudgeClient;
 })(FudgeNet || (FudgeNet = {}));

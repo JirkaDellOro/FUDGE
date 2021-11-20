@@ -276,17 +276,23 @@ namespace FudgeNet {
     private cRreceiveAnswer = async (_message: FudgeNet.Message) => {
       console.info("Caller: received answer, create data channel ", _message);
       // try {
-      await this.peers[_message.idSource!].peerConnection.setRemoteDescription(_message.content?.answer);
-      // this.peers[_message.idSource!].createDataChannel(this, _message.idSource!);
+      let peerConnection: RTCPeerConnection = this.peers[_message.idSource!].peerConnection;
+      await peerConnection.setRemoteDescription(_message.content?.answer);
       // this.peers[_message.idSource!].peerConnection.dispatchEvent(new Event("datachannel"));
       // } catch (error) {
       //   console.error(error);
       // }
     }
 
-    private cRsendIceCandidates = (_candidate: RTCIceCandidate | null, _idRemote: string) => {
+    private cRsendIceCandidates = async (_candidate: RTCIceCandidate | null, _idRemote: string) => {
+      await this.delay(5000);
       if (!_candidate)
         return;
+        
+      this.peers[_idRemote].peerConnection.addEventListener(
+        "datachannel", (_event: RTCDataChannelEvent) => this.cEestablishConnection(_event, this.peers[_idRemote])
+      );
+
       // try {
       console.info("Caller: send ICECandidates to server");
       let message: FudgeNet.Message = {
@@ -305,9 +311,6 @@ namespace FudgeNet {
         throw (new Error("message lacks source."));
       let peer: Rtc = this.peers[_message.idSource] || (this.peers[_message.idSource] = new Rtc());
       let peerConnection: RTCPeerConnection = peer.peerConnection;
-      peerConnection.addEventListener(
-        "datachannel", (_event: RTCDataChannelEvent) => this.cEestablishConnection(_event, peer)
-      );
 
       let offerToSet: RTCSessionDescription | RTCSessionDescriptionInit = _message.content?.offer;
       if (!offerToSet) {
@@ -364,6 +367,7 @@ namespace FudgeNet {
       if (!_message.idSource || !_message.content)
         throw (new Error("message lacks source or content."));
       await this.peers[_message.idSource].peerConnection.addIceCandidate(_message.content.candidate);
+      this.peers[_message.idSource!].createDataChannel(this, _message.idSource!);
       // } catch (error) {
       //   console.error("Unexpected Error: Adding Ice Candidate", error);
       // }
@@ -377,6 +381,12 @@ namespace FudgeNet {
       else {
         console.error("Unexpected Error: RemoteDatachannel");
       }
+    }
+
+    private async delay(_milisec: number): Promise<void> {
+      return new Promise(resolve => {
+        setTimeout(() => { resolve(); }, _milisec);
+      });
     }
   }
 }
