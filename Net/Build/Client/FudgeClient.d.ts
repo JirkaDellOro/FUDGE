@@ -92,7 +92,7 @@ declare namespace FudgeNet {
      * used internally by the {@link FudgeClient} and should not be used otherwise.
      * @author Jirka Dell'Oro-Friedl, HFU, 2021
      */
-    class RtcConnection {
+    class Rtc {
         peerConnection: RTCPeerConnection;
         dataChannel: RTCDataChannel | undefined;
         mediaStream: MediaStream | undefined;
@@ -114,7 +114,7 @@ declare namespace FudgeNet {
         urlServer: string;
         socket: WebSocket;
         peers: {
-            [id: string]: RtcConnection;
+            [id: string]: Rtc;
         };
         clientsInfoFromServer: {
             [id: string]: {

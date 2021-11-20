@@ -43,7 +43,7 @@ namespace FudgeNet {
    * used internally by the {@link FudgeClient} and should not be used otherwise.
    * @author Jirka Dell'Oro-Friedl, HFU, 2021
    */
-  export class RtcConnection {
+  export class Rtc {
     public peerConnection: RTCPeerConnection;
     public dataChannel: RTCDataChannel | undefined;
     // TODO: use mediaStream in the future? 
