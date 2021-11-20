@@ -7,11 +7,16 @@ namespace FudgeCore {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentMesh);
     public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
     public readonly mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY();
-    #mesh: Mesh = null;
+    #mesh: Mesh;
 
-    public constructor(_mesh: Mesh = null) {
+    public constructor(_mesh?: Mesh, _skeleton?: Skeleton) {
       super();
       this.mesh = _mesh;
+      if (_skeleton) this.skeleton.set(_skeleton);
+
+      this.addEventListener(EVENT.COMPONENT_ADD, (event: Event) => {
+        if (event.target == this && this.skeleton) this.node.addChild(this.skeleton);
+      });
     }
 
     public get mesh(): Mesh {
@@ -20,6 +25,13 @@ namespace FudgeCore {
 
     public set mesh(_mesh: Mesh) {
       this.#mesh = _mesh;
+
+      if (this.node && this.skeleton)
+        this.node.addChild(this.skeleton);
+    }
+
+    public get skeleton(): SkeletonInstance {
+      return (this.mesh as MeshSkin)?.skeleton;
     }
 
     public get radius(): number {

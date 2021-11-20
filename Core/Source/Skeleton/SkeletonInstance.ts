@@ -3,21 +3,36 @@ namespace FudgeCore {
 
     public readonly bones: Array<Bone> = new Array();
 
+    #mtxBones: Array<Matrix4x4>;
+    #mtxBonesUpdated: number;
+
     private skeletonSource: Skeleton;
     
     /**
      * Creates a new skeleton instance
      */
-    constructor() {
+    public constructor() {
       super();
       this.addEventListener(EVENT.CHILD_APPEND, this.onChildAppend);
     }
 
     /**
-     * Gets the inverse matrices of the bone bind transformations relative to this skeleton instance
+     * Gets the bone local transformations
      */
-    public get mtxBindInverses(): Array<Matrix4x4> {
-      return this.skeletonSource.mtxBindInverses;
+    public get mtxBoneLocals(): Array<Matrix4x4> {
+      return this.bones.map(bone => bone.mtxLocal);
+    }
+
+    /**
+     * Gets the bone transformations for a vertex
+     */
+    public get mtxBones(): Array<Matrix4x4> {
+      if (this.#mtxBonesUpdated != this.timestampUpdate) {
+        this.calculateMtxBones();
+        this.#mtxBonesUpdated = this.timestampUpdate;
+      }
+
+      return this.#mtxBones;
     }
 
     /**
@@ -32,7 +47,18 @@ namespace FudgeCore {
      * Resets this skeleton instance to its default pose
      */
     public resetPose(): void {
-      this.bones.forEach((bone, index) => bone.mtxLocal.set(Matrix4x4.INVERSION(this.mtxBindInverses[index])));
+      this.bones.forEach((bone, index) => bone.mtxLocal.set(Matrix4x4.INVERSION(this.skeletonSource.mtxBindInverses[index])));
+    }
+
+    private calculateMtxBones(): void {
+      this.#mtxBones = this.bones.map((bone, index) => {
+        // bone matrix T = N^-1 * B_delta * B_0^-1 * S
+        const boneMatrix: Matrix4x4 = this.getParent()?.mtxWorldInverse.clone || Matrix4x4.IDENTITY();
+        boneMatrix.multiply(bone.mtxWorld);
+        boneMatrix.multiply(this.skeletonSource.mtxBindInverses[index]);
+
+        return boneMatrix;
+      });
     }
 
     /**

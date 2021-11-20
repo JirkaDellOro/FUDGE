@@ -280,15 +280,16 @@ namespace FudgeCore {
           node.addComponent(this.cameras[gltfNode.camera]);
         }
 
-        // check for mesh and skeleton
+        // check for mesh
         if (gltfNode.mesh != undefined) {
-          if (gltfNode.skin == undefined)
-            node.addComponent(new ComponentMesh(this.meshes[gltfNode.mesh]));
-          else {
-            const skeleton: Skeleton = this.skeletons[gltfNode.skin];
-            node.addComponent(new ComponentMeshSkin(this.meshes[gltfNode.mesh] as MeshSkin, skeleton));
-            node.addComponent(new ComponentAnimator(this.skeletalAnimations.get(skeleton)));
-          }
+          node.addComponent(new ComponentMesh(this.meshes[gltfNode.mesh]));
+        }
+
+        // check for skeleton        
+        if (gltfNode.skin != undefined) {
+          node.getComponent(ComponentMesh).skeleton.set(this.skeletons[gltfNode.skin]);
+          const skeletalAnimation: Animation = this.skeletalAnimations.get(this.skeletons[gltfNode.skin]);
+          if (skeletalAnimation) node.addComponent(new ComponentAnimator(skeletalAnimation));
         }
       });
     }

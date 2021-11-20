@@ -1891,41 +1891,14 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         mtxPivot: Matrix4x4;
         readonly mtxWorld: Matrix4x4;
-        constructor(_mesh?: Mesh);
+        constructor(_mesh?: Mesh, _skeleton?: Skeleton);
         get mesh(): Mesh;
         set mesh(_mesh: Mesh);
+        get skeleton(): SkeletonInstance;
         get radius(): number;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorForUserInterface(): MutatorForUserInterface;
-    }
-}
-declare namespace FudgeCore {
-    class ComponentMeshSkin extends ComponentMesh {
-        #private;
-        readonly skeleton: SkeletonInstance;
-        mtxSkeleton: Matrix4x4;
-        /**
-         * Creates a new mesh-skin component with an optional mesh-skin
-         * and an optional skeleton component to influence this components mesh
-         */
-        constructor(_mesh?: MeshSkin, _skeleton?: Skeleton, _mtxSkeleton?: Matrix4x4);
-        get mesh(): MeshSkin;
-        set mesh(_mesh: MeshSkin);
-        /**
-         * Gets the bone local transformations
-         */
-        get mtxBoneLocals(): Array<Matrix4x4>;
-        /**
-         * Gets the bone transformations for a vertex
-         */
-        get mtxBones(): Array<Matrix4x4>;
-        /**
-         * Calculates the position of a vertex transformed by the skeleton
-         * @param _index index of the vertex
-         */
-        getVertexPosition(_index: number): Vector3;
-        private calculateMtxBones;
     }
 }
 declare namespace FudgeCore {
@@ -4426,9 +4399,17 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    class RenderInjectorMeshSkin extends RenderInjectorMesh {
+        static decorate(_constructor: Function): void;
+        protected static createRenderBuffers(this: MeshSkin): void;
+        protected static useRenderBuffers(this: MeshSkin, _shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): void;
+        protected static deleteRenderBuffers(_renderBuffers: RenderBuffers): void;
+    }
+}
+declare namespace FudgeCore {
     class MeshSkin extends MeshGLTF {
         static readonly vectorizedJointMatrixLength: number;
-        component: ComponentMeshSkin;
+        readonly skeleton: SkeletonInstance;
         protected ƒiBones: Uint8Array;
         protected ƒweights: Float32Array;
         protected ƒmtxBones: Float32Array;
@@ -4441,7 +4422,11 @@ declare namespace FudgeCore {
         get iBones(): Uint8Array;
         get weights(): Float32Array;
         get mtxBones(): Float32Array;
-        get nBones(): number;
+        /**
+         * Calculates the position of a vertex transformed by the skeleton
+         * @param _index index of the vertex
+         */
+        getVertexPosition(_index: number): Vector3;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
@@ -5702,13 +5687,6 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    class RenderInjectorMeshSkin {
-        protected static createRenderBuffers(this: MeshSkin): void;
-        protected static useRenderBuffers(this: MeshSkin, _shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): void;
-        protected static deleteRenderBuffers(_renderBuffers: RenderBuffers): void;
-    }
-}
-declare namespace FudgeCore {
     abstract class RenderParticles extends Render {
         static drawParticles(): void;
     }
@@ -6126,6 +6104,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     class SkeletonInstance extends GraphInstance {
+        #private;
         readonly bones: Array<Bone>;
         private skeletonSource;
         /**
@@ -6133,9 +6112,13 @@ declare namespace FudgeCore {
          */
         constructor();
         /**
-         * Gets the inverse matrices of the bone bind transformations relative to this skeleton instance
+         * Gets the bone local transformations
          */
-        get mtxBindInverses(): Array<Matrix4x4>;
+        get mtxBoneLocals(): Array<Matrix4x4>;
+        /**
+         * Gets the bone transformations for a vertex
+         */
+        get mtxBones(): Array<Matrix4x4>;
         /**
          * Set this skeleton instance to be a recreation of the {@link Skeleton} given
          */
@@ -6144,6 +6127,7 @@ declare namespace FudgeCore {
          * Resets this skeleton instance to its default pose
          */
         resetPose(): void;
+        private calculateMtxBones;
         /**
          * Registers all bones of a appended node
          */
