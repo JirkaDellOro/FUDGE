@@ -163,7 +163,6 @@ declare namespace FudgeNet {
         private cRreceiveAnswer;
         private cRsendIceCandidates;
         private cEreceiveOffer;
-        private cEanswerOffer;
         private cEaddIceCandidate;
         private cEestablishConnection;
     }
