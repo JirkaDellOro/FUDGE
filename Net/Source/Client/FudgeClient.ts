@@ -279,7 +279,7 @@ namespace FudgeNet {
       try {
         ƒ.Debug.fudge("Caller: received answer, create data channel ", _message);
         await this.peers[_message.idSource!].peerConnection.setRemoteDescription(_message.content?.answer);
-        this.peers[_message.idSource!].createDataChannel(this, _message.idSource!);
+        // this.peers[_message.idSource!].createDataChannel(this, _message.idSource!);
         // this.peers[_message.idSource].peerConnection.dispatchEvent(new Event("datachannel"));
       } catch (error) {
         console.error("Unexpected Error: Setting Remote Description from Answer", error);
