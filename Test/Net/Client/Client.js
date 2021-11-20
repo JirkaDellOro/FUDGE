@@ -57,6 +57,8 @@ var ClientTest;
             }
             return;
         }
+        else
+            console.table(_event);
     }
     function delay(_milisec) {
         return new Promise(resolve => {

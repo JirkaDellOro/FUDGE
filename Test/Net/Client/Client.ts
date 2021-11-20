@@ -59,7 +59,8 @@ namespace ClientTest {
           break;
       }
       return;
-    }
+    } else
+      console.table(_event);
   }
 
   function delay(_milisec: number): Promise<void> {
