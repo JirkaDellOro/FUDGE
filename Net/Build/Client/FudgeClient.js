@@ -351,8 +351,8 @@ var FudgeNet;
                     this.cRsendOffer(_idRemote);
                 });
                 rtc.peerConnection.addEventListener("icecandidate", (_event) => this.cRsendIceCandidates(_event.candidate, _idRemote));
-                // rtc.createDataChannel(this, _idRemote);
-                rtc.peerConnection.dispatchEvent(new Event("negotiationneeded"));
+                rtc.createDataChannel(this, _idRemote);
+                // rtc.peerConnection.dispatchEvent(new Event("negotiationneeded"));
             }
             catch (error) {
                 console.error("Unexpected Error: Creating Client Datachannel and adding Listeners", error);
@@ -375,7 +375,7 @@ var FudgeNet;
             try {
                 ƒ.Debug.fudge("Caller: received answer, create data channel ", _message);
                 await this.peers[_message.idSource].peerConnection.setRemoteDescription(_message.content?.answer);
-                this.peers[_message.idSource].createDataChannel(this, _message.idSource);
+                // this.peers[_message.idSource!].createDataChannel(this, _message.idSource!);
                 // this.peers[_message.idSource!].peerConnection.dispatchEvent(new Event("datachannel"));
             }
             catch (error) {
