@@ -1,4 +1,5 @@
-namespace AnimationTest {
+///<reference path="./../../Core/Build/FudgeCore.d.ts"/>
+namespace SkeletonTest {
   import ƒ = FudgeCore;
 
   window.addEventListener("load", init);
@@ -13,11 +14,12 @@ namespace AnimationTest {
 
     const canvas: HTMLCanvasElement = document.querySelector("canvas");
 
-    const node: ƒ.Node = initAnimatedQuad();
+    const node: ƒ.Node = initAnimatedCuboid();
 
     const camera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
     camera.mtxPivot.translateX(-10);
-    camera.mtxPivot.rotateZ(180);
+    camera.mtxPivot.translateY(10);
+    camera.mtxPivot.showTo(ƒ.Vector3.ZERO(), camera.mtxPivot.getZ());
     node.addComponent(camera);
     //gltf.scene.addComponent(camera);
 
@@ -31,24 +33,51 @@ namespace AnimationTest {
     ƒ.Loop.start();
   }
 
-  class MeshQuadSkin extends ƒ.MeshSkin {
+  class MeshCuboidSkin extends ƒ.MeshSkin {
     constructor() {
       super();
       this.ƒvertices = Float32Array.from([
-        -1, -1, -2, // 0
-         1, -1, -2, // 1
-        -1,  1, -2, // 2
-         1,  1, -2, // 3
+       -1, -1, -2, // 0
+        1, -1, -2, // 1
+       -1,  1, -2, // 2
+        1,  1, -2, // 3
 
-        -1, -1,  0, // 4
-         1, -1,  0, // 5
-        -1,  1,  0, // 6
-         1,  1,  0, // 7
+       -1, -1,  0, // 4
+        1, -1,  0, // 5
+       -1,  1,  0, // 6
+        1,  1,  0, // 7
 
-        -1, -1,  2, // 8
-         1, -1,  2, // 9
-        -1,  1,  2, // 10
-         1,  1,  2  // 11
+       -1, -1,  2, // 8
+        1, -1,  2, // 9
+       -1,  1,  2, // 10
+        1,  1,  2  // 11
+      ]);
+      this.ƒindices = Uint16Array.from([
+        0,  2,  3, // bottom
+        3,  1,  0,
+
+        0,  1,  5, // front-bottom
+        5,  4,  0,
+        4,  5,  9, // front-top
+        9,  8,  4,
+
+        1,  3,  7, // right-bottom
+        7,  5,  1,
+        5,  7, 11, // right-top
+       11,  9,  5,
+
+        3,  2,  6, // back-bottom
+        6,  7,  3,
+        7,  6, 10, // back-top
+       10, 11,  7,
+
+        2,  0,  4, // left-bottom
+        4,  6,  2,
+        6,  4,  8, // left-top
+        8, 10,  6,
+
+        8,  9, 11, // top
+       11, 10,  8
       ]);
       this.ƒiBones = Uint8Array.from([
         0, 1, 0, 0,
@@ -82,46 +111,19 @@ namespace AnimationTest {
         0.0, 1.0, 0, 0,
         0.0, 1.0, 0, 0
       ]);
-      this.ƒindices = Uint16Array.from([
-         0,  1,  2,
-         2,  3,  1,
-
-         0,  1,  4,
-         4,  5,  1,
-         4,  5,  8,
-         8,  9,  5,
-
-         1,  2,  5,
-         5,  6,  2,
-         5,  6,  9,
-         9, 10,  6,
-
-         2,  3,  6,
-         6,  7,  3,
-         6,  7, 10,
-        10, 11,  7,
-
-         3,  0,  7,
-         7,  4,  0,
-         7,  4, 11,
-        11,  8,  4,
-
-         8,  9, 10,
-        10, 11,  9
-      ]);
     }
   }
 
-  function initAnimatedQuad(): ƒ.Node {
-    const zylinder: ƒ.Node = new ƒ.Node("AnimatedQuad");
+  function initAnimatedCuboid(): ƒ.Node {
+    const zylinder: ƒ.Node = new ƒ.Node("AnimatedCuboid");
 
     const skeleton: ƒ.Skeleton = new ƒ.Skeleton("Skeleton");
     skeleton.addChild(new ƒ.Bone("LowerBone", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Z(-2))));
     skeleton.bones[0].addChild(new ƒ.Bone("UpperBone", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Z(2))));
     //console.log(ƒ.Serializer.serialize(skeleton));
 
-    const mesh: ƒ.MeshSkin = new MeshQuadSkin();
-    const cmpMesh: ƒ.ComponentMeshSkin = new ƒ.ComponentMeshSkin(mesh, skeleton);
+    const mesh: ƒ.MeshSkin = new MeshCuboidSkin();
+    const cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh(mesh, skeleton);
     zylinder.addComponent(cmpMesh);
 
     const material: ƒ.Material = new ƒ.Material("Grey", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("Grey")));
