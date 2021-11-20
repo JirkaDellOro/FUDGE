@@ -249,17 +249,15 @@ namespace FudgeNet {
             this.cRsendOffer(_idRemote);
           }
         );
+        rtc.peerConnection.addEventListener(
+          "icecandidate", (_event: RTCPeerConnectionIceEvent) => this.cRsendIceCandidates(_event.candidate, _idRemote)
+        );
 
-        rtc.createDataChannel(this, _idRemote);
-        // peer.peerConnection.dispatchEvent(new Event("negotiationneeded"));
+        // rtc.createDataChannel(this, _idRemote);
+        rtc.peerConnection.dispatchEvent(new Event("negotiationneeded"));
       } catch (error) {
         console.error("Unexpected Error: Creating Client Datachannel and adding Listeners", error);
       }
-
-      let peerConnection: RTCPeerConnection = this.peers[_idRemote].peerConnection;
-      peerConnection.addEventListener(
-        "icecandidate", (_event: RTCPeerConnectionIceEvent) => this.cRsendIceCandidates(_event.candidate, _idRemote)
-      );
     }
 
     private cRsendOffer = (_idRemote: string) => {
@@ -279,8 +277,8 @@ namespace FudgeNet {
       try {
         ƒ.Debug.fudge("Caller: received answer, create data channel ", _message);
         await this.peers[_message.idSource!].peerConnection.setRemoteDescription(_message.content?.answer);
-        // this.peers[_message.idSource!].createDataChannel(this, _message.idSource!);
-        // this.peers[_message.idSource].peerConnection.dispatchEvent(new Event("datachannel"));
+        this.peers[_message.idSource!].createDataChannel(this, _message.idSource!);
+        // this.peers[_message.idSource!].peerConnection.dispatchEvent(new Event("datachannel"));
       } catch (error) {
         console.error("Unexpected Error: Setting Remote Description from Answer", error);
       }
