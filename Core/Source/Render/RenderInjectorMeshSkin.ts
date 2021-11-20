@@ -1,7 +1,20 @@
 namespace FudgeCore {
-  export class RenderInjectorMeshSkin {
+  export class RenderInjectorMeshSkin extends RenderInjectorMesh {
+
+    public static decorate(_constructor: Function): void {
+      Object.defineProperty(_constructor.prototype, "useRenderBuffers", {
+        value: RenderInjectorMeshSkin.useRenderBuffers
+      });
+      Object.defineProperty(_constructor.prototype, "createRenderBuffers", {
+        value: RenderInjectorMeshSkin.createRenderBuffers
+      });
+      Object.defineProperty(_constructor.prototype, "deleteRenderBuffers", {
+        value: RenderInjectorMeshSkin.deleteRenderBuffers
+      });
+    }
 
     protected static createRenderBuffers(this: MeshSkin): void {
+      super.createRenderBuffers.call(this);
       const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
 
       this.renderBuffers.iBones = RenderWebGL.assert<WebGLBuffer>(crc3.createBuffer());
@@ -14,6 +27,7 @@ namespace FudgeCore {
     }
 
     protected static useRenderBuffers(this: MeshSkin, _shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): void {
+      super.useRenderBuffers.call(this, _shader, _mtxWorld, _mtxProjection, _id);
       const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
 
       const aIBone: number = _shader.attributes["a_iBone"];
@@ -36,6 +50,7 @@ namespace FudgeCore {
     }
 
     protected static deleteRenderBuffers(_renderBuffers: RenderBuffers): void {
+      super.deleteRenderBuffers(_renderBuffers);
       const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       
       if (_renderBuffers) {
