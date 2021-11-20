@@ -173,7 +173,7 @@ namespace FudgeNet {
           }
           break;
       }
-      
+
       this.dispatchEvent(new MessageEvent(_event.type, <MessageEventInit<unknown>><unknown>_event));
     }
 
@@ -318,7 +318,18 @@ namespace FudgeNet {
     private cEaddIceCandidate = async (_message: FudgeNet.Message) => {
       console.info("Callee: try to add candidate to peer connection");
       // try {
-      await this.peers[_message.idSource!].peerConnection.addIceCandidate(_message.content?.candidate);
+      let peerConnection: RTCPeerConnection = this.peers[_message.idSource!].peerConnection;
+      await peerConnection.addIceCandidate(_message.content?.candidate);
+      this.peers[_message.idSource!].createDataChannel(this, _message.idSource!);
+      // let dataChannel: RTCDataChannel = peerConnection.createDataChannel(_message.idSource + "->" + this.id, {
+      //   negotiated: true
+      // });
+
+      // dataChannel.addEventListener("open", (event) => {
+      //   peerConnection.beginTransmission(dataChannel);
+      // });
+
+      // peerConnection.requestRemoteChannel(dataChannel.id);
       // } catch (error) {
       //   console.error("Unexpected Error: Adding Ice Candidate", error);
       // }
