@@ -101,8 +101,8 @@ var FudgeNet;
         mediaStream;
         constructor() {
             this.peerConnection = new RTCPeerConnection(FudgeNet.configuration);
-            this.peerConnection.addEventListener("signalingstatechange", (_event) => console.log("Signaling state change", _event));
-            this.peerConnection.addEventListener("connectionstatechange", (_event) => console.log("Connection state change", _event));
+            this.peerConnection.addEventListener("signalingstatechange", (_event) => this.logState("Signaling state change", _event));
+            this.peerConnection.addEventListener("connectionstatechange", (_event) => this.logState("Connection state change", _event));
         }
         createDataChannel(_client, _idRemote) {
             this.addDataChannel(_client, this.peerConnection.createDataChannel(_client.id + "->" + _idRemote));
@@ -115,6 +115,11 @@ var FudgeNet;
             function dispatchRtcEvent(_event) {
                 _client.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, { detail: _event }));
             }
+        }
+        logState(_type, _event) {
+            let target = _event.target;
+            let state = { type: _type, connection: target.connectionState, iceState: target.iceConnectionState, iceGather: target.iceGatheringState };
+            console.table(state);
         }
     }
     FudgeNet.Rtc = Rtc;

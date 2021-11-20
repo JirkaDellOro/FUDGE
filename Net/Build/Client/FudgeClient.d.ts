@@ -99,6 +99,7 @@ declare namespace FudgeNet {
         constructor();
         createDataChannel(_client: FudgeClient, _idRemote: string): void;
         addDataChannel(_client: FudgeClient, _dataChannel: RTCDataChannel): void;
+        private logState;
     }
 }
 declare namespace FudgeNet {

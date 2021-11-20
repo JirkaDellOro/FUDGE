@@ -52,10 +52,10 @@ namespace FudgeNet {
     constructor() {
       this.peerConnection = new RTCPeerConnection(configuration);
       this.peerConnection.addEventListener(
-        "signalingstatechange", (_event: Event) => console.log("Signaling state change", _event)
+        "signalingstatechange", (_event: Event) => this.logState("Signaling state change", _event)
       );
       this.peerConnection.addEventListener(
-        "connectionstatechange", (_event: Event) => console.log("Connection state change", _event)
+        "connectionstatechange", (_event: Event) => this.logState("Connection state change", _event)
       );
     }
 
@@ -72,6 +72,12 @@ namespace FudgeNet {
       function dispatchRtcEvent(this: RTCDataChannel, _event: Event): void {
         _client.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, { detail: _event }));
       }
+    }
+
+    private logState(_type: string, _event: Event): void {
+      let target: RTCPeerConnection = <RTCPeerConnection>_event.target;
+      let state: Object = {type: _type, connection: target.connectionState, iceState: target.iceConnectionState, iceGather: target.iceGatheringState };
+      console.table(state);
     }
   }
 }
