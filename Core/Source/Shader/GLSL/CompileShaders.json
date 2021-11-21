@@ -1,0 +1,9 @@
+{
+  "ShaderTextureFlat": {
+    "vertex": "ShaderTextureFlat.vert",
+    "fragment": "ShaderTextureFlat.frag",
+    "coat": "CoatTextured",
+    "namespace": "FudgeCore",
+    "outdir": "../"
+  }
+}
