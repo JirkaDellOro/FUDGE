@@ -21,7 +21,7 @@ namespace FudgeCore {
             vec3 direction;
         };
 
-        const uint MAX_LIGHTS_DIRECTIONAL = 10u;
+        const uint MAX_LIGHTS_DIRECTIONAL = 100u;
 
         in vec3 a_position;
         in vec3 a_normal;

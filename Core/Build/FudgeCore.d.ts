@@ -5285,6 +5285,18 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
+     * Textured shading
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     */
+    abstract class ShaderTextureFlat extends Shader {
+        static readonly iSubclass: number;
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    /**
      * Single color shading
      * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
      */
