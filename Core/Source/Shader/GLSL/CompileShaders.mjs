@@ -23,12 +23,16 @@ for (let name in json) {
     code += `  public static getCoat(): typeof Coat { return ${shader.coat}; }\n\n`;
 
   let vertex = fs.readFileSync(shader.vertex, { encoding: 'utf8' })
-  code += `  public static getVertexShaderSource(): string { return \n`;
-  code += `"` + vertex + `";\n}\n\n`;
-
+  code += "  public static getVertexShaderSource(): string { \n";
+  code += "return `";
+  code += vertex;
+  code += "\n`; }\n\n";
+  
   let fragment = fs.readFileSync(shader.fragment, { encoding: 'utf8' })
-  code += `  public static getFragmentShaderSource(): string { return \n`;
-  code += `"` + fragment + `";\n}\n`;
+  code += "  public static getFragmentShaderSource(): string { \n";
+  code += "return `";
+  code +=  fragment;
+  code += "\n`; }\n";
 
   code += `}`;
 
@@ -36,5 +40,5 @@ for (let name in json) {
     code = `namespace ${shader.namespace} {\n` + code + `\n}`;
   }
 
-  console.log(code);
+  fs.writeFileSync(shader.outdir + "/" + name + ".ts", code);
 }
