@@ -23,7 +23,8 @@ namespace FudgeCore {
     protected ƒindices: Uint16Array;
     protected ƒtextureUVs: Float32Array;
     protected ƒnormalsFace: Float32Array;
-    protected ƒnormals: Float32Array;
+    protected ƒfaceCrossProducts: Float32Array; 
+    protected ƒnormalsVertex: Float32Array;
     protected ƒbox: Box;
     // TODO: explore mathematics for easy transformations of radius 
     protected ƒradius: number;
@@ -89,6 +90,18 @@ namespace FudgeCore {
 
       return this.ƒnormalsFace;
     }
+    public get faceCrossProducts(): Float32Array {
+      if (this.ƒfaceCrossProducts == null)
+        this.ƒfaceCrossProducts = this.calculateFaceCrossProducts();
+
+      return this.ƒfaceCrossProducts;
+    }
+    public get normalsVertex(): Float32Array {
+      if (this.ƒnormalsVertex == null)
+        this.ƒnormalsVertex = this.createVertexNormals();
+
+      return this.ƒnormalsVertex;
+    }
     public get textureUVs(): Float32Array {
       if (this.ƒtextureUVs == null)
         this.ƒtextureUVs = this.createTextureUVs();
@@ -125,11 +138,22 @@ namespace FudgeCore {
       this.ƒindices = undefined;
       this.ƒtextureUVs = undefined;
       this.ƒnormalsFace = undefined;
-      this.ƒnormals = undefined;
+      this.ƒfaceCrossProducts = undefined;
+      this.ƒnormalsVertex = undefined;
       this.ƒbox = undefined;
       this.ƒradius = undefined;
 
       this.renderBuffers = null;
+    }
+
+    public create(): void {
+      this.ƒvertices = this.createVertices();
+      this.ƒindices = this.createIndices();
+      this.ƒtextureUVs = this.createTextureUVs();
+      this.ƒfaceCrossProducts = this.calculateFaceCrossProducts();
+      this.ƒnormalsFace = this.createFaceNormals();
+      this.ƒnormalsVertex = this.createVertexNormals();
+      this.createRenderBuffers();
     }
 
     // Serialize/Deserialize for all meshes that calculate without parameters
@@ -171,8 +195,8 @@ namespace FudgeCore {
     protected createIndices(): Uint16Array { return null; }
     protected createNormals(): Float32Array { return null; }
 
-    protected createFaceNormals(): Float32Array {
-      let normals: Float32Array = new Float32Array(this.vertices.length);
+    protected calculateFaceCrossProducts(): Float32Array {
+      let crossProducts: number[] = [];
       let vertices: Vector3[] = [];
 
       for (let v: number = 0; v < this.vertices.length; v += 3)
@@ -183,11 +207,49 @@ namespace FudgeCore {
 
         let v0: Vector3 = Vector3.DIFFERENCE(vertices[trigon[0]], vertices[trigon[1]]);
         let v1: Vector3 = Vector3.DIFFERENCE(vertices[trigon[0]], vertices[trigon[2]]);
-        let normal: Vector3 = /* Vector3.NORMALIZATION */(Vector3.CROSS(v0, v1));
+        let crossProduct: Vector3 = Vector3.CROSS(v0, v1);
         let index: number = trigon[2] * 3;
-        normals.set(normal.get(), index);
+        crossProducts[index] = crossProduct.x;
+        crossProducts[index + 1] = crossProduct.y;
+        crossProducts[index + 2] = crossProduct.z;
       }
-      return normals;
+      return new Float32Array(crossProducts);
+    }
+
+    protected createFaceNormals(): Float32Array {
+      let normals: number[] = [];
+      let faceCrossProducts: Float32Array = this.faceCrossProducts;
+
+      for (let n: number = 0; n < faceCrossProducts.length; n += 3) {
+        let normal: Vector3 = new Vector3(faceCrossProducts[n], faceCrossProducts[n + 1], faceCrossProducts[n + 2]);
+        normal = Vector3.NORMALIZATION(normal);
+        normals.push(normal.x, normal.y, normal.z);
+      }
+      return new Float32Array(normals);
+    }
+
+    protected createVertexNormals(): Float32Array {
+      let normals: Vector3[] = [];
+      let faceCrossProducts: Float32Array = this.faceCrossProducts;
+
+      for (let v: number = 0; v < this.vertices.length; v += 3)
+        normals.push(Vector3.ZERO());
+
+      for (let i: number = 0; i < this.indices.length; i += 3) {
+        let trigon: number[] = [this.indices[i], this.indices[i + 1], this.indices[i + 2]];
+        let index: number = trigon[2] * 3;
+        let normalFace: Vector3 = new Vector3(faceCrossProducts[index], faceCrossProducts[index + 1], faceCrossProducts[index + 2]);
+
+        for (let t: number = 0; t < trigon.length; t++)
+          normals[trigon[t]] = Vector3.SUM(normals[trigon[t]], normalFace);
+      }
+      let vertexNormals: number[] = [];
+      for (let n: number = 0; n < normals.length; n++) {
+        if (normals[n].magnitude != 0)
+          normals[n] = Vector3.NORMALIZATION(normals[n]);
+        vertexNormals.push(normals[n].x, normals[n].y, normals[n].z);
+      }
+      return new Float32Array(vertexNormals);
     }
 
     protected createRadius(): number {
@@ -218,8 +280,9 @@ namespace FudgeCore {
       delete _mutator.ƒradius;
       delete _mutator.ƒvertices;
       delete _mutator.ƒindices;
-      delete _mutator.ƒnormals;
+      delete _mutator.ƒnormalsVertex;
       delete _mutator.ƒnormalsFace;
+      delete _mutator.ƒfaceCrossProducts;
       delete _mutator.ƒtextureUVs;
       delete _mutator.renderBuffers;
     }

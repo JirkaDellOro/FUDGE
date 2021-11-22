@@ -13,19 +13,21 @@ namespace FudgeCore {
     /** list of all the subclasses derived from this class, if they registered properly*/
     public static readonly subclasses: typeof Shader[] = [];
 
+    public static vertexShaderSource: string;
+    public static fragmentShaderSource: string;
+
     public static program: WebGLProgram;
     public static attributes: { [name: string]: number };
     public static uniforms: { [name: string]: WebGLUniformLocation };
 
     /** The type of coat that can be used with this shader to create a material */
-    public static getCoat(): typeof Coat { return null; }
-    public static getVertexShaderSource(): string { return null; }
-    public static getFragmentShaderSource(): string { return null; }
+    public static getCoat(): typeof Coat { return CoatColored; }
+    public static getVertexShaderSource(): string { return this.vertexShaderSource; }
+    public static getFragmentShaderSource(): string { return this.fragmentShaderSource; }
 
     public static deleteProgram(this: typeof Shader): void {/* injected by decorator */ }
     public static useProgram(this: typeof Shader): void {/* injected by decorator */ }
     public static createProgram(this: typeof Shader): void {/* injected by decorator */ } 
-    
     
     protected static registerSubclass(_subclass: typeof Shader): number { return Shader.subclasses.push(_subclass) - 1; }
   }

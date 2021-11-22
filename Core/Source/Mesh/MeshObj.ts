@@ -4,13 +4,14 @@ namespace FudgeCore {
    * static LOAD Method. Currently only works with triangulated Meshes
    * (activate 'Geomentry → Triangulate Faces' in Blenders obj exporter)
    * @todo UVs, Load Materials, Support Quads
-   * @authors Simon Storl-Schulke 2021 */
+   * @authors Simon Storl-Schulke 2021 | Luis Keck, HFU, 2021 */
   export class MeshObj extends Mesh {
 
     protected verts: number[] = [];
     protected uvs: number[] = [];
     protected inds: number[] = [];
     protected facenormals: number[] = [];
+    protected facecrossproducts: number[] = [];
 
     public constructor(objString: string) {
       super();
@@ -23,7 +24,7 @@ namespace FudgeCore {
     public static LOAD(
       src: string,
       name: string = "ObjNode",
-      material: Material = new Material("MaterialRed", ShaderFlat)
+      material: Material = new Material("MaterialRed", ShaderFlat, new CoatColored(new Color(0.8, 0.8, 0.8, 1)))
     ): Node {
       let xmlhttp: XMLHttpRequest = new XMLHttpRequest();
       let fileContent: string = "";
@@ -47,14 +48,33 @@ namespace FudgeCore {
       return nodeObj;
     }
 
+    public static LOAD_MESH(src: string): Mesh {
+
+      let xmlhttp: XMLHttpRequest = new XMLHttpRequest();
+      let fileContent: string = "";
+      let mesh: Mesh;
+
+      xmlhttp.onreadystatechange = async function (): Promise<void> {
+
+        if (this.readyState == 4 && this.status == 200) {
+          fileContent = this.responseText;
+          mesh = new MeshObj(fileContent);
+        }
+      };
+
+      xmlhttp.open("GET", src, true);
+      xmlhttp.send();
+
+      return mesh;
+    }
 
     /** Creates three Vertices from each face. Although inefficient, this has to be done for now - see Issue 244 */
     protected splitVertices(): void {
-
       let vertsNew: number[] = [];
       //let uvsNew: number[] = [];
       let indicesNew: number[] = [];
       let faceNormalsNew: number[] = [];
+      let faceCrossProductsNew: number[] = [];
 
       // For each face
       for (let i: number = 0; i < this.inds.length; i += 3) {
@@ -80,6 +100,12 @@ namespace FudgeCore {
 
         // Calculate Normal by three face vertices
         let normal: Vector3 = Vector3.CROSS(Vector3.DIFFERENCE(v2, v1), Vector3.DIFFERENCE(v3, v1));
+
+        faceCrossProductsNew.push(
+          normal.x, normal.y, normal.z,
+          normal.x, normal.y, normal.z,
+          normal.x, normal.y, normal.z);
+
         normal.normalize();
 
         // Use same Normal for all three face verices
@@ -100,6 +126,7 @@ namespace FudgeCore {
       // this.uvs = uvsNew;
       this.inds = indicesNew;
       this.facenormals = faceNormalsNew;
+      this.facecrossproducts = faceCrossProductsNew;
     }
 
     /** Splits up the obj string into separate arrays for each datatype */
@@ -133,7 +160,6 @@ namespace FudgeCore {
       }
     }
 
-
     protected createVertices(): Float32Array {
       return new Float32Array(this.verts);
     }
@@ -147,8 +173,44 @@ namespace FudgeCore {
       return new Uint16Array(this.inds);
     }
 
+    protected calculateFaceCrossProducts(): Float32Array {
+      return new Float32Array(this.faceCrossProducts);
+    }
     protected createFaceNormals(): Float32Array {
       return new Float32Array(this.facenormals);
+    }
+
+    /*Luis Keck: Calculates vertex normals for smooth shading.
+    New function needed because faces do not share vertices currently */
+    protected createVertexNormals(): Float32Array {
+      let vertexNormals: number[] = [];
+
+      //goes through all vertices
+      for (let i: number = 0; i < this.vertices.length; i += 3) {
+        let vertex: Vector3 = new Vector3(this.vertices[i], this.vertices[i + 1], this.vertices[i + 2]);
+        let samePosVerts: number[] = [];
+
+        //finds vertices that share position with the vertex of current iteration
+        for (let j: number = 0; j < this.vertices.length; j += 3) {
+          if (this.vertices[j] == vertex.x && this.vertices[j + 1] == vertex.y && this.vertices[j + 2] == vertex.z)
+            samePosVerts.push(j);
+        }
+
+        let sum: Vector3 = Vector3.ZERO();
+        //adds the face normals of all faces that would share these vertices
+        for (let z: number = 0; z < samePosVerts.length; z++)
+          sum = Vector3.SUM(sum, new Vector3(
+            this.faceCrossProducts[samePosVerts[z] + 0],
+            this.faceCrossProducts[samePosVerts[z] + 1],
+            this.faceCrossProducts[samePosVerts[z] + 2]
+          ));
+
+        if (sum.magnitude != 0)
+          sum = Vector3.NORMALIZATION(sum);
+
+        vertexNormals.push(sum.x, sum.y, sum.z);
+      }
+      return new Float32Array(vertexNormals);
     }
   }
 }

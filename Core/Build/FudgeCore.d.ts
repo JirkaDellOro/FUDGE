@@ -452,6 +452,7 @@ declare namespace FudgeCore {
         nIndices: number;
         textureUVs: WebGLBuffer;
         normalsFace: WebGLBuffer;
+        normalsVertex: WebGLBuffer;
     }
     class RenderInjectorMesh {
         static decorate(_constructor: Function): void;
@@ -2472,7 +2473,8 @@ declare namespace FudgeCore {
      */
     class CoatColored extends Coat {
         color: Color;
-        constructor(_color?: Color);
+        shininess: number;
+        constructor(_color?: Color, _shininess?: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }
@@ -2841,6 +2843,11 @@ declare namespace FudgeCore {
          */
         static MULTIPLICATION(_mtxLeft: Matrix4x4, _mtxRight: Matrix4x4): Matrix4x4;
         /**
+         * Computes and returns the transpose of a passed matrix.
+         * @param _mtx The matrix to compute the inverse of.
+         */
+        static TRANSPOSE(_mtx: Matrix4x4): Matrix4x4;
+        /**
          * Computes and returns the inverse of a passed matrix.
          * @param _mtx The matrix to compute the inverse of.
          */
@@ -2935,6 +2942,8 @@ declare namespace FudgeCore {
          * The rotation is appended to already applied transforms, thus multiplied from the right. Set _fromLeft to true to switch and put it in front.
          */
         rotate(_by: Vector3, _fromLeft?: boolean): void;
+        transpose(): Matrix4x4;
+        inverse(): Matrix4x4;
         /**
          * Adds a rotation around the x-axis to this matrix
          */
@@ -3404,7 +3413,8 @@ declare namespace FudgeCore {
         protected ƒindices: Uint16Array;
         protected ƒtextureUVs: Float32Array;
         protected ƒnormalsFace: Float32Array;
-        protected ƒnormals: Float32Array;
+        protected ƒfaceCrossProducts: Float32Array;
+        protected ƒnormalsVertex: Float32Array;
         protected ƒbox: Box;
         protected ƒradius: number;
         constructor(_name?: string);
@@ -3420,6 +3430,8 @@ declare namespace FudgeCore {
         get vertices(): Float32Array;
         get indices(): Uint16Array;
         get normalsFace(): Float32Array;
+        get faceCrossProducts(): Float32Array;
+        get normalsVertex(): Float32Array;
         get textureUVs(): Float32Array;
         get boundingBox(): Box;
         get radius(): number;
@@ -3429,6 +3441,7 @@ declare namespace FudgeCore {
         getVertexCount(): number;
         getIndexCount(): number;
         clear(): void;
+        create(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         /**Flip the Normals of a Mesh to render opposite side of each polygon*/
@@ -3437,7 +3450,9 @@ declare namespace FudgeCore {
         protected createTextureUVs(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createNormals(): Float32Array;
+        protected calculateFaceCrossProducts(): Float32Array;
         protected createFaceNormals(): Float32Array;
+        protected createVertexNormals(): Float32Array;
         protected createRadius(): number;
         protected createBoundingBox(): Box;
         protected reduceMutator(_mutator: Mutator): void;
@@ -3533,16 +3548,18 @@ declare namespace FudgeCore {
      * static LOAD Method. Currently only works with triangulated Meshes
      * (activate 'Geomentry → Triangulate Faces' in Blenders obj exporter)
      * @todo UVs, Load Materials, Support Quads
-     * @authors Simon Storl-Schulke 2021 */
+     * @authors Simon Storl-Schulke 2021 | Luis Keck, HFU, 2021 */
     class MeshObj extends Mesh {
         protected verts: number[];
         protected uvs: number[];
         protected inds: number[];
         protected facenormals: number[];
+        protected facecrossproducts: number[];
         constructor(objString: string);
         /** Loads an obj file from the given source url and a returns a complete Node from it.
         * Multiple Objects are treated as a single Mesh. If no material is given, uses a default flat white material. */
         static LOAD(src: string, name?: string, material?: Material): Node;
+        static LOAD_MESH(src: string): Mesh;
         /** Creates three Vertices from each face. Although inefficient, this has to be done for now - see Issue 244 */
         protected splitVertices(): void;
         /** Splits up the obj string into separate arrays for each datatype */
@@ -3550,7 +3567,9 @@ declare namespace FudgeCore {
         protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;
         protected createIndices(): Uint16Array;
+        protected calculateFaceCrossProducts(): Float32Array;
         protected createFaceNormals(): Float32Array;
+        protected createVertexNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {
@@ -5209,6 +5228,8 @@ declare namespace FudgeCore {
         static readonly baseClass: typeof Shader;
         /** list of all the subclasses derived from this class, if they registered properly*/
         static readonly subclasses: typeof Shader[];
+        static vertexShaderSource: string;
+        static fragmentShaderSource: string;
         static program: WebGLProgram;
         static attributes: {
             [name: string]: number;
@@ -5227,10 +5248,7 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    /**
-     * Single color shading
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
+    /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
     abstract class ShaderFlat extends Shader {
         static readonly iSubclass: number;
         static getCoat(): typeof Coat;
@@ -5302,6 +5320,31 @@ declare namespace FudgeCore {
         static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    enum SHADER_MODULE {
+        HEAD_VERT = "#version 300 es\nprecision highp float;\nin vec3 a_position;",
+        HEAD_FRAG = "#version 300 es\nprecision highp float;\n#define GLSLIFY 1\n",
+        NORMAL_FACE = "in vec3 a_normalFace;",
+        NORMAL_VERTEX = "in vec3 a_normalVertex;",
+        MATRIX_WORLD = "uniform mat4 u_world;",
+        MATRIX_PROJECTION = "uniform mat4 u_projection;",
+        MATRIX_NORMAL = "uniform mat4 u_normal;",
+        COLOR_OUT = "out vec4 v_color;",
+        COLOR_OUT_FLAT = "flat out vec4 v_color;",
+        COLOR_IN = "in vec4 v_color;",
+        COLOR_IN_FLAT = "flat in vec4 v_color;",
+        COLOR_U = "uniform vec4 u_color;",
+        SHININESS = "uniform float u_shininess;",
+        FRAG_OUT = "out vec4 frag;",
+        LIGHTS = "struct LightAmbient {\n    vec4 color;\n};\nstruct LightDirectional {\n    vec4 color;\n    vec3 direction;\n};\nconst uint MAX_LIGHTS_DIRECTIONAL = 10u;\nuniform LightAmbient u_ambient;\nuniform uint u_nLightsDirectional;\nuniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];",
+        REFLECTION = "vec3 calculateReflection(vec3 light_dir, vec3 view_dir, vec3 normal, float shininess) {\n    vec3 color = vec3(1);\n    vec3 R = reflect(-light_dir, normal);\n    float spec_dot = max(dot(R, view_dir), 0.0);\n    color += pow(spec_dot, shininess);\n    return color;\n}",
+        FLAT_MAIN_VERT = "void main() {\n    gl_Position = u_projection * vec4(a_position, 1.0);\n    vec3 normal = normalize(mat3(u_world) * a_normalFace);\n    v_color = u_ambient.color;\n    for(uint i = 0u; i < u_nLightsDirectional; i++) {\n        float illumination = -dot(normal, u_directional[i].direction);\n        if(illumination > 0.0f)\n            v_color += illumination * u_directional[i].color;\n    }\n    v_color.a = 1.0;\n}",
+        BASIC_MAIN_FRAG = "void main() {\n    frag = u_color * v_color;\n}",
+        GOURAUD_MAIN_VERT = "void main() {\n    gl_Position = u_projection * vec4(a_position, 1.0);\n    vec4 v_position4 = u_world * vec4(a_normalVertex, 1.0);\n    vec3 v_position = vec3(v_position4) / v_position4.w;\n    vec3 N = normalize(vec3(u_normal * vec4(a_normalVertex, 0.0)));\n    v_color = u_ambient.color;\n    for(uint i = 0u; i < u_nLightsDirectional; i++) {\n        vec3 light_dir = normalize(-u_directional[i].direction);\n        vec3 view_dir = normalize(v_position);\n        float illuminance = dot(light_dir, N);\n        if(illuminance > 0.0) {\n            vec3 reflection = calculateReflection(light_dir, view_dir, N, u_shininess);\n            v_color += vec4(reflection, 1.0) * illuminance * u_directional[i].color;\n        }\n    }\n    v_color.a = 1.0;\n}",
+        PHONG_MAIN_VERT = "out vec3 f_normal;\nout vec3 v_position;\nvoid main() {\n    f_normal = vec3(u_normal * vec4(a_normalVertex, 0.0));\n    vec4 v_position4 = u_world * vec4(a_position, 1.0);\n    v_position = vec3(v_position4) / v_position4.w;\n    gl_Position = u_projection * vec4(a_position, 1.0);\n}",
+        PHONG_MAIN_FRAG = "void main() {\n    frag = u_ambient.color;\n    for(uint i = 0u; i < u_nLightsDirectional; i++) {\n        vec3 light_dir = normalize(-u_directional[i].direction);\n        vec3 view_dir = normalize(v_position);\n        vec3 N = normalize(f_normal);\n        float illuminance = dot(light_dir, N);\n        if(illuminance > 0.0) {\n            vec3 reflection = calculateReflection(light_dir, view_dir, N, u_shininess);\n            frag += vec4(reflection, 1.0) * illuminance * u_directional[i].color;\n        }\n    }\n    frag *= u_color;\n    frag.a = 1.0;\n}"
     }
 }
 declare namespace FudgeCore {

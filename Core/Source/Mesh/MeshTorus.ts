@@ -28,7 +28,7 @@ namespace FudgeCore {
       this.clear();
 
       let vertices: Array<number> = [];
-      let normals: number[] = [];
+      let facenormals: number[] = [];
       let textureUVs: number[] = [];
 
       let centerX: number;
@@ -53,7 +53,7 @@ namespace FudgeCore {
 
           let normal: Vector3 = new Vector3(x - centerX, y - centerY, z);
           normal.normalize();
-          normals.push(normal.x, normal.y, normal.z);
+          facenormals.push(normal.x, normal.y, normal.z);
 
           textureUVs.push(i / this.majorSegments, j / this.minorSegments);
         }
@@ -63,7 +63,7 @@ namespace FudgeCore {
       vertices = vertices.map(_value => _value / 2);
 
       this.ƒtextureUVs = new Float32Array(textureUVs);
-      this.ƒnormals = new Float32Array(normals);
+      this.ƒnormalsFace = new Float32Array(facenormals);
       this.ƒvertices = new Float32Array(vertices);
       this.ƒindices = this.createIndices();
       this.createRenderBuffers();

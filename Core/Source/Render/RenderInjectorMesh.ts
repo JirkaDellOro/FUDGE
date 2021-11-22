@@ -5,6 +5,7 @@ namespace FudgeCore {
     nIndices: number;
     textureUVs: WebGLBuffer;
     normalsFace: WebGLBuffer;
+    normalsVertex: WebGLBuffer;
   }
  //gives WebGL Buffer the data from the {@link Mesh]]
   export class RenderInjectorMesh {
@@ -38,12 +39,17 @@ namespace FudgeCore {
       crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, normalsFace);
       crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, this.normalsFace, WebGL2RenderingContext.STATIC_DRAW);
 
+      let normalsVertex: WebGLBuffer = RenderWebGL.assert<WebGLBuffer>(crc3.createBuffer());
+      crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, normalsVertex);
+      crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, this.normalsVertex, WebGL2RenderingContext.STATIC_DRAW);
+
       let renderBuffers: RenderBuffers = {
         vertices: vertices,
         indices: indices,
         nIndices: this.getIndexCount(),
         textureUVs: textureUVs,
-        normalsFace: normalsFace
+        normalsFace: normalsFace,
+        normalsVertex: normalsVertex
       };
 
       this.renderBuffers = renderBuffers;
@@ -70,11 +76,25 @@ namespace FudgeCore {
         crc3.uniformMatrix4fv(uWorld, false, _mtxWorld.get());
       }
 
-      let aNormal: number = _shader.attributes["a_normal"];
-      if (aNormal) {
+      let uNormal: WebGLUniformLocation = _shader.uniforms["u_normal"];
+      if (uNormal) {
+        // TODO: optimize so that inversion or whole normalMatrix is cached
+        let normalMatrix: Matrix4x4 = Matrix4x4.TRANSPOSE(Matrix4x4.INVERSION(_mtxWorld));
+        crc3.uniformMatrix4fv(uNormal, false, normalMatrix.get());
+      }
+
+      let aNormalFace: number = _shader.attributes["a_normalFace"];
+      if (aNormalFace) {
         crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderBuffers.normalsFace);
-        crc3.enableVertexAttribArray(aNormal);
-        RenderWebGL.setAttributeStructure(aNormal, Mesh.getBufferSpecification());
+        crc3.enableVertexAttribArray(aNormalFace);
+        RenderWebGL.setAttributeStructure(aNormalFace, Mesh.getBufferSpecification());
+      }
+
+      let aNormalVertex: number = _shader.attributes["a_normalVertex"];
+      if (aNormalVertex) {
+        crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderBuffers.normalsVertex);
+        crc3.enableVertexAttribArray(aNormalVertex);
+        RenderWebGL.setAttributeStructure(aNormalVertex, Mesh.getBufferSpecification());
       }
 
       // feed in texture coordinates if shader accepts a_textureUVs
