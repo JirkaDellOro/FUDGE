@@ -5,7 +5,6 @@
 * @authors Luis Keck, HFU, 2021
 */
 precision highp float;
-#define GLSLIFY 1
 uniform vec4 u_color;
 
 in vec4 v_color;

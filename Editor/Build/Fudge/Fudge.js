@@ -1015,12 +1015,12 @@ var Fudge;
         async contextMenuCallback(_item, _window, _event) {
             ƒ.Debug.fudge(`MenuSelect | id: ${Fudge.CONTEXTMENU[_item.id]} | event: ${_event}`);
             let iSubclass = _item["iSubclass"];
+            if (!iSubclass) {
+                alert("Funky Electron-Error... please try again");
+                return;
+            }
             switch (Number(_item.id)) {
                 case Fudge.CONTEXTMENU.CREATE_MESH:
-                    if (!iSubclass) {
-                        alert("Funky Electron-Error... please try again");
-                        return;
-                    }
                     let typeMesh = ƒ.Mesh.subclasses[iSubclass];
                     //@ts-ignore
                     let meshNew = new typeMesh();
@@ -1028,12 +1028,8 @@ var Fudge;
                     this.table.selectInterval(meshNew, meshNew);
                     break;
                 case Fudge.CONTEXTMENU.CREATE_MATERIAL:
-                    if (!iSubclass) {
-                        alert("Funky Electron-Error... please try again");
-                        return;
-                    }
                     let typeShader = ƒ.Shader.subclasses[iSubclass];
-                    let mtrNew = new ƒ.Material("NewMaterial", typeShader);
+                    let mtrNew = new ƒ.Material(typeShader.name, typeShader);
                     this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
                     this.table.selectInterval(mtrNew, mtrNew);
                     break;
