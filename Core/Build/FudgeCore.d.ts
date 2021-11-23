@@ -2846,6 +2846,10 @@ declare namespace FudgeCore {
          */
         static MULTIPLICATION(_mtxLeft: Matrix4x4, _mtxRight: Matrix4x4): Matrix4x4;
         /**
+         * Computes and returns the transpose of a passed matrix.
+         */
+        static TRANSPOSE(_mtx: Matrix4x4): Matrix4x4;
+        /**
          * Computes and returns the inverse of a passed matrix.
          * @param _mtx The matrix to compute the inverse of.
          */
@@ -3620,7 +3624,7 @@ declare namespace FudgeCore {
         protected heightMapFunction: HeightMapFunction;
         constructor(_name?: string, _resolution?: Vector2, _scaleInput?: Vector2, _functionOrSeed?: HeightMapFunction | number);
         create(_resolution?: Vector2, _scaleInput?: Vector2, _functionOrSeed?: HeightMapFunction | number): void;
-        getTerrainInfo(position: Vector3, mtxWorld?: Matrix4x4): TerrainInfo;
+        getTerrainInfo(_position: Vector3, _mtxWorld?: Matrix4x4, _mtxInverse?: Matrix4x4): TerrainInfo;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;
