@@ -224,7 +224,7 @@ namespace HeightMap {
     gridFlat.mtxLocal.scale(new f.Vector3(3, 0.7, 3))
 
     water = Scenes.createCompleteMeshNode("Water", matWater, meshPlane);
-    // water.mtxLocal.rotateX(-90);
+    water.mtxLocal.rotateX(-90);
     water.mtxLocal.scale(new f.Vector3(3, 3, 1));
 
     finish = Scenes.createCompleteMeshNode("Finish", matFinish, meshPlane);

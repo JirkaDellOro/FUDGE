@@ -25,10 +25,10 @@ namespace PhysikTest {
   let tyreBL: f.Node;
   let tyreBR: f.Node;
 
-  let frontSuspensionRight: f.ComponentJointCylindrical;
-  let frontSuspensionLeft: f.ComponentJointCylindrical;
-  let backSuspensionRight: f.ComponentJointCylindrical;
-  let backSuspensionLeft: f.ComponentJointCylindrical;
+  let frontSuspensionRight: f.JointCylindrical;
+  let frontSuspensionLeft: f.JointCylindrical;
+  let backSuspensionRight: f.JointCylindrical;
+  let backSuspensionLeft: f.JointCylindrical;
 
   let cntKeyHorizontal: f.Control = new f.Control("Keyboard", 1, f.CONTROL_TYPE.PROPORTIONAL, true);
   let cntKeyVertical: f.Control = new f.Control("Keyboard", 4, f.CONTROL_TYPE.PROPORTIONAL, true);
@@ -86,25 +86,25 @@ namespace PhysikTest {
     let meshSphere = new f.MeshSphere("Tyre", 10, 10);
 
     controlled = new Controlled("Cube", f.Matrix4x4.IDENTITY() , matRed, new f.MeshCube() );
-    let cmpRigidbody: f.ComponentRigidbody = new f.ComponentRigidbody(500, f.PHYSICS_TYPE.DYNAMIC, f.COLLIDER_TYPE.CUBE, f.PHYSICS_GROUP.DEFAULT, null, null);
+    let cmpRigidbody: f.ComponentRigidbody = new f.ComponentRigidbody(500, f.BODY_TYPE.DYNAMIC, f.COLLIDER_TYPE.CUBE, f.COLLISION_GROUP.DEFAULT, null, null);
     controlled.addComponent(cmpRigidbody);
     controlled.mtxLocal.translation = new f.Vector3( 0.3, 0, 0.3 );
     controlled.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(0.1,0.05,0.025));
     controlled.getComponent(f.ComponentMesh).mtxPivot.translate(new f.Vector3(0.5, 0, 0.5));
 
-    tyreFL = createCompleteNode("Tyre FL", matGrey, meshSphere, 20, f.PHYSICS_TYPE.DYNAMIC);
+    tyreFL = createCompleteNode("Tyre FL", matGrey, meshSphere, 20, f.BODY_TYPE.DYNAMIC);
     tyreFL.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(0.5, 0.5, 0.15));
     bodies.push(tyreFL);
 
-    tyreFR = createCompleteNode("Tyre FR", matGrey, meshSphere, 20, f.PHYSICS_TYPE.DYNAMIC);
+    tyreFR = createCompleteNode("Tyre FR", matGrey, meshSphere, 20, f.BODY_TYPE.DYNAMIC);
     tyreFR.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(0.5, 0.5, 0.15));
     bodies.push(tyreFR);
 
-    tyreBR = createCompleteNode("Tyre BR", matGrey, meshSphere, 20, f.PHYSICS_TYPE.DYNAMIC);
+    tyreBR = createCompleteNode("Tyre BR", matGrey, meshSphere, 20, f.BODY_TYPE.DYNAMIC);
     tyreBR.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(0.5, 0.5, 0.15));
     bodies.push(tyreBR);
 
-    tyreBL = createCompleteNode("Tyre FL", matGrey, meshSphere, 20, f.PHYSICS_TYPE.DYNAMIC);
+    tyreBL = createCompleteNode("Tyre FL", matGrey, meshSphere, 20, f.BODY_TYPE.DYNAMIC);
     tyreBL.getComponent(f.ComponentMesh).mtxPivot.scale(new f.Vector3(0.5, 0.5, 0.15));
     bodies.push(tyreBL);
 
@@ -178,49 +178,49 @@ namespace PhysikTest {
     controlled.addChild(tyreBR);
     controlled.addChild(tyreBL);
 
-    frontSuspensionRight = new f.ComponentJointCylindrical(controlled.getComponent(f.ComponentRigidbody), tyreFR.getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(0.50, -1, -0.75));
+    frontSuspensionRight = new f.JointCylindrical(controlled.getComponent(f.ComponentRigidbody), tyreFR.getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(0.50, -1, -0.75));
     controlled.addComponent(frontSuspensionRight);
     frontSuspensionRight.springDamping = 100;
     frontSuspensionRight.springFrequency = 2;
-    frontSuspensionRight.translationMotorLimitUpper = 0;
-    frontSuspensionRight.translationMotorLimitLower = 0;
-    frontSuspensionRight.rotationalMotorLimitUpper = 0;
-    frontSuspensionRight.rotationalMotorLimitLower = 0;
+    frontSuspensionRight.maxMotor = 0;
+    frontSuspensionRight.minMotor = 0;
+    frontSuspensionRight.maxRotor = 0;
+    frontSuspensionRight.minRotor = 0;
     frontSuspensionRight.internalCollision = true;
 
-    frontSuspensionLeft = new f.ComponentJointCylindrical(controlled.getComponent(f.ComponentRigidbody), tyreFL.getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(-0.50, -1, -0.75));
+    frontSuspensionLeft = new f.JointCylindrical(controlled.getComponent(f.ComponentRigidbody), tyreFL.getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(-0.50, -1, -0.75));
     controlled.addComponent(frontSuspensionLeft);
     frontSuspensionLeft.springDamping = 100;
     frontSuspensionLeft.springFrequency = 2;
-    frontSuspensionLeft.translationMotorLimitUpper = 0;
-    frontSuspensionLeft.translationMotorLimitLower = 0;
-    frontSuspensionLeft.rotationalMotorLimitUpper = 0;
-    frontSuspensionLeft.rotationalMotorLimitLower = 0;
+    frontSuspensionLeft.maxMotor = 0;
+    frontSuspensionLeft.minMotor = 0;
+    frontSuspensionLeft.maxRotor = 0;
+    frontSuspensionLeft.minRotor = 0;
     frontSuspensionLeft.internalCollision = true;
 
-    backSuspensionLeft = new f.ComponentJointCylindrical(controlled.getComponent(f.ComponentRigidbody), tyreBL.getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(-0.50, -1, 0.75));
+    backSuspensionLeft = new f.JointCylindrical(controlled.getComponent(f.ComponentRigidbody), tyreBL.getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(-0.50, -1, 0.75));
     controlled.addComponent(backSuspensionLeft);
     backSuspensionLeft.springDamping = 100;
     backSuspensionLeft.springFrequency = 2;
-    backSuspensionLeft.translationMotorLimitUpper = 0;
-    backSuspensionLeft.translationMotorLimitLower = 0;
-    backSuspensionLeft.rotationalMotorLimitUpper = 0;
-    backSuspensionLeft.rotationalMotorLimitLower = 0;
+    backSuspensionLeft.maxMotor = 0;
+    backSuspensionLeft.minMotor = 0;
+    backSuspensionLeft.maxRotor = 0;
+    backSuspensionLeft.minRotor = 0;
     backSuspensionLeft.internalCollision = true;
 
-    backSuspensionRight = new f.ComponentJointCylindrical(controlled.getComponent(f.ComponentRigidbody), tyreBR.getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(0.50, -1, 0.75));
+    backSuspensionRight = new f.JointCylindrical(controlled.getComponent(f.ComponentRigidbody), tyreBR.getComponent(f.ComponentRigidbody), new f.Vector3(0, -1, 0), new f.Vector3(0.50, -1, 0.75));
     controlled.addComponent(backSuspensionRight);
     backSuspensionRight.springDamping = 100;
     backSuspensionRight.springFrequency = 2;
-    backSuspensionRight.translationMotorLimitUpper = 0;
-    backSuspensionRight.translationMotorLimitLower = 0;
-    backSuspensionRight.rotationalMotorLimitUpper = 0;
-    backSuspensionRight.rotationalMotorLimitLower = 0;
+    backSuspensionRight.maxMotor = 0;
+    backSuspensionRight.minMotor = 0;
+    backSuspensionRight.maxRotor = 0;
+    backSuspensionRight.minRotor = 0;
     backSuspensionRight.internalCollision = true;
 
     f.Physics.adjustTransforms(graph);
 
-    f.Physics.settings.debugDraw = true;
+    // f.Physics.settings.debugDraw = true;
 
     viewport.initialize("Viewport", graph, cmpCamera, document.querySelector("canvas"));
     viewport.setFocus(true);
@@ -355,7 +355,7 @@ namespace PhysikTest {
   //   }
   // }
 
-  function createCompleteNode(_name: string, _material: f.Material, _mesh: f.Mesh, _mass: number, _physicsType: f.PHYSICS_TYPE, _group: f.PHYSICS_GROUP = f.PHYSICS_GROUP.DEFAULT, _colType: f.COLLIDER_TYPE = f.COLLIDER_TYPE.CUBE, _convexMesh: Float32Array = null): f.Node {
+  function createCompleteNode(_name: string, _material: f.Material, _mesh: f.Mesh, _mass: number, _physicsType: f.BODY_TYPE, _group: f.COLLISION_GROUP = f.COLLISION_GROUP.DEFAULT, _colType: f.COLLIDER_TYPE = f.COLLIDER_TYPE.CUBE, _convexMesh: Float32Array = null): f.Node {
     let node: f.Node = new f.Node(_name);
     let cmpMesh: f.ComponentMesh = new f.ComponentMesh(_mesh);
     let cmpMaterial: f.ComponentMaterial = new f.ComponentMaterial(_material);

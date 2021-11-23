@@ -2087,6 +2087,11 @@ declare namespace FudgeCore {
          * Returns the value given as _inactive if not.
          */
         static mapToValue<T>(_active: T, _inactive: T, _keys: KEYBOARD_CODE[], _combo?: boolean): T;
+        /**
+         * Returns a balanced ternary value (either -1, 0 or 1)
+         * according to the match of the keys currently being pressed and the lists of keys given
+         */
+        static mapToTrit(_positive: KEYBOARD_CODE[], _negative: KEYBOARD_CODE[]): number;
         private static initialize;
         private static hndKeyInteraction;
     }
@@ -3599,7 +3604,7 @@ declare namespace FudgeCore {
      * @authors Simon Storl-Schulke, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
      */
     type HeightMapFunction = (x: number, z: number) => number;
-    class PositionOnTerrain {
+    class TerrainInfo {
         position: Vector3;
         normal: Vector3;
     }
@@ -3615,7 +3620,7 @@ declare namespace FudgeCore {
         protected heightMapFunction: HeightMapFunction;
         constructor(_name?: string, _resolution?: Vector2, _scaleInput?: Vector2, _functionOrSeed?: HeightMapFunction | number);
         create(_resolution?: Vector2, _scaleInput?: Vector2, _functionOrSeed?: HeightMapFunction | number): void;
-        getPositionOnTerrain(position: Vector3, mtxWorld?: Matrix4x4): PositionOnTerrain;
+        getTerrainInfo(position: Vector3, mtxWorld?: Matrix4x4): TerrainInfo;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;

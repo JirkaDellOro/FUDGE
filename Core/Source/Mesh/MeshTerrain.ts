@@ -8,7 +8,7 @@ namespace FudgeCore {
    */
   export type HeightMapFunction = (x: number, z: number) => number;
 
-  export class PositionOnTerrain {
+  export class TerrainInfo {
     position: Vector3;
     normal: Vector3;
   }
@@ -47,14 +47,14 @@ namespace FudgeCore {
     }
 
 
-    public getPositionOnTerrain(position: Vector3, mtxWorld?: Matrix4x4): PositionOnTerrain {
+    public getTerrainInfo(position: Vector3, mtxWorld?: Matrix4x4): TerrainInfo {
       let relPosObject: Vector3 = position;
 
       if (mtxWorld)
         relPosObject = Vector3.TRANSFORMATION(position, Matrix4x4.INVERSION(mtxWorld), true);
 
       let nearestFace: DistanceToFaceVertices = this.findNearestFace(relPosObject);
-      let posOnTerrain: PositionOnTerrain = new PositionOnTerrain;
+      let posOnTerrain: TerrainInfo = new TerrainInfo;
 
       let origin: Vector3 = new Vector3(relPosObject.x, this.calculateHeight(nearestFace, relPosObject), relPosObject.z);
       let direction: Vector3 = nearestFace.faceNormal;

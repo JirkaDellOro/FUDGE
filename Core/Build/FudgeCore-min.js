@@ -3754,6 +3754,9 @@ var FudgeCore;
                 return _active;
             return _inactive;
         }
+        static mapToTrit(_positive, _negative) {
+            return Keyboard.mapToValue(-1, 0, _negative) + Keyboard.mapToValue(1, 0, _positive);
+        }
         static initialize() {
             let store = {};
             document.addEventListener("keydown", Keyboard.hndKeyInteraction);
@@ -6696,11 +6699,11 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
-    class PositionOnTerrain {
+    class TerrainInfo {
         position;
         normal;
     }
-    FudgeCore.PositionOnTerrain = PositionOnTerrain;
+    FudgeCore.TerrainInfo = TerrainInfo;
     class MeshTerrain extends FudgeCore.Mesh {
         static iSubclass = FudgeCore.Mesh.registerSubclass(MeshTerrain);
         resolution;
@@ -6726,12 +6729,12 @@ var FudgeCore;
             else
                 this.heightMapFunction = new FudgeCore.Noise2().sample;
         }
-        getPositionOnTerrain(position, mtxWorld) {
+        getTerrainInfo(position, mtxWorld) {
             let relPosObject = position;
             if (mtxWorld)
                 relPosObject = FudgeCore.Vector3.TRANSFORMATION(position, FudgeCore.Matrix4x4.INVERSION(mtxWorld), true);
             let nearestFace = this.findNearestFace(relPosObject);
-            let posOnTerrain = new PositionOnTerrain;
+            let posOnTerrain = new TerrainInfo;
             let origin = new FudgeCore.Vector3(relPosObject.x, this.calculateHeight(nearestFace, relPosObject), relPosObject.z);
             let direction = nearestFace.faceNormal;
             if (mtxWorld) {

@@ -4,14 +4,13 @@ var SuspensionTest;
     var f = FudgeCore;
     var ƒAid = FudgeAid;
     class Controlled extends ƒAid.Node {
-        constructor() {
-            super(...arguments);
-            this.axisSpeed = new f.Axis("Speed", 1, 0 /* PROPORTIONAL */);
-            this.axisRotation = new f.Axis("Rotation", 1, 0 /* PROPORTIONAL */);
-            this.maxSpeed = 0.2; // units per second
-            this.maxRotSpeed = 180; // degrees per second
-            this.groundClearance = 0.025;
-        }
+        axisSpeed = new f.Axis("Speed", 1, 0 /* PROPORTIONAL */);
+        axisRotation = new f.Axis("Rotation", 1, 0 /* PROPORTIONAL */);
+        maxSpeed = 0.2; // units per second
+        maxRotSpeed = 180; // degrees per second
+        terrain;
+        meshTerrain;
+        groundClearance = 0.025;
         setUpAxis() {
             this.axisSpeed.setDelay(2000);
             this.axisRotation.setDelay(300);
@@ -31,10 +30,10 @@ var SuspensionTest;
             let tyreFR = this.getChildrenByName("FR")[0];
             let tyreBR = this.getChildrenByName("BR")[0];
             let tyreBL = this.getChildrenByName("BL")[0];
-            let posFL = this.meshTerrain.getPositionOnTerrain(tyreFL.mtxWorld.translation, this.terrain.mtxWorld);
-            let posFR = this.meshTerrain.getPositionOnTerrain(tyreFR.mtxWorld.translation, this.terrain.mtxWorld);
-            let posBR = this.meshTerrain.getPositionOnTerrain(tyreBR.mtxWorld.translation, this.terrain.mtxWorld);
-            let posBL = this.meshTerrain.getPositionOnTerrain(tyreBL.mtxWorld.translation, this.terrain.mtxWorld);
+            let posFL = this.meshTerrain.getTerrainInfo(tyreFL.mtxWorld.translation, this.terrain.mtxWorld);
+            let posFR = this.meshTerrain.getTerrainInfo(tyreFR.mtxWorld.translation, this.terrain.mtxWorld);
+            let posBR = this.meshTerrain.getTerrainInfo(tyreBR.mtxWorld.translation, this.terrain.mtxWorld);
+            let posBL = this.meshTerrain.getTerrainInfo(tyreBL.mtxWorld.translation, this.terrain.mtxWorld);
             let vecFrontAxis = f.Vector3.DIFFERENCE(posFL.position, posFR.position);
             let vecRearAxis = f.Vector3.DIFFERENCE(posBL.position, posBR.position);
             vecFrontAxis = f.Vector3.SCALE(vecFrontAxis, 0.5);
