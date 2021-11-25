@@ -27,7 +27,7 @@ namespace Fudge {
       this.dom.appendChild(this.tree);
       this.tree.getItems()[0].expand(true);
 
-      this.dom.title = "Drag & drop external image, audiofile etc. to the view Internal, to create a FUDGE-resource";
+      this.dom.title = `Drag & drop external image, audiofile etc. to the "Internal", to create a FUDGE-resource`;
     }
 
     public getSelection(): DirectoryEntry[] {

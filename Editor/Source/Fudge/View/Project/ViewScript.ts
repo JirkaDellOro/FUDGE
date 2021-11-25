@@ -19,6 +19,7 @@ namespace Fudge {
     }
 
     public listScripts(): void {
+      this.dom.title = `Drag & drop scripts on "Components"`;
       while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild));
       let scriptinfos: ScriptInfo[] = [];
       for (let namespace in ƒ.Project.scriptNamespaces) {

@@ -945,7 +945,7 @@ var Fudge;
             this.tree = new ƒui.Tree(new Fudge.ControllerTreeDirectory(), root);
             this.dom.appendChild(this.tree);
             this.tree.getItems()[0].expand(true);
-            this.dom.title = "Drag & drop external image, audiofile etc. to the view Internal, to create a FUDGE-resource";
+            this.dom.title = `Drag & drop external image, audiofile etc. to the "Internal", to create a FUDGE-resource`;
         }
         getSelection() {
             return this.tree.controller.selection;
@@ -985,8 +985,8 @@ var Fudge;
                 ;
             this.table = new ƒui.Table(new Fudge.ControllerTableResource(), Object.values(ƒ.Project.resources));
             this.dom.appendChild(this.table);
-            this.dom.title = "Right click to create new resource";
-            this.table.title = "Select resource to edit";
+            this.dom.title = "● Right click to create new resource.\n● Select or drag resource.";
+            this.table.title = `● Select to edit in "Properties"\n●  Drag to "Properties" or "Components" to use if applicable.`;
         }
         getSelection() {
             return this.table.controller.selection;
@@ -2608,8 +2608,8 @@ var Fudge;
             this.tree.addEventListener("delete" /* DELETE */, this.hndEvent);
             this.tree.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.append(this.tree);
-            this.dom.title = "Right click on existing node to create child node";
-            this.tree.title = "Select node to edit";
+            this.dom.title = "● Right click on existing node to create child node.\n● Use Copy/Paste to duplicate nodes.";
+            this.tree.title = "Select node to edit or duplicate.";
         }
         getSelection() {
             return this.tree.controller.selection;
@@ -2730,9 +2730,11 @@ var Fudge;
             super(_container, _state);
             this.graph = ƒ.Project.resources[_state["graph"]];
             this.createUserInterface();
-            let title = "● Use mousebuttons and ctrl-, shift- or alt-key to navigate view.\n";
+            let title = `● Drop a graph from "Internal" here.\n`;
+            title += "● Use mousebuttons and ctrl-, shift- or alt-key to navigate view.\n";
             title += "● Click to select node, rightclick to select transformations.\n";
-            title += "● Hold X, Y or Z to transform. Add shift-key to invert restriction.";
+            title += "● Hold X, Y or Z to transform. Add shift-key to invert restriction.\n";
+            title += "● Transformation affects selected component.";
             this.dom.title = title;
             this.dom.tabIndex = 0;
             _container.on("resize", this.redraw);
@@ -3256,6 +3258,7 @@ var Fudge;
             // this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
         }
         listScripts() {
+            this.dom.title = `Drag & drop scripts on "Components"`;
             while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
                 ;
             let scriptinfos = [];
