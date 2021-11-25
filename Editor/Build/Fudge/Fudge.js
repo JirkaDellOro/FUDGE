@@ -945,6 +945,7 @@ var Fudge;
             this.tree = new ƒui.Tree(new Fudge.ControllerTreeDirectory(), root);
             this.dom.appendChild(this.tree);
             this.tree.getItems()[0].expand(true);
+            this.dom.title = "Drag & drop external image, audiofile etc. to the view Internal, to create a FUDGE-resource";
         }
         getSelection() {
             return this.tree.controller.selection;
@@ -2396,35 +2397,38 @@ var Fudge;
         fillContent() {
             while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
                 ;
-            if (this.node) {
-                if (this.node instanceof ƒ.Node) {
-                    this.setTitle("Components | " + this.node.name);
-                    this.dom.title = "Drop internal resources or use right click to create new components";
-                    let components = this.node.getAllComponents();
-                    for (let component of components) {
-                        let details = ƒUi.Generator.createDetailsFromMutable(component);
-                        let controller = new Fudge.ControllerComponent(component, details);
-                        Reflect.set(details, "controller", controller); // insert a link back to the controller
-                        details.expand(this.expanded[component.type]);
-                        this.dom.append(details);
-                        if (component instanceof ƒ.ComponentRigidbody) {
-                            let pivot = controller.domElement.querySelector("[key=mtxPivot");
-                            let opacity = pivot.style.opacity;
-                            setPivotOpacity(null);
-                            controller.domElement.addEventListener("mutate" /* MUTATE */, setPivotOpacity);
-                            function setPivotOpacity(_event) {
-                                let initialization = controller.getMutator({ initialization: 0 }).initialization;
-                                pivot.style.opacity = initialization == ƒ.BODY_INIT.TO_PIVOT ? opacity : "0.3";
-                            }
-                        }
-                    }
-                }
-            }
-            else {
+            let cntEmpty = document.createElement("div");
+            cntEmpty.textContent = "Drop internal resources or use right click to create new components";
+            this.dom.title = "Drop internal resources or use right click to create new components";
+            if (!this.node || !(this.node instanceof ƒ.Node)) { // TODO: examine, if anything other than node can appear here...
                 this.setTitle("Components");
                 this.dom.title = "Select node to edit components";
-                let cntEmpty = document.createElement("div");
+                cntEmpty.textContent = "Select node to edit components";
                 this.dom.append(cntEmpty);
+                return;
+            }
+            this.setTitle("Components | " + this.node.name);
+            let components = this.node.getAllComponents();
+            if (!components.length) {
+                this.dom.append(cntEmpty);
+                return;
+            }
+            for (let component of components) {
+                let details = ƒUi.Generator.createDetailsFromMutable(component);
+                let controller = new Fudge.ControllerComponent(component, details);
+                Reflect.set(details, "controller", controller); // insert a link back to the controller
+                details.expand(this.expanded[component.type]);
+                this.dom.append(details);
+                if (component instanceof ƒ.ComponentRigidbody) {
+                    let pivot = controller.domElement.querySelector("[key=mtxPivot");
+                    let opacity = pivot.style.opacity;
+                    setPivotOpacity(null);
+                    controller.domElement.addEventListener("mutate" /* MUTATE */, setPivotOpacity);
+                    function setPivotOpacity(_event) {
+                        let initialization = controller.getMutator({ initialization: 0 }).initialization;
+                        pivot.style.opacity = initialization == ƒ.BODY_INIT.TO_PIVOT ? opacity : "0.3";
+                    }
+                }
             }
         }
         hndEvent = (_event) => {
