@@ -22,6 +22,7 @@ declare namespace Fudge {
         PANEL_GRAPH_OPEN = "panelGraphOpen",
         PANEL_ANIMATION_OPEN = "panelAnimationOpen",
         PANEL_PROJECT_OPEN = "panelProjectOpen",
+        PANEL_HELP_OPEN = "panelHelpOpen",
         FULLSCREEN = "fullscreen"
     }
     enum EVENT_EDITOR {
@@ -36,7 +37,8 @@ declare namespace Fudge {
     }
     enum PANEL {
         GRAPH = "PanelGraph",
-        PROJECT = "PanelProject"
+        PROJECT = "PanelProject",
+        HELP = "PanelHelp"
     }
     enum VIEW {
         HIERARCHY = "ViewHierarchy",

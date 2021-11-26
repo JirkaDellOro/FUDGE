@@ -50,11 +50,8 @@ var Fudge;
         MENU["PANEL_GRAPH_OPEN"] = "panelGraphOpen";
         MENU["PANEL_ANIMATION_OPEN"] = "panelAnimationOpen";
         MENU["PANEL_PROJECT_OPEN"] = "panelProjectOpen";
+        MENU["PANEL_HELP_OPEN"] = "panelHelpOpen";
         MENU["FULLSCREEN"] = "fullscreen";
-        /* obsolete ?
-        NODE_DELETE = "nodeDelete",
-        NODE_UPDATE = "nodeUpdate",
-        */
     })(MENU = Fudge.MENU || (Fudge.MENU = {}));
     let EVENT_EDITOR;
     (function (EVENT_EDITOR) {
@@ -66,16 +63,12 @@ var Fudge;
         EVENT_EDITOR["DESTROY"] = "destroy";
         EVENT_EDITOR["CLEAR_PROJECT"] = "clearProject";
         EVENT_EDITOR["TRANSFORM"] = "transform";
-        /* obsolete ?
-        REMOVE = "removeNode",
-        HIDE = "hideNode",
-        ACTIVATE_VIEWPORT = "activateViewport",
-        */
     })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
     let PANEL;
     (function (PANEL) {
         PANEL["GRAPH"] = "PanelGraph";
         PANEL["PROJECT"] = "PanelProject";
+        PANEL["HELP"] = "PanelHelp";
     })(PANEL = Fudge.PANEL || (Fudge.PANEL = {}));
     let VIEW;
     (function (VIEW) {
@@ -587,6 +580,7 @@ var Fudge;
             Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: false });
             Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: false });
             Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: false });
+            Fudge.ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_HELP_OPEN, on: true });
             if (localStorage.project) {
                 console.log("Load project referenced in local storage", localStorage.project);
                 await Page.loadProject(new URL(localStorage.project));
@@ -597,6 +591,7 @@ var Fudge;
             Page.goldenLayout.on("itemCreated", Page.hndPanelCreated);
             Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.PROJECT, Fudge.PanelProject);
             Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.GRAPH, Fudge.PanelGraph);
+            Page.goldenLayout.registerComponentConstructor(Fudge.PANEL.HELP, Fudge.PanelHelp);
             Page.loadLayout();
         }
         static add(_panel, _state) {
@@ -725,6 +720,9 @@ var Fudge;
             });
             Fudge.ipcRenderer.on(Fudge.MENU.PANEL_PROJECT_OPEN, (_event, _args) => {
                 Page.add(Fudge.PanelProject, null);
+            });
+            Fudge.ipcRenderer.on(Fudge.MENU.PANEL_HELP_OPEN, (_event, _args) => {
+                Page.add(Fudge.PanelHelp, null);
             });
             Fudge.ipcRenderer.on(Fudge.MENU.QUIT, (_event, _args) => {
                 Page.setDefaultProject();
@@ -1591,6 +1589,40 @@ var Fudge;
         };
     }
     Fudge.PanelGraph = PanelGraph;
+})(Fudge || (Fudge = {}));
+var Fudge;
+(function (Fudge) {
+    /**
+    * Shows a graph and offers means for manipulation
+    * @authors Monika Galkewitsch, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
+    */
+    class PanelHelp extends Fudge.Panel {
+        constructor(_container, _state) {
+            super(_container, _state);
+            this.setTitle("Help");
+            console.log(this.dom);
+            // TODO: iframe sandbox disallows use of scripts, remove or replace with object if necessary
+            // this.dom.innerHTML = `<iframe src="Help.html" sandbox></iframe>`;
+            this.dom.innerHTML = `<object data="Help.html"></object>`;
+            // const config: RowOrColumnItemConfig = {
+            //   type: "column",
+            //   isClosable: true,
+            //   content: [
+            //     {
+            //       type: "component",
+            //       componentType: VIEW.RENDER,
+            //       componentState: _state,
+            //       title: "Render"
+            //     }
+            //   ]
+            // };
+            // this.goldenLayout.addItemAtLocation(config, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
+        }
+        getState() {
+            return {};
+        }
+    }
+    Fudge.PanelHelp = PanelHelp;
 })(Fudge || (Fudge = {}));
 var Fudge;
 (function (Fudge) {

@@ -39,6 +39,7 @@ declare namespace Fudge {
         PANEL_GRAPH_OPEN = "panelGraphOpen",
         PANEL_ANIMATION_OPEN = "panelAnimationOpen",
         PANEL_PROJECT_OPEN = "panelProjectOpen",
+        PANEL_HELP_OPEN = "panelHelpOpen",
         FULLSCREEN = "fullscreen"
     }
     enum EVENT_EDITOR {
@@ -53,7 +54,8 @@ declare namespace Fudge {
     }
     enum PANEL {
         GRAPH = "PanelGraph",
-        PROJECT = "PanelProject"
+        PROJECT = "PanelProject",
+        HELP = "PanelHelp"
     }
     enum VIEW {
         HIERARCHY = "ViewHierarchy",
@@ -357,6 +359,18 @@ declare namespace Fudge {
         };
         private hndEvent;
         private hndFocusNode;
+    }
+}
+declare namespace Fudge {
+    /**
+    * Shows a graph and offers means for manipulation
+    * @authors Monika Galkewitsch, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
+    */
+    class PanelHelp extends Panel {
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        getState(): {
+            [key: string]: string;
+        };
     }
 }
 declare namespace Fudge {

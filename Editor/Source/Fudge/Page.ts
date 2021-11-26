@@ -76,6 +76,7 @@ namespace Fudge {
       ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: false });
       ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: false });
       ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: false });
+      ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_HELP_OPEN, on: true });
 
       if (localStorage.project) {
         console.log("Load project referenced in local storage", localStorage.project);
@@ -89,6 +90,7 @@ namespace Fudge {
 
       Page.goldenLayout.registerComponentConstructor(PANEL.PROJECT, PanelProject);
       Page.goldenLayout.registerComponentConstructor(PANEL.GRAPH, PanelGraph);
+      Page.goldenLayout.registerComponentConstructor(PANEL.HELP, PanelHelp);
 
       Page.loadLayout();
     }
@@ -238,6 +240,10 @@ namespace Fudge {
 
       ipcRenderer.on(MENU.PANEL_PROJECT_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
         Page.add(PanelProject, null);
+      });
+
+      ipcRenderer.on(MENU.PANEL_HELP_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
+        Page.add(PanelHelp, null);
       });
 
       ipcRenderer.on(MENU.QUIT, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
