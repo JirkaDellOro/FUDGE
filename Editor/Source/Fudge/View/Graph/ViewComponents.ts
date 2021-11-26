@@ -220,7 +220,7 @@ namespace Fudge {
       if (mtxTransform instanceof ƒ.Matrix4x4)
         this.transform3(dtl.transform, value, mtxTransform, distance);
       if (mtxTransform instanceof ƒ.Matrix3x3)
-        this.transform2(dtl.transform, value.toVector2(), mtxTransform, distance);
+        this.transform2(dtl.transform, value.toVector2(), mtxTransform, 1);
     }
 
     private transform3(_transform: TRANSFORM, _value: ƒ.Vector3, _mtxTransform: ƒ.Matrix4x4, _distance: number): void {
