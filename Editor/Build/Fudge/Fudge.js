@@ -613,7 +613,7 @@ var Fudge;
                 ]
             };
             if (!Page.goldenLayout.rootItem) // workaround because golden Layout loses rootItem...
-                Page.loadLayout();
+                Page.loadLayout(); // TODO: these two lines appear to be obsolete, the condition is not met
             Page.goldenLayout.rootItem.layoutManager.addItemAtLocation(panelConfig, [{ typeId: 7 /* Root */ }]);
         }
         static find(_type) {
@@ -629,7 +629,7 @@ var Fudge;
                 settings: { showPopoutIcon: false, showMaximiseIcon: true },
                 root: {
                     type: "row",
-                    isClosable: true,
+                    isClosable: false,
                     content: []
                 }
             };
@@ -2889,7 +2889,7 @@ var Fudge;
                 return;
             }
             this.#pointerMoved ||= (_event.movementX != 0 || _event.movementY != 0);
-            this.dom.focus();
+            this.dom.focus({ preventScroll: true });
             let restriction;
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.X]))
                 restriction = "x";

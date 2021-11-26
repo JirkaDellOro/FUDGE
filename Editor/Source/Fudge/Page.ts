@@ -108,7 +108,7 @@ namespace Fudge {
       };
 
       if (!Page.goldenLayout.rootItem)  // workaround because golden Layout loses rootItem...
-        Page.loadLayout();
+        Page.loadLayout(); // TODO: these two lines appear to be obsolete, the condition is not met
 
       Page.goldenLayout.rootItem.layoutManager.addItemAtLocation(panelConfig, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
     }
@@ -128,7 +128,7 @@ namespace Fudge {
         settings: { showPopoutIcon: false, showMaximiseIcon: true },
         root: {
           type: "row",
-          isClosable: true,
+          isClosable: false,
           content: [
           ]
         }

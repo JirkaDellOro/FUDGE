@@ -202,7 +202,7 @@ namespace Fudge {
       }
       this.#pointerMoved ||= (_event.movementX != 0 || _event.movementY != 0);
 
-      this.dom.focus();
+      this.dom.focus({preventScroll: true});
       let restriction: string;
       if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.X]))
         restriction = "x";
