@@ -97,7 +97,8 @@ namespace FudgeCore {
 
     public async mutate(_mutator: Mutator): Promise<void> {
       await super.mutate(_mutator);
-      await this.coat.mutate(_mutator.coat);
+      // appearenty, coat already mutates... next line unnecessary and buggy, since url gets stripped
+      // await this.coat.mutate(_mutator.coat);
     }
 
     protected reduceMutator(_mutator: Mutator): void {
