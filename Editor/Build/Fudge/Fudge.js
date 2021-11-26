@@ -2349,6 +2349,7 @@ var Fudge;
     class ViewComponents extends Fudge.View {
         node;
         expanded = { ComponentTransform: true };
+        selected = "ComponentTransform";
         constructor(_container, _state) {
             super(_container, _state);
             this.fillContent();
@@ -2461,6 +2462,8 @@ var Fudge;
                         pivot.style.opacity = initialization == ƒ.BODY_INIT.TO_PIVOT ? opacity : "0.3";
                     }
                 }
+                if (details.getAttribute("key") == this.selected)
+                    this.select(details);
             }
         }
         hndEvent = (_event) => {
@@ -2581,6 +2584,7 @@ var Fudge;
                 child.classList.remove("selected");
             _details.classList.add("selected");
             _details.focus();
+            this.selected = _details.getAttribute("key");
         }
         getSelected() {
             for (let child of this.dom.children)

@@ -491,6 +491,7 @@ declare namespace Fudge {
     class ViewComponents extends View {
         private node;
         private expanded;
+        private selected;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;

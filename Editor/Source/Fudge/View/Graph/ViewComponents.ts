@@ -20,6 +20,7 @@ namespace Fudge {
   export class ViewComponents extends View {
     private node: ƒ.Node;
     private expanded: { [type: string]: boolean } = { ComponentTransform: true };
+    private selected: string = "ComponentTransform";
 
     constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
@@ -147,6 +148,8 @@ namespace Fudge {
             pivot.style.opacity = initialization == ƒ.BODY_INIT.TO_PIVOT ? opacity : "0.3";
           }
         }
+        if (details.getAttribute("key") == this.selected)
+          this.select(details);
       }
     }
 
@@ -275,6 +278,7 @@ namespace Fudge {
         child.classList.remove("selected");
       _details.classList.add("selected");
       _details.focus();
+      this.selected = _details.getAttribute("key");
     }
 
     private getSelected(): ƒUi.Details {
