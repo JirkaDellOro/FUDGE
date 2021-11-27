@@ -1,6 +1,6 @@
 #version 300 es
-#define LIGHT_VERTEX
-#define LIGHT_FLAT
+// #define LIGHT_VERTEX
+// #define LIGHT_FLAT
 /**
 * Universal Shader as base for many others. Controlled by compiler directives
 * @authors Jirka Dell'Oro-Friedl, HFU, 2021

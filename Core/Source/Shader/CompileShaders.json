@@ -7,18 +7,26 @@
     "outdir": "Build/",
     "register": "true"
   },
+  "ShaderFlat": {
+    "vertex": "Source/ShaderUniversal.vert",
+    "fragment": "Source/ShaderUniversal.frag",
+    "coat": "CoatColored",
+    "namespace": "FudgeCore",
+    "outdir": "Build/",
+    "register": "true",
+    "defVertex": [
+      "LIGHT_VERTEX",
+      "LIGHT_FLAT"
+    ],
+    "defFragment": [
+      "LIGHT_VERTEX",
+      "LIGHT_FLAT"
+    ]
+  },
   "ShaderTextureFlat": {
     "vertex": "Source/ShaderTextureFlat.vert",
     "fragment": "Source/ShaderTextureFlat.frag",
     "coat": "CoatTextured",
-    "namespace": "FudgeCore",
-    "outdir": "Build/",
-    "register": "true"
-  },
-  "ShaderFlat": {
-    "vertex": "Source/ShaderFlat.vert",
-    "fragment": "Source/ShaderFlat.frag",
-    "coat": "CoatColored",
     "namespace": "FudgeCore",
     "outdir": "Build/",
     "register": "true"

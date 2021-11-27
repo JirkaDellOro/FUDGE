@@ -1,6 +1,6 @@
 #version 300 es
-#define LIGHT_FLAT
-#define LIGHT_VERTEX
+// #define LIGHT_VERTEX
+// #define LIGHT_FLAT
 /**
 * Universal Shader as base for many others. Controlled by compiler directives
 * @authors Jirka Dell'Oro-Friedl, HFU, 2021
@@ -23,9 +23,9 @@ precision mediump float;
 #endif
 
 // accept light on vertices
-#ifdef LIGHT_VERTEX
+    #ifdef LIGHT_VERTEX
 flat in vec4 v_color;
-#endif
+    #endif
 
 // a base-color to include
 uniform vec4 u_color;
