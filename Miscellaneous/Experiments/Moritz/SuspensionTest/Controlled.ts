@@ -37,11 +37,10 @@ namespace SuspensionTest {
       let tyreBR: f.Node = this.getChildrenByName("BR")[0];
       let tyreBL: f.Node = this.getChildrenByName("BL")[0];
 
-      let posFL: f.PositionOnTerrain = this.meshTerrain.getPositionOnTerrain(tyreFL.mtxWorld.translation, this.terrain.mtxWorld);
-      let posFR: f.PositionOnTerrain = this.meshTerrain.getPositionOnTerrain(tyreFR.mtxWorld.translation, this.terrain.mtxWorld);
-
-      let posBR: f.PositionOnTerrain = this.meshTerrain.getPositionOnTerrain(tyreBR.mtxWorld.translation, this.terrain.mtxWorld);
-      let posBL: f.PositionOnTerrain = this.meshTerrain.getPositionOnTerrain(tyreBL.mtxWorld.translation, this.terrain.mtxWorld);
+      let posFL: f.TerrainInfo = this.meshTerrain.getTerrainInfo(tyreFL.mtxWorld.translation, this.terrain.mtxWorld);
+      let posFR: f.TerrainInfo = this.meshTerrain.getTerrainInfo(tyreFR.mtxWorld.translation, this.terrain.mtxWorld);
+      let posBR: f.TerrainInfo = this.meshTerrain.getTerrainInfo(tyreBR.mtxWorld.translation, this.terrain.mtxWorld);
+      let posBL: f.TerrainInfo = this.meshTerrain.getTerrainInfo(tyreBL.mtxWorld.translation, this.terrain.mtxWorld);
 
       let vecFrontAxis: f.Vector3 = f.Vector3.DIFFERENCE(posFL.position, posFR.position);
       let vecRearAxis: f.Vector3 = f.Vector3.DIFFERENCE(posBL.position, posBR.position);

@@ -27,8 +27,8 @@ namespace Fudge {
       while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild));
       this.table = new ƒui.Table<ƒ.SerializableResource>(new ControllerTableResource(), Object.values(ƒ.Project.resources));
       this.dom.appendChild(this.table);
-      this.dom.title = "Right click to create new resource";
-      this.table.title = "Select resource to edit";
+      this.dom.title = "● Right click to create new resource.\n● Select or drag resource.";
+      this.table.title = `● Select to edit in "Properties"\n●  Drag to "Properties" or "Components" to use if applicable.`;
     }
 
     public getSelection(): ƒ.SerializableResource[] {

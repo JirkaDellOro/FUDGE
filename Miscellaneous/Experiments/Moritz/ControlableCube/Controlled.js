@@ -4,13 +4,10 @@ var ControlableCube;
     var ƒ = FudgeCore;
     var ƒAid = FudgeAid;
     class Controlled extends ƒAid.Node {
-        constructor() {
-            super(...arguments);
-            this.axisSpeed = new ƒ.Axis("Speed", 1, 0 /* PROPORTIONAL */);
-            this.axisRotation = new ƒ.Axis("Rotation", 1, 0 /* PROPORTIONAL */);
-            this.maxSpeed = 5; // units per second
-            this.maxRotSpeed = 180; // degrees per second
-        }
+        axisSpeed = new ƒ.Axis("Speed", 1, 0 /* PROPORTIONAL */);
+        axisRotation = new ƒ.Axis("Rotation", 1, 0 /* PROPORTIONAL */);
+        maxSpeed = 5; // units per second
+        maxRotSpeed = 180; // degrees per second
         setUpAxis() {
             this.axisSpeed.setDelay(500);
             this.axisRotation.setDelay(200);

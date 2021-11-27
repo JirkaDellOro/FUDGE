@@ -76,6 +76,7 @@ namespace Fudge {
       ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PROJECT_SAVE, on: false });
       ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_PROJECT_OPEN, on: false });
       ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_GRAPH_OPEN, on: false });
+      ipcRenderer.send("enableMenuItem", { item: Fudge.MENU.PANEL_HELP_OPEN, on: true });
 
       if (localStorage.project) {
         console.log("Load project referenced in local storage", localStorage.project);
@@ -89,6 +90,7 @@ namespace Fudge {
 
       Page.goldenLayout.registerComponentConstructor(PANEL.PROJECT, PanelProject);
       Page.goldenLayout.registerComponentConstructor(PANEL.GRAPH, PanelGraph);
+      Page.goldenLayout.registerComponentConstructor(PANEL.HELP, PanelHelp);
 
       Page.loadLayout();
     }
@@ -108,7 +110,7 @@ namespace Fudge {
       };
 
       if (!Page.goldenLayout.rootItem)  // workaround because golden Layout loses rootItem...
-        Page.loadLayout();
+        Page.loadLayout(); // TODO: these two lines appear to be obsolete, the condition is not met
 
       Page.goldenLayout.rootItem.layoutManager.addItemAtLocation(panelConfig, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
     }
@@ -128,7 +130,7 @@ namespace Fudge {
         settings: { showPopoutIcon: false, showMaximiseIcon: true },
         root: {
           type: "row",
-          isClosable: true,
+          isClosable: false,
           content: [
           ]
         }
@@ -238,6 +240,10 @@ namespace Fudge {
 
       ipcRenderer.on(MENU.PANEL_PROJECT_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
         Page.add(PanelProject, null);
+      });
+
+      ipcRenderer.on(MENU.PANEL_HELP_OPEN, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {
+        Page.add(PanelHelp, null);
       });
 
       ipcRenderer.on(MENU.QUIT, (_event: Electron.IpcRendererEvent, _args: unknown[]) => {

@@ -8,7 +8,7 @@ namespace FudgeCore {
    */
   export type HeightMapFunction = (x: number, z: number) => number;
 
-  export class PositionOnTerrain {
+  export class TerrainInfo {
     position: Vector3;
     normal: Vector3;
   }
@@ -47,22 +47,21 @@ namespace FudgeCore {
     }
 
 
-    public getPositionOnTerrain(position: Vector3, mtxWorld?: Matrix4x4): PositionOnTerrain {
-      let relPosObject: Vector3 = position;
+    public getTerrainInfo(_position: Vector3, _mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY(), _mtxInverse?: Matrix4x4): TerrainInfo {
+      if (!_mtxInverse)
+        _mtxInverse = Matrix4x4.INVERSION(_mtxWorld);
 
-      if (mtxWorld)
-        relPosObject = Vector3.TRANSFORMATION(position, Matrix4x4.INVERSION(mtxWorld), true);
+      let posLocal: Vector3 = Vector3.TRANSFORMATION(_position, _mtxInverse, true);
 
-      let nearestFace: DistanceToFaceVertices = this.findNearestFace(relPosObject);
-      let posOnTerrain: PositionOnTerrain = new PositionOnTerrain;
+      let nearestFace: DistanceToFaceVertices = this.findNearestFace(posLocal);
+      let posOnTerrain: TerrainInfo = new TerrainInfo;
 
-      let origin: Vector3 = new Vector3(relPosObject.x, this.calculateHeight(nearestFace, relPosObject), relPosObject.z);
+      let origin: Vector3 = new Vector3(posLocal.x, this.calculateHeight(nearestFace, posLocal), posLocal.z);
       let direction: Vector3 = nearestFace.faceNormal;
 
-      if (mtxWorld) {
-        origin = Vector3.TRANSFORMATION(origin, mtxWorld, true);
-        direction = Vector3.TRANSFORMATION(direction, mtxWorld, false);
-      }
+      origin = Vector3.TRANSFORMATION(origin, _mtxWorld, true);
+      direction = Vector3.TRANSFORMATION(direction, Matrix4x4.TRANSPOSE(_mtxInverse), false);
+      direction.normalize();
 
       posOnTerrain.position = origin;
       posOnTerrain.normal = direction;

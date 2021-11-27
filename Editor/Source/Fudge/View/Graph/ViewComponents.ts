@@ -20,6 +20,7 @@ namespace Fudge {
   export class ViewComponents extends View {
     private node: ƒ.Node;
     private expanded: { [type: string]: boolean } = { ComponentTransform: true };
+    private selected: string = "ComponentTransform";
 
     constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
@@ -111,36 +112,44 @@ namespace Fudge {
 
     private fillContent(): void {
       while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild));
-      if (this.node) {
-        if (this.node instanceof ƒ.Node) {
-          this.setTitle("Components | " + this.node.name);
-          this.dom.title = "Drop internal resources or use right click to create new components";
+      let cntEmpty: HTMLDivElement = document.createElement("div");
+      cntEmpty.textContent = "Drop internal resources or use right click to create new components";
+      this.dom.title = "Drop internal resources or use right click to create new components";
 
-          let components: ƒ.Component[] = this.node.getAllComponents();
-          for (let component of components) {
-            let details: ƒUi.Details = ƒUi.Generator.createDetailsFromMutable(component);
-            let controller: ControllerComponent = new ControllerComponent(component, details);
-            Reflect.set(details, "controller", controller); // insert a link back to the controller
-            details.expand(this.expanded[component.type]);
-            this.dom.append(details);
-            if (component instanceof ƒ.ComponentRigidbody) {
-              let pivot: HTMLElement = controller.domElement.querySelector("[key=mtxPivot");
-              let opacity: string = pivot.style.opacity;
-              setPivotOpacity(null);
-              controller.domElement.addEventListener(ƒUi.EVENT.MUTATE, setPivotOpacity);
-              function setPivotOpacity(_event: Event): void {
-                let initialization: ƒ.BODY_INIT = controller.getMutator({ initialization: 0 }).initialization;
-                pivot.style.opacity = initialization == ƒ.BODY_INIT.TO_PIVOT ? opacity : "0.3";
-              }
-            }
-          }
-        }
-      }
-      else {
+      if (!this.node || !(this.node instanceof ƒ.Node)) {  // TODO: examine, if anything other than node can appear here...
         this.setTitle("Components");
         this.dom.title = "Select node to edit components";
-        let cntEmpty: HTMLDivElement = document.createElement("div");
+        cntEmpty.textContent = "Select node to edit components";
         this.dom.append(cntEmpty);
+        return;
+      }
+
+      this.setTitle("Components | " + this.node.name);
+
+      let components: ƒ.Component[] = this.node.getAllComponents();
+      if (!components.length) {
+        this.dom.append(cntEmpty);
+        return;
+      }
+
+      for (let component of components) {
+        let details: ƒUi.Details = ƒUi.Generator.createDetailsFromMutable(component);
+        let controller: ControllerComponent = new ControllerComponent(component, details);
+        Reflect.set(details, "controller", controller); // insert a link back to the controller
+        details.expand(this.expanded[component.type]);
+        this.dom.append(details);
+        if (component instanceof ƒ.ComponentRigidbody) {
+          let pivot: HTMLElement = controller.domElement.querySelector("[key=mtxPivot");
+          let opacity: string = pivot.style.opacity;
+          setPivotOpacity(null);
+          controller.domElement.addEventListener(ƒUi.EVENT.MUTATE, setPivotOpacity);
+          function setPivotOpacity(_event: Event): void {
+            let initialization: ƒ.BODY_INIT = controller.getMutator({ initialization: 0 }).initialization;
+            pivot.style.opacity = initialization == ƒ.BODY_INIT.TO_PIVOT ? opacity : "0.3";
+          }
+        }
+        if (details.getAttribute("key") == this.selected)
+          this.select(details);
       }
     }
 
@@ -211,7 +220,7 @@ namespace Fudge {
       if (mtxTransform instanceof ƒ.Matrix4x4)
         this.transform3(dtl.transform, value, mtxTransform, distance);
       if (mtxTransform instanceof ƒ.Matrix3x3)
-        this.transform2(dtl.transform, value.toVector2(), mtxTransform, distance);
+        this.transform2(dtl.transform, value.toVector2(), mtxTransform, 1);
     }
 
     private transform3(_transform: TRANSFORM, _value: ƒ.Vector3, _mtxTransform: ƒ.Matrix4x4, _distance: number): void {
@@ -239,8 +248,8 @@ namespace Fudge {
           break;
       }
     }
-    
-    private transform2(_transform: TRANSFORM, _value: ƒ.Vector2,  _mtxTransform: ƒ.Matrix3x3, _distance: number): void {
+
+    private transform2(_transform: TRANSFORM, _value: ƒ.Vector2, _mtxTransform: ƒ.Matrix3x3, _distance: number): void {
       switch (_transform) {
         case TRANSFORM.TRANSLATE:
           let factorTranslation: number = 0.001; // TODO: eliminate magic numbers
@@ -269,6 +278,7 @@ namespace Fudge {
         child.classList.remove("selected");
       _details.classList.add("selected");
       _details.focus();
+      this.selected = _details.getAttribute("key");
     }
 
     private getSelected(): ƒUi.Details {

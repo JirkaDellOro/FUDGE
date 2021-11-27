@@ -4,14 +4,13 @@ var HeightMap;
     var f = FudgeCore;
     var ƒAid = FudgeAid;
     class Controlled extends ƒAid.Node {
-        constructor() {
-            super(...arguments);
-            this.axisSpeed = new f.Axis("Speed", 1, 0 /* PROPORTIONAL */);
-            this.axisRotation = new f.Axis("Rotation", 1, 0 /* PROPORTIONAL */);
-            this.maxSpeed = 0.2; // units per second
-            this.maxRotSpeed = 180; // degrees per second
-            this.groundClearance = 0.025;
-        }
+        axisSpeed = new f.Axis("Speed", 1, 0 /* PROPORTIONAL */);
+        axisRotation = new f.Axis("Rotation", 1, 0 /* PROPORTIONAL */);
+        maxSpeed = 0.2; // units per second
+        maxRotSpeed = 180; // degrees per second
+        terrain;
+        meshTerrain;
+        groundClearance = 0.025;
         setUpAxis() {
             this.axisSpeed.setDelay(2000);
             this.axisRotation.setDelay(300);
@@ -35,10 +34,10 @@ var HeightMap;
             let cornerFR = this.getChildrenByName("FR")[0];
             let cornerBR = this.getChildrenByName("BR")[0];
             let cornerBL = this.getChildrenByName("BL")[0];
-            let posFL = this.meshTerrain.getPositionOnTerrain(cornerFL.mtxWorld.translation, this.terrain.mtxWorld);
-            let posFR = this.meshTerrain.getPositionOnTerrain(cornerFR.mtxWorld.translation, this.terrain.mtxWorld);
-            let posBR = this.meshTerrain.getPositionOnTerrain(cornerBR.mtxWorld.translation, this.terrain.mtxWorld);
-            let posBL = this.meshTerrain.getPositionOnTerrain(cornerBL.mtxWorld.translation, this.terrain.mtxWorld);
+            let posFL = this.meshTerrain.getTerrainInfo(cornerFL.mtxWorld.translation, this.terrain.mtxWorld);
+            let posFR = this.meshTerrain.getTerrainInfo(cornerFR.mtxWorld.translation, this.terrain.mtxWorld);
+            let posBR = this.meshTerrain.getTerrainInfo(cornerBR.mtxWorld.translation, this.terrain.mtxWorld);
+            let posBL = this.meshTerrain.getTerrainInfo(cornerBL.mtxWorld.translation, this.terrain.mtxWorld);
             let vecFrontAxis = f.Vector3.DIFFERENCE(posFL.position, posFR.position);
             let vecRearAxis = f.Vector3.DIFFERENCE(posBL.position, posBR.position);
             vecFrontAxis = f.Vector3.SCALE(vecFrontAxis, 0.5);
