@@ -14,13 +14,9 @@
     "namespace": "FudgeCore",
     "outdir": "Build/",
     "register": "true",
-    "defVertex": [
-      "LIGHT_VERTEX",
-      "LIGHT_FLAT"
-    ],
-    "defFragment": [
-      "LIGHT_VERTEX",
-      "LIGHT_FLAT"
+    "define": [
+      "LIGHT",
+      "FLAT"
     ]
   },
   "ShaderTextureFlat": {
@@ -30,24 +26,23 @@
     "namespace": "FudgeCore",
     "outdir": "Build/",
     "register": "true",
-    "defVertex": [
-      "LIGHT_VERTEX",
-      "LIGHT_FLAT",
-      "TEXTURE"
-    ],
-    "defFragment": [
-      "LIGHT_VERTEX",
-      "LIGHT_FLAT",
+    "define": [
+      "LIGHT",
+      "FLAT",
       "TEXTURE"
     ]
   },
   "ShaderGouraud": {
-    "vertex": "Source/ShaderGouraud.vert",
-    "fragment": "Source/ShaderGouraud.frag",
+    "vertex": "Source/ShaderUniversal.vert",
+    "fragment": "Source/ShaderUniversal.frag",
     "coat": "CoatColored",
     "namespace": "FudgeCore",
     "outdir": "Build/",
-    "register": "true"
+    "register": "true",
+    "define": [
+      "LIGHT",
+      "GOURAUD"
+    ]
   },
   "ShaderPhong": {
     "vertex": "Source/ShaderPhong.vert",

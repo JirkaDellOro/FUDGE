@@ -8,17 +8,16 @@ export abstract class ShaderTextureFlat extends Shader {
 
   public static getVertexShaderSource(): string { 
 return `#version 300 es
-#define LIGHT_VERTEX
-#define LIGHT_FLAT
+#define LIGHT
+#define FLAT
 #define TEXTURE
 
 /**
 * Universal Shader as base for many others. Controlled by compiler directives
 * @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
 */
-
-// LIGHT_VERTEX: offer buffers for lighting vertices with different light types
-#ifdef LIGHT_VERTEX
+// LIGHT: offer buffers for lighting vertices with different light types
+  #if defined(LIGHT)
 struct LightAmbient {
   vec4 color;
 };
@@ -32,33 +31,51 @@ const uint MAX_LIGHTS_DIRECTIONAL = 100u;
 uniform LightAmbient u_ambient;
 uniform uint u_nLightsDirectional;
 uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
+  #endif 
 
-flat out vec4 v_color;
-#endif 
-
-// LIGHT_FLAT: offer buffers for face normals and their transformation
-#ifdef LIGHT_FLAT
+  // FLAT: offer buffers for face normals and their transformation
+  #if defined(FLAT)
 in vec3 a_normalFace;
 uniform mat4 u_normal;
-#endif
+flat out vec4 v_color;
+  #else
+  // regular output if not FLAT
+out vec4 v_color;
+  #endif
 
-// TEXTURE: offer buffers for UVs and pivot matrix
-#ifdef TEXTURE
+  // TEXTURE: offer buffers for UVs and pivot matrix
+  #if defined(TEXTURE)
 in vec2 a_textureUVs;
 uniform mat3 u_pivot;
 out vec2 v_textureUVs;
-#endif
+  #endif
 
-// MINIMAL (no define needed): buffers for vertex position and transformation
+  // LIGHT_GOURAUD: offer buffers for vertex normals, their transformation and the shininess
+  #if defined(GOURAUD)
+in vec3 a_normalVertex;
+uniform mat4 u_world;
+uniform mat4 u_normal;
+uniform float u_shininess;
+  #endif
+
+  // MINIMAL (no define needed): buffers for vertex position and transformation
 in vec3 a_position;
 uniform mat4 u_projection;
 
+vec3 calculateReflection(vec3 light_dir, vec3 view_dir, vec3 normal, float shininess) {
+  vec3 color = vec3(1);
+  vec3 R = reflect(-light_dir, normal);
+  float spec_dot = max(dot(R, view_dir), 0.0);
+  color += pow(spec_dot, shininess);
+  return color;
+}
+
 void main() {
-  // MINIMAL
+    // MINIMAL
   gl_Position = u_projection * vec4(a_position, 1.0);
 
-  // LIGHT_FLAT: calculate flat lighting
-  #ifdef LIGHT_FLAT
+    // LIGHT_FLAT: calculate flat lighting
+    #if defined(FLAT)
   vec3 normal = normalize(mat3(u_normal) * a_normalFace);
   v_color = u_ambient.color;
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
@@ -66,20 +83,41 @@ void main() {
     if(illumination > 0.0f)
       v_color += illumination * u_directional[i].color;
   }
+    #endif
 
-  // TEXTURE: transform UVs
+    // LIGHT_GOURAUD: calculate gouraud lighting on vertices
+    #if defined(GOURAUD)
+  vec4 v_position4 = u_world * vec4(a_normalVertex, 1);
+  vec3 v_position = vec3(v_position4) / v_position4.w;
+  vec3 N = normalize(vec3(u_normal * vec4(a_normalVertex, 0)));
+
+  v_color = u_ambient.color;
+  for(uint i = 0u; i < u_nLightsDirectional; i++) {
+    vec3 light_dir = normalize(-u_directional[i].direction);
+    vec3 view_dir = normalize(v_position);
+
+    float illuminance = dot(light_dir, N);
+    if(illuminance > 0.0) {
+      vec3 reflection = calculateReflection(light_dir, view_dir, N, u_shininess);
+      v_color += vec4(reflection, 1) * illuminance * u_directional[i].color;
+    }
+  }
+    #endif
+
+    // TEXTURE: transform UVs
+    #if defined(TEXTURE)
   v_textureUVs = vec2(u_pivot * vec3(a_textureUVs, 1.0)).xy;
+    #endif
 
-  // always full opacity for now...
+    // always full opacity for now...
   v_color.a = 1.0;
-  #endif
 }
 `; }
 
   public static getFragmentShaderSource(): string { 
 return `#version 300 es
-#define LIGHT_VERTEX
-#define LIGHT_FLAT
+#define LIGHT
+#define FLAT
 #define TEXTURE
 
 /**
@@ -87,54 +125,43 @@ return `#version 300 es
 * @authors Jirka Dell'Oro-Friedl, HFU, 2021
 */
 
-// LIGHT_FRAGMENT: offer buffers for lighting fragments with different light types
-#ifdef LIGHT_FRAGMENT
-precision highp float;
-
-struct LightAmbient {
-  vec4 color;
-};
-struct LightDirectional {
-  vec4 color;
-  vec3 direction;
-};
-#else
-// medium precision is otherwise sufficient
 precision mediump float;
-#endif
 
-// LIGHT_VERTEX: input vertex colors from lighting
-#ifdef LIGHT_VERTEX
+  // FLAT: input vertex colors flat, so the third of a triangle determines the color
+  #if defined(FLAT) 
 flat in vec4 v_color;
-#endif
+  // LIGHT: input vertex colors for each vertex for interpolation over the face
+  #elif defined(LIGHT)
+in vec4 v_color;
+  #endif
 
-// TEXTURE: input UVs and texture
-#ifdef TEXTURE
+  // TEXTURE: input UVs and texture
+  #if defined(TEXTURE)
 in vec2 v_textureUVs;
 uniform sampler2D u_texture;
-#endif
+  #endif
 
-// MINIMAL (no define needed): include base color
+  // MINIMAL (no define needed): include base color
 uniform vec4 u_color;
 
 out vec4 frag;
 
 void main() {
-  // MINIMAL: set the base color
+    // MINIMAL: set the base color
   frag = u_color;
 
-  // LIGHT_FLAT: multiply with vertex color
-  #ifdef LIGHT_FLAT
+    // LIGHT_VERTEX: multiply with vertex color
+    #if defined(FLAT) || defined(LIGHT)
   frag *= v_color;
-  #endif
+    #endif
 
-  // TEXTURE: multiply with texel color
-  #ifdef TEXTURE
+    // TEXTURE: multiply with texel color
+    #if defined(TEXTURE)
   vec4 colorTexture = texture(u_texture, v_textureUVs);
   frag *= colorTexture;
-  #endif
+    #endif
 
-  // discard pixel alltogether when transparent: don't show in Z-Buffer
+    // discard pixel alltogether when transparent: don't show in Z-Buffer
   if(frag.a < 0.01)
     discard;
 }

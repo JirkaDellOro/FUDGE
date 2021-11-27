@@ -25,14 +25,14 @@ for (let name in json) {
     code += `  public static getCoat(): typeof Coat { return ${description.coat}; }\n\n`;
 
   let vertex = fs.readFileSync(description.vertex, { encoding: 'utf8' })
-  vertex = insertDefines(vertex, description.defVertex);
+  vertex = insertDefines(vertex, description.define);
   code += "  public static getVertexShaderSource(): string { \n";
   code += "return `";
   code += vertex;
   code += "\n`; }\n\n";
 
   let fragment = fs.readFileSync(description.fragment, { encoding: 'utf8' })
-  fragment = insertDefines(fragment, description.defFragment);
+  fragment = insertDefines(fragment, description.define);
   code += "  public static getFragmentShaderSource(): string { \n";
   code += "return `";
   code += fragment;
