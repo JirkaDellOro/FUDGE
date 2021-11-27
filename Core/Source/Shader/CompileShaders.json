@@ -1,4 +1,12 @@
 {
+  "ShaderLucent": {
+    "vertex": "Source/ShaderUniversal.vert",
+    "fragment": "Source/ShaderUniversal.frag",
+    "coat": "CoatColored",
+    "namespace": "FudgeCore",
+    "outdir": "Build/",
+    "register": "true"
+  },
   "ShaderTextureFlat": {
     "vertex": "Source/ShaderTextureFlat.vert",
     "fragment": "Source/ShaderTextureFlat.frag",
