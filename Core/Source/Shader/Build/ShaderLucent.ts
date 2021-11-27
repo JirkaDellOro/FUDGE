@@ -8,14 +8,12 @@ export abstract class ShaderLucent extends Shader {
 
   public static getVertexShaderSource(): string { 
 return `#version 300 es
-// #define LIGHT_VERTEX
-// #define LIGHT_FLAT
 /**
 * Universal Shader as base for many others. Controlled by compiler directives
-* @authors Jirka Dell'Oro-Friedl, HFU, 2021
+* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
 */
 
-// START: offer buffers for light types
+// LIGHT_VERTEX: offer buffers for lighting vertices with different light types
 #ifdef LIGHT_VERTEX
 struct LightAmbient {
   vec4 color;
@@ -33,21 +31,29 @@ uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
 
 flat out vec4 v_color;
 #endif 
-// END: offer buffers for light types
 
+// LIGHT_FLAT: offer buffers for face normals and their transformation
 #ifdef LIGHT_FLAT
 in vec3 a_normalFace;
 uniform mat4 u_normal;
 #endif
 
+// TEXTURE: offer buffers for UVs and pivot matrix
+#ifdef TEXTURE
+in vec2 a_textureUVs;
+uniform mat3 u_pivot;
+out vec2 v_textureUVs;
+#endif
 
+// MINIMAL (no define needed): buffers for vertex position and transformation
 in vec3 a_position;
 uniform mat4 u_projection;
 
 void main() {
+  // MINIMAL
   gl_Position = u_projection * vec4(a_position, 1.0);
 
-// START: calculate flat lighting
+  // LIGHT_FLAT: calculate flat lighting
   #ifdef LIGHT_FLAT
   vec3 normal = normalize(mat3(u_normal) * a_normalFace);
   v_color = u_ambient.color;
@@ -56,22 +62,24 @@ void main() {
     if(illumination > 0.0f)
       v_color += illumination * u_directional[i].color;
   }
+
+  // TEXTURE: transform UVs
+  v_textureUVs = vec2(u_pivot * vec3(a_textureUVs, 1.0)).xy;
+
+  // always full opacity for now...
   v_color.a = 1.0;
   #endif
-// END: calculate flat lighting
 }
 `; }
 
   public static getFragmentShaderSource(): string { 
 return `#version 300 es
-// #define LIGHT_VERTEX
-// #define LIGHT_FLAT
 /**
 * Universal Shader as base for many others. Controlled by compiler directives
 * @authors Jirka Dell'Oro-Friedl, HFU, 2021
 */
 
-// START: calculate light per fragment
+// LIGHT_FRAGMENT: offer buffers for lighting fragments with different light types
 #ifdef LIGHT_FRAGMENT
 precision highp float;
 
@@ -83,26 +91,44 @@ struct LightDirectional {
   vec3 direction;
 };
 #else
-// END: calculate light per fragment
+// medium precision is otherwise sufficient
 precision mediump float;
 #endif
 
-// accept light on vertices
-    #ifdef LIGHT_VERTEX
+// LIGHT_VERTEX: input vertex colors from lighting
+#ifdef LIGHT_VERTEX
 flat in vec4 v_color;
-    #endif
+#endif
 
-// a base-color to include
+// TEXTURE: input UVs and texture
+#ifdef TEXTURE
+in vec2 v_textureUVs;
+uniform sampler2D u_texture;
+#endif
+
+// MINIMAL (no define needed): include base color
 uniform vec4 u_color;
+
 out vec4 frag;
 
 void main() {
-  
-  #ifdef LIGHT_FLAT // flat shading
-  frag = u_color * v_color;
-  #else
+  // MINIMAL: set the base color
   frag = u_color;
+
+  // LIGHT_FLAT: multiply with vertex color
+  #ifdef LIGHT_FLAT
+  frag *= v_color;
   #endif
+
+  // TEXTURE: multiply with texel color
+  #ifdef TEXTURE
+  vec4 colorTexture = texture(u_texture, v_textureUVs);
+  frag *= colorTexture;
+  #endif
+
+  // discard pixel alltogether when transparent: don't show in Z-Buffer
+  if(frag.a < 0.01)
+    discard;
 }
 `; }
 }

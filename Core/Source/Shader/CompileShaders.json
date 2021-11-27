@@ -24,12 +24,22 @@
     ]
   },
   "ShaderTextureFlat": {
-    "vertex": "Source/ShaderTextureFlat.vert",
-    "fragment": "Source/ShaderTextureFlat.frag",
+    "vertex": "Source/ShaderUniversal.vert",
+    "fragment": "Source/ShaderUniversal.frag",
     "coat": "CoatTextured",
     "namespace": "FudgeCore",
     "outdir": "Build/",
-    "register": "true"
+    "register": "true",
+    "defVertex": [
+      "LIGHT_VERTEX",
+      "LIGHT_FLAT",
+      "TEXTURE"
+    ],
+    "defFragment": [
+      "LIGHT_VERTEX",
+      "LIGHT_FLAT",
+      "TEXTURE"
+    ]
   },
   "ShaderGouraud": {
     "vertex": "Source/ShaderGouraud.vert",
