@@ -3,6 +3,12 @@
 * Universal Shader as base for many others. Controlled by compiler directives
 * @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
 */
+
+  // MINIMAL (no define needed): buffers for vertex position and transformation
+in vec3 a_position;
+uniform mat4 u_projection;
+
+
 // LIGHT: offer buffers for lighting vertices with different light types
   #if defined(LIGHT)
 struct LightAmbient {
@@ -37,17 +43,13 @@ uniform mat3 u_pivot;
 out vec2 v_textureUVs;
   #endif
 
-  // LIGHT_GOURAUD: offer buffers for vertex normals, their transformation and the shininess
+  // GOURAUD: offer buffers for vertex normals, their transformation and the shininess
   #if defined(GOURAUD)
 in vec3 a_normalVertex;
 uniform mat4 u_world;
 uniform mat4 u_normal;
 uniform float u_shininess;
   #endif
-
-  // MINIMAL (no define needed): buffers for vertex position and transformation
-in vec3 a_position;
-uniform mat4 u_projection;
 
 vec3 calculateReflection(vec3 light_dir, vec3 view_dir, vec3 normal, float shininess) {
   vec3 color = vec3(1);
@@ -61,7 +63,7 @@ void main() {
     // MINIMAL
   gl_Position = u_projection * vec4(a_position, 1.0);
 
-    // LIGHT_FLAT: calculate flat lighting
+    // FLAT: calculate flat lighting
     #if defined(FLAT)
   vec3 normal = normalize(mat3(u_normal) * a_normalFace);
   v_color = u_ambient.color;
@@ -72,7 +74,7 @@ void main() {
   }
     #endif
 
-    // LIGHT_GOURAUD: calculate gouraud lighting on vertices
+    // GOURAUD: calculate gouraud lighting on vertices
     #if defined(GOURAUD)
   vec4 v_position4 = u_world * vec4(a_normalVertex, 1);
   vec3 v_position = vec3(v_position4) / v_position4.w;

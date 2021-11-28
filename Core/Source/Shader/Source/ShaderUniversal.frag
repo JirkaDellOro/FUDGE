@@ -6,6 +6,9 @@
 
 precision mediump float;
 
+  // MINIMAL (no define needed): include base color
+uniform vec4 u_color;
+
   // FLAT: input vertex colors flat, so the third of a triangle determines the color
   #if defined(FLAT) 
 flat in vec4 v_color;
@@ -20,16 +23,13 @@ in vec2 v_textureUVs;
 uniform sampler2D u_texture;
   #endif
 
-  // MINIMAL (no define needed): include base color
-uniform vec4 u_color;
-
 out vec4 frag;
 
 void main() {
     // MINIMAL: set the base color
   frag = u_color;
 
-    // LIGHT_VERTEX: multiply with vertex color
+    // VERTEX: multiply with vertex color
     #if defined(FLAT) || defined(LIGHT)
   frag *= v_color;
     #endif

@@ -15,7 +15,6 @@
     "outdir": "Build/",
     "register": "true",
     "define": [
-      "LIGHT",
       "TEXTURE"
     ]
   },
