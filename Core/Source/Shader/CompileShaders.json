@@ -7,6 +7,18 @@
     "outdir": "Build/",
     "register": "true"
   },
+  "ShaderTextureLucent": {
+    "vertex": "Source/ShaderUniversal.vert",
+    "fragment": "Source/ShaderUniversal.frag",
+    "coat": "CoatTextured",
+    "namespace": "FudgeCore",
+    "outdir": "Build/",
+    "register": "true",
+    "define": [
+      "LIGHT",
+      "TEXTURE"
+    ]
+  },
   "ShaderFlat": {
     "vertex": "Source/ShaderUniversal.vert",
     "fragment": "Source/ShaderUniversal.frag",
@@ -42,6 +54,19 @@
     "define": [
       "LIGHT",
       "GOURAUD"
+    ]
+  },
+  "ShaderTextureGouraud": {
+    "vertex": "Source/ShaderUniversal.vert",
+    "fragment": "Source/ShaderUniversal.frag",
+    "coat": "CoatTextured",
+    "namespace": "FudgeCore",
+    "outdir": "Build/",
+    "register": "true",
+    "define": [
+      "LIGHT",
+      "GOURAUD",
+      "TEXTURE"
     ]
   },
   "ShaderPhong": {
