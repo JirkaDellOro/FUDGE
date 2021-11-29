@@ -75,6 +75,7 @@ namespace Fudge {
 
     public setTitle(_title: string): void {
       this.container.setTitle(_title);
+      console.log("Title", this.container.element.parentElement);
     }
 
     public getDragDropSources(): Object[] {

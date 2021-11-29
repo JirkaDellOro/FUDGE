@@ -883,6 +883,7 @@ var Fudge;
         }
         setTitle(_title) {
             this.container.setTitle(_title);
+            console.log("Title", this.container.element.parentElement);
         }
         getDragDropSources() {
             return [];
@@ -1521,7 +1522,7 @@ var Fudge;
                     }
                 ]
             };
-            const hierachyAndComponents = {
+            const hierarchyAndComponents = {
                 type: "column",
                 isClosable: true,
                 content: [
@@ -1529,7 +1530,7 @@ var Fudge;
                         type: "component",
                         componentType: Fudge.VIEW.HIERARCHY,
                         componentState: _state,
-                        title: "Hierachy"
+                        title: "Hierarchy"
                     },
                     {
                         type: "component",
@@ -1540,7 +1541,7 @@ var Fudge;
                 ]
             };
             this.goldenLayout.addItemAtLocation(renderConfig, [{ typeId: 7 /* Root */ }]);
-            this.goldenLayout.addItemAtLocation(hierachyAndComponents, [{ typeId: 7 /* Root */ }]);
+            this.goldenLayout.addItemAtLocation(hierarchyAndComponents, [{ typeId: 7 /* Root */ }]);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);

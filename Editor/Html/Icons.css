@@ -1,8 +1,5 @@
-tr[icon]>td:first-child>input {
-  width: calc(100% - 21px);
-}
-
-tr[icon]>td:first-child:before {
+/* common */
+tr[icon]>td:first-child::before, div.lm_tab::before {
   width: 16px;
   height: 16px;
   content: "";
@@ -10,6 +7,11 @@ tr[icon]>td:first-child:before {
   display: inline-block;
   /* mask-size: 10px; */
   margin-right: 5px;
+}
+
+/* Resources in ViewInternal */
+tr[icon]>td:first-child>input {
+  width: calc(100% - 21px);
 }
 
 tr[icon^=Mesh]>td:first-child::before {
@@ -26,11 +28,77 @@ tr[icon^=Graph]>td:first-child::before {
   mask: url(../Html/Icon/Graph.svg);
   -webkit-mask: url(../Html/Icon/Graph.svg);
 }
+
 tr[icon^=Audio]>td:first-child::before {
   mask: url(../Html/Icon/Audio.svg);
   -webkit-mask: url(../Html/Icon/Audio.svg);
 }
+
 tr[icon^=Texture]>td:first-child::before {
   mask: url(../Html/Icon/Texture.svg);
   -webkit-mask: url(../Html/Icon/Texture.svg);
+}
+
+/* Panel titles */
+
+div.lm_tab[title^="Graph"]::before {
+  mask: url(../Html/Icon/Graph.svg);
+  -webkit-mask: url(../Html/Icon/Graph.svg);
+  /* vertical-align: middle; */
+}
+
+div.lm_tab[title^="Project"]::before {
+  mask: url(../Html/Icon/Project.svg);
+  -webkit-mask: url(../Html/Icon/Project.svg);
+  /* vertical-align: middle; */
+}
+
+div.lm_tab[title^="Help"]::before {
+  mask: url(../Html/Icon/Help.svg);
+  -webkit-mask: url(../Html/Icon/Help.svg);
+  /* vertical-align: middle; */
+}
+
+
+/* View titles */
+div.lm_tab[title^="Internal"]::before {
+  mask: url(../Html/Icon/Internal.svg);
+  -webkit-mask: url(../Html/Icon/Internal.svg);
+  /* vertical-align: middle; */
+}
+
+div.lm_tab[title^="External"]::before {
+  mask: url(../Html/Icon/External.svg);
+  -webkit-mask: url(../Html/Icon/External.svg);
+  /* vertical-align: middle; */
+}
+
+div.lm_tab[title^="Preview"]::before, div.lm_tab[title^="Render"]::before {
+  mask: url(../Html/Icon/Camera.svg);
+  -webkit-mask: url(../Html/Icon/Camera.svg);
+  /* vertical-align: middle; */
+}
+
+div.lm_tab[title^="Properties"]::before {
+  mask: url(../Html/Icon/Document.svg);
+  -webkit-mask: url(../Html/Icon/Document.svg);
+  /* vertical-align: middle; */
+}
+
+div.lm_tab[title^="Script"]::before {
+  mask: url(../Html/Icon/Script.svg);
+  -webkit-mask: url(../Html/Icon/Script.svg);
+  /* vertical-align: middle; */
+}
+
+div.lm_tab[title^="Hierarchy"]::before {
+  mask: url(../Html/Icon/Hierarchy.svg);
+  -webkit-mask: url(../Html/Icon/Hierarchy.svg);
+  /* vertical-align: middle; */
+}
+
+div.lm_tab[title^="Components"]::before {
+  mask: url(../Html/Icon/Components.svg);
+  -webkit-mask: url(../Html/Icon/Components.svg);
+  /* vertical-align: middle; */
 }

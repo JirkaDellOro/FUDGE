@@ -31,7 +31,7 @@ namespace Fudge {
         ]
       };
 
-      const hierachyAndComponents: RowOrColumnItemConfig = {
+      const hierarchyAndComponents: RowOrColumnItemConfig = {
         type: "column",
         isClosable: true,
         content: [
@@ -39,7 +39,7 @@ namespace Fudge {
             type: "component",
             componentType: VIEW.HIERARCHY,
             componentState: _state,
-            title: "Hierachy"
+            title: "Hierarchy"
           },
           {
             type: "component",
@@ -52,7 +52,7 @@ namespace Fudge {
 
 
       this.goldenLayout.addItemAtLocation(renderConfig, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
-      this.goldenLayout.addItemAtLocation(hierachyAndComponents, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
+      this.goldenLayout.addItemAtLocation(hierarchyAndComponents, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
 
 
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
