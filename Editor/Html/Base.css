@@ -155,15 +155,19 @@ table.sortable th>span>input[value="down"]::before {
 table.sortable input[type="text"] {
   width: 100%;
   box-sizing: border-box;
+  cursor: text;
 }
 
 table.sortable .selected input {
   color: var(--color-highlight);
   font-weight: bold;
 }
+table.sortable td {
+  vertical-align: bottom;
+}
 
-table.sortable td>input:read-only {
-  /* TODO: indicate that enabled (not disabled) fields can be doubleclicked to alter content */
+table.sortable td>input:disabled {
+  /* TODO: indicate tha]t enabled (not disabled) fields can be doubleclicked to alter content */
   cursor: default;
 }
 
@@ -210,7 +214,7 @@ details div {
   padding-left: 1em;
 }
 
-details.selected > summary {
+details.selected>summary {
   color: var(--color-highlight);
   font-weight: bold;
 }

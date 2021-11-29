@@ -1,0 +1,36 @@
+tr[icon]>td:first-child>input {
+  width: calc(100% - 21px);
+}
+
+tr[icon]>td:first-child:before {
+  width: 16px;
+  height: 16px;
+  content: "";
+  background: var(--color-text);
+  display: inline-block;
+  /* mask-size: 10px; */
+  margin-right: 5px;
+}
+
+tr[icon^=Mesh]>td:first-child::before {
+  mask: url(../Html/Icon/Mesh.svg);
+  -webkit-mask: url(../Html/Icon/Mesh.svg);
+}
+
+tr[icon^=Material]>td:first-child::before {
+  mask: url(../Html/Icon/Material.svg);
+  -webkit-mask: url(../Html/Icon/Material.svg);
+}
+
+tr[icon^=Graph]>td:first-child::before {
+  mask: url(../Html/Icon/Graph.svg);
+  -webkit-mask: url(../Html/Icon/Graph.svg);
+}
+tr[icon^=Audio]>td:first-child::before {
+  mask: url(../Html/Icon/Audio.svg);
+  -webkit-mask: url(../Html/Icon/Audio.svg);
+}
+tr[icon^=Texture]>td:first-child::before {
+  mask: url(../Html/Icon/Texture.svg);
+  -webkit-mask: url(../Html/Icon/Texture.svg);
+}
