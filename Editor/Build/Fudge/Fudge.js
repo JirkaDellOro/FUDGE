@@ -883,7 +883,6 @@ var Fudge;
         }
         setTitle(_title) {
             this.container.setTitle(_title);
-            console.log("Title", this.container.element.parentElement);
         }
         getDragDropSources() {
             return [];

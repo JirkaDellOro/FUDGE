@@ -1,12 +1,21 @@
 /* common */
-tr[icon]>td:first-child::before, div.lm_tab::before {
+tr[icon]>td:first-child::before, div.lm_tab::before, details>summary::after {
   width: 16px;
   height: 16px;
   content: "";
   background: var(--color-text);
   display: inline-block;
-  /* mask-size: 10px; */
   margin-right: 5px;
+  vertical-align: inherit;
+}
+
+details>summary::after {
+  margin-right: 0px;
+  margin-left: 5px;
+  /* default icon for scripts */
+  mask: url(../Html/Icon/Script.svg);
+  -webkit-mask: url(../Html/Icon/Script.svg);
+  vertical-align: bottom;
 }
 
 /* Resources in ViewInternal */
@@ -44,19 +53,16 @@ tr[icon^=Texture]>td:first-child::before {
 div.lm_tab[title^="Graph"]::before {
   mask: url(../Html/Icon/Graph.svg);
   -webkit-mask: url(../Html/Icon/Graph.svg);
-  /* vertical-align: middle; */
 }
 
 div.lm_tab[title^="Project"]::before {
   mask: url(../Html/Icon/Project.svg);
   -webkit-mask: url(../Html/Icon/Project.svg);
-  /* vertical-align: middle; */
 }
 
 div.lm_tab[title^="Help"]::before {
   mask: url(../Html/Icon/Help.svg);
   -webkit-mask: url(../Html/Icon/Help.svg);
-  /* vertical-align: middle; */
 }
 
 
@@ -64,41 +70,98 @@ div.lm_tab[title^="Help"]::before {
 div.lm_tab[title^="Internal"]::before {
   mask: url(../Html/Icon/Internal.svg);
   -webkit-mask: url(../Html/Icon/Internal.svg);
-  /* vertical-align: middle; */
 }
 
 div.lm_tab[title^="External"]::before {
   mask: url(../Html/Icon/External.svg);
   -webkit-mask: url(../Html/Icon/External.svg);
-  /* vertical-align: middle; */
 }
 
 div.lm_tab[title^="Preview"]::before, div.lm_tab[title^="Render"]::before {
   mask: url(../Html/Icon/Camera.svg);
   -webkit-mask: url(../Html/Icon/Camera.svg);
-  /* vertical-align: middle; */
 }
 
 div.lm_tab[title^="Properties"]::before {
   mask: url(../Html/Icon/Document.svg);
   -webkit-mask: url(../Html/Icon/Document.svg);
-  /* vertical-align: middle; */
 }
 
 div.lm_tab[title^="Script"]::before {
   mask: url(../Html/Icon/Script.svg);
   -webkit-mask: url(../Html/Icon/Script.svg);
-  /* vertical-align: middle; */
 }
 
 div.lm_tab[title^="Hierarchy"]::before {
   mask: url(../Html/Icon/Hierarchy.svg);
   -webkit-mask: url(../Html/Icon/Hierarchy.svg);
-  /* vertical-align: middle; */
 }
 
 div.lm_tab[title^="Components"]::before {
   mask: url(../Html/Icon/Components.svg);
   -webkit-mask: url(../Html/Icon/Components.svg);
-  /* vertical-align: middle; */
+}
+
+/* Properties */
+details[key^=coat]>summary::after {
+  /* show no icon for coat */
+  width: 0px;
+  margin: 0px;
+}
+
+details[key^=coat]>summary::after {
+  /* show no icon for coat */
+  width: 0px;
+  margin: 0px;
+}
+
+details[key^=texture]>summary::after, details[key^=Texture]>summary::after {
+  mask: url(../Html/Icon/Texture.svg);
+  -webkit-mask: url(../Html/Icon/Texture.svg);
+}
+
+details[key^=material]>summary::after, details[key^=Material]>summary::after, details[key^=ComponentMaterial]>summary::after {
+  mask: url(../Html/Icon/Material.svg);
+  -webkit-mask: url(../Html/Icon/Material.svg);
+}
+
+details[key^=mesh]>summary::after, details[key^=Mesh]>summary::after, details[key^=ComponentMesh]>summary::after {
+  mask: url(../Html/Icon/Mesh.svg);
+  -webkit-mask: url(../Html/Icon/Mesh.svg);
+}
+
+details[key^=light]>summary::after, details[key^=ComponentLight]>summary::after {
+  mask: url(../Html/Icon/Light.svg);
+  -webkit-mask: url(../Html/Icon/Light.svg);
+}
+
+details[key^=script]>summary::after, details[key^=ComponentScript]>summary::after {
+  mask: url(../Html/Icon/Script.svg);
+  -webkit-mask: url(../Html/Icon/Script.svg);
+}
+
+details[key^=audio]>summary::after, details[key^=Audio]>summary::after, details[key^=ComponentAudio]>summary::after {
+  mask: url(../Html/Icon/Audio.svg);
+  -webkit-mask: url(../Html/Icon/Audio.svg);
+}
+
+details[key^=ComponentAudioListener]>summary::after {
+  mask: url(../Html/Icon/Listener.svg);
+  -webkit-mask: url(../Html/Icon/Listener.svg);
+}
+details[key^=ComponentTransform]>summary::after {
+  mask: url(../Html/Icon/Transform.svg);
+  -webkit-mask: url(../Html/Icon/Transform.svg);
+}
+details[key^=ComponentRigidbody]>summary::after {
+  mask: url(../Html/Icon/Rigidbody.svg);
+  -webkit-mask: url(../Html/Icon/Rigidbody.svg);
+}
+details[key^=Joint]>summary::after {
+  mask: url(../Html/Icon/Joint.svg);
+  -webkit-mask: url(../Html/Icon/Joint.svg);
+}
+details[key^=ComponentCamera]>summary::after {
+  mask: url(../Html/Icon/Camera.svg);
+  -webkit-mask: url(../Html/Icon/Camera.svg);
 }
