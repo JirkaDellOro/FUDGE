@@ -2470,7 +2470,7 @@ var Fudge;
                     }
                 }
                 if (details.getAttribute("key") == this.selected)
-                    this.select(details);
+                    this.select(details, false);
             }
         }
         hndEvent = (_event) => {
@@ -2586,12 +2586,13 @@ var Fudge;
                     break;
             }
         }
-        select(_details) {
+        select(_details, _focus = true) {
             for (let child of this.dom.children)
                 child.classList.remove("selected");
             _details.classList.add("selected");
-            _details.focus();
             this.selected = _details.getAttribute("key");
+            if (_focus)
+                _details.focus();
         }
         getSelected() {
             for (let child of this.dom.children)
