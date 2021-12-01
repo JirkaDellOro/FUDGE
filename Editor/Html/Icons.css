@@ -1,5 +1,10 @@
 /* common */
-tr[icon]>td:first-child::before, div.lm_tab::before, details>summary::after {
+tr[icon]>td:first-child::before,
+div.lm_tab::before,
+details>summary::after,
+.lm_controls .lm_close::before,
+.lm_controls .lm_maximise::before,
+.lm_maximised .lm_controls .lm_maximise::before {
   width: 16px;
   height: 16px;
   content: "";
@@ -16,6 +21,22 @@ details>summary::after {
   mask: url(../Html/Icon/Script.svg);
   -webkit-mask: url(../Html/Icon/Script.svg);
   vertical-align: bottom;
+}
+
+.lm_controls .lm_close::before {
+  mask: url(../Html/Icon/Close.svg);
+  -webkit-mask: url(../Html/Icon/Close.svg);
+  margin-left: 5px;
+}
+
+.lm_controls .lm_maximise::before {
+  mask: url(../Html/Icon/Maximize.svg);
+  -webkit-mask: url(../Html/Icon/Maximize.svg);
+}
+
+.lm_maximised .lm_controls .lm_maximise::before {
+  mask: url(../Html/Icon/Minimize.svg);
+  -webkit-mask: url(../Html/Icon/Minimize.svg);
 }
 
 /* Resources in ViewInternal */
@@ -109,12 +130,6 @@ details[key^=coat]>summary::after {
   margin: 0px;
 }
 
-details[key^=coat]>summary::after {
-  /* show no icon for coat */
-  width: 0px;
-  margin: 0px;
-}
-
 details[key^=texture]>summary::after, details[key^=Texture]>summary::after {
   mask: url(../Html/Icon/Texture.svg);
   -webkit-mask: url(../Html/Icon/Texture.svg);
@@ -149,18 +164,22 @@ details[key^=ComponentAudioListener]>summary::after {
   mask: url(../Html/Icon/Listener.svg);
   -webkit-mask: url(../Html/Icon/Listener.svg);
 }
+
 details[key^=ComponentTransform]>summary::after {
   mask: url(../Html/Icon/Transform.svg);
   -webkit-mask: url(../Html/Icon/Transform.svg);
 }
+
 details[key^=ComponentRigidbody]>summary::after {
   mask: url(../Html/Icon/Rigidbody.svg);
   -webkit-mask: url(../Html/Icon/Rigidbody.svg);
 }
+
 details[key^=Joint]>summary::after {
   mask: url(../Html/Icon/Joint.svg);
   -webkit-mask: url(../Html/Icon/Joint.svg);
 }
+
 details[key^=ComponentCamera]>summary::after {
   mask: url(../Html/Icon/Camera.svg);
   -webkit-mask: url(../Html/Icon/Camera.svg);
