@@ -23,10 +23,12 @@ namespace FudgeCore {
   }
 
   interface AnimationSequenceMatrix4x4 {
-    rotation: AnimationSequenceVector3;
-    scale: AnimationSequenceVector3;
-    translation: AnimationSequenceVector3;
+    rotation?: AnimationSequenceVector3;
+    scale?: AnimationSequenceVector3;
+    translation?: AnimationSequenceVector3;
   }
+
+  type TransformationType = "rotation" | "scale" | "translation";
 
   export class GLTFLoader {
 
@@ -210,27 +212,12 @@ namespace FudgeCore {
               const iBone: number = skeleton.bones.indexOf(this.nodes[channel.target.node]);
               
               // create new 4 by 4 matrix animation sequence if there is no entry for index iBone
-              if (!boneSequences[iBone]) boneSequences[iBone] = {
-                rotation: undefined,
-                scale: undefined,
-                translation: undefined
-              };
+              if (!boneSequences[iBone]) boneSequences[iBone] = {};
 
               // set the vector 3 animation sequence of the entry refered by the channel target path
-              /*if (channel.target.path != "weights")
-                boneSequences[iBone][channel.target.path] = this.getAnimationSequenceVector3(gltfAnimation.samplers[channel.sampler]);*/
-              const sequence: AnimationSequenceVector3 = this.getAnimationSequenceVector3(gltfAnimation.samplers[channel.sampler]);
-              switch (channel.target.path) {
-                case "rotation":
-                  boneSequences[iBone].rotation = sequence;
-                  break;
-                case "scale":
-                  boneSequences[iBone].scale = sequence;
-                  break;
-                case "translation":
-                  boneSequences[iBone].translation = sequence;
-                  break;
-              }
+              const transformationType: TransformationType = channel.target.path as TransformationType;
+              if (transformationType)
+                boneSequences[iBone][transformationType] = this.getAnimationSequenceVector3(gltfAnimation.samplers[channel.sampler]);
 
               return boneSequences;
             },
@@ -239,8 +226,10 @@ namespace FudgeCore {
 
           const animationStructure: AnimationStructure = {
             components: {
-              ComponentMeshSkin: [{ "ƒ.ComponentMeshSkin": {
-                mtxBoneLocals: boneSequences
+              ComponentMesh: [{ "ƒ.ComponentMesh": {
+                skeleton: {
+                  mtxBoneLocals: boneSequences
+                }
               }}]
             }
           };
