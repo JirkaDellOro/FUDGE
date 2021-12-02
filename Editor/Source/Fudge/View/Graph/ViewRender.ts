@@ -19,9 +19,11 @@ namespace Fudge {
       this.graph = <ƒ.Graph>ƒ.Project.resources[_state["graph"]];
       this.createUserInterface();
 
-      let title: string = "● Use mousebuttons and ctrl-, shift- or alt-key to navigate view.\n";
+      let title: string = `● Drop a graph from "Internal" here.\n`;
+      title += "● Use mousebuttons and ctrl-, shift- or alt-key to navigate view.\n";
       title += "● Click to select node, rightclick to select transformations.\n";
-      title += "● Hold X, Y or Z to transform. Add shift-key to invert restriction.";
+      title += "● Hold X, Y or Z to transform. Add shift-key to invert restriction.\n";
+      title += "● Transformation affects selected component.";
       this.dom.title = title;
       this.dom.tabIndex = 0;
 
@@ -200,7 +202,7 @@ namespace Fudge {
       }
       this.#pointerMoved ||= (_event.movementX != 0 || _event.movementY != 0);
 
-      this.dom.focus();
+      this.dom.focus({preventScroll: true});
       let restriction: string;
       if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.X]))
         restriction = "x";

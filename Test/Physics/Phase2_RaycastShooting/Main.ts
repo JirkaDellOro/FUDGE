@@ -81,9 +81,10 @@ namespace FudgePhysics_Communication {
         viewPort.initialize("Viewport", hierarchy, cmpCamera, app);
         viewPort.activatePointerEvent(f.EVENT_POINTER.MOVE, true);
         viewPort.addEventListener(f.EVENT_POINTER.MOVE, hndPointerMove);
+        viewPort.physicsDebugMode = f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
 
         viewPort.showSceneGraph();
-        f.Physics.settings.debugMode = f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
+        // f.Physics.settings.debugMode = f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
 
         f.Loop.addEventListener(f.EVENT.LOOP_FRAME, update);
         f.Physics.adjustTransforms(hierarchy);
@@ -157,7 +158,7 @@ namespace FudgePhysics_Communication {
         forward = f.Vector3.Z();
         forward.transform(bodies[4].mtxWorld, false);
 
-        hitInfo = f.Physics.raycast(origin, forward, 20);
+        hitInfo = f.Physics.raycast(origin, forward, 20, true);
 
         if (hitInfo.hit == true && hitInfo.rigidbodyComponent.node.name == "Target") {
             f.Debug.log("hit");

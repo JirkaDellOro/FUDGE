@@ -4,16 +4,14 @@ var PhysikTest;
     var f = FudgeCore;
     var ƒAid = FudgeAid;
     class Controlled extends ƒAid.Node {
-        constructor() {
-            super(...arguments);
-            this.axisSpeed = new f.Axis("Speed", 1, 0 /* PROPORTIONAL */);
-            this.axisRotation = new f.Axis("Rotation", 1, 0 /* PROPORTIONAL */);
-            this.maxSpeed = 0.2; // units per second
-            this.maxRotSpeed = 180; // degrees per second
-            this.height = 0;
-            this.lookAt = f.Vector3.X(1);
-            this.groundClearance = 0.0225;
-        }
+        axisSpeed = new f.Axis("Speed", 1, 0 /* PROPORTIONAL */);
+        axisRotation = new f.Axis("Rotation", 1, 0 /* PROPORTIONAL */);
+        maxSpeed = 0.2; // units per second
+        maxRotSpeed = 180; // degrees per second
+        height = 0;
+        lookAt = f.Vector3.X(1);
+        meshTerrain;
+        groundClearance = 0.0225;
         setUpAxis() {
             this.axisSpeed.setDelay(1000);
             this.axisRotation.setDelay(1000);

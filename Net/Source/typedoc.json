@@ -1,0 +1,10 @@
+{
+    "entryPoints": ["."],
+    "entryPointStrategy": "expand",
+    "out": "../../Documentation/Reference/Net/",
+    "name": "Fudge Net",
+    "readme": "none",
+    "excludePrivate": "true",
+    "excludeProtected": "true",
+    "plugin": "typedoc-plugin-merge-modules"
+}

@@ -160,7 +160,7 @@ var HeightMap;
         gridFlat.mtxLocal.translateY(-0.1);
         gridFlat.mtxLocal.scale(new f.Vector3(3, 0.7, 3));
         water = Scenes.createCompleteMeshNode("Water", matWater, meshPlane);
-        // water.mtxLocal.rotateX(-90);
+        water.mtxLocal.rotateX(-90);
         water.mtxLocal.scale(new f.Vector3(3, 3, 1));
         finish = Scenes.createCompleteMeshNode("Finish", matFinish, meshPlane);
         finish.mtxLocal.translation = new f.Vector3(-0.69969, 0.25512, 0.70381);

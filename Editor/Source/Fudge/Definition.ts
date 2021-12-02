@@ -15,6 +15,7 @@ namespace Fudge {
     SCALE
   }
 
+
   export enum MENU {
     QUIT = "quit",
     PROJECT_NEW = "projectNew",
@@ -24,11 +25,8 @@ namespace Fudge {
     PANEL_GRAPH_OPEN = "panelGraphOpen",
     PANEL_ANIMATION_OPEN = "panelAnimationOpen",
     PANEL_PROJECT_OPEN = "panelProjectOpen",
+    PANEL_HELP_OPEN = "panelHelpOpen",
     FULLSCREEN = "fullscreen"
-    /* obsolete ?
-    NODE_DELETE = "nodeDelete",
-    NODE_UPDATE = "nodeUpdate",
-    */
   }
 
 
@@ -41,16 +39,13 @@ namespace Fudge {
     DESTROY = "destroy",
     CLEAR_PROJECT = "clearProject",
     TRANSFORM = "transform"
-    /* obsolete ?
-    REMOVE = "removeNode",
-    HIDE = "hideNode",
-    ACTIVATE_VIEWPORT = "activateViewport",
-    */
   }
+
 
   export enum PANEL {
     GRAPH = "PanelGraph",
-    PROJECT = "PanelProject"
+    PROJECT = "PanelProject",
+    HELP = "PanelHelp"
   }
 
 

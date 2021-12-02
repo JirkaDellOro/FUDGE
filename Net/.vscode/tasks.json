@@ -1,0 +1,49 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "CustomTask: Compile All",
+      "type": "shell",
+      "command": "tsc -p ./tsconfig.client.json",
+      "dependsOn": [
+        "CustomTask: Compile Server"
+      ],
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "CustomTask: Compile Server",
+      "type": "shell",
+      "command": "tsc -p ./tsconfig.server.json",
+      "dependsOn": [
+        "CustomTask: Add Export"
+      ]
+    },
+    {
+      "label": "CustomTask: Add Export",
+      "type": "shell",
+      "command": "AddExport .\\Source\\Server\\Message.d.ts",
+      "dependsOn": [
+        "CustomTask: Add Module.Export"
+      ]
+    },
+    {
+      "label": "CustomTask: Add Module.Export",
+      "type": "shell",
+      "command": "echo module.exports = {FudgeNet: FudgeNet}; >> .\\Source\\Server\\Message.js",
+      "dependsOn": [
+        "CustomTask: Compile Message"
+      ]
+    },
+    {
+      "label": "CustomTask: Compile Message",
+      "type": "shell",
+      "command": "tsc -p ./tsconfig.message.json"
+    }
+  ]
+}

@@ -317,15 +317,16 @@ var FudgeCore;
         }
         static async deserialize(_serialization) {
             let reconstruct;
+            let path;
             try {
-                for (let path in _serialization) {
+                for (path in _serialization) {
                     reconstruct = Serializer.reconstruct(path);
                     reconstruct = await reconstruct.deserialize(_serialization[path]);
                     return reconstruct;
                 }
             }
             catch (_error) {
-                throw new Error("Deserialization failed: " + _error);
+                throw new Error(`Deserialization of ${path} failed: ` + _error);
             }
             return null;
         }
@@ -403,6 +404,61 @@ var FudgeCore;
         }
     }
     FudgeCore.Serializer = Serializer;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class Component extends FudgeCore.Mutable {
+        static iSubclass;
+        static baseClass = Component;
+        static subclasses = [];
+        #node = null;
+        singleton = true;
+        active = true;
+        static registerSubclass(_subclass) { return Component.subclasses.push(_subclass) - 1; }
+        get isActive() {
+            return this.active;
+        }
+        get isSingleton() {
+            return this.singleton;
+        }
+        get node() {
+            return this.#node;
+        }
+        activate(_on) {
+            this.active = _on;
+            this.dispatchEvent(new Event(_on ? "componentActivate" : "componentDeactivate"));
+        }
+        attachToNode(_container) {
+            if (this.#node == _container)
+                return;
+            let previousContainer = this.#node;
+            try {
+                if (previousContainer)
+                    previousContainer.removeComponent(this);
+                this.#node = _container;
+                if (this.#node)
+                    this.#node.addComponent(this);
+            }
+            catch (_error) {
+                this.#node = previousContainer;
+            }
+        }
+        serialize() {
+            let serialization = {
+                active: this.active
+            };
+            return serialization;
+        }
+        async deserialize(_serialization) {
+            this.active = _serialization.active;
+            return this;
+        }
+        reduceMutator(_mutator) {
+            delete _mutator.singleton;
+            delete _mutator.mtxWorld;
+        }
+    }
+    FudgeCore.Component = Component;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -686,8 +742,11 @@ var FudgeCore;
         static get(_T) {
             let key = _T.name;
             let instances = Recycler.depot[key];
-            if (instances && instances.length > 0)
-                return instances.pop();
+            if (instances && instances.length > 0) {
+                let instance = instances.pop();
+                instance.recycle();
+                return instance;
+            }
             else
                 return new _T();
         }
@@ -700,7 +759,9 @@ var FudgeCore;
                 Recycler.store(t);
                 return t;
             }
-            return instances[0];
+            let instance = instances[0];
+            instance.recycle();
+            return instance;
         }
         static store(_instance) {
             let key = _instance.constructor.name;
@@ -827,10 +888,10 @@ var FudgeCore;
         get magnitudeSquared() {
             return Vector2.DOT(this, this);
         }
-        get copy() {
-            let copy = FudgeCore.Recycler.get(Vector2);
-            copy.data.set(this.data);
-            return copy;
+        get clone() {
+            let clone = FudgeCore.Recycler.get(Vector2);
+            clone.data.set(this.data);
+            return clone;
         }
         get geo() {
             let geo = FudgeCore.Recycler.get(FudgeCore.Geo2);
@@ -843,6 +904,9 @@ var FudgeCore;
         set geo(_geo) {
             this.set(_geo.magnitude, 0);
             this.transform(FudgeCore.Matrix3x3.ROTATION(_geo.angle));
+        }
+        recycle() {
+            this.data.set([0, 0]);
         }
         equals(_compare, _tolerance = Number.EPSILON) {
             if (Math.abs(this.x - _compare.x) > _tolerance)
@@ -995,8 +1059,14 @@ var FudgeCore;
         set bottom(_value) {
             this.size.y = this.position.y + _value;
         }
-        get copy() {
+        get clone() {
             return Rectangle.GET(this.x, this.y, this.width, this.height);
+        }
+        recycle() {
+            this.setPositionAndSize();
+        }
+        copy(_rect) {
+            this.setPositionAndSize(_rect.x, _rect.y, _rect.width, _rect.height);
         }
         setPositionAndSize(_x = 0, _y = 0, _width = 1, _height = 1, _origin = ORIGIN2D.TOPLEFT) {
             this.size.set(_width, _height);
@@ -1024,7 +1094,7 @@ var FudgeCore;
             }
         }
         pointToRect(_point, _target) {
-            let result = _point.copy;
+            let result = _point.clone;
             result.subtract(this.position);
             result.x *= _target.width / this.width;
             result.y *= _target.height / this.height;
@@ -1131,7 +1201,7 @@ var FudgeCore;
             RenderWebGL.crc3.canvas.height = _height;
         }
         static setRenderRectangle(_rect) {
-            Object.assign(RenderWebGL.rectRender, _rect);
+            RenderWebGL.rectRender.setPositionAndSize(_rect.x, _rect.y, _rect.width, _rect.height);
             RenderWebGL.crc3.viewport(_rect.x, _rect.y, _rect.width, _rect.height);
         }
         static clear(_color = null) {
@@ -1221,7 +1291,7 @@ var FudgeCore;
             try {
                 let cmpMaterial = _node.getComponent(FudgeCore.ComponentMaterial);
                 let cmpMesh = _node.getComponent(FudgeCore.ComponentMesh);
-                let coat = cmpMaterial.material.getCoat();
+                let coat = cmpMaterial.material.coat;
                 let shader = coat instanceof FudgeCore.CoatTextured ? FudgeCore.ShaderPickTextured : FudgeCore.ShaderPick;
                 shader.useProgram();
                 coat.useRenderData(shader, cmpMaterial);
@@ -1270,7 +1340,7 @@ var FudgeCore;
         }
         static drawMesh(_cmpMesh, cmpMaterial, _mtxMeshToWorld, _mtxWorldToView) {
             let shader = cmpMaterial.material.getShader();
-            let coat = cmpMaterial.material.getCoat();
+            let coat = cmpMaterial.material.coat;
             shader.useProgram();
             _cmpMesh.mesh.useRenderBuffers(shader, _mtxMeshToWorld, _mtxWorldToView);
             coat.useRenderData(shader, cmpMaterial);
@@ -1515,6 +1585,9 @@ var FudgeCore;
                 return list[0];
             return null;
         }
+        attach(_component) {
+            this.addComponent(_component);
+        }
         addComponent(_component) {
             if (_component.node == this)
                 return;
@@ -1525,9 +1598,12 @@ var FudgeCore;
                 throw new Error("Component is marked singleton and can't be attached, no more than one allowed");
             else
                 cmpList.push(_component);
-            _component.setContainer(this);
+            _component.attachToNode(this);
             _component.dispatchEvent(new Event("componentAdd"));
             this.dispatchEventToTargetOnly(new CustomEvent("componentAdd", { detail: _component }));
+        }
+        detach(_component) {
+            this.removeComponent(_component);
         }
         removeComponent(_component) {
             try {
@@ -1538,7 +1614,7 @@ var FudgeCore;
                 _component.dispatchEvent(new Event("componentRemove"));
                 this.dispatchEventToTargetOnly(new CustomEvent("componentRemove", { detail: _component }));
                 componentsOfType.splice(foundAt, 1);
-                _component.setContainer(null);
+                _component.attachToNode(null);
             }
             catch (_error) {
                 throw new Error(`Unable to remove component '${_component}'in node named '${this.name}'`);
@@ -1658,6 +1734,324 @@ var FudgeCore;
         }
     }
     FudgeCore.Node = Node;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class Joint extends FudgeCore.Component {
+        static baseClass = Joint;
+        static subclasses = [];
+        #idBodyAnchor = 0;
+        #idBodyTied = 0;
+        #bodyAnchor;
+        #bodyTied;
+        #connected = false;
+        #anchor;
+        #internalCollision = false;
+        #breakForce = 0;
+        #breakTorque = 0;
+        #nameChildToConnect;
+        singleton = false;
+        constructor(_bodyAnchor = null, _bodyTied = null) {
+            super();
+            this.bodyAnchor = _bodyAnchor;
+            this.bodyTied = _bodyTied;
+            this.addEventListener("componentAdd", this.dirtyStatus);
+            this.addEventListener("componentRemove", this.removeJoint);
+        }
+        static registerSubclass(_subclass) { return Joint.subclasses.push(_subclass) - 1; }
+        get bodyAnchor() {
+            return this.#bodyAnchor;
+        }
+        set bodyAnchor(_cmpRB) {
+            this.#idBodyAnchor = _cmpRB != null ? _cmpRB.id : -1;
+            this.#bodyAnchor = _cmpRB;
+            this.disconnect();
+            this.dirtyStatus();
+        }
+        get bodyTied() {
+            return this.#bodyTied;
+        }
+        set bodyTied(_cmpRB) {
+            this.#idBodyTied = _cmpRB != null ? _cmpRB.id : -1;
+            this.#bodyTied = _cmpRB;
+            this.disconnect();
+            this.dirtyStatus();
+        }
+        get anchor() {
+            return new FudgeCore.Vector3(this.#anchor.x, this.#anchor.y, this.#anchor.z);
+        }
+        set anchor(_value) {
+            this.#anchor = new OIMO.Vec3(_value.x, _value.y, _value.z);
+            this.disconnect();
+            this.dirtyStatus();
+        }
+        get breakTorque() {
+            return this.#breakTorque;
+        }
+        set breakTorque(_value) {
+            this.#breakTorque = _value;
+            if (this.joint != null)
+                this.joint.setBreakTorque(this.#breakTorque);
+        }
+        get breakForce() {
+            return this.#breakForce;
+        }
+        set breakForce(_value) {
+            this.#breakForce = _value;
+            if (this.joint != null)
+                this.joint.setBreakForce(this.#breakForce);
+        }
+        get internalCollision() {
+            return this.#internalCollision;
+        }
+        set internalCollision(_value) {
+            this.#internalCollision = _value;
+            if (this.joint != null)
+                this.joint.setAllowCollision(this.#internalCollision);
+        }
+        connectChild(_name) {
+            this.#nameChildToConnect = _name;
+            if (!this.node)
+                return;
+            let children = this.node.getChildrenByName(_name);
+            if (children.length == 1)
+                this.connectNode(children.pop());
+            else
+                FudgeCore.Debug.warn(`${this.constructor.name} at ${this.node.name} fails to connect child with non existent or ambigous name ${_name}`);
+        }
+        connectNode(_node) {
+            if (!_node || !this.node)
+                return;
+            FudgeCore.Debug.fudge(`${this.constructor.name} connected ${this.node.name} and ${_node.name}`);
+            let connectBody = _node.getComponent(FudgeCore.ComponentRigidbody);
+            let thisBody = this.node.getComponent(FudgeCore.ComponentRigidbody);
+            if (!connectBody || !thisBody) {
+                FudgeCore.Debug.warn(`${this.constructor.name} at ${this.node.name} fails due to missing rigidbodies on ${this.node.name} or ${_node.name}`);
+                return;
+            }
+            this.bodyAnchor = thisBody;
+            this.bodyTied = connectBody;
+        }
+        isConnected() {
+            return this.#connected;
+        }
+        connect() {
+            if (this.#connected == false) {
+                if (this.#idBodyAnchor == -1 || this.#idBodyTied == -1) {
+                    if (this.#nameChildToConnect)
+                        this.connectChild(this.#nameChildToConnect);
+                    return;
+                }
+                this.constructJoint();
+                this.#connected = true;
+                this.addJoint();
+            }
+        }
+        disconnect() {
+            if (this.#connected == true) {
+                this.removeJoint();
+                this.#connected = false;
+            }
+        }
+        getOimoJoint() {
+            return this.joint;
+        }
+        serialize() {
+            let serialization = this.#getMutator();
+            serialization.anchor = this.anchor.serialize();
+            serialization[super.constructor.name] = super.serialize();
+            return serialization;
+        }
+        async deserialize(_serialization) {
+            this.anchor = await new FudgeCore.Vector3().deserialize(_serialization.anchor);
+            this.#mutate(_serialization);
+            await super.deserialize(_serialization[super.constructor.name]);
+            this.connectChild(_serialization.nameChildToConnect);
+            return this;
+        }
+        getMutator() {
+            let mutator = super.getMutator(true);
+            Object.assign(mutator, this.#getMutator());
+            mutator.anchor = this.anchor.getMutator();
+            return mutator;
+        }
+        async mutate(_mutator) {
+            this.anchor = new FudgeCore.Vector3(...(Object.values(_mutator.anchor)));
+            delete _mutator.anchor;
+            this.connectChild(_mutator.nameChildToConnect);
+            this.#mutate(_mutator);
+            this.deleteFromMutator(_mutator, this.#getMutator());
+            super.mutate(_mutator);
+        }
+        #getMutator = () => {
+            let mutator = {
+                nameChildToConnect: this.#nameChildToConnect,
+                internalCollision: this.#internalCollision,
+                breakForce: this.#breakForce,
+                breakTorque: this.#breakTorque
+            };
+            return mutator;
+        };
+        #mutate = (_mutator) => {
+            this.internalCollision = _mutator.internalCollision;
+            this.breakForce = _mutator.breakForce;
+            this.breakTorque = _mutator.breakTorque;
+        };
+        reduceMutator(_mutator) {
+            delete _mutator.springDamper;
+            delete _mutator.joint;
+            delete _mutator.motor;
+            super.reduceMutator(_mutator);
+        }
+        dirtyStatus() {
+            FudgeCore.Physics.world.changeJointStatus(this);
+        }
+        addJoint() {
+            FudgeCore.Physics.world.addJoint(this);
+        }
+        removeJoint() {
+            FudgeCore.Physics.world.removeJoint(this);
+        }
+        constructJoint(..._configParams) {
+            let posBodyAnchor = this.bodyAnchor.node.mtxWorld.translation;
+            let worldAnchor = new OIMO.Vec3(posBodyAnchor.x + this.#anchor.x, posBodyAnchor.y + this.#anchor.y, posBodyAnchor.z + this.#anchor.z);
+            this.config.init(this.#bodyAnchor.getOimoRigidbody(), this.#bodyTied.getOimoRigidbody(), worldAnchor, ..._configParams);
+        }
+        configureJoint() {
+            this.joint.setBreakForce(this.breakForce);
+            this.joint.setBreakTorque(this.breakTorque);
+            this.joint.setAllowCollision(this.#internalCollision);
+        }
+        deleteFromMutator(_mutator, _delete) {
+            for (let key in _delete)
+                delete _mutator[key];
+        }
+    }
+    FudgeCore.Joint = Joint;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class JointAxial extends FudgeCore.Joint {
+        #maxMotor = 10;
+        #minMotor = -10;
+        #motorSpeed = 0;
+        #axis;
+        #springFrequency = 0;
+        #springDamping = 0;
+        springDamper;
+        constructor(_bodyAnchor = null, _bodyTied = null, _axis = new FudgeCore.Vector3(0, 1, 0), _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
+            super(_bodyAnchor, _bodyTied);
+            this.axis = _axis;
+            this.anchor = _localAnchor;
+            this.minMotor = -10;
+            this.maxMotor = 10;
+        }
+        get axis() {
+            return new FudgeCore.Vector3(this.#axis.x, this.#axis.y, this.#axis.z);
+        }
+        set axis(_value) {
+            this.#axis = new OIMO.Vec3(_value.x, _value.y, _value.z);
+            this.disconnect();
+            this.dirtyStatus();
+        }
+        get maxMotor() {
+            return this.#maxMotor;
+        }
+        set maxMotor(_value) {
+            this.#maxMotor = _value;
+            try {
+                this.joint.getLimitMotor().upperLimit = _value;
+            }
+            catch (_e) { }
+        }
+        get minMotor() {
+            return this.#minMotor;
+        }
+        set minMotor(_value) {
+            this.#minMotor = _value;
+            try {
+                this.joint.getLimitMotor().lowerLimit = _value;
+            }
+            catch (_e) { }
+        }
+        get springDamping() {
+            return this.#springDamping;
+        }
+        set springDamping(_value) {
+            this.#springDamping = _value;
+            try {
+                this.joint.getSpringDamper().dampingRatio = _value;
+            }
+            catch (_e) { }
+        }
+        get motorSpeed() {
+            return this.#motorSpeed;
+        }
+        set motorSpeed(_value) {
+            this.#motorSpeed = _value;
+            try {
+                this.joint.getLimitMotor().motorSpeed = _value;
+            }
+            catch (_e) { }
+        }
+        get springFrequency() {
+            return this.#springFrequency;
+        }
+        set springFrequency(_value) {
+            this.#springFrequency = _value;
+            try {
+                this.joint.getSpringDamper().frequency = _value;
+            }
+            catch (_e) { }
+        }
+        serialize() {
+            let serialization = this.#getMutator();
+            serialization.axis = this.axis.serialize();
+            serialization[super.constructor.name] = super.serialize();
+            return serialization;
+        }
+        async deserialize(_serialization) {
+            this.axis = await new FudgeCore.Vector3().deserialize(_serialization.axis);
+            this.#mutate(_serialization);
+            super.deserialize(_serialization[super.constructor.name]);
+            return this;
+        }
+        async mutate(_mutator) {
+            this.axis = new FudgeCore.Vector3(...(Object.values(_mutator.axis)));
+            delete _mutator.axis;
+            this.#mutate(_mutator);
+            this.deleteFromMutator(_mutator, this.#getMutator());
+            super.mutate(_mutator);
+        }
+        getMutator() {
+            let mutator = super.getMutator();
+            mutator.axis = this.axis.getMutator();
+            Object.assign(mutator, this.#getMutator());
+            return mutator;
+        }
+        #getMutator = () => {
+            let mutator = {
+                springDamping: this.#springDamping,
+                springFrequency: this.#springFrequency,
+                maxMotor: this.#maxMotor,
+                minMotor: this.#minMotor,
+                motorSpeed: this.#motorSpeed
+            };
+            return mutator;
+        };
+        #mutate = (_mutator) => {
+            this.springDamping = _mutator.springDamping;
+            this.springFrequency = _mutator.springFrequency;
+            this.maxMotor = _mutator.maxMotor;
+            this.minMotor = _mutator.minMotor;
+            this.motorSpeed = _mutator.motorSpeed;
+        };
+        constructJoint() {
+            this.springDamper = new OIMO.SpringDamper().setSpring(this.#springFrequency, this.#springDamping);
+            super.constructJoint(this.#axis);
+        }
+    }
+    FudgeCore.JointAxial = JointAxial;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -2318,62 +2712,6 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
-    class Component extends FudgeCore.Mutable {
-        static iSubclass;
-        static baseClass = Component;
-        static subclasses = [];
-        #node = null;
-        singleton = true;
-        active = true;
-        static registerSubclass(_subclass) { return Component.subclasses.push(_subclass) - 1; }
-        get isActive() {
-            return this.active;
-        }
-        get isSingleton() {
-            return this.singleton;
-        }
-        get node() {
-            return this.#node;
-        }
-        activate(_on) {
-            this.active = _on;
-            this.dispatchEvent(new Event(_on ? "componentActivate" : "componentDeactivate"));
-        }
-        setContainer(_container) {
-            if (this.#node == _container)
-                return;
-            let previousContainer = this.#node;
-            try {
-                if (previousContainer)
-                    previousContainer.removeComponent(this);
-                this.#node = _container;
-                if (this.#node)
-                    this.#node.addComponent(this);
-            }
-            catch (_error) {
-                this.#node = previousContainer;
-            }
-        }
-        serialize() {
-            let serialization = {
-                active: this.active
-            };
-            return serialization;
-        }
-        async deserialize(_serialization) {
-            this.active = _serialization.active;
-            return this;
-        }
-        reduceMutator(_mutator) {
-            delete _mutator.singleton;
-            delete _mutator.container;
-            delete _mutator.mtxWorld;
-        }
-    }
-    FudgeCore.Component = Component;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
     class ComponentAnimator extends FudgeCore.Component {
         static iSubclass = FudgeCore.Component.registerSubclass(ComponentAnimator);
         animation;
@@ -2551,6 +2889,9 @@ var FudgeCore;
         setAudio(_audio) {
             this.createSource(_audio, this.source.loop);
         }
+        getAudio() {
+            return this.audio;
+        }
         setPanner(_property, _value) {
             Reflect.set(this.panner, _property, _value);
         }
@@ -2706,6 +3047,9 @@ var FudgeCore;
             this.panner.orientationX.value = forward.x;
             this.panner.orientationY.value = forward.y;
             this.panner.orientationZ.value = forward.z;
+            FudgeCore.Recycler.store(forward);
+            if (this.node)
+                FudgeCore.Recycler.store(mtxResult);
         };
     }
     FudgeCore.ComponentAudio = ComponentAudio;
@@ -2737,6 +3081,8 @@ var FudgeCore;
                 _listener.setPosition(position.x, position.y, position.z);
                 _listener.setOrientation(forward.x, forward.y, forward.z, up.x, up.y, up.z);
             }
+            FudgeCore.Recycler.store(forward);
+            FudgeCore.Recycler.store(up);
         }
     }
     FudgeCore.ComponentAudioListener = ComponentAudioListener;
@@ -2760,6 +3106,7 @@ var FudgeCore;
         static iSubclass = FudgeCore.Component.registerSubclass(ComponentCamera);
         mtxPivot = FudgeCore.Matrix4x4.IDENTITY();
         clrBackground = new FudgeCore.Color(0, 0, 0, 1);
+        #mtxWorldToView;
         projection = PROJECTION.CENTRAL;
         mtxProjection = new FudgeCore.Matrix4x4;
         fieldOfView = 45;
@@ -2769,15 +3116,17 @@ var FudgeCore;
         far = 2000;
         backgroundEnabled = true;
         get mtxWorldToView() {
-            let mtxCamera = this.mtxPivot;
+            let mtxCamera = this.mtxPivot.clone;
             try {
                 mtxCamera = FudgeCore.Matrix4x4.MULTIPLICATION(this.node.mtxWorld, this.mtxPivot);
             }
             catch (_error) {
             }
-            let mtxResult = FudgeCore.Matrix4x4.INVERSION(mtxCamera);
-            mtxResult = FudgeCore.Matrix4x4.MULTIPLICATION(this.mtxProjection, mtxResult);
-            return mtxResult;
+            let mtxInversion = FudgeCore.Matrix4x4.INVERSION(mtxCamera);
+            this.#mtxWorldToView = FudgeCore.Matrix4x4.MULTIPLICATION(this.mtxProjection, mtxInversion);
+            FudgeCore.Recycler.store(mtxCamera);
+            FudgeCore.Recycler.store(mtxInversion);
+            return this.#mtxWorldToView;
         }
         getProjection() {
             return this.projection;
@@ -3010,10 +3359,10 @@ var FudgeCore;
 (function (FudgeCore) {
     class ComponentMaterial extends FudgeCore.Component {
         static iSubclass = FudgeCore.Component.registerSubclass(ComponentMaterial);
-        material;
         clrPrimary = FudgeCore.Color.CSS("white");
         clrSecondary = FudgeCore.Color.CSS("white");
         mtxPivot = FudgeCore.Matrix3x3.IDENTITY();
+        material;
         sortForAlpha = false;
         constructor(_material = null) {
             super();
@@ -3125,7 +3474,7 @@ var FudgeCore;
             let container = this.node;
             if (!container && !container.getParent())
                 return this.mtxLocal.lookAt(_targetWorld, _up);
-            let mtxWorld = container.mtxWorld.copy;
+            let mtxWorld = container.mtxWorld.clone;
             mtxWorld.lookAt(_targetWorld, _up, true);
             let mtxLocal = FudgeCore.Matrix4x4.RELATIVE(mtxWorld, null, container.getParent().mtxWorldInverse);
             this.mtxLocal = mtxLocal;
@@ -3134,7 +3483,7 @@ var FudgeCore;
             let container = this.node;
             if (!container && !container.getParent())
                 return this.mtxLocal.showTo(_targetWorld, _up);
-            let mtxWorld = container.mtxWorld.copy;
+            let mtxWorld = container.mtxWorld.clone;
             mtxWorld.showTo(_targetWorld, _up, true);
             let mtxLocal = FudgeCore.Matrix4x4.RELATIVE(mtxWorld, null, container.getParent().mtxWorldInverse);
             this.mtxLocal = mtxLocal;
@@ -3162,14 +3511,20 @@ var FudgeCore;
                 case BASE.WORLD:
                     this.rebase(_node);
                     this.mtxLocal.multiply(_mtxTransform, true);
-                    let container = this.node;
-                    if (container) {
-                        if (_base == BASE.NODE)
-                            container.mtxWorld.set(FudgeCore.Matrix4x4.MULTIPLICATION(_node.mtxWorld, container.mtxLocal));
-                        let parent = container.getParent();
+                    let node = this.node;
+                    if (node) {
+                        let mtxTemp;
+                        if (_base == BASE.NODE) {
+                            mtxTemp = FudgeCore.Matrix4x4.MULTIPLICATION(_node.mtxWorld, node.mtxLocal);
+                            node.mtxWorld.set(mtxTemp);
+                            FudgeCore.Recycler.store(mtxTemp);
+                        }
+                        let parent = node.getParent();
                         if (parent) {
-                            this.rebase(container.getParent());
-                            container.mtxWorld.set(FudgeCore.Matrix4x4.MULTIPLICATION(container.getParent().mtxWorld, container.mtxLocal));
+                            this.rebase(node.getParent());
+                            mtxTemp = FudgeCore.Matrix4x4.MULTIPLICATION(node.getParent().mtxWorld, node.mtxLocal);
+                            node.mtxWorld.set(mtxTemp);
+                            FudgeCore.Recycler.store(mtxTemp);
                         }
                     }
                     break;
@@ -3398,6 +3753,9 @@ var FudgeCore;
             if (Keyboard.isPressedCombo(_keys))
                 return _active;
             return _inactive;
+        }
+        static mapToTrit(_positive, _negative) {
+            return Keyboard.mapToValue(-1, 0, _negative) + Keyboard.mapToValue(1, 0, _positive);
         }
         static initialize() {
             let store = {};
@@ -3682,6 +4040,20 @@ var FudgeCore;
         KEYBOARD_CODE["NUMPAD_PARENT_RIGHT"] = "NumpadParentRight";
         KEYBOARD_CODE["SLEEP"] = "Sleep";
     })(KEYBOARD_CODE = FudgeCore.KEYBOARD_CODE || (FudgeCore.KEYBOARD_CODE = {}));
+    let KEYBOARD_CODE_DE;
+    (function (KEYBOARD_CODE_DE) {
+        KEYBOARD_CODE_DE["Z"] = "KeyY";
+        KEYBOARD_CODE_DE["Y"] = "KeyZ";
+        KEYBOARD_CODE_DE["\u00D6"] = "Semicolon";
+        KEYBOARD_CODE_DE["\u00C4"] = "Quote";
+        KEYBOARD_CODE_DE["\u00DC"] = "BracketLeft";
+        KEYBOARD_CODE_DE["HASH"] = "Backslash";
+        KEYBOARD_CODE_DE["PLUS"] = "BracketRight";
+        KEYBOARD_CODE_DE["\u00DF"] = "Minus";
+        KEYBOARD_CODE_DE["ACUTE"] = "Equal";
+        KEYBOARD_CODE_DE["LESS_THAN"] = "IntlBackSlash";
+        KEYBOARD_CODE_DE["MINUS"] = "Slash";
+    })(KEYBOARD_CODE_DE = FudgeCore.KEYBOARD_CODE_DE || (FudgeCore.KEYBOARD_CODE_DE = {}));
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
@@ -3755,7 +4127,6 @@ var FudgeCore;
             if (!_graph)
                 return;
             this.idSource = _graph.idResource;
-            this.reset();
         }
         async reset() {
             let resource = await FudgeCore.Project.getResource(this.idSource);
@@ -3786,18 +4157,17 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Coat extends FudgeCore.Mutable {
-        name = "Coat";
         renderData;
         useRenderData(_shader, _cmpMaterial) { }
         serialize() {
-            let serialization = { name: this.name };
-            return serialization;
+            return {};
         }
         async deserialize(_serialization) {
-            this.name = _serialization.name;
             return this;
         }
-        reduceMutator() { }
+        reduceMutator(_mutator) {
+            delete _mutator.renderData;
+        }
     }
     FudgeCore.Coat = Coat;
     let CoatColored = class CoatColored extends Coat {
@@ -3831,6 +4201,16 @@ var FudgeCore;
             this.color = _color || new FudgeCore.Color();
             this.shadeSmooth = _shadeSmooth || 0;
         }
+        serialize() {
+            let serialization = super.serialize();
+            serialization.color = this.color.serialize();
+            return serialization;
+        }
+        async deserialize(_serialization) {
+            await super.deserialize(_serialization);
+            await this.color.deserialize(_serialization.color);
+            return this;
+        }
     };
     CoatMatCap = __decorate([
         FudgeCore.RenderInjectorCoat.decorate
@@ -3847,7 +4227,6 @@ var FudgeCore;
         }
         serialize() {
             let serialization = super.serialize();
-            delete serialization.texture;
             serialization.idTexture = this.texture.idResource;
             return serialization;
         }
@@ -3961,42 +4340,42 @@ var FudgeCore;
 var FudgeCore;
 (function (FudgeCore) {
     class Material extends FudgeCore.Mutable {
+        #coat;
         name;
         idResource = undefined;
         shaderType;
-        coat;
         constructor(_name, _shader, _coat) {
             super();
             this.name = _name;
             this.shaderType = _shader;
             if (_shader) {
                 if (_coat)
-                    this.setCoat(_coat);
+                    this.coat = _coat;
                 else
-                    this.setCoat(this.createCoatMatchingShader());
+                    this.coat = this.createCoatMatchingShader();
             }
             FudgeCore.Project.register(this);
         }
-        createCoatMatchingShader() {
-            let coat = new (this.shaderType.getCoat())();
-            return coat;
+        get coat() {
+            return this.#coat;
         }
-        setCoat(_coat) {
+        set coat(_coat) {
             if (_coat.constructor != this.shaderType.getCoat())
                 if (_coat instanceof this.shaderType.getCoat())
                     FudgeCore.Debug.fudge("Coat is extension of Coat required by shader");
                 else
                     throw (new Error("Shader and coat don't match"));
-            this.coat = _coat;
+            this.#coat = _coat;
         }
-        getCoat() {
-            return this.coat;
+        createCoatMatchingShader() {
+            let coat = new (this.shaderType.getCoat())();
+            return coat;
         }
         setShader(_shaderType) {
             this.shaderType = _shaderType;
             let coat = this.createCoatMatchingShader();
-            coat.mutate(this.coat.getMutator());
-            this.setCoat(coat);
+            coat.mutate(this.#coat.getMutator());
+            this.coat = coat;
         }
         getShader() {
             return this.shaderType;
@@ -4006,7 +4385,7 @@ var FudgeCore;
                 name: this.name,
                 idResource: this.idResource,
                 shader: this.shaderType.name,
-                coat: FudgeCore.Serializer.serialize(this.coat)
+                coat: FudgeCore.Serializer.serialize(this.#coat)
             };
             return serialization;
         }
@@ -4015,8 +4394,17 @@ var FudgeCore;
             FudgeCore.Project.register(this, _serialization.idResource);
             this.shaderType = FudgeCore[_serialization.shader];
             let coat = await FudgeCore.Serializer.deserialize(_serialization.coat);
-            this.setCoat(coat);
+            this.coat = coat;
             return this;
+        }
+        getMutator() {
+            let mutator = super.getMutator(true);
+            mutator.coat = this.coat.getMutator();
+            return mutator;
+        }
+        async mutate(_mutator) {
+            await super.mutate(_mutator);
+            await this.coat.mutate(_mutator.coat);
         }
         reduceMutator(_mutator) {
         }
@@ -4111,6 +4499,9 @@ var FudgeCore;
             this.magnitude = _magnitude;
             this.angle = _angle;
         }
+        recycle() {
+            this.set();
+        }
         toString() {
             return `angle: ${this.angle.toPrecision(5)},  magnitude: ${this.magnitude.toPrecision(5)}`;
         }
@@ -4130,6 +4521,9 @@ var FudgeCore;
             this.magnitude = _magnitude;
             this.latitude = _latitude;
             this.longitude = _longitude;
+        }
+        recycle() {
+            this.set();
         }
         toString() {
             return `longitude: ${this.longitude.toPrecision(5)}, latitude: ${this.latitude.toPrecision(5)}, magnitude: ${this.magnitude.toPrecision(5)}`;
@@ -4211,16 +4605,12 @@ var FudgeCore;
 (function (FudgeCore) {
     class Matrix3x3 extends FudgeCore.Mutable {
         static deg2rad = Math.PI / 180;
-        data = new Float32Array(3);
+        data = new Float32Array(9);
         mutator = null;
         vectors;
         constructor() {
             super();
-            this.data = new Float32Array([
-                1, 0, 0,
-                0, 1, 0,
-                0, 0, 1
-            ]);
+            this.recycle();
             this.resetCache();
         }
         static PROJECTION(_width, _height) {
@@ -4234,11 +4624,6 @@ var FudgeCore;
         }
         static IDENTITY() {
             const mtxResult = FudgeCore.Recycler.get(Matrix3x3);
-            mtxResult.data.set([
-                1, 0, 0,
-                0, 1, 0,
-                0, 0, 1
-            ]);
             return mtxResult;
         }
         static TRANSLATION(_translate) {
@@ -4307,16 +4692,16 @@ var FudgeCore;
         get translation() {
             if (!this.vectors.translation)
                 this.vectors.translation = new FudgeCore.Vector2(this.data[6], this.data[7]);
-            return this.vectors.translation.copy;
+            return this.vectors.translation;
         }
         set translation(_translation) {
-            this.data.set(_translation.get(), 12);
+            this.data.set(_translation.get(), 6);
             this.vectors.translation = _translation;
             this.mutator = null;
         }
         get rotation() {
             if (!this.vectors.rotation)
-                this.vectors.rotation = this.getEulerAngles();
+                this.vectors.rotation = this.getEulerAngle();
             return this.vectors.rotation;
         }
         set rotation(_rotation) {
@@ -4326,16 +4711,24 @@ var FudgeCore;
         get scaling() {
             if (!this.vectors.scaling)
                 this.vectors.scaling = new FudgeCore.Vector2(Math.hypot(this.data[0], this.data[1]), Math.hypot(this.data[3], this.data[4]));
-            return this.vectors.scaling.copy;
+            return this.vectors.scaling;
         }
         set scaling(_scaling) {
             this.mutate({ "scaling": _scaling });
             this.resetCache();
         }
-        get copy() {
-            let mtxCopy = FudgeCore.Recycler.get(Matrix3x3);
-            mtxCopy.set(this);
-            return mtxCopy;
+        get clone() {
+            let mtxClone = FudgeCore.Recycler.get(Matrix3x3);
+            mtxClone.set(this);
+            return mtxClone;
+        }
+        recycle() {
+            this.data = new Float32Array([
+                1, 0, 0,
+                0, 1, 0,
+                0, 0, 1
+            ]);
+            this.resetCache();
         }
         translate(_by) {
             const mtxResult = Matrix3x3.MULTIPLICATION(this, Matrix3x3.TRANSLATION(_by));
@@ -4358,14 +4751,16 @@ var FudgeCore;
             FudgeCore.Recycler.store(mtxResult);
         }
         scaleX(_by) {
-            let vector = FudgeCore.Recycler.borrow(FudgeCore.Vector2);
+            let vector = FudgeCore.Recycler.get(FudgeCore.Vector2);
             vector.set(_by, 1);
             this.scale(vector);
+            FudgeCore.Recycler.store(vector);
         }
         scaleY(_by) {
-            let vector = FudgeCore.Recycler.borrow(FudgeCore.Vector2);
+            let vector = FudgeCore.Recycler.get(FudgeCore.Vector2);
             vector.set(1, _by);
             this.scale(vector);
+            FudgeCore.Recycler.store(vector);
         }
         rotate(_angleInDegrees) {
             const mtxResult = Matrix3x3.MULTIPLICATION(this, Matrix3x3.ROTATION(_angleInDegrees));
@@ -4373,10 +4768,12 @@ var FudgeCore;
             FudgeCore.Recycler.store(mtxResult);
         }
         multiply(_mtxRight) {
-            this.set(Matrix3x3.MULTIPLICATION(this, _mtxRight));
+            let mtxResult = Matrix3x3.MULTIPLICATION(this, _mtxRight);
+            this.set(mtxResult);
+            FudgeCore.Recycler.store(mtxResult);
             this.mutator = null;
         }
-        getEulerAngles() {
+        getEulerAngle() {
             let scaling = this.scaling;
             let s0 = this.data[0] / scaling.x;
             let s1 = this.data[1] / scaling.x;
@@ -4479,27 +4876,18 @@ var FudgeCore;
 (function (FudgeCore) {
     class Matrix4x4 extends FudgeCore.Mutable {
         static deg2rad = Math.PI / 180;
+        #eulerAngles = FudgeCore.Vector3.ZERO();
+        #vectors = { translation: FudgeCore.Vector3.ZERO(), rotation: FudgeCore.Vector3.ZERO(), scaling: FudgeCore.Vector3.ZERO() };
         data = new Float32Array(16);
         mutator = null;
         vectors;
         constructor() {
             super();
-            this.data.set([
-                1, 0, 0, 0,
-                0, 1, 0, 0,
-                0, 0, 1, 0,
-                0, 0, 0, 1
-            ]);
+            this.recycle();
             this.resetCache();
         }
         static IDENTITY() {
             const mtxResult = FudgeCore.Recycler.get(Matrix4x4);
-            mtxResult.data.set([
-                1, 0, 0, 0,
-                0, 1, 0, 0,
-                0, 0, 1, 0,
-                0, 0, 0, 1
-            ]);
             return mtxResult;
         }
         static CONSTRUCTION(_vectors) {
@@ -4746,8 +5134,11 @@ var FudgeCore;
             return mtxResult;
         }
         static RELATIVE(_mtx, _mtxBase, _mtxInverse) {
-            let mtxResult = _mtxInverse ? _mtxInverse : Matrix4x4.INVERSION(_mtxBase);
-            mtxResult = Matrix4x4.MULTIPLICATION(mtxResult, _mtx);
+            if (_mtxInverse)
+                return Matrix4x4.MULTIPLICATION(_mtxInverse, _mtx);
+            let mtxInverse = Matrix4x4.INVERSION(_mtxBase);
+            let mtxResult = Matrix4x4.MULTIPLICATION(mtxInverse, _mtx);
+            FudgeCore.Recycler.store(mtxInverse);
             return mtxResult;
         }
         static PROJECTION_CENTRAL(_aspect, _fieldOfViewInDegrees, _near, _far, _direction) {
@@ -4788,20 +5179,23 @@ var FudgeCore;
         }
         set translation(_translation) {
             this.data.set(_translation.get(), 12);
-            this.vectors.translation = _translation.copy;
+            if (this.vectors.translation)
+                this.vectors.translation.set(_translation.x, _translation.y, _translation.z);
+            else
+                this.vectors.translation = _translation.clone;
             this.mutator = null;
         }
         get translation() {
             if (!this.vectors.translation) {
-                this.vectors.translation = FudgeCore.Recycler.get(FudgeCore.Vector3);
+                this.vectors.translation = this.#vectors.translation;
                 this.vectors.translation.set(this.data[12], this.data[13], this.data[14]);
             }
-            return this.vectors.translation.copy;
+            return this.vectors.translation;
         }
         get rotation() {
             if (!this.vectors.rotation)
-                this.vectors.rotation = this.getEulerAngles();
-            return this.vectors.rotation.copy;
+                this.vectors.rotation = this.getEulerAngles().clone;
+            return this.vectors.rotation;
         }
         set rotation(_rotation) {
             this.mutate({ "rotation": _rotation });
@@ -4809,19 +5203,28 @@ var FudgeCore;
         }
         get scaling() {
             if (!this.vectors.scaling) {
-                this.vectors.scaling = FudgeCore.Recycler.get(FudgeCore.Vector3);
+                this.vectors.scaling = this.#vectors.scaling;
                 this.vectors.scaling.set(Math.hypot(this.data[0], this.data[1], this.data[2]), Math.hypot(this.data[4], this.data[5], this.data[6]), Math.hypot(this.data[8], this.data[9], this.data[10]));
             }
-            return this.vectors.scaling.copy;
+            return this.vectors.scaling;
         }
         set scaling(_scaling) {
             this.mutate({ "scaling": _scaling });
             this.resetCache();
         }
-        get copy() {
-            let mtxCopy = FudgeCore.Recycler.get(Matrix4x4);
-            mtxCopy.set(this);
-            return mtxCopy;
+        get clone() {
+            let mtxClone = FudgeCore.Recycler.get(Matrix4x4);
+            mtxClone.set(this);
+            return mtxClone;
+        }
+        recycle() {
+            this.data.set([
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            ]);
+            this.resetCache();
         }
         rotate(_by, _fromLeft = false) {
             let mtxRotation = Matrix4x4.ROTATION(_by);
@@ -4925,19 +5328,22 @@ var FudgeCore;
             FudgeCore.Recycler.store(mtxResult);
         }
         scaleX(_by) {
-            let vector = FudgeCore.Recycler.borrow(FudgeCore.Vector3);
+            let vector = FudgeCore.Recycler.get(FudgeCore.Vector3);
             vector.set(_by, 1, 1);
             this.scale(vector);
+            FudgeCore.Recycler.store(vector);
         }
         scaleY(_by) {
-            let vector = FudgeCore.Recycler.borrow(FudgeCore.Vector3);
+            let vector = FudgeCore.Recycler.get(FudgeCore.Vector3);
             vector.set(1, _by, 1);
             this.scale(vector);
+            FudgeCore.Recycler.store(vector);
         }
         scaleZ(_by) {
-            let vector = FudgeCore.Recycler.borrow(FudgeCore.Vector3);
+            let vector = FudgeCore.Recycler.get(FudgeCore.Vector3);
             vector.set(1, 1, _by);
             this.scale(vector);
+            FudgeCore.Recycler.store(vector);
         }
         multiply(_matrix, _fromLeft = false) {
             const mtxResult = _fromLeft ? Matrix4x4.MULTIPLICATION(_matrix, this) : Matrix4x4.MULTIPLICATION(this, _matrix);
@@ -4973,10 +5379,9 @@ var FudgeCore;
                 y1 = Math.atan2(-this.data[2] / scaling.x, sy);
                 z1 = 0;
             }
-            let rotation = FudgeCore.Recycler.get(FudgeCore.Vector3);
-            rotation.set(x1, y1, z1);
-            rotation.scale(180 / Math.PI);
-            return rotation;
+            this.#eulerAngles.set(x1, y1, z1);
+            this.#eulerAngles.scale(180 / Math.PI);
+            return this.#eulerAngles;
         }
         set(_mtxTo) {
             if (_mtxTo instanceof Float32Array)
@@ -5066,15 +5471,15 @@ var FudgeCore;
             let newScaling = _mutator["scaling"];
             let vectors = { translation: oldTranslation, rotation: oldRotation, scaling: oldScaling };
             if (newTranslation) {
-                vectors.translation = FudgeCore.Recycler.get(FudgeCore.Vector3);
+                vectors.translation = vectors.translation || this.#vectors.translation;
                 vectors.translation.set(newTranslation.x != undefined ? newTranslation.x : oldTranslation.x, newTranslation.y != undefined ? newTranslation.y : oldTranslation.y, newTranslation.z != undefined ? newTranslation.z : oldTranslation.z);
             }
             if (newRotation) {
-                vectors.rotation = FudgeCore.Recycler.get(FudgeCore.Vector3);
+                vectors.rotation = vectors.rotation || this.#vectors.rotation;
                 vectors.rotation.set(newRotation.x != undefined ? newRotation.x : oldRotation.x, newRotation.y != undefined ? newRotation.y : oldRotation.y, newRotation.z != undefined ? newRotation.z : oldRotation.z);
             }
             if (newScaling) {
-                vectors.scaling = FudgeCore.Recycler.get(FudgeCore.Vector3);
+                vectors.scaling = vectors.scaling || this.#vectors.scaling;
                 vectors.scaling.set(newScaling.x != undefined ? newScaling.x : oldScaling.x, newScaling.y != undefined ? newScaling.y : oldScaling.y, newScaling.z != undefined ? newScaling.z : oldScaling.z);
             }
             let mtxResult = Matrix4x4.IDENTITY();
@@ -5575,10 +5980,10 @@ var FudgeCore;
         get magnitudeSquared() {
             return Vector3.DOT(this, this);
         }
-        get copy() {
-            let copy = FudgeCore.Recycler.get(Vector3);
-            copy.data.set(this.data);
-            return copy;
+        get clone() {
+            let clone = FudgeCore.Recycler.get(Vector3);
+            clone.data.set(this.data);
+            return clone;
         }
         set geo(_geo) {
             this.set(0, 0, _geo.magnitude);
@@ -5593,6 +5998,9 @@ var FudgeCore;
             geo.longitude = 180 * Math.atan2(this.x / geo.magnitude, this.z / geo.magnitude) / Math.PI;
             geo.latitude = 180 * Math.asin(this.y / geo.magnitude) / Math.PI;
             return geo;
+        }
+        recycle() {
+            this.data.set([0, 0, 0]);
         }
         equals(_compare, _tolerance = Number.EPSILON) {
             if (Math.abs(this.x - _compare.x) > _tolerance)
@@ -5640,7 +6048,9 @@ var FudgeCore;
             return new Float32Array(this.data);
         }
         transform(_mtxTransform, _includeTranslation = true) {
-            this.data = Vector3.TRANSFORMATION(this, _mtxTransform, _includeTranslation).data;
+            let transformed = Vector3.TRANSFORMATION(this, _mtxTransform, _includeTranslation);
+            this.data.set(transformed.data);
+            FudgeCore.Recycler.store(transformed);
         }
         toVector2() {
             return new FudgeCore.Vector2(this.x, this.y);
@@ -5653,6 +6063,11 @@ var FudgeCore;
         shuffle() {
             let a = Array.from(this.data);
             this.set(FudgeCore.Random.default.splice(a), FudgeCore.Random.default.splice(a), a[0]);
+        }
+        getDistance(_to) {
+            let difference = Vector3.DIFFERENCE(this, _to);
+            FudgeCore.Recycler.store(difference);
+            return difference.magnitude;
         }
         min(_compare) {
             this.x = Math.min(this.x, _compare.x);
@@ -5938,7 +6353,7 @@ var FudgeCore;
             return 3;
         }
         create(_shape = [], _fitTexture = true) {
-            this.shape = FudgeCore.MutableArray.from(_shape.map(_vertex => _vertex.copy));
+            this.shape = FudgeCore.MutableArray.from(_shape.map(_vertex => _vertex.clone));
             this.clear();
             this.fitTexture = _fitTexture;
             if (_shape.length < this.minVertices) {
@@ -6053,14 +6468,14 @@ var FudgeCore;
             vertices.push(...base);
             let lid = polygon.map((_v) => FudgeCore.Vector3.TRANSFORMATION(_v, _mtxTransforms[nTransforms - 1], true));
             vertices.push(...lid);
-            polygon.push(polygon[0].copy);
+            polygon.push(polygon[0].clone);
             let wrap;
             for (let i = 0; i < nTransforms; i++) {
                 let mtxTransform = _mtxTransforms[i];
                 wrap = polygon.map((_v) => FudgeCore.Vector3.TRANSFORMATION(_v, mtxTransform, true));
                 vertices.push(...wrap);
                 if (i > 0 && i < nTransforms - 1)
-                    vertices.push(...wrap.map((_vector) => _vector.copy));
+                    vertices.push(...wrap.map((_vector) => _vector.clone));
             }
             let indices = [];
             indices.push(...this.indices);
@@ -6144,7 +6559,7 @@ var FudgeCore;
             this.parseObj(objString);
             this.splitVertices();
         }
-        static LOAD(src, name = "ObjNode", material = new FudgeCore.Material("MaterialRed", FudgeCore.ShaderFlat, new FudgeCore.CoatColored(new FudgeCore.Color(0.8, 0.8, 0.8, 1)))) {
+        static LOAD(src, name = "ObjNode", material = new FudgeCore.Material("MaterialRed", FudgeCore.ShaderFlat)) {
             let xmlhttp = new XMLHttpRequest();
             let fileContent = "";
             let nodeObj = new FudgeCore.Node(name);
@@ -6198,7 +6613,6 @@ var FudgeCore;
         }
         createVertices() {
             return new Float32Array(this.verts);
-            ;
         }
         createTextureUVs() {
             return new Float32Array(this.uvs);
@@ -6285,11 +6699,11 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
-    class PositionOnTerrain {
+    class TerrainInfo {
         position;
         normal;
     }
-    FudgeCore.PositionOnTerrain = PositionOnTerrain;
+    FudgeCore.TerrainInfo = TerrainInfo;
     class MeshTerrain extends FudgeCore.Mesh {
         static iSubclass = FudgeCore.Mesh.registerSubclass(MeshTerrain);
         resolution;
@@ -6303,8 +6717,8 @@ var FudgeCore;
         create(_resolution = FudgeCore.Vector2.ONE(2), _scaleInput = FudgeCore.Vector2.ONE(), _functionOrSeed = 0) {
             this.clear();
             this.seed = undefined;
-            this.resolution = _resolution.copy;
-            this.scale = _scaleInput.copy;
+            this.resolution = _resolution.clone;
+            this.scale = _scaleInput.clone;
             if (_functionOrSeed instanceof Function)
                 this.heightMapFunction = _functionOrSeed;
             else if (typeof (_functionOrSeed) == "number") {
@@ -6315,12 +6729,12 @@ var FudgeCore;
             else
                 this.heightMapFunction = new FudgeCore.Noise2().sample;
         }
-        getPositionOnTerrain(position, mtxWorld) {
+        getTerrainInfo(position, mtxWorld) {
             let relPosObject = position;
             if (mtxWorld)
                 relPosObject = FudgeCore.Vector3.TRANSFORMATION(position, FudgeCore.Matrix4x4.INVERSION(mtxWorld), true);
             let nearestFace = this.findNearestFace(relPosObject);
-            let posOnTerrain = new PositionOnTerrain;
+            let posOnTerrain = new TerrainInfo;
             let origin = new FudgeCore.Vector3(relPosObject.x, this.calculateHeight(nearestFace, relPosObject), relPosObject.z);
             let direction = nearestFace.faceNormal;
             if (mtxWorld) {
@@ -6588,7 +7002,7 @@ var FudgeCore;
             let nVerticesPolygon = polygon.length;
             let vertices = [];
             for (let sector = 0; sector <= this.sectors; sector++) {
-                vertices.push(...polygon.map((_vector) => _vector.copy));
+                vertices.push(...polygon.map((_vector) => _vector.clone));
                 polygon.forEach((_vector) => _vector.transform(mtxRotate));
             }
             let indices = [];
@@ -6821,1526 +7235,12 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
-    class ComponentJoint extends FudgeCore.Component {
-        static iSubclass = FudgeCore.Component.registerSubclass(ComponentJoint);
-        singleton = false;
-        get attachedRigidbody() {
-            return this.attachedRB;
-        }
-        set attachedRigidbody(_cmpRB) {
-            this.idAttachedRB = _cmpRB != null ? _cmpRB.id : 0;
-            this.attachedRB = _cmpRB;
-            this.disconnect();
-            this.dirtyStatus();
-        }
-        get connectedRigidbody() {
-            return this.connectedRB;
-        }
-        set connectedRigidbody(_cmpRB) {
-            this.idConnectedRB = _cmpRB != null ? _cmpRB.id : 0;
-            this.connectedRB = _cmpRB;
-            this.disconnect();
-            this.dirtyStatus();
-        }
-        get selfCollision() {
-            return this.collisionBetweenConnectedBodies;
-        }
-        set selfCollision(_value) {
-            this.collisionBetweenConnectedBodies = _value;
-        }
-        idAttachedRB = 0;
-        idConnectedRB = 0;
-        attachedRB;
-        connectedRB;
-        connected = false;
-        collisionBetweenConnectedBodies;
-        constructor(_attachedRigidbody = null, _connectedRigidbody = null) {
-            super();
-            this.attachedRigidbody = _attachedRigidbody;
-            this.connectedRigidbody = _connectedRigidbody;
-        }
-        checkConnection() {
-            return this.connected;
-        }
-        addConstraintToWorld(cmpJoint) {
-            FudgeCore.Physics.world.addJoint(cmpJoint);
-        }
-        removeConstraintFromWorld(cmpJoint) {
-            FudgeCore.Physics.world.removeJoint(cmpJoint);
-        }
-        setBodiesFromLoadedIDs() {
-            FudgeCore.Debug.log("Set From: " + this.idAttachedRB + " / " + this.idConnectedRB);
-            this.attachedRigidbody = FudgeCore.Physics.world.getBodyByID(this.idAttachedRB);
-            this.connectedRigidbody = FudgeCore.Physics.world.getBodyByID(this.idConnectedRB);
-        }
-        async baseDeserialize(_serialization) {
-            await super.deserialize(_serialization[super.constructor.name]);
-            return this;
-        }
-        baseSerialize() {
-            let serialization;
-            serialization = super.serialize();
-            return serialization;
-        }
-    }
-    FudgeCore.ComponentJoint = ComponentJoint;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    class ComponentJointCylindrical extends FudgeCore.ComponentJoint {
-        static iSubclass = FudgeCore.Component.registerSubclass(ComponentJointCylindrical);
-        jointSpringDampingRatio = 0;
-        jointSpringFrequency = 0;
-        jointRotationSpringDampingRatio = 0;
-        jointRotationSpringFrequency = 0;
-        jointMotorLimitUpper = 10;
-        jointMotorLimitLower = -10;
-        jointMotorForce = 0;
-        jointMotorSpeed = 0;
-        jointRotationMotorLimitUpper = 360;
-        jointRotationMotorLimitLower = 0;
-        jointRotationMotorTorque = 0;
-        jointRotationMotorSpeed = 0;
-        jointBreakForce = 0;
-        jointBreakTorque = 0;
-        config = new OIMO.CylindricalJointConfig();
-        rotationalMotor;
-        translationMotor;
-        springDamper;
-        rotationSpringDamper;
-        jointAnchor;
-        jointAxis;
-        jointInternalCollision;
-        oimoJoint;
-        constructor(_attachedRigidbody = null, _connectedRigidbody = null, _axis = new FudgeCore.Vector3(0, 1, 0), _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
-            super(_attachedRigidbody, _connectedRigidbody);
-            this.jointAxis = new OIMO.Vec3(_axis.x, _axis.y, _axis.z);
-            this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
-            this.addEventListener("componentAdd", this.dirtyStatus);
-            this.addEventListener("componentRemove", this.superRemove);
-        }
-        get axis() {
-            return new FudgeCore.Vector3(this.jointAxis.x, this.jointAxis.y, this.jointAxis.z);
-        }
-        set axis(_value) {
-            this.jointAxis = new OIMO.Vec3(_value.x, _value.y, _value.z);
-            this.disconnect();
-            this.dirtyStatus();
-        }
-        get anchor() {
-            return new FudgeCore.Vector3(this.jointAnchor.x, this.jointAnchor.y, this.jointAnchor.z);
-        }
-        set anchor(_value) {
-            this.jointAnchor = new OIMO.Vec3(_value.x, _value.y, _value.z);
-            this.disconnect();
-            this.dirtyStatus();
-        }
-        get springDamping() {
-            return this.jointSpringDampingRatio;
-        }
-        set springDamping(_value) {
-            this.jointSpringDampingRatio = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getTranslationalSpringDamper().dampingRatio = this.jointSpringDampingRatio;
-        }
-        get springFrequency() {
-            return this.jointSpringFrequency;
-        }
-        set springFrequency(_value) {
-            this.jointSpringFrequency = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getTranslationalSpringDamper().frequency = this.jointSpringFrequency;
-        }
-        get rotationSpringDamping() {
-            return this.jointRotationSpringDampingRatio;
-        }
-        set rotationSpringDamping(_value) {
-            this.jointRotationSpringDampingRatio = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getRotationalSpringDamper().dampingRatio = this.jointRotationSpringDampingRatio;
-        }
-        get rotationSpringFrequency() {
-            return this.jointRotationSpringFrequency;
-        }
-        set rotationSpringFrequency(_value) {
-            this.jointRotationSpringFrequency = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getRotationalSpringDamper().frequency = this.jointRotationSpringFrequency;
-        }
-        get breakForce() {
-            return this.jointBreakForce;
-        }
-        set breakForce(_value) {
-            this.jointBreakForce = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.setBreakForce(this.jointBreakForce);
-        }
-        get breakTorque() {
-            return this.jointBreakTorque;
-        }
-        set breakTorque(_value) {
-            this.jointBreakTorque = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.setBreakTorque(this.jointBreakTorque);
-        }
-        get rotationalMotorLimitUpper() {
-            return this.jointRotationMotorLimitUpper * 180 / Math.PI;
-        }
-        set rotationalMotorLimitUpper(_value) {
-            this.jointRotationMotorLimitUpper = _value * Math.PI / 180;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getRotationalLimitMotor().upperLimit = this.jointRotationMotorLimitUpper;
-        }
-        get rotationalMotorLimitLower() {
-            return this.jointRotationMotorLimitLower * 180 / Math.PI;
-        }
-        set rotationalMotorLimitLower(_value) {
-            this.jointRotationMotorLimitLower = _value * Math.PI / 180;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getRotationalLimitMotor().lowerLimit = this.jointRotationMotorLimitLower;
-        }
-        get rotationalMotorSpeed() {
-            return this.jointRotationMotorSpeed;
-        }
-        set rotationalMotorSpeed(_value) {
-            this.jointRotationMotorSpeed = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getRotationalLimitMotor().motorSpeed = this.jointRotationMotorSpeed;
-        }
-        get rotationalMotorTorque() {
-            return this.jointRotationMotorTorque;
-        }
-        set rotationalMotorTorque(_value) {
-            this.jointRotationMotorTorque = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getRotationalLimitMotor().motorTorque = this.jointRotationMotorTorque;
-        }
-        get translationMotorLimitUpper() {
-            return this.jointMotorLimitUpper;
-        }
-        set translationMotorLimitUpper(_value) {
-            this.jointMotorLimitUpper = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getTranslationalLimitMotor().upperLimit = this.jointMotorLimitUpper;
-        }
-        get translationMotorLimitLower() {
-            return this.jointMotorLimitUpper;
-        }
-        set translationMotorLimitLower(_value) {
-            this.jointMotorLimitLower = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getTranslationalLimitMotor().lowerLimit = this.jointMotorLimitLower;
-        }
-        get translationMotorSpeed() {
-            return this.jointMotorSpeed;
-        }
-        set translationMotorSpeed(_value) {
-            this.jointMotorSpeed = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getTranslationalLimitMotor().motorSpeed = this.jointMotorSpeed;
-        }
-        get translationMotorForce() {
-            return this.jointMotorForce;
-        }
-        set translationMotorForce(_value) {
-            this.jointMotorForce = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getTranslationalLimitMotor().motorForce = this.jointMotorForce;
-        }
-        get internalCollision() {
-            return this.jointInternalCollision;
-        }
-        set internalCollision(_value) {
-            this.jointInternalCollision = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.setAllowCollision(this.jointInternalCollision);
-        }
-        connect() {
-            if (this.connected == false) {
-                this.constructJoint();
-                this.connected = true;
-                this.superAdd();
-            }
-        }
-        disconnect() {
-            if (this.connected == true) {
-                this.superRemove();
-                this.connected = false;
-            }
-        }
-        getOimoJoint() {
-            return this.oimoJoint;
-        }
-        serialize() {
-            let serialization = {
-                attID: super.idAttachedRB,
-                conID: super.idConnectedRB,
-                axis: this.axis,
-                anchor: this.anchor,
-                internalCollision: this.jointInternalCollision,
-                springDamping: this.jointSpringDampingRatio,
-                springFrequency: this.jointSpringFrequency,
-                breakForce: this.jointBreakForce,
-                breakTorque: this.jointBreakTorque,
-                motorLimitUpper: this.jointMotorLimitUpper,
-                motorLimitLower: this.jointMotorLimitLower,
-                motorSpeed: this.jointMotorSpeed,
-                motorForce: this.jointMotorForce,
-                springDampingRotation: this.jointRotationSpringDampingRatio,
-                springFrequencyRotation: this.jointRotationSpringFrequency,
-                upperLimitRotation: this.jointRotationMotorLimitUpper,
-                lowerLimitRotation: this.jointRotationMotorLimitLower,
-                motorSpeedRotation: this.jointRotationMotorSpeed,
-                motorTorque: this.jointRotationMotorTorque,
-                [super.constructor.name]: super.baseSerialize()
-            };
-            return serialization;
-        }
-        async deserialize(_serialization) {
-            super.idAttachedRB = _serialization.attID;
-            super.idConnectedRB = _serialization.conID;
-            if (_serialization.attID != null && _serialization.conID != null)
-                super.setBodiesFromLoadedIDs();
-            this.axis = _serialization.axis != null ? _serialization.axis : this.jointAxis;
-            this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
-            this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
-            this.springDamping = _serialization.springDamping != null ? _serialization.springDamping : this.jointSpringDampingRatio;
-            this.springFrequency = _serialization.springFrequency != null ? _serialization.springFrequency : this.jointSpringFrequency;
-            this.breakForce = _serialization.breakForce != null ? _serialization.breakForce : this.jointBreakForce;
-            this.breakTorque = _serialization.breakTorque != null ? _serialization.breakTorque : this.jointBreakTorque;
-            this.translationMotorLimitUpper = _serialization.upperLimitTranslation != null ? _serialization.upperLimitTranslation : this.jointMotorLimitUpper;
-            this.translationMotorLimitLower = _serialization.lowerLimitTranslation != null ? _serialization.lowerLimitTranslation : this.jointMotorLimitLower;
-            this.translationMotorSpeed = _serialization.motorSpeedTranslation != null ? _serialization.motorSpeedTranslation : this.jointMotorSpeed;
-            this.jointMotorForce = _serialization.motorForceTranslation != null ? _serialization.motorForceTranslation : this.jointMotorForce;
-            this.rotationSpringDamping = _serialization.springDampingRotation != null ? _serialization.springDampingRotation : this.jointRotationSpringDampingRatio;
-            this.rotationSpringFrequency = _serialization.springFrequencyRotation != null ? _serialization.springFrequencyRotation : this.jointRotationSpringFrequency;
-            this.rotationalMotorLimitUpper = _serialization.upperLimitRotation != null ? _serialization.upperLimitRotation : this.jointRotationMotorLimitUpper;
-            this.rotationalMotorLimitLower = _serialization.lowerLimitRotation != null ? _serialization.lowerLimitRotation : this.jointRotationMotorLimitLower;
-            this.rotationalMotorSpeed = _serialization.motorSpeedRotation != null ? _serialization.motorSpeedRotation : this.jointRotationMotorSpeed;
-            this.rotationalMotorTorque = _serialization.motorTorque != null ? _serialization.motorTorque : this.jointRotationMotorTorque;
-            super.baseDeserialize(_serialization);
-            return this;
-        }
-        dirtyStatus() {
-            FudgeCore.Physics.world.changeJointStatus(this);
-        }
-        constructJoint() {
-            this.springDamper = new OIMO.SpringDamper().setSpring(this.jointSpringFrequency, this.jointSpringDampingRatio);
-            this.rotationSpringDamper = new OIMO.SpringDamper().setSpring(this.jointRotationSpringFrequency, this.rotationSpringDamping);
-            this.translationMotor = new OIMO.TranslationalLimitMotor().setLimits(this.jointMotorLimitLower, this.jointMotorLimitUpper);
-            this.translationMotor.setMotor(this.jointMotorSpeed, this.jointMotorForce);
-            this.rotationalMotor = new OIMO.RotationalLimitMotor().setLimits(this.jointRotationMotorLimitLower, this.jointRotationMotorLimitUpper);
-            this.rotationalMotor.setMotor(this.jointRotationMotorSpeed, this.jointRotationMotorTorque);
-            this.config = new OIMO.CylindricalJointConfig();
-            let attachedRBPos = this.attachedRigidbody.node.mtxWorld.translation;
-            let worldAnchor = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
-            this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, this.jointAxis);
-            this.config.translationalSpringDamper = this.springDamper;
-            this.config.translationalLimitMotor = this.translationMotor;
-            this.config.rotationalLimitMotor = this.rotationalMotor;
-            this.config.rotationalSpringDamper = this.rotationSpringDamper;
-            var j = new OIMO.CylindricalJoint(this.config);
-            j.setBreakForce(this.breakForce);
-            j.setBreakTorque(this.breakTorque);
-            j.setAllowCollision(this.jointInternalCollision);
-            this.oimoJoint = j;
-        }
-        superAdd() {
-            this.addConstraintToWorld(this);
-        }
-        superRemove() {
-            this.removeConstraintFromWorld(this);
-        }
-    }
-    FudgeCore.ComponentJointCylindrical = ComponentJointCylindrical;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    class ComponentJointPrismatic extends FudgeCore.ComponentJoint {
-        static iSubclass = FudgeCore.Component.registerSubclass(ComponentJointPrismatic);
-        jointSpringDampingRatio = 0;
-        jointSpringFrequency = 0;
-        jointMotorLimitUpper = 10;
-        jointMotorLimitLower = -10;
-        jointMotorForce = 0;
-        jointMotorSpeed = 0;
-        jointBreakForce = 0;
-        jointBreakTorque = 0;
-        config = new OIMO.PrismaticJointConfig();
-        translationalMotor;
-        springDamper;
-        jointAnchor;
-        jointAxis;
-        jointInternalCollision;
-        oimoJoint;
-        constructor(_attachedRigidbody = null, _connectedRigidbody = null, _axis = new FudgeCore.Vector3(0, 1, 0), _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
-            super(_attachedRigidbody, _connectedRigidbody);
-            this.jointAxis = new OIMO.Vec3(_axis.x, _axis.y, _axis.z);
-            this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
-            this.addEventListener("componentAdd", this.dirtyStatus);
-            this.addEventListener("componentRemove", this.superRemove);
-        }
-        get axis() {
-            return new FudgeCore.Vector3(this.jointAxis.x, this.jointAxis.y, this.jointAxis.z);
-        }
-        set axis(_value) {
-            this.jointAxis = new OIMO.Vec3(_value.x, _value.y, _value.z);
-            this.disconnect();
-            this.dirtyStatus();
-        }
-        get anchor() {
-            return new FudgeCore.Vector3(this.jointAnchor.x, this.jointAnchor.y, this.jointAnchor.z);
-        }
-        set anchor(_value) {
-            this.jointAnchor = new OIMO.Vec3(_value.x, _value.y, _value.z);
-            this.disconnect();
-            this.dirtyStatus();
-        }
-        get springDamping() {
-            return this.jointSpringDampingRatio;
-        }
-        set springDamping(_value) {
-            this.jointSpringDampingRatio = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getSpringDamper().dampingRatio = this.jointSpringDampingRatio;
-        }
-        get springFrequency() {
-            return this.jointSpringFrequency;
-        }
-        set springFrequency(_value) {
-            this.jointSpringFrequency = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getSpringDamper().frequency = this.jointSpringFrequency;
-        }
-        get breakForce() {
-            return this.jointBreakForce;
-        }
-        set breakForce(_value) {
-            this.jointBreakForce = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.setBreakForce(this.jointBreakForce);
-        }
-        get breakTorque() {
-            return this.jointBreakTorque;
-        }
-        set breakTorque(_value) {
-            this.jointBreakTorque = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.setBreakTorque(this.jointBreakTorque);
-        }
-        get motorLimitUpper() {
-            return this.jointMotorLimitUpper;
-        }
-        set motorLimitUpper(_value) {
-            this.jointMotorLimitUpper = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getLimitMotor().upperLimit = this.jointMotorLimitUpper;
-        }
-        get motorLimitLower() {
-            return this.jointMotorLimitLower;
-        }
-        set motorLimitLower(_value) {
-            this.jointMotorLimitLower = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getLimitMotor().lowerLimit = this.jointMotorLimitLower;
-        }
-        get motorSpeed() {
-            return this.jointMotorSpeed;
-        }
-        set motorSpeed(_value) {
-            this.jointMotorSpeed = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getLimitMotor().motorSpeed = this.jointMotorSpeed;
-        }
-        get motorForce() {
-            return this.jointMotorForce;
-        }
-        set motorForce(_value) {
-            this.jointMotorForce = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getLimitMotor().motorForce = this.jointMotorForce;
-        }
-        get internalCollision() {
-            return this.jointInternalCollision;
-        }
-        set internalCollision(_value) {
-            this.jointInternalCollision = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.setAllowCollision(this.jointInternalCollision);
-        }
-        connect() {
-            if (this.connected == false) {
-                this.constructJoint();
-                this.connected = true;
-                this.superAdd();
-                FudgeCore.Debug.log("called Connection For: " + this.attachedRB.node.name + " / " + this.connectedRB.node.name);
-                FudgeCore.Debug.log("Strength: " + this.springDamping + " / " + this.springFrequency);
-                FudgeCore.Debug.log(this.oimoJoint);
-            }
-        }
-        disconnect() {
-            if (this.connected == true) {
-                this.superRemove();
-                this.connected = false;
-            }
-        }
-        getOimoJoint() {
-            return this.oimoJoint;
-        }
-        serialize() {
-            let serialization = {
-                attID: super.idAttachedRB,
-                conID: super.idConnectedRB,
-                axis: this.axis,
-                anchor: this.anchor,
-                internalCollision: this.jointInternalCollision,
-                springDamping: this.jointSpringDampingRatio,
-                springFrequency: this.jointSpringFrequency,
-                breakForce: this.jointBreakForce,
-                breakTorque: this.jointBreakTorque,
-                motorLimitUpper: this.jointMotorLimitUpper,
-                motorLimitLower: this.jointMotorLimitLower,
-                motorSpeed: this.jointMotorSpeed,
-                motorForce: this.jointMotorForce,
-                [super.constructor.name]: super.baseSerialize()
-            };
-            return serialization;
-        }
-        async deserialize(_serialization) {
-            super.idAttachedRB = _serialization.attID;
-            super.idConnectedRB = _serialization.conID;
-            if (_serialization.attID != null && _serialization.conID != null)
-                super.setBodiesFromLoadedIDs();
-            this.axis = _serialization.axis != null ? _serialization.axis : this.jointAxis;
-            this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
-            this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
-            this.springDamping = _serialization.springDamping != null ? _serialization.springDamping : this.jointSpringDampingRatio;
-            this.springFrequency = _serialization.springFrequency != null ? _serialization.springFrequency : this.jointSpringFrequency;
-            this.breakForce = _serialization.breakForce != null ? _serialization.breakForce : this.jointBreakForce;
-            this.breakTorque = _serialization.breakTorque != null ? _serialization.breakTorque : this.jointBreakTorque;
-            this.motorLimitUpper = _serialization.motorLimitUpper != null ? _serialization.motorLimitUpper : this.jointMotorLimitUpper;
-            this.motorLimitLower = _serialization.motorLimitLower != null ? _serialization.motorLimitLower : this.jointMotorLimitLower;
-            this.motorSpeed = _serialization.motorSpeed != null ? _serialization.motorSpeed : this.jointMotorSpeed;
-            this.motorForce = _serialization.motorForce != null ? _serialization.motorForce : this.jointMotorForce;
-            super.baseDeserialize(_serialization);
-            return this;
-        }
-        dirtyStatus() {
-            FudgeCore.Debug.log("Dirty Status");
-            FudgeCore.Physics.world.changeJointStatus(this);
-        }
-        constructJoint() {
-            this.springDamper = new OIMO.SpringDamper().setSpring(this.jointSpringFrequency, this.jointSpringDampingRatio);
-            this.translationalMotor = new OIMO.TranslationalLimitMotor().setLimits(this.jointMotorLimitLower, this.jointMotorLimitUpper);
-            this.translationalMotor.setMotor(this.jointMotorSpeed, this.jointMotorForce);
-            this.config = new OIMO.PrismaticJointConfig();
-            let attachedRBPos = this.attachedRigidbody.node.mtxWorld.translation;
-            let worldAnchor = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
-            this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, this.jointAxis);
-            this.config.springDamper = this.springDamper;
-            this.config.limitMotor = this.translationalMotor;
-            var j = new OIMO.PrismaticJoint(this.config);
-            j.setBreakForce(this.breakForce);
-            j.setBreakTorque(this.breakTorque);
-            j.setAllowCollision(this.jointInternalCollision);
-            this.oimoJoint = j;
-        }
-        superAdd() {
-            this.addConstraintToWorld(this);
-        }
-        superRemove() {
-            this.removeConstraintFromWorld(this);
-        }
-    }
-    FudgeCore.ComponentJointPrismatic = ComponentJointPrismatic;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    class ComponentJointRagdoll extends FudgeCore.ComponentJoint {
-        static iSubclass = FudgeCore.Component.registerSubclass(ComponentJointRagdoll);
-        jointTwistSpringDampingRatio = 0;
-        jointTwistSpringFrequency = 0;
-        jointSwingSpringDampingRatio = 0;
-        jointSwingSpringFrequency = 0;
-        jointTwistMotorLimitUpper = 360;
-        jointTwistMotorLimitLower = 0;
-        jointTwistMotorTorque = 0;
-        jointTwistMotorSpeed = 0;
-        jointBreakForce = 0;
-        jointBreakTorque = 0;
-        config = new OIMO.RagdollJointConfig();
-        jointTwistMotor;
-        jointTwistSpringDamper;
-        jointSwingSpringDamper;
-        jointAnchor;
-        jointFirstAxis;
-        jointSecondAxis;
-        jointInternalCollision;
-        jointMaxAngle1;
-        jointMaxAngle2;
-        oimoJoint;
-        constructor(_attachedRigidbody = null, _connectedRigidbody = null, _firstAxis = new FudgeCore.Vector3(1, 0, 0), _secondAxis = new FudgeCore.Vector3(0, 0, 1), _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
-            super(_attachedRigidbody, _connectedRigidbody);
-            this.jointFirstAxis = new OIMO.Vec3(_firstAxis.x, _firstAxis.y, _firstAxis.z);
-            this.jointSecondAxis = new OIMO.Vec3(_secondAxis.x, _secondAxis.y, _secondAxis.z);
-            this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
-            this.addEventListener("componentAdd", this.dirtyStatus);
-            this.addEventListener("componentRemove", this.superRemove);
-        }
-        get firstAxis() {
-            return new FudgeCore.Vector3(this.jointFirstAxis.x, this.jointFirstAxis.y, this.jointFirstAxis.z);
-        }
-        set firstAxis(_value) {
-            this.jointFirstAxis = new OIMO.Vec3(_value.x, _value.y, _value.z);
-            this.disconnect();
-            this.dirtyStatus();
-        }
-        get secondAxis() {
-            return new FudgeCore.Vector3(this.jointSecondAxis.x, this.jointSecondAxis.y, this.jointSecondAxis.z);
-        }
-        set secondAxis(_value) {
-            this.jointSecondAxis = new OIMO.Vec3(_value.x, _value.y, _value.z);
-            this.disconnect();
-            this.dirtyStatus();
-        }
-        get anchor() {
-            return new FudgeCore.Vector3(this.jointAnchor.x, this.jointAnchor.y, this.jointAnchor.z);
-        }
-        set anchor(_value) {
-            this.jointAnchor = new OIMO.Vec3(_value.x, _value.y, _value.z);
-            this.disconnect();
-            this.dirtyStatus();
-        }
-        get maxAngleFirstAxis() {
-            return this.jointMaxAngle1 * 180 / Math.PI;
-        }
-        set maxAngleFirstAxis(_value) {
-            this.jointMaxAngle1 = _value * Math.PI / 180;
-            this.disconnect();
-            this.dirtyStatus();
-        }
-        get maxAngleSecondAxis() {
-            return this.jointMaxAngle2 * 180 / Math.PI;
-        }
-        set maxAngleSecondAxis(_value) {
-            this.jointMaxAngle2 = _value * Math.PI / 180;
-            this.disconnect();
-            this.dirtyStatus();
-        }
-        get springDampingTwist() {
-            return this.jointTwistSpringDampingRatio;
-        }
-        set springDampingTwist(_value) {
-            this.jointTwistSpringDampingRatio = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getTwistSpringDamper().dampingRatio = this.jointTwistSpringDampingRatio;
-        }
-        get springFrequencyTwist() {
-            return this.jointTwistSpringFrequency;
-        }
-        set springFrequencyTwist(_value) {
-            this.jointTwistSpringFrequency = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getTwistSpringDamper().frequency = this.jointTwistSpringFrequency;
-        }
-        get springDampingSwing() {
-            return this.jointSwingSpringDampingRatio;
-        }
-        set springDampingSwing(_value) {
-            this.jointSwingSpringDampingRatio = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getSwingSpringDamper().dampingRatio = this.jointSwingSpringDampingRatio;
-        }
-        get springFrequencySwing() {
-            return this.jointSwingSpringFrequency;
-        }
-        set springFrequencySwing(_value) {
-            this.jointSwingSpringFrequency = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getSwingSpringDamper().frequency = this.jointSwingSpringFrequency;
-        }
-        get breakForce() {
-            return this.jointBreakForce;
-        }
-        set breakForce(_value) {
-            this.jointBreakForce = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.setBreakForce(this.jointBreakForce);
-        }
-        get breakTorque() {
-            return this.jointBreakTorque;
-        }
-        set breakTorque(_value) {
-            this.jointBreakTorque = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.setBreakTorque(this.jointBreakTorque);
-        }
-        get twistMotorLimitUpper() {
-            return this.jointTwistMotorLimitUpper * 180 / Math.PI;
-        }
-        set twistMotorLimitUpper(_value) {
-            this.jointTwistMotorLimitUpper = _value * Math.PI / 180;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getTwistLimitMotor().upperLimit = this.jointTwistMotorLimitUpper;
-        }
-        get twistMotorLimitLower() {
-            return this.jointTwistMotorLimitLower * 180 / Math.PI;
-        }
-        set twistMotorLimitLower(_value) {
-            this.jointTwistMotorLimitLower = _value * Math.PI / 180;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getTwistLimitMotor().lowerLimit = this.jointTwistMotorLimitLower;
-        }
-        get twistMotorSpeed() {
-            return this.jointTwistMotorSpeed;
-        }
-        set twistMotorSpeed(_value) {
-            this.jointTwistMotorSpeed = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getTwistLimitMotor().motorSpeed = this.jointTwistMotorSpeed;
-        }
-        get twistMotorTorque() {
-            return this.twistMotorTorque;
-        }
-        set twistMotorTorque(_value) {
-            this.twistMotorTorque = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getTwistLimitMotor().motorTorque = this.twistMotorTorque;
-        }
-        get internalCollision() {
-            return this.jointInternalCollision;
-        }
-        set internalCollision(_value) {
-            this.jointInternalCollision = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.setAllowCollision(this.jointInternalCollision);
-        }
-        connect() {
-            if (this.connected == false) {
-                this.constructJoint();
-                this.connected = true;
-                this.superAdd();
-            }
-        }
-        disconnect() {
-            if (this.connected == true) {
-                this.superRemove();
-                this.connected = false;
-            }
-        }
-        getOimoJoint() {
-            return this.oimoJoint;
-        }
-        serialize() {
-            let serialization = {
-                attID: super.idAttachedRB,
-                conID: super.idConnectedRB,
-                anchor: this.anchor,
-                internalCollision: this.jointInternalCollision,
-                breakForce: this.jointBreakForce,
-                breakTorque: this.jointBreakTorque,
-                firstAxis: this.jointFirstAxis,
-                secondAxis: this.jointSecondAxis,
-                maxAngleFirstAxis: this.jointMaxAngle1,
-                maxAngleSecondAxis: this.jointMaxAngle2,
-                springDampingTwist: this.jointTwistSpringDampingRatio,
-                springFrequencyTwist: this.jointTwistSpringFrequency,
-                springDampingSwing: this.jointSwingSpringDampingRatio,
-                springFrequencySwing: this.jointSwingSpringFrequency,
-                twistMotorLimitUpper: this.jointTwistMotorLimitUpper,
-                twistMotorLimitLower: this.jointTwistMotorLimitLower,
-                twistMotorSpeed: this.twistMotorSpeed,
-                twistMotorTorque: this.twistMotorTorque,
-                [super.constructor.name]: super.baseSerialize()
-            };
-            return serialization;
-        }
-        async deserialize(_serialization) {
-            super.idAttachedRB = _serialization.attID;
-            super.idConnectedRB = _serialization.conID;
-            if (_serialization.attID != null && _serialization.conID != null)
-                super.setBodiesFromLoadedIDs();
-            this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
-            this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
-            this.breakForce = _serialization.breakForce != null ? _serialization.breakForce : this.jointBreakForce;
-            this.breakTorque = _serialization.breakTorque != null ? _serialization.breakTorque : this.jointBreakTorque;
-            this.firstAxis = _serialization.firstAxis != null ? _serialization.firstAxis : this.jointFirstAxis;
-            this.secondAxis = _serialization.secondAxis != null ? _serialization.secondAxis : this.jointSecondAxis;
-            this.maxAngleFirstAxis = _serialization.maxAngleFirstAxis != null ? _serialization.maxAngleFirstAxis : this.jointMaxAngle1;
-            this.maxAngleSecondAxis = _serialization.maxAngleSecondAxis != null ? _serialization.maxAngleSecondAxis : this.jointMaxAngle2;
-            this.springDampingTwist = _serialization.springDampingTwist != null ? _serialization.springDampingTwist : this.jointTwistSpringDampingRatio;
-            this.springFrequencyTwist = _serialization.springFrequencyTwist != null ? _serialization.springFrequencyTwist : this.jointTwistSpringFrequency;
-            this.springDampingSwing = _serialization.springDampingSwing != null ? _serialization.springDampingSwing : this.jointSwingSpringDampingRatio;
-            this.springFrequencySwing = _serialization.springFrequencySwing != null ? _serialization.springFrequencySwing : this.jointSwingSpringFrequency;
-            this.twistMotorLimitUpper = _serialization.twistMotorLimitUpper != null ? _serialization.twistMotorLimitUpper : this.jointTwistMotorLimitUpper;
-            this.twistMotorLimitLower = _serialization.twistMotorLimitLower != null ? _serialization.twistMotorLimitLower : this.jointTwistMotorLimitLower;
-            this.twistMotorSpeed = _serialization.twistMotorSpeed != null ? _serialization.twistMotorSpeed : this.jointTwistMotorSpeed;
-            this.twistMotorTorque = _serialization.twistMotorTorque != null ? _serialization.twistMotorTorque : this.jointTwistMotorTorque;
-            super.baseDeserialize(_serialization);
-            return this;
-        }
-        dirtyStatus() {
-            FudgeCore.Physics.world.changeJointStatus(this);
-        }
-        constructJoint() {
-            this.jointTwistSpringDamper = new OIMO.SpringDamper().setSpring(this.jointTwistSpringFrequency, this.jointTwistSpringDampingRatio);
-            this.jointSwingSpringDamper = new OIMO.SpringDamper().setSpring(this.jointSwingSpringFrequency, this.jointSwingSpringDampingRatio);
-            this.jointTwistMotor = new OIMO.RotationalLimitMotor().setLimits(this.jointTwistMotorLimitLower, this.jointTwistMotorLimitUpper);
-            this.jointTwistMotor.setMotor(this.jointTwistMotorSpeed, this.jointTwistMotorTorque);
-            this.config = new OIMO.RagdollJointConfig();
-            let attachedRBPos = this.attachedRigidbody.node.mtxWorld.translation;
-            let worldAnchor = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
-            this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, this.jointFirstAxis, this.jointSecondAxis);
-            this.config.swingSpringDamper = this.jointSwingSpringDamper;
-            this.config.twistSpringDamper = this.jointTwistSpringDamper;
-            this.config.twistLimitMotor = this.jointTwistMotor;
-            this.config.maxSwingAngle1 = this.jointMaxAngle1;
-            this.config.maxSwingAngle2 = this.jointMaxAngle2;
-            var j = new OIMO.RagdollJoint(this.config);
-            j.setBreakForce(this.breakForce);
-            j.setBreakTorque(this.breakTorque);
-            j.setAllowCollision(this.jointInternalCollision);
-            this.oimoJoint = j;
-        }
-        superAdd() {
-            this.addConstraintToWorld(this);
-        }
-        superRemove() {
-            this.removeConstraintFromWorld(this);
-        }
-    }
-    FudgeCore.ComponentJointRagdoll = ComponentJointRagdoll;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    class ComponentJointRevolute extends FudgeCore.ComponentJoint {
-        static iSubclass = FudgeCore.Component.registerSubclass(ComponentJointRevolute);
-        jointSpringDampingRatio = 0;
-        jointSpringFrequency = 0;
-        jointMotorLimitUpper = 360;
-        jointMotorLimitLower = 0;
-        jointmotorTorque = 0;
-        jointMotorSpeed = 0;
-        jointBreakForce = 0;
-        jointBreakTorque = 0;
-        config = new OIMO.RevoluteJointConfig();
-        rotationalMotor;
-        springDamper;
-        jointAnchor;
-        jointAxis;
-        jointInternalCollision;
-        oimoJoint;
-        constructor(_attachedRigidbody = null, _connectedRigidbody = null, _axis = new FudgeCore.Vector3(0, 1, 0), _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
-            super(_attachedRigidbody, _connectedRigidbody);
-            this.jointAxis = new OIMO.Vec3(_axis.x, _axis.y, _axis.z);
-            this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
-            this.addEventListener("componentAdd", this.dirtyStatus);
-            this.addEventListener("componentRemove", this.superRemove);
-        }
-        get axis() {
-            return new FudgeCore.Vector3(this.jointAxis.x, this.jointAxis.y, this.jointAxis.z);
-        }
-        set axis(_value) {
-            this.jointAxis = new OIMO.Vec3(_value.x, _value.y, _value.z);
-            this.disconnect();
-            this.dirtyStatus();
-        }
-        get anchor() {
-            return new FudgeCore.Vector3(this.jointAnchor.x, this.jointAnchor.y, this.jointAnchor.z);
-        }
-        set anchor(_value) {
-            this.jointAnchor = new OIMO.Vec3(_value.x, _value.y, _value.z);
-            this.disconnect();
-            this.dirtyStatus();
-        }
-        get springDamping() {
-            return this.jointSpringDampingRatio;
-        }
-        set springDamping(_value) {
-            this.jointSpringDampingRatio = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getSpringDamper().dampingRatio = this.jointSpringDampingRatio;
-        }
-        get springFrequency() {
-            return this.jointSpringFrequency;
-        }
-        set springFrequency(_value) {
-            this.jointSpringFrequency = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getSpringDamper().frequency = this.jointSpringFrequency;
-        }
-        get breakForce() {
-            return this.jointBreakForce;
-        }
-        set breakForce(_value) {
-            this.jointBreakForce = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.setBreakForce(this.jointBreakForce);
-        }
-        get breakTorque() {
-            return this.jointBreakTorque;
-        }
-        set breakTorque(_value) {
-            this.jointBreakTorque = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.setBreakTorque(this.jointBreakTorque);
-        }
-        get motorLimitUpper() {
-            return this.jointMotorLimitUpper * 180 / Math.PI;
-        }
-        set motorLimitUpper(_value) {
-            this.jointMotorLimitUpper = _value * Math.PI / 180;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getLimitMotor().upperLimit = this.jointMotorLimitUpper;
-        }
-        get motorLimitLower() {
-            return this.jointMotorLimitLower * 180 / Math.PI;
-        }
-        set motorLimitLower(_value) {
-            this.jointMotorLimitLower = _value * Math.PI / 180;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getLimitMotor().lowerLimit = this.jointMotorLimitLower;
-        }
-        get motorSpeed() {
-            return this.jointMotorSpeed;
-        }
-        set motorSpeed(_value) {
-            this.jointMotorSpeed = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getLimitMotor().motorSpeed = this.jointMotorSpeed;
-        }
-        get motorTorque() {
-            return this.jointmotorTorque;
-        }
-        set motorTorque(_value) {
-            this.jointmotorTorque = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getLimitMotor().motorTorque = this.jointmotorTorque;
-        }
-        get internalCollision() {
-            return this.jointInternalCollision;
-        }
-        set internalCollision(_value) {
-            this.jointInternalCollision = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.setAllowCollision(this.jointInternalCollision);
-        }
-        connect() {
-            if (this.connected == false) {
-                this.constructJoint();
-                this.connected = true;
-                this.superAdd();
-            }
-        }
-        disconnect() {
-            if (this.connected == true) {
-                this.superRemove();
-                this.connected = false;
-            }
-        }
-        getOimoJoint() {
-            return this.oimoJoint;
-        }
-        serialize() {
-            let serialization = {
-                attID: super.idAttachedRB,
-                conID: super.idConnectedRB,
-                axis: this.axis,
-                anchor: this.anchor,
-                internalCollision: this.jointInternalCollision,
-                springDamping: this.jointSpringDampingRatio,
-                springFrequency: this.jointSpringFrequency,
-                breakForce: this.jointBreakForce,
-                breakTorque: this.jointBreakTorque,
-                motorLimitUpper: this.jointMotorLimitUpper,
-                motorLimitLower: this.jointMotorLimitLower,
-                motorSpeed: this.jointMotorSpeed,
-                motorTorque: this.jointmotorTorque,
-                [super.constructor.name]: super.baseSerialize()
-            };
-            return serialization;
-        }
-        async deserialize(_serialization) {
-            super.idAttachedRB = _serialization.attID;
-            super.idConnectedRB = _serialization.conID;
-            if (_serialization.attID != null && _serialization.conID != null)
-                super.setBodiesFromLoadedIDs();
-            this.axis = _serialization.axis != null ? _serialization.axis : this.jointAxis;
-            this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
-            this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
-            this.springDamping = _serialization.springDamping != null ? _serialization.springDamping : this.jointSpringDampingRatio;
-            this.springFrequency = _serialization.springFrequency != null ? _serialization.springFrequency : this.jointSpringFrequency;
-            this.breakForce = _serialization.breakForce != null ? _serialization.breakForce : this.jointBreakForce;
-            this.breakTorque = _serialization.breakTorque != null ? _serialization.breakTorque : this.jointBreakTorque;
-            this.motorLimitUpper = _serialization.upperLimit != null ? _serialization.upperLimit : this.jointMotorLimitUpper;
-            this.motorLimitLower = _serialization.lowerLimit != null ? _serialization.lowerLimit : this.jointMotorLimitLower;
-            this.motorSpeed = _serialization.motorSpeed != null ? _serialization.motorSpeed : this.jointMotorSpeed;
-            this.motorTorque = _serialization.motorForce != null ? _serialization.motorForce : this.jointmotorTorque;
-            super.baseDeserialize(_serialization);
-            return this;
-        }
-        dirtyStatus() {
-            FudgeCore.Physics.world.changeJointStatus(this);
-        }
-        constructJoint() {
-            this.springDamper = new OIMO.SpringDamper().setSpring(this.jointSpringFrequency, this.jointSpringDampingRatio);
-            this.rotationalMotor = new OIMO.RotationalLimitMotor().setLimits(this.jointMotorLimitLower, this.jointMotorLimitUpper);
-            this.rotationalMotor.setMotor(this.jointMotorSpeed, this.jointmotorTorque);
-            this.config = new OIMO.RevoluteJointConfig();
-            let attachedRBPos = this.attachedRigidbody.node.mtxWorld.translation;
-            let worldAnchor = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
-            this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, this.jointAxis);
-            this.config.springDamper = this.springDamper;
-            this.config.limitMotor = this.rotationalMotor;
-            var j = new OIMO.RevoluteJoint(this.config);
-            j.setBreakForce(this.breakForce);
-            j.setBreakTorque(this.breakTorque);
-            j.setAllowCollision(this.jointInternalCollision);
-            this.oimoJoint = j;
-        }
-        superAdd() {
-            this.addConstraintToWorld(this);
-        }
-        superRemove() {
-            this.removeConstraintFromWorld(this);
-        }
-    }
-    FudgeCore.ComponentJointRevolute = ComponentJointRevolute;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    class ComponentJointSpherical extends FudgeCore.ComponentJoint {
-        static iSubclass = FudgeCore.Component.registerSubclass(ComponentJointSpherical);
-        jointSpringDampingRatio = 0;
-        jointSpringFrequency = 0;
-        jointBreakForce = 0;
-        jointBreakTorque = 0;
-        config = new OIMO.SphericalJointConfig();
-        springDamper;
-        jointAnchor;
-        jointInternalCollision;
-        oimoJoint;
-        constructor(_attachedRigidbody = null, _connectedRigidbody = null, _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
-            super(_attachedRigidbody, _connectedRigidbody);
-            this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
-            this.addEventListener("componentAdd", this.dirtyStatus);
-            this.addEventListener("componentRemove", this.superRemove);
-        }
-        get anchor() {
-            return new FudgeCore.Vector3(this.jointAnchor.x, this.jointAnchor.y, this.jointAnchor.z);
-        }
-        set anchor(_value) {
-            this.jointAnchor = new OIMO.Vec3(_value.x, _value.y, _value.z);
-            this.disconnect();
-            this.dirtyStatus();
-        }
-        get springDamping() {
-            return this.jointSpringDampingRatio;
-        }
-        set springDamping(_value) {
-            this.jointSpringDampingRatio = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getSpringDamper().dampingRatio = this.jointSpringDampingRatio;
-        }
-        get springFrequency() {
-            return this.jointSpringFrequency;
-        }
-        set springFrequency(_value) {
-            this.jointSpringFrequency = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getSpringDamper().frequency = this.jointSpringFrequency;
-        }
-        get breakForce() {
-            return this.jointBreakForce;
-        }
-        set breakForce(_value) {
-            this.jointBreakForce = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.setBreakForce(this.jointBreakForce);
-        }
-        get breakTorque() {
-            return this.jointBreakTorque;
-        }
-        set breakTorque(_value) {
-            this.jointBreakTorque = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.setBreakTorque(this.jointBreakTorque);
-        }
-        get internalCollision() {
-            return this.jointInternalCollision;
-        }
-        set internalCollision(_value) {
-            this.jointInternalCollision = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.setAllowCollision(this.jointInternalCollision);
-        }
-        connect() {
-            if (this.connected == false) {
-                this.constructJoint();
-                this.connected = true;
-                this.superAdd();
-            }
-        }
-        disconnect() {
-            if (this.connected == true) {
-                this.superRemove();
-                this.connected = false;
-            }
-        }
-        getOimoJoint() {
-            return this.oimoJoint;
-        }
-        serialize() {
-            let serialization = {
-                attID: super.idAttachedRB,
-                conID: super.idConnectedRB,
-                anchor: this.anchor,
-                internalCollision: this.jointInternalCollision,
-                springDamping: this.jointSpringDampingRatio,
-                springFrequency: this.jointSpringFrequency,
-                breakForce: this.jointBreakForce,
-                breakTorque: this.jointBreakTorque,
-                [super.constructor.name]: super.baseSerialize()
-            };
-            return serialization;
-        }
-        async deserialize(_serialization) {
-            super.idAttachedRB = _serialization.attID;
-            super.idConnectedRB = _serialization.conID;
-            if (_serialization.attID != null && _serialization.conID != null)
-                super.setBodiesFromLoadedIDs();
-            this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
-            this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
-            this.springDamping = _serialization.springDamping != null ? _serialization.springDamping : this.jointSpringDampingRatio;
-            this.springFrequency = _serialization.springFrequency != null ? _serialization.springFrequency : this.jointSpringFrequency;
-            this.breakForce = _serialization.breakForce != null ? _serialization.breakForce : this.jointBreakForce;
-            this.breakTorque = _serialization.breakTorque != null ? _serialization.breakTorque : this.jointBreakTorque;
-            super.baseDeserialize(_serialization);
-            return this;
-        }
-        dirtyStatus() {
-            FudgeCore.Physics.world.changeJointStatus(this);
-        }
-        constructJoint() {
-            this.springDamper = new OIMO.SpringDamper().setSpring(this.jointSpringFrequency, this.jointSpringDampingRatio);
-            this.config = new OIMO.SphericalJointConfig();
-            let attachedRBPos = this.attachedRigidbody.node.mtxWorld.translation;
-            let worldAnchor = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
-            this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor);
-            this.config.springDamper = this.springDamper;
-            var j = new OIMO.SphericalJoint(this.config);
-            j.setBreakForce(this.breakForce);
-            j.setBreakTorque(this.breakTorque);
-            j.setAllowCollision(this.jointInternalCollision);
-            this.oimoJoint = j;
-        }
-        superAdd() {
-            this.addConstraintToWorld(this);
-        }
-        superRemove() {
-            this.removeConstraintFromWorld(this);
-        }
-    }
-    FudgeCore.ComponentJointSpherical = ComponentJointSpherical;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    class ComponentJointUniversal extends FudgeCore.ComponentJoint {
-        static iSubclass = FudgeCore.Component.registerSubclass(ComponentJointUniversal);
-        jointFirstSpringDampingRatio = 0;
-        jointFirstSpringFrequency = 0;
-        jointSecondSpringDampingRatio = 0;
-        jointSecondSpringFrequency = 0;
-        jointFirstMotorLimitUpper = 360;
-        jointFirstMotorLimitLower = 0;
-        jointFirstMotorTorque = 0;
-        jointFirstMotorSpeed = 0;
-        jointSecondMotorLimitUpper = 360;
-        jointSecondMotorLimitLower = 0;
-        jointSecondMotorTorque = 0;
-        jointSecondMotorSpeed = 0;
-        jointBreakForce = 0;
-        jointBreakTorque = 0;
-        config = new OIMO.UniversalJointConfig();
-        firstAxisMotor;
-        secondAxisMotor;
-        firstAxisSpringDamper;
-        secondAxisSpringDamper;
-        jointAnchor;
-        jointFirstAxis;
-        jointSecondAxis;
-        jointInternalCollision;
-        oimoJoint;
-        constructor(_attachedRigidbody = null, _connectedRigidbody = null, _firstAxis = new FudgeCore.Vector3(1, 0, 0), _secondAxis = new FudgeCore.Vector3(0, 0, 1), _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
-            super(_attachedRigidbody, _connectedRigidbody);
-            this.jointFirstAxis = new OIMO.Vec3(_firstAxis.x, _firstAxis.y, _firstAxis.z);
-            this.jointSecondAxis = new OIMO.Vec3(_secondAxis.x, _secondAxis.y, _secondAxis.z);
-            this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
-            this.addEventListener("componentAdd", this.dirtyStatus);
-            this.addEventListener("componentRemove", this.superRemove);
-        }
-        get firstAxis() {
-            return new FudgeCore.Vector3(this.jointFirstAxis.x, this.jointFirstAxis.y, this.jointFirstAxis.z);
-        }
-        set firstAxis(_value) {
-            this.jointFirstAxis = new OIMO.Vec3(_value.x, _value.y, _value.z);
-            this.disconnect();
-            this.dirtyStatus();
-        }
-        get secondAxis() {
-            return new FudgeCore.Vector3(this.jointSecondAxis.x, this.jointSecondAxis.y, this.jointSecondAxis.z);
-        }
-        set secondAxis(_value) {
-            this.jointSecondAxis = new OIMO.Vec3(_value.x, _value.y, _value.z);
-            this.disconnect();
-            this.dirtyStatus();
-        }
-        get anchor() {
-            return new FudgeCore.Vector3(this.jointAnchor.x, this.jointAnchor.y, this.jointAnchor.z);
-        }
-        set anchor(_value) {
-            this.jointAnchor = new OIMO.Vec3(_value.x, _value.y, _value.z);
-            this.disconnect();
-            this.dirtyStatus();
-        }
-        get springDampingFirstAxis() {
-            return this.jointFirstSpringDampingRatio;
-        }
-        set springDampingFirstAxis(_value) {
-            this.jointFirstSpringDampingRatio = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getSpringDamper1().dampingRatio = this.jointFirstSpringDampingRatio;
-        }
-        get springFrequencyFirstAxis() {
-            return this.jointFirstSpringFrequency;
-        }
-        set springFrequencyFirstAxis(_value) {
-            this.jointFirstSpringFrequency = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getSpringDamper1().frequency = this.jointFirstSpringFrequency;
-        }
-        get springDampingSecondAxis() {
-            return this.jointSecondSpringDampingRatio;
-        }
-        set springDampingSecondAxis(_value) {
-            this.jointSecondSpringDampingRatio = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getSpringDamper2().dampingRatio = this.jointSecondSpringDampingRatio;
-        }
-        get springFrequencySecondAxis() {
-            return this.jointSecondSpringFrequency;
-        }
-        set springFrequencySecondAxis(_value) {
-            this.jointSecondSpringFrequency = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getSpringDamper2().frequency = this.jointSecondSpringFrequency;
-        }
-        get breakForce() {
-            return this.jointBreakForce;
-        }
-        set breakForce(_value) {
-            this.jointBreakForce = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.setBreakForce(this.jointBreakForce);
-        }
-        get breakTorque() {
-            return this.jointBreakTorque;
-        }
-        set breakTorque(_value) {
-            this.jointBreakTorque = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.setBreakTorque(this.jointBreakTorque);
-        }
-        get motorLimitUpperFirstAxis() {
-            return this.jointFirstMotorLimitUpper * 180 / Math.PI;
-        }
-        set motorLimitUpperFirstAxis(_value) {
-            this.jointFirstMotorLimitUpper = _value * Math.PI / 180;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getLimitMotor1().upperLimit = this.jointFirstMotorLimitUpper;
-        }
-        get motorLimitLowerFirstAxis() {
-            return this.jointFirstMotorLimitLower * 180 / Math.PI;
-        }
-        set motorLimitLowerFirstAxis(_value) {
-            this.jointFirstMotorLimitLower = _value * Math.PI / 180;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getLimitMotor1().lowerLimit = this.jointFirstMotorLimitLower;
-        }
-        get motorSpeedFirstAxis() {
-            return this.jointFirstMotorSpeed;
-        }
-        set motorSpeedFirstAxis(_value) {
-            this.jointFirstMotorSpeed = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getLimitMotor1().motorSpeed = this.jointFirstMotorSpeed;
-        }
-        get motorTorqueFirstAxis() {
-            return this.jointFirstMotorTorque;
-        }
-        set motorTorqueFirstAxis(_value) {
-            this.jointFirstMotorTorque = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getLimitMotor1().motorTorque = this.jointFirstMotorTorque;
-        }
-        get motorLimitUpperSecondAxis() {
-            return this.jointSecondMotorLimitUpper * 180 / Math.PI;
-        }
-        set motorLimitUpperSecondAxis(_value) {
-            this.jointSecondMotorLimitUpper = _value * Math.PI / 180;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getLimitMotor2().upperLimit = this.jointSecondMotorLimitUpper;
-        }
-        get motorLimitLowerSecondAxis() {
-            return this.jointSecondMotorLimitLower * 180 / Math.PI;
-        }
-        set motorLimitLowerSecondAxis(_value) {
-            this.jointSecondMotorLimitLower = _value * Math.PI / 180;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getLimitMotor2().lowerLimit = this.jointSecondMotorLimitLower;
-        }
-        get motorSpeedSecondAxis() {
-            return this.jointSecondMotorSpeed;
-        }
-        set motorSpeedSecondAxis(_value) {
-            this.jointSecondMotorSpeed = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getLimitMotor2().motorSpeed = this.jointSecondMotorSpeed;
-        }
-        get motorTorqueSecondAxis() {
-            return this.jointSecondMotorTorque;
-        }
-        set motorTorqueSecondAxis(_value) {
-            this.jointSecondMotorTorque = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.getLimitMotor2().motorTorque = this.jointSecondMotorTorque;
-        }
-        get internalCollision() {
-            return this.jointInternalCollision;
-        }
-        set internalCollision(_value) {
-            this.jointInternalCollision = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.setAllowCollision(this.jointInternalCollision);
-        }
-        connect() {
-            if (this.connected == false) {
-                this.constructJoint();
-                this.connected = true;
-                this.superAdd();
-            }
-        }
-        disconnect() {
-            if (this.connected == true) {
-                this.superRemove();
-                this.connected = false;
-            }
-        }
-        getOimoJoint() {
-            return this.oimoJoint;
-        }
-        serialize() {
-            let serialization = {
-                attID: super.idAttachedRB,
-                conID: super.idConnectedRB,
-                anchor: this.anchor,
-                internalCollision: this.jointInternalCollision,
-                breakForce: this.jointBreakForce,
-                breakTorque: this.jointBreakTorque,
-                firstAxis: this.jointFirstAxis,
-                secondAxis: this.jointSecondAxis,
-                springDampingFirstAxis: this.jointFirstSpringDampingRatio,
-                springFrequencyFirstAxis: this.jointFirstSpringFrequency,
-                springDampingSecondAxis: this.jointSecondSpringDampingRatio,
-                springFrequencySecondAxis: this.jointSecondSpringFrequency,
-                motorLimitUpperFirstAxis: this.jointFirstMotorLimitUpper,
-                motorLimitLowerFirstAxis: this.jointFirstMotorLimitLower,
-                motorSpeedFirstAxis: this.jointFirstMotorSpeed,
-                motorTorqueFirstAxis: this.jointFirstMotorTorque,
-                motorLimitUpperSecondAxis: this.jointSecondMotorLimitUpper,
-                motorLimitLowerSecondAxis: this.jointSecondMotorLimitLower,
-                motorSpeedSecondAxis: this.jointSecondMotorSpeed,
-                motorTorqueSecondAxis: this.jointSecondMotorTorque,
-                [super.constructor.name]: super.baseSerialize()
-            };
-            return serialization;
-        }
-        async deserialize(_serialization) {
-            super.idAttachedRB = _serialization.attID;
-            super.idConnectedRB = _serialization.conID;
-            if (_serialization.attID != null && _serialization.conID != null)
-                super.setBodiesFromLoadedIDs();
-            this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
-            this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
-            this.breakForce = _serialization.breakForce != null ? _serialization.breakForce : this.jointBreakForce;
-            this.breakTorque = _serialization.breakTorque != null ? _serialization.breakTorque : this.jointBreakTorque;
-            this.firstAxis = _serialization.firstAxis != null ? _serialization.firstAxis : this.jointFirstAxis;
-            this.secondAxis = _serialization.secondAxis != null ? _serialization.secondAxis : this.jointSecondAxis;
-            this.springDampingFirstAxis = _serialization.springDampingFirstAxis != null ? _serialization.springDampingFirstAxis : this.jointFirstSpringDampingRatio;
-            this.springFrequencyFirstAxis = _serialization.springFrequencyFirstAxis != null ? _serialization.springFrequencyFirstAxis : this.jointFirstSpringFrequency;
-            this.springDampingSecondAxis = _serialization.springDampingSecondAxis != null ? _serialization.springDampingSecondAxis : this.jointSecondSpringDampingRatio;
-            this.springFrequencySecondAxis = _serialization.springFrequencySecondAxis != null ? _serialization.springFrequencySecondAxis : this.jointSecondSpringFrequency;
-            this.motorLimitUpperFirstAxis = _serialization.motorLimitUpperFirstAxis != null ? _serialization.motorLimitUpperFirstAxis : this.jointFirstMotorLimitUpper;
-            this.motorLimitLowerFirstAxis = _serialization.motorLimitLowerFirstAxis != null ? _serialization.motorLimitLowerFirstAxis : this.jointFirstMotorLimitUpper;
-            this.motorSpeedFirstAxis = _serialization.motorSpeedFirstAxis != null ? _serialization.motorSpeedFirstAxis : this.jointFirstMotorSpeed;
-            this.motorTorqueFirstAxis = _serialization.motorTorqueFirstAxis != null ? _serialization.motorTorqueFirstAxis : this.jointFirstMotorTorque;
-            this.motorLimitUpperSecondAxis = _serialization.motorLimitUpperSecondAxis != null ? _serialization.motorLimitUpperSecondAxis : this.jointSecondMotorLimitUpper;
-            this.motorLimitLowerSecondAxis = _serialization.motorLimitLowerSecondAxis != null ? _serialization.motorLimitLowerSecondAxis : this.jointSecondMotorLimitUpper;
-            this.motorSpeedSecondAxis = _serialization.motorSpeedSecondAxis != null ? _serialization.motorSpeedSecondAxis : this.jointSecondMotorSpeed;
-            this.motorTorqueSecondAxis = _serialization.motorTorqueSecondAxis != null ? _serialization.motorTorqueSecondAxis : this.jointSecondMotorTorque;
-            super.baseDeserialize(_serialization);
-            return this;
-        }
-        dirtyStatus() {
-            FudgeCore.Physics.world.changeJointStatus(this);
-        }
-        constructJoint() {
-            this.firstAxisSpringDamper = new OIMO.SpringDamper().setSpring(this.jointFirstSpringFrequency, this.jointFirstSpringDampingRatio);
-            this.secondAxisSpringDamper = new OIMO.SpringDamper().setSpring(this.jointSecondSpringFrequency, this.jointSecondSpringDampingRatio);
-            this.firstAxisMotor = new OIMO.RotationalLimitMotor().setLimits(this.jointFirstMotorLimitLower, this.jointFirstMotorLimitUpper);
-            this.firstAxisMotor.setMotor(this.jointFirstMotorSpeed, this.jointFirstMotorTorque);
-            this.secondAxisMotor = new OIMO.RotationalLimitMotor().setLimits(this.jointFirstMotorLimitLower, this.jointFirstMotorLimitUpper);
-            this.secondAxisMotor.setMotor(this.jointFirstMotorSpeed, this.jointFirstMotorTorque);
-            this.config = new OIMO.UniversalJointConfig();
-            let attachedRBPos = this.attachedRigidbody.node.mtxWorld.translation;
-            let worldAnchor = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
-            this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, this.jointFirstAxis, this.jointSecondAxis);
-            this.config.limitMotor1 = this.firstAxisMotor;
-            this.config.limitMotor2 = this.secondAxisMotor;
-            this.config.springDamper1 = this.firstAxisSpringDamper;
-            this.config.springDamper2 = this.secondAxisSpringDamper;
-            var j = new OIMO.UniversalJoint(this.config);
-            j.setBreakForce(this.breakForce);
-            j.setBreakTorque(this.breakTorque);
-            j.setAllowCollision(this.jointInternalCollision);
-            this.oimoJoint = j;
-        }
-        superAdd() {
-            this.addConstraintToWorld(this);
-        }
-        superRemove() {
-            this.removeConstraintFromWorld(this);
-        }
-    }
-    FudgeCore.ComponentJointUniversal = ComponentJointUniversal;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    class ComponentJointWelding extends FudgeCore.ComponentJoint {
-        static iSubclass = FudgeCore.Component.registerSubclass(ComponentJointWelding);
-        get internalCollision() {
-            return this.jointInternalCollision;
-        }
-        set internalCollision(_value) {
-            this.jointInternalCollision = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.setAllowCollision(this.jointInternalCollision);
-        }
-        get breakForce() {
-            return this.jointBreakForce;
-        }
-        set breakForce(_value) {
-            this.jointBreakForce = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.setBreakForce(this.jointBreakForce);
-        }
-        get breakTorque() {
-            return this.jointBreakTorque;
-        }
-        set breakTorque(_value) {
-            this.jointBreakTorque = _value;
-            if (this.oimoJoint != null)
-                this.oimoJoint.setBreakTorque(this.jointBreakTorque);
-        }
-        get anchor() {
-            return new FudgeCore.Vector3(this.jointAnchor.x, this.jointAnchor.y, this.jointAnchor.z);
-        }
-        set anchor(_value) {
-            this.jointAnchor = new OIMO.Vec3(_value.x, _value.y, _value.z);
-            this.disconnect();
-            this.dirtyStatus();
-        }
-        jointAnchor;
-        jointInternalCollision = false;
-        jointBreakForce = 0;
-        jointBreakTorque = 0;
-        config = new OIMO.GenericJointConfig();
-        oimoJoint;
-        constructor(_attachedRigidbody = null, _connectedRigidbody = null, _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
-            super(_attachedRigidbody, _connectedRigidbody);
-            this.jointAnchor = new OIMO.Vec3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
-            this.addEventListener("componentAdd", this.dirtyStatus);
-            this.addEventListener("componentRemove", this.superRemove);
-        }
-        connect() {
-            if (this.connected == false) {
-                this.constructJoint();
-                this.connected = true;
-                this.superAdd();
-            }
-        }
-        disconnect() {
-            if (this.connected == true) {
-                this.superRemove();
-                this.connected = false;
-            }
-        }
-        getOimoJoint() {
-            return this.oimoJoint;
-        }
-        dirtyStatus() {
-            FudgeCore.Physics.world.changeJointStatus(this);
-        }
-        constructJoint() {
-            this.config = new OIMO.GenericJointConfig();
-            let attachedRBPos = this.attachedRigidbody.node.mtxWorld.translation;
-            let worldAnchor = new OIMO.Vec3(attachedRBPos.x + this.jointAnchor.x, attachedRBPos.y + this.jointAnchor.y, attachedRBPos.z + this.jointAnchor.z);
-            this.config.init(this.attachedRB.getOimoRigidbody(), this.connectedRB.getOimoRigidbody(), worldAnchor, new OIMO.Mat3(), new OIMO.Mat3());
-            var j = new OIMO.GenericJoint(this.config);
-            j.setAllowCollision(this.jointInternalCollision);
-            this.oimoJoint = j;
-        }
-        superAdd() {
-            this.addConstraintToWorld(this);
-        }
-        superRemove() {
-            this.removeConstraintFromWorld(this);
-        }
-        serialize() {
-            let serialization = {
-                attID: super.idAttachedRB,
-                conID: super.idConnectedRB,
-                anchor: this.anchor,
-                internalCollision: this.jointInternalCollision,
-                breakForce: this.jointBreakForce,
-                breakTorque: this.jointBreakTorque,
-                [super.constructor.name]: super.baseSerialize()
-            };
-            return serialization;
-        }
-        async deserialize(_serialization) {
-            super.idAttachedRB = _serialization.attID;
-            super.idConnectedRB = _serialization.conID;
-            if (_serialization.attID != null && _serialization.conID != null)
-                super.setBodiesFromLoadedIDs();
-            this.anchor = _serialization.anchor != null ? _serialization.anchor : this.jointAnchor;
-            this.internalCollision = _serialization.internalCollision != null ? _serialization.internalCollision : false;
-            this.breakForce = _serialization.breakForce != null ? _serialization.breakForce : this.jointBreakForce;
-            this.breakTorque = _serialization.breakTorque != null ? _serialization.breakTorque : this.jointBreakTorque;
-            super.baseDeserialize(_serialization);
-            return this;
-        }
-    }
-    FudgeCore.ComponentJointWelding = ComponentJointWelding;
-})(FudgeCore || (FudgeCore = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    let BODY_ADJUST;
-    (function (BODY_ADJUST) {
-        BODY_ADJUST[BODY_ADJUST["TO_MESH"] = 0] = "TO_MESH";
-        BODY_ADJUST[BODY_ADJUST["TO_NODE"] = 1] = "TO_NODE";
-        BODY_ADJUST[BODY_ADJUST["TO_PIVOT"] = 2] = "TO_PIVOT";
-    })(BODY_ADJUST = FudgeCore.BODY_ADJUST || (FudgeCore.BODY_ADJUST = {}));
+    let BODY_INIT;
+    (function (BODY_INIT) {
+        BODY_INIT[BODY_INIT["TO_MESH"] = 0] = "TO_MESH";
+        BODY_INIT[BODY_INIT["TO_NODE"] = 1] = "TO_NODE";
+        BODY_INIT[BODY_INIT["TO_PIVOT"] = 2] = "TO_PIVOT";
+    })(BODY_INIT = FudgeCore.BODY_INIT || (FudgeCore.BODY_INIT = {}));
     class ComponentRigidbody extends FudgeCore.Component {
         static iSubclass = FudgeCore.Component.registerSubclass(ComponentRigidbody);
         mtxPivot = FudgeCore.Matrix4x4.IDENTITY();
@@ -8348,7 +7248,8 @@ var FudgeCore;
         collisions = new Array();
         triggerings = new Array();
         collisionMask;
-        adjust;
+        initialization = BODY_INIT.TO_PIVOT;
+        isInitialized = false;
         #id = 0;
         #collider;
         #colliderInfo;
@@ -8365,6 +7266,8 @@ var FudgeCore;
         #effectRotation = FudgeCore.Vector3.ONE();
         #effectGravity = 1;
         #isTrigger = false;
+        #mtxPivotUnscaled = FudgeCore.Matrix4x4.IDENTITY();
+        #mtxPivotInverse = FudgeCore.Matrix4x4.IDENTITY();
         #callbacks;
         constructor(_mass = 1, _type = FudgeCore.BODY_TYPE.DYNAMIC, _colliderType = FudgeCore.COLLIDER_TYPE.CUBE, _group = FudgeCore.Physics.settings.defaultCollisionGroup, _mtxTransform = null, _convexMesh = null) {
             super();
@@ -8372,6 +7275,12 @@ var FudgeCore;
         }
         get id() {
             return this.#id;
+        }
+        get mtxPivotInverse() {
+            return this.#mtxPivotInverse;
+        }
+        get mtxPivotUnscaled() {
+            return this.#mtxPivotUnscaled;
         }
         get typeBody() {
             return this.#typeBody;
@@ -8402,7 +7311,7 @@ var FudgeCore;
         set typeCollider(_value) {
             if (_value != this.#typeCollider && this.#rigidbody != null) {
                 this.#typeCollider = _value;
-                this.updateFromWorld();
+                this.initialize();
             }
         }
         get collisionGroup() {
@@ -8485,6 +7394,121 @@ var FudgeCore;
         translateBody(_translationChange) {
             this.#rigidbody.translate(new OIMO.Vec3(_translationChange.x, _translationChange.y, _translationChange.z));
         }
+        getPosition() {
+            let tmpPos = this.#rigidbody.getPosition();
+            return new FudgeCore.Vector3(tmpPos.x, tmpPos.y, tmpPos.z);
+        }
+        setPosition(_value) {
+            this.#rigidbody.setPosition(new OIMO.Vec3(_value.x, _value.y, _value.z));
+        }
+        getRotation() {
+            let orientation = this.#rigidbody.getOrientation();
+            let tmpQuat = new FudgeCore.Quaternion(orientation.x, orientation.y, orientation.z, orientation.w);
+            return tmpQuat.toDegrees();
+        }
+        setRotation(_value) {
+            let quat = new OIMO.Quat();
+            let mtxRot = FudgeCore.Matrix4x4.IDENTITY();
+            mtxRot.rotate(new FudgeCore.Vector3(_value.x, _value.y, _value.z));
+            let array = mtxRot.get();
+            let rot = new OIMO.Mat3(array[0], array[4], array[8], array[1], array[5], array[9], array[2], array[6], array[10]);
+            quat.fromMat3(rot);
+            this.#rigidbody.setOrientation(quat);
+        }
+        getScaling() {
+            let scaling = this.node.mtxWorld.scaling.clone;
+            scaling.x *= this.mtxPivot.scaling.x;
+            scaling.y *= this.mtxPivot.scaling.y;
+            scaling.z *= this.mtxPivot.scaling.z;
+            return scaling;
+        }
+        setScaling(_value) {
+            this.createCollider(new OIMO.Vec3(_value.x / 2, _value.y / 2, _value.z / 2), this.#typeCollider);
+            this.#collider = new OIMO.Shape(this.#colliderInfo);
+            let oldCollider = this.#rigidbody.getShapeList();
+            this.#rigidbody.addShape(this.#collider);
+            this.#rigidbody.removeShape(oldCollider);
+            this.#collider.userData = this;
+            this.#collider.setCollisionGroup(this.collisionGroup);
+            this.#collider.setCollisionMask(this.collisionMask);
+            this.#collider.setRestitution(this.#restitution);
+            this.#collider.setFriction(this.#friction);
+            this.#collider.setContactCallback(this.#callbacks);
+        }
+        initialize() {
+            if (!this.node)
+                return;
+            switch (Number(this.initialization)) {
+                case BODY_INIT.TO_NODE:
+                    this.mtxPivot = FudgeCore.Matrix4x4.IDENTITY();
+                    break;
+                case BODY_INIT.TO_MESH:
+                    let cmpMesh = this.node.getComponent(FudgeCore.ComponentMesh);
+                    if (cmpMesh)
+                        this.mtxPivot = cmpMesh.mtxPivot.clone;
+                    break;
+                case BODY_INIT.TO_PIVOT:
+                    break;
+            }
+            let mtxWorld = FudgeCore.Matrix4x4.MULTIPLICATION(this.node.mtxWorld, this.mtxPivot);
+            let position = mtxWorld.translation;
+            let rotation = mtxWorld.getEulerAngles();
+            let scaling = mtxWorld.scaling;
+            this.setScaling(scaling);
+            this.#rigidbody.setMassData(this.#massData);
+            this.setPosition(position);
+            this.setRotation(rotation);
+            this.#mtxPivotUnscaled = FudgeCore.Matrix4x4.CONSTRUCTION({ translation: this.mtxPivot.translation, rotation: this.mtxPivot.rotation, scaling: FudgeCore.Vector3.ONE() });
+            this.#mtxPivotInverse = FudgeCore.Matrix4x4.INVERSION(this.#mtxPivotUnscaled);
+            this.isInitialized = true;
+        }
+        getVelocity() {
+            let velocity = this.#rigidbody.getLinearVelocity();
+            return new FudgeCore.Vector3(velocity.x, velocity.y, velocity.z);
+        }
+        setVelocity(_value) {
+            let velocity = new OIMO.Vec3(_value.x, _value.y, _value.z);
+            this.#rigidbody.setLinearVelocity(velocity);
+        }
+        getAngularVelocity() {
+            let velocity = this.#rigidbody.getAngularVelocity();
+            return new FudgeCore.Vector3(velocity.x, velocity.y, velocity.z);
+        }
+        setAngularVelocity(_value) {
+            let velocity = new OIMO.Vec3(_value.x, _value.y, _value.z);
+            this.#rigidbody.setAngularVelocity(velocity);
+        }
+        applyForce(_force) {
+            this.#rigidbody.applyForceToCenter(new OIMO.Vec3(_force.x, _force.y, _force.z));
+        }
+        applyForceAtPoint(_force, _worldPoint) {
+            this.#rigidbody.applyForce(new OIMO.Vec3(_force.x, _force.y, _force.z), new OIMO.Vec3(_worldPoint.x, _worldPoint.y, _worldPoint.z));
+        }
+        applyTorque(_rotationalForce) {
+            this.#rigidbody.applyTorque(new OIMO.Vec3(_rotationalForce.x, _rotationalForce.y, _rotationalForce.z));
+        }
+        applyImpulseAtPoint(_impulse, _worldPoint = null) {
+            _worldPoint = _worldPoint != null ? _worldPoint : this.getPosition();
+            this.#rigidbody.applyImpulse(new OIMO.Vec3(_impulse.x, _impulse.y, _impulse.z), new OIMO.Vec3(_worldPoint.x, _worldPoint.y, _worldPoint.z));
+        }
+        applyLinearImpulse(_impulse) {
+            this.#rigidbody.applyLinearImpulse(new OIMO.Vec3(_impulse.x, _impulse.y, _impulse.z));
+        }
+        applyAngularImpulse(_rotationalImpulse) {
+            this.#rigidbody.applyAngularImpulse(new OIMO.Vec3(_rotationalImpulse.x, _rotationalImpulse.y, _rotationalImpulse.z));
+        }
+        addVelocity(_value) {
+            this.#rigidbody.addLinearVelocity(new OIMO.Vec3(_value.x, _value.y, _value.z));
+        }
+        addAngularVelocity(_value) {
+            this.#rigidbody.addAngularVelocity(new OIMO.Vec3(_value.x, _value.y, _value.z));
+        }
+        deactivateAutoSleep() {
+            this.#rigidbody.setAutoSleep(false);
+        }
+        activateAutoSleep() {
+            this.#rigidbody.setAutoSleep(true);
+        }
         checkCollisionEvents() {
             let list = this.#rigidbody.getContactLinkList();
             let objHit;
@@ -8549,138 +7573,13 @@ var FudgeCore;
                 }
             });
         }
-        updateFromWorld(_toMesh = false) {
-            let cmpMesh = this.node.getComponent(FudgeCore.ComponentMesh);
-            let worldTransform = (_toMesh && cmpMesh) ? cmpMesh.mtxWorld : this.node.mtxWorld;
-            let position = worldTransform.translation;
-            position.add(this.mtxPivot.translation);
-            let rotation = worldTransform.getEulerAngles();
-            rotation.add(this.mtxPivot.rotation);
-            let scaling = worldTransform.scaling;
-            scaling.x *= this.mtxPivot.scaling.x;
-            scaling.y *= this.mtxPivot.scaling.y;
-            scaling.z *= this.mtxPivot.scaling.z;
-            this.createCollider(new OIMO.Vec3(scaling.x / 2, scaling.y / 2, scaling.z / 2), this.#typeCollider);
-            this.#collider = new OIMO.Shape(this.#colliderInfo);
-            let oldCollider = this.#rigidbody.getShapeList();
-            this.#rigidbody.addShape(this.#collider);
-            this.#rigidbody.removeShape(oldCollider);
-            this.#collider.userData = this;
-            this.#collider.setCollisionGroup(this.collisionGroup);
-            this.#collider.setCollisionMask(this.collisionMask);
-            if (this.#rigidbody.getShapeList() != null) {
-                this.#rigidbody.getShapeList().setRestitution(this.#restitution);
-                this.#rigidbody.getShapeList().setFriction(this.#friction);
-                this.#rigidbody.getShapeList().setContactCallback(this.#callbacks);
-            }
-            this.#rigidbody.setMassData(this.#massData);
-            this.setPosition(position);
-            this.setRotation(rotation);
-        }
-        getPosition() {
-            let tmpPos = this.#rigidbody.getPosition();
-            return new FudgeCore.Vector3(tmpPos.x, tmpPos.y, tmpPos.z);
-        }
-        setPosition(_value) {
-            this.#rigidbody.setPosition(new OIMO.Vec3(_value.x, _value.y, _value.z));
-        }
-        getRotation() {
-            let orientation = this.#rigidbody.getOrientation();
-            let tmpQuat = new FudgeCore.Quaternion(orientation.x, orientation.y, orientation.z, orientation.w);
-            return tmpQuat.toDegrees();
-        }
-        setRotation(_value) {
-            let quat = new OIMO.Quat();
-            let mtxRot = FudgeCore.Matrix4x4.IDENTITY();
-            mtxRot.rotate(new FudgeCore.Vector3(_value.x, _value.y, _value.z));
-            let array = mtxRot.get();
-            let rot = new OIMO.Mat3(array[0], array[4], array[8], array[1], array[5], array[9], array[2], array[6], array[10]);
-            quat.fromMat3(rot);
-            this.#rigidbody.setOrientation(quat);
-        }
-        getScaling() {
-            let scaling = this.node.mtxWorld.scaling.copy;
-            scaling.x *= this.mtxPivot.scaling.x;
-            scaling.y *= this.mtxPivot.scaling.y;
-            scaling.z *= this.mtxPivot.scaling.z;
-            return scaling;
-        }
-        setScaling(_value) {
-            let scaling = _value.copy;
-            scaling.x *= this.mtxPivot.scaling.x;
-            scaling.y *= this.mtxPivot.scaling.y;
-            scaling.z *= this.mtxPivot.scaling.z;
-            this.createCollider(new OIMO.Vec3(scaling.x / 2, scaling.y / 2, scaling.z / 2), this.typeCollider);
-            this.#collider = new OIMO.Shape(this.#colliderInfo);
-            let oldCollider = this.#rigidbody.getShapeList();
-            this.#rigidbody.addShape(this.#collider);
-            this.#rigidbody.removeShape(oldCollider);
-            this.#collider.userData = this;
-            this.#collider.setCollisionGroup(this.collisionGroup);
-            this.#collider.setCollisionMask(this.collisionMask);
-            if (this.#rigidbody.getShapeList() != null) {
-                this.#rigidbody.getShapeList().setRestitution(this.#restitution);
-                this.#rigidbody.getShapeList().setFriction(this.#friction);
-                this.#rigidbody.getShapeList().setContactCallback(this.#callbacks);
-            }
-            let mutator = {};
-            mutator["scaling"] = _value;
-            this.node.mtxLocal.mutate(mutator);
-        }
-        getVelocity() {
-            let velocity = this.#rigidbody.getLinearVelocity();
-            return new FudgeCore.Vector3(velocity.x, velocity.y, velocity.z);
-        }
-        setVelocity(_value) {
-            let velocity = new OIMO.Vec3(_value.x, _value.y, _value.z);
-            this.#rigidbody.setLinearVelocity(velocity);
-        }
-        getAngularVelocity() {
-            let velocity = this.#rigidbody.getAngularVelocity();
-            return new FudgeCore.Vector3(velocity.x, velocity.y, velocity.z);
-        }
-        setAngularVelocity(_value) {
-            let velocity = new OIMO.Vec3(_value.x, _value.y, _value.z);
-            this.#rigidbody.setAngularVelocity(velocity);
-        }
-        applyForce(_force) {
-            this.#rigidbody.applyForceToCenter(new OIMO.Vec3(_force.x, _force.y, _force.z));
-        }
-        applyForceAtPoint(_force, _worldPoint) {
-            this.#rigidbody.applyForce(new OIMO.Vec3(_force.x, _force.y, _force.z), new OIMO.Vec3(_worldPoint.x, _worldPoint.y, _worldPoint.z));
-        }
-        applyTorque(_rotationalForce) {
-            this.#rigidbody.applyTorque(new OIMO.Vec3(_rotationalForce.x, _rotationalForce.y, _rotationalForce.z));
-        }
-        applyImpulseAtPoint(_impulse, _worldPoint = null) {
-            _worldPoint = _worldPoint != null ? _worldPoint : this.getPosition();
-            this.#rigidbody.applyImpulse(new OIMO.Vec3(_impulse.x, _impulse.y, _impulse.z), new OIMO.Vec3(_worldPoint.x, _worldPoint.y, _worldPoint.z));
-        }
-        applyLinearImpulse(_impulse) {
-            this.#rigidbody.applyLinearImpulse(new OIMO.Vec3(_impulse.x, _impulse.y, _impulse.z));
-        }
-        applyAngularImpulse(_rotationalImpulse) {
-            this.#rigidbody.applyAngularImpulse(new OIMO.Vec3(_rotationalImpulse.x, _rotationalImpulse.y, _rotationalImpulse.z));
-        }
-        addVelocity(_value) {
-            this.#rigidbody.addLinearVelocity(new OIMO.Vec3(_value.x, _value.y, _value.z));
-        }
-        addAngularVelocity(_value) {
-            this.#rigidbody.addAngularVelocity(new OIMO.Vec3(_value.x, _value.y, _value.z));
-        }
-        deactivateAutoSleep() {
-            this.#rigidbody.setAutoSleep(false);
-        }
-        activateAutoSleep() {
-            this.#rigidbody.setAutoSleep(true);
-        }
-        raycastThisBody(_origin, _direction, _length) {
+        raycastThisBody(_origin, _direction, _length, _debugDraw = false) {
             let hitInfo = new FudgeCore.RayHitInfo();
             let geometry = this.#rigidbody.getShapeList().getGeometry();
             let transform = this.#rigidbody.getTransform();
-            let scaledDirection = _direction.copy;
+            let scaledDirection = _direction.clone;
             scaledDirection.scale(_length);
-            let endpoint = FudgeCore.Vector3.SUM(scaledDirection, _origin.copy);
+            let endpoint = FudgeCore.Vector3.SUM(scaledDirection, _origin.clone);
             let oimoRay = new OIMO.RayCastHit();
             let hit = geometry.rayCast(new OIMO.Vec3(_origin.x, _origin.y, _origin.z), new OIMO.Vec3(endpoint.x, endpoint.y, endpoint.z), transform, oimoRay);
             if (hit) {
@@ -8699,7 +7598,7 @@ var FudgeCore;
                 hitInfo.rayOrigin = _origin;
                 hitInfo.hitPoint = new FudgeCore.Vector3(endpoint.x, endpoint.y, endpoint.z);
             }
-            if (FudgeCore.Physics.settings.debugDraw) {
+            if (_debugDraw) {
                 FudgeCore.Physics.world.debugDraw.debugRay(hitInfo.rayOrigin, hitInfo.hitPoint, new FudgeCore.Color(0, 1, 0, 1));
             }
             return hitInfo;
@@ -8710,6 +7609,7 @@ var FudgeCore;
             delete serialization.active;
             serialization.typeBody = FudgeCore.BODY_TYPE[this.#typeBody];
             serialization.typeCollider = FudgeCore.COLLIDER_TYPE[this.#typeCollider];
+            serialization.initialization = BODY_INIT[this.initialization];
             serialization.id = this.#id;
             serialization.pivot = this.mtxPivot.serialize();
             serialization[super.constructor.name] = super.serialize();
@@ -8728,9 +7628,10 @@ var FudgeCore;
             this.friction = _serialization.friction || this.friction;
             this.restitution = _serialization.restitution || this.restitution;
             this.isTrigger = _serialization.trigger || this.isTrigger;
-            this.#typeBody = FudgeCore.BODY_TYPE[_serialization.typeBody];
-            this.#typeCollider = FudgeCore.COLLIDER_TYPE[_serialization.typeCollider];
-            this.create(this.mass, this.#typeBody, this.#typeCollider, this.collisionGroup, null, this.convexMesh);
+            this.initialization = _serialization.initialization;
+            this.initialization = BODY_INIT[_serialization.initialization];
+            this.typeBody = FudgeCore.BODY_TYPE[_serialization.typeBody];
+            this.typeCollider = FudgeCore.COLLIDER_TYPE[_serialization.typeCollider];
             return this;
         }
         async mutate(_mutator) {
@@ -8769,12 +7670,15 @@ var FudgeCore;
                 types.typeBody = FudgeCore.BODY_TYPE;
             if (types.typeCollider)
                 types.typeCollider = FudgeCore.COLLIDER_TYPE;
+            if (types.initialization)
+                types.initialization = BODY_INIT;
             return types;
         }
         reduceMutator(_mutator) {
             super.reduceMutator(_mutator);
             delete _mutator.convexMesh;
             delete _mutator.collisionMask;
+            delete _mutator.isInitialized;
         }
         create(_mass = 1, _type = FudgeCore.BODY_TYPE.DYNAMIC, _colliderType = FudgeCore.COLLIDER_TYPE.CUBE, _group = FudgeCore.Physics.settings.defaultCollisionGroup, _mtxTransform = null, _convexMesh = null) {
             this.convexMesh = _convexMesh;
@@ -9116,35 +8020,26 @@ var FudgeCore;
             this.shader.compile(this.vertexShaderSource(), this.fragmentShaderSource());
             this.initializeBuffers();
         }
-        getDebugModeFromSettings() {
-            let mode = FudgeCore.Physics.settings.debugMode;
-            let elementsToDraw = new Array();
-            switch (mode) {
-                case 0:
-                    elementsToDraw = [false, true, false, false, false, false, false, false, true];
+        setDebugMode(_mode = FudgeCore.PHYSICS_DEBUGMODE.NONE) {
+            let draw = { drawAabbs: false, drawBases: false, drawBvh: false, drawContactBases: false, drawContacts: false, drawJointLimits: false, drawJoints: false, drawPairs: false, drawShapes: false };
+            switch (_mode) {
+                case FudgeCore.PHYSICS_DEBUGMODE.COLLIDERS:
+                    draw.drawBases = draw.drawShapes = true;
                     break;
-                case 1:
-                    elementsToDraw = [false, false, false, false, false, true, true, false, true];
+                case FudgeCore.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER:
+                    draw.drawJoints = draw.drawJointLimits = draw.drawShapes = true;
                     break;
-                case 2:
-                    elementsToDraw = [true, true, true, false, false, false, false, false, false];
+                case FudgeCore.PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY:
+                    draw.drawBases = draw.drawJointLimits = draw.drawJoints = draw.drawShapes = true;
                     break;
-                case 3:
-                    elementsToDraw = [false, true, false, true, true, false, false, true, true];
+                case FudgeCore.PHYSICS_DEBUGMODE.CONTACTS:
+                    draw.drawBases = draw.drawContactBases = draw.drawContacts = draw.drawPairs = draw.drawShapes = true;
                     break;
-                case 4:
-                    elementsToDraw = [false, true, false, false, false, true, true, false, true];
+                case FudgeCore.PHYSICS_DEBUGMODE.BOUNDING_BOXES:
+                    draw.drawAabbs = draw.drawBases = draw.drawBvh = true;
                     break;
             }
-            this.oimoDebugDraw.drawAabbs = elementsToDraw[0];
-            this.oimoDebugDraw.drawBases = elementsToDraw[1];
-            this.oimoDebugDraw.drawBvh = elementsToDraw[2];
-            this.oimoDebugDraw.drawContactBases = elementsToDraw[3];
-            this.oimoDebugDraw.drawContacts = elementsToDraw[4];
-            this.oimoDebugDraw.drawJointLimits = elementsToDraw[5];
-            this.oimoDebugDraw.drawJoints = elementsToDraw[6];
-            this.oimoDebugDraw.drawPairs = elementsToDraw[7];
-            this.oimoDebugDraw.drawShapes = elementsToDraw[8];
+            Object.assign(this.oimoDebugDraw, draw);
         }
         initializeBuffers() {
             let attribs = [
@@ -9341,11 +8236,12 @@ var FudgeCore;
     })(COLLIDER_TYPE = FudgeCore.COLLIDER_TYPE || (FudgeCore.COLLIDER_TYPE = {}));
     let PHYSICS_DEBUGMODE;
     (function (PHYSICS_DEBUGMODE) {
-        PHYSICS_DEBUGMODE[PHYSICS_DEBUGMODE["COLLIDERS"] = 0] = "COLLIDERS";
-        PHYSICS_DEBUGMODE[PHYSICS_DEBUGMODE["JOINTS_AND_COLLIDER"] = 1] = "JOINTS_AND_COLLIDER";
-        PHYSICS_DEBUGMODE[PHYSICS_DEBUGMODE["BOUNDING_BOXES"] = 2] = "BOUNDING_BOXES";
-        PHYSICS_DEBUGMODE[PHYSICS_DEBUGMODE["CONTACTS"] = 3] = "CONTACTS";
-        PHYSICS_DEBUGMODE[PHYSICS_DEBUGMODE["PHYSIC_OBJECTS_ONLY"] = 4] = "PHYSIC_OBJECTS_ONLY";
+        PHYSICS_DEBUGMODE[PHYSICS_DEBUGMODE["NONE"] = 0] = "NONE";
+        PHYSICS_DEBUGMODE[PHYSICS_DEBUGMODE["COLLIDERS"] = 1] = "COLLIDERS";
+        PHYSICS_DEBUGMODE[PHYSICS_DEBUGMODE["JOINTS_AND_COLLIDER"] = 2] = "JOINTS_AND_COLLIDER";
+        PHYSICS_DEBUGMODE[PHYSICS_DEBUGMODE["BOUNDING_BOXES"] = 3] = "BOUNDING_BOXES";
+        PHYSICS_DEBUGMODE[PHYSICS_DEBUGMODE["CONTACTS"] = 4] = "CONTACTS";
+        PHYSICS_DEBUGMODE[PHYSICS_DEBUGMODE["PHYSIC_OBJECTS_ONLY"] = 5] = "PHYSIC_OBJECTS_ONLY";
     })(PHYSICS_DEBUGMODE = FudgeCore.PHYSICS_DEBUGMODE || (FudgeCore.PHYSICS_DEBUGMODE = {}));
     class RayHitInfo {
         hit;
@@ -9353,28 +8249,26 @@ var FudgeCore;
         hitPoint;
         rigidbodyComponent;
         hitNormal;
-        rayOrigin = FudgeCore.Vector3.ZERO();
-        rayEnd = FudgeCore.Vector3.ZERO();
+        rayOrigin;
+        rayEnd;
         constructor() {
+            this.recycle();
+        }
+        recycle() {
             this.hit = false;
             this.hitDistance = 0;
             this.hitPoint = FudgeCore.Vector3.ZERO();
+            this.rigidbodyComponent = null;
             this.hitNormal = FudgeCore.Vector3.ZERO();
+            this.rayOrigin = FudgeCore.Vector3.ZERO();
+            this.rayEnd = FudgeCore.Vector3.ZERO();
         }
     }
     FudgeCore.RayHitInfo = RayHitInfo;
     class PhysicsSettings {
-        debugDraw = false;
-        physicsDebugMode = PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
         constructor(_defGroup, _defMask) {
             this.defaultCollisionGroup = _defGroup;
             this.defaultCollisionMask = _defMask;
-        }
-        get debugMode() {
-            return this.physicsDebugMode;
-        }
-        set debugMode(_value) {
-            this.physicsDebugMode = _value;
         }
         get disableSleeping() {
             return OIMO.Setting.disableSleeping;
@@ -9447,6 +8341,807 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
+    class JointCylindrical extends FudgeCore.JointAxial {
+        static iSubclass = FudgeCore.Joint.registerSubclass(JointCylindrical);
+        #springDampingRotation = 0;
+        #springFrequencyRotation = 0;
+        #motorForce = 0;
+        #maxRotor = 360;
+        #minRotor = 0;
+        #rotorTorque = 0;
+        #rotorSpeed = 0;
+        #rotor;
+        #rotorSpringDamper;
+        joint;
+        config = new OIMO.CylindricalJointConfig();
+        motor;
+        constructor(_bodyAnchor = null, _bodyTied = null, _axis = new FudgeCore.Vector3(0, 1, 0), _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
+            super(_bodyAnchor, _bodyTied, _axis, _localAnchor);
+        }
+        set springDamping(_value) {
+            super.springDamping = _value;
+            if (this.joint != null)
+                this.joint.getTranslationalSpringDamper().dampingRatio = _value;
+        }
+        set springFrequency(_value) {
+            super.springFrequency = _value;
+            if (this.joint != null)
+                this.joint.getTranslationalSpringDamper().frequency = _value;
+        }
+        get springDampingRotation() {
+            return this.#springDampingRotation;
+        }
+        set springDampingRotation(_value) {
+            this.#springDampingRotation = _value;
+            if (this.joint != null)
+                this.joint.getRotationalSpringDamper().dampingRatio = _value;
+        }
+        get springFrequencyRotation() {
+            return this.#springFrequencyRotation;
+        }
+        set springFrequencyRotation(_value) {
+            this.#springFrequencyRotation = _value;
+            if (this.joint != null)
+                this.joint.getRotationalSpringDamper().frequency = _value;
+        }
+        get maxRotor() {
+            return this.#maxRotor;
+        }
+        set maxRotor(_value) {
+            this.#maxRotor = _value;
+            if (this.joint != null)
+                this.joint.getRotationalLimitMotor().upperLimit = _value * Math.PI / 180;
+        }
+        get minRotor() {
+            return this.#minRotor;
+        }
+        set minRotor(_value) {
+            this.#minRotor = _value;
+            if (this.joint != null)
+                this.joint.getRotationalLimitMotor().lowerLimit = _value * Math.PI / 180;
+        }
+        get rotorSpeed() {
+            return this.#rotorSpeed;
+        }
+        set rotorSpeed(_value) {
+            this.#rotorSpeed = _value;
+            if (this.joint != null)
+                this.joint.getRotationalLimitMotor().motorSpeed = _value;
+        }
+        get rotorTorque() {
+            return this.#rotorTorque;
+        }
+        set rotorTorque(_value) {
+            this.#rotorTorque = _value;
+            if (this.joint != null)
+                this.joint.getRotationalLimitMotor().motorTorque = _value;
+        }
+        set maxMotor(_value) {
+            super.maxMotor = _value;
+            if (this.joint != null)
+                this.joint.getTranslationalLimitMotor().upperLimit = _value;
+        }
+        set minMotor(_value) {
+            super.minMotor = _value;
+            if (this.joint != null)
+                this.joint.getTranslationalLimitMotor().lowerLimit = _value;
+        }
+        set motorSpeed(_value) {
+            super.motorSpeed = _value;
+            if (this.joint != null)
+                this.joint.getTranslationalLimitMotor().motorSpeed = _value;
+        }
+        get motorForce() {
+            return this.#motorForce;
+        }
+        set motorForce(_value) {
+            this.#motorForce = _value;
+            if (this.joint != null)
+                this.joint.getTranslationalLimitMotor().motorForce = _value;
+        }
+        serialize() {
+            let serialization = this.#getMutator();
+            serialization[super.constructor.name] = super.serialize();
+            return serialization;
+        }
+        async deserialize(_serialization) {
+            this.#mutate(_serialization);
+            super.deserialize(_serialization[super.constructor.name]);
+            return this;
+        }
+        async mutate(_mutator) {
+            this.#mutate(_mutator);
+            this.deleteFromMutator(_mutator, this.#getMutator());
+            super.mutate(_mutator);
+        }
+        getMutator() {
+            let mutator = super.getMutator();
+            Object.assign(mutator, this.#getMutator());
+            return mutator;
+        }
+        #getMutator = () => {
+            let mutator = {
+                motorForce: this.motorForce,
+                springDampingRotation: this.springDampingRotation,
+                springFrequencyRotation: this.springFrequencyRotation,
+                maxRotor: this.maxRotor,
+                minRotor: this.minRotor,
+                rotorTorque: this.rotorTorque,
+                rotorSpeed: this.rotorSpeed
+            };
+            return mutator;
+        };
+        #mutate = (_mutator) => {
+            this.motorForce = _mutator.motorForce;
+            this.rotorTorque = _mutator.rotorTorque;
+            this.rotorSpeed = _mutator.rotorSpeed;
+            this.maxRotor = _mutator.maxRotor;
+            this.minRotor = _mutator.minRotor;
+            this.springDampingRotation = _mutator.springDampingRotation;
+            this.springFrequencyRotation = _mutator.springFrequencyRotation;
+            this.springFrequency = _mutator.springFrequency;
+        };
+        constructJoint() {
+            this.#rotorSpringDamper = new OIMO.SpringDamper().setSpring(this.springFrequencyRotation, this.springDampingRotation);
+            this.motor = new OIMO.TranslationalLimitMotor().setLimits(super.minMotor, super.maxMotor);
+            this.motor.setMotor(super.motorSpeed, this.motorForce);
+            this.#rotor = new OIMO.RotationalLimitMotor().setLimits(this.minRotor * Math.PI / 180, this.maxRotor * Math.PI / 180);
+            this.#rotor.setMotor(this.rotorSpeed, this.rotorTorque);
+            this.config = new OIMO.CylindricalJointConfig();
+            super.constructJoint();
+            this.config.translationalSpringDamper = this.springDamper;
+            this.config.translationalLimitMotor = this.motor;
+            this.config.rotationalLimitMotor = this.#rotor;
+            this.config.rotationalSpringDamper = this.#rotorSpringDamper;
+            this.joint = new OIMO.CylindricalJoint(this.config);
+            this.configureJoint();
+        }
+    }
+    FudgeCore.JointCylindrical = JointCylindrical;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class JointPrismatic extends FudgeCore.JointAxial {
+        static iSubclass = FudgeCore.Joint.registerSubclass(JointPrismatic);
+        #motorForce = 0;
+        joint;
+        config = new OIMO.PrismaticJointConfig();
+        motor;
+        constructor(_bodyAnchor = null, _bodyTied = null, _axis = new FudgeCore.Vector3(0, 1, 0), _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
+            super(_bodyAnchor, _bodyTied, _axis, _localAnchor);
+            this.maxMotor = 10;
+            this.minMotor = -10;
+        }
+        get motorForce() {
+            return this.#motorForce;
+        }
+        set motorForce(_value) {
+            this.#motorForce = _value;
+            if (this.joint != null)
+                this.joint.getLimitMotor().motorForce = _value;
+        }
+        serialize() {
+            let serialization = {
+                motorForce: this.motorForce,
+                [super.constructor.name]: super.serialize()
+            };
+            return serialization;
+        }
+        async deserialize(_serialization) {
+            this.motorForce = _serialization.motorForce;
+            super.deserialize(_serialization[super.constructor.name]);
+            return this;
+        }
+        getMutator() {
+            let mutator = super.getMutator();
+            mutator.motorForce = this.motorForce;
+            return mutator;
+        }
+        async mutate(_mutator) {
+            this.motorForce = _mutator.motorForce;
+            delete _mutator.motorForce;
+            super.mutate(_mutator);
+        }
+        constructJoint() {
+            this.motor = new OIMO.TranslationalLimitMotor().setLimits(this.minMotor, this.maxMotor);
+            this.motor.setMotor(this.motorSpeed, this.motorForce);
+            this.config = new OIMO.PrismaticJointConfig();
+            super.constructJoint();
+            this.config.springDamper = this.springDamper;
+            this.config.limitMotor = this.motor;
+            this.joint = new OIMO.PrismaticJoint(this.config);
+            this.configureJoint();
+        }
+    }
+    FudgeCore.JointPrismatic = JointPrismatic;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class JointRagdoll extends FudgeCore.Joint {
+        static iSubclass = FudgeCore.Joint.registerSubclass(JointRagdoll);
+        #springDampingTwist = 0;
+        #springFrequencyTwist = 0;
+        #springDampingSwing = 0;
+        #springFrequencySwing = 0;
+        #maxMotorTwist = 360;
+        #minMotorTwist = 0;
+        #motorTorqueTwist = 0;
+        #motorSpeedTwist = 0;
+        #motorTwist;
+        #springDamperTwist;
+        #springDamperSwing;
+        #axisFirst;
+        #axisSecond;
+        #maxAngleFirst = 0;
+        #maxAngleSecond = 0;
+        joint;
+        config = new OIMO.RagdollJointConfig();
+        constructor(_bodyAnchor = null, _bodyTied = null, _axisFirst = new FudgeCore.Vector3(1, 0, 0), _axisSecond = new FudgeCore.Vector3(0, 0, 1), _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
+            super(_bodyAnchor, _bodyTied);
+            this.axisFirst = _axisFirst;
+            this.axisSecond = _axisSecond;
+            this.anchor = _localAnchor;
+        }
+        get axisFirst() {
+            return new FudgeCore.Vector3(this.#axisFirst.x, this.#axisFirst.y, this.#axisFirst.z);
+        }
+        set axisFirst(_value) {
+            this.#axisFirst = new OIMO.Vec3(_value.x, _value.y, _value.z);
+            this.disconnect();
+            this.dirtyStatus();
+        }
+        get axisSecond() {
+            return new FudgeCore.Vector3(this.#axisSecond.x, this.#axisSecond.y, this.#axisSecond.z);
+        }
+        set axisSecond(_value) {
+            this.#axisSecond = new OIMO.Vec3(_value.x, _value.y, _value.z);
+            this.disconnect();
+            this.dirtyStatus();
+        }
+        get maxAngleFirstAxis() {
+            return this.#maxAngleFirst * 180 / Math.PI;
+        }
+        set maxAngleFirstAxis(_value) {
+            this.#maxAngleFirst = _value * Math.PI / 180;
+            this.disconnect();
+            this.dirtyStatus();
+        }
+        get maxAngleSecondAxis() {
+            return this.#maxAngleSecond * 180 / Math.PI;
+        }
+        set maxAngleSecondAxis(_value) {
+            this.#maxAngleSecond = _value * Math.PI / 180;
+            this.disconnect();
+            this.dirtyStatus();
+        }
+        get springDampingTwist() {
+            return this.#springDampingTwist;
+        }
+        set springDampingTwist(_value) {
+            this.#springDampingTwist = _value;
+            if (this.joint != null)
+                this.joint.getTwistSpringDamper().dampingRatio = _value;
+        }
+        get springFrequencyTwist() {
+            return this.#springFrequencyTwist;
+        }
+        set springFrequencyTwist(_value) {
+            this.#springFrequencyTwist = _value;
+            if (this.joint != null)
+                this.joint.getTwistSpringDamper().frequency = _value;
+        }
+        get springDampingSwing() {
+            return this.#springDampingSwing;
+        }
+        set springDampingSwing(_value) {
+            this.#springDampingSwing = _value;
+            if (this.joint != null)
+                this.joint.getSwingSpringDamper().dampingRatio = _value;
+        }
+        get springFrequencySwing() {
+            return this.#springFrequencySwing;
+        }
+        set springFrequencySwing(_value) {
+            this.#springFrequencySwing = _value;
+            if (this.joint != null)
+                this.joint.getSwingSpringDamper().frequency = _value;
+        }
+        get maxMotorTwist() {
+            return this.#maxMotorTwist * 180 / Math.PI;
+        }
+        set maxMotorTwist(_value) {
+            _value *= Math.PI / 180;
+            this.#maxMotorTwist = _value;
+            if (this.joint != null)
+                this.joint.getTwistLimitMotor().upperLimit = _value;
+        }
+        get minMotorTwist() {
+            return this.#minMotorTwist * 180 / Math.PI;
+        }
+        set minMotorTwist(_value) {
+            _value *= Math.PI / 180;
+            this.#minMotorTwist = _value;
+            if (this.joint != null)
+                this.joint.getTwistLimitMotor().lowerLimit = _value;
+        }
+        get motorSpeedTwist() {
+            return this.#motorSpeedTwist;
+        }
+        set motorSpeedTwist(_value) {
+            this.#motorSpeedTwist = _value;
+            if (this.joint != null)
+                this.joint.getTwistLimitMotor().motorSpeed = _value;
+        }
+        get motorTorqueTwist() {
+            return this.#motorTorqueTwist;
+        }
+        set motorTorqueTwist(_value) {
+            this.#motorTorqueTwist = _value;
+            if (this.joint != null)
+                this.joint.getTwistLimitMotor().motorTorque = _value;
+        }
+        serialize() {
+            let serialization = this.#getMutator();
+            serialization.axisFirst = this.axisFirst.serialize();
+            serialization.axisSecond = this.axisSecond.serialize();
+            serialization[super.constructor.name] = super.serialize();
+            return serialization;
+        }
+        async deserialize(_serialization) {
+            await this.axisFirst.deserialize(_serialization.axisFirst);
+            await this.axisSecond.deserialize(_serialization.axisSecond);
+            this.#mutate(_serialization);
+            super.deserialize(_serialization[super.constructor.name]);
+            return this;
+        }
+        async mutate(_mutator) {
+            this.axisFirst = new FudgeCore.Vector3(...(Object.values(_mutator.axisFirst)));
+            this.axisSecond = new FudgeCore.Vector3(...(Object.values(_mutator.axisSecond)));
+            delete _mutator.axisFirst;
+            delete _mutator.axisSecond;
+            this.#mutate(_mutator);
+            this.deleteFromMutator(_mutator, this.#getMutator());
+            super.mutate(_mutator);
+        }
+        getMutator() {
+            let mutator = super.getMutator();
+            Object.assign(mutator, this.#getMutator());
+            mutator.axisFirst = this.axisFirst.getMutator();
+            mutator.axisSecond = this.axisSecond.getMutator();
+            return mutator;
+        }
+        #getMutator = () => {
+            let mutator = {
+                maxAngleFirst: this.#maxAngleFirst,
+                maxAngleSecond: this.#maxAngleSecond,
+                springDampingTwist: this.springDampingTwist,
+                springFrequencyTwist: this.springFrequencyTwist,
+                springDampingSwing: this.springDampingSwing,
+                springFrequencySwing: this.springFrequencySwing,
+                maxMotorTwist: this.#maxMotorTwist,
+                minMotorTwist: this.#minMotorTwist,
+                motorSpeedTwist: this.motorSpeedTwist,
+                motorTorqueTwist: this.motorTorqueTwist
+            };
+            return mutator;
+        };
+        #mutate = (_mutator) => {
+            this.#maxAngleFirst = _mutator.maxAngleFirst;
+            this.#maxAngleSecond = _mutator.maxAngleSecond;
+            this.springDampingTwist = _mutator.springDampingTwist;
+            this.springFrequencyTwist = _mutator.springFrequencyTwist;
+            this.springDampingSwing = _mutator.springDampingSwing;
+            this.springFrequencySwing = _mutator.springFrequencySwing;
+            this.maxMotorTwist = _mutator.maxMotorTwist;
+            this.minMotorTwist = _mutator.minMotorTwist;
+            this.motorSpeedTwist = _mutator.motorSpeedTwist;
+            this.motorTorqueTwist = _mutator.motorTorqueTwist;
+        };
+        constructJoint() {
+            this.#springDamperTwist = new OIMO.SpringDamper().setSpring(this.springFrequencyTwist, this.springDampingTwist);
+            this.#springDamperSwing = new OIMO.SpringDamper().setSpring(this.springFrequencySwing, this.springDampingSwing);
+            this.#motorTwist = new OIMO.RotationalLimitMotor().setLimits(this.minMotorTwist, this.maxMotorTwist);
+            this.#motorTwist.setMotor(this.motorSpeedTwist, this.motorTorqueTwist);
+            this.config = new OIMO.RagdollJointConfig();
+            super.constructJoint(this.axisFirst, this.axisSecond);
+            this.config.swingSpringDamper = this.#springDamperSwing;
+            this.config.twistSpringDamper = this.#springDamperTwist;
+            this.config.twistLimitMotor = this.#motorTwist;
+            this.config.maxSwingAngle1 = this.#maxAngleFirst;
+            this.config.maxSwingAngle2 = this.#maxAngleSecond;
+            this.joint = new OIMO.RagdollJoint(this.config);
+            super.configureJoint();
+        }
+    }
+    FudgeCore.JointRagdoll = JointRagdoll;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class JointRevolute extends FudgeCore.JointAxial {
+        static iSubclass = FudgeCore.Joint.registerSubclass(JointRevolute);
+        #motorTorque = 0;
+        #rotor;
+        joint;
+        config = new OIMO.RevoluteJointConfig();
+        constructor(_bodyAnchor = null, _bodyTied = null, _axis = new FudgeCore.Vector3(0, 1, 0), _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
+            super(_bodyAnchor, _bodyTied, _axis, _localAnchor);
+            this.maxMotor = 360;
+            this.minMotor = 0;
+        }
+        set maxMotor(_value) {
+            super.maxMotor = _value;
+            _value *= Math.PI / 180;
+            if (this.joint)
+                this.joint.getLimitMotor().upperLimit = _value;
+        }
+        set minMotor(_value) {
+            super.minMotor = _value;
+            if (this.joint)
+                this.joint.getLimitMotor().lowerLimit = _value * Math.PI / 180;
+        }
+        get motorTorque() {
+            return this.#motorTorque;
+        }
+        set motorTorque(_value) {
+            this.#motorTorque = _value;
+            if (this.joint != null)
+                this.joint.getLimitMotor().motorTorque = _value;
+        }
+        serialize() {
+            let serialization = {
+                motorTorque: this.motorTorque,
+                [super.constructor.name]: super.serialize()
+            };
+            return serialization;
+        }
+        async deserialize(_serialization) {
+            this.motorTorque = _serialization.motorTorque;
+            super.deserialize(_serialization[super.constructor.name]);
+            return this;
+        }
+        getMutator() {
+            let mutator = super.getMutator();
+            mutator.motorTorque = this.motorTorque;
+            return mutator;
+        }
+        async mutate(_mutator) {
+            this.motorTorque = _mutator.motorTorque;
+            delete _mutator.motorTorque;
+            super.mutate(_mutator);
+        }
+        constructJoint() {
+            this.#rotor = new OIMO.RotationalLimitMotor().setLimits(super.minMotor * Math.PI / 180, super.maxMotor * Math.PI / 180);
+            this.#rotor.setMotor(this.motorSpeed, this.motorTorque);
+            this.config = new OIMO.RevoluteJointConfig();
+            super.constructJoint();
+            this.config.springDamper = this.springDamper;
+            this.config.limitMotor = this.#rotor;
+            this.joint = new OIMO.RevoluteJoint(this.config);
+            this.configureJoint();
+        }
+    }
+    FudgeCore.JointRevolute = JointRevolute;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class JointSpherical extends FudgeCore.Joint {
+        static iSubclass = FudgeCore.Joint.registerSubclass(JointSpherical);
+        #springDamping = 0;
+        #springFrequency = 0;
+        #springDamper;
+        joint;
+        config = new OIMO.SphericalJointConfig();
+        constructor(_bodyAnchor = null, _bodyTied = null, _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
+            super(_bodyAnchor, _bodyTied);
+            this.anchor = new FudgeCore.Vector3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
+        }
+        get springDamping() {
+            return this.#springDamping;
+        }
+        set springDamping(_value) {
+            this.#springDamping = _value;
+            if (this.joint != null)
+                this.joint.getSpringDamper().dampingRatio = _value;
+        }
+        get springFrequency() {
+            return this.#springFrequency;
+        }
+        set springFrequency(_value) {
+            this.#springFrequency = _value;
+            if (this.joint != null)
+                this.joint.getSpringDamper().frequency = _value;
+        }
+        serialize() {
+            let serialization = {
+                springDamping: this.springDamping,
+                springFrequency: this.springFrequency,
+                [super.constructor.name]: super.serialize()
+            };
+            return serialization;
+        }
+        async deserialize(_serialization) {
+            this.springDamping = _serialization.springDamping;
+            this.springFrequency = _serialization.springFrequency;
+            super.deserialize(_serialization[super.constructor.name]);
+            return this;
+        }
+        getMutator() {
+            let mutator = super.getMutator();
+            mutator.springDamping = this.springDamping;
+            mutator.springFrequency = this.springFrequency;
+            return mutator;
+        }
+        async mutate(_mutator) {
+            this.springDamping = _mutator.springDamping;
+            this.springFrequency = _mutator.springFrequency;
+            delete _mutator.springDamping;
+            delete _mutator.springFrequency;
+            super.mutate(_mutator);
+        }
+        constructJoint() {
+            this.#springDamper = new OIMO.SpringDamper().setSpring(this.springFrequency, this.springDamping);
+            this.config = new OIMO.SphericalJointConfig();
+            super.constructJoint();
+            this.config.springDamper = this.#springDamper;
+            this.joint = new OIMO.SphericalJoint(this.config);
+            super.configureJoint();
+        }
+    }
+    FudgeCore.JointSpherical = JointSpherical;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class JointUniversal extends FudgeCore.Joint {
+        static iSubclass = FudgeCore.Joint.registerSubclass(JointUniversal);
+        #springDampingFirst = 0;
+        #springFrequencyFirst = 0;
+        #springDampingSecond = 0;
+        #springFrequencySecond = 0;
+        #maxRotorFirst = 360;
+        #minRotorFirst = 0;
+        #rotorTorqueFirst = 0;
+        #rotorSpeedFirst = 0;
+        #maxRotorSecond = 360;
+        #minRotorSecond = 0;
+        #rotorTorqueSecond = 0;
+        #rotorSpeedSecond = 0;
+        #motorFirst;
+        #motorSecond;
+        #axisSpringDamperFirst;
+        #axisSpringDamperSecond;
+        #axisFirst;
+        #axisSecond;
+        joint;
+        config = new OIMO.UniversalJointConfig();
+        constructor(_bodyAnchor = null, _bodyTied = null, _axisFirst = new FudgeCore.Vector3(1, 0, 0), _axisSecond = new FudgeCore.Vector3(0, 0, 1), _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
+            super(_bodyAnchor, _bodyTied);
+            this.axisFirst = _axisFirst;
+            this.axisSecond = _axisSecond;
+            this.anchor = _localAnchor;
+        }
+        get axisFirst() {
+            return new FudgeCore.Vector3(this.#axisFirst.x, this.#axisFirst.y, this.#axisFirst.z);
+        }
+        set axisFirst(_value) {
+            this.#axisFirst = new OIMO.Vec3(_value.x, _value.y, _value.z);
+            this.disconnect();
+            this.dirtyStatus();
+        }
+        get axisSecond() {
+            return new FudgeCore.Vector3(this.#axisSecond.x, this.#axisSecond.y, this.#axisSecond.z);
+        }
+        set axisSecond(_value) {
+            this.#axisSecond = new OIMO.Vec3(_value.x, _value.y, _value.z);
+            this.disconnect();
+            this.dirtyStatus();
+        }
+        get springDampingFirst() {
+            return this.#springDampingFirst;
+        }
+        set springDampingFirst(_value) {
+            this.#springDampingFirst = _value;
+            if (this.joint != null)
+                this.joint.getSpringDamper1().dampingRatio = _value;
+        }
+        get springFrequencyFirst() {
+            return this.#springFrequencyFirst;
+        }
+        set springFrequencyFirst(_value) {
+            this.#springFrequencyFirst = _value;
+            if (this.joint != null)
+                this.joint.getSpringDamper1().frequency = _value;
+        }
+        get springDampingSecond() {
+            return this.#springDampingSecond;
+        }
+        set springDampingSecond(_value) {
+            this.#springDampingSecond = _value;
+            if (this.joint != null)
+                this.joint.getSpringDamper2().dampingRatio = _value;
+        }
+        get springFrequencySecond() {
+            return this.#springFrequencySecond;
+        }
+        set springFrequencySecond(_value) {
+            this.#springFrequencySecond = _value;
+            if (this.joint != null)
+                this.joint.getSpringDamper2().frequency = _value;
+        }
+        get maxRotorFirst() {
+            return this.#maxRotorFirst;
+        }
+        set maxRotorFirst(_value) {
+            this.#maxRotorFirst = _value;
+            if (this.joint != null)
+                this.joint.getLimitMotor1().upperLimit = _value * Math.PI / 180;
+        }
+        get minRotorFirst() {
+            return this.#minRotorFirst;
+        }
+        set minRotorFirst(_value) {
+            this.#minRotorFirst = _value;
+            if (this.joint != null)
+                this.joint.getLimitMotor1().lowerLimit = _value * Math.PI / 180;
+        }
+        get rotorSpeedFirst() {
+            return this.#rotorSpeedFirst;
+        }
+        set rotorSpeedFirst(_value) {
+            this.#rotorSpeedFirst = _value;
+            if (this.joint != null)
+                this.joint.getLimitMotor1().motorSpeed = _value;
+        }
+        get rotorTorqueFirst() {
+            return this.#rotorTorqueFirst;
+        }
+        set rotorTorqueFirst(_value) {
+            this.#rotorTorqueFirst = _value;
+            if (this.joint != null)
+                this.joint.getLimitMotor1().motorTorque = _value;
+        }
+        get maxRotorSecond() {
+            return this.#maxRotorSecond;
+        }
+        set maxRotorSecond(_value) {
+            this.#maxRotorSecond = _value;
+            if (this.joint != null)
+                this.joint.getLimitMotor2().upperLimit = _value * Math.PI / 180;
+        }
+        get minRotorSecond() {
+            return this.#minRotorSecond;
+        }
+        set minRotorSecond(_value) {
+            this.#minRotorSecond = _value;
+            if (this.joint != null)
+                this.joint.getLimitMotor2().lowerLimit = _value * Math.PI / 180;
+        }
+        get rotorSpeedSecond() {
+            return this.#rotorSpeedSecond;
+        }
+        set rotorSpeedSecond(_value) {
+            this.#rotorSpeedSecond = _value;
+            if (this.joint != null)
+                this.joint.getLimitMotor2().motorSpeed = _value;
+        }
+        get rotorTorqueSecond() {
+            return this.#rotorTorqueSecond;
+        }
+        set rotorTorqueSecond(_value) {
+            this.#rotorTorqueSecond = _value;
+            if (this.joint != null)
+                this.joint.getLimitMotor2().motorTorque = _value;
+        }
+        serialize() {
+            let serialization = this.#getMutator();
+            serialization.firstAxis = this.axisFirst.serialize();
+            serialization.secondAxis = this.axisSecond.serialize();
+            serialization[super.constructor.name] = super.serialize();
+            return serialization;
+        }
+        async deserialize(_serialization) {
+            this.axisFirst = await new FudgeCore.Vector3().deserialize(_serialization.axisFirst);
+            this.axisSecond = await new FudgeCore.Vector3().deserialize(_serialization.axisSecond);
+            this.#mutate(_serialization);
+            super.deserialize(_serialization[super.constructor.name]);
+            return this;
+        }
+        async mutate(_mutator) {
+            this.axisFirst = new FudgeCore.Vector3(...(Object.values(_mutator.axisFirst)));
+            this.axisSecond = new FudgeCore.Vector3(...(Object.values(_mutator.axisSecond)));
+            delete _mutator.axisFirst;
+            delete _mutator.axisSecond;
+            this.#mutate(_mutator);
+            this.deleteFromMutator(_mutator, this.#getMutator());
+            super.mutate(_mutator);
+        }
+        getMutator() {
+            let mutator = super.getMutator();
+            Object.assign(mutator, this.#getMutator());
+            mutator.axisFirst = this.axisFirst.getMutator();
+            mutator.axisSecond = this.axisSecond.getMutator();
+            return mutator;
+        }
+        #getMutator = () => {
+            let mutator = {
+                springDampingFirst: this.#springDampingFirst,
+                springFrequencyFirst: this.#springFrequencyFirst,
+                springDampingSecond: this.#springDampingSecond,
+                springFrequencySecond: this.#springFrequencySecond,
+                maxRotorFirst: this.#maxRotorFirst,
+                minRotorFirst: this.#minRotorFirst,
+                rotorSpeedFirst: this.#rotorSpeedFirst,
+                rotorTorqueFirst: this.#rotorTorqueFirst,
+                maxRotorSecond: this.#maxRotorSecond,
+                minRotorSecond: this.#minRotorSecond,
+                rotorSpeedSecond: this.#rotorSpeedSecond,
+                rotorTorqueSecond: this.#rotorTorqueSecond
+            };
+            return mutator;
+        };
+        #mutate = (_mutator) => {
+            this.springDampingFirst = _mutator.springDampingFirst;
+            this.springFrequencyFirst = _mutator.springFrequencyFirst;
+            this.springDampingSecond = _mutator.springDampingSecond;
+            this.springFrequencySecond = _mutator.springFrequencySecond;
+            this.maxRotorFirst = _mutator.maxRotorFirst;
+            this.minRotorFirst = _mutator.minRotorFirst;
+            this.rotorSpeedFirst = _mutator.rotorSpeedFirst;
+            this.rotorTorqueFirst = _mutator.rotorTorqueFirst;
+            this.maxRotorSecond = _mutator.maxRotorSecond;
+            this.minRotorSecond = _mutator.minRotorSecond;
+            this.rotorSpeedSecond = _mutator.rotorSpeedSecond;
+            this.rotorTorqueSecond = _mutator.rotorTorqueSecond;
+        };
+        constructJoint() {
+            this.#axisSpringDamperFirst = new OIMO.SpringDamper().setSpring(this.#springFrequencyFirst, this.#springDampingFirst);
+            this.#axisSpringDamperSecond = new OIMO.SpringDamper().setSpring(this.#springFrequencySecond, this.#springDampingSecond);
+            this.#motorFirst = new OIMO.RotationalLimitMotor().setLimits(this.#minRotorFirst * Math.PI / 180, this.#maxRotorFirst * Math.PI / 180);
+            this.#motorFirst.setMotor(this.#rotorSpeedFirst, this.#rotorTorqueFirst);
+            this.#motorSecond = new OIMO.RotationalLimitMotor().setLimits(this.#minRotorFirst * Math.PI / 180, this.#maxRotorFirst * Math.PI / 180);
+            this.#motorSecond.setMotor(this.#rotorSpeedFirst, this.#rotorTorqueFirst);
+            this.config = new OIMO.UniversalJointConfig();
+            super.constructJoint(this.#axisFirst, this.#axisSecond);
+            this.config.limitMotor1 = this.#motorFirst;
+            this.config.limitMotor2 = this.#motorSecond;
+            this.config.springDamper1 = this.#axisSpringDamperFirst;
+            this.config.springDamper2 = this.#axisSpringDamperSecond;
+            this.joint = new OIMO.UniversalJoint(this.config);
+            super.configureJoint();
+        }
+    }
+    FudgeCore.JointUniversal = JointUniversal;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class JointWelding extends FudgeCore.Joint {
+        static iSubclass = FudgeCore.Joint.registerSubclass(JointWelding);
+        joint;
+        config = new OIMO.GenericJointConfig();
+        constructor(_bodyAnchor = null, _bodyTied = null, _localAnchor = new FudgeCore.Vector3(0, 0, 0)) {
+            super(_bodyAnchor, _bodyTied);
+            this.anchor = new FudgeCore.Vector3(_localAnchor.x, _localAnchor.y, _localAnchor.z);
+        }
+        serialize() {
+            let serialization = {
+                [super.constructor.name]: super.serialize()
+            };
+            return serialization;
+        }
+        async deserialize(_serialization) {
+            super.deserialize(_serialization[super.constructor.name]);
+            return this;
+        }
+        constructJoint() {
+            this.config = new OIMO.GenericJointConfig();
+            super.constructJoint(new OIMO.Mat3(), new OIMO.Mat3());
+            this.joint = new OIMO.GenericJoint(this.config);
+            this.joint.setAllowCollision(this.internalCollision);
+        }
+    }
+    FudgeCore.JointWelding = JointWelding;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
     class Physics {
         static settings;
         static world = Physics.initializePhysics();
@@ -9456,7 +9151,7 @@ var FudgeCore;
         bodyList = new Array();
         jointList = new Array();
         static initializePhysics() {
-            if (typeof OIMO !== "undefined" && this.world == null) {
+            if (typeof OIMO !== "undefined") {
                 this.world = new Physics();
                 this.settings = new FudgeCore.PhysicsSettings(FudgeCore.COLLISION_GROUP.DEFAULT, (FudgeCore.COLLISION_GROUP.DEFAULT | FudgeCore.COLLISION_GROUP.GROUP_1 | FudgeCore.COLLISION_GROUP.GROUP_2 | FudgeCore.COLLISION_GROUP.GROUP_3 | FudgeCore.COLLISION_GROUP.GROUP_4));
                 this.world.createWorld();
@@ -9465,7 +9160,7 @@ var FudgeCore;
             }
             return this.world;
         }
-        static raycast(_origin, _direction, _length = 1, _group = FudgeCore.COLLISION_GROUP.DEFAULT) {
+        static raycast(_origin, _direction, _length = 1, _debugDraw = false, _group = FudgeCore.COLLISION_GROUP.DEFAULT) {
             let hitInfo = new FudgeCore.RayHitInfo();
             let ray = new OIMO.RayCastClosest();
             let begin = new OIMO.Vec3(_origin.x, _origin.y, _origin.z);
@@ -9503,7 +9198,7 @@ var FudgeCore;
                 hitInfo.rayOrigin = _origin;
                 hitInfo.hitPoint = new FudgeCore.Vector3(end.x, end.y, end.z);
             }
-            if (Physics.settings.debugDraw) {
+            if (_debugDraw) {
                 Physics.world.debugDraw.debugRay(hitInfo.rayOrigin, hitInfo.hitPoint, new FudgeCore.Color(0, 1, 0, 1));
             }
             return hitInfo;
@@ -9511,13 +9206,16 @@ var FudgeCore;
         static adjustTransforms(_branch, _toMesh = false) {
             FudgeCore.Render.prepare(_branch, { ignorePhysics: true });
             for (let node of FudgeCore.Render.nodesPhysics)
-                node.getComponent(FudgeCore.ComponentRigidbody).updateFromWorld(_toMesh);
+                node.getComponent(FudgeCore.ComponentRigidbody).initialize();
         }
         static getRayEndPoint(start, direction, length) {
-            let origin = new FudgeCore.Vector3(start.x, start.y, start.z);
-            let scaledDirection = direction;
+            let origin = FudgeCore.Recycler.borrow(FudgeCore.Vector3);
+            origin.set(start.x, start.y, start.z);
+            let scaledDirection = direction.clone;
             scaledDirection.scale(length);
             let endpoint = FudgeCore.Vector3.SUM(scaledDirection, origin);
+            FudgeCore.Recycler.store(scaledDirection);
+            FudgeCore.Recycler.store(endpoint);
             return new OIMO.Vec3(endpoint.x, endpoint.y, endpoint.z);
         }
         static getRayDistance(origin, hitPoint) {
@@ -9570,27 +9268,25 @@ var FudgeCore;
                 Physics.world.oimoWorld.step(_deltaTime * FudgeCore.Time.game.getScale());
             }
         }
-        draw(_cmpCamera) {
-            Physics.world.debugDraw.getDebugModeFromSettings();
+        draw(_cmpCamera, _mode) {
+            Physics.world.debugDraw.setDebugMode(_mode);
             Physics.world.mainCam = _cmpCamera;
             Physics.world.oimoWorld.debugDraw();
             Physics.world.debugDraw.drawBuffers();
             Physics.world.debugDraw.clearBuffers();
         }
         connectJoints() {
-            let jointsToConnect = new Array();
-            this.jointList.forEach(function (value) {
-                jointsToConnect.push(value);
-            });
-            this.jointList.splice(0, this.jointList.length);
-            jointsToConnect.forEach((value) => {
-                if (value.checkConnection() == false) {
-                    value.connect();
+            let jointsToConnect = this.jointList;
+            this.jointList = [];
+            jointsToConnect.forEach((_joint) => {
+                if (_joint.isConnected() == false) {
+                    _joint.connect();
                 }
             });
         }
         changeJointStatus(_cmpJoint) {
-            this.jointList.push(_cmpJoint);
+            if (this.jointList.indexOf(_cmpJoint) < 0)
+                this.jointList.push(_cmpJoint);
         }
         distributeBodyID() {
             let freeId = 0;
@@ -9736,6 +9432,10 @@ var FudgeCore;
             this.min.min(_include);
             this.max.max(_include);
         }
+        recycle() {
+            this.min.set(Infinity, Infinity, Infinity);
+            this.max.set(-Infinity, -Infinity, -Infinity);
+        }
     }
     FudgeCore.Box = Box;
 })(FudgeCore || (FudgeCore = {}));
@@ -9787,7 +9487,7 @@ var FudgeCore;
                 let difference = FudgeCore.Vector3.DIFFERENCE(this.posMesh, vertex);
                 let distance = Math.abs(FudgeCore.Vector3.DOT(normal, difference));
                 if (distance < minDistance) {
-                    result = normal.copy;
+                    result = normal.clone;
                     minDistance = distance;
                 }
             }
@@ -9815,10 +9515,13 @@ var FudgeCore;
         static pickCamera(_branch, _cmpCamera, _posProjection) {
             let ray = new FudgeCore.Ray(new FudgeCore.Vector3(-_posProjection.x, _posProjection.y, 1));
             let length = ray.direction.magnitude;
-            let mtxCamera = _cmpCamera.mtxPivot;
-            if (_cmpCamera.node)
-                mtxCamera = FudgeCore.Matrix4x4.MULTIPLICATION(_cmpCamera.node.mtxWorld, _cmpCamera.mtxPivot);
-            ray.transform(mtxCamera);
+            if (_cmpCamera.node) {
+                let mtxCamera = FudgeCore.Matrix4x4.MULTIPLICATION(_cmpCamera.node.mtxWorld, _cmpCamera.mtxPivot);
+                ray.transform(mtxCamera);
+                FudgeCore.Recycler.store(mtxCamera);
+            }
+            else
+                ray.transform(_cmpCamera.mtxPivot);
             let picks = Picker.pickRay(_branch, ray, length * _cmpCamera.getNear(), length * _cmpCamera.getFar());
             return picks;
         }
@@ -9891,8 +9594,11 @@ var FudgeCore;
             _branch.radius = 0;
             _branch.dispatchEventToTargetOnly(new Event("renderPrepare"));
             _branch.timestampUpdate = Render.timestampUpdate;
-            if (_branch.cmpTransform && _branch.cmpTransform.isActive)
-                _branch.mtxWorld.set(FudgeCore.Matrix4x4.MULTIPLICATION(_mtxWorld, _branch.cmpTransform.mtxLocal));
+            if (_branch.cmpTransform && _branch.cmpTransform.isActive) {
+                let mtxWorldBranch = FudgeCore.Matrix4x4.MULTIPLICATION(_mtxWorld, _branch.cmpTransform.mtxLocal);
+                _branch.mtxWorld.set(mtxWorldBranch);
+                FudgeCore.Recycler.store(mtxWorldBranch);
+            }
             else
                 _branch.mtxWorld.set(_mtxWorld);
             let cmpRigidbody = _branch.getComponent(FudgeCore.ComponentRigidbody);
@@ -9916,7 +9622,9 @@ var FudgeCore;
             let cmpMesh = _branch.getComponent(FudgeCore.ComponentMesh);
             let cmpMaterial = _branch.getComponent(FudgeCore.ComponentMaterial);
             if (cmpMesh && cmpMesh.isActive && cmpMaterial && cmpMaterial.isActive) {
-                cmpMesh.mtxWorld = FudgeCore.Matrix4x4.MULTIPLICATION(_branch.mtxWorld, cmpMesh.mtxPivot);
+                let mtxWorldMesh = FudgeCore.Matrix4x4.MULTIPLICATION(_branch.mtxWorld, cmpMesh.mtxPivot);
+                cmpMesh.mtxWorld.set(mtxWorldMesh);
+                FudgeCore.Recycler.store(mtxWorldMesh);
                 let shader = cmpMaterial.material.getShader();
                 if (_shadersUsed.indexOf(shader) < 0)
                     _shadersUsed.push(shader);
@@ -9931,7 +9639,9 @@ var FudgeCore;
                 _branch.nNodesInBranch += child.nNodesInBranch;
                 let cmpMeshChild = child.getComponent(FudgeCore.ComponentMesh);
                 let position = cmpMeshChild ? cmpMeshChild.mtxWorld.translation : child.mtxWorld.translation;
-                _branch.radius = Math.max(_branch.radius, FudgeCore.Vector3.DIFFERENCE(position, _branch.mtxWorld.translation).magnitude + child.radius);
+                position = position.clone;
+                _branch.radius = Math.max(_branch.radius, position.getDistance(_branch.mtxWorld.translation) + child.radius);
+                FudgeCore.Recycler.store(position);
             }
             if (firstLevel) {
                 Render.dispatchEvent(new Event("renderPrepareEnd"));
@@ -9986,18 +9696,24 @@ var FudgeCore;
             if (!_node.mtxLocal) {
                 throw (new Error("ComponentRigidbody requires ComponentTransform at the same Node"));
             }
+            if (!_cmpRigidbody.isInitialized || FudgeCore.Project.mode == FudgeCore.MODE.EDITOR)
+                _cmpRigidbody.initialize();
             _cmpRigidbody.checkCollisionEvents();
-            if (_cmpRigidbody.typeBody == FudgeCore.BODY_TYPE.KINEMATIC) {
-                let mtxPivotWorld = FudgeCore.Matrix4x4.MULTIPLICATION(_node.mtxWorld, _cmpRigidbody.mtxPivot);
+            if (_cmpRigidbody.typeBody == FudgeCore.BODY_TYPE.KINEMATIC || FudgeCore.Project.mode == FudgeCore.MODE.EDITOR) {
+                let mtxPivotWorld = FudgeCore.Matrix4x4.MULTIPLICATION(_node.mtxWorld, _cmpRigidbody.mtxPivotUnscaled);
                 _cmpRigidbody.setPosition(mtxPivotWorld.translation);
                 _cmpRigidbody.setRotation(mtxPivotWorld.rotation);
+                FudgeCore.Recycler.store(mtxPivotWorld);
                 return;
             }
-            let mutator = {};
-            mutator["rotation"] = _cmpRigidbody.getRotation();
-            mutator["translation"] = _cmpRigidbody.getPosition();
-            _node.mtxWorld.mutate(mutator);
-            _node.mtxLocal.set(FudgeCore.Matrix4x4.RELATIVE(_node.mtxWorld, _node.getParent().mtxWorld));
+            let mtxWorld = FudgeCore.Matrix4x4.CONSTRUCTION({ translation: _cmpRigidbody.getPosition(), rotation: _cmpRigidbody.getRotation(), scaling: null });
+            mtxWorld.multiply(_cmpRigidbody.mtxPivotInverse);
+            _node.mtxWorld.translation = mtxWorld.translation;
+            _node.mtxWorld.rotation = mtxWorld.rotation;
+            let mtxLocal = FudgeCore.Matrix4x4.RELATIVE(_node.mtxWorld, _node.getParent().mtxWorld);
+            _node.mtxLocal.set(mtxLocal);
+            FudgeCore.Recycler.store(mtxWorld);
+            FudgeCore.Recycler.store(mtxLocal);
         }
     }
     FudgeCore.Render = Render;
@@ -10024,6 +9740,7 @@ var FudgeCore;
         frameSourceToRender = new FudgeCore.FramingScaled();
         adjustingFrames = true;
         adjustingCamera = true;
+        physicsDebugMode = FudgeCore.PHYSICS_DEBUGMODE.NONE;
         #branch = null;
         #crc2 = null;
         #canvas = null;
@@ -10081,10 +9798,10 @@ var FudgeCore;
             if (_calculateTransforms)
                 this.calculateTransforms();
             FudgeCore.Render.clear(this.camera.clrBackground);
-            if (FudgeCore.Physics.settings?.debugMode != FudgeCore.PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
+            if (this.physicsDebugMode != FudgeCore.PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
                 FudgeCore.Render.draw(this.camera);
-            if (FudgeCore.Physics.settings?.debugDraw) {
-                FudgeCore.Physics.world.draw(this.camera);
+            if (this.physicsDebugMode != FudgeCore.PHYSICS_DEBUGMODE.NONE) {
+                FudgeCore.Physics.world.draw(this.camera, this.physicsDebugMode);
             }
             this.#crc2.imageSmoothingEnabled = false;
             this.#crc2.drawImage(FudgeCore.Render.getCanvas(), this.rectSource.x, this.rectSource.y, this.rectSource.width, this.rectSource.height, this.rectDestination.x, this.rectDestination.y, this.rectDestination.width, this.rectDestination.height);
@@ -10100,12 +9817,20 @@ var FudgeCore;
             let rectCanvas = this.frameClientToCanvas.getRect(rectClient);
             this.#canvas.width = rectCanvas.width;
             this.#canvas.height = rectCanvas.height;
-            this.rectDestination = this.frameCanvasToDestination.getRect(rectCanvas);
-            this.rectSource = this.frameDestinationToSource.getRect(this.rectDestination);
+            let rectTemp;
+            rectTemp = this.frameCanvasToDestination.getRect(rectCanvas);
+            this.rectDestination.copy(rectTemp);
+            FudgeCore.Recycler.store(rectTemp);
+            rectTemp = this.frameDestinationToSource.getRect(this.rectDestination);
+            this.rectSource.copy(rectTemp);
+            FudgeCore.Recycler.store(rectTemp);
             this.rectSource.x = this.rectSource.y = 0;
             let rectRender = this.frameSourceToRender.getRect(this.rectSource);
             FudgeCore.Render.setRenderRectangle(rectRender);
             FudgeCore.Render.setCanvasSize(rectRender.width, rectRender.height);
+            FudgeCore.Recycler.store(rectClient);
+            FudgeCore.Recycler.store(rectCanvas);
+            FudgeCore.Recycler.store(rectRender);
         }
         adjustCamera() {
             let rect = FudgeCore.Render.getRenderRectangle();
@@ -10413,13 +10138,13 @@ var FudgeCore;
             await graph.deserialize(serialization);
             Project.register(graph);
             if (_replaceWithInstance && _node.getParent()) {
-                let instance = new FudgeCore.GraphInstance(graph);
+                let instance = await Project.createGraphInstance(graph);
                 _node.getParent().replaceChild(_node, instance);
             }
             return graph;
         }
         static async createGraphInstance(_graph) {
-            let instance = new FudgeCore.GraphInstance(null);
+            let instance = new FudgeCore.GraphInstance();
             await instance.set(_graph);
             return instance;
         }
@@ -10523,9 +10248,8 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
-    var ShaderFlat_1;
-    let ShaderFlat = ShaderFlat_1 = class ShaderFlat extends FudgeCore.Shader {
-        static iSubclass = FudgeCore.Shader.registerSubclass(ShaderFlat_1);
+    class ShaderFlat extends FudgeCore.Shader {
+        static iSubclass = FudgeCore.Shader.registerSubclass(ShaderFlat);
         static getCoat() {
             return FudgeCore.CoatColored;
         }
@@ -10539,7 +10263,7 @@ var FudgeCore;
             vec3 direction;
         };
 
-        const uint MAX_LIGHTS_DIRECTIONAL = 10u;
+        const uint MAX_LIGHTS_DIRECTIONAL = 100u;
 
         in vec3 a_position;
         in vec3 a_normal;
@@ -10577,10 +10301,7 @@ var FudgeCore;
             frag = u_color * v_color;
         }`;
         }
-    };
-    ShaderFlat = ShaderFlat_1 = __decorate([
-        FudgeCore.RenderInjectorShader.decorate
-    ], ShaderFlat);
+    }
     FudgeCore.ShaderFlat = ShaderFlat;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
@@ -10758,6 +10479,73 @@ var FudgeCore;
 })(FudgeCore || (FudgeCore = {}));
 var FudgeCore;
 (function (FudgeCore) {
+    class ShaderTextureFlat extends FudgeCore.Shader {
+        static iSubclass = FudgeCore.Shader.registerSubclass(ShaderTextureFlat);
+        static getCoat() { return FudgeCore.CoatTextured; }
+        static getVertexShaderSource() {
+            return `#version 300 es
+struct LightAmbient {
+  vec4 color;
+};
+struct LightDirectional {
+  vec4 color;
+  vec3 direction;
+};
+
+const uint MAX_LIGHTS_DIRECTIONAL = 100u;
+
+in vec3 a_position;
+in vec3 a_normal;
+in vec2 a_textureUVs;
+uniform mat4 u_world;
+uniform mat4 u_projection;
+uniform mat3 u_pivot;
+
+uniform LightAmbient u_ambient;
+uniform uint u_nLightsDirectional;
+uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
+flat out vec4 v_color;
+out vec2 v_textureUVs;
+
+void main() {
+  gl_Position = u_projection * vec4(a_position, 1.0);
+  vec3 normal = normalize(transpose(inverse(mat3(u_world))) * a_normal);
+
+  v_color = u_ambient.color;
+  for(uint i = 0u; i < u_nLightsDirectional; i++) {
+    float illumination = -dot(normal, u_directional[i].direction);
+    if(illumination > 0.0f)
+      v_color += illumination * u_directional[i].color; // vec4(1,1,1,1); // 
+  }
+
+  v_color.a = 1.0;
+  v_textureUVs = vec2(u_pivot * vec3(a_textureUVs, 1.0)).xy;
+}
+`;
+        }
+        static getFragmentShaderSource() {
+            return `#version 300 es
+precision mediump float;
+
+uniform vec4 u_color;
+flat in vec4 v_color;
+in vec2 v_textureUVs;
+uniform sampler2D u_texture;
+out vec4 frag;
+
+void main() {
+  vec4 colorTexture = texture(u_texture, v_textureUVs);
+  frag = u_color * v_color * colorTexture;
+  if(frag.a < 0.01)
+    discard;
+}
+`;
+        }
+    }
+    FudgeCore.ShaderTextureFlat = ShaderTextureFlat;
+})(FudgeCore || (FudgeCore = {}));
+var FudgeCore;
+(function (FudgeCore) {
     class ShaderUniColor extends FudgeCore.Shader {
         static iSubclass = FudgeCore.Shader.registerSubclass(ShaderUniColor);
         static getCoat() {
@@ -10806,11 +10594,28 @@ var FudgeCore;
             this.name = _name;
         }
         useRenderData() { }
+        refresh() {
+            this.renderData = null;
+        }
         serialize() {
-            return {};
+            let serialization = {
+                idResource: this.idResource,
+                name: this.name,
+                mipmap: MIPMAP[this.mipmap]
+            };
+            return serialization;
         }
         async deserialize(_serialization) {
+            FudgeCore.Project.register(this, _serialization.idResource);
+            this.name = _serialization.name;
+            this.mipmap = MIPMAP[_serialization.mipmap];
             return this;
+        }
+        getMutatorAttributeTypes(_mutator) {
+            let types = super.getMutatorAttributeTypes(_mutator);
+            if (types.mipmap)
+                types.mipmap = MIPMAP;
+            return types;
         }
         reduceMutator(_mutator) {
             delete _mutator.idResource;
@@ -10849,15 +10654,13 @@ var FudgeCore;
         serialize() {
             return {
                 url: this.url,
-                idResource: this.idResource,
-                name: this.name,
-                type: this.type
+                type: this.type,
+                [super.constructor.name]: super.serialize()
             };
         }
         async deserialize(_serialization) {
-            FudgeCore.Project.register(this, _serialization.idResource);
+            await super.deserialize(_serialization[super.constructor.name]);
             await this.load(_serialization.url);
-            this.name = _serialization.name;
             return this;
         }
         async mutate(_mutator) {

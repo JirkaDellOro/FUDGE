@@ -25,10 +25,18 @@ namespace Fudge {
 
     public listResources(): void {
       while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild));
-      this.table = new ƒui.Table<ƒ.SerializableResource>(new ControllerTableResource(), Object.values(ƒ.Project.resources));
+      this.table = new ƒui.Table<ƒ.SerializableResource>(new ControllerTableResource(), Object.values(ƒ.Project.resources), "type");
       this.dom.appendChild(this.table);
-      this.dom.title = "Right click to create new resource";
-      this.table.title = "Select resource to edit";
+      this.dom.title = "● Right click to create new resource.\n● Select or drag resource.";
+      this.table.title = `● Select to edit in "Properties"\n●  Drag to "Properties" or "Components" to use if applicable.`;
+
+      for (let tr of this.table.querySelectorAll("tr")) {
+        let tds: NodeListOf<HTMLTableCellElement> = tr.querySelectorAll("td");
+        if (!tds.length)
+          continue;
+        tds[1].classList.add("icon");
+        tds[1].setAttribute("icon", (<HTMLInputElement>tds[1].children[0]).value);
+      }
     }
 
     public getSelection(): ƒ.SerializableResource[] {

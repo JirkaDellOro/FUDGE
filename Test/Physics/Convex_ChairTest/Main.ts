@@ -47,10 +47,10 @@ namespace FudgeExperiments_Marko_ConvexColliderThroughWelding {
 
     viewPort = new f.Viewport(); //Creating a viewport that is rendered onto the html canvas element
     viewPort.initialize("Viewport", hierarchy, cmpCamera, app); //initialize the viewport with the root node, camera and canvas
+    // viewPort.physicsDebugMode = f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
 
     //PHYSICS - Start using physics by telling the physics the scene root object. Physics will recalculate every transform and initialize
     f.Physics.adjustTransforms(hierarchy);
-    f.Physics.settings.debugMode = f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
     app.addEventListener("mousedown", () => { spawnChair(); });
 
     //Important start the game loop after starting physics, so physics can use the current transform before it's first iteration

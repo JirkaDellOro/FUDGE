@@ -43,8 +43,8 @@ namespace Fudge {
       this.tree.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
       this.tree.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.append(this.tree);
-      this.dom.title = "Right click on existing node to create child node";
-      this.tree.title = "Select node to edit";
+      this.dom.title = "● Right click on existing node to create child node.\n● Use Copy/Paste to duplicate nodes.";
+      this.tree.title = "Select node to edit or duplicate.";
     }
 
     public getSelection(): ƒ.Node[] {

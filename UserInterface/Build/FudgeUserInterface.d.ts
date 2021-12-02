@@ -391,7 +391,8 @@ declare namespace FudgeUserInterface {
     class Table<T extends Object> extends HTMLTableElement {
         controller: TableController<T>;
         data: T[];
-        constructor(_controller: TableController<T>, _data: T[]);
+        icon: string;
+        constructor(_controller: TableController<T>, _data: T[], _icon?: string);
         /**
          * Create the table
          */

@@ -1,0 +1,8 @@
+{
+  /* Sole purpose of this file is to act as entry point for TypeDoc */
+  /* To compile Fudge Net, envoke "CustomTask: Compile All"*/
+  "compilerOptions": {
+    "target": "ESNext",
+    "allowSyntheticDefaultImports": true
+  }
+}

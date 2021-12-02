@@ -84,7 +84,7 @@ namespace FudgeCore {
     CONVEX
   }
 
-  /** Displaying different types of debug information about different physic features. Default = JOINTS_AND_COLLIDER. debugDraw in the settings must be active to see anything. */
+  /** Displaying different types of debug information about different physic features. Default = JOINTS_AND_COLLIDER. */
   export enum PHYSICS_DEBUGMODE {
     NONE,
     COLLIDERS,

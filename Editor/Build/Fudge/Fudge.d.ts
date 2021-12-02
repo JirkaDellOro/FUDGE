@@ -39,6 +39,7 @@ declare namespace Fudge {
         PANEL_GRAPH_OPEN = "panelGraphOpen",
         PANEL_ANIMATION_OPEN = "panelAnimationOpen",
         PANEL_PROJECT_OPEN = "panelProjectOpen",
+        PANEL_HELP_OPEN = "panelHelpOpen",
         FULLSCREEN = "fullscreen"
     }
     enum EVENT_EDITOR {
@@ -53,7 +54,8 @@ declare namespace Fudge {
     }
     enum PANEL {
         GRAPH = "PanelGraph",
-        PROJECT = "PanelProject"
+        PROJECT = "PanelProject",
+        HELP = "PanelHelp"
     }
     enum VIEW {
         HIERARCHY = "ViewHierarchy",
@@ -361,6 +363,18 @@ declare namespace Fudge {
 }
 declare namespace Fudge {
     /**
+    * Shows a graph and offers means for manipulation
+    * @authors Monika Galkewitsch, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
+    */
+    class PanelHelp extends Panel {
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        getState(): {
+            [key: string]: string;
+        };
+    }
+}
+declare namespace Fudge {
+    /**
      * Display the project structure and offer functions for creation, deletion and adjustment of resources
      * @authors Jirka Dell'Oro-Friedl, HFU, 2020
      */
@@ -477,6 +491,7 @@ declare namespace Fudge {
     class ViewComponents extends View {
         private node;
         private expanded;
+        private selected;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;

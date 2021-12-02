@@ -44,6 +44,14 @@ namespace FudgeCore {
       return _inactive;
     }
 
+    /**
+     * Returns a balanced ternary value (either -1, 0 or 1) 
+     * according to the match of the keys currently being pressed and the lists of keys given 
+     */
+    public static mapToTrit(_positive: KEYBOARD_CODE[], _negative: KEYBOARD_CODE[]): number {
+      return Keyboard.mapToValue(-1, 0, _negative) + Keyboard.mapToValue(1, 0, _positive);
+    }
+
     // public static locale(_keyboard: Object): void {
     //   if (!Keyboard.code_en) {
     //     // save original keyboard codes to be able to switch back later

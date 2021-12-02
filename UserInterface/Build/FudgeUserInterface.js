@@ -1428,10 +1428,12 @@ var FudgeUserInterface;
     class Table extends HTMLTableElement {
         controller;
         data;
-        constructor(_controller, _data) {
+        icon;
+        constructor(_controller, _data, _icon) {
             super();
             this.controller = _controller;
             this.data = _data;
+            this.icon = _icon;
             this.create();
             this.className = "sortable";
             this.addEventListener("sort" /* SORT */, this.hndSort);
@@ -1457,6 +1459,8 @@ var FudgeUserInterface;
             for (let row of this.data) {
                 // tr = this.createRow(row, head);
                 let item = new FudgeUserInterface.TableItem(this.controller, row);
+                if (this.icon)
+                    item.setAttribute("icon", Reflect.get(row, this.icon));
                 this.appendChild(item);
             }
         }

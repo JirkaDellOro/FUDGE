@@ -34,6 +34,7 @@ var TestInstructions;
                     break;
             }
             document.body.appendChild(dialog);
+            dialog.style.zIndex = "100";
             //@ts-ignore
             dialog.show();
         }
