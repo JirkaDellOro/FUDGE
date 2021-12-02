@@ -318,7 +318,10 @@ namespace FudgeCore {
       let shader: typeof Shader = cmpMaterial.material.getShader();
       let coat: Coat = cmpMaterial.material.coat;
       shader.useProgram();
-      _cmpMesh.mesh.useRenderBuffers(shader, _mtxMeshToWorld, _mtxWorldToView);
+      if (_cmpMesh.mesh instanceof MeshSkin)
+        _cmpMesh.mesh.useRenderBuffers(shader, _mtxMeshToWorld, _mtxWorldToView, null, _cmpMesh.skeleton.getMtxBonesIterator());
+      else
+        _cmpMesh.mesh.useRenderBuffers(shader, _mtxMeshToWorld, _mtxWorldToView);
       coat.useRenderData(shader, cmpMaterial);
       RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, _cmpMesh.mesh.renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
     }
