@@ -90,9 +90,8 @@ namespace FudgeCore {
     private registerBone(_bone: Bone): void {
       this.bones.push(_bone);
       if (this.calculateMtxBindInversesOnChildAppend) {
-        console.log("calculate mtxBindInverse");
         this.calculateMtxWorld(_bone);
-        this.mtxBindInverses.push(_bone.mtxWorldInverse);        
+        this.mtxBindInverses.push(_bone.mtxWorldInverse);
       }
     }
 
