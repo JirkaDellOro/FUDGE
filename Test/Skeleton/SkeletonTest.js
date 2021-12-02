@@ -122,7 +122,7 @@ var SkeletonTest;
         const cmpMesh = new ƒ.ComponentMesh(mesh);
         await cmpMesh.skeleton.set(skeleton);
         zylinder.addComponent(cmpMesh);
-        const material = new ƒ.Material("Grey", ƒ.ShaderFlatSkeletal, new ƒ.CoatColored(ƒ.Color.CSS("Grey")));
+        const material = new ƒ.Material("Grey", ƒ.ShaderFlatSkin, new ƒ.CoatColored(ƒ.Color.CSS("Grey")));
         const cmpMaterial = new ƒ.ComponentMaterial(material);
         zylinder.addComponent(cmpMaterial);
         cmpMesh.skeleton.mtxBoneLocals[1].rotateX(45);

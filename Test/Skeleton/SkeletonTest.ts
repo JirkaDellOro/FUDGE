@@ -145,7 +145,7 @@ namespace SkeletonTest {
     await cmpMesh.skeleton.set(skeleton);
     zylinder.addComponent(cmpMesh);
 
-    const material: ƒ.Material = new ƒ.Material("Grey", ƒ.ShaderFlatSkeletal, new ƒ.CoatColored(ƒ.Color.CSS("Grey")));
+    const material: ƒ.Material = new ƒ.Material("Grey", ƒ.ShaderFlatSkin, new ƒ.CoatColored(ƒ.Color.CSS("Grey")));
     const cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(material);
     zylinder.addComponent(cmpMaterial);
 
