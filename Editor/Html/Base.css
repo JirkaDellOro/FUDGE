@@ -65,26 +65,6 @@ div[panel] .lm_close {
   background-color: var(--color-background-main);
 }
 
-/* Checkbox */
-
-input[type="checkbox"] {
-  appearance: none;
-  margin-right: 0.2em;
-}
-
-input[type="checkbox"]::before {
-  /* appearance: unset; */
-  /* color: var(--color-); */
-  font-weight: 900;
-  text-shadow: 1px 1px var(--color-background-main);
-  content: "⭘";
-  /* □⚐◎◯⭘⦾○○ */
-}
-
-input[type="checkbox"]:checked:before {
-  content: "⭙";
-  /* ☑✔⮽⚑◉⦻⭙⦿⮿●■ */
-}
 
 /* Tree Control */
 
