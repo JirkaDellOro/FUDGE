@@ -3552,7 +3552,7 @@ declare namespace FudgeCore {
      * static LOAD Method. Currently only works with triangulated Meshes
      * (activate 'Geomentry → Triangulate Faces' in Blenders obj exporter)
      * @todo UVs, Load Materials, Support Quads
-     * @authors Simon Storl-Schulke 2021 | Luis Keck, HFU, 2021 */
+     * @authors Simon Storl-Schulke 2021 | Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021 */
     class MeshObj extends Mesh {
         protected verts: number[];
         protected uvs: number[];
@@ -3571,6 +3571,7 @@ declare namespace FudgeCore {
         protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;
         protected createIndices(): Uint16Array;
+        protected calculateFaceCrossProducts(): Float32Array;
         protected createFaceNormals(): Float32Array;
     }
 }

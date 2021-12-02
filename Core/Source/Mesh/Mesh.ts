@@ -23,7 +23,7 @@ namespace FudgeCore {
     protected ƒindices: Uint16Array;
     protected ƒtextureUVs: Float32Array;
     protected ƒnormalsFace: Float32Array;
-    protected ƒfaceCrossProducts: Float32Array; 
+    protected ƒfaceCrossProducts: Float32Array;
     protected ƒnormalsVertex: Float32Array;
     protected ƒbox: Box;
     // TODO: explore mathematics for easy transformations of radius 
@@ -200,7 +200,7 @@ namespace FudgeCore {
       let vertices: Vector3[] = [];
 
       for (let v: number = 0; v < this.vertices.length; v += 3)
-        vertices.push(new Vector3(...this.vertices.slice(v, v + 3)));
+        vertices.push(new Vector3(this.vertices[v], this.vertices[v + 1], this.vertices[v + 2]));
 
       for (let i: number = 0; i < this.indices.length; i += 3) {
         let trigon: number[] = [this.indices[i], this.indices[i + 1], this.indices[i + 2]];
@@ -228,30 +228,75 @@ namespace FudgeCore {
       return new Float32Array(normals);
     }
 
+    /*Luis Keck: Calculates vertex normals for smooth shading.
+    New function needed because faces do not share vertices currently */
     protected createVertexNormals(): Float32Array {
-      let normals: Vector3[] = [];
-      let faceCrossProducts: Float32Array = this.faceCrossProducts;
-
-      for (let v: number = 0; v < this.vertices.length; v += 3)
-        normals.push(Vector3.ZERO());
-
-      for (let i: number = 0; i < this.indices.length; i += 3) {
-        let trigon: number[] = [this.indices[i], this.indices[i + 1], this.indices[i + 2]];
-        let index: number = trigon[2] * 3;
-        let normalFace: Vector3 = new Vector3(faceCrossProducts[index], faceCrossProducts[index + 1], faceCrossProducts[index + 2]);
-
-        for (let t: number = 0; t < trigon.length; t++)
-          // normals[trigon[t]] = Vector3.SUM(normals[trigon[t]], normalFace);
-          normals[trigon[t]].add(normalFace);
-      }
       let vertexNormals: number[] = [];
-      for (let normal of normals) {
-        // if (normals[n].magnitude != 0)
-        //   normals[n] = Vector3.NORMALIZATION(normals[n]);
-        vertexNormals.push(...normal.get());
+      let done: boolean[] = new Array<boolean>(this.vertices.length);
+      let iVertex: Vector3 = new Vector3();
+      let jVertex: Vector3 = new Vector3();
+      //goes through all vertices
+      for (let i: number = 0; i < this.vertices.length; i += 3) {
+        if (done[i])
+          continue;
+        iVertex.set(this.vertices[i], this.vertices[i + 1], this.vertices[i + 2]);
+        let samePosVerts: number[] = [i];
+        done[i] = true;
+
+        //finds vertices that share position with the vertex of current iteration
+        for (let j: number = i + 3; j < this.vertices.length; j += 3) {
+          if (done[j])
+            continue;
+          jVertex.set(this.vertices[j], this.vertices[j + 1], this.vertices[j + 2]);
+          done[j] = (iVertex.equals(jVertex, 0.01));
+          if (done[j])
+            samePosVerts.push(j);
+        }
+
+        let sum: Vector3 = Vector3.ZERO();
+        //adds the face normals of all faces that would share these vertices
+        for (let z of samePosVerts)
+          sum = Vector3.SUM(sum, new Vector3(
+            this.faceCrossProducts[z + 0],
+            this.faceCrossProducts[z + 1],
+            this.faceCrossProducts[z + 2])
+          );
+
+        if (sum.magnitude != 0)
+          sum = Vector3.NORMALIZATION(sum);  // appears to be obsolete
+
+        for (let z of samePosVerts) {
+          vertexNormals[z] = sum.x;
+          vertexNormals[z + 1] = sum.y;
+          vertexNormals[z + 2] = sum.z;
+        }
       }
       return new Float32Array(vertexNormals);
     }
+
+    // protected createVertexNormals(): Float32Array {
+    //   let normals: Vector3[] = [];
+    //   let faceCrossProducts: Float32Array = this.faceCrossProducts;
+
+    //   for (let v: number = 0; v < this.vertices.length; v += 3)
+    //     normals.push(Vector3.ZERO());
+
+    //   for (let i: number = 0; i < this.indices.length; i += 3) {
+    //     let trigon: number[] = [this.indices[i], this.indices[i + 1], this.indices[i + 2]];
+    //     let index: number = trigon[2] * 3;
+    //     let normalFace: Vector3 = new Vector3(faceCrossProducts[index], faceCrossProducts[index + 1], faceCrossProducts[index + 2]);
+
+    //     for (let index of trigon)
+    //       normals[index].add(normalFace);
+    //   }
+    //   let vertexNormals: number[] = [];
+    //   for (let n: number = 0; n < normals.length; n++) {
+    //     // if (normals[n].magnitude != 0)
+    //     //   normals[n] = Vector3.NORMALIZATION(normals[n]);
+    //     vertexNormals.push(normals[n].x, normals[n].y, normals[n].z);
+    //   }
+    //   return new Float32Array(vertexNormals);
+    // }
 
     protected createRadius(): number {
       let radius: number = 0;
