@@ -5376,6 +5376,13 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    abstract class ShaderCustom extends Shader {
+        static readonly iSubclass: number;
+        static vertexShaderSource: string;
+        static fragmentShaderSource: string;
+    }
+}
+declare namespace FudgeCore {
     abstract class ShaderFlat extends Shader {
         static readonly iSubclass: number;
         static vertexShaderSource: string;

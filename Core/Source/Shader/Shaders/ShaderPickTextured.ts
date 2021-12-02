@@ -3,8 +3,7 @@ namespace FudgeCore {
   export abstract class ShaderPickTextured extends Shader {
     public static readonly iSubclass: number = Shader.registerSubclass(ShaderPickTextured);
 
-    public static vertexShaderSource: string = 
-    `#version 300 es
+    public static vertexShaderSource: string = `#version 300 es
 /**
 * Renders for Raycasting
 * @authors Jirka Dell'Oro-Friedl, HFU, 2019

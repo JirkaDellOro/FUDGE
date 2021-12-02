@@ -3,8 +3,7 @@ namespace FudgeCore {
   export abstract class ShaderSmooth extends Shader {
     public static readonly iSubclass: number = Shader.registerSubclass(ShaderSmooth);
 
-    public static vertexShaderSource: string = 
-    `#version 300 es
+    public static vertexShaderSource: string = `#version 300 es
 #define GLSLIFY 1
 /**
 * Smooth color shading

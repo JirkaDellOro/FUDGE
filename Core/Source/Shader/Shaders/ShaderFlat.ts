@@ -3,8 +3,7 @@ namespace FudgeCore {
   export abstract class ShaderFlat extends Shader {
     public static readonly iSubclass: number = Shader.registerSubclass(ShaderFlat);
 
-    public static vertexShaderSource: string = 
-    `#version 300 es
+    public static vertexShaderSource: string = `#version 300 es
 
 /**
 * Flat color shading

@@ -3,8 +3,7 @@ namespace FudgeCore {
   export abstract class ShaderMatCap extends Shader {
     public static readonly iSubclass: number = Shader.registerSubclass(ShaderMatCap);
 
-    public static vertexShaderSource: string = 
-    `#version 300 es
+    public static vertexShaderSource: string = `#version 300 es
 /**
 * Matcap (Material Capture) shading. The texture provided by the coat is used as a matcap material. 
 * Implementation based on https://www.clicktorelease.com/blog/creating-spherical-environment-mapping-shader/

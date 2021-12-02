@@ -3,8 +3,7 @@ namespace FudgeCore {
   export abstract class ShaderGouraud extends Shader {
     public static readonly iSubclass: number = Shader.registerSubclass(ShaderGouraud);
 
-    public static vertexShaderSource: string = 
-    `#version 300 es
+    public static vertexShaderSource: string = `#version 300 es
 /**
 * Gouraud shading
 * Implementation based on https://www.gsn-lib.org/docs/nodes/ShaderPluginNode.php

@@ -3,8 +3,7 @@ namespace FudgeCore {
   export abstract class ShaderUniColor extends Shader {
     public static readonly iSubclass: number = Shader.registerSubclass(ShaderUniColor);
 
-    public static vertexShaderSource: string = 
-    `#version 300 es
+    public static vertexShaderSource: string = `#version 300 es
 /**
 * Single color shading
 * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019

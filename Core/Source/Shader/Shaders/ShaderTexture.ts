@@ -3,8 +3,7 @@ namespace FudgeCore {
   export abstract class ShaderTexture extends Shader {
     public static readonly iSubclass: number = Shader.registerSubclass(ShaderTexture);
 
-    public static vertexShaderSource: string = 
-    `#version 300 es
+    public static vertexShaderSource: string = `#version 300 es
 /**
 * Textured shading
 * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
