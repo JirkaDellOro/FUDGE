@@ -5,8 +5,6 @@ namespace FudgeCore {
     
     public static readonly vectorizedJointMatrixLength: number = 16;
 
-    public readonly skeleton: SkeletonInstance = new SkeletonInstance();
-
     protected ƒiBones: Uint8Array;
     protected ƒweights: Float32Array;
     protected ƒmtxBones: Float32Array;
@@ -38,41 +36,7 @@ namespace FudgeCore {
       return this.ƒweights;
     }
 
-    public get mtxBones(): Float32Array {
-      // get bone matrices and concatenate them to one Float32Array
-      this.ƒmtxBones = Float32Array.from(
-        this.skeleton.mtxBones.flatMap(mtxBone => Array.from(mtxBone.get()))
-      );
-
-      return this.ƒmtxBones;
-    }
-
-    /**
-     * Calculates the position of a vertex transformed by the skeleton
-     * @param _index index of the vertex
-     */
-    public getVertexPosition(_index: number): Vector3 {
-      // extract the vertex data (vertices: 3D vectors, bone indices & weights: 4D vectors)
-      const vertex: Vector3 = new Vector3(...this.vertices.slice(_index * 3, _index * 3 + 3));
-      const iBones: Uint8Array = this.iBones.slice(_index * 4, _index * 4 + 4);
-      const weights: Float32Array = this.weights.slice(_index * 4, _index * 4 + 4);
-
-      // get bone matrices
-      const mtxBones: Array<Matrix4x4> = this.skeleton.mtxBones;
-
-      // skin matrix S = sum_i=1^m{w_i * B_i}
-      const skinMatrix: Matrix4x4 = new Matrix4x4();
-      skinMatrix.set(Array
-        .from(iBones)
-        .map((iJoint, iWeight) => mtxBones[iJoint].get().map(value => value * weights[iWeight])) // apply weight on each matrix
-        .reduce((mtxBoneA, mtxBoneB) => mtxBoneA.map((value, index) => value + mtxBoneB[index])) // sum up the matrices
-      );
-
-      // transform vertex
-      vertex.transform(skinMatrix);
-
-      return vertex;
-    }
+    public useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Iterable<number>): void {/* injected by RenderInjector*/ }
 
     public serialize(): Serialization {
       const serialization: Serialization = super.serialize();
