@@ -39,8 +39,6 @@ namespace FudgeCore {
         let shdFragment: WebGLShader = compileShader(this.getFragmentShaderSource(), WebGL2RenderingContext.FRAGMENT_SHADER);
         crc3.attachShader(program, RenderWebGL.assert<WebGLShader>(shdVertex));
         crc3.attachShader(program, RenderWebGL.assert<WebGLShader>(shdFragment));
-        console.log(crc3.getShaderParameter(shdVertex, crc3.COMPILE_STATUS));
-        console.log(crc3.getShaderParameter(shdFragment, crc3.COMPILE_STATUS));
         crc3.linkProgram(program);
         let error: string = RenderWebGL.assert<string>(crc3.getProgramInfoLog(program));
         if (error !== "") {

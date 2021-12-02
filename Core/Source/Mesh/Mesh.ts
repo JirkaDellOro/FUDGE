@@ -241,13 +241,14 @@ namespace FudgeCore {
         let normalFace: Vector3 = new Vector3(faceCrossProducts[index], faceCrossProducts[index + 1], faceCrossProducts[index + 2]);
 
         for (let t: number = 0; t < trigon.length; t++)
-          normals[trigon[t]] = Vector3.SUM(normals[trigon[t]], normalFace);
+          // normals[trigon[t]] = Vector3.SUM(normals[trigon[t]], normalFace);
+          normals[trigon[t]].add(normalFace);
       }
       let vertexNormals: number[] = [];
-      for (let n: number = 0; n < normals.length; n++) {
-        if (normals[n].magnitude != 0)
-          normals[n] = Vector3.NORMALIZATION(normals[n]);
-        vertexNormals.push(normals[n].x, normals[n].y, normals[n].z);
+      for (let normal of normals) {
+        // if (normals[n].magnitude != 0)
+        //   normals[n] = Vector3.NORMALIZATION(normals[n]);
+        vertexNormals.push(...normal.get());
       }
       return new Float32Array(vertexNormals);
     }

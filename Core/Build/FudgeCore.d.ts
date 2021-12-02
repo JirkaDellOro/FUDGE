@@ -3571,9 +3571,7 @@ declare namespace FudgeCore {
         protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;
         protected createIndices(): Uint16Array;
-        protected calculateFaceCrossProducts(): Float32Array;
         protected createFaceNormals(): Float32Array;
-        protected createVertexNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {
