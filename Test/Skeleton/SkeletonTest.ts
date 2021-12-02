@@ -14,7 +14,7 @@ namespace SkeletonTest {
 
     const canvas: HTMLCanvasElement = document.querySelector("canvas");
 
-    const node: ƒ.Node = initAnimatedCuboid();
+    const node: ƒ.Node = await initAnimatedCuboid();
 
     const camera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
     camera.mtxPivot.translateX(-10);
@@ -23,9 +23,27 @@ namespace SkeletonTest {
     node.addComponent(camera);
     //gltf.scene.addComponent(camera);
 
+    const light: ƒ.ComponentLight = new ƒ.ComponentLight();
+    light.setType(ƒ.LightDirectional);
+    light.mtxPivot.set(camera.mtxPivot);
+    node.addComponent(light);
+
     const viewport: ƒ.Viewport = new ƒ.Viewport();
     viewport.initialize("Viewport", node, camera, canvas);
     //viewport.initialize("Viewport", gltf.scene, camera, canvas);
+/*    
+    ƒ.Render.prepare(node);
+    const cmpMesh: ƒ.ComponentMesh = node.getComponent(ƒ.ComponentMesh);
+    cmpMesh.skeleton.mtxBones.forEach((mtxBone, iBone) =>
+      console.log(`mtxBone[${iBone}]${mtxBone.toString()}`)
+    );
+    for (let iVertex: number = 0; iVertex < cmpMesh.mesh.vertices.length / 3; iVertex++) {
+      const pos: ƒ.Vector3 = cmpMesh.getVertexPosition(iVertex);
+      cmpMesh.mesh.vertices[iVertex * 3 + 0] = pos.x;
+      cmpMesh.mesh.vertices[iVertex * 3 + 1] = pos.y;
+      cmpMesh.mesh.vertices[iVertex * 3 + 2] = pos.z;
+    }
+*/
     viewport.draw();
     console.log(viewport);
 
@@ -56,9 +74,9 @@ namespace SkeletonTest {
         0,  2,  3, // bottom
         3,  1,  0,
 
-        0,  1,  5, // front-bottom
+        0,  1,  5, // back-bottom
         5,  4,  0,
-        4,  5,  9, // front-top
+        4,  5,  9, // back-top
         9,  8,  4,
 
         1,  3,  7, // right-bottom
@@ -66,9 +84,9 @@ namespace SkeletonTest {
         5,  7, 11, // right-top
        11,  9,  5,
 
-        3,  2,  6, // back-bottom
+        3,  2,  6, // front-bottom
         6,  7,  3,
-        7,  6, 10, // back-top
+        7,  6, 10, // front-top
        10, 11,  7,
 
         2,  0,  4, // left-bottom
@@ -114,7 +132,7 @@ namespace SkeletonTest {
     }
   }
 
-  function initAnimatedCuboid(): ƒ.Node {
+  async function initAnimatedCuboid(): Promise<ƒ.Node> {
     const zylinder: ƒ.Node = new ƒ.Node("AnimatedCuboid");
 
     const skeleton: ƒ.Skeleton = new ƒ.Skeleton("Skeleton");
@@ -123,12 +141,15 @@ namespace SkeletonTest {
     //console.log(ƒ.Serializer.serialize(skeleton));
 
     const mesh: ƒ.MeshSkin = new MeshCuboidSkin();
-    const cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh(mesh, skeleton);
+    const cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh(mesh);
+    await cmpMesh.skeleton.set(skeleton);
     zylinder.addComponent(cmpMesh);
 
-    const material: ƒ.Material = new ƒ.Material("Grey", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("Grey")));
+    const material: ƒ.Material = new ƒ.Material("Grey", ƒ.ShaderFlatSkeletal, new ƒ.CoatColored(ƒ.Color.CSS("Grey")));
     const cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(material);
     zylinder.addComponent(cmpMaterial);
+
+    cmpMesh.skeleton.mtxBoneLocals[1].rotateX(45);
     
     const sequence: ƒ.AnimationSequence = new ƒ.AnimationSequence();
     sequence.addKey(new ƒ.AnimationKey(0, 0));
@@ -150,7 +171,7 @@ namespace SkeletonTest {
 
     const animation: ƒ.Animation = new ƒ.Animation("Animation", animationStructure);
     const cmpAnimator: ƒ.ComponentAnimator = new ƒ.ComponentAnimator(animation);
-    zylinder.addComponent(cmpAnimator);
+    //zylinder.addComponent(cmpAnimator);
 
     console.log(zylinder);
     return zylinder;

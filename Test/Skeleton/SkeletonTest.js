@@ -11,16 +11,33 @@ var SkeletonTest;
         gltf.scene.getChildrenByName("Arm")[0].getChild(0).addComponent(new ƒ.ComponentMaterial(new ƒ.Material("UniColor", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("red")))));
         console.log(gltf);
         const canvas = document.querySelector("canvas");
-        const node = initAnimatedCuboid();
+        const node = await initAnimatedCuboid();
         const camera = new ƒ.ComponentCamera();
         camera.mtxPivot.translateX(-10);
         camera.mtxPivot.translateY(10);
         camera.mtxPivot.showTo(ƒ.Vector3.ZERO(), camera.mtxPivot.getZ());
         node.addComponent(camera);
         //gltf.scene.addComponent(camera);
+        const light = new ƒ.ComponentLight();
+        light.setType(ƒ.LightDirectional);
+        light.mtxPivot.set(camera.mtxPivot);
+        node.addComponent(light);
         const viewport = new ƒ.Viewport();
         viewport.initialize("Viewport", node, camera, canvas);
         //viewport.initialize("Viewport", gltf.scene, camera, canvas);
+        /*
+            ƒ.Render.prepare(node);
+            const cmpMesh: ƒ.ComponentMesh = node.getComponent(ƒ.ComponentMesh);
+            cmpMesh.skeleton.mtxBones.forEach((mtxBone, iBone) =>
+              console.log(`mtxBone[${iBone}]${mtxBone.toString()}`)
+            );
+            for (let iVertex: number = 0; iVertex < cmpMesh.mesh.vertices.length / 3; iVertex++) {
+              const pos: ƒ.Vector3 = cmpMesh.getVertexPosition(iVertex);
+              cmpMesh.mesh.vertices[iVertex * 3 + 0] = pos.x;
+              cmpMesh.mesh.vertices[iVertex * 3 + 1] = pos.y;
+              cmpMesh.mesh.vertices[iVertex * 3 + 2] = pos.z;
+            }
+        */
         viewport.draw();
         console.log(viewport);
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, () => viewport.draw());
@@ -95,18 +112,20 @@ var SkeletonTest;
             ]);
         }
     }
-    function initAnimatedCuboid() {
+    async function initAnimatedCuboid() {
         const zylinder = new ƒ.Node("AnimatedCuboid");
         const skeleton = new ƒ.Skeleton("Skeleton");
         skeleton.addChild(new ƒ.Bone("LowerBone", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Z(-2))));
         skeleton.bones[0].addChild(new ƒ.Bone("UpperBone", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Z(2))));
         //console.log(ƒ.Serializer.serialize(skeleton));
         const mesh = new MeshCuboidSkin();
-        const cmpMesh = new ƒ.ComponentMesh(mesh, skeleton);
+        const cmpMesh = new ƒ.ComponentMesh(mesh);
+        await cmpMesh.skeleton.set(skeleton);
         zylinder.addComponent(cmpMesh);
-        const material = new ƒ.Material("Grey", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("Grey")));
+        const material = new ƒ.Material("Grey", ƒ.ShaderFlatSkeletal, new ƒ.CoatColored(ƒ.Color.CSS("Grey")));
         const cmpMaterial = new ƒ.ComponentMaterial(material);
         zylinder.addComponent(cmpMaterial);
+        cmpMesh.skeleton.mtxBoneLocals[1].rotateX(45);
         const sequence = new ƒ.AnimationSequence();
         sequence.addKey(new ƒ.AnimationKey(0, 0));
         sequence.addKey(new ƒ.AnimationKey(5000, 45));
@@ -125,7 +144,7 @@ var SkeletonTest;
         };
         const animation = new ƒ.Animation("Animation", animationStructure);
         const cmpAnimator = new ƒ.ComponentAnimator(animation);
-        zylinder.addComponent(cmpAnimator);
+        //zylinder.addComponent(cmpAnimator);
         console.log(zylinder);
         return zylinder;
     }
