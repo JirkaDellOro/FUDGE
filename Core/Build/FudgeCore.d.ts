@@ -1891,11 +1891,15 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         mtxPivot: Matrix4x4;
         readonly mtxWorld: Matrix4x4;
+        mesh: Mesh;
         constructor(_mesh?: Mesh, _skeleton?: Skeleton);
-        get mesh(): Mesh;
-        set mesh(_mesh: Mesh);
-        get skeleton(): SkeletonInstance;
         get radius(): number;
+        get skeleton(): SkeletonInstance;
+        /**
+         * Calculates the position of a vertex transformed by the skeleton
+         * @param _index index of the vertex
+         */
+        getVertexPosition(_index: number): Vector3;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorForUserInterface(): MutatorForUserInterface;
@@ -4402,14 +4406,13 @@ declare namespace FudgeCore {
     class RenderInjectorMeshSkin extends RenderInjectorMesh {
         static decorate(_constructor: Function): void;
         protected static createRenderBuffers(this: MeshSkin): void;
-        protected static useRenderBuffers(this: MeshSkin, _shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): void;
+        protected static useRenderBuffers(this: MeshSkin, _shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Iterable<number>): void;
         protected static deleteRenderBuffers(_renderBuffers: RenderBuffers): void;
     }
 }
 declare namespace FudgeCore {
     class MeshSkin extends MeshGLTF {
         static readonly vectorizedJointMatrixLength: number;
-        readonly skeleton: SkeletonInstance;
         protected ƒiBones: Uint8Array;
         protected ƒweights: Float32Array;
         protected ƒmtxBones: Float32Array;
@@ -4421,12 +4424,7 @@ declare namespace FudgeCore {
         constructor(_gltfMesh?: GLTF.Mesh, _loader?: GLTFLoader);
         get iBones(): Uint8Array;
         get weights(): Float32Array;
-        get mtxBones(): Float32Array;
-        /**
-         * Calculates the position of a vertex transformed by the skeleton
-         * @param _index index of the vertex
-         */
-        getVertexPosition(_index: number): Vector3;
+        useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Iterable<number>): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
@@ -6007,6 +6005,18 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
+     * Single color flat skin deformation shading
+     * @authors Matthias Roming, HFU, 2021
+     */
+    abstract class ShaderFlatSkeletal extends Shader {
+        static readonly iSubclass: number;
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    /**
      * Matcap (Material Capture) shading. The texture provided by the coat is used as a matcap material.
      * Implementation based on https://www.clicktorelease.com/blog/creating-spherical-environment-mapping-shader/
      * @authors Simon Storl-Schulke, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
@@ -6119,6 +6129,10 @@ declare namespace FudgeCore {
          * Gets the bone transformations for a vertex
          */
         get mtxBones(): Array<Matrix4x4>;
+        /**
+         * Gets the bone transformations for a vertex
+         */
+        getMtxBonesIterator(): IterableIterator<number>;
         /**
          * Set this skeleton instance to be a recreation of the {@link Skeleton} given
          */
