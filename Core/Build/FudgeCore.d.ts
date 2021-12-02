@@ -1893,7 +1893,7 @@ declare namespace FudgeCore {
         mtxPivot: Matrix4x4;
         readonly mtxWorld: Matrix4x4;
         mesh: Mesh;
-        constructor(_mesh?: Mesh, _skeleton?: Skeleton);
+        constructor(_mesh?: Mesh);
         get radius(): number;
         get skeleton(): SkeletonInstance;
         /**
@@ -6018,7 +6018,7 @@ declare namespace FudgeCore {
      * Single color flat skin deformation shading
      * @authors Matthias Roming, HFU, 2021
      */
-    abstract class ShaderFlatSkeletal extends Shader {
+    abstract class ShaderFlatSkin extends Shader {
         static readonly iSubclass: number;
         static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
