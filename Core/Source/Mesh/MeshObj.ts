@@ -6,6 +6,7 @@ namespace FudgeCore {
    * @todo UVs, Load Materials, Support Quads
    * @authors Simon Storl-Schulke 2021 | Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021 */
   export class MeshObj extends Mesh {
+    public static readonly iSubclass: number = Mesh.registerSubclass(MeshObj);
     public url: RequestInfo;
 
     protected verts: number[] = [];
@@ -35,7 +36,6 @@ namespace FudgeCore {
       this.url = _url;
       let data: string = await (await fetch(this.url)).text();
       this.parseObj(data);
-      this.clear();
     }
 
     /** Splits up the obj string into separate arrays for each datatype */
@@ -67,10 +67,28 @@ namespace FudgeCore {
           );
         }
       }
-      
+
       this.splitVertices();
+      this.clear();
     }
 
+    //#region Transfer
+    public serialize(): Serialization {
+      let serialization: Serialization = super.serialize();
+      serialization.url = this.url;
+      return serialization;
+    }
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      await super.deserialize(_serialization);
+      this.load(_serialization.url);
+      return this;
+    }
+
+    public async mutate(_mutator: Mutator): Promise<void> {
+      super.mutate(_mutator);
+      this.load(_mutator.url);
+    }
+    //#endregion
     /** Creates three Vertices from each face. Although inefficient, this has to be done for now - see Issue 244 */
     protected splitVertices(): void {
       let vertsNew: number[] = [];

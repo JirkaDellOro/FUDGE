@@ -3554,6 +3554,7 @@ declare namespace FudgeCore {
      * @todo UVs, Load Materials, Support Quads
      * @authors Simon Storl-Schulke 2021 | Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021 */
     class MeshObj extends Mesh {
+        static readonly iSubclass: number;
         url: RequestInfo;
         protected verts: number[];
         protected uvs: number[];
@@ -3567,6 +3568,9 @@ declare namespace FudgeCore {
         load(_url: RequestInfo): Promise<void>;
         /** Splits up the obj string into separate arrays for each datatype */
         parseObj(data: string): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
         /** Creates three Vertices from each face. Although inefficient, this has to be done for now - see Issue 244 */
         protected splitVertices(): void;
         protected createVertices(): Float32Array;
