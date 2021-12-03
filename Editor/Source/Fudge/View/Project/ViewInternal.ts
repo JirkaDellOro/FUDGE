@@ -110,7 +110,7 @@ namespace Fudge {
       if (_viewSource instanceof ViewExternal) {
         let sources: DirectoryEntry[] = _viewSource.getDragDropSources();
         for (let source of sources)
-          if (source.getMimeType() != MIME.AUDIO && source.getMimeType() != MIME.IMAGE)
+          if (source.getMimeType() != MIME.AUDIO && source.getMimeType() != MIME.IMAGE && source.getMimeType() != MIME.MESH)
             return;
       }
 
@@ -134,6 +134,9 @@ namespace Fudge {
               break;
             case MIME.IMAGE:
               console.log(new ƒ.TextureImage(source.pathRelative));
+              break;
+            case MIME.MESH:
+              console.log(new ƒ.MeshObj(null, source.pathRelative));
               break;
           }
         }

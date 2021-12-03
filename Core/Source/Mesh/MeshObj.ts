@@ -34,7 +34,8 @@ namespace FudgeCore {
          */
     public async load(_url: RequestInfo): Promise<void> {
       this.url = _url;
-      let data: string = await (await fetch(this.url)).text();
+      let url: string = new URL(this.url.toString(), Project.baseURL).toString()
+      let data: string = await (await fetch(url)).text();
       this.parseObj(data);
     }
 

@@ -101,10 +101,12 @@ var Fudge;
         MIME["TEXT"] = "text";
         MIME["AUDIO"] = "audio";
         MIME["IMAGE"] = "image";
+        MIME["MESH"] = "mesh";
         MIME["UNKNOWN"] = "unknown";
     })(MIME = Fudge.MIME || (Fudge.MIME = {}));
     let mime = new Map([
         [MIME.TEXT, ["ts", "json", "html", "htm", "css", "js", "txt"]],
+        [MIME.MESH, ["obj"]],
         [MIME.AUDIO, ["mp3", "wav", "ogg"]],
         [MIME.IMAGE, ["png", "jpg", "jpeg", "tif", "tga", "gif"]]
     ]);
@@ -1053,7 +1055,7 @@ var Fudge;
             if (_viewSource instanceof Fudge.ViewExternal) {
                 let sources = _viewSource.getDragDropSources();
                 for (let source of sources)
-                    if (source.getMimeType() != Fudge.MIME.AUDIO && source.getMimeType() != Fudge.MIME.IMAGE)
+                    if (source.getMimeType() != Fudge.MIME.AUDIO && source.getMimeType() != Fudge.MIME.IMAGE && source.getMimeType() != Fudge.MIME.MESH)
                         return;
             }
             _event.dataTransfer.dropEffect = "link";
@@ -1076,6 +1078,9 @@ var Fudge;
                             break;
                         case Fudge.MIME.IMAGE:
                             console.log(new ƒ.TextureImage(source.pathRelative));
+                            break;
+                        case Fudge.MIME.MESH:
+                            console.log(new ƒ.MeshObj(null, source.pathRelative));
                             break;
                     }
                 }
@@ -1109,6 +1114,7 @@ var Fudge;
     var ƒUi = FudgeUserInterface;
     let filter = {
         UrlOnTexture: { fromViews: [Fudge.ViewExternal], onKeyAttribute: "url", onTypeAttribute: "TextureImage", ofType: Fudge.DirectoryEntry, dropEffect: "link" },
+        UrlOnMeshObj: { fromViews: [Fudge.ViewExternal], onKeyAttribute: "url", onTypeAttribute: "MeshObj", ofType: Fudge.DirectoryEntry, dropEffect: "link" },
         UrlOnAudio: { fromViews: [Fudge.ViewExternal], onKeyAttribute: "url", onTypeAttribute: "Audio", ofType: Fudge.DirectoryEntry, dropEffect: "link" },
         MaterialOnComponentMaterial: { fromViews: [Fudge.ViewInternal], onTypeAttribute: "Material", onType: ƒ.ComponentMaterial, ofType: ƒ.Material, dropEffect: "link" },
         MeshOnComponentMesh: { fromViews: [Fudge.ViewInternal], onType: ƒ.ComponentMesh, ofType: ƒ.Mesh, dropEffect: "link" },
@@ -1135,6 +1141,9 @@ var Fudge;
         hndDragOver = (_event) => {
             // url on texture
             if (this.filterDragDrop(_event, filter.UrlOnTexture, checkMimeType(Fudge.MIME.IMAGE)))
+                return;
+            // url on meshobj
+            if (this.filterDragDrop(_event, filter.UrlOnMeshObj, checkMimeType(Fudge.MIME.MESH)))
                 return;
             // url on audio
             if (this.filterDragDrop(_event, filter.UrlOnAudio, checkMimeType(Fudge.MIME.AUDIO)))
@@ -1200,6 +1209,9 @@ var Fudge;
             };
             // texture
             if (this.filterDragDrop(_event, filter.UrlOnTexture, setExternalLink))
+                return;
+            // texture
+            if (this.filterDragDrop(_event, filter.UrlOnMeshObj, setExternalLink))
                 return;
             // audio
             if (this.filterDragDrop(_event, filter.UrlOnAudio, setExternalLink))
