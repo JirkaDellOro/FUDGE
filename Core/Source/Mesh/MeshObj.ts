@@ -6,6 +6,7 @@ namespace FudgeCore {
    * @todo UVs, Load Materials, Support Quads
    * @authors Simon Storl-Schulke 2021 | Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021 */
   export class MeshObj extends Mesh {
+    public url: RequestInfo;
 
     protected verts: number[] = [];
     protected uvs: number[] = [];
@@ -13,59 +14,61 @@ namespace FudgeCore {
     protected facenormals: number[] = [];
     protected facecrossproducts: number[] = [];
 
-    public constructor(objString: string) {
-      super();
-      this.parseObj(objString);
+    public constructor(_name?: string, _url?: RequestInfo) {
+      super(_name); {
+        if (_url) {
+          this.load(_url);
+          if (!_name)
+            _name = _url.toString().split("/").pop();
+        }
+        if (!_name)
+          _name = "MeshObj";
+
+        this.name = _name;
+      }
+    }
+
+    /**
+         * Asynchronously loads the image from the given url
+         */
+    public async load(_url: RequestInfo): Promise<void> {
+      this.url = _url;
+      let data: string = await (await fetch(this.url)).text();
+      this.parseObj(data);
+      this.clear();
+    }
+
+    /** Splits up the obj string into separate arrays for each datatype */
+    public parseObj(data: string): void {
+      const lines: string[] = data.split("\n");
+
+      for (let line of lines) {
+        line = line.trim();
+
+        if (!line || line.startsWith("#"))
+          continue;
+
+        const parts: string[] = line.split(" ");
+        parts.shift();
+
+        //Vertex - example: v 0.70 -0.45 -0.52
+        if (!line || line.startsWith("v ")) this.verts.push(...parts.map(x => +x));
+
+        //Texcoord - example: vt 0.545454 0.472382
+        else if (!line || line.startsWith("vt ")) this.uvs.push(...parts.map(x => +x));
+
+        /*Face Indices - example: f 1/1/1 2/2/1 3/3/1 -->
+        vertex1/texcoord1/normal1 vertex2/texcoord2/normal2 vertex3/texcoord3/normal3*/
+        else if (!line || line.startsWith("f ")) {
+          this.inds.push(
+            +parts[0].split("/")[0] - 1,
+            +parts[1].split("/")[0] - 1,
+            +parts[2].split("/")[0] - 1
+          );
+        }
+      }
+      
       this.splitVertices();
-    }
-
-    /** Loads an obj file from the given source url and a returns a complete Node from it. 
-    * Multiple Objects are treated as a single Mesh. If no material is given, uses a default flat white material. */
-    public static LOAD(
-      src: string,
-      name: string = "ObjNode",
-      material: Material = new Material("MaterialRed", ShaderFlat, new CoatColored(new Color(0.8, 0.8, 0.8, 1)))
-    ): Node {
-      let xmlhttp: XMLHttpRequest = new XMLHttpRequest();
-      let fileContent: string = "";
-      let nodeObj: Node = new Node(name);
-      nodeObj.addComponent(new ComponentTransform());
-
-      xmlhttp.onreadystatechange = async function (): Promise<void> {
-
-        if (this.readyState == 4 && this.status == 200) {
-          fileContent = this.responseText;
-          let meshObj: Mesh = new MeshObj(fileContent);
-          nodeObj.addComponent(new ComponentMesh(meshObj));
-          nodeObj.addComponent(new ComponentMaterial(material));
-          //TODO: New Node for each Object and return Parent Node
-        }
-      };
-
-      xmlhttp.open("GET", src, true);
-      xmlhttp.send();
-
-      return nodeObj;
-    }
-
-    public static LOAD_MESH(src: string): Mesh {
-
-      let xmlhttp: XMLHttpRequest = new XMLHttpRequest();
-      let fileContent: string = "";
-      let mesh: Mesh;
-
-      xmlhttp.onreadystatechange = async function (): Promise<void> {
-
-        if (this.readyState == 4 && this.status == 200) {
-          fileContent = this.responseText;
-          mesh = new MeshObj(fileContent);
-        }
-      };
-
-      xmlhttp.open("GET", src, true);
-      xmlhttp.send();
-
-      return mesh;
     }
 
     /** Creates three Vertices from each face. Although inefficient, this has to be done for now - see Issue 244 */
@@ -127,37 +130,6 @@ namespace FudgeCore {
       this.inds = indicesNew;
       this.facenormals = faceNormalsNew;
       this.facecrossproducts = faceCrossProductsNew;
-    }
-
-    /** Splits up the obj string into separate arrays for each datatype */
-    protected parseObj(data: string): void {
-      const lines: string[] = data.split("\n");
-
-      for (let line of lines) {
-        line = line.trim();
-
-        if (!line || line.startsWith("#"))
-          continue;
-
-        const parts: string[] = line.split(" ");
-        parts.shift();
-
-        //Vertex - example: v 0.70 -0.45 -0.52
-        if (!line || line.startsWith("v ")) this.verts.push(...parts.map(x => +x));
-
-        //Texcoord - example: vt 0.545454 0.472382
-        else if (!line || line.startsWith("vt ")) this.uvs.push(...parts.map(x => +x));
-
-        /*Face Indices - example: f 1/1/1 2/2/1 3/3/1 -->
-        vertex1/texcoord1/normal1 vertex2/texcoord2/normal2 vertex3/texcoord3/normal3*/
-        else if (!line || line.startsWith("f ")) {
-          this.inds.push(
-            +parts[0].split("/")[0] - 1,
-            +parts[1].split("/")[0] - 1,
-            +parts[2].split("/")[0] - 1
-          );
-        }
-      }
     }
 
     protected createVertices(): Float32Array {

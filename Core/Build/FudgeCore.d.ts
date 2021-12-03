@@ -3554,20 +3554,21 @@ declare namespace FudgeCore {
      * @todo UVs, Load Materials, Support Quads
      * @authors Simon Storl-Schulke 2021 | Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021 */
     class MeshObj extends Mesh {
+        url: RequestInfo;
         protected verts: number[];
         protected uvs: number[];
         protected inds: number[];
         protected facenormals: number[];
         protected facecrossproducts: number[];
-        constructor(objString: string);
-        /** Loads an obj file from the given source url and a returns a complete Node from it.
-        * Multiple Objects are treated as a single Mesh. If no material is given, uses a default flat white material. */
-        static LOAD(src: string, name?: string, material?: Material): Node;
-        static LOAD_MESH(src: string): Mesh;
+        constructor(_name?: string, _url?: RequestInfo);
+        /**
+             * Asynchronously loads the image from the given url
+             */
+        load(_url: RequestInfo): Promise<void>;
+        /** Splits up the obj string into separate arrays for each datatype */
+        parseObj(data: string): void;
         /** Creates three Vertices from each face. Although inefficient, this has to be done for now - see Issue 244 */
         protected splitVertices(): void;
-        /** Splits up the obj string into separate arrays for each datatype */
-        protected parseObj(data: string): void;
         protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;
         protected createIndices(): Uint16Array;
