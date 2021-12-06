@@ -75,16 +75,37 @@ var SkeletonTest;
         const material = new ƒ.Material("Grey", ƒ.ShaderFlatSkin, new ƒ.CoatColored(ƒ.Color.CSS("Grey")));
         const cmpMaterial = new ƒ.ComponentMaterial(material);
         zylinder.addComponent(cmpMaterial);
-        const sequence = new ƒ.AnimationSequence();
-        sequence.addKey(new ƒ.AnimationKey(0, 0));
-        sequence.addKey(new ƒ.AnimationKey(1000, 45));
-        sequence.addKey(new ƒ.AnimationKey(2000, 0));
+        const sequence0 = new ƒ.AnimationSequence();
+        sequence0.addKey(new ƒ.AnimationKey(0, -2.5));
+        sequence0.addKey(new ƒ.AnimationKey(1000, -1.5));
+        sequence0.addKey(new ƒ.AnimationKey(2000, -2.5));
+        const sequence1 = new ƒ.AnimationSequence();
+        sequence1.addKey(new ƒ.AnimationKey(0, 0));
+        sequence1.addKey(new ƒ.AnimationKey(1000, 45));
+        sequence1.addKey(new ƒ.AnimationKey(2000, 0));
         const animationStructure = {
             components: {
-                ComponentTransform: [{ "ƒ.ComponentTransform": {
-                            mtxLocal: {
-                                rotation: {
-                                    z: sequence
+                ComponentMesh: [{ "ƒ.ComponentMesh": {
+                            skeleton: {
+                                bones: {
+                                    0: {
+                                        components: {
+                                            ComponentTransform: [{ "ƒ.ComponentTransform": {
+                                                        mtxLocal: {
+                                                            translation: {
+                                                                y: sequence0
+                                                            }
+                                                        }
+                                                    } }]
+                                        }
+                                    }
+                                },
+                                mtxBoneLocals: {
+                                    1: {
+                                        rotation: {
+                                            z: sequence1
+                                        }
+                                    }
                                 }
                             }
                         } }]
@@ -92,7 +113,7 @@ var SkeletonTest;
         };
         const animation = new ƒ.Animation("Animation", animationStructure);
         const cmpAnimator = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE.LOOP);
-        cmpMesh.skeleton.bones[1].addComponent(cmpAnimator);
+        zylinder.addComponent(cmpAnimator);
         cmpAnimator.activate(true);
         return zylinder;
     }
