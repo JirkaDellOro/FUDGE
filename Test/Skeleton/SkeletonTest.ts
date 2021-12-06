@@ -5,139 +5,89 @@ namespace SkeletonTest {
   window.addEventListener("load", init);
 
   async function init(): Promise<void> {
-    const gltf: ƒ.GLTFLoaderResponse = await ƒ.GLTFLoader.load("animated_arm.gltf");
-    gltf.cameras[0].clrBackground = ƒ.Color.CSS("grey");
-    gltf.scene.getChildrenByName("Arm")[0].getChild(0).addComponent(
-      new ƒ.ComponentMaterial(new ƒ.Material("UniColor", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("red"))))
-    );
-    console.log(gltf);
-
     const canvas: HTMLCanvasElement = document.querySelector("canvas");
 
-    const node: ƒ.Node = await initAnimatedCuboid();
+    // setup scene
+    const scene: ƒ.Node = new ƒ.Node("Scene");
 
-    const camera: ƒ.ComponentCamera = new ƒ.ComponentCamera();
-    camera.mtxPivot.translateX(-10);
-    camera.mtxPivot.translateY(10);
-    camera.mtxPivot.showTo(ƒ.Vector3.ZERO(), camera.mtxPivot.getZ());
-    node.addComponent(camera);
-    //gltf.scene.addComponent(camera);
+    const rotatorX: ƒ.Node = new ƒ.Node("RotatorX");
+    rotatorX.addComponent(new ƒ.ComponentTransform());
 
-    const light: ƒ.ComponentLight = new ƒ.ComponentLight();
-    light.setType(ƒ.LightDirectional);
-    light.mtxPivot.set(camera.mtxPivot);
-    node.addComponent(light);
+    const rotatorY: ƒ.Node = new ƒ.Node("RotatorY");
+    rotatorY.addComponent(new ƒ.ComponentTransform());
 
+    const zylinder: ƒ.Node = await initAnimatedZylinder();
+    console.log(zylinder);
+
+    scene.addChild(rotatorX);
+    rotatorX.addChild(rotatorY);
+    rotatorY.addChild(zylinder);
+
+    // setup camera
+    const camera: ƒ.Node = new ƒ.Node("Camera");
+    camera.addComponent(new ƒ.ComponentCamera());
+    camera.addComponent(new ƒ.ComponentTransform());
+    camera.mtxLocal.translateZ(10);
+    camera.mtxLocal.showTo(ƒ.Vector3.ZERO(), camera.mtxLocal.getY());
+    scene.addChild(camera);
+
+    // setup light
+    const cmpLightDirectional: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightDirectional(new ƒ.Color(0.5, 0.5, 0.5)));
+    cmpLightDirectional.mtxPivot.rotateY(180);
+    scene.addComponent(cmpLightDirectional);
+
+    const cmpLightAmbient: ƒ.ComponentLight = new ƒ.ComponentLight(new ƒ.LightAmbient(new ƒ.Color(0.5, 0.5, 0.5)));
+    scene.addComponent(cmpLightAmbient);
+
+    // setup viewport
     const viewport: ƒ.Viewport = new ƒ.Viewport();
-    viewport.initialize("Viewport", node, camera, canvas);
-    //viewport.initialize("Viewport", gltf.scene, camera, canvas);
-/*    
-    ƒ.Render.prepare(node);
-    const cmpMesh: ƒ.ComponentMesh = node.getComponent(ƒ.ComponentMesh);
-    cmpMesh.skeleton.mtxBones.forEach((mtxBone, iBone) =>
-      console.log(`mtxBone[${iBone}]${mtxBone.toString()}`)
-    );
-    for (let iVertex: number = 0; iVertex < cmpMesh.mesh.vertices.length / 3; iVertex++) {
-      const pos: ƒ.Vector3 = cmpMesh.getVertexPosition(iVertex);
-      cmpMesh.mesh.vertices[iVertex * 3 + 0] = pos.x;
-      cmpMesh.mesh.vertices[iVertex * 3 + 1] = pos.y;
-      cmpMesh.mesh.vertices[iVertex * 3 + 2] = pos.z;
-    }
-*/
+    viewport.initialize("Viewport", scene, camera.getComponent(ƒ.ComponentCamera), canvas);
     viewport.draw();
     console.log(viewport);
 
-    ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, () => viewport.draw());
+    // run loop
+    ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, () => update(viewport, rotatorX.mtxLocal, rotatorY.mtxLocal));
     ƒ.Loop.start();
   }
 
   class MeshCuboidSkin extends ƒ.MeshSkin {
     constructor() {
       super();
-      this.ƒvertices = Float32Array.from([
-       -1, -1, -2, // 0
-        1, -1, -2, // 1
-       -1,  1, -2, // 2
-        1,  1, -2, // 3
-
-       -1, -1,  0, // 4
-        1, -1,  0, // 5
-       -1,  1,  0, // 6
-        1,  1,  0, // 7
-
-       -1, -1,  2, // 8
-        1, -1,  2, // 9
-       -1,  1,  2, // 10
-        1,  1,  2  // 11
-      ]);
-      this.ƒindices = Uint16Array.from([
-        0,  2,  3, // bottom
-        3,  1,  0,
-
-        0,  1,  5, // back-bottom
-        5,  4,  0,
-        4,  5,  9, // back-top
-        9,  8,  4,
-
-        1,  3,  7, // right-bottom
-        7,  5,  1,
-        5,  7, 11, // right-top
-       11,  9,  5,
-
-        3,  2,  6, // front-bottom
-        6,  7,  3,
-        7,  6, 10, // front-top
-       10, 11,  7,
-
-        2,  0,  4, // left-bottom
-        4,  6,  2,
-        6,  4,  8, // left-top
-        8, 10,  6,
-
-        8,  9, 11, // top
-       11, 10,  8
-      ]);
-      this.ƒiBones = Uint8Array.from([
-        0, 1, 0, 0,
-        0, 1, 0, 0,
-        0, 1, 0, 0,
-        0, 1, 0, 0,
-
-        0, 1, 0, 0,
-        0, 1, 0, 0,
-        0, 1, 0, 0,
-        0, 1, 0, 0,
-
-        0, 1, 0, 0,
-        0, 1, 0, 0,
-        0, 1, 0, 0,
-        0, 1, 0, 0
-      ]);
-      this.ƒweights = Float32Array.from([
-        1.0, 0.0, 0, 0,
-        1.0, 0.0, 0, 0,
-        1.0, 0.0, 0, 0,
-        1.0, 0.0, 0, 0,
-        
-        0.5, 0.5, 0, 0,
-        0.5, 0.5, 0, 0,
-        0.5, 0.5, 0, 0,
-        0.5, 0.5, 0, 0,
-        
-        0.0, 1.0, 0, 0,
-        0.0, 1.0, 0, 0,
-        0.0, 1.0, 0, 0,
-        0.0, 1.0, 0, 0
-      ]);
+      const meshSource: ƒ.Mesh = new ƒ.MeshRotation(
+        "MeshExtrusion",
+        [
+          new ƒ.Vector2(0, 2),
+          new ƒ.Vector2(0.5, 2),
+          new ƒ.Vector2(0.5, 0),
+          new ƒ.Vector2(0.5, -2),
+          new ƒ.Vector2(0, -2)
+        ],
+        6
+      );
+      this.ƒvertices = meshSource.vertices;
+      this.ƒindices = meshSource.indices;
+      const iBones: number[] = [];
+      const weights: number[] = [];
+      for (let iVertex: number = 0; iVertex < this.ƒvertices.length; iVertex += 3) {
+        iBones.push(0, 1, 0, 0);
+        weights.push(
+          1 - (this.ƒvertices[iVertex + 1] + 2) / 4,
+          (this.ƒvertices[iVertex + 1] + 2) / 4,
+          0,
+          0
+        );
+      }
+      this.ƒiBones = new Uint8Array(iBones);
+      this.ƒweights = new Float32Array(weights);
     }
   }
 
-  async function initAnimatedCuboid(): Promise<ƒ.Node> {
-    const zylinder: ƒ.Node = new ƒ.Node("AnimatedCuboid");
+  async function initAnimatedZylinder(): Promise<ƒ.Node> {
+    const zylinder: ƒ.Node = new ƒ.Node("AnimatedZylinder");
 
     const skeleton: ƒ.Skeleton = new ƒ.Skeleton("Skeleton");
-    skeleton.addChild(new ƒ.Bone("LowerBone", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Z(-2))));
-    skeleton.bones[0].addChild(new ƒ.Bone("UpperBone", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Z(2))));
+    skeleton.addChild(new ƒ.Bone("LowerBone", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(-2))));
+    skeleton.bones[0].addChild(new ƒ.Bone("UpperBone", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(2))));
     //console.log(ƒ.Serializer.serialize(skeleton));
 
     const mesh: ƒ.MeshSkin = new MeshCuboidSkin();
@@ -148,21 +98,18 @@ namespace SkeletonTest {
     const material: ƒ.Material = new ƒ.Material("Grey", ƒ.ShaderFlatSkin, new ƒ.CoatColored(ƒ.Color.CSS("Grey")));
     const cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(material);
     zylinder.addComponent(cmpMaterial);
-
-    cmpMesh.skeleton.mtxBoneLocals[1].rotateX(45);
     
     const sequence: ƒ.AnimationSequence = new ƒ.AnimationSequence();
     sequence.addKey(new ƒ.AnimationKey(0, 0));
-    sequence.addKey(new ƒ.AnimationKey(5000, 45));
+    sequence.addKey(new ƒ.AnimationKey(1000, 45));
+    sequence.addKey(new ƒ.AnimationKey(2000, 0));
 
     const animationStructure: ƒ.AnimationStructure = {
       components: {
-        ComponentSkeleton: [ { "ƒ.ComponentSkeleton": {
-          mtxBoneLocals: {
-            1: {
-              rotation: {
-                z: sequence
-              }
+        ComponentTransform: [ { "ƒ.ComponentTransform": {
+          mtxLocal: {
+            rotation: {
+              z: sequence
             }
           }
         }}]
@@ -170,10 +117,22 @@ namespace SkeletonTest {
     };
 
     const animation: ƒ.Animation = new ƒ.Animation("Animation", animationStructure);
-    const cmpAnimator: ƒ.ComponentAnimator = new ƒ.ComponentAnimator(animation);
-    //zylinder.addComponent(cmpAnimator);
+    const cmpAnimator: ƒ.ComponentAnimator = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE.LOOP);
+    cmpMesh.skeleton.bones[1].addComponent(cmpAnimator);
+    cmpAnimator.activate(true);
 
-    console.log(zylinder);
     return zylinder;
+  }
+
+  function update(_viewport: ƒ.Viewport, _mtxRotatorX: ƒ.Matrix4x4, _mtxRotatorY: ƒ.Matrix4x4): void {
+    if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_RIGHT])) _mtxRotatorY.rotateY(3);
+    if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_UP])) _mtxRotatorX.rotateX(-3);
+    if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_LEFT])) _mtxRotatorY.rotateY(-3);
+    if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_DOWN])) _mtxRotatorX.rotateX(3);
+    if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.SPACE])) {
+      _mtxRotatorX.set(ƒ.Matrix4x4.IDENTITY());
+      _mtxRotatorY.set(ƒ.Matrix4x4.IDENTITY());
+    }
+    _viewport.draw();
   }
 }

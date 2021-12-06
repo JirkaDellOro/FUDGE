@@ -5,5 +5,12 @@
     "coat": "CoatTextured",
     "namespace": "FudgeCore",
     "outdir": "../"
+  },
+  "ShaderFlatSkin": {
+    "vertex": "ShaderFlatSkin.vert",
+    "fragment": "ShaderFlat.frag",
+    "coat": "CoatColored",
+    "namespace": "FudgeCore",
+    "outdir": "../"
   }
 }

@@ -26,7 +26,7 @@ namespace FudgeCore {
       crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, this.weights, WebGL2RenderingContext.STATIC_DRAW);
     }
 
-    protected static useRenderBuffers(this: MeshSkin, _shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Iterable<number>): void {
+    protected static useRenderBuffers(this: MeshSkin, _shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): void {
       super.useRenderBuffers.call(this, _shader, _mtxWorld, _mtxProjection, _id);
       const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
 
@@ -34,7 +34,7 @@ namespace FudgeCore {
       if (aIBone) {
         crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderBuffers.iBones);
         crc3.enableVertexAttribArray(aIBone);
-        crc3.vertexAttribPointer(aIBone, 4, WebGL2RenderingContext.FLOAT, false, 0, 0);
+        crc3.vertexAttribIPointer(aIBone, 4, WebGL2RenderingContext.UNSIGNED_BYTE, 0, 0);
       }
 
       const aWeight: number = _shader.attributes["a_weight"];
@@ -44,9 +44,13 @@ namespace FudgeCore {
         crc3.vertexAttribPointer(aWeight, 4, WebGL2RenderingContext.FLOAT, false, 0, 0);
       }
 
-      const uMtxBones: WebGLUniformLocation = _shader.uniforms["u_mtxBones"];
-      if (uMtxBones)
-        crc3.uniformMatrix4fv(uMtxBones, false, _mtxBones);
+      _mtxBones.forEach((mtxBone, iBone) => {
+        const uMtxBone: WebGLUniformLocation = _shader.uniforms[`u_bones[${iBone}].matrix`];
+        if (uMtxBone)
+          crc3.uniformMatrix4fv(uMtxBone, false, mtxBone.get());
+      });
+
+      crc3.uniformMatrix4fv(_shader.uniforms["u_mtxTest"], false, _mtxBones[1].get());
     }
 
     protected static deleteRenderBuffers(_renderBuffers: RenderBuffers): void {

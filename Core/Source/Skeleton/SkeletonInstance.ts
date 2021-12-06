@@ -36,13 +36,6 @@ namespace FudgeCore {
     }
 
     /**
-     * Gets the bone transformations for a vertex
-     */
-    public * getMtxBonesIterator(): IterableIterator<number> {
-      for (const matrix of this.mtxBones) for (const number of matrix.get()) yield number;
-    }
-
-    /**
      * Set this skeleton instance to be a recreation of the {@link Skeleton} given
      */
     public async set(_skeleton: Skeleton): Promise<void> {

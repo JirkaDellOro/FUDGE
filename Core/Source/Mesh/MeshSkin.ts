@@ -36,7 +36,7 @@ namespace FudgeCore {
       return this.ƒweights;
     }
 
-    public useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Iterable<number>): void {/* injected by RenderInjector*/ }
+    public useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): void {/* injected by RenderInjector*/ }
 
     public serialize(): Serialization {
       const serialization: Serialization = super.serialize();

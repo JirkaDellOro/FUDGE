@@ -3,18 +3,23 @@
 in vec3 a_position;
 in vec3 a_normal;
 
+flat out vec4 v_color;
+
 uniform mat4 u_world;
 uniform mat4 u_projection;
 
-flat out vec4 v_color;
-
 // Bones
-const uint MAX_BONES = 256u;
+struct Bone {
+  mat4 matrix;
+};
 
-in vec4 a_iBone;
+const uint MAX_BONES = 10u;
+
+in uvec4 a_iBone;
 in vec4 a_weight;
 
-uniform mat4 u_mtxBones[MAX_BONES];
+uniform Bone u_bones[MAX_BONES];
+uniform mat4 mtxTest;
 
 // Lights
 struct LightAmbient {
@@ -32,15 +37,15 @@ uniform LightAmbient u_ambient;
 uniform uint u_nLightsDirectional;
 uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
 
-void main() {  
-  mat4 skinMatrix =
-    a_weight.x * u_mtxBones[uint(a_iBone.x)] +
-    a_weight.y * u_mtxBones[uint(a_iBone.y)] +
-    a_weight.z * u_mtxBones[uint(a_iBone.z)] +
-    a_weight.w * u_mtxBones[uint(a_iBone.w)];
+void main() {
+  mat4 mtxSkin =
+    a_weight.x * u_bones[a_iBone.x].matrix +
+    a_weight.y * u_bones[a_iBone.y].matrix +
+    a_weight.z * u_bones[a_iBone.z].matrix +
+    a_weight.w * u_bones[a_iBone.w].matrix;
 
-  gl_Position = u_projection * skinMatrix * vec4(a_position, 1.0);
-  vec3 normal = normalize(transpose(inverse(mat3(u_world * skinMatrix))) * a_normal);
+  gl_Position = u_projection * mtxSkin * vec4(a_position, 1.0);
+  vec3 normal = normalize(transpose(inverse(mat3(u_world * mtxSkin))) * a_normal);
   
   v_color = u_ambient.color;
   for (uint i = 0u; i < u_nLightsDirectional; i++) {

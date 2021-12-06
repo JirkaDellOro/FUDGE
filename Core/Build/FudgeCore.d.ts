@@ -4416,7 +4416,7 @@ declare namespace FudgeCore {
     class RenderInjectorMeshSkin extends RenderInjectorMesh {
         static decorate(_constructor: Function): void;
         protected static createRenderBuffers(this: MeshSkin): void;
-        protected static useRenderBuffers(this: MeshSkin, _shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Iterable<number>): void;
+        protected static useRenderBuffers(this: MeshSkin, _shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): void;
         protected static deleteRenderBuffers(_renderBuffers: RenderBuffers): void;
     }
 }
@@ -4434,7 +4434,7 @@ declare namespace FudgeCore {
         constructor(_gltfMesh?: GLTF.Mesh, _loader?: GLTFLoader);
         get iBones(): Uint8Array;
         get weights(): Float32Array;
-        useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Iterable<number>): void;
+        useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
@@ -6148,10 +6148,6 @@ declare namespace FudgeCore {
          * Gets the bone transformations for a vertex
          */
         get mtxBones(): Array<Matrix4x4>;
-        /**
-         * Gets the bone transformations for a vertex
-         */
-        getMtxBonesIterator(): IterableIterator<number>;
         /**
          * Set this skeleton instance to be a recreation of the {@link Skeleton} given
          */

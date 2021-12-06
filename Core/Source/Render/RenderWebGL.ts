@@ -319,7 +319,7 @@ namespace FudgeCore {
       let coat: Coat = cmpMaterial.material.coat;
       shader.useProgram();
       if (_cmpMesh.mesh instanceof MeshSkin)
-        _cmpMesh.mesh.useRenderBuffers(shader, _mtxMeshToWorld, _mtxWorldToView, null, _cmpMesh.skeleton.getMtxBonesIterator());
+        _cmpMesh.mesh.useRenderBuffers(shader, _mtxMeshToWorld, _mtxWorldToView, null, _cmpMesh.skeleton.mtxBones);
       else
         _cmpMesh.mesh.useRenderBuffers(shader, _mtxMeshToWorld, _mtxWorldToView);
       coat.useRenderData(shader, cmpMaterial);
