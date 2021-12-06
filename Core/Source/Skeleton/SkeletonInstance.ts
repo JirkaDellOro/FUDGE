@@ -2,6 +2,7 @@ namespace FudgeCore {
   export class SkeletonInstance extends GraphInstance {
 
     public readonly bones: Array<Bone> = new Array();
+    public readonly mtxBoneLocals: MutableArray<Matrix4x4> = new MutableArray();
 
     #mtxBones: Array<Matrix4x4>;
     #mtxBonesUpdated: number;
@@ -13,14 +14,6 @@ namespace FudgeCore {
      */
     public constructor() {
       super();
-      this.addEventListener(EVENT.CHILD_APPEND, this.onChildAppend);
-    }
-
-    /**
-     * Gets the bone local transformations
-     */
-    public get mtxBoneLocals(): Array<Matrix4x4> {
-      return this.bones.map(bone => bone.mtxLocal);
     }
 
     /**
@@ -39,8 +32,12 @@ namespace FudgeCore {
      * Set this skeleton instance to be a recreation of the {@link Skeleton} given
      */
     public async set(_skeleton: Skeleton): Promise<void> {
+      this.bones.length = 0;
+      this.mtxBoneLocals.length = 0;
       this.skeletonSource = _skeleton;
+      this.addEventListener(EVENT.CHILD_APPEND, this.onChildAppend);
       await super.set(_skeleton);
+      this.removeEventListener(EVENT.CHILD_APPEND, this.onChildAppend);
     }
 
     /**
@@ -48,6 +45,15 @@ namespace FudgeCore {
      */
     public resetPose(): void {
       this.bones.forEach((bone, index) => bone.mtxLocal.set(Matrix4x4.INVERSION(this.skeletonSource.mtxBindInverses[index])));
+    }
+
+    public applyAnimation(_mutator: Mutator): void {
+      super.applyAnimation(_mutator);
+      if (_mutator.mtxBoneLocals)
+        this.mtxBoneLocals.mutate(_mutator.mtxBoneLocals);
+      if (_mutator.bones)
+        for (let i in _mutator.bones)
+          this.bones[+i].applyAnimation(_mutator.bones[i]);
     }
 
     private calculateMtxBones(): void {
@@ -67,8 +73,13 @@ namespace FudgeCore {
     private onChildAppend = (_event: Event) => {
       for (const node of _event.target as Node) {
         if (node instanceof Bone && !this.bones.includes(node))
-          this.bones.push(node);
+          this.registerBone(node);
       }
+    }
+
+    private registerBone(_bone: Bone): void {
+      this.bones.push(_bone);
+      this.mtxBoneLocals.push(_bone.mtxLocal);
     }
 
   }
