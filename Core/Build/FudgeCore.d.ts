@@ -1896,6 +1896,7 @@ declare namespace FudgeCore {
         constructor(_mesh?: Mesh);
         get radius(): number;
         get skeleton(): SkeletonInstance;
+        set skeleton(_skeleton: SkeletonInstance);
         /**
          * Calculates the position of a vertex transformed by the skeleton
          * @param _index index of the vertex
@@ -6135,15 +6136,12 @@ declare namespace FudgeCore {
     class SkeletonInstance extends GraphInstance {
         #private;
         readonly bones: Array<Bone>;
+        readonly mtxBoneLocals: MutableArray<Matrix4x4>;
         private skeletonSource;
         /**
          * Creates a new skeleton instance
          */
         constructor();
-        /**
-         * Gets the bone local transformations
-         */
-        get mtxBoneLocals(): Array<Matrix4x4>;
         /**
          * Gets the bone transformations for a vertex
          */
@@ -6156,11 +6154,13 @@ declare namespace FudgeCore {
          * Resets this skeleton instance to its default pose
          */
         resetPose(): void;
+        applyAnimation(_mutator: Mutator): void;
         private calculateMtxBones;
         /**
          * Registers all bones of a appended node
          */
         private onChildAppend;
+        private registerBone;
     }
 }
 declare namespace FudgeCore {
