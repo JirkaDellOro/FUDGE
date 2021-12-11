@@ -1,7 +1,7 @@
 namespace FudgeCore {
   export class Skeleton extends Graph {
 
-    public readonly bones: Array<Bone> = new Array();
+    public readonly bones: Array<Bone> = [];
 
     /**
      * The inverse matrices of the bone bind transformations relative to this skeleton
@@ -24,7 +24,7 @@ namespace FudgeCore {
         this.calculateMtxBindInversesOnChildAppend = false;
       }
       else {
-        this.mtxBindInverses = new Array();
+        this.mtxBindInverses = [];
         this.calculateMtxBindInversesOnChildAppend = true;
       }
 
