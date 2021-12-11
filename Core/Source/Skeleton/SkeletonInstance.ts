@@ -1,8 +1,8 @@
 namespace FudgeCore {
   export class SkeletonInstance extends GraphInstance {
 
-    public readonly bones: Array<Bone> = new Array();
-    public readonly mtxBoneLocals: MutableArray<Matrix4x4> = new MutableArray();
+    public mtxBindShape: Matrix4x4 = Matrix4x4.IDENTITY();
+    public readonly bones: Array<Bone> = [];
 
     #mtxBones: Array<Matrix4x4>;
     #mtxBonesUpdated: number;
@@ -14,6 +14,10 @@ namespace FudgeCore {
      */
     public constructor() {
       super();
+    }
+
+    public get mtxBoneLocals(): Array<Matrix4x4> {
+      return this.bones.map(bone => bone.mtxLocal);
     }
 
     /**
@@ -33,7 +37,6 @@ namespace FudgeCore {
      */
     public async set(_skeleton: Skeleton): Promise<void> {
       this.bones.length = 0;
-      this.mtxBoneLocals.length = 0;
       this.skeletonSource = _skeleton;
       this.addEventListener(EVENT.CHILD_APPEND, this.onChildAppend);
       await super.set(_skeleton);
@@ -50,10 +53,11 @@ namespace FudgeCore {
     public applyAnimation(_mutator: Mutator): void {
       super.applyAnimation(_mutator);
       if (_mutator.mtxBoneLocals)
-        this.mtxBoneLocals.mutate(_mutator.mtxBoneLocals);
+        for (const iBone in _mutator.mtxBoneLocals)
+          this.mtxBoneLocals[+iBone].mutate(_mutator.mtxBoneLocals[iBone]);
       if (_mutator.bones)
-        for (let i in _mutator.bones)
-          this.bones[+i].applyAnimation(_mutator.bones[i]);
+        for (const iBone in _mutator.bones)
+          this.bones[+iBone].applyAnimation(_mutator.bones[iBone]);
     }
 
     private calculateMtxBones(): void {
@@ -62,6 +66,7 @@ namespace FudgeCore {
         const boneMatrix: Matrix4x4 = this.getParent()?.mtxWorldInverse.clone || Matrix4x4.IDENTITY();
         boneMatrix.multiply(bone.mtxWorld);
         boneMatrix.multiply(this.skeletonSource.mtxBindInverses[index]);
+        if (this.cmpTransform) boneMatrix.multiply(Matrix4x4.INVERSION(this.mtxLocal));
 
         return boneMatrix;
       });
@@ -73,13 +78,8 @@ namespace FudgeCore {
     private onChildAppend = (_event: Event) => {
       for (const node of _event.target as Node) {
         if (node instanceof Bone && !this.bones.includes(node))
-          this.registerBone(node);
+          this.bones.push(node);
       }
-    }
-
-    private registerBone(_bone: Bone): void {
-      this.bones.push(_bone);
-      this.mtxBoneLocals.push(_bone.mtxLocal);
     }
 
   }
