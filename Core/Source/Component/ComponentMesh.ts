@@ -37,10 +37,6 @@ namespace FudgeCore {
       return this.#skeleton;
     }
 
-    public set skeleton(_skeleton: SkeletonInstance) {
-      this.skeleton.applyAnimation(_skeleton);
-    }
-
     /**
      * Calculates the position of a vertex transformed by the skeleton
      * @param _index index of the vertex
