@@ -56,11 +56,13 @@ namespace SkeletonTest {
       const meshSource: ƒ.Mesh = new ƒ.MeshRotation(
         "MeshExtrusion",
         [
-          new ƒ.Vector2(0, 2),
-          new ƒ.Vector2(0.5, 2),
-          new ƒ.Vector2(0.5, 0),
-          new ƒ.Vector2(0.5, -2),
-          new ƒ.Vector2(0, -2)
+          new ƒ.Vector2(0, 4),
+          new ƒ.Vector2(1, 4),
+          new ƒ.Vector2(1, 3),
+          new ƒ.Vector2(1, 2),
+          new ƒ.Vector2(1, 1),
+          new ƒ.Vector2(1, 0),
+          new ƒ.Vector2(0, 0)
         ],
         6
       );
@@ -71,8 +73,8 @@ namespace SkeletonTest {
       for (let iVertex: number = 0; iVertex < this.ƒvertices.length; iVertex += 3) {
         iBones.push(0, 1, 0, 0);
         weights.push(
-          1 - (this.ƒvertices[iVertex + 1] + 2) / 4,
-          (this.ƒvertices[iVertex + 1] + 2) / 4,
+          1 - this.ƒvertices[iVertex + 1] / 4,
+          this.ƒvertices[iVertex + 1] / 4,
           0,
           0
         );
@@ -86,13 +88,16 @@ namespace SkeletonTest {
     const zylinder: ƒ.Node = new ƒ.Node("AnimatedZylinder");
 
     const skeleton: ƒ.Skeleton = new ƒ.Skeleton("Skeleton");
-    skeleton.addChild(new ƒ.Bone("LowerBone", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(-2))));
-    skeleton.bones[0].addChild(new ƒ.Bone("UpperBone", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(2))));
+    skeleton.addChild(new ƒ.Bone("LowerBone", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(0))));
+    skeleton.bones[0].addChild(new ƒ.Bone("UpperBone", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(1))));
     //console.log(ƒ.Serializer.serialize(skeleton));
 
     const mesh: ƒ.MeshSkin = new MeshCuboidSkin();
     const cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh(mesh);
+    cmpMesh.mtxPivot.translateY(-2);
     await cmpMesh.skeleton.set(skeleton);
+    cmpMesh.skeleton.addComponent(new ƒ.ComponentTransform());
+    cmpMesh.skeleton.mtxLocal.scale(ƒ.Vector3.ONE(2));
     zylinder.addComponent(cmpMesh);
 
     const material: ƒ.Material = new ƒ.Material("Grey", ƒ.ShaderFlatSkin, new ƒ.CoatColored(ƒ.Color.CSS("Grey")));
@@ -100,9 +105,9 @@ namespace SkeletonTest {
     zylinder.addComponent(cmpMaterial);
     
     const sequence0: ƒ.AnimationSequence = new ƒ.AnimationSequence();
-    sequence0.addKey(new ƒ.AnimationKey(0, -2.5));
-    sequence0.addKey(new ƒ.AnimationKey(1000, -1.5));
-    sequence0.addKey(new ƒ.AnimationKey(2000, -2.5));
+    sequence0.addKey(new ƒ.AnimationKey(0, -0.5));
+    sequence0.addKey(new ƒ.AnimationKey(1000, 0.5));
+    sequence0.addKey(new ƒ.AnimationKey(2000, -0.5));
     
     const sequence1: ƒ.AnimationSequence = new ƒ.AnimationSequence();
     sequence1.addKey(new ƒ.AnimationKey(0, 0));
@@ -110,37 +115,31 @@ namespace SkeletonTest {
     sequence1.addKey(new ƒ.AnimationKey(2000, 0));
 
     const animationStructure: ƒ.AnimationStructure = {
-      components: {
-        ComponentMesh: [ { "ƒ.ComponentMesh": {
-          skeleton: {
-            bones: {
-              0: {
-                components: {
-                  ComponentTransform: [ { "ƒ.ComponentTransform": {
-                    mtxLocal: {
-                      translation: {
-                        y: sequence0
-                      }
-                    }
-                  }}]
+      bones: {
+        0: {
+          components: {
+            ComponentTransform: [ { "ƒ.ComponentTransform": {
+              mtxLocal: {
+                translation: {
+                  y: sequence0
                 }
               }
-            },
-            mtxBoneLocals: {
-              1: {
-                rotation: {
-                  z: sequence1
-                }
-              }
-            }
+            }}]
           }
-        }}]
+        }
+      },
+      mtxBoneLocals: {
+        1: {
+          rotation: {
+            z: sequence1
+          }
+        }
       }
     };
 
     const animation: ƒ.Animation = new ƒ.Animation("Animation", animationStructure);
     const cmpAnimator: ƒ.ComponentAnimator = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE.LOOP);
-    zylinder.addComponent(cmpAnimator);
+    cmpMesh.skeleton.addComponent(cmpAnimator);
     cmpAnimator.activate(true);
 
     return zylinder;
