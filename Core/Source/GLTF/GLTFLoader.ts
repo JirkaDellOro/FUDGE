@@ -178,7 +178,7 @@ namespace FudgeCore {
           mtxBindInverses.push(mtx);
         }
 
-        return new Skeleton(name, rootBone, mtxBindInverses);
+        return new Skeleton(name, rootBone/*, mtxBindInverses*/);
       }) || [];
     }
 
@@ -207,32 +207,24 @@ namespace FudgeCore {
             .find(parent => parent instanceof Skeleton) as Skeleton;
 
           // map channels to 4 by 4 matrix animation sequences indexed by the bone indices
-          const boneSequences: {[iBone: number]: AnimationSequenceMatrix4x4} = gltfAnimation.channels.reduce(
+          const boneSequences: { [boneName: string]: AnimationSequenceMatrix4x4 } = gltfAnimation.channels.reduce(
             (boneSequences, channel) => {
-              const iBone: number = skeleton.bones.indexOf(this.nodes[channel.target.node]);
+              const boneName: string = this.nodes[channel.target.node].name;
               
               // create new 4 by 4 matrix animation sequence if there is no entry for index iBone
-              if (!boneSequences[iBone]) boneSequences[iBone] = {};
+              if (!boneSequences[boneName]) boneSequences[boneName] = {};
 
               // set the vector 3 animation sequence of the entry refered by the channel target path
               const transformationType: TransformationType = channel.target.path as TransformationType;
               if (transformationType)
-                boneSequences[iBone][transformationType] = this.getAnimationSequenceVector3(gltfAnimation.samplers[channel.sampler]);
+                boneSequences[boneName][transformationType] = this.getAnimationSequenceVector3(gltfAnimation.samplers[channel.sampler]);
 
               return boneSequences;
             },
-            {} as {[iBone: number]: AnimationSequenceMatrix4x4}
+            {} as {[boneName: string]: AnimationSequenceMatrix4x4}
           );
 
-          const animationStructure: AnimationStructure = {
-            components: {
-              ComponentMesh: [{ "ƒ.ComponentMesh": {
-                skeleton: {
-                  mtxBoneLocals: boneSequences
-                }
-              }}]
-            }
-          };
+          const animationStructure: AnimationStructure = { mtxBoneLocals: boneSequences };
 
           const animation: Animation = new Animation(gltfAnimation.name, animationStructure);
           this.skeletalAnimations.set(skeleton, animation);
@@ -278,7 +270,8 @@ namespace FudgeCore {
         if (gltfNode.skin != undefined) {
           node.getComponent(ComponentMesh).skeleton.set(this.skeletons[gltfNode.skin]);
           const skeletalAnimation: Animation = this.skeletalAnimations.get(this.skeletons[gltfNode.skin]);
-          if (skeletalAnimation) node.addComponent(new ComponentAnimator(skeletalAnimation));
+          if (skeletalAnimation)
+            node.getComponent(ComponentMesh).skeleton.addComponent(new ComponentAnimator(skeletalAnimation));
         }
       });
     }
