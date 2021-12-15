@@ -12,14 +12,8 @@ namespace FudgeCore {
     protected createJoints: () => Uint8Array;
     protected createWeights: () => Float32Array;
 
-    /**
-     * Creates a new mesh-skin with an optional name
-     */
-    constructor(_gltfMesh?: GLTF.Mesh, _loader?: GLTFLoader) {
-      super(_gltfMesh, _loader);
-
-      this.ƒiBones = _loader?.getUint8Array(_gltfMesh.primitives[0].attributes.JOINTS_0);
-      this.ƒweights = _loader?.getFloat32Array(_gltfMesh.primitives[0].attributes.WEIGHTS_0);
+    public static async LOAD(_loader: GLTFLoader, _iMesh: number): Promise<MeshSkin> {
+      return await new MeshSkin(_loader.gltf.meshes[_iMesh].name).load(_loader, _iMesh);
     }
 
     public get iBones(): Uint8Array {
@@ -38,13 +32,11 @@ namespace FudgeCore {
 
     public useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): void {/* injected by RenderInjector*/ }
 
-    public serialize(): Serialization {
-      const serialization: Serialization = super.serialize();
-      return serialization;
-    }
-
-    public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      super.deserialize(_serialization);
+    protected async load(_loader: GLTFLoader, _iMesh: number): Promise<MeshSkin> {
+      await super.load(_loader, _iMesh);
+      const gltfMesh: GLTF.Mesh = _loader.gltf.meshes[_iMesh];
+      this.ƒiBones = await _loader.getUint8Array(gltfMesh.primitives[0].attributes.JOINTS_0);
+      this.ƒweights = await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.WEIGHTS_0);
       return this;
     }
 

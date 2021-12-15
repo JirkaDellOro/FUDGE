@@ -3112,36 +3112,29 @@ declare namespace GLTF {
     }
 }
 declare namespace FudgeCore {
-    interface GLTFLoaderResponse {
-        scene: Graph;
-        scenes: Array<Graph>;
-        cameras: Array<ComponentCamera>;
-        animations: Array<Animation>;
-    }
     class GLTFLoader {
         readonly gltf: GLTF.GlTf;
+        readonly uri: string;
+        private readonly scenes;
+        private readonly nodes;
+        private readonly iBones;
+        private readonly cameras;
+        private readonly animations;
+        private readonly skeletalAnimations;
+        private readonly meshes;
+        private readonly skeletons;
         private readonly buffers;
-        private scenes;
-        private nodes;
-        private cameras;
-        private animations;
-        private skeletalAnimations;
-        private meshes;
-        private skeletons;
         private constructor();
-        static load(_uri: string): Promise<GLTFLoaderResponse>;
-        private static createLoader;
-        getUint8Array(_iAccessor: number): Uint8Array;
-        getUint16Array(_iAccessor: number): Uint16Array;
-        getFloat32Array(_iAccessor: number): Float32Array;
-        private createNodes;
-        private createScenes;
-        private createCameras;
-        private createMeshes;
-        private createSkeletons;
-        private appendNodeChildren;
-        private createAnimations;
-        private appendNodeComponents;
+        static LOAD(_uri: string): Promise<GLTFLoader>;
+        getScene(_iScene?: number): Promise<Graph>;
+        getNode(_iNode: number): Promise<Node>;
+        getCamera(_iCamera: number): Promise<ComponentCamera>;
+        getMesh(_iMesh: number): Promise<Mesh>;
+        getSkeleton(_iSkeleton: number): Promise<Skeleton>;
+        getAnimation(_iAniamtion: number): Promise<Animation>;
+        getUint8Array(_iAccessor: number): Promise<Uint8Array>;
+        getUint16Array(_iAccessor: number): Promise<Uint16Array>;
+        getFloat32Array(_iAccessor: number): Promise<Float32Array>;
         private assertCmpTypeMatches;
         private getBufferData;
         private getAnimationSequenceVector3;
@@ -4270,9 +4263,12 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     class MeshGLTF extends Mesh {
-        constructor(_gltfMesh?: GLTF.Mesh, _loader?: GLTFLoader);
+        private uriGLTF;
+        private iGLTF;
+        static LOAD(_loader: GLTFLoader, _iMesh: number): Promise<MeshGLTF>;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        protected load(_loader: GLTFLoader, _iMesh: number): Promise<MeshGLTF>;
     }
 }
 declare namespace FudgeCore {
@@ -4428,15 +4424,11 @@ declare namespace FudgeCore {
         protected ƒmtxBones: Float32Array;
         protected createJoints: () => Uint8Array;
         protected createWeights: () => Float32Array;
-        /**
-         * Creates a new mesh-skin with an optional name
-         */
-        constructor(_gltfMesh?: GLTF.Mesh, _loader?: GLTFLoader);
+        static LOAD(_loader: GLTFLoader, _iMesh: number): Promise<MeshSkin>;
         get iBones(): Uint8Array;
         get weights(): Float32Array;
         useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): void;
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
+        protected load(_loader: GLTFLoader, _iMesh: number): Promise<MeshSkin>;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
