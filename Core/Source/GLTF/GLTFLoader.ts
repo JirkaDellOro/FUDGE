@@ -29,15 +29,14 @@ namespace FudgeCore {
 
   export class GLTFLoader {
 
-    public readonly gltf: GLTF.GlTf; 
-    public readonly uri: string;   
+    public readonly gltf: GLTF.GlTf;
+    public readonly uri: string;
 
     private readonly scenes: Array<Graph> = [];
     private readonly nodes: Array<Node> = [];
     private readonly iBones: Array<number>;
     private readonly cameras: Array<ComponentCamera> = [];
     private readonly animations: Array<Animation> = [];
-    private readonly skeletalAnimations: Map<Skeleton, Animation> = new Map();
     private readonly meshes: Array<Mesh> = [];
     private readonly skeletons: Array<Skeleton> = [];
     private readonly buffers: Array<ArrayBuffer> = [];
@@ -99,15 +98,12 @@ namespace FudgeCore {
 
         // check for mesh
         if (gltfNode.mesh != undefined) {
-          node.addComponent(new ComponentMesh(this.meshes[gltfNode.mesh]));
+          node.addComponent(new ComponentMesh(await this.getMesh(gltfNode.mesh)));
         }
 
         // check for skeleton        
         if (gltfNode.skin != undefined) {
-          await node.getComponent(ComponentMesh).skeleton.set(this.skeletons[gltfNode.skin]);
-          const skeletalAnimation: Animation = this.skeletalAnimations.get(this.skeletons[gltfNode.skin]);
-          if (skeletalAnimation)
-            node.getComponent(ComponentMesh).skeleton.addComponent(new ComponentAnimator(skeletalAnimation));
+          await node.getComponent(ComponentMesh).skeleton.set(await this.getSkeleton(gltfNode.skin));
         }
 
         this.nodes[_iNode] = node;

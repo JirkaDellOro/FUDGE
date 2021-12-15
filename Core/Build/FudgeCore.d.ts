@@ -3120,7 +3120,6 @@ declare namespace FudgeCore {
         private readonly iBones;
         private readonly cameras;
         private readonly animations;
-        private readonly skeletalAnimations;
         private readonly meshes;
         private readonly skeletons;
         private readonly buffers;
