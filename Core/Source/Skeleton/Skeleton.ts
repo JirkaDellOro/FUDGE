@@ -1,19 +1,15 @@
 namespace FudgeCore {
   export class Skeleton extends Graph {
 
-    public readonly bones: Array<Bone> = [];
-
-    /**
-     * The inverse matrices of the bone bind transformations relative to this skeleton
-     */
-    public readonly mtxBindInverses: Array<Matrix4x4>;
+    public readonly bones: BoneList = {};
+    public readonly mtxBindInverses: BoneMatrix4x4List;
 
     private calculateMtxBindInversesOnChildAppend: boolean;
     
     /**
      * Creates a new skeleton with a name
      */
-    constructor(_name: string = "Skeleton", _rootBone?: Bone, _mtxBindInverses?: Array<Matrix4x4>) {
+    constructor(_name: string = "Skeleton", _rootBone?: Bone, _mtxBindInverses?: BoneMatrix4x4List) {
       super(_name);
 
       this.addEventListener(EVENT.CHILD_APPEND, this.onChildAppend);
@@ -24,7 +20,7 @@ namespace FudgeCore {
         this.calculateMtxBindInversesOnChildAppend = false;
       }
       else {
-        this.mtxBindInverses = [];
+        this.mtxBindInverses = {};
         this.calculateMtxBindInversesOnChildAppend = true;
       }
 
@@ -35,20 +31,30 @@ namespace FudgeCore {
 
     /**
      * Sets the current state of this skeleton as the default pose
-     * by updating the inverse matrices
+     * by updating the inverse bind matrices
      */
     public setDefaultPose(): void {
-      // clear the list of inverse bind matrices
-      this.mtxBindInverses.length = 0;
+      for (const boneName in this.bones) {
+        this.calculateMtxWorld(this.bones[boneName]);
+        this.mtxBindInverses[boneName] = this.bones[boneName].mtxWorldInverse;
+      }
+    }
 
-      // recalculate the inverse bind matrices
-      this.bones.forEach(bone => this.calculateMtxWorld(bone));
-      this.mtxBindInverses.push(...this.bones.map(bone => bone.mtxWorldInverse));
+    public indexOfBone(_boneName: string): number {
+      let index: number = 0;
+      for (const boneName in this.bones) {
+        if (_boneName == boneName) return index;
+        index++;
+      }
+      return -1;
     }
 
     public serialize(): Serialization {
       const serialization: Serialization = super.serialize();
-      serialization.mtxBindInverses = Serializer.serializeArray(Matrix4x4, this.mtxBindInverses);
+      serialization.mtxBindInverses = {};
+      for (const boneName in this.mtxBindInverses) {
+        serialization.mtxBindInverses[boneName] = this.mtxBindInverses[boneName].serialize();
+      }
       return serialization;
     }
 
@@ -57,7 +63,9 @@ namespace FudgeCore {
       this.calculateMtxBindInversesOnChildAppend = false;
 
       await super.deserialize(_serialization);
-      this.mtxBindInverses.push(...await Serializer.deserializeArray(_serialization.mtxBindInverses) as Array<Matrix4x4>);
+      for (const boneName in _serialization.mtxBindInverses) {
+        this.mtxBindInverses[boneName] = await new Matrix4x4().deserialize(_serialization.mtxBindInverses[boneName]) as Matrix4x4;
+      }
 
       this.calculateMtxBindInversesOnChildAppend = true;
       return this;
@@ -88,17 +96,16 @@ namespace FudgeCore {
     }
 
     private registerBone(_bone: Bone): void {
-      this.bones.push(_bone);
+      this.bones[_bone.name] = _bone;
       if (this.calculateMtxBindInversesOnChildAppend) {
         this.calculateMtxWorld(_bone);
-        this.mtxBindInverses.push(_bone.mtxWorldInverse);
+        this.mtxBindInverses[_bone.name] = _bone.mtxWorldInverse;
       }
     }
 
     private deregisterBone(_bone: Bone): void {
-      const boneIndex: number = this.bones.indexOf(_bone);
-      this.bones.splice(boneIndex);
-      this.mtxBindInverses.splice(boneIndex);
+      delete this.bones[_bone.name];
+      delete this.mtxBindInverses[_bone.name];
     }
 
     /**

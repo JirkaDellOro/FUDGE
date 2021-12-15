@@ -6097,22 +6097,30 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    interface BoneList {
+        [boneName: string]: Bone;
+    }
+}
+declare namespace FudgeCore {
+    interface BoneMatrix4x4List {
+        [boneName: string]: Matrix4x4;
+    }
+}
+declare namespace FudgeCore {
     class Skeleton extends Graph {
-        readonly bones: Array<Bone>;
-        /**
-         * The inverse matrices of the bone bind transformations relative to this skeleton
-         */
-        readonly mtxBindInverses: Array<Matrix4x4>;
+        readonly bones: BoneList;
+        readonly mtxBindInverses: BoneMatrix4x4List;
         private calculateMtxBindInversesOnChildAppend;
         /**
          * Creates a new skeleton with a name
          */
-        constructor(_name?: string, _rootBone?: Bone, _mtxBindInverses?: Array<Matrix4x4>);
+        constructor(_name?: string, _rootBone?: Bone, _mtxBindInverses?: BoneMatrix4x4List);
         /**
          * Sets the current state of this skeleton as the default pose
-         * by updating the inverse matrices
+         * by updating the inverse bind matrices
          */
         setDefaultPose(): void;
+        indexOfBone(_boneName: string): number;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         /**
@@ -6135,13 +6143,13 @@ declare namespace FudgeCore {
     class SkeletonInstance extends GraphInstance {
         #private;
         mtxBindShape: Matrix4x4;
-        readonly bones: Array<Bone>;
         private skeletonSource;
         /**
          * Creates a new skeleton instance
          */
         constructor();
-        get mtxBoneLocals(): Array<Matrix4x4>;
+        get bones(): BoneList;
+        get mtxBoneLocals(): BoneMatrix4x4List;
         /**
          * Gets the bone transformations for a vertex
          */
@@ -6160,6 +6168,12 @@ declare namespace FudgeCore {
          * Registers all bones of a appended node
          */
         private onChildAppend;
+        /**
+         * Deregisters all bones of a removed node
+         */
+        private onChildRemove;
+        private registerBone;
+        private deregisterBone;
     }
 }
 declare namespace FudgeCore {

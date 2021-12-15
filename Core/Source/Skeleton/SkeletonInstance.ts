@@ -2,9 +2,10 @@ namespace FudgeCore {
   export class SkeletonInstance extends GraphInstance {
 
     public mtxBindShape: Matrix4x4 = Matrix4x4.IDENTITY();
-    public readonly bones: Array<Bone> = [];
 
-    #mtxBones: Array<Matrix4x4>;
+    #bones: BoneList;
+    #mtxBoneLocals: BoneMatrix4x4List;
+    #mtxBones: Array<Matrix4x4> = [];
     #mtxBonesUpdated: number;
 
     private skeletonSource: Skeleton;
@@ -16,8 +17,12 @@ namespace FudgeCore {
       super();
     }
 
-    public get mtxBoneLocals(): Array<Matrix4x4> {
-      return this.bones.map(bone => bone.mtxLocal);
+    public get bones(): BoneList {
+      return this.#bones;
+    }
+
+    public get mtxBoneLocals(): BoneMatrix4x4List {
+      return this.#mtxBoneLocals;
     }
 
     /**
@@ -36,40 +41,45 @@ namespace FudgeCore {
      * Set this skeleton instance to be a recreation of the {@link Skeleton} given
      */
     public async set(_skeleton: Skeleton): Promise<void> {
-      this.bones.length = 0;
       this.skeletonSource = _skeleton;
+      this.#bones = {};
+      this.#mtxBoneLocals = {};
       this.addEventListener(EVENT.CHILD_APPEND, this.onChildAppend);
+      this.addEventListener(EVENT.CHILD_REMOVE, this.onChildRemove);
       await super.set(_skeleton);
       this.removeEventListener(EVENT.CHILD_APPEND, this.onChildAppend);
+      this.removeEventListener(EVENT.CHILD_REMOVE, this.onChildRemove);
     }
 
     /**
      * Resets this skeleton instance to its default pose
      */
     public resetPose(): void {
-      this.bones.forEach((bone, index) => bone.mtxLocal.set(Matrix4x4.INVERSION(this.skeletonSource.mtxBindInverses[index])));
+      for (const boneName in this.bones)
+        this.bones[boneName].mtxLocal.set(Matrix4x4.INVERSION(this.skeletonSource.mtxBindInverses[boneName]));
     }
 
     public applyAnimation(_mutator: Mutator): void {
       super.applyAnimation(_mutator);
       if (_mutator.mtxBoneLocals)
-        for (const iBone in _mutator.mtxBoneLocals)
-          this.mtxBoneLocals[+iBone].mutate(_mutator.mtxBoneLocals[iBone]);
+        for (const boneName in _mutator.mtxBoneLocals)
+          this.mtxBoneLocals[boneName]?.mutate(_mutator.mtxBoneLocals[boneName]);
       if (_mutator.bones)
-        for (const iBone in _mutator.bones)
-          this.bones[+iBone].applyAnimation(_mutator.bones[iBone]);
+        for (const boneName in _mutator.bones)
+          this.bones[boneName]?.applyAnimation(_mutator.bones[boneName]);
     }
 
     private calculateMtxBones(): void {
-      this.#mtxBones = this.bones.map((bone, index) => {
+      this.#mtxBones.length = 0;
+      for (const boneName in this.bones) {
         // bone matrix T = N^-1 * B_delta * B_0^-1 * S
-        const boneMatrix: Matrix4x4 = this.getParent()?.mtxWorldInverse.clone || Matrix4x4.IDENTITY();
-        boneMatrix.multiply(bone.mtxWorld);
-        boneMatrix.multiply(this.skeletonSource.mtxBindInverses[index]);
-        if (this.cmpTransform) boneMatrix.multiply(Matrix4x4.INVERSION(this.mtxLocal));
+        const mtxBone: Matrix4x4 = this.getParent()?.mtxWorldInverse.clone || Matrix4x4.IDENTITY();
+        mtxBone.multiply(this.bones[boneName].mtxWorld);
+        mtxBone.multiply(this.skeletonSource.mtxBindInverses[boneName]);
+        if (this.cmpTransform) mtxBone.multiply(Matrix4x4.INVERSION(this.mtxLocal));
 
-        return boneMatrix;
-      });
+        this.#mtxBones.push(mtxBone);
+      }
     }
 
     /**
@@ -77,9 +87,31 @@ namespace FudgeCore {
      */
     private onChildAppend = (_event: Event) => {
       for (const node of _event.target as Node) {
-        if (node instanceof Bone && !this.bones.includes(node))
-          this.bones.push(node);
+        if (node instanceof Bone)
+        this.registerBone(node);
       }
+    }
+
+    /**
+     * Deregisters all bones of a removed node
+     */
+    private onChildRemove = (_event: Event) => {
+      if (_event.currentTarget == this) {
+        for (const node of _event.target as Node) {
+          if (node instanceof Bone)
+            this.deregisterBone(node);
+        }
+      }
+    }
+
+    private registerBone(_bone: Bone): void {
+      this.bones[_bone.name] = _bone;
+      this.mtxBoneLocals[_bone.name] = _bone.mtxLocal;
+    }
+
+    private deregisterBone(_bone: Bone): void {
+      delete this.bones[_bone.name];
+      delete this.mtxBoneLocals[_bone.name];
     }
 
   }
