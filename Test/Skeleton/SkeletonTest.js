@@ -13,7 +13,7 @@ var SkeletonTest;
         rotatorX.addComponent(new ƒ.ComponentTransform());
         const rotatorY = new ƒ.Node("RotatorY");
         rotatorY.addComponent(new ƒ.ComponentTransform());
-        const zylinder = await initAnimatedZylinder();
+        const zylinder = await initAnimatedCylinder();
         console.log(zylinder);
         scene.addChild(rotatorX);
         rotatorX.addChild(rotatorY);
@@ -40,7 +40,7 @@ var SkeletonTest;
         ƒ.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, () => update(viewport, rotatorX.mtxLocal, rotatorY.mtxLocal));
         ƒ.Loop.start();
     }
-    class MeshCuboidSkin extends ƒ.MeshSkin {
+    class MeshSkinCylinder extends ƒ.MeshSkin {
         constructor() {
             super();
             const meshSource = new ƒ.MeshRotation("MeshExtrusion", [
@@ -57,23 +57,29 @@ var SkeletonTest;
             const iBones = [];
             const weights = [];
             for (let iVertex = 0; iVertex < this.ƒvertices.length; iVertex += 3) {
-                iBones.push(0, 1, 0, 0);
+                iBones.push(MeshSkinCylinder.skeleton.indexOfBone("LowerBone"), MeshSkinCylinder.skeleton.indexOfBone("UpperBone"), 0, 0);
                 weights.push(1 - this.ƒvertices[iVertex + 1] / 4, this.ƒvertices[iVertex + 1] / 4, 0, 0);
             }
             this.ƒiBones = new Uint8Array(iBones);
             this.ƒweights = new Float32Array(weights);
         }
+        static #skeleton;
+        static get skeleton() {
+            if (!this.#skeleton) {
+                this.#skeleton = new ƒ.Skeleton("SkeletonCylinder");
+                this.#skeleton.addChild(new ƒ.Bone("LowerBone", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(0))));
+                this.#skeleton.bones.LowerBone.addChild(new ƒ.Bone("UpperBone", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(1))));
+                console.log(ƒ.Serializer.serialize(this.#skeleton));
+            }
+            return this.#skeleton;
+        }
     }
-    async function initAnimatedZylinder() {
-        const zylinder = new ƒ.Node("AnimatedZylinder");
-        const skeleton = new ƒ.Skeleton("Skeleton");
-        skeleton.addChild(new ƒ.Bone("LowerBone", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(0))));
-        skeleton.bones[0].addChild(new ƒ.Bone("UpperBone", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(1))));
-        //console.log(ƒ.Serializer.serialize(skeleton));
-        const mesh = new MeshCuboidSkin();
+    async function initAnimatedCylinder() {
+        const zylinder = new ƒ.Node("AnimatedCylinder");
+        const mesh = new MeshSkinCylinder();
         const cmpMesh = new ƒ.ComponentMesh(mesh);
         cmpMesh.mtxPivot.translateY(-2);
-        await cmpMesh.skeleton.set(skeleton);
+        await cmpMesh.skeleton.set(MeshSkinCylinder.skeleton);
         cmpMesh.skeleton.addComponent(new ƒ.ComponentTransform());
         cmpMesh.skeleton.mtxLocal.scale(ƒ.Vector3.ONE(2));
         zylinder.addComponent(cmpMesh);
@@ -90,7 +96,7 @@ var SkeletonTest;
         sequence1.addKey(new ƒ.AnimationKey(2000, 0));
         const animationStructure = {
             bones: {
-                0: {
+                LowerBone: {
                     components: {
                         ComponentTransform: [{ "ƒ.ComponentTransform": {
                                     mtxLocal: {
@@ -103,7 +109,7 @@ var SkeletonTest;
                 }
             },
             mtxBoneLocals: {
-                1: {
+                UpperBone: {
                     rotation: {
                         z: sequence1
                     }
