@@ -3113,6 +3113,7 @@ declare namespace GLTF {
 }
 declare namespace FudgeCore {
     class GLTFLoader {
+        private static loaders;
         readonly gltf: GLTF.GlTf;
         readonly uri: string;
         private readonly scenes;
@@ -3128,9 +3129,9 @@ declare namespace FudgeCore {
         getScene(_iScene?: number): Promise<Graph>;
         getNode(_iNode: number): Promise<Node>;
         getCamera(_iCamera: number): Promise<ComponentCamera>;
+        getAnimation(_iAniamtion: number): Promise<Animation>;
         getMesh(_iMesh: number): Promise<Mesh>;
         getSkeleton(_iSkeleton: number): Promise<Skeleton>;
-        getAnimation(_iAniamtion: number): Promise<Animation>;
         getUint8Array(_iAccessor: number): Promise<Uint8Array>;
         getUint16Array(_iAccessor: number): Promise<Uint16Array>;
         getFloat32Array(_iAccessor: number): Promise<Float32Array>;

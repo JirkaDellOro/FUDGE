@@ -9,6 +9,10 @@ namespace FudgeCore {
     FLOAT = 5126
   }
 
+  interface GLTFLoaderList {
+    [uri: string]: GLTFLoader;
+  }
+
   interface AnimationStructureVector3 {
     x: AnimationSequence;
     y: AnimationSequence;
@@ -29,6 +33,8 @@ namespace FudgeCore {
 
   export class GLTFLoader {
 
+    private static loaders: GLTFLoaderList = {};
+
     public readonly gltf: GLTF.GlTf;
     public readonly uri: string;
 
@@ -48,6 +54,7 @@ namespace FudgeCore {
     }
 
     public static async LOAD(_uri: string): Promise<GLTFLoader> {
+      if (this.loaders[_uri]) return this.loaders[_uri];      
       const response: Response = await fetch(_uri);
       const gltf: GLTF.GlTf = await response.json();
       return new GLTFLoader(gltf, _uri);
@@ -137,6 +144,33 @@ namespace FudgeCore {
       return this.cameras[_iCamera];
     }
 
+    public async getAnimation(_iAniamtion: number): Promise<Animation> {
+      if (!this.animations[_iAniamtion]) {
+        const gltfAnimation: GLTF.Animation = this.gltf.animations[_iAniamtion];
+
+        // check if the animation is a skeletal animation
+        if (gltfAnimation.channels.every(channel => this.iBones.includes(channel.target.node))) {
+          // map channels to an animation structure for animating the local bone matrices
+          const animationStructure: AnimationStructure = {};
+          for (const gltfChannel of gltfAnimation.channels) {
+            const boneName: string = this.nodes[gltfChannel.target.node].name;
+            
+            // create new 4 by 4 matrix animation structure if there is no entry for the bone name
+            if (!animationStructure[boneName]) animationStructure[boneName] = {};
+
+            // set the vector 3 animation structure of the entry refered by the channel target path
+            const transformationType: TransformationType = gltfChannel.target.path as TransformationType;
+            if (transformationType)
+              (animationStructure.mtxBoneLocals as AnimationStructureBoneMatrix4x4List)[boneName][transformationType] =
+                await this.getAnimationSequenceVector3(gltfAnimation.samplers[gltfChannel.sampler]);
+          }
+
+          return new Animation(gltfAnimation.name, animationStructure);
+        }
+        else throw new Error("Non-skeletal animations are not supported yet.");
+      }
+    }
+
     public async getMesh(_iMesh: number): Promise<Mesh> {
       if (!this.meshes[_iMesh]) {
         const gltfMesh: GLTF.Mesh = this.gltf.meshes[_iMesh];
@@ -168,33 +202,6 @@ namespace FudgeCore {
         return new Skeleton(name, rootBone, mtxBindInverses);
       }
       return this.skeletons[_iSkeleton];
-    }
-
-    public async getAnimation(_iAniamtion: number): Promise<Animation> {
-      if (!this.animations[_iAniamtion]) {
-        const gltfAnimation: GLTF.Animation = this.gltf.animations[_iAniamtion];
-
-        // check if the animation is a skeletal animation
-        if (gltfAnimation.channels.every(channel => this.iBones.includes(channel.target.node))) {
-          // map channels to an animation structure for animating the local bone matrices
-          const animationStructure: AnimationStructure = {};
-          for (const gltfChannel of gltfAnimation.channels) {
-            const boneName: string = this.nodes[gltfChannel.target.node].name;
-            
-            // create new 4 by 4 matrix animation structure if there is no entry for the bone name
-            if (!animationStructure[boneName]) animationStructure[boneName] = {};
-
-            // set the vector 3 animation structure of the entry refered by the channel target path
-            const transformationType: TransformationType = gltfChannel.target.path as TransformationType;
-            if (transformationType)
-              (animationStructure.mtxBoneLocals as AnimationStructureBoneMatrix4x4List)[boneName][transformationType] =
-                await this.getAnimationSequenceVector3(gltfAnimation.samplers[gltfChannel.sampler]);
-          }
-
-          return new Animation(gltfAnimation.name, animationStructure);
-        }
-        else throw new Error("Non-skeletal animations are not supported yet.");
-      }
     }
 
     public async getUint8Array(_iAccessor: number): Promise<Uint8Array> {
