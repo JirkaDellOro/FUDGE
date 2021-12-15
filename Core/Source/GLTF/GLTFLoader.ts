@@ -1,11 +1,4 @@
 namespace FudgeCore {
-  export interface GLTFLoaderResponse {
-    scene: Graph;
-    scenes: Array<Graph>;
-    cameras: Array<ComponentCamera>;
-    animations: Array<Animation>;
-  }
-
   enum ComponentType {
     BYTE = 5120,
     UNSIGNED_BYTE = 5121,
@@ -16,229 +9,72 @@ namespace FudgeCore {
     FLOAT = 5126
   }
 
-  interface AnimationSequenceVector3 {
+  interface AnimationStructureVector3 {
     x: AnimationSequence;
     y: AnimationSequence;
     z: AnimationSequence;
   }
 
-  interface AnimationSequenceMatrix4x4 {
-    rotation?: AnimationSequenceVector3;
-    scale?: AnimationSequenceVector3;
-    translation?: AnimationSequenceVector3;
+  interface AnimationStructureMatrix4x4 {
+    rotation?: AnimationStructureVector3;
+    scale?: AnimationStructureVector3;
+    translation?: AnimationStructureVector3;
+  }
+
+  interface AnimationStructureBoneMatrix4x4List {
+    [boneName: string]: AnimationStructureMatrix4x4;
   }
 
   type TransformationType = "rotation" | "scale" | "translation";
 
   export class GLTFLoader {
 
-    public readonly gltf: GLTF.GlTf;
-    
-    private readonly buffers: Array<ArrayBuffer>;
+    public readonly gltf: GLTF.GlTf; 
+    public readonly uri: string;   
 
-    private scenes: Array<Graph>;
-    private nodes: Array<Node>;
-    private cameras: Array<ComponentCamera>;
-    private animations: Array<Animation>;
-    private skeletalAnimations: Map<Skeleton, Animation> = new Map();
-    private meshes: Array<Mesh>;
-    private skeletons: Array<Skeleton>;
+    private readonly scenes: Array<Graph> = [];
+    private readonly nodes: Array<Node> = [];
+    private readonly iBones: Array<number>;
+    private readonly cameras: Array<ComponentCamera> = [];
+    private readonly animations: Array<Animation> = [];
+    private readonly skeletalAnimations: Map<Skeleton, Animation> = new Map();
+    private readonly meshes: Array<Mesh> = [];
+    private readonly skeletons: Array<Skeleton> = [];
+    private readonly buffers: Array<ArrayBuffer> = [];
 
-    private constructor(_gltf: GLTF.GlTf, _buffers: Array<ArrayBuffer>) {
+    private constructor(_gltf: GLTF.GlTf, _uri: string) {
       this.gltf = _gltf;
-      this.buffers = _buffers;
+      this.uri = _uri;
+      this.iBones = this.gltf.skins?.flatMap(gltfSkin => gltfSkin.joints) || [];
     }
 
-    public static async load(_uri: string): Promise<GLTFLoaderResponse> {
-      const loader: GLTFLoader = await this.createLoader(_uri);
-
-      loader.createNodes();
-      loader.appendNodeChildren();
-      loader.createScenes();
-      loader.createCameras();
-      loader.createMeshes();
-      loader.createSkeletons();
-      loader.createAnimations();
-      loader.appendNodeComponents();
-
-      return {
-        scene: loader.scenes[loader.gltf.scene],
-        scenes: loader.scenes,
-        cameras: loader.cameras,
-        animations: loader.animations
-      } as GLTFLoaderResponse;
-    }
-
-    private static async createLoader(_uri: string): Promise<GLTFLoader> {
-      // load gltf
+    public static async LOAD(_uri: string): Promise<GLTFLoader> {
       const response: Response = await fetch(_uri);
       const gltf: GLTF.GlTf = await response.json();
-
-      // load buffers
-      const buffers: Array<ArrayBuffer> = [];
-      if (gltf.buffers)
-        for (const buffer of gltf.buffers) {
-          const response: Response = await fetch(buffer.uri);
-          const blob: Blob = await response.blob();
-          buffers.push(await blob.arrayBuffer());
-        }
-      
-      return new GLTFLoader(gltf, buffers);
+      return new GLTFLoader(gltf, _uri);
     }
 
-    public getUint8Array(_iAccessor: number): Uint8Array {
-      this.assertCmpTypeMatches(_iAccessor, ComponentType.UNSIGNED_BYTE);
-      return this.getBufferData(_iAccessor) as Uint8Array;
+    public async getScene(_iScene: number = this.gltf.scene): Promise<Graph> {
+      if (!this.scenes[_iScene]) {
+        const gltfScene: GLTF.Scene = this.gltf.scenes[_iScene];
+        const scene: Node = new Node(gltfScene.name);
+        for (const iNode of gltfScene.nodes)
+          scene.addChild(await this.getNode(iNode));
+        this.scenes[_iScene] = await Project.registerAsGraph(scene);
+      }
+      return this.scenes[_iScene];
     }
 
-    public getUint16Array(_iAccessor: number): Uint16Array {
-      this.assertCmpTypeMatches(_iAccessor, ComponentType.UNSIGNED_SHORT);
-      return this.getBufferData(_iAccessor) as Uint16Array;
-    }
+    public async getNode(_iNode: number): Promise<Node> {
+      if (!this.nodes[_iNode]) {
+        const gltfNode: GLTF.Node = this.gltf.nodes[_iNode];
+        const node: Node = this.iBones.includes(_iNode) ? new Bone(gltfNode.name) : new Node(gltfNode.name);
 
-    public getFloat32Array(_iAccessor: number): Float32Array {
-      this.assertCmpTypeMatches(_iAccessor, ComponentType.FLOAT);
-      return this.getBufferData(_iAccessor) as Float32Array;
-    }
-
-    private createNodes(): void {
-      // get bone indices to determine which nodes are bones of a skeleton
-      const iBones: Array<number> = this.gltf.skins?.flatMap(gltfSkin => gltfSkin.joints) || [];
-
-      this.nodes = this.gltf.nodes?.map((gltfNode, iNode) => {
-        const node: Node =
-          iBones.includes(iNode)
-          ? new Bone(gltfNode.name)
-          : new Node(gltfNode.name);
-
-        return node;
-      }) || [];
-    }
-
-    private createScenes(): void {
-      this.scenes = this.gltf.scenes?.map(gltfScene => {
-        const scene: Graph = new Graph(gltfScene.name);
-
-        gltfScene.nodes?.forEach(nodeIndex => {
-          scene.addChild(this.nodes[nodeIndex]);
-        });
-
-        return scene;
-      }) || [];
-    }
-
-    private createCameras(): void {
-      this.cameras = this.gltf.cameras.map(cltfCamera => {
-        const camera: ComponentCamera = new ComponentCamera();
-
-        if (cltfCamera.perspective)
-          camera.projectCentral(
-            cltfCamera.perspective.aspectRatio,
-            cltfCamera.perspective.yfov * 180 / Math.PI,
-            null,
-            cltfCamera.perspective.znear,
-            cltfCamera.perspective.zfar
-          );
-        else
-          camera.projectOrthographic(
-            -cltfCamera.orthographic.xmag,
-            cltfCamera.orthographic.xmag,
-            -cltfCamera.orthographic.ymag,
-            cltfCamera.orthographic.ymag
-          );
-
-        return camera;
-      }) || [];
-    }
-
-    private createMeshes(): void {
-      this.meshes = this.gltf.meshes?.map(gltfMesh => {
-        // check if the mesh refers to joints to determine whether its a normal mesh or a mesh skin
-        const mesh: Mesh =
-          gltfMesh.primitives[0].attributes.JOINTS_0 != undefined
-          ? new MeshSkin(gltfMesh, this)
-          : new MeshGLTF(gltfMesh, this);
+        // check for children
+        if (gltfNode.children)
+          for (const iNode of gltfNode.children)
+            node.addChild(await this.getNode(iNode));
         
-        return mesh;
-      }) || [];
-    }
-
-    private createSkeletons(): void {
-      this.skeletons = this.gltf.skins?.map(gltfSkin => {
-        const name: string = gltfSkin.name;
-        const rootBone: Bone = this.nodes[gltfSkin.joints[0]];
-
-        // convert float array to array of matrices
-        const mtxBindInverses: Array<Matrix4x4> = new Array();
-        const floatArray: Float32Array = this.getFloat32Array(gltfSkin.inverseBindMatrices);
-        const span: number = 16;
-        for (let i: number = 0; i <= floatArray.length - span; i += span) {
-          const mtx: Matrix4x4 = new Matrix4x4();
-          mtx.set(floatArray.subarray(i, i + span));
-          mtxBindInverses.push(mtx);
-        }
-
-        return new Skeleton(name, rootBone/*, mtxBindInverses*/);
-      }) || [];
-    }
-
-    private appendNodeChildren(): void {
-      this.gltf.nodes?.forEach((gltfNode, iNode) => {
-        const node: Node = this.nodes[iNode];
-
-        gltfNode.children?.forEach(iNode => {
-          const child: Node = this.nodes[iNode];
-          if (!(child instanceof Bone && !(node instanceof Bone)))
-            node.addChild(child);
-        });
-      });
-    }
-
-    private createAnimations(): void {
-      this.animations = this.gltf.animations?.map(gltfAnimation => {
-        const animatedNodes: Array<Node> = gltfAnimation.channels.map(channel => this.nodes[channel.target.node]);
-
-        // check if the animation is a skeletal animation
-        if (animatedNodes.every(node => node instanceof Bone)) {
-          // find the skeleton of the bones
-          const skeleton: Skeleton =
-            animatedNodes
-            .map(node => node.getParent())
-            .find(parent => parent instanceof Skeleton) as Skeleton;
-
-          // map channels to 4 by 4 matrix animation sequences indexed by the bone indices
-          const boneSequences: { [boneName: string]: AnimationSequenceMatrix4x4 } = gltfAnimation.channels.reduce(
-            (boneSequences, channel) => {
-              const boneName: string = this.nodes[channel.target.node].name;
-              
-              // create new 4 by 4 matrix animation sequence if there is no entry for index iBone
-              if (!boneSequences[boneName]) boneSequences[boneName] = {};
-
-              // set the vector 3 animation sequence of the entry refered by the channel target path
-              const transformationType: TransformationType = channel.target.path as TransformationType;
-              if (transformationType)
-                boneSequences[boneName][transformationType] = this.getAnimationSequenceVector3(gltfAnimation.samplers[channel.sampler]);
-
-              return boneSequences;
-            },
-            {} as {[boneName: string]: AnimationSequenceMatrix4x4}
-          );
-
-          const animationStructure: AnimationStructure = { mtxBoneLocals: boneSequences };
-
-          const animation: Animation = new Animation(gltfAnimation.name, animationStructure);
-          this.skeletalAnimations.set(skeleton, animation);
-
-          return animation;
-        }
-        else throw new Error("Non-skeletal animations are not supported yet.");
-      }) || [];
-    }
-
-    private appendNodeComponents(): void {
-      this.gltf.nodes?.forEach((gltfNode, iNode) => {
-        const node: Node = this.nodes[iNode];
-
         // check for transformation
         if (gltfNode.matrix || gltfNode.rotation || gltfNode.scale || gltfNode.translation) {
           if (!node.getComponent(ComponentTransform)) 
@@ -258,7 +94,7 @@ namespace FudgeCore {
 
         // check for camera
         if (gltfNode.camera != undefined) {
-          node.addComponent(this.cameras[gltfNode.camera]);
+          node.addComponent(await this.getCamera(gltfNode.camera));
         }
 
         // check for mesh
@@ -268,12 +104,116 @@ namespace FudgeCore {
 
         // check for skeleton        
         if (gltfNode.skin != undefined) {
-          node.getComponent(ComponentMesh).skeleton.set(this.skeletons[gltfNode.skin]);
+          await node.getComponent(ComponentMesh).skeleton.set(this.skeletons[gltfNode.skin]);
           const skeletalAnimation: Animation = this.skeletalAnimations.get(this.skeletons[gltfNode.skin]);
           if (skeletalAnimation)
             node.getComponent(ComponentMesh).skeleton.addComponent(new ComponentAnimator(skeletalAnimation));
         }
-      });
+
+        this.nodes[_iNode] = node;
+      }
+      return this.nodes[_iNode];
+    }
+
+    public async getCamera(_iCamera: number): Promise<ComponentCamera> {
+      if (!this.cameras[_iCamera]) {
+        const gltfCamera: GLTF.Camera = this.gltf.cameras[_iCamera];
+        const camera: ComponentCamera = new ComponentCamera();
+
+        if (gltfCamera.perspective)
+          camera.projectCentral(
+            gltfCamera.perspective.aspectRatio,
+            gltfCamera.perspective.yfov * 180 / Math.PI,
+            null,
+            gltfCamera.perspective.znear,
+            gltfCamera.perspective.zfar
+          );
+        else
+          camera.projectOrthographic(
+            -gltfCamera.orthographic.xmag,
+            gltfCamera.orthographic.xmag,
+            -gltfCamera.orthographic.ymag,
+            gltfCamera.orthographic.ymag
+          );
+
+        return camera;
+      }
+      return this.cameras[_iCamera];
+    }
+
+    public async getMesh(_iMesh: number): Promise<Mesh> {
+      if (!this.meshes[_iMesh]) {
+        const gltfMesh: GLTF.Mesh = this.gltf.meshes[_iMesh];
+        this.meshes[_iMesh] = await (
+          gltfMesh.primitives[0].JOINTS_0 != undefined ?
+          MeshSkin.LOAD(this, _iMesh) :
+          MeshGLTF.LOAD(this, _iMesh)
+        );
+      }
+      return this.meshes[_iMesh];
+    }
+
+    public async getSkeleton(_iSkeleton: number): Promise<Skeleton> {
+      if (!this.skeletons[_iSkeleton]) {
+        const gltfSkeleton: GLTF.Skin = this.gltf.skins[_iSkeleton];
+        const name: string = gltfSkeleton.name;
+        const rootBone: Bone = await this.getNode(gltfSkeleton.joints[0]);
+
+        // convert float array to array of matrices
+        const mtxBindInverses: BoneMatrix4x4List = {};
+        const floatArray: Float32Array = await this.getFloat32Array(gltfSkeleton.inverseBindMatrices);
+        const span: number = 16;
+        for (let i: number = 0; i <= floatArray.length - span; i += span) {
+          const boneName: string = this.gltf.nodes[gltfSkeleton.joints[i]].name;
+          mtxBindInverses[boneName] = new Matrix4x4();
+          mtxBindInverses[boneName].set(floatArray.subarray(i, i + span));
+        }
+
+        return new Skeleton(name, rootBone, mtxBindInverses);
+      }
+      return this.skeletons[_iSkeleton];
+    }
+
+    public async getAnimation(_iAniamtion: number): Promise<Animation> {
+      if (!this.animations[_iAniamtion]) {
+        const gltfAnimation: GLTF.Animation = this.gltf.animations[_iAniamtion];
+
+        // check if the animation is a skeletal animation
+        if (gltfAnimation.channels.every(channel => this.iBones.includes(channel.target.node))) {
+          // map channels to an animation structure for animating the local bone matrices
+          const animationStructure: AnimationStructure = {};
+          for (const gltfChannel of gltfAnimation.channels) {
+            const boneName: string = this.nodes[gltfChannel.target.node].name;
+            
+            // create new 4 by 4 matrix animation structure if there is no entry for the bone name
+            if (!animationStructure[boneName]) animationStructure[boneName] = {};
+
+            // set the vector 3 animation structure of the entry refered by the channel target path
+            const transformationType: TransformationType = gltfChannel.target.path as TransformationType;
+            if (transformationType)
+              (animationStructure.mtxBoneLocals as AnimationStructureBoneMatrix4x4List)[boneName][transformationType] =
+                await this.getAnimationSequenceVector3(gltfAnimation.samplers[gltfChannel.sampler]);
+          }
+
+          return new Animation(gltfAnimation.name, animationStructure);
+        }
+        else throw new Error("Non-skeletal animations are not supported yet.");
+      }
+    }
+
+    public async getUint8Array(_iAccessor: number): Promise<Uint8Array> {
+      this.assertCmpTypeMatches(_iAccessor, ComponentType.UNSIGNED_BYTE);
+      return await this.getBufferData(_iAccessor) as Uint8Array;
+    }
+
+    public async getUint16Array(_iAccessor: number): Promise<Uint16Array> {
+      this.assertCmpTypeMatches(_iAccessor, ComponentType.UNSIGNED_SHORT);
+      return await this.getBufferData(_iAccessor) as Uint16Array;
+    }
+
+    public async getFloat32Array(_iAccessor: number): Promise<Float32Array> {
+      this.assertCmpTypeMatches(_iAccessor, ComponentType.FLOAT);
+      return await this.getBufferData(_iAccessor) as Float32Array;
     }
 
     private assertCmpTypeMatches(_iAccessor: number, _cmpType: ComponentType): void {
@@ -283,23 +223,30 @@ namespace FudgeCore {
       );
     }
 
-    private getBufferData(_iAccessor: number): Uint8Array | Uint16Array | Float32Array {
-      const accessor: GLTF.Accessor = this.gltf.accessors[_iAccessor];
-      if (!accessor)
+    private async getBufferData(_iAccessor: number): Promise<Uint8Array | Uint16Array | Float32Array> {
+      const gltfAccessor: GLTF.Accessor = this.gltf.accessors[_iAccessor];
+      if (!gltfAccessor)
         throw new Error("Couldn't find accessor");
 
-      const bufferView: GLTF.BufferView = this.gltf.bufferViews[accessor.bufferView];
-      if (!bufferView)
+      const gltfBufferView: GLTF.BufferView = this.gltf.bufferViews[gltfAccessor.bufferView];
+      if (!gltfBufferView)
         throw new Error("Couldn't find buffer view");
 
-      const buffer: ArrayBuffer = this.buffers[bufferView.buffer];
-      if (!buffer)
+      const gltfBuffer: GLTF.Buffer = this.gltf.buffers[gltfBufferView.buffer];
+      if (!gltfBuffer)
         throw new Error("Couldn't find buffer");
 
-      const byteOffset: number = bufferView.byteOffset || 0;
-      const byteLength: number = bufferView.byteLength || 0;
+      if (!this.buffers[gltfBufferView.buffer]) {
+        const response: Response = await fetch(gltfBuffer.uri);
+        const blob: Blob = await response.blob();
+        this.buffers[gltfBufferView.buffer] = await blob.arrayBuffer();
+      }
 
-      switch (accessor.componentType) {
+      const buffer: ArrayBuffer = this.buffers[gltfBufferView.buffer];
+      const byteOffset: number = gltfBufferView.byteOffset || 0;
+      const byteLength: number = gltfBufferView.byteLength || 0;
+
+      switch (gltfAccessor.componentType) {
         case ComponentType.UNSIGNED_BYTE:
           return new Uint8Array(buffer, byteOffset, byteLength / Uint8Array.BYTES_PER_ELEMENT);
 
@@ -309,13 +256,13 @@ namespace FudgeCore {
         case ComponentType.FLOAT:
           return new Float32Array(buffer, byteOffset, byteLength / Float32Array.BYTES_PER_ELEMENT);
 
-        default: throw new Error(`Unsupported component type: ${accessor.componentType}.`);
+        default: throw new Error(`Unsupported component type: ${gltfAccessor.componentType}.`);
       }
     }
 
-    private getAnimationSequenceVector3(_sampler: GLTF.Sampler): AnimationSequenceVector3 {
-      const input: Float32Array = this.getFloat32Array(_sampler.input);
-      const output: Float32Array = this.getFloat32Array(_sampler.output);
+    private async getAnimationSequenceVector3(_sampler: GLTF.Sampler): Promise<AnimationStructureVector3> {
+      const input: Float32Array = await this.getFloat32Array(_sampler.input);
+      const output: Float32Array = await this.getFloat32Array(_sampler.output);
 
       const sequenceX: AnimationSequence = new AnimationSequence();
       const sequenceY: AnimationSequence = new AnimationSequence();
