@@ -49,8 +49,6 @@ namespace FudgeCore {
         if (uMtxBone)
           crc3.uniformMatrix4fv(uMtxBone, false, mtxBone.get());
       });
-
-      crc3.uniformMatrix4fv(_shader.uniforms["u_mtxTest"], false, _mtxBones[1].get());
     }
 
     protected static deleteRenderBuffers(_renderBuffers: RenderBuffers): void {
