@@ -332,9 +332,9 @@ namespace FudgeCore {
      * Initializes the rigidbody according to its initialization setting to match the mesh, the node or its own pivot matrix
      */
     public initialize(): void {
-      if (!this.node) // dealay initialization until this rigidbody is attached to a node
+      if (!this.node) // delay initialization until this rigidbody is attached to a node
         return;
-      switch (Number(this.initialization)) {
+      switch (this.initialization) {
         case BODY_INIT.TO_NODE:
           this.mtxPivot = Matrix4x4.IDENTITY();
           break;
@@ -611,7 +611,7 @@ namespace FudgeCore {
       this.effectGravity = _serialization.effectGravity || this.effectGravity;
       this.friction = _serialization.friction || this.friction;
       this.restitution = _serialization.restitution || this.restitution;
-      this.isTrigger = _serialization.trigger || this.isTrigger;
+      this.isTrigger = _serialization.isTrigger || this.isTrigger;
       this.initialization = _serialization.initialization;
 
       this.initialization = <number><unknown>BODY_INIT[_serialization.initialization];
