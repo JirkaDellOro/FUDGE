@@ -91,3 +91,4 @@ A collection of various other documents and resources, including unmaintained ex
 | Robin Schwab       | Modeller                          |
 | Luis Keck          | Shader-System                     |
 | Marius König       | Integration Golden Layout 2       |
+| Moritz Beaugrand   | Terrain                           |
