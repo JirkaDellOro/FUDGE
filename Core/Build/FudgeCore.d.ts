@@ -3130,7 +3130,7 @@ declare namespace FudgeCore {
         getNode(_iNode: number): Promise<Node>;
         getCamera(_iCamera: number): Promise<ComponentCamera>;
         getAnimation(_iAniamtion: number): Promise<Animation>;
-        getMesh(_iMesh: number): Promise<Mesh>;
+        getMesh(_iMesh: number): Promise<MeshGLTF>;
         getSkeleton(_iSkeleton: number): Promise<Skeleton>;
         getUint8Array(_iAccessor: number): Promise<Uint8Array>;
         getUint16Array(_iAccessor: number): Promise<Uint16Array>;

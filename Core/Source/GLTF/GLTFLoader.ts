@@ -25,10 +25,6 @@ namespace FudgeCore {
     translation?: AnimationStructureVector3;
   }
 
-  interface AnimationStructureBoneMatrix4x4List {
-    [boneName: string]: AnimationStructureMatrix4x4;
-  }
-
   type TransformationType = "rotation" | "scale" | "translation";
 
   export class GLTFLoader {
@@ -43,7 +39,7 @@ namespace FudgeCore {
     private readonly iBones: Array<number>;
     private readonly cameras: Array<ComponentCamera> = [];
     private readonly animations: Array<Animation> = [];
-    private readonly meshes: Array<Mesh> = [];
+    private readonly meshes: Array<MeshGLTF> = [];
     private readonly skeletons: Array<Skeleton> = [];
     private readonly buffers: Array<ArrayBuffer> = [];
 
@@ -151,17 +147,21 @@ namespace FudgeCore {
         // check if the animation is a skeletal animation
         if (gltfAnimation.channels.every(channel => this.iBones.includes(channel.target.node))) {
           // map channels to an animation structure for animating the local bone matrices
-          const animationStructure: AnimationStructure = {};
+          const animationStructure: {
+            mtxBoneLocals: {
+              [boneName: string]: AnimationStructureMatrix4x4
+            }
+          } = { mtxBoneLocals: {} };
           for (const gltfChannel of gltfAnimation.channels) {
             const boneName: string = this.nodes[gltfChannel.target.node].name;
             
             // create new 4 by 4 matrix animation structure if there is no entry for the bone name
-            if (!animationStructure[boneName]) animationStructure[boneName] = {};
+            if (!animationStructure.mtxBoneLocals[boneName]) animationStructure.mtxBoneLocals[boneName] = {};
 
             // set the vector 3 animation structure of the entry refered by the channel target path
             const transformationType: TransformationType = gltfChannel.target.path as TransformationType;
             if (transformationType)
-              (animationStructure.mtxBoneLocals as AnimationStructureBoneMatrix4x4List)[boneName][transformationType] =
+              animationStructure.mtxBoneLocals[boneName][transformationType] =
                 await this.getAnimationSequenceVector3(gltfAnimation.samplers[gltfChannel.sampler]);
           }
 
@@ -171,11 +171,12 @@ namespace FudgeCore {
       }
     }
 
-    public async getMesh(_iMesh: number): Promise<Mesh> {
+    public async getMesh(_iMesh: number): Promise<MeshGLTF> {
       if (!this.meshes[_iMesh]) {
         const gltfMesh: GLTF.Mesh = this.gltf.meshes[_iMesh];
+        console.log(gltfMesh);
         this.meshes[_iMesh] = await (
-          gltfMesh.primitives[0].JOINTS_0 != undefined ?
+          gltfMesh.primitives[0].attributes.JOINTS_0 != undefined ?
           MeshSkin.LOAD(this, _iMesh) :
           MeshGLTF.LOAD(this, _iMesh)
         );
@@ -193,10 +194,10 @@ namespace FudgeCore {
         const mtxBindInverses: BoneMatrix4x4List = {};
         const floatArray: Float32Array = await this.getFloat32Array(gltfSkeleton.inverseBindMatrices);
         const span: number = 16;
-        for (let i: number = 0; i <= floatArray.length - span; i += span) {
-          const boneName: string = this.gltf.nodes[gltfSkeleton.joints[i]].name;
+        for (let iFloat: number = 0, iBone: number = 0; iFloat < floatArray.length; iFloat += span, iBone++) {
+          const boneName: string = this.nodes[gltfSkeleton.joints[iBone]].name;
           mtxBindInverses[boneName] = new Matrix4x4();
-          mtxBindInverses[boneName].set(floatArray.subarray(i, i + span));
+          mtxBindInverses[boneName].set(floatArray.subarray(iFloat, iFloat + span));
         }
 
         return new Skeleton(name, rootBone, mtxBindInverses);
