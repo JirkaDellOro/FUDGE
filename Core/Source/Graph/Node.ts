@@ -405,6 +405,8 @@ namespace FudgeCore {
       }
 
       this.dispatchEvent(new Event(EVENT.NODE_DESERIALIZED));
+      for (let component of this.getAllComponents())
+        component.dispatchEvent(new Event(EVENT.NODE_DESERIALIZED));
       return this;
     }
     // #endregion

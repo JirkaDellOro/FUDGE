@@ -52,7 +52,6 @@ namespace StateMachine {
       super();
       this.instructions = Guard.instructions;
     }
-
   }
 
   class ComponentGuard extends ƒAid.ComponentStateMachine<JOB> {

@@ -1,12 +1,8 @@
 namespace FudgeCore {
   export const enum EVENT_PHYSICS {
-    /** broadcast to a {@link Node} and all {@link Node}s in the branch it's the root of */
     TRIGGER_ENTER = "TriggerEnteredCollision",
-    /** broadcast to a {@link Node} and all {@link Node}s in the branch it's the root of */
     TRIGGER_EXIT = "TriggerLeftCollision",
-    /** broadcast to a {@link Node} and all {@link Node}s in the branch it's the root of */
     COLLISION_ENTER = "ColliderEnteredCollision",
-    /** broadcast to a {@link Node} and all {@link Node}s in the branch it's the root of */
     COLLISION_EXIT = "ColliderLeftCollision"
   }
 
