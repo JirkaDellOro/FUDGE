@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>StateMachine</title>
+  <link rel="stylesheet" href="../TestInstructions.css">
+  <script src="../dialog-polyfill.min.js"></script>
+  <script src="../TestInstructions.js"></script>
+  <script src="../../Core/Build/FudgeCore.js"></script>
+  <script src="../../Aid/Build/FudgeAid.js"></script>
+  <script src="Test.js"></script>
+
+  <style>
+    textarea {
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <script>
+    TestInstructions.display({
+      Name: "StateMachine",
+      Test: [
+        "StateMachines as independent class and as component to be attached to a node."
+      ],
+      Setup: [
+        "1 StateMachine and a textarea for output.",
+        "1 ComponentStateMachine and a textarea for output.",
+        "Both state machines use the same set of instructions.",
+        "Each machine represents an entity with the states IDLE, PATROL and CHASE.",
+        "The standard action in all states is to wait a second, select a next state by random and transit over.",
+        "All actions and transitions generate an output to the textarea.",
+        "In the state CHASE, a special action gets called and when transitioning from CHASE to CHASE a special transition is used.",
+        "Both generate a special output with an exclamation mark, the action then calls the standard action."
+      ],
+      Observe: [
+        "Observe the output."
+      ],
+      Expect: [
+        "The state machines must generate an output describing a transition and an action every second.",
+        "In the CHASE state, there is additional output with a '!'.",
+        "A transition from CHASE to CHASE is marked with an '!'."
+      ]
+    });
+  </script>
+  <fieldset>Guard<br />
+    <textarea id="Guard" cols="80" rows="20"></textarea>
+  </fieldset>
+  <fieldset>ComponentGuard<br />
+    <textarea id="ComponentGuard" cols="80" rows="20"></textarea>
+  </fieldset>
+</body>
+
+</html>
