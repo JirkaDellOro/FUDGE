@@ -322,7 +322,7 @@ namespace FudgeCore {
       this.#collider.userData = this; //reset the extra information so that this collider knows to which Fudge Component it's connected
       this.#collider.setCollisionGroup(this.collisionGroup);
       this.#collider.setCollisionMask(this.collisionMask);
-      
+
       this.#collider.setRestitution(this.#restitution);
       this.#collider.setFriction(this.#friction);
       this.#collider.setContactCallback(this.#callbacks);
@@ -350,7 +350,7 @@ namespace FudgeCore {
 
       let position: Vector3 = mtxWorld.translation; //Adding the offsets from the pivot
       let rotation: Vector3 = mtxWorld.getEulerAngles();
-      let scaling: Vector3 = mtxWorld.scaling;  
+      let scaling: Vector3 = mtxWorld.scaling;
       //scaling requires collider to be recreated
       this.setScaling(scaling);
 
@@ -603,14 +603,14 @@ namespace FudgeCore {
       super.deserialize(_serialization[super.constructor.name]);
       this.mtxPivot.deserialize(_serialization.pivot);
       this.#id = _serialization.id;
-      this.mass = _serialization.mass || this.mass;
-      this.dampTranslation = _serialization.dampTranslation || this.dampTranslation;
-      this.dampRotation = _serialization.dampRotation || this.dampRotation;
-      this.collisionGroup = _serialization.collisionGroup || this.collisionGroup;
+      this.mass = ifNumber(_serialization.mass, this.mass);
+      this.dampTranslation = ifNumber(_serialization.dampTranslation, this.dampTranslation);
+      this.dampRotation = ifNumber(_serialization.dampRotation, this.dampRotation);
+      this.collisionGroup = ifNumber(_serialization.collisionGroup, this.collisionGroup);
       this.effectRotation = _serialization.effectRotation || this.effectRotation;
-      this.effectGravity = _serialization.effectGravity || this.effectGravity;
-      this.friction = _serialization.friction || this.friction;
-      this.restitution = _serialization.restitution || this.restitution;
+      this.effectGravity = ifNumber(_serialization.effectGravity, this.effectGravity);
+      this.friction = ifNumber(_serialization.friction, this.friction);
+      this.restitution = ifNumber(_serialization.restitution, this.restitution);
       this.isTrigger = _serialization.isTrigger || this.isTrigger;
       this.initialization = _serialization.initialization;
 

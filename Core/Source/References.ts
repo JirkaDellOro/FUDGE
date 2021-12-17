@@ -11,3 +11,7 @@
 /// <reference path="Physics/Joint.ts"/>
 /// <reference path="Physics/JointAxial.ts"/>
 
+//global functions
+function ifNumber(_check: number, _default: number): number {
+  return typeof _check == "undefined" ? _default : _check;
+}

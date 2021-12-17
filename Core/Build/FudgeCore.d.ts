@@ -1143,6 +1143,7 @@ declare namespace FudgeCore {
         protected constructJoint(): void;
     }
 }
+declare function ifNumber(_check: number, _default: number): number;
 declare namespace FudgeCore {
     /**
      * Holds information about the AnimationStructure that the Animation uses to map the Sequences to the Attributes.
