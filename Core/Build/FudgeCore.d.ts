@@ -3610,8 +3610,14 @@ declare namespace FudgeCore {
      */
     type HeightMapFunction = (x: number, z: number) => number;
     class TerrainInfo {
+        /** the position of the point vertically projected on the terrain in world coordinates */
         position: Vector3;
+        /** the normal of the face of the terrain under the point in world coordinates */
         normal: Vector3;
+        /** the point retransformed into mesh coordinates of the terrain */
+        positionMesh: Vector3;
+        /** vertical distance of the point to the terrain, negative if below */
+        distance: number;
     }
     /**
      * Generates a planar grid and applies a heightmap-function to it.
