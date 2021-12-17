@@ -162,7 +162,7 @@ namespace FudgeCore {
             const transformationType: TransformationType = gltfChannel.target.path as TransformationType;
             if (transformationType)
               animationStructure.mtxBoneLocals[boneName][transformationType] =
-                await this.getAnimationSequenceVector3(gltfAnimation.samplers[gltfChannel.sampler]);
+                await this.getAnimationSequenceVector3(gltfAnimation.samplers[gltfChannel.sampler], transformationType);
           }
 
           return new Animation(gltfAnimation.name, animationStructure);
@@ -264,18 +264,24 @@ namespace FudgeCore {
       }
     }
 
-    private async getAnimationSequenceVector3(_sampler: GLTF.Sampler): Promise<AnimationStructureVector3> {
+    private async getAnimationSequenceVector3(_sampler: GLTF.Sampler, _transformationType: TransformationType): Promise<AnimationStructureVector3> {
       const input: Float32Array = await this.getFloat32Array(_sampler.input);
       const output: Float32Array = await this.getFloat32Array(_sampler.output);
+      const inputFactor: number = 10000;
 
       const sequenceX: AnimationSequence = new AnimationSequence();
       const sequenceY: AnimationSequence = new AnimationSequence();
       const sequenceZ: AnimationSequence = new AnimationSequence();
 
       for (let i: number = 0; i < input.length; ++i) {
-        sequenceX.addKey(new AnimationKey(input[i], output[i * 3]));
-        sequenceY.addKey(new AnimationKey(input[i], output[i * 3 + 1]));
-        sequenceZ.addKey(new AnimationKey(input[i], output[i * 3 + 2]));
+        const vector: { x: number, y: number, z: number } =
+          _transformationType == "rotation" ?
+          new Quaternion(output[i * 3], output[i * 3 + 1], output[i * 3 + 2], output[i * 3 + 3]).toDegrees() :
+          { x: output[i * 3], y: output[i * 3 + 1], z: output[i * 3 + 2] };
+
+        sequenceX.addKey(new AnimationKey(inputFactor * input[i], vector.x));
+        sequenceY.addKey(new AnimationKey(inputFactor * input[i], vector.y));
+        sequenceZ.addKey(new AnimationKey(inputFactor * input[i], vector.z));
       }
 
       return {

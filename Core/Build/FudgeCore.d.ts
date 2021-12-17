@@ -3138,6 +3138,7 @@ declare namespace FudgeCore {
         private assertCmpTypeMatches;
         private getBufferData;
         private getAnimationSequenceVector3;
+        private quaternionToEulers;
     }
 }
 declare namespace FudgeCore {
