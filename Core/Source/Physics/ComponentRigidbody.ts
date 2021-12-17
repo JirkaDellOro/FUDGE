@@ -478,6 +478,8 @@ namespace FudgeCore {
      * Automatically called in the RenderManager, no interaction needed.
      */
     public checkCollisionEvents(): void {
+      if (!this.isInitialized) // check collisions only if intialization completed
+        return;
       let list: OIMO.ContactLink = this.#rigidbody.getContactLinkList(); //all physical contacts between colliding bodies on this rb
       let objHit: ComponentRigidbody; //collision consisting of 2 bodies, so Hit1/2
       let objHit2: ComponentRigidbody;
@@ -491,9 +493,13 @@ namespace FudgeCore {
         let collisionManifold: OIMO.Manifold = list.getContact().getManifold(); //Manifold = Additional informations about the contact
         objHit = list.getContact().getShape1().userData;  //Userdata is used to transfer the ƒ.ComponentRigidbody, it's an empty OimoPhysics Variable
         //Only register the collision on the actual touch, not on "shadowCollide", to register in the moment of impulse calculation
+        if (!objHit.isInitialized)
+          continue;
         if (objHit == null || list.getContact().isTouching() == false) // only act if the collision is actual touching, so right at the moment when a impulse is happening, not when shapes overlap
           return;
         objHit2 = list.getContact().getShape2().userData;
+        if (!objHit2.isInitialized)
+          continue;
         if (objHit2 == null || list.getContact().isTouching() == false)
           return;
         let points: OIMO.ManifoldPoint[] = collisionManifold.getPoints(); //All points in the collision where the two bodies are touching, used to calculate the full impact
