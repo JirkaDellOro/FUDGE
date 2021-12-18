@@ -6,9 +6,6 @@ html, body {
  overflow: hidden;
 }
 
-dialog { 
-  text-align: center; 
-}
 
 canvas.fullscreen { 
   width: 100vw; 

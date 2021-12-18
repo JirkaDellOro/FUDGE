@@ -12,17 +12,7 @@
   <link type="resources" src="MeshZoo.json" />
   <!--Auto-View-->
   <script>(function (_graphId) {
-      window.addEventListener("load", init);
-      // show dialog for startup
-      let dialog;
-      function init(_event) {
-        dialog = document.querySelector("dialog");
-        dialog.addEventListener("click", function (_event) {
-          dialog.close();
-          startInteractiveViewport();
-        });
-        dialog.showModal();
-      }
+      window.addEventListener("load", startInteractiveViewport);
       // setup and start interactive viewport
       async function startInteractiveViewport() {
         // load resources referenced in the link-tag
@@ -59,11 +49,31 @@
 </head>
 
 <body>
-  <!--Dialog shown at startup only-->
-  <dialog>
-    <h1>MeshZoo</h1>
-    <p>click to start</p>
-  </dialog>
+  <script src="../../dialog-polyfill.min.js"></script>
+  <script src="../../TestInstructions.js"></script>y
+  <!--Dialog shown at startup only--><script>
+    TestInstructions.display({
+      Name: "Pick bounding radius",
+      Test: [
+        "Each nodes hold information about the radius of a bounding sphere itself and all its children fit in.",
+        "This can be used for a proximity picking which might be sufficient in many cases or serve as a filter for more precise picking.",
+      ],
+      Setup: [
+        "Several meshes in a hierarchy. Additional spheres display the bounding spheres radii.",
+      ],
+      Act: [
+        "Open the console, move the camera.",
+        "Move the mouse over the objects.",
+      ],
+      Observe: [
+        "The console output.",
+      ],
+      Expect: [
+        "The console displays which bounding spheres the mouse ray intersects.",
+        "Zoo is the sphere of the root node containing all others.",
+      ]
+    });
+  </script>
   <!--Canvas for FUDGE to render to-->
   <canvas class="fullscreen">
   </canvas>
