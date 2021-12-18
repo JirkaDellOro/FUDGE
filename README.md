@@ -27,7 +27,7 @@ To get started with FUDGE, please browse through the [Wiki](https://github.com/J
 ## Test
 Browse through the tests, as they are also a good starting point to examine isolated functionalities of FUDGE and see code running. Run your local clone with a local server or visit [Test](https://JirkaDellOro.github.io/FUDGE/Test)
 ## Code 
-Find the source code on [Github](https://github.com/JirkaDellOro). Below, you'll see a short description of the structure of the repository and links to the documentation.
+Find the source code on [Github](https://github.com/JirkaDellOro/FUDGE). Below, you'll see a short description of the structure of the repository and links to the documentation.
 
 # Folders
 ## Core  
