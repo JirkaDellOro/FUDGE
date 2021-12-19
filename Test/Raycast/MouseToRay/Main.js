@@ -46,8 +46,8 @@ var MouseToRay;
     function positionCube() {
         let modifiers = new Map([
             [ƒ.KEYBOARD_CODE.X, ƒ.Vector3.X()],
-            [ƒ.KEYBOARD_CODE.Y, ƒ.Vector3.Y()],
-            [ƒ.KEYBOARD_CODE.Z, ƒ.Vector3.Z()]
+            [ƒ.KEYBOARD_CODE_DE.Y, ƒ.Vector3.Y()],
+            [ƒ.KEYBOARD_CODE_DE.Z, ƒ.Vector3.Z()]
         ]);
         let normal;
         for (let entry of modifiers)

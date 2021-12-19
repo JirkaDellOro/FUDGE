@@ -56,15 +56,16 @@ namespace MouseToRay {
   }
 
   function positionCube(): void {
-    let modifiers: Map<ƒ.KEYBOARD_CODE, ƒ.Vector3> = new Map([
-      [ƒ.KEYBOARD_CODE.X, ƒ.Vector3.X()],
-      [ƒ.KEYBOARD_CODE.Y, ƒ.Vector3.Y()],
-      [ƒ.KEYBOARD_CODE.Z, ƒ.Vector3.Z()]
+    let modifiers: Map<ƒ.KEYBOARD_CODE_DE, ƒ.Vector3> = new Map([
+      [<ƒ.KEYBOARD_CODE_DE><unknown>ƒ.KEYBOARD_CODE.X, ƒ.Vector3.X()],
+      [ƒ.KEYBOARD_CODE_DE.Y, ƒ.Vector3.Y()],
+      [ƒ.KEYBOARD_CODE_DE.Z, ƒ.Vector3.Z()]
     ]);
+    
 
     let normal: ƒ.Vector3;
     for (let entry of modifiers)
-      if (ƒ.Keyboard.isPressedOne([entry[0]]))
+      if (ƒ.Keyboard.isPressedOne([<ƒ.KEYBOARD_CODE><unknown>entry[0]]))
         normal = entry[1];
 
     let pos: ƒ.Vector3;

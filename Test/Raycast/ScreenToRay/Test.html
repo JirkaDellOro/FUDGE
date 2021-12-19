@@ -53,6 +53,40 @@
 </head>
 
 <body>
+  <script src="../../dialog-polyfill.min.js"></script>
+  <script src="../../TestInstructions.js"></script>
+  <script>
+    TestInstructions.display({
+      Name: "Pick shader and texture painting",
+      Test: [
+        "The accuracy of the picking shader, the mapping to texture coordinates and the manipulation of the texture image",
+      ],
+      Setup: [
+        "- A torus with the standard texture in a canvas.",
+        "- A canvas with a magnified view at the area under the mouse cursor.",
+        "- An arrow displaying the face normal at the point picked.",
+        "- A textfield with the information extracted from the pick",
+        "- A user interface to manipulate camera and framing.",
+      ],
+      Act: [
+        "- Move the mouse.",
+        "- Click to draw red pixels on the texture.",
+        "- Press WASD to rotate the torus",
+        "- Adjust framing and camera settings.",
+      ],
+      Observe: [
+        "The data displayed, the arrow on the torus, the change of the texture.",
+      ],
+      Expect: [
+        "- The arrow displays the face normal at the point of the mousecursor.",
+        "- The information displayed matches the observations and expectations.",
+        "- Everything works with different adjustments to cameraprojection and framing.",
+      ],
+      Known_Bugs: [
+        "The normal twitches in some places, needs further examination.",
+      ],
+    });
+  </script>
   <canvas id="viewport"></canvas>
   <canvas id="ray"></canvas>
   <output></output>

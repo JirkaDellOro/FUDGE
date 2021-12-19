@@ -70,9 +70,9 @@ namespace ScreenToRayToScreen {
 
     ray.direction.scale(camera.distance);
     ray.origin.transform(camera.cmpCamera.mtxPivot);
-    ray.origin.transform(camera.cmpCamera.getContainer().mtxWorld);
+    ray.origin.transform(camera.cmpCamera.node.mtxWorld);
     ray.direction.transform(camera.cmpCamera.mtxPivot, false);
-    ray.direction.transform(camera.cmpCamera.getContainer().mtxWorld, false);
+    ray.direction.transform(camera.cmpCamera.node.mtxWorld, false);
     console.group("transformed");
     ƒ.Debug.log("origin", ray.origin.toString());
     ƒ.Debug.log("direction", ray.direction.toString());

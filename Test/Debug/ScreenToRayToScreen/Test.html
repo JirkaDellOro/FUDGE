@@ -59,5 +59,27 @@
 </head>
 
 <body>
+  <script src="../../dialog-polyfill.min.js"></script>
+  <script src="../../TestInstructions.js"></script>
+  <script>
+    TestInstructions.display({
+      Name: "Debug to textarea and canvas",
+      Test: [
+        "See debug output in a textarea floating over the viewport and a copy printed onto the canvas.",
+      ],
+      Setup: [
+        "The test was originally an experiment for mouserays and mutated into a test for Debug-methods.",
+      ],
+      Act: [
+        "Move the mouse.",
+      ],
+      Observe: [
+        "The debug output in the console, the textarea and the canvas.",
+      ],
+      Expect: [
+        "The numbers change in the output. There are icons to identify logs, warnings, errors and info",
+      ]
+    });
+  </script>
     <canvas id="viewport"></canvas>
 </body>

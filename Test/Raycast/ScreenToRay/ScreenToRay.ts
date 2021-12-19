@@ -133,16 +133,23 @@ namespace ScreenToRay {
       return;
 
     let material: ƒ.Material = pick.node.getComponent(ƒ.ComponentMaterial).material;
-    let coat: ƒ.CoatTextured = <ƒ.CoatTextured>material.getCoat();
+    let coat: ƒ.CoatTextured = <ƒ.CoatTextured>material.coat;
+    //@ts-ignore
     let img: HTMLImageElement | OffscreenCanvas = <HTMLImageElement | OffscreenCanvas>coat.texture.texImageSource;
+    //@ts-ignore
     let canvas: OffscreenCanvas;
-
+    
+    //@ts-ignore
     if (img instanceof OffscreenCanvas)
-      canvas = <OffscreenCanvas>img;
+    //@ts-ignore
+    canvas = <OffscreenCanvas>img;
     else
-      canvas = new OffscreenCanvas(img.width, img.height);
-      
+    //@ts-ignore
+    canvas = new OffscreenCanvas(img.width, img.height);
+    
+    //@ts-ignore
     let crc2: OffscreenCanvasRenderingContext2D = canvas.getContext("2d");
+    //@ts-ignore
     if (!(img instanceof OffscreenCanvas))
       crc2.drawImage(img, 0, 0);
 
@@ -151,9 +158,9 @@ namespace ScreenToRay {
     width = width < 0 ? 1 + (width + Math.trunc(width)) : width -= Math.trunc(width);
     let height: number = pick.textureUV.y;
     height = height < 0 ? 1 + (height + Math.trunc(height)) : height -= Math.trunc(height);
-    crc2.fillRect(width * img.width - 5, height * img.height - 5, 10, 10);
+    crc2.fillRect(Math.round(width * img.width), Math.round(height * img.height), 1, 1);
     let txtCanvas: ƒ.Texture = new ƒ.TextureCanvas("Test", crc2);
-    material.setCoat(new ƒ.CoatTextured(ƒ.Color.CSS("white"), txtCanvas));
+    material.coat = new ƒ.CoatTextured(ƒ.Color.CSS("white"), txtCanvas);
   }
 
 
@@ -173,7 +180,7 @@ namespace ScreenToRay {
   }
 
   function computeRay(): ƒ.Ray {
-    let posMouse: ƒ.Vector2 = mouse.copy;
+    let posMouse: ƒ.Vector2 = mouse.clone;
     setUiPoint("Client", posMouse);
 
     let posRender: ƒ.Vector2 = viewport.pointClientToRender(posMouse);

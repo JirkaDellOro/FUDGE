@@ -105,14 +105,21 @@ var ScreenToRay;
         if (!mouseButton)
             return;
         let material = pick.node.getComponent(ƒ.ComponentMaterial).material;
-        let coat = material.getCoat();
+        let coat = material.coat;
+        //@ts-ignore
         let img = coat.texture.texImageSource;
+        //@ts-ignore
         let canvas;
+        //@ts-ignore
         if (img instanceof OffscreenCanvas)
+            //@ts-ignore
             canvas = img;
         else
+            //@ts-ignore
             canvas = new OffscreenCanvas(img.width, img.height);
+        //@ts-ignore
         let crc2 = canvas.getContext("2d");
+        //@ts-ignore
         if (!(img instanceof OffscreenCanvas))
             crc2.drawImage(img, 0, 0);
         crc2.fillStyle = "red";
@@ -120,9 +127,9 @@ var ScreenToRay;
         width = width < 0 ? 1 + (width + Math.trunc(width)) : width -= Math.trunc(width);
         let height = pick.textureUV.y;
         height = height < 0 ? 1 + (height + Math.trunc(height)) : height -= Math.trunc(height);
-        crc2.fillRect(width * img.width - 5, height * img.height - 5, 10, 10);
+        crc2.fillRect(Math.round(width * img.width), Math.round(height * img.height), 1, 1);
         let txtCanvas = new ƒ.TextureCanvas("Test", crc2);
-        material.setCoat(new ƒ.CoatTextured(ƒ.Color.CSS("white"), txtCanvas));
+        material.coat = new ƒ.CoatTextured(ƒ.Color.CSS("white"), txtCanvas);
     }
     function adjustRayCamera() {
         let ray = computeRay();
@@ -136,7 +143,7 @@ var ScreenToRay;
         crcRay.strokeRect(-10, -10, 20, 20);
     }
     function computeRay() {
-        let posMouse = mouse.copy;
+        let posMouse = mouse.clone;
         setUiPoint("Client", posMouse);
         let posRender = viewport.pointClientToRender(posMouse);
         setUiPoint("Render", posRender);

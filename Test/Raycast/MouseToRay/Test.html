@@ -59,5 +59,28 @@
 </head>
 
 <body>
+  <script src="../../dialog-polyfill.min.js"></script>
+  <script src="../../TestInstructions.js"></script>
+  <script>
+    TestInstructions.display({
+      Name: "Mouse ray and intersection",
+      Test: [
+        "The calculations of a ray using client coordinates, positions on it in world space and the intersection of that ray with a plane.",
+      ],
+      Setup: [
+        "A red cube and a visualization of a coordinate system.",
+      ],
+      Act: [
+        "Move the mouse, use the scroll wheel, press X,Y or Z",
+      ],
+      Observe: [
+        "The movement of the cube.",
+      ],
+      Expect: [
+        "The cube follows the mouse in a distance chosen with the scroll wheel.",
+        "If X, Y or Z is pressed, the movement is restricted to the plane defined by the origin and the specified direction as normal.",
+      ]
+    });
+  </script>
     <canvas id="viewport"></canvas>
 </body>
