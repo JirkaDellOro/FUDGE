@@ -55,18 +55,21 @@ namespace SkeletonTest {
 
     // import assets
     const loader: ƒ.GLTFLoader = await ƒ.GLTFLoader.LOAD("./animated_arm.gltf");
-    const mesh: ƒ.Mesh = await loader.getMesh(0);
+    const mesh: ƒ.Mesh = await loader.getMeshByName("ArmMesh");
     console.log(mesh instanceof ƒ.MeshSkin);
-    const skeleton: ƒ.Skeleton = await loader.getSkeleton(0);
-    const animation: ƒ.Animation = await loader.getAnimation(0);  
+    const skeleton: ƒ.SkeletonInstance = await loader.getSkeletonByName("ArmSkeleton");
+    const animation: ƒ.Animation = await loader.getAnimationByName("ArmLift");
+
+    // setup skeleton
+    const cmpAnimator: ƒ.ComponentAnimator = new ƒ.ComponentAnimator(animation);
+    skeleton.addComponent(cmpAnimator);
+    cmpAnimator.activate(true);
+    arm.addChild(skeleton);
 
     // setup component mesh
     const cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh(mesh);
-    const cmpAnimator: ƒ.ComponentAnimator = new ƒ.ComponentAnimator(animation);
     cmpMesh.mtxPivot.translateY(-2);
-    await cmpMesh.skeleton.set(skeleton);
-    cmpMesh.skeleton.addComponent(cmpAnimator);
-    cmpAnimator.activate(true);
+    cmpMesh.skeleton = skeleton;
     arm.addComponent(cmpMesh);
 
     // setup component material

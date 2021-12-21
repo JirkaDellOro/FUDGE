@@ -44,17 +44,19 @@ var SkeletonTest;
         const arm = new ƒ.Node("Arm");
         // import assets
         const loader = await ƒ.GLTFLoader.LOAD("./animated_arm.gltf");
-        const mesh = await loader.getMesh(0);
+        const mesh = await loader.getMeshByName("ArmMesh");
         console.log(mesh instanceof ƒ.MeshSkin);
-        const skeleton = await loader.getSkeleton(0);
-        const animation = await loader.getAnimation(0);
+        const skeleton = await loader.getSkeletonByName("ArmSkeleton");
+        const animation = await loader.getAnimationByName("ArmLift");
+        // setup skeleton
+        const cmpAnimator = new ƒ.ComponentAnimator(animation);
+        skeleton.addComponent(cmpAnimator);
+        cmpAnimator.activate(true);
+        arm.addChild(skeleton);
         // setup component mesh
         const cmpMesh = new ƒ.ComponentMesh(mesh);
-        const cmpAnimator = new ƒ.ComponentAnimator(animation);
         cmpMesh.mtxPivot.translateY(-2);
-        await cmpMesh.skeleton.set(skeleton);
-        cmpMesh.skeleton.addComponent(cmpAnimator);
-        cmpAnimator.activate(true);
+        cmpMesh.skeleton = skeleton;
         arm.addComponent(cmpMesh);
         // setup component material
         const material = new ƒ.Material("MaterialArm", ƒ.ShaderFlatSkin, new ƒ.CoatColored(ƒ.Color.CSS("grey")));

@@ -16,7 +16,7 @@ namespace SkeletonTest {
     const rotatorY: ƒ.Node = new ƒ.Node("RotatorY");
     rotatorY.addComponent(new ƒ.ComponentTransform());
 
-    const zylinder: ƒ.Node = await initAnimatedCylinder();
+    const zylinder: ƒ.Node = await createAnimatedCylinder();
     console.log(zylinder);
 
     scene.addChild(rotatorX);
@@ -101,20 +101,11 @@ namespace SkeletonTest {
     }
   }
 
-  async function initAnimatedCylinder(): Promise<ƒ.Node> {
+  async function createAnimatedCylinder(): Promise<ƒ.Node> {
     const zylinder: ƒ.Node = new ƒ.Node("AnimatedCylinder");
 
-    const mesh: ƒ.MeshSkin = new MeshSkinCylinder();
-    const cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh(mesh);
-    cmpMesh.mtxPivot.translateY(-2);
-    await cmpMesh.skeleton.set(MeshSkinCylinder.skeleton);
-    cmpMesh.skeleton.addComponent(new ƒ.ComponentTransform());
-    cmpMesh.skeleton.mtxLocal.scale(ƒ.Vector3.ONE(2));
-    zylinder.addComponent(cmpMesh);
-
-    const material: ƒ.Material = new ƒ.Material("Grey", ƒ.ShaderFlatSkin, new ƒ.CoatColored(ƒ.Color.CSS("Grey")));
-    const cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(material);
-    zylinder.addComponent(cmpMaterial);
+    // setup skeleton and its animation
+    const skeleton: ƒ.SkeletonInstance = await ƒ.SkeletonInstance.CREATE(MeshSkinCylinder.skeleton);
     
     const sequence0: ƒ.AnimationSequence = new ƒ.AnimationSequence();
     sequence0.addKey(new ƒ.AnimationKey(0, -0.5));
@@ -123,7 +114,7 @@ namespace SkeletonTest {
     
     const sequence1: ƒ.AnimationSequence = new ƒ.AnimationSequence();
     sequence1.addKey(new ƒ.AnimationKey(0, 0));
-    sequence1.addKey(new ƒ.AnimationKey(1000, 45));
+    sequence1.addKey(new ƒ.AnimationKey(1000, 90));
     sequence1.addKey(new ƒ.AnimationKey(2000, 0));
 
     const animationStructure: ƒ.AnimationStructure = {
@@ -151,8 +142,24 @@ namespace SkeletonTest {
 
     const animation: ƒ.Animation = new ƒ.Animation("Animation", animationStructure);
     const cmpAnimator: ƒ.ComponentAnimator = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE.LOOP);
-    cmpMesh.skeleton.addComponent(cmpAnimator);
+    skeleton.addComponent(cmpAnimator);    
     cmpAnimator.activate(true);
+
+    zylinder.addChild(skeleton);
+
+    // setup component mesh
+    const mesh: ƒ.MeshSkin = new MeshSkinCylinder();
+    const cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh(mesh);
+    cmpMesh.mtxPivot.translateY(-2);
+    cmpMesh.skeleton = skeleton;
+    cmpMesh.skeleton.addComponent(new ƒ.ComponentTransform());
+    cmpMesh.skeleton.mtxLocal.scale(ƒ.Vector3.ONE(2));
+    zylinder.addComponent(cmpMesh);
+
+    // setup component material
+    const material: ƒ.Material = new ƒ.Material("Grey", ƒ.ShaderFlatSkin, new ƒ.CoatColored(ƒ.Color.CSS("Grey")));
+    const cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(material);
+    zylinder.addComponent(cmpMaterial);
 
     return zylinder;
   }
