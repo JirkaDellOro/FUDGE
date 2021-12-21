@@ -8,7 +8,7 @@ namespace FudgeCore {
     public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
     public readonly mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY();
     public mesh: Mesh;
-    #skeleton: SkeletonInstance;
+    public skeleton: SkeletonInstance;
 
     public constructor(_mesh?: Mesh) {
       super();
@@ -19,22 +19,6 @@ namespace FudgeCore {
       let scaling: Vector3 = this.mtxWorld.scaling;
       let scale: number = Math.max(Math.abs(scaling.x), Math.abs(scaling.y), Math.abs(scaling.z));
       return this.mesh.radius * scale;
-    }
-
-    public get skeleton(): SkeletonInstance {
-      if (!(this.mesh instanceof MeshSkin))
-        return null;
-      if (!this.#skeleton) {
-        this.#skeleton = new SkeletonInstance();
-        if (this.node)
-          this.node.addChild(this.skeleton);
-        else {
-          this.addEventListener(EVENT.COMPONENT_ADD, (event: Event) => {
-            if (event.target == this && this.skeleton) this.node.addChild(this.skeleton);
-          });
-        }
-      }
-      return this.#skeleton;
     }
 
     /**
