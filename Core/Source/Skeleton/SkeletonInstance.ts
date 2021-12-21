@@ -17,6 +17,12 @@ namespace FudgeCore {
       super();
     }
 
+    public static async CREATE(_source: Skeleton): Promise<SkeletonInstance> {
+      const skeleton: SkeletonInstance = new SkeletonInstance();
+      await skeleton.set(_source);
+      return skeleton;
+    }
+
     public get bones(): BoneList {
       return this.#bones;
     }
