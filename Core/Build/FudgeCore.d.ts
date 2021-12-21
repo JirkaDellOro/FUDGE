@@ -1888,14 +1888,13 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentMesh extends Component {
-        #private;
         static readonly iSubclass: number;
         mtxPivot: Matrix4x4;
         readonly mtxWorld: Matrix4x4;
         mesh: Mesh;
+        skeleton: SkeletonInstance;
         constructor(_mesh?: Mesh);
         get radius(): number;
-        get skeleton(): SkeletonInstance;
         /**
          * Calculates the position of a vertex transformed by the skeleton
          * @param _index index of the vertex
@@ -3113,32 +3112,30 @@ declare namespace GLTF {
 }
 declare namespace FudgeCore {
     class GLTFLoader {
+        #private;
         private static loaders;
         readonly gltf: GLTF.GlTf;
         readonly uri: string;
-        private readonly scenes;
-        private readonly nodes;
-        private readonly iBones;
-        private readonly cameras;
-        private readonly animations;
-        private readonly meshes;
-        private readonly skeletons;
-        private readonly buffers;
         private constructor();
         static LOAD(_uri: string): Promise<GLTFLoader>;
-        getScene(_iScene?: number): Promise<Graph>;
+        getScene(_iScene?: number): Promise<GraphInstance>;
+        getSceneByName(_name: string): Promise<GraphInstance>;
         getNode(_iNode: number): Promise<Node>;
+        getNodeByName(_name: string): Promise<Node>;
         getCamera(_iCamera: number): Promise<ComponentCamera>;
+        getCameraByName(_name: string): Promise<ComponentCamera>;
         getAnimation(_iAniamtion: number): Promise<Animation>;
+        getAnimationByName(_name: string): Promise<Animation>;
         getMesh(_iMesh: number): Promise<MeshGLTF>;
-        getSkeleton(_iSkeleton: number): Promise<Skeleton>;
+        getMeshByName(_name: string): Promise<MeshGLTF>;
+        getSkeleton(_iSkeleton: number): Promise<SkeletonInstance>;
+        getSkeletonByName(_name: string): Promise<SkeletonInstance>;
         getUint8Array(_iAccessor: number): Promise<Uint8Array>;
         getUint16Array(_iAccessor: number): Promise<Uint16Array>;
         getFloat32Array(_iAccessor: number): Promise<Float32Array>;
         private assertCmpTypeMatches;
         private getBufferData;
         private getAnimationSequenceVector3;
-        private quaternionToEulers;
     }
 }
 declare namespace FudgeCore {
@@ -6141,6 +6138,7 @@ declare namespace FudgeCore {
          * Creates a new skeleton instance
          */
         constructor();
+        static CREATE(_source: Skeleton): Promise<SkeletonInstance>;
         get bones(): BoneList;
         get mtxBoneLocals(): BoneMatrix4x4List;
         /**
