@@ -4,7 +4,7 @@ namespace FudgeCore {
     public mtxBindShape: Matrix4x4 = Matrix4x4.IDENTITY();
 
     #bones: BoneList;
-    #mtxBoneLocals: BoneMatrix4x4List;
+    #mtxBoneLocals: BoneMatrixList;
     #mtxBones: Array<Matrix4x4> = [];
     #mtxBonesUpdated: number;
 
@@ -27,7 +27,7 @@ namespace FudgeCore {
       return this.#bones;
     }
 
-    public get mtxBoneLocals(): BoneMatrix4x4List {
+    public get mtxBoneLocals(): BoneMatrixList {
       return this.#mtxBoneLocals;
     }
 
@@ -50,11 +50,11 @@ namespace FudgeCore {
       this.skeletonSource = _skeleton;
       this.#bones = {};
       this.#mtxBoneLocals = {};
-      this.addEventListener(EVENT.CHILD_APPEND, this.onChildAppend);
-      this.addEventListener(EVENT.CHILD_REMOVE, this.onChildRemove);
+      this.addEventListener(EVENT.CHILD_APPEND, this.hndChildAppend);
+      this.addEventListener(EVENT.CHILD_REMOVE, this.hndChildRemove);
       await super.set(_skeleton);
-      this.removeEventListener(EVENT.CHILD_APPEND, this.onChildAppend);
-      this.removeEventListener(EVENT.CHILD_REMOVE, this.onChildRemove);
+      this.removeEventListener(EVENT.CHILD_APPEND, this.hndChildAppend);
+      this.removeEventListener(EVENT.CHILD_REMOVE, this.hndChildRemove);
     }
 
     /**
@@ -91,33 +91,23 @@ namespace FudgeCore {
     /**
      * Registers all bones of a appended node
      */
-    private onChildAppend = (_event: Event) => {
-      for (const node of _event.target as Node) {
-        if (node instanceof Bone)
-        this.registerBone(node);
+    private hndChildAppend = (_event: Event) => {
+      if (_event.currentTarget != this) return;
+      for (const node of _event.target as Node) if (this.skeletonSource.bones[node.name]) {
+        this.bones[node.name] = node;
+        this.mtxBoneLocals[node.name] = node.mtxLocal;
       }
     }
 
     /**
      * Deregisters all bones of a removed node
      */
-    private onChildRemove = (_event: Event) => {
-      if (_event.currentTarget == this) {
-        for (const node of _event.target as Node) {
-          if (node instanceof Bone)
-            this.deregisterBone(node);
-        }
+    private hndChildRemove = (_event: Event) => {
+      if (_event.currentTarget != this) return;
+      for (const node of _event.target as Node) if (this.bones[node.name]) {
+        delete this.bones[node.name];
+        delete this.mtxBoneLocals[node.name];
       }
-    }
-
-    private registerBone(_bone: Bone): void {
-      this.bones[_bone.name] = _bone;
-      this.mtxBoneLocals[_bone.name] = _bone.mtxLocal;
-    }
-
-    private deregisterBone(_bone: Bone): void {
-      delete this.bones[_bone.name];
-      delete this.mtxBoneLocals[_bone.name];
     }
 
   }

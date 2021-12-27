@@ -2,31 +2,41 @@ namespace FudgeCore {
   export class Skeleton extends Graph {
 
     public readonly bones: BoneList = {};
-    public readonly mtxBindInverses: BoneMatrix4x4List;
-
-    private calculateMtxBindInversesOnChildAppend: boolean;
+    public readonly mtxBindInverses: BoneMatrixList = {};
     
     /**
      * Creates a new skeleton with a name
      */
-    constructor(_name: string = "Skeleton", _rootBone?: Bone, _mtxBindInverses?: BoneMatrix4x4List) {
+    constructor(_name: string = "Skeleton") {
       super(_name);
+      this.addEventListener(EVENT.CHILD_REMOVE, this.hndChildRemove);
+    }
 
-      this.addEventListener(EVENT.CHILD_APPEND, this.onChildAppend);
-      this.addEventListener(EVENT.CHILD_REMOVE, this.onChildRemove);
+    /**
+     * Appends a node to this skeleton or the given parent and registers it as a bone
+     * @param _mtxInit initial local matrix
+     * @param _parentName name of the parent node, that must be registered as a bone
+     */
+    public addBone(_bone: Node, _mtxInit?: Matrix4x4, _parentName?: string): void {
+      if (_parentName)
+        this.bones[_parentName].addChild(_bone);
+      else
+        this.addChild(_bone);
+      if (!_bone.cmpTransform)
+        _bone.addComponent(new ComponentTransform());
+      if (_mtxInit)
+        _bone.mtxLocal.set(_mtxInit);
+      this.calculateMtxWorld(_bone);
+      this.registerBone(_bone, _bone.mtxWorldInverse);
+    }
 
-      if (_mtxBindInverses) {
-        this.mtxBindInverses = _mtxBindInverses;
-        this.calculateMtxBindInversesOnChildAppend = false;
-      }
-      else {
-        this.mtxBindInverses = {};
-        this.calculateMtxBindInversesOnChildAppend = true;
-      }
-
-      if (_rootBone) this.addChild(_rootBone);
-
-      this.calculateMtxBindInversesOnChildAppend = true;
+    /**
+     * Registers a node as a bone with its bind inverse matrix
+     * @param _bone the node to be registered, that should be a descendant of this skeleton
+     */
+    public registerBone(_bone: Node, _mtxBindInverse: Matrix4x4): void {
+      this.bones[_bone.name] = _bone;
+      this.mtxBindInverses[_bone.name] = _mtxBindInverse;
     }
 
     /**
@@ -43,7 +53,8 @@ namespace FudgeCore {
     public indexOfBone(_boneName: string): number {
       let index: number = 0;
       for (const boneName in this.bones) {
-        if (_boneName == boneName) return index;
+        if (_boneName == boneName)
+          return index;
         index++;
       }
       return -1;
@@ -52,73 +63,40 @@ namespace FudgeCore {
     public serialize(): Serialization {
       const serialization: Serialization = super.serialize();
       serialization.mtxBindInverses = {};
-      for (const boneName in this.mtxBindInverses) {
+      for (const boneName in this.mtxBindInverses)
         serialization.mtxBindInverses[boneName] = this.mtxBindInverses[boneName].serialize();
-      }
       return serialization;
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      // deactivate calculation of inverse bind matrices to load them from the serialization instead
-      this.calculateMtxBindInversesOnChildAppend = false;
-
       await super.deserialize(_serialization);
-      for (const boneName in _serialization.mtxBindInverses) {
-        this.mtxBindInverses[boneName] = await new Matrix4x4().deserialize(_serialization.mtxBindInverses[boneName]) as Matrix4x4;
+      for (const node of this) if (_serialization.mtxBindInverses[node.name]) {
+        this.registerBone(node, await new Matrix4x4().deserialize(_serialization.mtxBindInverses[node.name]) as Matrix4x4);
+        break;
       }
-
-      this.calculateMtxBindInversesOnChildAppend = true;
       return this;
-    }
-
-    /**
-     * Registers all bones of a appended node
-     */
-    private onChildAppend = (_event: Event) => {
-      if (_event.currentTarget == this) {
-        for (const node of _event.target as Node) {
-          if (node instanceof Bone)
-            this.registerBone(node);
-        }
-      }
     }
 
     /**
      * Deregisters all bones of a removed node
      */
-    private onChildRemove = (_event: Event) => {
-      if (_event.currentTarget == this) {
-        for (const node of _event.target as Node) {
-          if (node instanceof Bone)
-            this.deregisterBone(node);
-        }
+    private hndChildRemove = (_event: Event) => {
+      if (_event.currentTarget != this) return;
+      for (const node of _event.target as Node) if (this.bones[node.name]) {
+        delete this.bones[node.name];
+        delete this.mtxBindInverses[node.name];
       }
-    }
-
-    private registerBone(_bone: Bone): void {
-      this.bones[_bone.name] = _bone;
-      if (this.calculateMtxBindInversesOnChildAppend) {
-        this.calculateMtxWorld(_bone);
-        this.mtxBindInverses[_bone.name] = _bone.mtxWorldInverse;
-      }
-    }
-
-    private deregisterBone(_bone: Bone): void {
-      delete this.bones[_bone.name];
-      delete this.mtxBindInverses[_bone.name];
     }
 
     /**
      * Calculates and sets the world matrix of a bone relative to its parent
      */
-    private calculateMtxWorld(_node: Bone): void {
-      if (!(_node.getParent() instanceof Bone || _node.getParent() == this))
-        throw new Error("Bone has an invalid parent. The Parent must be a bone or a skeleton.");
-
-      if (!_node.cmpTransform)
-        _node.addComponent(new ComponentTransform());
-
-      _node.mtxWorld.set(Matrix4x4.MULTIPLICATION(_node.getParent().mtxWorld, _node.mtxLocal));
+    private calculateMtxWorld(_node: Node): void {
+      _node.mtxWorld.set(
+        _node.cmpTransform ?
+        Matrix4x4.MULTIPLICATION(_node.getParent().mtxWorld, _node.mtxLocal) :
+        _node.getParent().mtxWorld
+      );
     }
 
   }

@@ -1888,13 +1888,15 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class ComponentMesh extends Component {
+        #private;
         static readonly iSubclass: number;
         mtxPivot: Matrix4x4;
         readonly mtxWorld: Matrix4x4;
         mesh: Mesh;
-        skeleton: SkeletonInstance;
         constructor(_mesh?: Mesh);
         get radius(): number;
+        get skeleton(): SkeletonInstance;
+        bindSkeleton(_skeleton: SkeletonInstance): void;
         /**
          * Calculates the position of a vertex transformed by the skeleton
          * @param _index index of the vertex
@@ -3114,6 +3116,7 @@ declare namespace FudgeCore {
     class GLTFLoader {
         #private;
         private static loaders;
+        private static defaultMaterial;
         readonly gltf: GLTF.GlTf;
         readonly uri: string;
         private constructor();
@@ -3124,7 +3127,7 @@ declare namespace FudgeCore {
         getNodeByName(_name: string): Promise<Node>;
         getCamera(_iCamera: number): Promise<ComponentCamera>;
         getCameraByName(_name: string): Promise<ComponentCamera>;
-        getAnimation(_iAniamtion: number): Promise<Animation>;
+        getAnimation(_iAnimation: number): Promise<Animation>;
         getAnimationByName(_name: string): Promise<Animation>;
         getMesh(_iMesh: number): Promise<MeshGLTF>;
         getMeshByName(_name: string): Promise<MeshGLTF>;
@@ -3133,8 +3136,11 @@ declare namespace FudgeCore {
         getUint8Array(_iAccessor: number): Promise<Uint8Array>;
         getUint16Array(_iAccessor: number): Promise<Uint16Array>;
         getFloat32Array(_iAccessor: number): Promise<Float32Array>;
-        private assertCmpTypeMatches;
+        private assertComponentTypeMatches;
         private getBufferData;
+        private isSkeletalAnimation;
+        private findSkeletalAnimationIndices;
+        private isBoneIndex;
         private getAnimationSequenceVector3;
     }
 }
@@ -6082,29 +6088,34 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    class Bone extends Node {
-        constructor(_name: string, _mtxInit?: Matrix4x4);
-    }
-}
-declare namespace FudgeCore {
     interface BoneList {
-        [boneName: string]: Bone;
+        [boneName: string]: Node;
     }
 }
 declare namespace FudgeCore {
-    interface BoneMatrix4x4List {
+    interface BoneMatrixList {
         [boneName: string]: Matrix4x4;
     }
 }
 declare namespace FudgeCore {
     class Skeleton extends Graph {
         readonly bones: BoneList;
-        readonly mtxBindInverses: BoneMatrix4x4List;
-        private calculateMtxBindInversesOnChildAppend;
+        readonly mtxBindInverses: BoneMatrixList;
         /**
          * Creates a new skeleton with a name
          */
-        constructor(_name?: string, _rootBone?: Bone, _mtxBindInverses?: BoneMatrix4x4List);
+        constructor(_name?: string);
+        /**
+         * Appends a node to this skeleton or the given parent and registers it as a bone
+         * @param _mtxInit initial local matrix
+         * @param _parentName name of the parent node, that must be registered as a bone
+         */
+        addBone(_bone: Node, _mtxInit?: Matrix4x4, _parentName?: string): void;
+        /**
+         * Registers a node as a bone with its bind inverse matrix
+         * @param _bone the node to be registered, that should be a descendant of this skeleton
+         */
+        registerBone(_bone: Node, _mtxBindInverse: Matrix4x4): void;
         /**
          * Sets the current state of this skeleton as the default pose
          * by updating the inverse bind matrices
@@ -6114,15 +6125,9 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         /**
-         * Registers all bones of a appended node
-         */
-        private onChildAppend;
-        /**
          * Deregisters all bones of a removed node
          */
-        private onChildRemove;
-        private registerBone;
-        private deregisterBone;
+        private hndChildRemove;
         /**
          * Calculates and sets the world matrix of a bone relative to its parent
          */
@@ -6140,7 +6145,7 @@ declare namespace FudgeCore {
         constructor();
         static CREATE(_source: Skeleton): Promise<SkeletonInstance>;
         get bones(): BoneList;
-        get mtxBoneLocals(): BoneMatrix4x4List;
+        get mtxBoneLocals(): BoneMatrixList;
         /**
          * Gets the bone transformations for a vertex
          */
@@ -6158,13 +6163,11 @@ declare namespace FudgeCore {
         /**
          * Registers all bones of a appended node
          */
-        private onChildAppend;
+        private hndChildAppend;
         /**
          * Deregisters all bones of a removed node
          */
-        private onChildRemove;
-        private registerBone;
-        private deregisterBone;
+        private hndChildRemove;
     }
 }
 declare namespace FudgeCore {

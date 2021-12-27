@@ -1,5 +1,5 @@
 namespace FudgeCore {
-  export interface BoneMatrix4x4List {
+  export interface BoneMatrixList {
     [boneName: string]: Matrix4x4;
   }
 }
