@@ -51,7 +51,7 @@ namespace SkeletonTest {
   }
 
   class MeshSkinCylinder extends ƒ.MeshSkin {
-    static #skeleton: ƒ.Skeleton;
+    private static ƒskeleton: ƒ.Skeleton;
 
     constructor() {
       super();
@@ -91,69 +91,71 @@ namespace SkeletonTest {
     }
 
     public static get skeleton(): ƒ.Skeleton {
-      if (!this.#skeleton) {
-        this.#skeleton = new ƒ.Skeleton("SkeletonCylinder");
-        this.#skeleton.addChild(new ƒ.Bone("LowerBone", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(0))));
-        this.#skeleton.bones.LowerBone.addChild(new ƒ.Bone("UpperBone", ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(1))));
-        console.log(ƒ.Serializer.serialize(this.#skeleton));
+      if (!this.ƒskeleton) {
+        this.ƒskeleton = new ƒ.Skeleton("SkeletonCylinder");
+        this.ƒskeleton.addBone(new ƒ.Node("LowerBone"), ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(0)));
+        this.ƒskeleton.addBone(new ƒ.Node("UpperBone"), ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(1)), "LowerBone");
+        this.ƒskeleton.addComponent(new ƒ.ComponentTransform(ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(2))));
+        console.log(ƒ.Serializer.serialize(this.ƒskeleton));
       }
-      return this.#skeleton;
+      return this.ƒskeleton;
     }
   }
 
   async function createAnimatedCylinder(): Promise<ƒ.Node> {
-    const zylinder: ƒ.Node = new ƒ.Node("AnimatedCylinder");
+    const zylinder: ƒ.Node = new ƒ.Node("CylinderAnimated"); 
 
     // setup skeleton and its animation
     const skeleton: ƒ.SkeletonInstance = await ƒ.SkeletonInstance.CREATE(MeshSkinCylinder.skeleton);
-    
-    const sequence0: ƒ.AnimationSequence = new ƒ.AnimationSequence();
-    sequence0.addKey(new ƒ.AnimationKey(0, -0.5));
-    sequence0.addKey(new ƒ.AnimationKey(1000, 0.5));
-    sequence0.addKey(new ƒ.AnimationKey(2000, -0.5));
-    
-    const sequence1: ƒ.AnimationSequence = new ƒ.AnimationSequence();
-    sequence1.addKey(new ƒ.AnimationKey(0, 0));
-    sequence1.addKey(new ƒ.AnimationKey(1000, 90));
-    sequence1.addKey(new ƒ.AnimationKey(2000, 0));
-
-    const animationStructure: ƒ.AnimationStructure = {
+    const sequenceRotation: ƒ.AnimationSequence = new ƒ.AnimationSequence();
+    sequenceRotation.addKey(new ƒ.AnimationKey(0, 0));
+    sequenceRotation.addKey(new ƒ.AnimationKey(1000, 90));
+    sequenceRotation.addKey(new ƒ.AnimationKey(2000, 0));
+    const sequenceScaling: ƒ.AnimationSequence = new ƒ.AnimationSequence();
+    sequenceScaling.addKey(new ƒ.AnimationKey(0, 1));
+    sequenceScaling.addKey(new ƒ.AnimationKey(1000, 1.25));
+    sequenceScaling.addKey(new ƒ.AnimationKey(2000, 1));
+    const sequenceTranslation: ƒ.AnimationSequence = new ƒ.AnimationSequence();
+    sequenceTranslation.addKey(new ƒ.AnimationKey(0, -0.5));
+    sequenceTranslation.addKey(new ƒ.AnimationKey(1000, 0.5));
+    sequenceTranslation.addKey(new ƒ.AnimationKey(2000, -0.5));
+    const animation: ƒ.Animation = new ƒ.Animation("AnimationSkeletonCylinder", {
+      mtxBoneLocals: {
+        UpperBone: {
+          rotation: {
+            z: sequenceRotation
+          }
+        }
+      },
       bones: {
         LowerBone: {
           components: {
             ComponentTransform: [ { "ƒ.ComponentTransform": {
               mtxLocal: {
+                scaling: {
+                  x: sequenceScaling,
+                  y: sequenceScaling,
+                  z: sequenceScaling
+                },
                 translation: {
-                  y: sequence0
+                  y: sequenceTranslation
                 }
               }
             }}]
           }
         }
-      },
-      mtxBoneLocals: {
-        UpperBone: {
-          rotation: {
-            z: sequence1
-          }
-        }
       }
-    };
-
-    const animation: ƒ.Animation = new ƒ.Animation("Animation", animationStructure);
+    });
     const cmpAnimator: ƒ.ComponentAnimator = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE.LOOP);
     skeleton.addComponent(cmpAnimator);    
     cmpAnimator.activate(true);
-
     zylinder.addChild(skeleton);
 
     // setup component mesh
     const mesh: ƒ.MeshSkin = new MeshSkinCylinder();
     const cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh(mesh);
     cmpMesh.mtxPivot.translateY(-2);
-    cmpMesh.skeleton = skeleton;
-    cmpMesh.skeleton.addComponent(new ƒ.ComponentTransform());
-    cmpMesh.skeleton.mtxLocal.scale(ƒ.Vector3.ONE(2));
+    cmpMesh.bindSkeleton(skeleton);
     zylinder.addComponent(cmpMesh);
 
     // setup component material

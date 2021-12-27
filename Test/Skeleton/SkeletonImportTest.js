@@ -1,4 +1,3 @@
-"use strict";
 ///<reference path="./../../Core/Build/FudgeCore.d.ts"/>
 var SkeletonTest;
 ///<reference path="./../../Core/Build/FudgeCore.d.ts"/>
@@ -56,7 +55,7 @@ var SkeletonTest;
         // setup component mesh
         const cmpMesh = new ƒ.ComponentMesh(mesh);
         cmpMesh.mtxPivot.translateY(-2);
-        cmpMesh.skeleton = skeleton;
+        cmpMesh.bindSkeleton(skeleton);
         arm.addComponent(cmpMesh);
         // setup component material
         const material = new ƒ.Material("MaterialArm", ƒ.ShaderFlatSkin, new ƒ.CoatColored(ƒ.Color.CSS("grey")));

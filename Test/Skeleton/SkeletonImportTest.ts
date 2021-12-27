@@ -69,7 +69,7 @@ namespace SkeletonTest {
     // setup component mesh
     const cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh(mesh);
     cmpMesh.mtxPivot.translateY(-2);
-    cmpMesh.skeleton = skeleton;
+    cmpMesh.bindSkeleton(skeleton);
     arm.addComponent(cmpMesh);
 
     // setup component material
