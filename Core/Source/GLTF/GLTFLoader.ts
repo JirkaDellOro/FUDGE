@@ -30,13 +30,13 @@ namespace FudgeCore {
   export class GLTFLoader {
 
     private static loaders: GLTFLoaderList;
+    private static defaultMaterial: Material;
 
     public readonly gltf: GLTF.GlTf;
     public readonly uri: string;
 
     #scenes: Graph[];
     #nodes: Node[];
-    #iBones: number[];
     #cameras: ComponentCamera[];
     #animations: Animation[];
     #meshes: MeshGLTF[];
@@ -46,7 +46,6 @@ namespace FudgeCore {
     private constructor(_gltf: GLTF.GlTf, _uri: string) {
       this.gltf = _gltf;
       this.uri = _uri;
-      this.#iBones = this.gltf.skins?.flatMap(gltfSkin => gltfSkin.joints) || [];
     }
 
     public static async LOAD(_uri: string): Promise<GLTFLoader> {
@@ -85,7 +84,7 @@ namespace FudgeCore {
         this.#nodes = [];
       if (!this.#nodes[_iNode]) {
         const gltfNode: GLTF.Node = this.gltf.nodes[_iNode];
-        const node: Node = this.#iBones.includes(_iNode) ? new Bone(gltfNode.name) : new Node(gltfNode.name);
+        const node: Node = new Node(gltfNode.name);
 
         // check for children
         if (gltfNode.children)
@@ -117,6 +116,9 @@ namespace FudgeCore {
         // check for mesh
         if (gltfNode.mesh != undefined) {
           node.addComponent(new ComponentMesh(await this.getMesh(gltfNode.mesh)));
+          if (!GLTFLoader.defaultMaterial)
+            GLTFLoader.defaultMaterial = new Material("GLTFDefaultMaterial", ShaderFlatSkin, new CoatColored(Color.CSS("white")));
+          node.addComponent(new ComponentMaterial(GLTFLoader.defaultMaterial));
         }
 
         // check for skeleton        
@@ -124,7 +126,10 @@ namespace FudgeCore {
           const skeleton: SkeletonInstance = await this.getSkeleton(gltfNode.skin);
           node.addChild(skeleton);
           if (node.getComponent(ComponentMesh))
-            node.getComponent(ComponentMesh).skeleton = skeleton;
+            node.getComponent(ComponentMesh).bindSkeleton(skeleton);
+          for (const iAnimation of this.findSkeletalAnimationIndices(gltfNode.skin)) {
+            skeleton.addComponent(new ComponentAnimator(await this.getAnimation(iAnimation)));
+          }
         }
 
         this.#nodes[_iNode] = node;
@@ -174,14 +179,13 @@ namespace FudgeCore {
       return await this.getCamera(iCamera);
     }
 
-    public async getAnimation(_iAniamtion: number): Promise<Animation> {
+    public async getAnimation(_iAnimation: number): Promise<Animation> {
       if (!this.#animations)
         this.#animations = [];
-      if (!this.#animations[_iAniamtion]) {
-        const gltfAnimation: GLTF.Animation = this.gltf.animations[_iAniamtion];
+      if (!this.#animations[_iAnimation]) {
+        const gltfAnimation: GLTF.Animation = this.gltf.animations[_iAnimation];
 
-        // check if the animation is a skeletal animation
-        if (gltfAnimation.channels.every(channel => this.#iBones.includes(channel.target.node))) {
+        if (this.isSkeletalAnimation(gltfAnimation)) {
           // map channels to an animation structure for animating the local bone matrices
           const animationStructure: {
             mtxBoneLocals: {
@@ -201,10 +205,12 @@ namespace FudgeCore {
                 await this.getAnimationSequenceVector3(gltfAnimation.samplers[gltfChannel.sampler], transformationType);
           }
 
-          return new Animation(gltfAnimation.name, animationStructure);
+          this.#animations[_iAnimation] = new Animation(gltfAnimation.name, animationStructure);
         }
-        else throw new Error("Non-skeletal animations are not supported yet.");
+        else
+          throw new Error("Non-skeletal animations are not supported yet.");
       }
+      return this.#animations[_iAnimation];
     }
 
     public async getAnimationByName(_name: string): Promise<Animation> {
@@ -241,20 +247,18 @@ namespace FudgeCore {
         this.#skeletons = [];
       if (!this.#skeletons[_iSkeleton]) {
         const gltfSkeleton: GLTF.Skin = this.gltf.skins[_iSkeleton];
-        const name: string = gltfSkeleton.name;
-        const rootBone: Bone = await this.getNode(gltfSkeleton.joints[0]);
+        const skeleton: Skeleton = new Skeleton(gltfSkeleton.name);
+        skeleton.addChild(await this.getNode(gltfSkeleton.joints[0]));
 
-        // convert float array to array of matrices
-        const mtxBindInverses: BoneMatrix4x4List = {};
+        // convert float array to array of matrices and register bones
         const floatArray: Float32Array = await this.getFloat32Array(gltfSkeleton.inverseBindMatrices);
         const span: number = 16;
         for (let iFloat: number = 0, iBone: number = 0; iFloat < floatArray.length; iFloat += span, iBone++) {
-          const boneName: string = this.#nodes[gltfSkeleton.joints[iBone]].name;
-          mtxBindInverses[boneName] = new Matrix4x4();
-          mtxBindInverses[boneName].set(floatArray.subarray(iFloat, iFloat + span));
+          const mtxBone: Matrix4x4 = new Matrix4x4();
+          mtxBone.set(floatArray.subarray(iFloat, iFloat + span));
+          skeleton.registerBone(this.#nodes[gltfSkeleton.joints[iBone]], mtxBone);
         }
-
-        this.#skeletons[_iSkeleton] = new Skeleton(name, rootBone, mtxBindInverses);
+        this.#skeletons[_iSkeleton] = skeleton;
       }
       return await SkeletonInstance.CREATE(this.#skeletons[_iSkeleton]);
     }
@@ -267,21 +271,21 @@ namespace FudgeCore {
     }
 
     public async getUint8Array(_iAccessor: number): Promise<Uint8Array> {
-      this.assertCmpTypeMatches(_iAccessor, ComponentType.UNSIGNED_BYTE);
+      this.assertComponentTypeMatches(_iAccessor, ComponentType.UNSIGNED_BYTE);
       return await this.getBufferData(_iAccessor) as Uint8Array;
     }
 
     public async getUint16Array(_iAccessor: number): Promise<Uint16Array> {
-      this.assertCmpTypeMatches(_iAccessor, ComponentType.UNSIGNED_SHORT);
+      this.assertComponentTypeMatches(_iAccessor, ComponentType.UNSIGNED_SHORT);
       return await this.getBufferData(_iAccessor) as Uint16Array;
     }
 
     public async getFloat32Array(_iAccessor: number): Promise<Float32Array> {
-      this.assertCmpTypeMatches(_iAccessor, ComponentType.FLOAT);
+      this.assertComponentTypeMatches(_iAccessor, ComponentType.FLOAT);
       return await this.getBufferData(_iAccessor) as Float32Array;
     }
 
-    private assertCmpTypeMatches(_iAccessor: number, _cmpType: ComponentType): void {
+    private assertComponentTypeMatches(_iAccessor: number, _cmpType: ComponentType): void {
       const accessorCmpType: ComponentType = this.gltf.accessors[_iAccessor]?.componentType;
       if (accessorCmpType != _cmpType)
         throw new Error(`Type missmatch. Expected component type ${ComponentType[_cmpType]} but was ${ComponentType[accessorCmpType]}.`);
@@ -325,6 +329,20 @@ namespace FudgeCore {
         default:
           throw new Error(`Unsupported component type: ${gltfAccessor.componentType}.`);
       }
+    }
+
+    private isSkeletalAnimation(_animation: GLTF.Animation): boolean {
+      return _animation.channels.every(channel => this.isBoneIndex(channel.target.node));
+    }
+
+    private findSkeletalAnimationIndices(_iSkeleton: number): number[] {
+      return this.gltf.animations
+        .filter(animation => animation.channels.every(channel => this.gltf.skins[_iSkeleton].joints.includes(channel.target.node)))
+        .map((_, iAnimation) => iAnimation);
+    }
+
+    private isBoneIndex(_iNode: number): boolean {
+      return this.gltf.skins?.flatMap(gltfSkin => gltfSkin.joints).includes(_iNode);
     }
 
     private async getAnimationSequenceVector3(_sampler: GLTF.Sampler, _transformationType: TransformationType): Promise<AnimationStructureVector3> {
