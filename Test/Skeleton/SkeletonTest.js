@@ -64,19 +64,23 @@ var SkeletonTest;
         }
         static get skeleton() {
             if (!this.ƒskeleton) {
+                // setup skeleton with a skeleton transform test
                 this.ƒskeleton = new ƒ.Skeleton("SkeletonCylinder");
                 this.ƒskeleton.addBone(new ƒ.Node("LowerBone"), ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(0)));
                 this.ƒskeleton.addBone(new ƒ.Node("UpperBone"), ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.Y(1)), "LowerBone");
                 this.ƒskeleton.addComponent(new ƒ.ComponentTransform(ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(2))));
-                console.log(ƒ.Serializer.serialize(this.ƒskeleton));
             }
             return this.ƒskeleton;
         }
     }
     async function createAnimatedCylinder() {
         const zylinder = new ƒ.Node("CylinderAnimated");
-        // setup skeleton and its animation
-        const skeleton = await ƒ.SkeletonInstance.CREATE(MeshSkinCylinder.skeleton);
+        // skeleton serialization test
+        const serialization = ƒ.Serializer.serialize(MeshSkinCylinder.skeleton);
+        console.log(serialization);
+        const skeleton = await ƒ.Serializer.deserialize(serialization);
+        const skeletonInstance = await ƒ.SkeletonInstance.CREATE(skeleton);
+        // setup skeleton animator
         const sequenceRotation = new ƒ.AnimationSequence();
         sequenceRotation.addKey(new ƒ.AnimationKey(0, 0));
         sequenceRotation.addKey(new ƒ.AnimationKey(1000, 90));
@@ -117,14 +121,14 @@ var SkeletonTest;
             }
         });
         const cmpAnimator = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE.LOOP);
-        skeleton.addComponent(cmpAnimator);
+        skeletonInstance.addComponent(cmpAnimator);
         cmpAnimator.activate(true);
-        zylinder.addChild(skeleton);
+        zylinder.addChild(skeletonInstance);
         // setup component mesh
         const mesh = new MeshSkinCylinder();
         const cmpMesh = new ƒ.ComponentMesh(mesh);
         cmpMesh.mtxPivot.translateY(-2);
-        cmpMesh.bindSkeleton(skeleton);
+        cmpMesh.bindSkeleton(skeletonInstance);
         zylinder.addComponent(cmpMesh);
         // setup component material
         const material = new ƒ.Material("Grey", ƒ.ShaderFlatSkin, new ƒ.CoatColored(ƒ.Color.CSS("Grey")));

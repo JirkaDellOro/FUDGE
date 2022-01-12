@@ -51,32 +51,11 @@ namespace SkeletonTest {
   }
 
   async function loadAnimatedArm(): Promise<ƒ.Node> {
-    const arm: ƒ.Node = new ƒ.Node("Arm");
-
-    // import assets
     const loader: ƒ.GLTFLoader = await ƒ.GLTFLoader.LOAD("./animated_arm.gltf");
-    const mesh: ƒ.Mesh = await loader.getMeshByName("ArmMesh");
-    console.log(mesh instanceof ƒ.MeshSkin);
-    const skeleton: ƒ.SkeletonInstance = await loader.getSkeletonByName("ArmSkeleton");
-    const animation: ƒ.Animation = await loader.getAnimationByName("ArmLift");
-
-    // setup skeleton
-    const cmpAnimator: ƒ.ComponentAnimator = new ƒ.ComponentAnimator(animation);
-    skeleton.addComponent(cmpAnimator);
-    cmpAnimator.activate(true);
-    arm.addChild(skeleton);
-
-    // setup component mesh
-    const cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh(mesh);
-    cmpMesh.mtxPivot.translateY(-2);
-    cmpMesh.bindSkeleton(skeleton);
-    arm.addComponent(cmpMesh);
-
-    // setup component material
-    const material: ƒ.Material = new ƒ.Material("MaterialArm", ƒ.ShaderFlatSkin, new ƒ.CoatColored(ƒ.Color.CSS("grey")));
-    const cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(material);
-    arm.addComponent(cmpMaterial);
-
+    const arm: ƒ.Node = await loader.getNodeByName("ArmModel");
+    arm.addComponent(new ƒ.ComponentTransform());
+    arm.mtxLocal.translateY(-2);
+    arm.getChildrenByName("ArmSkeleton")[0].getComponent(ƒ.ComponentAnimator).activate(true);
     return arm;
   }
 
