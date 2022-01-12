@@ -11,9 +11,11 @@ namespace FudgeCore {
 
     #skeleton: SkeletonInstance;
 
-    public constructor(_mesh?: Mesh) {
+    public constructor(_mesh?: Mesh, _skeleton?: SkeletonInstance) {
       super();
       this.mesh = _mesh;
+      if (_skeleton)
+        this.bindSkeleton(_skeleton);
     }
 
     public get radius(): number {
