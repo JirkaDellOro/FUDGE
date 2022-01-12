@@ -70,22 +70,9 @@ namespace FudgeCore {
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       await super.deserialize(_serialization);
-      for (const node of this) if (_serialization.mtxBindInverses[node.name]) {
+      for (const node of this) if (_serialization.mtxBindInverses[node.name])
         this.registerBone(node, await new Matrix4x4().deserialize(_serialization.mtxBindInverses[node.name]) as Matrix4x4);
-        break;
-      }
       return this;
-    }
-
-    /**
-     * Deregisters all bones of a removed node
-     */
-    private hndChildRemove = (_event: Event) => {
-      if (_event.currentTarget != this) return;
-      for (const node of _event.target as Node) if (this.bones[node.name]) {
-        delete this.bones[node.name];
-        delete this.mtxBindInverses[node.name];
-      }
     }
 
     /**
@@ -97,6 +84,17 @@ namespace FudgeCore {
         Matrix4x4.MULTIPLICATION(_node.getParent().mtxWorld, _node.mtxLocal) :
         _node.getParent().mtxWorld
       );
+    }
+
+    /**
+     * Deregisters all bones of a removed node
+     */
+    private hndChildRemove = (_event: Event) => {
+      if (_event.currentTarget != this) return;
+      for (const node of _event.target as Node) if (this.bones[node.name]) {
+        delete this.bones[node.name];
+        delete this.mtxBindInverses[node.name];
+      }
     }
 
   }
