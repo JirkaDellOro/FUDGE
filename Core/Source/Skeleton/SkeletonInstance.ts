@@ -9,17 +9,10 @@ namespace FudgeCore {
     #mtxBonesUpdated: number;
 
     private skeletonSource: Skeleton;
-    
-    /**
-     * Creates a new skeleton instance
-     */
-    public constructor() {
-      super();
-    }
 
-    public static async CREATE(_source: Skeleton): Promise<SkeletonInstance> {
+    public static async CREATE(_skeleton: Skeleton): Promise<SkeletonInstance> {
       const skeleton: SkeletonInstance = new SkeletonInstance();
-      await skeleton.set(_source);
+      await skeleton.set(_skeleton);
       return skeleton;
     }
 

@@ -1893,7 +1893,7 @@ declare namespace FudgeCore {
         mtxPivot: Matrix4x4;
         readonly mtxWorld: Matrix4x4;
         mesh: Mesh;
-        constructor(_mesh?: Mesh);
+        constructor(_mesh?: Mesh, _skeleton?: SkeletonInstance);
         get radius(): number;
         get skeleton(): SkeletonInstance;
         bindSkeleton(_skeleton: SkeletonInstance): void;
@@ -4269,10 +4269,9 @@ declare namespace FudgeCore {
     class MeshGLTF extends Mesh {
         private uriGLTF;
         private iGLTF;
-        static LOAD(_loader: GLTFLoader, _iMesh: number): Promise<MeshGLTF>;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
-        protected load(_loader: GLTFLoader, _iMesh: number): Promise<MeshGLTF>;
+        load(_loader: GLTFLoader, _iMesh: number): Promise<MeshGLTF>;
     }
 }
 declare namespace FudgeCore {
@@ -4428,11 +4427,10 @@ declare namespace FudgeCore {
         protected ƒmtxBones: Float32Array;
         protected createJoints: () => Uint8Array;
         protected createWeights: () => Float32Array;
-        static LOAD(_loader: GLTFLoader, _iMesh: number): Promise<MeshSkin>;
         get iBones(): Uint8Array;
         get weights(): Float32Array;
+        load(_loader: GLTFLoader, _iMesh: number): Promise<MeshSkin>;
         useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): void;
-        protected load(_loader: GLTFLoader, _iMesh: number): Promise<MeshSkin>;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -6125,13 +6123,13 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         /**
-         * Deregisters all bones of a removed node
-         */
-        private hndChildRemove;
-        /**
          * Calculates and sets the world matrix of a bone relative to its parent
          */
         private calculateMtxWorld;
+        /**
+         * Deregisters all bones of a removed node
+         */
+        private hndChildRemove;
     }
 }
 declare namespace FudgeCore {
@@ -6139,11 +6137,7 @@ declare namespace FudgeCore {
         #private;
         mtxBindShape: Matrix4x4;
         private skeletonSource;
-        /**
-         * Creates a new skeleton instance
-         */
-        constructor();
-        static CREATE(_source: Skeleton): Promise<SkeletonInstance>;
+        static CREATE(_skeleton: Skeleton): Promise<SkeletonInstance>;
         get bones(): BoneList;
         get mtxBoneLocals(): BoneMatrixList;
         /**
