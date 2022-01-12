@@ -43,11 +43,11 @@ namespace FudgeCore {
       this.skeletonSource = _skeleton;
       this.#bones = {};
       this.#mtxBoneLocals = {};
-      this.addEventListener(EVENT.CHILD_APPEND, this.hndChildAppend);
-      this.addEventListener(EVENT.CHILD_REMOVE, this.hndChildRemove);
       await super.set(_skeleton);
-      this.removeEventListener(EVENT.CHILD_APPEND, this.hndChildAppend);
-      this.removeEventListener(EVENT.CHILD_REMOVE, this.hndChildRemove);
+      for (const node of this) if (_skeleton.mtxBindInverses[node.name]) {
+        this.bones[node.name] = node;
+        this.mtxBoneLocals[node.name] = node.mtxLocal;
+      }
     }
 
     /**
@@ -78,28 +78,6 @@ namespace FudgeCore {
         if (this.cmpTransform) mtxBone.multiply(Matrix4x4.INVERSION(this.mtxLocal));
 
         this.#mtxBones.push(mtxBone);
-      }
-    }
-
-    /**
-     * Registers all bones of a appended node
-     */
-    private hndChildAppend = (_event: Event) => {
-      if (_event.currentTarget != this) return;
-      for (const node of _event.target as Node) if (this.skeletonSource.bones[node.name]) {
-        this.bones[node.name] = node;
-        this.mtxBoneLocals[node.name] = node.mtxLocal;
-      }
-    }
-
-    /**
-     * Deregisters all bones of a removed node
-     */
-    private hndChildRemove = (_event: Event) => {
-      if (_event.currentTarget != this) return;
-      for (const node of _event.target as Node) if (this.bones[node.name]) {
-        delete this.bones[node.name];
-        delete this.mtxBoneLocals[node.name];
       }
     }
 

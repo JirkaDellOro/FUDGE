@@ -6154,14 +6154,6 @@ declare namespace FudgeCore {
         resetPose(): void;
         applyAnimation(_mutator: Mutator): void;
         private calculateMtxBones;
-        /**
-         * Registers all bones of a appended node
-         */
-        private hndChildAppend;
-        /**
-         * Deregisters all bones of a removed node
-         */
-        private hndChildRemove;
     }
 }
 declare namespace FudgeCore {
