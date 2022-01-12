@@ -21,6 +21,7 @@ var SkeletonTest;
         const camera = new ƒ.Node("Camera");
         camera.addComponent(new ƒ.ComponentCamera());
         camera.addComponent(new ƒ.ComponentTransform());
+        camera.getComponent(ƒ.ComponentCamera).clrBackground.setHex("4472C4FF");
         camera.mtxLocal.translateZ(10);
         camera.mtxLocal.showTo(ƒ.Vector3.ZERO(), camera.mtxLocal.getY());
         scene.addChild(camera);
@@ -131,7 +132,7 @@ var SkeletonTest;
         cmpMesh.bindSkeleton(skeletonInstance);
         zylinder.addComponent(cmpMesh);
         // setup component material
-        const material = new ƒ.Material("Grey", ƒ.ShaderFlatSkin, new ƒ.CoatColored(ƒ.Color.CSS("Grey")));
+        const material = new ƒ.Material("MaterialZylinder", ƒ.ShaderFlatSkin, new ƒ.CoatColored(ƒ.Color.CSS("White")));
         const cmpMaterial = new ƒ.ComponentMaterial(material);
         zylinder.addComponent(cmpMaterial);
         return zylinder;
