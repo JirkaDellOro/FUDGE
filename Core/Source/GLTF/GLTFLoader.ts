@@ -228,8 +228,8 @@ namespace FudgeCore {
         console.log(gltfMesh);
         this.#meshes[_iMesh] = await (
           gltfMesh.primitives[0].attributes.JOINTS_0 != undefined ?
-          MeshSkin.LOAD(this, _iMesh) :
-          MeshGLTF.LOAD(this, _iMesh)
+          new MeshSkin().load(this, _iMesh) :
+          new MeshGLTF().load(this, _iMesh)
         );
       }
       return this.#meshes[_iMesh];

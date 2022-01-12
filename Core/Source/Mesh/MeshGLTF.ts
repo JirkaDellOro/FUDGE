@@ -4,10 +4,6 @@ namespace FudgeCore {
     private uriGLTF: string;
     private iGLTF: number;
 
-    public static async LOAD(_loader: GLTFLoader, _iMesh: number): Promise<MeshGLTF> {
-      return await new MeshGLTF(_loader.gltf.meshes[_iMesh].name).load(_loader, _iMesh);
-    }
-
     public serialize(): Serialization {
       const serialization: Serialization = super.serialize();
       serialization.uriGLTF = this.uriGLTF;
@@ -22,8 +18,9 @@ namespace FudgeCore {
       return this;
     }
 
-    protected async load(_loader: GLTFLoader, _iMesh: number): Promise<MeshGLTF> {
+    public async load(_loader: GLTFLoader, _iMesh: number): Promise<MeshGLTF> {
       const gltfMesh: GLTF.Mesh = _loader.gltf.meshes[_iMesh];
+      this.name = gltfMesh.name;
       this.ƒindices = await _loader.getUint16Array(gltfMesh.primitives[0].indices);
       this.ƒvertices = await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.POSITION);
       this.ƒnormals = await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.NORMAL);
