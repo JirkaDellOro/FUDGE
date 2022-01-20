@@ -12,7 +12,9 @@ namespace FudgeCore {
     public name: string; // The name to call this node by.
     public readonly mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY();
     public timestampUpdate: number = 0;
+    /** The number of nodes of the whole branch including this node and all successors */
     public nNodesInBranch: number = 0;
+    /** The radius of the bounding sphere in world dimensions enclosing the geometry of this node and all successors in the branch */
     public radius: number = 0;
 
     #mtxWorldInverseUpdated: number;

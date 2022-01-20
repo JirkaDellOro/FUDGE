@@ -860,7 +860,9 @@ declare namespace FudgeCore {
         name: string;
         readonly mtxWorld: Matrix4x4;
         timestampUpdate: number;
+        /** The number of nodes of the whole branch including this node and all successors */
         nNodesInBranch: number;
+        /** The radius of the bounding sphere in world dimensions enclosing the geometry of this node and all successors in the branch */
         radius: number;
         private parent;
         private children;
