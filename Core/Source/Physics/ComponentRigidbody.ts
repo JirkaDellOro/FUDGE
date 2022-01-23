@@ -361,6 +361,7 @@ namespace FudgeCore {
       this.#mtxPivotUnscaled = Matrix4x4.CONSTRUCTION({ translation: this.mtxPivot.translation, rotation: this.mtxPivot.rotation, scaling: Vector3.ONE() });
       this.#mtxPivotInverse = Matrix4x4.INVERSION(this.#mtxPivotUnscaled);
 
+      this.addRigidbodyToWorld();
       this.isInitialized = true;
     }
     //#endregion
@@ -706,7 +707,9 @@ namespace FudgeCore {
       this.#callbacks.endTriggerContact = this.triggerExit;
 
       //Handling adding/removing the component
-      this.addEventListener(EVENT.COMPONENT_ADD, this.addRigidbodyToWorld);
+      // this.removeEventListener(EVENT.COMPONENT_ADD, this.addRigidbodyToWorld); // in case it already exists
+      this.removeEventListener(EVENT.COMPONENT_REMOVE, this.removeRigidbodyFromWorld); // in case it already exists
+      // this.addEventListener(EVENT.COMPONENT_ADD, this.addRigidbodyToWorld);
       this.addEventListener(EVENT.COMPONENT_REMOVE, this.removeRigidbodyFromWorld);
     }
 
@@ -820,6 +823,7 @@ namespace FudgeCore {
     /** Removing this ComponentRigidbody from the Physiscs.world taking the informations from the oimoPhysics system */
     private removeRigidbodyFromWorld(): void {
       Physics.world.removeRigidbody(this);
+      this.isInitialized = false;
     }
 
 
