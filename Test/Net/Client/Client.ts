@@ -15,6 +15,7 @@ namespace ClientTest {
     document.forms[0].querySelector("button#mesh").addEventListener("click", createStructure);
     document.forms[0].querySelector("button#host").addEventListener("click", createStructure);
     document.forms[0].querySelector("button#disconnect").addEventListener("click", createStructure);
+    document.forms[1].querySelector("fieldset").addEventListener("click", sendMessage);
     createTable();
   }
 
@@ -139,6 +140,28 @@ namespace ClientTest {
       default:
         client.dispatch({ command: FudgeNet.COMMAND.DISCONNECT_PEERS });
         client.disconnectPeers();
+        break;
+    }
+  }
+
+  function sendMessage(_event: Event): void {
+    let formdata: FormData = new FormData(document.forms[1]);
+    let message: string = formdata.get("message").toString();
+    let tcp: boolean = formdata.get("protocol").toString() == "tcp";
+    let receiver: string = formdata.get("receiver").toString();
+
+    switch ((<HTMLElement>_event.target).id) {
+      case "sendServer":
+        client.dispatch({ route: FudgeNet.ROUTE.SERVER, content: { text: message } });
+        break;
+      case "sendHost":
+        client.dispatch({ route: tcp ? FudgeNet.ROUTE.VIA_SERVER_HOST : FudgeNet.ROUTE.HOST, content: { text: message } });
+        break;
+      case "sendAll":
+        client.dispatch({ route: tcp ? FudgeNet.ROUTE.VIA_SERVER : undefined, content: { text: message } });
+        break;
+      case "sendClient":
+        client.dispatch({ route: tcp ? FudgeNet.ROUTE.VIA_SERVER : undefined, idTarget: receiver, content: { text: message } });
         break;
     }
   }
