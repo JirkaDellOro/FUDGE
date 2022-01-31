@@ -1,3 +1,4 @@
+import { hostname } from "os";
 import WebSocket from "ws";
 import { FudgeNet } from "./Message.js";
 
@@ -135,10 +136,22 @@ export class FudgeServer {
         this.connectHost(message);
         break;
       default:
-        // // TODO: other command may be passed on the the clients to have messages travel via websockets and the server
-        // console.log("WebSocket: Message command not recognized");
-        this.logMessage("Pass", message);
-        this.dispatch(message);
+        switch (message.route) {
+          case FudgeNet.ROUTE.VIA_SERVER_HOST:
+            message.idTarget = this.idHost;
+            this.logMessage("Forward to host", message);
+            this.dispatch(message);
+            break;
+          case FudgeNet.ROUTE.VIA_SERVER:
+            if (message.idTarget) {
+              this.logMessage("Pass to target", message);
+              this.dispatch(message);
+            } else {
+              this.logMessage("Broadcast to all", message);
+              this.broadcast(message);
+            }
+            break;
+        }
         break;
     }
   }
