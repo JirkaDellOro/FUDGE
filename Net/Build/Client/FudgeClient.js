@@ -238,11 +238,19 @@ var FudgeNet;
                 console.log(_error);
             }
         }
+        /**
+         * Sends out a disconnect message to all peers, disconnects from all peers and sends a CREATE_MESH-command to the server,
+         * to establish RTC-peer-connections between all clients
+         */
         createMesh() {
             this.dispatch({ command: FudgeNet.COMMAND.DISCONNECT_PEERS });
             this.disconnectPeers();
             this.dispatch({ command: FudgeNet.COMMAND.CREATE_MESH, route: FudgeNet.ROUTE.SERVER });
         }
+        /**
+         * Sends out a disconnect message to all peers, disconnects from all peers and sends a CONNECT_HOST-command to the server,
+         * to establish RTC-peer-connections between this client and all others, making this the host
+         */
         becomeHost() {
             this.dispatch({ command: FudgeNet.COMMAND.DISCONNECT_PEERS });
             this.disconnectPeers();
@@ -291,6 +299,7 @@ var FudgeNet;
                     }
                     break;
             }
+            // Dispatch a new event with the same information a programm using this client can react to
             this.dispatchEvent(new MessageEvent(_event.type, _event));
         };
         // ----------------------

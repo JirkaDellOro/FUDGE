@@ -145,7 +145,15 @@ declare namespace FudgeNet {
          * according to {@link FudgeNet.ROUTE} and `idTarget`
          */
         dispatch(_message: FudgeNet.Message): void;
+        /**
+         * Sends out a disconnect message to all peers, disconnects from all peers and sends a CREATE_MESH-command to the server,
+         * to establish RTC-peer-connections between all clients
+         */
         createMesh(): void;
+        /**
+         * Sends out a disconnect message to all peers, disconnects from all peers and sends a CONNECT_HOST-command to the server,
+         * to establish RTC-peer-connections between this client and all others, making this the host
+         */
         becomeHost(): void;
         hndMessage: (_event: MessageEvent) => void;
         private sendToPeer;

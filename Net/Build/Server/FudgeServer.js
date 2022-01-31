@@ -54,9 +54,15 @@ class FudgeServer {
             // TODO: examine, if idTarget should be tweaked...
             this.clients[id].socket?.send(message);
     }
+    /**
+     * Logs the net-message with some additional text as prefix
+     */
     logMessage(_text, _message) {
         console.log(_text, `command: ${_message.command}, route: ${_message.route}, idTarget: ${_message.idTarget}, idSource: ${_message.idSource}`);
     }
+    /**
+     * Log the list of known clients
+     */
     logClients() {
         let ids = Reflect.ownKeys(this.clients);
         // TODO: also display known peer-connections?
