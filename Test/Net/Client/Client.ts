@@ -4,7 +4,9 @@ namespace ClientTest {
   import ƒClient = FudgeNet.FudgeClient;
   ƒ.Debug.setFilter(ƒ.DebugConsole, ƒ.DEBUG_FILTER.ALL);
 
+  // Create a FudgeClient for this browser tab
   let client: ƒClient = new ƒClient();
+  // keep a list of known clients, updated with information from the server
   let clientsKnown: { [id: string]: { name?: string; isHost?: boolean; } } = {};
 
   window.addEventListener("load", start);
@@ -22,12 +24,14 @@ namespace ClientTest {
   async function connectToServer(_event: Event): Promise<void> {
     let domServer: HTMLInputElement = document.forms[0].querySelector("input[name=server");
     try {
+      // connect to a server with the given url
       client.connectToServer(domServer.value);
       await delay(1000);
       document.forms[0].querySelector("button#login").removeAttribute("disabled");
       document.forms[0].querySelector("button#mesh").removeAttribute("disabled");
       document.forms[0].querySelector("button#host").removeAttribute("disabled");
       (<HTMLInputElement>document.forms[0].querySelector("input#id")).value = client.id;
+      // install an event listener to be called when a message comes in
       client.addEventListener(FudgeNet.EVENT.MESSAGE_RECEIVED, receiveMessage);
     } catch (_error) {
       console.log(_error);
@@ -37,6 +41,7 @@ namespace ClientTest {
 
   async function loginToServer(_event: Event): Promise<void> {
     let domLogin: HTMLInputElement = document.forms[0].querySelector("input[name=login");
+    // associate a readable name with this client id
     client.loginToServer(domLogin.value);
   }
 
@@ -44,12 +49,14 @@ namespace ClientTest {
     if (_event instanceof MessageEvent) {
       let message: FudgeNet.Message = JSON.parse(_event.data);
       if (message.command != FudgeNet.COMMAND.SERVER_HEARTBEAT && message.command != FudgeNet.COMMAND.CLIENT_HEARTBEAT)
+        // print the message to the console, if not heartbeat. Heartbeat shows as blinking squares 
         console.table(message);
       switch (message.command) {
         case FudgeNet.COMMAND.SERVER_HEARTBEAT:
           if (client.name == undefined)
             proposeName();
           updateTable();
+          // on each server heartbeat, dispatch this clients heartbeat
           client.dispatch({ command: FudgeNet.COMMAND.CLIENT_HEARTBEAT });
           break;
         case FudgeNet.COMMAND.CLIENT_HEARTBEAT:
@@ -98,6 +105,7 @@ namespace ClientTest {
       if (!client.clientsInfoFromServer[id])
         comment(id, "Disconnected");
 
+    // each client keeps information about all clients
     clientsKnown = client.clientsInfoFromServer;
 
     for (let id in clientsKnown) {
@@ -132,12 +140,15 @@ namespace ClientTest {
     let button: HTMLButtonElement = <HTMLButtonElement>_event.target;
     switch (button.textContent) {
       case "create mesh":
+        // creates an RTC-Mesh, where all clients are directly connected to one another
         client.createMesh();
         break;
       case "become host":
+        // creates a host structure, where all other clients are connected to this client but not to each other
         client.becomeHost();
         break;
       default:
+        // send a command to dismiss all RTC-connections
         client.dispatch({ command: FudgeNet.COMMAND.DISCONNECT_PEERS });
         client.disconnectPeers();
         break;
@@ -152,15 +163,19 @@ namespace ClientTest {
 
     switch ((<HTMLElement>_event.target).id) {
       case "sendServer":
+        // send the message to the server only
         client.dispatch({ route: FudgeNet.ROUTE.SERVER, content: { text: message } });
         break;
-      case "sendHost":
+        case "sendHost":
+        // send the message to the host via RTC or TCP
         client.dispatch({ route: tcp ? FudgeNet.ROUTE.VIA_SERVER_HOST : FudgeNet.ROUTE.HOST, content: { text: message } });
         break;
-      case "sendAll":
+        case "sendAll":
+        // send the message to all clients (no target specified) via RTC (no route specified) or TCP (route = via server)
         client.dispatch({ route: tcp ? FudgeNet.ROUTE.VIA_SERVER : undefined, content: { text: message } });
         break;
-      case "sendClient":
+        case "sendClient":
+        // send the message to a specific client (target specified) via RTC (no route specified) or TCP (route = via server)
         client.dispatch({ route: tcp ? FudgeNet.ROUTE.VIA_SERVER : undefined, idTarget: receiver, content: { text: message } });
         break;
     }
