@@ -329,7 +329,8 @@ namespace FudgeNet {
     }
 
     private cEaddIceCandidate = async (_event: MessageEvent, _message: FudgeNet.Message) => {
-      console.info("EVENT for adding ice", (<any>_event.currentTarget).iceConnectionState, (<any>_event.currentTarget).iceGatheringState);
+      console.info("EVENT for adding ice", _event);
+      // console.info("EVENT for adding ice", (<any>_event.currentTarget).iceConnectionState, (<any>_event.currentTarget).iceGatheringState);
       console.info("Callee: try to add candidate to peer connection");
       // try {
       let peerConnection: RTCPeerConnection = this.peers[_message.idSource!].peerConnection;
