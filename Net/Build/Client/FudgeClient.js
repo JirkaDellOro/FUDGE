@@ -432,7 +432,8 @@ var FudgeNet;
             console.info("Callee: remote description set, expected 'stable', got:  ", peerConnection.signalingState);
         };
         cEaddIceCandidate = async (_event, _message) => {
-            console.info("EVENT for adding ice", _event.currentTarget.iceConnectionState, _event.currentTarget.iceGatheringState);
+            console.info("EVENT for adding ice", _event);
+            // console.info("EVENT for adding ice", (<any>_event.currentTarget).iceConnectionState, (<any>_event.currentTarget).iceGatheringState);
             console.info("Callee: try to add candidate to peer connection");
             // try {
             let peerConnection = this.peers[_message.idSource].peerConnection;
