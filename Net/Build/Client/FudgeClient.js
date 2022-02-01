@@ -403,13 +403,14 @@ var FudgeNet;
         };
         cRsendIceCandidates = async (_event, _idRemote) => {
             // await this.delay(5000);
+            let pc = _event.currentTarget;
             // try {
-            console.info("EVENT for sending ice", _event.currentTarget.iceConnectionState, _event.currentTarget.iceGatheringState);
-            if (_event.currentTarget.iceGatheringState != "gathering")
+            console.info("EVENT for sending ice", pc.connectionState, pc.iceConnectionState, pc.iceGatheringState);
+            if (pc.iceGatheringState != "gathering" && pc.iceConnectionState != "new")
                 return;
             console.info("Caller: send ICECandidates to server");
             let message = {
-                route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.ICE_CANDIDATE, idTarget: _idRemote, content: { candidate: _event.candidate }
+                route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.ICE_CANDIDATE, idTarget: _idRemote, content: { candidate: _event.candidate, states: [pc.connectionState, pc.iceConnectionState, pc.iceGatheringState] }
             };
             this.dispatch(message);
             // } catch (error) {
@@ -435,20 +436,21 @@ var FudgeNet;
             console.info("EVENT for adding ice", _event);
             // console.info("EVENT for adding ice", (<any>_event.currentTarget).iceConnectionState, (<any>_event.currentTarget).iceGatheringState);
             console.info("Callee: try to add candidate to peer connection");
-            // try {
-            let peerConnection = this.peers[_message.idSource].peerConnection;
-            await peerConnection.addIceCandidate(_message.content?.candidate);
-            this.peers[_message.idSource].createDataChannel(this, _message.idSource);
-            // let dataChannel: RTCDataChannel = peerConnection.createDataChannel(_message.idSource + "->" + this.id, {
-            //   negotiated: true
-            // });
-            // dataChannel.addEventListener("open", (event) => {
-            //   peerConnection.beginTransmission(dataChannel);
-            // });
-            // peerConnection.requestRemoteChannel(dataChannel.id);
-            // } catch (error) {
-            //   console.error("Unexpected Error: Adding Ice Candidate", error);
-            // }
+            try {
+                let peerConnection = this.peers[_message.idSource].peerConnection;
+                await peerConnection.addIceCandidate(_message.content?.candidate);
+                this.peers[_message.idSource].createDataChannel(this, _message.idSource);
+                // let dataChannel: RTCDataChannel = peerConnection.createDataChannel(_message.idSource + "->" + this.id, {
+                //   negotiated: true
+                // });
+                // dataChannel.addEventListener("open", (event) => {
+                //   peerConnection.beginTransmission(dataChannel);
+                // });
+                // peerConnection.requestRemoteChannel(dataChannel.id);
+            }
+            catch (error) {
+                console.error("Unexpected Error: Adding Ice Candidate", error);
+            }
         };
         cEestablishConnection = (_event, _peer) => {
             console.info("Callee: establish channel on connection", _event.channel);

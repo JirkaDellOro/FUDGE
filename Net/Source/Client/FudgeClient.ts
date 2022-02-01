@@ -291,14 +291,15 @@ namespace FudgeNet {
 
     private cRsendIceCandidates = async (_event: RTCPeerConnectionIceEvent, _idRemote: string) => {
       // await this.delay(5000);
-
+      let pc: RTCPeerConnection = <RTCPeerConnection>_event.currentTarget;
       // try {
-      console.info("EVENT for sending ice", (<any>_event.currentTarget).iceConnectionState, (<any>_event.currentTarget).iceGatheringState);
-      if ((<RTCPeerConnection>_event.currentTarget).iceGatheringState != "gathering")
+      console.info("EVENT for sending ice", pc.connectionState, pc.iceConnectionState, pc.iceGatheringState);
+      if (pc.iceGatheringState != "gathering" && pc.iceConnectionState != "new")
         return;
+
       console.info("Caller: send ICECandidates to server");
       let message: FudgeNet.Message = {
-        route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.ICE_CANDIDATE, idTarget: _idRemote, content: { candidate: _event.candidate }
+        route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.ICE_CANDIDATE, idTarget: _idRemote, content: { candidate: _event.candidate, states: [ pc.connectionState, pc.iceConnectionState, pc.iceGatheringState] }
       };
       this.dispatch(message);
       // } catch (error) {
@@ -332,7 +333,7 @@ namespace FudgeNet {
       console.info("EVENT for adding ice", _event);
       // console.info("EVENT for adding ice", (<any>_event.currentTarget).iceConnectionState, (<any>_event.currentTarget).iceGatheringState);
       console.info("Callee: try to add candidate to peer connection");
-      // try {
+      try {
       let peerConnection: RTCPeerConnection = this.peers[_message.idSource!].peerConnection;
       await peerConnection.addIceCandidate(_message.content?.candidate);
       this.peers[_message.idSource!].createDataChannel(this, _message.idSource!);
@@ -345,9 +346,9 @@ namespace FudgeNet {
       // });
 
       // peerConnection.requestRemoteChannel(dataChannel.id);
-      // } catch (error) {
-      //   console.error("Unexpected Error: Adding Ice Candidate", error);
-      // }
+      } catch (error) {
+        console.error("Unexpected Error: Adding Ice Candidate", error);
+      }
     }
 
     private cEestablishConnection = (_event: RTCDataChannelEvent, _peer: Rtc) => {
