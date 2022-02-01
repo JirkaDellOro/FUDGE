@@ -3121,18 +3121,18 @@ declare namespace FudgeCore {
         readonly uri: string;
         private constructor();
         static LOAD(_uri: string): Promise<GLTFLoader>;
-        getScene(_iScene?: number): Promise<GraphInstance>;
-        getSceneByName(_name: string): Promise<GraphInstance>;
-        getNode(_iNode: number): Promise<Node>;
-        getNodeByName(_name: string): Promise<Node>;
-        getCamera(_iCamera: number): Promise<ComponentCamera>;
-        getCameraByName(_name: string): Promise<ComponentCamera>;
-        getAnimation(_iAnimation: number): Promise<Animation>;
-        getAnimationByName(_name: string): Promise<Animation>;
-        getMesh(_iMesh: number): Promise<MeshGLTF>;
-        getMeshByName(_name: string): Promise<MeshGLTF>;
-        getSkeleton(_iSkeleton: number): Promise<SkeletonInstance>;
-        getSkeletonByName(_name: string): Promise<SkeletonInstance>;
+        getSceneByIndex(_iScene?: number): Promise<GraphInstance>;
+        getScene(_name: string): Promise<GraphInstance>;
+        getNodeByIndex(_iNode: number): Promise<Node>;
+        getNode(_name: string): Promise<Node>;
+        getCameraByIndex(_iCamera: number): Promise<ComponentCamera>;
+        getCamera(_name: string): Promise<ComponentCamera>;
+        getAnimationByIndex(_iAnimation: number): Promise<Animation>;
+        getAnimation(_name: string): Promise<Animation>;
+        getMeshByIndex(_iMesh: number): Promise<MeshGLTF>;
+        getMesh(_name: string): Promise<MeshGLTF>;
+        getSkeletonByIndex(_iSkeleton: number): Promise<SkeletonInstance>;
+        getSkeleton(_name: string): Promise<SkeletonInstance>;
         getUint8Array(_iAccessor: number): Promise<Uint8Array>;
         getUint16Array(_iAccessor: number): Promise<Uint16Array>;
         getFloat32Array(_iAccessor: number): Promise<Float32Array>;
@@ -4268,7 +4268,6 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     class MeshGLTF extends Mesh {
         private uriGLTF;
-        private iGLTF;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         load(_loader: GLTFLoader, _iMesh: number): Promise<MeshGLTF>;
