@@ -59,27 +59,27 @@ namespace FudgeCore {
       return this.loaders[_uri];
     }
 
-    public async getScene(_iScene: number = this.gltf.scene): Promise<GraphInstance> {
+    public async getSceneByIndex(_iScene: number = this.gltf.scene): Promise<GraphInstance> {
       if (!this.#scenes)
         this.#scenes = [];
       if (!this.#scenes[_iScene]) {
         const gltfScene: GLTF.Scene = this.gltf.scenes[_iScene];
         const scene: Node = new Node(gltfScene.name);
         for (const iNode of gltfScene.nodes)
-          scene.addChild(await this.getNode(iNode));
+          scene.addChild(await this.getNodeByIndex(iNode));
         this.#scenes[_iScene] = await Project.registerAsGraph(scene);
       }
       return Project.createGraphInstance(this.#scenes[_iScene]);
     }
 
-    public async getSceneByName(_name: string): Promise<GraphInstance> {
+    public async getScene(_name: string): Promise<GraphInstance> {
       const iScene: number = this.gltf.scenes.findIndex(scene => scene.name == _name);
       if (iScene == -1)
         throw new Error(`Couldn't find name ${_name} in gltf scenes.`);
-      return await this.getScene(iScene);
+      return await this.getSceneByIndex(iScene);
     }
 
-    public async getNode(_iNode: number): Promise<Node> {
+    public async getNodeByIndex(_iNode: number): Promise<Node> {
       if (!this.#nodes)
         this.#nodes = [];
       if (!this.#nodes[_iNode]) {
@@ -89,7 +89,7 @@ namespace FudgeCore {
         // check for children
         if (gltfNode.children)
           for (const iNode of gltfNode.children)
-            node.addChild(await this.getNode(iNode));
+            node.addChild(await this.getNodeByIndex(iNode));
         
         // check for transformation
         if (gltfNode.matrix || gltfNode.rotation || gltfNode.scale || gltfNode.translation) {
@@ -110,12 +110,12 @@ namespace FudgeCore {
 
         // check for camera
         if (gltfNode.camera != undefined) {
-          node.addComponent(await this.getCamera(gltfNode.camera));
+          node.addComponent(await this.getCameraByIndex(gltfNode.camera));
         }
 
         // check for mesh
         if (gltfNode.mesh != undefined) {
-          node.addComponent(new ComponentMesh(await this.getMesh(gltfNode.mesh)));
+          node.addComponent(new ComponentMesh(await this.getMeshByIndex(gltfNode.mesh)));
           if (!GLTFLoader.defaultMaterial)
             GLTFLoader.defaultMaterial = new Material("GLTFDefaultMaterial", ShaderFlatSkin, new CoatColored(Color.CSS("white")));
           node.addComponent(new ComponentMaterial(GLTFLoader.defaultMaterial));
@@ -123,12 +123,12 @@ namespace FudgeCore {
 
         // check for skeleton        
         if (gltfNode.skin != undefined) {
-          const skeleton: SkeletonInstance = await this.getSkeleton(gltfNode.skin);
+          const skeleton: SkeletonInstance = await this.getSkeletonByIndex(gltfNode.skin);
           node.addChild(skeleton);
           if (node.getComponent(ComponentMesh))
             node.getComponent(ComponentMesh).bindSkeleton(skeleton);
           for (const iAnimation of this.findSkeletalAnimationIndices(gltfNode.skin)) {
-            skeleton.addComponent(new ComponentAnimator(await this.getAnimation(iAnimation)));
+            skeleton.addComponent(new ComponentAnimator(await this.getAnimationByIndex(iAnimation)));
           }
         }
 
@@ -137,14 +137,14 @@ namespace FudgeCore {
       return this.#nodes[_iNode];
     }
 
-    public async getNodeByName(_name: string): Promise<Node> {
+    public async getNode(_name: string): Promise<Node> {
       const iNode: number = this.gltf.nodes.findIndex(node => node.name == _name);
       if (iNode == -1)
         throw new Error(`Couldn't find name ${_name} in gltf nodes.`);
-      return await this.getNode(iNode);
+      return await this.getNodeByIndex(iNode);
     }
 
-    public async getCamera(_iCamera: number): Promise<ComponentCamera> {
+    public async getCameraByIndex(_iCamera: number): Promise<ComponentCamera> {
       if (!this.#cameras)
         this.#cameras = [];
       if (!this.#cameras[_iCamera]) {
@@ -172,14 +172,14 @@ namespace FudgeCore {
       return this.#cameras[_iCamera];
     }
 
-    public async getCameraByName(_name: string): Promise<ComponentCamera> {
+    public async getCamera(_name: string): Promise<ComponentCamera> {
       const iCamera: number = this.gltf.cameras.findIndex(camera => camera.name == _name);
       if (iCamera == -1)
         throw new Error(`Couldn't find name ${_name} in gltf cameras.`);
-      return await this.getCamera(iCamera);
+      return await this.getCameraByIndex(iCamera);
     }
 
-    public async getAnimation(_iAnimation: number): Promise<Animation> {
+    public async getAnimationByIndex(_iAnimation: number): Promise<Animation> {
       if (!this.#animations)
         this.#animations = [];
       if (!this.#animations[_iAnimation]) {
@@ -213,19 +213,18 @@ namespace FudgeCore {
       return this.#animations[_iAnimation];
     }
 
-    public async getAnimationByName(_name: string): Promise<Animation> {
+    public async getAnimation(_name: string): Promise<Animation> {
       const iAnimation: number = this.gltf.animations.findIndex(animation => animation.name == _name);
       if (iAnimation == -1)
         throw new Error(`Couldn't find name ${_name} in gltf animations.`);
-      return await this.getAnimation(iAnimation);
+      return await this.getAnimationByIndex(iAnimation);
     }
 
-    public async getMesh(_iMesh: number): Promise<MeshGLTF> {
+    public async getMeshByIndex(_iMesh: number): Promise<MeshGLTF> {
       if (!this.#meshes)
         this.#meshes = [];
       if (!this.#meshes[_iMesh]) {
         const gltfMesh: GLTF.Mesh = this.gltf.meshes[_iMesh];
-        console.log(gltfMesh);
         this.#meshes[_iMesh] = await (
           gltfMesh.primitives[0].attributes.JOINTS_0 != undefined ?
           new MeshSkin().load(this, _iMesh) :
@@ -235,20 +234,20 @@ namespace FudgeCore {
       return this.#meshes[_iMesh];
     }
 
-    public async getMeshByName(_name: string): Promise<MeshGLTF> {
+    public async getMesh(_name: string): Promise<MeshGLTF> {
       const iMesh: number = this.gltf.meshes.findIndex(mesh => mesh.name == _name);
       if (iMesh == -1)
         throw new Error(`Couldn't find name ${_name} in gltf meshes.`);
-      return await this.getMesh(iMesh);
+      return await this.getMeshByIndex(iMesh);
     }
 
-    public async getSkeleton(_iSkeleton: number): Promise<SkeletonInstance> {
+    public async getSkeletonByIndex(_iSkeleton: number): Promise<SkeletonInstance> {
       if (!this.#skeletons)
         this.#skeletons = [];
       if (!this.#skeletons[_iSkeleton]) {
         const gltfSkeleton: GLTF.Skin = this.gltf.skins[_iSkeleton];
         const skeleton: Skeleton = new Skeleton(gltfSkeleton.name);
-        skeleton.addChild(await this.getNode(gltfSkeleton.joints[0]));
+        skeleton.addChild(await this.getNodeByIndex(gltfSkeleton.joints[0]));
 
         // convert float array to array of matrices and register bones
         const floatArray: Float32Array = await this.getFloat32Array(gltfSkeleton.inverseBindMatrices);
@@ -263,11 +262,11 @@ namespace FudgeCore {
       return await SkeletonInstance.CREATE(this.#skeletons[_iSkeleton]);
     }
 
-    public async getSkeletonByName(_name: string): Promise<SkeletonInstance> {
+    public async getSkeleton(_name: string): Promise<SkeletonInstance> {
       const iSkeleton: number = this.gltf.skins.findIndex(skeleton => skeleton.name == _name);
       if (iSkeleton == -1)
         throw new Error(`Couldn't find name ${_name} in gltf skins.`);
-      return await this.getSkeleton(iSkeleton);
+      return await this.getSkeletonByIndex(iSkeleton);
     }
 
     public async getUint8Array(_iAccessor: number): Promise<Uint8Array> {
