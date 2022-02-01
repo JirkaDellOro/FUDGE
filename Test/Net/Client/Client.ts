@@ -13,7 +13,7 @@ namespace ClientTest {
 
   async function start(_event: Event): Promise<void> {
     document.forms[0].querySelector("button#connect").addEventListener("click", connectToServer);
-    document.forms[0].querySelector("button#login").addEventListener("click", loginToServer);
+    document.forms[0].querySelector("button#rename").addEventListener("click", rename);
     document.forms[0].querySelector("button#mesh").addEventListener("click", createStructure);
     document.forms[0].querySelector("button#host").addEventListener("click", createStructure);
     document.forms[0].querySelector("button#disconnect").addEventListener("click", createStructure);
@@ -27,7 +27,7 @@ namespace ClientTest {
       // connect to a server with the given url
       client.connectToServer(domServer.value);
       await delay(1000);
-      document.forms[0].querySelector("button#login").removeAttribute("disabled");
+      // document.forms[0].querySelector("button#login").removeAttribute("disabled");
       document.forms[0].querySelector("button#mesh").removeAttribute("disabled");
       document.forms[0].querySelector("button#host").removeAttribute("disabled");
       (<HTMLInputElement>document.forms[0].querySelector("input#id")).value = client.id;
@@ -39,18 +39,19 @@ namespace ClientTest {
     }
   }
 
-  async function loginToServer(_event: Event): Promise<void> {
-    let domLogin: HTMLInputElement = document.forms[0].querySelector("input[name=login");
+  async function rename(_event: Event): Promise<void> {
+    let domProposeName: HTMLInputElement = document.forms[0].querySelector("input[name=proposal]");
+    let domName: HTMLInputElement = document.forms[0].querySelector("input[name=name]");
+    domName.value = domProposeName.value;
     // associate a readable name with this client id
-    client.loginToServer(domLogin.value);
+    client.loginToServer(domName.value);
   }
 
   async function receiveMessage(_event: CustomEvent | MessageEvent): Promise<void> {
     if (_event instanceof MessageEvent) {
       let message: FudgeNet.Message = JSON.parse(_event.data);
       if (message.command != FudgeNet.COMMAND.SERVER_HEARTBEAT && message.command != FudgeNet.COMMAND.CLIENT_HEARTBEAT)
-        // print the message to the console, if not heartbeat. Heartbeat shows as blinking squares 
-        console.table(message);
+        showMessage(message);
       switch (message.command) {
         case FudgeNet.COMMAND.SERVER_HEARTBEAT:
           if (client.name == undefined)
@@ -79,13 +80,13 @@ namespace ClientTest {
 
   function proposeName(): void {
     // search for a free number i to use for the proposal of the name "Client" + i
-    let domLogin: HTMLInputElement = document.forms[0].querySelector("input[name=login");
-    if (document.activeElement == domLogin)
+    let domProposeName: HTMLInputElement = document.forms[0].querySelector("input[name=proposal");
+    if (document.activeElement == domProposeName)
       return; // don't interfere when user's at the element
 
     let i: number = 0;
     for (; Object.values(client.clientsInfoFromServer).find(_info => _info.name == "Client-" + i); i++);
-    domLogin.value = "Client-" + i;
+    domProposeName.value = "Client-" + i;
   }
 
   function createTable(): void {
@@ -166,18 +167,27 @@ namespace ClientTest {
         // send the message to the server only
         client.dispatch({ route: FudgeNet.ROUTE.SERVER, content: { text: message } });
         break;
-        case "sendHost":
+      case "sendHost":
         // send the message to the host via RTC or TCP
         client.dispatch({ route: tcp ? FudgeNet.ROUTE.VIA_SERVER_HOST : FudgeNet.ROUTE.HOST, content: { text: message } });
         break;
-        case "sendAll":
+      case "sendAll":
         // send the message to all clients (no target specified) via RTC (no route specified) or TCP (route = via server)
         client.dispatch({ route: tcp ? FudgeNet.ROUTE.VIA_SERVER : undefined, content: { text: message } });
         break;
-        case "sendClient":
+      case "sendClient":
         // send the message to a specific client (target specified) via RTC (no route specified) or TCP (route = via server)
         client.dispatch({ route: tcp ? FudgeNet.ROUTE.VIA_SERVER : undefined, idTarget: receiver, content: { text: message } });
         break;
     }
+  }
+
+  function showMessage(_message: FudgeNet.Message): void {
+    console.table(_message);
+    if (_message.command)
+      return;
+    let received: HTMLTextAreaElement = document.forms[1].querySelector("textarea#received");
+    let line: string = _message.idSource + "(" + clientsKnown[_message.idSource].name + "):" + JSON.stringify(_message.content);
+    received.value = line + "\n" + received.value;
   }
 }

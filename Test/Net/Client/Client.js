@@ -12,7 +12,7 @@ var ClientTest;
     window.addEventListener("load", start);
     async function start(_event) {
         document.forms[0].querySelector("button#connect").addEventListener("click", connectToServer);
-        document.forms[0].querySelector("button#login").addEventListener("click", loginToServer);
+        document.forms[0].querySelector("button#rename").addEventListener("click", rename);
         document.forms[0].querySelector("button#mesh").addEventListener("click", createStructure);
         document.forms[0].querySelector("button#host").addEventListener("click", createStructure);
         document.forms[0].querySelector("button#disconnect").addEventListener("click", createStructure);
@@ -25,7 +25,7 @@ var ClientTest;
             // connect to a server with the given url
             client.connectToServer(domServer.value);
             await delay(1000);
-            document.forms[0].querySelector("button#login").removeAttribute("disabled");
+            // document.forms[0].querySelector("button#login").removeAttribute("disabled");
             document.forms[0].querySelector("button#mesh").removeAttribute("disabled");
             document.forms[0].querySelector("button#host").removeAttribute("disabled");
             document.forms[0].querySelector("input#id").value = client.id;
@@ -37,17 +37,18 @@ var ClientTest;
             console.log("Make sure, FudgeServer is running and accessable");
         }
     }
-    async function loginToServer(_event) {
-        let domLogin = document.forms[0].querySelector("input[name=login");
+    async function rename(_event) {
+        let domProposeName = document.forms[0].querySelector("input[name=proposal]");
+        let domName = document.forms[0].querySelector("input[name=name]");
+        domName.value = domProposeName.value;
         // associate a readable name with this client id
-        client.loginToServer(domLogin.value);
+        client.loginToServer(domName.value);
     }
     async function receiveMessage(_event) {
         if (_event instanceof MessageEvent) {
             let message = JSON.parse(_event.data);
             if (message.command != FudgeNet.COMMAND.SERVER_HEARTBEAT && message.command != FudgeNet.COMMAND.CLIENT_HEARTBEAT)
-                // print the message to the console, if not heartbeat. Heartbeat shows as blinking squares 
-                console.table(message);
+                showMessage(message);
             switch (message.command) {
                 case FudgeNet.COMMAND.SERVER_HEARTBEAT:
                     if (client.name == undefined)
@@ -75,13 +76,13 @@ var ClientTest;
     }
     function proposeName() {
         // search for a free number i to use for the proposal of the name "Client" + i
-        let domLogin = document.forms[0].querySelector("input[name=login");
-        if (document.activeElement == domLogin)
+        let domProposeName = document.forms[0].querySelector("input[name=proposal");
+        if (document.activeElement == domProposeName)
             return; // don't interfere when user's at the element
         let i = 0;
         for (; Object.values(client.clientsInfoFromServer).find(_info => _info.name == "Client-" + i); i++)
             ;
-        domLogin.value = "Client-" + i;
+        domProposeName.value = "Client-" + i;
     }
     function createTable() {
         let table = document.querySelector("table");
@@ -164,6 +165,14 @@ var ClientTest;
                 client.dispatch({ route: tcp ? FudgeNet.ROUTE.VIA_SERVER : undefined, idTarget: receiver, content: { text: message } });
                 break;
         }
+    }
+    function showMessage(_message) {
+        console.table(_message);
+        if (_message.command)
+            return;
+        let received = document.forms[1].querySelector("textarea#received");
+        let line = _message.idSource + "(" + clientsKnown[_message.idSource].name + "):" + JSON.stringify(_message.content);
+        received.value = line + "\n" + received.value;
     }
 })(ClientTest || (ClientTest = {}));
 //# sourceMappingURL=Client.js.map

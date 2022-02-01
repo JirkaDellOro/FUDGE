@@ -67,7 +67,7 @@ var FudgeNet;
         iceServers: [
             // { urls: "stun:stun2.1.google.com:19302" },
             // { urls: "stun:stun.example.com" }
-            // { urls: "stun:stun.l.google.com:19302" },
+            { urls: "stun:stun.l.google.com:19302" },
             // { urls: "turn:0.peerjs.com:3478", username: "peerjs", credential: "peerjsp" }
             // {
             //   urls: "turn:192.158.29.39:3478?transport=udp",
@@ -85,14 +85,14 @@ var FudgeNet;
             //   credential: "webrtc",
             //   username: "webrtc"
             // }
-            {
-                urls: "stun:stun.stunprotocol.org"
-            },
-            {
-                urls: "turn:numb.viagenie.ca",
-                credential: "muazkh",
-                username: "webrtc@live.com"
-            }
+            // {
+            //   urls: "stun:stun.stunprotocol.org"
+            // },
+            // {
+            //   urls: "turn:numb.viagenie.ca",
+            //   credential: "muazkh",
+            //   username: "webrtc@live.com"
+            // }
         ]
     };
     /**
