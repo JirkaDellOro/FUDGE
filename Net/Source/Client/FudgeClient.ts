@@ -193,7 +193,7 @@ namespace FudgeNet {
       if (dataChannel && dataChannel.readyState == "open")
         dataChannel.send(_message);
       else {
-        console.error("Datachannel disconnected, ready state: ", dataChannel?.readyState);
+        console.warn(`Can't send message to ${_idPeer}, status ${dataChannel?.readyState}, message ${_message}`);
       }
     }
 
@@ -259,7 +259,8 @@ namespace FudgeNet {
         }
       );
       rtc.peerConnection.addEventListener(
-        "icecandidate", (_event: RTCPeerConnectionIceEvent) => this.cRsendIceCandidates(_event.candidate, _idRemote)
+        // send event, collect candidates first in send ice candidates
+        "icecandidate", (_event: RTCPeerConnectionIceEvent) => this.cRsendIceCandidates(_event, _idRemote)
       );
 
       rtc.createDataChannel(this, _idRemote);
@@ -288,13 +289,16 @@ namespace FudgeNet {
       // }
     }
 
-    private cRsendIceCandidates = async (_candidate: RTCIceCandidate | null, _idRemote: string) => {
-      await this.delay(5000);
+    private cRsendIceCandidates = async (_event: RTCPeerConnectionIceEvent, _idRemote: string) => {
+      // await this.delay(5000);
 
       // try {
+      console.info("XXXXXXXXXXXXXXXXX", (<any>_event.currentTarget).iceConnectionState, (<any>_event.currentTarget).iceGatheringState);
+      if ((<RTCPeerConnection>_event.currentTarget).iceGatheringState != "gathering")
+        return;
       console.info("Caller: send ICECandidates to server");
       let message: FudgeNet.Message = {
-        route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.ICE_CANDIDATE, idTarget: _idRemote, content: { candidate: _candidate }
+        route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.ICE_CANDIDATE, idTarget: _idRemote, content: { candidate: _event.candidate }
       };
       this.dispatch(message);
       // } catch (error) {

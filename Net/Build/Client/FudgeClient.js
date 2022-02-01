@@ -67,7 +67,7 @@ var FudgeNet;
         iceServers: [
             // { urls: "stun:stun2.1.google.com:19302" },
             // { urls: "stun:stun.example.com" }
-            { urls: "stun:stun.l.google.com:19302" },
+            // { urls: "stun:stun.l.google.com:19302" },
             // { urls: "turn:0.peerjs.com:3478", username: "peerjs", credential: "peerjsp" }
             // {
             //   urls: "turn:192.158.29.39:3478?transport=udp",
@@ -85,14 +85,14 @@ var FudgeNet;
             //   credential: "webrtc",
             //   username: "webrtc"
             // }
-            // {
-            //   urls: "stun:stun.stunprotocol.org"
-            // },
-            // {
-            //   urls: "turn:numb.viagenie.ca",
-            //   credential: "muazkh",
-            //   username: "webrtc@live.com"
-            // }
+            {
+                urls: "stun:stun.stunprotocol.org"
+            },
+            {
+                urls: "turn:numb.viagenie.ca",
+                credential: "muazkh",
+                username: "webrtc@live.com"
+            }
         ]
     };
     /**
@@ -113,7 +113,9 @@ var FudgeNet;
             this.peerConnection.addEventListener("connectionstatechange", (_event) => this.logState("Connection state change", _event));
         }
         createDataChannel(_client, _idRemote) {
-            this.addDataChannel(_client, this.peerConnection.createDataChannel(_client.id + "->" + _idRemote, { negotiated: true, id: 0 }));
+            console.log("Create data channel", _client, _idRemote);
+            let newDataChannel = this.peerConnection.createDataChannel(_client.id + "->" + _idRemote, { negotiated: true, id: 0 });
+            this.addDataChannel(_client, newDataChannel);
         }
         addDataChannel(_client, _dataChannel) {
             this.dataChannel = _dataChannel;
@@ -316,7 +318,7 @@ var FudgeNet;
             if (dataChannel && dataChannel.readyState == "open")
                 dataChannel.send(_message);
             else {
-                console.error("Datachannel disconnected, ready state: ", dataChannel?.readyState);
+                console.warn(`Can't send message to ${_idPeer}, status ${dataChannel?.readyState}, message ${_message}`);
             }
         };
         sendToAllPeers = (_message) => {
@@ -373,7 +375,9 @@ var FudgeNet;
                 await rtc.peerConnection.setLocalDescription(await rtc.peerConnection.createOffer(_event));
                 this.cRsendOffer(_idRemote);
             });
-            rtc.peerConnection.addEventListener("icecandidate", (_event) => this.cRsendIceCandidates(_event.candidate, _idRemote));
+            rtc.peerConnection.addEventListener(
+            // send event, collect candidates first in send ice candidates
+            "icecandidate", (_event) => this.cRsendIceCandidates(_event, _idRemote));
             rtc.createDataChannel(this, _idRemote);
         };
         cRsendOffer = (_idRemote) => {
@@ -397,12 +401,15 @@ var FudgeNet;
             //   console.error(error);
             // }
         };
-        cRsendIceCandidates = async (_candidate, _idRemote) => {
-            await this.delay(5000);
+        cRsendIceCandidates = async (_event, _idRemote) => {
+            // await this.delay(5000);
             // try {
+            console.info("XXXXXXXXXXXXXXXXX", _event.currentTarget.iceConnectionState, _event.currentTarget.iceGatheringState);
+            if (_event.currentTarget.iceGatheringState != "gathering")
+                return;
             console.info("Caller: send ICECandidates to server");
             let message = {
-                route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.ICE_CANDIDATE, idTarget: _idRemote, content: { candidate: _candidate }
+                route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.ICE_CANDIDATE, idTarget: _idRemote, content: { candidate: _event.candidate }
             };
             this.dispatch(message);
             // } catch (error) {
