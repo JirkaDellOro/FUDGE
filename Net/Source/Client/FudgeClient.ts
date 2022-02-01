@@ -295,6 +295,7 @@ namespace FudgeNet {
       // try {
       console.info("EVENT for sending ice", pc.connectionState, pc.iceConnectionState, pc.iceGatheringState);
       if (pc.iceGatheringState != "gathering" && pc.iceConnectionState != "new")
+      // if (pc.iceGatheringState != "complete")
         return;
 
       console.info("Caller: send ICECandidates to server");
@@ -346,6 +347,7 @@ namespace FudgeNet {
       // });
 
       // peerConnection.requestRemoteChannel(dataChannel.id);
+      // this.cEestablishConnection
       } catch (error) {
         console.error("Unexpected Error: Adding Ice Candidate", error);
       }

@@ -69,7 +69,7 @@ namespace FudgeNet {
 
     public createDataChannel(_client: FudgeClient, _idRemote: string): void {
       console.log("Create data channel", _client, _idRemote);
-      let newDataChannel: RTCDataChannel = this.peerConnection.createDataChannel(_client.id + "->" + _idRemote, { negotiated: true, id: 0 });
+      let newDataChannel: RTCDataChannel = this.peerConnection.createDataChannel(_client.id + "->" + _idRemote/* , { negotiated: true, id: 0 } */);
       this.addDataChannel(_client, newDataChannel);
     }
 
