@@ -287,7 +287,7 @@ var FudgeNet;
                     this.cRreceiveAnswer(message);
                     break;
                 case FudgeNet.COMMAND.ICE_CANDIDATE:
-                    this.cEaddIceCandidate(message);
+                    this.cEaddIceCandidate(_event, message);
                     break;
                 case FudgeNet.COMMAND.CONNECT_PEERS:
                     this.connectPeers(message.content?.peers);
@@ -404,7 +404,7 @@ var FudgeNet;
         cRsendIceCandidates = async (_event, _idRemote) => {
             // await this.delay(5000);
             // try {
-            console.info("XXXXXXXXXXXXXXXXX", _event.currentTarget.iceConnectionState, _event.currentTarget.iceGatheringState);
+            console.info("EVENT for sending ice", _event.currentTarget.iceConnectionState, _event.currentTarget.iceGatheringState);
             if (_event.currentTarget.iceGatheringState != "gathering")
                 return;
             console.info("Caller: send ICECandidates to server");
@@ -431,7 +431,8 @@ var FudgeNet;
             this.dispatch(answerMessage);
             console.info("Callee: remote description set, expected 'stable', got:  ", peerConnection.signalingState);
         };
-        cEaddIceCandidate = async (_message) => {
+        cEaddIceCandidate = async (_event, _message) => {
+            console.info("EVENT for adding ice", _event.currentTarget.iceConnectionState, _event.currentTarget.iceGatheringState);
             console.info("Callee: try to add candidate to peer connection");
             // try {
             let peerConnection = this.peers[_message.idSource].peerConnection;
