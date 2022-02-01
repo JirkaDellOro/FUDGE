@@ -53,7 +53,10 @@ namespace SkeletonTest {
 
   async function loadAnimatedArm(): Promise<ƒ.Node> {
     const loader: ƒ.GLTFLoader = await ƒ.GLTFLoader.LOAD("./animated_arm.gltf");
-    const arm: ƒ.Node = await loader.getNodeByName("ArmModel");
+    const arm: ƒ.Node = await loader.getNode("ArmModel");
+    const meshSerialization: ƒ.Serialization = ƒ.Serializer.serialize(arm.getComponent(ƒ.ComponentMesh).mesh);
+    console.log(meshSerialization);
+    arm.getComponent(ƒ.ComponentMesh).mesh = await ƒ.Serializer.deserialize(meshSerialization) as ƒ.MeshSkin;
     arm.addComponent(new ƒ.ComponentTransform());
     arm.mtxLocal.translateY(-2);
     arm.getChildrenByName("ArmSkeleton")[0].getComponent(ƒ.ComponentAnimator).activate(true);
