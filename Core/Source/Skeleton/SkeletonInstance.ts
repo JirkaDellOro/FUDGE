@@ -1,11 +1,9 @@
 namespace FudgeCore {
   export class SkeletonInstance extends GraphInstance {
 
-    public mtxBindShape: Matrix4x4 = Matrix4x4.IDENTITY();
-
     #bones: BoneList;
     #mtxBoneLocals: BoneMatrixList;
-    #mtxBones: Array<Matrix4x4> = [];
+    #mtxBones: Matrix4x4[];
     #mtxBonesUpdated: number;
 
     private skeletonSource: Skeleton;
@@ -27,12 +25,11 @@ namespace FudgeCore {
     /**
      * Gets the bone transformations for a vertex
      */
-    public get mtxBones(): Array<Matrix4x4> {
+    public get mtxBones(): Matrix4x4[] {
       if (this.#mtxBonesUpdated != this.timestampUpdate) {
         this.calculateMtxBones();
         this.#mtxBonesUpdated = this.timestampUpdate;
       }
-
       return this.#mtxBones;
     }
 
@@ -40,14 +37,16 @@ namespace FudgeCore {
      * Set this skeleton instance to be a recreation of the {@link Skeleton} given
      */
     public async set(_skeleton: Skeleton): Promise<void> {
-      this.skeletonSource = _skeleton;
-      this.#bones = {};
-      this.#mtxBoneLocals = {};
       await super.set(_skeleton);
-      for (const node of this) if (_skeleton.mtxBindInverses[node.name]) {
-        this.bones[node.name] = node;
-        this.mtxBoneLocals[node.name] = node.mtxLocal;
-      }
+      this.skeletonSource = _skeleton;
+      this.registerBones();
+    }
+
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      await super.deserialize(_serialization);
+      this.skeletonSource = Project.resources[_serialization.idSource || _serialization.idResource] as Skeleton;
+      this.registerBones();
+      return this;
     }
 
     /**
@@ -69,7 +68,7 @@ namespace FudgeCore {
     }
 
     private calculateMtxBones(): void {
-      this.#mtxBones.length = 0;
+      this.#mtxBones = [];
       for (const boneName in this.bones) {
         // bone matrix T = N^-1 * B_delta * B_0^-1 * S
         const mtxBone: Matrix4x4 = this.getParent()?.mtxWorldInverse.clone || Matrix4x4.IDENTITY();
@@ -78,6 +77,15 @@ namespace FudgeCore {
         if (this.cmpTransform) mtxBone.multiply(Matrix4x4.INVERSION(this.mtxLocal));
 
         this.#mtxBones.push(mtxBone);
+      }
+    }
+
+    private registerBones(): void {
+      this.#bones = {};
+      this.#mtxBoneLocals = {};
+      for (const node of this) if (this.skeletonSource.mtxBindInverses[node.name]) {
+        this.bones[node.name] = node;
+        this.mtxBoneLocals[node.name] = node.mtxLocal;
       }
     }
 

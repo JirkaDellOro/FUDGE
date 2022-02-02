@@ -3121,22 +3121,21 @@ declare namespace FudgeCore {
         readonly uri: string;
         private constructor();
         static LOAD(_uri: string): Promise<GLTFLoader>;
+        getScene(_name?: string): Promise<GraphInstance>;
         getSceneByIndex(_iScene?: number): Promise<GraphInstance>;
-        getScene(_name: string): Promise<GraphInstance>;
-        getNodeByIndex(_iNode: number): Promise<Node>;
         getNode(_name: string): Promise<Node>;
-        getCameraByIndex(_iCamera: number): Promise<ComponentCamera>;
+        getNodeByIndex(_iNode: number): Promise<Node>;
         getCamera(_name: string): Promise<ComponentCamera>;
-        getAnimationByIndex(_iAnimation: number): Promise<Animation>;
+        getCameraByIndex(_iCamera: number): Promise<ComponentCamera>;
         getAnimation(_name: string): Promise<Animation>;
-        getMeshByIndex(_iMesh: number): Promise<MeshGLTF>;
+        getAnimationByIndex(_iAnimation: number): Promise<Animation>;
         getMesh(_name: string): Promise<MeshGLTF>;
-        getSkeletonByIndex(_iSkeleton: number): Promise<SkeletonInstance>;
+        getMeshByIndex(_iMesh: number): Promise<MeshGLTF>;
         getSkeleton(_name: string): Promise<SkeletonInstance>;
+        getSkeletonByIndex(_iSkeleton: number): Promise<SkeletonInstance>;
         getUint8Array(_iAccessor: number): Promise<Uint8Array>;
         getUint16Array(_iAccessor: number): Promise<Uint16Array>;
         getFloat32Array(_iAccessor: number): Promise<Float32Array>;
-        private assertComponentTypeMatches;
         private getBufferData;
         private isSkeletalAnimation;
         private findSkeletalAnimationIndices;
@@ -6111,8 +6110,9 @@ declare namespace FudgeCore {
         /**
          * Registers a node as a bone with its bind inverse matrix
          * @param _bone the node to be registered, that should be a descendant of this skeleton
+         * @param _mtxBindInverse a precalculated inverse matrix of the bind pose from the bone
          */
-        registerBone(_bone: Node, _mtxBindInverse: Matrix4x4): void;
+        registerBone(_bone: Node, _mtxBindInverse?: Matrix4x4): void;
         /**
          * Sets the current state of this skeleton as the default pose
          * by updating the inverse bind matrices
@@ -6134,7 +6134,6 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     class SkeletonInstance extends GraphInstance {
         #private;
-        mtxBindShape: Matrix4x4;
         private skeletonSource;
         static CREATE(_skeleton: Skeleton): Promise<SkeletonInstance>;
         get bones(): BoneList;
@@ -6142,17 +6141,19 @@ declare namespace FudgeCore {
         /**
          * Gets the bone transformations for a vertex
          */
-        get mtxBones(): Array<Matrix4x4>;
+        get mtxBones(): Matrix4x4[];
         /**
          * Set this skeleton instance to be a recreation of the {@link Skeleton} given
          */
         set(_skeleton: Skeleton): Promise<void>;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         /**
          * Resets this skeleton instance to its default pose
          */
         resetPose(): void;
         applyAnimation(_mutator: Mutator): void;
         private calculateMtxBones;
+        private registerBones;
     }
 }
 declare namespace FudgeCore {
