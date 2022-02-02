@@ -9,6 +9,8 @@ namespace FudgeCore {
     FLOAT = 5126
   }
 
+  type TypedArray = Uint8Array | Uint16Array | Uint32Array | Int8Array | Int16Array | Int32Array | Float32Array | Float64Array;
+
   interface GLTFLoaderList {
     [uri: string]: GLTFLoader;
   }
@@ -59,24 +61,32 @@ namespace FudgeCore {
       return this.loaders[_uri];
     }
 
+    public async getScene(_name?: string): Promise<GraphInstance> {
+      const iScene: number = _name ? this.gltf.scenes.findIndex(scene => scene.name == _name) : this.gltf.scene;
+      if (iScene == -1)
+        throw new Error(`Couldn't find name ${_name} in gltf scenes.`);
+      return await this.getSceneByIndex(iScene);
+    }
+
     public async getSceneByIndex(_iScene: number = this.gltf.scene): Promise<GraphInstance> {
       if (!this.#scenes)
         this.#scenes = [];
       if (!this.#scenes[_iScene]) {
         const gltfScene: GLTF.Scene = this.gltf.scenes[_iScene];
-        const scene: Node = new Node(gltfScene.name);
+        const scene: Graph = new Graph(gltfScene.name);
         for (const iNode of gltfScene.nodes)
           scene.addChild(await this.getNodeByIndex(iNode));
-        this.#scenes[_iScene] = await Project.registerAsGraph(scene);
+        Project.register(scene);
+        this.#scenes[_iScene] = scene;
       }
       return Project.createGraphInstance(this.#scenes[_iScene]);
     }
 
-    public async getScene(_name: string): Promise<GraphInstance> {
-      const iScene: number = this.gltf.scenes.findIndex(scene => scene.name == _name);
-      if (iScene == -1)
-        throw new Error(`Couldn't find name ${_name} in gltf scenes.`);
-      return await this.getSceneByIndex(iScene);
+    public async getNode(_name: string): Promise<Node> {
+      const iNode: number = this.gltf.nodes.findIndex(node => node.name == _name);
+      if (iNode == -1)
+        throw new Error(`Couldn't find name ${_name} in gltf nodes.`);
+      return await this.getNodeByIndex(iNode);
     }
 
     public async getNodeByIndex(_iNode: number): Promise<Node> {
@@ -137,11 +147,11 @@ namespace FudgeCore {
       return this.#nodes[_iNode];
     }
 
-    public async getNode(_name: string): Promise<Node> {
-      const iNode: number = this.gltf.nodes.findIndex(node => node.name == _name);
-      if (iNode == -1)
-        throw new Error(`Couldn't find name ${_name} in gltf nodes.`);
-      return await this.getNodeByIndex(iNode);
+    public async getCamera(_name: string): Promise<ComponentCamera> {
+      const iCamera: number = this.gltf.cameras.findIndex(camera => camera.name == _name);
+      if (iCamera == -1)
+        throw new Error(`Couldn't find name ${_name} in gltf cameras.`);
+      return await this.getCameraByIndex(iCamera);
     }
 
     public async getCameraByIndex(_iCamera: number): Promise<ComponentCamera> {
@@ -172,11 +182,11 @@ namespace FudgeCore {
       return this.#cameras[_iCamera];
     }
 
-    public async getCamera(_name: string): Promise<ComponentCamera> {
-      const iCamera: number = this.gltf.cameras.findIndex(camera => camera.name == _name);
-      if (iCamera == -1)
-        throw new Error(`Couldn't find name ${_name} in gltf cameras.`);
-      return await this.getCameraByIndex(iCamera);
+    public async getAnimation(_name: string): Promise<Animation> {
+      const iAnimation: number = this.gltf.animations.findIndex(animation => animation.name == _name);
+      if (iAnimation == -1)
+        throw new Error(`Couldn't find name ${_name} in gltf animations.`);
+      return await this.getAnimationByIndex(iAnimation);
     }
 
     public async getAnimationByIndex(_iAnimation: number): Promise<Animation> {
@@ -213,11 +223,11 @@ namespace FudgeCore {
       return this.#animations[_iAnimation];
     }
 
-    public async getAnimation(_name: string): Promise<Animation> {
-      const iAnimation: number = this.gltf.animations.findIndex(animation => animation.name == _name);
-      if (iAnimation == -1)
-        throw new Error(`Couldn't find name ${_name} in gltf animations.`);
-      return await this.getAnimationByIndex(iAnimation);
+    public async getMesh(_name: string): Promise<MeshGLTF> {
+      const iMesh: number = this.gltf.meshes.findIndex(mesh => mesh.name == _name);
+      if (iMesh == -1)
+        throw new Error(`Couldn't find name ${_name} in gltf meshes.`);
+      return await this.getMeshByIndex(iMesh);
     }
 
     public async getMeshByIndex(_iMesh: number): Promise<MeshGLTF> {
@@ -234,11 +244,11 @@ namespace FudgeCore {
       return this.#meshes[_iMesh];
     }
 
-    public async getMesh(_name: string): Promise<MeshGLTF> {
-      const iMesh: number = this.gltf.meshes.findIndex(mesh => mesh.name == _name);
-      if (iMesh == -1)
-        throw new Error(`Couldn't find name ${_name} in gltf meshes.`);
-      return await this.getMeshByIndex(iMesh);
+    public async getSkeleton(_name: string): Promise<SkeletonInstance> {
+      const iSkeleton: number = this.gltf.skins.findIndex(skeleton => skeleton.name == _name);
+      if (iSkeleton == -1)
+        throw new Error(`Couldn't find name ${_name} in gltf skins.`);
+      return await this.getSkeletonByIndex(iSkeleton);
     }
 
     public async getSkeletonByIndex(_iSkeleton: number): Promise<SkeletonInstance> {
@@ -247,50 +257,46 @@ namespace FudgeCore {
       if (!this.#skeletons[_iSkeleton]) {
         const gltfSkeleton: GLTF.Skin = this.gltf.skins[_iSkeleton];
         const skeleton: Skeleton = new Skeleton(gltfSkeleton.name);
+
+        // add all bones as children/descendants by adding the root bone
         skeleton.addChild(await this.getNodeByIndex(gltfSkeleton.joints[0]));
 
         // convert float array to array of matrices and register bones
         const floatArray: Float32Array = await this.getFloat32Array(gltfSkeleton.inverseBindMatrices);
         const span: number = 16;
         for (let iFloat: number = 0, iBone: number = 0; iFloat < floatArray.length; iFloat += span, iBone++) {
-          const mtxBone: Matrix4x4 = new Matrix4x4();
-          mtxBone.set(floatArray.subarray(iFloat, iFloat + span));
-          skeleton.registerBone(this.#nodes[gltfSkeleton.joints[iBone]], mtxBone);
+          const mtxBindInverse: Matrix4x4 = new Matrix4x4();
+          mtxBindInverse.set(floatArray.subarray(iFloat, iFloat + span));
+          skeleton.registerBone(this.#nodes[gltfSkeleton.joints[iBone]], mtxBindInverse);
         }
+        Project.register(skeleton);
         this.#skeletons[_iSkeleton] = skeleton;
       }
       return await SkeletonInstance.CREATE(this.#skeletons[_iSkeleton]);
     }
 
-    public async getSkeleton(_name: string): Promise<SkeletonInstance> {
-      const iSkeleton: number = this.gltf.skins.findIndex(skeleton => skeleton.name == _name);
-      if (iSkeleton == -1)
-        throw new Error(`Couldn't find name ${_name} in gltf skins.`);
-      return await this.getSkeletonByIndex(iSkeleton);
-    }
-
     public async getUint8Array(_iAccessor: number): Promise<Uint8Array> {
-      this.assertComponentTypeMatches(_iAccessor, ComponentType.UNSIGNED_BYTE);
-      return await this.getBufferData(_iAccessor) as Uint8Array;
+      const array: TypedArray = await this.getBufferData(_iAccessor);
+      return this.gltf.accessors[_iAccessor]?.componentType == ComponentType.BYTE ?
+        array as Uint8Array :
+        Uint8Array.from(array);
     }
 
     public async getUint16Array(_iAccessor: number): Promise<Uint16Array> {
-      this.assertComponentTypeMatches(_iAccessor, ComponentType.UNSIGNED_SHORT);
-      return await this.getBufferData(_iAccessor) as Uint16Array;
+      const array: TypedArray = await this.getBufferData(_iAccessor);
+      return this.gltf.accessors[_iAccessor]?.componentType == ComponentType.SHORT ?
+        array as Uint16Array :
+        Uint16Array.from(array);
     }
 
     public async getFloat32Array(_iAccessor: number): Promise<Float32Array> {
-      this.assertComponentTypeMatches(_iAccessor, ComponentType.FLOAT);
-      return await this.getBufferData(_iAccessor) as Float32Array;
+      const array: TypedArray = await this.getBufferData(_iAccessor);
+      return this.gltf.accessors[_iAccessor]?.componentType == ComponentType.FLOAT ?
+        array as Float32Array :
+        Float32Array.from(array);
     }
 
-    private assertComponentTypeMatches(_iAccessor: number, _cmpType: ComponentType): void {
-      const accessorCmpType: ComponentType = this.gltf.accessors[_iAccessor]?.componentType;
-      if (accessorCmpType != _cmpType)
-        throw new Error(`Type missmatch. Expected component type ${ComponentType[_cmpType]} but was ${ComponentType[accessorCmpType]}.`);
-    }
-
-    private async getBufferData(_iAccessor: number): Promise<Uint8Array | Uint16Array | Float32Array> {
+    private async getBufferData(_iAccessor: number): Promise<TypedArray> {
       const gltfAccessor: GLTF.Accessor = this.gltf.accessors[_iAccessor];
       if (!gltfAccessor)
         throw new Error("Couldn't find accessor");
@@ -319,8 +325,20 @@ namespace FudgeCore {
         case ComponentType.UNSIGNED_BYTE:
           return new Uint8Array(buffer, byteOffset, byteLength / Uint8Array.BYTES_PER_ELEMENT);
 
+        case ComponentType.BYTE:
+          return new Int8Array(buffer, byteOffset, byteLength / Int8Array.BYTES_PER_ELEMENT);
+
         case ComponentType.UNSIGNED_SHORT:
           return new Uint16Array(buffer, byteOffset, byteLength / Uint16Array.BYTES_PER_ELEMENT);
+
+        case ComponentType.SHORT:
+          return new Int16Array(buffer, byteOffset, byteLength / Int16Array.BYTES_PER_ELEMENT);
+
+        case ComponentType.UNSIGNED_INT:
+          return new Uint32Array(buffer, byteOffset, byteLength / Uint32Array.BYTES_PER_ELEMENT);
+
+        case ComponentType.INT:
+          return new Int32Array(buffer, byteOffset, byteLength / Int32Array.BYTES_PER_ELEMENT);
 
         case ComponentType.FLOAT:
           return new Float32Array(buffer, byteOffset, byteLength / Float32Array.BYTES_PER_ELEMENT);
