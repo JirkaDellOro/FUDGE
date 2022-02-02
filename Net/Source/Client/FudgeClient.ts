@@ -312,8 +312,8 @@ namespace FudgeNet {
     private cEreceiveOffer = async (_message: FudgeNet.Message): Promise<void> => {
       console.info("Callee: offer received, create connection", _message);
 
-      let peer: Rtc = this.peers[_message.idSource!] || (this.peers[_message.idSource!] = new Rtc());
-      let peerConnection: RTCPeerConnection = peer.peerConnection;
+      let rtc: Rtc = /* this.peers[_message.idSource!] ||  */(this.peers[_message.idSource!] = new Rtc());
+      let peerConnection: RTCPeerConnection = rtc.peerConnection;
 
       await peerConnection.setRemoteDescription(new RTCSessionDescription(_message.content?.offer));
       await peerConnection.setLocalDescription();

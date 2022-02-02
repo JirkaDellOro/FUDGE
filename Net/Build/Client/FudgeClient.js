@@ -421,8 +421,8 @@ var FudgeNet;
         // cE = callee
         cEreceiveOffer = async (_message) => {
             console.info("Callee: offer received, create connection", _message);
-            let peer = this.peers[_message.idSource] || (this.peers[_message.idSource] = new FudgeNet.Rtc());
-            let peerConnection = peer.peerConnection;
+            let rtc = (this.peers[_message.idSource] = new FudgeNet.Rtc());
+            let peerConnection = rtc.peerConnection;
             await peerConnection.setRemoteDescription(new RTCSessionDescription(_message.content?.offer));
             await peerConnection.setLocalDescription();
             peerConnection.addEventListener("datachannel", (_event) => this.cEestablishConnection(_event, this.peers[_message.idSource]));
