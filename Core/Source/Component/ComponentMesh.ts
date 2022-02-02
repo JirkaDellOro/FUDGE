@@ -29,15 +29,14 @@ namespace FudgeCore {
     }
 
     public bindSkeleton(_skeleton: SkeletonInstance): void {
+      this.#skeleton = _skeleton;
+
       if (!this.skeleton && !this.node)
         this.addEventListener(EVENT.COMPONENT_ADD, (_event: Event) => {
           if (_event.target != this) return;
           this.node.addChild(this.skeleton);
         });
-
-      this.#skeleton = _skeleton;
-
-      if (this.node)
+      else if (this.node)
         this.node.addChild(this.skeleton);
     }
 
@@ -93,6 +92,9 @@ namespace FudgeCore {
       else
         serialization = { mesh: Serializer.serialize(this.mesh) };
 
+      if (this.skeleton)
+        serialization.skeleton = this.skeleton.name;
+
       serialization.pivot = this.mtxPivot.serialize();
       serialization[super.constructor.name] = super.serialize();
       return serialization;
@@ -105,6 +107,15 @@ namespace FudgeCore {
       else
         mesh = <Mesh>await Serializer.deserialize(_serialization.mesh);
       this.mesh = mesh;
+
+      if (_serialization.skeleton)
+        this.addEventListener(EVENT.COMPONENT_ADD, (_event: Event) => {
+          if (_event.target != this) return;
+          this.node.addEventListener(EVENT.CHILD_APPEND, (_event: Event) => {
+            if (_event.target instanceof SkeletonInstance && _event.target.name == _serialization.skeleton)
+              this.#skeleton = _event.target;
+          });
+        });
 
       await this.mtxPivot.deserialize(_serialization.pivot);
       await super.deserialize(_serialization[super.constructor.name]);
