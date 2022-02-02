@@ -27,14 +27,15 @@ namespace FudgeCore {
       if (_mtxInit)
         _bone.mtxLocal.set(_mtxInit);
       this.calculateMtxWorld(_bone);
-      this.registerBone(_bone, _bone.mtxWorldInverse);
+      this.registerBone(_bone);
     }
 
     /**
      * Registers a node as a bone with its bind inverse matrix
      * @param _bone the node to be registered, that should be a descendant of this skeleton
+     * @param _mtxBindInverse a precalculated inverse matrix of the bind pose from the bone
      */
-    public registerBone(_bone: Node, _mtxBindInverse: Matrix4x4): void {
+    public registerBone(_bone: Node, _mtxBindInverse: Matrix4x4 = _bone.mtxWorldInverse): void {
       this.bones[_bone.name] = _bone;
       this.mtxBindInverses[_bone.name] = _mtxBindInverse;
     }
