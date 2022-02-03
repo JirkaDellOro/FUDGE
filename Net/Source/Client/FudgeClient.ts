@@ -251,16 +251,21 @@ namespace FudgeNet {
       rtc.peerConnection.addEventListener(
         "negotiationneeded", async (_event: Event) => this.cRsendOffer(_idRemote, _event)
       );
-      rtc.peerConnection.addEventListener(
-        // send event, collect candidates first in send ice candidates
-        // send offer on gatheringstatechange = complete
-        "icecandidate", (_event: RTCPeerConnectionIceEvent) => this.cRsendIceCandidates(_event, _idRemote)
-      );
+      // rtc.peerConnection.addEventListener(
+      //   // send event, collect candidates first in send ice candidates
+      //   // send offer on gatheringstatechange = complete
+      //   "icecandidate", (_event: RTCPeerConnectionIceEvent) => this.cRsendIceCandidates(_event, _idRemote)
+      // );
 
       rtc.peerConnection.addEventListener(
         // "icecandidateerror", (_event: RTCPeerConnectionIceEvent) => console.log(_event)
         // "iceconnectionstatechange", (_event: RTCPeerConnectionIceEvent) => console.log(_event)
-        "icegatheringstatechange", (_event: RTCPeerConnectionIceEvent) => console.log(_event)
+        "icegatheringstatechange", (_event: Event) => {
+          let pc: RTCPeerConnection = <RTCPeerConnection>_event.currentTarget;
+          console.info("EVENT for sending ice", pc.connectionState, pc.iceConnectionState, pc.iceGatheringState);
+          if (pc.iceGatheringState == "complete")
+            this.cRsendIceCandidates(<RTCPeerConnectionIceEvent>_event, _idRemote);
+        }
       );
 
       // fires the negotiationneeded-event
