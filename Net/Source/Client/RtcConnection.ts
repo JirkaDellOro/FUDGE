@@ -51,7 +51,9 @@ namespace FudgeNet {
    * used internally by the {@link FudgeClient} and should not be used otherwise.
    * @author Jirka Dell'Oro-Friedl, HFU, 2021
    */
-  export class Rtc {
+
+  // TODO: use extension instead of decorator pattern
+  export class Rtc /* extends RTCPeerConnection */ {
     public peerConnection: RTCPeerConnection;
     public dataChannel: RTCDataChannel | undefined;
     // TODO: use mediaStream in the future? 
@@ -69,7 +71,7 @@ namespace FudgeNet {
 
     public createDataChannel(_client: FudgeClient, _idRemote: string): void {
       console.log("Create data channel", _client, _idRemote);
-      let newDataChannel: RTCDataChannel = this.peerConnection.createDataChannel(_client.id + "->" + _idRemote/* , { negotiated: true, id: 0 } */);
+      let newDataChannel: RTCDataChannel = this.peerConnection.createDataChannel(_client.id + "->" + _idRemote /* , { negotiated: true, id: 0 } */ );
       this.addDataChannel(_client, newDataChannel);
     }
 
@@ -81,6 +83,14 @@ namespace FudgeNet {
 
       function dispatchRtcEvent(this: RTCDataChannel, _event: Event): void {
         _client.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, { detail: _event }));
+      }
+    }
+    
+    public send(_message: string): void {
+      if (this.dataChannel && this.dataChannel.readyState == "open")
+        this.dataChannel.send(_message);
+      else {
+        console.warn(`Can't send message on ${this.dataChannel?.id}, status ${this.dataChannel?.readyState}, message ${_message}`);
       }
     }
 
