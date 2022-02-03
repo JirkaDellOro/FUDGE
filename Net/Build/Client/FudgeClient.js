@@ -438,7 +438,7 @@ var FudgeNet;
             // if (peerConnection.signalingState == "stable")
             await peerConnection.setRemoteDescription(_message.content?.answer);
             const answerMessage = {
-                route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.ICE_CANDIDATE, idTarget: _message.idSource
+                route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.ICE_CANDIDATE, idTarget: _message.idSource, content: { text: "Test" }
             };
             this.dispatch(answerMessage);
         };
@@ -467,7 +467,7 @@ var FudgeNet;
             // console.info("EVENT for adding ice", (<any>_event.currentTarget).iceConnectionState, (<any>_event.currentTarget).iceGatheringState);
             console.info("Callee: try to add candidate to peer connection");
             try {
-                let peerConnection = this.peers[_message.idSource].peerConnection;
+                // let peerConnection: RTCPeerConnection = this.peers[_message.idSource!].peerConnection;
                 // await peerConnection.addIceCandidate(_message.content?.candidate);
                 // TODO: see why each ice-candidate invokes the creation of a new data channel...
                 this.peers[_message.idSource].createDataChannel(this, _message.idSource);
