@@ -101,14 +101,20 @@ namespace FudgeNet {
       _message.idSource = this.id;
       let message: string = JSON.stringify(_message);
       try {
-        if (!_message.route || _message.route == FudgeNet.ROUTE.HOST) {
-          // send via RTC to specific peer (if idTarget set), all peers (if not set) or host (if route set to host)
+        if (_message.route == FudgeNet.ROUTE.HOST) {
+          // to host via rtc
+          this.sendToPeer(this.idHost, message);
+        }
+        else if (_message.route) {
+          // other routes go via or to the server
+          this.socket.send(message);
+        }
+        else {
+          // send via RTC to specific peer (if idTarget set) or all peers (if not set)
           if (_message.idTarget)
             this.sendToPeer(_message.idTarget, message);
           else
             this.sendToAllPeers(message);
-        } else {
-          this.socket.send(message);
         }
       } catch (_error) {
         console.log(_error);
@@ -137,8 +143,8 @@ namespace FudgeNet {
 
     public hndMessage = (_event: MessageEvent): void => {
       let message: FudgeNet.Message = JSON.parse(_event.data);
-      if (message.command != FudgeNet.COMMAND.SERVER_HEARTBEAT && message.command != FudgeNet.COMMAND.CLIENT_HEARTBEAT)
-        console.log(_event.timeStamp, message);
+      // if (message.command != FudgeNet.COMMAND.SERVER_HEARTBEAT && message.command != FudgeNet.COMMAND.CLIENT_HEARTBEAT)
+      // console.log(_event.timeStamp, message);
 
       //tslint:disable-next-line: no-any
       switch (message.command) {
@@ -249,14 +255,14 @@ namespace FudgeNet {
       this.peers[_idRemote] = rtc;
 
       rtc.addEventListener(
-        // "negotiationneeded", async (_event: Event) => this.cRsendOffer(_idRemote, _event)
-        "negotiationneeded", (_event: Event) => console.log(_event.type)
+        "negotiationneeded", async (_event: Event) => this.cRsendOffer(_idRemote, _event)
+        // "negotiationneeded", (_event: Event) => console.log(_event.type)
       );
       rtc.addEventListener(
         // send event, collect candidates first in send ice candidates
         // send offer on gatheringstatechange = complete
-        // "icecandidate", (_event: RTCPeerConnectionIceEvent) => this.cRsendIceCandidates(_event, _idRemote)
-        "icecandidate", (_event: Event) => console.log(_event.type)
+        "icecandidate", (_event: RTCPeerConnectionIceEvent) => this.cRsendIceCandidates(_event, _idRemote)
+        // "icecandidate", (_event: Event) => console.log(_event.type)
       );
 
       rtc.addEventListener(
@@ -264,27 +270,27 @@ namespace FudgeNet {
         // "iceconnectionstatechange", (_event: RTCPeerConnectionIceEvent) => console.log(_event)
         "icegatheringstatechange", (_event: Event) => {
           console.error(rtc.iceGatheringState);
-          if (rtc.iceGatheringState == "complete")
-            this.cRsendOffer(_idRemote, _event);
+          // if (rtc.iceGatheringState == "complete")
+          //   this.cRsendOffer(_idRemote, _event);
         }
       );
 
       // fires the negotiationneeded-event
       rtc.setupDataChannel(this, _idRemote);
-      let localDescription: RTCSessionDescriptionInit = await rtc.createOffer({ iceRestart: true });
-      await rtc.setLocalDescription(localDescription);
     }
 
     /**
      * Start negotiation by sending an offer with the local description of the connection via the signalling server
      */
     private cRsendOffer = async (_idRemote: string, _event: Event) => {
-      // let peerConnection: RTCPeerConnection = this.peers[_idRemote];
+      let rtc: RTCPeerConnection = this.peers[_idRemote];
+      let localDescription: RTCSessionDescriptionInit = await rtc.createOffer({ iceRestart: true });
+      await rtc.setLocalDescription(localDescription);
       // let localDescription: RTCSessionDescriptionInit = await peerConnection.createOffer(<RTCOfferOptions>_event);
       // // TODO: see what happens without parameter...
       // await peerConnection.setLocalDescription(localDescription);
       const offerMessage: FudgeNet.Message = {
-        route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.RTC_OFFER, idTarget: _idRemote, content: { offer: this.peers[_idRemote].localDescription }
+        route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.RTC_OFFER, idTarget: _idRemote, content: { offer: rtc.localDescription }
       };
       this.dispatch(offerMessage);
       console.info("Caller: send offer, expected 'have-local-offer', got:  ", this.peers[_idRemote].signalingState);
@@ -338,12 +344,12 @@ namespace FudgeNet {
     private cRsendIceCandidates = async (_event: RTCPeerConnectionIceEvent, _idRemote: string) => {
       // await this.delay(5000);
       let pc: RTCPeerConnection = <RTCPeerConnection>_event.currentTarget;
-      console.info("EVENT for sending ice", pc.connectionState, pc.iceConnectionState, pc.iceGatheringState);
+      // console.info("EVENT for sending ice", pc.connectionState, pc.iceConnectionState, pc.iceGatheringState);
       if (pc.iceGatheringState != "gathering" && pc.iceConnectionState != "new")
         // if (pc.iceGatheringState != "complete")
         return;
 
-      console.info("Caller: send ICECandidates to server");
+      console.info("Caller: send ICECandidates to server", _event.candidate);
       let message: FudgeNet.Message = {
         route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.ICE_CANDIDATE, idTarget: _idRemote, content: { candidate: _event.candidate, states: [pc.connectionState, pc.iceConnectionState, pc.iceGatheringState] }
       };
@@ -354,9 +360,9 @@ namespace FudgeNet {
      * Callee receives the info about the ice-candidate and adds it to the connection
      */
     private cEaddIceCandidate = async (_event: MessageEvent, _message: FudgeNet.Message) => {
-      console.info("EVENT for adding ice", _event);
+      // console.info("EVENT for adding ice", _event);
       // console.info("EVENT for adding ice", (<any>_event.currentTarget).iceConnectionState, (<any>_event.currentTarget).iceGatheringState);
-      console.info("Callee: try to add candidate to peer connection");
+      console.info("Callee: try to add candidate to peer connection", _message.content?.candidate);
       try {
         // let peerConnection: RTCPeerConnection = this.peers[_message.idSource!].peerConnection;
         await this.peers[_message.idSource!].addIceCandidate(_message.content?.candidate);
