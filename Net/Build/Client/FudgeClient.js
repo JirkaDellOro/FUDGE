@@ -112,12 +112,12 @@ var FudgeNet;
             this.addEventListener("signalingstatechange", (_event) => this.logState("Signaling state change", _event));
             this.addEventListener("connectionstatechange", (_event) => this.logState("Connection state change", _event));
         }
-        setupDataChannel(_client, _idRemote) {
+        setupDataChannel = (_client, _idRemote) => {
             let newDataChannel = this.createDataChannel(_client.id + "->" + _idRemote /* , { negotiated: true, id: 0 } */);
             console.log("Created data channel", newDataChannel.id);
             this.addDataChannel(_client, newDataChannel);
-        }
-        addDataChannel(_client, _dataChannel) {
+        };
+        addDataChannel = (_client, _dataChannel) => {
             console.error("AddDataChannel, must only be called once for each connection");
             this.dataChannel = _dataChannel;
             this.dataChannel.addEventListener(EVENT.CONNECTION_OPENED, dispatchRtcEvent);
@@ -126,19 +126,19 @@ var FudgeNet;
             function dispatchRtcEvent(_event) {
                 _client.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, { detail: _event }));
             }
-        }
-        send(_message) {
+        };
+        send = (_message) => {
             if (this.dataChannel && this.dataChannel.readyState == "open")
                 this.dataChannel.send(_message);
             else {
                 // console.warn(`Can't send message on ${this.dataChannel?.id}, status ${this.dataChannel?.readyState}, message ${_message}`);
             }
-        }
-        logState(_type, _event) {
+        };
+        logState = (_type, _event) => {
             let target = _event.target;
             let state = { type: _type, connection: target.connectionState, iceState: target.iceConnectionState, iceGather: target.iceGatheringState };
             console.table(state);
-        }
+        };
     }
     FudgeNet.Rtc = Rtc;
 })(FudgeNet || (FudgeNet = {}));

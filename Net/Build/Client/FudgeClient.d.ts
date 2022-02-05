@@ -90,9 +90,9 @@ declare namespace FudgeNet {
         dataChannel: RTCDataChannel | undefined;
         mediaStream: MediaStream | undefined;
         constructor();
-        setupDataChannel(_client: FudgeClient, _idRemote: string): void;
-        addDataChannel(_client: FudgeClient, _dataChannel: RTCDataChannel): void;
-        send(_message: string): void;
+        setupDataChannel: (_client: FudgeClient, _idRemote: string) => void;
+        addDataChannel: (_client: FudgeClient, _dataChannel: RTCDataChannel) => void;
+        send: (_message: string) => void;
         private logState;
     }
 }
