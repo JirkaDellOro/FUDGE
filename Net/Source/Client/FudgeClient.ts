@@ -310,7 +310,7 @@ namespace FudgeNet {
       rtc.addEventListener(
         "datachannel", (_event: RTCDataChannelEvent) => this.cEestablishConnection(_event, this.peers[_message.idSource!])
       );
-
+      // rtc.setupDataChannel(this, _message.idSource!);
       await rtc.setRemoteDescription(new RTCSessionDescription(_message.content?.offer));
       await rtc.setLocalDescription();
 
@@ -330,10 +330,10 @@ namespace FudgeNet {
       // let peerConnection: RTCPeerConnection = this.peers[_message.idSource!].peerConnection;
       // if (peerConnection.signalingState == "stable")
       await this.peers[_message.idSource!].setRemoteDescription(_message.content?.answer);
-      const answerMessage: FudgeNet.Message = {
-        route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.ICE_CANDIDATE, idTarget: _message.idSource, content: { text: "Test" }
-      };
-      this.dispatch(answerMessage);
+      // const answerMessage: FudgeNet.Message = {
+      //   route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.ICE_CANDIDATE, idTarget: _message.idSource, content: { text: "Test" }
+      // };
+      // this.dispatch(answerMessage);
     }
 
 
