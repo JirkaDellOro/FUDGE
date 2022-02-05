@@ -248,14 +248,16 @@ namespace FudgeNet {
       let rtc: Rtc = new Rtc();
       this.peers[_idRemote] = rtc;
 
-      // rtc.peerConnection.addEventListener(
-      //   "negotiationneeded", async (_event: Event) => this.cRsendOffer(_idRemote, _event)
-      // );
-      // rtc.peerConnection.addEventListener(
-      //   // send event, collect candidates first in send ice candidates
-      //   // send offer on gatheringstatechange = complete
-      //   "icecandidate", (_event: RTCPeerConnectionIceEvent) => this.cRsendIceCandidates(_event, _idRemote)
-      // );
+      rtc.peerConnection.addEventListener(
+        // "negotiationneeded", async (_event: Event) => this.cRsendOffer(_idRemote, _event)
+        "negotiationneeded", (_event: Event) => console.log(_event.type)
+      );
+      rtc.peerConnection.addEventListener(
+        // send event, collect candidates first in send ice candidates
+        // send offer on gatheringstatechange = complete
+        // "icecandidate", (_event: RTCPeerConnectionIceEvent) => this.cRsendIceCandidates(_event, _idRemote)
+        "icecandidate", (_event: Event) => console.log(_event.type)
+      );
 
       rtc.peerConnection.addEventListener(
         // "icecandidateerror", (_event: RTCPeerConnectionIceEvent) => console.log(_event)
@@ -269,7 +271,8 @@ namespace FudgeNet {
 
       // fires the negotiationneeded-event
       rtc.createDataChannel(this, _idRemote);
-      rtc.peerConnection.createOffer().then(offer => rtc.peerConnection.setLocalDescription(offer));
+      let localDescription: RTCSessionDescriptionInit = await rtc.peerConnection.createOffer({iceRestart: true});
+      await rtc.peerConnection.setLocalDescription(localDescription);
     }
 
     /**

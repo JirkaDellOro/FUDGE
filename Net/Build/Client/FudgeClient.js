@@ -375,14 +375,14 @@ var FudgeNet;
         cRstartNegotiation = async (_idRemote) => {
             let rtc = new FudgeNet.Rtc();
             this.peers[_idRemote] = rtc;
-            // rtc.peerConnection.addEventListener(
-            //   "negotiationneeded", async (_event: Event) => this.cRsendOffer(_idRemote, _event)
-            // );
-            // rtc.peerConnection.addEventListener(
-            //   // send event, collect candidates first in send ice candidates
-            //   // send offer on gatheringstatechange = complete
-            //   "icecandidate", (_event: RTCPeerConnectionIceEvent) => this.cRsendIceCandidates(_event, _idRemote)
-            // );
+            rtc.peerConnection.addEventListener(
+            // "negotiationneeded", async (_event: Event) => this.cRsendOffer(_idRemote, _event)
+            "negotiationneeded", (_event) => console.log(_event.type));
+            rtc.peerConnection.addEventListener(
+            // send event, collect candidates first in send ice candidates
+            // send offer on gatheringstatechange = complete
+            // "icecandidate", (_event: RTCPeerConnectionIceEvent) => this.cRsendIceCandidates(_event, _idRemote)
+            "icecandidate", (_event) => console.log(_event.type));
             rtc.peerConnection.addEventListener(
             // "icecandidateerror", (_event: RTCPeerConnectionIceEvent) => console.log(_event)
             // "iceconnectionstatechange", (_event: RTCPeerConnectionIceEvent) => console.log(_event)
@@ -393,7 +393,8 @@ var FudgeNet;
             });
             // fires the negotiationneeded-event
             rtc.createDataChannel(this, _idRemote);
-            rtc.peerConnection.createOffer().then(offer => rtc.peerConnection.setLocalDescription(offer));
+            let localDescription = await rtc.peerConnection.createOffer({ iceRestart: true });
+            await rtc.peerConnection.setLocalDescription(localDescription);
         };
         /**
          * Start negotiation by sending an offer with the local description of the connection via the signalling server

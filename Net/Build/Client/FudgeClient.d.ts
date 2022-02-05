@@ -43,13 +43,9 @@ declare namespace FudgeNet {
      * - route VIA_SERVER_HOST -> send message to client acting as host via server using websocket, ignoring idTarget
      */
     enum ROUTE {
-        // to host using rtc
         HOST = "toHost",
-        // to server using tcp, server doesn't support rtc
         SERVER = "toServer",
-        // via server to a client using tcp
         VIA_SERVER = "viaServer",
-        // via server to host using tcp
         VIA_SERVER_HOST = "viaServerToHost"
     }
     interface Message {
