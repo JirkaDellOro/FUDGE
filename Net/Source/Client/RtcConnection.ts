@@ -69,12 +69,13 @@ namespace FudgeNet {
     }
 
     public setupDataChannel(_client: FudgeClient, _idRemote: string): void {
-      let newDataChannel: RTCDataChannel = this.createDataChannel(_client.id + "->" + _idRemote /* , { negotiated: true, id: 0 } */ );
+      let newDataChannel: RTCDataChannel = this.createDataChannel(_client.id + "->" + _idRemote /* , { negotiated: true, id: 0 } */);
       console.log("Created data channel", newDataChannel.id);
       this.addDataChannel(_client, newDataChannel);
     }
 
     public addDataChannel(_client: FudgeClient, _dataChannel: RTCDataChannel): void {
+      console.error("AddDataChannel, must only be called once for each connection");
       this.dataChannel = _dataChannel;
       this.dataChannel.addEventListener(EVENT.CONNECTION_OPENED, dispatchRtcEvent);
       this.dataChannel.addEventListener(EVENT.CONNECTION_CLOSED, dispatchRtcEvent);
@@ -84,7 +85,7 @@ namespace FudgeNet {
         _client.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, { detail: _event }));
       }
     }
-    
+
     public send(_message: string): void {
       if (this.dataChannel && this.dataChannel.readyState == "open")
         this.dataChannel.send(_message);
