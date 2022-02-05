@@ -86,7 +86,7 @@ var ClientTest;
     }
     function createTable() {
         let table = document.querySelector("table");
-        let html = `<tr><th>&nbsp;</th><th>name</th><th>id</th><th>Comment</th></tr>`;
+        let html = `<tr><th>&nbsp;</th><th>name</th><th>id</th><th>data</th><th>signal</th><th>connection</th><th>gather</th><th>ice</th></tr>`;
         html += `<tr><td><span>0</span></td><td>Server</td><td>&nbsp;</td><td>&nbsp;</td></tr>`;
         table.innerHTML = html;
     }
@@ -102,21 +102,33 @@ var ClientTest;
         for (let id in clientsKnown) {
             let name = clientsKnown[id].name;
             let isHost = clientsKnown[id].isHost;
+            let peer = client.peers[id];
             let row = table.querySelector(`#${id}`);
             if (row) {
                 row.querySelector("td[name=name]").textContent = name + (isHost ? " (HOST)" : "");
-                row.querySelector("td[name=comment]").textContent = client.peers[id]?.dataChannel?.readyState;
+                row.querySelector("td[name=data]").textContent = peer?.dataChannel?.readyState;
+                row.querySelector("td[name=signal]").textContent = peer?.peerConnection.signalingState;
+                row.querySelector("td[name=connection]").textContent = peer?.peerConnection.connectionState;
+                row.querySelector("td[name=gather]").textContent = peer?.peerConnection.iceGatheringState;
+                row.querySelector("td[name=ice]").textContent = peer?.peerConnection.iceConnectionState;
             }
             else {
                 row = document.createElement("tr");
                 table.appendChild(row);
-                row.outerHTML = `<tr id="${id}"><td><span>0</span></td><td name="name">${name}</td><td name="id">${id}</td><td name="comment"></td></tr>`;
+                let html;
+                html = `<tr id="${id}"><td><span>0</span></td><td name="name">${name}</td><td name="id">${id}</td>`;
+                html += `<td name="data"></td>`;
+                html += `<td name="signal"></td>`;
+                html += `<td name="connection"></td>`;
+                html += `<td name="gather"></td>`;
+                html += `<td name="ice"></td></tr>`;
+                row.outerHTML = html;
             }
         }
     }
     function comment(_id, _comment) {
         let table = document.querySelector("table");
-        let cell = table.querySelector(`#${_id}>td[name=comment]`);
+        let cell = table.querySelector(`#${_id}>td[name=data]`);
         cell.textContent = _comment;
     }
     function blink(_span) {

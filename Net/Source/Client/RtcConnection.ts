@@ -90,7 +90,7 @@ namespace FudgeNet {
       if (this.dataChannel && this.dataChannel.readyState == "open")
         this.dataChannel.send(_message);
       else {
-        console.warn(`Can't send message on ${this.dataChannel?.id}, status ${this.dataChannel?.readyState}, message ${_message}`);
+        // console.warn(`Can't send message on ${this.dataChannel?.id}, status ${this.dataChannel?.readyState}, message ${_message}`);
       }
     }
 
