@@ -117,10 +117,10 @@ namespace ClientTest {
       if (row) {
         row.querySelector("td[name=name]").textContent = name + (isHost ? " (HOST)" : "");
         row.querySelector("td[name=data]").textContent = peer?.dataChannel?.readyState;
-        row.querySelector("td[name=signal]").textContent = peer?.peerConnection.signalingState;
-        row.querySelector("td[name=connection]").textContent = peer?.peerConnection.connectionState;
-        row.querySelector("td[name=gather]").textContent = peer?.peerConnection.iceGatheringState;
-        row.querySelector("td[name=ice]").textContent = peer?.peerConnection.iceConnectionState;
+        row.querySelector("td[name=signal]").textContent = peer?.signalingState;
+        row.querySelector("td[name=connection]").textContent = peer?.connectionState;
+        row.querySelector("td[name=gather]").textContent = peer?.iceGatheringState;
+        row.querySelector("td[name=ice]").textContent = peer?.iceConnectionState;
       }
       else {
         row = document.createElement("tr");

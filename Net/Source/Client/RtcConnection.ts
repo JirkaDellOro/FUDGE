@@ -53,25 +53,24 @@ namespace FudgeNet {
    */
 
   // TODO: use extension instead of decorator pattern
-  export class Rtc /* extends RTCPeerConnection */ {
-    public peerConnection: RTCPeerConnection;
+  export class Rtc extends RTCPeerConnection {
     public dataChannel: RTCDataChannel | undefined;
     // TODO: use mediaStream in the future? 
     public mediaStream: MediaStream | undefined;
 
     constructor() {
-      this.peerConnection = new RTCPeerConnection(configuration);
-      this.peerConnection.addEventListener(
+      super(configuration);
+      this.addEventListener(
         "signalingstatechange", (_event: Event) => this.logState("Signaling state change", _event)
       );
-      this.peerConnection.addEventListener(
+      this.addEventListener(
         "connectionstatechange", (_event: Event) => this.logState("Connection state change", _event)
       );
     }
 
-    public createDataChannel(_client: FudgeClient, _idRemote: string): void {
+    public setupDataChannel(_client: FudgeClient, _idRemote: string): void {
       console.log("Create data channel", _client, _idRemote);
-      let newDataChannel: RTCDataChannel = this.peerConnection.createDataChannel(_client.id + "->" + _idRemote /* , { negotiated: true, id: 0 } */ );
+      let newDataChannel: RTCDataChannel = this.createDataChannel(_client.id + "->" + _idRemote /* , { negotiated: true, id: 0 } */ );
       this.addDataChannel(_client, newDataChannel);
     }
 

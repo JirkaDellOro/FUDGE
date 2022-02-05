@@ -92,12 +92,11 @@ declare namespace FudgeNet {
      * used internally by the {@link FudgeClient} and should not be used otherwise.
      * @author Jirka Dell'Oro-Friedl, HFU, 2021
      */
-    class Rtc {
-        peerConnection: RTCPeerConnection;
+    class Rtc extends RTCPeerConnection {
         dataChannel: RTCDataChannel | undefined;
         mediaStream: MediaStream | undefined;
         constructor();
-        createDataChannel(_client: FudgeClient, _idRemote: string): void;
+        setupDataChannel(_client: FudgeClient, _idRemote: string): void;
         addDataChannel(_client: FudgeClient, _dataChannel: RTCDataChannel): void;
         send(_message: string): void;
         private logState;
