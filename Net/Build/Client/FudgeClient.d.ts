@@ -77,6 +77,8 @@ declare namespace FudgeNet {
     let configuration: {
         iceServers: {
             urls: string;
+            username: string;
+            credential: string;
         }[];
     };
     /**

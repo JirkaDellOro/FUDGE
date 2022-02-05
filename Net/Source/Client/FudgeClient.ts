@@ -295,11 +295,11 @@ namespace FudgeNet {
 
       // TODO: see if reusing connection is preferable
       let rtc: Rtc = this.peers[_message.idSource!] || (this.peers[_message.idSource!] = new Rtc());
+      await rtc.setRemoteDescription(new RTCSessionDescription(_message.content?.offer));
+      await rtc.setLocalDescription();
       rtc.addEventListener(
         "datachannel", (_event: RTCDataChannelEvent) => this.cEestablishConnection(_event, this.peers[_message.idSource!])
       );
-      await rtc.setRemoteDescription(new RTCSessionDescription(_message.content?.offer));
-      await rtc.setLocalDescription();
 
       const answerMessage: FudgeNet.Message = {
         route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.RTC_ANSWER, idTarget: _message.idSource, content: { answer: rtc.localDescription }
