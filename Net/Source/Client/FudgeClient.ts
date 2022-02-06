@@ -268,7 +268,9 @@ namespace FudgeNet {
       );
 
       // fires the negotiationneeded-event
-      rtc.setupDataChannel(this, _idRemote);
+      // rtc.setupDataChannel(this, _idRemote);
+      // this.cRsendOffer(_idRemote);
+      rtc.restartIce();
     }
 
     /**
@@ -294,12 +296,12 @@ namespace FudgeNet {
       console.info("Callee: offer received, create connection", _message);
 
       let rtc: Rtc = this.peers[_message.idSource!] || (this.peers[_message.idSource!] = new Rtc());
-      // rtc.addEventListener(
-      //   "datachannel", (_event: RTCDataChannelEvent) => this.cEestablishConnection(_event, this.peers[_message.idSource!])
-      // );
+      rtc.addEventListener(
+        "datachannel", (_event: RTCDataChannelEvent) => this.cEestablishConnection(_event, this.peers[_message.idSource!])
+      );
       await rtc.setRemoteDescription(new RTCSessionDescription(_message.content?.offer));
       await rtc.setLocalDescription();
-      rtc.setupDataChannel(this, _message.idSource!);
+      // rtc.setupDataChannel(this, _message.idSource!);
 
       const answerMessage: FudgeNet.Message = {
         route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.RTC_ANSWER, idTarget: _message.idSource, content: { answer: rtc.localDescription }
@@ -314,7 +316,10 @@ namespace FudgeNet {
      */
     private cRreceiveAnswer = async (_message: FudgeNet.Message) => {
       console.info("Caller: received answer, create data channel ", _message);
-      await this.peers[_message.idSource!].setRemoteDescription(_message.content?.answer);
+      let rtc: Rtc = this.peers[_message.idSource!];
+      await rtc.setRemoteDescription(_message.content?.answer);
+      rtc.setupDataChannel(this, _message.idSource!);
+      // rtc.restartIce();
     }
 
 
