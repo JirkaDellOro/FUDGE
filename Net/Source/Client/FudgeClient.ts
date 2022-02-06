@@ -254,9 +254,9 @@ namespace FudgeNet {
       let rtc: Rtc = new Rtc();
       this.peers[_idRemote] = rtc;
 
-      rtc.addEventListener(
-        "negotiationneeded", async (_event: Event) => this.cRsendOffer(_idRemote, _event)
-      );
+      // rtc.addEventListener(
+      //   "negotiationneeded", async (_event: Event) => this.cRsendOffer(_idRemote, _event)
+      // );
       rtc.addEventListener(
         "icecandidate", (_event: RTCPeerConnectionIceEvent) => this.cRsendIceCandidates(_event, _idRemote)
       );
@@ -268,13 +268,14 @@ namespace FudgeNet {
       );
 
       // fires the negotiationneeded-event
-      rtc.setupDataChannel(this, _idRemote);
+      // rtc.setupDataChannel(this, _idRemote);
+      this.cRsendOffer(_idRemote);
     }
 
     /**
      * Start negotiation by sending an offer with the local description of the connection via the signalling server
      */
-    private cRsendOffer = async (_idRemote: string, _event: Event) => {
+    private cRsendOffer = async (_idRemote: string) => {
       let rtc: RTCPeerConnection = this.peers[_idRemote];
       let localDescription: RTCSessionDescriptionInit = await rtc.createOffer({ iceRestart: true });
       await rtc.setLocalDescription(localDescription);
@@ -295,12 +296,12 @@ namespace FudgeNet {
 
       // TODO: see if reusing connection is preferable
       let rtc: Rtc = /* this.peers[_message.idSource!] || */ (this.peers[_message.idSource!] = new Rtc());
-      rtc.addEventListener(
-        "datachannel", (_event: RTCDataChannelEvent) => this.cEestablishConnection(_event, this.peers[_message.idSource!])
-      );
 
       await rtc.setRemoteDescription(new RTCSessionDescription(_message.content?.offer));
       await rtc.setLocalDescription();
+      rtc.addEventListener(
+        "datachannel", (_event: RTCDataChannelEvent) => this.cEestablishConnection(_event, this.peers[_message.idSource!])
+      );
 
       const answerMessage: FudgeNet.Message = {
         route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.RTC_ANSWER, idTarget: _message.idSource, content: { answer: rtc.localDescription }
@@ -316,6 +317,7 @@ namespace FudgeNet {
     private cRreceiveAnswer = async (_message: FudgeNet.Message) => {
       console.info("Caller: received answer, create data channel ", _message);
       await this.peers[_message.idSource!].setRemoteDescription(_message.content?.answer);
+      this.peers[_message.idSource!].setupDataChannel(this, _message.idSource!);
     }
 
 
