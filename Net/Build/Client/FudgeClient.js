@@ -64,6 +64,7 @@ var FudgeNet;
     // More info from here https://developer.mozilla.org/en-US/docs/Web/API/RTCConfiguration
     // tslint:disable-next-line: typedef
     FudgeNet.configuration = {
+        iceCandidatePoolSize: 5,
         iceServers: [
             // { urls: "stun:stun2.1.google.com:19302" }
             // { urls: "stun:stun.example.com" }
@@ -114,7 +115,7 @@ var FudgeNet;
         }
         setupDataChannel = (_client, _idRemote) => {
             let newDataChannel = this.createDataChannel(_client.id + "->" + _idRemote /* , { negotiated: true, id: 0 } */);
-            console.log("Created data channel", newDataChannel.id);
+            console.log("Created data channel", newDataChannel);
             this.addDataChannel(_client, newDataChannel);
         };
         addDataChannel = (_client, _dataChannel) => {
@@ -411,7 +412,7 @@ var FudgeNet;
         cEreceiveOffer = async (_message) => {
             console.info("Callee: offer received, create connection", _message);
             // TODO: see if reusing connection is preferable
-            let rtc = this.peers[_message.idSource] || (this.peers[_message.idSource] = new FudgeNet.Rtc());
+            let rtc = (this.peers[_message.idSource] = new FudgeNet.Rtc());
             await rtc.setRemoteDescription(new RTCSessionDescription(_message.content?.offer));
             await rtc.setLocalDescription();
             rtc.addEventListener("datachannel", (_event) => this.cEestablishConnection(_event, this.peers[_message.idSource]));
@@ -426,9 +427,12 @@ var FudgeNet;
          * Caller receives the answer and sets the remote description on its side. The first part of the negotiation is done.
          */
         cRreceiveAnswer = async (_message) => {
-            console.info("Caller: received answer, create data channel ", _message);
-            await this.peers[_message.idSource].setRemoteDescription(_message.content?.answer);
-            this.peers[_message.idSource].setupDataChannel(this, _message.idSource);
+            console.info("Caller: received answer", _message);
+            let rtc = this.peers[_message.idSource];
+            await rtc.setRemoteDescription(_message.content?.answer);
+            // debugger;
+            if (!rtc.dataChannel)
+                rtc.setupDataChannel(this, _message.idSource);
         };
         /**
          * Caller starts collecting ICE-candidates and calls this function for each candidate found,

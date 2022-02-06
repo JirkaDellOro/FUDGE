@@ -75,6 +75,7 @@ declare namespace FudgeNet {
         MESSAGE_RECEIVED = "message"
     }
     let configuration: {
+        iceCandidatePoolSize: number;
         iceServers: ({
             urls: string;
             credential?: undefined;

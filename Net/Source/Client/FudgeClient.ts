@@ -296,7 +296,7 @@ namespace FudgeNet {
       console.info("Callee: offer received, create connection", _message);
 
       // TODO: see if reusing connection is preferable
-      let rtc: Rtc = this.peers[_message.idSource!] || (this.peers[_message.idSource!] = new Rtc());
+      let rtc: Rtc = /* this.peers[_message.idSource!] || */ (this.peers[_message.idSource!] = new Rtc());
 
       await rtc.setRemoteDescription(new RTCSessionDescription(_message.content?.offer));
       await rtc.setLocalDescription();
@@ -316,9 +316,12 @@ namespace FudgeNet {
      * Caller receives the answer and sets the remote description on its side. The first part of the negotiation is done.
      */
     private cRreceiveAnswer = async (_message: FudgeNet.Message) => {
-      console.info("Caller: received answer, create data channel ", _message);
-      await this.peers[_message.idSource!].setRemoteDescription(_message.content?.answer);
-      this.peers[_message.idSource!].setupDataChannel(this, _message.idSource!);
+      console.info("Caller: received answer", _message);
+      let rtc: Rtc = this.peers[_message.idSource!];
+      await rtc.setRemoteDescription(_message.content?.answer);
+      // debugger;
+      if (!rtc.dataChannel)
+        rtc.setupDataChannel(this, _message.idSource!);
     }
 
 

@@ -11,6 +11,7 @@ namespace FudgeNet {
   // More info from here https://developer.mozilla.org/en-US/docs/Web/API/RTCConfiguration
   // tslint:disable-next-line: typedef
   export let configuration = {
+    iceCandidatePoolSize: 5,
     iceServers: [
       // { urls: "stun:stun2.1.google.com:19302" }
       // { urls: "stun:stun.example.com" }
@@ -41,7 +42,6 @@ namespace FudgeNet {
         username: "webrtc@live.com"
       }
     ]
-
   };
 
   /**
@@ -70,7 +70,7 @@ namespace FudgeNet {
 
     public setupDataChannel = (_client: FudgeClient, _idRemote: string): void => {
       let newDataChannel: RTCDataChannel = this.createDataChannel(_client.id + "->" + _idRemote /* , { negotiated: true, id: 0 } */);
-      console.log("Created data channel", newDataChannel.id);
+      console.log("Created data channel", newDataChannel);
       this.addDataChannel(_client, newDataChannel);
     }
 
