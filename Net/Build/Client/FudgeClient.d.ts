@@ -194,5 +194,6 @@ declare namespace FudgeNet {
          */
         private cEaddIceCandidate;
         private cEestablishConnection;
+        private delay;
     }
 }

@@ -426,10 +426,6 @@ var FudgeNet;
         cRreceiveAnswer = async (_message) => {
             console.info("Caller: received answer, create data channel ", _message);
             await this.peers[_message.idSource].setRemoteDescription(_message.content?.answer);
-            const answerMessage = {
-                route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.ICE_CANDIDATE, idTarget: _message.idSource, content: { text: "Dummy" }
-            };
-            this.dispatch(answerMessage);
         };
         /**
          * Caller starts collecting ICE-candidates and calls this function for each candidate found,
@@ -437,8 +433,9 @@ var FudgeNet;
          */
         cRsendIceCandidates = async (_event, _idRemote) => {
             let pc = _event.currentTarget;
-            if (!_event.candidate || pc.iceGatheringState != "gathering")
+            if (_event.candidate == null || pc.iceGatheringState != "gathering")
                 return;
+            this.delay(2000);
             console.info("Caller: send ICECandidates to server", _event.candidate);
             let message = {
                 route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.ICE_CANDIDATE, idTarget: _idRemote, content: { candidate: _event.candidate, states: [pc.connectionState, pc.iceConnectionState, pc.iceGatheringState] }
@@ -461,6 +458,11 @@ var FudgeNet;
                 console.error("Unexpected Error: RemoteDatachannel");
             }
         };
+        async delay(_milisec) {
+            return new Promise(resolve => {
+                setTimeout(() => { resolve(); }, _milisec);
+            });
+        }
     }
     FudgeNet.FudgeClient = FudgeClient;
 })(FudgeNet || (FudgeNet = {}));
