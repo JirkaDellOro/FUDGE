@@ -296,7 +296,7 @@ namespace FudgeNet {
       console.info("Callee: offer received, create connection", _message);
 
       // TODO: see if reusing connection is preferable
-      let rtc: Rtc = /* this.peers[_message.idSource!] || */ (this.peers[_message.idSource!] = new Rtc());
+      let rtc: Rtc = this.peers[_message.idSource!] || (this.peers[_message.idSource!] = new Rtc());
 
       await rtc.setRemoteDescription(new RTCSessionDescription(_message.content?.offer));
       await rtc.setLocalDescription();

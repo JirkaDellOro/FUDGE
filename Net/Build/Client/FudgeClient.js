@@ -411,7 +411,7 @@ var FudgeNet;
         cEreceiveOffer = async (_message) => {
             console.info("Callee: offer received, create connection", _message);
             // TODO: see if reusing connection is preferable
-            let rtc = (this.peers[_message.idSource] = new FudgeNet.Rtc());
+            let rtc = this.peers[_message.idSource] || (this.peers[_message.idSource] = new FudgeNet.Rtc());
             await rtc.setRemoteDescription(new RTCSessionDescription(_message.content?.offer));
             await rtc.setLocalDescription();
             rtc.addEventListener("datachannel", (_event) => this.cEestablishConnection(_event, this.peers[_message.idSource]));
