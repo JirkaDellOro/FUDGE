@@ -16,7 +16,7 @@
 <body>
   <form id="connect">
     <fieldset>
-      <legend>Server</legend>
+      <legend>WS (WebSocket)</legend>
       <input type="text" name="server" value="wss://fudge-server.herokuapp.com" list="urls">
       <!-- <input type="text" name="server" value="" list="urls"> -->
       <datalist id="urls">
@@ -24,17 +24,21 @@
         <option value="wss://fudge-server.herokuapp.com">
       </datalist>
       <button type="button" id="connect">Connect</button><br />
+      <input type="text" id="id" value="" disabled> id <br />
       <input type="text" name="name" value="" disabled>
       <button type="button" id="rename">&lt;-Name</button>
       <input type="text" name="proposal" value=""><br />
-      <input type="text" id="id" value="" disabled> id <br />
+    </fieldset>
+    <fieldset>
+      <legend>WebRTC</legend>
       <button type="button" id="mesh" disabled>create mesh</button>
-      <button type="button" id="host" disabled>become host</button><br />
-      <button type="button" id="disconnect">disconnect all</button><br />
+      <button type="button" id="host" disabled>become host</button>
+      <button type="button" id="disconnect">disconnect</button>
+      <button type="button" id="reset">reset all connections</button>
     </fieldset>
   </form>
   <fieldset>
-    <legend>Connections</legend>
+    <legend>Status</legend>
     <table> </table>
   </fieldset>
   <form id="communication">
@@ -42,7 +46,7 @@
       <legend>Communication</legend>
       Send <textarea cols=70 rows="1" name="message">Test</textarea><br />
       using
-      <input type="radio" name="protocol" value="tcp" id="tcp" /><label for="tcp">TCP</label>
+      <input type="radio" name="protocol" value="ws" id="ws" /><label for="ws">WS</label>
       <input type="radio" name="protocol" value="rtc" id="rtc" checked /><label for="rtc">RTC</label>
       to <button type="button" id="sendServer">server (TCP only)</button>
       <button type="button" id="sendHost">host</button>

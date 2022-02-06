@@ -14,9 +14,10 @@ namespace ClientTest {
   async function start(_event: Event): Promise<void> {
     document.forms[0].querySelector("button#connect").addEventListener("click", connectToServer);
     document.forms[0].querySelector("button#rename").addEventListener("click", rename);
-    document.forms[0].querySelector("button#mesh").addEventListener("click", createStructure);
-    document.forms[0].querySelector("button#host").addEventListener("click", createStructure);
-    document.forms[0].querySelector("button#disconnect").addEventListener("click", createStructure);
+    document.forms[0].querySelector("button#mesh").addEventListener("click", structurePeers);
+    document.forms[0].querySelector("button#host").addEventListener("click", structurePeers);
+    document.forms[0].querySelector("button#disconnect").addEventListener("click", structurePeers);
+    document.forms[0].querySelector("button#reset").addEventListener("click", structurePeers);
     document.forms[1].querySelector("fieldset").addEventListener("click", sendMessage);
     createTable();
   }
@@ -64,6 +65,10 @@ namespace ClientTest {
           let span: HTMLSpanElement = document.querySelector(`#${message.idSource} span`);
           blink(span);
           break;
+          break;
+        case FudgeNet.COMMAND.DISCONNECT_PEERS:
+          client.disconnectPeers();
+          break;
         default:
           break;
       }
@@ -104,7 +109,7 @@ namespace ClientTest {
 
     for (let id in clientsKnown)
       if (!client.clientsInfoFromServer[id])
-        comment(id, "Disconnected");
+        deleteRow(id);
 
     // each client keeps information about all clients
     clientsKnown = client.clientsInfoFromServer;
@@ -137,10 +142,10 @@ namespace ClientTest {
     }
   }
 
-  function comment(_id: string, _comment: string): void {
+  function deleteRow(_id: string): void {
     let table: HTMLTableElement = document.querySelector("table");
-    let cell: HTMLTableCellElement = table.querySelector(`#${_id}>td[name=data]`);
-    cell.textContent = _comment;
+    let row: HTMLTableRowElement = table.querySelector(`tr#${_id}`);
+    table.removeChild(row.parentElement);
   }
 
   function blink(_span: HTMLSpanElement): void {
@@ -149,7 +154,7 @@ namespace ClientTest {
     _span.parentElement.replaceChild(newSpan, _span);
   }
 
-  function createStructure(_event: Event): void {
+  function structurePeers(_event: Event): void {
     let button: HTMLButtonElement = <HTMLButtonElement>_event.target;
     switch (button.textContent) {
       case "create mesh":
@@ -160,18 +165,20 @@ namespace ClientTest {
         // creates a host structure, where all other clients are connected to this client but not to each other
         client.becomeHost();
         break;
-      default:
-        // send a command to dismiss all RTC-connections
-        client.dispatch({ command: FudgeNet.COMMAND.DISCONNECT_PEERS });
+      case "disconnect":
         client.disconnectPeers();
         break;
+      default:
+        // send a command to dismiss all RTC-connections
+        client.dispatch({ command: FudgeNet.COMMAND.DISCONNECT_PEERS, route: FudgeNet.ROUTE.VIA_SERVER });
     }
   }
 
   function sendMessage(_event: Event): void {
     let formdata: FormData = new FormData(document.forms[1]);
+    let protocol: string = formdata.get("protocol").toString();
     let message: string = formdata.get("message").toString();
-    let tcp: boolean = formdata.get("protocol").toString() == "tcp";
+    let ws: boolean = protocol == "ws";
     let receiver: string = formdata.get("receiver").toString();
 
     switch ((<HTMLElement>_event.target).id) {
@@ -181,15 +188,15 @@ namespace ClientTest {
         break;
       case "sendHost":
         // send the message to the host via RTC or TCP
-        client.dispatch({ route: tcp ? FudgeNet.ROUTE.VIA_SERVER_HOST : FudgeNet.ROUTE.HOST, content: { text: message } });
+        client.dispatch({ route: ws ? FudgeNet.ROUTE.VIA_SERVER_HOST : FudgeNet.ROUTE.HOST, content: { text: message } });
         break;
       case "sendAll":
         // send the message to all clients (no target specified) via RTC (no route specified) or TCP (route = via server)
-        client.dispatch({ route: tcp ? FudgeNet.ROUTE.VIA_SERVER : undefined, content: { text: message } });
+        client.dispatch({ route: ws ? FudgeNet.ROUTE.VIA_SERVER : undefined, content: { text: message } });
         break;
       case "sendClient":
         // send the message to a specific client (target specified) via RTC (no route specified) or TCP (route = via server)
-        client.dispatch({ route: tcp ? FudgeNet.ROUTE.VIA_SERVER : undefined, idTarget: receiver, content: { text: message } });
+        client.dispatch({ route: ws ? FudgeNet.ROUTE.VIA_SERVER : undefined, idTarget: receiver, content: { text: message } });
         break;
     }
   }
@@ -199,7 +206,7 @@ namespace ClientTest {
     if (_message.command)
       return;
     let received: HTMLTextAreaElement = document.forms[1].querySelector("textarea#received");
-    let line: string = _message.idSource + "(" + clientsKnown[_message.idSource].name + "):" + JSON.stringify(_message.content);
+    let line: string = (_message.route || "toPeer") + " > " + _message.idSource + "(" + clientsKnown[_message.idSource].name + "):" + JSON.stringify(_message.content);
     received.value = line + "\n" + received.value;
   }
 }
