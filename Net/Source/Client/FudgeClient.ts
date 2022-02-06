@@ -254,9 +254,9 @@ namespace FudgeNet {
       let rtc: Rtc = new Rtc();
       this.peers[_idRemote] = rtc;
 
-      // rtc.addEventListener(
-      //   "negotiationneeded", async (_event: Event) => this.cRsendOffer(_idRemote, _event)
-      // );
+      rtc.addEventListener(
+        "negotiationneeded", async (_event: Event) => this.cRsendOffer(_idRemote)
+      );
       rtc.addEventListener(
         "icecandidate", (_event: RTCPeerConnectionIceEvent) => this.cRsendIceCandidates(_event, _idRemote)
       );
@@ -279,6 +279,7 @@ namespace FudgeNet {
       let rtc: RTCPeerConnection = this.peers[_idRemote];
       let localDescription: RTCSessionDescriptionInit = await rtc.createOffer({ iceRestart: true });
       await rtc.setLocalDescription(localDescription);
+      // this.peers[_idRemote].setupDataChannel(this, _idRemote);
       const offerMessage: FudgeNet.Message = {
         route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.RTC_OFFER, idTarget: _idRemote, content: { offer: rtc.localDescription }
       };

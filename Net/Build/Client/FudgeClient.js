@@ -113,7 +113,7 @@ var FudgeNet;
             this.addEventListener("connectionstatechange", (_event) => this.logState("Connection state change", _event));
         }
         setupDataChannel = (_client, _idRemote) => {
-            let newDataChannel = super.createDataChannel(_client.id + "->" + _idRemote /* , { negotiated: true, id: 0 } */);
+            let newDataChannel = this.createDataChannel(_client.id + "->" + _idRemote /* , { negotiated: true, id: 0 } */);
             console.log("Created data channel", newDataChannel.id);
             this.addDataChannel(_client, newDataChannel);
         };
@@ -380,9 +380,7 @@ var FudgeNet;
         cRstartNegotiation = async (_idRemote) => {
             let rtc = new FudgeNet.Rtc();
             this.peers[_idRemote] = rtc;
-            // rtc.addEventListener(
-            //   "negotiationneeded", async (_event: Event) => this.cRsendOffer(_idRemote, _event)
-            // );
+            rtc.addEventListener("negotiationneeded", async (_event) => this.cRsendOffer(_idRemote));
             rtc.addEventListener("icecandidate", (_event) => this.cRsendIceCandidates(_event, _idRemote));
             rtc.addEventListener("icegatheringstatechange", (_event) => {
                 console.log("ICE-state", rtc.iceGatheringState);
@@ -398,6 +396,7 @@ var FudgeNet;
             let rtc = this.peers[_idRemote];
             let localDescription = await rtc.createOffer({ iceRestart: true });
             await rtc.setLocalDescription(localDescription);
+            // this.peers[_idRemote].setupDataChannel(this, _idRemote);
             const offerMessage = {
                 route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.RTC_OFFER, idTarget: _idRemote, content: { offer: rtc.localDescription }
             };
