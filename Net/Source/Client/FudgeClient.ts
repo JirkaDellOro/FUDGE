@@ -255,7 +255,7 @@ namespace FudgeNet {
       this.peers[_idRemote] = rtc;
 
       rtc.addEventListener(
-        "negotiationneeded", async (_event: Event) => this.cRsendOffer(_idRemote)
+        "negotiationneeded", async (_event: Event) => this.cRsendOffer(_idRemote, _event)
       );
       rtc.addEventListener(
         "icecandidate", (_event: RTCPeerConnectionIceEvent) => this.cRsendIceCandidates(_event, _idRemote)
@@ -268,18 +268,16 @@ namespace FudgeNet {
       );
 
       // fires the negotiationneeded-event
-      // rtc.setupDataChannel(this, _idRemote);
-      this.cRsendOffer(_idRemote);
+      rtc.setupDataChannel(this, _idRemote);
     }
 
     /**
      * Start negotiation by sending an offer with the local description of the connection via the signalling server
      */
-    private cRsendOffer = async (_idRemote: string) => {
+    private cRsendOffer = async (_idRemote: string, _event: Event) => {
       let rtc: RTCPeerConnection = this.peers[_idRemote];
       let localDescription: RTCSessionDescriptionInit = await rtc.createOffer({ iceRestart: true });
       await rtc.setLocalDescription(localDescription);
-      // this.peers[_idRemote].setupDataChannel(this, _idRemote);
       const offerMessage: FudgeNet.Message = {
         route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.RTC_OFFER, idTarget: _idRemote, content: { offer: rtc.localDescription }
       };
@@ -297,14 +295,11 @@ namespace FudgeNet {
 
       // TODO: see if reusing connection is preferable
       let rtc: Rtc = this.peers[_message.idSource!] || (this.peers[_message.idSource!] = new Rtc());
-
+      rtc.addEventListener(
+        "datachannel", (_event: RTCDataChannelEvent) => this.cEestablishConnection(_event, this.peers[_message.idSource!])
+      );
       await rtc.setRemoteDescription(new RTCSessionDescription(_message.content?.offer));
       await rtc.setLocalDescription();
-      // rtc.addEventListener(
-      //   "datachannel", (_event: RTCDataChannelEvent) => this.cEestablishConnection(_event, this.peers[_message.idSource!])
-      // );
-      if (!rtc.dataChannel)
-        rtc.setupDataChannel(this, _message.idSource!);
 
       const answerMessage: FudgeNet.Message = {
         route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.RTC_ANSWER, idTarget: _message.idSource, content: { answer: rtc.localDescription }
@@ -318,12 +313,8 @@ namespace FudgeNet {
      * Caller receives the answer and sets the remote description on its side. The first part of the negotiation is done.
      */
     private cRreceiveAnswer = async (_message: FudgeNet.Message) => {
-      console.info("Caller: received answer", _message);
-      let rtc: Rtc = this.peers[_message.idSource!];
-      await rtc.setRemoteDescription(_message.content?.answer);
-      // debugger;
-      if (!rtc.dataChannel)
-        rtc.setupDataChannel(this, _message.idSource!);
+      console.info("Caller: received answer, create data channel ", _message);
+      await this.peers[_message.idSource!].setRemoteDescription(_message.content?.answer);
     }
 
 
@@ -332,10 +323,10 @@ namespace FudgeNet {
      * which sends the candidate info to callee via the server
      */
     private cRsendIceCandidates = async (_event: RTCPeerConnectionIceEvent, _idRemote: string) => {
-      let pc: RTCPeerConnection = <RTCPeerConnection>_event.currentTarget;
-      if (_event.candidate == null || pc.iceGatheringState != "gathering")
+      if (!_event.candidate)
         return;
 
+      let pc: RTCPeerConnection = <RTCPeerConnection>_event.currentTarget;
       console.info("Caller: send ICECandidates to server", _event.candidate);
       let message: FudgeNet.Message = {
         route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.ICE_CANDIDATE, idTarget: _idRemote, content: { candidate: _event.candidate, states: [pc.connectionState, pc.iceConnectionState, pc.iceGatheringState] }
@@ -359,12 +350,6 @@ namespace FudgeNet {
       else {
         console.error("Unexpected Error: RemoteDatachannel");
       }
-    }
-
-    private async delay(_milisec: number): Promise<void> {
-      return new Promise(resolve => {
-        setTimeout(() => { resolve(); }, _milisec);
-      });
     }
   }
 }

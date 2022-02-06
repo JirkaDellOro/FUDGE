@@ -75,16 +75,9 @@ declare namespace FudgeNet {
         MESSAGE_RECEIVED = "message"
     }
     let configuration: {
-        iceCandidatePoolSize: number;
-        iceServers: ({
+        iceServers: {
             urls: string;
-            credential?: undefined;
-            username?: undefined;
-        } | {
-            urls: string;
-            credential: string;
-            username: string;
-        })[];
+        }[];
     };
     /**
      * Manages a single rtc peer-to-peer connection with multiple channels.
@@ -195,6 +188,5 @@ declare namespace FudgeNet {
          */
         private cEaddIceCandidate;
         private cEestablishConnection;
-        private delay;
     }
 }

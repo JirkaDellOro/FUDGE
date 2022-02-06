@@ -11,11 +11,10 @@ namespace FudgeNet {
   // More info from here https://developer.mozilla.org/en-US/docs/Web/API/RTCConfiguration
   // tslint:disable-next-line: typedef
   export let configuration = {
-    iceCandidatePoolSize: 5,
     iceServers: [
       // { urls: "stun:stun2.1.google.com:19302" }
       // { urls: "stun:stun.example.com" }
-      // { urls: "stun:stun.l.google.com:19302" }
+      { urls: "stun:stun.l.google.com:19302" }
       // { urls: "turn:0.peerjs.com:3478", username: "peerjs", credential: "peerjsp" }
       // {
       //   urls: "turn:192.158.29.39:3478?transport=udp",
@@ -33,15 +32,16 @@ namespace FudgeNet {
       //   credential: "webrtc",
       //   username: "webrtc"
       // }
-      {
-        urls: "stun:stun.stunprotocol.org"
-      },
-      {
-        urls: "turn:numb.viagenie.ca",
-        credential: "muazkh",
-        username: "webrtc@live.com"
-      }
+      // {
+      //   urls: "stun:stun.stunprotocol.org"
+      // }
+      // {
+      //   urls: "turn:numb.viagenie.ca",
+      //   credential: "muazkh",
+      //   username: "webrtc@live.com"
+      // }
     ]
+
   };
 
   /**
@@ -69,8 +69,8 @@ namespace FudgeNet {
     }
 
     public setupDataChannel = (_client: FudgeClient, _idRemote: string): void => {
-      let newDataChannel: RTCDataChannel = this.createDataChannel(_client.id + "->" + _idRemote, { negotiated: true, id: 0 });
-      console.log("Created data channel", newDataChannel);
+      let newDataChannel: RTCDataChannel = this.createDataChannel(_client.id + "->" + _idRemote /* , { negotiated: true, id: 0 } */);
+      console.log("Created data channel", newDataChannel.id);
       this.addDataChannel(_client, newDataChannel);
     }
 
