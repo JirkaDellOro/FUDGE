@@ -409,7 +409,7 @@ var FudgeNet;
         cEreceiveOffer = async (_message) => {
             console.info("Callee: offer received, create connection", _message);
             // TODO: see if reusing connection is preferable
-            let rtc = this.peers[_message.idSource] || (this.peers[_message.idSource] = new FudgeNet.Rtc());
+            let rtc = (this.peers[_message.idSource] = new FudgeNet.Rtc());
             rtc.addEventListener("datachannel", (_event) => this.cEestablishConnection(_event, this.peers[_message.idSource]));
             await rtc.setRemoteDescription(new RTCSessionDescription(_message.content?.offer));
             await rtc.setLocalDescription();
@@ -435,7 +435,6 @@ var FudgeNet;
             let pc = _event.currentTarget;
             if (_event.candidate == null || pc.iceGatheringState != "gathering")
                 return;
-            await this.delay(2000);
             console.info("Caller: send ICECandidates to server", _event.candidate);
             let message = {
                 route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.ICE_CANDIDATE, idTarget: _idRemote, content: { candidate: _event.candidate, states: [pc.connectionState, pc.iceConnectionState, pc.iceGatheringState] }

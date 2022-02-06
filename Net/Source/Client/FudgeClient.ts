@@ -294,7 +294,7 @@ namespace FudgeNet {
       console.info("Callee: offer received, create connection", _message);
 
       // TODO: see if reusing connection is preferable
-      let rtc: Rtc = this.peers[_message.idSource!] || (this.peers[_message.idSource!] = new Rtc());
+      let rtc: Rtc = /* this.peers[_message.idSource!] || */ (this.peers[_message.idSource!] = new Rtc());
       rtc.addEventListener(
         "datachannel", (_event: RTCDataChannelEvent) => this.cEestablishConnection(_event, this.peers[_message.idSource!])
       );
@@ -327,8 +327,6 @@ namespace FudgeNet {
       let pc: RTCPeerConnection = <RTCPeerConnection>_event.currentTarget;
       if (_event.candidate == null || pc.iceGatheringState != "gathering")
         return;
-
-      await this.delay(2000);
 
       console.info("Caller: send ICECandidates to server", _event.candidate);
       let message: FudgeNet.Message = {
