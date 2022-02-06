@@ -68,12 +68,12 @@ var FudgeNet;
             // { urls: "stun:stun2.1.google.com:19302" }
             // { urls: "stun:stun.example.com" }
             // { urls: "stun:stun.l.google.com:19302" }
-            { urls: "turn:0.peerjs.com:3478", username: "peerjs", credential: "peerjsp" },
-            {
-                urls: "turn:192.158.29.39:3478?transport=udp",
-                credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
-                username: "28224511:1379330808"
-            }
+            // { urls: "turn:0.peerjs.com:3478", username: "peerjs", credential: "peerjsp" }
+            // {
+            //   urls: "turn:192.158.29.39:3478?transport=udp",
+            //   credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
+            //   username: "28224511:1379330808"
+            // }
             // { urls: "stun:relay.backups.cz" },
             // {
             //   urls: "turn:relay.backups.cz",
@@ -85,14 +85,14 @@ var FudgeNet;
             //   credential: "webrtc",
             //   username: "webrtc"
             // }
-            // {
-            //   urls: "stun:stun.stunprotocol.org"
-            // }
-            // {
-            //   urls: "turn:numb.viagenie.ca",
-            //   credential: "muazkh",
-            //   username: "webrtc@live.com"
-            // }
+            {
+                urls: "stun:stun.stunprotocol.org"
+            },
+            {
+                urls: "turn:numb.viagenie.ca",
+                credential: "muazkh",
+                username: "webrtc@live.com"
+            }
         ]
     };
     /**
@@ -410,9 +410,9 @@ var FudgeNet;
             console.info("Callee: offer received, create connection", _message);
             // TODO: see if reusing connection is preferable
             let rtc = this.peers[_message.idSource] || (this.peers[_message.idSource] = new FudgeNet.Rtc());
+            rtc.addEventListener("datachannel", (_event) => this.cEestablishConnection(_event, this.peers[_message.idSource]));
             await rtc.setRemoteDescription(new RTCSessionDescription(_message.content?.offer));
             await rtc.setLocalDescription();
-            rtc.addEventListener("datachannel", (_event) => this.cEestablishConnection(_event, this.peers[_message.idSource]));
             const answerMessage = {
                 route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.RTC_ANSWER, idTarget: _message.idSource, content: { answer: rtc.localDescription }
             };
@@ -426,15 +426,19 @@ var FudgeNet;
         cRreceiveAnswer = async (_message) => {
             console.info("Caller: received answer, create data channel ", _message);
             await this.peers[_message.idSource].setRemoteDescription(_message.content?.answer);
+            const answerMessage = {
+                route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.ICE_CANDIDATE, idTarget: _message.idSource, content: { text: "Dummy" }
+            };
+            this.dispatch(answerMessage);
         };
         /**
          * Caller starts collecting ICE-candidates and calls this function for each candidate found,
          * which sends the candidate info to callee via the server
          */
         cRsendIceCandidates = async (_event, _idRemote) => {
-            if (!_event.candidate)
-                return;
             let pc = _event.currentTarget;
+            if (!_event.candidate || pc.iceGatheringState != "gathering")
+                return;
             console.info("Caller: send ICECandidates to server", _event.candidate);
             let message = {
                 route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.ICE_CANDIDATE, idTarget: _idRemote, content: { candidate: _event.candidate, states: [pc.connectionState, pc.iceConnectionState, pc.iceGatheringState] }

@@ -295,11 +295,12 @@ namespace FudgeNet {
 
       // TODO: see if reusing connection is preferable
       let rtc: Rtc = this.peers[_message.idSource!] || (this.peers[_message.idSource!] = new Rtc());
-      await rtc.setRemoteDescription(new RTCSessionDescription(_message.content?.offer));
-      await rtc.setLocalDescription();
       rtc.addEventListener(
         "datachannel", (_event: RTCDataChannelEvent) => this.cEestablishConnection(_event, this.peers[_message.idSource!])
       );
+
+      await rtc.setRemoteDescription(new RTCSessionDescription(_message.content?.offer));
+      await rtc.setLocalDescription();
 
       const answerMessage: FudgeNet.Message = {
         route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.RTC_ANSWER, idTarget: _message.idSource, content: { answer: rtc.localDescription }
@@ -315,6 +316,10 @@ namespace FudgeNet {
     private cRreceiveAnswer = async (_message: FudgeNet.Message) => {
       console.info("Caller: received answer, create data channel ", _message);
       await this.peers[_message.idSource!].setRemoteDescription(_message.content?.answer);
+      const answerMessage: FudgeNet.Message = {
+        route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.ICE_CANDIDATE, idTarget: _message.idSource, content: { text: "Dummy" }
+      };
+      this.dispatch(answerMessage);
     }
 
 
@@ -323,10 +328,10 @@ namespace FudgeNet {
      * which sends the candidate info to callee via the server
      */
     private cRsendIceCandidates = async (_event: RTCPeerConnectionIceEvent, _idRemote: string) => {
-      if (!_event.candidate)
+      let pc: RTCPeerConnection = <RTCPeerConnection>_event.currentTarget;
+      if (!_event.candidate || pc.iceGatheringState != "gathering")
         return;
 
-      let pc: RTCPeerConnection = <RTCPeerConnection>_event.currentTarget;
       console.info("Caller: send ICECandidates to server", _event.candidate);
       let message: FudgeNet.Message = {
         route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.ICE_CANDIDATE, idTarget: _idRemote, content: { candidate: _event.candidate, states: [pc.connectionState, pc.iceConnectionState, pc.iceGatheringState] }
