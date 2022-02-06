@@ -435,7 +435,7 @@ var FudgeNet;
             let pc = _event.currentTarget;
             if (_event.candidate == null || pc.iceGatheringState != "gathering")
                 return;
-            this.delay(2000);
+            await this.delay(2000);
             console.info("Caller: send ICECandidates to server", _event.candidate);
             let message = {
                 route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.ICE_CANDIDATE, idTarget: _idRemote, content: { candidate: _event.candidate, states: [pc.connectionState, pc.iceConnectionState, pc.iceGatheringState] }

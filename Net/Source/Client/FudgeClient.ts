@@ -327,8 +327,8 @@ namespace FudgeNet {
       let pc: RTCPeerConnection = <RTCPeerConnection>_event.currentTarget;
       if (_event.candidate == null || pc.iceGatheringState != "gathering")
         return;
-        
-      this.delay(2000);
+
+      await this.delay(2000);
 
       console.info("Caller: send ICECandidates to server", _event.candidate);
       let message: FudgeNet.Message = {
