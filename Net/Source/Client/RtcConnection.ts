@@ -70,12 +70,12 @@ namespace FudgeNet {
 
     public setupDataChannel = (_client: FudgeClient, _idRemote: string): void => {
       let newDataChannel: RTCDataChannel = this.createDataChannel(_client.id + "->" + _idRemote /* , { negotiated: true, id: 0 } */);
-      console.log("Created data channel", newDataChannel.label);
+      console.warn("Created data channel");
       this.addDataChannel(_client, newDataChannel);
     }
 
     public addDataChannel = (_client: FudgeClient, _dataChannel: RTCDataChannel): void => {
-      console.error("AddDataChannel, must only be called once for each connection");
+      console.warn("AddDataChannel", _dataChannel.id, _dataChannel.label);
       this.dataChannel = _dataChannel;
       this.dataChannel.addEventListener(EVENT.CONNECTION_OPENED, dispatchRtcEvent);
       this.dataChannel.addEventListener(EVENT.CONNECTION_CLOSED, dispatchRtcEvent);

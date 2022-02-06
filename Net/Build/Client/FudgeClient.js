@@ -114,11 +114,11 @@ var FudgeNet;
         }
         setupDataChannel = (_client, _idRemote) => {
             let newDataChannel = this.createDataChannel(_client.id + "->" + _idRemote /* , { negotiated: true, id: 0 } */);
-            console.log("Created data channel", newDataChannel.label);
+            console.warn("Created data channel");
             this.addDataChannel(_client, newDataChannel);
         };
         addDataChannel = (_client, _dataChannel) => {
-            console.error("AddDataChannel, must only be called once for each connection");
+            console.warn("AddDataChannel", _dataChannel.id, _dataChannel.label);
             this.dataChannel = _dataChannel;
             this.dataChannel.addEventListener(EVENT.CONNECTION_OPENED, dispatchRtcEvent);
             this.dataChannel.addEventListener(EVENT.CONNECTION_CLOSED, dispatchRtcEvent);
@@ -387,8 +387,8 @@ var FudgeNet;
             });
             // fires the negotiationneeded-event
             // rtc.setupDataChannel(this, _idRemote);
-            // this.cRsendOffer(_idRemote);
-            rtc.restartIce();
+            this.cRsendOffer(_idRemote);
+            // rtc.restartIce();
         };
         /**
          * Start negotiation by sending an offer with the local description of the connection via the signalling server
@@ -410,7 +410,7 @@ var FudgeNet;
          */
         cEreceiveOffer = async (_message) => {
             console.info("Callee: offer received, create connection", _message);
-            let rtc = this.peers[_message.idSource] || (this.peers[_message.idSource] = new FudgeNet.Rtc());
+            let rtc = (this.peers[_message.idSource] = new FudgeNet.Rtc());
             rtc.addEventListener("datachannel", (_event) => this.cEestablishConnection(_event, this.peers[_message.idSource]));
             await rtc.setRemoteDescription(new RTCSessionDescription(_message.content?.offer));
             await rtc.setLocalDescription();
@@ -431,6 +431,8 @@ var FudgeNet;
             await rtc.setRemoteDescription(_message.content?.answer);
             if (!rtc.dataChannel)
                 rtc.setupDataChannel(this, _message.idSource);
+            else
+                console.warn("Datachannel reuse: ", rtc.dataChannel.id, rtc.dataChannel.label);
         };
         /**
          * Caller starts collecting ICE-candidates and calls this function for each candidate found,

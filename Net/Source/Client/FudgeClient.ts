@@ -269,8 +269,8 @@ namespace FudgeNet {
 
       // fires the negotiationneeded-event
       // rtc.setupDataChannel(this, _idRemote);
-      // this.cRsendOffer(_idRemote);
-      rtc.restartIce();
+      this.cRsendOffer(_idRemote);
+      // rtc.restartIce();
     }
 
     /**
@@ -295,7 +295,7 @@ namespace FudgeNet {
     private cEreceiveOffer = async (_message: FudgeNet.Message): Promise<void> => {
       console.info("Callee: offer received, create connection", _message);
 
-      let rtc: Rtc = this.peers[_message.idSource!] || (this.peers[_message.idSource!] = new Rtc());
+      let rtc: Rtc = /* this.peers[_message.idSource!] || */ (this.peers[_message.idSource!] = new Rtc());
       rtc.addEventListener(
         "datachannel", (_event: RTCDataChannelEvent) => this.cEestablishConnection(_event, this.peers[_message.idSource!])
       );
@@ -320,6 +320,8 @@ namespace FudgeNet {
       await rtc.setRemoteDescription(_message.content?.answer);
       if (!rtc.dataChannel)
         rtc.setupDataChannel(this, _message.idSource!);
+      else
+      console.warn("Datachannel reuse: ", rtc.dataChannel!.id, rtc.dataChannel!.label);
     }
 
 
