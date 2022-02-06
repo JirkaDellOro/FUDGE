@@ -318,8 +318,8 @@ namespace FudgeNet {
       console.info("Caller: received answer, create data channel ", _message);
       let rtc: Rtc = this.peers[_message.idSource!];
       await rtc.setRemoteDescription(_message.content?.answer);
-      rtc.setupDataChannel(this, _message.idSource!);
-      // rtc.restartIce();
+      if (!rtc.dataChannel)
+        rtc.setupDataChannel(this, _message.idSource!);
     }
 
 
