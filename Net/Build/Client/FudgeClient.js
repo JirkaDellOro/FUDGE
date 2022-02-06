@@ -386,8 +386,8 @@ var FudgeNet;
                 console.log("ICE-state", rtc.iceGatheringState);
             });
             // fires the negotiationneeded-event
-            // rtc.setupDataChannel(this, _idRemote);
-            this.cRsendOffer(_idRemote);
+            rtc.setupDataChannel(this, _idRemote);
+            // this.cRsendOffer(_idRemote);
             // rtc.restartIce();
         };
         /**
@@ -429,10 +429,10 @@ var FudgeNet;
             console.info("Caller: received answer, create data channel ", _message);
             let rtc = this.peers[_message.idSource];
             await rtc.setRemoteDescription(_message.content?.answer);
-            if (!rtc.dataChannel)
-                rtc.setupDataChannel(this, _message.idSource);
-            else
-                console.warn("Datachannel reuse: ", rtc.dataChannel.id, rtc.dataChannel.label);
+            // if (!rtc.dataChannel)
+            //   rtc.setupDataChannel(this, _message.idSource!);
+            // else
+            // console.warn("Datachannel reuse: ", rtc.dataChannel!.id, rtc.dataChannel!.label);
         };
         /**
          * Caller starts collecting ICE-candidates and calls this function for each candidate found,
