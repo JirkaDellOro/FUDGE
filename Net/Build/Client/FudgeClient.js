@@ -113,8 +113,8 @@ var FudgeNet;
             this.addEventListener("connectionstatechange", (_event) => this.logState("Connection state change", _event));
         }
         setupDataChannel = (_client, _idRemote) => {
-            let newDataChannel = this.createDataChannel(_client.id + "->" + _idRemote /* , { negotiated: true, id: 0 } */);
-            console.log("Created data channel", newDataChannel.id);
+            let newDataChannel = this.createDataChannel(_client.id + "->" + _idRemote, { negotiated: true, id: 0 });
+            console.log("Created data channel", newDataChannel.label);
             this.addDataChannel(_client, newDataChannel);
         };
         addDataChannel = (_client, _dataChannel) => {
@@ -408,11 +408,13 @@ var FudgeNet;
          */
         cEreceiveOffer = async (_message) => {
             console.info("Callee: offer received, create connection", _message);
-            // TODO: see if reusing connection is preferable
-            let rtc = (this.peers[_message.idSource] = new FudgeNet.Rtc());
-            rtc.addEventListener("datachannel", (_event) => this.cEestablishConnection(_event, this.peers[_message.idSource]));
+            let rtc = this.peers[_message.idSource] || (this.peers[_message.idSource] = new FudgeNet.Rtc());
+            // rtc.addEventListener(
+            //   "datachannel", (_event: RTCDataChannelEvent) => this.cEestablishConnection(_event, this.peers[_message.idSource!])
+            // );
             await rtc.setRemoteDescription(new RTCSessionDescription(_message.content?.offer));
             await rtc.setLocalDescription();
+            rtc.setupDataChannel(this, _message.idSource);
             const answerMessage = {
                 route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.RTC_ANSWER, idTarget: _message.idSource, content: { answer: rtc.localDescription }
             };
