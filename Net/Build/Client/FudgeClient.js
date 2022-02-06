@@ -380,7 +380,7 @@ var FudgeNet;
         cRstartNegotiation = async (_idRemote) => {
             let rtc = new FudgeNet.Rtc();
             this.peers[_idRemote] = rtc;
-            rtc.addEventListener("negotiationneeded", async (_event) => this.cRsendOffer(_idRemote, _event));
+            rtc.addEventListener("negotiationneeded", async (_event) => this.cRsendOffer(_idRemote));
             rtc.addEventListener("icecandidate", (_event) => this.cRsendIceCandidates(_event, _idRemote));
             rtc.addEventListener("icegatheringstatechange", (_event) => {
                 console.log("ICE-state", rtc.iceGatheringState);
@@ -391,7 +391,7 @@ var FudgeNet;
         /**
          * Start negotiation by sending an offer with the local description of the connection via the signalling server
          */
-        cRsendOffer = async (_idRemote, _event) => {
+        cRsendOffer = async (_idRemote) => {
             let rtc = this.peers[_idRemote];
             let localDescription = await rtc.createOffer({ iceRestart: true });
             await rtc.setLocalDescription(localDescription);
@@ -409,7 +409,7 @@ var FudgeNet;
         cEreceiveOffer = async (_message) => {
             console.info("Callee: offer received, create connection", _message);
             // TODO: see if reusing connection is preferable
-            let rtc = this.peers[_message.idSource] || (this.peers[_message.idSource] = new FudgeNet.Rtc());
+            let rtc = (this.peers[_message.idSource] = new FudgeNet.Rtc());
             rtc.addEventListener("datachannel", (_event) => this.cEestablishConnection(_event, this.peers[_message.idSource]));
             await rtc.setRemoteDescription(new RTCSessionDescription(_message.content?.offer));
             await rtc.setLocalDescription();

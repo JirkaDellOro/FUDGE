@@ -255,7 +255,7 @@ namespace FudgeNet {
       this.peers[_idRemote] = rtc;
 
       rtc.addEventListener(
-        "negotiationneeded", async (_event: Event) => this.cRsendOffer(_idRemote, _event)
+        "negotiationneeded", async (_event: Event) => this.cRsendOffer(_idRemote)
       );
       rtc.addEventListener(
         "icecandidate", (_event: RTCPeerConnectionIceEvent) => this.cRsendIceCandidates(_event, _idRemote)
@@ -274,7 +274,7 @@ namespace FudgeNet {
     /**
      * Start negotiation by sending an offer with the local description of the connection via the signalling server
      */
-    private cRsendOffer = async (_idRemote: string, _event: Event) => {
+    private cRsendOffer = async (_idRemote: string) => {
       let rtc: RTCPeerConnection = this.peers[_idRemote];
       let localDescription: RTCSessionDescriptionInit = await rtc.createOffer({ iceRestart: true });
       await rtc.setLocalDescription(localDescription);
@@ -294,7 +294,7 @@ namespace FudgeNet {
       console.info("Callee: offer received, create connection", _message);
 
       // TODO: see if reusing connection is preferable
-      let rtc: Rtc = this.peers[_message.idSource!] || (this.peers[_message.idSource!] = new Rtc());
+      let rtc: Rtc = /* this.peers[_message.idSource!] || */ (this.peers[_message.idSource!] = new Rtc());
       rtc.addEventListener(
         "datachannel", (_event: RTCDataChannelEvent) => this.cEestablishConnection(_event, this.peers[_message.idSource!])
       );
