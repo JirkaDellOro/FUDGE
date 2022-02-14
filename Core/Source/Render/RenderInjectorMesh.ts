@@ -4,7 +4,7 @@ namespace FudgeCore {
     indices: WebGLBuffer;
     nIndices: number;
     textureUVs: WebGLBuffer;
-    normalsFace: WebGLBuffer;
+    normalsFlat: WebGLBuffer;
     normalsVertex: WebGLBuffer;
   }
  //gives WebGL Buffer the data from the {@link Mesh]]
@@ -35,9 +35,9 @@ namespace FudgeCore {
       crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, textureUVs);
       crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, this.textureUVs, WebGL2RenderingContext.STATIC_DRAW);
 
-      let normalsFace: WebGLBuffer = RenderWebGL.assert<WebGLBuffer>(crc3.createBuffer());
-      crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, normalsFace);
-      crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, this.normalsFace, WebGL2RenderingContext.STATIC_DRAW);
+      let normalsFlat: WebGLBuffer = RenderWebGL.assert<WebGLBuffer>(crc3.createBuffer());
+      crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, normalsFlat);
+      crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, this.normalsFlat, WebGL2RenderingContext.STATIC_DRAW);
 
       let normalsVertex: WebGLBuffer = RenderWebGL.assert<WebGLBuffer>(crc3.createBuffer());
       crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, normalsVertex);
@@ -48,7 +48,7 @@ namespace FudgeCore {
         indices: indices,
         nIndices: this.getIndexCount(),
         textureUVs: textureUVs,
-        normalsFace: normalsFace,
+        normalsFlat: normalsFlat,
         normalsVertex: normalsVertex
       };
 
@@ -85,7 +85,7 @@ namespace FudgeCore {
 
       let aNormalFace: number = _shader.attributes["a_normalFace"];
       if (aNormalFace) {
-        crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderBuffers.normalsFace);
+        crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderBuffers.normalsFlat);
         crc3.enableVertexAttribArray(aNormalFace);
         RenderWebGL.setAttributeStructure(aNormalFace, Mesh.getBufferSpecification());
       }

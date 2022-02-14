@@ -42,7 +42,7 @@ namespace FudgeCore {
       return textureUVs;
     }
 
-    protected createFaceNormals(): Float32Array {
+    protected createFlatNormals(): Float32Array {
       return new Float32Array([
         /*0: normal of front face*/
         0, 0, 1,

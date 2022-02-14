@@ -168,7 +168,7 @@ namespace FudgeCore {
       return new Float32Array(this.facecrossproducts);
     }
 
-    protected createFaceNormals(): Float32Array {
+    protected createFlatNormals(): Float32Array {
       return new Float32Array(this.facenormals);
     }
   }

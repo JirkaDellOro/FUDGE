@@ -85,7 +85,7 @@ namespace FudgeCore {
       return textureUVs;
     }
 
-    protected createFaceNormals(): Float32Array {
+    protected createFlatNormals(): Float32Array {
       let normals: Float32Array = new Float32Array([
                 // for each triangle, the last vertex of the three defining refers to the normalvector when using flat shading
                 // First wrap

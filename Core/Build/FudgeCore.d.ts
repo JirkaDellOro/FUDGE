@@ -451,7 +451,7 @@ declare namespace FudgeCore {
         indices: WebGLBuffer;
         nIndices: number;
         textureUVs: WebGLBuffer;
-        normalsFace: WebGLBuffer;
+        normalsFlat: WebGLBuffer;
         normalsVertex: WebGLBuffer;
     }
     class RenderInjectorMesh {
@@ -3402,6 +3402,16 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    class Face {
+        private vertices;
+        indices: number[];
+        normalUnscaled: Vector3;
+        normal: Vector3;
+        constructor(_vertices: Vertex[], _index0: number, _index1: number, _index2: number);
+        calculateNormals(): void;
+    }
+}
+declare namespace FudgeCore {
     /**
      * Abstract base class for all meshes.
      * Meshes provide indexed vertices, the order of indices to create trigons and normals, and texture coordinates
@@ -3416,13 +3426,27 @@ declare namespace FudgeCore {
         idResource: string;
         name: string;
         renderBuffers: RenderBuffers;
+        /** vertices of the actual point cloud, some points might be in the same location in order to refer to different texels */
         protected ƒvertices: Float32Array;
+        /** indices to create faces from the vertices, rotation determines direction of face-normal */
         protected ƒindices: Uint16Array;
+        /** texture coordinates associated with the vertices by the position in the array */
         protected ƒtextureUVs: Float32Array;
-        protected ƒnormalsFace: Float32Array;
-        protected ƒfaceCrossProducts: Float32Array;
+        /** normals of the faces, not used for rendering but computation of flat- and vertex-normals */
+        protected ƒnormalsFaceUnscaled: Float32Array;
+        /** vertex normals for smooth shading, interpolated between vertices during rendering */
         protected ƒnormalsVertex: Float32Array;
+        /** flat-shading: normalized face normals, every third entry is used only */
+        protected ƒnormalsFlat: Float32Array;
+        /** flat-shading: extra vertex array, since using vertices with multiple faces is rarely possible due to the limitation above */
+        protected ƒverticesFlat: Float32Array;
+        /** flat-shading: therefore an extra indices-array is needed */
+        protected ƒindicesFlat: Float32Array;
+        /** flat-shading: and an extra textureUV-array */
+        protected ƒtextureUVsFlat: Float32Array;
+        /** bounding box AABB */
         protected ƒbox: Box;
+        /** bounding radius */
         protected ƒradius: number;
         constructor(_name?: string);
         static getBufferSpecification(): BufferSpecification;
@@ -3436,10 +3460,12 @@ declare namespace FudgeCore {
         get type(): string;
         get vertices(): Float32Array;
         get indices(): Uint16Array;
-        get normalsFace(): Float32Array;
-        get faceCrossProducts(): Float32Array;
+        get normalsFaceUnscaled(): Float32Array;
         get normalsVertex(): Float32Array;
         get textureUVs(): Float32Array;
+        get normalsFlat(): Float32Array;
+        get verticesFlat(): Float32Array;
+        get textureUVsFlat(): Float32Array;
         get boundingBox(): Box;
         get radius(): number;
         useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): void;
@@ -3458,8 +3484,10 @@ declare namespace FudgeCore {
         protected createIndices(): Uint16Array;
         protected createNormals(): Float32Array;
         protected calculateFaceCrossProducts(): Float32Array;
-        protected createFaceNormals(): Float32Array;
+        protected createFlatNormals(): Float32Array;
         protected createVertexNormals(): Float32Array;
+        createFlatVertices(): Float32Array;
+        createFlatTextureUVs(): Float32Array;
         protected createRadius(): number;
         protected createBoundingBox(): Box;
         protected reduceMutator(_mutator: Mutator): void;
@@ -3482,7 +3510,7 @@ declare namespace FudgeCore {
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
-        protected createFaceNormals(): Float32Array;
+        protected createFlatNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {
@@ -3547,7 +3575,7 @@ declare namespace FudgeCore {
         protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;
         protected createIndices(): Uint16Array;
-        protected createFaceNormals(): Float32Array;
+        protected createFlatNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {
@@ -3580,7 +3608,7 @@ declare namespace FudgeCore {
         protected createTextureUVs(): Float32Array;
         protected createIndices(): Uint16Array;
         protected calculateFaceCrossProducts(): Float32Array;
-        protected createFaceNormals(): Float32Array;
+        protected createFlatNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {
@@ -3618,7 +3646,7 @@ declare namespace FudgeCore {
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
-        protected createFaceNormals(): Float32Array;
+        protected createFlatNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {
@@ -3735,7 +3763,7 @@ declare namespace FudgeCore {
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
-        protected createFaceNormals(): Float32Array;
+        protected createFlatNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {
@@ -3752,6 +3780,13 @@ declare namespace FudgeCore {
         create(_thickness?: number, _majorSegments?: number, _minorSegments?: number): void;
         mutate(_mutator: Mutator): Promise<void>;
         protected createIndices(): Uint16Array;
+    }
+}
+declare namespace FudgeCore {
+    class Vertex {
+        position: Vector3;
+        uv: Vector2;
+        constructor(_position: Vector3, _uv: Vector2);
     }
 }
 declare namespace FudgeCore {

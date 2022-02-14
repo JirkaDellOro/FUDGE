@@ -27,7 +27,7 @@ namespace FudgeCore {
             return this.indicesToSet;
         }
 
-        protected createFaceNormals(): Float32Array {
+        protected createFlatNormals(): Float32Array {
             return this.faceNormalsToSet;
         }
     }

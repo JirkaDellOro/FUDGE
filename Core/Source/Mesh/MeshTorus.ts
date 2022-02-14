@@ -63,7 +63,7 @@ namespace FudgeCore {
       vertices = vertices.map(_value => _value / 2);
 
       this.ƒtextureUVs = new Float32Array(textureUVs);
-      this.ƒnormalsFace = new Float32Array(facenormals);
+      this.ƒnormalsFlat = new Float32Array(facenormals);
       this.ƒvertices = new Float32Array(vertices);
       this.ƒindices = this.createIndices();
       this.createRenderBuffers();
