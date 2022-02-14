@@ -9,8 +9,14 @@ namespace FudgeCore {
   export type HeightMapFunction = (x: number, z: number) => number;
 
   export class TerrainInfo {
+    /** the position of the point vertically projected on the terrain in world coordinates */
     position: Vector3;
+    /** the normal of the face of the terrain under the point in world coordinates */
     normal: Vector3;
+    /** the point retransformed into mesh coordinates of the terrain */
+    positionMesh: Vector3;
+    /** vertical distance of the point to the terrain, negative if below */
+    distance: number;
   }
 
   /**
@@ -51,22 +57,21 @@ namespace FudgeCore {
       if (!_mtxInverse)
         _mtxInverse = Matrix4x4.INVERSION(_mtxWorld);
 
-      let posLocal: Vector3 = Vector3.TRANSFORMATION(_position, _mtxInverse, true);
+      let terrainInfo: TerrainInfo = new TerrainInfo;
 
+      let posLocal: Vector3 = terrainInfo.positionMesh = Vector3.TRANSFORMATION(_position, _mtxInverse, true);
       let nearestFace: DistanceToFaceVertices = this.findNearestFace(posLocal);
-      let posOnTerrain: TerrainInfo = new TerrainInfo;
 
-      let origin: Vector3 = new Vector3(posLocal.x, this.calculateHeight(nearestFace, posLocal), posLocal.z);
-      let direction: Vector3 = nearestFace.faceNormal;
+      terrainInfo.position = new Vector3(posLocal.x, this.calculateHeight(nearestFace, posLocal), posLocal.z);
+      let normal: Vector3 = nearestFace.faceNormal;
 
-      origin = Vector3.TRANSFORMATION(origin, _mtxWorld, true);
-      direction = Vector3.TRANSFORMATION(direction, Matrix4x4.TRANSPOSE(_mtxInverse), false);
-      direction.normalize();
+      terrainInfo.position = Vector3.TRANSFORMATION(terrainInfo.position, _mtxWorld, true);
+      terrainInfo.normal = Vector3.TRANSFORMATION(normal, Matrix4x4.TRANSPOSE(_mtxInverse), false);
+      terrainInfo.normal.normalize();
 
-      posOnTerrain.position = origin;
-      posOnTerrain.normal = direction;
+      terrainInfo.distance = _position.y - terrainInfo.position.y;
 
-      return posOnTerrain;
+      return terrainInfo;
     }
 
     //#region Transfer

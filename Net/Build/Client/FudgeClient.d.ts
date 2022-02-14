@@ -86,13 +86,13 @@ declare namespace FudgeNet {
      * used internally by the {@link FudgeClient} and should not be used otherwise.
      * @author Jirka Dell'Oro-Friedl, HFU, 2021
      */
-    class Rtc {
-        peerConnection: RTCPeerConnection;
+    class Rtc extends RTCPeerConnection {
         dataChannel: RTCDataChannel | undefined;
         mediaStream: MediaStream | undefined;
         constructor();
-        createDataChannel(_client: FudgeClient, _idRemote: string): void;
-        addDataChannel(_client: FudgeClient, _dataChannel: RTCDataChannel): void;
+        setupDataChannel: (_client: FudgeClient, _idRemote: string) => void;
+        addDataChannel: (_client: FudgeClient, _dataChannel: RTCDataChannel) => void;
+        send: (_message: string) => void;
         private logState;
     }
 }
@@ -145,7 +145,15 @@ declare namespace FudgeNet {
          * according to {@link FudgeNet.ROUTE} and `idTarget`
          */
         dispatch(_message: FudgeNet.Message): void;
+        /**
+         * Sends out a disconnect message to all peers, disconnects from all peers and sends a CREATE_MESH-command to the server,
+         * to establish RTC-peer-connections between all clients
+         */
         createMesh(): void;
+        /**
+         * Sends out a disconnect message to all peers, disconnects from all peers and sends a CONNECT_HOST-command to the server,
+         * to establish RTC-peer-connections between this client and all others, making this the host
+         */
         becomeHost(): void;
         hndMessage: (_event: MessageEvent) => void;
         private sendToPeer;
@@ -153,13 +161,32 @@ declare namespace FudgeNet {
         private addWebSocketEventListeners;
         private loginValidAddUser;
         private assignIdAndSendConfirmation;
+        /**
+         * Create a new Rtc-Object, install listeners to it and create a data channel
+         */
         private cRstartNegotiation;
+        /**
+         * Start negotiation by sending an offer with the local description of the connection via the signalling server
+         */
         private cRsendOffer;
-        private cRreceiveAnswer;
-        private cRsendIceCandidates;
+        /**
+         * Callee receives offer, creates a peerConnection on its side, sets the remote description and its own local description,
+         * installs a datachannel-event on the connection and sends its local description back to the caller as answer to the offer via the server
+         */
         private cEreceiveOffer;
+        /**
+         * Caller receives the answer and sets the remote description on its side. The first part of the negotiation is done.
+         */
+        private cRreceiveAnswer;
+        /**
+         * Caller starts collecting ICE-candidates and calls this function for each candidate found,
+         * which sends the candidate info to callee via the server
+         */
+        private cRsendIceCandidates;
+        /**
+         * Callee receives the info about the ice-candidate and adds it to the connection
+         */
         private cEaddIceCandidate;
         private cEestablishConnection;
-        private delay;
     }
 }

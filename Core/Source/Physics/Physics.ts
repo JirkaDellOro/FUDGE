@@ -98,13 +98,14 @@ namespace FudgeCore {
        * Used because OimoPhysics defines ray by start/end. But GameEngines commonly use origin/direction.
        */
     private static getRayEndPoint(start: OIMO.Vec3, direction: Vector3, length: number): OIMO.Vec3 {
-      let origin: Vector3 = Recycler.borrow(Vector3);
+      let origin: Vector3 = Recycler.get(Vector3);
       origin.set(start.x, start.y, start.z);
       let scaledDirection: Vector3 = direction.clone;
       scaledDirection.scale(length);
       let endpoint: Vector3 = Vector3.SUM(scaledDirection, origin);
       Recycler.store(scaledDirection);
       Recycler.store(endpoint);
+      Recycler.store(origin);
       return new OIMO.Vec3(endpoint.x, endpoint.y, endpoint.z);
     }
 

@@ -983,10 +983,17 @@ var Fudge;
         listResources() {
             while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
                 ;
-            this.table = new ƒui.Table(new Fudge.ControllerTableResource(), Object.values(ƒ.Project.resources));
+            this.table = new ƒui.Table(new Fudge.ControllerTableResource(), Object.values(ƒ.Project.resources), "type");
             this.dom.appendChild(this.table);
             this.dom.title = "● Right click to create new resource.\n● Select or drag resource.";
             this.table.title = `● Select to edit in "Properties"\n●  Drag to "Properties" or "Components" to use if applicable.`;
+            for (let tr of this.table.querySelectorAll("tr")) {
+                let tds = tr.querySelectorAll("td");
+                if (!tds.length)
+                    continue;
+                tds[1].classList.add("icon");
+                tds[1].setAttribute("icon", tds[1].children[0].value);
+            }
         }
         getSelection() {
             return this.table.controller.selection;
@@ -1522,7 +1529,7 @@ var Fudge;
                     }
                 ]
             };
-            const hierachyAndComponents = {
+            const hierarchyAndComponents = {
                 type: "column",
                 isClosable: true,
                 content: [
@@ -1530,7 +1537,7 @@ var Fudge;
                         type: "component",
                         componentType: Fudge.VIEW.HIERARCHY,
                         componentState: _state,
-                        title: "Hierachy"
+                        title: "Hierarchy"
                     },
                     {
                         type: "component",
@@ -1541,7 +1548,7 @@ var Fudge;
                 ]
             };
             this.goldenLayout.addItemAtLocation(renderConfig, [{ typeId: 7 /* Root */ }]);
-            this.goldenLayout.addItemAtLocation(hierachyAndComponents, [{ typeId: 7 /* Root */ }]);
+            this.goldenLayout.addItemAtLocation(hierarchyAndComponents, [{ typeId: 7 /* Root */ }]);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
@@ -2471,7 +2478,7 @@ var Fudge;
                     }
                 }
                 if (details.getAttribute("key") == this.selected)
-                    this.select(details);
+                    this.select(details, false);
             }
         }
         hndEvent = (_event) => {
@@ -2587,12 +2594,13 @@ var Fudge;
                     break;
             }
         }
-        select(_details) {
+        select(_details, _focus = true) {
             for (let child of this.dom.children)
                 child.classList.remove("selected");
             _details.classList.add("selected");
-            _details.focus();
             this.selected = _details.getAttribute("key");
+            if (_focus)
+                _details.focus();
         }
         getSelected() {
             for (let child of this.dom.children)

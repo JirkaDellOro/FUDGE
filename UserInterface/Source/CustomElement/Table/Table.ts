@@ -18,12 +18,14 @@ namespace FudgeUserInterface {
   export class Table<T extends Object> extends HTMLTableElement {
     public controller: TableController<T>;
     public data: T[];
+    public icon: string;
 
-    constructor(_controller: TableController<T>, _data: T[]) {
+    constructor(_controller: TableController<T>, _data: T[], _icon?: string) {
       super();
       this.controller = _controller;
       this.data = _data;
-      this.create(); 
+      this.icon = _icon;
+      this.create();
       this.className = "sortable";
 
       this.addEventListener(EVENT.SORT, <EventListener>this.hndSort);
@@ -52,6 +54,9 @@ namespace FudgeUserInterface {
       for (let row of this.data) {
         // tr = this.createRow(row, head);
         let item: TableItem<T> = new TableItem<T>(this.controller, row);
+        // TODO: see if icon consideration should move to TableItem
+        if (this.icon)
+          item.setAttribute("icon", Reflect.get(row, this.icon));
         this.appendChild(item);
       }
     }

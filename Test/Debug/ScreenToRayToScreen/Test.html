@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>ScreenToRay</title>
+    <script type="text/javascript" src="../../../Core/Build/FudgeCore.js"></script>
+    <script type="text/javascript" src="../../../Aid/Build/FudgeAid.js"></script>
+    <script type="text/javascript" src="../../Scenes/Scenes.js"></script>
+    <!-- <script type="text/javascript" src="../../UI-Elements/UI.js"></script>  -->
+    <script type="text/javascript" src="Camera.js"></script>
+    <script type="text/javascript" src="Main.js"></script>
+
+    <style type="text/css">
+        html,
+        body {
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: lightskyblue;
+        }
+
+        canvas {
+            image-rendering: pixelated;
+            display: block;
+            position: absolute;
+            top: 2%;
+            left: 2%;
+            width: 96%;
+            height: 96%;
+        }
+
+        input[type=number] {
+            width: 4em;
+            margin-right: 1em;
+        }
+
+        div {
+            width: 30em;
+            position: fixed;
+            top: 0px;
+            right: 0px;
+            background-color: beige;
+        }
+
+        span {
+          position: fixed;
+          background-color: lightskyblue;
+          width: 380px;
+          height: 100px;
+        }
+
+        textarea {
+          height: 100%;
+          width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+  <script src="../../dialog-polyfill.min.js"></script>
+  <script src="../../TestInstructions.js"></script>
+  <script>
+    TestInstructions.display({
+      Name: "Debug to textarea and canvas",
+      Test: [
+        "See debug output in a textarea floating over the viewport and a copy printed onto the canvas.",
+      ],
+      Setup: [
+        "The test was originally an experiment for mouserays and mutated into a test for Debug-methods.",
+      ],
+      Act: [
+        "Move the mouse.",
+      ],
+      Observe: [
+        "The debug output in the console, the textarea and the canvas.",
+      ],
+      Expect: [
+        "The numbers change in the output. There are icons to identify logs, warnings, errors and info",
+      ]
+    });
+  </script>
+    <canvas id="viewport"></canvas>
+</body>

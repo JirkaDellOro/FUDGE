@@ -19,6 +19,7 @@ namespace Script {
       // Listen to this component being added to or removed from a node
       this.addEventListener(ƒ.EVENT.COMPONENT_ADD, this.hndEvent);
       this.addEventListener(ƒ.EVENT.COMPONENT_REMOVE, this.hndEvent);
+      this.addEventListener(ƒ.EVENT.NODE_DESERIALIZED, this.hndEvent);
     }
 
     // Activate the functions of this component as response to events
@@ -30,6 +31,9 @@ namespace Script {
         case ƒ.EVENT.COMPONENT_REMOVE:
           this.removeEventListener(ƒ.EVENT.COMPONENT_ADD, this.hndEvent);
           this.removeEventListener(ƒ.EVENT.COMPONENT_REMOVE, this.hndEvent);
+          break;
+        case ƒ.EVENT.NODE_DESERIALIZED:
+          // if deserialized the node is now fully reconstructed and access to all its components and children is possible
           break;
       }
     }

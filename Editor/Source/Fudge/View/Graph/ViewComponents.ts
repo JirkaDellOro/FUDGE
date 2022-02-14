@@ -149,7 +149,7 @@ namespace Fudge {
           }
         }
         if (details.getAttribute("key") == this.selected)
-          this.select(details);
+          this.select(details, false);
       }
     }
 
@@ -273,12 +273,13 @@ namespace Fudge {
       }
     }
 
-    private select(_details: ƒUi.Details): void {
+    private select(_details: ƒUi.Details, _focus: boolean = true): void {
       for (let child of this.dom.children)
         child.classList.remove("selected");
       _details.classList.add("selected");
-      _details.focus();
       this.selected = _details.getAttribute("key");
+      if (_focus)
+        _details.focus();
     }
 
     private getSelected(): ƒUi.Details {

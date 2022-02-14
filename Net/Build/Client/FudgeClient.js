@@ -65,9 +65,9 @@ var FudgeNet;
     // tslint:disable-next-line: typedef
     FudgeNet.configuration = {
         iceServers: [
-            { urls: "stun:stun2.1.google.com:19302" },
-            { urls: "stun:stun.example.com" }
-            // { urls: "stun:stun.l.google.com:19302" },
+            // { urls: "stun:stun2.1.google.com:19302" }
+            // { urls: "stun:stun.example.com" }
+            { urls: "stun:stun.l.google.com:19302" }
             // { urls: "turn:0.peerjs.com:3478", username: "peerjs", credential: "peerjsp" }
             // {
             //   urls: "turn:192.158.29.39:3478?transport=udp",
@@ -85,6 +85,14 @@ var FudgeNet;
             //   credential: "webrtc",
             //   username: "webrtc"
             // }
+            // {
+            //   urls: "stun:stun.stunprotocol.org"
+            // }
+            // {
+            //   urls: "turn:numb.viagenie.ca",
+            //   credential: "muazkh",
+            //   username: "webrtc@live.com"
+            // }
         ]
     };
     /**
@@ -94,20 +102,23 @@ var FudgeNet;
      * used internally by the {@link FudgeClient} and should not be used otherwise.
      * @author Jirka Dell'Oro-Friedl, HFU, 2021
      */
-    class Rtc {
-        peerConnection;
+    // TODO: use extension instead of decorator pattern
+    class Rtc extends RTCPeerConnection {
         dataChannel;
         // TODO: use mediaStream in the future? 
         mediaStream;
         constructor() {
-            this.peerConnection = new RTCPeerConnection(FudgeNet.configuration);
-            this.peerConnection.addEventListener("signalingstatechange", (_event) => this.logState("Signaling state change", _event));
-            this.peerConnection.addEventListener("connectionstatechange", (_event) => this.logState("Connection state change", _event));
+            super(FudgeNet.configuration);
+            this.addEventListener("signalingstatechange", (_event) => this.logState("Signaling state change", _event));
+            this.addEventListener("connectionstatechange", (_event) => this.logState("Connection state change", _event));
         }
-        createDataChannel(_client, _idRemote) {
-            this.addDataChannel(_client, this.peerConnection.createDataChannel(_client.id + "->" + _idRemote, { negotiated: true, id: 0 }));
-        }
-        addDataChannel(_client, _dataChannel) {
+        setupDataChannel = (_client, _idRemote) => {
+            let newDataChannel = this.createDataChannel(_client.id + "->" + _idRemote /* , { negotiated: true, id: 0 } */);
+            console.warn("Created data channel");
+            this.addDataChannel(_client, newDataChannel);
+        };
+        addDataChannel = (_client, _dataChannel) => {
+            console.warn("AddDataChannel", _dataChannel.id, _dataChannel.label);
             this.dataChannel = _dataChannel;
             this.dataChannel.addEventListener(EVENT.CONNECTION_OPENED, dispatchRtcEvent);
             this.dataChannel.addEventListener(EVENT.CONNECTION_CLOSED, dispatchRtcEvent);
@@ -115,12 +126,19 @@ var FudgeNet;
             function dispatchRtcEvent(_event) {
                 _client.dispatchEvent(new CustomEvent(EVENT.MESSAGE_RECEIVED, { detail: _event }));
             }
-        }
-        logState(_type, _event) {
+        };
+        send = (_message) => {
+            if (this.dataChannel && this.dataChannel.readyState == "open")
+                this.dataChannel.send(_message);
+            else {
+                // console.warn(`Can't send message on ${this.dataChannel?.id}, status ${this.dataChannel?.readyState}, message ${_message}`);
+            }
+        };
+        logState = (_type, _event) => {
             let target = _event.target;
             let state = { type: _type, connection: target.connectionState, iceState: target.iceConnectionState, iceGather: target.iceGatheringState };
             console.table(state);
-        }
+        };
     }
     FudgeNet.Rtc = Rtc;
 })(FudgeNet || (FudgeNet = {}));
@@ -196,7 +214,7 @@ var FudgeNet;
             let peer = this.peers[_idRemote];
             if (!peer)
                 return;
-            peer.peerConnection.close();
+            peer.close();
             delete this.peers[_idRemote];
             console.log("Deleted peer", _idRemote, "remaining", this.peers);
         }
@@ -204,14 +222,14 @@ var FudgeNet;
          * Disconnect all peers
          */
         disconnectPeers(_ids) {
-            if (_ids)
-                for (let id of _ids) {
+            if (_ids) {
+                for (let id of _ids)
                     this.disconnectPeer(id);
-                    return;
-                }
+                return;
+            }
             // no ids specified, disconnect all
             for (let id in this.peers)
-                this.peers[id].peerConnection.close();
+                this.peers[id].close();
             this.peers = {};
         }
         /**
@@ -223,26 +241,39 @@ var FudgeNet;
             _message.idSource = this.id;
             let message = JSON.stringify(_message);
             try {
-                if (!_message.route || _message.route == FudgeNet.ROUTE.HOST) {
-                    // send via RTC to specific peer (if idTarget set), all peers (if not set) or host (if route set to host)
+                if (_message.route == FudgeNet.ROUTE.HOST) {
+                    // to host via rtc
+                    this.sendToPeer(this.idHost, message);
+                }
+                else if (_message.route) {
+                    // other routes go via or to the server
+                    this.socket.send(message);
+                }
+                else {
+                    // send via RTC to specific peer (if idTarget set) or all peers (if not set)
                     if (_message.idTarget)
                         this.sendToPeer(_message.idTarget, message);
                     else
                         this.sendToAllPeers(message);
-                }
-                else {
-                    this.socket.send(message);
                 }
             }
             catch (_error) {
                 console.log(_error);
             }
         }
+        /**
+         * Sends out a disconnect message to all peers, disconnects from all peers and sends a CREATE_MESH-command to the server,
+         * to establish RTC-peer-connections between all clients
+         */
         createMesh() {
             this.dispatch({ command: FudgeNet.COMMAND.DISCONNECT_PEERS });
             this.disconnectPeers();
             this.dispatch({ command: FudgeNet.COMMAND.CREATE_MESH, route: FudgeNet.ROUTE.SERVER });
         }
+        /**
+         * Sends out a disconnect message to all peers, disconnects from all peers and sends a CONNECT_HOST-command to the server,
+         * to establish RTC-peer-connections between this client and all others, making this the host
+         */
         becomeHost() {
             this.dispatch({ command: FudgeNet.COMMAND.DISCONNECT_PEERS });
             this.disconnectPeers();
@@ -251,8 +282,8 @@ var FudgeNet;
         }
         hndMessage = (_event) => {
             let message = JSON.parse(_event.data);
-            if (message.command != FudgeNet.COMMAND.SERVER_HEARTBEAT && message.command != FudgeNet.COMMAND.CLIENT_HEARTBEAT)
-                console.log(_event.timeStamp, message);
+            // if (message.command != FudgeNet.COMMAND.SERVER_HEARTBEAT && message.command != FudgeNet.COMMAND.CLIENT_HEARTBEAT)
+            // console.log(_event.timeStamp, message);
             //tslint:disable-next-line: no-any
             switch (message.command) {
                 case FudgeNet.COMMAND.ASSIGN_ID:
@@ -269,7 +300,7 @@ var FudgeNet;
                     this.cRreceiveAnswer(message);
                     break;
                 case FudgeNet.COMMAND.ICE_CANDIDATE:
-                    this.cEaddIceCandidate(message);
+                    this.cEaddIceCandidate(_event, message);
                     break;
                 case FudgeNet.COMMAND.CONNECT_PEERS:
                     this.connectPeers(message.content?.peers);
@@ -291,16 +322,12 @@ var FudgeNet;
                     }
                     break;
             }
+            // Dispatch a new event with the same information a programm using this client can react to
             this.dispatchEvent(new MessageEvent(_event.type, _event));
         };
         // ----------------------
         sendToPeer = (_idPeer, _message) => {
-            let dataChannel = this.peers[_idPeer].dataChannel;
-            if (dataChannel && dataChannel.readyState == "open")
-                dataChannel.send(_message);
-            else {
-                console.error("Datachannel disconnected, ready state: ", dataChannel?.readyState);
-            }
+            this.peers[_idPeer].send(_message);
         };
         sendToAllPeers = (_message) => {
             for (let idPeer in this.peers) {
@@ -347,82 +374,86 @@ var FudgeNet;
         };
         //#region RTC-Negotiation
         // cR = caller
+        /**
+         * Create a new Rtc-Object, install listeners to it and create a data channel
+         */
         cRstartNegotiation = async (_idRemote) => {
-            // try {
             let rtc = new FudgeNet.Rtc();
             this.peers[_idRemote] = rtc;
-            rtc.peerConnection.addEventListener("negotiationneeded", async (_event) => {
-                console.log("Negotiation needed", _event);
-                await rtc.peerConnection.setLocalDescription(await rtc.peerConnection.createOffer(_event));
-                this.cRsendOffer(_idRemote);
+            rtc.addEventListener("negotiationneeded", async (_event) => this.cRsendOffer(_idRemote));
+            rtc.addEventListener("icecandidate", (_event) => this.cRsendIceCandidates(_event, _idRemote));
+            rtc.addEventListener("icegatheringstatechange", (_event) => {
+                console.log("ICE-state", rtc.iceGatheringState);
             });
-            rtc.peerConnection.addEventListener("icecandidate", (_event) => this.cRsendIceCandidates(_event.candidate, _idRemote));
-            rtc.createDataChannel(this, _idRemote);
+            // fires the negotiationneeded-event
+            rtc.setupDataChannel(this, _idRemote);
+            // this.cRsendOffer(_idRemote);
+            // rtc.restartIce();
         };
-        cRsendOffer = (_idRemote) => {
-            // try {
-            let peerConnection = this.peers[_idRemote].peerConnection;
+        /**
+         * Start negotiation by sending an offer with the local description of the connection via the signalling server
+         */
+        cRsendOffer = async (_idRemote) => {
+            let rtc = this.peers[_idRemote];
+            let localDescription = await rtc.createOffer({ iceRestart: true });
+            await rtc.setLocalDescription(localDescription);
             const offerMessage = {
-                route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.RTC_OFFER, idTarget: _idRemote, content: { offer: peerConnection.localDescription }
+                route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.RTC_OFFER, idTarget: _idRemote, content: { offer: rtc.localDescription }
             };
             this.dispatch(offerMessage);
-            console.info("Caller: send offer, expected 'have-local-offer', got:  ", peerConnection.signalingState);
-            // } catch (error) {
-            //   console.error("Unexpected Error: Creating Object and Sending RTC Offer", error);
-            // }
-        };
-        cRreceiveAnswer = async (_message) => {
-            console.info("Caller: received answer, create data channel ", _message);
-            // try {
-            let peerConnection = this.peers[_message.idSource].peerConnection;
-            await peerConnection.setRemoteDescription(_message.content?.answer);
-            // } catch (error) {
-            //   console.error(error);
-            // }
-        };
-        cRsendIceCandidates = async (_candidate, _idRemote) => {
-            await this.delay(5000);
-            // try {
-            console.info("Caller: send ICECandidates to server");
-            let message = {
-                route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.ICE_CANDIDATE, idTarget: _idRemote, content: { candidate: _candidate }
-            };
-            this.dispatch(message);
-            // } catch (error) {
-            //   console.error("Unexpected Error: Creating and Sending ICECandidates to Peer", error);
-            // }
+            console.info("Caller: send offer, expected 'have-local-offer', got:  ", this.peers[_idRemote].signalingState);
         };
         // cE = callee
+        /**
+         * Callee receives offer, creates a peerConnection on its side, sets the remote description and its own local description,
+         * installs a datachannel-event on the connection and sends its local description back to the caller as answer to the offer via the server
+         */
         cEreceiveOffer = async (_message) => {
             console.info("Callee: offer received, create connection", _message);
-            let peer = this.peers[_message.idSource] || (this.peers[_message.idSource] = new FudgeNet.Rtc());
-            let peerConnection = peer.peerConnection;
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(_message.content?.offer));
-            await peerConnection.setLocalDescription();
-            peerConnection.addEventListener("datachannel", (_event) => this.cEestablishConnection(_event, this.peers[_message.idSource]));
+            let rtc = (this.peers[_message.idSource] = new FudgeNet.Rtc());
+            rtc.addEventListener("datachannel", (_event) => this.cEestablishConnection(_event, this.peers[_message.idSource]));
+            await rtc.setRemoteDescription(new RTCSessionDescription(_message.content?.offer));
+            await rtc.setLocalDescription();
+            // rtc.setupDataChannel(this, _message.idSource!);
             const answerMessage = {
-                route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.RTC_ANSWER, idTarget: _message.idSource, content: { answer: peerConnection.localDescription }
+                route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.RTC_ANSWER, idTarget: _message.idSource, content: { answer: rtc.localDescription }
             };
             console.info("Callee: send answer to server ", answerMessage);
             this.dispatch(answerMessage);
-            console.info("Callee: remote description set, expected 'stable', got:  ", peerConnection.signalingState);
+            console.info("Callee: remote description set, expected 'stable', got:  ", rtc.signalingState);
         };
-        cEaddIceCandidate = async (_message) => {
-            console.info("Callee: try to add candidate to peer connection");
-            // try {
-            let peerConnection = this.peers[_message.idSource].peerConnection;
-            await peerConnection.addIceCandidate(_message.content?.candidate);
-            this.peers[_message.idSource].createDataChannel(this, _message.idSource);
-            // let dataChannel: RTCDataChannel = peerConnection.createDataChannel(_message.idSource + "->" + this.id, {
-            //   negotiated: true
-            // });
-            // dataChannel.addEventListener("open", (event) => {
-            //   peerConnection.beginTransmission(dataChannel);
-            // });
-            // peerConnection.requestRemoteChannel(dataChannel.id);
-            // } catch (error) {
-            //   console.error("Unexpected Error: Adding Ice Candidate", error);
-            // }
+        /**
+         * Caller receives the answer and sets the remote description on its side. The first part of the negotiation is done.
+         */
+        cRreceiveAnswer = async (_message) => {
+            console.info("Caller: received answer, create data channel ", _message);
+            let rtc = this.peers[_message.idSource];
+            await rtc.setRemoteDescription(_message.content?.answer);
+            // if (!rtc.dataChannel)
+            //   rtc.setupDataChannel(this, _message.idSource!);
+            // else
+            // console.warn("Datachannel reuse: ", rtc.dataChannel!.id, rtc.dataChannel!.label);
+        };
+        /**
+         * Caller starts collecting ICE-candidates and calls this function for each candidate found,
+         * which sends the candidate info to callee via the server
+         */
+        cRsendIceCandidates = async (_event, _idRemote) => {
+            if (!_event.candidate)
+                return;
+            let pc = _event.currentTarget;
+            console.info("Caller: send ICECandidates to server", _event.candidate);
+            let message = {
+                route: FudgeNet.ROUTE.SERVER, command: FudgeNet.COMMAND.ICE_CANDIDATE, idTarget: _idRemote, content: { candidate: _event.candidate, states: [pc.connectionState, pc.iceConnectionState, pc.iceGatheringState] }
+            };
+            this.dispatch(message);
+        };
+        /**
+         * Callee receives the info about the ice-candidate and adds it to the connection
+         */
+        cEaddIceCandidate = async (_event, _message) => {
+            console.info("Callee: try to add candidate to peer connection", _message.content?.candidate);
+            await this.peers[_message.idSource].addIceCandidate(_message.content?.candidate);
         };
         cEestablishConnection = (_event, _peer) => {
             console.info("Callee: establish channel on connection", _event.channel);
@@ -433,11 +464,6 @@ var FudgeNet;
                 console.error("Unexpected Error: RemoteDatachannel");
             }
         };
-        async delay(_milisec) {
-            return new Promise(resolve => {
-                setTimeout(() => { resolve(); }, _milisec);
-            });
-        }
     }
     FudgeNet.FudgeClient = FudgeClient;
 })(FudgeNet || (FudgeNet = {}));

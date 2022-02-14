@@ -65,26 +65,6 @@ div[panel] .lm_close {
   background-color: var(--color-background-main);
 }
 
-/* Checkbox */
-
-input[type="checkbox"] {
-  appearance: none;
-  margin-right: 0.2em;
-}
-
-input[type="checkbox"]::before {
-  /* appearance: unset; */
-  /* color: var(--color-); */
-  font-weight: 900;
-  text-shadow: 1px 1px var(--color-background-main);
-  content: "⭘";
-  /* □⚐◎◯⭘⦾○○ */
-}
-
-input[type="checkbox"]:checked:before {
-  content: "⭙";
-  /* ☑✔⮽⚑◉⦻⭙⦿⮿●■ */
-}
 
 /* Tree Control */
 
@@ -155,15 +135,19 @@ table.sortable th>span>input[value="down"]::before {
 table.sortable input[type="text"] {
   width: 100%;
   box-sizing: border-box;
+  cursor: text;
 }
 
 table.sortable .selected input {
   color: var(--color-highlight);
   font-weight: bold;
 }
+table.sortable td {
+  vertical-align: bottom;
+}
 
-table.sortable td>input:read-only {
-  /* TODO: indicate that enabled (not disabled) fields can be doubleclicked to alter content */
+table.sortable td>input:disabled {
+  /* TODO: indicate tha]t enabled (not disabled) fields can be doubleclicked to alter content */
   cursor: default;
 }
 
@@ -210,7 +194,7 @@ details div {
   padding-left: 1em;
 }
 
-details.selected > summary {
+details.selected>summary {
   color: var(--color-highlight);
   font-weight: bold;
 }

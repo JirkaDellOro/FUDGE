@@ -861,7 +861,9 @@ declare namespace FudgeCore {
         name: string;
         readonly mtxWorld: Matrix4x4;
         timestampUpdate: number;
+        /** The number of nodes of the whole branch including this node and all successors */
         nNodesInBranch: number;
+        /** The radius of the bounding sphere in world dimensions enclosing the geometry of this node and all successors in the branch */
         radius: number;
         private parent;
         private children;
@@ -1144,6 +1146,7 @@ declare namespace FudgeCore {
         protected constructJoint(): void;
     }
 }
+declare function ifNumber(_check: number, _default: number): number;
 declare namespace FudgeCore {
     /**
      * Holds information about the AnimationStructure that the Animation uses to map the Sequences to the Attributes.
@@ -3627,8 +3630,14 @@ declare namespace FudgeCore {
      */
     type HeightMapFunction = (x: number, z: number) => number;
     class TerrainInfo {
+        /** the position of the point vertically projected on the terrain in world coordinates */
         position: Vector3;
+        /** the normal of the face of the terrain under the point in world coordinates */
         normal: Vector3;
+        /** the point retransformed into mesh coordinates of the terrain */
+        positionMesh: Vector3;
+        /** vertical distance of the point to the terrain, negative if below */
+        distance: number;
     }
     /**
      * Generates a planar grid and applies a heightmap-function to it.
@@ -4100,13 +4109,9 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     const enum EVENT_PHYSICS {
-        /** broadcast to a {@link Node} and all {@link Node}s in the branch it's the root of */
         TRIGGER_ENTER = "TriggerEnteredCollision",
-        /** broadcast to a {@link Node} and all {@link Node}s in the branch it's the root of */
         TRIGGER_EXIT = "TriggerLeftCollision",
-        /** broadcast to a {@link Node} and all {@link Node}s in the branch it's the root of */
         COLLISION_ENTER = "ColliderEnteredCollision",
-        /** broadcast to a {@link Node} and all {@link Node}s in the branch it's the root of */
         COLLISION_EXIT = "ColliderLeftCollision"
     }
     class EventPhysics extends Event {
