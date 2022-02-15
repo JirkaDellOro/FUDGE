@@ -3641,6 +3641,9 @@ declare namespace FudgeCore {
     class MeshQuad extends MeshPolygon {
         static readonly iSubclass: number;
         constructor(_name?: string);
+        get verticesFlat(): Float32Array;
+        get indicesFlat(): Uint16Array;
+        get normalsFlat(): Float32Array;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -3756,10 +3759,8 @@ declare namespace FudgeCore {
     class MeshSprite extends Mesh {
         static readonly iSubclass: number;
         constructor(_name?: string);
-        protected createVertices(): Float32Array;
-        protected createIndices(): Uint16Array;
-        protected createTextureUVs(): Float32Array;
-        protected createFlatNormals(): Float32Array;
+        get verticesFlat(): Float32Array;
+        get indicesFlat(): Uint16Array;
     }
 }
 declare namespace FudgeCore {
