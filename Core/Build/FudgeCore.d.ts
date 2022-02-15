@@ -3117,6 +3117,7 @@ declare namespace FudgeCore {
         #private;
         private static loaders;
         private static defaultMaterial;
+        private static defaultSkinMaterial;
         readonly gltf: GLTF.GlTf;
         readonly uri: string;
         private constructor();
@@ -3135,6 +3136,7 @@ declare namespace FudgeCore {
         getSkeletonByIndex(_iSkeleton: number): Promise<SkeletonInstance>;
         getUint8Array(_iAccessor: number): Promise<Uint8Array>;
         getUint16Array(_iAccessor: number): Promise<Uint16Array>;
+        getUint32Array(_iAccessor: number): Promise<Uint32Array>;
         getFloat32Array(_iAccessor: number): Promise<Float32Array>;
         private getBufferData;
         private isSkeletalAnimation;

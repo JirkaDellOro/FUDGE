@@ -33,6 +33,7 @@ namespace FudgeCore {
 
     private static loaders: GLTFLoaderList;
     private static defaultMaterial: Material;
+    private static defaultSkinMaterial: Material;
 
     public readonly gltf: GLTF.GlTf;
     public readonly uri: string;
@@ -126,9 +127,16 @@ namespace FudgeCore {
         // check for mesh
         if (gltfNode.mesh != undefined) {
           node.addComponent(new ComponentMesh(await this.getMeshByIndex(gltfNode.mesh)));
-          if (!GLTFLoader.defaultMaterial)
-            GLTFLoader.defaultMaterial = new Material("GLTFDefaultMaterial", ShaderFlatSkin, new CoatColored(Color.CSS("white")));
-          node.addComponent(new ComponentMaterial(GLTFLoader.defaultMaterial));
+          if (node.getComponent(ComponentMesh).mesh instanceof MeshSkin) {
+            if (!GLTFLoader.defaultSkinMaterial)
+              GLTFLoader.defaultSkinMaterial = new Material("GLTFDefaultSkinMaterial", ShaderFlatSkin, new CoatColored(Color.CSS("white")));
+            node.addComponent(new ComponentMaterial(GLTFLoader.defaultSkinMaterial));
+          }
+          else {
+            if (!GLTFLoader.defaultMaterial)
+              GLTFLoader.defaultMaterial = new Material("GLTFDefaultMaterial", ShaderFlat, new CoatColored(Color.CSS("white")));
+            node.addComponent(new ComponentMaterial(GLTFLoader.defaultMaterial));
+          }
         }
 
         // check for skeleton        
@@ -277,23 +285,42 @@ namespace FudgeCore {
 
     public async getUint8Array(_iAccessor: number): Promise<Uint8Array> {
       const array: TypedArray = await this.getBufferData(_iAccessor);
-      return this.gltf.accessors[_iAccessor]?.componentType == ComponentType.BYTE ?
-        array as Uint8Array :
-        Uint8Array.from(array);
+      if (this.gltf.accessors[_iAccessor]?.componentType == ComponentType.UNSIGNED_BYTE)
+        return array as Uint8Array;
+      else {
+        console.warn(`Expected component type UNSIGNED_BYTE but was ${ComponentType[this.gltf.accessors[_iAccessor]?.componentType]}.`);
+        return Uint8Array.from(array);
+      }
     }
 
     public async getUint16Array(_iAccessor: number): Promise<Uint16Array> {
       const array: TypedArray = await this.getBufferData(_iAccessor);
-      return this.gltf.accessors[_iAccessor]?.componentType == ComponentType.SHORT ?
-        array as Uint16Array :
-        Uint16Array.from(array);
+      if (this.gltf.accessors[_iAccessor]?.componentType == ComponentType.UNSIGNED_SHORT)
+        return array as Uint16Array;
+      else {
+        console.warn(`Expected component type UNSIGNED_SHORT but was ${ComponentType[this.gltf.accessors[_iAccessor]?.componentType]}.`);
+        return Uint16Array.from(array);
+      }
+    }
+
+    public async getUint32Array(_iAccessor: number): Promise<Uint32Array> {
+      const array: TypedArray = await this.getBufferData(_iAccessor);
+      if (this.gltf.accessors[_iAccessor]?.componentType == ComponentType.UNSIGNED_INT)
+        return array as Uint32Array;
+      else {
+        console.warn(`Expected component type UNSIGNED_INT but was ${ComponentType[this.gltf.accessors[_iAccessor]?.componentType]}.`);
+        return Uint32Array.from(array);
+      }
     }
 
     public async getFloat32Array(_iAccessor: number): Promise<Float32Array> {
       const array: TypedArray = await this.getBufferData(_iAccessor);
-      return this.gltf.accessors[_iAccessor]?.componentType == ComponentType.FLOAT ?
-        array as Float32Array :
-        Float32Array.from(array);
+      if (this.gltf.accessors[_iAccessor]?.componentType == ComponentType.FLOAT)
+        return array as Float32Array;
+      else {
+        console.warn(`Expected component type FLOAT but was ${ComponentType[this.gltf.accessors[_iAccessor]?.componentType]}.`);
+        return Float32Array.from(array);
+      }
     }
 
     private async getBufferData(_iAccessor: number): Promise<TypedArray> {
