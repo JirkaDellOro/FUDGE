@@ -12,9 +12,9 @@ namespace FudgeNet {
   // tslint:disable-next-line: typedef
   export let configuration = {
     iceServers: [
-      { urls: "stun:stun2.1.google.com:19302" },
-      { urls: "stun:stun.example.com" }
-      // { urls: "stun:stun.l.google.com:19302" },
+      // { urls: "stun:stun2.1.google.com:19302" }
+      // { urls: "stun:stun.example.com" }
+      { urls: "stun:stun.l.google.com:19302" }
       // { urls: "turn:0.peerjs.com:3478", username: "peerjs", credential: "peerjsp" }
       // {
       //   urls: "turn:192.158.29.39:3478?transport=udp",
@@ -32,6 +32,14 @@ namespace FudgeNet {
       //   credential: "webrtc",
       //   username: "webrtc"
       // }
+      // {
+      //   urls: "stun:stun.stunprotocol.org"
+      // }
+      // {
+      //   urls: "turn:numb.viagenie.ca",
+      //   credential: "muazkh",
+      //   username: "webrtc@live.com"
+      // }
     ]
 
   };
@@ -43,27 +51,31 @@ namespace FudgeNet {
    * used internally by the {@link FudgeClient} and should not be used otherwise.
    * @author Jirka Dell'Oro-Friedl, HFU, 2021
    */
-  export class Rtc {
-    public peerConnection: RTCPeerConnection;
+
+  // TODO: use extension instead of decorator pattern
+  export class Rtc extends RTCPeerConnection {
     public dataChannel: RTCDataChannel | undefined;
     // TODO: use mediaStream in the future? 
     public mediaStream: MediaStream | undefined;
 
     constructor() {
-      this.peerConnection = new RTCPeerConnection(configuration);
-      this.peerConnection.addEventListener(
+      super(configuration);
+      this.addEventListener(
         "signalingstatechange", (_event: Event) => this.logState("Signaling state change", _event)
       );
-      this.peerConnection.addEventListener(
+      this.addEventListener(
         "connectionstatechange", (_event: Event) => this.logState("Connection state change", _event)
       );
     }
 
-    public createDataChannel(_client: FudgeClient, _idRemote: string): void {
-      this.addDataChannel(_client, this.peerConnection.createDataChannel(_client.id + "->" + _idRemote, { negotiated: true, id: 0 }));
+    public setupDataChannel = (_client: FudgeClient, _idRemote: string): void => {
+      let newDataChannel: RTCDataChannel = this.createDataChannel(_client.id + "->" + _idRemote /* , { negotiated: true, id: 0 } */);
+      console.warn("Created data channel");
+      this.addDataChannel(_client, newDataChannel);
     }
 
-    public addDataChannel(_client: FudgeClient, _dataChannel: RTCDataChannel): void {
+    public addDataChannel = (_client: FudgeClient, _dataChannel: RTCDataChannel): void => {
+      console.warn("AddDataChannel", _dataChannel.id, _dataChannel.label);
       this.dataChannel = _dataChannel;
       this.dataChannel.addEventListener(EVENT.CONNECTION_OPENED, dispatchRtcEvent);
       this.dataChannel.addEventListener(EVENT.CONNECTION_CLOSED, dispatchRtcEvent);
@@ -74,7 +86,15 @@ namespace FudgeNet {
       }
     }
 
-    private logState(_type: string, _event: Event): void {
+    public send = (_message: string): void => {
+      if (this.dataChannel && this.dataChannel.readyState == "open")
+        this.dataChannel.send(_message);
+      else {
+        // console.warn(`Can't send message on ${this.dataChannel?.id}, status ${this.dataChannel?.readyState}, message ${_message}`);
+      }
+    }
+
+    private logState = (_type: string, _event: Event): void => {
       let target: RTCPeerConnection = <RTCPeerConnection>_event.target;
       let state: Object = { type: _type, connection: target.connectionState, iceState: target.iceConnectionState, iceGather: target.iceGatheringState };
       console.table(state);

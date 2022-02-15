@@ -54,9 +54,15 @@ class FudgeServer {
             // TODO: examine, if idTarget should be tweaked...
             this.clients[id].socket?.send(message);
     }
+    /**
+     * Logs the net-message with some additional text as prefix
+     */
     logMessage(_text, _message) {
         console.log(_text, `command: ${_message.command}, route: ${_message.route}, idTarget: ${_message.idTarget}, idSource: ${_message.idSource}`);
     }
+    /**
+     * Log the list of known clients
+     */
     logClients() {
         let ids = Reflect.ownKeys(this.clients);
         // TODO: also display known peer-connections?
@@ -114,10 +120,23 @@ class FudgeServer {
                 this.connectHost(message);
                 break;
             default:
-                // // TODO: other command may be passed on the the clients to have messages travel via websockets and the server
-                // console.log("WebSocket: Message command not recognized");
-                this.logMessage("Pass", message);
-                this.dispatch(message);
+                switch (message.route) {
+                    case Message_js_1.FudgeNet.ROUTE.VIA_SERVER_HOST:
+                        message.idTarget = this.idHost;
+                        this.logMessage("Forward to host", message);
+                        this.dispatch(message);
+                        break;
+                    case Message_js_1.FudgeNet.ROUTE.VIA_SERVER:
+                        if (message.idTarget) {
+                            this.logMessage("Pass to target", message);
+                            this.dispatch(message);
+                        }
+                        else {
+                            this.logMessage("Broadcast to all", message);
+                            this.broadcast(message);
+                        }
+                        break;
+                }
                 break;
         }
     }

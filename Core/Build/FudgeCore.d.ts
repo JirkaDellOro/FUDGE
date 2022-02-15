@@ -451,7 +451,8 @@ declare namespace FudgeCore {
         indices: WebGLBuffer;
         nIndices: number;
         textureUVs: WebGLBuffer;
-        normalsFace: WebGLBuffer;
+        normalsFlat: WebGLBuffer;
+        normalsVertex: WebGLBuffer;
         iBones?: WebGLBuffer;
         weights?: WebGLBuffer;
     }
@@ -862,7 +863,9 @@ declare namespace FudgeCore {
         name: string;
         readonly mtxWorld: Matrix4x4;
         timestampUpdate: number;
+        /** The number of nodes of the whole branch including this node and all successors */
         nNodesInBranch: number;
+        /** The radius of the bounding sphere in world dimensions enclosing the geometry of this node and all successors in the branch */
         radius: number;
         private parent;
         private children;
@@ -1145,6 +1148,7 @@ declare namespace FudgeCore {
         protected constructJoint(): void;
     }
 }
+declare function ifNumber(_check: number, _default: number): number;
 declare namespace FudgeCore {
     /**
      * Holds information about the AnimationStructure that the Animation uses to map the Sequences to the Attributes.
@@ -3206,7 +3210,8 @@ declare namespace FudgeCore {
      */
     class CoatColored extends Coat {
         color: Color;
-        constructor(_color?: Color);
+        shininess: number;
+        constructor(_color?: Color, _shininess?: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }
@@ -3673,6 +3678,8 @@ declare namespace FudgeCore {
          * The rotation is appended to already applied transforms, thus multiplied from the right. Set _fromLeft to true to switch and put it in front.
          */
         rotate(_by: Vector3, _fromLeft?: boolean): void;
+        transpose(): Matrix4x4;
+        inverse(): Matrix4x4;
         /**
          * Adds a rotation around the x-axis to this matrix
          */
@@ -4124,6 +4131,16 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    class Face {
+        private vertices;
+        indices: number[];
+        normalUnscaled: Vector3;
+        normal: Vector3;
+        constructor(_vertices: Vertex[], _index0: number, _index1: number, _index2: number);
+        calculateNormals(): void;
+    }
+}
+declare namespace FudgeCore {
     /**
      * Abstract base class for all meshes.
      * Meshes provide indexed vertices, the order of indices to create trigons and normals, and texture coordinates
@@ -4138,12 +4155,27 @@ declare namespace FudgeCore {
         idResource: string;
         name: string;
         renderBuffers: RenderBuffers;
+        /** vertices of the actual point cloud, some points might be in the same location in order to refer to different texels */
         protected ƒvertices: Float32Array;
+        /** indices to create faces from the vertices, rotation determines direction of face-normal */
         protected ƒindices: Uint16Array;
+        /** texture coordinates associated with the vertices by the position in the array */
         protected ƒtextureUVs: Float32Array;
-        protected ƒnormalsFace: Float32Array;
-        protected ƒnormals: Float32Array;
+        /** normals of the faces, not used for rendering but computation of flat- and vertex-normals */
+        protected ƒnormalsFaceUnscaled: Float32Array;
+        /** vertex normals for smooth shading, interpolated between vertices during rendering */
+        protected ƒnormalsVertex: Float32Array;
+        /** flat-shading: normalized face normals, every third entry is used only */
+        protected ƒnormalsFlat: Float32Array;
+        /** flat-shading: extra vertex array, since using vertices with multiple faces is rarely possible due to the limitation above */
+        protected ƒverticesFlat: Float32Array;
+        /** flat-shading: therefore an extra indices-array is needed */
+        protected ƒindicesFlat: Float32Array;
+        /** flat-shading: and an extra textureUV-array */
+        protected ƒtextureUVsFlat: Float32Array;
+        /** bounding box AABB */
         protected ƒbox: Box;
+        /** bounding radius */
         protected ƒradius: number;
         constructor(_name?: string);
         static getBufferSpecification(): BufferSpecification;
@@ -4157,8 +4189,12 @@ declare namespace FudgeCore {
         get type(): string;
         get vertices(): Float32Array;
         get indices(): Uint16Array;
-        get normalsFace(): Float32Array;
+        get normalsFaceUnscaled(): Float32Array;
+        get normalsVertex(): Float32Array;
         get textureUVs(): Float32Array;
+        get normalsFlat(): Float32Array;
+        get verticesFlat(): Float32Array;
+        get textureUVsFlat(): Float32Array;
         get boundingBox(): Box;
         get radius(): number;
         useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): void;
@@ -4167,6 +4203,7 @@ declare namespace FudgeCore {
         getVertexCount(): number;
         getIndexCount(): number;
         clear(): void;
+        create(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         /**Flip the Normals of a Mesh to render opposite side of each polygon*/
@@ -4175,7 +4212,11 @@ declare namespace FudgeCore {
         protected createTextureUVs(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createNormals(): Float32Array;
-        protected createFaceNormals(): Float32Array;
+        protected calculateFaceCrossProducts(): Float32Array;
+        protected createFlatNormals(): Float32Array;
+        protected createVertexNormals(): Float32Array;
+        createFlatVertices(): Float32Array;
+        createFlatTextureUVs(): Float32Array;
         protected createRadius(): number;
         protected createBoundingBox(): Box;
         protected reduceMutator(_mutator: Mutator): void;
@@ -4198,7 +4239,7 @@ declare namespace FudgeCore {
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
-        protected createFaceNormals(): Float32Array;
+        protected createFlatNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {
@@ -4263,7 +4304,7 @@ declare namespace FudgeCore {
         protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;
         protected createIndices(): Uint16Array;
-        protected createFaceNormals(): Float32Array;
+        protected createFlatNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {
@@ -4279,24 +4320,32 @@ declare namespace FudgeCore {
      * static LOAD Method. Currently only works with triangulated Meshes
      * (activate 'Geomentry → Triangulate Faces' in Blenders obj exporter)
      * @todo UVs, Load Materials, Support Quads
-     * @authors Simon Storl-Schulke 2021 */
+     * @authors Simon Storl-Schulke 2021 | Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021 */
     class MeshObj extends Mesh {
+        static readonly iSubclass: number;
+        url: RequestInfo;
         protected verts: number[];
         protected uvs: number[];
         protected inds: number[];
         protected facenormals: number[];
-        constructor(objString: string);
-        /** Loads an obj file from the given source url and a returns a complete Node from it.
-        * Multiple Objects are treated as a single Mesh. If no material is given, uses a default flat white material. */
-        static LOAD(src: string, name?: string, material?: Material): Node;
+        protected facecrossproducts: number[];
+        constructor(_name?: string, _url?: RequestInfo);
+        /**
+             * Asynchronously loads the image from the given url
+             */
+        load(_url: RequestInfo): Promise<void>;
+        /** Splits up the obj string into separate arrays for each datatype */
+        parseObj(data: string): void;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
         /** Creates three Vertices from each face. Although inefficient, this has to be done for now - see Issue 244 */
         protected splitVertices(): void;
-        /** Splits up the obj string into separate arrays for each datatype */
-        protected parseObj(data: string): void;
         protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;
         protected createIndices(): Uint16Array;
-        protected createFaceNormals(): Float32Array;
+        protected calculateFaceCrossProducts(): Float32Array;
+        protected createFlatNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {
@@ -4334,7 +4383,7 @@ declare namespace FudgeCore {
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
-        protected createFaceNormals(): Float32Array;
+        protected createFlatNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {
@@ -4346,8 +4395,14 @@ declare namespace FudgeCore {
      */
     type HeightMapFunction = (x: number, z: number) => number;
     class TerrainInfo {
+        /** the position of the point vertically projected on the terrain in world coordinates */
         position: Vector3;
+        /** the normal of the face of the terrain under the point in world coordinates */
         normal: Vector3;
+        /** the point retransformed into mesh coordinates of the terrain */
+        positionMesh: Vector3;
+        /** vertical distance of the point to the terrain, negative if below */
+        distance: number;
     }
     /**
      * Generates a planar grid and applies a heightmap-function to it.
@@ -4468,7 +4523,7 @@ declare namespace FudgeCore {
         protected createVertices(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createTextureUVs(): Float32Array;
-        protected createFaceNormals(): Float32Array;
+        protected createFlatNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {
@@ -4485,6 +4540,13 @@ declare namespace FudgeCore {
         create(_thickness?: number, _majorSegments?: number, _minorSegments?: number): void;
         mutate(_mutator: Mutator): Promise<void>;
         protected createIndices(): Uint16Array;
+    }
+}
+declare namespace FudgeCore {
+    class Vertex {
+        position: Vector3;
+        uv: Vector2;
+        constructor(_position: Vector3, _uv: Vector2);
     }
 }
 declare namespace FudgeCore {
@@ -4842,13 +4904,9 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     const enum EVENT_PHYSICS {
-        /** broadcast to a {@link Node} and all {@link Node}s in the branch it's the root of */
         TRIGGER_ENTER = "TriggerEnteredCollision",
-        /** broadcast to a {@link Node} and all {@link Node}s in the branch it's the root of */
         TRIGGER_EXIT = "TriggerLeftCollision",
-        /** broadcast to a {@link Node} and all {@link Node}s in the branch it's the root of */
         COLLISION_ENTER = "ColliderEnteredCollision",
-        /** broadcast to a {@link Node} and all {@link Node}s in the branch it's the root of */
         COLLISION_EXIT = "ColliderLeftCollision"
     }
     class EventPhysics extends Event {
@@ -5978,6 +6036,8 @@ declare namespace FudgeCore {
         static readonly baseClass: typeof Shader;
         /** list of all the subclasses derived from this class, if they registered properly*/
         static readonly subclasses: typeof Shader[];
+        static vertexShaderSource: string;
+        static fragmentShaderSource: string;
         static program: WebGLProgram;
         static attributes: {
             [name: string]: number;
@@ -5996,10 +6056,7 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    /**
-     * Single color shading
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
+    /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
     abstract class ShaderFlat extends Shader {
         static readonly iSubclass: number;
         static getCoat(): typeof Coat;
@@ -6008,10 +6065,7 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    /**
-     * Single color flat skin deformation shading
-     * @authors Matthias Roming, HFU, 2021
-     */
+    /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
     abstract class ShaderFlatSkin extends Shader {
         static readonly iSubclass: number;
         static getCoat(): typeof Coat;
@@ -6020,11 +6074,25 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    /**
-     * Matcap (Material Capture) shading. The texture provided by the coat is used as a matcap material.
-     * Implementation based on https://www.clicktorelease.com/blog/creating-spherical-environment-mapping-shader/
-     * @authors Simon Storl-Schulke, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
+    /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
+    abstract class ShaderGouraud extends Shader {
+        static readonly iSubclass: number;
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
+    abstract class ShaderLucent extends Shader {
+        static readonly iSubclass: number;
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
     abstract class ShaderMatCap extends Shader {
         static readonly iSubclass: number;
         static getCoat(): typeof Coat;
@@ -6033,33 +6101,24 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    /**
-     * Renders for Raycasting
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
-     */
+    /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
+    abstract class ShaderPhong extends Shader {
+        static readonly iSubclass: number;
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
     abstract class ShaderPick extends Shader {
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
     }
 }
 declare namespace FudgeCore {
-    /**
-     * Renders for Raycasting
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
-     */
+    /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
     abstract class ShaderPickTextured extends Shader {
-        static getVertexShaderSource(): string;
-        static getFragmentShaderSource(): string;
-    }
-}
-declare namespace FudgeCore {
-    /**
-     * Textured shading
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    abstract class ShaderTexture extends Shader {
-        static readonly iSubclass: number;
-        static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;
         static getFragmentShaderSource(): string;
     }
@@ -6074,11 +6133,17 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    /**
-     * Single color shading
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-     */
-    abstract class ShaderUniColor extends Shader {
+    /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
+    abstract class ShaderTextureGouraud extends Shader {
+        static readonly iSubclass: number;
+        static getCoat(): typeof Coat;
+        static getVertexShaderSource(): string;
+        static getFragmentShaderSource(): string;
+    }
+}
+declare namespace FudgeCore {
+    /** Code generated by CompileShaders.mjs using the information in CompileShaders.json */
+    abstract class ShaderTextureLucent extends Shader {
         static readonly iSubclass: number;
         static getCoat(): typeof Coat;
         static getVertexShaderSource(): string;

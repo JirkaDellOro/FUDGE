@@ -4,7 +4,8 @@ div.lm_tab::before,
 details>summary::after,
 .lm_controls .lm_close::before,
 .lm_controls .lm_maximise::before,
-.lm_maximised .lm_controls .lm_maximise::before {
+.lm_maximised .lm_controls .lm_maximise::before,
+fudge-boolean input[type="checkbox"]::before {
   width: 16px;
   height: 16px;
   content: "";
@@ -13,6 +14,25 @@ details>summary::after,
   margin-right: 5px;
   vertical-align: inherit;
 }
+
+
+/* Checkbox */
+fudge-boolean input[type="checkbox"] {
+  appearance: none;
+  /* margin-right: 0.2em; */
+  vertical-align: bottom;
+}
+
+fudge-boolean input[type="checkbox"]::before {
+  mask: url(../Html/Icon/SwitchOff.svg);
+  -webkit-mask: url(../Html/Icon/SwitchOff.svg);
+}
+
+fudge-boolean input[type="checkbox"]:checked:before {
+  mask: url(../Html/Icon/SwitchOn.svg);
+  -webkit-mask: url(../Html/Icon/SwitchOn.svg);
+}
+
 
 details>summary::after {
   margin-right: 0px;
@@ -23,6 +43,7 @@ details>summary::after {
   vertical-align: bottom;
 }
 
+/* View controls */
 .lm_controls .lm_close::before {
   mask: url(../Html/Icon/Close.svg);
   -webkit-mask: url(../Html/Icon/Close.svg);
@@ -165,7 +186,7 @@ details[key^=ComponentAudioListener]>summary::after {
   -webkit-mask: url(../Html/Icon/Listener.svg);
 }
 
-details[key^=ComponentTransform]>summary::after {
+details[key^=ComponentTransform]>summary::after, details[key^=mtxTransforms]>summary::after {
   mask: url(../Html/Icon/Transform.svg);
   -webkit-mask: url(../Html/Icon/Transform.svg);
 }
@@ -183,4 +204,9 @@ details[key^=Joint]>summary::after {
 details[key^=ComponentCamera]>summary::after {
   mask: url(../Html/Icon/Camera.svg);
   -webkit-mask: url(../Html/Icon/Camera.svg);
+}
+
+details[key^=shape]>summary::after {
+  mask: url(../Html/Icon/Shape.svg);
+  -webkit-mask: url(../Html/Icon/Shape.svg);
 }

@@ -1,0 +1,101 @@
+{
+  "ShaderLucent": {
+    "vertex": "Source/ShaderUniversal.vert",
+    "fragment": "Source/ShaderUniversal.frag",
+    "coat": "CoatColored",
+    "namespace": "FudgeCore",
+    "outdir": "Build/",
+    "register": "true"
+  },
+  "ShaderTextureLucent": {
+    "vertex": "Source/ShaderUniversal.vert",
+    "fragment": "Source/ShaderUniversal.frag",
+    "coat": "CoatTextured",
+    "namespace": "FudgeCore",
+    "outdir": "Build/",
+    "register": "true",
+    "define": [
+      "TEXTURE"
+    ]
+  },
+  "ShaderFlat": {
+    "vertex": "Source/ShaderUniversal.vert",
+    "fragment": "Source/ShaderUniversal.frag",
+    "coat": "CoatColored",
+    "namespace": "FudgeCore",
+    "outdir": "Build/",
+    "register": "true",
+    "define": [
+      "LIGHT",
+      "FLAT"
+    ]
+  },
+  "ShaderTextureFlat": {
+    "vertex": "Source/ShaderUniversal.vert",
+    "fragment": "Source/ShaderUniversal.frag",
+    "coat": "CoatTextured",
+    "namespace": "FudgeCore",
+    "outdir": "Build/",
+    "register": "true",
+    "define": [
+      "LIGHT",
+      "FLAT",
+      "TEXTURE"
+    ]
+  },
+  "ShaderGouraud": {
+    "vertex": "Source/ShaderUniversal.vert",
+    "fragment": "Source/ShaderUniversal.frag",
+    "coat": "CoatColored",
+    "namespace": "FudgeCore",
+    "outdir": "Build/",
+    "register": "true",
+    "define": [
+      "LIGHT",
+      "GOURAUD"
+    ]
+  },
+  "ShaderTextureGouraud": {
+    "vertex": "Source/ShaderUniversal.vert",
+    "fragment": "Source/ShaderUniversal.frag",
+    "coat": "CoatTextured",
+    "namespace": "FudgeCore",
+    "outdir": "Build/",
+    "register": "true",
+    "define": [
+      "LIGHT",
+      "GOURAUD",
+      "TEXTURE"
+    ]
+  },
+  "ShaderPhong": {
+    "vertex": "Source/ShaderPhong.vert",
+    "fragment": "Source/ShaderPhong.frag",
+    "coat": "CoatColored",
+    "namespace": "FudgeCore",
+    "outdir": "Build/",
+    "register": "true"
+  },
+  "ShaderMatCap": {
+    "vertex": "Source/ShaderMatCap.vert",
+    "fragment": "Source/ShaderMatCap.frag",
+    "coat": "CoatMatCap",
+    "namespace": "FudgeCore",
+    "outdir": "Build/",
+    "register": "true"
+  },
+  "ShaderPick": {
+    "vertex": "Source/ShaderPick.vert",
+    "fragment": "Source/ShaderPick.frag",
+    "namespace": "FudgeCore",
+    "outdir": "Build/",
+    "register": "false"
+  },
+  "ShaderPickTextured": {
+    "vertex": "Source/ShaderPickTextured.vert",
+    "fragment": "Source/ShaderPickTextured.frag",
+    "namespace": "FudgeCore",
+    "outdir": "Build/",
+    "register": "false"
+  }
+}

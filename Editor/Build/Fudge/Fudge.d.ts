@@ -80,6 +80,7 @@ declare namespace Fudge {
         TEXT = "text",
         AUDIO = "audio",
         IMAGE = "image",
+        MESH = "mesh",
         UNKNOWN = "unknown"
     }
     const fs: ƒ.General;

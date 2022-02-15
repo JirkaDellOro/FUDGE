@@ -75,14 +75,13 @@ namespace Fudge {
     protected async contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): Promise<void> {
       ƒ.Debug.fudge(`MenuSelect | id: ${CONTEXTMENU[_item.id]} | event: ${_event}`);
       let iSubclass: number = _item["iSubclass"];
+      if (!iSubclass) {
+        alert("Funky Electron-Error... please try again");
+        return;
+      }
 
       switch (Number(_item.id)) {
         case CONTEXTMENU.CREATE_MESH:
-          if (!iSubclass) {
-            alert("Funky Electron-Error... please try again");
-            return;
-          }
-
           let typeMesh: typeof ƒ.Mesh = ƒ.Mesh.subclasses[iSubclass];
           //@ts-ignore
           let meshNew: ƒ.Mesh = new typeMesh();
@@ -90,12 +89,8 @@ namespace Fudge {
           this.table.selectInterval(meshNew, meshNew);
           break;
         case CONTEXTMENU.CREATE_MATERIAL:
-          if (!iSubclass) {
-            alert("Funky Electron-Error... please try again");
-            return;
-          }
           let typeShader: typeof ƒ.Shader = ƒ.Shader.subclasses[iSubclass];
-          let mtrNew: ƒ.Material = new ƒ.Material("NewMaterial", typeShader);
+          let mtrNew: ƒ.Material = new ƒ.Material(typeShader.name, typeShader);
           this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
           this.table.selectInterval(mtrNew, mtrNew);
           break;
@@ -123,7 +118,7 @@ namespace Fudge {
       if (_viewSource instanceof ViewExternal) {
         let sources: DirectoryEntry[] = _viewSource.getDragDropSources();
         for (let source of sources)
-          if (source.getMimeType() != MIME.AUDIO && source.getMimeType() != MIME.IMAGE)
+          if (source.getMimeType() != MIME.AUDIO && source.getMimeType() != MIME.IMAGE && source.getMimeType() != MIME.MESH)
             return;
       }
 
@@ -147,6 +142,9 @@ namespace Fudge {
               break;
             case MIME.IMAGE:
               console.log(new ƒ.TextureImage(source.pathRelative));
+              break;
+            case MIME.MESH:
+              console.log(new ƒ.MeshObj(null, source.pathRelative));
               break;
           }
         }

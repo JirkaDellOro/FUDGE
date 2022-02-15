@@ -136,7 +136,7 @@ namespace Controls {
   }
 
   function hndModeInput(_event: Event): void {
-    let target: HTMLInputElement = document.querySelector("input#Passive");
+    let target: HTMLInputElement = document.querySelector("input#Polling");
     rateDispatchOutput = 100;
     if (target.checked) {
       rateDispatchOutput = 0;
@@ -193,7 +193,7 @@ namespace Controls {
     controlDifferential.dispatchEvent(new Event(ƒ.EVENT_CONTROL.OUTPUT));
     controlIntegral.dispatchEvent(new Event(ƒ.EVENT_CONTROL.OUTPUT));
 
-    let target: HTMLInputElement = document.querySelector("input#Passive");
+    let target: HTMLInputElement = document.querySelector("input#Polling");
     if (target.checked)
       window.setTimeout(update, 10);
   }

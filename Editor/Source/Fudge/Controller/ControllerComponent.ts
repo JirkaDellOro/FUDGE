@@ -17,6 +17,7 @@ namespace Fudge {
 
   let filter: { [name: string]: DragDropFilter } = {
     UrlOnTexture: { fromViews: [ViewExternal], onKeyAttribute: "url", onTypeAttribute: "TextureImage", ofType: DirectoryEntry, dropEffect: "link" },
+    UrlOnMeshObj: { fromViews: [ViewExternal], onKeyAttribute: "url", onTypeAttribute: "MeshObj", ofType: DirectoryEntry, dropEffect: "link" },
     UrlOnAudio: { fromViews: [ViewExternal], onKeyAttribute: "url", onTypeAttribute: "Audio", ofType: DirectoryEntry, dropEffect: "link" },
     MaterialOnComponentMaterial: { fromViews: [ViewInternal], onTypeAttribute: "Material", onType: ƒ.ComponentMaterial, ofType: ƒ.Material, dropEffect: "link" },
     MeshOnComponentMesh: { fromViews: [ViewInternal], onType: ƒ.ComponentMesh, ofType: ƒ.Mesh, dropEffect: "link" },
@@ -46,6 +47,8 @@ namespace Fudge {
     private hndDragOver = (_event: DragEvent): void => {
       // url on texture
       if (this.filterDragDrop(_event, filter.UrlOnTexture, checkMimeType(MIME.IMAGE))) return;
+      // url on meshobj
+      if (this.filterDragDrop(_event, filter.UrlOnMeshObj, checkMimeType(MIME.MESH))) return;
       // url on audio
       if (this.filterDragDrop(_event, filter.UrlOnAudio, checkMimeType(MIME.AUDIO))) return;
 
@@ -107,6 +110,8 @@ namespace Fudge {
 
       // texture
       if (this.filterDragDrop(_event, filter.UrlOnTexture, setExternalLink)) return;
+      // texture
+      if (this.filterDragDrop(_event, filter.UrlOnMeshObj, setExternalLink)) return;
       // audio
       if (this.filterDragDrop(_event, filter.UrlOnAudio, setExternalLink)) return;
 

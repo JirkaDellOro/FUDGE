@@ -25,7 +25,7 @@
       "command": "node CompileShaders.mjs CompileShaders.json",
       "group": "build",
       "options": {
-        "cwd": "Shader/GLSL/"
+        "cwd": "Shader/"
       }
     }
   ]

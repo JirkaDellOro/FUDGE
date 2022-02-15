@@ -173,15 +173,15 @@ namespace FudgeCore {
 
     //#region Physics
     private static transformByPhysics(_node: Node, _cmpRigidbody: ComponentRigidbody): void {
+      if (!_cmpRigidbody.isInitialized) // || Project.mode == MODE.EDITOR)
+        _cmpRigidbody.initialize();
+
       if (!Physics.world?.getBodyList().length)
         return;
 
       if (!_node.mtxLocal) {
         throw (new Error("ComponentRigidbody requires ComponentTransform at the same Node"));
       }
-
-      if (!_cmpRigidbody.isInitialized || Project.mode == MODE.EDITOR)
-        _cmpRigidbody.initialize();
 
       _cmpRigidbody.checkCollisionEvents();
 
@@ -199,7 +199,7 @@ namespace FudgeCore {
       mtxWorld.multiply(_cmpRigidbody.mtxPivotInverse);
       _node.mtxWorld.translation = mtxWorld.translation;
       _node.mtxWorld.rotation = mtxWorld.rotation;
-      let mtxLocal: Matrix4x4 = Matrix4x4.RELATIVE(_node.mtxWorld, _node.getParent().mtxWorld);
+      let mtxLocal: Matrix4x4 = _node.getParent() ? Matrix4x4.RELATIVE(_node.mtxWorld, _node.getParent().mtxWorld) : _node.mtxWorld;
       _node.mtxLocal.set(mtxLocal);
       Recycler.store(mtxWorld);
       Recycler.store(mtxLocal);

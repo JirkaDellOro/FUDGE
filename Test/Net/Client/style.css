@@ -11,3 +11,8 @@ span {
     background-color: orange;
   }
 }
+
+th {
+  width: 5em;
+  text-align: left;
+}
