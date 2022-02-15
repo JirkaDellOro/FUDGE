@@ -3426,6 +3426,8 @@ declare namespace FudgeCore {
         idResource: string;
         name: string;
         renderBuffers: RenderBuffers;
+        protected cloud: Vertex[];
+        protected faces: Face[];
         /** vertices of the actual point cloud, some points might be in the same location in order to refer to different texels */
         protected ƒvertices: Float32Array;
         /** indices to create faces from the vertices, rotation determines direction of face-normal */
@@ -3745,6 +3747,7 @@ declare namespace FudgeCore {
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;
         protected createIndices(): Uint16Array;
+        protected createFaces(_vertices: Vertex[]): Face[];
     }
 }
 declare namespace FudgeCore {
@@ -3786,7 +3789,8 @@ declare namespace FudgeCore {
     class Vertex {
         position: Vector3;
         uv: Vector2;
-        constructor(_position: Vector3, _uv: Vector2);
+        normal: Vector3;
+        constructor(_position: Vector3, _uv?: Vector2, _normal?: Vector3);
     }
 }
 declare namespace FudgeCore {

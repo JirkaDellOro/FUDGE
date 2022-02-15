@@ -18,6 +18,10 @@ namespace FudgeCore {
 
     public renderBuffers: RenderBuffers; /* defined by RenderInjector*/
 
+    // new base structure for meshes in FUDGE
+    protected cloud: Vertex[] = [];
+    protected faces: Face[] = [];
+
     /** vertices of the actual point cloud, some points might be in the same location in order to refer to different texels */
     protected ƒvertices: Float32Array;
     /** indices to create faces from the vertices, rotation determines direction of face-normal */
@@ -72,6 +76,7 @@ namespace FudgeCore {
       return indices;
     }
 
+    // TODO: become Face-method?
     protected static deleteInvalidIndices(_indices: number[], _vertices: Vector3[]): void {
       //delete "non"-faces with two identical vectors
       for (let i: number = _indices.length - 3; i >= 0; i -= 3) {
@@ -250,8 +255,8 @@ namespace FudgeCore {
       let faceCrossProducts: Float32Array = this.normalsFaceUnscaled;
 
       for (let n: number = 0; n < faceCrossProducts.length; n += 3) {
-        normals.push(0, 0, 0);
-        normals.push(0, 0, 0);
+        // normals.push(0, 0, 0);
+        // normals.push(0, 0, 0);
         // only third entry used
         let normal: Vector3 = new Vector3(faceCrossProducts[n], faceCrossProducts[n + 1], faceCrossProducts[n + 2]);
         normal = Vector3.NORMALIZATION(normal);
@@ -376,6 +381,17 @@ namespace FudgeCore {
       return box;
     }
 
+    // public getMutator(): Mutator {
+    //   let mutator: Mutator = {
+    //     name: this.name,
+    //     idResource: this.idResource
+    //   }
+    //   return mutator;
+    // }
+
+    // protected reduceMutator(_mutator: Mutator): void {
+    //   // nothing to reduce...
+    // }
 
     protected reduceMutator(_mutator: Mutator): void {
       // TODO: so much to delete... rather just gather what to mutate

@@ -25,7 +25,6 @@ namespace FudgeCore {
         new Face(vertices, 2, 3, 0)
       ];
 
-      this.ƒvertices = new Float32Array(vertices.flatMap((_vertex: Vertex) => [..._vertex.position.get()]));
       this.ƒtextureUVs = new Float32Array(vertices.flatMap((_vertex: Vertex) => [..._vertex.uv.get()]));
       this.ƒindices = new Uint16Array(faces.flatMap((_face: Face) => [..._face.indices]));
       this.ƒnormalsFlat = new Float32Array(this.ƒvertices.length);

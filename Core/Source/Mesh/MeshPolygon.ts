@@ -132,6 +132,5 @@ namespace FudgeCore {
         indices.push(0, i - 1, i);
       return new Uint16Array(indices);
     }
-
   }
 }

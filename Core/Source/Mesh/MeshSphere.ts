@@ -35,9 +35,12 @@ namespace FudgeCore {
         this.stacks = Math.max(2, _stacks);
       }
 
-      let vertices: Array<number> = [];
-      let normals: number[] = [];
-      let textureUVs: number[] = [];
+      // let vertices: Array<number> = [];
+      // let normals: number[] = [];
+      // let textureUVs: number[] = [];
+
+      // TODO: the following is method createVertices
+      let vertices: Vertex[] = [];
 
       let x: number;
       let z: number;
@@ -66,25 +69,38 @@ namespace FudgeCore {
           //vertex position
           x = xz * Math.cos(sectorAngle);
           z = xz * Math.sin(sectorAngle);
-          vertices.push(x, y, z);
+          vertices.push(new Vertex(
+            new Vector3(x / 2, y / 2, z / 2),
+            new Vector2(j / this.sectors * -1, i / this.stacks),
+            new Vector3(x, y, z))
+          );
 
           //normals
-          normals.push(x, y, z);
+          // normals.push(x, y, z);
 
           //UV Coords
-          textureUVs.push(j / this.sectors * -1);
-          textureUVs.push(i / this.stacks);
+          // textureUVs.push(j / this.sectors * -1);
+          // textureUVs.push(i / this.stacks);
         }
       }
 
       // scale down
-      vertices = vertices.map(_value => _value / 2);
+      // vertices = vertices.map(_value => _value / 2);
 
-      this.ƒtextureUVs = new Float32Array(textureUVs);
       // this.ƒnormals = new Float32Array(normals);
-      this.ƒvertices = new Float32Array(vertices);
-      this.ƒnormalsFlat = this.createFlatNormals();
-      this.ƒindices = this.createIndices();
+      this.ƒvertices = new Float32Array(vertices.flatMap(_vertex => [..._vertex.position.get()]));
+      this.ƒtextureUVs = new Float32Array(vertices.flatMap(_vertex => [..._vertex.uv.get()]));
+
+      let faces: Face[] = this.createFaces(vertices);
+
+      // this.ƒnormalsFlat = this.createFlatNormals();
+      // this.ƒindices = this.createIndices();
+      this.ƒindices = new Uint16Array(faces.flatMap((_face: Face) => [..._face.indices]));
+      // this.ƒnormalsFlat = new Float32Array(this.ƒvertices.length);
+      // for (let face of faces) {
+      //   let index: number = 3 * face.indices[2]; // face normal gets attached to the third vertex
+      //   this.ƒnormalsFlat.set(face.normal.get(), index);
+      // }
       // this.createRenderBuffers();
     }
 
@@ -136,6 +152,32 @@ namespace FudgeCore {
       }
       let indices: Uint16Array = new Uint16Array(inds);
       return indices;
+    }
+
+    protected createFaces(_vertices: Vertex[]): Face[] {
+      let faces: Face[] = [];
+
+      let k1: number;
+      let k2: number;
+
+      for (let i: number = 0; i < this.stacks; ++i) {
+        k1 = i * (this.sectors + 1);   // beginning of current stack
+        k2 = k1 + this.sectors + 1;    // beginning of next stack
+
+        for (let j: number = 0; j < this.sectors; ++j, ++k1, ++k2) {
+
+          // 2 triangles per sector excluding first and last stacks
+          // k1 => k2 => k1+1
+          if (i != 0)
+            faces.push(new Face(_vertices, k1, k1 + 1, k2));
+
+
+          if (i != (this.stacks - 1))
+            faces.push(new Face(_vertices, k1 + 1, k2 + 1, k2));
+        }
+      }
+
+      return faces;
     }
   }
 }
