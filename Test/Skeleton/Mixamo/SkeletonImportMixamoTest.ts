@@ -28,7 +28,7 @@ namespace SkeletonTest {
     camera.addComponent(new ƒ.ComponentCamera());
     camera.addComponent(new ƒ.ComponentTransform());
     camera.getComponent(ƒ.ComponentCamera).clrBackground.setHex("4472C4FF");
-    camera.mtxLocal.translateZ(10);
+    camera.mtxLocal.translateZ(1000);
     camera.mtxLocal.showTo(ƒ.Vector3.ZERO(), camera.mtxLocal.getY());
     scene.addChild(camera);
 

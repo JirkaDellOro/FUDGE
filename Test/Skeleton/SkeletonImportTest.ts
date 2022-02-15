@@ -59,7 +59,6 @@ namespace SkeletonTest {
     arm.getComponent(ƒ.ComponentMesh).mesh = await ƒ.Serializer.deserialize(meshSerialization) as ƒ.MeshSkin;
     arm.addComponent(new ƒ.ComponentTransform());
     arm.mtxLocal.translateY(-2);
-    arm.getChildrenByName("ArmSkeleton")[0].getComponent(ƒ.ComponentAnimator).activate(true);
     return arm;
   }
 

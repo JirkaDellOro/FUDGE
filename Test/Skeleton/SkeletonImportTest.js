@@ -48,7 +48,6 @@ var SkeletonTest;
         arm.getComponent(ƒ.ComponentMesh).mesh = await ƒ.Serializer.deserialize(meshSerialization);
         arm.addComponent(new ƒ.ComponentTransform());
         arm.mtxLocal.translateY(-2);
-        arm.getChildrenByName("ArmSkeleton")[0].getComponent(ƒ.ComponentAnimator).activate(true);
         return arm;
     }
     function update(_viewport, _mtxRotatorX, _mtxRotatorY) {
