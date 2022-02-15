@@ -3,7 +3,7 @@ namespace FudgeCore {
    * Abstract base class for all meshes. 
    * Meshes provide indexed vertices, the order of indices to create trigons and normals, and texture coordinates
    * 
-   * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+   * @authors Jirka Dell'Oro-Friedl, HFU, 2019/22
    */
   @RenderInjectorMesh.decorate
   export abstract class Mesh extends Mutable implements SerializableResource {
@@ -93,44 +93,69 @@ namespace FudgeCore {
     }
 
     public get vertices(): Float32Array {
-      if (this.ƒvertices == null)
-        this.ƒvertices = this.createVertices();
-
-      return this.ƒvertices; // optimize:  || (this.ƒvertices = this.createVertices());
+      return this.ƒvertices || ( // return cache or ...
+        // ... flatten all vertex positions from cloud into a typed array
+        this.ƒvertices = new Float32Array(this.cloud.flatMap((_vertex: Vertex) => [..._vertex.position.get()])
+        ));
     }
+
     public get indices(): Uint16Array {
-      if (this.ƒindices == null)
-        this.ƒindices = this.createIndices();
-
-      return this.ƒindices;
+      return this.ƒindices || ( // return cache or ...
+        // ... flatten all indices from the faces into a typed array
+        this.ƒindices = new Uint16Array(this.faces.flatMap((_face: Face) => [..._face.indices])
+        ));
     }
-    public get normalsFaceUnscaled(): Float32Array {
-      if (this.ƒnormalsFaceUnscaled == null)
-        this.ƒnormalsFaceUnscaled = this.calculateFaceCrossProducts();
 
-      return this.ƒnormalsFaceUnscaled;
-    }
+    // public get normalsFaceUnscaled(): Float32Array {
+    //   if (this.ƒnormalsFaceUnscaled == null)
+    //     this.ƒnormalsFaceUnscaled = this.calculateFaceCrossProducts();
+
+    //   return this.ƒnormalsFaceUnscaled;
+    // }
+
     public get normalsVertex(): Float32Array {
-      if (this.ƒnormalsVertex == null)
-        this.ƒnormalsVertex = this.createVertexNormals();
+      if (this.ƒnormalsVertex == null) {
+        // sum up all unscaled normals of faces connected to one vertex...
+        let normalsVertex: Vector3[] = (new Array<Vector3>(this.cloud.length)).fill(Vector3.ZERO());
+        for (let face of this.faces)
+          for (let index of face.indices)
+            normalsVertex[index] = Vector3.SUM(normalsVertex[index], face.normalUnscaled);
+        // ... and normalize them
+        for (let normal of normalsVertex)
+          normal.normalize();
+
+        this.ƒnormalsVertex = new Float32Array(normalsVertex.flatMap((_normal: Vector3) => [..._normal.get()]));
+      }
 
       return this.ƒnormalsVertex;
     }
-    public get textureUVs(): Float32Array {
-      if (this.ƒtextureUVs == null)
-        this.ƒtextureUVs = this.createTextureUVs();
 
-      return this.ƒtextureUVs;
+    public get textureUVs(): Float32Array {
+      return this.ƒtextureUVs || ( // return cache or ...
+        // ... flatten all uvs from the clous into a typed array
+        this.ƒtextureUVs = new Float32Array(this.cloud.flatMap((_vertex: Vertex) => [..._vertex.uv.get()])
+        ));
     }
 
     public get normalsFlat(): Float32Array {
-      return this.ƒnormalsFlat || (this.ƒnormalsFlat = this.createFlatNormals());
+      if (this.ƒnormalsFlat == null) {
+        this.ƒnormalsFlat = new Float32Array(this.verticesFlat.length);
+        for (let face of this.faces) {
+          // store the face normal at the position of the third vertex of a face in the normalsFlat array
+          let index: number = 3 * face.indices[2];
+          this.ƒnormalsFlat.set(face.normal.get(), index);
+        }
+      }
+
+      return this.ƒnormalsFlat;
     }
+
     public get verticesFlat(): Float32Array {
-      return this.ƒverticesFlat || (this.ƒverticesFlat = this.createFlatVertices());
+      return this.ƒverticesFlat || (this.ƒverticesFlat = this.createVerticesFlat());
     }
+
     public get textureUVsFlat(): Float32Array {
-      return this.ƒtextureUVsFlat || (this.ƒtextureUVsFlat = this.createFlatTextureUVs());
+      return this.ƒtextureUVsFlat || (this.ƒtextureUVsFlat = this.createTextureUVsFlat());
     }
 
     public get boundingBox(): Box {
@@ -183,9 +208,10 @@ namespace FudgeCore {
       this.ƒvertices = this.createVertices();
       this.ƒindices = this.createIndices();
       this.ƒtextureUVs = this.createTextureUVs();
-      this.ƒnormalsFaceUnscaled = this.calculateFaceCrossProducts();
-      this.ƒnormalsFlat = this.createFlatNormals();
-      this.ƒnormalsVertex = this.createVertexNormals();
+      this.ƒverticesFlat = this.createVerticesFlat();
+      // this.ƒnormalsFaceUnscaled = this.calculateFaceCrossProducts();
+      // this.ƒnormalsFlat = this.createFlatNormals();
+      // this.ƒnormalsVertex = this.createVertexNormals();
       this.createRenderBuffers();
     }
 
@@ -250,68 +276,68 @@ namespace FudgeCore {
     }
 
     // TODO: this method doesn't appear to make sense, since there is no relation to any vertex-array
-    protected createFlatNormals(): Float32Array {
-      let normals: number[] = [];
-      let faceCrossProducts: Float32Array = this.normalsFaceUnscaled;
+    // protected createFlatNormals(): Float32Array {
+    //   let normals: number[] = [];
+    //   let faceCrossProducts: Float32Array = this.normalsFaceUnscaled;
 
-      for (let n: number = 0; n < faceCrossProducts.length; n += 3) {
-        // normals.push(0, 0, 0);
-        // normals.push(0, 0, 0);
-        // only third entry used
-        let normal: Vector3 = new Vector3(faceCrossProducts[n], faceCrossProducts[n + 1], faceCrossProducts[n + 2]);
-        normal = Vector3.NORMALIZATION(normal);
-        normals.push(normal.x, normal.y, normal.z);
-      }
-      return new Float32Array(normals);
-    }
+    //   for (let n: number = 0; n < faceCrossProducts.length; n += 3) {
+    //     // normals.push(0, 0, 0);
+    //     // normals.push(0, 0, 0);
+    //     // only third entry used
+    //     let normal: Vector3 = new Vector3(faceCrossProducts[n], faceCrossProducts[n + 1], faceCrossProducts[n + 2]);
+    //     normal = Vector3.NORMALIZATION(normal);
+    //     normals.push(normal.x, normal.y, normal.z);
+    //   }
+    //   return new Float32Array(normals);
+    // }
 
     /*Luis Keck: Calculates vertex normals for smooth shading.
     New function needed because faces do not share vertices currently */
-    protected createVertexNormals(): Float32Array {
-      let vertexNormals: number[] = [];
-      let done: boolean[] = new Array<boolean>(this.vertices.length);
-      let iVertex: Vector3 = new Vector3();
-      let jVertex: Vector3 = new Vector3();
-      //goes through all vertices
-      for (let i: number = 0; i < this.vertices.length; i += 3) {
-        if (done[i])
-          continue;
-        iVertex.set(this.vertices[i], this.vertices[i + 1], this.vertices[i + 2]);
-        let samePosVerts: number[] = [i];
-        done[i] = true;
+    // protected createVertexNormals(): Float32Array {
+    //   let vertexNormals: number[] = [];
+    //   let done: boolean[] = new Array<boolean>(this.vertices.length);
+    //   let iVertex: Vector3 = new Vector3();
+    //   let jVertex: Vector3 = new Vector3();
+    //   //goes through all vertices
+    //   for (let i: number = 0; i < this.vertices.length; i += 3) {
+    //     if (done[i])
+    //       continue;
+    //     iVertex.set(this.vertices[i], this.vertices[i + 1], this.vertices[i + 2]);
+    //     let samePosVerts: number[] = [i];
+    //     done[i] = true;
 
-        //finds vertices that share position with the vertex of current iteration
-        for (let j: number = i + 3; j < this.vertices.length; j += 3) {
-          if (done[j])
-            continue;
-          jVertex.set(this.vertices[j], this.vertices[j + 1], this.vertices[j + 2]);
-          done[j] = (iVertex.equals(jVertex, 0.01));
-          if (done[j])
-            samePosVerts.push(j);
-        }
+    //     //finds vertices that share position with the vertex of current iteration
+    //     for (let j: number = i + 3; j < this.vertices.length; j += 3) {
+    //       if (done[j])
+    //         continue;
+    //       jVertex.set(this.vertices[j], this.vertices[j + 1], this.vertices[j + 2]);
+    //       done[j] = (iVertex.equals(jVertex, 0.01));
+    //       if (done[j])
+    //         samePosVerts.push(j);
+    //     }
 
-        let sum: Vector3 = Vector3.ZERO();
-        //adds the face normals of all faces that would share these vertices
-        for (let z of samePosVerts)
-          sum = Vector3.SUM(sum, new Vector3(
-            this.normalsFaceUnscaled[z + 0],
-            this.normalsFaceUnscaled[z + 1],
-            this.normalsFaceUnscaled[z + 2])
-          );
+    //     let sum: Vector3 = Vector3.ZERO();
+    //     //adds the face normals of all faces that would share these vertices
+    //     for (let z of samePosVerts)
+    //       sum = Vector3.SUM(sum, new Vector3(
+    //         this.normalsFaceUnscaled[z + 0],
+    //         this.normalsFaceUnscaled[z + 1],
+    //         this.normalsFaceUnscaled[z + 2])
+    //       );
 
-        if (sum.magnitude != 0)
-          sum = Vector3.NORMALIZATION(sum);  // appears to be obsolete
+    //     if (sum.magnitude != 0)
+    //       sum = Vector3.NORMALIZATION(sum);  // appears to be obsolete
 
-        for (let z of samePosVerts) {
-          vertexNormals[z] = sum.x;
-          vertexNormals[z + 1] = sum.y;
-          vertexNormals[z + 2] = sum.z;
-        }
-      }
-      return new Float32Array(vertexNormals);
-    }
+    //     for (let z of samePosVerts) {
+    //       vertexNormals[z] = sum.x;
+    //       vertexNormals[z + 1] = sum.y;
+    //       vertexNormals[z + 2] = sum.z;
+    //     }
+    //   }
+    //   return new Float32Array(vertexNormals);
+    // }
 
-    createFlatVertices(): Float32Array {
+    createVerticesFlat(): Float32Array {
       let vertices: number[] = [];
       let indices: number[] = [];
       // create unique vertices for each face, tripling the number
@@ -325,7 +351,7 @@ namespace FudgeCore {
       return new Float32Array(vertices);
     }
 
-    createFlatTextureUVs(): Float32Array {
+    createTextureUVsFlat(): Float32Array {
       let uv: number[] = [];
       // create unique vertices for each face, tripling the number
       for (let i: number = 0; i < this.indices.length; i++) {

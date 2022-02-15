@@ -8,7 +8,7 @@ namespace FudgeCore {
    *            ╲|_╲╱ 
    *            2   3
    * ```
-   * @authors Jirka Dell'Oro-Friedl, HFU, 2021
+   * @authors Jirka Dell'Oro-Friedl, HFU, 2021/22
    */
   export class MeshPolygon extends Mesh {
     public static readonly iSubclass: number = Mesh.registerSubclass(MeshPolygon);
@@ -24,29 +24,6 @@ namespace FudgeCore {
       super(_name);
       this.create(_shape, _fitTexture);
     }
-
-    // private static fitMesh(_vertices: Vector2[]): Vector2[] {
-    //   let result: Vector2[] = [];
-    //   let min: Vector2 = Vector2.ZERO();
-    //   let max: Vector2 = Vector2.ZERO();
-    //   for (let vertex of _vertices) {
-    //     min.x = Math.min(min.x, vertex.x);
-    //     max.x = Math.max(max.x, vertex.x);
-    //     min.y = Math.min(min.y, vertex.y);
-    //     max.y = Math.max(max.y, vertex.y);
-    //   }
-    //   let center: Vector2 = new Vector2((min.x + max.x) / 2, (min.y + max.y) / 2);
-    //   let size: Vector2 = new Vector2(max.x - min.x, max.y - min.y);
-
-    //   for (let vertex of _vertices) {
-    //     let adjusted: Vector2 = Vector2.DIFFERENCE(vertex, center);
-    //     adjusted.x /= size.x;
-    //     adjusted.y /= size.y;
-    //     result.push(adjusted);
-    //   }
-
-    //   return result;
-    // }
 
     protected get minVertices(): number {
       return 3;
@@ -67,11 +44,9 @@ namespace FudgeCore {
 
       let min: Vector2 = Vector2.ZERO();
       let max: Vector2 = Vector2.ZERO();
-      let vertices: number[] = [];
+      this.cloud = [];
       for (let vertex of shape) {
-        vertices.push(vertex.x);
-        vertices.push(vertex.y);
-        vertices.push(0);
+        this.cloud.push(new Vertex(vertex.toVector3()));
 
         min.x = Math.min(min.x, vertex.x);
         max.x = Math.max(max.x, vertex.x);
@@ -80,25 +55,18 @@ namespace FudgeCore {
       }
       let size: Vector2 = new Vector2(max.x - min.x, max.y - min.y);
 
-      let textureUVs: number[] = [];
       if (this.fitTexture) {
-        for (let vertex of shape) {
-          let textureUV: Vector2 = Vector2.SUM(vertex, min);
-          textureUV.y *= -1;
-          textureUVs.push(textureUV.x / size.x);
-          textureUVs.push(textureUV.y / size.y);
+        for (let i: number = 0; i < shape.length; i++) {
+          let textureUV: Vector2 = Vector2.SUM(shape[i], min);
+          this.cloud[i].uv = new Vector2(textureUV.x / size.x, -textureUV.y / size.y);
         }
       } else {
-        textureUVs = _shape.map(_vertex => [_vertex.x, -_vertex.y]).flat();
+        _shape.forEach((_vertex, i) => this.cloud[i].uv = new Vector2(_vertex.x, -_vertex.y));
       }
 
-      // console.log(textureUVs);
-
-      this.ƒvertices = new Float32Array(vertices);
-      this.ƒtextureUVs = new Float32Array(textureUVs);
-      this.ƒindices = this.createIndices();
-      // this.ƒnormalsFace = this.createFaceNormals();
-      // this.createRenderBuffers();
+      this.faces = [];
+      for (let i: number = 2; i < this.vertices.length / 3; i++)
+        this.faces.push(new Face(this.cloud, 0, i - 1, i));
     }
 
     //#region Transfer
@@ -125,12 +93,5 @@ namespace FudgeCore {
       super.reduceMutator(_mutator);
     }
     //#endregion
-
-    protected createIndices(): Uint16Array {
-      let indices: Array<number> = [];
-      for (let i: number = 2; i < this.vertices.length / 3; i++)
-        indices.push(0, i - 1, i);
-      return new Uint16Array(indices);
-    }
   }
 }

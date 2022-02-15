@@ -3416,7 +3416,7 @@ declare namespace FudgeCore {
      * Abstract base class for all meshes.
      * Meshes provide indexed vertices, the order of indices to create trigons and normals, and texture coordinates
      *
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019/22
      */
     abstract class Mesh extends Mutable implements SerializableResource {
         /** refers back to this class from any subclass e.g. in order to find compatible other resources*/
@@ -3462,7 +3462,6 @@ declare namespace FudgeCore {
         get type(): string;
         get vertices(): Float32Array;
         get indices(): Uint16Array;
-        get normalsFaceUnscaled(): Float32Array;
         get normalsVertex(): Float32Array;
         get textureUVs(): Float32Array;
         get normalsFlat(): Float32Array;
@@ -3486,10 +3485,8 @@ declare namespace FudgeCore {
         protected createIndices(): Uint16Array;
         protected createNormals(): Float32Array;
         protected calculateFaceCrossProducts(): Float32Array;
-        protected createFlatNormals(): Float32Array;
-        protected createVertexNormals(): Float32Array;
-        createFlatVertices(): Float32Array;
-        createFlatTextureUVs(): Float32Array;
+        createVerticesFlat(): Float32Array;
+        createTextureUVsFlat(): Float32Array;
         protected createRadius(): number;
         protected createBoundingBox(): Box;
         protected reduceMutator(_mutator: Mutator): void;
@@ -3525,7 +3522,7 @@ declare namespace FudgeCore {
      *            ╲|_╲╱
      *            2   3
      * ```
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2021
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2021/22
      */
     class MeshPolygon extends Mesh {
         static readonly iSubclass: number;
@@ -3539,7 +3536,6 @@ declare namespace FudgeCore {
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;
         protected reduceMutator(_mutator: Mutator): void;
-        protected createIndices(): Uint16Array;
     }
 }
 declare namespace FudgeCore {
@@ -3637,7 +3633,7 @@ declare namespace FudgeCore {
      * Generate a simple quad with edges of length 1, the face consisting of two trigons
      * ```plaintext
      *        0 __ 3
-     *         |__|
+     *         |_\|
      *        1    2
      * ```
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
@@ -3645,10 +3641,6 @@ declare namespace FudgeCore {
     class MeshQuad extends Mesh {
         static readonly iSubclass: number;
         constructor(_name?: string);
-        protected createVertices(): Float32Array;
-        protected createIndices(): Uint16Array;
-        protected createTextureUVs(): Float32Array;
-        protected createFlatNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {
