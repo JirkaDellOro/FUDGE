@@ -3522,7 +3522,7 @@ declare namespace FudgeCore {
      *            ╲|_╲╱
      *            2   3
      * ```
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2021/22
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2021-2022
      */
     class MeshPolygon extends Mesh {
         static readonly iSubclass: number;
@@ -3636,11 +3636,12 @@ declare namespace FudgeCore {
      *         |_\|
      *        1    2
      * ```
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2019-2022
      */
-    class MeshQuad extends Mesh {
+    class MeshQuad extends MeshPolygon {
         static readonly iSubclass: number;
         constructor(_name?: string);
+        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace FudgeCore {

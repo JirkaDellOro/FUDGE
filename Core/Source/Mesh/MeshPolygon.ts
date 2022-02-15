@@ -8,7 +8,7 @@ namespace FudgeCore {
    *            ╲|_╲╱ 
    *            2   3
    * ```
-   * @authors Jirka Dell'Oro-Friedl, HFU, 2021/22
+   * @authors Jirka Dell'Oro-Friedl, HFU, 2021-2022
    */
   export class MeshPolygon extends Mesh {
     public static readonly iSubclass: number = Mesh.registerSubclass(MeshPolygon);
