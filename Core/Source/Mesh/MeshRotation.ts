@@ -56,15 +56,24 @@ namespace FudgeCore {
       let mtxRotate: Matrix4x4 = Matrix4x4.ROTATION_Y(angle);
       // copy original polygon as Vector3 array
       let polygon: Vector3[] = [];
-      for (let i: number = 0; i < this.shape.length; i ++)
+      let distances: number[] = [0];
+      let total: number = 0;
+      for (let i: number = 0; i < this.shape.length; i++) {
         polygon.push(this.shape[i].toVector3());
+        if (i > 0) {
+          let distance: number = Vector2.DIFFERENCE(this.shape[i], this.shape[i - 1]).magnitude;
+          total += distance;
+          distances.push(total);
+        }
+      }
+      distances.forEach((entry, index) => { distances[index] = entry / total });
 
       let nVerticesPolygon: number = polygon.length;
 
       let cloud: Vertex[] = [];
       for (let sector: number = 0; sector <= this.sectors; sector++) {
         for (let i: number = 0; i < nVerticesPolygon; i++) {
-          let uv: Vector2 = new Vector2(sector / this.sectors, i * 1 / (nVerticesPolygon - 1));
+          let uv: Vector2 = new Vector2(sector / this.sectors, distances[i]);
           // TODO: last sector should only be references to the first meridian
           cloud.push(new Vertex(polygon[i].clone, uv));
         }
