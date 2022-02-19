@@ -12,7 +12,7 @@ namespace FudgeCore {
    */
   export class MeshPolygon extends Mesh {
     public static readonly iSubclass: number = Mesh.registerSubclass(MeshPolygon);
-    protected static verticesDefault: Vector2[] = [ // trigon is the minimal shape
+    protected static shapeDefault: Vector2[] = [ // trigon is the minimal shape
       new Vector2(-1, -1),
       new Vector2(1, -1),
       new Vector2(0, 1)
@@ -20,7 +20,7 @@ namespace FudgeCore {
     protected shape: MutableArray<Vector2> = new MutableArray<Vector2>();
     protected fitTexture: boolean;
 
-    public constructor(_name: string = "MeshPolygon", _shape: Vector2[] = MeshPolygon.verticesDefault, _fitTexture: boolean = true) {
+    public constructor(_name: string = "MeshPolygon", _shape: Vector2[] = MeshPolygon.shapeDefault, _fitTexture: boolean = true) {
       super(_name);
       this.create(_shape, _fitTexture);
     }
@@ -36,7 +36,7 @@ namespace FudgeCore {
 
       if (_shape.length < this.minVertices) {
         Debug.warn(`At least ${this.minVertices} vertices needed to construct MeshPolygon, default trigon used`);
-        this.create(MeshPolygon.verticesDefault, true);
+        this.create(MeshPolygon.shapeDefault, true);
         return;
       }
 

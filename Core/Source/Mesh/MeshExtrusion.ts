@@ -20,7 +20,7 @@ namespace FudgeCore {
     private mtxTransforms: MutableArray<Matrix4x4> = new MutableArray<Matrix4x4>();
     // private transforms: MutableArray<Matrix4x4> = new MutableArray(Matrix4x4);
 
-    public constructor(_name: string = "MeshExtrusion", _vertices: Vector2[] = MeshPolygon.verticesDefault, _mtxTransforms: Matrix4x4[] = MeshExtrusion.mtxDefaults, _fitTexture: boolean = true) {
+    public constructor(_name: string = "MeshExtrusion", _vertices: Vector2[] = MeshPolygon.shapeDefault, _mtxTransforms: Matrix4x4[] = MeshExtrusion.mtxDefaults, _fitTexture: boolean = true) {
       super(_name, _vertices, _fitTexture);
       this.extrude(_mtxTransforms);
       // console.log("Mutator", this.getMutator());

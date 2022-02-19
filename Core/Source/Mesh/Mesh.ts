@@ -122,7 +122,9 @@ namespace FudgeCore {
             normalsVertex[index] = Vector3.SUM(normalsVertex[index], face.normalUnscaled);
         // ... and normalize them
         for (let normal of normalsVertex)
-          normal.normalize();
+          // some vertices might be unused and yield a zero-normal...
+          if (normal.magnitudeSquared > 0)
+            normal.normalize();
 
         this.ƒnormalsVertex = new Float32Array(normalsVertex.flatMap((_normal: Vector3) => [..._normal.get()]));
       }

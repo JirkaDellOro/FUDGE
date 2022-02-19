@@ -13,7 +13,6 @@ namespace FudgeCore {
 
     public calculateNormals(): void {
       let trigon: Vector3[] = this.indices.map((_index: number) => this.vertices[_index].position);
-
       let v0: Vector3 = Vector3.DIFFERENCE(trigon[0], trigon[1]);
       let v1: Vector3 = Vector3.DIFFERENCE(trigon[0], trigon[2]);
       this.normalUnscaled = Vector3.CROSS(v0, v1);

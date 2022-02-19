@@ -3526,7 +3526,7 @@ declare namespace FudgeCore {
      */
     class MeshPolygon extends Mesh {
         static readonly iSubclass: number;
-        protected static verticesDefault: Vector2[];
+        protected static shapeDefault: Vector2[];
         protected shape: MutableArray<Vector2>;
         protected fitTexture: boolean;
         constructor(_name?: string, _shape?: Vector2[], _fitTexture?: boolean);
@@ -3774,6 +3774,12 @@ declare namespace FudgeCore {
         create(_thickness?: number, _majorSegments?: number, _minorSegments?: number): void;
         mutate(_mutator: Mutator): Promise<void>;
         protected createIndices(): Uint16Array;
+    }
+}
+declare namespace FudgeCore {
+    class Quad {
+        faces: Face[];
+        constructor(_vertices: Vertex[], _index0: number, _index1: number, _index2: number, _index3: number, _planar?: boolean);
     }
 }
 declare namespace FudgeCore {

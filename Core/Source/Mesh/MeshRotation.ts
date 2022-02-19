@@ -50,50 +50,42 @@ namespace FudgeCore {
     //#endregion
 
     private rotate(_sectors: number): void {
+      this.clear();
       this.sectors = Math.round(_sectors);
       let angle: number = 360 / this.sectors;
       let mtxRotate: Matrix4x4 = Matrix4x4.ROTATION_Y(angle);
-      // save original polygon
+      // copy original polygon as Vector3 array
       let polygon: Vector3[] = [];
-      for (let i: number = 0; i < this.vertices.length; i += 3)
-        polygon.push(new Vector3(this.vertices[i], this.vertices[i + 1], this.vertices[i + 2]));
+      for (let i: number = 0; i < this.shape.length; i ++)
+        polygon.push(this.shape[i].toVector3());
 
       let nVerticesPolygon: number = polygon.length;
-      // let nFacesPolygon: number = nVerticesPolygon - 2;
-      // let nIndicesPolygon: number = nFacesPolygon * 3;
 
-      let vertices: Vector3[] = [];
-      for (let sector: number = 0; sector <= this.sectors; sector++) {
-        vertices.push(...polygon.map((_vector: Vector3) => _vector.clone));
-        polygon.forEach((_vector: Vector3) => _vector.transform(mtxRotate));
-        // vertices.push(...polygon.map((_vector: Vector3) => _vector.copy));
-      }
-
-      // copy indices to new index array
-      let indices: number[] = [];
-
-      for (let sector: number = 0; sector < this.sectors; sector++) {
-        for (let quad: number = 0; quad < nVerticesPolygon - 1; quad++) {
-          let start: number = sector * nVerticesPolygon + quad;
-          let quadIndices: number[] = [start + 1, start + 1 + nVerticesPolygon, start + nVerticesPolygon, start];
-          indices.push(...Mesh.getTrigonsFromQuad(quadIndices));
-        }
-      }
-      Mesh.deleteInvalidIndices(indices, vertices);
-
-
-      let textureUVs: number[] = [];
+      let cloud: Vertex[] = [];
       for (let sector: number = 0; sector <= this.sectors; sector++) {
         for (let i: number = 0; i < nVerticesPolygon; i++) {
-          let u: number = sector / this.sectors;
-          let v: number = i * 1 / (nVerticesPolygon - 1);
-          textureUVs.push(u, v);
+          let uv: Vector2 = new Vector2(sector / this.sectors, i * 1 / (nVerticesPolygon - 1));
+          // TODO: last sector should only be references to the first meridian
+          cloud.push(new Vertex(polygon[i].clone, uv));
+        }
+        polygon.forEach((_vector: Vector3) => _vector.transform(mtxRotate));
+      }
+
+
+      // copy indices to new index array
+      let faces: Face[] = [];
+
+      for (let sector: number = 0; sector < this.sectors; sector++) {
+        for (let stack: number = 0; stack < nVerticesPolygon - 1; stack++) {
+          let start: number = sector * nVerticesPolygon + stack;
+          let quad: Quad = new Quad(cloud, start + 1, start + 1 + nVerticesPolygon, start + nVerticesPolygon, start);
+          faces.push(...quad.faces);
+          // TODO: catch invalid faces right here...
         }
       }
 
-      this.ƒvertices = new Float32Array(vertices.map((_v: Vector3) => [_v.x, _v.y, _v.z]).flat());
-      this.ƒindices = new Uint16Array(indices);
-      this.ƒtextureUVs = new Float32Array(textureUVs);
+      this.cloud = cloud;
+      this.faces = faces;
     }
   }
 }
