@@ -3623,9 +3623,6 @@ declare namespace FudgeCore {
     class MeshPyramid extends Mesh {
         static readonly iSubclass: number;
         constructor(_name?: string);
-        protected createVertices(): Float32Array;
-        protected createIndices(): Uint16Array;
-        protected createTextureUVs(): Float32Array;
     }
 }
 declare namespace FudgeCore {
@@ -3784,7 +3781,12 @@ declare namespace FudgeCore {
         position: Vector3;
         uv: Vector2;
         normal: Vector3;
-        constructor(_position: Vector3, _uv?: Vector2, _normal?: Vector3);
+        referTo: number;
+        /**
+         * Represents a vertex of a mesh with extended information such as the uv coordinates and the vertex normal.
+         * It may refer to another vertex via an index into some array, in which case the position and the normal are stored there.
+         */
+        constructor(_positionOrIndex: Vector3 | number, _uv?: Vector2, _normal?: Vector3);
     }
 }
 declare namespace FudgeCore {
