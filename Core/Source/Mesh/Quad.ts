@@ -8,7 +8,7 @@ namespace FudgeCore {
         this.faces.push(new Face(_vertices, _index0, _index1, _index2));
       }
       catch (_e: unknown) {
-        console.error(_e);
+        Debug.fudge("Face excluded", (<Error>_e).message);
       }
       try {
         if (_planar)
@@ -17,7 +17,7 @@ namespace FudgeCore {
           this.faces.push(new Face(_vertices, _index0, _index2, _index3));
       }
       catch (_e: unknown) {
-        console.error(_e);
+        Debug.fudge("Face excluded", (<Error>_e).message);
       }
     }
   }
