@@ -3797,7 +3797,18 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     class Vertices extends Array<Vertex> {
+        /**
+         * returns the position associated with the vertex addressed, resolving references between vertices
+         */
         position(_index: number): Vector3;
+        /**
+         * returns the normal associated with the vertex addressed, resolving references between vertices
+         */
+        normal(_index: number): Vector3;
+        /**
+         * returns the uv-coordinates associated with the vertex addressed
+         */
+        uv(_index: number): Vector2;
     }
 }
 declare namespace FudgeCore {

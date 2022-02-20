@@ -107,23 +107,13 @@ namespace FudgeCore {
         ));
     }
 
-    // public get normalsFaceUnscaled(): Float32Array {
-    //   if (this.ƒnormalsFaceUnscaled == null)
-    //     this.ƒnormalsFaceUnscaled = this.calculateFaceCrossProducts();
-
-    //   return this.ƒnormalsFaceUnscaled;
-    // }
-
     public get normalsVertex(): Float32Array {
       if (this.ƒnormalsVertex == null) {
         // sum up all unscaled normals of faces connected to one vertex...
         this.cloud.forEach(_vertex => _vertex.normal.set(0, 0, 0));
         for (let face of this.faces)
           for (let index of face.indices) {
-            let i: number = this.cloud[index].referTo;
-            if (i == undefined)
-              i = index;
-            this.cloud[i].normal.add(face.normalUnscaled);
+            this.cloud.normal(index).add(face.normalUnscaled);
           }
         // ... and normalize them
         this.cloud.forEach(_vertex => {
@@ -135,9 +125,7 @@ namespace FudgeCore {
         // this.ƒnormalsVertex = new Float32Array(normalsVertex.flatMap((_normal: Vector3) => [..._normal.get()]));
 
         this.ƒnormalsVertex = new Float32Array(this.cloud.flatMap((_vertex: Vertex, _index: number) => {
-          return _vertex.referTo != undefined ?
-            [...this.cloud[_vertex.referTo].normal.get()] :
-            [...this.cloud[_index].normal.get()];
+          return [...this.cloud.normal(_index).get()];
         }));
       }
 
