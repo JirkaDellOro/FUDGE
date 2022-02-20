@@ -3543,12 +3543,12 @@ declare namespace FudgeCore {
      * Generates an extrusion of a polygon by a series of transformations
      * ```plaintext
      *                      ____
-     * Polygon         ____╱╲   ╲
-     * Transform 0  → ╱ ╲__╲_╲___╲ ← Transform 2
-     *                ╲_╱__╱ ╱   ╱
-     *     Transform 1  →  ╲╱___╱
+     * Polygon         ____╱╲   ╲                             y
+     * Transform 0  → ╱ ╲__╲_╲___╲ ← Transform 2          z __│
+     * (base)         ╲_╱__╱ ╱   ╱   (lid)                     ╲
+     *     Transform 1  →  ╲╱___╱                               x
      * ```
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2021
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2021-2022
      */
     class MeshExtrusion extends MeshPolygon {
         static readonly iSubclass: number;
@@ -3708,8 +3708,15 @@ declare namespace FudgeCore {
     /**
      * Generates a rotation of a polygon around the y-axis
      * ```plaintext
+     *                     y
+     *                  _  ↑ 0_1
+     *                 │   │→x │2
+     *                  ╲  │  ╱3
+     *                  ╱  │  ╲
+     *                 ╱___│___╲4
+     *                      5
      * ```
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2021
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2021-2022
      */
     class MeshRotation extends Mesh {
         static readonly iSubclass: number;

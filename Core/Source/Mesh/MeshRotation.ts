@@ -2,9 +2,16 @@
 namespace FudgeCore {
   /**
    * Generates a rotation of a polygon around the y-axis
-   * ```plaintext  
+   * ```plaintext       
+   *                     y
+   *                  _  ↑ 0_1
+   *                 │   │→x │2         
+   *                  ╲  │  ╱3         
+   *                  ╱  │  ╲   
+   *                 ╱___│___╲4 
+   *                      5
    * ```
-   * @authors Jirka Dell'Oro-Friedl, HFU, 2021
+   * @authors Jirka Dell'Oro-Friedl, HFU, 2021-2022
    */
   export class MeshRotation extends Mesh {
     public static readonly iSubclass: number = Mesh.registerSubclass(MeshRotation);

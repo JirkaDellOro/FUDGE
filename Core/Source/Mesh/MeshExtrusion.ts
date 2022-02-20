@@ -4,12 +4,12 @@ namespace FudgeCore {
    * Generates an extrusion of a polygon by a series of transformations
    * ```plaintext  
    *                      ____
-   * Polygon         ____╱╲   ╲   
-   * Transform 0  → ╱ ╲__╲_╲___╲ ← Transform 2
-   *                ╲_╱__╱ ╱   ╱ 
-   *     Transform 1  →  ╲╱___╱
+   * Polygon         ____╱╲   ╲                             y
+   * Transform 0  → ╱ ╲__╲_╲___╲ ← Transform 2          z __│
+   * (base)         ╲_╱__╱ ╱   ╱   (lid)                     ╲       
+   *     Transform 1  →  ╲╱___╱                               x
    * ```
-   * @authors Jirka Dell'Oro-Friedl, HFU, 2021
+   * @authors Jirka Dell'Oro-Friedl, HFU, 2021-2022
    */
   export class MeshExtrusion extends MeshPolygon {
     public static readonly iSubclass: number = Mesh.registerSubclass(MeshExtrusion);
@@ -69,7 +69,9 @@ namespace FudgeCore {
       let lid: Vertex[] = this.cloud.map((_v: Vertex) => new Vertex(Vector3.TRANSFORMATION(_v.position, _mtxTransforms[nTransforms - 1], true), _v.uv));
       vertices.push(...lid);
 
-      // add the lid faces, which are copies of the already existing base faces, but with an index offset and reverse order of indices
+      // recreate base faces to recalculate normals
+      this.faces = this.faces.map((_face: Face) => new Face(vertices, _face.indices[0], _face.indices[1], _face.indices[2]))
+      // create the lid faces using the indices of the base faces, but with an index offset and reverse order of indices
       this.faces.push(...this.faces.map(_face =>
         new Face(vertices, _face.indices[2] + nVerticesShape, _face.indices[1] + nVerticesShape, _face.indices[0] + nVerticesShape)
       ));
