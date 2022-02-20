@@ -82,7 +82,7 @@ namespace FudgeCore {
           if (sector == this.sectors)
             cloud.push(new Vertex(i, uv));
           else {
-            if (sector > 0 && polygon[i].x == 0) // use a single vertex when it's on the rotation axis
+            if (sector > 0 && this.shape[i].x == 0) // use a single vertex when it's on the rotation axis
               cloud.push(new Vertex(i, uv));
             else
               cloud.push(new Vertex(polygon[i].clone, uv));

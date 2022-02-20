@@ -58,9 +58,7 @@ namespace FudgeCore {
       this.mtxTransforms = <MutableArray<Matrix4x4>>MutableArray.from(<MutableArray<Matrix4x4>>_mtxTransforms);
 
       // save original polygon
-      let polygon: Vector3[] = [];
-      for (let i: number = 0; i < this.vertices.length; i += 3)
-        polygon.push(new Vector3(this.vertices[i], this.vertices[i + 1], this.vertices[i + 2]));
+      let polygon: Vector3[] = this.shape.map(_vertex => _vertex.toVector3())
 
       let nTransforms: number = _mtxTransforms.length;
       let nVerticesPolygon: number = polygon.length;
