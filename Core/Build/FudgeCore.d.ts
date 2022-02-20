@@ -3485,8 +3485,8 @@ declare namespace FudgeCore {
         protected createIndices(): Uint16Array;
         protected createNormals(): Float32Array;
         protected calculateFaceCrossProducts(): Float32Array;
-        createVerticesFlat(): Float32Array;
-        createTextureUVsFlat(): Float32Array;
+        private createVerticesFlat;
+        private createTextureUVsFlat;
         protected createRadius(): number;
         protected createBoundingBox(): Box;
         protected reduceMutator(_mutator: Mutator): void;

@@ -339,7 +339,7 @@ namespace FudgeCore {
     //   return new Float32Array(vertexNormals);
     // }
 
-    createVerticesFlat(): Float32Array {
+    private createVerticesFlat(): Float32Array {
       let vertices: number[] = [];
       let indices: number[] = [];
       // create unique vertices for each face, tripling the number
@@ -353,7 +353,7 @@ namespace FudgeCore {
       return new Float32Array(vertices);
     }
 
-    createTextureUVsFlat(): Float32Array {
+    private createTextureUVsFlat(): Float32Array {
       let uv: number[] = [];
       // create unique vertices for each face, tripling the number
       for (let i: number = 0; i < this.indices.length; i++) {

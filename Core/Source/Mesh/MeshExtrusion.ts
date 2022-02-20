@@ -56,88 +56,53 @@ namespace FudgeCore {
 
     private extrude(_mtxTransforms: Matrix4x4[] = MeshExtrusion.mtxDefaults): void {
       this.mtxTransforms = <MutableArray<Matrix4x4>>MutableArray.from(<MutableArray<Matrix4x4>>_mtxTransforms);
-
-      // save original polygon
-      let polygon: Vector3[] = this.shape.map(_vertex => _vertex.toVector3())
-
       let nTransforms: number = _mtxTransforms.length;
-      let nVerticesPolygon: number = polygon.length;
+      let nVerticesShape: number = this.cloud.length;
 
-      let nFacesPolygon: number = nVerticesPolygon - 2;
-      let nIndicesPolygon: number = nFacesPolygon * 3;
+      // create new vertex cloud, current cloud holds MeshPolygon
+      let vertices: Vertices = new Vertices();
 
-      let vertices: Vector3[] = [];
       // create base by transformation of polygon with first transform
-      let base: Vector3[] = polygon.map((_v: Vector3) => Vector3.TRANSFORMATION(_v, _mtxTransforms[0], true));
+      let base: Vertex[] = this.cloud.map((_v: Vertex) => new Vertex(Vector3.TRANSFORMATION(_v.position, _mtxTransforms[0], true), _v.uv));
       vertices.push(...base);
       // create lid by transformation of polygon with last transform
-      let lid: Vector3[] = polygon.map((_v: Vector3) => Vector3.TRANSFORMATION(_v, _mtxTransforms[nTransforms - 1], true));
+      let lid: Vertex[] = this.cloud.map((_v: Vertex) => new Vertex(Vector3.TRANSFORMATION(_v.position, _mtxTransforms[nTransforms - 1], true), _v.uv));
       vertices.push(...lid);
 
-      // duplicate first vertex of polygon to the end to create a texturable wrapping
-      polygon.push(polygon[0].clone);
-      let wrap: Vector3[];
-      for (let i: number = 0; i < nTransforms; i++) {
-        let mtxTransform: Matrix4x4 = _mtxTransforms[i];
-        wrap = polygon.map((_v: Vector3) => Vector3.TRANSFORMATION(_v, mtxTransform, true));
+      // add the lid faces, which are copies of the already existing base faces, but with an index offset and reverse order of indices
+      this.faces.push(...this.faces.map(_face =>
+        new Face(vertices, _face.indices[2] + nVerticesShape, _face.indices[1] + nVerticesShape, _face.indices[0] + nVerticesShape)
+      ));
+
+      for (let t: number = 0; t < nTransforms; t++) {
+        let mtxTransform: Matrix4x4 = _mtxTransforms[t];
+        let referToClose: number = vertices.length;
+        let wrap: Vertex[] = this.cloud.map((_v: Vertex, _i: number) =>
+          new Vertex(Vector3.TRANSFORMATION(_v.position, mtxTransform, true), new Vector2(_i / nVerticesShape, t / nTransforms))
+        );
         vertices.push(...wrap);
-        if (i > 0 && i < nTransforms - 1)
-          vertices.push(...wrap.map((_vector: Vector3) => _vector.clone));
-      }
-
-
-      // copy indices to new index array
-      let indices: number[] = [];
-      indices.push(...this.indices);
-
-      // copy indices for second polygon and reverse sequence
-      for (let i: number = 0; i < nIndicesPolygon; i += 3) {
-        indices.push(this.indices[i] + nVerticesPolygon);
-        indices.push(this.indices[i + 2] + nVerticesPolygon);
-        indices.push(this.indices[i + 1] + nVerticesPolygon);
+        vertices.push(new Vertex(referToClose, new Vector2(1, t / nTransforms)));
+        // if (i > 0 && i < nTransforms - 1)
+        //   vertices.push(...wrap.map((_vector: Vector3) => _vector.clone)); <- no slicing for flat shading yet...
       }
 
       // create indizes for wrapper
       for (let t: number = 0; t < nTransforms - 1; t++)
-        for (let i: number = 0; i < nVerticesPolygon; i++) {
+        for (let i: number = 0; i < nVerticesShape; i++) {
           // let index: number = i + (2 + t) * nVerticesPolygon + t;
-          let index: number = i + 2 * nVerticesPolygon + 2 * t * (nVerticesPolygon + 1);
-          indices.push(...Mesh.getTrigonsFromQuad([index, index + nVerticesPolygon + 1, index + nVerticesPolygon + 2, index + 1], false));
+          // let index: number = i + 2 * nVerticesShape + 2 * t * (nVerticesShape + 1);
+          let index: number =
+            + 2 * nVerticesShape // base & lid are offsets 
+            + t * (nVerticesShape + 1)// offset for each transformation
+            + i;
+          let quad: Quad = new Quad(vertices, index, index + nVerticesShape + 1, index + nVerticesShape + 2, index + 1, false);
+          this.faces.push(...quad.faces);
         }
 
-      Mesh.deleteInvalidIndices(indices, vertices);
-
-
-      let nTextureUVs: number = this.textureUVs.length;
-      let textureUVs: number[] = [];
-      textureUVs.push(...this.textureUVs);
-      textureUVs.push(...this.textureUVs);
-
-      // TODO: wrap texture nicer respecting the distances between vertices, see lengths polygon etc.
-      // first step: use fitTexture only for stretching, otherwise use vertext positions for texturing
-      // let sumLengths: number = lengthsPolygon.reduce((_sum, _value) => _sum + _value);
-      let index: number = nTextureUVs * 2;
-      let incV: number = 1 / nVerticesPolygon;
-      let incU: number = 1 / (nTransforms - 1);
-      let u: number = 1;
-      for (let t: number = 0; t < nTransforms - 1; t++) {
-        let v: number = 0;
-        for (let vertex: number = 0; vertex <= nVerticesPolygon; vertex++) {
-          textureUVs[index] = v;
-          textureUVs[index + nVerticesPolygon * 2 + 2] = v;
-          index++;
-          textureUVs[index] = u;
-          textureUVs[index + nVerticesPolygon * 2 + 2] = u - incU;
-          index++;
-          v += incV;
-        }
-        u -= incU;
-      }
-
-      this.ƒvertices = new Float32Array(vertices.map((_v: Vector3) => [_v.x, _v.y, _v.z]).flat());
-      this.ƒindices = new Uint16Array(indices);
-      this.ƒtextureUVs = new Float32Array(textureUVs);
+      this.cloud = vertices;
+      return;
     }
+
 
     // private calculatePolygonLengths(): number[] {
     //   let result: number[] = [];

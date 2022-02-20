@@ -65,8 +65,8 @@ namespace FudgeCore {
       }
 
       this.faces = [];
-      for (let i: number = 2; i < this.vertices.length / 3; i++)
-        this.faces.push(new Face(this.cloud, 0, i - 1, i));
+      for (let i: number = 2; i < this.cloud.length; i++)
+        this.faces.push(new Face(this.cloud, i - 1, i, 0));
     }
 
     //#region Transfer
