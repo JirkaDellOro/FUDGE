@@ -3227,7 +3227,7 @@ declare namespace FudgeCore {
      *            /
      *          +z
      * ```
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019-2022
      */
     class Vector3 extends Mutable implements Recycable {
         private data;
@@ -3402,6 +3402,11 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Describes a face of a {@link Mesh} by referencing three {@link Vertices} with their indizes
+     * and calculates face normals.
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2022
+     */
     class Face {
         private vertices;
         indices: number[];
@@ -3782,6 +3787,11 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * A surface created with four vertices which immediately creates none, one or two {@link Face}s depending on vertices at identical positions.
+     * If the Quad is planar, index2 is the third vertex for each trigon on thus may reference a face normal for both faces.
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2022
+     */
     class Quad {
         faces: Face[];
         constructor(_vertices: Vertices, _index0: number, _index1: number, _index2: number, _index3: number, _planar?: boolean);
@@ -3796,11 +3806,18 @@ declare namespace FudgeCore {
         /**
          * Represents a vertex of a mesh with extended information such as the uv coordinates and the vertex normal.
          * It may refer to another vertex via an index into some array, in which case the position and the normal are stored there.
+         * This way, vertex position and normal is a 1:1 association, vertex to texture coordinates a 1:n association.
+       * @authors Jirka Dell'Oro-Friedl, HFU, 2022
          */
         constructor(_positionOrIndex: Vector3 | number, _uv?: Vector2, _normal?: Vector3);
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Array with extended functionality to serve as a {@link Vertex}-cloud.
+     * Accessors yield position or normal also for vertices referencing other vertices
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2022
+     */
     class Vertices extends Array<Vertex> {
         /**
          * returns the position associated with the vertex addressed, resolving references between vertices

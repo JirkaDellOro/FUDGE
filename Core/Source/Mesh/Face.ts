@@ -1,4 +1,9 @@
 namespace FudgeCore {
+  /**
+   * Describes a face of a {@link Mesh} by referencing three {@link Vertices} with their indizes
+   * and calculates face normals.
+   * @authors Jirka Dell'Oro-Friedl, HFU, 2022
+   */
   export class Face {
     private vertices: Vertices;
     public indices: number[] = [];

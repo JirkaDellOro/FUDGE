@@ -1,4 +1,9 @@
 namespace FudgeCore {
+  /**
+   * A surface created with four vertices which immediately creates none, one or two {@link Face}s depending on vertices at identical positions.
+   * If the Quad is planar, index2 is the third vertex for each trigon on thus may reference a face normal for both faces.
+   * @authors Jirka Dell'Oro-Friedl, HFU, 2022
+   */
   export class Quad {
     public faces: Face[];
 

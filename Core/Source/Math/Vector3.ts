@@ -7,7 +7,7 @@ namespace FudgeCore {
    *            /
    *          +z   
    * ```
-   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019-2022
    */
   export class Vector3 extends Mutable implements Recycable {
     private data: Float32Array; // TODO: check why this shouldn't be x,y,z as numbers...

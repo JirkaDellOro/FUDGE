@@ -1,4 +1,9 @@
 namespace FudgeCore {
+  /**
+   * Array with extended functionality to serve as a {@link Vertex}-cloud. 
+   * Accessors yield position or normal also for vertices referencing other vertices
+   * @authors Jirka Dell'Oro-Friedl, HFU, 2022
+   */
   export class Vertices extends Array<Vertex> {
     /**
      * returns the position associated with the vertex addressed, resolving references between vertices 

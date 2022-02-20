@@ -91,8 +91,6 @@ namespace FudgeCore {
       // create indizes for wrapper
       for (let t: number = 0; t < nTransforms - 1; t++)
         for (let i: number = 0; i < nVerticesShape; i++) {
-          // let index: number = i + (2 + t) * nVerticesPolygon + t;
-          // let index: number = i + 2 * nVerticesShape + 2 * t * (nVerticesShape + 1);
           let index: number =
             + 2 * nVerticesShape // base & lid are offsets 
             + t * (nVerticesShape + 1)// offset for each transformation
