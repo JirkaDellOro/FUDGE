@@ -3711,11 +3711,12 @@ declare namespace FudgeCore {
      * ```
      * @authors Jirka Dell'Oro-Friedl, HFU, 2021
      */
-    class MeshRotation extends MeshPolygon {
+    class MeshRotation extends Mesh {
         static readonly iSubclass: number;
         protected static verticesDefault: Vector2[];
-        private sectors;
-        constructor(_name?: string, _vertices?: Vector2[], _sectors?: number, _fitTexture?: boolean);
+        protected shape: MutableArray<Vector2>;
+        protected sectors: number;
+        constructor(_name?: string, _shape?: Vector2[], _sectors?: number);
         protected get minVertices(): number;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
@@ -3730,9 +3731,8 @@ declare namespace FudgeCore {
      * Implementation based on http://www.songho.ca/opengl/gl_sphere.html
      * @authors Simon Storl-Schulke, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
-    class MeshSphere extends Mesh {
+    class MeshSphere extends MeshRotation {
         static readonly iSubclass: number;
-        private sectors;
         private stacks;
         constructor(_name?: string, _sectors?: number, _stacks?: number);
         create(_sectors?: number, _stacks?: number): void;

@@ -4,12 +4,10 @@ namespace FudgeCore {
    * Implementation based on http://www.songho.ca/opengl/gl_sphere.html
    * @authors Simon Storl-Schulke, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2020
    */
-  export class MeshSphere extends Mesh {
+  export class MeshSphere extends MeshRotation {
     public static readonly iSubclass: number = Mesh.registerSubclass(MeshSphere);
 
     // protected ƒnormals: Float32Array;
-
-    private sectors: number;
     private stacks: number;
 
     // Dirty Workaround to have access to the normals from createVertices()
@@ -19,7 +17,6 @@ namespace FudgeCore {
 
     public constructor(_name: string = "MeshSphere", _sectors: number = 8, _stacks: number = 8) {
       super(_name);
-
       this.create(_sectors, _stacks);
     }
 
