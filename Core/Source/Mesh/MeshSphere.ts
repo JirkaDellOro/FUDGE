@@ -6,14 +6,7 @@ namespace FudgeCore {
    */
   export class MeshSphere extends MeshRotation {
     public static readonly iSubclass: number = Mesh.registerSubclass(MeshSphere);
-
-    // protected ƒnormals: Float32Array;
     private stacks: number;
-
-    // Dirty Workaround to have access to the normals from createVertices()
-    // private normals: Array<number> = [];
-    // private textureUVs: Array<number> = [];
-    // public textureUVs: Float32Array;
 
     public constructor(_name: string = "MeshSphere", _sectors: number = 8, _stacks: number = 8) {
       super(_name);
@@ -32,74 +25,22 @@ namespace FudgeCore {
         this.stacks = Math.max(2, _stacks);
       }
 
-      // let vertices: Array<number> = [];
-      // let normals: number[] = [];
-      // let textureUVs: number[] = [];
-
-      // TODO: the following is method createVertices
-      let vertices: Vertex[] = [];
-
-      let x: number;
-      let z: number;
-      let xz: number;
-      let y: number;
-
-
-      let sectorStep: number = 2 * Math.PI / this.sectors;
+      let shape: Vector2[] = [];
       let stackStep: number = Math.PI / this.stacks;
-      let stackAngle: number;
-      let sectorAngle: number;
-
-      /* add (sectorCount+1) vertices per stack.
-      the first and last vertices have same position and normal, 
-      but different tex coords */
       for (let i: number = 0; i <= this.stacks; ++i) {
-        stackAngle = Math.PI / 2 - i * stackStep;
-        xz = Math.cos(stackAngle);
-        y = Math.sin(stackAngle);
+        let stackAngle: number = Math.PI / 2 - i * stackStep;
+        let x: number = Math.cos(stackAngle);
+        let y: number = Math.sin(stackAngle);
 
-        // add (sectorCount+1) vertices per stack
-        // the first and last vertices have same position and normal, but different tex coords
-        for (let j: number = 0; j <= this.sectors; ++j) {
-          sectorAngle = j * sectorStep;
-
-          //vertex position
-          x = xz * Math.cos(sectorAngle);
-          z = xz * Math.sin(sectorAngle);
-          vertices.push(new Vertex(
-            new Vector3(x / 2, y / 2, z / 2),
-            new Vector2(j / this.sectors * -1, i / this.stacks),
-            new Vector3(x, y, z))
-          );
-
-          //normals
-          // normals.push(x, y, z);
-
-          //UV Coords
-          // textureUVs.push(j / this.sectors * -1);
-          // textureUVs.push(i / this.stacks);
-        }
+        shape.push(new Vector2(x / 2, y / 2));
       }
+      // place first and last vertex exactly on rotation axis
+      shape[0].x = 0;
+      shape[shape.length-1].x = 0;
 
-      // scale down
-      // vertices = vertices.map(_value => _value / 2);
-
-      // this.ƒnormals = new Float32Array(normals);
-      this.ƒvertices = new Float32Array(vertices.flatMap(_vertex => [..._vertex.position.get()]));
-      this.ƒtextureUVs = new Float32Array(vertices.flatMap(_vertex => [..._vertex.uv.get()]));
-
-      let faces: Face[] = this.createFaces(vertices);
-
-      // this.ƒnormalsFlat = this.createFlatNormals();
-      // this.ƒindices = this.createIndices();
-      this.ƒindices = new Uint16Array(faces.flatMap((_face: Face) => [..._face.indices]));
-      // this.ƒnormalsFlat = new Float32Array(this.ƒvertices.length);
-      // for (let face of faces) {
-      //   let index: number = 3 * face.indices[2]; // face normal gets attached to the third vertex
-      //   this.ƒnormalsFlat.set(face.normal.get(), index);
-      // }
-      // this.createRenderBuffers();
+      super.rotate(shape, _sectors);
     }
+
 
     //#region Transfer
     public serialize(): Serialization {
@@ -108,6 +49,7 @@ namespace FudgeCore {
       serialization.stacks = this.stacks;
       return serialization;
     }
+
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       await super.deserialize(_serialization);
       this.create(_serialization.sectors, _serialization.stacks);
@@ -119,62 +61,5 @@ namespace FudgeCore {
       this.create(_mutator.sectors, _mutator.stacks);
     }
     //#endregion
-
-    protected createIndices(): Uint16Array {
-      let inds: Array<number> = [];
-
-      let k1: number;
-      let k2: number;
-
-      for (let i: number = 0; i < this.stacks; ++i) {
-        k1 = i * (this.sectors + 1);   // beginning of current stack
-        k2 = k1 + this.sectors + 1;    // beginning of next stack
-
-        for (let j: number = 0; j < this.sectors; ++j, ++k1, ++k2) {
-
-          // 2 triangles per sector excluding first and last stacks
-          // k1 => k2 => k1+1
-          if (i != 0) {
-            inds.push(k1);
-            inds.push(k1 + 1);
-            inds.push(k2);
-          }
-
-          if (i != (this.stacks - 1)) {
-            inds.push(k1 + 1);
-            inds.push(k2 + 1);
-            inds.push(k2);
-          }
-        }
-      }
-      let indices: Uint16Array = new Uint16Array(inds);
-      return indices;
-    }
-
-    protected createFaces(_vertices: Vertex[]): Face[] {
-      let faces: Face[] = [];
-
-      let k1: number;
-      let k2: number;
-
-      for (let i: number = 0; i < this.stacks; ++i) {
-        k1 = i * (this.sectors + 1);   // beginning of current stack
-        k2 = k1 + this.sectors + 1;    // beginning of next stack
-
-        for (let j: number = 0; j < this.sectors; ++j, ++k1, ++k2) {
-
-          // 2 triangles per sector excluding first and last stacks
-          // k1 => k2 => k1+1
-          if (i != 0)
-            faces.push(new Face(_vertices, k1, k1 + 1, k2));
-
-
-          if (i != (this.stacks - 1))
-            faces.push(new Face(_vertices, k1 + 1, k2 + 1, k2));
-        }
-      }
-
-      return faces;
-    }
   }
 }

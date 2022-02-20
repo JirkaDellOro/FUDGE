@@ -3722,7 +3722,7 @@ declare namespace FudgeCore {
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;
         protected reduceMutator(_mutator: Mutator): void;
-        private rotate;
+        protected rotate(_shape: Vector2[], _sectors: number): void;
     }
 }
 declare namespace FudgeCore {
@@ -3739,8 +3739,6 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;
-        protected createIndices(): Uint16Array;
-        protected createFaces(_vertices: Vertex[]): Face[];
     }
 }
 declare namespace FudgeCore {

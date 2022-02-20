@@ -52,7 +52,7 @@ namespace FudgeCore {
     }
     //#endregion
 
-    private rotate(_shape: Vector2[], _sectors: number): void {
+    protected rotate(_shape: Vector2[], _sectors: number): void {
       this.shape = <MutableArray<Vector2>>MutableArray.from(_shape.map(_vertex => _vertex.clone));
       this.clear();
       this.sectors = Math.round(_sectors);
