@@ -70,12 +70,15 @@ namespace FudgeCore {
 
       let nVerticesPolygon: number = polygon.length;
 
-      let cloud: Vertex[] = [];
+      let cloud: Vertices = new Vertices();
       for (let sector: number = 0; sector <= this.sectors; sector++) {
         for (let i: number = 0; i < nVerticesPolygon; i++) {
           let uv: Vector2 = new Vector2(sector / this.sectors, distances[i]);
           // TODO: last sector should only be references to the first meridian
-          cloud.push(new Vertex(polygon[i].clone, uv));
+          if (sector == this.sectors)
+            cloud.push(new Vertex(i, uv));
+          else
+            cloud.push(new Vertex(polygon[i].clone, uv));
         }
         polygon.forEach((_vector: Vector3) => _vector.transform(mtxRotate));
       }

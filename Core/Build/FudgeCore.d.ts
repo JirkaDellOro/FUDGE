@@ -3426,7 +3426,7 @@ declare namespace FudgeCore {
         idResource: string;
         name: string;
         renderBuffers: RenderBuffers;
-        protected cloud: Vertex[];
+        protected cloud: Vertices;
         protected faces: Face[];
         /** vertices of the actual point cloud, some points might be in the same location in order to refer to different texels */
         protected ƒvertices: Float32Array;
@@ -3793,6 +3793,11 @@ declare namespace FudgeCore {
          * It may refer to another vertex via an index into some array, in which case the position and the normal are stored there.
          */
         constructor(_positionOrIndex: Vector3 | number, _uv?: Vector2, _normal?: Vector3);
+    }
+}
+declare namespace FudgeCore {
+    class Vertices extends Array<Vertex> {
+        position(_index: number): Vector3;
     }
 }
 declare namespace FudgeCore {

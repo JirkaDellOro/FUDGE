@@ -13,12 +13,12 @@ namespace FudgeCore {
 
     public constructor(_name: string = "MeshSprite") {
       super(_name);
-      this.cloud = [
+      this.cloud = new Vertices(
         new Vertex(new Vector3(-0.5, 0.5, 0), new Vector2(0, 0)),
         new Vertex(new Vector3(-0.5, -0.5, 0), new Vector2(0, 1)),
         new Vertex(new Vector3(0.5, -0.5, 0), new Vector2(1, 1)),
         new Vertex(new Vector3(0.5, 0.5, 0), new Vector2(1, 0))
-      ];
+      );
       this.faces = [
         new Face(this.cloud, 1, 2, 0),
         new Face(this.cloud, 2, 3, 0),

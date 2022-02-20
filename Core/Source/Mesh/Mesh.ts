@@ -19,7 +19,7 @@ namespace FudgeCore {
     public renderBuffers: RenderBuffers; /* defined by RenderInjector*/
 
     // new base structure for meshes in FUDGE
-    protected cloud: Vertex[] = [];
+    protected cloud: Vertices = new Vertices();
     protected faces: Face[] = [];
 
     /** vertices of the actual point cloud, some points might be in the same location in order to refer to different texels */
@@ -95,8 +95,9 @@ namespace FudgeCore {
     public get vertices(): Float32Array {
       return this.ƒvertices || ( // return cache or ...
         // ... flatten all vertex positions from cloud into a typed array
-        this.ƒvertices = new Float32Array(this.cloud.flatMap((_vertex: Vertex) => [..._vertex.position.get()])
-        ));
+        this.ƒvertices = new Float32Array(this.cloud.flatMap((_vertex: Vertex, _index: number) => {
+          return [...this.cloud.position(_index).get()];
+        })));
     }
 
     public get indices(): Uint16Array {
@@ -116,17 +117,28 @@ namespace FudgeCore {
     public get normalsVertex(): Float32Array {
       if (this.ƒnormalsVertex == null) {
         // sum up all unscaled normals of faces connected to one vertex...
-        let normalsVertex: Vector3[] = (new Array<Vector3>(this.cloud.length)).fill(Vector3.ZERO());
+        this.cloud.forEach(_vertex => _vertex.normal.set(0, 0, 0));
         for (let face of this.faces)
-          for (let index of face.indices)
-            normalsVertex[index] = Vector3.SUM(normalsVertex[index], face.normalUnscaled);
+          for (let index of face.indices) {
+            let i: number = this.cloud[index].referTo;
+            if (i == undefined)
+              i = index;
+            this.cloud[i].normal.add(face.normalUnscaled);
+          }
         // ... and normalize them
-        for (let normal of normalsVertex)
+        this.cloud.forEach(_vertex => {
           // some vertices might be unused and yield a zero-normal...
-          if (normal.magnitudeSquared > 0)
-            normal.normalize();
+          if (_vertex.normal.magnitudeSquared > 0)
+            _vertex.normal.normalize();
+        });
 
-        this.ƒnormalsVertex = new Float32Array(normalsVertex.flatMap((_normal: Vector3) => [..._normal.get()]));
+        // this.ƒnormalsVertex = new Float32Array(normalsVertex.flatMap((_normal: Vector3) => [..._normal.get()]));
+
+        this.ƒnormalsVertex = new Float32Array(this.cloud.flatMap((_vertex: Vertex, _index: number) => {
+          return _vertex.referTo != undefined ?
+            [...this.cloud[_vertex.referTo].normal.get()] :
+            [...this.cloud[_index].normal.get()];
+        }));
       }
 
       return this.ƒnormalsVertex;

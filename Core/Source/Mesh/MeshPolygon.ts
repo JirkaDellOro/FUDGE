@@ -44,7 +44,7 @@ namespace FudgeCore {
 
       let min: Vector2 = Vector2.ZERO();
       let max: Vector2 = Vector2.ZERO();
-      this.cloud = [];
+      this.cloud = new Vertices();
       for (let vertex of shape) {
         this.cloud.push(new Vertex(vertex.toVector3()));
 

@@ -16,7 +16,7 @@ namespace FudgeCore {
       super(_name);
       // this.create();
 
-      this.cloud = [
+      this.cloud = new Vertices(
         // ground vertices
         new Vertex(new Vector3(-0.5, 0.0, 0.5), new Vector2(0, 1)),
         new Vertex(new Vector3(0.5, 0.0, 0.5), new Vector2(1, 1)),
@@ -29,7 +29,7 @@ namespace FudgeCore {
         new Vertex(new Vector3(0.5, 0.0, 0.5), new Vector2(1, 0)),
         new Vertex(new Vector3(0.5, 0.0, -0.5), new Vector2(1, 1)),
         new Vertex(new Vector3(-0.5, 0.0, -0.5), new Vector2(0, 1)),
-      ];
+      );
       this.faces = [
         new Face(this.cloud, 4, 0, 1),
         new Face(this.cloud, 4, 1, 2),
