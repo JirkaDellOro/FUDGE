@@ -3407,7 +3407,7 @@ declare namespace FudgeCore {
         indices: number[];
         normalUnscaled: Vector3;
         normal: Vector3;
-        constructor(_vertices: Vertex[], _index0: number, _index1: number, _index2: number);
+        constructor(_vertices: Vertices, _index0: number, _index1: number, _index2: number);
         calculateNormals(): void;
     }
 }
@@ -3777,7 +3777,7 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     class Quad {
         faces: Face[];
-        constructor(_vertices: Vertex[], _index0: number, _index1: number, _index2: number, _index3: number, _planar?: boolean);
+        constructor(_vertices: Vertices, _index0: number, _index1: number, _index2: number, _index3: number, _planar?: boolean);
     }
 }
 declare namespace FudgeCore {

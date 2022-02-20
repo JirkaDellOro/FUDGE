@@ -2,7 +2,7 @@ namespace FudgeCore {
   export class Quad {
     public faces: Face[];
 
-    constructor(_vertices: Vertex[], _index0: number, _index1: number, _index2: number, _index3: number, _planar: boolean = true) {
+    constructor(_vertices: Vertices, _index0: number, _index1: number, _index2: number, _index3: number, _planar: boolean = true) {
       this.faces = [];
       try {
         this.faces.push(new Face(_vertices, _index0, _index1, _index2));
