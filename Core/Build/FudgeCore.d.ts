@@ -3501,20 +3501,16 @@ declare namespace FudgeCore {
     /**
      * Generate a simple cube with edges of length 1, each face consisting of two trigons
      * ```plaintext
-     *            4____7
-     *           0/__3/|
-     *            ||5_||6
-     *           1|/_2|/
+     *       (12) 4____7  (11)
+     *       (8) 0/__3/| (10)
+     *       (15) ||5_||6 (14)
+     *       (9) 1|/_2|/ (13)
      * ```
      * @authors Jirka Dell'Oro-Friedl, HFU, 2019
      */
     class MeshCube extends Mesh {
         static readonly iSubclass: number;
         constructor(_name?: string);
-        protected createVertices(): Float32Array;
-        protected createIndices(): Uint16Array;
-        protected createTextureUVs(): Float32Array;
-        protected createFlatNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {
