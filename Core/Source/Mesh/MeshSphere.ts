@@ -6,31 +6,31 @@ namespace FudgeCore {
    */
   export class MeshSphere extends MeshRotation {
     public static readonly iSubclass: number = Mesh.registerSubclass(MeshSphere);
-    private stacks: number;
+    private latitudes: number;
 
-    public constructor(_name: string = "MeshSphere", _sectors: number = 8, _stacks: number = 8) {
+    public constructor(_name: string = "MeshSphere", _longitudes: number = 8, _latitudes: number = 8) {
       super(_name);
-      this.create(_sectors, _stacks);
+      this.create(_longitudes, _latitudes);
     }
 
-    public create(_sectors: number = 3, _stacks: number = 2): void {
+    public create(_longitudes: number = 3, _latitudes: number = 2): void {
       this.clear();
       //Clamp resolution to prevent performance issues
-      this.sectors = Math.min(Math.round(_sectors), 128);
-      this.stacks = Math.min(Math.round(_stacks), 128);
+      this.longitudes = Math.min(Math.round(_longitudes), 128);
+      this.latitudes = Math.min(Math.round(_latitudes), 128);
 
-      if (_sectors < 3 || _stacks < 2) {
-        Debug.warn("UV Sphere must have at least 3 sectors and 2 stacks to form a 3-dimensional shape.");
-        this.sectors = Math.max(3, _sectors);
-        this.stacks = Math.max(2, _stacks);
+      if (_longitudes < 3 || _latitudes < 2) {
+        Debug.warn("UV Sphere must have at least 3 longitudes and 2 latitudes to form a 3-dimensional shape.");
+        this.longitudes = Math.max(3, _longitudes);
+        this.latitudes = Math.max(2, _latitudes);
       }
 
       let shape: Vector2[] = [];
-      let stackStep: number = Math.PI / this.stacks;
-      for (let i: number = 0; i <= this.stacks; ++i) {
-        let stackAngle: number = Math.PI / 2 - i * stackStep;
-        let x: number = Math.cos(stackAngle);
-        let y: number = Math.sin(stackAngle);
+      let step: number = Math.PI / this.latitudes;
+      for (let i: number = 0; i <= this.latitudes; ++i) {
+        let angle: number = Math.PI / 2 - i * step;
+        let x: number = Math.cos(angle);
+        let y: number = Math.sin(angle);
 
         shape.push(new Vector2(x / 2, y / 2));
       }
@@ -38,27 +38,26 @@ namespace FudgeCore {
       shape[0].x = 0;
       shape[shape.length-1].x = 0;
 
-      super.rotate(shape, _sectors);
+      super.rotate(shape, _longitudes);
     }
 
 
     //#region Transfer
     public serialize(): Serialization {
       let serialization: Serialization = super.serialize();
-      serialization.sectors = this.sectors;
-      serialization.stacks = this.stacks;
+      serialization.latitudes = this.latitudes;
       return serialization;
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       await super.deserialize(_serialization);
-      this.create(_serialization.sectors, _serialization.stacks);
+      this.create(_serialization.longitudes, _serialization.latitudes);
       return this;
     }
 
     public async mutate(_mutator: Mutator): Promise<void> {
       super.mutate(_mutator);
-      this.create(_mutator.sectors, _mutator.stacks);
+      this.create(_mutator.longitudes, _mutator.latitudes);
     }
     
     protected reduceMutator(_mutator: Mutator): void {

@@ -3723,14 +3723,13 @@ declare namespace FudgeCore {
         static readonly iSubclass: number;
         protected static verticesDefault: Vector2[];
         protected shape: MutableArray<Vector2>;
-        protected sectors: number;
-        constructor(_name?: string, _shape?: Vector2[], _sectors?: number);
+        protected longitudes: number;
+        constructor(_name?: string, _shape?: Vector2[], _longitudes?: number);
         protected get minVertices(): number;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;
-        protected reduceMutator(_mutator: Mutator): void;
-        protected rotate(_shape: Vector2[], _sectors: number): void;
+        protected rotate(_shape: Vector2[], _longitudes: number): void;
     }
 }
 declare namespace FudgeCore {
@@ -3741,9 +3740,9 @@ declare namespace FudgeCore {
      */
     class MeshSphere extends MeshRotation {
         static readonly iSubclass: number;
-        private stacks;
-        constructor(_name?: string, _sectors?: number, _stacks?: number);
-        create(_sectors?: number, _stacks?: number): void;
+        private latitudes;
+        constructor(_name?: string, _longitudes?: number, _latitudes?: number);
+        create(_longitudes?: number, _latitudes?: number): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;
@@ -3772,15 +3771,17 @@ declare namespace FudgeCore {
      * Generate a Torus with a given thickness and the number of major- and minor segments
      * @authors Simon Storl-Schulke, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
-    class MeshTorus extends Mesh {
+    class MeshTorus extends MeshRotation {
         static readonly iSubclass: number;
-        private thickness;
-        private majorSegments;
-        private minorSegments;
-        constructor(_name?: string, _thickness?: number, _majorSegments?: number, _minorSegments?: number);
-        create(_thickness?: number, _majorSegments?: number, _minorSegments?: number): void;
+        private size;
+        private latitudes;
+        constructor(_name?: string, _size?: number, _longitudes?: number, _latitudes?: number);
+        create(_size?: number, _longitudes?: number, _latitudes?: number): void;
+        private static getShape;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;
-        protected createIndices(): Uint16Array;
+        protected reduceMutator(_mutator: Mutator): void;
     }
 }
 declare namespace FudgeCore {
