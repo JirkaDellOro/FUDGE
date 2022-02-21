@@ -30,6 +30,19 @@
       "FLAT"
     ]
   },
+  "ShaderFlatSkin": {
+    "vertex": "Source/ShaderUniversal.vert",
+    "fragment": "Source/ShaderUniversal.frag",
+    "coat": "CoatColored",
+    "namespace": "FudgeCore",
+    "outdir": "Build/",
+    "register": "true",
+    "define": [
+      "LIGHT",
+      "FLAT",
+      "SKIN"
+    ]
+  },
   "ShaderTextureFlat": {
     "vertex": "Source/ShaderUniversal.vert",
     "fragment": "Source/ShaderUniversal.frag",
@@ -53,6 +66,19 @@
     "define": [
       "LIGHT",
       "GOURAUD"
+    ]
+  },
+  "ShaderGouraudSkin": {
+    "vertex": "Source/ShaderUniversal.vert",
+    "fragment": "Source/ShaderUniversal.frag",
+    "coat": "CoatColored",
+    "namespace": "FudgeCore",
+    "outdir": "Build/",
+    "register": "true",
+    "define": [
+      "LIGHT",
+      "GOURAUD",
+      "SKIN"
     ]
   },
   "ShaderTextureGouraud": {

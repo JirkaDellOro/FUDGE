@@ -21,7 +21,7 @@ namespace FudgeCore {
       this.name = gltfMesh.name;
       this.ƒindices = await _loader.getUint16Array(gltfMesh.primitives[0].indices);
       this.ƒvertices = await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.POSITION);
-      this.ƒnormals = await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.NORMAL);
+      this.ƒnormalsVertex = await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.NORMAL);
       this.ƒtextureUVs = await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.TEXCOORD_0);
       this.uriGLTF = _loader.uri;
       return this;

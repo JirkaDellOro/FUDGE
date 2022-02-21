@@ -13,11 +13,14 @@ var Picking;
     let mouse = new ƒ.Vector2();
     let cursor = new ƒAid.Node("Cursor", ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(0.05)), new ƒ.Material("Cursor", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("darkgray"))), new ƒ.MeshSphere("Cursor", 5, 5));
     class Data extends ƒ.Mutable {
-        red = 100;
-        green = 100;
-        blue = 100;
-        yellow = 100;
-        cursor = 100;
+        constructor() {
+            super(...arguments);
+            this.red = 100;
+            this.green = 100;
+            this.blue = 100;
+            this.yellow = 100;
+            this.cursor = 100;
+        }
         reduceMutator(_mutator) { }
     }
     let data = new Data();
