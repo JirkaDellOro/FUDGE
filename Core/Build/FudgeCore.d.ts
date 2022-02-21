@@ -3776,8 +3776,8 @@ declare namespace FudgeCore {
         private size;
         private latitudes;
         constructor(_name?: string, _size?: number, _longitudes?: number, _latitudes?: number);
-        create(_size?: number, _longitudes?: number, _latitudes?: number): void;
         private static getShape;
+        create(_size?: number, _longitudes?: number, _latitudes?: number): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;

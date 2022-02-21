@@ -11,8 +11,7 @@ namespace FudgeCore {
       this.faces = [];
       try {
         this.faces.push(new Face(_vertices, _index0, _index1, _index2));
-      }
-      catch (_e: unknown) {
+      } catch (_e: unknown) {
         Debug.fudge("Face excluded", (<Error>_e).message);
       }
       try {
@@ -20,8 +19,7 @@ namespace FudgeCore {
           this.faces.push(new Face(_vertices, _index3, _index0, _index2));
         else
           this.faces.push(new Face(_vertices, _index0, _index2, _index3));
-      }
-      catch (_e: unknown) {
+      } catch (_e: unknown) {
         Debug.fudge("Face excluded", (<Error>_e).message);
       }
     }

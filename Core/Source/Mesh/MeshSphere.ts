@@ -36,7 +36,7 @@ namespace FudgeCore {
       }
       // place first and last vertex exactly on rotation axis
       shape[0].x = 0;
-      shape[shape.length-1].x = 0;
+      shape[shape.length - 1].x = 0;
 
       super.rotate(shape, _longitudes);
     }
@@ -59,10 +59,10 @@ namespace FudgeCore {
       super.mutate(_mutator);
       this.create(_mutator.longitudes, _mutator.latitudes);
     }
-    
+
     protected reduceMutator(_mutator: Mutator): void {
-        super.reduceMutator(_mutator);
-        delete _mutator.shape;
+      super.reduceMutator(_mutator);
+      delete _mutator.shape;
     }
     //#endregion
   }

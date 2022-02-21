@@ -15,20 +15,23 @@ namespace FudgeCore {
       this.latitudes = Math.max(3, _latitudes);
     }
 
-    public create(_size: number = 0.25, _longitudes: number = 8, _latitudes: number = 6) {
+    private static getShape(_size: number, _latitudes: number): Vector2[] {
+      let shape: Vector2[] = [];
+      let radius: number = _size / 2;
+      let center: Vector2 = new Vector2(0.25 + radius, 0);
+      for (let latitude: number = 0; latitude <= _latitudes; latitude++) {
+        let angle: number = 2 * Math.PI * latitude / _latitudes;
+        shape.push(Vector2.SUM(center, new Vector2(radius * -Math.cos(angle), radius * Math.sin(angle))));
+      }
+      return shape;
+    }
+
+    public create(_size: number = 0.25, _longitudes: number = 8, _latitudes: number = 6): void {
       this.size = _size;
       this.latitudes = Math.max(3, _latitudes);
       super.rotate(MeshTorus.getShape(_size, _latitudes), _longitudes);
     }
 
-    private static getShape(_size: number, _latitudes: number): Vector2[] {
-      let shape: Vector2[] = [];
-      let radius: number = _size / 2;
-      let center: Vector2 = new Vector2(0.25 + radius, 0);
-      for (let angle: number = 0; angle < 2 * Math.PI; angle += 2 * Math.PI / _latitudes)
-        shape.push(Vector2.SUM(center, new Vector2(radius * -Math.cos(angle), radius * Math.sin(angle))));
-      return shape;
-    }
 
     //#region Transfer
     public serialize(): Serialization {
