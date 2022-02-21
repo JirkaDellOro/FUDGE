@@ -60,6 +60,11 @@ namespace FudgeCore {
       super.mutate(_mutator);
       this.create(_mutator.sectors, _mutator.stacks);
     }
+    
+    protected reduceMutator(_mutator: Mutator): void {
+        super.reduceMutator(_mutator);
+        delete _mutator.shape;
+    }
     //#endregion
   }
 }
