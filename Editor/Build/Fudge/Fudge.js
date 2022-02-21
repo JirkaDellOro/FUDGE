@@ -1021,13 +1021,14 @@ var Fudge;
             return menu;
         }
         async contextMenuCallback(_item, _window, _event) {
+            let choice = Number(_item.id);
             ƒ.Debug.fudge(`MenuSelect | id: ${Fudge.CONTEXTMENU[_item.id]} | event: ${_event}`);
             let iSubclass = _item["iSubclass"];
-            if (!iSubclass) {
+            if (choice != Fudge.CONTEXTMENU.CREATE_GRAPH && !iSubclass) {
                 alert("Funky Electron-Error... please try again");
                 return;
             }
-            switch (Number(_item.id)) {
+            switch (choice) {
                 case Fudge.CONTEXTMENU.CREATE_MESH:
                     let typeMesh = ƒ.Mesh.subclasses[iSubclass];
                     //@ts-ignore

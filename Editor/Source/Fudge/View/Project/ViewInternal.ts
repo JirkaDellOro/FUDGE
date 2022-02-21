@@ -73,14 +73,15 @@ namespace Fudge {
     }
 
     protected async contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): Promise<void> {
+      let choice: CONTEXTMENU = Number(_item.id);
       ƒ.Debug.fudge(`MenuSelect | id: ${CONTEXTMENU[_item.id]} | event: ${_event}`);
       let iSubclass: number = _item["iSubclass"];
-      if (!iSubclass) {
+      if (choice != CONTEXTMENU.CREATE_GRAPH && !iSubclass) {
         alert("Funky Electron-Error... please try again");
         return;
       }
 
-      switch (Number(_item.id)) {
+      switch (choice) {
         case CONTEXTMENU.CREATE_MESH:
           let typeMesh: typeof ƒ.Mesh = ƒ.Mesh.subclasses[iSubclass];
           //@ts-ignore
