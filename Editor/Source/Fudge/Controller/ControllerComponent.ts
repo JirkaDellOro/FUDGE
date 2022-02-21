@@ -29,11 +29,27 @@ namespace Fudge {
   export class ControllerComponent extends ƒUi.Controller {
     public constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement) {
       super(_mutable, _domElement);
-      this.domElement.addEventListener(ƒUi.EVENT.INPUT, this.mutateOnInput); // this should be obsolete
+      this.domElement.addEventListener(ƒUi.EVENT.INPUT, this.mutateOnInput, true); // this should be obsolete
       this.domElement.addEventListener(ƒUi.EVENT.DRAG_OVER, this.hndDragOver);
       this.domElement.addEventListener(ƒUi.EVENT.DROP, this.hndDrop);
       this.domElement.addEventListener(ƒUi.EVENT.KEY_DOWN, this.hndKey);
     }
+
+    //#region hack getMutator in order to specifically exclude parts of it (e.g. recreate mesh everytime mtxPivot changes...)
+    protected mutateOnInput = async (_event: Event) => {
+      this.getMutator = super.getMutator;
+      if (this.mutable instanceof ƒ.ComponentMesh) {
+        let found: EventTarget = _event.composedPath().find((_dom: HTMLElement) => _dom == this.domElement || _dom.getAttribute("key") == "mesh");
+        if (found == this.domElement) 
+          this.getMutator = this.getMutatorStripped;
+      }
+    }
+    public getMutatorStripped = (_mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator => {
+      let mutator: ƒ.Mutator = super.getMutator(_mutator, _types);
+      delete (mutator.mesh);
+      return mutator;
+    }
+    //#endregion
 
     private hndKey = (_event: KeyboardEvent): void => {
       _event.stopPropagation();

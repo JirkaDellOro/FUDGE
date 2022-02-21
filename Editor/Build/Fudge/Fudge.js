@@ -1132,11 +1132,26 @@ var Fudge;
     class ControllerComponent extends ƒUi.Controller {
         constructor(_mutable, _domElement) {
             super(_mutable, _domElement);
-            this.domElement.addEventListener("input" /* INPUT */, this.mutateOnInput); // this should be obsolete
+            this.domElement.addEventListener("input" /* INPUT */, this.mutateOnInput, true); // this should be obsolete
             this.domElement.addEventListener("dragover" /* DRAG_OVER */, this.hndDragOver);
             this.domElement.addEventListener("drop" /* DROP */, this.hndDrop);
             this.domElement.addEventListener("keydown" /* KEY_DOWN */, this.hndKey);
         }
+        //#region hack getMutator in order to specifically exclude parts of it (e.g. recreate mesh everytime mtxPivot changes...)
+        mutateOnInput = async (_event) => {
+            this.getMutator = super.getMutator;
+            if (this.mutable instanceof ƒ.ComponentMesh) {
+                let found = _event.composedPath().find((_dom) => _dom == this.domElement || _dom.getAttribute("key") == "mesh");
+                if (found == this.domElement)
+                    this.getMutator = this.getMutatorStripped;
+            }
+        };
+        getMutatorStripped = (_mutator, _types) => {
+            let mutator = super.getMutator(_mutator, _types);
+            delete (mutator.mesh);
+            return mutator;
+        };
+        //#endregion
         hndKey = (_event) => {
             _event.stopPropagation();
             switch (_event.code) {
