@@ -3788,9 +3788,12 @@ declare namespace FudgeCore {
     /**
      * A surface created with four vertices which immediately creates none, one or two {@link Face}s depending on vertices at identical positions.
      * ```plaintext
-     *        0 __ 3
-     *         |_\|
-     *        1    2
+     * QUADSPLIT:  PLANAR                  AT_0                     AT_1
+     *             0 _ 3                   0 _ 3                    0 _ 3
+     *              |\|                     |\|                      |/|
+     *             1 ‾ 2                   1 ‾ 2                    1 ‾ 2
+     *  shared last vertex 2      last vertices 2 + 3      last vertices 3 + 0
+     *
      * ```
      * @authors Jirka Dell'Oro-Friedl, HFU, 2022
      */
