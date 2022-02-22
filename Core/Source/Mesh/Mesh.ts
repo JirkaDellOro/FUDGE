@@ -25,6 +25,7 @@ namespace FudgeCore {
     protected cloud: Vertices = new Vertices();
     protected faces: Face[] = [];
 
+    // TODO: move all ƒ-Stuff to the RenderInjector...
     /** vertices of the actual point cloud, some points might be in the same location in order to refer to different texels */
     protected ƒvertices: Float32Array;
     /** indices to create faces from the vertices, rotation determines direction of face-normal */
@@ -41,7 +42,7 @@ namespace FudgeCore {
     /** flat-shading: extra vertex array, since using vertices with multiple faces is rarely possible due to the limitation above */
     protected ƒverticesFlat: Float32Array;
     /** flat-shading: therefore an extra indices-array is needed */
-    protected ƒindicesFlat: Float32Array;
+    protected ƒindicesFlat: Uint16Array;
     /** flat-shading: and an extra textureUV-array */
     protected ƒtextureUVsFlat: Float32Array;
 
@@ -64,20 +65,6 @@ namespace FudgeCore {
     }
 
     protected static registerSubclass(_subClass: typeof Mesh): number { return Mesh.subclasses.push(_subClass) - 1; }
-
-    /**
-     * Takes an array of four indices for a quad and returns an array of six indices for two trigons cutting that quad.
-     * If the quad is planar (default), the trigons end on the same index, allowing a single normal for both faces on the referenced vertex 
-     */
-    protected static getTrigonsFromQuad(_quad: number[], _even: boolean = true): number[] {
-      // TODO: add parameters for other diagonal and reversion of rotation
-      let indices: number[];
-      if (_even)
-        indices = [_quad[0], _quad[1], _quad[2], _quad[3], _quad[0], _quad[2]];
-      else
-        indices = [_quad[0], _quad[1], _quad[2], _quad[0], _quad[2], _quad[3]];
-      return indices;
-    }
 
     public get type(): string {
       return this.constructor.name;
@@ -130,21 +117,17 @@ namespace FudgeCore {
         ));
     }
 
-    public get normalsFlat(): Float32Array {
-      if (this.ƒnormalsFlat == null) {
-        this.ƒnormalsFlat = new Float32Array(this.verticesFlat.length);
-        for (let face of this.faces) {
-          // store the face normal at the position of the third vertex of a face in the normalsFlat array
-          let index: number = 3 * face.indices[2];
-          this.ƒnormalsFlat.set(face.normal.get(), index);
-        }
-      }
-
-      return this.ƒnormalsFlat;
-    }
 
     public get verticesFlat(): Float32Array {
       return this.ƒverticesFlat || (this.ƒverticesFlat = this.createVerticesFlat());
+    }
+
+    public get indicesFlat(): Uint16Array {
+      return this.ƒindicesFlat;
+    }
+
+    public get normalsFlat(): Float32Array {
+      return this.ƒnormalsFlat || (this.ƒnormalsFlat = this.createNormalsFlat());
     }
 
     public get textureUVsFlat(): Float32Array {
@@ -164,17 +147,9 @@ namespace FudgeCore {
       return this.ƒradius;
     }
 
-
-    public useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): void {/* injected by RenderInjector*/ }
+    public useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): number { return 0; /* injected by RenderInjector*/ }
     public createRenderBuffers(): void {/* injected by RenderInjector*/ }
     public deleteRenderBuffers(_shader: typeof Shader): void {/* injected by RenderInjector*/ }
-
-    public getVertexCount(): number {
-      return this.vertices.length / Mesh.getBufferSpecification().size;
-    }
-    public getIndexCount(): number {
-      return this.indices.length;
-    }
 
     public clear(): void {
       // buffers for smooth shading
@@ -197,18 +172,19 @@ namespace FudgeCore {
       this.renderBuffers = null;
     }
 
-    public create(): void {
-      // TODO: should actually not be called since it opposes lazy pattern
-      this.ƒvertices = this.createVertices();
-      this.ƒindices = this.createIndices();
-      this.ƒtextureUVs = this.createTextureUVs();
-      this.ƒverticesFlat = this.createVerticesFlat();
-      // this.ƒnormalsFaceUnscaled = this.calculateFaceCrossProducts();
-      // this.ƒnormalsFlat = this.createFlatNormals();
-      // this.ƒnormalsVertex = this.createVertexNormals();
-      this.createRenderBuffers();
-    }
+    // public create(): void {
+    //   // TODO: should actually not be called since it opposes lazy pattern
+    //   this.ƒvertices = this.createVertices();
+    //   this.ƒindices = this.createIndices();
+    //   this.ƒtextureUVs = this.createTextureUVs();
+    //   this.ƒverticesFlat = this.createVerticesFlat();
+    //   // this.ƒnormalsFaceUnscaled = this.calculateFaceCrossProducts();
+    //   // this.ƒnormalsFlat = this.createFlatNormals();
+    //   // this.ƒnormalsVertex = this.createVertexNormals();
+    //   this.createRenderBuffers();
+    // }
 
+    //#region Transfer
     // Serialize/Deserialize for all meshes that calculate without parameters
     public serialize(): Serialization {
       let serialization: Serialization = {
@@ -225,11 +201,64 @@ namespace FudgeCore {
       return this;
     }
 
+    protected reduceMutator(_mutator: Mutator): void {
+      // TODO: so much to delete... rather just gather what to mutate
+      delete _mutator.ƒbox;
+      delete _mutator.ƒradius;
+      delete _mutator.ƒvertices;
+      delete _mutator.ƒindices;
+      delete _mutator.ƒnormalsVertex;
+      delete _mutator.ƒnormalsFaceUnscaled;
+      delete _mutator.ƒtextureUVs;
+      delete _mutator.ƒnormalsFlat;
+      delete _mutator.ƒverticesFlat;
+      delete _mutator.ƒindicesFlat;
+      delete _mutator.ƒtextureUVsFlat;
 
-    protected createVertices(): Float32Array { return null; }
-    protected createTextureUVs(): Float32Array { return null; }
-    protected createIndices(): Uint16Array { return null; }
-    protected createNormals(): Float32Array { return null; }
+      delete _mutator.renderBuffers;
+    }
+    //#endregion
+
+    // protected createTextureUVs(): Float32Array { return null; }
+    // protected createIndices(): Uint16Array { return null; }
+    // protected createNormals(): Float32Array { return null; }
+
+    protected createVerticesFlat(): Float32Array {
+      let positions: Vector3[] = [];
+      let indices: number[] = [];
+      let i: number = 0;
+      for (let face of this.faces)
+        for (let index of face.indices) {
+          indices.push(i++);
+          positions.push(this.cloud.position(index));
+        }
+        
+      this.ƒindicesFlat = new Uint16Array(indices);
+      return new Float32Array(positions.flatMap(_v => [..._v.get()]));
+    }
+
+    protected createNormalsFlat(): Float32Array {
+      let normals: Vector3[] = [];
+      let zero: Vector3 = Vector3.ZERO();
+      for (let face of this.faces) {
+        // store the face normal at the position of the third vertex
+        normals.push(zero);
+        normals.push(zero);
+        normals.push(face.normal);
+      }
+      this.ƒnormalsFlat = new Float32Array(normals.flatMap(_n => [..._n.get()]));
+      return this.ƒnormalsFlat;
+    }
+
+    protected createTextureUVsFlat(): Float32Array {
+      let uv: number[] = [];
+      // create unique vertices for each face, tripling the number
+      for (let i: number = 0; i < this.indices.length; i++) {
+        let index: number = this.indices[i] * 2;
+        uv.push(this.textureUVs[index], this.textureUVs[index + 1]);
+      }
+      return new Float32Array(uv);
+    }
 
     protected calculateFaceCrossProducts(): Float32Array {
       let crossProducts: number[] = [];
@@ -275,46 +304,5 @@ namespace FudgeCore {
     }
 
 
-    protected reduceMutator(_mutator: Mutator): void {
-      // TODO: so much to delete... rather just gather what to mutate
-      delete _mutator.ƒbox;
-      delete _mutator.ƒradius;
-      delete _mutator.ƒvertices;
-      delete _mutator.ƒindices;
-      delete _mutator.ƒnormalsVertex;
-      delete _mutator.ƒnormalsFaceUnscaled;
-      delete _mutator.ƒtextureUVs;
-      delete _mutator.ƒnormalsFlat;
-      delete _mutator.ƒverticesFlat;
-      delete _mutator.ƒindicesFlat
-      delete _mutator.ƒtextureUVsFlat;
-
-      delete _mutator.renderBuffers;
-    }
-
-    
-    private createVerticesFlat(): Float32Array {
-      let vertices: number[] = [];
-      let indices: number[] = [];
-      // create unique vertices for each face, tripling the number
-      for (let i: number = 0; i < this.indices.length; i++) {
-        indices.push(i); // index is then simply a subsequent number
-        let index: number = this.indices[i] * 3;
-        vertices.push(this.vertices[index], this.vertices[index + 1], this.vertices[index + 2]);
-      }
-
-      this.ƒindicesFlat = new Float32Array(indices);
-      return new Float32Array(vertices);
-    }
-
-    private createTextureUVsFlat(): Float32Array {
-      let uv: number[] = [];
-      // create unique vertices for each face, tripling the number
-      for (let i: number = 0; i < this.indices.length; i++) {
-        let index: number = this.indices[i] * 2;
-        uv.push(this.textureUVs[index], this.textureUVs[index + 1]);
-      }
-      return new Float32Array(uv);
-    }
   }
 }

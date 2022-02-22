@@ -449,15 +449,17 @@ declare namespace FudgeCore {
     interface RenderBuffers {
         vertices: WebGLBuffer;
         indices: WebGLBuffer;
-        nIndices: number;
         textureUVs: WebGLBuffer;
-        normalsFlat: WebGLBuffer;
         normalsVertex: WebGLBuffer;
+        verticesFlat: WebGLBuffer;
+        indicesFlat: WebGLBuffer;
+        normalsFlat: WebGLBuffer;
+        textureUVsFlat: WebGLBuffer;
     }
     class RenderInjectorMesh {
         static decorate(_constructor: Function): void;
         protected static createRenderBuffers(this: Mesh): void;
-        protected static useRenderBuffers(this: Mesh, _shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): void;
+        protected static useRenderBuffers(this: Mesh, _shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): number;
         protected static deleteRenderBuffers(_renderBuffers: RenderBuffers): void;
     }
 }
@@ -3408,10 +3410,10 @@ declare namespace FudgeCore {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2022
      */
     class Face {
-        private vertices;
         indices: number[];
         normalUnscaled: Vector3;
         normal: Vector3;
+        private vertices;
         constructor(_vertices: Vertices, _index0: number, _index1: number, _index2: number);
         calculateNormals(): void;
     }
@@ -3448,7 +3450,7 @@ declare namespace FudgeCore {
         /** flat-shading: extra vertex array, since using vertices with multiple faces is rarely possible due to the limitation above */
         protected ƒverticesFlat: Float32Array;
         /** flat-shading: therefore an extra indices-array is needed */
-        protected ƒindicesFlat: Float32Array;
+        protected ƒindicesFlat: Uint16Array;
         /** flat-shading: and an extra textureUV-array */
         protected ƒtextureUVsFlat: Float32Array;
         /** bounding box AABB */
@@ -3458,40 +3460,30 @@ declare namespace FudgeCore {
         constructor(_name?: string);
         static getBufferSpecification(): BufferSpecification;
         protected static registerSubclass(_subClass: typeof Mesh): number;
-        /**
-         * Takes an array of four indices for a quad and returns an array of six indices for two trigons cutting that quad.
-         * If the quad is planar (default), the trigons end on the same index, allowing a single normal for both faces on the referenced vertex
-         */
-        protected static getTrigonsFromQuad(_quad: number[], _even?: boolean): number[];
         get type(): string;
         get vertices(): Float32Array;
         get indices(): Uint16Array;
         get normalsVertex(): Float32Array;
         get textureUVs(): Float32Array;
-        get normalsFlat(): Float32Array;
         get verticesFlat(): Float32Array;
+        get indicesFlat(): Uint16Array;
+        get normalsFlat(): Float32Array;
         get textureUVsFlat(): Float32Array;
         get boundingBox(): Box;
         get radius(): number;
-        useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): void;
+        useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): number;
         createRenderBuffers(): void;
         deleteRenderBuffers(_shader: typeof Shader): void;
-        getVertexCount(): number;
-        getIndexCount(): number;
         clear(): void;
-        create(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
-        protected createVertices(): Float32Array;
-        protected createTextureUVs(): Float32Array;
-        protected createIndices(): Uint16Array;
-        protected createNormals(): Float32Array;
+        protected reduceMutator(_mutator: Mutator): void;
+        protected createVerticesFlat(): Float32Array;
+        protected createNormalsFlat(): Float32Array;
+        protected createTextureUVsFlat(): Float32Array;
         protected calculateFaceCrossProducts(): Float32Array;
         protected createRadius(): number;
         protected createBoundingBox(): Box;
-        protected reduceMutator(_mutator: Mutator): void;
-        private createVerticesFlat;
-        private createTextureUVsFlat;
     }
 }
 declare namespace FudgeCore {

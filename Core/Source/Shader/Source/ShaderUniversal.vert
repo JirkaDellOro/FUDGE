@@ -4,10 +4,20 @@
 * @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
 */
 
-  // MINIMAL (no define needed): buffers for vertex position and transformation
-in vec3 a_position;
+  // MINIMAL (no define needed): buffers for transformation
 uniform mat4 u_projection;
 
+  // FLAT: offer buffers for face normals and their transformation
+  #if defined(FLAT)
+in vec3 a_positionFlat;
+in vec3 a_normalFace;
+uniform mat4 u_normal;
+flat out vec4 v_color;
+  #else
+  // regular if not FLAT
+in vec3 a_position;
+out vec4 v_color;
+  #endif
 
 // LIGHT: offer buffers for lighting vertices with different light types
   #if defined(LIGHT)
@@ -25,16 +35,6 @@ uniform LightAmbient u_ambient;
 uniform uint u_nLightsDirectional;
 uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
   #endif 
-
-  // FLAT: offer buffers for face normals and their transformation
-  #if defined(FLAT)
-in vec3 a_normalFace;
-uniform mat4 u_normal;
-flat out vec4 v_color;
-  #else
-  // regular output if not FLAT
-out vec4 v_color;
-  #endif
 
   // TEXTURE: offer buffers for UVs and pivot matrix
   #if defined(TEXTURE)
@@ -60,11 +60,10 @@ vec3 calculateReflection(vec3 light_dir, vec3 view_dir, vec3 normal, float shini
 }
 
 void main() {
-    // MINIMAL
-  gl_Position = u_projection * vec4(a_position, 1.0);
 
-    // FLAT: calculate flat lighting
+    // FLAT: calculate flat shading
     #if defined(FLAT)
+  gl_Position = u_projection * vec4(a_positionFlat, 1.0);
   vec3 normal = normalize(mat3(u_normal) * a_normalFace);
   v_color = u_ambient.color;
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
@@ -72,6 +71,8 @@ void main() {
     if(illumination > 0.0f)
       v_color += illumination * u_directional[i].color;
   }
+    #else
+  gl_Position = u_projection * vec4(a_position, 1.0);
     #endif
 
     // GOURAUD: calculate gouraud lighting on vertices

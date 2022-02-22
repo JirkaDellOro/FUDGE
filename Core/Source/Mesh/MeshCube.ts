@@ -34,7 +34,7 @@ namespace FudgeCore {
         new Vertex(4, new Vector2(1, 0)), // 12
         new Vertex(2, new Vector2(0, 0)), // 13
         new Vertex(6, new Vector2(1, 0)), // 14
-        new Vertex(5, new Vector2(1, 1)), // 15
+        new Vertex(5, new Vector2(1, 1))  // 15
       );
 
       this.faces = [
@@ -43,7 +43,7 @@ namespace FudgeCore {
         ...new Quad(this.cloud, 3, 2, 6, 7).faces, // right
         ...new Quad(this.cloud, 4, 5, 9, 8).faces, // left
         ...new Quad(this.cloud, 0, 10, 11, 12).faces, // top
-        ...new Quad(this.cloud, 13, 1, 15, 14).faces, // bottom
+        ...new Quad(this.cloud, 13, 1, 15, 14).faces  // bottom
       ];
     }
   }

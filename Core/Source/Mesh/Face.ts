@@ -5,10 +5,10 @@ namespace FudgeCore {
    * @authors Jirka Dell'Oro-Friedl, HFU, 2022
    */
   export class Face {
-    private vertices: Vertices;
     public indices: number[] = [];
     public normalUnscaled: Vector3;
     public normal: Vector3;
+    private vertices: Vertices;
 
     constructor(_vertices: Vertices, _index0: number, _index1: number, _index2: number) {
       this.indices = [_index0, _index1, _index2];
