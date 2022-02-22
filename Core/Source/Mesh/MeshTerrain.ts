@@ -4,7 +4,7 @@ namespace FudgeCore {
    * This function type takes x and z as Parameters and returns a number between -1 and 1 to be used as a heightmap. 
    * x * z * 2 represent the amout of faces which are created. As a result you get 1 vertex more in each direction (x and z axis)
    * The y-component of the resulting mesh may be moved to values between 0 and a maximum height.
-   * @authors Simon Storl-Schulke, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
+   * @authors Simon Storl-Schulke, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021-2022
    */
   export type HeightMapFunction = (x: number, z: number) => number;
 
@@ -20,8 +20,9 @@ namespace FudgeCore {
   }
 
   /**
-   * Generates a planar grid and applies a heightmap-function to it.
-   * @authors Jirka Dell'Oro-Friedl, HFU, 2021 | Simon Storl-Schulke, HFU, 2020 | Moritz Beaugrand, HFU, 2021
+   * Generates a planar grid and applies a heightmap-function to it. 
+   * Standard function is the simplex noise implemented with FUDGE, but another function can be given.
+   * @authors Jirka Dell'Oro-Friedl, HFU, 2021-2022 | Simon Storl-Schulke, HFU, 2020 | Moritz Beaugrand, HFU, 2021
    */
   export class MeshTerrain extends Mesh {
     public static readonly iSubclass: number = Mesh.registerSubclass(MeshTerrain);
@@ -50,6 +51,34 @@ namespace FudgeCore {
       }
       else
         this.heightMapFunction = new Noise2().sample;
+
+      this.cloud = new Vertices();
+      //Iterate over each cell to generate grid of vertices
+      for (let z: number = 0; z <= this.resolution.y; z++) {
+        for (let x: number = 0; x <= this.resolution.x; x++) {
+          let xNorm: number = x / this.resolution.x;
+          let zNorm: number = z / this.resolution.y;
+          this.cloud.push(new Vertex(
+            new Vector3(xNorm - 0.5, this.heightMapFunction(xNorm * this.scale.x, zNorm * this.scale.y), zNorm - 0.5),
+            new Vector2(xNorm, zNorm)
+          ));
+        }
+      }
+
+      let quads: Quad[] = [];
+      for (let z: number = 0; z < this.resolution.y; z++)
+        for (let x: number = 0; x < this.resolution.x; x++) {
+          quads.push(new Quad(
+            this.cloud,
+            (x + 0) + (z + 0) * (this.resolution.x + 1),
+            (x + 0) + (z + 1) * (this.resolution.x + 1),
+            (x + 1) + (z + 1) * (this.resolution.x + 1),
+            (x + 1) + (z + 0) * (this.resolution.x + 1)
+          ));
+        }
+      this.faces = quads.flatMap((quad: Quad) => quad.faces);
+
+      console.log(this.cloud, this.faces, quads);
     }
 
 
@@ -100,83 +129,6 @@ namespace FudgeCore {
       );
     }
     //#endregion
-
-    protected createVertices(): Float32Array {
-      let vertices: Vector3[] = [];
-      //Iterate over each cell to generate grid of vertices
-      let row: Vector3[];
-      for (let z: number = 0; z <= this.resolution.y; z++) {
-        row = [];
-        for (let x: number = 0; x <= this.resolution.x; x++) {
-          let xNorm: number = x / this.resolution.x;
-          let zNorm: number = z / this.resolution.y;
-          row.push(new Vector3(
-            xNorm - 0.5,
-            this.heightMapFunction(xNorm * this.scale.x, zNorm * this.scale.y),
-            zNorm - 0.5
-          ));
-        }
-        vertices.push(...row);
-        if (z > 0 && z <= this.resolution.y - 1) // duplicate row to separate vertex- and face-normals
-          vertices.push(...row);
-      }
-
-      return new Float32Array(vertices.map((_v: Vector3) => [_v.x, _v.y, _v.z]).flat());
-    }
-
-    protected createIndices(): Uint16Array {
-      let vert: number = 0;
-      let tris: number = 0;
-
-      let indices: Uint16Array = new Uint16Array(this.resolution.x * this.resolution.y * 6);
-
-      let switchOrientation: Boolean = false;
-
-      for (let z: number = 0; z < 2 * this.resolution.y; z += 2) {
-        for (let x: number = 0; x < this.resolution.x; x++) {
-
-          if (!switchOrientation) {
-            indices[tris + 1] = vert + this.resolution.x + 1;
-            indices[tris + 2] = vert + 1;
-            // First triangle of each uneven grid-cell
-            indices[tris + 0] = vert + 0;
-
-            // Second triangle of each uneven grid-cell
-            indices[tris + 4] = vert + this.resolution.x + 1;
-            indices[tris + 5] = vert + this.resolution.x + 2;
-            indices[tris + 3] = vert + 1;
-          }
-          else {
-            // First triangle of each even grid-cell
-            indices[tris + 1] = vert + this.resolution.x + 1;
-            indices[tris + 2] = vert + this.resolution.x + 2;
-            indices[tris + 0] = vert + 0;
-
-            // Second triangle of each even grid-cell
-            indices[tris + 3] = vert + 0;
-            indices[tris + 4] = vert + this.resolution.x + 2;
-            indices[tris + 5] = vert + 1;
-          }
-
-          switchOrientation = !switchOrientation;
-          vert++;
-          tris += 6;
-        }
-        if (this.resolution.x % 2 == 0)
-          switchOrientation = !switchOrientation;
-        vert += this.resolution.x + 2;
-      }
-      return indices;
-    }
-
-    protected createTextureUVs(): Float32Array {
-      let textureUVs: Vector2[] = [];
-      for (let i: number = 0; i < this.vertices.length; i += 3)
-        textureUVs.push(new Vector2(this.vertices[i], this.vertices[i + 2]));
-
-      return new Float32Array(textureUVs.map((_v: Vector2) => [_v.x + 0.5, _v.y + 0.5]).flat());
-
-    }
 
     private calculateHeight(face: DistanceToFaceVertices, relativePosObject: Vector3): number {
       let ray: Ray = new Ray(new Vector3(0, 1, 0), relativePosObject);

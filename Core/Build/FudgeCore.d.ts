@@ -3647,7 +3647,7 @@ declare namespace FudgeCore {
      * This function type takes x and z as Parameters and returns a number between -1 and 1 to be used as a heightmap.
      * x * z * 2 represent the amout of faces which are created. As a result you get 1 vertex more in each direction (x and z axis)
      * The y-component of the resulting mesh may be moved to values between 0 and a maximum height.
-     * @authors Simon Storl-Schulke, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021
+     * @authors Simon Storl-Schulke, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021-2022
      */
     type HeightMapFunction = (x: number, z: number) => number;
     class TerrainInfo {
@@ -3662,7 +3662,8 @@ declare namespace FudgeCore {
     }
     /**
      * Generates a planar grid and applies a heightmap-function to it.
-     * @authors Jirka Dell'Oro-Friedl, HFU, 2021 | Simon Storl-Schulke, HFU, 2020 | Moritz Beaugrand, HFU, 2021
+     * Standard function is the simplex noise implemented with FUDGE, but another function can be given.
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2021-2022 | Simon Storl-Schulke, HFU, 2020 | Moritz Beaugrand, HFU, 2021
      */
     class MeshTerrain extends Mesh {
         static readonly iSubclass: number;
@@ -3676,9 +3677,6 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;
-        protected createVertices(): Float32Array;
-        protected createIndices(): Uint16Array;
-        protected createTextureUVs(): Float32Array;
         private calculateHeight;
         private findNearestFace;
     }
