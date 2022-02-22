@@ -70,7 +70,7 @@ namespace FudgeCore {
       vertices.push(...lid);
 
       // recreate base faces to recalculate normals
-      this.faces = this.faces.map((_face: Face) => new Face(vertices, _face.indices[0], _face.indices[1], _face.indices[2]))
+      this.faces = this.faces.map((_face: Face) => new Face(vertices, _face.indices[0], _face.indices[1], _face.indices[2]));
       // create the lid faces using the indices of the base faces, but with an index offset and reverse order of indices
       this.faces.push(...this.faces.map(_face =>
         new Face(vertices, _face.indices[2] + nVerticesShape, _face.indices[1] + nVerticesShape, _face.indices[0] + nVerticesShape)
@@ -93,9 +93,9 @@ namespace FudgeCore {
         for (let i: number = 0; i < nVerticesShape; i++) {
           let index: number =
             + 2 * nVerticesShape // base & lid are offsets 
-            + t * (nVerticesShape + 1)// offset for each transformation
+            + t * (nVerticesShape + 1) // offset for each transformation
             + i;
-          let quad: Quad = new Quad(vertices, index, index + nVerticesShape + 1, index + nVerticesShape + 2, index + 1, false);
+          let quad: Quad = new Quad(vertices, index, index + nVerticesShape + 1, index + nVerticesShape + 2, index + 1, QUADSPLIT.AT_0);
           this.faces.push(...quad.faces);
         }
 

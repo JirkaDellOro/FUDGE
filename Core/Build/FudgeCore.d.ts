@@ -3780,14 +3780,25 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    enum QUADSPLIT {
+        PLANAR = 0,
+        AT_0 = 1,
+        AT_1 = 2
+    }
     /**
      * A surface created with four vertices which immediately creates none, one or two {@link Face}s depending on vertices at identical positions.
-     * If the Quad is planar, index2 is the third vertex for each trigon on thus may reference a face normal for both faces.
+     * ```plaintext
+     *        0 __ 3
+     *         |_\|
+     *        1    2
+     * ```
      * @authors Jirka Dell'Oro-Friedl, HFU, 2022
      */
     class Quad {
+        #private;
         faces: Face[];
-        constructor(_vertices: Vertices, _index0: number, _index1: number, _index2: number, _index3: number, _planar?: boolean);
+        constructor(_vertices: Vertices, _index0: number, _index1: number, _index2: number, _index3: number, _split?: QUADSPLIT);
+        get split(): QUADSPLIT;
     }
 }
 declare namespace FudgeCore {

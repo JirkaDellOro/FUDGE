@@ -66,16 +66,22 @@ namespace FudgeCore {
       }
 
       let quads: Quad[] = [];
-      for (let z: number = 0; z < this.resolution.y; z++)
+      let split: QUADSPLIT = QUADSPLIT.AT_0;
+      for (let z: number = 0; z < this.resolution.y; z++) {
         for (let x: number = 0; x < this.resolution.x; x++) {
           quads.push(new Quad(
             this.cloud,
             (x + 0) + (z + 0) * (this.resolution.x + 1),
             (x + 0) + (z + 1) * (this.resolution.x + 1),
             (x + 1) + (z + 1) * (this.resolution.x + 1),
-            (x + 1) + (z + 0) * (this.resolution.x + 1)
+            (x + 1) + (z + 0) * (this.resolution.x + 1),
+            split
           ));
+          split = (split == QUADSPLIT.AT_0) ? QUADSPLIT.AT_1 : QUADSPLIT.AT_0;
         }
+        if (this.resolution.x % 2 == 0) // reverse last split change if x-resolution is even
+          split = (split == QUADSPLIT.AT_0) ? QUADSPLIT.AT_1 : QUADSPLIT.AT_0;
+      }
       this.faces = quads.flatMap((quad: Quad) => quad.faces);
 
       console.log(this.cloud, this.faces, quads);
