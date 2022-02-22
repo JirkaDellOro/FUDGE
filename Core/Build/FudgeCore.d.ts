@@ -3463,7 +3463,6 @@ declare namespace FudgeCore {
          * If the quad is planar (default), the trigons end on the same index, allowing a single normal for both faces on the referenced vertex
          */
         protected static getTrigonsFromQuad(_quad: number[], _even?: boolean): number[];
-        protected static deleteInvalidIndices(_indices: number[], _vertices: Vector3[]): void;
         get type(): string;
         get vertices(): Float32Array;
         get indices(): Uint16Array;
@@ -3483,18 +3482,16 @@ declare namespace FudgeCore {
         create(): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
-        /**Flip the Normals of a Mesh to render opposite side of each polygon*/
-        flipNormals(): void;
         protected createVertices(): Float32Array;
         protected createTextureUVs(): Float32Array;
         protected createIndices(): Uint16Array;
         protected createNormals(): Float32Array;
         protected calculateFaceCrossProducts(): Float32Array;
-        private createVerticesFlat;
-        private createTextureUVsFlat;
         protected createRadius(): number;
         protected createBoundingBox(): Box;
         protected reduceMutator(_mutator: Mutator): void;
+        private createVerticesFlat;
+        private createTextureUVsFlat;
     }
 }
 declare namespace FudgeCore {

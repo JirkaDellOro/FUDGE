@@ -164,6 +164,7 @@ namespace FudgeCore {
       return new Uint16Array(this.inds);
     }
 
+    // Becomes obsolete and so does the method in Mesh
     protected calculateFaceCrossProducts(): Float32Array {
       return new Float32Array(this.facecrossproducts);
     }
