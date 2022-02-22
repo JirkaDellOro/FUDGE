@@ -172,18 +172,6 @@ namespace FudgeCore {
       this.renderBuffers = null;
     }
 
-    // public create(): void {
-    //   // TODO: should actually not be called since it opposes lazy pattern
-    //   this.ƒvertices = this.createVertices();
-    //   this.ƒindices = this.createIndices();
-    //   this.ƒtextureUVs = this.createTextureUVs();
-    //   this.ƒverticesFlat = this.createVerticesFlat();
-    //   // this.ƒnormalsFaceUnscaled = this.calculateFaceCrossProducts();
-    //   // this.ƒnormalsFlat = this.createFlatNormals();
-    //   // this.ƒnormalsVertex = this.createVertexNormals();
-    //   this.createRenderBuffers();
-    // }
-
     //#region Transfer
     // Serialize/Deserialize for all meshes that calculate without parameters
     public serialize(): Serialization {
@@ -218,10 +206,6 @@ namespace FudgeCore {
       delete _mutator.renderBuffers;
     }
     //#endregion
-
-    // protected createTextureUVs(): Float32Array { return null; }
-    // protected createIndices(): Uint16Array { return null; }
-    // protected createNormals(): Float32Array { return null; }
 
     protected createVerticesFlat(): Float32Array {
       let positions: Vector3[] = [];

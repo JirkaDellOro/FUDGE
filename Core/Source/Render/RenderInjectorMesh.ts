@@ -95,6 +95,9 @@ namespace FudgeCore {
       crc3.uniformMatrix4fv(uProjection, false, _mtxProjection.get());
 
       // feed in face normals if shader accepts u_world. 
+      // TODO: test if translation should be stripped
+      // let mtxWorld: Matrix4x4 = _mtxWorld.clone;
+      // mtxWorld.translation = Vector3.ZERO();
       let uWorld: WebGLUniformLocation = _shader.uniforms["u_world"];
       if (uWorld) 
         crc3.uniformMatrix4fv(uWorld, false, _mtxWorld.get());
