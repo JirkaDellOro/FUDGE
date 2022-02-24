@@ -16,12 +16,12 @@ namespace SkeletonTest {
     const rotatorY: ƒ.Node = new ƒ.Node("RotatorY");
     rotatorY.addComponent(new ƒ.ComponentTransform());
 
-    const zylinder: ƒ.Node = await createAnimatedCylinder();
-    console.log(zylinder);
+    const cylinder: ƒ.Node = await createAnimatedCylinder();
+    console.log(cylinder);
 
     scene.addChild(rotatorX);
     rotatorX.addChild(rotatorY);
-    rotatorY.addChild(zylinder);
+    rotatorY.addChild(cylinder);
 
     // setup camera
     const camera: ƒ.Node = new ƒ.Node("Camera");
@@ -57,7 +57,7 @@ namespace SkeletonTest {
     constructor() {
       super();
       const meshSource: ƒ.Mesh = new ƒ.MeshRotation(
-        "MeshExtrusion",
+        "MeshRotation",
         [
           new ƒ.Vector2(0, 4),
           new ƒ.Vector2(1, 4),
@@ -104,7 +104,7 @@ namespace SkeletonTest {
   }
 
   async function createAnimatedCylinder(): Promise<ƒ.Node> {
-    const zylinder: ƒ.Node = new ƒ.Node("CylinderAnimated");
+    const cylinder: ƒ.Node = new ƒ.Node("CylinderAnimated");
 
     // skeleton serialization test
     const serialization: ƒ.Serialization = ƒ.Serializer.serialize(MeshSkinCylinder.skeleton);
@@ -155,21 +155,21 @@ namespace SkeletonTest {
     const cmpAnimator: ƒ.ComponentAnimator = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE.LOOP);
     skeletonInstance.addComponent(cmpAnimator);    
     cmpAnimator.activate(true);
-    zylinder.addChild(skeletonInstance);
+    cylinder.addChild(skeletonInstance);
 
     // setup component mesh
     const mesh: ƒ.MeshSkin = new MeshSkinCylinder();
     const cmpMesh: ƒ.ComponentMesh = new ƒ.ComponentMesh(mesh);
     cmpMesh.mtxPivot.translateY(-2);
     cmpMesh.bindSkeleton(skeletonInstance);
-    zylinder.addComponent(cmpMesh);
+    cylinder.addComponent(cmpMesh);
 
     // setup component material
-    const material: ƒ.Material = new ƒ.Material("MaterialZylinder", ƒ.ShaderFlatSkin, new ƒ.CoatColored(ƒ.Color.CSS("White")));
+    const material: ƒ.Material = new ƒ.Material("MaterialCylinder", ƒ.ShaderFlatSkin, new ƒ.CoatColored(ƒ.Color.CSS("White")));
     const cmpMaterial: ƒ.ComponentMaterial = new ƒ.ComponentMaterial(material);
-    zylinder.addComponent(cmpMaterial);
+    cylinder.addComponent(cmpMaterial);
 
-    return zylinder;
+    return cylinder;
   }
 
   function update(_viewport: ƒ.Viewport, _mtxRotatorX: ƒ.Matrix4x4, _mtxRotatorY: ƒ.Matrix4x4): void {
