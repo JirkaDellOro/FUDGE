@@ -98,12 +98,14 @@ namespace FudgeCore {
       // TODO: test if translation should be stripped
       // let mtxWorld: Matrix4x4 = _mtxWorld.clone;
       // mtxWorld.translation = Vector3.ZERO();
-      let uWorld: WebGLUniformLocation = _shader.uniforms["u_world"];
-      if (uWorld) 
-        crc3.uniformMatrix4fv(uWorld, false, _mtxMeshToWorld.get());
+      // let uWorld: WebGLUniformLocation = _shader.uniforms["u_world"];
+      // if (uWorld) 
+      //   crc3.uniformMatrix4fv(uWorld, false, _mtxMeshToWorld.get());
 
       let uNormal: WebGLUniformLocation = _shader.uniforms["u_normal"];
       if (uNormal) {
+        // let mtxMeshToWorld: Matrix4x4 = _mtxMeshToWorld.clone;
+        // mtxMeshToWorld.translation = Vector3.ZERO();
         // TODO: optimize so that inversion or whole normalMatrix is cached
         let normalMatrix: Matrix4x4 = Matrix4x4.TRANSPOSE(Matrix4x4.INVERSION(_mtxMeshToWorld));
         crc3.uniformMatrix4fv(uNormal, false, normalMatrix.get());

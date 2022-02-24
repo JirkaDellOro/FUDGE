@@ -304,6 +304,7 @@ namespace FudgeCore {
             let direction: Vector3 = Vector3.Z();
             direction.transform(cmpLight.mtxPivot, false);
             direction.transform(cmpLight.node.mtxWorld, false);
+            direction.normalize();
             RenderWebGL.crc3.uniform3fv(uni[`u_directional[${i}].direction`], direction.get());
           }
         }

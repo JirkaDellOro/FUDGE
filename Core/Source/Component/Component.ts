@@ -70,7 +70,7 @@ namespace FudgeCore {
       return serialization;
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      this.active = _serialization.active;
+      this.activate(_serialization.active);
       return this;
     }
 
