@@ -266,6 +266,7 @@ namespace FudgeCore {
     }
 
     protected createRadius(): number {
+      //TODO: radius and bounding box could be created on construction of vertex-array
       let radius: number = 0;
       for (let vertex: number = 0; vertex < this.vertices.length; vertex += 3) {
         radius = Math.max(radius, Math.hypot(this.vertices[vertex], this.vertices[vertex + 1], this.vertices[vertex + 2]));

@@ -16,7 +16,7 @@ namespace FudgeCore {
     private static createHeightMapFunction(_texture: TextureImage): HeightMapFunction {
       let array: Uint8ClampedArray = MeshRelief.textureToClampedArray(_texture);
       let heightMapFunction: HeightMapFunction = (_x: number, _z: number) => {
-        let pixel: number = _z * _texture.image.width + _x;
+        let pixel: number = Math.round(_z * _texture.image.width + _x);
         return array[pixel * 4] / 255;
       };
       return heightMapFunction;
@@ -38,7 +38,7 @@ namespace FudgeCore {
       if (!_texture)
         return;
       this.texture = _texture;
-      let resolution: Vector2 = _texture ? new Vector2(_texture.image.width - 1, _texture.image.height - 1) : undefined
+      let resolution: Vector2 = _texture ? new Vector2(_texture.image.width - 1, _texture.image.height - 1) : undefined;
       super.create(resolution, resolution, MeshRelief.createHeightMapFunction(_texture));
     }
 
