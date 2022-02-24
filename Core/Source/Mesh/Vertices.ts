@@ -6,7 +6,7 @@ namespace FudgeCore {
    */
   export class Vertices extends Array<Vertex> {
     // TODO: this class may become more powerful by hiding the array and add more service methods like calculating bounding box, radius etc.
-    
+    // see if a proxy of the array interfacing [] would do a good job
     /**
      * returns the position associated with the vertex addressed, resolving references between vertices 
      */
