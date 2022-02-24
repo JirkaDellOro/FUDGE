@@ -98,7 +98,7 @@ void main() {
   vec4 v_position4 = u_world * vec4(a_position, 1);
   vec3 v_position = vec3(v_position4) / v_position4.w;
   vec3 N = normalize(vec3(u_normal * vec4(a_normalVertex, 0)));
- vec3 view_dir = normalize(v_position);
+  vec3 view_dir = normalize(v_position);
 
   v_color = u_ambient.color;
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
@@ -106,8 +106,9 @@ void main() {
     float illuminance = dot(light_dir, N);
 
     if(illuminance > 0.0) {
-      vec4 reflection = calculateReflection(v_color, light_dir, view_dir, N, u_shininess);
-      v_color += vec4(reflection) * illuminance * u_directional[i].color;
+      // vec4 reflection = calculateReflection(v_color, light_dir, view_dir, N, u_shininess);
+      // v_color += vec4(reflection) * illuminance * u_directional[i].color;
+      v_color += illuminance * u_directional[i].color;
     }
   }
     #endif
