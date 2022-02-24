@@ -459,7 +459,7 @@ declare namespace FudgeCore {
     class RenderInjectorMesh {
         static decorate(_constructor: Function): void;
         protected static createRenderBuffers(this: Mesh): void;
-        protected static useRenderBuffers(this: Mesh, _shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): number;
+        protected static useRenderBuffers(this: Mesh, _shader: typeof Shader, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4, _id?: number): number;
         protected static deleteRenderBuffers(_renderBuffers: RenderBuffers): void;
     }
 }
@@ -840,7 +840,7 @@ declare namespace FudgeCore {
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
-        protected static drawMesh(_cmpMesh: ComponentMesh, cmpMaterial: ComponentMaterial, _mtxMeshToWorld: Matrix4x4, _mtxWorldToView: Matrix4x4): void;
+        protected static drawMesh(_cmpMesh: ComponentMesh, cmpMaterial: ComponentMaterial, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4): void;
     }
 }
 declare namespace FudgeCore {

@@ -303,7 +303,7 @@ namespace FudgeCore {
             RenderWebGL.crc3.uniform4fv(uni[`u_directional[${i}].color`], cmpLight.light.color.getArray());
             let direction: Vector3 = Vector3.Z();
             direction.transform(cmpLight.mtxPivot, false);
-            direction.transform(cmpLight.node.mtxWorld);
+            direction.transform(cmpLight.node.mtxWorld, false);
             RenderWebGL.crc3.uniform3fv(uni[`u_directional[${i}].direction`], direction.get());
           }
         }
@@ -314,11 +314,11 @@ namespace FudgeCore {
     /**
      * Draw a mesh buffer using the given infos and the complete projection matrix
      */
-    protected static drawMesh(_cmpMesh: ComponentMesh, cmpMaterial: ComponentMaterial, _mtxMeshToWorld: Matrix4x4, _mtxWorldToView: Matrix4x4): void {
+    protected static drawMesh(_cmpMesh: ComponentMesh, cmpMaterial: ComponentMaterial, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4): void {
       let shader: typeof Shader = cmpMaterial.material.getShader();
       let coat: Coat = cmpMaterial.material.coat;
       shader.useProgram();
-      let nIndices: number = _cmpMesh.mesh.useRenderBuffers(shader, _mtxMeshToWorld, _mtxWorldToView);
+      let nIndices: number = _cmpMesh.mesh.useRenderBuffers(shader, _mtxMeshToWorld, _mtxMeshToView);
       coat.useRenderData(shader, cmpMaterial);
       RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
     }

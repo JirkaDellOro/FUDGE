@@ -77,7 +77,7 @@ namespace FudgeCore {
       this.renderBuffers = renderBuffers;
     }
 
-    protected static useRenderBuffers(this: Mesh, _shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): number {
+    protected static useRenderBuffers(this: Mesh, _shader: typeof Shader, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4, _id?: number): number {
       if (!this.renderBuffers)
         this.createRenderBuffers();
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
@@ -92,7 +92,7 @@ namespace FudgeCore {
       }
 
       let uProjection: WebGLUniformLocation = _shader.uniforms["u_projection"];
-      crc3.uniformMatrix4fv(uProjection, false, _mtxProjection.get());
+      crc3.uniformMatrix4fv(uProjection, false, _mtxMeshToView.get());
 
       // feed in face normals if shader accepts u_world. 
       // TODO: test if translation should be stripped
@@ -100,12 +100,12 @@ namespace FudgeCore {
       // mtxWorld.translation = Vector3.ZERO();
       let uWorld: WebGLUniformLocation = _shader.uniforms["u_world"];
       if (uWorld) 
-        crc3.uniformMatrix4fv(uWorld, false, _mtxWorld.get());
+        crc3.uniformMatrix4fv(uWorld, false, _mtxMeshToWorld.get());
 
       let uNormal: WebGLUniformLocation = _shader.uniforms["u_normal"];
       if (uNormal) {
         // TODO: optimize so that inversion or whole normalMatrix is cached
-        let normalMatrix: Matrix4x4 = Matrix4x4.TRANSPOSE(Matrix4x4.INVERSION(_mtxWorld));
+        let normalMatrix: Matrix4x4 = Matrix4x4.TRANSPOSE(Matrix4x4.INVERSION(_mtxMeshToWorld));
         crc3.uniformMatrix4fv(uNormal, false, normalMatrix.get());
       }
 
