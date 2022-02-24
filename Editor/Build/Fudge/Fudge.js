@@ -105,7 +105,7 @@ var Fudge;
         MIME["UNKNOWN"] = "unknown";
     })(MIME = Fudge.MIME || (Fudge.MIME = {}));
     let mime = new Map([
-        [MIME.TEXT, ["ts", "json", "html", "htm", "css", "js", "txt", "obj"]],
+        [MIME.TEXT, ["ts", "json", "html", "htm", "css", "js", "txt"]],
         [MIME.MESH, ["obj"]],
         [MIME.AUDIO, ["mp3", "wav", "ogg"]],
         [MIME.IMAGE, ["png", "jpg", "jpeg", "tif", "tga", "gif"]]
@@ -1139,6 +1139,11 @@ var Fudge;
             this.domElement.addEventListener("keydown" /* KEY_DOWN */, this.hndKey);
         }
         //#region hack getMutator in order to specifically exclude parts of it (e.g. recreate mesh everytime mtxPivot changes...)
+        getMutatorStripped = (_mutator, _types) => {
+            let mutator = super.getMutator(_mutator, _types);
+            delete (mutator.mesh);
+            return mutator;
+        };
         mutateOnInput = async (_event) => {
             this.getMutator = super.getMutator;
             if (this.mutable instanceof ƒ.ComponentMesh) {
@@ -1146,11 +1151,6 @@ var Fudge;
                 if (found == this.domElement)
                     this.getMutator = this.getMutatorStripped;
             }
-        };
-        getMutatorStripped = (_mutator, _types) => {
-            let mutator = super.getMutator(_mutator, _types);
-            delete (mutator.mesh);
-            return mutator;
         };
         //#endregion
         hndKey = (_event) => {

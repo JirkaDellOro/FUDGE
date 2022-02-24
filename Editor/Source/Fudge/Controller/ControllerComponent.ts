@@ -36,6 +36,12 @@ namespace Fudge {
     }
 
     //#region hack getMutator in order to specifically exclude parts of it (e.g. recreate mesh everytime mtxPivot changes...)
+    public getMutatorStripped = (_mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator => {
+      let mutator: ƒ.Mutator = super.getMutator(_mutator, _types);
+      delete (mutator.mesh);
+      return mutator;
+    }
+    
     protected mutateOnInput = async (_event: Event) => {
       this.getMutator = super.getMutator;
       if (this.mutable instanceof ƒ.ComponentMesh) {
@@ -43,11 +49,6 @@ namespace Fudge {
         if (found == this.domElement) 
           this.getMutator = this.getMutatorStripped;
       }
-    }
-    public getMutatorStripped = (_mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator => {
-      let mutator: ƒ.Mutator = super.getMutator(_mutator, _types);
-      delete (mutator.mesh);
-      return mutator;
     }
     //#endregion
 

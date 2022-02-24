@@ -3568,19 +3568,9 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    /**Simple Wavefront OBJ import. Takes a wavefront obj string. To Load from a file url, use the
-     * static LOAD Method. Currently only works with triangulated Meshes
-     * (activate 'Geomentry → Triangulate Faces' in Blenders obj exporter)
-     * @todo UVs, Load Materials, Support Quads
-     * @authors Simon Storl-Schulke 2021 | Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021 */
     class MeshObj extends Mesh {
         static readonly iSubclass: number;
         url: RequestInfo;
-        protected verts: number[];
-        protected uvs: number[];
-        protected inds: number[];
-        protected facenormals: number[];
-        protected facecrossproducts: number[];
         constructor(_name?: string, _url?: RequestInfo);
         /**
              * Asynchronously loads the image from the given url
@@ -3591,13 +3581,6 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;
-        /** Creates three Vertices from each face. Although inefficient, this has to be done for now - see Issue 244 */
-        protected splitVertices(): void;
-        protected createVertices(): Float32Array;
-        protected createTextureUVs(): Float32Array;
-        protected createIndices(): Uint16Array;
-        protected calculateFaceCrossProducts(): Float32Array;
-        protected createFlatNormals(): Float32Array;
     }
 }
 declare namespace FudgeCore {

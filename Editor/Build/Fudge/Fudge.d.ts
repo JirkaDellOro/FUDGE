@@ -259,8 +259,8 @@ declare namespace Fudge {
     import ƒUi = FudgeUserInterface;
     class ControllerComponent extends ƒUi.Controller {
         constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
-        protected mutateOnInput: (_event: Event) => Promise<void>;
         getMutatorStripped: (_mutator?: ƒ.Mutator, _types?: ƒ.Mutator) => ƒ.Mutator;
+        protected mutateOnInput: (_event: Event) => Promise<void>;
         private hndKey;
         private hndDragOver;
         private hndDrop;
