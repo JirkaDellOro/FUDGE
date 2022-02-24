@@ -111,7 +111,7 @@ namespace FudgeCore {
         crc3.uniformMatrix4fv(uNormal, false, normalMatrix.get());
       }
 
-      setBuffer("a_position", this.renderBuffers.vertices);      
+      setBuffer("a_position", this.renderBuffers.vertices);
       setBuffer("a_positionFlat", this.renderBuffers.verticesFlat);
       setBuffer("a_normalFace", this.renderBuffers.normalsFlat);
       setBuffer("a_normalVertex", this.renderBuffers.normalsVertex);
@@ -120,7 +120,10 @@ namespace FudgeCore {
       // feed in texture coordinates if shader accepts a_textureUVs
       let aTextureUVs: number = _shader.attributes["a_textureUVs"];
       if (aTextureUVs) {
-        crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderBuffers.textureUVs);
+        if (_shader == ShaderTextureFlat)
+          crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderBuffers.textureUVsFlat);
+        else
+          crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderBuffers.textureUVs);
         crc3.enableVertexAttribArray(aTextureUVs); // enable the buffer
         crc3.vertexAttribPointer(aTextureUVs, 2, WebGL2RenderingContext.FLOAT, false, 0, 0);
       }
