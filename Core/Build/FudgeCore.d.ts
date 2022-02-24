@@ -3689,7 +3689,6 @@ declare namespace FudgeCore {
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;
         protected reduceMutator(_mutator: Mutator): void;
-        protected createVertices(): Float32Array;
     }
 }
 declare namespace FudgeCore {

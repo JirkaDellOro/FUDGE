@@ -83,8 +83,6 @@ namespace FudgeCore {
           split = (split == QUADSPLIT.AT_0) ? QUADSPLIT.AT_1 : QUADSPLIT.AT_0;
       }
       this.faces = quads.flatMap((quad: Quad) => quad.faces);
-
-      console.log(this.cloud, this.faces, quads);
     }
 
 

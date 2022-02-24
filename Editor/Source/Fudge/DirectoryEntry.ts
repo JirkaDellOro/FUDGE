@@ -11,7 +11,7 @@ namespace Fudge {
   }
 
   let mime: Map<MIME, string[]> = new Map([
-    [MIME.TEXT, ["ts", "json", "html", "htm", "css", "js", "txt"]],
+    [MIME.TEXT, ["ts", "json", "html", "htm", "css", "js", "txt", "obj"]],
     [MIME.MESH, ["obj"]],
     [MIME.AUDIO, ["mp3", "wav", "ogg"]],
     [MIME.IMAGE, ["png", "jpg", "jpeg", "tif", "tga", "gif"]]

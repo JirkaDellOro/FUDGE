@@ -105,7 +105,7 @@ var Fudge;
         MIME["UNKNOWN"] = "unknown";
     })(MIME = Fudge.MIME || (Fudge.MIME = {}));
     let mime = new Map([
-        [MIME.TEXT, ["ts", "json", "html", "htm", "css", "js", "txt"]],
+        [MIME.TEXT, ["ts", "json", "html", "htm", "css", "js", "txt", "obj"]],
         [MIME.MESH, ["obj"]],
         [MIME.AUDIO, ["mp3", "wav", "ogg"]],
         [MIME.IMAGE, ["png", "jpg", "jpeg", "tif", "tga", "gif"]]
