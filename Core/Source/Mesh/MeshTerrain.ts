@@ -39,7 +39,7 @@ namespace FudgeCore {
     public create(_resolution: Vector2 = Vector2.ONE(2), _scaleInput: Vector2 = Vector2.ONE(), _functionOrSeed: HeightMapFunction | number = 0): void {
       this.clear();
       this.seed = undefined;
-      this.resolution = _resolution.clone;
+      this.resolution = new Vector2(Math.round(_resolution.x), Math.round(_resolution.y));
       this.scale = _scaleInput.clone;
 
       if (_functionOrSeed instanceof Function)
@@ -141,6 +141,21 @@ namespace FudgeCore {
       return intersection.y;
     }
 
+    private findNearestFaceNew(relativPosObject: Vector3): DistanceToFaceVertices {
+      let z: number = Math.floor((relativPosObject.z + 0.5) * this.resolution.y);
+      let x: number = Math.floor((relativPosObject.x + 0.5) * this.resolution.x);
+      let index: number = (z * this.resolution.x + x) * 2;
+      let face1: Face =  this.faces[index];
+      let face2: Face =  this.faces[index];
+      
+      let d1: DistanceToFaceVertices = new DistanceToFaceVertices(face1.getPosition(0), face1.getPosition(1), face1.getPosition(2), relativPosObject);
+      let d2: DistanceToFaceVertices = new DistanceToFaceVertices(face2.getPosition(0), face1.getPosition(1), face1.getPosition(2), relativPosObject);
+      
+      if (d1.distance < d2.distance)
+        return d1;
+        else return d2;
+      return null;
+    }
     private findNearestFace(relativPosObject: Vector3): DistanceToFaceVertices {
       let vertices: Float32Array = this.vertices;
       let indices: Uint16Array = this.indices;
@@ -175,8 +190,9 @@ namespace FudgeCore {
 
     }
   }
-
+  
   class DistanceToFaceVertices {
+    // TODO: this should become a correct "hit"- function in Face
     public vertexONE: Vector3;
     public vertexTWO: Vector3;
     public vertexTHREE: Vector3;

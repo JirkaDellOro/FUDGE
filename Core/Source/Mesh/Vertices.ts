@@ -5,6 +5,8 @@ namespace FudgeCore {
    * @authors Jirka Dell'Oro-Friedl, HFU, 2022
    */
   export class Vertices extends Array<Vertex> {
+    // TODO: this class may become more powerful by hiding the array and add more service methods like calculating bounding box, radius etc.
+    
     /**
      * returns the position associated with the vertex addressed, resolving references between vertices 
      */

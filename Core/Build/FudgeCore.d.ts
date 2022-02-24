@@ -3416,6 +3416,7 @@ declare namespace FudgeCore {
         private vertices;
         constructor(_vertices: Vertices, _index0: number, _index1: number, _index2: number);
         calculateNormals(): void;
+        getPosition(_index: number): Vector3;
     }
 }
 declare namespace FudgeCore {
@@ -3670,6 +3671,7 @@ declare namespace FudgeCore {
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;
         private calculateHeight;
+        private findNearestFaceNew;
         private findNearestFace;
     }
 }

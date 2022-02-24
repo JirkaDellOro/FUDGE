@@ -23,5 +23,9 @@ namespace FudgeCore {
       this.normalUnscaled = Vector3.CROSS(v0, v1);
       this.normal = Vector3.NORMALIZATION(this.normalUnscaled);
     }
+
+    public getPosition(_index: number): Vector3 {
+      return this.vertices.position(this.indices[_index]);
+    }
   }
 }
