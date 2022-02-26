@@ -73,7 +73,7 @@ namespace FudgeCore {
           distances.push(total);
         }
       }
-      distances.forEach((entry, index) => { distances[index] = entry / total });
+      distances.forEach((entry, index) => { distances[index] = entry / total; });
 
       let nVerticesPolygon: number = polygon.length;
 

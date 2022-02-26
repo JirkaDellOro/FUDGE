@@ -20,6 +20,7 @@ See and examine this example of a [minimal scene on codepen](https://codepen.io/
 - clone this repository
 - install modules required by typing `npm install` in a terminal on the FUDGE-folder
 - start the editor by typing `electron Editor/Electron` or `npm run-script run` or envoking the file FUDGE.bat using the mouse 
+![](Miscellaneous/Screenshots/Editor.png)
 
 # Learn
 ## Wiki

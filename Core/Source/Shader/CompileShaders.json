@@ -1,5 +1,5 @@
 {
-  "ShaderLucent": {
+  "ShaderLit": {
     "vertex": "Source/ShaderUniversal.vert",
     "fragment": "Source/ShaderUniversal.frag",
     "coat": "CoatColored",
@@ -7,7 +7,7 @@
     "outdir": "Build/",
     "register": "true"
   },
-  "ShaderTextureLucent": {
+  "ShaderLitTextured": {
     "vertex": "Source/ShaderUniversal.vert",
     "fragment": "Source/ShaderUniversal.frag",
     "coat": "CoatTextured",
@@ -30,7 +30,7 @@
       "FLAT"
     ]
   },
-  "ShaderTextureFlat": {
+  "ShaderFlatTextured": {
     "vertex": "Source/ShaderUniversal.vert",
     "fragment": "Source/ShaderUniversal.frag",
     "coat": "CoatTextured",
@@ -55,7 +55,7 @@
       "GOURAUD"
     ]
   },
-  "ShaderTextureGouraud": {
+  "ShaderGouraudTextured": {
     "vertex": "Source/ShaderUniversal.vert",
     "fragment": "Source/ShaderUniversal.frag",
     "coat": "CoatTextured",

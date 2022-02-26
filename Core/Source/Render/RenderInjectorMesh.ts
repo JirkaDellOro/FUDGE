@@ -120,7 +120,7 @@ namespace FudgeCore {
       // feed in texture coordinates if shader accepts a_textureUVs
       let aTextureUVs: number = _shader.attributes["a_textureUVs"];
       if (aTextureUVs) {
-        if (_shader == ShaderTextureFlat)
+        if (_shader == ShaderFlatTextured)
           crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderBuffers.textureUVsFlat);
         else
           crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderBuffers.textureUVs);
@@ -133,7 +133,7 @@ namespace FudgeCore {
       if (uId)
         RenderWebGL.getRenderingContext().uniform1i(uId, _id);
 
-      if (_shader == ShaderFlat || _shader == ShaderTextureFlat) {
+      if (_shader == ShaderFlat || _shader == ShaderFlatTextured) {
         crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.renderBuffers.indicesFlat);
         return this.indicesFlat.length;
       }
