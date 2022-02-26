@@ -34,8 +34,8 @@ namespace AudioSpace {
   async function init(_event: Event): Promise<void> {
     out = document.querySelector("output");
 
-    const mtrWhite: ƒ.Material = new ƒ.Material("White", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("white")));
-    const mtrGrey: ƒ.Material = new ƒ.Material("White", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("slategrey")));
+    const mtrWhite: ƒ.Material = new ƒ.Material("White", ƒ.ShaderLit, new ƒ.CoatColored(ƒ.Color.CSS("white")));
+    const mtrGrey: ƒ.Material = new ƒ.Material("White", ƒ.ShaderLit, new ƒ.CoatColored(ƒ.Color.CSS("slategrey")));
     const inner: ƒAid.Node = new ƒAid.Node("Inner", ƒ.Matrix4x4.IDENTITY(), mtrWhite, new ƒ.MeshPyramid());
     const outer: ƒAid.Node = new ƒAid.Node("Outer", ƒ.Matrix4x4.IDENTITY(), mtrGrey, new ƒ.MeshPyramid());
     const mtxMesh: ƒ.Matrix4x4 = inner.mtxMeshPivot;

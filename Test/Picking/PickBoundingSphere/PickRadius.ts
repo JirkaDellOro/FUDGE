@@ -12,7 +12,7 @@ namespace PickRadius {
     root.appendChild(zoo);
 
     let meshShpere: ƒ.MeshSphere = new ƒ.MeshSphere("BoundingSphere", 40, 40);
-    let material: ƒ.Material = new ƒ.Material("Transparent", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("white", 0.5)));
+    let material: ƒ.Material = new ƒ.Material("Transparent", ƒ.ShaderLit, new ƒ.CoatColored(ƒ.Color.CSS("white", 0.5)));
 
     for (let child of zoo.getChildren()) {
       let sphere: ƒ.Node = new ƒAid.Node(

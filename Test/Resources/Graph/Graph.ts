@@ -56,8 +56,8 @@ namespace Graph {
   }
 
   function createCenterAndSatellite(): ƒ.Node {
-    let mtrOrange: ƒ.Material = new ƒ.Material("Orange", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(1, 0.5, 0, 1)));
-    let mtrCyan: ƒ.Material = new ƒ.Material("Cyan", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(0, 0.5, 1, 1)));
+    let mtrOrange: ƒ.Material = new ƒ.Material("Orange", ƒ.ShaderLit, new ƒ.CoatColored(new ƒ.Color(1, 0.5, 0, 1)));
+    let mtrCyan: ƒ.Material = new ƒ.Material("Cyan", ƒ.ShaderLit, new ƒ.CoatColored(new ƒ.Color(0, 0.5, 1, 1)));
     let pyramid: ƒ.MeshPyramid = new ƒ.MeshPyramid();
     let cube: ƒ.MeshCube = new ƒ.MeshCube();
     

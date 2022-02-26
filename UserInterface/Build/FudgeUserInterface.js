@@ -1459,6 +1459,7 @@ var FudgeUserInterface;
             for (let row of this.data) {
                 // tr = this.createRow(row, head);
                 let item = new FudgeUserInterface.TableItem(this.controller, row);
+                // TODO: see if icon consideration should move to TableItem
                 if (this.icon)
                     item.setAttribute("icon", Reflect.get(row, this.icon));
                 this.appendChild(item);

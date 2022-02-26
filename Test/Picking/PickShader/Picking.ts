@@ -15,7 +15,7 @@ namespace Picking {
   let cursor: ƒAid.Node = new ƒAid.Node(
     "Cursor",
     ƒ.Matrix4x4.SCALING(ƒ.Vector3.ONE(0.05)),
-    new ƒ.Material("Cursor", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("darkgray"))),
+    new ƒ.Material("Cursor", ƒ.ShaderLit, new ƒ.CoatColored(ƒ.Color.CSS("darkgray"))),
     new ƒ.MeshSphere("Cursor", 5, 5)
   );
 

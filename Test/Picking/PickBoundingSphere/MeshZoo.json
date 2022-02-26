@@ -26,7 +26,7 @@
     "ƒ.Material": {
       "name": "SolidWhite",
       "idResource": "Material|2021-02-26T06:53:57.625Z|88423",
-      "shader": "ShaderUniColor",
+      "shader": "ShaderLit",
       "coat": {
         "ƒ.CoatColored": {
           "name": "Coat",

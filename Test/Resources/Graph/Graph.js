@@ -42,8 +42,8 @@ var Graph;
         }
     }
     function createCenterAndSatellite() {
-        let mtrOrange = new ƒ.Material("Orange", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(1, 0.5, 0, 1)));
-        let mtrCyan = new ƒ.Material("Cyan", ƒ.ShaderUniColor, new ƒ.CoatColored(new ƒ.Color(0, 0.5, 1, 1)));
+        let mtrOrange = new ƒ.Material("Orange", ƒ.ShaderLit, new ƒ.CoatColored(new ƒ.Color(1, 0.5, 0, 1)));
+        let mtrCyan = new ƒ.Material("Cyan", ƒ.ShaderLit, new ƒ.CoatColored(new ƒ.Color(0, 0.5, 1, 1)));
         let pyramid = new ƒ.MeshPyramid();
         let cube = new ƒ.MeshCube();
         let center = new ƒAid.Node("Center", ƒ.Matrix4x4.IDENTITY(), mtrOrange, pyramid);

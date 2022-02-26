@@ -28,8 +28,8 @@ var AudioSpace;
     window.addEventListener("load", init);
     async function init(_event) {
         out = document.querySelector("output");
-        const mtrWhite = new ƒ.Material("White", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("white")));
-        const mtrGrey = new ƒ.Material("White", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("slategrey")));
+        const mtrWhite = new ƒ.Material("White", ƒ.ShaderLit, new ƒ.CoatColored(ƒ.Color.CSS("white")));
+        const mtrGrey = new ƒ.Material("White", ƒ.ShaderLit, new ƒ.CoatColored(ƒ.Color.CSS("slategrey")));
         const inner = new ƒAid.Node("Inner", ƒ.Matrix4x4.IDENTITY(), mtrWhite, new ƒ.MeshPyramid());
         const outer = new ƒAid.Node("Outer", ƒ.Matrix4x4.IDENTITY(), mtrGrey, new ƒ.MeshPyramid());
         const mtxMesh = inner.mtxMeshPivot;
