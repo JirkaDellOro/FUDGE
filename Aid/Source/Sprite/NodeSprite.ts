@@ -18,7 +18,7 @@ namespace FudgeAid {
 
       this.cmpMesh = new ƒ.ComponentMesh(NodeSprite.mesh);
       // Define coat from the SpriteSheet to use when rendering
-      this.cmpMaterial = new ƒ.ComponentMaterial(new ƒ.Material(_name, ƒ.ShaderTexture, null));
+      this.cmpMaterial = new ƒ.ComponentMaterial(new ƒ.Material(_name, ƒ.ShaderLitTextured, null));
       this.addComponent(this.cmpMesh);
       this.addComponent(this.cmpMaterial);
     }

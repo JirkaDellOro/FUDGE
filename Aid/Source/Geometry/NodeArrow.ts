@@ -27,7 +27,7 @@ namespace FudgeAid {
       map.set("Shaft", new ƒ.MeshCube("ArrowShaft"));
       map.set("Head", new ƒ.MeshPyramid("ArrowHead"));
       let coat: ƒ.CoatColored = new ƒ.CoatColored(ƒ.Color.CSS("white"));
-      map.set("Material", new ƒ.Material("Arrow", ƒ.ShaderUniColor, coat));
+      map.set("Material", new ƒ.Material("Arrow", ƒ.ShaderLit, coat));
 
       map.forEach((_resource) => ƒ.Project.deregister(_resource));
       return map;
