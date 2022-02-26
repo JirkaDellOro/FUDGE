@@ -141,6 +141,7 @@ namespace FudgeCore {
       return intersection.y;
     }
 
+    // @ts-ignore // TODO: optimize with cloud/face
     private findNearestFaceNew(relativPosObject: Vector3): DistanceToFaceVertices {
       let z: number = Math.floor((relativPosObject.z + 0.5) * this.resolution.y);
       let x: number = Math.floor((relativPosObject.x + 0.5) * this.resolution.x);
