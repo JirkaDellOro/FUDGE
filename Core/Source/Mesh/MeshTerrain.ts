@@ -8,19 +8,26 @@ namespace FudgeCore {
    */
   export type HeightMapFunction = (x: number, z: number) => number;
 
+  /**
+   * Information about the vertical projection of a given position onto the terrain
+   */
   export class TerrainInfo {
     /** the position of the point vertically projected on the terrain in world coordinates */
     position: Vector3;
     /** the normal of the face of the terrain under the point in world coordinates */
     normal: Vector3;
-    /** the point retransformed into mesh coordinates of the terrain */
-    positionMesh: Vector3;
     /** vertical distance of the point to the terrain, negative if below */
     distance: number;
+    /** the position in face coordinates */
+    positionFace: Vector3;
+    /** the index of the face the position is inside */
+    index: number;
   }
 
   /**
-   * Generates a planar grid and applies a heightmap-function to it. 
+   * A terrain spreads out in the x-z-plane, y is the height derived from the heightmap function. 
+   * The terrain is always 1 in size in all dimensions, fitting into the unit-cube. 
+   * Resolution determines the number of quads in x and z dimension, scale the factor applied to the x,z-coordinates passed to the heightmap function.
    * Standard function is the simplex noise implemented with FUDGE, but another function can be given.
    * @authors Jirka Dell'Oro-Friedl, HFU, 2021-2022 | Simon Storl-Schulke, HFU, 2020 | Moritz Beaugrand, HFU, 2021
    */
@@ -85,23 +92,40 @@ namespace FudgeCore {
       this.faces = quads.flatMap((quad: Quad) => quad.faces);
     }
 
-
+    /**
+     * Returns information about the vertical projection of the given position onto the terrain.
+     * Pass the overall world transformation of the terrain if the position is given in world coordinates.
+     * If at hand, pass the inverse too to avoid unnecessary calculation.
+     */
     public getTerrainInfo(_position: Vector3, _mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY(), _mtxInverse?: Matrix4x4): TerrainInfo {
       if (!_mtxInverse)
         _mtxInverse = Matrix4x4.INVERSION(_mtxWorld);
 
       let terrainInfo: TerrainInfo = new TerrainInfo;
 
-      let posLocal: Vector3 = terrainInfo.positionMesh = Vector3.TRANSFORMATION(_position, _mtxInverse, true);
-      let nearestFace: DistanceToFaceVertices = this.findNearestFace(posLocal);
+      let posLocal: Vector3 = Vector3.TRANSFORMATION(_position, _mtxInverse, true);
 
-      terrainInfo.position = new Vector3(posLocal.x, this.calculateHeight(nearestFace, posLocal), posLocal.z);
-      let normal: Vector3 = nearestFace.faceNormal;
 
-      terrainInfo.position = Vector3.TRANSFORMATION(terrainInfo.position, _mtxWorld, true);
-      terrainInfo.normal = Vector3.TRANSFORMATION(normal, Matrix4x4.TRANSPOSE(_mtxInverse), false);
-      terrainInfo.normal.normalize();
+      let z: number = Math.floor((posLocal.z + 0.5) * this.resolution.y);
+      let x: number = Math.floor((posLocal.x + 0.5) * this.resolution.x);
+      if (z < 0 || z > this.resolution.y - 1 || x < 0 || x > this.resolution.x - 1)
+        return null;
 
+      let index: number = (z * this.resolution.x + x) * 2;
+      let face: Face = this.faces[index];
+
+      let ray: Ray = new Ray(Vector3.Y(), posLocal);
+      let point: Vector3 = ray.intersectFacePlane(face);
+      if (!face.isInside(point)) {
+        index++;
+        face = this.faces[index];
+        point = ray.intersectFacePlane(face);
+      }
+
+      terrainInfo.index = index;
+      terrainInfo.positionFace = point;
+      terrainInfo.position = Vector3.TRANSFORMATION(point, _mtxWorld, true);
+      terrainInfo.normal = Vector3.TRANSFORMATION(face.normal, Matrix4x4.TRANSPOSE(_mtxInverse), false);
       terrainInfo.distance = _position.y - terrainInfo.position.y;
 
       return terrainInfo;
@@ -133,99 +157,5 @@ namespace FudgeCore {
       );
     }
     //#endregion
-
-    private calculateHeight(face: DistanceToFaceVertices, relativePosObject: Vector3): number {
-      let ray: Ray = new Ray(new Vector3(0, 1, 0), relativePosObject);
-      let intersection: Vector3 = ray.intersectPlane(face.vertexONE, face.faceNormal);
-
-      return intersection.y;
-    }
-
-    // @ts-ignore // TODO: optimize with cloud/face
-    private findNearestFaceNew(relativPosObject: Vector3): DistanceToFaceVertices {
-      let z: number = Math.floor((relativPosObject.z + 0.5) * this.resolution.y);
-      let x: number = Math.floor((relativPosObject.x + 0.5) * this.resolution.x);
-      let index: number = (z * this.resolution.x + x) * 2;
-      let face1: Face =  this.faces[index];
-      let face2: Face =  this.faces[index];
-      
-      let d1: DistanceToFaceVertices = new DistanceToFaceVertices(face1.getPosition(0), face1.getPosition(1), face1.getPosition(2), relativPosObject);
-      let d2: DistanceToFaceVertices = new DistanceToFaceVertices(face2.getPosition(0), face1.getPosition(1), face1.getPosition(2), relativPosObject);
-      
-      if (d1.distance < d2.distance)
-        return d1;
-        else return d2;
-      return null;
-    }
-    private findNearestFace(relativPosObject: Vector3): DistanceToFaceVertices {
-      let vertices: Float32Array = this.vertices;
-      let indices: Uint16Array = this.indices;
-
-      let row: number = Math.floor((relativPosObject.z + 0.5) * this.resolution.y);
-      let column: number = Math.floor((relativPosObject.x + 0.5) * this.resolution.x);
-
-      if (row >= this.resolution.y) row = this.resolution.y - 1;
-      if (row < 0) row = 0;
-      if (column >= this.resolution.x) column = this.resolution.y - 1;
-      if (column < 0) column = 0;
-
-      let field: number = ((row * this.resolution.x) + column) * 6;
-
-      let vertexONE1: Vector3 = new Vector3(vertices[indices[field] * 3], vertices[indices[field] * 3 + 1], vertices[indices[field] * 3 + 2]);
-      let vertexTWO1: Vector3 = new Vector3(vertices[indices[field + 1] * 3], vertices[indices[field + 1] * 3 + 1], vertices[indices[field + 1] * 3 + 2]);
-      let vertexTHREE1: Vector3 = new Vector3(vertices[indices[field + 2] * 3], vertices[indices[field + 2] * 3 + 1], vertices[indices[field + 2] * 3 + 2]);
-
-      let face1: DistanceToFaceVertices = new DistanceToFaceVertices(vertexONE1, vertexTWO1, vertexTHREE1, relativPosObject);
-
-      field = field + 3;
-
-      let vertexONE2: Vector3 = new Vector3(vertices[indices[field] * 3], vertices[indices[field] * 3 + 1], vertices[indices[field] * 3 + 2]);
-      let vertexTWO2: Vector3 = new Vector3(vertices[indices[field + 1] * 3], vertices[indices[field + 1] * 3 + 1], vertices[indices[field + 1] * 3 + 2]);
-      let vertexTHREE2: Vector3 = new Vector3(vertices[indices[field + 2] * 3], vertices[indices[field + 2] * 3 + 1], vertices[indices[field + 2] * 3 + 2]);
-
-      let face2: DistanceToFaceVertices = new DistanceToFaceVertices(vertexONE2, vertexTWO2, vertexTHREE2, relativPosObject);
-
-      if (face1.distance < face2.distance)
-        return face1;
-      else return face2;
-
-    }
-  }
-  
-  class DistanceToFaceVertices {
-    // TODO: this should become a correct "hit"- function in Face
-    public vertexONE: Vector3;
-    public vertexTWO: Vector3;
-    public vertexTHREE: Vector3;
-
-    public distanceONE: number;
-    public distanceTWO: number;
-    public distanceTHREE: number;
-
-    public distance: number;
-
-    public faceNormal: Vector3;
-
-    public constructor(vertexONE: Vector3, vertexTWO: Vector3, vertexTHREE: Vector3, relativPosObject: Vector3) {
-      this.vertexONE = vertexONE;
-      this.vertexTWO = vertexTWO;
-      this.vertexTHREE = vertexTHREE;
-
-      this.distanceONE = new Vector2(vertexONE.x - relativPosObject.x, vertexONE.z - relativPosObject.z).magnitude;
-      this.distanceTWO = new Vector2(vertexTWO.x - relativPosObject.x, vertexTWO.z - relativPosObject.z).magnitude;
-      this.distanceTHREE = new Vector2(vertexTHREE.x - relativPosObject.x, vertexTHREE.z - relativPosObject.z).magnitude;
-
-      this.distance = this.distanceONE + this.distanceTWO + this.distanceTHREE;
-
-      this.calculateFaceNormal();
-
-    }
-
-    private calculateFaceNormal(): void {
-      let v1: Vector3 = Vector3.DIFFERENCE(this.vertexTWO, this.vertexONE);
-      let v2: Vector3 = Vector3.DIFFERENCE(this.vertexTHREE, this.vertexONE);
-
-      this.faceNormal = Vector3.CROSS(v1, v2);
-    }
   }
 }

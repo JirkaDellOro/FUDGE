@@ -20,7 +20,6 @@ namespace FudgeCore {
       let trigon: Vector3[] = this.indices.map((_index: number) => this.vertices.position(_index));
       let v1: Vector3 = Vector3.DIFFERENCE(trigon[1], trigon[0]);
       let v2: Vector3 = Vector3.DIFFERENCE(trigon[2], trigon[0]);
-      console.log(v1.toString(), v2.toString());
       this.normalUnscaled = Vector3.CROSS(v1, v2);
       this.normal = Vector3.NORMALIZATION(this.normalUnscaled);
     }

@@ -10,7 +10,7 @@ namespace FudgeCore {
     /** TODO: support length */
     public length: number;
 
-    constructor(_direction: Vector3 = Vector3.Z(-1), _origin: Vector3 = Vector3.ZERO(), _length: number = 1) {
+    constructor(_direction: Vector3 = Vector3.Z(1), _origin: Vector3 = Vector3.ZERO(), _length: number = 1) {
       this.origin = _origin;
       this.direction = _direction;
       this.length = _length;
@@ -29,8 +29,8 @@ namespace FudgeCore {
     }
 
     /**
-     * Returns the point of intersection of this ray with a plane defined by 
-     * the face. All values and calculations must be relative to the same coordinate system, preferably the world
+     * Returns the point of intersection of this ray with a plane defined by the face. 
+     * All values and calculations must be relative to the same coordinate system, preferably the world
      */
     public intersectFacePlane(_face: Face): Vector3 {
       return this.intersectPlane(_face.getPosition(0), _face.normal);

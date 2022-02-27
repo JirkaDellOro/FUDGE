@@ -3630,18 +3630,25 @@ declare namespace FudgeCore {
      * @authors Simon Storl-Schulke, HFU, 2020 | Jirka Dell'Oro-Friedl, HFU, 2021-2022
      */
     type HeightMapFunction = (x: number, z: number) => number;
+    /**
+     * Information about the vertical projection of a given position onto the terrain
+     */
     class TerrainInfo {
         /** the position of the point vertically projected on the terrain in world coordinates */
         position: Vector3;
         /** the normal of the face of the terrain under the point in world coordinates */
         normal: Vector3;
-        /** the point retransformed into mesh coordinates of the terrain */
-        positionMesh: Vector3;
         /** vertical distance of the point to the terrain, negative if below */
         distance: number;
+        /** the position in face coordinates */
+        positionFace: Vector3;
+        /** the index of the face the position is inside */
+        index: number;
     }
     /**
-     * Generates a planar grid and applies a heightmap-function to it.
+     * A terrain spreads out in the x-z-plane, y is the height derived from the heightmap function.
+     * The terrain is always 1 in size in all dimensions, fitting into the unit-cube.
+     * Resolution determines the number of quads in x and z dimension, scale the factor applied to the x,z-coordinates passed to the heightmap function.
      * Standard function is the simplex noise implemented with FUDGE, but another function can be given.
      * @authors Jirka Dell'Oro-Friedl, HFU, 2021-2022 | Simon Storl-Schulke, HFU, 2020 | Moritz Beaugrand, HFU, 2021
      */
@@ -3653,13 +3660,15 @@ declare namespace FudgeCore {
         protected heightMapFunction: HeightMapFunction;
         constructor(_name?: string, _resolution?: Vector2, _scaleInput?: Vector2, _functionOrSeed?: HeightMapFunction | number);
         create(_resolution?: Vector2, _scaleInput?: Vector2, _functionOrSeed?: HeightMapFunction | number): void;
+        /**
+         * Returns information about the vertical projection of the given position onto the terrain.
+         * Pass the overall world transformation of the terrain if the position is given in world coordinates.
+         * If at hand, pass the inverse too to avoid unnecessary calculation.
+         */
         getTerrainInfo(_position: Vector3, _mtxWorld?: Matrix4x4, _mtxInverse?: Matrix4x4): TerrainInfo;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         mutate(_mutator: Mutator): Promise<void>;
-        private calculateHeight;
-        private findNearestFaceNew;
-        private findNearestFace;
     }
 }
 declare namespace FudgeCore {
@@ -4971,8 +4980,8 @@ declare namespace FudgeCore {
          */
         intersectPlane(_origin: Vector3, _normal: Vector3): Vector3;
         /**
-         * Returns the point of intersection of this ray with a plane defined by
-         * the face. All values and calculations must be relative to the same coordinate system, preferably the world
+         * Returns the point of intersection of this ray with a plane defined by the face.
+         * All values and calculations must be relative to the same coordinate system, preferably the world
          */
         intersectFacePlane(_face: Face): Vector3;
         /**
