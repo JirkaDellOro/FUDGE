@@ -3417,6 +3417,10 @@ declare namespace FudgeCore {
         constructor(_vertices: Vertices, _index0: number, _index1: number, _index2: number);
         calculateNormals(): void;
         getPosition(_index: number): Vector3;
+        /**
+         * must be coplanar
+         */
+        isInside(_point: Vector3): boolean;
     }
 }
 declare namespace FudgeCore {
@@ -4950,7 +4954,7 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-     * Defined by an origin and a direction of type {@link Pick}, rays are used to calculate picking an intersections
+     * Defined by an origin and a direction of type {@link Pick}, rays are used to calculate picking and intersections
      *
      * @authors Jirka Dell'Oro-Friedl, HFU, 2021
      */
@@ -4966,6 +4970,11 @@ declare namespace FudgeCore {
          * must be relative to the same coordinate system, preferably the world
          */
         intersectPlane(_origin: Vector3, _normal: Vector3): Vector3;
+        /**
+         * Returns the point of intersection of this ray with a plane defined by
+         * the face. All values and calculations must be relative to the same coordinate system, preferably the world
+         */
+        intersectFacePlane(_face: Face): Vector3;
         /**
          * Returns the shortest distance from the ray to the given target point.
          * All values and calculations must be relative to the same coordinate system, preferably the world.
