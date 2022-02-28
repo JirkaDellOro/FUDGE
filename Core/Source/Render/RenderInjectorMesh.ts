@@ -28,37 +28,21 @@ namespace FudgeCore {
     protected static createRenderBuffers(this: Mesh): void {
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
 
-      let vertices: WebGLBuffer = RenderWebGL.assert<WebGLBuffer>(crc3.createBuffer());
-      crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, vertices);
-      crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, this.vertices, WebGL2RenderingContext.STATIC_DRAW);
+      function createBuffer(_type: GLenum, _array: Float32Array | Uint16Array): WebGLBuffer {
+        let buffer: WebGLBuffer = RenderWebGL.assert<WebGLBuffer>(crc3.createBuffer());
+        crc3.bindBuffer(_type, buffer);
+        crc3.bufferData(_type, _array, WebGL2RenderingContext.STATIC_DRAW);
+        return buffer;
+      }
 
-      let indices: WebGLBuffer = RenderWebGL.assert<WebGLBuffer>(crc3.createBuffer());
-      crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, indices);
-      crc3.bufferData(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.indices, WebGL2RenderingContext.STATIC_DRAW);
-
-      let normalsVertex: WebGLBuffer = RenderWebGL.assert<WebGLBuffer>(crc3.createBuffer());
-      crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, normalsVertex);
-      crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, this.normalsVertex, WebGL2RenderingContext.STATIC_DRAW);
-
-      let textureUVs: WebGLBuffer = crc3.createBuffer();
-      crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, textureUVs);
-      crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, this.textureUVs, WebGL2RenderingContext.STATIC_DRAW);
-
-      let verticesFlat: WebGLBuffer = RenderWebGL.assert<WebGLBuffer>(crc3.createBuffer());
-      crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, verticesFlat);
-      crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, this.verticesFlat, WebGL2RenderingContext.STATIC_DRAW);
-
-      let indicesFlat: WebGLBuffer = RenderWebGL.assert<WebGLBuffer>(crc3.createBuffer());
-      crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, indicesFlat);
-      crc3.bufferData(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.indicesFlat, WebGL2RenderingContext.STATIC_DRAW);
-
-      let normalsFlat: WebGLBuffer = RenderWebGL.assert<WebGLBuffer>(crc3.createBuffer());
-      crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, normalsFlat);
-      crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, this.normalsFlat, WebGL2RenderingContext.STATIC_DRAW);
-
-      let textureUVsFlat: WebGLBuffer = RenderWebGL.assert<WebGLBuffer>(crc3.createBuffer());
-      crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, textureUVsFlat);
-      crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, this.textureUVsFlat, WebGL2RenderingContext.STATIC_DRAW);
+      let vertices: WebGLBuffer = createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.vertices);
+      let indices: WebGLBuffer = createBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.indices);
+      let normalsVertex: WebGLBuffer = createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.normalsVertex);
+      let textureUVs: WebGLBuffer = createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.textureUVs);
+      let verticesFlat: WebGLBuffer = createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.verticesFlat);
+      let indicesFlat: WebGLBuffer = createBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.indicesFlat);
+      let normalsFlat: WebGLBuffer = createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.normalsFlat);
+      let textureUVsFlat: WebGLBuffer = createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.textureUVsFlat);
 
 
       let renderBuffers: RenderBuffers = {
@@ -97,19 +81,8 @@ namespace FudgeCore {
       let uProjection: WebGLUniformLocation = _shader.uniforms["u_projection"];
       crc3.uniformMatrix4fv(uProjection, false, _mtxMeshToView.get());
 
-      // feed in face normals if shader accepts u_world. 
-      // TODO: test if translation should be stripped
-      // let mtxWorld: Matrix4x4 = _mtxWorld.clone;
-      // mtxWorld.translation = Vector3.ZERO();
-      // let uWorld: WebGLUniformLocation = _shader.uniforms["u_world"];
-      // if (uWorld) 
-      //   crc3.uniformMatrix4fv(uWorld, false, _mtxMeshToWorld.get());
-
       let uNormal: WebGLUniformLocation = _shader.uniforms["u_normal"];
       if (uNormal) {
-        // let mtxMeshToWorld: Matrix4x4 = _mtxMeshToWorld.clone;
-        // mtxMeshToWorld.translation = Vector3.ZERO();
-        // TODO: optimize so that inversion or whole normalMatrix is cached
         let normalMatrix: Matrix4x4 = Matrix4x4.TRANSPOSE(Matrix4x4.INVERSION(_mtxMeshToWorld));
         crc3.uniformMatrix4fv(uNormal, false, normalMatrix.get());
       }
@@ -146,8 +119,6 @@ namespace FudgeCore {
     }
 
     protected static deleteRenderBuffers(_renderBuffers: RenderBuffers): void {
-      // console.log("deleteRenderBuffers", this);
-      // return;
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       if (_renderBuffers) {
         // TODO: cleanup all buffers, flat/normals is missing...

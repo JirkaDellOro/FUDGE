@@ -840,7 +840,7 @@ declare namespace FudgeCore {
         /**
          * Draw a mesh buffer using the given infos and the complete projection matrix
          */
-        protected static drawMesh(_cmpMesh: ComponentMesh, cmpMaterial: ComponentMaterial, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4): void;
+        protected static drawMesh(_cmpMesh: ComponentMesh, cmpMaterial: ComponentMaterial, _cmpCamera: ComponentCamera): void;
     }
 }
 declare namespace FudgeCore {
@@ -1745,11 +1745,13 @@ declare namespace FudgeCore {
         private near;
         private far;
         private backgroundEnabled;
+        get mtxWorld(): Matrix4x4;
         /**
          * Returns the multiplication of the worldtransformation of the camera container, the pivot of this camera and the inversion of the projection matrix
          * yielding the worldspace to viewspace matrix
          */
         get mtxWorldToView(): Matrix4x4;
+        resetWorldToView(): void;
         getProjection(): PROJECTION;
         getBackgroundEnabled(): boolean;
         getAspect(): number;

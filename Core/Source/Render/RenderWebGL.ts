@@ -315,18 +315,17 @@ namespace FudgeCore {
     /**
      * Draw a mesh buffer using the given infos and the complete projection matrix
      */
-    protected static drawMesh(_cmpMesh: ComponentMesh, cmpMaterial: ComponentMaterial, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4): void {
+    protected static drawMesh(_cmpMesh: ComponentMesh, cmpMaterial: ComponentMaterial, _cmpCamera: ComponentCamera): void {
       let shader: typeof Shader = cmpMaterial.material.getShader();
       let coat: Coat = cmpMaterial.material.coat;
+      let mtxMeshToView: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, _cmpMesh.mtxWorld);
       shader.useProgram();
-      let nIndices: number = _cmpMesh.mesh.useRenderBuffers(shader, _mtxMeshToWorld, _mtxMeshToView);
+      let nIndices: number = _cmpMesh.mesh.useRenderBuffers(shader, _cmpMesh.mtxWorld, mtxMeshToView);
       coat.useRenderData(shader, cmpMaterial);
+      let uCamera: WebGLUniformLocation = shader.uniforms["u_camera"];
+      if (uCamera)
+        RenderWebGL.crc3.uniformMatrix4fv(uCamera, false, _cmpCamera.mtxWorld.get());
       RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
     }
-
-
-    /**
-     * Drawing a physics debug buffer
-     */
   }
 }

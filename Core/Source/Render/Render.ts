@@ -146,6 +146,7 @@ namespace FudgeCore {
 
     //#region Drawing
     public static draw(_cmpCamera: ComponentCamera): void {
+      _cmpCamera.resetWorldToView();
       Render.drawList(_cmpCamera, this.nodesSimple);
       Render.drawListAlpha(_cmpCamera);
     }
@@ -164,10 +165,8 @@ namespace FudgeCore {
     private static drawList(_cmpCamera: ComponentCamera, _list: RecycableArray<Node> | Array<Node>): void {
       for (let node of _list) {
         let cmpMesh: ComponentMesh = node.getComponent(ComponentMesh);
-        let mtxMeshToView: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, cmpMesh.mtxWorld);
         let cmpMaterial: ComponentMaterial = node.getComponent(ComponentMaterial);
-        Render.drawMesh(cmpMesh, cmpMaterial, cmpMesh.mtxWorld, mtxMeshToView);
-        Recycler.store(mtxMeshToView);
+        Render.drawMesh(cmpMesh, cmpMaterial, _cmpCamera);
       }
     }
 
