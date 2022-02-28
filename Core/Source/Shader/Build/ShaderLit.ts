@@ -65,9 +65,12 @@ uniform mat4 u_world;
 uniform vec3 u_camera;
 
 float calculateReflection(vec3 light_dir, vec3 view_dir, vec3 normal, float shininess) {
-  vec3 reflection = max(reflect(-light_dir, normal), 0.0);
+  if(shininess <= 0.0)
+    return 0.0;
+  vec3 reflection = normalize(reflect(-light_dir, normal));
   float spec_dot = dot(reflection, view_dir);
-  return pow(max(spec_dot, 0.0), shininess);
+  return pow(max(spec_dot, 0.0), shininess * 10.0) * shininess;
+  // return max(spec_dot, 0.0) * shininess;
 }
   #endif
 
@@ -96,16 +99,15 @@ void main() {
   // calculate the directional lighting effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
     float illumination = -dot(normal, u_directional[i].direction);
-    if(illumination > 0.0f)
+    if(illumination > 0.0f) {
       v_color += illumination * u_directional[i].color;
-  }
-    #endif
-
-    #if defined(CAMERA)
-  vec3 view_dir = normalize(vec3(u_world * posVertex) - u_camera);
-  for(uint i = 0u; i < u_nLightsDirectional; i++) {
-    float reflection = calculateReflection(u_directional[i].direction, view_dir, normal, u_shininess);
-    // v_color = /* (1.0 - reflection) * */ v_color + reflection * u_directional[i].color;
+        #if defined(CAMERA)
+      vec3 view_dir = normalize(vec3(u_world * posVertex) - u_camera);
+      // for(uint i = 0u; i < u_nLightsDirectional; i++) {
+      float reflection = calculateReflection(u_directional[i].direction, view_dir, normal, u_shininess);
+      v_color += reflection * u_directional[i].color;
+        #endif
+    }
   }
     #endif
 
