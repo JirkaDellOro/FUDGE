@@ -65,8 +65,8 @@
         "Number input fields for different settings: Factor, Delay"
       ],
       Act: [
-        "Change between passive and active mode",
-        "Control one imput with A / D or by moving the respective slider"
+        "Change between polling and events mode",
+        "Control one input with A / D or by moving the respective slider"
       ],
       Observe: [
         "see the incoming input signals",
@@ -75,11 +75,11 @@
       Control: [
         "<strong>Keys: </strong>  A: gives a negative input value equal to the factor | D: gives a positive input value equal to the factor",
         "<strong>Slider: </strong>  increase and decrease the input ",
-        "<strong>Checkboxes: </strong>  choose active or passive mode",
+        "<strong>Checkboxes: </strong>  choose polling or events mode",
         "<strong>Number-Stepper: </strong>  Enter a delay for the outputs and the scaling factor"
       ],
       Expect: [
-        "The probotional controller outputs the amount of input received multiplied by its factor",
+        "The proportional controller outputs the amount of input received multiplied by its factor",
         "The integral controller adds the received input multiplied by a factor to the current value",
         "The differential controller gives an impulse in the amount of the received input multiplied by its factor"
       ]
@@ -92,10 +92,10 @@
   <fieldset id="Mode">
     <legend>Mode</legend>
     <meter id="Update"></meter>
-    <input type="radio" name="Mode" id="Passive" checked></input>
-    <label for="Passive">Passive</label>
-    <input type="radio" name="Mode" id="Active"></input>
-    <label for="Active">Active</label>
+    <input type="radio" name="Mode" id="Polling" checked></input>
+    <label for="Polling">Polling</label>
+    <input type="radio" name="Mode" id="Events"></input>
+    <label for="Events">Events</label>
   </fieldset>
 
   <fieldset id="Input">

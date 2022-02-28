@@ -41,6 +41,8 @@ namespace TestInstructions {
           break;
       }
       document.body.appendChild(dialog);
+      dialog.style.zIndex = "100";
+      //@ts-ignore
       dialog.show();
     }
     dialog.className = "dialog";
@@ -48,13 +50,16 @@ namespace TestInstructions {
 
   function handleKeypress(_event: KeyboardEvent): void {
     if (_event.code == "F1" && _event.ctrlKey)
+    //@ts-ignore
       if (dialog.open)
+        //@ts-ignore
         dialog.close();
       else
+        //@ts-ignore
         dialog.show();
   }
 
   export function get(_key: string): HTMLUListElement | string {
     return <HTMLUListElement>dialog.querySelector("ul#" + _key);
   }
-} 
+}

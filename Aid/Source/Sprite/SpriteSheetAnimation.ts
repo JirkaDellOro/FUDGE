@@ -16,7 +16,6 @@ namespace FudgeAid {
    */
   export function createSpriteSheet(_name: string, _image: HTMLImageElement): ƒ.CoatTextured {
     let coat: ƒ.CoatTextured = new ƒ.CoatTextured();
-    coat.name = _name;
     let texture: ƒ.TextureImage = new ƒ.TextureImage();
     texture.image = _image;
     coat.texture = texture;
@@ -72,17 +71,17 @@ namespace FudgeAid {
     public generateByGrid(_startRect: ƒ.Rectangle, _frames: number, _resolutionQuad: number, _origin: ƒ.ORIGIN2D, _offsetNext: ƒ.Vector2, _offsetWrap: ƒ.Vector2 = ƒ.Vector2.ZERO()): void {
       let img: TexImageSource = this.spritesheet.texture.texImageSource;
       let rectImage: ƒ.Rectangle = new ƒ.Rectangle(0, 0, img.width, img.height);
-      let rect: ƒ.Rectangle = _startRect.copy;
+      let rect: ƒ.Rectangle = _startRect.clone;
       let rects: ƒ.Rectangle[] = [];
       while (_frames--) {
-        rects.push(rect.copy);
+        rects.push(rect.clone);
         rect.position.add(_offsetNext);
 
         if (rectImage.covers(rect))
           continue;
 
         _startRect.position.add(_offsetWrap);
-        rect = _startRect.copy;
+        rect = _startRect.clone;
         if (!rectImage.covers(rect))
           break;
       }

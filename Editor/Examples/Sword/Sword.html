@@ -3,25 +3,45 @@
 <head>
 <title>Sword</title>
 <meta charset="utf-8" />
-<!--Load FUDGE-->
-<script type="text/javascript" src="../../../Core/Build/FudgeCore.js">
-</script>
-<script type="text/javascript" src="../../../Aid/Build/FudgeAid.js">
-</script>
-<!--Link stylesheet and internal resources-->
 <link rel="stylesheet" href="Sword.css" />
+
+<!--Editor settings of this project-->
+<meta type="settings" autoview="Graph|2021-04-06T08:51:13.475Z|74846" project="{'name':'Sword','includeAutoViewScript':true,'graphAutoView':'Graph|2021-04-06T08:51:13.475Z|74846'}" panels="[{'type':'PanelProject','state':{}},{'type':'PanelGraph','state':{'graph':'Graph|2021-04-06T08:51:13.475Z|74846'}}]" />
+
+<!--Activate the following line to include the FUDGE-version of Oimo-Physics. You may want to download a local copy to work offline and be independent from future changes!-->
+<!-- <script type="text/javascript" src="../../../Physics/OimoPhysics.js"></script> -->
+
+<!--Load FUDGE. You may want to download local copies to work offline and be independent from future changes! Developers working on FUDGE itself may want to create symlinks-->
+<script type="text/javascript" src="https://jirkadelloro.github.io/FUDGE/Core/Build/FudgeCore.js"></script>
+<script type="text/javascript" src="https://jirkadelloro.github.io/FUDGE/Aid/Build/FudgeAid.js"></script>
+
+<!--Activate the following line to see renderings of physics components-->
+<!-- <script type="text/javascript">FudgeCore.Physics.settings.debugDraw = true;</script> -->
+
+<!--Link internal resources. The editor only loads the first, but at runtime, multiple files can contribute-->
 <link type="resources" src="Sword.json" />
-<!--Auto-View-->
-<script>(function (_graphId) {
+
+<!--Load custom scripts-->
+<!-- <script type="text/javascript" src="Script/Build/Script.js" editor="true"></script> -->
+
+<script name="autoView">(function (_graphId) {
+                /**
+                 * AutoView-Script
+                 * Loads and displays the selected graph and implements a basic orbit camera
+                 * @author Jirka Dell'Oro-Friedl, HFU, 2021
+                 */
                 window.addEventListener("load", init);
                 // show dialog for startup
                 let dialog;
                 function init(_event) {
                     dialog = document.querySelector("dialog");
+                    dialog.querySelector("h1").textContent = document.title;
                     dialog.addEventListener("click", function (_event) {
+                        // @ts-ignore until HTMLDialog is implemented by all browsers and available in dom.d.ts
                         dialog.close();
                         startInteractiveViewport();
                     });
+                    //@ts-ignore
                     dialog.showModal();
                 }
                 // setup and start interactive viewport
@@ -32,6 +52,10 @@
                     // pick the graph to show
                     let graph = FudgeCore.Project.resources[_graphId];
                     FudgeCore.Debug.log("Graph:", graph);
+                    if (!graph) {
+                        alert("Nothing to render. Create a graph with at least a mesh, material and probably some light");
+                        return;
+                    }
                     // setup the viewport
                     let cmpCamera = new FudgeCore.ComponentCamera();
                     let canvas = document.querySelector("canvas");
@@ -45,7 +69,7 @@
                     FudgeAid.Viewport.expandCameraToInteractiveOrbit(viewport);
                     // setup audio
                     let cmpListener = new ƒ.ComponentAudioListener();
-                    cmpCamera.getContainer().addComponent(cmpListener);
+                    cmpCamera.node.addComponent(cmpListener);
                     FudgeCore.AudioManager.default.listenWith(cmpListener);
                     FudgeCore.AudioManager.default.listenTo(graph);
                     FudgeCore.Debug.log("Audio:", FudgeCore.AudioManager.default);
@@ -53,13 +77,13 @@
                     viewport.draw();
                     canvas.dispatchEvent(new CustomEvent("interactiveViewportStarted", { bubbles: true, detail: viewport }));
                 }
-            })("Graph|2021-04-06T08:51:13.475Z|74846");
+            })(document.head.querySelector("meta[autoView]").getAttribute("autoView"));
 </script>
 </head>
 <body>
 <!--Dialog shown at startup only-->
 <dialog>
-<h1>Sword</h1>
+<h1>Title (will be replaced by autoView)</h1>
 <p>click to start</p>
 </dialog>
 <!--Canvas for FUDGE to render to-->

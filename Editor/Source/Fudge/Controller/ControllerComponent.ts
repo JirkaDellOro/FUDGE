@@ -17,31 +17,55 @@ namespace Fudge {
 
   let filter: { [name: string]: DragDropFilter } = {
     UrlOnTexture: { fromViews: [ViewExternal], onKeyAttribute: "url", onTypeAttribute: "TextureImage", ofType: DirectoryEntry, dropEffect: "link" },
+    UrlOnMeshObj: { fromViews: [ViewExternal], onKeyAttribute: "url", onTypeAttribute: "MeshObj", ofType: DirectoryEntry, dropEffect: "link" },
     UrlOnAudio: { fromViews: [ViewExternal], onKeyAttribute: "url", onTypeAttribute: "Audio", ofType: DirectoryEntry, dropEffect: "link" },
     MaterialOnComponentMaterial: { fromViews: [ViewInternal], onTypeAttribute: "Material", onType: ƒ.ComponentMaterial, ofType: ƒ.Material, dropEffect: "link" },
     MeshOnComponentMesh: { fromViews: [ViewInternal], onType: ƒ.ComponentMesh, ofType: ƒ.Mesh, dropEffect: "link" },
     MeshOnMeshLabel: { fromViews: [ViewInternal], onKeyAttribute: "mesh", ofType: ƒ.Mesh, dropEffect: "link" },
-    TextureOnMaterial: { fromViews: [ViewInternal], onType: ƒ.Material, ofType: ƒ.Texture, dropEffect: "link" }
+    TextureOnMaterial: { fromViews: [ViewInternal], onType: ƒ.Material, ofType: ƒ.Texture, dropEffect: "link" },
+    TextureOnMeshRelief: { fromViews: [ViewInternal], onType: ƒ.MeshRelief, ofType: ƒ.TextureImage, dropEffect: "link" }
   };
 
   export class ControllerComponent extends ƒUi.Controller {
     public constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement) {
       super(_mutable, _domElement);
-      this.domElement.addEventListener(ƒUi.EVENT.INPUT, this.mutateOnInput); // this should be obsolete
+      this.domElement.addEventListener(ƒUi.EVENT.INPUT, this.mutateOnInput, true); // this should be obsolete
       this.domElement.addEventListener(ƒUi.EVENT.DRAG_OVER, this.hndDragOver);
       this.domElement.addEventListener(ƒUi.EVENT.DROP, this.hndDrop);
       this.domElement.addEventListener(ƒUi.EVENT.KEY_DOWN, this.hndKey);
     }
 
+    //#region hack getMutator in order to specifically exclude parts of it (e.g. recreate mesh everytime mtxPivot changes...)
+    public getMutatorStripped = (_mutator?: ƒ.Mutator, _types?: ƒ.Mutator): ƒ.Mutator => {
+      let mutator: ƒ.Mutator = super.getMutator(_mutator, _types);
+      delete (mutator.mesh);
+      return mutator;
+    }
+    
+    protected mutateOnInput = async (_event: Event) => {
+      this.getMutator = super.getMutator;
+      if (this.mutable instanceof ƒ.ComponentMesh) {
+        let found: EventTarget = _event.composedPath().find((_dom: HTMLElement) => _dom == this.domElement || _dom.getAttribute("key") == "mesh");
+        if (found == this.domElement) 
+          this.getMutator = this.getMutatorStripped;
+      }
+    }
+    //#endregion
+
     private hndKey = (_event: KeyboardEvent): void => {
       _event.stopPropagation();
-      if (_event.code == ƒ.KEYBOARD_CODE.DELETE)
-        this.domElement.dispatchEvent(new CustomEvent(ƒUi.EVENT.DELETE, { bubbles: true, detail: this }));
+      switch (_event.code) {
+        case ƒ.KEYBOARD_CODE.DELETE:
+          this.domElement.dispatchEvent(new CustomEvent(ƒUi.EVENT.DELETE, { bubbles: true, detail: this }));
+          break;
+      }
     }
 
     private hndDragOver = (_event: DragEvent): void => {
       // url on texture
       if (this.filterDragDrop(_event, filter.UrlOnTexture, checkMimeType(MIME.IMAGE))) return;
+      // url on meshobj
+      if (this.filterDragDrop(_event, filter.UrlOnMeshObj, checkMimeType(MIME.MESH))) return;
       // url on audio
       if (this.filterDragDrop(_event, filter.UrlOnAudio, checkMimeType(MIME.AUDIO))) return;
 
@@ -56,6 +80,8 @@ namespace Fudge {
       if (this.filterDragDrop(_event, filter.MeshOnMeshLabel)) return;
       // Texture on Material
       if (this.filterDragDrop(_event, filter.TextureOnMaterial)) return;
+      // Texture on MeshRelief
+      if (this.filterDragDrop(_event, filter.TextureOnMeshRelief)) return;
 
       function checkMimeType(_mime: MIME): (_sources: Object[]) => boolean {
         return (_sources: Object[]): boolean => {
@@ -90,9 +116,19 @@ namespace Fudge {
         this.domElement.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
         return true;
       };
+      let setHeightMap: (_sources: Object[]) => boolean = (_sources: Object[]): boolean => {
+        // this.mutable["texture"] = _sources[0];
+        let mutator: ƒ.Mutator = this.mutable.getMutator();
+        mutator.texture = _sources[0];
+        this.mutable.mutate(mutator);
+        this.domElement.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
+        return true;
+      };
 
       // texture
       if (this.filterDragDrop(_event, filter.UrlOnTexture, setExternalLink)) return;
+      // texture
+      if (this.filterDragDrop(_event, filter.UrlOnMeshObj, setExternalLink)) return;
       // audio
       if (this.filterDragDrop(_event, filter.UrlOnAudio, setExternalLink)) return;
 
@@ -104,6 +140,8 @@ namespace Fudge {
       if (this.filterDragDrop(_event, filter.MeshOnMeshLabel, setMesh)) return;
       // Texture on Material
       if (this.filterDragDrop(_event, filter.TextureOnMaterial, setTexture)) return;
+      // Texture on MeshRelief
+      if (this.filterDragDrop(_event, filter.TextureOnMeshRelief, setHeightMap)) return;
     }
 
 

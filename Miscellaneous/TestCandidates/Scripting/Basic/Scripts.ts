@@ -25,10 +25,10 @@ namespace Scripts {
 
         private hndComponentAdd(_event: Event): void {
             console.log("Component event", _event);
-            console.log("Container", this.getContainer());
+            console.log("Container", this.node);
             console.log("Target is this?", _event.target == this, this.name);
-            this.getContainer().addEventListener(ƒ.EVENT.COMPONENT_ADD, this.hndNodeEvent);
-            this.getContainer().addEventListener(ƒ.EVENT.CHILD_REMOVE, this.hndNodeEvent);
+            this.node.addEventListener(ƒ.EVENT.COMPONENT_ADD, this.hndNodeEvent);
+            this.node.addEventListener(ƒ.EVENT.CHILD_REMOVE, this.hndNodeEvent);
         }
 
         private hndNodeEvent(_event: Event): void {

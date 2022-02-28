@@ -21,20 +21,18 @@ namespace FudgeCore {
    * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
    */
 
-  export class Matrix4x4 extends Mutable implements Serializable {
+  export class Matrix4x4 extends Mutable implements Serializable, Recycable {
     private static deg2rad: number = Math.PI / 180;
+    #eulerAngles: Vector3 = Vector3.ZERO();
+    #vectors: VectorRepresentation = { translation: Vector3.ZERO(), rotation: Vector3.ZERO(), scaling: Vector3.ZERO() };
+
     private data: Float32Array = new Float32Array(16); // The data of the matrix.
     private mutator: Mutator = null; // prepared for optimization, keep mutator to reduce redundant calculation and for comparison. Set to null when data changes!
     private vectors: VectorRepresentation; // vector representation of this matrix
 
     public constructor() {
       super();
-      this.data.set([
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-      ]);
+      this.recycle();
       this.resetCache();
     }
 
@@ -44,12 +42,6 @@ namespace FudgeCore {
      */
     public static IDENTITY(): Matrix4x4 {
       const mtxResult: Matrix4x4 = Recycler.get(Matrix4x4);
-      mtxResult.data.set([
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-      ]);
       return mtxResult;
     }
 
@@ -125,6 +117,21 @@ namespace FudgeCore {
           b30 * a03 + b31 * a13 + b32 * a23 + b33 * a33
         ]);
       return mtxResult;
+    }
+    
+    /**
+     * Computes and returns the transpose of a passed matrix.
+     */
+    public static TRANSPOSE(_mtx: Matrix4x4): Matrix4x4 {
+      let m: Float32Array = _mtx.data;
+      let result: Matrix4x4 = Recycler.get(Matrix4x4);
+      result.data.set([
+        m[0], m[4], m[8], m[12],
+        m[1], m[5], m[9], m[13],
+        m[2], m[6], m[10], m[14],
+        m[3], m[7], m[11], m[15]
+      ]);
+      return result;
     }
 
     /**
@@ -361,8 +368,12 @@ namespace FudgeCore {
      * If known, pass the inverse of the base to avoid unneccesary calculation 
      */
     public static RELATIVE(_mtx: Matrix4x4, _mtxBase: Matrix4x4, _mtxInverse?: Matrix4x4): Matrix4x4 {
-      let mtxResult: Matrix4x4 = _mtxInverse ? _mtxInverse : Matrix4x4.INVERSION(_mtxBase);
-      mtxResult = Matrix4x4.MULTIPLICATION(mtxResult, _mtx);
+      if (_mtxInverse)
+       return Matrix4x4.MULTIPLICATION(_mtxInverse, _mtx);
+
+      let mtxInverse: Matrix4x4 = Matrix4x4.INVERSION(_mtxBase);
+      let mtxResult: Matrix4x4 = Matrix4x4.MULTIPLICATION(mtxInverse, _mtx);
+      Recycler.store(mtxInverse);
       return mtxResult;
     }
     //#endregion
@@ -431,31 +442,36 @@ namespace FudgeCore {
 
     //#region  Accessors
     /** 
-     * - get: a copy of the calculated translation {@link Vector3}   
+     * - get: return a vector representation of the translation {@link Vector3}.  
+     * **Caution!** Use immediately and readonly, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate. 
      * - set: effect the matrix ignoring its rotation and scaling
      */
     public set translation(_translation: Vector3) {
       this.data.set(_translation.get(), 12);
       // no full cache reset required
-      this.vectors.translation = _translation.copy;
+      if (this.vectors.translation)
+        this.vectors.translation.set(_translation.x, _translation.y, _translation.z);
+      else
+        this.vectors.translation = _translation.clone;
       this.mutator = null;
     }
     public get translation(): Vector3 {
       if (!this.vectors.translation) {
-        this.vectors.translation = Recycler.get(Vector3);
+        this.vectors.translation = this.#vectors.translation;
         this.vectors.translation.set(this.data[12], this.data[13], this.data[14]);
       }
-      return this.vectors.translation.copy;
+      return this.vectors.translation; // .clone;
     }
 
     /** 
-     * - get: a copy of the calculated rotation {@link Vector3}   
+     * - get: return a vector representation of the rotation {@link Vector3}.  
+     * **Caution!** Use immediately and readonly, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate. 
      * - set: effect the matrix
      */
     public get rotation(): Vector3 {
       if (!this.vectors.rotation)
-        this.vectors.rotation = this.getEulerAngles();
-      return this.vectors.rotation.copy;
+        this.vectors.rotation = this.getEulerAngles().clone;
+      return this.vectors.rotation; //.clone;
     }
     public set rotation(_rotation: Vector3) {
       this.mutate({ "rotation": _rotation });
@@ -463,19 +479,20 @@ namespace FudgeCore {
     }
 
     /** 
-     * - get: a copy of the calculated scale {@link Vector3}   
+     * - get: return a vector representation of the scaling {@link Vector3}.  
+     * **Caution!** Use immediately and readonly, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate. 
      * - set: effect the matrix
      */
     public get scaling(): Vector3 {
       if (!this.vectors.scaling) {
-        this.vectors.scaling = Recycler.get(Vector3);
+        this.vectors.scaling = this.#vectors.scaling;
         this.vectors.scaling.set(
           Math.hypot(this.data[0], this.data[1], this.data[2]),
           Math.hypot(this.data[4], this.data[5], this.data[6]),
           Math.hypot(this.data[8], this.data[9], this.data[10])
         );
       }
-      return this.vectors.scaling.copy;
+      return this.vectors.scaling; // .clone;
     }
     public set scaling(_scaling: Vector3) {
       this.mutate({ "scaling": _scaling });
@@ -485,12 +502,22 @@ namespace FudgeCore {
     /**
      * Return a copy of this
      */
-    public get copy(): Matrix4x4 {
-      let mtxCopy: Matrix4x4 = Recycler.get(Matrix4x4);
-      mtxCopy.set(this);
-      return mtxCopy;
+    public get clone(): Matrix4x4 {
+      let mtxClone: Matrix4x4 = Recycler.get(Matrix4x4);
+      mtxClone.set(this);
+      return mtxClone;
     }
     //#endregion
+
+    public recycle(): void {
+      this.data.set([
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+      ]);
+      this.resetCache(); 
+    }
 
     //#region Rotation
     /**
@@ -504,6 +531,95 @@ namespace FudgeCore {
       let mtxRotation: Matrix4x4 = Matrix4x4.ROTATION(_by);
       this.multiply(mtxRotation, _fromLeft);
       Recycler.store(mtxRotation);
+    }
+
+    public transpose(): Matrix4x4 {
+      let matrix: Float32Array = this.data;
+      this.data.set([
+        matrix[0], matrix[4], matrix[8],  matrix[12],
+        matrix[1], matrix[5], matrix[9],  matrix[13],
+        matrix[2], matrix[6], matrix[10], matrix[14],
+        matrix[3], matrix[7], matrix[11], matrix[15]
+      ]);
+      return this;
+    }
+
+    public inverse(): Matrix4x4 {
+      let m: Float32Array = this.data;
+      let m00: number = m[0 * 4 + 0];
+      let m01: number = m[0 * 4 + 1];
+      let m02: number = m[0 * 4 + 2];
+      let m03: number = m[0 * 4 + 3];
+      let m10: number = m[1 * 4 + 0];
+      let m11: number = m[1 * 4 + 1];
+      let m12: number = m[1 * 4 + 2];
+      let m13: number = m[1 * 4 + 3];
+      let m20: number = m[2 * 4 + 0];
+      let m21: number = m[2 * 4 + 1];
+      let m22: number = m[2 * 4 + 2];
+      let m23: number = m[2 * 4 + 3];
+      let m30: number = m[3 * 4 + 0];
+      let m31: number = m[3 * 4 + 1];
+      let m32: number = m[3 * 4 + 2];
+      let m33: number = m[3 * 4 + 3];
+      let tmp0: number = m22 * m33;
+      let tmp1: number = m32 * m23;
+      let tmp2: number = m12 * m33;
+      let tmp3: number = m32 * m13;
+      let tmp4: number = m12 * m23;
+      let tmp5: number = m22 * m13;
+      let tmp6: number = m02 * m33;
+      let tmp7: number = m32 * m03;
+      let tmp8: number = m02 * m23;
+      let tmp9: number = m22 * m03;
+      let tmp10: number = m02 * m13;
+      let tmp11: number = m12 * m03;
+      let tmp12: number = m20 * m31;
+      let tmp13: number = m30 * m21;
+      let tmp14: number = m10 * m31;
+      let tmp15: number = m30 * m11;
+      let tmp16: number = m10 * m21;
+      let tmp17: number = m20 * m11;
+      let tmp18: number = m00 * m31;
+      let tmp19: number = m30 * m01;
+      let tmp20: number = m00 * m21;
+      let tmp21: number = m20 * m01;
+      let tmp22: number = m00 * m11;
+      let tmp23: number = m10 * m01;
+
+      let t0: number = (tmp0 * m11 + tmp3 * m21 + tmp4 * m31) -
+        (tmp1 * m11 + tmp2 * m21 + tmp5 * m31);
+
+      let t1: number = (tmp1 * m01 + tmp6 * m21 + tmp9 * m31) -
+        (tmp0 * m01 + tmp7 * m21 + tmp8 * m31);
+      let t2: number = (tmp2 * m01 + tmp7 * m11 + tmp10 * m31) -
+        (tmp3 * m01 + tmp6 * m11 + tmp11 * m31);
+      let t3: number = (tmp5 * m01 + tmp8 * m11 + tmp11 * m21) -
+        (tmp4 * m01 + tmp9 * m11 + tmp10 * m21);
+
+      let d: number = 1.0 / (m00 * t0 + m10 * t1 + m20 * t2 + m30 * t3);
+
+      // let matrix: Matrix4x4 = new Matrix4x4;
+      const matrix: Matrix4x4 = Recycler.get(Matrix4x4);
+      matrix.data.set([
+        d * t0, // [0]
+        d * t1, // [1]
+        d * t2, // [2]
+        d * t3, // [3]
+        d * ((tmp1 * m10 + tmp2 * m20 + tmp5 * m30) - (tmp0 * m10 + tmp3 * m20 + tmp4 * m30)),        // [4]
+        d * ((tmp0 * m00 + tmp7 * m20 + tmp8 * m30) - (tmp1 * m00 + tmp6 * m20 + tmp9 * m30)),        // [5]
+        d * ((tmp3 * m00 + tmp6 * m10 + tmp11 * m30) - (tmp2 * m00 + tmp7 * m10 + tmp10 * m30)),      // [6]
+        d * ((tmp4 * m00 + tmp9 * m10 + tmp10 * m20) - (tmp5 * m00 + tmp8 * m10 + tmp11 * m20)),      // [7]
+        d * ((tmp12 * m13 + tmp15 * m23 + tmp16 * m33) - (tmp13 * m13 + tmp14 * m23 + tmp17 * m33)),  // [8]
+        d * ((tmp13 * m03 + tmp18 * m23 + tmp21 * m33) - (tmp12 * m03 + tmp19 * m23 + tmp20 * m33)),  // [9]
+        d * ((tmp14 * m03 + tmp19 * m13 + tmp22 * m33) - (tmp15 * m03 + tmp18 * m13 + tmp23 * m33)),  // [10]
+        d * ((tmp17 * m03 + tmp20 * m13 + tmp23 * m23) - (tmp16 * m03 + tmp21 * m13 + tmp22 * m23)),  // [11]
+        d * ((tmp14 * m22 + tmp17 * m32 + tmp13 * m12) - (tmp16 * m32 + tmp12 * m12 + tmp15 * m22)),  // [12]
+        d * ((tmp20 * m32 + tmp12 * m02 + tmp19 * m22) - (tmp18 * m22 + tmp21 * m32 + tmp13 * m02)),  // [13]
+        d * ((tmp18 * m12 + tmp23 * m32 + tmp15 * m02) - (tmp22 * m32 + tmp14 * m02 + tmp19 * m12)),  // [14]
+        d * ((tmp22 * m22 + tmp16 * m02 + tmp21 * m12) - (tmp20 * m12 + tmp23 * m22 + tmp17 * m02))  // [15]
+      ]);
+      return matrix;
     }
 
     /**
@@ -668,25 +784,28 @@ namespace FudgeCore {
      * Add a scaling along the x-axis by the given amount to this matrix 
      */
     public scaleX(_by: number): void {
-      let vector: Vector3 = Recycler.borrow(Vector3);
+      let vector: Vector3 = Recycler.get(Vector3);
       vector.set(_by, 1, 1);
       this.scale(vector);
+      Recycler.store(vector);
     }
     /**
      * Add a scaling along the y-axis by the given amount to this matrix 
      */
     public scaleY(_by: number): void {
-      let vector: Vector3 = Recycler.borrow(Vector3);
+      let vector: Vector3 = Recycler.get(Vector3);
       vector.set(1, _by, 1);
       this.scale(vector);
+      Recycler.store(vector);
     }
     /**
      * Add a scaling along the z-axis by the given amount to this matrix 
      */
     public scaleZ(_by: number): void {
-      let vector: Vector3 = Recycler.borrow(Vector3);
+      let vector: Vector3 = Recycler.get(Vector3);
       vector.set(1, 1, _by);
       this.scale(vector);
+      Recycler.store(vector);
     }
     //#endregion
 
@@ -703,7 +822,8 @@ namespace FudgeCore {
 
     //#region Transfer
     /**
-     * Calculates and returns the euler-angles representing the current rotation of this matrix
+     * Calculates and returns the euler-angles representing the current rotation of this matrix.  
+     * **Caution!** Use immediately and readonly, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate. 
      */
     public getEulerAngles(): Vector3 {
       let scaling: Vector3 = this.scaling;
@@ -742,11 +862,11 @@ namespace FudgeCore {
         z1 = 0;
       }
 
-      let rotation: Vector3 = Recycler.get(Vector3);
-      rotation.set(x1, y1, z1);
-      rotation.scale(180 / Math.PI);
+      // let rotation: Vector3 = Recycler.borrow(Vector3);
+      this.#eulerAngles.set(x1, y1, z1);
+      this.#eulerAngles.scale(180 / Math.PI);
 
-      return rotation;
+      return this.#eulerAngles;
     }
 
     /**
@@ -876,7 +996,7 @@ namespace FudgeCore {
       let newScaling: Vector3 = <Vector3>_mutator["scaling"];
       let vectors: VectorRepresentation = { translation: oldTranslation, rotation: oldRotation, scaling: oldScaling };
       if (newTranslation) {
-        vectors.translation = Recycler.get(Vector3);
+        vectors.translation = vectors.translation || this.#vectors.translation;
         vectors.translation.set(
           newTranslation.x != undefined ? newTranslation.x : oldTranslation.x,
           newTranslation.y != undefined ? newTranslation.y : oldTranslation.y,
@@ -884,7 +1004,7 @@ namespace FudgeCore {
         );
       }
       if (newRotation) {
-        vectors.rotation = Recycler.get(Vector3);
+        vectors.rotation = vectors.rotation || this.#vectors.rotation;
         vectors.rotation.set(
           newRotation.x != undefined ? newRotation.x : oldRotation.x,
           newRotation.y != undefined ? newRotation.y : oldRotation.y,
@@ -892,7 +1012,7 @@ namespace FudgeCore {
         );
       }
       if (newScaling) {
-        vectors.scaling = Recycler.get(Vector3);
+        vectors.scaling = vectors.scaling || this.#vectors.scaling;
         vectors.scaling.set(
           newScaling.x != undefined ? newScaling.x : oldScaling.x,
           newScaling.y != undefined ? newScaling.y : oldScaling.y,

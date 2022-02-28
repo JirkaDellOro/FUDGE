@@ -1,6 +1,6 @@
 namespace FudgeCore {
   /**
-   * Defined by an origin and a direction of type {@link Pick}, rays are used to calculate picking an intersections
+   * Defined by an origin and a direction of type {@link Pick}, rays are used to calculate picking and intersections
    * 
    * @authors Jirka Dell'Oro-Friedl, HFU, 2021
    */
@@ -10,7 +10,7 @@ namespace FudgeCore {
     /** TODO: support length */
     public length: number;
 
-    constructor(_direction: Vector3 = Vector3.Z(-1), _origin: Vector3 = Vector3.ZERO(), _length: number = 1) {
+    constructor(_direction: Vector3 = Vector3.Z(1), _origin: Vector3 = Vector3.ZERO(), _length: number = 1) {
       this.origin = _origin;
       this.direction = _direction;
       this.length = _length;
@@ -26,6 +26,14 @@ namespace FudgeCore {
       let factor: number = Vector3.DOT(difference, _normal) / Vector3.DOT(this.direction, _normal);
       let intersect: Vector3 = Vector3.SUM(this.origin, Vector3.SCALE(this.direction, factor));
       return intersect;
+    }
+
+    /**
+     * Returns the point of intersection of this ray with a plane defined by the face. 
+     * All values and calculations must be relative to the same coordinate system, preferably the world
+     */
+    public intersectFacePlane(_face: Face): Vector3 {
+      return this.intersectPlane(_face.getPosition(0), _face.normal);
     }
 
     /**

@@ -32,7 +32,7 @@ namespace FudgeCore {
 
       this.addEventListener(EVENT.COMPONENT_REMOVE, () => this.activate(false));
       this.addEventListener(EVENT.COMPONENT_ADD, () => {
-        this.getContainer().addEventListener(EVENT.CHILD_REMOVE, () => this.activate(false));
+        this.node.addEventListener(EVENT.CHILD_REMOVE, () => this.activate(false));
         this.activate(true);
       });
     }
@@ -55,16 +55,16 @@ namespace FudgeCore {
 
     public activate(_on: boolean): void {
       super.activate(_on);
-      if (!this.getContainer())
+      if (!this.node)
         return;
 
       if (_on) {
         Time.game.addEventListener(EVENT.TIME_SCALED, this.updateScale);
-        this.getContainer().addEventListener(EVENT.RENDER_PREPARE, this.updateAnimationLoop);
+        this.node.addEventListener(EVENT.RENDER_PREPARE, this.updateAnimationLoop);
       }
       else {
         Time.game.addEventListener(EVENT.TIME_SCALED, this.updateScale);
-        this.getContainer().removeEventListener(EVENT.RENDER_PREPARE, this.updateAnimationLoop);
+        this.node.removeEventListener(EVENT.RENDER_PREPARE, this.updateAnimationLoop);
       }
     }
 
@@ -76,7 +76,7 @@ namespace FudgeCore {
       this.#previous = _time;
       _time = _time % this.animation.totalTime;
       let mutator: Mutator = this.animation.getMutated(_time, this.animation.calculateDirection(_time, this.playmode), this.playback);
-      this.getContainer().applyAnimation(mutator);
+      this.node.applyAnimation(mutator);
     }
 
     /**
@@ -144,8 +144,8 @@ namespace FudgeCore {
         this.#previous = time;
         time = time % this.animation.totalTime;
         let mutator: Mutator = this.animation.getMutated(time, direction, this.playback);
-        if (this.getContainer()) {
-          this.getContainer().applyAnimation(mutator);
+        if (this.node) {
+          this.node.applyAnimation(mutator);
         }
         return [mutator, time];
       }

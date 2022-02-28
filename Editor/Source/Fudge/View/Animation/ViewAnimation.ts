@@ -36,7 +36,7 @@ namespace Fudge {
     private time: FudgeCore.Time = new FudgeCore.Time();
     private playing: boolean = false;
 
-    constructor(_container: GoldenLayout.Container, _state: Object) {
+    constructor(_container: ComponentContainer, _state: Object) {
       super(_container, _state);
       this.playbackTime = 500;
 
@@ -221,7 +221,7 @@ namespace Fudge {
       spsI.max = "999";
       spsI.step = "1";
       spsI.id = "sps";
-      spsI.value = this.animation.stepsPerSecond.toString();
+      spsI.value = this.animation.fps.toString(); // stepsPerSecond.toString();
       spsI.style.width = "40px";
 
       _tb.appendChild(spsL);
@@ -284,7 +284,7 @@ namespace Fudge {
           this.updateDisplay();
           break;
         case "back":
-          this.playbackTime = this.playbackTime -= 1000 / this.animation.stepsPerSecond;
+          this.playbackTime = this.playbackTime -= 1000 / this.animation.fps; // stepsPerSecond;
           this.playbackTime = Math.max(this.playbackTime, 0);
           this.updateDisplay();
           break;
@@ -296,7 +296,7 @@ namespace Fudge {
           this.playing = false;
           break;
         case "forward":
-          this.playbackTime = this.playbackTime += 1000 / this.animation.stepsPerSecond;
+          this.playbackTime = this.playbackTime += 1000 / this.animation.fps; // stepsPerSecond;
           this.playbackTime = Math.min(this.playbackTime, this.animation.totalTime);
           this.updateDisplay();
           break;
@@ -327,7 +327,7 @@ namespace Fudge {
         case "sps":
           // console.log("sps changed to", target.value);
           if (!isNaN(+target.value)) {
-            this.animation.stepsPerSecond = +target.value;
+            this.animation.fps /* stepsPerSecond */ = +target.value;
             this.sheet.redraw(this.playbackTime);
           }
           break;
@@ -349,10 +349,6 @@ namespace Fudge {
       this.sheet.redraw(this.playbackTime);
       if (!_m)
         _m = this.animation.getMutated(this.playbackTime, 0, this.cmpAnimator.playback);
-      // this.attributeList.innerHTML = "";
-      // this.attributeList.appendChild(
-      // this.controller.BuildFromMutator(_m);
-      // this.controller = new FudgeUserInterface.UIAnimationList(_m, this.attributeList); //TODO: remove this hack, because it's horrible!
       this.controller.updateMutator(_m);
     }
 

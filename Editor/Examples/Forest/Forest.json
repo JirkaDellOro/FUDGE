@@ -165,7 +165,8 @@
                     "ComponentMaterial": [
                       {
                         "ƒ.ComponentMaterial": {
-                          "clrPrimary": "[0.35294117647058826, 0.7843137254901961, 0.19607843137254902, 1]",
+                          "sortForAlpha": "undefined",
+                          "clrPrimary": "[0.35294117647058826, 0.7843137254901961, 0.19607843137254902, 0.61]",
                           "clrSecondary": "[1, 1, 1, 1]",
                           "pivot": {
                             "translation": "[0, 0]",
@@ -270,7 +271,8 @@
                     "ComponentMaterial": [
                       {
                         "ƒ.ComponentMaterial": {
-                          "clrPrimary": "[0.35294117647058826, 0.7843137254901961, 0.19607843137254902, 1]",
+                          "sortForAlpha": "undefined",
+                          "clrPrimary": "[0.6078431372549019, 0.5764705882352941, 0.15294117647058825, 0.67]",
                           "clrSecondary": "[1, 1, 1, 1]",
                           "pivot": {
                             "translation": "[0, 0]",

@@ -20,7 +20,7 @@ var FudgeExperiments_Marko_ConvexColliderThroughWelding;
         hierarchy = new f.Node("Scene"); //create the root Node where every object is parented to. Should never be changed
         //PHYSICS - Basic Plane and Cube
         //Creating a physically static ground plane for our physics playground. A simple scaled cube but with physics type set to static
-        bodies[0] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC);
+        bodies[0] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC);
         bodies[0].mtxLocal.scale(new f.Vector3(14, 0.3, 14)); //Scale the body with it's standard ComponentTransform
         bodies[0].mtxLocal.rotateX(3, true); //Give it a slight rotation so the physical objects are sliding, always from left when it's after a scaling
         hierarchy.appendChild(bodies[0]); //Add the node to the scene by adding it to the scene-root
@@ -50,7 +50,7 @@ var FudgeExperiments_Marko_ConvexColliderThroughWelding;
         viewPort.draw(); // Draw the current Fudge Scene to the canvas
     }
     // Function to quickly create a node with multiple needed FudgeComponents, including a physics component
-    function createCompleteNode(_name, _material, _mesh, _mass, _physicsType, _group = f.PHYSICS_GROUP.DEFAULT, _colType = f.COLLIDER_TYPE.CUBE) {
+    function createCompleteNode(_name, _material, _mesh, _mass, _physicsType, _group = f.COLLISION_GROUP.DEFAULT, _colType = f.COLLIDER_TYPE.CUBE) {
         //Standard Fudge Node Creation
         let node = new f.Node(_name); //Creating the node
         let cmpMesh = new f.ComponentMesh(_mesh); //Creating a mesh for the node
@@ -72,35 +72,35 @@ var FudgeExperiments_Marko_ConvexColliderThroughWelding;
         let spawnHeight = rngHeight(8, 20);
         noChairs++;
         //Creating a chair, base + back + 4 legs
-        let base = createCompleteNode("Base", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.PHYSICS_TYPE.DYNAMIC);
+        let base = createCompleteNode("Base", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC);
         base.mtxLocal.translate(new f.Vector3(0, 3.5 + spawnHeight, 0));
         base.mtxLocal.scale(new f.Vector3(1, 0.2, 1));
         hierarchy.appendChild(base);
-        let back = createCompleteNode("Back", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.PHYSICS_TYPE.DYNAMIC);
+        let back = createCompleteNode("Back", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC);
         back.mtxLocal.translate(new f.Vector3(0.4, 4 + spawnHeight, 0));
         back.mtxLocal.scale(new f.Vector3(0.2, 1, 1));
         hierarchy.appendChild(back);
         let weldingJoint = new f.ComponentJointWelding(base.getComponent(f.ComponentRigidbody), back.getComponent(f.ComponentRigidbody));
         back.addComponent(weldingJoint);
-        let leg = createCompleteNode("Leg_BL", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.GROUP_2);
+        let leg = createCompleteNode("Leg_BL", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_2);
         leg.mtxLocal.translate(new f.Vector3(0.4, 3 + spawnHeight, 0.4));
         leg.mtxLocal.scale(new f.Vector3(0.2, 0.8, 0.2));
         hierarchy.appendChild(leg);
         weldingJoint = new f.ComponentJointWelding(base.getComponent(f.ComponentRigidbody), leg.getComponent(f.ComponentRigidbody));
         back.addComponent(weldingJoint);
-        leg = createCompleteNode("Leg_BR", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.GROUP_2);
+        leg = createCompleteNode("Leg_BR", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_2);
         leg.mtxLocal.translate(new f.Vector3(0.4, 3 + spawnHeight, -0.4));
         leg.mtxLocal.scale(new f.Vector3(0.2, 0.8, 0.2));
         hierarchy.appendChild(leg);
         weldingJoint = new f.ComponentJointWelding(base.getComponent(f.ComponentRigidbody), leg.getComponent(f.ComponentRigidbody));
         back.addComponent(weldingJoint);
-        leg = createCompleteNode("Leg_FR", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.GROUP_2);
+        leg = createCompleteNode("Leg_FR", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_2);
         leg.mtxLocal.translate(new f.Vector3(-0.4, 3 + spawnHeight, -0.4));
         leg.mtxLocal.scale(new f.Vector3(0.2, 0.8, 0.2));
         hierarchy.appendChild(leg);
         weldingJoint = new f.ComponentJointWelding(base.getComponent(f.ComponentRigidbody), leg.getComponent(f.ComponentRigidbody));
         back.addComponent(weldingJoint);
-        leg = createCompleteNode("Leg_FR", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.GROUP_2);
+        leg = createCompleteNode("Leg_FR", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_2);
         leg.mtxLocal.translate(new f.Vector3(-0.4, 3 + spawnHeight, 0.4));
         leg.mtxLocal.scale(new f.Vector3(0.2, 0.8, 0.2));
         hierarchy.appendChild(leg);

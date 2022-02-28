@@ -141,9 +141,9 @@ namespace SuspensionTest {
     img = new ƒ.TextureImage();
     await img.load("../Textures/test2.png");
 
-    gridMeshFlat = new f.MeshTerrain("HeightMap", img);
+    gridMeshFlat = new f.MeshRelief("HeightMap", img);
     gridFlat = Scenes.createCompleteMeshNode("Grid", matFlat, gridMeshFlat);
-    gridMeshFlat.node = gridFlat;
+    // gridMeshFlat.node = gridFlat;
     gridFlat.mtxLocal.scale(new f.Vector3(1,0.3,1))
 
     controlled.meshTerrain = gridMeshFlat;
@@ -200,27 +200,27 @@ namespace SuspensionTest {
   }
   
   function moreVertices(_event: KeyboardEvent): void{
-    if(_event.code == f.KEYBOARD_CODE.M){
+    // if(_event.code == f.KEYBOARD_CODE.M){
       
-      gridMeshFlat.resolutionX = gridMeshFlat.resolutionX + 1;
-      gridMeshFlat.resolutionZ = gridMeshFlat.resolutionZ + 1;
+    //   gridMeshFlat.sizeX = gridMeshFlat.sizeX + 1;
+    //   gridMeshFlat.sizeZ = gridMeshFlat.sizeZ + 1;
       
-      gridMeshFlat.clear();
-      gridMeshFlat.createRenderBuffers();
+    //   gridMeshFlat.clear();
+    //   gridMeshFlat.createRenderBuffers();
 
-      console.log(gridMeshFlat.resolutionX);
-    }
+    //   console.log(gridMeshFlat.sizeX);
+    // }
 
-    if(_event.code == f.KEYBOARD_CODE.N){
+    // if(_event.code == f.KEYBOARD_CODE.N){
       
-      gridMeshFlat.resolutionX = gridMeshFlat.resolutionX - 1;
-      gridMeshFlat.resolutionZ = gridMeshFlat.resolutionZ - 1;
+    //   gridMeshFlat.sizeX = gridMeshFlat.sizeX - 1;
+    //   gridMeshFlat.sizeZ = gridMeshFlat.sizeZ - 1;
       
-      gridMeshFlat.clear();
-      gridMeshFlat.createRenderBuffers();
+    //   gridMeshFlat.clear();
+    //   gridMeshFlat.createRenderBuffers();
 
-      console.log(gridMeshFlat.resolutionX);
-    }
+    //   console.log(gridMeshFlat.sizeX);
+    // }
 
   }
 

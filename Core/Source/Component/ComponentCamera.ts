@@ -22,6 +22,7 @@ namespace FudgeCore {
     public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
     public clrBackground: Color = new Color(0, 0, 0, 1); // The color of the background the camera will render.
     //private orthographic: boolean = false; // Determines whether the image will be rendered with perspective or orthographic projection.
+    #mtxWorldToView: Matrix4x4;
     private projection: PROJECTION = PROJECTION.CENTRAL;
     private mtxProjection: Matrix4x4 = new Matrix4x4; // The matrix to multiply each scene objects transformation by, to determine where it will be drawn.
     private fieldOfView: number = 45; // The camera's sensorangle.
@@ -33,20 +34,23 @@ namespace FudgeCore {
     // TODO: examine, if background should be an attribute of Camera or Viewport
 
     /**
-     * Returns the multiplikation of the worldtransformation of the camera container, the pivot of this camera and the inversion of the projection matrix
+     * Returns the multiplication of the worldtransformation of the camera container, the pivot of this camera and the inversion of the projection matrix
      * yielding the worldspace to viewspace matrix
      */
     public get mtxWorldToView(): Matrix4x4 {
       //TODO: optimize, no need to recalculate if neither mtxWorld nor pivot have changed
-      let mtxCamera: Matrix4x4 = this.mtxPivot;
+      let mtxCamera: Matrix4x4 = this.mtxPivot.clone;
       try {
-        mtxCamera = Matrix4x4.MULTIPLICATION(this.getContainer().mtxWorld, this.mtxPivot);
-      } catch (_error) {
+        mtxCamera = Matrix4x4.MULTIPLICATION(this.node.mtxWorld, this.mtxPivot);
+      } catch (_error) {   
         // no container node or no world transformation found -> continue with pivot only
       }
-      let mtxResult: Matrix4x4 = Matrix4x4.INVERSION(mtxCamera);
-      mtxResult = Matrix4x4.MULTIPLICATION(this.mtxProjection, mtxResult);
-      return mtxResult;
+      let mtxInversion: Matrix4x4 = Matrix4x4.INVERSION(mtxCamera);
+      this.#mtxWorldToView = Matrix4x4.MULTIPLICATION(this.mtxProjection, mtxInversion);
+      Recycler.store(mtxCamera);
+      Recycler.store(mtxInversion);
+      
+      return this.#mtxWorldToView;
     }
 
     public getProjection(): PROJECTION {

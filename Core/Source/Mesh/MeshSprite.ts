@@ -13,46 +13,27 @@ namespace FudgeCore {
 
     public constructor(_name: string = "MeshSprite") {
       super(_name);
-      // this.create();
+      this.cloud = new Vertices(
+        new Vertex(new Vector3(-0.5, 0.5, 0), new Vector2(0, 0)),
+        new Vertex(new Vector3(-0.5, -0.5, 0), new Vector2(0, 1)),
+        new Vertex(new Vector3(0.5, -0.5, 0), new Vector2(1, 1)),
+        new Vertex(new Vector3(0.5, 0.5, 0), new Vector2(1, 0))
+      );
+      this.faces = [
+        new Face(this.cloud, 1, 2, 0),
+        new Face(this.cloud, 2, 3, 0),
+        new Face(this.cloud, 0, 3, 1),
+        new Face(this.cloud, 3, 2, 1)
+      ];
+
+      console.log(this.normalsVertex); 
     }
 
+    // flat is standard here
+    public get verticesFlat(): Float32Array { return super.vertices; }
+    public get indicesFlat(): Uint16Array { return super.indices; }
 
-    protected createVertices(): Float32Array {
-      let vertices: Float32Array = new Float32Array([
-        /*0*/ -1, 1, 0, /*1*/ -1, -1, 0,  /*2*/ 1, -1, 0, /*3*/ 1, 1, 0
-      ]);
+    // instead, smooth shading would need extra attention but is not relevant...
 
-      vertices = vertices.map(_value => _value / 2);
-
-      return vertices;
-    }
-    protected createIndices(): Uint16Array {
-      let indices: Uint16Array = new Uint16Array([
-        1, 2, 0, 2, 3, 0, //front
-        0, 3, 1, 3, 2, 1  //back
-      ]);
-      return indices;
-    }
-
-    protected createTextureUVs(): Float32Array {
-      let textureUVs: Float32Array = new Float32Array([
-        // front
-        /*0*/ 0, 0, /*1*/ 0, 1,  /*2*/ 1, 1, /*3*/ 1, 0
-      ]);
-      return textureUVs;
-    }
-
-    protected createFaceNormals(): Float32Array {
-      return new Float32Array([
-        /*0: normal of front face*/
-        0, 0, 1,
-        /*1: normal of back face*/
-        0, 0, -1,
-        /*2*/
-        0, 0, 0,
-        /*3*/
-        0, 0, 0
-      ]);
-    }
   }
 }

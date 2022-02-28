@@ -34,6 +34,8 @@ var TestInstructions;
                     break;
             }
             document.body.appendChild(dialog);
+            dialog.style.zIndex = "100";
+            //@ts-ignore
             dialog.show();
         }
         dialog.className = "dialog";
@@ -41,9 +43,12 @@ var TestInstructions;
     TestInstructions.display = display;
     function handleKeypress(_event) {
         if (_event.code == "F1" && _event.ctrlKey)
+            //@ts-ignore
             if (dialog.open)
+                //@ts-ignore
                 dialog.close();
             else
+                //@ts-ignore
                 dialog.show();
     }
     function get(_key) {

@@ -10,12 +10,16 @@ namespace FudgeCore {
     // TODO: examine, if this should be a direct reference to the Graph, instead of the id
     private idSource: string = undefined;
 
+    /**
+     * This constructor allone will not create a reconstruction, but only save the id.
+     * To create an instance of the graph, call reset on this or set with a graph as parameter.
+     * Prefer Project.createGraphInstance(_graph).
+     */
     constructor(_graph?: Graph) {
       super("Graph");
       if (!_graph)
         return;
       this.idSource = _graph.idResource;
-      this.reset();
     }
 
     /**

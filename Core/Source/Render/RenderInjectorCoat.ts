@@ -10,6 +10,10 @@ namespace FudgeCore {
       let colorUniformLocation: WebGLUniformLocation = _shader.uniforms["u_color"];
       let color: Color = Color.MULTIPLY((<CoatColored>this).color, _cmpMaterial.clrPrimary);
       RenderWebGL.getRenderingContext().uniform4fv(colorUniformLocation, color.getArray());
+
+      let shininessUniformLocation: WebGLUniformLocation = _shader.uniforms["u_shininess"];
+      let shininess: number = (<CoatColored>this).shininess;
+      RenderWebGL.getRenderingContext().uniform1f(shininessUniformLocation, shininess);
     }
 
     protected static injectCoatTextured(this: Coat, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void {

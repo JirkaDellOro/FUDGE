@@ -59,7 +59,7 @@ namespace Fudge {
       //TODO: make this scale nicely/use the animations SPS
       let baseWidth: number = 1000;
       let pixelPerSecond: number = Math.floor(baseWidth * this.scale.x);
-      let stepsPerSecond: number = this.view.animation.stepsPerSecond;
+      let stepsPerSecond: number = this.view.animation.fps; // was stepsPerSecond TODO: find out why... see masterthesis Lukas Scheuerle;
       let stepsPerDisplayText: number = 1;
       // [stepsPerSecond, stepsPerDisplayText] = this.calculateDisplay(pixelPerSecond);
       let pixelPerStep: number = pixelPerSecond / stepsPerSecond;

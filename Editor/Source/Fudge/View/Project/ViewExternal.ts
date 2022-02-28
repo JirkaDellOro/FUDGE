@@ -9,7 +9,7 @@ namespace Fudge {
   export class ViewExternal extends View {
     private tree: ƒui.Tree<DirectoryEntry>;
 
-    constructor(_container: GoldenLayout.Container, _state: Object) {
+    constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
 
       this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
@@ -26,6 +26,8 @@ namespace Fudge {
       this.tree = new ƒui.Tree<DirectoryEntry>(new ControllerTreeDirectory(), root);
       this.dom.appendChild(this.tree);
       this.tree.getItems()[0].expand(true);
+
+      this.dom.title = `Drag & drop external image, audiofile etc. to the "Internal", to create a FUDGE-resource`;
     }
 
     public getSelection(): DirectoryEntry[] {

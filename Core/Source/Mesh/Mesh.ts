@@ -3,7 +3,7 @@ namespace FudgeCore {
    * Abstract base class for all meshes. 
    * Meshes provide indexed vertices, the order of indices to create trigons and normals, and texture coordinates
    * 
-   * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+   * @authors Jirka Dell'Oro-Friedl, HFU, 2019/22
    */
   @RenderInjectorMesh.decorate
   export abstract class Mesh extends Mutable implements SerializableResource {
@@ -12,20 +12,44 @@ namespace FudgeCore {
     /** list of all the subclasses derived from this class, if they registered properly*/
     public static readonly subclasses: typeof Mesh[] = [];
 
+    // TODO: at this time, creating the buffers for flat shading is a brute force algorithm and should be optimized in the different subclasses
+    // TODO: rename vertices to verticesSmooth or just cloud, and cloud to vertices
+    // 
 
     public idResource: string = undefined;
     public name: string = "Mesh";
 
     public renderBuffers: RenderBuffers; /* defined by RenderInjector*/
 
-    // TODO: check if these arrays must be cached like this or if calling the methods is better.
+    // new base structure for meshes in FUDGE
+    protected cloud: Vertices = new Vertices();
+    protected faces: Face[] = [];
+
+    // TODO: move all ƒ-Stuff to the RenderInjector...
+    /** vertices of the actual point cloud, some points might be in the same location in order to refer to different texels */
     protected ƒvertices: Float32Array;
+    /** indices to create faces from the vertices, rotation determines direction of face-normal */
     protected ƒindices: Uint16Array;
+    /** texture coordinates associated with the vertices by the position in the array */
     protected ƒtextureUVs: Float32Array;
-    protected ƒnormalsFace: Float32Array;
-    protected ƒnormals: Float32Array;
+    /** normals of the faces, not used for rendering but computation of flat- and vertex-normals */
+    protected ƒnormalsFaceUnscaled: Float32Array;
+    /** vertex normals for smooth shading, interpolated between vertices during rendering */
+    protected ƒnormalsVertex: Float32Array;
+
+    /** flat-shading: normalized face normals, every third entry is used only */
+    protected ƒnormalsFlat: Float32Array;
+    /** flat-shading: extra vertex array, since using vertices with multiple faces is rarely possible due to the limitation above */
+    protected ƒverticesFlat: Float32Array;
+    /** flat-shading: therefore an extra indices-array is needed */
+    protected ƒindicesFlat: Uint16Array;
+    /** flat-shading: and an extra textureUV-array */
+    protected ƒtextureUVsFlat: Float32Array;
+
+    /** bounding box AABB */
     protected ƒbox: Box;
     // TODO: explore mathematics for easy transformations of radius 
+    /** bounding radius */
     protected ƒradius: number;
 
 
@@ -36,65 +60,76 @@ namespace FudgeCore {
       Project.register(this);
     }
 
-    public static getBufferSpecification(): BufferSpecification {
-      return { size: 3, dataType: WebGL2RenderingContext.FLOAT, normalize: false, stride: 0, offset: 0 };
-    }
-
     protected static registerSubclass(_subClass: typeof Mesh): number { return Mesh.subclasses.push(_subClass) - 1; }
-
-    /**
-     * Takes an array of four indices for a quad and returns an array of six indices for two trigons cutting that quad.
-     * If the quad is planar (default), the trigons end on the same index, allowing a single normal for both faces on the referenced vertex 
-     */
-    protected static getTrigonsFromQuad(_quad: number[], _even: boolean = true): number[] {
-      // TODO: add parameters for other diagonal and reversion of rotation
-      let indices: number[];
-      if (_even)
-        indices = [_quad[0], _quad[1], _quad[2], _quad[3], _quad[0], _quad[2]];
-      else
-        indices = [_quad[0], _quad[1], _quad[2], _quad[0], _quad[2], _quad[3]];
-      return indices;
-    }
-
-    protected static deleteInvalidIndices(_indices: number[], _vertices: Vector3[]): void {
-      //delete "non"-faces with two identical vectors
-      for (let i: number = _indices.length - 3; i >= 0; i -= 3) {
-        let v0: Vector3 = _vertices[_indices[i]];
-        let v1: Vector3 = _vertices[_indices[i + 1]];
-        let v2: Vector3 = _vertices[_indices[i + 2]];
-        if (v0.equals(v1) || v2.equals(v1) || v0.equals(v2))
-          _indices.splice(i, 3);
-      }
-    }
 
     public get type(): string {
       return this.constructor.name;
     }
 
     public get vertices(): Float32Array {
-      if (this.ƒvertices == null)
-        this.ƒvertices = this.createVertices();
-
-      return this.ƒvertices;
+      return this.ƒvertices || ( // return cache or ...
+        // ... flatten all vertex positions from cloud into a typed array
+        this.ƒvertices = new Float32Array(this.cloud.flatMap((_vertex: Vertex, _index: number) => {
+          return [...this.cloud.position(_index).get()];
+        })));
     }
+
     public get indices(): Uint16Array {
-      if (this.ƒindices == null)
-        this.ƒindices = this.createIndices();
-
-      return this.ƒindices;
+      return this.ƒindices || ( // return cache or ...
+        // ... flatten all indices from the faces into a typed array
+        this.ƒindices = new Uint16Array(this.faces.flatMap((_face: Face) => [..._face.indices])
+        ));
     }
-    public get normalsFace(): Float32Array {
-      if (this.ƒnormalsFace == null)
-        this.ƒnormalsFace = this.createFaceNormals();
 
-      return this.ƒnormalsFace;
+    public get normalsVertex(): Float32Array {
+      if (this.ƒnormalsVertex == null) {
+        // sum up all unscaled normals of faces connected to one vertex...
+        this.cloud.forEach(_vertex => _vertex.normal.set(0, 0, 0));
+        for (let face of this.faces)
+          for (let index of face.indices) {
+            this.cloud.normal(index).add(face.normalUnscaled);
+          }
+        // ... and normalize them
+        this.cloud.forEach(_vertex => {
+          // some vertices might be unused and yield a zero-normal...
+          if (_vertex.normal.magnitudeSquared > 0)
+            _vertex.normal.normalize();
+        });
+
+        // this.ƒnormalsVertex = new Float32Array(normalsVertex.flatMap((_normal: Vector3) => [..._normal.get()]));
+
+        this.ƒnormalsVertex = new Float32Array(this.cloud.flatMap((_vertex: Vertex, _index: number) => {
+          return [...this.cloud.normal(_index).get()];
+        }));
+      }
+
+      return this.ƒnormalsVertex;
     }
+
     public get textureUVs(): Float32Array {
-      if (this.ƒtextureUVs == null)
-        this.ƒtextureUVs = this.createTextureUVs();
-
-      return this.ƒtextureUVs;
+      return this.ƒtextureUVs || ( // return cache or ...
+        // ... flatten all uvs from the clous into a typed array
+        this.ƒtextureUVs = new Float32Array(this.cloud.flatMap((_vertex: Vertex) => [..._vertex.uv.get()])
+        ));
     }
+
+
+    public get verticesFlat(): Float32Array {
+      return this.ƒverticesFlat || (this.ƒverticesFlat = this.createVerticesFlat());
+    }
+
+    public get indicesFlat(): Uint16Array {
+      return this.ƒindicesFlat;
+    }
+
+    public get normalsFlat(): Float32Array {
+      return this.ƒnormalsFlat || (this.ƒnormalsFlat = this.createNormalsFlat());
+    }
+
+    public get textureUVsFlat(): Float32Array {
+      return this.ƒtextureUVsFlat || (this.ƒtextureUVsFlat = this.createTextureUVsFlat());
+    }
+
     public get boundingBox(): Box {
       if (this.ƒbox == null)
         this.ƒbox = this.createBoundingBox();
@@ -108,30 +143,32 @@ namespace FudgeCore {
       return this.ƒradius;
     }
 
-
-    public useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): void {/* injected by RenderInjector*/ }
+    public useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): number { return 0; /* injected by RenderInjector*/ }
     public createRenderBuffers(): void {/* injected by RenderInjector*/ }
     public deleteRenderBuffers(_shader: typeof Shader): void {/* injected by RenderInjector*/ }
 
-    public getVertexCount(): number {
-      return this.vertices.length / Mesh.getBufferSpecification().size;
-    }
-    public getIndexCount(): number {
-      return this.indices.length;
-    }
-
     public clear(): void {
+      // buffers for smooth shading
       this.ƒvertices = undefined;
       this.ƒindices = undefined;
       this.ƒtextureUVs = undefined;
-      this.ƒnormalsFace = undefined;
-      this.ƒnormals = undefined;
+      this.ƒnormalsVertex = undefined;
+
+      // special buffers for flat shading
+      this.ƒnormalsFlat = undefined;
+      this.ƒverticesFlat = undefined;
+      this.ƒindicesFlat = undefined;
+      this.ƒtextureUVsFlat = undefined;
+
+      // 
+      this.ƒnormalsFaceUnscaled = undefined;
       this.ƒbox = undefined;
       this.ƒradius = undefined;
 
       this.renderBuffers = null;
     }
 
+    //#region Transfer
     // Serialize/Deserialize for all meshes that calculate without parameters
     public serialize(): Serialization {
       let serialization: Serialization = {
@@ -148,31 +185,63 @@ namespace FudgeCore {
       return this;
     }
 
-    /**Flip the Normals of a Mesh to render opposite side of each polygon*/
-    public flipNormals(): void {
+    protected reduceMutator(_mutator: Mutator): void {
+      // TODO: so much to delete... rather just gather what to mutate
+      delete _mutator.ƒbox;
+      delete _mutator.ƒradius;
+      delete _mutator.ƒvertices;
+      delete _mutator.ƒindices;
+      delete _mutator.ƒnormalsVertex;
+      delete _mutator.ƒnormalsFaceUnscaled;
+      delete _mutator.ƒtextureUVs;
+      delete _mutator.ƒnormalsFlat;
+      delete _mutator.ƒverticesFlat;
+      delete _mutator.ƒindicesFlat;
+      delete _mutator.ƒtextureUVsFlat;
 
-      //invertNormals
-      for (let n: number = 0; n < this.normalsFace.length; n++) {
-        this.normalsFace[n] = -this.normalsFace[n];
-      }
+      delete _mutator.renderBuffers;
+    }
+    //#endregion
 
-      //flip indices direction
-      for (let i: number = 0; i < this.indices.length - 2; i += 3) {
-        let i0: number = this.indices[i];
-        this.indices[i] = this.indices[i + 1];
-        this.indices[i + 1] = i0;
-      }
-      this.createRenderBuffers();
+    protected createVerticesFlat(): Float32Array {
+      let positions: Vector3[] = [];
+      let indices: number[] = [];
+      let i: number = 0;
+      for (let face of this.faces)
+        for (let index of face.indices) {
+          indices.push(i++);
+          positions.push(this.cloud.position(index));
+        }
+        
+      this.ƒindicesFlat = new Uint16Array(indices);
+      return new Float32Array(positions.flatMap(_v => [..._v.get()]));
     }
 
+    protected createNormalsFlat(): Float32Array {
+      let normals: Vector3[] = [];
+      let zero: Vector3 = Vector3.ZERO();
+      for (let face of this.faces) {
+        // store the face normal at the position of the third vertex
+        normals.push(zero);
+        normals.push(zero);
+        normals.push(face.normal);
+      }
+      this.ƒnormalsFlat = new Float32Array(normals.flatMap(_n => [..._n.get()]));
+      return this.ƒnormalsFlat;
+    }
 
-    protected createVertices(): Float32Array { return null; }
-    protected createTextureUVs(): Float32Array { return null; }
-    protected createIndices(): Uint16Array { return null; }
-    protected createNormals(): Float32Array { return null; }
+    protected createTextureUVsFlat(): Float32Array {
+      let uv: number[] = [];
+      // create unique vertices for each face, tripling the number
+      for (let i: number = 0; i < this.indices.length; i++) {
+        let index: number = this.indices[i] * 2;
+        uv.push(this.textureUVs[index], this.textureUVs[index + 1]);
+      }
+      return new Float32Array(uv);
+    }
 
-    protected createFaceNormals(): Float32Array {
-      let normals: number[] = [];
+    protected calculateFaceCrossProducts(): Float32Array {
+      let crossProducts: number[] = [];
       let vertices: Vector3[] = [];
 
       for (let v: number = 0; v < this.vertices.length; v += 3)
@@ -183,16 +252,17 @@ namespace FudgeCore {
 
         let v0: Vector3 = Vector3.DIFFERENCE(vertices[trigon[0]], vertices[trigon[1]]);
         let v1: Vector3 = Vector3.DIFFERENCE(vertices[trigon[0]], vertices[trigon[2]]);
-        let normal: Vector3 = Vector3.NORMALIZATION(Vector3.CROSS(v0, v1));
+        let crossProduct: Vector3 = Vector3.CROSS(v0, v1);
         let index: number = trigon[2] * 3;
-        normals[index] = normal.x;
-        normals[index + 1] = normal.y;
-        normals[index + 2] = normal.z;
+        crossProducts[index] = crossProduct.x;
+        crossProducts[index + 1] = crossProduct.y;
+        crossProducts[index + 2] = crossProduct.z;
       }
-      return new Float32Array(normals);
+      return new Float32Array(crossProducts);
     }
 
     protected createRadius(): number {
+      //TODO: radius and bounding box could be created on construction of vertex-array
       let radius: number = 0;
       for (let vertex: number = 0; vertex < this.vertices.length; vertex += 3) {
         radius = Math.max(radius, Math.hypot(this.vertices[vertex], this.vertices[vertex + 1], this.vertices[vertex + 2]));
@@ -215,15 +285,5 @@ namespace FudgeCore {
     }
 
 
-    protected reduceMutator(_mutator: Mutator): void {
-      delete _mutator.ƒbox;
-      delete _mutator.ƒradius;
-      delete _mutator.ƒvertices;
-      delete _mutator.ƒindices;
-      delete _mutator.ƒnormals;
-      delete _mutator.ƒnormalsFace;
-      delete _mutator.ƒtextureUVs;
-      delete _mutator.renderBuffers;
-    }
   }
 }

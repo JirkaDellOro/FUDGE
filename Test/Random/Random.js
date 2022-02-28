@@ -2,8 +2,12 @@ var Random;
 (function (Random) {
     var ƒ = FudgeCore;
     class Result {
+        result;
+        comment;
     }
-    let random = new ƒ.Random();
+    let seed = parseFloat(location.search.slice(1)) || undefined;
+    console.log("Seed = " + seed);
+    let random = new ƒ.Random(seed);
     let results = {};
     window.addEventListener("load", hndload);
     function hndload() {

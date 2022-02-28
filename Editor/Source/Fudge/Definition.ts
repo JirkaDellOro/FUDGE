@@ -1,12 +1,4 @@
 namespace Fudge {
-
-
-
-
-
-
-
-
   export enum CONTEXTMENU {
     // SKETCH = ViewSketch,
     ADD_NODE,
@@ -16,7 +8,11 @@ namespace Fudge {
     CREATE_MESH,
     CREATE_MATERIAL,
     CREATE_GRAPH,
-    REMOVE_COMPONENT
+    REMOVE_COMPONENT,
+    ADD_JOINT,
+    TRANSLATE,
+    ROTATE,
+    SCALE
   }
 
 
@@ -29,11 +25,8 @@ namespace Fudge {
     PANEL_GRAPH_OPEN = "panelGraphOpen",
     PANEL_ANIMATION_OPEN = "panelAnimationOpen",
     PANEL_PROJECT_OPEN = "panelProjectOpen",
+    PANEL_HELP_OPEN = "panelHelpOpen",
     FULLSCREEN = "fullscreen"
-    /* obsolete ?
-    NODE_DELETE = "nodeDelete",
-    NODE_UPDATE = "nodeUpdate",
-    */
   }
 
 
@@ -42,18 +35,17 @@ namespace Fudge {
     FOCUS_NODE = "focusNode",
     SET_PROJECT = "setProject",
     UPDATE = "update",
-    DESTROY = "destroy"
-
-    /* obsolete ?
-    REMOVE = "removeNode",
-    HIDE = "hideNode",
-    ACTIVATE_VIEWPORT = "activateViewport",
-    */
+    REFRESH = "refresh",
+    DESTROY = "destroy",
+    CLEAR_PROJECT = "clearProject",
+    TRANSFORM = "transform"
   }
+
 
   export enum PANEL {
     GRAPH = "PanelGraph",
-    PROJECT = "PanelProject"
+    PROJECT = "PanelProject",
+    HELP = "PanelHelp"
   }
 
 
@@ -71,5 +63,11 @@ namespace Fudge {
     
     // SKETCH = ViewSketch,
     // MESH = ViewMesh,
+  }
+
+  export enum TRANSFORM {
+    TRANSLATE = "translate",
+    ROTATE = "rotate",
+    SCALE = "scale"
   }
 }

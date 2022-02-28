@@ -1,5 +1,6 @@
 {
-    "entryPoints": "",
+    "entryPoints": ["."],
+    "entryPointStrategy": "expand",
     "out": "../../Documentation/Reference/Core/",
     "name": "Fudge Core",
     "readme": "none",

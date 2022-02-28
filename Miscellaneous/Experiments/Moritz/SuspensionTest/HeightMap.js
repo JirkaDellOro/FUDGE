@@ -100,9 +100,9 @@ var SuspensionTest;
         let cmpCamera = Scenes.createCamera(new f.Vector3(0, 2, 1), new f.Vector3(0, 0, 0));
         img = new ƒ.TextureImage();
         await img.load("../Textures/test2.png");
-        gridMeshFlat = new f.MeshTerrain("HeightMap", img);
+        gridMeshFlat = new f.MeshRelief("HeightMap", img);
         gridFlat = Scenes.createCompleteMeshNode("Grid", matFlat, gridMeshFlat);
-        gridMeshFlat.node = gridFlat;
+        // gridMeshFlat.node = gridFlat;
         gridFlat.mtxLocal.scale(new f.Vector3(1, 0.3, 1));
         controlled.meshTerrain = gridMeshFlat;
         controlled.terrain = gridFlat;
@@ -144,20 +144,20 @@ var SuspensionTest;
         SuspensionTest.viewport.draw();
     }
     function moreVertices(_event) {
-        if (_event.code == f.KEYBOARD_CODE.M) {
-            gridMeshFlat.resolutionX = gridMeshFlat.resolutionX + 1;
-            gridMeshFlat.resolutionZ = gridMeshFlat.resolutionZ + 1;
-            gridMeshFlat.clear();
-            gridMeshFlat.createRenderBuffers();
-            console.log(gridMeshFlat.resolutionX);
-        }
-        if (_event.code == f.KEYBOARD_CODE.N) {
-            gridMeshFlat.resolutionX = gridMeshFlat.resolutionX - 1;
-            gridMeshFlat.resolutionZ = gridMeshFlat.resolutionZ - 1;
-            gridMeshFlat.clear();
-            gridMeshFlat.createRenderBuffers();
-            console.log(gridMeshFlat.resolutionX);
-        }
+        // if(_event.code == f.KEYBOARD_CODE.M){
+        //   gridMeshFlat.sizeX = gridMeshFlat.sizeX + 1;
+        //   gridMeshFlat.sizeZ = gridMeshFlat.sizeZ + 1;
+        //   gridMeshFlat.clear();
+        //   gridMeshFlat.createRenderBuffers();
+        //   console.log(gridMeshFlat.sizeX);
+        // }
+        // if(_event.code == f.KEYBOARD_CODE.N){
+        //   gridMeshFlat.sizeX = gridMeshFlat.sizeX - 1;
+        //   gridMeshFlat.sizeZ = gridMeshFlat.sizeZ - 1;
+        //   gridMeshFlat.clear();
+        //   gridMeshFlat.createRenderBuffers();
+        //   console.log(gridMeshFlat.sizeX);
+        // }
     }
     function setupControls() {
         controlled.axisSpeed.addControl(cntKeyVertical);

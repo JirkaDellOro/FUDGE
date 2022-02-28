@@ -11,6 +11,10 @@ var Fudge;
         CONTEXTMENU[CONTEXTMENU["CREATE_MATERIAL"] = 5] = "CREATE_MATERIAL";
         CONTEXTMENU[CONTEXTMENU["CREATE_GRAPH"] = 6] = "CREATE_GRAPH";
         CONTEXTMENU[CONTEXTMENU["REMOVE_COMPONENT"] = 7] = "REMOVE_COMPONENT";
+        CONTEXTMENU[CONTEXTMENU["ADD_JOINT"] = 8] = "ADD_JOINT";
+        CONTEXTMENU[CONTEXTMENU["TRANSLATE"] = 9] = "TRANSLATE";
+        CONTEXTMENU[CONTEXTMENU["ROTATE"] = 10] = "ROTATE";
+        CONTEXTMENU[CONTEXTMENU["SCALE"] = 11] = "SCALE";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -22,11 +26,8 @@ var Fudge;
         MENU["PANEL_GRAPH_OPEN"] = "panelGraphOpen";
         MENU["PANEL_ANIMATION_OPEN"] = "panelAnimationOpen";
         MENU["PANEL_PROJECT_OPEN"] = "panelProjectOpen";
+        MENU["PANEL_HELP_OPEN"] = "panelHelpOpen";
         MENU["FULLSCREEN"] = "fullscreen";
-        /* obsolete ?
-        NODE_DELETE = "nodeDelete",
-        NODE_UPDATE = "nodeUpdate",
-        */
     })(MENU = Fudge.MENU || (Fudge.MENU = {}));
     let EVENT_EDITOR;
     (function (EVENT_EDITOR) {
@@ -34,17 +35,16 @@ var Fudge;
         EVENT_EDITOR["FOCUS_NODE"] = "focusNode";
         EVENT_EDITOR["SET_PROJECT"] = "setProject";
         EVENT_EDITOR["UPDATE"] = "update";
+        EVENT_EDITOR["REFRESH"] = "refresh";
         EVENT_EDITOR["DESTROY"] = "destroy";
-        /* obsolete ?
-        REMOVE = "removeNode",
-        HIDE = "hideNode",
-        ACTIVATE_VIEWPORT = "activateViewport",
-        */
+        EVENT_EDITOR["CLEAR_PROJECT"] = "clearProject";
+        EVENT_EDITOR["TRANSFORM"] = "transform";
     })(EVENT_EDITOR = Fudge.EVENT_EDITOR || (Fudge.EVENT_EDITOR = {}));
     let PANEL;
     (function (PANEL) {
         PANEL["GRAPH"] = "PanelGraph";
         PANEL["PROJECT"] = "PanelProject";
+        PANEL["HELP"] = "PanelHelp";
     })(PANEL = Fudge.PANEL || (Fudge.PANEL = {}));
     let VIEW;
     (function (VIEW) {
@@ -61,6 +61,12 @@ var Fudge;
         // SKETCH = ViewSketch,
         // MESH = ViewMesh,
     })(VIEW = Fudge.VIEW || (Fudge.VIEW = {}));
+    let TRANSFORM;
+    (function (TRANSFORM) {
+        TRANSFORM["TRANSLATE"] = "translate";
+        TRANSFORM["ROTATE"] = "rotate";
+        TRANSFORM["SCALE"] = "scale";
+    })(TRANSFORM = Fudge.TRANSFORM || (Fudge.TRANSFORM = {}));
 })(Fudge || (Fudge = {}));
 ///<reference types="../../node_modules/electron"/>
 /**
@@ -75,28 +81,17 @@ var Main;
  */
 (function (Main) {
     //#region Types and Data
-    let MENU;
-    (function (MENU) {
-        MENU["PHYSICS_DEBUG"] = "physicsDebug";
-        MENU["PHYSICS_DEBUG_M1"] = "physicsDebug1";
-        MENU["PHYSICS_DEBUG_M2"] = "physicsDebug2";
-        MENU["PHYSICS_DEBUG_M3"] = "physicsDebug3";
-        MENU["PHYSICS_DEBUG_M4"] = "physicsDebug4";
-        MENU["PHYSICS_DEBUG_M5"] = "physicsDebug5";
-    })(MENU || (MENU = {}));
     const { app, BrowserWindow, Menu, ipcMain } = require("electron");
+    // TODO: use the following line in Electron version 14 and up
+    // require("@electron/remote/main").initialize();
     let fudge;
     let defaultWidth = 800;
     let defaultHeight = 600;
+    let saved = false;
     //#endregion
     // app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
     //#region Events 
     app.addListener("ready", createFudge);
-    app.addListener("window-all-closed", function () {
-        console.log("Quit");
-        if (process.platform !== "darwin")
-            app.quit();
-    });
     app.addListener("activate", function () {
         console.log("Activate");
         if (fudge === null)
@@ -105,6 +100,16 @@ var Main;
     ipcMain.addListener("enableMenuItem", function (_event, _args) {
         Menu.getApplicationMenu().getMenuItemById(_args["item"]).enabled = _args["on"];
     });
+    function quit(_event) {
+        if (!saved) {
+            console.log("Trying to save state!", _event.type);
+            // _event.preventDefault();
+            send(fudge, Fudge.MENU.QUIT);
+            saved = true;
+            if (process.platform !== "darwin")
+                app.quit();
+        }
+    }
     function send(_window, _message, ..._args) {
         console.log(`Send message ${_message}`);
         _window.webContents.send(_message, _args);
@@ -115,13 +120,9 @@ var Main;
         console.log("createFudge");
         fudge = addWindow("../Html/Fudge.html");
         const menu = Menu.buildFromTemplate(getMenuFudge());
-<<<<<<< HEAD
         // fudge.setMenu(menu);
         Menu.setApplicationMenu(menu);
-=======
-        Menu.setApplicationMenu(menu);
-        //fudge.setMenu(menu); // do not work with mac
->>>>>>> DavidTest
+        fudge.on("close", quit);
     }
     function addWindow(_url, width = defaultWidth, height = defaultHeight) {
         let window = new BrowserWindow({
@@ -143,7 +144,7 @@ var Main;
     //#region Menus  
     function menuSelect(_item, _window, _event) {
         console.log(`MenuSelect: Item-id=${Fudge.MENU[_item.id]}`);
-        // TODO: simplify switch by usinge enums as messages
+        // TODO: simplify switch using enums as messages
         switch (_item.id) {
             case Fudge.MENU.DEVTOOLS_OPEN:
                 _window.webContents.openDevTools();
@@ -152,26 +153,7 @@ var Main;
                 _window.fullScreen = !_window.isFullScreen();
                 break;
             case Fudge.MENU.QUIT:
-                app.quit();
-                break;
-            //Physics Debug Menu Options | Marko Fehrenbach, HFU 2020  
-            case MENU.PHYSICS_DEBUG:
-                send(_window, "togglePhysicsDebugView");
-                break;
-            case MENU.PHYSICS_DEBUG_M1:
-                send(_window, "PhysicsViewMode_1");
-                break;
-            case MENU.PHYSICS_DEBUG_M2:
-                send(_window, "PhysicsViewMode_2");
-                break;
-            case MENU.PHYSICS_DEBUG_M3:
-                send(_window, "PhysicsViewMode_3");
-                break;
-            case MENU.PHYSICS_DEBUG_M4:
-                send(_window, "PhysicsViewMode_4");
-                break;
-            case MENU.PHYSICS_DEBUG_M5:
-                send(_window, "PhysicsViewMode_5");
+                quit({ type: "Ctrl+Q" });
                 break;
             default:
                 send(_window, _item.id, null);
@@ -190,6 +172,7 @@ var Main;
             },
             {
                 label: "Edit", submenu: [
+                    { label: "Help", id: Fudge.MENU.PANEL_HELP_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+H" : "Ctrl+H", enabled: true },
                     { label: "Project", id: Fudge.MENU.PANEL_PROJECT_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+R" : "Ctrl+R", enabled: false },
                     { label: "Graph", id: Fudge.MENU.PANEL_GRAPH_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+G" : "Ctrl+G", enabled: false },
                     { label: "Animation", id: Fudge.MENU.PANEL_ANIMATION_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "Command+I" : "Ctrl+I", enabled: false }
@@ -198,24 +181,7 @@ var Main;
             {
                 label: "Debug", submenu: [
                     { label: "DevTool", id: Fudge.MENU.DEVTOOLS_OPEN, click: menuSelect, accelerator: process.platform == "darwin" ? "F12" : "F12" },
-                    { label: "Fullscreen", id: Fudge.MENU.FULLSCREEN, click: menuSelect, accelerator: process.platform == "darwin" ? "F11" : "F11" },
-                    { type: "separator" },
-                    {
-                        label: "Physic Debug View", id: String(MENU.PHYSICS_DEBUG), click: menuSelect, accelerator: "CmdOrCtrl+P"
-                    }, {
-                        label: "Physics Debug Mode", "submenu": [{
-                                "label": "Colliders", id: String(MENU.PHYSICS_DEBUG_M1), click: menuSelect
-                            }, {
-                                "label": "Colliders and Joints (Default)", id: String(MENU.PHYSICS_DEBUG_M2), click: menuSelect
-                            }, {
-                                "label": "Bounding Boxes", id: String(MENU.PHYSICS_DEBUG_M3), click: menuSelect
-                            }, {
-                                "label": "Contacts", id: String(MENU.PHYSICS_DEBUG_M4), click: menuSelect
-                            },
-                            {
-                                "label": "Show Physics Objects ONLY", id: String(MENU.PHYSICS_DEBUG_M5), click: menuSelect
-                            }]
-                    }
+                    { label: "Fullscreen", id: Fudge.MENU.FULLSCREEN, click: menuSelect, accelerator: process.platform == "darwin" ? "F11" : "F11" }
                 ]
             }
         ];

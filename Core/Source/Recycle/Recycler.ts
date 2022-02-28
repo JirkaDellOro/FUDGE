@@ -1,4 +1,7 @@
 namespace FudgeCore {
+  export interface Recycable {
+    recycle(): void;
+  }
   /**
    * Keeps a depot of objects that have been marked for reuse, sorted by type.  
    * Using {@link Recycler} reduces load on the carbage collector and thus supports smooth performance
@@ -7,14 +10,18 @@ namespace FudgeCore {
     private static depot: { [type: string]: Object[] } = {};
 
     /**
-     * Fetches an object of the requested type from the depot, or returns a new one, if the depot was empty 
+     * Fetches an object of the requested type from the depot, calls its recycle-method and returns it.
+     * If the depot for that type is empty it returns a new object of the requested type
      * @param _T The class identifier of the desired object
      */
-    public static get<T>(_T: new () => T): T {
+    public static get<T extends Recycable>(_T: new () => T): T {
       let key: string = _T.name;
       let instances: Object[] = Recycler.depot[key];
-      if (instances && instances.length > 0)
-        return <T>instances.pop();
+      if (instances && instances.length > 0) {
+        let instance: T = <T>instances.pop();
+        instance.recycle();
+        return instance;
+      }
       else
         return new _T();
     }
@@ -25,7 +32,7 @@ namespace FudgeCore {
      * For short term usage of objects in a local scope, when there will be no other call to Recycler.get or .borrow!
      * @param _T The class identifier of the desired object
      */
-    public static borrow<T>(_T: new () => T): T {
+    public static borrow<T extends Recycable>(_T: new () => T): T {
       let t: T;
       let key: string = _T.name;
       let instances: Object[] = Recycler.depot[key];
@@ -34,7 +41,9 @@ namespace FudgeCore {
         Recycler.store(t);
         return t;
       }
-      return <T>instances[0];
+      let instance: T = <T>instances[0];
+      instance.recycle();
+      return instance;
     }
 
     /**

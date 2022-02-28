@@ -16,17 +16,17 @@ namespace Graph {
         }
 
         hndAddComponent = (_event: Event) => {
-            this.getContainer().addEventListener("startSatellite", this.start, true);
+            this.node.addEventListener("startSatellite", this.start, true);
         }
 
         hndRemoveComponent = (_event: Event) => {
-            this.getContainer().removeEventListener("startSatellite", this.start);
+            this.node.removeEventListener("startSatellite", this.start);
             ƒ.Loop.removeEventListener(ƒ.EVENT.LOOP_FRAME, this.update);
         }
 
         public start = (_event: Event) => {
-            this.mtxLocal = this.getContainer().mtxLocal;
-            this.mtxPivot = (<ƒ.ComponentMesh>this.getContainer().getComponent(ƒ.ComponentMesh)).mtxPivot;
+            this.mtxLocal = this.node.mtxLocal;
+            this.mtxPivot = (<ƒ.ComponentMesh>this.node.getComponent(ƒ.ComponentMesh)).mtxPivot;
 
             this.mtxPivot.translateZ(-0.5);
             this.mtxPivot.scale(ƒ.Vector3.ONE(0.2));

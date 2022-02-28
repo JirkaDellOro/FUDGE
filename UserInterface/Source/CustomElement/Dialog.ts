@@ -33,8 +33,10 @@ namespace FudgeUserInterface {
       div.appendChild(btnOk);
       Dialog.dom.appendChild(div);
       if (_modal)
+        //@ts-ignore
         Dialog.dom.showModal();
       else
+        //@ts-ignore
         Dialog.dom.show();
 
       return new Promise((_resolve) => {
@@ -43,6 +45,7 @@ namespace FudgeUserInterface {
           btnOk.removeEventListener("click", hndButton);
           if (_event.target == btnOk)
             Controller.updateMutator(content, _data);
+          //@ts-ignore
           Dialog.dom.close();
           document.body.removeChild(Dialog.dom);
           _resolve(_event.target == btnOk);

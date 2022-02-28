@@ -10,7 +10,7 @@ namespace Fudge {
     // TODO: consider script namespaces ƒ.ScriptNamespaces to find all scripts not just ComponentScripts
     private table: ƒui.Table<ScriptInfo>;
 
-    constructor(_container: GoldenLayout.Container, _state: Object) {
+   constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
 
       this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
@@ -19,6 +19,7 @@ namespace Fudge {
     }
 
     public listScripts(): void {
+      this.dom.title = `Drag & drop scripts on "Components"`;
       while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild));
       let scriptinfos: ScriptInfo[] = [];
       for (let namespace in ƒ.Project.scriptNamespaces) {

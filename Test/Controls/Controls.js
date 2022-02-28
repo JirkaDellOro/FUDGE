@@ -108,7 +108,7 @@ var Controls;
         return value;
     }
     function hndModeInput(_event) {
-        let target = document.querySelector("input#Passive");
+        let target = document.querySelector("input#Polling");
         rateDispatchOutput = 100;
         if (target.checked) {
             rateDispatchOutput = 0;
@@ -156,7 +156,7 @@ var Controls;
         controlProportional.dispatchEvent(new Event("output" /* OUTPUT */));
         controlDifferential.dispatchEvent(new Event("output" /* OUTPUT */));
         controlIntegral.dispatchEvent(new Event("output" /* OUTPUT */));
-        let target = document.querySelector("input#Passive");
+        let target = document.querySelector("input#Polling");
         if (target.checked)
             window.setTimeout(update, 10);
     }

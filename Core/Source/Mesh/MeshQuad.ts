@@ -3,48 +3,40 @@ namespace FudgeCore {
    * Generate a simple quad with edges of length 1, the face consisting of two trigons
    * ```plaintext
    *        0 __ 3
-   *         |__|
+   *         |_\|
    *        1    2             
    * ``` 
-   * @authors Jirka Dell'Oro-Friedl, HFU, 2019
+   * @authors Jirka Dell'Oro-Friedl, HFU, 2019-2022
    */
-  export class MeshQuad extends Mesh {
+  export class MeshQuad extends MeshPolygon {
     public static readonly iSubclass: number = Mesh.registerSubclass(MeshQuad);
+    protected static shape: Vector2[] = [
+      new Vector2(-0.5, 0.5), new Vector2(-0.5, -0.5), new Vector2(0.5, -0.5), new Vector2(0.5, 0.5)
+    ];
 
     public constructor(_name: string = "MeshQuad") {
-      super(_name);
-      // this.create();
+      super(_name, MeshQuad.shape);
     }
 
+    // // flat equals smooth
+    // public get verticesFlat(): Float32Array { return this.vertices; }
+    // public get indicesFlat(): Uint16Array { return this.indices; }
+    // public get normalsFlat(): Float32Array { return this.normalsVertex; }
 
-    protected createVertices(): Float32Array {
-      let vertices: Float32Array = new Float32Array([
-                /*0*/ -1, 1, 0, /*1*/ -1, -1, 0,  /*2*/ 1, -1, 0, /*3*/ 1, 1, 0
-      ]);
-
-      vertices = vertices.map(_value => _value / 2);
-      return vertices;
+    //#region Transger
+    public serialize(): Serialization {
+      let serialization: Serialization = this.getMutator();
+      return serialization;
     }
-    
-    protected createIndices(): Uint16Array {
-      let indices: Uint16Array = new Uint16Array([
-        1, 2, 0, 2, 3, 0
-      ]);
-      return indices;
+    public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      await super.deserialize(_serialization);
+      this.create(MeshQuad.shape, true);
+      return this;
     }
-
-    protected createTextureUVs(): Float32Array {
-      let textureUVs: Float32Array = new Float32Array([
-                // front
-                /*0*/ 0, 0, /*1*/ 0, 1,  /*2*/ 1, 1, /*3*/ 1, 0
-      ]);
-      return textureUVs;
-    }
-
-    protected createFaceNormals(): Float32Array {
-      return new Float32Array([
-                /*0*/ 0, 0, 1, /*1*/ 0, 0, 0, /*2*/ 0, 0, 0, /*3*/ 0, 0, 0
-      ]);
+    protected reduceMutator(_mutator: Mutator): void {
+      super.reduceMutator(_mutator);
+      delete _mutator.shape;
+      delete _mutator.fitTexture;
     }
   }
 }

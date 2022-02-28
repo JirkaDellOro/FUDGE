@@ -14,7 +14,7 @@ namespace Fudge {
     private viewport: ƒ.Viewport;
     private cmrOrbit: ƒAid.CameraOrbit;
 
-    constructor(_container: GoldenLayout.Container, _state: Object) {
+    constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
 
       // create viewport for 3D-resources
@@ -33,8 +33,8 @@ namespace Fudge {
       this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent, true);
+      this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
       // this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
-      // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
       // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
     }
 
@@ -84,9 +84,13 @@ namespace Fudge {
 
     private fillContent(): void {
       this.dom.innerHTML = "";
-      if (!this.resource)
+      if (!this.resource) {
+        this.dom.innerHTML = "Select an internal or external resource to preview";
+        this.setTitle("Preview");
         return;
-
+      }
+      
+      this.setTitle("Preview | " + this.resource.name);
       //@ts-ignore
       let type: string = this.resource.type || "Function";
       if (this.resource instanceof ƒ.Mesh)
@@ -183,6 +187,9 @@ namespace Fudge {
     private hndEvent = (_event: CustomEvent): void => {
       // console.log(_event.type);
       switch (_event.type) {
+        // case EVENT_EDITOR.SET_PROJECT:
+        //   this.resource = undefined;
+        //   break;
         case ƒUi.EVENT.CHANGE:
         case ƒUi.EVENT.MUTATE:
         case EVENT_EDITOR.UPDATE:
@@ -191,7 +198,9 @@ namespace Fudge {
           this.redraw();
           break;
         default:
-          if (_event.detail.data instanceof ScriptInfo)
+          if (!_event.detail)
+            this.resource = undefined;
+          else if (_event.detail.data instanceof ScriptInfo)
             this.resource = _event.detail.data.script;
           else
             this.resource = _event.detail.data;

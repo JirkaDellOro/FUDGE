@@ -74,7 +74,7 @@ namespace HeightMap {
     if (!chequeredFlag()) {
       let time: number = Date.now() - startTime;
       let seconds = Math.floor(time / 1000);
-      console.log(seconds + ":" + time % (seconds * 1000));
+      // console.log(seconds + ":" + time % (seconds * 1000));
     }
 
     if (controlled.mtxWorld.translation.y < 0) sunk = true;
@@ -216,9 +216,9 @@ namespace HeightMap {
     heightMap = new ƒ.TextureImage();
     await heightMap.load("../Textures/map.png");
 
-    gridMeshFlat = new f.MeshTerrain("HeightMap", heightMap);
+    gridMeshFlat = new f.MeshRelief("HeightMap", heightMap);
     gridFlat = Scenes.createCompleteMeshNode("Grid", matTex, gridMeshFlat);
-    gridMeshFlat.node = gridFlat;
+    // gridMeshFlat.node = gridFlat;
     gridFlat.mtxLocal.translateY(-0.1)
 
     gridFlat.mtxLocal.scale(new f.Vector3(3, 0.7, 3))

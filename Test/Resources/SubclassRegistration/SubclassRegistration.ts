@@ -2,9 +2,10 @@ namespace SubclassRegistration {
   import ƒ = FudgeCore;
   // ƒ.Debug.setFilter(ƒ.DebugConsole, ƒ.DEBUG_FILTER.ALL | ƒ.DEBUG_FILTER.SOURCE);
 
+  test(ƒ.Shader);
   test(ƒ.Mesh);
   test(ƒ.Component);
-  test(ƒ.Shader);
+  test(ƒ.Joint);
 
   function test(_class: Function): void {
     console.group(_class.name);

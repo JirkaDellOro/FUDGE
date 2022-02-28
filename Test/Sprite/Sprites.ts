@@ -12,10 +12,8 @@ namespace Test_sprites {
   let spriteNode: ƒAid.NodeSprite;
 
   async function hndLoad(_event: Event): Promise<void> {
-
     // setup sprites
     await loadSprites();
-
 
     // setup scene
     root = new ƒ.Node("root");
@@ -45,22 +43,17 @@ namespace Test_sprites {
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, hndLoop);
     ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 10);
 
-
-
     document.forms[0].addEventListener("change", handleChange);
-
   }
 
   function hndLoop(_event: Event): void {
     let avg: HTMLInputElement = document.querySelector("[name=currentframe]");
-    avg.value = spriteNode.getCurrentFrame + ""; //ToDo: see if I can get the current frame differently
+    avg.value = spriteNode.getCurrentFrame.toString();
 
     viewport.draw();
   }
 
-
   async function loadSprites(): Promise<void> {
-
     let imgSpriteSheet: ƒ.TextureImage = new ƒ.TextureImage();
     await imgSpriteSheet.load("Assets/bounceball.png");
 
@@ -69,7 +62,6 @@ namespace Test_sprites {
   }
 
   function generateSprites(_spritesheet: ƒ.CoatTextured): void {
-
     animations = {};
     this.animations = {};
     let name: string = "bounce";
@@ -82,9 +74,5 @@ namespace Test_sprites {
     let value: number = parseInt((<HTMLInputElement>_event.target).value);
     spriteNode.framerate = value;
     console.log("framerate set to: " + value);
-
   }
- 
-
 }
-

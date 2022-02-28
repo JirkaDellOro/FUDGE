@@ -13,19 +13,15 @@ namespace FudgeCore {
    * Simple class for 3x3 matrix operations
    * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
    */
-  export class Matrix3x3 extends Mutable implements Serializable {
+  export class Matrix3x3 extends Mutable implements Serializable, Recycable {
     private static deg2rad: number = Math.PI / 180;
-    private data: Float32Array = new Float32Array(3); // The data of the matrix.
+    private data: Float32Array = new Float32Array(9); // The data of the matrix.
     private mutator: Mutator = null; // prepared for optimization, keep mutator to reduce redundant calculation and for comparison. Set to null when data changes!
     private vectors: VectorRepresentation; // vector representation of this matrix
 
     public constructor() {
       super();
-      this.data = new Float32Array([
-        1, 0, 0,
-        0, 1, 0,
-        0, 0, 1
-      ]);
+      this.recycle();
       this.resetCache();
     }
 
@@ -43,11 +39,6 @@ namespace FudgeCore {
 
     public static IDENTITY(): Matrix3x3 {
       const mtxResult: Matrix3x3 = Recycler.get(Matrix3x3);
-      mtxResult.data.set([
-        1, 0, 0,
-        0, 1, 0,
-        0, 0, 1
-      ]);
       return mtxResult;
     }
 
@@ -131,16 +122,17 @@ namespace FudgeCore {
     }
 
     /** 
-     * - get: a copy of the calculated translation {@link Vector2}   
+     * - get: return a vector representation of the translation {@link Vector2}.  
+     * **Caution!** Use immediately, since the vector is going to be reused by Recycler. Create a clone to keep longer and manipulate. 
      * - set: effect the matrix ignoring its rotation and scaling
      */
     public get translation(): Vector2 {
       if (!this.vectors.translation)
         this.vectors.translation = new Vector2(this.data[6], this.data[7]);
-      return this.vectors.translation.copy;
+      return this.vectors.translation; // .clone;
     }
     public set translation(_translation: Vector2) {
-      this.data.set(_translation.get(), 12);
+      this.data.set(_translation.get(), 6);
       // no full cache reset required
       this.vectors.translation = _translation;
       this.mutator = null;
@@ -152,7 +144,7 @@ namespace FudgeCore {
      */
     public get rotation(): number {
       if (!this.vectors.rotation)
-        this.vectors.rotation = this.getEulerAngles();
+        this.vectors.rotation = this.getEulerAngle();
       return this.vectors.rotation;
     }
     public set rotation(_rotation: number) {
@@ -161,7 +153,8 @@ namespace FudgeCore {
     }
 
     /** 
-     * - get: a copy of the calculated scale {@link Vector2}   
+     * - get: return a vector representation of the scale {@link Vector3}.  
+     * **Caution!** Do not manipulate result, instead create a clone!    
      * - set: effect the matrix
      */
     public get scaling(): Vector2 {
@@ -170,20 +163,29 @@ namespace FudgeCore {
           Math.hypot(this.data[0], this.data[1]),
           Math.hypot(this.data[3], this.data[4])
         );
-      return this.vectors.scaling.copy;
+      return this.vectors.scaling; // .clone;
     }
     public set scaling(_scaling: Vector2) {
       this.mutate({ "scaling": _scaling });
       this.resetCache();
     }
-    
+
     /**
      * Return a copy of this
      */
-    public get copy(): Matrix3x3 {
-      let mtxCopy: Matrix3x3 = Recycler.get(Matrix3x3);
-      mtxCopy.set(this);
-      return mtxCopy;
+    public get clone(): Matrix3x3 {
+      let mtxClone: Matrix3x3 = Recycler.get(Matrix3x3);
+      mtxClone.set(this);
+      return mtxClone;
+    }
+
+    public recycle(): void {
+      this.data = new Float32Array([
+        1, 0, 0,
+        0, 1, 0,
+        0, 0, 1
+      ]);
+      this.resetCache(); 
     }
 
     //#region Translation
@@ -228,17 +230,19 @@ namespace FudgeCore {
      * Add a scaling along the x-Axis by the given amount to this matrix 
      */
     public scaleX(_by: number): void {
-      let vector: Vector2 = Recycler.borrow(Vector2);
+      let vector: Vector2 = Recycler.get(Vector2);
       vector.set(_by, 1);
       this.scale(vector);
+      Recycler.store(vector);
     }
     /**
      * Add a scaling along the y-Axis by the given amount to this matrix 
      */
     public scaleY(_by: number): void {
-      let vector: Vector2 = Recycler.borrow(Vector2);
+      let vector: Vector2 = Recycler.get(Vector2);
       vector.set(1, _by);
       this.scale(vector);
+      Recycler.store(vector);
     }
     //#endregion
 
@@ -259,7 +263,9 @@ namespace FudgeCore {
      * Multiply this matrix with the given matrix
      */
     public multiply(_mtxRight: Matrix3x3): void {
-      this.set(Matrix3x3.MULTIPLICATION(this, _mtxRight));
+      let mtxResult: Matrix3x3 = Matrix3x3.MULTIPLICATION(this, _mtxRight);
+      this.set(mtxResult);
+      Recycler.store(mtxResult);
       this.mutator = null;
     }
     //#endregion
@@ -269,7 +275,7 @@ namespace FudgeCore {
     /**
      * Calculates and returns the euler-angles representing the current rotation of this matrix
      */
-    public getEulerAngles(): number {
+    public getEulerAngle(): number {
       let scaling: Vector2 = this.scaling;
 
       let s0: number = this.data[0] / scaling.x;

@@ -21,16 +21,35 @@ namespace FudgeCore {
     public abstract get texImageSource(): TexImageSource;
     public useRenderData(): void {/* injected by RenderInjector*/ }
 
+    public refresh(): void {
+      this.renderData = null;
+    }
+
     //#region Transfer
     public serialize(): Serialization {
-      return {};
+      let serialization: Serialization = {
+        idResource: this.idResource,
+        name: this.name,
+        mipmap: MIPMAP[this.mipmap]
+      };
+      return serialization;
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      Project.register(this, _serialization.idResource);
+      this.name = _serialization.name;
+      this.mipmap = <number><unknown>MIPMAP[_serialization.mipmap];
       return this;
     }
 
+    public getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes {
+      let types: MutatorAttributeTypes = super.getMutatorAttributeTypes(_mutator);
+      if (types.mipmap)
+        types.mipmap = MIPMAP;
+      return types;
+    }
+
     protected reduceMutator(_mutator: Mutator): void {
-      delete _mutator.idResource; 
+      delete _mutator.idResource;
     }
   }
 
@@ -80,15 +99,13 @@ namespace FudgeCore {
     public serialize(): Serialization {
       return {
         url: this.url,
-        idResource: this.idResource,
-        name: this.name,
-        type: this.type // serialize for editor views
+        type: this.type, // serialize for editor views
+        [super.constructor.name]: super.serialize()
       };
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      Project.register(this, _serialization.idResource);
+      await super.deserialize(_serialization[super.constructor.name]);
       await this.load(_serialization.url);
-      this.name = _serialization.name;
       // this.type is an accessor of Mutable doesn't need to be deserialized
       return this;
     }
@@ -111,7 +128,7 @@ namespace FudgeCore {
   export class TextureBase64 extends Texture {
     public image: HTMLImageElement = new Image();
 
-    constructor (_name: string, _base64: string, _mipmap: MIPMAP = MIPMAP.CRISP) {
+    constructor(_name: string, _base64: string, _mipmap: MIPMAP = MIPMAP.CRISP) {
       super(_name);
       this.image.src = _base64;
       this.mipmap = _mipmap;
@@ -123,10 +140,14 @@ namespace FudgeCore {
   /**
    * Texture created from a canvas
    */
+  // TODO: remove type fixes when experimental technology is standard
+  type OffscreenCanvasRenderingContext2D = General;
+  type OffscreenCanvas = General;
+
   export class TextureCanvas extends Texture {
     public crc2: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
 
-    constructor (_name: string, _crc2: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D) {
+    constructor(_name: string, _crc2: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D) {
       super(_name);
       this.crc2 = _crc2;
     }

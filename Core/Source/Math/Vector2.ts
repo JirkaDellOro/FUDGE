@@ -7,7 +7,7 @@ namespace FudgeCore {
    * ```
    * @authors Lukas Scheuerle, Jirka Dell'Oro-Friedl, HFU, 2019
    */
-  export class Vector2 extends Mutable {
+  export class Vector2 extends Mutable implements Recycable {
     private data: Float32Array;
 
     public constructor(_x: number = 0, _y: number = 0) {
@@ -202,10 +202,10 @@ namespace FudgeCore {
      * @returns A deep copy of the vector.
      * TODO: rename this clone and create a new method copy, which copies the values from a vector given 
      */
-    public get copy(): Vector2 {
-      let copy: Vector2 = Recycler.get(Vector2);
-      copy.data.set(this.data);
-      return copy;
+    public get clone(): Vector2 {
+      let clone: Vector2 = Recycler.get(Vector2);
+      clone.data.set(this.data);
+      return clone;
     }
 
     /**
@@ -230,6 +230,10 @@ namespace FudgeCore {
       this.transform(Matrix3x3.ROTATION(_geo.angle));
     }
     //#endregion
+    
+    public recycle(): void {
+      this.data.set([0, 0]);
+    }
 
     /**
      * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance

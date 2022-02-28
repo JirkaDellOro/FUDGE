@@ -11,7 +11,7 @@ namespace Fudge {
     // private selectedNode: ƒ.Node;
     private tree: ƒUi.Tree<ƒ.Node>;
 
-    constructor(_container: GoldenLayout.Container, _state: Object) {
+    constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
       // this.contextMenu = this.getContextMenu(this.contextMenuCallback);
 
@@ -23,11 +23,16 @@ namespace Fudge {
     }
 
     public setGraph(_graph: ƒ.Node): void {
-      if (!_graph)
+      if (!_graph) {
+        this.graph = undefined;
+        this.dom.innerHTML = "";
         return;
-      if (this.tree)
+      }
+
+      if (this.graph && this.tree)
         this.dom.removeChild(this.tree);
 
+      this.dom.innerHTML = "";
       this.graph = _graph;
       // this.selectedNode = null;
 
@@ -38,6 +43,8 @@ namespace Fudge {
       this.tree.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
       this.tree.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       this.dom.append(this.tree);
+      this.dom.title = "● Right click on existing node to create child node.\n● Use Copy/Paste to duplicate nodes.";
+      this.tree.title = "Select node to edit or duplicate.";
     }
 
     public getSelection(): ƒ.Node[] {

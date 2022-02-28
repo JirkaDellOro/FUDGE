@@ -30,34 +30,20 @@ var Mesh;
         // scene setup
         graph.addChild(translator);
         graph.addChild(camera);
-        let material = new ƒ.Material("texture", ƒ.ShaderTexture, new ƒ.CoatTextured());
-        //let material: ƒ.Material = new ƒ.Material("matheial", ƒ.ShaderUniColor, new ƒ.CoatColored(ƒ.Color.CSS("Red")));
+        let material = new ƒ.Material("texture", ƒ.ShaderLitTextured, new ƒ.CoatTextured());
+        //let material: ƒ.Material = new ƒ.Material("matheial", ƒ.ShaderLit, new ƒ.CoatColored(ƒ.Color.CSS("Red")));
         let subclass = ƒ.Mesh.subclasses;
         for (let i = 0; i < subclass.length; i++) {
             console.log(subclass[i].name);
             let node = new ƒ.Node(subclass[i].name.replace("Mesh", ""));
             let mesh;
             switch (subclass[i].name) {
-                case "MeshPolygon":
-                    mesh = new ƒ.MeshPolygon();
-                    break;
-                case "MeshExtrusion":
-                    mesh = new ƒ.MeshExtrusion();
-                    break;
-                case "MeshRotation":
-                    mesh = new ƒ.MeshRotation();
-                    break;
-                case "MeshSphere":
-                    mesh = new ƒ.MeshSphere();
-                    break;
-                case "MeshTerrain":
-                    //ToDo: MeshTerrain insert
-                    continue;
-                case "MeshTorus":
-                    mesh = new ƒ.MeshTorus();
+                case "MeshObj":
+                    mesh = new ƒ.MeshObj("Icosphere", "Icosphere.obj");
                     break;
                 default:
-                    mesh = subclass[i].prototype;
+                    //@ts-ignore
+                    mesh = new subclass[i]();
                     break;
             }
             let cmpMesh = new ƒ.ComponentMesh(mesh);

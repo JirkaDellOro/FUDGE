@@ -7,7 +7,7 @@ namespace FudgeCore {
    *  -→ Magnitude (Distance from the center)  
    * ```
    */
-  export class Geo3 {
+  export class Geo3 implements Recycable {
     public magnitude: number = 0;
     public latitude: number = 0;
     public longitude: number = 0;
@@ -23,6 +23,10 @@ namespace FudgeCore {
       this.magnitude = _magnitude;
       this.latitude = _latitude;
       this.longitude = _longitude;
+    }
+
+    public recycle(): void {
+      this.set();
     }
 
     /**

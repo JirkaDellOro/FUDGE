@@ -51,6 +51,19 @@
       "sectors": 4
     }
   },
+  "Material|2021-04-06T08:51:49.620Z|35129": {
+    "ƒ.Material": {
+      "name": "mtrFlat",
+      "idResource": "Material|2021-04-06T08:51:49.620Z|35129",
+      "shader": "ShaderFlat",
+      "coat": {
+        "ƒ.CoatColored": {
+          "name": "Coat",
+          "color": "[1, 1, 1, 1]"
+        }
+      }
+    }
+  },
   "Graph|2021-04-06T08:51:13.475Z|74846": {
     "ƒ.Graph": {
       "name": "Sword",
@@ -122,19 +135,6 @@
       "children": [],
       "idResource": "Graph|2021-04-06T08:51:13.475Z|74846",
       "type": "Graph"
-    }
-  },
-  "Material|2021-04-06T08:51:49.620Z|35129": {
-    "ƒ.Material": {
-      "name": "mtrFlat",
-      "idResource": "Material|2021-04-06T08:51:49.620Z|35129",
-      "shader": "ShaderFlat",
-      "coat": {
-        "ƒ.CoatColored": {
-          "name": "Coat",
-          "color": "[1, 1, 1, 1]"
-        }
-      }
     }
   }
 }

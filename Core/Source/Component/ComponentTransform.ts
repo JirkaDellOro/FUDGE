@@ -24,12 +24,12 @@ namespace FudgeCore {
      * respectively calculating yaw and pitch. If no up vector is given, the previous up-vector is used. 
      */
     public lookAt(_targetWorld: Vector3, _up?: Vector3): void {
-      let container: Node = this.getContainer();
+      let container: Node = this.node;
       if (!container && !container.getParent())
         return this.mtxLocal.lookAt(_targetWorld, _up);
 
       // component is attached to a child node -> transform respecting the hierarchy
-      let mtxWorld: Matrix4x4 = container.mtxWorld.copy;
+      let mtxWorld: Matrix4x4 = container.mtxWorld.clone;
       mtxWorld.lookAt(_targetWorld, _up, true);
       let mtxLocal: Matrix4x4 = Matrix4x4.RELATIVE(mtxWorld, null, container.getParent().mtxWorldInverse);
       this.mtxLocal = mtxLocal;
@@ -40,12 +40,12 @@ namespace FudgeCore {
      * respectively calculating yaw only. If no up vector is given, the previous up-vector is used. 
      */
     public showTo(_targetWorld: Vector3, _up?: Vector3): void {
-      let container: Node = this.getContainer();
+      let container: Node = this.node;
       if (!container && !container.getParent())
         return this.mtxLocal.showTo(_targetWorld, _up);
 
       // component is attached to a child node -> transform respecting the hierarchy
-      let mtxWorld: Matrix4x4 = container.mtxWorld.copy;
+      let mtxWorld: Matrix4x4 = container.mtxWorld.clone;
       mtxWorld.showTo(_targetWorld, _up, true);
       let mtxLocal: Matrix4x4 = Matrix4x4.RELATIVE(mtxWorld, null, container.getParent().mtxWorldInverse);
       this.mtxLocal = mtxLocal;
@@ -57,7 +57,7 @@ namespace FudgeCore {
      */
     public rebase(_node: Node = null): void {
       let mtxResult: Matrix4x4 = this.mtxLocal;
-      let container: Node = this.getContainer();
+      let container: Node = this.node;
       if (container)
         mtxResult = container.mtxWorld;
 
@@ -85,17 +85,23 @@ namespace FudgeCore {
           this.rebase(_node);
           this.mtxLocal.multiply(_mtxTransform, true);
 
-          let container: Node = this.getContainer();
-          if (container) {
-            if (_base == BASE.NODE)
+          let node: Node = this.node;
+          if (node) {
+            let mtxTemp: Matrix4x4;
+            if (_base == BASE.NODE) {
               // fix mtxWorld of container for subsequent rebasing 
-              container.mtxWorld.set(Matrix4x4.MULTIPLICATION(_node.mtxWorld, container.mtxLocal));
+              mtxTemp = Matrix4x4.MULTIPLICATION(_node.mtxWorld, node.mtxLocal);
+              node.mtxWorld.set(mtxTemp);
+              Recycler.store(mtxTemp);
+            }
 
-            let parent: Node = container.getParent();
+            let parent: Node = node.getParent();
             if (parent) {
               // fix mtxLocal for current parent
-              this.rebase(container.getParent());
-              container.mtxWorld.set(Matrix4x4.MULTIPLICATION(container.getParent().mtxWorld, container.mtxLocal));
+              this.rebase(node.getParent());
+              mtxTemp = Matrix4x4.MULTIPLICATION(node.getParent().mtxWorld, node.mtxLocal);
+              node.mtxWorld.set(mtxTemp);
+              Recycler.store(mtxTemp);
             }
           }
           break;

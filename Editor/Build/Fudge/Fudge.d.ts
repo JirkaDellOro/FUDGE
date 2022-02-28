@@ -1,16 +1,19 @@
 /// <reference types="../../../node_modules/electron/electron" />
 /// <reference types="../../core/build/fudgecore" />
 /// <reference types="../../../aid/build/fudgeaid" />
-/// <reference types="golden-layout" />
+/// <reference types="../../GoldenLayout/golden-layout" />
 /// <reference types="../../../userinterface/build/fudgeuserinterface" />
 declare namespace Fudge {
-    type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
-    class ContextMenu {
+    export type ContextMenuCallback = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) => void;
+    type Subclass<T> = {
+        subclasses: T[];
+        name: string;
+    };
+    export class ContextMenu {
         static appendCopyPaste(_menu: Electron.Menu): void;
-        static getSubclassMenu<T extends {
-            name: string;
-        }>(_id: CONTEXTMENU, _superclass: T[], _callback: ContextMenuCallback): Electron.Menu;
+        static getSubclassMenu<T extends Subclass<T>>(_id: CONTEXTMENU, _class: T, _callback: ContextMenuCallback): Electron.Menu;
     }
+    export {};
 }
 declare namespace Fudge {
     enum CONTEXTMENU {
@@ -21,7 +24,11 @@ declare namespace Fudge {
         CREATE_MESH = 4,
         CREATE_MATERIAL = 5,
         CREATE_GRAPH = 6,
-        REMOVE_COMPONENT = 7
+        REMOVE_COMPONENT = 7,
+        ADD_JOINT = 8,
+        TRANSLATE = 9,
+        ROTATE = 10,
+        SCALE = 11
     }
     enum MENU {
         QUIT = "quit",
@@ -32,6 +39,7 @@ declare namespace Fudge {
         PANEL_GRAPH_OPEN = "panelGraphOpen",
         PANEL_ANIMATION_OPEN = "panelAnimationOpen",
         PANEL_PROJECT_OPEN = "panelProjectOpen",
+        PANEL_HELP_OPEN = "panelHelpOpen",
         FULLSCREEN = "fullscreen"
     }
     enum EVENT_EDITOR {
@@ -39,11 +47,15 @@ declare namespace Fudge {
         FOCUS_NODE = "focusNode",
         SET_PROJECT = "setProject",
         UPDATE = "update",
-        DESTROY = "destroy"
+        REFRESH = "refresh",
+        DESTROY = "destroy",
+        CLEAR_PROJECT = "clearProject",
+        TRANSFORM = "transform"
     }
     enum PANEL {
         GRAPH = "PanelGraph",
-        PROJECT = "PanelProject"
+        PROJECT = "PanelProject",
+        HELP = "PanelHelp"
     }
     enum VIEW {
         HIERARCHY = "ViewHierarchy",
@@ -57,12 +69,18 @@ declare namespace Fudge {
         PREVIEW = "ViewPreview",
         SCRIPT = "ViewScript"
     }
+    enum TRANSFORM {
+        TRANSLATE = "translate",
+        ROTATE = "rotate",
+        SCALE = "scale"
+    }
 }
 declare namespace Fudge {
     export enum MIME {
         TEXT = "text",
         AUDIO = "audio",
         IMAGE = "image",
+        MESH = "mesh",
         UNKNOWN = "unknown"
     }
     const fs: ƒ.General;
@@ -88,66 +106,75 @@ declare namespace Fudge {
 declare namespace Fudge {
     let watcher: ƒ.General;
     function newProject(): Promise<void>;
-    function saveProject(): Promise<void>;
+    function saveProject(_new?: boolean): Promise<void>;
     function promptLoadProject(): Promise<URL>;
     function loadProject(_url: URL): Promise<void>;
 }
 declare namespace Fudge {
     import ƒ = FudgeCore;
-    class FileInfo extends ƒ.Mutable {
-        overwrite: boolean;
-        filename: string;
-        constructor(_overwrite: boolean, _filename: string);
-        protected reduceMutator(_mutator: ƒ.Mutator): void;
-    }
-    export class Files extends ƒ.Mutable {
-        index: FileInfo;
-        style: FileInfo;
-        internal: FileInfo;
-        script: FileInfo;
-        constructor();
-        protected reduceMutator(_mutator: ƒ.Mutator): void;
-    }
-    export class Project extends ƒ.Mutable {
-        files: Files;
+    class Project extends ƒ.Mutable {
+        #private;
         base: URL;
-        private includePhysics;
+        name: string;
+        fileIndex: string;
+        fileInternal: string;
+        fileScript: string;
+        fileStyles: string;
         private includeAutoViewScript;
-        private graphToStartWith;
+        private graphAutoView;
         constructor(_base: URL);
         openDialog(): Promise<boolean>;
         hndChange: (_event: Event) => void;
+        load(htmlContent: string): Promise<void>;
         getProjectJSON(): string;
         getProjectCSS(): string;
         getProjectHTML(_title: string): string;
-        getGraphs(): Object;
         getMutatorAttributeTypes(_mutator: ƒ.Mutator): ƒ.MutatorAttributeTypes;
         protected reduceMutator(_mutator: ƒ.Mutator): void;
+        private getGraphs;
+        private createProjectHTML;
         private getAutoViewScript;
+        private settingsStringify;
+        private panelsStringify;
+        private stringifyHTML;
     }
-    export {};
 }
 declare namespace Fudge {
+    import ƒ = FudgeCore;
     const ipcRenderer: Electron.IpcRenderer;
     const remote: Electron.Remote;
     let project: Project;
+    interface PanelInfo {
+        type: string;
+        state: PanelState;
+    }
     /**
      * The uppermost container for all panels controlling data flow between.
      * @authors Monika Galkewitsch, HFU, 2019 | Lukas Scheuerle, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class Page {
+        static goldenLayoutModule: ƒ.General;
+        static modeTransform: TRANSFORM;
         private static idCounter;
         private static goldenLayout;
         private static panels;
-        static start(): Promise<void>;
-        static setupGoldenLayout(): void;
-        static add(_panel: typeof Panel, _title: string, _state?: Object): void;
-        static find(_type: typeof Panel): Panel[];
+        static setDefaultProject(): void;
+        static getPanelInfo(): string;
+        static setPanelInfo(_panelInfos: string): void;
+        static setTransform(_mode: TRANSFORM): void;
+        private static start;
+        private static setupGoldenLayout;
+        private static add;
+        private static find;
         private static generateID;
+        private static loadLayout;
         private static setupPageListeners;
         /** Send custom copies of the given event to the views */
         private static broadcastEvent;
+        private static hndKey;
         private static hndEvent;
+        private static hndPanelCreated;
+        private static loadProject;
         private static setupMainListeners;
     }
 }
@@ -180,7 +207,7 @@ declare namespace Fudge {
         protected contextMenu: Electron.Menu;
         private container;
         private id;
-        constructor(_container: GoldenLayout.Container, _state: Object);
+        constructor(_container: ComponentContainer, _state: JsonValue);
         static getViewSource(_event: DragEvent): View;
         private static registerViewForDragDrop;
         setTitle(_title: string): void;
@@ -200,7 +227,7 @@ declare namespace Fudge {
      */
     class ViewExternal extends View {
         private tree;
-        constructor(_container: GoldenLayout.Container, _state: Object);
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         setProject(): void;
         getSelection(): DirectoryEntry[];
         getDragDropSources(): DirectoryEntry[];
@@ -216,7 +243,7 @@ declare namespace Fudge {
      */
     class ViewInternal extends View {
         private table;
-        constructor(_container: GoldenLayout.Container, _state: Object);
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         listResources(): void;
         getSelection(): ƒ.SerializableResource[];
         getDragDropSources(): ƒ.SerializableResource[];
@@ -232,6 +259,8 @@ declare namespace Fudge {
     import ƒUi = FudgeUserInterface;
     class ControllerComponent extends ƒUi.Controller {
         constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
+        getMutatorStripped: (_mutator?: ƒ.Mutator, _types?: ƒ.Mutator) => ƒ.Mutator;
+        protected mutateOnInput: (_event: Event) => Promise<void>;
         private hndKey;
         private hndDragOver;
         private hndDrop;
@@ -300,6 +329,9 @@ declare namespace Fudge {
     }
 }
 declare namespace Fudge {
+    interface PanelState {
+        [key: string]: string;
+    }
     /**
      * Base class for all [[Panel]]s aggregating [[View]]s
      * Subclasses are presets for common panels. A user might add or delete [[View]]s at runtime
@@ -308,9 +340,10 @@ declare namespace Fudge {
     abstract class Panel extends View {
         protected goldenLayout: GoldenLayout;
         private views;
-        constructor(_container: GoldenLayout.Container, _state: Object);
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         /** Send custom copies of the given event to the views */
         broadcastEvent: (_event: Event) => void;
+        abstract getState(): PanelState;
         private addViewComponent;
     }
 }
@@ -322,10 +355,25 @@ declare namespace Fudge {
     */
     class PanelGraph extends Panel {
         private graph;
-        constructor(_container: GoldenLayout.Container, _state: Object);
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         setGraph(_graph: ƒ.Graph): void;
+        getState(): {
+            [key: string]: string;
+        };
         private hndEvent;
         private hndFocusNode;
+    }
+}
+declare namespace Fudge {
+    /**
+    * Shows a graph and offers means for manipulation
+    * @authors Monika Galkewitsch, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2020
+    */
+    class PanelHelp extends Panel {
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        getState(): {
+            [key: string]: string;
+        };
     }
 }
 declare namespace Fudge {
@@ -334,7 +382,10 @@ declare namespace Fudge {
      * @authors Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class PanelProject extends Panel {
-        constructor(_container: GoldenLayout.Container, _state: Object);
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
+        getState(): {
+            [key: string]: string;
+        };
         private hndEvent;
     }
 }
@@ -371,7 +422,7 @@ declare namespace Fudge {
         private hover;
         private time;
         private playing;
-        constructor(_container: GoldenLayout.Container, _state: Object);
+        constructor(_container: ComponentContainer, _state: Object);
         openAnimation(): void;
         fillContent(): void;
         installListeners(): void;
@@ -443,13 +494,19 @@ declare namespace Fudge {
     class ViewComponents extends View {
         private node;
         private expanded;
-        constructor(_container: GoldenLayout.Container, _state: Object);
+        private selected;
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): void;
         private fillContent;
         private hndEvent;
+        private hndTransform;
+        private transform3;
+        private transform2;
+        private select;
+        private getSelected;
         private createComponent;
         private findComponentType;
     }
@@ -463,7 +520,7 @@ declare namespace Fudge {
     class ViewHierarchy extends View {
         private graph;
         private tree;
-        constructor(_container: GoldenLayout.Container, _state: Object);
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         setGraph(_graph: ƒ.Node): void;
         getSelection(): ƒ.Node[];
         getDragDropSources(): ƒ.Node[];
@@ -482,17 +539,22 @@ declare namespace Fudge {
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
      */
     class ViewRender extends View {
+        #private;
         private cmrOrbit;
         private viewport;
         private canvas;
         private graph;
-        constructor(_container: GoldenLayout.Container, _state: Object);
+        constructor(_container: ComponentContainer, _state: JsonValue);
         createUserInterface(): void;
         setGraph(_node: ƒ.Node): void;
+        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
+        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        protected openContextMenu: (_event: Event) => void;
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         protected hndDrop(_event: DragEvent, _viewSource: View): void;
         private hndEvent;
         private hndPick;
+        private hndPointer;
         private activeViewport;
         private redraw;
     }
@@ -508,7 +570,7 @@ declare namespace Fudge {
         private resource;
         private viewport;
         private cmrOrbit;
-        constructor(_container: GoldenLayout.Container, _state: Object);
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         private static createStandardMaterial;
         private static createStandardMesh;
         private fillContent;
@@ -530,7 +592,7 @@ declare namespace Fudge {
      */
     class ViewProperties extends View {
         private resource;
-        constructor(_container: GoldenLayout.Container, _state: Object);
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         protected hndDragOver(_event: DragEvent, _viewSource: View): void;
         private fillContent;
         private hndEvent;
@@ -543,7 +605,7 @@ declare namespace Fudge {
      */
     class ViewScript extends View {
         private table;
-        constructor(_container: GoldenLayout.Container, _state: Object);
+        constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         listScripts(): void;
         getSelection(): ScriptInfo[];
         getDragDropSources(): ScriptInfo[];

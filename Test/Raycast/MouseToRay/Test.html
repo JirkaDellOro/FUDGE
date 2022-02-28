@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>MouseToRay</title>
+    <script type="text/javascript" src="../../../Core/Build/FudgeCore.js"></script>
+    <script type="text/javascript" src="../../../Aid/Build/FudgeAid.js"></script>
+    <script type="text/javascript" src="../../Scenes/Scenes.js"></script>
+    <!-- <script type="text/javascript" src="../../UI-Elements/UI.js"></script>  -->
+    <script type="text/javascript" src="Camera.js"></script>
+    <script type="text/javascript" src="Main.js"></script>
+
+    <style type="text/css">
+        html,
+        body {
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: lightskyblue;
+        }
+
+        canvas {
+            image-rendering: pixelated;
+            display: block;
+            position: absolute;
+            top: 2%;
+            left: 2%;
+            width: 96%;
+            height: 96%;
+        }
+
+        input[type=number] {
+            width: 4em;
+            margin-right: 1em;
+        }
+
+        div {
+            width: 30em;
+            position: fixed;
+            top: 0px;
+            right: 0px;
+            background-color: beige;
+        }
+
+        span {
+          position: fixed;
+          background-color: lightskyblue;
+          width: 380px;
+          height: 100px;
+        }
+
+        textarea {
+          height: 100%;
+          width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+  <script src="../../dialog-polyfill.min.js"></script>
+  <script src="../../TestInstructions.js"></script>
+  <script>
+    TestInstructions.display({
+      Name: "Mouse ray and intersection",
+      Test: [
+        "The calculations of a ray using client coordinates, positions on it in world space and the intersection of that ray with a plane.",
+      ],
+      Setup: [
+        "A red cube and a visualization of a coordinate system.",
+      ],
+      Act: [
+        "Move the mouse, use the scroll wheel, press X,Y or Z",
+      ],
+      Observe: [
+        "The movement of the cube.",
+      ],
+      Expect: [
+        "The cube follows the mouse in a distance chosen with the scroll wheel.",
+        "If X, Y or Z is pressed, the movement is restricted to the plane defined by the origin and the specified direction as normal.",
+      ]
+    });
+  </script>
+    <canvas id="viewport"></canvas>
+</body>

@@ -7,9 +7,9 @@ namespace FudgeCore {
    *            /
    *          +z   
    * ```
-   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019-2022
    */
-  export class Vector3 extends Mutable {
+  export class Vector3 extends Mutable implements Recycable {
     private data: Float32Array; // TODO: check why this shouldn't be x,y,z as numbers...
 
     public constructor(_x: number = 0, _y: number = 0, _z: number = 0) {
@@ -86,17 +86,11 @@ namespace FudgeCore {
      * Creates and returns a vector which is a copy of the given vector scaled to the given length
      */
     public static NORMALIZATION(_vector: Vector3, _length: number = 1): Vector3 {
-      let magnitude: number = _vector.magnitude;
-      let vector: Vector3;
-      try {
-        if (magnitude == 0)
-          throw (new RangeError("Impossible normalization"));
-        vector = Vector3.ZERO();
-        let factor: number = _length / _vector.magnitude;
-        vector.set(_vector.x * factor, _vector.y * factor, _vector.z * factor);
-      } catch (_error) {
-        Debug.warn(_error);
-      }
+      let magnitudeSquared: number = _vector.magnitudeSquared;
+      let vector: Vector3 = _vector.clone;
+      if (magnitudeSquared == 0)
+        throw (new RangeError("Impossible normalization"));
+      vector.scale(_length / Math.sqrt(magnitudeSquared))
       return vector;
     }
 
@@ -225,10 +219,10 @@ namespace FudgeCore {
      * Returns a copy of this vector
      * TODO: rename this clone and create a new method copy, which copies the values from a vector given 
      */
-    public get copy(): Vector3 {
-      let copy: Vector3 = Recycler.get(Vector3);
-      copy.data.set(this.data);
-      return copy;
+    public get clone(): Vector3 {
+      let clone: Vector3 = Recycler.get(Vector3);
+      clone.data.set(this.data);
+      return clone;
     }
 
     /**
@@ -252,6 +246,10 @@ namespace FudgeCore {
       return geo;
     }
     //#endregion
+
+    public recycle(): void {
+      this.data.set([0, 0, 0]);
+    }
 
     /**
      * Returns true if the coordinates of this and the given vector are to be considered identical within the given tolerance
@@ -337,7 +335,9 @@ namespace FudgeCore {
      * Including is the default, excluding will only rotate and scale this vector.
      */
     public transform(_mtxTransform: Matrix4x4, _includeTranslation: boolean = true): void {
-      this.data = Vector3.TRANSFORMATION(this, _mtxTransform, _includeTranslation).data;
+      let transformed: Vector3 = Vector3.TRANSFORMATION(this, _mtxTransform, _includeTranslation);
+      this.data.set(transformed.data);
+      Recycler.store(transformed);
     }
 
     /**
@@ -359,11 +359,16 @@ namespace FudgeCore {
     /**
      * Shuffles the components of this vector
      */
-    public shuffle(): void {
+    shuffle(): void {
       let a: number[] = Array.from(this.data);
       this.set(Random.default.splice(a), Random.default.splice(a), a[0]);
     }
 
+    public getDistance(_to: Vector3): number {
+      let difference: Vector3 = Vector3.DIFFERENCE(this, _to);
+      Recycler.store(difference);
+      return difference.magnitude;
+    }
     /**
      * For each dimension, moves the component to the minimum of this and the given vector
      */

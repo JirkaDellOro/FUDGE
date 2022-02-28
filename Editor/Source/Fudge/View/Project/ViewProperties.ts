@@ -9,14 +9,15 @@ namespace Fudge {
   export class ViewProperties extends View {
     private resource: ƒ.SerializableResource;
 
-    constructor(_container: GoldenLayout.Container, _state: Object) {
-      super(_container, _state); this.fillContent();
+    constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
+      super(_container, _state);
+      this.fillContent();
 
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent, true);
+      this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
       // this.dom.addEventListener(EVENT_EDITOR.FOCUS_RESOURCE, this.hndEvent);
       // this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
-      // this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
       // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
     }
 
@@ -65,7 +66,7 @@ namespace Fudge {
       let content: HTMLElement = document.createElement("div");
       content.style.whiteSpace = "nowrap";
       if (this.resource) {
-        this.setTitle(this.resource.name);
+        this.setTitle("Properties | " + this.resource.name);
         if (this.resource instanceof ƒ.Mutable) {
           let fieldset: ƒui.Details = ƒui.Generator.createDetailsFromMutable(this.resource);
           let uiMutable: ControllerComponent = new ControllerComponent(this.resource, fieldset);
@@ -86,19 +87,26 @@ namespace Fudge {
             content.innerHTML += key + ": " + value + "<br/>";
           }
         }
-
-        this.dom.append(content);
       }
+      else {
+        this.setTitle("Properties");
+        content.innerHTML = "Select an internal or external resource to examine properties";
+      }
+      this.dom.append(content);
     }
 
     private hndEvent = (_event: CustomEvent): void => {
       switch (_event.type) {
+        case EVENT_EDITOR.SET_PROJECT:
+          this.resource = undefined;
+          break;
         case ƒui.EVENT.SELECT:
           this.resource = _event.detail.data;
+          break;
         default:
-          this.fillContent();
           break;
       }
+      this.fillContent();
     }
   }
 }

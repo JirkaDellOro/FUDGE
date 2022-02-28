@@ -115,7 +115,7 @@ namespace FudgeCore {
      * @param _rect
      */
     public static setRenderRectangle(_rect: Rectangle): void {
-      Object.assign(RenderWebGL.rectRender, _rect);
+      RenderWebGL.rectRender.setPositionAndSize(_rect.x, _rect.y, _rect.width, _rect.height);
       RenderWebGL.crc3.viewport(_rect.x, _rect.y, _rect.width, _rect.height);
     }
 
@@ -247,7 +247,7 @@ namespace FudgeCore {
         let cmpMaterial: ComponentMaterial = _node.getComponent(ComponentMaterial);
         let cmpMesh: ComponentMesh = _node.getComponent(ComponentMesh);
 
-        let coat: Coat = cmpMaterial.material.getCoat();
+        let coat: Coat = cmpMaterial.material.coat;
         let shader: typeof Shader = coat instanceof CoatTextured ? ShaderPickTextured : ShaderPick;
 
         shader.useProgram();
@@ -257,8 +257,8 @@ namespace FudgeCore {
         RenderWebGL.getRenderingContext().uniform2fv(sizeUniformLocation, [RenderWebGL.sizePick, RenderWebGL.sizePick]);
 
         let mesh: Mesh = cmpMesh.mesh;
-        mesh.useRenderBuffers(shader, _mtxMeshToWorld, _mtxWorldToView, Render.ƒpicked.length);
-        RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, mesh.renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
+        let nIndices: number = mesh.useRenderBuffers(shader, _mtxMeshToWorld, _mtxWorldToView, Render.ƒpicked.length);
+        RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
 
         let pick: Pick = new Pick(_node);
         Render.ƒpicked.push(pick);
@@ -303,7 +303,8 @@ namespace FudgeCore {
             RenderWebGL.crc3.uniform4fv(uni[`u_directional[${i}].color`], cmpLight.light.color.getArray());
             let direction: Vector3 = Vector3.Z();
             direction.transform(cmpLight.mtxPivot, false);
-            direction.transform(cmpLight.getContainer().mtxWorld);
+            direction.transform(cmpLight.node.mtxWorld, false);
+            direction.normalize();
             RenderWebGL.crc3.uniform3fv(uni[`u_directional[${i}].direction`], direction.get());
           }
         }
@@ -314,13 +315,13 @@ namespace FudgeCore {
     /**
      * Draw a mesh buffer using the given infos and the complete projection matrix
      */
-    protected static drawMesh(_cmpMesh: ComponentMesh, cmpMaterial: ComponentMaterial, _mtxMeshToWorld: Matrix4x4, _mtxWorldToView: Matrix4x4): void {
+    protected static drawMesh(_cmpMesh: ComponentMesh, cmpMaterial: ComponentMaterial, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4): void {
       let shader: typeof Shader = cmpMaterial.material.getShader();
-      let coat: Coat = cmpMaterial.material.getCoat();
+      let coat: Coat = cmpMaterial.material.coat;
       shader.useProgram();
-      _cmpMesh.mesh.useRenderBuffers(shader, _mtxMeshToWorld, _mtxWorldToView);
+      let nIndices: number = _cmpMesh.mesh.useRenderBuffers(shader, _mtxMeshToWorld, _mtxMeshToView);
       coat.useRenderData(shader, cmpMaterial);
-      RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, _cmpMesh.mesh.renderBuffers.nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
+      RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
     }
 
 

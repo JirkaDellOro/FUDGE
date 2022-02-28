@@ -42,11 +42,10 @@ namespace HeightMap {
       let cornerBR: f.Node = this.getChildrenByName("BR")[0];
       let cornerBL: f.Node = this.getChildrenByName("BL")[0];
 
-      let posFL: f.PositionOnTerrain = this.meshTerrain.getPositionOnTerrain(cornerFL.mtxWorld.translation, this.terrain.mtxWorld);
-      let posFR: f.PositionOnTerrain = this.meshTerrain.getPositionOnTerrain(cornerFR.mtxWorld.translation, this.terrain.mtxWorld);
-
-      let posBR: f.PositionOnTerrain = this.meshTerrain.getPositionOnTerrain(cornerBR.mtxWorld.translation, this.terrain.mtxWorld);
-      let posBL: f.PositionOnTerrain = this.meshTerrain.getPositionOnTerrain(cornerBL.mtxWorld.translation, this.terrain.mtxWorld);
+      let posFL: f.TerrainInfo = this.meshTerrain.getTerrainInfo(cornerFL.mtxWorld.translation, this.terrain.mtxWorld);
+      let posFR: f.TerrainInfo = this.meshTerrain.getTerrainInfo(cornerFR.mtxWorld.translation, this.terrain.mtxWorld);
+      let posBR: f.TerrainInfo = this.meshTerrain.getTerrainInfo(cornerBR.mtxWorld.translation, this.terrain.mtxWorld);
+      let posBL: f.TerrainInfo = this.meshTerrain.getTerrainInfo(cornerBL.mtxWorld.translation, this.terrain.mtxWorld);
 
       let vecFrontAxis: f.Vector3 = f.Vector3.DIFFERENCE(posFL.position, posFR.position);
       let vecRearAxis: f.Vector3 = f.Vector3.DIFFERENCE(posBL.position, posBR.position);

@@ -21,7 +21,7 @@ namespace FudgeCore {
    * Defines a rectangle with position and size and add comfortable methods to it
    * @author Jirka Dell'Oro-Friedl, HFU, 2019
    */
-  export class Rectangle extends Mutable {
+  export class Rectangle extends Mutable implements Recycable {
     public position: Vector2 = Recycler.get(Vector2);
     public size: Vector2 = Recycler.get(Vector2);
 
@@ -112,8 +112,16 @@ namespace FudgeCore {
       this.size.y = this.position.y + _value;
     }
     
-    public get copy(): Rectangle {
+    public get clone(): Rectangle {
       return Rectangle.GET(this.x, this.y, this.width, this.height);
+    }
+
+    public recycle(): void {
+      this.setPositionAndSize();
+    }
+
+    public copy(_rect: Rectangle): void {
+      this.setPositionAndSize(_rect.x, _rect.y, _rect.width, _rect.height);
     }
 
     /**
@@ -134,7 +142,7 @@ namespace FudgeCore {
     }
 
     public pointToRect(_point: Vector2, _target: Rectangle): Vector2 {
-      let result: Vector2 = _point.copy;
+      let result: Vector2 = _point.clone;
       result.subtract(this.position);
       result.x *= _target.width / this.width;
       result.y *= _target.height / this.height;

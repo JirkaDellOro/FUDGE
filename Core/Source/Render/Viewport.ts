@@ -25,6 +25,7 @@ namespace FudgeCore {
 
     public adjustingFrames: boolean = true;
     public adjustingCamera: boolean = true;
+    public physicsDebugMode: PHYSICS_DEBUGMODE = PHYSICS_DEBUGMODE.NONE;
 
 
     #branch: Node = null; // The to render with all its descendants.
@@ -85,6 +86,7 @@ namespace FudgeCore {
      * Set the branch to be drawn in the viewport.
      */
     public setBranch(_branch: Node): void {
+      // TODO: figure out what the event handling was created for. Doesn't have another effect than information on the console (deactivated)
       if (this.#branch) {
         this.#branch.removeEventListener(EVENT.COMPONENT_ADD, this.hndComponentEvent);
         this.#branch.removeEventListener(EVENT.COMPONENT_REMOVE, this.hndComponentEvent);
@@ -132,10 +134,10 @@ namespace FudgeCore {
 
       Render.clear(this.camera.clrBackground);
 
-      if (Physics.settings?.debugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
+      if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
         Render.draw(this.camera);
-      if (Physics.settings?.debugDraw) {
-        Physics.world.draw(this.camera);
+      if (this.physicsDebugMode != PHYSICS_DEBUGMODE.NONE) {
+        Physics.world.draw(this.camera, this.physicsDebugMode);
       }
 
       this.#crc2.imageSmoothingEnabled = false;
@@ -167,10 +169,17 @@ namespace FudgeCore {
       let rectCanvas: Rectangle = this.frameClientToCanvas.getRect(rectClient);
       this.#canvas.width = rectCanvas.width;
       this.#canvas.height = rectCanvas.height;
+
+      let rectTemp: Rectangle;
       // adjust the destination area on the target-canvas to render to by applying the framing to canvas
-      this.rectDestination = this.frameCanvasToDestination.getRect(rectCanvas);
+      rectTemp = this.frameCanvasToDestination.getRect(rectCanvas);
+      this.rectDestination.copy(rectTemp);
+      Recycler.store(rectTemp);
       // adjust the area on the source-canvas to render from by applying the framing to destination area
-      this.rectSource = this.frameDestinationToSource.getRect(this.rectDestination);
+      rectTemp = this.frameDestinationToSource.getRect(this.rectDestination);
+      this.rectSource.copy(rectTemp);
+      Recycler.store(rectTemp);
+
       // having an offset source does make sense only when multiple viewports display parts of the same rendering. For now: shift it to 0,0
       this.rectSource.x = this.rectSource.y = 0;
       // still, a partial image of the rendering may be retrieved by moving and resizing the render viewport. For now, it's always adjusted to the current viewport
@@ -178,6 +187,10 @@ namespace FudgeCore {
       Render.setRenderRectangle(rectRender);
       // no more transformation after this for now, offscreen canvas and render-viewport have the same size
       Render.setCanvasSize(rectRender.width, rectRender.height);
+
+      Recycler.store(rectClient);
+      Recycler.store(rectCanvas);
+      Recycler.store(rectRender);
     }
     /**
      * Adjust the camera parameters to fit the rendering into the render vieport
@@ -200,7 +213,7 @@ namespace FudgeCore {
       // ray.direction.scale(camera.distance);
       ray.origin.transform(this.camera.mtxPivot);
       ray.direction.transform(this.camera.mtxPivot, false);
-      let cameraNode: Node = this.camera.getContainer();
+      let cameraNode: Node = this.camera.node;
       if (cameraNode) {
         ray.origin.transform(cameraNode.mtxWorld);
         ray.direction.transform(cameraNode.mtxWorld, false);
@@ -421,7 +434,8 @@ namespace FudgeCore {
     }
 
     private hndComponentEvent(_event: Event): void {
-      Debug.fudge(_event);
+      // TODO: find out what the idea was here...
+      // Debug.fudge(_event);
     }
     // #endregion
   }

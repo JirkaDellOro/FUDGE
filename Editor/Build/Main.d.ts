@@ -7,7 +7,11 @@ declare namespace Fudge {
         CREATE_MESH = 4,
         CREATE_MATERIAL = 5,
         CREATE_GRAPH = 6,
-        REMOVE_COMPONENT = 7
+        REMOVE_COMPONENT = 7,
+        ADD_JOINT = 8,
+        TRANSLATE = 9,
+        ROTATE = 10,
+        SCALE = 11
     }
     enum MENU {
         QUIT = "quit",
@@ -18,6 +22,7 @@ declare namespace Fudge {
         PANEL_GRAPH_OPEN = "panelGraphOpen",
         PANEL_ANIMATION_OPEN = "panelAnimationOpen",
         PANEL_PROJECT_OPEN = "panelProjectOpen",
+        PANEL_HELP_OPEN = "panelHelpOpen",
         FULLSCREEN = "fullscreen"
     }
     enum EVENT_EDITOR {
@@ -25,11 +30,15 @@ declare namespace Fudge {
         FOCUS_NODE = "focusNode",
         SET_PROJECT = "setProject",
         UPDATE = "update",
-        DESTROY = "destroy"
+        REFRESH = "refresh",
+        DESTROY = "destroy",
+        CLEAR_PROJECT = "clearProject",
+        TRANSFORM = "transform"
     }
     enum PANEL {
         GRAPH = "PanelGraph",
-        PROJECT = "PanelProject"
+        PROJECT = "PanelProject",
+        HELP = "PanelHelp"
     }
     enum VIEW {
         HIERARCHY = "ViewHierarchy",
@@ -42,6 +51,11 @@ declare namespace Fudge {
         PROPERTIES = "ViewProperties",
         PREVIEW = "ViewPreview",
         SCRIPT = "ViewScript"
+    }
+    enum TRANSFORM {
+        TRANSLATE = "translate",
+        ROTATE = "rotate",
+        SCALE = "scale"
     }
 }
 /**

@@ -13,7 +13,7 @@ namespace Fudge {
   export class ViewInternal extends View {
     private table: ƒui.Table<ƒ.SerializableResource>;
 
-    constructor(_container: GoldenLayout.Container, _state: Object) {
+    constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
 
       this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
@@ -25,8 +25,18 @@ namespace Fudge {
 
     public listResources(): void {
       while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild));
-      this.table = new ƒui.Table<ƒ.SerializableResource>(new ControllerTableResource(), Object.values(ƒ.Project.resources));
+      this.table = new ƒui.Table<ƒ.SerializableResource>(new ControllerTableResource(), Object.values(ƒ.Project.resources), "type");
       this.dom.appendChild(this.table);
+      this.dom.title = "● Right click to create new resource.\n● Select or drag resource.";
+      this.table.title = `● Select to edit in "Properties"\n●  Drag to "Properties" or "Components" to use if applicable.`;
+
+      for (let tr of this.table.querySelectorAll("tr")) {
+        let tds: NodeListOf<HTMLTableCellElement> = tr.querySelectorAll("td");
+        if (!tds.length)
+          continue;
+        tds[1].classList.add("icon");
+        tds[1].setAttribute("icon", (<HTMLInputElement>tds[1].children[0]).value);
+      }
     }
 
     public getSelection(): ƒ.SerializableResource[] {
@@ -45,13 +55,13 @@ namespace Fudge {
 
       item = new remote.MenuItem({
         label: "Create Mesh",
-        submenu: ContextMenu.getSubclassMenu<typeof ƒ.Mesh>(CONTEXTMENU.CREATE_MESH, ƒ.Mesh.subclasses, _callback)
+        submenu: ContextMenu.getSubclassMenu(CONTEXTMENU.CREATE_MESH, ƒ.Mesh, _callback)
       });
       menu.append(item);
 
       item = new remote.MenuItem({
         label: "Create Material",
-        submenu: ContextMenu.getSubclassMenu<typeof ƒ.Shader>(CONTEXTMENU.CREATE_MATERIAL, ƒ.Shader.subclasses, _callback)
+        submenu: ContextMenu.getSubclassMenu(CONTEXTMENU.CREATE_MATERIAL, ƒ.Shader, _callback)
       });
       menu.append(item);
 
@@ -63,16 +73,16 @@ namespace Fudge {
     }
 
     protected async contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): Promise<void> {
+      let choice: CONTEXTMENU = Number(_item.id);
       ƒ.Debug.fudge(`MenuSelect | id: ${CONTEXTMENU[_item.id]} | event: ${_event}`);
       let iSubclass: number = _item["iSubclass"];
+      if (choice != CONTEXTMENU.CREATE_GRAPH && !iSubclass) {
+        alert("Funky Electron-Error... please try again");
+        return;
+      }
 
-      switch (Number(_item.id)) {
+      switch (choice) {
         case CONTEXTMENU.CREATE_MESH:
-          if (!iSubclass) {
-            alert("Funky Electron-Error... please try again");
-            return;
-          }
-
           let typeMesh: typeof ƒ.Mesh = ƒ.Mesh.subclasses[iSubclass];
           //@ts-ignore
           let meshNew: ƒ.Mesh = new typeMesh();
@@ -80,12 +90,8 @@ namespace Fudge {
           this.table.selectInterval(meshNew, meshNew);
           break;
         case CONTEXTMENU.CREATE_MATERIAL:
-          if (!iSubclass) {
-            alert("Funky Electron-Error... please try again");
-            return;
-          }
           let typeShader: typeof ƒ.Shader = ƒ.Shader.subclasses[iSubclass];
-          let mtrNew: ƒ.Material = new ƒ.Material("NewMaterial", typeShader);
+          let mtrNew: ƒ.Material = new ƒ.Material(typeShader.name, typeShader);
           this.dom.dispatchEvent(new Event(EVENT_EDITOR.UPDATE, { bubbles: true }));
           this.table.selectInterval(mtrNew, mtrNew);
           break;
@@ -113,7 +119,7 @@ namespace Fudge {
       if (_viewSource instanceof ViewExternal) {
         let sources: DirectoryEntry[] = _viewSource.getDragDropSources();
         for (let source of sources)
-          if (source.getMimeType() != MIME.AUDIO && source.getMimeType() != MIME.IMAGE)
+          if (source.getMimeType() != MIME.AUDIO && source.getMimeType() != MIME.IMAGE && source.getMimeType() != MIME.MESH)
             return;
       }
 
@@ -137,6 +143,9 @@ namespace Fudge {
               break;
             case MIME.IMAGE:
               console.log(new ƒ.TextureImage(source.pathRelative));
+              break;
+            case MIME.MESH:
+              console.log(new ƒ.MeshObj(null, source.pathRelative));
               break;
           }
         }

@@ -41,10 +41,12 @@ namespace FudgeCore {
         pivot: this.mtxPivot.serialize(),
         light: Serializer.serialize(this.light)
       };
+      serialization[super.constructor.name] = super.serialize();
       return serialization;
     }
 
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
+      await super.deserialize(_serialization[super.constructor.name]);
       await this.mtxPivot.deserialize(_serialization.pivot);
       this.light = await <Promise<Light>>Serializer.deserialize(_serialization.light);
       return this;

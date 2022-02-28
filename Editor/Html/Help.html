@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Help</title>
+  <link type="text/css" rel="stylesheet" href="Base.css" />
+  <link type="text/css" rel="stylesheet" href="../Themes/Black/Colors.css" />
+  <style>
+    * {
+      margin: 0px;
+      padding: 0px;
+    }
+
+    body {
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    details {
+      overflow: hidden;
+      float: right;
+    }
+
+    a {
+      color: var(--color-bright);
+    }
+
+    p {
+      margin-bottom: 0.5em;
+    }
+
+    ol {
+      list-style-position: outside;
+      list-style-type: none;
+      counter-reset: item;
+    }
+
+    li {
+      display: flex;
+      position: relative;
+      left: 1em;
+      margin-bottom: 0.5em;
+      margin-right: 1em;
+    }
+
+    details {
+      display: inline;
+    }
+
+    ol>li {
+      counter-increment: item;
+    }
+
+    ol>li::before {
+      content: counters(item, '.');
+      vertical-align: top;
+      margin-right: 0.5em;
+    }
+
+    img {
+      margin: 0em 2em;
+    }
+
+    @media (min-width: 950px) {
+      img {
+        float: right;
+      }
+    }
+
+    summary {
+      margin-bottom: 0.5em;
+    }
+
+    span {
+      display: table;
+      width: 7em;
+    }
+  </style>
+</head>
+
+<body class="lm_content">
+  <p>
+  <h1>Welcome to FUDGE</h1>
+  </p>
+  <p>
+    This help-panel offers an introduction to the editor and how to work with it. For an introduction to the engine
+    visit the <a href="https://jirkadelloro.github.io/FUDGE/" target="_blank">start page</a> or the <a
+      href="https://github.com/JirkaDellOro/FUDGE/wiki" target="_blank">Wiki</a>.<br />
+    Click on the headlines for details.
+  </p>
+
+  <ol>
+    <li>
+      <details>
+        <summary>
+          General interface concepts
+        </summary>
+        <ol>
+          <li>Open the various editor panels using "Edit" in the main menu or the keyboard shortcuts.</li>
+          <li>A panel consists of multiple views that control specific sets of data.</li>
+          <li>Hover on a view with the mousecursor to get further instructions.</li>
+          <li>Control the views mostly by drag & drop and context menus (right mouseclick).</li>
+          <li>Control numeric inputs by selecting digits with the mouse or the arrowkeys and use the mousewheel or arrow
+            keys to alter. Press F2 to input a full new value or just start typing when the input field is selected.
+          </li>
+        </ol>
+      </details>
+    </li>
+    <li>
+      <details>
+        <summary>
+          Start a project
+        </summary>
+        <ol>
+          <li>Select "New" under "Project" in the main menu.</li>
+          <li>Choose or create an empty folder, the folder's name becomes your project's name.</li>
+          <li>Review the project settings and hit "OK".</li>
+          <li>The project panel and the graph panel open and display the current state of your new project (which is
+            empty).</li>
+        </ol>
+      </details>
+    </li>
+    <li>
+      <details>
+        <summary>
+          Project Panel
+        </summary>
+        <img src="Image/Project.png" alt="PanelProject">
+        <ol>
+          <li><span>External</span> View the files in the project. Serves as a starting point to use external
+            files like images or sounds via drag&drop to the view "Internal".</li>
+          <li><span>Internal</span> View the internal resources of the project that will be serialized to the file
+            "Internal.json". Drag & drop internal resources to the appropriate locations to use them. Drop a branch from
+            a "Hierarchy" view here to create a graph as a resource.</li>
+          <li><span>Preview</span> Renders a preview of the resource selected in the views "Interal" or
+            "External".</li>
+          <li><span>Properties</span> Displays the properties of the selected resource. Offers drop-locations for
+            internal resources.</li>
+          <li><span>Script</span> Shows a list of custom scripts available in the project. Drop on "Graph|Components" to
+            attach to a node.</li>
+        </ol>
+      </details>
+    </li>
+    <li>
+      <details>
+        <summary>
+          Graph Panel
+        </summary>
+        <ol>
+          <img src="Image/Graph.png" alt="PanelGraph">
+          <li><span>Render</span> Drop a graph from "Project|Internal" here to edit.
+            Navigate the editor camera to view the rendering of the graph. Select nodes by clicking and use the keyboard
+            together with the mouse to manipulate transformations.</li>
+          <li><span>Hierarchy</span> View the graph as a hierarchical tree. Create new nodes and manipulate the
+            parent child relationsships</li>
+          <li><span>Components</span> View the components attached to the selected node. Manipulate by adjusting
+            values, dropping internal resources or using mouse-movement in the Render-View.</li>
+        </ol>
+      </details>
+    </li>
+  </ol>
+</body>
+
+</html>

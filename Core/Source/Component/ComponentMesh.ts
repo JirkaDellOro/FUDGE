@@ -6,7 +6,7 @@ namespace FudgeCore {
   export class ComponentMesh extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentMesh);
     public mtxPivot: Matrix4x4 = Matrix4x4.IDENTITY();
-    public mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY();
+    public readonly mtxWorld: Matrix4x4 = Matrix4x4.IDENTITY();
     public mesh: Mesh = null;
 
     public constructor(_mesh: Mesh = null) {
