@@ -18,24 +18,11 @@ namespace FudgeCore {
 
     protected static injectCoatTextured(this: Coat, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void {
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
-      // if (this.renderData) {
-      // buffers exist
-      // TODO: find a way to use inheritance through decorator, thus calling methods injected in superclass
-      let colorUniformLocation: WebGLUniformLocation = _shader.uniforms["u_color"];
-      let color: Color = Color.MULTIPLY((<CoatTextured>this).color, _cmpMaterial.clrPrimary);
-      RenderWebGL.getRenderingContext().uniform4fv(colorUniformLocation, color.getArray());
+      Reflect.apply(RenderInjectorCoat.injectCoatColored, this, [_shader, _cmpMaterial]);
 
-      // crc3.activeTexture(WebGL2RenderingContext.TEXTURE0);
-      // crc3.bindTexture(WebGL2RenderingContext.TEXTURE_2D, this.renderData["texture0"]);
       (<CoatTextured>this).texture.useRenderData();
       crc3.uniform1i(_shader.uniforms["u_texture"], 0);
       crc3.uniformMatrix3fv(_shader.uniforms["u_pivot"], false, _cmpMaterial.mtxPivot.get());
-      // }
-      // else {
-      //   this.renderData = {};
-      //   (<CoatTextured>this).texture.useRenderData();
-      //   this.useRenderData(_shader, _cmpMaterial);
-      // }
     }
 
     protected static injectCoatMatCap(this: Coat, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void {

@@ -324,7 +324,7 @@ namespace FudgeCore {
       coat.useRenderData(shader, cmpMaterial);
       let uCamera: WebGLUniformLocation = shader.uniforms["u_camera"];
       if (uCamera)
-        RenderWebGL.crc3.uniformMatrix4fv(uCamera, false, _cmpCamera.mtxWorld.get());
+        RenderWebGL.crc3.uniform3fv(uCamera, _cmpCamera.mtxWorld.translation.get());
       RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);
     }
   }

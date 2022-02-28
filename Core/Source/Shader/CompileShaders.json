@@ -27,7 +27,8 @@
     "register": "true",
     "define": [
       "LIGHT",
-      "FLAT"
+      "FLAT",
+      "CAMERA"
     ]
   },
   "ShaderFlatTextured": {
@@ -40,7 +41,8 @@
     "define": [
       "LIGHT",
       "FLAT",
-      "TEXTURE"
+      "TEXTURE",
+      "CAMERA"
     ]
   },
   "ShaderGouraud": {
@@ -52,7 +54,8 @@
     "register": "true",
     "define": [
       "LIGHT",
-      "GOURAUD"
+      "GOURAUD",
+      "CAMERA"
     ]
   },
   "ShaderGouraudTextured": {
@@ -65,7 +68,8 @@
     "define": [
       "LIGHT",
       "GOURAUD",
-      "TEXTURE"
+      "TEXTURE",
+      "CAMERA"
     ]
   },
   "ShaderPhong": {

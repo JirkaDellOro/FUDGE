@@ -10,6 +10,7 @@ export abstract class ShaderGouraud extends Shader {
 return `#version 300 es
 #define LIGHT
 #define GOURAUD
+#define CAMERA
 
 /**
 * Universal Shader as base for many others. Controlled by compiler directives
@@ -58,58 +59,57 @@ out vec2 v_textureUVs;
   // GOURAUD: offer buffers for vertex normals, their transformation and the shininess
   #if defined(GOURAUD)
 in vec3 a_normalVertex;
-uniform mat4 u_world;
 uniform mat4 u_normal;
-uniform float u_shininess;
   #endif
 
-vec4 calculateReflection(vec4 ambientCol, vec3 light_dir, vec3 view_dir, vec3 normal, float shininess) {
-  vec4 color = ambientCol;
-  vec3 R = reflect(-light_dir, normal);
-  float spec_dot = max(dot(R, view_dir), 0.0);
+  // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
+  #if defined(CAMERA)
+uniform float u_shininess;
+uniform mat4 u_world;
+uniform vec3 u_camera;
 
-  if(shininess < 0.0)
-    shininess = 0.0;
-    
-  if(spec_dot > 0.0)
-    color += pow(spec_dot, shininess) * vec4(1);
-
-  return color;
+float calculateReflection(vec3 light_dir, vec3 view_dir, vec3 normal, float shininess) {
+  vec3 reflection = max(reflect(-light_dir, normal), 0.0);
+  float spec_dot = dot(reflection, view_dir);
+  return pow(max(spec_dot, 0.0), shininess);
 }
+  #endif
 
 void main() {
+  vec4 posVertex;
 
-    // FLAT: calculate flat shading
     #if defined(FLAT)
-  gl_Position = u_projection * vec4(a_positionFlat, 1.0);
+    // FLAT: use the special vertex and normal buffers for flat shading
+  posVertex = vec4(a_positionFlat, 1.0);
   vec3 normal = normalize(mat3(u_normal) * a_normalFace);
   v_color = u_ambient.color;
+    #else 
+  posVertex = vec4(a_position, 1.0);
+    #endif
+
+    // use the regular vertex buffer
+  gl_Position = u_projection * posVertex;
+
+    // GOURAUD: use the vertex normals
+    #if defined(GOURAUD)
+  v_color = u_ambient.color;
+  vec3 normal = normalize(mat3(u_normal) * a_normalVertex);
+    #endif
+
+    #if defined(LIGHT)
+  // calculate the directional lighting effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
     float illumination = -dot(normal, u_directional[i].direction);
     if(illumination > 0.0f)
       v_color += illumination * u_directional[i].color;
   }
-    #else
-  gl_Position = u_projection * vec4(a_position, 1.0);
     #endif
 
-    // GOURAUD: calculate gouraud lighting on vertices
-    #if defined(GOURAUD)
-  vec4 v_position4 = u_world * vec4(a_position, 1);
-  vec3 v_position = vec3(v_position4) / v_position4.w;
-  vec3 N = normalize(vec3(u_normal * vec4(a_normalVertex, 0)));
-  vec3 view_dir = normalize(v_position);
-
-  v_color = u_ambient.color;
+    #if defined(CAMERA)
+  vec3 view_dir = normalize(vec3(u_world * posVertex) - u_camera);
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
-    vec3 light_dir = normalize(-u_directional[i].direction);
-    float illuminance = dot(light_dir, N);
-
-    if(illuminance > 0.0) {
-      // vec4 reflection = calculateReflection(v_color, light_dir, view_dir, N, u_shininess);
-      // v_color += vec4(reflection) * illuminance * u_directional[i].color;
-      v_color += illuminance * u_directional[i].color;
-    }
+    float reflection = calculateReflection(u_directional[i].direction, view_dir, normal, u_shininess);
+    // v_color = /* (1.0 - reflection) * */ v_color + reflection * u_directional[i].color;
   }
     #endif
 
@@ -127,6 +127,7 @@ void main() {
 return `#version 300 es
 #define LIGHT
 #define GOURAUD
+#define CAMERA
 
 /**
 * Universal Shader as base for many others. Controlled by compiler directives

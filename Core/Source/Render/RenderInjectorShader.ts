@@ -18,7 +18,6 @@ namespace FudgeCore {
         this.createProgram();
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
       crc3.useProgram(this.program);
-      crc3.enableVertexAttribArray(this.attributes["a_position"]);
     }
 
     public static deleteProgram(this: typeof Shader): void {
