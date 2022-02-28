@@ -88,7 +88,10 @@ namespace FudgeCore {
           return;
         crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, _buffer);
         crc3.enableVertexAttribArray(attribute);
-        RenderWebGL.setAttributeStructure(attribute, Mesh.getBufferSpecification());
+        RenderWebGL.setAttributeStructure(
+          attribute,
+          { size: 3, dataType: WebGL2RenderingContext.FLOAT, normalize: false, stride: 0, offset: 0 }
+        );
       }
 
       let uProjection: WebGLUniformLocation = _shader.uniforms["u_projection"];

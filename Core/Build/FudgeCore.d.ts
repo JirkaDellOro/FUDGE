@@ -3463,7 +3463,6 @@ declare namespace FudgeCore {
         /** bounding radius */
         protected ƒradius: number;
         constructor(_name?: string);
-        static getBufferSpecification(): BufferSpecification;
         protected static registerSubclass(_subClass: typeof Mesh): number;
         get type(): string;
         get vertices(): Float32Array;

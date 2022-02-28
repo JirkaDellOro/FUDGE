@@ -60,10 +60,6 @@ namespace FudgeCore {
       Project.register(this);
     }
 
-    public static getBufferSpecification(): BufferSpecification {
-      return { size: 3, dataType: WebGL2RenderingContext.FLOAT, normalize: false, stride: 0, offset: 0 };
-    }
-
     protected static registerSubclass(_subClass: typeof Mesh): number { return Mesh.subclasses.push(_subClass) - 1; }
 
     public get type(): string {
