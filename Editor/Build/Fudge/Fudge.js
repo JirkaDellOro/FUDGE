@@ -3029,7 +3029,7 @@ var Fudge;
             return mtrStandard;
         }
         static createStandardMesh() {
-            let meshStandard = new ƒ.MeshSphere("Sphere", 6, 5);
+            let meshStandard = new ƒ.MeshSphere("Sphere", 20, 12);
             ƒ.Project.deregister(meshStandard);
             return meshStandard;
         }

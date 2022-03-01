@@ -45,7 +45,7 @@ namespace Fudge {
     }
 
     private static createStandardMesh(): ƒ.Mesh {
-      let meshStandard: ƒ.MeshSphere = new ƒ.MeshSphere("Sphere", 6, 5);
+      let meshStandard: ƒ.MeshSphere = new ƒ.MeshSphere("Sphere", 20, 12);
       ƒ.Project.deregister(meshStandard);
       return meshStandard;
     }

@@ -41,11 +41,13 @@ namespace FudgeCore {
     public serialize(): Serialization {
       let serialization: Serialization = super.serialize();
       serialization.color = this.color.serialize();
+      serialization.shininess = this.shininess;
       return serialization;
     }
     public async deserialize(_serialization: Serialization): Promise<Serializable> {
       await super.deserialize(_serialization);
       await this.color.deserialize(_serialization.color);
+      this.shininess = _serialization.shininess;
       return this;
     }
     //#endregion
