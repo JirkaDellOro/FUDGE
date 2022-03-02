@@ -33,11 +33,11 @@ out vec4 v_vctColor;
 // LIGHT: offer buffers for lighting vertices with different light types
   #if defined(LIGHT)
 struct LightAmbient {
-  vec4 color;
+  vec4 vctColor;
 };
 struct LightDirectional {
-  vec4 color;
-  vec3 direction;
+  vec4 vctColor;
+  vec3 vctDirection;
 };
 
 const uint MAX_LIGHTS_DIRECTIONAL = 100u;
@@ -83,7 +83,7 @@ void main() {
     // FLAT: use the special vertex and normal buffers for flat shading
   posVertex = vec4(a_vctPositionFlat, 1.0);
   vec3 normal = normalize(mat3(u_mtxNormal) * a_vctNormalFace);
-  v_vctColor = u_ambient.color;
+  v_vctColor = u_ambient.vctColor;
     #else 
   posVertex = vec4(a_vctPosition, 1.0);
     #endif
@@ -93,21 +93,21 @@ void main() {
 
     // GOURAUD: use the vertex normals
     #if defined(GOURAUD)
-  v_vctColor = u_ambient.color;
+  v_vctColor = u_ambient.vctColor;
   vec3 normal = normalize(mat3(u_mtxNormal) * a_vctNormalVertex);
     #endif
 
     #if defined(LIGHT)
   // calculate the directional lighting effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
-    float illumination = -dot(normal, u_directional[i].direction);
+    float illumination = -dot(normal, u_directional[i].vctDirection);
     if(illumination > 0.0f) {
-      v_vctColor += illumination * u_directional[i].color;
+      v_vctColor += illumination * u_directional[i].vctColor;
         #if defined(CAMERA)
       vec3 view_dir = normalize(vec3(u_mtxWorld * posVertex) - u_vctCamera);
       // for(uint i = 0u; i < u_nLightsDirectional; i++) {
-      float reflection = calculateReflection(u_directional[i].direction, view_dir, normal, u_fShininess);
-      v_vctColor += reflection * u_directional[i].color;
+      float reflection = calculateReflection(u_directional[i].vctDirection, view_dir, normal, u_fShininess);
+      v_vctColor += reflection * u_directional[i].vctColor;
         #endif
     }
   }

@@ -277,7 +277,7 @@ namespace FudgeCore {
       let uni: { [name: string]: WebGLUniformLocation } = _shader.uniforms;
 
       // Ambient
-      let ambient: WebGLUniformLocation = uni["u_ambient.color"];
+      let ambient: WebGLUniformLocation = uni["u_ambient.vctColor"];
       if (ambient) {
         RenderWebGL.crc3.uniform4fv(ambient, [0, 0, 0, 0]);
         let cmpLights: ComponentLight[] = _lights.get(LightAmbient);
@@ -300,12 +300,12 @@ namespace FudgeCore {
           RenderWebGL.crc3.uniform1ui(nDirectional, n);
           for (let i: number = 0; i < n; i++) {
             let cmpLight: ComponentLight = cmpLights[i];
-            RenderWebGL.crc3.uniform4fv(uni[`u_directional[${i}].color`], cmpLight.light.color.getArray());
+            RenderWebGL.crc3.uniform4fv(uni[`u_directional[${i}].vctColor`], cmpLight.light.color.getArray());
             let direction: Vector3 = Vector3.Z();
             direction.transform(cmpLight.mtxPivot, false);
             direction.transform(cmpLight.node.mtxWorld, false);
             direction.normalize();
-            RenderWebGL.crc3.uniform3fv(uni[`u_directional[${i}].direction`], direction.get());
+            RenderWebGL.crc3.uniform3fv(uni[`u_directional[${i}].vctDirection`], direction.get());
           }
         }
       }
