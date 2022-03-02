@@ -15,7 +15,7 @@ uniform mat4 u_mtxNormal;
 flat out vec4 v_vctColor;
   #else
   // regular if not FLAT
-in vec3 a_position;
+in vec3 a_vctPosition;
 out vec4 v_vctColor;
   #endif
 
@@ -74,7 +74,7 @@ void main() {
   vec3 normal = normalize(mat3(u_mtxNormal) * a_vctNormalFace);
   v_vctColor = u_ambient.color;
     #else 
-  posVertex = vec4(a_position, 1.0);
+  posVertex = vec4(a_vctPosition, 1.0);
     #endif
 
     // use the regular vertex buffer

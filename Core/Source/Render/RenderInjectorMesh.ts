@@ -94,7 +94,7 @@ namespace FudgeCore {
         crc3.uniformMatrix4fv(uNormal, false, normalMatrix.get());
       }
 
-      setBuffer("a_position", this.renderBuffers.vertices);
+      setBuffer("a_vctPosition", this.renderBuffers.vertices);
       setBuffer("a_vctPositionFlat", this.renderBuffers.verticesFlat);
       setBuffer("a_vctNormalFace", this.renderBuffers.normalsFlat);
       setBuffer("a_normalVertex", this.renderBuffers.normalsVertex);
