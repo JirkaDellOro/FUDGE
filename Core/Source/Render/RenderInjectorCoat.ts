@@ -22,7 +22,7 @@ namespace FudgeCore {
 
       (<CoatTextured>this).texture.useRenderData();
       crc3.uniform1i(_shader.uniforms["u_texture"], 0);
-      crc3.uniformMatrix3fv(_shader.uniforms["u_pivot"], false, _cmpMaterial.mtxPivot.get());
+      crc3.uniformMatrix3fv(_shader.uniforms["u_mtxPivot"], false, _cmpMaterial.mtxPivot.get());
     }
 
     protected static injectCoatMatCap(this: Coat, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void {
