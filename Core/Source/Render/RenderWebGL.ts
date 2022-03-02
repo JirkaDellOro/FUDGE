@@ -253,7 +253,7 @@ namespace FudgeCore {
         shader.useProgram();
         coat.useRenderData(shader, cmpMaterial);
 
-        let sizeUniformLocation: WebGLUniformLocation = shader.uniforms["u_size"];
+        let sizeUniformLocation: WebGLUniformLocation = shader.uniforms["u_vctSize"];
         RenderWebGL.getRenderingContext().uniform2fv(sizeUniformLocation, [RenderWebGL.sizePick, RenderWebGL.sizePick]);
 
         let mesh: Mesh = cmpMesh.mesh;

@@ -139,7 +139,7 @@ return `#version 300 es
 precision mediump float;
 
   // MINIMAL (no define needed): include base color
-uniform vec4 u_vecColor;
+uniform vec4 u_vctColor;
 
   // FLAT: input vertex colors flat, so the third of a triangle determines the color
   #if defined(FLAT) 
@@ -155,25 +155,25 @@ in vec2 v_vctTexture;
 uniform sampler2D u_texture;
   #endif
 
-out vec4 frag;
+out vec4 vctFrag;
 
 void main() {
     // MINIMAL: set the base color
-  frag = u_vecColor;
+  vctFrag = u_vctColor;
 
     // VERTEX: multiply with vertex color
     #if defined(FLAT) || defined(LIGHT)
-  frag *= v_vctColor;
+  vctFrag *= v_vctColor;
     #endif
 
     // TEXTURE: multiply with texel color
     #if defined(TEXTURE)
   vec4 colorTexture = texture(u_texture, v_vctTexture);
-  frag *= colorTexture;
+  vctFrag *= colorTexture;
     #endif
 
     // discard pixel alltogether when transparent: don't show in Z-Buffer
-  if(frag.a < 0.01)
+  if(vctFrag.a < 0.01)
     discard;
 }
 `; }

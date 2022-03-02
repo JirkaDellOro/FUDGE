@@ -57,7 +57,7 @@ uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
 
 in vec3 f_normal;
 in vec3 v_position;
-uniform vec4 u_vecColor;
+uniform vec4 u_vctColor;
 uniform float u_fShininess;
 out vec4 frag;
 
@@ -82,7 +82,7 @@ void main() {
             frag += vec4(reflection, 1.0) * illuminance * u_directional[i].color;
         }
     }
-    frag *= u_vecColor;
+    frag *= u_vctColor;
     frag.a = 1.0;
 }       
 `; }
