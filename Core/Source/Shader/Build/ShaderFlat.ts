@@ -23,7 +23,7 @@ uniform mat4 u_mtxProjection;
   // FLAT: offer buffers for face normals and their transformation
   #if defined(FLAT)
 in vec3 a_vctPositionFlat;
-in vec3 a_normalFace;
+in vec3 a_vctNormalFace;
 uniform mat4 u_normal;
 flat out vec4 v_color;
   #else
@@ -84,7 +84,7 @@ void main() {
     #if defined(FLAT)
     // FLAT: use the special vertex and normal buffers for flat shading
   posVertex = vec4(a_vctPositionFlat, 1.0);
-  vec3 normal = normalize(mat3(u_normal) * a_normalFace);
+  vec3 normal = normalize(mat3(u_normal) * a_vctNormalFace);
   v_color = u_ambient.color;
     #else 
   posVertex = vec4(a_position, 1.0);

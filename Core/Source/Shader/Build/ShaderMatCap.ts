@@ -14,7 +14,7 @@ return `#version 300 es
 * @authors Simon Storl-Schulke, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
 */
 in vec3 a_position;
-in vec3 a_normalFace;
+in vec3 a_vctNormalFace;
 
 uniform mat4 u_mtxProjection;
 
@@ -22,7 +22,7 @@ out vec2 texcoords_smooth;
 flat out vec2 texcoords_flat;
 
 void main() {
-    texcoords_smooth = normalize(mat3(u_mtxProjection) * a_normalFace).xy * 0.5 - 0.5;
+    texcoords_smooth = normalize(mat3(u_mtxProjection) * a_vctNormalFace).xy * 0.5 - 0.5;
     texcoords_flat = texcoords_smooth;
     gl_Position = u_mtxProjection * vec4(a_position, 1.0);
 }
