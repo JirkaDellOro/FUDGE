@@ -66,7 +66,7 @@ uniform mat4 u_mtxNormal;
   #if defined(CAMERA)
 uniform float u_fShininess;
 uniform mat4 u_mtxWorld;
-uniform vec3 u_camera;
+uniform vec3 u_vctCamera;
 
 float calculateReflection(vec3 light_dir, vec3 view_dir, vec3 normal, float shininess) {
   if(shininess <= 0.0)
@@ -106,7 +106,7 @@ void main() {
     if(illumination > 0.0f) {
       v_vctColor += illumination * u_directional[i].color;
         #if defined(CAMERA)
-      vec3 view_dir = normalize(vec3(u_mtxWorld * posVertex) - u_camera);
+      vec3 view_dir = normalize(vec3(u_mtxWorld * posVertex) - u_vctCamera);
       // for(uint i = 0u; i < u_nLightsDirectional; i++) {
       float reflection = calculateReflection(u_directional[i].direction, view_dir, normal, u_fShininess);
       v_vctColor += reflection * u_directional[i].color;
@@ -139,7 +139,7 @@ return `#version 300 es
 precision mediump float;
 
   // MINIMAL (no define needed): include base color
-uniform vec4 u_color;
+uniform vec4 u_vecColor;
 
   // FLAT: input vertex colors flat, so the third of a triangle determines the color
   #if defined(FLAT) 
@@ -159,7 +159,7 @@ out vec4 frag;
 
 void main() {
     // MINIMAL: set the base color
-  frag = u_color;
+  frag = u_vecColor;
 
     // VERTEX: multiply with vertex color
     #if defined(FLAT) || defined(LIGHT)

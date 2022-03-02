@@ -7,7 +7,7 @@
 precision mediump float;
 
   // MINIMAL (no define needed): include base color
-uniform vec4 u_color;
+uniform vec4 u_vecColor;
 
   // FLAT: input vertex colors flat, so the third of a triangle determines the color
   #if defined(FLAT) 
@@ -27,7 +27,7 @@ out vec4 frag;
 
 void main() {
     // MINIMAL: set the base color
-  frag = u_color;
+  frag = u_vecColor;
 
     // VERTEX: multiply with vertex color
     #if defined(FLAT) || defined(LIGHT)

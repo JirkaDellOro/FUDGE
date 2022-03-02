@@ -322,7 +322,7 @@ namespace FudgeCore {
       shader.useProgram();
       let nIndices: number = _cmpMesh.mesh.useRenderBuffers(shader, _cmpMesh.mtxWorld, mtxMeshToView);
       coat.useRenderData(shader, cmpMaterial);
-      let uCamera: WebGLUniformLocation = shader.uniforms["u_camera"];
+      let uCamera: WebGLUniformLocation = shader.uniforms["u_vctCamera"];
       if (uCamera)
         RenderWebGL.crc3.uniform3fv(uCamera, _cmpCamera.mtxWorld.translation.get());
       RenderWebGL.crc3.drawElements(WebGL2RenderingContext.TRIANGLES, nIndices, WebGL2RenderingContext.UNSIGNED_SHORT, 0);

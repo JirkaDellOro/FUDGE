@@ -53,7 +53,7 @@ uniform mat4 u_mtxNormal;
   #if defined(CAMERA)
 uniform float u_fShininess;
 uniform mat4 u_mtxWorld;
-uniform vec3 u_camera;
+uniform vec3 u_vctCamera;
 
 float calculateReflection(vec3 light_dir, vec3 view_dir, vec3 normal, float shininess) {
   if(shininess <= 0.0)
@@ -93,7 +93,7 @@ void main() {
     if(illumination > 0.0f) {
       v_vctColor += illumination * u_directional[i].color;
         #if defined(CAMERA)
-      vec3 view_dir = normalize(vec3(u_mtxWorld * posVertex) - u_camera);
+      vec3 view_dir = normalize(vec3(u_mtxWorld * posVertex) - u_vctCamera);
       // for(uint i = 0u; i < u_nLightsDirectional; i++) {
       float reflection = calculateReflection(u_directional[i].direction, view_dir, normal, u_fShininess);
       v_vctColor += reflection * u_directional[i].color;
