@@ -18,7 +18,7 @@ in vec4 v_vctColor;
   #endif
 
   // TEXTURE: input UVs and texture
-  #if defined(TEXTURE)
+  #if defined(TEXTURE) || defined(MATCAP)
 in vec2 v_vctTexture;
 uniform sampler2D u_texture;
   #endif
@@ -35,7 +35,7 @@ void main() {
     #endif
 
     // TEXTURE: multiply with texel color
-    #if defined(TEXTURE)
+    #if defined(TEXTURE) || defined(MATCAP)
   vec4 vctColorTexture = texture(u_texture, v_vctTexture);
   vctFrag *= vctColorTexture;
     #endif

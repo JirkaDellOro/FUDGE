@@ -56,30 +56,30 @@ namespace FudgeCore {
   /**
    * A {@link Coat} to be used by the MatCap Shader providing a texture, a tint color (0.5 grey is neutral). Set shadeSmooth to 1 for smooth shading.
    */
-  @RenderInjectorCoat.decorate
-  export class CoatMatCap extends Coat {
-    public texture: TextureImage = null;
-    public color: Color = new Color();
-    public shadeSmooth: number;
+  // @RenderInjectorCoat.decorate
+  // export class CoatMatCap extends Coat {
+  //   public texture: TextureImage = null;
+  //   public color: Color = new Color();
+  //   public shadeSmooth: number;
 
-    constructor(_texture?: TextureImage, _color?: Color, _shadeSmooth?: number) {
-      super();
-      this.texture = _texture || new TextureImage();
-      this.color = _color || new Color();
-      this.shadeSmooth = _shadeSmooth || 0;
-    }
+  //   constructor(_texture?: TextureImage, _color?: Color, _shadeSmooth?: number) {
+  //     super();
+  //     this.texture = _texture || new TextureImage();
+  //     this.color = _color || new Color();
+  //     this.shadeSmooth = _shadeSmooth || 0;
+  //   }
     
-    //#region Transfer
-    public serialize(): Serialization {
-      let serialization: Serialization = super.serialize();
-      serialization.color = this.color.serialize();
-      return serialization;
-    }
-    public async deserialize(_serialization: Serialization): Promise<Serializable> {
-      await super.deserialize(_serialization);
-      await this.color.deserialize(_serialization.color);
-      return this;
-    }
+  //   //#region Transfer
+  //   public serialize(): Serialization {
+  //     let serialization: Serialization = super.serialize();
+  //     serialization.color = this.color.serialize();
+  //     return serialization;
+  //   }
+  //   public async deserialize(_serialization: Serialization): Promise<Serializable> {
+  //     await super.deserialize(_serialization);
+  //     await this.color.deserialize(_serialization.color);
+  //     return this;
+  //   }
     //#endregion
-  }
+  // }
 }

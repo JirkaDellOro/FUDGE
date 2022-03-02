@@ -4,55 +4,188 @@ namespace FudgeCore {
 export abstract class ShaderMatCap extends Shader {
   public static readonly iSubclass: number = Shader.registerSubclass(ShaderMatCap);
 
-  public static getCoat(): typeof Coat { return CoatMatCap; }
+  public static getCoat(): typeof Coat { return CoatTextured; }
 
   public static getVertexShaderSource(): string { 
 return `#version 300 es
-/**
-* Matcap (Material Capture) shading. The texture provided by the coat is used as a matcap material. 
-* Implementation based on https://www.clicktorelease.com/blog/creating-spherical-environment-mapping-shader/
-* @authors Simon Storl-Schulke, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
-*/
-in vec3 a_vctPosition;
-in vec3 a_vctNormalFace;
+#define CAMERA
+#define MATCAP
 
+/**
+* Universal Shader as base for many others. Controlled by compiler directives
+* @authors 2021, Luis Keck, HFU, 2021 | Jirka Dell'Oro-Friedl, HFU, 2021
+*/
+
+  // MINIMAL (no define needed): buffers for transformation
 uniform mat4 u_mtxProjection;
 
-out vec2 texcoords_smooth;
-flat out vec2 texcoords_flat;
+  // FLAT: offer buffers for face normals and their transformation
+  #if defined(FLAT)
+in vec3 a_vctPositionFlat;
+in vec3 a_vctNormalFace;
+uniform mat4 u_mtxNormal;
+flat out vec4 v_vctColor;
+  #else
+  // regular if not FLAT
+in vec3 a_vctPosition;
+out vec4 v_vctColor;
+  #endif
+
+  // LIGHT: offer buffers for lighting vertices with different light types
+  #if defined(LIGHT)
+struct LightAmbient {
+  vec4 vctColor;
+};
+struct LightDirectional {
+  vec4 vctColor;
+  vec3 vctDirection;
+};
+
+const uint MAX_LIGHTS_DIRECTIONAL = 100u;
+
+uniform LightAmbient u_ambient;
+uniform uint u_nLightsDirectional;
+uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
+  #endif 
+
+  // TEXTURE: offer buffers for UVs and pivot matrix
+  #if defined(TEXTURE)
+uniform mat3 u_mtxPivot;
+in vec2 a_vctTexture;
+out vec2 v_vctTexture;
+  #endif
+
+  #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
+out vec2 v_vctTexture;
+  #endif
+
+  // GOURAUD: offer buffers for vertex normals, their transformation and the shininess
+  #if defined(GOURAUD)||defined(MATCAP)
+in vec3 a_vctNormalVertex;
+uniform mat4 u_mtxNormal;
+  #endif
+
+  // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
+  #if defined(CAMERA)
+uniform float u_fShininess;
+uniform mat4 u_mtxWorld;
+uniform vec3 u_vctCamera;
+
+float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fShininess) {
+  if(_fShininess <= 0.0)
+    return 0.0;
+  vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
+  float fScpecular = dot(vctReflection, _vctView);
+  return pow(max(fScpecular, 0.0), _fShininess * 10.0) * _fShininess;
+  // return max(spec_dot, 0.0) * shininess;
+}
+  #endif
 
 void main() {
-    texcoords_smooth = normalize(mat3(u_mtxProjection) * a_vctNormalFace).xy * 0.5 - 0.5;
-    texcoords_flat = texcoords_smooth;
-    gl_Position = u_mtxProjection * vec4(a_vctPosition, 1.0);
+  vec4 vctPosition;
+
+    #if defined(FLAT)
+    // FLAT: use the special vertex and normal buffers for flat shading
+  vctPosition = vec4(a_vctPositionFlat, 1.0);
+  vec3 vctNormal = normalize(mat3(u_mtxNormal) * a_vctNormalFace);
+  v_vctColor = u_ambient.vctColor;
+    #else 
+  vctPosition = vec4(a_vctPosition, 1.0);
+    #endif
+
+    // use the regular vertex buffer
+  gl_Position = u_mtxProjection * vctPosition;
+
+    // GOURAUD: use the vertex normals
+    #if defined(GOURAUD)
+  v_vctColor = u_ambient.vctColor;
+  vec3 vctNormal = normalize(mat3(u_mtxNormal) * a_vctNormalVertex);
+    #endif
+
+    #if defined(CAMERA)
+  // view vector needed
+  vec3 vctView = normalize(vec3(u_mtxWorld * vctPosition) - u_vctCamera);
+    #endif
+
+    #if defined(LIGHT)
+  // calculate the directional lighting effect
+  for(uint i = 0u; i < u_nLightsDirectional; i++) {
+    float fIllumination = -dot(vctNormal, u_directional[i].vctDirection);
+    if(fIllumination > 0.0f) {
+      v_vctColor += fIllumination * u_directional[i].vctColor;
+        #if defined(CAMERA)
+      float fReflection = calculateReflection(u_directional[i].vctDirection, vctView, vctNormal, u_fShininess);
+      v_vctColor += fReflection * u_directional[i].vctColor;
+        #endif
+    }
+  }
+    #endif
+
+    // TEXTURE: transform UVs
+    #if defined(TEXTURE)
+  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
+    #endif
+
+    #if defined(MATCAP)
+  vec3 vctNormal = normalize(mat3(u_mtxNormal) * a_vctNormalVertex);
+  vec3 vctReflection = reflect(-vctView, vctNormal);
+  v_vctTexture = vctReflection.xy * 0.5 + 0.5;
+    #endif
+
+    // always full opacity for now...
+  v_vctColor.a = 1.0;
 }
 `; }
 
   public static getFragmentShaderSource(): string { 
 return `#version 300 es
+#define CAMERA
+#define MATCAP
+
 /**
-* Matcap (Material Capture) shading. The texture provided by the coat is used as a matcap material. 
-* Implementation based on https://www.clicktorelease.com/blog/creating-spherical-environment-mapping-shader/
-* @authors Simon Storl-Schulke, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+* Universal Shader as base for many others. Controlled by compiler directives
+* @authors Jirka Dell'Oro-Friedl, HFU, 2021
 */
+
 precision mediump float;
 
-uniform vec4 u_tint_color;
-uniform int shade_smooth;
-uniform sampler2D u_texture;
+  // MINIMAL (no define needed): include base color
+uniform vec4 u_vctColor;
 
-in vec2 texcoords_smooth;
-flat in vec2 texcoords_flat;
+  // FLAT: input vertex colors flat, so the third of a triangle determines the color
+  #if defined(FLAT) 
+flat in vec4 v_vctColor;
+  // LIGHT: input vertex colors for each vertex for interpolation over the face
+  #elif defined(LIGHT)
+in vec4 v_vctColor;
+  #endif
+
+  // TEXTURE: input UVs and texture
+  #if defined(TEXTURE) || defined(MATCAP)
+in vec2 v_vctTexture;
+uniform sampler2D u_texture;
+  #endif
 
 out vec4 vctFrag;
 
 void main() {
+    // MINIMAL: set the base color
+  vctFrag = u_vctColor;
 
-    if (shade_smooth > 0) {
-      vctFrag = u_tint_color * texture(u_texture, texcoords_smooth) * 2.0;
-    } else {
-      vctFrag = u_tint_color * texture(u_texture, texcoords_flat) * 2.0;
-    }
+    // VERTEX: multiply with vertex color
+    #if defined(FLAT) || defined(LIGHT)
+  vctFrag *= v_vctColor;
+    #endif
+
+    // TEXTURE: multiply with texel color
+    #if defined(TEXTURE) || defined(MATCAP)
+  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
+  vctFrag *= vctColorTexture;
+    #endif
+
+    // discard pixel alltogether when transparent: don't show in Z-Buffer
+  if(vctFrag.a < 0.01)
+    discard;
 }
 `; }
 }

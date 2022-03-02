@@ -442,7 +442,6 @@ declare namespace FudgeCore {
         static decorate(_constructor: Function): void;
         protected static injectCoatColored(this: Coat, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
         protected static injectCoatTextured(this: Coat, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
-        protected static injectCoatMatCap(this: Coat, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
     }
 }
 declare namespace FudgeCore {
@@ -2493,14 +2492,6 @@ declare namespace FudgeCore {
     /**
      * A {@link Coat} to be used by the MatCap Shader providing a texture, a tint color (0.5 grey is neutral). Set shadeSmooth to 1 for smooth shading.
      */
-    class CoatMatCap extends Coat {
-        texture: TextureImage;
-        color: Color;
-        shadeSmooth: number;
-        constructor(_texture?: TextureImage, _color?: Color, _shadeSmooth?: number);
-        serialize(): Serialization;
-        deserialize(_serialization: Serialization): Promise<Serializable>;
-    }
 }
 declare namespace FudgeCore {
     /**

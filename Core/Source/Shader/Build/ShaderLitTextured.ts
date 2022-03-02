@@ -30,7 +30,7 @@ in vec3 a_vctPosition;
 out vec4 v_vctColor;
   #endif
 
-// LIGHT: offer buffers for lighting vertices with different light types
+  // LIGHT: offer buffers for lighting vertices with different light types
   #if defined(LIGHT)
 struct LightAmbient {
   vec4 vctColor;
@@ -49,13 +49,17 @@ uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
 
   // TEXTURE: offer buffers for UVs and pivot matrix
   #if defined(TEXTURE)
-in vec2 a_vctTexture;
 uniform mat3 u_mtxPivot;
+in vec2 a_vctTexture;
+out vec2 v_vctTexture;
+  #endif
+
+  #if defined(MATCAP) // MatCap-shader generates texture coordinates from surface normals
 out vec2 v_vctTexture;
   #endif
 
   // GOURAUD: offer buffers for vertex normals, their transformation and the shininess
-  #if defined(GOURAUD)
+  #if defined(GOURAUD)||defined(MATCAP)
 in vec3 a_vctNormalVertex;
 uniform mat4 u_mtxNormal;
   #endif
@@ -97,6 +101,11 @@ void main() {
   vec3 vctNormal = normalize(mat3(u_mtxNormal) * a_vctNormalVertex);
     #endif
 
+    #if defined(CAMERA)
+  // view vector needed
+  vec3 vctView = normalize(vec3(u_mtxWorld * vctPosition) - u_vctCamera);
+    #endif
+
     #if defined(LIGHT)
   // calculate the directional lighting effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
@@ -104,8 +113,6 @@ void main() {
     if(fIllumination > 0.0f) {
       v_vctColor += fIllumination * u_directional[i].vctColor;
         #if defined(CAMERA)
-      vec3 vctView = normalize(vec3(u_mtxWorld * vctPosition) - u_vctCamera);
-      // for(uint i = 0u; i < u_nLightsDirectional; i++) {
       float fReflection = calculateReflection(u_directional[i].vctDirection, vctView, vctNormal, u_fShininess);
       v_vctColor += fReflection * u_directional[i].vctColor;
         #endif
@@ -116,6 +123,12 @@ void main() {
     // TEXTURE: transform UVs
     #if defined(TEXTURE)
   v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
+    #endif
+
+    #if defined(MATCAP)
+  vec3 vctNormal = normalize(mat3(u_mtxNormal) * a_vctNormalVertex);
+  vec3 vctReflection = reflect(-vctView, vctNormal);
+  v_vctTexture = vctReflection.xy * 0.5 + 0.5;
     #endif
 
     // always full opacity for now...
@@ -146,7 +159,7 @@ in vec4 v_vctColor;
   #endif
 
   // TEXTURE: input UVs and texture
-  #if defined(TEXTURE)
+  #if defined(TEXTURE) || defined(MATCAP)
 in vec2 v_vctTexture;
 uniform sampler2D u_texture;
   #endif
@@ -163,7 +176,7 @@ void main() {
     #endif
 
     // TEXTURE: multiply with texel color
-    #if defined(TEXTURE)
+    #if defined(TEXTURE) || defined(MATCAP)
   vec4 vctColorTexture = texture(u_texture, v_vctTexture);
   vctFrag *= vctColorTexture;
     #endif
