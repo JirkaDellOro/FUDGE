@@ -59,7 +59,7 @@ in vec3 f_normal;
 in vec3 v_position;
 uniform vec4 u_vctColor;
 uniform float u_fShininess;
-out vec4 frag;
+out vec4 vctFrag;
 
 vec3 calculateReflection(vec3 light_dir, vec3 view_dir, vec3 normal, float shininess) {
     vec3 color = vec3(1);
@@ -70,7 +70,7 @@ vec3 calculateReflection(vec3 light_dir, vec3 view_dir, vec3 normal, float shini
 }
 
 void main() {
-    frag = u_ambient.color;
+    vctFrag = u_ambient.color;
     for(uint i = 0u; i < u_nLightsDirectional; i++) {
         vec3 light_dir = normalize(-u_directional[i].direction);
         vec3 view_dir = normalize(v_position);
@@ -79,11 +79,11 @@ void main() {
         float illuminance = dot(light_dir, N);
         if(illuminance > 0.0) {
             vec3 reflection = calculateReflection(light_dir, view_dir, N, u_fShininess);
-            frag += vec4(reflection, 1.0) * illuminance * u_directional[i].color;
+            vctFrag += vec4(reflection, 1.0) * illuminance * u_directional[i].color;
         }
     }
-    frag *= u_vctColor;
-    frag.a = 1.0;
+    vctFrag *= u_vctColor;
+    vctFrag.a = 1.0;
 }       
 `; }
 }
