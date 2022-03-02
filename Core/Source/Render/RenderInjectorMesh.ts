@@ -78,7 +78,7 @@ namespace FudgeCore {
         );
       }
 
-      let uProjection: WebGLUniformLocation = _shader.uniforms["u_projection"];
+      let uProjection: WebGLUniformLocation = _shader.uniforms["u_mtxProjection"];
       crc3.uniformMatrix4fv(uProjection, false, _mtxMeshToView.get());
 
       let uWorld: WebGLUniformLocation = _shader.uniforms["u_world"];

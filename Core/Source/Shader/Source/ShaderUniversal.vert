@@ -5,7 +5,7 @@
 */
 
   // MINIMAL (no define needed): buffers for transformation
-uniform mat4 u_projection;
+uniform mat4 u_mtxProjection;
 
   // FLAT: offer buffers for face normals and their transformation
   #if defined(FLAT)
@@ -78,7 +78,7 @@ void main() {
     #endif
 
     // use the regular vertex buffer
-  gl_Position = u_projection * posVertex;
+  gl_Position = u_mtxProjection * posVertex;
 
     // GOURAUD: use the vertex normals
     #if defined(GOURAUD)

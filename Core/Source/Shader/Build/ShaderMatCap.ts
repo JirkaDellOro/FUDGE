@@ -16,15 +16,15 @@ return `#version 300 es
 in vec3 a_position;
 in vec3 a_normalFace;
 
-uniform mat4 u_projection;
+uniform mat4 u_mtxProjection;
 
 out vec2 texcoords_smooth;
 flat out vec2 texcoords_flat;
 
 void main() {
-    texcoords_smooth = normalize(mat3(u_projection) * a_normalFace).xy * 0.5 - 0.5;
+    texcoords_smooth = normalize(mat3(u_mtxProjection) * a_normalFace).xy * 0.5 - 0.5;
     texcoords_flat = texcoords_smooth;
-    gl_Position = u_projection * vec4(a_position, 1.0);
+    gl_Position = u_mtxProjection * vec4(a_position, 1.0);
 }
 `; }
 
