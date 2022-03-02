@@ -25,11 +25,11 @@ uniform mat4 u_mtxProjection;
 in vec3 a_vctPositionFlat;
 in vec3 a_vctNormalFace;
 uniform mat4 u_mtxNormal;
-flat out vec4 v_color;
+flat out vec4 v_vctColor;
   #else
   // regular if not FLAT
 in vec3 a_position;
-out vec4 v_color;
+out vec4 v_vctColor;
   #endif
 
 // LIGHT: offer buffers for lighting vertices with different light types
@@ -85,7 +85,7 @@ void main() {
     // FLAT: use the special vertex and normal buffers for flat shading
   posVertex = vec4(a_vctPositionFlat, 1.0);
   vec3 normal = normalize(mat3(u_mtxNormal) * a_vctNormalFace);
-  v_color = u_ambient.color;
+  v_vctColor = u_ambient.color;
     #else 
   posVertex = vec4(a_position, 1.0);
     #endif
@@ -95,7 +95,7 @@ void main() {
 
     // GOURAUD: use the vertex normals
     #if defined(GOURAUD)
-  v_color = u_ambient.color;
+  v_vctColor = u_ambient.color;
   vec3 normal = normalize(mat3(u_mtxNormal) * a_normalVertex);
     #endif
 
@@ -104,12 +104,12 @@ void main() {
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
     float illumination = -dot(normal, u_directional[i].direction);
     if(illumination > 0.0f) {
-      v_color += illumination * u_directional[i].color;
+      v_vctColor += illumination * u_directional[i].color;
         #if defined(CAMERA)
       vec3 view_dir = normalize(vec3(u_world * posVertex) - u_camera);
       // for(uint i = 0u; i < u_nLightsDirectional; i++) {
       float reflection = calculateReflection(u_directional[i].direction, view_dir, normal, u_shininess);
-      v_color += reflection * u_directional[i].color;
+      v_vctColor += reflection * u_directional[i].color;
         #endif
     }
   }
@@ -121,7 +121,7 @@ void main() {
     #endif
 
     // always full opacity for now...
-  v_color.a = 1.0;
+  v_vctColor.a = 1.0;
 }
 `; }
 
@@ -143,10 +143,10 @@ uniform vec4 u_color;
 
   // FLAT: input vertex colors flat, so the third of a triangle determines the color
   #if defined(FLAT) 
-flat in vec4 v_color;
+flat in vec4 v_vctColor;
   // LIGHT: input vertex colors for each vertex for interpolation over the face
   #elif defined(LIGHT)
-in vec4 v_color;
+in vec4 v_vctColor;
   #endif
 
   // TEXTURE: input UVs and texture
@@ -163,7 +163,7 @@ void main() {
 
     // VERTEX: multiply with vertex color
     #if defined(FLAT) || defined(LIGHT)
-  frag *= v_color;
+  frag *= v_vctColor;
     #endif
 
     // TEXTURE: multiply with texel color

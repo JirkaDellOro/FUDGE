@@ -11,10 +11,10 @@ uniform vec4 u_color;
 
   // FLAT: input vertex colors flat, so the third of a triangle determines the color
   #if defined(FLAT) 
-flat in vec4 v_color;
+flat in vec4 v_vctColor;
   // LIGHT: input vertex colors for each vertex for interpolation over the face
   #elif defined(LIGHT)
-in vec4 v_color;
+in vec4 v_vctColor;
   #endif
 
   // TEXTURE: input UVs and texture
@@ -31,7 +31,7 @@ void main() {
 
     // VERTEX: multiply with vertex color
     #if defined(FLAT) || defined(LIGHT)
-  frag *= v_color;
+  frag *= v_vctColor;
     #endif
 
     // TEXTURE: multiply with texel color
