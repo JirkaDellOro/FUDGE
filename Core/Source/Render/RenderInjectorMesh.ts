@@ -100,8 +100,8 @@ namespace FudgeCore {
       setBuffer("a_normalVertex", this.renderBuffers.normalsVertex);
 
 
-      // feed in texture coordinates if shader accepts a_textureUVs
-      let aTextureUVs: number = _shader.attributes["a_textureUVs"];
+      // feed in texture coordinates if shader accepts a_vctTexture
+      let aTextureUVs: number = _shader.attributes["a_vctTexture"];
       if (aTextureUVs) {
         if (_shader == ShaderFlatTextured)
           crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderBuffers.textureUVsFlat);

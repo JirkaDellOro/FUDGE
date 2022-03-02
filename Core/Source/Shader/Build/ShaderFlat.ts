@@ -51,7 +51,7 @@ uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
 
   // TEXTURE: offer buffers for UVs and pivot matrix
   #if defined(TEXTURE)
-in vec2 a_textureUVs;
+in vec2 a_vctTexture;
 uniform mat3 u_pivot;
 out vec2 v_textureUVs;
   #endif
@@ -117,7 +117,7 @@ void main() {
 
     // TEXTURE: transform UVs
     #if defined(TEXTURE)
-  v_textureUVs = vec2(u_pivot * vec3(a_textureUVs, 1.0)).xy;
+  v_textureUVs = vec2(u_pivot * vec3(a_vctTexture, 1.0)).xy;
     #endif
 
     // always full opacity for now...
