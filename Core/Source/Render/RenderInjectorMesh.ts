@@ -95,7 +95,7 @@ namespace FudgeCore {
       }
 
       setBuffer("a_position", this.renderBuffers.vertices);
-      setBuffer("a_positionFlat", this.renderBuffers.verticesFlat);
+      setBuffer("a_vctPositionFlat", this.renderBuffers.verticesFlat);
       setBuffer("a_normalFace", this.renderBuffers.normalsFlat);
       setBuffer("a_normalVertex", this.renderBuffers.normalsVertex);
 
