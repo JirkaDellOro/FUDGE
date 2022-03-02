@@ -64,48 +64,48 @@ uniform float u_fShininess;
 uniform mat4 u_mtxWorld;
 uniform vec3 u_vctCamera;
 
-float calculateReflection(vec3 light_dir, vec3 view_dir, vec3 normal, float shininess) {
-  if(shininess <= 0.0)
+float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fShininess) {
+  if(_fShininess <= 0.0)
     return 0.0;
-  vec3 reflection = normalize(reflect(-light_dir, normal));
-  float spec_dot = dot(reflection, view_dir);
-  return pow(max(spec_dot, 0.0), shininess * 10.0) * shininess;
+  vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
+  float fScpecular = dot(vctReflection, _vctView);
+  return pow(max(fScpecular, 0.0), _fShininess * 10.0) * _fShininess;
   // return max(spec_dot, 0.0) * shininess;
 }
   #endif
 
 void main() {
-  vec4 posVertex;
+  vec4 vctPosition;
 
     #if defined(FLAT)
     // FLAT: use the special vertex and normal buffers for flat shading
-  posVertex = vec4(a_vctPositionFlat, 1.0);
-  vec3 normal = normalize(mat3(u_mtxNormal) * a_vctNormalFace);
+  vctPosition = vec4(a_vctPositionFlat, 1.0);
+  vec3 vctNormal = normalize(mat3(u_mtxNormal) * a_vctNormalFace);
   v_vctColor = u_ambient.vctColor;
     #else 
-  posVertex = vec4(a_vctPosition, 1.0);
+  vctPosition = vec4(a_vctPosition, 1.0);
     #endif
 
     // use the regular vertex buffer
-  gl_Position = u_mtxProjection * posVertex;
+  gl_Position = u_mtxProjection * vctPosition;
 
     // GOURAUD: use the vertex normals
     #if defined(GOURAUD)
   v_vctColor = u_ambient.vctColor;
-  vec3 normal = normalize(mat3(u_mtxNormal) * a_vctNormalVertex);
+  vec3 vctNormal = normalize(mat3(u_mtxNormal) * a_vctNormalVertex);
     #endif
 
     #if defined(LIGHT)
   // calculate the directional lighting effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
-    float illumination = -dot(normal, u_directional[i].vctDirection);
-    if(illumination > 0.0f) {
-      v_vctColor += illumination * u_directional[i].vctColor;
+    float fIllumination = -dot(vctNormal, u_directional[i].vctDirection);
+    if(fIllumination > 0.0f) {
+      v_vctColor += fIllumination * u_directional[i].vctColor;
         #if defined(CAMERA)
-      vec3 view_dir = normalize(vec3(u_mtxWorld * posVertex) - u_vctCamera);
+      vec3 vctView = normalize(vec3(u_mtxWorld * vctPosition) - u_vctCamera);
       // for(uint i = 0u; i < u_nLightsDirectional; i++) {
-      float reflection = calculateReflection(u_directional[i].vctDirection, view_dir, normal, u_fShininess);
-      v_vctColor += reflection * u_directional[i].vctColor;
+      float fReflection = calculateReflection(u_directional[i].vctDirection, vctView, vctNormal, u_fShininess);
+      v_vctColor += fReflection * u_directional[i].vctColor;
         #endif
     }
   }
