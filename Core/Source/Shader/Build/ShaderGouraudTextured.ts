@@ -170,8 +170,8 @@ void main() {
 
     // TEXTURE: multiply with texel color
     #if defined(TEXTURE)
-  vec4 colorTexture = texture(u_texture, v_vctTexture);
-  vctFrag *= colorTexture;
+  vec4 vctColorTexture = texture(u_texture, v_vctTexture);
+  vctFrag *= vctColorTexture;
     #endif
 
     // discard pixel alltogether when transparent: don't show in Z-Buffer
