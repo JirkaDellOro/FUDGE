@@ -60,7 +60,7 @@ uniform mat4 u_mtxNormal;
 
   // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
   #if defined(CAMERA)
-uniform float u_shininess;
+uniform float u_fShininess;
 uniform mat4 u_world;
 uniform vec3 u_camera;
 
@@ -104,7 +104,7 @@ void main() {
         #if defined(CAMERA)
       vec3 view_dir = normalize(vec3(u_world * posVertex) - u_camera);
       // for(uint i = 0u; i < u_nLightsDirectional; i++) {
-      float reflection = calculateReflection(u_directional[i].direction, view_dir, normal, u_shininess);
+      float reflection = calculateReflection(u_directional[i].direction, view_dir, normal, u_fShininess);
       v_vctColor += reflection * u_directional[i].color;
         #endif
     }

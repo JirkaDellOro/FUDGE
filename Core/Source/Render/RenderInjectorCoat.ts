@@ -11,7 +11,7 @@ namespace FudgeCore {
       let color: Color = Color.MULTIPLY((<CoatColored>this).color, _cmpMaterial.clrPrimary);
       RenderWebGL.getRenderingContext().uniform4fv(colorUniformLocation, color.getArray());
 
-      let shininessUniformLocation: WebGLUniformLocation = _shader.uniforms["u_shininess"];
+      let shininessUniformLocation: WebGLUniformLocation = _shader.uniforms["u_fShininess"];
       let shininess: number = (<CoatColored>this).shininess;
       RenderWebGL.getRenderingContext().uniform1f(shininessUniformLocation, shininess);
     }
