@@ -11,7 +11,7 @@ uniform mat4 u_mtxProjection;
   #if defined(FLAT)
 in vec3 a_vctPositionFlat;
 in vec3 a_vctNormalFace;
-uniform mat4 u_normal;
+uniform mat4 u_mtxNormal;
 flat out vec4 v_color;
   #else
   // regular if not FLAT
@@ -46,7 +46,7 @@ out vec2 v_textureUVs;
   // GOURAUD: offer buffers for vertex normals, their transformation and the shininess
   #if defined(GOURAUD)
 in vec3 a_normalVertex;
-uniform mat4 u_normal;
+uniform mat4 u_mtxNormal;
   #endif
 
   // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
@@ -71,7 +71,7 @@ void main() {
     #if defined(FLAT)
     // FLAT: use the special vertex and normal buffers for flat shading
   posVertex = vec4(a_vctPositionFlat, 1.0);
-  vec3 normal = normalize(mat3(u_normal) * a_vctNormalFace);
+  vec3 normal = normalize(mat3(u_mtxNormal) * a_vctNormalFace);
   v_color = u_ambient.color;
     #else 
   posVertex = vec4(a_position, 1.0);
@@ -83,7 +83,7 @@ void main() {
     // GOURAUD: use the vertex normals
     #if defined(GOURAUD)
   v_color = u_ambient.color;
-  vec3 normal = normalize(mat3(u_normal) * a_normalVertex);
+  vec3 normal = normalize(mat3(u_mtxNormal) * a_normalVertex);
     #endif
 
     #if defined(LIGHT)
