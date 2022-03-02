@@ -19,7 +19,7 @@ in vec4 v_vctColor;
 
   // TEXTURE: input UVs and texture
   #if defined(TEXTURE)
-in vec2 v_textureUVs;
+in vec2 v_vctTexture;
 uniform sampler2D u_texture;
   #endif
 
@@ -36,7 +36,7 @@ void main() {
 
     // TEXTURE: multiply with texel color
     #if defined(TEXTURE)
-  vec4 colorTexture = texture(u_texture, v_textureUVs);
+  vec4 colorTexture = texture(u_texture, v_vctTexture);
   frag *= colorTexture;
     #endif
 

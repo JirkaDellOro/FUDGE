@@ -8,7 +8,7 @@ precision highp int;
 
 uniform int u_id;
 uniform vec2 u_size;
-in vec2 v_textureUVs;
+in vec2 v_vctTexture;
 uniform vec4 u_color;
 uniform sampler2D u_texture;
 
@@ -21,8 +21,8 @@ void main() {
     if (pixel != id)
       discard;
     
-    vec4 color = u_color * texture(u_texture, v_textureUVs);
+    vec4 color = u_color * texture(u_texture, v_vctTexture);
     uint icolor = uint(color.r * 255.0) << 24 | uint(color.g * 255.0) << 16 | uint(color.b * 255.0) << 8 | uint(color.a * 255.0);
   
-  frag = ivec4(floatBitsToInt(gl_FragCoord.z), icolor, floatBitsToInt(v_textureUVs.x), floatBitsToInt(v_textureUVs.y));
+  frag = ivec4(floatBitsToInt(gl_FragCoord.z), icolor, floatBitsToInt(v_vctTexture.x), floatBitsToInt(v_vctTexture.y));
 }

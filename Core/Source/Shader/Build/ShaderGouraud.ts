@@ -53,7 +53,7 @@ uniform LightDirectional u_directional[MAX_LIGHTS_DIRECTIONAL];
   #if defined(TEXTURE)
 in vec2 a_vctTexture;
 uniform mat3 u_mtxPivot;
-out vec2 v_textureUVs;
+out vec2 v_vctTexture;
   #endif
 
   // GOURAUD: offer buffers for vertex normals, their transformation and the shininess
@@ -117,7 +117,7 @@ void main() {
 
     // TEXTURE: transform UVs
     #if defined(TEXTURE)
-  v_textureUVs = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
+  v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
     #endif
 
     // always full opacity for now...
@@ -151,7 +151,7 @@ in vec4 v_vctColor;
 
   // TEXTURE: input UVs and texture
   #if defined(TEXTURE)
-in vec2 v_textureUVs;
+in vec2 v_vctTexture;
 uniform sampler2D u_texture;
   #endif
 
@@ -168,7 +168,7 @@ void main() {
 
     // TEXTURE: multiply with texel color
     #if defined(TEXTURE)
-  vec4 colorTexture = texture(u_texture, v_textureUVs);
+  vec4 colorTexture = texture(u_texture, v_vctTexture);
   frag *= colorTexture;
     #endif
 

@@ -13,11 +13,11 @@ in vec2 a_vctTexture;
 uniform mat4 u_mtxProjection;
 uniform mat3 u_mtxPivot;
 
-out vec2 v_textureUVs;
+out vec2 v_vctTexture;
 
 void main() {   
     gl_Position = u_mtxProjection * vec4(a_vctPosition, 1.0);
-    v_textureUVs = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
+    v_vctTexture = vec2(u_mtxPivot * vec3(a_vctTexture, 1.0)).xy;
 }
 `; }
 
@@ -32,7 +32,7 @@ precision highp int;
 
 uniform int u_id;
 uniform vec2 u_size;
-in vec2 v_textureUVs;
+in vec2 v_vctTexture;
 uniform vec4 u_color;
 uniform sampler2D u_texture;
 
@@ -45,10 +45,10 @@ void main() {
     if (pixel != id)
       discard;
     
-    vec4 color = u_color * texture(u_texture, v_textureUVs);
+    vec4 color = u_color * texture(u_texture, v_vctTexture);
     uint icolor = uint(color.r * 255.0) << 24 | uint(color.g * 255.0) << 16 | uint(color.b * 255.0) << 8 | uint(color.a * 255.0);
   
-  frag = ivec4(floatBitsToInt(gl_FragCoord.z), icolor, floatBitsToInt(v_textureUVs.x), floatBitsToInt(v_textureUVs.y));
+  frag = ivec4(floatBitsToInt(gl_FragCoord.z), icolor, floatBitsToInt(v_vctTexture.x), floatBitsToInt(v_vctTexture.y));
 }
 `; }
 }
