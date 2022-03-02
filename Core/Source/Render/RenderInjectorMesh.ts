@@ -81,7 +81,7 @@ namespace FudgeCore {
       let uProjection: WebGLUniformLocation = _shader.uniforms["u_mtxProjection"];
       crc3.uniformMatrix4fv(uProjection, false, _mtxMeshToView.get());
 
-      let uWorld: WebGLUniformLocation = _shader.uniforms["u_world"];
+      let uWorld: WebGLUniformLocation = _shader.uniforms["u_mtxWorld"];
       if (uWorld) {
         // let mtxWorld: Matrix4x4 = _mtxMeshToWorld.clone;
         // mtxWorld.translation = Vector3.ZERO();
