@@ -56,7 +56,7 @@ out vec2 v_vctTexture;
 
   // GOURAUD: offer buffers for vertex normals, their transformation and the shininess
   #if defined(GOURAUD)
-in vec3 a_normalVertex;
+in vec3 a_vctNormalVertex;
 uniform mat4 u_mtxNormal;
   #endif
 
@@ -94,7 +94,7 @@ void main() {
     // GOURAUD: use the vertex normals
     #if defined(GOURAUD)
   v_vctColor = u_ambient.color;
-  vec3 normal = normalize(mat3(u_mtxNormal) * a_normalVertex);
+  vec3 normal = normalize(mat3(u_mtxNormal) * a_vctNormalVertex);
     #endif
 
     #if defined(LIGHT)

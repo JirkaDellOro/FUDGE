@@ -97,7 +97,7 @@ namespace FudgeCore {
       setBuffer("a_vctPosition", this.renderBuffers.vertices);
       setBuffer("a_vctPositionFlat", this.renderBuffers.verticesFlat);
       setBuffer("a_vctNormalFace", this.renderBuffers.normalsFlat);
-      setBuffer("a_normalVertex", this.renderBuffers.normalsVertex);
+      setBuffer("a_vctNormalVertex", this.renderBuffers.normalsVertex);
 
 
       // feed in texture coordinates if shader accepts a_vctTexture

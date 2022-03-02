@@ -7,7 +7,7 @@
 precision highp float;
 
 in vec3 a_vctPosition;
-in vec3 a_normalVertex;
+in vec3 a_vctNormalVertex;
 uniform mat4 u_world;
 uniform mat4 u_mtxProjection;
 uniform mat4 u_mtxNormal;
@@ -16,7 +16,7 @@ out vec3 f_normal;
 out vec3 v_position;
 
 void main() {
-  f_normal = vec3(u_mtxNormal * vec4(a_normalVertex, 0.0));
+  f_normal = vec3(u_mtxNormal * vec4(a_vctNormalVertex, 0.0));
   vec4 v_position4 = u_world * vec4(a_vctPosition, 1.0);
   v_position = vec3(v_position4) / v_position4.w;
   gl_Position = u_mtxProjection * vec4(a_vctPosition, 1.0);
