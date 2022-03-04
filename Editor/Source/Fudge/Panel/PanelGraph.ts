@@ -18,41 +18,32 @@ namespace Fudge {
 
       this.setTitle("Graph");
 
-      const renderConfig: RowOrColumnItemConfig = {
+      const config: RowOrColumnItemConfig = {
         type: "column",
-        isClosable: true,
-        content: [
-          {
-            type: "component",
-            componentType: VIEW.RENDER,
-            componentState: _state,
-            title: "Render"
-          }
-        ]
-      };
-
-      const hierarchyAndComponents: RowOrColumnItemConfig = {
-        type: "column",
-        isClosable: true,
-        content: [
-          {
+        content: [{
+          type: "component",
+          componentType: VIEW.RENDER,
+          componentState: _state,
+          title: "Render"
+        }, {
+          type: "row",
+          content: [{
             type: "component",
             componentType: VIEW.HIERARCHY,
             componentState: _state,
             title: "Hierarchy"
-          },
-          {
+          }, {
             type: "component",
             componentType: VIEW.COMPONENTS,
             componentState: _state,
             title: "Components"
-          }
-        ]
+          }]
+        }]
       };
 
 
-      this.goldenLayout.addItemAtLocation(renderConfig, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
-      this.goldenLayout.addItemAtLocation(hierarchyAndComponents, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
+      this.goldenLayout.addItemAtLocation(config, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
+      // this.goldenLayout.addItemAtLocation(hierarchyAndComponents, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
 
 
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);

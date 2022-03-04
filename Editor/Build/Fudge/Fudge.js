@@ -1533,38 +1533,30 @@ var Fudge;
             this.goldenLayout.registerComponentConstructor(Fudge.VIEW.COMPONENTS, Fudge.ViewComponents);
             this.goldenLayout.registerComponentConstructor(Fudge.VIEW.HIERARCHY, Fudge.ViewHierarchy);
             this.setTitle("Graph");
-            const renderConfig = {
+            const config = {
                 type: "column",
-                isClosable: true,
-                content: [
-                    {
+                content: [{
                         type: "component",
                         componentType: Fudge.VIEW.RENDER,
                         componentState: _state,
                         title: "Render"
-                    }
-                ]
+                    }, {
+                        type: "row",
+                        content: [{
+                                type: "component",
+                                componentType: Fudge.VIEW.HIERARCHY,
+                                componentState: _state,
+                                title: "Hierarchy"
+                            }, {
+                                type: "component",
+                                componentType: Fudge.VIEW.COMPONENTS,
+                                componentState: _state,
+                                title: "Components"
+                            }]
+                    }]
             };
-            const hierarchyAndComponents = {
-                type: "column",
-                isClosable: true,
-                content: [
-                    {
-                        type: "component",
-                        componentType: Fudge.VIEW.HIERARCHY,
-                        componentState: _state,
-                        title: "Hierarchy"
-                    },
-                    {
-                        type: "component",
-                        componentType: Fudge.VIEW.COMPONENTS,
-                        componentState: _state,
-                        title: "Components"
-                    }
-                ]
-            };
-            this.goldenLayout.addItemAtLocation(renderConfig, [{ typeId: 7 /* Root */ }]);
-            this.goldenLayout.addItemAtLocation(hierarchyAndComponents, [{ typeId: 7 /* Root */ }]);
+            this.goldenLayout.addItemAtLocation(config, [{ typeId: 7 /* Root */ }]);
+            // this.goldenLayout.addItemAtLocation(hierarchyAndComponents, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
@@ -1676,48 +1668,45 @@ var Fudge;
             this.goldenLayout.registerComponentConstructor(Fudge.VIEW.PREVIEW, Fudge.ViewPreview);
             this.goldenLayout.registerComponentConstructor(Fudge.VIEW.SCRIPT, Fudge.ViewScript);
             let inner = this.goldenLayout.rootItem.contentItems[0];
-            const previewAndPropertiesConfig = {
+            const config = {
                 type: "column",
-                content: [
-                    {
-                        type: "component",
-                        componentType: Fudge.VIEW.PREVIEW,
-                        componentState: _state,
-                        title: "Preview"
-                    },
-                    {
-                        type: "component",
-                        componentType: Fudge.VIEW.PROPERTIES,
-                        componentState: _state,
-                        title: "Properties"
-                    }
-                ]
+                content: [{
+                        type: "row",
+                        content: [{
+                                type: "component",
+                                componentType: Fudge.VIEW.PROPERTIES,
+                                componentState: _state,
+                                title: "Properties"
+                            }, {
+                                type: "component",
+                                componentType: Fudge.VIEW.PREVIEW,
+                                componentState: _state,
+                                title: "Preview"
+                            }]
+                    }, {
+                        type: "row",
+                        content: [{
+                                type: "column",
+                                content: [{
+                                        type: "component",
+                                        componentType: Fudge.VIEW.EXTERNAL,
+                                        componentState: _state,
+                                        title: "External"
+                                    }, {
+                                        type: "component",
+                                        componentType: Fudge.VIEW.SCRIPT,
+                                        componentState: _state,
+                                        title: "Script"
+                                    }]
+                            }, {
+                                type: "component",
+                                componentType: Fudge.VIEW.INTERNAL,
+                                componentState: _state,
+                                title: "Internal"
+                            }]
+                    }]
             };
-            const internalExternalScriptConfig = {
-                type: "column",
-                content: [
-                    {
-                        type: "component",
-                        componentType: Fudge.VIEW.INTERNAL,
-                        componentState: _state,
-                        title: "Internal"
-                    },
-                    {
-                        type: "component",
-                        componentType: Fudge.VIEW.EXTERNAL,
-                        componentState: _state,
-                        title: "External"
-                    },
-                    {
-                        type: "component",
-                        componentType: Fudge.VIEW.SCRIPT,
-                        componentState: _state,
-                        title: "Script"
-                    }
-                ]
-            };
-            this.goldenLayout.rootItem.layoutManager.addItemAtLocation(previewAndPropertiesConfig, [{ typeId: 7 /* Root */ }]);
-            this.goldenLayout.rootItem.layoutManager.addItemAtLocation(internalExternalScriptConfig, [{ typeId: 7 /* Root */ }]);
+            this.goldenLayout.rootItem.layoutManager.addItemAtLocation(config, [{ typeId: 7 /* Root */ }]);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
@@ -3003,6 +2992,7 @@ var Fudge;
         resource;
         viewport;
         cmrOrbit;
+        graphIllumination = true;
         constructor(_container, _state) {
             super(_container, _state);
             // create viewport for 3D-resources
@@ -3020,7 +3010,7 @@ var Fudge;
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent, true);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
-            // this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
+            this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
         }
         static createStandardMaterial() {
@@ -3034,30 +3024,27 @@ var Fudge;
             return meshStandard;
         }
         // #region  ContextMenu
-        // protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
-        //   const menu: Electron.Menu = new remote.Menu();
-        //   let item: Electron.MenuItem;
-        //   item = new remote.MenuItem({ label: "Add Component", submenu: [] });
-        //   for (let subItem of ContextMenu.getComponents(_callback))
-        //     item.submenu.append(subItem);
-        //   menu.append(item);
-        //   ContextMenu.appendCopyPaste(menu);
-        //   return menu;
-        // }
-        // protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
-        //   ƒ.Debug.info(`MenuSelect: Item-id=${CONTEXTMENU[_item.id]}`);
-        //   switch (Number(_item.id)) {
-        //     case CONTEXTMENU.ADD_COMPONENT:
-        //       let iSubclass: number = _item["iSubclass"];
-        //       let component: typeof ƒ.Component = ƒ.Component.subclasses[iSubclass];
-        //       //@ts-ignore
-        //       let cmpNew: ƒ.Component = new component();
-        //       ƒ.Debug.info(cmpNew.type, cmpNew);
-        //       // this.node.addComponent(cmpNew);
-        //       this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.SELECT, { bubbles: true, detail: { data: this.resource } }));
-        //       break;
-        //   }
-        // }
+        getContextMenu(_callback) {
+            const menu = new Fudge.remote.Menu();
+            let item;
+            item = new Fudge.remote.MenuItem({ label: "Illuminate Graph", id: "Illumination", checked: this.graphIllumination, type: "checkbox", click: _callback });
+            menu.append(item);
+            return menu;
+        }
+        contextMenuCallback(_item, _window, _event) {
+            ƒ.Debug.info(`MenuSelect: Item-id=${_item.id}`);
+            switch (_item.id) {
+                case "Illumination":
+                    this.illuminateGraph(_item.checked);
+                    break;
+            }
+        }
+        illuminateGraph(_checked) {
+            let nodeLight = this.viewport.getBranch().getChildrenByName("PreviewIllumination")[0];
+            this.graphIllumination = _checked;
+            nodeLight.activate(this.graphIllumination);
+            this.redraw();
+        }
         //#endregion
         fillContent() {
             this.dom.innerHTML = "";
@@ -3098,8 +3085,8 @@ var Fudge;
                     this.redraw();
                     break;
                 case "Graph":
-                    this.viewport.setBranch(this.resource);
-                    this.dom.appendChild(this.viewport.getCanvas());
+                    graph = this.createStandardGraph(true);
+                    graph.appendChild(this.resource);
                     this.redraw();
                     break;
                 case "TextureImage":
@@ -3114,10 +3101,14 @@ var Fudge;
                 default: break;
             }
         }
-        createStandardGraph() {
+        createStandardGraph(_graphIllumination = false) {
             let graph = new ƒ.Node("PreviewScene");
-            ƒAid.addStandardLightComponents(graph);
             this.viewport.setBranch(graph);
+            let nodeLight = new ƒ.Node("PreviewIllumination");
+            graph.addChild(nodeLight);
+            ƒAid.addStandardLightComponents(nodeLight);
+            if (_graphIllumination) // otherwise, light is always on!
+                this.illuminateGraph(this.graphIllumination);
             this.dom.appendChild(this.viewport.getCanvas());
             return graph;
         }

@@ -570,9 +570,13 @@ declare namespace Fudge {
         private resource;
         private viewport;
         private cmrOrbit;
+        private graphIllumination;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         private static createStandardMaterial;
         private static createStandardMesh;
+        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
+        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        private illuminateGraph;
         private fillContent;
         private createStandardGraph;
         private createFilePreview;

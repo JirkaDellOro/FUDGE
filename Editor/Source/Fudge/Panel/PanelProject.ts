@@ -25,50 +25,46 @@ namespace Fudge {
       this.goldenLayout.registerComponentConstructor(VIEW.SCRIPT, ViewScript);
 
       let inner: ContentItem = this.goldenLayout.rootItem.contentItems[0];
-      const previewAndPropertiesConfig: RowOrColumnItemConfig = {
+      const config: RowOrColumnItemConfig = {
         type: "column",
-        content: [
-          {
-            type: "component",
-            componentType: VIEW.PREVIEW,
-            componentState: _state,
-            title: "Preview"
-          },
-          {
+        content: [{
+          type: "row",
+          content: [{
             type: "component",
             componentType: VIEW.PROPERTIES,
             componentState: _state,
             title: "Properties"
-          }
-        ]
-      };
-
-      const internalExternalScriptConfig: RowOrColumnItemConfig = {
-        type: "column",
-        content: [
-          {
+          }, {
+            type: "component",
+            componentType: VIEW.PREVIEW,
+            componentState: _state,
+            title: "Preview"
+          }]
+        }, {
+          type: "row",
+          content: [{
+            type: "column",
+            content: [{
+              type: "component",
+              componentType: VIEW.EXTERNAL,
+              componentState: _state,
+              title: "External"
+            }, {
+              type: "component",
+              componentType: VIEW.SCRIPT,
+              componentState: _state,
+              title: "Script"
+            }]
+          }, {
             type: "component",
             componentType: VIEW.INTERNAL,
             componentState: _state,
             title: "Internal"
-          },
-          {
-            type: "component",
-            componentType: VIEW.EXTERNAL,
-            componentState: _state,
-            title: "External"
-          },
-          {
-            type: "component",
-            componentType: VIEW.SCRIPT,
-            componentState: _state,
-            title: "Script"
-          }
-        ]
+          }]
+        }]
       };
 
-      this.goldenLayout.rootItem.layoutManager.addItemAtLocation(previewAndPropertiesConfig, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
-      this.goldenLayout.rootItem.layoutManager.addItemAtLocation(internalExternalScriptConfig, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
+      this.goldenLayout.rootItem.layoutManager.addItemAtLocation(config, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
 
       this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndEvent);
@@ -78,7 +74,7 @@ namespace Fudge {
       this.setTitle("Project | " + project.name);
       this.broadcastEvent(new Event(EVENT_EDITOR.SET_PROJECT));
     }
-    
+
     public getState(): { [key: string]: string } {
       // TODO: iterate over views and collect their states for reconstruction 
       return {};
