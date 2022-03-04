@@ -16,13 +16,13 @@ return `#version 300 es
 */
 
   // MINIMAL (no define needed): buffers for transformation
-uniform mat4 u_mtxProjection;
+uniform mat4 u_mtxMeshToView;
 
   // FLAT: offer buffers for face normals and their transformation
   #if defined(FLAT)
 in vec3 a_vctPositionFlat;
 in vec3 a_vctNormalFace;
-uniform mat4 u_mtxNormal;
+uniform mat4 u_mtxNormalMeshToWorld;
 flat out vec4 v_vctColor;
   #else
   // regular if not FLAT
@@ -61,13 +61,14 @@ out vec2 v_vctTexture;
   // GOURAUD: offer buffers for vertex normals, their transformation and the shininess
   #if defined(GOURAUD)||defined(MATCAP)
 in vec3 a_vctNormalVertex;
-uniform mat4 u_mtxNormal;
+uniform mat4 u_mtxNormalMeshToWorld;
   #endif
 
   // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
   #if defined(CAMERA)
 uniform float u_fShininess;
-uniform mat4 u_mtxWorld;
+uniform mat4 u_mtxMeshToWorld;
+uniform mat4 u_mtxWorldToView;
 uniform vec3 u_vctCamera;
 
 float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fShininess) {
@@ -86,24 +87,26 @@ void main() {
     #if defined(FLAT)
     // FLAT: use the special vertex and normal buffers for flat shading
   vctPosition = vec4(a_vctPositionFlat, 1.0);
-  vec3 vctNormal = normalize(mat3(u_mtxNormal) * a_vctNormalFace);
+  vec3 vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormalFace);
   v_vctColor = u_ambient.vctColor;
     #else 
   vctPosition = vec4(a_vctPosition, 1.0);
     #endif
 
     // use the regular vertex buffer
-  gl_Position = u_mtxProjection * vctPosition;
+  gl_Position = u_mtxMeshToView * vctPosition;
 
     // GOURAUD: use the vertex normals
     #if defined(GOURAUD)
   v_vctColor = u_ambient.vctColor;
-  vec3 vctNormal = normalize(mat3(u_mtxNormal) * a_vctNormalVertex);
+  vec3 vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormalVertex);
     #endif
 
     #if defined(CAMERA)
   // view vector needed
-  vec3 vctView = normalize(vec3(u_mtxWorld * vctPosition) - u_vctCamera);
+  // vec4 posWorld4 = u_mtxMeshToWorld * vctPosition;
+  // vec3 vctView = normalize(posWorld4.xyz/posWorld4.w - u_vctCamera);
+  vec3 vctView = normalize(vec3(u_mtxMeshToWorld * vctPosition) - u_vctCamera);
     #endif
 
     #if defined(LIGHT)
@@ -126,9 +129,9 @@ void main() {
     #endif
 
     #if defined(MATCAP)
-  vec3 vctNormal = normalize(mat3(u_mtxNormal) * a_vctNormalVertex);
-  vec3 vctReflection = reflect(-vctView, vctNormal);
-  v_vctTexture = vctReflection.xy * 0.5 + 0.5;
+  vec3 vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormalVertex);
+  vctNormal = mat3(u_mtxWorldToView) * vctNormal;
+  v_vctTexture = 0.5 * vctNormal.xy / length(vctNormal) + 0.5;
     #endif
 
     // always full opacity for now...

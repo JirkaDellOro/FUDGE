@@ -7,13 +7,13 @@
 in vec3 a_vctPosition;
 in vec3 a_vctNormalFace;
 
-uniform mat4 u_mtxProjection;
+uniform mat4 u_mtxMeshToView;
 
 out vec2 texcoords_smooth;
 flat out vec2 texcoords_flat;
 
 void main() {
-    texcoords_smooth = normalize(mat3(u_mtxProjection) * a_vctNormalFace).xy * 0.5 - 0.5;
+    texcoords_smooth = normalize(mat3(u_mtxMeshToView) * a_vctNormalFace).xy * 0.5 - 0.5;
     texcoords_flat = texcoords_smooth;
-    gl_Position = u_mtxProjection * vec4(a_vctPosition, 1.0);
+    gl_Position = u_mtxMeshToView * vec4(a_vctPosition, 1.0);
 }
