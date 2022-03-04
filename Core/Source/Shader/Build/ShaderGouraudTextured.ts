@@ -135,6 +135,7 @@ void main() {
   vec3 vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormalVertex);
   vctNormal = mat3(u_mtxWorldToView) * vctNormal;
   v_vctTexture = 0.5 * vctNormal.xy / length(vctNormal) + 0.5;
+  v_vctTexture.y *= -1.0;
     #endif
 
     // always full opacity for now...
