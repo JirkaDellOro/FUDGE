@@ -298,7 +298,8 @@ var Fudge;
             this.name = _base.toString().split("/").slice(-2, -1)[0];
             this.fileIndex = _base.toString().split("/").pop() || this.fileIndex;
             ƒ.Project.clear();
-            ƒ.Physics.initializePhysics();
+            let physics = new ƒ.Physics();
+            ƒ.Physics.activePhysics = physics;
         }
         async openDialog() {
             let promise = ƒui.Dialog.prompt(Fudge.project, false, "Review project settings", "Adjust settings and press OK", "OK", "Cancel");
@@ -2911,7 +2912,7 @@ var Fudge;
             this.dom.dispatchEvent(new CustomEvent(Fudge.EVENT_EDITOR.SET_GRAPH, { bubbles: true, detail: source }));
         }
         hndEvent = (_event) => {
-            ƒ.Physics.world.connectJoints();
+            ƒ.Physics.connectJoints();
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.CLEAR_PROJECT:
                     this.setGraph(null);
@@ -2982,6 +2983,10 @@ var Fudge;
 (function (Fudge) {
     var ƒ = FudgeCore;
     var ƒAid = FudgeAid;
+    let CONTEXTMENU;
+    (function (CONTEXTMENU) {
+        CONTEXTMENU["ILLUMINATE"] = "Illuminate";
+    })(CONTEXTMENU || (CONTEXTMENU = {}));
     /**
      * Preview a resource
      * @author Jirka Dell'Oro-Friedl, HFU, 2020
@@ -2992,7 +2997,6 @@ var Fudge;
         resource;
         viewport;
         cmrOrbit;
-        graphIllumination = true;
         constructor(_container, _state) {
             super(_container, _state);
             // create viewport for 3D-resources
@@ -3027,23 +3031,24 @@ var Fudge;
         getContextMenu(_callback) {
             const menu = new Fudge.remote.Menu();
             let item;
-            item = new Fudge.remote.MenuItem({ label: "Illuminate Graph", id: "Illumination", checked: this.graphIllumination, type: "checkbox", click: _callback });
+            item = new Fudge.remote.MenuItem({ label: "Illuminate Graph", id: CONTEXTMENU.ILLUMINATE, checked: true, type: "checkbox", click: _callback });
             menu.append(item);
             return menu;
         }
         contextMenuCallback(_item, _window, _event) {
             ƒ.Debug.info(`MenuSelect: Item-id=${_item.id}`);
             switch (_item.id) {
-                case "Illumination":
-                    this.illuminateGraph(_item.checked);
+                case CONTEXTMENU.ILLUMINATE:
+                    this.illuminateGraph();
                     break;
             }
         }
-        illuminateGraph(_checked) {
-            let nodeLight = this.viewport.getBranch().getChildrenByName("PreviewIllumination")[0];
-            this.graphIllumination = _checked;
-            nodeLight.activate(this.graphIllumination);
-            this.redraw();
+        illuminateGraph() {
+            let nodeLight = this.viewport.getBranch()?.getChildrenByName("PreviewIllumination")[0];
+            if (nodeLight) {
+                nodeLight.activate(this.contextMenu.getMenuItemById(CONTEXTMENU.ILLUMINATE).checked);
+                this.redraw();
+            }
         }
         //#endregion
         fillContent() {
@@ -3108,7 +3113,7 @@ var Fudge;
             graph.addChild(nodeLight);
             ƒAid.addStandardLightComponents(nodeLight);
             if (_graphIllumination) // otherwise, light is always on!
-                this.illuminateGraph(this.graphIllumination);
+                this.illuminateGraph();
             this.dom.appendChild(this.viewport.getCanvas());
             return graph;
         }

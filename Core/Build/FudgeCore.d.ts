@@ -4264,7 +4264,7 @@ declare namespace FudgeCore {
     }
     /** General settings for the physic simulation and the debug of it. */
     class PhysicsSettings {
-        constructor(_defGroup: number, _defMask: number);
+        constructor(_defaultCollisionGroup: number, _defaultCollisionMask: number);
         /** Change if rigidbodies are able to sleep (don't be considered in physical calculations) when their movement is below a threshold. Deactivation is decreasing performance for minor advantage in precision. */
         get disableSleeping(): boolean;
         set disableSleeping(_value: boolean);
@@ -4744,14 +4744,9 @@ declare namespace FudgeCore {
       * @author Marko Fehrenbach, HFU 2020
       */
     class Physics {
+        #private;
         /** The SETTINGS that apply to the physical world. Ranging from things like sleeping, collisionShapeThickness and others */
         static settings: PhysicsSettings;
-        /** The PHYSICAL WORLD that gives every {@link Node} with a ComponentRigidbody a physical representation and moves them accordingly to the laws of the physical world. */
-        static world: Physics;
-        /** The rendering of physical debug informations. Used internally no interaction needed.*/
-        debugDraw: PhysicsDebugDraw;
-        /** The camera/viewport the physics are debugged to. Used internally no interaction needed. */
-        mainCam: ComponentCamera;
         private oimoWorld;
         private bodyList;
         private jointList;
@@ -4759,80 +4754,68 @@ declare namespace FudgeCore {
          * Creating a physical world to represent the {@link Node} Scene Tree. Call once before using any physics functions or
          * rigidbodies.
          */
-        static initializePhysics(): Physics;
+        constructor();
+        static set activePhysics(_physics: Physics);
+        static get debugDraw(): PhysicsDebugDraw;
+        static get mainCam(): ComponentCamera;
         /**
         * Cast a RAY into the physical world from a origin point in a certain direction. Receiving informations about the hit object and the
         * hit point. Do not specify a _group to raycast the whole world, else only bodies within the specific group can be hit.
         */
         static raycast(_origin: Vector3, _direction: Vector3, _length?: number, _debugDraw?: boolean, _group?: COLLISION_GROUP): RayHitInfo;
         /**
+        * Simulates the physical world. _deltaTime is the amount of time between physical steps, default is 60 frames per second ~17ms.
+        * A frame timing can't be smaller than 1/30 of a second, or else it will be set to 30 frames, to have more consistent frame calculations.
+        */
+        static simulate(_deltaTime?: number): void;
+        static draw(_cmpCamera: ComponentCamera, _mode?: PHYSICS_DEBUGMODE): void;
+        /**
           * Adjusts the transforms of the {@link ComponentRigidbody}s in the given branch to match their nodes or meshes
           */
         static adjustTransforms(_branch: Node, _toMesh?: boolean): void;
+        /**
+        * Get the applied gravitational force to physical objects. Default earth gravity = 9.81 m/s
+        */
+        static getGravity(): Vector3;
+        /**
+        * Set the applied gravitational force to physical objects. Default earth gravity = 9.81 m/s
+        */
+        static setGravity(_value: Vector3): void;
+        /**
+        * Adding a new OIMO Rigidbody to the OIMO World, happens automatically when adding a FUDGE Rigidbody Component
+        */
+        static addRigidbody(_cmpRB: ComponentRigidbody): void;
+        /**
+        * Removing a OIMO Rigidbody to the OIMO World, happens automatically when removing a FUDGE Rigidbody Component
+        */
+        static removeRigidbody(_cmpRB: ComponentRigidbody): void;
+        /**
+        * Adding a new OIMO Joint/Constraint to the OIMO World, happens automatically when adding a FUDGE Joint Component
+        */
+        static addJoint(_cmpJoint: Joint): void;
+        /**
+        * Called internally to inform the physics system that a joint has a change of core properties like ComponentRigidbody and needs to
+        * be recreated.
+        */
+        static changeJointStatus(_cmpJoint: Joint): void;
+        /**
+          * Removing a OIMO Joint/Constraint to the OIMO World, happens automatically when removeing a FUDGE Joint Component
+          */
+        static removeJoint(_cmpJoint: Joint): void;
+        /** Returns all the ComponentRigidbodies that are known to the physical space. */
+        static getBodyList(): ComponentRigidbody[];
+        /** Giving a ComponentRigidbody a specific identification number so it can be referenced in the loading process. And removed rb's can receive a new id. */
+        static distributeBodyID(): number;
+        /** Connect all joints that are not connected yet. Used internally no user interaction needed. This functionality is called and needed to make sure joints connect/disconnect
+         * if any of the two paired ComponentRigidbodies change.
+         */
+        static connectJoints(): void;
         /** Internal function to calculate the endpoint of mathematical ray. By adding the multiplied direction to the origin.
            * Used because OimoPhysics defines ray by start/end. But GameEngines commonly use origin/direction.
            */
         private static getRayEndPoint;
         /** Internal function to get the distance in which a ray hit by subtracting points from each other and get the square root of the squared product of each component. */
         private static getRayDistance;
-        /** Returns all the ComponentRigidbodies that are known to the physical space. */
-        getBodyList(): ComponentRigidbody[];
-        /**
-        * Getting the solver iterations of the physics engine. Higher iteration numbers increase accuracy but decrease performance
-        */
-        getSolverIterations(): number;
-        /**
-        * Setting the solver iterations of the physics engine. Higher iteration numbers increase accuracy but decrease performance
-        */
-        setSolverIterations(_value: number): void;
-        /**
-        * Get the applied gravitational force to physical objects. Default earth gravity = 9.81 m/s
-        */
-        getGravity(): Vector3;
-        /**
-        * Set the applied gravitational force to physical objects. Default earth gravity = 9.81 m/s
-        */
-        setGravity(_value: Vector3): void;
-        /**
-        * Adding a new OIMO Rigidbody to the OIMO World, happens automatically when adding a FUDGE Rigidbody Component
-        */
-        addRigidbody(_cmpRB: ComponentRigidbody): void;
-        /**
-        * Removing a OIMO Rigidbody to the OIMO World, happens automatically when removing a FUDGE Rigidbody Component
-        */
-        removeRigidbody(_cmpRB: ComponentRigidbody): void;
-        /**
-        * Adding a new OIMO Joint/Constraint to the OIMO World, happens automatically when adding a FUDGE Joint Component
-        */
-        addJoint(_cmpJoint: Joint): void;
-        /**
-          * Removing a OIMO Joint/Constraint to the OIMO World, happens automatically when removeing a FUDGE Joint Component
-          */
-        removeJoint(_cmpJoint: Joint): void;
-        /** Returns the actual used world of the OIMO physics engine. No user interaction needed.*/
-        getOimoWorld(): OIMO.World;
-        /**
-        * Simulates the physical world. _deltaTime is the amount of time between physical steps, default is 60 frames per second ~17ms.
-        * A frame timing can't be smaller than 1/30 of a second, or else it will be set to 30 frames, to have more consistent frame calculations.
-        */
-        simulate(_deltaTime?: number): void;
-        draw(_cmpCamera: ComponentCamera, _mode?: PHYSICS_DEBUGMODE): void;
-        /** Connect all joints that are not connected yet. Used internally no user interaction needed. This functionality is called and needed to make sure joints connect/disconnect
-         * if any of the two paired ComponentRigidbodies change.
-         */
-        connectJoints(): void;
-        /**
-        * Called internally to inform the physics system that a joint has a change of core properties like ComponentRigidbody and needs to
-        * be recreated.
-        */
-        changeJointStatus(_cmpJoint: Joint): void;
-        /** Giving a ComponentRigidbody a specific identification number so it can be referenced in the loading process. And removed rb's can receive a new id. */
-        distributeBodyID(): number;
-        /** Returns the ComponentRigidbody with the given id. Used internally to reconnect joints on loading in the editor. */
-        getBodyByID(_id: number): ComponentRigidbody;
-        /** Updates all {@link Rigidbodies} known to the Physics.world to match their containers or meshes transformations */
-        /** Create a oimoPhysics world. Called once at the beginning if none is existend yet. */
-        private createWorld;
     }
 }
 declare namespace FudgeCore {

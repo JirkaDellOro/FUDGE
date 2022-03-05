@@ -570,7 +570,6 @@ declare namespace Fudge {
         private resource;
         private viewport;
         private cmrOrbit;
-        private graphIllumination;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         private static createStandardMaterial;
         private static createStandardMesh;

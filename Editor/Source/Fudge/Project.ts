@@ -24,7 +24,8 @@ namespace Fudge {
       this.fileIndex = _base.toString().split("/").pop() || this.fileIndex;
 
       ƒ.Project.clear();
-      ƒ.Physics.initializePhysics();
+      let physics: ƒ.Physics = new ƒ.Physics();
+      ƒ.Physics.activePhysics = physics;
     }
 
     public async openDialog(): Promise<boolean> {

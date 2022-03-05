@@ -162,7 +162,7 @@ namespace Fudge {
     }
 
     private hndEvent = (_event: CustomEvent): void => {
-      ƒ.Physics.world.connectJoints();
+      ƒ.Physics.connectJoints();
       switch (_event.type) {
         case EVENT_EDITOR.CLEAR_PROJECT:
           this.setGraph(null);

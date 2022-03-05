@@ -582,7 +582,7 @@ namespace FudgeCore {
         hitInfo.hitPoint = new Vector3(endpoint.x, endpoint.y, endpoint.z);
       }
       if (_debugDraw) {
-        Physics.world.debugDraw.debugRay(hitInfo.rayOrigin, hitInfo.hitPoint, new Color(0, 1, 0, 1));
+        Physics.debugDraw.debugRay(hitInfo.rayOrigin, hitInfo.hitPoint, new Color(0, 1, 0, 1));
       }
       return hitInfo;
     }
@@ -699,7 +699,7 @@ namespace FudgeCore {
       this.collisionMask = Physics.settings.defaultCollisionMask;
       //Create the actual rigidbody in the OimoPhysics Space
       this.createRigidbody(_mass, _type, this.#typeCollider, _mtxTransform, this.#collisionGroup);
-      this.#id = Physics.world.distributeBodyID();
+      this.#id = Physics.distributeBodyID();
 
       // Event Callbacks directly from OIMO Physics
       this.#callbacks = new OIMO.ContactCallback(); //fehm
@@ -817,12 +817,12 @@ namespace FudgeCore {
 
     /** Adding this ComponentRigidbody to the Physiscs.world giving the oimoPhysics system the information needed */
     private addRigidbodyToWorld(): void {
-      Physics.world.addRigidbody(this);
+      Physics.addRigidbody(this);
     }
 
     /** Removing this ComponentRigidbody from the Physiscs.world taking the informations from the oimoPhysics system */
     private removeRigidbodyFromWorld(): void {
-      Physics.world.removeRigidbody(this);
+      Physics.removeRigidbody(this);
       this.isInitialized = false;
     }
 

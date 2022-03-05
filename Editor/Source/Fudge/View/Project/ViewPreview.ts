@@ -3,6 +3,9 @@ namespace Fudge {
   import ƒUi = FudgeUserInterface;
   import ƒAid = FudgeAid;
 
+  enum CONTEXTMENU {
+    ILLUMINATE = "Illuminate"
+  }
   /**
    * Preview a resource
    * @author Jirka Dell'Oro-Friedl, HFU, 2020  
@@ -13,7 +16,6 @@ namespace Fudge {
     private resource: ƒ.SerializableResource | DirectoryEntry | Function;
     private viewport: ƒ.Viewport;
     private cmrOrbit: ƒAid.CameraOrbit;
-    private graphIllumination: boolean = true;
 
     constructor(_container: ComponentContainer, _state: JsonValue | undefined) {
       super(_container, _state);
@@ -56,7 +58,7 @@ namespace Fudge {
       const menu: Electron.Menu = new remote.Menu();
       let item: Electron.MenuItem;
 
-      item = new remote.MenuItem({ label: "Illuminate Graph", id: "Illumination", checked: this.graphIllumination, type: "checkbox", click: _callback });
+      item = new remote.MenuItem({ label: "Illuminate Graph", id: CONTEXTMENU.ILLUMINATE, checked: true, type: "checkbox", click: _callback });
       menu.append(item);
       return menu;
     }
@@ -65,17 +67,18 @@ namespace Fudge {
       ƒ.Debug.info(`MenuSelect: Item-id=${_item.id}`);
 
       switch (_item.id) {
-        case "Illumination":
-          this.illuminateGraph(_item.checked);
+        case CONTEXTMENU.ILLUMINATE:
+          this.illuminateGraph();
           break;
       }
     }
 
-    private illuminateGraph(_checked: boolean): void {
-      let nodeLight: ƒ.Node = this.viewport.getBranch().getChildrenByName("PreviewIllumination")[0];
-      this.graphIllumination = _checked;
-      nodeLight.activate(this.graphIllumination);
-      this.redraw();
+    private illuminateGraph(): void {
+      let nodeLight: ƒ.Node = this.viewport.getBranch()?.getChildrenByName("PreviewIllumination")[0];
+      if (nodeLight) {
+        nodeLight.activate(this.contextMenu.getMenuItemById(CONTEXTMENU.ILLUMINATE).checked);
+        this.redraw();
+      }
     }
     //#endregion
 
@@ -145,7 +148,7 @@ namespace Fudge {
       graph.addChild(nodeLight);
       ƒAid.addStandardLightComponents(nodeLight);
       if (_graphIllumination) // otherwise, light is always on!
-        this.illuminateGraph(this.graphIllumination);
+        this.illuminateGraph();
 
       this.dom.appendChild(this.viewport.getCanvas());
       return graph;
