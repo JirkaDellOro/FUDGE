@@ -2,15 +2,15 @@
 
 namespace FudgeCore {
   /**
-    * Main Physics Class to hold information about the physical representation of the scene
+    * Manages the OIMO physics engine for FUDGE. Multiple instances may be created, one is active at a time.
+    * All methods are static and use the currently active instance. At startup, a default instance is created and become the active instance
+    * Attaching a {@link ComponentRigidbody} to a {@link Node} places a physics collider in the physics instance active at that time.
     * @author Marko Fehrenbach, HFU 2020
     */
   export class Physics {
     /** The SETTINGS that apply to the physical world. Ranging from things like sleeping, collisionShapeThickness and others */
     public static settings: PhysicsSettings = new PhysicsSettings(COLLISION_GROUP.DEFAULT, (COLLISION_GROUP.DEFAULT | COLLISION_GROUP.GROUP_1 | COLLISION_GROUP.GROUP_2 | COLLISION_GROUP.GROUP_3 | COLLISION_GROUP.GROUP_4));
-    static #activePhysics: Physics;
-    /** The PHYSICAL WORLD that gives every {@link Node} with a ComponentRigidbody a physical representation and moves them accordingly to the laws of the physical world. */
-    // public static world: Physics = Physics.initializePhysics();
+    private static ƒactive: Physics = new Physics();
 
     /** The rendering of physical debug informations. Used internally no interaction needed.*/
     #debugDraw: PhysicsDebugDraw;
@@ -21,10 +21,6 @@ namespace FudgeCore {
     private bodyList: ComponentRigidbody[] = new Array();
     private jointList: Joint[] = new Array();
 
-    /**
-     * Creating a physical world to represent the {@link Node} Scene Tree. Call once before using any physics functions or
-     * rigidbodies.
-     */
     public constructor() {
       if (typeof OIMO == "undefined") {// Check if OIMO Namespace was loaded, else do not use any physics. Check is needed to ensure FUDGE can be used without Physics
         Debug.error("OIMO physics engine not connected!");
@@ -35,14 +31,18 @@ namespace FudgeCore {
       this.oimoWorld.setDebugDraw(this.#debugDraw.oimoDebugDraw); //Tell OimoPhysics where to debug to and how it will be handled
     }
 
-    public static set activePhysics(_physics: Physics) {
-      Physics.#activePhysics = _physics;
+    /**
+     * Define the currently active Physics instance
+     */
+    public static set activeInstance(_physics: Physics) {
+      Physics.ƒactive = _physics;
     }
+
     public static get debugDraw(): PhysicsDebugDraw {
-      return Physics.#activePhysics.#debugDraw;
+      return Physics.ƒactive.#debugDraw;
     }
     public static get mainCam(): ComponentCamera {
-      return Physics.#activePhysics.#mainCam;
+      return Physics.ƒactive.#mainCam;
     }
 
     /**
@@ -56,10 +56,10 @@ namespace FudgeCore {
       let end: OIMO.Vec3 = this.getRayEndPoint(begin, new Vector3(_direction.x, _direction.y, _direction.z), _length);
       ray.clear();
       if (_group == COLLISION_GROUP.DEFAULT) { //Case 1: Raycasting the whole world, normal mode
-        Physics.#activePhysics.oimoWorld.rayCast(begin, end, ray);
+        Physics.ƒactive.oimoWorld.rayCast(begin, end, ray);
       } else { //Case2: Raycasting on each body in a specific group
         let allHits: RayHitInfo[] = new Array();
-        Physics.#activePhysics.bodyList.forEach(function (value: ComponentRigidbody): void {
+        Physics.ƒactive.bodyList.forEach(function (value: ComponentRigidbody): void {
           if (value.collisionGroup == _group) {
             hitInfo = value.raycastThisBody(_origin, _direction, _length);
             if (hitInfo.hit == true) { //Every hit is could potentially be the closest
@@ -86,7 +86,7 @@ namespace FudgeCore {
         hitInfo.hitPoint = new Vector3(end.x, end.y, end.z);
       }
       if (_debugDraw) { //Handle debugging
-        Physics.#activePhysics.#debugDraw.debugRay(hitInfo.rayOrigin, hitInfo.hitPoint, new Color(0, 1, 0, 1));
+        Physics.ƒactive.#debugDraw.debugRay(hitInfo.rayOrigin, hitInfo.hitPoint, new Color(0, 1, 0, 1));
       }
       return hitInfo;
     }
@@ -97,20 +97,23 @@ namespace FudgeCore {
     * A frame timing can't be smaller than 1/30 of a second, or else it will be set to 30 frames, to have more consistent frame calculations.
     */
     public static simulate(_deltaTime: number = 1 / 60): void {
-      if (Physics.#activePhysics.jointList.length > 0)
+      if (Physics.ƒactive.jointList.length > 0)
         Physics.connectJoints(); //Connect joints if anything has happened between the last call to any of the two paired rigidbodies
       if (Time.game.getScale() != 0) { //If time is stopped do not simulate to avoid misbehaviour
         _deltaTime = _deltaTime > 1 / 30 ? 1 / 30 : _deltaTime; //If instead of a fixed rate the game framerate is used, make sure irregular timings are fixed to 30fps
-        Physics.#activePhysics.oimoWorld.step(_deltaTime * Time.game.getScale());  //Update the simulation by the given deltaTime and the Fudge internal TimeScale
+        Physics.ƒactive.oimoWorld.step(_deltaTime * Time.game.getScale());  //Update the simulation by the given deltaTime and the Fudge internal TimeScale
       }
     }
 
+    /**
+     * Draw information about the currently active instance using the {@link ComponentCamera} given
+     */
     public static draw(_cmpCamera: ComponentCamera, _mode?: PHYSICS_DEBUGMODE): void {
-      Physics.#activePhysics.#debugDraw.setDebugMode(_mode);
-      Physics.#activePhysics.#mainCam = _cmpCamera;
-      Physics.#activePhysics.oimoWorld.debugDraw(); //Filling the physics world debug informations into the debug rendering handler
-      Physics.#activePhysics.#debugDraw.drawBuffers();
-      Physics.#activePhysics.#debugDraw.clearBuffers();  //Updates info about the current projection, resetting the points/lines/triangles that need to be drawn from debug
+      Physics.ƒactive.#debugDraw.setDebugMode(_mode);
+      Physics.ƒactive.#mainCam = _cmpCamera;
+      Physics.ƒactive.oimoWorld.debugDraw(); //Filling the physics world debug informations into the debug rendering handler
+      Physics.ƒactive.#debugDraw.drawBuffers();
+      Physics.ƒactive.#debugDraw.clearBuffers();  //Updates info about the current projection, resetting the points/lines/triangles that need to be drawn from debug
     }
 
     /**
@@ -123,71 +126,70 @@ namespace FudgeCore {
     }
 
     /**
-    * Get the applied gravitational force to physical objects. Default earth gravity = 9.81 m/s
+    * Get the applied gravitational force of the active instance. Default earth gravity = 9.81 m/s
     */
     public static getGravity(): Vector3 {
-      let tmpVec: OIMO.Vec3 = Physics.#activePhysics.oimoWorld.getGravity();
+      let tmpVec: OIMO.Vec3 = Physics.ƒactive.oimoWorld.getGravity();
       return new Vector3(tmpVec.x, tmpVec.y, tmpVec.z);
     }
 
     /**
-    * Set the applied gravitational force to physical objects. Default earth gravity = 9.81 m/s
+    * Set the applied gravitational force of the active instance. Default earth gravity = 9.81 m/s
     */
     public static setGravity(_value: Vector3): void {
       let tmpVec: OIMO.Vec3 = new OIMO.Vec3(_value.x, _value.y, _value.z);
-      Physics.#activePhysics.oimoWorld.setGravity(tmpVec);
+      Physics.ƒactive.oimoWorld.setGravity(tmpVec);
     }
 
     /**
-    * Adding a new OIMO Rigidbody to the OIMO World, happens automatically when adding a FUDGE Rigidbody Component
+    * Add a new OIMO Rigidbody to the active instance, happens automatically when adding a FUDGE Rigidbody Component.
     */
     public static addRigidbody(_cmpRB: ComponentRigidbody): void {
-      Physics.#activePhysics.bodyList.push(_cmpRB);
-      Physics.#activePhysics.oimoWorld.addRigidBody(_cmpRB.getOimoRigidbody());
+      Physics.ƒactive.bodyList.push(_cmpRB);
+      Physics.ƒactive.oimoWorld.addRigidBody(_cmpRB.getOimoRigidbody());
     }
 
     /**
-    * Removing a OIMO Rigidbody to the OIMO World, happens automatically when removing a FUDGE Rigidbody Component
+    * Remove the OIMO Rigidbody to the active instance, happens automatically when removing a FUDGE Rigidbody Component
     */
     public static removeRigidbody(_cmpRB: ComponentRigidbody): void {
-      let id: number = Physics.#activePhysics.bodyList.indexOf(_cmpRB);
-      Physics.#activePhysics.bodyList.splice(id, 1);
-      Physics.#activePhysics.oimoWorld.removeRigidBody(_cmpRB.getOimoRigidbody());
+      let id: number = Physics.ƒactive.bodyList.indexOf(_cmpRB);
+      Physics.ƒactive.bodyList.splice(id, 1);
+      Physics.ƒactive.oimoWorld.removeRigidBody(_cmpRB.getOimoRigidbody());
     }
 
     /**
-    * Adding a new OIMO Joint/Constraint to the OIMO World, happens automatically when adding a FUDGE Joint Component
+    * Add a new OIMO Joint/Constraint to the active instance, happens automatically when adding a FUDGE Joint Component
     */
     public static addJoint(_cmpJoint: Joint): void {
-      Physics.#activePhysics.oimoWorld.addJoint(_cmpJoint.getOimoJoint());
+      Physics.ƒactive.oimoWorld.addJoint(_cmpJoint.getOimoJoint());
     }
 
     /**
-    * Called internally to inform the physics system that a joint has a change of core properties like ComponentRigidbody and needs to
-    * be recreated.
+    * Called internally to inform the physics system that a joint has a change of core properties and needs to be recreated.
     */
     public static changeJointStatus(_cmpJoint: Joint): void {
-      if (Physics.#activePhysics.jointList.indexOf(_cmpJoint) < 0)
-        Physics.#activePhysics.jointList.push(_cmpJoint);
+      if (Physics.ƒactive.jointList.indexOf(_cmpJoint) < 0)
+        Physics.ƒactive.jointList.push(_cmpJoint);
     }
 
     /**
-      * Removing a OIMO Joint/Constraint to the OIMO World, happens automatically when removeing a FUDGE Joint Component
+      * Remove the OIMO Joint/Constraint to the active instance, happens automatically when removing a FUDGE Joint Component
       */
     public static removeJoint(_cmpJoint: Joint): void {
-      Physics.#activePhysics.oimoWorld.removeJoint(_cmpJoint.getOimoJoint());
+      Physics.ƒactive.oimoWorld.removeJoint(_cmpJoint.getOimoJoint());
     }
 
-    /** Returns all the ComponentRigidbodies that are known to the physical space. */
+    /** Returns all the ComponentRigidbodies that are known to the active instance. */
     public static getBodyList(): ComponentRigidbody[] {
-      return Physics.#activePhysics.bodyList;
+      return Physics.ƒactive.bodyList;
     }
 
     /** Giving a ComponentRigidbody a specific identification number so it can be referenced in the loading process. And removed rb's can receive a new id. */
     public static distributeBodyID(): number {
       let freeId: number = 0;
       let free: boolean = false;
-      Physics.#activePhysics.bodyList.forEach((_value: ComponentRigidbody): void => {
+      Physics.ƒactive.bodyList.forEach((_value: ComponentRigidbody): void => {
         if (_value.id != freeId) {
           free = true;
         } else {
@@ -201,7 +203,8 @@ namespace FudgeCore {
       return freeId;
     }
 
-    /** Connect all joints that are not connected yet. Used internally no user interaction needed. This functionality is called and needed to make sure joints connect/disconnect
+    /** 
+     * Connect all joints that are not connected yet. Used internally no user interaction needed. This functionality is called and needed to make sure joints connect/disconnect
      * if any of the two paired ComponentRigidbodies change.
      */
     public static connectJoints(): void { //Try to connect dirty joints until they are connected
@@ -210,13 +213,33 @@ namespace FudgeCore {
       //   jointsToConnect.push(value);
       // });
       // this.jointList.splice(0, this.jointList.length);
-      let jointsToConnect: Joint[] = Physics.#activePhysics.jointList;
-      Physics.#activePhysics.jointList = [];
+      let jointsToConnect: Joint[] = Physics.ƒactive.jointList;
+      Physics.ƒactive.jointList = [];
       jointsToConnect.forEach((_joint: Joint): void => {
         if (_joint.isConnected() == false) {
           _joint.connect();
         }
       });
+    }
+
+    /** Remove all oimo joints and rigidbodies, so that they can be reused in another world  */
+    public static cleanup(): void {
+      let oimoWorld: OIMO.World = Physics.ƒactive.oimoWorld;
+      if (oimoWorld != null) {
+        //Resetting the world so a new world can be created, fix for re-opening a project in editor, making sure there are no old things calculated
+        let jointsWorld: number = oimoWorld.getNumJoints();
+        let bodiesWorld: number = oimoWorld.getNumRigidBodies();
+        for (let body of Physics.ƒactive.bodyList)
+          body.isInitialized = false;
+        Physics.ƒactive.jointList = new Array();// TODO: see if it would be smarter, do use these arrays. Definitely more intuitive...
+        for (let i: number = 0; i < jointsWorld; i++) {
+          oimoWorld.removeJoint(Physics.ƒactive.oimoWorld.getJointList());
+        }
+        for (let i: number = 0; i < bodiesWorld; i++) {
+          let oimoBody: OIMO.RigidBody = oimoWorld.getRigidBodyList();
+          oimoWorld.removeRigidBody(oimoBody);
+        }
+      }
     }
 
     // /** Returns the actual used world of the OIMO physics engine. No user interaction needed.*/
@@ -277,23 +300,6 @@ namespace FudgeCore {
     // private updateWorldFromWorldMatrix(_toMesh: boolean = false): void {
     //   for (let body of this.bodyList)
     //     body.updateFromWorld(_toMesh);
-    // }
-
-    /** Create a oimoPhysics world.  */
-    // private createWorld(): void {
-    // if (Physics.world.oimoWorld != null) {
-    //   //Resetting the world so a new world can be created, fix for re-opening a project in editor, making sure there are no old things calculated
-    //   let jointsWorld: number = Physics.world.oimoWorld.getNumJoints();
-    //   let bodiesWorld: number = Physics.world.oimoWorld.getNumRigidBodies();
-    //   this.bodyList = null;
-    //   this.jointList = null;
-    //   for (let i: number = 0; i < jointsWorld; i++) {
-    //     Physics.world.oimoWorld.removeJoint(Physics.world.oimoWorld.getJointList());
-    //   }
-    //   for (let i: number = 0; i < bodiesWorld; i++) {
-    //     Physics.world.oimoWorld.removeRigidBody(Physics.world.oimoWorld.getRigidBodyList());
-    //   }
-    // }
     // }
   }
 }

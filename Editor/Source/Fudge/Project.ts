@@ -25,7 +25,7 @@ namespace Fudge {
 
       ƒ.Project.clear();
       let physics: ƒ.Physics = new ƒ.Physics();
-      ƒ.Physics.activePhysics = physics;
+      ƒ.Physics.activeInstance = physics;
     }
 
     public async openDialog(): Promise<boolean> {

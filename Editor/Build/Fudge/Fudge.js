@@ -299,7 +299,7 @@ var Fudge;
             this.fileIndex = _base.toString().split("/").pop() || this.fileIndex;
             ƒ.Project.clear();
             let physics = new ƒ.Physics();
-            ƒ.Physics.activePhysics = physics;
+            ƒ.Physics.activeInstance = physics;
         }
         async openDialog() {
             let promise = ƒui.Dialog.prompt(Fudge.project, false, "Review project settings", "Adjust settings and press OK", "OK", "Cancel");
@@ -2842,6 +2842,9 @@ var Fudge;
                 this.dom.appendChild(this.canvas);
             }
             this.graph = _node;
+            ƒ.Physics.cleanup();
+            ƒ.Physics.activeInstance = new ƒ.Physics();
+            this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
             this.viewport.setBranch(this.graph);
             this.redraw();
         }
