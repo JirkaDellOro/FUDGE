@@ -367,7 +367,8 @@ namespace FudgeCore {
     // #region Serialization
     public serialize(): Serialization {
       let serialization: Serialization = {
-        name: this.name
+        name: this.name,
+        active: this.active
       };
 
       let components: Serialization = {};
@@ -410,6 +411,8 @@ namespace FudgeCore {
       this.dispatchEvent(new Event(EVENT.NODE_DESERIALIZED));
       for (let component of this.getAllComponents())
         component.dispatchEvent(new Event(EVENT.NODE_DESERIALIZED));
+
+      this.activate(_serialization.active);
       return this;
     }
     // #endregion

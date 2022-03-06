@@ -43,7 +43,6 @@ namespace FudgeCore {
       this.dispatchEvent(new Event(_on ? EVENT.COMPONENT_ACTIVATE : EVENT.COMPONENT_DEACTIVATE));
     }
 
-
     /**
      * Tries to attach the component to the given node, removing it from the node it was attached to if applicable
      */
@@ -76,6 +75,7 @@ namespace FudgeCore {
 
     public async mutate(_mutator: Mutator): Promise<void> {
       this.activate(_mutator.active);
+      super.mutate(_mutator);
     }
 
     protected reduceMutator(_mutator: Mutator): void {

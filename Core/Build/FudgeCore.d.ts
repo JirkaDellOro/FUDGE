@@ -4058,6 +4058,7 @@ declare namespace FudgeCore {
          * Set the restitution of the rigidbody, which is the factor of bounciness of this rigidbody on surfaces
          */
         set restitution(_restitution: number);
+        hndEvent: (_event: Event) => void;
         /**
          * Returns the rigidbody in the form the physics engine is using it, should not be used unless a functionality
          * is not provided through the FUDGE Integration.

@@ -155,7 +155,8 @@ namespace FudgeCore {
     public static removeRigidbody(_cmpRB: ComponentRigidbody): void {
       // TODO: two lists are being managed, info might deviate. Cleanup!
       let oimoRigidBody: OIMO.RigidBody = _cmpRB.getOimoRigidbody();
-      oimoRigidBody._world.removeRigidBody(oimoRigidBody);
+      if (oimoRigidBody._world)
+        oimoRigidBody._world.removeRigidBody(oimoRigidBody);
       // what if the rigidbodys oimo-world does not belong to the active instance?
       let id: number = Physics.ƒactive.bodyList.indexOf(_cmpRB);
       Physics.ƒactive.bodyList.splice(id, 1);
