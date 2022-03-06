@@ -152,7 +152,7 @@ namespace FudgePhysics_Communication {
   }
 
   function update(): void {
-    f.Physics.world.simulate();
+    f.Physics.simulate();
     hitInfo = f.Physics.raycast(origin, direction, 10);
     if (hitInfo.hit == true && hitInfo.rigidbodyComponent.node.name == "Cube_1") {
       f.Debug.log(hitInfo);

@@ -20,6 +20,7 @@ namespace FudgeCore {
      */
   export class ComponentRigidbody extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentRigidbody);
+    private static mapBodyType: { [type: number]: number } = { [BODY_TYPE.DYNAMIC]: OIMO.RigidBodyType.DYNAMIC, [BODY_TYPE.STATIC]: OIMO.RigidBodyType.STATIC, [BODY_TYPE.KINEMATIC]: OIMO.RigidBodyType.KINEMATIC };
 
     /** Transformation of the collider relative to the node's transform. Once set mostly remains constant. 
      * If altered, {@link isInitialized} must be reset to false to recreate the collider in the next {@link Render.prepare}
@@ -76,11 +77,19 @@ namespace FudgeCore {
 
     #callbacks: OIMO.ContactCallback; //Callback Methods when within the oimoSystem a event is happening
 
+    // #physics: Physics; //TODO: keep a pointer to the physics instance used by this component
+
     /** Creating a new rigidbody with a weight in kg, a physics type (default = dynamic), a collider type what physical form has the collider, to what group does it belong, is there a transform Matrix that should be used, and is the collider defined as a group of points that represent a convex mesh. */
     constructor(_mass: number = 1, _type: BODY_TYPE = BODY_TYPE.DYNAMIC, _colliderType: COLLIDER_TYPE = COLLIDER_TYPE.CUBE, _group: COLLISION_GROUP = Physics.settings.defaultCollisionGroup, _mtxTransform: Matrix4x4 = null, _convexMesh: Float32Array = null) {
       super();
       this.create(_mass, _type, _colliderType, _group, _mtxTransform, _convexMesh);
+
+      this.addEventListener(EVENT.COMPONENT_ADD, this.hndEvent);
+      this.addEventListener(EVENT.COMPONENT_REMOVE, this.hndEvent);
+      // this.addEventListener(EVENT.NODE_DESERIALIZED, this.hndEvent);
     }
+
+
 
     //#region Accessors
     public get id(): number {
@@ -103,22 +112,7 @@ namespace FudgeCore {
     /** Set the body type. See {@link BODY_TYPE} */
     public set typeBody(_value: BODY_TYPE) {
       this.#typeBody = _value;
-      let oimoType: number;
-      switch (this.#typeBody) {
-        case BODY_TYPE.DYNAMIC:
-          oimoType = OIMO.RigidBodyType.DYNAMIC;
-          break;
-        case BODY_TYPE.STATIC:
-          oimoType = OIMO.RigidBodyType.STATIC;
-          break;
-        case BODY_TYPE.KINEMATIC:
-          oimoType = OIMO.RigidBodyType.KINEMATIC;
-          break;
-        default:
-          oimoType = OIMO.RigidBodyType.DYNAMIC;
-          break;
-      }
-      this.#rigidbody.setType(oimoType);
+      this.#rigidbody.setType(ComponentRigidbody.mapBodyType[this.#typeBody]);
       this.#rigidbody.setMassData(this.#massData); //have to reset mass after changing the type, since Oimo is handling mass internally wrong when switching types
     }
 
@@ -238,6 +232,30 @@ namespace FudgeCore {
         this.#rigidbody.getShapeList().setRestitution(this.#restitution);
     }
     //#endregion
+
+    // Activate the functions of this component as response to events
+    public hndEvent = (_event: Event): void => {
+      switch (_event.type) {
+        case EVENT.COMPONENT_ADD:
+          // this.addEventListener(EVENT.COMPONENT_ACTIVATE, this.addRigidbodyToWorld);
+          this.addEventListener(EVENT.COMPONENT_DEACTIVATE, this.removeRigidbodyFromWorld);
+          // this.node.addEventListener(EVENT.NODE_ACTIVATE, this.addRigidbodyToWorld, true); // use capture to react to broadcast!
+          this.node.addEventListener(EVENT.NODE_DEACTIVATE, this.removeRigidbodyFromWorld, true);
+          break;
+        case EVENT.COMPONENT_REMOVE:
+          // this.removeEventListener(EVENT.COMPONENT_ADD, this.addRigidbodyToWorld);
+          this.removeEventListener(EVENT.COMPONENT_REMOVE, this.removeRigidbodyFromWorld);
+          // this.node.removeEventListener(EVENT.NODE_ACTIVATE, this.addRigidbodyToWorld, true); // use capture to react to broadcast!
+          this.node.removeEventListener(EVENT.NODE_DEACTIVATE, this.removeRigidbodyFromWorld, true);
+          this.removeRigidbodyFromWorld();
+          break;
+        // case EVENT.NODE_DESERIALIZED:
+        //   // if deserialized the node is now fully reconstructed and access to all its components and children is possible
+        //   this.node.addEventListener(EVENT.NODE_ACTIVATE, this.addRigidbodyToWorld);
+        //   this.node.addEventListener(EVENT.NODE_DEACTIVATE, this.removeRigidbodyFromWorld);
+        //   break;
+      }
+    }
 
     //#region Transformation
     /**
@@ -582,7 +600,7 @@ namespace FudgeCore {
         hitInfo.hitPoint = new Vector3(endpoint.x, endpoint.y, endpoint.z);
       }
       if (_debugDraw) {
-        Physics.world.debugDraw.debugRay(hitInfo.rayOrigin, hitInfo.hitPoint, new Color(0, 1, 0, 1));
+        Physics.debugDraw.debugRay(hitInfo.rayOrigin, hitInfo.hitPoint, new Color(0, 1, 0, 1));
       }
       return hitInfo;
     }
@@ -699,18 +717,12 @@ namespace FudgeCore {
       this.collisionMask = Physics.settings.defaultCollisionMask;
       //Create the actual rigidbody in the OimoPhysics Space
       this.createRigidbody(_mass, _type, this.#typeCollider, _mtxTransform, this.#collisionGroup);
-      this.#id = Physics.world.distributeBodyID();
+      this.#id = Physics.distributeBodyID();
 
       // Event Callbacks directly from OIMO Physics
       this.#callbacks = new OIMO.ContactCallback(); //fehm
       this.#callbacks.beginTriggerContact = this.triggerEnter;
       this.#callbacks.endTriggerContact = this.triggerExit;
-
-      //Handling adding/removing the component
-      // this.removeEventListener(EVENT.COMPONENT_ADD, this.addRigidbodyToWorld); // in case it already exists
-      this.removeEventListener(EVENT.COMPONENT_REMOVE, this.removeRigidbodyFromWorld); // in case it already exists
-      // this.addEventListener(EVENT.COMPONENT_ADD, this.addRigidbodyToWorld);
-      this.addEventListener(EVENT.COMPONENT_REMOVE, this.removeRigidbodyFromWorld);
     }
 
     /** Creates the actual OimoPhysics Rigidbody out of informations the Fudge Component has. */
@@ -816,13 +828,14 @@ namespace FudgeCore {
     }
 
     /** Adding this ComponentRigidbody to the Physiscs.world giving the oimoPhysics system the information needed */
-    private addRigidbodyToWorld(): void {
-      Physics.world.addRigidbody(this);
+    private addRigidbodyToWorld = (): void => {
+      if (!this.#rigidbody._world)
+        Physics.addRigidbody(this);
     }
 
     /** Removing this ComponentRigidbody from the Physiscs.world taking the informations from the oimoPhysics system */
-    private removeRigidbodyFromWorld(): void {
-      Physics.world.removeRigidbody(this);
+    private removeRigidbodyFromWorld = (): void => {
+      Physics.removeRigidbody(this);
       this.isInitialized = false;
     }
 

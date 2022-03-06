@@ -175,7 +175,7 @@ namespace FudgeCore {
       if (!_cmpRigidbody.isInitialized) // || Project.mode == MODE.EDITOR)
         _cmpRigidbody.initialize();
 
-      if (!Physics.world?.getBodyList().length)
+      if (!Physics.getBodyList().length)
         return;
 
       if (!_node.mtxLocal) {

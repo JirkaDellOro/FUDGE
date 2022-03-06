@@ -139,6 +139,10 @@ declare namespace FudgeCore {
         COMPONENT_ACTIVATE = "componentActivate",
         /** dispatched to a {@link Component} when its being deactivated */
         COMPONENT_DEACTIVATE = "componentDeactivate",
+        /** dispatched to a {@link Node}, it's successors and ancestors when its being activated */
+        NODE_ACTIVATE = "nodeActivate",
+        /** dispatched to a {@link Node}, it's successors and ancestors when its being deactivated */
+        NODE_DEACTIVATE = "nodeDeactivate",
         /** dispatched to a child {@link Node} and its ancestors after it was appended to a parent */
         CHILD_APPEND = "childAppend",
         /** dispatched to a child {@link Node} and its ancestors just before its being removed from its parent */
@@ -400,6 +404,7 @@ declare namespace FudgeCore {
         attachToNode(_container: Node | null): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        mutate(_mutator: Mutator): Promise<void>;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }
@@ -1014,6 +1019,135 @@ declare namespace FudgeCore {
         broadcastEvent(_event: Event): void;
         private broadcastEventRecursive;
         private callListeners;
+    }
+}
+declare namespace FudgeCore {
+    const enum EVENT_PHYSICS {
+        TRIGGER_ENTER = "TriggerEnteredCollision",
+        TRIGGER_EXIT = "TriggerLeftCollision",
+        COLLISION_ENTER = "ColliderEnteredCollision",
+        COLLISION_EXIT = "ColliderLeftCollision"
+    }
+    class EventPhysics extends Event {
+        /**
+         * ComponentRigidbody that collided with this ComponentRigidbody
+         */
+        cmpRigidbody: ComponentRigidbody;
+        /**
+         * The normal impulse between the two colliding objects. Normal represents the default impulse.
+         * Impulse is only happening on COLLISION_ENTER, so there is no impulse on exit nor on triggers.
+         * Use the velocity of the cmpRigidbody to determine the intensity of the EVENT instead.
+         */
+        normalImpulse: number;
+        tangentImpulse: number;
+        binomalImpulse: number;
+        /** The point where the collision/triggering initially happened. The collision point exists only on COLLISION_ENTER / TRIGGER_ENTER. */
+        collisionPoint: Vector3;
+        /** The normal vector of the collision. Only existing on COLLISION_ENTER */
+        collisionNormal: Vector3;
+        /** Creates a new event customized for physics. Holding informations about impulses. Collision point and the body that is colliding */
+        constructor(_type: EVENT_PHYSICS, _hitRigidbody: ComponentRigidbody, _normalImpulse: number, _tangentImpulse: number, _binormalImpulse: number, _collisionPoint?: Vector3, _collisionNormal?: Vector3);
+    }
+    /**
+    * Groups to place a node in, not every group should collide with every group. Use a Mask in to exclude collisions
+    */
+    enum COLLISION_GROUP {
+        DEFAULT = 1,
+        GROUP_1 = 2,
+        GROUP_2 = 4,
+        GROUP_3 = 8,
+        GROUP_4 = 16,
+        GROUP_5 = 32
+    }
+    /**
+    * Defines the type of the rigidbody which determines the way it interacts with the physical and the visual world
+    */
+    enum BODY_TYPE {
+        /** The body ignores the hierarchy of the render graph, is completely controlled  by physics and takes its node with it  */
+        DYNAMIC = 0,
+        /** The body ignores the hierarchy of the render graph, is completely immoveble and keeps its node from moving  */
+        STATIC = 1,
+        /** The body is controlled by its node and moves with it, while it impacts the physical world e.g. by collisions */
+        KINEMATIC = 2
+    }
+    /**
+    * Different types of collider shapes, with different options in scaling BOX = Vector3(length, height, depth),
+    * SPHERE = Vector3(diameter, x, x), CAPSULE = Vector3(diameter, height, x), CYLINDER = Vector3(diameter, height, x),
+    * CONE = Vector(diameter, height, x), PYRAMID = Vector3(length, height, depth); x == unused.
+    * CONVEX = ComponentMesh needs to be available in the RB Property convexMesh, the points of that component are used to create a collider that matches,
+    * the closest possible representation of that form, in form of a hull. Convex is experimental and can produce unexpected behaviour when vertices
+    * are too close to one another and the given vertices do not form a in itself closed shape and having a genus of 0 (no holes). Vertices in the ComponentMesh can be scaled differently
+    * for texturing/normal or other reasons, so the collider might be off compared to the visual shape, this can be corrected by changing the pivot scale of the ComponentRigidbody.
+    */
+    enum COLLIDER_TYPE {
+        CUBE = 0,
+        SPHERE = 1,
+        CAPSULE = 2,
+        CYLINDER = 3,
+        CONE = 4,
+        PYRAMID = 5,
+        CONVEX = 6
+    }
+    /** Displaying different types of debug information about different physic features. Default = JOINTS_AND_COLLIDER. */
+    enum PHYSICS_DEBUGMODE {
+        NONE = 0,
+        COLLIDERS = 1,
+        JOINTS_AND_COLLIDER = 2,
+        BOUNDING_BOXES = 3,
+        CONTACTS = 4,
+        PHYSIC_OBJECTS_ONLY = 5
+    }
+    /** Info about Raycasts shot from the physics system. */
+    class RayHitInfo {
+        hit: boolean;
+        hitDistance: number;
+        hitPoint: Vector3;
+        rigidbodyComponent: ComponentRigidbody;
+        hitNormal: Vector3;
+        rayOrigin: Vector3;
+        rayEnd: Vector3;
+        constructor();
+        recycle(): void;
+    }
+    /** General settings for the physic simulation and the debug of it. */
+    class PhysicsSettings {
+        constructor(_defaultCollisionGroup: number, _defaultCollisionMask: number);
+        /** Change if rigidbodies are able to sleep (don't be considered in physical calculations) when their movement is below a threshold. Deactivation is decreasing performance for minor advantage in precision. */
+        get disableSleeping(): boolean;
+        set disableSleeping(_value: boolean);
+        /** Sleeping Threshold for Movement Veloctiy. */
+        get sleepingVelocityThreshold(): number;
+        set sleepingVelocityThreshold(_value: number);
+        /** Sleeping Threshold for Rotation Velocity. */
+        get sleepingAngularVelocityThreshold(): number;
+        set sleepingAngularVelocityThreshold(_value: number);
+        /** Threshold how long the Rigidbody must be below/above the threshold to count as sleeping. */
+        get sleepingTimeThreshold(): number;
+        set sleepingTimeThreshold(_value: number);
+        /** Error threshold. Default is 0.05. The higher the more likely collisions get detected before actual impact at high speeds but it's visually less accurate. */
+        get defaultCollisionMargin(): number;
+        set defaultCollisionMargin(_thickness: number);
+        /** The default applied friction between two rigidbodies with the default value. How much velocity is slowed down when moving accross this surface. */
+        get defaultFriction(): number;
+        set defaultFriction(_value: number);
+        /** Bounciness of rigidbodies. How much of the impact is restituted. */
+        get defaultRestitution(): number;
+        set defaultRestitution(_value: number);
+        /** Groups the default rigidbody will collide with. Set it like: (PHYSICS_GROUP.DEFAULT | PHYSICS_GROUP.GROUP_1 | PHYSICS_GROUP.GROUP_2 | PHYSICS_GROUP.GROUP_3)
+         * to collide with multiple groups. Default is collision with everything but triggers.
+        */
+        get defaultCollisionMask(): number;
+        set defaultCollisionMask(_value: number);
+        /** The group that this rigidbody belongs to. Default is the DEFAULT Group which means its just a normal Rigidbody not a trigger nor anything special. */
+        get defaultCollisionGroup(): COLLISION_GROUP;
+        set defaultCollisionGroup(_value: COLLISION_GROUP);
+        /** Change the type of joint solver algorithm. Default Iterative == 0, is faster but less stable. Direct == 1, slow but more stable, recommended for complex joint work. Change this setting only at the start of your game. */
+        get defaultConstraintSolverType(): number;
+        set defaultConstraintSolverType(_value: number);
+        /** The correction algorithm used to correct physics calculations. Change this only at the beginning of your game. Each has different approaches, so if you have problems test another
+         *  Default 0 = Baumgarte (fast but less correct induces some energy errors), 1 = Split-Impulse (fast and no engery errors, but more inaccurate for joints), 2 = Non-linear Gauss Seidel (slowest but most accurate)*/
+        get defaultCorrectionAlgorithm(): number;
+        set defaultCorrectionAlgorithm(_value: number);
     }
 }
 declare namespace FudgeCore {
@@ -3843,6 +3977,7 @@ declare namespace FudgeCore {
     class ComponentRigidbody extends Component {
         #private;
         static readonly iSubclass: number;
+        private static mapBodyType;
         /** Transformation of the collider relative to the node's transform. Once set mostly remains constant.
          * If altered, {@link isInitialized} must be reset to false to recreate the collider in the next {@link Render.prepare}
          */
@@ -3923,6 +4058,7 @@ declare namespace FudgeCore {
          * Set the restitution of the rigidbody, which is the factor of bounciness of this rigidbody on surfaces
          */
         set restitution(_restitution: number);
+        hndEvent: (_event: Event) => void;
         /**
          * Returns the rigidbody in the form the physics engine is using it, should not be used unless a functionality
          * is not provided through the FUDGE Integration.
@@ -4172,135 +4308,6 @@ declare namespace FudgeCore {
         private vertexShaderSource;
         /** The source code (string) of the in physicsDebug used super simple fragmentShader. Unlit - only colorizing the drawn pixels, normals/position are given to make it expandable */
         private fragmentShaderSource;
-    }
-}
-declare namespace FudgeCore {
-    const enum EVENT_PHYSICS {
-        TRIGGER_ENTER = "TriggerEnteredCollision",
-        TRIGGER_EXIT = "TriggerLeftCollision",
-        COLLISION_ENTER = "ColliderEnteredCollision",
-        COLLISION_EXIT = "ColliderLeftCollision"
-    }
-    class EventPhysics extends Event {
-        /**
-         * ComponentRigidbody that collided with this ComponentRigidbody
-         */
-        cmpRigidbody: ComponentRigidbody;
-        /**
-         * The normal impulse between the two colliding objects. Normal represents the default impulse.
-         * Impulse is only happening on COLLISION_ENTER, so there is no impulse on exit nor on triggers.
-         * Use the velocity of the cmpRigidbody to determine the intensity of the EVENT instead.
-         */
-        normalImpulse: number;
-        tangentImpulse: number;
-        binomalImpulse: number;
-        /** The point where the collision/triggering initially happened. The collision point exists only on COLLISION_ENTER / TRIGGER_ENTER. */
-        collisionPoint: Vector3;
-        /** The normal vector of the collision. Only existing on COLLISION_ENTER */
-        collisionNormal: Vector3;
-        /** Creates a new event customized for physics. Holding informations about impulses. Collision point and the body that is colliding */
-        constructor(_type: EVENT_PHYSICS, _hitRigidbody: ComponentRigidbody, _normalImpulse: number, _tangentImpulse: number, _binormalImpulse: number, _collisionPoint?: Vector3, _collisionNormal?: Vector3);
-    }
-    /**
-    * Groups to place a node in, not every group should collide with every group. Use a Mask in to exclude collisions
-    */
-    enum COLLISION_GROUP {
-        DEFAULT = 1,
-        GROUP_1 = 2,
-        GROUP_2 = 4,
-        GROUP_3 = 8,
-        GROUP_4 = 16,
-        GROUP_5 = 32
-    }
-    /**
-    * Defines the type of the rigidbody which determines the way it interacts with the physical and the visual world
-    */
-    enum BODY_TYPE {
-        /** The body ignores the hierarchy of the render graph, is completely controlled  by physics and takes its node with it  */
-        DYNAMIC = 0,
-        /** The body ignores the hierarchy of the render graph, is completely immoveble and keeps its node from moving  */
-        STATIC = 1,
-        /** The body is controlled by its node and moves with it, while it impacts the physical world e.g. by collisions */
-        KINEMATIC = 2
-    }
-    /**
-    * Different types of collider shapes, with different options in scaling BOX = Vector3(length, height, depth),
-    * SPHERE = Vector3(diameter, x, x), CAPSULE = Vector3(diameter, height, x), CYLINDER = Vector3(diameter, height, x),
-    * CONE = Vector(diameter, height, x), PYRAMID = Vector3(length, height, depth); x == unused.
-    * CONVEX = ComponentMesh needs to be available in the RB Property convexMesh, the points of that component are used to create a collider that matches,
-    * the closest possible representation of that form, in form of a hull. Convex is experimental and can produce unexpected behaviour when vertices
-    * are too close to one another and the given vertices do not form a in itself closed shape and having a genus of 0 (no holes). Vertices in the ComponentMesh can be scaled differently
-    * for texturing/normal or other reasons, so the collider might be off compared to the visual shape, this can be corrected by changing the pivot scale of the ComponentRigidbody.
-    */
-    enum COLLIDER_TYPE {
-        CUBE = 0,
-        SPHERE = 1,
-        CAPSULE = 2,
-        CYLINDER = 3,
-        CONE = 4,
-        PYRAMID = 5,
-        CONVEX = 6
-    }
-    /** Displaying different types of debug information about different physic features. Default = JOINTS_AND_COLLIDER. */
-    enum PHYSICS_DEBUGMODE {
-        NONE = 0,
-        COLLIDERS = 1,
-        JOINTS_AND_COLLIDER = 2,
-        BOUNDING_BOXES = 3,
-        CONTACTS = 4,
-        PHYSIC_OBJECTS_ONLY = 5
-    }
-    /** Info about Raycasts shot from the physics system. */
-    class RayHitInfo {
-        hit: boolean;
-        hitDistance: number;
-        hitPoint: Vector3;
-        rigidbodyComponent: ComponentRigidbody;
-        hitNormal: Vector3;
-        rayOrigin: Vector3;
-        rayEnd: Vector3;
-        constructor();
-        recycle(): void;
-    }
-    /** General settings for the physic simulation and the debug of it. */
-    class PhysicsSettings {
-        constructor(_defGroup: number, _defMask: number);
-        /** Change if rigidbodies are able to sleep (don't be considered in physical calculations) when their movement is below a threshold. Deactivation is decreasing performance for minor advantage in precision. */
-        get disableSleeping(): boolean;
-        set disableSleeping(_value: boolean);
-        /** Sleeping Threshold for Movement Veloctiy. */
-        get sleepingVelocityThreshold(): number;
-        set sleepingVelocityThreshold(_value: number);
-        /** Sleeping Threshold for Rotation Velocity. */
-        get sleepingAngularVelocityThreshold(): number;
-        set sleepingAngularVelocityThreshold(_value: number);
-        /** Threshold how long the Rigidbody must be below/above the threshold to count as sleeping. */
-        get sleepingTimeThreshold(): number;
-        set sleepingTimeThreshold(_value: number);
-        /** Error threshold. Default is 0.05. The higher the more likely collisions get detected before actual impact at high speeds but it's visually less accurate. */
-        get defaultCollisionMargin(): number;
-        set defaultCollisionMargin(_thickness: number);
-        /** The default applied friction between two rigidbodies with the default value. How much velocity is slowed down when moving accross this surface. */
-        get defaultFriction(): number;
-        set defaultFriction(_value: number);
-        /** Bounciness of rigidbodies. How much of the impact is restituted. */
-        get defaultRestitution(): number;
-        set defaultRestitution(_value: number);
-        /** Groups the default rigidbody will collide with. Set it like: (PHYSICS_GROUP.DEFAULT | PHYSICS_GROUP.GROUP_1 | PHYSICS_GROUP.GROUP_2 | PHYSICS_GROUP.GROUP_3)
-         * to collide with multiple groups. Default is collision with everything but triggers.
-        */
-        get defaultCollisionMask(): number;
-        set defaultCollisionMask(_value: number);
-        /** The group that this rigidbody belongs to. Default is the DEFAULT Group which means its just a normal Rigidbody not a trigger nor anything special. */
-        get defaultCollisionGroup(): COLLISION_GROUP;
-        set defaultCollisionGroup(_value: COLLISION_GROUP);
-        /** Change the type of joint solver algorithm. Default Iterative == 0, is faster but less stable. Direct == 1, slow but more stable, recommended for complex joint work. Change this setting only at the start of your game. */
-        get defaultConstraintSolverType(): number;
-        set defaultConstraintSolverType(_value: number);
-        /** The correction algorithm used to correct physics calculations. Change this only at the beginning of your game. Each has different approaches, so if you have problems test another
-         *  Default 0 = Baumgarte (fast but less correct induces some energy errors), 1 = Split-Impulse (fast and no engery errors, but more inaccurate for joints), 2 = Non-linear Gauss Seidel (slowest but most accurate)*/
-        get defaultCorrectionAlgorithm(): number;
-        set defaultCorrectionAlgorithm(_value: number);
     }
 }
 declare namespace FudgeCore {
@@ -4740,99 +4747,89 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     /**
-      * Main Physics Class to hold information about the physical representation of the scene
+      * Manages the OIMO physics engine for FUDGE. Multiple instances may be created, one is active at a time.
+      * All methods are static and use the currently active instance. At startup, a default instance is created and become the active instance
+      * Attaching a {@link ComponentRigidbody} to a {@link Node} places a physics collider in the physics instance active at that time.
       * @author Marko Fehrenbach, HFU 2020
       */
     class Physics {
+        #private;
         /** The SETTINGS that apply to the physical world. Ranging from things like sleeping, collisionShapeThickness and others */
         static settings: PhysicsSettings;
-        /** The PHYSICAL WORLD that gives every {@link Node} with a ComponentRigidbody a physical representation and moves them accordingly to the laws of the physical world. */
-        static world: Physics;
-        /** The rendering of physical debug informations. Used internally no interaction needed.*/
-        debugDraw: PhysicsDebugDraw;
-        /** The camera/viewport the physics are debugged to. Used internally no interaction needed. */
-        mainCam: ComponentCamera;
+        private static ƒactive;
         private oimoWorld;
         private bodyList;
         private jointList;
+        constructor();
         /**
-         * Creating a physical world to represent the {@link Node} Scene Tree. Call once before using any physics functions or
-         * rigidbodies.
+         * Define the currently active Physics instance
          */
-        static initializePhysics(): Physics;
+        static set activeInstance(_physics: Physics);
+        static get debugDraw(): PhysicsDebugDraw;
+        static get mainCam(): ComponentCamera;
         /**
         * Cast a RAY into the physical world from a origin point in a certain direction. Receiving informations about the hit object and the
         * hit point. Do not specify a _group to raycast the whole world, else only bodies within the specific group can be hit.
         */
         static raycast(_origin: Vector3, _direction: Vector3, _length?: number, _debugDraw?: boolean, _group?: COLLISION_GROUP): RayHitInfo;
         /**
+        * Simulates the physical world. _deltaTime is the amount of time between physical steps, default is 60 frames per second ~17ms.
+        * A frame timing can't be smaller than 1/30 of a second, or else it will be set to 30 frames, to have more consistent frame calculations.
+        */
+        static simulate(_deltaTime?: number): void;
+        /**
+         * Draw information about the currently active instance using the {@link ComponentCamera} given
+         */
+        static draw(_cmpCamera: ComponentCamera, _mode?: PHYSICS_DEBUGMODE): void;
+        /**
           * Adjusts the transforms of the {@link ComponentRigidbody}s in the given branch to match their nodes or meshes
           */
         static adjustTransforms(_branch: Node, _toMesh?: boolean): void;
+        /**
+        * Get the applied gravitational force of the active instance. Default earth gravity = 9.81 m/s
+        */
+        static getGravity(): Vector3;
+        /**
+        * Set the applied gravitational force of the active instance. Default earth gravity = 9.81 m/s
+        */
+        static setGravity(_value: Vector3): void;
+        /**
+        * Add a new OIMO Rigidbody to the active instance, happens automatically when adding a FUDGE Rigidbody Component.
+        */
+        static addRigidbody(_cmpRB: ComponentRigidbody): void;
+        /**
+        * Remove the OIMO Rigidbody to the active instance, happens automatically when removing a FUDGE Rigidbody Component
+        */
+        static removeRigidbody(_cmpRB: ComponentRigidbody): void;
+        /**
+        * Add a new OIMO Joint/Constraint to the active instance, happens automatically when adding a FUDGE Joint Component
+        */
+        static addJoint(_cmpJoint: Joint): void;
+        /**
+        * Called internally to inform the physics system that a joint has a change of core properties and needs to be recreated.
+        */
+        static changeJointStatus(_cmpJoint: Joint): void;
+        /**
+          * Remove the OIMO Joint/Constraint to the active instance, happens automatically when removing a FUDGE Joint Component
+          */
+        static removeJoint(_cmpJoint: Joint): void;
+        /** Returns all the ComponentRigidbodies that are known to the active instance. */
+        static getBodyList(): ComponentRigidbody[];
+        /** Giving a ComponentRigidbody a specific identification number so it can be referenced in the loading process. And removed rb's can receive a new id. */
+        static distributeBodyID(): number;
+        /**
+         * Connect all joints that are not connected yet. Used internally no user interaction needed. This functionality is called and needed to make sure joints connect/disconnect
+         * if any of the two paired ComponentRigidbodies change.
+         */
+        static connectJoints(): void;
+        /** Remove all oimo joints and rigidbodies, so that they can be reused in another world  */
+        static cleanup(): void;
         /** Internal function to calculate the endpoint of mathematical ray. By adding the multiplied direction to the origin.
            * Used because OimoPhysics defines ray by start/end. But GameEngines commonly use origin/direction.
            */
         private static getRayEndPoint;
         /** Internal function to get the distance in which a ray hit by subtracting points from each other and get the square root of the squared product of each component. */
         private static getRayDistance;
-        /** Returns all the ComponentRigidbodies that are known to the physical space. */
-        getBodyList(): ComponentRigidbody[];
-        /**
-        * Getting the solver iterations of the physics engine. Higher iteration numbers increase accuracy but decrease performance
-        */
-        getSolverIterations(): number;
-        /**
-        * Setting the solver iterations of the physics engine. Higher iteration numbers increase accuracy but decrease performance
-        */
-        setSolverIterations(_value: number): void;
-        /**
-        * Get the applied gravitational force to physical objects. Default earth gravity = 9.81 m/s
-        */
-        getGravity(): Vector3;
-        /**
-        * Set the applied gravitational force to physical objects. Default earth gravity = 9.81 m/s
-        */
-        setGravity(_value: Vector3): void;
-        /**
-        * Adding a new OIMO Rigidbody to the OIMO World, happens automatically when adding a FUDGE Rigidbody Component
-        */
-        addRigidbody(_cmpRB: ComponentRigidbody): void;
-        /**
-        * Removing a OIMO Rigidbody to the OIMO World, happens automatically when removing a FUDGE Rigidbody Component
-        */
-        removeRigidbody(_cmpRB: ComponentRigidbody): void;
-        /**
-        * Adding a new OIMO Joint/Constraint to the OIMO World, happens automatically when adding a FUDGE Joint Component
-        */
-        addJoint(_cmpJoint: Joint): void;
-        /**
-          * Removing a OIMO Joint/Constraint to the OIMO World, happens automatically when removeing a FUDGE Joint Component
-          */
-        removeJoint(_cmpJoint: Joint): void;
-        /** Returns the actual used world of the OIMO physics engine. No user interaction needed.*/
-        getOimoWorld(): OIMO.World;
-        /**
-        * Simulates the physical world. _deltaTime is the amount of time between physical steps, default is 60 frames per second ~17ms.
-        * A frame timing can't be smaller than 1/30 of a second, or else it will be set to 30 frames, to have more consistent frame calculations.
-        */
-        simulate(_deltaTime?: number): void;
-        draw(_cmpCamera: ComponentCamera, _mode?: PHYSICS_DEBUGMODE): void;
-        /** Connect all joints that are not connected yet. Used internally no user interaction needed. This functionality is called and needed to make sure joints connect/disconnect
-         * if any of the two paired ComponentRigidbodies change.
-         */
-        connectJoints(): void;
-        /**
-        * Called internally to inform the physics system that a joint has a change of core properties like ComponentRigidbody and needs to
-        * be recreated.
-        */
-        changeJointStatus(_cmpJoint: Joint): void;
-        /** Giving a ComponentRigidbody a specific identification number so it can be referenced in the loading process. And removed rb's can receive a new id. */
-        distributeBodyID(): number;
-        /** Returns the ComponentRigidbody with the given id. Used internally to reconnect joints on loading in the editor. */
-        getBodyByID(_id: number): ComponentRigidbody;
-        /** Updates all {@link Rigidbodies} known to the Physics.world to match their containers or meshes transformations */
-        /** Create a oimoPhysics world. Called once at the beginning if none is existend yet. */
-        private createWorld;
     }
 }
 declare namespace FudgeCore {

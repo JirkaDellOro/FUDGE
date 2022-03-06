@@ -438,7 +438,7 @@ declare namespace FudgeUserInterface {
         abstract getLabel(_object: T): string;
         /** Return false to disallow renaming the item/object, or processes the proposed new label */
         abstract rename(_object: T, _new: string): boolean;
-        abstract delete(_focussed: T[]): T[];
+        delete(_focussed: T[]): Promise<T[]>;
         /**
          * Return a list of copies of the objects given for copy & paste
          * @param _focussed The object currently having focus
@@ -581,6 +581,8 @@ declare namespace FudgeUserInterface {
         };
         /** Retrieve a string to create a label for the tree item representing the object  */
         abstract getLabel(_object: T): string;
+        /** Retrieve a space separated string of attributes to add to the list item representing the object for further styling  */
+        abstract getAttributes(_object: T): string;
         /** Return false to disallow renaming the item/object, or processes the proposed new label */
         abstract rename(_object: T, _new: string): boolean;
         /** Return true if the object has children that must be shown when unfolding the tree item */
@@ -644,6 +646,10 @@ declare namespace FudgeUserInterface {
          * Get the label text shown
          */
         getLabel(): string;
+        /**
+         * Get the label text shown
+         */
+        refreshAttributes(): void;
         /**
          * Tries to expanding the [[TreeList]] of children, by dispatching [[EVENT.EXPAND]].
          * The user of the tree needs to add an event listener to the tree

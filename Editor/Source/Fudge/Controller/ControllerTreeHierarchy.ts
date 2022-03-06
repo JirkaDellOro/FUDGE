@@ -6,6 +6,12 @@ namespace Fudge {
     public getLabel(_node: ƒ.Node): string {
       return _node.name;
     }
+
+    public getAttributes(_node: ƒ.Node): string {
+      let attributes: string = _node.isActive ? "active" : "inactive";
+      return attributes;
+    }
+    
     public rename(_node: ƒ.Node, _new: string): boolean {
       _node.name = _new;
       return true;
@@ -50,7 +56,7 @@ namespace Fudge {
       let copies: ƒ.Node[] = [];
       for (let original of _originals) {
         let serialization: ƒ.Serialization = ƒ.Serializer.serialize(original);
-        let copy: ƒ.Node = <ƒ.Node> await ƒ.Serializer.deserialize(serialization);
+        let copy: ƒ.Node = <ƒ.Node>await ƒ.Serializer.deserialize(serialization);
         copies.push(copy);
       }
       return copies;

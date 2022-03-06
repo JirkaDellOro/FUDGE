@@ -18,46 +18,38 @@ namespace Fudge {
 
       this.setTitle("Graph");
 
-      const renderConfig: RowOrColumnItemConfig = {
+      const config: RowOrColumnItemConfig = {
         type: "column",
-        isClosable: true,
-        content: [
-          {
-            type: "component",
-            componentType: VIEW.RENDER,
-            componentState: _state,
-            title: "Render"
-          }
-        ]
-      };
-
-      const hierarchyAndComponents: RowOrColumnItemConfig = {
-        type: "column",
-        isClosable: true,
-        content: [
-          {
+        content: [{
+          type: "component",
+          componentType: VIEW.RENDER,
+          componentState: _state,
+          title: "Render"
+        }, {
+          type: "row",
+          content: [{
             type: "component",
             componentType: VIEW.HIERARCHY,
             componentState: _state,
             title: "Hierarchy"
-          },
-          {
+          }, {
             type: "component",
             componentType: VIEW.COMPONENTS,
             componentState: _state,
             title: "Components"
-          }
-        ]
+          }]
+        }]
       };
 
 
-      this.goldenLayout.addItemAtLocation(renderConfig, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
-      this.goldenLayout.addItemAtLocation(hierarchyAndComponents, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
+      this.goldenLayout.addItemAtLocation(config, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
+      // this.goldenLayout.addItemAtLocation(hierarchyAndComponents, [{ typeId: LayoutManager.LocationSelector.TypeId.Root }]);
 
 
       this.dom.addEventListener(EVENT_EDITOR.SET_GRAPH, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
+      this.dom.addEventListener(EVENT_EDITOR.REFRESH, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(ƒui.EVENT.SELECT, this.hndFocusNode);
       this.dom.addEventListener(ƒui.EVENT.RENAME, this.broadcastEvent);
@@ -96,7 +88,7 @@ namespace Fudge {
           this.setGraph(_event.detail);
           break;
         case EVENT_EDITOR.REFRESH:
-          console.log("Refresh");
+          break;
         case EVENT_EDITOR.SET_PROJECT:
         case EVENT_EDITOR.UPDATE:
           // TODO: meaningful difference between update and setgraph

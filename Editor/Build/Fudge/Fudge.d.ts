@@ -18,17 +18,18 @@ declare namespace Fudge {
 declare namespace Fudge {
     enum CONTEXTMENU {
         ADD_NODE = 0,
-        ADD_COMPONENT = 1,
-        ADD_COMPONENT_SCRIPT = 2,
-        EDIT = 3,
-        CREATE_MESH = 4,
-        CREATE_MATERIAL = 5,
-        CREATE_GRAPH = 6,
-        REMOVE_COMPONENT = 7,
-        ADD_JOINT = 8,
-        TRANSLATE = 9,
-        ROTATE = 10,
-        SCALE = 11
+        ACTIVATE_NODE = 1,
+        ADD_COMPONENT = 2,
+        ADD_COMPONENT_SCRIPT = 3,
+        EDIT = 4,
+        CREATE_MESH = 5,
+        CREATE_MATERIAL = 6,
+        CREATE_GRAPH = 7,
+        REMOVE_COMPONENT = 8,
+        ADD_JOINT = 9,
+        TRANSLATE = 10,
+        ROTATE = 11,
+        SCALE = 12
     }
     enum MENU {
         QUIT = "quit",
@@ -277,7 +278,7 @@ declare namespace Fudge {
         getLabel(_object: ƒ.SerializableResource): string;
         rename(_object: ƒ.SerializableResource, _new: string): boolean;
         copy(_originals: ƒ.SerializableResource[]): Promise<ƒ.SerializableResource[]>;
-        delete(_focussed: ƒ.SerializableResource[]): ƒ.SerializableResource[];
+        delete(_focussed: ƒ.SerializableResource[]): Promise<ƒ.SerializableResource[]>;
         sort(_data: ƒ.SerializableResource[], _key: string, _direction: number): void;
     }
 }
@@ -307,6 +308,7 @@ declare namespace Fudge {
     import ƒUi = FudgeUserInterface;
     class ControllerTreeDirectory extends ƒUi.TreeController<DirectoryEntry> {
         getLabel(_entry: DirectoryEntry): string;
+        getAttributes(_object: DirectoryEntry): string;
         rename(_entry: DirectoryEntry, _new: string): boolean;
         hasChildren(_entry: DirectoryEntry): boolean;
         getChildren(_entry: DirectoryEntry): DirectoryEntry[];
@@ -320,6 +322,7 @@ declare namespace Fudge {
     import ƒUi = FudgeUserInterface;
     class ControllerTreeHierarchy extends ƒUi.TreeController<ƒ.Node> {
         getLabel(_node: ƒ.Node): string;
+        getAttributes(_node: ƒ.Node): string;
         rename(_node: ƒ.Node, _new: string): boolean;
         hasChildren(_node: ƒ.Node): boolean;
         getChildren(_node: ƒ.Node): ƒ.Node[];
@@ -573,6 +576,9 @@ declare namespace Fudge {
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         private static createStandardMaterial;
         private static createStandardMesh;
+        protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
+        protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
+        private illuminateGraph;
         private fillContent;
         private createStandardGraph;
         private createFilePreview;

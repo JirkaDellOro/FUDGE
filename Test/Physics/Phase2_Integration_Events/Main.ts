@@ -115,7 +115,7 @@ namespace FudgePhysics_Communication {
 
   function update(): void {
 
-    f.Physics.world.simulate();
+    f.Physics.simulate();
     viewPort.draw();
     measureFPS();
   }

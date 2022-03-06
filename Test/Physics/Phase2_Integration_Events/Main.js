@@ -92,7 +92,7 @@ var FudgePhysics_Communication;
         }
     }
     function update() {
-        f.Physics.world.simulate();
+        f.Physics.simulate();
         viewPort.draw();
         measureFPS();
     }

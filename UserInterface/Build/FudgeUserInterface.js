@@ -1357,15 +1357,15 @@ var FudgeUserInterface;
                 content = FudgeUserInterface.Generator.createInterfaceFromMutator(_data);
             content.id = "content";
             Dialog.dom.appendChild(content);
-            let div = document.createElement("div");
-            div.innerHTML = "<p>" + _callToAction + "</p>";
+            let footer = document.createElement("footer");
+            footer.innerHTML = "<p>" + _callToAction + "</p>";
             let btnCancel = document.createElement("button");
             btnCancel.innerHTML = _cancel;
-            div.appendChild(btnCancel);
+            footer.appendChild(btnCancel);
             let btnOk = document.createElement("button");
             btnOk.innerHTML = _ok;
-            div.appendChild(btnOk);
-            Dialog.dom.appendChild(div);
+            footer.appendChild(btnOk);
+            Dialog.dom.appendChild(footer);
             if (_modal)
                 //@ts-ignore
                 Dialog.dom.showModal();
@@ -1377,7 +1377,12 @@ var FudgeUserInterface;
                     btnCancel.removeEventListener("click", hndButton);
                     btnOk.removeEventListener("click", hndButton);
                     if (_event.target == btnOk)
-                        FudgeUserInterface.Controller.updateMutator(content, _data);
+                        try {
+                            FudgeUserInterface.Controller.updateMutator(content, _data);
+                        }
+                        catch (_e) {
+                            ƒ.Debug.info(_e);
+                        }
                     //@ts-ignore
                     Dialog.dom.close();
                     document.body.removeChild(Dialog.dom);
@@ -1580,12 +1585,12 @@ var FudgeUserInterface;
         //   // _event.stopPropagation();
         //   // this.addChildren(this.controller.dragDrop.sources, this.controller.dragDrop.target);
         // }
-        hndDelete = (_event) => {
+        hndDelete = async (_event) => {
             let target = _event.target;
             _event.stopPropagation();
-            let remove = this.controller.delete([target.data]);
-            console.log(remove);
-            // this.delete(remove);
+            let deleted = await this.controller.delete([target.data]);
+            if (deleted.length)
+                this.dispatchEvent(new Event("removeChild" /* REMOVE_CHILD */, { bubbles: true }));
         };
         hndEscape = (_event) => {
             this.clearSelection();
@@ -1651,6 +1656,7 @@ var FudgeUserInterface;
         dragDrop = { sources: [], target: null };
         /** Stores references to objects being dragged, and objects to drop on. Override with a reference in outer scope, if drag&drop should operate outside of table */
         copyPaste = { sources: [], target: null };
+        async delete(_focussed) { return _focussed; }
     }
     FudgeUserInterface.TableController = TableController;
 })(FudgeUserInterface || (FudgeUserInterface = {}));
@@ -2211,6 +2217,12 @@ var FudgeUserInterface;
             return this.label.value;
         }
         /**
+         * Get the label text shown
+         */
+        refreshAttributes() {
+            this.setAttribute("attributes", this.controller.getAttributes(this.data));
+        }
+        /**
          * Tries to expanding the [[TreeList]] of children, by dispatching [[EVENT.EXPAND]].
          * The user of the tree needs to add an event listener to the tree
          * in order to create that [[TreeList]] and add it as branch to this item
@@ -2272,6 +2284,7 @@ var FudgeUserInterface;
             this.label.disabled = true;
             this.label.value = this.display;
             this.appendChild(this.label);
+            this.refreshAttributes();
             this.tabIndex = 0;
         }
         hndFocus = (_event) => {

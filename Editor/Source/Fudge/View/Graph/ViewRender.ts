@@ -81,6 +81,9 @@ namespace Fudge {
         this.dom.appendChild(this.canvas);
       }
       this.graph = _node;
+      ƒ.Physics.cleanup();
+      ƒ.Physics.activeInstance = new ƒ.Physics();
+      this.viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
       this.viewport.setBranch(this.graph);
       this.redraw();
     }
@@ -162,7 +165,7 @@ namespace Fudge {
     }
 
     private hndEvent = (_event: CustomEvent): void => {
-      ƒ.Physics.world.connectJoints();
+      ƒ.Physics.connectJoints();
       switch (_event.type) {
         case EVENT_EDITOR.CLEAR_PROJECT:
           this.setGraph(null);

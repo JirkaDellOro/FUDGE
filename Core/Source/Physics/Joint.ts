@@ -249,15 +249,15 @@ namespace FudgeCore {
 
     /** Tell the FudgePhysics system that this joint needs to be handled in the next frame. */
     protected dirtyStatus(): void {
-      Physics.world.changeJointStatus(this);
+      Physics.changeJointStatus(this);
     }
 
     protected addJoint(): void {
-      Physics.world.addJoint(this);
+      Physics.addJoint(this);
     }
 
     protected removeJoint(): void {
-      Physics.world.removeJoint(this);
+      Physics.removeJoint(this);
     }
 
     protected constructJoint(..._configParams: Object[]): void {

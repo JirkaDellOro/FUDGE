@@ -3,6 +3,9 @@ namespace Fudge {
   import ƒUi = FudgeUserInterface;
   import ƒAid = FudgeAid;
 
+  enum CONTEXTMENU {
+    ILLUMINATE = "Illuminate"
+  }
   /**
    * Preview a resource
    * @author Jirka Dell'Oro-Friedl, HFU, 2020  
@@ -34,7 +37,7 @@ namespace Fudge {
       this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent, true);
       this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent);
-      // this.dom.addEventListener(ƒui.EVENT.CONTEXTMENU, this.openContextMenu);
+      this.dom.addEventListener(ƒUi.EVENT.CONTEXTMENU, this.openContextMenu);
       // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
     }
 
@@ -51,35 +54,32 @@ namespace Fudge {
     }
 
     // #region  ContextMenu
-    // protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
-    //   const menu: Electron.Menu = new remote.Menu();
-    //   let item: Electron.MenuItem;
+    protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu {
+      const menu: Electron.Menu = new remote.Menu();
+      let item: Electron.MenuItem;
 
-    //   item = new remote.MenuItem({ label: "Add Component", submenu: [] });
-    //   for (let subItem of ContextMenu.getComponents(_callback))
-    //     item.submenu.append(subItem);
-    //   menu.append(item);
+      item = new remote.MenuItem({ label: "Illuminate Graph", id: CONTEXTMENU.ILLUMINATE, checked: true, type: "checkbox", click: _callback });
+      menu.append(item);
+      return menu;
+    }
 
-    //   ContextMenu.appendCopyPaste(menu);
-    //   return menu;
-    // }
+    protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
+      ƒ.Debug.info(`MenuSelect: Item-id=${_item.id}`);
 
-    // protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void {
-    //   ƒ.Debug.info(`MenuSelect: Item-id=${CONTEXTMENU[_item.id]}`);
+      switch (_item.id) {
+        case CONTEXTMENU.ILLUMINATE:
+          this.illuminateGraph();
+          break;
+      }
+    }
 
-    //   switch (Number(_item.id)) {
-    //     case CONTEXTMENU.ADD_COMPONENT:
-    //       let iSubclass: number = _item["iSubclass"];
-    //       let component: typeof ƒ.Component = ƒ.Component.subclasses[iSubclass];
-    //       //@ts-ignore
-    //       let cmpNew: ƒ.Component = new component();
-    //       ƒ.Debug.info(cmpNew.type, cmpNew);
-
-    //       // this.node.addComponent(cmpNew);
-    //       this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.SELECT, { bubbles: true, detail: { data: this.resource } }));
-    //       break;
-    //   }
-    // }
+    private illuminateGraph(): void {
+      let nodeLight: ƒ.Node = this.viewport.getBranch()?.getChildrenByName("PreviewIllumination")[0];
+      if (nodeLight) {
+        nodeLight.activate(this.contextMenu.getMenuItemById(CONTEXTMENU.ILLUMINATE).checked);
+        this.redraw();
+      }
+    }
     //#endregion
 
     private fillContent(): void {
@@ -89,7 +89,7 @@ namespace Fudge {
         this.setTitle("Preview");
         return;
       }
-      
+
       this.setTitle("Preview | " + this.resource.name);
       //@ts-ignore
       let type: string = this.resource.type || "Function";
@@ -123,8 +123,8 @@ namespace Fudge {
           this.redraw();
           break;
         case "Graph":
-          this.viewport.setBranch(<ƒ.Graph>this.resource);
-          this.dom.appendChild(this.viewport.getCanvas());
+          graph = this.createStandardGraph(true);
+          graph.appendChild(<ƒ.Graph>this.resource);
           this.redraw();
           break;
         case "TextureImage":
@@ -140,10 +140,16 @@ namespace Fudge {
       }
     }
 
-    private createStandardGraph(): ƒ.Node {
+    private createStandardGraph(_graphIllumination: boolean = false): ƒ.Node {
       let graph: ƒ.Node = new ƒ.Node("PreviewScene");
-      ƒAid.addStandardLightComponents(graph);
       this.viewport.setBranch(graph);
+
+      let nodeLight: ƒ.Node = new ƒ.Node("PreviewIllumination");
+      graph.addChild(nodeLight);
+      ƒAid.addStandardLightComponents(nodeLight);
+      if (_graphIllumination) // otherwise, light is always on!
+        this.illuminateGraph();
+
       this.dom.appendChild(this.viewport.getCanvas());
       return graph;
     }

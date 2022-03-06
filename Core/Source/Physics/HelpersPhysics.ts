@@ -52,7 +52,6 @@ namespace FudgeCore {
   * Defines the type of the rigidbody which determines the way it interacts with the physical and the visual world
   */
   export enum BODY_TYPE {
-    
     /** The body ignores the hierarchy of the render graph, is completely controlled  by physics and takes its node with it  */
     DYNAMIC, // = OIMO.RigidBodyType.DYNAMIC,
     /** The body ignores the hierarchy of the render graph, is completely immoveble and keeps its node from moving  */
@@ -118,9 +117,9 @@ namespace FudgeCore {
   /** General settings for the physic simulation and the debug of it. */
   export class PhysicsSettings {
 
-    constructor(_defGroup: number, _defMask: number) {
-      this.defaultCollisionGroup = _defGroup;
-      this.defaultCollisionMask = _defMask;
+    constructor(_defaultCollisionGroup: number, _defaultCollisionMask: number) {
+      this.defaultCollisionGroup = _defaultCollisionGroup;
+      this.defaultCollisionMask = _defaultCollisionMask;
     }
 
     /** Change if rigidbodies are able to sleep (don't be considered in physical calculations) when their movement is below a threshold. Deactivation is decreasing performance for minor advantage in precision. */

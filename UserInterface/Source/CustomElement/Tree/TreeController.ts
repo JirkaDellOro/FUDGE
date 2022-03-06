@@ -14,6 +14,9 @@ namespace FudgeUserInterface {
     /** Retrieve a string to create a label for the tree item representing the object  */
     public abstract getLabel(_object: T): string;
 
+    /** Retrieve a space separated string of attributes to add to the list item representing the object for further styling  */
+    public abstract getAttributes(_object: T): string;
+
     /** Return false to disallow renaming the item/object, or processes the proposed new label */
     public abstract rename(_object: T, _new: string): boolean;
 

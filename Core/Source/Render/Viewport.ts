@@ -137,7 +137,7 @@ namespace FudgeCore {
       if (this.physicsDebugMode != PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY)
         Render.draw(this.camera);
       if (this.physicsDebugMode != PHYSICS_DEBUGMODE.NONE) {
-        Physics.world.draw(this.camera, this.physicsDebugMode);
+        Physics.draw(this.camera, this.physicsDebugMode);
       }
 
       this.#crc2.imageSmoothingEnabled = false;
