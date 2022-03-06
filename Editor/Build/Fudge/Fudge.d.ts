@@ -278,7 +278,7 @@ declare namespace Fudge {
         getLabel(_object: ƒ.SerializableResource): string;
         rename(_object: ƒ.SerializableResource, _new: string): boolean;
         copy(_originals: ƒ.SerializableResource[]): Promise<ƒ.SerializableResource[]>;
-        delete(_focussed: ƒ.SerializableResource[]): ƒ.SerializableResource[];
+        delete(_focussed: ƒ.SerializableResource[]): Promise<ƒ.SerializableResource[]>;
         sort(_data: ƒ.SerializableResource[], _key: string, _direction: number): void;
     }
 }

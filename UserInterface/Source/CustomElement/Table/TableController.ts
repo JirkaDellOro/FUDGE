@@ -17,7 +17,7 @@ namespace FudgeUserInterface {
     /** Return false to disallow renaming the item/object, or processes the proposed new label */
     public abstract rename(_object: T, _new: string): boolean;
 
-    public abstract delete(_focussed: T[]): T[];
+    public async delete(_focussed: T[]): Promise<T[]> { return _focussed; }
 
     /** 
      * Return a list of copies of the objects given for copy & paste

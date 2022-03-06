@@ -76,7 +76,7 @@ ul.tree li {
   white-space: nowrap;
 }
 
-ul.tree li[attributes~="inactive"] > input {
+ul.tree li[attributes~="inactive"]>input {
   text-decoration: line-through;
 }
 
@@ -146,6 +146,7 @@ table.sortable .selected input {
   color: var(--color-highlight);
   font-weight: bold;
 }
+
 table.sortable td {
   vertical-align: bottom;
 }
@@ -207,17 +208,28 @@ details.selected>summary {
 
 dialog {
   background-color: var(--color-background-main);
-  border: none;
+  border: 1px solid var(--color-bright);
   color: var(--color-text);
   box-shadow: 0px 0px 10px 5px var(--color-background-main);
   top: 50%;
   left: 50%;
   transform: translateX(-50%) translateY(-50%);
   z-index: 1000;
+  padding: 2em;
 }
 
 dialog>div#content {
   background-color: var(--color-background-content);
+}
+
+dialog>h1 {
+  color: var(--color-signal);
+  height: 2em;
+}
+
+dialog>footer>p {
+  padding-top: 2em;
+  padding-bottom: 1em;
 }
 
 /* Select */

@@ -129,7 +129,7 @@
               {
                 "ƒ.Node": {
                   "name": "Box",
-                  "active": true,
+                  "active": false,
                   "components": {
                     "ComponentMesh": [
                       {
@@ -295,7 +295,7 @@
         {
           "ƒ.GraphInstance": {
             "name": "Pyramid",
-            "active": true,
+            "active": false,
             "components": {
               "ComponentMesh": [
                 {

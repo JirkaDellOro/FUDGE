@@ -438,7 +438,7 @@ declare namespace FudgeUserInterface {
         abstract getLabel(_object: T): string;
         /** Return false to disallow renaming the item/object, or processes the proposed new label */
         abstract rename(_object: T, _new: string): boolean;
-        abstract delete(_focussed: T[]): T[];
+        delete(_focussed: T[]): Promise<T[]>;
         /**
          * Return a list of copies of the objects given for copy & paste
          * @param _focussed The object currently having focus

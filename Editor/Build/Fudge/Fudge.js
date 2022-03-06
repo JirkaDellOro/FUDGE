@@ -981,6 +981,7 @@ var Fudge;
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener("contextmenu" /* CONTEXTMENU */, this.openContextMenu);
             this.dom.addEventListener("delete" /* DELETE */, this.hndEvent);
+            this.dom.addEventListener("removeChild" /* REMOVE_CHILD */, this.hndEvent);
         }
         listResources() {
             while (this.dom.lastChild && this.dom.removeChild(this.dom.lastChild))
@@ -1104,9 +1105,9 @@ var Fudge;
                 case "mutate" /* MUTATE */:
                     this.listResources();
                     break;
-                // case ƒui.EVENT.SELECT:
-                //   console.log(_event.detail.data);
-                //   break;
+                case "removeChild" /* REMOVE_CHILD */:
+                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.UPDATE, { bubbles: true }));
+                    break;
             }
         };
     }
@@ -1313,8 +1314,40 @@ var Fudge;
         getLabel(_object) { return ""; }
         rename(_object, _new) { return false; }
         copy(_originals) { return null; }
-        delete(_focussed) {
-            return null;
+        async delete(_focussed) {
+            console.log(_focussed, this.selection);
+            // this.selection = [];
+            let expendables = this.selection.concat([]); //_focussed);
+            let serializations = ƒ.Project.serialize();
+            let serializationStrings = new Map();
+            let usages = {};
+            for (let idResource in serializations)
+                serializationStrings.set(ƒ.Project.resources[idResource], JSON.stringify(serializations[idResource]));
+            for (let expendable of expendables) {
+                usages[expendable.idResource] = [];
+                for (let resource of serializationStrings.keys())
+                    if (resource.idResource != expendable.idResource)
+                        if (serializationStrings.get(resource).indexOf(expendable.idResource) > -1)
+                            usages[expendable.idResource].push(resource.name + " " + resource.type);
+            }
+            if (await openDialog()) {
+                let deleted = [];
+                for (let usage in usages)
+                    if (usages[usage].length == 0) { // delete only unused
+                        deleted.push(ƒ.Project.resources[usage]);
+                        ƒ.Project.deregister(ƒ.Project.resources[usage]);
+                    }
+                return deleted;
+            }
+            async function openDialog() {
+                let promise = ƒui.Dialog.prompt(usages, true, "Review references, delete dependend resources first if applicable", "To delete unused resources, press OK", "OK", "Cancel");
+                if (await promise) {
+                    return true;
+                }
+                else
+                    return false;
+            }
+            return [];
         }
         sort(_data, _key, _direction) {
             function compare(_a, _b) {
