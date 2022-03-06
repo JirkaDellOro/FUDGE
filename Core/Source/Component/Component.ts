@@ -74,6 +74,10 @@ namespace FudgeCore {
       return this;
     }
 
+    public async mutate(_mutator: Mutator): Promise<void> {
+      this.activate(_mutator.active);
+    }
+
     protected reduceMutator(_mutator: Mutator): void {
       delete _mutator.singleton;
       delete _mutator.mtxWorld;

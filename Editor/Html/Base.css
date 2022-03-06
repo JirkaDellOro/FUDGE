@@ -76,6 +76,10 @@ ul.tree li {
   white-space: nowrap;
 }
 
+ul.tree li[attributes~="inactive"] > input {
+  text-decoration: line-through;
+}
+
 ul.tree ul {
   padding-left: 1em;
 }

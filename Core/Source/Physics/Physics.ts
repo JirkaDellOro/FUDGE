@@ -153,9 +153,12 @@ namespace FudgeCore {
     * Remove the OIMO Rigidbody to the active instance, happens automatically when removing a FUDGE Rigidbody Component
     */
     public static removeRigidbody(_cmpRB: ComponentRigidbody): void {
+      // TODO: two lists are being managed, info might deviate. Cleanup!
+      let oimoRigidBody: OIMO.RigidBody = _cmpRB.getOimoRigidbody();
+      oimoRigidBody._world.removeRigidBody(oimoRigidBody);
+      // what if the rigidbodys oimo-world does not belong to the active instance?
       let id: number = Physics.ƒactive.bodyList.indexOf(_cmpRB);
       Physics.ƒactive.bodyList.splice(id, 1);
-      Physics.ƒactive.oimoWorld.removeRigidBody(_cmpRB.getOimoRigidbody());
     }
 
     /**
@@ -231,7 +234,7 @@ namespace FudgeCore {
         let bodiesWorld: number = oimoWorld.getNumRigidBodies();
         for (let body of Physics.ƒactive.bodyList)
           body.isInitialized = false;
-        Physics.ƒactive.jointList = new Array();// TODO: see if it would be smarter, do use these arrays. Definitely more intuitive...
+        Physics.ƒactive.jointList = new Array(); // TODO: see if it would be smarter, do use these arrays. Definitely more intuitive...
         for (let i: number = 0; i < jointsWorld; i++) {
           oimoWorld.removeJoint(Physics.ƒactive.oimoWorld.getJointList());
         }

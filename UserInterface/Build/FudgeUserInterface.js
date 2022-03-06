@@ -2211,6 +2211,12 @@ var FudgeUserInterface;
             return this.label.value;
         }
         /**
+         * Get the label text shown
+         */
+        refreshAttributes() {
+            this.setAttribute("attributes", this.controller.getAttributes(this.data));
+        }
+        /**
          * Tries to expanding the [[TreeList]] of children, by dispatching [[EVENT.EXPAND]].
          * The user of the tree needs to add an event listener to the tree
          * in order to create that [[TreeList]] and add it as branch to this item
@@ -2272,6 +2278,7 @@ var FudgeUserInterface;
             this.label.disabled = true;
             this.label.value = this.display;
             this.appendChild(this.label);
+            this.refreshAttributes();
             this.tabIndex = 0;
         }
         hndFocus = (_event) => {

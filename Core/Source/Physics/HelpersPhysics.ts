@@ -52,7 +52,6 @@ namespace FudgeCore {
   * Defines the type of the rigidbody which determines the way it interacts with the physical and the visual world
   */
   export enum BODY_TYPE {
-    
     /** The body ignores the hierarchy of the render graph, is completely controlled  by physics and takes its node with it  */
     DYNAMIC, // = OIMO.RigidBodyType.DYNAMIC,
     /** The body ignores the hierarchy of the render graph, is completely immoveble and keeps its node from moving  */

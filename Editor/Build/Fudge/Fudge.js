@@ -28,17 +28,18 @@ var Fudge;
     (function (CONTEXTMENU) {
         // SKETCH = ViewSketch,
         CONTEXTMENU[CONTEXTMENU["ADD_NODE"] = 0] = "ADD_NODE";
-        CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT"] = 1] = "ADD_COMPONENT";
-        CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT_SCRIPT"] = 2] = "ADD_COMPONENT_SCRIPT";
-        CONTEXTMENU[CONTEXTMENU["EDIT"] = 3] = "EDIT";
-        CONTEXTMENU[CONTEXTMENU["CREATE_MESH"] = 4] = "CREATE_MESH";
-        CONTEXTMENU[CONTEXTMENU["CREATE_MATERIAL"] = 5] = "CREATE_MATERIAL";
-        CONTEXTMENU[CONTEXTMENU["CREATE_GRAPH"] = 6] = "CREATE_GRAPH";
-        CONTEXTMENU[CONTEXTMENU["REMOVE_COMPONENT"] = 7] = "REMOVE_COMPONENT";
-        CONTEXTMENU[CONTEXTMENU["ADD_JOINT"] = 8] = "ADD_JOINT";
-        CONTEXTMENU[CONTEXTMENU["TRANSLATE"] = 9] = "TRANSLATE";
-        CONTEXTMENU[CONTEXTMENU["ROTATE"] = 10] = "ROTATE";
-        CONTEXTMENU[CONTEXTMENU["SCALE"] = 11] = "SCALE";
+        CONTEXTMENU[CONTEXTMENU["ACTIVATE_NODE"] = 1] = "ACTIVATE_NODE";
+        CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT"] = 2] = "ADD_COMPONENT";
+        CONTEXTMENU[CONTEXTMENU["ADD_COMPONENT_SCRIPT"] = 3] = "ADD_COMPONENT_SCRIPT";
+        CONTEXTMENU[CONTEXTMENU["EDIT"] = 4] = "EDIT";
+        CONTEXTMENU[CONTEXTMENU["CREATE_MESH"] = 5] = "CREATE_MESH";
+        CONTEXTMENU[CONTEXTMENU["CREATE_MATERIAL"] = 6] = "CREATE_MATERIAL";
+        CONTEXTMENU[CONTEXTMENU["CREATE_GRAPH"] = 7] = "CREATE_GRAPH";
+        CONTEXTMENU[CONTEXTMENU["REMOVE_COMPONENT"] = 8] = "REMOVE_COMPONENT";
+        CONTEXTMENU[CONTEXTMENU["ADD_JOINT"] = 9] = "ADD_JOINT";
+        CONTEXTMENU[CONTEXTMENU["TRANSLATE"] = 10] = "TRANSLATE";
+        CONTEXTMENU[CONTEXTMENU["ROTATE"] = 11] = "ROTATE";
+        CONTEXTMENU[CONTEXTMENU["SCALE"] = 12] = "SCALE";
     })(CONTEXTMENU = Fudge.CONTEXTMENU || (Fudge.CONTEXTMENU = {}));
     let MENU;
     (function (MENU) {
@@ -1380,6 +1381,9 @@ var Fudge;
         getLabel(_entry) {
             return _entry.name;
         }
+        getAttributes(_object) {
+            return "";
+        }
         rename(_entry, _new) {
             _entry.name = _new;
             return true;
@@ -1422,6 +1426,10 @@ var Fudge;
     class ControllerTreeHierarchy extends ƒUi.TreeController {
         getLabel(_node) {
             return _node.name;
+        }
+        getAttributes(_node) {
+            let attributes = _node.isActive ? "active" : "inactive";
+            return attributes;
         }
         rename(_node, _new) {
             _node.name = _new;
@@ -1561,6 +1569,7 @@ var Fudge;
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_GRAPH, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.SET_PROJECT, this.hndEvent);
             this.dom.addEventListener(Fudge.EVENT_EDITOR.UPDATE, this.hndEvent);
+            this.dom.addEventListener(Fudge.EVENT_EDITOR.REFRESH, this.hndEvent);
             this.dom.addEventListener("mutate" /* MUTATE */, this.hndEvent);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndFocusNode);
             this.dom.addEventListener("rename" /* RENAME */, this.broadcastEvent);
@@ -1594,7 +1603,7 @@ var Fudge;
                     this.setGraph(_event.detail);
                     break;
                 case Fudge.EVENT_EDITOR.REFRESH:
-                    console.log("Refresh");
+                    break;
                 case Fudge.EVENT_EDITOR.SET_PROJECT:
                 case Fudge.EVENT_EDITOR.UPDATE:
                     // TODO: meaningful difference between update and setgraph
@@ -2713,15 +2722,10 @@ var Fudge;
         getContextMenu(_callback) {
             const menu = new Fudge.remote.Menu();
             let item;
-            item = new Fudge.remote.MenuItem({ label: "Add Node", id: String(Fudge.CONTEXTMENU.ADD_NODE), click: _callback, accelerator: process.platform == "darwin" ? "N" : "N" });
+            item = new Fudge.remote.MenuItem({ label: "Add Node", id: String(Fudge.CONTEXTMENU.ADD_NODE), click: _callback, accelerator: "N" });
             menu.append(item);
-            // item = new remote.MenuItem({
-            //   label: "Add Component",
-            //   submenu: ContextMenu.getSubclassMenu<typeof ƒ.Component>(CONTEXTMENU.ADD_COMPONENT, ƒ.Component.subclasses, _callback)
-            // });
-            // menu.append(item);
-            // ContextMenu.appendCopyPaste(menu);
-            // menu.addListener("menu-will-close", (_event: Electron.Event) => { console.log(_event); });
+            item = new Fudge.remote.MenuItem({ label: "De- / Acvtivate", id: String(Fudge.CONTEXTMENU.ACTIVATE_NODE), click: _callback, accelerator: "A" });
+            menu.append(item);
             return menu;
         }
         contextMenuCallback(_item, _window, _event) {
@@ -2734,22 +2738,10 @@ var Fudge;
                     this.tree.findVisible(focus).expand(true);
                     this.tree.findVisible(child).focus();
                     break;
-                // case CONTEXTMENU.ADD_COMPONENT:
-                //   let iSubclass: number = _item["iSubclass"];
-                //   let component: typeof ƒ.Component = ƒ.Component.subclasses[iSubclass];
-                //   //@ts-ignore
-                //   let cmpNew: ƒ.Component = new component();
-                //   ƒ.Debug.info(cmpNew.type, cmpNew);
-                //   focus.addComponent(cmpNew);
-                //   this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.SELECT, { bubbles: true, detail: { data: focus } }));
-                //   break;
-                case Fudge.CONTEXTMENU.ADD_COMPONENT_SCRIPT:
-                    // let script: typeof ƒ.ComponentScript = <typeof ƒ.ComponentScript>_item["Script"];
-                    let cmpScript = ƒ.Serializer.reconstruct(_item["Script"]);
-                    // let cmpScript: ƒ.ComponentScript = new script(); //Reflect.construct(script); //
-                    ƒ.Debug.info(cmpScript.type, cmpScript);
-                    focus.addComponent(cmpScript);
-                    this.dom.dispatchEvent(new CustomEvent("itemselect" /* SELECT */, { bubbles: true, detail: { data: focus } }));
+                case Fudge.CONTEXTMENU.ACTIVATE_NODE:
+                    focus.activate(!focus.isActive);
+                    this.tree.findVisible(focus).refreshAttributes();
+                    this.dom.dispatchEvent(new Event(Fudge.EVENT_EDITOR.REFRESH, { bubbles: true }));
                     break;
             }
         }

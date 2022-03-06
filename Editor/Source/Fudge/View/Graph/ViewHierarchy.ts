@@ -54,7 +54,7 @@ namespace Fudge {
     public getDragDropSources(): ƒ.Node[] {
       return this.tree.controller.dragDrop.sources;
     }
-    
+
     public focusNode(_node: ƒ.Node): void {
       let path: ƒ.Node[] = _node.getPath();
       path = path.splice(path.indexOf(this.graph));
@@ -103,18 +103,10 @@ namespace Fudge {
       const menu: Electron.Menu = new remote.Menu();
       let item: Electron.MenuItem;
 
-      item = new remote.MenuItem({ label: "Add Node", id: String(CONTEXTMENU.ADD_NODE), click: _callback, accelerator: process.platform == "darwin" ? "N" : "N" });
+      item = new remote.MenuItem({ label: "Add Node", id: String(CONTEXTMENU.ADD_NODE), click: _callback, accelerator: "N" });
       menu.append(item);
-
-      // item = new remote.MenuItem({
-      //   label: "Add Component",
-      //   submenu: ContextMenu.getSubclassMenu<typeof ƒ.Component>(CONTEXTMENU.ADD_COMPONENT, ƒ.Component.subclasses, _callback)
-      // });
-      // menu.append(item);
-
-      // ContextMenu.appendCopyPaste(menu);
-
-      // menu.addListener("menu-will-close", (_event: Electron.Event) => { console.log(_event); });
+      item = new remote.MenuItem({ label: "De- / Acvtivate", id: String(CONTEXTMENU.ACTIVATE_NODE), click: _callback, accelerator: "A" });
+      menu.append(item);
       return menu;
     }
 
@@ -129,24 +121,10 @@ namespace Fudge {
           this.tree.findVisible(focus).expand(true);
           this.tree.findVisible(child).focus();
           break;
-        // case CONTEXTMENU.ADD_COMPONENT:
-        //   let iSubclass: number = _item["iSubclass"];
-        //   let component: typeof ƒ.Component = ƒ.Component.subclasses[iSubclass];
-        //   //@ts-ignore
-        //   let cmpNew: ƒ.Component = new component();
-        //   ƒ.Debug.info(cmpNew.type, cmpNew);
-
-        //   focus.addComponent(cmpNew);
-        //   this.dom.dispatchEvent(new CustomEvent(ƒui.EVENT.SELECT, { bubbles: true, detail: { data: focus } }));
-        //   break;
-        case CONTEXTMENU.ADD_COMPONENT_SCRIPT:
-          // let script: typeof ƒ.ComponentScript = <typeof ƒ.ComponentScript>_item["Script"];
-          let cmpScript: ƒ.ComponentScript = <ƒ.ComponentScript>ƒ.Serializer.reconstruct(_item["Script"]);
-          // let cmpScript: ƒ.ComponentScript = new script(); //Reflect.construct(script); //
-          ƒ.Debug.info(cmpScript.type, cmpScript);
-
-          focus.addComponent(cmpScript);
-          this.dom.dispatchEvent(new CustomEvent(ƒUi.EVENT.SELECT, { bubbles: true, detail: { data: focus } }));
+        case CONTEXTMENU.ACTIVATE_NODE:
+          focus.activate(!focus.isActive);
+          this.tree.findVisible(focus).refreshAttributes();
+          this.dom.dispatchEvent(new Event(EVENT_EDITOR.REFRESH, {bubbles: true}));
           break;
       }
     }
@@ -165,17 +143,6 @@ namespace Fudge {
           this.setGraph(_event.detail);
       }
     }
-
-    // private setNode(_node: ƒ.Node): void {
-    //   ƒ.Debug.info("Hierarchy", _node);
-    //   // this.listController.setSelection(_event.detail);
-    //   this.selectedNode = _node;
-    // }
-
-    // private passEventToPanel = (_event: CustomEvent): void => {
-    //   let eventToPass: CustomEvent;
-    //   eventToPass = new CustomEvent(_event.type, { bubbles: true, detail: _event.detail });
-    // }
     //#endregion
   }
 }

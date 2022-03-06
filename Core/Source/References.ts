@@ -8,6 +8,7 @@
 /// <reference path="Render/RenderWebGL.ts"/>
 /// <reference path="Render/RenderInjectorTexture.ts"/>
 /// <reference path="Graph/Node.ts"/>
+/// <reference path="Physics/HelpersPhysics.ts"/>
 /// <reference path="Physics/Joint.ts"/>
 /// <reference path="Physics/JointAxial.ts"/>
 
