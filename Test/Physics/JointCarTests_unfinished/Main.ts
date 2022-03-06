@@ -41,7 +41,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
     //For this demo we want a higher accuracy since semi-real car physics are very delicate to calculate (thats why normally a raycast car is used for approximation)
     //OimoPhysics which is integrated in Fudge is using a correctionAlgorithm on solver iterations instead of fully recalculate physics too often, 
     //so you can crank the number of solver iterations higher than with most engines. But Oimo is in general less accurate.
-    f.Physics.world.setSolverIterations(1000);
+    // f.Physics.setSolverIterations(1000);
     f.Physics.settings.defaultRestitution = 0.15;
     f.Physics.settings.defaultFriction = 0.95;
     //f.Physics.settings.defaultConstraintSolverType = 1; //Use most accurate joint solving, slower but needed for complex things like cars
@@ -90,7 +90,7 @@ namespace Turorials_FUDGEPhysics_Lesson1 {
   //Function to animate/update the Fudge scene, commonly known as gameloop
   function update(): void {
     //PHYSICS - Simulate physical changes each frame, parameter to set time between frames
-    f.Physics.world.simulate(f.Loop.timeFrameReal / 1000);
+    f.Physics.simulate(f.Loop.timeFrameReal / 1000);
 
     viewPort.draw(); // Draw the current Fudge Scene to the canvas
   }

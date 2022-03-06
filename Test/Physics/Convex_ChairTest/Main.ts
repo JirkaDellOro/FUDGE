@@ -50,7 +50,7 @@ namespace FudgeExperiments_Marko_ConvexColliderThroughWelding {
     // viewPort.physicsDebugMode = f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
 
     //PHYSICS - Start using physics by telling the physics the scene root object. Physics will recalculate every transform and initialize
-    f.Physics.adjustTransforms(hierarchy);
+    // f.Physics.adjustTransforms(hierarchy);
     app.addEventListener("mousedown", () => { spawnChair(); });
 
     //Important start the game loop after starting physics, so physics can use the current transform before it's first iteration
@@ -60,7 +60,7 @@ namespace FudgeExperiments_Marko_ConvexColliderThroughWelding {
 
   //Function to animate/update the Fudge scene, commonly known as gameloop
   function update(): void {
-    f.Physics.world.simulate(); //PHYSICS - Simulate physical changes each frame, parameter to set time between frames
+    f.Physics.simulate(); //PHYSICS - Simulate physical changes each frame, parameter to set time between frames
     measureFPS();
     viewPort.draw(); // Draw the current Fudge Scene to the canvas
   }
@@ -90,23 +90,26 @@ namespace FudgeExperiments_Marko_ConvexColliderThroughWelding {
     let spawnHeight: number = rngHeight(8, 20);
     noChairs++;
 
+    let chair: f.Node =  new f.Node("Chair");
+    hierarchy.appendChild(chair);
+
     //Creating a chair, base + back + 4 legs
     let base: f.Node = createCompleteNode("Base", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC);
     base.mtxLocal.translate(new f.Vector3(0, 3.5 + spawnHeight, 0));
     base.mtxLocal.scale(new f.Vector3(1, 0.2, 1));
-    hierarchy.appendChild(base);
+    chair.appendChild(base);
 
     let back: f.Node = createCompleteNode("Back", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC);
     back.mtxLocal.translate(new f.Vector3(0.4, 4 + spawnHeight, 0));
     back.mtxLocal.scale(new f.Vector3(0.2, 1, 1));
-    hierarchy.appendChild(back);
+    chair.appendChild(back);
     let weldingJoint: f.JointWelding = new f.JointWelding(base.getComponent(f.ComponentRigidbody), back.getComponent(f.ComponentRigidbody));
     back.addComponent(weldingJoint);
 
     let leg: f.Node = createCompleteNode("Leg_BL", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_2);
     leg.mtxLocal.translate(new f.Vector3(0.4, 3 + spawnHeight, 0.4));
     leg.mtxLocal.scale(new f.Vector3(0.2, 0.8, 0.2));
-    hierarchy.appendChild(leg);
+    chair.appendChild(leg);
 
     weldingJoint = new f.JointWelding(base.getComponent(f.ComponentRigidbody), leg.getComponent(f.ComponentRigidbody));
     back.addComponent(weldingJoint);
@@ -114,7 +117,7 @@ namespace FudgeExperiments_Marko_ConvexColliderThroughWelding {
     leg = createCompleteNode("Leg_BR", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_2);
     leg.mtxLocal.translate(new f.Vector3(0.4, 3 + spawnHeight, -0.4));
     leg.mtxLocal.scale(new f.Vector3(0.2, 0.8, 0.2));
-    hierarchy.appendChild(leg);
+    chair.appendChild(leg);
 
     weldingJoint = new f.JointWelding(base.getComponent(f.ComponentRigidbody), leg.getComponent(f.ComponentRigidbody));
     back.addComponent(weldingJoint);
@@ -122,7 +125,7 @@ namespace FudgeExperiments_Marko_ConvexColliderThroughWelding {
     leg = createCompleteNode("Leg_FR", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_2);
     leg.mtxLocal.translate(new f.Vector3(-0.4, 3 + spawnHeight, -0.4));
     leg.mtxLocal.scale(new f.Vector3(0.2, 0.8, 0.2));
-    hierarchy.appendChild(leg);
+    chair.appendChild(leg);
 
     weldingJoint = new f.JointWelding(base.getComponent(f.ComponentRigidbody), leg.getComponent(f.ComponentRigidbody));
     back.addComponent(weldingJoint);
@@ -130,11 +133,11 @@ namespace FudgeExperiments_Marko_ConvexColliderThroughWelding {
     leg = createCompleteNode("Leg_FR", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(0.75, 0.8, 0.75, 1))), new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_2);
     leg.mtxLocal.translate(new f.Vector3(-0.4, 3 + spawnHeight, 0.4));
     leg.mtxLocal.scale(new f.Vector3(0.2, 0.8, 0.2));
-    hierarchy.appendChild(leg);
+    chair.appendChild(leg);
 
     weldingJoint = new f.JointWelding(base.getComponent(f.ComponentRigidbody), leg.getComponent(f.ComponentRigidbody));
     back.addComponent(weldingJoint);
-    f.Physics.adjustTransforms(hierarchy); // Important! You need to at least adjust Transforms for the parts of the chair
+    f.Physics.adjustTransforms(chair); // Important! You need to at least adjust Transforms for the parts of the chair
   }
 
   function measureFPS(): void {
@@ -145,7 +148,7 @@ namespace FudgeExperiments_Marko_ConvexColliderThroughWelding {
       }
       times.push(now);
       fps = times.length;
-      fpsDisplay.textContent = `FPS: ${fps.toString()} / Chairs: ${noChairs} / Bodies: ${f.Physics.world.getBodyList().length}`;
+      fpsDisplay.textContent = `FPS: ${fps.toString()} / Chairs: ${noChairs} / Bodies: ${f.Physics.getBodyList().length}`;
     });
   }
 

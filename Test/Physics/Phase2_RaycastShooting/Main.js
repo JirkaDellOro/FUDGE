@@ -65,12 +65,12 @@ var FudgePhysics_Communication;
         viewPort.showSceneGraph();
         // f.Physics.settings.debugMode = f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
         f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
-        f.Physics.adjustTransforms(hierarchy);
+        // f.Physics.adjustTransforms(hierarchy);
         f.Loop.start();
     }
     function update() {
         continousRaycast();
-        f.Physics.world.simulate();
+        f.Physics.simulate();
         viewPort.draw();
         measureFPS();
     }

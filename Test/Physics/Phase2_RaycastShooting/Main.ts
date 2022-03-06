@@ -87,13 +87,13 @@ namespace FudgePhysics_Communication {
         // f.Physics.settings.debugMode = f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
 
         f.Loop.addEventListener(f.EVENT.LOOP_FRAME, update);
-        f.Physics.adjustTransforms(hierarchy);
+        // f.Physics.adjustTransforms(hierarchy);
         f.Loop.start();
     }
 
     function update(): void {
         continousRaycast();
-        f.Physics.world.simulate();
+        f.Physics.simulate();
         viewPort.draw();
         measureFPS();
     }
