@@ -10,6 +10,8 @@ namespace FudgeCore {
     indicesFlat: WebGLBuffer;
     normalsFlat: WebGLBuffer;
     textureUVsFlat: WebGLBuffer;
+    iBones?: WebGLBuffer;
+    weights?: WebGLBuffer;
   }
   //gives WebGL Buffer the data from the {@link Mesh]]
   export class RenderInjectorMesh {

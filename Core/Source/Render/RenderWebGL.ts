@@ -320,7 +320,12 @@ namespace FudgeCore {
       let coat: Coat = cmpMaterial.material.coat;
       let mtxMeshToView: Matrix4x4 = Matrix4x4.MULTIPLICATION(_cmpCamera.mtxWorldToView, _cmpMesh.mtxWorld);
       shader.useProgram();
-      let nIndices: number = _cmpMesh.mesh.useRenderBuffers(shader, _cmpMesh.mtxWorld, mtxMeshToView);
+      let nIndices: number;
+      if (_cmpMesh.mesh instanceof MeshSkin)
+        nIndices = _cmpMesh.mesh.useRenderBuffers(shader, _cmpMesh.mtxWorld, mtxMeshToView, null, _cmpMesh.skeleton.mtxBones);
+      else
+        nIndices = _cmpMesh.mesh.useRenderBuffers(shader, _cmpMesh.mtxWorld, mtxMeshToView);
+
       coat.useRenderData(shader, cmpMaterial);
       let uCamera: WebGLUniformLocation = shader.uniforms["u_vctCamera"];
       if (uCamera)

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Skeleton System Test</title>
+    <!--Load FUDGE-->
+    <script src="./../../Core/Build/FudgeCore.js"></script>
+    <!--Load scripts-->
+    <script src="SkeletonImportTest.js" editor="true"></script>
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+      }
+      canvas.fullscreen {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw; 
+        height: 100vh; 
+      }
+    </style>
+  </head>
+  <body>
+    <!--Canvas for FUDGE to render to-->
+    <canvas class="fullscreen" width="800" height="640"></canvas>
+  </body>
+</html>

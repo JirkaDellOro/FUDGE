@@ -105,5 +105,12 @@
     "namespace": "FudgeCore",
     "outdir": "Build/",
     "register": "false"
+  },
+  "ShaderFlatSkin": {
+    "vertex": "ShaderFlatSkin.vert",
+    "fragment": "ShaderFlat.frag",
+    "coat": "CoatColored",
+    "namespace": "FudgeCore",
+    "outdir": "../"
   }
 }
