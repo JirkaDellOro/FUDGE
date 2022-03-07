@@ -25,10 +25,10 @@ namespace FudgeCore {
         // tip (vertex #4)
         new Vertex(new Vector3(0.0, 1.0, 0.0), new Vector2(0.5, 0.5)),
         // floor again for downside texture
-        new Vertex(new Vector3(-0.5, 0.0, 0.5), new Vector2(0, 0)),
-        new Vertex(new Vector3(0.5, 0.0, 0.5), new Vector2(1, 0)),
-        new Vertex(new Vector3(0.5, 0.0, -0.5), new Vector2(1, 1)),
-        new Vertex(new Vector3(-0.5, 0.0, -0.5), new Vector2(0, 1)),
+        new Vertex(0, new Vector2(0, 0)),
+        new Vertex(1, new Vector2(1, 0)),
+        new Vertex(2, new Vector2(1, 1)),
+        new Vertex(3, new Vector2(0, 1))
       );
       this.faces = [
         new Face(this.cloud, 4, 0, 1),

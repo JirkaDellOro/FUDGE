@@ -21,7 +21,7 @@ namespace FudgeCore {
 
     public renderBuffers: RenderBuffers; /* defined by RenderInjector*/
 
-    // new base structure for meshes in FUDGE
+    // base structure for meshes in FUDGE
     protected cloud: Vertices = new Vertices();
     protected faces: Face[] = [];
 
