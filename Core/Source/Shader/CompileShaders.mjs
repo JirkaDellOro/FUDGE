@@ -21,6 +21,11 @@ for (let name in json) {
   if (description.register == "true")
     code += `  public static readonly iSubclass: number = Shader.registerSubclass(${name});\n\n`;
 
+  if (description.define)
+  code += `  public static define: string[] = ${JSON.stringify(description.define, null, 4)};\n\n`;
+  else
+  code += `  public static define: string[] = [];\n\n`;
+
   if (description.coat)
     code += `  public static getCoat(): typeof Coat { return ${description.coat}; }\n\n`;
 

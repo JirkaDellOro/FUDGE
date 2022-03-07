@@ -1,4 +1,14 @@
 namespace FudgeCore {
+  export class RenderMesh {
+    public smooth: RenderBuffers;
+    public flat: RenderBuffers;
+
+    public clear(): void {
+      this.smooth = null;
+      this.flat = null;
+    }
+  }
+
   export interface RenderBuffers {
     // regular/smooth shading
     vertices: WebGLBuffer;
@@ -61,6 +71,7 @@ namespace FudgeCore {
       };
 
       this.renderBuffers = renderBuffers;
+      this.renderMesh = new RenderMesh();
     }
 
     protected static useRenderBuffers(this: Mesh, _shader: typeof Shader, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4, _id?: number): number {
@@ -94,6 +105,11 @@ namespace FudgeCore {
       if (uNormal) {
         let normalMatrix: Matrix4x4 = Matrix4x4.TRANSPOSE(Matrix4x4.INVERSION(_mtxMeshToWorld));
         crc3.uniformMatrix4fv(uNormal, false, normalMatrix.get());
+      }
+
+
+      if (_shader.define.includes("FLAT")) {
+        console.log("FLAT SHADING!");
       }
 
       setBuffer("a_vctPosition", this.renderBuffers.vertices);

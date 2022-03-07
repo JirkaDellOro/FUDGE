@@ -20,6 +20,7 @@ namespace FudgeCore {
     public name: string = "Mesh";
 
     public renderBuffers: RenderBuffers; /* defined by RenderInjector*/
+    protected renderMesh: RenderMesh; /* defined by RenderInjector*/
 
     // base structure for meshes in FUDGE
     protected cloud: Vertices = new Vertices();

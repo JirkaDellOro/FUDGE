@@ -4,6 +4,12 @@ namespace FudgeCore {
 export abstract class ShaderFlatSkin extends Shader {
   public static readonly iSubclass: number = Shader.registerSubclass(ShaderFlatSkin);
 
+  public static define: string[] = [
+    "LIGHT",
+    "FLAT",
+    "BONES"
+];
+
   public static getCoat(): typeof Coat { return CoatColored; }
 
   public static getVertexShaderSource(): string { 
