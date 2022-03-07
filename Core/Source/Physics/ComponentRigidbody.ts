@@ -20,11 +20,12 @@ namespace FudgeCore {
      */
   export class ComponentRigidbody extends Component {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentRigidbody);
-    private static mapBodyType: { [type: number]: number } = {
-      [BODY_TYPE.DYNAMIC]: OIMO?.RigidBodyType.DYNAMIC,
-      [BODY_TYPE.STATIC]: OIMO?.RigidBodyType.STATIC,
-      [BODY_TYPE.KINEMATIC]: OIMO?.RigidBodyType.KINEMATIC
-    };
+    private static mapBodyType: { [type: number]: number } = (typeof OIMO == "undefined") ?
+      {
+        [BODY_TYPE.DYNAMIC]: 0, [BODY_TYPE.STATIC]: 1, [BODY_TYPE.KINEMATIC]: 2
+      } : {
+        [BODY_TYPE.DYNAMIC]: OIMO.RigidBodyType.DYNAMIC, [BODY_TYPE.STATIC]: OIMO.RigidBodyType.STATIC, [BODY_TYPE.KINEMATIC]: OIMO.RigidBodyType.KINEMATIC
+      };
 
     /** Transformation of the collider relative to the node's transform. Once set mostly remains constant. 
      * If altered, {@link isInitialized} must be reset to false to recreate the collider in the next {@link Render.prepare}
