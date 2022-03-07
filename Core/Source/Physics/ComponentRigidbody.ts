@@ -22,7 +22,7 @@ namespace FudgeCore {
     public static readonly iSubclass: number = Component.registerSubclass(ComponentRigidbody);
     private static mapBodyType: { [type: number]: number } = (typeof OIMO == "undefined") ?
       {
-        [BODY_TYPE.DYNAMIC]: 0, [BODY_TYPE.STATIC]: 1, [BODY_TYPE.KINEMATIC]: 2
+        [BODY_TYPE.DYNAMIC]: BODY_TYPE.DYNAMIC, [BODY_TYPE.STATIC]: BODY_TYPE.STATIC, [BODY_TYPE.KINEMATIC]: BODY_TYPE.KINEMATIC
       } : {
         [BODY_TYPE.DYNAMIC]: OIMO.RigidBodyType.DYNAMIC, [BODY_TYPE.STATIC]: OIMO.RigidBodyType.STATIC, [BODY_TYPE.KINEMATIC]: OIMO.RigidBodyType.KINEMATIC
       };
