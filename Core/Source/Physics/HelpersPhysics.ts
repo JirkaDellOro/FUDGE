@@ -118,6 +118,8 @@ namespace FudgeCore {
   export class PhysicsSettings {
 
     constructor(_defaultCollisionGroup: number, _defaultCollisionMask: number) {
+      if (typeof OIMO == "undefined")
+        return;
       this.defaultCollisionGroup = _defaultCollisionGroup;
       this.defaultCollisionMask = _defaultCollisionMask;
     }
@@ -184,8 +186,7 @@ namespace FudgeCore {
       return OIMO.Setting.defaultCollisionMask;
     }
     set defaultCollisionMask(_value: number) {
-      if (OIMO != undefined)
-        OIMO.Setting.defaultCollisionMask = _value;
+      OIMO.Setting.defaultCollisionMask = _value;
     }
 
     /** The group that this rigidbody belongs to. Default is the DEFAULT Group which means its just a normal Rigidbody not a trigger nor anything special. */
@@ -193,8 +194,7 @@ namespace FudgeCore {
       return <COLLISION_GROUP>OIMO.Setting.defaultCollisionGroup;
     }
     set defaultCollisionGroup(_value: COLLISION_GROUP) {
-      if (OIMO != undefined)
-        OIMO.Setting.defaultCollisionGroup = _value;
+      OIMO.Setting.defaultCollisionGroup = _value;
     }
 
     /** Change the type of joint solver algorithm. Default Iterative == 0, is faster but less stable. Direct == 1, slow but more stable, recommended for complex joint work. Change this setting only at the start of your game. */
