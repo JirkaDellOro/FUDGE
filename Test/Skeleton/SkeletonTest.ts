@@ -69,11 +69,13 @@ namespace SkeletonTest {
         ],
         6
       );
-      this.ƒvertices = meshSource.vertices;
-      this.ƒindices = meshSource.indices;
+
+      this.cloud = Reflect.get(meshSource, "cloud");
+      this.faces = Reflect.get(meshSource, "faces");
+
       const iBones: number[] = [];
       const weights: number[] = [];
-      for (let iVertex: number = 0; iVertex < this.ƒvertices.length; iVertex += 3) {
+      for (let iVertex: number = 0; iVertex < this.verticesFlat.length; iVertex += 3) {
         iBones.push(
           MeshSkinCylinder.skeleton.indexOfBone("LowerBone"),
           MeshSkinCylinder.skeleton.indexOfBone("UpperBone"),
@@ -81,12 +83,13 @@ namespace SkeletonTest {
           0
         );
         weights.push(
-          1 - this.ƒvertices[iVertex + 1] / 4,
-          this.ƒvertices[iVertex + 1] / 4,
+          1 - this.verticesFlat[iVertex + 1] / 4,
+          this.verticesFlat[iVertex + 1] / 4,
           0,
           0
         );
       }
+      console.table(weights);
       this.ƒiBones = new Uint8Array(iBones);
       this.ƒweights = new Float32Array(weights);
     }
@@ -136,24 +139,26 @@ namespace SkeletonTest {
       bones: {
         LowerBone: {
           components: {
-            ComponentTransform: [ { "ƒ.ComponentTransform": {
-              mtxLocal: {
-                scaling: {
-                  x: sequenceScaling,
-                  y: sequenceScaling,
-                  z: sequenceScaling
-                },
-                translation: {
-                  y: sequenceTranslation
+            ComponentTransform: [{
+              "ƒ.ComponentTransform": {
+                mtxLocal: {
+                  scaling: {
+                    x: sequenceScaling,
+                    y: sequenceScaling,
+                    z: sequenceScaling
+                  },
+                  translation: {
+                    y: sequenceTranslation
+                  }
                 }
               }
-            }}]
+            }]
           }
         }
       }
     });
     const cmpAnimator: ƒ.ComponentAnimator = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE.LOOP);
-    skeletonInstance.addComponent(cmpAnimator);    
+    skeletonInstance.addComponent(cmpAnimator);
     cmpAnimator.activate(true);
     cylinder.addChild(skeletonInstance);
 

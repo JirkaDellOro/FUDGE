@@ -118,7 +118,7 @@ namespace FudgeCore {
       if (uId)
         RenderWebGL.getRenderingContext().uniform1i(uId, _id);
 
-      if (_shader == ShaderFlat || _shader == ShaderFlatTextured) {
+      if (_shader == ShaderFlat || _shader == ShaderFlatTextured || _shader == ShaderFlatSkin) {
         crc3.bindBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.renderBuffers.indicesFlat);
         return this.indicesFlat.length;
       }

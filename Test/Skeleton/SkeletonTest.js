@@ -12,11 +12,11 @@ var SkeletonTest;
         rotatorX.addComponent(new ƒ.ComponentTransform());
         const rotatorY = new ƒ.Node("RotatorY");
         rotatorY.addComponent(new ƒ.ComponentTransform());
-        const zylinder = await createAnimatedCylinder();
-        console.log(zylinder);
+        const cylinder = await createAnimatedCylinder();
+        console.log(cylinder);
         scene.addChild(rotatorX);
         rotatorX.addChild(rotatorY);
-        rotatorY.addChild(zylinder);
+        rotatorY.addChild(cylinder);
         // setup camera
         const camera = new ƒ.Node("Camera");
         camera.addComponent(new ƒ.ComponentCamera());
@@ -41,9 +41,10 @@ var SkeletonTest;
         ƒ.Loop.start();
     }
     class MeshSkinCylinder extends ƒ.MeshSkin {
+        static ƒskeleton;
         constructor() {
             super();
-            const meshSource = new ƒ.MeshRotation("MeshExtrusion", [
+            const meshSource = new ƒ.MeshRotation("MeshRotation", [
                 new ƒ.Vector2(0, 4),
                 new ƒ.Vector2(1, 4),
                 new ƒ.Vector2(1, 3),
@@ -52,14 +53,15 @@ var SkeletonTest;
                 new ƒ.Vector2(1, 0),
                 new ƒ.Vector2(0, 0)
             ], 6);
-            this.ƒvertices = meshSource.vertices;
-            this.ƒindices = meshSource.indices;
+            this.cloud = Reflect.get(meshSource, "cloud");
+            this.faces = Reflect.get(meshSource, "faces");
             const iBones = [];
             const weights = [];
-            for (let iVertex = 0; iVertex < this.ƒvertices.length; iVertex += 3) {
+            for (let iVertex = 0; iVertex < this.verticesFlat.length; iVertex += 3) {
                 iBones.push(MeshSkinCylinder.skeleton.indexOfBone("LowerBone"), MeshSkinCylinder.skeleton.indexOfBone("UpperBone"), 0, 0);
-                weights.push(1 - this.ƒvertices[iVertex + 1] / 4, this.ƒvertices[iVertex + 1] / 4, 0, 0);
+                weights.push(1 - this.verticesFlat[iVertex + 1] / 4, this.verticesFlat[iVertex + 1] / 4, 0, 0);
             }
+            console.table(weights);
             this.ƒiBones = new Uint8Array(iBones);
             this.ƒweights = new Float32Array(weights);
         }
@@ -75,7 +77,7 @@ var SkeletonTest;
         }
     }
     async function createAnimatedCylinder() {
-        const zylinder = new ƒ.Node("CylinderAnimated");
+        const cylinder = new ƒ.Node("CylinderAnimated");
         // skeleton serialization test
         const serialization = ƒ.Serializer.serialize(MeshSkinCylinder.skeleton);
         console.log(serialization);
@@ -105,7 +107,8 @@ var SkeletonTest;
             bones: {
                 LowerBone: {
                     components: {
-                        ComponentTransform: [{ "ƒ.ComponentTransform": {
+                        ComponentTransform: [{
+                                "ƒ.ComponentTransform": {
                                     mtxLocal: {
                                         scaling: {
                                             x: sequenceScaling,
@@ -116,7 +119,8 @@ var SkeletonTest;
                                             y: sequenceTranslation
                                         }
                                     }
-                                } }]
+                                }
+                            }]
                     }
                 }
             }
@@ -124,18 +128,18 @@ var SkeletonTest;
         const cmpAnimator = new ƒ.ComponentAnimator(animation, ƒ.ANIMATION_PLAYMODE.LOOP);
         skeletonInstance.addComponent(cmpAnimator);
         cmpAnimator.activate(true);
-        zylinder.addChild(skeletonInstance);
+        cylinder.addChild(skeletonInstance);
         // setup component mesh
         const mesh = new MeshSkinCylinder();
         const cmpMesh = new ƒ.ComponentMesh(mesh);
         cmpMesh.mtxPivot.translateY(-2);
         cmpMesh.bindSkeleton(skeletonInstance);
-        zylinder.addComponent(cmpMesh);
+        cylinder.addComponent(cmpMesh);
         // setup component material
-        const material = new ƒ.Material("MaterialZylinder", ƒ.ShaderFlatSkin, new ƒ.CoatColored(ƒ.Color.CSS("White")));
+        const material = new ƒ.Material("MaterialCylinder", ƒ.ShaderFlatSkin, new ƒ.CoatColored(ƒ.Color.CSS("White")));
         const cmpMaterial = new ƒ.ComponentMaterial(material);
-        zylinder.addComponent(cmpMaterial);
-        return zylinder;
+        cylinder.addComponent(cmpMaterial);
+        return cylinder;
     }
     function update(_viewport, _mtxRotatorX, _mtxRotatorY) {
         if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_RIGHT]))

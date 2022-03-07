@@ -83,6 +83,7 @@ float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float 
   #endif
 
   #if defined(BONES)
+uniform mat4 u_mtxMeshToWorld;
 // Bones
 struct Bone {
   mat4 matrix;
@@ -91,10 +92,9 @@ struct Bone {
 const uint MAX_BONES = 10u;
 
 in uvec4 a_iBone;
-in vec4 a_weight;
+in vec4 a_fWeight;
 
 uniform Bone u_bones[MAX_BONES];
-uniform mat4 mtxTest;
   #endif
 
 void main() {
@@ -107,14 +107,13 @@ void main() {
     #endif
 
     #if defined(BONES)
-  mat4 mtxSkin = 
-    a_weight.x * u_bones[a_iBone.x].matrix +
-    a_weight.y * u_bones[a_iBone.y].matrix +
-    a_weight.z * u_bones[a_iBone.z].matrix +
-    a_weight.w * u_bones[a_iBone.w].matrix;
+  mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x].matrix +
+    a_fWeight.y * u_bones[a_iBone.y].matrix +
+    a_fWeight.z * u_bones[a_iBone.z].matrix +
+    a_fWeight.w * u_bones[a_iBone.w].matrix;
 
-  mtxMeshToView = u_projection * mtxSkin;
-  mtxNormalMeshToWorld = transpose(inverse(mat3(mtxMeshToWorld * mtxSkin)));
+  mtxMeshToView *= mtxSkin;
+  mtxNormalMeshToWorld = transpose(inverse(u_mtxMeshToWorld * mtxSkin));
     #endif
 
     #if defined(FLAT)
@@ -129,7 +128,7 @@ void main() {
     // GOURAUD: use the vertex normals
     #if defined(GOURAUD)
   v_vctColor = u_ambient.vctColor;
-  vctNormal = a_vctNormalVertex)
+  vctNormal = a_vctNormalVertex;
     #endif
 
     // calculate position and normal according to input and defines
@@ -143,7 +142,7 @@ void main() {
     #endif
 
     #if defined(LIGHT)
-  vec3 vctNormal = normalize(mat3(mtxNormalMeshToWorld) * a_vctNormalFace);
+  vctNormal = normalize(mat3(mtxNormalMeshToWorld) * vctNormal);
   // calculate the directional lighting effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
     float fIllumination = -dot(vctNormal, u_directional[i].vctDirection);

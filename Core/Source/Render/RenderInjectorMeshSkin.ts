@@ -26,8 +26,8 @@ namespace FudgeCore {
       crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, this.weights, WebGL2RenderingContext.STATIC_DRAW);
     }
 
-    protected static useRenderBuffers(this: MeshSkin, _shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): number {
-      let nIndices: number = super.useRenderBuffers.call(this, _shader, _mtxWorld, _mtxProjection, _id);
+    protected static useRenderBuffers(this: MeshSkin, _shader: typeof Shader, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): number {
+      let nIndices: number = super.useRenderBuffers.call(this, _shader, _mtxMeshToWorld, _mtxMeshToView, _id);
       const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
 
       const aIBone: number = _shader.attributes["a_iBone"];
@@ -37,7 +37,7 @@ namespace FudgeCore {
         crc3.vertexAttribIPointer(aIBone, 4, WebGL2RenderingContext.UNSIGNED_BYTE, 0, 0);
       }
 
-      const aWeight: number = _shader.attributes["a_weight"];
+      const aWeight: number = _shader.attributes["a_fWeight"];
       if (aWeight) {
         crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderBuffers.weights);
         crc3.enableVertexAttribArray(aWeight);

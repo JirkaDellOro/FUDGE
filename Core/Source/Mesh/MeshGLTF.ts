@@ -19,10 +19,10 @@ namespace FudgeCore {
     public async load(_loader: GLTFLoader, _iMesh: number): Promise<MeshGLTF> {
       const gltfMesh: GLTF.Mesh = _loader.gltf.meshes[_iMesh];
       this.name = gltfMesh.name;
-      this.ƒindices = await _loader.getUint16Array(gltfMesh.primitives[0].indices);
-      this.ƒvertices = await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.POSITION);
-      this.ƒnormalsVertex = await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.NORMAL); // normalsFlat?
-      this.ƒtextureUVs = await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.TEXCOORD_0);
+      this.ƒindicesFlat = await _loader.getUint16Array(gltfMesh.primitives[0].indices);
+      this.ƒverticesFlat = await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.POSITION);
+      this.ƒnormalsFlat = await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.NORMAL); // normalsFlat?
+      this.ƒtextureUVsFlat = await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.TEXCOORD_0);
       this.uriGLTF = _loader.uri;
       return this;
     }
