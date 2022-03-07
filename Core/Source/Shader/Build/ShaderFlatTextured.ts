@@ -84,26 +84,58 @@ float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float 
 }
   #endif
 
+  #if defined(BONES)
+// Bones
+struct Bone {
+  mat4 matrix;
+};
+
+const uint MAX_BONES = 10u;
+
+in uvec4 a_iBone;
+in vec4 a_weight;
+
+uniform Bone u_bones[MAX_BONES];
+uniform mat4 mtxTest;
+  #endif
+
 void main() {
   vec4 vctPosition;
+  mat4 mtxMeshToView = u_mtxMeshToView;
+
+    #if defined(LIGHT)
+  vec3 vctNormal;
+  mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
+    #endif
+
+    #if defined(BONES)
+  mat4 mtxSkin = 
+    a_weight.x * u_bones[a_iBone.x].matrix +
+    a_weight.y * u_bones[a_iBone.y].matrix +
+    a_weight.z * u_bones[a_iBone.z].matrix +
+    a_weight.w * u_bones[a_iBone.w].matrix;
+
+  mtxMeshToView = u_projection * mtxSkin;
+  mtxNormalMeshToWorld = transpose(inverse(mat3(mtxMeshToWorld * mtxSkin)));
+    #endif
 
     #if defined(FLAT)
     // FLAT: use the special vertex and normal buffers for flat shading
   vctPosition = vec4(a_vctPositionFlat, 1.0);
-  vec3 vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormalFace);
+  vctNormal = a_vctNormalFace;
   v_vctColor = u_ambient.vctColor;
     #else 
   vctPosition = vec4(a_vctPosition, 1.0);
     #endif
 
-    // use the regular vertex buffer
-  gl_Position = u_mtxMeshToView * vctPosition;
-
     // GOURAUD: use the vertex normals
     #if defined(GOURAUD)
   v_vctColor = u_ambient.vctColor;
-  vec3 vctNormal = normalize(mat3(u_mtxNormalMeshToWorld) * a_vctNormalVertex);
+  vctNormal = a_vctNormalVertex)
     #endif
+
+    // calculate position and normal according to input and defines
+  gl_Position = mtxMeshToView * vctPosition;
 
     #if defined(CAMERA)
   // view vector needed
@@ -113,6 +145,7 @@ void main() {
     #endif
 
     #if defined(LIGHT)
+  vec3 vctNormal = normalize(mat3(mtxNormalMeshToWorld) * a_vctNormalFace);
   // calculate the directional lighting effect
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
     float fIllumination = -dot(vctNormal, u_directional[i].vctDirection);

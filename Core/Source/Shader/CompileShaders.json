@@ -107,10 +107,16 @@
     "register": "false"
   },
   "ShaderFlatSkin": {
-    "vertex": "ShaderFlatSkin.vert",
-    "fragment": "ShaderFlat.frag",
+    "vertex": "Source/ShaderUniversal.vert",
+    "fragment": "Source/ShaderUniversal.frag",
     "coat": "CoatColored",
     "namespace": "FudgeCore",
-    "outdir": "../"
+    "outdir": "Build",
+    "register": "true",
+    "define": [
+      "LIGHT",
+      "FLAT",
+      "BONES"
+    ]
   }
 }
