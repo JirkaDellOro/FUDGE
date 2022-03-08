@@ -2,6 +2,17 @@ namespace FudgeCore {
   /**
    * Inserted into a {@link Mesh}, an instance of this class calculates and represents the mesh data in the form needed by the render engine
    */
+
+  export interface RenderBuffers {
+    vertices?: WebGLBuffer;
+    indices?: WebGLBuffer;
+    textureUVs?: WebGLBuffer;
+    normals?: WebGLBuffer;
+    iBones?: WebGLBuffer;
+    weights?: WebGLBuffer;
+    nIndices?: number;
+  }
+  
   export class RenderMesh {
     public smooth: RenderBuffers = null;
     public flat: RenderBuffers = null;
@@ -171,15 +182,4 @@ namespace FudgeCore {
       return new Float32Array(crossProducts);
     }
   }
-
-  export interface RenderBuffers {
-    vertices?: WebGLBuffer;
-    indices?: WebGLBuffer;
-    textureUVs?: WebGLBuffer;
-    normals?: WebGLBuffer;
-    iBones?: WebGLBuffer;
-    weights?: WebGLBuffer;
-    nIndices?: number;
-  }
-
 }

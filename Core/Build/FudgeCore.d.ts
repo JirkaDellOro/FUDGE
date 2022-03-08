@@ -5023,6 +5023,15 @@ declare namespace FudgeCore {
     /**
      * Inserted into a {@link Mesh}, an instance of this class calculates and represents the mesh data in the form needed by the render engine
      */
+    interface RenderBuffers {
+        vertices?: WebGLBuffer;
+        indices?: WebGLBuffer;
+        textureUVs?: WebGLBuffer;
+        normals?: WebGLBuffer;
+        iBones?: WebGLBuffer;
+        weights?: WebGLBuffer;
+        nIndices?: number;
+    }
     class RenderMesh {
         smooth: RenderBuffers;
         flat: RenderBuffers;
@@ -5059,15 +5068,6 @@ declare namespace FudgeCore {
         protected createNormalsFlat(): Float32Array;
         protected createTextureUVsFlat(): Float32Array;
         protected calculateFaceCrossProducts(): Float32Array;
-    }
-    interface RenderBuffers {
-        vertices?: WebGLBuffer;
-        indices?: WebGLBuffer;
-        textureUVs?: WebGLBuffer;
-        normals?: WebGLBuffer;
-        iBones?: WebGLBuffer;
-        weights?: WebGLBuffer;
-        nIndices?: number;
     }
 }
 declare namespace FudgeCore {

@@ -20,11 +20,12 @@ namespace FudgeCore {
       const gltfMesh: GLTF.Mesh = _loader.gltf.meshes[_iMesh];
       this.name = gltfMesh.name;
 
-      this.getRenderBuffers(ShaderFlat); // hotfix to create renderMesh
+      this.renderMesh = new RenderMesh(this);
       Reflect.set(this.renderMesh, "ƒindicesFlat", await _loader.getUint16Array(gltfMesh.primitives[0].indices));
       Reflect.set(this.renderMesh, "ƒverticesFlat", await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.POSITION));
       Reflect.set(this.renderMesh, "ƒnormalsFlat", await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.NORMAL)); // normalsFlat?
       Reflect.set(this.renderMesh, "ƒtextureUVsFlat", await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.TEXCOORD_0));
+      // let renderBuffers: RenderBuffers =  this.getRenderBuffers(ShaderFlat); // hotfix to create renderMesh
 
       this.uriGLTF = _loader.uri;
       return this;
