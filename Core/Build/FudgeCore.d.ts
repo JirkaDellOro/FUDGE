@@ -2026,11 +2026,6 @@ declare namespace FudgeCore {
         get radius(): number;
         get skeleton(): SkeletonInstance;
         bindSkeleton(_skeleton: SkeletonInstance): void;
-        /**
-         * Calculates the position of a vertex transformed by the skeleton
-         * @param _index index of the vertex
-         */
-        getVertexPosition(_index: number): Vector3;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorForUserInterface(): MutatorForUserInterface;
@@ -3562,7 +3557,7 @@ declare namespace FudgeCore {
         static readonly subclasses: typeof Mesh[];
         idResource: string;
         name: string;
-        cloud: Vertices;
+        vertices: Vertices;
         faces: Face[];
         protected renderMesh: RenderMesh;
         /** bounding box AABB */
@@ -3828,13 +3823,6 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     class MeshSkin extends MeshGLTF {
-        protected ƒiBones: Uint8Array;
-        protected ƒweights: Float32Array;
-        protected ƒmtxBones: Float32Array;
-        protected createBones: () => Uint8Array;
-        protected createWeights: () => Float32Array;
-        get iBones(): Uint8Array;
-        get weights(): Float32Array;
         load(_loader: GLTFLoader, _iMesh: number): Promise<MeshSkin>;
         useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): RenderBuffers;
         protected reduceMutator(_mutator: Mutator): void;
@@ -3918,11 +3906,16 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    interface Bone {
+        index: number;
+        weight: number;
+    }
     class Vertex {
         position: Vector3;
         uv: Vector2;
         normal: Vector3;
         referTo: number;
+        bones: Bone[];
         /**
          * Represents a vertex of a mesh with extended information such as the uv coordinates and the vertex normal.
          * It may refer to another vertex via an index into some array, in which case the position and the normal are stored there.
@@ -3940,6 +3933,10 @@ declare namespace FudgeCore {
      */
     class Vertices extends Array<Vertex> {
         /**
+         * Returns the subset of vertices that do not refer to other vertices
+         */
+        get originals(): Array<Vertex>;
+        /**
          * returns the position associated with the vertex addressed, resolving references between vertices
          */
         position(_index: number): Vector3;
@@ -3951,6 +3948,10 @@ declare namespace FudgeCore {
          * returns the uv-coordinates associated with the vertex addressed
          */
         uv(_index: number): Vector2;
+        /**
+         * returns the position associated with the vertex addressed, resolving references between vertices
+         */
+        bones(_index: number): Bone[];
     }
 }
 declare namespace FudgeCore {
@@ -5053,7 +5054,12 @@ declare namespace FudgeCore {
         protected ƒindicesFlat: Uint16Array;
         /** flat-shading: and an extra textureUV-array */
         protected ƒtextureUVsFlat: Float32Array;
+        /** flat-shading: and an extra textureUV-array */
+        protected ƒiBones: Uint8Array;
+        protected ƒweights: Float32Array;
         constructor(_mesh: Mesh);
+        get iBones(): Uint8Array;
+        get weights(): Float32Array;
         get vertices(): Float32Array;
         get indices(): Uint16Array;
         get normalsVertex(): Float32Array;

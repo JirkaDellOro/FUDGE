@@ -44,9 +44,9 @@ namespace FudgeCore {
 
       let min: Vector2 = Vector2.ZERO();
       let max: Vector2 = Vector2.ZERO();
-      this.cloud = new Vertices();
+      this.vertices = new Vertices();
       for (let vertex of shape) {
-        this.cloud.push(new Vertex(vertex.toVector3()));
+        this.vertices.push(new Vertex(vertex.toVector3()));
 
         min.x = Math.min(min.x, vertex.x);
         max.x = Math.max(max.x, vertex.x);
@@ -58,15 +58,15 @@ namespace FudgeCore {
       if (this.fitTexture) {
         for (let i: number = 0; i < shape.length; i++) {
           let textureUV: Vector2 = Vector2.SUM(shape[i], min);
-          this.cloud[i].uv = new Vector2(textureUV.x / size.x, -textureUV.y / size.y);
+          this.vertices[i].uv = new Vector2(textureUV.x / size.x, -textureUV.y / size.y);
         }
       } else {
-        _shape.forEach((_vertex, i) => this.cloud[i].uv = new Vector2(_vertex.x, -_vertex.y));
+        _shape.forEach((_vertex, i) => this.vertices[i].uv = new Vector2(_vertex.x, -_vertex.y));
       }
 
       this.faces = [];
-      for (let i: number = 2; i < this.cloud.length; i++)
-        this.faces.push(new Face(this.cloud, i - 1, i, 0));
+      for (let i: number = 2; i < this.vertices.length; i++)
+        this.faces.push(new Face(this.vertices, i - 1, i, 0));
     }
 
     //#region Transfer

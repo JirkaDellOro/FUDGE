@@ -70,30 +70,17 @@ namespace SkeletonTest {
         6
       );
 
-      this.cloud = Reflect.get(meshSource, "cloud");
+      this.vertices = Reflect.get(meshSource, "vertices");
       this.faces = Reflect.get(meshSource, "faces");
 
-      const iBones: number[] = [];
-      const weights: number[] = [];
-
-      this.getRenderBuffers(ƒ.ShaderGouraud); // hotfix to create renderMesh
-      for (let iVertex: number = 0; iVertex < this.renderMesh.vertices.length; iVertex += 3) {
-        iBones.push(
-          MeshSkinCylinder.skeleton.indexOfBone("LowerBone"),
-          MeshSkinCylinder.skeleton.indexOfBone("UpperBone"),
-          0,
-          0
-        );
-        weights.push(
-          1 - this.renderMesh.vertices[iVertex + 1] / 4,
-          this.renderMesh.vertices[iVertex + 1] / 4,
-          0,
-          0
-        );
+      for (let vertex of this.vertices.originals) {
+        vertex.bones = [
+          { index: MeshSkinCylinder.skeleton.indexOfBone("LowerBone"), weight: 1 - vertex.position.y / 4 },
+          { index: MeshSkinCylinder.skeleton.indexOfBone("UpperBone"), weight: vertex.position.y / 4 },
+          { index: 0, weight: 0 },
+          { index: 0, weight: 0 }
+        ];
       }
-
-      this.ƒiBones = new Uint8Array(iBones);
-      this.ƒweights = new Float32Array(weights);
     }
 
     public static get skeleton(): ƒ.Skeleton {

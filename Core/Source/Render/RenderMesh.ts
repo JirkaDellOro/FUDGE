@@ -1,4 +1,4 @@
-namespace FudgeCore {  
+namespace FudgeCore {
   /**
    * Inserted into a {@link Mesh}, an instance of this class calculates and represents the mesh data in the form needed by the render engine
    */
@@ -38,15 +38,34 @@ namespace FudgeCore {
     /** flat-shading: and an extra textureUV-array */
     protected ƒtextureUVsFlat: Float32Array;
 
+    /** flat-shading: and an extra textureUV-array */
+    protected ƒiBones: Uint8Array;
+    protected ƒweights: Float32Array;
+
     constructor(_mesh: Mesh) {
       this.mesh = _mesh;
+    }
+
+    public get iBones(): Uint8Array {
+      return this.ƒiBones || ( // return cache or ...
+        this.ƒiBones = new Uint8Array(this.mesh.vertices.flatMap((_vertex: Vertex, _index: number) => {
+          return [...this.mesh.vertices.bones(_index).map(_bone => _bone.index)];
+        })));
+    }
+
+    public get weights(): Float32Array {
+      return this.ƒweights || ( // return cache or ...
+        this.ƒweights = new Float32Array(this.mesh.vertices.flatMap((_vertex: Vertex, _index: number) => {
+          return [...this.mesh.vertices.bones(_index).map(_bone => _bone.weight)];
+        }))
+      );
     }
 
     public get vertices(): Float32Array {
       return this.ƒvertices || ( // return cache or ...
         // ... flatten all vertex positions from cloud into a typed array
-        this.ƒvertices = new Float32Array(this.mesh.cloud.flatMap((_vertex: Vertex, _index: number) => {
-          return [...this.mesh.cloud.position(_index).get()];
+        this.ƒvertices = new Float32Array(this.mesh.vertices.flatMap((_vertex: Vertex, _index: number) => {
+          return [...this.mesh.vertices.position(_index).get()];
         })));
     }
 
@@ -60,13 +79,13 @@ namespace FudgeCore {
     public get normalsVertex(): Float32Array {
       if (this.ƒnormalsVertex == null) {
         // sum up all unscaled normals of faces connected to one vertex...
-        this.mesh.cloud.forEach(_vertex => _vertex.normal.set(0, 0, 0));
+        this.mesh.vertices.forEach(_vertex => _vertex.normal.set(0, 0, 0));
         for (let face of this.mesh.faces)
           for (let index of face.indices) {
-            this.mesh.cloud.normal(index).add(face.normalUnscaled);
+            this.mesh.vertices.normal(index).add(face.normalUnscaled);
           }
         // ... and normalize them
-        this.mesh.cloud.forEach(_vertex => {
+        this.mesh.vertices.forEach(_vertex => {
           // some vertices might be unused and yield a zero-normal...
           if (_vertex.normal.magnitudeSquared > 0)
             _vertex.normal.normalize();
@@ -74,8 +93,8 @@ namespace FudgeCore {
 
         // this.ƒnormalsVertex = new Float32Array(normalsVertex.flatMap((_normal: Vector3) => [..._normal.get()]));
 
-        this.ƒnormalsVertex = new Float32Array(this.mesh.cloud.flatMap((_vertex: Vertex, _index: number) => {
-          return [...this.mesh.cloud.normal(_index).get()];
+        this.ƒnormalsVertex = new Float32Array(this.mesh.vertices.flatMap((_vertex: Vertex, _index: number) => {
+          return [...this.mesh.vertices.normal(_index).get()];
         }));
       }
 
@@ -85,7 +104,7 @@ namespace FudgeCore {
     public get textureUVs(): Float32Array {
       return this.ƒtextureUVs || ( // return cache or ...
         // ... flatten all uvs from the clous into a typed array
-        this.ƒtextureUVs = new Float32Array(this.mesh.cloud.flatMap((_vertex: Vertex) => [..._vertex.uv.get()])
+        this.ƒtextureUVs = new Float32Array(this.mesh.vertices.flatMap((_vertex: Vertex) => [..._vertex.uv.get()])
         ));
     }
 
@@ -121,9 +140,12 @@ namespace FudgeCore {
       this.ƒindicesFlat = undefined;
       this.ƒtextureUVsFlat = undefined;
 
+      this.ƒiBones = undefined;
+      this.ƒweights = undefined;
+
       // 
       this.ƒnormalsFaceUnscaled = undefined;
-    } 
+    }
     protected createVerticesFlat(): Float32Array {
       let positions: Vector3[] = [];
       let indices: number[] = [];
@@ -131,9 +153,9 @@ namespace FudgeCore {
       for (let face of this.mesh.faces)
         for (let index of face.indices) {
           indices.push(i++);
-          positions.push(this.mesh.cloud.position(index));
+          positions.push(this.mesh.vertices.position(index));
         }
-        
+
       this.ƒindicesFlat = new Uint16Array(indices);
       return new Float32Array(positions.flatMap(_v => [..._v.get()]));
     }

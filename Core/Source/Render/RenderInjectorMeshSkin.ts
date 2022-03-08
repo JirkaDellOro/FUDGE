@@ -17,14 +17,14 @@ namespace FudgeCore {
       let renderBuffers: RenderBuffers = super.getRenderBuffers.call(this, _shader);
       const crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
 
-      if (this.iBones && !renderBuffers.iBones) {
+      if (this.renderMesh.iBones && !renderBuffers.iBones) {
         renderBuffers.iBones = RenderWebGL.assert(crc3.createBuffer());
         crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderBuffers.iBones);
-        crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, this.iBones, WebGL2RenderingContext.STATIC_DRAW);
+        crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.iBones, WebGL2RenderingContext.STATIC_DRAW);
 
         renderBuffers.weights = RenderWebGL.assert(crc3.createBuffer());
         crc3.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, renderBuffers.weights);
-        crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, this.weights, WebGL2RenderingContext.STATIC_DRAW);
+        crc3.bufferData(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.weights, WebGL2RenderingContext.STATIC_DRAW);
       }
 
       return renderBuffers;

@@ -19,7 +19,7 @@ namespace FudgeCore {
     public idResource: string = undefined;
     public name: string = "Mesh";
     // base structure for meshes in FUDGE
-    public cloud: Vertices = new Vertices();
+    public vertices: Vertices = new Vertices();
     public faces: Face[] = [];
 
     // public renderBuffers: RenderBuffers; /* defined by RenderInjector*/
@@ -91,15 +91,6 @@ namespace FudgeCore {
       // TODO: so much to delete... rather just gather what to mutate
       delete _mutator.ƒbox;
       delete _mutator.ƒradius;
-      delete _mutator.ƒvertices;
-      delete _mutator.ƒindices;
-      delete _mutator.ƒnormalsVertex;
-      delete _mutator.ƒnormalsFaceUnscaled;
-      delete _mutator.ƒtextureUVs;
-      delete _mutator.ƒnormalsFlat;
-      delete _mutator.ƒverticesFlat;
-      delete _mutator.ƒindicesFlat;
-      delete _mutator.ƒtextureUVsFlat;
 
       delete _mutator.renderBuffers;
     }
@@ -109,8 +100,8 @@ namespace FudgeCore {
     protected createRadius(): number {
       //TODO: radius and bounding box could be created on construction of vertex-array
       let radius: number = 0;
-      for (let i: number = 0; i < this.cloud.length; i++) {
-        radius = Math.max(radius, this.cloud.position(i).magnitudeSquared);
+      for (let i: number = 0; i < this.vertices.length; i++) {
+        radius = Math.max(radius, this.vertices.position(i).magnitudeSquared);
       }
       return Math.sqrt(radius);
     }
@@ -118,8 +109,8 @@ namespace FudgeCore {
     protected createBoundingBox(): Box {
       let box: Box = Recycler.get(Box);
       box.set();
-      for (let i: number = 0; i < this.cloud.length; i ++) {
-        let point: Vector3 = this.cloud.position(i);
+      for (let i: number = 0; i < this.vertices.length; i ++) {
+        let point: Vector3 = this.vertices.position(i);
         box.min.x = Math.min(point.x, box.min.x);
         box.max.x = Math.max(point.x, box.max.x);
         box.min.y = Math.min(point.y, box.min.y);
@@ -129,7 +120,5 @@ namespace FudgeCore {
       }
       return box;
     }
-
-
   }
 }
