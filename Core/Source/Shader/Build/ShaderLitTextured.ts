@@ -73,7 +73,7 @@ float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float 
 }
   #endif
 
-  #if defined(BONES)
+  #if defined(SKIN)
 uniform mat4 u_mtxMeshToWorld;
 // Bones
 struct Bone {
@@ -108,7 +108,7 @@ void main() {
       #endif
     #endif
 
-    #if defined(BONES)
+    #if defined(SKIN)
   mat4 mtxSkin = a_fWeight.x * u_bones[a_iBone.x].matrix +
     a_fWeight.y * u_bones[a_iBone.y].matrix +
     a_fWeight.z * u_bones[a_iBone.z].matrix +

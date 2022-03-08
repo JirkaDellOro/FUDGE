@@ -160,26 +160,5 @@ namespace FudgeCore {
       }
       return new Float32Array(uv);
     }
-
-    // protected calculateFaceCrossProducts(): Float32Array {
-    //   let crossProducts: number[] = [];
-    //   let vertices: Vector3[] = [];
-
-    //   for (let v: number = 0; v < this.vertices.length; v += 3)
-    //     vertices.push(new Vector3(this.vertices[v], this.vertices[v + 1], this.vertices[v + 2]));
-
-    //   for (let i: number = 0; i < this.indices.length; i += 3) {
-    //     let trigon: number[] = [this.indices[i], this.indices[i + 1], this.indices[i + 2]];
-
-    //     let v0: Vector3 = Vector3.DIFFERENCE(vertices[trigon[0]], vertices[trigon[1]]);
-    //     let v1: Vector3 = Vector3.DIFFERENCE(vertices[trigon[0]], vertices[trigon[2]]);
-    //     let crossProduct: Vector3 = Vector3.CROSS(v0, v1);
-    //     let index: number = trigon[2] * 3;
-    //     crossProducts[index] = crossProduct.x;
-    //     crossProducts[index + 1] = crossProduct.y;
-    //     crossProducts[index + 2] = crossProduct.z;
-    //   }
-    //   return new Float32Array(crossProducts);
-    // }
   }
 }

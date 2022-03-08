@@ -129,12 +129,12 @@ namespace FudgeCore {
           node.addComponent(new ComponentMesh(await this.getMeshByIndex(gltfNode.mesh)));
           if (node.getComponent(ComponentMesh).mesh instanceof MeshSkin) {
             if (!GLTFLoader.defaultSkinMaterial)
-              GLTFLoader.defaultSkinMaterial = new Material("GLTFDefaultSkinMaterial", ShaderFlatSkin, new CoatColored(Color.CSS("white")));
+              GLTFLoader.defaultSkinMaterial = new Material("GLTFDefaultSkinMaterial", ShaderGouraudSkin, new CoatColored(Color.CSS("white")));
             node.addComponent(new ComponentMaterial(GLTFLoader.defaultSkinMaterial));
           }
           else {
             if (!GLTFLoader.defaultMaterial)
-              GLTFLoader.defaultMaterial = new Material("GLTFDefaultMaterial", ShaderFlat, new CoatColored(Color.CSS("white")));
+              GLTFLoader.defaultMaterial = new Material("GLTFDefaultMaterial", ShaderGouraud, new CoatColored(Color.CSS("white")));
             node.addComponent(new ComponentMaterial(GLTFLoader.defaultMaterial));
           }
         }

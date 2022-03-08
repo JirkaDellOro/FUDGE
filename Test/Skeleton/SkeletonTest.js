@@ -57,10 +57,10 @@ var SkeletonTest;
             this.faces = Reflect.get(meshSource, "faces");
             const iBones = [];
             const weights = [];
-            this.getRenderBuffers(ƒ.ShaderFlat); // hotfix to create renderMesh
-            for (let iVertex = 0; iVertex < this.renderMesh.verticesFlat.length; iVertex += 3) {
+            this.getRenderBuffers(ƒ.ShaderGouraud); // hotfix to create renderMesh
+            for (let iVertex = 0; iVertex < this.renderMesh.vertices.length; iVertex += 3) {
                 iBones.push(MeshSkinCylinder.skeleton.indexOfBone("LowerBone"), MeshSkinCylinder.skeleton.indexOfBone("UpperBone"), 0, 0);
-                weights.push(1 - this.renderMesh.verticesFlat[iVertex + 1] / 4, this.renderMesh.verticesFlat[iVertex + 1] / 4, 0, 0);
+                weights.push(1 - this.renderMesh.vertices[iVertex + 1] / 4, this.renderMesh.vertices[iVertex + 1] / 4, 0, 0);
             }
             this.ƒiBones = new Uint8Array(iBones);
             this.ƒweights = new Float32Array(weights);
@@ -136,7 +136,7 @@ var SkeletonTest;
         cmpMesh.bindSkeleton(skeletonInstance);
         cylinder.addComponent(cmpMesh);
         // setup component material
-        const material = new ƒ.Material("MaterialCylinder", ƒ.ShaderFlatSkin, new ƒ.CoatColored(ƒ.Color.CSS("White")));
+        const material = new ƒ.Material("MaterialCylinder", ƒ.ShaderGouraudSkin, new ƒ.CoatColored(ƒ.Color.CSS("White")));
         const cmpMaterial = new ƒ.ComponentMaterial(material);
         cylinder.addComponent(cmpMaterial);
         return cylinder;

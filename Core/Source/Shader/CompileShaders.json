@@ -116,7 +116,20 @@
     "define": [
       "LIGHT",
       "FLAT",
-      "BONES"
+      "SKIN"
+    ]
+  },
+  "ShaderGouraudSkin": {
+    "vertex": "Source/ShaderUniversal.vert",
+    "fragment": "Source/ShaderUniversal.frag",
+    "coat": "CoatColored",
+    "namespace": "FudgeCore",
+    "outdir": "Build",
+    "register": "true",
+    "define": [
+      "LIGHT",
+      "GOURAUD",
+      "SKIN"
     ]
   }
 }
