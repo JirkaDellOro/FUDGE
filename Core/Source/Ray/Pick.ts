@@ -56,11 +56,13 @@ namespace FudgeCore {
       let minDistance: number = Infinity;
       let result: Vector3;
 
-      for (let i: number = 2; i < mesh.indices.length; i += 3) {
-        let iVertex: number = mesh.indices[i];
-        let [x, y, z] = mesh.vertices.subarray(iVertex * 3, (iVertex + 1) * 3);
+      // TODO: remove hotfix using renderMesh and use cloud and faces instead
+      let renderMesh: RenderMesh = Reflect.get(mesh, "renderMesh");
+      for (let i: number = 2; i < renderMesh.indices.length; i += 3) {
+        let iVertex: number = renderMesh.indices[i];
+        let [x, y, z] = renderMesh.vertices.subarray(iVertex * 3, (iVertex + 1) * 3);
         vertex.set(x, y, z);
-        [x, y, z] = mesh.normalsFlat.subarray(iVertex * 3, (iVertex + 1) * 3);
+        [x, y, z] = renderMesh.normalsFlat.subarray(iVertex * 3, (iVertex + 1) * 3);
         normal.set(x, y, z);
 
         let difference: Vector3 = Vector3.DIFFERENCE(this.posMesh, vertex);

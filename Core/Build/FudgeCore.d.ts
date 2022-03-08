@@ -450,20 +450,6 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
-    class RenderMesh {
-        smooth: RenderBuffers;
-        flat: RenderBuffers;
-        clear(): void;
-    }
-    interface RenderBuffers {
-        vertices?: WebGLBuffer;
-        indices?: WebGLBuffer;
-        textureUVs?: WebGLBuffer;
-        normals?: WebGLBuffer;
-        iBones?: WebGLBuffer;
-        weights?: WebGLBuffer;
-        nIndices?: number;
-    }
     class RenderInjectorMesh {
         static decorate(_constructor: Function): void;
         protected static getRenderBuffers(this: Mesh, _shader: typeof Shader): RenderBuffers;
@@ -3576,27 +3562,9 @@ declare namespace FudgeCore {
         static readonly subclasses: typeof Mesh[];
         idResource: string;
         name: string;
+        cloud: Vertices;
+        faces: Face[];
         protected renderMesh: RenderMesh;
-        protected cloud: Vertices;
-        protected faces: Face[];
-        /** vertices of the actual point cloud, some points might be in the same location in order to refer to different texels */
-        protected ƒvertices: Float32Array;
-        /** indices to create faces from the vertices, rotation determines direction of face-normal */
-        protected ƒindices: Uint16Array;
-        /** texture coordinates associated with the vertices by the position in the array */
-        protected ƒtextureUVs: Float32Array;
-        /** normals of the faces, not used for rendering but computation of flat- and vertex-normals */
-        protected ƒnormalsFaceUnscaled: Float32Array;
-        /** vertex normals for smooth shading, interpolated between vertices during rendering */
-        protected ƒnormalsVertex: Float32Array;
-        /** flat-shading: normalized face normals, every third entry is used only */
-        protected ƒnormalsFlat: Float32Array;
-        /** flat-shading: extra vertex array, since using vertices with multiple faces is rarely possible due to the limitation above */
-        protected ƒverticesFlat: Float32Array;
-        /** flat-shading: therefore an extra indices-array is needed */
-        protected ƒindicesFlat: Uint16Array;
-        /** flat-shading: and an extra textureUV-array */
-        protected ƒtextureUVsFlat: Float32Array;
         /** bounding box AABB */
         protected ƒbox: Box;
         /** bounding radius */
@@ -3604,14 +3572,6 @@ declare namespace FudgeCore {
         constructor(_name?: string);
         protected static registerSubclass(_subClass: typeof Mesh): number;
         get type(): string;
-        get vertices(): Float32Array;
-        get indices(): Uint16Array;
-        get normalsVertex(): Float32Array;
-        get textureUVs(): Float32Array;
-        get verticesFlat(): Float32Array;
-        get indicesFlat(): Uint16Array;
-        get normalsFlat(): Float32Array;
-        get textureUVsFlat(): Float32Array;
         get boundingBox(): Box;
         get radius(): number;
         useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): RenderBuffers;
@@ -3621,10 +3581,6 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
-        protected createVerticesFlat(): Float32Array;
-        protected createNormalsFlat(): Float32Array;
-        protected createTextureUVsFlat(): Float32Array;
-        protected calculateFaceCrossProducts(): Float32Array;
         protected createRadius(): number;
         protected createBoundingBox(): Box;
     }
@@ -5061,6 +5017,57 @@ declare namespace FudgeCore {
         private static drawListAlpha;
         private static drawList;
         private static transformByPhysics;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Inserted into a {@link Mesh}, an instance of this class calculates and represents the mesh data in the form needed by the render engine
+     */
+    class RenderMesh {
+        smooth: RenderBuffers;
+        flat: RenderBuffers;
+        mesh: Mesh;
+        /** vertices of the actual point cloud, some points might be in the same location in order to refer to different texels */
+        protected ƒvertices: Float32Array;
+        /** indices to create faces from the vertices, rotation determines direction of face-normal */
+        protected ƒindices: Uint16Array;
+        /** texture coordinates associated with the vertices by the position in the array */
+        protected ƒtextureUVs: Float32Array;
+        /** normals of the faces, not used for rendering but computation of flat- and vertex-normals */
+        protected ƒnormalsFaceUnscaled: Float32Array;
+        /** vertex normals for smooth shading, interpolated between vertices during rendering */
+        protected ƒnormalsVertex: Float32Array;
+        /** flat-shading: normalized face normals, every third entry is used only */
+        protected ƒnormalsFlat: Float32Array;
+        /** flat-shading: extra vertex array, since using vertices with multiple faces is rarely possible due to the limitation above */
+        protected ƒverticesFlat: Float32Array;
+        /** flat-shading: therefore an extra indices-array is needed */
+        protected ƒindicesFlat: Uint16Array;
+        /** flat-shading: and an extra textureUV-array */
+        protected ƒtextureUVsFlat: Float32Array;
+        constructor(_mesh: Mesh);
+        get vertices(): Float32Array;
+        get indices(): Uint16Array;
+        get normalsVertex(): Float32Array;
+        get textureUVs(): Float32Array;
+        get verticesFlat(): Float32Array;
+        get indicesFlat(): Uint16Array;
+        get normalsFlat(): Float32Array;
+        get textureUVsFlat(): Float32Array;
+        clear(): void;
+        protected createVerticesFlat(): Float32Array;
+        protected createNormalsFlat(): Float32Array;
+        protected createTextureUVsFlat(): Float32Array;
+        protected calculateFaceCrossProducts(): Float32Array;
+    }
+    interface RenderBuffers {
+        vertices?: WebGLBuffer;
+        indices?: WebGLBuffer;
+        textureUVs?: WebGLBuffer;
+        normals?: WebGLBuffer;
+        iBones?: WebGLBuffer;
+        weights?: WebGLBuffer;
+        nIndices?: number;
     }
 }
 declare namespace FudgeCore {

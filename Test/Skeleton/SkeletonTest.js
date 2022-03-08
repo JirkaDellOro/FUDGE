@@ -57,9 +57,10 @@ var SkeletonTest;
             this.faces = Reflect.get(meshSource, "faces");
             const iBones = [];
             const weights = [];
-            for (let iVertex = 0; iVertex < this.verticesFlat.length; iVertex += 3) {
+            this.getRenderBuffers(ƒ.ShaderFlat); // hotfix to create renderMesh
+            for (let iVertex = 0; iVertex < this.renderMesh.verticesFlat.length; iVertex += 3) {
                 iBones.push(MeshSkinCylinder.skeleton.indexOfBone("LowerBone"), MeshSkinCylinder.skeleton.indexOfBone("UpperBone"), 0, 0);
-                weights.push(1 - this.verticesFlat[iVertex + 1] / 4, this.verticesFlat[iVertex + 1] / 4, 0, 0);
+                weights.push(1 - this.renderMesh.verticesFlat[iVertex + 1] / 4, this.renderMesh.verticesFlat[iVertex + 1] / 4, 0, 0);
             }
             this.ƒiBones = new Uint8Array(iBones);
             this.ƒweights = new Float32Array(weights);

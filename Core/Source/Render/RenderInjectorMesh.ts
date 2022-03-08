@@ -1,24 +1,4 @@
 namespace FudgeCore {
-  export class RenderMesh {
-    public smooth: RenderBuffers = null;
-    public flat: RenderBuffers = null;
-
-    public clear(): void {
-      this.smooth = null;
-      this.flat = null;
-    }
-  }
-
-  export interface RenderBuffers {
-    vertices?: WebGLBuffer;
-    indices?: WebGLBuffer;
-    textureUVs?: WebGLBuffer;
-    normals?: WebGLBuffer;
-    iBones?: WebGLBuffer;
-    weights?: WebGLBuffer;
-    nIndices?: number;
-  }
-
   //Feeds WebGL Buffers with data calculated from the {@link Mesh]]
   export class RenderInjectorMesh {
     public static decorate(_constructor: Function): void {
@@ -36,26 +16,26 @@ namespace FudgeCore {
     protected static getRenderBuffers(this: Mesh, _shader: typeof Shader): RenderBuffers {
       let crc3: WebGL2RenderingContext = RenderWebGL.getRenderingContext();
 
-      this.renderMesh = this.renderMesh || new RenderMesh();
+      this.renderMesh = this.renderMesh || new RenderMesh(this);
       if (_shader.define.includes("FLAT")) {
         if (this.renderMesh.flat == null)
           this.renderMesh.flat = {
-            vertices: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.verticesFlat),
-            indices: createBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.indicesFlat),
-            normals: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.normalsFlat),
-            textureUVs: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.textureUVsFlat),
-            nIndices: this.indicesFlat.length
+            vertices: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.verticesFlat),
+            indices: createBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.renderMesh.indicesFlat),
+            normals: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.normalsFlat),
+            textureUVs: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.textureUVsFlat),
+            nIndices: this.renderMesh.indicesFlat.length
           };
         return this.renderMesh.flat;
       }
       else {
         if (this.renderMesh.smooth == null)
           this.renderMesh.smooth = {
-            vertices: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.vertices),
-            indices: createBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.indices),
-            normals: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.normalsVertex),
-            textureUVs: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.textureUVs),
-            nIndices: this.indices.length
+            vertices: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.vertices),
+            indices: createBuffer(WebGL2RenderingContext.ELEMENT_ARRAY_BUFFER, this.renderMesh.indices),
+            normals: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.normalsVertex),
+            textureUVs: createBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.renderMesh.textureUVs),
+            nIndices: this.renderMesh.indices.length
           };
         return this.renderMesh.smooth;
       }

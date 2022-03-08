@@ -25,13 +25,11 @@ namespace FudgeCore {
         new Face(this.cloud, 0, 3, 1),
         new Face(this.cloud, 3, 2, 1)
       ];
-
-      console.log(this.normalsVertex); 
     }
 
     // flat is standard here
-    public get verticesFlat(): Float32Array { return super.vertices; }
-    public get indicesFlat(): Uint16Array { return super.indices; }
+    public get verticesFlat(): Float32Array { return this.renderMesh.vertices; }
+    public get indicesFlat(): Uint16Array { return this.renderMesh.indices; }
 
     // instead, smooth shading would need extra attention but is not relevant...
 

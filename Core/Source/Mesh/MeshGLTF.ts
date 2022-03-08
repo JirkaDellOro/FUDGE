@@ -19,10 +19,13 @@ namespace FudgeCore {
     public async load(_loader: GLTFLoader, _iMesh: number): Promise<MeshGLTF> {
       const gltfMesh: GLTF.Mesh = _loader.gltf.meshes[_iMesh];
       this.name = gltfMesh.name;
-      this.ƒindicesFlat = await _loader.getUint16Array(gltfMesh.primitives[0].indices);
-      this.ƒverticesFlat = await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.POSITION);
-      this.ƒnormalsFlat = await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.NORMAL); // normalsFlat?
-      this.ƒtextureUVsFlat = await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.TEXCOORD_0);
+
+      this.getRenderBuffers(ShaderFlat); // hotfix to create renderMesh
+      Reflect.set(this.renderMesh, "ƒindicesFlat", await _loader.getUint16Array(gltfMesh.primitives[0].indices));
+      Reflect.set(this.renderMesh, "ƒverticesFlat", await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.POSITION));
+      Reflect.set(this.renderMesh, "ƒnormalsFlat", await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.NORMAL)); // normalsFlat?
+      Reflect.set(this.renderMesh, "ƒtextureUVsFlat", await _loader.getFloat32Array(gltfMesh.primitives[0].attributes.TEXCOORD_0));
+
       this.uriGLTF = _loader.uri;
       return this;
     }

@@ -49,7 +49,7 @@ namespace FudgeCore {
       const iVertex: number = _index * 3;
       const iBoneInfluence: number = _index * 4;
       
-      const vertex: Vector3 = new Vector3(...this.mesh.vertices.slice(iVertex, iVertex + 3));
+      const vertex: Vector3 = new Vector3(...Reflect.get(this.mesh, "renderMesh").vertices.slice(iVertex, iVertex + 3));
       if (!(this.mesh instanceof MeshSkin)) return vertex;
 
       const iBones: Uint8Array = this.mesh.iBones.slice(iBoneInfluence, iBoneInfluence + 4);

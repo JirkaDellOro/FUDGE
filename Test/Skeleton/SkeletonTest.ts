@@ -75,7 +75,9 @@ namespace SkeletonTest {
 
       const iBones: number[] = [];
       const weights: number[] = [];
-      for (let iVertex: number = 0; iVertex < this.verticesFlat.length; iVertex += 3) {
+
+      this.getRenderBuffers(ƒ.ShaderFlat); // hotfix to create renderMesh
+      for (let iVertex: number = 0; iVertex < this.renderMesh.verticesFlat.length; iVertex += 3) {
         iBones.push(
           MeshSkinCylinder.skeleton.indexOfBone("LowerBone"),
           MeshSkinCylinder.skeleton.indexOfBone("UpperBone"),
@@ -83,8 +85,8 @@ namespace SkeletonTest {
           0
         );
         weights.push(
-          1 - this.verticesFlat[iVertex + 1] / 4,
-          this.verticesFlat[iVertex + 1] / 4,
+          1 - this.renderMesh.verticesFlat[iVertex + 1] / 4,
+          this.renderMesh.verticesFlat[iVertex + 1] / 4,
           0,
           0
         );
