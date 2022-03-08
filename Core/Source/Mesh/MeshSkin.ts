@@ -34,7 +34,7 @@ namespace FudgeCore {
       return this;
     }
 
-    public useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): number { return 0; /* injected by RenderInjector*/ }
+    public useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): RenderBuffers { return null; /* injected by RenderInjector*/ }
 
     protected reduceMutator(_mutator: Mutator): void {
       super.reduceMutator(_mutator);

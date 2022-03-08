@@ -19,7 +19,7 @@ namespace FudgeCore {
     public idResource: string = undefined;
     public name: string = "Mesh";
 
-    public renderBuffers: RenderBuffers; /* defined by RenderInjector*/
+    // public renderBuffers: RenderBuffers; /* defined by RenderInjector*/
     protected renderMesh: RenderMesh; /* defined by RenderInjector*/
 
     // base structure for meshes in FUDGE
@@ -144,8 +144,8 @@ namespace FudgeCore {
       return this.ƒradius;
     }
 
-    public useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): number { return 0; /* injected by RenderInjector*/ }
-    public createRenderBuffers(): void {/* injected by RenderInjector*/ }
+    public useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): RenderBuffers { return null; /* injected by RenderInjector*/ }
+    public getRenderBuffers(_shader: typeof Shader): RenderBuffers {return null; /* injected by RenderInjector*/ }
     public deleteRenderBuffers(_shader: typeof Shader): void {/* injected by RenderInjector*/ }
 
     public clear(): void {
@@ -166,7 +166,7 @@ namespace FudgeCore {
       this.ƒbox = undefined;
       this.ƒradius = undefined;
 
-      this.renderBuffers = null;
+      this.renderMesh?.clear();
     }
 
     //#region Transfer

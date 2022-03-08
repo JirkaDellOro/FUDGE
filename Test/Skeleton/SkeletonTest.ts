@@ -89,7 +89,7 @@ namespace SkeletonTest {
           0
         );
       }
-      console.table(weights);
+
       this.ƒiBones = new Uint8Array(iBones);
       this.ƒweights = new Float32Array(weights);
     }

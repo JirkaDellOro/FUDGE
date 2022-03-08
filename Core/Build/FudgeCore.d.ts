@@ -456,21 +456,18 @@ declare namespace FudgeCore {
         clear(): void;
     }
     interface RenderBuffers {
-        vertices: WebGLBuffer;
-        indices: WebGLBuffer;
-        textureUVs: WebGLBuffer;
-        normalsVertex: WebGLBuffer;
-        verticesFlat: WebGLBuffer;
-        indicesFlat: WebGLBuffer;
-        normalsFlat: WebGLBuffer;
-        textureUVsFlat: WebGLBuffer;
+        vertices?: WebGLBuffer;
+        indices?: WebGLBuffer;
+        textureUVs?: WebGLBuffer;
+        normals?: WebGLBuffer;
         iBones?: WebGLBuffer;
         weights?: WebGLBuffer;
+        nIndices?: number;
     }
     class RenderInjectorMesh {
         static decorate(_constructor: Function): void;
-        protected static createRenderBuffers(this: Mesh): void;
-        protected static useRenderBuffers(this: Mesh, _shader: typeof Shader, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4, _id?: number): number;
+        protected static getRenderBuffers(this: Mesh, _shader: typeof Shader): RenderBuffers;
+        protected static useRenderBuffers(this: Mesh, _shader: typeof Shader, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4, _id?: number): RenderBuffers;
         protected static deleteRenderBuffers(_renderBuffers: RenderBuffers): void;
     }
 }
@@ -3579,7 +3576,6 @@ declare namespace FudgeCore {
         static readonly subclasses: typeof Mesh[];
         idResource: string;
         name: string;
-        renderBuffers: RenderBuffers;
         protected renderMesh: RenderMesh;
         protected cloud: Vertices;
         protected faces: Face[];
@@ -3618,8 +3614,8 @@ declare namespace FudgeCore {
         get textureUVsFlat(): Float32Array;
         get boundingBox(): Box;
         get radius(): number;
-        useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): number;
-        createRenderBuffers(): void;
+        useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number): RenderBuffers;
+        getRenderBuffers(_shader: typeof Shader): RenderBuffers;
         deleteRenderBuffers(_shader: typeof Shader): void;
         clear(): void;
         serialize(): Serialization;
@@ -3869,8 +3865,8 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     class RenderInjectorMeshSkin extends RenderInjectorMesh {
         static decorate(_constructor: Function): void;
-        protected static createRenderBuffers(this: MeshSkin): void;
-        protected static useRenderBuffers(this: MeshSkin, _shader: typeof Shader, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): number;
+        protected static getRenderBuffers(this: MeshSkin, _shader: typeof Shader): RenderBuffers;
+        protected static useRenderBuffers(this: MeshSkin, _shader: typeof Shader, _mtxMeshToWorld: Matrix4x4, _mtxMeshToView: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): RenderBuffers;
         protected static deleteRenderBuffers(_renderBuffers: RenderBuffers): void;
     }
 }
@@ -3885,7 +3881,7 @@ declare namespace FudgeCore {
         get iBones(): Uint8Array;
         get weights(): Float32Array;
         load(_loader: GLTFLoader, _iMesh: number): Promise<MeshSkin>;
-        useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): number;
+        useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): RenderBuffers;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }

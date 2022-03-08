@@ -61,7 +61,6 @@ var SkeletonTest;
                 iBones.push(MeshSkinCylinder.skeleton.indexOfBone("LowerBone"), MeshSkinCylinder.skeleton.indexOfBone("UpperBone"), 0, 0);
                 weights.push(1 - this.verticesFlat[iVertex + 1] / 4, this.verticesFlat[iVertex + 1] / 4, 0, 0);
             }
-            console.table(weights);
             this.ƒiBones = new Uint8Array(iBones);
             this.ƒweights = new Float32Array(weights);
         }
