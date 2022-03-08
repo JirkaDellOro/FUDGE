@@ -3828,11 +3828,10 @@ declare namespace FudgeCore {
 }
 declare namespace FudgeCore {
     class MeshSkin extends MeshGLTF {
-        static readonly vectorizedJointMatrixLength: number;
         protected ƒiBones: Uint8Array;
         protected ƒweights: Float32Array;
         protected ƒmtxBones: Float32Array;
-        protected createJoints: () => Uint8Array;
+        protected createBones: () => Uint8Array;
         protected createWeights: () => Float32Array;
         get iBones(): Uint8Array;
         get weights(): Float32Array;
@@ -5067,7 +5066,6 @@ declare namespace FudgeCore {
         protected createVerticesFlat(): Float32Array;
         protected createNormalsFlat(): Float32Array;
         protected createTextureUVsFlat(): Float32Array;
-        protected calculateFaceCrossProducts(): Float32Array;
     }
 }
 declare namespace FudgeCore {

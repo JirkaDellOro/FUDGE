@@ -2,19 +2,16 @@
 namespace FudgeCore {
   @RenderInjectorMeshSkin.decorate
   export class MeshSkin extends MeshGLTF {
-    
-    public static readonly vectorizedJointMatrixLength: number = 16;
-
     protected ƒiBones: Uint8Array;
     protected ƒweights: Float32Array;
     protected ƒmtxBones: Float32Array;
 
-    protected createJoints: () => Uint8Array;
+    protected createBones: () => Uint8Array;
     protected createWeights: () => Float32Array;
 
     public get iBones(): Uint8Array {
       if (this.ƒiBones == null)
-        this.ƒiBones = this.createJoints?.call(this);
+        this.ƒiBones = this.createBones?.call(this);
       
       return this.ƒiBones;
     }
