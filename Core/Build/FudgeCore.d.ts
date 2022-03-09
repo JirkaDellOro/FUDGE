@@ -5042,10 +5042,11 @@ declare namespace FudgeCore {
         protected ƒindices: Uint16Array;
         /** texture coordinates associated with the vertices by the position in the array */
         protected ƒtextureUVs: Float32Array;
-        /** normals of the faces, not used for rendering but computation of flat- and vertex-normals */
-        protected ƒnormalsFaceUnscaled: Float32Array;
         /** vertex normals for smooth shading, interpolated between vertices during rendering */
         protected ƒnormalsVertex: Float32Array;
+        /** bones */
+        protected ƒiBones: Uint8Array;
+        protected ƒweights: Float32Array;
         /** flat-shading: normalized face normals, every third entry is used only */
         protected ƒnormalsFlat: Float32Array;
         /** flat-shading: extra vertex array, since using vertices with multiple faces is rarely possible due to the limitation above */
@@ -5054,9 +5055,9 @@ declare namespace FudgeCore {
         protected ƒindicesFlat: Uint16Array;
         /** flat-shading: and an extra textureUV-array */
         protected ƒtextureUVsFlat: Float32Array;
-        /** flat-shading: and an extra textureUV-array */
-        protected ƒiBones: Uint8Array;
-        protected ƒweights: Float32Array;
+        /** bones */
+        protected ƒiBonesFlat: Uint8Array;
+        protected ƒweightsFlat: Float32Array;
         constructor(_mesh: Mesh);
         get iBones(): Uint8Array;
         get weights(): Float32Array;
@@ -5068,6 +5069,8 @@ declare namespace FudgeCore {
         get indicesFlat(): Uint16Array;
         get normalsFlat(): Float32Array;
         get textureUVsFlat(): Float32Array;
+        get iBonesFlat(): Uint8Array;
+        get weightsFlat(): Float32Array;
         clear(): void;
         protected createVerticesFlat(): Float32Array;
         protected createNormalsFlat(): Float32Array;

@@ -2,7 +2,6 @@ namespace FudgeCore {
   /**
    * Inserted into a {@link Mesh}, an instance of this class calculates and represents the mesh data in the form needed by the render engine
    */
-
   export interface RenderBuffers {
     vertices?: WebGLBuffer;
     indices?: WebGLBuffer;
@@ -24,11 +23,12 @@ namespace FudgeCore {
     protected ƒindices: Uint16Array;
     /** texture coordinates associated with the vertices by the position in the array */
     protected ƒtextureUVs: Float32Array;
-    /** normals of the faces, not used for rendering but computation of flat- and vertex-normals */
-    protected ƒnormalsFaceUnscaled: Float32Array;
     /** vertex normals for smooth shading, interpolated between vertices during rendering */
     protected ƒnormalsVertex: Float32Array;
-
+    /** bones */
+    protected ƒiBones: Uint8Array;
+    protected ƒweights: Float32Array;
+    
     /** flat-shading: normalized face normals, every third entry is used only */
     protected ƒnormalsFlat: Float32Array;
     /** flat-shading: extra vertex array, since using vertices with multiple faces is rarely possible due to the limitation above */
@@ -37,10 +37,9 @@ namespace FudgeCore {
     protected ƒindicesFlat: Uint16Array;
     /** flat-shading: and an extra textureUV-array */
     protected ƒtextureUVsFlat: Float32Array;
-
-    /** flat-shading: and an extra textureUV-array */
-    protected ƒiBones: Uint8Array;
-    protected ƒweights: Float32Array;
+    /** bones */
+    protected ƒiBonesFlat: Uint8Array;
+    protected ƒweightsFlat: Float32Array;
 
     constructor(_mesh: Mesh) {
       this.mesh = _mesh;
@@ -125,6 +124,15 @@ namespace FudgeCore {
       return this.ƒtextureUVsFlat || (this.ƒtextureUVsFlat = this.createTextureUVsFlat());
     }
 
+    public get iBonesFlat(): Uint8Array {
+      return this.ƒiBonesFlat;
+    }
+
+    public get weightsFlat(): Float32Array {
+      return this.ƒweightsFlat;
+    }
+
+
     public clear(): void {
       this.smooth = null;
       this.flat = null;
@@ -142,21 +150,29 @@ namespace FudgeCore {
 
       this.ƒiBones = undefined;
       this.ƒweights = undefined;
-
-      // 
-      this.ƒnormalsFaceUnscaled = undefined;
     }
+
     protected createVerticesFlat(): Float32Array {
       let positions: Vector3[] = [];
+      let bones: Bone[][] = [];
       let indices: number[] = [];
       let i: number = 0;
       for (let face of this.mesh.faces)
         for (let index of face.indices) {
           indices.push(i++);
           positions.push(this.mesh.vertices.position(index));
+          bones.push(this.mesh.vertices.bones(index));
         }
 
       this.ƒindicesFlat = new Uint16Array(indices);
+      this.ƒiBonesFlat = new Uint8Array(bones.flatMap((_bones: Bone[]) => {
+        return [..._bones.map(_bone => _bone.index)];
+      }));
+
+      this.ƒweightsFlat = new Float32Array(bones.flatMap((_bones: Bone[]) => {
+        return [..._bones.map(_bone => _bone.weight)];
+      }));
+
       return new Float32Array(positions.flatMap(_v => [..._v.get()]));
     }
 
