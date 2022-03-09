@@ -28,7 +28,7 @@ namespace FudgeCore {
     /** bones */
     protected ƒiBones: Uint8Array;
     protected ƒweights: Float32Array;
-    
+
     /** flat-shading: normalized face normals, every third entry is used only */
     protected ƒnormalsFlat: Float32Array;
     /** flat-shading: extra vertex array, since using vertices with multiple faces is rarely possible due to the limitation above */
@@ -161,10 +161,14 @@ namespace FudgeCore {
         for (let index of face.indices) {
           indices.push(i++);
           positions.push(this.mesh.vertices.position(index));
-          bones.push(this.mesh.vertices.bones(index));
+          let bone: Bone[] = this.mesh.vertices.bones(index);
+          if (bone)
+            bones.push(bone);
         }
 
       this.ƒindicesFlat = new Uint16Array(indices);
+
+      console.log(bones);
       this.ƒiBonesFlat = new Uint8Array(bones.flatMap((_bones: Bone[]) => {
         return [..._bones.map(_bone => _bone.index)];
       }));
