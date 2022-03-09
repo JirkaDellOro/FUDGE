@@ -168,7 +168,6 @@ namespace FudgeCore {
 
       this.ƒindicesFlat = new Uint16Array(indices);
 
-      console.log(bones);
       this.ƒiBonesFlat = new Uint8Array(bones.flatMap((_bones: Bone[]) => {
         return [..._bones.map(_bone => _bone.index)];
       }));

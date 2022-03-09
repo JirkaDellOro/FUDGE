@@ -54,18 +54,18 @@ out vec2 v_vctTexture;
 
   // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
   #if defined(CAMERA)
-uniform float u_fShininess;
+uniform float u_fSpecular;
+uniform float u_fDiffuse;
 uniform mat4 u_mtxMeshToWorld;
 uniform mat4 u_mtxWorldToView;
 uniform vec3 u_vctCamera;
 
-float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fShininess) {
-  if(_fShininess <= 0.0)
+float calculateReflection(vec3 _vctLight, vec3 _vctView, vec3 _vctNormal, float _fSpecular) {
+  if(_fSpecular <= 0.0)
     return 0.0;
   vec3 vctReflection = normalize(reflect(-_vctLight, _vctNormal));
-  float fScpecular = dot(vctReflection, _vctView);
-  return pow(max(fScpecular, 0.0), _fShininess * 10.0) * _fShininess;
-  // return max(spec_dot, 0.0) * shininess;
+  float fHitCamera = dot(vctReflection, _vctView);
+  return pow(max(fHitCamera, 0.0), _fSpecular * 10.0) * _fSpecular; // 10.0 = magic number, looks good... 
 }
   #endif
 
@@ -100,7 +100,7 @@ void main() {
   vec3 vctNormal = a_vctNormal;
   mat4 mtxNormalMeshToWorld = u_mtxNormalMeshToWorld;
       #if defined(LIGHT)
-  v_vctColor = u_ambient.vctColor;
+  v_vctColor = u_fDiffuse * u_ambient.vctColor;
       #endif
     #endif
 
@@ -130,9 +130,9 @@ void main() {
   for(uint i = 0u; i < u_nLightsDirectional; i++) {
     float fIllumination = -dot(vctNormal, u_directional[i].vctDirection);
     if(fIllumination > 0.0f) {
-      v_vctColor += fIllumination * u_directional[i].vctColor;
+      v_vctColor += u_fDiffuse * fIllumination * u_directional[i].vctColor;
         #if defined(CAMERA)
-      float fReflection = calculateReflection(u_directional[i].vctDirection, vctView, vctNormal, u_fShininess);
+      float fReflection = calculateReflection(u_directional[i].vctDirection, vctView, vctNormal, u_fSpecular);
       v_vctColor += fReflection * u_directional[i].vctColor;
         #endif
     }

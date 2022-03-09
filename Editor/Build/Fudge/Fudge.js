@@ -3046,7 +3046,7 @@ var Fudge;
             // this.dom.addEventListener(ƒui.EVENT.RENAME, this.hndEvent);
         }
         static createStandardMaterial() {
-            let mtrStandard = new ƒ.Material("StandardMaterial", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("white")));
+            let mtrStandard = new ƒ.Material("StandardMaterial", ƒ.ShaderFlat, new ƒ.CoatRemissive(ƒ.Color.CSS("white")));
             ƒ.Project.deregister(mtrStandard);
             return mtrStandard;
         }

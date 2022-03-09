@@ -445,8 +445,10 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     class RenderInjectorCoat extends RenderInjector {
         static decorate(_constructor: Function): void;
-        protected static injectCoatColored(this: Coat, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
-        protected static injectCoatTextured(this: Coat, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
+        protected static injectCoatColored(this: CoatColored, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
+        protected static injectCoatRemissive(this: CoatRemissive, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
+        protected static injectCoatTextured(this: CoatTextured, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
+        protected static injectCoatRemissiveTextured(this: CoatRemissiveTextured, _shader: typeof Shader, _cmpMaterial: ComponentMaterial): void;
     }
 }
 declare namespace FudgeCore {
@@ -2606,19 +2608,29 @@ declare namespace FudgeCore {
         deserialize(_serialization: Serialization): Promise<Serializable>;
         protected reduceMutator(_mutator: Mutator): void;
     }
+}
+declare namespace FudgeCore {
     /**
      * The simplest {@link Coat} providing just a color
      */
     class CoatColored extends Coat {
         color: Color;
-        shininess: number;
-        constructor(_color?: Color, _shininess?: number);
+        constructor(_color?: Color);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }
+}
+declare namespace FudgeCore {
     /**
-     * A {@link Coat} to be used by the MatCap Shader providing a texture, a tint color (0.5 grey is neutral). Set shadeSmooth to 1 for smooth shading.
+     * The simplest {@link Coat} providing just a color
      */
+    class CoatRemissive extends CoatColored {
+        specular: number;
+        diffuse: number;
+        constructor(_color?: Color, _diffuse?: number, _specular?: number);
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+    }
 }
 declare namespace FudgeCore {
     /**
@@ -2627,6 +2639,18 @@ declare namespace FudgeCore {
     class CoatTextured extends CoatColored {
         texture: Texture;
         constructor(_color?: Color, _texture?: Texture);
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * A {@link Coat} providing a texture and additional data for texturing
+     */
+    class CoatRemissiveTextured extends CoatTextured {
+        specular: number;
+        diffuse: number;
+        constructor(_color?: Color, _texture?: Texture, _diffuse?: number, _specular?: number);
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
     }

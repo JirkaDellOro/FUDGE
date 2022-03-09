@@ -21,7 +21,7 @@
   "ShaderFlat": {
     "vertex": "Source/ShaderUniversal.vert",
     "fragment": "Source/ShaderUniversal.frag",
-    "coat": "CoatColored",
+    "coat": "CoatRemissive",
     "namespace": "FudgeCore",
     "outdir": "Build/",
     "register": "true",
@@ -34,7 +34,7 @@
   "ShaderFlatTextured": {
     "vertex": "Source/ShaderUniversal.vert",
     "fragment": "Source/ShaderUniversal.frag",
-    "coat": "CoatTextured",
+    "coat": "CoatRemissiveTextured",
     "namespace": "FudgeCore",
     "outdir": "Build/",
     "register": "true",
@@ -48,7 +48,7 @@
   "ShaderGouraud": {
     "vertex": "Source/ShaderUniversal.vert",
     "fragment": "Source/ShaderUniversal.frag",
-    "coat": "CoatColored",
+    "coat": "CoatRemissive",
     "namespace": "FudgeCore",
     "outdir": "Build/",
     "register": "true",
@@ -60,7 +60,7 @@
   "ShaderGouraudTextured": {
     "vertex": "Source/ShaderUniversal.vert",
     "fragment": "Source/ShaderUniversal.frag",
-    "coat": "CoatTextured",
+    "coat": "CoatRemissiveTextured",
     "namespace": "FudgeCore",
     "outdir": "Build/",
     "register": "true",
@@ -107,7 +107,7 @@
   "ShaderFlatSkin": {
     "vertex": "Source/ShaderUniversal.vert",
     "fragment": "Source/ShaderUniversal.frag",
-    "coat": "CoatColored",
+    "coat": "CoatRemissive",
     "namespace": "FudgeCore",
     "outdir": "Build",
     "register": "true",
@@ -120,7 +120,7 @@
   "ShaderGouraudSkin": {
     "vertex": "Source/ShaderUniversal.vert",
     "fragment": "Source/ShaderUniversal.frag",
-    "coat": "CoatColored",
+    "coat": "CoatRemissive",
     "namespace": "FudgeCore",
     "outdir": "Build",
     "register": "true",
