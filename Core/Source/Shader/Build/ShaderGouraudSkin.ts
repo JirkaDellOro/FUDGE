@@ -6,7 +6,6 @@ export abstract class ShaderGouraudSkin extends Shader {
 
   public static define: string[] = [
     "LIGHT",
-    "GOURAUD",
     "SKIN"
 ];
 
@@ -15,7 +14,6 @@ export abstract class ShaderGouraudSkin extends Shader {
   public static getVertexShaderSource(): string { 
 return `#version 300 es
 #define LIGHT
-#define GOURAUD
 #define SKIN
 
 /**
@@ -167,7 +165,6 @@ void main() {
   public static getFragmentShaderSource(): string { 
 return `#version 300 es
 #define LIGHT
-#define GOURAUD
 #define SKIN
 
 /**

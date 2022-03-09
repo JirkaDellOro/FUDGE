@@ -6,7 +6,6 @@ export abstract class ShaderGouraud extends Shader {
 
   public static define: string[] = [
     "LIGHT",
-    "GOURAUD",
     "CAMERA"
 ];
 
@@ -15,7 +14,6 @@ export abstract class ShaderGouraud extends Shader {
   public static getVertexShaderSource(): string { 
 return `#version 300 es
 #define LIGHT
-#define GOURAUD
 #define CAMERA
 
 /**
@@ -167,7 +165,6 @@ void main() {
   public static getFragmentShaderSource(): string { 
 return `#version 300 es
 #define LIGHT
-#define GOURAUD
 #define CAMERA
 
 /**

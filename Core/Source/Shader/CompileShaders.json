@@ -54,7 +54,6 @@
     "register": "true",
     "define": [
       "LIGHT",
-      "GOURAUD",
       "CAMERA"
     ]
   },
@@ -67,7 +66,6 @@
     "register": "true",
     "define": [
       "LIGHT",
-      "GOURAUD",
       "TEXTURE",
       "CAMERA"
     ]
@@ -128,7 +126,6 @@
     "register": "true",
     "define": [
       "LIGHT",
-      "GOURAUD",
       "SKIN"
     ]
   }
