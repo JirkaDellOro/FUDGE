@@ -134,8 +134,8 @@ var SkeletonTest;
         cmpMesh.mtxPivot.translateY(-2);
         cmpMesh.bindSkeleton(skeletonInstance);
         cylinder.addComponent(cmpMesh);
-        // setup component material
-        const material = new ƒ.Material("MaterialCylinder", ƒ.ShaderGouraudSkin, new ƒ.CoatColored(ƒ.Color.CSS("White")));
+        // setup component material 
+        const material = new ƒ.Material("MaterialCylinder", ƒ.ShaderGouraudSkin, new ƒ.CoatRemissive(ƒ.Color.CSS("White")));
         const cmpMaterial = new ƒ.ComponentMaterial(material);
         cylinder.addComponent(cmpMaterial);
         return cylinder;

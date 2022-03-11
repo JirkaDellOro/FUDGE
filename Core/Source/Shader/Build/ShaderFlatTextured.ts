@@ -33,6 +33,7 @@ in vec3 a_vctPosition;
   #if defined(LIGHT)
 uniform mat4 u_mtxNormalMeshToWorld;
 in vec3 a_vctNormal;
+uniform float u_fDiffuse;
 
 struct LightAmbient {
   vec4 vctColor;
@@ -65,7 +66,6 @@ out vec2 v_vctTexture;
   // CAMERA: offer buffer and functionality for specular reflection depending on the camera-position
   #if defined(CAMERA)
 uniform float u_fSpecular;
-uniform float u_fDiffuse;
 uniform mat4 u_mtxMeshToWorld;
 uniform mat4 u_mtxWorldToView;
 uniform vec3 u_vctCamera;
