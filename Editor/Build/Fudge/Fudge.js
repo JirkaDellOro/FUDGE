@@ -1102,7 +1102,7 @@ var Fudge;
             switch (_event.type) {
                 case Fudge.EVENT_EDITOR.SET_PROJECT:
                 case Fudge.EVENT_EDITOR.UPDATE:
-                case "mutate" /* MUTATE */:
+                    // case ƒui.EVENT.MUTATE:
                     this.listResources();
                     break;
                 case "removeChild" /* REMOVE_CHILD */:
@@ -3200,8 +3200,8 @@ var Fudge;
                 //   this.resource = undefined;
                 //   break;
                 case "change" /* CHANGE */:
-                case "mutate" /* MUTATE */:
                 case Fudge.EVENT_EDITOR.UPDATE:
+                case "mutate" /* MUTATE */:
                     if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture || this.resource instanceof ƒ.Material)
                         this.fillContent();
                     this.redraw();

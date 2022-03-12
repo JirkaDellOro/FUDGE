@@ -159,7 +159,7 @@ namespace Fudge {
       switch (_event.type) {
         case EVENT_EDITOR.SET_PROJECT:
         case EVENT_EDITOR.UPDATE:
-        case ƒui.EVENT.MUTATE:
+        // case ƒui.EVENT.MUTATE:
           this.listResources();
           break;
         case ƒui.EVENT.REMOVE_CHILD:

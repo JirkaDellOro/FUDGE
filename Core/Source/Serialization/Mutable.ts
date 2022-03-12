@@ -164,15 +164,18 @@ namespace FudgeCore {
       }
     }
     /**
-     * Updates the attribute values of the instance according to the state of the mutator. Must be protected...!
-     * Uses mutateBase but can be overwritten in subclasses
+     * Updates the attribute values of the instance according to the state of the mutator.
+     * The mutation may be restricted to a subset of the mutator and the event dispatching suppressed.
+     * Uses mutateBase, but can be overwritten in subclasses
      */
-    public async mutate(_mutator: Mutator, _selection?: string[]): Promise<void> {
+    public async mutate(_mutator: Mutator, _selection: string[] = null, _dispatchMutate: boolean = true): Promise<void> {
       await this.mutateBase(_mutator, _selection);
+      if (_dispatchMutate)
+        this.dispatchEvent(new Event(EVENT.MUTATE));
     }
 
     /**
-     * Base method for mutation, always available to subclasses
+     * Base method for mutation, always available to subclasses. Do not overwrite in subclasses!
      */
     protected async mutateBase(_mutator: Mutator, _selection?: string[]): Promise<void> {
       let mutator: Mutator = {};
@@ -189,11 +192,10 @@ namespace FudgeCore {
         let mutant: Object = Reflect.get(this, attribute);
         let value: Mutator = <Mutator>mutator[attribute];
         if (mutant instanceof MutableArray || mutant instanceof Mutable)
-          await mutant.mutate(value);
+          await mutant.mutate(value, null, false);
         else
           Reflect.set(this, attribute, value);
       }
-      this.dispatchEvent(new Event(EVENT.MUTATE));
     }
     /**
      * Reduces the attributes of the general mutator according to desired options for mutation. To be implemented in subclasses

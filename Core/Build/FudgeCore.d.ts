@@ -259,12 +259,13 @@ declare namespace FudgeCore {
          */
         updateMutator(_mutator: Mutator): void;
         /**
-         * Updates the attribute values of the instance according to the state of the mutator. Must be protected...!
-         * Uses mutateBase but can be overwritten in subclasses
+         * Updates the attribute values of the instance according to the state of the mutator.
+         * The mutation may be restricted to a subset of the mutator and the event dispatching suppressed.
+         * Uses mutateBase, but can be overwritten in subclasses
          */
-        mutate(_mutator: Mutator, _selection?: string[]): Promise<void>;
+        mutate(_mutator: Mutator, _selection?: string[], _dispatchMutate?: boolean): Promise<void>;
         /**
-         * Base method for mutation, always available to subclasses
+         * Base method for mutation, always available to subclasses. Do not overwrite in subclasses!
          */
         protected mutateBase(_mutator: Mutator, _selection?: string[]): Promise<void>;
         /**

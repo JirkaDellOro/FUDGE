@@ -137,7 +137,7 @@ namespace Fudge {
 
     private createStandardGraph(): ƒ.Node {
       let graph: ƒ.Node = new ƒ.Node("PreviewScene");
-      this.viewport.setBranch(graph);      
+      this.viewport.setBranch(graph);
 
       let nodeLight: ƒ.Node = new ƒ.Node("PreviewIllumination");
       graph.addChild(nodeLight);
@@ -209,10 +209,10 @@ namespace Fudge {
         //   this.resource = undefined;
         //   break;
         case ƒUi.EVENT.CHANGE:
-        case ƒUi.EVENT.MUTATE:
         case EVENT_EDITOR.UPDATE:
           if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture || this.resource instanceof ƒ.Material)
             this.fillContent();
+        case ƒUi.EVENT.MUTATE:
           this.redraw();
           break;
         default:
