@@ -114,7 +114,8 @@ namespace FudgeCore {
 
     public async mutate(_mutator: Mutator): Promise<void> {
       super.mutate(_mutator);
-      this.load(_mutator.url);
+      if (typeof (_mutator.url) !== "undefined")
+        this.load(_mutator.url);
     }
     //#endregion
   }

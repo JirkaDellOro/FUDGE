@@ -64,7 +64,8 @@ namespace FudgeCore {
     }
 
     public async mutate(_mutator: Mutator): Promise<void> {
-      this.setTexture(_mutator.texture);
+      if (typeof (_mutator.texture) !== "undefined")
+        this.setTexture(_mutator.texture);
     }
 
     protected reduceMutator(_mutator: Mutator): void {

@@ -654,7 +654,7 @@ namespace FudgeCore {
     /** Change properties by an associative array */
     public async mutate(_mutator: Mutator): Promise<void> {
       super.mutate(_mutator);
-
+      // TODO: see if this alternative should be, at least partially, done with mutateSelection
       let callIfExist: Function = (_key: string, _setter: Function) => {
         if (_mutator[_key])
           _setter(_mutator[_key]);

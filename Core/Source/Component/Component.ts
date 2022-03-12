@@ -13,7 +13,7 @@ namespace FudgeCore {
     public static readonly baseClass: typeof Component = Component;
     /** list of all the subclasses derived from this class, if they registered properly*/
     public static readonly subclasses: typeof Component[] = [];
-    
+
     #node: Node | null = null;
     protected singleton: boolean = true;
     protected active: boolean = true;
@@ -60,7 +60,7 @@ namespace FudgeCore {
         this.#node = previousContainer;
       }
     }
-    
+
     //#region Transfer
     public serialize(): Serialization {
       let serialization: Serialization = {
@@ -74,7 +74,8 @@ namespace FudgeCore {
     }
 
     public async mutate(_mutator: Mutator): Promise<void> {
-      this.activate(_mutator.active);
+      if (typeof(_mutator.active) !== "undefined")
+        this.activate(_mutator.active);
       super.mutate(_mutator);
     }
 

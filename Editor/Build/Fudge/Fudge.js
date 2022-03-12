@@ -1141,19 +1141,24 @@ var Fudge;
             this.domElement.addEventListener("drop" /* DROP */, this.hndDrop);
             this.domElement.addEventListener("keydown" /* KEY_DOWN */, this.hndKey);
         }
-        //#region hack getMutator in order to specifically exclude parts of it (e.g. recreate mesh everytime mtxPivot changes...)
-        getMutatorStripped = (_mutator, _types) => {
-            let mutator = super.getMutator(_mutator, _types);
-            delete (mutator.mesh);
-            return mutator;
-        };
         mutateOnInput = async (_event) => {
+            // TODO: move this to Ui.Controller as a general optimization to only mutate what has been changed...!
             this.getMutator = super.getMutator;
-            if (this.mutable instanceof ƒ.ComponentMesh) {
-                let found = _event.composedPath().find((_dom) => _dom == this.domElement || _dom.getAttribute("key") == "mesh");
-                if (found == this.domElement)
-                    this.getMutator = this.getMutatorStripped;
+            let path = [];
+            for (let target of _event.composedPath()) {
+                if (target == document)
+                    break;
+                let key = target.getAttribute("key");
+                if (key)
+                    path.push(key);
             }
+            path.pop();
+            path.reverse();
+            let mutator = ƒ.Mutable.getMutatorFromPath(this.getMutator(), path);
+            this.getMutator = (_mutator, _types) => {
+                this.getMutator = super.getMutator; // reset
+                return mutator;
+            };
         };
         //#endregion
         hndKey = (_event) => {
@@ -3025,6 +3030,7 @@ var Fudge;
         resource;
         viewport;
         cmrOrbit;
+        previewNode;
         constructor(_container, _state) {
             super(_container, _state);
             // create viewport for 3D-resources
@@ -3036,6 +3042,7 @@ var Fudge;
             this.viewport = new ƒ.Viewport();
             this.viewport.initialize("Preview", null, cmpCamera, canvas);
             this.cmrOrbit = ƒAid.Viewport.expandCameraToInteractiveOrbit(this.viewport, false);
+            this.previewNode = this.createStandardGraph();
             this.fillContent();
             _container.on("resize", this.redraw);
             this.dom.addEventListener("itemselect" /* SELECT */, this.hndEvent);
@@ -3071,13 +3078,6 @@ var Fudge;
                     break;
             }
         }
-        illuminateGraph() {
-            let nodeLight = this.viewport.getBranch()?.getChildrenByName("PreviewIllumination")[0];
-            if (nodeLight) {
-                nodeLight.activate(this.contextMenu.getMenuItemById(CONTEXTMENU.ILLUMINATE).checked);
-                this.redraw();
-            }
-        }
         //#endregion
         fillContent() {
             this.dom.innerHTML = "";
@@ -3092,7 +3092,7 @@ var Fudge;
             if (this.resource instanceof ƒ.Mesh)
                 type = "Mesh";
             // console.log(type);
-            let graph;
+            let previewObject = new ƒ.Node("PreviewObject");
             let preview;
             switch (type) {
                 case "Function":
@@ -3106,20 +3106,20 @@ var Fudge;
                         this.dom.appendChild(preview);
                     break;
                 case "Mesh":
-                    graph = this.createStandardGraph();
-                    graph.addComponent(new ƒ.ComponentMesh(this.resource));
-                    graph.addComponent(new ƒ.ComponentMaterial(ViewPreview.mtrStandard));
+                    previewObject.addComponent(new ƒ.ComponentMesh(this.resource));
+                    previewObject.addComponent(new ƒ.ComponentMaterial(ViewPreview.mtrStandard));
+                    this.setViewObject(previewObject);
                     this.redraw();
                     break;
                 case "Material":
-                    graph = this.createStandardGraph();
-                    graph.addComponent(new ƒ.ComponentMesh(ViewPreview.meshStandard));
-                    graph.addComponent(new ƒ.ComponentMaterial(this.resource));
+                    previewObject.addComponent(new ƒ.ComponentMesh(ViewPreview.meshStandard));
+                    previewObject.addComponent(new ƒ.ComponentMaterial(this.resource));
+                    this.setViewObject(previewObject);
                     this.redraw();
                     break;
                 case "Graph":
-                    graph = this.createStandardGraph(true);
-                    graph.appendChild(this.resource);
+                    previewObject.appendChild(this.resource);
+                    this.setViewObject(previewObject);
                     this.redraw();
                     break;
                 case "TextureImage":
@@ -3134,16 +3134,30 @@ var Fudge;
                 default: break;
             }
         }
-        createStandardGraph(_graphIllumination = false) {
+        createStandardGraph() {
             let graph = new ƒ.Node("PreviewScene");
             this.viewport.setBranch(graph);
             let nodeLight = new ƒ.Node("PreviewIllumination");
             graph.addChild(nodeLight);
             ƒAid.addStandardLightComponents(nodeLight);
+            this.dom.appendChild(this.viewport.getCanvas());
+            let previewNode = new ƒ.Node("PreviewNode");
+            graph.addChild(previewNode);
+            return previewNode;
+        }
+        setViewObject(_node, _graphIllumination = false) {
+            this.previewNode.removeAllChildren();
+            this.previewNode.addChild(_node);
             if (_graphIllumination) // otherwise, light is always on!
                 this.illuminateGraph();
             this.dom.appendChild(this.viewport.getCanvas());
-            return graph;
+        }
+        illuminateGraph() {
+            let nodeLight = this.viewport.getBranch()?.getChildrenByName("PreviewIllumination")[0];
+            if (nodeLight) {
+                nodeLight.activate(this.contextMenu.getMenuItemById(CONTEXTMENU.ILLUMINATE).checked);
+                this.redraw();
+            }
         }
         createFilePreview(_entry) {
             let mime = _entry.getMimeType();

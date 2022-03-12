@@ -260,7 +260,6 @@ declare namespace Fudge {
     import ƒUi = FudgeUserInterface;
     class ControllerComponent extends ƒUi.Controller {
         constructor(_mutable: ƒ.Mutable, _domElement: HTMLElement);
-        getMutatorStripped: (_mutator?: ƒ.Mutator, _types?: ƒ.Mutator) => ƒ.Mutator;
         protected mutateOnInput: (_event: Event) => Promise<void>;
         private hndKey;
         private hndDragOver;
@@ -299,7 +298,7 @@ declare namespace Fudge {
         getHead(): ƒui.TABLE[];
         getLabel(_object: ScriptInfo): string;
         rename(_object: ScriptInfo, _new: string): boolean;
-        delete(_focussed: ScriptInfo[]): ScriptInfo[];
+        delete(_focussed: ScriptInfo[]): Promise<ScriptInfo[]>;
         copy(_originals: ScriptInfo[]): Promise<ScriptInfo[]>;
         sort(_data: ScriptInfo[], _key: string, _direction: number): void;
     }
@@ -573,14 +572,16 @@ declare namespace Fudge {
         private resource;
         private viewport;
         private cmrOrbit;
+        private previewNode;
         constructor(_container: ComponentContainer, _state: JsonValue | undefined);
         private static createStandardMaterial;
         private static createStandardMesh;
         protected getContextMenu(_callback: ContextMenuCallback): Electron.Menu;
         protected contextMenuCallback(_item: Electron.MenuItem, _window: Electron.BrowserWindow, _event: Electron.Event): void;
-        private illuminateGraph;
         private fillContent;
         private createStandardGraph;
+        private setViewObject;
+        private illuminateGraph;
         private createFilePreview;
         private createTextPreview;
         private createImagePreview;

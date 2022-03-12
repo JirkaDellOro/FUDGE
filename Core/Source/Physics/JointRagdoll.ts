@@ -222,8 +222,10 @@ namespace FudgeCore {
     }
 
     public async mutate(_mutator: Mutator): Promise<void> {
-      this.axisFirst = new Vector3(...<number[]>(Object.values(_mutator.axisFirst)));
-      this.axisSecond = new Vector3(...<number[]>(Object.values(_mutator.axisSecond)));
+      if (typeof (_mutator.axisFirst) !== "undefined")
+        this.axisFirst = new Vector3(...<number[]>(Object.values(_mutator.axisFirst)));
+      if (typeof (_mutator.axisSecond) !== "undefined")
+        this.axisSecond = new Vector3(...<number[]>(Object.values(_mutator.axisSecond)));
       delete _mutator.axisFirst;
       delete _mutator.axisSecond;
       this.#mutate(_mutator);
@@ -256,16 +258,13 @@ namespace FudgeCore {
     }
 
     #mutate = (_mutator: Mutator): void => {
-      this.#maxAngleFirst = _mutator.maxAngleFirst;
-      this.#maxAngleSecond = _mutator.maxAngleSecond;
-      this.springDampingTwist = _mutator.springDampingTwist;
-      this.springFrequencyTwist = _mutator.springFrequencyTwist;
-      this.springDampingSwing = _mutator.springDampingSwing;
-      this.springFrequencySwing = _mutator.springFrequencySwing;
-      this.maxMotorTwist = _mutator.maxMotorTwist;
-      this.minMotorTwist = _mutator.minMotorTwist;
-      this.motorSpeedTwist = _mutator.motorSpeedTwist;
-      this.motorTorqueTwist = _mutator.motorTorqueTwist;
+      if (typeof (_mutator.maxAngleFirst) !== "undefined")
+        this.#maxAngleFirst = _mutator.maxAngleFirst;
+      if (typeof (_mutator.maxAngleSecond) !== "undefined")
+        this.#maxAngleSecond = _mutator.maxAngleSecond;
+      this.mutateBase(_mutator, [
+        "springDampingTwist", "springFrequencyTwist", "springDampingSwing", "springFrequencySwing", "maxMotorTwist", "minMotorTwist", "motorSpeedTwist", "motorTorqueTwist"
+      ]);
     }
     //#endregion
 

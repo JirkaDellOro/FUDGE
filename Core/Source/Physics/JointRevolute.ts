@@ -91,7 +91,8 @@ namespace FudgeCore {
     }
 
     public async mutate(_mutator: Mutator): Promise<void> {
-      this.motorTorque = _mutator.motorTorque;
+      if (typeof (_mutator.motorTorque) !== "undefined")
+        this.motorTorque = _mutator.motorTorque;
       delete _mutator.motorTorque;
       super.mutate(_mutator);
     }

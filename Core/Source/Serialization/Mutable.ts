@@ -55,6 +55,17 @@ namespace FudgeCore {
     //   });
     // }
 
+    public static getMutatorFromPath(_mutator: Mutator, _path: string[]): Mutator {
+      let key: string = _path[0];
+      let mutator: Mutator = {};
+      if (!_mutator[key]) // if the path deviates from mutator structure, return the mutator
+        return _mutator;
+      mutator[key] = _mutator[key];
+      if (_path.length > 1)
+        mutator[key] = Mutable.getMutatorFromPath(mutator[key], _path.slice(1, _path.length));
+      return mutator;
+    }
+
     /**
      * Retrieves the type of this mutable subclass as the name of the runtime class
      * @returns The type of the mutable
@@ -154,14 +165,29 @@ namespace FudgeCore {
     }
     /**
      * Updates the attribute values of the instance according to the state of the mutator. Must be protected...!
-     * @param _mutator
+     * Uses mutateBase but can be overwritten in subclasses
      */
-    public async mutate(_mutator: Mutator): Promise<void> {
-      for (let attribute in _mutator) {
+    public async mutate(_mutator: Mutator, _selection?: string[]): Promise<void> {
+      await this.mutateBase(_mutator, _selection);
+    }
+
+    /**
+     * Base method for mutation, always available to subclasses
+     */
+    protected async mutateBase(_mutator: Mutator, _selection?: string[]): Promise<void> {
+      let mutator: Mutator = {};
+      if (!_selection)
+        mutator = _mutator;
+      else
+        for (let attribute of _selection) // reduce the mutator to the selection
+          if (typeof (_mutator[attribute]) !== "undefined")
+            mutator[attribute] = _mutator[attribute];
+
+      for (let attribute in mutator) {
         if (!Reflect.has(this, attribute))
           continue;
         let mutant: Object = Reflect.get(this, attribute);
-        let value: Mutator = <Mutator>_mutator[attribute];
+        let value: Mutator = <Mutator>mutator[attribute];
         if (mutant instanceof MutableArray || mutant instanceof Mutable)
           await mutant.mutate(value);
         else

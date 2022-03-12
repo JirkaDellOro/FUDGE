@@ -222,6 +222,7 @@ declare namespace FudgeCore {
         /**
          * Decorator allows to attach {@link Mutable} functionality to existing classes.
          */
+        static getMutatorFromPath(_mutator: Mutator, _path: string[]): Mutator;
         /**
          * Retrieves the type of this mutable subclass as the name of the runtime class
          * @returns The type of the mutable
@@ -259,9 +260,13 @@ declare namespace FudgeCore {
         updateMutator(_mutator: Mutator): void;
         /**
          * Updates the attribute values of the instance according to the state of the mutator. Must be protected...!
-         * @param _mutator
+         * Uses mutateBase but can be overwritten in subclasses
          */
-        mutate(_mutator: Mutator): Promise<void>;
+        mutate(_mutator: Mutator, _selection?: string[]): Promise<void>;
+        /**
+         * Base method for mutation, always available to subclasses
+         */
+        protected mutateBase(_mutator: Mutator, _selection?: string[]): Promise<void>;
         /**
          * Reduces the attributes of the general mutator according to desired options for mutation. To be implemented in subclasses
          * @param _mutator
@@ -1800,7 +1805,6 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutator(): Mutator;
-        mutate(_mutator: Mutator): Promise<void>;
         protected reduceMutator(_mutator: Mutator): void;
         private hndAudioReady;
         private hndAudioEnded;
@@ -2722,7 +2726,6 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutator(): Mutator;
-        mutate(_mutator: Mutator): Promise<void>;
         protected reduceMutator(_mutator: Mutator): void;
     }
 }

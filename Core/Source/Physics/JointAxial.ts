@@ -124,7 +124,8 @@ namespace FudgeCore {
     }
 
     public async mutate(_mutator: Mutator): Promise<void> {
-      this.axis = new Vector3(...<number[]>(Object.values(_mutator.axis)));
+      if (typeof (_mutator.axis) !== "undefined")
+        this.axis = new Vector3(...<number[]>(Object.values(_mutator.axis)));
       delete _mutator.axis;
       this.#mutate(_mutator);
       this.deleteFromMutator(_mutator, this.#getMutator());
@@ -149,11 +150,7 @@ namespace FudgeCore {
       return mutator;
     }
     #mutate = (_mutator: Mutator): void => {
-      this.springDamping = _mutator.springDamping;
-      this.springFrequency = _mutator.springFrequency;
-      this.maxMotor = _mutator.maxMotor;
-      this.minMotor = _mutator.minMotor;
-      this.motorSpeed = _mutator.motorSpeed;
+      this.mutateBase(_mutator, ["springDamping", "springFrequency", "maxMotor", "minMotor", "motorSpeed"]);
     }
 
     //#endregion

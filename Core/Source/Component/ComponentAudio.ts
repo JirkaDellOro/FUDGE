@@ -208,11 +208,11 @@ namespace FudgeCore {
       return mutator;
     }
 
-    public async mutate(_mutator: Mutator): Promise<void> {
-      await super.mutate(_mutator);
-      this.volume = _mutator.volume;
-      this.loop = _mutator.loop;
-    }
+    // public async mutate(_mutator: Mutator): Promise<void> {
+    //   await super.mutate(_mutator);
+    //   // this.volume = _mutator.volume;
+    //   // this.loop = _mutator.loop;
+    // }
 
     protected reduceMutator(_mutator: Mutator): void {
       super.reduceMutator(_mutator);
