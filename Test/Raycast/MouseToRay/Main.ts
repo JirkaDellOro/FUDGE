@@ -82,7 +82,7 @@ namespace MouseToRay {
     root.addChild(new ƒAid.NodeCoordinateSystem());
     ƒAid.addStandardLightComponents(root);
 
-    let cube: ƒAid.Node = new ƒAid.Node("Cube", ƒ.Matrix4x4.IDENTITY(), new ƒ.Material("Red", ƒ.ShaderFlat, new ƒ.CoatColored(ƒ.Color.CSS("RED"))), new ƒ.MeshCube());
+    let cube: ƒAid.Node = new ƒAid.Node("Cube", ƒ.Matrix4x4.IDENTITY(), new ƒ.Material("Red", ƒ.ShaderFlat, new ƒ.CoatRemissive(ƒ.Color.CSS("RED"))), new ƒ.MeshCube());
     root.addChild(cube);
   }
 }
