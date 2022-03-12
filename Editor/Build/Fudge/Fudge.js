@@ -3109,12 +3109,14 @@ var Fudge;
                     previewObject.addComponent(new ƒ.ComponentMesh(this.resource));
                     previewObject.addComponent(new ƒ.ComponentMaterial(ViewPreview.mtrStandard));
                     this.setViewObject(previewObject);
+                    this.resetCamera();
                     this.redraw();
                     break;
                 case "Material":
                     previewObject.addComponent(new ƒ.ComponentMesh(ViewPreview.meshStandard));
                     previewObject.addComponent(new ƒ.ComponentMaterial(this.resource));
                     this.setViewObject(previewObject);
+                    this.resetCamera();
                     this.redraw();
                     break;
                 case "Graph":
@@ -3201,9 +3203,9 @@ var Fudge;
                 //   break;
                 case "change" /* CHANGE */:
                 case Fudge.EVENT_EDITOR.UPDATE:
-                case "mutate" /* MUTATE */:
-                    if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture || this.resource instanceof ƒ.Material)
+                    if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture /*  || this.resource instanceof ƒ.Material */)
                         this.fillContent();
+                case "mutate" /* MUTATE */:
                     this.redraw();
                     break;
                 default:
@@ -3230,7 +3232,6 @@ var Fudge;
         }
         redraw = () => {
             try {
-                this.resetCamera();
                 this.viewport.draw();
             }
             catch (_error) {

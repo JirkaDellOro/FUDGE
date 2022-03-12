@@ -109,12 +109,14 @@ namespace Fudge {
           previewObject.addComponent(new ƒ.ComponentMesh(<ƒ.Mesh>this.resource));
           previewObject.addComponent(new ƒ.ComponentMaterial(ViewPreview.mtrStandard));
           this.setViewObject(previewObject);
+          this.resetCamera();
           this.redraw();
           break;
         case "Material":
           previewObject.addComponent(new ƒ.ComponentMesh(ViewPreview.meshStandard));
           previewObject.addComponent(new ƒ.ComponentMaterial(<ƒ.Material>this.resource));
           this.setViewObject(previewObject);
+          this.resetCamera();
           this.redraw();
           break;
         case "Graph":
@@ -210,7 +212,7 @@ namespace Fudge {
         //   break;
         case ƒUi.EVENT.CHANGE:
         case EVENT_EDITOR.UPDATE:
-          if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture || this.resource instanceof ƒ.Material)
+          if (this.resource instanceof ƒ.Audio || this.resource instanceof ƒ.Texture /*  || this.resource instanceof ƒ.Material */)
             this.fillContent();
         case ƒUi.EVENT.MUTATE:
           this.redraw();
@@ -243,7 +245,6 @@ namespace Fudge {
 
     private redraw = () => {
       try {
-        this.resetCamera();
         this.viewport.draw();
       } catch (_error: unknown) {
         //nop
