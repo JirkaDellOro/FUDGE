@@ -46,7 +46,7 @@ namespace FudgeCore {
      */
     public static pickViewport(_viewport: Viewport, _posClient: Vector2): Pick[] {
       let posProjection: Vector2 = _viewport.pointClientToProjection(_posClient);
-      let nodes: Node[] = Array.from(_viewport.getBranch().getIterator());
+      let nodes: Node[] = Array.from(_viewport.getBranch().getIterator(true));
       let picks: Pick[] = Picker.pickCamera(nodes, _viewport.camera, posProjection);
       return picks;
     }
