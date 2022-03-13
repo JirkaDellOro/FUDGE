@@ -357,7 +357,7 @@ namespace FudgeCore {
     public initialize(): void {
       if (!this.node) // delay initialization until this rigidbody is attached to a node
         return;
-      switch (this.initialization) {
+      switch (Number(this.initialization)) {
         case BODY_INIT.TO_NODE:
           this.mtxPivot = Matrix4x4.IDENTITY();
           break;
@@ -653,11 +653,15 @@ namespace FudgeCore {
 
     /** Change properties by an associative array */
     public async mutate(_mutator: Mutator): Promise<void> {
-      if (_mutator.typeBody !== undefined)
+      if (_mutator.typeBody != undefined)
         _mutator.typeBody = parseInt(_mutator.typeBody);
-      if (_mutator.typeCollider !== undefined)
+      if (_mutator.typeCollider != undefined)
         _mutator.typeCollider = parseInt(_mutator.typeCollider);
+      if (_mutator.initialization != undefined)
+        _mutator.initialization = parseInt(_mutator.initialization);
       super.mutate(_mutator);
+      if (_mutator.initialization != undefined)
+        this.initialize();
       // TODO: see if this alternative should be, at least partially, done with mutateSelection
       // let callIfExist: Function = (_key: string, _setter: Function) => {
       //   if (_mutator[_key])
