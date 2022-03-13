@@ -660,7 +660,7 @@ namespace FudgeCore {
       if (_mutator.initialization != undefined)
         _mutator.initialization = parseInt(_mutator.initialization);
       super.mutate(_mutator);
-      if (_mutator.initialization != undefined)
+      if (_mutator.initialization != undefined && this.isActive)
         this.initialize();
       // TODO: see if this alternative should be, at least partially, done with mutateSelection
       // let callIfExist: Function = (_key: string, _setter: Function) => {
