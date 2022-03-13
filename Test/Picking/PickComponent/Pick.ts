@@ -11,9 +11,7 @@ namespace PickRadius {
     root.replaceChild(zoo, radii);
     root.appendChild(zoo);
 
-    root.addEventListener("mousemove", (_event: MouseEvent) =>
-      console.log("target: " + (<ƒ.Node>_event.target).name, "currentTarget: " + (<ƒ.Node>_event.currentTarget).name)
-    );
+    root.addEventListener("mousemove", hit);
 
     let meshShpere: ƒ.MeshSphere = new ƒ.MeshSphere("BoundingSphere", 40, 40);
     let material: ƒ.Material = new ƒ.Material("Transparent", ƒ.ShaderLit, new ƒ.CoatColored(ƒ.Color.CSS("white", 0.5)));
@@ -43,8 +41,16 @@ namespace PickRadius {
     viewport.getCanvas().addEventListener("mousemove", pick);
 
     function pick(_event: PointerEvent): void {
+      document.querySelector("div").innerHTML = "";
       viewport.draw();
       viewport.dispatchPointerEvent(_event);
+    }
+
+    function hit(_event: PointerEvent): void {
+      let node: ƒ.Node = (<ƒ.Node>_event.target);
+      let cmpPick: ƒ.ComponentPick = node.getComponent(ƒ.ComponentPick);
+
+      document.querySelector("div").innerHTML += cmpPick.pick + ":" + node.name + "<br/>";
     }
   }
 }

@@ -10,7 +10,7 @@ var PickRadius;
         let radii = new ƒ.Node("Radii");
         root.replaceChild(zoo, radii);
         root.appendChild(zoo);
-        root.addEventListener("mousemove", (_event) => console.log("target: " + _event.target.name, "currentTarget: " + _event.currentTarget.name));
+        root.addEventListener("mousemove", hit);
         let meshShpere = new ƒ.MeshSphere("BoundingSphere", 40, 40);
         let material = new ƒ.Material("Transparent", ƒ.ShaderLit, new ƒ.CoatColored(ƒ.Color.CSS("white", 0.5)));
         for (let child of zoo.getChildren()) {
@@ -28,8 +28,14 @@ var PickRadius;
         ƒ.Debug.branch(root);
         viewport.getCanvas().addEventListener("mousemove", pick);
         function pick(_event) {
+            document.querySelector("div").innerHTML = "";
             viewport.draw();
             viewport.dispatchPointerEvent(_event);
+        }
+        function hit(_event) {
+            let node = _event.target;
+            let cmpPick = node.getComponent(ƒ.ComponentPick);
+            document.querySelector("div").innerHTML += cmpPick.pick + ":" + node.name + "<br/>";
         }
     }
 })(PickRadius || (PickRadius = {}));

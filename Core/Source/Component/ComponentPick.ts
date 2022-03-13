@@ -17,13 +17,19 @@ namespace FudgeCore {
 
     public pickAndDispatch(_ray: Ray, _event: PointerEvent): void {
       let cmpMesh: ComponentMesh = this.node.getComponent(ComponentMesh);
+      let position: Vector3 = cmpMesh ? cmpMesh.mtxWorld.translation : this.node.mtxWorld.translation;
+
       switch (this.pick) {
         case PICK.RADIUS:
           // TODO: should only be node.radius. Adjustment needed, if mesh was transformed...
-          let position: Vector3 = cmpMesh ? cmpMesh.mtxWorld.translation : this.node.mtxWorld.translation;
           if (_ray.getDistance(position).magnitude < this.node.radius) {
             this.node.dispatchEvent(_event);
           }
+          break;
+        case PICK.PHYSICS:
+          let hitInfo: RayHitInfo = Physics.raycast(_ray.origin, _ray.direction, Vector3.DIFFERENCE(position, _ray.origin).magnitudeSquared);
+          if (hitInfo.hit)
+            this.node.dispatchEvent(_event);
           break;
       }
     }

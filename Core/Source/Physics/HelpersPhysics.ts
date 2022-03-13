@@ -93,11 +93,11 @@ namespace FudgeCore {
   export class RayHitInfo {
     public hit: boolean;
     public hitDistance: number;
-    public hitPoint: Vector3;
+    public hitPoint: Vector3 = Vector3.ZERO();
     public rigidbodyComponent: ComponentRigidbody;
-    public hitNormal: Vector3;
-    public rayOrigin: Vector3;
-    public rayEnd: Vector3;
+    public hitNormal: Vector3 = Vector3.ZERO();
+    public rayOrigin: Vector3 = Vector3.ZERO();
+    public rayEnd: Vector3 = Vector3.ZERO();
 
     constructor() {
       this.recycle();
@@ -106,11 +106,11 @@ namespace FudgeCore {
     public recycle(): void {
       this.hit = false;
       this.hitDistance = 0;
-      this.hitPoint = Vector3.ZERO();
+      this.hitPoint.recycle();
       this.rigidbodyComponent = null;
-      this.hitNormal = Vector3.ZERO();
-      this.rayOrigin = Vector3.ZERO();
-      this.rayEnd = Vector3.ZERO();
+      this.hitNormal.recycle();
+      this.rayOrigin.recycle();
+      this.rayEnd.recycle();
     }
   }
 
