@@ -27,7 +27,7 @@ namespace FudgeCore {
     public adjustingFrames: boolean = true;
     public adjustingCamera: boolean = true;
     public physicsDebugMode: PHYSICS_DEBUGMODE = PHYSICS_DEBUGMODE.NONE;
-    
+
     public componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
 
     #branch: Node = null; // The to render with all its descendants.
@@ -162,14 +162,22 @@ namespace FudgeCore {
     }
 
     public dispatchPointerEvent(_event: PointerEvent): void {
-      let ray: Ray = this.getRayFromClient(new Vector2(_event.clientX, _event.clientY));
-      for (let cmpPick of this.componentsPick) {
-        let cmpMesh: ComponentMesh = cmpPick.node.getComponent(ComponentMesh);
-        // TODO: should only be node.radius. Adjustment needed, if mesh was transformed...
-        let position: Vector3 = cmpMesh ? cmpMesh.mtxWorld.translation : cmpPick.node.mtxWorld.translation;
-        if (ray.getDistance(position).magnitude < cmpPick.node.radius) {
-          cmpPick.node.dispatchEvent(_event);
-        }
+      let posClient: Vector2 = new Vector2(_event.clientX, _event.clientY);
+      let ray: Ray = this.getRayFromClient(posClient);
+      // let cameraPicks: RecycableArray<Node> = Recycler.get(RecycableArray); //TODO: think about optimization later
+      let cameraPicks: Node[] = [];
+      let otherPicks: ComponentPick[] = [];
+      for (let cmpPick of this.componentsPick)
+        cmpPick.pick == PICK.CAMERA ? cameraPicks.push(cmpPick.node) : otherPicks.push(cmpPick);
+
+      if (cameraPicks.length) {
+        let picks: Pick[] = Picker.pickCamera(cameraPicks, this.camera, this.pointClientToProjection(posClient));
+        for (let pick of picks)
+          pick.node.dispatchEvent(_event);
+      }
+
+      for (let cmpPick of otherPicks) {
+        cmpPick.pickAndDispatch(ray, _event);
       }
     }
 

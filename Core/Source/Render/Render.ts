@@ -127,13 +127,13 @@ namespace FudgeCore {
      * Used with a {@link Picker}-camera, this method renders one pixel with picking information 
      * for each node in the line of sight and return that as an unsorted {@link Pick}-array
      */
-    public static pickBranch(_branch: Node, _cmpCamera: ComponentCamera): Pick[] { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
+    public static pickBranch(_nodes: Node[], _cmpCamera: ComponentCamera): Pick[] { // TODO: see if third parameter _world?: Matrix4x4 would be usefull
       Render.ƒpicked = [];
-      let size: number = Math.ceil(Math.sqrt(_branch.nNodesInBranch));
+      let size: number = Math.ceil(Math.sqrt(_nodes.length));
       Render.createPickTexture(size);
       Render.setBlendMode(BLEND.OPAQUE);
 
-      for (let node of _branch.getIterator(true)) {
+      for (let node of _nodes) {
         let cmpMesh: ComponentMesh = node.getComponent(ComponentMesh);
         let cmpMaterial: ComponentMaterial = node.getComponent(ComponentMaterial);
         if (cmpMesh && cmpMesh.isActive && cmpMaterial && cmpMaterial.isActive) {

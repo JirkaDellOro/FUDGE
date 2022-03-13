@@ -427,6 +427,7 @@ declare namespace FudgeCore {
          * Sets the virtual length of the array to zero but keeps the entries beyond.
          */
         reset(): void;
+        recycle(): void;
         push(_entry: T): number;
         pop(): T;
         /**
@@ -484,7 +485,7 @@ declare namespace FudgeCore {
          * If the depot for that type is empty it returns a new object of the requested type
          * @param _T The class identifier of the desired object
          */
-        static get<T extends Recycable>(_T: new () => T): T;
+        static get<T extends Recycable | RecycableArray<T>>(_T: new () => T): T;
         /**
          * Returns a reference to an object of the requested type in the depot, but does not remove it there.
          * If no object of the requested type was in the depot, one is created, stored and borrowed.
@@ -2043,6 +2044,11 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    enum PICK {
+        RADIUS = "radius",
+        CAMERA = "camera",
+        PHYSICS = "physics"
+    }
     /**
      * Base class for scripts the user writes
      * @authors Jirka Dell'Oro-Friedl, HFU, 2022
@@ -2050,8 +2056,11 @@ declare namespace FudgeCore {
      */
     class ComponentPick extends Component {
         static readonly iSubclass: number;
+        pick: PICK;
+        pickAndDispatch(_ray: Ray, _event: PointerEvent): void;
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        getMutatorAttributeTypes(_mutator: Mutator): MutatorAttributeTypes;
     }
 }
 declare namespace FudgeCore {
@@ -4980,12 +4989,12 @@ declare namespace FudgeCore {
          * Takes a ray plus min and max values for the near and far planes to construct the picker-camera,
          * then renders the pick-texture and returns an unsorted {@link Pick}-array with information about the hits of the ray.
          */
-        static pickRay(_branch: Node, _ray: Ray, _min: number, _max: number): Pick[];
+        static pickRay(_nodes: Node[], _ray: Ray, _min: number, _max: number): Pick[];
         /**
          * Takes a camera and a point on its virtual normed projection plane (distance 1) to construct the picker-camera,
          * then renders the pick-texture and returns an unsorted {@link Pick}-array with information about the hits of the ray.
          */
-        static pickCamera(_branch: Node, _cmpCamera: ComponentCamera, _posProjection: Vector2): Pick[];
+        static pickCamera(_nodes: Node[], _cmpCamera: ComponentCamera, _posProjection: Vector2): Pick[];
         /**
          * Takes the camera of the given viewport and a point the client surface to construct the picker-camera,
          * then renders the pick-texture and returns an unsorted {@link Pick}-array with information about the hits of the ray.
@@ -5057,7 +5066,7 @@ declare namespace FudgeCore {
          * Used with a {@link Picker}-camera, this method renders one pixel with picking information
          * for each node in the line of sight and return that as an unsorted {@link Pick}-array
          */
-        static pickBranch(_branch: Node, _cmpCamera: ComponentCamera): Pick[];
+        static pickBranch(_nodes: Node[], _cmpCamera: ComponentCamera): Pick[];
         static draw(_cmpCamera: ComponentCamera): void;
         private static drawListAlpha;
         private static drawList;

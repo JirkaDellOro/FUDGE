@@ -25,6 +25,10 @@ namespace FudgeCore {
       this.#length = 0;
     }
 
+    public recycle(): void {
+      this.reset();
+    }
+
     public push(_entry: T): number {
       this.#array[this.#length] = _entry;
       this.#length++;

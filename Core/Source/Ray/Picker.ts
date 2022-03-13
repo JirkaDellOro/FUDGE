@@ -9,13 +9,13 @@ namespace FudgeCore {
      * Takes a ray plus min and max values for the near and far planes to construct the picker-camera,
      * then renders the pick-texture and returns an unsorted {@link Pick}-array with information about the hits of the ray.
      */
-    public static pickRay(_branch: Node, _ray: Ray, _min: number, _max: number): Pick[] {
+    public static pickRay(_nodes: Node[], _ray: Ray, _min: number, _max: number): Pick[] {
       let cmpCameraPick: ComponentCamera = new ComponentCamera();
       cmpCameraPick.mtxPivot.translation = _ray.origin;
       cmpCameraPick.mtxPivot.lookAt(_ray.direction);
       cmpCameraPick.projectCentral(1, 0.001, FIELD_OF_VIEW.DIAGONAL, _min, _max);
 
-      let picks: Pick[] = Render.pickBranch(_branch, cmpCameraPick);
+      let picks: Pick[] = Render.pickBranch(_nodes, cmpCameraPick);
       return picks;
     }
 
@@ -23,7 +23,7 @@ namespace FudgeCore {
      * Takes a camera and a point on its virtual normed projection plane (distance 1) to construct the picker-camera,
      * then renders the pick-texture and returns an unsorted {@link Pick}-array with information about the hits of the ray.
      */
-    public static pickCamera(_branch: Node, _cmpCamera: ComponentCamera, _posProjection: Vector2): Pick[] {
+    public static pickCamera(_nodes: Node[], _cmpCamera: ComponentCamera, _posProjection: Vector2): Pick[] {
       let ray: Ray = new Ray(new Vector3(-_posProjection.x, _posProjection.y, 1));
       let length: number = ray.direction.magnitude;
 
@@ -36,7 +36,7 @@ namespace FudgeCore {
         ray.transform(_cmpCamera.mtxPivot);
 
 
-      let picks: Pick[] = Picker.pickRay(_branch, ray, length * _cmpCamera.getNear(), length * _cmpCamera.getFar());
+      let picks: Pick[] = Picker.pickRay(_nodes, ray, length * _cmpCamera.getNear(), length * _cmpCamera.getFar());
       return picks;
     }
 
@@ -46,7 +46,8 @@ namespace FudgeCore {
      */
     public static pickViewport(_viewport: Viewport, _posClient: Vector2): Pick[] {
       let posProjection: Vector2 = _viewport.pointClientToProjection(_posClient);
-      let picks: Pick[] = Picker.pickCamera(_viewport.getBranch(), _viewport.camera, posProjection);
+      let nodes: Node[] = Array.from(_viewport.getBranch().getIterator());
+      let picks: Pick[] = Picker.pickCamera(nodes, _viewport.camera, posProjection);
       return picks;
     }
   }
