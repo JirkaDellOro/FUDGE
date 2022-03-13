@@ -417,6 +417,8 @@ declare namespace FudgeCore {
 declare namespace FudgeCore {
     /**
      * Wraps a regular Javascript Array and offers very limited functionality geared solely towards avoiding garbage colletion.
+     * @author Jirka Dell'Oro-Friedl, HFU, 2021
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Recycler
      */
     class RecycableArray<T> {
         #private;
@@ -471,7 +473,9 @@ declare namespace FudgeCore {
     }
     /**
      * Keeps a depot of objects that have been marked for reuse, sorted by type.
-     * Using {@link Recycler} reduces load on the carbage collector and thus supports smooth performance
+     * Using {@link Recycler} reduces load on the carbage collector and thus supports smooth performance.
+     * @author Jirka Dell'Oro-Friedl, HFU, 2021
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Recycler
      */
     abstract class Recycler {
         private static depot;
@@ -2036,6 +2040,18 @@ declare namespace FudgeCore {
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
         getMutatorForUserInterface(): MutatorForUserInterface;
+    }
+}
+declare namespace FudgeCore {
+    /**
+     * Base class for scripts the user writes
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2022
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Component
+     */
+    class ComponentPick extends Component {
+        static readonly iSubclass: number;
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
     }
 }
 declare namespace FudgeCore {
@@ -5027,6 +5043,7 @@ declare namespace FudgeCore {
         static rectClip: Rectangle;
         static pickBuffer: Int32Array;
         static nodesPhysics: RecycableArray<Node>;
+        static componentsPick: RecycableArray<ComponentPick>;
         private static nodesSimple;
         private static nodesAlpha;
         private static timestampUpdate;
@@ -5116,7 +5133,8 @@ declare namespace FudgeCore {
      * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
      * through a series of {@link Framing} objects. The stages involved are in order of rendering
      * {@link Render}.viewport -> {@link Viewport}.source -> {@link Viewport}.destination -> DOM-Canvas -> Client(CSS)
-     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+     * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019-2022
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Viewport
      */
     class Viewport extends EventTargetƒ {
         #private;
@@ -5132,6 +5150,7 @@ declare namespace FudgeCore {
         adjustingFrames: boolean;
         adjustingCamera: boolean;
         physicsDebugMode: PHYSICS_DEBUGMODE;
+        componentsPick: RecycableArray<ComponentPick>;
         /**
          * Returns true if this viewport currently has focus and thus receives keyboard events
          */
@@ -5178,6 +5197,7 @@ declare namespace FudgeCore {
          * Calculate the cascade of transforms in this branch and store the results as mtxWorld in the {@link Node}s and {@link ComponentMesh}es
          */
         calculateTransforms(): void;
+        dispatchPointerEvent(_event: PointerEvent): void;
         /**
          * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas
          */

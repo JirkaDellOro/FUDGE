@@ -1,6 +1,8 @@
 namespace FudgeCore {
   /**
    * Wraps a regular Javascript Array and offers very limited functionality geared solely towards avoiding garbage colletion.
+   * @author Jirka Dell'Oro-Friedl, HFU, 2021
+   * @link https://github.com/JirkaDellOro/FUDGE/wiki/Recycler
    */
   export class RecycableArray<T> {
     #length: number = 0;

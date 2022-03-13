@@ -12,6 +12,7 @@ namespace FudgeCore {
     public static rectClip: Rectangle = new Rectangle(-1, 1, 2, -2);
     public static pickBuffer: Int32Array;
     public static nodesPhysics: RecycableArray<Node> = new RecycableArray();
+    public static componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
     private static nodesSimple: RecycableArray<Node> = new RecycableArray();
     private static nodesAlpha: RecycableArray<Node> = new RecycableArray();
     private static timestampUpdate: number;
@@ -32,6 +33,7 @@ namespace FudgeCore {
         Render.nodesSimple.reset();
         Render.nodesAlpha.reset();
         Render.nodesPhysics.reset();
+        Render.componentsPick.reset();
         Render.dispatchEvent(new Event(EVENT.RENDER_PREPARE_START));
       }
 
@@ -58,6 +60,12 @@ namespace FudgeCore {
         Render.nodesPhysics.push(_branch); // add this node to physics list
         if (!_options?.ignorePhysics)
           this.transformByPhysics(_branch, cmpRigidbody);
+      }
+
+      
+      let cmpPick: ComponentPick = _branch.getComponent(ComponentPick);
+      if (cmpPick && cmpPick.isActive) { 
+        Render.componentsPick.push(cmpPick); // add this component to pick list
       }
 
 

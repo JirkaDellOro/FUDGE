@@ -4,7 +4,8 @@ namespace FudgeCore {
    * and the propagation of the rendered image from the offscreen renderbuffer to the target canvas
    * through a series of {@link Framing} objects. The stages involved are in order of rendering
    * {@link Render}.viewport -> {@link Viewport}.source -> {@link Viewport}.destination -> DOM-Canvas -> Client(CSS)
-   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019
+   * @authors Jascha Karagöl, HFU, 2019 | Jirka Dell'Oro-Friedl, HFU, 2019-2022
+   * @link https://github.com/JirkaDellOro/FUDGE/wiki/Viewport
    */
   export class Viewport extends EventTargetƒ {
     private static focus: Viewport;
@@ -26,7 +27,8 @@ namespace FudgeCore {
     public adjustingFrames: boolean = true;
     public adjustingCamera: boolean = true;
     public physicsDebugMode: PHYSICS_DEBUGMODE = PHYSICS_DEBUGMODE.NONE;
-
+    
+    public componentsPick: RecycableArray<ComponentPick> = new RecycableArray();
 
     #branch: Node = null; // The to render with all its descendants.
     #crc2: CanvasRenderingContext2D = null;
@@ -156,8 +158,20 @@ namespace FudgeCore {
       if (this.#branch.getParent())
         mtxRoot = this.#branch.getParent().mtxWorld;
       Render.prepare(this.#branch, null, mtxRoot);
+      this.componentsPick = Render.componentsPick;
     }
 
+    public dispatchPointerEvent(_event: PointerEvent): void {
+      let ray: Ray = this.getRayFromClient(new Vector2(_event.clientX, _event.clientY));
+      for (let cmpPick of this.componentsPick) {
+        let cmpMesh: ComponentMesh = cmpPick.node.getComponent(ComponentMesh);
+        // TODO: should only be node.radius. Adjustment needed, if mesh was transformed...
+        let position: Vector3 = cmpMesh ? cmpMesh.mtxWorld.translation : cmpPick.node.mtxWorld.translation;
+        if (ray.getDistance(position).magnitude < cmpPick.node.radius) {
+          cmpPick.node.dispatchEvent(_event);
+        }
+      }
+    }
 
     /**
      * Adjust all frames involved in the rendering process from the display area in the client up to the renderer canvas
