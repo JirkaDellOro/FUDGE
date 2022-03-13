@@ -74,9 +74,9 @@ namespace FudgeCore {
     }
 
     public async mutate(_mutator: Mutator): Promise<void> {
+      super.mutate(_mutator);
       if (typeof(_mutator.active) !== "undefined")
         this.activate(_mutator.active);
-      super.mutate(_mutator);
     }
 
     protected reduceMutator(_mutator: Mutator): void {
