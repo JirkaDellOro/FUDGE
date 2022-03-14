@@ -57,5 +57,12 @@ namespace FudgeCore {
       this.idSource = _graph.idResource;
       this.dispatchEvent(new Event(EVENT.GRAPH_INSTANTIATED));
     }
+
+    /**
+     * Retrieve the graph this instances refers to
+     */
+    public get(): Graph {
+      return <Graph>Project.resources[this.idSource];
+    }
   }
 }

@@ -171,7 +171,7 @@ namespace FudgeCore {
     public async mutate(_mutator: Mutator, _selection: string[] = null, _dispatchMutate: boolean = true): Promise<void> {
       await this.mutateBase(_mutator, _selection);
       if (_dispatchMutate)
-        this.dispatchEvent(new Event(EVENT.MUTATE));
+        this.dispatchEvent(new CustomEvent(EVENT.MUTATE, {detail: {mutator: _mutator}}));
     }
 
     /**

@@ -129,7 +129,7 @@
               {
                 "ƒ.Node": {
                   "name": "Box",
-                  "active": false,
+                  "active": true,
                   "components": {
                     "ComponentMesh": [
                       {
@@ -295,7 +295,7 @@
         {
           "ƒ.GraphInstance": {
             "name": "Pyramid",
-            "active": false,
+            "active": true,
             "components": {
               "ComponentMesh": [
                 {
@@ -382,6 +382,13 @@
                         "active": true
                       }
                     }
+                  }
+                }
+              ],
+              "ComponentSyncGraph": [
+                {
+                  "ƒ.ComponentSyncGraph": {
+                    "active": true
                   }
                 }
               ]

@@ -393,6 +393,7 @@ declare namespace FudgeCore {
         static readonly subclasses: typeof Component[];
         protected singleton: boolean;
         protected active: boolean;
+        constructor();
         protected static registerSubclass(_subclass: typeof Component): number;
         get isActive(): boolean;
         /**
@@ -2087,6 +2088,8 @@ declare namespace FudgeCore {
         constructor();
         serialize(): Serialization;
         deserialize(_serialization: Serialization): Promise<Serializable>;
+        private hndEvent;
+        private hndMutation;
     }
 }
 declare namespace FudgeCore {
@@ -2634,6 +2637,10 @@ declare namespace FudgeCore {
          * Set this node to be a recreation of the {@link Graph} given
          */
         set(_graph: Graph): Promise<void>;
+        /**
+         * Retrieve the graph this instances refers to
+         */
+        get(): Graph;
     }
 }
 declare namespace FudgeCore {

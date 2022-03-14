@@ -246,6 +246,8 @@ namespace FudgeCore {
           this.addEventListener(EVENT.COMPONENT_DEACTIVATE, this.removeRigidbodyFromWorld);
           // this.node.addEventListener(EVENT.NODE_ACTIVATE, this.addRigidbodyToWorld, true); // use capture to react to broadcast!
           this.node.addEventListener(EVENT.NODE_DEACTIVATE, this.removeRigidbodyFromWorld, true);
+          if (!this.node.cmpTransform)
+            Debug.warn(`ComponentRigidbody attached to node missing ComponentTransform`, this.node);
           break;
         case EVENT.COMPONENT_REMOVE:
           // this.removeEventListener(EVENT.COMPONENT_ADD, this.addRigidbodyToWorld);
@@ -254,11 +256,10 @@ namespace FudgeCore {
           this.node.removeEventListener(EVENT.NODE_DEACTIVATE, this.removeRigidbodyFromWorld, true);
           this.removeRigidbodyFromWorld();
           break;
-        // case EVENT.NODE_DESERIALIZED:
-        //   // if deserialized the node is now fully reconstructed and access to all its components and children is possible
-        //   this.node.addEventListener(EVENT.NODE_ACTIVATE, this.addRigidbodyToWorld);
-        //   this.node.addEventListener(EVENT.NODE_DEACTIVATE, this.removeRigidbodyFromWorld);
-        //   break;
+        case EVENT.NODE_DESERIALIZED:
+          if (!this.node.cmpTransform)
+            Debug.error(`ComponentRigidbody attached to node missing ComponentTransform`, this.node);
+          break;
       }
     }
 

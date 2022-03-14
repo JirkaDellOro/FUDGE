@@ -18,7 +18,19 @@ namespace FudgeCore {
     protected singleton: boolean = true;
     protected active: boolean = true;
 
+    public constructor() {
+      super();
+      this.addEventListener(EVENT.MUTATE, (_event: CustomEvent) => {
+        if (this.#node) {
+          // TODO: find the number of the component in the array if not singleton
+          _event.detail.component = this;
+          this.#node.dispatchEvent(_event);
+        }
+      });
+    }
+
     protected static registerSubclass(_subclass: typeof Component): number { return Component.subclasses.push(_subclass) - 1; }
+
 
     public get isActive(): boolean {
       return this.active;
@@ -75,7 +87,7 @@ namespace FudgeCore {
 
     public async mutate(_mutator: Mutator): Promise<void> {
       super.mutate(_mutator);
-      if (typeof(_mutator.active) !== "undefined")
+      if (typeof (_mutator.active) !== "undefined")
         this.activate(_mutator.active);
     }
 
