@@ -1,5 +1,9 @@
 ///<reference path="./../Render/RenderInjectorMeshSkin.ts"/>
 namespace FudgeCore {
+  /**
+   * Mesh influenced by a skeleton
+   * @author Matthias Roming, HFU, 2022
+   */
   @RenderInjectorMeshSkin.decorate
   export class MeshSkin extends MeshGLTF {
 

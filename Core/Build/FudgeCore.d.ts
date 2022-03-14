@@ -3727,6 +3727,10 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Mesh loaded from a GLTF-file
+     * @author Matthias Roming, HFU, 2022
+     */
     class MeshGLTF extends Mesh {
         private uriGLTF;
         serialize(): Serialization;
@@ -3888,6 +3892,10 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Mesh influenced by a skeleton
+     * @author Matthias Roming, HFU, 2022
+     */
     class MeshSkin extends MeshGLTF {
         load(_loader: GLTFLoader, _iMesh: number): Promise<MeshSkin>;
         useRenderBuffers(_shader: typeof Shader, _mtxWorld: Matrix4x4, _mtxProjection: Matrix4x4, _id?: number, _mtxBones?: Matrix4x4[]): RenderBuffers;

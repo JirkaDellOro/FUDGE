@@ -1,4 +1,8 @@
 namespace FudgeCore {
+  /**
+   * Mesh loaded from a GLTF-file
+   * @author Matthias Roming, HFU, 2022
+   */
   export class MeshGLTF extends Mesh {
 
     private uriGLTF: string;
