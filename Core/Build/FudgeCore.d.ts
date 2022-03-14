@@ -2077,6 +2077,19 @@ declare namespace FudgeCore {
     }
 }
 declare namespace FudgeCore {
+    /**
+     * Synchronizes the graph instance this component is attached to with the graph and vice versa
+     * @authors Jirka Dell'Oro-Friedl, HFU, 2022
+     * @link https://github.com/JirkaDellOro/FUDGE/wiki/Component
+     */
+    class ComponentSyncGraph extends Component {
+        static readonly iSubclass: number;
+        constructor();
+        serialize(): Serialization;
+        deserialize(_serialization: Serialization): Promise<Serializable>;
+    }
+}
+declare namespace FudgeCore {
     enum BASE {
         SELF = 0,
         PARENT = 1,
