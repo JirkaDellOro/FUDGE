@@ -46,6 +46,7 @@ namespace FudgeCore {
         node = node.getChildrenByName(path.pop().name)[0];
       let cmpMutate: Component = node.getComponent(_event.detail.component.constructor);
       cmpMutate.mutate(_event.detail.mutator);
+      graph.dispatchEvent(new Event(EVENT.MUTATE, { bubbles: true }));
     }
   }
 }

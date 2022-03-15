@@ -30,7 +30,7 @@ namespace Fudge {
       _container.on("resize", this.redraw);
       this.dom.addEventListener(ƒUi.EVENT.MUTATE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.UPDATE, this.hndEvent);
-      this.dom.addEventListener(EVENT_EDITOR.REFRESH, this.hndEvent, true);
+      this.dom.addEventListener(EVENT_EDITOR.REFRESH, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.SELECT, this.hndEvent);
       this.dom.addEventListener(ƒUi.EVENT.DELETE, this.hndEvent);
       this.dom.addEventListener(EVENT_EDITOR.SET_PROJECT, this.hndEvent, true);

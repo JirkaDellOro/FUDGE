@@ -233,7 +233,6 @@ namespace Fudge {
         this.transform2(dtl.transform, value.toVector2(), mtxTransform, 1);
 
       component.dispatchEvent(new CustomEvent(ƒ.EVENT.MUTATE, { detail: { mutator: controller.getMutator() } }));
-      this.dom.dispatchEvent(new Event(EVENT_EDITOR.REFRESH, {bubbles: true}));
     }
 
     private transform3(_transform: TRANSFORM, _value: ƒ.Vector3, _mtxTransform: ƒ.Matrix4x4, _distance: number): void {
