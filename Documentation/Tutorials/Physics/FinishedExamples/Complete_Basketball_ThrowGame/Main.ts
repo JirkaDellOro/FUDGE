@@ -43,32 +43,32 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
         //#region Physics
         //PHYSICS - Basic Plane and Cube
         //Creating a physically static ground plane for our physics playground. A simple scaled cube but with physics type set to static
-        bodies[0] = createCompleteNode("Ground", groundMaterial, new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC);
+        bodies[0] = createCompleteNode("Ground", groundMaterial, new f.MeshCube(), 0, f.BODY_TYPE.STATIC);
         bodies[0].mtxLocal.scale(new f.Vector3(14, 0.3, 14)); //Scale the body with it's standard ComponentTransform
         bodies[0].getComponent(f.ComponentRigidbody).restitution = 0.5;
         hierarchy.appendChild(bodies[0]); //Add the node to the scene by adding it to the scene-root
 
         //Backwalls - So cubes are not pushed away easily
-        bodies[1] = createCompleteNode("WallBack", groundMaterial, new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC);
+        bodies[1] = createCompleteNode("WallBack", groundMaterial, new f.MeshCube(), 0, f.BODY_TYPE.STATIC);
         bodies[1].mtxLocal.translate(new f.Vector3(0, -7, -7.5));
         bodies[1].mtxLocal.scale(new f.Vector3(14, 0.3, 15));
         bodies[1].mtxLocal.rotateX(90, true);
         hierarchy.appendChild(bodies[1]);
 
-        bodies[2] = createCompleteNode("WallLeft", groundMaterial, new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC);
+        bodies[2] = createCompleteNode("WallLeft", groundMaterial, new f.MeshCube(), 0, f.BODY_TYPE.STATIC);
         bodies[2].mtxLocal.translate(new f.Vector3(7.5, 7, 0));
         bodies[2].mtxLocal.scale(new f.Vector3(15, 0.3, 14));
         bodies[2].mtxLocal.rotateZ(90, true);
         hierarchy.appendChild(bodies[2]);
 
-        bodies[3] = createCompleteNode("WallRight", groundMaterial, new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC);
+        bodies[3] = createCompleteNode("WallRight", groundMaterial, new f.MeshCube(), 0, f.BODY_TYPE.STATIC);
         bodies[3].mtxLocal.translate(new f.Vector3(-7.5, 7, 0));
         bodies[3].mtxLocal.scale(new f.Vector3(15, 0.3, 14));
         bodies[3].mtxLocal.rotateZ(-90, true);
         hierarchy.appendChild(bodies[3]);
 
         //Ball
-        bodies[4] = createCompleteNode("Basketball", new f.Material("Basketball", f.ShaderFlat, new f.CoatColored(new f.Color(181 / 255, 66 / 255, 19 / 255))), new f.MeshSphere(), 0.65, f.PHYSICS_TYPE.KINEMATIC, f.PHYSICS_GROUP.DEFAULT, f.COLLIDER_TYPE.SPHERE);
+        bodies[4] = createCompleteNode("Basketball", new f.Material("Basketball", f.ShaderFlat, new f.CoatColored(new f.Color(181 / 255, 66 / 255, 19 / 255))), new f.MeshSphere(), 0.65, f.BODY_TYPE.KINEMATIC, f.COLLISION_GROUP.DEFAULT, f.COLLIDER_TYPE.SPHERE);
         bodies[4].mtxLocal.translate(ballStart);
         bodies[4].mtxLocal.scale(new f.Vector3(0.26, 0.26, 0.26)); //26cm diameter basketball
         hierarchy.appendChild(bodies[4]);
@@ -91,7 +91,7 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
         bodies[17].getComponent(f.ComponentRigidbody).addEventListener(f.EVENT_PHYSICS.COLLISION_ENTER, targetColEnter);
         //#endregion
 
-        f.Physics.world.setSolverIterations(15);
+        //f.Physics.world.setSolverIterations(15);
 
         //Standard Fudge Scene Initialization - Creating a directional light, a camera and initialize the viewport
         let cmpLight: f.ComponentLight = new f.ComponentLight(new f.LightDirectional(f.Color.CSS("WHITE")));
@@ -126,13 +126,13 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
 
     //Function to animate/update the Fudge scene, commonly known as gameloop
     function update(): void {
-        f.Physics.world.simulate(); //PHYSICS - Simulate physical changes each frame, parameter to set time between frames
+        f.Physics.simulate(); //PHYSICS - Simulate physical changes each frame, parameter to set time between frames
         raycastSpeedTest();
         viewPort.draw(); // Draw the current Fudge Scene to the canvas
     }
 
     // Function to quickly create a node with multiple needed FudgeComponents, including a physics component
-    function createCompleteNode(_name: string, _material: f.Material, _mesh: f.Mesh, _mass: number, _physicsType: f.PHYSICS_TYPE, _group: f.PHYSICS_GROUP = f.PHYSICS_GROUP.DEFAULT, _colType: f.COLLIDER_TYPE = f.COLLIDER_TYPE.CUBE): f.Node {
+    function createCompleteNode(_name: string, _material: f.Material, _mesh: f.Mesh, _mass: number, _physicsType: f.BODY_TYPE, _group: f.COLLISION_GROUP = f.COLLISION_GROUP.DEFAULT, _colType: f.COLLIDER_TYPE = f.COLLIDER_TYPE.CUBE): f.Node {
         //Standard Fudge Node Creation
         let node: f.Node = new f.Node(_name); //Creating the node
         let cmpMesh: f.ComponentMesh = new f.ComponentMesh(_mesh); //Creating a mesh for the node
@@ -176,18 +176,18 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
     }
 
     function throwBall(_xDirection: number, _forwardUpStrength: number, _power: number) {
-        ball.physicsType = f.PHYSICS_TYPE.DYNAMIC; //make ball listening to physics again
+        ball.typeBody = f.BODY_TYPE.DYNAMIC; //make ball listening to physics again
         ball.applyForce(new f.Vector3(-_xDirection * _power * 0.8, _power * -_forwardUpStrength * 0.8, _forwardUpStrength * _power)); //throw the ball with forces
         ball.applyTorque(new f.Vector3(-0.0005 * _power, 0, 0)); //Just add a tad bit of rotational force to make it visually more realistic
     }
 
     function resetBall() {
         //ball.setPosition(ballStart); <-- Position can't be set by physics since you make the ball kinematic in the same frame
-        ball.getContainer().mtxLocal.translation = ballStart; // Kinematic objects need to be set through normal transform
-        ball.getContainer().mtxLocal.rotation = f.Vector3.ZERO();
+        ball.node.mtxLocal.translation = ballStart; // Kinematic objects need to be set through normal transform
+        ball.node.mtxLocal.rotation = f.Vector3.ZERO();
         ball.setVelocity(new f.Vector3(0, 0, 0));
         ball.setAngularVelocity(new f.Vector3(0, 0, 0));
-        ball.physicsType = f.PHYSICS_TYPE.KINEMATIC;
+        ball.typeBody = f.BODY_TYPE.KINEMATIC;
     }
 
     //Creating a basket and a board with some decoration - 7 new bodies
@@ -195,27 +195,27 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
         let materialBasket: f.Material = new f.Material("Basket", f.ShaderFlat, new f.CoatColored(new f.Color(0.9, 0.2, 0.2, 1)));
         let basketPosition: f.Vector3 = _position;
         //Basket - Square - Not completly real values of course since it's no circle
-        bodies[_bodyStartNo] = createCompleteNode("BasketBack", materialBasket, new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC);
+        bodies[_bodyStartNo] = createCompleteNode("BasketBack", materialBasket, new f.MeshCube(), 0, f.BODY_TYPE.STATIC);
         bodies[_bodyStartNo].mtxLocal.translate(new f.Vector3(basketPosition.x, basketPosition.y, basketPosition.z));
         bodies[_bodyStartNo].mtxLocal.scale(new f.Vector3(0.6, 0.05, 0.15));
         hierarchy.appendChild(bodies[_bodyStartNo]);
-        bodies[_bodyStartNo + 1] = createCompleteNode("BasketSide", materialBasket, new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC);
+        bodies[_bodyStartNo + 1] = createCompleteNode("BasketSide", materialBasket, new f.MeshCube(), 0, f.BODY_TYPE.STATIC);
         bodies[_bodyStartNo + 1].mtxLocal.translate(new f.Vector3(basketPosition.x + 0.3, basketPosition.y, basketPosition.z - 0.3));
         bodies[_bodyStartNo + 1].mtxLocal.scale(new f.Vector3(0.15, 0.05, 0.6));
         hierarchy.appendChild(bodies[_bodyStartNo + 1]);
-        bodies[_bodyStartNo + 2] = createCompleteNode("BasketSide", materialBasket, new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC);
+        bodies[_bodyStartNo + 2] = createCompleteNode("BasketSide", materialBasket, new f.MeshCube(), 0, f.BODY_TYPE.STATIC);
         bodies[_bodyStartNo + 2].mtxLocal.translate(new f.Vector3(basketPosition.x - 0.3, basketPosition.y, basketPosition.z - 0.3));
         bodies[_bodyStartNo + 2].mtxLocal.scale(new f.Vector3(0.15, 0.05, 0.6));
         hierarchy.appendChild(bodies[_bodyStartNo + 2]);
-        bodies[_bodyStartNo + 3] = createCompleteNode("BasketFront", materialBasket, new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC);
+        bodies[_bodyStartNo + 3] = createCompleteNode("BasketFront", materialBasket, new f.MeshCube(), 0, f.BODY_TYPE.STATIC);
         bodies[_bodyStartNo + 3].mtxLocal.translate(new f.Vector3(basketPosition.x, basketPosition.y, basketPosition.z - 0.6));
         bodies[_bodyStartNo + 3].mtxLocal.scale(new f.Vector3(0.6, 0.05, 0.15));
         hierarchy.appendChild(bodies[_bodyStartNo + 3]);
-        bodies[_bodyStartNo + 4] = createCompleteNode("BasketHolder", materialBasket, new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC);
+        bodies[_bodyStartNo + 4] = createCompleteNode("BasketHolder", materialBasket, new f.MeshCube(), 0, f.BODY_TYPE.STATIC);
         bodies[_bodyStartNo + 4].mtxLocal.translate(new f.Vector3(basketPosition.x, basketPosition.y - 0.01, basketPosition.z - 0.775));
         bodies[_bodyStartNo + 4].mtxLocal.scale(new f.Vector3(0.15, 0.05, 0.6));
         hierarchy.appendChild(bodies[_bodyStartNo + 4]);
-        bodies[_bodyStartNo + 5] = createCompleteNode("WhiteBoard", boardDefault, new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC);
+        bodies[_bodyStartNo + 5] = createCompleteNode("WhiteBoard", boardDefault, new f.MeshCube(), 0, f.BODY_TYPE.STATIC);
         bodies[_bodyStartNo + 5].mtxLocal.translate(new f.Vector3(basketPosition.x, basketPosition.y + 0.45, basketPosition.z - 0.775)); //Board 17.5 cm from basket
         bodies[_bodyStartNo + 5].mtxLocal.scale(new f.Vector3(1.80, 1.05, 0.15));
         hierarchy.appendChild(bodies[_bodyStartNo + 5]);
@@ -241,7 +241,7 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
         hierarchy.appendChild(node);
 
         //GoalTrigger - Slightly positioned under the basket entry so it only counts when it goes through and very small
-        bodies[_bodyStartNo + 6] = createCompleteNode("GoalTrigger", materialBasket, new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.DEFAULT);
+        bodies[_bodyStartNo + 6] = createCompleteNode("GoalTrigger", materialBasket, new f.MeshCube(), 0, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.DEFAULT);
         bodies[_bodyStartNo + 6].removeComponent(bodies[_bodyStartNo + 6].getComponent(f.ComponentMesh)); //Trigger does not need to be visible so remove the mesh component
         bodies[_bodyStartNo + 6].getComponent(f.ComponentRigidbody).isTrigger = true;
         bodies[_bodyStartNo + 6].mtxLocal.translate(new f.Vector3(basketPosition.x, basketPosition.y - 0.05, basketPosition.z - 0.3));
@@ -253,16 +253,16 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
     function createShootableDecoration(_bodyStartNo: number, _position: f.Vector3, _height: number = 1) {
         let stickMaterial: f.Material = new f.Material("JointStick", f.ShaderFlat, new f.CoatColored(new f.Color(0, 0.15, 1, 0.7)))
         //Spherical Joint
-        bodies[_bodyStartNo] = createCompleteNode("Socket", groundMaterial, new f.MeshCube(), 1, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.GROUP_1);
+        bodies[_bodyStartNo] = createCompleteNode("Socket", groundMaterial, new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
         hierarchy.appendChild(bodies[_bodyStartNo]);
         bodies[_bodyStartNo].mtxLocal.translate(new f.Vector3(_position.x, _position.y, _position.z));
         bodies[_bodyStartNo].mtxLocal.scale(new f.Vector3(0.5, 0.5, 0.5));
 
-        bodies[_bodyStartNo + 1] = createCompleteNode("BallJoint", stickMaterial, new f.MeshCube(), 0.5, f.PHYSICS_TYPE.DYNAMIC, f.PHYSICS_GROUP.GROUP_1);
+        bodies[_bodyStartNo + 1] = createCompleteNode("BallJoint", stickMaterial, new f.MeshCube(), 0.5, f.BODY_TYPE.DYNAMIC, f.COLLISION_GROUP.GROUP_1);
         hierarchy.appendChild(bodies[_bodyStartNo + 1]);
         bodies[_bodyStartNo + 1].mtxLocal.translate(new f.Vector3(_position.x, _position.y + _height, _position.z));
         bodies[_bodyStartNo + 1].mtxLocal.scale(new f.Vector3(0.3, 1.5, 0.3));
-        let hingeJoint = new f.ComponentJointRevolute(bodies[_bodyStartNo].getComponent(f.ComponentRigidbody), bodies[_bodyStartNo + 1].getComponent(f.ComponentRigidbody), new f.Vector3(1, 0, 0));
+        let hingeJoint = new f.JointRevolute(bodies[_bodyStartNo].getComponent(f.ComponentRigidbody), bodies[_bodyStartNo + 1].getComponent(f.ComponentRigidbody), new f.Vector3(1, 0, 0));
         bodies[_bodyStartNo].addComponent(hingeJoint);
         hingeJoint.springDamping = 0.9;
     }
@@ -286,7 +286,7 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
     function raycastSpeedTest() {
         let origin = new f.Vector3(0, 3.15, -6.775);
         let rayHit: f.RayHitInfo = f.Physics.raycast(origin, new f.Vector3(0, 0, 1), 1.5);
-        if (rayHit.hit && rayHit.rigidbodyComponent.getContainer().name == "Basketball") {
+        if (rayHit.hit && rayHit.rigidbodyComponent.node.name == "Basketball") {
             lastSpeed = ball.getVelocity().magnitude;
             goalCounter.textContent = "Points: " + points.toString() + " / Speed: " + lastSpeed.toFixed(2);
         }
@@ -295,7 +295,7 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
     //#region Event Handling
     //Register a triggering event - Lesson Trigger Events
     function goalCheckEnter(_event: f.EventPhysics) {
-        if (_event.cmpRigidbody.getContainer().name == "Basketball") {
+        if (_event.cmpRigidbody.node.name == "Basketball") {
             bodies[10].getComponent(f.ComponentMaterial).material = boardGoal;
             points += 100;
             goalCounter.textContent = "Points: " + points.toString() + " / Speed: " + lastSpeed.toFixed(2);
@@ -303,20 +303,20 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
     }
 
     function goalCheckExit(_event: f.EventPhysics) {
-        if (_event.cmpRigidbody.getContainer().name == "Basketball") {
+        if (_event.cmpRigidbody.node.name == "Basketball") {
             bodies[10].getComponent(f.ComponentMaterial).material = boardDefault;
         }
     }
 
     //Register a collision of a body with the ground - Lesson Collision Events
     function groundColEnter(_event: f.EventPhysics) {
-        if (_event.cmpRigidbody.getContainer().name == "Basketball") {
+        if (_event.cmpRigidbody.node.name == "Basketball") {
             spawnDecoObjectOnSpot(_event.collisionPoint, _event.normalImpulse);
         }
     }
 
     function targetColEnter(_event: f.EventPhysics) {
-        if (_event.cmpRigidbody.getContainer().name == "Basketball") {
+        if (_event.cmpRigidbody.node.name == "Basketball") {
             points += 50;
             goalCounter.textContent = "Points: " + points.toString() + " / Speed: " + lastSpeed.toFixed(2);
         }

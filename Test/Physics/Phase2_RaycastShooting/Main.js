@@ -24,17 +24,17 @@ var FudgePhysics_Communication;
         ground.mtxLocal.scale(new f.Vector3(20, 0.3, 20));
         ground.mtxLocal.translate(new f.Vector3(0, -1.5, 0));
         hierarchy.appendChild(ground);
-        bodies[0] = createCompleteMeshNode("Target", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_2);
+        bodies[0] = createCompleteMeshNode("Target 1", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_2);
         hierarchy.appendChild(bodies[0]);
         bodies[0].mtxLocal.translate(new f.Vector3(-10, 2, -10), true);
         bodies[0].mtxLocal.scale(new f.Vector3(3, 5, 3));
         bodies[0].mtxLocal.rotateY(45);
-        bodies[1] = createCompleteMeshNode("Target", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_2);
+        bodies[1] = createCompleteMeshNode("Target 2", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_2);
         hierarchy.appendChild(bodies[1]);
         bodies[1].mtxLocal.translate(new f.Vector3(10, 2, 10), true);
         bodies[1].mtxLocal.scale(new f.Vector3(3, 5, 3));
         bodies[1].mtxLocal.rotateY(-45);
-        bodies[2] = createCompleteMeshNode("Target", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_2);
+        bodies[2] = createCompleteMeshNode("Target 3", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 0, 0, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_2);
         hierarchy.appendChild(bodies[2]);
         bodies[2].mtxLocal.translate(new f.Vector3(10, 2, 0), true);
         bodies[2].mtxLocal.scale(new f.Vector3(3, 5, 5));
@@ -126,8 +126,8 @@ var FudgePhysics_Communication;
         forward = f.Vector3.Z();
         forward.transform(bodies[4].mtxWorld, false);
         hitInfo = f.Physics.raycast(origin, forward, 20, true);
-        if (hitInfo.hit == true && hitInfo.rigidbodyComponent.node.name == "Target") {
-            f.Debug.log("hit");
+        if (hitInfo.hit == true && hitInfo.rigidbodyComponent.node.name.includes("Target")) {
+            f.Debug.log("hit", hitInfo.rigidbodyComponent.node.name);
         }
     }
 })(FudgePhysics_Communication || (FudgePhysics_Communication = {}));

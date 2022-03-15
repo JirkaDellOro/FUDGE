@@ -4,6 +4,7 @@ var FudgePhysics_Communication;
 (function (FudgePhysics_Communication) {
     var f = FudgeCore;
     window.addEventListener("load", init);
+    document.addEventListener("keydown", hndKeyDown);
     const app = document.querySelector("canvas");
     let viewPort;
     let hierarchy;
@@ -56,7 +57,7 @@ var FudgePhysics_Communication;
         viewPort.physicsDebugMode = f.PHYSICS_DEBUGMODE.CONTACTS;
         f.Loop.addEventListener("loopFrame" /* LOOP_FRAME */, update);
         cubes[0].getComponent(f.ComponentRigidbody).restitution = 1.3;
-        f.Time.game.setScale(0.5);
+        f.Time.game.setScale(0);
         f.Physics.adjustTransforms(hierarchy);
         f.Loop.start();
     }
@@ -118,6 +119,16 @@ var FudgePhysics_Communication;
         node.addComponent(cmpTransform);
         node.addComponent(cmpRigidbody);
         return node;
+    }
+    function hndKeyDown(_event) {
+        if (_event.code == f.KEYBOARD_CODE.W) {
+            if (f.Time.game.getScale() < 1)
+                f.Time.game.setScale(f.Time.game.getScale() + 0.1);
+        }
+        if (_event.code == f.KEYBOARD_CODE.S) {
+            if (f.Time.game.getScale() > 0)
+                f.Time.game.setScale(f.Time.game.getScale() - 0.1);
+        }
     }
 })(FudgePhysics_Communication || (FudgePhysics_Communication = {}));
 //# sourceMappingURL=Main.js.map

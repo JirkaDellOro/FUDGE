@@ -15,6 +15,7 @@ var Turorials_FUDGEPhysics_Lesson1;
     let carBody;
     //Setting Variables
     let materialPlayer = new f.Material("Player", f.ShaderFlat, new f.CoatColored(new f.Color(0.7, 0.5, 0.35, 1)));
+    let speedChange = 5;
     //Car Settings / Joints
     let frontSuspensionRight;
     let frontSuspensionLeft;
@@ -41,7 +42,7 @@ var Turorials_FUDGEPhysics_Lesson1;
         //PHYSICS 
         //Creating a physically static ground plane for our physics playground. A simple scaled cube but with physics type set to static
         bodies[0] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_2);
-        bodies[0].mtxLocal.scale(new f.Vector3(14, 0.3, 14)); //Scale the body with it's standard ComponentTransform
+        bodies[0].mtxLocal.scale(new f.Vector3(25, 0.3, 25)); //Scale the body with it's standard ComponentTransform
         //bodies[0].mtxLocal.rotateX(4, true); //Give it a slight rotation so the physical objects are sliding, always from left when it's after a scaling
         hierarchy.appendChild(bodies[0]); //Add the node to the scene by adding it to the scene-root
         //A car is basically wheels on a suspension. A suspension is a prismatic spring and a wheel is on a revolute joint.
@@ -181,10 +182,10 @@ var Turorials_FUDGEPhysics_Lesson1;
         bodies[18].addComponent(wheelJointBackRight);
         wheelJointBackLeft = new f.JointRevolute(bodies[20].getComponent(f.ComponentRigidbody), bodies[16].getComponent(f.ComponentRigidbody), new f.Vector3(-1, 0, 0));
         bodies[20].addComponent(wheelJointBackLeft);
-        wheelJointFrontRight.motorSpeed = -5;
-        wheelJointFrontRight.motorTorque = 50;
-        wheelJointFrontLeft.motorSpeed = -5;
-        wheelJointFrontLeft.motorTorque = 50;
+        // wheelJointFrontRight.motorSpeed = -5;
+        // wheelJointFrontRight.motorTorque = 50;
+        // wheelJointFrontLeft.motorSpeed = -5;
+        // wheelJointFrontLeft.motorTorque = 50;
         // wheelJoint_backR.motorSpeed = -5;
         // wheelJoint_backR.motorTorque = 50;
         // wheelJoint_backL.motorSpeed = -5;
@@ -200,11 +201,16 @@ var Turorials_FUDGEPhysics_Lesson1;
         }
         if (_event.code == f.KEYBOARD_CODE.W) {
             bodies[12].getComponent(f.ComponentRigidbody).applyForce(new f.Vector3(0, 10, 0));
-            wheelJointFrontRight.motorSpeed++;
-            wheelJointFrontLeft.motorSpeed++;
+            wheelJointFrontRight.motorSpeed += speedChange;
+            wheelJointFrontLeft.motorSpeed += speedChange;
+            wheelJointFrontRight.motorTorque += speedChange;
+            wheelJointFrontLeft.motorTorque += speedChange;
         }
         if (_event.code == f.KEYBOARD_CODE.S) {
-            //
+            wheelJointFrontRight.motorSpeed -= speedChange;
+            wheelJointFrontLeft.motorSpeed -= speedChange;
+            wheelJointFrontRight.motorTorque -= speedChange;
+            wheelJointFrontLeft.motorTorque -= speedChange;
         }
         if (_event.code == f.KEYBOARD_CODE.D) {
             frontSuspensionLeft.maxRotor = currentAngle > -maxAngle ? currentAngle-- : currentAngle;
@@ -215,6 +221,9 @@ var Turorials_FUDGEPhysics_Lesson1;
         if (_event.code == f.KEYBOARD_CODE.T) {
             viewPort.physicsDebugMode = viewPort.physicsDebugMode == f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER ? f.PHYSICS_DEBUGMODE.PHYSIC_OBJECTS_ONLY : f.PHYSICS_DEBUGMODE.JOINTS_AND_COLLIDER;
             frontSuspensionRight.maxMotor = 0;
+        }
+        if (_event.code == f.KEYBOARD_CODE.X) {
+            f.Time.game.setScale(f.Time.game.getScale() === 1 ? 0 : 1);
         }
     }
 })(Turorials_FUDGEPhysics_Lesson1 || (Turorials_FUDGEPhysics_Lesson1 = {}));

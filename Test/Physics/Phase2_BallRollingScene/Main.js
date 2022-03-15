@@ -31,6 +31,7 @@ var FudgePhysics_Communication;
         ballRB = bodies[0].getComponent(f.ComponentRigidbody);
         ballRB.dampTranslation = 0.1;
         ballRB.dampRotation = 0.1;
+        ballRB.restitution = 0.75;
         bodies[1] = createCompleteMeshNode("Cube_-10GradZ", new f.Material("Cube", f.ShaderFlat, new f.CoatColored(new f.Color(1, 1, 0, 1))), "Cube", 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.GROUP_1);
         hierarchy.appendChild(bodies[1]);
         bodies[1].mtxLocal.translate(new f.Vector3(-7, -1.5, 0));
@@ -50,7 +51,7 @@ var FudgePhysics_Communication;
         bodies[3].removeComponent(bodies[3].getComponent(f.ComponentMesh));
         hierarchy.appendChild(bodies[3]);
         bodies[3].mtxLocal.translate(new f.Vector3(0, -3, 0));
-        bodies[3].mtxLocal.scale(new f.Vector3(40, 0.3, 40));
+        bodies[3].mtxLocal.scale(new f.Vector3(60, 1, 60));
         bodies[3].getComponent(f.ComponentRigidbody).isTrigger = true;
         bodies[3].getComponent(f.ComponentRigidbody).addEventListener("TriggerEnteredCollision" /* TRIGGER_ENTER */, resetBall);
         let cmpLight = new f.ComponentLight(new f.LightDirectional(f.Color.CSS("WHITE")));
@@ -141,6 +142,12 @@ var FudgePhysics_Communication;
         //toggle between force applied and impulse applied
         if (_event.code == f.KEYBOARD_CODE.T) {
             isForce = !isForce;
+        }
+        if (_event.code == f.KEYBOARD_CODE.SPACE) {
+            if (isForce)
+                ballRB.applyForce(new f.Vector3(0, 600, 0));
+            else
+                ballRB.applyImpulseAtPoint(new f.Vector3(0, 10, 0));
         }
     }
 })(FudgePhysics_Communication || (FudgePhysics_Communication = {}));
