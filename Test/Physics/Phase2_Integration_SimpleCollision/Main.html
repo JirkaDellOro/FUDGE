@@ -2,48 +2,59 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Fudge and Physics - Default</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="../../../../Physics/OimoPhysics.js"></script>
-  <script src="../../../../Core/Build/FudgeCore.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Fudge and Physics - Default</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="../../../../Physics/OimoPhysics.js"></script>
+    <script src="../../../../Core/Build/FudgeCore.js"></script>
 </head>
 
 <body>
-  <script src="../../dialog-polyfill.min.js"></script>
-  <script src="../../TestInstructions.js"></script>
-  <script>
-    TestInstructions.display({
-      Name: "Type the name of the test here",
-      Test: [
-        "Describe what is actually being tested here",
-      ],
-      Setup: [
-        "Explain the setup of the scene",
-        "Use multilple lines separated by comma"
-      ],
-      Act: [
-        "Describe what the tester can do",
-      ],
-      Observe: [
-        "Describe what the tester should pay attention to",
-      ],
-      Control: [
-        "Describe how the tester can perform actions, which controls to use",
-      ],
-      Expect: [
-        "Describe what the tester is supposed to see, which desired behavior is supposed to be observed while testing",
-      ]
-    });
-  </script>
-  
-  <h1>Fudge_Physics - Gravity & Collision</h1>
-  <h2 id="FPS">FPS</h2>
-  <canvas width="600" height="400"></canvas>
-  <script src="Main.js"></script>
-  <p>Move Kinematic Cube - WASD</p>
+    <script src="../../dialog-polyfill.min.js"></script>
+    <script src="../../TestInstructions.js"></script>
+    <script>
+        TestInstructions.display({
+            Name: "Basic Physical Interaction - Combining Shapes/Bodies",
+            Test: [
+                "The most basic interaction between OIMO and FUDGE,",
+                "the transfer of physical simulation to hierarchical calculation.",
+                "Combining multiple FUDGE Nodes to one OIMO Body - parenting",
+                "Types of physical bodies - Static, Dynamic, Kinematic",
+                "Types of collider - Standard Shapes, Pyramid, Convex Custom Collider"
+            ],
+            Setup: [
+                "A player controlled green cube, as a kinematic body (only influenced through code)",
+                "Some dynamic bodies (blue/red) that interact with each other",
+                "A yellow node attached to a body which means it reacts to the body simulation but is not part of it",
+                "A 'shape' that consists of multiple 'meshes' but only one body, a custom convex collider spans over the result",
+                "Grey ground that is static and therefore does interact with others but is immovable"
+            ],
+            Act: [
+                "Move the player controlled cube to interact with different body types",
+            ],
+            Observe: [
+                "The movement and interactions between different body types"
+            ],
+            Control: [
+                "E/Q lower/lift the kinematic cube",
+                "WASD move the kinematic cube"
+            ],
+            Expect: [
+                "Yellow does not interact - Because it's not part of the simulation - but it moves/rotates with it's parent",
+                "Grey ground does not interact with player - because kinematic can't be influenced by physics",
+                "Green can 'push' everything but is not influenced by others",
+                "Everything else interacts according to physical rules and the visual shapes"
+            ]
+        });
+    </script>
+
+    <h1>Fudge_Physics - Gravity & Collision</h1>
+    <h2 id="FPS">FPS</h2>
+    <canvas width="600" height="400"></canvas>
+    <script src="Main.js"></script>
+    <p>Move Kinematic Cube - WASD</p>
 </body>
 
 </html>

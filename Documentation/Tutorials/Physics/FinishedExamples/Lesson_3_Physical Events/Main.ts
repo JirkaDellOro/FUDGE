@@ -31,36 +31,36 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
 
         //PHYSICS - Step 2: Create some physical Nodes to play with 
         //Creating a physically static ground plane for our physics playground. A simple scaled cube but with physics type set to static
-        bodies[0] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.PHYSICS_TYPE.STATIC);
+        bodies[0] = createCompleteNode("Ground", new f.Material("Ground", f.ShaderFlat, new f.CoatColored(new f.Color(0.2, 0.2, 0.2, 1))), new f.MeshCube(), 0, f.BODY_TYPE.STATIC);
         bodies[0].mtxLocal.scale(new f.Vector3(14, 0.3, 14)); //Scale the body with it's standard ComponentTransform
         bodies[0].mtxLocal.rotateX(4, true); //Give it a slight rotation so the physical objects are sliding, always from left when it's after a scaling
         hierarchy.appendChild(bodies[0]); //Add the node to the scene by adding it to the scene-root
 
         //Step 1 - Creating a the player cube - to interact to trigger, COLLIDERS and TRIGGERS 
-        bodies[1] = createCompleteNode("Player", playerDefaultMat, new f.MeshCube(), 1, f.PHYSICS_TYPE.DYNAMIC);
+        bodies[1] = createCompleteNode("Player", playerDefaultMat, new f.MeshCube(), 1, f.BODY_TYPE.DYNAMIC);
         playerBody = bodies[1]; //Reference this node specifically so we can access it for input more easily
         playerBody.mtxLocal.translate(new f.Vector3(0, 1, 0));
         hierarchy.appendChild(bodies[1]);
-        playerBody.getComponent(f.ComponentRigidbody).rotationInfluenceFactor = new f.Vector3(0, 0, 0); //make rotation fixed the player does not rotate
+        playerBody.getComponent(f.ComponentRigidbody).effectRotation = new f.Vector3(0, 0, 0); //make rotation fixed the player does not rotate
         playerBody.getComponent(f.ComponentRigidbody).friction = 1;
 
         //Step 2 - Create bodies - one used as a button when it collides it will an action will happen - one as a trigger, when it's overlapping it will trigger an action
         //The Collision Event is happening on a collision so a normal body can receive it
         //A use case for a collision event is for example when the player is hitting the ground to play a sound
-        bodies[2] = createCompleteNode("Collider_Button", new f.Material("Collider_Button", f.ShaderFlat, new f.CoatColored(new f.Color(0.3, 0.3, 0.4, 1))), new f.MeshCube(), 1, f.PHYSICS_TYPE.STATIC);
+        bodies[2] = createCompleteNode("Collider_Button", new f.Material("Collider_Button", f.ShaderFlat, new f.CoatColored(new f.Color(0.3, 0.3, 0.4, 1))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC);
         bodies[2].mtxLocal.translate(new f.Vector3(-3, 1, 0));
         hierarchy.appendChild(bodies[2]);
 
         //The Trigger Event is happening when bodies overlap, so we need a special body that does not collide but overlap
         //So it must be flagged as trigger, and normally in games it's invisble, so it has no mesh component or is fully transparent.
         //A use case is something like spawning enemies when a player enters a room.
-        bodies[3] = createCompleteNode("Trigger_Button", new f.Material("Trigger_Button", f.ShaderFlat, new f.CoatColored(new f.Color(0.5, 0.3, 0.2, 0.3))), new f.MeshCube(), 1, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.DEFAULT);
+        bodies[3] = createCompleteNode("Trigger_Button", new f.Material("Trigger_Button", f.ShaderFlat, new f.CoatColored(new f.Color(0.5, 0.3, 0.2, 0.3))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.DEFAULT);
         bodies[3].mtxLocal.translate(new f.Vector3(3, 1, 0));
         bodies[3].getComponent(f.ComponentRigidbody).isTrigger = true;
         hierarchy.appendChild(bodies[3]);
 
         //Trigger when player is falling of the plane
-        bodies[4] = createCompleteNode("Trigger_Reset", new f.Material("Trigger_Reset", f.ShaderFlat, new f.CoatColored(new f.Color(0.5, 0.3, 0.2, 0.3))), new f.MeshCube(), 1, f.PHYSICS_TYPE.STATIC, f.PHYSICS_GROUP.DEFAULT);
+        bodies[4] = createCompleteNode("Trigger_Reset", new f.Material("Trigger_Reset", f.ShaderFlat, new f.CoatColored(new f.Color(0.5, 0.3, 0.2, 0.3))), new f.MeshCube(), 1, f.BODY_TYPE.STATIC, f.COLLISION_GROUP.DEFAULT);
         bodies[4].getComponent(f.ComponentRigidbody).isTrigger = true;
         bodies[4].removeComponent(bodies[4].getComponent(f.ComponentMesh)); //removing the mesh to have invisible trigger - standard practice
         bodies[4].mtxLocal.translate(new f.Vector3(0, -4, 0));
@@ -112,12 +112,12 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
 
     //Function to animate/update the Fudge scene, commonly known as gameloop
     function update(): void {
-        f.Physics.world.simulate(); //PHYSICS - Simulate physical changes each frame, parameter to set time between frames
+        f.Physics.simulate(); //PHYSICS - Simulate physical changes each frame, parameter to set time between frames
         viewPort.draw(); // Draw the current Fudge Scene to the canvas
     }
 
     // Function to quickly create a node with multiple needed FudgeComponents, including a physics component
-    function createCompleteNode(_name: string, _material: f.Material, _mesh: f.Mesh, _mass: number, _physicsType: f.PHYSICS_TYPE, _group: f.PHYSICS_GROUP = f.PHYSICS_GROUP.DEFAULT, _colType: f.COLLIDER_TYPE = f.COLLIDER_TYPE.CUBE): f.Node {
+    function createCompleteNode(_name: string, _material: f.Material, _mesh: f.Mesh, _mass: number, _physicsType: f.BODY_TYPE, _group: f.COLLISION_GROUP = f.COLLISION_GROUP.DEFAULT, _colType: f.COLLIDER_TYPE = f.COLLIDER_TYPE.CUBE): f.Node {
         let node: f.Node = new f.Node(_name); //Creating the node
         let cmpMesh: f.ComponentMesh = new f.ComponentMesh(_mesh); //Creating a mesh for the node
         let cmpMaterial: f.ComponentMaterial = new f.ComponentMaterial(_material); //Creating a material for the node
@@ -163,12 +163,12 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
     function hndCollisionEventEnter(_event: f.EventPhysics): void {
         //_event. keeps a plethora of informations about the event the most interesting are things like 
         /* 
-          _event.cmpRigidbody -> to identify the body involved in the event, with getContainer().name you get the actual name of the node involved 
+          _event.cmpRigidbody -> to identify the body involved in the event, with node.name you get the actual name of the node involved 
           _event.normalImpulse -> intensity of the collision good to play a sound that is only as heavy as the collision
           _event.collisionPoint -> the point in the world where the collision is happening to maybe spawn things like particles
           _event.collisionNormal -> the direction the collision is happening often used to correctly rotate spawned things on the colliding surface
         */
-        if (_event.cmpRigidbody.getContainer().name == "Player") { //Our Event is happening with the body NODE called "Player"
+        if (_event.cmpRigidbody.node.name == "Player") { //Our Event is happening with the body NODE called "Player"
             f.Debug.log("Player hit me - Collider");
             //We let this collider act like a bumper through this event. We take the event normal and shoot the player away from the bumper on the contact point.
             playerBody.getComponent(f.ComponentRigidbody).applyForceAtPoint(new f.Vector3(_event.collisionNormal.x * 500, _event.collisionNormal.y * 500, _event.collisionNormal.z * 500), _event.collisionPoint);
@@ -176,21 +176,21 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
     }
 
     function hndCollisionEventExit(_event: f.EventPhysics): void {
-        if (_event.cmpRigidbody.getContainer().name == "Player") {
+        if (_event.cmpRigidbody.node.name == "Player") {
             f.Debug.log("Player left me - Collider");
         }
     }
 
     //Event function handling triggering
     function hndTriggerEventEnter(_event: f.EventPhysics): void {
-        if (_event.cmpRigidbody.getContainer().name == "Player") {
+        if (_event.cmpRigidbody.node.name == "Player") {
             f.Debug.log("Player entered me - Trigger");
             playerBody.getComponent(f.ComponentMaterial).material = playerTriggeredMat;
         }
     }
 
     function hndTriggerEventExit(_event: f.EventPhysics): void {
-        if (_event.cmpRigidbody.getContainer().name == "Player") {
+        if (_event.cmpRigidbody.node.name == "Player") {
             f.Debug.log("Player left me - Trigger");
             playerBody.getComponent(f.ComponentMaterial).material = playerDefaultMat;
         }
@@ -198,7 +198,7 @@ namespace Tutorials_FUDGEPhysics_Lesson1 {
 
     //Since the player could fall of we will reset him back with a trigger when he falls down from the plane
     function hndResetTrigger(_event: f.EventPhysics): void {
-        if (_event.cmpRigidbody.getContainer().name == "Player") {
+        if (_event.cmpRigidbody.node.name == "Player") {
             playerBody.getComponent(f.ComponentRigidbody).setPosition(new f.Vector3(0, 3, 0)); //Since it's a physics body we have to set position through physics not transform
         }
     }

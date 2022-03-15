@@ -2,51 +2,65 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Fudge and Physics - Default</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="../../../../Physics/OimoPhysics.js"></script>
-  <script src="../../../../Core/Build/FudgeCore.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Fudge and Physics - Default</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="../../../../Physics/OimoPhysics.js"></script>
+    <script src="../../../../Core/Build/FudgeCore.js"></script>
 </head>
 
 <body>
-  <script src="../../dialog-polyfill.min.js"></script>
-  <script src="../../TestInstructions.js"></script>
-  <script>
-    TestInstructions.display({
-      Name: "Type the name of the test here",
-      Test: [
-        "Describe what is actually being tested here",
-      ],
-      Setup: [
-        "Explain the setup of the scene",
-        "Use multilple lines separated by comma"
-      ],
-      Act: [
-        "Describe what the tester can do",
-      ],
-      Observe: [
-        "Describe what the tester should pay attention to",
-      ],
-      Control: [
-        "Describe how the tester can perform actions, which controls to use",
-      ],
-      Expect: [
-        "Describe what the tester is supposed to see, which desired behavior is supposed to be observed while testing",
-      ]
-    });
-  </script>
+    <script src="../../dialog-polyfill.min.js"></script>
+    <script src="../../TestInstructions.js"></script>
+    <script>
+        TestInstructions.display({
+            Name: "Joint Creation / Interaction",
+            Test: [
+                "The correct creation of joints, also the application of their rulesets,",
+                "and the interaction with other joints/bodies that are not part of the linked bodies.",
+                "Standard use cases of joints"
+            ],
+            Setup: [
+                "The scene consists of some common use cases for every type of joints (except welding joint)",
+                "e.g. a swinging door, a jumping pad, a slider etc."
+            ],
+            Act: [
+                "Use the controls to test if each joint is displaying the correct behaviour",
+                "Look at the debug mode to verify that joint specific rulesets are applied (maximum distance between linked bodies etc)"
+            ],
+            Observe: [
+                "Multiple joints influence each other",
+                "Bodies linked with joints act as one unit with a specific ruleset",
+                "Joints have specific rulesets that have changeable properties, like an anchor, motorspeed etc."
+            ],
+            Control: [
+                "Mouseclick in the scene to move control cube of the ragdoll, <br> that is a unit (body) built out of multiple bodyparts connected through ragdolljoints",
+                "WASD - Move kinematic player cube",
+                "PrismaticJoint 'Spring' - Z, PrismaticJoint 'Slider' - U / I (Left/Right)",
+                "RevoluteJoint 'Door' - O / P, Cylindrical Joint 'Drill' - F / V",
+                "SphericalJoint 'Drill/Shoulderjoint' - G (to rotate) or push against it",
+                "Spherical/Universal Joint 'Rope' - H / J (swing/turn/twist)",
+                "Debug Mode - M"
+            ],
+            Expect: [
+                "Connected bodies act as a single unit in the simulation, if part of the chain is moved the rest does too",
+                "Each joint has a specific ruleset that allows for specific usage. The ruleset contains firstly degrees of freedom,",
+                "meaning in which axis it can move/rotate/twist. And second limits/motors/rotors/dampeners to specify,",
+                "how those degrees of freedom behave. The behavior of each joint should look distinct and reproducible."
+            ]
+        });
+    </script>
 
-  <h1>Fudge_Physics - Joints and Debug</h1>
-  <h2 id="FPS">FPS</h2>
-  <canvas width="600" height="400"></canvas>
-  <script src="Main.js"></script>
-  <p>MoveKinematic Cube - WASD, Prismatic Joint Spring: Z, Prismatic Joint Slider - U/I</p>
-  <p>Revolut Joint Door - O/P, Cylindrical Joint (Drill) - F/V</p>
-  <p>Spherical Joint - G, Universal Joint (Rope Ending) - H, J</p>
-  <p>Debug Mode - M</p>
+    <h1>Fudge_Physics - Joints and Debug</h1>
+    <h2 id="FPS">FPS</h2>
+    <canvas width="600" height="400"></canvas>
+    <script src="Main.js"></script>
+    <p>MoveKinematic Cube - WASD, Prismatic Joint Spring: Z, Prismatic Joint Slider - U/I</p>
+    <p>Revolut Joint Door - O/P, Cylindrical Joint (Drill) - F/V</p>
+    <p>Spherical Joint - G, Universal Joint (Rope Ending) - H, J</p>
+    <p>Debug Mode - M</p>
 </body>
 
 </html>

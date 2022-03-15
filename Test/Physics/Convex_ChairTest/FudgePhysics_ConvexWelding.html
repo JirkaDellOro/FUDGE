@@ -2,78 +2,88 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Fudge Physics ConvexWelding</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Fudge Physics ConvexWelding</title>
 
-  <!-- (Optional) Styling the html page just to be easier on the eyes -->
-  <style>
-    body {
-      font-family: Arial, Helvetica, sans-serif;
-      background-color: rgb(42, 42, 42);
-    }
+    <!-- (Optional) Styling the html page just to be easier on the eyes -->
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: rgb(42, 42, 42);
+        }
 
-    h1 {
-      color: rgb(255, 227, 104);
-    }
+        h1 {
+            color: rgb(255, 227, 104);
+        }
 
-    h2 {
-      color: gainsboro;
-    }
+        h2 {
+            color: gainsboro;
+        }
 
-    /* Canvas needs a size either on the element directly or here in the css code */
-    canvas {
-      width: 64%;
-      height: 27%;
-    }
-  </style>
-  <!--  -->
-  <script src="../../dialog-polyfill.min.js"></script>
-  <script src="../../TestInstructions.js"></script>
+        /* Canvas needs a size either on the element directly or here in the css code */
+        canvas {
+            width: 64%;
+            height: 27%;
+        }
+    </style>
+    <!--  -->
+    <script src="../../dialog-polyfill.min.js"></script>
+    <script src="../../TestInstructions.js"></script>
 
-  <!-- Use Fudge and use the implemented physics engine OimoPhysics by referencing them at the start-->
-  <script src="../../../../Physics/OimoPhysics.js"></script>
-  <script src="../../../../Core/Build/FudgeCore.js"></script>
-  <!-- -->
+    <!-- Use Fudge and use the implemented physics engine OimoPhysics by referencing them at the start-->
+    <script src="../../../../Physics/OimoPhysics.js"></script>
+    <script src="../../../../Core/Build/FudgeCore.js"></script>
+    <!-- -->
 
 </head>
 
 <body>
-  <script src="../../dialog-polyfill.min.js"></script>
-  <script src="../../TestInstructions.js"></script>
-  <script>
-    TestInstructions.display({
-      Name: "Type the name of the test here",
-      Test: [
-        "Describe what is actually being tested here",
-      ],
-      Setup: [
-        "Explain the setup of the scene",
-        "Use multilple lines separated by comma"
-      ],
-      Act: [
-        "Describe what the tester can do",
-      ],
-      Observe: [
-        "Describe what the tester should pay attention to",
-      ],
-      Control: [
-        "Describe how the tester can perform actions, which controls to use",
-      ],
-      Expect: [
-        "Describe what the tester is supposed to see, which desired behavior is supposed to be observed while testing",
-      ]
-    });
-  </script>
+    <script src="../../dialog-polyfill.min.js"></script>
+    <script src="../../TestInstructions.js"></script>
+    <script>
+        TestInstructions.display({
+            Name: "WeldingJoints - Connect Bodies To Act As A Unit",
+            Test: [
+                "A welding joint must connect bodies in a way,",
+                "where they do not move away from each other, or rotate in any way",
+                "This joint is a good workaround to create 'concave' bodies without actually having a single concave object",
+                "The test verifies this functionality + testing the performance, when using hundreds of theses joints"
+            ],
+            Setup: [
+                "A chair - 6 Bodies, combined with 5 welding Joints",
+                "interact with the environment, after falling from a certain height into the scene"
+            ],
+            Act: [
+                "You can spawn new chairs with a click, and observe how the chairs behave",
+            ],
+            Observe: [
+                "All parts of the chairs must stay together and act like a single unit",
+                "Parts of different chairs can move between e.g. the chair legs to verify,",
+                "that these are indeed 'convex' objects behaving like 'concave' without additional collider shapes.",
+                "Performance of over 50 chairs (250 joints, 300 bodies) should result in playable framerates.",
+                "If the speed of interactions is too fast, (fast clicking), joints misbehave"
+            ],
+            Control: [
+                "Click (Left-Mouse-Button) to spawn a new char in the scene center",
+                "The spawn is with a random height"
+            ],
+            Expect: [
+                "When instantiating in a slow pace, the chairs behave like a single unit",
+                "the performance hit of this method is bareable for a game",
+                "Clicking to fast results in jitter and stuck chairs, due to no continous collision detection"
+            ]
+        });
+    </script>
 
-  <h1>Fudge Physics Test of Convex Colliders through WeldingJoints</h1>
-  <h2>Click canvas to spawn a new chair at the spawnpoint</h2>
-  <h2 id="FPS">FPS</h2>
-  <!-- The canvas to draw your Fudge scene too -->
-  <canvas></canvas>
-  <!-- Your actual code  -->
-  <script src="Main.js"></script>
+    <h1>Fudge Physics Test of Convex Colliders through WeldingJoints</h1>
+    <h2>Click canvas to spawn a new chair at the spawnpoint</h2>
+    <h2 id="FPS">FPS</h2>
+    <!-- The canvas to draw your Fudge scene too -->
+    <canvas></canvas>
+    <!-- Your actual code  -->
+    <script src="Main.js"></script>
 
 </body>
 

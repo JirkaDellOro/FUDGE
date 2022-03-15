@@ -33,33 +33,40 @@
 </head>
 
 <body>
-  <script src="../../dialog-polyfill.min.js"></script>
-  <script src="../../TestInstructions.js"></script>
-  <script>
-    TestInstructions.display({
-      Name: "Type the name of the test here",
-      Test: [
-        "Describe what is actually being tested here",
-      ],
-      Setup: [
-        "Explain the setup of the scene",
-        "Use multilple lines separated by comma"
-      ],
-      Act: [
-        "Describe what the tester can do",
-      ],
-      Observe: [
-        "Describe what the tester should pay attention to",
-      ],
-      Control: [
-        "Describe how the tester can perform actions, which controls to use",
-      ],
-      Expect: [
-        "Describe what the tester is supposed to see, which desired behavior is supposed to be observed while testing",
-      ]
-    });
-  </script>
-  
+    <script src="../../dialog-polyfill.min.js"></script>
+    <script src="../../TestInstructions.js"></script>
+    <script>
+        TestInstructions.display({
+            Name: "JointCar - Multiple Joints Stability <span style='color: black'>(unfinished)</span>",
+            Test: [
+                "The stability of a construct where multiple joints influence each other",
+            ],
+            Setup: [
+                "A car consisting of a body with 4 wheels.",
+                "The car is built to represent a realistic undercarriage, so a wheel is,",
+                "a cylinder on a spring for suspension and a revolute joint to simulate the cars axle"
+            ],
+            Act: [
+                "Try to steer the car with the keyboard"
+            ],
+            Observe: [
+                "Do they joints try to stay in their limit's and do not wander away from the body?",
+                "Do all parts stay together?",
+                "Does turning the wheels work, is the car steerable?"
+            ],
+            Control: [
+                "Press W to increase speed, X to toggle TimeScale between 1 and 0",
+                "T to switch to debug and A/D to try and steer"
+            ],
+            Expect: [
+                "Since it's not correctly stabilized and tested:",
+                "The car feels like a mars rover - it does move but is hard to control",
+                "The joints sometimes go crazy because they solve to something which they can't calculate",
+                "The car is sometimes steerable"
+            ]
+        });
+    </script>
+
     <h1>Physics Car</h1>
     <!-- The canvas to draw your Fudge scene too -->
     <canvas></canvas>
