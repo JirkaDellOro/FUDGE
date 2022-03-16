@@ -1148,6 +1148,11 @@ declare namespace FudgeCore {
          *  Default 0 = Baumgarte (fast but less correct induces some energy errors), 1 = Split-Impulse (fast and no engery errors, but more inaccurate for joints), 2 = Non-linear Gauss Seidel (slowest but most accurate)*/
         get defaultCorrectionAlgorithm(): number;
         set defaultCorrectionAlgorithm(_value: number);
+        /** The precision of the simulation in form of number of iterations the simulations runs through until it accepts the result.
+         *  10 Default - Higher means more precision but results in a performance decrease.
+         */
+        get solverIterations(): number;
+        set solverIterations(_value: number);
     }
 }
 declare namespace FudgeCore {
@@ -4761,10 +4766,13 @@ declare namespace FudgeCore {
         private bodyList;
         private jointList;
         constructor();
+        getOimoWorld(): OIMO.World;
         /**
          * Define the currently active Physics instance
          */
         static set activeInstance(_physics: Physics);
+        /** Get the currently active Physics instance */
+        static get activeInstance(): Physics;
         static get debugDraw(): PhysicsDebugDraw;
         static get mainCam(): ComponentCamera;
         /**
